@@ -47,6 +47,7 @@ import org.springframework.web.servlet.ModelAndView;
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.automation.util.AutomationConst;
+import com.ibm.cio.cmr.request.automation.util.geo.FranceUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.AddrPK;
@@ -177,6 +178,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       } else if (SwissUtil.isCountrySwissEnabled(entityManager, cmrIssuingCntry)) {
         performLegacyDirectMassUpdate(model, entityManager, request);
       } else if (ATUtil.isCountryATEnabled(entityManager, cmrIssuingCntry)) {// CMR-803
+        performLegacyDirectMassUpdate(model, entityManager, request);
+      } else if (FranceUtil.isCountryFREnabled(entityManager, cmrIssuingCntry)) {
         performLegacyDirectMassUpdate(model, entityManager, request);
       } else {
         performMassUpdate(model, entityManager, request);
@@ -1762,7 +1765,10 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         processLegacyDirectMassFile(entityManager, request, reqId, token, items);
         return;
       }
-
+      if (cmrIssuingCntry != null && FranceUtil.isCountryFREnabled(entityManager, cmrIssuingCntry)) {
+        processLegacyDirectMassFile(entityManager, request, reqId, token, items);
+        return;
+      }
       if (cmrIssuingCntry.equalsIgnoreCase("631")) {
         scoring = addrService.getScorecardRecord(entityManager, reqId);
       }
@@ -4579,6 +4585,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
 
   }
 
+
   public boolean validateSWISSMassUpdateFile(String path, Data data, Admin admin) throws Exception {
     List<Boolean> isErr = new ArrayList<Boolean>();
     try (FileInputStream fis = new FileInputStream(path)) {
@@ -4832,6 +4839,15 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                     if (SystemLocation.AUSTRIA.equals(data.getCmrIssuingCntry()) && !validateATMassUpdateFile(filePath, data, admin)) {
                       throw new CmrException(MessageUtil.ERROR_MASS_FILE);
                     }
+                  } else if (FranceUtil.isCountryFREnabled(entityManager, data.getCmrIssuingCntry())) {
+                    fis = new FileInputStream(filePath);
+                    try {
+                      if (SystemLocation.FRANCE.equals(data.getCmrIssuingCntry())) {
+                        validateFRMassUpdateFile(filePath, data, admin);
+                      }
+                    } catch (Exception e) {
+                      throw new CmrException(e);
+                    }
                   } else {
                     if (!validateMassUpdateFile(item.getInputStream())) {
                       throw new CmrException(MessageUtil.ERROR_MASS_FILE);
@@ -4860,6 +4876,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                         data.getCmrIssuingCntry());
                   } else if (ATUtil.isCountryATEnabled(entityManager, data.getCmrIssuingCntry())) {// CMR-800
                     setMassUpdateListForAT(entityManager, legacyDirectModelCol, filePath, reqId, newIterId, filePath);
+                  } else if (FranceUtil.isCountryFREnabled(entityManager, data.getCmrIssuingCntry())) {
+                    setMassUpdateListForFR(entityManager, legacyDirectModelCol, filePath, reqId, newIterId, filePath);
                   } else if (SwissUtil.isCountrySwissEnabled(entityManager, data.getCmrIssuingCntry())) {
                     setMassUpdateListForSWISS(entityManager, legacyDirectModelCol, filePath, reqId, newIterId, filePath);
                   } else {
@@ -5084,6 +5102,83 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       MassChangeTemplateManager.initTemplatesAndValidators(SystemLocation.AUSTRIA);
       // change to the ID of the config you are generating
       MassChangeTemplate template = MassChangeTemplateManager.getMassUpdateTemplate(SystemLocation.AUSTRIA);
+      List<TemplateTab> tabs = template.getTabs();
+
+      InputStream mfStream = new FileInputStream(filepath);
+
+      // 2. loop through all the tabs returned by the config
+      if (tabs != null && tabs.size() > 0) {
+        Workbook mfWb = new XSSFWorkbook(mfStream);
+        MassUpdateModel model = new MassUpdateModel();
+        List<MassUpdateAddressModel> addrModels = new ArrayList<MassUpdateAddressModel>();
+        List<MassUpdateModel> models = new ArrayList<MassUpdateModel>();
+
+        for (int i = 0; i < tabs.size(); i++) {
+          // 3. For every sheet, do: Sheet dataSheet =
+          // mfWb.getSheet(CMR_SHEET_NAME);
+          TemplateTab tab = tabs.get(i);
+          Sheet dataSheet = mfWb.getSheet(tab.getName());
+
+          // Check row for ISU_CD, INAC_CD, and/or CLIENT_TIER only
+          if ("Data".equals(tab.getName())) {
+            // call method that will set to Data table
+            for (Row cmrRow : dataSheet) {
+              int seqNo = cmrRow.getRowNum() + 1;
+
+              if (seqNo > 1) {
+                model = new MassUpdateModel();
+                model.setParReqId(reqId);
+                model.setSeqNo(seqNo);
+                model.setIterationId(newIterId);
+                model.setErrorTxt("");
+                model.setRowStatusCd("");
+                // 4. then for every sheet, get the fields
+                model = setMassUpdateData(entityManager, cmrRow, model, tab, reqId);
+
+                if (!StringUtils.isEmpty(model.getCmrNo()) && model.getCmrNo().length() <= 8 && model.getCmrNo().length() != 0) {
+                  models.add(model);
+                }
+              }
+            }
+          } else {
+            // if it is not Data, that means it is an address
+            MassUpdateAddressModel addrModel = new MassUpdateAddressModel();
+
+            for (Row cmrRow : dataSheet) {
+              int seqNo = cmrRow.getRowNum() + 1;
+
+              if (seqNo > 1) {
+                // 4. then for every sheet, get the fields
+                addrModel = new MassUpdateAddressModel();
+                addrModel.setParReqId(reqId);
+                addrModel.setSeqNo(seqNo);
+                addrModel.setIterationId(newIterId);
+                addrModel.setAddrType(tab.getTypeCode());
+                addrModel = setMassUpdateAddr(entityManager, cmrRow, addrModel, tab, reqId);
+
+                if (!StringUtils.isEmpty(addrModel.getCmrNo()) && addrModel.getCmrNo().length() <= 8 && addrModel.getCmrNo().length() != 0) {
+                  addrModels.add(addrModel);
+                }
+              }
+            }
+          }
+        }
+        massUpdtCol.put("dataModels", models);
+        massUpdtCol.put("addrModels", addrModels);
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  private void setMassUpdateListForFR(EntityManager entityManager, Map<String, Object> massUpdtCol, String filepath, long reqId, int newIterId,
+      String filePath) throws Exception {
+
+    // 1. get the config file and get all the valid tabs
+    try {
+      MassChangeTemplateManager.initTemplatesAndValidators(SystemLocation.FRANCE);
+      // change to the ID of the config you are generating
+      MassChangeTemplate template = MassChangeTemplateManager.getMassUpdateTemplate(SystemLocation.FRANCE);
       List<TemplateTab> tabs = template.getTabs();
 
       InputStream mfStream = new FileInputStream(filepath);
@@ -5680,6 +5775,64 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       return true;
     } else {
       return false;
+    }
+
+  }
+
+  public boolean validateFRMassUpdateFile(String path, Data data, Admin admin) throws Exception {
+    List<Boolean> isErr = new ArrayList<Boolean>();
+    try (FileInputStream fis = new FileInputStream(path)) {
+      MassChangeTemplateManager.initTemplatesAndValidators(SystemLocation.FRANCE);
+      MassChangeTemplate template = MassChangeTemplateManager.getMassUpdateTemplate(SystemLocation.FRANCE);
+
+      EntityManager em = JpaManager.getEntityManager();
+      try {
+        String country = data.getCmrIssuingCntry();
+        LOG.debug("Validating " + path);
+        byte[] bookBytes = template.cloneStream(fis);
+
+        List<TemplateValidation> validations = null;
+        StringBuilder errTxt = new StringBuilder();
+
+        try (InputStream is = new ByteArrayInputStream(bookBytes)) {
+          validations = template.validate(em, is, country, 2000);
+          LOG.debug(new ObjectMapper().writeValueAsString(validations));
+          for (TemplateValidation validation : validations) {
+            for (ValidationRow row : validation.getRows()) {
+              if (!row.isSuccess()) {
+                if (StringUtils.isEmpty(errTxt.toString())) {
+                  errTxt.append("Tab name :" + validation.getTabName() + ", " + row.getError());
+                } else {
+                  errTxt.append("\nTab name :" + validation.getTabName() + ", " + row.getError());
+                }
+              }
+            }
+          }
+        }
+
+        if (!StringUtils.isEmpty(errTxt.toString())) {
+          // LOG.debug(errTxt);
+          throw new Exception(errTxt.toString());
+        }
+        try (InputStream is = new ByteArrayInputStream(bookBytes)) {
+          try (FileOutputStream fos = new FileOutputStream(path)) {
+            LOG.debug("Merging..");
+            template.merge(validations, is, fos, 2000);
+          }
+        }
+        // modify the country for testing
+      } catch (Exception e) {
+        LOG.error("An error occurred in validating FR Mass Update File.");
+        throw new Exception(e.getMessage());
+      } finally {
+        em.close();
+      }
+    }
+
+    if (isErr.contains(false)) {
+      return false;
+    } else {
+      return true;
     }
 
   }

@@ -1,0 +1,55 @@
+<html>
+<head>
+<style>
+  body, td, th {
+    font-family: IBM Plex Sans, Arial;
+    font-size: 13px;
+    width: 100%;
+    margin : 0;
+  }
+  th {
+    text-align: right;
+    padding-right: 5px;
+  }
+  td { 
+    text-align: left;
+  }
+</style>
+</head>
+<body>
+  <p>
+    The available Pool CMR records for Country {{country}} <strong>have been consumed</strong>.
+    Pool CMR assignment will be skipped until new records are added to the pool.
+  </p>
+  <p>Below is the current search criteria used for searching pool records:</p>
+  <table cellspacing="0" cellpadding="0" border="0" width="500px">
+    <tr>
+      <th>Name:</th>
+      <td>{{cat.name}}</td>
+    </tr>
+    <tr> 
+      <th>Address:</th>
+      <td>{{cat.address}}</td>
+    </tr>
+    <tr>
+      <th>City:</th>
+      <td>{{cat.city}}</td>
+    </tr>
+    <tr>
+      <th>State/Province:</th>
+      <td>{{cat.state}}</td>
+    </tr>
+    <tr>
+      <th>Postal Code:</th>
+      <td>{{cat.zip}}</td>
+    </tr>
+  </table>
+  <p>
+    <strong>
+      Note that Pool CMR has been <span style="color:red">DISABLED</span> temporarily. To re-enable the pool assignment, 
+      please go into the CreateCMR system administration and update the System Parameter
+      POOL.CMR.STATUS to Y.
+    </strong>
+  </p>
+</body>
+</html>

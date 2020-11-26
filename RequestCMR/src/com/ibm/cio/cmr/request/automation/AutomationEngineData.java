@@ -271,7 +271,6 @@ public class AutomationEngineData extends HashMap<String, Object> {
   public HashMap<String, String> getPendingChecks() {
     return getNegativeChecks();
   }
-
   public boolean isTrackNegativeChecks() {
     return trackNegativeChecks;
   }

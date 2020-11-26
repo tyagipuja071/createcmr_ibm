@@ -159,6 +159,7 @@ public class FranceUtil extends AutomationUtil {
             request.setCustomerName(name);
             request.setIssuingCountry(data.getCmrIssuingCntry());
             request.setLandedCountry(zs01.getLandCntry());
+            request.setNameMatch("Y");
             client.setReadTimeout(1000 * 60 * 5);
             LOG.debug("Connecting to the Duplicate CMR Check Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
             MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.CMR_SERVICE_ID, request, MatchingResponse.class);
@@ -960,5 +961,31 @@ public class FranceUtil extends AutomationUtil {
     }
 
     return isRelevantFieldUpdated;
+  }
+
+  public static boolean isCountryFREnabled(EntityManager entityManager, String cntry) {
+
+    boolean isFR = false;
+
+    String sql = ExternalizedQuery.getSql("FRANCE.GET_SUPP_CNTRY_BY_ID");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CNTRY", cntry);
+    query.setForReadOnly(true);
+    List<Integer> records = query.getResults(Integer.class);
+    Integer singleObject = null;
+
+    if (records != null && records.size() > 0) {
+      singleObject = records.get(0);
+      Integer val = singleObject != null ? singleObject : null;
+
+      if (val != null) {
+        isFR = true;
+      } else {
+        isFR = false;
+      }
+    } else {
+      isFR = false;
+    }
+    return isFR;
   }
 }

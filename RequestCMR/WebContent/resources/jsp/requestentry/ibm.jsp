@@ -185,7 +185,7 @@ dojo.addOnLoad(function(){
     </cmr:view>
     
     <!-- DEFECT 1205817 : Merge SORTL and SBO fields -->
-    <cmr:view exceptForGEO="LA,EMEA,AP,MCO,MCO1,MCO2,FR,CEMEA,NORDX,NL,CN">
+    <cmr:view exceptForGEO="LA,EMEA,AP,MCO,MCO1,MCO2,FR,CEMEA,NORDX,NL,CN" exceptForCountry="649">
     <cmr:row topPad="10">
     <cmr:column span="2" containerForField="SearchTerm" >
         <p>
@@ -199,7 +199,7 @@ dojo.addOnLoad(function(){
     </cmr:row>
    </cmr:view>
 
-    <cmr:view exceptForCountry="643,749,778,818,834,852,856,646,714,720,848" exceptForGEO="FR,JP,MCO2">
+    <cmr:view exceptForCountry="643,749,778,818,834,852,856,646,714,720,848,649" exceptForGEO="FR,JP,MCO2">
     <cmr:row topPad="10" addBackground="true">
       <cmr:column span="2" containerForField="Enterprise" exceptForGEO="MCO1,NORDX" exceptForCountry="755">
         <p>
@@ -355,7 +355,7 @@ dojo.addOnLoad(function(){
   <%}%>
 
    <!--  PPSCEID, Membership Level, BP Relation Type -->    
-   <cmr:view exceptForCountry="643,749,778,818,834,852,856,646,714,720,760">
+   <cmr:view exceptForCountry="643,749,778,818,834,852,856,646,714,720,760,649">
 		<cmr:row topPad="10" addBackground="true">
   			<cmr:column span="2" containerForField="PPSCEID">
   				<p>
@@ -385,18 +385,18 @@ dojo.addOnLoad(function(){
           </p>
         </cmr:column>
 		</cmr:row>
-    <%--   CMR-3869 <cmr:view exceptForGEO="MCO2,CN" exceptForCountry="644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889,838,620,642,675,677,680,752,762,767,768,772,805,808,823,832,849,850,865,729,618,624,788">
+ <%--   CMR-3869  <cmr:view exceptForGEO="MCO2,CN" exceptForCountry="644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889,838,620,642,675,677,680,752,762,767,768,772,805,808,823,832,849,850,865,729,618,624,788,862,754,866">
   		<cmr:row topPad="10" addBackground="true">
         <cmr:column span="2" containerForField="SOENumber">
           <p>
-            <cmr:label fieldId="soeReqNo">
+           <cmr:label fieldId="soeReqNo">
               <cmr:fieldLabel fieldId="SOENumber" />:
             </cmr:label>
             <cmr:field fieldId="SOENumber" id="soeReqNo" path="soeReqNo" tabId="MAIN_IBM_TAB" />
           </p>
         </cmr:column>
   		</cmr:row>
-    </cmr:view>
+    </cmr:view> 
     --%>
 		</cmr:view>
 
@@ -446,5 +446,9 @@ dojo.addOnLoad(function(){
     
      <!--  SWISS fields -->
     <jsp:include page="SWISS/ch_ibm.jsp" />
+     
+     <!--  Canada fields -->
+    <jsp:include page="CA/ca_ibm.jsp" />
+    
      
 	</cmr:section>

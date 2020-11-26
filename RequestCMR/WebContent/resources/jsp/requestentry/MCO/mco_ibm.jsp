@@ -1,5 +1,6 @@
 <%@page import="com.ibm.cio.cmr.request.model.BaseModel"%>
-<%@page import="com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel"%>
+<%@page
+	import="com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles"%>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
@@ -16,17 +17,32 @@
   boolean newEntry = BaseModel.STATE_NEW == reqentry.getState();
 %>
 <cmr:view forGEO="MCO,MCO1,MCO2">
-  <cmr:row topPad="10">
-    <cmr:column span="2" containerForField="SalRepNameNo">
-      <p>
-        <cmr:label fieldId="repTeamMemberNo">
-          <cmr:fieldLabel fieldId="SalRepNameNo" />:
-           <cmr:delta text="${rdcdata.repTeamMemberNo}" oldValue="${reqentry.repTeamMemberNo}" id="delta-repTeamMemberNo" />
-        </cmr:label>
-        <cmr:field fieldId="SalRepNameNo" id="repTeamMemberNo" path="repTeamMemberNo" tabId="MAIN_IBM_TAB" />
-      </p>
-    </cmr:column>
-    <%-- <cmr:column span="2" containerForField="EngineeringBo" forCountry="838">
+	<cmr:row topPad="10">
+		<cmr:column span="2" containerForField="SalRepNameNo"
+			exceptForCountry="780">
+			<p>
+				<cmr:label fieldId="repTeamMemberNo">
+					<cmr:fieldLabel fieldId="SalRepNameNo" />:
+           <cmr:delta text="${rdcdata.repTeamMemberNo}"
+						oldValue="${reqentry.repTeamMemberNo}" id="delta-repTeamMemberNo" />
+				</cmr:label>
+				<cmr:field fieldId="SalRepNameNo" id="repTeamMemberNo"
+					path="repTeamMemberNo" tabId="MAIN_IBM_TAB" />
+			</p>
+		</cmr:column>
+
+		<cmr:column span="2" containerForField="Enterprise" forCountry="780">
+			<p>
+				<cmr:label fieldId="enterprise">
+					<cmr:fieldLabel fieldId="Enterprise" />:
+              <cmr:delta text="${rdcdata.enterprise}"
+						oldValue="${reqentry.enterprise}" />
+				</cmr:label>
+				<cmr:field id="enterprise" path="enterprise" fieldId="Enterprise"
+					tabId="MAIN_IBM_TAB" />
+			</p>
+		</cmr:column>
+		<%-- <cmr:column span="2" containerForField="EngineeringBo" forCountry="838">
       <p>
         <cmr:label fieldId="engineeringBo">
           <cmr:fieldLabel fieldId="EngineeringBo" />:
@@ -35,33 +51,39 @@
         <cmr:field fieldId="EngineeringBo" id="engineeringBo" path="engineeringBo" tabId="MAIN_IBM_TAB"/>
       </p>
     </cmr:column>     --%>
-    <cmr:column span="2" containerForField="SalesBusOff" exceptForCountry="838">
-      <p>
-        <cmr:label fieldId="salesBusOffCd">
-          <cmr:fieldLabel fieldId="SalesBusOff" />:
+		<cmr:column span="2" containerForField="SalesBusOff"
+			exceptForCountry="838">
+			<p>
+				<cmr:label fieldId="salesBusOffCd">
+					<cmr:fieldLabel fieldId="SalesBusOff" />:
         </cmr:label>
-        <cmr:field fieldId="SalesBusOff" id="salesBusOffCd" path="salesBusOffCd" tabId="MAIN_IBM_TAB" />
-      </p>
-    </cmr:column>
-    
-    <cmr:view forCountry="838">
-      <%
-        if (reqentry.getReqType().equalsIgnoreCase("U")) {
-      %>
-      <cmr:column span="2" containerForField="SalesBusOff2">
-          <p>
-            <cmr:label fieldId="salesBusOffCd">
-            <cmr:fieldLabel fieldId="SalesBusOff" />: 
-               <cmr:delta text="${rdcdata.salesBusOffCd}" oldValue="${reqentry.salesBusOffCd}" id="delta-salesBusOffCd2" />
-            </cmr:label>
-            <cmr:field path="salesBusOffCd" id="salesBusOffCd2" fieldId="SalesBusOff2" tabId="MAIN_IBM_TAB" />
-          </p>
-        </cmr:column>
-      <%} else if (reqentry.getReqType().equalsIgnoreCase("C")) { %>
-      <cmr:column span="2" containerForField="SalesBusOff">
-        <p>
-          <cmr:label fieldId="salesBusOffCd">
-            <cmr:fieldLabel fieldId="SalesBusOff" />:
+				<cmr:field fieldId="SalesBusOff" id="salesBusOffCd"
+					path="salesBusOffCd" tabId="MAIN_IBM_TAB" />
+			</p>
+		</cmr:column>
+
+		<cmr:view forCountry="838">
+			<%
+			  if (reqentry.getReqType().equalsIgnoreCase("U")) {
+			%>
+			<cmr:column span="2" containerForField="SalesBusOff2">
+				<p>
+					<cmr:label fieldId="salesBusOffCd">
+						<cmr:fieldLabel fieldId="SalesBusOff" />: 
+               <cmr:delta text="${rdcdata.salesBusOffCd}"
+							oldValue="${reqentry.salesBusOffCd}" id="delta-salesBusOffCd2" />
+					</cmr:label>
+					<cmr:field path="salesBusOffCd" id="salesBusOffCd2"
+						fieldId="SalesBusOff2" tabId="MAIN_IBM_TAB" />
+				</p>
+			</cmr:column>
+			<%
+			  } else if (reqentry.getReqType().equalsIgnoreCase("C")) {
+			%>
+			<cmr:column span="2" containerForField="SalesBusOff">
+				<p>
+					<cmr:label fieldId="salesBusOffCd">
+						<cmr:fieldLabel fieldId="SalesBusOff" />:
           </cmr:label>
           <cmr:field fieldId="SalesBusOff" id="salesBusOffCd" path="salesBusOffCd" tabId="MAIN_IBM_TAB" />
         </p>
@@ -84,7 +106,7 @@
         </p>
       </cmr:column>
       
-      <cmr:column span="2" containerForField="InternalDept" exceptForCountry="864">
+      <cmr:column span="2" containerForField="InternalDept" exceptForCountry="864,780">
         <p>
           <cmr:label fieldId="ibmDeptCostCenter">
             <cmr:fieldLabel fieldId="InternalDept" />: 
@@ -94,7 +116,7 @@
       </cmr:column>
         <% if (reqentry.getReqType().equalsIgnoreCase("U")) { %>
       <cmr:view forGEO="MCO1,MCO2">
-        <cmr:column span="2" containerForField="CollectionCd">
+        <cmr:column span="2" containerForField="CollectionCd" exceptForCountry="780">
           <p>
             <cmr:label fieldId="collectionCd">
               <cmr:fieldLabel fieldId="CollectionCd" />: 
