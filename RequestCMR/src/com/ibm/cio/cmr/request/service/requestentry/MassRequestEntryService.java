@@ -4594,7 +4594,6 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
 
   }
 
-
   public boolean validateSWISSMassUpdateFile(String path, Data data, Admin admin) throws Exception {
     List<Boolean> isErr = new ArrayList<Boolean>();
     try (FileInputStream fis = new FileInputStream(path)) {
@@ -4671,16 +4670,16 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         try (InputStream is = new ByteArrayInputStream(bookBytes)) {
           validations = template.validate(em, is, country, 2000);
           LOG.debug(new ObjectMapper().writeValueAsString(validations));
-          
-    	  for (TemplateValidation validation : validations) {
-	    	  if(validation.hasErrors()) {
-	    		  if (StringUtils.isEmpty(errTxt.toString())) {
-	                  errTxt.append("Tab name :" + validation.getTabName() + ", " + validation.getAllError());
-	              } else {
-	                  errTxt.append("\nTab name :" + validation.getTabName() + ", " + validation.getAllError());
-	              }	  
-	    	  }
-          }  
+
+          for (TemplateValidation validation : validations) {
+            if (validation.hasErrors()) {
+              if (StringUtils.isEmpty(errTxt.toString())) {
+                errTxt.append("Tab name :" + validation.getTabName() + ", " + validation.getAllError());
+              } else {
+                errTxt.append("\nTab name :" + validation.getTabName() + ", " + validation.getAllError());
+              }
+            }
+          }
         }
 
         if (!StringUtils.isEmpty(errTxt.toString())) {
@@ -5195,6 +5194,83 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       MassChangeTemplateManager.initTemplatesAndValidators(SystemLocation.FRANCE);
       // change to the ID of the config you are generating
       MassChangeTemplate template = MassChangeTemplateManager.getMassUpdateTemplate(SystemLocation.FRANCE);
+      List<TemplateTab> tabs = template.getTabs();
+
+      InputStream mfStream = new FileInputStream(filepath);
+
+      // 2. loop through all the tabs returned by the config
+      if (tabs != null && tabs.size() > 0) {
+        Workbook mfWb = new XSSFWorkbook(mfStream);
+        MassUpdateModel model = new MassUpdateModel();
+        List<MassUpdateAddressModel> addrModels = new ArrayList<MassUpdateAddressModel>();
+        List<MassUpdateModel> models = new ArrayList<MassUpdateModel>();
+
+        for (int i = 0; i < tabs.size(); i++) {
+          // 3. For every sheet, do: Sheet dataSheet =
+          // mfWb.getSheet(CMR_SHEET_NAME);
+          TemplateTab tab = tabs.get(i);
+          Sheet dataSheet = mfWb.getSheet(tab.getName());
+
+          // Check row for ISU_CD, INAC_CD, and/or CLIENT_TIER only
+          if ("Data".equals(tab.getName())) {
+            // call method that will set to Data table
+            for (Row cmrRow : dataSheet) {
+              int seqNo = cmrRow.getRowNum() + 1;
+
+              if (seqNo > 1) {
+                model = new MassUpdateModel();
+                model.setParReqId(reqId);
+                model.setSeqNo(seqNo);
+                model.setIterationId(newIterId);
+                model.setErrorTxt("");
+                model.setRowStatusCd("");
+                // 4. then for every sheet, get the fields
+                model = setMassUpdateData(entityManager, cmrRow, model, tab, reqId);
+
+                if (!StringUtils.isEmpty(model.getCmrNo()) && model.getCmrNo().length() <= 8 && model.getCmrNo().length() != 0) {
+                  models.add(model);
+                }
+              }
+            }
+          } else {
+            // if it is not Data, that means it is an address
+            MassUpdateAddressModel addrModel = new MassUpdateAddressModel();
+
+            for (Row cmrRow : dataSheet) {
+              int seqNo = cmrRow.getRowNum() + 1;
+
+              if (seqNo > 1) {
+                // 4. then for every sheet, get the fields
+                addrModel = new MassUpdateAddressModel();
+                addrModel.setParReqId(reqId);
+                addrModel.setSeqNo(seqNo);
+                addrModel.setIterationId(newIterId);
+                addrModel.setAddrType(tab.getTypeCode());
+                addrModel = setMassUpdateAddr(entityManager, cmrRow, addrModel, tab, reqId);
+
+                if (!StringUtils.isEmpty(addrModel.getCmrNo()) && addrModel.getCmrNo().length() <= 8 && addrModel.getCmrNo().length() != 0) {
+                  addrModels.add(addrModel);
+                }
+              }
+            }
+          }
+        }
+        massUpdtCol.put("dataModels", models);
+        massUpdtCol.put("addrModels", addrModels);
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+  
+   private void setMassUpdateListForDR(EntityManager entityManager, Map<String, Object> massUpdtCol, String filepath, long reqId, int newIterId,
+      String filePath, String cmrIssuingCntry) throws Exception {
+
+    // 1. get the config file and get all the valid tabs
+    try {
+      MassChangeTemplateManager.initTemplatesAndValidators(cmrIssuingCntry);
+      // change to the ID of the config you are generating
+      MassChangeTemplate template = MassChangeTemplateManager.getMassUpdateTemplate(cmrIssuingCntry);
       List<TemplateTab> tabs = template.getTabs();
 
       InputStream mfStream = new FileInputStream(filepath);
