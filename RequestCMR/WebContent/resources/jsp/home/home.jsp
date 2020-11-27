@@ -210,7 +210,7 @@ function getRandomColor() {
                      <li>
                      The application also provides Web Service APIs for external systems to be able
                      to directly create requests without using the user interface. 
-                     Specifications can be found <a href="https://w3-connections.ibm.com/files/app/file/5a2ff1b0-0534-44fd-9abb-52ab4be41d72" target="_blank">here</a>.
+                     Specifications can be found <a href="https://ibm.box.com/s/6s88qa7f41ufagfeyupu86m08vwe5bp9" target="_blank">here</a>.
                      </li>
                    </ul>
                  </div>
