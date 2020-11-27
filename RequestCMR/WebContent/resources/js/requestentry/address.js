@@ -1756,6 +1756,10 @@ function applyAddrChangesModal_onLoad() {
         break;
       }
 
+      if (cntry == '649' && reqType == 'C' && type.ret1 == 'ZP01') {
+        continue;
+      }
+
       // update TR
       // Rollback TR change
       /* Removed for Cyprus
