@@ -88,6 +88,7 @@ import com.ibm.cio.cmr.request.service.approval.ApprovalService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.ConfigUtil;
+import com.ibm.cio.cmr.request.util.IERPRequestUtils;
 import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.RequestUtils;
@@ -180,6 +181,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       } else if (ATUtil.isCountryATEnabled(entityManager, cmrIssuingCntry)) {// CMR-803
         performLegacyDirectMassUpdate(model, entityManager, request);
       } else if (FranceUtil.isCountryFREnabled(entityManager, cmrIssuingCntry)) {
+        performLegacyDirectMassUpdate(model, entityManager, request);
+      } else if (IERPRequestUtils.isCountryDREnabled(entityManager, cmrIssuingCntry)) {
         performLegacyDirectMassUpdate(model, entityManager, request);
       } else {
         performMassUpdate(model, entityManager, request);
@@ -1760,6 +1763,12 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         processLegacyDirectMassFile(entityManager, request, reqId, token, items);
         return;
       }
+
+      if (cmrIssuingCntry != null && IERPRequestUtils.isCountryDREnabled(entityManager, cmrIssuingCntry)) {
+        processLegacyDirectMassFile(entityManager, request, reqId, token, items);
+        return;
+      }
+
       // CMR-803
       if (cmrIssuingCntry != null && ATUtil.isCountryATEnabled(entityManager, cmrIssuingCntry)) {
         processLegacyDirectMassFile(entityManager, request, reqId, token, items);
@@ -4848,6 +4857,11 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                     } catch (Exception e) {
                       throw new CmrException(e);
                     }
+                  } else if (IERPRequestUtils.isCountryDREnabled(entityManager, data.getCmrIssuingCntry())) {
+                    fis = new FileInputStream(filePath);
+                    if (!IERPRequestUtils.validateDRMassUpdateFile(filePath, data, admin, data.getCmrIssuingCntry())) {
+                      throw new CmrException(MessageUtil.ERROR_MASS_FILE);
+                    }
                   } else {
                     if (!validateMassUpdateFile(item.getInputStream())) {
                       throw new CmrException(MessageUtil.ERROR_MASS_FILE);
@@ -4880,6 +4894,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                     setMassUpdateListForFR(entityManager, legacyDirectModelCol, filePath, reqId, newIterId, filePath);
                   } else if (SwissUtil.isCountrySwissEnabled(entityManager, data.getCmrIssuingCntry())) {
                     setMassUpdateListForSWISS(entityManager, legacyDirectModelCol, filePath, reqId, newIterId, filePath);
+                  } else if (IERPRequestUtils.isCountryDREnabled(entityManager, data.getCmrIssuingCntry())) {
+                    setMassUpdateListForDR(entityManager, legacyDirectModelCol, filePath, reqId, newIterId, filePath, data.getCmrIssuingCntry());
                   } else {
                     if (!PageManager.fromGeo("JP", cmrIssuingCntry)) {
                       setMassUpdateList(modelList, item.getInputStream(), reqId, newIterId, filePath);
