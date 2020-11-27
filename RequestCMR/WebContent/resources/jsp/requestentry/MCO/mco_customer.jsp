@@ -1,6 +1,5 @@
 <%@page import="com.ibm.cio.cmr.request.model.BaseModel"%>
-<%@page
-	import="com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel"%>
+<%@page import="com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles"%>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
@@ -19,22 +18,80 @@
 
 <cmr:view forGEO="MCO,MCO1,MCO2">
 
-	<!-- Add hidden fields to keep imported values -->
-	<form:hidden path="orgNo" />
-	<form:hidden path="sourceCd" />
-	<form:hidden path="mrcCd" />
-	<form:hidden path="sitePartyId" />
-	<form:hidden path="searchTerm" />
+  <!-- Add hidden fields to keep imported values -->
+  <form:hidden path="orgNo" />
+  <form:hidden path="sourceCd" />
+  <form:hidden path="mrcCd" />
+  <form:hidden path="sitePartyId" />
+  <form:hidden path="searchTerm" />
 
-	<cmr:row addBackground="false">
-		<cmr:view forGEO="MCO,MCO1,MCO2">
+  <cmr:view forCountry="851">
+  	<cmr:row addBackground="true">
+  	  <cmr:column span="2" containerForField="LocalTax1">
+        <p>
+          <cmr:label fieldId="taxCd1"> <cmr:fieldLabel fieldId="LocalTax1" />: </cmr:label>
+          <cmr:field path="taxCd1" id="taxCd1" fieldId="LocalTax1" tabId="MAIN_CUST_TAB" />
+        </p>
+      </cmr:column>
+      <c:if test="${reqentry.reqType != 'U'}">
+      <cmr:column span="2" containerForField="LocalTax2">
+        <p>
+       	  <cmr:label fieldId="vatExempt2">&nbsp;</cmr:label>
+          <cmr:field path="taxCd2" id="taxCd2" fieldId="LocalTax2" tabId="MAIN_CUST_TAB" />
+          <cmr:label fieldId="taxCd2" forRadioOrCheckbox="true">
+            <cmr:fieldLabel fieldId="LocalTax2" />
+          </cmr:label>
+        </p>
+      </cmr:column>
+      </c:if>
+  	</cmr:row>
+  </cmr:view>
+  <cmr:view forCountry="700">
+  	<cmr:row addBackground="true">
+  	  <cmr:column span="2" containerForField="BusinessType">
+        <p>
+          <cmr:label fieldId="busnType"> <cmr:fieldLabel fieldId="BusinessType" />: </cmr:label>
+          <cmr:field path="busnType" id="busnType" fieldId="BusinessType" tabId="MAIN_CUST_TAB" />
+        </p>
+      </cmr:column>
+      <c:if test="${reqentry.reqType != 'U'}">
+      <cmr:column span="2" containerForField="LocalTax2">
+        <p>
+       	  <cmr:label fieldId="vatExempt2">&nbsp;</cmr:label>
+          <cmr:field path="taxCd2" id="taxCd2" fieldId="LocalTax2" tabId="MAIN_CUST_TAB" />
+          <cmr:label fieldId="taxCd2" forRadioOrCheckbox="true">
+            <cmr:fieldLabel fieldId="LocalTax2" />
+          </cmr:label>
+        </p>
+      </cmr:column>
+      </c:if>
+  	</cmr:row>
+  </cmr:view>
+  	<cmr:row addBackground="false">
+		<%--     <cmr:column span="2" containerForField="LocationNumber" forCountry="838">
+      <p>
+        <cmr:label fieldId="locationNumber">
+          <cmr:fieldLabel fieldId="LocationNumber" />: 
+            <cmr:delta text="${rdcdata.locationNumber}" oldValue="${reqentry.locationNo}" id="delta-locationNumber" />
+        </cmr:label>
+            <cmr:field path="locationNo" id="locationNumber" fieldId="LocationNumber" tabId="MAIN_CUST_TAB" />
+      </p>
+    </cmr:column> --%>
+		<cmr:column span="2" containerForField="SpecialTaxCd" forCountry="822">
+			<p>
+				<label for="specialTaxCd"> <cmr:fieldLabel
+						fieldId="SpecialTaxCd" />:
+				</label>
+				<cmr:field fieldId="SpecialTaxCd" id="specialTaxCd"
+					path="specialTaxCd" tabId="MAIN_CUST_TAB" />
+			</p>
+		</cmr:column>
+  <cmr:view forGEO="MCO1,MCO2">
 			<cmr:column span="2" containerForField="SpecialTaxCd"
 				exceptForCountry="780">
 				<p>
 					<label for="specialTaxCd"> <cmr:fieldLabel
-							fieldId="SpecialTaxCd" />: <cmr:delta
-							text="${rdcdata.specialTaxCd}"
-							oldValue="${reqentry.specialTaxCd}" />
+							fieldId="SpecialTaxCd" />:
 					</label>
 					<cmr:field fieldId="SpecialTaxCd" id="specialTaxCd"
 						path="specialTaxCd" tabId="MAIN_CUST_TAB" />
@@ -64,151 +121,8 @@
 				</p>
 			</cmr:column>
 		</cmr:view>
-
-		<cmr:view forCountry="780">
-			<%--New Fields for Malta --%>
-			<cmr:column span="2" containerForField="OrderBlock" forCountry="780">
-				<p>
-					<cmr:label fieldId="ordBlk">
-						<cmr:fieldLabel fieldId="OrderBlock" />:
-						<cmr:delta text="${rdcdata.ordBlk}"
-							oldValue="${reqentry.ordBlk}" />
-					</cmr:label>
-					<cmr:field path="ordBlk" id="ordBlk" fieldId="OrderBlock"
-						tabId="MAIN_CUST_TAB" />
-				</p>
-			</cmr:column>
-			
-			<cmr:column span="2" containerForField="CustClass" forCountry="780">
-				<p>
-					<cmr:label fieldId="custClass">
-						<cmr:fieldLabel fieldId="CustClass" />:
-          			</cmr:label>
-					<cmr:field path="custClass" id="custClass" fieldId="CustClass"
-						tabId="MAIN_CUST_TAB" />
-				</p>
-			</cmr:column>
-		</cmr:view>
-
-		<cmr:view forGEO="MCO1">
-			<cmr:column span="2" containerForField="CommercialFinanced">
-				<p>
-					<cmr:label fieldId="commercialFinanced">
-						<cmr:fieldLabel fieldId="CommercialFinanced" />:
-            		<cmr:delta text="${rdcdata.commercialFinanced}"
-							oldValue="${reqentry.commercialFinanced}" />
-					</cmr:label>
-					<cmr:field path="commercialFinanced" id="commercialFinanced"
-						fieldId="CommercialFinanced" tabId="MAIN_CUST_TAB" />
-				</p>
-			</cmr:column>
-		</cmr:view>
-	</cmr:row>
-
-	<cmr:view forCountry="XXXX">
-    <cmr:row addBackground="false">
-      <cmr:column span="2" containerForField="OrgNo">
-        <p>
-          <label for="orgNo"> <cmr:fieldLabel fieldId="OrgNo" />: </label>
-          <cmr:field fieldId="OrgNo" id="orgNo" path="orgNo" tabId="MAIN_CUST_TAB" />
-        </p>
-      </cmr:column>
-      <cmr:column span="2" containerForField="SourceCd">
-        <p>
-          <cmr:label fieldId="taxCd1"> <cmr:fieldLabel fieldId="LocalTax1" />: </cmr:label>
-          <cmr:field path="taxCd1" id="taxCd1" fieldId="LocalTax1" tabId="MAIN_CUST_TAB" />
-        </p>
-      </cmr:column>
-      <c:if test="${reqentry.reqType != 'U'}">
-      <cmr:column span="2" containerForField="LocalTax2">
-        <p>
-       	  <cmr:label fieldId="vatExempt2">&nbsp;</cmr:label>
-          <cmr:field path="taxCd2" id="taxCd2" fieldId="LocalTax2" tabId="MAIN_CUST_TAB" />
-          <cmr:label fieldId="taxCd2" forRadioOrCheckbox="true">
-            <cmr:fieldLabel fieldId="LocalTax2" />
-          </cmr:label>
-        </p>
-      </cmr:column>
-      </c:if>
-  	</cmr:row>
-  </cmr:view>
-
-	<cmr:view forCountry="822,838">
-    <cmr:row addBackground="true">
-      <cmr:column span="2" containerForField="CollectionCd" exceptForCountry="780">
-        <p>
-          <cmr:label fieldId="busnType"> <cmr:fieldLabel fieldId="BusinessType" />: </cmr:label>
-          <cmr:field path="busnType" id="busnType" fieldId="BusinessType" tabId="MAIN_CUST_TAB" />
-        </p>
-      </cmr:column>
-      <c:if test="${reqentry.reqType != 'U'}">
-      <cmr:column span="2" containerForField="LocalTax2">
-        <p>
-       	  <cmr:label fieldId="vatExempt2">&nbsp;</cmr:label>
-          <cmr:field path="taxCd2" id="taxCd2" fieldId="LocalTax2" tabId="MAIN_CUST_TAB" />
-          <cmr:label fieldId="taxCd2" forRadioOrCheckbox="true">
-            <cmr:fieldLabel fieldId="LocalTax2" />
-          </cmr:label>
-        </p>
-      </cmr:column>
-      </c:if>
-  	</cmr:row>
-  </cmr:view>
-	<cmr:row addBackground="false">
-		<%--     <cmr:column span="2" containerForField="LocationNumber" forCountry="838">
-      <p>
-        <cmr:label fieldId="locationNumber">
-          <cmr:fieldLabel fieldId="LocationNumber" />: 
-            <cmr:delta text="${rdcdata.locationNumber}" oldValue="${reqentry.locationNo}" id="delta-locationNumber" />
-        </cmr:label>
-            <cmr:field path="locationNo" id="locationNumber" fieldId="LocationNumber" tabId="MAIN_CUST_TAB" />
-      </p>
-    </cmr:column> --%>
-		<cmr:column span="2" containerForField="SpecialTaxCd" forCountry="822">
-			<p>
-				<label for="specialTaxCd"> <cmr:fieldLabel
-						fieldId="SpecialTaxCd" />:
-				</label>
-				<cmr:field fieldId="SpecialTaxCd" id="specialTaxCd"
-					path="specialTaxCd" tabId="MAIN_CUST_TAB" />
-			</p>
-		</cmr:column>
-		<cmr:view forGEO="MCO1,MCO2">
-			<cmr:column span="2" containerForField="SpecialTaxCd">
-				<p>
-					<label for="specialTaxCd"> <cmr:fieldLabel
-							fieldId="SpecialTaxCd" />:
-					</label>
-					<cmr:field fieldId="SpecialTaxCd" id="specialTaxCd"
-						path="specialTaxCd" tabId="MAIN_CUST_TAB" />
-				</p>
-			</cmr:column>
-		</cmr:view>
-		<cmr:column span="2" containerForField="AbbrevLocation">
-			<p>
-				<label for="abbrevLocn"> <cmr:fieldLabel
-						fieldId="AbbrevLocation" />: <cmr:delta
-						text="${rdcdata.abbrevLocn}" oldValue="${reqentry.abbrevLocn}" />
-				</label>
-				<cmr:field fieldId="AbbrevLocation" id="abbrevLocn"
-					path="abbrevLocn" tabId="MAIN_CUST_TAB" />
-			</p>
-		</cmr:column>
-		<cmr:view forGEO="MCO,MCO1,MCO2">
-			<cmr:column span="2" containerForField="EmbargoCode">
-				<p>
-					<cmr:label fieldId="embargoCd">
-						<cmr:fieldLabel fieldId="EmbargoCode" />:
-            <cmr:delta text="${rdcdata.embargoCd}"
-							oldValue="${reqentry.embargoCd}" />
-					</cmr:label>
-					<cmr:field path="embargoCd" id="embargoCd" fieldId="EmbargoCode"
-						tabId="MAIN_CUST_TAB" />
-				</p>
-			</cmr:column>
-		</cmr:view>
-
-		<!-- Type Of Customer for MCO,MCO1 -->
+	
+	<!-- Type Of Customer for MCO,MCO1 -->
 		<!-- CommercialFinanced,CodFlag MCO1 -->
 		<cmr:view forGEO="MCO,MCO1" exceptForCountry="838">
 			<c:if test="${reqentry.reqType != 'C'}">
@@ -242,6 +156,30 @@
 						</p>
 					</cmr:column>
 			</c:if>
+		</cmr:view>
+		<cmr:view forCountry="780">
+			<%--New Fields for Malta --%>
+			<cmr:column span="2" containerForField="OrderBlock" forCountry="780">
+				<p>
+					<cmr:label fieldId="ordBlk">
+						<cmr:fieldLabel fieldId="OrderBlock" />:
+						<cmr:delta text="${rdcdata.ordBlk}"
+							oldValue="${reqentry.ordBlk}" />
+					</cmr:label>
+					<cmr:field path="ordBlk" id="ordBlk" fieldId="OrderBlock"
+						tabId="MAIN_CUST_TAB" />
+				</p>
+			</cmr:column>
+			
+			<cmr:column span="2" containerForField="CustClass" forCountry="780">
+				<p>
+					<cmr:label fieldId="custClass">
+						<cmr:fieldLabel fieldId="CustClass" />:
+          			</cmr:label>
+					<cmr:field path="custClass" id="custClass" fieldId="CustClass"
+						tabId="MAIN_CUST_TAB" />
+				</p>
+			</cmr:column>
 		</cmr:view>
 	</cmr:row>
 
