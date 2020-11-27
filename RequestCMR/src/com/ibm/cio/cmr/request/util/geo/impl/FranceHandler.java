@@ -290,10 +290,9 @@ public class FranceHandler extends GEOHandler {
       String maxAddrSeq = "99999";
       String sql = null;
       reqType = getReqType(entityManager, reqId);
-      sql = ExternalizedQuery.getSql("ADDRESS.GETMADDRSEQ");
+      sql = ExternalizedQuery.getSql("ADDRESS.GETMADDRSEQ_IGF");
       PreparedQuery query = new PreparedQuery(entityManager, sql);
       query.setParameter("REQ_ID", reqId);
-      query.setParameter("ADDR_TYPE", addrType);
 
       List<Object[]> results = query.getResults();
       if (results != null && results.size() > 0) {
