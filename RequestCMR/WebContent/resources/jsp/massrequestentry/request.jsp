@@ -217,7 +217,7 @@ dojo.addOnLoad(function() {
     <div title="Your Actions" id="cmr-your-actions" class="cmr-actions ${yourActionsViewOnly == true ? "view-only" : " cmr-actions-locked"}" style="display:none">
       <div class="cmr-action-dd">
         <form:select cssStyle="width:260px" dojoType="dijit.form.FilteringSelect" id="yourAction" searchAttr="name" style="display: inline-block;" maxHeight="200" required="false" path="yourAction" placeHolder="${ui.yourAction}" />
-        <img title="Proceed with the selected Action" class="cmr-proceed-icon" src="${resourcesPath}/images/go.png" onclick="processRequestAction()">
+        <img title="Proceed with the selected Action" class="cmr-proceed-icon" src="${resourcesPath}/images/play.webp" onclick="processRequestAction()">
       </div>
       <div class="cmr-action-txt" id="viewOnlyText" style="display:none">View Only</div>
     </div>
