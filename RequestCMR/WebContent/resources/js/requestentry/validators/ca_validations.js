@@ -96,7 +96,37 @@ function toggleAddrTypesForCA(cntry, addressMode, details) {
       cmr.showNode('radiocont_ZS01');
       cmr.hideNode('radiocont_ZI01');
     }
+    var reqType = FormManager.getActualValue('reqType');
+    if (reqType == 'C' || (reqType == 'U' && isAddressInGrid('ZP01'))) {
+      cmr.hideNode('radiocont_ZP01');
+    } else {
+      cmr.showNode('radiocont_ZP01');
+    }
   }
+}
+
+/**
+ * Checks if the address type is already present in the Address Grid
+ * 
+ * @param addrType
+ * @returns
+ */
+function isAddressInGrid(addrType) {
+  var record = null;
+  var type = null;
+  for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+    record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+    type = record.addrType;
+
+    if (typeof (type) == 'object') {
+      type = type[0];
+    }
+
+    if (type == addrType) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /**
@@ -128,7 +158,8 @@ function addCAAddressHandler(cntry, addressMode, saving) {
  * @returns
  */
 function canCopyAddress(value, rowIndex, grid) {
-  if (CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount >= 2) {
+  var reqType = FormManager.getActualValue('reqType');
+  if ((reqType == 'C' && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount >= 2) || (reqType == 'U' && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount >= 3)) {
     return false;
   }
   return true;
@@ -214,5 +245,5 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addToggleAddrTypeFunction(toggleAddrTypesForCA, [ SysLoc.CANADA ]);
   GEOHandler.addAddrFunction(addCAAddressHandler, [ SysLoc.CANADA ]);
-
+  GEOHandler.enableCopyAddress(SysLoc.CANADA);
 });
