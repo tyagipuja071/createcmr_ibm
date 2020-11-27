@@ -90,6 +90,7 @@ public class LegacyDirectUtil {
     FIELDS_CLEAR_LIST.add("EmbargoCode");
     FIELDS_CLEAR_LIST.add("Enterprise");
     FIELDS_CLEAR_LIST.add("TypeOfCustomer");
+    FIELDS_CLEAR_LIST.add("CodFlag");
 
     // LD_BYPASS_MASS_UPDT_DUP_FILLS_VAL.add("758");
   }
@@ -259,8 +260,8 @@ public class LegacyDirectUtil {
 
   }
 
-  public static LegacyDirectObjectContainer getLegacyDBValuesForITMass(EntityManager entityManager, String country, String cmrNo,
-      MassUpdtData muData, boolean readOnly) throws CmrException {
+  public static LegacyDirectObjectContainer getLegacyDBValuesForITMass(EntityManager entityManager, String country, String cmrNo, MassUpdtData muData,
+      boolean readOnly) throws CmrException {
     LegacyDirectObjectContainer legacyObjects = new LegacyDirectObjectContainer();
 
     // DENNIS: Grab first the CMRTCEXT record of the CMR
@@ -1420,5 +1421,22 @@ public class LegacyDirectUtil {
     }
 
     return isDR;
+  }
+  
+  public static DataRdc getOldData(EntityManager entityManager, String reqId) {
+    String sql = ExternalizedQuery.getSql("SUMMARY.OLDDATA");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    query.setForReadOnly(true);
+    List<DataRdc> records = query.getResults(DataRdc.class);
+    DataRdc oldData = new DataRdc();
+
+    if (records != null && records.size() > 0) {
+      oldData = records.get(0);
+    } else {
+      oldData = null;
+    }
+
+    return oldData;
   }
 }

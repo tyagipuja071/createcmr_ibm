@@ -6,6 +6,7 @@ package com.ibm.cio.cmr.request.util.geo;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
@@ -829,6 +830,10 @@ public abstract class GEOHandler {
         if (nvalue > 0) {
           colVal = "" + nvalue;
         }
+
+        BigDecimal bd = new BigDecimal(colVal);
+        long val = bd.longValue();
+        colVal = Long.toString(val);
         break;
       default:
         break;

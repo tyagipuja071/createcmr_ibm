@@ -415,6 +415,7 @@ public class RequestEntryModel extends BaseModel {
   private String matchIndc;
   private String matchOverrideIndc;
   private String dupCmrReason;
+  private String paygoProcessIndc;
 
   // CMR-5910 - military flag
   private String military;
@@ -3012,6 +3013,14 @@ public class RequestEntryModel extends BaseModel {
 
   public void setAddrStdTs(Date addrStdTs) {
     this.addrStdTs = addrStdTs;
+  }
+
+  public String getPaygoProcessIndc() {
+    return paygoProcessIndc;
+  }
+
+  public void setPaygoProcessIndc(String paygoProcessIndc) {
+    this.paygoProcessIndc = paygoProcessIndc;
   }
 
   public String getMilitary() {

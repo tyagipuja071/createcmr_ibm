@@ -391,4 +391,9 @@ public abstract class MessageTransformer {
   public String getReqStatusForSendingMail(String mailFlag) {
     return null;
   }
+  
+   public boolean skipCreditCodeUpdateForCountry() {
+    return false;
+  }
+  
 }

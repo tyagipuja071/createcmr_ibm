@@ -57,52 +57,54 @@
 				<cmr:label fieldId="salesBusOffCd">
 					<cmr:fieldLabel fieldId="SalesBusOff" />:
         </cmr:label>
-				<cmr:field fieldId="SalesBusOff" id="salesBusOffCd"
-					path="salesBusOffCd" tabId="MAIN_IBM_TAB" />
-			</p>
-		</cmr:column>
-
-		<cmr:view forCountry="838">
-			<%
-			  if (reqentry.getReqType().equalsIgnoreCase("U")) {
-			%>
-			<cmr:column span="2" containerForField="SalesBusOff2">
-				<p>
-					<cmr:label fieldId="salesBusOffCd">
-						<cmr:fieldLabel fieldId="SalesBusOff" />: 
-               <cmr:delta text="${rdcdata.salesBusOffCd}"
-							oldValue="${reqentry.salesBusOffCd}" id="delta-salesBusOffCd2" />
-					</cmr:label>
-					<cmr:field path="salesBusOffCd" id="salesBusOffCd2"
-						fieldId="SalesBusOff2" tabId="MAIN_IBM_TAB" />
-				</p>
-			</cmr:column>
-			<%
-			  } else if (reqentry.getReqType().equalsIgnoreCase("C")) {
-			%>
-			<cmr:column span="2" containerForField="SalesBusOff">
-				<p>
-					<cmr:label fieldId="salesBusOffCd">
-						<cmr:fieldLabel fieldId="SalesBusOff" />:
+        <cmr:field fieldId="SalesBusOff" id="salesBusOffCd" path="salesBusOffCd" tabId="MAIN_IBM_TAB" />
+      </p>
+    </cmr:column>
+    
+    <cmr:view forCountry="838">
+      <%
+        if (reqentry.getReqType().equalsIgnoreCase("U")) {
+      %>
+      <cmr:column span="2" containerForField="SalesBusOff2">
+          <p>
+            <cmr:label fieldId="salesBusOffCd">
+            <cmr:fieldLabel fieldId="SalesBusOff" />: 
+               <cmr:delta text="${rdcdata.salesBusOffCd}" oldValue="${reqentry.salesBusOffCd}" id="delta-salesBusOffCd2" />
+            </cmr:label>
+            <cmr:field path="salesBusOffCd" id="salesBusOffCd2" fieldId="SalesBusOff2" tabId="MAIN_IBM_TAB" />
+          </p>
+        </cmr:column>
+      <%} else if (reqentry.getReqType().equalsIgnoreCase("C")) { %>
+      <cmr:column span="2" containerForField="SalesBusOff">
+        <p>
+          <cmr:label fieldId="salesBusOffCd">
+            <cmr:fieldLabel fieldId="SalesBusOff" />:
           </cmr:label>
-					<cmr:field fieldId="SalesBusOff" id="salesBusOffCd"
-						path="salesBusOffCd" tabId="MAIN_IBM_TAB" />
-				</p>
-			</cmr:column>
-
-			<%
-			  }
-			%>
-		</cmr:view>
-		<%-- END of SBO and Sales Rep --%>
-		<%
-		  if (reqentry.getReqType().equalsIgnoreCase("U")) {
-		%>
-		<cmr:view forGEO="MCO1">
-			<cmr:column span="2" containerForField="CreditCd">
-				<p>
-					<cmr:label fieldId="creditCd">
-						<cmr:fieldLabel fieldId="CreditCd" />: 
+          <cmr:field fieldId="SalesBusOff" id="salesBusOffCd" path="salesBusOffCd" tabId="MAIN_IBM_TAB" />
+        </p>
+      </cmr:column>
+      
+      <% } %>
+    </cmr:view>
+    <%-- END of SBO and Sales Rep --%>
+    
+  </cmr:row>
+  
+  <cmr:view forGEO="MCO1,MCO2">
+    <cmr:row>
+      <cmr:column span="2" containerForField="InternalDept" forCountry="864">
+        <p>
+          <cmr:label fieldId="ibmDeptCostCenter">
+            <cmr:fieldLabel fieldId="InternalDept" />: 
+          </cmr:label>
+          <cmr:field path="adminDeptLine" id="ibmDeptCostCenter" fieldId="InternalDept" tabId="MAIN_IBM_TAB" />
+        </p>
+      </cmr:column>
+      
+      <cmr:column span="2" containerForField="InternalDept" exceptForCountry="864">
+        <p>
+          <cmr:label fieldId="ibmDeptCostCenter">
+            <cmr:fieldLabel fieldId="InternalDept" />: 
           </cmr:label>
 					<cmr:field path="creditCd" id="creditCd" fieldId="CreditCd"
 						tabId="MAIN_IBM_TAB" />

@@ -870,7 +870,7 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
         <cmr:column span="1" width="130">
           <label><cmr:fieldLabel fieldId="MembLevel" />:</label>
         </cmr:column>
-        <cmr:column span="1" width="170">
+        <cmr:column span="1" width="170" exceptForGEO="MCO1">
           <%
             String membLevel = DropdownListController.getDescription("MembLevel", data.getMemLvl(), cntry);
           %>
@@ -896,7 +896,7 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
         <cmr:column span="1" width="130">
           <label><cmr:fieldLabel fieldId="BPRelationType" />:</label>
         </cmr:column>
-        <cmr:column span="1" width="170">
+        <cmr:column span="1" width="170" exceptForGEO="MCO1">
           <%
             String bpRelType = DropdownListController.getDescription("BPRelationType", data.getBpRelType(), cntry);
           %>
