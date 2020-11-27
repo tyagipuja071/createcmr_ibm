@@ -239,7 +239,7 @@ public class DataRdc extends BaseEntity<DataPK> implements Serializable {
   private String email3;
 
   @Column(name = "BUSN_TYP")
-  private String busnTyp;
+  private String busnType;
 
   @Column(name = "ICMS_IND")
   private String icmsInd;
@@ -1014,12 +1014,12 @@ public class DataRdc extends BaseEntity<DataPK> implements Serializable {
     this.email3 = email3;
   }
 
-  public String getBusnTyp() {
-    return this.busnTyp;
+  public String getBusnType() {
+    return this.busnType;
   }
 
-  public void setBusnTyp(String busnTyp) {
-    this.busnTyp = busnTyp;
+  public void setBusnType(String busnType) {
+    this.busnType = busnType;
   }
 
   public String getIcmsInd() {

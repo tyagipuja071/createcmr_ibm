@@ -35,7 +35,7 @@
         <cmr:label fieldId="ierpSitePrtyId" cssClass="cmr-inline">
           <cmr:fieldLabel fieldId="SitePartyID" />:</cmr:label>
         <cmr:delta text="-" id="delta-ierpSitePrtyId" />
-        <cmr:field fieldId="SitePartyID" id="ierpSitePrtyId" path="ierpSitePrtyId" />
+        <cmr:field fieldId="IERPSitePrtyId" id="ierpSitePrtyId" path="ierpSitePrtyId" />
       </p>
     </cmr:column>
   </cmr:row>
@@ -117,6 +117,9 @@
     <cmr:label fieldId="custNm4">
       <cmr:fieldLabel fieldId="CustomerName4" />: 
       <cmr:delta text="-" id="delta-custNm4" />
+      <cmr:view forGEO="MCO2">
+      	<cmr:info text="${ui.info.addrAddlName}" />
+      </cmr:view>
     </cmr:label>
     <cmr:field fieldId="CustomerName4" id="custNm4" path="custNm4"/>
   </cmr:column>

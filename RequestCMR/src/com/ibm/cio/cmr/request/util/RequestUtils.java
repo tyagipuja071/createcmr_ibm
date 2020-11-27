@@ -1579,4 +1579,22 @@ public class RequestUtils {
     return query.getSingleResult(String.class);
   }
 
+  /**
+   * Returns true if the partner is accredited for the Pay-Go process
+   * 
+   * @param entityManager
+   * @param sourceSystId
+   * @return
+   */
+  public static boolean isPayGoAccredited(EntityManager entityManager, String sourceSystId) {
+    if (StringUtils.isBlank(sourceSystId)) {
+      return false;
+    }
+    String sql = ExternalizedQuery.getSql("PAYGO.CHECK");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("SYST_ID", sourceSystId);
+    query.setForReadOnly(true);
+    return query.exists();
+  }
+
 }

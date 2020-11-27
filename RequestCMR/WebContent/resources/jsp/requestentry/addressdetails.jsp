@@ -1016,7 +1016,7 @@
       </cmr:column>
     </cmr:view>
    
-    <cmr:view forCountry="666">
+    <cmr:view forCountry="666,864">
      <c:if test="${reqentry.mainAddrType == 'ZS01' || reqentry.mainAddrType == 'ZD01'}">
       <cmr:column span="1">
         <cmr:label fieldId="custPhone_view">
