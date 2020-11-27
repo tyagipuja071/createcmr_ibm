@@ -4,6 +4,9 @@
 package com.ibm.cio.cmr.request.util;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
@@ -15,6 +18,7 @@ import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.codehaus.jackson.map.ObjectMapper;
 
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.CmrException;
@@ -23,6 +27,10 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.WfHist;
 import com.ibm.cio.cmr.request.entity.WfHistPK;
+import com.ibm.cio.cmr.request.masschange.MassChangeTemplateManager;
+import com.ibm.cio.cmr.request.masschange.obj.MassChangeTemplate;
+import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation;
+import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation.ValidationRow;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.mail.Email;
@@ -37,6 +45,93 @@ public class IERPRequestUtils extends RequestUtils {
   private static final Logger LOG = Logger.getLogger(RequestUtils.class);
   private static String emailTemplate = null;
   private static String batchemailTemplate = null;
+
+  public static boolean isCountryDREnabled(EntityManager entityManager, String cntry) {
+
+    if (entityManager == null) {
+      entityManager = JpaManager.getEntityManager();
+    }
+
+    boolean isDR = false;
+    String sql = ExternalizedQuery.getSql("DR.GET_SUPP_CNTRY_BY_ID");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CNTRY", cntry);
+    query.setForReadOnly(true);
+    List<Integer> records = query.getResults(Integer.class);
+    Integer singleObject = null;
+
+    if (records != null && records.size() > 0) {
+      singleObject = records.get(0);
+      Integer val = singleObject != null ? singleObject : null;
+
+      if (val != null) {
+        isDR = true;
+      } else {
+        isDR = false;
+      }
+
+    } else {
+      isDR = false;
+    }
+
+    return isDR;
+  }
+
+  public static boolean validateDRMassUpdateFile(String path, Data data, Admin admin, String cmrIssuingCntry) throws Exception {
+    List<Boolean> isErr = new ArrayList<Boolean>();
+    try (FileInputStream fis = new FileInputStream(path)) {
+      MassChangeTemplateManager.initTemplatesAndValidators(cmrIssuingCntry);
+      MassChangeTemplate template = MassChangeTemplateManager.getMassUpdateTemplate(cmrIssuingCntry);
+      EntityManager em = JpaManager.getEntityManager();
+      try {
+        String country = data.getCmrIssuingCntry();
+        LOG.debug("Validating " + path);
+        byte[] bookBytes = template.cloneStream(fis);
+
+        List<TemplateValidation> validations = null;
+        StringBuilder errTxt = new StringBuilder();
+
+        try (InputStream is = new ByteArrayInputStream(bookBytes)) {
+          validations = template.validate(em, is, country, 2000);
+          LOG.debug(new ObjectMapper().writeValueAsString(validations));
+          for (TemplateValidation validation : validations) {
+            for (ValidationRow row : validation.getRows()) {
+              if (!row.isSuccess()) {
+                if (StringUtils.isEmpty(errTxt.toString())) {
+                  errTxt.append("Tab name :" + validation.getTabName() + ", " + row.getError());
+                } else {
+                  errTxt.append("\nTab name :" + validation.getTabName() + ", " + row.getError());
+                }
+              }
+            }
+          }
+        }
+
+        if (!StringUtils.isEmpty(errTxt.toString())) {
+          throw new Exception(new ObjectMapper().writeValueAsString(errTxt.toString()));
+        }
+
+        try (InputStream is = new ByteArrayInputStream(bookBytes)) {
+          try (FileOutputStream fos = new FileOutputStream(path)) {
+            LOG.debug("Merging..");
+            template.merge(validations, is, fos, 2000);
+          }
+        }
+        // modify the country for testing
+      } catch (Exception e) {
+        LOG.error("An error occurred in validating Malta Mass Update File.");
+        return false;
+      } finally {
+        em.close();
+      }
+    }
+
+    if (isErr.contains(false)) {
+      return false;
+    } else {
+      return true;
+    }
+  }
 
   public static void sendEmailNotifications(EntityManager entityManager, Admin admin, WfHist history, String siteIds, String emailCmt) {
     String cmrno = "";
