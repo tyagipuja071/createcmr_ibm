@@ -21,6 +21,7 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CompoundEntity;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataRdc;
+import com.ibm.cio.cmr.request.entity.MassUpdt;
 import com.ibm.cio.cmr.request.entity.ReqCmtLog;
 import com.ibm.cio.cmr.request.entity.ReqCmtLogPK;
 import com.ibm.cio.cmr.request.entity.SuppCntry;
@@ -35,12 +36,17 @@ import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.CNHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.DEHandler;
 import com.ibm.cmr.create.batch.model.CmrServiceInput;
+import com.ibm.cmr.create.batch.model.MassUpdateServiceInput;
+import com.ibm.cmr.create.batch.util.BatchUtil;
 import com.ibm.cmr.create.batch.util.DebugUtil;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.ProcessClient;
 import com.ibm.cmr.services.client.process.ProcessRequest;
 import com.ibm.cmr.services.client.process.ProcessResponse;
 import com.ibm.cmr.services.client.process.RDcRecord;
+import com.ibm.cmr.services.client.process.mass.MassProcessRequest;
+import com.ibm.cmr.services.client.process.mass.MassUpdateRecord;
+import com.ibm.cmr.services.client.process.mass.RequestValueRecord;
 
 public class IERPProcessService extends BaseBatchService {
 
@@ -68,6 +74,247 @@ public class IERPProcessService extends BaseBatchService {
   @Override
   protected boolean isTransactional() {
     return true;
+  }
+
+  public MassProcessRequest prepareReactivateDelRequest(EntityManager entityManager, Admin admin, Data data, MassUpdateServiceInput input)
+      throws JsonGenerationException, JsonMappingException, IOException, Exception {
+
+    MassProcessRequest request = new MassProcessRequest();
+    // request.setMandt(input.getInputMandt());
+    request.setMandt(SystemConfiguration.getValue("MANDT"));
+    request.setReqId(input.getInputReqId());
+    request.setReqType(input.getInputReqType());
+    request.setUserId(input.getInputUserId());
+
+    long reqId = admin.getId().getReqId();
+    long iterationId = admin.getIterationId();
+    String sysLoc = data.getCmrIssuingCntry();
+
+    // get PASS records for the current iteration
+    List<MassUpdateRecord> updtRecordsList = new ArrayList<MassUpdateRecord>();
+    PreparedQuery massquery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.REACT_DEL_RECORDS"));
+    massquery.setParameter("REQ_ID", reqId);
+    massquery.setParameter("ITERATION_ID", iterationId);
+    massquery.setParameter("STATUS", "READY");
+    List<CompoundEntity> results = massquery.getCompundResults(Admin.class, Admin.BATCH_REACT_DEL_SERVICE_MAPPING);
+
+    MassUpdt massUpdt = null;
+    MassUpdateRecord record = null;
+    LOG.debug("Size of Mass Update Record list for Iteration " + iterationId + " : " + results.size());
+    for (CompoundEntity entity : results) {
+      record = new MassUpdateRecord();
+      massUpdt = entity.getEntity(MassUpdt.class);
+
+      // set the values in the update record
+      record.setCmrNo(massUpdt.getCmrNo());
+      record.setSysLoc(sysLoc);
+      record.setAddrType("ZS01");
+
+      // set all the name and values pair the document here
+      List<RequestValueRecord> requestValueRecords = new ArrayList<RequestValueRecord>();
+
+      // add LOEVM_Record
+      if (CmrConstants.REQ_TYPE_DELETE.equals(input.getInputReqType())) {
+        RequestValueRecord loevm = new RequestValueRecord();
+        loevm.setField("LOEVM");
+        loevm.setValue("X");
+        requestValueRecords.add(loevm);
+      } else if (CmrConstants.REQ_TYPE_REACTIVATE.equals(input.getInputReqType())) {
+        RequestValueRecord loevm = new RequestValueRecord();
+        loevm.setField("LOEVM");
+        loevm.setValue("");
+        requestValueRecords.add(loevm);
+      }
+
+      // set requestValueRecords list updatRec
+
+      record.setValues(requestValueRecords);
+      // set updtRec in updtRecordsList
+      updtRecordsList.add(record);
+      // request.getRecords()
+    }
+    // set updtRecordsList in request
+    request.setRecords(updtRecordsList);
+
+    return request;
+
+  }
+
+  protected void processReactivateDeleteRequest(EntityManager entityManager, Admin admin, Data data) throws Exception {
+
+    // Create the request
+
+    long reqId = admin.getId().getReqId();
+    long iterationId = admin.getIterationId();
+    String processingStatus = admin.getRdcProcessingStatus();
+
+    MassUpdateServiceInput input = TransConnService.prepareMassChangeInput(entityManager, admin);
+
+    MassProcessRequest request = new MassProcessRequest();
+    // set the update mass record in request
+    if (input.getInputReqType() != null && (input.getInputReqType().equalsIgnoreCase("D") || input.getInputReqType().equalsIgnoreCase("R"))) {
+      request = prepareReactivateDelRequest(entityManager, admin, data, input);
+    }
+
+    createComment(entityManager, "Processing started.", admin.getId().getReqId());
+    // to indicate that batch has picked but pending complete
+    admin.setReqStatus("PCO");
+
+    LOG.trace("Request JSON:");
+    if (LOG.isTraceEnabled()) {
+      DebugUtil.printObjectAsJson(LOG, request);
+    }
+    // actual service call here
+    ProcessResponse response = null;
+    String applicationId = BatchUtil.getAppId(data.getCmrIssuingCntry());
+    if (applicationId == null) {
+      LOG.debug("No Application ID mapped to " + data.getCmrIssuingCntry());
+      response = new ProcessResponse();
+      response.setReqId(request.getReqId());
+      response.setMandt(request.getMandt());
+      response.setStatus(CmrConstants.RDC_STATUS_NOT_COMPLETED);
+      response.setMessage("No application ID defined for Country: " + data.getCmrIssuingCntry() + ". Cannot process RDc records.");
+    } else {
+      try {
+        this.serviceClient.setReadTimeout(60 * 20 * 1000); // 20 mins
+        response = this.serviceClient.executeAndWrap(applicationId, request, ProcessResponse.class);
+        response.setReqId(request.getReqId());
+      } catch (Exception e) {
+        LOG.error("Error when connecting to the mass change service.", e);
+        response = new ProcessResponse();
+        response.setReqId(request.getReqId());
+        response.setStatus(CmrConstants.RDC_STATUS_ABORTED);
+        response.setMessage("A system error has occured. Setting to aborted.");
+      }
+    }
+
+    LOG.trace("Response JSON:");
+    if (LOG.isTraceEnabled()) {
+      DebugUtil.printObjectAsJson(LOG, response);
+    }
+    LOG.info("Response received from Process Service [Request ID: " + response.getReqId() + " Status: " + response.getStatus() + " Message: "
+        + (response.getMessage() != null ? response.getMessage() : "-") + "]");
+
+    if (response.getReqId() <= 0) {
+      response.setReqId(request.getReqId());
+    }
+
+    String resultCode = response.getStatus();
+    if (StringUtils.isBlank(resultCode)) {
+      resultCode = CmrConstants.RDC_STATUS_NOT_COMPLETED;
+    }
+
+    try {
+      // update MASS_UPDT table with the error txt and row status cd
+      if (response != null) {
+        if (response.getRecords() != null && response.getRecords().size() > 0) {
+          for (RDcRecord record : response.getRecords()) {
+            PreparedQuery updtQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.GET_MASS_UPDT_ENTITY"));
+            updtQuery.setParameter("REQ_ID", reqId);
+            updtQuery.setParameter("ITERATION_ID", iterationId);
+            updtQuery.setParameter("CMR_NO", record.getCmrNo());
+            List<MassUpdt> updateList = updtQuery.getResults(MassUpdt.class);
+
+            for (MassUpdt massUpdt : updateList) {
+              massUpdt.setErrorTxt(record.getMessage());
+              if (CmrConstants.RDC_STATUS_NOT_COMPLETED.equals(record.getStatus())) {
+                massUpdt.setRowStatusCd("RDCER");
+              } else if (CmrConstants.RDC_STATUS_COMPLETED.equals(record.getStatus())) {
+                massUpdt.setRowStatusCd("DONE");
+              }
+              LOG.info("Mass Update Record Updated [Request ID: " + massUpdt.getId().getParReqId() + " CMR_NO: " + massUpdt.getCmrNo() + " SEQ No: "
+                  + massUpdt.getId().getSeqNo() + "]");
+              updateEntity(massUpdt, entityManager);
+            }
+          }
+        }
+      }
+
+      String requestType = "";
+      String action = "";
+      switch (admin.getReqType()) {
+      case "D":
+        action = TransConnService.ACTION_RDC_DELETE;
+        requestType = "Mass Delete";
+        break;
+      case "R":
+        action = TransConnService.ACTION_RDC_REACTIVATE;
+        requestType = "Mass Reactivate";
+        break;
+      }
+
+      // create comment log and workflow history entries for update type of
+      // request
+      StringBuilder comment = new StringBuilder();
+      if (isCompletedSuccessfully(resultCode)) {
+        comment = comment.append(requestType + " in RDc successfully completed.");
+      } else {
+        if (CmrConstants.RDC_STATUS_ABORTED.equals(resultCode) && CmrConstants.RDC_STATUS_ABORTED.equals(processingStatus)) {
+          comment = comment.append(requestType + " in RDc failed: " + response.getMessage());
+        } else if (CmrConstants.RDC_STATUS_ABORTED.equalsIgnoreCase(resultCode)) {
+          comment = comment.append(requestType + " in RDc aborted: " + response.getMessage() + "\nSystem will retry once.");
+        } else if (CmrConstants.RDC_STATUS_NOT_COMPLETED.equalsIgnoreCase(resultCode)) {
+          comment = comment.append(requestType + " in RDc failed: " + response.getMessage());
+        } else if (CmrConstants.RDC_STATUS_IGNORED.equalsIgnoreCase(resultCode)) {
+          comment = comment.append(requestType + " in RDc skipped: " + response.getMessage());
+        }
+      }
+
+      createCommentLog(entityManager, admin, comment.toString());
+
+      if (!CmrConstants.RDC_STATUS_IGNORED.equals(resultCode)) {
+        RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin, comment.toString().trim(), action, null, null,
+            "COM".equals(admin.getReqStatus()));
+      }
+      // RequestUtils.createCommentLogFromBatch(entityManager, BATCH_USER_ID,
+      // admin.getId().getReqId(), comment.toString().trim());
+
+      // only update Admin record once depending on the overall status of the
+      // request
+      LOG.debug("Updating Admin record for Request ID " + admin.getId().getReqId());
+
+      if (CmrConstants.RDC_STATUS_ABORTED.equals(resultCode) || CmrConstants.RDC_STATUS_NOT_COMPLETED.equals(resultCode)) {
+        // reject and send back to processor
+        admin.setRdcProcessingStatus(CmrConstants.RDC_STATUS_NOT_COMPLETED);
+        admin.setReqStatus("PPN");
+        admin.setProcessedFlag("E"); // set request status to error.
+
+      } else if (CmrConstants.RDC_STATUS_IGNORED.equals(resultCode)) {
+        admin.setRdcProcessingStatus(CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS);
+        admin.setReqStatus("COM");
+        admin.setProcessedFlag("N"); // set request status to not processed.
+
+      } else if (CmrConstants.RDC_STATUS_COMPLETED.equals(resultCode)) {
+        admin.setRdcProcessingStatus(CmrConstants.RDC_STATUS_COMPLETED);
+        admin.setReqStatus("COM");
+        admin.setProcessedFlag("Y"); // set request status to processed.
+      } else {
+        admin.setRdcProcessingStatus(resultCode);
+      }
+
+      admin.setRdcProcessingTs(SystemUtil.getCurrentTimestamp());
+      admin.setRdcProcessingMsg(response.getMessage());
+      updateEntity(admin, entityManager);
+      LOG.debug("Request ID " + admin.getId().getReqId() + " Status: " + admin.getRdcProcessingStatus() + " Message: " + admin.getRdcProcessingMsg());
+
+      partialCommit(entityManager);
+      try {
+        String siteIds = "";
+        sendEmailNotifications(entityManager, admin, siteIds, comment.toString());
+      } catch (Exception e) {
+        e.printStackTrace();
+        LOG.error("ERROR: " + e.getMessage());
+      }
+
+    } catch (Exception e) {
+      LOG.error("Error in processing Mass Change Request  " + admin.getId().getReqId(), e);
+      addError("Mass Change Request " + admin.getId().getReqId() + " Error: " + e.getMessage());
+    }
+
+  }
+
+  protected boolean isCompletedSuccessfully(String status) {
+    return CmrConstants.RDC_STATUS_COMPLETED.equals(status) || CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equals(status);
   }
 
   @SuppressWarnings("unchecked")
@@ -105,6 +352,36 @@ public class IERPProcessService extends BaseBatchService {
 
         ProcessResponse response = null;
         String overallStatus = null;
+
+        try {
+          switch (admin.getReqType()) {
+          case CmrConstants.REQ_TYPE_REACTIVATE:
+          case CmrConstants.REQ_TYPE_DELETE:
+            processReactivateDeleteRequest(em, admin, data);
+            break;
+          }
+          if (!(CmrConstants.REQ_TYPE_DELETE.equalsIgnoreCase(admin.getReqType())
+              && CmrConstants.REQ_TYPE_REACTIVATE.equalsIgnoreCase(admin.getReqType()))) {
+            if (CmrConstants.RDC_STATUS_ABORTED.equalsIgnoreCase(admin.getRdcProcessingStatus())
+                || CmrConstants.RDC_STATUS_NOT_COMPLETED.equalsIgnoreCase(admin.getRdcProcessingStatus())) {
+              admin.setReqStatus("PPN");
+              admin.setProcessedFlag("E"); // set request status to error.
+              WfHist hist = createHistory(em, "Sending back to processor due to error on RDC processing", "PPN", "RDC Processing",
+                  admin.getId().getReqId());
+            } else if ((CmrConstants.RDC_STATUS_COMPLETED.equalsIgnoreCase(admin.getRdcProcessingStatus())
+                || CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equalsIgnoreCase(admin.getRdcProcessingStatus()))
+                && !"TREC".equalsIgnoreCase(admin.getReqReason())) {
+              admin.setReqStatus("COM");
+              admin.setProcessedFlag("Y"); // set request status to processed
+              WfHist hist = createHistory(em, "Request processing Completed Successfully", "COM", "RDC Processing", admin.getId().getReqId());
+            }
+          }
+          partialCommit(em);
+        } catch (Exception e) {
+          partialRollback(em);
+          LOG.error("Unexpected error occurred during processing of Request " + admin.getId().getReqId(), e);
+          processError(em, admin, e.getMessage());
+        }
 
         boolean prospectConversion = CmrConstants.YES_NO.Y.equals(admin.getProspLegalInd()) ? true : false;
 
@@ -394,6 +671,29 @@ public class IERPProcessService extends BaseBatchService {
         }
       }
     }
+  }
+
+  private void processError(EntityManager entityManager, Admin admin, String errorMsg) throws CmrException, SQLException {
+    if (CmrConstants.REQ_TYPE_DELETE.equals(admin.getReqType()) || CmrConstants.REQ_TYPE_REACTIVATE.equals(admin.getReqType())) {
+      admin.setDisableAutoProc("Y");// disable auto processing if error on
+                                    // processing
+    }
+    // processing pending
+    LOG.info("Processing error for Request ID " + admin.getId().getReqId() + ": " + errorMsg);
+    admin.setReqStatus("PPN");
+    admin.setLockBy(null);
+    admin.setLockByNm(null);
+    admin.setLockInd("N");
+    // error
+    admin.setProcessedFlag("E");
+    admin.setLastUpdtBy(BATCH_USER_ID);
+    updateEntity(admin, entityManager);
+
+    WfHist hist = createHistory(entityManager, "An error occurred during processing: " + errorMsg, "PPN", "Processing Error",
+        admin.getId().getReqId());
+    createComment(entityManager, "An error occurred during processing:\n" + errorMsg, admin.getId().getReqId());
+
+    RequestUtils.sendEmailNotifications(entityManager, admin, hist);
   }
 
   private void sendEmailNotifications(EntityManager em, Admin admin, String siteIds, String emailCmt) throws Exception {

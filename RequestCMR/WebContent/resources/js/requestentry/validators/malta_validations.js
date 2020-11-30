@@ -785,7 +785,7 @@ function addISICValidatorForScenario() {
         }
         if ("C" == reqType) {
           if ((_custType != null && _isicCd != null) && _custType != 'PRICU' && _isicCd == '9500') {
-            return new ValidationResult(null, false, 'ISIC value 9500 is not allowed for other scenario than Private Person.');
+            return new ValidationResult(null, false, 'ISIC value 9500 can be entered only for CMR with Classification code 60 (Private Person).');
           } else {
             return new ValidationResult(null, true);
           }
