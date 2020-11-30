@@ -81,7 +81,7 @@ public class IERPProcessService extends BaseBatchService {
 
     MassProcessRequest request = new MassProcessRequest();
     // request.setMandt(input.getInputMandt());
-    request.setMandt("100");
+    request.setMandt(SystemConfiguration.getValue("MANDT"));
     request.setReqId(input.getInputReqId());
     request.setReqType(input.getInputReqType());
     request.setUserId(input.getInputUserId());
