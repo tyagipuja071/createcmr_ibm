@@ -4,9 +4,6 @@ var othCEWA = [ "610", "636", "645", "669", "698", "725", "745", "764", "769", "
 var _vatExemptHandler = null;
 
 function addMaltaLandedCountryHandler(cntry, addressMode, saving, finalSave) {
-  var addrType = FormManager.getActualValue('addrType');
-  var custGrp = FormManager.getActualValue('custGrp');
-
   if (!saving) {
     if (addressMode == 'newAddress') {
       FilteringDropdown['val_landCntry'] = FormManager.getActualValue('defaultLandedCountry');
@@ -14,11 +11,6 @@ function addMaltaLandedCountryHandler(cntry, addressMode, saving, finalSave) {
     } else {
       FilteringDropdown['val_landCntry'] = null;
     }
-  }
-
-  if (custGrp != 'LOCAL' && addrType == 'ZS01') {
-    FormManager.enable('landCntry');
-    FormManager.resetDropdownValues(FormManager.getField('landCntry'));
   }
 }
 
@@ -95,6 +87,13 @@ function disableAddrFieldsMT() {
     FormManager.disable('custPhone');
   }
 
+  if (addrType != 'ZS01' && addrType != 'ZP01') {
+    FormManager.readOnly('poBox');
+    FormManager.setValue('poBox', '');
+  } else {
+    FormManager.enable('poBox');
+  }
+
 }
 
 function addAddressTypeValidator() {
@@ -159,23 +158,6 @@ function addAddressFieldValidators() {
           if (val.length > 28) {
             return new ValidationResult(null, false, 'Total computed length of City and Postal Code should not exceed 28 characters.');
           }
-        }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), null, 'frmCMR_addressModal');
-
-  // CEWA - postal code should accept alphanumeric and spaces
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var postCd = FormManager.getActualValue('postCd');
-        var landCntry = FormManager.getActualValue('landCntry');
-        if (landCntry != 'MT') {
-          return;
-        }
-        if (postCd && postCd.length > 0 && !postCd.match(/^[A-Z]{3} [\d]{4}/)) {
-          return new ValidationResult(null, false, postCd + ' is not a valid format for Postal Code, the correct format for postal code is -> "ABC 1234"');
         }
         return new ValidationResult(null, true);
       }

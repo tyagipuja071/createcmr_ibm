@@ -726,8 +726,22 @@ public class MaltaHandler extends BaseSOFHandler {
 
   }
 
+  private void setBlankFieldsAtCopy(Addr addr) {
+    if (!StringUtils.isEmpty(addr.getCustPhone())) {
+      if (!"ZD01".equals(addr.getId().getAddrType())) {
+        addr.setCustPhone("");
+      }
+    }
+    if (!StringUtils.isEmpty(addr.getPoBox())) {
+      if (!"ZS01".equals(addr.getId().getAddrType()) && !"ZP01".equals(addr.getId().getAddrType())) {
+        addr.setPoBox("");
+      }
+    }
+  }
+
   @Override
   public void doBeforeAddrSave(EntityManager entityManager, Addr addr, String cmrIssuingCntry) throws Exception {
+    setBlankFieldsAtCopy(addr);
     if (!"ZP01".equals(addr.getId().getAddrType())) {
       addr.setDept("");
     }
@@ -1013,4 +1027,5 @@ public class MaltaHandler extends BaseSOFHandler {
         "DUNS_NO", "ORD_BLK"));
     return fields;
   }
+
 }
