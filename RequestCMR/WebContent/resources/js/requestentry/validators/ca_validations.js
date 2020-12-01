@@ -272,6 +272,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addInacCdValidator, [ SysLoc.CANADA ], null, true);
   GEOHandler.registerValidator(addNameConfirmationAttachmentValidator, [ SysLoc.CANADA ], null, true);
   GEOHandler.registerValidator(addTerritoryAttachmentValidator, [ SysLoc.CANADA ], null, true);
+  GEOHandler.registerValidator(addDPLCheckValidator, [ SysLoc.CANADA ], GEOHandler.ROLE_REQUESTER, true);
+  GEOHandler.registerValidator(addDPLAssessmentValidator, [ SysLoc.CANADA ], GEOHandler.ROLE_REQUESTER, true);
 
   // NOTE: do not add multiple addAfterConfig calls to avoid confusion, club the
   // functions on afterConfigForCA
