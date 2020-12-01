@@ -129,6 +129,11 @@ public class USHandler extends GEOHandler {
   }
 
   private List<FindCMRRecordModel> getZP01FromRDC(EntityManager entityManager, String cmrNo) {
+    boolean closeMgr = false;
+    if (this.entityManager == null) {
+      this.entityManager = JpaManager.getEntityManager();
+      closeMgr = true;
+    }
     FindCMRRecordModel address = null;
     List<FindCMRRecordModel> addressList = new ArrayList<FindCMRRecordModel>();
     String sqlRDC = ExternalizedQuery.getSql("KNA1.US.MULTIPLE_BILLTO");
@@ -156,6 +161,10 @@ public class USHandler extends GEOHandler {
         address.setCmrSapNumber(kna1.getId().getKunnr());
         addressList.add(address);
       }
+    }
+    if (closeMgr) {
+      this.entityManager.clear();
+      this.entityManager.close();
     }
     return addressList;
   }
