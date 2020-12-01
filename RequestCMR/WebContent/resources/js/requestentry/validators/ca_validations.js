@@ -38,7 +38,7 @@ function addAddressRecordTypeValidator() {
               invoiceToCnt++;
             }
           }
-          if (installAtCnt != 1 || CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 2) {
+          if (FormManager.getActualValue('reqType') == 'C' && (installAtCnt != 1 || CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 2)) {
             return new ValidationResult(null, false, 'The request should contain exactly one Install At address and one optional Invoice To address.');
           } else {
             return new ValidationResult(null, true);
@@ -182,6 +182,41 @@ function addCAAddressHandler(cntry, addressMode, saving) {
       FilteringDropdown['val_landCntry'] = null;
     }
   }
+
+  if (cmr.currentRequestType == 'U') {
+    cmr.hideNode('radiocont_ZS01');
+
+    // Some cmr's only has ZS01 so we will show invoice if not present
+    if (isAddressInGrid('ZI01')) {
+      cmr.hideNode('radiocont_ZI01');
+    } else {
+      cmr.showNode('radiocont_ZI01');
+    }
+  }
+}
+
+/**
+ * Checks if the address type is already present in the Address Grid
+ * 
+ * @param addrType
+ * @returns
+ */
+function isAddressInGrid(addrType) {
+  var record = null;
+  var type = null;
+  for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+    record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+    type = record.addrType;
+
+    if (typeof (type) == 'object') {
+      type = type[0];
+    }
+
+    if (type == addrType) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /**
@@ -198,8 +233,7 @@ function canCopyAddress(value, rowIndex, grid) {
 }
 
 /**
- * Toggles the REMOVE function on the address tab and prevents removng the ZS01
- * address
+ * Toggles the REMOVE function on the address tab and prevents removing imported address in update requests
  * 
  * @param value
  * @param rowIndex
@@ -207,8 +241,17 @@ function canCopyAddress(value, rowIndex, grid) {
  * @returns
  */
 function canRemoveAddress(value, rowIndex, grid) {
+  var rowData = grid.getItem(rowIndex);
+  var importInd = rowData.importInd[0];
   var reqType = FormManager.getActualValue('reqType');
-  return reqType == 'C' || grid.getItem(rowIndex).addrType[0] != 'ZS01'
+  if ('U' == reqType && 'Y' == importInd) {
+    return false;
+  }
+  return true;
+}
+
+function ADDRESS_GRID_showCheck(value, rowIndex, grid) {
+  return canRemoveAddress(value, rowIndex, grid);
 }
 
 /**

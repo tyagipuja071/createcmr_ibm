@@ -72,9 +72,7 @@ visibility: hidden !IMPORTANT;
       }
       break;
     case '649':
-      if (CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 1){
-        cmr.hideNode('addAddressButton');
-      } else if (FormManager.getActualValue('reqType') == 'U'){
+      if (CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 1 && FormManager.getActualValue('reqType') == 'C'){
         cmr.hideNode('addAddressButton');
       } else {
         if (dojo.byId('addAddressButton')){
