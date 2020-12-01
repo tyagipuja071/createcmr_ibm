@@ -134,7 +134,10 @@ public class USAddrStdElement extends OverridingElement {
       }
 
       // create data elements for import for Street, City, and Postal Code.
-      if (!StringUtils.isBlank(tgmeData.getPostalCode())) {
+      if (SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry()) && !"US".equals(addr.getLandCntry())) {
+        details.append(" - Postal Code set to 00000 for Non-US landed country.\n");
+        overrides.addOverride(getProcessCode(), addr.getId().getAddrType(), "POST_CD", addr.getPostCd(), "00000");
+      } else if (!StringUtils.isBlank(tgmeData.getPostalCode())) {
         LOG.debug(" Postal code is  : " + tgmeData.getPostalCode());
         details.append("Postal Code: " + tgmeData.getPostalCode() + "\n");
         if (tgmeData.getPostalCode().trim().length() > addr.getPostCd().length()) {
