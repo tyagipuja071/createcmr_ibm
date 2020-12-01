@@ -66,7 +66,7 @@ public class CreatebyModelHandler implements RowHandler {
     RequestEntryModel mockEntryModel = new RequestEntryModel();
     mockEntryModel.setReqType("C");
     if (geoHandler != null) {
-      geoHandler.convertFrom(null, resultModel, mockEntryModel, new ImportCMRModel());
+      geoHandler.convertFrom(entityManager, resultModel, mockEntryModel, new ImportCMRModel());
     }
     mainRecord = resultModel.getItems().size() > 0 ? resultModel.getItems().get(0) : null;
     if (mainRecord == null) {
