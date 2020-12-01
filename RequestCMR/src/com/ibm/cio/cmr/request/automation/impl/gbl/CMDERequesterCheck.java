@@ -44,6 +44,8 @@ public class CMDERequesterCheck extends ValidatingElement {
       if (query.exists()) {
         // skip checks if requester is from CMDE team
         countryUtil.skipAllChecks(engineData);
+        admin.setScenarioVerifiedIndc("Y");
+        engineData.addPositiveCheckStatus("SKIP_APPROVALS");
         log.debug("Requester is from CMDE team, skipping Automation checks.");
         output.setDetails("Requester is from CMDE team, skipping Automation checks.\n");
         validation.setMessage("Automation checks Skipped");

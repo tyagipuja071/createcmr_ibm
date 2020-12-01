@@ -62,6 +62,10 @@ public class DefaultApprovalsElement extends ApprovalsElement {
     if (StringUtils.isBlank(approvalsResult) || "NONE".equalsIgnoreCase(approvalsResult)) {
       result.setResults("None");
       result.setDetails("No approvals are required.");
+    } else if (engineData.hasPositiveCheckStatus("SKIP_APPROVALS")) {
+      result.setOnError(false);
+      result.setDetails("No approvals are required.");
+      result.setResults("Skipped");
     } else {
       result.setOnError(true);
       result.setResults("Generated");
