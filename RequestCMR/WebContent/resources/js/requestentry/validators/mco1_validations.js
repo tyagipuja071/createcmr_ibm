@@ -1867,7 +1867,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(mandatoryForBusinessPartner, [ SysLoc.SOUTH_AFRICA ]);
   GEOHandler.addAfterConfig(validateTypeOfCustomer, GEOHandler.MCO1);
 
-  GEOHandler.registerValidator(addInacCodeValidator, [ SysLoc.SOUTH_AFRICA ], null, true);
+  //GEOHandler.registerValidator(addInacCodeValidator, [ SysLoc.SOUTH_AFRICA ], null, true);
   GEOHandler.registerValidator(embargoCdValidator, [ SysLoc.SOUTH_AFRICA ], null, true);
   GEOHandler.registerValidator(validateCMRNumForProspect, [ SysLoc.SOUTH_AFRICA ], GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(addStreetAddressValidator, [ SysLoc.SOUTH_AFRICA ], null, true);
