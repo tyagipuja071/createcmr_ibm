@@ -103,41 +103,37 @@ public class MaltaHandler extends BaseSOFHandler {
         if (source.getItems() != null) {
           String addrType = null;
           String seqNo = null;
-          List<String> sofUses = null;
           FindCMRRecordModel addr = null;
 
           // map RDc - SOF - CreateCMR by sequence no
           for (FindCMRRecordModel record : source.getItems()) {
             seqNo = record.getCmrAddrSeq();
             if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo)) {
-              sofUses = this.legacyObjects.getUsesBySequenceNo(seqNo);
-              for (String sofUse : sofUses) {
-                addrType = getAddressTypeByUse(sofUse);
-                if (!StringUtils.isEmpty(addrType)) {
-                  addr = cloneAddress(record, addrType);
-                  LOG.trace("Adding address type " + addrType + " for sequence " + seqNo);
-                  addr.setCmrStreetAddressCont(record.getCmrName3());
+              addrType = record.getCmrAddrTypeCode();
+              if (!StringUtils.isEmpty(addrType)) {
+                addr = cloneAddress(record, addrType);
+                LOG.trace("Adding address type " + addrType + " for sequence " + seqNo);
+                addr.setCmrStreetAddressCont(record.getCmrName3());
 
-                  // Name3 in rdc = CustNm3 on SOF
-                  if (StringUtils.isEmpty(record.getCmrName3())) {
-                    addr.setCmrName3(record.getCmrName3());
-                  }
-
-                  // Name4 In rdc = Street Address Con't on SOF
-                  if (StringUtils.isEmpty(record.getCmrName4())) {
-                    addr.setCmrStreetAddressCont(record.getCmrName4());
-                  }
-
-                  // PO BOX
-                  if (!StringUtils.isBlank(record.getCmrPOBox())) {
-                    record.setCmrPOBox(record.getCmrPOBox());
-                  }
-
-                  if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
-                    addr.setCmrAddrSeq("00001");
-                  }
-                  converted.add(addr);
+                // Name3 in rdc = CustNm3 on SOF
+                if (!StringUtils.isEmpty(record.getCmrName3())) {
+                  addr.setCmrName3(record.getCmrName3());
                 }
+
+                // Name4 In rdc = Street Address Con't on SOF
+                if (!StringUtils.isEmpty(record.getCmrName4())) {
+                  addr.setCmrStreetAddressCont(record.getCmrName4());
+                }
+
+                // PO BOX
+                if (!StringUtils.isBlank(record.getCmrPOBox())) {
+                  record.setCmrPOBox(record.getCmrPOBox());
+                }
+
+                if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
+                  addr.setCmrAddrSeq("00001");
+                }
+                converted.add(addr);
               }
             }
           }
@@ -228,20 +224,13 @@ public class MaltaHandler extends BaseSOFHandler {
   protected void importOtherSOFAddresses(EntityManager entityManager, String cmrCountry, Map<String, FindCMRRecordModel> zi01Map,
       List<FindCMRRecordModel> converted) {
 
-    FindCMRRecordModel record = createAddress(entityManager, cmrCountry, CmrConstants.ADDR_TYPE.ZI01.toString(), "Install-At", zi01Map);
+    FindCMRRecordModel record = createAddress(entityManager, cmrCountry, CmrConstants.ADDR_TYPE.ZI01.toString(), "Installing", zi01Map);
     if (record != null) {
       converted.add(record);
     }
 
-    record = createAddress(entityManager, cmrCountry, CmrConstants.ADDR_TYPE.ZP01.toString(), "Bill-To", zi01Map);
+    record = createAddress(entityManager, cmrCountry, CmrConstants.ADDR_TYPE.ZP01.toString(), "Billing", zi01Map);
     if (record != null) {
-      record.setCmrBldg(null);
-      converted.add(record);
-    }
-
-    record = createAddress(entityManager, cmrCountry, CmrConstants.ADDR_TYPE.ZD01.toString(), "Ship-To", zi01Map);
-    if (record != null) {
-      record.setCmrBldg(null);
       converted.add(record);
     }
 
