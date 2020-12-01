@@ -147,6 +147,9 @@ public abstract class USBPHandler {
         } else if (RESTRICT_TO_END_USER.equals(data.getRestrictTo()) && deptAttn.contains("pool")
             && ("P".equals(data.getBpAcctTyp()) || "TT2".equals(data.getCsoSite()))) {
           return new USBPPoolHandler();
+        } else if (RESTRICT_TO_END_USER.equals(data.getRestrictTo())
+            && (deptAttn.contains("demo dev") || deptAttn.contains("lease dev") || deptAttn.contains("development"))) {
+          return new USBPDevelopHandler();
         }
       } else if (USUtil.LEASING.equals(custGrp)) {
         return new USLeasingHandler();
