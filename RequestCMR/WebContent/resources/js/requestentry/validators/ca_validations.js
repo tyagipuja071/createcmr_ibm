@@ -82,7 +82,7 @@ function addNameConfirmationAttachmentValidator() {
             });
 
             if (ret == null || ret.ret1 == null) {
-              return new ValidationResult(null, false, 'Legal Name Confirmation in Attachment tab is required.');
+              return new ValidationResult(null, false, 'Legal Name Change Letter in Attachment tab is required.');
             } else {
               return new ValidationResult(null, true);
             }
@@ -233,7 +233,8 @@ function canCopyAddress(value, rowIndex, grid) {
 }
 
 /**
- * Toggles the REMOVE function on the address tab and prevents removing imported address in update requests
+ * Toggles the REMOVE function on the address tab and prevents removing imported
+ * address in update requests
  * 
  * @param value
  * @param rowIndex
