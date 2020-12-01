@@ -328,6 +328,15 @@
       <description>Padding, in pixels, from the previous row. Defaults to none
       </description>
     </attribute>
+    <attribute>
+      <name>noPad</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.Boolean</type>
+      <description>Whether the row should have left and right padding
+        Defaults to false.
+      </description>
+    </attribute>
   </tag>
 
   <tag>
