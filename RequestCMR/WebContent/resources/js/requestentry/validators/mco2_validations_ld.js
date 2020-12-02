@@ -1336,6 +1336,7 @@ function validateCMRForMCO2GMLLCScenario() {
             CMR_NO : requestCMR,
             MANDT : cmr.MANDT
           });
+
           if (exists && exists.ret1 && action != 'PCM' && cmrStatusOrig != 'C') {
             return new ValidationResult({
               id : 'cmrNo',

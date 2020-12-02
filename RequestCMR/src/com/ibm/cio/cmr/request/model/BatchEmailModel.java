@@ -155,4 +155,4 @@ public class BatchEmailModel {
     this.enableAddlField2 = enableAddlField2;
   }
 
-}
+  }

@@ -31,8 +31,10 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import com.ibm.cio.cmr.request.automation.util.geo.FranceUtil;
 import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation.ValidationRow;
 import com.ibm.cio.cmr.request.util.at.ATUtil;
+import com.ibm.cio.cmr.request.util.geo.impl.FranceHandler;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
 import com.ibm.cio.cmr.request.util.swiss.SwissUtil;
 
@@ -204,6 +206,12 @@ public class MassChangeTemplate {
         for (TemplateTab tab : this.tabs) {
           validations.add(tab.validate(entityManager, book, country, maxRows));
         }
+      } else if (FranceUtil.isCountryFREnabled(entityManager, country)) {
+        FranceHandler.validateFRMassUpdateTemplateDupFills(validations, book, maxRows, country);
+        for (TemplateTab tab : this.tabs) {
+          validations.add(tab.validate(entityManager, book, country, maxRows));
+        }
+
       } else if (ATUtil.isCountryATEnabled(entityManager, country)) {// CMR-800
         String[] sheetNames = { "Sold To", "Mail to", "Bill To", "Ship To", "Install At" };// CMR-2065
                                                                                     // installing
@@ -290,7 +298,7 @@ public class MassChangeTemplate {
               // continue;
               // }
               // }
-              //
+              // String name3 = "";
               // if (StringUtils.isNotBlank(dept) && !StringUtils.equals(dept,
               // "@")) {
               // name3 += dept;

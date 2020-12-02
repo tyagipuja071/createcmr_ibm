@@ -250,8 +250,8 @@ public class LegacyDirectLegacyMassProcessService extends TransConnService {
     admin.setLastUpdtBy(BATCH_USER_ID);
     updateEntity(admin, entityManager);
 
-    WfHist hist = createHistory(entityManager, "An error occurred during processing: " + errorMsg, "PPN", "Processing Error", admin.getId()
-        .getReqId());
+    WfHist hist = createHistory(entityManager, "An error occurred during processing: " + errorMsg, "PPN", "Processing Error",
+        admin.getId().getReqId());
     createComment(entityManager, "An error occurred during processing:\n" + errorMsg, admin.getId().getReqId());
 
     RequestUtils.sendEmailNotifications(entityManager, admin, hist);
@@ -516,8 +516,8 @@ public class LegacyDirectLegacyMassProcessService extends TransConnService {
       updateEntity(admin, entityManager);
     }
     if (!CmrConstants.RDC_STATUS_IGNORED.equals(resultCode)) {
-      RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin, comment, "C".equals(admin.getReqType()) ? ACTION_RDC_CREATE
-          : ACTION_RDC_UPDATE, null, null, true, false);
+      RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin, comment,
+          "C".equals(admin.getReqType()) ? ACTION_RDC_CREATE : ACTION_RDC_UPDATE, null, null, true, false);
     }
   }
 
@@ -969,8 +969,8 @@ public class LegacyDirectLegacyMassProcessService extends TransConnService {
       if (!"@".equals(muData.getNewEntpName1().trim())
           && LegacyDirectUtil.isFisCodeUsed(entityManager, SystemLocation.ITALY, muData.getNewEntpName1(), massUpdt.getCmrNo())) {
         errorCmrs.add("Entered Fiscal Code for CMR:" + massUpdt.getCmrNo() + " and Fiscal Code:" + muData.getNewEntpName1() + " is already in use.");
-        legacyObjects.setErrTxt("Entered Fiscal Code for CMR:" + massUpdt.getCmrNo() + " and Fiscal Code:" + muData.getNewEntpName1()
-            + " is already in use.");
+        legacyObjects
+            .setErrTxt("Entered Fiscal Code for CMR:" + massUpdt.getCmrNo() + " and Fiscal Code:" + muData.getNewEntpName1() + " is already in use.");
         massUpdt.setErrorTxt(legacyObjects.getErrTxt());
         massUpdt.setRowStatusCd(MASS_UPDATE_FAIL);
         partialCommit(entityManager);
@@ -994,7 +994,8 @@ public class LegacyDirectLegacyMassProcessService extends TransConnService {
       errorCmrs
           .add("Mass update has encountered an error: The list of legacy customer data with the same fiscal code is empty. Please correct the data.");
       // throw new CmrException(new Exception(
-      // "Mass update has encountered an error: The list of legacy customer data with the same fiscal code is empty. Please correct the data."));
+      // "Mass update has encountered an error: The list of legacy customer data
+      // with the same fiscal code is empty. Please correct the data."));
       massUpdt.setErrorTxt(legacyObjects.getErrTxt());
       massUpdt.setRowStatusCd(MASS_UPDATE_FAIL);
       partialCommit(entityManager);

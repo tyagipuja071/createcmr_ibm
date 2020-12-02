@@ -71,6 +71,15 @@ visibility: hidden !IMPORTANT;
         }
       }
       break;
+    case '649':
+      if (CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 1 && FormManager.getActualValue('reqType') == 'C'){
+        cmr.hideNode('addAddressButton');
+      } else {
+        if (dojo.byId('addAddressButton')){
+          dojo.byId('addAddressButton').style.display = 'inline';
+        }
+      }
+      break;
     case '631':
       if (CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 1){
         cmr.hideNode('addAddressButton');
@@ -305,11 +314,20 @@ visibility: hidden !IMPORTANT;
               <cmr:formatter functionName="customerNameFormatter" />
             </cmr:gridCol>
           </cmr:view>
-          
-          <cmr:view forGEO="FR">
-            <cmr:gridCol width="120px" field="custNm3" header="Customer Name/ Additional Address Information" />
-          </cmr:view>
+
+			<!-- MALTA LEGACY -->
+			<cmr:view forCountry="780">
+				<cmr:gridCol width="120px" field="custNm3" header="Name 3" />
+			</cmr:view>				
+
+			<cmr:view forGEO="FR">
+            	<cmr:gridCol width="120px" field="custNm3" header="Customer Name/ Additional Address Information" />
+          	</cmr:view>
         <%} %>
+        
+        <cmr:view forCountry="649">
+        	<cmr:gridCol width="60px" field="addrSeq" header="Sequence" />
+        </cmr:view>
         
         <!-- Defect : 1444422 for FR-->
         <!-- iERP Site Party ID -->
@@ -397,7 +415,7 @@ visibility: hidden !IMPORTANT;
         <cmr:gridCol width="70px" field="postCd" header="${ui.grid.zipCode}" />  
 
         <!-- Dept / Attn -->
-        <cmr:view forGEO="MCO,MCO1,MCO2,NORDX">
+        <cmr:view forGEO="MCO,MCO1,MCO2,NORDX" exceptForCountry="780">
           <cmr:gridCol width="100px" field="custNm4" header="Dept/Attn" />
         </cmr:view>
         

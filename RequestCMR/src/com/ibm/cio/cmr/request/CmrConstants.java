@@ -896,6 +896,7 @@ public class CmrConstants {
   public static final String CN_CITIES_UPPER_FIELD_ID = "##ChinaCityUpperList";
 
   public static final String PROCESSING_TYPE_LEGACY_DIRECT = "LD";
+  public static final String PROCESSING_TYPE_RDC_MAIN = "MA";
   public static final String PROCESSING_TYPE_MQ = "MQ";
   public static final String PROCESSING_TYPE_TRANSACTION_CONNECT = "TC";
   public static final String PROCESSING_TYPE_IERP = "DR";
@@ -909,5 +910,7 @@ public class CmrConstants {
   public static final String SESSION_ERROR_KEY = "_currenterror";
 
   public static final int LD_MASS_UPDATE_UPPER_LIMIT = 40;
+  public static final List<String> DE_CND_ISSUING_COUNTRY_VAL = Arrays.asList("724", "619", "621", "627", "647", "791", "640", "759", "839", "843",
+      "859");
 
 }

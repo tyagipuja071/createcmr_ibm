@@ -316,18 +316,18 @@ public abstract class BaseSOFHandler extends GEOHandler {
       LOG.trace("Collection Code: " + data.getCollectionCd());
       data.setSalesTeamCd(this.currentImportValues.get("SMR"));
       LOG.trace("SMR: " + data.getSalesTeamCd());
-      
-      //For Turkey the key name is wrong, so add this branch only for turkey
+
+      // For Turkey the key name is wrong, so add this branch only for turkey
       if (SystemLocation.TURKEY.equals(data.getCmrIssuingCntry())) {
-          if (this.currentImportValues.get("EconomicCd") != null) {
-              data.setEconomicCd(this.currentImportValues.get("EconomicCd"));
-              LOG.trace("Economic Code: " + data.getEconomicCd());
-            } else {
-              // temporary solution to handle the wrong tag
-              data.setEconomicCd(this.currentImportValues.get("EcononicCode"));
-              LOG.trace("Economic Code: " + data.getEconomicCd());
-            }
-      }else{
+        if (this.currentImportValues.get("EconomicCd") != null) {
+          data.setEconomicCd(this.currentImportValues.get("EconomicCd"));
+          LOG.trace("Economic Code: " + data.getEconomicCd());
+        } else {
+          // temporary solution to handle the wrong tag
+          data.setEconomicCd(this.currentImportValues.get("EcononicCode"));
+          LOG.trace("Economic Code: " + data.getEconomicCd());
+        }
+      } else {
         if (this.currentImportValues.get("EconomicCode") != null) {
           data.setEconomicCd(this.currentImportValues.get("EconomicCode"));
           LOG.trace("Economic Code: " + data.getEconomicCd());
@@ -335,12 +335,10 @@ public abstract class BaseSOFHandler extends GEOHandler {
           // temporary solution to handle the wrong tag
           data.setEconomicCd(this.currentImportValues.get("EcononicCode"));
           LOG.trace("Economic Code: " + data.getEconomicCd());
-        }       
+        }
       }
-      
-      
-      
-      //For Turkey ModeOfPayment set as CoF
+
+      // For Turkey ModeOfPayment set as CoF
       if (SystemLocation.TURKEY.equals(data.getCmrIssuingCntry())) {
         data.setCommercialFinanced(this.currentImportValues.get("ModeOfPayment"));
       } else {
@@ -620,6 +618,11 @@ public abstract class BaseSOFHandler extends GEOHandler {
    * @return
    */
   protected String getAddressTypeByUse(String addressUse) {
+    return null;
+  }
+
+  @Override
+  public List<String> getDataFieldsForUpdate(String cmrIssuingCntry) {
     return null;
   }
 }

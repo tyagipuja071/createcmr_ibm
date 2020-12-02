@@ -13,7 +13,7 @@ import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.automation.RequestData;
-import com.ibm.cio.cmr.request.automation.impl.us.USBusinessPartnerElement;
+import com.ibm.cio.cmr.request.automation.util.geo.us.USBPHandler;
 import com.ibm.cio.cmr.request.automation.util.geo.us.USDetailsContainer;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
@@ -40,6 +40,7 @@ public class USBranchOffcMapping {
   public static String[] INDUSTRY_WYK = { "J", "V", "L", "P", "M" };
   public static String[] INDUSTRY_YUC = { "Y", "G", "E", "H", "X" };
   public static String[] INDUSTRY_1QP = { "W" };
+  public static String[] INDUSTRY_1SD = { "Z" };
   public static String[] INDUSTRY_WYL = { "R", "D", "W", "T" };
   public static String[] INDUSTRY_WYR = { "F", "S", "N" };
   public static Map<String, List<String>> indARBOMap = new HashMap<String, List<String>>();
@@ -81,6 +82,7 @@ public class USBranchOffcMapping {
     indARBOMap.put("OCA", Arrays.asList(INDUSTRY_OCA));
     indARBOMap.put("WYK", Arrays.asList(INDUSTRY_WYK));
     indARBOMap.put("YUC", Arrays.asList(INDUSTRY_YUC));
+    indARBOMap.put("1SD", Arrays.asList(INDUSTRY_1SD));
     indARBOMap.put("1QP", Arrays.asList(INDUSTRY_1QP));
     indARBOMap.put("WYL", Arrays.asList(INDUSTRY_WYL));
     indARBOMap.put("WYR", Arrays.asList(INDUSTRY_WYR));
@@ -126,9 +128,9 @@ public class USBranchOffcMapping {
     case LOGIC:
       if (USUtil.SC_BP_POOL.equals(scenario)) {
         if ("CreateCMR-BP".equals(admin.getSourceSystId())) {
-          if (USBusinessPartnerElement.BP_INDIRECT_REMARKETER.equals(data.getBpName())) {
+          if (USBPHandler.BP_INDIRECT_REMARKETER.equals(data.getBpName())) {
             calculatedCsoSite = "DV4";
-          } else if (USBusinessPartnerElement.BP_MANAGING_IR.equals(data.getBpName())) {
+          } else if (USBPHandler.BP_MANAGING_IR.equals(data.getBpName())) {
             calculatedCsoSite = "YBV";
           }
         } else if (BluePagesHelper.getPerson(admin.getRequesterId()) != null) {

@@ -309,7 +309,7 @@ div#cmr-info-box, div#cmr-error-box, div#cmr-validation-box {
     </c:if>
     <form:hidden path="covBgRetrievedInd" />
     <form:hidden path="rdcProcessingMsg" />
-    <cmr:view exceptForCountry="848,618,724">
+    <cmr:view exceptForCountry="848,618,724,780">
     	<form:hidden path="ordBlk" />
     </cmr:view>
     <cmr:view forGEO="LA">
@@ -366,7 +366,7 @@ div#cmr-info-box, div#cmr-error-box, div#cmr-validation-box {
       <form:hidden path="findDnbTs" />
     </c:if>
     
-    <cmr:view exceptForGEO="IERP,CND,CN,JP,SWISS" exceptForCountry="618,862,866,754,644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889,838,620,642,675,677,680,752,762,767,768,772,805,808,823,832,849,850,865,729">
+    <cmr:view exceptForGEO="IERP,CND,CN,JP,SWISS" exceptForCountry="618,862,780,866,754,644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889,838,620,642,675,677,680,752,762,767,768,772,805,808,823,832,849,850,865,729">
     <form:hidden path="custClass" />
     </cmr:view>
     
@@ -380,13 +380,15 @@ div#cmr-info-box, div#cmr-error-box, div#cmr-validation-box {
     <form:hidden path="oldCustNm1" />
     <form:hidden path="oldCustNm2" />
     <form:hidden path="delInd" />
-    <form:hidden path="modelCmrNo" />
+    <cmr:view exceptForCountry="649">
+    	<form:hidden path="modelCmrNo"/>
+    </cmr:view>
     <form:hidden path="approvalResult" />
     
     
 	<form:hidden path="dupCmrReason"/>
 
-
+    
     <cmr:view forCountry="760">
       <form:hidden path="custType" />
     </cmr:view>
@@ -400,6 +402,12 @@ div#cmr-info-box, div#cmr-error-box, div#cmr-validation-box {
     </cmr:view>
       <form:hidden path="paygoProcessIndc" />
 	
+    <%-- Canada Handling --%>
+    <cmr:view exceptForCountry="649">
+      <form:hidden path="invoiceDistCd" />
+      <form:hidden path="cusInvoiceCopies" />
+    </cmr:view>
+    
     <!-- Your Actions Dropdown -->
     <div title="Your Actions" id="cmr-your-actions" class="cmr-actions ${yourActionsViewOnly == true ? " view-only" : " cmr-actions-locked"}" style="display: none">
       <c:if test="${sourceSystem != null }">
