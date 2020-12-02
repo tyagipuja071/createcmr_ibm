@@ -132,8 +132,8 @@ function addAddressTypeValidator() {
             }
           }
 
-          if (zs01MT == 0 || zp01MT == 0 || zi01MT == 0 || zd01MT == 0) {
-            return new ValidationResult(null, false, 'All address types are mandatory.');
+          if (zs01MT == 0) {
+            return new ValidationResult(null, false, 'ZS01 address types is mandatory.');
           } else if (zs01MT > 1) {
             return new ValidationResult(null, false, 'Only one Sold-To address is allowed.');
           }
