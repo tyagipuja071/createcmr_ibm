@@ -264,7 +264,6 @@ var CmrMetrics = (function() {
         load : function(data, ioargs) {
           console.log('success');
           cmr.hideProgress();
-          console.log(data);
           var weekly = data.weekly;
           var scenario = data.scenario;
           var data = data.data;
