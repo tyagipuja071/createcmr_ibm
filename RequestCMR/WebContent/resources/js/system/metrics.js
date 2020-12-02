@@ -449,7 +449,7 @@ var CmrMetrics = (function() {
                     n : wData[dt].noStatus
                   });
                 }
-                allData.sort(function(a,b,){
+                allData.sort(function(a,b){
                   return a.lbl > b.lbl;
                 });
                 
@@ -566,7 +566,7 @@ var CmrMetrics = (function() {
                       n : scenario[dt].noStatus
                     });
                   }
-                  allData.sort(function(a,b,){
+                  allData.sort(function(a,b){
                     return a.lbl < b.lbl;
                   });
                   
@@ -685,7 +685,7 @@ var CmrMetrics = (function() {
                         n : scenario[dt].noStatus
                       });
                     }
-                    allData.sort(function(a,b,){
+                    allData.sort(function(a,b){
                       return a.lbl < b.lbl;
                     });
                     
