@@ -1,13 +1,19 @@
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles"%>
+<c:set var="contextPath" value="${pageContext.request.contextPath}" />
+<c:set var="resourcesPath" value="${contextPath}/resources" />
 <html>
 <head>
 <title>Create CMR Release Notes</title>
-<link rel="stylesheet" type="text/css" href="//1.w3.s81c.com/common/v17e/css/w3.css" />
+<link rel="stylesheet" type="text/css" href="${resourcesPath}/css/ext/w3.css" />
+<link rel="stylesheet" type="text/css" href="${resourcesPath}/css/cmr.css" />
+<link href="${resourcesPath}/css/ext/data.css" rel="stylesheet" title="www" type="text/css" />
 <style>
 html {
   background: white !important;
 }
 body {
-  font-family: "HelveticaNeue-Light", "Helvetica Neue Light",
+  font-family: IBM Plex Sans,"HelveticaNeue-Light", "Helvetica Neue Light",
     "Helvetica Neue", "HelvLightIBM", Arial, sans-serif;
   font-size: 13px;
   background: white !important;
@@ -16,7 +22,7 @@ body {
 h2 {
   width: 650px;
   text-align: center;
-  font-family: "HelveticaNeue-Light", "Helvetica Neue Light",
+  font-family: IBM Plex Sans,"HelveticaNeue-Light", "Helvetica Neue Light",
     "Helvetica Neue", "HelvLightIBM", Arial, sans-serif !important;
   font-size:15px;
 }
@@ -29,16 +35,6 @@ table {
   background: white !important;
 }
 
-th, td {
-  font-family: "HelveticaNeue-Light", "Helvetica Neue Light",
-    "Helvetica Neue", "HelvLightIBM", Arial, sans-serif !important;
-  border-right: 1px Solid #777;
-  border-bottom: 1px Solid #777;
-  text-align: left;
-  vertical-align: top;
-  font-size: 13px;
-  background: white !important;
-}
 ul {
   margin: 0;
 }
@@ -46,11 +42,38 @@ ul {
 </head>
 <body>
   <h2>Create CMR Release Notes</h2>
-  <table cellpadding="2" cellspacing="0">
+  <table cellpadding="2" cellspacing="0" class="ibm-data-table ibm-sortable-table ibm-alternating">
+    <caption>
+      <em>CreateCMR Release Notes</em>
+    </caption>
+    <thead>
+      <tr>
+        <th scope="col" width="160">Release / Build No.</th>
+        <th scope="col" width="160">Date of Deployment</th>
+        <th scope="col" width="*">Changes</th>
+      </tr>
+    </thead>
+    <tbody>
     <tr>
-      <th width="160">Release / Build No.</th>
-      <th width="160">Date of Deployment</th>
-      <th width="*">Changes</th>
+      <td>R5.0 b-R5296</td>
+      <td>November 21, 2020</td>
+      <td>
+        <ul>
+          <li>South Africa & African countries Legacy Consolidation</li>
+          <li>Internal CreateCMR Fixes & Enhancements</li>
+        </ul>
+      </td>
+    </tr> 
+    <tr>
+      <td>R5.0 b-R5272</td>
+      <td>November 07, 2020</td>
+      <td>
+        <ul>
+          <li>CreateCMR 2.0 - US Rev2</li>
+          <li>DPL Search</li>
+          <li>Internal CreateCMR Fixes & Enhancements</li>
+        </ul>
+      </td>
     </tr>
     <tr>
       <td>R5.0 b-R5250</td>
@@ -683,6 +706,7 @@ ul {
         </ul>
       </td>
     </tr>
+    </tbody>
   </table>
 </body>
 </html>

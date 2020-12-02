@@ -40,6 +40,8 @@ public class AutomationEngineData extends HashMap<String, Object> {
   public static final String SKIP_GBG = "_gblSkipGbg";
   public static final String SKIP_COVERAGE = "_gblSkipCoverage";
   public static final String REQ_MATCH_SCENARIO = "REQ_MATCH_SCENARIO";
+  private int trackedNegativeCheckCount;
+  private boolean trackNegativeChecks;
   /**
    * 
    */
@@ -82,6 +84,9 @@ public class AutomationEngineData extends HashMap<String, Object> {
     }
     checks = (Map<String, String>) get(NEGATIVE_CHECKS);
     checks.put(checkKey, userFriendlyCheckMessage);
+    if (this.trackNegativeChecks) {
+      this.trackedNegativeCheckCount++;
+    }
   }
 
   /**
@@ -115,6 +120,16 @@ public class AutomationEngineData extends HashMap<String, Object> {
     }
     checks = (Map<String, String>) get(NEGATIVE_CHECKS);
     return checks.get(checkKey);
+  }
+
+  @SuppressWarnings("unchecked")
+  /**
+   * Returns the map of negative check statuses
+   * 
+   * @return
+   */
+  public Map<String, String> getNegativeChecks() {
+    return (Map<String, String>) get(NEGATIVE_CHECKS);
   }
 
   /**
@@ -204,5 +219,39 @@ public class AutomationEngineData extends HashMap<String, Object> {
       // only track the first element that verified the source
       put(MATCH_DEPARTMENT, indc);
     }
+  }
+
+  @SuppressWarnings("unchecked")
+  public List<RejectionContainer> getRejectionReasons() {
+    List<RejectionContainer> container = (List<RejectionContainer>) get(REJECTIONS);
+    if (container != null) {
+      return container;
+    } else {
+      container = new ArrayList<RejectionContainer>();
+      put(REJECTIONS, container);
+      return container;
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  public HashMap<String, String> getPendingChecks() {
+    HashMap<String, String> checks = (HashMap<String, String>) get(NEGATIVE_CHECKS);
+    if (checks == null) {
+      return new HashMap<String, String>();
+    } else {
+      return checks;
+    }
+  }
+
+  public boolean isTrackNegativeChecks() {
+    return trackNegativeChecks;
+  }
+
+  public void setTrackNegativeChecks(boolean trackNegativeChecks) {
+    this.trackNegativeChecks = trackNegativeChecks;
+  }
+
+  public int getTrackedNegativeCheckCount() {
+    return trackedNegativeCheckCount;
   }
 }

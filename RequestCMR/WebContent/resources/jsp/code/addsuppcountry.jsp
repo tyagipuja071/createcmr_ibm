@@ -342,7 +342,7 @@ SuppCountryModel suppModel = (SuppCountryModel) request.getAttribute("suppcountr
         </cmr:column>
       </cmr:row>
       <cmr:row addBackground="true">
-        <cmr:column span="1" width="180">
+        <cmr:column span="1" width="220">
           <p>
             <cmr:label fieldId="autoEngineIndc">Automation Engine Enabled: </cmr:label>
           </p>
@@ -360,7 +360,7 @@ SuppCountryModel suppModel = (SuppCountryModel) request.getAttribute("suppcountr
         </cmr:column>
       </cmr:row>
       <cmr:row addBackground="true">
-        <cmr:column span="1" width="180">
+        <cmr:column span="1" width="220">
           <p>
             <cmr:label fieldId="recoveryDirection">Recovery Direction: </cmr:label>
           </p>
@@ -378,7 +378,7 @@ SuppCountryModel suppModel = (SuppCountryModel) request.getAttribute("suppcountr
       </cmr:row>
 
       <cmr:row addBackground="true">
-        <cmr:column span="1" width="180">
+        <cmr:column span="1" width="220">
           <p>
             <cmr:label fieldId="dnbPrimaryIndc">Company Information: </cmr:label>
           </p>
@@ -389,6 +389,41 @@ SuppCountryModel suppModel = (SuppCountryModel) request.getAttribute("suppcountr
             required="false" path="dnbPrimaryIndc" placeHolder="Company Information">
             <form:option value="">Use external sources (non D&B) to check and validate company information</form:option>
             <form:option value="Y">Use D&B as primary source of company information and verification</form:option>
+          </form:select>
+          </p>
+        </cmr:column>
+      </cmr:row>
+      
+      <cmr:row addBackground="true">
+        <cmr:column span="1" width="220">
+          <p>
+            <cmr:label fieldId="startQuickSearch">Start Requests from Quick Search: </cmr:label>
+          </p>
+        </cmr:column>
+        <cmr:column span="2">
+          <p>
+          <form:select dojoType="dijit.form.FilteringSelect" id="startQuickSearch" searchAttr="name" style="display: block; width:550px" maxHeight="200"
+            required="false" path="startQuickSearch" placeHolder="Start Requests from Quick Search">
+            <form:option value="">No, Start requests from Create CMR Screen</form:option>
+            <form:option value="Y">Yes, Use Quick Search for starting new requests</form:option>
+          </form:select>
+          </p>
+        </cmr:column>
+      </cmr:row>
+      
+      <cmr:row addBackground="true">
+        <cmr:column span="1" width="220">
+          <p>
+            <cmr:label fieldId="tradestyleNmUsage">Trade Style Name Usage: </cmr:label>
+          </p>
+        </cmr:column>
+        <cmr:column span="2">
+          <p>
+          <form:select dojoType="dijit.form.FilteringSelect" id="tradestyleNmUsage" searchAttr="name" style="display: block; width:550px" maxHeight="200"
+            required="false" path="tradestyleNmUsage" placeHolder="Trade Style Name Usage">
+            <form:option value="">Allow requests with Trade Style Name</form:option>
+            <form:option value="R">Reject requests with Trade Style Name</form:option>
+            <form:option value="O">Override Trade Style Name with Legal Name</form:option>
           </form:select>
           </p>
         </cmr:column>

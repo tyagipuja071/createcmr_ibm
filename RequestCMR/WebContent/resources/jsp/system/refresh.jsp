@@ -69,7 +69,7 @@ span.refresh-n {
 				
 			<%} else {%>
 					<div class="ibm-columns">
-						<div class="ibm-col-1-1" style="width:915px">
+						<div class="ibm-col-1-1" style="width:1060px">
 				            <table cellspacing="0" cellpadding="0" border="0" summary="System Refresh" class="ibm-data-table ibm-sortable-table ibm-alternating">
 				                <caption>
 				                <em>System Refresh</em>

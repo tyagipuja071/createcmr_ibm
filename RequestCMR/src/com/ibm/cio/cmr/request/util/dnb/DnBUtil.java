@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.EntityManager;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -24,6 +26,8 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.CompanyFinder;
 import com.ibm.cio.cmr.request.util.RequestUtils;
@@ -132,6 +136,8 @@ public class DnBUtil {
     registerDnBVATCode("UZ", 17279); // Tax Registration Number (Uzbekistan)
     registerDnBVATCode("VE", 1396); // Venezuelan Registry of Fiscal Information
     registerDnBVATCode("VN", 1397); // Business Registration Number (Vietnam)
+    registerDnBVATCode("SG", 1386); // Singapore Registration File Number
+    registerDnBVATCode("ZA", 15169); // Value Added Tax Number(ZA)
 
     // Tax Cd1
     registerDnBTaxCd1Code("NL", 6256); // NetherLand Tax Registration Number
@@ -141,8 +147,6 @@ public class DnBUtil {
 
     // other codes
     registerOtherDnBCode("FR", CODE_SIREN, 2078); // SIREN
-    registerOtherDnBCode("SG", "SG_REG_NO", 1386); // Singapore Registration
-                                                   // File Number
 
   }
 
@@ -436,73 +440,131 @@ public class DnBUtil {
    * Does a {@link StringUtils#getLevenshteinDistance(String, String)}
    * comparison of the address data against the DnB record and determines if
    * they match
-   *
-   * @param handler
+   * 
+   * @param country
+   * @param addr
    * @param admin
-   * @param addresses
    * @param dnbRecord
    * @return
    */
   public static boolean closelyMatchesDnb(String country, Addr addr, Admin admin, DnBMatchingResponse dnbRecord) {
-    return closelyMatchesDnb(country, addr, admin, dnbRecord, null);
+    return closelyMatchesDnb(country, addr, admin, dnbRecord, null, false);
   }
 
   /**
    * Does a {@link StringUtils#getLevenshteinDistance(String, String)}
    * comparison of the address data against the DnB record and determines if
    * they match
-   *
-   * @param handler
+   * 
+   * @param country
+   * @param addr
    * @param admin
-   * @param addresses
    * @param dnbRecord
    * @param nameToUse
+   * @param useTradestyleName
    * @return
    */
-  public static boolean closelyMatchesDnb(String country, Addr addr, Admin admin, DnBMatchingResponse dnbRecord, String nameToUse) {
+  public static boolean closelyMatchesDnb(String country, Addr addr, Admin admin, DnBMatchingResponse dnbRecord, String nameToUse,
+      boolean useTradestyleName) {
+    return closelyMatchesDnb(country, addr, admin, dnbRecord, nameToUse, useTradestyleName, false);
+  }
 
+  /**
+   * Does a {@link StringUtils#getLevenshteinDistance(String, String)}
+   * comparison of the address data against the DnB record and determines if
+   * they match
+   * 
+   * @param country
+   * @param addr
+   * @param admin
+   * @param dnbRecord
+   * @param nameToUse
+   * @param useTradestyleName
+   * @param allowLongNameAddress
+   * @return
+   */
+  public static boolean closelyMatchesDnb(String country, Addr addr, Admin admin, DnBMatchingResponse dnbRecord, String nameToUse,
+      boolean useTradestyleName, boolean allowLongNameAddress) {
     GEOHandler handler = RequestUtils.getGEOHandler(country);
+    int maxLength = 60;
+    if (handler != null) {
+      maxLength = handler.getName1Length() + handler.getName2Length();
+    }
 
-    String compareName = nameToUse != null ? nameToUse : getCustomerName(handler, admin, addr);
-    String altCompareName = nameToUse != null ? null : getAltCustomerName(handler, admin, addr);
+    // Name/TradestyleName close matching - BEGIN
 
-    if (StringUtils.isNotBlank(compareName) && StringUtils.isNotBlank(dnbRecord.getDnbName())) {
-      if (StringUtils.getLevenshteinDistance(compareName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) >= 12 && (altCompareName == null
-          || StringUtils.getLevenshteinDistance(altCompareName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) >= 12)) {
-        return false;
-      }
-      if (StringUtils.getLevenshteinDistance(compareName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) >= 6 && (altCompareName == null
-          || StringUtils.getLevenshteinDistance(altCompareName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) >= 6)) {
-        // do a comparison of common words first
-        List<String> commonA = CommonWordsUtil.getVariations(compareName.toUpperCase());
-        List<String> commonB = CommonWordsUtil.getVariations(dnbRecord.getDnbName().toUpperCase());
-        boolean foundMinimal = false;
-        for (String phraseA : commonA) {
-          for (String phraseB : commonB) {
-            if (StringUtils.getLevenshteinDistance(phraseA, phraseB) < 6) {
-              foundMinimal = true;
-            }
-          }
+    List<String> dnbNames = new ArrayList<String>();
+    boolean nameMatch = false;
+    boolean longNameMatch = false;
+
+    if (useTradestyleName && !dnbRecord.getTradeStyleNames().isEmpty()) {
+      dnbNames.addAll(dnbRecord.getTradeStyleNames());
+    } else {
+      dnbNames.add(dnbRecord.getDnbName());
+    }
+    for (String dnbName : dnbNames) {
+      String compareName = nameToUse != null ? nameToUse : getCustomerName(handler, admin, addr);
+      String altCompareName = nameToUse != null ? null : getAltCustomerName(handler, admin, addr);
+      if (StringUtils.isNotBlank(compareName) && StringUtils.isNotBlank(dnbName)) {
+        if (StringUtils.getLevenshteinDistance(compareName.toUpperCase(), dnbName.toUpperCase()) >= 12
+            && (altCompareName == null || StringUtils.getLevenshteinDistance(altCompareName.toUpperCase(), dnbName.toUpperCase()) >= 12)) {
+          nameMatch = false;
         }
-        if (!foundMinimal) {
-          if (altCompareName != null) {
-            List<String> altCommonA = CommonWordsUtil.getVariations(altCompareName.toUpperCase());
-            for (String phraseA : altCommonA) {
-              for (String phraseB : commonB) {
-                if (StringUtils.getLevenshteinDistance(phraseA, phraseB) < 6) {
-                  foundMinimal = true;
-                }
+        if (StringUtils.getLevenshteinDistance(compareName.toUpperCase(), dnbName.toUpperCase()) >= 6
+            && (altCompareName == null || StringUtils.getLevenshteinDistance(altCompareName.toUpperCase(), dnbName.toUpperCase()) >= 6)) {
+          // do a comparison of common words first
+          List<String> commonA = CommonWordsUtil.getVariations(compareName.toUpperCase());
+          List<String> commonB = CommonWordsUtil.getVariations(dnbName.toUpperCase());
+          boolean foundMinimal = false;
+          for (String phraseA : commonA) {
+            for (String phraseB : commonB) {
+              if (StringUtils.getLevenshteinDistance(phraseA, phraseB) < 6) {
+                foundMinimal = true;
               }
             }
           }
           if (!foundMinimal) {
-            return false;
+            if (altCompareName != null) {
+              List<String> altCommonA = CommonWordsUtil.getVariations(altCompareName.toUpperCase());
+              for (String phraseA : altCommonA) {
+                for (String phraseB : commonB) {
+                  if (StringUtils.getLevenshteinDistance(phraseA, phraseB) < 6) {
+                    foundMinimal = true;
+                  }
+                }
+              }
+            }
+            if (!foundMinimal) {
+              nameMatch = false;
+            } else {
+              nameMatch = true;
+              break;
+            }
           }
+        } else {
+          LOG.debug("Name " + compareName + " close to " + dnbName);
+          nameMatch = true;
+          break;
         }
-      } else {
-        LOG.debug("Name " + compareName + " close to " + dnbRecord.getDnbName());
+
+        try {
+          if (!nameMatch && allowLongNameAddress && !longNameMatch && StringUtils.isNotBlank(compareName)
+              && compareName.getBytes("UTF-8").length >= maxLength
+              && StringUtils.startsWith(dnbName.replaceAll("\\s", ""), compareName.replaceAll("\\s", ""))) {
+            LOG.debug("Name Match failed for - " + compareName + ", but long name match passed.");
+            longNameMatch = true;
+          }
+        } catch (Exception e) {
+          LOG.error("Unable to get bytelength of compareName", e);
+        }
       }
     }
+    if (!nameMatch && !longNameMatch) {
+      return false;
+    }
+    // Name/TradestyleName close matching - END
+
+    // Address close matching - BEGIN
     String address = addr.getAddrTxt() != null ? addr.getAddrTxt() : "";
     address += StringUtils.isNotBlank(addr.getAddrTxt2()) ? " " + addr.getAddrTxt2() : "";
     address = address.trim();
@@ -512,9 +574,11 @@ public class DnBUtil {
     dnbAddress = dnbAddress.trim();
 
     if (StringUtils.isNotBlank(address) && StringUtils.isNotBlank(dnbAddress)
-        && StringUtils.getLevenshteinDistance(address.toUpperCase(), dnbAddress.toUpperCase()) > 8) {
+        && StringUtils.getLevenshteinDistance(address.toUpperCase(), dnbAddress.toUpperCase()) > 8
+        && !(allowLongNameAddress && dnbAddress.replaceAll("\\s", "").contains(address.replaceAll("\\s", "")))) {
       return false;
     }
+
     if (StringUtils.isNotBlank(addr.getPostCd()) && StringUtils.isNotBlank(dnbRecord.getDnbPostalCode())) {
       String currentPostalCode = addr.getPostCd();
       String dnbPostalCode = dnbRecord.getDnbPostalCode();
@@ -535,18 +599,20 @@ public class DnBUtil {
       return false;
     }
 
+    // Address close matching - END
+
     return true;
+
   }
 
   /**
    * Does a {@link StringUtils#getLevenshteinDistance(String, String)}
    * comparison of the address data against the DnB record and determines if
    * they match
-   *
+   * 
+   * @param country
    * @param addr
-   * @param handler
    * @param admin
-   * @param addresses
    * @param dnbRecord
    * @return
    */
@@ -725,4 +791,11 @@ public class DnBUtil {
     return res;
   }
 
+  public static boolean isDnbOverrideAttachmentProvided(EntityManager entityManager, long reqId) {
+    String sql = ExternalizedQuery.getSql("QUERY.CHECK_DNB_MATCH_ATTACHMENT");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("ID", reqId);
+
+    return query.exists();
+  }
 }

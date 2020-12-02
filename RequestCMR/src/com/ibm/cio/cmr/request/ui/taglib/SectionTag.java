@@ -56,10 +56,12 @@ public class SectionTag extends TagSupport {
     return EVAL_PAGE;
   }
 
+  @Override
   public String getId() {
     return id;
   }
 
+  @Override
   public void setId(String id) {
     this.id = id;
   }

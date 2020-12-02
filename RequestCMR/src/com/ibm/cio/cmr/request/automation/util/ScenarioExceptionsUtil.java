@@ -34,6 +34,8 @@ public class ScenarioExceptionsUtil {
   boolean skipChecks;
   boolean checkVATForDnB;
   boolean skipCompanyVerification;
+  boolean manualReviewIndc;
+  boolean reviewExtReqIndc;
 
   public ScenarioExceptionsUtil(EntityManager entityManager, String cmrIssuingCntry, String subRegion, String scenario, String subScenario) {
 
@@ -179,6 +181,28 @@ public class ScenarioExceptionsUtil {
     } else {
       setSkipChecks(false);
     }
+
+    // manual review indc
+    if (child != null && child.getManualReviewIndc() != null && StringUtils.isNotBlank(child.getManualReviewIndc())) {
+      setManualReviewIndc("Y".equals(child.getManualReviewIndc()));
+    } else if (median != null && median.getManualReviewIndc() != null && StringUtils.isNotBlank(median.getManualReviewIndc())) {
+      setManualReviewIndc("Y".equals(median.getManualReviewIndc()));
+    } else if (parent != null && parent.getManualReviewIndc() != null && StringUtils.isNotBlank(parent.getManualReviewIndc())) {
+      setManualReviewIndc("Y".equals(parent.getManualReviewIndc()));
+    } else {
+      setManualReviewIndc(false);
+    }
+
+    // review external requests indc
+    if (child != null && child.getReviewExtReqIndc() != null && StringUtils.isNotBlank(child.getReviewExtReqIndc())) {
+      setReviewExtReqIndc("Y".equals(child.getReviewExtReqIndc()));
+    } else if (median != null && median.getReviewExtReqIndc() != null && StringUtils.isNotBlank(median.getReviewExtReqIndc())) {
+      setReviewExtReqIndc("Y".equals(median.getReviewExtReqIndc()));
+    } else if (parent != null && parent.getReviewExtReqIndc() != null && StringUtils.isNotBlank(parent.getReviewExtReqIndc())) {
+      setReviewExtReqIndc("Y".equals(parent.getReviewExtReqIndc()));
+    } else {
+      setReviewExtReqIndc(false);
+    }
   }
 
   public void test() {
@@ -253,6 +277,22 @@ public class ScenarioExceptionsUtil {
 
   public void setCheckVATForDnB(boolean checkVATForDnB) {
     this.checkVATForDnB = checkVATForDnB;
+  }
+
+  public boolean isManualReviewIndc() {
+    return manualReviewIndc;
+  }
+
+  public void setManualReviewIndc(boolean manualReviewIndc) {
+    this.manualReviewIndc = manualReviewIndc;
+  }
+
+  public boolean isReviewExtReqIndc() {
+    return reviewExtReqIndc;
+  }
+
+  public void setReviewExtReqIndc(boolean reviewExtReqIndc) {
+    this.reviewExtReqIndc = reviewExtReqIndc;
   }
 
 }
