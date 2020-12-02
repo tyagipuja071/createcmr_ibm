@@ -73,37 +73,41 @@ public class MCOCewaHandler extends MCOHandler {
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
     super.setDataValuesOnImport(admin, data, results, mainRecord);
 
-    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
-      if (legacyObjects != null && legacyObjects.getCustomer() != null) {
-        CmrtCust legacyCust = legacyObjects.getCustomer();
+    String country = mainRecord.getCmrIssuedBy();
+    String processingType = PageManager.getProcessingType(country, "U");
+    if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
+      if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+        if (legacyObjects != null && legacyObjects.getCustomer() != null) {
+          CmrtCust legacyCust = legacyObjects.getCustomer();
 
-        if (legacyCust.getCustType() != null)
-          data.setCrosSubTyp(legacyCust.getCustType());
+          if (legacyCust.getCustType() != null)
+            data.setCrosSubTyp(legacyCust.getCustType());
 
-        if (legacyCust.getTaxCd() != null)
-          data.setSpecialTaxCd(legacyCust.getTaxCd());
+          if (legacyCust.getTaxCd() != null)
+            data.setSpecialTaxCd(legacyCust.getTaxCd());
 
-        if (legacyCust.getEnterpriseNo() != null)
-          data.setEnterprise(legacyCust.getEnterpriseNo());
+          if (legacyCust.getEnterpriseNo() != null)
+            data.setEnterprise(legacyCust.getEnterpriseNo());
 
-      }
+        }
 
-      data.setDunsNo(mainRecord.getCmrDuns());
+        data.setDunsNo(mainRecord.getCmrDuns());
 
-      String zs01sapNo = getKunnrSapr3Kna1(data.getCmrNo(), data.getCmrIssuingCntry());
-      data.setIbmDeptCostCenter(getDepartment(zs01sapNo));
-      data.setAdminDeptLine(data.getIbmDeptCostCenter());
+        String zs01sapNo = getKunnrSapr3Kna1(data.getCmrNo(), data.getCmrIssuingCntry());
+        data.setIbmDeptCostCenter(getDepartment(zs01sapNo));
+        data.setAdminDeptLine(data.getIbmDeptCostCenter());
 
-      String modeOfPayment = legacyObjects.getCustomer().getModeOfPayment();
-      if (StringUtils.isNotBlank(modeOfPayment) && ("R".equals(modeOfPayment) || "S".equals(modeOfPayment) || "T".equals(modeOfPayment))) {
-        data.setCommercialFinanced(modeOfPayment);
-        data.setCreditCd("N");
-      } else if (StringUtils.isNotBlank(modeOfPayment) && "5".equals(modeOfPayment)) {
-        data.setCreditCd("Y");
-        data.setCommercialFinanced("");
-      } else {
-        data.setCreditCd("");
-        data.setCommercialFinanced("");
+        String modeOfPayment = legacyObjects.getCustomer().getModeOfPayment();
+        if (StringUtils.isNotBlank(modeOfPayment) && ("R".equals(modeOfPayment) || "S".equals(modeOfPayment) || "T".equals(modeOfPayment))) {
+          data.setCommercialFinanced(modeOfPayment);
+          data.setCreditCd("N");
+        } else if (StringUtils.isNotBlank(modeOfPayment) && "5".equals(modeOfPayment)) {
+          data.setCreditCd("Y");
+          data.setCommercialFinanced("");
+        } else {
+          data.setCreditCd("");
+          data.setCommercialFinanced("");
+        }
       }
     }
 
@@ -204,21 +208,20 @@ public class MCOCewaHandler extends MCOHandler {
   }
 
   @Override
-  public void setDataDefaultsOnCreate(Data data, EntityManager entityManager) {
-    data.setRepTeamMemberNo("DUMMY1");
-  }
-
-  @Override
   public void doBeforeAddrSave(EntityManager entityManager, Addr addr, String cmrIssuingCntry) throws Exception {
     super.doBeforeAddrSave(entityManager, addr, cmrIssuingCntry);
 
-    if (addr != null) {
-      if (!("ZS01".equals(addr.getId().getAddrType()) || "ZD01".equals(addr.getId().getAddrType()))) {
-        addr.setCustPhone("");
-      }
+    String processingType = PageManager.getProcessingType(cmrIssuingCntry, "U");
+    if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
 
-      if (!("ZS01".equals(addr.getId().getAddrType()) || "ZP01".equals(addr.getId().getAddrType()))) {
-        addr.setPoBox("");
+      if (addr != null) {
+        if (!("ZS01".equals(addr.getId().getAddrType()) || "ZD01".equals(addr.getId().getAddrType()))) {
+          addr.setCustPhone("");
+        }
+
+        if (!("ZS01".equals(addr.getId().getAddrType()) || "ZP01".equals(addr.getId().getAddrType()))) {
+          addr.setPoBox("");
+        }
       }
     }
   }
@@ -426,17 +429,20 @@ public class MCOCewaHandler extends MCOHandler {
 
   @Override
   public void doBeforeDataSave(EntityManager entityManager, Admin admin, Data data, String cmrIssuingCntry) throws Exception {
-    if (CmrConstants.REQ_TYPE_UPDATE.equalsIgnoreCase(admin.getReqType()) || CmrConstants.REQ_TYPE_CREATE.equalsIgnoreCase(admin.getReqType())) {
-      if (!StringUtils.isEmpty(data.getSalesBusOffCd())) {
-        data.setSearchTerm(data.getSalesBusOffCd());
+    String processingType = PageManager.getProcessingType(cmrIssuingCntry, "U");
+    if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
+      if (CmrConstants.REQ_TYPE_UPDATE.equalsIgnoreCase(admin.getReqType()) || CmrConstants.REQ_TYPE_CREATE.equalsIgnoreCase(admin.getReqType())) {
+        if (!StringUtils.isEmpty(data.getSalesBusOffCd())) {
+          data.setSearchTerm(data.getSalesBusOffCd());
+        }
       }
-    }
 
-    if (CmrConstants.REQ_TYPE_CREATE.equalsIgnoreCase(admin.getReqType())) {
-      data.setRepTeamMemberNo("DUMMY1");
-    }
+      if (CmrConstants.REQ_TYPE_CREATE.equalsIgnoreCase(admin.getReqType())) {
+        data.setRepTeamMemberNo("DUMMY1");
+      }
 
-    data.setAdminDeptLine(data.getIbmDeptCostCenter());
+      data.setAdminDeptLine(data.getIbmDeptCostCenter());
+    }
   }
 
   @Override
@@ -832,7 +838,12 @@ public class MCOCewaHandler extends MCOHandler {
 
   @Override
   public boolean skipOnSummaryUpdate(String cntry, String field) {
-    return Arrays.asList(MCO2_SKIP_ON_SUMMARY_UPDATE_FIELDS).contains(field);
+    String processingType = PageManager.getProcessingType(cntry, "U");
+    if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
+      return Arrays.asList(MCO2_SKIP_ON_SUMMARY_UPDATE_FIELDS).contains(field);
+    } else {
+      return false;
+    }
   }
 
 }

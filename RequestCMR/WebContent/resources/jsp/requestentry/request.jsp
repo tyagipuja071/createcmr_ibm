@@ -275,6 +275,7 @@ div#cmr-info-box, div#cmr-error-box, div#cmr-validation-box {
     <input type="hidden" value="<%=autoEngineIndc%>" id="autoEngineIndc">
     <cmr:modelAction formName="frmCMR" />
     <form:hidden path="fromUrl" id="fromUrl" />
+    <form:hidden path="userRole" />
     <form:hidden path="claimRole" />
     <form:hidden path="redirectUrl" />
     <form:hidden path="saveRejectScore" />
