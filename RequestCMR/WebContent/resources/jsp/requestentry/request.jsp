@@ -258,6 +258,11 @@ div.cmr-tabs {
 div#ibm-content-main {
   padding-top: 20px;
 }
+
+div#cmr-info-box, div#cmr-error-box, div#cmr-validation-box {
+  padding-top: 15px !important;
+}
+
 </style>
 <cmr:model model="reqentry" />
 <cmr:boxContent>
@@ -270,6 +275,7 @@ div#ibm-content-main {
     <input type="hidden" value="<%=autoEngineIndc%>" id="autoEngineIndc">
     <cmr:modelAction formName="frmCMR" />
     <form:hidden path="fromUrl" id="fromUrl" />
+    <form:hidden path="userRole" />
     <form:hidden path="claimRole" />
     <form:hidden path="redirectUrl" />
     <form:hidden path="saveRejectScore" />
@@ -403,14 +409,14 @@ div#ibm-content-main {
     </cmr:view>
     
     <!-- Your Actions Dropdown -->
-    <div title="Your Actions" id="cmr-your-actions" class="cmr-actions ${yourActionsViewOnly == true ? " view-only" : ""}" style="display: none">
+    <div title="Your Actions" id="cmr-your-actions" class="cmr-actions ${yourActionsViewOnly == true ? " view-only" : " cmr-actions-locked"}" style="display: none">
       <c:if test="${sourceSystem != null }">
       <div class="cmr-source-sys-txt"><span class="cmr-source-sub">Source:</span> ${sourceSystem}</div>
       </c:if>
       <div class="cmr-action-dd">
         <form:select cssStyle="width:260px" dojoType="dijit.form.FilteringSelect" id="yourAction" searchAttr="name" style="display: inline-block;"
           maxHeight="200" required="false" path="yourAction" placeHolder="${ui.yourAction}" />
-        <img title="Proceed with the selected Action" class="cmr-proceed-icon" src="${resourcesPath}/images/go.png" onclick="processRequestAction()">
+        <img title="Proceed with the selected Action" class="cmr-proceed-icon" src="${resourcesPath}/images/play.webp" onclick="processRequestAction()">
       </div>
       <div class="cmr-action-txt" id="viewOnlyText" style="display: none">View Only</div>
       <div class="cmr-action-txt" id="superUserModeText" style="display: none">SUPER USER MODE</div>

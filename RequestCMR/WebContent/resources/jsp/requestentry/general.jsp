@@ -29,101 +29,11 @@ boolean laReactivateCapable = PageManager.laReactivateEnabled(reqentry.getCmrIss
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 <c:set var="resourcesPath" value="${contextPath}/resources" />
     <cmr:section id="GENERAL_REQ_TAB">
-      <cmr:row topPad="10">
-          <cmr:column span="1" width="100">
-            <p>
-              <label for="requestId"><cmr:fieldLabel fieldId="RequestID" />: </label>
-              <c:if test="${reqentry.reqId == 0}">
-              Not assigned
-              </c:if>
-              <c:if test="${reqentry.reqId != 0}">
-              ${reqentry.reqId}
-              </c:if>
-            <form:hidden id="reqId" path="reqId" />
-            </p>
-          </cmr:column>
-          <cmr:column span="1" width="200">
-            <p>
-              <label for="overallStatus">${ui.genReqStat}: </label>
-              ${reqentry.overallStatus}
-            <form:hidden id="overallStatus" path="overallStatus" />
-            </p>
-          </cmr:column>
-          <cmr:column span="1" width="170">
-            <p>
-              <label for="lockByNm">${ui.lockedBy}: </label>
-             ${reqentry.lockByNm}
-            <form:hidden id="lockByNm" path="lockByNm" />
-            </p>
-          </cmr:column>
-          <cmr:column span="1" width="150">
-            <p>
-            <label for="userRole">${ui.yourRole}: </label>
-            ${reqentry.userRole}
-          <form:hidden id="userRole" path="userRole" />
-          </p>
-          </cmr:column>
-          <cmr:column span="1" width="170">
-              <p>
-                <label for="yourId">${ui.yourId}: </label>
-               ${reqentry.yourId}
-              <form:hidden id="yourId" path="yourId" />
-              <br/>
-              ${reqentry.yourNm}
-              <form:hidden id="yourNm" path="yourNm" />
-              </p>
-            </cmr:column>
-      </cmr:row>
-      <cmr:row>
-          <cmr:column span="1" width="100">
-            <p>
-              <label for="createTs">${ui.createDate}: </label>
-              ${reqentry.createDate}
-            <form:hidden id="createDate" path="createDate" />
-            </p>
-          </cmr:column>
-          <cmr:column span="1" width="200">
-              <p>
-                <label for="lastUpdtTs">${ui.lastUpdated}: </label>
-                ${reqentry.lstUpdDate}
-              <form:hidden id="lstUpdDate" path="lstUpdDate" />
-              </p>
-          </cmr:column>
-          <cmr:column span="1" width="170">
-            <p>
-              <label for="lockTs">${ui.lockedDate}: </label>
-             ${reqentry.lockedDate}
-            <form:hidden id="lockedDate" path="lockedDate" />
-            </p>
-          </cmr:column>
-          <cmr:column span="1" width="150">
-            <p>
-              <label for="lockTs">${ui.procStatus}: </label>
-             ${reqentry.processingStatus}
-            </p>
-          </cmr:column>
-    <%if (!newEntry){ %>
-          <cmr:column span="1" width="190" >
-            <div style="padding-top:10px">
-            <cmr:button label="${ui.btn.requestSummary}" onClick="showSummaryScreen(${reqentry.reqId}, '${reqentry.reqType}')" highlight="false" pad="false"/>
-            <img class="pdf" title="Export Request Details to PDF" onclick="exportToPdf()" src="${resourcesPath}/images/pdf-icon.png">
-            </div>
-          </cmr:column>
-    <%} %>
-      </cmr:row>
-      <cmr:row topPad="10">
-<%if (!readOnly){ %>
-        <cmr:column span="2" >
-          <span style="color:red;font-size:16px;font-weight:bold">*</span> 
-        <span style="font-size:14px;font-style:italic;color:#333">
-          ${ui.mandatoryLegend}
-        </span>
-          </cmr:column>
-<%}%>
-      </cmr:row>
+      <form:hidden id="reqId" path="reqId" />
+      <jsp:include page="detailstrip.jsp" />
       <cmr:row addBackground="true">
         <cmr:column span="2">
-          <cmr:row>
+          <cmr:row noPad="true">
             <cmr:column span="2">
               <p>
               <cmr:label fieldId="cmrIssuingCntry">
@@ -135,7 +45,7 @@ boolean laReactivateCapable = PageManager.laReactivateEnabled(reqentry.getCmrIss
               </p>
             </cmr:column>
           </cmr:row>
-          <cmr:row>
+          <cmr:row noPad="true">
             <cmr:column span="2">
             <p>
               <cmr:label fieldId="reqType">
@@ -149,7 +59,7 @@ if (readOnly){
   findCmrJs = "";
 }
 %>              
-              <img title="Search for the CMR" class="cmr-proceed2-icon" src="${resourcesPath}/images/search-icon2.png" <%=findCmrJs%>>
+              <img title="Search and Import the CMR" class="cmr-proceed2-icon" src="${resourcesPath}/images/search2.png" <%=findCmrJs%>>
             <cmr:view exceptForGEO="IERP,CND">
             <cmr:column span="2" containerForField="ProspectToLegalCMR">
               <cmr:field fieldId="ProspectToLegalCMR" path="prospLegalInd" tabId="MAIN_GENERAL_TAB"/>
@@ -178,28 +88,12 @@ if (readOnly){
             
           </cmr:row>
        </cmr:column>
-       <cmr:column span="1" width="250">
-       <br/>
+       <cmr:column span="2" >
 	<cmr:view forCountry="724" >
  	<% autoProcCapable = true ;%>
         </cmr:view>
-              <%if (autoProcCapable){%>
-            <cmr:row>
-              <cmr:column span="1" width="250" containerForField="DisableAutoProcessing">
-              <p>
-              <cmr:field fieldId="DisableAutoProcessing" path="disableAutoProc" />
-              <cmr:label fieldId="disableAutoProc" forRadioOrCheckbox="true">
-                 <cmr:fieldLabel fieldId="DisableAutoProcessing" />
-              </cmr:label>
-              <cmr:info text="${ui.info.disableAutoProc}"></cmr:info>
-             </p>
-             </cmr:column>
-            </cmr:row>
-             <%} else {%>
-               <input type="hidden" name="disableAutoProc" value="Y">
-             <%} %>
-            <cmr:row topPad="${reqentry.userRole == 'Requester' ? 10 : 35 }">
-                <cmr:column span="1" width="250">
+            <cmr:row topPad="15" noPad="true">
+                <cmr:column span="2" >
                   <cmr:buttonsRow>
                     <cmr:button id="cmrSearchBtn" label="${ui.btn.cmrSrch}" onClick="doCMRSearch()" highlight="true" styleClass="cmr-reqentry-btn"/>
                       <span class="ibm-required cmr-required-spacer">
@@ -216,9 +110,8 @@ if (readOnly){
                   </cmr:buttonsRow>
                 </cmr:column>
             </cmr:row>
-            <cmr:row>
-                <cmr:column span="1" width="250">
-                  <br/>
+            <cmr:row noPad="true" topPad="20">
+                <cmr:column span="2">
                   <cmr:buttonsRow>
                     <cmr:button  id="dnbSearchBtn" label="${ui.btn.dnbSrch}" onClick="doDnBSearch()" highlight="true" styleClass="cmr-reqentry-btn"/>
                     <span class="ibm-required cmr-required-spacer" id="dnbRequiredIndc" >*</span>
@@ -228,11 +121,24 @@ if (readOnly){
                     <%}%>
                   </cmr:buttonsRow>
               </cmr:column>
-              <br>
-              &nbsp;
             </cmr:row>
+              <%if (autoProcCapable){%>
+            <cmr:row noPad="true" topPad="10">
+              <cmr:column span="2" containerForField="DisableAutoProcessing">
+              <p>
+              <cmr:field fieldId="DisableAutoProcessing" path="disableAutoProc" />
+              <cmr:label fieldId="disableAutoProc" forRadioOrCheckbox="true">
+                 <cmr:fieldLabel fieldId="DisableAutoProcessing" />
+              </cmr:label>
+              <cmr:info text="${ui.info.disableAutoProc}"></cmr:info>
+             </p>
+             </cmr:column>
+            </cmr:row>
+             <%} else {%>
+               <input type="hidden" name="disableAutoProc" value="Y">
+             <%} %>
         </cmr:column>
-        <cmr:column span="2" width="310">
+        <div class="ibm-col-6-2">
             
             <table border="2" cellspacing="0" cellpadding="0" class="cmr-scorecard">
               <tr>
@@ -245,11 +151,11 @@ if (readOnly){
                 </td>
               </tr>
               <tr>
-                <td width="90px">CMR Search &nbsp;<%if (!readOnly){%><span class="ibm-required cmr-required-spacer">*</span>
+                <td width="100px">CMR Search &nbsp;<%if (!readOnly){%><span class="ibm-required cmr-required-spacer">*</span>
                     <%} %>
                   <form:hidden path="findCmrResult"/>
                 </td>
-                <td width="110px" id="findCMRResult_txt">
+                <td width="120px" id="findCMRResult_txt">
                   <c:if test="${reqentry.findCmrResult == 'Rejected'}">
                   <a href="javascript:showCMRRejectedModal()">${reqentry.findCmrResult}</a>
                   </c:if>
@@ -257,7 +163,7 @@ if (readOnly){
                   ${reqentry.findCmrResult}
                   </c:if>
                 </td>
-                <td width="95px">${reqentry.findCmrDate}</td>
+                <td width="105px">${reqentry.findCmrDate}</td>
               </tr>
               <tr>
                 <td>D&B Search&nbsp;<span id="dnbRequired" class="ibm-required cmr-required-spacer">*</span>
@@ -365,7 +271,7 @@ if (readOnly){
               </tr>
               </cmr:view>              
             </table>
-        </cmr:column>
+        </div>
       </cmr:row>
 
 	<cmr:view forCountry="758,864,706,707,762,808,702,678,624,848" >
@@ -572,83 +478,63 @@ if (readOnly){
     </cmr:view>
   <%} %>
       <cmr:row addBackground="true">
-        <cmr:column span="2">
-          <cmr:row>
-            <cmr:column span="2">
-              <p>
-              <cmr:label fieldId="expediteInd">
-                <cmr:fieldLabel fieldId="Expedite" />:<cmr:info text="${ui.info.expediteInd}" />
-              </cmr:label>
-              <cmr:field id="expediteInd" path="expediteInd" fieldId="Expedite" tabId="MAIN_GENERAL_TAB"/>
-              </p>
-            </cmr:column>
-          </cmr:row>
-          <cmr:row>
             <cmr:column span="2">
             <p>
               <cmr:label fieldId="requestingLob">
                 <cmr:fieldLabel fieldId="RequestingLOB" />:
                 <cmr:info text="${ui.info.requestingLOB}" />
               </cmr:label>
-              <cmr:field id="requestingLob" path="requestingLob" fieldId="RequestingLOB" tabId="MAIN_GENERAL_TAB"/>
+              <cmr:field id="requestingLob" path="requestingLob" fieldId="RequestingLOB" tabId="MAIN_GENERAL_TAB" size="250"/>
             </p>
             </cmr:column>
-          </cmr:row>
-        </cmr:column>
-        <cmr:column span="2">
-          <cmr:row>
-            <cmr:column span="2">
-              <p>
-              <cmr:label fieldId="expediteReason">
-                <cmr:fieldLabel fieldId="ExpediteReason" />:
-              </cmr:label>
-              <cmr:field id="expediteReason" path="expediteReason" fieldId="ExpediteReason" tabId="MAIN_GENERAL_TAB"/>
-              </p>
-            </cmr:column>
-          </cmr:row>
-          <cmr:row>
             <cmr:column span="2">
             <p>
               <cmr:label fieldId="reqReason">
                 <cmr:fieldLabel fieldId="RequestReason" />:
               </cmr:label>
-              <cmr:field id="reqReason" path="reqReason" fieldId="RequestReason" tabId="MAIN_GENERAL_TAB"/>
+              <cmr:field id="reqReason" path="reqReason" fieldId="RequestReason" tabId="MAIN_GENERAL_TAB" size="250"/>
             </p>
             </cmr:column>
-          </cmr:row>
-        </cmr:column>
         <cmr:view forGEO="JP">
-        <cmr:column span="2">
-          <cmr:row>
             <cmr:column span="2">
               <p>
                 <label for="requesterId">Requester ID:</label>
                 ${reqentry.requesterId} (${requesterId_UID})
               </p>
             </cmr:column>
-          </cmr:row>
-          <cmr:row>
             <cmr:column span="2">
               <p>
                 <label for="reqFor"><cmr:fieldLabel fieldId="OriginatorName" />:<cmr:info text="${ui.info.orgName}" /></label>
                 <cmr:bluepages model="reqentry" namePath="originatorNm"  idPath="originatorId" useBothIds="true" showId="true"></cmr:bluepages>
               </p>
             </cmr:column>
-          </cmr:row>
-        </cmr:column>
         </cmr:view>
-        <cmr:view exceptForGEO="JP" exceptForCountry="649">
-          <cmr:column span="2">
-            <cmr:row>
+        <cmr:view exceptForGEO="JP">
               <cmr:column span="2">
                 <p>
                   <label for="requesterId">Requester:</label>
                   <cmr:field model="reqentry" path="originatorNm" idPath="originatorId" fieldId="OriginatorName"/>
                 </p>
               </cmr:column>
-            </cmr:row>
-          </cmr:column>
         </cmr:view>
+      </cmr:row>
+      <cmr:row addBackground="true">
+            <cmr:column span="2">
+              <p>
+              <cmr:label fieldId="expediteInd">
+                <cmr:fieldLabel fieldId="Expedite" />:<cmr:info text="${ui.info.expediteInd}" />
+              </cmr:label>
+              <cmr:field id="expediteInd" path="expediteInd" fieldId="Expedite" tabId="MAIN_GENERAL_TAB" size="250"/>
+              </p>
+            </cmr:column>
+            <cmr:column span="2">
+              <p>
+              <cmr:label fieldId="expediteReason">
+                <cmr:fieldLabel fieldId="ExpediteReason" />:
+              </cmr:label>
+              <cmr:field id="expediteReason" path="expediteReason" fieldId="ExpediteReason" tabId="MAIN_GENERAL_TAB" size="250"/>
+              </p>
+            </cmr:column>
       </cmr:row>
       <cmr:view forGEO="JP">
         <cmr:row addBackground="false" topPad="10">

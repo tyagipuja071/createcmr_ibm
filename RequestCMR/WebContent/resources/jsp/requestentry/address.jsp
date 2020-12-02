@@ -127,7 +127,7 @@ visibility: hidden !IMPORTANT;
   <jsp:include page="detailstrip.jsp" />
 
   <cmr:row addBackground="true" topPad="10">
-    <cmr:column span="1" width="190">
+    <cmr:column span="1" width="220">
       <p>
         <cmr:label fieldId="dplCheck">
               DPL Check Result:
@@ -155,7 +155,7 @@ visibility: hidden !IMPORTANT;
         </div>
       </p>
     </cmr:column>
-    <cmr:column span="1" width="190">
+    <cmr:column span="1" width="220">
       <p>
         <cmr:label fieldId="dplCheck">
           Performed By:
@@ -165,7 +165,7 @@ visibility: hidden !IMPORTANT;
         </div>
       </p>
     </cmr:column>
-    <cmr:column span="1" width="170">
+    <cmr:column span="1" width="220">
       <p>
         <cmr:label fieldId="dplCheck">
           DPL Check Date:
@@ -175,7 +175,7 @@ visibility: hidden !IMPORTANT;
         </div>
       </p>
     </cmr:column>
-    <cmr:column span="1" width="170">
+    <cmr:column span="1" width="250">
       <%if (!readOnly){ %>
       <p>
         <input type="button" value="DPL Check" class="cmr-grid-btn-h btn-search" onclick="doDplCheck()"> 
@@ -187,7 +187,7 @@ visibility: hidden !IMPORTANT;
 
   <c:if test="${fn:trim(reqentry.dplChkResult) == 'AF' || fn:trim(reqentry.dplChkResult) == 'SF'}">
     <cmr:row>
-      <cmr:column span="1" width="190">
+      <cmr:column span="1" width="220">
         <p>
           <cmr:label fieldId="dplCheck">
               DPL Assessment Result:
@@ -209,7 +209,7 @@ visibility: hidden !IMPORTANT;
           </div>
         </p>
       </cmr:column>
-      <cmr:column span="1" width="190">
+      <cmr:column span="1" width="220">
         <p>
           <cmr:label fieldId="dplCheck">
             Assessed By:
@@ -219,7 +219,7 @@ visibility: hidden !IMPORTANT;
           </div>
         </p>
       </cmr:column>
-      <cmr:column span="1" width="170">
+      <cmr:column span="1" width="220">
         <p>
           <cmr:label fieldId="dplCheck">
             Assessment Date:

@@ -120,7 +120,7 @@ public class USHandler extends GEOHandler {
 
     // check if ZP01 records exist in RDC & import
     List<FindCMRRecordModel> addressesList = null;
-    addressesList = getZP01FromRDC(main.getCmrNum());
+    addressesList = getZP01FromRDC(entityManager, main.getCmrNum());
     if (!addressesList.isEmpty() && addressesList.size() > 0) {
       converted.addAll(addressesList);
     }
@@ -128,7 +128,7 @@ public class USHandler extends GEOHandler {
     source.setItems(converted);
   }
 
-  private List<FindCMRRecordModel> getZP01FromRDC(String cmrNo) {
+  private List<FindCMRRecordModel> getZP01FromRDC(EntityManager entityManager, String cmrNo) {
     FindCMRRecordModel address = null;
     List<FindCMRRecordModel> addressList = new ArrayList<FindCMRRecordModel>();
     String sqlRDC = ExternalizedQuery.getSql("KNA1.US.MULTIPLE_BILLTO");
