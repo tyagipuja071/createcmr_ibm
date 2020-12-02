@@ -1,3 +1,4 @@
+<%@page import="com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel"%>
 <%@page import="com.ibm.cio.cmr.request.user.AppUser"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles"%>
@@ -23,6 +24,7 @@
   }
   String autoEngineIndc = (String) request.getAttribute("autoEngineIndc");
   AppUser user = AppUser.getUser(request);
+  RequestEntryModel reqentry = (RequestEntryModel) request.getAttribute("reqentry");
 %>
 <!--  Comment Log -->
 <cmr:boxContent>
@@ -32,6 +34,9 @@
     <div class="cmtlog">
       <div class="section-header">Comments:</div>
       <div class="add-cmt">
+      <%if (user.isProcessor() && "Processor".equals(reqentry.getUserRole())){ %>
+        <input type="button" id="superUserModeBtn" class="cmr-grid-btn-o" style="margin-left: 20px" onclick="cmr.superUserMode()" value="Super User Mode">
+      <%} %> 
       <%if (("P".equals(autoEngineIndc) || "B".equals(autoEngineIndc)) && user.isProcessor()){ %>
         <input type="button" class="cmr-grid-btn-h" style="margin-left: 20px" onclick="Automation.viewResults()" value="View System Processing Results">
       <%}%>

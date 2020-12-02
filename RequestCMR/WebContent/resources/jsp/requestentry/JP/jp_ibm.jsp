@@ -27,6 +27,12 @@
   String prodType8 = reqentry.getFomeZero();
   
 %>
+<style>
+  .jp-chk {
+    width: 250px;
+    display: inline-block;
+  }
+</style>
 <cmr:view forGEO="JP">
   <cmr:row addBackground="true">
   	
@@ -57,11 +63,13 @@
         </cmr:label>
         <div id="privIndcCheckboxes" style="display: block">
       	  <input type="radio" name="privIndc" value="1" id="privIndc_1" <%= ("1".equals(requestFor))?"checked":"" %> />
-		  <label class=" cmr-radio-check-label" for="privIndc_1">So Projec/FHS-OAK</label>
-		  <input  type="radio" name="privIndc" value="2" id="privIndc_2" <%= ("2".equals(requestFor))?"checked":"" %> />
-		  <label class=" cmr-radio-check-label" for="privIndc_2">NOS Porject</label>
-		  <input type="radio" name="privIndc" value="3" id="privIndc_3" <%= ("3".equals(requestFor))?"checked":"" %> />
-		  <label class=" cmr-radio-check-label" for="privIndc_3">So Infra/FHS-OTR(Infra)</label>
+    		  <label class=" cmr-radio-check-label" for="privIndc_1">So Projec/FHS-OAK</label>
+          <br>
+    		  <input  type="radio" name="privIndc" value="2" id="privIndc_2" <%= ("2".equals(requestFor))?"checked":"" %> />
+    		  <label class=" cmr-radio-check-label" for="privIndc_2">NOS Porject</label>
+          <br>          
+    		  <input type="radio" name="privIndc" value="3" id="privIndc_3" <%= ("3".equals(requestFor))?"checked":"" %> />
+    		  <label class=" cmr-radio-check-label" for="privIndc_3">So Infra/FHS-OTR(Infra)</label>
     	</div>
     </cmr:column> 
     <cmr:column span="2" containerForField="SalesBusOff" >
@@ -99,22 +107,38 @@
           <cmr:delta text="-" id="delta-ibmBankNumber" code="L" />
       </cmr:label>
       <div id="prodTypeCheckboxes" style="display: block">
-        <input type="checkbox" name="codCondition" value="1" id="prodType_1" <%= ("1".equals(prodType1))?"checked":"" %> />
-		<label class=" cmr-radio-check-label" for="prodType_1">AAS HW</label>
-		<input  type="checkbox" name="remoteCustInd" value="1" id="prodType_2" <%= ("1".equals(prodType2))?"checked":"" %> />
-		<label class=" cmr-radio-check-label" for="prodType_2">AAS z9/zSeries SW</label>
-		<input type="checkbox" name="decentralizedOptIndc" value="1" id="prodType_3" <%= ("1".equals(prodType3))?"checked":"" %> />
-		<label class=" cmr-radio-check-label" for="prodType_3">Others expect AAS z9/zSeries SW</label>
-		<input type="checkbox" name="importActIndc" value="1" id="prodType_4" <%= ("1".equals(prodType4))?"checked":"" %> />
-		<label class=" cmr-radio-check-label" for="prodType_4">QCOS</label>
-		<input  type="checkbox" name="mailingCondition" value="1" id="prodType_5" <%= ("1".equals(prodType5))?"checked":"" %> />
-		<label class=" cmr-radio-check-label" for="prodType_5">Lenovo</label>
-		<input type="checkbox" name="sizeCd" value="1" id="prodType_6" <%= ("1".equals(prodType6))?"checked":"" %> />
-		<label class=" cmr-radio-check-label" for="prodType_6">CISCO</label>
-		<input  type="checkbox" name="footnoteNo" value="1" id="prodType_7" <%= ("1".equals(prodType7))?"checked":"" %> />
-		<label class=" cmr-radio-check-label" for="prodType_7">Demo used</label>
-		<input type="checkbox" name="fomeZero" value="1" id="prodType_8" <%= ("1".equals(prodType8))?"checked":"" %> />
-		<label class=" cmr-radio-check-label" for="prodType_8">Others</label>
+        <div class="jp-chk">
+          <input type="checkbox" name="codCondition" value="1" id="prodType_1" <%= ("1".equals(prodType1))?"checked":"" %> />
+          <label class=" cmr-radio-check-label" for="prodType_1">AAS HW</label>
+        </div>
+        <div class="jp-chk">
+      		<input  type="checkbox" name="remoteCustInd" value="1" id="prodType_2" <%= ("1".equals(prodType2))?"checked":"" %> />
+      		<label class=" cmr-radio-check-label" for="prodType_2">AAS z9/zSeries SW</label>
+        </div>
+        <div class="jp-chk">
+      		<input type="checkbox" name="decentralizedOptIndc" value="1" id="prodType_3" <%= ("1".equals(prodType3))?"checked":"" %> />
+      		<label class=" cmr-radio-check-label" for="prodType_3">Others expect AAS z9/zSeries SW</label>
+        </div>
+        <div class="jp-chk">
+      		<input type="checkbox" name="importActIndc" value="1" id="prodType_4" <%= ("1".equals(prodType4))?"checked":"" %> />
+      		<label class=" cmr-radio-check-label" for="prodType_4">QCOS</label>
+        </div>
+        <div class="jp-chk">
+      		<input  type="checkbox" name="mailingCondition" value="1" id="prodType_5" <%= ("1".equals(prodType5))?"checked":"" %> />
+      		<label class=" cmr-radio-check-label" for="prodType_5">Lenovo</label>
+        </div>
+        <div class="jp-chk">
+      		<input type="checkbox" name="sizeCd" value="1" id="prodType_6" <%= ("1".equals(prodType6))?"checked":"" %> />
+      		<label class=" cmr-radio-check-label" for="prodType_6">CISCO</label>
+        </div>
+        <div class="jp-chk">
+      		<input  type="checkbox" name="footnoteNo" value="1" id="prodType_7" <%= ("1".equals(prodType7))?"checked":"" %> />
+      		<label class=" cmr-radio-check-label" for="prodType_7">Demo used</label>
+        </div>
+        <div class="jp-chk">
+      		<input type="checkbox" name="fomeZero" value="1" id="prodType_8" <%= ("1".equals(prodType8))?"checked":"" %> />
+      		<label class=" cmr-radio-check-label" for="prodType_8">Others</label>
+        </div>
       </div>
     </cmr:column>  
     <br>

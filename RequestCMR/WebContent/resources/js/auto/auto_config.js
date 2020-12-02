@@ -933,7 +933,9 @@ app
                 skipChecksIndc : 'Controls whether automatic checks and computations for this scenario will be skipped. If skipped, the request only undergoes standard processes like DPL check and no data will be computed.\n\nDefault: No',
                 skipAddressChecks : 'For update requests, requests with updates/new instances of ONLY the specified addresses here will not be checked anymore by the system. For some countries for example, new Shipping addresses should just be processed directly.\n\nDefault: Check all addresses',
                 dupAddressChecks : 'Maps the CMR address types against the RDc address types which will be used in duplicate checks. By default, the system uses only Main address vs RDc Sold-to to determine duplicates.\n\nDefault:Main address vs RDc Sold-to',
-                skipCompanyVerificationChecks : 'Controls whether automatic checks for company verification (Eg. External API vat validation, D&B check, etc.) for this scenario will be skipped. If skipped, the request only undergoes standard processes like DPL check and company information will not be validated.\n\nDefault: No'
+                skipCompanyVerificationChecks : 'Controls whether automatic checks for company verification (Eg. External API vat validation, D&B check, etc.) for this scenario will be skipped. If skipped, the request only undergoes standard processes like DPL check and company information will not be validated.\n\nDefault: No',
+                manualReviewIndc : 'Controls if the request should always be sent to CMDE queue for manual review. If Yes, even if the request has no pending checks, it would route to CMDE team for review. If No, the request would follow the country\'s process on completion configuration.\n\nDefault: No',
+                reviewExtReqIndc : 'Controls if the requests triggered from External Systems should always be sent to CMDE queue for manual review. If Yes, even if the request has no pending checks, it would route to CMDE team for review. If No, the request would follow the country\'s process on completion configuration.\n\nDefault: No'
               };
 
               $scope.getCountries = function() {
@@ -1149,6 +1151,8 @@ app
                       skipVerificationIndc : r.skipVerificationIndc ? r.skipVerificationIndc.trim() : '',
                       checkVatIndc : r.checkVatIndc ? r.checkVatIndc.trim() : '',
                       skipChecksIndc : r.skipChecksIndc ? r.skipChecksIndc.trim() : '',
+                      manualReviewIndc : r.manualReviewIndc ? r.manualReviewIndc : '',
+                      reviewExtReqIndc : r.reviewExtReqIndc ? r.reviewExtReqIndc : '',
                       skipAddressChecks : skipTypes,
                       dupAddressChecks : dupTypes,
                       status : 'E'
@@ -1186,7 +1190,8 @@ app
                   skipChecksIndc : '',
                   skipAddressChecks : [],
                   dupAddressChecks : [],
-                  skipChecksIndc : '',
+                  manualReviewIndc : '',
+                  reviewExtReqIndc : '',
                   status : 'N'
                 };
                 $scope.cleanException(exc);

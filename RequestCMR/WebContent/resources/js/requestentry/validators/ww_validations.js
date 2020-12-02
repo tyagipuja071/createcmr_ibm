@@ -122,43 +122,89 @@ function addDnBSearchValidator() {
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
 
+function addDnBMatchingAttachmentValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqId = FormManager.getActualValue('reqId');
+        var reqType = FormManager.getActualValue('reqType');
+        var reqStatus = FormManager.getActualValue('reqStatus');
+        var matchOverrideIndc = FormManager.getActualValue('matchOverrideIndc');
+        var findDnbResult = FormManager.getActualValue('findDnbResult');
+        var userRole = FormManager.getActualValue('userRole');
+        var ifReprocessAllowed = FormManager.getActualValue('autoEngineIndc');
+        if (reqId > 0 && reqType == 'C' && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B')
+            && !isSkipDnbMatching() && FormManager.getActualValue('matchOverrideIndc') == 'Y') {
+          // FOR US Temporary
+          var id = FormManager.getActualValue('reqId');
+          var ret = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
+            ID : id
+          });
+          if (ret == null || ret.ret1 == null) {
+            return new ValidationResult(null, false, "By overriding the D&B matching, you\'re obliged to provide either one of the following documentation as backup - "
+                + "client\'s official website, Secretary of State business registration proof, client\'s confirmation email and signed PO, attach it under the file content "
+                + "of <strong>Company Proof</strong>. Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.");
+          } else {
+            return new ValidationResult(null, true);
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_ATTACH_TAB', 'frmCMR');
+}
+
 /**
  * Method to check whether for a scenario dnb matching is allowed or not
  */
 function isSkipDnbMatching() {
-  var custGrp = FormManager.getActualValue('custGrp');
+   var custGrp = FormManager.getActualValue('custGrp');
   var custSubGroup = FormManager.getActualValue('custSubGrp');
   var dnbPrimary = FormManager.getActualValue("dnbPrimary");
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var countryUse = FormManager.getActualValue("countryUse");
   var subRegionCd = countryUse != null && countryUse.length > 0 ? countryUse : cntry;
-  if (custGrp != null && custGrp != '' && custSubGrp != null && custSubGrp != '' && dnbPrimary == 'Y') {
-    var qParams = {
-      CNTRY : cntry,
-      CUST_TYP : custGrp,
-      CUST_SUB_TYP : custSubGroup,
-      SUBREGION_CD : subRegionCd
-    };
-    var result = cmr.query("AUTO.SKIP_VERIFICATION_INDC", qParams);
-    if (result.ret1 != null && result.ret1 == "Y") {
-      return true;
-    } else {
-      qParams.CUST_SUB_GRP = "*";
-      result = cmr.query("AUTO.SKIP_VERIFICATION_INDC", qParams);
-      if (result.ret1 != null && result.ret1 == 'Y') {
-        return true;
-      } else {
-        qParams.CUST_GRP = "*";
-        result = cmr.query("AUTO.SKIP_VERIFICATION_INDC", qParams);
-        if (result.ret1 != null && result.ret1 == 'Y') {
+  if(dnbPrimary == 'Y') {
+    if (custGrp != null && custGrp != '' && custSubGrp != null && custSubGrp != '') {
+      var qParams = {
+        CNTRY : cntry,
+        CUST_TYP : custGrp,
+        CUST_SUB_TYP : custSubGroup,
+        SUBREGION_CD : subRegionCd
+      };
+      var result = cmr.query("AUTO.SKIP_VERIFICATION_INDC", qParams);
+      if (result.ret1 != null && result.ret1 != "") {
+        if(result.ret1=='Y'){
           return true;
+        } else if (result.ret1=='N'){
+          return false;
+        }
+      } else {
+        qParams.CUST_SUB_TYP = "*";
+        result = cmr.query("AUTO.SKIP_VERIFICATION_INDC", qParams);
+        if (result.ret1 != null && result.ret1 != '') {
+          if(result.ret1 == 'Y'){
+            return true;
+          } else if (result.ret1 == 'N'){
+            return false;
+          }
+        } else {
+          qParams.CUST_TYP = "*";
+          result = cmr.query("AUTO.SKIP_VERIFICATION_INDC", qParams);
+          if (result.ret1 != null && result.ret1 != '') {
+            if(result.ret1=='Y'){
+              return true;
+            } else if (result.ret1=='N'){
+              return false;
+            }
+          }
         }
       }
-    }
-  } else if (dnbPrimary == 'N') {
+      return false;
+    } else return true;
+  } else {
     return true;
   }
-  return false;
 }
 
 /**
@@ -679,11 +725,12 @@ function validateCMRNumberForLegacy() {
             return new ValidationResult(null, true);
           }
           // Validation for Internal Scenario
-          if (_custSubGrp == 'INTER' || _custSubGrp == 'CRINT' || _custSubGrp == 'XINT') {
+          var internalScenarios = [ 'ZAINT', 'NAINT', 'LSINT', 'SZINT', 'ZAXIN', 'NAXIN', 'LSXIN', 'SZXIN' ];
+          if (_custSubGrp == 'INTER' || _custSubGrp == 'CRINT' || _custSubGrp == 'XINT' || internalScenarios.includes(_custSubGrp)) {
             if (!cmrNo.startsWith("99")) {
               return new ValidationResult(null, false, 'Internal CMR should begin with 99.');
             }
-          } else if (_custSubGrp != 'INTER' || _custSubGrp != 'CRINT' || _custSubGrp != 'XINT') {
+          } else if (_custSubGrp != 'INTER' || _custSubGrp != 'CRINT' || _custSubGrp != 'XINT' || !internalScenarios.includes(_custSubGrp)) {
             if (cmrNo.startsWith("99")) {
               return new ValidationResult(null, false, 'CMR Starting with 99 is allowed for Internal Scenario Only.');
             }
@@ -712,49 +759,72 @@ function validateCMRNumberForLegacy() {
  * validate Existing CMRNo
  */
 function validateExistingCMRNo() {
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        console.log('checking requested cmr number...');
-        var reqType = FormManager.getActualValue('reqType');
-        var cmrNo = FormManager.getActualValue('cmrNo');
-        var cntry = FormManager.getActualValue('cmrIssuingCntry');
-        var action = FormManager.getActualValue('yourAction');
-        if (reqType == 'C' && cmrNo) {
-          var exists = cmr.query('LD.CHECK_EXISTING_CMR_NO', {
-            COUNTRY : cntry,
-            CMR_NO : cmrNo,
-            MANDT : cmr.MANDT
-          });
-          if (exists && exists.ret1 && action != 'PCM') {
-            return new ValidationResult({
-              id : 'cmrNo',
-              type : 'text',
-              name : 'cmrNo'
-            }, false, 'The requested CMR Number ' + cmrNo + ' already exists in the system.');
-          } else {
-            exists = cmr.query('LD.CHECK_EXISTING_CMR_NO_RESERVED', {
+    FormManager.addFormValidator((function() {
+      return {
+        validate : function() {
+          console.log('checking requested cmr number...');
+          var reqType = FormManager.getActualValue('reqType');
+          var cmrNo = FormManager.getActualValue('cmrNo');
+          var cntry = FormManager.getActualValue('cmrIssuingCntry');
+          var action = FormManager.getActualValue('yourAction');
+          var _custSubGrp = FormManager.getActualValue('custSubGrp');
+          if (reqType == 'C' && cmrNo) {
+            var exists = cmr.query('LD.CHECK_EXISTING_CMR_NO', {
               COUNTRY : cntry,
               CMR_NO : cmrNo,
               MANDT : cmr.MANDT
             });
-            if (exists && exists.ret1) {
+            if (exists && exists.ret1 && action != 'PCM') {
               return new ValidationResult({
                 id : 'cmrNo',
                 type : 'text',
                 name : 'cmrNo'
               }, false, 'The requested CMR Number ' + cmrNo + ' already exists in the system.');
+            } else {
+              exists = cmr.query('LD.CHECK_EXISTING_CMR_NO_RESERVED', {
+                COUNTRY : cntry,
+                CMR_NO : cmrNo,
+                MANDT : cmr.MANDT
+              });
+              if (exists && exists.ret1) {
+                return new ValidationResult({
+                  id : 'cmrNo',
+                  type : 'text',
+                  name : 'cmrNo'
+                }, false, 'The requested CMR Number ' + cmrNo + ' already exists in the system.');
+              }
             }
           }
+          return new ValidationResult({
+            id : 'cmrNo',
+            type : 'text',
+            name : 'cmrNo'
+          }, true);
         }
-        return new ValidationResult({
-          id : 'cmrNo',
-          type : 'text',
-          name : 'cmrNo'
-        }, true);
+      };
+    })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
+/**
+ * Validator for the DPL Assessment
+ */
+function addDPLAssessmentValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var dplResult = FormManager.getActualValue('dplChkResult').toUpperCase();
+        if (dplResult != 'AF' && dplResult != 'SF'){
+          return new ValidationResult(null, true);
+        }
+        var result = typeof(_pagemodel) != 'undefined' ? _pagemodel.intDplAssessmentResult : 'X';
+        if (!result || result.trim() == '') {
+          return new ValidationResult(null, false, 'DPL Assessment is required for failed DPL checks. ');
+        } else {
+          return new ValidationResult(null, true);
+        }
       }
     };
-  })(), 'MAIN_IBM_TAB', 'frmCMR');
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
 /* Register WW Validators */
@@ -766,18 +836,18 @@ dojo.addOnLoad(function() {
       '717', '718', '725', '745', '753', '764', '769', '770', '780', '782', '804', '810', '825', '827', '831', '833', '835', '840', '841', '842', '851', '857', '876', '879', '880', '881', '883',
       '758', '706', '760', '613', '655', '663', '681', '683', '731', '735', '781', '799', '811', '813', '829', '869', '871', '358', '359', '363', '603', '607', '620', '626', '644', '642', '651',
       '668', '677', '680', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '752', '762', '767', '768', '772', '787', '805', '808', '820', '821', '823', '826', '832', '849',
-      '850', '865', '889', '618', '641', '846', '806', '702', '678', '624', '788', '848' ];
+      '850', '865', '889', '618', '641', '846', '806', '702', '678', '624', '788', '848', '729' ];
   GEOHandler.COUNTRIES_FOR_GEN_TEMPLATE_CRSSBORDER = [ '631', '866', '754', '724', '666', '726', '862', '755', '616', '615', '643', '738', '744', '749', '736', '778', '796', '818', '834', '652',
       '856', '852', '790', '822', '838', '815', '661', '629', '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718',
       '725', '745', '753', '764', '769', '770', '780', '782', '804', '810', '825', '827', '831', '833', '835', '840', '841', '842', '851', '857', '876', '879', '880', '881', '883', '613', '655',
       '663', '681', '683', '731', '735', '781', '799', '811', '813', '829', '869', '871', '358', '359', '363', '603', '607', '626', '644', '642', '651', '668', '693', '694', '695', '699', '704',
-      '705', '708', '740', '741', '752', '768', '772', '787', '820', '821', '826', '849', '850', '865', '889', '618', '641' ];
+      '705', '708', '740', '741', '752', '768', '772', '787', '820', '821', '826', '849', '850', '865', '889', '618', '641', '729' ];
   GEOHandler.NO_ADDR_STD = [ '613', '629', '631', '655', '661', '663', '681', '683', '731', '735', '781', '799', '811', '813', '815', '829', '869', '871', '755', '754', '866', '621', '791', '640',
       '759', '839', '859', '726', '862', '666', '616', '615', '643', '720', '738', '744', '749', '714', '736', '778', '646', '796', '818', '834', '652', '856', '852', '790', '822', '838', '758',
       '864', '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770', '780',
       '782', '804', '810', '825', '827', '831', '833', '835', '840', '841', '842', '851', '857', '876', '879', '880', '881', '883', '706', '729', '358', '359', '363', '603', '607', '620', '626',
       '644', '642', '651', '668', '677', '680', '693', '694', '695', '699', '704', '705', '707', '707', '708', '740', '741', '752', '762', '762', '767', '768', '772', '787', '805', '808', '808',
-      '820', '821', '823', '826', '832', '849', '850', '865', '889', '618', '724', '641', '846', '806', '702', '678', '624', '788', '760', '848' ];
+      '820', '821', '823', '826', '832', '849', '850', '865', '889', '618', '724', '641', '846', '806', '702', '678', '624', '788', '760', '848', '729' ];
 
   GEOHandler.NO_ME_CEMEA = [ '631', '866', '754', '755', '726', '862', '666', '724', '616', '615', '643', '720', '738', '744', '749', '714', '736', '778', '646', '796', '818', '834', '652', '856',
       '852', '790', '822', '838', '815', '661', '629', '864', '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718',
@@ -785,8 +855,12 @@ dojo.addOnLoad(function() {
       '760', '613', '655', '663', '681', '683', '731', '735', '781', '799', '811', '813', '829', '869', '871', '358', '359', '363', '603', '607', '626', '644', '651', '668', '693', '694', '695',
       '699', '704', '705', '707', '708', '740', '741', '787', '820', '821', '826', '889', '618' ];
 
+  GEOHandler.AFRICA = [ '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770',
+       '782', '804', '810', '825', '827', '831', '833', '835', '840', '841', '842', '851', '857', '876', '879', '880', '881', '883' ];
+
   GEOHandler.registerWWValidator(addCMRSearchValidator);
   GEOHandler.registerWWValidator(addDnBSearchValidator);
+  GEOHandler.registerWWValidator(addDnBMatchingAttachmentValidator);
   // Story 1185886 : Address Standardization is not required for LA countries
   // and Israel
   GEOHandler.skipTGMEForCountries(GEOHandler.NO_ADDR_STD);
@@ -795,7 +869,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addSoldToValidator, [ '897', '755', '726', '866', '754', '862', '666', '822', '838', '864', '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667',
       '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770', '780', '782', '804', '810', '825', '827', '831', '833', '835', '840', '841', '842', '851',
       '857', '876', '879', '880', '881', '883', '358', '359', '363', '603', '607', '620', '626', '644', '642', '651', '668', '677', '680', '693', '694', '695', '699', '704', '705', '707', '708',
-      '740', '741', '752', '762', '767', '768', '772', '787', '805', '808', '820', '821', '823', '826', '832', '849', '850', '865', '889', '618', '758', '760', '848' ], null, false, true);
+      '740', '741', '752', '762', '767', '768', '772', '787', '805', '808', '820', '821', '823', '826', '832', '849', '850', '865', '889', '618', '758', '760', '848', '729' ], null, false, true);
   GEOHandler.registerWWValidator(addAddrStdValidator);
   // exclude for LA
   GEOHandler.registerWWValidator(addTaxCodesValidator, GEOHandler.LA, null, false, true);
@@ -810,8 +884,8 @@ dojo.addOnLoad(function() {
   // GEOHandler.ROLE_PROCESSOR);
 
   // For Legacy GR, CY and PT
-  GEOHandler.registerValidator(validateCMRNumberForLegacy, [ SysLoc.CYPRUS, SysLoc.GREECE ], GEOHandler.ROLE_PROCESSOR, true);
-  GEOHandler.registerValidator(validateExistingCMRNo, [ SysLoc.PORTUGAL, SysLoc.CYPRUS, SysLoc.GREECE ], GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.registerValidator(validateCMRNumberForLegacy, [ SysLoc.CYPRUS, SysLoc.GREECE, SysLoc.SOUTH_AFRICA, ...GEOHandler.AFRICA ], GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.registerValidator(validateExistingCMRNo, [ SysLoc.PORTUGAL, SysLoc.CYPRUS, SysLoc.GREECE, ...GEOHandler.AFRICA ], GEOHandler.ROLE_PROCESSOR, true);
 
   GEOHandler.addAfterConfig(initGenericTemplateHandler, GEOHandler.COUNTRIES_FOR_GEN_TEMPLATE);
   // exclude countries that will not be part of client tier logic
@@ -820,7 +894,7 @@ dojo.addOnLoad(function() {
       '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770', '780', '782', '804', '810', '825', '827',
       '831', '833', '835', '840', '841', '842', '851', '857', '876', '879', '880', '881', '883', '358', '359', '363', '603', '607', '620', '626', '644', '642', '651', '668', '677', '680', '693',
       '694', '695', '699', '704', '705', '707', '708', '740', '741', '752', '762', '767', '768', '772', '787', '805', '808', '820', '821', '823', '826', '832', '849', '850', '865', '889', '618',
-      '706', '760', '758', '678', '702', '806', '846', '624', '788', '641', '848' ], true);
+      '706', '760', '758', '678', '702', '806', '846', '624', '788', '641', '848', '729' ], true);
   GEOHandler.registerValidator(addCrossBorderValidator, GEOHandler.COUNTRIES_FOR_GEN_TEMPLATE_CRSSBORDER, null, true);
 
   /* 1427121 BDS Postal COde validation */
@@ -831,5 +905,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerWWValidator(addINACValidator);
 
   GEOHandler.VAT_RQD_CROSS_LNDCNTRY = [ 'AR', 'AT', 'BE', 'BG', 'BO', 'BR', 'CL', 'CO', 'CR', 'CY', 'CZ', 'DE', 'DO', 'EC', 'EG', 'ES', 'FR', 'GB', 'GR', 'GT', 'HN', 'HR', 'HU', 'IE', 'IL', 'IT',
-      'LU', 'MT', 'MX', 'NI', 'NL', 'PA', 'PE', 'PK', 'PL', 'PT', 'PY', 'RO', 'RU', 'RS', 'SI', 'SK', 'SV', 'TR', 'UA', 'UY', 'ZA', 'VE' ];
+      'LU', 'MT', 'MX', 'NI', 'NL', 'PA', 'PE', 'PK', 'PL', 'PT', 'PY', 'RO', 'RU', 'RS', 'SI', 'SK', 'SV', 'TR', 'UA', 'UY', 'ZA', 'VE', 'AO', 'MG', 'TZ' ];
 });

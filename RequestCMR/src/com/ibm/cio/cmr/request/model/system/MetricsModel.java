@@ -15,6 +15,10 @@ public class MetricsModel {
   private String countType;
   private String groupByGeo;
   private String groupByProcCenter;
+  private String country;
+  private String reqType;
+
+  private String excludeUnsubmitted;
 
   public String getDateFrom() {
     return dateFrom;
@@ -62,5 +66,29 @@ public class MetricsModel {
 
   public void setGroupByProcCenter(String groupByProcCenter) {
     this.groupByProcCenter = groupByProcCenter;
+  }
+
+  public String getExcludeUnsubmitted() {
+    return excludeUnsubmitted;
+  }
+
+  public void setExcludeUnsubmitted(String excludeUnsubmitted) {
+    this.excludeUnsubmitted = excludeUnsubmitted;
+  }
+
+  public String getCountry() {
+    return country;
+  }
+
+  public void setCountry(String country) {
+    this.country = country;
+  }
+
+  public String getReqType() {
+    return reqType;
+  }
+
+  public void setReqType(String reqType) {
+    this.reqType = reqType;
   }
 }

@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.ibm.cio.cmr.request.util.geo.impl;
 
@@ -25,6 +25,7 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataRdc;
+import com.ibm.cio.cmr.request.entity.Kna1;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.model.requestentry.ImportCMRModel;
@@ -45,7 +46,7 @@ import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
 
 /**
  * @author Jeffrey Zamora
- * 
+ *
  */
 public class USHandler extends GEOHandler {
 
@@ -67,14 +68,14 @@ public class USHandler extends GEOHandler {
       throws Exception {
     this.entityManager = entityManager;
     LOG.trace("Converting records for US");
+    String[] seqArray = new String[] { "001", "002" };
+    List<String> seqList = Arrays.asList(seqArray);
     List<FindCMRRecordModel> converted = new ArrayList<>();
 
     List<FindCMRRecordModel> records = source.getItems();
-
     FindCMRRecordModel main = records != null && records.size() > 0 ? records.get(0) : new FindCMRRecordModel();
     boolean prospectConversion = CmrConstants.PROSPECT_ORDER_BLOCK.equals(main.getCmrOrderBlock());
     for (FindCMRRecordModel record : records) {
-
       record.setCmrName1Plain(null);
       record.setCmrName2Plain(null);
 
@@ -91,9 +92,12 @@ public class USHandler extends GEOHandler {
         if ("ZS01".equals(record.getCmrAddrTypeCode()) || "ZI01".equals(record.getCmrAddrTypeCode())) {
           // set the address type to Install At for CreateCMR
           record.setCmrAddrTypeCode("ZS01");
-        } else if ("ZP01".equals(record.getCmrAddrTypeCode())) {
+        } else if ("ZP01".equals(record.getCmrAddrTypeCode()) && seqList.contains(record.getCmrAddrSeq())) {
           // set the address type to Invoice To for CreateCMR
           record.setCmrAddrTypeCode("ZI01");
+        } else if (StringUtils.isNotBlank(record.getCmrAddrSeq()) && "ZP01".equals(record.getCmrAddrTypeCode())
+            && Integer.parseInt(record.getCmrAddrSeq()) >= 200) {
+          continue;
         }
 
         converted.add(record);
@@ -114,8 +118,46 @@ public class USHandler extends GEOHandler {
       }
     }
 
+    // check if ZP01 records exist in RDC & import
+    List<FindCMRRecordModel> addressesList = null;
+    addressesList = getZP01FromRDC(entityManager, main.getCmrNum());
+    if (!addressesList.isEmpty() && addressesList.size() > 0) {
+      converted.addAll(addressesList);
+    }
     Collections.sort(converted);
     source.setItems(converted);
+  }
+
+  private List<FindCMRRecordModel> getZP01FromRDC(EntityManager entityManager, String cmrNo) {
+    FindCMRRecordModel address = null;
+    List<FindCMRRecordModel> addressList = new ArrayList<FindCMRRecordModel>();
+    String sqlRDC = ExternalizedQuery.getSql("KNA1.US.MULTIPLE_BILLTO");
+    PreparedQuery queryRDC = new PreparedQuery(entityManager, sqlRDC);
+    queryRDC.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    queryRDC.setParameter("ZZKV_CUSNO", cmrNo);
+    queryRDC.setForReadOnly(true);
+
+    List<Kna1> kna1List = queryRDC.getResults(Kna1.class);
+    if (kna1List != null && !kna1List.isEmpty() && kna1List.size() > 0) {
+      for (Kna1 kna1 : kna1List) {
+        address = new FindCMRRecordModel();
+        address.setCmrAddrTypeCode(CmrConstants.RDC_BILL_TO);
+        address.setCmrName(kna1.getName1());
+        address.setCmrName2(kna1.getName2());
+        address.setCmrAddrSeq(kna1.getZzkvSeqno());
+        address.setCmrStreetAddress(kna1.getStras());
+        address.setCmrCountryLanded(kna1.getLand1());
+        address.setCmrPostalCode(kna1.getPstlz());
+        address.setCmrDept(kna1.getName4());
+        address.setCmrCity(kna1.getOrt01());
+        address.setCmrState(kna1.getRegio());
+        address.setCmrCounty(kna1.getCounc());
+        address.setCmrAddrType(kna1.getKtokd());
+        address.setCmrSapNumber(kna1.getId().getKunnr());
+        addressList.add(address);
+      }
+    }
+    return addressList;
   }
 
   @Override
@@ -290,7 +332,7 @@ public class USHandler extends GEOHandler {
   }
 
   /**
-   * 
+   *
    * @param url
    * @param data
    * @throws Exception
@@ -426,7 +468,7 @@ public class USHandler extends GEOHandler {
     }
     // no cmr no, manual parse
     String postCd = address.getPostCd();
-    if (postCd.trim().length() == 9 && !postCd.contains("-")) {
+    if (StringUtils.isNotBlank(postCd) && postCd.trim().length() == 9 && !postCd.contains("-")) {
       postCd = postCd.substring(0, 5) + "-" + postCd.substring(5);
       LOG.debug("Postal code formatted: " + postCd);
       address.setPostCd(postCd);
@@ -738,7 +780,7 @@ public class USHandler extends GEOHandler {
 
   /**
    * Checks absolute equality between the strings
-   * 
+   *
    * @param val1
    * @param val2
    * @return
@@ -955,7 +997,7 @@ public class USHandler extends GEOHandler {
 
   /**
    * Gets the Affiliate value assigned with the most CMRs under the INAC
-   * 
+   *
    * @param entityManager
    * @param inac
    * @return
@@ -978,7 +1020,7 @@ public class USHandler extends GEOHandler {
 
   /**
    * Gets the Affiliate value assigned with the most CMRs under the INAC
-   * 
+   *
    * @param entityManager
    * @param inac
    * @return

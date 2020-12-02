@@ -142,7 +142,7 @@ div.det-btn input:hover {
 }
 
 input.search-btn {
-  height: 22px;
+  height: 25px;
   border: 1px Solid #666;
   border-radius : 3px;
   padding: 3px;
@@ -221,4 +221,86 @@ span.restrict {
   background: linear-gradient(to bottom,  #fcfff4 0%,#dfe5d7 40%,#b3bead 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
   filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fcfff4', endColorstr='#b3bead',GradientType=0 ); /* IE6-9 */
   cursor: help;
+}
+
+
+.twitter-typeahead {
+  width: 100%;
+}
+.typeahead-suggestion {
+  margin: 5px 5px;
+  padding: 5px 10px;
+  border-radius: 4px;
+  background-color: #FFF;
+  border: 1px solid #CCC;
+}
+.typeahead-suggestion .sub-text {
+  color: #999999;
+  margin-left: 10px;
+}
+.tt-cursor .typeahead-suggestion {
+  background: rgba(0, 85, 128, 0.11);
+}
+.tt-dropdown-menu {
+  width: 100%;
+  background: #EEE;
+}
+.tt-no-suggestions {
+  margin: 5px 5px;
+  padding: 5px 10px;
+  border-radius: 4px;
+  background-color: #FFF;
+  border: 1px solid #CCC;
+  font-weight: bold;
+}
+#noData {
+  display: table;
+  width: 100%;
+}
+#noData #noDataInner {
+  display: table-cell;
+  text-align: center;
+  vertical-align: middle;
+}
+
+
+input.loading {
+  background: transparent url(../images/search_spinner.gif) 95% center no-repeat;
+}
+
+// Twitter Typeahead
+.twitter-typeahead{
+  width: 100%;
+}
+
+.tt-dropdown-menu { 
+  width: 100%;
+  background: @subheader-background;
+  border-top: 1px solid darken(@main-container-background,10%);
+}
+
+.tt-suggestion, .tt-no-suggestions { 
+  margin: 7px 7px;
+  padding: 0 5px;
+  background: #FFF;
+  box-shadow: 1px 1px 2px #FFF;
+  border-radius: 2px;
+  border: 1px solid @primary-border-color;
+}
+
+.tt-cursor { 
+    background: rgba(0, 85, 128, 0.11);
+}
+
+.typeahead-suggestion { 
+  .sub-text {
+    .text-muted();
+    margin-left:10px;
+  }
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+input#companyField.loading {
+  background: transparent url(../images/search_spinner.gif) 95% center no-repeat;
 }

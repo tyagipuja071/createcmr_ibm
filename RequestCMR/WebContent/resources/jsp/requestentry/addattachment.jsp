@@ -9,6 +9,22 @@
   dojo.addOnLoad(function() {
     FilteringDropdown.loadItems('docContent', 'docContent_spinner', 'lov', 'fieldId=DocContent');
     FormManager.addValidator('filename', Validators.REQUIRED, [ '${ui.filename}' ]);
+    FormManager.addFormValidator((function() {
+      return {
+        validate : function() {
+          var value = FormManager.getActualValue('filename');
+          if (!value || value == '' || value.length == 0) {
+            return new ValidationResult(null, true);
+          } else {
+            var regex = /[^\u0000-\u007f]/;
+            if (regex.test(value) || value.indexOf('~') >= 0){
+              return new ValidationResult(null, false, 'Filename must not contain non-Latin characters and tilde(~).');
+            }
+          }
+          return new ValidationResult(null, true);
+        }
+      };
+    })(), null, 'frmCMR_addAttachmentModal');
     FormManager.addValidator('docContent', Validators.REQUIRED, [ '${ui.content}' ]);
   });
 </script>

@@ -917,6 +917,9 @@ var FormManager = (function() {
       return null;
     },
     disable : function(fieldId) {
+      if (cmr.isSuperUserMode()){
+        return;
+      }
       var field = dijit.byId(fieldId);
       if (field) {
         field.set('disabled', true);
@@ -983,6 +986,9 @@ var FormManager = (function() {
       }
     },
     readOnly : function(fieldId) {
+      if (cmr.isSuperUserMode()){
+        return;
+      }
       var field = dijit.byId(fieldId);
       if (field) {
         field.set('readOnly', true);
