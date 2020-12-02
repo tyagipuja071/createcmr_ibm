@@ -20,17 +20,24 @@ function addMaltaLandedCountryHandler(cntry, addressMode, saving, finalSave) {
 var _ISUHandler = null;
 var _CTCHandler = null;
 var _addrTypeHandler = [];
-var _addrTypesForCEWA = [ 'ZS01', 'ZP01', 'ZI01', 'ZD01', 'ZS02' ];
+var _addrTypesForMT = [ 'ZS01', 'ZP01', 'ZI01', 'ZD01' ];
 
-function addHandlersForCEWA() {
-  for (var i = 0; i < _addrTypesForCEWA.length; i++) {
+function addHandlersForMT() {
+  for (var i = 0; i < _addrTypesForMT.length; i++) {
     _addrTypeHandler[i] = null;
     if (_addrTypeHandler[i] == null) {
-      _addrTypeHandler[i] = dojo.connect(FormManager.getField('addrType_' + _addrTypesForCEWA[i]), 'onClick', function(value) {
+      _addrTypeHandler[i] = dojo.connect(FormManager.getField('addrType_' + _addrTypesForMT[i]), 'onClick', function(value) {
         disableAddrFieldsMT();
       });
     }
   }
+
+  if (_vatExemptHandler == null) {
+    _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
+      setVatValidatorMalta();
+    });
+  }
+
 }
 
 /*
@@ -101,7 +108,8 @@ function addAddressTypeValidator() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
-        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount == 0) {
+        var addrType = FormManager.getActualValue('addrType');
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount == 0 && addrType == 'ZS01') {
           return new ValidationResult(null, false, 'All address types are mandatory.');
         }
         if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
@@ -677,15 +685,11 @@ var _addrTypesForMCO2 = [ 'ZD01', 'ZI01', 'ZP01', 'ZS01', 'ZS02' ];
 var addrTypeHandler = [];
 
 function addAfterConfigMalta() {
-  if (_vatExemptHandler == null) {
-    _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
-      setVatValidatorMalta();
-    });
-  }
   lockOrderBlock();
   enterpriseMalta();
   hidePpsceidExceptBP();
   classFieldBehaviour();
+  setVatValidatorMalta();
   disableEnableFieldsForMT();
   setAddressDetailsForView();
 }
@@ -760,14 +764,14 @@ function addOrdBlkValidator() {
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
+
 function setVatValidatorMalta() {
   console.log("setVatValidatorMalta for Malta..");
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
   if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
-    if (dijit.byId('vatExempt').get('checked')) {
-      FormManager.resetValidations('vat');
-    } else {
-      FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+    FormManager.resetValidations('vat');
+    if (!dijit.byId('vatExempt').get('checked')) {
+      checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
     }
   }
 }
@@ -833,7 +837,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.MCO2);
   GEOHandler.setRevertIsicBehavior(false);
 
-  GEOHandler.addAfterConfig(addHandlersForCEWA, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(setAbbrvNmLoc, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(crossborderScenariosAbbrvLoc, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(scenariosAbbrvLocOnChange, GEOHandler.MCO2);
@@ -859,6 +862,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.MCO2, GEOHandler.ROLE_PROCESSOR, true);
 
   // Malta Legacy
+  GEOHandler.addAfterConfig(addHandlersForMT, [ SysLoc.MALTA ]);
   GEOHandler.addAfterConfig(addAfterConfigMalta, [ SysLoc.MALTA ]);
   GEOHandler.addAddrFunction(disableAddrFieldsMT, [ SysLoc.MALTA ]);
   GEOHandler.addAddrFunction(addAddrValidatorMALTA, [ SysLoc.MALTA ]);
