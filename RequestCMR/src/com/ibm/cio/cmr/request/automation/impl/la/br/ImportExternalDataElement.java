@@ -13,6 +13,7 @@ import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.impl.OverridingElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
+import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.BrazilUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
@@ -104,6 +105,24 @@ public class ImportExternalDataElement extends OverridingElement {
             getMidasDetails(results, requestData, engineData, details, "ZI01", callMIDAS, scenarioSubType);
           }
         }
+
+        if ("INTER".equals(scenarioSubType)) {
+          String mainCustNm = " " + AutomationUtil.getCleanString((StringUtils.isNotBlank(admin.getMainCustNm1()) ? admin.getMainCustNm1() : "")
+              + (StringUtils.isNotBlank(admin.getMainCustNm2()) ? " " + admin.getMainCustNm2() : "")) + " ";
+
+          if (!mainCustNm.contains(" IBM ") && !mainCustNm.contains(" PROXXI ")) {
+            // CODE fix for CMR-7831
+            details.append(
+                "Only IBM VAT/CNPJ is allowed to create request for Internal Scenario.\nPlease use IBM VAT/CNPJ or choose a different scenario to proceed.\n");
+            engineData.addRejectionComment("OTH",
+                "Only IBM VAT/CNPJ is allowed to create request for Internal Scenario.\nPlease use IBM VAT/CNPJ or choose a different scenario to proceed.",
+                "", "");
+            results.setResults("Scenario Invalid");
+            results.setDetails(details.toString());
+            results.setOnError(true);
+          }
+        }
+
       } else {
         if (requestData.getAddress("ZS01") == null) {
           details.append("Main address(ZS01) not found on the request,so skipping MIDAS import.\n");
@@ -408,6 +427,7 @@ public class ImportExternalDataElement extends OverridingElement {
     return desc;
   }
 
+  @SuppressWarnings("unchecked")
   private String getSoldToAbbrevName(RequestData requestData, AutomationEngineData engineData) {
     String soldToVat = null;
     String soldToAbbrevName = null;

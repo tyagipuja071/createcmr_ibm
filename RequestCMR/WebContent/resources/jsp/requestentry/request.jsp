@@ -275,6 +275,7 @@ div#cmr-info-box, div#cmr-error-box, div#cmr-validation-box {
     <input type="hidden" value="<%=autoEngineIndc%>" id="autoEngineIndc">
     <cmr:modelAction formName="frmCMR" />
     <form:hidden path="fromUrl" id="fromUrl" />
+    <form:hidden path="userRole" />
     <form:hidden path="claimRole" />
     <form:hidden path="redirectUrl" />
     <form:hidden path="saveRejectScore" />
@@ -407,7 +408,7 @@ div#cmr-info-box, div#cmr-error-box, div#cmr-validation-box {
       <div class="cmr-action-dd">
         <form:select cssStyle="width:260px" dojoType="dijit.form.FilteringSelect" id="yourAction" searchAttr="name" style="display: inline-block;"
           maxHeight="200" required="false" path="yourAction" placeHolder="${ui.yourAction}" />
-        <img title="Proceed with the selected Action" class="cmr-proceed-icon" src="${resourcesPath}/images/go.png" onclick="processRequestAction()">
+        <img title="Proceed with the selected Action" class="cmr-proceed-icon" src="${resourcesPath}/images/play.webp" onclick="processRequestAction()">
       </div>
       <div class="cmr-action-txt" id="viewOnlyText" style="display: none">View Only</div>
       <div class="cmr-action-txt" id="superUserModeText" style="display: none">SUPER USER MODE</div>

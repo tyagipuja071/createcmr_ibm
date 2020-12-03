@@ -59,6 +59,22 @@
     };
     
     FilteringDropdown.loadFixedItems('groupByGeo', null, dropdown1);
+    
+    var sources = cmr.query('METRICS.SOURCES', {_qall : 'Y'});
+    
+    var dropdown2 = {
+        listItems : {
+          identifier : "id", 
+          label : "name",
+          items : [{ id : '', name : ''}]
+        }
+    };
+    if (sources){
+      sources.forEach(function(src,i){
+        dropdown2.listItems.items.push({ id : src.ret1, name : src.ret1});
+      });
+    }
+    FilteringDropdown.loadFixedItems('sourceSystId', null, dropdown2);
     FilteringDropdown.loadItems('groupByProcCenter', 'groupByProcCenter_spinner', 'proc_center');
     FilteringDropdown.loadItems('country', 'country_spinner', 'bds', 'fieldId=CMRIssuingCountry');
     FormManager.addValidator('dateFrom', Validators.REQUIRED, [ 'Date (from)' ]);
@@ -180,9 +196,24 @@ div#filterlabels table {
             </cmr:label>
           </p>
         </cmr:column>
+        <cmr:column span="3" >
+          <p>
+            <form:select dojoType="dijit.form.FilteringSelect" id="country" searchAttr="name" style="display: inline-block;" maxHeight="200" required="false" path="country" placeHolder="Filter by Issuing Country">
+            </form:select>
+            <cmr:info text="Selecting a country generates drill-down charts like Weekly Trends and Scenarios Breakdown" />
+          </p>
+        </cmr:column>
+      </cmr:row>
+      <cmr:row>
+        <cmr:column span="1" width="150">
+          <p>
+            <cmr:label fieldId="sourceSystId">Source System:</cmr:label>
+          </p>
+        </cmr:column>
         <cmr:column span="2" width="235">
           <p>
-            <form:select dojoType="dijit.form.FilteringSelect" id="country" searchAttr="name" style="display: block;" maxHeight="200" required="false" path="country" placeHolder="Filter by Issuing Country">
+            <form:select dojoType="dijit.form.FilteringSelect" id="sourceSystId" searchAttr="name" style="display: block;" maxHeight="200"
+              required="false" path="sourceSystId" placeHolder="Filter by Source System">
             </form:select>
           </p>
         </cmr:column>

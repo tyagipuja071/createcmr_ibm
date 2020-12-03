@@ -59,7 +59,7 @@ if (readOnly){
   findCmrJs = "";
 }
 %>              
-              <img title="Search for the CMR" class="cmr-proceed2-icon" src="${resourcesPath}/images/search-icon2.png" <%=findCmrJs%>>
+              <img title="Search and Import the CMR" class="cmr-proceed2-icon" src="${resourcesPath}/images/search2.png" <%=findCmrJs%>>
             <cmr:view exceptForGEO="IERP,CND">
             <cmr:column span="2" containerForField="ProspectToLegalCMR">
               <cmr:field fieldId="ProspectToLegalCMR" path="prospLegalInd" tabId="MAIN_GENERAL_TAB"/>

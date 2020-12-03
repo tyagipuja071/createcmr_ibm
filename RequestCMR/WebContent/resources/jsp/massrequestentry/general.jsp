@@ -26,6 +26,7 @@ boolean autoProcCapable = PageManager.autoProcEnabled(reqentry.getCmrIssuingCntr
 <c:set var="resourcesPath" value="${contextPath}/resources" />
 
     <cmr:section id="GENERAL_REQ_TAB">
+      <form:hidden id="reqId" path="reqId" />
       <jsp:include page="/resources/jsp/requestentry/detailstrip.jsp" />
       <cmr:row addBackground="true">
         <cmr:column span="2">
