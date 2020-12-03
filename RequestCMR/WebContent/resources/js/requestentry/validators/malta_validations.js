@@ -105,12 +105,15 @@ function disableAddrFieldsMT() {
 
 function addAddressTypeValidator() {
   console.log("addAddressTypeValidator for MALTA..........");
+  var addrType = FormManager.getActualValue('addrType');
+  if (addrType != 'ZS01') {
+    return;
+  }
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
-        var addrType = FormManager.getActualValue('addrType');
-        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount == 0 && addrType == 'ZS01') {
-          return new ValidationResult(null, false, 'All address types are mandatory.');
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount == 0) {
+          return new ValidationResult(null, false, 'Sold-To Address is Required.');
         }
         if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
           var record = null;
@@ -165,48 +168,6 @@ function addAddressFieldValidators() {
           val += postCd;
           if (val.length > 28) {
             return new ValidationResult(null, false, 'Total computed length of City and Postal Code should not exceed 28 characters.');
-          }
-        }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), null, 'frmCMR_addressModal');
-
-  // addrCont + poBox should not exceed 28 characters
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var stCont = FormManager.getActualValue('addrTxt2');
-        var poBox = FormManager.getActualValue('poBox');
-        var val = stCont;
-
-        if (poBox != '') {
-          val += poBox;
-          if (val != null && val.length > 28) {
-            return new ValidationResult(null, false, 'Total computed length of Street Con\'t and PO Box should not exceed 28 characters.');
-          }
-        }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), null, 'frmCMR_addressModal');
-
-  // phone + ATT should not exceed 29 characters (for Shipping & EPL only)
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var addrType = FormManager.getActualValue('addrType');
-
-        if (addrType == 'ZD01' || addrType == 'ZS02') {
-          var att = FormManager.getActualValue('custNm4');
-          var custPhone = FormManager.getActualValue('custPhone');
-          var val = att;
-
-          if (custPhone != '') {
-            val += custPhone;
-            if (val != null && val.length > 29) {
-              return new ValidationResult(null, false, 'Total computed length of Attention Person and Phone should not exceed 29 characters.');
-            }
           }
         }
         return new ValidationResult(null, true);
@@ -856,14 +817,13 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(requireVATForCrossBorder, GEOHandler.MCO2, null, true);
   GEOHandler.registerValidator(streetValidatorCustom, GEOHandler.MCO2, null, true);
 
-  GEOHandler.addAddrFunction(changeAbbrevNmLocn, GEOHandler.MCO2);
-
   /* 1438717 - add DPL match validation for failed dpl checks */
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.MCO2, GEOHandler.ROLE_PROCESSOR, true);
 
   // Malta Legacy
   GEOHandler.addAfterConfig(addHandlersForMT, [ SysLoc.MALTA ]);
   GEOHandler.addAfterConfig(addAfterConfigMalta, [ SysLoc.MALTA ]);
+  GEOHandler.addAddrFunction(changeAbbrevNmLocn, [ SysLoc.MALTA ]);
   GEOHandler.addAddrFunction(disableAddrFieldsMT, [ SysLoc.MALTA ]);
   GEOHandler.addAddrFunction(addAddrValidatorMALTA, [ SysLoc.MALTA ]);
   GEOHandler.addAddrFunction(addMaltaLandedCountryHandler, [ SysLoc.MALTA ]);
