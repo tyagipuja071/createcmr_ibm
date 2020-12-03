@@ -345,7 +345,9 @@ public abstract class USBPHandler {
       createAddressOverrides = true;
     } else if (ibmCmr != null) {
       // CMR-4033
-      String parts[] = handler.doSplitName(ibmCmr.getCmrName(), "", 24, 24);
+      String name = (StringUtils.isNotBlank(ibmCmr.getCmrName1Plain()) ? ibmCmr.getCmrName1Plain() : "")
+          + (StringUtils.isNotBlank(ibmCmr.getCmrName2Plain()) ? " " + ibmCmr.getCmrName2Plain() : "");
+      String parts[] = handler.doSplitName(name, "", 24, 24);
       mainCustNm1 = parts[0];
       mainCustNm2 = parts[1];
       parts = handler.doSplitAddress(ibmCmr.getCmrStreetAddress(), ibmCmr.getCmrStreetAddressCont(), 24, 24);
@@ -557,7 +559,8 @@ public abstract class USBPHandler {
     ibmCmrModel.setCmrLde(completedChildData.getBgRuleId());
     ibmCmrModel.setCmrCoverage(completedChildData.getCovId());
     ibmCmrModel.setCmrCoverageName(completedChildData.getCovDesc());
-    ibmCmrModel.setCmrName(childRequest.getAdmin().getMainCustNm1());
+    ibmCmrModel.setCmrName1Plain(childRequest.getAdmin().getMainCustNm1());
+    ibmCmrModel.setCmrName2Plain(childRequest.getAdmin().getMainCustNm2());
     ibmCmrModel.setUsCmrCsoSite(completedChildData.getCsoSite());
     ibmCmrModel.setUsCmrMktgArDept(completedChildData.getMtkgArDept());
 
