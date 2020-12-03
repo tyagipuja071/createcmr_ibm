@@ -46,7 +46,7 @@ import com.ibm.cmr.create.batch.util.TerminatorThread;
 public abstract class BaseBatchService extends BaseSimpleService<Boolean> {
 
   protected Logger LOG;
-  private final List<Exception> exceptionList;
+  private final List<Throwable> exceptionList;
   private long startTime;
   private static final SimpleDateFormat TIME_FORMATTER = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
   protected static String BATCH_USER_ID = "CreateCMR";
@@ -60,7 +60,7 @@ public abstract class BaseBatchService extends BaseSimpleService<Boolean> {
     BATCH_USER_ID = SystemConfiguration.getValue("BATCH_USERID");
     BATCH_SERVICE_URL = SystemConfiguration.getValue("BATCH_SERVICES_URL");
     LOG = Logger.getLogger(getClass());
-    this.exceptionList = new ArrayList<Exception>();
+    this.exceptionList = new ArrayList<Throwable>();
     if (useServicesConnections()) {
       initSSL();
     }
@@ -71,7 +71,7 @@ public abstract class BaseBatchService extends BaseSimpleService<Boolean> {
    * 
    * @param error
    */
-  protected void addError(Exception error) {
+  protected void addError(Throwable error) {
     this.exceptionList.add(error);
   }
 
@@ -102,7 +102,7 @@ public abstract class BaseBatchService extends BaseSimpleService<Boolean> {
     } else {
       LOG.info("Completed with Errors.");
       int cnt = 1;
-      for (Exception e : this.exceptionList) {
+      for (Throwable e : this.exceptionList) {
         LOG.error("Error " + cnt + " = " + e.getMessage());
         cnt++;
       }
@@ -150,7 +150,7 @@ public abstract class BaseBatchService extends BaseSimpleService<Boolean> {
       }
 
       return executionStatus;
-    } catch (Exception e) {
+    } catch (Throwable e) {
       addError(e);
       LOG.error("An error was encountered during processing. Transaction will be rolled back.", e);
       if (isTransactional() && transaction != null && transaction.isActive()) {
