@@ -199,6 +199,9 @@ public class AutoStatsService extends BaseSimpleService<RequestStatsContainer> {
         } else {
           scenario = "-" + stat.getReqType() + "-";
         }
+        if (StringUtils.isBlank(scenario)) {
+          scenario = "[unspecified]";
+        }
         if (!scenarioMap.containsKey(scenario)) {
           scenarioMap.put(scenario, new AutomationSummaryModel());
         }
