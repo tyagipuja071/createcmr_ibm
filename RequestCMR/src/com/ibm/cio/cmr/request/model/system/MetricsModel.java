@@ -20,6 +20,7 @@ public class MetricsModel {
 
   private String excludeUnsubmitted;
   private String sourceSystId;
+  private String excludeExternal;
 
   public String getDateFrom() {
     return dateFrom;
@@ -99,6 +100,14 @@ public class MetricsModel {
 
   public void setSourceSystId(String sourceSystId) {
     this.sourceSystId = sourceSystId;
+  }
+
+  public String getExcludeExternal() {
+    return excludeExternal;
+  }
+
+  public void setExcludeExternal(String excludeExternal) {
+    this.excludeExternal = excludeExternal;
   }
 
 }

@@ -240,6 +240,21 @@ div#filterlabels table {
         </cmr:column>
         <cmr:column span="2" width="300">
           <p>
+            <form:checkbox path="excludeExternal" value="Y"/>
+            <label for="OEMInd" class=" cmr-radio-check-label">
+               <span id="cmr-fld-lbl-OEMInd">Exclude External Requests</span>
+               <cmr:info text="Excludes requests created by external systems via APIs or applications." />
+            </label>            
+          </p>
+        </cmr:column>
+      </cmr:row>
+      <cmr:row >
+        <cmr:column span="1" width="150">
+          <p>
+          </p>
+        </cmr:column>
+        <cmr:column span="2" width="300">
+          <p>
             <form:checkbox path="reqType" value="Y"/>
             <label for="RequestType" class=" cmr-radio-check-label">
                <span id="cmr-fld-lbl-OEMInd">Create Requests Only</span>
