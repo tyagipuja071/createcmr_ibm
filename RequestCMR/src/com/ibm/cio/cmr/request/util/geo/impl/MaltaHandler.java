@@ -762,64 +762,79 @@ public class MaltaHandler extends BaseSOFHandler {
     return true;
   }
 
-  @Override
-  public String generateAddrSeq(EntityManager entityManager, String addrType, long reqId, String cmrIssuingCntry) {
-    if (SystemLocation.MALTA.equals(cmrIssuingCntry)) {
-      String newSeq = null;
-      String maxSeq = getMaxSeqNumber(entityManager, addrType, reqId, cmrIssuingCntry);
-      if (maxSeq == null) {
-        if ("ZS01".equals(addrType)) {
-          newSeq = "00001";
-        }
-        if ("ZP01".equals(addrType)) {
-          newSeq = "00002";
-        }
-        if ("ZI01".equals(addrType)) {
-          newSeq = "00003";
-        }
-        if ("ZD01".equals(addrType)) {
-          newSeq = "00004";
-        }
-      } else {
-        if (Integer.parseInt(maxSeq) <= 4) {
-          if ("ZS01".equals(addrType)) {
-            newSeq = "00001";
-          }
-          if ("ZP01".equals(addrType)) {
-            newSeq = "00002";
-          }
-          if ("ZI01".equals(addrType)) {
-            newSeq = "00003";
-          }
-          if ("ZD01".equals(addrType)) {
-            newSeq = "00004";
-          }
-        } else {
-          newSeq = maxSeq;
-        }
-      }
-      return newSeq;
-    }
-    return null;
-  }
-
-  private String getMaxSeqNumber(EntityManager entityManager, String addrType, long reqId, String cmrIssuingCntry) {
-    String sql = null;
-    String maxSeq = null;
-    sql = ExternalizedQuery.getSql("ADDRESS.GETADDRSEQ.MT_C");
-
+  public String getReqType(EntityManager entityManager, long reqId) {
+    String reqType = "";
+    String sql = ExternalizedQuery.getSql("ADMIN.GETREQTYPE.MT");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", reqId);
-    query.setParameter("ADDR_TYPE", addrType);
 
-    List<Object[]> results = query.getResults();
+    List<String> results = query.getResults(String.class);
     if (results != null && results.size() > 0) {
-      Object[] result = results.get(0);
-      if (result != null && result.length > 0 && result[0] != null) {
-        maxSeq = (String) result[0];
+      reqType = results.get(0);
+    }
+    return reqType;
+  }
+
+  public String getCMRNo(EntityManager entityManager, long reqId) {
+    String cmrNo = "";
+    String sql = ExternalizedQuery.getSql("DATA.GETCMRNO.MT");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+
+    List<String> results = query.getResults(String.class);
+    if (results != null && results.size() > 0) {
+      cmrNo = results.get(0);
+    }
+    return cmrNo;
+  }
+
+  @Override
+  public String generateAddrSeq(EntityManager entityManager, String addrType, long reqId, String cmrIssuingCntry) {
+    String newAddrSeq = "";
+    String cmrNo = "";
+    String reqType = "";
+
+    if (!StringUtils.isEmpty(addrType)) {
+      int addrSeq = 00000;
+      String minAddrSeq = "00000";
+      String maxAddrSeq = "99999";
+      String sql = null;
+      reqType = getReqType(entityManager, reqId);
+      if (reqType.equalsIgnoreCase("U")) {
+        cmrNo = getCMRNo(entityManager, reqId);
+        sql = ExternalizedQuery.getSql("ADDRESS.GETADDRSEQ.MT_U");
+      } else {
+        sql = ExternalizedQuery.getSql("ADDRESS.GETADDRSEQ.MT_C");
+      }
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("REQ_ID", reqId);
+      query.setParameter("ADDR_TYPE", addrType);
+
+      List<Object[]> results = query.getResults();
+      if (results != null && results.size() > 0) {
+        Object[] result = results.get(0);
+        maxAddrSeq = (String) (result != null && result.length > 0 && result[0] != null ? result[0] : "00001");
+
+        if (!(Integer.valueOf(maxAddrSeq) >= 00001 && Integer.valueOf(maxAddrSeq) <= 99999)) {
+          maxAddrSeq = "";
+        }
+        if (StringUtils.isEmpty(maxAddrSeq) || addrType.equalsIgnoreCase("ZS01")) {
+          maxAddrSeq = minAddrSeq;
+        }
+        try {
+          addrSeq = Integer.parseInt(maxAddrSeq);
+        } catch (Exception e) {
+          // if returned value is invalid
+        }
+        addrSeq++;
+      }
+      newAddrSeq = String.format("%05d", Integer.parseInt(Integer.toString(addrSeq)));
+      // newAddrSeq = Integer.toString(addrSeq);
+      if (!StringUtils.isEmpty(cmrNo)) {
+        newAddrSeq = "000" + cmrNo + "L" + newAddrSeq;
       }
     }
-    return maxSeq;
+    return newAddrSeq;
   }
 
   @Override
@@ -1000,11 +1015,9 @@ public class MaltaHandler extends BaseSOFHandler {
 
   @Override
   public String generateModifyAddrSeqOnCopy(EntityManager entityManager, String addrType, long reqId, String oldAddrSeq, String cmrIssuingCntry) {
-    String newSeq = null;
-    if (SystemLocation.MALTA.equals(cmrIssuingCntry)) {
-      newSeq = generateAddrSeq(entityManager, addrType, reqId, cmrIssuingCntry);
-    }
-    return newSeq;
+    String newAddrSeq = "";
+    newAddrSeq = generateAddrSeq(entityManager, addrType, reqId, cmrIssuingCntry);
+    return newAddrSeq;
   }
 
   @Override
