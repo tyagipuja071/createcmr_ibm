@@ -105,16 +105,9 @@ function disableAddrFieldsMT() {
 
 function addAddressTypeValidator() {
   console.log("addAddressTypeValidator for MALTA..........");
-  var addrType = FormManager.getActualValue('addrType');
-  if (addrType != 'ZS01') {
-    return;
-  }
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
-        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount == 0) {
-          return new ValidationResult(null, false, 'Sold-To Address is Required.');
-        }
         if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
           var record = null;
           var type = null;
@@ -144,7 +137,7 @@ function addAddressTypeValidator() {
           }
 
           if (zs01MT == 0) {
-            return new ValidationResult(null, false, 'ZS01 address types is mandatory.');
+            return new ValidationResult(null, false, 'Sold-To address types is mandatory.');
           } else if (zs01MT > 1) {
             return new ValidationResult(null, false, 'Only one Sold-To address is allowed.');
           }
