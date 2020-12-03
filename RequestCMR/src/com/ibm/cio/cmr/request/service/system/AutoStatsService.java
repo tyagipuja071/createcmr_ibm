@@ -112,6 +112,10 @@ public class AutoStatsService extends BaseSimpleService<RequestStatsContainer> {
       sql += "and data.CMR_ISSUING_CNTRY = :COUNTRY ";
     }
 
+    if ("Y".equals(model.getExcludeExternal())) {
+      sql += "and ( trim(nvl(admin.SOURCE_SYST_ID,'')) = '' or admin.SOURCE_SYST_ID = 'CreateCMR') ";
+    }
+
     if (!"Y".equals(params.getParam("buildSummary"))) {
       sql += " order by admin.REQ_ID";
     }

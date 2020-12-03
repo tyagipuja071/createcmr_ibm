@@ -240,6 +240,7 @@ var CmrMetrics = (function() {
       var groupByProcCenter = FormManager.getActualValue('groupByProcCenter');
       var country = FormManager.getActualValue('country');
       var excludeUnsubmitted = FormManager.getActualValue('excludeUnsubmitted');
+      var excludeExternal = FormManager.getActualValue('excludeExternal');
       var reqType = FormManager.getActualValue('reqType');
       var sourceSystId = FormManager.getActualValue('sourceSystId');
       
@@ -256,6 +257,7 @@ var CmrMetrics = (function() {
           country : country,
           groupByGeo : groupByGeo,
           excludeUnsubmitted : excludeUnsubmitted,
+          excludeExternal : excludeExternal,
           reqType : reqType,
           sourceSystId : sourceSystId
         },
