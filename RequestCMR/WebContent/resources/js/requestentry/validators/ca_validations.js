@@ -18,10 +18,13 @@ function addAddressRecordTypeValidator() {
         if (FormManager.getActualValue('cmrIssuingCntry') != SysLoc.CANADA) {
           return new ValidationResult(null, true);
         }
-        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount == 0) {
-          return new ValidationResult(null, false, 'Please add an Install At and optionally an Invoice To address to this request.');
-        }
-        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+        var reqType = FormManager.getActualValue('reqType');
+
+        if (reqType == 'C') {
+          if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount < 2) {
+            return new ValidationResult(null, false, 'Please add Install At and Invoice To address to this request.');
+          }
+
           var record = null;
           var type = null;
           var invoiceToCnt = 0;
@@ -38,16 +41,17 @@ function addAddressRecordTypeValidator() {
               invoiceToCnt++;
             }
           }
-          if (FormManager.getActualValue('reqType') == 'C' && (installAtCnt != 1 || CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 2)) {
-            return new ValidationResult(null, false, 'The request should contain exactly one Install At address and one optional Invoice To address.');
+          if (installAtCnt != 1 || invoiceToCnt != 1) {
+            return new ValidationResult(null, false, 'The request should contain both Install At address and Invoice To address.');
           } else {
             return new ValidationResult(null, true);
           }
+        } else {
+          return new ValidationResult(null, true);
         }
       }
     };
   })(), 'MAIN_NAME_TAB', 'frmCMR');
-
 }
 
 function addInacCdValidator() {
