@@ -646,9 +646,11 @@ public class TransConnService extends BaseBatchService {
           zi01AddrQuery.setParameter("REQ_ID", admin.getId().getReqId());
           zi01AddrQuery.setParameter("ADDR_TYPE", "ZI01");
           Addr zi01Addr = zi01AddrQuery.getSingleResult(Addr.class);
-          zi01Addr.setSapNo(kna1KunnrMap.get("ZP01"));
-          if (!StringUtils.isBlank(zi01Addr.getSapNo())) {
-            updateEntity(zi01Addr, entityManager);
+          if (zi01Addr != null) {
+            zi01Addr.setSapNo(kna1KunnrMap.get("ZP01"));
+            if (!StringUtils.isBlank(zi01Addr.getSapNo())) {
+              updateEntity(zi01Addr, entityManager);
+            }
           }
 
           PreparedQuery zp01AddrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.GET_ADDR_ENTITY_CREATE_REQ"));
@@ -660,42 +662,20 @@ public class TransConnService extends BaseBatchService {
           newAddrQuery.setParameter("REQ_ID", reqId);
           List<Addr> newAddresses = newAddrQuery.getResults(Addr.class);
 
-          for (Addr newAddr : newAddresses) {
-            AddrPK addrPK = newAddr.getId();
-            if (zi01Addr != null && addrPK.getAddrType().equals("ZI01")) {
-              copyValuesToEntity(zi01Addr, newAddr);
-              newAddr.setSapNo(null);
-              newAddr.setImportInd(CmrConstants.YES_NO.N.toString());
-              newAddr.setChangedIndc(null);
-            } else {
-              copyValuesToEntity(addr, newAddr);
-              newAddr.setSapNo(kna1KunnrMap.get("ZS01"));
-              newAddr.setImportInd(CmrConstants.YES_NO.Y.toString());
-              newAddr.setChangedIndc(CmrConstants.YES_NO.Y.toString());
-            }
-            newAddr.setId(addrPK);
-            newAddr.setAddrStdResult("X");
-            newAddr.setAddrStdAcceptInd(null);
-            newAddr.setAddrStdRejReason(null);
-            newAddr.setAddrStdRejCmt(null);
-            newAddr.setAddrStdTs(null);
-            newAddr.setRdcCreateDt(ERDAT_FORMATTER.format(SystemUtil.getCurrentTimestamp()));
-            newAddr.setRdcLastUpdtDt(SystemUtil.getCurrentTimestamp());
-            updateEntity(newAddr, entityManager);
-          }
-
-          if (zp01Addrs != null && !zp01Addrs.isEmpty()) {
-            // copy zp01 addresses
-            for (Addr zp01 : zp01Addrs) {
-              Addr newAddr = new Addr();
-              AddrPK addrPK = new AddrPK();
-              addrPK.setAddrSeq(zp01.getId().getAddrSeq());
-              addrPK.setReqId(reqId);
-              addrPK.setAddrType("ZP01");
-              copyValuesToEntity(zp01, newAddr);
-              newAddr.setSapNo(null);
-              newAddr.setImportInd(CmrConstants.YES_NO.N.toString());
-              newAddr.setChangedIndc(null);
+          if (newAddresses != null) {
+            for (Addr newAddr : newAddresses) {
+              AddrPK addrPK = newAddr.getId();
+              if (zi01Addr != null && addrPK.getAddrType().equals("ZI01")) {
+                copyValuesToEntity(zi01Addr, newAddr);
+                newAddr.setSapNo(null);
+                newAddr.setImportInd(CmrConstants.YES_NO.N.toString());
+                newAddr.setChangedIndc(null);
+              } else {
+                copyValuesToEntity(addr, newAddr);
+                newAddr.setSapNo(kna1KunnrMap.get("ZS01"));
+                newAddr.setImportInd(CmrConstants.YES_NO.Y.toString());
+                newAddr.setChangedIndc(CmrConstants.YES_NO.Y.toString());
+              }
               newAddr.setId(addrPK);
               newAddr.setAddrStdResult("X");
               newAddr.setAddrStdAcceptInd(null);
@@ -705,12 +685,38 @@ public class TransConnService extends BaseBatchService {
               newAddr.setRdcCreateDt(ERDAT_FORMATTER.format(SystemUtil.getCurrentTimestamp()));
               newAddr.setRdcLastUpdtDt(SystemUtil.getCurrentTimestamp());
               updateEntity(newAddr, entityManager);
-              break;
+            }
+
+            if (zp01Addrs != null && !zp01Addrs.isEmpty()) {
+              // copy zp01 addresses
+              for (Addr zp01 : zp01Addrs) {
+                Addr newAddr = new Addr();
+                AddrPK addrPK = new AddrPK();
+                addrPK.setAddrSeq(zp01.getId().getAddrSeq());
+                addrPK.setReqId(reqId);
+                addrPK.setAddrType("ZP01");
+                copyValuesToEntity(zp01, newAddr);
+                newAddr.setSapNo(null);
+                newAddr.setImportInd(CmrConstants.YES_NO.N.toString());
+                newAddr.setChangedIndc(null);
+                newAddr.setId(addrPK);
+                newAddr.setAddrStdResult("X");
+                newAddr.setAddrStdAcceptInd(null);
+                newAddr.setAddrStdRejReason(null);
+                newAddr.setAddrStdRejCmt(null);
+                newAddr.setAddrStdTs(null);
+                newAddr.setRdcCreateDt(ERDAT_FORMATTER.format(SystemUtil.getCurrentTimestamp()));
+                newAddr.setRdcLastUpdtDt(SystemUtil.getCurrentTimestamp());
+                updateEntity(newAddr, entityManager);
+                break;
+              }
             }
           }
-
           newAdmin.setReqStatus("PCP");
           newAdmin.setPoolCmrIndc(CmrConstants.YES_NO.Y.toString());
+          admin.setChildReqId(newAdmin.getChildReqId());
+          updateEntity(newAdmin, entityManager);
+          updateEntity(admin, entityManager);
 
           RequestUtils.createCommentLogFromBatch(entityManager, BATCH_USER_ID, admin.getId().getReqId(),
               "Child Update Request " + reqId + " created.");
