@@ -22,6 +22,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.CmrException;
+import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
@@ -39,6 +40,10 @@ import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cmr.services.client.CmrServicesFactory;
+import com.ibm.cmr.services.client.QueryClient;
+import com.ibm.cmr.services.client.query.QueryRequest;
+import com.ibm.cmr.services.client.query.QueryResponse;
 import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
 
 /**
@@ -653,12 +658,55 @@ public class MaltaHandler extends BaseSOFHandler {
 
   @Override
   public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo) throws Exception {
-    address.setCustNm1(currentRecord.getCmrName1Plain());
-    address.setCustNm2(currentRecord.getCmrName2Plain());
-    address.setCustNm3(currentRecord.getCmrName3());
-    address.setAddrTxt(currentRecord.getCmrStreetAddress());
-    address.setAddrTxt2(currentRecord.getCmrStreetAddressCont());
-    address.setTransportZone("");
+    if (currentRecord != null) {
+      String spid = "";
+      address.setCustNm1(currentRecord.getCmrName1Plain());
+      address.setCustNm2(currentRecord.getCmrName2Plain());
+      address.setCustNm3(currentRecord.getCmrName3());
+      address.setAddrTxt(currentRecord.getCmrStreetAddress());
+      address.setAddrTxt2(currentRecord.getCmrStreetAddressCont());
+      address.setTransportZone("");
+
+      if (CmrConstants.REQ_TYPE_UPDATE.equalsIgnoreCase(admin.getReqType())) {
+        address.getId().setAddrSeq(currentRecord.getCmrAddrSeq());
+        spid = getRDcIerpSitePartyId(currentRecord.getCmrSapNumber());
+        address.setIerpSitePrtyId(spid);
+      } else {
+        String addrSeq = address.getId().getAddrSeq();
+        addrSeq = StringUtils.leftPad(addrSeq, 5, '0');
+        address.getId().setAddrSeq(addrSeq);
+        address.setIerpSitePrtyId(spid);
+      }
+    }
+  }
+
+  private String getRDcIerpSitePartyId(String kunnr) throws Exception {
+    String spid = "";
+
+    String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
+    String mandt = SystemConfiguration.getValue("MANDT");
+    String sql = ExternalizedQuery.getSql("GET.IERP.BRAN5");
+    sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
+    sql = StringUtils.replace(sql, ":KUNNR", "'" + kunnr + "'");
+    String dbId = QueryClient.RDC_APP_ID;
+
+    QueryRequest query = new QueryRequest();
+    query.setSql(sql);
+    query.addField("BRAN5");
+    query.addField("MANDT");
+    query.addField("KUNNR");
+
+    LOG.debug("Getting existing BRAN5 value from RDc DB..");
+    QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
+    QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
+
+    if (response.isSuccess() && response.getRecords() != null && response.getRecords().size() != 0) {
+      List<Map<String, Object>> records = response.getRecords();
+      Map<String, Object> record = records.get(0);
+      spid = record.get("BRAN5") != null ? record.get("BRAN5").toString() : "";
+      LOG.debug("***RETURNING BRAN5 > " + spid + " WHERE KUNNR IS > " + kunnr);
+    }
+    return spid;
   }
 
   @Override
@@ -886,7 +934,8 @@ public class MaltaHandler extends BaseSOFHandler {
 
   @Override
   public void validateMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country) {
-    super.validateMassUpdateTemplateDupFills(validations, book, maxRows, country);
+    // super.validateMassUpdateTemplateDupFills(validations, book, maxRows,
+    // country);
     XSSFCell currCell = null;
     for (String name : MT_MASS_UPDATE_SHEET_NAMES) {
       XSSFSheet sheet = book.getSheet(name);
@@ -918,6 +967,9 @@ public class MaltaHandler extends BaseSOFHandler {
             if (row.getRowNum() == 2001) {
               continue;
             }
+
+            TemplateValidation error = new TemplateValidation(name);
+            String rowNumber = "Row" + row.getRowNum() + ": ";
 
             if (!"Data".equalsIgnoreCase(sheet.getSheetName())) {
               // iterate all the rows and check each column value
@@ -957,8 +1009,37 @@ public class MaltaHandler extends BaseSOFHandler {
               if ("Ship-To".equalsIgnoreCase(sheet.getSheetName())) {
                 currCell = (XSSFCell) row.getCell(11);
                 phone = validateColValFromCell(currCell);
-              }
 
+                if (!StringUtils.isBlank(cmrNo) && StringUtils.isBlank(seqNo) && !"Data".equalsIgnoreCase(sheet.getSheetName())) {
+                  LOG.trace("Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
+                  error.addError(row.getRowNum(), rowNumber + "Address Sequence No.",
+                      "Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
+                  validations.add(error);
+                }
+
+                if (!StringUtils.isBlank(phone) && !phone.contains("@") && !StringUtils.isNumeric(phone)) {
+                  LOG.trace("Phone Number should contain only digits.");
+                  error.addError(row.getRowNum(), rowNumber + "Phone #", "Phone Number should contain only digits.");
+                  validations.add(error);
+                }
+              } else {
+                if (!StringUtils.isBlank(cmrNo) && StringUtils.isBlank(seqNo) && !"Data".equalsIgnoreCase(sheet.getSheetName())) {
+                  LOG.trace("Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
+                  error.addError(row.getRowNum(), rowNumber + "Address Sequence No.",
+                      "Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
+                  validations.add(error);
+                }
+
+                if (!StringUtils.isBlank(city) && !StringUtils.isBlank(postalCode)) {
+                  int count = city.length() + postalCode.length();
+                  if (count > 28) {
+                    LOG.trace("Total computed length of City and Postal Code should not exceed 28 characters.");
+                    error.addError(row.getRowNum(), rowNumber + "City",
+                        "Total computed length of City and Postal Code should not exceed 28 characters.");
+                    validations.add(error);
+                  }
+                }
+              }
             } else if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
               currCell = (XSSFCell) row.getCell(0);
               cmrNo = validateColValFromCell(currCell);
@@ -974,57 +1055,46 @@ public class MaltaHandler extends BaseSOFHandler {
 
               currCell = (XSSFCell) row.getCell(11);
               ordBlk = validateColValFromCell(currCell);
-            }
 
-            TemplateValidation error = new TemplateValidation(name);
+              if (!StringUtils.isBlank(isic) && !StringUtils.isBlank(classificationCd)
+                  && ((!"9500".equals(isic) && "60".equals(classificationCd)) || ("9500".equals(isic) && !"60".equals(classificationCd)))) {
+                LOG.trace(
+                    "Note that ISIC value 9500 can be entered only for CMR with Classification code 60. Please fix and upload the template again.");
+                error.addError(row.getRowNum(), rowNumber + "Classification Code",
+                    "Note that ISIC value 9500 can be entered only for CMR with Classification code 60. Please fix and upload the template again.");
+                validations.add(error);
+              }
 
-            if (!StringUtils.isBlank(inac) && inac.length() == 4 && !StringUtils.isNumeric(inac) && !"@@@@".equals(inac)
-                && !inac.matches("^[a-zA-Z][a-zA-Z][0-9][0-9]$")) {
-              LOG.trace("INAC should have all 4 digits or 2 letters and 2 digits in order.");
-              error.addError(row.getRowNum(), "INAC/NAC", "INAC should have all 4 digits or 2 letters and 2 digits in order.");
-              validations.add(error);
-            }
+              if (!StringUtils.isBlank(inac) && inac.length() == 4 && !StringUtils.isNumeric(inac) && !"@@@@".equals(inac)
+                  && !inac.matches("^[a-zA-Z][a-zA-Z][0-9][0-9]$")) {
+                LOG.trace("INAC should have all 4 digits or 2 letters and 2 digits in order.");
+                error.addError(row.getRowNum(), rowNumber + "INAC/NAC", "INAC should have all 4 digits or 2 letters and 2 digits in order.");
+              }
 
-            if (StringUtils.isEmpty(cmrNo)) {
-              LOG.trace("Note that CMR No. is mandatory. Please fix and upload the template again.");
-              error.addError(row.getRowNum(), "CMR No.", "Note that CMR No. is mandatory. Please fix and upload the template again.");
-              validations.add(error);
-            }
-            if (!StringUtils.isBlank(cmrNo) && StringUtils.isBlank(seqNo) && !"Data".equalsIgnoreCase(sheet.getSheetName())) {
-              LOG.trace("Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
-              error.addError(row.getRowNum(), "Address Sequence No.",
-                  "Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
-              validations.add(error);
-            }
-            if (!StringUtils.isBlank(isic) && !StringUtils.isBlank(classificationCd)
-                && ((!"9500".equals(isic) && "60".equals(classificationCd)) || ("9500".equals(isic) && !"60".equals(classificationCd)))) {
-              LOG.trace(
-                  "Note that ISIC value 9500 can be entered only for CMR with Classification code 60. Please fix and upload the template again.");
-              error.addError(row.getRowNum(), "Classification Code",
-                  "Note that ISIC value 9500 can be entered only for CMR with Classification code 60. Please fix and upload the template again.");
-              validations.add(error);
-            }
-            if (!StringUtils.isBlank(ordBlk) && !("88".equals(ordBlk) || "94".equals(ordBlk) || "@".equals(ordBlk))) {
-              LOG.trace("Note that value of Order block can only be 88 or 94 or @ or blank. Please fix and upload the template again.");
-              error.addError(row.getRowNum(), "Classification Code",
-                  "Note that value of Order block can only be 88 or 94 or @ or blank. Please fix and upload the template again.");
-              validations.add(error);
-            }
-
-            if (!StringUtils.isBlank(phone) && !phone.contains("@") && !StringUtils.isNumeric(phone)) {
-              LOG.trace("Phone Number should contain only digits.");
-              error.addError(row.getRowNum(), "Phone #", "Phone Number should contain only digits.");
-              validations.add(error);
-            }
-
-            if (!StringUtils.isBlank(city) && !StringUtils.isBlank(postalCode)) {
-              int count = city.length() + postalCode.length();
-              if (count > 28) {
-                LOG.trace("Total computed length of City and Postal Code should not exceed 28 characters.");
-                error.addError(row.getRowNum(), "City", "Total computed length of City and Postal Code should not exceed 28 characters.");
+              if (!StringUtils.isBlank(ordBlk) && !("88".equals(ordBlk) || "94".equals(ordBlk) || "@".equals(ordBlk))) {
+                LOG.trace("Note that value of Order block can only be 88 or 94 or @ or blank. Please fix and upload the template again.");
+                error.addError(row.getRowNum(), rowNumber + "Order block",
+                    "Note that value of Order block can only be 88 or 94 or @ or blank. Please fix and upload the template again.");
                 validations.add(error);
               }
             }
+
+            /*
+             * if (!StringUtils.isBlank(inac) && inac.length() == 4 &&
+             * !StringUtils.isNumeric(inac) && !"@@@@".equals(inac) &&
+             * !inac.matches("^[a-zA-Z][a-zA-Z][0-9][0-9]$")) { LOG.
+             * trace("INAC should have all 4 digits or 2 letters and 2 digits in order."
+             * ); error.addError(row.getRowNum(), rowNumber + "INAC/NAC",
+             * "INAC should have all 4 digits or 2 letters and 2 digits in order."
+             * ); validations.add(error); }
+             */
+
+            if (StringUtils.isEmpty(cmrNo)) {
+              LOG.trace("Note that CMR No. is mandatory. Please fix and upload the template again.");
+              error.addError(row.getRowNum(), rowNumber + "CMR No.", "Note that CMR No. is mandatory. Please fix and upload the template again.");
+              validations.add(error);
+            }
+
           }
         }
       }
