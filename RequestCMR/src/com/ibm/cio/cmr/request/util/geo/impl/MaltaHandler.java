@@ -693,6 +693,7 @@ public class MaltaHandler extends BaseSOFHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getCustClass(), "CustClass", cmrCountry));
       results.add(update);
     }
+
     if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getOrdBlk(), newData.getOrdBlk())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "OrderBlock", "-"));
@@ -700,6 +701,23 @@ public class MaltaHandler extends BaseSOFHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getOrdBlk(), "OrderBlock", cmrCountry));
       results.add(update);
     }
+
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCustPrefLang(), newData.getCustPrefLang())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "PrefLang", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getCustPrefLang(), "PrefLang", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getCustPrefLang(), "PrefLang", cmrCountry));
+      results.add(update);
+    }
+
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getSalesBusOffCd(), newData.getSalesBusOffCd())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "SBO", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getSalesBusOffCd(), "SBO", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getSalesBusOffCd(), "SBO", cmrCountry));
+      results.add(update);
+    }
+
   }
 
   @Override
