@@ -51,7 +51,7 @@ import com.ibm.cmr.services.client.wtaas.WtaasQueryResponse;
 public abstract class APHandler extends GEOHandler {
 
   private static final Logger LOG = Logger.getLogger(APHandler.class);
-  private static final String[] AP_SKIP_ON_SUMMARY_UPDATE_FIELDS = {};
+  private static final String[] AP_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "SearchTerm" };
   protected WtaasRecord currentRecord;
 
   @Override
@@ -336,6 +336,14 @@ public abstract class APHandler extends GEOHandler {
       update.setDataField(PageManager.getLabel(cmrCountry, "EngineeringBo", "-"));
       update.setNewData(service.getCodeAndDescription(newData.getEngineeringBo(), "EngineeringBo", cmrCountry));
       update.setOldData(service.getCodeAndDescription(oldData.getEngineeringBo(), "EngineeringBo", cmrCountry));
+      results.add(update);
+    }
+
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getSearchTerm(), newData.getApCustClusterId())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "Cluster", "-"));
+      update.setNewData(newData.getApCustClusterId());
+      update.setOldData(oldData.getSearchTerm());
       results.add(update);
     }
   }
