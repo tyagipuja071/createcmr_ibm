@@ -57,7 +57,8 @@ public class ImportExternalDataElement extends OverridingElement {
       Admin admin = requestData.getAdmin();
 
       String reqReason = admin.getReqReason();
-      soldToVat = requestData.getAddress("ZS01").getVat();
+      Addr zs01 = requestData.getAddress("ZS01");
+      soldToVat = zs01 != null ? zs01.getVat() : null;
 
       if ("C".equals(admin.getReqType()) && data != null) {
         scenarioSubType = data.getCustSubGrp();
@@ -89,7 +90,7 @@ public class ImportExternalDataElement extends OverridingElement {
         results.setDetails(details.toString());
         results.setOnError(false);
 
-      } else if (requestData.getAddress("ZS01") != null) {
+      } else if (zs01 != null) {
 
         getMidasDetails(results, requestData, engineData, details, "ZS01", callMIDAS, scenarioSubType);
 
@@ -107,8 +108,14 @@ public class ImportExternalDataElement extends OverridingElement {
         }
 
         if ("INTER".equals(scenarioSubType)) {
-          String mainCustNm = " " + AutomationUtil.getCleanString((StringUtils.isNotBlank(admin.getMainCustNm1()) ? admin.getMainCustNm1() : "")
-              + (StringUtils.isNotBlank(admin.getMainCustNm2()) ? " " + admin.getMainCustNm2() : "")) + " ";
+          String mainCustNm = "";
+          if (StringUtils.isNotBlank(zs01.getVat()) && engineData.get(zs01.getVat()) != null) {
+            @SuppressWarnings("unchecked")
+            AutomationResponse<MidasResponse> response = (AutomationResponse<MidasResponse>) engineData.get(zs01.getVat());
+            if (response != null && response.isSuccess()) {
+              mainCustNm = response.getRecord() != null ? " " + AutomationUtil.getCleanString(response.getRecord().getCompanyName()) + " " : "";
+            }
+          }
 
           if (!mainCustNm.contains(" IBM ") && !mainCustNm.contains(" PROXXI ")) {
             // CODE fix for CMR-7831
@@ -120,6 +127,7 @@ public class ImportExternalDataElement extends OverridingElement {
             results.setResults("Scenario Invalid");
             results.setDetails(details.toString());
             results.setOnError(true);
+            return results;
           }
         }
 
@@ -372,43 +380,6 @@ public class ImportExternalDataElement extends OverridingElement {
     results.setOnError(false);
     results.setDetails(details.toString());
     results.setProcessOutput(overrides);
-  }
-
-  /**
-   * Calls the sintegra service
-   * 
-   * @param vat
-   * @param state
-   * @return
-   * @throws Exception
-   */
-  @Deprecated
-  private SintegraResponse querySintegra(String vat, String state) throws Exception {
-    AutomationServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
-        AutomationServiceClient.class);
-    client.setReadTimeout(1000 * 60 * 5);
-    client.setRequestMethod(Method.Get);
-
-    // calling SINTEGRA
-    log.debug("Calling Sintegra Service for VAT " + vat);
-    MidasRequest requestSoldTo = new MidasRequest();
-    requestSoldTo.setCnpj(vat);
-    requestSoldTo.setUf(state);
-
-    log.debug("Connecting to the Sintegra Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
-    AutomationResponse<?> rawResponseSoldTo = client.executeAndWrap(AutomationServiceClient.BR_SINTEGRA_SERVICE_ID, requestSoldTo,
-        AutomationResponse.class);
-    ObjectMapper mapperSoldTo = new ObjectMapper();
-    String jsonSoldTo = mapperSoldTo.writeValueAsString(rawResponseSoldTo);
-    log.trace("Sintegra Service Response for VAT " + vat + ": " + jsonSoldTo);
-
-    TypeReference<AutomationResponse<SintegraResponse>> refSoldTo = new TypeReference<AutomationResponse<SintegraResponse>>() {
-    };
-    AutomationResponse<SintegraResponse> response = mapperSoldTo.readValue(jsonSoldTo, refSoldTo);
-    if (response.isSuccess()) {
-      return response.getRecord();
-    }
-    return null;
   }
 
   private String getAddressDesc(String type) {
