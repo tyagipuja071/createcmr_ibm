@@ -1788,6 +1788,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
           fileName = "MassUpdate_" + reqId + "_Iter" + (newIterId) + ".xlsx";
         }
 
+        String filePath = uploadDir.getAbsolutePath() + "/" + fileName;
+        filePath = filePath.replaceAll("[\\\\]", "/");
+
         for (FileItem item : items) {
           if (!item.isFormField()) {
             if ("massFile".equals(item.getFieldName())) {
@@ -1829,6 +1832,10 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                   if (!validateMassUpdateFileJP(item.getInputStream(), data, admin)) {
                     throw new CmrException(MessageUtil.ERROR_MASS_FILE);
                   }
+                } else if (IERPRequestUtils.isCountryDREnabled(entityManager, cmrIssuingCntry)) {
+                  if (!validateDRMassUpdateFile(filePath, data, admin, cmrIssuingCntry)) {
+                    throw new CmrException(MessageUtil.ERROR_MASS_FILE);
+                  }
                 } else {
                   if (!validateMassUpdateFile(item.getInputStream())) {
                     throw new CmrException(MessageUtil.ERROR_MASS_FILE);
@@ -1838,8 +1845,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
 
               }
 
-              String filePath = uploadDir.getAbsolutePath() + "/" + fileName;
-              filePath = filePath.replaceAll("[\\\\]", "/");
+              // String filePath = uploadDir.getAbsolutePath() + "/" + fileName;
+              // filePath = filePath.replaceAll("[\\\\]", "/");
 
               // MASS FILE | write the file
               File file = new File(filePath);
@@ -4577,8 +4584,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         LOG.error(e.getMessage());
         LOG.error("An error occurred in validating Malta Mass Update File.");
         // return false;
-        throw new Exception(e.getMessage());
 
+        throw new Exception(e.getMessage());
+        // throw new CmrException(MessageUtil.ERROR_GENERAL, e.getMessage());
         // return false;
       } finally {
         em.close();
@@ -4590,6 +4598,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     } else {
       return true;
     }
+
   }
 
   // CMR-800
