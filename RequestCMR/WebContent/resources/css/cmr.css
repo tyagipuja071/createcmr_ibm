@@ -878,6 +878,18 @@ span.source-syst {
   padding-right: 5px;
 }
 
+div.source-exp {
+  width: 60px;
+  padding: 2px;
+  font-size: 11px;
+  text-decoration: italic;
+  background: rgb(68, 193, 62);
+  padding-left: 5px;
+  padding-right: 5px;
+  color: white;
+}
+
+
 div.cmr-feedback-btn {
   cursor: pointer;
   line-height: 50px;
@@ -972,4 +984,5 @@ div.cmr-overall-status-btn {
   width: 120px;
   text-align: right;
 }
+
 /* reno end */

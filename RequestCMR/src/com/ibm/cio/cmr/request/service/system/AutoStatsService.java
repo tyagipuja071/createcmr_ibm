@@ -101,12 +101,19 @@ public class AutoStatsService extends BaseSimpleService<RequestStatsContainer> {
 
     if ("Y".equals(model.getReqType())) {
       sql += "and admin.REQ_TYPE = 'C' ";
+    }
 
+    if (!StringUtils.isBlank(model.getSourceSystId())) {
+      sql += "and admin.SOURCE_SYST_ID = :SOURCE ";
     }
 
     String issuingCntry = model.getCountry();
     if (!StringUtils.isBlank(issuingCntry)) {
       sql += "and data.CMR_ISSUING_CNTRY = :COUNTRY ";
+    }
+
+    if ("Y".equals(model.getExcludeExternal())) {
+      sql += "and ( trim(nvl(admin.SOURCE_SYST_ID,'')) = '' or admin.SOURCE_SYST_ID = 'CreateCMR') ";
     }
 
     if (!"Y".equals(params.getParam("buildSummary"))) {
@@ -121,6 +128,7 @@ public class AutoStatsService extends BaseSimpleService<RequestStatsContainer> {
     query.setParameter("COUNTRY", model.getCountry());
     query.setParameter("CREATE_FROM", from);
     query.setParameter("CREATE_TO", to);
+    query.setParameter("SOURCE", model.getSourceSystId());
     query.setForReadOnly(true);
 
     List<AutomationStatsModel> stats = query.getResults(AutomationStatsModel.class);
@@ -128,20 +136,23 @@ public class AutoStatsService extends BaseSimpleService<RequestStatsContainer> {
     container.setAutomationRecords(stats);
     if ("Y".equals(params.getParam("buildSummary"))) {
       LOG.debug("Building summary for statistics..");
-      container.setAutomationSummary(buildSummary(stats));
+      buildSummaries(container, stats, !StringUtils.isBlank(model.getCountry()));
     }
     LOG.debug("Automation data retrieved.");
     return container;
   }
 
-  private Map<String, AutomationSummaryModel> buildSummary(List<AutomationStatsModel> stats) {
-    Map<String, AutomationSummaryModel> map = new HashMap<String, AutomationSummaryModel>();
+  private void buildSummaries(RequestStatsContainer container, List<AutomationStatsModel> stats, boolean buildCountrySummary) {
+    Map<String, AutomationSummaryModel> generalMap = new HashMap<String, AutomationSummaryModel>();
+    Map<String, Map<String, AutomationSummaryModel>> weeklyMap = new HashMap<String, Map<String, AutomationSummaryModel>>();
+    Map<String, AutomationSummaryModel> scenarioMap = new HashMap<String, AutomationSummaryModel>();
 
     for (AutomationStatsModel stat : stats) {
-      if (!map.containsKey(stat.getCmrIssuingCntry())) {
-        map.put(stat.getCmrIssuingCntry(), new AutomationSummaryModel());
+      if (!generalMap.containsKey(stat.getCmrIssuingCntry())) {
+        generalMap.put(stat.getCmrIssuingCntry(), new AutomationSummaryModel());
       }
-      AutomationSummaryModel summary = map.get(stat.getCmrIssuingCntry());
+
+      AutomationSummaryModel summary = generalMap.get(stat.getCmrIssuingCntry());
       summary.setCountry(stat.getCmrIssuingCntry() + " - " + stat.getCntryDesc());
       summary.setTouchless(summary.getTouchless() + ("Y".equals(stat.getFullAuto()) ? 1 : 0));
       summary.setLegacy(summary.getLegacy() + ("Y".equals(stat.getLegacy()) ? 1 : 0));
@@ -155,7 +166,9 @@ public class AutoStatsService extends BaseSimpleService<RequestStatsContainer> {
         if ("S".equals(stat.getFailureIndc())) {
           processCd = "System Error";
         } else if ("CHECKS".equals(processCd)) {
-          processCd = extractProcessCause(stat);
+          processCd = extractProcessCause(stat, null);
+        } else if ("Y".equals(stat.getPaygo())) {
+          processCd = extractProcessCause(stat, processCd);
         }
         if (summary.getReviewMap().get(processCd) == null) {
           summary.getReviewMap().put(processCd, (long) 0);
@@ -163,12 +176,58 @@ public class AutoStatsService extends BaseSimpleService<RequestStatsContainer> {
         Map<String, Long> revMap = summary.getReviewMap();
         revMap.put(processCd, revMap.get(processCd) + 1);
       }
-    }
 
-    return map;
+      if (buildCountrySummary) {
+        if (!weeklyMap.containsKey(stat.getCmrIssuingCntry())) {
+          weeklyMap.put(stat.getCmrIssuingCntry(), new HashMap<String, AutomationSummaryModel>());
+        }
+
+        Map<String, AutomationSummaryModel> summaryMap = weeklyMap.get(stat.getCmrIssuingCntry());
+        if (!summaryMap.containsKey(stat.getWeekOf())) {
+          summaryMap.put(stat.getWeekOf(), new AutomationSummaryModel());
+        }
+        summary = summaryMap.get(stat.getWeekOf());
+        summary.setCountry(stat.getCmrIssuingCntry() + " - " + stat.getCntryDesc());
+        summary.setTouchless(summary.getTouchless() + ("Y".equals(stat.getFullAuto()) ? 1 : 0));
+        summary.setLegacy(summary.getLegacy() + ("Y".equals(stat.getLegacy()) ? 1 : 0));
+        summary.setReview(summary.getReview() + ("Y".equals(stat.getReview()) ? 1 : 0));
+        if (!"Y".equals(stat.getFullAuto()) && !"Y".equals(stat.getLegacy()) && !"Y".equals(stat.getReview())) {
+          summary.setNoStatus(summary.getNoStatus() + 1);
+        }
+
+        container.setWeeklyAutomationSummary(weeklyMap);
+
+        String scenario = null;
+        if ("Create".equals(stat.getReqType())) {
+          scenario = stat.getCustGrp() != null && stat.getCustGrp().toUpperCase().contains("CROSS") ? "(Cross-border)" : stat.getCustSubGrp();
+        } else {
+          scenario = "-" + stat.getReqType() + "-";
+        }
+        if (StringUtils.isBlank(scenario)) {
+          scenario = "[unspecified]";
+        }
+        if (!scenarioMap.containsKey(scenario)) {
+          scenarioMap.put(scenario, new AutomationSummaryModel());
+        }
+        summary = scenarioMap.get(scenario);
+        summary.setCountry(stat.getCmrIssuingCntry() + " - " + stat.getCntryDesc());
+        summary.setTouchless(summary.getTouchless() + ("Y".equals(stat.getFullAuto()) ? 1 : 0));
+        summary.setLegacy(summary.getLegacy() + ("Y".equals(stat.getLegacy()) ? 1 : 0));
+        summary.setReview(summary.getReview() + ("Y".equals(stat.getReview()) ? 1 : 0));
+        if (!"Y".equals(stat.getFullAuto()) && !"Y".equals(stat.getLegacy()) && !"Y".equals(stat.getReview())) {
+          summary.setNoStatus(summary.getNoStatus() + 1);
+        }
+
+      }
+    }
+    container.setAutomationSummary(generalMap);
+    if (buildCountrySummary) {
+      container.setWeeklyAutomationSummary(weeklyMap);
+      container.setScenarioSummary(scenarioMap);
+    }
   }
 
-  private String extractProcessCause(AutomationStatsModel stat) {
+  private String extractProcessCause(AutomationStatsModel stat, String defaultProcess) {
     String cmt = stat.getCmt();
     if (StringUtils.isBlank(cmt)) {
       return "Other Checks";
@@ -182,15 +241,20 @@ public class AutoStatsService extends BaseSimpleService<RequestStatsContainer> {
       return "City/County";
     } else if (cmt.contains("BUYING GROUP ID UNDER COVERAGE")) {
       return "BG/GBG Issue";
+    } else if (cmt.contains("THE OVERRIDE VALUE COULD NOT BE DETERMINED")) {
+      return "Coverage Issue";
+    } else if (cmt.contains("DPL CHECK FAILED")) {
+      return "Global - DPL Check";
     } else if (cmt.contains("D&B matches were chosen to be overridden".toUpperCase())) {
       return "D&B Overrides";
     } else if (cmt.contains("D&B".toUpperCase())) {
       return "D&B - Others";
+    } else if (cmt.contains("VAT VALUE DID NOT MATCH WITH")) {
+      return "VAT Mismatch";
     } else if (cmt.contains("UPDATED ELEMENTS CANNOT")) {
       return "Update Checks";
     }
-
-    return "Other Checks";
+    return defaultProcess != null ? defaultProcess : "Other Checks";
   }
 
   /**
@@ -394,7 +458,7 @@ public class AutoStatsService extends BaseSimpleService<RequestStatsContainer> {
         return "";
       }
       if ("CHECKS".equals(request.getProcessCd())) {
-        return extractProcessCause(request);
+        return extractProcessCause(request, null);
       } else {
         return "";
       }

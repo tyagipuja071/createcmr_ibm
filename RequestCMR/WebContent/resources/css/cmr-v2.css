@@ -101,3 +101,8 @@ body.ibm-type input {
 div#ibm-top {
 	min-height: 520px;
 }
+
+div#widget_yourAction span.dijitPlaceHolder, input#yourAction {
+	text-shadow: 1px 1px #CCC;
+}
+

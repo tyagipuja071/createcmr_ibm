@@ -63,7 +63,7 @@ div.cmr-sub {
         <cmr:gridCol width="80px" field="reqId" header="${ui.grid.requestID}" align="right">
           <cmr:formatter functionName="requestIdFormatter" />
         </cmr:gridCol>
-        <cmr:gridCol width="90px" field="expediteInd" header="${ui.grid.expedite}" align="center">
+        <cmr:gridCol width="90px" field="expediteInd" header="Source" align="center">
           <cmr:formatter functionName="expediteFormatter" />
         </cmr:gridCol>
         <cmr:gridCol width="75px" field="cmrIssuingCntry" header="${ui.grid.cmrIssuingCntry}" >
