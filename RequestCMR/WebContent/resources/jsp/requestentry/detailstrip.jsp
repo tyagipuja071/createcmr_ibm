@@ -33,7 +33,7 @@ if ("DRA".equals(reqentry.getReqStatus())){
   </cmr:column>
   <cmr:column span="1" width="165">
             <p>
-              <label for="lockTs">${ui.yourRole}: </label>
+              <label for="userRole">${ui.yourRole}: </label>
              ${reqentry.userRole}
             </p>
           </cmr:column>

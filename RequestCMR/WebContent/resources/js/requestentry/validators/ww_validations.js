@@ -158,51 +158,53 @@ function addDnBMatchingAttachmentValidator() {
  * Method to check whether for a scenario dnb matching is allowed or not
  */
 function isSkipDnbMatching() {
-  var custGrp = FormManager.getActualValue('custGrp');
+   var custGrp = FormManager.getActualValue('custGrp');
   var custSubGroup = FormManager.getActualValue('custSubGrp');
   var dnbPrimary = FormManager.getActualValue("dnbPrimary");
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var countryUse = FormManager.getActualValue("countryUse");
   var subRegionCd = countryUse != null && countryUse.length > 0 ? countryUse : cntry;
-  if (custGrp != null && custGrp != '' && custSubGrp != null && custSubGrp != '' && dnbPrimary == 'Y') {
-    var qParams = {
-      CNTRY : cntry,
-      CUST_TYP : custGrp,
-      CUST_SUB_TYP : custSubGroup,
-      SUBREGION_CD : subRegionCd
-    };
-    var result = cmr.query("AUTO.SKIP_VERIFICATION_INDC", qParams);
-    if (result.ret1 != null && result.ret1 != "") {
-      if(result.ret1=='Y'){
-      	return true;
-			} else if (result.ret1=='N'){
-				return false;
-			}
-    } else {
-      qParams.CUST_SUB_TYP = "*";
-      result = cmr.query("AUTO.SKIP_VERIFICATION_INDC", qParams);
-      if (result.ret1 != null && result.ret1 != '') {
-				if(result.ret1 == 'Y'){
-        	return true;
-				} else if (result.ret1 == 'N'){
-					return false;
-				}
+  if(dnbPrimary == 'Y') {
+    if (custGrp != null && custGrp != '' && custSubGrp != null && custSubGrp != '') {
+      var qParams = {
+        CNTRY : cntry,
+        CUST_TYP : custGrp,
+        CUST_SUB_TYP : custSubGroup,
+        SUBREGION_CD : subRegionCd
+      };
+      var result = cmr.query("AUTO.SKIP_VERIFICATION_INDC", qParams);
+      if (result.ret1 != null && result.ret1 != "") {
+        if(result.ret1=='Y'){
+          return true;
+        } else if (result.ret1=='N'){
+          return false;
+        }
       } else {
-        qParams.CUST_TYP = "*";
+        qParams.CUST_SUB_TYP = "*";
         result = cmr.query("AUTO.SKIP_VERIFICATION_INDC", qParams);
         if (result.ret1 != null && result.ret1 != '') {
-          if(result.ret1=='Y'){
-	        	return true;
-					} else if (result.ret1=='N'){
-						return false;
-					}
+          if(result.ret1 == 'Y'){
+            return true;
+          } else if (result.ret1 == 'N'){
+            return false;
+          }
+        } else {
+          qParams.CUST_TYP = "*";
+          result = cmr.query("AUTO.SKIP_VERIFICATION_INDC", qParams);
+          if (result.ret1 != null && result.ret1 != '') {
+            if(result.ret1=='Y'){
+              return true;
+            } else if (result.ret1=='N'){
+              return false;
+            }
+          }
         }
       }
-    }
-  } else if (dnbPrimary == 'N') {
+      return false;
+    } else return true;
+  } else {
     return true;
   }
-  return false;
 }
 
 /**
@@ -767,7 +769,10 @@ function validateExistingCMRNo() {
           var action = FormManager.getActualValue('yourAction');
           var _custSubGrp = FormManager.getActualValue('custSubGrp');
           if (reqType == 'C' && cmrNo) {
-            var exists = cmr.query('LD.CHECK_EXISTING_CMR_NO', {
+            if (cmrNo.startsWith('P')) { 
+              return new ValidationResult(null, true);
+            }  
+            var exists = cmr.query('LD.CHECK_CMR_EXIST_IN_RDC', {
               COUNTRY : cntry,
               CMR_NO : cmrNo,
               MANDT : cmr.MANDT

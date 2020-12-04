@@ -23,7 +23,7 @@
         <label for="email2"> 
           <cmr:fieldLabel fieldId="AbbrevLocation" />: 
         </label>
-        <cmr:field fieldId="AbbrevLocation" id="email2" path="email2" size="500" tabId="MAIN_CUST_TAB" />
+        <cmr:field fieldId="AbbrevLocation" id="email2" path="email2" size="570" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
     <cmr:column span="1" containerForField="IBMRelatedCMR">

@@ -1417,51 +1417,53 @@ function setRejSupplInfoFields(value) {
  * Method to check whether for a scenario dnb matching is allowed or not
  */
 function isSkipDnbMatching() {
-  var custGrp = FormManager.getActualValue('custGrp');
+   var custGrp = FormManager.getActualValue('custGrp');
   var custSubGroup = FormManager.getActualValue('custSubGrp');
   var dnbPrimary = FormManager.getActualValue("dnbPrimary");
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var countryUse = FormManager.getActualValue("countryUse");
   var subRegionCd = countryUse != null && countryUse.length > 0 ? countryUse : cntry;
-  if (custGrp != null && custGrp != '' && custSubGrp != null && custSubGrp != '' && dnbPrimary == 'Y') {
-    var qParams = {
-      CNTRY : cntry,
-      CUST_TYP : custGrp,
-      CUST_SUB_TYP : custSubGroup,
-      SUBREGION_CD : subRegionCd
-    };
-    var result = cmr.query("AUTO.SKIP_VERIFICATION_INDC", qParams);
-    if (result.ret1 != null && result.ret1 != "") {
-      if(result.ret1=='Y'){
-      	return true;
-			} else if (result.ret1=='N'){
-				return false;
-			}
-    } else {
-      qParams.CUST_SUB_TYP = "*";
-      result = cmr.query("AUTO.SKIP_VERIFICATION_INDC", qParams);
-      if (result.ret1 != null && result.ret1 != '') {
+  if(dnbPrimary == 'Y') {
+    if (custGrp != null && custGrp != '' && custSubGrp != null && custSubGrp != '') {
+      var qParams = {
+        CNTRY : cntry,
+        CUST_TYP : custGrp,
+        CUST_SUB_TYP : custSubGroup,
+        SUBREGION_CD : subRegionCd
+      };
+      var result = cmr.query("AUTO.SKIP_VERIFICATION_INDC", qParams);
+      if (result.ret1 != null && result.ret1 != "") {
         if(result.ret1=='Y'){
-	      	return true;
-				} else if (result.ret1=='N'){
-					return false;
-				}
+          return true;
+        } else if (result.ret1=='N'){
+          return false;
+        }
       } else {
-        qParams.CUST_TYP = "*";
+        qParams.CUST_SUB_TYP = "*";
         result = cmr.query("AUTO.SKIP_VERIFICATION_INDC", qParams);
         if (result.ret1 != null && result.ret1 != '') {
-          if(result.ret1=='Y'){
-	        	return true;
-					} else if (result.ret1=='N'){
-						return false;
-					}
+          if(result.ret1 == 'Y'){
+            return true;
+          } else if (result.ret1 == 'N'){
+            return false;
+          }
+        } else {
+          qParams.CUST_TYP = "*";
+          result = cmr.query("AUTO.SKIP_VERIFICATION_INDC", qParams);
+          if (result.ret1 != null && result.ret1 != '') {
+            if(result.ret1=='Y'){
+              return true;
+            } else if (result.ret1=='N'){
+              return false;
+            }
+          }
         }
       }
-    }
-  } else if (dnbPrimary == 'N') {
+      return false;
+    } else return true;
+  } else {
     return true;
   }
-  return false;
 }
 
 /**
@@ -1473,7 +1475,7 @@ function handleRequiredDnBSearch() {
   var reqStatus = FormManager.getActualValue('reqStatus');
   if (reqId != null && reqId != '' && reqType == 'C' && reqStatus == 'DRA' && _dnbSearchHandler == null) {
     _dnbSearchHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
-      if (!isSkipDnbMatching()) {
+      if (!isSkipDnbMatching() && FormManager.getActualValue('viewOnlyMode') != 'true') {
         cmr.showNode('dnbRequired');
         cmr.showNode('dnbRequiredIndc');
       } else {
@@ -1481,6 +1483,10 @@ function handleRequiredDnBSearch() {
         cmr.hideNode('dnbRequiredIndc');
       }
     });
+  }
+  
+  if(_dnbSearchHandler && _dnbSearchHandler[0]){
+    _dnbSearchHandler[0].onChange();
   }
 }
 

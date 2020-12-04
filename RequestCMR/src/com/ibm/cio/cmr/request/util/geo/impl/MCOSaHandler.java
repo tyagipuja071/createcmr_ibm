@@ -1134,12 +1134,15 @@ public class MCOSaHandler extends MCOHandler {
               validations.add(error);
             }
 
-            if (!StringUtils.isBlank(inac) && inac.length() == 4 && !StringUtils.isNumeric(inac) && !"@@@@".equals(inac)
-                && !inac.matches("^[a-zA-Z][a-zA-Z][0-9][0-9]$")) {
-              LOG.trace("INAC should have all 4 digits or 2 letters and 2 digits in order.");
-              error.addError(row.getRowNum(), "INAC/NAC", "INAC should have all 4 digits or 2 letters and 2 digits in order.");
-              validations.add(error);
-            }
+            /*
+             * if (!StringUtils.isBlank(inac) && inac.length() == 4 &&
+             * !StringUtils.isNumeric(inac) && !"@@@@".equals(inac) &&
+             * !inac.matches("^[a-zA-Z][a-zA-Z][0-9][0-9]$")) { LOG.
+             * trace("INAC should have all 4 digits or 2 letters and 2 digits in order."
+             * ); error.addError(row.getRowNum(), "INAC/NAC",
+             * "INAC should have all 4 digits or 2 letters and 2 digits in order."
+             * ); validations.add(error); }
+             */
 
             if (!StringUtils.isBlank(custName1) || !StringUtils.isBlank(nameCont) || !StringUtils.isBlank(street) || !StringUtils.isBlank(streetCont)
                 || !StringUtils.isBlank(att) || !StringUtils.isBlank(city) || !StringUtils.isBlank(postalCode) || !StringUtils.isBlank(landCountry)

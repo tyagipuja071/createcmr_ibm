@@ -176,7 +176,7 @@ dojo.addOnLoad(function(){
      <!-- INAC Type, INAC Code, ISBU, Industry Class -->
       	<cmr:row topPad="10" addBackground="true">
       	<cmr:view forCountry="643,818,615,852,856,749,778,834,652,744,616,796">
-      	  <cmr:column  span="1" width="80" containerForField="INACType">
+      	  <cmr:column  span="1" width="100" containerForField="INACType">
         	<p>
               <cmr:label fieldId="inacType">
                 <cmr:fieldLabel fieldId="INACType" />
@@ -185,7 +185,7 @@ dojo.addOnLoad(function(){
               <cmr:field id="inacType" path="inacType" fieldId="INACType" tabId="MAIN_IBM_TAB" size="80"/>
             </p>          
       	  </cmr:column>
-      	  <cmr:column span="1" width="180" containerForField="INACCode">
+      	  <cmr:column span="1" width="230" containerForField="INACCode">
         	<p>
           	  <cmr:label fieldId="inacCd">
                 <cmr:fieldLabel fieldId="INACCode" />:
@@ -224,7 +224,7 @@ dojo.addOnLoad(function(){
       	  <cmr:column span="2" containerForField="IndustryClass">
       		<p>
       		  <Label style="">IndustryClass:</Label>
-			  <input type="text" id="IndustryClass" name ="IndustryClass" value="${fn:substring(reqentry.subIndustryCd, 0, 1)}" readonly="readonly" style="width:15px;BACKGROUND: #FFFFEE;border: 1px Solid #DDDDDD"/>
+			        <input type="text" id="IndustryClass" name ="IndustryClass" value="${fn:substring(reqentry.subIndustryCd, 0, 1)}" readonly="readonly" style="width:15px;BACKGROUND: #FFFFEE;border: 1px Solid #DDDDDD"/>
       		</p>
     	  </cmr:column>
     	  <cmr:column span="2" containerForField="RestrictedInd">
