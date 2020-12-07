@@ -752,9 +752,9 @@ public class MaltaHandler extends BaseSOFHandler {
 
     if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCustPrefLang(), newData.getCustPrefLang())) {
       update = new UpdatedDataModel();
-      update.setDataField(PageManager.getLabel(cmrCountry, "PrefLang", "-"));
-      update.setNewData(service.getCodeAndDescription(newData.getCustPrefLang(), "PrefLang", cmrCountry));
-      update.setOldData(service.getCodeAndDescription(oldData.getCustPrefLang(), "PrefLang", cmrCountry));
+      update.setDataField(PageManager.getLabel(cmrCountry, "CustLang", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getCustPrefLang(), "CustLang", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getCustPrefLang(), "CustLang", cmrCountry));
       results.add(update);
     }
 
