@@ -635,16 +635,11 @@ public class MaltaHandler extends BaseSOFHandler {
     LOG.trace("Currency: " + data.getLegacyCurrencyCd());
 
     // MCO Africa - For SBO values exceeding 4 char length
-    String sBO = this.currentImportValues.get("SearchTerm");
+    String sBO = this.currentImportValues.get("SBO");
     if (!(StringUtils.isEmpty(sBO))) {
       if (sBO.length() > 4) {
         data.setSalesBusOffCd(sBO.substring(0, 4));
       }
-    }
-
-    String AbbLoc = this.currentImportValues.get("AbbrevLocation");
-    if (!(StringUtils.isEmpty(AbbLoc))) {
-      data.setAbbrevLocn(AbbLoc);
     }
 
     data.setEmbargoCd(this.currentImportValues.get("EmbargoCode"));
