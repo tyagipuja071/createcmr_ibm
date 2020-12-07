@@ -157,20 +157,32 @@ div.cmr-tabs div.active:hover {
 /* End Tabs */
 
 /* Sub section */
+div.cmr-all-sub {
+}
+
+/* renovation */
 div.cmr-sub {
   border-left: 1px Solid #E5E5E5;
   border-right: 1px Solid #E5E5E5;
   border-bottom: 1px Solid #E5E5E5;
-  padding-left: 10px;
-  padding-right: 10px;
+/*  padding-left: 10px;*/
+/*  padding-right: 10px;*/
   margin-top: -1px;
   box-shadow: 3px 3px 3px #DDDDDD;
+}
+
+div.cmr-row-inner {
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
 div.cmr-sub div.ibm-rule {
   margin-right: 20px !important;
 }
 
+div.cmr-sub .no-hide {
+	width: 95%;
+}
 /* End Sub section */
 
 /* w3 Overrides */
@@ -244,10 +256,12 @@ table.dojoxGridRowTable th {
 
 div.ibm-confidential-note {
   color: #D9182D;
-  font-size: 14px;
+  font-size: 12px;
   text-align: right;
   text-shadow: white 1px 1px 1px;
   padding: 5px;
+  text-transform: uppercase;
+  font-weight: bold;
 }
 
 input.cmr-inline-btn {
@@ -276,7 +290,7 @@ span.ibm-information-link:before {
 }
 
 span.cmr-release-note {
-  font-size: 10px;
+  font-size: 9px;
   letter-spacing: 1px;
 }
 
@@ -438,7 +452,7 @@ div.spacer {
 }
 /* Request Entry CSS */
 div.cmr-actions {
-  width: 960px;
+  width: 1060px;
   height: 25px;
   z-index: 949;
   left: auto;
@@ -446,8 +460,8 @@ div.cmr-actions {
   padding-bottom: 2px;
   background: -moz-linear-gradient(top, #bebebe, #868686);
   position: fixed;
-  top: 247px;
-  background: rgb(226, 226, 226); /* Old browsers */
+  top: 135px;
+ background: rgb(226, 226, 226); /* Old browsers */
   background: -moz-linear-gradient(top, rgba(226, 226, 226, 1) 0%,
     rgba(219, 219, 219, 1) 50%, rgba(209, 209, 209, 1) 51%,
     rgba(254, 254, 254, 1) 100%); /* FF3.6-15 */
@@ -464,6 +478,14 @@ div.cmr-actions {
   border-radius: 5px;
 }
 
+div.cmr-actions-locked {
+	background: #e4efc0; /* Old browsers */
+	background: -moz-linear-gradient(top,  #e4efc0 0%, #abbd73 100%); /* FF3.6-15 */
+	background: -webkit-linear-gradient(top,  #e4efc0 0%,#abbd73 100%); /* Chrome10-25,Safari5.1-6 */
+	background: linear-gradient(to bottom,  #e4efc0 0%,#abbd73 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e4efc0', endColorstr='#abbd73',GradientType=0 ); /* IE6-9 */
+} 
+
 div.cmr-action-dd {
   float: right;
   padding-right: 15px;
@@ -478,7 +500,7 @@ div.cmr-action-txt {
   text-align: center;
   font-size: 15px;
   font-weight: bold;
-  text-shadow: 2px 2px #DDDDDD;
+  text-shadow: none;
   color: #D9182D;
 }
 
@@ -491,12 +513,13 @@ div.cmr-source-sys-txt {
   letter-spacing: 0.5px;
   text-shadow: none;
   border-radius: 3px;
-  background: green;
+  background: #666;
   padding-left: 5px;
   padding-right: 5px;
   padding-top: 2px;
   padding-bottom: 2px;
   text-transform: uppercase;
+  line-height: 18px;
 }
 
 span.cmr-source-sub {
@@ -512,6 +535,7 @@ div#widget_yourAction span.dijitPlaceHolder {
 
 input#yourAction {
   padding-left: 2px !important;
+  font-weight: bold;
 }
 
 img.cmr-proceed-icon {
@@ -538,6 +562,7 @@ img.cmr-delta-icon {
 
 input.cmr-grid-btn {
   font-size: 12px;
+  font-family : IBM Plex Sans, Calibri, Geneva, Arial, Helvetica, sans-serif;
   border-radius: 3px;
   background-color: #FFF;
   border-color: #CCC rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
@@ -565,6 +590,21 @@ input.cmr-grid-btn-h {
     rgba(0, 0, 0, 0.5);
   background-image: -moz-linear-gradient(center top, transparent, rgba(0, 0, 0, 0.2));
   background-image: -ms-linear-gradient(transparent, rgba(0, 0, 0, 0.2));
+  cursor: pointer;
+  border: 1px solid #555;
+  margin-left: 5px;
+  margin-top: 3px;
+  margin-bottom: 3px;
+  height: 20px;
+}
+input.cmr-grid-btn-o {
+  font-size: 12px;
+  border-radius: 3px;
+	background: #fac695; 
+	background: -moz-linear-gradient(top,  #fac695 0%, #f5ab66 47%, #ef8d31 100%); 
+	background: -webkit-linear-gradient(top,  #fac695 0%,#f5ab66 47%,#ef8d31 100%); 
+	background: linear-gradient(to bottom,  #fac695 0%,#f5ab66 47%,#ef8d31 100%); 
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fac695', endColorstr='#ef8d31',GradientType=0 ); 
   cursor: pointer;
   border: 1px solid #555;
   margin-left: 5px;
@@ -764,6 +804,8 @@ a.translate:hover {
 
 div.cmtlog {
   height: 40px !important;
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
 div.section-header {
@@ -827,12 +869,26 @@ img.approval-icon {
 span.source-syst {
   padding: 2px;
   color: White;
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.5px;
   text-shadow: none;
   border-radius: 3px;
-  background: green;
+  background: #777;
+  padding-left: 5px;
+  padding-right: 5px;
 }
+
+div.source-exp {
+  width: 60px;
+  padding: 2px;
+  font-size: 11px;
+  text-decoration: italic;
+  background: rgb(68, 193, 62);
+  padding-left: 5px;
+  padding-right: 5px;
+  color: white;
+}
+
 
 div.cmr-feedback-btn {
   cursor: pointer;
@@ -846,7 +902,7 @@ div.cmr-feedback-btn {
   z-index: 999;
   color: white;
   font-weight: 300 !important;
-  background-color: #367aa3 !important;
+  background-color: #2684ff !important;
   text-shadow: none;
 }
 
@@ -857,14 +913,10 @@ div.cmr-quick-search-btn {
   z-index: 999;
   color: white;
   font-weight: 300 !important;
-  /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#a9db80+0,96c56f+100;Green+3D+%232 */
   background: #a9db80; /* Old browsers */
   background: -moz-linear-gradient(top, #a9db80 0%, #96c56f 100%);
-  /* FF3.6-15 */
   background: -webkit-linear-gradient(top, #a9db80 0%, #96c56f 100%);
-  /* Chrome10-25,Safari5.1-6 */
   background: linear-gradient(to bottom, #a9db80 0%, #96c56f 100%);
-  /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
   filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a9db80',
     endColorstr='#96c56f', GradientType=0); /* IE6-9 */
   text-shadow: none;
@@ -874,3 +926,63 @@ div.cmr-quick-search-btn {
 div.login-info {
 	font-size: 14px;
 }
+
+.nihilo .dijitMenuItem {
+  font-family: IBM Plex Sans, Arial !important;	 
+}
+
+div.cmr-overall-status {
+	border: 1px Solid #AAA;
+	border-radius : 5px;
+	padding: 8px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+/*	text-align: center;*/
+	font-weight: bold;
+	text-shadow: 1px 1px #DDD;
+	float:right;
+	box-shadow: 1px 1px #DDD;
+	background: #a7c7dc; /* Old browsers */
+	background: -moz-linear-gradient(top,  #a7c7dc 0%, #85b2d3 100%); /* FF3.6-15 */
+	background: -webkit-linear-gradient(top,  #a7c7dc 0%,#85b2d3 100%); /* Chrome10-25,Safari5.1-6 */
+	background: linear-gradient(to bottom,  #a7c7dc 0%,#85b2d3 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a7c7dc', endColorstr='#85b2d3',GradientType=0 ); /* IE6-9 */
+}
+
+div.cmr-overall-status-dra {
+	background: #f2f5f6; /* Old browsers */
+	background: -moz-linear-gradient(top,  #f2f5f6 0%, #e3eaed 37%, #c8d7dc 100%); /* FF3.6-15 */
+	background: -webkit-linear-gradient(top,  #f2f5f6 0%,#e3eaed 37%,#c8d7dc 100%); /* Chrome10-25,Safari5.1-6 */
+	background: linear-gradient(to bottom,  #f2f5f6 0%,#e3eaed 37%,#c8d7dc 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f2f5f6', endColorstr='#c8d7dc',GradientType=0 ); /* IE6-9 */
+}
+
+div.cmr-overall-status-rej {
+	background: #febbbb; /* Old browsers */
+	background: -moz-linear-gradient(top,  #febbbb 0%, #fe9090 45%, #ff5c5c 100%); /* FF3.6-15 */
+	background: -webkit-linear-gradient(top,  #febbbb 0%,#fe9090 45%,#ff5c5c 100%); /* Chrome10-25,Safari5.1-6 */
+	background: linear-gradient(to bottom,  #febbbb 0%,#fe9090 45%,#ff5c5c 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#febbbb', endColorstr='#ff5c5c',GradientType=0 ); /* IE6-9 */
+}
+
+div.cmr-overall-status-com {
+	background: #cdeb8e; /* Old browsers */
+	background: -moz-linear-gradient(top,  #cdeb8e 0%, #a5c956 100%); /* FF3.6-15 */
+	background: -webkit-linear-gradient(top,  #cdeb8e 0%,#a5c956 100%); /* Chrome10-25,Safari5.1-6 */
+	background: linear-gradient(to bottom,  #cdeb8e 0%,#a5c956 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#cdeb8e', endColorstr='#a5c956',GradientType=0 ); /* IE6-9 */
+}
+
+div.cmr-overall-status-txt {
+  min-width: 130px;	
+  display: inline-block;
+}
+
+div.cmr-overall-status-btn {
+  display: inline-block;
+  vertical-align: top;
+  width: 120px;
+  text-align: right;
+}
+
+/* reno end */

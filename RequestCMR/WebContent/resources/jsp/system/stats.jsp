@@ -64,6 +64,20 @@
     FormManager.addValidator('dateTo', Validators.REQUIRED, [ 'Date (to)' ]);
     FormManager.addValidator('dateFrom', Validators.DATE('YYYY-MM-DD'), [ 'Date (from)' ]);
     FormManager.addValidator('dateTo', Validators.DATE('YYYY-MM-DD'), [ 'Date (to)' ]);
+    FormManager.addFormValidator((function() {
+      return {
+        validate : function() {
+          var from = moment(FormManager.getActualValue('dateFrom'), "YYYY-MM-DD");
+          var to = moment(FormManager.getActualValue('dateTo'), "YYYY-MM-DD");
+          
+          var duration = moment.duration(to.diff(from));
+          if (duration.asDays() > 180){
+            return new ValidationResult(null, false, 'Dates should not be more than 6 months.');
+          } 
+          return new ValidationResult(null, true);
+        }
+      };
+    })(), null, 'frmCMR');
     
     FormManager.ready();
   });
@@ -175,8 +189,9 @@ div#filterlabels table {
       </cmr:row>
       <cmr:row topPad="10">
         <cmr:column span="6">
-          <cmr:button label="Export Statistics to File" onClick="CmrMetrics.exportStats()" highlight="false" pad="true" />
-          <cmr:button label="Export Squad Report to File" onClick="CmrMetrics.exportSquadStats()" highlight="false" pad="true" />
+          <cmr:button label="Export Request Statistics" onClick="CmrMetrics.exportStats()" highlight="true" pad="true" />
+          <cmr:button label="Export Squad Report" onClick="CmrMetrics.exportSquadStats()" highlight="false" pad="true" />
+          <cmr:button label="Export Requester Statistics" onClick="CmrMetrics.exportRequesterStats()" highlight="false" pad="true" />
         </cmr:column>
       </cmr:row>
     </form:form>

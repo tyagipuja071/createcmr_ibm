@@ -410,7 +410,7 @@
         </cmr:row>
       </cmr:view>
    </cmr:view>
-   <cmr:view forCountry="758,760,603,607,626,644,651,668,693,694,695,699,704,705,707,708,740,741,787,820,821,826,889,358,359,363">
+   <cmr:view forCountry="758,760,603,607,626,644,651,668,693,694,695,699,704,705,707,708,740,741,787,820,821,826,889,358,359,363,620,642,677,680,752,762,767,768,772,805,808,823,832,849,850,865,729,675">
     <cmr:row>
       <cmr:column span="1">
        	<cmr:label fieldId="custNm4_view">
@@ -1005,7 +1005,7 @@
       </cmr:column>
     </cmr:view>
    
-    <cmr:view forCountry="666">
+    <cmr:view forCountry="666,864">
      <c:if test="${reqentry.mainAddrType == 'ZS01' || reqentry.mainAddrType == 'ZD01'}">
       <cmr:column span="1">
         <cmr:label fieldId="custPhone_view">

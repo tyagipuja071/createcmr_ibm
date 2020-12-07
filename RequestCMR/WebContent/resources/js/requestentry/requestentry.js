@@ -473,7 +473,53 @@ function doSaveChangeComments() {
   if (action == YourActions.Reject && rejReason == '') {
     cmr.showAlert('Please specify the Reject Reason');
     return;
-  } else if (action == YourActions.Reject && (rejReason == 'DUPC' || rejReason == 'MAPP') && (FormManager.getActualValue('rejSupplInfo1') == '' || FormManager.getActualValue('rejSupplInfo2') == '')) {
+  } else if (action == YourActions.Reject && rejReason == 'DUPC') {
+	    if (dojo.byId('rejInfo1Label').innerText == "CMR No.") {
+	        var rej = FormManager.getActualValue('rejectReason');
+	        var isscntry = FormManager.getActualValue('cmrIssuingCntry');
+	        mandt = FormManager.getActualValue('mandt');
+	        var ktokd = "ZS01";
+	        var rejInfo1 = FormManager.getActualValue('rejSupplInfo1');
+	        if (rejInfo1 != '') {
+	          var qParams = {
+	            ZZKV_CUSNO : rejInfo1,
+	            KATR6 : isscntry,
+	            MANDT : mandt
+	          };
+	          var result = cmr.query('VALIDATECMR', qParams);
+	          var cmrExist = result.ret1;
+	          if (cmrExist != undefined) {
+	            var qParams1 = {
+	              ZZKV_CUSNO : rejInfo1,
+	              MANDT : mandt,
+	              KATR6 : isscntry
+	            };
+	            var kunnr = cmr.query('GET.KUNNR.SOLDTO', qParams1);
+	            var kunnr1 = kunnr.ret1;
+	            if (kunnr1 != null || kunnr1 != undefined ) {
+	              dojo.byId('rejSupplInfo2').value = kunnr1;
+	              console.log(dojo.byId('rejSupplInfo2').value);
+	            }
+	            else{
+	            	cmr.showAlert('No Sold-To Kunnr found for ' + rejInfo1 +".");
+	            	return;
+	            }
+	            var rejInfo2 = FormManager.getActualValue('rejSupplInfo2');
+	            var rejField = '<input type="hidden" name="rejectReason" value="' + rej + '">';
+	            rejField += '<input type="hidden" name="rejSupplInfo1" value="' + rejInfo1 + '">';
+	            rejField += '<input type="hidden" name="rejSupplInfo2" value="' + rejInfo2 + '">';
+	            dojo.place(rejField, document.forms['frmCMR'], 'last');
+	          } else {
+	          cmr.showAlert('The CMR Number is not correct');
+	          return;
+	          } 
+	        }
+	        else{
+	        	cmr.showAlert('Please specify ' + dojo.byId('rejInfo1Label').innerText +".");
+	        	return;
+	        }
+	      }
+	    } else if (action == YourActions.Reject && (rejReason == 'DUPC' || rejReason == 'MAPP') && (FormManager.getActualValue('rejSupplInfo1') == '' || FormManager.getActualValue('rejSupplInfo2') == '')) {
     cmr.showAlert('Please specify ' + dojo.byId('rejInfo1Label').innerText + " and " + dojo.byId('rejInfo2Label').innerText + ".");
     return;
   } else if (action == YourActions.Reject && (rejReason == 'MDOC' || rejReason == 'DUPR' || rejReason == 'TYPR') && FormManager.getActualValue('rejSupplInfo1') == '') {
@@ -705,7 +751,7 @@ function afterConfigChange() {
       FormManager.show('DeactivateToActivateCMR', 'func');
       if (dijit.byId('func')) {
         FormManager.getField('func').set('checked', true);
-      } else {
+      } else if (dojo.byId('func')) {
         dojo.byId('func').checked = true;
       }
       FormManager.disable('func');
@@ -1020,6 +1066,7 @@ var _moveOk = false;
 
 function addMoveHandler() {
   window.addEventListener('scroll', moveYourActions);
+  moveYourActions();
   return;
 }
 /**
@@ -1031,7 +1078,7 @@ function moveYourActions(e) {
   var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
   if ((scrollTop) > 157) {
     elem.css({
-      'top' : 33
+      'top' : 0
     });
   } else {
     var pos = $('#ibm-secondary-tabs').offset();
@@ -1336,6 +1383,7 @@ function setRejSupplInfoFields(value) {
     cmr.showNode('rejInfo2Div');
     dojo.byId('rejInfo1Label').innerText = "CMR No.";
     dojo.byId('rejInfo2Label').innerText = "Sold-to KUNNR";
+    FormManager.readOnly('rejSupplInfo2');
     break;
   case "MDOC":
     cmr.showNode('rejInfo1Div');
@@ -1369,39 +1417,53 @@ function setRejSupplInfoFields(value) {
  * Method to check whether for a scenario dnb matching is allowed or not
  */
 function isSkipDnbMatching() {
-  var custGrp = FormManager.getActualValue('custGrp');
+   var custGrp = FormManager.getActualValue('custGrp');
   var custSubGroup = FormManager.getActualValue('custSubGrp');
   var dnbPrimary = FormManager.getActualValue("dnbPrimary");
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var countryUse = FormManager.getActualValue("countryUse");
   var subRegionCd = countryUse != null && countryUse.length > 0 ? countryUse : cntry;
-  if (custGrp != null && custGrp != '' && custSubGrp != null && custSubGrp != '' && dnbPrimary == 'Y') {
-    var qParams = {
-      CNTRY : cntry,
-      CUST_TYP : custGrp,
-      CUST_SUB_TYP : custSubGroup,
-      SUBREGION_CD : subRegionCd
-    };
-    var result = cmr.query("AUTO.SKIP_VERIFICATION_INDC", qParams);
-    if (result.ret1 != null && result.ret1 == "Y") {
-      return true;
-    } else {
-      qParams.CUST_SUB_GRP = "*";
-      result = cmr.query("AUTO.SKIP_VERIFICATION_INDC", qParams);
-      if (result.ret1 != null && result.ret1 == 'Y') {
-        return true;
-      } else {
-        qParams.CUST_GRP = "*";
-        result = cmr.query("AUTO.SKIP_VERIFICATION_INDC", qParams);
-        if (result.ret1 != null && result.ret1 == 'Y') {
+  if(dnbPrimary == 'Y') {
+    if (custGrp != null && custGrp != '' && custSubGrp != null && custSubGrp != '') {
+      var qParams = {
+        CNTRY : cntry,
+        CUST_TYP : custGrp,
+        CUST_SUB_TYP : custSubGroup,
+        SUBREGION_CD : subRegionCd
+      };
+      var result = cmr.query("AUTO.SKIP_VERIFICATION_INDC", qParams);
+      if (result.ret1 != null && result.ret1 != "") {
+        if(result.ret1=='Y'){
           return true;
+        } else if (result.ret1=='N'){
+          return false;
+        }
+      } else {
+        qParams.CUST_SUB_TYP = "*";
+        result = cmr.query("AUTO.SKIP_VERIFICATION_INDC", qParams);
+        if (result.ret1 != null && result.ret1 != '') {
+          if(result.ret1 == 'Y'){
+            return true;
+          } else if (result.ret1 == 'N'){
+            return false;
+          }
+        } else {
+          qParams.CUST_TYP = "*";
+          result = cmr.query("AUTO.SKIP_VERIFICATION_INDC", qParams);
+          if (result.ret1 != null && result.ret1 != '') {
+            if(result.ret1=='Y'){
+              return true;
+            } else if (result.ret1=='N'){
+              return false;
+            }
+          }
         }
       }
-    }
-  } else if (dnbPrimary == 'N') {
+      return false;
+    } else return true;
+  } else {
     return true;
   }
-  return false;
 }
 
 /**
@@ -1413,7 +1475,7 @@ function handleRequiredDnBSearch() {
   var reqStatus = FormManager.getActualValue('reqStatus');
   if (reqId != null && reqId != '' && reqType == 'C' && reqStatus == 'DRA' && _dnbSearchHandler == null) {
     _dnbSearchHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
-      if (!isSkipDnbMatching()) {
+      if (!isSkipDnbMatching() && FormManager.getActualValue('viewOnlyMode') != 'true') {
         cmr.showNode('dnbRequired');
         cmr.showNode('dnbRequiredIndc');
       } else {
@@ -1421,6 +1483,10 @@ function handleRequiredDnBSearch() {
         cmr.hideNode('dnbRequiredIndc');
       }
     });
+  }
+  
+  if(_dnbSearchHandler && _dnbSearchHandler[0]){
+    _dnbSearchHandler[0].onChange();
   }
 }
 
@@ -1608,3 +1674,4 @@ function autoSaveRequest() {
   }
   FormManager.doAction('frmCMR', 'SAV', true, 'Saving the request...');
 }
+

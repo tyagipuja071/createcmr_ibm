@@ -127,7 +127,7 @@ visibility: hidden !IMPORTANT;
   <jsp:include page="detailstrip.jsp" />
 
   <cmr:row addBackground="true" topPad="10">
-    <cmr:column span="1" width="190">
+    <cmr:column span="1" width="220">
       <p>
         <cmr:label fieldId="dplCheck">
               DPL Check Result:
@@ -155,7 +155,7 @@ visibility: hidden !IMPORTANT;
         </div>
       </p>
     </cmr:column>
-    <cmr:column span="1" width="190">
+    <cmr:column span="1" width="220">
       <p>
         <cmr:label fieldId="dplCheck">
           Performed By:
@@ -165,7 +165,7 @@ visibility: hidden !IMPORTANT;
         </div>
       </p>
     </cmr:column>
-    <cmr:column span="1" width="170">
+    <cmr:column span="1" width="220">
       <p>
         <cmr:label fieldId="dplCheck">
           DPL Check Date:
@@ -175,7 +175,7 @@ visibility: hidden !IMPORTANT;
         </div>
       </p>
     </cmr:column>
-    <cmr:column span="1" width="170">
+    <cmr:column span="1" width="250">
       <%if (!readOnly){ %>
       <p>
         <input type="button" value="DPL Check" class="cmr-grid-btn-h btn-search" onclick="doDplCheck()"> 
@@ -187,7 +187,7 @@ visibility: hidden !IMPORTANT;
 
   <c:if test="${fn:trim(reqentry.dplChkResult) == 'AF' || fn:trim(reqentry.dplChkResult) == 'SF'}">
     <cmr:row>
-      <cmr:column span="1" width="190">
+      <cmr:column span="1" width="220">
         <p>
           <cmr:label fieldId="dplCheck">
               DPL Assessment Result:
@@ -209,7 +209,7 @@ visibility: hidden !IMPORTANT;
           </div>
         </p>
       </cmr:column>
-      <cmr:column span="1" width="190">
+      <cmr:column span="1" width="220">
         <p>
           <cmr:label fieldId="dplCheck">
             Assessed By:
@@ -219,7 +219,7 @@ visibility: hidden !IMPORTANT;
           </div>
         </p>
       </cmr:column>
-      <cmr:column span="1" width="170">
+      <cmr:column span="1" width="220">
         <p>
           <cmr:label fieldId="dplCheck">
             Assessment Date:
@@ -419,11 +419,6 @@ visibility: hidden !IMPORTANT;
 			<cmr:gridCol width="100px" field="dept" header="TIN#"></cmr:gridCol>  		    	
         </cmr:view>
         
-         <!-- ICE# -->
-        <cmr:view forCountry="642">
-			<cmr:gridCol width="100px" field="dept" header="ICE#"></cmr:gridCol>  		    	
-        </cmr:view> 
-        
         <!-- Story : 1830918 -->
         
         <cmr:view forCountry="848">
@@ -510,7 +505,7 @@ visibility: hidden !IMPORTANT;
         </cmr:view>
 
         <!-- Phone -->
-        <cmr:view exceptForCountry="758,760,603,607,626,644,651,668,693,694,695,699,704,705,707,708,740,741,787,820,821,826,889,358,359,363">
+        <cmr:view exceptForCountry="758,760,603,607,626,644,651,668,693,694,695,699,704,705,707,708,740,741,787,820,821,826,889,358,359,363,620,642,675,677,680,752,762,767,768,772,805,808,823,832,849,850,865,729">
           <cmr:gridCol width="90px" field="custPhone" header="Phone #" />
         </cmr:view>
         

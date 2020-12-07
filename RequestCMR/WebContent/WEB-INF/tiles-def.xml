@@ -134,6 +134,12 @@
     <put-attribute name="body" value="/resources/jsp/system/stats.jsp" />
   </definition>
 
+  <definition name="autostats" extends="base">
+    <put-attribute name="title" value="CreateCMR | Automation Statistics" />
+    <put-attribute name="body" value="/resources/jsp/system/autostats.jsp" />
+  </definition>
+
+
   <!-- Request Entry -->
   <definition name="ibm" extends="base">
     <put-attribute name="title" value="CreateCMR | IBM" />

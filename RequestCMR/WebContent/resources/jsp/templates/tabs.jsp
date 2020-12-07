@@ -103,6 +103,7 @@ boolean approver = user != null && user.isApprover();
 				</c:if>
         <c:if test="${primaryTabId ==  'METRICS'}">
             <li id="METRICS_STATS_TAB"><a href="javascript: goToUrl('${contextPath}/metrics/stats')">Request Statistics</a></li>
+            <li id="METRICS_ASTATS_TAB"><a href="javascript: goToUrl('${contextPath}/metrics/autostats')">Automation Statistics</a></li>
             <li id="METRICS_DAILY_TAB"><a href="javascript: goToUrl('${contextPath}/metrics/daily')">Daily Totals</a></li>
             <%if (SystemConfiguration.isAdmin(request)){ %> 
             <li id="METRICS_USAGE_TAB"><a href="javascript: goToUrl('${contextPath}/metrics/usage')">Web Service Usage</a></li>
@@ -122,10 +123,10 @@ boolean approver = user != null && user.isApprover();
 				  
     			<c:if test="${primaryTabId ==  'WORKFLOW'}">
 				  <!-- Home Secondary Tabs -->
-				  <li id="OPEN_REQ_TAB"><a href="javascript: goToUrl('${contextPath}/workflow/open')">My Open Requests</a></li>
-				  <li id="COMPLETED_REQ_TAB"><a href="javascript: goToUrl('${contextPath}/workflow/completed')">My Completed Requests</a></li>
-				  <li id="REJECTED_REQ_TAB"><a href="javascript: goToUrl('${contextPath}/workflow/rejected')">My Rejected Requests</a></li>
-				  <li id="ALL_REQ_TAB"><a href="javascript: goToUrl('${contextPath}/workflow/all')">All My Requests</a></li>
+				  <li id="OPEN_REQ_TAB"><a href="javascript: goToUrl('${contextPath}/workflow/open')">Open Requests</a></li>
+				  <li id="COMPLETED_REQ_TAB"><a href="javascript: goToUrl('${contextPath}/workflow/completed')">Completed Requests</a></li>
+				  <li id="REJECTED_REQ_TAB"><a href="javascript: goToUrl('${contextPath}/workflow/rejected')">Rejected Requests</a></li>
+				  <li id="ALL_REQ_TAB"><a href="javascript: goToUrl('${contextPath}/workflow/all')">All Requests</a></li>
 				  <li id="SEARCH_REQUESTS_TAB"><a href="javascript: goToUrl('${contextPath}/workflow/search')">Search Requests</a></li>
 				</c:if>
         
