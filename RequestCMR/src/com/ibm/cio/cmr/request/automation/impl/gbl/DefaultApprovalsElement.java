@@ -59,13 +59,13 @@ public class DefaultApprovalsElement extends ApprovalsElement {
     ApprovalService service = new ApprovalService();
     String approvalsResult = service.processDefaultApproval(entityManager, reqId, admin.getReqType(), requester, model);
     LOG.trace("Approvals result: " + approvalsResult);
-    if (StringUtils.isBlank(approvalsResult) || "NONE".equalsIgnoreCase(approvalsResult)) {
+    if (engineData.hasPositiveCheckStatus("SKIP_APPROVALS")) {
+      result.setOnError(false);
+      result.setDetails("Skip processing of element as requester is from CMDE team.");
+      result.setResults("Skipped");
+    } else if (StringUtils.isBlank(approvalsResult) || "NONE".equalsIgnoreCase(approvalsResult)) {
       result.setResults("None");
       result.setDetails("No approvals are required.");
-    } else if (engineData.hasPositiveCheckStatus("SKIP_APPROVALS")) {
-      result.setOnError(false);
-      result.setDetails("No approvals are required.");
-      result.setResults("Skipped");
     } else {
       result.setOnError(true);
       result.setResults("Generated");
