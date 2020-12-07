@@ -565,6 +565,22 @@ function enterpriseMalta() {
 
 }
 
+function enterpriseValidation() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var enterprise = FormManager.getActualValue('enterprise');
+
+        if (enterprise.length >= 1 && enterprise.length != 6) {
+          return new ValidationResult(null, false, 'Enterprise Number should be 6 digit long.');
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 function streetValidatorCustom() {
   console.log("streetValidatorCustom..............");
   FormManager.addFormValidator((function() {
@@ -822,9 +838,11 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(addMaltaLandedCountryHandler, [ SysLoc.MALTA ]);
   GEOHandler.addAfterTemplateLoad(addAfterTemplateLoadMalta, [ SysLoc.MALTA ]);
   GEOHandler.registerValidator(addOrdBlkValidator, [ SysLoc.MALTA ], null, true);
+  GEOHandler.registerValidator(enterpriseValidation, [ SysLoc.MALTA ], null, true);
   GEOHandler.registerValidator(addAddressTypeValidator, [ SysLoc.MALTA ], null, true);
   GEOHandler.registerValidator(addAddressFieldValidators, [ SysLoc.MALTA ], null, true);
- // GEOHandler.registerValidator(addISICValidatorForScenario, [ SysLoc.MALTA ], null, true);
+  // GEOHandler.registerValidator(addISICValidatorForScenario, [ SysLoc.MALTA ],
+  // null, true);
   GEOHandler.registerValidator(addIsicClassificationCodeValidator, [ SysLoc.MALTA ], null, true);
 
 });
