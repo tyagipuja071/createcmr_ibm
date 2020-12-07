@@ -637,7 +637,7 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
           ${summary.data.vat}
 				</cmr:column>
 
-        <cmr:column span="1" width="90" forGEO="EMEA,MCO,NORDX,CEMEA">
+        <cmr:column span="1" width="90" forGEO="EMEA,MCO,NORDX,CEMEA" forCountry="780">
           <cmr:view exceptForCountry="758">
             <label><cmr:fieldLabel fieldId="VATExempt" />: </label>
           </cmr:view>

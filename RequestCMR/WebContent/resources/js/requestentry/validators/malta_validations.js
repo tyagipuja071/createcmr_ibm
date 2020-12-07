@@ -824,7 +824,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addOrdBlkValidator, [ SysLoc.MALTA ], null, true);
   GEOHandler.registerValidator(addAddressTypeValidator, [ SysLoc.MALTA ], null, true);
   GEOHandler.registerValidator(addAddressFieldValidators, [ SysLoc.MALTA ], null, true);
-  GEOHandler.registerValidator(addISICValidatorForScenario, [ SysLoc.MALTA ], null, true);
+ // GEOHandler.registerValidator(addISICValidatorForScenario, [ SysLoc.MALTA ], null, true);
   GEOHandler.registerValidator(addIsicClassificationCodeValidator, [ SysLoc.MALTA ], null, true);
 
 });
