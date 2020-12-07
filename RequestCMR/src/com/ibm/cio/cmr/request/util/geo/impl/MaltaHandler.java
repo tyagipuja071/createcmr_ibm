@@ -635,11 +635,16 @@ public class MaltaHandler extends BaseSOFHandler {
     LOG.trace("Currency: " + data.getLegacyCurrencyCd());
 
     // MCO Africa - For SBO values exceeding 4 char length
-    String sBO = this.currentImportValues.get("SBO");
+    String sBO = this.currentImportValues.get("SearchTerm");
     if (!(StringUtils.isEmpty(sBO))) {
       if (sBO.length() > 4) {
         data.setSalesBusOffCd(sBO.substring(0, 4));
       }
+    }
+
+    String AbbLoc = this.currentImportValues.get("AbbrevLocation");
+    if (!(StringUtils.isEmpty(AbbLoc))) {
+      data.setAbbrevLocn(AbbLoc);
     }
 
     data.setEmbargoCd(this.currentImportValues.get("EmbargoCode"));
@@ -752,9 +757,9 @@ public class MaltaHandler extends BaseSOFHandler {
 
     if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCustPrefLang(), newData.getCustPrefLang())) {
       update = new UpdatedDataModel();
-      update.setDataField(PageManager.getLabel(cmrCountry, "PrefLang", "-"));
-      update.setNewData(service.getCodeAndDescription(newData.getCustPrefLang(), "PrefLang", cmrCountry));
-      update.setOldData(service.getCodeAndDescription(oldData.getCustPrefLang(), "PrefLang", cmrCountry));
+      update.setDataField(PageManager.getLabel(cmrCountry, "CustLang", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getCustPrefLang(), "CustLang", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getCustPrefLang(), "CustLang", cmrCountry));
       results.add(update);
     }
 
