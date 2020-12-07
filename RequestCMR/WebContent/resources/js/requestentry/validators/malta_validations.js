@@ -563,10 +563,6 @@ function enterpriseMalta() {
     FormManager.enable('enterprise');
   }
 
-  if (cmrNo.length >= 1 && cmrNo.length != 6) {
-    return new ValidationResult(null, false, 'CMR Number should be 6 digit long.');
-  }
-
 }
 
 function enterpriseValidation() {
