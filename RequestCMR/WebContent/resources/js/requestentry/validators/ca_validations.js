@@ -69,7 +69,7 @@ function addInacCdValidator() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
-function addNameConfirmationAttachmentValidator() {
+function addChangeNameAttachmentValidator() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
@@ -86,39 +86,14 @@ function addNameConfirmationAttachmentValidator() {
             });
 
             if (ret == null || ret.ret1 == null) {
-              return new ValidationResult(null, false, 'Legal Name Change Letter in Attachment tab is required.');
-            } else {
-              return new ValidationResult(null, true);
-            }
-          } else {
-            return new ValidationResult(null, true);
-          }
-        }
-      }
-    };
-  })(), 'MAIN_ATTACH_TAB', 'frmCMR');
-}
-
-function addTerritoryAttachmentValidator() {
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var reqType = FormManager.getActualValue('reqType');
-        var mainCustNm1 = FormManager.getActualValue("mainCustNm1");
-        var oldCustNm1 = FormManager.getActualValue("oldCustNm1");
-        var mainCustNm2 = FormManager.getActualValue("mainCustNm2");
-        var oldCustNm2 = FormManager.getActualValue("oldCustNm2");
-        if (typeof (_pagemodel) != 'undefined') {
-          if (reqType == 'U' && (mainCustNm1 != oldCustNm1 || mainCustNm2 != oldCustNm2)) {
-            var id = FormManager.getActualValue('reqId');
-            var ret = cmr.query('CHECK_TERRITORY_ATTACHMENT', {
-              ID : id
-            });
-
-            if (ret == null || ret.ret1 == null) {
-              return new ValidationResult(null, false, 'TERRITORY Manager Approval in Attachment tab is required.');
-            } else {
-              return new ValidationResult(null, true);
+              var ret2 = cmr.query('CHECK_TERRITORY_ATTACHMENT', {
+                ID : id
+              });
+              if (ret2 == null || ret2.ret1 == null) {
+                return new ValidationResult(null, false, 'Legal Name Change Letter OR Territory Manager Approval in Attachment tab is required.');
+              } else {
+                return new ValidationResult(null, true);
+              }
             }
           } else {
             return new ValidationResult(null, true);
@@ -318,8 +293,7 @@ dojo.addOnLoad(function() {
   // validators - register one each
   GEOHandler.registerValidator(addAddressRecordTypeValidator, [ SysLoc.CANADA ], null, true);
   GEOHandler.registerValidator(addInacCdValidator, [ SysLoc.CANADA ], null, true);
-  GEOHandler.registerValidator(addNameConfirmationAttachmentValidator, [ SysLoc.CANADA ], null, true);
-  GEOHandler.registerValidator(addTerritoryAttachmentValidator, [ SysLoc.CANADA ], null, true);
+  GEOHandler.registerValidator(addChangeNameAttachmentValidator, [ SysLoc.CANADA ], null, true);
   GEOHandler.registerValidator(addDPLCheckValidator, [ SysLoc.CANADA ], GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(addDPLAssessmentValidator, [ SysLoc.CANADA ], GEOHandler.ROLE_REQUESTER, true);
 
