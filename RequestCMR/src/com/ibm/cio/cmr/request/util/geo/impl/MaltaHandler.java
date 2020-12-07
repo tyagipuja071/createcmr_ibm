@@ -760,9 +760,9 @@ public class MaltaHandler extends BaseSOFHandler {
 
     if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getSalesBusOffCd(), newData.getSalesBusOffCd())) {
       update = new UpdatedDataModel();
-      update.setDataField(PageManager.getLabel(cmrCountry, "SBO", "-"));
-      update.setNewData(service.getCodeAndDescription(newData.getSalesBusOffCd(), "SBO", cmrCountry));
-      update.setOldData(service.getCodeAndDescription(oldData.getSalesBusOffCd(), "SBO", cmrCountry));
+      update.setDataField(PageManager.getLabel(cmrCountry, "SalesBusOff", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getSalesBusOffCd(), "SalesBusOff", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getSalesBusOffCd(), "SalesBusOff", cmrCountry));
       results.add(update);
     }
 

@@ -37,10 +37,10 @@
       <cmr:column span="1" width="240">
         ${summary.data.embargoCd}
       </cmr:column>
-     <cmr:column span="1" width="90">
+     <cmr:column span="1" width="90" exceptForCountry="780">
       <label><cmr:fieldLabel fieldId="SpecialTaxCd" />: </label>
      </cmr:column>
-    <cmr:column span="1" width="240">
+    <cmr:column span="1" width="240" exceptForCountry="780">
       <%
         String taxCd = DropdownListController.getDescription("SpecialTaxCd", data.getSpecialTaxCd(), cntry);
       %>
