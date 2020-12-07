@@ -111,7 +111,11 @@ var SysLoc = (function() {
     UZBEKISTAN : '741',
     MOLDOVA : '787',
     BOSNIA_HERZEGOVINA : '699',
+<<<<<<< HEAD
 		MADAGASCAR : '700',
+=======
+    MADAGASCAR : '700',
+>>>>>>> refs/remotes/origin/yellow_canada
     CANADA : '649'
   };
 })();
