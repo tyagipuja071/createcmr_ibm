@@ -109,6 +109,7 @@ function afterConfigForFR() {
 
   reqReasonOnChange();
   filterCmrnoP();
+  cmrNoEnable();
 }
 
 function setINACOnScenario() {
@@ -2450,6 +2451,18 @@ function addCmrNoValidator() {
       }
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
+function cmrNoEnable() {
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var reqType = FormManager.getActualValue('reqType');
+  var cmrNo = FormManager.getActualValue('cmrNo');
+
+  if (role != "PROCESSOR" || FormManager.getActualValue('viewOnlyPage') == 'true' || reqType == 'U') {
+    FormManager.readOnly('cmrNo');
+  } else {
+    FormManager.enable('cmrNo');
+  }
 }
 
 dojo.addOnLoad(function() {
