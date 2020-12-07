@@ -773,4 +773,9 @@ public class GermanyUtil extends AutomationUtil {
     return isDnBRelevantFieldUpdated;
   }
 
+  @Override
+  public List<String> getSkipChecksRequestTypesforCMDE() {
+    return Arrays.asList("C", "U", "M");
+  }
+
 }

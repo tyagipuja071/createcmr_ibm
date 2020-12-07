@@ -961,4 +961,9 @@ public class FranceUtil extends AutomationUtil {
 
     return isRelevantFieldUpdated;
   }
+
+  @Override
+  public List<String> getSkipChecksRequestTypesforCMDE() {
+    return Arrays.asList("C", "U", "M", "D", "R");
+  }
 }
