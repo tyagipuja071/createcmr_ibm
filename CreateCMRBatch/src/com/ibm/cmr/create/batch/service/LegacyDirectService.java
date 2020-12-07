@@ -368,7 +368,7 @@ public class LegacyDirectService extends TransConnService {
         CEEProcessService theService = new CEEProcessService();
         theService.processDupCreate(entityManager, admin, cmrObjects);
       }
-
+      
       // Add to build duplicate CMR data for ME countries -CMR6019
       if ("Y".equals(cmrObjects.getData().getDupCmrIndc())) {
         DupCMRProcessService theService = new DupCMRProcessService();
@@ -2985,7 +2985,8 @@ public class LegacyDirectService extends TransConnService {
           for (Addr addr : addresses) {
             if ("ZS01".equals(addr.getId().getAddrType())) {
               AddrRdc addrRdc = getAddrRdcRecord(entityManager, addr);
-              if (addrRdc == null || (addrRdc != null && !addr.getCustPhone().equals(addrRdc.getCustPhone()))) {
+              if (addrRdc == null || (addrRdc != null && StringUtils.isBlank(addr.getCustPhone()) && !StringUtils.isBlank(addrRdc.getCustPhone()))
+                  || (addrRdc != null && addr.getCustPhone() != null && !addr.getCustPhone().equals(addrRdc.getCustPhone()))) {
                 isDataUpdated = true;
               }
             }
@@ -3013,9 +3014,11 @@ public class LegacyDirectService extends TransConnService {
             continue;
           }
 
-          if (transformer.skipLegacyAddressData(entityManager, cmrObjects, addr, false)) {
-            LOG.debug("Skipping RDC update for address :" + addr.getId().getAddrType());
-            continue;
+          if (!"PG01".equals(addr.getId().getAddrType())) { 
+            if (transformer.skipLegacyAddressData(entityManager, cmrObjects, addr, false)) {
+              LOG.debug("Skipping RDC update for address :" + addr.getId().getAddrType());
+              continue;
+            } 
           }
 
           request.setSapNo(addr.getSapNo());

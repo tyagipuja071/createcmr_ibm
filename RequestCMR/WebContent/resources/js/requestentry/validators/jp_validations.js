@@ -867,6 +867,11 @@ function toggleAddrTypesForJP(cntry, addressMode) {
       cmr.hideNode('radiocont_ZP06');
       cmr.hideNode('radiocont_ZP07');
       cmr.hideNode('radiocont_ZP08');
+      var custSubGrp = FormManager.getActualValue('custSubGrp');
+      if (custSubGrp == 'BPWPQ') {
+        cmr.hideNode('radiocont_ZI02');
+        cmr.hideNode('radiocont_ZP09');
+      }
     }
   }
   return;
@@ -4862,7 +4867,7 @@ function setSalesBusOffCdRequired() {
     break;
   case 'BVMDS':
     FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'Office Code' ], 'MAIN_IBM_TAB');
-	break;
+    break;
   default:
     if (_role == 'Processor') {
       FormManager.enable('salesBusOffCd');

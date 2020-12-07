@@ -43,7 +43,10 @@ String processingType = PageManager.getProcessingType(reqentry.getCmrIssuingCntr
   <cmr:view forCountry="726">
   <script src="${resourcesPath}/js/requestentry/validators/gr_validations.js?${cmrv}" type="text/javascript"></script>
   </cmr:view>
-  <cmr:view exceptForCountry="726,862,666">
+  <cmr:view forCountry="666">
+  <script src="${resourcesPath}/js/requestentry/validators/cy_validations.js?${cmrv}" type="text/javascript"></script>
+  </cmr:view>
+  <cmr:view exceptForCountry="726,666,862">
   <script src="${resourcesPath}/js/requestentry/validators/emea_validations.js?${cmrv}" type="text/javascript"></script>
   </cmr:view>
 </cmr:view>
@@ -71,12 +74,16 @@ String processingType = PageManager.getProcessingType(reqentry.getCmrIssuingCntr
   <script src="${resourcesPath}/js/requestentry/validators/mco1_validations.js?${cmrv}" type="text/javascript"></script>
 </cmr:view>
 
-<cmr:view forGEO="MCO2">
+<cmr:view forGEO="MCO2" exceptForCountry="780">
   <%  if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) { %>  
   	<script src="${resourcesPath}/js/requestentry/validators/mco2_validations_ld.js?${cmrv}" type="text/javascript"></script>
   <%  }  else { %>  
 	<script src="${resourcesPath}/js/requestentry/validators/mco2_validations.js?${cmrv}" type="text/javascript"></script>
   <%  } %>
+</cmr:view>
+
+<cmr:view forGEO="MCO2" forCountry="780">
+  <script src="${resourcesPath}/js/requestentry/validators/malta_validations.js?${cmrv}" type="text/javascript"></script>
 </cmr:view>
 
 <cmr:view forGEO="FR">
@@ -115,5 +122,9 @@ String processingType = PageManager.getProcessingType(reqentry.getCmrIssuingCntr
 
 <cmr:view forGEO="SWISS">
   <script src="${resourcesPath}/js/requestentry/validators/swiss_validations.js?${cmrv}" type="text/javascript"></script>
+</cmr:view>
+
+<cmr:view forCountry="649">
+  <script src="${resourcesPath}/js/requestentry/validators/ca_validations.js?${cmrv}" type="text/javascript"></script>
 </cmr:view>
 

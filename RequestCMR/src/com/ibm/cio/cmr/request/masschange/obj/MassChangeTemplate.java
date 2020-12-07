@@ -31,8 +31,11 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import com.ibm.cio.cmr.request.automation.util.geo.FranceUtil;
 import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation.ValidationRow;
+import com.ibm.cio.cmr.request.util.IERPRequestUtils;
 import com.ibm.cio.cmr.request.util.at.ATUtil;
+import com.ibm.cio.cmr.request.util.geo.impl.FranceHandler;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
 import com.ibm.cio.cmr.request.util.swiss.SwissUtil;
 
@@ -199,18 +202,29 @@ public class MassChangeTemplate {
         for (TemplateTab tab : this.tabs) {
           validations.add(tab.validateSwiss(entityManager, book, country, maxRows, hwFlagMap));
         }
+      } else if (IERPRequestUtils.isCountryDREnabled(entityManager, country)) {
+        IERPRequestUtils.validateMassUpdateTemplateDupFills(validations, book, maxRows, country);
+        for (TemplateTab tab : this.tabs) {
+          validations.add(tab.validate(entityManager, book, country, maxRows));
+        }
       } else if (LegacyDirectUtil.isCountryLegacyDirectEnabled(entityManager, country)) {
         LegacyDirectUtil.validateMassUpdateTemplateDupFills(validations, book, maxRows, country);
         for (TemplateTab tab : this.tabs) {
           validations.add(tab.validate(entityManager, book, country, maxRows));
         }
+      } else if (FranceUtil.isCountryFREnabled(entityManager, country)) {
+        FranceHandler.validateFRMassUpdateTemplateDupFills(validations, book, maxRows, country);
+        for (TemplateTab tab : this.tabs) {
+          validations.add(tab.validate(entityManager, book, country, maxRows));
+        }
+
       } else if (ATUtil.isCountryATEnabled(entityManager, country)) {// CMR-800
         String[] sheetNames = { "Sold To", "Mail to", "Bill To", "Ship To", "Install At" };// CMR-2065
-                                                                                    // installing
-                                                                                    // change
-                                                                                    // to
-                                                                                    // Sold
-                                                                                    // To
+        // installing
+        // change
+        // to
+        // Sold
+        // To
         for (String name : sheetNames) {
           XSSFSheet sheet = book.getSheet(name);
           LOG.debug("validating name 3 for sheet " + name);
@@ -290,7 +304,7 @@ public class MassChangeTemplate {
               // continue;
               // }
               // }
-              //
+              // String name3 = "";
               // if (StringUtils.isNotBlank(dept) && !StringUtils.equals(dept,
               // "@")) {
               // name3 += dept;
