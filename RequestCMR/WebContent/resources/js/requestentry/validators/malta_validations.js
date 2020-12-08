@@ -654,9 +654,24 @@ function addValidatorStreet() {
 var _addrTypesForMCO2 = [ 'ZD01', 'ZI01', 'ZP01', 'ZS01', 'ZS02' ];
 var addrTypeHandler = [];
 
+function cmrNoforProspect() {
+  var ifProspect = FormManager.getActualValue('prospLegalInd');
+  if (dijit.byId('prospLegalInd')) {
+    ifProspect = dijit.byId('prospLegalInd').get('checked') ? 'Y' : 'N';
+  }
+  console.log("cmrNoforProspect ifProspect:" + ifProspect);
+  if ('Y' == ifProspect) {
+    FormManager.readOnly('cmrNo');
+  } else {
+    FormManager.enable('cmrNo');
+  }
+
+}
+
 function addAfterConfigMalta() {
   lockOrderBlock();
   enterpriseMalta();
+  cmrNoforProspect();
   hidePpsceidExceptBP();
   classFieldBehaviour();
   setVatValidatorMalta();
