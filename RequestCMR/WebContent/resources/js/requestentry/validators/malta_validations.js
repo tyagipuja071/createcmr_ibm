@@ -108,6 +108,27 @@ function addAddressTypeValidator() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
+        var addrType = FormManager.getActualValue('addrType_ZS01');
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount == 0) {
+          var zs01MT = 0;
+
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+            record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+            if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+              record = _allAddressData[i];
+            }
+            type = record.addrType;
+            if (typeof (type) == 'object') {
+              type = type[0];
+            }
+            if (type == 'ZS01') {
+              zs01MT++;
+            }
+          }
+          if (zs01MT == 0) {
+            return new ValidationResult(null, false, 'Sold-To address types is mandatory.');
+          }
+        }
         if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
           var record = null;
           var type = null;
