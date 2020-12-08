@@ -239,12 +239,9 @@ function ADDRESS_GRID_showCheck(value, rowIndex, grid) {
  * addAfterConfig calls to
  */
 function afterConfigForCA() {
-  if (role.toUpperCase() == 'REQUESTER' || role.toUpperCase() == 'VIEWER') {
+  if (role.toUpperCase() == 'VIEWER') {
     FormManager.readOnly('abbrevLocn');
     FormManager.readOnly('abbrevNm');
-  } else {
-    FormManager.enable('abbrevLocn');
-    FormManager.enable('abbrevNm');
   }
 
   addFieldHandlers();
@@ -286,6 +283,46 @@ function addFieldHandlers() {
   }
 }
 
+function addLocationNoValidator() {
+  FormManager.addFormValidator(
+      (function() {
+        return {
+          validate : function() {
+            var CND_LOC_CD = [ 'AG000', 'AI000', 'AW000', 'BS000', 'BB000', 'BM000', 'BQ000', 'BV000', 'CW000', 'DM000', 'DO000', 'GD000', 'GP000', 'GY000', 'HT000', 'KN000', 'KY000', 'JM000',
+                'LC000', 'MQ000', 'MS000', 'PR000', 'SR000', 'SX000', 'TC000', 'TT000', 'VC000', 'VG000' ];
+            var CND_CNTRY_CODE = [ 'AG', 'AI', 'AW', 'BS', 'BB', 'BM', 'BQ', 'BV', 'CW', 'DM', 'DO', 'GD', 'GP', 'GY', 'HT', 'KN', 'KY', 'JM', 'LC', 'MQ', 'MS', 'PR', 'SR', 'SX', 'TC', 'TT', 'VC',
+                'VG' ];
+            var custGrp = FormManager.getActualValue('custGrp');
+            var custSubGrp = FormManager.getActualValue('custSubGrp');
+            var locationNumber = FormManager.getActualValue('locationNumber');
+
+            for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+              record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+              if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+                record = _allAddressData[i];
+              }
+              type = record.addrType;
+              if (typeof (type) == 'object') {
+                type = type[0];
+              }
+              if (type == 'ZS01') {
+                var landCntry = record.landCntry[0];
+                if ((CND_LOC_CD.indexOf(locationNumber) == -1) && (CND_CNTRY_CODE.indexOf(landCntry) > -1) && custGrp == 'CROSS') {
+                  return new ValidationResult(null, false, 'Invalid Location Code for Caribbean Countries.');
+                } else if (custGrp == 'LOCAL' && (CND_LOC_CD.indexOf(locationNumber) > -1) && landCntry == 'CA') {
+                  return new ValidationResult(null, false, 'Invalid Location Code.');
+                } else if (custSubGrp == 'USA' && locationNumber != '99999') {
+                  return new ValidationResult(null, false, 'Invalid Location Code.');
+                } else {
+                  return new ValidationResult(null, true);
+                }
+              }
+            }
+          }
+        };
+      })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
 /* Register CA Javascripts */
 dojo.addOnLoad(function() {
   console.log('adding CA scripts...');
@@ -304,4 +341,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addToggleAddrTypeFunction(toggleAddrTypesForCA, [ SysLoc.CANADA ]);
   GEOHandler.addAddrFunction(addCAAddressHandler, [ SysLoc.CANADA ]);
   GEOHandler.enableCopyAddress(SysLoc.CANADA);
+  GEOHandler.registerValidator(addLocationNoValidator, [ SysLoc.CANADA ], null, true);
 });
