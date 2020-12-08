@@ -323,6 +323,30 @@ function addLocationNoValidator() {
       })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
+function removeValidatorForOptionalFields() {
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var reqType = FormManager.getActualValue('reqType');
+
+  if (viewOnlyPage == 'true' || reqType != 'C') {
+    return;
+  }
+
+  if (role == 'REQUESTER') {
+    FormManager.removeValidator('taxCd2', Validators.REQUIRED);
+    FormManager.removeValidator('salesBusOffCd', Validators.REQUIRED);
+    FormManager.removeValidator('installBranchOff', Validators.REQUIRED);
+    FormManager.removeValidator('salesTeamCd', Validators.REQUIRED);
+    FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
+    FormManager.removeValidator('invoiceDistCd', Validators.REQUIRED);
+    FormManager.removeValidator('taxCd3', Validators.REQUIRED);
+    FormManager.removeValidator('creditCd', Validators.REQUIRED);
+    FormManager.removeValidator('cusInvoiceCopies', Validators.REQUIRED);
+    FormManager.removeValidator('subIndustryCd', Validators.REQUIRED);
+    FormManager.removeValidator('isicCd', Validators.REQUIRED);
+  }
+}
+
 /* Register CA Javascripts */
 dojo.addOnLoad(function() {
   console.log('adding CA scripts...');
@@ -342,5 +366,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addToggleAddrTypeFunction(toggleAddrTypesForCA, [ SysLoc.CANADA ]);
   GEOHandler.addAddrFunction(addCAAddressHandler, [ SysLoc.CANADA ]);
   GEOHandler.enableCopyAddress(SysLoc.CANADA);
-
+  GEOHandler.addAfterTemplateLoad(removeValidatorForOptionalFields, SysLoc.CANADA);
 });
