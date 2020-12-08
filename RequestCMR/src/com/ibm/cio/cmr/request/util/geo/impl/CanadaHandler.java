@@ -407,6 +407,8 @@ public class CanadaHandler extends GEOHandler {
         data.setLocationNumber("DO000");
       } else if (("GD").equals(mainAddr.getLandCntry())) {
         data.setLocationNumber("GD000");
+      } else if (("GP").equals(mainAddr.getLandCntry())) {
+        data.setLocationNumber("GP000");
       } else if (("GY").equals(mainAddr.getLandCntry())) {
         data.setLocationNumber("GY000");
       } else if (("HT").equals(mainAddr.getLandCntry())) {
@@ -415,8 +417,6 @@ public class CanadaHandler extends GEOHandler {
         data.setLocationNumber("KN000");
       } else if (("KY").equals(mainAddr.getLandCntry())) {
         data.setLocationNumber("KY000");
-      } else if (("JM").equals(mainAddr.getLandCntry())) {
-        data.setLocationNumber("JM000");
       } else if (("JM").equals(mainAddr.getLandCntry())) {
         data.setLocationNumber("JM000");
       } else if (("LC").equals(mainAddr.getLandCntry())) {
