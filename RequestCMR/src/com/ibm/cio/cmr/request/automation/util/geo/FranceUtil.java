@@ -963,6 +963,11 @@ public class FranceUtil extends AutomationUtil {
     return isRelevantFieldUpdated;
   }
 
+  @Override
+  public List<String> getSkipChecksRequestTypesforCMDE() {
+    return Arrays.asList("C", "U", "M", "D", "R");
+  }
+
   public static boolean isCountryFREnabled(EntityManager entityManager, String cntry) {
 
     boolean isFR = false;

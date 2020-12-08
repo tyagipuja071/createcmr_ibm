@@ -551,4 +551,9 @@ public class SpainUtil extends AutomationUtil {
 
   }
 
+  @Override
+  public List<String> getSkipChecksRequestTypesforCMDE() {
+    return Arrays.asList("C", "U", "M", "D", "R");
+  }
+
 }
