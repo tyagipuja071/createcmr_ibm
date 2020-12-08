@@ -333,6 +333,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addChangeNameAttachmentValidator, [ SysLoc.CANADA ], null, true);
   GEOHandler.registerValidator(addDPLCheckValidator, [ SysLoc.CANADA ], GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(addDPLAssessmentValidator, [ SysLoc.CANADA ], GEOHandler.ROLE_REQUESTER, true);
+  GEOHandler.registerValidator(addLocationNoValidator, [ SysLoc.CANADA ], null, true);
 
   // NOTE: do not add multiple addAfterConfig calls to avoid confusion, club the
   // functions on afterConfigForCA
@@ -341,5 +342,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addToggleAddrTypeFunction(toggleAddrTypesForCA, [ SysLoc.CANADA ]);
   GEOHandler.addAddrFunction(addCAAddressHandler, [ SysLoc.CANADA ]);
   GEOHandler.enableCopyAddress(SysLoc.CANADA);
-  GEOHandler.registerValidator(addLocationNoValidator, [ SysLoc.CANADA ], null, true);
+
 });
