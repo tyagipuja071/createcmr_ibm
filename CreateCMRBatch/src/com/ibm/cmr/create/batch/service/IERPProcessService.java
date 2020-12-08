@@ -166,18 +166,19 @@ public class IERPProcessService extends BaseBatchService {
     }
     // actual service call here
     ProcessResponse response = null;
-    String applicationId = BatchUtil.getAppId(data.getCmrIssuingCntry());
-    if (applicationId == null) {
-      LOG.debug("No Application ID mapped to " + data.getCmrIssuingCntry());
-      response = new ProcessResponse();
-      response.setReqId(request.getReqId());
-      response.setMandt(request.getMandt());
-      response.setStatus(CmrConstants.RDC_STATUS_NOT_COMPLETED);
-      response.setMessage("No application ID defined for Country: " + data.getCmrIssuingCntry() + ". Cannot process RDc records.");
-    } else {
+   // String applicationId = BatchUtil.getAppId(data.getCmrIssuingCntry());
+    /*
+     * if (applicationId == null) { LOG.debug("No Application ID mapped to " +
+     * data.getCmrIssuingCntry()); response = new ProcessResponse();
+     * response.setReqId(request.getReqId());
+     * response.setMandt(request.getMandt());
+     * response.setStatus(CmrConstants.RDC_STATUS_NOT_COMPLETED);
+     * response.setMessage("No application ID defined for Country: " +
+     * data.getCmrIssuingCntry() + ". Cannot process RDc records."); } else {
+     */
       try {
         this.serviceClient.setReadTimeout(60 * 20 * 1000); // 20 mins
-        response = this.serviceClient.executeAndWrap(applicationId, request, ProcessResponse.class);
+        response = this.serviceClient.executeAndWrap(ProcessClient.IERP_APP_ID, request, ProcessResponse.class);
         response.setReqId(request.getReqId());
       } catch (Exception e) {
         LOG.error("Error when connecting to the mass change service.", e);
@@ -186,7 +187,7 @@ public class IERPProcessService extends BaseBatchService {
         response.setStatus(CmrConstants.RDC_STATUS_ABORTED);
         response.setMessage("A system error has occured. Setting to aborted.");
       }
-    }
+   // }
 
     LOG.trace("Response JSON:");
     if (LOG.isTraceEnabled()) {
