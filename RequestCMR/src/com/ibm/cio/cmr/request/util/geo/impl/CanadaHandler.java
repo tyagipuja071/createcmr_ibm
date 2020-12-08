@@ -335,7 +335,8 @@ public class CanadaHandler extends GEOHandler {
    */
   private void setAddressRelatedData(EntityManager entityManager, Admin admin, Data data, Addr zs01) {
     Addr mainAddr = zs01;
-    List<String> caribNorthDistCntries = Arrays.asList("BS", "BB", "BM", "KY", "GY", "JM", "AW", "LC", "SR", "TT", "CW");
+    List<String> caribNorthDistCntries = Arrays.asList("AG", "AI", "AW", "BS", "BB", "BM", "BQ", "BV", "CW", "DM", "DO", "GD", "GP", "GY", "HT", "KN",
+        "KY", "JM", "LC", "MQ", "MS", "PR", "SR", "SX", "TC", "TT", "VC", "VG");
     if (mainAddr == null) {
       // reuse italy's ZS01
       String sql = ExternalizedQuery.getSql("ITALY.GETINSTALLING");
@@ -382,7 +383,63 @@ public class CanadaHandler extends GEOHandler {
         data.setLocationNumber("13999");
       }
     } else if (caribNorthDistCntries.contains(mainAddr.getLandCntry())) {
-      data.setLocationNumber("99000");
+      if (("AG").equals(mainAddr.getLandCntry())) {
+        data.setLocationNumber("AG000");
+      } else if (("AI").equals(mainAddr.getLandCntry())) {
+        data.setLocationNumber("AI000");
+      } else if (("AW").equals(mainAddr.getLandCntry())) {
+        data.setLocationNumber("AW000");
+      } else if (("BS").equals(mainAddr.getLandCntry())) {
+        data.setLocationNumber("BS000");
+      } else if (("BB").equals(mainAddr.getLandCntry())) {
+        data.setLocationNumber("BB000");
+      } else if (("BM").equals(mainAddr.getLandCntry())) {
+        data.setLocationNumber("BM000");
+      } else if (("BQ").equals(mainAddr.getLandCntry())) {
+        data.setLocationNumber("BQ000");
+      } else if (("BV").equals(mainAddr.getLandCntry())) {
+        data.setLocationNumber("BV000");
+      } else if (("CW").equals(mainAddr.getLandCntry())) {
+        data.setLocationNumber("CW000");
+      } else if (("DM").equals(mainAddr.getLandCntry())) {
+        data.setLocationNumber("DM000");
+      } else if (("DO").equals(mainAddr.getLandCntry())) {
+        data.setLocationNumber("DO000");
+      } else if (("GD").equals(mainAddr.getLandCntry())) {
+        data.setLocationNumber("GD000");
+      } else if (("GY").equals(mainAddr.getLandCntry())) {
+        data.setLocationNumber("GY000");
+      } else if (("HT").equals(mainAddr.getLandCntry())) {
+        data.setLocationNumber("HT000");
+      } else if (("KN").equals(mainAddr.getLandCntry())) {
+        data.setLocationNumber("KN000");
+      } else if (("KY").equals(mainAddr.getLandCntry())) {
+        data.setLocationNumber("KY000");
+      } else if (("JM").equals(mainAddr.getLandCntry())) {
+        data.setLocationNumber("JM000");
+      } else if (("JM").equals(mainAddr.getLandCntry())) {
+        data.setLocationNumber("JM000");
+      } else if (("LC").equals(mainAddr.getLandCntry())) {
+        data.setLocationNumber("LC000");
+      } else if (("MQ").equals(mainAddr.getLandCntry())) {
+        data.setLocationNumber("MQ000");
+      } else if (("MS").equals(mainAddr.getLandCntry())) {
+        data.setLocationNumber("MS000");
+      } else if (("PR").equals(mainAddr.getLandCntry())) {
+        data.setLocationNumber("PR000");
+      } else if (("SR").equals(mainAddr.getLandCntry())) {
+        data.setLocationNumber("SR000");
+      } else if (("SX").equals(mainAddr.getLandCntry())) {
+        data.setLocationNumber("SX000");
+      } else if (("TC").equals(mainAddr.getLandCntry())) {
+        data.setLocationNumber("TC000");
+      } else if (("TT").equals(mainAddr.getLandCntry())) {
+        data.setLocationNumber("TT000");
+      } else if (("VC").equals(mainAddr.getLandCntry())) {
+        data.setLocationNumber("VC000");
+      } else if (("VG").equals(mainAddr.getLandCntry())) {
+        data.setLocationNumber("VG000");
+      }
     } else if ("USA".equals(data.getCustSubGrp())) {
       data.setLocationNumber("99999");
     }
