@@ -173,7 +173,7 @@ public class CoverageBgGlcISUHandler implements RowHandler {
       }
     } catch (Exception e) {
       LOG.error("Error in retrieving GLC code", e);
-      return false;
+      return true;
     }
   }
 
@@ -217,7 +217,7 @@ public class CoverageBgGlcISUHandler implements RowHandler {
       }
     } catch (Exception e) {
       LOG.error("Error in retrieving Buying Group", e);
-      return false;
+      return true;
     }
   }
 
@@ -244,8 +244,8 @@ public class CoverageBgGlcISUHandler implements RowHandler {
       coverage.setGbQuadSectorTier(data.getClientTier());
       coverage.setINAC(data.getInacCd());
       coverage.setIndustryClass(data.getSubIndustryCd());
-      coverage.setIndustryCode(data.getSubIndustryCd() != null && data.getSubIndustryCd().length() > 0 ? data.getSubIndustryCd().substring(0, 1)
-          : null);
+      coverage
+          .setIndustryCode(data.getSubIndustryCd() != null && data.getSubIndustryCd().length() > 0 ? data.getSubIndustryCd().substring(0, 1) : null);
       coverage.setIndustrySolutionUnit(data.getIsuCd());
       coverage.setNationalTaxID(data.getTaxCd1());
       coverage.setSORTL(data.getSearchTerm());
@@ -290,7 +290,7 @@ public class CoverageBgGlcISUHandler implements RowHandler {
       }
     } catch (Exception e) {
       LOG.error("Error in retrieving Coverage", e);
-      return false;
+      return true;
     }
   }
 

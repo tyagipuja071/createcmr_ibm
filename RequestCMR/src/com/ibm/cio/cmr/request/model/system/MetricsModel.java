@@ -19,6 +19,8 @@ public class MetricsModel {
   private String reqType;
 
   private String excludeUnsubmitted;
+  private String sourceSystId;
+  private String excludeExternal;
 
   public String getDateFrom() {
     return dateFrom;
@@ -91,4 +93,21 @@ public class MetricsModel {
   public void setReqType(String reqType) {
     this.reqType = reqType;
   }
+
+  public String getSourceSystId() {
+    return sourceSystId;
+  }
+
+  public void setSourceSystId(String sourceSystId) {
+    this.sourceSystId = sourceSystId;
+  }
+
+  public String getExcludeExternal() {
+    return excludeExternal;
+  }
+
+  public void setExcludeExternal(String excludeExternal) {
+    this.excludeExternal = excludeExternal;
+  }
+
 }

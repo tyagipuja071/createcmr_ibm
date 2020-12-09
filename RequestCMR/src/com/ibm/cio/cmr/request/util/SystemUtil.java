@@ -56,7 +56,7 @@ public class SystemUtil {
   private static final Logger LOG = Logger.getLogger(SystemUtil.class);
 
   private static Timestamp dbtime = null;
-  private static Date servertime = null;
+  // private static Date servertime = null;
 
   @SuppressWarnings("unchecked")
   /**
@@ -65,6 +65,7 @@ public class SystemUtil {
    * @return
    */
   public static Timestamp getCurrentTimestamp() {
+    dbtime = null; // always get fresh
     if (dbtime == null) {
       try {
         // only query once the db's timestamp. use the offset to calculate
@@ -77,7 +78,7 @@ public class SystemUtil {
           if (results != null && results.size() > 0) {
             Timestamp ts = (Timestamp) results.get(0)[0];
             dbtime = ts;
-            servertime = new Date();
+            // servertime = new Date();
           }
         } finally {
           em.clear();
@@ -87,8 +88,9 @@ public class SystemUtil {
         LOG.error("Error in getting time.", e);
       }
     }
-    long diff = new Date().getTime() - servertime.getTime();
-    return new Timestamp(dbtime.getTime() + diff);
+    // long diff = new Date().getTime() - servertime.getTime();
+    // return new Timestamp(dbtime.getTime() + diff);
+    return dbtime;
   }
 
   /**
@@ -232,7 +234,7 @@ public class SystemUtil {
 
     return executeFindCMR(findCMRUrl, cmrIssuingCntry, searchCountry);
   }
-  
+
   /**
    * Interfaces with Find CMR and gets the pool records
    * 
@@ -262,7 +264,7 @@ public class SystemUtil {
     findCMRUrl += "&includeOrdBlk93=Y";
 
     return executeFindCMR(findCMRUrl, cmrIssuingCntry, searchCountry);
-  }  
+  }
 
   public static FindCMRResultModel findCMRsAltLang(String cmrIssuingCntry, int resultRows, String name, String street, String city,
       String extraParams) throws CmrException, UnsupportedEncodingException {

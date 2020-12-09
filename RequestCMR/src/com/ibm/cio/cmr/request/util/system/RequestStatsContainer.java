@@ -24,6 +24,8 @@ public class RequestStatsContainer {
   private List<RequesterStatsModel> requesterRecords;
   private List<AutomationStatsModel> automationRecords;
   private Map<String, AutomationSummaryModel> automationSummary;
+  private Map<String, Map<String, AutomationSummaryModel>> weeklyAutomationSummary;
+  private Map<String, AutomationSummaryModel> scenarioSummary;
 
   public List<RequestStatsModel> getRecords() {
     return records;
@@ -71,5 +73,21 @@ public class RequestStatsContainer {
 
   public void setAutomationSummary(Map<String, AutomationSummaryModel> automationSummary) {
     this.automationSummary = automationSummary;
+  }
+
+  public Map<String, Map<String, AutomationSummaryModel>> getWeeklyAutomationSummary() {
+    return weeklyAutomationSummary;
+  }
+
+  public void setWeeklyAutomationSummary(Map<String, Map<String, AutomationSummaryModel>> weeklyAutomationSummary) {
+    this.weeklyAutomationSummary = weeklyAutomationSummary;
+  }
+
+  public Map<String, AutomationSummaryModel> getScenarioSummary() {
+    return scenarioSummary;
+  }
+
+  public void setScenarioSummary(Map<String, AutomationSummaryModel> scenarioSummary) {
+    this.scenarioSummary = scenarioSummary;
   }
 }

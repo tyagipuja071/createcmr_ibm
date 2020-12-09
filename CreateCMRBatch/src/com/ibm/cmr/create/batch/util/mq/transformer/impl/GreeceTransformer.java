@@ -56,7 +56,7 @@ public class GreeceTransformer extends EMEATransformer {
    */
 
   // Comment this out when reverting to MQ
-  private static final String[] ADDRESS_ORDER = { "ZP01", "ZS01", "ZD01", "ZI01" };
+  private static final String[] ADDRESS_ORDER = { "ZS01", "ZP01", "ZD01", "ZI01" };
 
   private static final Logger LOG = Logger.getLogger(GreeceTransformer.class);
   private static final String DEFAULT_CLEAR_CHAR = "@";
