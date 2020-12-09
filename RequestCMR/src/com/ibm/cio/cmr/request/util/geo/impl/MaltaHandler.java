@@ -815,7 +815,7 @@ public class MaltaHandler extends BaseSOFHandler {
   public List<String> getAddressFieldsForUpdateCheck(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
     fields.addAll(Arrays.asList("CUST_NM1", "CUST_NM2", "CUST_NM4", "ADDR_TXT", "ADDR_TXT_2", "CITY1", "POST_CD", "DEPT", "LAND_CNTRY", "PO_BOX",
-        "CUST_PHONE"));
+        "CUST_PHONE", "CUST_NM3"));
     return fields;
   }
 
