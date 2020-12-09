@@ -13,7 +13,7 @@ import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.automation.RequestData;
-import com.ibm.cio.cmr.request.automation.impl.us.USBusinessPartnerElement;
+import com.ibm.cio.cmr.request.automation.util.geo.us.USBPHandler;
 import com.ibm.cio.cmr.request.automation.util.geo.us.USDetailsContainer;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
@@ -126,9 +126,9 @@ public class USBranchOffcMapping {
     case LOGIC:
       if (USUtil.SC_BP_POOL.equals(scenario)) {
         if ("CreateCMR-BP".equals(admin.getSourceSystId())) {
-          if (USBusinessPartnerElement.BP_INDIRECT_REMARKETER.equals(data.getBpName())) {
+          if (USBPHandler.BP_INDIRECT_REMARKETER.equals(data.getBpName())) {
             calculatedCsoSite = "DV4";
-          } else if (USBusinessPartnerElement.BP_MANAGING_IR.equals(data.getBpName())) {
+          } else if (USBPHandler.BP_MANAGING_IR.equals(data.getBpName())) {
             calculatedCsoSite = "YBV";
           }
         } else if (BluePagesHelper.getPerson(admin.getRequesterId()) != null) {

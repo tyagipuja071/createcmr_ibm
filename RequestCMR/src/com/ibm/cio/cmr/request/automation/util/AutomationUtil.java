@@ -747,21 +747,26 @@ public abstract class AutomationUtil {
    * @return
    * @throws Exception
    */
-  protected boolean checkPPSCEID(String ppsCeId) throws Exception {
+  public static boolean checkPPSCEID(String ppsCeId) {
     if (StringUtils.isBlank(ppsCeId)) {
       return false;
     }
-    PPSServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
-        PPSServiceClient.class);
-    client.setRequestMethod(Method.Get);
-    client.setReadTimeout(1000 * 60 * 5);
-    PPSRequest request = new PPSRequest();
-    request.setCeid(ppsCeId.toLowerCase());
-    PPSResponse ppsResponse = client.executeAndWrap(request, PPSResponse.class);
-    if (!ppsResponse.isSuccess()) {
+    try {
+      PPSServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
+          PPSServiceClient.class);
+      client.setRequestMethod(Method.Get);
+      client.setReadTimeout(1000 * 60 * 5);
+      PPSRequest request = new PPSRequest();
+      request.setCeid(ppsCeId.toLowerCase());
+      PPSResponse ppsResponse = client.executeAndWrap(request, PPSResponse.class);
+      if (!ppsResponse.isSuccess()) {
+        return false;
+      } else {
+        return true;
+      }
+    } catch (Exception e) {
+      LOG.error("Error occured in connecting to PPS", e);
       return false;
-    } else {
-      return true;
     }
   }
 
@@ -1149,4 +1154,38 @@ public abstract class AutomationUtil {
 
     return !newName.equals(oldName);
   }
+
+  public static boolean checkCommentSection(EntityManager entityManager, Admin admin, Data data) {
+    List<String> BP_CMT_1 = Arrays.asList("Maintenance", "MA", "HWMA");
+    List<String> BP_CMT_2 = Arrays.asList("End User", "HW");
+    boolean rejectRequest = false;
+    String restrictCd = StringUtils.isNotBlank(data.getRestrictTo()) ? data.getRestrictTo() : "";
+    String sql = ExternalizedQuery.getSql("AUTOMATION.GET_CMT_LOG");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", admin.getId().getReqId());
+    query.setForReadOnly(true);
+    List<String> comments = query.getResults(String.class);
+    for (String cmt : comments) {
+      String cleanCmt = " " + getCleanString(cmt) + " ";
+      switch (restrictCd) {
+      case "BPQS":
+        for (String keyword : BP_CMT_1) {
+          if (cleanCmt.contains(" " + getCleanString(keyword) + " ")) {
+            rejectRequest = true;
+            break;
+          }
+        }
+        break;
+      case "IRCSO":
+        for (String keyword : BP_CMT_2) {
+          if (cleanCmt.contains(" " + getCleanString(keyword) + " ")) {
+            rejectRequest = true;
+            break;
+          }
+        }
+      }
+    }
+    return rejectRequest;
+  }
+
 }
