@@ -52,7 +52,7 @@ public class CMDERequesterCheck extends ValidatingElement {
         output.setDetails("Requester is from CMDE team, skipping Automation checks.\n");
         validation.setMessage("Automation checks Skipped");
         validation.setSuccess(true);
-      } else {
+      } else if (!"C".equals(admin.getReqType()) && !"U".equals(admin.getReqType())) {
         String message = "Requester not from CMDE team.";
         if (ActionOnError.Proceed.equals(getActionOnError())) {
           message += "Further processing validation will be required before proceeding.";
