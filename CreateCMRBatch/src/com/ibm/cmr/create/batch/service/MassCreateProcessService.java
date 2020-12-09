@@ -248,6 +248,7 @@ public class MassCreateProcessService extends BaseBatchService {
       request.setReqId(cmrServiceInput.getInputReqId());
       request.setReqType(CmrConstants.REQ_TYPE_CREATE);
       request.setUserId(cmrServiceInput.getInputUserId());
+      // request.setIterationId(itrId);
 
       if (!cmrNoSapNoMap.containsKey(mass_create.getCmrNo())) {
         cmrNoSapNoMap.put(mass_create.getCmrNo(), new ArrayList<String>());
@@ -300,8 +301,8 @@ public class MassCreateProcessService extends BaseBatchService {
             PreparedQuery createAddrQry = new PreparedQuery(em, ExternalizedQuery.getSql("BATCH.GET_MASS_ADDR_ENTITY_CREATE_REQ"));
             createAddrQry.setParameter("REQ_ID", reqId);
             createAddrQry.setParameter("ITERATION_ID", itrId);
-            createAddrQry.setParameter("ADDR_TYPE", "ZS01".equals(record.getAddressType()) || "ZI01".equals(record.getAddressType()) ? "ZS01"
-                : "ZI01");
+            createAddrQry.setParameter("ADDR_TYPE",
+                "ZS01".equals(record.getAddressType()) || "ZI01".equals(record.getAddressType()) ? "ZS01" : "ZI01");
             createAddrQry.setParameter("SEQ_NO", mass_create.getId().getSeqNo());
             List<MassCreateAddr> cretAddrList = createAddrQry.getResults(MassCreateAddr.class);
             for (MassCreateAddr cretAddrEntity : cretAddrList) {
@@ -327,9 +328,8 @@ public class MassCreateProcessService extends BaseBatchService {
               massCretEntity.setErrorTxt(response.getMessage());
               massCretEntity.setRowStatusCd("RDCER");
             }
-          } else if (null != response.getStatus()
-              && (CmrConstants.RDC_STATUS_COMPLETED.equalsIgnoreCase(response.getStatus()) || CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS
-                  .equalsIgnoreCase(response.getStatus()))) {
+          } else if (null != response.getStatus() && (CmrConstants.RDC_STATUS_COMPLETED.equalsIgnoreCase(response.getStatus())
+              || CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equalsIgnoreCase(response.getStatus()))) {
             if (massCretEntity.getRowStatusCd().equalsIgnoreCase(CmrConstants.MASS_CREATE_ROW_STATUS_UPDATE_FAILE)) {
               massCretEntity.setErrorTxt("The automatic update failed.");
             } else {

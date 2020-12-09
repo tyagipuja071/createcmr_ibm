@@ -726,7 +726,153 @@ public class METransformer extends EMEATransformer {
       generateCMRNoObj.setMax(984880);
     }
 
-    if ("Y".equals(data.getDupCmrIndc())) {
+    if (custSubGrp.contains("IN")) {
+      if (!StringUtils.isBlank(data.getAbbrevNm()) && data.getAbbrevNm().startsWith("DUMMY")) {
+        if ("832".equals(data.getCmrIssuingCntry())) {
+          generateCMRNoObj.setMin(985901);
+          generateCMRNoObj.setMax(985999);
+        } else if ("677".equals(data.getCmrIssuingCntry())) {
+          generateCMRNoObj.setMin(985001);
+          generateCMRNoObj.setMax(985090);
+        } else if ("680".equals(data.getCmrIssuingCntry())) {
+          generateCMRNoObj.setMin(985091);
+          generateCMRNoObj.setMax(985180);
+        } else if ("805".equals(data.getCmrIssuingCntry())) {
+          generateCMRNoObj.setMin(985181);
+          generateCMRNoObj.setMax(985270);
+        } else if ("849".equals(data.getCmrIssuingCntry())) {
+          generateCMRNoObj.setMin(985271);
+          generateCMRNoObj.setMax(985360);
+        } else if ("620".equals(data.getCmrIssuingCntry())) {
+          generateCMRNoObj.setMin(985361);
+          generateCMRNoObj.setMax(985450);
+        } else if ("767".equals(data.getCmrIssuingCntry())) {
+          generateCMRNoObj.setMin(985451);
+          generateCMRNoObj.setMax(985540);
+        } else if ("823".equals(data.getCmrIssuingCntry())) {
+          generateCMRNoObj.setMin(985541);
+          generateCMRNoObj.setMax(985630);
+        } else if ("772".equals(data.getCmrIssuingCntry())) {
+          generateCMRNoObj.setMin(985631);
+          generateCMRNoObj.setMax(985720);
+        } else if ("762".equals(data.getCmrIssuingCntry())) {
+          generateCMRNoObj.setMin(985721);
+          generateCMRNoObj.setMax(985810);
+        } else if ("768".equals(data.getCmrIssuingCntry())) {
+          generateCMRNoObj.setMin(985811);
+          generateCMRNoObj.setMax(985900);
+        }
+      } else {
+        if ("832".equals(data.getCmrIssuingCntry())) {
+          generateCMRNoObj.setMin(999001);
+          generateCMRNoObj.setMax(999999);
+        } else if ("677".equals(data.getCmrIssuingCntry())) {
+          generateCMRNoObj.setMin(990000);
+          generateCMRNoObj.setMax(990900);
+        } else if ("680".equals(data.getCmrIssuingCntry())) {
+          generateCMRNoObj.setMin(990901);
+          generateCMRNoObj.setMax(991800);
+        } else if ("805".equals(data.getCmrIssuingCntry())) {
+          generateCMRNoObj.setMin(991801);
+          generateCMRNoObj.setMax(992700);
+        } else if ("849".equals(data.getCmrIssuingCntry())) {
+          generateCMRNoObj.setMin(992701);
+          generateCMRNoObj.setMax(993600);
+        } else if ("620".equals(data.getCmrIssuingCntry())) {
+          generateCMRNoObj.setMin(993601);
+          generateCMRNoObj.setMax(994500);
+        } else if ("767".equals(data.getCmrIssuingCntry())) {
+          generateCMRNoObj.setMin(994501);
+          generateCMRNoObj.setMax(995400);
+        } else if ("823".equals(data.getCmrIssuingCntry())) {
+          generateCMRNoObj.setMin(995401);
+          generateCMRNoObj.setMax(996300);
+        } else if ("772".equals(data.getCmrIssuingCntry())) {
+          generateCMRNoObj.setMin(996301);
+          generateCMRNoObj.setMax(997200);
+        } else if ("762".equals(data.getCmrIssuingCntry())) {
+          generateCMRNoObj.setMin(997201);
+          generateCMRNoObj.setMax(998100);
+        } else if ("768".equals(data.getCmrIssuingCntry())) {
+          generateCMRNoObj.setMin(998101);
+          generateCMRNoObj.setMax(999000);
+        }
+      }
+    } else if (custSubGrp.contains("BP") || custSubGrp.contains("BUS")) {
+      if ("832".equals(data.getCmrIssuingCntry())) {
+        generateCMRNoObj.setMin(8801);
+        generateCMRNoObj.setMax(9999);
+      } else if ("677".equals(data.getCmrIssuingCntry())) {
+        generateCMRNoObj.setMin(1000);
+        generateCMRNoObj.setMax(1800);
+      } else if ("680".equals(data.getCmrIssuingCntry())) {
+        generateCMRNoObj.setMin(1801);
+        generateCMRNoObj.setMax(2600);
+      } else if ("805".equals(data.getCmrIssuingCntry())) {
+        generateCMRNoObj.setMin(2601);
+        generateCMRNoObj.setMax(3400);
+      } else if ("849".equals(data.getCmrIssuingCntry())) {
+        generateCMRNoObj.setMin(3401);
+        generateCMRNoObj.setMax(4200);
+      } else if ("620".equals(data.getCmrIssuingCntry())) {
+        generateCMRNoObj.setMin(4201);
+        generateCMRNoObj.setMax(5000);
+      } else if ("767".equals(data.getCmrIssuingCntry())) {
+        generateCMRNoObj.setMin(5001);
+        generateCMRNoObj.setMax(5800);
+      } else if ("823".equals(data.getCmrIssuingCntry())) {
+        generateCMRNoObj.setMin(5801);
+        generateCMRNoObj.setMax(6600);
+      } else if ("772".equals(data.getCmrIssuingCntry())) {
+        generateCMRNoObj.setMin(6601);
+        generateCMRNoObj.setMax(7200);
+      } else if ("762".equals(data.getCmrIssuingCntry())) {
+        generateCMRNoObj.setMin(7201);
+        generateCMRNoObj.setMax(8000);
+      } else if ("768".equals(data.getCmrIssuingCntry())) {
+        generateCMRNoObj.setMin(8001);
+        generateCMRNoObj.setMax(8800);
+      }
+      LOG.debug("that is ME BP CMR");
+    } else {
+      if ("832".equals(data.getCmrIssuingCntry())) {
+        generateCMRNoObj.setMin(900001);
+        generateCMRNoObj.setMax(980000);
+      } else if ("677".equals(data.getCmrIssuingCntry())) {
+        generateCMRNoObj.setMin(10000);
+        generateCMRNoObj.setMax(90000);
+      } else if ("680".equals(data.getCmrIssuingCntry())) {
+        generateCMRNoObj.setMin(90001);
+        generateCMRNoObj.setMax(180000);
+      } else if ("805".equals(data.getCmrIssuingCntry())) {
+        generateCMRNoObj.setMin(180001);
+        generateCMRNoObj.setMax(270000);
+      } else if ("849".equals(data.getCmrIssuingCntry())) {
+        generateCMRNoObj.setMin(270001);
+        generateCMRNoObj.setMax(360000);
+      } else if ("620".equals(data.getCmrIssuingCntry())) {
+        generateCMRNoObj.setMin(360001);
+        generateCMRNoObj.setMax(450000);
+      } else if ("767".equals(data.getCmrIssuingCntry())) {
+        generateCMRNoObj.setMin(450001);
+        generateCMRNoObj.setMax(540000);
+      } else if ("823".equals(data.getCmrIssuingCntry())) {
+        generateCMRNoObj.setMin(540001);
+        generateCMRNoObj.setMax(630000);
+      } else if ("772".equals(data.getCmrIssuingCntry())) {
+        generateCMRNoObj.setMin(630001);
+        generateCMRNoObj.setMax(720000);
+      } else if ("762".equals(data.getCmrIssuingCntry())) {
+        generateCMRNoObj.setMin(720001);
+        generateCMRNoObj.setMax(810000);
+      } else if ("768".equals(data.getCmrIssuingCntry())) {
+        generateCMRNoObj.setMin(810001);
+        generateCMRNoObj.setMax(900000);
+      }
+      LOG.debug("that is ME BP CMR");
+    }
+
+    if ("Y".equals(data.getDupCmrIndc()) || "677, 680, 805, 849, 620, 767, 823, 772, 762, 768, 832".indexOf(data.getCmrIssuingCntry()) > -1) {
       generateCMRNoObj.setLoc2("675");
     }
   }

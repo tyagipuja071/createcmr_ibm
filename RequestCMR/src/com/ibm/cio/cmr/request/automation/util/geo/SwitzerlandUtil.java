@@ -326,7 +326,7 @@ public class SwitzerlandUtil extends AutomationUtil {
       case "ISU Code":
         // noop, for switch handling only
         break;
-      case "MUBOTY(SORTL)":
+      case "SORTL":
         // noop, for switch handling only
         break;
       default:

@@ -240,7 +240,9 @@ var CmrMetrics = (function() {
       var groupByProcCenter = FormManager.getActualValue('groupByProcCenter');
       var country = FormManager.getActualValue('country');
       var excludeUnsubmitted = FormManager.getActualValue('excludeUnsubmitted');
+      var excludeExternal = FormManager.getActualValue('excludeExternal');
       var reqType = FormManager.getActualValue('reqType');
+      var sourceSystId = FormManager.getActualValue('sourceSystId');
       
       cmr.showProgress('Generating charts, please wait...');
 
@@ -255,33 +257,57 @@ var CmrMetrics = (function() {
           country : country,
           groupByGeo : groupByGeo,
           excludeUnsubmitted : excludeUnsubmitted,
-          reqType : reqType
+          excludeExternal : excludeExternal,
+          reqType : reqType,
+          sourceSystId : sourceSystId
         },
         timeout : 180000,
         sync : false,
         load : function(data, ioargs) {
           console.log('success');
-          console.log(data);
           cmr.hideProgress();
+          var weekly = data.weekly;
+          var scenario = data.scenario;
           var data = data.data;
+          if (!data){
+            cmr.showAlert('No automation data for the time period.');
+            return;
+          }
           if (data){
             dojo.byId('charts-cont').innerHTML = '';
             var html = '';  
             for (var cntry in data){
               var stat = data[cntry];
               html += '<div class="ibm-columns">';
-              html += '  <div class="ibm-col-6-3">';
+              html += '  <div class="ibm-col-6-3" style="padding-left:10px">';
               html += '    <div style="text-decoration:underline;font-weight:bold;font-size:13px">'+stat.country+'</div>';
               html += '  </div>';
               html += '</div>';
-              html += '<div class="ibm-columns">';
-              html += '  <div class="ibm-col-6-3" style="border:1px Solid #AAA;width:450px">';
+              html += '<div class="ibm-columns" style="padding:10px">';
+              html += '  <div class="ibm-col-6-3" style="border:1px Solid #AAA;width:510px;margin-right:10px">';
               html += '    <canvas id="canvas-'+cntry+'" style="height:400px"></canvas>';
               html += '  </div>';
-              html += '  <div class="ibm-col-6-3" style="border:1px Solid #AAA;width:450px">';
+              html += '  <div class="ibm-col-6-3" style="border:1px Solid #AAA;width:510px">';
               html += '    <canvas id="canvas-rev-'+cntry+'" style="height:400px"></canvas>';
               html += '  </div>';
               html += '</div>';
+              if (country != ''){
+                html += '<div class="ibm-columns" style="padding:10px">';
+                html += '  <div class="ibm-col-6-3" style="border:1px Solid #AAA;width:510px;margin-right:10px">';
+                html += '    <canvas id="canvas-weekly-'+cntry+'" style="height:500px"></canvas>';
+                html += '  </div>';
+                html += '</div>';
+                html += '<div class="ibm-columns" style="padding:10px">';
+                html += '  <div class="ibm-col-1-1" style="border:1px Solid #AAA;width:1000px">';
+                html += '    <canvas id="canvas-sc-'+cntry+'" style="height:400px"></canvas>';
+                html += '  </div>';
+                html += '</div>';
+                html += '<div class="ibm-columns" style="padding:10px">';
+                html += '  <div class="ibm-col-1-1" style="border:1px Solid #AAA;width:1000px">';
+                html += '    <canvas id="canvas-sc2-'+cntry+'" style="height:400px"></canvas>';
+                html += '  </div>';
+                html += '</div>';
+              }
               html += '<div class="ibm-columns">&nbsp;';
               html += '</div>';
             }  
@@ -357,12 +383,29 @@ var CmrMetrics = (function() {
               for (var rev in map){
                 total2 += map[rev];
               }
+              
+              var sorted = [];
               for (var rev in map){
+                sorted.push({
+                  val : map[rev],
+                  rev : rev
+                });
+              }
+              sorted.sort(function(a,b){
+                return a.val < b.val;
+              })
+              sorted.forEach(function(s,i){
+                var rev = s.rev;
                 dataSet2.push(map[rev]);
                 labelSet2.push(rev+ ' ('+(total2 > 0 ? ((map[rev]/total2)*100).toFixed(1) : 0)+'%)');
                 colorSet2.push(CmrMetrics.getRandomColor());
+              });
+              for (var rev in map){
+                //dataSet2.push(map[rev]);
+                //labelSet2.push(rev+ ' ('+(total2 > 0 ? ((map[rev]/total2)*100).toFixed(1) : 0)+'%)');
+                //colorSet2.push(CmrMetrics.getRandomColor());
               }
-              var chart = new Chart(ctx2, {
+              var chart2 = new Chart(ctx2, {
                 type: 'pie',
                 data: {
                   labels: labelSet2,
@@ -392,6 +435,370 @@ var CmrMetrics = (function() {
                   responsive : true,
                 }
               });
+              
+              if (country != ''){
+                // weekly trend
+                var ctx3 = dojo.byId("canvas-weekly-"+cntry).getContext("2d");
+                
+                var wData = weekly[cntry];
+                var allData = [];
+                for (var dt in wData){
+                  allData.push({
+                    lbl : dt,
+                    t : wData[dt].touchless,
+                    r : wData[dt].review,
+                    l : wData[dt].legacy,
+                    n : wData[dt].noStatus
+                  });
+                }
+                allData.sort(function(a,b){
+                  return a.lbl > b.lbl;
+                });
+                
+                var tSet = {
+                    label : 'Touchless',
+                    fill : false,
+                    backgroundColor : 'rgb(57,198,75)',
+                    borderColor : 'rgb(57,198,75)',
+                    data : []
+                };
+                var rSet = {
+                    label : 'Review Required',
+                    fill : false,
+                    backgroundColor : 'rgb(185,70,73)',
+                    borderColor : 'rgb(185,70,73)',
+                    data : []
+                };
+                var lSet = {
+                    label : 'Legacy Issues',
+                    fill : false,
+                    backgroundColor : 'rgb(237,221,18)',
+                    borderColor : 'rgb(237,221,18)',
+                    data : []
+                };
+                var nSet = {
+                    label : 'Pending/Unknown',
+                    fill : false,
+                    backgroundColor : 'rgb(174,174,174)',
+                    borderColor : 'rgb(174,174,174)',
+                    data : []
+                };
+                var labels = [];
+                allData.forEach(function(d,i){
+                  labels.push(d.lbl);
+                  var total = d.t + d.r + d.n + d.l;
+                  tSet.data.push(((d.t/total)*100).toFixed(1));
+                  rSet.data.push(((d.r/total)*100).toFixed(1));
+                  nSet.data.push(((d.n/total)*100).toFixed(1));
+                  lSet.data.push(((d.l/total)*100).toFixed(1));
+                });
+                
+                var config = {
+                    type: 'line',
+                    data: {
+                      labels: labels,
+                      datasets: [tSet, rSet, nSet, lSet]
+                    },
+                    options: {
+                      responsive: true,
+                      title: {
+                        display: true,
+                        text: 'Weekly Trend of Automation'
+                      },
+                      tooltips: {
+                        mode: 'index',
+                        intersect: false,
+                      },
+                      hover: {
+                        mode: 'nearest',
+                        intersect: true
+                      },
+                      legend : {
+                        display : true,
+                        position : 'top',
+                        labels : {
+                          boxWidth : 16,
+                          fontSize : 11,
+                          padding : 6
+                        }
+                      },
+                      scales: {
+                        xAxes: [{
+                          display: true,
+                          scaleLabel: {
+                            display: true,
+                            labelString: 'Week of (Start)',
+                            fontSize : 11
+                          },
+                          ticks : {
+                            fontSize : 11
+                          }
+                        }],
+                        yAxes: [{
+                          display: true,
+                          scaleLabel: {
+                            display: true,
+                            labelString: '% of Requests',
+                            fontSize : 11
+                          },
+                          ticks: {
+                            min: 0,
+                            max: 100,
+                            stepSize: 20,
+                            fontSize : 11
+                          }
+                        }]
+                      }
+                    }
+                  };
+                
+                  var chart3 = new Chart(ctx3, config);
+                  
+                  
+                  // scenarios
+                  var ctx4 = dojo.byId("canvas-sc-"+cntry).getContext("2d");
+                  
+                  var allData = [];
+                  for (var dt in scenario){
+                    allData.push({
+                      lbl : dt,
+                      t : scenario[dt].touchless,
+                      r : scenario[dt].review,
+                      l : scenario[dt].legacy,
+                      n : scenario[dt].noStatus
+                    });
+                  }
+                  allData.sort(function(a,b){
+                    return a.lbl < b.lbl;
+                  });
+                  
+                  var tSet = {
+                      label : 'Touchless',
+                      fill : false,
+                      backgroundColor : 'rgb(57,198,75)',
+                      borderColor : 'rgb(57,198,75)',
+                      data : []
+                  };
+                  var rSet = {
+                      label : 'Review Required',
+                      fill : false,
+                      backgroundColor : 'rgb(185,70,73)',
+                      borderColor : 'rgb(185,70,73)',
+                      data : []
+                  };
+                  var lSet = {
+                      label : 'Legacy Issues',
+                      fill : false,
+                      backgroundColor : 'rgb(237,221,18)',
+                      borderColor : 'rgb(237,221,18)',
+                      data : []
+                  };
+                  var nSet = {
+                      label : 'Pending/Unknown',
+                      fill : false,
+                      backgroundColor : 'rgb(174,174,174)',
+                      borderColor : 'rgb(174,174,174)',
+                      data : []
+                  };
+                  var labels = [];
+                  allData.forEach(function(d,i){
+                    labels.push(d.lbl);
+                    var total = d.t + d.r + d.n + d.l;
+                    tSet.data.push(((d.t/total)*100).toFixed(1));
+                    rSet.data.push(((d.r/total)*100).toFixed(1));
+                    nSet.data.push(((d.n/total)*100).toFixed(1));
+                    lSet.data.push(((d.l/total)*100).toFixed(1));
+                  });
+                  
+                  var config2 = {
+                      type: 'bar',
+                      data: {
+                        labels: labels,
+                        datasets: [tSet, rSet, nSet, lSet]
+                      },
+                      options: {
+                        responsive: true,
+                        title: {
+                          display: true,
+                          text: 'Automation Per Scenario (%)'
+                        },
+                        tooltips: {
+                          mode: 'index',
+                          intersect: false,
+                        },
+                        hover: {
+                          mode: 'nearest',
+                          intersect: true
+                        },
+                        legend : {
+                          display : true,
+                          position : 'top',
+                          labels : {
+                            boxWidth : 16,
+                            fontSize : 11,
+                            padding : 6
+                          }
+                        },
+                        scales: {
+                          xAxes: [{
+                            display: true,
+                            scaleLabel: {
+                              display: true,
+                              labelString: 'Scenario',
+                              fontSize : 11
+                            },
+                            ticks : {
+                              fontSize : 11
+                            },
+                            stacked : true
+                          }],
+                          yAxes: [{
+                            display: true,
+                            scaleLabel: {
+                              display: true,
+                              labelString: '% of Requests',
+                              fontSize : 11
+                            },
+                            ticks: {
+                              min: 0,
+                              max: 100,
+                              stepSize: 25,
+                              fontSize : 11
+                            },
+                            stacked : true
+                          }]
+                        }
+                      }
+                    };
+                  
+                    var chart4 = new Chart(ctx4, config2);
+
+                    
+                    // scenarios
+                    var ctx5 = dojo.byId("canvas-sc2-"+cntry).getContext("2d");
+                    
+                    var allData = [];
+                    for (var dt in scenario){
+                      allData.push({
+                        lbl : dt,
+                        t : scenario[dt].touchless,
+                        r : scenario[dt].review,
+                        l : scenario[dt].legacy,
+                        n : scenario[dt].noStatus
+                      });
+                    }
+                    allData.sort(function(a,b){
+                      return a.lbl < b.lbl;
+                    });
+                    
+                    var tSet = {
+                        label : 'Touchless',
+                        fill : false,
+                        backgroundColor : 'rgb(57,198,75)',
+                        borderColor : 'rgb(57,198,75)',
+                        data : []
+                    };
+                    var rSet = {
+                        label : 'Review Required',
+                        fill : false,
+                        backgroundColor : 'rgb(185,70,73)',
+                        borderColor : 'rgb(185,70,73)',
+                        data : []
+                    };
+                    var lSet = {
+                        label : 'Legacy Issues',
+                        fill : false,
+                        backgroundColor : 'rgb(237,221,18)',
+                        borderColor : 'rgb(237,221,18)',
+                        data : []
+                    };
+                    var nSet = {
+                        label : 'Pending/Unknown',
+                        fill : false,
+                        backgroundColor : 'rgb(174,174,174)',
+                        borderColor : 'rgb(174,174,174)',
+                        data : []
+                    };
+                    var labels = [];
+                    var max = 0;
+                    allData.forEach(function(d,i){
+                      labels.push(d.lbl);
+                      tSet.data.push(d.t);
+                      rSet.data.push(d.r);
+                      lSet.data.push(d.l);
+                      nSet.data.push(d.n);
+                      var total = d.t + d.r + d.l + d.n;
+                      if (total > max) {
+                        max = total;
+                      }
+                    });
+                    
+                    var config3 = {
+                        type: 'bar',
+                        data: {
+                          labels: labels,
+                          datasets: [tSet, rSet, nSet, lSet]
+                        },
+                        options: {
+                          responsive: true,
+                          title: {
+                            display: true,
+                            text: 'Automation Per Scenario (Totals)'
+                          },
+                          tooltips: {
+                            mode: 'index',
+                            intersect: false,
+                          },
+                          hover: {
+                            mode: 'nearest',
+                            intersect: true
+                          },
+                          legend : {
+                            display : true,
+                            position : 'top',
+                            labels : {
+                              boxWidth : 16,
+                              fontSize : 11,
+                              padding : 6
+                            }
+                          },
+                          scales: {
+                            xAxes: [{
+                              display: true,
+                              scaleLabel: {
+                                display: true,
+                                labelString: 'Scenario',
+                                fontSize : 11
+                              },
+                              ticks : {
+                                fontSize : 11
+                              },
+                              stacked : true
+                            }],
+                            yAxes: [{
+                              display: true,
+                              scaleLabel: {
+                                display: true,
+                                labelString: 'Total No. of Requests',
+                                fontSize : 11
+                              },
+                              ticks: {
+                                min: 0,
+                                max: max,
+                                stepSize: 50,
+                                fontSize : 11
+                              },
+                              stacked : true
+                            }]
+                          }
+                        }
+                      };
+                    
+                      var chart5 = new Chart(ctx5, config3);
+                    
+                    
+              }
+              
             }
             
             

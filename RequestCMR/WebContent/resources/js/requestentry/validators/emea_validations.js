@@ -8563,7 +8563,7 @@ function autoSetAbbrNameUKI() {
             offset = 11 - installingCustNm.length;
           }
           var installingCustNmTrim = installingCustNm.length > 11 ? installingCustNm.substring(0, 11) : installingCustNm;
-          var billingCustNmTrim = billingCustNm.length > (offset + 10) ? billingCustNm.substring(0, offset + 10) : billingCustNm;
+          var billingCustNmTrim = billingCustNm.length > (offset + 8) ? billingCustNm.substring(0, offset + 8) : billingCustNm;
           FormManager.setValue('abbrevNm', (installingCustNmTrim + ' / ' + billingCustNmTrim));
         }
       }
