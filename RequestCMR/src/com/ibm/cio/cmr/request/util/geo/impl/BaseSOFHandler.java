@@ -152,7 +152,7 @@ public abstract class BaseSOFHandler extends GEOHandler {
       String processingType = PageManager.getProcessingType(mainRecord.getCmrIssuedBy(), "U");
       if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
         retrieveSOFValuesFromLegacyDB(null, mainRecord);
-      } else {
+      } else if (CmrConstants.PROCESSING_TYPE_MQ.equals(processingType)) {
         // old query service
         retrieveSOFValuesViaQueryService(cmrIssuingCntry, cmrNo);
       }
