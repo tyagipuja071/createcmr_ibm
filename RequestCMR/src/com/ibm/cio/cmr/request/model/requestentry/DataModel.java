@@ -1204,6 +1204,8 @@ public class DataModel extends BaseModel {
 
   public void setCusInvoiceCopies(String cusInvoiceCopies) {
     this.cusInvoiceCopies = cusInvoiceCopies;
+  }
+
   public String getApCustClusterId() {
     return apCustClusterId;
   }

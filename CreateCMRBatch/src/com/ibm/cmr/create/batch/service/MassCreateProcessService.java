@@ -248,7 +248,7 @@ public class MassCreateProcessService extends BaseBatchService {
       request.setReqId(cmrServiceInput.getInputReqId());
       request.setReqType(CmrConstants.REQ_TYPE_CREATE);
       request.setUserId(cmrServiceInput.getInputUserId());
-      request.setIterationId(itrId);
+      // request.setIterationId(itrId);
 
       if (!cmrNoSapNoMap.containsKey(mass_create.getCmrNo())) {
         cmrNoSapNoMap.put(mass_create.getCmrNo(), new ArrayList<String>());
