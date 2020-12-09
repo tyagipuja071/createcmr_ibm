@@ -369,7 +369,7 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
       handleAs : 'json',
       method : 'POST',
       content : model,
-      timeout : 3 * 60000,
+      timeout : 7 * 60000,
       sync : false,
       load : function(data, ioargs) {
         console.log(data);
@@ -391,8 +391,7 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
     });
   };
 
-  $scope.getSubRegion = function(issuingCountry, countryCd) {
-    var issuingCntry = FormManager.getActualValue('issuingCntry');
+  $scope.getSubRegion = function(issuingCntry, countryCd) {
     if (issuingCntry && issuingCntry.length > 3) {
       return issuingCntry;
     }
