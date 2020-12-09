@@ -105,8 +105,8 @@ function addChangeNameAttachmentValidator() {
 }
 
 /**
- * Toggles the Install At and Invoice To choices depending on the current
- * address records
+ * Toggles the Install At, Invoice To, and Maintenance Billing choices depending
+ * on the current address records
  * 
  * @param cntry
  * @param addressMode
@@ -115,31 +115,35 @@ function addChangeNameAttachmentValidator() {
  */
 function toggleAddrTypesForCA(cntry, addressMode, details) {
   if (addressMode == 'newAddress' || addressMode == 'copyAddress') {
-    if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
-      var firstRecord = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(0);
-      var type = firstRecord.addrType;
-      if (typeof (type) == 'object') {
-        type = type[0];
+    var addressRowCount = CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount;
+    if (addressRowCount > 0) {
+      var arrAddrType = [];
+      var i;
+      for (i = 0; i < addressRowCount; i++) {
+        var addrType = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i).addrType;
+        arrAddrType.push("" + addrType);
       }
-      if (type == 'ZS01') {
-        FormManager.setValue('addrType', 'ZI01');
-        cmr.showNode('radiocont_ZI01');
+
+      cmr.showNode('radiocont_ZS01');
+      cmr.showNode('radiocont_ZI01');
+      cmr.showNode('radiocont_ZP01');
+
+      if (arrAddrType.indexOf("ZS01") != -1) {
         cmr.hideNode('radiocont_ZS01');
-      } else if (type == 'ZI01') {
-        FormManager.setValue('addrType', 'ZS01');
-        cmr.showNode('radiocont_ZS01');
-        cmr.hideNode('radiocont_ZI01');
       }
+
+      if (arrAddrType.indexOf("ZI01") != -1) {
+        cmr.hideNode('radiocont_ZI01');
+        FormManager.setValue('addrType', 'ZP01');
+      } else {
+        FormManager.setValue('addrType', 'ZI01');
+      }
+
     } else {
       FormManager.setValue('addrType', 'ZS01');
       cmr.showNode('radiocont_ZS01');
       cmr.hideNode('radiocont_ZI01');
-    }
-    var reqType = FormManager.getActualValue('reqType');
-    if (reqType == 'C') {
       cmr.hideNode('radiocont_ZP01');
-    } else {
-      cmr.showNode('radiocont_ZP01');
     }
   }
 }
