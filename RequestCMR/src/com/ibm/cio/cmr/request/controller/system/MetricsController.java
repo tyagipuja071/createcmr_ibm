@@ -414,6 +414,8 @@ public class MetricsController extends BaseController {
       map.addAttribute("success", true);
       map.addAttribute("error", null);
       map.addAttribute("data", container.getAutomationSummary());
+      map.addAttribute("weekly", container.getWeeklyAutomationSummary());
+      map.addAttribute("scenario", container.getScenarioSummary());
     } catch (Exception e) {
       map.addAttribute("success", false);
       map.addAttribute("data", null);

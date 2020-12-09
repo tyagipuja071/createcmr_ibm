@@ -27,6 +27,7 @@ import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
+import com.ibm.cio.cmr.request.automation.util.DummyServletRequest;
 import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
 import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.us.USDetailsContainer;
@@ -34,12 +35,16 @@ import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.model.BaseModel;
+import com.ibm.cio.cmr.request.model.requestentry.AddressModel;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.CmrClientService;
+import com.ibm.cio.cmr.request.service.requestentry.AddressService;
+import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.ConfigUtil;
 import com.ibm.cio.cmr.request.util.JpaManager;
@@ -133,8 +138,6 @@ public class USUtil extends AutomationUtil {
   public static final String SC_SCHOOL_COLLEGE = "SCHOOL COLLEGE";
   // Leasing
   public static final String SC_LEASE_NO_RESTRICT = "NO RESTRICT";
-  public static final String SC_LEASE_32C = "32C";
-  public static final String SC_LEASE_TPPS = "TPPS";
   public static final String SC_LEASE_3CC = "3CC";
   public static final String SC_LEASE_IPMA = "IPMA";
   public static final String SC_LEASE_LPMA = "LPMA";
@@ -274,6 +277,64 @@ public class USUtil extends AutomationUtil {
         }
       }
 
+      if (SC_LEASE_IPMA.equals(scenarioSubType) || SC_LEASE_LPMA.equals(scenarioSubType)) {
+        Addr zi01 = requestData.getAddress("ZI01");
+
+        String divn = "IBM Credit LLC";
+        String dept = SC_LEASE_IPMA.equals(scenarioSubType) ? "IPMA" : "LPMA";
+        String address = "7100 Highlands Parkway";
+        String address2 = "";
+        String city = "Smyrna";
+        String state = "GA";
+        String postCd = "30082-4859";
+        String landCntry = "US";
+
+        if (zi01 == null) {
+
+          LOG.debug("Adding the main address..");
+          AddressService addrService = new AddressService();
+          AddressModel addrModel = new AddressModel();
+          addrModel.setReqId(data.getId().getReqId());
+          addrModel.setDivn(divn);
+          addrModel.setDept(dept);
+          addrModel.setLandCntry(landCntry);
+          addrModel.setAddrTxt(address);
+          addrModel.setAddrTxt2(address2);
+          addrModel.setCity1(city);
+          addrModel.setStateProv(state);
+          addrModel.setPostCd(postCd);
+          addrModel.setState(BaseModel.STATE_NEW);
+          addrModel.setAction("ADD_ADDRESS");
+
+          addrModel.setAddrType(CmrConstants.ADDR_TYPE.ZI01.toString());
+          addrModel.setCmrIssuingCntry(data.getCmrIssuingCntry());
+          try {
+            AppUser user = new AppUser();
+            user.setIntranetId(requestData.getAdmin().getRequesterId());
+            user.setBluePagesName(requestData.getAdmin().getRequesterNm());
+            DummyServletRequest dummyReq = new DummyServletRequest();
+            if (dummyReq.getSession() != null) {
+              LOG.trace("Session found for dummy req");
+              dummyReq.getSession().setAttribute(CmrConstants.SESSION_APPUSER_KEY, user);
+            } else {
+              LOG.warn("Session not found for dummy req");
+            }
+            addrService.performTransaction(addrModel, entityManager, dummyReq);
+          } catch (Exception e) {
+            LOG.error("An error occurred while adding ZI01 address", e);
+          }
+          entityManager.flush();
+        } else {
+          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "DIVN", zi01.getDivn(), divn);
+          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "DEPT", zi01.getDept(), dept);
+          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "ADDR_TXT", zi01.getAddrTxt(), address);
+          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "CITY1", zi01.getCity1(), city);
+          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "STATE_PROV", zi01.getStateProv(), state);
+          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "POST_CD", zi01.getPostCd(), postCd);
+          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "LAND_CNTRY", zi01.getLandCntry(), landCntry);
+        }
+      }
+
       LOG.debug("US : Performing field computations for req_id : " + admin.getId().getReqId());
       // computation start
       if (engineData.hasPositiveCheckStatus(AutomationEngineData.BO_COMPUTATION)) {
@@ -402,11 +463,10 @@ public class USUtil extends AutomationUtil {
     Data data = requestData.getData();
     boolean valid = true;
     String[] scenarioList = { SC_SCHOOL_PUBLIC, SC_SCHOOL_CHARTER, SC_SCHOOL_PRIV, SC_SCHOOL_PAROCHL, SC_SCHOOL_COLLEGE, SC_STATE_STATE,
-        SC_STATE_DIST, SC_STATE_COUNTY, SC_STATE_CITY, SC_LEASE_32C, SC_LEASE_TPPS, SC_LEASE_3CC, SC_LEASE_SVR_CONT, SC_BP_POOL, SC_BP_DEVELOP,
-        SC_BP_E_HOST, SC_FED_REGULAR, SC_FED_CLINIC, SC_FED_FEDSTATE, SC_FED_HEALTHCARE, SC_FED_HOSPITAL, SC_FED_INDIAN_TRIBE, SC_FED_NATIVE_CORP,
-        SC_FED_POA, SC_FED_TRIBAL_BUS };
-    String[] skipCompanyChecksScenarioList = { SC_BP_POOL, SC_BP_DEVELOP, SC_BP_E_HOST, SC_BP_END_USER, SC_LEASE_3CC, SC_LEASE_SVR_CONT, SC_INTERNAL,
-        SC_DUMMY, SC_IGS, SC_IGSF, SC_REST_SSI, SC_STATE_DIST, SC_FED_REGULAR, SC_FED_CLINIC, SC_FED_FEDSTATE, SC_FED_HEALTHCARE, SC_FED_HOSPITAL,
+        SC_STATE_DIST, SC_STATE_COUNTY, SC_STATE_CITY, SC_LEASE_LPMA, SC_FED_REGULAR, SC_FED_CLINIC, SC_FED_FEDSTATE, SC_FED_HEALTHCARE,
+        SC_FED_HOSPITAL, SC_FED_INDIAN_TRIBE, SC_FED_NATIVE_CORP, SC_FED_POA, SC_FED_TRIBAL_BUS };
+    String[] skipCompanyChecksScenarioList = { SC_BP_DEVELOP, SC_BP_E_HOST, SC_BP_END_USER, SC_LEASE_3CC, SC_LEASE_SVR_CONT, SC_INTERNAL, SC_DUMMY,
+        SC_IGS, SC_IGSF, SC_REST_SSI, SC_STATE_DIST, SC_FED_REGULAR, SC_FED_CLINIC, SC_FED_FEDSTATE, SC_FED_HEALTHCARE, SC_FED_HOSPITAL,
         SC_FED_INDIAN_TRIBE, SC_FED_NATIVE_CORP, SC_FED_POA, SC_FED_TRIBAL_BUS, SC_STATE_COUNTY, SC_STATE_CITY, SC_STATE_STATE, SC_STATE_HOSPITALS,
         SC_SCHOOL_PUBLIC, SC_SCHOOL_CHARTER, SC_SCHOOL_PRIV, SC_SCHOOL_PAROCHL, SC_SCHOOL_COLLEGE, SC_LEASE_LPMA, SC_PVT_HOUSEHOLD };
     String scenarioSubType = "";

@@ -242,6 +242,8 @@ public class DataModel extends BaseModel {
 
   private String military;
 
+  private String apCustClusterId;
+
   public String getCreditCd() {
     return creditCd;
   }
@@ -1162,6 +1164,14 @@ public class DataModel extends BaseModel {
 
   public void setMilitary(String military) {
     this.military = military;
+  }
+
+  public String getApCustClusterId() {
+    return apCustClusterId;
+  }
+
+  public void setApCustClusterId(String apCustClusterId) {
+    this.apCustClusterId = apCustClusterId;
   }
 
 }

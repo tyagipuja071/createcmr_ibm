@@ -68,7 +68,12 @@ public class EUVatValidationElement extends ValidatingElement implements Company
         engineData.addNegativeCheckStatus("_vatLandCntry", msg);
         LOG.debug("Landed Country not found. Need review.");
       } else {
-        if (!EU_COUNTRIES.contains(landCntryForVies)) {
+        if (engineData.isVatVerified()) {
+          validation.setSuccess(true);
+          validation.setMessage("Skipped.");
+          output.setDetails("VAT has been marked verified through previous process executions. Skipping VIES verification.");
+          LOG.debug("VAT has been marked verified through previous process executions. Skipping VIES verification.");
+        } else if (!EU_COUNTRIES.contains(landCntryForVies)) {
           validation.setSuccess(true);
           validation.setMessage("Skipped.");
           output.setDetails("Landed Country does not belong to the European Union. Skipping VAT Validation.");
@@ -95,7 +100,7 @@ public class EUVatValidationElement extends ValidatingElement implements Company
               validation.setSuccess(true);
               validation.setMessage("Execution done.");
               LOG.debug("VAT and company information verified through VIES.");
-              engineData.addPositiveCheckStatus(AutomationEngineData.VAT_VERIFIED);
+              engineData.setVatVerified(true, "VAT Verified");
 
               details.append("VAT and company information verified through VIES.");
               details.append("\nCompany details from VIES :");

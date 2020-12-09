@@ -67,7 +67,10 @@ dojo.addOnLoad(function(){
    		<cmr:row topPad="10" addBackground="true">
 	   	  <cmr:column span="2" containerForField="Cluster">
 	      	<p>
-	        <cmr:label fieldId="apCustClusterId"> <cmr:fieldLabel fieldId="Cluster" />: </cmr:label>
+	        <cmr:label fieldId="apCustClusterId"> 
+	         <cmr:fieldLabel fieldId="Cluster" />:
+	         <cmr:delta text="${rdcdata.apCustClusterId}" oldValue="${reqentry.apCustClusterId}"/> 
+	        </cmr:label>
 	        <cmr:field path="apCustClusterId" id="apCustClusterId" fieldId="Cluster" tabId="MAIN_IBM_TAB" />
 	      	</p>
 	      </cmr:column>
