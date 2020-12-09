@@ -37,7 +37,6 @@ import com.ibm.cio.cmr.request.util.geo.impl.CNHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.DEHandler;
 import com.ibm.cmr.create.batch.model.CmrServiceInput;
 import com.ibm.cmr.create.batch.model.MassUpdateServiceInput;
-import com.ibm.cmr.create.batch.util.BatchUtil;
 import com.ibm.cmr.create.batch.util.DebugUtil;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.ProcessClient;
@@ -166,7 +165,7 @@ public class IERPProcessService extends BaseBatchService {
     }
     // actual service call here
     ProcessResponse response = null;
-   // String applicationId = BatchUtil.getAppId(data.getCmrIssuingCntry());
+    // String applicationId = BatchUtil.getAppId(data.getCmrIssuingCntry());
     /*
      * if (applicationId == null) { LOG.debug("No Application ID mapped to " +
      * data.getCmrIssuingCntry()); response = new ProcessResponse();
@@ -176,18 +175,18 @@ public class IERPProcessService extends BaseBatchService {
      * response.setMessage("No application ID defined for Country: " +
      * data.getCmrIssuingCntry() + ". Cannot process RDc records."); } else {
      */
-      try {
-        this.serviceClient.setReadTimeout(60 * 20 * 1000); // 20 mins
-        response = this.serviceClient.executeAndWrap(ProcessClient.IERP_APP_ID, request, ProcessResponse.class);
-        response.setReqId(request.getReqId());
-      } catch (Exception e) {
-        LOG.error("Error when connecting to the mass change service.", e);
-        response = new ProcessResponse();
-        response.setReqId(request.getReqId());
-        response.setStatus(CmrConstants.RDC_STATUS_ABORTED);
-        response.setMessage("A system error has occured. Setting to aborted.");
-      }
-   // }
+    try {
+      this.serviceClient.setReadTimeout(60 * 20 * 1000); // 20 mins
+      response = this.serviceClient.executeAndWrap(ProcessClient.IERP_APP_ID, request, ProcessResponse.class);
+      response.setReqId(request.getReqId());
+    } catch (Exception e) {
+      LOG.error("Error when connecting to the mass change service.", e);
+      response = new ProcessResponse();
+      response.setReqId(request.getReqId());
+      response.setStatus(CmrConstants.RDC_STATUS_ABORTED);
+      response.setMessage("A system error has occured. Setting to aborted.");
+    }
+    // }
 
     LOG.trace("Response JSON:");
     if (LOG.isTraceEnabled()) {
@@ -727,10 +726,13 @@ public class IERPProcessService extends BaseBatchService {
   }
 
   private ProcessResponse sendAddrForProcessing(Addr addr, ProcessRequest request, List<ProcessResponse> responses, boolean isIndexNotUpdated,
-      String siteIds, EntityManager em) {
+      String siteIds, EntityManager em, boolean isSeqNoRequired) {
     ProcessResponse response = null;
     request.setSapNo(addr.getSapNo());
     request.setAddrType(addr.getId().getAddrType());
+    if (isSeqNoRequired) {
+      request.setSeqNo(addr.getId().getAddrSeq());
+    }
     // call the ierp service
     LOG.info("Sending request to IerpProcessService [Request ID: " + request.getReqId() + " CMR No: " + request.getCmrNo() + " Type: "
         + request.getReqType() + " SAP No: " + request.getSapNo() + "]");
@@ -817,7 +819,10 @@ public class IERPProcessService extends BaseBatchService {
     request.setReqType(cmrServiceInput.getInputReqType());
     request.setUserId(cmrServiceInput.getInputUserId());
     boolean isIndexNotUpdated = false;
-
+    boolean isSeqNoRequired = false;
+    if (!CmrConstants.DE_CND_ISSUING_COUNTRY_VAL.contains(data.getCmrIssuingCntry()) && !CNHandler.isCNIssuingCountry(data.getCmrIssuingCntry())) {
+      isSeqNoRequired = true;
+    }
     try {
       // 1. Get first the ones that are new -- BATCH.GET_NEW_ADDR_FOR_UPDATE
       String sql = ExternalizedQuery.getSql("BATCH.GET_NEW_ADDR_FOR_UPDATE");
@@ -827,7 +832,7 @@ public class IERPProcessService extends BaseBatchService {
 
       if (addresses != null && addresses.size() > 0) {
         for (Addr addr : addresses) {
-          response = sendAddrForProcessing(addr, request, responses, isIndexNotUpdated, siteIds, em);
+          response = sendAddrForProcessing(addr, request, responses, isIndexNotUpdated, siteIds, em, isSeqNoRequired);
           respStatuses.add(response.getStatus());
         }
       }
@@ -852,7 +857,7 @@ public class IERPProcessService extends BaseBatchService {
           }
 
           if (isAddrUpdated) {
-            response = sendAddrForProcessing(addr, request, responses, isIndexNotUpdated, siteIds, em);
+            response = sendAddrForProcessing(addr, request, responses, isIndexNotUpdated, siteIds, em, isSeqNoRequired);
             respStatuses.add(response.getStatus());
           } else {
             notProcessed.add(addr);
@@ -877,7 +882,7 @@ public class IERPProcessService extends BaseBatchService {
       if (isDataUpdated && (notProcessed != null && notProcessed.size() > 0)) {
         LOG.debug("Processing CMR Data changes to " + notProcessed.size() + " addresses of CMR# " + data.getCmrNo());
         for (Addr addr : notProcessed) {
-          response = sendAddrForProcessing(addr, request, responses, isIndexNotUpdated, siteIds, em);
+          response = sendAddrForProcessing(addr, request, responses, isIndexNotUpdated, siteIds, em, isSeqNoRequired);
           respStatuses.add(response.getStatus());
         }
       }
