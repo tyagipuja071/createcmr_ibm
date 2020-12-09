@@ -276,44 +276,83 @@ public class FranceHandler extends GEOHandler {
   @Override
   public String generateAddrSeq(EntityManager entityManager, String addrType, long reqId, String cmrIssuingCntry) {
     String newAddrSeq = "";
-    String cmrNo = "";
-    String reqType = "";
-
     if (!StringUtils.isEmpty(addrType)) {
+      int addrSeq = 0;
       if ("ZD02".equals(addrType)) {
         return "598";
       } else if ("ZP02".equals(addrType)) {
         return "599";
+      } else if ("ZS01".equals(addrType)) {
+        addrSeq = 1;
+      } else if ("ZP01".equals(addrType)) {
+        addrSeq = 2;
+      } else if ("ZI01".equals(addrType)) {
+        addrSeq = 3;
+      } else if ("ZD01".equals(addrType)) {
+        addrSeq = 4;
       }
-      int addrSeq = 00000;
-      String minAddrSeq = "00000";
-      String maxAddrSeq = "99999";
-      String sql = null;
-      reqType = getReqType(entityManager, reqId);
-      sql = ExternalizedQuery.getSql("ADDRESS.GETMADDRSEQ_IGF");
+
+      String reqType = getReqType(entityManager, reqId);
+      String sql = ExternalizedQuery.getSql("ADDRESS.GETMADDRSEQ_CREATECMR");
       PreparedQuery query = new PreparedQuery(entityManager, sql);
       query.setParameter("REQ_ID", reqId);
 
-      List<Object[]> results = query.getResults();
-      if (results != null && results.size() > 0) {
-        Object[] result = results.get(0);
-        maxAddrSeq = (String) (result != null && result.length > 0 && result[0] != null ? result[0] : "1");
-
-        if (!(Integer.valueOf(maxAddrSeq) >= 1 && Integer.valueOf(maxAddrSeq) <= 99999)) {
-          maxAddrSeq = "";
+      List<Object[]> resultsCMR = query.getResults();
+      if (resultsCMR != null && resultsCMR.size() > 0) {
+        boolean seqExistCMR = false;
+        List<String> seqListCMR = new ArrayList<String>();
+        // Get create cmr seq list
+        for (int i = 0; i < resultsCMR.size(); i++) {
+          String item = String.valueOf(resultsCMR.get(i));
+          if (!StringUtils.isEmpty(item)) {
+            seqListCMR.add(item);
+          }
         }
-        if (StringUtils.isEmpty(maxAddrSeq) || addrType.equalsIgnoreCase("ZS01")) {
-          maxAddrSeq = minAddrSeq;
+        // Check if seq is already exist in create cmr
+        seqExistCMR = seqListCMR.contains(Integer.toString(addrSeq));
+        if (seqExistCMR) {
+          // Get Max seq from create cmr
+          addrSeq = Integer.parseInt(seqListCMR.get(0));
+          for (int i = 0; i < seqListCMR.size(); i++) {
+            if (addrSeq < Integer.parseInt(seqListCMR.get(i))) {
+              addrSeq = Integer.parseInt(seqListCMR.get(i));
+            }
+          }
+          if (addrSeq < 5) {
+            addrSeq = 5;
+          } else {
+            addrSeq = addrSeq + 1;
+          }
         }
-        try {
-          addrSeq = Integer.parseInt(maxAddrSeq);
-        } catch (Exception e) {
-          // if returned value is invalid
-        }
-        addrSeq++;
       }
-      // newAddrSeq = String.format("%05d",
-      // Integer.parseInt(Integer.toString(addrSeq)));
+      if (CmrConstants.REQ_TYPE_UPDATE.equals(reqType)) {
+        String cmrNo = getCMRNo(entityManager, reqId);
+        if (!StringUtils.isEmpty(cmrNo)) {
+          String sqlRDC = ExternalizedQuery.getSql("ADDRESS.GETMADDRSEQ_RDC");
+          PreparedQuery queryRDC = new PreparedQuery(entityManager, sqlRDC);
+          queryRDC.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+          queryRDC.setParameter("ZZKV_CUSNO", cmrNo);
+          List<Object[]> resultsRDC = queryRDC.getResults();
+          List<String> seqListRDC = new ArrayList<String>();
+          for (int i = 0; i < resultsRDC.size(); i++) {
+            String item = String.valueOf(resultsRDC.get(i));
+            if (!StringUtils.isEmpty(item)) {
+              seqListRDC.add(item);
+            }
+          }
+          if (addrSeq < 5 && seqListRDC.contains(Integer.toString(addrSeq))) {
+            addrSeq = 5;
+          }
+          while (seqListRDC.contains(Integer.toString(addrSeq))) {
+            addrSeq++;
+          }
+        }
+      }
+
+      // Old logic:if seq range is not 0-99999, set seq to 1
+      if (!(addrSeq >= 1 && addrSeq <= 99999)) {
+        addrSeq = 1;
+      }
       newAddrSeq = Integer.toString(addrSeq);
     }
     return newAddrSeq;
