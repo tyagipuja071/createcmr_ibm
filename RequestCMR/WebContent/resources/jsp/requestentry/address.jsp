@@ -71,15 +71,6 @@ visibility: hidden !IMPORTANT;
         }
       }
       break;
-    case '649':
-      if (CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 1 && FormManager.getActualValue('reqType') == 'C'){
-        cmr.hideNode('addAddressButton');
-      } else {
-        if (dojo.byId('addAddressButton')){
-          dojo.byId('addAddressButton').style.display = 'inline';
-        }
-      }
-      break;
     case '631':
       if (CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 1){
         cmr.hideNode('addAddressButton');
