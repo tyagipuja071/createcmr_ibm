@@ -71,6 +71,11 @@ public class AutomationStatsModel {
 
   private String cmt;
 
+  @Column(name = "WEEK_OF")
+  private String weekOf;
+
+  private String paygo;
+
   public StatsPK getId() {
     return id;
   }
@@ -237,6 +242,22 @@ public class AutomationStatsModel {
 
   public void setCmt(String cmt) {
     this.cmt = cmt;
+  }
+
+  public String getWeekOf() {
+    return weekOf;
+  }
+
+  public void setWeekOf(String weekOf) {
+    this.weekOf = weekOf;
+  }
+
+  public String getPaygo() {
+    return paygo;
+  }
+
+  public void setPaygo(String paygo) {
+    this.paygo = paygo;
   }
 
 }

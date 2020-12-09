@@ -143,8 +143,11 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
                 }
                 if (scenarioExceptions.isCheckVATForDnB()
                     && ((!isTaxCdMatch && !StringUtils.isBlank(data.getVat())) || (isTaxCdMatch && !StringUtils.isBlank(data.getTaxCd1())))
-                    && ((!orgIdFound && engineData.hasPositiveCheckStatus(AutomationEngineData.VAT_VERIFIED)) || (orgIdFound && isOrgIdMatched))) {
+                    && ((!orgIdFound && engineData.isVatVerified()) || (orgIdFound && isOrgIdMatched))) {
                   // found the perfect match here
+                  if (!isTaxCdMatch) {
+                    engineData.setVatVerified(true, "VAT Verified");
+                  }
                   perfectMatch = dnbRecord;
                   break;
                 }
@@ -194,8 +197,11 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
                 processAddressFields(data.getCmrIssuingCntry(), highestCloseMatch, output, 1, scenarioExceptions, handler, eligibleAddresses);
               }
             }
-            engineData.addNegativeCheckStatus("DNB_VAT_MATCH_CHECK_FAIL",
-                (isTaxCdMatch ? "Org ID " : "VAT ") + " value did not match with the highest confidence D&B match.");
+            if (isTaxCdMatch) {
+              engineData.addNegativeCheckStatus("DNB_VAT_MATCH_CHECK_FAIL", "Org ID value did not match with the highest confidence D&B match.");
+            } else {
+              engineData.setVatVerified(false, "VAT value did not match with the highest confidence D&B match.");
+            }
             LOG.trace(new ObjectMapper().writeValueAsString(highestCloseMatch));
           } else {
 

@@ -176,9 +176,9 @@ public class UpdateSwitchElement extends ValidatingElement {
         validation.setSuccess(true);
         validation.setMessage("Execution done.");
         if (StringUtils.isEmpty(output.getDetails())) {
-          output.setDetails("No data/address changes made on request.");
+          output.setDetails("Update checks performed successfully");
         }
-        log.debug("No data/address changes made on request.");
+        log.debug("Update checks performed successfully");
       }
     }
     output.setResults(validation.getMessage());
