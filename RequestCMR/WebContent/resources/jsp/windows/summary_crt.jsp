@@ -136,6 +136,16 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
           <cmr:column span="1" width="170">
             ${summary.addr.custNm3}
           </cmr:column>
+        
+        <cmr:column span="1" width="50">
+          </cmr:column>
+		<cmr:column span="2" width="130" forCountry="780">
+			<label><cmr:fieldLabel fieldId="POBox" />:</label>
+		</cmr:column>
+        <cmr:column span="2" width="170" forCountry="780">
+			${summary.addr.poBox}
+		</cmr:column>
+		
         </cmr:row>
       </cmr:view>
 
@@ -471,7 +481,7 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
         </cmr:row>
       </cmr:view> --%>
 
-      <cmr:view forGEO="MCO,NORDX,NL" forCountry="780">
+      <cmr:view forGEO="MCO,NORDX,NL">
         <cmr:row>
           <cmr:column span="1" width="127">
           </cmr:column>
@@ -628,7 +638,7 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
 
 
       <cmr:row addBackground="true">
-        <cmr:column span="1" width="127">
+        <cmr:column span="1" width="127" exceptForCountry="780">
         </cmr:column>
         <cmr:column span="1" width="130">
           <label><cmr:fieldLabel fieldId="VAT" />: </label>
@@ -637,7 +647,7 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
           ${summary.data.vat}
 				</cmr:column>
 
-        <cmr:column span="1" width="90" forGEO="EMEA,MCO,NORDX,CEMEA" forCountry="780">
+        <cmr:column span="1" width="90" forGEO="EMEA,MCO,NORDX,CEMEA">
           <cmr:view exceptForCountry="758">
             <label><cmr:fieldLabel fieldId="VATExempt" />: </label>
           </cmr:view>
@@ -646,6 +656,25 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
           ${summary.data.vatExempt == 'Y' ? "Yes" : ""}
         </cmr:column>
       </cmr:row>
+      
+      <cmr:view forCountry="780">
+        <cmr:row>
+        	<cmr:column span="1" width="127">
+        	</cmr:column>
+	        <cmr:column span="1" width="130">
+	          <label><cmr:fieldLabel fieldId="VAT" />: </label>
+	        </cmr:column>
+	        <cmr:column span="1" width="240">
+				${summary.data.vat}
+			</cmr:column>
+			<cmr:column span="1" width="50">
+	            <label><cmr:fieldLabel fieldId="VATExempt" />: </label>
+	        </cmr:column>
+	        <cmr:column span="1" width="100">
+				${summary.data.vatExempt == 'Y' ? "Yes" : ""}
+	        </cmr:column>
+        </cmr:row>
+      </cmr:view>
 
       <!-- US Customer Fields -->
       <jsp:include page="US/us_customer_summary.jsp" />
