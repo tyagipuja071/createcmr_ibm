@@ -146,7 +146,6 @@ public class FranceUtil extends AutomationUtil {
       } else {
         switch (scenario) {
         case "PRICU":
-        case "CBICU":
         case "IBMEM":
         case "CBIEM":
           String name = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
@@ -175,12 +174,10 @@ public class FranceUtil extends AutomationUtil {
               if (response.getMatched() && response.getMatches().size() > 0) {
                 duplicateCMRNo = response.getMatches().get(0).getCmrNo();
                 String zs01Kunnr = getZS01Kunnr(duplicateCMRNo, SystemLocation.FRANCE);
-                details.append("The " + ((scenario.equals("PRICU") || scenario.equals("CBICU")) ? "Private Customer" : "IBM Employee")
-                    + " already has a record with CMR No. " + duplicateCMRNo);
-                engineData.addRejectionComment("DUPC",
-                    "Customer already exists / duplicate CMR.The "
-                        + ((scenario.equals("PRICU") || scenario.equals("CBICU")) ? "Private Customer" : "IBM Employee")
-                        + " already has a record with CMR No. " + duplicateCMRNo,
+                details.append("The " + ((scenario.equals("PRICU")) ? "Private Customer" : "IBM Employee") + " already has a record with CMR No. "
+                    + duplicateCMRNo);
+                engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR.The "
+                    + ((scenario.equals("PRICU")) ? "Private Customer" : "IBM Employee") + " already has a record with CMR No. " + duplicateCMRNo,
                     duplicateCMRNo, zs01Kunnr);
                 valid = false;
               } else {
@@ -209,76 +206,8 @@ public class FranceUtil extends AutomationUtil {
             engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name match failed to execute.");
           }
           break;
-        case "CBOEM":
-        case "LCOEM":
-          // check duplicate CMR's manually
-          MatchingResponse<DuplicateCMRCheckResponse> response = null;
-          try {
-            DupCMRCheckElement cmrCheckElement = new DupCMRCheckElement(null, null, false, false);
-            response = cmrCheckElement.getMatches(entityManager, requestData, engineData);
-            // get a count of matches with match grade E1,E2, F1 or F2
-            int count = 0;
-            if (response != null && response.getSuccess()) {
-              if (response.getMatched()) {
-                LOG.debug("Duplicate CMR's found for request: " + data.getId().getReqId());
-                for (DuplicateCMRCheckResponse cmrResponse : response.getMatches()) {
-                  if (cmrResponse.getMatchGrade().equals("E1") || cmrResponse.getMatchGrade().equals("E2") || cmrResponse.getMatchGrade().equals("F1")
-                      || cmrResponse.getMatchGrade().equals("F2")) {
-                    count++;
-                  }
-                }
-              }
-            } else {
-              LOG.error("Unable to perform Duplicate CMR Check for BROKR scenario.");
-              details.append("Unable to perform Duplicate CMR Check for Broker scenario.");
-              engineData.addNegativeCheckStatus("CMR_CHECK_FAILED", "Unable to perform Duplicate CMR Check for Broker scenario.");
-            }
-            if (count > 1) {
-              engineData.addRejectionComment("OTH", "Multiple registered CMRs already found for this customer.", "", "");
-              details.append("Multiple registered CMRs already found for this customer.");
-              valid = false;
-            } else if (count == 1) {
-              details.append("Single registered CMR found for this customer.");
-            } else {
-              details.append("No registered CMRs found for this customer.");
-            }
-          } catch (Exception e) {
-            LOG.error("Unable to perform Duplicate CMR Check for BROKR scenario.", e);
-            details.append("Unable to perform Duplicate CMR Check for Broker scenario.");
-            engineData.addNegativeCheckStatus("CMR_CHECK_FAILED", "Unable to perform Duplicate CMR Check for Broker scenario.");
-          }
-          break;
-        case "CBIEU":
-        case "CBUEU":
-        case "BPIEU":
-        case "BPUEU":
-          if (StringUtils.isNotBlank(data.getPpsceid())) {
-            try {
-              if (!checkPPSCEID(data.getPpsceid())) {
-                engineData.addRejectionComment("OTH", "PPS CE ID on the request is invalid.", "", "");
-                details.append("PPS CE ID on the request is invalid.");
-                valid = false;
-              } else {
-                details.append("PPS CE ID validated successfully with PartnerWorld Profile Systems.");
-              }
-              engineData.addNegativeCheckStatus("DISABLEDAUTOPROC",
-                  "Requests for " + scenarioDesc + " cannot be processed automatically. Manual processing would be required.");
-            } catch (Exception e) {
-              LOG.error("Not able to validate PPS CE ID using PPS Service.", e);
-              details.append("Not able to validate PPS CE ID using PPS Service.");
-              engineData.addNegativeCheckStatus("PPSCEID", "Not able to validate PPS CE ID using PPS Service.");
-            }
-          } else {
-            details.append("PPS CE ID not available on the request.");
-            engineData.addNegativeCheckStatus("PPSCEID", "PPS CE ID not available on the request.");
-          }
-          break;
         case "INTER":
         case "CBTER":
-        case "LCIFF":
-        case "LCIFL":
-        case "CBIFF":
-        case "CBIFL":
           String mainCustNm = zs01.getCustNm1();
           if (StringUtils.isNotBlank(mainCustNm) && !mainCustNm.toUpperCase().contains("IBM") && !(data.getCountryUse().length() > 3)) {
             engineData.addRejectionComment("OTH", "Wrong Customer Name on the main address. IBM should be part of the name.", "", "");
@@ -306,7 +235,7 @@ public class FranceUtil extends AutomationUtil {
           engineData.addNegativeCheckStatus("DISABLEDAUTOPROC",
               "Requests for " + scenarioDesc + " cannot be processed automatically. Manual processing would be required.");
           break;
-        case "CHDPT":
+        case "CBDPT":
         case "THDPT":
           // zs02 -> mailing zp01 -> billing
           Addr mailing = null;
