@@ -424,6 +424,7 @@ var TemplateService = (function() {
               } else {
                 if (create) {
                   var useCountryRules = false;
+                  var processorCheck = true;
                   if (typeof (useCountryScenarioRules) != 'undefined') {
                     useCountryRules = useCountryScenarioRules(currentChosenScenario, name, values[0]);
                   }
@@ -431,7 +432,10 @@ var TemplateService = (function() {
                     if (scenarioChanged) {
                       FormManager.setValue(name, values[0]);
                     }
-                    if (!retainValue || (retainValue && FormManager.getActualValue(name) == '')) {
+                    if (typeof (countryScenarioProcessorRules) != 'undefined' && getUserRole() == 'Processor') {
+                      processorCheck = countryScenarioProcessorRules();
+                    }
+                    if (processorCheck && (!retainValue || (retainValue && FormManager.getActualValue(name) == ''))) {
                       FormManager.setValue(name, values[0]);
                     }
                   }

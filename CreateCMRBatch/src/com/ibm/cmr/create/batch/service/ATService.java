@@ -625,7 +625,8 @@ public class ATService extends TransConnService {
                 addrSeqs = red.getSeqNo().split(",");
               }
 
-              if (red.getAddressType().equalsIgnoreCase(addr.getId().getAddrType()) && addrSeqs[1].equalsIgnoreCase(addr.getId().getAddrSeq())) {
+              if ((red.getAddressType().equalsIgnoreCase(addr.getId().getAddrType()) || "ZS02".equalsIgnoreCase(addr.getId().getAddrType()))
+                  && addrSeqs[1].equalsIgnoreCase(addr.getId().getAddrSeq())) {
                 addr.setPairedAddrSeq(addrSeqs[0]);
                 addr.setSapNo(red.getSapNo());
                 addr.setIerpSitePrtyId(red.getIerpSitePartyId());

@@ -65,6 +65,11 @@ public class UpdateSwitchElement extends ValidatingElement {
       validation.setMessage("Skipped");
       output.setDetails("Processing is skipped for non Update requests.");
       log.debug("Processing is skipped for non Update requests.");
+    } else if ("U".equals(admin.getReqType()) && engineData.hasPositiveCheckStatus("SKIP_UPDATE_SWITCH")) {
+      validation.setSuccess(true);
+      validation.setMessage("Skipped");
+      output.setDetails("Processing is skipped as requester is from CMDE team.");
+      log.debug("Processing is skipped as requester is from CMDE team.");
     } else if ("U".equals(admin.getReqType())) {
 
       GEOHandler handler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
@@ -125,6 +130,20 @@ public class UpdateSwitchElement extends ValidatingElement {
           validation.setSuccess(true);
           validation.setMessage("No Validations");
         } else {
+          log.debug("Verifying PayGo Accreditation for " + admin.getSourceSystId());
+          boolean payGoAddredited = AutomationUtil.isPayGoAccredited(entityManager, admin.getSourceSystId());
+          // do an initial check for PayGo cmrs
+          if (payGoAddredited && "PG".equals(data.getOrdBlk())) {
+            log.debug(
+                "Allowing name/address changes for PayGo accredited partner " + admin.getSourceSystId() + " Request: " + admin.getId().getReqId());
+            String details = StringUtils.isNotBlank(output.getDetails()) ? output.getDetails() : "";
+            output.setDetails("Skipped address checks on updates to PayGo CMR. Partner accredited for PayGo.\n");
+            validation.setMessage("Validated");
+            validation.setSuccess(true);
+            output.setResults("Validated");
+            output.setProcessOutput(validation);
+            return output;
+          }
           boolean hasCountryLogic = false;
           if (automationUtil != null) {
             hasCountryLogic = automationUtil.runUpdateChecksForAddress(entityManager, engineData, requestData, changes, output, validation);

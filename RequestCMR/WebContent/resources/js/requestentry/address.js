@@ -262,6 +262,9 @@ function AddressDetailsModal_onLoad() {
     cmr.showNode('updateButtonFromView');
   }
 
+  if (details.ret2 == 'PG01' && role != 'PROCESSOR') {
+    cmr.hideNode('updateButtonFromView');
+  }  
   // Defect 1518423: PP: Update Address functionality is visible for Imported
   // Billing Address for SM Create :Mukesh
   if ('758' == FormManager.getActualValue('cmrIssuingCntry') && 'C' == FormManager.getActualValue('reqType') && 'Y' == details.ret31) {
@@ -909,7 +912,7 @@ function addEditAddressModal_onLoad() {
       FormManager.setValue('addrType', 'ZP01');
     }
     if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.PORTUGAL || FormManager.getActualValue('cmrIssuingCntry') == SysLoc.SPAIN
-        || FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE) {
+     || FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE) {
       FormManager.setValue('addrType', 'ZS01');
     }
     FormManager.clearValue('transportZone');
@@ -1773,17 +1776,29 @@ function applyAddrChangesModal_onLoad() {
         }
       }
 
-      if (SysLoc.GREECE == cntry && type.ret1 == 'ZP01') {
-        if (FormManager.getActualValue('custGrp') == 'LOCAL') {
-          continue;
-        } else if (FormManager.getActualValue('reqType') == 'U' && FormManager.getActualValue('landCntry') == 'GR') {
-          continue;
-        } else if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZS01') {
+      if(SysLoc.GREECE == cntry && type.ret1 == 'ZP01') {
+    	  if(FormManager.getActualValue('custGrp') == 'LOCAL') {
+    		  continue;
+    	  } else if (FormManager.getActualValue('reqType') == 'U' && FormManager.getActualValue('landCntry') == 'GR') {
+    		  continue;
+    	  } else if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZS01') {
+    		  continue;
+    	  }
+      }
+      
+      if(SysLoc.GREECE == cntry && type.ret1 == 'ZS01') {
+    	  if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZP01') {
+    		  continue;
+    	  }
+      } 
+
+      if (SysLoc.TURKEY == cntry && type.ret1 == 'ZP01') {
+        if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZS01') {
           continue;
         }
       }
 
-      if (SysLoc.GREECE == cntry && type.ret1 == 'ZS01') {
+      if (SysLoc.TURKEY == cntry && type.ret1 == 'ZS01') {
         if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZP01') {
           continue;
         }
@@ -1954,6 +1969,19 @@ function applyAddrChangesModal_onLoad() {
       } else if (cEECountries.indexOf(cntry) > -1) {
         var reqReason = FormManager.getActualValue('reqReason');
         if ((type.ret1 == 'ZP03' || type.ret1 == 'ZD02') && (reqReason != 'IGF' || !isZD01OrZP01ExistOnCMR(type.ret1))) {
+          continue;
+        }
+        if (reqType != 'C' && typeof (GEOHandler) != 'undefined' && !GEOHandler.canCopyAddressType(type.ret1) && !single) {
+          choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (create additional only)</label><br>';
+        } else if (cmr.currentAddressType && type.ret1 != cmr.currentAddressType) {
+          choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + '</label><br>';
+        } else {
+          choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (copy only if others exist)</label><br>';
+          addressDesc = type.ret2;
+        }
+      } else if (cntry == '706') {
+        var reqReason = FormManager.getActualValue('reqReason');
+        if ((type.ret1 == 'ZP02' || type.ret1 == 'ZD02') && (reqReason != 'IGF' || !isZD01OrZP01ExistOnCMR(type.ret1))) {
           continue;
         }
         if (reqType != 'C' && typeof (GEOHandler) != 'undefined' && !GEOHandler.canCopyAddressType(type.ret1) && !single) {

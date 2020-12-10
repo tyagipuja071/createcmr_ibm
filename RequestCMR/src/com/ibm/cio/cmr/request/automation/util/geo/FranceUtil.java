@@ -962,4 +962,35 @@ public class FranceUtil extends AutomationUtil {
 
     return isRelevantFieldUpdated;
   }
+
+  @Override
+  public List<String> getSkipChecksRequestTypesforCMDE() {
+    return Arrays.asList("C", "U", "M", "D", "R");
+  }
+
+  public static boolean isCountryFREnabled(EntityManager entityManager, String cntry) {
+
+    boolean isFR = false;
+
+    String sql = ExternalizedQuery.getSql("FRANCE.GET_SUPP_CNTRY_BY_ID");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CNTRY", cntry);
+    query.setForReadOnly(true);
+    List<Integer> records = query.getResults(Integer.class);
+    Integer singleObject = null;
+
+    if (records != null && records.size() > 0) {
+      singleObject = records.get(0);
+      Integer val = singleObject != null ? singleObject : null;
+
+      if (val != null) {
+        isFR = true;
+      } else {
+        isFR = false;
+      }
+    } else {
+      isFR = false;
+    }
+    return isFR;
+  }
 }

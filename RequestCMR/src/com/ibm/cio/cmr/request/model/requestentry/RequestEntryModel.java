@@ -420,15 +420,15 @@ public class RequestEntryModel extends BaseModel {
   // CMR-5910 - military flag
   private String military;
 
-  // canada fields
-  private String invoiceDistCd;
-  private String cusInvoiceCopies;
-  
   // dpl assessment internal fields
   private String intDplAssessmentResult;
   private String intDplAssessmentDate;
   private String intDplAssessmentBy;
-  private String intDplAssessmentCmt;  
+  private String intDplAssessmentCmt;
+
+  // canada fields
+  private String invoiceDistCd;
+  private String cusInvoiceCopies;
 
   public String getMatchIndc() {
     return matchIndc;
@@ -3019,14 +3019,6 @@ public class RequestEntryModel extends BaseModel {
     this.addrStdTs = addrStdTs;
   }
 
-  public String getPaygoProcessIndc() {
-    return paygoProcessIndc;
-  }
-
-  public void setPaygoProcessIndc(String paygoProcessIndc) {
-    this.paygoProcessIndc = paygoProcessIndc;
-  }
-
   public String getMilitary() {
     return military;
   }
@@ -3035,22 +3027,14 @@ public class RequestEntryModel extends BaseModel {
     this.military = military;
   }
 
-  public String getInvoiceDistCd() {
-    return invoiceDistCd;
+  public String getPaygoProcessIndc() {
+    return paygoProcessIndc;
   }
 
-  public void setInvoiceDistCd(String invoiceDistCd) {
-    this.invoiceDistCd = invoiceDistCd;
+  public void setPaygoProcessIndc(String paygoProcessIndc) {
+    this.paygoProcessIndc = paygoProcessIndc;
   }
 
-  public String getCusInvoiceCopies() {
-    return cusInvoiceCopies;
-  }
-
-  public void setCusInvoiceCopies(String cusInvoiceCopies) {
-    this.cusInvoiceCopies = cusInvoiceCopies;
-  }
-  
   public String getIntDplAssessmentResult() {
     return intDplAssessmentResult;
   }
@@ -3081,6 +3065,22 @@ public class RequestEntryModel extends BaseModel {
 
   public void setIntDplAssessmentCmt(String intDplAssessmentCmt) {
     this.intDplAssessmentCmt = intDplAssessmentCmt;
+  }
+
+  public String getInvoiceDistCd() {
+    return invoiceDistCd;
+  }
+
+  public void setInvoiceDistCd(String invoiceDistCd) {
+    this.invoiceDistCd = invoiceDistCd;
+  }
+
+  public String getCusInvoiceCopies() {
+    return cusInvoiceCopies;
+  }
+
+  public void setCusInvoiceCopies(String cusInvoiceCopies) {
+    this.cusInvoiceCopies = cusInvoiceCopies;
   }
 
 }

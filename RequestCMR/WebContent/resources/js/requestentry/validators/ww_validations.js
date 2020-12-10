@@ -327,7 +327,6 @@ function initGenericTemplateHandler() {
       if (_delayedLoadComplete) {
         var val = FormManager.getActualValue('custSubGrp');
         if (val != '') {
-          console.log('filling request entry..')
           TemplateService.fill('reqentry');
         }
       }
@@ -772,7 +771,7 @@ function validateExistingCMRNo() {
           if (reqType == 'C' && cmrNo) {
             if (cmrNo.startsWith('P')) { 
               return new ValidationResult(null, true);
-            }  
+            }          
             var exists = cmr.query('LD.CHECK_CMR_EXIST_IN_RDC', {
               COUNTRY : cntry,
               CMR_NO : cmrNo,
@@ -809,28 +808,114 @@ function validateExistingCMRNo() {
     })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
-/**
- * Validator for the DPL Assessment
- */
-function addDPLAssessmentValidator() {
+function doubleByteCharacterValidator() {
+  var _reqId = FormManager.getActualValue('reqId');
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
-        var dplResult = FormManager.getActualValue('dplChkResult').toUpperCase();
-        if (dplResult != 'AF' && dplResult != 'SF'){
-          return new ValidationResult(null, true);
-        }
-        var result = typeof(_pagemodel) != 'undefined' ? _pagemodel.intDplAssessmentResult : 'X';
-        if (!result || result.trim() == '') {
-          return new ValidationResult(null, false, 'DPL Assessment is required for failed DPL checks. ');
+        var custNm1lbl = FormManager.getLabel('CustomerName1');
+        var custNm2lbl = FormManager.getLabel('CustomerName2');
+        var custNm3lbl = FormManager.getLabel('CustomerName3');
+        var addrTxtlbl = FormManager.getLabel('StreetAddress1');
+        var addrTxt2lbl = FormManager.getLabel('StreetAddress2');
+        var city1lbl = FormManager.getLabel('City1');
+        var city2lbl = FormManager.getLabel('City2');
+        var deptlbl = FormManager.getLabel('Department');
+        var bldglbl = FormManager.getLabel('Building');
+        var officelbl = FormManager.getLabel('Office');
+        var poBoxlbl = FormManager.getLabel('POBox');
+
+        var AddrParams = {
+          REQ_ID : _reqId,
+        };
+
+        var AddrResult = cmr.query('GET.CN.ADDRDETAILS', AddrParams);
+        var _custNm1 = AddrResult.ret1;
+        var _custNm2 = AddrResult.ret2;
+        var _custNm3 = AddrResult.ret3;
+        var _addrTxt = AddrResult.ret4;
+        var _addrTxt2 = AddrResult.ret5;
+        var _dropdowncity1 = AddrResult.ret6;
+        var _city2 = AddrResult.ret7;
+        var _dept = AddrResult.ret8;
+        var _bldg = AddrResult.ret9;
+        var _office = AddrResult.ret10;
+        var _poBox = AddrResult.ret11;
+        var reg = /^[-_ a-zA-Z0-9]+$/;
+        if (_custNm1 != '' && (_custNm1.length > 0 && !_custNm1.match(reg))) {
+          return new ValidationResult({
+            id : 'custNm1',
+            type : 'text',
+            name : 'custNm1'
+          }, false, 'Double byte and Special characters are not allowed in ' + custNm1lbl);
+        } else if (_custNm2 != '' && (_custNm2.length > 0 && !_custNm2.match(reg))) {
+          return new ValidationResult({
+            id : 'custNm2',
+            type : 'text',
+            name : 'custNm2'
+          }, false, 'Double byte and Special characters are not allowed in ' + custNm2lbl);
+        } else if (_custNm3 != '' && (_custNm3.length > 0 && !_custNm3.match(reg))) {
+          return new ValidationResult({
+            id : 'custNm3',
+            type : 'text',
+            name : 'custNm3'
+          }, false, 'Double byte and Special characters are not allowed in ' + custNm3lbl);
+        } else if (_addrTxt != '' && (_addrTxt.length > 0 && !_addrTxt.match(reg))) {
+          return new ValidationResult({
+            id : 'addrTxt',
+            type : 'text',
+            name : 'addrTxt'
+          }, false, 'Double byte and Special characters are not allowed in ' + addrTxtlbl);
+        } else if (_addrTxt2 != '' && (_addrTxt2.length > 0 && !_addrTxt2.match(reg))) {
+          return new ValidationResult({
+            id : 'addrTxt2',
+            type : 'text',
+            name : 'addrTxt2'
+          }, false, 'Double byte and Special characters are not allowed in ' + addrTxtlbl2);
+        } else if (_dropdowncity1 != '' && (_dropdowncity1.length > 0 && !_dropdowncity1.match(reg))) {
+          return new ValidationResult({
+            id : 'dropdowncity1',
+            type : 'dropdown',
+            name : 'dropdowncity1'
+          }, false, 'DDouble byte and Special characters are not allowed in ' + city1lbl);
+        } else if (_city2 != '' && (_city2.length > 0 && !_city2.match(reg))) {
+          return new ValidationResult({
+            id : 'city2',
+            type : 'text',
+            name : 'city2'
+          }, false, 'Double byte and Special characters are not allowed in ' + city2lbl);
+        } else if (_dept != '' && (_dept.length > 0 && !_dept.match(reg))) {
+          return new ValidationResult({
+            id : 'dept',
+            type : 'text',
+            name : 'dept'
+          }, false, 'Double byte and Special characters are not allowed in ' + deptlbl);
+        } else if (_bldg != '' && (_bldg.length > 0 && !_bldg.match(reg))) {
+          return new ValidationResult({
+            id : 'bldg',
+            type : 'text',
+            name : 'bldg'
+          }, false, 'Double byte and Special characters are not allowed in ' + bldglbl);
+        } else if (_office != '' && (_office.length > 0 && !_office.match(reg))) {
+          return new ValidationResult({
+            id : 'office',
+            type : 'text',
+            name : 'office'
+          }, false, 'Double byte and Special characters are not allowed in ' + officelbl);
+        } else if (_poBox != '' && (_poBox.length > 0 && !_poBox.match(reg))) {
+          return new ValidationResult({
+            id : 'poBox',
+            type : 'text',
+            name : 'poBox'
+          }, false, 'Double byte and Special characters are not allowed in ' + poBoxlbl);
         } else {
           return new ValidationResult(null, true);
         }
       }
     };
-  })(), 'MAIN_NAME_TAB', 'frmCMR');
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
-
+ 
 /**
  * Validator for the DPL Assessment
  */
@@ -863,7 +948,7 @@ dojo.addOnLoad(function() {
       '717', '718', '725', '745', '753', '764', '769', '770', '780', '782', '804', '810', '825', '827', '831', '833', '835', '840', '841', '842', '851', '857', '876', '879', '880', '881', '883',
       '758', '706', '760', '613', '655', '663', '681', '683', '731', '735', '781', '799', '811', '813', '829', '869', '871', '358', '359', '363', '603', '607', '620', '626', '644', '642', '651',
       '668', '677', '680', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '752', '762', '767', '768', '772', '787', '805', '808', '820', '821', '823', '826', '832', '849',
-      '850', '865', '889', '618', '641', '846', '806', '702', '678', '624', '788', '848', '649', '729' ];
+      '850', '865', '889', '618', '641', '846', '806', '702', '678', '624', '788', '848', '729', '649' ];
   GEOHandler.COUNTRIES_FOR_GEN_TEMPLATE_CRSSBORDER = [ '631', '866', '754', '724', '666', '726', '862', '755', '616', '615', '643', '738', '744', '749', '736', '778', '796', '818', '834', '652',
       '856', '852', '790', '822', '838', '815', '661', '629', '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718',
       '725', '745', '753', '764', '769', '770', '780', '782', '804', '810', '825', '827', '831', '833', '835', '840', '841', '842', '851', '857', '876', '879', '880', '881', '883', '613', '655',
@@ -896,7 +981,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addSoldToValidator, [ '897', '755', '726', '866', '754', '862', '666', '822', '838', '864', '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667',
       '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770', '780', '782', '804', '810', '825', '827', '831', '833', '835', '840', '841', '842', '851',
       '857', '876', '879', '880', '881', '883', '358', '359', '363', '603', '607', '620', '626', '644', '642', '651', '668', '677', '680', '693', '694', '695', '699', '704', '705', '707', '708',
-      '740', '741', '752', '762', '767', '768', '772', '787', '805', '808', '820', '821', '823', '826', '832', '849', '850', '865', '889', '618', '758', '760', '848', '649', '729' ], null, false, true);
+      '740', '741', '752', '762', '767', '768', '772', '787', '805', '808', '820', '821', '823', '826', '832', '849', '850', '865', '889', '618', '758', '760', '848', '729', '649' ], null, false, true);
   GEOHandler.registerWWValidator(addAddrStdValidator);
   // exclude for LA
   GEOHandler.registerWWValidator(addTaxCodesValidator, GEOHandler.LA, null, false, true);
@@ -910,9 +995,10 @@ dojo.addOnLoad(function() {
   // GEOHandler.registerWWValidator(addCovBGValidator,
   // GEOHandler.ROLE_PROCESSOR);
 
-  // For Legacy GR, CY and PT
-  GEOHandler.registerValidator(validateCMRNumberForLegacy, [ SysLoc.CYPRUS, SysLoc.GREECE, SysLoc.SOUTH_AFRICA, ...GEOHandler.AFRICA ], GEOHandler.ROLE_PROCESSOR, true);
-  GEOHandler.registerValidator(validateExistingCMRNo, [ SysLoc.PORTUGAL, SysLoc.CYPRUS, SysLoc.GREECE, ...GEOHandler.AFRICA ], GEOHandler.ROLE_PROCESSOR, true);
+    // For Legacy PT,CY,GR,SA
+  GEOHandler.registerValidator(validateCMRNumberForLegacy, [ SysLoc.PORTUGAL, SysLoc.CYPRUS, SysLoc.GREECE , SysLoc.SOUTH_AFRICA, ...GEOHandler.AFRICA, SysLoc.MALTA ], GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.registerValidator(validateExistingCMRNo, [ SysLoc.PORTUGAL, SysLoc.CYPRUS, SysLoc.GREECE , ...GEOHandler.AFRICA, SysLoc.MALTA ], GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.registerValidator(doubleByteCharacterValidator, [ SysLoc.CHINA ], null, true);
 
   GEOHandler.addAfterConfig(initGenericTemplateHandler, GEOHandler.COUNTRIES_FOR_GEN_TEMPLATE);
   // exclude countries that will not be part of client tier logic

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -21,7 +22,7 @@ public class TemplateValidation {
   private final String tabName;
 
   private Map<String, StringBuilder> allError = new HashMap<String, StringBuilder>();
-  
+
   public TemplateValidation(String tabName) {
     // only allow template to instantiate this
     this.tabName = tabName;
@@ -50,19 +51,19 @@ public class TemplateValidation {
       this.rows.add(row);
     }
   }
-  
+
   public boolean hasErrors() {
-	  return this.allError.size() > 0;
+    return this.allError.size() > 0;
   }
-  
+
   public String getAllError() {
-	  StringBuilder tabErrors = new StringBuilder();
-	  
-	  for(Map.Entry<String, StringBuilder> entry : this.allError.entrySet()) {
-		  tabErrors.append(entry.getValue().toString()).append(": ").append(entry.getKey());
-	  }
-	  
-	  return tabErrors.toString();
+    StringBuilder tabErrors = new StringBuilder();
+
+    for (Map.Entry<String, StringBuilder> entry : this.allError.entrySet()) {
+      tabErrors.append(entry.getValue().toString()).append(": ").append(entry.getKey());
+    }
+
+    return tabErrors.toString();
   }
 
   public class ValidationRow {
@@ -86,21 +87,20 @@ public class TemplateValidation {
     }
 
     public void addError(String field, String msg) {
-      this.error.append(this.error.length() > 0 ? "\n" : "");
+      // this.error.append(this.error.length() > 0 ? "\n" : "");
       this.error.append(field + ": " + msg);
-      
-      if(allError.containsKey(msg)) {
-    	  allError.get(msg).append(" Row" + this.rowNumber);
-      }
-      else {
-    	  StringBuilder sbRowError = new StringBuilder();
-    	  
-    	  if(StringUtils.isNotEmpty(field)){
-    		sbRowError.append(field).append(", :");  
-    	  }
-    	  
-    	  sbRowError.append(" Row").append("" + this.rowNumber);
-    	  allError.put(msg, sbRowError);
+
+      if (allError.containsKey(msg)) {
+        allError.get(msg).append(" Row" + this.rowNumber);
+      } else {
+        StringBuilder sbRowError = new StringBuilder();
+
+        if (StringUtils.isNotEmpty(field)) {
+          sbRowError.append(field).append(", :");
+        }
+
+        sbRowError.append(" Row").append("" + this.rowNumber);
+        allError.put(msg, sbRowError);
       }
     }
   }

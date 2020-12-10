@@ -40,6 +40,7 @@ public class USBranchOffcMapping {
   public static String[] INDUSTRY_WYK = { "J", "V", "L", "P", "M" };
   public static String[] INDUSTRY_YUC = { "Y", "G", "E", "H", "X" };
   public static String[] INDUSTRY_1QP = { "W" };
+  public static String[] INDUSTRY_1SD = { "Z" };
   public static String[] INDUSTRY_WYL = { "R", "D", "W", "T" };
   public static String[] INDUSTRY_WYR = { "F", "S", "N" };
   public static Map<String, List<String>> indARBOMap = new HashMap<String, List<String>>();
@@ -81,6 +82,7 @@ public class USBranchOffcMapping {
     indARBOMap.put("OCA", Arrays.asList(INDUSTRY_OCA));
     indARBOMap.put("WYK", Arrays.asList(INDUSTRY_WYK));
     indARBOMap.put("YUC", Arrays.asList(INDUSTRY_YUC));
+    indARBOMap.put("1SD", Arrays.asList(INDUSTRY_1SD));
     indARBOMap.put("1QP", Arrays.asList(INDUSTRY_1QP));
     indARBOMap.put("WYL", Arrays.asList(INDUSTRY_WYL));
     indARBOMap.put("WYR", Arrays.asList(INDUSTRY_WYR));

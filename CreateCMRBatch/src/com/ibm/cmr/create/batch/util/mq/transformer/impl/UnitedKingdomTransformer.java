@@ -48,7 +48,7 @@ public class UnitedKingdomTransformer extends EMEATransformer {
 
   // added marekting response code to preserve BP = 5 for updates
   private static final String[] NO_UPDATE_FIELDS = { "OrganizationNo", "CurrencyCode" };
-  private static final String[] ADDRESS_ORDER = { "ZP01", "ZS01", "ZI01", "ZD01", "ZS02" };
+  private static final String[] ADDRESS_ORDER = { "ZP01", "ZS01", "ZI01", "ZD01", "ZS02", "PG01" };
   private static final String DEFAULT_LANDED_COUNTRY = "UK";
   private static final String DEFAULT_CLEAR_CHAR = "@";
   private static final String DEFAULT_CLEAR_6_CHAR = "@@@@@@";

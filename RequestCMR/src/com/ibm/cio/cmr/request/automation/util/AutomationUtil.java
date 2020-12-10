@@ -1136,6 +1136,24 @@ public abstract class AutomationUtil {
   }
 
   /**
+   * Returns true if the partner is accredited for the Pay-Go process
+   * 
+   * @param entityManager
+   * @param sourceSystId
+   * @return
+   */
+  public static boolean isPayGoAccredited(EntityManager entityManager, String sourceSystId) {
+    if (StringUtils.isBlank(sourceSystId)) {
+      return false;
+    }
+    String sql = ExternalizedQuery.getSql("AUTO.PAYGO.CHECK");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("SYST_ID", sourceSystId);
+    query.setForReadOnly(true);
+    return query.exists();
+  }
+
+  /**
    * returns the country-wise request types for {@link CMDERequesterCheck}
    * element to skip all checks if the requester is CMDE
    * 

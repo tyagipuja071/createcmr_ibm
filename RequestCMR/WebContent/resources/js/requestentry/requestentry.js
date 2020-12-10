@@ -7,7 +7,7 @@
  * UI handling
  * 
  */
-var CNTRY_LIST_FOR_INVALID_CUSTOMERS = [ '838', '866', '754' ];
+//var CNTRY_LIST_FOR_INVALID_CUSTOMERS = [ '838', '866', '754' ];
 dojo.require("dojo.io.iframe");
 
 /**
@@ -747,7 +747,7 @@ function afterConfigChange() {
     }
     var cntry = FormManager.getActualValue('cmrIssuingCntry');
 
-    if (FormManager.getActualValue('ordBlk') == '93' && !CNTRY_LIST_FOR_INVALID_CUSTOMERS.includes(cntry)) {
+    if (FormManager.getActualValue('ordBlk') == '93' && _pagemodel.reqType != 'X') {
       FormManager.show('DeactivateToActivateCMR', 'func');
       if (dijit.byId('func')) {
         FormManager.getField('func').set('checked', true);
@@ -1634,6 +1634,20 @@ function showAddrVerificationModal() {
   cmr.showModal('addressVerificationModal');
 }
 
+/**
+ * Save function
+ */
+function autoSaveRequest() {
+  // enable all checkboxes
+  var cb = dojo.query('[type=checkbox]');
+  for (var i = 0; i < cb.length; i++) {
+    if (cb[i].id.indexOf('dijit') < 0 && cb[i].disabled) {
+      cb[i].disabled = false;
+      cb[i].removeAttribute('disabled');
+    }
+  }
+  FormManager.doAction('frmCMR', 'SAV', true, 'Saving the request...');
+}
 
 function checkForConfirmationAttachments(){
 	var id = FormManager.getActualValue('reqId');
@@ -1674,4 +1688,3 @@ function autoSaveRequest() {
   }
   FormManager.doAction('frmCMR', 'SAV', true, 'Saving the request...');
 }
-
