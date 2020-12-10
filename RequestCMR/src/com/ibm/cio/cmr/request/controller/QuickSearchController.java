@@ -28,6 +28,7 @@ import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.service.QuickSearchService;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.CompanyFinder;
+import com.ibm.cio.cmr.request.util.async.AsyncRequestCreator;
 import com.ibm.cmr.services.client.dnb.DnbData;
 
 /**
@@ -101,62 +102,79 @@ public class QuickSearchController extends BaseController {
 
 	@RequestMapping(value = "/quick_search/process")
   public @ResponseBody ModelMap processRequest(HttpServletRequest request, CompanyRecordModel company) throws Exception {
-		ModelMap map = new ModelMap();
+    ModelMap map = new ModelMap();
 
-		ParamContainer params = new ParamContainer();
-		params.addParam("model", company);
-		try {
-			RequestEntryModel reqEntry = service.process(request, params);
-			if (reqEntry != null && reqEntry.getReqId() > 0) {
-				map.addAttribute("success", true);
-				map.addAttribute("model", reqEntry);
-			} else {
-				map.addAttribute("success", false);
-				map.addAttribute("msg", "An unexpected error occured. Please try again later.");
-			}
-		} catch (Exception e) {
-			LOG.error("An error was encountered in processing the request creation", e);
-			map.addAttribute("success", false);
-			map.addAttribute("msg", e.getMessage());
-		}
-		return map;
-	}
+    ParamContainer params = new ParamContainer();
+    params.addParam("model", company);
+    try {
+      RequestEntryModel reqEntry = service.process(request, params);
+      if (reqEntry != null && reqEntry.getReqId() > 0) {
+        map.addAttribute("success", true);
+        map.addAttribute("model", reqEntry);
+      } else {
+        map.addAttribute("success", false);
+        map.addAttribute("msg", "An unexpected error occured. Please try again later.");
+      }
+    } catch (Exception e) {
+      LOG.error("An error was encountered in processing the request creation", e);
+      map.addAttribute("success", false);
+      map.addAttribute("msg", e.getMessage());
+    }
+    return map;
+  }
 
-	// Changes for Update API Framework change- Start 
-	@RequestMapping(value = "/update", method = RequestMethod.POST, consumes = "application/json")
-	public @ResponseBody ModelMap getUpdate(@RequestBody CompanyRecordModel company,
-			@Context HttpServletRequest request) throws Exception {
-		ModelMap map = new ModelMap();
-		AppUser user = new AppUser();
-		user.setIntranetId("CREATECMR");
-		user.setBluePagesName("CREATECMR");
-		user.setDefaultLineOfBusn("XCRM");
-		user.setDefaultRequestRsn("OTH");
-		DummyServletRequest dummyReq = new DummyServletRequest();
-		if (dummyReq.getSession() != null) {
-			LOG.trace("Session found for dummy req");
-			dummyReq.getSession().setAttribute(CmrConstants.SESSION_APPUSER_KEY, user);
-		} else {
-			LOG.warn("Session not found for dummy req");
-		}
+  @RequestMapping(value = "/quick_search/async")
+  public @ResponseBody ModelMap processRequestAsync(HttpServletRequest request, CompanyRecordModel company) throws Exception {
+    ModelMap map = new ModelMap();
 
-		ParamContainer params = new ParamContainer();
-		params.addParam("model", company);
-		try {
-			RequestEntryModel reqEntry = service.process(dummyReq, params);
-			if (reqEntry != null && reqEntry.getReqId() > 0) {
-				map.addAttribute("success", true);
-				map.addAttribute("model", reqEntry.getReqId());
-			} else {
-				map.addAttribute("success", false);
-				map.addAttribute("msg", "An unexpected error occured. Please try again later.");
-			}
-		} catch (Exception e) {
-			LOG.error("An error was encountered in processing the request creation", e);
-			map.addAttribute("success", false);
-			map.addAttribute("msg", e.getMessage());
-		}
-		return map;
-	}
+    try {
+      AppUser user = AppUser.getUser(request);
+      AsyncRequestCreator async = new AsyncRequestCreator(user, company.getIssuingCntry(), company.getCmrNo());
+      Thread t = new Thread(async);
+      t.start();
+      map.addAttribute("success", true);
+      map.addAttribute("msg", null);
+    } catch (Exception e) {
+      LOG.error("An error was encountered in processing the request creation", e);
+      map.addAttribute("success", false);
+      map.addAttribute("msg", e.getMessage());
+    }
+    return map;
+  }
 
+  // Changes for Update API Framework change- Start
+  @RequestMapping(value = "/update", method = RequestMethod.POST, consumes = "application/json")
+  public @ResponseBody ModelMap getUpdate(@RequestBody CompanyRecordModel company, @Context HttpServletRequest request) throws Exception {
+    ModelMap map = new ModelMap();
+    AppUser user = new AppUser();
+    user.setIntranetId("CREATECMR");
+    user.setBluePagesName("CREATECMR");
+    user.setDefaultLineOfBusn("XCRM");
+    user.setDefaultRequestRsn("OTH");
+    DummyServletRequest dummyReq = new DummyServletRequest();
+    if (dummyReq.getSession() != null) {
+      LOG.trace("Session found for dummy req");
+      dummyReq.getSession().setAttribute(CmrConstants.SESSION_APPUSER_KEY, user);
+    } else {
+      LOG.warn("Session not found for dummy req");
+    }
+
+    ParamContainer params = new ParamContainer();
+    params.addParam("model", company);
+    try {
+      RequestEntryModel reqEntry = service.process(dummyReq, params);
+      if (reqEntry != null && reqEntry.getReqId() > 0) {
+        map.addAttribute("success", true);
+        map.addAttribute("model", reqEntry.getReqId());
+      } else {
+        map.addAttribute("success", false);
+        map.addAttribute("msg", "An unexpected error occured. Please try again later.");
+      }
+    } catch (Exception e) {
+      LOG.error("An error was encountered in processing the request creation", e);
+      map.addAttribute("success", false);
+      map.addAttribute("msg", e.getMessage());
+    }
+    return map;
+  }
 }
