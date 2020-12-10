@@ -50,6 +50,8 @@ public class DataModel extends BaseModel {
 
   private String taxCd2;
 
+  private String taxCd3;
+
   private String memLvl;
 
   private String ppsceid;
@@ -107,6 +109,8 @@ public class DataModel extends BaseModel {
   private String mktgDept;
 
   private String mtkgArDept;
+
+  private String adminDeptCd;
 
   private String pccMktgDept;
 
@@ -198,6 +202,10 @@ public class DataModel extends BaseModel {
 
   private String locationNumber;
 
+  private String orgNo;
+
+  private String cusInvoiceCopies;
+
   private String currencyCd;
 
   private String legacyCurrencyCd;
@@ -246,6 +254,14 @@ public class DataModel extends BaseModel {
 
   public String getCreditCd() {
     return creditCd;
+  }
+
+  public String getAdminDeptCd() {
+    return adminDeptCd;
+  }
+
+  public void setAdminDeptCd(String adminDeptCd) {
+    this.adminDeptCd = adminDeptCd;
   }
 
   public void setCreditCd(String creditCd) {
@@ -420,6 +436,14 @@ public class DataModel extends BaseModel {
 
   public void setTaxCd2(String taxCd2) {
     this.taxCd2 = taxCd2;
+  }
+
+  public String getTaxCd3() {
+    return taxCd3;
+  }
+
+  public void setTaxCd3(String taxCd3) {
+    this.taxCd3 = taxCd3;
   }
 
   public String getMemLvl() {
@@ -1166,6 +1190,22 @@ public class DataModel extends BaseModel {
     this.military = military;
   }
 
+  public String getOrgNo() {
+    return orgNo;
+  }
+
+  public void setOrgNo(String orgNo) {
+    this.orgNo = orgNo;
+  }
+
+  public String getCusInvoiceCopies() {
+    return cusInvoiceCopies;
+  }
+
+  public void setCusInvoiceCopies(String cusInvoiceCopies) {
+    this.cusInvoiceCopies = cusInvoiceCopies;
+  }
+  
   public String getApCustClusterId() {
     return apCustClusterId;
   }

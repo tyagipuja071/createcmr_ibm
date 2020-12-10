@@ -477,6 +477,7 @@ span.mail {
                       <option value="*">(any)</option>
                       <option value="$">is blank</option>
                       <option value="IN">in</option>
+                      <option value="NIN">not in</option>
                       <option value="CON">contains</option>
                       <option value="NCO">doesn't contain</option>
                       <option ng-show="requestType == 'U'" value="CHG">is changed</option>
@@ -492,6 +493,7 @@ span.mail {
                     <span ng-switch-when="*">(any)</span>
                     <span ng-switch-when="$">is blank</span>
                     <span ng-switch-when="IN">in</span>
+                    <span ng-switch-when="NIN">not in</span>
                     <span ng-switch-when="CON">contains</span>
                     <span ng-switch-when="NCO">doesn't contain</span>
                     <span ng-switch-when="CHG">is changed</span>
@@ -576,6 +578,7 @@ span.mail {
                     <span ng-switch-when="*">with any value</span>
                     <span ng-switch-when="$">is blank</span>
                     <span ng-switch-when="IN">with value of either one of</span>
+                    <span ng-switch-when="NIN">with value not in the list</span>
                     <span ng-switch-when="CON">that contains</span>
                     <span ng-switch-when="NCO">that doesn't contain</span>
                     <span ng-switch-when="CHG">that has been updated</span>
@@ -619,6 +622,7 @@ span.mail {
                     <span ng-switch-when="*">with any value</span>
                     <span ng-switch-when="$">is blank</span>
                     <span ng-switch-when="IN">with value of either one of</span>
+                    <span ng-switch-when="NIN">with value not in the list</span>
                     <span ng-switch-when="CON">that contains</span>
                     <span ng-switch-when="NCO">that doesn't contain</span>
                     <span ng-switch-when="CHG">that has been updated</span>
