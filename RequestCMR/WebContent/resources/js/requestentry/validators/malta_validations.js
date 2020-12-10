@@ -590,8 +590,12 @@ function enterpriseValidation() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
+        var reqType = FormManager.getActualValue('reqType');
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
         var enterprise = FormManager.getActualValue('enterprise');
-
+        if ((reqType != 'U') && (custSubGrp == 'BUSPR' || custSubGrp == 'XBP')) {
+          return;
+        }
         if (enterprise.length >= 1 && enterprise.length != 6) {
           return new ValidationResult(null, false, 'Enterprise Number should be 6 digit long.');
         } else {
