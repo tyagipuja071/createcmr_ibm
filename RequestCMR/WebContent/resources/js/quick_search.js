@@ -392,6 +392,7 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
   };
 
   $scope.getSubRegion = function(issuingCntry, countryCd) {
+    var issuingCntry = FormManager.getActualValue('issuingCntry');
     if (issuingCntry && issuingCntry.length > 3) {
       return issuingCntry;
     }
