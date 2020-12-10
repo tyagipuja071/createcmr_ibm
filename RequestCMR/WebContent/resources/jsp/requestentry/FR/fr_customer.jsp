@@ -45,6 +45,14 @@
         </cmr:label>
         <cmr:field fieldId="CurrencyCode" id="currencyCd" path="currencyCd" tabId="MAIN_CUST_TAB" />
       </p>
+    </cmr:column>
+    <cmr:column span="2" containerForField="CustClass">
+        <p>
+          <cmr:label fieldId="custClass">
+            <cmr:fieldLabel fieldId="CustClass" />:
+          </cmr:label>
+          <cmr:field fieldId="CustClass" id="custClass" path="custClass" tabId="MAIN_CUST_TAB" />
+        </p>
     </cmr:column>  
     <cmr:column span="2" containerForField="DoubleCreate">
         <p>
