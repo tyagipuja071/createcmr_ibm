@@ -35,7 +35,7 @@ function afterConfigForFR() {
   if (role == 'Requester') {
     FormManager.readOnly('abbrevNm');
     FormManager.readOnly('abbrevLocn');
-    FormManager.readOnly('taxCd2');
+    //FormManager.readOnly('taxCd2');
     FormManager.readOnly('poBox');
     FormManager.readOnly('embargoCd');
     // FormManager.readOnly('currencyCd');
@@ -2452,21 +2452,13 @@ function setClassificationCodeTR(){
   FormManager.show('CustClass', 'custClass');
   FormManager.resetDropdownValues(FormManager.getField('custClass'));
   
-  if (reqType == 'C'){
+  if (reqType == 'C') {
     if(custSubGrp != ''){
       if (custSubGrp == 'COMME' || custSubGrp == 'CBMME' || custSubGrp == 'HOSTC' || 
           custSubGrp == 'CBSTC' || custSubGrp == 'THDPT' || custSubGrp == 'CBDPT') {
         FormManager.setValue(field, '11');
         FormManager.readOnly(field);
-      } else if (custSubGrp == 'BUSPR') {
-        FormManager.limitDropdownValues(field, [ '42', '43', '44', '45', '46', '47', '48' ]);
-        FormManager.enable(field);
-        
-        if(pageModelFlag == 'Y'){
-          FormManager.setValue(field, _pagemodel.custClass);
-        }
-        
-      } else if (custSubGrp == 'XBUSP') {
+      } else if (custSubGrp == 'BUSPR' || custSubGrp == 'XBUSP') {
         FormManager.limitDropdownValues(field, [ '42', '43', '44', '45', '46', '47', '48' ]);
         FormManager.enable(field);
         
@@ -2496,7 +2488,7 @@ function setClassificationCodeTR(){
         FormManager.setValue(field, '85');
         FormManager.readOnly(field);
       } else if (custSubGrp == 'LCFIN' || custSubGrp == 'CBFIN') {
-        FormManager.limitDropdownValues(field, [ '33', '34', '35', '36' ]);
+        FormManager.limitDropdownValues(field, [ '32', '33', '34', '35', '36' ]);
         FormManager.enable(field);
         
         if(pageModelFlag == 'Y'){
