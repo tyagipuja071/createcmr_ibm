@@ -665,8 +665,12 @@ public class MaltaHandler extends BaseSOFHandler {
       address.setCustNm3(currentRecord.getCmrName3());
       address.setAddrTxt(currentRecord.getCmrStreetAddress());
       address.setAddrTxt2(currentRecord.getCmrStreetAddressCont());
-      address.setTransportZone("");
 
+      if (!(StringUtils.isEmpty(currentRecord.getCmrPOBox()))) {
+        address.setPoBox(currentRecord.getCmrPOBox().substring(0, 10));
+      }
+
+      address.setTransportZone("");
       if (CmrConstants.REQ_TYPE_UPDATE.equalsIgnoreCase(admin.getReqType())) {
         address.getId().setAddrSeq(currentRecord.getCmrAddrSeq());
         spid = getRDcIerpSitePartyId(currentRecord.getCmrSapNumber());
