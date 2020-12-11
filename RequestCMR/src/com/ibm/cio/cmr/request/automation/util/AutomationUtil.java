@@ -17,6 +17,7 @@ import org.codehaus.jackson.type.TypeReference;
 
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
+import com.ibm.cio.cmr.request.automation.impl.gbl.CMDERequesterCheck;
 import com.ibm.cio.cmr.request.automation.impl.gbl.CalculateCoverageElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.DnBMatchingElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
@@ -746,21 +747,26 @@ public abstract class AutomationUtil {
    * @return
    * @throws Exception
    */
-  protected boolean checkPPSCEID(String ppsCeId) throws Exception {
+  public static boolean checkPPSCEID(String ppsCeId) {
     if (StringUtils.isBlank(ppsCeId)) {
       return false;
     }
-    PPSServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
-        PPSServiceClient.class);
-    client.setRequestMethod(Method.Get);
-    client.setReadTimeout(1000 * 60 * 5);
-    PPSRequest request = new PPSRequest();
-    request.setCeid(ppsCeId.toLowerCase());
-    PPSResponse ppsResponse = client.executeAndWrap(request, PPSResponse.class);
-    if (!ppsResponse.isSuccess()) {
+    try {
+      PPSServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
+          PPSServiceClient.class);
+      client.setRequestMethod(Method.Get);
+      client.setReadTimeout(1000 * 60 * 5);
+      PPSRequest request = new PPSRequest();
+      request.setCeid(ppsCeId.toLowerCase());
+      PPSResponse ppsResponse = client.executeAndWrap(request, PPSResponse.class);
+      if (!ppsResponse.isSuccess()) {
+        return false;
+      } else {
+        return true;
+      }
+    } catch (Exception e) {
+      LOG.error("Error occured in connecting to PPS", e);
       return false;
-    } else {
-      return true;
     }
   }
 
@@ -1043,6 +1049,11 @@ public abstract class AutomationUtil {
     return kunnr;
   }
 
+  /**
+   * Skips execution for all elements
+   * 
+   * @param engineData
+   */
   public void skipAllChecks(AutomationEngineData engineData) {
     if (engineData != null && engineData.containsKey("SCENARIO_EXCEPTIONS")) {
       ScenarioExceptionsUtil scenarioExceptions = (ScenarioExceptionsUtil) engineData.get("SCENARIO_EXCEPTIONS");
@@ -1050,6 +1061,32 @@ public abstract class AutomationUtil {
       scenarioExceptions.setSkipChecks(true);
       scenarioExceptions.setSkipCompanyVerification(true);
     }
+  }
+
+  /**
+   * 
+   * Gets scenario exceptions for a particular request
+   * 
+   * @param entityManager
+   * @param requestData
+   * @param engineData
+   * @return
+   */
+  public static ScenarioExceptionsUtil getScenarioExceptions(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData) {
+    ScenarioExceptionsUtil scenarioExceptions = null;
+    if (engineData != null && engineData.containsKey("SCENARIO_EXCEPTIONS")) {
+      scenarioExceptions = (ScenarioExceptionsUtil) engineData.get("SCENARIO_EXCEPTIONS");
+      return scenarioExceptions;
+    } else {
+      Data data = requestData.getData();
+      scenarioExceptions = new ScenarioExceptionsUtil(entityManager, data.getCmrIssuingCntry(), data.getCountryUse(), data.getCustGrp(),
+          data.getCustSubGrp());
+      if (engineData != null) {
+        engineData.put("SCENARIO_EXCEPTIONS", scenarioExceptions);
+      }
+      return scenarioExceptions;
+    }
+
   }
 
   /**
@@ -1096,6 +1133,59 @@ public abstract class AutomationUtil {
     String custNm3 = StringUtils.isNotBlank(addr.getCustNm3()) ? addr.getCustNm3() : "";
     String custNm4 = StringUtils.isNotBlank(addr.getCustNm4()) ? addr.getCustNm4() : "";
     return custNm1 + custNm2 + custNm3 + custNm4;
+  }
+
+  /**
+   * returns the country-wise request types for {@link CMDERequesterCheck}
+   * element to skip all checks if the requester is CMDE
+   * 
+   * @return
+   */
+  public List<String> getSkipChecksRequestTypesforCMDE() {
+    return new ArrayList<String>();
+  }
+
+  public static boolean isLegalNameChanged(Admin admin) {
+    String newName = admin.getMainCustNm1().toUpperCase();
+    newName += !StringUtils.isBlank(admin.getMainCustNm2()) ? " " + admin.getMainCustNm2().toUpperCase() : "";
+
+    String oldName = !StringUtils.isBlank(admin.getOldCustNm1()) ? admin.getOldCustNm1().toUpperCase() : "";
+    oldName += !StringUtils.isBlank(admin.getOldCustNm2()) ? " " + admin.getOldCustNm2().toUpperCase() : "";
+
+    return !newName.equals(oldName);
+  }
+
+  public static boolean checkCommentSection(EntityManager entityManager, Admin admin, Data data) {
+    List<String> BP_CMT_1 = Arrays.asList("Maintenance", "MA", "HWMA");
+    List<String> BP_CMT_2 = Arrays.asList("End User", "HW");
+    boolean rejectRequest = false;
+    String restrictCd = StringUtils.isNotBlank(data.getRestrictTo()) ? data.getRestrictTo() : "";
+    String sql = ExternalizedQuery.getSql("AUTOMATION.GET_CMT_LOG");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", admin.getId().getReqId());
+    query.setForReadOnly(true);
+    List<String> comments = query.getResults(String.class);
+    for (String cmt : comments) {
+      String cleanCmt = " " + getCleanString(cmt) + " ";
+      switch (restrictCd) {
+      case "BPQS":
+        for (String keyword : BP_CMT_1) {
+          if (cleanCmt.contains(" " + getCleanString(keyword) + " ")) {
+            rejectRequest = true;
+            break;
+          }
+        }
+        break;
+      case "IRCSO":
+        for (String keyword : BP_CMT_2) {
+          if (cleanCmt.contains(" " + getCleanString(keyword) + " ")) {
+            rejectRequest = true;
+            break;
+          }
+        }
+      }
+    }
+    return rejectRequest;
   }
 
 }

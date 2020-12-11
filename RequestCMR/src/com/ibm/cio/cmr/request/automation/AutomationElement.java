@@ -8,9 +8,9 @@ import javax.persistence.EntityManager;
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.automation.out.AutomationOutput;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
+import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
 import com.ibm.cio.cmr.request.entity.BaseEntity;
-import com.ibm.cio.cmr.request.entity.Data;
 
 /**
  * An object that can be configured and ran via the {@link AutomationEngine}
@@ -215,19 +215,7 @@ public abstract class AutomationElement<R extends AutomationOutput> {
   }
 
   public ScenarioExceptionsUtil getScenarioExceptions(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData) {
-    ScenarioExceptionsUtil scenarioExceptions = null;
-    if (engineData != null && engineData.containsKey("SCENARIO_EXCEPTIONS")) {
-      scenarioExceptions = (ScenarioExceptionsUtil) engineData.get("SCENARIO_EXCEPTIONS");
-      return scenarioExceptions;
-    } else {
-      Data data = requestData.getData();
-      scenarioExceptions = new ScenarioExceptionsUtil(entityManager, data.getCmrIssuingCntry(), data.getCountryUse(), data.getCustGrp(),
-          data.getCustSubGrp());
-      if (engineData != null) {
-        engineData.put("SCENARIO_EXCEPTIONS", scenarioExceptions);
-      }
-      return scenarioExceptions;
-    }
-
+    return AutomationUtil.getScenarioExceptions(entityManager, requestData, engineData);
   }
+
 }

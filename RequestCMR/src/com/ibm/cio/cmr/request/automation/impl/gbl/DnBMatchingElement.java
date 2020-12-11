@@ -35,6 +35,7 @@ import com.ibm.cio.cmr.request.service.requestentry.ImportDnBService;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
@@ -67,6 +68,19 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
     ScenarioExceptionsUtil scenarioExceptions = getScenarioExceptions(entityManager, requestData, engineData);
     AutomationResult<MatchingOutput> result = buildResult(admin.getId().getReqId());
     MatchingOutput output = new MatchingOutput();
+
+    // skip dnb matching if dnb matches on UI are overriden and attachment is
+    // provided
+    if ("Y".equals(admin.getMatchOverrideIndc()) && DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+      result.setResults("Overriden");
+      result.setDetails(
+          "D&B matches were chosen to be overridden by the requester.\nSupporting documentation is provided by the requester as attachment.");
+      List<String> dnbOverrideCountryList = SystemParameters.getList("DNB_OVR_CNTRY_LIST");
+      if (dnbOverrideCountryList == null || !dnbOverrideCountryList.contains(data.getCmrIssuingCntry())) {
+        engineData.addNegativeCheckStatus("_dnbOverride", "D&B matches were chosen to be overridden by the requester.");
+      }
+      return result;
+    }
 
     if (soldTo != null) {
       boolean shouldThrowError = !"Y".equals(admin.getCompVerifiedIndc());
@@ -129,8 +143,11 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
                 }
                 if (scenarioExceptions.isCheckVATForDnB()
                     && ((!isTaxCdMatch && !StringUtils.isBlank(data.getVat())) || (isTaxCdMatch && !StringUtils.isBlank(data.getTaxCd1())))
-                    && ((!orgIdFound && engineData.hasPositiveCheckStatus(AutomationEngineData.VAT_VERIFIED)) || (orgIdFound && isOrgIdMatched))) {
+                    && ((!orgIdFound && engineData.isVatVerified()) || (orgIdFound && isOrgIdMatched))) {
                   // found the perfect match here
+                  if (!isTaxCdMatch) {
+                    engineData.setVatVerified(true, "VAT Verified");
+                  }
                   perfectMatch = dnbRecord;
                   break;
                 }
@@ -180,8 +197,11 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
                 processAddressFields(data.getCmrIssuingCntry(), highestCloseMatch, output, 1, scenarioExceptions, handler, eligibleAddresses);
               }
             }
-            engineData.addNegativeCheckStatus("DNB_VAT_MATCH_CHECK_FAIL",
-                (isTaxCdMatch ? "Org ID " : "VAT ") + " value did not match with the highest confidence D&B match.");
+            if (isTaxCdMatch) {
+              engineData.addNegativeCheckStatus("DNB_VAT_MATCH_CHECK_FAIL", "Org ID value did not match with the highest confidence D&B match.");
+            } else {
+              engineData.setVatVerified(false, "VAT value did not match with the highest confidence D&B match.");
+            }
             LOG.trace(new ObjectMapper().writeValueAsString(highestCloseMatch));
           } else {
 

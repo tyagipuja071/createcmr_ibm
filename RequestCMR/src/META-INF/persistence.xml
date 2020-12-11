@@ -117,6 +117,7 @@
 
     <class>com.ibm.cio.cmr.request.model.system.RequestStatsModel</class>
     <class>com.ibm.cio.cmr.request.model.system.StatsPK</class>
+    <class>com.ibm.cio.cmr.request.model.system.AutomationStatsModel</class>
     <class>com.ibm.cio.cmr.request.model.system.SquadStatisticsModel</class>
     <class>com.ibm.cio.cmr.request.model.system.SquadStatsPK</class>
 
@@ -210,6 +211,9 @@
 
       <property name="openjpa.RuntimeUnenhancedClasses" value="supported" />
       <property name="openjpa.Log" value="SQL=INFO" />
+      <property name="eclipselink.cache.shared.default" value="false"/>      
+      <property name="javax.persistence.lock.timeout" value="300000" />
+      <property name="javax.persistence.query.timeout" value="600000" />
 	  <!-- END ORIGINAL -->
 	  
 	  <!-- TEMP -->
@@ -238,7 +242,7 @@
     </properties>
   </persistence-unit>
 
-  <persistence-unit name="CEDP" transaction-type="RESOURCE_LOCAL">
+  <persistence-unit name="CEDP_UI" transaction-type="RESOURCE_LOCAL">
     <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
     <non-jta-data-source>jdbc/cedp</non-jta-data-source>
 

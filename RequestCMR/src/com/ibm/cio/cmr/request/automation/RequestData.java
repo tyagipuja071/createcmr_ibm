@@ -50,24 +50,35 @@ public class RequestData {
     AdminPK adminPk = new AdminPK();
     adminPk.setReqId(reqId);
     this.admin = entityManager.find(Admin.class, adminPk);
+    if (this.admin != null) {
+      entityManager.refresh(this.admin);
+    }
 
     DataPK dataPk = new DataPK();
     dataPk.setReqId(reqId);
     this.data = entityManager.find(Data.class, dataPk);
+    if (this.data != null) {
+      entityManager.refresh(this.data);
+    }
 
     ScorecardPK scorecardPk = new ScorecardPK();
     scorecardPk.setReqId(reqId);
     this.scorecard = entityManager.find(Scorecard.class, scorecardPk);
+    if (this.scorecard != null) {
+      entityManager.refresh(this.scorecard);
+    }
 
     switch (admin.getReqType()) {
     case "C":
     case "U":
       this.addresses = extractAddresses(entityManager, reqId);
       break;
-    case "M":
-      throw new IllegalArgumentException("Mass Update is not supported at the moment.");
-    case "N":
-      throw new IllegalArgumentException("Mass Create is not supported at the moment.");
+    /*
+     * case "M": throw new
+     * IllegalArgumentException("Mass Update is not supported at the moment.");
+     * case "N": throw new
+     * IllegalArgumentException("Mass Create is not supported at the moment.");
+     */
     }
   }
 

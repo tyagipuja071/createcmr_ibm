@@ -70,23 +70,21 @@
       <% } %>
     </cmr:view>
     <%-- END of SBO and Sales Rep --%>
-    <% if (reqentry.getReqType().equalsIgnoreCase("U")) { %>
-    <cmr:view forGEO="MCO1">
-      <cmr:column span="2" containerForField="CreditCd">
-        <p>
-          <cmr:label fieldId="creditCd">
-            <cmr:fieldLabel fieldId="CreditCd" />: 
-          </cmr:label>
-          <cmr:field path="creditCd" id="creditCd" fieldId="CreditCd" tabId="MAIN_IBM_TAB" />
-        </p>
-      </cmr:column>
-    </cmr:view>
-    <% } %>
+    
   </cmr:row>
   
   <cmr:view forGEO="MCO1,MCO2">
     <cmr:row>
-      <cmr:column span="2" containerForField="InternalDept">
+      <cmr:column span="2" containerForField="InternalDept" forCountry="864">
+        <p>
+          <cmr:label fieldId="ibmDeptCostCenter">
+            <cmr:fieldLabel fieldId="InternalDept" />: 
+          </cmr:label>
+          <cmr:field path="adminDeptLine" id="ibmDeptCostCenter" fieldId="InternalDept" tabId="MAIN_IBM_TAB" />
+        </p>
+      </cmr:column>
+      
+      <cmr:column span="2" containerForField="InternalDept" exceptForCountry="864">
         <p>
           <cmr:label fieldId="ibmDeptCostCenter">
             <cmr:fieldLabel fieldId="InternalDept" />: 

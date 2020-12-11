@@ -17,12 +17,16 @@ public class RowTag extends TagSupport {
   private static final long serialVersionUID = 1L;
   private boolean addBackground;
   private int topPad;
+  private boolean noPad;
 
   @Override
   public int doStartTag() throws JspException {
     StringBuilder sb = new StringBuilder();
     String style = this.topPad > 0 ? " style=\"padding-top:" + this.topPad + "px\"" : "";
     sb.append("              <div class=\"ibm-columns" + (this.addBackground ? " cmr-bg" : "") + "\"" + style + ">\n");
+    if (!this.noPad) {
+      sb.append("                <div class=\"cmr-row-inner\">\n");
+    }
     try {
       this.pageContext.getOut().write(sb.toString());
     } catch (IOException e) {
@@ -34,6 +38,9 @@ public class RowTag extends TagSupport {
   @Override
   public int doEndTag() throws JspException {
     StringBuilder sb = new StringBuilder();
+    if (!this.noPad) {
+      sb.append("                </div>\n");
+    }
     sb.append("              </div>\n");
     try {
       this.pageContext.getOut().write(sb.toString());
@@ -57,5 +64,13 @@ public class RowTag extends TagSupport {
 
   public void setTopPad(int topPad) {
     this.topPad = topPad;
+  }
+
+  public boolean isNoPad() {
+    return noPad;
+  }
+
+  public void setNoPad(boolean noPad) {
+    this.noPad = noPad;
   }
 }

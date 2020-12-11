@@ -27,6 +27,7 @@ import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
+import com.ibm.cio.cmr.request.automation.util.DummyServletRequest;
 import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
 import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.us.USDetailsContainer;
@@ -34,12 +35,16 @@ import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.model.BaseModel;
+import com.ibm.cio.cmr.request.model.requestentry.AddressModel;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.CmrClientService;
+import com.ibm.cio.cmr.request.service.requestentry.AddressService;
+import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.ConfigUtil;
 import com.ibm.cio.cmr.request.util.JpaManager;
@@ -62,7 +67,6 @@ import com.ibm.cmr.services.client.query.QueryResponse;
 
 /**
  * 
- * @author Rangoli Saxena
  * @author RoopakChugh
  *
  */
@@ -134,8 +138,6 @@ public class USUtil extends AutomationUtil {
   public static final String SC_SCHOOL_COLLEGE = "SCHOOL COLLEGE";
   // Leasing
   public static final String SC_LEASE_NO_RESTRICT = "NO RESTRICT";
-  public static final String SC_LEASE_32C = "32C";
-  public static final String SC_LEASE_TPPS = "TPPS";
   public static final String SC_LEASE_3CC = "3CC";
   public static final String SC_LEASE_IPMA = "IPMA";
   public static final String SC_LEASE_LPMA = "LPMA";
@@ -230,6 +232,7 @@ public class USUtil extends AutomationUtil {
     StringBuilder eleResults = new StringBuilder();
     String scenarioSubType = "";
     boolean boCodesCalculated = false;
+
     if ("C".equals(admin.getReqType()) && data != null) {
       scenarioSubType = data.getCustSubGrp();
       if (SC_BYMODEL.equals(scenarioSubType)) {
@@ -271,6 +274,64 @@ public class USUtil extends AutomationUtil {
           return results;
         } else {
           details.append("No Duplicate CMRs found").append("\n");
+        }
+      }
+
+      if (SC_LEASE_IPMA.equals(scenarioSubType) || SC_LEASE_LPMA.equals(scenarioSubType)) {
+        Addr zi01 = requestData.getAddress("ZI01");
+
+        String divn = "IBM Credit LLC";
+        String dept = SC_LEASE_IPMA.equals(scenarioSubType) ? "IPMA" : "LPMA";
+        String address = "7100 Highlands Parkway";
+        String address2 = "";
+        String city = "Smyrna";
+        String state = "GA";
+        String postCd = "30082-4859";
+        String landCntry = "US";
+
+        if (zi01 == null) {
+
+          LOG.debug("Adding the main address..");
+          AddressService addrService = new AddressService();
+          AddressModel addrModel = new AddressModel();
+          addrModel.setReqId(data.getId().getReqId());
+          addrModel.setDivn(divn);
+          addrModel.setDept(dept);
+          addrModel.setLandCntry(landCntry);
+          addrModel.setAddrTxt(address);
+          addrModel.setAddrTxt2(address2);
+          addrModel.setCity1(city);
+          addrModel.setStateProv(state);
+          addrModel.setPostCd(postCd);
+          addrModel.setState(BaseModel.STATE_NEW);
+          addrModel.setAction("ADD_ADDRESS");
+
+          addrModel.setAddrType(CmrConstants.ADDR_TYPE.ZI01.toString());
+          addrModel.setCmrIssuingCntry(data.getCmrIssuingCntry());
+          try {
+            AppUser user = new AppUser();
+            user.setIntranetId(requestData.getAdmin().getRequesterId());
+            user.setBluePagesName(requestData.getAdmin().getRequesterNm());
+            DummyServletRequest dummyReq = new DummyServletRequest();
+            if (dummyReq.getSession() != null) {
+              LOG.trace("Session found for dummy req");
+              dummyReq.getSession().setAttribute(CmrConstants.SESSION_APPUSER_KEY, user);
+            } else {
+              LOG.warn("Session not found for dummy req");
+            }
+            addrService.performTransaction(addrModel, entityManager, dummyReq);
+          } catch (Exception e) {
+            LOG.error("An error occurred while adding ZI01 address", e);
+          }
+          entityManager.flush();
+        } else {
+          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "DIVN", zi01.getDivn(), divn);
+          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "DEPT", zi01.getDept(), dept);
+          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "ADDR_TXT", zi01.getAddrTxt(), address);
+          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "CITY1", zi01.getCity1(), city);
+          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "STATE_PROV", zi01.getStateProv(), state);
+          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "POST_CD", zi01.getPostCd(), postCd);
+          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "LAND_CNTRY", zi01.getLandCntry(), landCntry);
         }
       }
 
@@ -378,9 +439,7 @@ public class USUtil extends AutomationUtil {
         overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SPECIAL_TAX_CD", data.getSpecialTaxCd(), "");
       }
 
-    } else if ("U".equals(admin.getReqType()))
-
-    {
+    } else if ("U".equals(admin.getReqType())) {
       eleResults.append("Skipped");
       details.append("Skipping BO codes computations for update requests.");
     }
@@ -404,11 +463,10 @@ public class USUtil extends AutomationUtil {
     Data data = requestData.getData();
     boolean valid = true;
     String[] scenarioList = { SC_SCHOOL_PUBLIC, SC_SCHOOL_CHARTER, SC_SCHOOL_PRIV, SC_SCHOOL_PAROCHL, SC_SCHOOL_COLLEGE, SC_STATE_STATE,
-        SC_STATE_DIST, SC_STATE_COUNTY, SC_STATE_CITY, SC_LEASE_32C, SC_LEASE_TPPS, SC_LEASE_3CC, SC_LEASE_SVR_CONT, SC_BP_POOL, SC_BP_DEVELOP,
-        SC_BP_E_HOST, SC_FED_REGULAR, SC_FED_CLINIC, SC_FED_FEDSTATE, SC_FED_HEALTHCARE, SC_FED_HOSPITAL, SC_FED_INDIAN_TRIBE, SC_FED_NATIVE_CORP,
-        SC_FED_POA, SC_FED_TRIBAL_BUS };
-    String[] skipCompanyChecksScenarioList = { SC_BP_POOL, SC_BP_DEVELOP, SC_BP_E_HOST, SC_BP_END_USER, SC_LEASE_3CC, SC_LEASE_SVR_CONT, SC_INTERNAL,
-        SC_DUMMY, SC_IGS, SC_IGSF, SC_REST_SSI, SC_STATE_DIST, SC_FED_REGULAR, SC_FED_CLINIC, SC_FED_FEDSTATE, SC_FED_HEALTHCARE, SC_FED_HOSPITAL,
+        SC_STATE_DIST, SC_STATE_COUNTY, SC_STATE_CITY, SC_LEASE_LPMA, SC_FED_REGULAR, SC_FED_CLINIC, SC_FED_FEDSTATE, SC_FED_HEALTHCARE,
+        SC_FED_HOSPITAL, SC_FED_INDIAN_TRIBE, SC_FED_NATIVE_CORP, SC_FED_POA, SC_FED_TRIBAL_BUS };
+    String[] skipCompanyChecksScenarioList = { SC_BP_DEVELOP, SC_BP_E_HOST, SC_BP_END_USER, SC_LEASE_3CC, SC_LEASE_SVR_CONT, SC_INTERNAL, SC_DUMMY,
+        SC_IGS, SC_IGSF, SC_REST_SSI, SC_STATE_DIST, SC_FED_REGULAR, SC_FED_CLINIC, SC_FED_FEDSTATE, SC_FED_HEALTHCARE, SC_FED_HOSPITAL,
         SC_FED_INDIAN_TRIBE, SC_FED_NATIVE_CORP, SC_FED_POA, SC_FED_TRIBAL_BUS, SC_STATE_COUNTY, SC_STATE_CITY, SC_STATE_STATE, SC_STATE_HOSPITALS,
         SC_SCHOOL_PUBLIC, SC_SCHOOL_CHARTER, SC_SCHOOL_PRIV, SC_SCHOOL_PAROCHL, SC_SCHOOL_COLLEGE, SC_LEASE_LPMA, SC_PVT_HOUSEHOLD };
     String scenarioSubType = "";
@@ -494,11 +552,13 @@ public class USUtil extends AutomationUtil {
     query.setForReadOnly(true);
     if (query.exists() && "Y".equals(SystemParameters.getString("US.SKIP_UPDATE_CHECK"))) {
       // skip checks if requester is from USCMDE team
+      admin.setScenarioVerifiedIndc("Y");
       LOG.debug("Requester is from US CMDE team, skipping update checks.");
       output.setDetails("Requester is from US CMDE team, skipping update checks.\n");
       validation.setMessage("Skipped");
       validation.setSuccess(true);
     } else {
+      admin.setScenarioVerifiedIndc("N");
       EntityManager cedpManager = JpaManager.getEntityManager("CEDP");
       boolean hasNegativeCheck = false;
       USDetailsContainer detailsCont = determineUSCMRDetails(entityManager, requestData.getData().getCmrNo());
@@ -678,11 +738,12 @@ public class USUtil extends AutomationUtil {
           }
         }
 
-        // Admin update checks
-        if (changes.isLegalNameChanged()) {
-          failedChecks.put("CUST_NM_UPDATED", "Customer Name on the request is updated.");
-          hasNegativeCheck = true;
-        }
+        // // Admin update checks
+        // if (changes.isLegalNameChanged()) {
+        // failedChecks.put("CUST_NM_UPDATED", "Customer Name on the request is
+        // updated.");
+        // hasNegativeCheck = true;
+        // }
       } finally {
         cedpManager.clear();
         cedpManager.close();
@@ -725,7 +786,7 @@ public class USUtil extends AutomationUtil {
       throws Exception {
     Data data = requestData.getData();
     String updatedValue = updatedDataModel.getNewData();
-    String error = "The CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle.";
+    String error = "The CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle .\nLink:- https://jira.data.zc2.ibm.com/servicedesk/customer/portal/14";
     String sql = ExternalizedQuery.getSql("AUTO.US.GET_CMR_REVENUE");
     PreparedQuery query = new PreparedQuery(cedpManager, sql);
     query.setParameter("CMR_NO", data.getCmrNo());
@@ -737,7 +798,7 @@ public class USUtil extends AutomationUtil {
         revenue = (BigDecimal) results.get(0)[1];
       }
       if (revenue.floatValue() > 100000) {
-        return error;
+        return error + "\n- CMR with revenue > 100K";
       } else if (revenue.floatValue() == 0) {
         String dunsNo = "";
         if (StringUtils.isNotBlank(data.getDunsNo())) {
@@ -756,7 +817,7 @@ public class USUtil extends AutomationUtil {
           DnBCompany dnbData = DnBUtil.getDnBDetails(dunsNo);
           if (dnbData != null && StringUtils.isNotBlank(dnbData.getIbmIsic())) {
             if (!dnbData.getIbmIsic().equals(updatedValue)) {
-              return error;
+              return error + "\n- Requested ISIC did not match value in D&B";
             } else {
               sql = ExternalizedQuery.getSql("AUTO.US.GET_ISU_BY_ISIC");
               query = new PreparedQuery(entityManager, sql);
@@ -765,7 +826,7 @@ public class USUtil extends AutomationUtil {
               query.setForReadOnly(true);
               String brsch = query.getSingleResult(String.class);
               if (!data.getIsuCd().equals(brsch)) {
-                return error;
+                return error + "\n- ISU/Industry impact";
               } else {
                 // check if isic and sicmen are equal if not set them equal
                 if (data.getIsicCd() != null && !data.getIsicCd().equals(data.getUsSicmen())) {
@@ -779,10 +840,10 @@ public class USUtil extends AutomationUtil {
               }
             }
           } else {
-            return error;
+            return error + "\n- Isic is blank";
           }
         } else {
-          return error;
+          return error + "\n- Duns No. is blank";
         }
       }
     }
@@ -800,7 +861,7 @@ public class USUtil extends AutomationUtil {
    */
   private String performEnterpriseAffiliateCheck(EntityManager cedpManager, EntityManager entityManager, RequestData requestData) throws Exception {
     Data data = requestData.getData();
-    String error = "The CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle.";
+    String error = "The CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle.\nLink:- https://jira.data.zc2.ibm.com/servicedesk/customer/portal/14";
     String sql = ExternalizedQuery.getSql("AUTO.US.GET_CMR_REVENUE");
     PreparedQuery query = new PreparedQuery(cedpManager, sql);
     query.setParameter("CMR_NO", data.getCmrNo());
@@ -812,7 +873,7 @@ public class USUtil extends AutomationUtil {
         revenue = (BigDecimal) results.get(0)[1];
       }
       if (revenue.floatValue() > 0) {
-        return error;
+        return error + "\n- CMR with revenue";
       } else if (revenue.floatValue() == 0) {
         sql = ExternalizedQuery.getSql("AUTO.US.AFF_ENT_DUNS_CHECK");
         query = new PreparedQuery(entityManager, sql);
@@ -842,7 +903,7 @@ public class USUtil extends AutomationUtil {
           }
 
         } else {
-          return error;
+          return error + "\n- Target enterprise/affiliate is not under the same GU DUNs/parent";
         }
       }
     }
@@ -871,8 +932,19 @@ public class USUtil extends AutomationUtil {
         String creationCapChanged = (String) results.get(0)[2];
         String sicValidation = (String) results.get(0)[3];
         String revenue = (String) results.get(0)[4];
+        String error = "The CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle.\nLink:- https://jira.data.zc2.ibm.com/servicedesk/customer/portal/14";
         if (!"Ok".equals(creationCapChanged) || !"Ok".equals(sicValidation) || !"Ok".equals(revenue)) {
-          return "'The CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle.";
+          if (!"Ok".equals(revenue)) {
+            error += "\n- CMR with revenue";
+          }
+          if (!"Ok".equals(creationCapChanged)) {
+            error += "\n- Not new CMR (for CMR pass the 30 days period)";
+          }
+          if (!"Ok".equals(sicValidation)) {
+            error += "\n- ISU-ISIC validation failed";
+          }
+          return error;
+
         } else {
           sql = ExternalizedQuery.getSql("AUTO.US.GET_CSP_AFFILIATE");
           query = new PreparedQuery(cedpManager, sql);
@@ -1346,7 +1418,7 @@ public class USUtil extends AutomationUtil {
 
       if (response != null && response.getMatched()) {
         for (DnBMatchingResponse dnbRecord : response.getMatches()) {
-          if (DnBUtil.closelyMatchesDnb(addr.getLandCntry(), addr, admin, dnbRecord, addr.getDivn())) {
+          if (DnBUtil.closelyMatchesDnb(addr.getLandCntry(), addr, admin, dnbRecord, addr.getDivn(), false)) {
             closeMatches.add(dnbRecord);
           }
         }
@@ -1367,4 +1439,10 @@ public class USUtil extends AutomationUtil {
     engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
     engineData.put(AutomationEngineData.GBG_MATCH, calcGbg);
   }
+
+  @Override
+  public List<String> getSkipChecksRequestTypesforCMDE() {
+    return Arrays.asList("E", "M");
+  }
+
 }

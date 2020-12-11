@@ -11,9 +11,10 @@
   String details = (String) request.getAttribute("request");
   String reqId = request.getParameter("reqId");
 %>
+
 <html>
 <head>
-<title>Connecting to Find CMR</title>
+<title>Connecting to FindCMR</title>
 <style>
 body {
 }
@@ -29,7 +30,7 @@ span.ibm-spinner {
 h3 {
 	width: 100%;
 	text-align: center;
-	font-family: "Helvetica";
+	font-family: "IBM Plex Sans", Calibri;
 }
 
 div.loader {
@@ -76,12 +77,12 @@ div.bg {
       <input type="hidden" name="reqId" value="<%=reqId%>">
 <%if (auth != null){ %>
       <div class="loader">
-        <h3>Please wait while Find CMR is loading...</h3>
+        <h3>Please wait while FindCMR is loading...</h3>
         <span class="ibm-spinner"></span>
       </div>
 <%} else { %>
       <div class="error">
-        <h3>Connection to the Find CMR application was not established. <br> 
+        <h3>Connection to the FindCMR application was not established. <br> 
         Please try logging out of the application then access the tool again.
         <br>If the error persists, please contact your system administrator.</h3>
       </div>
