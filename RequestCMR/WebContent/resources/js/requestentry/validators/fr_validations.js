@@ -36,11 +36,13 @@ function afterConfigForFR() {
   if (role == 'Requester') {
     FormManager.readOnly('abbrevNm');
     FormManager.readOnly('abbrevLocn');
-    FormManager.setValue('taxCd2', '1');
     // FormManager.readOnly('taxCd2');
     FormManager.readOnly('poBox');
     FormManager.readOnly('embargoCd');
     // FormManager.readOnly('currencyCd');
+    FormManager.resetDropdownValues(FormManager.getField('taxCd2'));
+    FormManager.limitDropdownValues(FormManager.getField('taxCd2'), [ '1', '0' ]);
+    FormManager.setValue('taxCd2', '1');
     if (reqType == 'U') {
       FormManager.enable('taxCd2');
       FormManager.enable('currencyCd');
@@ -1652,9 +1654,7 @@ function setTaxCdOnScnrio() {
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
   }
-  //CMR-(228) France new tax code logic don't need this.
-  //just remove this START.
-  /*
+  
   if (role == 'Requester' && reqType == 'C') {
     if (FormManager.getActualValue('custGrp') == 'LOCAL') {
       setTaxCdDropDownValuesLOCAL();
@@ -1662,13 +1662,9 @@ function setTaxCdOnScnrio() {
       setTaxCdDropDownValuesCROSS();
     }
   }
-  */
-  //just remove this END.
+
 }
 
-//CMR-(228) France new tax code logic don't need this.
-//just remove this START.
-/*
 function setTaxCdDropDownValuesLOCAL() {
   var countryUse = null;
   var countyCd = null;
@@ -1680,44 +1676,39 @@ function setTaxCdDropDownValuesLOCAL() {
   }
   if (countyCd == "GF") {
     FormManager.enable('taxCd2');
-    FormManager.limitDropdownValues(FormManager.getField('taxCd2'), [ '11', '69' ]);
+    //FormManager.limitDropdownValues(FormManager.getField('taxCd2'), [ '11', '69' ]);
     if (FormManager.getActualValue('taxCd2') == '') {
-      FormManager.setValue('taxCd2', '69');
+      //FormManager.setValue('taxCd2', '69');
     }
   } else if (countyCd == "PM" || countyCd == "YT" || countyCd == "AD" || countyCd == "DZ" || countyCd == "TN") {
     FormManager.enable('taxCd2');
-    FormManager.limitDropdownValues(FormManager.getField('taxCd2'), [ '11', '37' ]);
+    //FormManager.limitDropdownValues(FormManager.getField('taxCd2'), [ '11', '37' ]);
     if (FormManager.getActualValue('taxCd2') == '') {
-      FormManager.setValue('taxCd2', '37');
+      //FormManager.setValue('taxCd2', '37');
     }
   } else if (countyCd == "VU" || countyCd == "WF") {
     FormManager.resetDropdownValues(FormManager.getField('taxCd2'));
-    FormManager.setValue('taxCd2', '36');
-    FormManager.readOnly('taxCd2');
+    //FormManager.setValue('taxCd2', '36');
+    //FormManager.readOnly('taxCd2');
   } else if (countyCd == "GP" || countyCd == "MQ" || countyCd == "RE" || countyCd == "KM") {
     FormManager.resetDropdownValues(FormManager.getField('taxCd2'));
-    FormManager.setValue('taxCd2', '02');
-    FormManager.readOnly('taxCd2');
+    //FormManager.setValue('taxCd2', '02');
+    //FormManager.readOnly('taxCd2');
   } else if (countyCd == "FR" || countyCd == "MC") {
     FormManager.resetDropdownValues(FormManager.getField('taxCd2'));
-    FormManager.setValue('taxCd2', '01');
-    FormManager.readOnly('taxCd2');
+    //FormManager.setValue('taxCd2', '01');
+    //FormManager.readOnly('taxCd2');
   } else if (countyCd == "PF") {
     FormManager.resetDropdownValues(FormManager.getField('taxCd2'));
-    FormManager.setValue('taxCd2', '34');
-    FormManager.readOnly('taxCd2');
+    //FormManager.setValue('taxCd2', '34');
+    //FormManager.readOnly('taxCd2');
   } else if (countyCd == "NC") {
     FormManager.resetDropdownValues(FormManager.getField('taxCd2'));
-    FormManager.setValue('taxCd2', '41');
-    FormManager.readOnly('taxCd2');
+    //FormManager.setValue('taxCd2', '41');
+    //FormManager.readOnly('taxCd2');
   }
 }
-*/
-//just remove this END.
 
-//CMR-(228) France new tax code logic don't need this.
-//just remove this START.
-/*
 function setTaxCdDropDownValuesCROSS() {
   var isEUCntry = false;
   var reqId = FormManager.getActualValue('reqId');
@@ -1736,21 +1727,19 @@ function setTaxCdDropDownValuesCROSS() {
     }
     if (isEUCntry == true) {
       FormManager.enable('taxCd2');
-      FormManager.limitDropdownValues(FormManager.getField('taxCd2'), [ '12', '15' ]);
+      //FormManager.limitDropdownValues(FormManager.getField('taxCd2'), [ '12', '15' ]);
       if (FormManager.getActualValue('taxCd2') == '') {
-        FormManager.setValue('taxCd2', '15');
+        //FormManager.setValue('taxCd2', '15');
       }
     } else {
       FormManager.enable('taxCd2');
-      FormManager.limitDropdownValues(FormManager.getField('taxCd2'), [ '11', '37' ]);
+      //FormManager.limitDropdownValues(FormManager.getField('taxCd2'), [ '11', '37' ]);
       if (FormManager.getActualValue('taxCd2') == '') {
-        FormManager.setValue('taxCd2', '37');
+        //FormManager.setValue('taxCd2', '37');
       }
     }
   }
 }
-*/
-//just remove this END.
 
 function setTaxCdOnAddrSave() {
   var role = null;
