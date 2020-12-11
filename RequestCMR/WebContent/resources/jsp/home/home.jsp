@@ -18,6 +18,9 @@ img.logo {
   border-radius: 10px;
   border: 1px Solid #AAA;
 }
+#ibm-content .ibm-columns {
+  margin-top: 10px;
+}
 </style>
 <script>
 dojo.addOnLoad(function(){
@@ -32,7 +35,7 @@ dojo.addOnLoad(function(){
     msg += 'Some functions of the application may not work correctly until you update to the required version.';
     cmr.showAlert(msg);
   }
-  window.setTimeout('generateCharts()', 500);
+  window.setTimeout('generateCharts()', 150);
 });
 
 function generateCharts(){
@@ -164,7 +167,7 @@ function getRandomColor() {
   }
   div.logo-text {
    display: inline-block;
-   width: 370px;
+   width: 470px;
    vertical-align: top;
    padding-bottom: 20px;
   }
@@ -174,7 +177,6 @@ function getRandomColor() {
 
 	<div class="ibm-col-1-1">
 		<!-- start main content -->
-		<div id="wwq-content">
 			
 			<%if (alert != null && !"".equals(alert.trim())){%>		    
 			<div class="ibm-columns">
@@ -194,7 +196,7 @@ function getRandomColor() {
 				<div class="ibm-col-1-1">
 							
 					<div class="ibm-columns">
-						<div class="ibm-col-4-2" style="width:500px">
+						<div class="ibm-col-4-2" style="width:600px">
 							<div id="welcome_note_id">
                  <div class="logo">
                    <img src="${resourcesPath}/images/CreateCMRLogo.png" class="logo">
@@ -208,7 +210,7 @@ function getRandomColor() {
                      <li>
                      The application also provides Web Service APIs for external systems to be able
                      to directly create requests without using the user interface. 
-                     Specifications can be found <a href="https://w3-connections.ibm.com/files/app/file/5a2ff1b0-0534-44fd-9abb-52ab4be41d72" target="_blank">here</a>.
+                     Specifications can be found <a href="https://ibm.box.com/s/6s88qa7f41ufagfeyupu86m08vwe5bp9" target="_blank">here</a>.
                      </li>
                    </ul>
                  </div>
@@ -243,6 +245,5 @@ function getRandomColor() {
 			</div>
 			
 			<!-- stop main content -->
-		</div>
 	</div>
 </div>

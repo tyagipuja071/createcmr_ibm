@@ -190,26 +190,10 @@
 	<!-- Leasing Start -->
 	<mapping>
 		<scenario>NO RESTRICT</scenario>
-		<csoSite>request</csoSite>
-		<mktgDept>request</mktgDept>
-		<mtkgArDept>request</mtkgArDept>
-		<svcArOffice>request</svcArOffice>
-		<pccArDept>G8M</pccArDept>
-	</mapping>
-	<mapping>
-		<scenario>32C</scenario>
-		<csoSite>32C</csoSite>
-		<mktgDept>request</mktgDept>
-		<mtkgArDept>32C</mtkgArDept>
-		<svcArOffice>request</svcArOffice>
-		<pccArDept>G8M</pccArDept>
-	</mapping>
-	<mapping>
-		<scenario>TPPS</scenario>
-		<csoSite>32C</csoSite>
-		<mktgDept>request</mktgDept>
-		<mtkgArDept>32C</mtkgArDept>
-		<svcArOffice>NRV</svcArOffice>
+		<csoSite>PAH</csoSite>
+		<mktgDept>SVB</mktgDept>
+		<mtkgArDept>logic</mtkgArDept>
+		<svcArOffice>logic</svcArOffice>
 		<pccArDept>G8M</pccArDept>
 	</mapping>
 	<mapping>

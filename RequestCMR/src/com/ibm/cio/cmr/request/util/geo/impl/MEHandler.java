@@ -348,7 +348,9 @@ public class MEHandler extends BaseSOFHandler {
                     String gline5 = gAddr.getAddrLine5();
                     if (!StringUtils.isBlank(gline5)) {
                       String legacyposcd = gline5.split(" ")[0];
-                      legacycity = gline5.substring(legacyposcd.length() + 1, gline5.length());
+                      if (gline5.length() > legacyposcd.length()) {
+                          legacycity = gline5.substring(legacyposcd.length() + 1, gline5.length());
+                      }
                     }
                     // add value
                     installing.setCmrName1Plain(gAddr.getAddrLine1());

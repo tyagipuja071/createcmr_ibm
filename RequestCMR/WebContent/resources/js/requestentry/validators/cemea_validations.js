@@ -3638,7 +3638,7 @@ function togglePPSCeidCEE() {
     FormManager.enable('ppsceid');
     FormManager.resetValidations('ppsceid');
     FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
-  } else if (reqType == 'U' && isuCd == '8B' && clientTier == '7' && (cmrNo.length > 0 && cmrNo.substr(0, 2) == '00')) {
+  } else if (reqType == 'U') {
     FormManager.show('PPSCEID', 'ppsceid');
     FormManager.removeValidator('ppsceid', Validators.REQUIRED);
     FormManager.readOnly('ppsceid');

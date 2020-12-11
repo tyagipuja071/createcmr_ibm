@@ -29,7 +29,7 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
 }
 
 #ibm-content .ibm-columns {
-  padding: 0px 10px 5px;
+  padding: 10px 10px 5px;
 }
 
 .ibm-col-4-2,.ibm-col-4-3,.ibm-col-5-2,.ibm-col-5-3,.ibm-col-5-4,.ibm-col-6-3,.ibm-col-6-4,.ibm-col-6-5 {
