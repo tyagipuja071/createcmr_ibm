@@ -462,9 +462,9 @@ function addAttachmentValidator() {
             if (recordCount != null) {
               if (recordCount > 0) {
                 return new ValidationResult(null, true);
-              } else if (recordCount == 0) {
+              } /*else if (recordCount == 0) {
                 return new ValidationResult(null, false, 'Proof of address is mandatory.');
-              }
+              }*/
             }
             break;
           }
@@ -493,9 +493,9 @@ function addAttachmentValidator() {
                 if (recordCount != null) {
                   if (recordCount > 0) {
                     return new ValidationResult(null, true);
-                  } else if (recordCount == 0) {
+                  } /*else if (recordCount == 0) {
                     return new ValidationResult(null, false, 'Proof of address is mandatory.');
-                  }
+                  }*/
                 }
               } else if (importInd != 'Y') {
                 var reqId = FormManager.getActualValue('reqId');
@@ -510,9 +510,9 @@ function addAttachmentValidator() {
                 if (recordCount != null) {
                   if (recordCount > 0) {
                     return new ValidationResult(null, true);
-                  } else if (recordCount == 0) {
+                  } /*else if (recordCount == 0) {
                     return new ValidationResult(null, false, 'Proof of address is mandatory.');
-                  }
+                  }*/
                 }
               } else {
                 counter = counter + 1;
@@ -521,9 +521,9 @@ function addAttachmentValidator() {
 
             if (counter > 0) {
               return new ValidationResult(null, true);
-            } else {
+            } /*else {
               return new ValidationResult(null, false, 'Proof of address is mandatory.');
-            }
+            }*/
           } else {
             return new ValidationResult(null, true);
           }
