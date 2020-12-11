@@ -35,7 +35,7 @@ function afterConfigForFR() {
   if (role == 'Requester') {
     FormManager.readOnly('abbrevNm');
     FormManager.readOnly('abbrevLocn');
-    //FormManager.readOnly('taxCd2');
+    // FormManager.readOnly('taxCd2');
     FormManager.readOnly('poBox');
     FormManager.readOnly('embargoCd');
     // FormManager.readOnly('currencyCd');
@@ -1078,9 +1078,8 @@ function setDummySIRETOnCustSubGrpChange() {
 // }
 // }
 function setAbbrevNmLocnOnAddressSave(cntry, addressMode, saving, finalSave, force) {
-  var role = null;
-  if (typeof (_pagemodel) != 'undefined') {
-    role = _pagemodel.userRole;
+  if (cmr.currentRequestType == 'U') {
+    return;
   }
   if (finalSave || force || addressMode == 'ZS01') {
     var copyTypes = document.getElementsByName('copyTypes');
@@ -1104,12 +1103,15 @@ function setAbbrevNmLocnOnAddressSave(cntry, addressMode, saving, finalSave, for
 }
 
 function updateAbbrNameWithZS01() {
+  if (cmr.currentRequestType == 'U') {
+    return;
+  }
   var reqType = FormManager.getActualValue('reqType');
   var abbrName = FormManager.getActualValue("abbrevNm");
   var newAddrName1 = FormManager.getActualValue("custNm1");
   var role = FormManager.getActualValue('userRole').toUpperCase();
 
-  if ('PROCESSOR' == role || ('Requester' == role && reqType == 'C')) {
+  if ('PROCESSOR' == role) {
     var zs01ReqId = FormManager.getActualValue('reqId');
     var qParams = {
       REQ_ID : zs01ReqId,
@@ -2547,52 +2549,52 @@ function canCopyAddress(value, rowIndex, grid) {
   return false;
 }
 
-//Control Classification Code
-function setClassificationCodeTR(){
-  
+// Control Classification Code
+function setClassificationCodeTR() {
+
   var reqType = FormManager.getActualValue('reqType');
   var field = FormManager.getField('custClass');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var pageModelFlag = 'N';
-  
+
   if (typeof (_pagemodel) != 'undefined') {
     if (_pagemodel.custClass != null && _pagemodel.custClass != 'null') {
       pageModelFlag = 'Y';
     }
   }
-  
+
   FormManager.show('CustClass', 'custClass');
   FormManager.resetDropdownValues(FormManager.getField('custClass'));
-  
+
   if (reqType == 'C') {
-    if(custSubGrp != ''){
-      if (custSubGrp == 'COMME' || custSubGrp == 'CBMME' || custSubGrp == 'HOSTC' || 
-          custSubGrp == 'CBSTC' || custSubGrp == 'THDPT' || custSubGrp == 'CBDPT') {
+    if (custSubGrp != '') {
+      if (custSubGrp == 'COMME' || custSubGrp == 'CBMME' || custSubGrp == 'HOSTC' || custSubGrp == 'CBSTC' || custSubGrp == 'THDPT'
+          || custSubGrp == 'CBDPT') {
         FormManager.setValue(field, '11');
         FormManager.readOnly(field);
       } else if (custSubGrp == 'BUSPR' || custSubGrp == 'XBUSP') {
         FormManager.limitDropdownValues(field, [ '42', '43', '44', '45', '46', '47', '48' ]);
         FormManager.enable(field);
-        
-        if(pageModelFlag == 'Y'){
+
+        if (pageModelFlag == 'Y') {
           FormManager.setValue(field, _pagemodel.custClass);
         } else {
           FormManager.setValue(field, '43');
         }
-        
+
       } else if (custSubGrp == 'PRICU' || custSubGrp == 'XBLUM') {
         FormManager.setValue(field, '60');
         FormManager.readOnly(field);
       } else if (custSubGrp == 'GOVRN' || custSubGrp == 'CBVRN') {
         FormManager.limitDropdownValues(field, [ '13', '14', '17' ]);
         FormManager.enable(field);
-        
-        if(pageModelFlag == 'Y'){
+
+        if (pageModelFlag == 'Y') {
           FormManager.setValue(field, _pagemodel.custClass);
         } else {
           FormManager.setValue(field, '13');
         }
-        
+
       } else if (custSubGrp == 'INTER' || custSubGrp == 'CBTER') {
         FormManager.setValue(field, '81');
         FormManager.readOnly(field);
@@ -2602,13 +2604,13 @@ function setClassificationCodeTR(){
       } else if (custSubGrp == 'LCFIN' || custSubGrp == 'CBFIN') {
         FormManager.limitDropdownValues(field, [ '32', '33', '34', '35', '36' ]);
         FormManager.enable(field);
-        
-        if(pageModelFlag == 'Y'){
+
+        if (pageModelFlag == 'Y') {
           FormManager.setValue(field, _pagemodel.custClass);
         } else {
           FormManager.setValue(field, '33');
         }
-        
+
       } else if (custSubGrp == 'IBMEM' || custSubGrp == 'CBIEM') {
         FormManager.setValue(field, '71');
         FormManager.readOnly(field);
@@ -2618,10 +2620,11 @@ function setClassificationCodeTR(){
       FormManager.readOnly(field);
     }
   } else if (reqType == 'U') {
-    FormManager.limitDropdownValues(field, [ '11', '13', '14', '17', '32', '33', '34', '35', '36', '42', '43', '44', '45', '46', '47', '48', '60', '71', '81', '85' ]);
+    FormManager.limitDropdownValues(field, [ '11', '13', '14', '17', '32', '33', '34', '35', '36', '42', '43', '44', '45', '46', '47', '48', '60',
+        '71', '81', '85' ]);
     FormManager.enable(field);
   }
-  
+
 }
 
 dojo.addOnLoad(function() {
