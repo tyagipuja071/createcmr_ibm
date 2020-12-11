@@ -407,7 +407,7 @@ public class FranceHandler extends GEOHandler {
 
   @Override
   public void setDataDefaultsOnCreate(Data data, EntityManager entityManager) {
-
+    data.setCountryUse("706");
   }
 
   @Override
@@ -475,7 +475,7 @@ public class FranceHandler extends GEOHandler {
 
   @Override
   public void doBeforeDataSave(EntityManager entityManager, Admin admin, Data data, String cmrIssuingCntry) throws Exception {
-
+    data.setCountryUse("706");
     // if ("C".equals(admin.getReqType())) {
     // data.setCurrencyCd("CHF");
     // }
