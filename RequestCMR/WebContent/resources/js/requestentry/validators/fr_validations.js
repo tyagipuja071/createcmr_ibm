@@ -567,7 +567,7 @@ function addALPHANUMSPACEValidatorFR() {
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
   }
-  if (role == 'Processor' || (role == 'Requester' && FormManager.getActualValue('reqType') == 'C')) {
+  if (role == 'Processor' || (role == 'Requester' && FormManager.getActualValue('reqType') == 'U')) {
     FormManager.addValidator('abbrevLocn', Validators.CHECKALPHANUMDASH, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
     FormManager.addValidator('abbrevNm', Validators.CHECKALPHANUMDASH, [ 'Abbreviated Name' ], 'MAIN_CUST_TAB');
     FormManager.addValidator('abbrevLocn', Validators.CHECKSPACEPLACE4DASH, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
