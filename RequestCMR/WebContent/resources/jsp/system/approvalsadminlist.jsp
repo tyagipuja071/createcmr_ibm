@@ -44,6 +44,17 @@ String createTsHeader =title+"<img src=\""+contextPath+"/resources/images/info-b
   }
   
 </script>
+<style>
+.ibm-columns {
+  width: 1150px;
+}
+.ibm-col-1-1 {
+  width: 1150px;
+}
+div.cmr-sub {
+  padding-left: 0;
+}
+</style>
 <cmr:boxContent>
   <cmr:tabs />
 
@@ -54,7 +65,7 @@ String createTsHeader =title+"<img src=\""+contextPath+"/resources/images/info-b
           <h3>Requests with Pending Approvals</h3>
         </cmr:column>
       </cmr:row>
-      <cmr:grid url="/workflow/search/results/list.json" id="requestResultGrid" useFilter="true">
+      <cmr:grid url="/workflow/search/results/list.json" id="requestResultGrid" useFilter="true" width="1120" innerWidth="1120">
         <cmr:gridParam fieldId="pendingAppr" value="Y" />
         <cmr:gridCol width="80px" field="reqId" header="${ui.grid.requestID}" align="right">
           <cmr:formatter functionName="requestIdFormatter" />

@@ -25,8 +25,6 @@ String procCenter = reqentry.getProcCenter() != null ? reqentry.getProcCenter() 
 
 <cmr:section id="ATTACH_REQ_TAB" hidden="true">
   <jsp:include page="detailstrip.jsp" />
-  <cmr:row>
-    <cmr:column span="6">
       <cmr:row addBackground="true">
         <cmr:column span="2">
           <p>
@@ -42,12 +40,12 @@ String procCenter = reqentry.getProcCenter() != null ? reqentry.getProcCenter() 
             <cmr:gridParam fieldId="reqId" value="${reqentry.reqId}" />
             <cmr:view forCountry="897">
             <cmr:gridCol width="120px" field="attachTsStr" header="${ui.grid.attachTs}" ></cmr:gridCol>
-            <cmr:gridCol width="410px" field="docLink" header="${ui.grid.docLink}" >
+            <cmr:gridCol width="auto" field="docLink" header="${ui.grid.docLink}" >
               <cmr:formatter functionName="fileNameFormatter" />
             </cmr:gridCol>
             </cmr:view>
             <cmr:view exceptForCountry="897">
-            <cmr:gridCol width="530px" field="docLink" header="${ui.grid.docLink}" >
+            <cmr:gridCol width="auto" field="docLink" header="${ui.grid.docLink}" >
               <cmr:formatter functionName="fileNameFormatter" />
             </cmr:gridCol>
             </cmr:view>
@@ -71,6 +69,4 @@ String procCenter = reqentry.getProcCenter() != null ? reqentry.getProcCenter() 
           </div>
         <br><br>
       </cmr:row>
-    </cmr:column>
-  </cmr:row>
 </cmr:section>

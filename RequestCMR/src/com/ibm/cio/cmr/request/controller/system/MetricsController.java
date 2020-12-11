@@ -24,7 +24,9 @@ import com.ibm.cio.cmr.request.model.ParamContainer;
 import com.ibm.cio.cmr.request.model.code.FieldInfoModel;
 import com.ibm.cio.cmr.request.model.system.MetricsChart;
 import com.ibm.cio.cmr.request.model.system.MetricsModel;
+import com.ibm.cio.cmr.request.service.system.AutoStatsService;
 import com.ibm.cio.cmr.request.service.system.MetricsService;
+import com.ibm.cio.cmr.request.service.system.RequesterStatService;
 import com.ibm.cio.cmr.request.service.system.SquadStatisticsService;
 import com.ibm.cio.cmr.request.service.system.StatisticsService;
 import com.ibm.cio.cmr.request.service.system.WebSvcUsageService;
@@ -51,6 +53,12 @@ public class MetricsController extends BaseController {
 
   @Autowired
   private WebSvcUsageService usageService;
+
+  @Autowired
+  private RequesterStatService requesterService;
+
+  @Autowired
+  private AutoStatsService autoStatsService;
 
   /**
    * Handles the metrics page
@@ -149,6 +157,70 @@ public class MetricsController extends BaseController {
   }
 
   /**
+   * Handles the metrics page
+   * 
+   * @param request
+   * @param model
+   * @return
+   */
+  @RequestMapping(value = "/metrics/requesterstats", method = RequestMethod.GET)
+  public ModelAndView showRequesterStatsPage(HttpServletRequest request, ModelMap model) {
+    AppUser user = AppUser.getUser(request);
+    if (!user.isAdmin() && !user.isCmde() && !user.isProcessor()) {
+      LOG.warn("User " + user.getIntranetId() + " (" + user.getBluePagesName() + ") tried accessing the Fields system function.");
+      ModelAndView mv = new ModelAndView("noaccess", "fields", new FieldInfoModel());
+      return mv;
+    }
+    MetricsModel metrics = new MetricsModel();
+    Calendar cal = new GregorianCalendar();
+    cal.setTime(new Date());
+    String now = MetricsService.FORMATTER.format(cal.getTime());
+    for (int i = 1; i <= 29; i++) {
+      cal.add(Calendar.DATE, -1);
+    }
+    String prev = MetricsService.FORMATTER.format(cal.getTime());
+
+    metrics.setDateFrom(prev);
+    metrics.setDateTo(now);
+    ModelAndView mv = new ModelAndView("requesterstats", "metrics", metrics);
+    setPageKeys("METRICS", "METRICS_RSTATS", mv);
+    return mv;
+
+  }
+
+  /**
+   * Handles the metrics page
+   * 
+   * @param request
+   * @param model
+   * @return
+   */
+  @RequestMapping(value = "/metrics/autostats", method = RequestMethod.GET)
+  public ModelAndView showAutomationStatsPage(HttpServletRequest request, ModelMap model) {
+    AppUser user = AppUser.getUser(request);
+    if (!user.isAdmin() && !user.isCmde() && !user.isProcessor()) {
+      LOG.warn("User " + user.getIntranetId() + " (" + user.getBluePagesName() + ") tried accessing the Fields system function.");
+      ModelAndView mv = new ModelAndView("noaccess", "fields", new FieldInfoModel());
+      return mv;
+    }
+    MetricsModel metrics = new MetricsModel();
+    Calendar cal = new GregorianCalendar();
+    cal.setTime(new Date());
+    String now = MetricsService.FORMATTER.format(cal.getTime());
+    for (int i = 1; i <= 29; i++) {
+      cal.add(Calendar.DATE, -1);
+    }
+    String prev = MetricsService.FORMATTER.format(cal.getTime());
+
+    metrics.setDateFrom(prev);
+    metrics.setDateTo(now);
+    ModelAndView mv = new ModelAndView("autostats", "metrics", metrics);
+    setPageKeys("METRICS", "METRICS_ASTATS", mv);
+    return mv;
+
+  }
+
+  /**
    * Handles the param listing page
    * 
    * @param request
@@ -217,7 +289,7 @@ public class MetricsController extends BaseController {
       MetricsChart chart = service.process(request, params);
       service.exportToExcel(model, chart, response);
     } catch (Exception e) {
-      e.printStackTrace();
+      LOG.debug("Cannot export Daily statistics", e);
     }
   }
 
@@ -238,7 +310,7 @@ public class MetricsController extends BaseController {
       MetricsChart chart = usageService.process(request, params);
       usageService.exportToExcel(model, chart, response);
     } catch (Exception e) {
-      e.printStackTrace();
+      LOG.debug("Cannot export Usage statistics", e);
     }
   }
 
@@ -260,7 +332,7 @@ public class MetricsController extends BaseController {
         statService.exportToExcel(container, model, response);
       }
     } catch (Exception e) {
-      e.printStackTrace();
+      LOG.debug("Cannot export Request statistics", e);
     }
   }
 
@@ -282,8 +354,74 @@ public class MetricsController extends BaseController {
         statService.exportToSquadReport(container, model, response);
       }
     } catch (Exception e) {
-      e.printStackTrace();
+      LOG.debug("Cannot export Squad statistics", e);
     }
+  }
+
+  /**
+   * Handles the param listing page
+   * 
+   * @param request
+   * @param model
+   * @return
+   * @throws CmrException
+   */
+  @RequestMapping(value = "/metrics/requesterexport")
+  public void generateRequesterStatistics(HttpServletRequest request, HttpServletResponse response, MetricsModel model) throws CmrException {
+    ParamContainer params = new ParamContainer();
+    params.addParam("model", model);
+    try {
+      RequestStatsContainer container = requesterService.process(request, params);
+      if (container != null) {
+        requesterService.exportToExcel(container, model, response);
+      }
+    } catch (Exception e) {
+      LOG.debug("Cannot export Requester statistics", e);
+    }
+  }
+
+  @RequestMapping(value = "/metrics/autoexport")
+  public void generateAutomationStatistics(HttpServletRequest request, HttpServletResponse response, MetricsModel model) throws CmrException {
+    ParamContainer params = new ParamContainer();
+    params.addParam("model", model);
+    try {
+      RequestStatsContainer container = autoStatsService.process(request, params);
+      if (container != null) {
+        autoStatsService.exportToExcel(container, model, response);
+      }
+    } catch (Exception e) {
+      LOG.debug("Cannot export Requester statistics", e);
+    }
+  }
+
+  /**
+   * Handles the param listing page
+   * 
+   * @param request
+   * @param model
+   * @return
+   * @throws CmrException
+   */
+  @RequestMapping(value = "/metrics/autochart")
+  public ModelMap generateAutomationChart(HttpServletRequest request, MetricsModel model) throws CmrException {
+    ModelMap map = new ModelMap();
+    ParamContainer params = new ParamContainer();
+    params.addParam("model", model);
+    params.addParam("export", false);
+    params.addParam("buildSummary", "Y");
+    try {
+      RequestStatsContainer container = autoStatsService.process(request, params);
+      map.addAttribute("success", true);
+      map.addAttribute("error", null);
+      map.addAttribute("data", container.getAutomationSummary());
+      map.addAttribute("weekly", container.getWeeklyAutomationSummary());
+      map.addAttribute("scenario", container.getScenarioSummary());
+    } catch (Exception e) {
+      map.addAttribute("success", false);
+      map.addAttribute("data", null);
+      map.addAttribute("error", e.getMessage());
+    }
+    return map;
   }
 
 }

@@ -36,6 +36,17 @@ function openRequestgrid_GRID_onLoad(){
   }
 }
 </script>
+<style>
+.ibm-columns {
+  width: 1150px;
+}
+.ibm-col-1-1 {
+  width: 1150px;
+}
+div.cmr-sub {
+  padding-left: 0;
+}
+</style>
 <form:form method="POST" action="${contextPath}/workflow/open" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="wfreq">
 
   <form:hidden path="reqId" id="mainReqId" />
@@ -48,16 +59,15 @@ function openRequestgrid_GRID_onLoad(){
 
     <cmr:section id="GRIDSECTION">
       <br>
-      <cmr:grid url="/workflow/open/list.json" id="openRequestgrid" useFilter="true">
+      <cmr:grid url="/workflow/open/list.json" id="openRequestgrid" useFilter="true" width="1120" innerWidth="1120">
         <cmr:gridCol width="80px" field="reqId" header="${ui.grid.requestID}" align="right">
           <cmr:formatter functionName="requestIdFormatter" />
         </cmr:gridCol>
-        <cmr:gridCol width="90px" field="expediteInd" header="${ui.grid.expedite}" align="center">
+        <cmr:gridCol width="90px" field="expediteInd" header="Source" align="center">
           <cmr:formatter functionName="expediteFormatter" />
         </cmr:gridCol>
        
         
-        <cmr:gridCol width="60px" field="cmrOwnerDesc" header="${ui.grid.cmrOwner}" />
         <cmr:gridCol width="75px" field="cmrIssuingCntry" header="${ui.grid.cmrIssuingCntry}" >
         <cmr:formatter functionName="countryFormatter" />
         </cmr:gridCol>
@@ -83,10 +93,6 @@ function openRequestgrid_GRID_onLoad(){
         <cmr:gridCol width="120px" field="createTsString" header="${ui.grid.createDate}" />
         <cmr:gridCol width="120px" field="lastUpdtTsString" header="${ui.grid.lastAction}" />
         <cmr:gridCol width="120px" field="requesterNm" header="${ui.grid.requesterNm}" />
-        <cmr:gridCol width="120px" field="originatorNm" header="${ui.grid.originatorNm}" />
-        <cmr:gridCol width="120px" field="processingStatus" header="${ui.grid.processingStatus}" />
-        <cmr:gridCol width="200px" field="reqReason" header="${ui.grid.reqReason}" />
-        <cmr:gridCol width="90px" field="requestDueDate" header="${ui.grid.requestDueDate}" />
       </cmr:grid>
       <br>
     </cmr:section>

@@ -45,11 +45,11 @@ public class GridTag extends TagSupport {
     columns = new ArrayList<GridColumn>();
     params = new HashMap<String, String>();
     StringBuilder sb = new StringBuilder();
-    String style = this.width > 0 ? "width:" + this.width + "px" : "";
+    String style = this.width > 0 ? "width:" + this.width + "px" : "width:100%";
 
-    sb.append("              <div class=\"ibm-columns\" " + (this.innerWidth > 0 ? "style=\"width:" + this.innerWidth + "px !important\"" : "")
-        + ">\n");
-    sb.append("                <div class=\"" + getColumnClass() + "\" style=\"overflow-x: auto; " + style + "\">\n");
+    sb.append(
+        "              <div class=\"ibm-columns\" " + (this.innerWidth > 0 ? "style=\"width:" + this.innerWidth + "px !important\"" : "") + ">\n");
+    sb.append("                <div class=\"" + getColumnClass() + "\" style=\"margin:0 !important; overflow-x: auto; " + style + "\">\n");
     sb.append("                  <div id=\"" + this.id + "_GRID\">\n");
     sb.append("                    <span id=\"" + this.id + "_spinner\" class=\"ibm-spinner-small\"></span>\n");
     sb.append("                  </div>\n");

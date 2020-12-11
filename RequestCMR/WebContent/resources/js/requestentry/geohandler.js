@@ -82,6 +82,7 @@ var SysLoc = (function() {
     THAILAND : "856",
     TANZANIA : "851",
     MOROCCO : "642",
+    TUNISIA : "729",
     TURKEY : '862',
     TRINIDAD_TOBAGO : '859',
     UK : '866',
@@ -103,14 +104,14 @@ var SysLoc = (function() {
     TAJIKISTAN : '363',
     ARMENIA : '607',
     ALBANIA : '603',
-    BELARUS: '626',
+    BELARUS : '626',
     GEORGIA : '651',
     KYRGYZSTAN : '695',
     MACEDONIA : '705',
     UZBEKISTAN : '741',
     MOLDOVA : '787',
-    BOSNIA_HERZEGOVINA : '699'
-    
+    BOSNIA_HERZEGOVINA : '699',
+    MADAGASCAR : '700'
   };
 })();
 
@@ -165,6 +166,9 @@ var GEOHandler = (function() {
       return nameAddressType;
     },
     registerWWValidator : function(validator, roleCode, existingRequestOnly) {
+      if (validator == null) {
+        return;
+      }
       if (existingRequestOnly && (dojo.byId("reqId").value == '0' || (typeof (_pagemodel) != 'undefined' && _pagemodel.reqId == 0))) {
         console.log('skipping WW validator for new entry: ' + validator.name);
         return;
@@ -185,6 +189,9 @@ var GEOHandler = (function() {
 
     // register a country specific validator, can be except for that country
     registerValidator : function(validator, arrayOfCountryCodes, roleCode, existingRequestOnly, excludeCountries) {
+      if (validator == null) {
+        return;
+      }
       if (existingRequestOnly && (dojo.byId("reqId").value == '0' || (typeof (_pagemodel) != 'undefined' && _pagemodel.reqId == 0))) {
         console.log('skipping validator for new entry: ' + validator.name + ", countries: " + getCMRIssuingCountry());
         return;

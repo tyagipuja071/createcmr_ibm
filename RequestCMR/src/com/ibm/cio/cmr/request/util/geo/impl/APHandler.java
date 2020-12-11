@@ -51,7 +51,7 @@ import com.ibm.cmr.services.client.wtaas.WtaasQueryResponse;
 public abstract class APHandler extends GEOHandler {
 
   private static final Logger LOG = Logger.getLogger(APHandler.class);
-  private static final String[] AP_SKIP_ON_SUMMARY_UPDATE_FIELDS = {};
+  private static final String[] AP_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "SearchTerm" };
   protected WtaasRecord currentRecord;
 
   @Override
@@ -203,14 +203,14 @@ public abstract class APHandler extends GEOHandler {
     if (!StringUtils.isBlank(data.getAbbrevLocn()) && data.getAbbrevLocn().length() > 9)
       data.setAbbrevLocn(data.getAbbrevLocn().substring(0, 9));
 
-    LOG.trace("SalesmanNo: " + data.getRepTeamMemberNo());
-    LOG.trace("AbbrLoc: " + data.getAbbrevLocn());
-    LOG.trace("IBMCode: " + data.getCollectionCd());
-    LOG.trace("Cluster: " + data.getApCustClusterId());
-    LOG.trace("ISBU Cd/ SellDept: " + data.getIsbuCd());
-    LOG.trace("GbSeg Code / Client Tier: " + data.getClientTier());
-    LOG.trace("MrktRespCode: " + data.getMrcCd());
-    LOG.trace("Province Code/SellBrnchOff : " + data.getTerritoryCd());
+    LOG.debug("SalesmanNo: " + data.getRepTeamMemberNo());
+    LOG.debug("AbbrLoc: " + data.getAbbrevLocn());
+    LOG.debug("IBMCode: " + data.getCollectionCd());
+    LOG.debug("Cluster: " + data.getApCustClusterId());
+    LOG.debug("ISBU Cd/ SellDept: " + data.getIsbuCd());
+    LOG.debug("GbSeg Code / Client Tier: " + data.getClientTier());
+    LOG.debug("MrktRespCode: " + data.getMrcCd());
+    LOG.debug("Province Code/SellBrnchOff : " + data.getTerritoryCd());
 
   }
 
@@ -336,6 +336,14 @@ public abstract class APHandler extends GEOHandler {
       update.setDataField(PageManager.getLabel(cmrCountry, "EngineeringBo", "-"));
       update.setNewData(service.getCodeAndDescription(newData.getEngineeringBo(), "EngineeringBo", cmrCountry));
       update.setOldData(service.getCodeAndDescription(oldData.getEngineeringBo(), "EngineeringBo", cmrCountry));
+      results.add(update);
+    }
+
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getApCustClusterId(), newData.getApCustClusterId())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "Cluster", "-"));
+      update.setNewData(newData.getApCustClusterId());
+      update.setOldData(oldData.getApCustClusterId());
       results.add(update);
     }
   }

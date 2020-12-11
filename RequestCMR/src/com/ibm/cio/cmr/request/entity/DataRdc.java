@@ -239,7 +239,7 @@ public class DataRdc extends BaseEntity<DataPK> implements Serializable {
   private String email3;
 
   @Column(name = "BUSN_TYP")
-  private String busnTyp;
+  private String busnType;
 
   @Column(name = "ICMS_IND")
   private String icmsInd;
@@ -273,6 +273,9 @@ public class DataRdc extends BaseEntity<DataPK> implements Serializable {
 
   @Column(name = "MAILING_COND")
   private String mailingCondition;
+  
+  @Column(name = "AP_CUST_CLUSTER_ID")
+  private String apCustClusterId;
 
   @Column(name = "BP_SALES_REP_NO")
   private String bpSalesRepNo;
@@ -1014,12 +1017,12 @@ public class DataRdc extends BaseEntity<DataPK> implements Serializable {
     this.email3 = email3;
   }
 
-  public String getBusnTyp() {
-    return this.busnTyp;
+  public String getBusnType() {
+    return this.busnType;
   }
 
-  public void setBusnTyp(String busnTyp) {
-    this.busnTyp = busnTyp;
+  public void setBusnType(String busnType) {
+    this.busnType = busnType;
   }
 
   public String getIcmsInd() {
@@ -1534,4 +1537,12 @@ public class DataRdc extends BaseEntity<DataPK> implements Serializable {
     this.military = military;
   }
 
+  public String getApCustClusterId() {
+    return apCustClusterId;
+  }
+
+  public void setApCustClusterId(String apCustClusterId) {
+    this.apCustClusterId = apCustClusterId;
+  }
+  
 }

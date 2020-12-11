@@ -107,14 +107,15 @@
         </cmr:column>
       </cmr:row>
       <br>
-      <cmr:buttonsRow>
+      <cmr:row>
         <cmr:button label="${ui.btn.search}" onClick="doSearchChangeLogs()" highlight="true" />
-      </cmr:buttonsRow>
+      </cmr:row>
       <br>      
     </cmr:section>
   </cmr:boxContent>
    
   <cmr:boxContent>   
+    <cmr:tabs />
     <cmr:section alwaysShown="true">
       <cmr:row topPad="8">
         <cmr:column span="6">

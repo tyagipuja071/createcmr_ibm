@@ -25,7 +25,7 @@ div.auto-desc {
 textarea.auto-desc {
   font-size: 13px;
   line-height: 20px;
-  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", "HelvLightIBM", Arial, sans-serif;
+  font-family: IBM Plex Sans, "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", "HelvLightIBM", Arial, sans-serif;
   border-radius: 5px;
   padding: 10px;
 }
@@ -66,14 +66,14 @@ table.element-table select {
   border: 1px Solid #666;
   border-radius: 4px;
   padding: 3px;
-  font-family: "HelveticaNeue-Light","Helvetica Neue Light","Helvetica Neue","HelvLightIBM",Arial,sans-serif;
+  font-family: IBM Plex Sans, "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", "HelvLightIBM", Arial, sans-serif;
 }
 
 select.auto-select  {
   border: 1px Solid #666;
   border-radius: 4px;
   padding: 3px;
-  font-family: "HelveticaNeue-Light","Helvetica Neue Light","Helvetica Neue","HelvLightIBM",Arial,sans-serif;
+  font-family: IBM Plex Sans, "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", "HelvLightIBM", Arial, sans-serif;
 }
 
 select.auto-select option {

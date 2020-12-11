@@ -71,8 +71,8 @@
     </cmr:row>
     <cmr:buttonsRow>
       <cmr:hr />
-      <a class="ibm-btn-pri" href="<%=SystemConfiguration.getValue("DPL_CHECK_DB", "#")%>" title="Click here to open the database" style="display:inline">${ui.dpl.btn}</a>
-      <cmr:info text="${ui.dpl.info}" />
+      <a class="ibm-btn-pri" href="javascript: doDplSearchRequest()" title="Search against the DPL database using request data" style="display:inline">DPL Search</a>
+      <cmr:info text="Searches the DPL Database using the saved information on the request" />
       <cmr:button label="${ui.btn.close}" onClick="cmr.hideModal('DplDetailsModal')" highlight="false" pad="true" />
     </cmr:buttonsRow>
   </form:form>

@@ -106,13 +106,13 @@ public class TemplateColumn {
       // add number validator
       if (this.length > 0) {
         // do a range of values
-        String min = 1 + "";
+        String min = 0 + "";
         String max = StringUtils.leftPad("", this.length, '9');
         constraint = (XSSFDataValidationConstraint) helper.createNumericConstraint(ValidationType.INTEGER, OperatorType.BETWEEN, min, max);
         errorMsg = "Please input only numbers from " + min + " to " + max + ".";
       } else {
         // generic values, use 9 as numer length limit
-        String min = 1 + "";
+        String min = 0 + "";
         String max = StringUtils.leftPad("", 9, '9');
         constraint = (XSSFDataValidationConstraint) helper.createNumericConstraint(ValidationType.INTEGER, OperatorType.BETWEEN, min, max);
         errorMsg = "Please input numbers only.";
