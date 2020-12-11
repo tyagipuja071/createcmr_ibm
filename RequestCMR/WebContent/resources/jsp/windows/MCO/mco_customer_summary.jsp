@@ -17,6 +17,24 @@
   Addr addr = summary.getAddr();
   String cntry = data.getCmrIssuingCntry();
 %>
+<cmr:view forCountry="780">
+	<cmr:row addBackground="true">
+		<cmr:column span="1" width="127">
+		</cmr:column>
+		<cmr:column span="1" width="130">
+			<label><cmr:fieldLabel fieldId="VAT" />: </label>
+		</cmr:column>
+		<cmr:column span="1" width="240">
+				${summary.data.vat}
+			</cmr:column>
+		<cmr:column span="1" width="50">
+			<label><cmr:fieldLabel fieldId="VATExempt" />: </label>
+		</cmr:column>
+		<cmr:column span="1" width="100">
+				${summary.data.vatExempt == 'Y' ? "Yes" : ""}
+	        </cmr:column>
+	</cmr:row>
+</cmr:view>
 <cmr:view forGEO="MCO,MCO1,MCO2">
   <cmr:row addBackground="true">
     <cmr:column span="1" width="127">
