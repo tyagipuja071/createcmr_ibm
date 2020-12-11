@@ -12,6 +12,7 @@ var VAT_EU_COUNTRY = [ "AT", "BE", "BG", "HR", "CY", "CZ", "EG", "FR", "DE", "GR
     "RU", "RS", "SK", "SI", "ZA", "ES", "TR", "GB", "UA" ];
 
 function afterConfigForFR() {
+  FormManager.hide('CountrySubRegion', 'countryUse');
   var role = null;
   var reqType = null;
 
