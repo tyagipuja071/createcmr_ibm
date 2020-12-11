@@ -35,6 +35,7 @@ function afterConfigForFR() {
   if (role == 'Requester') {
     FormManager.readOnly('abbrevNm');
     FormManager.readOnly('abbrevLocn');
+    FormManager.setValue('taxCd2', '1');
     // FormManager.readOnly('taxCd2');
     FormManager.readOnly('poBox');
     FormManager.readOnly('embargoCd');
@@ -51,7 +52,7 @@ function afterConfigForFR() {
     FormManager.enable('taxCd2');
     FormManager.enable('embargoCd');
     FormManager.enable('currencyCd');
-    FormManager.addValidator('taxCd2', Validators.REQUIRED, [ 'Tax Code' ], 'MAIN_CUST_TAB');
+    //FormManager.addValidator('taxCd2', Validators.REQUIRED, [ 'Tax Code' ], 'MAIN_CUST_TAB');
     FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
   }
 
@@ -81,12 +82,15 @@ function afterConfigForFR() {
     affacturageLogic();
     setISUClientTierOnScenario();
     setFieldsRequiredForCreateRequester();
-    setClassificationCodeTR();
+    setClassificationCode();
   });
   if (_custSubGrpHandler && _custSubGrpHandler[0]) {
     _custSubGrpHandler[0].onChange();
   }
 
+  // CMR-(228) France new tax code logic don't need this.
+  // just remove this START.
+  /*
   dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
     var isicCd = FormManager.getActualValue('isicCd');
     var countyCd = FormManager.getActualValue('countryUse');
@@ -102,6 +106,8 @@ function afterConfigForFR() {
       }
     }
   });
+  */
+  // just remove this END.
 
   // set defaultLandedCountry
   var landCntry = '';
@@ -1645,6 +1651,9 @@ function setTaxCdOnScnrio() {
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
   }
+  //CMR-(228) France new tax code logic don't need this.
+  //just remove this START.
+  /*
   if (role == 'Requester' && reqType == 'C') {
     if (FormManager.getActualValue('custGrp') == 'LOCAL') {
       setTaxCdDropDownValuesLOCAL();
@@ -1652,8 +1661,13 @@ function setTaxCdOnScnrio() {
       setTaxCdDropDownValuesCROSS();
     }
   }
+  */
+  //just remove this END.
 }
 
+//CMR-(228) France new tax code logic don't need this.
+//just remove this START.
+/*
 function setTaxCdDropDownValuesLOCAL() {
   var countryUse = null;
   var countyCd = null;
@@ -1697,7 +1711,12 @@ function setTaxCdDropDownValuesLOCAL() {
     FormManager.readOnly('taxCd2');
   }
 }
+*/
+//just remove this END.
 
+//CMR-(228) France new tax code logic don't need this.
+//just remove this START.
+/*
 function setTaxCdDropDownValuesCROSS() {
   var isEUCntry = false;
   var reqId = FormManager.getActualValue('reqId');
@@ -1729,6 +1748,8 @@ function setTaxCdDropDownValuesCROSS() {
     }
   }
 }
+*/
+//just remove this END.
 
 function setTaxCdOnAddrSave() {
   var role = null;
@@ -2550,7 +2571,7 @@ function canCopyAddress(value, rowIndex, grid) {
 }
 
 // Control Classification Code
-function setClassificationCodeTR() {
+function setClassificationCode() {
 
   var reqType = FormManager.getActualValue('reqType');
   var field = FormManager.getField('custClass');
