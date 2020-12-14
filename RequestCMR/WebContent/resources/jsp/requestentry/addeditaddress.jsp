@@ -89,7 +89,10 @@
     <cmr:view forGEO="SWISS">
       <jsp:include page="SWISS/ch_address.jsp"></jsp:include>
     </cmr:view>
-    <cmr:view exceptForGEO="US,LA,EMEA,CND,IERP,AP,MCO,MCO1,MCO2,FR,CEMEA,JP,CN,NORDX,BELUX,NL,SWISS">
+    <cmr:view forCountry="649">
+      <jsp:include page="CA/ca_address.jsp"></jsp:include>
+    </cmr:view>
+    <cmr:view exceptForGEO="US,LA,EMEA,CND,IERP,AP,MCO,MCO1,MCO2,FR,CEMEA,JP,CN,NORDX,BELUX,NL,SWISS" exceptForCountry="649">
       <jsp:include page="default_address.jsp"></jsp:include>
     </cmr:view>
     
