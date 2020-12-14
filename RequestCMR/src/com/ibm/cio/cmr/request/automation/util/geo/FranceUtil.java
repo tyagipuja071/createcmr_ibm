@@ -65,7 +65,7 @@ public class FranceUtil extends AutomationUtil {
   public static final String SCENARIO_CROSSBORDER_INTERNAL = "CBTER";
   public static final String SCENARIO_CROSSBORDER_COMMERCIAL = "CBMME";
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
-      CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO, CmrConstants.RDC_SECONDARY_SOLD_TO);
+      CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO);
   private static final Logger LOG = Logger.getLogger(FranceUtil.class);
   private static List<FrSboMapping> sortlMappings = new ArrayList<FrSboMapping>();
   private static final String MATCHING = "matching";
@@ -195,7 +195,7 @@ public class FranceUtil extends AutomationUtil {
     Admin admin = requestData.getAdmin();
     Addr zs01 = requestData.getAddress("ZS01");
     String customerName = getCustomerFullName(zs01);
-    Addr zs02 = requestData.getAddress("ZS02");
+    Addr zd01 = requestData.getAddress("ZD01");
     Addr zi01 = requestData.getAddress("ZI01");
     String customerNameZI01 = getCustomerFullName(zi01);
     Addr zp01 = requestData.getAddress("ZP01");
@@ -233,8 +233,8 @@ public class FranceUtil extends AutomationUtil {
         case SCENARIO_CROSSBORDER_COMMERCIAL:
         case SCENARIO_COMMERCIAL:
           if (customerName.toUpperCase().equals(customerNameZI01.toUpperCase())) {
-            details.append("Billing and Installing name are not same. Request will require CMDE review before proceeding.").append("\n");
-            engineData.addNegativeCheckStatus("BILL_INSTALL_DIFF", "Billing and Installing addresses are not same.");
+            details.append("Sold-to and Installing name are not same. Request will require CMDE review before proceeding.").append("\n");
+            engineData.addNegativeCheckStatus("SOLDTO_INSTALL_DIFF", "Sold-to and Installing addresses are not same.");
             return false;
           } else if (zs01 != null) {
             // remove duplicate address
@@ -266,14 +266,14 @@ public class FranceUtil extends AutomationUtil {
         case SCENARIO_CROSSBORDER_THIRD_PARTY:
         case SCENARIO_THIRD_PARTY:
 
-          if (zs02 != null && zp01 != null) {
-            String zs02Details = (StringUtils.isNotBlank(zs02.getCustNm1()) ? zs02.getCustNm1() : "")
-                + (StringUtils.isNotBlank(zs02.getAddrTxt()) ? zs02.getAddrTxt() : "")
-                + (StringUtils.isNotBlank(zs02.getCity1()) ? zs02.getCity1() : "");
+          if (zd01 != null && zp01 != null) {
+            String zd01Details = (StringUtils.isNotBlank(zd01.getCustNm1()) ? zd01.getCustNm1() : "")
+                + (StringUtils.isNotBlank(zd01.getAddrTxt()) ? zd01.getAddrTxt() : "")
+                + (StringUtils.isNotBlank(zd01.getCity1()) ? zd01.getCity1() : "");
             String zp01Details = (StringUtils.isNotBlank(zp01.getCustNm1()) ? zp01.getCustNm1() : "")
                 + (StringUtils.isNotBlank(zp01.getAddrTxt()) ? zp01.getAddrTxt() : "")
                 + (StringUtils.isNotBlank(zp01.getCity1()) ? zp01.getCity1() : "");
-            if (!zs02Details.equalsIgnoreCase(zp01Details)) {
+            if (!zd01Details.equalsIgnoreCase(zp01Details)) {
               engineData.addRejectionComment("OTH", "Invalid Billing/Mailing address found on the request. The addresses should be the same.", "",
                   "");
               details.append("Invalid Billing/Mailing address found on the request. The addresses should be the same.").append("\n");
