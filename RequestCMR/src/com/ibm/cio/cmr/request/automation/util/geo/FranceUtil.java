@@ -13,7 +13,6 @@ import org.apache.commons.digester.Digester;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
 
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
@@ -36,22 +35,37 @@ import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
-import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.ConfigUtil;
-import com.ibm.cio.cmr.request.util.Person;
+import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
-import com.ibm.cmr.services.client.CmrServicesFactory;
-import com.ibm.cmr.services.client.MatchingServiceClient;
+import com.ibm.cmr.services.client.dnb.DnBCompany;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
-import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckRequest;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
 
 public class FranceUtil extends AutomationUtil {
 
+  public static final String SCENARIO_INTERNAL_SO = "INTSO";
+  public static final String SCENARIO_THIRD_PARTY = "THDPT";
+  public static final String SCENARIO_HOSTING = "HOSTC";
+  public static final String SCENARIO_BUSINESS_PARTNER = "BUSPR";
+  public static final String SCENARIO_PRIVATE_PERSON = "PRICU";
+  public static final String SCENARIO_IBM_EMPLOYEE = "IBMEM";
+  public static final String SCENARIO_INTERNAL = "INTER";
+  public static final String SCENARIO_COMMERCIAL = "COMME";
+  public static final String SCENARIO_CROSSBORDER_INTERNAL_SO = "CBTSO";
+  public static final String SCENARIO_CROSSBORDER_THIRD_PARTY = "CBDPT";
+  public static final String SCENARIO_CROSSBORDER_HOSTING = "CBSTC";
+  public static final String SCENARIO_CROSSBORDER_BUSINESS_PARTNER = "XBUSP";
+  public static final String SCENARIO_CROSSBORDER_PRIVATE_PERSON = "XBLUM";
+  public static final String SCENARIO_CROSSBORDER_IBM_EMPLOYEE = "CBIEM";
+  public static final String SCENARIO_CROSSBORDER_INTERNAL = "CBTER";
+  public static final String SCENARIO_CROSSBORDER_COMMERCIAL = "CBMME";
+  private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
+      CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO);
   private static final Logger LOG = Logger.getLogger(FranceUtil.class);
   private static List<FrSboMapping> sortlMappings = new ArrayList<FrSboMapping>();
   private static final String MATCHING = "matching";
@@ -85,25 +99,71 @@ public class FranceUtil extends AutomationUtil {
   @Override
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {
+    Admin admin = requestData.getAdmin();
+    // Addr addr = requestData.getAddress();
     Data data = requestData.getData();
-    String coverage = (String) engineData.get(AutomationEngineData.COVERAGE_CALCULATED);
-    if (!StringUtils.isBlank(coverage) || engineData.hasPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED)) {
-      // if calculated data would hold value for sbo calculated using coverage
-      // calculation
-      details.append("SBO value calculated via Coverage Calculation Element- " + data.getSalesBusOffCd()).append("\n");
-    } else {
-      if (StringUtils.isNotBlank(data.getSalesBusOffCd()) && StringUtils.isNotBlank(data.getInstallBranchOff())) {
-        details.append("SBO value already provided on the request - " + data.getSalesBusOffCd()).append("\n");
-        results.setResults("Skipped");
-      } else {
-        engineData.addRejectionComment("OTH", "SBO cannot be computed automatically.", "", "");
-        details.append("SBO cannot be computed automatically.").append("\n");
-        results.setResults("SBO not calculated.");
-        results.setOnError(true);
-      }
+    String scenario = data.getCustSubGrp();
+    if (!"C".equals(admin.getReqType())) {
+      details.append("Field Computation skipped for Updates.");
+      results.setResults("Skipped");
+      results.setDetails(details.toString());
+      return results;
     }
-    results.setProcessOutput(overrides);
+    if (SCENARIO_INTERNAL_SO.equals(scenario) || SCENARIO_THIRD_PARTY.equals(scenario) || SCENARIO_CROSSBORDER_INTERNAL_SO.equals(scenario)
+        || SCENARIO_CROSSBORDER_THIRD_PARTY.equals(scenario)) {
+      Addr zi01 = requestData.getAddress("ZI01");
+      boolean highQualityMatchExists = false;
+      List<DnBMatchingResponse> response = getMatches(requestData, engineData, zi01, false);
+      if (response != null && response.size() > 0) {
+        for (DnBMatchingResponse dnbRecord : response) {
+          boolean closelyMatches = DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), zi01, admin, dnbRecord);
+          if (closelyMatches) {
+            engineData.put("ZI01_DNB_MATCH", dnbRecord);
+            highQualityMatchExists = true;
+            details.append("High Quality DnB Match found for Installing address.\n");
+            details.append("Overriding ISIC and Sub Industry Code using DnB Match retrieved.\n");
+            LOG.debug("Connecting to D&B details service..");
+            DnBCompany dnbData = DnBUtil.getDnBDetails(dnbRecord.getDunsNo());
+            if (dnbData != null) {
+              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISIC_CD", data.getIsicCd(), dnbData.getIbmIsic());
+              details.append("ISIC =  " + dnbData.getIbmIsic() + " (" + dnbData.getIbmIsicDesc() + ")").append("\n");
+              String subInd = RequestUtils.getSubIndustryCd(entityManager, dnbData.getIbmIsic(), data.getCmrIssuingCntry());
+              if (subInd != null) {
+                overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), subInd);
+                details.append("Subindustry Code  =  " + subInd).append("\n");
+              }
+            }
+            results.setResults("Calculated.");
+            results.setProcessOutput(overrides);
+            break;
+          }
+        }
+      }
+      if (!highQualityMatchExists && "C".equals(admin.getReqType())) {
+        LOG.debug("No High Quality DnB Match found for Installing address.");
+        details.append("No High Quality DnB Match found for Installing address. Request will require CMDE review before proceeding.").append("\n");
+        engineData.addNegativeCheckStatus("NOMATCHFOUND",
+            "No High Quality DnB Match found for Installing address. Request cannot be processed automatically.");
+      }
+    } else {
+      details.append("No specific fields to calculate.");
+      results.setResults("Skipped.");
+      results.setProcessOutput(overrides);
+    }
+    results.setDetails(details.toString());
+    LOG.debug(results.getDetails());
     return results;
+  }
+
+  @Override
+  public GBGFinderRequest createRequest(Admin admin, Data data, Addr addr, Boolean isOrgIdMatchOnly) {
+    GBGFinderRequest request = super.createRequest(admin, data, addr, isOrgIdMatchOnly);
+    String scenarioType = data.getCustSubGrp();
+    if (("C".equals(admin.getReqType())) && (SCENARIO_INTERNAL_SO.equals(scenarioType) || SCENARIO_THIRD_PARTY.equals(scenarioType)
+        || SCENARIO_CROSSBORDER_INTERNAL_SO.equals(scenarioType) || SCENARIO_CROSSBORDER_THIRD_PARTY.equals(scenarioType))) {
+      request.setOrgId("");
+    }
+    return request;
   }
 
   /**
@@ -132,158 +192,109 @@ public class FranceUtil extends AutomationUtil {
   public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
       AutomationResult<ValidationOutput> result, StringBuilder details, ValidationOutput output) {
     Data data = requestData.getData();
-    Addr zs01 = requestData.getAddress("ZS01");
     Admin admin = requestData.getAdmin();
-    boolean valid = true;
+    Addr zs01 = requestData.getAddress("ZS01");
+    String customerName = getCustomerFullName(zs01);
+    Addr zd01 = requestData.getAddress("ZD01");
+    Addr zi01 = requestData.getAddress("ZI01");
+    String customerNameZI01 = getCustomerFullName(zi01);
+    Addr zp01 = requestData.getAddress("ZP01");
+
     String scenario = data.getCustSubGrp();
     if (StringUtils.isNotBlank(scenario)) {
       String scenarioDesc = getScenarioDescription(entityManager, data);
-      if (StringUtils.isNotBlank(data.getCountryUse()) && data.getCountryUse().length() > 3 && !"CBMME".equals(scenario)
-          && !"COMME".equals(scenario)) {
+      if (StringUtils.isNotBlank(data.getCountryUse()) && data.getCountryUse().length() > 3 && !SCENARIO_COMMERCIAL.equals(scenario)
+          && !SCENARIO_CROSSBORDER_COMMERCIAL.equals(scenario)) {
         engineData.addNegativeCheckStatus("DISABLEDAUTOPROC",
             "Requests for " + scenarioDesc + " cannot be processed automatically. Manual processing would be required.");
       } else {
         switch (scenario) {
-        case "PRICU":
-        case "IBMEM":
-        case "CBIEM":
-          String name = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
-          String duplicateCMRNo = null;
-          // getting fuzzy matches on basis of name
-          try {
-            MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
-                MatchingServiceClient.class);
-            DuplicateCMRCheckRequest request = new DuplicateCMRCheckRequest();
-            request.setCustomerName(name);
-            request.setIssuingCountry(data.getCmrIssuingCntry());
-            request.setLandedCountry(zs01.getLandCntry());
-            request.setNameMatch("Y");
-            client.setReadTimeout(1000 * 60 * 5);
-            LOG.debug("Connecting to the Duplicate CMR Check Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
-            MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.CMR_SERVICE_ID, request, MatchingResponse.class);
-            ObjectMapper mapper = new ObjectMapper();
-            String json = mapper.writeValueAsString(rawResponse);
+        case SCENARIO_CROSSBORDER_PRIVATE_PERSON:
+        case SCENARIO_PRIVATE_PERSON:
+        case SCENARIO_CROSSBORDER_IBM_EMPLOYEE:
+        case SCENARIO_IBM_EMPLOYEE:
+          return doPrivatePersonChecks(engineData, SystemLocation.FRANCE, zs01.getLandCntry(), customerName, details,
+              (SCENARIO_IBM_EMPLOYEE.equals(scenario) || SCENARIO_IBM_EMPLOYEE.equals(scenario)), requestData);
 
-            TypeReference<MatchingResponse<DuplicateCMRCheckResponse>> ref = new TypeReference<MatchingResponse<DuplicateCMRCheckResponse>>() {
-            };
-
-            MatchingResponse<DuplicateCMRCheckResponse> response = mapper.readValue(json, ref);
-
-            if (response.getSuccess()) {
-              if (response.getMatched() && response.getMatches().size() > 0) {
-                duplicateCMRNo = response.getMatches().get(0).getCmrNo();
-                String zs01Kunnr = getZS01Kunnr(duplicateCMRNo, SystemLocation.FRANCE);
-                details.append("The " + ((scenario.equals("PRICU")) ? "Private Customer" : "IBM Employee") + " already has a record with CMR No. "
-                    + duplicateCMRNo);
-                engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR.The "
-                    + ((scenario.equals("PRICU")) ? "Private Customer" : "IBM Employee") + " already has a record with CMR No. " + duplicateCMRNo,
-                    duplicateCMRNo, zs01Kunnr);
-                valid = false;
-              } else {
-                details.append("No Duplicate CMRs were found with Name: " + name);
-              }
-              if (StringUtils.isBlank(duplicateCMRNo) && (scenario.equals("IBMEM") || scenario.equals("CBIEM"))) {
-                Person person = null;
-                try {
-                  person = BluePagesHelper
-                      .getPersonByName(zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : ""));
-                  if (person == null) {
-                    engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
-                    details.append("Employee details not found in IBM BluePages.").append("\n");
-                  } else {
-                    details.append("Employee details validated with IBM BluePages for " + person.getName() + "(" + person.getEmail() + ").")
-                        .append("\n");
-                  }
-                } catch (Exception e) {
-                  LOG.error("Not able to check name against bluepages", e);
-                  engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED", "Not able to check name against bluepages for scenario IBM Employee.");
-                }
+        case SCENARIO_INTERNAL:
+        case SCENARIO_CROSSBORDER_INTERNAL:
+          for (String addrType : RELEVANT_ADDRESSES) {
+            List<Addr> addresses = requestData.getAddresses(addrType);
+            for (Addr addr : addresses) {
+              String custNmTrimmed = getCustomerFullName(addr);
+              if (!(custNmTrimmed.toUpperCase().contains("IBM") || custNmTrimmed.toUpperCase().contains("International Business Machines"))) {
+                details.append("Wrong Customer Name on the main address. IBM should be part of the name.").append("\n");
+                engineData.addRejectionComment("OTH", "Wrong Customer Name on the main address. IBM should be part of the name.", "", "");
+                return false;
               }
             }
-          } catch (Exception e) {
-            details.append("Duplicate CMR check using customer name match failed to execute.");
-            engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name match failed to execute.");
           }
           break;
-        case "INTER":
-        case "CBTER":
-          String mainCustNm = zs01.getCustNm1();
-          if (StringUtils.isNotBlank(mainCustNm) && !mainCustNm.toUpperCase().contains("IBM") && !(data.getCountryUse().length() > 3)) {
-            engineData.addRejectionComment("OTH", "Wrong Customer Name on the main address. IBM should be part of the name.", "", "");
-            details.append("Wrong Customer Name on the main address. IBM should be part of the name.").append("\n");
-            valid = false;
+        case SCENARIO_CROSSBORDER_COMMERCIAL:
+        case SCENARIO_COMMERCIAL:
+          if (customerName.toUpperCase().equals(customerNameZI01.toUpperCase())) {
+            details.append("Sold-to and Installing name are not same. Request will require CMDE review before proceeding.").append("\n");
+            engineData.addNegativeCheckStatus("SOLDTO_INSTALL_DIFF", "Sold-to and Installing addresses are not same.");
+            return false;
+          } else if (zs01 != null) {
+            // remove duplicate address
+            removeDuplicateAddresses(entityManager, requestData, details);
           }
           break;
-        case "HOSTC":
-        case "CBSTC":
-          String custNm1 = zs01.getCustNm1();
-          String custNm2 = zs01.getCustNm2();
-          String custNm = custNm1 + (StringUtils.isNotBlank(custNm2) ? " " + custNm2 : "");
-          if (!(data.getCountryUse().length() > 3)) {
-            if (StringUtils.isNotBlank(custNm) && custNm.toUpperCase().contains("CHEZ")) {
-              valid = true;
-            } else {
-              engineData.addRejectionComment("OTH", "Wrong Customer Name on Host address. CHEZ should be part of the name.", "", "");
-              details.append("Wrong Customer Name on Host address. CHEZ should be part of the name.").append("\n");
-              valid = false;
-            }
+        case SCENARIO_HOSTING:
+        case SCENARIO_CROSSBORDER_HOSTING:
+          if (customerName.toUpperCase().equals(customerNameZI01.toUpperCase())) {
+            details.append("Customer Names on Sold-to and Install-at address should be different for Hosting Scenario").append("\n");
+            engineData.addRejectionComment("OTH", "Customer Names on Sold-to and Install-at address should be different for Hosting Scenario", "",
+                "");
+            return false;
+          } else if (StringUtils.isNotBlank(customerName) && !customerName.toUpperCase().contains("CHEZ")) {
+            details.append("Wrong Customer Name on Host address. CHEZ should be part of the name.").append("\n");
+            engineData.addRejectionComment("OTH", "Wrong Customer Name on Host address. CHEZ should be part of the name.", "", "");
+            return false;
           }
           break;
-        case "INTSO":
-        case "CBTSO":
+        case SCENARIO_BUSINESS_PARTNER:
+        case SCENARIO_CROSSBORDER_BUSINESS_PARTNER:
+          return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
+
+        case SCENARIO_INTERNAL_SO:
+        case SCENARIO_CROSSBORDER_INTERNAL_SO:
           engineData.addNegativeCheckStatus("DISABLEDAUTOPROC",
               "Requests for " + scenarioDesc + " cannot be processed automatically. Manual processing would be required.");
           break;
-        case "CBDPT":
-        case "THDPT":
-          // zs02 -> mailing zp01 -> billing
-          Addr mailing = null;
-          Addr billing = null;
-          for (Addr addr : requestData.getAddresses()) {
-            if ("ZS02".equalsIgnoreCase(addr.getId().getAddrType())) {
-              mailing = addr;
-            }
-            if ("ZP01".equalsIgnoreCase(addr.getId().getAddrType())) {
-              billing = addr;
-            }
-          }
-          if (mailing != null && billing != null) {
-            String mailDetails = (StringUtils.isNotBlank(mailing.getCustNm1()) ? mailing.getCustNm1() : "")
-                + (StringUtils.isNotBlank(mailing.getAddrTxt()) ? mailing.getAddrTxt() : "")
-                + (StringUtils.isNotBlank(mailing.getCity1()) ? mailing.getCity1() : "");
-            String billDetails = (StringUtils.isNotBlank(billing.getCustNm1()) ? billing.getCustNm1() : "")
-                + (StringUtils.isNotBlank(billing.getAddrTxt()) ? billing.getAddrTxt() : "")
-                + (StringUtils.isNotBlank(billing.getCity1()) ? billing.getCity1() : "");
+        case SCENARIO_CROSSBORDER_THIRD_PARTY:
+        case SCENARIO_THIRD_PARTY:
 
-            if (mailDetails.equalsIgnoreCase(billDetails)) {
-              valid = true;
-            } else {
+          if (zd01 != null && zp01 != null) {
+            String zd01Details = (StringUtils.isNotBlank(zd01.getCustNm1()) ? zd01.getCustNm1() : "")
+                + (StringUtils.isNotBlank(zd01.getAddrTxt()) ? zd01.getAddrTxt() : "")
+                + (StringUtils.isNotBlank(zd01.getCity1()) ? zd01.getCity1() : "");
+            String zp01Details = (StringUtils.isNotBlank(zp01.getCustNm1()) ? zp01.getCustNm1() : "")
+                + (StringUtils.isNotBlank(zp01.getAddrTxt()) ? zp01.getAddrTxt() : "")
+                + (StringUtils.isNotBlank(zp01.getCity1()) ? zp01.getCity1() : "");
+            if (!zd01Details.equalsIgnoreCase(zp01Details)) {
               engineData.addRejectionComment("OTH", "Invalid Billing/Mailing address found on the request. The addresses should be the same.", "",
                   "");
               details.append("Invalid Billing/Mailing address found on the request. The addresses should be the same.").append("\n");
-              valid = false;
+              return false;
             }
+          } else if (customerName.toUpperCase().equals(customerNameZI01.toUpperCase())) {
+            details.append("Customer Names on Sold-to and Install-at address should be different for Third Party Scenario").append("\n");
+            engineData.addRejectionComment("OTH", "Customer Names on Sold-to and Install-at address should be different for Third Party Scenario", "",
+                "");
+            return false;
           }
         }
-        // if (admin.getSourceSystId() != null) {
-        // // if ("MARKETPLACE".equalsIgnoreCase(admin.getSourceSystId())) {
-        // // engineData.addNegativeCheckStatus("MARKETPLACE", "Processor review
-        // // is required for MARKETPLACE requests.");
-        // // } else
-        // if ("CreateCMR-BP".equalsIgnoreCase(admin.getSourceSystId())) {
-        // engineData.addNegativeCheckStatus("BP_PORTAL", "Processor review is
-        // required for BP Portal requests.");
-        // }
-        // }
       }
     } else {
       if (StringUtils.isBlank(scenario)) {
-        valid = false;
         engineData.addRejectionComment("OTH", "No Scenario found on the request", "", "");
         details.append("No Scenario found on the request");
+        return false;
       }
     }
-    return valid;
+    return true;
   }
 
   private String getScenarioDescription(EntityManager entityManager, Data data) {
