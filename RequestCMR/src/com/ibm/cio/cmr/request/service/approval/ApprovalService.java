@@ -527,7 +527,7 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
         comment = comment + "\n" + rejectReasonCmt;
       }
       this.log.debug("Creating workflow history and sending notifications.");
-      RequestUtils.createWorkflowHistory(this, entityManager, user, admin, comment, "Approval", null, null, false, rejectReasonCmt, rejectReasonCd);
+      RequestUtils.createWorkflowHistory(this, entityManager, user, admin, comment, "Approval", null, null, false, null, rejectReasonCd);
       RequestUtils.createCommentLog(this, entityManager, appuser, admin.getId().getReqId(), comment);
 
     } else {
