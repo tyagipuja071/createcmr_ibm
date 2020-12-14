@@ -944,7 +944,7 @@ public class NLHandler extends BaseSOFHandler {
 
   @Override
   public void doBeforeAddrSave(EntityManager entityManager, Addr addr, String cmrIssuingCntry) throws Exception {
-    addEditKVK_VATAddress(entityManager, addr);
+    // addEditKVK_VATAddress(entityManager, addr);
     if (!"ZS01".equals(addr.getId().getAddrType())) {
       addr.setCustPhone("");
     }
