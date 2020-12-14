@@ -197,7 +197,10 @@ public class FranceUtil extends AutomationUtil {
     String customerName = getCustomerFullName(zs01);
     Addr zd01 = requestData.getAddress("ZD01");
     Addr zi01 = requestData.getAddress("ZI01");
-    String customerNameZI01 = getCustomerFullName(zi01);
+    String customerNameZI01 = "";
+    if (zi01 != null) {
+      customerNameZI01 = getCustomerFullName(zi01);
+    }
     Addr zp01 = requestData.getAddress("ZP01");
 
     String scenario = data.getCustSubGrp();
@@ -243,7 +246,7 @@ public class FranceUtil extends AutomationUtil {
           break;
         case SCENARIO_HOSTING:
         case SCENARIO_CROSSBORDER_HOSTING:
-          if (customerName.toUpperCase().equals(customerNameZI01.toUpperCase())) {
+          if (StringUtils.isNotBlank(customerNameZI01) && customerName.toUpperCase().equals(customerNameZI01.toUpperCase())) {
             details.append("Customer Names on Sold-to and Install-at address should be different for Hosting Scenario").append("\n");
             engineData.addRejectionComment("OTH", "Customer Names on Sold-to and Install-at address should be different for Hosting Scenario", "",
                 "");
