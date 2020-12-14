@@ -328,7 +328,7 @@ public class FranceHandler extends GEOHandler {
       if (CmrConstants.REQ_TYPE_UPDATE.equals(reqType)) {
         String cmrNo = getCMRNo(entityManager, reqId);
         if (!StringUtils.isEmpty(cmrNo)) {
-          String sqlRDC = ExternalizedQuery.getSql("ADDRESS.GETMADDRSEQ_RDC");
+          String sqlRDC = ExternalizedQuery.getSql("FR.ADDRESS.GETMADDRSEQ_RDC");
           PreparedQuery queryRDC = new PreparedQuery(entityManager, sqlRDC);
           queryRDC.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
           queryRDC.setParameter("ZZKV_CUSNO", cmrNo);
