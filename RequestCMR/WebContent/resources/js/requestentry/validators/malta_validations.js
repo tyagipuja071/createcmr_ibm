@@ -680,12 +680,20 @@ var _addrTypesForMCO2 = [ 'ZD01', 'ZI01', 'ZP01', 'ZS01', 'ZS02' ];
 var addrTypeHandler = [];
 
 function cmrNoforProspect() {
+  var cmrNO = FormManager.getActualValue('cmrNo');
   var ifProspect = FormManager.getActualValue('prospLegalInd');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
   if (dijit.byId('prospLegalInd')) {
     ifProspect = dijit.byId('prospLegalInd').get('checked') ? 'Y' : 'N';
   }
   console.log("cmrNoforProspect ifProspect:" + ifProspect);
   if ('Y' == ifProspect) {
+    FormManager.readOnly('cmrNo');
+  } else {
+    FormManager.enable('cmrNo');
+  }
+
+  if (role != 'REQUESTER' && cmrNO.startsWith('P')) {
     FormManager.readOnly('cmrNo');
   } else {
     FormManager.enable('cmrNo');
@@ -697,7 +705,6 @@ function addAfterConfigMalta() {
   lockOrderBlock();
   enterpriseMalta();
   cmrNoforProspect();
-  hidePpsceidExceptBP();
   classFieldBehaviour();
   setVatValidatorMalta();
   disableEnableFieldsForMT();
@@ -716,6 +723,7 @@ function addAfterTemplateLoadMalta(fromAddress, scenario, scenarioChanged) {
 
 function disableEnableFieldsForMT() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
+  var custType = FormManager.getActualValue('custGrp');
   var reqType = FormManager.getActualValue('reqType');
 
   if (reqType == 'C') {
@@ -743,6 +751,13 @@ function disableEnableFieldsForMT() {
     FormManager.readOnly('custPrefLang');
   } else {
     FormManager.enable('custPrefLang');
+  }
+
+  var custType = FormManager.getActualValue('custSubGrp');
+  if (custType == 'BUSPR' || custType == 'XBP') {
+    FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPSCEID' ]);
+  } else {
+    FormManager.removeValidator('ppsceid', Validators.REQUIRED);
   }
 
 }
