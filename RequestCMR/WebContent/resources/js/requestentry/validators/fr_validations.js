@@ -40,9 +40,13 @@ function afterConfigForFR() {
     FormManager.readOnly('poBox');
     FormManager.readOnly('embargoCd');
     // FormManager.readOnly('currencyCd');
-    FormManager.resetDropdownValues(FormManager.getField('taxCd2'));
-    FormManager.limitDropdownValues(FormManager.getField('taxCd2'), [ '1', '0' ]);
-    FormManager.setValue('taxCd2', '1');
+    
+    if (reqType == 'C'){
+      FormManager.resetDropdownValues(FormManager.getField('taxCd2'));
+      FormManager.limitDropdownValues(FormManager.getField('taxCd2'), [ '1', '0' ]);
+      FormManager.setValue('taxCd2', '1');
+    }
+    
     if (reqType == 'U') {
       FormManager.enable('taxCd2');
       FormManager.enable('currencyCd');
@@ -86,6 +90,7 @@ function afterConfigForFR() {
     setISUClientTierOnScenario();
     setFieldsRequiredForCreateRequester();
     setClassificationCode();
+    setTaxCd();
   });
   if (_custSubGrpHandler && _custSubGrpHandler[0]) {
     _custSubGrpHandler[0].onChange();
@@ -1769,15 +1774,15 @@ function setTaxCdOnAddrSaveCROSS() {
     }
     if (isEUCntry == true) {
       FormManager.enable('taxCd2');
-      FormManager.limitDropdownValues(FormManager.getField('taxCd2'), [ '12', '15' ]);
+      //FormManager.limitDropdownValues(FormManager.getField('taxCd2'), [ '12', '15' ]);
       if (FormManager.getActualValue('taxCd2') == '') {
-        FormManager.setValue('taxCd2', '15');
+        //FormManager.setValue('taxCd2', '15');
       }
     } else {
       FormManager.enable('taxCd2');
-      FormManager.limitDropdownValues(FormManager.getField('taxCd2'), [ '11', '37' ]);
+      //FormManager.limitDropdownValues(FormManager.getField('taxCd2'), [ '11', '37' ]);
       if (FormManager.getActualValue('taxCd2') == '') {
-        FormManager.setValue('taxCd2', '37');
+        //FormManager.setValue('taxCd2', '37');
       }
     }
   }
@@ -2626,6 +2631,9 @@ function setClassificationCode() {
         FormManager.setValue(field, '71');
         FormManager.readOnly(field);
       }
+      FormManager.resetDropdownValues(FormManager.getField('taxCd2'));
+      FormManager.limitDropdownValues(FormManager.getField('taxCd2'), [ '1', '0' ]);
+      FormManager.setValue('taxCd2', '1');
     } else {
       FormManager.setValue(field, '');
       FormManager.readOnly(field);
@@ -2636,6 +2644,12 @@ function setClassificationCode() {
     FormManager.enable(field);
   }
 
+}
+
+function setTaxCd(){
+  FormManager.resetDropdownValues(FormManager.getField('taxCd2'));
+  FormManager.limitDropdownValues(FormManager.getField('taxCd2'), [ '1', '0' ]);
+  FormManager.setValue('taxCd2', '1');
 }
 
 dojo.addOnLoad(function() {
@@ -2687,4 +2701,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(restrictDuplicateAddr, [ '706' ], null, true);
   GEOHandler.addAfterTemplateLoad(filterCmrnoP, '706');
   GEOHandler.registerValidator(addCmrNoValidator, [ '706' ], null, true);
+  GEOHandler.addAfterConfig(setTaxCd, '706');
+  GEOHandler.addAfterTemplateLoad(setTaxCd, '706');
 });
