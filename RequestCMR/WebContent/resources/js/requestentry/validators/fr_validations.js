@@ -9,6 +9,7 @@ var _poBOXHandler = [];
 var EU_COUNTRIES = [ "AT", "BE", "BG", "HR", "CY", "CZ", "DE", "DK", "EE", "GR", "FI", "FR", "GB", "HU", "IE", "IT", "LT", "LU", "LV", "MT", "NL", "PL", "PT", "RO", "SE", "SI", "SK" ];
 var VAT_EU_COUNTRY = [ "AT", "BE", "BG", "HR", "CY", "CZ", "EG", "FR", "DE", "GR", "HU", "IE", "IL", "IT", "LU", "MT", "NL", "PK", "PL", "PT", "RO", "RU", "RS", "SK", "SI", "ZA", "ES", "TR", "GB",
     "UA" ];
+var SUB_REGIONS = new Set([ 'MQ', 'GP', 'GF', 'PM', 'RE', 'TF', 'KM', 'YT', 'NC', 'VC', 'WF', 'PF', 'MC', 'AD', 'DZ' ]);
 
 function afterConfigForFR() {
   FormManager.hide('CountrySubRegion', 'countryUse');
@@ -338,8 +339,9 @@ function setSBOOnScenario() {
       } else if (role == 'Processor') {
         FormManager.enable('salesBusOffCd');
       }
-    } else if (custSubGrp == 'CBMME' || custSubGrp == 'CBIEU' || custSubGrp == 'CBUEU' || custSubGrp == 'CBICU' || custSubGrp == 'CBVRN' || custSubGrp == 'CBFIN' || custSubGrp == 'CBTSO'
-        || custSubGrp == 'XBLUM' || custSubGrp == 'CBSTC' || custSubGrp == 'CBDPT' || custSubGrp == 'CBIEM') {
+    } else if (!SUB_REGIONS.has(countyCd)
+        && (custSubGrp == 'CBMME' || custSubGrp == 'CBICU' || custSubGrp == 'CBVRN' || custSubGrp == 'CBFIN' || custSubGrp == 'CBTSO' || custSubGrp == 'XBLUM' || custSubGrp == 'CBSTC'
+            || custSubGrp == 'CBDPT' || custSubGrp == 'CBIEM')) {
       if (role == 'Requester') {
         FormManager.setValue('salesBusOffCd', '200200');// CMR-221
         FormManager.readOnly('salesBusOffCd');
