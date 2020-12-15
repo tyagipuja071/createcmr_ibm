@@ -121,6 +121,11 @@ public class FranceUtil extends AutomationUtil {
             engineData.put("ZI01_DNB_MATCH", dnbRecord);
             highQualityMatchExists = true;
             details.append("High Quality DnB Match found for Installing address.\n");
+            details.append(" - Confidence Code:  " + dnbRecord.getConfidenceCode() + " \n");
+            details.append(" - DUNS No.:  " + dnbRecord.getDunsNo() + " \n");
+            details.append(" - Name:  " + dnbRecord.getDnbName() + " \n");
+            details.append(" - Address:  " + dnbRecord.getDnbStreetLine1() + " " + dnbRecord.getDnbCity() + " " + dnbRecord.getDnbPostalCode() + " "
+                + dnbRecord.getDnbCountry() + "\n\n");
             details.append("Overriding ISIC and Sub Industry Code using DnB Match retrieved.\n");
             LOG.debug("Connecting to D&B details service..");
             DnBCompany dnbData = DnBUtil.getDnBDetails(dnbRecord.getDunsNo());
