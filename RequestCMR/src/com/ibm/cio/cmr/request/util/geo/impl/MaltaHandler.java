@@ -673,17 +673,18 @@ public class MaltaHandler extends BaseSOFHandler {
       address.setTransportZone("");
       if (CmrConstants.REQ_TYPE_UPDATE.equalsIgnoreCase(admin.getReqType())) {
         address.getId().setAddrSeq(currentRecord.getCmrAddrSeq());
-        spid = getRDcIerpSitePartyId(currentRecord.getCmrSapNumber());
+        spid = getRDcIerpSitePartyId(currentRecord.getCmrSitePartyID());
         address.setIerpSitePrtyId(spid);
       } else {
         String addrSeq = address.getId().getAddrSeq();
         addrSeq = StringUtils.leftPad(addrSeq, 5, '0');
         address.getId().setAddrSeq(addrSeq);
-        address.setIerpSitePrtyId(spid);
+        address.setIerpSitePrtyId(currentRecord.getCmrSitePartyID());
       }
     }
   }
 
+  /* IerpSitePartyId */
   private String getRDcIerpSitePartyId(String kunnr) throws Exception {
     String spid = "";
 
