@@ -27,6 +27,8 @@ public class RequestStatsContainer {
   private Map<String, Map<String, AutomationSummaryModel>> weeklyAutomationSummary;
   private Map<String, AutomationSummaryModel> scenarioSummary;
 
+  private Map<String, Long> partnerSummary;
+
   public List<RequestStatsModel> getRecords() {
     return records;
   }
@@ -89,5 +91,13 @@ public class RequestStatsContainer {
 
   public void setScenarioSummary(Map<String, AutomationSummaryModel> scenarioSummary) {
     this.scenarioSummary = scenarioSummary;
+  }
+
+  public Map<String, Long> getPartnerSummary() {
+    return partnerSummary;
+  }
+
+  public void setPartnerSummary(Map<String, Long> partnerSummary) {
+    this.partnerSummary = partnerSummary;
   }
 }
