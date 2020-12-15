@@ -263,13 +263,14 @@ var CmrMetrics = (function() {
           sourceSystId : sourceSystId,
           excludeChildRequests : excludeChildRequests
         },
-        timeout : 180000,
+        timeout : 15 * 60 * 1000,
         sync : false,
         load : function(data, ioargs) {
           console.log('success');
           cmr.hideProgress();
           var weekly = data.weekly;
           var scenario = data.scenario;
+          var partner = data.partner;
           var data = data.data;
           if (!data){
             cmr.showAlert('No automation data for the time period.');
@@ -293,11 +294,45 @@ var CmrMetrics = (function() {
               html += '    <canvas id="canvas-rev-'+cntry+'" style="height:400px"></canvas>';
               html += '  </div>';
               html += '</div>';
+              if (sourceSystId != '' && country == ''){
+                html += '<div class="ibm-columns" style="padding:10px">';
+                html += '  <div class="ibm-col-6-3" style="border:1px Solid #AAA;width:510px;margin-right:10px">';
+                html += '    <div class="partner-head">Average Times of Processing (hh:mm:ss)</div>';
+                html += '    <table class="partner-table">';
+                html += '      <tr>';
+                html += '        <th>Touchless Average:</th><td id="partnerTouchless">00:00:00</td>';
+                html += '      </tr>';
+                html += '      <tr>';
+                html += '        <th>Review Average:</th><td id="partnerReview">00:00:00</td>';
+                html += '      </tr>';
+                html += '      <tr>';
+                html += '        <th>Overall Average:</th><td id="partnerTotal">00:00:00</td>';
+                html += '      </tr>';
+                html += '    </table>';
+                html += '  </div>';
+                html += '</div>';
+              } 
               if (country != ''){
                 html += '<div class="ibm-columns" style="padding:10px">';
                 html += '  <div class="ibm-col-6-3" style="border:1px Solid #AAA;width:510px;margin-right:10px">';
                 html += '    <canvas id="canvas-weekly-'+cntry+'" style="height:500px"></canvas>';
                 html += '  </div>';
+                if (sourceSystId != ''){
+                  html += '  <div class="ibm-col-6-3" style="border:1px Solid #AAA;width:495px;margin-right:10px">';
+                  html += '    <div class="partner-head">Average Times of Processing</div>';
+                  html += '    <table class="partner-table">';
+                  html += '      <tr>';
+                  html += '        <th>Touchless Average:</th><td id="partnerTouchless">00:00:00</td>';
+                  html += '      </tr>';
+                  html += '      <tr>';
+                  html += '        <th>Review Average:</th><td id="partnerReview">00:00:00</td>';
+                  html += '      </tr>';
+                  html += '      <tr>';
+                  html += '        <th>Overall Average:</th><td id="partnerTotal">00:00:00</td>';
+                  html += '      </tr>';
+                  html += '    </table>';
+                  html += '  </div>';
+                }
                 html += '</div>';
                 html += '<div class="ibm-columns" style="padding:10px">';
                 html += '  <div class="ibm-col-1-1" style="border:1px Solid #AAA;width:1000px">';
@@ -800,6 +835,18 @@ var CmrMetrics = (function() {
                     
                     
               }
+              if (sourceSystId != ''){
+                var aveTouchless = partner.touchless > 0 ? partner.touchlessTotal / partner.touchless : 0;
+                aveTouchless = aveTouchless.toFixed(0);
+                var aveReview = partner.review > 0 ? partner.reviewTotal / partner.review : 0;
+                aveReview = aveReview.toFixed(0);
+                var aveTotal = partner.touchless + partner.review > 0 ? (partner.touchlessTotal + partner.reviewTotal)/(partner.touchless + partner.review) : 0;
+                aveTotal = aveTotal.toFixed(0);
+                
+                dojo.byId('partnerTouchless').innerHTML = moment.utc(aveTouchless*1000).format('H [hrs], m [mins], s [secs]');
+                dojo.byId('partnerReview').innerHTML = moment.utc(aveReview*1000).format('H [hrs], m [mins], s [secs]');
+                dojo.byId('partnerTotal').innerHTML = moment.utc(aveTotal*1000).format('H [hrs], m [mins], s [secs]');
+               }
               
             }
             
