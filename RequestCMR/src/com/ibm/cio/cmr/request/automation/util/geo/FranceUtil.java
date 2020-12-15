@@ -232,7 +232,7 @@ public class FranceUtil extends AutomationUtil {
           break;
         case SCENARIO_CROSSBORDER_COMMERCIAL:
         case SCENARIO_COMMERCIAL:
-          if (customerName.toUpperCase().equals(customerNameZI01.toUpperCase())) {
+          if (!(customerName.toUpperCase().equals(customerNameZI01.toUpperCase()))) {
             details.append("Sold-to and Installing name are not same. Request will require CMDE review before proceeding.").append("\n");
             engineData.addNegativeCheckStatus("SOLDTO_INSTALL_DIFF", "Sold-to and Installing addresses are not same.");
             return false;
