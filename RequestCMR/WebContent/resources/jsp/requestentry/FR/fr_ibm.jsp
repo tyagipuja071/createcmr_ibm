@@ -17,7 +17,7 @@
 %>
 <cmr:view forGEO="FR">
   <cmr:row addBackground="false">
-    <cmr:column span="2" containerForField="SalRepNameNo">
+    <%-- <cmr:column span="2" containerForField="SalRepNameNo">
       <p>
         <cmr:label fieldId="repTeamMemberNo">
           <cmr:fieldLabel fieldId="SalRepNameNo" />:
@@ -25,7 +25,7 @@
         </cmr:label>
         <cmr:field fieldId="SalRepNameNo" id="repTeamMemberNo" path="repTeamMemberNo" tabId="MAIN_IBM_TAB" />
       </p>
-    </cmr:column>
+    </cmr:column> --%>
     <cmr:column span="2" containerForField="SalesBusOff" >
       <p>
         <cmr:label fieldId="salesBusOffCd">
@@ -54,34 +54,25 @@
         <cmr:field path="ibmDeptCostCenter" id="ibmDeptCostCenter" fieldId="InternalDept" tabId="MAIN_IBM_TAB" />
       </p>
     </cmr:column>  
-    <cmr:column span="2" containerForField="CollectionCd">
-      <p>
-        <cmr:label fieldId="collectionCd">
-        <cmr:fieldLabel fieldId="CollectionCd" />: 
-           <cmr:delta text="${rdcdata.collectionCd}" oldValue="${reqentry.collectionCd}" id="delta-collectionCd" />
-        </cmr:label>
-        <cmr:field path="collectionCd" id="collectionCd" fieldId="CollectionCd" tabId="MAIN_IBM_TAB" />
-      </p>
-    </cmr:column>
   </cmr:row>
+ <%--    <cmr:column span="2" containerForField="PrivIndc">
   <cmr:row addBackground="true">    
-    <cmr:column span="2" containerForField="PrivIndc">
       <p>
         <cmr:label fieldId="privIndc">
           <cmr:fieldLabel fieldId="PrivIndc" />:
         </cmr:label>
         <cmr:field fieldId="PrivIndc" id="privIndc" path="privIndc" tabId="MAIN_IBM_TAB" />
       </p>
-    </cmr:column>
-    <cmr:column span="2" containerForField="DuplicateCMR">
+    </cmr:column> --%>
+<%--     <cmr:column span="2" containerForField="DuplicateCMR">
       <p>
         <cmr:label fieldId="dupCmrIndc">
           <cmr:fieldLabel fieldId="DuplicateCMR" />:
         </cmr:label>
         <cmr:field fieldId="DuplicateCMR" id="dupCmrIndc" path="dupCmrIndc" tabId="MAIN_IBM_TAB" />
       </p>
-    </cmr:column> 
-    <%
+    </cmr:column>  --%>
+    <%-- <%
       if (("U").equalsIgnoreCase(reqentry.getReqType())) {
     %>      
     <cmr:column span="2" containerForField="CommercialFinanced">
@@ -92,6 +83,7 @@
         <cmr:field fieldId="CommercialFinanced" id="commercialFinanced" path="commercialFinanced" tabId="MAIN_IBM_TAB" />
       </p>
     </cmr:column>
-    <% } %>
+    <% } %> 
   </cmr:row>  
+    --%>
 </cmr:view>
