@@ -813,6 +813,30 @@ public class LegacyDirectUtil {
     return tempList;
   }
 
+  public static List<String> addSpecialCharToLovDR(List<String> lovList, String cntry, boolean codeOnly, String fieldId) {
+    List<String> tempList = new ArrayList<String>();
+    // if (SystemLocation.UNITED_KINGDOM.equals(cntry) ||
+    // SystemLocation.IRELAND.equals(cntry)) {
+    if (FIELDS_CLEAR_LIST.contains(fieldId)) {
+      LOG.debug("***Field " + fieldId + " is on clear list. Adding '@'");
+      if (codeOnly) {
+        tempList.add("@");
+      } /*
+         * else { tempList.add("@ | Clear field"); }
+         */
+      for (String choice : lovList) {
+        tempList.add(choice);
+      }
+    } else {
+      LOG.debug("***Field " + fieldId + " is NOT on clear list. Returning ORIGINAL list.");
+      tempList = lovList;
+    }
+    // } else {
+    // tempList = lovList;
+    // }
+    return tempList;
+  }
+
   private static String validateColValFromCell(XSSFCell cell) {
     String colVal = "";
     if (cell != null) {
@@ -1422,7 +1446,7 @@ public class LegacyDirectUtil {
 
     return isDR;
   }
-  
+
   public static DataRdc getOldData(EntityManager entityManager, String reqId) {
     String sql = ExternalizedQuery.getSql("SUMMARY.OLDDATA");
     PreparedQuery query = new PreparedQuery(entityManager, sql);

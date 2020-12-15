@@ -34,6 +34,7 @@ import com.ibm.cio.cmr.request.model.ParamContainer;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.DropDownService;
+import com.ibm.cio.cmr.request.util.IERPRequestUtils;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
 
 /**
@@ -132,7 +133,12 @@ public class TemplateColumn {
         if (LegacyDirectUtil.isCountryLegacyDirectEnabled(entityManager, country)) {
           lovs = getLovs(entityManager, this.lovId, country, true);
           lovs = LegacyDirectUtil.addSpecialCharToLov(lovs, country, true, this.lovId);
-        } else {
+        } else if (IERPRequestUtils.isCountryDREnabled(entityManager, country)) {
+          lovs = getLovsDR(entityManager, this.lovId, country, true);
+          lovs = LegacyDirectUtil.addSpecialCharToLovDR(lovs, country, true, this.lovId);
+        }
+
+        else {
           lovs = getLovs(entityManager, this.lovId, country, false);
         }
 
@@ -254,10 +260,12 @@ public class TemplateColumn {
       // LOG.debug(">> cbCity > " + cbCity);
       // LOG.debug(">> localCity > " + localCity);
       // if (!StringUtils.isEmpty(cbCity) && !StringUtils.isEmpty(localCity)) {
-      // LOG.trace("Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty. >> "
+      // LOG.trace("Cross Border City and Local City must not be populated at
+      // the same time. If one is populated, the other must be empty. >> "
       // + this.label);
       // validation.addError(rowIndex, this.label,
-      // "Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty.");
+      // "Cross Border City and Local City must not be populated at the same
+      // time. If one is populated, the other must be empty.");
       // }
       // }
       //
@@ -267,10 +275,13 @@ public class TemplateColumn {
       //
       // if (!StringUtils.isEmpty(cbPostal) &&
       // !StringUtils.isEmpty(localPostal)) {
-      // LOG.trace("Cross Border Postal Code and Local Postal Code must not be populated at the same time. If one is populated, the other must be empty. >>"
+      // LOG.trace("Cross Border Postal Code and Local Postal Code must not be
+      // populated at the same time. If one is populated, the other must be
+      // empty. >>"
       // + this.label);
       // validation.addError(rowIndex, this.label,
-      // "Cross Border Postal Code and Local Postal Code must not be populated at the same time. If one is populated, the other must be empty.");
+      // "Cross Border Postal Code and Local Postal Code must not be populated
+      // at the same time. If one is populated, the other must be empty.");
       // }
       // }
 
@@ -287,16 +298,18 @@ public class TemplateColumn {
       // }
       //
       // if (markedColumnsAsDups != null && markedColumnsAsDups.size() > 1) {
-      // LOG.trace("There are fields dually marked on the template. This will be returned as an error");
+      // LOG.trace("There are fields dually marked on the template. This will be
+      // returned as an error");
       // validation.addError(rowIndex, this.label,
-      // "There are fields dually marked on the template. This will be returned as an error");
+      // "There are fields dually marked on the template. This will be returned
+      // as an error");
       // }
     }
   }
 
   @SuppressWarnings("deprecation")
-  public void validateSwiss(EntityManager entityManager, TemplateValidation validation, XSSFWorkbook book, XSSFSheet sheet, String country,
-      int colNo, int maxRows, HashMap<String, String> hwFlagMap) {
+  public void validateSwiss(EntityManager entityManager, TemplateValidation validation, XSSFWorkbook book, XSSFSheet sheet, String country, int colNo,
+      int maxRows, HashMap<String, String> hwFlagMap) {
     XSSFRow row = null;
     XSSFCell currCell = null;
     String value = null;
@@ -380,8 +393,9 @@ public class TemplateColumn {
         LOG.debug(">> localPostal > " + localPostal);
 
         if (!StringUtils.isEmpty(cbPostal) && !StringUtils.isEmpty(localPostal)) {
-          LOG.trace("Cross Border Postal Code and Local Postal Code must not be populated at the same time. If one is populated, the other must be empty. >>"
-              + this.label);
+          LOG.trace(
+              "Cross Border Postal Code and Local Postal Code must not be populated at the same time. If one is populated, the other must be empty. >>"
+                  + this.label);
           validation.addError(rowIndex, this.label,
               "Cross Border Postal Code and Local Postal Code must not be populated at the same time. If one is populated, the other must be empty.");
         }
@@ -511,8 +525,9 @@ public class TemplateColumn {
         LOG.debug(">> localPostal > " + localPostal);
 
         if (!StringUtils.isEmpty(cbPostal) && !StringUtils.isEmpty(localPostal)) {
-          LOG.trace("Cross Border Postal Code and Local Postal Code must not be populated at the same time. If one is populated, the other must be empty. >>"
-              + this.label);
+          LOG.trace(
+              "Cross Border Postal Code and Local Postal Code must not be populated at the same time. If one is populated, the other must be empty. >>"
+                  + this.label);
           validation.addError(rowIndex, this.label,
               "Cross Border Postal Code and Local Postal Code must not be populated at the same time. If one is populated, the other must be empty.");
         }
@@ -634,6 +649,27 @@ public class TemplateColumn {
         } else {
           choices.add(result[0] + " | " + result[1]);
         }
+
+      }
+    }
+    return choices;
+  }
+
+  private List<String> getLovsDR(EntityManager entityManager, String lovId, String country, boolean codeOnly) {
+    List<String> choices = new ArrayList<String>();
+    String sql = ExternalizedQuery.getSql("LOV");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("FIELD_ID", "##" + lovId);
+    query.setParameter("CMR_CNTRY", country);
+    query.setForReadOnly(true);
+    List<Object[]> results = query.getResults();
+    if (results != null && results.size() > 0) {
+      for (Object[] result : results) {
+        if (codeOnly) {
+          choices.add((String) result[0]);
+        } /*
+           * else { choices.add(result[0] + " | " + result[1]); }
+           */
 
       }
     }
