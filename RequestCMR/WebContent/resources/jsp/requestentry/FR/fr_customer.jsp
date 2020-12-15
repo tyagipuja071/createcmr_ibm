@@ -37,7 +37,7 @@
     </cmr:column>
   </cmr:row>
   <cmr:row addBackground="true">
-    <cmr:column span="2" containerForField="CurrencyCode">
+<%--     <cmr:column span="2" containerForField="CurrencyCode">
       <p>
         <cmr:label fieldId="currencyCd">
           <cmr:fieldLabel fieldId="CurrencyCode" />:
@@ -45,7 +45,7 @@
         </cmr:label>
         <cmr:field fieldId="CurrencyCode" id="currencyCd" path="currencyCd" tabId="MAIN_CUST_TAB" />
       </p>
-    </cmr:column>
+    </cmr:column> --%>
     <cmr:column span="2" containerForField="CustClass">
         <p>
           <cmr:label fieldId="custClass">
