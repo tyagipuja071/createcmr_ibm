@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.persistence.Column;
 import javax.persistence.EntityManager;
@@ -115,12 +116,15 @@ public class AutoStatsService extends BaseSimpleService<RequestStatsContainer> {
     if ("Y".equals(model.getExcludeExternal())) {
       sql += "and ( trim(nvl(admin.SOURCE_SYST_ID,'')) = '' or admin.SOURCE_SYST_ID = 'CreateCMR') ";
     }
+    if ("Y".equals(model.getExcludeChildRequests())) {
+      sql += "and not exists (select 1 from CREQCMR.ADMIN ad where ad.CHILD_REQ_ID = admin.REQ_ID) ";
+    }
 
     if (!"Y".equals(params.getParam("buildSummary"))) {
       sql += " order by admin.REQ_ID";
     }
-    sql = StringUtils.replaceOnce(sql, ":FROM", model.getDateFrom());
-    sql = StringUtils.replaceOnce(sql, ":TO", model.getDateTo());
+    sql = StringUtils.replaceOnce(sql, ":CREATE_FROM", "timestamp('" + model.getDateFrom() + " 00:00:00')");
+    sql = StringUtils.replaceOnce(sql, ":CREATE_TO", "timestamp('" + model.getDateTo() + " 23:59:59')");
 
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     // query.setParameter("GEO_CD", geo);
@@ -136,16 +140,18 @@ public class AutoStatsService extends BaseSimpleService<RequestStatsContainer> {
     container.setAutomationRecords(stats);
     if ("Y".equals(params.getParam("buildSummary"))) {
       LOG.debug("Building summary for statistics..");
-      buildSummaries(container, stats, !StringUtils.isBlank(model.getCountry()));
+      buildSummaries(container, stats, !StringUtils.isBlank(model.getCountry()), !StringUtils.isBlank(model.getSourceSystId()));
     }
     LOG.debug("Automation data retrieved.");
     return container;
   }
 
-  private void buildSummaries(RequestStatsContainer container, List<AutomationStatsModel> stats, boolean buildCountrySummary) {
+  private void buildSummaries(RequestStatsContainer container, List<AutomationStatsModel> stats, boolean buildCountrySummary,
+      boolean buildPartnerSummary) {
     Map<String, AutomationSummaryModel> generalMap = new HashMap<String, AutomationSummaryModel>();
     Map<String, Map<String, AutomationSummaryModel>> weeklyMap = new HashMap<String, Map<String, AutomationSummaryModel>>();
     Map<String, AutomationSummaryModel> scenarioMap = new HashMap<String, AutomationSummaryModel>();
+    Map<String, Long> partnerMap = new HashMap<String, Long>();
 
     for (AutomationStatsModel stat : stats) {
       if (!generalMap.containsKey(stat.getCmrIssuingCntry())) {
@@ -217,13 +223,36 @@ public class AutoStatsService extends BaseSimpleService<RequestStatsContainer> {
         if (!"Y".equals(stat.getFullAuto()) && !"Y".equals(stat.getLegacy()) && !"Y".equals(stat.getReview())) {
           summary.setNoStatus(summary.getNoStatus() + 1);
         }
+      }
 
+      if (buildPartnerSummary) {
+        if (!partnerMap.containsKey("touchless")) {
+          partnerMap.put("touchless", (long) 0);
+        }
+        if (!partnerMap.containsKey("touchlessTotal")) {
+          partnerMap.put("touchlessTotal", (long) 0);
+        }
+        if (!partnerMap.containsKey("review")) {
+          partnerMap.put("review", (long) 0);
+        }
+        if (!partnerMap.containsKey("reviewTotal")) {
+          partnerMap.put("reviewTotal", (long) 0);
+        }
+        partnerMap.put("touchless", "Y".equals(stat.getFullAuto()) ? partnerMap.get("touchless") + 1 : partnerMap.get("touchless"));
+        partnerMap.put("review", "Y".equals(stat.getReview()) ? partnerMap.get("review") + 1 : partnerMap.get("review"));
+        partnerMap.put("touchlessTotal",
+            "Y".equals(stat.getFullAuto()) ? partnerMap.get("touchlessTotal") + stat.getOverallTat() : partnerMap.get("touchlessTotal"));
+        partnerMap.put("reviewTotal",
+            "Y".equals(stat.getReview()) ? partnerMap.get("reviewTotal") + stat.getOverallTat() : partnerMap.get("reviewTotal"));
       }
     }
     container.setAutomationSummary(generalMap);
     if (buildCountrySummary) {
       container.setWeeklyAutomationSummary(weeklyMap);
       container.setScenarioSummary(scenarioMap);
+    }
+    if (buildPartnerSummary) {
+      container.setPartnerSummary(partnerMap);
     }
   }
 
@@ -431,6 +460,21 @@ public class AutoStatsService extends BaseSimpleService<RequestStatsContainer> {
         cell.setCellValue(MarketUtil.getGEO(value.toString().trim()));
       } else if ("MARKET".equals(sc.getDbField())) {
         cell.setCellValue(MarketUtil.getMarket(value.toString().trim()));
+      } else if ("PROCESS_CD".equals(sc.getDbField())) {
+        String processCd = request.getProcessCd();
+        if ("Y".equals(request.getPaygo())) {
+          processCd = extractProcessCause(request, processCd);
+        }
+        cell.setCellValue(processCd);
+      } else if ("OVERALL_TAT".equals(sc.getDbField())) {
+        Long lVal = (Long) value;
+        if (lVal != null && lVal.longValue() >= 0) {
+          long millis = lVal.longValue() * 1000;
+          String hms = String.format("%02d:%02d:%02d", TimeUnit.MILLISECONDS.toHours(millis),
+              TimeUnit.MILLISECONDS.toMinutes(millis) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millis)),
+              TimeUnit.MILLISECONDS.toSeconds(millis) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis)));
+          cell.setCellValue(hms);
+        }
       } else {
         if (value instanceof String) {
           cell.setCellValue(value.toString());
@@ -453,7 +497,7 @@ public class AutoStatsService extends BaseSimpleService<RequestStatsContainer> {
   private Object getValue(String columnName, AutomationStatsModel request) throws IllegalArgumentException, IllegalAccessException {
     Column col = null;
 
-    if ("ERROR_CHECKS".equals(columnName)) {
+    if ("ERROR_CHECKS".equals(columnName) || "PROCESS_CD".equals(columnName)) {
       if (!"Y".equals(request.getReview())) {
         return "";
       }
@@ -504,6 +548,8 @@ public class AutoStatsService extends BaseSimpleService<RequestStatsContainer> {
         "Specifies the automation element that caused automation to stop. S - System Error, P - Processing Error"));
     config.add(new StatXLSConfig("Rejected", "REJECT", 16, "Indicates whether the request was rejected by the automation engine."));
     config.add(new StatXLSConfig("Reject Reason", "REJ_REASON", 25, "Indicates whether the first rejection reason for the request."));
+    config
+        .add(new StatXLSConfig("Overall TAT", "OVERALL_TAT", 25, "Indicates the total time (hh:mm:ss) it took from request creation to completion."));
 
   }
 
