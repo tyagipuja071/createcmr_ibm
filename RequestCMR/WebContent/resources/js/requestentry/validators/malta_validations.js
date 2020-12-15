@@ -462,9 +462,11 @@ function addAttachmentValidator() {
             if (recordCount != null) {
               if (recordCount > 0) {
                 return new ValidationResult(null, true);
-              } /*else if (recordCount == 0) {
-                return new ValidationResult(null, false, 'Proof of address is mandatory.');
-              }*/
+              } /*
+                 * else if (recordCount == 0) { return new
+                 * ValidationResult(null, false, 'Proof of address is
+                 * mandatory.'); }
+                 */
             }
             break;
           }
@@ -493,9 +495,11 @@ function addAttachmentValidator() {
                 if (recordCount != null) {
                   if (recordCount > 0) {
                     return new ValidationResult(null, true);
-                  } /*else if (recordCount == 0) {
-                    return new ValidationResult(null, false, 'Proof of address is mandatory.');
-                  }*/
+                  } /*
+                     * else if (recordCount == 0) { return new
+                     * ValidationResult(null, false, 'Proof of address is
+                     * mandatory.'); }
+                     */
                 }
               } else if (importInd != 'Y') {
                 var reqId = FormManager.getActualValue('reqId');
@@ -510,9 +514,11 @@ function addAttachmentValidator() {
                 if (recordCount != null) {
                   if (recordCount > 0) {
                     return new ValidationResult(null, true);
-                  } /*else if (recordCount == 0) {
-                    return new ValidationResult(null, false, 'Proof of address is mandatory.');
-                  }*/
+                  } /*
+                     * else if (recordCount == 0) { return new
+                     * ValidationResult(null, false, 'Proof of address is
+                     * mandatory.'); }
+                     */
                 }
               } else {
                 counter = counter + 1;
@@ -521,9 +527,10 @@ function addAttachmentValidator() {
 
             if (counter > 0) {
               return new ValidationResult(null, true);
-            } /*else {
-              return new ValidationResult(null, false, 'Proof of address is mandatory.');
-            }*/
+            } /*
+               * else { return new ValidationResult(null, false, 'Proof of
+               * address is mandatory.'); }
+               */
           } else {
             return new ValidationResult(null, true);
           }
@@ -687,18 +694,13 @@ function cmrNoforProspect() {
     ifProspect = dijit.byId('prospLegalInd').get('checked') ? 'Y' : 'N';
   }
   console.log("cmrNoforProspect ifProspect:" + ifProspect);
-  if ('Y' == ifProspect) {
+  if (role == 'REQUESTER' || 'Y' == ifProspect || (role != 'REQUESTER' && cmrNO.startsWith('P'))) {
     FormManager.readOnly('cmrNo');
-  } else {
+  } else if ('Y' != ifProspect && (role == 'PROCESSOR') && reqType != 'U') {
     FormManager.enable('cmrNo');
-  }
-
-  if (role != 'REQUESTER' && cmrNO.startsWith('P')) {
+  } else {
     FormManager.readOnly('cmrNo');
-  } else {
-    FormManager.enable('cmrNo');
   }
-
 }
 
 function addAfterConfigMalta() {
