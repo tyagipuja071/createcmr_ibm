@@ -37,13 +37,15 @@ function afterConfigForFR() {
     FormManager.readOnly('abbrevLocn');
     // FormManager.readOnly('taxCd2');
     FormManager.readOnly('poBox');
-    FormManager.readOnly('embargoCd');
+    // FormManager.readOnly('embargoCd');
     // FormManager.readOnly('currencyCd');
 
     if (reqType == 'C') {
       FormManager.resetDropdownValues(FormManager.getField('taxCd2'));
       FormManager.limitDropdownValues(FormManager.getField('taxCd2'), [ '1', '0' ]);
       FormManager.setValue('taxCd2', '1');
+      
+      FormManager.readOnly('embargoCd');
     }
 
     if (reqType == 'U') {
@@ -51,6 +53,27 @@ function afterConfigForFR() {
       FormManager.enable('currencyCd');
       FormManager.enable('abbrevNm');
       FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
+      
+      FormManager.enable('embargoCd');
+      FormManager.addFormValidator((function() {
+        return {
+          validate : function() {
+            var orderBlockCd = FormManager.getActualValue('embargoCd');
+            if (orderBlockCd == '94' || orderBlockCd == '88' || orderBlockCd == '') {
+              return new ValidationResult(null, true);
+            } else {
+              return new ValidationResult({
+                id : 'embargoCd',
+                type : 'text',
+                name : 'embargoCd'
+              }, false, 'Order Block Code value should be only 94 or 88 or empty.');
+            }
+            
+            return new ValidationResult(null, true);
+          }
+        };
+      })(), 'MAIN_CUST_TAB', 'frmCMR');
+      
     }
   } else if (role == 'Processor') {
     FormManager.enable('abbrevNm');
