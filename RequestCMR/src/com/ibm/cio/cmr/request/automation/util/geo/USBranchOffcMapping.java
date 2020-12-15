@@ -43,7 +43,6 @@ public class USBranchOffcMapping {
   public static String[] INDUSTRY_1SD = { "Z" };
   public static String[] INDUSTRY_WYL = { "R", "D", "W", "T" };
   public static String[] INDUSTRY_WYR = { "F", "S", "N" };
-  public static String[] INDUSTRY_1SD = { "Z" };
   public static Map<String, List<String>> indARBOMap = new HashMap<String, List<String>>();
   public static Map<String, List<String>> stateMktgDepMap = new HashMap<String, List<String>>();
 
