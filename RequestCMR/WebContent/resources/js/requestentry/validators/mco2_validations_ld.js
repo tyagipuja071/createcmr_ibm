@@ -996,11 +996,11 @@ function addAdditionalNameStreetContPOBoxValidator() {
     return {
       validate : function() {
 
-        var isUpdate = FormManager.getActualValue('reqType') == 'U';
         var isLocalBasedOnLanded = FormManager.getActualValue('defaultLandedCountry') == FormManager.getActualValue('landCntry');
         var custSubGrp = FormManager.getActualValue('custSubGrp');
         var isGmllcScenario = custSubGrp == 'LLC' || custSubGrp == 'LLCBP' || custSubGrp == 'LLCEX';
-        if ((FormManager.getActualValue('custGrp') == 'LOCAL' || (isUpdate && isLocalBasedOnLanded)) && !isGmllcScenario) {
+        var addrType = FormManager.getActualValue('addrType');
+        if (isLocalBasedOnLanded && !(isGmllcScenario && addrType == 'ZS01')) {
           return new ValidationResult(null, true);
         }
 
@@ -1919,6 +1919,59 @@ function isVatRequired() {
   return false;
 }
 
+function addAddressGridValidatorGMLLC() {
+  console.log("addAddressGridValidatorGMLLC..............");
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        var isGmllcScenario = custSubGrp == 'LLC' || custSubGrp == 'LLCBP' || custSubGrp == 'LLCEX';
+
+        if (!isGmllcScenario) {
+          return new ValidationResult(null, true);
+        }
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+          var record = null;
+          var type = null;
+
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+            record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+            if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+              record = _allAddressData[i];
+            }
+            type = record.addrType;
+            if (typeof (type) == 'object') {
+              type = type[0];
+            }
+
+            if (type != 'ZS01') {
+              continue;
+            }
+
+            var streetCont;
+            var isAddlNameFilled = false;
+            var isStreetContPOBOXFilled = false;
+            
+            if ((record.custNm4[0] != '' && record.custNm4[0] != null)) {
+              isAddlNameFilled = true;
+            }
+
+            if ((record.addrTxt2[0] != '' && record.addrTxt2[0] != null) || (record.poBox[0] != '' && record.poBox[0] != null)) {
+              isStreetContPOBOXFilled = true;
+            }
+
+            if (isAddlNameFilled && isStreetContPOBOXFilled) {
+              return new ValidationResult(null, false,
+                  'Please update Sold-to (Main) Address. Fill-out either \'Additional Name or Address Information\' or \'Street Continuation\' and/or \'PO Box\' only.');
+            }
+          }
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
 /* End 1430539 */
 dojo.addOnLoad(function() {
   GEOHandler.MCO2 = [ '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770',
@@ -1978,6 +2031,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(clearPhoneNoFromGrid, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(clearPOBoxFromGrid, GEOHandler.MCO2);
   GEOHandler.registerValidator(addAddressGridValidatorStreetPOBox, GEOHandler.MCO2, null, true);
+  GEOHandler.registerValidator(addAddressGridValidatorGMLLC, GEOHandler.MCO2, null, true);
   GEOHandler.registerValidator(addInternalDeptNumberValidator, GEOHandler.MCO2, null, true);
   GEOHandler.registerValidator(addTaxRegFormatValidationMadagascar, [ SysLoc.MADAGASCAR ], null, true);
   GEOHandler.registerValidator(addAttachmentValidatorOnTaxRegMadagascar, [ SysLoc.MADAGASCAR ], null, true);
