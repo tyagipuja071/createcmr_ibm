@@ -241,6 +241,7 @@ var CmrMetrics = (function() {
       var country = FormManager.getActualValue('country');
       var excludeUnsubmitted = FormManager.getActualValue('excludeUnsubmitted');
       var excludeExternal = FormManager.getActualValue('excludeExternal');
+      var excludeChildRequests = FormManager.getActualValue('excludeChildRequests');
       var reqType = FormManager.getActualValue('reqType');
       var sourceSystId = FormManager.getActualValue('sourceSystId');
       
@@ -259,7 +260,8 @@ var CmrMetrics = (function() {
           excludeUnsubmitted : excludeUnsubmitted,
           excludeExternal : excludeExternal,
           reqType : reqType,
-          sourceSystId : sourceSystId
+          sourceSystId : sourceSystId,
+          excludeChildRequests : excludeChildRequests
         },
         timeout : 180000,
         sync : false,
