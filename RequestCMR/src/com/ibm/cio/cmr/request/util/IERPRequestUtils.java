@@ -41,6 +41,23 @@ public class IERPRequestUtils extends RequestUtils {
   private static String emailTemplate = null;
   private static String batchemailTemplate = null;
 
+  private static final List<String> FIELDS_CLEAR_LIST = new ArrayList<String>();
+
+  static {
+    // FIELDS_CLEAR_LIST.add("CollectionCd");
+    // FIELDS_CLEAR_LIST.add("SpecialTaxCd");
+    // FIELDS_CLEAR_LIST.add("ModeOfPayment");
+    // FIELDS_CLEAR_LIST.add("CrosSubTyp");
+    // FIELDS_CLEAR_LIST.add("TipoCliente");
+    // FIELDS_CLEAR_LIST.add("CommercialFinanced");
+    FIELDS_CLEAR_LIST.add("EmbargoCode");
+    // FIELDS_CLEAR_LIST.add("Enterprise");
+    // FIELDS_CLEAR_LIST.add("TypeOfCustomer");
+    // FIELDS_CLEAR_LIST.add("CodFlag");
+
+    // LD_BYPASS_MASS_UPDT_DUP_FILLS_VAL.add("758");
+  }
+
   public static boolean isCountryDREnabled(EntityManager entityManager, String cntry) {
 
     if (entityManager == null) {
@@ -70,6 +87,51 @@ public class IERPRequestUtils extends RequestUtils {
     }
 
     return isDR;
+  }
+
+  public static List<String> getLovsDR(EntityManager entityManager, String lovId, String country, boolean codeOnly) {
+    List<String> choices = new ArrayList<String>();
+    String sql = ExternalizedQuery.getSql("LOV");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("FIELD_ID", "##" + lovId);
+    query.setParameter("CMR_CNTRY", country);
+    query.setForReadOnly(true);
+    List<Object[]> results = query.getResults();
+    if (results != null && results.size() > 0) {
+      for (Object[] result : results) {
+        if (codeOnly) {
+          choices.add((String) result[0]);
+        } /*
+           * else { choices.add(result[0] + " | " + result[1]); }
+           */
+
+      }
+    }
+    return choices;
+  }
+
+  public static List<String> addSpecialCharToLovDR(List<String> lovList, String cntry, boolean codeOnly, String fieldId) {
+    List<String> tempList = new ArrayList<String>();
+    // if (SystemLocation.UNITED_KINGDOM.equals(cntry) ||
+    // SystemLocation.IRELAND.equals(cntry)) {
+    if (FIELDS_CLEAR_LIST.contains(fieldId)) {
+      LOG.debug("***Field " + fieldId + " is on clear list. Adding '@'");
+      if (codeOnly) {
+        tempList.add("@");
+      } /*
+         * else { tempList.add("@ | Clear field"); }
+         */
+      for (String choice : lovList) {
+        tempList.add(choice);
+      }
+    } else {
+      LOG.debug("***Field " + fieldId + " is NOT on clear list. Returning ORIGINAL list.");
+      tempList = lovList;
+    }
+    // } else {
+    // tempList = lovList;
+    // }
+    return tempList;
   }
 
   public static void validateMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country) {
