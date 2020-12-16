@@ -258,12 +258,10 @@ public class TemplateColumn {
       // LOG.debug(">> cbCity > " + cbCity);
       // LOG.debug(">> localCity > " + localCity);
       // if (!StringUtils.isEmpty(cbCity) && !StringUtils.isEmpty(localCity)) {
-      // LOG.trace("Cross Border City and Local City must not be populated at
-      // the same time. If one is populated, the other must be empty. >> "
+      // LOG.trace("Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty. >> "
       // + this.label);
       // validation.addError(rowIndex, this.label,
-      // "Cross Border City and Local City must not be populated at the same
-      // time. If one is populated, the other must be empty.");
+      // "Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty.");
       // }
       // }
       //
@@ -301,8 +299,7 @@ public class TemplateColumn {
   }
 
   @SuppressWarnings("deprecation")
-  public void validateSwiss(EntityManager entityManager, TemplateValidation validation, XSSFWorkbook book, XSSFSheet sheet, String country, int colNo,
-      int maxRows, HashMap<String, String> hwFlagMap) {
+  public void validateSwiss(EntityManager entityManager, TemplateValidation validation, XSSFWorkbook book, XSSFSheet sheet, String country, int colNo, int maxRows, HashMap<String, String> hwFlagMap) {
     XSSFRow row = null;
     XSSFCell currCell = null;
     String value = null;
