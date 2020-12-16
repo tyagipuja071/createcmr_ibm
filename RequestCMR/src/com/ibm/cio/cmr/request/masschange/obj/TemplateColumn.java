@@ -299,7 +299,8 @@ public class TemplateColumn {
   }
 
   @SuppressWarnings("deprecation")
-  public void validateSwiss(EntityManager entityManager, TemplateValidation validation, XSSFWorkbook book, XSSFSheet sheet, String country, int colNo, int maxRows, HashMap<String, String> hwFlagMap) {
+  public void validateSwiss(EntityManager entityManager, TemplateValidation validation, XSSFWorkbook book, XSSFSheet sheet, String country, 
+      int colNo, int maxRows, HashMap<String, String> hwFlagMap) {
     XSSFRow row = null;
     XSSFCell currCell = null;
     String value = null;
@@ -384,7 +385,7 @@ public class TemplateColumn {
 
         if (!StringUtils.isEmpty(cbPostal) && !StringUtils.isEmpty(localPostal)) {
           LOG.trace("Cross Border Postal Code and Local Postal Code must not be populated at the same time. If one is populated, the other must be empty. >>"
-                  + this.label);
+                 + this.label);
           validation.addError(rowIndex, this.label,
               "Cross Border Postal Code and Local Postal Code must not be populated at the same time. If one is populated, the other must be empty.");
         }
@@ -515,7 +516,7 @@ public class TemplateColumn {
 
         if (!StringUtils.isEmpty(cbPostal) && !StringUtils.isEmpty(localPostal)) {
           LOG.trace("Cross Border Postal Code and Local Postal Code must not be populated at the same time. If one is populated, the other must be empty. >>"
-                  + this.label);
+                 + this.label);
           validation.addError(rowIndex, this.label,
               "Cross Border Postal Code and Local Postal Code must not be populated at the same time. If one is populated, the other must be empty.");
         }
