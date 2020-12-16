@@ -644,8 +644,6 @@ public class TemplateColumn {
     return choices;
   }
 
-
-
   /**
    * Retrieves the BDS choices given the Field ID and Issuing Country
    * 
