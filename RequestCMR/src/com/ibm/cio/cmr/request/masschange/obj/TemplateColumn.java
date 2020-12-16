@@ -273,13 +273,10 @@ public class TemplateColumn {
       //
       // if (!StringUtils.isEmpty(cbPostal) &&
       // !StringUtils.isEmpty(localPostal)) {
-      // LOG.trace("Cross Border Postal Code and Local Postal Code must not be
-      // populated at the same time. If one is populated, the other must be
-      // empty. >>"
+      // LOG.trace("Cross Border Postal Code and Local Postal Code must not be populated at the same time. If one is populated, the other must be empty. >>"
       // + this.label);
       // validation.addError(rowIndex, this.label,
-      // "Cross Border Postal Code and Local Postal Code must not be populated
-      // at the same time. If one is populated, the other must be empty.");
+      // "Cross Border Postal Code and Local Postal Code must not be populated at the same time. If one is populated, the other must be empty.");
       // }
       // }
 
@@ -296,11 +293,9 @@ public class TemplateColumn {
       // }
       //
       // if (markedColumnsAsDups != null && markedColumnsAsDups.size() > 1) {
-      // LOG.trace("There are fields dually marked on the template. This will be
-      // returned as an error");
+      // LOG.trace("There are fields dually marked on the template. This will be returned as an error");
       // validation.addError(rowIndex, this.label,
-      // "There are fields dually marked on the template. This will be returned
-      // as an error");
+      // "There are fields dually marked on the template. This will be returned as an error");
       // }
     }
   }
