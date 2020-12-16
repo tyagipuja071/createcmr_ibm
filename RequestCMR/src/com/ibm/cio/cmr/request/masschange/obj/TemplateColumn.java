@@ -134,8 +134,8 @@ public class TemplateColumn {
           lovs = getLovs(entityManager, this.lovId, country, true);
           lovs = LegacyDirectUtil.addSpecialCharToLov(lovs, country, true, this.lovId);
         } else if (IERPRequestUtils.isCountryDREnabled(entityManager, country)) {
-          lovs = getLovsDR(entityManager, this.lovId, country, true);
-          lovs = LegacyDirectUtil.addSpecialCharToLovDR(lovs, country, true, this.lovId);
+          lovs = IERPRequestUtils.getLovsDR(entityManager, this.lovId, country, true);
+          lovs = IERPRequestUtils.addSpecialCharToLovDR(lovs, country, true, this.lovId);
         }
 
         else {
@@ -655,26 +655,7 @@ public class TemplateColumn {
     return choices;
   }
 
-  private List<String> getLovsDR(EntityManager entityManager, String lovId, String country, boolean codeOnly) {
-    List<String> choices = new ArrayList<String>();
-    String sql = ExternalizedQuery.getSql("LOV");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("FIELD_ID", "##" + lovId);
-    query.setParameter("CMR_CNTRY", country);
-    query.setForReadOnly(true);
-    List<Object[]> results = query.getResults();
-    if (results != null && results.size() > 0) {
-      for (Object[] result : results) {
-        if (codeOnly) {
-          choices.add((String) result[0]);
-        } /*
-           * else { choices.add(result[0] + " | " + result[1]); }
-           */
 
-      }
-    }
-    return choices;
-  }
 
   /**
    * Retrieves the BDS choices given the Field ID and Issuing Country
