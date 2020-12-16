@@ -391,8 +391,7 @@ public class TemplateColumn {
         LOG.debug(">> localPostal > " + localPostal);
 
         if (!StringUtils.isEmpty(cbPostal) && !StringUtils.isEmpty(localPostal)) {
-          LOG.trace(
-              "Cross Border Postal Code and Local Postal Code must not be populated at the same time. If one is populated, the other must be empty. >>"
+          LOG.trace("Cross Border Postal Code and Local Postal Code must not be populated at the same time. If one is populated, the other must be empty. >>"
                   + this.label);
           validation.addError(rowIndex, this.label,
               "Cross Border Postal Code and Local Postal Code must not be populated at the same time. If one is populated, the other must be empty.");
@@ -523,8 +522,7 @@ public class TemplateColumn {
         LOG.debug(">> localPostal > " + localPostal);
 
         if (!StringUtils.isEmpty(cbPostal) && !StringUtils.isEmpty(localPostal)) {
-          LOG.trace(
-              "Cross Border Postal Code and Local Postal Code must not be populated at the same time. If one is populated, the other must be empty. >>"
+          LOG.trace("Cross Border Postal Code and Local Postal Code must not be populated at the same time. If one is populated, the other must be empty. >>"
                   + this.label);
           validation.addError(rowIndex, this.label,
               "Cross Border Postal Code and Local Postal Code must not be populated at the same time. If one is populated, the other must be empty.");
