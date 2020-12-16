@@ -943,4 +943,8 @@ public abstract class GEOHandler {
     return null;
   }
 
+  public boolean enableTempReactivateOnUpdate() {
+    return false;
+  }
+
 }

@@ -912,5 +912,5 @@ public class CmrConstants {
   public static final int LD_MASS_UPDATE_UPPER_LIMIT = 40;
   public static final List<String> DE_CND_ISSUING_COUNTRY_VAL = Arrays.asList("724", "619", "621", "627", "647", "791", "640", "759", "839", "843",
       "859");
-
+  public static final List<String> ORDER_BLK_LIST = Arrays.asList("88");
 }
