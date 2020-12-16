@@ -22,7 +22,6 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.CmrException;
-import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
@@ -40,10 +39,6 @@ import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.SystemLocation;
-import com.ibm.cmr.services.client.CmrServicesFactory;
-import com.ibm.cmr.services.client.QueryClient;
-import com.ibm.cmr.services.client.query.QueryRequest;
-import com.ibm.cmr.services.client.query.QueryResponse;
 import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
 
 /**
@@ -634,16 +629,19 @@ public class MaltaHandler extends BaseSOFHandler {
     data.setLegacyCurrencyCd(this.currentImportValues.get("CurrencyCode"));
     LOG.trace("Currency: " + data.getLegacyCurrencyCd());
 
-    // MCO Africa - For SBO values exceeding 4 char length
-    String sBO = this.currentImportValues.get("SBO");
-    if (!(StringUtils.isEmpty(sBO))) {
-      if (sBO.length() > 4) {
-        data.setSalesBusOffCd(sBO.substring(0, 4));
+    // MALTA - For SBO values exceeding 4 char length
+    if (!(StringUtils.isEmpty(mainRecord.getCmrSortl()))) {
+      if (mainRecord.getCmrSortl().length() > 4) {
+        data.setSalesBusOffCd(mainRecord.getCmrSortl().substring(0, 4));
       }
     }
 
     data.setEmbargoCd(this.currentImportValues.get("EmbargoCode"));
     LOG.trace("EmbargoCode: " + data.getEmbargoCd());
+
+    if (!(StringUtils.isEmpty(data.getAbbrevLocn()))) {
+      data.setAbbrevLocn(data.getAbbrevLocn());
+    }
 
     data.setInstallBranchOff("");
     data.setSpecialTaxCd("");
@@ -659,7 +657,6 @@ public class MaltaHandler extends BaseSOFHandler {
   @Override
   public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo) throws Exception {
     if (currentRecord != null) {
-      String spid = "";
       address.setCustNm1(currentRecord.getCmrName1Plain());
       address.setCustNm2(currentRecord.getCmrName2Plain());
       address.setCustNm3(currentRecord.getCmrName3());
@@ -670,47 +667,15 @@ public class MaltaHandler extends BaseSOFHandler {
         address.setPoBox(currentRecord.getCmrPOBox().substring(0, 10));
       }
 
-      address.setTransportZone("");
-      if (CmrConstants.REQ_TYPE_UPDATE.equalsIgnoreCase(admin.getReqType())) {
-        address.getId().setAddrSeq(currentRecord.getCmrAddrSeq());
-        spid = getRDcIerpSitePartyId(currentRecord.getCmrSapNumber());
-        address.setIerpSitePrtyId(spid);
-      } else {
-        String addrSeq = address.getId().getAddrSeq();
-        addrSeq = StringUtils.leftPad(addrSeq, 5, '0');
-        address.getId().setAddrSeq(addrSeq);
-        address.setIerpSitePrtyId(spid);
+      if (!(StringUtils.isEmpty(currentRecord.getCmrSitePartyID()))) {
+        address.setIerpSitePrtyId(currentRecord.getCmrSitePartyID());
       }
+
+      address.setTransportZone("");
+      String addrSeq = address.getId().getAddrSeq();
+      addrSeq = StringUtils.leftPad(addrSeq, 5, '0');
+      address.getId().setAddrSeq(addrSeq);
     }
-  }
-
-  private String getRDcIerpSitePartyId(String kunnr) throws Exception {
-    String spid = "";
-
-    String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
-    String mandt = SystemConfiguration.getValue("MANDT");
-    String sql = ExternalizedQuery.getSql("GET.IERP.BRAN5");
-    sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
-    sql = StringUtils.replace(sql, ":KUNNR", "'" + kunnr + "'");
-    String dbId = QueryClient.RDC_APP_ID;
-
-    QueryRequest query = new QueryRequest();
-    query.setSql(sql);
-    query.addField("BRAN5");
-    query.addField("MANDT");
-    query.addField("KUNNR");
-
-    LOG.debug("Getting existing BRAN5 value from RDc DB..");
-    QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
-    QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
-
-    if (response.isSuccess() && response.getRecords() != null && response.getRecords().size() != 0) {
-      List<Map<String, Object>> records = response.getRecords();
-      Map<String, Object> record = records.get(0);
-      spid = record.get("BRAN5") != null ? record.get("BRAN5").toString() : "";
-      LOG.debug("***RETURNING BRAN5 > " + spid + " WHERE KUNNR IS > " + kunnr);
-    }
-    return spid;
   }
 
   @Override

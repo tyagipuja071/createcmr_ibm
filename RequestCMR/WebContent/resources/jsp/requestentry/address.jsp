@@ -326,6 +326,10 @@ visibility: hidden !IMPORTANT;
           <cmr:gridCol width="70px" field="ierpSitePrtyId" header="${ui.grid.ierpSitePrtyId}" />
         </cmr:view>
         
+        <cmr:view forCountry="780">
+          <cmr:gridCol width="70px" field="ierpSitePrtyId" header="${ui.grid.ierpSitePrtyId}" />
+        </cmr:view>
+        
         <cmr:view forGEO="SWISS">
           <cmr:gridCol width="70px" field="custNm4" header="${ui.grid.custNm4}" />
           <cmr:gridCol width="70px" field="custNm3" header="${ui.grid.custNm3}" />
