@@ -136,9 +136,7 @@ public class TemplateColumn {
         } else if (IERPRequestUtils.isCountryDREnabled(entityManager, country)) {
           lovs = IERPRequestUtils.getLovsDR(entityManager, this.lovId, country, true);
           lovs = IERPRequestUtils.addSpecialCharToLovDR(lovs, country, true, this.lovId);
-        }
-
-        else {
+        } else {
           lovs = getLovs(entityManager, this.lovId, country, false);
         }
 
