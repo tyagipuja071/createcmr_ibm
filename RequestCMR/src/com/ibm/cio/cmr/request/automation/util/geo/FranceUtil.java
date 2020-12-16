@@ -335,29 +335,38 @@ public class FranceUtil extends AutomationUtil {
     details.append("\n");
     if (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && CalculateCoverageElement.COV_BG.equals(covFrom)) {
       // If calculated using buying group then skip any other calculation
-      FieldResultKey sboKey = new FieldResultKey("DATA", "SALES_BO_CD");
-      String sboValue = "";
-      if (overrides.getData().containsKey(sboKey)) {
-        sboValue = overrides.getData().get(sboKey).getNewValue();
-        if (StringUtils.isNotBlank(data.getCustGrp()) && !"CROSS".equals(data.getCustGrp())) {
-          overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(), sboValue);
-        } else if (StringUtils.isNotBlank(data.getCustGrp()) && "CROSS".equals(data.getCustGrp())
-            && (StringUtils.isBlank(data.getIsuCd()) || (StringUtils.isNotBlank(data.getIsuCd()) && !"200".equals(data.getIsuCd())))) {
-          overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(), "200");
-        }
-      } else {
-        sboValue = getSBOfromCoverage(entityManager, container.getFinalCoverage());
-        if (StringUtils.isNotBlank(sboValue)) {
-          details.append("SORTL calculated on basis of Existing CMR Data: " + sboValue);
-          if (StringUtils.isNotBlank(data.getCustGrp()) && !"CROSS".equals(data.getCustGrp())) {
-            overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(), sboValue);
-          } else if (StringUtils.isNotBlank(data.getCustGrp()) && "CROSS".equals(data.getCustGrp())
-              && (StringUtils.isBlank(data.getIsuCd()) || (StringUtils.isNotBlank(data.getIsuCd()) && !"200".equals(data.getIsuCd())))) {
-            overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(), "200");
-          }
-          overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sboValue);
-        }
-      }
+      /*
+       * FieldResultKey sboKey = new FieldResultKey("DATA", "SALES_BO_CD");
+       * String sboValue = ""; if (overrides.getData().containsKey(sboKey)) {
+       * sboValue = overrides.getData().get(sboKey).getNewValue(); if
+       * (StringUtils.isNotBlank(data.getCustGrp()) &&
+       * !"CROSS".equals(data.getCustGrp())) {
+       * overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA",
+       * "INSTALL_BRANCH_OFF", data.getInstallBranchOff(), sboValue); } else if
+       * (StringUtils.isNotBlank(data.getCustGrp()) &&
+       * "CROSS".equals(data.getCustGrp()) &&
+       * (StringUtils.isBlank(data.getIsuCd()) ||
+       * (StringUtils.isNotBlank(data.getIsuCd()) &&
+       * !"200".equals(data.getIsuCd())))) {
+       * overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA",
+       * "INSTALL_BRANCH_OFF", data.getInstallBranchOff(), "200"); } } else {
+       * sboValue = getSBOfromCoverage(entityManager,
+       * container.getFinalCoverage()); if (StringUtils.isNotBlank(sboValue)) {
+       * details.append("SORTL calculated on basis of Existing CMR Data: " +
+       * sboValue); if (StringUtils.isNotBlank(data.getCustGrp()) &&
+       * !"CROSS".equals(data.getCustGrp())) {
+       * overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA",
+       * "INSTALL_BRANCH_OFF", data.getInstallBranchOff(), sboValue); } else if
+       * (StringUtils.isNotBlank(data.getCustGrp()) &&
+       * "CROSS".equals(data.getCustGrp()) &&
+       * (StringUtils.isBlank(data.getIsuCd()) ||
+       * (StringUtils.isNotBlank(data.getIsuCd()) &&
+       * !"200".equals(data.getIsuCd())))) {
+       * overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA",
+       * "INSTALL_BRANCH_OFF", data.getInstallBranchOff(), "200"); }
+       * overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA",
+       * "SALES_BO_CD", data.getSalesBusOffCd(), sboValue); } }
+       */
       engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
     } else {
       isCoverageCalculated = false;
@@ -381,22 +390,40 @@ public class FranceUtil extends AutomationUtil {
           String sboValue = "";
           if (overrides.getData().containsKey(sboKey)) {
             sboValue = overrides.getData().get(sboKey).getNewValue();
-            if (StringUtils.isNotBlank(data.getCustGrp()) && !"CROSS".equals(data.getCustGrp())) {
-              overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(), sboValue);
-            } else if (StringUtils.isNotBlank(data.getCustGrp()) && "CROSS".equals(data.getCustGrp())
-                && (StringUtils.isBlank(data.getIsuCd()) || (StringUtils.isNotBlank(data.getIsuCd()) && !"200".equals(data.getIsuCd())))) {
-              overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(), "200");
-            }
+            overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(), sboValue);
+            /*
+             * if (StringUtils.isNotBlank(data.getCustGrp()) &&
+             * !"CROSS".equals(data.getCustGrp())) {
+             * overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV,
+             * "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(),
+             * sboValue); } else if (StringUtils.isNotBlank(data.getCustGrp())
+             * && "CROSS".equals(data.getCustGrp()) &&
+             * (StringUtils.isBlank(data.getIsuCd()) ||
+             * (StringUtils.isNotBlank(data.getIsuCd()) &&
+             * !"200".equals(data.getIsuCd())))) {
+             * overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV,
+             * "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(), "200");
+             * }
+             */
           } else {
             sboValue = getSBOfromCoverage(entityManager, coverage.getFinalCoverage());
             if (StringUtils.isNotBlank(sboValue)) {
               details.append("SORTL calculated on basis of Existing CMR Data: " + sboValue);
-              if (StringUtils.isNotBlank(data.getCustGrp()) && !"CROSS".equals(data.getCustGrp())) {
-                overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(), sboValue);
-              } else if (StringUtils.isNotBlank(data.getCustGrp()) && "CROSS".equals(data.getCustGrp())
-                  && (StringUtils.isBlank(data.getIsuCd()) || (StringUtils.isNotBlank(data.getIsuCd()) && !"200".equals(data.getIsuCd())))) {
-                overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(), "200");
-              }
+              overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(), sboValue);
+              /*
+               * if (StringUtils.isNotBlank(data.getCustGrp()) &&
+               * !"CROSS".equals(data.getCustGrp())) {
+               * overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV,
+               * "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(),
+               * sboValue); } else if (StringUtils.isNotBlank(data.getCustGrp())
+               * && "CROSS".equals(data.getCustGrp()) &&
+               * (StringUtils.isBlank(data.getIsuCd()) ||
+               * (StringUtils.isNotBlank(data.getIsuCd()) &&
+               * !"200".equals(data.getIsuCd())))) {
+               * overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV,
+               * "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(),
+               * "200"); }
+               */
               overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sboValue);
             }
           }
@@ -423,13 +450,21 @@ public class FranceUtil extends AutomationUtil {
             switch (response.get(MATCHING)) {
             case "Exact Match":
               overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), response.get(SBO));
-              if (StringUtils.isNotBlank(data.getCustGrp()) && !"CROSS".equals(data.getCustGrp())) {
-                overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(),
-                    response.get(SBO));
-              } else if (StringUtils.isNotBlank(data.getCustGrp()) && "CROSS".equals(data.getCustGrp())
-                  && (StringUtils.isBlank(data.getIsuCd()) || (StringUtils.isNotBlank(data.getIsuCd()) && !"200".equals(data.getIsuCd())))) {
-                overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(), "200");
-              }
+              /*
+               * if (StringUtils.isNotBlank(data.getCustGrp()) &&
+               * !"CROSS".equals(data.getCustGrp())) {
+               * overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV,
+               * "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(),
+               * response.get(SBO)); } else if
+               * (StringUtils.isNotBlank(data.getCustGrp()) &&
+               * "CROSS".equals(data.getCustGrp()) &&
+               * (StringUtils.isBlank(data.getIsuCd()) ||
+               * (StringUtils.isNotBlank(data.getIsuCd()) &&
+               * !"200".equals(data.getIsuCd())))) {
+               * overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV,
+               * "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(),
+               * "200"); }
+               */
               details.append("Coverage calculation Successful.").append("\n");
               details.append("Computed SBO = " + response.get(SBO)).append("\n\n");
               details.append("Matched Rule:").append("\n");
@@ -734,16 +769,18 @@ public class FranceUtil extends AutomationUtil {
             }
           }
           break;
-        case "Collection Code":
-          if ((StringUtils.isBlank(updatedDataModel.getOldData()) && StringUtils.isNotBlank(updatedDataModel.getNewData()))
-              || (StringUtils.isNotBlank(updatedDataModel.getOldData()) && StringUtils.isNotBlank(updatedDataModel.getNewData()))) {
-            if (!"AR".equalsIgnoreCase(admin.getRequestingLob())) {
-              hasNegativeCheck = true;
-              failedChecks.put(field, field + " updated. Updates to " + field + " needs verification.");
-              LOG.debug("Updates to Collection Code need verification.");
-            }
-          }
-          break;
+        /*
+         * case "Collection Code": if
+         * ((StringUtils.isBlank(updatedDataModel.getOldData()) &&
+         * StringUtils.isNotBlank(updatedDataModel.getNewData())) ||
+         * (StringUtils.isNotBlank(updatedDataModel.getOldData()) &&
+         * StringUtils.isNotBlank(updatedDataModel.getNewData()))) { if
+         * (!"AR".equalsIgnoreCase(admin.getRequestingLob())) { hasNegativeCheck
+         * = true; failedChecks.put(field, field + " updated. Updates to " +
+         * field + " needs verification.");
+         * LOG.debug("Updates to Collection Code need verification."); } }
+         * break;
+         */
         case "Top List Speciale":
           String designatedUser = SystemParameters.getString("TOP_LST_SPECI_USER");
           if (!admin.getRequesterId().equalsIgnoreCase(designatedUser)) {
@@ -846,12 +883,13 @@ public class FranceUtil extends AutomationUtil {
       }
     }
 
-    if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZD02.toString())) {
-      if (!"IGF".equalsIgnoreCase(admin.getRequestingLob()) && !(newAbbNm.contains("DF") && oldAbbNm.contains("D3"))) {
-        hasNegativeCheck = true;
-        failedChecks.put("H_ADDR_UPDTD", "Address H updated, Requesting LOB should be IGF.");
-      }
-    }
+    /*
+     * if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZD02.toString())) {
+     * if (!"IGF".equalsIgnoreCase(admin.getRequestingLob()) &&
+     * !(newAbbNm.contains("DF") && oldAbbNm.contains("D3"))) { hasNegativeCheck
+     * = true; failedChecks.put("H_ADDR_UPDTD",
+     * "Address H updated, Requesting LOB should be IGF."); } }
+     */
 
     if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZS01.toString()) || addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZP02.toString())) {
       List<Addr> addrsToChk = new ArrayList<Addr>();
