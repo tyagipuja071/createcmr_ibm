@@ -327,6 +327,7 @@ function initGenericTemplateHandler() {
       if (_delayedLoadComplete) {
         var val = FormManager.getActualValue('custSubGrp');
         if (val != '') {
+          console.log('filling request entry..')
           TemplateService.fill('reqentry');
         }
       }
@@ -830,6 +831,29 @@ function addDPLAssessmentValidator() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
+/**
+ * Validator for the DPL Assessment
+ */
+function addDPLAssessmentValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var dplResult = FormManager.getActualValue('dplChkResult').toUpperCase();
+        if (dplResult != 'AF' && dplResult != 'SF'){
+          return new ValidationResult(null, true);
+        }
+        var result = typeof(_pagemodel) != 'undefined' ? _pagemodel.intDplAssessmentResult : 'X';
+        if (!result || result.trim() == '') {
+          return new ValidationResult(null, false, 'DPL Assessment is required for failed DPL checks. ');
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
+
 /* Register WW Validators */
 dojo.addOnLoad(function() {
   console.log('adding WW validators...');
@@ -839,7 +863,7 @@ dojo.addOnLoad(function() {
       '717', '718', '725', '745', '753', '764', '769', '770', '780', '782', '804', '810', '825', '827', '831', '833', '835', '840', '841', '842', '851', '857', '876', '879', '880', '881', '883',
       '758', '706', '760', '613', '655', '663', '681', '683', '731', '735', '781', '799', '811', '813', '829', '869', '871', '358', '359', '363', '603', '607', '620', '626', '644', '642', '651',
       '668', '677', '680', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '752', '762', '767', '768', '772', '787', '805', '808', '820', '821', '823', '826', '832', '849',
-      '850', '865', '889', '618', '641', '846', '806', '702', '678', '624', '788', '848', '729' ];
+      '850', '865', '889', '618', '641', '846', '806', '702', '678', '624', '788', '848', '649', '729' ];
   GEOHandler.COUNTRIES_FOR_GEN_TEMPLATE_CRSSBORDER = [ '631', '866', '754', '724', '666', '726', '862', '755', '616', '615', '643', '738', '744', '749', '736', '778', '796', '818', '834', '652',
       '856', '852', '790', '822', '838', '815', '661', '629', '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718',
       '725', '745', '753', '764', '769', '770', '780', '782', '804', '810', '825', '827', '831', '833', '835', '840', '841', '842', '851', '857', '876', '879', '880', '881', '883', '613', '655',
@@ -872,7 +896,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addSoldToValidator, [ '897', '755', '726', '866', '754', '862', '666', '822', '838', '864', '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667',
       '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770', '780', '782', '804', '810', '825', '827', '831', '833', '835', '840', '841', '842', '851',
       '857', '876', '879', '880', '881', '883', '358', '359', '363', '603', '607', '620', '626', '644', '642', '651', '668', '677', '680', '693', '694', '695', '699', '704', '705', '707', '708',
-      '740', '741', '752', '762', '767', '768', '772', '787', '805', '808', '820', '821', '823', '826', '832', '849', '850', '865', '889', '618', '758', '760', '848', '729' ], null, false, true);
+      '740', '741', '752', '762', '767', '768', '772', '787', '805', '808', '820', '821', '823', '826', '832', '849', '850', '865', '889', '618', '758', '760', '848', '649', '729' ], null, false, true);
   GEOHandler.registerWWValidator(addAddrStdValidator);
   // exclude for LA
   GEOHandler.registerWWValidator(addTaxCodesValidator, GEOHandler.LA, null, false, true);

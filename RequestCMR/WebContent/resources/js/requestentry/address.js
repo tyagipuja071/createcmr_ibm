@@ -1755,15 +1755,12 @@ function applyAddrChangesModal_onLoad() {
 
       // update TR
       // Rollback TR change
-      /* Removed for Cyprus
-       * if ((SysLoc.CYPRUS == cntry) && reqType == 'C' && type.ret1 == 'ZD01')
-         {
-          break;
-         }
-       */     
-      
-      // update For TR
+      /*
+       * Removed for Cyprus if ((SysLoc.CYPRUS == cntry) && reqType == 'C' &&
+       * type.ret1 == 'ZD01') { break; }
+       */
 
+      // update For TR
       if (SysLoc.TURKEY == cntry && type.ret1 == 'ZP01') {
         if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZS01') {
           continue;
@@ -2784,11 +2781,9 @@ function doValidateSave() {
 
 }
 
-
-function openDPLSearch(){
+function openDPLSearch() {
   var reqId = FormManager.getActualValue('reqId');
-  WindowMgr.open('DPLSEARCH', 'DPLSEARCH'+reqId, 'dpl/request?reqId='+reqId, null,
-      550);
+  WindowMgr.open('DPLSEARCH', 'DPLSEARCH' + reqId, 'dpl/request?reqId=' + reqId, null, 550);
 }
 
 function doDplSearchRequest() {

@@ -276,6 +276,8 @@ div#cmr-info-box, div#cmr-error-box, div#cmr-validation-box {
     <cmr:modelAction formName="frmCMR" />
     <form:hidden path="fromUrl" id="fromUrl" />
     <form:hidden path="userRole" />
+    <form:hidden id="overallStatus" path="overallStatus" />
+    <form:hidden id="lockByNm" path="lockByNm" />
     <form:hidden path="claimRole" />
     <form:hidden path="redirectUrl" />
     <form:hidden path="saveRejectScore" />
@@ -380,13 +382,15 @@ div#cmr-info-box, div#cmr-error-box, div#cmr-validation-box {
     <form:hidden path="oldCustNm1" />
     <form:hidden path="oldCustNm2" />
     <form:hidden path="delInd" />
-    <form:hidden path="modelCmrNo" />
+    <cmr:view exceptForCountry="649">
+    	<form:hidden path="modelCmrNo"/>
+    </cmr:view>
     <form:hidden path="approvalResult" />
     
     
 	<form:hidden path="dupCmrReason"/>
 
-
+    
     <cmr:view forCountry="760">
       <form:hidden path="custType" />
     </cmr:view>
@@ -400,6 +404,12 @@ div#cmr-info-box, div#cmr-error-box, div#cmr-validation-box {
     </cmr:view>
       <form:hidden path="paygoProcessIndc" />
 	
+    <%-- Canada Handling --%>
+    <cmr:view exceptForCountry="649">
+      <form:hidden path="invoiceDistCd" />
+      <form:hidden path="cusInvoiceCopies" />
+    </cmr:view>
+    
     <!-- Your Actions Dropdown -->
     <div title="Your Actions" id="cmr-your-actions" class="cmr-actions ${yourActionsViewOnly == true ? " view-only" : " cmr-actions-locked"}" style="display: none">
       <c:if test="${sourceSystem != null }">
