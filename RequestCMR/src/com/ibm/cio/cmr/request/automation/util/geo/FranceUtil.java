@@ -3,9 +3,11 @@ package com.ibm.cio.cmr.request.automation.util.geo;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 
@@ -71,6 +73,8 @@ public class FranceUtil extends AutomationUtil {
   private static final String MATCHING = "matching";
   private static final String POSTAL_CD_STARTS = "postalCdStarts";
   private static final String SBO = "sbo";
+  private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Att. Person", "Phone #", "Contact Person",
+      "Customer Name/ Additional Address Information");
 
   @SuppressWarnings("unchecked")
   public FranceUtil() {
@@ -693,251 +697,240 @@ public class FranceUtil extends AutomationUtil {
   @Override
   public boolean runUpdateChecksForData(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
       RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
-    Admin admin = requestData.getAdmin();
-    Addr soldTo = requestData.getAddress("ZS01");
-    boolean hasNegativeCheck = false;
-    Map<String, String> failedChecks = new HashMap<String, String>();
-    LOG.debug("Changes are -> " + changes);
 
-    DataRdc rdc = getDataRdc(entityManager, admin);
-    if ("9500".equals(rdc.getIsicCd())) {
-      LOG.debug("Private customer record. Skipping validations.");
-      validation.setSuccess(true);
-      validation.setMessage("Skipped");
-      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_VAT_CHECKS);
-      output.setDetails("Update checks skipped for Private Customer record.");
+    Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
+    Addr soldTo = requestData.getAddress("ZS01");
+    if (handlePrivatePersonRecord(entityManager, admin, output, validation, engineData)) {
       return true;
     }
-    for (UpdatedDataModel updatedDataModel : changes.getDataUpdates()) {
-      if (updatedDataModel != null) {
-        LOG.debug("Checking updates for : " + new ObjectMapper().writeValueAsString(updatedDataModel));
-        String field = updatedDataModel.getDataField();
-        switch (field) {
-        case "VAT #":
-          if (StringUtils.isBlank(updatedDataModel.getOldData()) && StringUtils.isNotBlank(updatedDataModel.getNewData())) {
-            // check if the name + VAT exists in D&B
-            List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
-            if (matches.isEmpty()) {
-              // get DnB matches based on all address details
-              matches = getMatches(requestData, engineData, soldTo, false);
-            }
-            if (!matches.isEmpty()) {
-              for (DnBMatchingResponse dnbRecord : matches) {
-                if ("Y".equals(dnbRecord.getOrgIdMatch())) {
-                  hasNegativeCheck = false;
-                  break;
-                }
-                hasNegativeCheck = true;
-                failedChecks.put(field, field + " updated. Updates to " + field + " needs verification as it does not match DnB");
-                LOG.debug("Updates to VAT need verification as it does not match DnB");
-              }
-            }
+
+    StringBuilder details = new StringBuilder();
+    boolean cmdeReview = false;
+    List<String> ignoredUpdates = new ArrayList<String>();
+    for (UpdatedDataModel change : changes.getDataUpdates()) {
+      switch (change.getDataField()) {
+      case "VAT #":
+        if ((StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())) || (!StringUtils.isBlank(change.getOldData())
+            && !StringUtils.isBlank(change.getNewData()) && !(change.getOldData().equals(change.getNewData())))) {
+          // ADD and Update
+          List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
+          boolean matchesDnb = false;
+          if (matches != null) {
+            // check against D&B
+            matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
           }
-          break;
-        case "Collection Code":
-          if ((StringUtils.isBlank(updatedDataModel.getOldData()) && StringUtils.isNotBlank(updatedDataModel.getNewData()))
-              || (StringUtils.isNotBlank(updatedDataModel.getOldData()) && StringUtils.isNotBlank(updatedDataModel.getNewData()))) {
-            if (!"AR".equalsIgnoreCase(admin.getRequestingLob())) {
-              hasNegativeCheck = true;
-              failedChecks.put(field, field + " updated. Updates to " + field + " needs verification.");
-              LOG.debug("Updates to Collection Code need verification.");
-            }
+          if (!matchesDnb) {
+            cmdeReview = true;
+            engineData.addNegativeCheckStatus("_esVATCheckFailed", "VAT # on the request did not match D&B");
+            details.append("VAT # on the request did not match D&B\n");
+          } else {
+            details.append("VAT # on the request matches D&B\n");
           }
-          break;
-        case "Top List Speciale":
-          String designatedUser = SystemParameters.getString("TOP_LST_SPECI_USER");
-          if (!admin.getRequesterId().equalsIgnoreCase(designatedUser)) {
-            hasNegativeCheck = true;
-            failedChecks.put(field, field + " updated. Updates to " + field + " needs verification.");
-            LOG.debug("Updates to Top List Speciale need verification.");
-          }
-          break;
-        case "ISU Code":
-        case "Client Tier":
-        case "Search Term/Sales Branch Office":
-        case "Installing BO":
-          String designatedISUCTCUser = SystemParameters.getString("ISU_CTC_SBO_USER");
-          if (!admin.getRequesterId().equalsIgnoreCase(designatedISUCTCUser)) {
-            hasNegativeCheck = true;
-            failedChecks.put(field, field + " updated. Updates to " + field + " needs verification.");
-            LOG.debug("Updates to ISU/CTC/SBO/IBO need verification.");
-          }
-          break;
-        case "iERP Site Party ID":
-          // SKIP THESE FIELDS
-          break;
-        case "Abbreviated Name (TELX1)":
-          break;
-        default:
-          // Set Negative check status for any other fields updated.
-          failedChecks.put(field, field + " updated.");
-          hasNegativeCheck = true;
-          break;
         }
+        if (!StringUtils.isBlank(change.getOldData()) && (StringUtils.isBlank(change.getNewData()))) {
+          // noop, for switch handling only
+        }
+        break;
+      case "ISU Code":
+      case "Client Tier":
+      case "Search Term/Sales Branch Office":
+      case "Tax Code": {
+        // noop for switch handling
+      }
+        break;
+      case "Order Block Code":
+        if ("88".equals(change.getOldData()) || "88".equals(change.getNewData()) || "94".equals(change.getOldData())
+            || "94".equals(change.getOldData())) {
+          // noop, for switch handling only
+        }
+        break;
+
+      case "Customer Classification Code":
+        if ("60".equals(change.getNewData()) || "71".equals(change.getNewData()) || "81".equals(change.getNewData())) {
+          // noop for switch handling
+        }
+        break;
+      case "ISIC":
+      case "INAC/NAC Code":
+      case "SIRET":
+        cmdeReview = true;
+        break;
+      default:
+        ignoredUpdates.add(change.getDataField());
+        break;
       }
     }
 
-    if (hasNegativeCheck) {
-      engineData.addNegativeCheckStatus("RESTRICED_DATA_UPDATED", "Updated elements cannot be checked automatically.");
-      output.setDetails("Updated elements cannot be checked automatically.\n");
-      if (failedChecks != null && failedChecks.size() > 0) {
-        StringBuilder details = new StringBuilder();
-        details.append("Updated elements cannot be checked automatically.\nDetails:").append("\n");
-        for (String failedCheck : failedChecks.values()) {
-          details.append(" - " + failedCheck).append("\n");
-        }
-        output.setDetails(details.toString());
-      }
-      validation.setMessage("Review needed.");
+    if (cmdeReview) {
+      engineData.addNegativeCheckStatus("_esDataCheckFailed", "Updates to one or more fields cannot be validated.");
+      details.append("Updates to one or more fields cannot be validated.\n");
       validation.setSuccess(false);
+      validation.setMessage("Not Validated");
     } else {
-      output.setDetails("Updated DATA elements were validated successfully.\n");
-      validation.setMessage("Validated");
       validation.setSuccess(true);
+      validation.setMessage("Successful");
     }
+    if (!ignoredUpdates.isEmpty()) {
+      details.append("Updates to the following fields skipped validation:\n");
+      for (String field : ignoredUpdates) {
+        details.append(" - " + field + "\n");
+      }
+    }
+    output.setDetails(details.toString());
+    output.setProcessOutput(validation);
     return true;
   }
 
   @Override
   public boolean runUpdateChecksForAddress(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
       RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
-    Data data = requestData.getData();
+
     Admin admin = requestData.getAdmin();
-    boolean doesBillingMatchDnb = true;
-    boolean hasNegativeCheck = false;
-    Addr billing = requestData.getAddress("ZP01");
+    Data data = requestData.getData();
     Addr installing = requestData.getAddress("ZS01");
-    Addr payment = requestData.getAddress("ZP02");
-    String dataDetails = output.getDetails() != null ? output.getDetails() : "";
-    StringBuilder detail = new StringBuilder(dataDetails);
-    Map<String, String> failedChecks = new HashMap<String, String>();
-    DataRdc rdc = getDataRdc(entityManager, admin);
-    if ("9500".equals(rdc.getIsicCd())) {
-      LOG.debug("Private customer record. Skipping validations.");
-      validation.setSuccess(true);
-      validation.setMessage("Skipped");
-      output.setDetails("Update checks skipped for Private Customer record.");
-      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_VAT_CHECKS);
+    if (handlePrivatePersonRecord(entityManager, admin, output, validation, engineData)) {
       return true;
     }
-    String newAbbNm = changes.getDataChange("Abbreviated Name") != null ? changes.getDataChange("Abbreviated Name").getNewData() : "";
-    String oldAbbNm = changes.getDataChange("Abbreviated Name") != null ? changes.getDataChange("Abbreviated Name").getOldData() : "";
-
-    List<String> addrTypesChanged = new ArrayList<String>();
-    for (UpdatedNameAddrModel addrModel : changes.getAddressUpdates()) {
-      if (!addrTypesChanged.contains(addrModel.getAddrTypeCode())) {
-        addrTypesChanged.add(addrModel.getAddrTypeCode());
-      }
-    }
-
-    if (isRelevantFieldUpdated(changes) && addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZP01.toString())) {
-
-      LOG.debug("Billing changed -> " + changes.isAddressChanged("ZP01"));
-
-      // Check if address closely matches DnB
-      List<DnBMatchingResponse> matches = getMatches(requestData, engineData, billing, false);
-      if (matches != null) {
-        doesBillingMatchDnb = ifaddressCloselyMatchesDnb(matches, billing, admin, data.getCmrIssuingCntry());
-      }
-      if (!doesBillingMatchDnb) {
-        hasNegativeCheck = true;
-        failedChecks.put("BILLING_UPDTD", "Updates to Billing address need verification as it does not match D&B.");
-        LOG.debug("Updates to Billing address need verification as it does not match D&B");
-      }
-    }
-
-    if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZD02.toString())) {
-      if (!"IGF".equalsIgnoreCase(admin.getRequestingLob()) && !(newAbbNm.contains("DF") && oldAbbNm.contains("D3"))) {
-        hasNegativeCheck = true;
-        failedChecks.put("H_ADDR_UPDTD", "Address H updated, Requesting LOB should be IGF.");
-      }
-    }
-
-    if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZS01.toString()) || addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZP02.toString())) {
-      List<Addr> addrsToChk = new ArrayList<Addr>();
-      if (payment != null) {
-        addrsToChk.add(payment);
-      }
-      if (installing != null) {
-        addrsToChk.add(installing);
-      }
-
-      for (Addr addr : addrsToChk) {
-        if ("Y".equals(addr.getImportInd())) {
-          if (!isRelevantFieldUpdated(changes) && engineData.getNegativeCheckStatus("RESTRICED_DATA_UPDATED") == null && failedChecks.isEmpty()) {
-            validation.setSuccess(true);
-            LOG.debug("Updates to " + ("ZS01".equals(addr.getId().getAddrType()) ? "Installing" : "Payment") + " have been verified.");
-            detail.append("Updates to " + ("ZS01".equals(addr.getId().getAddrType()) ? "Installing" : "Payment") + " have been verified.");
-            validation.setMessage("Validated");
-            hasNegativeCheck = false;
-          } else if (isRelevantFieldUpdated(changes) && changes.isAddressChanged("ZS01")) {
-            LOG.debug("Installing address updated");
-            List<DnBMatchingResponse> matches = getMatches(requestData, engineData, installing, false);
-            boolean matchesDnb = false;
-            if (matches != null) {
-              for (DnBMatchingResponse dnb : matches) {
-                boolean closelyMatches = DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), addr, admin, dnb);
-                String siret = DnBUtil.getTaxCode1(dnb.getDnbCountry(), dnb.getOrgIdDetails());
-                if (closelyMatches && StringUtils.isNotBlank(siret) && data.getTaxCd1().equalsIgnoreCase(siret)) {
-                  matchesDnb = true;
-                  break;
-                }
-              }
-              if (matchesDnb) {
-                detail.append("Updates to Installing address have been verified.\n");
-                validation.setMessage("Validated");
-                hasNegativeCheck = false;
+    List<Addr> addresses = null;
+    StringBuilder checkDetails = new StringBuilder();
+    Set<String> resultCodes = new HashSet<String>();// R - review
+    for (String addrType : RELEVANT_ADDRESSES) {
+      if (changes.isAddressChanged(addrType)) {
+        if (CmrConstants.RDC_SOLD_TO.equals(addrType)) {
+          addresses = Collections.singletonList(requestData.getAddress(CmrConstants.RDC_SOLD_TO));
+        } else {
+          addresses = requestData.getAddresses(addrType);
+        }
+        for (Addr addr : addresses) {
+          if ("N".equals(addr.getImportInd())) {
+            // new address
+            if (CmrConstants.RDC_SHIP_TO.equals(addrType)) {
+              if (addressExists(entityManager, addr)) {
+                LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+                checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");
+                resultCodes.add("R");
               } else {
-                hasNegativeCheck = true;
-                failedChecks.put("INSTALLING_UPDATED", "Updates to Installing address need verification as it does not match D&B.");
+                LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+                checkDetails.append("Addition of new address (" + addr.getId().getAddrSeq() + ") address skipped in the checks.\n");
               }
             }
-          } else if (isRelevantFieldUpdated(changes) && (changes.isAddressChanged("ZP02"))) {
-            hasNegativeCheck = true;
-            failedChecks.put("ADDR_FIELDS_UPDTD", "Payment addresses cannot be modified.");
-          }
+            if (CmrConstants.RDC_INSTALL_AT.equals(addrType) || CmrConstants.RDC_BILL_TO.contentEquals(addrType)) {
+              String addrName = getCustomerFullName(addr);
+              String soldToName = "";
+              Addr zs01 = requestData.getAddress("ZS01");
+              if (zs01 != null) {
+                soldToName = getCustomerFullName(zs01);
+              }
 
+              if (addrName.equals(soldToName)) {
+                if (addressExists(entityManager, addr)) {
+                  LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+                  checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");
+                  resultCodes.add("R");
+                } else {
+                  LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+                  checkDetails.append("Addition of new address (" + addr.getId().getAddrSeq() + ") validated.\n");
+                }
+              } else {
+                LOG.debug("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified");
+                checkDetails.append("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") has different customer name than sold-to.\n");
+                resultCodes.add("D");
+              }
+            }
+          } else if ("Y".equals(addr.getChangedIndc())) {
+            // update address
+            if (isRelevantAddressFieldUpdated(changes, addr)) {
+              if (CmrConstants.RDC_INSTALL_AT.equals(addrType)) {
+                if (null == changes.getAddressChange(addrType, "Customer Name")
+                    && null == changes.getAddressChange(addrType, "Customer Name Con't")) {
+                  LOG.debug("Update to InstallAt " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+                  checkDetails.append("Update to InstallAt (" + addr.getId().getAddrSeq() + ") skipped in the checks.\n");
+                } else {
+                  resultCodes.add("D");
+                  checkDetails.append("Update to InstallAt (" + addr.getId().getAddrSeq() + ") has different customer name than sold-to .\n");
+                }
+              } else if (CmrConstants.RDC_SOLD_TO.equals(addrType)) {
+                LOG.debug("Installing (Sold To) address updated");
+                List<DnBMatchingResponse> matches = getMatches(requestData, engineData, installing, false);
+                boolean matchesDnb = false;
+                if (matches != null) {
+                  for (DnBMatchingResponse dnb : matches) {
+                    boolean closelyMatches = DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), addr, admin, dnb);
+                    String siret = DnBUtil.getTaxCode1(dnb.getDnbCountry(), dnb.getOrgIdDetails());
+                    if (closelyMatches && StringUtils.isNotBlank(siret) && data.getTaxCd1().equalsIgnoreCase(siret)) {
+                      matchesDnb = true;
+                      break;
+                    }
+                  }
+                  if (matchesDnb) {
+                    checkDetails.append("Updates to Installing address have been verified.\n");
+                  } else {
+                    resultCodes.add("D");
+                    checkDetails.append("Updates to Installing address need verification as it does not match D&B.");
+                  }
+                }
+              } else {
+                // proceed
+                LOG.debug("Update to Address " + addrType + "(" + addr.getId().getAddrSeq() + ") skipped in the checks.\\n");
+                checkDetails.append("Updates to Address (" + addr.getId().getAddrSeq() + ") skipped in the checks.\n");
+              }
+            } else {
+              checkDetails.append("Updates to non-address fields for " + addrType + "(" + addr.getId().getAddrSeq() + ") skipped in the checks.")
+                  .append("\n");
+            }
+          }
         }
       }
     }
-
-    if (hasNegativeCheck) {
-      engineData.addNegativeCheckStatus("RESTRICED_ADDR_UPDATED", "Updated elements cannot be checked automatically.");
-      output.setDetails("Updated elements cannot be checked automatically.\n");
-      StringBuilder details = new StringBuilder();
-      if (failedChecks != null && failedChecks.size() > 0) {
-        details.append("Updated elements cannot be checked automatically.\nDetails:").append("\n");
-        for (String failedCheck : failedChecks.values()) {
-          details.append(" - " + failedCheck).append("\n");
-        }
-      }
-      validation.setMessage("Review needed.");
+    if (resultCodes.contains("R")) {
+      output.setOnError(true);
+      engineData.addRejectionComment("_atRejectAddr", "Add or update on the address is rejected", "", "");
       validation.setSuccess(false);
-      output.setDetails(details.toString());
-      output.setDetails(detail.toString());
+      validation.setMessage("Rejected");
+    } else if (resultCodes.contains("D")) {
+      validation.setSuccess(false);
+      validation.setMessage("Not Validated");
+      engineData.addNegativeCheckStatus("_atCheckFailed", "Updates to addresses cannot be checked automatically.");
     } else {
       validation.setSuccess(true);
-      detail.append("Updates to relevant addresses found but have been marked as Verified.");
-      validation.setMessage("Validated");
-      output.setDetails(detail.toString());
+      validation.setMessage("Successful");
     }
+    String details = (output.getDetails() != null && output.getDetails().length() > 0) ? output.getDetails() : "";
+    details += checkDetails.length() > 0 ? "\n" + checkDetails.toString() : "";
+    output.setDetails(details);
+    output.setProcessOutput(validation);
     return true;
+
   }
 
-  private boolean isRelevantFieldUpdated(RequestChangeContainer changes) {
-    boolean isRelevantFieldUpdated = false;
-    List<UpdatedNameAddrModel> updatedAddrList = changes.getAddressUpdates();
-    String[] addressFields = { "Customer Name", "Customer Name Continuation", "Customer Name/ Additional Address Information", "Country (Landed)",
-        "Street", "Street Continuation", "Postal Code", "City", "PostBox" };
-    List<String> relevantFieldNames = Arrays.asList(addressFields);
-    for (UpdatedNameAddrModel updatedAddrModel : updatedAddrList) {
-      String fieldId = updatedAddrModel.getDataField();
-      if (StringUtils.isNotEmpty(fieldId) && relevantFieldNames.contains(fieldId)) {
-        isRelevantFieldUpdated = true;
-        break;
+  private boolean isRelevantAddressFieldUpdated(RequestChangeContainer changes, Addr addr) {
+    List<UpdatedNameAddrModel> addrChanges = changes.getAddressChanges(addr.getId().getAddrType(), addr.getId().getAddrSeq());
+    if (addrChanges == null) {
+      return false;
+    }
+    for (UpdatedNameAddrModel change : addrChanges) {
+      if (!NON_RELEVANT_ADDRESS_FIELDS.contains(change.getDataField())) {
+        return true;
       }
     }
-
-    return isRelevantFieldUpdated;
+    return false;
   }
+
+  /*
+   * private boolean isRelevantFieldUpdated(RequestChangeContainer changes) {
+   * boolean isRelevantFieldUpdated = false; List<UpdatedNameAddrModel>
+   * updatedAddrList = changes.getAddressUpdates(); String[] addressFields = {
+   * "Customer Name", "Customer Name Continuation",
+   * "Customer Name/ Additional Address Information", "Country (Landed)",
+   * "Street", "Street Continuation", "Postal Code", "City", "PostBox" };
+   * List<String> relevantFieldNames = Arrays.asList(addressFields); for
+   * (UpdatedNameAddrModel updatedAddrModel : updatedAddrList) { String fieldId
+   * = updatedAddrModel.getDataField(); if (StringUtils.isNotEmpty(fieldId) &&
+   * relevantFieldNames.contains(fieldId)) { isRelevantFieldUpdated = true;
+   * break; } }
+   * 
+   * return isRelevantFieldUpdated; }
+   */
+
 }
