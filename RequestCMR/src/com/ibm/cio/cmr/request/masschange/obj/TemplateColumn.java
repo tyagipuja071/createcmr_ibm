@@ -34,6 +34,7 @@ import com.ibm.cio.cmr.request.model.ParamContainer;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.DropDownService;
+import com.ibm.cio.cmr.request.util.IERPRequestUtils;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
 
 /**
@@ -132,6 +133,9 @@ public class TemplateColumn {
         if (LegacyDirectUtil.isCountryLegacyDirectEnabled(entityManager, country)) {
           lovs = getLovs(entityManager, this.lovId, country, true);
           lovs = LegacyDirectUtil.addSpecialCharToLov(lovs, country, true, this.lovId);
+        } else if (IERPRequestUtils.isCountryDREnabled(entityManager, country)) {
+          lovs = IERPRequestUtils.getLovsDR(entityManager, this.lovId, country, true);
+          lovs = IERPRequestUtils.addSpecialCharToLovDR(lovs, country, true, this.lovId);
         } else {
           lovs = getLovs(entityManager, this.lovId, country, false);
         }
