@@ -640,27 +640,26 @@ function addALPHANUMSPACEValidatorFR() {
 /**
  * story 1567051 - Address H available only for IGF LOB
  */
-// function toggleAddrTypesForFR(cntry, addressMode) {
-// var requestingLob = FormManager.getActualValue('requestingLob');
-// if (requestingLob == 'IGF') {
-// if (addressMode == 'newAddress' || addressMode == 'copyAddress') {
-// cmr.showNode('radiocont_ZD02');
-// }
-// } else {
-// cmr.hideNode('radiocont_ZD02');
-// }
-// dojo.connect(FormManager.getField('requestingLob'), 'onChange',
-// function(value) {
-// var _requestingLob = FormManager.getActualValue('requestingLob');
-// if (_requestingLob == 'IGF') {
-// if (addressMode == 'newAddress' || addressMode == 'copyAddress') {
-// cmr.showNode('radiocont_ZD02');
-// }
-// } else {
-// cmr.hideNode('radiocont_ZD02');
-// }
-// });
-// }
+/*function toggleAddrTypesForFR(cntry, addressMode) {
+  var requestingLob = FormManager.getActualValue('requestingLob');
+  if (requestingLob == 'IGF') {
+    if (addressMode == 'newAddress' || addressMode == 'copyAddress') {
+      cmr.showNode('radiocont_ZD02');
+    }
+  } else {
+    cmr.hideNode('radiocont_ZD02');
+  }
+  dojo.connect(FormManager.getField('requestingLob'), 'onChange', function(value) {
+    var _requestingLob = FormManager.getActualValue('requestingLob');
+    if (_requestingLob == 'IGF') {
+      if (addressMode == 'newAddress' || addressMode == 'copyAddress') {
+        cmr.showNode('radiocont_ZD02');
+      }
+    } else {
+      cmr.hideNode('radiocont_ZD02');
+    }
+  });
+}*/
 function included(cntryCd) {
   var includedCntryCd = [ 'AD', 'MC', 'MQ', 'GP', 'GF', 'PM', 'RE', 'TF', 'KM', 'YT', 'NC', 'VU', 'WF', 'PF' ];
   var includedInd = false;
@@ -2194,26 +2193,25 @@ function showAffacturageOnReqReason() {
   }
 }
 
-// function setAbbrevNameFrDSW() {
-// var _abbrevNmHandler = dojo.connect(FormManager.getField('abbrevNm'),
-// 'onChange', function(value) {
-// var abbrNm = FormManager.getActualValue('abbrevNm').trim();
-// var requestingLob = FormManager.getActualValue('requestingLob');
-// if (requestingLob == 'DSW') {
-// if (abbrNm.endsWith("D3")) {
-// abbrNm.substring(0, abbrNm.length - 2).trim();
-// }
-// if (!abbrNm.includes(" DSW D3")) {
-// abbrNm = abbrNm.length > 15 ? abbrNm.substring(0, 15) : abbrNm;
-// FormManager.setValue('abbrevNm', abbrNm.concat(" DSW D3"));
-// }
-// }
-// });
-// if (_abbrevNmHandler && _abbrevNmHandler[0]) {
-// _abbrevNmHandler[0].onChange();
-// }
-// }
-
+/*function setAbbrevNameFrDSW() {
+  var _abbrevNmHandler = dojo.connect(FormManager.getField('abbrevNm'), 'onChange', function(value) {
+    var abbrNm = FormManager.getActualValue('abbrevNm').trim();
+    var requestingLob = FormManager.getActualValue('requestingLob');
+    if (requestingLob == 'DSW') {
+      if (abbrNm.endsWith("D3")) {
+        abbrNm.substring(0, abbrNm.length - 2).trim();
+      }
+      if (!abbrNm.includes(" DSW D3")) {
+        abbrNm = abbrNm.length > 15 ? abbrNm.substring(0, 15) : abbrNm;
+        FormManager.setValue('abbrevNm', abbrNm.concat(" DSW D3"));
+      }
+    }
+  });
+  if (_abbrevNmHandler && _abbrevNmHandler[0]) {
+    _abbrevNmHandler[0].onChange();
+  }
+}
+*/
 function affacturageLogic() {
   var reqType = FormManager.getActualValue('reqType');
   var reqReason = FormManager.getActualValue('reqReason');
