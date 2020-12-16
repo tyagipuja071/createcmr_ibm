@@ -850,7 +850,7 @@ public class FranceUtil extends AutomationUtil {
                 checkDetails.append("Addition of new address (" + addr.getId().getAddrSeq() + ") address skipped in the checks.\n");
               }
             }
-            if (CmrConstants.RDC_INSTALL_AT.equals(addrType) || CmrConstants.RDC_BILL_TO.contentEquals(addrType)) {
+            if (CmrConstants.RDC_INSTALL_AT.equals(addrType)) {
               String addrName = getCustomerFullName(addr);
               String soldToName = "";
               Addr zs01 = requestData.getAddress("ZS01");
@@ -873,6 +873,13 @@ public class FranceUtil extends AutomationUtil {
                 resultCodes.add("D");
               }
             }
+            if (CmrConstants.RDC_BILL_TO.contentEquals(addrType)) {
+
+              LOG.debug("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified");
+              checkDetails.append("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified \n");
+              resultCodes.add("D");
+
+            }
           } else if ("Y".equals(addr.getChangedIndc())) {
             // update address
             if (isRelevantAddressFieldUpdated(changes, addr)) {
@@ -885,26 +892,10 @@ public class FranceUtil extends AutomationUtil {
                   resultCodes.add("D");
                   checkDetails.append("Update to InstallAt (" + addr.getId().getAddrSeq() + ") has different customer name than sold-to .\n");
                 }
-              } else if (CmrConstants.RDC_SOLD_TO.equals(addrType)) {
-                LOG.debug("Installing (Sold To) address updated");
-                List<DnBMatchingResponse> matches = getMatches(requestData, engineData, installing, false);
-                boolean matchesDnb = false;
-                if (matches != null) {
-                  for (DnBMatchingResponse dnb : matches) {
-                    boolean closelyMatches = DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), addr, admin, dnb);
-                    String siret = DnBUtil.getTaxCode1(dnb.getDnbCountry(), dnb.getOrgIdDetails());
-                    if (closelyMatches && StringUtils.isNotBlank(siret) && data.getTaxCd1().equalsIgnoreCase(siret)) {
-                      matchesDnb = true;
-                      break;
-                    }
-                  }
-                  if (matchesDnb) {
-                    checkDetails.append("Updates to Installing address have been verified.\n");
-                  } else {
-                    resultCodes.add("D");
-                    checkDetails.append("Updates to Installing address need verification as it does not match D&B.");
-                  }
-                }
+              } else if (CmrConstants.RDC_SOLD_TO.equals(addrType) || CmrConstants.RDC_BILL_TO.equals(addrType)) {
+                LOG.debug("Update to Address " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified");
+                checkDetails.append("Update to address " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified \n");
+                resultCodes.add("D");
               } else {
                 // proceed
                 LOG.debug("Update to Address " + addrType + "(" + addr.getId().getAddrSeq() + ") skipped in the checks.\\n");
