@@ -622,7 +622,7 @@ function addALPHANUMSPACEValidatorFR() {
 /**
  * story 1567051 - Address H available only for IGF LOB
  */
-function toggleAddrTypesForFR(cntry, addressMode) {
+/*function toggleAddrTypesForFR(cntry, addressMode) {
   var requestingLob = FormManager.getActualValue('requestingLob');
   if (requestingLob == 'IGF') {
     if (addressMode == 'newAddress' || addressMode == 'copyAddress') {
@@ -641,7 +641,7 @@ function toggleAddrTypesForFR(cntry, addressMode) {
       cmr.hideNode('radiocont_ZD02');
     }
   });
-}
+}*/
 function included(cntryCd) {
   var includedCntryCd = [ 'AD', 'MC', 'MQ', 'GP', 'GF', 'PM', 'RE', 'TF', 'KM', 'YT', 'NC', 'VU', 'WF', 'PF' ];
   var includedInd = false;
@@ -2031,7 +2031,7 @@ function showAffacturageOnReqReason() {
   }
 }
 
-function setAbbrevNameFrDSW() {
+/*function setAbbrevNameFrDSW() {
   var _abbrevNmHandler = dojo.connect(FormManager.getField('abbrevNm'), 'onChange', function(value) {
     var abbrNm = FormManager.getActualValue('abbrevNm').trim();
     var requestingLob = FormManager.getActualValue('requestingLob');
@@ -2049,7 +2049,7 @@ function setAbbrevNameFrDSW() {
     _abbrevNmHandler[0].onChange();
   }
 }
-
+*/
 function affacturageLogic() {
   var reqType = FormManager.getActualValue('reqType');
   var reqReason = FormManager.getActualValue('reqReason');
@@ -2275,7 +2275,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addLengthValidatorForSIRET, [ '706' ], null, true);
   GEOHandler.registerValidator(addLengthValidatorForSR, [ '706' ], null, true);
   GEOHandler.registerValidator(addALPHANUMValidatorForSR, [ '706' ], null, true);
-  GEOHandler.addToggleAddrTypeFunction(toggleAddrTypesForFR, '706');
+  //GEOHandler.addToggleAddrTypeFunction(toggleAddrTypesForFR, '706');
   GEOHandler.addAddrFunction(addFRLandedCountryHandler, '706');
   GEOHandler.enableCopyAddress('706', validateFRCopy, [ 'ZD01' ]);
   GEOHandler.registerValidator(addGenericVATValidator('706', 'MAIN_CUST_TAB', 'frmCMR', 'ZP01'), [ '706' ], null, true);
@@ -2284,7 +2284,7 @@ dojo.addOnLoad(function() {
   // GEOHandler.registerValidator(addPostalCodeLengthValidator, '706' , null,
   // true);
   GEOHandler.addAfterConfig(showAffacturageOnReqReason, '706');
-  GEOHandler.addAfterConfig(setAbbrevNameFrDSW, '706');
+  //GEOHandler.addAfterConfig(setAbbrevNameFrDSW, '706');
   // GEOHandler.registerValidator(addHostingInstallCustNmValidatorOnCheckReq,
   // '706', null, true);
   GEOHandler.registerValidator(addIBMAbbrevNmValidator, '706', null, true);
