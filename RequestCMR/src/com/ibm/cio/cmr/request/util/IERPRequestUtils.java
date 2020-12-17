@@ -104,7 +104,6 @@ public class IERPRequestUtils extends RequestUtils {
         } else {
           choices.add((String) result[0]);
         }
-
       }
     }
     return choices;
