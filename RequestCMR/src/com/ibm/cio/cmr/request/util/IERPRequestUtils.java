@@ -33,7 +33,7 @@ import com.ibm.cio.cmr.request.util.mail.MessageType;
 
 /**
  * @author Dennis Natad
- *
+ * 
  */
 public class IERPRequestUtils extends RequestUtils {
 
@@ -324,7 +324,7 @@ public class IERPRequestUtils extends RequestUtils {
 
   /**
    * String gets the fully qualified country name
-   * 
+   *
    * @param entityManager
    * @param country
    * @return
