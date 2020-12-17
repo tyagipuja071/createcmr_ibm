@@ -324,7 +324,7 @@ public class IERPRequestUtils extends RequestUtils {
 
   /**
    * String gets the fully qualified country name
-   * 
+   *
    * @param entityManager
    * @param country
    * @return
