@@ -25,8 +25,10 @@ import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.WfHist;
 import com.ibm.cio.cmr.request.entity.WfHistPK;
 import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation;
+import com.ibm.cio.cmr.request.model.ParamContainer;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.service.DropDownService;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.mail.Email;
 import com.ibm.cio.cmr.request.util.mail.MessageType;
@@ -99,11 +101,30 @@ public class IERPRequestUtils extends RequestUtils {
     List<Object[]> results = query.getResults();
     if (results != null && results.size() > 0) {
       for (Object[] result : results) {
-        // if (codeOnly) {
-        choices.add((String) result[0]);
-        // } else {
-        // choices.add((String) result[0]);
-        // }
+        /*
+         * if (codeOnly) { choices.add((String) result[0]); } else {
+         * choices.add(result[0] + " | " + result[1]); }
+         */
+        choices.add(result[1] + "");
+      }
+    }
+    return choices;
+  }
+
+  public static List<String> getBDSChoicesDR(EntityManager entityManager, String bdsId, String country, boolean codeOnly) {
+    ParamContainer params = new ParamContainer();
+    List<String> choices = new ArrayList<String>();
+    DropDownService service = new DropDownService();
+    PreparedQuery query = service.getBDSSql(bdsId, entityManager, params, country);
+    query.setForReadOnly(true);
+    List<Object[]> results = query.getResults();
+    if (results != null && results.size() > 0) {
+      for (Object[] result : results) {
+        /*
+         * if (codeOnly) { choices.add((String) result[0]); } else {
+         * choices.add(result[0] + " | " + result[1]); }
+         */
+        choices.add(result[1] + "");
       }
     }
     return choices;
