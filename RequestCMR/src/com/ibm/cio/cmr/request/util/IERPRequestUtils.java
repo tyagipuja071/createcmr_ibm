@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.ibm.cio.cmr.request.util;
 
@@ -33,7 +33,7 @@ import com.ibm.cio.cmr.request.util.mail.MessageType;
 
 /**
  * @author Dennis Natad
- * 
+ *
  */
 public class IERPRequestUtils extends RequestUtils {
 
@@ -101,10 +101,9 @@ public class IERPRequestUtils extends RequestUtils {
       for (Object[] result : results) {
         if (codeOnly) {
           choices.add((String) result[0]);
-        } /*
-           * else { choices.add(result[0] + " | " + result[1]); }
-           */
-
+        } else {
+          choices.add((String) result[0]);
+        }
       }
     }
     return choices;
@@ -325,7 +324,7 @@ public class IERPRequestUtils extends RequestUtils {
 
   /**
    * String gets the fully qualified country name
-   * 
+   *
    * @param entityManager
    * @param country
    * @return
