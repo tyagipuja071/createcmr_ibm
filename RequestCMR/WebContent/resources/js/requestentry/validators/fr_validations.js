@@ -32,6 +32,7 @@ function afterConfigForFR() {
 
   affacturageLogic();
   setFieldsRequiredForCreateRequester();
+  setIERPSitePartyIDForFR()
 
   if (role == 'Requester') {
     FormManager.readOnly('abbrevNm');
@@ -2711,6 +2712,20 @@ function setTaxCd() {
   FormManager.setValue('taxCd2', '1');
 }
 
+function setIERPSitePartyIDForFR() {
+  var role = null;
+  var sapNo = FormManager.getActualValue('sapNo');
+  var reqType = FormManager.getActualValue('reqType');
+  if (typeof (_pagemodel) != 'undefined') {
+    role = _pagemodel.userRole;
+  }
+  if (reqType == 'U') {
+    if (sapNo != null) {
+      FormManager.setValue('ierpSitePrtyId', 'S' + sapNo);
+    }
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.FR = [ SysLoc.FRANCE ];
   console.log('adding FR functions...');
@@ -2763,4 +2778,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addCmrNoValidator, [ '706' ], null, true);
   GEOHandler.addAfterConfig(setTaxCd, '706');
   GEOHandler.addAfterTemplateLoad(setTaxCd, '706');
+  GEOHandler.addAddrFunction(setIERPSitePartyIDForFR, '706');
 });
