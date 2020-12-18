@@ -457,6 +457,14 @@ function AddressDetailsModal_onLoad() {
       _assignDetailsValue('#AddressDetailsModal #custPhone_view', '');
     }
   }
+  if (FormManager.getActualValue('cmrIssuingCntry') == '706') {
+    var reqTypes = FormManager.getActualValue('reqType');
+    if (reqTypes == 'U') {
+      if (details.ret30 != null) {
+        _assignDetailsValue('#AddressDetailsModal #ierpSitePrtyId_view', 'S' + details.ret30);
+      }
+    }
+  }
 }
 
 function displayHwMstInstallFlagNew() {
