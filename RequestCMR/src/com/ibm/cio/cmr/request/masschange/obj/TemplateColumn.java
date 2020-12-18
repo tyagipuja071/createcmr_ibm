@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.ibm.cio.cmr.request.masschange.obj;
 
@@ -41,9 +41,9 @@ import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
  * Represents a column on the mass change template. The column writes the
  * correct basic validations during template generation, and performs the same
  * validation during template validation
- * 
+ *
  * @author JeffZAMORA
- * 
+ *
  */
 public class TemplateColumn {
 
@@ -70,7 +70,7 @@ public class TemplateColumn {
    * Writes this column to the current {@link XSSFSheet} represented by the
    * {@link TemplateTab} object. The special validations for data type, length,
    * and list of values restrictions will be added to the column
-   * 
+   *
    * @param entityManager
    * @param country
    * @param book
@@ -152,6 +152,9 @@ public class TemplateColumn {
         if (LegacyDirectUtil.isCountryLegacyDirectEnabled(entityManager, country)) {
           lovs = getBDSChoices(entityManager, this.bdsId, country, true);
           lovs = LegacyDirectUtil.addSpecialCharToLov(lovs, country, true, this.bdsId);
+        } else if (IERPRequestUtils.isCountryDREnabled(entityManager, country)) {
+          lovs = IERPRequestUtils.getBDSChoicesDR(entityManager, this.bdsId, country, true);
+          lovs = IERPRequestUtils.addSpecialCharToLovDR(lovs, country, true, this.bdsId);
         } else {
           lovs = getBDSChoices(entityManager, this.bdsId, country, false);
         }
@@ -258,10 +261,12 @@ public class TemplateColumn {
       // LOG.debug(">> cbCity > " + cbCity);
       // LOG.debug(">> localCity > " + localCity);
       // if (!StringUtils.isEmpty(cbCity) && !StringUtils.isEmpty(localCity)) {
-      // LOG.trace("Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty. >> "
+      // LOG.trace("Cross Border City and Local City must not be populated at
+      // the same time. If one is populated, the other must be empty. >> "
       // + this.label);
       // validation.addError(rowIndex, this.label,
-      // "Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty.");
+      // "Cross Border City and Local City must not be populated at the same
+      // time. If one is populated, the other must be empty.");
       // }
       // }
       //
@@ -271,10 +276,13 @@ public class TemplateColumn {
       //
       // if (!StringUtils.isEmpty(cbPostal) &&
       // !StringUtils.isEmpty(localPostal)) {
-      // LOG.trace("Cross Border Postal Code and Local Postal Code must not be populated at the same time. If one is populated, the other must be empty. >>"
+      // LOG.trace("Cross Border Postal Code and Local Postal Code must not be
+      // populated at the same time. If one is populated, the other must be
+      // empty. >>"
       // + this.label);
       // validation.addError(rowIndex, this.label,
-      // "Cross Border Postal Code and Local Postal Code must not be populated at the same time. If one is populated, the other must be empty.");
+      // "Cross Border Postal Code and Local Postal Code must not be populated
+      // at the same time. If one is populated, the other must be empty.");
       // }
       // }
 
@@ -291,16 +299,18 @@ public class TemplateColumn {
       // }
       //
       // if (markedColumnsAsDups != null && markedColumnsAsDups.size() > 1) {
-      // LOG.trace("There are fields dually marked on the template. This will be returned as an error");
+      // LOG.trace("There are fields dually marked on the template. This will be
+      // returned as an error");
       // validation.addError(rowIndex, this.label,
-      // "There are fields dually marked on the template. This will be returned as an error");
+      // "There are fields dually marked on the template. This will be returned
+      // as an error");
       // }
     }
   }
 
   @SuppressWarnings("deprecation")
-  public void validateSwiss(EntityManager entityManager, TemplateValidation validation, XSSFWorkbook book, XSSFSheet sheet, String country,
-      int colNo, int maxRows, HashMap<String, String> hwFlagMap) {
+  public void validateSwiss(EntityManager entityManager, TemplateValidation validation, XSSFWorkbook book, XSSFSheet sheet, String country, int colNo,
+      int maxRows, HashMap<String, String> hwFlagMap) {
     XSSFRow row = null;
     XSSFCell currCell = null;
     String value = null;
@@ -384,8 +394,9 @@ public class TemplateColumn {
         LOG.debug(">> localPostal > " + localPostal);
 
         if (!StringUtils.isEmpty(cbPostal) && !StringUtils.isEmpty(localPostal)) {
-          LOG.trace("Cross Border Postal Code and Local Postal Code must not be populated at the same time. If one is populated, the other must be empty. >>"
-              + this.label);
+          LOG.trace(
+              "Cross Border Postal Code and Local Postal Code must not be populated at the same time. If one is populated, the other must be empty. >>"
+                  + this.label);
           validation.addError(rowIndex, this.label,
               "Cross Border Postal Code and Local Postal Code must not be populated at the same time. If one is populated, the other must be empty.");
         }
@@ -515,8 +526,9 @@ public class TemplateColumn {
         LOG.debug(">> localPostal > " + localPostal);
 
         if (!StringUtils.isEmpty(cbPostal) && !StringUtils.isEmpty(localPostal)) {
-          LOG.trace("Cross Border Postal Code and Local Postal Code must not be populated at the same time. If one is populated, the other must be empty. >>"
-              + this.label);
+          LOG.trace(
+              "Cross Border Postal Code and Local Postal Code must not be populated at the same time. If one is populated, the other must be empty. >>"
+                  + this.label);
           validation.addError(rowIndex, this.label,
               "Cross Border Postal Code and Local Postal Code must not be populated at the same time. If one is populated, the other must be empty.");
         }
@@ -561,7 +573,7 @@ public class TemplateColumn {
 
   /**
    * Writes the LOV to the control sheet, and sets the formula for the column
-   * 
+   *
    * @param control
    * @param helper
    * @param values
@@ -617,7 +629,7 @@ public class TemplateColumn {
 
   /**
    * Retrieves the LOV list given the Field ID and Issuing Country
-   * 
+   *
    * @param entityManager
    * @param lovId
    * @param country
@@ -646,7 +658,7 @@ public class TemplateColumn {
 
   /**
    * Retrieves the BDS choices given the Field ID and Issuing Country
-   * 
+   *
    * @param entityManager
    * @param bdsId
    * @param country
@@ -673,7 +685,7 @@ public class TemplateColumn {
 
   /**
    * Logger of list of values, TRACE only
-   * 
+   *
    * @param list
    */
   private void printValues(Collection<String> list) {
