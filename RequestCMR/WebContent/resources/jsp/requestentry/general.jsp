@@ -76,8 +76,21 @@ if (readOnly){
                 <cmr:fieldLabel fieldId="ProspectToLegalCMR" />
                 <cmr:info text="${ui.info.makeProspectsLegal}"/>
               </cmr:label></cmr:column></cmr:view>
-              
-              <%if (laReactivateCapable){%>  
+
+			<cmr:view forCountry="780">
+				<cmr:column span="2" containerForField="ProspectToLegalCMR">
+					<cmr:field fieldId="ProspectToLegalCMR" path="prospLegalInd"
+						tabId="MAIN_GENERAL_TAB" />
+					<cmr:label fieldId="prospLegalInd" forRadioOrCheckbox="true">
+						<cmr:fieldLabel fieldId="ProspectToLegalCMR" />
+						<cmr:info text="${ui.info.makeProspectsLegal}" />
+					</cmr:label>
+				</cmr:column>
+			</cmr:view>
+
+			<%
+				if (laReactivateCapable) {
+			%>  
             <cmr:view forGEO="LA">
             <cmr:column span="2" containerForField="DeactivateToActivateCMR">
               <cmr:field fieldId="DeactivateToActivateCMR" path="func" tabId="MAIN_GENERAL_TAB"/>
