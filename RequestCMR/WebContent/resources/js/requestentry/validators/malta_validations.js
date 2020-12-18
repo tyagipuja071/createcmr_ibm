@@ -4,10 +4,16 @@ var othCEWA = [ "610", "636", "645", "669", "698", "725", "745", "764", "769", "
 var _vatExemptHandler = null;
 
 function addMaltaLandedCountryHandler(cntry, addressMode, saving, finalSave) {
+  var custGrp = FormManager.getActualValue('custGrp');
+  var addrType = FormManager.getActualValue('addrType');
   if (!saving) {
     if (addressMode == 'newAddress') {
-      FilteringDropdown['val_landCntry'] = FormManager.getActualValue('defaultLandedCountry');
-      FormManager.setValue('landCntry', FormManager.getActualValue('defaultLandedCountry'));
+      if (custGrp != 'CROSS') {
+        FilteringDropdown['val_landCntry'] = FormManager.getActualValue('defaultLandedCountry');
+        FormManager.setValue('landCntry', FormManager.getActualValue('defaultLandedCountry'));
+      } else if (custGrp == 'CROSS' && addrType == 'ZS01') {
+        FormManager.setValue('landCntry', '');
+      }
     } else {
       FilteringDropdown['val_landCntry'] = null;
     }

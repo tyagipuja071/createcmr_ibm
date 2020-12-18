@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.ibm.cio.cmr.request.masschange.obj;
 
@@ -41,9 +41,9 @@ import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
  * Represents a column on the mass change template. The column writes the
  * correct basic validations during template generation, and performs the same
  * validation during template validation
- * 
+ *
  * @author JeffZAMORA
- * 
+ *
  */
 public class TemplateColumn {
 
@@ -70,7 +70,7 @@ public class TemplateColumn {
    * Writes this column to the current {@link XSSFSheet} represented by the
    * {@link TemplateTab} object. The special validations for data type, length,
    * and list of values restrictions will be added to the column
-   * 
+   *
    * @param entityManager
    * @param country
    * @param book
@@ -152,6 +152,9 @@ public class TemplateColumn {
         if (LegacyDirectUtil.isCountryLegacyDirectEnabled(entityManager, country)) {
           lovs = getBDSChoices(entityManager, this.bdsId, country, true);
           lovs = LegacyDirectUtil.addSpecialCharToLov(lovs, country, true, this.bdsId);
+        } else if (IERPRequestUtils.isCountryDREnabled(entityManager, country)) {
+          lovs = IERPRequestUtils.getBDSChoicesDR(entityManager, this.bdsId, country, true);
+          lovs = IERPRequestUtils.addSpecialCharToLovDR(lovs, country, true, this.bdsId);
         } else {
           lovs = getBDSChoices(entityManager, this.bdsId, country, false);
         }
@@ -570,7 +573,7 @@ public class TemplateColumn {
 
   /**
    * Writes the LOV to the control sheet, and sets the formula for the column
-   * 
+   *
    * @param control
    * @param helper
    * @param values
@@ -626,7 +629,7 @@ public class TemplateColumn {
 
   /**
    * Retrieves the LOV list given the Field ID and Issuing Country
-   * 
+   *
    * @param entityManager
    * @param lovId
    * @param country
@@ -655,7 +658,7 @@ public class TemplateColumn {
 
   /**
    * Retrieves the BDS choices given the Field ID and Issuing Country
-   * 
+   *
    * @param entityManager
    * @param bdsId
    * @param country
@@ -682,7 +685,7 @@ public class TemplateColumn {
 
   /**
    * Logger of list of values, TRACE only
-   * 
+   *
    * @param list
    */
   private void printValues(Collection<String> list) {
