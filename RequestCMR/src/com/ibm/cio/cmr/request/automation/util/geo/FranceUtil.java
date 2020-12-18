@@ -72,6 +72,8 @@ public class FranceUtil extends AutomationUtil {
   private static final String SBO = "sbo";
   private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Att. Person", "Phone #", "Contact Person",
       "Customer Name/ Additional Address Information");
+  public static final List<String> FRANCE_SUBREGIONS = Arrays.asList("MC", "GP", "GF", "MQ", "RE", "PM", "KM", "VU", "PF", "YT", "NC", "WF", "AD",
+      "DZ");
 
   @SuppressWarnings("unchecked")
   public FranceUtil() {
@@ -330,46 +332,20 @@ public class FranceUtil extends AutomationUtil {
   public boolean performCountrySpecificCoverageCalculations(CalculateCoverageElement covElement, EntityManager entityManager,
       AutomationResult<OverrideOutput> results, StringBuilder details, OverrideOutput overrides, RequestData requestData,
       AutomationEngineData engineData, String covFrom, CoverageContainer container, boolean isCoverageCalculated) throws Exception {
+    if (!"C".equals(requestData.getAdmin().getReqType())) {
+      details.append("Coverage Calculation skipped for Updates.");
+      results.setResults("Skipped");
+      results.setDetails(details.toString());
+      return true;
+    }
     Data data = requestData.getData();
+    String scenario = data.getCustSubGrp();
     String coverageId = container.getFinalCoverage();
-    Addr zs01 = requestData.getAddress("ZS01");
+    Addr addr = requestData.getAddress("ZS01");
     details.append("\n");
     if (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && CalculateCoverageElement.COV_BG.equals(covFrom)) {
-      // If calculated using buying group then skip any other calculation
-      /*
-       * FieldResultKey sboKey = new FieldResultKey("DATA", "SALES_BO_CD");
-       * String sboValue = ""; if (overrides.getData().containsKey(sboKey)) {
-       * sboValue = overrides.getData().get(sboKey).getNewValue(); if
-       * (StringUtils.isNotBlank(data.getCustGrp()) &&
-       * !"CROSS".equals(data.getCustGrp())) {
-       * overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA",
-       * "INSTALL_BRANCH_OFF", data.getInstallBranchOff(), sboValue); } else if
-       * (StringUtils.isNotBlank(data.getCustGrp()) &&
-       * "CROSS".equals(data.getCustGrp()) &&
-       * (StringUtils.isBlank(data.getIsuCd()) ||
-       * (StringUtils.isNotBlank(data.getIsuCd()) &&
-       * !"200".equals(data.getIsuCd())))) {
-       * overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA",
-       * "INSTALL_BRANCH_OFF", data.getInstallBranchOff(), "200"); } } else {
-       * sboValue = getSBOfromCoverage(entityManager,
-       * container.getFinalCoverage()); if (StringUtils.isNotBlank(sboValue)) {
-       * details.append("SORTL calculated on basis of Existing CMR Data: " +
-       * sboValue); if (StringUtils.isNotBlank(data.getCustGrp()) &&
-       * !"CROSS".equals(data.getCustGrp())) {
-       * overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA",
-       * "INSTALL_BRANCH_OFF", data.getInstallBranchOff(), sboValue); } else if
-       * (StringUtils.isNotBlank(data.getCustGrp()) &&
-       * "CROSS".equals(data.getCustGrp()) &&
-       * (StringUtils.isBlank(data.getIsuCd()) ||
-       * (StringUtils.isNotBlank(data.getIsuCd()) &&
-       * !"200".equals(data.getIsuCd())))) {
-       * overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA",
-       * "INSTALL_BRANCH_OFF", data.getInstallBranchOff(), "200"); }
-       * overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA",
-       * "SALES_BO_CD", data.getSalesBusOffCd(), sboValue); } }
-       */
       engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
-    } else {
+    } else if (!FRANCE_SUBREGIONS.contains(addr.getLandCntry())) {
       isCoverageCalculated = false;
       // if not calculated using bg/gbg try calculation using SIREN
       details.setLength(0);// clear string builder
@@ -392,39 +368,11 @@ public class FranceUtil extends AutomationUtil {
           if (overrides.getData().containsKey(sboKey)) {
             sboValue = overrides.getData().get(sboKey).getNewValue();
             overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(), sboValue);
-            /*
-             * if (StringUtils.isNotBlank(data.getCustGrp()) &&
-             * !"CROSS".equals(data.getCustGrp())) {
-             * overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV,
-             * "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(),
-             * sboValue); } else if (StringUtils.isNotBlank(data.getCustGrp())
-             * && "CROSS".equals(data.getCustGrp()) &&
-             * (StringUtils.isBlank(data.getIsuCd()) ||
-             * (StringUtils.isNotBlank(data.getIsuCd()) &&
-             * !"200".equals(data.getIsuCd())))) {
-             * overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV,
-             * "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(), "200");
-             * }
-             */
           } else {
             sboValue = getSBOfromCoverage(entityManager, coverage.getFinalCoverage());
             if (StringUtils.isNotBlank(sboValue)) {
               details.append("SORTL calculated on basis of Existing CMR Data: " + sboValue);
               overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(), sboValue);
-              /*
-               * if (StringUtils.isNotBlank(data.getCustGrp()) &&
-               * !"CROSS".equals(data.getCustGrp())) {
-               * overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV,
-               * "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(),
-               * sboValue); } else if (StringUtils.isNotBlank(data.getCustGrp())
-               * && "CROSS".equals(data.getCustGrp()) &&
-               * (StringUtils.isBlank(data.getIsuCd()) ||
-               * (StringUtils.isNotBlank(data.getIsuCd()) &&
-               * !"200".equals(data.getIsuCd())))) {
-               * overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV,
-               * "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(),
-               * "200"); }
-               */
               overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sboValue);
             }
           }
@@ -439,33 +387,22 @@ public class FranceUtil extends AutomationUtil {
         details.append("Coverage could not be calculated on the basis of SIREN. SIREN/SIRET not found on the request.").append("\n");
       }
 
-      if (!isCoverageCalculated) {
+      if (!isCoverageCalculated && FRANCE_SUBREGIONS.contains(addr.getLandCntry())) {
         // if not calculated using siren as well
         if ("32".equals(data.getIsuCd()) && "S".equals(data.getClientTier())) {
           details.setLength(0);
           details.append("Calculating coverage using 32S-PostalCode logic.").append("\n");
-          HashMap<String, String> response = getSBOFromPostalCodeMapping(data.getCountryUse(), data.getIsicCd(), zs01.getPostCd(), data.getIsuCd(),
+          if (SCENARIO_INTERNAL_SO.equals(scenario) || SCENARIO_THIRD_PARTY.equals(scenario) || SCENARIO_CROSSBORDER_INTERNAL_SO.equals(scenario)
+              || SCENARIO_CROSSBORDER_THIRD_PARTY.equals(scenario)) {
+            addr = requestData.getAddress("ZI01");
+          }
+          HashMap<String, String> response = getSBOFromPostalCodeMapping(data.getCountryUse(), data.getIsicCd(), addr.getPostCd(), data.getIsuCd(),
               data.getClientTier());
           LOG.debug("Calculated SBO: " + response.get(SBO));
           if (StringUtils.isNotBlank(response.get(MATCHING))) {
             switch (response.get(MATCHING)) {
             case "Exact Match":
               overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), response.get(SBO));
-              /*
-               * if (StringUtils.isNotBlank(data.getCustGrp()) &&
-               * !"CROSS".equals(data.getCustGrp())) {
-               * overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV,
-               * "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(),
-               * response.get(SBO)); } else if
-               * (StringUtils.isNotBlank(data.getCustGrp()) &&
-               * "CROSS".equals(data.getCustGrp()) &&
-               * (StringUtils.isBlank(data.getIsuCd()) ||
-               * (StringUtils.isNotBlank(data.getIsuCd()) &&
-               * !"200".equals(data.getIsuCd())))) {
-               * overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV,
-               * "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(),
-               * "200"); }
-               */
               details.append("Coverage calculation Successful.").append("\n");
               details.append("Computed SBO = " + response.get(SBO)).append("\n\n");
               details.append("Matched Rule:").append("\n");
@@ -497,6 +434,20 @@ public class FranceUtil extends AutomationUtil {
       }
     }
     return true;
+  }
+
+  @Override
+  public String getAddressTypeForGbgCovCalcs(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData) throws Exception {
+    Data data = requestData.getData();
+    String scenario = data.getCustSubGrp();
+    String address = "ZS01";
+
+    LOG.debug("Address for the scenario to check: " + scenario);
+    if (SCENARIO_INTERNAL_SO.equals(scenario) || SCENARIO_THIRD_PARTY.equals(scenario) || SCENARIO_CROSSBORDER_INTERNAL_SO.equals(scenario)
+        || SCENARIO_CROSSBORDER_THIRD_PARTY.equals(scenario)) {
+      address = "ZI01";
+    }
+    return address;
   }
 
   private HashMap<String, String> getSBOFromPostalCodeMapping(String countryUse, String isicCd, String postCd, String isuCd, String clientTier) {
