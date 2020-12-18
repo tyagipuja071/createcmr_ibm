@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.ibm.cio.cmr.request.util.geo.impl;
 
@@ -48,9 +48,9 @@ import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
 
 /**
  * Handler for Malta
- * 
+ *
  * @author Garima Naraang
- * 
+ *
  */
 public class MaltaHandler extends BaseSOFHandler {
 
@@ -964,6 +964,7 @@ public class MaltaHandler extends BaseSOFHandler {
 
             // Data Sheet
             String isic = ""; // 3
+            String sbo = ""; // 5
             String classificationCd = ""; // 10
             String inac = ""; // 7
             String ordBlk = ""; // 11
@@ -1051,6 +1052,9 @@ public class MaltaHandler extends BaseSOFHandler {
               currCell = (XSSFCell) row.getCell(3);
               isic = validateColValFromCell(currCell);
 
+              currCell = (XSSFCell) row.getCell(5);
+              sbo = validateColValFromCell(currCell);
+
               currCell = (XSSFCell) row.getCell(7);
               inac = validateColValFromCell(currCell);
 
@@ -1073,6 +1077,11 @@ public class MaltaHandler extends BaseSOFHandler {
                   && !inac.matches("^[a-zA-Z][a-zA-Z][0-9][0-9]$")) {
                 LOG.trace("INAC should have all 4 digits or 2 letters and 2 digits in order.");
                 error.addError(row.getRowNum(), rowNumber + "INAC/NAC", "INAC should have all 4 digits or 2 letters and 2 digits in order.");
+              }
+
+              if (!StringUtils.isBlank(sbo) && !StringUtils.isAlphanumeric(sbo)) {
+                LOG.trace("Enter valid values for SBO/Search Term.");
+                error.addError(row.getRowNum(), rowNumber + "SBO/Search Term", "Enter valid values for SBO/Search Term");
               }
 
               if (!StringUtils.isBlank(ordBlk) && !("88".equals(ordBlk) || "94".equals(ordBlk) || "@".equals(ordBlk))) {
