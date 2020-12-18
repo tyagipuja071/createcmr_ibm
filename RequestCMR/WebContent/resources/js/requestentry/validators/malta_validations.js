@@ -726,6 +726,7 @@ function addAfterTemplateLoadMalta(fromAddress, scenario, scenarioChanged) {
     }
   }
   enterpriseMalta();
+  resetVatRequired();
   hidePpsceidExceptBP();
 }
 
@@ -806,6 +807,15 @@ function setVatValidatorMalta() {
     if (!dijit.byId('vatExempt').get('checked')) {
       checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
     }
+  }
+}
+
+function resetVatRequired() {
+  var _custType = FormManager.getActualValue('custSubGrp');
+  if (_custType == 'INTER' || _custType == 'GOVRN' || _custType == 'PRICU' || _custType == 'XGOV') {
+    FormManager.removeValidator('ppsceid', Validators.REQUIRED);
+  } else {
+    FormManager.addValidator('vat', Validators.REQUIRED, [ 'vat' ]);
   }
 }
 
