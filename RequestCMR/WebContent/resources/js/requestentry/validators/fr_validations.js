@@ -2225,7 +2225,6 @@ function setISUClientTierOnScenario() {
   var countyCd = null;
   var countryUse = FormManager.getActualValue('countryUse');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var landCntry = FormManager.getActualValue('landCntry');// CMR-234
 
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
@@ -2233,7 +2232,7 @@ function setISUClientTierOnScenario() {
   } else {
     return;
   }
-  if (role != 'Requester') {
+  if (role != 'Requester' && role != 'Processor') {// CMR-234
     return;
   }
   if (reqType == 'U') {
@@ -2268,6 +2267,9 @@ function setISUClientTierOnScenario() {
       && (custSubGrp == 'CBMME' || custSubGrp == 'CBVRN' || custSubGrp == 'XBLUM' || custSubGrp == 'CBIEM' || custSubGrp == 'CBFIN' || custSubGrp == 'CBTSO' || custSubGrp == 'CBDPT' || custSubGrp == 'CBSTC')) {
     FormManager.setValue('isuCd', '32');
     FormManager.setValue('clientTier', 'S');
+  } else if (custSubGrp == 'XBLUM' || custSubGrp == 'BUSPR' || custSubGrp == 'INTER' || custSubGrp == 'CBTER') {
+    FormManager.setValue('isuCd', '21');
+    FormManager.setValue('clientTier', '7');
   } else {
     return;
   }
@@ -2740,6 +2742,20 @@ function orderBlockCodeValidator(){
       }
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
+function setIERPSitePartyIDForFR() {
+  var role = null;
+  var sapNo = FormManager.getActualValue('sapNo');
+  var reqType = FormManager.getActualValue('reqType');
+  if (typeof (_pagemodel) != 'undefined') {
+    role = _pagemodel.userRole;
+  }
+  if (reqType == 'U') {
+    if (sapNo != null) {
+      FormManager.setValue('ierpSitePrtyId', 'S' + sapNo);
+    }
+  }
 }
 
 function setIERPSitePartyIDForFR() {
