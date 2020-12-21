@@ -63,7 +63,7 @@ public class FranceHandler extends GEOHandler {
   private static final List<String> IERP_ISSUING_COUNTRY_VAL = Arrays.asList("706");
 
   private static final String[] CH_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "LocalTax2", "SitePartyID", "Division", "POBoxCity", "City2", "Affiliate",
-      "Company", "INACType", "POBoxPostalCode", "TransportZone", "CurrencyCode" };
+      "Company", "INACType", "POBoxPostalCode", "TransportZone", "CurrencyCode", "MembLevel", "BPRelationType" };
 
   public static final String FR_MASSCHANGE_TEMPLATE_ID = "France";
 
