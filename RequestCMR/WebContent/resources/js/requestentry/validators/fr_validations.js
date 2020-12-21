@@ -15,7 +15,7 @@ function afterConfigForFR() {
   FormManager.hide('CountrySubRegion', 'countryUse');
   var role = null;
   var reqType = null;
-
+  
   reqType = FormManager.getActualValue('reqType');
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
@@ -47,7 +47,7 @@ function afterConfigForFR() {
       FormManager.limitDropdownValues(FormManager.getField('taxCd2'), [ '1', '0' ]);
       FormManager.setValue('taxCd2', '1');
 
-      FormManager.readOnly('embargoCd');
+      FormManager.readOnly('ordBlk');
     }
 
     if (reqType == 'U') {
@@ -55,27 +55,9 @@ function afterConfigForFR() {
       FormManager.enable('currencyCd');
       FormManager.enable('abbrevNm');
       FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
-
-      FormManager.enable('embargoCd');
-      FormManager.addFormValidator((function() {
-        return {
-          validate : function() {
-            var orderBlockCd = FormManager.getActualValue('embargoCd');
-            if (orderBlockCd == '94' || orderBlockCd == '88' || orderBlockCd == '') {
-              return new ValidationResult(null, true);
-            } else {
-              return new ValidationResult({
-                id : 'embargoCd',
-                type : 'text',
-                name : 'embargoCd'
-              }, false, 'Order Block Code value should be only 94 or 88 or empty.');
-            }
-
-            return new ValidationResult(null, true);
-          }
-        };
-      })(), 'MAIN_CUST_TAB', 'frmCMR');
-
+      
+      FormManager.enable('ordBlk');
+      orderBlockCodeValidator();
     }
   } else if (role == 'Processor') {
     FormManager.enable('abbrevNm');
@@ -86,6 +68,8 @@ function afterConfigForFR() {
     // FormManager.addValidator('taxCd2', Validators.REQUIRED, [ 'Tax Code' ],
     // 'MAIN_CUST_TAB');
     FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
+    
+    orderBlockCodeValidator();
   }
 
   if (role == 'Processor' && reqType == 'C') {
@@ -2627,87 +2611,135 @@ function canCopyAddress(value, rowIndex, grid) {
 
 // Control Classification Code
 function setClassificationCode() {
-
+  
+  var role = null;
+  if (typeof (_pagemodel) != 'undefined') {
+    role = _pagemodel.userRole;
+  }
+  
   var reqType = FormManager.getActualValue('reqType');
   var field = FormManager.getField('custClass');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var custClass = '';
   var pageModelFlag = 'N';
-
   if (typeof (_pagemodel) != 'undefined') {
     if (_pagemodel.custClass != null && _pagemodel.custClass != 'null') {
       pageModelFlag = 'Y';
     }
+    
+    if (_pagemodel.custClass != null && _pagemodel.custClass != 'null') {
+      custClass = _pagemodel.custClass;
+    }
   }
-
+  
   FormManager.show('CustClass', 'custClass');
   FormManager.resetDropdownValues(FormManager.getField('custClass'));
+  
+  if(role == 'Requester'){
+    if (reqType == 'C') {
+      if (custSubGrp != '') {
+        if (custSubGrp == 'COMME' || custSubGrp == 'CBMME' || custSubGrp == 'HOSTC' || custSubGrp == 'CBSTC' || custSubGrp == 'THDPT' || custSubGrp == 'CBDPT') {
+          FormManager.setValue(field, '11');
+        } else if (custSubGrp == 'BUSPR' || custSubGrp == 'XBUSP') {
+          FormManager.limitDropdownValues(field, [ '42', '43', '44', '45', '46', '47', '48' ]);
+          FormManager.enable(field);
+          
+          if (pageModelFlag == 'Y') {
+            FormManager.setValue(field, _pagemodel.custClass);
+          } else {
+            FormManager.setValue(field, '43');
+          }
+          
+        } else if (custSubGrp == 'PRICU' || custSubGrp == 'XBLUM') {
+          FormManager.setValue(field, '60');
+          FormManager.readOnly('custClass');
+        } else if (custSubGrp == 'GOVRN' || custSubGrp == 'CBVRN') {
+          FormManager.limitDropdownValues(field, [ '13', '14', '17' ]);
+          FormManager.enable(field);
+          
+          if (pageModelFlag == 'Y') {
+            FormManager.setValue(field, _pagemodel.custClass);
+          } else {
+            FormManager.setValue(field, '13');
+          }
+          
+        } else if (custSubGrp == 'INTER' || custSubGrp == 'CBTER') {
+          FormManager.setValue(field, '81');
+          FormManager.readOnly('custClass');
+        } else if (custSubGrp == 'INTSO' || custSubGrp == 'CBTSO') {
+          FormManager.setValue(field, '85');
+          FormManager.readOnly('custClass');
+        } else if (custSubGrp == 'LCFIN' || custSubGrp == 'CBFIN') {
+          FormManager.limitDropdownValues(field, [ '32', '33', '34', '35', '36' ]);
+          FormManager.enable(field);
 
-  if (reqType == 'C') {
-    if (custSubGrp != '') {
-      if (custSubGrp == 'COMME' || custSubGrp == 'CBMME' || custSubGrp == 'HOSTC' || custSubGrp == 'CBSTC' || custSubGrp == 'THDPT' || custSubGrp == 'CBDPT') {
-        FormManager.setValue(field, '11');
-        FormManager.readOnly(field);
-      } else if (custSubGrp == 'BUSPR' || custSubGrp == 'XBUSP') {
-        FormManager.limitDropdownValues(field, [ '42', '43', '44', '45', '46', '47', '48' ]);
-        FormManager.enable(field);
+          if (pageModelFlag == 'Y') {
+            FormManager.setValue(field, _pagemodel.custClass);
+          } else {
+            FormManager.setValue(field, '33');
+          }
 
-        if (pageModelFlag == 'Y') {
-          FormManager.setValue(field, _pagemodel.custClass);
-        } else {
-          FormManager.setValue(field, '43');
+        } else if (custSubGrp == 'IBMEM' || custSubGrp == 'CBIEM') {
+          FormManager.setValue(field, '71');
+          FormManager.readOnly('custClass');
         }
-
-      } else if (custSubGrp == 'PRICU' || custSubGrp == 'XBLUM') {
-        FormManager.setValue(field, '60');
-        FormManager.readOnly(field);
-      } else if (custSubGrp == 'GOVRN' || custSubGrp == 'CBVRN') {
-        FormManager.limitDropdownValues(field, [ '13', '14', '17' ]);
-        FormManager.enable(field);
-
-        if (pageModelFlag == 'Y') {
-          FormManager.setValue(field, _pagemodel.custClass);
-        } else {
-          FormManager.setValue(field, '13');
-        }
-
-      } else if (custSubGrp == 'INTER' || custSubGrp == 'CBTER') {
-        FormManager.setValue(field, '81');
-        FormManager.readOnly(field);
-      } else if (custSubGrp == 'INTSO' || custSubGrp == 'CBTSO') {
-        FormManager.setValue(field, '85');
-        FormManager.readOnly(field);
-      } else if (custSubGrp == 'LCFIN' || custSubGrp == 'CBFIN') {
-        FormManager.limitDropdownValues(field, [ '32', '33', '34', '35', '36' ]);
-        FormManager.enable(field);
-
-        if (pageModelFlag == 'Y') {
-          FormManager.setValue(field, _pagemodel.custClass);
-        } else {
-          FormManager.setValue(field, '33');
-        }
-
-      } else if (custSubGrp == 'IBMEM' || custSubGrp == 'CBIEM') {
-        FormManager.setValue(field, '71');
-        FormManager.readOnly(field);
+        FormManager.resetDropdownValues(FormManager.getField('taxCd2'));
+        FormManager.limitDropdownValues(FormManager.getField('taxCd2'), [ '1', '0' ]);
+        FormManager.setValue('taxCd2', '1');
+      } else {
+        FormManager.setValue(field, '');
+        FormManager.readOnly('custClass');
       }
-      FormManager.resetDropdownValues(FormManager.getField('taxCd2'));
-      FormManager.limitDropdownValues(FormManager.getField('taxCd2'), [ '1', '0' ]);
-      FormManager.setValue('taxCd2', '1');
-    } else {
-      FormManager.setValue(field, '');
-      FormManager.readOnly(field);
+    } else if (reqType == 'U') {
+      FormManager.limitDropdownValues(field, [ '11', '13', '14', '17', '32', '33', '34', '35', '36', '42', '43', '44', '45', '46', '47', '48', '60', '71', '81', '85' ]);
+      FormManager.setValue(field, custClass);
+      FormManager.readOnly('custClass');
     }
-  } else if (reqType == 'U') {
+  } else if(role == 'Processor') {
     FormManager.limitDropdownValues(field, [ '11', '13', '14', '17', '32', '33', '34', '35', '36', '42', '43', '44', '45', '46', '47', '48', '60', '71', '81', '85' ]);
+    FormManager.setValue(field, custClass);
     FormManager.enable(field);
+  } else if(role == 'Viewer') {
+    FormManager.limitDropdownValues(field, [ '11', '13', '14', '17', '32', '33', '34', '35', '36', '42', '43', '44', '45', '46', '47', '48', '60', '71', '81', '85' ]);
+    FormManager.setValue(field, custClass);
+    FormManager.readOnly('custClass');
   }
-
+  
 }
 
 function setTaxCd() {
   FormManager.resetDropdownValues(FormManager.getField('taxCd2'));
   FormManager.limitDropdownValues(FormManager.getField('taxCd2'), [ '1', '0' ]);
-  FormManager.setValue('taxCd2', '1');
+  
+  if (typeof (_pagemodel) != 'undefined') {
+    if (_pagemodel.taxCd2 == null && _pagemodel.taxCd2 == 'null') {
+      FormManager.setValue(FormManager.getField('taxCd2'), '1');
+    } else {
+      FormManager.setValue(FormManager.getField('taxCd2'), _pagemodel.taxCd2);
+    }
+  }
+  
+}
+
+function orderBlockCodeValidator(){
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var orderBlockCd = FormManager.getActualValue('ordBlk');
+        if (orderBlockCd == '94' || orderBlockCd == '88' || orderBlockCd == '') {
+          return new ValidationResult(null, true);
+        } else {
+          return new ValidationResult({
+            id : 'ordBlk',
+            type : 'text',
+            name : 'ordBlk'
+          }, false, 'Order Block Code value should be only 94 or 88 or empty.');
+        }
+        
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
 function setIERPSitePartyIDForFR() {

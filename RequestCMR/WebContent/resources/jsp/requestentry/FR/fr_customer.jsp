@@ -32,7 +32,7 @@
           <cmr:fieldLabel fieldId="EmbargoCode" />:
             <cmr:delta text="${rdcdata.embargoCd}" oldValue="${reqentry.embargoCd}" />
         </cmr:label>
-        <cmr:field path="embargoCd" id="embargoCd" fieldId="EmbargoCode" tabId="MAIN_CUST_TAB" />
+        <cmr:field path="ordBlk" id="ordBlk" fieldId="EmbargoCode" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
   </cmr:row>
