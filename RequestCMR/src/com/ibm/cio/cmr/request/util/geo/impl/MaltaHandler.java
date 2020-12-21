@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.ibm.cio.cmr.request.util.geo.impl;
 
@@ -43,9 +43,9 @@ import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
 
 /**
  * Handler for Malta
- * 
+ *
  * @author Garima Naraang
- * 
+ *
  */
 public class MaltaHandler extends BaseSOFHandler {
 
@@ -909,6 +909,7 @@ public class MaltaHandler extends BaseSOFHandler {
     for (String name : MT_MASS_UPDATE_SHEET_NAMES) {
       XSSFSheet sheet = book.getSheet(name);
       if (sheet != null) {
+        TemplateValidation error = new TemplateValidation(name);
         for (Row row : sheet) {
           if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
 
@@ -929,6 +930,7 @@ public class MaltaHandler extends BaseSOFHandler {
 
             // Data Sheet
             String isic = ""; // 3
+            String sbo = ""; // 5
             String classificationCd = ""; // 10
             String inac = ""; // 7
             String ordBlk = ""; // 11
@@ -937,7 +939,6 @@ public class MaltaHandler extends BaseSOFHandler {
               continue;
             }
 
-            TemplateValidation error = new TemplateValidation(name);
             String rowNumber = "Row" + row.getRowNum() + ": ";
 
             if (!"Data".equalsIgnoreCase(sheet.getSheetName())) {
@@ -983,20 +984,20 @@ public class MaltaHandler extends BaseSOFHandler {
                   LOG.trace("Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
                   error.addError(row.getRowNum(), rowNumber + "Address Sequence No.",
                       "Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
-                  validations.add(error);
+                  // validations.add(error);
                 }
 
                 if (!StringUtils.isBlank(phone) && !phone.contains("@") && !StringUtils.isNumeric(phone)) {
                   LOG.trace("Phone Number should contain only digits.");
                   error.addError(row.getRowNum(), rowNumber + "Phone #", "Phone Number should contain only digits.");
-                  validations.add(error);
+                  // validations.add(error);
                 }
               } else {
                 if (!StringUtils.isBlank(cmrNo) && StringUtils.isBlank(seqNo) && !"Data".equalsIgnoreCase(sheet.getSheetName())) {
                   LOG.trace("Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
                   error.addError(row.getRowNum(), rowNumber + "Address Sequence No.",
                       "Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
-                  validations.add(error);
+                  // validations.add(error);
                 }
 
                 if (!StringUtils.isBlank(city) && !StringUtils.isBlank(postalCode)) {
@@ -1005,7 +1006,7 @@ public class MaltaHandler extends BaseSOFHandler {
                     LOG.trace("Total computed length of City and Postal Code should not exceed 28 characters.");
                     error.addError(row.getRowNum(), rowNumber + "City",
                         "Total computed length of City and Postal Code should not exceed 28 characters.");
-                    validations.add(error);
+                    // validations.add(error);
                   }
                 }
               }
@@ -1015,6 +1016,9 @@ public class MaltaHandler extends BaseSOFHandler {
 
               currCell = (XSSFCell) row.getCell(3);
               isic = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(5);
+              sbo = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(7);
               inac = validateColValFromCell(currCell);
@@ -1031,7 +1035,7 @@ public class MaltaHandler extends BaseSOFHandler {
                     "Note that ISIC value 9500 can be entered only for CMR with Classification code 60. Please fix and upload the template again.");
                 error.addError(row.getRowNum(), rowNumber + "Classification Code",
                     "Note that ISIC value 9500 can be entered only for CMR with Classification code 60. Please fix and upload the template again.");
-                validations.add(error);
+                // validations.add(error);
               }
 
               if (!StringUtils.isBlank(inac) && inac.length() == 4 && !StringUtils.isNumeric(inac) && !"@@@@".equals(inac)
@@ -1040,11 +1044,16 @@ public class MaltaHandler extends BaseSOFHandler {
                 error.addError(row.getRowNum(), rowNumber + "INAC/NAC", "INAC should have all 4 digits or 2 letters and 2 digits in order.");
               }
 
+              if (!StringUtils.isBlank(sbo) && !StringUtils.isAlphanumeric(sbo)) {
+                LOG.trace("Enter valid values for SBO/Search Term.");
+                error.addError(row.getRowNum(), rowNumber + "SBO/Search Term", "Enter valid values for SBO/Search Term");
+              }
+
               if (!StringUtils.isBlank(ordBlk) && !("88".equals(ordBlk) || "94".equals(ordBlk) || "@".equals(ordBlk))) {
                 LOG.trace("Note that value of Order block can only be 88 or 94 or @ or blank. Please fix and upload the template again.");
                 error.addError(row.getRowNum(), rowNumber + "Order block",
                     "Note that value of Order block can only be 88 or 94 or @ or blank. Please fix and upload the template again.");
-                validations.add(error);
+                // validations.add(error);
               }
             }
 
@@ -1061,10 +1070,13 @@ public class MaltaHandler extends BaseSOFHandler {
             if (StringUtils.isEmpty(cmrNo)) {
               LOG.trace("Note that CMR No. is mandatory. Please fix and upload the template again.");
               error.addError(row.getRowNum(), rowNumber + "CMR No.", "Note that CMR No. is mandatory. Please fix and upload the template again.");
-              validations.add(error);
+              // validations.add(error);
             }
 
           }
+        } // end row loop
+        if (error.hasErrors()) {
+          validations.add(error);
         }
       }
     }
