@@ -46,18 +46,17 @@ public class IERPRequestUtils extends RequestUtils {
   private static final List<String> FIELDS_CLEAR_LIST = new ArrayList<String>();
 
   static {
-    // FIELDS_CLEAR_LIST.add("CollectionCd");
-    // FIELDS_CLEAR_LIST.add("SpecialTaxCd");
-    // FIELDS_CLEAR_LIST.add("ModeOfPayment");
-    // FIELDS_CLEAR_LIST.add("CrosSubTyp");
-    // FIELDS_CLEAR_LIST.add("TipoCliente");
-    // FIELDS_CLEAR_LIST.add("CommercialFinanced");
+    FIELDS_CLEAR_LIST.add("CollectionCd");
+    FIELDS_CLEAR_LIST.add("SpecialTaxCd");
+    FIELDS_CLEAR_LIST.add("ModeOfPayment");
+    FIELDS_CLEAR_LIST.add("CrosSubTyp");
+    FIELDS_CLEAR_LIST.add("TipoCliente");
+    FIELDS_CLEAR_LIST.add("CommercialFinanced");
     FIELDS_CLEAR_LIST.add("EmbargoCode");
-    // FIELDS_CLEAR_LIST.add("Enterprise");
-    // FIELDS_CLEAR_LIST.add("TypeOfCustomer");
-    // FIELDS_CLEAR_LIST.add("CodFlag");
-
-    // LD_BYPASS_MASS_UPDT_DUP_FILLS_VAL.add("758");
+    FIELDS_CLEAR_LIST.add("OrderBlock");
+    FIELDS_CLEAR_LIST.add("Enterprise");
+    FIELDS_CLEAR_LIST.add("TypeOfCustomer");
+    FIELDS_CLEAR_LIST.add("CodFlag");
   }
 
   public static boolean isCountryDREnabled(EntityManager entityManager, String cntry) {
