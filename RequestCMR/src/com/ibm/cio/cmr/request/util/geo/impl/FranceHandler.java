@@ -165,8 +165,8 @@ public class FranceHandler extends GEOHandler {
 
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
-
-    String zs01sapNo = getKunnrSapr3Kna1(data.getCmrNo(), mainRecord.getCmrOrderBlock());
+    
+    String zs01sapNo = getKunnrSapr3Kna1ForFR(data.getCmrNo(), mainRecord.getCmrOrderBlock());
     data.setMemLvl(getMembershipLevel(zs01sapNo));
     if (CmrConstants.PROSPECT_ORDER_BLOCK.equals(mainRecord.getCmrOrderBlock())) {
       data.setProspectSeqNo(mainRecord.getCmrAddrSeq());
@@ -179,13 +179,13 @@ public class FranceHandler extends GEOHandler {
     try {
       if ("88".equals(mainRecord.getCmrOrderBlock()) || "".equals(mainRecord.getCmrOrderBlock())) {
         data.setCurrencyCd(geCurrencyCode(zs01sapNo));
-        data.setTaxCd1(getTaxCode(zs01sapNo));
+        data.setTaxCd2(getTaxCodeForFR(zs01sapNo));
       }
     } catch (Exception e) {
       LOG.error("Error occured on setting Currency Code/ tax code value during import.");
       e.printStackTrace();
     }
-
+    
   }
 
   @Override
@@ -1249,6 +1249,67 @@ public class FranceHandler extends GEOHandler {
     }
     HashMap<String, String> hwFlagMap = new HashMap<>();
 
+  }
+  
+  private String getKunnrSapr3Kna1ForFR(String cmrNo, String ordBlk) throws Exception {
+    String kunnr = "";
+
+    String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
+    String mandt = SystemConfiguration.getValue("MANDT");
+    String sql = ExternalizedQuery.getSql("GET.KNA1.KUNNR_U_FR");
+    sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
+    sql = StringUtils.replace(sql, ":ZZKV_CUSNO", "'" + cmrNo + "'");
+    sql = StringUtils.replace(sql, ":AUFSD", "'" + ordBlk + "'");
+
+    String dbId = QueryClient.RDC_APP_ID;
+
+    QueryRequest query = new QueryRequest();
+    query.setSql(sql);
+    query.addField("KUNNR");
+    query.addField("ZZKV_CUSNO");
+
+    LOG.debug("Getting existing KUNNR value from RDc DB..");
+    
+    QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
+    QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
+
+    if (response.isSuccess() && response.getRecords() != null && response.getRecords().size() != 0) {
+      List<Map<String, Object>> records = response.getRecords();
+      Map<String, Object> record = records.get(0);
+      kunnr = record.get("KUNNR") != null ? record.get("KUNNR").toString() : "";
+      LOG.debug("***RETURNING KUNNR > " + kunnr);
+    }
+    return kunnr;
+  }
+  
+  private String getTaxCodeForFR(String kunnr) throws Exception {
+    String taxcode = "";
+
+    String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
+    String mandt = SystemConfiguration.getValue("MANDT");
+    String sql = ExternalizedQuery.getSql("GET.TAXCODE.TAXKD_FR");
+    sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
+    sql = StringUtils.replace(sql, ":KUNNR", "'" + kunnr + "'");
+    String dbId = QueryClient.RDC_APP_ID;
+
+    QueryRequest query = new QueryRequest();
+    query.setSql(sql);
+    query.addField("TAXKD");
+    query.addField("MANDT");
+    query.addField("KUNNR");
+
+    LOG.debug("Getting existing TAXKD value from RDc DB..");
+    
+    QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
+    QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
+
+    if (response.isSuccess() && response.getRecords() != null && response.getRecords().size() != 0) {
+      List<Map<String, Object>> records = response.getRecords();
+      Map<String, Object> record = records.get(0);
+      taxcode = record.get("TAXKD") != null ? record.get("TAXKD").toString() : "";
+      LOG.debug("***RETURNING TAXKD > " + taxcode + " WHERE KUNNR IS > " + kunnr);
+    }
+    return taxcode;
   }
 
 }
