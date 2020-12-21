@@ -972,7 +972,7 @@ public class MaltaHandler extends BaseSOFHandler {
               landCntry = validateColValFromCell(currCell);
 
               if ("Ship-To".equalsIgnoreCase(sheet.getSheetName())) {
-                currCell = (XSSFCell) row.getCell(11);
+                currCell = (XSSFCell) row.getCell(10);
                 phone = validateColValFromCell(currCell);
 
                 if (!StringUtils.isBlank(cmrNo) && StringUtils.isBlank(seqNo) && !"Data".equalsIgnoreCase(sheet.getSheetName())) {
