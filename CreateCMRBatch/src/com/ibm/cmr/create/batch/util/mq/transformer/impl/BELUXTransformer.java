@@ -53,10 +53,12 @@ public class BELUXTransformer extends EMEATransformer {
   private static final String[] NO_UPDATE_FIELDS = { "OrganizationNo", "CurrencyCode" };
 
   private static final String[] ADDRESS_ORDER = { "ZS01", "ZP01", "ZI01", "ZD01", "ZS02" };
+  private static final List SUB_TYPES_INTERNAL = Arrays.asList("BEINT", "LUINT", "INTER");
+  private static final List SUB_TYPES_INTERNAL_SO = Arrays.asList("BEISO", "LUISO");
 
   private static final Logger LOG = Logger.getLogger(EMEATransformer.class);
 
-  public static String DEFAULT_LANDED_COUNTRY = "AE";
+  public static String DEFAULT_LANDED_COUNTRY = "BE";
   public static final String CMR_REQUEST_REASON_TEMP_REACT_EMBARGO = "TREC";
   public static final String CMR_REQUEST_STATUS_CPR = "CPR";
   public static final String CMR_REQUEST_STATUS_PCR = "PCR";
@@ -81,7 +83,6 @@ public class BELUXTransformer extends EMEATransformer {
   private static final String[] BELUX_GBMSBM_COUNTRIES = { "624" };
   private static final String SCENARIO_TYPE_SBM = "SBM";
   private static final String SCENARIO_TYPE_GBM = "GBM";
-  // private static final String GULF_DUPLICATE = "GULF";
 
   public BELUXTransformer(String issuingCntry) {
     super(issuingCntry);
@@ -98,7 +99,7 @@ public class BELUXTransformer extends EMEATransformer {
     LOG.debug("Handling " + (update ? "update" : "create") + " request.");
     Map<String, String> messageHash = handler.messageHash;
 
-    handleEMEADefaults(handler, messageHash, cmrData, addrData, crossBorder);
+    // handleEMEADefaults(handler, messageHash, cmrData, addrData, crossBorder);
     // handleDataDefaults(handler, messageHash, cmrData, crossBorder,
     // addrData);
 
@@ -451,6 +452,18 @@ public class BELUXTransformer extends EMEATransformer {
     return !DEFAULT_LANDED_COUNTRY.equals(addr.getLandCntry());
   }
 
+  // private String getDefaultLandedCountry(String cntryCode) {
+  // if ("693".equals(cntryCode)) {
+  // DEFAULT_LANDED_COUNTRY = "BE";
+  // }
+  // if ("695".equals(cntryCode)) {
+  // DEFAULT_LANDED_COUNTRY = "LU";
+  // }
+  // if ("788".equals(cntryCode)) {
+  // DEFAULT_LANDED_COUNTRY = "NL";
+  // }
+  // }
+
   @Override
   public String getAddressUse(Addr addr) {
     switch (addr.getId().getAddrType()) {
@@ -657,27 +670,20 @@ public class BELUXTransformer extends EMEATransformer {
     System.out.println("_custSubGrp = " + custSubGrp);
 
     LOG.debug("Set max and min range of cmrNo..");
-    // if (_custSubGrp == "INTER" || _custSubGrp == "XINT") {
-    if (custSubGrp.contains("IN")) {
-      if (!StringUtils.isBlank(data.getAbbrevNm()) && data.getAbbrevNm().startsWith("DUMMY")) {
-        generateCMRNoObj.setMin(985001);
-        generateCMRNoObj.setMax(985999);
-      } else {
-        generateCMRNoObj.setMin(990300);
-        generateCMRNoObj.setMax(999990);
-      }
-    } else if (custSubGrp.contains("BP") || custSubGrp.contains("BUS")) {
-      generateCMRNoObj.setMin(1000);
-      generateCMRNoObj.setMax(9999);
-      LOG.debug("that is ME BP CMR");
-    } else {
-      generateCMRNoObj.setMin(15000);
-      generateCMRNoObj.setMax(984880);
+    // 624 and 788 Internal - 99xxxx
+    // Internal SO - 997xxx or 998xxx
+
+    if (SUB_TYPES_INTERNAL.contains(custSubGrp)) {
+      generateCMRNoObj.setMin(990000);
+      generateCMRNoObj.setMax(999999);
+    } else if (SUB_TYPES_INTERNAL_SO.contains(custSubGrp)) {
+      generateCMRNoObj.setMin(997000);
+      generateCMRNoObj.setMax(998999);
     }
 
-    if ("Y".equals(data.getDupCmrIndc())) {
-      generateCMRNoObj.setLoc2("624");
-    }
+    // if ("Y".equals(data.getDupCmrIndc())) {
+    // generateCMRNoObj.setLoc2("624");
+    // }
   }
 
   @Override
