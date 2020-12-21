@@ -42,6 +42,7 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
+import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
@@ -185,7 +186,15 @@ public class FranceHandler extends GEOHandler {
       LOG.error("Error occured on setting Currency Code/ tax code value during import.");
       e.printStackTrace();
     }
-    
+    EntityManager em = JpaManager.getEntityManager();
+    String sql = ExternalizedQuery.getSql("AT.GET.ZS01.DATLT");
+    PreparedQuery query = new PreparedQuery(em, sql);
+    query.setParameter("COUNTRY", SystemLocation.FRANCE);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("CMR_NO", data.getCmrNo());
+    String datlt = query.getSingleResult(String.class);
+    data.setAbbrevLocn(datlt);
+    LOG.trace("Abbrev Loc: " + data.getAbbrevLocn());
   }
 
   @Override
