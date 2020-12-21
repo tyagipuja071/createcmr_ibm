@@ -733,9 +733,6 @@ public class FranceUtil extends AutomationUtil {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
     Addr soldTo = requestData.getAddress("ZS01");
-    if (handlePrivatePersonRecord(entityManager, admin, output, validation, engineData)) {
-      return true;
-    }
 
     StringBuilder details = new StringBuilder();
     boolean cmdeReview = false;
@@ -787,6 +784,8 @@ public class FranceUtil extends AutomationUtil {
       case "INAC/NAC Code":
       case "SIRET":
         cmdeReview = true;
+        details.append("Updates to one or more fields cannot be validated.\n");
+        details.append("-" + change.getDataField() + " needs to be verified.\n");
         break;
       default:
         ignoredUpdates.add(change.getDataField());
@@ -796,7 +795,6 @@ public class FranceUtil extends AutomationUtil {
 
     if (cmdeReview) {
       engineData.addNegativeCheckStatus("_esDataCheckFailed", "Updates to one or more fields cannot be validated.");
-      details.append("Updates to one or more fields cannot be validated.\n");
       validation.setSuccess(false);
       validation.setMessage("Not Validated");
     } else {
@@ -820,10 +818,6 @@ public class FranceUtil extends AutomationUtil {
 
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
-    Addr installing = requestData.getAddress("ZS01");
-    if (handlePrivatePersonRecord(entityManager, admin, output, validation, engineData)) {
-      return true;
-    }
     List<Addr> addresses = null;
     StringBuilder checkDetails = new StringBuilder();
     Set<String> resultCodes = new HashSet<String>();// R - review
