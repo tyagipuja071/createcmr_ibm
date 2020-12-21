@@ -52,7 +52,8 @@ public class IERPRequestUtils extends RequestUtils {
     // FIELDS_CLEAR_LIST.add("CrosSubTyp");
     // FIELDS_CLEAR_LIST.add("TipoCliente");
     // FIELDS_CLEAR_LIST.add("CommercialFinanced");
-    FIELDS_CLEAR_LIST.add("EmbargoCode");
+    // FIELDS_CLEAR_LIST.add("EmbargoCode");
+    FIELDS_CLEAR_LIST.add("OrderBlock");
     // FIELDS_CLEAR_LIST.add("Enterprise");
     // FIELDS_CLEAR_LIST.add("TypeOfCustomer");
     // FIELDS_CLEAR_LIST.add("CodFlag");
