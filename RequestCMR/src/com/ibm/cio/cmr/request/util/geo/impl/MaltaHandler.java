@@ -835,12 +835,7 @@ public class MaltaHandler extends BaseSOFHandler {
       String maxAddrSeq = "99999";
       String sql = null;
       reqType = getReqType(entityManager, reqId);
-      if (reqType.equalsIgnoreCase("U")) {
-        cmrNo = getCMRNo(entityManager, reqId);
-        sql = ExternalizedQuery.getSql("ADDRESS.GETADDRSEQ.MT_U");
-      } else {
-        sql = ExternalizedQuery.getSql("ADDRESS.GETADDRSEQ.MT_C");
-      }
+      sql = ExternalizedQuery.getSql("ADDRESS.GETADDRSEQ.MT");
       PreparedQuery query = new PreparedQuery(entityManager, sql);
       query.setParameter("REQ_ID", reqId);
       query.setParameter("ADDR_TYPE", addrType);
