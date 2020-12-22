@@ -120,6 +120,25 @@ div#filterlabels table {
   background:white;
   border: 1px Solid Gray;
 }
+div.partner-head {
+  font-size: 12px;
+  color: #444;
+  font-weight: bold;
+  width: 100%;
+  text-align: center;
+}
+table.partner-table {
+  padding: 10px;
+  margin: 20px;
+  width: 100%;
+}
+table.partner-table td {
+  padding-left: 10px;
+}
+table.partner-table th {
+  width: 150px;
+  padding: 5px;
+}
 </style>
 <cmr:boxContent>
   <cmr:tabs />
@@ -232,6 +251,15 @@ div#filterlabels table {
             </label>            
           </p>
         </cmr:column>
+        <cmr:column span="2" width="300">
+          <p>
+            <form:checkbox path="reqType" value="Y"/>
+            <label for="RequestType" class=" cmr-radio-check-label">
+               <span id="cmr-fld-lbl-OEMInd">Create Requests Only</span>
+               <cmr:info text="Generates statistics for create requests only." />
+            </label>            
+          </p>
+        </cmr:column>
       </cmr:row>
       <cmr:row >
         <cmr:column span="1" width="150">
@@ -247,19 +275,25 @@ div#filterlabels table {
             </label>            
           </p>
         </cmr:column>
+        <cmr:column span="2" width="300">
+          <p>
+            <form:checkbox path="excludeChildRequests" value="Y"/>
+            <label for="ExcludeChildRequests" class=" cmr-radio-check-label">
+               <span id="cmr-fld-lbl-OEMInd">Exclude Child Requests</span>
+               <cmr:info text="Excludes child requests created by Automation" />
+            </label>            
+          </p>
+        </cmr:column>
       </cmr:row>
       <cmr:row >
         <cmr:column span="1" width="150">
           <p>
           </p>
         </cmr:column>
-        <cmr:column span="2" width="300">
+      </cmr:row>
+      <cmr:row >
+        <cmr:column span="1" width="150">
           <p>
-            <form:checkbox path="reqType" value="Y"/>
-            <label for="RequestType" class=" cmr-radio-check-label">
-               <span id="cmr-fld-lbl-OEMInd">Create Requests Only</span>
-               <cmr:info text="Generates statistics for create requests only." />
-            </label>            
           </p>
         </cmr:column>
       </cmr:row>
