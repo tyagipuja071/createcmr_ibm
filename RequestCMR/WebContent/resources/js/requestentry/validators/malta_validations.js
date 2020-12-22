@@ -725,6 +725,8 @@ function addAfterConfigMalta() {
   setVatValidatorMalta();
   disableEnableFieldsForMT();
   setAddressDetailsForView();
+ // disable copy address
+  GEOHandler.disableCopyAddress();
 }
 
 function addAfterTemplateLoadMalta(fromAddress, scenario, scenarioChanged) {
@@ -910,7 +912,7 @@ function addIsicClassificationCodeValidator() {
 dojo.addOnLoad(function() {
   GEOHandler.MCO2 = [ '780' ];
   console.log('adding MALTA functions...');
-  GEOHandler.enableCopyAddress(GEOHandler.MCO2, validateMCOCopy, [ 'ZD01' ]);
+ // GEOHandler.enableCopyAddress(GEOHandler.MCO2, validateMCOCopy, [ 'ZD01' ]);
   GEOHandler.enableCustomerNamesOnAddress(GEOHandler.MCO2);
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.MCO2);
   GEOHandler.setRevertIsicBehavior(false);
