@@ -49,6 +49,8 @@
     <cmr:field fieldId="CustomerName2" id="custNm2" path="custNm2" size="400" />
   </cmr:column>
 </cmr:row>
+<!-- 
+  CREATCMR-273 REMOVE UI FIELD(Customer Name/ Additional Address Information)
 <cmr:row addBackground="true">
   <cmr:column span="4">
     <cmr:label fieldId="custNm3">
@@ -57,7 +59,7 @@
     <cmr:delta text="-" id="delta-custNm3" />
     <cmr:field fieldId="CustomerName3" id="custNm3" path="custNm3" size="400" />
   </cmr:column>
-</cmr:row>
+</cmr:row> -->
 <cmr:row addBackground="true">  
   &nbsp;
 </cmr:row>
@@ -70,6 +72,15 @@
              <cmr:delta text="-" id="delta-landCntry" code="R" />
       </cmr:label>
       <cmr:field fieldId="LandedCountry" id="landCntry" path="landCntry" />
+    </p>
+  </cmr:column>
+  <cmr:column span="2" containerForField="StreetAddress1">
+    <p>
+      <cmr:label fieldId="addrTxt">
+        <cmr:fieldLabel fieldId="StreetAddress1" />: 
+             <cmr:delta text="-" id="delta-addrTxt" />
+      </cmr:label>
+      <cmr:field fieldId="StreetAddress1" id="addrTxt" path="addrTxt" />
     </p>
   </cmr:column>
   <%--  defect : 1444422 : removed for FR
@@ -86,15 +97,26 @@
 </cmr:row>
 
 <cmr:row>
-    <cmr:column span="2" containerForField="StreetAddress1">
+  <cmr:column span="2" containerForField="CustomerName3">
     <p>
-      <cmr:label fieldId="addrTxt">
-        <cmr:fieldLabel fieldId="StreetAddress1" />: 
-             <cmr:delta text="-" id="delta-addrTxt" />
+      <cmr:label fieldId="custNm3">
+        <cmr:fieldLabel fieldId="CustomerName3" />: 
+             <cmr:delta text="-" id="delta-custNm3" />
       </cmr:label>
-      <cmr:field fieldId="StreetAddress1" id="addrTxt" path="addrTxt" />
+      <cmr:field fieldId="CustomerName3" id="custNm3" path="custNm3" />
     </p>
   </cmr:column>
+  <cmr:column span="2" containerForField="CustomerName4">
+    <p>
+      <cmr:label fieldId="custNm4">
+        <cmr:fieldLabel fieldId="CustomerName4" />: 
+             <cmr:delta text="-" id="delta-custNm4" />
+      </cmr:label>
+      <cmr:field fieldId="CustomerName4" id="custNm4" path="custNm4" />
+    </p>
+  </cmr:column>
+  <%--
+  CREATCMR-273 REMOVE UI FIELD(Street Continuation) 
   <cmr:column span="2">
     <p>
       <cmr:label fieldId="addrTxt2">
@@ -102,7 +124,7 @@
           </cmr:label>
       <cmr:field fieldId="StreetAddress2" id="addrTxt2" path="addrTxt2" />
     </p>
-  </cmr:column>
+  </cmr:column> --%>
 </cmr:row>
 
 <cmr:row>
@@ -147,6 +169,8 @@
     </p>
   </cmr:column>
 </cmr:row>
+<%-- 
+  CREATCMR-273 REMOVE UI FIELD(Contact Person) 
 <cmr:row>
   <cmr:column span="2" containerForField="CustomerName4">
     <p>
@@ -157,8 +181,7 @@
       <cmr:field fieldId="CustomerName4" id="custNm4" path="custNm4" />
     </p>
   </cmr:column>
-</cmr:row>
-
+</cmr:row> --%>
 <cmr:row topPad="10" addBackground="true">
   <cmr:column span="2">
     <p>
