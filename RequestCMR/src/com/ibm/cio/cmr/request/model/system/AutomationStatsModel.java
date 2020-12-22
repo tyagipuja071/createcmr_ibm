@@ -79,6 +79,11 @@ public class AutomationStatsModel {
   @Column(name = "OVERALL_TAT")
   private long overallTat = -1;
 
+  @Column(name = "PAYGO_INDC")
+  private String paygoIndc;
+
+  private String pool;
+
   public StatsPK getId() {
     return id;
   }
@@ -269,6 +274,22 @@ public class AutomationStatsModel {
 
   public void setOverallTat(long overallTat) {
     this.overallTat = overallTat;
+  }
+
+  public String getPaygoIndc() {
+    return paygoIndc;
+  }
+
+  public void setPaygoIndc(String paygoIndc) {
+    this.paygoIndc = paygoIndc;
+  }
+
+  public String getPool() {
+    return pool;
+  }
+
+  public void setPool(String pool) {
+    this.pool = pool;
   }
 
 }

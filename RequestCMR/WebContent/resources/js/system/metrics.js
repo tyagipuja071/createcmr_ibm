@@ -359,22 +359,22 @@ var CmrMetrics = (function() {
               var colorSet = [];
               var totals = 0;
 
-              var total = stat.touchless + stat.legacy + stat.review + stat.noStatus;
+              var total = stat.touchless + stat.review;
               dataSet.push(stat.touchless);
               labelSet.push('Touchless ('+(total > 0 ? ((stat.touchless/total)*100).toFixed(1) : 0)+'%)');
-              colorSet.push('rgb(57,198,75)');
+              colorSet.push('rgb(0,255,64)');
 
-              dataSet.push(stat.legacy);
-              labelSet.push('Legacy Issues ('+(total > 0 ? ((stat.legacy/total)*100).toFixed(1) : 0)+'%)');
-              colorSet.push('rgb(237,221,18)');
+              //dataSet.push(stat.legacy);
+              //labelSet.push('Legacy Issues ('+(total > 0 ? ((stat.legacy/total)*100).toFixed(1) : 0)+'%)');
+              //colorSet.push('rgb(237,221,18)');
 
               dataSet.push(stat.review);
               labelSet.push('Review Required ('+(total > 0 ? ((stat.review/total)*100).toFixed(1) : 0)+'%)');
-              colorSet.push('rgb(185,70,73)');
+              colorSet.push('rgb(180,180,180)');
 
-              dataSet.push(stat.noStatus);
-              labelSet.push('Pending/Unknown ('+(total > 0 ? ((stat.noStatus/total)*100).toFixed(1) : 0)+'%)');
-              colorSet.push('rgb(174,174,174)');
+              //dataSet.push(stat.noStatus);
+              //labelSet.push('Pending/Unknown ('+(total > 0 ? ((stat.noStatus/total)*100).toFixed(1) : 0)+'%)');
+              //colorSet.push('rgb(174,174,174)');
 
               var chart = new Chart(ctx, {
                 type: 'pie',
@@ -495,15 +495,15 @@ var CmrMetrics = (function() {
                 var tSet = {
                     label : 'Touchless',
                     fill : false,
-                    backgroundColor : 'rgb(57,198,75)',
-                    borderColor : 'rgb(57,198,75)',
+                    backgroundColor : 'rgb(0,255,64)',
+                    borderColor : 'rgb(0,255,64)',
                     data : []
                 };
                 var rSet = {
                     label : 'Review Required',
                     fill : false,
-                    backgroundColor : 'rgb(185,70,73)',
-                    borderColor : 'rgb(185,70,73)',
+                    backgroundColor : 'rgb(180,180,180)',
+                    borderColor : 'rgb(180,180,180)',
                     data : []
                 };
                 var lSet = {
@@ -523,7 +523,7 @@ var CmrMetrics = (function() {
                 var labels = [];
                 allData.forEach(function(d,i){
                   labels.push(d.lbl);
-                  var total = d.t + d.r + d.n + d.l;
+                  var total = d.t + d.r;
                   tSet.data.push(((d.t/total)*100).toFixed(1));
                   rSet.data.push(((d.r/total)*100).toFixed(1));
                   nSet.data.push(((d.n/total)*100).toFixed(1));
@@ -534,7 +534,7 @@ var CmrMetrics = (function() {
                     type: 'line',
                     data: {
                       labels: labels,
-                      datasets: [tSet, rSet, nSet, lSet]
+                      datasets: [tSet, rSet]
                     },
                     options: {
                       responsive: true,
@@ -612,15 +612,15 @@ var CmrMetrics = (function() {
                   var tSet = {
                       label : 'Touchless',
                       fill : false,
-                      backgroundColor : 'rgb(57,198,75)',
-                      borderColor : 'rgb(57,198,75)',
+                      backgroundColor : 'rgb(0,255,64)',
+                      borderColor : 'rgb(0,255,64)',
                       data : []
                   };
                   var rSet = {
                       label : 'Review Required',
                       fill : false,
-                      backgroundColor : 'rgb(185,70,73)',
-                      borderColor : 'rgb(185,70,73)',
+                      backgroundColor : 'rgb(180,180,180)',
+                      borderColor : 'rgb(180,180,180)',
                       data : []
                   };
                   var lSet = {
@@ -640,7 +640,7 @@ var CmrMetrics = (function() {
                   var labels = [];
                   allData.forEach(function(d,i){
                     labels.push(d.lbl);
-                    var total = d.t + d.r + d.n + d.l;
+                    var total = d.t + d.r;
                     tSet.data.push(((d.t/total)*100).toFixed(1));
                     rSet.data.push(((d.r/total)*100).toFixed(1));
                     nSet.data.push(((d.n/total)*100).toFixed(1));
@@ -651,7 +651,7 @@ var CmrMetrics = (function() {
                       type: 'bar',
                       data: {
                         labels: labels,
-                        datasets: [tSet, rSet, nSet, lSet]
+                        datasets: [tSet, rSet]
                       },
                       options: {
                         responsive: true,
@@ -731,15 +731,15 @@ var CmrMetrics = (function() {
                     var tSet = {
                         label : 'Touchless',
                         fill : false,
-                        backgroundColor : 'rgb(57,198,75)',
-                        borderColor : 'rgb(57,198,75)',
+                        backgroundColor : 'rgb(0,255,64)',
+                        borderColor : 'rgb(0,255,64)',
                         data : []
                     };
                     var rSet = {
                         label : 'Review Required',
                         fill : false,
-                        backgroundColor : 'rgb(185,70,73)',
-                        borderColor : 'rgb(185,70,73)',
+                        backgroundColor : 'rgb(180,180,180)',
+                        borderColor : 'rgb(180,180,180)',
                         data : []
                     };
                     var lSet = {
@@ -764,7 +764,7 @@ var CmrMetrics = (function() {
                       rSet.data.push(d.r);
                       lSet.data.push(d.l);
                       nSet.data.push(d.n);
-                      var total = d.t + d.r + d.l + d.n;
+                      var total = d.t + d.r;
                       if (total > max) {
                         max = total;
                       }
@@ -774,7 +774,7 @@ var CmrMetrics = (function() {
                         type: 'bar',
                         data: {
                           labels: labels,
-                          datasets: [tSet, rSet, nSet, lSet]
+                          datasets: [tSet, rSet]
                         },
                         options: {
                           responsive: true,
