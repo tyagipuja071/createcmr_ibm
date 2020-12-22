@@ -72,6 +72,25 @@ function afterConfigForFR() {
     FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
     FormManager.addValidator('abbrevLocn', Validators.REQUIRED, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
     orderBlockCodeValidator();
+    
+    FormManager.addFormValidator((function() {
+      return {
+        validate : function() {
+          var orderBlockCd = FormManager.getActualValue('taxCd2');
+          if (orderBlockCd != '') {
+            return new ValidationResult(null, true);
+          } else {
+            return new ValidationResult({
+              id : 'taxCd2',
+              type : 'text',
+              name : 'taxCd2'
+            }, false, 'Tax Code is required.');
+          }
+
+          return new ValidationResult(null, true);
+        }
+      };
+    })(), 'MAIN_CUST_TAB', 'frmCMR');
   }
 
   if (role == 'Processor' && reqType == 'C') {
@@ -81,6 +100,7 @@ function afterConfigForFR() {
     FormManager.addValidator('installBranchOff', Validators.REQUIRED, [ 'Installing BO' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [ 'Sales Rep No' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('subIndustryCd', Validators.REQUIRED, [ 'Subindustry' ], 'MAIN_CUST_TAB');
+    FormManager.readOnly('ordBlk');
     // FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Abbreviated
     // Name (TELX1)' ], 'MAIN_CUST_TAB');
     // FormManager.addValidator('abbrevLocn', Validators.REQUIRED, [
@@ -593,39 +613,61 @@ function addLatinCharValidatorFR() {
   FormManager.addValidator('city1', Validators.LATIN, [ 'City' ]);
 }
 
-//function addALPHANUMSPACEValidatorFR() {
-//  var role = null;
-//  if (typeof (_pagemodel) != 'undefined') {
-//    role = _pagemodel.userRole;
-//  }
-//  if (role == 'Processor' || (role == 'Requester' && FormManager.getActualValue('reqType') == 'U')) {
-//    FormManager.addValidator('abbrevLocn', Validators.CHECKALPHANUMDASH, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
-//    FormManager.addValidator('abbrevNm', Validators.CHECKALPHANUMDASH, [ 'Abbreviated Name' ], 'MAIN_CUST_TAB');
-//    FormManager.addValidator('abbrevLocn', Validators.CHECKSPACEPLACE4DASH, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
-//    FormManager.addValidator('abbrevNm', Validators.CHECKSPACEPLACE4DASH, [ 'Abbreviated Name' ], 'MAIN_CUST_TAB');
-//    FormManager.addValidator('abbrevLocn', Validators.CHECKDASHSPACE, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
-//    FormManager.addValidator('abbrevNm', Validators.CHECKDASHSPACE, [ 'Abbreviated Name' ], 'MAIN_CUST_TAB');
-//  }
+// function addALPHANUMSPACEValidatorFR() {
+// var role = null;
+// if (typeof (_pagemodel) != 'undefined') {
+// role = _pagemodel.userRole;
+// }
+// if (role == 'Processor' || (role == 'Requester' &&
+// FormManager.getActualValue('reqType') == 'U')) {
+// FormManager.addValidator('abbrevLocn', Validators.CHECKALPHANUMDASH, [
+// 'Abbreviated Location' ], 'MAIN_CUST_TAB');
+// FormManager.addValidator('abbrevNm', Validators.CHECKALPHANUMDASH, [
+// 'Abbreviated Name' ], 'MAIN_CUST_TAB');
+// FormManager.addValidator('abbrevLocn', Validators.CHECKSPACEPLACE4DASH, [
+// 'Abbreviated Location' ], 'MAIN_CUST_TAB');
+// FormManager.addValidator('abbrevNm', Validators.CHECKSPACEPLACE4DASH, [
+// 'Abbreviated Name' ], 'MAIN_CUST_TAB');
+// FormManager.addValidator('abbrevLocn', Validators.CHECKDASHSPACE, [
+// 'Abbreviated Location' ], 'MAIN_CUST_TAB');
+// FormManager.addValidator('abbrevNm', Validators.CHECKDASHSPACE, [
+// 'Abbreviated Name' ], 'MAIN_CUST_TAB');
+// }
 //
-//  FormManager.addValidator('custNm1', Validators.CHECKALPHANUMDASH, [ 'Customer Name' ]);
-//  FormManager.addValidator('custNm2', Validators.CHECKALPHANUMDASHDOT, [ 'Customer Name Continuation' ]);
-//  FormManager.addValidator('custNm3', Validators.CHECKALPHANUMDASH, [ 'Customer Name/ Additional Address Information' ]);
-//  FormManager.addValidator('addrTxt', Validators.CHECKALPHANUMDASH, [ 'Street' ]);
-//  FormManager.addValidator('addrTxt2', Validators.CHECKALPHANUMDASH, [ 'Street Continuation' ]);
-//  FormManager.addValidator('city1', Validators.CHECKALPHANUMDASH, [ 'City' ]);
-//  FormManager.addValidator('custNm1', Validators.CHECKSPACEPLACE4DASH, [ 'Customer Name' ]);
-//  FormManager.addValidator('custNm2', Validators.CHECKSPACEPLACE4DASH, [ 'Customer Name Continuation' ]);
-//  FormManager.addValidator('custNm3', Validators.CHECKSPACEPLACE4DASH, [ 'Customer Name/ Additional Address Information' ]);
-//  FormManager.addValidator('addrTxt', Validators.CHECKSPACEPLACE4DASH, [ 'Street' ]);
-//  FormManager.addValidator('addrTxt2', Validators.CHECKSPACEPLACE4DASH, [ 'Street Continuation' ]);
-//  FormManager.addValidator('city1', Validators.CHECKSPACEPLACE4DASH, [ 'City' ]);
-//  FormManager.addValidator('custNm1', Validators.CHECKDASHSPACE, [ 'Customer Name' ]);
-//  FormManager.addValidator('custNm2', Validators.CHECKDASHSPACE, [ 'Customer Name Continuation' ]);
-//  FormManager.addValidator('custNm3', Validators.CHECKDASHSPACE, [ 'Customer Name/ Additional Address Information' ]);
-//  FormManager.addValidator('addrTxt', Validators.CHECKDASHSPACE, [ 'Street' ]);
-//  FormManager.addValidator('addrTxt2', Validators.CHECKDASHSPACE, [ 'Street Continuation' ]);
-//  FormManager.addValidator('city1', Validators.CHECKDASHSPACE, [ 'City' ]);
-//}
+// FormManager.addValidator('custNm1', Validators.CHECKALPHANUMDASH, [ 'Customer
+// Name' ]);
+// FormManager.addValidator('custNm2', Validators.CHECKALPHANUMDASHDOT, [
+// 'Customer Name Continuation' ]);
+// FormManager.addValidator('custNm3', Validators.CHECKALPHANUMDASH, [ 'Customer
+// Name/ Additional Address Information' ]);
+// FormManager.addValidator('addrTxt', Validators.CHECKALPHANUMDASH, [ 'Street'
+// ]);
+// FormManager.addValidator('addrTxt2', Validators.CHECKALPHANUMDASH, [ 'Street
+// Continuation' ]);
+// FormManager.addValidator('city1', Validators.CHECKALPHANUMDASH, [ 'City' ]);
+// FormManager.addValidator('custNm1', Validators.CHECKSPACEPLACE4DASH, [
+// 'Customer Name' ]);
+// FormManager.addValidator('custNm2', Validators.CHECKSPACEPLACE4DASH, [
+// 'Customer Name Continuation' ]);
+// FormManager.addValidator('custNm3', Validators.CHECKSPACEPLACE4DASH, [
+// 'Customer Name/ Additional Address Information' ]);
+// FormManager.addValidator('addrTxt', Validators.CHECKSPACEPLACE4DASH, [
+// 'Street' ]);
+// FormManager.addValidator('addrTxt2', Validators.CHECKSPACEPLACE4DASH, [
+// 'Street Continuation' ]);
+// FormManager.addValidator('city1', Validators.CHECKSPACEPLACE4DASH, [ 'City'
+// ]);
+// FormManager.addValidator('custNm1', Validators.CHECKDASHSPACE, [ 'Customer
+// Name' ]);
+// FormManager.addValidator('custNm2', Validators.CHECKDASHSPACE, [ 'Customer
+// Name Continuation' ]);
+// FormManager.addValidator('custNm3', Validators.CHECKDASHSPACE, [ 'Customer
+// Name/ Additional Address Information' ]);
+// FormManager.addValidator('addrTxt', Validators.CHECKDASHSPACE, [ 'Street' ]);
+// FormManager.addValidator('addrTxt2', Validators.CHECKDASHSPACE, [ 'Street
+// Continuation' ]);
+// FormManager.addValidator('city1', Validators.CHECKDASHSPACE, [ 'City' ]);
+// }
 
 function addALPHANUMSPACEValidatorFR() {
   var role = null;
@@ -2672,11 +2714,8 @@ function setClassificationCode() {
   var custClass = '';
   var pageModelFlag = 'N';
   if (typeof (_pagemodel) != 'undefined') {
-    if (_pagemodel.custClass != null && _pagemodel.custClass != 'null') {
+    if (_pagemodel.custClass != null || _pagemodel.custClass != 'null') {
       pageModelFlag = 'Y';
-    }
-
-    if (_pagemodel.custClass != null && _pagemodel.custClass != 'null') {
       custClass = _pagemodel.custClass;
     }
   }
@@ -2765,7 +2804,7 @@ function setTaxCd() {
   FormManager.limitDropdownValues(FormManager.getField('taxCd2'), [ '1', '0' ]);
 
   if (typeof (_pagemodel) != 'undefined') {
-    if (_pagemodel.taxCd2 == null && _pagemodel.taxCd2 == 'null') {
+    if (_pagemodel.taxCd2 == null || _pagemodel.taxCd2 == 'null') {
       FormManager.setValue(FormManager.getField('taxCd2'), '1');
     } else {
       FormManager.setValue(FormManager.getField('taxCd2'), _pagemodel.taxCd2);
