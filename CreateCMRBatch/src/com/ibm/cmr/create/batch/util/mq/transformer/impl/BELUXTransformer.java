@@ -378,13 +378,12 @@ public class BELUXTransformer extends EMEATransformer {
     case "ZP01":
       return "Bill-To";
     case "ZS01":
-      return "Sold-To";
+      return "Install-At";
     case "ZD01":
       return "Ship-To";
     case "ZI01":
-      return "Install-at";
-    case "ZS02":
-      return "Mail-To";
+      return "EPL";
+
     // case "ZP02":
     // return "G address (Address in local language)";
     // case "ZD02":
@@ -402,13 +401,12 @@ public class BELUXTransformer extends EMEATransformer {
     case "ZP01":
       return "Bill-To";
     case "ZS01":
-      return "Sold-To";
+      return "Install-At";
     case "ZD01":
       return "Ship-To";
     case "ZI01":
-      return "Install-at";
-    case "ZS02":
-      return "Mail-To";
+      return "EPL";
+
     // case "ZP02":
     // return "G address (Address in local language)";
     default:
