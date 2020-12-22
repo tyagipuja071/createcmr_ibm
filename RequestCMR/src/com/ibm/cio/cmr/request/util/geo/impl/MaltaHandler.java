@@ -859,10 +859,6 @@ public class MaltaHandler extends BaseSOFHandler {
         addrSeq++;
       }
       newAddrSeq = String.format("%05d", Integer.parseInt(Integer.toString(addrSeq)));
-      // newAddrSeq = Integer.toString(addrSeq);
-      if (!StringUtils.isEmpty(cmrNo)) {
-        newAddrSeq = "000" + cmrNo + "L" + newAddrSeq;
-      }
     }
     return newAddrSeq;
   }
