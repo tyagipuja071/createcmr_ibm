@@ -214,14 +214,8 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
             }
           });
           return;
-        }  else {
-          alert('proceed.');
-          return;
-        }
-      } else {
-        alert('proceed.');
-        return;
-      }
+        }  
+      } 
     }
     model.subRegion = $scope.getSubRegion(model.issuingCntry, model.countryCd && model.countryCd.length == 2 ? model.countryCd : $scope.frozen.countryCd);
     model.reqType = update ? 'U' : 'C';
