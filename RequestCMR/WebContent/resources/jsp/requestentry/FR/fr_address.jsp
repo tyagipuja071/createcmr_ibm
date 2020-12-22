@@ -115,7 +115,7 @@
       <cmr:field fieldId="CustomerName4" id="custNm4" path="custNm4" />
     </p>
   </cmr:column>
-  <%--
+  <%-- 
   CREATCMR-273 REMOVE UI FIELD(Street Continuation) 
   <cmr:column span="2">
     <p>
