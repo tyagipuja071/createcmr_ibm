@@ -118,7 +118,7 @@ public class IERPMassProcessService extends TransConnService {
    * @return
    */
   private List<Admin> getPendingRecordsRDC(EntityManager entityManager) {
-    String sql = ExternalizedQuery.getSql("MT.GET_MASS_PROCESS_PENDING.RDC");
+    String sql = ExternalizedQuery.getSql("DR.GET_MASS_PROCESS_PENDING.RDC");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     return query.getResults(Admin.class);
   }
@@ -173,7 +173,7 @@ public class IERPMassProcessService extends TransConnService {
       throw new Exception("Cannot locate DATA record");
     }
 
-    String sql = ExternalizedQuery.getSql("MT.GET.ADDR");
+    String sql = ExternalizedQuery.getSql("DR.GET.ADDR");
     // get the address order
     if (getIerpAddressOrder() != null) {
       String[] order = getIerpAddressOrder();
