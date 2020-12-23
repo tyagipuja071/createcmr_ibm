@@ -256,37 +256,20 @@ public class FranceUtil extends AutomationUtil {
           break;
         case SCENARIO_HOSTING:
         case SCENARIO_CROSSBORDER_HOSTING:
-          if (StringUtils.isNotBlank(customerNameZI01) && customerName.toUpperCase().equals(customerNameZI01.toUpperCase())) {
+          if (StringUtils.isNotBlank(customerNameZI01) && StringUtils.isNotBlank(customerName) && customerName.toUpperCase().equals(customerNameZI01.toUpperCase())) {
             details.append("Customer Names on Sold-to and Install-at address should be different for Hosting Scenario").append("\n");
             engineData.addRejectionComment("OTH", "Customer Names on Sold-to and Install-at address should be different for Hosting Scenario", "",
                 "");
             return false;
-          } else if (StringUtils.isNotBlank(customerName) && !customerName.toUpperCase().contains("CHEZ")) {
-            details.append("Wrong Customer Name on Host address. CHEZ should be part of the name.").append("\n");
-            engineData.addRejectionComment("OTH", "Wrong Customer Name on Host address. CHEZ should be part of the name.", "", "");
-            return false;
-          }
+          } 
           break;
         case SCENARIO_BUSINESS_PARTNER:
         case SCENARIO_CROSSBORDER_BUSINESS_PARTNER:
           return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
         case SCENARIO_CROSSBORDER_THIRD_PARTY:
         case SCENARIO_THIRD_PARTY:
-
-          if (zd01 != null && zp01 != null) {
-            String zd01Details = (StringUtils.isNotBlank(zd01.getCustNm1()) ? zd01.getCustNm1() : "")
-                + (StringUtils.isNotBlank(zd01.getAddrTxt()) ? zd01.getAddrTxt() : "")
-                + (StringUtils.isNotBlank(zd01.getCity1()) ? zd01.getCity1() : "");
-            String zp01Details = (StringUtils.isNotBlank(zp01.getCustNm1()) ? zp01.getCustNm1() : "")
-                + (StringUtils.isNotBlank(zp01.getAddrTxt()) ? zp01.getAddrTxt() : "")
-                + (StringUtils.isNotBlank(zp01.getCity1()) ? zp01.getCity1() : "");
-            if (!zd01Details.equalsIgnoreCase(zp01Details)) {
-              engineData.addRejectionComment("OTH", "Invalid Billing/Mailing address found on the request. The addresses should be the same.", "",
-                  "");
-              details.append("Invalid Billing/Mailing address found on the request. The addresses should be the same.").append("\n");
-              return false;
-            }
-          } else if (customerName.toUpperCase().equals(customerNameZI01.toUpperCase())) {
+         if (customerName.toUpperCase().equals(customerNameZI01.toUpperCase()) && StringUtils.isNotBlank(customerName)
+                 && StringUtils.isNotBlank(customerNameZI01)) {
             details.append("Customer Names on Sold-to and Install-at address should be different for Third Party Scenario").append("\n");
             engineData.addRejectionComment("OTH", "Customer Names on Sold-to and Install-at address should be different for Third Party Scenario", "",
                 "");
