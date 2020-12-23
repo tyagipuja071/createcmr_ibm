@@ -657,6 +657,7 @@ public class MaltaHandler extends BaseSOFHandler {
   @Override
   public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo) throws Exception {
     if (currentRecord != null) {
+      String spid = "";
       address.setCustNm1(currentRecord.getCmrName1Plain());
       address.setCustNm2(currentRecord.getCmrName2Plain());
       address.setCustNm3(currentRecord.getCmrName3());
@@ -667,10 +668,13 @@ public class MaltaHandler extends BaseSOFHandler {
         address.setPoBox(currentRecord.getCmrPOBox().substring(0, 10));
       }
 
-      if (!(StringUtils.isEmpty(currentRecord.getCmrSitePartyID()))) {
-        address.setIerpSitePrtyId(currentRecord.getCmrSitePartyID());
+      if (CmrConstants.REQ_TYPE_UPDATE.equalsIgnoreCase(admin.getReqType())) {
+        if (!(StringUtils.isEmpty(currentRecord.getCmrSitePartyID()))) {
+          address.setIerpSitePrtyId(currentRecord.getCmrSitePartyID());
+        }
+      } else {
+        address.setIerpSitePrtyId(spid);
       }
-
       address.setTransportZone("");
       String addrSeq = address.getId().getAddrSeq();
       addrSeq = StringUtils.leftPad(addrSeq, 5, '0');
@@ -1088,6 +1092,11 @@ public class MaltaHandler extends BaseSOFHandler {
         "SUB_INDUSTRY_CD", "VAT", "COV_DESC", "COV_ID", "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC", "GEO_LOCATION_CD",
         "DUNS_NO", "ORD_BLK"));
     return fields;
+  }
+
+  @Override
+  public boolean enableTempReactivateOnUpdate() {
+    return true;
   }
 
 }
