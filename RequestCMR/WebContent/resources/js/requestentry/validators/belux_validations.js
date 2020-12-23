@@ -322,7 +322,11 @@ function setExpediteReason() {
 /* Vat Handler */
 function setVatValidatorBELUX() {
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
+    if (custSubGrp == 'BEPRI' || custSubGrp == 'LUPRI') {
+      return;
+    }
     FormManager.resetValidations('vat');
     if (!dijit.byId('vatExempt').get('checked')) {
       checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
@@ -549,7 +553,7 @@ function setEconomicCodeValues(searchTerm) {
   var custSGrp = FormManager.getActualValue('custSubGrp');
 
   var economicCode = [];
-  if (searchTerm != '' && custSubGrp != 'ISO' && custSGrp != 'CBBUS') {
+  if (searchTerm != '' && (custSubGrp == 'COM' || custSubGrp == 'PUB' || custSubGrp == '3PA')) {
     var qParams = {
       _qall : 'Y',
       ISSUING_CNTRY : cntry + geoCd,
@@ -571,12 +575,20 @@ function setEconomicCodeValues(searchTerm) {
       }
     }
   }
-  if (custSubGrp == 'PUB') {
+  if (custSubGrp == 'PUB' || custSubGrp == 'COM') {
     FormManager.setValue('economicCd', 'K11');
-  } else if (custSGrp == 'CBBUS') {
+  } else if (custSGrp == 'CBBUS' || custSubGrp == 'BUS') {
     FormManager.setValue('economicCd', 'K49');
     if (role == 'Requester')
       FormManager.readOnly('economicCd');
+  } else if (custSubGrp == 'INT') {
+    FormManager.setValue('economicCd', 'K81');
+    FormManager.readOnly('economicCd');
+  } else if (custSubGrp == 'ISO') {
+    FormManager.setValue('economicCd', 'K85');
+    FormManager.readOnly('economicCd');
+  } else if (custSubGrp == 'PRI') {
+    FormManager.setValue('economicCd', 'K60');
   }
 }
 
