@@ -22,6 +22,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.CmrException;
+import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
@@ -39,6 +40,10 @@ import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cmr.services.client.CmrServicesFactory;
+import com.ibm.cmr.services.client.QueryClient;
+import com.ibm.cmr.services.client.query.QueryRequest;
+import com.ibm.cmr.services.client.query.QueryResponse;
 import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
 
 /**
@@ -636,11 +641,9 @@ public class MaltaHandler extends BaseSOFHandler {
       }
     }
 
-    data.setEmbargoCd(this.currentImportValues.get("EmbargoCode"));
-    LOG.trace("EmbargoCode: " + data.getEmbargoCd());
-
-    if (!(StringUtils.isEmpty(data.getAbbrevLocn()))) {
-      data.setAbbrevLocn(data.getAbbrevLocn());
+    // MALTA - OrderBlock
+    if (!(StringUtils.isEmpty(mainRecord.getCmrOrderBlock()))) {
+      data.setOrdBlk(mainRecord.getCmrOrderBlock());
     }
 
     data.setInstallBranchOff("");
@@ -648,6 +651,40 @@ public class MaltaHandler extends BaseSOFHandler {
     data.setCompany("");
     data.setInacType("");
 
+    if (!StringUtils.isEmpty(mainRecord.getCmrSapNumber())) {
+      data.setAbbrevLocn(getAbbrLocation(mainRecord.getCmrSapNumber()));
+    }
+
+  }
+
+  /* Abbreviated Location */
+  private String getAbbrLocation(String kunnr) throws Exception {
+    String abbrLoc = "";
+
+    String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
+    String mandt = SystemConfiguration.getValue("MANDT");
+    String sql = ExternalizedQuery.getSql("GET.ABBRLOC.DATLT");
+    sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
+    sql = StringUtils.replace(sql, ":KUNNR", "'" + kunnr + "'");
+    String dbId = QueryClient.RDC_APP_ID;
+
+    QueryRequest query = new QueryRequest();
+    query.setSql(sql);
+    query.addField("DATLT");
+    query.addField("MANDT");
+    query.addField("KUNNR");
+
+    LOG.debug("Getting existing DATLT value from RDc DB..");
+    QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
+    QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
+
+    if (response.isSuccess() && response.getRecords() != null && response.getRecords().size() != 0) {
+      List<Map<String, Object>> records = response.getRecords();
+      Map<String, Object> record = records.get(0);
+      abbrLoc = record.get("DATLT") != null ? record.get("DATLT").toString() : "";
+      LOG.debug("***RETURNING DATLT > " + abbrLoc + " WHERE KUNNR IS > " + kunnr);
+    }
+    return abbrLoc;
   }
 
   @Override

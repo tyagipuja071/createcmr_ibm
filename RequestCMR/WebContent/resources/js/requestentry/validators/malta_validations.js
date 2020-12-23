@@ -627,6 +627,7 @@ function enterpriseValidation() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+
 function streetValidatorCustom() {
   console.log("streetValidatorCustom..............");
   FormManager.addFormValidator((function() {
@@ -809,6 +810,14 @@ function addOrdBlkValidator() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
+function lockIBMTabForMalta() {
+  var reqType = FormManager.getActualValue('reqType');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  if (reqType == 'C' && role == 'PROCESSOR') {
+    FormManager.readOnly('cmrNo');       
+  }
+}
+
 function setVatValidatorMalta() {
   console.log("setVatValidatorMalta for Malta..");
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
@@ -947,6 +956,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(addAddrValidatorMALTA, [ SysLoc.MALTA ]);
   GEOHandler.addAddrFunction(addMaltaLandedCountryHandler, [ SysLoc.MALTA ]);
   GEOHandler.addAfterTemplateLoad(addAfterTemplateLoadMalta, [ SysLoc.MALTA ]);
+GEOHandler.addAfterConfig(lockIBMTabForMalta, [ SysLoc.MALTA ]);
+GEOHandler.addAfterTemplateLoad(lockIBMTabForMalta, [ SysLoc.MALTA ]);
   GEOHandler.registerValidator(addOrdBlkValidator, [ SysLoc.MALTA ], null, true);
   GEOHandler.registerValidator(enterpriseValidation, [ SysLoc.MALTA ], null, true);
   GEOHandler.registerValidator(addAddressTypeValidator, [ SysLoc.MALTA ], null, true);
