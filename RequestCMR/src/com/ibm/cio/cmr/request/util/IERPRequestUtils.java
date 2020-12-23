@@ -101,9 +101,7 @@ public class IERPRequestUtils extends RequestUtils {
     if (results != null && results.size() > 0) {
       for (Object[] result : results) {
         if (codeOnly) {
-          choices.add((String) result[1]);
-        } else {
-          // choices.add("" + result[1]);
+          choices.add((String) result[0]);
         }
       }
     }
@@ -120,9 +118,7 @@ public class IERPRequestUtils extends RequestUtils {
     if (results != null && results.size() > 0) {
       for (Object[] result : results) {
         if (codeOnly) {
-          choices.add((String) result[1]);
-        } else {
-          // choices.add("" + result[1]);
+          choices.add((String) result[0]);
         }
       }
     }
