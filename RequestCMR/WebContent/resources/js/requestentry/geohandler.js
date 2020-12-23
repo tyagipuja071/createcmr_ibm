@@ -111,7 +111,8 @@ var SysLoc = (function() {
     UZBEKISTAN : '741',
     MOLDOVA : '787',
     BOSNIA_HERZEGOVINA : '699',
-    MADAGASCAR : '700'
+    MADAGASCAR : '700',
+    CANADA : '649'
   };
 })();
 

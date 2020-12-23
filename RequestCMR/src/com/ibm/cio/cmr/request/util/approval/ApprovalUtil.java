@@ -285,6 +285,9 @@ public class ApprovalUtil {
     case "IN":
       sql = sql.append(fieldName + " in " + getClauseForContains(value));
       break;
+    case "NIN":
+      sql = sql.append(fieldName + " not in " + getClauseForContains(value));
+      break;
     case "CON":
       sql = sql.append("trim(upper(" + fieldName + ")) like '%" + value.toUpperCase() + "%'");
       break;

@@ -115,6 +115,9 @@ public class AutoStatsService extends BaseSimpleService<RequestStatsContainer> {
     if ("Y".equals(model.getExcludeExternal())) {
       sql += "and ( trim(nvl(admin.SOURCE_SYST_ID,'')) = '' or admin.SOURCE_SYST_ID = 'CreateCMR') ";
     }
+    if ("Y".equals(model.getExcludeChildRequests())) {
+      sql += "and not exists (select 1 from CREQCMR.ADMIN ad where ad.CHILD_REQ_ID = admin.REQ_ID) ";
+    }
 
     if (!"Y".equals(params.getParam("buildSummary"))) {
       sql += " order by admin.REQ_ID";

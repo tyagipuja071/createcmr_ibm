@@ -86,10 +86,12 @@ import com.ibm.cio.cmr.request.service.BaseService;
 import com.ibm.cio.cmr.request.service.approval.ApprovalService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.user.AppUser;
+import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.ConfigUtil;
 import com.ibm.cio.cmr.request.util.IERPRequestUtils;
 import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.MessageUtil;
+import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
@@ -1079,6 +1081,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         admin.setProcessedTs(null);
       }
 
+      setLockByName(admin);
       updateEntity(admin, entityManager);
 
       adminToUse = admin;
@@ -5879,6 +5882,19 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         throw (CmrException) e;
       } else {
         throw new CmrException(MessageUtil.ERROR_GENERAL);
+      }
+    }
+  }
+
+  private void setLockByName(Admin admin) {
+    if (StringUtils.isBlank(admin.getLockByNm()) && !StringUtils.isBlank(admin.getLockBy())) {
+      try {
+        Person person = BluePagesHelper.getPerson(admin.getLockBy());
+        if (person != null) {
+          admin.setLockByNm(person.getName());
+        }
+      } catch (CmrException e) {
+        this.log.warn("Name for " + admin.getLockBy() + " cannot be retrieved.");
       }
     }
   }

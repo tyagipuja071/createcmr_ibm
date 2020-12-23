@@ -4,10 +4,16 @@ var othCEWA = [ "610", "636", "645", "669", "698", "725", "745", "764", "769", "
 var _vatExemptHandler = null;
 
 function addMaltaLandedCountryHandler(cntry, addressMode, saving, finalSave) {
+  var custGrp = FormManager.getActualValue('custGrp');
+  var addrType = FormManager.getActualValue('addrType');
   if (!saving) {
     if (addressMode == 'newAddress') {
-      FilteringDropdown['val_landCntry'] = FormManager.getActualValue('defaultLandedCountry');
-      FormManager.setValue('landCntry', FormManager.getActualValue('defaultLandedCountry'));
+      if (custGrp != 'CROSS') {
+        FilteringDropdown['val_landCntry'] = FormManager.getActualValue('defaultLandedCountry');
+        FormManager.setValue('landCntry', FormManager.getActualValue('defaultLandedCountry'));
+      } else if (custGrp == 'CROSS' && addrType == 'ZS01') {
+        FormManager.setValue('landCntry', '');
+      }
     } else {
       FilteringDropdown['val_landCntry'] = null;
     }
@@ -36,6 +42,14 @@ function addHandlersForMT() {
     _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
       setVatValidatorMalta();
     });
+  }
+
+  if (FormManager.getActualValue('reqType') == 'C') {
+    if (_vatExemptHandler == null) {
+      _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
+        resetVatRequired(true);
+      });
+    }
   }
 
 }
@@ -462,9 +476,11 @@ function addAttachmentValidator() {
             if (recordCount != null) {
               if (recordCount > 0) {
                 return new ValidationResult(null, true);
-              } /*else if (recordCount == 0) {
-                return new ValidationResult(null, false, 'Proof of address is mandatory.');
-              }*/
+              } /*
+                 * else if (recordCount == 0) { return new
+                 * ValidationResult(null, false, 'Proof of address is
+                 * mandatory.'); }
+                 */
             }
             break;
           }
@@ -493,9 +509,11 @@ function addAttachmentValidator() {
                 if (recordCount != null) {
                   if (recordCount > 0) {
                     return new ValidationResult(null, true);
-                  } /*else if (recordCount == 0) {
-                    return new ValidationResult(null, false, 'Proof of address is mandatory.');
-                  }*/
+                  } /*
+                     * else if (recordCount == 0) { return new
+                     * ValidationResult(null, false, 'Proof of address is
+                     * mandatory.'); }
+                     */
                 }
               } else if (importInd != 'Y') {
                 var reqId = FormManager.getActualValue('reqId');
@@ -510,9 +528,11 @@ function addAttachmentValidator() {
                 if (recordCount != null) {
                   if (recordCount > 0) {
                     return new ValidationResult(null, true);
-                  } /*else if (recordCount == 0) {
-                    return new ValidationResult(null, false, 'Proof of address is mandatory.');
-                  }*/
+                  } /*
+                     * else if (recordCount == 0) { return new
+                     * ValidationResult(null, false, 'Proof of address is
+                     * mandatory.'); }
+                     */
                 }
               } else {
                 counter = counter + 1;
@@ -521,9 +541,10 @@ function addAttachmentValidator() {
 
             if (counter > 0) {
               return new ValidationResult(null, true);
-            } /*else {
-              return new ValidationResult(null, false, 'Proof of address is mandatory.');
-            }*/
+            } /*
+               * else { return new ValidationResult(null, false, 'Proof of
+               * address is mandatory.'); }
+               */
           } else {
             return new ValidationResult(null, true);
           }
@@ -680,28 +701,32 @@ var _addrTypesForMCO2 = [ 'ZD01', 'ZI01', 'ZP01', 'ZS01', 'ZS02' ];
 var addrTypeHandler = [];
 
 function cmrNoforProspect() {
+  var cmrNO = FormManager.getActualValue('cmrNo');
   var ifProspect = FormManager.getActualValue('prospLegalInd');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
   if (dijit.byId('prospLegalInd')) {
     ifProspect = dijit.byId('prospLegalInd').get('checked') ? 'Y' : 'N';
   }
   console.log("cmrNoforProspect ifProspect:" + ifProspect);
-  if ('Y' == ifProspect) {
+  if (role == 'REQUESTER' || 'Y' == ifProspect || (role != 'REQUESTER' && cmrNO.startsWith('P'))) {
     FormManager.readOnly('cmrNo');
-  } else {
+  } else if ('Y' != ifProspect && (role == 'PROCESSOR') && reqType != 'U') {
     FormManager.enable('cmrNo');
+  } else {
+    FormManager.readOnly('cmrNo');
   }
-
 }
 
 function addAfterConfigMalta() {
   lockOrderBlock();
   enterpriseMalta();
   cmrNoforProspect();
-  hidePpsceidExceptBP();
   classFieldBehaviour();
   setVatValidatorMalta();
   disableEnableFieldsForMT();
   setAddressDetailsForView();
+ // disable copy address
+  GEOHandler.disableCopyAddress();
 }
 
 function addAfterTemplateLoadMalta(fromAddress, scenario, scenarioChanged) {
@@ -711,11 +736,13 @@ function addAfterTemplateLoadMalta(fromAddress, scenario, scenarioChanged) {
     }
   }
   enterpriseMalta();
+  resetVatRequired();
   hidePpsceidExceptBP();
 }
 
 function disableEnableFieldsForMT() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
+  var custType = FormManager.getActualValue('custGrp');
   var reqType = FormManager.getActualValue('reqType');
 
   if (reqType == 'C') {
@@ -743,6 +770,13 @@ function disableEnableFieldsForMT() {
     FormManager.readOnly('custPrefLang');
   } else {
     FormManager.enable('custPrefLang');
+  }
+
+  var custType = FormManager.getActualValue('custSubGrp');
+  if (custType == 'BUSPR' || custType == 'XBP') {
+    FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPSCEID' ]);
+  } else {
+    FormManager.removeValidator('ppsceid', Validators.REQUIRED);
   }
 
 }
@@ -784,6 +818,42 @@ function setVatValidatorMalta() {
       checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
     }
   }
+}
+
+function resetVatRequired() {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+  if (FormManager.getActualValue('reqType') == 'C') {
+    var custSubType = FormManager.getActualValue('custSubGrp');
+    var isIBPriv = custSubType != '' && (custSubType.includes('XBP') || custSubType.includes('XCOM') || custSubType.includes('XGOV') || custSubType.includes('XTP'));
+    var zs01Cntry = FormManager.getActualValue('cmrIssuingCntry');
+    var ret = cmr.query('VAT.GET_ZS01_CNTRY', {
+      REQID : FormManager.getActualValue('reqId'),
+      TYPE : 'ZS01'
+    });
+
+    if (ret && ret.ret1 && ret.ret1 != '') {
+      zs01Cntry = ret.ret1;
+    }
+
+    if (GEOHandler.VAT_RQD_CROSS_LNDCNTRY.indexOf(zs01Cntry) >= 0 && custSubType != '') {
+      FormManager.enable('vatExempt');
+      if (_isScenarioChanged && !value && (custSubType != '' && !isIBPriv)) {
+        FormManager.getField('vatExempt').set('checked', false);
+      }
+      if (dijit.byId('vatExempt') != undefined && (dijit.byId('vatExempt').get('checked') || (!dijit.byId('vatExempt').get('checked') && isIBPriv))) {
+        FormManager.removeValidator('vat', Validators.REQUIRED);
+      }
+    } else {
+      FormManager.getField('vatExempt').set('checked', false);
+      FormManager.hide('VATExempt', 'vatExempt');
+      FormManager.removeValidator('vat', Validators.REQUIRED);
+    }
+
+  }
+
 }
 
 function addISICValidatorForScenario() {
@@ -842,7 +912,7 @@ function addIsicClassificationCodeValidator() {
 dojo.addOnLoad(function() {
   GEOHandler.MCO2 = [ '780' ];
   console.log('adding MALTA functions...');
-  GEOHandler.enableCopyAddress(GEOHandler.MCO2, validateMCOCopy, [ 'ZD01' ]);
+ // GEOHandler.enableCopyAddress(GEOHandler.MCO2, validateMCOCopy, [ 'ZD01' ]);
   GEOHandler.enableCustomerNamesOnAddress(GEOHandler.MCO2);
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.MCO2);
   GEOHandler.setRevertIsicBehavior(false);

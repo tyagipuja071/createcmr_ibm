@@ -316,9 +316,17 @@ visibility: hidden !IMPORTANT;
           	</cmr:view>
         <%} %>
         
+        <cmr:view forCountry="649">
+        	<cmr:gridCol width="60px" field="addrSeq" header="Sequence" />
+        </cmr:view>
+        
         <!-- Defect : 1444422 for FR-->
         <!-- iERP Site Party ID -->
         <cmr:view forGEO="IERP,CND,FR,SWISS">
+          <cmr:gridCol width="70px" field="ierpSitePrtyId" header="${ui.grid.ierpSitePrtyId}" />
+        </cmr:view>
+        
+        <cmr:view forCountry="780">
           <cmr:gridCol width="70px" field="ierpSitePrtyId" header="${ui.grid.ierpSitePrtyId}" />
         </cmr:view>
         

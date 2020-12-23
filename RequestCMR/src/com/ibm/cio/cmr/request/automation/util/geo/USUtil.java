@@ -613,8 +613,10 @@ public class USUtil extends AutomationUtil {
               }
               break;
             case "Miscellaneous Bill Code":
-              List<String> newCodes = Arrays.asList(updatedDataModel.getNewData().split(""));
-              List<String> oldCodes = Arrays.asList(updatedDataModel.getOldData().split(""));
+              List<String> newCodes = updatedDataModel.getNewData() != null ? Arrays.asList(updatedDataModel.getNewData().split(""))
+                  : new ArrayList<String>();
+              List<String> oldCodes = updatedDataModel.getOldData() != null ? Arrays.asList(updatedDataModel.getOldData().split(""))
+                  : new ArrayList<String>();
 
               for (String s : oldCodes) {
                 if (!newCodes.contains(s) && !allowedCodesRemoval.contains(s) && !hasNegativeCheck) {

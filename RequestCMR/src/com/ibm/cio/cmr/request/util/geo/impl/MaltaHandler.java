@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.ibm.cio.cmr.request.util.geo.impl;
 
@@ -22,7 +22,6 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.CmrException;
-import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
@@ -40,17 +39,13 @@ import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.SystemLocation;
-import com.ibm.cmr.services.client.CmrServicesFactory;
-import com.ibm.cmr.services.client.QueryClient;
-import com.ibm.cmr.services.client.query.QueryRequest;
-import com.ibm.cmr.services.client.query.QueryResponse;
 import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
 
 /**
  * Handler for Malta
- * 
+ *
  * @author Garima Naraang
- * 
+ *
  */
 public class MaltaHandler extends BaseSOFHandler {
 
@@ -634,16 +629,19 @@ public class MaltaHandler extends BaseSOFHandler {
     data.setLegacyCurrencyCd(this.currentImportValues.get("CurrencyCode"));
     LOG.trace("Currency: " + data.getLegacyCurrencyCd());
 
-    // MCO Africa - For SBO values exceeding 4 char length
-    String sBO = this.currentImportValues.get("SBO");
-    if (!(StringUtils.isEmpty(sBO))) {
-      if (sBO.length() > 4) {
-        data.setSalesBusOffCd(sBO.substring(0, 4));
+    // MALTA - For SBO values exceeding 4 char length
+    if (!(StringUtils.isEmpty(mainRecord.getCmrSortl()))) {
+      if (mainRecord.getCmrSortl().length() > 4) {
+        data.setSalesBusOffCd(mainRecord.getCmrSortl().substring(0, 4));
       }
     }
 
     data.setEmbargoCd(this.currentImportValues.get("EmbargoCode"));
     LOG.trace("EmbargoCode: " + data.getEmbargoCd());
+
+    if (!(StringUtils.isEmpty(data.getAbbrevLocn()))) {
+      data.setAbbrevLocn(data.getAbbrevLocn());
+    }
 
     data.setInstallBranchOff("");
     data.setSpecialTaxCd("");
@@ -659,7 +657,6 @@ public class MaltaHandler extends BaseSOFHandler {
   @Override
   public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo) throws Exception {
     if (currentRecord != null) {
-      String spid = "";
       address.setCustNm1(currentRecord.getCmrName1Plain());
       address.setCustNm2(currentRecord.getCmrName2Plain());
       address.setCustNm3(currentRecord.getCmrName3());
@@ -670,47 +667,15 @@ public class MaltaHandler extends BaseSOFHandler {
         address.setPoBox(currentRecord.getCmrPOBox().substring(0, 10));
       }
 
-      address.setTransportZone("");
-      if (CmrConstants.REQ_TYPE_UPDATE.equalsIgnoreCase(admin.getReqType())) {
-        address.getId().setAddrSeq(currentRecord.getCmrAddrSeq());
-        spid = getRDcIerpSitePartyId(currentRecord.getCmrSapNumber());
-        address.setIerpSitePrtyId(spid);
-      } else {
-        String addrSeq = address.getId().getAddrSeq();
-        addrSeq = StringUtils.leftPad(addrSeq, 5, '0');
-        address.getId().setAddrSeq(addrSeq);
-        address.setIerpSitePrtyId(spid);
+      if (!(StringUtils.isEmpty(currentRecord.getCmrSitePartyID()))) {
+        address.setIerpSitePrtyId(currentRecord.getCmrSitePartyID());
       }
+
+      address.setTransportZone("");
+      String addrSeq = address.getId().getAddrSeq();
+      addrSeq = StringUtils.leftPad(addrSeq, 5, '0');
+      address.getId().setAddrSeq(addrSeq);
     }
-  }
-
-  private String getRDcIerpSitePartyId(String kunnr) throws Exception {
-    String spid = "";
-
-    String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
-    String mandt = SystemConfiguration.getValue("MANDT");
-    String sql = ExternalizedQuery.getSql("GET.IERP.BRAN5");
-    sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
-    sql = StringUtils.replace(sql, ":KUNNR", "'" + kunnr + "'");
-    String dbId = QueryClient.RDC_APP_ID;
-
-    QueryRequest query = new QueryRequest();
-    query.setSql(sql);
-    query.addField("BRAN5");
-    query.addField("MANDT");
-    query.addField("KUNNR");
-
-    LOG.debug("Getting existing BRAN5 value from RDc DB..");
-    QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
-    QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
-
-    if (response.isSuccess() && response.getRecords() != null && response.getRecords().size() != 0) {
-      List<Map<String, Object>> records = response.getRecords();
-      Map<String, Object> record = records.get(0);
-      spid = record.get("BRAN5") != null ? record.get("BRAN5").toString() : "";
-      LOG.debug("***RETURNING BRAN5 > " + spid + " WHERE KUNNR IS > " + kunnr);
-    }
-    return spid;
   }
 
   @Override
@@ -870,12 +835,7 @@ public class MaltaHandler extends BaseSOFHandler {
       String maxAddrSeq = "99999";
       String sql = null;
       reqType = getReqType(entityManager, reqId);
-      if (reqType.equalsIgnoreCase("U")) {
-        cmrNo = getCMRNo(entityManager, reqId);
-        sql = ExternalizedQuery.getSql("ADDRESS.GETADDRSEQ.MT_U");
-      } else {
-        sql = ExternalizedQuery.getSql("ADDRESS.GETADDRSEQ.MT_C");
-      }
+      sql = ExternalizedQuery.getSql("ADDRESS.GETADDRSEQ.MT");
       PreparedQuery query = new PreparedQuery(entityManager, sql);
       query.setParameter("REQ_ID", reqId);
       query.setParameter("ADDR_TYPE", addrType);
@@ -899,10 +859,6 @@ public class MaltaHandler extends BaseSOFHandler {
         addrSeq++;
       }
       newAddrSeq = String.format("%05d", Integer.parseInt(Integer.toString(addrSeq)));
-      // newAddrSeq = Integer.toString(addrSeq);
-      if (!StringUtils.isEmpty(cmrNo)) {
-        newAddrSeq = "000" + cmrNo + "L" + newAddrSeq;
-      }
     }
     return newAddrSeq;
   }
@@ -944,6 +900,7 @@ public class MaltaHandler extends BaseSOFHandler {
     for (String name : MT_MASS_UPDATE_SHEET_NAMES) {
       XSSFSheet sheet = book.getSheet(name);
       if (sheet != null) {
+        TemplateValidation error = new TemplateValidation(name);
         for (Row row : sheet) {
           if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
 
@@ -964,6 +921,7 @@ public class MaltaHandler extends BaseSOFHandler {
 
             // Data Sheet
             String isic = ""; // 3
+            String sbo = ""; // 5
             String classificationCd = ""; // 10
             String inac = ""; // 7
             String ordBlk = ""; // 11
@@ -972,7 +930,6 @@ public class MaltaHandler extends BaseSOFHandler {
               continue;
             }
 
-            TemplateValidation error = new TemplateValidation(name);
             String rowNumber = "Row" + row.getRowNum() + ": ";
 
             if (!"Data".equalsIgnoreCase(sheet.getSheetName())) {
@@ -1011,27 +968,27 @@ public class MaltaHandler extends BaseSOFHandler {
               landCntry = validateColValFromCell(currCell);
 
               if ("Ship-To".equalsIgnoreCase(sheet.getSheetName())) {
-                currCell = (XSSFCell) row.getCell(11);
+                currCell = (XSSFCell) row.getCell(10);
                 phone = validateColValFromCell(currCell);
 
                 if (!StringUtils.isBlank(cmrNo) && StringUtils.isBlank(seqNo) && !"Data".equalsIgnoreCase(sheet.getSheetName())) {
                   LOG.trace("Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
                   error.addError(row.getRowNum(), rowNumber + "Address Sequence No.",
                       "Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
-                  validations.add(error);
+                  // validations.add(error);
                 }
 
                 if (!StringUtils.isBlank(phone) && !phone.contains("@") && !StringUtils.isNumeric(phone)) {
                   LOG.trace("Phone Number should contain only digits.");
                   error.addError(row.getRowNum(), rowNumber + "Phone #", "Phone Number should contain only digits.");
-                  validations.add(error);
+                  // validations.add(error);
                 }
               } else {
                 if (!StringUtils.isBlank(cmrNo) && StringUtils.isBlank(seqNo) && !"Data".equalsIgnoreCase(sheet.getSheetName())) {
                   LOG.trace("Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
                   error.addError(row.getRowNum(), rowNumber + "Address Sequence No.",
                       "Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
-                  validations.add(error);
+                  // validations.add(error);
                 }
 
                 if (!StringUtils.isBlank(city) && !StringUtils.isBlank(postalCode)) {
@@ -1040,7 +997,7 @@ public class MaltaHandler extends BaseSOFHandler {
                     LOG.trace("Total computed length of City and Postal Code should not exceed 28 characters.");
                     error.addError(row.getRowNum(), rowNumber + "City",
                         "Total computed length of City and Postal Code should not exceed 28 characters.");
-                    validations.add(error);
+                    // validations.add(error);
                   }
                 }
               }
@@ -1050,6 +1007,9 @@ public class MaltaHandler extends BaseSOFHandler {
 
               currCell = (XSSFCell) row.getCell(3);
               isic = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(5);
+              sbo = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(7);
               inac = validateColValFromCell(currCell);
@@ -1066,7 +1026,7 @@ public class MaltaHandler extends BaseSOFHandler {
                     "Note that ISIC value 9500 can be entered only for CMR with Classification code 60. Please fix and upload the template again.");
                 error.addError(row.getRowNum(), rowNumber + "Classification Code",
                     "Note that ISIC value 9500 can be entered only for CMR with Classification code 60. Please fix and upload the template again.");
-                validations.add(error);
+                // validations.add(error);
               }
 
               if (!StringUtils.isBlank(inac) && inac.length() == 4 && !StringUtils.isNumeric(inac) && !"@@@@".equals(inac)
@@ -1075,11 +1035,16 @@ public class MaltaHandler extends BaseSOFHandler {
                 error.addError(row.getRowNum(), rowNumber + "INAC/NAC", "INAC should have all 4 digits or 2 letters and 2 digits in order.");
               }
 
+              if (!StringUtils.isBlank(sbo) && !StringUtils.isAlphanumeric(sbo)) {
+                LOG.trace("Enter valid values for SBO/Search Term.");
+                error.addError(row.getRowNum(), rowNumber + "SBO/Search Term", "Enter valid values for SBO/Search Term");
+              }
+
               if (!StringUtils.isBlank(ordBlk) && !("88".equals(ordBlk) || "94".equals(ordBlk) || "@".equals(ordBlk))) {
                 LOG.trace("Note that value of Order block can only be 88 or 94 or @ or blank. Please fix and upload the template again.");
                 error.addError(row.getRowNum(), rowNumber + "Order block",
                     "Note that value of Order block can only be 88 or 94 or @ or blank. Please fix and upload the template again.");
-                validations.add(error);
+                // validations.add(error);
               }
             }
 
@@ -1096,10 +1061,13 @@ public class MaltaHandler extends BaseSOFHandler {
             if (StringUtils.isEmpty(cmrNo)) {
               LOG.trace("Note that CMR No. is mandatory. Please fix and upload the template again.");
               error.addError(row.getRowNum(), rowNumber + "CMR No.", "Note that CMR No. is mandatory. Please fix and upload the template again.");
-              validations.add(error);
+              // validations.add(error);
             }
 
           }
+        } // end row loop
+        if (error.hasErrors()) {
+          validations.add(error);
         }
       }
     }
