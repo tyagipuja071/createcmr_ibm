@@ -238,12 +238,15 @@ public class AutoStatsService extends BaseSimpleService<RequestStatsContainer> {
         if (!partnerMap.containsKey("reviewTotal")) {
           partnerMap.put("reviewTotal", (long) 0);
         }
-        partnerMap.put("touchless", "Y".equals(stat.getFullAuto()) ? partnerMap.get("touchless") + 1 : partnerMap.get("touchless"));
-        partnerMap.put("review", "Y".equals(stat.getReview()) ? partnerMap.get("review") + 1 : partnerMap.get("review"));
-        partnerMap.put("touchlessTotal",
-            "Y".equals(stat.getFullAuto()) ? partnerMap.get("touchlessTotal") + stat.getOverallTat() : partnerMap.get("touchlessTotal"));
-        partnerMap.put("reviewTotal",
-            "Y".equals(stat.getReview()) ? partnerMap.get("reviewTotal") + stat.getOverallTat() : partnerMap.get("reviewTotal"));
+        if ("Y".equals(stat.getPool()) && "Update".equals(stat.getReqType())) {
+        } else {
+          partnerMap.put("touchless", "Y".equals(stat.getFullAuto()) ? partnerMap.get("touchless") + 1 : partnerMap.get("touchless"));
+          partnerMap.put("review", "Y".equals(stat.getReview()) ? partnerMap.get("review") + 1 : partnerMap.get("review"));
+          partnerMap.put("touchlessTotal",
+              "Y".equals(stat.getFullAuto()) ? partnerMap.get("touchlessTotal") + stat.getOverallTat() : partnerMap.get("touchlessTotal"));
+          partnerMap.put("reviewTotal",
+              "Y".equals(stat.getReview()) ? partnerMap.get("reviewTotal") + stat.getOverallTat() : partnerMap.get("reviewTotal"));
+        }
       }
     }
     container.setAutomationSummary(generalMap);
@@ -462,7 +465,9 @@ public class AutoStatsService extends BaseSimpleService<RequestStatsContainer> {
         cell.setCellValue(MarketUtil.getMarket(value.toString().trim()));
       } else if ("PROCESS_CD".equals(sc.getDbField())) {
         String processCd = request.getProcessCd();
-        if ("Y".equals(request.getPaygo())) {
+        if (!"Y".equals(request.getReview())) {
+          processCd = "";
+        } else if ("Y".equals(request.getPaygo())) {
           processCd = extractProcessCause(request, processCd);
         }
         cell.setCellValue(processCd);
@@ -502,6 +507,9 @@ public class AutoStatsService extends BaseSimpleService<RequestStatsContainer> {
         return "";
       }
       if ("CHECKS".equals(request.getProcessCd())) {
+        if ("Y".equals(request.getFullAuto())) {
+          return "";
+        }
         return extractProcessCause(request, null);
       } else {
         return "";
@@ -539,8 +547,9 @@ public class AutoStatsService extends BaseSimpleService<RequestStatsContainer> {
     config.add(new StatXLSConfig("Scenario Code", "CUST_GRP", 20, null));
     config.add(new StatXLSConfig("Scenario Subtype Code", "CUST_SUB_GRP", 20, null));
     config.add(new StatXLSConfig("Source System", "SOURCE_SYST_ID", 20, null));
+    config.add(new StatXLSConfig("PayGo", "PAYGO_INDC", 10, null));
+    config.add(new StatXLSConfig("Pool", "POOL", 10, null));
     config.add(new StatXLSConfig("Touchless", "FULL_AUTO", 16, "Indicates whether the request was completed without any form of manual work."));
-    config.add(new StatXLSConfig("Legacy Issue", "LEGACY", 16, "Indicates whether the processing encountered errors during legacy processing."));
     config.add(new StatXLSConfig("Review Required", "REVIEW", 16, "Indicates whether the request needed manual CMDE review."));
     config.add(new StatXLSConfig("Review Cause", "PROCESS_CD", 25, "Specifies the first automation element that caused automation to stop."));
     config.add(new StatXLSConfig("Error Checks", "ERROR_CHECKS", 25, "Indicates the checks that caused the review"));
