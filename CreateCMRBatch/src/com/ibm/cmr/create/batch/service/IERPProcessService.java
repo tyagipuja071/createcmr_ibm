@@ -351,7 +351,9 @@ public class IERPProcessService extends BaseBatchService {
         Admin admin = entity.getEntity(Admin.class);
         Data data = entity.getEntity(Data.class);
         // create a entry in request's comment log re_cmt_log table
-        createCommentLog(em, admin, "RDc processing has started. Waiting for completion.");
+        if (admin != null && !CMR_REQUEST_STATUS_CPR.equals(admin.getReqStatus())) {
+          createCommentLog(em, admin, "RDc processing has started. Waiting for completion.");
+        }
         CmrServiceInput cmrServiceInput = getReqParam(em, admin.getId().getReqId(), admin.getReqType(), data);
         GEOHandler cntryHandler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
         boolean enableTempReact = cntryHandler.enableTempReactivateOnUpdate() && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason());
@@ -535,6 +537,7 @@ public class IERPProcessService extends BaseBatchService {
                 noOFWorkingDays = IERPRequestUtils.checked2WorkingDays(admin.getProcessedTs(), SystemUtil.getCurrentTimestamp());
               }
               if (noOFWorkingDays >= 3) {
+                createCommentLog(em, admin, "RDc processing has started. Waiting for completion.");
                 data.setOrdBlk(rdcOrderBlk);
                 updateEntity(data, em);
                 overallResponse = processUpdateRequest(admin, data, cmrServiceInput, em);
