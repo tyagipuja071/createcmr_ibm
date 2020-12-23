@@ -529,23 +529,15 @@ public class IERPProcessService extends BaseBatchService {
             if (admin.getProcessedTs() == null || IERPRequestUtils.isTimeStampEquals(admin.getProcessedTs())) {
               firstRun = true;
               overallResponse = processUpdateRequest(admin, data, cmrServiceInput, em);
-              comment = comment.append("\nTemporary Reactivation - Order Block removal process done in RDc.");
-              RequestUtils.createCommentLogFromBatch(em, BATCH_USER_ID, admin.getId().getReqId(), comment.toString().trim());
-              RequestUtils.createWorkflowHistoryFromBatch(em, BATCH_USER_ID, admin,
-                  "RDc  Processing has been completed. Please check request's comment log for details.", ACTION_RDC_UPDATE, null, null,
-                  "CPR".equals(admin.getReqStatus()));
-              admin.setReqStatus(CMR_REQUEST_STATUS_CPR);
-
             } else {
               int noOFWorkingDays = 0;
               if (admin.getReqStatus() != null && admin.getReqStatus().equals(CMR_REQUEST_STATUS_CPR)) {
                 noOFWorkingDays = IERPRequestUtils.checked2WorkingDays(admin.getProcessedTs(), SystemUtil.getCurrentTimestamp());
               }
               if (noOFWorkingDays >= 3) {
+                data.setOrdBlk(rdcOrderBlk);
+                updateEntity(data, em);
                 overallResponse = processUpdateRequest(admin, data, cmrServiceInput, em);
-                RequestUtils.createWorkflowHistoryFromBatch(em, BATCH_USER_ID, admin, comment.toString().trim(), ACTION_RDC_UPDATE, null, null,
-                    "COM".equals(admin.getReqStatus()));
-                admin.setReqStatus(CmrConstants.REQUEST_STATUS.COM.toString());
               }
             }
           }
@@ -568,12 +560,13 @@ public class IERPProcessService extends BaseBatchService {
                     }
                     statusMessage.append("CMR Number " + resp.getCmrNo() + ", sequence number " + resp.getRecords().get(0).getSeqNo() + ", ");
                     statusMessage.append(" address type " + resp.getRecords().get(0).getAddressType() + "\n");
-                    if (firstRun) {
-                      statusMessage.append(
-                          "Temporary Reactivation - Order Block removal process done in RDc." + resp.getRecords().get(0).getAddressType() + "\n");
-                    }
                   }
                 }
+              }
+              if (firstRun) {
+                statusMessage.append("Temporary Reactivation - Order Block removal process done in RDc.\n");
+              } else {
+                statusMessage.append("RDc Processing has been completed at 2nd time for Temporary Reactivate Embargo Code.");
               }
             } else if (CmrConstants.RDC_STATUS_ABORTED.equals(overallStatus)) {
               statusMessage.append("Record with request ID " + admin.getId().getReqId() + " has FAILED processing. Status: ABORTED");
@@ -622,8 +615,13 @@ public class IERPProcessService extends BaseBatchService {
              * jzamora - edited to return the request back to processor if an
              * error occurred, to avoid endless loop
              */
-            if (CmrConstants.RDC_STATUS_COMPLETED.equals(overallStatus)) {
+            if (CmrConstants.RDC_STATUS_COMPLETED.equals(overallStatus) && !firstRun) {
               admin.setReqStatus(CmrConstants.REQUEST_STATUS.COM.toString());
+            } else if (CmrConstants.RDC_STATUS_COMPLETED.equals(overallStatus) && firstRun) {
+              admin.setReqStatus(CMR_REQUEST_STATUS_CPR);
+              admin.setDisableAutoProc(CmrConstants.YES_NO.N.toString());
+              admin.setProcessedFlag(CmrConstants.YES_NO.N.toString());
+              admin.setProcessedTs(SystemUtil.getCurrentTimestamp());
             } else {
               LOG.debug("Unlocking request due to error..");
               admin.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
@@ -631,6 +629,11 @@ public class IERPProcessService extends BaseBatchService {
               admin.setLockByNm(null);
               admin.setLockTs(null);
               admin.setLockInd(CmrConstants.YES_NO.N.toString());
+              if (firstRun) {
+                // revert as rdc run has resulted into error
+                data.setOrdBlk("");
+                updateEntity(data, em);
+              }
             }
             // admin.setReqStatus(CmrConstants.RDC_STATUS_COMPLETED.equals(overallStatus)
             // ? CmrConstants.REQUEST_STATUS.COM.toString()
@@ -650,9 +653,14 @@ public class IERPProcessService extends BaseBatchService {
 
             siteIds = new StringBuffer((String) overallResponse.get("siteIds"));
 
-            if (!CmrConstants.RDC_STATUS_IGNORED.equals(overallStatus)) {
+            if (!CmrConstants.RDC_STATUS_IGNORED.equals(overallStatus) && !firstRun) {
               IERPRequestUtils.createWorkflowHistoryFromBatch(em, BATCH_USER_ID, admin, wfHistCmt.trim(), actionRdc, null, null,
                   "COM".equals(admin.getReqStatus()));
+            }
+
+            if (!CmrConstants.RDC_STATUS_IGNORED.equals(overallStatus) && firstRun) {
+              IERPRequestUtils.createWorkflowHistoryFromBatch(em, BATCH_USER_ID, admin, wfHistCmt.trim(), actionRdc, null, null,
+                  "CPR".equals(admin.getReqStatus()));
             }
 
             partialCommit(em);
@@ -664,8 +672,12 @@ public class IERPProcessService extends BaseBatchService {
             } catch (Exception e) {
               LOG.error("ERROR: " + e.getMessage());
             }
-
-          } // if overallResponse is not null
+            // if overallResponse is not null
+          } else if (overallResponse == null && firstRun) {
+            // revert as rdc run has resulted into error
+            data.setOrdBlk("");
+            updateEntity(data, em);
+          }
 
         } else if (CmrConstants.REQ_TYPE_CREATE.equals(cmrServiceInput.getInputReqType())) {
           response = processCreateRequest(admin, cmrServiceInput, em);
@@ -982,8 +994,11 @@ public class IERPProcessService extends BaseBatchService {
     request.setUserId(cmrServiceInput.getInputUserId());
     boolean isIndexNotUpdated = false;
     boolean isSeqNoRequired = false;
+    boolean handleTempReact = false;
+    boolean processTempReact = false;
     if (!CmrConstants.DE_CND_ISSUING_COUNTRY_VAL.contains(data.getCmrIssuingCntry()) && !CNHandler.isCNIssuingCountry(data.getCmrIssuingCntry())) {
       isSeqNoRequired = true;
+      handleTempReact = true;
     }
     try {
       // 1. Get first the ones that are new -- BATCH.GET_NEW_ADDR_FOR_UPDATE
@@ -1041,7 +1056,11 @@ public class IERPProcessService extends BaseBatchService {
         isDataUpdated = cntryHandler.isDataUpdate(data, dataRdc, data.getCmrIssuingCntry());
       }
 
-      if (isDataUpdated && (notProcessed != null && notProcessed.size() > 0)) {
+      if (handleTempReact && CMR_REQUEST_STATUS_CPR.equals(admin.getReqStatus())) {
+        processTempReact = true;
+      }
+
+      if ((isDataUpdated && (notProcessed != null && notProcessed.size() > 0)) || processTempReact) {
         LOG.debug("Processing CMR Data changes to " + notProcessed.size() + " addresses of CMR# " + data.getCmrNo());
         for (Addr addr : notProcessed) {
           response = sendAddrForProcessing(addr, request, responses, isIndexNotUpdated, siteIds, em, isSeqNoRequired);
