@@ -270,12 +270,6 @@ public class FranceUtil extends AutomationUtil {
         case SCENARIO_BUSINESS_PARTNER:
         case SCENARIO_CROSSBORDER_BUSINESS_PARTNER:
           return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
-
-        case SCENARIO_INTERNAL_SO:
-        case SCENARIO_CROSSBORDER_INTERNAL_SO:
-          engineData.addNegativeCheckStatus("DISABLEDAUTOPROC",
-              "Requests for " + scenarioDesc + " cannot be processed automatically. Manual processing would be required.");
-          break;
         case SCENARIO_CROSSBORDER_THIRD_PARTY:
         case SCENARIO_THIRD_PARTY:
 
