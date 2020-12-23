@@ -120,6 +120,25 @@ div#filterlabels table {
   background:white;
   border: 1px Solid Gray;
 }
+div.partner-head {
+  font-size: 12px;
+  color: #444;
+  font-weight: bold;
+  width: 100%;
+  text-align: center;
+}
+table.partner-table {
+  padding: 10px;
+  margin: 20px;
+  width: 100%;
+}
+table.partner-table td {
+  padding-left: 10px;
+}
+table.partner-table th {
+  width: 150px;
+  padding: 5px;
+}
 </style>
 <cmr:boxContent>
   <cmr:tabs />

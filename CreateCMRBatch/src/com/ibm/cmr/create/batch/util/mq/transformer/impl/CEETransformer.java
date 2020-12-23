@@ -635,7 +635,7 @@ public class CEETransformer extends EMEATransformer {
         } else if ("707ME".equals(cntryUse)) {
           line6 = "Montenegro";
         } else {
-          if (cmrData.getCustGrp().contains("CRO") || crossBorder) {
+          if ((StringUtils.isNotBlank(cmrData.getCustGrp()) && cmrData.getCustGrp().contains("CRO")) || crossBorder) {
             if (!StringUtils.isBlank(addrData.getLandCntry())) {
               line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
             } else {

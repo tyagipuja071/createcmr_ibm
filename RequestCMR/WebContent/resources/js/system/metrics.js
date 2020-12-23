@@ -263,13 +263,14 @@ var CmrMetrics = (function() {
           sourceSystId : sourceSystId,
           excludeChildRequests : excludeChildRequests
         },
-        timeout : 180000,
+        timeout : 15 * 60 * 1000,
         sync : false,
         load : function(data, ioargs) {
           console.log('success');
           cmr.hideProgress();
           var weekly = data.weekly;
           var scenario = data.scenario;
+          var partner = data.partner;
           var data = data.data;
           if (!data){
             cmr.showAlert('No automation data for the time period.');
@@ -293,11 +294,45 @@ var CmrMetrics = (function() {
               html += '    <canvas id="canvas-rev-'+cntry+'" style="height:400px"></canvas>';
               html += '  </div>';
               html += '</div>';
+              if (sourceSystId != '' && country == ''){
+                html += '<div class="ibm-columns" style="padding:10px">';
+                html += '  <div class="ibm-col-6-3" style="border:1px Solid #AAA;width:510px;margin-right:10px">';
+                html += '    <div class="partner-head">Average Times of Processing (hh:mm:ss)</div>';
+                html += '    <table class="partner-table">';
+                html += '      <tr>';
+                html += '        <th>Touchless Average:</th><td id="partnerTouchless">00:00:00</td>';
+                html += '      </tr>';
+                html += '      <tr>';
+                html += '        <th>Review Average:</th><td id="partnerReview">00:00:00</td>';
+                html += '      </tr>';
+                html += '      <tr>';
+                html += '        <th>Overall Average:</th><td id="partnerTotal">00:00:00</td>';
+                html += '      </tr>';
+                html += '    </table>';
+                html += '  </div>';
+                html += '</div>';
+              } 
               if (country != ''){
                 html += '<div class="ibm-columns" style="padding:10px">';
                 html += '  <div class="ibm-col-6-3" style="border:1px Solid #AAA;width:510px;margin-right:10px">';
                 html += '    <canvas id="canvas-weekly-'+cntry+'" style="height:500px"></canvas>';
                 html += '  </div>';
+                if (sourceSystId != ''){
+                  html += '  <div class="ibm-col-6-3" style="border:1px Solid #AAA;width:495px;margin-right:10px">';
+                  html += '    <div class="partner-head">Average Times of Processing</div>';
+                  html += '    <table class="partner-table">';
+                  html += '      <tr>';
+                  html += '        <th>Touchless Average:</th><td id="partnerTouchless">00:00:00</td>';
+                  html += '      </tr>';
+                  html += '      <tr>';
+                  html += '        <th>Review Average:</th><td id="partnerReview">00:00:00</td>';
+                  html += '      </tr>';
+                  html += '      <tr>';
+                  html += '        <th>Overall Average:</th><td id="partnerTotal">00:00:00</td>';
+                  html += '      </tr>';
+                  html += '    </table>';
+                  html += '  </div>';
+                }
                 html += '</div>';
                 html += '<div class="ibm-columns" style="padding:10px">';
                 html += '  <div class="ibm-col-1-1" style="border:1px Solid #AAA;width:1000px">';
@@ -324,22 +359,22 @@ var CmrMetrics = (function() {
               var colorSet = [];
               var totals = 0;
 
-              var total = stat.touchless + stat.legacy + stat.review + stat.noStatus;
+              var total = stat.touchless + stat.review;
               dataSet.push(stat.touchless);
               labelSet.push('Touchless ('+(total > 0 ? ((stat.touchless/total)*100).toFixed(1) : 0)+'%)');
-              colorSet.push('rgb(57,198,75)');
+              colorSet.push('rgb(0,255,64)');
 
-              dataSet.push(stat.legacy);
-              labelSet.push('Legacy Issues ('+(total > 0 ? ((stat.legacy/total)*100).toFixed(1) : 0)+'%)');
-              colorSet.push('rgb(237,221,18)');
+              //dataSet.push(stat.legacy);
+              //labelSet.push('Legacy Issues ('+(total > 0 ? ((stat.legacy/total)*100).toFixed(1) : 0)+'%)');
+              //colorSet.push('rgb(237,221,18)');
 
               dataSet.push(stat.review);
               labelSet.push('Review Required ('+(total > 0 ? ((stat.review/total)*100).toFixed(1) : 0)+'%)');
-              colorSet.push('rgb(185,70,73)');
+              colorSet.push('rgb(180,180,180)');
 
-              dataSet.push(stat.noStatus);
-              labelSet.push('Pending/Unknown ('+(total > 0 ? ((stat.noStatus/total)*100).toFixed(1) : 0)+'%)');
-              colorSet.push('rgb(174,174,174)');
+              //dataSet.push(stat.noStatus);
+              //labelSet.push('Pending/Unknown ('+(total > 0 ? ((stat.noStatus/total)*100).toFixed(1) : 0)+'%)');
+              //colorSet.push('rgb(174,174,174)');
 
               var chart = new Chart(ctx, {
                 type: 'pie',
@@ -460,15 +495,15 @@ var CmrMetrics = (function() {
                 var tSet = {
                     label : 'Touchless',
                     fill : false,
-                    backgroundColor : 'rgb(57,198,75)',
-                    borderColor : 'rgb(57,198,75)',
+                    backgroundColor : 'rgb(0,255,64)',
+                    borderColor : 'rgb(0,255,64)',
                     data : []
                 };
                 var rSet = {
                     label : 'Review Required',
                     fill : false,
-                    backgroundColor : 'rgb(185,70,73)',
-                    borderColor : 'rgb(185,70,73)',
+                    backgroundColor : 'rgb(180,180,180)',
+                    borderColor : 'rgb(180,180,180)',
                     data : []
                 };
                 var lSet = {
@@ -488,7 +523,7 @@ var CmrMetrics = (function() {
                 var labels = [];
                 allData.forEach(function(d,i){
                   labels.push(d.lbl);
-                  var total = d.t + d.r + d.n + d.l;
+                  var total = d.t + d.r;
                   tSet.data.push(((d.t/total)*100).toFixed(1));
                   rSet.data.push(((d.r/total)*100).toFixed(1));
                   nSet.data.push(((d.n/total)*100).toFixed(1));
@@ -499,7 +534,7 @@ var CmrMetrics = (function() {
                     type: 'line',
                     data: {
                       labels: labels,
-                      datasets: [tSet, rSet, nSet, lSet]
+                      datasets: [tSet, rSet]
                     },
                     options: {
                       responsive: true,
@@ -577,15 +612,15 @@ var CmrMetrics = (function() {
                   var tSet = {
                       label : 'Touchless',
                       fill : false,
-                      backgroundColor : 'rgb(57,198,75)',
-                      borderColor : 'rgb(57,198,75)',
+                      backgroundColor : 'rgb(0,255,64)',
+                      borderColor : 'rgb(0,255,64)',
                       data : []
                   };
                   var rSet = {
                       label : 'Review Required',
                       fill : false,
-                      backgroundColor : 'rgb(185,70,73)',
-                      borderColor : 'rgb(185,70,73)',
+                      backgroundColor : 'rgb(180,180,180)',
+                      borderColor : 'rgb(180,180,180)',
                       data : []
                   };
                   var lSet = {
@@ -605,7 +640,7 @@ var CmrMetrics = (function() {
                   var labels = [];
                   allData.forEach(function(d,i){
                     labels.push(d.lbl);
-                    var total = d.t + d.r + d.n + d.l;
+                    var total = d.t + d.r;
                     tSet.data.push(((d.t/total)*100).toFixed(1));
                     rSet.data.push(((d.r/total)*100).toFixed(1));
                     nSet.data.push(((d.n/total)*100).toFixed(1));
@@ -616,7 +651,7 @@ var CmrMetrics = (function() {
                       type: 'bar',
                       data: {
                         labels: labels,
-                        datasets: [tSet, rSet, nSet, lSet]
+                        datasets: [tSet, rSet]
                       },
                       options: {
                         responsive: true,
@@ -696,15 +731,15 @@ var CmrMetrics = (function() {
                     var tSet = {
                         label : 'Touchless',
                         fill : false,
-                        backgroundColor : 'rgb(57,198,75)',
-                        borderColor : 'rgb(57,198,75)',
+                        backgroundColor : 'rgb(0,255,64)',
+                        borderColor : 'rgb(0,255,64)',
                         data : []
                     };
                     var rSet = {
                         label : 'Review Required',
                         fill : false,
-                        backgroundColor : 'rgb(185,70,73)',
-                        borderColor : 'rgb(185,70,73)',
+                        backgroundColor : 'rgb(180,180,180)',
+                        borderColor : 'rgb(180,180,180)',
                         data : []
                     };
                     var lSet = {
@@ -729,7 +764,7 @@ var CmrMetrics = (function() {
                       rSet.data.push(d.r);
                       lSet.data.push(d.l);
                       nSet.data.push(d.n);
-                      var total = d.t + d.r + d.l + d.n;
+                      var total = d.t + d.r;
                       if (total > max) {
                         max = total;
                       }
@@ -739,7 +774,7 @@ var CmrMetrics = (function() {
                         type: 'bar',
                         data: {
                           labels: labels,
-                          datasets: [tSet, rSet, nSet, lSet]
+                          datasets: [tSet, rSet]
                         },
                         options: {
                           responsive: true,
@@ -800,6 +835,18 @@ var CmrMetrics = (function() {
                     
                     
               }
+              if (sourceSystId != ''){
+                var aveTouchless = partner.touchless > 0 ? partner.touchlessTotal / partner.touchless : 0;
+                aveTouchless = aveTouchless.toFixed(0);
+                var aveReview = partner.review > 0 ? partner.reviewTotal / partner.review : 0;
+                aveReview = aveReview.toFixed(0);
+                var aveTotal = partner.touchless + partner.review > 0 ? (partner.touchlessTotal + partner.reviewTotal)/(partner.touchless + partner.review) : 0;
+                aveTotal = aveTotal.toFixed(0);
+                
+                dojo.byId('partnerTouchless').innerHTML = moment.utc(aveTouchless*1000).format('H [hrs], m [mins], s [secs]');
+                dojo.byId('partnerReview').innerHTML = moment.utc(aveReview*1000).format('H [hrs], m [mins], s [secs]');
+                dojo.byId('partnerTotal').innerHTML = moment.utc(aveTotal*1000).format('H [hrs], m [mins], s [secs]');
+               }
               
             }
             
