@@ -7,8 +7,12 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -465,6 +469,67 @@ public class IERPRequestUtils extends RequestUtils {
       LOG.error("Error when loading Email template.", e);
       return null;
     }
+  }
+
+  public static String getOrderBlockFromDataRdc(EntityManager entityManager, Admin admin) {
+    LOG.debug("Batch: Order block in DATA_RDC req_id:" + admin.getId().getReqId());
+    String oldOrderBlock = "";
+    String sql = ExternalizedQuery.getSql("GET.ORDER_BLOCK_BY_REQID");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", admin.getId().getReqId());
+
+    List<Object[]> results = query.getResults();
+    if (results != null && results.size() > 0) {
+      Object[] result = results.get(0);
+      oldOrderBlock = result[0] != null ? (String) result[0] : "";
+    }
+
+    LOG.debug("Order block of Data_RDC>" + oldOrderBlock);
+    return oldOrderBlock;
+  }
+
+  public static boolean isTimeStampEquals(Date date) {
+    @SuppressWarnings("serial")
+    Timestamp ts = new Timestamp(Long.MIN_VALUE) {
+      @Override
+      public String toString() {
+        return "0000-00-00 00:00:00.000";
+      }
+    };
+    String sDate1 = ts.toString().substring(0, 3);
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
+    String sDate2 = sdf.format(date).substring(0, 3);
+
+    LOG.info("Check equality of sDate1 :" + sDate1 + " sDate2 :" + sDate2);
+    return sDate1.equals(sDate2) ? true : false;
+  }
+
+  public static int checked2WorkingDays(Date processedTs, Timestamp currentTimestamp) {
+    LOG.debug("processedTs=" + processedTs + " currentTimestamp=" + currentTimestamp);
+
+    int workingDays = 0;
+    String curStringDate = currentTimestamp.toString();
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
+    try {
+
+      Calendar start = Calendar.getInstance();
+      start.setTime(processedTs);
+
+      Calendar end = Calendar.getInstance();
+      end.setTime(sdf.parse(curStringDate));
+
+      while (!start.after(end)) {
+        int day = start.get(Calendar.DAY_OF_WEEK);
+        if ((day != Calendar.SATURDAY) && (day != Calendar.SUNDAY))
+          workingDays++;
+        start.add(Calendar.DATE, 1);
+      }
+      LOG.debug("No of workingDays=" + workingDays);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+    return workingDays;
   }
 
 }

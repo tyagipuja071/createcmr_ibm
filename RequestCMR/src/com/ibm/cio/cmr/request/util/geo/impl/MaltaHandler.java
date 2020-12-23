@@ -1094,4 +1094,9 @@ public class MaltaHandler extends BaseSOFHandler {
     return fields;
   }
 
+  @Override
+  public boolean enableTempReactivateOnUpdate() {
+    return true;
+  }
+
 }
