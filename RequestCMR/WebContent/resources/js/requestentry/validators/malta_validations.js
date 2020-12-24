@@ -760,8 +760,10 @@ function disableEnableFieldsForMT() {
     FormManager.readOnly('cmrOwner');
     FormManager.readOnly('specialTaxCd');
     FormManager.readOnly('custPrefLang');
-  } else {
-    FormManager.enable('cmrNo');
+  }else if (reqType == 'C' && role == 'PROCESSOR') {
+    FormManager.readOnly('cmrNo');
+  }else {
+	FormManager.enable('cmrNo');
     FormManager.enable('cmrOwner');
     FormManager.enable('specialTaxCd');
     FormManager.enable('custPrefLang');
@@ -810,13 +812,6 @@ function addOrdBlkValidator() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
-function lockIBMTabForMalta() {
-  var reqType = FormManager.getActualValue('reqType');
-  var role = FormManager.getActualValue('userRole').toUpperCase();
-  if (reqType == 'C' && role == 'PROCESSOR') {
-    FormManager.readOnly('cmrNo');       
-  }
-}
 
 function setVatValidatorMalta() {
   console.log("setVatValidatorMalta for Malta..");
@@ -956,8 +951,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(addAddrValidatorMALTA, [ SysLoc.MALTA ]);
   GEOHandler.addAddrFunction(addMaltaLandedCountryHandler, [ SysLoc.MALTA ]);
   GEOHandler.addAfterTemplateLoad(addAfterTemplateLoadMalta, [ SysLoc.MALTA ]);
-GEOHandler.addAfterConfig(lockIBMTabForMalta, [ SysLoc.MALTA ]);
-GEOHandler.addAfterTemplateLoad(lockIBMTabForMalta, [ SysLoc.MALTA ]);
   GEOHandler.registerValidator(addOrdBlkValidator, [ SysLoc.MALTA ], null, true);
   GEOHandler.registerValidator(enterpriseValidation, [ SysLoc.MALTA ], null, true);
   GEOHandler.registerValidator(addAddressTypeValidator, [ SysLoc.MALTA ], null, true);
