@@ -1527,7 +1527,7 @@ function add32SBODependcyOnPostCdOnAddrSave() {
   } else {
     return;
   }
-  if (role == 'Processor') {
+  if (role != 'Requester' || role != 'Processor') {// CMR-221
     return;
   }
   if (reqType == 'U') {
