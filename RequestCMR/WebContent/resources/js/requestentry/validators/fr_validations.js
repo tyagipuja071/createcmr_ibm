@@ -2752,6 +2752,7 @@ function setClassificationCode() {
 
   FormManager.show('CustClass', 'custClass');
   FormManager.resetDropdownValues(FormManager.getField('custClass'));
+
   if (role == 'Requester') {
     if (reqType == 'C') {
       if (custSubGrp != '') {
@@ -2891,6 +2892,18 @@ function setTaxCd() {
     } else {
       FormManager.setValue(FormManager.getField('taxCd2'), _pagemodel.taxCd2);
     }
+  }
+
+  var role = null;
+
+  if (typeof (_pagemodel) != 'undefined') {
+    role = _pagemodel.userRole;
+  }
+
+  if (role == 'Processor') {
+    cmr.showNode('taxCd2MandatoryFlag');
+  } else {
+    cmr.hideNode('taxCd2MandatoryFlag');
   }
 
 }
