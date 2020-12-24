@@ -2745,10 +2745,9 @@ function cmrNoEnable() {
 function canCopyAddress(value, rowIndex, grid) {
   return false;
 }
-
-// Control Classification Code
+var pageModelFlag = 'N';
+// Control Customer Classification Code
 function setClassificationCode() {
-
   var role = null;
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
@@ -2758,45 +2757,39 @@ function setClassificationCode() {
   var field = FormManager.getField('custClass');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var custClass = '';
-  var pageModelFlag = 'N';
-  if (typeof (_pagemodel) != 'undefined') {
-    if (_pagemodel.custClass != null || _pagemodel.custClass != 'null') {
-      pageModelFlag = 'Y';
-      custClass = _pagemodel.custClass;
-    }
-  }
 
   FormManager.show('CustClass', 'custClass');
   FormManager.resetDropdownValues(FormManager.getField('custClass'));
-
   if (role == 'Requester') {
     if (reqType == 'C') {
       if (custSubGrp != '') {
-        if (custSubGrp == 'COMME' || custSubGrp == 'CBMME' || custSubGrp == 'HOSTC' || custSubGrp == 'CBSTC' || custSubGrp == 'THDPT' || custSubGrp == 'CBDPT') {
+        if (custSubGrp == 'COMME' || custSubGrp == 'CBMME' || custSubGrp == 'HOSTC' || custSubGrp == 'CBSTC' || custSubGrp == 'THDPT'
+            || custSubGrp == 'CBDPT') {
           FormManager.setValue(field, '11');
+          FormManager.readOnly('custClass');
         } else if (custSubGrp == 'BUSPR' || custSubGrp == 'XBUSP') {
-          FormManager.limitDropdownValues(field, [ '42', '43', '44', '45', '46', '47', '48' ]);
+          var custSubGrpCodeArray = [ '42', '43', '44', '45', '46', '47', '48' ];
+          FormManager.limitDropdownValues(field, custSubGrpCodeArray);
           FormManager.enable(field);
-
           if (pageModelFlag == 'Y') {
-            FormManager.setValue(field, _pagemodel.custClass);
-          } else {
             FormManager.setValue(field, '43');
+          } else {
+            FormManager.setValue(field, custSubGrpCodeArray.indexOf(_pagemodel.custClass) > -1 ? _pagemodel.custClass : '43');
+            pageModelFlag = 'Y';
           }
-
         } else if (custSubGrp == 'PRICU' || custSubGrp == 'XBLUM') {
           FormManager.setValue(field, '60');
           FormManager.readOnly('custClass');
         } else if (custSubGrp == 'GOVRN' || custSubGrp == 'CBVRN') {
-          FormManager.limitDropdownValues(field, [ '13', '14', '17' ]);
+          var custSubGrpCodeArray = [ '13', '14', '17' ];
+          FormManager.limitDropdownValues(field, custSubGrpCodeArray);
           FormManager.enable(field);
-
           if (pageModelFlag == 'Y') {
-            FormManager.setValue(field, _pagemodel.custClass);
-          } else {
             FormManager.setValue(field, '13');
+          } else {
+            FormManager.setValue(field, custSubGrpCodeArray.indexOf(_pagemodel.custClass) > -1 ? _pagemodel.custClass : '13');
+            pageModelFlag = 'Y';
           }
-
         } else if (custSubGrp == 'INTER' || custSubGrp == 'CBTER') {
           FormManager.setValue(field, '81');
           FormManager.readOnly('custClass');
@@ -2804,38 +2797,93 @@ function setClassificationCode() {
           FormManager.setValue(field, '85');
           FormManager.readOnly('custClass');
         } else if (custSubGrp == 'LCFIN' || custSubGrp == 'CBFIN') {
-          FormManager.limitDropdownValues(field, [ '32', '33', '34', '35', '36' ]);
+          var custSubGrpCodeArray = [ '32', '33', '34', '35', '36' ];
+          FormManager.limitDropdownValues(field, custSubGrpCodeArray);
           FormManager.enable(field);
-
           if (pageModelFlag == 'Y') {
-            FormManager.setValue(field, _pagemodel.custClass);
-          } else {
             FormManager.setValue(field, '33');
+          } else {
+            FormManager.setValue(field, custSubGrpCodeArray.indexOf(_pagemodel.custClass) > -1 ? _pagemodel.custClass : '33');
+            pageModelFlag = 'Y';
           }
-
         } else if (custSubGrp == 'IBMEM' || custSubGrp == 'CBIEM') {
           FormManager.setValue(field, '71');
           FormManager.readOnly('custClass');
         }
-        FormManager.resetDropdownValues(FormManager.getField('taxCd2'));
-        FormManager.limitDropdownValues(FormManager.getField('taxCd2'), [ '1', '0' ]);
-        FormManager.setValue('taxCd2', '1');
+
       } else {
         FormManager.setValue(field, '');
         FormManager.readOnly('custClass');
       }
     } else if (reqType == 'U') {
-      FormManager.limitDropdownValues(field, [ '11', '13', '14', '17', '32', '33', '34', '35', '36', '42', '43', '44', '45', '46', '47', '48', '60', '71', '81', '85' ]);
-      FormManager.setValue(field, custClass);
+      FormManager.limitDropdownValues(field, [ '11', '13', '14', '17', '32', '33', '34', '35', '36', '42', '43', '44', '45', '46', '47', '48', '60',
+          '71', '81', '85' ]);
+      FormManager.setValue(field, _pagemodel.custClass);
       FormManager.readOnly('custClass');
     }
   } else if (role == 'Processor') {
-    FormManager.limitDropdownValues(field, [ '11', '13', '14', '17', '32', '33', '34', '35', '36', '42', '43', '44', '45', '46', '47', '48', '60', '71', '81', '85' ]);
-    FormManager.setValue(field, custClass);
-    FormManager.enable(field);
+    if (reqType == 'C') {
+      if (custSubGrp != '') {
+        if (custSubGrp == 'COMME' || custSubGrp == 'CBMME' || custSubGrp == 'HOSTC' || custSubGrp == 'CBSTC' || custSubGrp == 'THDPT'
+            || custSubGrp == 'CBDPT') {
+          FormManager.setValue(field, '11');
+          FormManager.readOnly('custClass');
+        } else if (custSubGrp == 'BUSPR' || custSubGrp == 'XBUSP') {
+          var custSubGrpCodeArray = [ '42', '43', '44', '45', '46', '47', '48' ];
+          FormManager.limitDropdownValues(field, custSubGrpCodeArray);
+          FormManager.enable(field);
+          if (pageModelFlag == 'Y') {
+            FormManager.setValue(field, '43');
+          } else {
+            FormManager.setValue(field, custSubGrpCodeArray.indexOf(_pagemodel.custClass) > -1 ? _pagemodel.custClass : '43');
+            pageModelFlag = 'Y';
+          }
+        } else if (custSubGrp == 'PRICU' || custSubGrp == 'XBLUM') {
+          FormManager.setValue(field, '60');
+          FormManager.readOnly('custClass');
+        } else if (custSubGrp == 'GOVRN' || custSubGrp == 'CBVRN') {
+          var custSubGrpCodeArray = [ '13', '14', '17' ];
+          FormManager.limitDropdownValues(field, custSubGrpCodeArray);
+          FormManager.enable(field);
+          if (pageModelFlag == 'Y') {
+            FormManager.setValue(field, '13');
+          } else {
+            FormManager.setValue(field, custSubGrpCodeArray.indexOf(_pagemodel.custClass) > -1 ? _pagemodel.custClass : '13');
+            pageModelFlag = 'Y';
+          }
+        } else if (custSubGrp == 'INTER' || custSubGrp == 'CBTER') {
+          FormManager.setValue(field, '81');
+          FormManager.readOnly('custClass');
+        } else if (custSubGrp == 'INTSO' || custSubGrp == 'CBTSO') {
+          FormManager.setValue(field, '85');
+          FormManager.readOnly('custClass');
+        } else if (custSubGrp == 'LCFIN' || custSubGrp == 'CBFIN') {
+          var custSubGrpCodeArray = [ '32', '33', '34', '35', '36' ];
+          FormManager.limitDropdownValues(field, custSubGrpCodeArray);
+          FormManager.enable(field);
+          if (pageModelFlag == 'Y') {
+            FormManager.setValue(field, '33');
+          } else {
+            FormManager.setValue(field, custSubGrpCodeArray.indexOf(_pagemodel.custClass) > -1 ? _pagemodel.custClass : '33');
+            pageModelFlag = 'Y';
+          }
+        } else if (custSubGrp == 'IBMEM' || custSubGrp == 'CBIEM') {
+          FormManager.setValue(field, '71');
+          FormManager.readOnly('custClass');
+        }
+      } else {
+        FormManager.setValue(field, '');
+        FormManager.readOnly('custClass');
+      }
+    } else if (reqType == 'U') {
+      FormManager.limitDropdownValues(field, [ '11', '13', '14', '17', '32', '33', '34', '35', '36', '42', '43', '44', '45', '46', '47', '48', '60',
+          '71', '81', '85' ]);
+      FormManager.setValue(field, _pagemodel.custClass);
+    }
   } else if (role == 'Viewer') {
-    FormManager.limitDropdownValues(field, [ '11', '13', '14', '17', '32', '33', '34', '35', '36', '42', '43', '44', '45', '46', '47', '48', '60', '71', '81', '85' ]);
-    FormManager.setValue(field, custClass);
+    FormManager.limitDropdownValues(field, [ '11', '13', '14', '17', '32', '33', '34', '35', '36', '42', '43', '44', '45', '46', '47', '48', '60',
+        '71', '81', '85' ]);
+    FormManager.setValue(field, _pagemodel.custClass);
     FormManager.readOnly('custClass');
   }
 
@@ -2904,6 +2952,10 @@ function setIERPSitePartyIDForFR() {
   }
 }
 
+function setSensitiveFlag() {
+  FormManager.readOnly('sensitiveFlag');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.FR = [ SysLoc.FRANCE ];
   console.log('adding FR functions...');
@@ -2958,5 +3010,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addCmrNoValidator, [ '706' ], null, true);
   GEOHandler.addAfterConfig(setTaxCd, '706');
   GEOHandler.addAfterTemplateLoad(setTaxCd, '706');
+  GEOHandler.addAfterConfig(setSensitiveFlag, '706');
+  GEOHandler.addAfterTemplateLoad(setSensitiveFlag, '706');
   GEOHandler.addAddrFunction(setIERPSitePartyIDForFR, '706');
 });
