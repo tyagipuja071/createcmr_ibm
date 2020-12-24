@@ -428,7 +428,7 @@ public class BELUXTransformer extends EMEATransformer {
   public void setDefaultLandedCountry(Data data) {
     if ("624".equals(data.getCmrIssuingCntry())) {
       String countryUse = data.getCountryUse();
-      if (countryUse != null)
+      if (countryUse != null && countryUse.length() > 3)
         countryUse = countryUse.substring(3, 5);
       if (!StringUtils.isEmpty(countryUse) && "LU".equalsIgnoreCase(countryUse))
         DEFAULT_LANDED_COUNTRY = "LU";
