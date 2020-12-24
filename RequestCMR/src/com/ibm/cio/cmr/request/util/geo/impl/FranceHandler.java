@@ -166,7 +166,7 @@ public class FranceHandler extends GEOHandler {
 
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
-    
+
     String zs01sapNo = getKunnrSapr3Kna1ForFR(data.getCmrNo(), mainRecord.getCmrOrderBlock());
     data.setMemLvl(getMembershipLevel(zs01sapNo));
     if (CmrConstants.PROSPECT_ORDER_BLOCK.equals(mainRecord.getCmrOrderBlock())) {
@@ -460,6 +460,21 @@ public class FranceHandler extends GEOHandler {
       results.add(update);
     }
 
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getTaxCd2(), newData.getTaxCd2())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "Tax Code", "Tax Code"));
+      update.setNewData(newData.getTaxCd2());
+      update.setOldData(oldData.getTaxCd2());
+      results.add(update);
+    }
+
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getCustClass(), newData.getCustClass())) {
+      for (UpdatedDataModel item : results) {
+        if (item.getDataField().equals("Customer Class")) {
+          results.remove(item);
+        }
+      }
+    }
     /*
      * if (RequestSummaryService.TYPE_CUSTOMER.equals(type) &&
      * !equals(oldData.getCustClass(), newData.getCustClass())) { update = new
@@ -1259,7 +1274,7 @@ public class FranceHandler extends GEOHandler {
     HashMap<String, String> hwFlagMap = new HashMap<>();
 
   }
-  
+
   private String getKunnrSapr3Kna1ForFR(String cmrNo, String ordBlk) throws Exception {
     String kunnr = "";
 
@@ -1278,7 +1293,7 @@ public class FranceHandler extends GEOHandler {
     query.addField("ZZKV_CUSNO");
 
     LOG.debug("Getting existing KUNNR value from RDc DB..");
-    
+
     QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
     QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
 
@@ -1290,7 +1305,7 @@ public class FranceHandler extends GEOHandler {
     }
     return kunnr;
   }
-  
+
   private String getTaxCodeForFR(String kunnr) throws Exception {
     String taxcode = "";
 
@@ -1308,7 +1323,7 @@ public class FranceHandler extends GEOHandler {
     query.addField("KUNNR");
 
     LOG.debug("Getting existing TAXKD value from RDc DB..");
-    
+
     QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
     QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
 
