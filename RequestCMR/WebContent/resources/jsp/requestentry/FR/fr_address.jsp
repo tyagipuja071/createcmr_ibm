@@ -49,8 +49,7 @@
     <cmr:field fieldId="CustomerName2" id="custNm2" path="custNm2" size="400" />
   </cmr:column>
 </cmr:row>
-<!-- 
-  CREATCMR-273 REMOVE UI FIELD(Customer Name/ Additional Address Information)
+<!-- CREATCMR-273 REMOVE UI FIELD(Customer Name/ Additional Address Information)
 <cmr:row addBackground="true">
   <cmr:column span="4">
     <cmr:label fieldId="custNm3">

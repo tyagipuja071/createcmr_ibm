@@ -53,9 +53,21 @@
     </cmr:column>
     <cmr:column span="1" width="240">
       <%
-        String taxCd = DropdownListController.getDescription("SpecialTaxCd", data.getSpecialTaxCd(), cntry);
+        String taxCd = DropdownListController.getDescription("LocalTax2", data.getTaxCd2(), cntry);
       %>
       <%=taxCd != null ? taxCd : ""%>
+    </cmr:column>
+    
+    <cmr:column span="1" width="130">
+      <cmr:view>
+        <label><cmr:fieldLabel fieldId="CustClass" />: </label>
+      </cmr:view> 
+    </cmr:column>
+    <cmr:column span="1" width="240">
+      <%
+        String custClass = DropdownListController.getDescription("CustClass", data.getCustClass(), cntry);
+      %>
+      <%= custClass != null ? custClass : "" %>
     </cmr:column>
   </cmr:row>
 
