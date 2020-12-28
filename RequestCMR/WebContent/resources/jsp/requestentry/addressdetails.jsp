@@ -873,11 +873,11 @@
       </cmr:column>
       <cmr:view exceptForGEO="MCO1,MCO2,CEMEA,NORDX,BELUX,SWISS,FR" exceptForCountry="666,726,822,838,758">
         <cmr:column span="1">
-          <cmr:label fieldId="custNm3_view">
-            <span class="lbl-CustomerName3">Division/Department</span>:</cmr:label>
+          <cmr:label fieldId="dept_view">
+            <span class="lbl-Department">${ui.dept}</span>:</cmr:label>
         </cmr:column>
         <cmr:column span="2">
-          <div id="custNm3_view">-</div>
+          <div id="dept_view">-</div>
         </cmr:column>
       </cmr:view>
       <cmr:view forGEO="FR" forCountry="706">
