@@ -468,6 +468,14 @@ public class FranceHandler extends GEOHandler {
       results.add(update);
     }
 
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getAbbrevLocn(), newData.getAbbrevLocn())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "Abbreviated Location", "Abbreviated Location"));
+      update.setNewData(newData.getAbbrevLocn());
+      update.setOldData(oldData.getAbbrevLocn());
+      results.add(update);
+    }
+
     if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getCustClass(), newData.getCustClass())) {
       for (UpdatedDataModel item : results) {
         if (item.getDataField().equals("Customer Class")) {
