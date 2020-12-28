@@ -325,6 +325,10 @@ function setVatValidatorBELUX() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
     if (custSubGrp == 'BEPRI' || custSubGrp == 'LUPRI') {
+      // FormManager.removeValidator('vat', Validators.REQUIRED);
+      return;
+    } else if (custSubGrp == 'BEPUB' || custSubGrp == 'BEINT' || custSubGrp == 'LUPUB' || custSubGrp == 'LUINT') {
+      FormManager.removeValidator('vat', Validators.REQUIRED);
       return;
     }
     FormManager.resetValidations('vat');
