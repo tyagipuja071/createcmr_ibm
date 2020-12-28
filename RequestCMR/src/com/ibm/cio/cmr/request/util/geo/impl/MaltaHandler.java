@@ -636,11 +636,8 @@ public class MaltaHandler extends BaseSOFHandler {
 
     // MALTA - For SBO values exceeding 4 char length
     if (!(StringUtils.isEmpty(mainRecord.getCmrSortl()))) {
-      if (mainRecord.getCmrSortl().length() > 4) {
-        data.setSalesBusOffCd(mainRecord.getCmrSortl().substring(0, 4));
-      }
+      data.setSalesBusOffCd(mainRecord.getCmrSortl().substring(0, 4));
     }
-
     // MALTA - OrderBlock
     if (!(StringUtils.isEmpty(mainRecord.getCmrOrderBlock()))) {
       data.setOrdBlk(mainRecord.getCmrOrderBlock());
