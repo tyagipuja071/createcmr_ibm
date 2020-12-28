@@ -268,8 +268,8 @@ public class FranceUtil extends AutomationUtil {
           return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
         case SCENARIO_CROSSBORDER_THIRD_PARTY:
         case SCENARIO_THIRD_PARTY:
-         if (customerName.toUpperCase().equals(customerNameZI01.toUpperCase()) && StringUtils.isNotBlank(customerName)
-                 && StringUtils.isNotBlank(customerNameZI01)) {
+          if (customerName.toUpperCase().equals(customerNameZI01.toUpperCase()) && StringUtils.isNotBlank(customerName)
+              && StringUtils.isNotBlank(customerNameZI01)) {
             details.append("Customer Names on Sold-to and Install-at address should be different for Third Party Scenario").append("\n");
             engineData.addRejectionComment("OTH", "Customer Names on Sold-to and Install-at address should be different for Third Party Scenario", "",
                 "");
@@ -366,7 +366,7 @@ public class FranceUtil extends AutomationUtil {
         details.append("Coverage could not be calculated on the basis of SIREN. SIREN/SIRET not found on the request.").append("\n");
       }
 
-      if (!isCoverageCalculated && FRANCE_SUBREGIONS.contains(addr.getLandCntry())) {
+      if (!isCoverageCalculated) {
         // if not calculated using siren as well
         if ("32".equals(data.getIsuCd()) && "S".equals(data.getClientTier())) {
           details.setLength(0);
