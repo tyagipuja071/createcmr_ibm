@@ -83,8 +83,7 @@ public class BELUXHandler extends BaseSOFHandler {
       SystemLocation.LEBANON, SystemLocation.LIBYA, SystemLocation.OMAN, SystemLocation.PAKISTAN, SystemLocation.QATAR, SystemLocation.SAUDI_ARABIA,
       SystemLocation.YEMEN, SystemLocation.SYRIAN_ARAB_REPUBLIC, SystemLocation.EGYPT, SystemLocation.TUNISIA_SOF, SystemLocation.GULF);
 
-  protected static final String[] ME_MASS_UPDATE_SHEET_NAMES = { "Sold To", "Mail to", "Bill To", "Ship To", "Install At",
-      "Address in Local language", };
+  protected static final String[] MASS_UPDATE_SHEET_NAMES = { "Sold To", "Mail to", "Bill To", "Ship To", "Install At" };
 
   @Override
   protected void handleSOFConvertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry,
@@ -1325,43 +1324,41 @@ public class BELUXHandler extends BaseSOFHandler {
   @Override
   public String generateAddrSeq(EntityManager entityManager, String addrType, long reqId, String cmrIssuingCntry) {
     String newAddrSeq = null;
-    if (ME_COUNTRIES_LIST.contains(cmrIssuingCntry)) {
-      if (!StringUtils.isEmpty(addrType)) {
-        if ("ZD02".equals(addrType)) {
-          return "598";
-        } else if ("ZP03".equals(addrType)) {
-          return "599";
-        }
+    if (!StringUtils.isEmpty(addrType)) {
+      if ("ZD02".equals(addrType)) {
+        return "598";
+      } else if ("ZP03".equals(addrType)) {
+        return "599";
       }
-      int addrSeq = 0;
-      String maxAddrSeq = null;
-      String sql = ExternalizedQuery.getSql("ADDRESS.GETMADDRSEQ_CEE");
-      PreparedQuery query = new PreparedQuery(entityManager, sql);
-      query.setParameter("REQ_ID", reqId);
-
-      List<Object[]> results = query.getResults();
-      if (results != null && results.size() > 0) {
-        Object[] result = results.get(0);
-        maxAddrSeq = (String) (result != null && result.length > 0 && result[0] != null ? result[0] : "00000");
-
-        if (!(Integer.valueOf(maxAddrSeq) >= 00000 && Integer.valueOf(maxAddrSeq) <= 20849)) {
-          maxAddrSeq = "";
-        }
-        if (StringUtils.isEmpty(maxAddrSeq)) {
-          maxAddrSeq = "00000";
-        }
-        try {
-          addrSeq = Integer.parseInt(maxAddrSeq);
-        } catch (Exception e) {
-          // if returned value is invalid
-        }
-        addrSeq++;
-      }
-
-      newAddrSeq = "0000" + Integer.toString(addrSeq);
-
-      newAddrSeq = newAddrSeq.substring(newAddrSeq.length() - 5, newAddrSeq.length());
     }
+    int addrSeq = 0;
+    String maxAddrSeq = null;
+    String sql = ExternalizedQuery.getSql("ADDRESS.GETMADDRSEQ_CEE");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+
+    List<Object[]> results = query.getResults();
+    if (results != null && results.size() > 0) {
+      Object[] result = results.get(0);
+      maxAddrSeq = (String) (result != null && result.length > 0 && result[0] != null ? result[0] : "00000");
+
+      if (!(Integer.valueOf(maxAddrSeq) >= 00000 && Integer.valueOf(maxAddrSeq) <= 20849)) {
+        maxAddrSeq = "";
+      }
+      if (StringUtils.isEmpty(maxAddrSeq)) {
+        maxAddrSeq = "00000";
+      }
+      try {
+        addrSeq = Integer.parseInt(maxAddrSeq);
+      } catch (Exception e) {
+        // if returned value is invalid
+      }
+      addrSeq++;
+    }
+
+    newAddrSeq = "0000" + Integer.toString(addrSeq);
+
+    newAddrSeq = newAddrSeq.substring(newAddrSeq.length() - 5, newAddrSeq.length());
     return newAddrSeq;
   }
 
@@ -1434,61 +1431,61 @@ public class BELUXHandler extends BaseSOFHandler {
     XSSFCell currCell = null;
 
     String[] countryAddrss = null;
-    if (ME_COUNTRIES_LIST.contains(country)) {
-      countryAddrss = ME_MASS_UPDATE_SHEET_NAMES;
 
-      XSSFSheet sheet = book.getSheet("Data");// validate Data sheet
-      row = sheet.getRow(0);// data field name row
-      int ordBlkIndex = 14;// default index
-      for (int cellIndex = 0; cellIndex < row.getLastCellNum(); cellIndex++) {
-        currCell = row.getCell(cellIndex);
-        String cellVal = validateColValFromCell(currCell);
-        if ("Order block code".equals(cellVal)) {
-          ordBlkIndex = cellIndex;
-          break;
-        }
+    countryAddrss = MASS_UPDATE_SHEET_NAMES;
+
+    XSSFSheet sheet = book.getSheet("Data");// validate Data sheet
+    row = sheet.getRow(0);// data field name row
+    int ordBlkIndex = 14;// default index
+    for (int cellIndex = 0; cellIndex < row.getLastCellNum(); cellIndex++) {
+      currCell = row.getCell(cellIndex);
+      String cellVal = validateColValFromCell(currCell);
+      if ("Order block code".equals(cellVal)) {
+        ordBlkIndex = cellIndex;
+        break;
       }
+    }
 
-      TemplateValidation error = new TemplateValidation("Data");
+    TemplateValidation error = new TemplateValidation("Data");
+    for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
+      row = sheet.getRow(rowIndex);
+      if (row == null) {
+        break; // stop immediately when row is blank
+      }
+      currCell = row.getCell(ordBlkIndex);
+      String ordBlk = validateColValFromCell(currCell);
+      if (StringUtils.isNotBlank(ordBlk) && !("@".equals(ordBlk) || "E".equals(ordBlk) || "S".equals(ordBlk))) {
+        LOG.trace("Order Block Code should only @, E, R. >> ");
+        error.addError(rowIndex, "Order Block Code", "Order Block Code should be only @, E, S. ");
+        validations.add(error);
+      }
+    }
+
+    for (String name : countryAddrss) {
+      sheet = book.getSheet(name);
       for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
+
         row = sheet.getRow(rowIndex);
         if (row == null) {
           break; // stop immediately when row is blank
         }
-        currCell = row.getCell(ordBlkIndex);
-        String ordBlk = validateColValFromCell(currCell);
-        if (StringUtils.isNotBlank(ordBlk) && !("@".equals(ordBlk) || "E".equals(ordBlk) || "S".equals(ordBlk))) {
-          LOG.trace("Order Block Code should only @, E, R. >> ");
-          error.addError(rowIndex, "Order Block Code", "Order Block Code should be only @, E, S. ");
-          validations.add(error);
-        }
-      }
+        String name3 = ""; // 4
+        String pobox = ""; // 8
 
-      for (String name : countryAddrss) {
-        sheet = book.getSheet(name);
-        for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
+        currCell = row.getCell(4);
+        name3 = validateColValFromCell(currCell);
+        currCell = row.getCell(8);
+        pobox = validateColValFromCell(currCell);
 
-          row = sheet.getRow(rowIndex);
-          if (row == null) {
-            break; // stop immediately when row is blank
-          }
-          String name3 = ""; // 4
-          String pobox = ""; // 8
-
-          currCell = row.getCell(4);
-          name3 = validateColValFromCell(currCell);
-          currCell = row.getCell(8);
-          pobox = validateColValFromCell(currCell);
-
-          if (!StringUtils.isEmpty(name3) && !StringUtils.isEmpty(pobox)) {
-            TemplateValidation errorAddr = new TemplateValidation(name);
-            LOG.trace("Customer Name (3) and PO BOX should not be input at the sametime.");
-            errorAddr.addError(row.getRowNum(), "PO BOX", "Customer Name (3) and PO BOX should not be input at the sametime.");
-            validations.add(errorAddr);
-          }
+        if (!StringUtils.isEmpty(name3) && !StringUtils.isEmpty(pobox)) {
+          TemplateValidation errorAddr = new TemplateValidation(name);
+          LOG.trace("Customer Name (3) and PO BOX should not be input at the sametime.");
+          errorAddr.addError(row.getRowNum(), "PO BOX", "Customer Name (3) and PO BOX should not be input at the sametime.");
+          validations.add(errorAddr);
         }
       }
     }
+
   }
 
   private int getCeeKnvpParvmCount(String kunnr) throws Exception {
