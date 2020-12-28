@@ -103,11 +103,14 @@ function disableAddrFieldsMT() {
     FormManager.disable('custPhone');
   }
 
-  if (addrType != 'ZS01' && addrType != 'ZP01') {
-    FormManager.readOnly('poBox');
-    FormManager.setValue('poBox', '');
+ if (addrType == 'ZS01' || addrType == 'ZP01') {
+	FormManager.enable('poBox');
+    /*FormManager.readOnly('poBox');
+    FormManager.setValue('poBox', '');*/
   } else {
-    FormManager.enable('poBox');
+   // FormManager.enable('poBox');
+FormManager.readOnly('poBox');
+    FormManager.setValue('poBox', '');
   }
 
 }
