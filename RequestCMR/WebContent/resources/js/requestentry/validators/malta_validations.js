@@ -6,6 +6,10 @@ var _vatExemptHandler = null;
 function addMaltaLandedCountryHandler(cntry, addressMode, saving, finalSave) {
   var custGrp = FormManager.getActualValue('custGrp');
   var addrType = FormManager.getActualValue('addrType');
+  var landCntry = 'MT'; // default to Malta
+// set default landed country
+  FormManager.setValue('defaultLandedCountry', landCntry);
+
   if (!saving) {
     if (addressMode == 'newAddress') {
       if (custGrp != 'CROSS') {
