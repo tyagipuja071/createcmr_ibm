@@ -7185,6 +7185,9 @@ function autoSetISUClientTierUK() {
   if (reqType != 'C') {
     return;
   }
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
 
   if ('866' == FormManager.getActualValue('cmrIssuingCntry')) {
     if (custSubGroup != undefined && custSubGroup != '' && !noScenario.has(custSubGroup)) {
