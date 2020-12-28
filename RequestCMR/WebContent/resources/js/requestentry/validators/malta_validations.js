@@ -38,16 +38,11 @@ function addHandlersForMT() {
     }
   }
 
-  if (_vatExemptHandler == null) {
-    _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
-      setVatValidatorMalta();
-    });
-  }
-
   if (FormManager.getActualValue('reqType') == 'C') {
     if (_vatExemptHandler == null) {
       _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
         resetVatRequired(true);
+        setVatValidatorMalta();
       });
     }
   }
@@ -627,7 +622,6 @@ function enterpriseValidation() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
-
 function streetValidatorCustom() {
   console.log("streetValidatorCustom..............");
   FormManager.addFormValidator((function() {
@@ -726,7 +720,7 @@ function addAfterConfigMalta() {
   setVatValidatorMalta();
   disableEnableFieldsForMT();
   setAddressDetailsForView();
- // disable copy address
+  // disable copy address
   GEOHandler.disableCopyAddress();
 }
 
@@ -760,10 +754,10 @@ function disableEnableFieldsForMT() {
     FormManager.readOnly('cmrOwner');
     FormManager.readOnly('specialTaxCd');
     FormManager.readOnly('custPrefLang');
-  }else if (reqType == 'C' && role == 'PROCESSOR') {
+  } else if (reqType == 'C' && role == 'PROCESSOR') {
     FormManager.readOnly('cmrNo');
-  }else {
-	FormManager.enable('cmrNo');
+  } else {
+    FormManager.enable('cmrNo');
     FormManager.enable('cmrOwner');
     FormManager.enable('specialTaxCd');
     FormManager.enable('custPrefLang');
@@ -811,7 +805,6 @@ function addOrdBlkValidator() {
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
-
 
 function setVatValidatorMalta() {
   console.log("setVatValidatorMalta for Malta..");
@@ -916,7 +909,7 @@ function addIsicClassificationCodeValidator() {
 dojo.addOnLoad(function() {
   GEOHandler.MCO2 = [ '780' ];
   console.log('adding MALTA functions...');
- // GEOHandler.enableCopyAddress(GEOHandler.MCO2, validateMCOCopy, [ 'ZD01' ]);
+  // GEOHandler.enableCopyAddress(GEOHandler.MCO2, validateMCOCopy, [ 'ZD01' ]);
   GEOHandler.enableCustomerNamesOnAddress(GEOHandler.MCO2);
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.MCO2);
   GEOHandler.setRevertIsicBehavior(false);
