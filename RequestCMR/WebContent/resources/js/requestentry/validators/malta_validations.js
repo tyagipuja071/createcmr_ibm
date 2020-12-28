@@ -12,8 +12,7 @@ var landCntry = 'MT'; // default to Malta
 
   if (!saving) {
     if (addressMode == 'newAddress') {
-      if (custGrp != 'CROSS') {
-	  
+      if (custGrp != 'CROSS') {	  
         FilteringDropdown['val_landCntry'] = FormManager.getActualValue('defaultLandedCountry');
         FormManager.setValue('landCntry', FormManager.getActualValue('defaultLandedCountry'));
       } else if (custGrp == 'CROSS' && addrType == 'ZS01') {
@@ -114,7 +113,7 @@ function disableAddrFieldsMT() {
     FormManager.setValue('poBox', '');*/
   } else {
    // FormManager.enable('poBox');
-FormManager.readOnly('poBox');
+    FormManager.readOnly('poBox');
     FormManager.setValue('poBox', '');
   }
 
