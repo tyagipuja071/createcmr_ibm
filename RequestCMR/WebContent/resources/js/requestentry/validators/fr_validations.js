@@ -6,10 +6,11 @@
 // var _addrTypesForFR = [ 'ZP01', 'ZS01', 'ZI01', 'ZD01', 'ZS02' ];
 var _addrTypesForFR = [ 'ZP01', 'ZS01', 'ZI01', 'ZD01' ];
 var _poBOXHandler = [];
-var EU_COUNTRIES = [ "AT", "BE", "BG", "HR", "CY", "CZ", "DE", "DK", "EE", "GR", "FI", "FR", "GB", "HU", "IE", "IT", "LT", "LU", "LV", "MT", "NL", "PL", "PT", "RO", "SE", "SI", "SK" ];
-var VAT_EU_COUNTRY = [ "AT", "BE", "BG", "HR", "CY", "CZ", "EG", "FR", "DE", "GR", "HU", "IE", "IL", "IT", "LU", "MT", "NL", "PK", "PL", "PT", "RO", "RU", "RS", "SK", "SI", "ZA", "ES", "TR", "GB",
-    "UA" ];
-var SUB_REGIONS = new Set([ 'MQ', 'GP', 'GF', 'PM', 'RE', 'TF', 'KM', 'YT', 'NC', 'VC', 'WF', 'PF', 'MC', 'AD', 'DZ' ]);
+var EU_COUNTRIES = [ "AT", "BE", "BG", "HR", "CY", "CZ", "DE", "DK", "EE", "GR", "FI", "FR", "GB", "HU", "IE", "IT", "LT", "LU", "LV", "MT", "NL",
+    "PL", "PT", "RO", "SE", "SI", "SK" ];
+var VAT_EU_COUNTRY = [ "AT", "BE", "BG", "HR", "CY", "CZ", "EG", "FR", "DE", "GR", "HU", "IE", "IL", "IT", "LU", "MT", "NL", "PK", "PL", "PT", "RO",
+    "RU", "RS", "SK", "SI", "ZA", "ES", "TR", "GB", "UA" ];
+var SUB_REGIONS = new Set([ 'MQ', 'GP', 'GF', 'PM', 'RE', 'TF', 'KM', 'YT', 'NC', 'VU', 'WF', 'PF', 'MC', 'AD', 'DZ' ]);
 
 function afterConfigForFR() {
   FormManager.hide('CountrySubRegion', 'countryUse');
@@ -161,6 +162,7 @@ function afterConfigForFR() {
   } else {
     FormManager.readOnly('taxCd1');
   }
+  addVatExemptHandler();
 }
 
 function setINACOnScenario() {
@@ -227,7 +229,91 @@ function setISICAndSubindustryOnScenario() {
     FormManager.enable('subIndustryCd');
   }
 }
-function setVATOnScenario() {
+// function setVATOnScenario() {
+// var role = null;
+// var reqType = FormManager.getActualValue('reqType');
+// if (typeof (_pagemodel) != 'undefined') {
+// role = _pagemodel.userRole;
+// }
+// if (reqType == 'U') {
+// return;
+// }
+// if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+// return;
+// }
+// if (role == 'Processor') {
+// return;
+// }
+//
+// var countyCd = null;
+// var countryUse = FormManager.getActualValue('countryUse');
+// if (countryUse.length > 3) {
+// countyCd = countryUse.substring(3, 5);
+// } else {
+// countyCd = "FR";
+// }
+//
+// var custSubGrp = FormManager.getActualValue('custSubGrp');
+// if (custSubGrp == '') {
+// return;
+// } else {
+// if (custSubGrp == 'PRICU' || custSubGrp == 'CBICU' || custSubGrp == 'IBMEM'
+// || custSubGrp == 'CBIEM') {
+// FormManager.readOnly('vat');
+// FormManager.removeValidator('vat', Validators.REQUIRED);
+//
+// } else if (custSubGrp == 'GOVRN' || custSubGrp == 'CBVRN') {
+// // RC: Temporary fix for story CMR-5134, until TAX exempt is implemented
+// FormManager.removeValidator('vat', Validators.REQUIRED);
+// FormManager.enable('vat');
+// } else if (custSubGrp == 'COMME' || custSubGrp == 'FIBAB' || custSubGrp ==
+// 'BPIEU' || custSubGrp == 'BPUEU' || custSubGrp == 'GOVRN'
+// || custSubGrp == 'INTER' || custSubGrp == 'INTSO' || custSubGrp == 'LCIFF' ||
+// custSubGrp == 'LCIFL' || custSubGrp == 'OTFIN'
+// || custSubGrp == 'LEASE' || custSubGrp == 'LCOEM' || custSubGrp == 'HOSTC' ||
+// custSubGrp == 'THDPT') {
+// if (countyCd == 'FR' || countyCd == 'AD') {
+// FormManager.enable('vat');
+// FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ],
+// 'MAIN_CUST_TAB');
+// } else {
+// FormManager.removeValidator('vat', Validators.REQUIRED);
+// FormManager.enable('vat');
+// }
+//
+// } else if (custSubGrp == 'CBMME' || custSubGrp == 'CBBAB' || custSubGrp ==
+// 'CBIEU' || custSubGrp == 'CBUEU' || custSubGrp == 'CBVRN'
+// || custSubGrp == 'CBTER' || custSubGrp == 'CBTSO' || custSubGrp == 'CBIFF' ||
+// custSubGrp == 'CBIFL' || custSubGrp == 'CBFIN'
+// || custSubGrp == 'CBASE' || custSubGrp == 'CBOEM' || custSubGrp == 'CBSTC' ||
+// custSubGrp == 'CBDPT') {
+// var isVATEUCntry = false;
+// var reqId = FormManager.getActualValue('reqId');
+// var qParams = {
+// REQ_ID : reqId,
+// ADDR_TYPE : 'ZS01',
+// };
+// var _result = cmr.query('ADDR.GET.LANDCNTRY.BY_REQID_ADDRTYP', qParams);
+// var landCntry = _result.ret2;
+// for (var i = 0; i < VAT_EU_COUNTRY.length; i++) {
+// if (VAT_EU_COUNTRY[i] == landCntry) {
+// isVATEUCntry = true;
+// break;
+// }
+// }
+// if (isVATEUCntry == true) {
+// FormManager.enable('vat');
+// FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ],
+// 'MAIN_CUST_TAB');
+// } else {
+// FormManager.removeValidator('vat', Validators.REQUIRED);
+// FormManager.enable('vat');
+// }
+// }
+// }
+// }
+
+function setVATOnScenario(vatExemptOnchange) {
   var role = null;
   var reqType = FormManager.getActualValue('reqType');
   if (typeof (_pagemodel) != 'undefined') {
@@ -239,42 +325,39 @@ function setVATOnScenario() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
-  if (role == 'Processor') {
-    return;
-  }
-
-  var countyCd = null;
-  var countryUse = FormManager.getActualValue('countryUse');
-  if (countryUse.length > 3) {
-    countyCd = countryUse.substring(3, 5);
-  } else {
-    countyCd = "FR";
-  }
-
   var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (!vatExemptOnchange) {
+    FormManager.enable('vatExempt');
+    if (dijit.byId('vatExempt') != undefined && dijit.byId('vatExempt') != null) {
+      FormManager.getField('vatExempt').set('checked', false);
+    }
+    var dbCustSubGrp = _pagemodel.custSubGrp;
+    var dbVatExempt = _pagemodel.vatExempt;
+    if (custSubGrp == dbCustSubGrp && dbVatExempt == 'Y' && dijit.byId('vatExempt') != undefined && dijit.byId('vatExempt') != null) {
+      FormManager.getField('vatExempt').set('checked', true);
+      FormManager.readOnly('vat');
+      FormManager.removeValidator('vat', Validators.REQUIRED);
+      return;
+    }
+  }
   if (custSubGrp == '') {
     return;
   } else {
-    if (custSubGrp == 'PRICU' || custSubGrp == 'CBICU' || custSubGrp == 'IBMEM' || custSubGrp == 'CBIEM') {
+    if (custSubGrp == 'PRICU' || custSubGrp == 'XBLUM' || custSubGrp == 'IBMEM' || custSubGrp == 'CBIEM') {
       FormManager.readOnly('vat');
       FormManager.removeValidator('vat', Validators.REQUIRED);
-
-    } else if (custSubGrp == 'GOVRN' || custSubGrp == 'CBVRN') {
-      // RC: Temporary fix for story CMR-5134, until TAX exempt is implemented
+      FormManager.readOnly('vatExempt');
+      if (dijit.byId('vatExempt') != undefined && dijit.byId('vatExempt') != null) {
+        FormManager.getField('vatExempt').set('checked', true);
+      }
+    } else if (custSubGrp == 'GOVRN' || custSubGrp == 'CBVRN' || custSubGrp == 'COMME' || custSubGrp == 'HOSTC' || custSubGrp == 'THDPT') {
+      FormManager.enable('vat');
+      FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+    } else if (custSubGrp == 'INTER' || custSubGrp == 'INTSO' || custSubGrp == 'BUSPR' || custSubGrp == 'LCFIN') {
       FormManager.removeValidator('vat', Validators.REQUIRED);
       FormManager.enable('vat');
-    } else if (custSubGrp == 'COMME' || custSubGrp == 'FIBAB' || custSubGrp == 'BPIEU' || custSubGrp == 'BPUEU' || custSubGrp == 'GOVRN' || custSubGrp == 'INTER' || custSubGrp == 'INTSO'
-        || custSubGrp == 'LCIFF' || custSubGrp == 'LCIFL' || custSubGrp == 'OTFIN' || custSubGrp == 'LEASE' || custSubGrp == 'LCOEM' || custSubGrp == 'HOSTC' || custSubGrp == 'THDPT') {
-      if (countyCd == 'FR' || countyCd == 'AD') {
-        FormManager.enable('vat');
-        FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
-      } else {
-        FormManager.removeValidator('vat', Validators.REQUIRED);
-        FormManager.enable('vat');
-      }
-
-    } else if (custSubGrp == 'CBMME' || custSubGrp == 'CBBAB' || custSubGrp == 'CBIEU' || custSubGrp == 'CBUEU' || custSubGrp == 'CBVRN' || custSubGrp == 'CBTER' || custSubGrp == 'CBTSO'
-        || custSubGrp == 'CBIFF' || custSubGrp == 'CBIFL' || custSubGrp == 'CBFIN' || custSubGrp == 'CBASE' || custSubGrp == 'CBOEM' || custSubGrp == 'CBSTC' || custSubGrp == 'CBDPT') {
+    } else if (custSubGrp == 'CBMME' || custSubGrp == 'XBUSP' || custSubGrp == 'CBTER' || custSubGrp == 'CBSTC' || custSubGrp == 'CBDPT'
+        || custSubGrp == 'CBTSO' || custSubGrp == 'CBFIN') {
       var isVATEUCntry = false;
       var reqId = FormManager.getActualValue('reqId');
       var qParams = {
@@ -315,7 +398,7 @@ function setSBOOnScenario() {
   // CMR-221 change start
   var countyCd = "FR";
   var custLandCntry = FormManager.getActualValue('landCntry');
-  if (custLandCntry != "") {
+  if (custLandCntry != '') {
     countyCd = custLandCntry;
   } else {
     var _zs01ReqId = FormManager.getActualValue('reqId');
@@ -353,110 +436,118 @@ function setSBOOnScenario() {
         FormManager.enable('salesBusOffCd');
       }
     } else if (!SUB_REGIONS.has(countyCd)
-        && (custSubGrp == 'CBMME' || custSubGrp == 'CBICU' || custSubGrp == 'CBVRN' || custSubGrp == 'CBFIN' || custSubGrp == 'CBTSO' || custSubGrp == 'XBLUM' || custSubGrp == 'CBSTC'
-            || custSubGrp == 'CBDPT' || custSubGrp == 'CBIEM')) {
+        && (custSubGrp == 'CBMME' || custSubGrp == 'CBICU' || custSubGrp == 'CBVRN' || custSubGrp == 'CBFIN' || custSubGrp == 'CBTSO'
+            || custSubGrp == 'XBLUM' || custSubGrp == 'CBSTC' || custSubGrp == 'CBDPT' || custSubGrp == 'CBIEM')) {
       if (role == 'Requester') {
         FormManager.setValue('salesBusOffCd', '200200');// CMR-221
         FormManager.readOnly('salesBusOffCd');
       } else if (role == 'Processor') {
+        FormManager.setValue('salesBusOffCd', '200200');// CMR-221
         FormManager.enable('salesBusOffCd');
       }
     } else if (custSubGrp == 'PRICU' || custSubGrp == 'IBMEM') {// CMR-221
       FormManager.readOnly('salesBusOffCd');
     } else {
-      if (countyCd == "FR" || countyCd == "KM" || countyCd == "WF") {
+      if (countyCd == "FR") {
         if (role == 'Requester') {
           FormManager.readOnly('salesBusOffCd');
         } else if (role == 'Processor') {
           FormManager.enable('salesBusOffCd');
         }
       } else if (countyCd == "MC") {
+        FormManager.setValue('salesBusOffCd', '02M02M');
         if (role == 'Requester') {
-          FormManager.setValue('salesBusOffCd', '02M02M');
           FormManager.readOnly('salesBusOffCd');
         } else if (role == 'Processor') {
           FormManager.enable('salesBusOffCd');
         }
       } else if (countyCd == "GP") {
+        FormManager.setValue('salesBusOffCd', '852852');
         if (role == 'Requester') {
-          FormManager.setValue('salesBusOffCd', '852852');
+          FormManager.readOnly('salesBusOffCd');
+        } else if (role == 'Processor') {
+          FormManager.enable('salesBusOffCd');
+        }
+      } else if (countyCd == "KM") {
+        FormManager.setValue('salesBusOffCd', '98W98W');
+        if (role == 'Requester') {
+          FormManager.readOnly('salesBusOffCd');
+        } else if (role == 'Processor') {
+          FormManager.enable('salesBusOffCd');
+        }
+      } else if (countyCd == "WF") {
+        FormManager.setValue('salesBusOffCd', '872872');
+        if (role == 'Requester') {
           FormManager.readOnly('salesBusOffCd');
         } else if (role == 'Processor') {
           FormManager.enable('salesBusOffCd');
         }
       } else if (countyCd == "GF") {
+        FormManager.setValue('salesBusOffCd', '853853');
         if (role == 'Requester') {
-          FormManager.setValue('salesBusOffCd', '853853');
           FormManager.readOnly('salesBusOffCd');
         } else if (role == 'Processor') {
           FormManager.enable('salesBusOffCd');
         }
       } else if (countyCd == "MQ") {
+        FormManager.setValue('salesBusOffCd', '851851');
         if (role == 'Requester') {
-          FormManager.setValue('salesBusOffCd', '851851');
           FormManager.readOnly('salesBusOffCd');
         } else if (role == 'Processor') {
           FormManager.enable('salesBusOffCd');
         }
-      } else if (countyCd == "RE") {
+      } else if (countyCd == "RE" || countyCd == "TF") {// CMR-234
+        FormManager.setValue('salesBusOffCd', '860860');
         if (role == 'Requester') {
-          FormManager.setValue('salesBusOffCd', '860860');
           FormManager.readOnly('salesBusOffCd');
         } else if (role == 'Processor') {
           FormManager.enable('salesBusOffCd');
         }
       } else if (countyCd == "PM") {
+        FormManager.setValue('salesBusOffCd', '853853');
         if (role == 'Requester') {
-          FormManager.setValue('salesBusOffCd', '853853');
           FormManager.readOnly('salesBusOffCd');
         } else if (role == 'Processor') {
           FormManager.enable('salesBusOffCd');
         }
       } else if (countyCd == "VU") {
+        FormManager.setValue('salesBusOffCd', '876876');
         if (role == 'Requester') {
-          FormManager.setValue('salesBusOffCd', '876876');
           FormManager.readOnly('salesBusOffCd');
         } else if (role == 'Processor') {
           FormManager.enable('salesBusOffCd');
         }
       } else if (countyCd == "PF") {
+        FormManager.setValue('salesBusOffCd', '873873');
         if (role == 'Requester') {
-          FormManager.setValue('salesBusOffCd', '873873');
           FormManager.readOnly('salesBusOffCd');
         } else if (role == 'Processor') {
           FormManager.enable('salesBusOffCd');
         }
       } else if (countyCd == "YT") {
+        FormManager.setValue('salesBusOffCd', '864864');
         if (role == 'Requester') {
-          FormManager.setValue('salesBusOffCd', '864864');
           FormManager.readOnly('salesBusOffCd');
         } else if (role == 'Processor') {
           FormManager.enable('salesBusOffCd');
         }
       } else if (countyCd == "NC") {
+        FormManager.setValue('salesBusOffCd', '872872');
         if (role == 'Requester') {
-          FormManager.setValue('salesBusOffCd', '872872');
           FormManager.readOnly('salesBusOffCd');
         } else if (role == 'Processor') {
           FormManager.enable('salesBusOffCd');
         }
       } else if (countyCd == "AD") {
+        FormManager.setValue('salesBusOffCd', '03T03T');
         if (role == 'Requester') {
-          FormManager.setValue('salesBusOffCd', '03T03T');
           FormManager.readOnly('salesBusOffCd');
         } else if (role == 'Processor') {
           FormManager.enable('salesBusOffCd');
         }
       } else if (countyCd == "DZ") {
+        FormManager.setValue('salesBusOffCd', '711711');
         if (role == 'Requester') {
-          FormManager.setValue('salesBusOffCd', '711711');
-          FormManager.readOnly('salesBusOffCd');
-        } else if (role == 'Processor') {
-          FormManager.enable('salesBusOffCd');
-        }
-      } else if (countyCd == "TN") {
-        if (role == 'Requester') {
-          FormManager.setValue('salesBusOffCd', '721721');
           FormManager.readOnly('salesBusOffCd');
         } else if (role == 'Processor') {
           FormManager.enable('salesBusOffCd');
@@ -751,14 +842,15 @@ function add32PostCdCntrySBOlogic() {
   // var countryUse = FormManager.getActualValue('countryUse');
   // if (countryUse.length > 3) {
   // countyCd = countryUse.substring(3, 5);
-  if (FormManager.getActualValue('landCntry') != undefined && FormManager.getActualValue('landCntry') != "") {
+  if (FormManager.getActualValue('landCntry') != undefined && FormManager.getActualValue('landCntry') != '') {
     countyCd = FormManager.getActualValue('landCntry');
   } else {
     countyCd = "FR";
   }
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  if (!((countyCd == "FR" || countyCd == "KM" || countyCd == "WF") && (custSubGrp == 'COMME' || custSubGrp == 'PRICU' || custSubGrp == 'GOVRN' || custSubGrp == 'INTER' || custSubGrp == 'INTSO'
-      || custSubGrp == 'IBMEM' || custSubGrp == 'LCOEM' || custSubGrp == 'HOSTC' || custSubGrp == 'THDPT' || custSubGrp == 'CBTER'))) {
+  if (!((countyCd == "FR" || countyCd == "KM" || countyCd == "WF") && (custSubGrp == 'COMME' || custSubGrp == 'PRICU' || custSubGrp == 'GOVRN'
+      || custSubGrp == 'INTER' || custSubGrp == 'INTSO' || custSubGrp == 'IBMEM' || custSubGrp == 'LCOEM' || custSubGrp == 'HOSTC'
+      || custSubGrp == 'THDPT' || custSubGrp == 'CBTER'))) {
     return;
   }
 
@@ -813,12 +905,14 @@ function add32PostCdCntrySBOlogic() {
       sboValue = sboResult.ret1;
       sboValue = sboValue + sboValue;// CMR-221
       FormManager.setValue('salesBusOffCd', sboValue);
-    } else if (postCd == '75' || postCd == '77' || postCd == '78' || postCd == '91' || postCd == '92' || postCd == '93' || postCd == '94' || postCd == '95') {
+    } else if (postCd == '75' || postCd == '77' || postCd == '78' || postCd == '91' || postCd == '92' || postCd == '93' || postCd == '94'
+        || postCd == '95') {
       var insustry = FormManager.getActualValue('subIndustryCd').substring(0, 1);
-      if (insustry == 'A' || insustry == 'B' || insustry == 'C' || insustry == 'D' || insustry == 'F' || insustry == 'H' || insustry == 'K' || insustry == 'N' || insustry == 'R' || insustry == 'S'
-          || insustry == 'T' || insustry == 'W') {
+      if (insustry == 'A' || insustry == 'B' || insustry == 'C' || insustry == 'D' || insustry == 'F' || insustry == 'H' || insustry == 'K'
+          || insustry == 'N' || insustry == 'R' || insustry == 'S' || insustry == 'T' || insustry == 'W') {
         FormManager.setValue('salesBusOffCd', '01D01D');// CMR-221
-      } else if (insustry == 'E' || insustry == 'G' || insustry == 'J' || insustry == 'L' || insustry == 'M' || insustry == 'P' || insustry == 'U' || insustry == 'V' || insustry == 'X') {
+      } else if (insustry == 'E' || insustry == 'G' || insustry == 'J' || insustry == 'L' || insustry == 'M' || insustry == 'P' || insustry == 'U'
+          || insustry == 'V' || insustry == 'X') {
         FormManager.setValue('salesBusOffCd', '01M01M');// CMR-221
       }
     }
@@ -969,7 +1063,8 @@ function setAbbrevLocnOnCustSubGrpChange() {
   if (custGrp == null) {
     return;
   } else if (custGrp == "LOCAL") {
-    if (countyCd != "VU" && countyCd != "PF" && countyCd != "YT" && countyCd != "NC" && countyCd != "WF" && countyCd != "AD" && countyCd != "DZ" && countyCd != "TN") {
+    if (countyCd != "VU" && countyCd != "PF" && countyCd != "YT" && countyCd != "NC" && countyCd != "WF" && countyCd != "AD" && countyCd != "DZ"
+        && countyCd != "TN") {
       var reqId = FormManager.getActualValue('reqId');
       var qParams = {
         REQ_ID : reqId,
@@ -1462,7 +1557,8 @@ function addAbbrevLocnlogic() {
     if (custGrp == null) {
       return;
     } else if (custGrp == "LOCAL") {
-      if (countyCd != "VU" && countyCd != "PF" && countyCd != "YT" && countyCd != "NC" && countyCd != "WF" && countyCd != "AD" && countyCd != "DZ" && countyCd != "TN") {
+      if (countyCd != "VU" && countyCd != "PF" && countyCd != "YT" && countyCd != "NC" && countyCd != "WF" && countyCd != "AD" && countyCd != "DZ"
+          && countyCd != "TN") {
         abbrevLocnValue = FormManager.getActualValue('city1');
       } else if (countyCd == "VU") {
         abbrevLocnValue = "Vanuatu";
@@ -1518,7 +1614,7 @@ function add32SBODependcyOnPostCdOnAddrSave() {
   } else {
     return;
   }
-  if (role == 'Processor') {
+  if (role != 'Requester' || role != 'Processor') {// CMR-221
     return;
   }
   if (reqType == 'U') {
@@ -1533,8 +1629,9 @@ function add32SBODependcyOnPostCdOnAddrSave() {
     countyCd = "FR";
   }
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  if (!((countyCd == "FR" || countyCd == "KM" || countyCd == "WF") && (custSubGrp == 'COMME' || custSubGrp == 'PRICU' || custSubGrp == 'GOVRN' || custSubGrp == 'INTER' || custSubGrp == 'LCIFF'
-      || custSubGrp == 'LCIFL' || custSubGrp == 'OTFIN' || custSubGrp == 'IBMEM' || custSubGrp == 'LCOEM' || custSubGrp == 'INTSO' || custSubGrp == 'HOSTC' || custSubGrp == 'THDPT' || custSubGrp == 'CBTER'))) {
+  if (!((countyCd == "FR" || countyCd == "KM" || countyCd == "WF") && (custSubGrp == 'COMME' || custSubGrp == 'PRICU' || custSubGrp == 'GOVRN'
+      || custSubGrp == 'INTER' || custSubGrp == 'LCIFF' || custSubGrp == 'LCIFL' || custSubGrp == 'OTFIN' || custSubGrp == 'IBMEM'
+      || custSubGrp == 'LCOEM' || custSubGrp == 'INTSO' || custSubGrp == 'HOSTC' || custSubGrp == 'THDPT' || custSubGrp == 'CBTER'))) {
     return;
   }
 
@@ -1574,12 +1671,14 @@ function add32SBODependcyOnPostCdOnAddrSave() {
       sboValue = sboResult.ret1;
       sboValue = sboValue + sboValue;// CMR-221
       FormManager.setValue('salesBusOffCd', sboValue);
-    } else if (postCd == '75' || postCd == '77' || postCd == '78' || postCd == '91' || postCd == '92' || postCd == '93' || postCd == '94' || postCd == '95') {
+    } else if (postCd == '75' || postCd == '77' || postCd == '78' || postCd == '91' || postCd == '92' || postCd == '93' || postCd == '94'
+        || postCd == '95') {
       var insustry = FormManager.getActualValue('subIndustryCd').substring(0, 1);
-      if (insustry == 'A' || insustry == 'B' || insustry == 'C' || insustry == 'D' || insustry == 'F' || insustry == 'H' || insustry == 'K' || insustry == 'N' || insustry == 'R' || insustry == 'S'
-          || insustry == 'T' || insustry == 'W') {
+      if (insustry == 'A' || insustry == 'B' || insustry == 'C' || insustry == 'D' || insustry == 'F' || insustry == 'H' || insustry == 'K'
+          || insustry == 'N' || insustry == 'R' || insustry == 'S' || insustry == 'T' || insustry == 'W') {
         FormManager.setValue('salesBusOffCd', '01D01D');// CMR-221
-      } else if (insustry == 'E' || insustry == 'G' || insustry == 'J' || insustry == 'L' || insustry == 'M' || insustry == 'P' || insustry == 'U' || insustry == 'V' || insustry == 'X') {
+      } else if (insustry == 'E' || insustry == 'G' || insustry == 'J' || insustry == 'L' || insustry == 'M' || insustry == 'P' || insustry == 'U'
+          || insustry == 'V' || insustry == 'X') {
         FormManager.setValue('salesBusOffCd', '01M01M');// CMR-221
       }
     }
@@ -1588,6 +1687,74 @@ function add32SBODependcyOnPostCdOnAddrSave() {
   // SBO scenario logic should over write the 32 postal code logic
   setSBOOnScenario();
 }
+// function addVATScenarioOnAddrSave() {
+// var role = null;
+// if (typeof (_pagemodel) != 'undefined') {
+// role = _pagemodel.userRole;
+// } else {
+// return;
+// }
+// if (cmr.currentRequestType == 'U') {
+// return;
+// }
+// if (role == 'Processor') {
+// return;
+// }
+// var countyCd = null;
+// var countryUse = FormManager.getActualValue('countryUse');
+// if (countryUse.length > 3) {
+// countyCd = countryUse.substring(3, 5);
+// } else {
+// countyCd = "FR";
+// }
+// var custSubGrp = FormManager.getActualValue('custSubGrp');
+// if (custSubGrp == '') {
+// return;
+// } else {
+// if (custSubGrp == 'PRICU' || custSubGrp == 'CBICU') {
+// FormManager.enable('vat');
+// FormManager.removeValidator('vat', Validators.REQUIRED);
+//
+// } else if (custSubGrp == 'COMME' || custSubGrp == 'FIBAB' || custSubGrp ==
+// 'BPIEU' || custSubGrp == 'BPUEU' || custSubGrp == 'GOVRN'
+// || custSubGrp == 'INTER' || custSubGrp == 'INTSO' || custSubGrp == 'LCIFF' ||
+// custSubGrp == 'LCIFL' || custSubGrp == 'OTFIN'
+// || custSubGrp == 'LEASE' || custSubGrp == 'LCOEM' || custSubGrp == 'HOSTC' ||
+// custSubGrp == 'THDPT') {
+// if (countyCd == 'FR' || countyCd == 'AD') {
+// FormManager.enable('vat');
+// FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ],
+// 'MAIN_CUST_TAB');
+// } else {
+// FormManager.removeValidator('vat', Validators.REQUIRED);
+// FormManager.enable('vat');
+// }
+//
+// } else if (custSubGrp == 'CBMME' || custSubGrp == 'CBBAB' || custSubGrp ==
+// 'CBIEU' || custSubGrp == 'CBUEU' || custSubGrp == 'CBVRN'
+// || custSubGrp == 'CBTER' || custSubGrp == 'CBTSO' || custSubGrp == 'CBIFF' ||
+// custSubGrp == 'CBIFL' || custSubGrp == 'CBFIN'
+// || custSubGrp == 'CBASE' || custSubGrp == 'CBOEM' || custSubGrp == 'CBSTC' ||
+// custSubGrp == 'CBDPT') {
+// var isVATEUCntry = false;
+// var landCntry = FormManager.getActualValue('landCntry');
+// for (var i = 0; i < VAT_EU_COUNTRY.length; i++) {
+// if (VAT_EU_COUNTRY[i] == landCntry) {
+// isVATEUCntry = true;
+// break;
+// }
+// }
+// if (isVATEUCntry == true) {
+// FormManager.enable('vat');
+// FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ],
+// 'MAIN_CUST_TAB');
+// } else {
+// FormManager.removeValidator('vat', Validators.REQUIRED);
+// FormManager.enable('vat');
+// }
+// }
+// }
+// }
 function addVATScenarioOnAddrSave() {
   var role = null;
   if (typeof (_pagemodel) != 'undefined') {
@@ -1598,36 +1765,37 @@ function addVATScenarioOnAddrSave() {
   if (cmr.currentRequestType == 'U') {
     return;
   }
-  if (role == 'Processor') {
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  FormManager.enable('vatExempt');
+  if (dijit.byId('vatExempt') != undefined && dijit.byId('vatExempt') != null) {
+    FormManager.getField('vatExempt').set('checked', false);
+  }
+  var dbCustSubGrp = _pagemodel.custSubGrp;
+  var dbVatExempt = _pagemodel.vatExempt;
+  if (custSubGrp == dbCustSubGrp && dbVatExempt == 'Y' && dijit.byId('vatExempt') != undefined && dijit.byId('vatExempt') != null) {
+    FormManager.getField('vatExempt').set('checked', true);
+    FormManager.readOnly('vat');
+    FormManager.removeValidator('vat', Validators.REQUIRED);
     return;
   }
-  var countyCd = null;
-  var countryUse = FormManager.getActualValue('countryUse');
-  if (countryUse.length > 3) {
-    countyCd = countryUse.substring(3, 5);
-  } else {
-    countyCd = "FR";
-  }
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (custSubGrp == '') {
     return;
   } else {
-    if (custSubGrp == 'PRICU' || custSubGrp == 'CBICU') {
-      FormManager.enable('vat');
+    if (custSubGrp == 'PRICU' || custSubGrp == 'XBLUM' || custSubGrp == 'IBMEM' || custSubGrp == 'CBIEM') {
+      FormManager.readOnly('vat');
       FormManager.removeValidator('vat', Validators.REQUIRED);
-
-    } else if (custSubGrp == 'COMME' || custSubGrp == 'FIBAB' || custSubGrp == 'BPIEU' || custSubGrp == 'BPUEU' || custSubGrp == 'GOVRN' || custSubGrp == 'INTER' || custSubGrp == 'INTSO'
-        || custSubGrp == 'LCIFF' || custSubGrp == 'LCIFL' || custSubGrp == 'OTFIN' || custSubGrp == 'LEASE' || custSubGrp == 'LCOEM' || custSubGrp == 'HOSTC' || custSubGrp == 'THDPT') {
-      if (countyCd == 'FR' || countyCd == 'AD') {
-        FormManager.enable('vat');
-        FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
-      } else {
-        FormManager.removeValidator('vat', Validators.REQUIRED);
-        FormManager.enable('vat');
+      FormManager.readOnly('vatExempt');
+      if (dijit.byId('vatExempt') != undefined && dijit.byId('vatExempt') != null) {
+        FormManager.getField('vatExempt').set('checked', true);
       }
-
-    } else if (custSubGrp == 'CBMME' || custSubGrp == 'CBBAB' || custSubGrp == 'CBIEU' || custSubGrp == 'CBUEU' || custSubGrp == 'CBVRN' || custSubGrp == 'CBTER' || custSubGrp == 'CBTSO'
-        || custSubGrp == 'CBIFF' || custSubGrp == 'CBIFL' || custSubGrp == 'CBFIN' || custSubGrp == 'CBASE' || custSubGrp == 'CBOEM' || custSubGrp == 'CBSTC' || custSubGrp == 'CBDPT') {
+    } else if (custSubGrp == 'GOVRN' || custSubGrp == 'CBVRN' || custSubGrp == 'COMME' || custSubGrp == 'HOSTC' || custSubGrp == 'THDPT') {
+      FormManager.enable('vat');
+      FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+    } else if (custSubGrp == 'INTER' || custSubGrp == 'INTSO' || custSubGrp == 'BUSPR' || custSubGrp == 'LCFIN') {
+      FormManager.removeValidator('vat', Validators.REQUIRED);
+      FormManager.enable('vat');
+    } else if (custSubGrp == 'CBMME' || custSubGrp == 'XBUSP' || custSubGrp == 'CBTER' || custSubGrp == 'CBSTC' || custSubGrp == 'CBDPT'
+        || custSubGrp == 'CBTSO' || custSubGrp == 'CBFIN') {
       var isVATEUCntry = false;
       var landCntry = FormManager.getActualValue('landCntry');
       for (var i = 0; i < VAT_EU_COUNTRY.length; i++) {
@@ -1646,7 +1814,6 @@ function addVATScenarioOnAddrSave() {
     }
   }
 }
-
 function hidePOBox() {
   if (cmr.addressMode == 'newAddress' || cmr.addressMode == 'copyAddress') {
     for (var i = 0; i < _addrTypesForFR.length; i++) {
@@ -1725,10 +1892,14 @@ function addCrossBorderValidatorForFR() {
         var result = cmr.query('VALIDATOR.CROSSBORDER', {
           REQID : reqId
         });
-        if (result != null && result.ret1 != '' && result.ret1 != undefined && defaultLandCntry != '' && result.ret1 != defaultLandCntry && scenario != 'CROSS') {
-          return new ValidationResult(null, false, 'Landed Country value of the Sold-to (Main) Address should be \'' + defaultLandCntry + '\' for Non Cross-Border customers.');
-        } else if (result != null && result.ret1 != '' && result.ret1 != undefined && defaultLandCntry != '' && result.ret1 == defaultLandCntry && scenario == 'CROSS') {
-          return new ValidationResult(null, false, 'Landed Country value of the Sold-to (Main) Address should not be \'' + defaultLandCntry + '\' for Cross-Border customers.');
+        if (result != null && result.ret1 != '' && result.ret1 != undefined && defaultLandCntry != '' && result.ret1 != defaultLandCntry
+            && scenario != 'CROSS') {
+          return new ValidationResult(null, false, 'Landed Country value of the Sold-to (Main) Address should be \'' + defaultLandCntry
+              + '\' for Non Cross-Border customers.');
+        } else if (result != null && result.ret1 != '' && result.ret1 != undefined && defaultLandCntry != '' && result.ret1 == defaultLandCntry
+            && scenario == 'CROSS') {
+          return new ValidationResult(null, false, 'Landed Country value of the Sold-to (Main) Address should not be \'' + defaultLandCntry
+              + '\' for Cross-Border customers.');
         }
         return new ValidationResult(null, true);
       }
@@ -2364,7 +2535,7 @@ function setISUClientTierOnScenario() {
   // CMR-234 change start
   var countyCd = "FR";
   var custLandCntry = FormManager.getActualValue('landCntry');
-  if (custLandCntry != "") {
+  if (custLandCntry != '') {
     countyCd = custLandCntry;
   } else {
     var _zs01ReqId = FormManager.getActualValue('reqId');
@@ -2386,7 +2557,8 @@ function setISUClientTierOnScenario() {
     FormManager.setValue('isuCd', '8B');
     FormManager.setValue('clientTier', '7');
   } else if (SUB_REGIONS.has(countyCd)// CMR-234
-      && (custSubGrp == 'CBMME' || custSubGrp == 'CBVRN' || custSubGrp == 'XBLUM' || custSubGrp == 'CBIEM' || custSubGrp == 'CBFIN' || custSubGrp == 'CBTSO' || custSubGrp == 'CBDPT' || custSubGrp == 'CBSTC')) {
+      && (custSubGrp == 'CBMME' || custSubGrp == 'CBVRN' || custSubGrp == 'XBLUM' || custSubGrp == 'CBIEM' || custSubGrp == 'CBFIN'
+          || custSubGrp == 'CBTSO' || custSubGrp == 'CBDPT' || custSubGrp == 'CBSTC')) {
     FormManager.setValue('isuCd', '32');
     FormManager.setValue('clientTier', 'S');
   } else if (custSubGrp == 'XBLUM' || custSubGrp == 'BUSPR' || custSubGrp == 'INTER' || custSubGrp == 'CBTER') {
@@ -2603,58 +2775,59 @@ function isZD01OrZP01ExistOnCMR(addressType) {
 }
 
 function restrictDuplicateAddr(cntry, addressMode, saving, finalSave, force) {
-  FormManager.addFormValidator(
-      (function() {
-        return {
-          validate : function() {
-            var reqReason = FormManager.getActualValue('reqReason');
-            var addressType = FormManager.getActualValue('addrType');
-            if (addressType == 'ZP02' || addressType == 'ZD02') {
-              if (reqReason != 'IGF') {
-                return new ValidationResult(null, false, 'Request Reason should be IGF.');
-              }
-            }
-            var requestId = FormManager.getActualValue('reqId');
-            var addressSeq = FormManager.getActualValue('addrSeq');
-            var dummyseq = "xx";
-            var showDuplicateIGFBillToError = false;
-            var showDuplicateIGFInstallAtToError = false;
-            var qParams;
-            if (addressMode == 'updateAddress') {
-              qParams = {
-                REQ_ID : requestId,
-                ADDR_SEQ : addressSeq,
-                ADDR_TYPE : addressType
-              };
-            } else {
-              qParams = {
-                REQ_ID : requestId,
-                ADDR_SEQ : dummyseq,
-                ADDR_TYPE : addressType
-              };
-            }
-            var result = cmr.query('GETADDRECORDSBYTYPE', qParams);
-            var addCount = result.ret1;
-            if (addressType != undefined && addressType != '' && addressType == 'ZP02' && cmr.addressMode != 'updateAddress') {
-              showDuplicateIGFBillToError = Number(addCount) >= 1 && addressType == 'ZP02';
-              if (showDuplicateIGFBillToError) {
-                return new ValidationResult(null, false,
-                    'Only one IGF Bill-To address is allowed. If you still want to create new address , please delete the existing one and then create a new address.');
-              }
-            }
+  FormManager
+      .addFormValidator(
+          (function() {
+            return {
+              validate : function() {
+                var reqReason = FormManager.getActualValue('reqReason');
+                var addressType = FormManager.getActualValue('addrType');
+                if (addressType == 'ZP02' || addressType == 'ZD02') {
+                  if (reqReason != 'IGF') {
+                    return new ValidationResult(null, false, 'Request Reason should be IGF.');
+                  }
+                }
+                var requestId = FormManager.getActualValue('reqId');
+                var addressSeq = FormManager.getActualValue('addrSeq');
+                var dummyseq = "xx";
+                var showDuplicateIGFBillToError = false;
+                var showDuplicateIGFInstallAtToError = false;
+                var qParams;
+                if (addressMode == 'updateAddress') {
+                  qParams = {
+                    REQ_ID : requestId,
+                    ADDR_SEQ : addressSeq,
+                    ADDR_TYPE : addressType
+                  };
+                } else {
+                  qParams = {
+                    REQ_ID : requestId,
+                    ADDR_SEQ : dummyseq,
+                    ADDR_TYPE : addressType
+                  };
+                }
+                var result = cmr.query('GETADDRECORDSBYTYPE', qParams);
+                var addCount = result.ret1;
+                if (addressType != undefined && addressType != '' && addressType == 'ZP02' && cmr.addressMode != 'updateAddress') {
+                  showDuplicateIGFBillToError = Number(addCount) >= 1 && addressType == 'ZP02';
+                  if (showDuplicateIGFBillToError) {
+                    return new ValidationResult(null, false,
+                        'Only one IGF Bill-To address is allowed. If you still want to create new address , please delete the existing one and then create a new address.');
+                  }
+                }
 
-            if (addressType != undefined && addressType != '' && addressType == 'ZD02' && cmr.addressMode != 'updateAddress') {
-              showDuplicateIGFInstallAtToError = Number(addCount) >= 1 && addressType == 'ZD02';
-              if (showDuplicateIGFInstallAtToError) {
-                return new ValidationResult(null, false,
-                    'Only one IGF Ship-To address is allowed. If you still want to create new address , please delete the existing one and then create a new address.');
-              }
-            }
+                if (addressType != undefined && addressType != '' && addressType == 'ZD02' && cmr.addressMode != 'updateAddress') {
+                  showDuplicateIGFInstallAtToError = Number(addCount) >= 1 && addressType == 'ZD02';
+                  if (showDuplicateIGFInstallAtToError) {
+                    return new ValidationResult(null, false,
+                        'Only one IGF Ship-To address is allowed. If you still want to create new address , please delete the existing one and then create a new address.');
+                  }
+                }
 
-            return new ValidationResult(null, true);
-          }
-        };
-      })(), null, 'frmCMR_addressModal');
+                return new ValidationResult(null, true);
+              }
+            };
+          })(), null, 'frmCMR_addressModal');
 }
 
 function filterCmrnoP() {
@@ -2687,7 +2860,8 @@ function addCmrNoValidator() {
             return new ValidationResult(null, false, 'CMR Number should be only numbers.');
           } else if (cmrNo == "000000") {
             return new ValidationResult(null, false, 'CMR Number should not be 000000.');
-          } else if (cmrNo != '' && custSubType != '' && (custSubType == 'CBTER' || custSubType == 'CBTSO' || custSubType == 'INTER' || custSubType == 'INTSO') && !cmrNo.startsWith('99')) {
+          } else if (cmrNo != '' && custSubType != ''
+              && (custSubType == 'CBTER' || custSubType == 'CBTSO' || custSubType == 'INTER' || custSubType == 'INTSO') && !cmrNo.startsWith('99')) {
             return new ValidationResult(null, false, 'CMR Number should be in 99XXXX format for internal scenarios');
           } else {
             var qParams = {
@@ -2750,6 +2924,7 @@ function setClassificationCode() {
 
   FormManager.show('CustClass', 'custClass');
   FormManager.resetDropdownValues(FormManager.getField('custClass'));
+
   if (role == 'Requester') {
     if (reqType == 'C') {
       if (custSubGrp != '') {
@@ -2891,6 +3066,18 @@ function setTaxCd() {
     }
   }
 
+  var role = null;
+
+  if (typeof (_pagemodel) != 'undefined') {
+    role = _pagemodel.userRole;
+  }
+
+  if (role == 'Processor') {
+    cmr.showNode('taxCd2MandatoryFlag');
+  } else {
+    cmr.hideNode('taxCd2MandatoryFlag');
+  }
+
 }
 
 function orderBlockCodeValidator() {
@@ -2944,6 +3131,30 @@ function setIERPSitePartyIDForFR() {
 
 function setSensitiveFlag() {
   FormManager.readOnly('sensitiveFlag');
+}
+
+var _vatExemptHandler = null;
+function addVatExemptHandler() {
+  if (!dijit.byId('vatExempt')) {
+    window.setTimeout('addVatExemptHandler()', 500);
+  } else {
+    if (_vatExemptHandler == null) {
+      _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
+        if (dijit.byId('vatExempt').get('checked')) {
+          FormManager.readOnly('vat');
+          FormManager.removeValidator('vat', Validators.REQUIRED);
+        } else if (FormManager.getActualValue('reqType') == 'U') {
+          FormManager.enable('vat');
+          FormManager.removeValidator('vat', Validators.REQUIRED);
+        } else if (FormManager.getActualValue('custSubGrp') == '') {
+          FormManager.enable('vat');
+          FormManager.removeValidator('vat', Validators.REQUIRED);
+        } else {
+          setVATOnScenario(true);
+        }
+      });
+    }
+  }
 }
 
 dojo.addOnLoad(function() {
