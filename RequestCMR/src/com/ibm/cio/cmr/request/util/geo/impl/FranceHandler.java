@@ -537,7 +537,7 @@ public class FranceHandler extends GEOHandler {
       addr.setCustNm3(StringUtils.join(addrDetailsList, ", "));
     }
     if (addrDetailsList.isEmpty() && "C".equals(admin.getReqType())) {
-      addr.setCustNm3("");
+      // addr.setCustNm3("");
     }
   }
 
