@@ -863,7 +863,11 @@ public class BELUXHandler extends BaseSOFHandler {
 
   @Override
   public void doBeforeAddrSave(EntityManager entityManager, Addr addr, String cmrIssuingCntry) throws Exception {
-
+    if (!"Y".equals(addr.getImportInd())) {
+      String addrSeq = addr.getId().getAddrSeq();
+      addrSeq = StringUtils.leftPad(addrSeq, 5, '0');
+      addr.getId().setAddrSeq(addrSeq);
+    }
   }
 
   @Override
