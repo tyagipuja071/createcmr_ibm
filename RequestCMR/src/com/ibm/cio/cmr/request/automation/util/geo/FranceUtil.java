@@ -70,8 +70,8 @@ public class FranceUtil extends AutomationUtil {
   private static final String MATCHING = "matching";
   private static final String POSTAL_CD_STARTS = "postalCdStarts";
   private static final String SBO = "sbo";
-  private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Att. Person", "Phone #", "Contact Person",
-      "Customer Name/ Additional Address Information");
+  private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Att. Person", "Phone #", "Division/Department",
+      "Attention to/Building/Floor/Office");
 
   @SuppressWarnings("unchecked")
   public FranceUtil() {
@@ -821,6 +821,15 @@ public class FranceUtil extends AutomationUtil {
     List<Addr> addresses = null;
     StringBuilder checkDetails = new StringBuilder();
     Set<String> resultCodes = new HashSet<String>();// R - review
+    if ("60".equals(data.getCustClass()) || "71".equals(data.getCustClass()) || "81".equals(data.getCustClass())) {
+      LOG.debug("Skipping validations.");
+      validation.setSuccess(true);
+      validation.setMessage("Skipped");
+      output.setDetails("Update checks skipped for address. \n-KUKLA updated to " + data.getCustClass());
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_CHECKS);
+      return true;
+    }
+
     for (String addrType : RELEVANT_ADDRESSES) {
       if (changes.isAddressChanged(addrType)) {
         if (CmrConstants.RDC_SOLD_TO.equals(addrType)) {
