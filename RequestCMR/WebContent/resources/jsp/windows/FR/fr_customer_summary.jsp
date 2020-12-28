@@ -70,5 +70,21 @@
       <%= custClass != null ? custClass : "" %>
     </cmr:column>
   </cmr:row>
+  
+  <cmr:row addBackground="true">
+    <cmr:column span="1" width="127">
+    </cmr:column>
+    <cmr:column span="1" width="130">
+      <cmr:view>
+        <label><cmr:fieldLabel fieldId="LocalTax1" />: </label>
+      </cmr:view> 
+    </cmr:column>
+    <cmr:column span="1" width="240">
+      <%
+        String taxCd1 = DropdownListController.getDescription("LocalTax1", data.getTaxCd1(), cntry);
+      %>
+      <%=taxCd1 != null ? taxCd1 : ""%>
+    </cmr:column>
+  </cmr:row>
 
 </cmr:view>
