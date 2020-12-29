@@ -178,6 +178,17 @@
         </p>
       </cmr:column>
     </cmr:view>
+    <cmr:view forCountry="706">
+      <cmr:column span="2" containerForField="LocalTax2">
+        <p>
+          <label for="taxCd2">
+          <cmr:fieldLabel fieldId="LocalTax2" />: <cmr:delta text="${rdcdata.taxCd2}" oldValue="${reqentry.taxCd2}" />
+          <span id="taxCd2MandatoryFlag" style="color:red;font-size:16px;font-weight:bold">*</span>
+          </label>
+          <cmr:field path="taxCd2" id="taxCd2" fieldId="LocalTax2" tabId="MAIN_CUST_TAB" />
+        </p>
+      </cmr:column>
+    </cmr:view>
 
     <cmr:view forCountry="897">
       <!-- // 1164558 -->
@@ -201,7 +212,7 @@
   <cmr:row addBackground="true">
     <!-- // 1164558 -->
     <cmr:view exceptForCountry="631,848,649" exceptForGEO="LA,JP">
-      <cmr:view exceptForGEO="EMEA,AP,MCO1,MCO,MCO2,CEMEA,NORDX,BELUX,NL,CN">
+      <cmr:view exceptForGEO="EMEA,AP,MCO1,MCO,MCO2,CEMEA,NORDX,BELUX,NL,CN,FR">
         <cmr:column span="2" containerForField="LocalTax2">
           <p>
             <label for="taxCd2">
