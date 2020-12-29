@@ -7,7 +7,7 @@ function addMaltaLandedCountryHandler(cntry, addressMode, saving, finalSave) {
   var custGrp = FormManager.getActualValue('custGrp');
   var addrType = FormManager.getActualValue('addrType');
   var landCntry = 'MT'; // default to Malta
-// set default landed country
+  // set default landed country
   FormManager.setValue('defaultLandedCountry', landCntry);
 
   if (!saving) {
@@ -45,7 +45,6 @@ function addHandlersForMT() {
   if (FormManager.getActualValue('reqType') == 'C') {
     if (_vatExemptHandler == null) {
       _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
-        resetVatRequired(true);
         setVatValidatorMalta();
       });
     }
@@ -726,6 +725,7 @@ function addAfterConfigMalta() {
   setAddressDetailsForView();
   // disable copy address
   GEOHandler.disableCopyAddress();
+  FormManager.removeValidator('vat', Validators.REQUIRED);
 }
 
 function addAfterTemplateLoadMalta(fromAddress, scenario, scenarioChanged) {
@@ -735,8 +735,8 @@ function addAfterTemplateLoadMalta(fromAddress, scenario, scenarioChanged) {
     }
   }
   enterpriseMalta();
-  resetVatRequired();
   hidePpsceidExceptBP();
+  setVatValidatorMalta();
 }
 
 function disableEnableFieldsForMT() {
@@ -811,6 +811,10 @@ function addOrdBlkValidator() {
 }
 
 function setVatValidatorMalta() {
+  var custGrp = FormManager.getActualValue('custGrp');
+  if (custGrp == 'CROSS') {
+    return;
+  }
   console.log("setVatValidatorMalta for Malta..");
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
   if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
@@ -819,42 +823,6 @@ function setVatValidatorMalta() {
       checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
     }
   }
-}
-
-function resetVatRequired() {
-  var viewOnly = FormManager.getActualValue('viewOnlyPage');
-  if (viewOnly != '' && viewOnly == 'true') {
-    return;
-  }
-  if (FormManager.getActualValue('reqType') == 'C') {
-    var custSubType = FormManager.getActualValue('custSubGrp');
-    var isIBPriv = custSubType != '' && (custSubType.includes('XBP') || custSubType.includes('XCOM') || custSubType.includes('XGOV') || custSubType.includes('XTP'));
-    var zs01Cntry = FormManager.getActualValue('cmrIssuingCntry');
-    var ret = cmr.query('VAT.GET_ZS01_CNTRY', {
-      REQID : FormManager.getActualValue('reqId'),
-      TYPE : 'ZS01'
-    });
-
-    if (ret && ret.ret1 && ret.ret1 != '') {
-      zs01Cntry = ret.ret1;
-    }
-
-    if (GEOHandler.VAT_RQD_CROSS_LNDCNTRY.indexOf(zs01Cntry) >= 0 && custSubType != '') {
-      FormManager.enable('vatExempt');
-      if (_isScenarioChanged && !value && (custSubType != '' && !isIBPriv)) {
-        FormManager.getField('vatExempt').set('checked', false);
-      }
-      if (dijit.byId('vatExempt') != undefined && (dijit.byId('vatExempt').get('checked') || (!dijit.byId('vatExempt').get('checked') && isIBPriv))) {
-        FormManager.removeValidator('vat', Validators.REQUIRED);
-      }
-    } else {
-      FormManager.getField('vatExempt').set('checked', false);
-      FormManager.hide('VATExempt', 'vatExempt');
-      FormManager.removeValidator('vat', Validators.REQUIRED);
-    }
-
-  }
-
 }
 
 function addISICValidatorForScenario() {
