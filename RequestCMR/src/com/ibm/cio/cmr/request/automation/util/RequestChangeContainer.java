@@ -4,6 +4,7 @@
 package com.ibm.cio.cmr.request.automation.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -19,6 +20,7 @@ import com.ibm.cio.cmr.request.model.window.RequestSummaryModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 
 /**
  * Container for changes on a request for update types
@@ -33,6 +35,11 @@ public class RequestChangeContainer {
   private List<UpdatedNameAddrModel> addressUpdates;
   private long reqId;
   private Admin admin;
+
+  private static final List<String> SKIP_RETRIEVE_VALUE_FIELDS_COUNTRIES = Arrays.asList(SystemLocation.UNITED_KINGDOM, SystemLocation.IRELAND,
+      SystemLocation.FRANCE, SystemLocation.GERMANY, SystemLocation.AUSTRIA, SystemLocation.SWITZERLAND, SystemLocation.SPAIN);
+  private static final List<String> RETRIEVE_VALUE_FIELDS = Arrays.asList("Buying Group ID", "Global Buying Group ID", "BG LDE Rule",
+      "Coverage Type/ID", "GEO Location Code");
 
   public RequestChangeContainer(EntityManager entityManager, String country, Admin admin, long reqId) throws Exception {
     this.country = country;
@@ -213,7 +220,22 @@ public class RequestChangeContainer {
    * @return
    */
   public boolean hasDataChanges() {
-    return !this.dataUpdates.isEmpty();
+    if (country != null && SKIP_RETRIEVE_VALUE_FIELDS_COUNTRIES.contains(country)) {
+      boolean changes = false;
+      if (!this.dataUpdates.isEmpty()) {
+        for (UpdatedDataModel field : dataUpdates) {
+          if (!RETRIEVE_VALUE_FIELDS.contains(field.getDataField())) {
+            changes = true;
+            break;
+          }
+        }
+        return changes;
+      } else {
+        return false;
+      }
+    } else {
+      return !this.dataUpdates.isEmpty();
+    }
   }
 
   /**
