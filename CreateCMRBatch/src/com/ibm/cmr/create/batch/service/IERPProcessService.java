@@ -478,6 +478,7 @@ public class IERPProcessService extends BaseBatchService {
               admin.setLockByNm(null);
               admin.setLockTs(null);
               admin.setLockInd(CmrConstants.YES_NO.N.toString());
+              admin.setProcessedFlag("E");
             }
             // admin.setReqStatus(CmrConstants.RDC_STATUS_COMPLETED.equals(overallStatus)
             // ? CmrConstants.REQUEST_STATUS.COM.toString()
@@ -632,6 +633,7 @@ public class IERPProcessService extends BaseBatchService {
               admin.setLockByNm(null);
               admin.setLockTs(null);
               admin.setLockInd(CmrConstants.YES_NO.N.toString());
+              admin.setProcessedFlag("E");
               if (firstRun) {
                 // revert as rdc run has resulted into error
                 data.setOrdBlk("");
@@ -760,6 +762,7 @@ public class IERPProcessService extends BaseBatchService {
             admin.setLockByNm(null);
             admin.setLockTs(null);
             admin.setLockInd(CmrConstants.YES_NO.N.toString());
+            admin.setProcessedFlag("E");
           }
           // admin.setReqStatus(CmrConstants.RDC_STATUS_COMPLETED.equals(overallStatus)
           // ? CmrConstants.REQUEST_STATUS.COM.toString()
