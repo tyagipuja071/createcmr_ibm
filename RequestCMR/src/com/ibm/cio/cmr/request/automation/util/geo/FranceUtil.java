@@ -70,8 +70,8 @@ public class FranceUtil extends AutomationUtil {
   private static final String MATCHING = "matching";
   private static final String POSTAL_CD_STARTS = "postalCdStarts";
   private static final String SBO = "sbo";
-  private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Att. Person", "Phone #", "Contact Person",
-      "Customer Name/ Additional Address Information");
+  private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Att. Person", "Phone #", "Division/Department",
+      "Attention to/Building/Floor/Office");
   public static final List<String> FRANCE_SUBREGIONS = Arrays.asList("MC", "GP", "GF", "MQ", "RE", "PM", "KM", "VU", "PF", "YT", "NC", "WF", "AD",
       "DZ");
 
@@ -203,13 +203,11 @@ public class FranceUtil extends AutomationUtil {
     Admin admin = requestData.getAdmin();
     Addr zs01 = requestData.getAddress("ZS01");
     String customerName = getCustomerFullName(zs01);
-    Addr zd01 = requestData.getAddress("ZD01");
     Addr zi01 = requestData.getAddress("ZI01");
     String customerNameZI01 = "";
     if (zi01 != null) {
       customerNameZI01 = getCustomerFullName(zi01);
     }
-    Addr zp01 = requestData.getAddress("ZP01");
 
     String scenario = data.getCustSubGrp();
     if (StringUtils.isNotBlank(scenario)) {
@@ -218,6 +216,14 @@ public class FranceUtil extends AutomationUtil {
           && !SCENARIO_CROSSBORDER_COMMERCIAL.equals(scenario)) {
         engineData.addNegativeCheckStatus("DISABLEDAUTOPROC",
             "Requests for " + scenarioDesc + " cannot be processed automatically. Manual processing would be required.");
+        if (SCENARIO_INTERNAL_SO.equals(scenario) || SCENARIO_THIRD_PARTY.equals(scenario) || SCENARIO_CROSSBORDER_INTERNAL_SO.equals(scenario)
+                || SCENARIO_CROSSBORDER_THIRD_PARTY.equals(scenario)) {
+        	if(zi01 == null) {
+        		 details.append("Install-at address should be present for" + scenarioDesc ).append("\n");
+                 engineData.addRejectionComment("OTH", "Install-at address should be present for" + scenarioDesc , "", "");
+                 return false;
+        	}
+        }
       } else {
         switch (scenario) {
         case SCENARIO_CROSSBORDER_PRIVATE_PERSON:
@@ -256,12 +262,13 @@ public class FranceUtil extends AutomationUtil {
           break;
         case SCENARIO_HOSTING:
         case SCENARIO_CROSSBORDER_HOSTING:
-          if (StringUtils.isNotBlank(customerNameZI01) && StringUtils.isNotBlank(customerName) && customerName.toUpperCase().equals(customerNameZI01.toUpperCase())) {
+          if (StringUtils.isNotBlank(customerNameZI01) && StringUtils.isNotBlank(customerName)
+              && customerName.toUpperCase().equals(customerNameZI01.toUpperCase())) {
             details.append("Customer Names on Sold-to and Install-at address should be different for Hosting Scenario").append("\n");
             engineData.addRejectionComment("OTH", "Customer Names on Sold-to and Install-at address should be different for Hosting Scenario", "",
                 "");
             return false;
-          } 
+          }
           break;
         case SCENARIO_BUSINESS_PARTNER:
         case SCENARIO_CROSSBORDER_BUSINESS_PARTNER:
@@ -704,12 +711,6 @@ public class FranceUtil extends AutomationUtil {
           // noop, for switch handling only
         }
         break;
-
-      case "Customer Classification Code":
-        if ("60".equals(change.getNewData()) || "71".equals(change.getNewData()) || "81".equals(change.getNewData())) {
-          // noop for switch handling
-        }
-        break;
       case "ISIC":
       case "INAC/NAC Code":
       case "SIRET":
@@ -751,6 +752,16 @@ public class FranceUtil extends AutomationUtil {
     List<Addr> addresses = null;
     StringBuilder checkDetails = new StringBuilder();
     Set<String> resultCodes = new HashSet<String>();// R - review
+    if (StringUtils.isNotBlank(data.getCustClass())
+        && ("60".equals(data.getCustClass()) || "71".equals(data.getCustClass()) || "81".equals(data.getCustClass()))) {
+      LOG.debug("Skipping validations.");
+      validation.setSuccess(true);
+      validation.setMessage("Skipped Address Update");
+      output.setDetails("Update checks skipped for address with KUKLA " + data.getCustClass());
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_CHECKS);
+      return true;
+    }
+
     for (String addrType : RELEVANT_ADDRESSES) {
       if (changes.isAddressChanged(addrType)) {
         if (CmrConstants.RDC_SOLD_TO.equals(addrType)) {
@@ -772,11 +783,11 @@ public class FranceUtil extends AutomationUtil {
               }
             }
             if (CmrConstants.RDC_INSTALL_AT.equals(addrType)) {
-              String addrName = getCustomerFullName(addr);
+              String addrName = addr.getCustNm1() + (StringUtils.isNotBlank(addr.getCustNm2()) ? addr.getCustNm2() : "");
               String soldToName = "";
               Addr zs01 = requestData.getAddress("ZS01");
               if (zs01 != null) {
-                soldToName = getCustomerFullName(zs01);
+                soldToName = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? zs01.getCustNm2() : "");
               }
 
               if (addrName.equals(soldToName)) {
@@ -805,8 +816,8 @@ public class FranceUtil extends AutomationUtil {
             // update address
             if (isRelevantAddressFieldUpdated(changes, addr)) {
               if (CmrConstants.RDC_INSTALL_AT.equals(addrType)) {
-                if (null == changes.getAddressChange(addrType, "Customer Name")
-                    && null == changes.getAddressChange(addrType, "Customer Name Con't")) {
+                if (null == changes.getAddressChange(addrType, "Customer legal name")
+                    && null == changes.getAddressChange(addrType, "Legal name continued")) {
                   LOG.debug("Update to InstallAt " + addrType + "(" + addr.getId().getAddrSeq() + ")");
                   checkDetails.append("Update to InstallAt (" + addr.getId().getAddrSeq() + ") skipped in the checks.\n");
                 } else {
