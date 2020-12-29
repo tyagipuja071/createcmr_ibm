@@ -96,7 +96,7 @@ function disableAddrFieldsMT() {
   var addrType = FormManager.getActualValue('addrType');
 
   if (custType == 'CROSS' && addrType == 'ZS01') {
-	FormManager.enable('landCntry');
+FormManager.enable('landCntry');
   } else {
 	FormManager.setValue('landCntry', FormManager.getActualValue('defaultLandedCountry'));
 	FormManager.readOnly('landCntry');
