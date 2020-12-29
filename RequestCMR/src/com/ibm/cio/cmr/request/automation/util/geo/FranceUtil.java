@@ -203,13 +203,11 @@ public class FranceUtil extends AutomationUtil {
     Admin admin = requestData.getAdmin();
     Addr zs01 = requestData.getAddress("ZS01");
     String customerName = getCustomerFullName(zs01);
-    Addr zd01 = requestData.getAddress("ZD01");
     Addr zi01 = requestData.getAddress("ZI01");
     String customerNameZI01 = "";
     if (zi01 != null) {
       customerNameZI01 = getCustomerFullName(zi01);
     }
-    Addr zp01 = requestData.getAddress("ZP01");
 
     String scenario = data.getCustSubGrp();
     if (StringUtils.isNotBlank(scenario)) {
@@ -218,6 +216,14 @@ public class FranceUtil extends AutomationUtil {
           && !SCENARIO_CROSSBORDER_COMMERCIAL.equals(scenario)) {
         engineData.addNegativeCheckStatus("DISABLEDAUTOPROC",
             "Requests for " + scenarioDesc + " cannot be processed automatically. Manual processing would be required.");
+        if (SCENARIO_INTERNAL_SO.equals(scenario) || SCENARIO_THIRD_PARTY.equals(scenario) || SCENARIO_CROSSBORDER_INTERNAL_SO.equals(scenario)
+                || SCENARIO_CROSSBORDER_THIRD_PARTY.equals(scenario)) {
+        	if(zi01 == null) {
+        		 details.append("Install-at address should be present for" + scenarioDesc ).append("\n");
+                 engineData.addRejectionComment("OTH", "Install-at address should be present for" + scenarioDesc , "", "");
+                 return false;
+        	}
+        }
       } else {
         switch (scenario) {
         case SCENARIO_CROSSBORDER_PRIVATE_PERSON:
