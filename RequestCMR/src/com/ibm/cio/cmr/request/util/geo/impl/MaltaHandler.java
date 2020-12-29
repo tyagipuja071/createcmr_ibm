@@ -116,6 +116,9 @@ public class MaltaHandler extends BaseSOFHandler {
             if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo)) {
               addrType = record.getCmrAddrTypeCode();
               if (!StringUtils.isEmpty(addrType)) {
+                if ("ZS01".equals(addrType) && "90".equals(record.getCmrOrderBlock())) {
+                  break;
+                }
                 addr = cloneAddress(record, addrType);
                 LOG.trace("Adding address type " + addrType + " for sequence " + seqNo);
                 addr.setCmrStreetAddressCont(record.getCmrName3());
@@ -699,7 +702,7 @@ public class MaltaHandler extends BaseSOFHandler {
       address.setAddrTxt2(currentRecord.getCmrStreetAddressCont());
 
       if (!(StringUtils.isEmpty(currentRecord.getCmrPOBox()))) {
-        address.setPoBox(currentRecord.getCmrPOBox().substring(0, 10));
+        address.setPoBox(currentRecord.getCmrPOBox().length() > 10 ? currentRecord.getCmrPOBox().substring(0, 10) : currentRecord.getCmrPOBox());
       }
 
       if (CmrConstants.REQ_TYPE_UPDATE.equalsIgnoreCase(admin.getReqType())) {
