@@ -746,7 +746,8 @@ public class FranceUtil extends AutomationUtil {
     List<Addr> addresses = null;
     StringBuilder checkDetails = new StringBuilder();
     Set<String> resultCodes = new HashSet<String>();// R - review
-    if ("60".equals(data.getCustClass()) || "71".equals(data.getCustClass()) || "81".equals(data.getCustClass())) {
+    if (StringUtils.isNotBlank(data.getCustClass())
+        && ("60".equals(data.getCustClass()) || "71".equals(data.getCustClass()) || "81".equals(data.getCustClass()))) {
       LOG.debug("Skipping validations.");
       validation.setSuccess(true);
       validation.setMessage("Skipped Address Update");
