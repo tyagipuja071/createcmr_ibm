@@ -262,12 +262,13 @@ public class FranceUtil extends AutomationUtil {
           break;
         case SCENARIO_HOSTING:
         case SCENARIO_CROSSBORDER_HOSTING:
-          if (StringUtils.isNotBlank(customerNameZI01) && StringUtils.isNotBlank(customerName) && customerName.toUpperCase().equals(customerNameZI01.toUpperCase())) {
+          if (StringUtils.isNotBlank(customerNameZI01) && StringUtils.isNotBlank(customerName)
+              && customerName.toUpperCase().equals(customerNameZI01.toUpperCase())) {
             details.append("Customer Names on Sold-to and Install-at address should be different for Hosting Scenario").append("\n");
             engineData.addRejectionComment("OTH", "Customer Names on Sold-to and Install-at address should be different for Hosting Scenario", "",
                 "");
             return false;
-          } 
+          }
           break;
         case SCENARIO_BUSINESS_PARTNER:
         case SCENARIO_CROSSBORDER_BUSINESS_PARTNER:
@@ -710,12 +711,6 @@ public class FranceUtil extends AutomationUtil {
           // noop, for switch handling only
         }
         break;
-
-      case "Customer Classification Code":
-        if ("60".equals(change.getNewData()) || "71".equals(change.getNewData()) || "81".equals(change.getNewData())) {
-          // noop for switch handling
-        }
-        break;
       case "ISIC":
       case "INAC/NAC Code":
       case "SIRET":
@@ -757,10 +752,11 @@ public class FranceUtil extends AutomationUtil {
     List<Addr> addresses = null;
     StringBuilder checkDetails = new StringBuilder();
     Set<String> resultCodes = new HashSet<String>();// R - review
-    if ("60".equals(data.getCustClass()) || "71".equals(data.getCustClass()) || "81".equals(data.getCustClass())) {
+    if (StringUtils.isNotBlank(data.getCustClass())
+        && ("60".equals(data.getCustClass()) || "71".equals(data.getCustClass()) || "81".equals(data.getCustClass()))) {
       LOG.debug("Skipping validations.");
       validation.setSuccess(true);
-      validation.setMessage("Skipped");
+      validation.setMessage("Skipped Address Update");
       output.setDetails("Update checks skipped for address with KUKLA " + data.getCustClass());
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_CHECKS);
       return true;
@@ -787,11 +783,11 @@ public class FranceUtil extends AutomationUtil {
               }
             }
             if (CmrConstants.RDC_INSTALL_AT.equals(addrType)) {
-              String addrName = getCustomerFullName(addr);
+              String addrName = addr.getCustNm1() + (StringUtils.isNotBlank(addr.getCustNm2()) ? addr.getCustNm2() : "");
               String soldToName = "";
               Addr zs01 = requestData.getAddress("ZS01");
               if (zs01 != null) {
-                soldToName = getCustomerFullName(zs01);
+                soldToName = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? zs01.getCustNm2() : "");
               }
 
               if (addrName.equals(soldToName)) {
@@ -820,8 +816,8 @@ public class FranceUtil extends AutomationUtil {
             // update address
             if (isRelevantAddressFieldUpdated(changes, addr)) {
               if (CmrConstants.RDC_INSTALL_AT.equals(addrType)) {
-                if (null == changes.getAddressChange(addrType, "Customer Name")
-                    && null == changes.getAddressChange(addrType, "Customer Name Con't")) {
+                if (null == changes.getAddressChange(addrType, "Customer legal name")
+                    && null == changes.getAddressChange(addrType, "Legal name continued")) {
                   LOG.debug("Update to InstallAt " + addrType + "(" + addr.getId().getAddrSeq() + ")");
                   checkDetails.append("Update to InstallAt (" + addr.getId().getAddrSeq() + ") skipped in the checks.\n");
                 } else {
