@@ -98,7 +98,7 @@ function disableAddrFieldsMT() {
   if (custType == 'CROSS' && addrType == 'ZS01') {
     FormManager.enable('landCntry');
   } else {
-	FormManager.setValue('landCntry', FormManager.getActualValue('defaultLandedCountry'));
+	FormManager.setValue('landCntry',FormManager.getActualValue('defaultLandedCountry'));
 	FormManager.readOnly('landCntry');
   }
   // Phone - for shipping
