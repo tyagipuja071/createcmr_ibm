@@ -18,14 +18,16 @@
 
 <cmr:view forGEO="FR">
   <cmr:row addBackground="false">
-    <cmr:column span="2" containerForField="AbbrevLocation">
-      <p>
-        <label for="abbrevLocn"> 
-          <cmr:fieldLabel fieldId="AbbrevLocation" />: 
-        </label>
-        <cmr:field fieldId="AbbrevLocation" id="abbrevLocn" path="abbrevLocn" tabId="MAIN_CUST_TAB" />
-      </p>
+    
+    <cmr:column span="2" containerForField="CustClass">
+        <p>
+          <cmr:label fieldId="custClass">
+            <cmr:fieldLabel fieldId="CustClass" />:
+          </cmr:label>
+          <cmr:field fieldId="CustClass" id="custClass" path="custClass" tabId="MAIN_CUST_TAB" />
+        </p>
     </cmr:column>
+    
     <cmr:column span="2" containerForField="EmbargoCode">
       <p>
         <cmr:label fieldId="embargoCd">
@@ -35,6 +37,17 @@
         <cmr:field path="ordBlk" id="ordBlk" fieldId="EmbargoCode" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
+    
+    <cmr:column span="2" containerForField="SensitiveFlag">
+        <p>
+          <cmr:label fieldId="sensitiveFlag">
+            <cmr:fieldLabel fieldId="SensitiveFlag" />:
+             <cmr:delta text="${rdcdata.sensitiveFlag}" oldValue="${reqentry.sensitiveFlag}" />
+          </cmr:label>
+          <cmr:field path="sensitiveFlag" id="sensitiveFlag" fieldId="SensitiveFlag" tabId="MAIN_CUST_TAB" />
+        </p>
+      </cmr:column>
+    
   </cmr:row>
   <cmr:row addBackground="true">
 <%--     <cmr:column span="2" containerForField="CurrencyCode">
@@ -46,14 +59,7 @@
         <cmr:field fieldId="CurrencyCode" id="currencyCd" path="currencyCd" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column> --%>
-    <cmr:column span="2" containerForField="CustClass">
-        <p>
-          <cmr:label fieldId="custClass">
-            <cmr:fieldLabel fieldId="CustClass" />:
-          </cmr:label>
-          <cmr:field fieldId="CustClass" id="custClass" path="custClass" tabId="MAIN_CUST_TAB" />
-        </p>
-    </cmr:column>  
+      
     <cmr:column span="2" containerForField="DoubleCreate">
         <p>
           <cmr:label fieldId="identClient">
