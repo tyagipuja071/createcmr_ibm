@@ -1855,8 +1855,8 @@ function setHideFieldForFR() {
     FormManager.addValidator('ibmDeptCostCenter', Validators.REQUIRED, [ 'Internal Department Number' ], 'MAIN_IBM_TAB');
     FormManager.show('InternalDept', 'InternalDept');
   } else {
-    FormManager.resetValidations('ibmDeptCostCenter');
-    FormManager.hide('InternalDept', 'InternalDept');
+    // FormManager.resetValidations('ibmDeptCostCenter');
+    // FormManager.hide('InternalDept', 'InternalDept');
   }
   if ('GOVRN' == reqType || 'CBVRN' == reqType) {
     FormManager.resetValidations('privIndc');
@@ -3121,6 +3121,106 @@ function setSensitiveFlag() {
   FormManager.readOnly('sensitiveFlag');
 }
 
+function addAddressFieldValidators() {
+
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var custNm1 = FormManager.getActualValue('custNm1');
+        if (custNm1 != null && custNm1 != '' && custNm1.length > 35) {
+          return new ValidationResult({
+            id : 'custNm1',
+            type : 'text',
+            name : 'custNm1'
+          }, false, 'Customer legal name should not exceed 35 characters.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var custNm2 = FormManager.getActualValue('custNm2');
+        if (custNm2 != null && custNm2 != '' && custNm2.length > 35) {
+          return new ValidationResult({
+            id : 'custNm2',
+            type : 'text',
+            name : 'custNm2'
+          }, false, 'Legal name continued should not exceed 35 characters.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var custNm3 = FormManager.getActualValue('custNm3');
+        if (custNm3 != null && custNm3 != '' && custNm3.length > 35) {
+          return new ValidationResult({
+            id : 'custNm3',
+            type : 'text',
+            name : 'custNm3'
+          }, false, ' Division/Department should not exceed 35 characters.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var custNm4 = FormManager.getActualValue('custNm4');
+        if (custNm4 != null && custNm4 != '' && custNm4.length > 35) {
+          return new ValidationResult({
+            id : 'custNm4',
+            type : 'text',
+            name : 'custNm4'
+          }, false, 'Attention to/Building/Floor/Office should not exceed 35 characters.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var city1 = FormManager.getActualValue('city1');
+        if (city1 != null && city1 != '' && city1.length > 35) {
+          return new ValidationResult({
+            id : 'city1',
+            type : 'text',
+            name : 'city1'
+          }, false, 'City should not exceed 35 characters.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var addrTxt = FormManager.getActualValue('addrTxt');
+        if (addrTxt != null && addrTxt != '' && addrTxt.length > 35) {
+          return new ValidationResult({
+            id : 'addrTxt',
+            type : 'text',
+            name : 'addrTxt'
+          }, false, 'Street name and number should not exceed 35 characters.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+
+}
+
 var _vatExemptHandler = null;
 function addVatExemptHandler() {
   if (!dijit.byId('vatExempt')) {
@@ -3202,4 +3302,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setSensitiveFlag, '706');
   GEOHandler.addAfterTemplateLoad(setSensitiveFlag, '706');
   GEOHandler.addAddrFunction(setIERPSitePartyIDForFR, '706');
+  GEOHandler.registerValidator(addAddressFieldValidators, [ '706' ], null, true);
 });
