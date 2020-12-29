@@ -18,7 +18,7 @@
 <cmr:section id="CUST_REQ_TAB" hidden="true">
   <jsp:include page="detailstrip.jsp" />
   <cmr:row addBackground="true">
-    <cmr:view exceptForGEO="CN">
+    <cmr:view exceptForGEO="CN,FR">
       <cmr:column span="2" containerForField="AbbrevName">
         <p>
 
@@ -28,6 +28,27 @@
         </p>
       </cmr:column>
     </cmr:view>
+    
+    <cmr:view forGEO="FR">
+      <cmr:column span="2" containerForField="AbbrevName">
+        <p>
+          <label for="abbrevNm"> <cmr:fieldLabel fieldId="AbbrevName" />: <cmr:delta text="${rdcdata.abbrevNm}"
+              oldValue="${reqentry.abbrevNm}" /> </label>
+          <cmr:field fieldId="AbbrevName" id="abbrevNm" path="abbrevNm" tabId="MAIN_CUST_TAB" />
+        </p>
+      </cmr:column>
+      
+      <cmr:column span="2" containerForField="AbbrevLocation">
+        <p>
+          <label for="abbrevLocn"> 
+            <cmr:fieldLabel fieldId="AbbrevLocation" />: 
+          </label>
+          <cmr:field fieldId="AbbrevLocation" id="abbrevLocn" path="abbrevLocn" tabId="MAIN_CUST_TAB" />
+        </p>
+      </cmr:column>
+      
+    </cmr:view>
+    
     <cmr:view forGEO="CA">
       <cmr:column span="2" containerForField="AbbrevLocation">
         <p>
@@ -102,7 +123,7 @@
   </cmr:row>
 
   <cmr:row>
-    <cmr:view exceptForCountry="643,749,778,818,834,852,856,646,714,720,760">
+    <cmr:view exceptForCountry="643,749,778,818,834,852,856,646,714,720,760,706">
       <cmr:column span="2" containerForField="SensitiveFlag">
         <p>
           <cmr:label fieldId="sensitiveFlag">
