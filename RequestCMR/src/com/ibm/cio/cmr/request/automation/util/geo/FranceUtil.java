@@ -331,46 +331,49 @@ public class FranceUtil extends AutomationUtil {
     details.append("\n");
     if (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && CalculateCoverageElement.COV_BG.equals(covFrom)) {
       engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
-    } else if (!FRANCE_SUBREGIONS.contains(addr.getLandCntry())) {
+    } else {
       isCoverageCalculated = false;
       // if not calculated using bg/gbg try calculation using SIREN
       details.setLength(0);// clear string builder
       overrides.clearOverrides(); // clear existing overrides
-      details.append("Calculating Coverage using SIREN.").append("\n\n");
-      String siren = StringUtils.isNotBlank(data.getTaxCd1()) ? (data.getTaxCd1().length() > 9 ? data.getTaxCd1().substring(0, 9) : data.getTaxCd1())
-          : "";
-      if (StringUtils.isNotBlank(siren)) {
-        details.append("SIREN: " + siren).append("\n");
-        List<CoverageContainer> coverages = covElement.computeCoverageFromRDCQuery(entityManager, "AUTO.COV.GET_COV_FROM_TAX_CD1", siren + "%",
-            data.getCmrIssuingCntry());
-        if (coverages != null && !coverages.isEmpty()) {
-          CoverageContainer coverage = coverages.get(0);
-          LOG.debug("Calculated Coverage using SIREN- Final Cov:" + coverage.getFinalCoverage() + ", Base Cov:" + coverage.getBaseCoverage()
-              + ", ISU:" + coverage.getIsuCd() + ", CTC:" + coverage.getClientTierCd());
-          covElement.logCoverage(entityManager, engineData, requestData, null, details, overrides, null, coverage, CalculateCoverageElement.FINAL,
-              CalculateCoverageElement.COV_REQ, true);
-          FieldResultKey sboKey = new FieldResultKey("DATA", "SALES_BO_CD");
-          String sboValue = "";
-          if (overrides.getData().containsKey(sboKey)) {
-            sboValue = overrides.getData().get(sboKey).getNewValue();
-            overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(), sboValue);
-          } else {
-            sboValue = getSBOfromCoverage(entityManager, coverage.getFinalCoverage());
-            if (StringUtils.isNotBlank(sboValue)) {
-              details.append("SORTL calculated on basis of Existing CMR Data: " + sboValue);
+      if (!FRANCE_SUBREGIONS.contains(addr.getLandCntry())) {
+        details.append("Calculating Coverage using SIREN.").append("\n\n");
+        String siren = StringUtils.isNotBlank(data.getTaxCd1())
+            ? (data.getTaxCd1().length() > 9 ? data.getTaxCd1().substring(0, 9) : data.getTaxCd1())
+            : "";
+        if (StringUtils.isNotBlank(siren)) {
+          details.append("SIREN: " + siren).append("\n");
+          List<CoverageContainer> coverages = covElement.computeCoverageFromRDCQuery(entityManager, "AUTO.COV.GET_COV_FROM_TAX_CD1", siren + "%",
+              data.getCmrIssuingCntry());
+          if (coverages != null && !coverages.isEmpty()) {
+            CoverageContainer coverage = coverages.get(0);
+            LOG.debug("Calculated Coverage using SIREN- Final Cov:" + coverage.getFinalCoverage() + ", Base Cov:" + coverage.getBaseCoverage()
+                + ", ISU:" + coverage.getIsuCd() + ", CTC:" + coverage.getClientTierCd());
+            covElement.logCoverage(entityManager, engineData, requestData, null, details, overrides, null, coverage, CalculateCoverageElement.FINAL,
+                CalculateCoverageElement.COV_REQ, true);
+            FieldResultKey sboKey = new FieldResultKey("DATA", "SALES_BO_CD");
+            String sboValue = "";
+            if (overrides.getData().containsKey(sboKey)) {
+              sboValue = overrides.getData().get(sboKey).getNewValue();
               overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(), sboValue);
-              overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sboValue);
+            } else {
+              sboValue = getSBOfromCoverage(entityManager, coverage.getFinalCoverage());
+              if (StringUtils.isNotBlank(sboValue)) {
+                details.append("SORTL calculated on basis of Existing CMR Data: " + sboValue);
+                overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(), sboValue);
+                overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sboValue);
+              }
             }
+            isCoverageCalculated = true;
+            results.setResults("Coverage Calculated");
+            engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
+            engineData.put(AutomationEngineData.COVERAGE_CALCULATED, coverage.getFinalCoverage());
+          } else {
+            details.append("Coverage could not be calculated on the basis of SIREN").append("\n");
           }
-          isCoverageCalculated = true;
-          results.setResults("Coverage Calculated");
-          engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
-          engineData.put(AutomationEngineData.COVERAGE_CALCULATED, coverage.getFinalCoverage());
         } else {
-          details.append("Coverage could not be calculated on the basis of SIREN").append("\n");
+          details.append("Coverage could not be calculated on the basis of SIREN. SIREN/SIRET not found on the request.").append("\n");
         }
-      } else {
-        details.append("Coverage could not be calculated on the basis of SIREN. SIREN/SIRET not found on the request.").append("\n");
       }
 
       if (!isCoverageCalculated) {
