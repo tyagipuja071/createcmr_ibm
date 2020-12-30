@@ -74,7 +74,7 @@ dojo.addOnLoad(function() {
         || CmrConstants.REQ_TYPE_MASS_CREATE.equals(reqentry.getReqType())) && reqentry.getReqId() > 0){%>
         addMassFileValidator();
         
-   <%if( reqentry.getCmrIssuingCntry().equalsIgnoreCase("631") && reqentry.getUserRole().equalsIgnoreCase("Processor")){%>
+   <%if( (reqentry.getCmrIssuingCntry().equalsIgnoreCase("631")|| reqentry.getCmrIssuingCntry().equalsIgnoreCase("706")) && reqentry.getUserRole().equalsIgnoreCase("Processor")){%>
         addDplCheckValidator();
     <%}%>
     <%}%>
