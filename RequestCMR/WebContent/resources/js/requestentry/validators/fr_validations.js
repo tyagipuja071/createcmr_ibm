@@ -1855,8 +1855,7 @@ function setHideFieldForFR() {
   }
   var reqType = FormManager.getActualValue('custSubGrp');
   if ('INTER' == reqType || 'CBTER' == reqType || 'INTSO' == reqType || 'CBTSO' == reqType) {
-    // FormManager.addValidator('ibmDeptCostCenter', Validators.REQUIRED, [
-    // 'Internal Department Number' ], 'MAIN_IBM_TAB');
+    FormManager.addValidator('ibmDeptCostCenter', Validators.REQUIRED, [ 'Internal Department Number' ], 'MAIN_IBM_TAB');
     FormManager.show('InternalDept', 'InternalDept');
   } else {
     // FormManager.resetValidations('ibmDeptCostCenter');

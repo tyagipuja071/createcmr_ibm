@@ -461,9 +461,17 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
           <cmr:column span="1" width="130">
             <label> <cmr:fieldLabel fieldId="CustomerName4" />:</label>
           </cmr:column>
-          <cmr:column span="1" width="170">
+          <cmr:column span="1" width="240">
             ${summary.addr.custNm4}
           </cmr:column>
+          <cmr:view forGEO="FR">
+            <cmr:column span="1" width="130">
+              <label> <cmr:fieldLabel fieldId="CustomerName3" />:</label>
+            </cmr:column>
+            <cmr:column span="1" width="240">
+              ${summary.addr.custNm3}
+            </cmr:column>
+          </cmr:view>
         </cmr:row>
       </cmr:view>
 
