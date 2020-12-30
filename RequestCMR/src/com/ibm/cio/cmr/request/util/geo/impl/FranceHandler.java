@@ -181,6 +181,7 @@ public class FranceHandler extends GEOHandler {
       if ("88".equals(mainRecord.getCmrOrderBlock()) || "".equals(mainRecord.getCmrOrderBlock())) {
         data.setCurrencyCd(geCurrencyCode(zs01sapNo));
         data.setTaxCd2(getTaxCodeForFR(zs01sapNo));
+        data.setIbmDeptCostCenter(getInternalDepartment((data.getCmrNo())));
       }
     } catch (Exception e) {
       LOG.error("Error occured on setting Currency Code/ tax code value during import.");
@@ -1342,6 +1343,25 @@ public class FranceHandler extends GEOHandler {
       LOG.debug("***RETURNING TAXKD > " + taxcode + " WHERE KUNNR IS > " + kunnr);
     }
     return taxcode;
+  }
+
+  private String getInternalDepartment(String cmrNo) throws Exception {
+    String department = "";
+    List<String> results = new ArrayList<String>();
+
+    EntityManager entityManager = JpaManager.getEntityManager();
+    String mandt = SystemConfiguration.getValue("MANDT");
+    String sql = ExternalizedQuery.getSql("GET.DEPT.KNA1.BYCMR");
+    sql = StringUtils.replace(sql, ":ZZKV_CUSNO", "'" + cmrNo + "'");
+    sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
+    sql = StringUtils.replace(sql, ":KATR6", "'" + "706" + "'");
+
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    results = query.getResults(String.class);
+    if (results != null && results.size() > 0) {
+      department = results.get(0);
+    }
+    return department;
   }
 
 }
