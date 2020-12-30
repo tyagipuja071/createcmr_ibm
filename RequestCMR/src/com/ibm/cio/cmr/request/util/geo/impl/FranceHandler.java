@@ -15,8 +15,8 @@ import javax.persistence.EntityManager;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.servlet.ModelAndView;
@@ -1247,41 +1247,48 @@ public class FranceHandler extends GEOHandler {
   }
 
   public static void validateFRMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country) {
-    String[] sheetNames = { "Sold To", "Mail to", "Bill To", "Ship To", "Install At" };
+    String[] sheetNames = { "Sold To", "Bill To", "Ship To", "Install At" };
+    XSSFCell currCell = null;
     for (String name : sheetNames) {
       XSSFSheet sheet = book.getSheet(name);
       LOG.debug("validating name 3 for sheet " + name);
-      for (Row row : sheet) {
-        if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
-          Cell cmrCell1 = row.getCell(4);
-          if (cmrCell1 != null) {
-            String name3 = "";
-            switch (cmrCell1.getCellTypeEnum()) {
-            case STRING:
-              name3 = cmrCell1.getStringCellValue();
-              break;
-            case NUMERIC:
-              double nvalue = cmrCell1.getNumericCellValue();
-              if (nvalue > 0) {
-                name3 = "" + nvalue;
-                break;
-              }
-            default:
+      if (sheet != null) {
+        for (Row row : sheet) {
+          if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
+            String cmrNo = ""; // 0
+            String seqNo = "";// 1
+            String postCd = "";// 7
+            currCell = (XSSFCell) row.getCell(0);
+            cmrNo = validateColValFromCell(currCell);
+
+            currCell = (XSSFCell) row.getCell(1);
+            seqNo = validateColValFromCell(currCell);
+
+            currCell = (XSSFCell) row.getCell(7);
+            postCd = validateColValFromCell(currCell);
+
+            if (row.getRowNum() == 2001) {
               continue;
             }
-            if (name3.length() > 30) {
-              LOG.debug("Total computed length of name3 should not exeed 30. Sheet: " + name + ", Row: " + row.getRowNum() + ", Name3:" + name3);
-              TemplateValidation error = new TemplateValidation(name);
-              error.addError(row.getRowNum(), "Customer Name 3", "Total computed length of customer name3 should not exeed 30");
+
+            TemplateValidation error = new TemplateValidation(name);
+            if (StringUtils.isEmpty(cmrNo)) {
+              LOG.trace("Note that CMR No. is mandatory. Please fix and upload the template again.");
+              error.addError(row.getRowNum(), "CMR No.", "Note that CMR No. is mandatory. Please fix and upload the template again.");
+              validations.add(error);
+            }
+
+            if (!StringUtils.isBlank(cmrNo) && StringUtils.isBlank(seqNo)) {
+              LOG.trace("Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
+              error.addError(row.getRowNum(), "Address Sequence No.",
+                  "Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
               validations.add(error);
             }
           }
         }
       }
+      }
     }
-    HashMap<String, String> hwFlagMap = new HashMap<>();
-
-  }
 
   private String getKunnrSapr3Kna1ForFR(String cmrNo, String ordBlk) throws Exception {
     String kunnr = "";
