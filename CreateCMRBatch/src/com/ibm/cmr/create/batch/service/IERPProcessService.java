@@ -522,7 +522,7 @@ public class IERPProcessService extends BaseBatchService {
           String rdcProcessingMessage = "";
           String wfHistCmt = "";
           String rdcOrderBlk = IERPRequestUtils.getOrderBlockFromDataRdc(em, admin);
-          String dataOrderBlk = data.getOrdBlk();
+          String dataOrderBlk = data.getCustAcctType();
           StringBuilder comment = new StringBuilder();
           HashMap<String, Object> overallResponse = null;
           boolean firstRun = false;
