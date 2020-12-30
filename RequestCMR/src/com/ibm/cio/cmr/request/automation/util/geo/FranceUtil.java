@@ -760,7 +760,7 @@ public class FranceUtil extends AutomationUtil {
       LOG.debug("Skipping validations.");
       validation.setSuccess(true);
       validation.setMessage("Skipped Address Update");
-      output.setDetails("Update checks skipped for address with KUKLA " + data.getCustClass());
+      output.setDetails("Skipped Address update on CMR with Kukla " + data.getCustClass());
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_CHECKS);
       return true;
     }
