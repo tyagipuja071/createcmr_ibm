@@ -93,10 +93,11 @@ function disableAddrFieldsMT() {
   var custType = FormManager.getActualValue('custGrp');
   var addrType = FormManager.getActualValue('addrType');
 
-  if (custType == 'LOCAL' && addrType == 'ZS01') {
-    FormManager.readOnly('landCntry');
-  } else {
+  if (custType == 'CROSS' && addrType == 'ZS01') {
     FormManager.enable('landCntry');
+  } else {
+	FormManager.setValue('landCntry',FormManager.getActualValue('defaultLandedCountry'));
+	FormManager.readOnly('landCntry');
   }
   // Phone - for shipping
   if (addrType == 'ZD01') {
