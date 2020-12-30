@@ -477,6 +477,14 @@ public class FranceHandler extends GEOHandler {
       results.add(update);
     }
 
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getDept(), newData.getIbmDeptCostCenter())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "Internal Department Number", "Internal Department Number"));
+      update.setNewData(newData.getIbmDeptCostCenter());
+      update.setOldData(oldData.getDept());
+      results.add(update);
+    }
+
     if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getCustClass(), newData.getCustClass())) {
       for (UpdatedDataModel item : results) {
         if (item.getDataField().equals("Customer Class")) {
@@ -1274,15 +1282,17 @@ public class FranceHandler extends GEOHandler {
 
             TemplateValidation error = new TemplateValidation(name);
             if (StringUtils.isEmpty(cmrNo)) {
-              LOG.trace("Note that CMR No. is mandatory. Please fix and upload the template again.");
-              error.addError(row.getRowNum(), "CMR No.", "Note that CMR No. is mandatory. Please fix and upload the template again.");
+              LOG.trace("The row " + row.getRowNum() + ":Note that CMR No. is mandatory. Please fix and upload the template again.");
+              error.addError(row.getRowNum(), "CMR No.",
+                  "The row " + row.getRowNum() + ":Note that CMR No. is mandatory. Please fix and upload the template again.");
               validations.add(error);
             }
 
             if (!StringUtils.isBlank(cmrNo) && StringUtils.isBlank(seqNo)) {
               LOG.trace("Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
               error.addError(row.getRowNum(), "Address Sequence No.",
-                  "Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
+                  "The row " + row.getRowNum()
+                      + ":Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
               validations.add(error);
             }
           }
