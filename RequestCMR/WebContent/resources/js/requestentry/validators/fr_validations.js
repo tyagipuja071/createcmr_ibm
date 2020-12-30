@@ -49,6 +49,8 @@ function afterConfigForFR() {
       FormManager.setValue('taxCd2', '1');
 
       FormManager.readOnly('ordBlk');
+
+      internalDeptValidate();
     }
 
     if (reqType == 'U') {
@@ -60,6 +62,8 @@ function afterConfigForFR() {
       FormManager.addValidator('abbrevLocn', Validators.REQUIRED, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
       FormManager.enable('ordBlk');
       orderBlockCodeValidator();
+      setInternalDept();
+      internalDeptValidate();
     }
   } else if (role == 'Processor') {
     FormManager.enable('abbrevNm');
@@ -72,7 +76,7 @@ function afterConfigForFR() {
     FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
     FormManager.addValidator('abbrevLocn', Validators.REQUIRED, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
     orderBlockCodeValidator();
-
+    internalDeptValidate();
     FormManager.addFormValidator((function() {
       return {
         validate : function() {
@@ -1851,7 +1855,8 @@ function setHideFieldForFR() {
   }
   var reqType = FormManager.getActualValue('custSubGrp');
   if ('INTER' == reqType || 'CBTER' == reqType || 'INTSO' == reqType || 'CBTSO' == reqType) {
-    FormManager.addValidator('ibmDeptCostCenter', Validators.REQUIRED, [ 'Internal Department Number' ], 'MAIN_IBM_TAB');
+    // FormManager.addValidator('ibmDeptCostCenter', Validators.REQUIRED, [
+    // 'Internal Department Number' ], 'MAIN_IBM_TAB');
     FormManager.show('InternalDept', 'InternalDept');
   } else {
     // FormManager.resetValidations('ibmDeptCostCenter');
@@ -3217,6 +3222,49 @@ function addAddressFieldValidators() {
     };
   })(), null, 'frmCMR_addressModal');
 
+}
+
+function setInternalDept() {
+  if (typeof (_pagemodel) != 'undefined') {
+    if (_pagemodel.ibmDeptCostCenter == null || _pagemodel.ibmDeptCostCenter == 'null') {
+      FormManager.setValue(FormManager.getField('ibmDeptCostCenter'), '');
+    } else {
+      FormManager.setValue(FormManager.getField('ibmDeptCostCenter'), _pagemodel.ibmDeptCostCenter);
+    }
+  }
+}
+
+function internalDeptValidate() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var ibmDeptCostCenter = FormManager.getActualValue('ibmDeptCostCenter');
+        var alphanumeric = /^[0-9a-zA-Z]*$/;
+        if (ibmDeptCostCenter == '') {
+          return new ValidationResult(null, true);
+        } else {
+          if (ibmDeptCostCenter.length < 6) {
+            return new ValidationResult({
+              id : 'ibmDeptCostCenter',
+              type : 'text',
+              name : 'ibmDeptCostCenter'
+            }, false, 'The value of internal department number is invalid, please input 6 chars length.');
+          }
+
+          if (!ibmDeptCostCenter.match(alphanumeric)) {
+            return new ValidationResult({
+              id : 'ibmDeptCostCenter',
+              type : 'text',
+              name : 'ibmDeptCostCenter'
+            }, false, 'The value of internal department number is invalid, please input digitals or letter.');
+          }
+
+          return new ValidationResult(null, true);
+
+        }
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
 var _vatExemptHandler = null;
