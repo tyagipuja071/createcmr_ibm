@@ -62,9 +62,9 @@ function lockOrderBlock() {
   var reqType = FormManager.getActualValue('reqType');
   var role = FormManager.getActualValue('userRole').toUpperCase();
   if (reqType != 'U' && role == 'REQUESTER') {
-    FormManager.readOnly('ordBlk');
+    FormManager.readOnly('custAcctType');
   } else {
-    FormManager.enable('ordBlk');
+    FormManager.enable('custAcctType');
   }
 }
 
@@ -96,8 +96,8 @@ function disableAddrFieldsMT() {
   if (custType == 'CROSS' && addrType == 'ZS01') {
     FormManager.enable('landCntry');
   } else {
-	FormManager.setValue('landCntry',FormManager.getActualValue('defaultLandedCountry'));
-	FormManager.readOnly('landCntry');
+    FormManager.setValue('landCntry', FormManager.getActualValue('defaultLandedCountry'));
+    FormManager.readOnly('landCntry');
   }
   // Phone - for shipping
   if (addrType == 'ZD01') {
@@ -789,7 +789,7 @@ function addOrdBlkValidator() {
     return {
       validate : function() {
         var reqType = null;
-        var ordBlk = FormManager.getActualValue('ordBlk');
+        var ordBlk = FormManager.getActualValue('custAcctType');
         if (typeof (_pagemodel) != 'undefined') {
           reqType = FormManager.getActualValue('reqType');
         }

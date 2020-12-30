@@ -161,12 +161,12 @@
 			<%--New Fields for Malta --%>
 			<cmr:column span="2" containerForField="OrderBlock" forCountry="780">
 				<p>
-					<cmr:label fieldId="ordBlk">
+					<cmr:label fieldId="custAcctType">
 						<cmr:fieldLabel fieldId="OrderBlock" />:
-						<cmr:delta text="${rdcdata.ordBlk}"
-							oldValue="${reqentry.ordBlk}" />
+						<cmr:delta text="${rdcdata.custAcctType}"
+							oldValue="${reqentry.custAcctType}" />
 					</cmr:label>
-					<cmr:field path="ordBlk" id="ordBlk" fieldId="OrderBlock"
+					<cmr:field path="custAcctType" id="custAcctType" fieldId="OrderBlock"
 						tabId="MAIN_CUST_TAB" />
 				</p>
 			</cmr:column>

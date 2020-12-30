@@ -643,7 +643,7 @@ public class MaltaHandler extends BaseSOFHandler {
     }
     // MALTA - OrderBlock
     if (!(StringUtils.isEmpty(mainRecord.getCmrOrderBlock()))) {
-      data.setOrdBlk(mainRecord.getCmrOrderBlock());
+      data.setCustAcctType(mainRecord.getCmrOrderBlock());
     }
 
     data.setInstallBranchOff("");
@@ -752,11 +752,11 @@ public class MaltaHandler extends BaseSOFHandler {
       results.add(update);
     }
 
-    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getOrdBlk(), newData.getOrdBlk())) {
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCustAcctType(), newData.getCustAcctType())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "OrderBlock", "-"));
-      update.setNewData(service.getCodeAndDescription(newData.getOrdBlk(), "OrderBlock", cmrCountry));
-      update.setOldData(service.getCodeAndDescription(oldData.getOrdBlk(), "OrderBlock", cmrCountry));
+      update.setNewData(service.getCodeAndDescription(newData.getCustAcctType(), "OrderBlock", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getCustAcctType(), "OrderBlock", cmrCountry));
       results.add(update);
     }
 
@@ -1134,6 +1134,75 @@ public class MaltaHandler extends BaseSOFHandler {
   @Override
   public boolean enableTempReactivateOnUpdate() {
     return true;
+  }
+
+  @Override
+  public Map<String, String> getUIFieldIdMap() {
+    Map<String, String> map = new HashMap<String, String>();
+    map.put("##OriginatorName", "originatorNm");
+    map.put("##SensitiveFlag", "sensitiveFlag");
+    map.put("##ISU", "isuCd");
+    map.put("##SearchTerm", "searchTerm");
+    map.put("##Building", "bldg");
+    map.put("##CMROwner", "cmrOwner");
+    map.put("##PPSCEID", "ppsceid");
+    map.put("##GlobalBuyingGroupID", "gbgId");
+    map.put("##CoverageID", "covId");
+    map.put("##OriginatorID", "originatorId");
+    map.put("##BPRelationType", "bpRelType");
+    map.put("##CAP", "capInd");
+    map.put("##LocalTax1", "taxCd1");
+    map.put("##RequestReason", "reqReason");
+    map.put("##POBox", "poBox");
+    map.put("##LandedCountry", "landCntry");
+    map.put("##CMRIssuingCountry", "cmrIssuingCntry");
+    map.put("##INACCode", "inacCd");
+    map.put("##CustPhone", "custPhone");
+    map.put("##Floor", "floor");
+    map.put("##VATExempt", "vatExempt");
+    map.put("##CustomerScenarioType", "custGrp");
+    map.put("##City1", "city1");
+    map.put("##InternalDept", "ibmDeptCostCenter");
+    map.put("##CustLangCd", "custLangCd");
+    map.put("##RequestingLOB", "requestingLob");
+    map.put("##AddrStdRejectReason", "addrStdRejReason");
+    map.put("##ExpediteReason", "expediteReason");
+    map.put("##VAT", "vat");
+    map.put("##CMRNumber", "cmrNo");
+    map.put("##Subindustry", "subIndustryCd");
+    map.put("##EnterCMR", "enterCMRNo");
+    map.put("##DisableAutoProcessing", "disableAutoProc");
+    map.put("##Expedite", "expediteInd");
+    map.put("##BGLDERule", "bgRuleId");
+    map.put("##ProspectToLegalCMR", "prospLegalInd");
+    map.put("##CountrySubRegion", "countryUse");
+    map.put("##ClientTier", "clientTier");
+    map.put("##IERPSitePrtyId", "ierpSitePrtyId");
+    map.put("##SAPNumber", "sapNo");
+    map.put("##Department", "dept");
+    map.put("##CustClass", "custClass");
+    map.put("##StreetAddress1", "addrTxt");
+    map.put("##AbbrevName", "abbrevNm");
+    map.put("##HwInstlMasterFlag", "hwInstlMstrFlg");
+    map.put("##CustFAX", "custFax");
+    map.put("##OrderBlock", "custAcctType");
+    map.put("##CustomerName1", "custNm1");
+    map.put("##ISIC", "isicCd");
+    map.put("##CustomerName2", "custNm2");
+    map.put("##CustomerName3", "custNm3");
+    map.put("##CustomerName4", "custNm4");
+    map.put("##CurrencyCode", "currencyCd");
+    map.put("##PostalCode", "postCd");
+    map.put("##TransportZone", "transportZone");
+    map.put("##SOENumber", "soeReqNo");
+    map.put("##DUNS", "dunsNo");
+    map.put("##BuyingGroupID", "bgId");
+    map.put("##RequesterID", "requesterId");
+    map.put("##GeoLocationCode", "geoLocationCd");
+    map.put("##MembLevel", "memLvl");
+    map.put("##RequestType", "reqType");
+    map.put("##CustomerScenarioSubType", "custSubGrp");
+    return map;
   }
 
 }
