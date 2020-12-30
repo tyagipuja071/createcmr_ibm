@@ -476,6 +476,14 @@ public class FranceHandler extends GEOHandler {
       results.add(update);
     }
 
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getDept(), newData.getIbmDeptCostCenter())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "Internal Department Number", "Internal Department Number"));
+      update.setNewData(newData.getIbmDeptCostCenter());
+      update.setOldData(oldData.getDept());
+      results.add(update);
+    }
+
     if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getCustClass(), newData.getCustClass())) {
       for (UpdatedDataModel item : results) {
         if (item.getDataField().equals("Customer Class")) {
