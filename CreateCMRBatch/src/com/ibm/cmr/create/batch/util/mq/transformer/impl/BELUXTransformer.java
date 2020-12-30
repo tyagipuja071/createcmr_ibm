@@ -53,8 +53,8 @@ public class BELUXTransformer extends EMEATransformer {
   private static final String[] NO_UPDATE_FIELDS = { "OrganizationNo", "CurrencyCode" };
 
   private static final String[] ADDRESS_ORDER = { "ZS01", "ZP01", "ZI01", "ZD01", "ZS02" };
-  private static final List SUB_TYPES_INTERNAL = Arrays.asList("BEINT", "LUINT", "INTER");
-  private static final List SUB_TYPES_INTERNAL_SO = Arrays.asList("BEISO", "LUISO");
+  private static final List<String> SUB_TYPES_INTERNAL = Arrays.asList("BEINT", "LUINT", "INTER");
+  private static final List<String> SUB_TYPES_INTERNAL_SO = Arrays.asList("BEISO", "LUISO");
 
   private static final Logger LOG = Logger.getLogger(EMEATransformer.class);
 
@@ -467,20 +467,12 @@ public class BELUXTransformer extends EMEATransformer {
     switch (addr.getId().getAddrType()) {
     case MQMsgConstants.ADDR_ZP01:
       return MQMsgConstants.SOF_ADDRESS_USE_BILLING;
-    case MQMsgConstants.ADDR_ZP03:
-      return MQMsgConstants.SOF_ADDRESS_USE_BILLING;
     case MQMsgConstants.ADDR_ZS01:
       return MQMsgConstants.SOF_ADDRESS_USE_INSTALLING;
     case MQMsgConstants.ADDR_ZD01:
       return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
-    case MQMsgConstants.ADDR_ZD02:
-      return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
     case MQMsgConstants.ADDR_ZI01:
       return MQMsgConstants.SOF_ADDRESS_USE_EPL;
-    case MQMsgConstants.ADDR_ZS02:
-      return MQMsgConstants.SOF_ADDRESS_USE_MAILING;
-    case MQMsgConstants.ADDR_ZP02:
-      return MQMsgConstants.SOF_ADDRESS_USE_COUNTRY_USE_G;
     default:
       return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
     }
@@ -496,12 +488,6 @@ public class BELUXTransformer extends EMEATransformer {
       return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
     case MQMsgConstants.ADDR_ZI01:
       return MQMsgConstants.SOF_ADDRESS_USE_EPL;
-    case MQMsgConstants.ADDR_ZS02:
-      return MQMsgConstants.SOF_ADDRESS_USE_MAILING;
-    case MQMsgConstants.ADDR_ZP02:
-      return MQMsgConstants.SOF_ADDRESS_USE_COUNTRY_USE_G;
-    case MQMsgConstants.ADDR_ZP03:
-      return MQMsgConstants.SOF_ADDRESS_USE_BILLING;
     default:
       return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
     }
@@ -1470,7 +1456,7 @@ public class BELUXTransformer extends EMEATransformer {
   }
 
   private List<Addr> getAddrLegacy(EntityManager entityManager, String reqId) {
-    LOG.debug("CEE -- Searching for ADDR records for Request " + reqId);
+    LOG.debug("BELUX -- Searching for ADDR records for Request " + reqId);
     String sql = ExternalizedQuery.getSql("LEGACYD.GET.ADDR");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", reqId);
@@ -1573,7 +1559,7 @@ public class BELUXTransformer extends EMEATransformer {
     Map<String, String> addrSeqToAddrUseMap = new HashMap<String, String>();
     addrSeqToAddrUseMap = mapSeqNoToAddrUse(getAddrLegacy(entityManager, String.valueOf(requestId)));
 
-    LOG.debug("LEGACY -- ME OVERRIDE transformOtherData");
+    LOG.debug("LEGACY -- BELUX OVERRIDE transformOtherData");
     LOG.debug("addrSeqToAddrUseMap size: " + addrSeqToAddrUseMap.size());
     for (CmrtAddr legacyAddr : legacyObjects.getAddresses()) {
       if ("C".equals(cmrObjects.getAdmin().getReqType())) {
@@ -1787,7 +1773,7 @@ public class BELUXTransformer extends EMEATransformer {
     q.setParameter("TYPE", addrType);
     q.setParameter("OLD_SEQ", oldSeq);
     q.setParameter("SAP_NO", kunnr);
-    LOG.debug("CEE - Assigning address sequence " + newSeq + " to " + addrType + " address.");
+    LOG.debug("BELUX - Assigning address sequence " + newSeq + " to " + addrType + " address.");
     q.executeSql();
   }
 
