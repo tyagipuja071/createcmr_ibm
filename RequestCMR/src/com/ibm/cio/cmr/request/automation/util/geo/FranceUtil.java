@@ -225,7 +225,7 @@ public class FranceUtil extends AutomationUtil {
         case SCENARIO_CROSSBORDER_IBM_EMPLOYEE:
         case SCENARIO_IBM_EMPLOYEE:
           return doPrivatePersonChecks(engineData, SystemLocation.FRANCE, zs01.getLandCntry(), customerName, details,
-              (SCENARIO_IBM_EMPLOYEE.equals(scenario) || SCENARIO_IBM_EMPLOYEE.equals(scenario)), requestData);
+              (SCENARIO_IBM_EMPLOYEE.equals(scenario) || SCENARIO_CROSSBORDER_IBM_EMPLOYEE.equals(scenario)), requestData);
 
         case SCENARIO_INTERNAL:
         case SCENARIO_CROSSBORDER_INTERNAL:
