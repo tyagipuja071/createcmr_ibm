@@ -106,13 +106,13 @@
 				</column>
 				<column>
 					<label>Name 3</label>
-					<dbColumn>CUST_NM2</dbColumn>
+					<dbColumn>CUST_NM3</dbColumn>
 					<width>40</width>
 					<length>30</length>
 				</column>
 				<column>
 					<label>Name 4</label>
-					<dbColumn>CUST_NM2</dbColumn>
+					<dbColumn>CUST_NM4</dbColumn>
 					<width>40</width>
 					<length>30</length>
 				</column>
@@ -134,7 +134,7 @@
 					<width>18</width>
 					<length>10</length>
 				</column>
-				<column number="true">
+				<column>
 					<label>PO Box</label>
 					<dbColumn>PO_BOX</dbColumn>
 					<width>18</width>
@@ -177,13 +177,13 @@
 				</column>
 				<column>
 					<label>Name 3</label>
-					<dbColumn>CUST_NM2</dbColumn>
+					<dbColumn>CUST_NM3</dbColumn>
 					<width>40</width>
 					<length>30</length>
 				</column>
 				<column>
 					<label>Name 4</label>
-					<dbColumn>CUST_NM2</dbColumn>
+					<dbColumn>CUST_NM4</dbColumn>
 					<width>40</width>
 					<length>30</length>
 				</column>
@@ -247,13 +247,13 @@
 				</column>
 				<column>
 					<label>Name 3</label>
-					<dbColumn>CUST_NM2</dbColumn>
+					<dbColumn>CUST_NM3</dbColumn>
 					<width>40</width>
 					<length>30</length>
 				</column>
 				<column>
 					<label>Name 4</label>
-					<dbColumn>CUST_NM2</dbColumn>
+					<dbColumn>CUST_NM4</dbColumn>
 					<width>40</width>
 					<length>30</length>
 				</column>
@@ -311,13 +311,13 @@
 				</column>
 				<column>
 					<label>Name 3</label>
-					<dbColumn>CUST_NM2</dbColumn>
+					<dbColumn>CUST_NM3</dbColumn>
 					<width>40</width>
 					<length>30</length>
 				</column>
 				<column>
 					<label>Name 4</label>
-					<dbColumn>CUST_NM2</dbColumn>
+					<dbColumn>CUST_NM4</dbColumn>
 					<width>40</width>
 					<length>30</length>
 				</column>
