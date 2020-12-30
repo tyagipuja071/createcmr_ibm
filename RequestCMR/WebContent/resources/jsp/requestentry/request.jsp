@@ -311,7 +311,7 @@ div#cmr-info-box, div#cmr-error-box, div#cmr-validation-box {
     </c:if>
     <form:hidden path="covBgRetrievedInd" />
     <form:hidden path="rdcProcessingMsg" />
-    <cmr:view exceptForCountry="848,618,724,780,706">
+    <cmr:view exceptForCountry="848,618,724,706">
     	<form:hidden path="ordBlk" />
     </cmr:view>
     <cmr:view forGEO="LA">
