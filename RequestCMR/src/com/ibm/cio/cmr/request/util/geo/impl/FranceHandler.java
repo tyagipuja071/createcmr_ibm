@@ -312,6 +312,7 @@ public class FranceHandler extends GEOHandler {
       query.setParameter("REQ_ID", reqId);
 
       List<Object[]> resultsCMR = query.getResults();
+      int maxSeq = 0;
       if (resultsCMR != null && resultsCMR.size() > 0) {
         boolean seqExistCMR = false;
         List<String> seqListCMR = new ArrayList<String>();
@@ -324,18 +325,18 @@ public class FranceHandler extends GEOHandler {
         }
         // Check if seq is already exist in create cmr
         seqExistCMR = seqListCMR.contains(Integer.toString(addrSeq));
-        if (seqExistCMR) {
-          // Get Max seq from create cmr
-          addrSeq = Integer.parseInt(seqListCMR.get(0));
-          for (int i = 0; i < seqListCMR.size(); i++) {
-            if (addrSeq < Integer.parseInt(seqListCMR.get(i))) {
-              addrSeq = Integer.parseInt(seqListCMR.get(i));
-            }
+        // Get Max seq from create cmr
+        maxSeq = Integer.parseInt(seqListCMR.get(0));
+        for (int i = 0; i < seqListCMR.size(); i++) {
+          if (maxSeq < Integer.parseInt(seqListCMR.get(i))) {
+            maxSeq = Integer.parseInt(seqListCMR.get(i));
           }
-          if (addrSeq < 5) {
+        }
+        if (seqExistCMR) {
+          if (maxSeq < 5) {
             addrSeq = 5;
           } else {
-            addrSeq = addrSeq + 1;
+            addrSeq = maxSeq + 1;
           }
         }
       }
@@ -355,7 +356,11 @@ public class FranceHandler extends GEOHandler {
             }
           }
           if (addrSeq < 5 && seqListRDC.contains(Integer.toString(addrSeq))) {
-            addrSeq = 5;
+            if (maxSeq < 5) {
+              addrSeq = 5;
+            } else {
+              addrSeq = maxSeq + 1;
+            }
           }
           while (seqListRDC.contains(Integer.toString(addrSeq))) {
             addrSeq++;
