@@ -68,7 +68,7 @@
   </cmr:row>
 
   <cmr:row>
-  <cmr:column span="1" width="127">
+    <cmr:column span="1" width="127">
     </cmr:column>
     <cmr:column span="1" width="130">
       <label><cmr:fieldLabel fieldId="SalRepNameNo" />: </label>
@@ -78,6 +78,12 @@
         String sr = DropdownListController.getDescription("SalRepNameNo", data.getRepTeamMemberNo(), cntry);
       %>
       <%=sr != null ? sr : ""%>
+    </cmr:column>
+    <cmr:column span="1" width="130">
+      <label><cmr:fieldLabel fieldId="InternalDept" />:</label>
+    </cmr:column>
+    <cmr:column span="1" width="200">
+      ${summary.data.ibmDeptCostCenter}
     </cmr:column>
   </cmr:row>
 
