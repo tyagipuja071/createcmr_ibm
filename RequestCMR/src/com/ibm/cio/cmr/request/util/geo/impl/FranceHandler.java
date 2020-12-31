@@ -48,8 +48,11 @@ import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.QueryClient;
+import com.ibm.cmr.services.client.ValidatorClient;
 import com.ibm.cmr.services.client.query.QueryRequest;
 import com.ibm.cmr.services.client.query.QueryResponse;
+import com.ibm.cmr.services.client.validator.ValidationResult;
+import com.ibm.cmr.services.client.validator.VatValidateRequest;
 import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
 
 /**
@@ -1256,17 +1259,18 @@ public class FranceHandler extends GEOHandler {
   }
 
   public static void validateFRMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country) {
-    String[] sheetNames = { "Sold To", "Bill To", "Ship To", "Install At" };
+    String[] sheetNames = { "Data", "Sold To", "Bill To", "Ship To", "Install At" };
     XSSFCell currCell = null;
     for (String name : sheetNames) {
       XSSFSheet sheet = book.getSheet(name);
-      LOG.debug("validating name 3 for sheet " + name);
+      LOG.debug("validating for sheet " + name);
       if (sheet != null) {
         for (Row row : sheet) {
           if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
             String cmrNo = ""; // 0
             String seqNo = "";// 1
             String postCd = "";// 7
+            String vat = "";//
             currCell = (XSSFCell) row.getCell(0);
             cmrNo = validateColValFromCell(currCell);
 
@@ -1281,25 +1285,68 @@ public class FranceHandler extends GEOHandler {
             }
 
             TemplateValidation error = new TemplateValidation(name);
+
+            if ("Data".equals(name)) {
+              currCell = (XSSFCell) row.getCell(12);
+              vat = validateColValFromCell(currCell);
+              try{
+                if (!StringUtils.isBlank(vat)) {
+                  if (!validateVAT("FR", vat)) {
+                    LOG.trace("The row " + row.getRowNum() + ":VAT is not valid for the Country.");
+                    error.addError(row.getRowNum(), "VAT.", "The row " + row.getRowNum() + ":VAT is not valid for the Country.<br>");
+                    validations.add(error);
+                  }
+                }
+              } catch(Exception e){
+                LOG.error("Error occured on connecting VAT validation service.");
+                e.printStackTrace();
+              }
+            }
+
             if (StringUtils.isEmpty(cmrNo)) {
               LOG.trace("The row " + row.getRowNum() + ":Note that CMR No. is mandatory. Please fix and upload the template again.");
               error.addError(row.getRowNum(), "CMR No.",
-                  "The row " + row.getRowNum() + ":Note that CMR No. is mandatory. Please fix and upload the template again.");
+                  "The row " + row.getRowNum() + ":Note that CMR No. is mandatory. Please fix and upload the template again.<br>");
               validations.add(error);
             }
-
-            if (!StringUtils.isBlank(cmrNo) && StringUtils.isBlank(seqNo)) {
-              LOG.trace("Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
-              error.addError(row.getRowNum(), "Address Sequence No.",
-                  "The row " + row.getRowNum()
-                      + ":Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
-              validations.add(error);
+            if (!"Data".equals(name)) {
+              if (!StringUtils.isBlank(cmrNo) && StringUtils.isBlank(seqNo)) {
+                LOG.trace("Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
+                error.addError(row.getRowNum(), "Address Sequence No.", "The row " + row.getRowNum()
+                    + ":Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.<br>");
+                validations.add(error);
+              }
             }
           }
         }
       }
-      }
     }
+  }
+
+  /**
+   * Connects to VAT validation service and validates VAT
+   *
+   * @param country
+   * @param vat
+   * @return
+   * @throws Exception
+   */
+  private static boolean validateVAT(String country, String vat) throws Exception {
+    LOG.debug("Validating VAT " + vat + " for " + country);
+    String baseUrl = SystemConfiguration.getValue("CMR_SERVICES_URL");
+    ValidatorClient client = CmrServicesFactory.getInstance().createClient(baseUrl, ValidatorClient.class);
+    VatValidateRequest vatRequest = new VatValidateRequest();
+    vatRequest.setCountry(country);
+    vatRequest.setVat(vat);
+
+    try {
+      ValidationResult validation = client.executeAndWrap(ValidatorClient.VAT_APP_ID, vatRequest, ValidationResult.class);
+      return validation.isSuccess();
+    } catch (Exception e) {
+      LOG.error("Error in VAT validation", e);
+      return false;
+    }
+  }
 
   private String getKunnrSapr3Kna1ForFR(String cmrNo, String ordBlk) throws Exception {
     String kunnr = "";
