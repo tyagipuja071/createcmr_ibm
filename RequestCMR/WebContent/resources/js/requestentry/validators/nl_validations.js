@@ -68,7 +68,7 @@ function afterConfigForNL() {
   setVatValidatorNL();
 
   var custSubScnrio = FormManager.getActualValue('custSubGrp');
-  if (custSubScnrio == 'PRICU' || custSubScnrio == 'PUBCU' || custSubScnrio == 'CBCOM' || custSubScnrio == 'CBBUS') {
+  if (custSubScnrio == 'PRICU' || custSubScnrio == 'PUBCU' || custSubScnrio == 'CBCOM' || custSubScnrio == 'CBBUS' || custSubScnrio == 'INTER') {
     FormManager.removeValidator('taxCd2', Validators.REQUIRED);
   } else if (reqType != 'U') {
     FormManager.addValidator('taxCd2', Validators.REQUIRED, [ 'KVK' ], 'MAIN_CUST_TAB');
@@ -329,7 +329,7 @@ function setBOTeamValues(clientTier) {
       console.log('custSubGrp==' + FormManager.getActualValue('custSubGrp'));
       console.log('pagemodel custSubGrp==' + _pagemodel.custSubGrp);
 
-      if (FormManager.getActualValue('custSubGrp') != '' && FormManager.getActualValue('custSubGrp') != null && FormManager.getActualValue('custSubGrp') != _pagemodel.custSubGrp
+      if (FormManager.getActualValue('custSubGrp') != null && FormManager.getActualValue('custSubGrp') != '' && FormManager.getActualValue('custSubGrp') != _pagemodel.custSubGrp
           || (FormManager.getActualValue('custSubGrp') == _pagemodel.custSubGrp && FormManager.getActualValue('subIndustryCd') != _pagemodel.subIndustryCd)) {
         FormManager.setValue('engineeringBo', selectedBoTeam);
 
