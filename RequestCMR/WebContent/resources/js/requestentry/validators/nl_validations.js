@@ -988,6 +988,41 @@ function attnFormatterNL(value, rowIndex) {
   return department + '<br>' + (attPerson ? ' ' + attPerson : '');
 }
 
+/**
+ * Override WW validator
+ */
+function addCMRSearchValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqType = FormManager.getActualValue('reqType');
+        var result = FormManager.getActualValue('findCmrResult');
+        if (reqType == 'U') {
+          if (result == '' || result.toUpperCase() == 'NOT DONE') {
+            return new ValidationResult(null, false, 'CMR Search has not been performed yet.');
+          }
+        }
+        if (reqType == 'U' && result.toUpperCase() != 'ACCEPTED') {
+          return new ValidationResult(null, false, 'An existing CMR for update must be searched for and imported properly to the request.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+
+function disbleCreateByModel() {
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType == 'C') {
+    FormManager.disable('cmrSearchBtn');
+    dojo.removeClass(dojo.byId('cmrSearchBtn'), 'ibm-btn-cancel-pri');
+    dojo.addClass(dojo.byId('cmrSearchBtn'), 'ibm-btn-cancel-disabled');
+    FormManager.disable('dnbSearchBtn');
+    dojo.removeClass(dojo.byId('dnbSearchBtn'), 'ibm-btn-cancel-pri');
+    dojo.addClass(dojo.byId('dnbSearchBtn'), 'ibm-btn-cancel-disabled');
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.NL = [ '788' ];
   console.log('adding NETHERLANDS functions...');
@@ -1022,4 +1057,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(disableLandCntry, GEOHandler.NL);
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.NL, GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.addAfterConfig(setAddressDetailsForView, GEOHandler.NL);
+
+  GEOHandler.registerValidator(addCMRSearchValidator, GEOHandler.NL, null, true);
+  GEOHandler.addAfterConfig(disbleCreateByModel, GEOHandler.NL);
 });
