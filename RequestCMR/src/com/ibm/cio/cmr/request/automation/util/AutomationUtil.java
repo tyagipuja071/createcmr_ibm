@@ -612,7 +612,7 @@ public abstract class AutomationUtil {
     case NoIBMRecord:
       engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
       details.append("Employee details not found in IBM BluePages.").append("\n");
-      break;
+      return false;
     case Passed:
       details.append("No Duplicate CMRs were found.").append("\n");
       break;
