@@ -15,7 +15,7 @@ function afterConfigForNL() {
   }
 
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  if (custSubGrp == 'INTER' || custSubGrp == 'PRICU') {
+  if (custSubGrp == 'PRICU') {
     FormManager.removeValidator('inacCd', Validators.REQUIRED);
     FormManager.readOnly('inacCd');
     FormManager.setValue('inacCd', '');
