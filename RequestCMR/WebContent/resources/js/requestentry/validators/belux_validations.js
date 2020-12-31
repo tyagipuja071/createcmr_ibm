@@ -1188,6 +1188,41 @@ function attnFormatterBELUX(value, rowIndex) {
   return title + (firstName ? ' ' + firstName : '') + (lastName ? ' ' + lastName : '');
 }
 
+/**
+ * Override WW validator
+ */
+function addCMRSearchValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqType = FormManager.getActualValue('reqType');
+        var result = FormManager.getActualValue('findCmrResult');
+        if (reqType == 'U') {
+          if (result == '' || result.toUpperCase() == 'NOT DONE') {
+            return new ValidationResult(null, false, 'CMR Search has not been performed yet.');
+          }
+        }
+        if (reqType == 'U' && result.toUpperCase() != 'ACCEPTED') {
+          return new ValidationResult(null, false, 'An existing CMR for update must be searched for and imported properly to the request.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+
+function disbleCreateByModel() {
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType == 'C') {
+    FormManager.disable('cmrSearchBtn');
+    dojo.removeClass(dojo.byId('cmrSearchBtn'), 'ibm-btn-cancel-pri');
+    dojo.addClass(dojo.byId('cmrSearchBtn'), 'ibm-btn-cancel-disabled');
+    FormManager.disable('dnbSearchBtn');
+    dojo.removeClass(dojo.byId('dnbSearchBtn'), 'ibm-btn-cancel-pri');
+    dojo.addClass(dojo.byId('dnbSearchBtn'), 'ibm-btn-cancel-disabled');
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.BELUX = [ '624' ];
 
@@ -1231,4 +1266,6 @@ dojo.addOnLoad(function() {
   /* 1596058: All BeLux - DPL check failed */
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.BELUX, GEOHandler.ROLE_PROCESSOR, true);
 
+  GEOHandler.registerValidator(addCMRSearchValidator, GEOHandler.BELUX, null, true);
+  GEOHandler.addAfterConfig(disbleCreateByModel, GEOHandler.BELUX);
 });
