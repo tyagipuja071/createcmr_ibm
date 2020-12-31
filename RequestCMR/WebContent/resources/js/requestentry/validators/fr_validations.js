@@ -2473,9 +2473,31 @@ function showAffacturageOnReqReason() {
         FormManager.hide('dupCmrIndc', 'dupCmrIndc');
       }
     }
+    checkOrderBlk();
   });
   if (_reqReasonHandler && _reqReasonHandler[0]) {
     _reqReasonHandler[0].onChange();
+  }
+}
+
+function checkOrderBlk() {
+  var value = FormManager.getActualValue('reqReason');
+  if (value != 'TREC')
+    return;
+  var reqId = FormManager.getActualValue('reqId');
+  var ordBlk = FormManager.getActualValue('ordBlk');
+  var qParams = {
+    REQ_ID : reqId
+  };
+
+  var result = cmr.query('GET.DATA_RDC.EMBARGO_BY_REQID_SWISS', qParams);
+  if (result.ret1 == '88' && !ordBlk) {
+    // correct, no alert
+  } else {
+    FormManager.clearValue('reqReason');
+    cmr
+        .showAlert('This request reason can be chosen only if the CMR\'s Order Block is 88 and the new value on the request is blank.<br><br>Please set the value of Order Block to blank then choose the request reason again.');
+    return;
   }
 }
 
