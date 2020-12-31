@@ -2472,31 +2472,54 @@ function showAffacturageOnReqReason() {
         FormManager.hide('dupCmrIndc', 'dupCmrIndc');
       }
     }
+    checkOrderBlk();
   });
   if (_reqReasonHandler && _reqReasonHandler[0]) {
     _reqReasonHandler[0].onChange();
   }
 }
 
-/*function setAbbrevNameFrDSW() {
-  var _abbrevNmHandler = dojo.connect(FormManager.getField('abbrevNm'), 'onChange', function(value) {
-    var abbrNm = FormManager.getActualValue('abbrevNm').trim();
-    var requestingLob = FormManager.getActualValue('requestingLob');
-    if (requestingLob == 'DSW') {
-      if (abbrNm.endsWith("D3")) {
-        abbrNm.substring(0, abbrNm.length - 2).trim();
-      }
-      if (!abbrNm.includes(" DSW D3")) {
-        abbrNm = abbrNm.length > 15 ? abbrNm.substring(0, 15) : abbrNm;
-        FormManager.setValue('abbrevNm', abbrNm.concat(" DSW D3"));
-      }
-    }
-  });
-  if (_abbrevNmHandler && _abbrevNmHandler[0]) {
-    _abbrevNmHandler[0].onChange();
+function checkOrderBlk() {
+  var value = FormManager.getActualValue('reqReason');
+  if (value != 'TREC')
+    return;
+  var reqId = FormManager.getActualValue('reqId');
+  var ordBlk = FormManager.getActualValue('ordBlk');
+  var qParams = {
+    REQ_ID : reqId
+  };
+
+  var result = cmr.query('GET.DATA_RDC.EMBARGO_BY_REQID_SWISS', qParams);
+  if (result.ret1 == '88' && !ordBlk) {
+    // correct, no alert
+  } else {
+    FormManager.clearValue('reqReason');
+    cmr
+        .showAlert('This request reason can be chosen only if the CMR\'s Order Block is 88 and the new value on the request is blank.<br><br>Please set the value of Order Block to blank then choose the request reason again.');
+    return;
   }
 }
-*/
+
+// function setAbbrevNameFrDSW() {
+// var _abbrevNmHandler = dojo.connect(FormManager.getField('abbrevNm'),
+// 'onChange', function(value) {
+// var abbrNm = FormManager.getActualValue('abbrevNm').trim();
+// var requestingLob = FormManager.getActualValue('requestingLob');
+// if (requestingLob == 'DSW') {
+// if (abbrNm.endsWith("D3")) {
+// abbrNm.substring(0, abbrNm.length - 2).trim();
+// }
+// if (!abbrNm.includes(" DSW D3")) {
+// abbrNm = abbrNm.length > 15 ? abbrNm.substring(0, 15) : abbrNm;
+// FormManager.setValue('abbrevNm', abbrNm.concat(" DSW D3"));
+// }
+// }
+// });
+// if (_abbrevNmHandler && _abbrevNmHandler[0]) {
+// _abbrevNmHandler[0].onChange();
+// }
+// }
+
 function affacturageLogic() {
   var reqType = FormManager.getActualValue('reqType');
   var reqReason = FormManager.getActualValue('reqReason');
