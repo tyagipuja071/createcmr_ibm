@@ -73,7 +73,7 @@ public class FranceHandler extends GEOHandler {
 
   public static final String DUMMY_SIRET_ADDRESS = "ZSIR";
 
-  private static final List<String> ENABLE_MASSCHANGE_AUTO_TEMPLATE = Arrays.asList(SystemLocation.SWITZERLAND);
+  private static final List<String> ENABLE_MASSCHANGE_AUTO_TEMPLATE = Arrays.asList(SystemLocation.FRANCE);
   public static final String[] HRDWRE_MSTR_FLAG_ADDRS = { "ZI01", "ZS01", "ZS02" };
 
   @Override
@@ -1334,7 +1334,7 @@ public class FranceHandler extends GEOHandler {
                   error.addError(row.getRowNum(), "Landed Country", "The row " + row.getRowNum()
                       + ":Please input landed Country when postal code is filled. Please fix and upload the template again.<br>");
                   validations.add(error);
-                }else{
+                } else {
                   try {
                     ValidationResult validation = checkPostalCode(countryAddr.substring(0, 2), postCd);
                     if (!validation.isSuccess()) {
