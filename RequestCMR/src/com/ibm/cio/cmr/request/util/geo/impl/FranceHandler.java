@@ -51,6 +51,7 @@ import com.ibm.cmr.services.client.QueryClient;
 import com.ibm.cmr.services.client.ValidatorClient;
 import com.ibm.cmr.services.client.query.QueryRequest;
 import com.ibm.cmr.services.client.query.QueryResponse;
+import com.ibm.cmr.services.client.validator.PostalCodeValidateRequest;
 import com.ibm.cmr.services.client.validator.ValidationResult;
 import com.ibm.cmr.services.client.validator.VatValidateRequest;
 import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
@@ -1270,6 +1271,7 @@ public class FranceHandler extends GEOHandler {
             String cmrNo = ""; // 0
             String seqNo = "";// 1
             String postCd = "";// 7
+            String countryAddr = ""; // BillTo:10, other:9
             String vat = "";//
             currCell = (XSSFCell) row.getCell(0);
             cmrNo = validateColValFromCell(currCell);
@@ -1287,20 +1289,23 @@ public class FranceHandler extends GEOHandler {
             TemplateValidation error = new TemplateValidation(name);
 
             if ("Data".equals(name)) {
-              currCell = (XSSFCell) row.getCell(12);
-              vat = validateColValFromCell(currCell);
-              try{
-                if (!StringUtils.isBlank(vat)) {
-                  if (!validateVAT("FR", vat)) {
-                    LOG.trace("The row " + row.getRowNum() + ":VAT is not valid for the Country.");
-                    error.addError(row.getRowNum(), "VAT.", "The row " + row.getRowNum() + ":VAT is not valid for the Country.<br>");
-                    validations.add(error);
-                  }
-                }
-              } catch(Exception e){
-                LOG.error("Error occured on connecting VAT validation service.");
-                e.printStackTrace();
-              }
+              // currCell = (XSSFCell) row.getCell(12);
+              // vat = validateColValFromCell(currCell);
+              // try{
+              // if (!StringUtils.isBlank(vat)) {
+              // if (!validateVAT(country, vat)) {
+              // LOG.trace("The row " + row.getRowNum() + ":VAT is not valid for
+              // the Country.");
+              // error.addError(row.getRowNum(), "VAT.", "The row " +
+              // row.getRowNum() + ":VAT is not valid for the Country.<br>");
+              // validations.add(error);
+              // }
+              // }
+              // } catch(Exception e){
+              // LOG.error("Error occured on connecting VAT validation
+              // service.");
+              // e.printStackTrace();
+              // }
             }
 
             if (StringUtils.isEmpty(cmrNo)) {
@@ -1310,6 +1315,35 @@ public class FranceHandler extends GEOHandler {
               validations.add(error);
             }
             if (!"Data".equals(name)) {
+              currCell = (XSSFCell) row.getCell(7);
+              postCd = validateColValFromCell(currCell);
+              if (!StringUtils.isEmpty(postCd)) {
+                if ("Bill TO".equals(name)) {
+                  currCell = (XSSFCell) row.getCell(10);
+                } else {
+                  currCell = (XSSFCell) row.getCell(9);
+                }
+                countryAddr = validateColValFromCell(currCell);
+                if (StringUtils.isEmpty(countryAddr)) {
+                  LOG.trace("Please input landed Country when postal code is filled. Please fix and upload the template again.");
+                  error.addError(row.getRowNum(), "Landed Country", "The row " + row.getRowNum()
+                      + ":Please input landed Country when postal code is filled. Please fix and upload the template again.<br>");
+                  validations.add(error);
+                }else{
+                  try {
+                    ValidationResult validation = checkPostalCode(countryAddr.substring(0, 2), postCd);
+                    if (!validation.isSuccess()) {
+                      LOG.trace(validation.getErrorMessage());
+                      error.addError(row.getRowNum(), "Postal code.", "The row " + row.getRowNum() + ":" + validation.getErrorMessage() + "<br>");
+                      validations.add(error);
+                    }
+                  } catch (Exception e) {
+                    LOG.error("Error occured on connecting postal code validation service.");
+                    e.printStackTrace();
+                  }
+                }
+              }
+
               if (!StringUtils.isBlank(cmrNo) && StringUtils.isBlank(seqNo)) {
                 LOG.trace("Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
                 error.addError(row.getRowNum(), "Address Sequence No.", "The row " + row.getRowNum()
@@ -1320,6 +1354,28 @@ public class FranceHandler extends GEOHandler {
           }
         }
       }
+    }
+  }
+
+  private static ValidationResult checkPostalCode(String landedCountry, String postalCode) throws Exception {
+    String baseUrl = SystemConfiguration.getValue("CMR_SERVICES_URL");
+    String mandt = SystemConfiguration.getValue("MANDT");
+
+    PostalCodeValidateRequest zipRequest = new PostalCodeValidateRequest();
+    zipRequest.setMandt(mandt);
+    zipRequest.setPostalCode(postalCode);
+    zipRequest.setSysLoc("706");
+    zipRequest.setCountry(landedCountry);
+
+    LOG.debug("Validating Postal Code " + postalCode + " for landedCountry " + landedCountry + " (mandt: " + mandt + " sysloc: 706" + ")");
+
+    ValidatorClient client = CmrServicesFactory.getInstance().createClient(baseUrl, ValidatorClient.class);
+    try {
+      ValidationResult validation = client.executeAndWrap(ValidatorClient.POSTAL_CODE_APP_ID, zipRequest, ValidationResult.class);
+      return validation;
+    } catch (Exception e) {
+      LOG.error("Error in postal code validation", e);
+      return null;
     }
   }
 
