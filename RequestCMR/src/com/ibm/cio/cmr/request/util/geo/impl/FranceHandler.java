@@ -73,7 +73,7 @@ public class FranceHandler extends GEOHandler {
 
   public static final String DUMMY_SIRET_ADDRESS = "ZSIR";
 
-  private static final List<String> ENABLE_MASSCHANGE_AUTO_TEMPLATE = Arrays.asList(SystemLocation.SWITZERLAND);
+  private static final List<String> ENABLE_MASSCHANGE_AUTO_TEMPLATE = Arrays.asList(SystemLocation.FRANCE);
   public static final String[] HRDWRE_MSTR_FLAG_ADDRS = { "ZI01", "ZS01", "ZS02" };
 
   @Override
@@ -312,6 +312,7 @@ public class FranceHandler extends GEOHandler {
       query.setParameter("REQ_ID", reqId);
 
       List<Object[]> resultsCMR = query.getResults();
+      int maxSeq = 0;
       if (resultsCMR != null && resultsCMR.size() > 0) {
         boolean seqExistCMR = false;
         List<String> seqListCMR = new ArrayList<String>();
@@ -324,18 +325,18 @@ public class FranceHandler extends GEOHandler {
         }
         // Check if seq is already exist in create cmr
         seqExistCMR = seqListCMR.contains(Integer.toString(addrSeq));
-        if (seqExistCMR) {
-          // Get Max seq from create cmr
-          addrSeq = Integer.parseInt(seqListCMR.get(0));
-          for (int i = 0; i < seqListCMR.size(); i++) {
-            if (addrSeq < Integer.parseInt(seqListCMR.get(i))) {
-              addrSeq = Integer.parseInt(seqListCMR.get(i));
-            }
+        // Get Max seq from create cmr
+        maxSeq = Integer.parseInt(seqListCMR.get(0));
+        for (int i = 0; i < seqListCMR.size(); i++) {
+          if (maxSeq < Integer.parseInt(seqListCMR.get(i))) {
+            maxSeq = Integer.parseInt(seqListCMR.get(i));
           }
-          if (addrSeq < 5) {
+        }
+        if (seqExistCMR) {
+          if (maxSeq < 5) {
             addrSeq = 5;
           } else {
-            addrSeq = addrSeq + 1;
+            addrSeq = maxSeq + 1;
           }
         }
       }
@@ -355,7 +356,11 @@ public class FranceHandler extends GEOHandler {
             }
           }
           if (addrSeq < 5 && seqListRDC.contains(Integer.toString(addrSeq))) {
-            addrSeq = 5;
+            if (maxSeq < 5) {
+              addrSeq = 5;
+            } else {
+              addrSeq = maxSeq + 1;
+            }
           }
           while (seqListRDC.contains(Integer.toString(addrSeq))) {
             addrSeq++;
@@ -1329,7 +1334,7 @@ public class FranceHandler extends GEOHandler {
                   error.addError(row.getRowNum(), "Landed Country", "The row " + row.getRowNum()
                       + ":Please input landed Country when postal code is filled. Please fix and upload the template again.<br>");
                   validations.add(error);
-                }else{
+                } else {
                   try {
                     ValidationResult validation = checkPostalCode(countryAddr.substring(0, 2), postCd);
                     if (!validation.isSuccess()) {
