@@ -1127,7 +1127,7 @@ public class MaltaHandler extends BaseSOFHandler {
     // CMR-3171 - add ORB_BLK here
     fields.addAll(Arrays.asList("ABBREV_NM", "CLIENT_TIER", "CUST_CLASS", "CUST_PREF_LANG", "INAC_CD", "ISU_CD", "SEARCH_TERM", "ISIC_CD",
         "SUB_INDUSTRY_CD", "VAT", "COV_DESC", "COV_ID", "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC", "GEO_LOCATION_CD",
-        "DUNS_NO", "ORD_BLK"));
+        "DUNS_NO", "CUST_ACCT_TYP"));
     return fields;
   }
 
