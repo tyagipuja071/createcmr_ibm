@@ -253,7 +253,6 @@ public class FranceUtil extends AutomationUtil {
               && StringUtils.isNotBlank(customerNameZI01)) {
             details.append("Sold-to and Installing name are not same. Request will require CMDE review before proceeding.").append("\n");
             engineData.addNegativeCheckStatus("SOLDTO_INSTALL_DIFF", "Sold-to and Installing addresses are not same.");
-            return false;
           }
           if (zs01 != null) {
             // remove duplicate address
