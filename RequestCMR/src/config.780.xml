@@ -205,7 +205,7 @@
 					<width>18</width>
 					<length>10</length>
 				</column>
-				<column number="true">
+				<column >
 					<label>PO Box</label>
 					<dbColumn>PO_BOX</dbColumn>
 					<width>18</width>
