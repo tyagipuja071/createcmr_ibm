@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 import javax.persistence.EntityManager;
 
@@ -397,7 +399,13 @@ public class IERPProcessService extends BaseBatchService {
           actionRdc = "System Action:RDc Update";
           StringBuffer statusMessage = new StringBuffer();
           List<ProcessResponse> responses = null;
-          HashMap<String, Object> overallResponse = processUpdateRequest(admin, data, cmrServiceInput, em);
+          HashMap<String, Object> overallResponse = null;
+          if (!CmrConstants.DE_CND_ISSUING_COUNTRY_VAL.contains(data.getCmrIssuingCntry())
+              && !CNHandler.isCNIssuingCountry(data.getCmrIssuingCntry())) {
+            overallResponse = processUpdateRequestLegacyStyle(admin, data, cmrServiceInput, em);
+          } else {
+            overallResponse = processUpdateRequest(admin, data, cmrServiceInput, em);
+          }
           String rdcProcessingMessage = "";
           String wfHistCmt = "";
 
@@ -531,17 +539,22 @@ public class IERPProcessService extends BaseBatchService {
               && CmrConstants.ORDER_BLK_LIST.contains(rdcOrderBlk) && (dataOrderBlk == null || StringUtils.isBlank(dataOrderBlk))) {
             if (admin.getProcessedTs() == null || IERPRequestUtils.isTimeStampEquals(admin.getProcessedTs())) {
               firstRun = true;
-              overallResponse = processUpdateRequest(admin, data, cmrServiceInput, em);
+              overallResponse = processUpdateRequestLegacyStyle(admin, data, cmrServiceInput, em);
             } else {
               int noOFWorkingDays = 0;
-              if (admin.getReqStatus() != null && admin.getReqStatus().equals(CMR_REQUEST_STATUS_CPR)) {
+              if (admin.getReqStatus() != null && !CMR_REQUEST_STATUS_CPR.equals(admin.getReqStatus())
+                  && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason()) && (rdcOrderBlk != null && !StringUtils.isBlank(rdcOrderBlk))
+                  && CmrConstants.ORDER_BLK_LIST.contains(rdcOrderBlk) && (dataOrderBlk == null || StringUtils.isBlank(dataOrderBlk))) {
+                admin.setReqStatus(CMR_REQUEST_STATUS_CPR);
+              }
+              if (admin.getReqStatus() != null && CMR_REQUEST_STATUS_CPR.equals(admin.getReqStatus())) {
                 noOFWorkingDays = IERPRequestUtils.checked2WorkingDays(admin.getProcessedTs(), SystemUtil.getCurrentTimestamp());
               }
               if (noOFWorkingDays >= 3) {
                 createCommentLog(em, admin, "RDc processing has started. Waiting for completion.");
-                data.setOrdBlk(rdcOrderBlk);
+                data.setCustAcctType(rdcOrderBlk);
                 updateEntity(data, em);
-                overallResponse = processUpdateRequest(admin, data, cmrServiceInput, em);
+                overallResponse = processUpdateRequestLegacyStyle(admin, data, cmrServiceInput, em);
               }
             }
           }
@@ -636,7 +649,7 @@ public class IERPProcessService extends BaseBatchService {
               admin.setProcessedFlag("E");
               if (firstRun) {
                 // revert as rdc run has resulted into error
-                data.setOrdBlk("");
+                data.setCustAcctType("");
                 updateEntity(data, em);
               }
             }
@@ -680,7 +693,7 @@ public class IERPProcessService extends BaseBatchService {
             // if overallResponse is not null
           } else if (overallResponse == null && firstRun) {
             // revert as rdc run has resulted into error
-            data.setOrdBlk("");
+            data.setCustAcctType("");
             updateEntity(data, em);
           }
 
@@ -1267,5 +1280,131 @@ public class IERPProcessService extends BaseBatchService {
   @Override
   protected boolean useServicesConnections() {
     return true;
+  }
+
+  public HashMap<String, Object> processUpdateRequestLegacyStyle(Admin admin, Data data, CmrServiceInput cmrServiceInput, EntityManager em)
+      throws Exception {
+
+    HashMap<String, Object> overallResponse = new HashMap<String, Object>();
+    List<ProcessResponse> responses = new ArrayList<ProcessResponse>();
+    List<String> respStatuses = new ArrayList<String>();
+    ProcessResponse response = null;
+    String siteIds = "";
+    ProcessRequest request = new ProcessRequest();
+    request.setCmrNo(cmrServiceInput.getInputCmrNo());
+    request.setMandt(cmrServiceInput.getInputMandt());
+    request.setReqId(cmrServiceInput.getInputReqId());
+    request.setReqType(cmrServiceInput.getInputReqType());
+    request.setUserId(cmrServiceInput.getInputUserId());
+    boolean isIndexNotUpdated = false;
+    boolean isSeqNoRequired = false;
+    boolean handleTempReact = false;
+    boolean processTempReact = false;
+    GEOHandler cntryHandler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
+    if (!CmrConstants.DE_CND_ISSUING_COUNTRY_VAL.contains(data.getCmrIssuingCntry()) && !CNHandler.isCNIssuingCountry(data.getCmrIssuingCntry())) {
+      isSeqNoRequired = true;
+      handleTempReact = true;
+    }
+    try {
+      String sql = ExternalizedQuery.getSql("BATCH.GET_UPDATED_ADDR_FOR_UPDATE_ORDERED");
+      // if there is a handler, order the addresses correctly
+      if (cntryHandler != null && cntryHandler.getAddressOrder() != null) {
+        String[] order = cntryHandler.getAddressOrder();
+        StringBuilder types = new StringBuilder();
+        if (order != null && order.length > 0) {
+          for (String type : order) {
+            LOG.trace("Looking for Address Types " + type);
+            types.append(types.length() > 0 ? ", " : "");
+            types.append("'" + type + "'");
+          }
+        }
+
+        if (types.length() > 0) {
+          sql += " and ADDR_TYPE in ( " + types.toString() + ") ";
+        }
+        StringBuilder orderBy = new StringBuilder();
+        int orderIndex = 0;
+        for (String type : order) {
+          orderBy.append(" when ADDR_TYPE = '").append(type).append("' then ").append(orderIndex);
+          orderIndex++;
+        }
+        orderBy.append(" else 25 end, ADDR_TYPE, case when IMPORT_IND = 'Y' then 0 else 1 end, ADDR_SEQ ");
+        sql += " order by case " + orderBy.toString();
+      }
+
+      PreparedQuery query = new PreparedQuery(em, sql);
+      query.setParameter("REQ_ID", admin.getId().getReqId());
+      List<Addr> addresses = query.getResults(Addr.class);
+      // List<Addr> notProcessed = new ArrayList<Addr>();
+      Queue<Addr> notProcessed = new LinkedList<>();
+
+      DataRdc dataRdc = getDataRdcRecords(em, data);
+      boolean isDataUpdated = false;
+      isDataUpdated = cntryHandler.isDataUpdate(data, dataRdc, data.getCmrIssuingCntry());
+
+      // 3. Check if there are customer and IBM changes, propagate to other
+      // addresses
+
+      if (handleTempReact && CMR_REQUEST_STATUS_CPR.equals(admin.getReqStatus())) {
+        processTempReact = true;
+      }
+
+      if ((isDataUpdated && (addresses != null && addresses.size() > 0)) || processTempReact) {
+        LOG.debug("Processing CMR Data changes to " + addresses.size() + " addresses of CMR# " + data.getCmrNo());
+        for (Addr addr : addresses) {
+          response = sendAddrForProcessing(addr, request, responses, isIndexNotUpdated, siteIds, em, isSeqNoRequired);
+          respStatuses.add(response.getStatus());
+        }
+      }
+
+      if (!isDataUpdated && addresses != null && addresses.size() > 0) {
+        for (Addr addr : addresses) {
+          if ("Y".equals(addr.getImportInd())) {
+            AddrRdc addrRdc = getAddrRdcRecords(em, addr);
+            boolean isAddrUpdated = false;
+            isAddrUpdated = RequestUtils.isUpdated(addr, addrRdc, data.getCmrIssuingCntry());
+            if (isAddrUpdated) {
+              response = sendAddrForProcessing(addr, request, responses, isIndexNotUpdated, siteIds, em, isSeqNoRequired);
+              respStatuses.add(response.getStatus());
+            } else {
+              notProcessed.add(addr);
+            }
+          } else {
+            response = sendAddrForProcessing(addr, request, responses, isIndexNotUpdated, siteIds, em, isSeqNoRequired);
+            respStatuses.add(response.getStatus());
+          }
+        }
+      }
+
+      if (respStatuses.size() > 0) {
+        if (respStatuses.contains(CmrConstants.RDC_STATUS_ABORTED)) {
+          if (isIndexNotUpdated) {
+            overallResponse.put("overallStatus", CmrConstants.RDC_STATUS_COMPLETED);
+          } else {
+            overallResponse.put("overallStatus", CmrConstants.RDC_STATUS_ABORTED);
+          }
+        } else if (respStatuses.contains(CmrConstants.RDC_STATUS_NOT_COMPLETED)) {
+          overallResponse.put("overallStatus", CmrConstants.RDC_STATUS_NOT_COMPLETED);
+        } else if (respStatuses.contains(CmrConstants.RDC_STATUS_COMPLETED)) {
+          overallResponse.put("overallStatus", CmrConstants.RDC_STATUS_COMPLETED);
+        }
+      } else {
+        LOG.error("Response statuses is empty for request ID: " + admin.getId().getReqId());
+        ProcessResponse customResponse = new ProcessResponse();
+        responses = new ArrayList<ProcessResponse>();
+        customResponse.setMessage("No data was updated on RDc for this request. Please contact Ops for assistance.");
+        responses.add(customResponse);
+        overallResponse.put("overallStatus", CmrConstants.RDC_STATUS_ABORTED);
+      }
+
+      overallResponse.put("siteIds", siteIds);
+      overallResponse.put("responses", responses);
+
+    } catch (Exception e) {
+      LOG.error("Error in processing Update Request " + admin.getId().getReqId(), e);
+      addError("Update Request " + admin.getId().getReqId() + " Error: " + e.getMessage());
+    }
+
+    return overallResponse;
   }
 }
