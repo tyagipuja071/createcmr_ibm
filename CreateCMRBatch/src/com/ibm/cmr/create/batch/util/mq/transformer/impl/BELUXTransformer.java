@@ -185,31 +185,50 @@ public class BELUXTransformer extends EMEATransformer {
     messageHash.remove(addrKey + "POBox");
 
     LOG.debug("Handling  Data for " + addrData.getCustNm1());
-    // <XXXAddress1> -> name
-    // <XXXAddress2> -> name 2,
-    // <XXXAddress3> -> street
-    // <XXXAddress4> -> Street con't
-    // <XXXAddress5> -> District + Postal code + City
+    // <XXXAddress1> -> Customer Name
+    // <XXXAddress2> -> Name Con't
+    // <XXXAddress3> -> Title/A and First name/c and Last name
+    // <XXXAddress4> -> Street/F and Street number/G or PO BOX
+    // <XXXAddress5> -> Postal Code/H and City/I
     // <XXXAddress6> -> Country
 
     // customer name
     String line1 = addrData.getCustNm1();
 
     // name 2, as nickname
-    String line2 = addrData.getCustNm2();
+    String line2 = "";
+    if (!StringUtils.isBlank(addrData.getCustNm2())) {
+      line2 += (line2.length() > 0 ? " " : "") + addrData.getCustNm2();
+    }
 
-    // Street
-    String line3 = addrData.getAddrTxt();
+    // Title/A and First name/c and Last name/B
+    String line3 = "";
+    if (!StringUtils.isBlank(addrData.getDept())) {
+      line3 += (line3.length() > 0 ? " " : "") + addrData.getDept();
+    }
+    if (!StringUtils.isBlank(addrData.getCustNm3())) {
+      line3 += (line3.length() > 0 ? " " : "") + addrData.getCustNm3();
+    }
+    if (!StringUtils.isBlank(addrData.getCustNm4())) {
+      line3 += (line3.length() > 0 ? " " : "") + addrData.getCustNm4();
+    }
 
-    // Street Con't
-    String line4 = addrData.getAddrTxt2();
-
-    // district + postal code + city
+    // Street/F and Street number/G or PO BOX/J
+    String line4 = "";
+    if (!StringUtils.isBlank(addrData.getAddrTxt())) {
+      line4 += (line4.length() > 0 ? " " : "") + addrData.getAddrTxt();
+    }
+    if (!StringUtils.isBlank(addrData.getAddrTxt2())) {
+      line4 += (line4.length() > 0 ? " " : "") + addrData.getAddrTxt2();
+    }
+    if (line4.length() == 0) {
+      if (!StringUtils.isBlank(addrData.getPoBox())) {
+        line4 += (line4.length() > 0 ? " " : "") + addrData.getPoBox();
+      }
+    }
+    // Postal Code/H and City/I
     String line5 = "";
 
-    if (!StringUtils.isBlank(addrData.getDept())) {
-      line5 += (line5.length() > 0 ? " " : "") + addrData.getDept();
-    }
     if (!StringUtils.isBlank(addrData.getPostCd())) {
       line5 += (line5.length() > 0 ? " " : "") + addrData.getPostCd();
     }
@@ -534,15 +553,18 @@ public class BELUXTransformer extends EMEATransformer {
     String addrType = addrData.getId().getAddrType();
     String phone = "";
     String addrLineT = "";
-
+    String nameCont = addrData.getCustNm2();
+    String title = addrData.getDept();
+    String firstName = addrData.getCustNm3();
+    String lastName = addrData.getCustNm4();
     LOG.trace("Handling " + (update ? "update" : "create") + " request.");
 
     // line1
     line1 = addrData.getCustNm1();
 
-    if (!StringUtils.isBlank(addrData.getCustNm2())) {
-      line2 = addrData.getCustNm2();
-    } else {
+    if (!StringUtils.isBlank(nameCont)) {
+      line2 = nameCont;
+    } else if (StringUtils.isBlank(nameCont)) {
       line2 = "";
     }
 
@@ -1594,9 +1616,7 @@ public class BELUXTransformer extends EMEATransformer {
 
   @Override
   public boolean hasCmrtCustExt() {
-    if ("BH".equals(DEFAULT_LANDED_COUNTRY) || "MA".equals(DEFAULT_LANDED_COUNTRY) || "AE".equals(DEFAULT_LANDED_COUNTRY)
-        || "KW".equals(DEFAULT_LANDED_COUNTRY) || "OM".equals(DEFAULT_LANDED_COUNTRY) || "QA".equals(DEFAULT_LANDED_COUNTRY)
-        || "SA".equals(DEFAULT_LANDED_COUNTRY) || "GC".equals(DEFAULT_LANDED_COUNTRY)) {
+    if ("BE".equals(DEFAULT_LANDED_COUNTRY) || "NL".equals(DEFAULT_LANDED_COUNTRY) || "LU".equals(DEFAULT_LANDED_COUNTRY)) {
       return true;
     } else {
       return false;
