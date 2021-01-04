@@ -216,14 +216,6 @@ public class FranceUtil extends AutomationUtil {
           && !SCENARIO_CROSSBORDER_COMMERCIAL.equals(scenario)) {
         engineData.addNegativeCheckStatus("DISABLEDAUTOPROC",
             "Requests for " + scenarioDesc + " cannot be processed automatically. Manual processing would be required.");
-        if (SCENARIO_INTERNAL_SO.equals(scenario) || SCENARIO_THIRD_PARTY.equals(scenario) || SCENARIO_CROSSBORDER_INTERNAL_SO.equals(scenario)
-                || SCENARIO_CROSSBORDER_THIRD_PARTY.equals(scenario)) {
-        	if(zi01 == null) {
-        		 details.append("Install-at address should be present for" + scenarioDesc ).append("\n");
-                 engineData.addRejectionComment("OTH", "Install-at address should be present for" + scenarioDesc , "", "");
-                 return false;
-        	}
-        }
       } else {
         switch (scenario) {
         case SCENARIO_CROSSBORDER_PRIVATE_PERSON:
@@ -273,8 +265,20 @@ public class FranceUtil extends AutomationUtil {
         case SCENARIO_BUSINESS_PARTNER:
         case SCENARIO_CROSSBORDER_BUSINESS_PARTNER:
           return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
+        case SCENARIO_INTERNAL_SO:
+        case SCENARIO_CROSSBORDER_INTERNAL_SO:
+        	 if(zi01 == null) {
+           	  details.append("Install-at address should be present for Interna SO Scenario." ).append("\n");
+                 engineData.addRejectionComment("OTH", "Install-at address should be present for Internal SO Scenario." , "", "");
+                 return false;  
+             }
         case SCENARIO_CROSSBORDER_THIRD_PARTY:
         case SCENARIO_THIRD_PARTY:
+          if(zi01 == null) {
+        	  details.append("Install-at address should be present for Third party Scenario." ).append("\n");
+              engineData.addRejectionComment("OTH", "Install-at address should be present for Third Party Scenario." , "", "");
+              return false;  
+          }
           if (customerName.toUpperCase().equals(customerNameZI01.toUpperCase()) && StringUtils.isNotBlank(customerName)
               && StringUtils.isNotBlank(customerNameZI01)) {
             details.append("Customer Names on Sold-to and Install-at address should be different for Third Party Scenario").append("\n");
