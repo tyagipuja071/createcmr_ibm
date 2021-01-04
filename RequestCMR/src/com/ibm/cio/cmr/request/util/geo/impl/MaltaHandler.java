@@ -64,6 +64,8 @@ public class MaltaHandler extends BaseSOFHandler {
       "CustClassCode", "LocalTax2", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office", "Floor", "Building", "County",
       "City2", "Department", "CustomerName4" };
 
+  protected static final String[] ADDRESS_ORDER = { "ZS01", "ZP01", "ZI01", "ZD01" };
+
   @Override
   protected void handleSOFConvertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry,
       FindCMRRecordModel mainRecord, List<FindCMRRecordModel> converted, ImportCMRModel searchModel) throws Exception {
@@ -1203,6 +1205,11 @@ public class MaltaHandler extends BaseSOFHandler {
     map.put("##RequestType", "reqType");
     map.put("##CustomerScenarioSubType", "custSubGrp");
     return map;
+  }
+
+  @Override
+  public String[] getAddressOrder() {
+    return ADDRESS_ORDER;
   }
 
 }
