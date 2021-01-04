@@ -200,6 +200,10 @@ public class FranceHandler extends GEOHandler {
     String datlt = query.getSingleResult(String.class);
     data.setAbbrevLocn(datlt);
     LOG.trace("Abbrev Loc: " + data.getAbbrevLocn());
+    // CMR-221
+    String search_term = data.getSearchTerm();
+    data.setSalesBusOffCd(search_term);
+    LOG.trace("SORTL: " + data.getSalesBusOffCd());
   }
 
   @Override
