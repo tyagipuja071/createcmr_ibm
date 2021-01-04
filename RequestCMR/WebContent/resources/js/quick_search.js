@@ -164,6 +164,8 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
     FormManager.setValue('streetAddress2', '');
     FormManager.setValue('postCd', '');
     FormManager.setValue('vat', '');
+    $scope.records = [];
+    $scope.searched = false;
   };
 
   $scope.confirmImport = function(rec, update) {
@@ -180,6 +182,41 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
   $scope.importRecord = function(rec, update) {
     var temp = JSON.stringify($scope.frozen);
     var model = JSON.parse(temp);
+
+    if (update){
+      var cmrNo = model.cmrNo;
+      var country = model.issuingCntry;
+      var q = cmr.query('QUICKSEARCH.ASYNC.CHECK', {MANDT : cmr.MANDT, CNTRY : country, CMR_NO : cmrNo});
+      if (q && !isNaN(q.ret1) && Number(q.ret1) > 100){
+        if (confirm('This CMR has more than 100 addresses. Do you want to create this request in the background to assure all information are loaded properly on the request?')){
+          dojo.xhrPost({
+            url : cmr.CONTEXT_ROOT + '/quick_search/async.json',
+            handleAs : 'json',
+            method : 'POST',
+            content : model,
+            timeout : 3 * 60000,
+            sync : false,
+            load : function(data, ioargs) {
+              console.log(data);
+              if (data && data.success) {
+                cmr.showAlert('Request has been queued for creation successfully. You will be notified via mail once the request is created.', null, null, true);
+                $scope.clearCriteria();
+              } else {
+                cmr.showAlert('An unexpected error occurred during the processing, pls try again later.');
+              }
+            },
+            error : function(error, ioargs) {
+              cmr.hideProgress();
+              $scope.searched = false;
+              console.log('error');
+              console.log(error);
+              cmr.showAlert('An unexpected error occurred during the processing, pls try again later.');
+            }
+          });
+          return;
+        }  
+      } 
+    }
     model.subRegion = $scope.getSubRegion(model.issuingCntry, model.countryCd && model.countryCd.length == 2 ? model.countryCd : $scope.frozen.countryCd);
     model.reqType = update ? 'U' : 'C';
     model.hasCmr = false;

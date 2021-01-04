@@ -28,6 +28,7 @@ import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.service.QuickSearchService;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.CompanyFinder;
+import com.ibm.cio.cmr.request.util.async.AsyncRequestCreator;
 import com.ibm.cmr.services.client.dnb.DnbData;
 
 /**
@@ -114,6 +115,25 @@ public class QuickSearchController extends BaseController {
         map.addAttribute("success", false);
         map.addAttribute("msg", "An unexpected error occured. Please try again later.");
       }
+    } catch (Exception e) {
+      LOG.error("An error was encountered in processing the request creation", e);
+      map.addAttribute("success", false);
+      map.addAttribute("msg", e.getMessage());
+    }
+    return map;
+  }
+
+  @RequestMapping(value = "/quick_search/async")
+  public @ResponseBody ModelMap processRequestAsync(HttpServletRequest request, CompanyRecordModel company) throws Exception {
+    ModelMap map = new ModelMap();
+
+    try {
+      AppUser user = AppUser.getUser(request);
+      AsyncRequestCreator async = new AsyncRequestCreator(user, company.getIssuingCntry(), company.getCmrNo());
+      Thread t = new Thread(async);
+      t.start();
+      map.addAttribute("success", true);
+      map.addAttribute("msg", null);
     } catch (Exception e) {
       LOG.error("An error was encountered in processing the request creation", e);
       map.addAttribute("success", false);
