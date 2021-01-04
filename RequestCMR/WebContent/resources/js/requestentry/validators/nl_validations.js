@@ -343,7 +343,7 @@ function setBOTeamValues(clientTier) {
           FormManager.readOnly('engineeringBo');
           FormManager.readOnly('economicCd');
         } else if (custSubScnrio == 'PUBCU' && role != 'PROCESSOR') {
-          FormManager.readOnly('economicCd');
+          FormManager.enable('economicCd');
         } else {
           FormManager.enable('engineeringBo');
           if (custSubScnrio != 'CBBUS' && role != 'REQUESTER')
