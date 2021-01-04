@@ -482,6 +482,8 @@ public class BELUXTransformer extends EMEATransformer {
       return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
     case MQMsgConstants.ADDR_ZI01:
       return MQMsgConstants.SOF_ADDRESS_USE_EPL;
+    case MQMsgConstants.ADDR_ZS02:
+      return MQMsgConstants.SOF_ADDRESS_USE_MAILING;
     default:
       return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
     }
@@ -497,6 +499,8 @@ public class BELUXTransformer extends EMEATransformer {
       return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
     case MQMsgConstants.ADDR_ZI01:
       return MQMsgConstants.SOF_ADDRESS_USE_EPL;
+    case MQMsgConstants.ADDR_ZS02:
+      return MQMsgConstants.SOF_ADDRESS_USE_MAILING;
     default:
       return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
     }
@@ -618,7 +622,7 @@ public class BELUXTransformer extends EMEATransformer {
     legacyAddr.setCity(addrData.getCity1() == null ? "" : addrData.getCity1());
     legacyAddr.setZipCode(addrData.getPostCd() == null ? "" : addrData.getPostCd());
     legacyAddr.setAddrLine6(line6);
-    legacyAddr.setStreet(line4);
+    legacyAddr.setStreet(addrData.getAddrTxt() == null ? "" : addrData.getAddrTxt());
     legacyAddr.setStreetNo(addrData.getAddrTxt2() == null ? "" : addrData.getAddrTxt2());
     legacyAddr.setAddrPhone(phone);
     legacyAddr.setAddrLineT(addrLineT);
