@@ -128,6 +128,11 @@ function afterConfigForFR() {
     setFieldsRequiredForCreateRequester();
     setClassificationCode();
     setTaxCd();
+    if (FormManager.getActualValue('custSubGrp') == 'HOSTC' || FormManager.getActualValue('custSubGrp') == 'CBSTC') {
+      updateAbbrNameWithZS01_ZI01();
+    } else {
+      updateAbbrNameWithZS01();
+    }
   });
   if (_custSubGrpHandler && _custSubGrpHandler[0]) {
     _custSubGrpHandler[0].onChange();
@@ -1331,7 +1336,6 @@ function setAbbrevNmLocnOnAddressSave(cntry, addressMode, saving, finalSave, for
       add32SBODependcyOnPostCdOnAddrSave();
       addVATScenarioOnAddrSave();
       setTaxCdOnAddrSave();
-      updateAbbrNameWithZS01();
     }
   }
 }
@@ -1371,10 +1375,71 @@ function updateAbbrNameWithZS01() {
     if (newAddrName1 != null && newAddrName1.length > 22) {
       newAddrName1 = newAddrName1.substr(0, 22);
     }
-    if (newAddrName1 == undefined) {
-      FormManager.setValue('abbrevNm', '');
-    } else {
+    if (newAddrName1 != undefined && newAddrName1 != null && newAddrName1 != '') {
       FormManager.setValue('abbrevNm', newAddrName1);
+    } else if (oldAddrName != null && oldAddrName != undefined && oldAddrName != '') {
+      FormManager.setValue('abbrevNm', oldAddrName.substr(0, 22));
+    }
+  }
+}
+
+function updateAbbrNameWithZS01_ZI01() {
+  if (cmr.currentRequestType == 'U') {
+    return;
+  }
+  var reqType = FormManager.getActualValue('reqType');
+  var abbrName = FormManager.getActualValue("abbrevNm");
+  var newAddrName1 = FormManager.getActualValue("custNm1");
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var reqId = FormManager.getActualValue('reqId');
+
+  if ('PROCESSOR' == role) {
+    var qParams = {
+      REQ_ID : reqId,
+    };
+    var result = cmr.query('DATA.GET.ABBREV_NM.BY_REQID', qParams);
+    var oldAbbrName = result.ret1;
+
+    if (abbrName != oldAbbrName) {
+      return;
+    }
+  }
+
+  var qPZs01 = {
+    REQ_ID : reqId,
+    ADDR_TYPE : "ZS01",
+  };
+  var qPZi01 = {
+    REQ_ID : reqId,
+    ADDR_TYPE : "ZI01",
+  };
+  var oldAddrName = null;
+  var resultzs01 = cmr.query('ADDR.GET.CUSTNM1.BY_REQID_ADDRTYP', qPZs01);
+  var resultzi01 = cmr.query('ADDR.GET.CUSTNM1.BY_REQID_ADDRTYP', qPZi01);
+
+  var zs01Nm = (resultzs01.ret1 != null && resultzs01.ret1 != undefined) ? resultzs01.ret1 : "";
+  var zi01Nm = (resultzi01.ret1 != null && resultzi01.ret1 != undefined) ? resultzi01.ret1 : "";
+
+  if (zi01Nm != "") {
+    var offset = 0;
+    if (zs01Nm.length < 11) {
+      offset = 11 - zs01Nm.length;
+    }
+    var zs01NmTrim = zs01Nm.length > 11 ? zs01Nm.substring(0, 11) : zs01Nm;
+    var zi01NmTrim = zi01Nm.length > (offset + 10) ? zi01Nm.substring(0, offset + 10) : zi01Nm;
+    oldAddrName = zs01NmTrim + '/' + zi01NmTrim;
+  } else {
+    oldAddrName = zs01Nm;
+  }
+
+  if (oldAddrName != newAddrName1) {
+    if (newAddrName1 != null && newAddrName1.length > 22) {
+      newAddrName1 = newAddrName1.substr(0, 22);
+    }
+    if (newAddrName1 != undefined && newAddrName1 != "" && newAddrName1 != null) {
+      FormManager.setValue('abbrevNm', newAddrName1);
+    } else if(oldAddrName != null && oldAddrName != undefined && oldAddrName != ''){
+      FormManager.setValue('abbrevNm', oldAddrName.substr(0, 22));
     }
   }
 }
