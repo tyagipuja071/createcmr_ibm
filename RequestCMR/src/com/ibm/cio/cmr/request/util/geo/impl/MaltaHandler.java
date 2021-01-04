@@ -1032,6 +1032,33 @@ public class MaltaHandler extends BaseSOFHandler {
                   // validations.add(error);
                 }
 
+                if (!StringUtils.isBlank(cmrNo) && !StringUtils.isBlank(seqNo)) {
+                  if (StringUtils.isBlank(custName1)) {
+                    LOG.trace("Customer Name is mandatory");
+                    error.addError(row.getRowNum(), rowNumber + "Customer Name", "Customer Name is mandatory.");
+                  }
+
+                  if (StringUtils.isBlank(street)) {
+                    LOG.trace("Street is mandatory");
+                    error.addError(row.getRowNum(), rowNumber + "Street", "Street is mandatory.");
+                  }
+
+                  if (StringUtils.isBlank(city)) {
+                    LOG.trace("City is mandatory");
+                    error.addError(row.getRowNum(), rowNumber + "City", "City is mandatory.");
+                  }
+
+                  if (StringUtils.isBlank(landCntry)) {
+                    LOG.trace("Landed Country is mandatory");
+                    error.addError(row.getRowNum(), rowNumber + "Landed Country", "Landed Country is mandatory.");
+                  }
+
+                  if (StringUtils.isBlank(postalCode)) {
+                    LOG.trace("Postal code is mandatory.");
+                    error.addError(row.getRowNum(), rowNumber + "Postal Code", "Postal code is mandatory.");
+                  }
+                }
+
                 if (!StringUtils.isBlank(city) && !StringUtils.isBlank(postalCode)) {
                   int count = city.length() + postalCode.length();
                   if (count > 28) {
