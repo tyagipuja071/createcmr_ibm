@@ -1299,10 +1299,11 @@ public class FranceHandler extends GEOHandler {
               // try{
               // if (!StringUtils.isBlank(vat)) {
               // if (!validateVAT(country, vat)) {
-              // LOG.trace("The row " + row.getRowNum() + ":VAT is not valid for
+              // LOG.trace("The row " + row.getRowNum()+1 + ":VAT is not valid
+              // for
               // the Country.");
-              // error.addError(row.getRowNum(), "VAT.", "The row " +
-              // row.getRowNum() + ":VAT is not valid for the Country.<br>");
+              // error.addError(row.getRowNum()+1, "VAT.", "The row " +
+              // row.getRowNum()+1 + ":VAT is not valid for the Country.<br>");
               // validations.add(error);
               // }
               // }
@@ -1314,9 +1315,9 @@ public class FranceHandler extends GEOHandler {
             }
 
             if (StringUtils.isEmpty(cmrNo)) {
-              LOG.trace("The row " + row.getRowNum() + ":Note that CMR No. is mandatory. Please fix and upload the template again.");
+              LOG.trace("The row " + row.getRowNum() + 1 + ":Note that CMR No. is mandatory. Please fix and upload the template again.");
               error.addError(row.getRowNum(), "CMR No.",
-                  "The row " + row.getRowNum() + ":Note that CMR No. is mandatory. Please fix and upload the template again.<br>");
+                  "The row " + row.getRowNum() + 1 + ":Note that CMR No. is mandatory. Please fix and upload the template again.<br>");
               validations.add(error);
             }
             if (!"Data".equals(name)) {
@@ -1331,7 +1332,7 @@ public class FranceHandler extends GEOHandler {
                 countryAddr = validateColValFromCell(currCell);
                 if (StringUtils.isEmpty(countryAddr)) {
                   LOG.trace("Please input landed Country when postal code is filled. Please fix and upload the template again.");
-                  error.addError(row.getRowNum(), "Landed Country", "The row " + row.getRowNum()
+                  error.addError(row.getRowNum() + 1, "Landed Country", "The row " + row.getRowNum() + 1
                       + ":Please input landed Country when postal code is filled. Please fix and upload the template again.<br>");
                   validations.add(error);
                 } else {
@@ -1339,7 +1340,8 @@ public class FranceHandler extends GEOHandler {
                     ValidationResult validation = checkPostalCode(countryAddr.substring(0, 2), postCd);
                     if (!validation.isSuccess()) {
                       LOG.trace(validation.getErrorMessage());
-                      error.addError(row.getRowNum(), "Postal code.", "The row " + row.getRowNum() + ":" + validation.getErrorMessage() + "<br>");
+                      error.addError(row.getRowNum() + 1, "Postal code.",
+                          "The row " + row.getRowNum() + 1 + ":" + validation.getErrorMessage() + "<br>");
                       validations.add(error);
                     }
                   } catch (Exception e) {
