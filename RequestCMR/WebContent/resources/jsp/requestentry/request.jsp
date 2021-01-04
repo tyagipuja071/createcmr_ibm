@@ -276,6 +276,8 @@ div#cmr-info-box, div#cmr-error-box, div#cmr-validation-box {
     <cmr:modelAction formName="frmCMR" />
     <form:hidden path="fromUrl" id="fromUrl" />
     <form:hidden path="userRole" />
+    <form:hidden id="overallStatus" path="overallStatus" />
+    <form:hidden id="lockByNm" path="lockByNm" />
     <form:hidden path="claimRole" />
     <form:hidden path="redirectUrl" />
     <form:hidden path="saveRejectScore" />
