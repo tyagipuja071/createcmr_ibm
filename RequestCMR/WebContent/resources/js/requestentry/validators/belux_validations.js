@@ -395,30 +395,20 @@ function setAccountTeamNumberValues(clientTier) {
   var geoCd = FormManager.getActualValue('countryUse').substring(3, 5);
 
   var accountTeamNumber = [];
-  var selectedAaccountTeamNumber = [];
   if (isuCd != '') {
     var isuCtc = isuCd + clientTier;
     var qParams = null;
-    var qSelectedParams = null;
     var results = null;
-    var selectedResult = null;
 
     // Account Team Number will be based on IMS for 32S
     if (ims != '' && ims.length > 1 && (isuCtc == '32S')) {
       qParams = {
         _qall : 'Y',
         ISSUING_CNTRY : cntry + geoCd,
-        ISU : '%' + isuCd + clientTier + '%'
-      // CLIENT_TIER : '%' + ims.substring(0, 1) + '%'
-      };
-      results = cmr.query('GET.SRLIST.BYISU', qParams);
-      qSelectedParams = {
-        _qall : 'Y',
-        ISSUING_CNTRY : cntry + geoCd,
         ISU : '%' + isuCd + clientTier + '%',
         CLIENT_TIER : '%' + ims.substring(0, 1) + '%'
       };
-      selectedResult = cmr.query('GET.SRLIST.BYISUCTC', qSelectedParams);
+      results = cmr.query('GET.SRLIST.BYISUCTC', qParams);
     } else {
       qParams = {
         _qall : 'Y',
@@ -426,71 +416,16 @@ function setAccountTeamNumberValues(clientTier) {
         ISU : '%' + isuCd + clientTier + '%'
       };
       results = cmr.query('GET.SRLIST.BYISU', qParams);
-      selectedResult = results;
     }
 
-    // if (ims != '' && ims.length > 1 && (isuCtc == '32S')) {
-    // qParams = {
-    // _qall : 'Y',
-    // ISSUING_CNTRY : cntry + geoCd,
-    // ISU : '%' + isuCd + clientTier + '%',
-    // CLIENT_TIER : '%' + ims.substring(0, 1) + '%'
-    // };
-    // selectedResult = cmr.query('GET.SRLIST.BYISUCTC', qParams);
-    // }
-
-    if (results != null || selectedResult != null) {
-      if (results != null) {
-        for (var i = 0; i < results.length; i++) {
-          accountTeamNumber.push(results[i].ret1);
-        }
-      }
-      if (selectedResult != null) {
-        for (var i = 0; i < selectedResult.length; i++) {
-          selectedAaccountTeamNumber.push(selectedResult[i].ret1);
-        }
+    if (results != null) {
+      for (var i = 0; i < results.length; i++) {
+        accountTeamNumber.push(results[i].ret1);
       }
       FormManager.limitDropdownValues(FormManager.getField('searchTerm'), accountTeamNumber);
       if (accountTeamNumber.length == 1) {
         FormManager.setValue('searchTerm', accountTeamNumber[0]);
       }
-
-      // 2020-09-17 CMR-4992
-      console.log('custSubGrp==' + FormManager.getActualValue('custSubGrp'));
-      console.log('pagemodel custSubGrp==' + _pagemodel.custSubGrp);
-      console.log('subIndustryCd==' + FormManager.getActualValue('subIndustryCd'));
-      console.log('pagemodel subIndustryCd==' + _pagemodel.subIndustryCd);
-
-      if (FormManager.getActualValue('custSubGrp') != '' && FormManager.getActualValue('custSubGrp') != null && FormManager.getActualValue('custSubGrp') != _pagemodel.custSubGrp
-          || (FormManager.getActualValue('custSubGrp') == _pagemodel.custSubGrp && FormManager.getActualValue('subIndustryCd') != _pagemodel.subIndustryCd)) {
-        var custSubGrp = FormManager.getActualValue('custSubGrp');
-        if (custSubGrp != 'BEBUS' && custSubGrp != 'CBBUS') {
-          FormManager.setValue('searchTerm', selectedAaccountTeamNumber[0]);
-        } else if (custSubGrp == 'BEBUS' || custSubGrp == 'CBBUS') {
-          FormManager.setValue('searchTerm', 'BP0000');
-        }
-      }
-    }
-
-    var custGrp = FormManager.getActualValue('custGrp');
-    var custSubGrp = FormManager.getActualValue('custSubGrp');
-    var role = FormManager.getActualValue('userRole').toUpperCase();
-
-    if (role == 'PROCESSOR') {
-      FormManager.enable('searchTerm');
-    } else if ((geoCd == 'LU') && (custSubGrp == 'CBBUS')) {
-      FormManager.setValue('searchTerm', 'LP0000');
-      FormManager.readOnly('searchTerm');
-    } else if ((custGrp == 'CROSS') && (custSubGrp == 'CBBUS')) {
-      FormManager.readOnly('searchTerm');
-    } else if ((custSubGrp == 'BEBUS') || (custSubGrp == 'LUBUS')) {
-      FormManager.readOnly('searchTerm');
-    } else if ((custSubGrp == 'LUBUS')) {
-      FormManager.readOnly('searchTerm');
-    } else if ((custSubGrp == 'BEINT') || (custSubGrp == 'BEISO') || (custSubGrp == 'BEPRI') || (custSubGrp == 'LUINT') || (custSubGrp == 'LUPRI') || (custSubGrp == 'LUISO')) {
-      FormManager.readOnly('searchTerm');
-    } else {
-      FormManager.enable('searchTerm');
     }
   }
 }
@@ -1134,6 +1069,19 @@ function setSBO(searchTerm) {
   }
   if (FormManager.getActualValue('countryUse') == '624') {
     FormManager.setValue('salesBusOffCd', '0'.concat(accTeam.substring(0, 2) + '0000'));
+    if (accTeam == 'B3V200') {
+      FormManager.setValue('salesBusOffCd', '0B30001');
+    } else if (accTeam == 'B3V400') {
+      FormManager.setValue('salesBusOffCd', '0B30002');
+    } else if (accTeam == 'B3V500') {
+      FormManager.setValue('salesBusOffCd', '0B30003');
+    } else if (accTeam == 'B3V600') {
+      FormManager.setValue('salesBusOffCd', '0B30004');
+    } else if (accTeam == 'B3V800') {
+      FormManager.setValue('salesBusOffCd', '0B30005');
+    } else if (accTeam == 'B3V900') {
+      FormManager.setValue('salesBusOffCd', '0B30005');
+    }
   } else if (FormManager.getActualValue('countryUse') == '624LU') {
     FormManager.setValue('salesBusOffCd', '0'.concat(accTeam.substring(0, 2) + '0001'));
   }
