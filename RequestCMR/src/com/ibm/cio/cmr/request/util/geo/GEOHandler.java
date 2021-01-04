@@ -947,4 +947,8 @@ public abstract class GEOHandler {
     return false;
   }
 
+  public String[] getAddressOrder() {
+    return null;
+  }
+
 }
