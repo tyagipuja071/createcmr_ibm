@@ -21,9 +21,11 @@ function addDPLValidator() {
         }
 
         var reqId = FormManager.getActualValue('reqId');
+        var iterId = FormManager.getActualValue('iterId');
         var dplPassed = true;
         var params = {
           _qall : 'Y',
+          ITER_ID : iterId,
           REQ_ID : reqId
         };
 

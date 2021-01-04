@@ -42,6 +42,7 @@ function afterConfigForFR() {
     FormManager.readOnly('poBox');
     // FormManager.readOnly('embargoCd');
     // FormManager.readOnly('currencyCd');
+    FormManager.readOnly('salesBusOffCd');// CMR-221
 
     if (reqType == 'C') {
       FormManager.resetDropdownValues(FormManager.getField('taxCd2'));
