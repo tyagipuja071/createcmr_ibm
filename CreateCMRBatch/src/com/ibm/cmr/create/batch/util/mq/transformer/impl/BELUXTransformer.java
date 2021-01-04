@@ -1,6 +1,3 @@
-/**
- * 
- */
 package com.ibm.cmr.create.batch.util.mq.transformer.impl;
 
 import java.text.SimpleDateFormat;
@@ -43,9 +40,9 @@ import com.ibm.cmr.create.batch.util.mq.transformer.MessageTransformer;
 import com.ibm.cmr.services.client.cmrno.GenerateCMRNoRequest;
 
 /**
- * {@link MessageTransformer} implementation for ME
+ * {@link MessageTransformer} implementation for ELUX
  * 
- * @author Paul
+ * @author George
  * 
  */
 public class BELUXTransformer extends EMEATransformer {
@@ -239,7 +236,6 @@ public class BELUXTransformer extends EMEATransformer {
     line5 = line5.trim();
 
     String countryName = LandedCountryMap.getCountryName(addrData.getLandCntry());
-    ;
 
     // country
     String line6 = countryName;
@@ -403,12 +399,6 @@ public class BELUXTransformer extends EMEATransformer {
     case "ZI01":
       return "EPL";
 
-    // case "ZP02":
-    // return "G address (Address in local language)";
-    // case "ZD02":
-    // return "IGF Ship-To";
-    // case "ZP03":
-    // return "IGF Bill-To";
     default:
       return "";
     }
@@ -426,8 +416,6 @@ public class BELUXTransformer extends EMEATransformer {
     case "ZI01":
       return "EPL";
 
-    // case "ZP02":
-    // return "G address (Address in local language)";
     default:
       return "";
     }
@@ -469,17 +457,19 @@ public class BELUXTransformer extends EMEATransformer {
     return !DEFAULT_LANDED_COUNTRY.equals(addr.getLandCntry());
   }
 
-  // private String getDefaultLandedCountry(String cntryCode) {
-  // if ("693".equals(cntryCode)) {
-  // DEFAULT_LANDED_COUNTRY = "BE";
-  // }
-  // if ("695".equals(cntryCode)) {
-  // DEFAULT_LANDED_COUNTRY = "LU";
-  // }
-  // if ("788".equals(cntryCode)) {
-  // DEFAULT_LANDED_COUNTRY = "NL";
-  // }
-  // }
+  private String getDefaultLandedCountry(String cntryCode, String cmrIssucingCountry) {
+
+    if ("624".equals(cntryCode)) {
+      DEFAULT_LANDED_COUNTRY = "BE";
+    }
+    if ("624LU".equals(cntryCode)) {
+      DEFAULT_LANDED_COUNTRY = "LU";
+    }
+    if ("788".equals(cmrIssucingCountry)) {
+      DEFAULT_LANDED_COUNTRY = "NL";
+    }
+    return DEFAULT_LANDED_COUNTRY;
+  }
 
   @Override
   public String getAddressUse(Addr addr) {
@@ -544,12 +534,6 @@ public class BELUXTransformer extends EMEATransformer {
 
     LOG.debug("Legacy Direct -Handling Address for " + (update ? "update" : "create") + " request.");
 
-    String line1 = "";
-    String line2 = "";
-    String line3 = "";
-    String line4 = "";
-    String line5 = "";
-    String line6 = "";
     String addrType = addrData.getId().getAddrType();
     String phone = "";
     String addrLineT = "";
@@ -559,90 +543,64 @@ public class BELUXTransformer extends EMEATransformer {
     String lastName = addrData.getCustNm4();
     LOG.trace("Handling " + (update ? "update" : "create") + " request.");
 
-    // line1
-    line1 = addrData.getCustNm1();
+    LOG.debug("Handling  Data for " + addrData.getCustNm1());
+    // <XXXAddress1> -> Customer Name
+    // <XXXAddress2> -> Name Con't
+    // <XXXAddress3> -> Title/A and First name/c and Last name
+    // <XXXAddress4> -> Street/F and Street number/G or PO BOX
+    // <XXXAddress5> -> Postal Code/H and City/I
+    // <XXXAddress6> -> Country
 
-    if (!StringUtils.isBlank(nameCont)) {
-      line2 = nameCont;
-    } else if (StringUtils.isBlank(nameCont)) {
-      line2 = "";
+    // customer name
+    String line1 = addrData.getCustNm1();
+
+    // name 2, as nickname
+    String line2 = "";
+    if (!StringUtils.isBlank(addrData.getCustNm2())) {
+      line2 += (line2.length() > 0 ? " " : "") + addrData.getCustNm2();
     }
 
-    String pobox = addrData.getPoBox();
-    String name3 = addrData.getCustNm3();
-    if (StringUtils.isNotBlank(name3)) {
-      line3 = name3;
-    } else if (StringUtils.isNotBlank(pobox)) {
-      line3 = "ZP02".equals(addrType) ? "" : "PO BOX ";
-      line3 = line3 + pobox;
+    // Title/A and First name/c and Last name/B
+    String line3 = "";
+    if (!StringUtils.isBlank(addrData.getDept())) {
+      line3 += (line3.length() > 0 ? " " : "") + addrData.getDept();
+    }
+    if (!StringUtils.isBlank(addrData.getCustNm3())) {
+      line3 += (line3.length() > 0 ? " " : "") + addrData.getCustNm3();
+    }
+    if (!StringUtils.isBlank(addrData.getCustNm4())) {
+      line3 += (line3.length() > 0 ? " " : "") + addrData.getCustNm4();
     }
 
+    // Street/F and Street number/G or PO BOX/J
+    String line4 = "";
     if (!StringUtils.isBlank(addrData.getAddrTxt())) {
-      line4 = addrData.getAddrTxt();
-    } else {
-      line4 = "";
+      line4 += (line4.length() > 0 ? " " : "") + addrData.getAddrTxt();
     }
-
-    // Dept + Postal code + City
-    line5 = (addrData.getPostCd() == null ? "" : addrData.getPostCd()) + " " + (addrData.getCity1() == null ? "" : addrData.getCity1());
-
-    // if (!StringUtils.isBlank(addrData.getPoBox())) {
-    legacyAddr.setPoBox(addrData.getPoBox());
-    // }
-
-    if (SystemLocation.JORDAN.equals(cmrData.getCmrIssuingCntry())) {
-      String cntryUse = cmrData.getCountryUse();
-      if ("ZP02".equals(addrData.getId().getAddrType())) {
-        line6 = addrData.getBldg() == null ? "" : addrData.getBldg();
-      } else {
-        if (!StringUtils.isBlank(cntryUse)) {
-          if ("762PS".equals(cntryUse)) {
-            line6 = "Palestine";
-          } else {
-            if (!StringUtils.isBlank(addrData.getLandCntry())) {
-              line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
-            } else {
-              line6 = "";
-            }
-          }
-        }
-      }
-
-    } else if (SystemLocation.PAKISTAN.equals(cmrData.getCmrIssuingCntry())) {
-      String cntryUse = cmrData.getCountryUse();
-
-      if ("ZP02".equals(addrData.getId().getAddrType())) {
-        line6 = addrData.getBldg() == null ? "" : addrData.getBldg();
-      } else {
-        if (!StringUtils.isBlank(cntryUse)) {
-          if ("808AF".equals(cntryUse)) {
-            line6 = "Afganistan";
-          } else {
-            if (!StringUtils.isBlank(addrData.getLandCntry())) {
-              line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
-            } else {
-              line6 = "";
-            }
-          }
-        }
-      }
-    } else {
-      if ("ZP02".equals(addrData.getId().getAddrType())) {
-        line6 = addrData.getBldg() == null ? "" : addrData.getBldg();
-      } else {
-        if (!StringUtils.isBlank(addrData.getLandCntry())) {
-          line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
-        } else {
-          line6 = "";
-        }
+    if (!StringUtils.isBlank(addrData.getAddrTxt2())) {
+      line4 += (line4.length() > 0 ? " " : "") + addrData.getAddrTxt2();
+    }
+    if (line4.length() == 0) {
+      if (!StringUtils.isBlank(addrData.getPoBox())) {
+        line4 += (line4.length() > 0 ? " " : "") + addrData.getPoBox();
       }
     }
+    // Postal Code/H and City/I
+    String line5 = "";
 
-    // if (!StringUtils.isBlank(addrData.getCustPhone())) {
-    // phone = addrData.getCustPhone().trim();
-    // } else {
-    // phone = "";
-    // }
+    if (!StringUtils.isBlank(addrData.getPostCd())) {
+      line5 += (line5.length() > 0 ? " " : "") + addrData.getPostCd();
+    }
+    if (!StringUtils.isBlank(addrData.getCity1())) {
+      line5 += (line5.length() > 0 ? " " : "") + addrData.getCity1();
+    }
+
+    line5 = line5.trim();
+
+    String countryName = LandedCountryMap.getCountryName(addrData.getLandCntry());
+
+    // country
+    String line6 = countryName;
 
     if (!StringUtils.isBlank(addrData.getTaxOffice())) {
       addrLineT = addrData.getTaxOffice();
@@ -657,16 +615,21 @@ public class BELUXTransformer extends EMEATransformer {
     legacyAddr.setAddrLine3(line3);
     legacyAddr.setAddrLine4(line4);
     legacyAddr.setAddrLine5(line5);
-    legacyAddr.setCity(addrData.getCity1());
-    legacyAddr.setZipCode(addrData.getPostCd());
+    legacyAddr.setCity(addrData.getCity1() == null ? "" : addrData.getCity1());
+    legacyAddr.setZipCode(addrData.getPostCd() == null ? "" : addrData.getPostCd());
     legacyAddr.setAddrLine6(line6);
     legacyAddr.setStreet(line4);
+    legacyAddr.setStreetNo(addrData.getAddrTxt2() == null ? "" : addrData.getAddrTxt2());
     legacyAddr.setAddrPhone(phone);
     legacyAddr.setAddrLineT(addrLineT);
-    legacyAddr.setDistrict(addrData.getDept());
-    // CMR-4937
+    legacyAddr.setDistrict(addrData.getDivn() == null ? "" : addrData.getDivn());
+    legacyAddr.setContact(addrData.getContact() == null ? "" : addrData.getContact());
     legacyAddr.setAddrLineU("");
 
+    legacyAddr.setFirstName(addrData.getCustNm3() == null ? "" : addrData.getCustNm3());
+    legacyAddr.setLastName(addrData.getCustNm4() == null ? "" : addrData.getCustNm4());
+    legacyAddr.setTitle(addrData.getDept() == null ? "" : addrData.getDept());
+    legacyAddr.setName(addrData.getCustNm1() == null ? "" : addrData.getCustNm1());
   }
 
   @Override
@@ -972,10 +935,10 @@ public class BELUXTransformer extends EMEATransformer {
         legacyCust.setBankAcctNo("");
       }
 
-      if ("762PS".equals(data.getCountryUse())) {
-        legacyCust.setRealCtyCd("762");
-      } else if ("808AF".equals(data.getCountryUse())) {
-        legacyCust.setRealCtyCd("614");
+      if ("624LU".equals(data.getCountryUse()) || "624".equals(data.getCountryUse())) {
+        legacyCust.setRealCtyCd("624");
+      } else if ("788".equals(data.getCmrIssuingCntry())) {
+        legacyCust.setRealCtyCd("788");
       }
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       for (Addr addr : cmrObjects.getAddresses()) {
@@ -988,10 +951,10 @@ public class BELUXTransformer extends EMEATransformer {
         }
       }
 
-      if ("762PS".equals(data.getCountryUse())) {
-        legacyCust.setRealCtyCd("762");
-      } else if ("808AF".equals(data.getCountryUse())) {
-        legacyCust.setRealCtyCd("614");
+      if ("624LU".equals(data.getCountryUse()) || "624".equals(data.getCountryUse())) {
+        legacyCust.setRealCtyCd("624");
+      } else if ("788".equals(data.getCmrIssuingCntry())) {
+        legacyCust.setRealCtyCd("788");
       }
 
       if (!StringUtils.isBlank(data.getEnterprise())) {
