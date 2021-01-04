@@ -594,7 +594,7 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
         <cmr:column span="1" width="127">
           <label>${ui.customerInfo}:</label>
         </cmr:column>
-        <cmr:view exceptForGEO="CEMEA">
+        <cmr:view exceptForGEO="CEMEA,FR">
           <cmr:column span="1" width="130">
             <label><cmr:fieldLabel fieldId="CustLang" />:</label>
           </cmr:column>
