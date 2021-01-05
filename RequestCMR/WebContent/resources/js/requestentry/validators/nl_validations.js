@@ -411,6 +411,7 @@ function setEconomicCodeValues(engineeringBo) {
 
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var engineeringBo = FormManager.getActualValue('engineeringBo');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
 
   var economicCode = [];
   if (engineeringBo != '') {
@@ -428,6 +429,14 @@ function setEconomicCodeValues(engineeringBo) {
         FormManager.limitDropdownValues(FormManager.getField('economicCd'), economicCode);
         if (economicCode.length == 1) {
           FormManager.setValue('economicCd', economicCode[0]);
+        }
+        if ('PRICU' == custSubGrp && '33U00' == engineeringBo) {
+          FormManager.setValue('economicCd', 'K60');
+          FormManager.readOnly('economicCd');
+        }
+        if ('INTER' == custSubGrp && '33U00' == engineeringBo) {
+          FormManager.setValue('economicCd', 'K81');
+          FormManager.readOnly('economicCd');
         }
       }
     }
