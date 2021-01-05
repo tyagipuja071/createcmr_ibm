@@ -145,8 +145,6 @@ public class DPLCheckElement extends ValidatingElement {
 
       DPLCheckResult dplResult = null;
       String errorInfo = null;
-      boolean noResults = false;
-
       AddressService addrService = new AddressService();
       for (Addr addr : addresses) {
         errorInfo = null;
@@ -186,15 +184,9 @@ public class DPLCheckElement extends ValidatingElement {
               details.append("DPL Check for [" + addr.getId().getAddrType() + "/" + addr.getId().getAddrSeq() + "] passed.");
               entityManager.merge(addr);
             } else {
-              noResults = false;
               errorInfo = "";
               if (dplResult.isUnderReview()) {
-                if (StringUtils.isEmpty(dplResult.getFailureDesc())) {
-                  noResults = true;
-                  errorInfo += " No Results retrieved from DPL.";
-                } else {
-                  errorInfo += " Export under review";
-                }
+                errorInfo += " Export under review";
               }
               if (errorStatus) {
                 errorInfo = MessageUtil.getMessage(MessageUtil.ERROR_DPL_EVS_ERROR);
@@ -257,7 +249,9 @@ public class DPLCheckElement extends ValidatingElement {
         break;
       case "AF":
         validation.setSuccess(false);
-        if (noResults) {
+        if ("N".equals(scorecard.getDplAssessmentResult())) {
+          details.append(details.length() > 0 ? "\n" : "");
+          details.append(scorecard.getDplAssessmentCmt());
           output.setOnError(false);
         } else {
           output.setOnError(true);
