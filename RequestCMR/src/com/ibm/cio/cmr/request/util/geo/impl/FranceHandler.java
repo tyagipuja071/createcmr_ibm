@@ -187,6 +187,7 @@ public class FranceHandler extends GEOHandler {
       if ("88".equals(mainRecord.getCmrOrderBlock()) || "".equals(mainRecord.getCmrOrderBlock())) {
         data.setCurrencyCd(geCurrencyCode(zs01sapNo));
         data.setTaxCd2(getTaxCodeForFR(zs01sapNo));
+        data.setAdminDeptLine(getDepartment(zs01sapNo));
         data.setIbmDeptCostCenter(getInternalDepartment((data.getCmrNo())));
       }
     } catch (Exception e) {
@@ -492,11 +493,11 @@ public class FranceHandler extends GEOHandler {
       results.add(update);
     }
 
-    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getDept(), newData.getIbmDeptCostCenter())) {
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getAdminDeptLine(), newData.getIbmDeptCostCenter())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "Internal Department Number", "Internal Department Number"));
       update.setNewData(newData.getIbmDeptCostCenter());
-      update.setOldData(oldData.getDept());
+      update.setOldData(oldData.getAdminDeptLine());
       results.add(update);
     }
     // CMR-221 For FR use SalesBusOff as SearchTerm
@@ -1568,6 +1569,35 @@ public class FranceHandler extends GEOHandler {
     results = query.getResults(String.class);
     if (results != null && results.size() > 0) {
       department = results.get(0);
+    }
+    return department;
+  }
+
+  private String getDepartment(String kunnr) throws Exception {
+    String department = "";
+
+    String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
+    String mandt = SystemConfiguration.getValue("MANDT");
+    String sql = ExternalizedQuery.getSql("GET.DEPT.KNA1.BYKUNNR");
+    sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
+    sql = StringUtils.replace(sql, ":KUNNR", "'" + kunnr + "'");
+    String dbId = QueryClient.RDC_APP_ID;
+
+    QueryRequest query = new QueryRequest();
+    query.setSql(sql);
+    query.addField("KUNNR");
+    query.addField("ZZKV_DEPT");
+
+    LOG.debug("Getting existing ZZKV_DEPT value from RDc DB..");
+
+    QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
+    QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
+
+    if (response.isSuccess() && response.getRecords() != null && response.getRecords().size() != 0) {
+      List<Map<String, Object>> records = response.getRecords();
+      Map<String, Object> record = records.get(0);
+      department = record.get("ZZKV_DEPT") != null ? record.get("ZZKV_DEPT").toString() : "";
+      LOG.debug("***RETURNING ZZKV_DEPT > " + department + " WHERE KUNNR IS > " + kunnr);
     }
     return department;
   }
