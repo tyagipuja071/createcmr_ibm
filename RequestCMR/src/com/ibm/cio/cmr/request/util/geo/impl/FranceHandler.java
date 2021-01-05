@@ -68,7 +68,8 @@ public class FranceHandler extends GEOHandler {
   private static final List<String> IERP_ISSUING_COUNTRY_VAL = Arrays.asList("706");
 
   private static final String[] CH_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "LocalTax2", "SitePartyID", "Division", "POBoxCity", "City2", "Affiliate",
-      "Company", "INACType", "POBoxPostalCode", "TransportZone", "CurrencyCode", "MembLevel", "BPRelationType", "CustLangCd", "CustLang" };
+      "Company", "INACType", "POBoxPostalCode", "TransportZone", "CurrencyCode", "MembLevel", "BPRelationType", "CustLangCd", "CustLang",
+      "SearchTerm" };
 
   public static final String FR_MASSCHANGE_TEMPLATE_ID = "France";
 
@@ -498,6 +499,14 @@ public class FranceHandler extends GEOHandler {
       update.setOldData(oldData.getDept());
       results.add(update);
     }
+    // CMR-221 For FR use SalesBusOff as SearchTerm
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getSalesBusOffCd(), newData.getSalesBusOffCd())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "SalesBusOff", "SalesBusOff"));
+      update.setNewData(newData.getSalesBusOffCd());
+      update.setOldData(oldData.getSalesBusOffCd());
+      results.add(update);
+    }
 
     if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getCustClass(), newData.getCustClass())) {
       for (UpdatedDataModel item : results) {
@@ -506,6 +515,7 @@ public class FranceHandler extends GEOHandler {
         }
       }
     }
+
     /*
      * if (RequestSummaryService.TYPE_CUSTOMER.equals(type) &&
      * !equals(oldData.getCustClass(), newData.getCustClass())) { update = new
