@@ -42,7 +42,6 @@ function afterConfigForFR() {
     FormManager.readOnly('poBox');
     // FormManager.readOnly('embargoCd');
     // FormManager.readOnly('currencyCd');
-    FormManager.readOnly('salesBusOffCd');// CMR-221
 
     if (reqType == 'C') {
       FormManager.resetDropdownValues(FormManager.getField('taxCd2'));
@@ -101,7 +100,7 @@ function afterConfigForFR() {
   if (role == 'Processor' && reqType == 'C') {
     FormManager.addValidator('isuCd', Validators.REQUIRED, [ 'ISU Code' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
-    FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'Search Term/Sales Branch Office' ], 'MAIN_IBM_TAB');
+    FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'Search Term (SORTL)' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('installBranchOff', Validators.REQUIRED, [ 'Installing BO' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [ 'Sales Rep No' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('subIndustryCd', Validators.REQUIRED, [ 'Subindustry' ], 'MAIN_CUST_TAB');
@@ -1438,7 +1437,7 @@ function updateAbbrNameWithZS01_ZI01() {
     }
     if (newAddrName1 != undefined && newAddrName1 != "" && newAddrName1 != null) {
       FormManager.setValue('abbrevNm', newAddrName1);
-    } else if(oldAddrName != null && oldAddrName != undefined && oldAddrName != ''){
+    } else if (oldAddrName != null && oldAddrName != undefined && oldAddrName != '') {
       FormManager.setValue('abbrevNm', oldAddrName.substr(0, 22));
     }
   }
@@ -2677,7 +2676,7 @@ function setFieldsRequiredForCreateRequester() {
       return;
     } else {
       if (custSubGrp == 'INTER' || custSubGrp == 'CBTER') {
-        FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'Search Term/Sales Branch Office' ], 'MAIN_IBM_TAB');
+        FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'Search Term (SORTL)' ], 'MAIN_IBM_TAB');
         FormManager.addValidator('installBranchOff', Validators.REQUIRED, [ 'Installing BO' ], 'MAIN_IBM_TAB');
       } else {
         FormManager.removeValidator('salesBusOffCd', Validators.REQUIRED);
