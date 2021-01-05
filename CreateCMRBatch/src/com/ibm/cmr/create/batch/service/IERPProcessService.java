@@ -39,6 +39,7 @@ import com.ibm.cio.cmr.request.util.geo.impl.CNHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.DEHandler;
 import com.ibm.cmr.create.batch.model.CmrServiceInput;
 import com.ibm.cmr.create.batch.model.MassUpdateServiceInput;
+import com.ibm.cmr.create.batch.util.BatchUtil;
 import com.ibm.cmr.create.batch.util.DebugUtil;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.ProcessClient;
@@ -455,6 +456,45 @@ public class IERPProcessService extends BaseBatchService {
               statusMessage.append("Record with request ID " + admin.getId().getReqId()
                   + " has FAILED processing. Status: NOT COMPLETED. Response message: " + ncMessage);
               wfHistCmt = statusMessage.toString();
+            }
+
+            if (!overallStatus.contains(CmrConstants.RDC_STATUS_NOT_COMPLETED) && !overallStatus.contains(CmrConstants.RDC_STATUS_ABORTED)) {
+              // now process the partner functions
+              LOG.info("Processing partner functions for Request " + admin.getId().getReqId());
+              ProcessRequest request = new ProcessRequest();
+              request.setReqId(cmrServiceInput.getInputReqId());
+              request.setReqType(ProcessRequest.TYPE_KNVP);
+              request.setAddrType("ZS01");
+              request.setSapNo(null);
+              request.setCmrNo(data.getCmrNo());
+              request.setMandt(SystemConfiguration.getValue("MANDT"));
+              request.setUserId(cmrServiceInput.getInputUserId());
+              String applicationId = BatchUtil.getAppId(data.getCmrIssuingCntry());
+
+              if (LOG.isTraceEnabled()) {
+                LOG.trace("Request JSON:");
+                DebugUtil.printObjectAsJson(LOG, request);
+              }
+
+              try {
+                this.serviceClient.setReadTimeout(60 * 10 * 1000); // 10 mins
+                response = this.serviceClient.executeAndWrap(applicationId, request, ProcessResponse.class);
+              } catch (Exception e) {
+                LOG.error("Error when connecting to the service.", e);
+                response = new ProcessResponse();
+                response.setReqId(admin.getId().getReqId());
+                response.setCmrNo(request.getCmrNo());
+                response.setMandt(request.getMandt());
+                response.setStatus(CmrConstants.RDC_STATUS_ABORTED);
+                response.setMessage("Cannot connect to the service at the moment.");
+              }
+              if (LOG.isTraceEnabled()) {
+                LOG.trace("Response JSON:");
+                DebugUtil.printObjectAsJson(LOG, response);
+              }
+
+              statusMessage = statusMessage.append("\nPartner functions "
+                  + (isCompletedSuccessfully(response.getStatus()) ? "processed successfully." : "not successfully processed."));
             }
 
             createCommentLog(em, admin, statusMessage.toString());
