@@ -740,6 +740,10 @@ function addAfterTemplateLoadMalta(fromAddress, scenario, scenarioChanged) {
   setVatValidatorMalta();
 }
 
+function canCopyAddress(value, rowIndex, grid) {
+  return false;
+}
+
 function disableEnableFieldsForMT() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custType = FormManager.getActualValue('custGrp');
