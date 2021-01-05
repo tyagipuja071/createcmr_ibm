@@ -43,7 +43,7 @@ import com.ibm.cmr.create.batch.util.mq.handler.MQMessageHandler;
 import com.ibm.cmr.services.client.cmrno.GenerateCMRNoRequest;
 
 /**
- * @author Rangoli Saxena
+ * @author George
  * 
  */
 public class NLTransformer extends EMEATransformer {
@@ -54,6 +54,8 @@ public class NLTransformer extends EMEATransformer {
   protected boolean duplicateRecordFound = false;
   protected Map<String, String> dupCMRValues = new HashMap<String, String>();
   protected List<String> dupShippingSequences = null;
+  private static final List<String> SUB_TYPES_INTERNAL = Arrays.asList("BEINT", "LUINT", "INTER");
+  private static final List<String> SUB_TYPES_INTERNAL_SO = Arrays.asList("BEISO", "LUISO");
 
   protected static Map<String, String> SOURCE_CODE_MAP = new HashMap<String, String>();
 
@@ -304,31 +306,50 @@ public class NLTransformer extends EMEATransformer {
     messageHash.remove(addrKey + "POBox");
 
     LOG.debug("Handling  Data for " + addrData.getCustNm1());
-    // <XXXAddress1> -> name
-    // <XXXAddress2> -> name 2,
-    // <XXXAddress3> -> street
-    // <XXXAddress4> -> Street con't
-    // <XXXAddress5> -> District + Postal code + City
+    // <XXXAddress1> -> Customer Name
+    // <XXXAddress2> -> Name Con't
+    // <XXXAddress3> -> Title/A and First name/c and Last name
+    // <XXXAddress4> -> Street/F and Street number/G or PO BOX
+    // <XXXAddress5> -> Postal Code/H and City/I
     // <XXXAddress6> -> Country
 
     // customer name
     String line1 = addrData.getCustNm1();
 
     // name 2, as nickname
-    String line2 = addrData.getCustNm2();
+    String line2 = "";
+    if (!StringUtils.isBlank(addrData.getCustNm2())) {
+      line2 += (line2.length() > 0 ? " " : "") + addrData.getCustNm2();
+    }
 
-    // Street
-    String line3 = addrData.getAddrTxt();
+    // Title/A and First name/c and Last name/B
+    String line3 = "";
+    if (!StringUtils.isBlank(addrData.getDept())) {
+      line3 += (line3.length() > 0 ? " " : "") + addrData.getDept();
+    }
+    if (!StringUtils.isBlank(addrData.getCustNm3())) {
+      line3 += (line3.length() > 0 ? " " : "") + addrData.getCustNm3();
+    }
+    if (!StringUtils.isBlank(addrData.getCustNm4())) {
+      line3 += (line3.length() > 0 ? " " : "") + addrData.getCustNm4();
+    }
 
-    // Street Con't
-    String line4 = addrData.getAddrTxt2();
-
-    // district + postal code + city
+    // Street/F and Street number/G or PO BOX/J
+    String line4 = "";
+    if (!StringUtils.isBlank(addrData.getAddrTxt())) {
+      line4 += (line4.length() > 0 ? " " : "") + addrData.getAddrTxt();
+    }
+    if (!StringUtils.isBlank(addrData.getAddrTxt2())) {
+      line4 += (line4.length() > 0 ? " " : "") + addrData.getAddrTxt2();
+    }
+    if (line4.length() == 0) {
+      if (!StringUtils.isBlank(addrData.getPoBox())) {
+        line4 += (line4.length() > 0 ? " " : "") + addrData.getPoBox();
+      }
+    }
+    // Postal Code/H and City/I
     String line5 = "";
 
-    if (!StringUtils.isBlank(addrData.getDept())) {
-      line5 += (line5.length() > 0 ? " " : "") + addrData.getDept();
-    }
     if (!StringUtils.isBlank(addrData.getPostCd())) {
       line5 += (line5.length() > 0 ? " " : "") + addrData.getPostCd();
     }
@@ -339,7 +360,6 @@ public class NLTransformer extends EMEATransformer {
     line5 = line5.trim();
 
     String countryName = LandedCountryMap.getCountryName(addrData.getLandCntry());
-    ;
 
     // country
     String line6 = countryName;
@@ -483,58 +503,10 @@ public class NLTransformer extends EMEATransformer {
         handler.addrData.setTaxOffice(addressDataMap.get("taxOffice"));
       }
     }
-
   }
 
   public void setDefaultLandedCountry(Data data) {
-    // if ("620".equals(data.getCmrIssuingCntry())) {
-    // DEFAULT_LANDED_COUNTRY = "BH";
-    // }
-    // if ("642".equals(data.getCmrIssuingCntry())) {
-    // DEFAULT_LANDED_COUNTRY = "MA";
-    // }
-    // if ("677".equals(data.getCmrIssuingCntry())) {
-    // DEFAULT_LANDED_COUNTRY = "AE";
-    // }
-    // if ("680".equals(data.getCmrIssuingCntry())) {
-    // DEFAULT_LANDED_COUNTRY = "AE";
-    // }
-    // if ("752".equals(data.getCmrIssuingCntry())) {
-    // DEFAULT_LANDED_COUNTRY = "IQ";
-    // }
-    // if ("762".equals(data.getCmrIssuingCntry())) {
-    // DEFAULT_LANDED_COUNTRY = "JO";
-    // }
-    // if ("767".equals(data.getCmrIssuingCntry())) {
-    // DEFAULT_LANDED_COUNTRY = "KW";
-    // }
-    // if ("768".equals(data.getCmrIssuingCntry())) {
-    // DEFAULT_LANDED_COUNTRY = "LB";
-    // }
-    // if ("772".equals(data.getCmrIssuingCntry())) {
-    // DEFAULT_LANDED_COUNTRY = "LY";
-    // }
-    // if ("805".equals(data.getCmrIssuingCntry())) {
-    // DEFAULT_LANDED_COUNTRY = "OM";
-    // }
-    // if ("808".equals(data.getCmrIssuingCntry())) {
-    // DEFAULT_LANDED_COUNTRY = "PK";
-    // }
-    // if ("823".equals(data.getCmrIssuingCntry())) {
-    // DEFAULT_LANDED_COUNTRY = "QA";
-    // }
-    // if ("832".equals(data.getCmrIssuingCntry())) {
-    // DEFAULT_LANDED_COUNTRY = "SA";
-    // }
-    // if ("849".equals(data.getCmrIssuingCntry())) {
-    // DEFAULT_LANDED_COUNTRY = "YE";
-    // }
-    // if ("850".equals(data.getCmrIssuingCntry())) {
-    // DEFAULT_LANDED_COUNTRY = "SY";
-    // }
-    // if ("865".equals(data.getCmrIssuingCntry())) {
-    // DEFAULT_LANDED_COUNTRY = "EG";
-    // }
+
     if ("788".equals(data.getCmrIssuingCntry())) {
       DEFAULT_LANDED_COUNTRY = "NL";
     }
@@ -593,102 +565,70 @@ public class NLTransformer extends EMEATransformer {
 
     LOG.debug("Legacy Direct -Handling Address for " + (update ? "update" : "create") + " request.");
 
-    String line1 = "";
-    String line2 = "";
-    String line3 = "";
-    String line4 = "";
-    String line5 = "";
-    String line6 = "";
     String addrType = addrData.getId().getAddrType();
     String phone = "";
     String addrLineT = "";
 
     LOG.trace("Handling " + (update ? "update" : "create") + " request.");
 
-    // line1
-    line1 = addrData.getCustNm1();
+    LOG.debug("Handling  Data for " + addrData.getCustNm1());
+    // <XXXAddress1> -> Customer Name
+    // <XXXAddress2> -> Name Con't
+    // <XXXAddress3> -> Title/A and First name/c and Last name
+    // <XXXAddress4> -> Street/F and Street number/G or PO BOX
+    // <XXXAddress5> -> Postal Code/H and City/I
+    // <XXXAddress6> -> Country
 
+    // customer name
+    String line1 = addrData.getCustNm1();
+
+    // name 2, as nickname
+    String line2 = "";
     if (!StringUtils.isBlank(addrData.getCustNm2())) {
-      line2 = addrData.getCustNm2();
-    } else {
-      line2 = "";
+      line2 += (line2.length() > 0 ? " " : "") + addrData.getCustNm2();
     }
 
-    String pobox = addrData.getPoBox();
-    String name3 = addrData.getCustNm3();
-    if (StringUtils.isNotBlank(name3)) {
-      line3 = name3;
-    } else if (StringUtils.isNotBlank(pobox)) {
-      line3 = "ZP02".equals(addrType) ? "" : "PO BOX ";
-      line3 = line3 + pobox;
+    // Title/A and First name/c and Last name/B
+    String line3 = "";
+    if (!StringUtils.isBlank(addrData.getDept())) {
+      line3 += (line3.length() > 0 ? " " : "") + addrData.getDept();
+    }
+    if (!StringUtils.isBlank(addrData.getCustNm3())) {
+      line3 += (line3.length() > 0 ? " " : "") + addrData.getCustNm3();
+    }
+    if (!StringUtils.isBlank(addrData.getCustNm4())) {
+      line3 += (line3.length() > 0 ? " " : "") + addrData.getCustNm4();
     }
 
+    // Street/F and Street number/G or PO BOX/J
+    String line4 = "";
     if (!StringUtils.isBlank(addrData.getAddrTxt())) {
-      line4 = addrData.getAddrTxt();
-    } else {
-      line4 = "";
+      line4 += (line4.length() > 0 ? " " : "") + addrData.getAddrTxt();
     }
-
-    // Dept + Postal code + City
-    line5 = (addrData.getPostCd() == null ? "" : addrData.getPostCd()) + " " + (addrData.getCity1() == null ? "" : addrData.getCity1());
-
-    // if (!StringUtils.isBlank(addrData.getPoBox())) {
-    legacyAddr.setPoBox(addrData.getPoBox());
-    // }
-
-    if (SystemLocation.JORDAN.equals(cmrData.getCmrIssuingCntry())) {
-      String cntryUse = cmrData.getCountryUse();
-      if ("ZP02".equals(addrData.getId().getAddrType())) {
-        line6 = addrData.getBldg() == null ? "" : addrData.getBldg();
-      } else {
-        if (!StringUtils.isBlank(cntryUse)) {
-          if ("762PS".equals(cntryUse)) {
-            line6 = "Palestine";
-          } else {
-            if (!StringUtils.isBlank(addrData.getLandCntry())) {
-              line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
-            } else {
-              line6 = "";
-            }
-          }
-        }
-      }
-
-    } else if (SystemLocation.PAKISTAN.equals(cmrData.getCmrIssuingCntry())) {
-      String cntryUse = cmrData.getCountryUse();
-
-      if ("ZP02".equals(addrData.getId().getAddrType())) {
-        line6 = addrData.getBldg() == null ? "" : addrData.getBldg();
-      } else {
-        if (!StringUtils.isBlank(cntryUse)) {
-          if ("808AF".equals(cntryUse)) {
-            line6 = "Afganistan";
-          } else {
-            if (!StringUtils.isBlank(addrData.getLandCntry())) {
-              line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
-            } else {
-              line6 = "";
-            }
-          }
-        }
-      }
-    } else {
-      if ("ZP02".equals(addrData.getId().getAddrType())) {
-        line6 = addrData.getBldg() == null ? "" : addrData.getBldg();
-      } else {
-        if (!StringUtils.isBlank(addrData.getLandCntry())) {
-          line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
-        } else {
-          line6 = "";
-        }
+    if (!StringUtils.isBlank(addrData.getAddrTxt2())) {
+      line4 += (line4.length() > 0 ? " " : "") + addrData.getAddrTxt2();
+    }
+    if (line4.length() == 0) {
+      if (!StringUtils.isBlank(addrData.getPoBox())) {
+        line4 += (line4.length() > 0 ? " " : "") + addrData.getPoBox();
       }
     }
+    // Postal Code/H and City/I
+    String line5 = "";
 
-    // if (!StringUtils.isBlank(addrData.getCustPhone())) {
-    // phone = addrData.getCustPhone().trim();
-    // } else {
-    // phone = "";
-    // }
+    if (!StringUtils.isBlank(addrData.getPostCd())) {
+      line5 += (line5.length() > 0 ? " " : "") + addrData.getPostCd();
+    }
+    if (!StringUtils.isBlank(addrData.getCity1())) {
+      line5 += (line5.length() > 0 ? " " : "") + addrData.getCity1();
+    }
+
+    line5 = line5.trim();
+
+    String countryName = LandedCountryMap.getCountryName(addrData.getLandCntry());
+
+    // country
+    String line6 = countryName;
 
     if (!StringUtils.isBlank(addrData.getTaxOffice())) {
       addrLineT = addrData.getTaxOffice();
@@ -703,16 +643,21 @@ public class NLTransformer extends EMEATransformer {
     legacyAddr.setAddrLine3(line3);
     legacyAddr.setAddrLine4(line4);
     legacyAddr.setAddrLine5(line5);
-    legacyAddr.setCity(addrData.getCity1());
-    legacyAddr.setZipCode(addrData.getPostCd());
+    legacyAddr.setCity(addrData.getCity1() == null ? "" : addrData.getCity1());
+    legacyAddr.setZipCode(addrData.getPostCd() == null ? "" : addrData.getPostCd());
     legacyAddr.setAddrLine6(line6);
-    legacyAddr.setStreet(line4);
+    legacyAddr.setStreet(addrData.getAddrTxt() == null ? "" : addrData.getAddrTxt());
+    legacyAddr.setStreetNo(addrData.getAddrTxt2() == null ? "" : addrData.getAddrTxt2());
     legacyAddr.setAddrPhone(phone);
     legacyAddr.setAddrLineT(addrLineT);
-    legacyAddr.setDistrict(addrData.getDept());
-    // CMR-4937
+    legacyAddr.setDistrict(addrData.getDivn() == null ? "" : addrData.getDivn());
+    legacyAddr.setContact(addrData.getContact() == null ? "" : addrData.getContact());
     legacyAddr.setAddrLineU("");
 
+    legacyAddr.setFirstName(addrData.getCustNm3() == null ? "" : addrData.getCustNm3());
+    legacyAddr.setLastName(addrData.getCustNm4() == null ? "" : addrData.getCustNm4());
+    legacyAddr.setTitle(addrData.getDept() == null ? "" : addrData.getDept());
+    legacyAddr.setName(addrData.getCustNm1() == null ? "" : addrData.getCustNm1());
   }
 
   @Override
@@ -722,27 +667,18 @@ public class NLTransformer extends EMEATransformer {
     System.out.println("_custSubGrp = " + custSubGrp);
 
     LOG.debug("Set max and min range of cmrNo..");
-    // if (_custSubGrp == "INTER" || _custSubGrp == "XINT") {
-    if (custSubGrp.contains("IN")) {
-      if (!StringUtils.isBlank(data.getAbbrevNm()) && data.getAbbrevNm().startsWith("DUMMY")) {
-        generateCMRNoObj.setMin(985001);
-        generateCMRNoObj.setMax(985999);
-      } else {
-        generateCMRNoObj.setMin(990300);
-        generateCMRNoObj.setMax(999990);
-      }
-    } else if (custSubGrp.contains("BP") || custSubGrp.contains("BUS")) {
-      generateCMRNoObj.setMin(1000);
-      generateCMRNoObj.setMax(9999);
-      LOG.debug("that is ME BP CMR");
-    } else {
-      generateCMRNoObj.setMin(15000);
-      generateCMRNoObj.setMax(984880);
+    // 624 and 788
+    // Internal - 99xxxx
+    // Internal SO - 997xxx or 998xxx
+
+    if (SUB_TYPES_INTERNAL.contains(custSubGrp)) {
+      generateCMRNoObj.setMin(990000);
+      generateCMRNoObj.setMax(999999);
+    } else if (SUB_TYPES_INTERNAL_SO.contains(custSubGrp)) {
+      generateCMRNoObj.setMin(997000);
+      generateCMRNoObj.setMax(998999);
     }
 
-    if ("Y".equals(data.getDupCmrIndc())) {
-      generateCMRNoObj.setLoc2("788");
-    }
   }
 
   @Override
@@ -1669,9 +1605,7 @@ public class NLTransformer extends EMEATransformer {
 
   @Override
   public boolean hasCmrtCustExt() {
-    if ("BH".equals(DEFAULT_LANDED_COUNTRY) || "MA".equals(DEFAULT_LANDED_COUNTRY) || "AE".equals(DEFAULT_LANDED_COUNTRY)
-        || "KW".equals(DEFAULT_LANDED_COUNTRY) || "OM".equals(DEFAULT_LANDED_COUNTRY) || "QA".equals(DEFAULT_LANDED_COUNTRY)
-        || "SA".equals(DEFAULT_LANDED_COUNTRY) || "GC".equals(DEFAULT_LANDED_COUNTRY)) {
+    if ("BE".equals(DEFAULT_LANDED_COUNTRY) || "NL".equals(DEFAULT_LANDED_COUNTRY) || "LU".equals(DEFAULT_LANDED_COUNTRY)) {
       return true;
     } else {
       return false;
