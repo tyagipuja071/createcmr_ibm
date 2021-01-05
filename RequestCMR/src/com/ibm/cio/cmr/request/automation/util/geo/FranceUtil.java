@@ -706,7 +706,7 @@ public class FranceUtil extends AutomationUtil {
         break;
       case "ISU Code":
       case "Client Tier":
-      case "Search Term/Sales Branch Office":
+      case "Search Term (SORTL)":
       case "Tax Code": {
         // noop for switch handling
       }
