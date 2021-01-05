@@ -14,12 +14,12 @@ function afterConfigForNL() {
     role = _pagemodel.userRole;
   }
 
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
-  if (custSubGrp == 'PRICU') {
-    FormManager.removeValidator('inacCd', Validators.REQUIRED);
-    FormManager.readOnly('inacCd');
-    FormManager.setValue('inacCd', '');
-  }
+  // var custSubGrp = FormManager.getActualValue('custSubGrp');
+  // if (custSubGrp == 'PRICU') {
+  // FormManager.removeValidator('inacCd', Validators.REQUIRED);
+  // FormManager.readOnly('inacCd');
+  // FormManager.setValue('inacCd', '');
+  // }
 
   // Set abbrevLocn for Softlayer Scenario
   var custSubType = FormManager.getActualValue('custSubGrp');
