@@ -1052,6 +1052,7 @@ public class FRService extends TransConnService {
                     }
                   }
                 }
+                resetOrdBlk(entityManager, SystemConfiguration.getValue("MANDT"), data.getCmrIssuingCntry(), data.getCmrNo());
                 updateEntity(addr, entityManager);
 
                 if (response.getRecords() != null) {
@@ -2202,5 +2203,13 @@ public class FRService extends TransConnService {
       partialCommit(em);
     }
     return response;
+  }
+
+  public void resetOrdBlk(EntityManager entityManager, String mandt, String katr6, String cmrNo) {
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("FR.RESET.ORDBLK"));
+    query.setParameter("MANDT", mandt);
+    query.setParameter("KATR6", katr6);
+    query.setParameter("ZZKV_CUSNO", cmrNo);
+    query.executeSql();
   }
 }
