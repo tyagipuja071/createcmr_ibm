@@ -29,6 +29,7 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AdminPK;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataRdc;
+import com.ibm.cio.cmr.request.entity.Kna1;
 import com.ibm.cio.cmr.request.entity.KunnrExt;
 import com.ibm.cio.cmr.request.entity.UpdatedAddr;
 import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation;
@@ -1281,7 +1282,6 @@ public class FranceHandler extends GEOHandler {
             String seqNo = "";// 1
             String postCd = "";// 7
             String countryAddr = ""; // BillTo:10, other:9
-            String vat = "";//
             currCell = (XSSFCell) row.getCell(0);
             cmrNo = validateColValFromCell(currCell);
 
@@ -1295,11 +1295,20 @@ public class FranceHandler extends GEOHandler {
               continue;
             }
 
-            TemplateValidation error = new TemplateValidation(name);
-
             if ("Data".equals(name)) {
-              // currCell = (XSSFCell) row.getCell(12);
-              // vat = validateColValFromCell(currCell);
+              String vat = "";// 12
+              currCell = (XSSFCell) row.getCell(12);
+              vat = validateColValFromCell(currCell);
+              String isic = "";// 3
+              currCell = (XSSFCell) row.getCell(3);
+              vat = validateColValFromCell(currCell);
+              String classificationCd = "";// 11
+              currCell = (XSSFCell) row.getCell(11);
+              vat = validateColValFromCell(currCell);
+              String inac = "";// 4
+              currCell = (XSSFCell) row.getCell(4);
+              vat = validateColValFromCell(currCell);
+
               // try{
               // if (!StringUtils.isBlank(vat)) {
               // if (!validateVAT(country, vat)) {
@@ -1318,13 +1327,45 @@ public class FranceHandler extends GEOHandler {
               // service.");
               // e.printStackTrace();
               // }
+
+              // if (!StringUtils.isBlank(isic) &&
+              // !StringUtils.isBlank(classificationCd)
+              // && ((!"9500".equals(isic) && "60".equals(classificationCd)) ||
+              // ("9500".equals(isic) && !"60".equals(classificationCd)))) {
+              // LOG.trace(
+              // "Note that ISIC value 9500 can be entered only for CMR with
+              // Classification code 60. Please fix and upload the template
+              // again.");
+              // error.addError((row.getRowNum() + 1), "Classification Code",
+              // "Note that ISIC value 9500 can be entered only for CMR with
+              // Classification code 60. Please fix and upload the template
+              // again.");
+              // }
+
+              // if (!StringUtils.isBlank(inac) && inac.length() == 4 &&
+              // !StringUtils.isNumeric(inac) && !"@@@@".equals(inac)
+              // && !inac.matches("^[a-zA-Z][a-zA-Z][0-9][0-9]$")) {
+              // LOG.trace("INAC should have all 4 digits or 2 letters and 2
+              // digits in order.");
+              // error.addError((row.getRowNum() + 1), "INAC/NAC", "INAC should
+              // have all 4 digits or 2 letters and 2 digits in order.");
+              // }
             }
 
             if (StringUtils.isEmpty(cmrNo)) {
+              TemplateValidation error = new TemplateValidation(name);
               LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that CMR No. is mandatory. Please fix and upload the template again.");
               error.addError((row.getRowNum() + 1), "CMR No.",
                   "The row " + (row.getRowNum() + 1) + ":Note that CMR No. is mandatory. Please fix and upload the template again.<br>");
               validations.add(error);
+            }
+            if (isDivCMR(cmrNo)) {
+              TemplateValidation error = new TemplateValidation(name);
+              LOG.trace("The row " + (row.getRowNum() + 1) + ":Note the CMR number is not existed or a divestiture CMR records.");
+              error.addError((row.getRowNum() + 1), "CMR No.",
+                  "The row " + (row.getRowNum() + 1) + ":Note the CMR number is not existed or a divestiture CMR records.<br>");
+              validations.add(error);
+
             }
             if (!"Data".equals(name)) {
               currCell = (XSSFCell) row.getCell(7);
@@ -1337,6 +1378,7 @@ public class FranceHandler extends GEOHandler {
                 }
                 countryAddr = validateColValFromCell(currCell);
                 if (StringUtils.isEmpty(countryAddr)) {
+                  TemplateValidation error = new TemplateValidation(name);
                   LOG.trace("Please input landed Country when postal code is filled. Please fix and upload the template again.");
                   error.addError((row.getRowNum() + 1), "Landed Country", "The row " + (row.getRowNum() + 1)
                       + ":Please input landed Country when postal code is filled. Please fix and upload the template again.<br>");
@@ -1345,6 +1387,7 @@ public class FranceHandler extends GEOHandler {
                   try {
                     ValidationResult validation = checkPostalCode(countryAddr.substring(0, 2), postCd);
                     if (!validation.isSuccess()) {
+                      TemplateValidation error = new TemplateValidation(name);
                       LOG.trace(validation.getErrorMessage());
                       error.addError((row.getRowNum() + 1), "Postal code.",
                           "The row " + (row.getRowNum() + 1) + ":" + validation.getErrorMessage() + "<br>");
@@ -1358,6 +1401,7 @@ public class FranceHandler extends GEOHandler {
               }
 
               if (!StringUtils.isBlank(cmrNo) && StringUtils.isBlank(seqNo)) {
+                TemplateValidation error = new TemplateValidation(name);
                 LOG.trace("Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
                 error.addError((row.getRowNum() + 1), "Address Sequence No.", "The row " + (row.getRowNum() + 1)
                     + ":Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.<br>");
@@ -1368,6 +1412,27 @@ public class FranceHandler extends GEOHandler {
         }
       }
     }
+  }
+
+  private static boolean isDivCMR(String cmrNo) {
+    boolean isDivestiture = true;
+    String mandt = SystemConfiguration.getValue("MANDT");
+    EntityManager entityManager = JpaManager.getEntityManager();
+    String sql = ExternalizedQuery.getSql("FR.GET.ZS01KATR10");
+
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setForReadOnly(true);
+    query.setParameter("KATR6", SystemLocation.FRANCE);
+    query.setParameter("MANDT", mandt);
+    query.setParameter("CMR", cmrNo);
+
+    Kna1 zs01 = query.getSingleResult(Kna1.class);
+    if (zs01 != null) {
+      if (StringUtils.isBlank(zs01.getKatr10())) {
+        isDivestiture = false;
+      }
+    }
+    return isDivestiture;
   }
 
   private static ValidationResult checkPostalCode(String landedCountry, String postalCode) throws Exception {
