@@ -89,14 +89,16 @@ function classFieldBehaviour() {
   }
 }
 
-function disableAddrFieldsMT() {
+function disableAddrFieldsMT(cntry, addressMode, saving, finalSave, force) {
   var custType = FormManager.getActualValue('custGrp');
   var addrType = FormManager.getActualValue('addrType');
 
   if (custType == 'LOCAL' && addrType == 'ZS01') {
     FormManager.readOnly('landCntry');
   } else {
-    FormManager.setValue('landCntry', FormManager.getActualValue('defaultLandedCountry'));
+    if (!saving && addressMode != 'updateAddress') {
+      FormManager.setValue('landCntry', FormManager.getActualValue('defaultLandedCountry'));
+    }
     FormManager.enable('landCntry');
   }
   // Phone - for shipping
