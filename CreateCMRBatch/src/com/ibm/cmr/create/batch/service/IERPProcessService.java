@@ -588,9 +588,12 @@ public class IERPProcessService extends BaseBatchService {
                 admin.setReqStatus(CMR_REQUEST_STATUS_CPR);
               }
               if (admin.getReqStatus() != null && CMR_REQUEST_STATUS_CPR.equals(admin.getReqStatus())) {
+                LOG.debug("no Of Working days before check= " + noOFWorkingDays + " For Request ID=" + admin.getId().getReqId());
                 noOFWorkingDays = IERPRequestUtils.checked2WorkingDays(admin.getProcessedTs(), SystemUtil.getCurrentTimestamp());
+                LOG.debug("no Of Working days after check= " + noOFWorkingDays + " For Request ID=" + admin.getId().getReqId());
               }
               if (noOFWorkingDays >= 3) {
+                LOG.debug("Processing 2nd time ,no Of Working days = " + noOFWorkingDays);
                 createCommentLog(em, admin, "RDc processing has started. Waiting for completion.");
                 data.setCustAcctType(rdcOrderBlk);
                 updateEntity(data, em);
