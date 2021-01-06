@@ -84,6 +84,9 @@ public class AutomationStatsModel {
 
   private String pool;
 
+  @Column(name = "CREATE_TS")
+  private String createTs;
+
   public StatsPK getId() {
     return id;
   }
@@ -290,6 +293,14 @@ public class AutomationStatsModel {
 
   public void setPool(String pool) {
     this.pool = pool;
+  }
+
+  public String getCreateTs() {
+    return createTs;
+  }
+
+  public void setCreateTs(String createTs) {
+    this.createTs = createTs;
   }
 
 }

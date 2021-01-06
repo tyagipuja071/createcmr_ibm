@@ -124,7 +124,7 @@
       </cmr:row>
       <cmr:row topPad="10" addBackground="false">
         <cmr:column span="6">
-          <cmr:grid url="/changeloglist.json" id="changeLogGrid" span="6" useFilter="true" usePaging="false">
+          <cmr:grid url="/changeloglist.json" id="changeLogGrid" span="6" useFilter="true" usePaging="true">
             <cmr:gridParam fieldId="requestIdStr" value=":requestIdStr" />
             <cmr:gridParam fieldId="userId" value=":userId" />
             <cmr:gridParam fieldId="tablName" value=":tablName" />
