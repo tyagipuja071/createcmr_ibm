@@ -594,7 +594,7 @@ function enterpriseMalta() {
     return;
   }
 
-  if (custType == 'BUSPR' || custType == 'XBP' && role != 'VIEWER') {
+  if (custType == 'BUSPR' || custType == 'XBP') {
     FormManager.hide('Enterprise', 'enterprise');
   } else {
     FormManager.show('Enterprise', 'enterprise');
