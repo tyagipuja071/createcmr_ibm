@@ -1007,7 +1007,11 @@ public class MaltaHandler extends BaseSOFHandler {
               currCell = (XSSFCell) row.getCell(9);
               poBox = validateColValFromCell(currCell);
 
-              currCell = (XSSFCell) row.getCell(10);
+              if ("Sold-To".equalsIgnoreCase(sheet.getSheetName()) || "Bill-To".equalsIgnoreCase(sheet.getSheetName())) {
+                currCell = (XSSFCell) row.getCell(10);
+              } else {
+                currCell = (XSSFCell) row.getCell(9);
+              }
               landCntry = validateColValFromCell(currCell);
 
               if (!StringUtils.isBlank(cmrNo) && !StringUtils.isBlank(seqNo)) {
