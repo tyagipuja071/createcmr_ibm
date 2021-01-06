@@ -347,13 +347,20 @@ public class IERPMassProcessService extends TransConnService {
           if (isCompletedSuccessfully(resultCode)) {
             if (response.getRecords() != null) {
               if (response != null && response.getRecords() != null && response.getRecords().size() > 0) {
-                comment.append("Record with the following Kunnr, Address sequence and address types on request ID " + admin.getId().getReqId()
-                    + " was SUCCESSFULLY processed:\n");
-                for (RDcRecord pRecord : response.getRecords()) {
-                  comment.append("Kunnr: " + pRecord.getSapNo() + ", sequence number: " + pRecord.getSeqNo() + ", ");
-                  comment.append(" address type: " + pRecord.getAddressType() + "\n");
+
+                if (CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equals(resultCode)) {
+                  comment.append("RDc records were not processed.");
+                  comment = comment.append("Warning Message: " + response.getMessage());
+                } else {
+                  comment.append("Record with the following Kunnr, Address sequence and address types on request ID " + admin.getId().getReqId()
+                      + " was SUCCESSFULLY processed:\n");
+                  for (RDcRecord pRecord : response.getRecords()) {
+                    comment.append("Kunnr: " + pRecord.getSapNo() + ", sequence number: " + pRecord.getSeqNo() + ", ");
+                    comment.append(" address type: " + pRecord.getAddressType() + "\n");
+                  }
                 }
               }
+
             } else {
               comment.append("RDc records were not processed.");
               if (CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equals(resultCode)) {
