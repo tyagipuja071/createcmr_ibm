@@ -1032,6 +1032,40 @@ function disbleCreateByModel() {
   }
 }
 
+/**
+ * Validator to check whether D&B search has been performed
+ */
+function addDnBSearchValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        if (FormManager.getActualValue('dnbPrimary') != 'Y') {
+          return new ValidationResult(null, true);
+        }
+        var reqType = FormManager.getActualValue('reqType');
+        if (reqType == 'U') {
+          return new ValidationResult(null, true);
+        }
+        if (reqType == 'C') {
+          return new ValidationResult(null, true);
+        }
+        var reqStatus = FormManager.getActualValue('reqStatus');
+        if (reqStatus != 'DRA') {
+          return new ValidationResult(null, true);
+        }
+        if (isSkipDnbMatching()) {
+          return new ValidationResult(null, true);
+        }
+        var result = FormManager.getActualValue('findDnbResult');
+        if (result == '' || result.toUpperCase() == 'NOT DONE') {
+          return new ValidationResult(null, false, 'D&B Search has not been performed yet.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.NL = [ '788' ];
   console.log('adding NETHERLANDS functions...');
@@ -1068,5 +1102,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setAddressDetailsForView, GEOHandler.NL);
 
   GEOHandler.registerValidator(addCMRSearchValidator, GEOHandler.NL, null, true);
+  GEOHandler.registerValidator(addDnBSearchValidator, GEOHandler.NL, null, true);
   GEOHandler.addAfterConfig(disbleCreateByModel, GEOHandler.NL);
 });
