@@ -111,9 +111,16 @@ public class DPLCheckElement extends ValidatingElement {
           if (!isDPLApprovalPresent(entityManager, data.getCmrIssuingCntry(), admin.getReqType())) {
             validation.setSuccess(false);
             validation.setMessage("AF".equals(scorecard.getDplChkResult()) ? "All Failed" : "Some Failed");
-            output.setOnError(true);
-            engineData.addRejectionComment("OTH", "DPL check failed for one or more addresses on the request.", "", "");
-            output.setDetails("DPL check failed for one or more addresses on the request.");
+            details.setLength(0);
+            details.append("DPL check failed for one or more addresses on the request.\n");
+            if ("N".equals(scorecard.getDplAssessmentResult())) {
+              details.append("No actual results found during the search.");
+              output.setOnError(false);
+            } else {
+              output.setOnError(true);
+              engineData.addRejectionComment("OTH", "DPL check failed for one or more addresses on the request.", "", "");
+            }
+            output.setDetails(details.toString());
           } else {
             validation.setSuccess(true);
             validation.setMessage("Approval Required");
@@ -243,15 +250,21 @@ public class DPLCheckElement extends ValidatingElement {
         break;
       case "SF":
         validation.setSuccess(false);
-        output.setOnError(true);
-        engineData.addRejectionComment("OTH", "DPL Check Failed for some addresses.", "", "");
+        if ("N".equals(scorecard.getDplAssessmentResult())) {
+          details.append(details.length() > 0 ? "\n" : "");
+          details.append("No actual results found during the search.");
+          output.setOnError(false);
+        } else {
+          output.setOnError(true);
+          engineData.addRejectionComment("OTH", "DPL Check Failed for some addresses.", "", "");
+        }
         validation.setMessage("Some Failed");
         break;
       case "AF":
         validation.setSuccess(false);
         if ("N".equals(scorecard.getDplAssessmentResult())) {
           details.append(details.length() > 0 ? "\n" : "");
-          details.append(scorecard.getDplAssessmentCmt());
+          details.append("No actual results found during the search.");
           output.setOnError(false);
         } else {
           output.setOnError(true);
