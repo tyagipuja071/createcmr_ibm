@@ -746,6 +746,15 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
               ${summary.data.enterprise}
     				</cmr:column>
           </cmr:view>
+          
+          <cmr:view forCountry="780">
+            <cmr:column span="1" width="130">
+              <label><cmr:fieldLabel fieldId="Enterprise" />:</label>
+            </cmr:column>
+            <cmr:column span="1" width="170">
+              ${summary.data.enterprise}
+    				</cmr:column>
+          </cmr:view>
         </cmr:row>
 
         <cmr:row addBackground="false">

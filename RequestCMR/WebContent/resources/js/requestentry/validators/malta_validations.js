@@ -594,13 +594,13 @@ function enterpriseMalta() {
     return;
   }
 
-  if (custType == 'COMME' || custType == 'PRICU' || custType == 'THDPT' || custType == 'GOVRN' || custType == 'XCOM' || custType == 'XGOV' || custType == 'XTP') {
-    FormManager.show('Enterprise', 'enterprise');
-  } else {
+  if (custType == 'BUSPR' || custType == 'XBP' && role != 'VIEWER') {
     FormManager.hide('Enterprise', 'enterprise');
+  } else {
+    FormManager.show('Enterprise', 'enterprise');
   }
 
-  if (reqType == 'C' && role == 'REQUESTER') {
+  if (reqType == 'C' && role != 'PROCESSOR') {
     FormManager.readOnly('enterprise');
   } else {
     FormManager.enable('enterprise');
@@ -612,6 +612,7 @@ function enterpriseValidation() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
+        var numPattern = /^[0-9]+$/;
         var reqType = FormManager.getActualValue('reqType');
         var custSubGrp = FormManager.getActualValue('custSubGrp');
         var enterprise = FormManager.getActualValue('enterprise');
@@ -620,9 +621,15 @@ function enterpriseValidation() {
         }
         if (enterprise.length >= 1 && enterprise.length != 6) {
           return new ValidationResult(null, false, 'Enterprise Number should be 6 digit long.');
-        } else {
-          return new ValidationResult(null, true);
         }
+        if (cmrNo.length > 1 && !cmrNo.match(numPattern)) {
+          return new ValidationResult({
+            id : 'enterprise',
+            type : 'text',
+            name : 'cmrNo'
+          }, false, 'CMR Number should be number only.');
+        }
+        return new ValidationResult(null, true);
       }
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
