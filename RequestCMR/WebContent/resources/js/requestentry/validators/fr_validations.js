@@ -359,14 +359,14 @@ function setVATOnScenario(vatExemptOnchange) {
       if (dijit.byId('vatExempt') != undefined && dijit.byId('vatExempt') != null) {
         FormManager.getField('vatExempt').set('checked', true);
       }
-    } else if (custSubGrp == 'GOVRN' || custSubGrp == 'CBVRN' || custSubGrp == 'COMME' || custSubGrp == 'HOSTC' || custSubGrp == 'THDPT') {
+    } else if (custSubGrp == 'GOVRN' || custSubGrp == 'COMME' || custSubGrp == 'HOSTC' || custSubGrp == 'THDPT') {
       FormManager.enable('vat');
       FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
     } else if (custSubGrp == 'INTER' || custSubGrp == 'INTSO' || custSubGrp == 'BUSPR' || custSubGrp == 'LCFIN') {
       FormManager.removeValidator('vat', Validators.REQUIRED);
       FormManager.enable('vat');
     } else if (custSubGrp == 'CBMME' || custSubGrp == 'XBUSP' || custSubGrp == 'CBTER' || custSubGrp == 'CBSTC' || custSubGrp == 'CBDPT'
-        || custSubGrp == 'CBTSO' || custSubGrp == 'CBFIN') {
+        || custSubGrp == 'CBTSO' || custSubGrp == 'CBFIN' || custSubGrp == 'CBVRN') {
       var isVATEUCntry = false;
       var reqId = FormManager.getActualValue('reqId');
       var qParams = {
