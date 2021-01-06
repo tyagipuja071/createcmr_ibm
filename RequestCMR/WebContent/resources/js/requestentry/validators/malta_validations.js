@@ -766,7 +766,7 @@ function disableEnableFieldsForMT() {
     FormManager.readOnly('specialTaxCd');
     FormManager.readOnly('custPrefLang');
   } else if (reqType == 'C' && role == 'PROCESSOR') {
-    FormManager.readOnly('cmrNo');
+    FormManager.enable('cmrNo');
   } else {
     FormManager.enable('cmrNo');
     FormManager.enable('cmrOwner');
