@@ -50,13 +50,41 @@ public class NLTransformer extends EMEATransformer {
 
   private static final Logger LOG = Logger.getLogger(NLTransformer.class);
 
-  protected static final String[] ADDRESS_ORDER = { "ZS01", "ZKVK", "ZVAT", "ZP01", "ZD01", "ZI01" };
+  private static final String[] ADDRESS_ORDER = { "ZS01", "ZP01", "ZI01", "ZD01", "ZS02" };
   protected boolean duplicateRecordFound = false;
   protected Map<String, String> dupCMRValues = new HashMap<String, String>();
   protected List<String> dupShippingSequences = null;
   private static final List<String> SUB_TYPES_INTERNAL = Arrays.asList("BEINT", "LUINT", "INTER");
   private static final List<String> SUB_TYPES_INTERNAL_SO = Arrays.asList("BEISO", "LUISO");
 
+  private static final String[] NO_UPDATE_FIELDS = { "OrganizationNo", "CurrencyCode" };
+
+  public static String DEFAULT_LANDED_COUNTRY = "AE";
+  public static final String CMR_REQUEST_REASON_TEMP_REACT_EMBARGO = "TREC";
+  public static final String CMR_REQUEST_STATUS_CPR = "CPR";
+  public static final String CMR_REQUEST_STATUS_PCR = "PCR";
+  // private static final String DEFAULT_CLEAR_CHAR = "@";
+
+  private static final String ADDRESS_USE_EXISTS = "Y";
+  private static final String ADDRESS_USE_NOT_EXISTS = "N";
+  private static final String ADDRESS_USE_MAILING = "1";
+  private static final String ADDRESS_USE_BILLING = "2";
+  private static final String ADDRESS_USE_INSTALLING = "3";
+  private static final String ADDRESS_USE_SHIPPING = "4";
+  private static final String ADDRESS_USE_EPL_MAILING = "5";
+  private static final String ADDRESS_USE_LIT_MAILING = "6";
+  private static final String ADDRESS_USE_COUNTRY_A = "A";
+  private static final String ADDRESS_USE_COUNTRY_B = "B";
+  private static final String ADDRESS_USE_COUNTRY_C = "C";
+  private static final String ADDRESS_USE_COUNTRY_D = "D";
+  private static final String ADDRESS_USE_COUNTRY_E = "E";
+  private static final String ADDRESS_USE_COUNTRY_F = "F";
+  private static final String ADDRESS_USE_COUNTRY_G = "G";
+  private static final String ADDRESS_USE_COUNTRY_H = "H";
+  private static final String[] BELUX_GBMSBM_COUNTRIES = { "788" };
+  private static final String SCENARIO_TYPE_SBM = "SBM";
+  private static final String SCENARIO_TYPE_GBM = "GBM";
+  // private static final String GULF_DUPLICATE = "GULF";
   protected static Map<String, String> SOURCE_CODE_MAP = new HashMap<String, String>();
 
   static {
@@ -81,18 +109,14 @@ public class NLTransformer extends EMEATransformer {
   @Override
   public String getAddressKey(String addrType) {
     switch (addrType) {
+    case "ZP01":
+      return "Bill-To";
     case "ZS01":
-      return "General";
+      return "Install-At";
+    case "ZD01":
+      return "Ship-To";
     case "ZI01":
       return "EPL";
-    case "ZD01":
-      return "Shipping";
-    case "ZP01":
-      return "Billing";
-    case "ZKVK":
-      return "KVK";
-    case "ZVAT":
-      return "VAT";
     default:
       return "";
     }
@@ -101,18 +125,14 @@ public class NLTransformer extends EMEATransformer {
   @Override
   public String getTargetAddressType(String addrType) {
     switch (addrType) {
+    case "ZP01":
+      return "Bill-To";
     case "ZS01":
-      return "General";
+      return "Install-At";
+    case "ZD01":
+      return "Ship-To";
     case "ZI01":
       return "EPL";
-    case "ZD01":
-      return "Shipping";
-    case "ZP01":
-      return "Billing";
-    case "ZKVK":
-      return "KVK";
-    case "ZVAT":
-      return "VAT";
     default:
       return "";
     }
@@ -131,18 +151,33 @@ public class NLTransformer extends EMEATransformer {
   @Override
   public String getAddressUse(Addr addr) {
     switch (addr.getId().getAddrType()) {
-    case MQMsgConstants.ADDR_ZS01:
-      return "1";
-    case "ZKVK":
-      return "2";
-    case "ZVAT":
-      return "3";
     case MQMsgConstants.ADDR_ZP01:
-      return "4";
+      return MQMsgConstants.SOF_ADDRESS_USE_BILLING;
+    case MQMsgConstants.ADDR_ZS01:
+      return MQMsgConstants.SOF_ADDRESS_USE_INSTALLING;
     case MQMsgConstants.ADDR_ZD01:
-      return "5";
+      return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
     case MQMsgConstants.ADDR_ZI01:
-      return "6";
+      return MQMsgConstants.SOF_ADDRESS_USE_EPL;
+    case MQMsgConstants.ADDR_ZS02:
+      return MQMsgConstants.SOF_ADDRESS_USE_MAILING;
+    default:
+      return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
+    }
+  }
+
+  public String getAddressUseByType(String addrType) {
+    switch (addrType) {
+    case MQMsgConstants.ADDR_ZP01:
+      return MQMsgConstants.SOF_ADDRESS_USE_BILLING;
+    case MQMsgConstants.ADDR_ZS01:
+      return MQMsgConstants.SOF_ADDRESS_USE_INSTALLING;
+    case MQMsgConstants.ADDR_ZD01:
+      return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
+    case MQMsgConstants.ADDR_ZI01:
+      return MQMsgConstants.SOF_ADDRESS_USE_EPL;
+    case MQMsgConstants.ADDR_ZS02:
+      return MQMsgConstants.SOF_ADDRESS_USE_MAILING;
     default:
       return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
     }
@@ -180,35 +215,6 @@ public class NLTransformer extends EMEATransformer {
     }
     return true;
   }
-
-  private static final String[] NO_UPDATE_FIELDS = { "OrganizationNo", "CurrencyCode" };
-
-  public static String DEFAULT_LANDED_COUNTRY = "AE";
-  public static final String CMR_REQUEST_REASON_TEMP_REACT_EMBARGO = "TREC";
-  public static final String CMR_REQUEST_STATUS_CPR = "CPR";
-  public static final String CMR_REQUEST_STATUS_PCR = "PCR";
-  // private static final String DEFAULT_CLEAR_CHAR = "@";
-
-  private static final String ADDRESS_USE_EXISTS = "Y";
-  private static final String ADDRESS_USE_NOT_EXISTS = "N";
-  private static final String ADDRESS_USE_MAILING = "1";
-  private static final String ADDRESS_USE_BILLING = "2";
-  private static final String ADDRESS_USE_INSTALLING = "3";
-  private static final String ADDRESS_USE_SHIPPING = "4";
-  private static final String ADDRESS_USE_EPL_MAILING = "5";
-  private static final String ADDRESS_USE_LIT_MAILING = "6";
-  private static final String ADDRESS_USE_COUNTRY_A = "A";
-  private static final String ADDRESS_USE_COUNTRY_B = "B";
-  private static final String ADDRESS_USE_COUNTRY_C = "C";
-  private static final String ADDRESS_USE_COUNTRY_D = "D";
-  private static final String ADDRESS_USE_COUNTRY_E = "E";
-  private static final String ADDRESS_USE_COUNTRY_F = "F";
-  private static final String ADDRESS_USE_COUNTRY_G = "G";
-  private static final String ADDRESS_USE_COUNTRY_H = "H";
-  private static final String[] BELUX_GBMSBM_COUNTRIES = { "788" };
-  private static final String SCENARIO_TYPE_SBM = "SBM";
-  private static final String SCENARIO_TYPE_GBM = "GBM";
-  // private static final String GULF_DUPLICATE = "GULF";
 
   @Override
   public void formatDataLines(MQMessageHandler handler) {
@@ -509,27 +515,6 @@ public class NLTransformer extends EMEATransformer {
 
     if ("788".equals(data.getCmrIssuingCntry())) {
       DEFAULT_LANDED_COUNTRY = "NL";
-    }
-  }
-
-  public String getAddressUseByType(String addrType) {
-    switch (addrType) {
-    case MQMsgConstants.ADDR_ZP01:
-      return MQMsgConstants.SOF_ADDRESS_USE_BILLING;
-    case MQMsgConstants.ADDR_ZS01:
-      return MQMsgConstants.SOF_ADDRESS_USE_INSTALLING;
-    case MQMsgConstants.ADDR_ZD01:
-      return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
-    case MQMsgConstants.ADDR_ZI01:
-      return MQMsgConstants.SOF_ADDRESS_USE_EPL;
-    case MQMsgConstants.ADDR_ZS02:
-      return MQMsgConstants.SOF_ADDRESS_USE_MAILING;
-    case MQMsgConstants.ADDR_ZP02:
-      return MQMsgConstants.SOF_ADDRESS_USE_COUNTRY_USE_G;
-    case MQMsgConstants.ADDR_ZP03:
-      return MQMsgConstants.SOF_ADDRESS_USE_BILLING;
-    default:
-      return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
     }
   }
 
@@ -900,26 +885,25 @@ public class NLTransformer extends EMEATransformer {
 
       legacyCust.setAccAdminBo("");
       legacyCust.setCeDivision("");
-      // CMR-5993
-      String cntry = legacyCust.getId().getSofCntryCode().trim();
-      String sales_Rep_ID = cntry + cntry;
-      if ((SCENARIO_TYPE_SBM.equals(data.getCustGrp()) || SCENARIO_TYPE_GBM.equals(data.getCustGrp()))
-          && Arrays.asList(BELUX_GBMSBM_COUNTRIES).contains(cntry)) {
-        sales_Rep_ID = "530530";
-      }
+
+      // George CREATCMR-371 send value 999999 to DB2, to both REMXA and REMXD
+      String sales_Rep_ID = "999999";
       legacyCust.setSalesGroupRep(sales_Rep_ID);
       legacyCust.setSalesRepNo(sales_Rep_ID);
       legacyCust.setDcRepeatAgreement("0");
       legacyCust.setLeasingInd("0");
       legacyCust.setAuthRemarketerInd("0");
       legacyCust.setCeDivision("2");
-      legacyCust.setLangCd("");
+
       legacyCust.setDeptCd("");
       legacyCust.setCurrencyCd("");
-      legacyCust.setTaxCd("");
       legacyCust.setOverseasTerritory("");
       legacyCust.setInvoiceCpyReqd("");
       legacyCust.setCustType("");
+      // George CREATCMR-546
+      legacyCust.setTaxCd(data.getTaxCd1() == null ? "" : data.getTaxCd1());
+      legacyCust.setTelNoOrVat(data.getPhone1() == null ? "" : data.getPhone1());
+      legacyCust.setLangCd(data.getCustPrefLang() == null ? "" : data.getCustPrefLang());
 
       if (SystemLocation.ABU_DHABI.equals(data.getCmrIssuingCntry()) && !StringUtils.isBlank(data.getBpAcctTyp())) {
         legacyCust.setCustType(data.getBpAcctTyp());
@@ -995,23 +979,6 @@ public class NLTransformer extends EMEATransformer {
 
       // CMR-5993
       String cntry = legacyCust.getId().getSofCntryCode().trim();
-      String sales_Rep_ID = cntry + cntry;
-      if ((SCENARIO_TYPE_SBM.equals(data.getCustGrp()) || SCENARIO_TYPE_GBM.equals(data.getCustGrp()))
-          && Arrays.asList(BELUX_GBMSBM_COUNTRIES).contains(cntry)) {
-        sales_Rep_ID = "530530";
-      }
-
-      if (!StringUtils.isBlank(data.getRepTeamMemberNo())) {
-        legacyCust.setSalesGroupRep(data.getRepTeamMemberNo());
-      } else {
-        legacyCust.setSalesGroupRep(sales_Rep_ID);
-      }
-
-      if (!StringUtils.isBlank(data.getRepTeamMemberNo())) {
-        legacyCust.setSalesRepNo(data.getRepTeamMemberNo());
-      } else {
-        legacyCust.setSalesRepNo(sales_Rep_ID);
-      }
 
       if (!StringUtils.isBlank(data.getPhone1())) {
         legacyCust.setTelNoOrVat(data.getPhone1());

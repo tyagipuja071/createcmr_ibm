@@ -894,10 +894,15 @@ public class BELUXTransformer extends EMEATransformer {
       legacyCust.setLangCd("");
       legacyCust.setDeptCd("");
       legacyCust.setCurrencyCd("");
-      legacyCust.setTaxCd("");
+      legacyCust.setTaxCd(data.getTaxCd1() == null ? "" : data.getTaxCd1());
       legacyCust.setOverseasTerritory("");
       legacyCust.setInvoiceCpyReqd("");
       legacyCust.setCustType("");
+
+      // George CREATCMR-546
+      legacyCust.setTaxCd(data.getTaxCd1() == null ? "" : data.getTaxCd1());
+      legacyCust.setTelNoOrVat(data.getPhone1() == null ? "" : data.getPhone1());
+      legacyCust.setLangCd(data.getCustPrefLang() == null ? "" : data.getCustPrefLang());
 
       if (SystemLocation.ABU_DHABI.equals(data.getCmrIssuingCntry()) && !StringUtils.isBlank(data.getBpAcctTyp())) {
         legacyCust.setCustType(data.getBpAcctTyp());
@@ -939,8 +944,10 @@ public class BELUXTransformer extends EMEATransformer {
         legacyCust.setBankAcctNo("");
       }
 
-      if ("624LU".equals(data.getCountryUse()) || "624".equals(data.getCountryUse())) {
+      if ("624".equals(data.getCountryUse())) {
         legacyCust.setRealCtyCd("624");
+      } else if ("624LU".equals(data.getCountryUse())) {
+        legacyCust.setRealCtyCd("623");
       } else if ("788".equals(data.getCmrIssuingCntry())) {
         legacyCust.setRealCtyCd("788");
       }
@@ -955,8 +962,10 @@ public class BELUXTransformer extends EMEATransformer {
         }
       }
 
-      if ("624LU".equals(data.getCountryUse()) || "624".equals(data.getCountryUse())) {
+      if ("624".equals(data.getCountryUse())) {
         legacyCust.setRealCtyCd("624");
+      } else if ("624LU".equals(data.getCountryUse())) {
+        legacyCust.setRealCtyCd("623");
       } else if ("788".equals(data.getCmrIssuingCntry())) {
         legacyCust.setRealCtyCd("788");
       }
