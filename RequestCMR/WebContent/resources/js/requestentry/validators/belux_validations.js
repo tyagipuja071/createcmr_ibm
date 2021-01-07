@@ -490,6 +490,8 @@ function setEconomicCodeValues(searchTerm) {
   var geoCd = FormManager.getActualValue('countryUse').substring(3, 5);
   var custSubGrp = FormManager.getActualValue('custSubGrp').substring(2, 5);
   var custSGrp = FormManager.getActualValue('custSubGrp');
+  var isuCd = FormManager.getActualValue('isuCd');
+  var clientTier = FormManager.getActualValue('clientTier');
 
   var economicCode = [];
   if (searchTerm != '' && (custSubGrp == 'COM' || custSubGrp == 'PUB' || custSubGrp == '3PA')) {
@@ -514,8 +516,13 @@ function setEconomicCodeValues(searchTerm) {
       }
     }
   }
-  if (custSubGrp == 'PUB' || custSubGrp == 'COM') {
-    FormManager.setValue('economicCd', 'K11');
+  if (custSubGrp == 'PUB' || custSubGrp == 'COM' || custSubGrp == '3PA') {
+    // FormManager.setValue('economicCd', 'K11');
+    if ('32' == isuCd && 'N' == clientTier) {
+      FormManager.setValue('economicCd', 'K43');
+    } else if ('5B' == isuCd && '7' == clientTier) {
+      FormManager.setValue('economicCd', 'K44');
+    }
   } else if (custSGrp == 'CBBUS' || custSubGrp == 'BUS') {
     FormManager.setValue('economicCd', 'K49');
     if (role == 'Requester')
@@ -729,11 +736,17 @@ function addBELUXAddressTypeValidator() {
           if (soldToCnt == 0 || mailToCnt == 0) {
             return new ValidationResult(null, false, 'Sold-to, Mail-To address are mandatory.');
           } else if (installAtCnt > 1) {
-            //return new ValidationResult(null, false, 'Only one Install-at address can be defined. Please remove the additional Installing address.');
+            // return new ValidationResult(null, false, 'Only one Install-at
+            // address can be defined. Please remove the additional Installing
+            // address.');
+            return new ValidationResult(null, true);
           } else if (billToCnt > 1) {
             return new ValidationResult(null, false, 'Only one Bill-to address can be defined. Please remove the additional Billing address.');
           } else if (soldToCnt > 1) {
-            return new ValidationResult(null, false, 'Only one Sold-to address can be defined. Please remove the additional Mailing address.');
+            // return new ValidationResult(null, false, 'Only one Sold-to
+            // address can be defined. Please remove the additional Mailing
+            // address.');
+            return new ValidationResult(null, true);
           } else if (mailToCnt > 1) {
             return new ValidationResult(null, false, 'Only one Mail-To address can be defined. Please remove the additional Software address.');
           } else {
