@@ -416,4 +416,31 @@ public class DPLSearchService extends BaseSimpleService<Object> {
   protected boolean isTransactional() {
     return true;
   }
+
+  /**
+   * Returns the number of actual dpl search results for a particular search
+   * performed.
+   * 
+   * @param entityManager
+   * @param reqId
+   * @param user
+   * @return
+   * @throws Exception
+   */
+  public int getResultCount(EntityManager entityManager, long reqId, AppUser user) throws Exception {
+    ParamContainer params = new ParamContainer();
+    params.addParam("processType", "SEARCH");
+    params.addParam("reqId", reqId);
+    params.addParam("user", user);
+    List<DPLSearchResults> results = getPlainDPLSearchResults(entityManager, params);
+
+    int resultCount = 0;
+    for (DPLSearchResults result : results) {
+      if (result.getDeniedPartyRecords() != null) {
+        resultCount += result.getDeniedPartyRecords().size();
+      }
+    }
+    return resultCount;
+  }
+
 }

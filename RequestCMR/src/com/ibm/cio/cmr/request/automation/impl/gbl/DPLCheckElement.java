@@ -45,6 +45,7 @@ import com.ibm.comexp.at.exportchecks.ews.EWSProperties;
 public class DPLCheckElement extends ValidatingElement {
 
   private static final Logger log = Logger.getLogger(DPLCheckElement.class);
+  private static final DPLSearchService dplService = new DPLSearchService();
 
   public DPLCheckElement(String requestTypes, String actionOnError, boolean overrideData, boolean stopOnError) {
     super(requestTypes, actionOnError, overrideData, stopOnError);
@@ -113,7 +114,7 @@ public class DPLCheckElement extends ValidatingElement {
             validation.setMessage("AF".equals(scorecard.getDplChkResult()) ? "All Failed" : "Some Failed");
             details.setLength(0);
             details.append("DPL check failed for one or more addresses on the request.\n");
-            if ("N".equals(scorecard.getDplAssessmentResult())) {
+            if (dplService.getResultCount(entityManager, reqId, user) == 0) {
               details.append("No actual results found during the search.");
               output.setOnError(false);
             } else {
@@ -250,7 +251,7 @@ public class DPLCheckElement extends ValidatingElement {
         break;
       case "SF":
         validation.setSuccess(false);
-        if ("N".equals(scorecard.getDplAssessmentResult())) {
+        if (dplService.getResultCount(entityManager, reqId, user) == 0) {
           details.append(details.length() > 0 ? "\n" : "");
           details.append("No actual results found during the search.");
           output.setOnError(false);
@@ -262,7 +263,7 @@ public class DPLCheckElement extends ValidatingElement {
         break;
       case "AF":
         validation.setSuccess(false);
-        if ("N".equals(scorecard.getDplAssessmentResult())) {
+        if (dplService.getResultCount(entityManager, reqId, user) == 0) {
           details.append(details.length() > 0 ? "\n" : "");
           details.append("No actual results found during the search.");
           output.setOnError(false);
@@ -363,7 +364,6 @@ public class DPLCheckElement extends ValidatingElement {
       params.addParam("filePrefix", "AutoDPLSearch_");
 
       try {
-        DPLSearchService dplService = new DPLSearchService();
         dplService.process(null, params);
       } catch (Exception e) {
         log.warn("DPL results not attached to the request", e);
