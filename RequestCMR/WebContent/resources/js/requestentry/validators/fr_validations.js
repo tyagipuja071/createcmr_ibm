@@ -51,7 +51,7 @@ function afterConfigForFR() {
       FormManager.readOnly('ordBlk');
 
       internalDeptValidate();
-      iSICAndSubScenarioType('C');
+      iSICAndSubScenarioTypeCreate();
     }
 
     if (reqType == 'U') {
@@ -64,8 +64,9 @@ function afterConfigForFR() {
       FormManager.enable('ordBlk');
       orderBlockCodeValidator();
       setInternalDept();
+
       internalDeptValidate();
-      iSICAndSubScenarioType('U');
+      iSICAndSubScenarioTypeUpdate();
     }
   } else if (role == 'Processor') {
     FormManager.enable('abbrevNm');
@@ -3364,47 +3365,53 @@ function internalDeptValidate() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
-function iSICAndSubScenarioType(reqType) {
-  if (reqType == 'C') {
-    FormManager.addFormValidator((function() {
-      return {
-        validate : function() {
-          var custSubGrp = FormManager.getActualValue('custSubGrp');
-          var isicCd = FormManager.getActualValue('isicCd');
-          if (isicCd == '9500' && (custSubGrp != 'PRICU' || custSubGrp != 'XBLUM' || custSubGrp != 'IBMEM' || custSubGrp != 'CBIEM')) {
+function iSICAndSubScenarioTypeCreate() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        var isicCd = FormManager.getActualValue('isicCd');
+        if (isicCd == '9500') {
+          if (custSubGrp == 'PRICU' || custSubGrp == 'XBLUM' || custSubGrp == 'IBMEM' || custSubGrp == 'CBIEM') {
+            return new ValidationResult(null, true);
+          } else {
             return new ValidationResult({
               id : 'isicCd',
               type : 'text',
               name : 'isicCd'
             }, false, 'ISIC value 9500 is not allowed for other scenario than Private Person and IBM Employee.');
-          } else {
-            return new ValidationResult(null, true);
           }
-          return new ValidationResult(null, true);
         }
-      };
-    })(), 'MAIN_CUST_TAB', 'frmCMR');
-  } else if (reqType == 'U') {
-    FormManager.addFormValidator((function() {
-      return {
-        validate : function() {
-          var custClass = FormManager.getField('custClass');
-          var isicCd = FormManager.getActualValue('isicCd');
-          if (isicCd == '9500' && (custClass != '60' || custClass != '71')) {
-            return new ValidationResult({
-              id : 'isicCd',
-              type : 'text',
-              name : 'isicCd'
-            }, false, 'ISIC value 9500 is not allowed for other scenario than Private Person and IBM Employee.');
-          } else {
-            return new ValidationResult(null, true);
-          }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
 
-          return new ValidationResult(null, true);
+}
+
+function iSICAndSubScenarioTypeUpdate() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var custClass = FormManager.getField('custClass');
+        var isicCd = FormManager.getActualValue('isicCd');
+        if (isicCd == '9500') {
+          if (custClass == '60' || custClass == '71') {
+            return new ValidationResult(null, true);
+          } else {
+            return new ValidationResult({
+              id : 'isicCd',
+              type : 'text',
+              name : 'isicCd'
+            }, false, 'ISIC value 9500 is not allowed for other scenario than Private Person and IBM Employee.');
+          }
         }
-      };
-    })(), 'MAIN_CUST_TAB', 'frmCMR');
-  }
+
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+
 }
 
 var _vatExemptHandler = null;
