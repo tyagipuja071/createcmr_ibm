@@ -894,13 +894,16 @@ public class NLTransformer extends EMEATransformer {
       legacyCust.setLeasingInd("0");
       legacyCust.setAuthRemarketerInd("0");
       legacyCust.setCeDivision("2");
-      legacyCust.setLangCd("");
+
       legacyCust.setDeptCd("");
       legacyCust.setCurrencyCd("");
-      legacyCust.setTaxCd("");
       legacyCust.setOverseasTerritory("");
       legacyCust.setInvoiceCpyReqd("");
       legacyCust.setCustType("");
+      // George CREATCMR-546
+      legacyCust.setTaxCd(data.getTaxCd1() == null ? "" : data.getTaxCd1());
+      legacyCust.setTelNoOrVat(data.getPhone1() == null ? "" : data.getPhone1());
+      legacyCust.setLangCd(data.getCustPrefLang() == null ? "" : data.getCustPrefLang());
 
       if (SystemLocation.ABU_DHABI.equals(data.getCmrIssuingCntry()) && !StringUtils.isBlank(data.getBpAcctTyp())) {
         legacyCust.setCustType(data.getBpAcctTyp());
