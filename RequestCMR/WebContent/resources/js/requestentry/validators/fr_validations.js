@@ -134,6 +134,7 @@ function afterConfigForFR() {
     } else {
       updateAbbrNameWithZS01();
     }
+    setPPSCEIDRequired();
   });
   if (_custSubGrpHandler && _custSubGrpHandler[0]) {
     _custSubGrpHandler[0].onChange();
@@ -1249,7 +1250,7 @@ function setDummySIRETOnCustSubGrpChange(value) {
   if (reqType == 'U') {
     return;
   }
-  if (value == "COMME") {
+  if (value == "COMME" || value == "HOSTC" || value == "THDPT") {
     FormManager.enable('taxCd1');
     FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'SIRET' ], 'MAIN_CUST_TAB');
   } else if (value == 'PRICU' || value == 'XBLUM' || value == 'IBMEM' || value == 'CBIEM') {
@@ -2235,32 +2236,32 @@ function setTaxCdOnAddrSaveCROSS() {
 // })(), null, 'frmCMR_addressModal');
 // }
 
-function addPpsceidValidator() {
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var custSubGrp = FormManager.getActualValue('custSubGrp');
-        var ppsceid = FormManager.getActualValue('ppsceid');
-
-        if (custSubGrp == 'XBUSP' || custSubGrp == 'BUSPR') {
-          var validateResult = true;
-          if (ppsceid == '') {
-            validateResult = false;
-          }
-          if (validateResult == false) {
-            return new ValidationResult({
-              id : 'ppsceid',
-              type : 'text',
-              name : 'ppsceid'
-            }, false, 'PPS CEID is mandatory for Business Partner Scenario');
-          }
-        }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), 'MAIN_IBM_TAB', 'frmCMR');
-
-}
+// function addPpsceidValidator() {
+// FormManager.addFormValidator((function() {
+// return {
+// validate : function() {
+// var custSubGrp = FormManager.getActualValue('custSubGrp');
+// var ppsceid = FormManager.getActualValue('ppsceid');
+//
+// if (custSubGrp == 'XBUSP' || custSubGrp == 'BUSPR') {
+// var validateResult = true;
+// if (ppsceid == '') {
+// validateResult = false;
+// }
+// if (validateResult == false) {
+// return new ValidationResult({
+// id : 'ppsceid',
+// type : 'text',
+// name : 'ppsceid'
+// }, false, 'PPS CEID is mandatory for Business Partner Scenario');
+// }
+// }
+// return new ValidationResult(null, true);
+// }
+// };
+// })(), 'MAIN_IBM_TAB', 'frmCMR');
+//
+// }
 
 function endWith(string, endString) {
   var result = false;
@@ -3429,6 +3430,19 @@ function addVatExemptHandler() {
   }
 }
 
+function setPPSCEIDRequired() {
+  var reqType = FormManager.getActualValue('reqType');
+  var subGrp = FormManager.getActualValue('custSubGrp');
+  if (reqType == 'U') {
+    return;
+  }
+  if (subGrp == 'XBUSP' || subGrp == 'BUSPR') {
+    FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
+  } else {
+    FormManager.removeValidator('ppsceid', Validators.REQUIRED);
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.FR = [ SysLoc.FRANCE ];
   console.log('adding FR functions...');
@@ -3439,7 +3453,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(add32PostCdCntrySBOlogicOnISUChange, '706');
   GEOHandler.addAfterConfig(addIBOlogic, '706');
   GEOHandler.registerValidator(addFRAddressTypeValidator, '706', null, true);
-  GEOHandler.registerValidator(addPpsceidValidator, '706', null, true);
+  // GEOHandler.registerValidator(addPpsceidValidator, '706', null, true);
   GEOHandler.addAddrFunction(addLatinCharValidatorFR, '706');
   GEOHandler.addAddrFunction(addPhoneValidatorFR, '706');
   GEOHandler.addAddrFunction(setAbbrevNmLocnOnAddressSave, '706');
