@@ -757,6 +757,10 @@ function disableEnableFieldsForMT() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custType = FormManager.getActualValue('custGrp');
   var reqType = FormManager.getActualValue('reqType');
+  var ifProspect = FormManager.getActualValue('prospLegalInd');
+  if (dijit.byId('prospLegalInd')) {
+    ifProspect = dijit.byId('prospLegalInd').get('checked') ? 'Y' : 'N';
+  }
 
   if (reqType == 'C') {
     FormManager.readOnly('sensitiveFlag');
@@ -772,6 +776,8 @@ function disableEnableFieldsForMT() {
     FormManager.readOnly('cmrOwner');
     FormManager.readOnly('specialTaxCd');
     FormManager.readOnly('custPrefLang');
+  } else if (reqType == 'C' && role == 'PROCESSOR' && ifProspect == 'Y') {
+    FormManager.enable('cmrNo');
   } else if (reqType == 'C' && role == 'PROCESSOR') {
     FormManager.enable('cmrNo');
   } else {
@@ -891,6 +897,70 @@ function addIsicClassificationCodeValidator() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
+function validateCMRNumForProspect() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var cmrNo = FormManager.getActualValue('cmrNo');
+        var _custSubGrp = FormManager.getActualValue('custSubGrp');
+
+        var numPattern = /^[0-9]+$/;
+        var cmrSubNum = '';
+        if (FormManager.getActualValue('reqType') != 'C') {
+          return new ValidationResult(null, true);
+        }
+        if (cmrNo == '') {
+          return new ValidationResult(null, true);
+        } else {
+          cmrSubNum = cmrNo.substring(1, 6);
+
+          // Skip validation for Prospect Request
+          var ifProspect = FormManager.getActualValue('prospLegalInd');
+          if (dijit.byId('prospLegalInd')) {
+            ifProspect = dijit.byId('prospLegalInd').get('checked') ? 'Y' : 'N';
+          }
+          console.log("validateCMRNumberForLegacy ifProspect:" + ifProspect);
+          if ('Y' == ifProspect) {
+            if (cmrNo == '000000') {
+              return new ValidationResult(null, false, 'CMR Number should be number only Except -> 000000');
+            }
+            if (cmrNo.length >= 1 && cmrNo.length != 6) {
+              return new ValidationResult(null, false, 'CMR Number should be 6 digit long.');
+            }
+
+            // Validation for Internal Scenario
+            var internalScenarios = [ 'XINTE', 'INTER' ];
+            if (internalScenarios.includes(_custSubGrp)) {
+              if (!cmrNo.startsWith("99")) {
+                return new ValidationResult(null, false, 'Internal CMR should begin with 99.');
+              }
+              if (cmrNo.length > 1 && !cmrNo.match(numPattern)) {
+                return new ValidationResult({
+                  id : 'cmrNo',
+                  type : 'text',
+                  name : 'cmrNo'
+                }, false, 'CMR Number should be number only.');
+              }
+            } else if (!internalScenarios.includes(_custSubGrp)) {
+              if (cmrNo.startsWith("99")) {
+                return new ValidationResult(null, false, 'CMR Starting with 99 is allowed for Internal Scenario Only.');
+              }
+              if (cmrNo.length > 1 && ((!cmrNo.startsWith('P') && isNaN(cmrNo.substring(0, 1))) || (!cmrSubNum.match(numPattern)))) {
+                return new ValidationResult({
+                  id : 'cmrNo',
+                  type : 'text',
+                  name : 'cmrNo'
+                }, false, 'CMR Number should have numbers only.');
+              }
+            }
+            return new ValidationResult(null, true);
+          }
+        }
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 /* End 1430539 */
 dojo.addOnLoad(function() {
   GEOHandler.MCO2 = [ '780' ];
@@ -937,5 +1007,5 @@ dojo.addOnLoad(function() {
   // GEOHandler.registerValidator(addISICValidatorForScenario, [ SysLoc.MALTA ],
   // null, true);
   GEOHandler.registerValidator(addIsicClassificationCodeValidator, [ SysLoc.MALTA ], null, true);
-
+  GEOHandler.registerValidator(validateCMRNumForProspect, [ SysLoc.MALTA ], GEOHandler.ROLE_PROCESSOR, true);
 });
