@@ -636,16 +636,15 @@ function addNLAddressTypeValidator() {
     return {
       validate : function() {
         if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount == 0) {
-          return new ValidationResult(null, false, 'General address is mandatory. Only one address for each address type should be defined when sending for processing.');
+          return new ValidationResult(null, false, 'Sold-to address is mandatory. Only one address for each address type should be defined when sending for processing.');
         }
         if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
           var record = null;
           var type = null;
-          var installingCnt = 0;
-          var billingCnt = 0;
-          var mailingCnt = 0;
-          var shippingCnt = 0;
-          var eplCnt = 0;
+          var billToCnt = 0;
+          var soldToCnt = 0;
+          var shipToCnt = 0;
+          var installAtCnt = 0;
 
           for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
             record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
@@ -657,23 +656,23 @@ function addNLAddressTypeValidator() {
               type = type[0];
             }
             if (type == 'ZS01') {
-              mailingCnt++;
+              soldToCnt++;
             } else if (type == 'ZP01') {
-              billingCnt++;
+              billToCnt++;
             } else if (type == 'ZD01') {
-              shippingCnt++;
-            } else if (type == 'ZI02') {
-              eplCnt++;
+              shipToCnt++;
+            } else if (type == 'ZI01') {
+              installAtCnt++;
             }
           }
-          if (mailingCnt == 0) {
-            return new ValidationResult(null, false, 'General Address is mandatory.');
-          } else if (billingCnt > 1) {
-            return new ValidationResult(null, false, 'Only one Billing address can be defined. Please remove the additional Billing address.');
-          } else if (mailingCnt > 1) {
-            return new ValidationResult(null, false, 'Only one General address can be defined. Please remove the additional Mailing address.');
-          } else if (eplCnt > 1) {
-            return new ValidationResult(null, false, 'Only one EPL Mailing address can be defined. Please remove the additional EPL Mailing address.');
+          if (soldToCnt == 0) {
+            return new ValidationResult(null, false, 'Sold-to Address is mandatory.');
+          } else if (billToCnt > 1) {
+            return new ValidationResult(null, false, 'Only one Billing address can be defined. Please remove the additional Bill-to address.');
+          } else if (soldToCnt > 1) {
+            return new ValidationResult(null, false, 'Only one Sold-to address can be defined. Please remove the additional Sold-to address.');
+          } else if (installAtCnt > 1) {
+            return new ValidationResult(null, false, 'Only one Install-at address can be defined. Please remove the additional Install-at address.');
           } else {
             return new ValidationResult(null, true);
           }
