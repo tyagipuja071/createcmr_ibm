@@ -1932,7 +1932,6 @@ function setHideFieldForFR() {
   }
   var reqType = FormManager.getActualValue('custSubGrp');
   var requestType = FormManager.getActualValue('reqType');
-
   if (requestType == 'C') {
     if (reqType == 'INTER' || reqType == 'CBTER' || reqType == 'INTSO' || reqType == 'CBTSO') {
       FormManager.addValidator('ibmDeptCostCenter', Validators.REQUIRED, [ 'Internal Department Number' ], 'MAIN_IBM_TAB');
