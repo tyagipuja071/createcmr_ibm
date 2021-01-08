@@ -808,6 +808,7 @@ public abstract class AutomationUtil {
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", addrToCheck.getId().getReqId());
     query.setParameter("ADDR_TYPE", addrToCheck.getId().getAddrType());
+    query.setParameter("ADDR_SEQ", addrToCheck.getId().getAddrSeq());
     query.setParameter("NAME1", addrToCheck.getCustNm1());
     query.setParameter("LAND_CNTRY", addrToCheck.getLandCntry());
     query.setParameter("CITY", addrToCheck.getCity1());
