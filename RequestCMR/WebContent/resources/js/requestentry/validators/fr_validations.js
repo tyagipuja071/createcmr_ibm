@@ -2554,6 +2554,10 @@ function showAffacturageOnReqReason() {
 
 function checkOrderBlk() {
   var value = FormManager.getActualValue('reqReason');
+  var role = _pagemodel.userRole;
+  if (role == 'Viewer') {
+    return;
+  }
   if (value != 'TREC')
     return;
   var reqId = FormManager.getActualValue('reqId');
