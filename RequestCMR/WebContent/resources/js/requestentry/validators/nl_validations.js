@@ -334,7 +334,7 @@ function setBOTeamValues(clientTier) {
         FormManager.setValue('engineeringBo', selectedBoTeam);
 
         var custSubScnrio = FormManager.getActualValue('custSubGrp');
-        if (custSubScnrio == 'BUSPR') {
+        if (custSubScnrio == 'BUSPR' || custSubScnrio == 'CBBUS') {
           FormManager.setValue('engineeringBo', '33P01');
           FormManager.readOnly('engineeringBo');
           FormManager.readOnly('economicCd');
@@ -409,9 +409,12 @@ function setEconomicCodeValues(engineeringBo) {
     return;
   }
 
+  var role = FormManager.getActualValue('userRole').toUpperCase();
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var engineeringBo = FormManager.getActualValue('engineeringBo');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var isuCd = FormManager.getActualValue('isuCd');
+  var clientTier = FormManager.getActualValue('clientTier');
 
   var economicCode = [];
   if (engineeringBo != '') {
@@ -432,10 +435,20 @@ function setEconomicCodeValues(engineeringBo) {
         }
         if ('PRICU' == custSubGrp && '33U00' == engineeringBo) {
           FormManager.setValue('economicCd', 'K60');
-          FormManager.readOnly('economicCd');
         }
         if ('INTER' == custSubGrp && '33U00' == engineeringBo) {
           FormManager.setValue('economicCd', 'K81');
+        }
+        if ('33P01' == engineeringBo && ('BUSPR' == custSubGrp || 'CBBUS' == custSubGrp)) {
+          FormManager.setValue('economicCd', 'K49');
+        }
+        if ('5B' == isuCd && '7' == clientTier && ('2NY77' == engineeringBo || '33P01' == engineeringBo)) {
+          FormManager.setValue('economicCd', 'K44');
+        }
+        if ('32' == isuCd && 'N' == clientTier && '2NY77' == engineeringBo) {
+          FormManager.setValue('economicCd', 'K43');
+        }
+        if (role == 'REQUESTER') {
           FormManager.readOnly('economicCd');
         }
       }
