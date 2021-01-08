@@ -1052,7 +1052,6 @@ public class FRService extends TransConnService {
                     }
                   }
                 }
-                resetOrdBlk(entityManager, SystemConfiguration.getValue("MANDT"), data.getCmrIssuingCntry(), data.getCmrNo());
                 updateEntity(addr, entityManager);
 
                 if (response.getRecords() != null) {
@@ -1150,6 +1149,9 @@ public class FRService extends TransConnService {
           } catch (Exception e) {
             LOG.error("Error in processing Update Request " + admin.getId().getReqId(), e);
             addError("Update Request " + admin.getId().getReqId() + " Error: " + e.getMessage());
+          }
+          if ("COM".equals(admin.getReqStatus())) {
+            resetOrdBlk(entityManager, SystemConfiguration.getValue("MANDT"), data.getCmrIssuingCntry(), data.getCmrNo());
           }
         }
       }
