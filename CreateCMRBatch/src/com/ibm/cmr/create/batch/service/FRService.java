@@ -964,6 +964,9 @@ public class FRService extends TransConnService {
             boolean isDataUpdated = false;
             isDataUpdated = FranceHandler.isDataUpdated(data, dataRdc, data.getCmrIssuingCntry());
 
+            data.setOrdBlk("88");
+            updateEntity(data, entityManager);
+
             for (Addr addr : addresses) {
               entityManager.detach(addr);
               if (usedSequences.contains(addr.getId().getAddrSeq())) {
@@ -1149,9 +1152,6 @@ public class FRService extends TransConnService {
           } catch (Exception e) {
             LOG.error("Error in processing Update Request " + admin.getId().getReqId(), e);
             addError("Update Request " + admin.getId().getReqId() + " Error: " + e.getMessage());
-          }
-          if ("COM".equals(admin.getReqStatus())) {
-            resetOrdBlk(entityManager, SystemConfiguration.getValue("MANDT"), data.getCmrIssuingCntry(), data.getCmrNo());
           }
         }
       }
@@ -2205,13 +2205,5 @@ public class FRService extends TransConnService {
       partialCommit(em);
     }
     return response;
-  }
-
-  public void resetOrdBlk(EntityManager entityManager, String mandt, String katr6, String cmrNo) {
-    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("FR.RESET.ORDBLK"));
-    query.setParameter("MANDT", mandt);
-    query.setParameter("KATR6", katr6);
-    query.setParameter("ZZKV_CUSNO", cmrNo);
-    query.executeSql();
   }
 }
