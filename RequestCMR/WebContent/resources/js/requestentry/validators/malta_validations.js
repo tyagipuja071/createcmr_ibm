@@ -627,7 +627,7 @@ function enterpriseValidation() {
             id : 'enterprise',
             type : 'text',
             name : 'enterprise'
-          }, false, 'Enterprise should be numberic only.');
+          }, false, 'Enterprise Number should be numeric only.');
         }
         return new ValidationResult(null, true);
       }
