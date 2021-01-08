@@ -74,10 +74,21 @@ function submitMassFile() {
     cmr.showAlert('Invalid mass file type selected. Please select \".xlsx\" file only.');
     return;
   }
-  if ((FormManager.getActualValue('massFile').endsWith(".xlsm") != true && FormManager.getActualValue('reqType') == 'N')) {
+
+  var massCreateCountryXLSMSupport = [ '897' ];
+  if (massCreateCountryXLSMSupport.indexOf(FormManager.getActualValue('cmrIssuingCntry')) > -1
+      && (FormManager.getActualValue('massFile').endsWith(".xlsm") != true && FormManager.getActualValue('reqType') == 'N')) {
     cmr.showAlert('Invalid mass file type selected. Please select \".xlsm\" file only.');
     return;
   }
+
+  var massCreateCountryXLSXSupport = [ '649' ];
+  if (massCreateCountryXLSXSupport.indexOf(FormManager.getActualValue('cmrIssuingCntry')) > -1
+      && (FormManager.getActualValue('massFile').endsWith(".xlsx") != true && FormManager.getActualValue('reqType') == 'N')) {
+    cmr.showAlert('Invalid mass file type selected. Please select \".xlsx\" file only.');
+    return;
+  }
+
   cmr.aftertoken = refreshMassProcess;
   FormManager.doHiddenFileAction('frmCMRProcess', 'SUBMIT_FILE', cmr.CONTEXT_ROOT + '/massrequest/process.json', true, massTokenId, false);
 
@@ -126,12 +137,12 @@ function actualAddToCMRList() {
 
   cmr.cmrList = textAreaString;
   // validation added to not import invalid CMR number for Swiss
-  
-    var MCOAFRICA = [ '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770',
+
+  var MCOAFRICA = [ '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770',
       '782', '804', '810', '825', '827', '831', '833', '835', '840', '841', '842', '851', '857', '876', '879', '880', '881', '883' ];
-  
-  if (cmrCntry == SysLoc.SWITZERLAND || cmrCntry == SysLoc.SPAIN || cmrCntry == SysLoc.AUSTRIA || cmrCntry == SysLoc.GREECE || cmrCntry == SysLoc.CYPRUS || cmrCntry == SysLoc.PORTUGAL || cmrCntry == SysLoc.SOUTH_AFRICA
-  	|| (MCOAFRICA.indexOf(cmrCntry) > -1)) {
+
+  if (cmrCntry == SysLoc.SWITZERLAND || cmrCntry == SysLoc.SPAIN || cmrCntry == SysLoc.AUSTRIA || cmrCntry == SysLoc.GREECE || cmrCntry == SysLoc.CYPRUS || cmrCntry == SysLoc.PORTUGAL
+      || cmrCntry == SysLoc.SOUTH_AFRICA || (MCOAFRICA.indexOf(cmrCntry) > -1)) {
     var cmrsArr = cmr.cmrList.split(',');
     var reqtype = FormManager.getActualValue('reqType');
     var invalidCount = 0;

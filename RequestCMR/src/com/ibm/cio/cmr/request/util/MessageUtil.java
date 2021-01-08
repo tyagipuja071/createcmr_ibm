@@ -249,6 +249,7 @@ public class MessageUtil {
   public static final int INFO_ERROR_LOG_EMPTY = 8022;
   public static final int INFO_MASS_REQUEST_COMPLETED = 8023;
   public static final int ERROR_MASS_FILE_CMR_ROW = 8024;
+  public static final int ERROR_MASS_FILE_INVALID_CMRNO = 8051;
   public static final int ERROR_MASS_FILE_ROW = 8025;
   public static final int ERROR_MASS_FILE_EMPTY = 8026;
   public static final int ERROR_MASS_FILE_CONFIG = 8027;
