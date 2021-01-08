@@ -541,10 +541,11 @@ public class MassRequestEntryController extends BaseController {
       if (admin != null) {
         if (CmrConstants.REQ_TYPE_MASS_CREATE.equals(admin.getReqType())) {
           docLink = SystemConfiguration.getSystemProperty("masscreate." + cmrIssuingCntry);
+          templateName = docLink;
           if (StringUtils.isEmpty(docLink)) {
             docLink = MASS_CREATE_TEMPLATE + ".xlsm";
+            templateName = MASS_CREATE_TEMPLATE + "v" + SystemConfiguration.getValue("MASS_CREATE_TEMPLATE_VER") + ".xlsm";
           }
-          templateName = MASS_CREATE_TEMPLATE + "v" + SystemConfiguration.getValue("MASS_CREATE_TEMPLATE_VER") + ".xlsm";
         } else {
           EntityManager eManager = JpaManager.getEntityManager();
           if (LegacyDirectUtil.isCountryLegacyDirectEnabled(eManager, cmrIssuingCntry)) {
