@@ -876,7 +876,7 @@ public class BELUXTransformer extends EMEATransformer {
 
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
 
-      legacyCust.setAccAdminBo("");
+      legacyCust.setAccAdminBo(data.getIbmDeptCostCenter() == null ? "" : data.getIbmDeptCostCenter());
       legacyCust.setCeDivision("");
       // CMR-5993
       String cntry = legacyCust.getId().getSofCntryCode().trim();
@@ -895,10 +895,22 @@ public class BELUXTransformer extends EMEATransformer {
       legacyCust.setInvoiceCpyReqd("");
       legacyCust.setCustType("");
 
+      if ("624".equals(data.getCountryUse())) {
+        legacyCust.setRealCtyCd("624");
+      } else if ("624LU".equals(data.getCountryUse())) {
+        legacyCust.setRealCtyCd("623");
+      } else if ("788".equals(data.getCmrIssuingCntry())) {
+        legacyCust.setRealCtyCd("788");
+      }
+
       // George CREATCMR-546
       legacyCust.setTaxCd(data.getTaxCd1() == null ? "" : data.getTaxCd1());
       legacyCust.setLangCd(data.getCustPrefLang() == null ? "" : data.getCustPrefLang());
       legacyCust.setBankAcctNo("");
+
+      // George CREATCMR-675
+
+      setSBOIBO(legacyCust, data);
 
       if (SystemLocation.ABU_DHABI.equals(data.getCmrIssuingCntry()) && !StringUtils.isBlank(data.getBpAcctTyp())) {
         legacyCust.setCustType(data.getBpAcctTyp());
@@ -917,13 +929,6 @@ public class BELUXTransformer extends EMEATransformer {
 
       legacyCust.setEnterpriseNo(data.getEnterprise() == null ? "" : data.getEnterprise());
 
-      if ("624".equals(data.getCountryUse())) {
-        legacyCust.setRealCtyCd("624");
-      } else if ("624LU".equals(data.getCountryUse())) {
-        legacyCust.setRealCtyCd("623");
-      } else if ("788".equals(data.getCmrIssuingCntry())) {
-        legacyCust.setRealCtyCd("788");
-      }
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       for (Addr addr : cmrObjects.getAddresses()) {
         if ("ZS01".equals(addr.getId().getAddrType())) {
@@ -1010,30 +1015,8 @@ public class BELUXTransformer extends EMEATransformer {
     } else {
       legacyCust.setEmbargoCd("");
     }
-
-    String cebo = data.getEngineeringBo();
-    if (!StringUtils.isBlank(cebo)) {
-      legacyCust.setCeBo(cebo);
-    } else {
-      legacyCust.setCeBo("");
-    }
-
-    if (!StringUtils.isBlank(data.getSalesBusOffCd())) {
-      String sbo = StringUtils.rightPad(data.getSalesBusOffCd(), 7, '0');
-      if (sbo.length() < 7) {
-        sbo = StringUtils.rightPad(sbo, 7, '0');
-      }
-      // CMR-5993
-      if ((SCENARIO_TYPE_SBM.equals(data.getCustGrp()) || SCENARIO_TYPE_GBM.equals(data.getCustGrp()))
-          && Arrays.asList(BELUX_GBMSBM_COUNTRIES).contains(legacyCust.getId().getSofCntryCode())) {
-        sbo = "5300000";
-      }
-      legacyCust.setSbo(sbo);
-      legacyCust.setIbo(sbo);
-    } else {
-      legacyCust.setSbo("");
-      legacyCust.setIbo("");
-    }
+    legacyCust.setCeBo(data.getEngineeringBo() == null ? "" : data.getEngineeringBo());
+    setSBOIBO(legacyCust, data);
 
     // common data for C/U
     // formatted data
@@ -1042,65 +1025,16 @@ public class BELUXTransformer extends EMEATransformer {
     }
 
     String vat = dummyHandler.cmrData.getVat();
-    // not for internal scenario
-    // if ("C".equals(admin.getReqType()) && !StringUtils.isEmpty(vat) &&
-    // !data.getCustSubGrp().contains("IN") &&
-    // !data.getCustSubGrp().contains("BP")
-    // && !data.getVatExempt().equals("Y")) {
-    // if ("821".equals(data.getCmrIssuingCntry())) {
-    // if (vat.matches("^[A-Z]{2}.*")) {
-    // String prefix = vat.substring(0, 2);
-    // legacyCust.setVat(vat.replace(prefix, ""));
-    // } else {
-    // legacyCust.setVat(vat);
-    // }
-    // } else if
-    // (("644,668,693,704,708,740,820,826").contains(data.getCmrIssuingCntry()))
-    // {
-    // if (vat.matches("^[A-Z]{2}.*")) {
-    // legacyCust.setVat(vat);
-    // } else {
-    // String zs01AddrssCntry = null;
-    // if (dummyHandler.currentAddresses != null) {
-    // for (Addr addr : dummyHandler.currentAddresses) {
-    // if (MQMsgConstants.ADDR_ZS01.equals(addr.getId().getAddrType())) {
-    // zs01AddrssCntry = addr.getLandCntry();
-    // break;
-    // }
-    // }
-    // legacyCust.setVat(zs01AddrssCntry + vat);
-    // }
-    // }
-    // } else {
-    // if (!StringUtils.isEmpty(vat)) {
-    // legacyCust.setVat(vat);
-    // } else {
-    // legacyCust.setVat("");
-    // }
-    //
-    // }
-    // } else {
+
     if (!StringUtils.isEmpty(vat)) {
       legacyCust.setVat(vat);
     } else {
       legacyCust.setVat("");
     }
-    // }
-
-    // if (!StringUtils.isEmpty(dummyHandler.messageHash.get("EconomicCode"))) {
-    // legacyCust.setEconomicCd(dummyHandler.messageHash.get("EconomicCode"));
-    // }
 
     if (!StringUtils.isEmpty(data.getIbmDeptCostCenter())) {
       legacyCust.setBankBranchNo(data.getIbmDeptCostCenter());
     }
-
-    // remove DistrictCd
-    // if (!StringUtils.isEmpty(data.getCollectionCd())) {
-    // legacyCust.setDistrictCd(data.getCollectionCd().substring(0, 2));
-    // }
-    // legacyCust.setBankBranchNo(data.getIbmDeptCostCenter() != null ?
-    // data.getIbmDeptCostCenter() : "");
 
     if (StringUtils.isEmpty(data.getCustSubGrp())) {
       legacyCust.setMrcCd("3");
@@ -1679,4 +1613,21 @@ public class BELUXTransformer extends EMEATransformer {
     q.executeSql();
   }
 
+  private void setSBOIBO(CmrtCust legacyCust, Data data) {
+    StringBuilder sbo = new StringBuilder(data.getSalesBusOffCd() == null ? "" : data.getSalesBusOffCd());
+    legacyCust.setSbo(sbo.toString());
+
+    if ("624".equalsIgnoreCase(legacyCust.getRealCtyCd())) {
+      if (!StringUtils.isEmpty(data.getCustSubGrp())
+          && (data.getCustSubGrp().contains("COM") || data.getCustSubGrp().contains("PUB") || data.getCustSubGrp().contains("3PA"))) {
+        legacyCust.setIbo(sbo.toString());
+      } else {
+        legacyCust.setIbo("");
+      }
+    } else if ("623".equalsIgnoreCase(legacyCust.getRealCtyCd())) {
+      if (!StringUtils.isEmpty(sbo.toString())) {
+        legacyCust.setIbo(sbo.replace(6, 7, "0").toString());
+      }
+    }
+  }
 }

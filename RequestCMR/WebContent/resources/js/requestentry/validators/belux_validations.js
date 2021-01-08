@@ -131,6 +131,23 @@ function afterConfigForBELUX() {
 
   setVatValidatorBELUX();
   addHandlerForReqRsn();
+  disableCmrNo();
+}
+
+function disableCmrNo() {
+  if (typeof (_pagemodel) != 'undefined') {
+    role = _pagemodel.userRole;
+  }
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType == 'U') {
+    // do nothing for Update request
+  } else if (reqType == 'C') {
+    if (role == 'Requester') {
+      FormManager.readOnly('cmrNo');
+    } else if (role == 'Processor') {
+      FormManager.enable('cmrNo');
+    }
+  }
 }
 
 function disableLandCntry() {
@@ -735,20 +752,10 @@ function addBELUXAddressTypeValidator() {
           }
           if (soldToCnt == 0 || mailToCnt == 0) {
             return new ValidationResult(null, false, 'Sold-to, Mail-To address are mandatory.');
-          } else if (installAtCnt > 1) {
-            // return new ValidationResult(null, false, 'Only one Install-at
-            // address can be defined. Please remove the additional Installing
-            // address.');
-            return new ValidationResult(null, true);
           } else if (billToCnt > 1) {
-            return new ValidationResult(null, false, 'Only one Bill-to address can be defined. Please remove the additional Billing address.');
-          } else if (soldToCnt > 1) {
-            // return new ValidationResult(null, false, 'Only one Sold-to
-            // address can be defined. Please remove the additional Mailing
-            // address.');
-            return new ValidationResult(null, true);
+            return new ValidationResult(null, false, 'Only one Bill-to address can be defined. Please remove the additional Bill-to address.');
           } else if (mailToCnt > 1) {
-            return new ValidationResult(null, false, 'Only one Mail-To address can be defined. Please remove the additional Software address.');
+            return new ValidationResult(null, false, 'Only one Mail-To address can be defined. Please remove the additional Mail-to address.');
           } else {
             return new ValidationResult(null, true);
           }
@@ -1093,7 +1100,7 @@ function setSBO(searchTerm) {
     } else if (accTeam == 'B3V800') {
       FormManager.setValue('salesBusOffCd', '0B30005');
     } else if (accTeam == 'B3V900') {
-      FormManager.setValue('salesBusOffCd', '0B30005');
+      FormManager.setValue('salesBusOffCd', '0B30006');
     }
   } else if (FormManager.getActualValue('countryUse') == '624LU') {
     FormManager.setValue('salesBusOffCd', '0'.concat(accTeam.substring(0, 2) + '0001'));
@@ -1184,6 +1191,60 @@ function disbleCreateByModel() {
   }
 }
 
+function addCmrNoValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var custSubType = FormManager.getActualValue('custSubGrp');
+        var cmrNo = FormManager.getActualValue('cmrNo');
+        if (FormManager.getActualValue('reqType') == 'U') {
+          return new ValidationResult(null, true);
+        }
+        if (cmrNo != '' && cmrNo != null) {
+          if (cmrNo.length != 6) {
+            return new ValidationResult(null, false, 'CMR Number should be exactly 6 digits long.');
+          } else if (isNaN(cmrNo)) {
+            return new ValidationResult(null, false, 'CMR Number should be only numbers.');
+          } else if (cmrNo == "000000") {
+            return new ValidationResult(null, false, 'CMR Number should not be 000000.');
+          } else if (custSubType != '' && (custSubType.includes('INT') && (!cmrNo.startsWith('99')))) {
+            return new ValidationResult(null, false, 'CMR Number should be in 99XXXX format for internal scenario');
+          } else if (custSubType != '' && (custSubType.includes('ISO') && ((!cmrNo.startsWith('997')) && (!cmrNo.startsWith('998'))))) {
+            return new ValidationResult(null, false, 'CMR Number should be in 997XXX or 998XXX format for internal SO scenario');
+          } else if (custSubType != '' && !custSubType.includes('IN') && cmrNo.startsWith('99')) {
+            return new ValidationResult(null, false, 'Non Internal CMR Number should not be in 99XXXX for scenarios');
+          } else {
+            var qParams = {
+              CMRNO : cmrNo,
+              CNTRY : cntry,
+              MANDT : cmr.MANDT
+            };
+            var results = cmr.query('GET.CMR.ME', qParams);
+            if (results.ret1 != null) {
+              return new ValidationResult(null, false, 'The CMR Number already exists.');
+            } else {
+              results = cmr.query('LD.CHECK_EXISTING_CMR_NO_RESERVED', {
+                COUNTRY : cntry,
+                CMR_NO : cmrNo,
+                MANDT : cmr.MANDT
+              });
+              if (results && results.ret1) {
+                return new ValidationResult({
+                  id : 'cmrNo',
+                  type : 'text',
+                  name : 'cmrNo'
+                }, false, 'The requested CMR Number ' + cmrNo + ' already exists in the system.');
+              }
+            }
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.BELUX = [ '624' ];
 
@@ -1228,5 +1289,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.BELUX, GEOHandler.ROLE_PROCESSOR, true);
 
   GEOHandler.registerValidator(addCMRSearchValidator, GEOHandler.BELUX, null, true);
+  GEOHandler.registerValidator(addCmrNoValidator, GEOHandler.BELUX, null, true);
   GEOHandler.addAfterConfig(disbleCreateByModel, GEOHandler.BELUX);
 });
