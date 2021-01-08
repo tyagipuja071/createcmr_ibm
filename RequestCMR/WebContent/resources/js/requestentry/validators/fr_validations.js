@@ -2667,7 +2667,7 @@ function setISUClientTierOnScenario() {
           || custSubGrp == 'CBTSO' || custSubGrp == 'CBDPT' || custSubGrp == 'CBSTC')) {
     FormManager.setValue('isuCd', '32');
     FormManager.setValue('clientTier', 'S');
-  } else if (custSubGrp == 'XBLUM' || custSubGrp == 'BUSPR' || custSubGrp == 'INTER' || custSubGrp == 'CBTER') {
+  } else if (custSubGrp == 'XBLUM' || custSubGrp == 'BUSPR' || custSubGrp == 'XBUSP' || custSubGrp == 'INTER' || custSubGrp == 'CBTER') {
     FormManager.setValue('isuCd', '21');
     FormManager.setValue('clientTier', '7');
   } else {
