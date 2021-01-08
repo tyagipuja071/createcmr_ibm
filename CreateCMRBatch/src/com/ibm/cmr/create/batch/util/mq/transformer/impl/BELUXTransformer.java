@@ -880,13 +880,9 @@ public class BELUXTransformer extends EMEATransformer {
       legacyCust.setCeDivision("");
       // CMR-5993
       String cntry = legacyCust.getId().getSofCntryCode().trim();
-      String sales_Rep_ID = cntry + cntry;
-      if ((SCENARIO_TYPE_SBM.equals(data.getCustGrp()) || SCENARIO_TYPE_GBM.equals(data.getCustGrp()))
-          && Arrays.asList(BELUX_GBMSBM_COUNTRIES).contains(cntry)) {
-        sales_Rep_ID = "530530";
-      }
-      legacyCust.setSalesGroupRep(sales_Rep_ID);
-      legacyCust.setSalesRepNo(sales_Rep_ID);
+
+      legacyCust.setSalesGroupRep(data.getSearchTerm() == null ? "" : data.getSearchTerm());
+      legacyCust.setSalesRepNo(data.getSearchTerm() == null ? "" : data.getSearchTerm());
       legacyCust.setDcRepeatAgreement("0");
       legacyCust.setLeasingInd("0");
       legacyCust.setAuthRemarketerInd("0");
@@ -901,8 +897,8 @@ public class BELUXTransformer extends EMEATransformer {
 
       // George CREATCMR-546
       legacyCust.setTaxCd(data.getTaxCd1() == null ? "" : data.getTaxCd1());
-      legacyCust.setTelNoOrVat(data.getPhone1() == null ? "" : data.getPhone1());
       legacyCust.setLangCd(data.getCustPrefLang() == null ? "" : data.getCustPrefLang());
+      legacyCust.setBankAcctNo("");
 
       if (SystemLocation.ABU_DHABI.equals(data.getCmrIssuingCntry()) && !StringUtils.isBlank(data.getBpAcctTyp())) {
         legacyCust.setCustType(data.getBpAcctTyp());
@@ -919,30 +915,7 @@ public class BELUXTransformer extends EMEATransformer {
         }
       }
 
-      if (data.getCustSubGrp().contains("CO") || data.getCustSubGrp().contains("TH") || data.getCustSubGrp().contains("TP")
-          || data.getCustSubGrp().contains("PRI") || data.getCustSubGrp().contains("PC")) {// commerical
-        if (!StringUtils.isBlank(data.getEnterprise())) {
-          legacyCust.setEnterpriseNo(data.getEnterprise());
-        } else {
-          legacyCust.setEnterpriseNo("");
-        }
-      } else if (data.getCustSubGrp().contains("IN")) {// internal
-        legacyCust.setEnterpriseNo("");
-      } else {// bp
-        legacyCust.setEnterpriseNo("");
-      }
-
-      if (!StringUtils.isBlank(data.getPhone1())) {
-        legacyCust.setTelNoOrVat(data.getPhone1());
-      } else {
-        legacyCust.setTelNoOrVat("");
-      }
-
-      if (!StringUtils.isBlank(data.getTaxCd1())) {
-        legacyCust.setBankAcctNo(data.getTaxCd1());
-      } else {
-        legacyCust.setBankAcctNo("");
-      }
+      legacyCust.setEnterpriseNo(data.getEnterprise() == null ? "" : data.getEnterprise());
 
       if ("624".equals(data.getCountryUse())) {
         legacyCust.setRealCtyCd("624");
@@ -969,13 +942,7 @@ public class BELUXTransformer extends EMEATransformer {
       } else if ("788".equals(data.getCmrIssuingCntry())) {
         legacyCust.setRealCtyCd("788");
       }
-
-      if (!StringUtils.isBlank(data.getEnterprise())) {
-        legacyCust.setEnterpriseNo(data.getEnterprise());
-      } else {
-        legacyCust.setEnterpriseNo("");
-      }
-
+      legacyCust.setSalesRepNo(data.getSearchTerm() == null ? "" : data.getSearchTerm());
       if (SystemLocation.ABU_DHABI.equals(data.getCmrIssuingCntry()) && !StringUtils.isBlank(data.getBpAcctTyp())) {
         legacyCust.setCustType(data.getBpAcctTyp());
       }
@@ -992,24 +959,6 @@ public class BELUXTransformer extends EMEATransformer {
         legacyCust.setSalesGroupRep(data.getRepTeamMemberNo());
       } else {
         legacyCust.setSalesGroupRep(sales_Rep_ID);
-      }
-
-      if (!StringUtils.isBlank(data.getRepTeamMemberNo())) {
-        legacyCust.setSalesRepNo(data.getRepTeamMemberNo());
-      } else {
-        legacyCust.setSalesRepNo(sales_Rep_ID);
-      }
-
-      if (!StringUtils.isBlank(data.getPhone1())) {
-        legacyCust.setTelNoOrVat(data.getPhone1());
-      } else {
-        legacyCust.setTelNoOrVat("");
-      }
-
-      if (!StringUtils.isBlank(data.getTaxCd1())) {
-        legacyCust.setBankAcctNo(data.getTaxCd1());
-      } else {
-        legacyCust.setBankAcctNo("");
       }
 
       String dataEmbargoCd = data.getEmbargoCd();
@@ -1197,23 +1146,7 @@ public class BELUXTransformer extends EMEATransformer {
     }
 
     // RABXA :Bank Account Number
-    if (SystemLocation.CROATIA.equals(cust.getId().getSofCntryCode())) {
-      if (!StringUtils.isBlank(muData.getSearchTerm())) {
-        if ("@".equals(muData.getSearchTerm())) {
-          cust.setBankAcctNo("");
-        } else {
-          cust.setBankAcctNo(muData.getSearchTerm());
-        }
-      }
-    } else {
-      if (!StringUtils.isBlank(muData.getEmail2())) {
-        if ("@".equals(muData.getEmail2())) {
-          cust.setBankAcctNo("");
-        } else {
-          cust.setBankAcctNo(muData.getEmail2());
-        }
-      }
-    }
+    cust.setBankAcctNo("");
 
     if (!StringUtils.isBlank(muData.getAbbrevLocn())) {
       cust.setAbbrevLocn(muData.getAbbrevLocn());
@@ -1274,17 +1207,6 @@ public class BELUXTransformer extends EMEATransformer {
       }
     }
 
-    // if (!cust.getId().getCustomerNo().startsWith("99") &&
-    // !StringUtils.isBlank(muData.getCompany())) {
-    // if ("@".equals(muData.getCompany())) {
-    // cust.setEnterpriseNo("");
-    // } else {
-    // cust.setEnterpriseNo(muData.getCompany());
-    // }
-    // } else if (cust.getId().getCustomerNo().startsWith("99")) {
-    // cust.setEnterpriseNo("");
-    // }
-
     // Email1 used to store phone
     if (!StringUtils.isBlank(muData.getEmail1())) {
       if ("@".equals(muData.getEmail1())) {
@@ -1293,22 +1215,6 @@ public class BELUXTransformer extends EMEATransformer {
         cust.setTelNoOrVat(muData.getEmail1());
       }
     }
-
-    // List<MassUpdtAddr> muaList = cmrObjects.getMassUpdateAddresses();
-    // if (muaList != null && muaList.size() > 0) {
-    // for (MassUpdtAddr mua : muaList) {
-    // if ("ZP01".equals(mua.getId().getAddrType())) {
-    // if (!StringUtils.isBlank(mua.getCustPhone())) {
-    // if (DEFAULT_CLEAR_CHAR.equals(mua.getCustPhone())) {
-    // cust.setTelNoOrVat("");
-    // } else {
-    // cust.setTelNoOrVat(mua.getCustPhone());
-    // }
-    // break;
-    // }
-    // }
-    // }
-    // }
 
     if (!StringUtils.isBlank(muData.getCollectionCd())) {
       if ("@".equals(muData.getCollectionCd())) {
