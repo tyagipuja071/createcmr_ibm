@@ -901,7 +901,6 @@ public class BELUXTransformer extends EMEATransformer {
 
       // George CREATCMR-546
       legacyCust.setTaxCd(data.getTaxCd1() == null ? "" : data.getTaxCd1());
-      legacyCust.setTelNoOrVat(data.getPhone1() == null ? "" : data.getPhone1());
       legacyCust.setLangCd(data.getCustPrefLang() == null ? "" : data.getCustPrefLang());
 
       if (SystemLocation.ABU_DHABI.equals(data.getCmrIssuingCntry()) && !StringUtils.isBlank(data.getBpAcctTyp())) {
@@ -930,12 +929,6 @@ public class BELUXTransformer extends EMEATransformer {
         legacyCust.setEnterpriseNo("");
       } else {// bp
         legacyCust.setEnterpriseNo("");
-      }
-
-      if (!StringUtils.isBlank(data.getPhone1())) {
-        legacyCust.setTelNoOrVat(data.getPhone1());
-      } else {
-        legacyCust.setTelNoOrVat("");
       }
 
       if (!StringUtils.isBlank(data.getTaxCd1())) {
@@ -998,12 +991,6 @@ public class BELUXTransformer extends EMEATransformer {
         legacyCust.setSalesRepNo(data.getRepTeamMemberNo());
       } else {
         legacyCust.setSalesRepNo(sales_Rep_ID);
-      }
-
-      if (!StringUtils.isBlank(data.getPhone1())) {
-        legacyCust.setTelNoOrVat(data.getPhone1());
-      } else {
-        legacyCust.setTelNoOrVat("");
       }
 
       if (!StringUtils.isBlank(data.getTaxCd1())) {
