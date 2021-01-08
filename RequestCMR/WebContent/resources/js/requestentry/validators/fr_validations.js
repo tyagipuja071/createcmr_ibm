@@ -80,6 +80,8 @@ function afterConfigForFR() {
     FormManager.addValidator('abbrevLocn', Validators.REQUIRED, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
     orderBlockCodeValidator();
     internalDeptValidate();
+    iSICAndSubScenarioTypeUpdate();
+
     FormManager.addFormValidator((function() {
       return {
         validate : function() {
@@ -1928,14 +1930,20 @@ function setHideFieldForFR() {
     FormManager.hide('DoubleCreate', 'DoubleCreate');
   }
   var reqType = FormManager.getActualValue('custSubGrp');
-
-  if (reqType == 'INTER' || reqType == 'CBTER' || reqType == 'INTSO' || reqType == 'CBTSO') {
-    FormManager.addValidator('ibmDeptCostCenter', Validators.REQUIRED, [ 'Internal Department Number' ], 'MAIN_IBM_TAB');
-    FormManager.show('InternalDept', 'InternalDept');
-  } else {
+  var requestType = FormManager.getActualValue('reqType');
+  if (requestType == 'C') {
+    if (reqType == 'INTER' || reqType == 'CBTER' || reqType == 'INTSO' || reqType == 'CBTSO') {
+      FormManager.addValidator('ibmDeptCostCenter', Validators.REQUIRED, [ 'Internal Department Number' ], 'MAIN_IBM_TAB');
+      FormManager.show('InternalDept', 'InternalDept');
+    } else {
+      FormManager.resetValidations('ibmDeptCostCenter');
+      FormManager.hide('InternalDept', 'InternalDept');
+    }
+  } else if (requestType == 'U') {
     FormManager.resetValidations('ibmDeptCostCenter');
-    FormManager.hide('InternalDept', 'InternalDept');
+    FormManager.show('InternalDept', 'InternalDept');
   }
+
   if ('GOVRN' == reqType || 'CBVRN' == reqType) {
     FormManager.resetValidations('privIndc');
     FormManager.show('PrivIndc', 'PrivIndc');
