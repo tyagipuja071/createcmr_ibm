@@ -106,7 +106,7 @@ var CmrGrid = (function() {
             sizeSwitch : true,
             pageStepper : true,
             gotoButton : true,
-            maxPageStep : 4,
+            maxPageStep : 5,
             position : "bottom"
           } : null,
           filter : useFilter ? {
@@ -257,7 +257,7 @@ var CmrGrid = (function() {
 
               }
               if (grid.pagination != null && grid.pagination.plugin != null) {
-                grid.pagination.plugin.init();
+                //grid.pagination.plugin.init();
               }
               grid.store = dataStore;
               grid._refresh();
@@ -288,7 +288,7 @@ var CmrGrid = (function() {
             onBegin : null,
             onComplete : function(data) {
               if (grid.pagination != null && grid.pagination.plugin != null) {
-                grid.pagination.plugin.init();
+                //grid.pagination.plugin.init();
               }
               grid.store = dataStore;
               grid._refresh();
@@ -311,7 +311,7 @@ var CmrGrid = (function() {
                 }
               });
               if (grid.pagination != null && grid.pagination.plugin != null) {
-                grid.pagination.plugin.init();
+                //grid.pagination.plugin.init();
               }
               grid.store = dataStore;
               grid._refresh();
