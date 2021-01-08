@@ -75,7 +75,23 @@ function afterConfigForNL() {
   }
 
   setDeptartmentNumber();
+  disableCmrNo();
+}
 
+function disableCmrNo() {
+  if (typeof (_pagemodel) != 'undefined') {
+    role = _pagemodel.userRole;
+  }
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType == 'U') {
+    // do nothing for Update request
+  } else if (reqType == 'C') {
+    if (role == 'Requester') {
+      FormManager.readOnly('cmrNo');
+    } else if (role == 'Processor') {
+      FormManager.enable('cmrNo');
+    }
+  }
 }
 
 /* Vat Handler */
@@ -1065,6 +1081,60 @@ function addDnBSearchValidator() {
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
 
+function addCmrNoValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var custSubType = FormManager.getActualValue('custSubGrp');
+        var cmrNo = FormManager.getActualValue('cmrNo');
+        if (FormManager.getActualValue('reqType') == 'U') {
+          return new ValidationResult(null, true);
+        }
+        if (cmrNo != '' && cmrNo != null) {
+          if (cmrNo.length != 6) {
+            return new ValidationResult(null, false, 'CMR Number should be exactly 6 digits long.');
+          } else if (isNaN(cmrNo)) {
+            return new ValidationResult(null, false, 'CMR Number should be only numbers.');
+          } else if (cmrNo == "000000") {
+            return new ValidationResult(null, false, 'CMR Number should not be 000000.');
+          } else if (custSubType != '' && (custSubType.includes('INT') && (!cmrNo.startsWith('99')))) {
+            return new ValidationResult(null, false, 'CMR Number should be in 99XXXX format for internal scenario');
+          } else if (custSubType != '' && (custSubType.includes('ISO') && ((!cmrNo.startsWith('997')) && (!cmrNo.startsWith('998'))))) {
+            return new ValidationResult(null, false, 'CMR Number should be in 997XXX or 998XXX format for internal SO scenario');
+          } else if (custSubType != '' && !custSubType.includes('IN') && cmrNo.startsWith('99')) {
+            return new ValidationResult(null, false, 'Non Internal CMR Number should not be in 99XXXX for scenarios');
+          } else {
+            var qParams = {
+              CMRNO : cmrNo,
+              CNTRY : cntry,
+              MANDT : cmr.MANDT
+            };
+            var results = cmr.query('GET.CMR.ME', qParams);
+            if (results.ret1 != null) {
+              return new ValidationResult(null, false, 'The CMR Number already exists.');
+            } else {
+              results = cmr.query('LD.CHECK_EXISTING_CMR_NO_RESERVED', {
+                COUNTRY : cntry,
+                CMR_NO : cmrNo,
+                MANDT : cmr.MANDT
+              });
+              if (results && results.ret1) {
+                return new ValidationResult({
+                  id : 'cmrNo',
+                  type : 'text',
+                  name : 'cmrNo'
+                }, false, 'The requested CMR Number ' + cmrNo + ' already exists in the system.');
+              }
+            }
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.NL = [ '788' ];
   console.log('adding NETHERLANDS functions...');
@@ -1102,5 +1172,6 @@ dojo.addOnLoad(function() {
 
   GEOHandler.registerValidator(addCMRSearchValidator, GEOHandler.NL, null, true);
   GEOHandler.registerValidator(addDnBSearchValidator, GEOHandler.NL, null, true);
+  GEOHandler.registerValidator(addCmrNoValidator, GEOHandler.NL, null, true);
   GEOHandler.addAfterConfig(disbleCreateByModel, GEOHandler.NL);
 });
