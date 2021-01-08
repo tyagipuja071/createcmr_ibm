@@ -622,12 +622,12 @@ function enterpriseValidation() {
         if (enterprise.length >= 1 && enterprise.length != 6) {
           return new ValidationResult(null, false, 'Enterprise Number should be 6 digit long.');
         }
-        if (cmrNo.length > 1 && !cmrNo.match(numPattern)) {
+        if (enterprise.length > 1 && !enterprise.match(numPattern)) {
           return new ValidationResult({
             id : 'enterprise',
             type : 'text',
-            name : 'cmrNo'
-          }, false, 'CMR Number should be number only.');
+            name : 'enterprise'
+          }, false, 'Enterprise Number should be numeric only.');
         }
         return new ValidationResult(null, true);
       }
