@@ -1173,7 +1173,9 @@ public class NLHandler extends BaseSOFHandler {
     String newAddrSeq = null;
     if ("ZD01".equals(addrType)) {
       newAddrSeq = generateShippingAddrSeqNL(entityManager, addrType, reqId);
-    } else if ("ZP01".equals(addrType) || "ZI01".equals(addrType) || "ZS01".equals(addrType)) {
+    } else if ("ZI01".equals(addrType)) {
+      newAddrSeq = generateZI01AddrSeq(entityManager, addrType, reqId);
+    } else if ("ZP01".equals(addrType) || "ZS01".equals(addrType)) {
       newAddrSeq = generateAddrSeqNL(entityManager, addrType, reqId);
     }
     return newAddrSeq;
@@ -1198,6 +1200,37 @@ public class NLHandler extends BaseSOFHandler {
       }
       if (StringUtils.isEmpty(maxAddrSeq)) {
         maxAddrSeq = "20800";
+      }
+      try {
+        addrSeq = Integer.parseInt(maxAddrSeq);
+      } catch (Exception e) {
+        // if returned value is invalid
+      }
+      addrSeq++;
+    }
+    newAddrSeq = Integer.toString(addrSeq);
+    return newAddrSeq;
+  }
+
+  protected String generateZI01AddrSeq(EntityManager entityManager, String addrType, long reqId) {
+    int addrSeq = 20700;
+    String maxAddrSeq = null;
+    String newAddrSeq = null;
+    String sql = ExternalizedQuery.getSql("ADDRESS.GETADDRSEQ");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    query.setParameter("ADDR_TYPE", addrType);
+
+    List<Object[]> results = query.getResults();
+    if (results != null && results.size() > 0) {
+      Object[] result = results.get(0);
+      maxAddrSeq = (String) (result != null && result.length > 0 && result[0] != null ? result[0] : "20700");
+
+      if (!(Integer.valueOf(maxAddrSeq) >= 20700 && Integer.valueOf(maxAddrSeq) <= 20749)) {
+        maxAddrSeq = "";
+      }
+      if (StringUtils.isEmpty(maxAddrSeq)) {
+        maxAddrSeq = "20700";
       }
       try {
         addrSeq = Integer.parseInt(maxAddrSeq);
