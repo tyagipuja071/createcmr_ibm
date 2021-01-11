@@ -140,7 +140,7 @@ public class MCOPtEsHandler extends MCOHandler {
       }
 
     } else {
-
+      String cmrIssueCd = reqEntry.getCmrIssuingCntry();
       String processingType = PageManager.getProcessingType(mainRecord.getCmrIssuedBy(), "U");
       if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
         if (source.getItems() != null) {
@@ -152,23 +152,131 @@ public class MCOPtEsHandler extends MCOHandler {
           // map RDc - SOF - CreateCMR by sequence no
           for (FindCMRRecordModel record : source.getItems()) {
             seqNo = record.getCmrAddrSeq();
+            // if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo)
+            // && !"822".equals(cmrIssueCd)) {
+            // if (StringUtils.isNotBlank(record.getCmrAddrSeq()) &&
+            // !"PG".equals(record.getCmrOrderBlock())) {
+            // sofUses = this.legacyObjects.getUsesBySequenceNo(seqNo);
+            // for (String sofUse : sofUses) {
+            // addrType = getAddressTypeByUse(sofUse);
+            // if (!StringUtils.isEmpty(addrType)) {
+            // addr = cloneAddress(record, addrType);
+            // LOG.trace("Adding address type " + addrType + " for sequence " +
+            // seqNo);
+            //
+            // // name3 in rdc = Address Con't on SOF
+            // addr.setCmrStreetAddressCont(record.getCmrName3());
+            // addr.setCmrName3(null);
+            //
+            // if (!StringUtils.isBlank(record.getCmrPOBox())) {
+            // String poBox = record.getCmrPOBox().trim();
+            // setPoBox(addr, poBox);
+            // }
+            //
+            // if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
+            // addr.setCmrAddrSeq("00001");
+            // }
+            // converted.add(addr);
+            // }
+            // }
+            // } else {
+            // record.setCmrAddrTypeCode("PG01");
+            // addrType = record.getCmrAddrTypeCode();
+            // if (!StringUtils.isEmpty(addrType)) {
+            // addr = cloneAddress(record, addrType);
+            // LOG.trace("Adding address type " + addrType + " for sequence " +
+            // seqNo);
+            // if (SystemLocation.PORTUGAL.equals(record.getCmrIssuedBy())) {
+            // addr.setCmrStreetAddressCont(record.getCmrName4());
+            // addr.setCmrName3(record.getCmrName3());
+            // addr.setCmrName2Plain(record.getCmrName2Plain());
+            // } else {
+            // // name3 in rdc = Address Con't on SOF
+            // addr.setCmrStreetAddressCont(record.getCmrName3());
+            // addr.setCmrName3(null);
+            // addr.setCmrName2Plain(!StringUtils.isEmpty(record.getCmrName2Plain())
+            // ? record.getCmrName2Plain() : record.getCmrName4());
+            // }
+            // if (!StringUtils.isBlank(record.getCmrPOBox())) {
+            // if (SystemLocation.PORTUGAL.equals(record.getCmrIssuedBy())) {
+            // addr.setCmrPOBox(record.getCmrPOBox());
+            // } else {
+            // addr.setCmrPOBox("PO BOX " + record.getCmrPOBox());
+            // }
+            // }
+            // if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
+            // addr.setCmrAddrSeq("00001");
+            // }
+            // converted.add(addr);
+            // }
+            // }
+            // }
+
             if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo)) {
-              sofUses = this.legacyObjects.getUsesBySequenceNo(seqNo);
-              for (String sofUse : sofUses) {
-                addrType = getAddressTypeByUse(sofUse);
+              if (StringUtils.isNotBlank(record.getCmrAddrSeq()) && !"PG".equals(record.getCmrOrderBlock())) {
+
+                sofUses = this.legacyObjects.getUsesBySequenceNo(seqNo);
+                for (String sofUse : sofUses) {
+                  addrType = getAddressTypeByUse(sofUse);
+                  if (!StringUtils.isEmpty(addrType)) {
+                    addr = cloneAddress(record, addrType);
+                    LOG.trace("Adding address type " + addrType + " for sequence " + seqNo);
+
+                    if (SystemLocation.PORTUGAL.equals(record.getCmrIssuedBy())) {
+                      addr.setCmrStreetAddressCont(record.getCmrName4());
+                      addr.setCmrName3(record.getCmrName3());
+
+                      addr.setCmrName2Plain(record.getCmrName2Plain());
+                    } else {
+                      // name3 in rdc = Address Con't on SOF
+                      addr.setCmrStreetAddressCont(record.getCmrName3());
+                      addr.setCmrName3(null);
+
+                      addr.setCmrName2Plain(!StringUtils.isEmpty(record.getCmrName2Plain()) ? record.getCmrName2Plain() : record.getCmrName4());
+                    }
+
+                    // addr.setCmrName2Plain(!StringUtils.isEmpty(record.getCmrName2Plain())
+                    // ? record.getCmrName2Plain() :
+                    // record.getCmrName4());
+
+                    if (!StringUtils.isBlank(record.getCmrPOBox())) {
+                      if (SystemLocation.PORTUGAL.equals(record.getCmrIssuedBy())) {
+                        addr.setCmrPOBox(record.getCmrPOBox());
+                      } else {
+                        addr.setCmrPOBox("PO BOX " + record.getCmrPOBox());
+                      }
+                    }
+
+                    if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
+                      addr.setCmrAddrSeq("00001");
+                    }
+
+                    converted.add(addr);
+                  }
+                }
+              } else {
+                record.setCmrAddrTypeCode("PG01");
+                addrType = record.getCmrAddrTypeCode();
                 if (!StringUtils.isEmpty(addrType)) {
                   addr = cloneAddress(record, addrType);
                   LOG.trace("Adding address type " + addrType + " for sequence " + seqNo);
-
-                  // name3 in rdc = Address Con't on SOF
-                  addr.setCmrStreetAddressCont(record.getCmrName3());
-                  addr.setCmrName3(null);
-
-                  if (!StringUtils.isBlank(record.getCmrPOBox())) {
-                    String poBox = record.getCmrPOBox().trim();
-                    setPoBox(addr, poBox);
+                  if (SystemLocation.PORTUGAL.equals(record.getCmrIssuedBy())) {
+                    addr.setCmrStreetAddressCont(record.getCmrName4());
+                    addr.setCmrName3(record.getCmrName3());
+                    addr.setCmrName2Plain(record.getCmrName2Plain());
+                  } else {
+                    // name3 in rdc = Address Con't on SOF
+                    addr.setCmrStreetAddressCont(record.getCmrName3());
+                    addr.setCmrName3(null);
+                    addr.setCmrName2Plain(!StringUtils.isEmpty(record.getCmrName2Plain()) ? record.getCmrName2Plain() : record.getCmrName4());
                   }
-
+                  if (!StringUtils.isBlank(record.getCmrPOBox())) {
+                    if (SystemLocation.PORTUGAL.equals(record.getCmrIssuedBy())) {
+                      addr.setCmrPOBox(record.getCmrPOBox());
+                    } else {
+                      addr.setCmrPOBox("PO BOX " + record.getCmrPOBox());
+                    }
+                  }
                   if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
                     addr.setCmrAddrSeq("00001");
                   }
@@ -176,6 +284,7 @@ public class MCOPtEsHandler extends MCOHandler {
                 }
               }
             }
+
           }
           // add unmapped addresses
           FindCMRRecordModel record = createAddress(entityManager, mainRecord.getCmrIssuedBy(), CmrConstants.ADDR_TYPE.ZP02.toString(), "Fiscal",
