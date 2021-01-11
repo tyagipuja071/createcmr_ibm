@@ -200,14 +200,9 @@ public class FranceUtil extends AutomationUtil {
   public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
       AutomationResult<ValidationOutput> result, StringBuilder details, ValidationOutput output) {
     Data data = requestData.getData();
-    Admin admin = requestData.getAdmin();
     Addr zs01 = requestData.getAddress("ZS01");
     String customerName = getCustomerFullName(zs01);
     Addr zi01 = requestData.getAddress("ZI01");
-    String customerNameZI01 = "";
-    if (zi01 != null) {
-      customerNameZI01 = getCustomerFullName(zi01);
-    }
 
     String scenario = data.getCustSubGrp();
     if (StringUtils.isNotBlank(scenario)) {
@@ -216,75 +211,62 @@ public class FranceUtil extends AutomationUtil {
           && !SCENARIO_CROSSBORDER_COMMERCIAL.equals(scenario)) {
         engineData.addNegativeCheckStatus("DISABLEDAUTOPROC",
             "Requests for " + scenarioDesc + " cannot be processed automatically. Manual processing would be required.");
-      } else {
-        switch (scenario) {
-        case SCENARIO_CROSSBORDER_PRIVATE_PERSON:
-        case SCENARIO_PRIVATE_PERSON:
-        case SCENARIO_CROSSBORDER_IBM_EMPLOYEE:
-        case SCENARIO_IBM_EMPLOYEE:
-          return doPrivatePersonChecks(engineData, SystemLocation.FRANCE, zs01.getLandCntry(), customerName, details,
-              (SCENARIO_IBM_EMPLOYEE.equals(scenario) || SCENARIO_CROSSBORDER_IBM_EMPLOYEE.equals(scenario)), requestData);
+      }
+      if ((SCENARIO_HOSTING.equals(scenario) || SCENARIO_CROSSBORDER_HOSTING.equals(scenario) || SCENARIO_THIRD_PARTY.equals(scenario)
+          || SCENARIO_CROSSBORDER_THIRD_PARTY.equals(scenario)) && compareCustomerNames(zs01, zi01)) {
+        details.append("Customer Names on Sold-to and Install-at address should be different for Third Party and Hosting Scenario").append("\n");
+        engineData.addRejectionComment("OTH",
+            "Customer Names on Sold-to and Install-at address should be different for Third Party and Hosting Scenario", "", "");
+        return false;
+      } else if ((SCENARIO_COMMERCIAL.equals(scenario) || SCENARIO_CROSSBORDER_COMMERCIAL.equals(scenario)) && !compareCustomerNames(zs01, zi01)) {
+        details.append("Sold-to and Installing name are not identical. Request will require CMDE review before proceeding.").append("\n");
+        engineData.addNegativeCheckStatus("SOLDTO_INSTALL_DIFF", "Sold-to and Installing addresses are not identical.");
+      }
+      switch (scenario) {
+      case SCENARIO_CROSSBORDER_PRIVATE_PERSON:
+      case SCENARIO_PRIVATE_PERSON:
+      case SCENARIO_CROSSBORDER_IBM_EMPLOYEE:
+      case SCENARIO_IBM_EMPLOYEE:
+        return doPrivatePersonChecks(engineData, SystemLocation.FRANCE, zs01.getLandCntry(), customerName, details,
+            (SCENARIO_IBM_EMPLOYEE.equals(scenario) || SCENARIO_CROSSBORDER_IBM_EMPLOYEE.equals(scenario)), requestData);
 
-        case SCENARIO_INTERNAL:
-        case SCENARIO_CROSSBORDER_INTERNAL:
-          for (String addrType : RELEVANT_ADDRESSES) {
-            List<Addr> addresses = requestData.getAddresses(addrType);
-            for (Addr addr : addresses) {
-              String custNmTrimmed = getCustomerFullName(addr);
-              if (!(custNmTrimmed.toUpperCase().contains("IBM") || custNmTrimmed.toUpperCase().contains("International Business Machines"))) {
-                details.append("Wrong Customer Name on the main address. IBM should be part of the name.").append("\n");
-                engineData.addRejectionComment("OTH", "Wrong Customer Name on the main address. IBM should be part of the name.", "", "");
-                return false;
-              }
+      case SCENARIO_INTERNAL:
+      case SCENARIO_CROSSBORDER_INTERNAL:
+        for (String addrType : RELEVANT_ADDRESSES) {
+          List<Addr> addresses = requestData.getAddresses(addrType);
+          for (Addr addr : addresses) {
+            String custNmTrimmed = getCustomerFullName(addr);
+            if (!(custNmTrimmed.toUpperCase().contains("IBM") || custNmTrimmed.toUpperCase().contains("International Business Machines"))) {
+              details.append("Wrong Customer Name on the main address. IBM should be part of the name.").append("\n");
+              engineData.addRejectionComment("OTH", "Wrong Customer Name on the main address. IBM should be part of the name.", "", "");
+              return false;
             }
           }
-          break;
-        case SCENARIO_CROSSBORDER_COMMERCIAL:
-        case SCENARIO_COMMERCIAL:
-          if ((!customerName.toUpperCase().equals(customerNameZI01.toUpperCase())) && StringUtils.isNotBlank(customerName)
-              && StringUtils.isNotBlank(customerNameZI01)) {
-            details.append("Sold-to and Installing name are not same. Request will require CMDE review before proceeding.").append("\n");
-            engineData.addNegativeCheckStatus("SOLDTO_INSTALL_DIFF", "Sold-to and Installing addresses are not same.");
-          }
-          if (zs01 != null) {
-            // remove duplicate address
-            removeDuplicateAddresses(entityManager, requestData, details);
-          }
-          break;
-        case SCENARIO_HOSTING:
-        case SCENARIO_CROSSBORDER_HOSTING:
-          if (StringUtils.isNotBlank(customerNameZI01) && StringUtils.isNotBlank(customerName)
-              && customerName.toUpperCase().equals(customerNameZI01.toUpperCase())) {
-            details.append("Customer Names on Sold-to and Install-at address should be different for Hosting Scenario").append("\n");
-            engineData.addRejectionComment("OTH", "Customer Names on Sold-to and Install-at address should be different for Hosting Scenario", "",
-                "");
-            return false;
-          }
-          break;
-        case SCENARIO_BUSINESS_PARTNER:
-        case SCENARIO_CROSSBORDER_BUSINESS_PARTNER:
-          return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
-        case SCENARIO_INTERNAL_SO:
-        case SCENARIO_CROSSBORDER_INTERNAL_SO:
-        	 if(zi01 == null) {
-           	  details.append("Install-at address should be present for Interna SO Scenario." ).append("\n");
-                 engineData.addRejectionComment("OTH", "Install-at address should be present for Internal SO Scenario." , "", "");
-                 return false;  
-             }
-        case SCENARIO_CROSSBORDER_THIRD_PARTY:
-        case SCENARIO_THIRD_PARTY:
-          if(zi01 == null) {
-        	  details.append("Install-at address should be present for Third party Scenario." ).append("\n");
-              engineData.addRejectionComment("OTH", "Install-at address should be present for Third Party Scenario." , "", "");
-              return false;  
-          }
-          if (customerName.toUpperCase().equals(customerNameZI01.toUpperCase()) && StringUtils.isNotBlank(customerName)
-              && StringUtils.isNotBlank(customerNameZI01)) {
-            details.append("Customer Names on Sold-to and Install-at address should be different for Third Party Scenario").append("\n");
-            engineData.addRejectionComment("OTH", "Customer Names on Sold-to and Install-at address should be different for Third Party Scenario", "",
-                "");
-            return false;
-          }
+        }
+        break;
+      case SCENARIO_COMMERCIAL:
+      case SCENARIO_CROSSBORDER_COMMERCIAL:
+        if (zs01 != null) {
+          // remove duplicate address
+          removeDuplicateAddresses(entityManager, requestData, details);
+        }
+        break;
+      case SCENARIO_BUSINESS_PARTNER:
+      case SCENARIO_CROSSBORDER_BUSINESS_PARTNER:
+        return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
+      case SCENARIO_INTERNAL_SO:
+      case SCENARIO_CROSSBORDER_INTERNAL_SO:
+        if (zi01 == null) {
+          details.append("Install-at address should be present for Interna SO Scenario.").append("\n");
+          engineData.addRejectionComment("OTH", "Install-at address should be present for Internal SO Scenario.", "", "");
+          return false;
+        }
+      case SCENARIO_THIRD_PARTY:
+      case SCENARIO_CROSSBORDER_THIRD_PARTY:
+        if (zi01 == null) {
+          details.append("Install-at address should be present for Third party Scenario.").append("\n");
+          engineData.addRejectionComment("OTH", "Install-at address should be present for Third Party Scenario.", "", "");
+          return false;
         }
       }
     } else {
