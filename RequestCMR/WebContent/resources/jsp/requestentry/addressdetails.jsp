@@ -1059,7 +1059,7 @@
       </cmr:column>
     </cmr:view>
     
-    <cmr:view exceptForGEO="IERP,CND,MCO1,MCO2,CEMEA,CN,NORDX,BELUX,NL,JP,AP,SWISS" exceptForCountry="862,726,666,822,838,758,631,760">
+    <cmr:view exceptForGEO="IERP,CND,MCO1,MCO2,CEMEA,CN,NORDX,BELUX,NL,JP,AP,SWISS,FR" exceptForCountry="862,726,666,822,838,758,631,760">
       <cmr:column span="1">
         <cmr:label fieldId="divn_view">
           <span class="lbl-Division">${ui.divn}</span>:</cmr:label>
