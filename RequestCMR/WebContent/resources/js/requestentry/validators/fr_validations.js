@@ -173,7 +173,7 @@ function afterConfigForFR() {
   filterCmrnoP();
   cmrNoEnable();
   FormManager.addValidator('taxCd1', Validators.DIGIT, [ 'SIRET' ], 'MAIN_CUST_TAB');
-  if (reqType == 'U') {
+  if (reqType == 'U' && FormManager.getActualValue('viewOnlyPage') != 'true') {
     FormManager.enable('taxCd1');
   } else {
     FormManager.readOnly('taxCd1');
@@ -1252,7 +1252,7 @@ function setDummySIRETOnCustSubGrpChange(value) {
   if (typeof (_pagemodel) != 'undefined') {
     reqType = FormManager.getActualValue('reqType');
   }
-  if (reqType == 'U') {
+  if (reqType == 'U' || FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
   if (value == "COMME" || value == "HOSTC" || value == "THDPT") {
@@ -3455,12 +3455,14 @@ function addVatExemptHandler() {
 function setPPSCEIDRequired() {
   var reqType = FormManager.getActualValue('reqType');
   var subGrp = FormManager.getActualValue('custSubGrp');
-  if (reqType == 'U') {
+  if (reqType == 'U' || FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
   if (subGrp == 'XBUSP' || subGrp == 'BUSPR') {
+    FormManager.enable('ppsceid');
     FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
   } else {
+    FormManager.readOnly('ppsceid');
     FormManager.removeValidator('ppsceid', Validators.REQUIRED);
   }
 }
