@@ -1989,7 +1989,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     } else if (ValidationResult.Passed == data.getValidationResult() && data.getRows() != null) {
       String maxRows = SystemConfiguration.getValue("MASS_CREATE_MAX_ROWS", "100");
       if (data.getRows() != null && (data.getRows().size() >= Integer.parseInt(maxRows))) {
-        log.error("Total cmrRecords exceed theh maximum limit of " + maxRows);
+        log.error("Total cmrRecords exceed the maximum limit of " + maxRows);
         throw new CmrException(MessageUtil.ERROR_MASS_FILE_ROWS, maxRows);
       }
     }
@@ -5763,6 +5763,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     XSSFRow sheetRow = null;
 
     int rowIndex = 0;
+    int maxRows = Integer.parseInt(SystemConfiguration.getValue("MASS_CREATE_MAX_ROWS", "100"));
     StringBuilder sbErrorRow = new StringBuilder();
     boolean isInvalidRow = false;
     for (Row row : sheet) {
@@ -5774,6 +5775,11 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
           rowCell = sheetRow.createCell(0);
         }
 
+        if (rowIndex > maxRows) {
+          log.error("Total cmrRecords exceed the maximum limit of " + maxRows);
+          throw new CmrException(MessageUtil.ERROR_MASS_FILE_ROWS, "" + maxRows);
+        }
+
         String cellValue = rowCell.getStringCellValue();
         if (StringUtils.isBlank(cellValue) || (StringUtils.isNotBlank(cellValue) && !StringUtils.isNumeric(cellValue))) {
           isInvalidRow = true;
@@ -5781,6 +5787,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
           sbErrorRow.append(",");
         }
       }
+
       rowIndex++;
     }
 
