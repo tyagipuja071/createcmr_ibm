@@ -961,6 +961,19 @@ function validateCMRNumForProspect() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+function hideCustPhoneonSummary() {
+  setInterval(function() {
+    if (openAddressDetails.addrType != 'ZD01') {
+      cmr.hideNode('custPhone_view');
+      $('label[for="custPhone_view"]').hide();
+    } else {
+      cmr.showNode('custPhone_view');
+      $('label[for="custPhone_view"]').show();
+    }
+  }, 1000);
+
+}
+
 /* End 1430539 */
 dojo.addOnLoad(function() {
   GEOHandler.MCO2 = [ '780' ];
@@ -1008,4 +1021,5 @@ dojo.addOnLoad(function() {
   // null, true);
   GEOHandler.registerValidator(addIsicClassificationCodeValidator, [ SysLoc.MALTA ], null, true);
   GEOHandler.registerValidator(validateCMRNumForProspect, [ SysLoc.MALTA ], GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.addAfterConfig(hideCustPhoneonSummary, [ SysLoc.MALTA ]);
 });
