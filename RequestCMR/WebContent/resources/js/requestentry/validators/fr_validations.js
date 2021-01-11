@@ -236,12 +236,13 @@ function setISICAndSubindustryOnScenario() {
       FormManager.setValue('subIndustryCd', 'WQ');
       FormManager.readOnly('isicCd');
       FormManager.readOnly('subIndustryCd');
-
     } else if (role == 'Processor') {
       FormManager.enable('isicCd');
       FormManager.enable('subIndustryCd');
     }
   } else {
+    FormManager.setValue('isicCd', '');
+    FormManager.setValue('subIndustryCd', '');
     FormManager.enable('isicCd');
     FormManager.enable('subIndustryCd');
   }
