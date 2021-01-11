@@ -41,7 +41,7 @@ import com.ibm.cmr.services.client.cmrno.GenerateCMRNoRequest;
  */
 public class PortugalTransformer extends MessageTransformer {
 
-  private static final String[] ADDRESS_ORDER = { "ZP01", "ZS01", "ZI01", "ZD01", "ZS02" };
+  private static final String[] ADDRESS_ORDER = { "ZP01", "ZS01", "ZI01", "ZD01", "ZS02", "PG01" };
 
   private static final Logger LOG = Logger.getLogger(PortugalTransformer.class);
   private static final String DEFAULT_CLEAR_NUM = "0";
@@ -891,6 +891,14 @@ public class PortugalTransformer extends MessageTransformer {
           return true;
         }
       }
+    }
+    return false;
+  }
+
+  @Override
+  public boolean skipLegacyAddressData(EntityManager entityManager, CMRRequestContainer cmrObjects, Addr currAddr, boolean flag) {
+    if ("PG01".equals(currAddr.getId().getAddrType())) {
+      return true;
     }
     return false;
   }
