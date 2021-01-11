@@ -551,6 +551,10 @@ visibility: hidden !IMPORTANT;
         <!--  SAP No -->
         <cmr:gridCol width="70px" field="sapNo" header="${ui.grid.sapNo}" />
         
+        <cmr:view forCountry="780">
+           <cmr:gridCol width="70px" field="ierpSitePrtyId" header="${ui.grid.ierpSitePrtyId}" />
+        </cmr:view>
+        
         <!-- Addr Std Results -->
         <cmr:view exceptForGEO="EMEA,LA,MCO,JP">
           <cmr:gridCol width="70px" field="addrStdResultText" header="${ui.grid.addrStdTxt}" />
