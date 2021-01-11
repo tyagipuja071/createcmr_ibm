@@ -1426,9 +1426,11 @@ public class ItalyTransformer extends EMEATransformer {
   @Override
   public void transformLegacyCustomerExtData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCustExt legacyCustExt,
       CMRRequestContainer cmrObjects) {
+
     Data data = cmrObjects.getData();
     boolean crossBorder = false;
     String landedCountry = "";
+
     for (Addr addr : cmrObjects.getAddresses()) {
       // Billing Address
       if (MQMsgConstants.ADDR_ZP01.equals(addr.getId().getAddrType())) {
@@ -1452,14 +1454,22 @@ public class ItalyTransformer extends EMEATransformer {
           landedCountry = addr.getLandCntry();
       }
     }
+
+    // IBM Tab and Customer Tab
+    for (Addr addr : cmrObjects.getAddresses()) {
+      // Billing Address
+      if (MQMsgConstants.ADDR_ZP01.equals(addr.getId().getAddrType())) {
+        legacyCustExt.setItCodeSSV(!StringUtils.isBlank(data.getCollectionCd()) ? data.getCollectionCd() : "");
+        legacyCustExt.setItIVA(!StringUtils.isBlank(data.getSpecialTaxCd()) ? data.getSpecialTaxCd() : "");
+      }
+    }
+
     // IBM Tab
     legacyCustExt.setItCompanyCustomerNo(!StringUtils.isEmpty(data.getCompany()) ? data.getCompany() : ""); // CODCP
     legacyCustExt.setAffiliate(!StringUtils.isBlank(data.getAffiliate()) ? data.getAffiliate() : "");
-    legacyCustExt.setItCodeSSV(!StringUtils.isBlank(data.getCollectionCd()) ? data.getCollectionCd() : "");
 
     // Customer Tab
     legacyCustExt.setiTaxCode(!StringUtils.isBlank(data.getTaxCd1()) ? data.getTaxCd1() : "");
-    legacyCustExt.setItIVA(!StringUtils.isBlank(data.getSpecialTaxCd()) ? data.getSpecialTaxCd() : "");
     legacyCustExt.setItIdentClient(!StringUtils.isBlank(data.getIdentClient()) ? data.getIdentClient() : "");
 
     // 4 new fields
