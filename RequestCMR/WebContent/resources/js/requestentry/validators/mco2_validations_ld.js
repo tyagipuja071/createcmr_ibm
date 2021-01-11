@@ -1030,7 +1030,11 @@ function addAdditionalNameStreetContPOBoxValidator() {
         var custSubGrp = FormManager.getActualValue('custSubGrp');
         var isGmllcScenario = custSubGrp == 'LLC' || custSubGrp == 'LLCBP' || custSubGrp == 'LLCEX';
         var addrType = FormManager.getActualValue('addrType');
-        if (isLocalBasedOnLanded && !(isGmllcScenario && addrType == 'ZS01')) {
+        var kenyaCntryCd = '764';
+        var isIssuingCntryKenya = FormManager.getActualValue('cmrIssuingCntry') == kenyaCntryCd;
+        var isKenyaLocalGmllc = isIssuingCntryKenya && addrType == 'ZS01' && isLocalBasedOnLanded && (custSubGrp == 'LLC' || custSubGrp == 'LLCBP');
+
+        if ((isLocalBasedOnLanded && !(isGmllcScenario && addrType == 'ZS01')) || isKenyaLocalGmllc) {
           return new ValidationResult(null, true);
         }
 
@@ -1956,8 +1960,11 @@ function addAddressGridValidatorGMLLC() {
       validate : function() {
         var custSubGrp = FormManager.getActualValue('custSubGrp');
         var isGmllcScenario = custSubGrp == 'LLC' || custSubGrp == 'LLCBP' || custSubGrp == 'LLCEX';
+        var kenyaCntryCd = '764';
+        var isIssuingCntryKenya = FormManager.getActualValue('cmrIssuingCntry') == kenyaCntryCd;
+        var isKenyaLocalGmllc = isIssuingCntryKenya && (custSubGrp == 'LLC' || custSubGrp == 'LLCBP');
 
-        if (!isGmllcScenario) {
+        if (!isGmllcScenario || isKenyaLocalGmllc) {
           return new ValidationResult(null, true);
         }
         if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
