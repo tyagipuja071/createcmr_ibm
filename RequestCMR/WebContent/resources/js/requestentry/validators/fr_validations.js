@@ -106,7 +106,8 @@ function afterConfigForFR() {
     FormManager.addValidator('isuCd', Validators.REQUIRED, [ 'ISU Code' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'Search Term (SORTL)' ], 'MAIN_IBM_TAB');
-    FormManager.addValidator('installBranchOff', Validators.REQUIRED, [ 'Installing BO' ], 'MAIN_IBM_TAB');
+    // FormManager.addValidator('installBranchOff', Validators.REQUIRED, [
+    // 'Installing BO' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [ 'Sales Rep No' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('subIndustryCd', Validators.REQUIRED, [ 'Subindustry' ], 'MAIN_CUST_TAB');
     FormManager.readOnly('ordBlk');
@@ -2697,10 +2698,11 @@ function setFieldsRequiredForCreateRequester() {
     } else {
       if (custSubGrp == 'INTER' || custSubGrp == 'CBTER') {
         FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'Search Term (SORTL)' ], 'MAIN_IBM_TAB');
-        FormManager.addValidator('installBranchOff', Validators.REQUIRED, [ 'Installing BO' ], 'MAIN_IBM_TAB');
+        // FormManager.addValidator('installBranchOff', Validators.REQUIRED, [
+        // 'Installing BO' ], 'MAIN_IBM_TAB');
       } else {
         FormManager.removeValidator('salesBusOffCd', Validators.REQUIRED);
-        FormManager.removeValidator('installBranchOff', Validators.REQUIRED);
+        // FormManager.removeValidator('installBranchOff', Validators.REQUIRED);
       }
     }
   }
@@ -3497,7 +3499,7 @@ dojo.addOnLoad(function() {
   GEOHandler.enableCopyAddress('706', validateFRCopy, [ 'ZD01' ]);
   GEOHandler.registerValidator(addGenericVATValidator('706', 'MAIN_CUST_TAB', 'frmCMR', 'ZP01'), [ '706' ], null, true);
   GEOHandler.addAddrFunction(disableLandCntry, [ '706' ]);
-  GEOHandler.registerValidator(addIBOUpdate453Validator, '706', null, true);
+  // GEOHandler.registerValidator(addIBOUpdate453Validator, '706', null, true);
   // GEOHandler.registerValidator(addPostalCodeLengthValidator, '706' , null,
   // true);
   GEOHandler.addAfterConfig(showAffacturageOnReqReason, '706');
