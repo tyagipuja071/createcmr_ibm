@@ -3473,7 +3473,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(afterConfigForFR, '706');
   GEOHandler.addAfterConfig(addFRClientTierLogic, '706');
   GEOHandler.addAfterConfig(add32PostCdCntrySBOlogicOnISUChange, '706');
-  GEOHandler.addAfterConfig(addIBOlogic, '706');
+  // GEOHandler.addAfterConfig(addIBOlogic, '706');
   GEOHandler.registerValidator(addFRAddressTypeValidator, '706', null, true);
   // GEOHandler.registerValidator(addPpsceidValidator, '706', null, true);
   GEOHandler.addAddrFunction(addLatinCharValidatorFR, '706');
