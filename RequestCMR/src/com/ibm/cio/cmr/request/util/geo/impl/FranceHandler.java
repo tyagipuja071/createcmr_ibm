@@ -1382,7 +1382,7 @@ public class FranceHandler extends GEOHandler {
               currCell = (XSSFCell) row.getCell(7);
               postCd = validateColValFromCell(currCell);
               if (!StringUtils.isEmpty(postCd)) {
-                if ("Bill TO".equals(name)) {
+                if ("Bill To".equals(name)) {
                   currCell = (XSSFCell) row.getCell(10);
                 } else {
                   currCell = (XSSFCell) row.getCell(9);
