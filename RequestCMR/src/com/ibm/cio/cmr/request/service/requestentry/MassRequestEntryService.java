@@ -28,6 +28,7 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -38,6 +39,9 @@ import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -127,6 +131,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
   private static final String STATUS_CHG_CMT_MID_PREFIX = "\" changed the REQUEST STATUS to \"";
   private static final String STATUS_CHG_CMT_POST_PREFIX = "\"<br/>";
   private static final String CMR_SHEET_NAME = "Mass Change";
+  private static final String MASS_DATA = "Mass Data";
   private static final String CONFIG_SHEET_NAME = "Config";
   private static final int CMR_ROW_NO = 2;
   private static final int CONFIG_ROW_NO = 2;
@@ -1176,8 +1181,13 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       if (CmrConstants.REQ_TYPE_MASS_CREATE.equalsIgnoreCase(admin.getReqType())
           && CmrConstants.Send_for_Processing().equalsIgnoreCase(model.getAction())
           && CmrConstants.REQUEST_STATUS.DRA.toString().equals(trans.getId().getCurrReqStatus())) {
-        trans.setNewReqStatus(CmrConstants.REQUEST_STATUS.SVA.toString());
-        trans.setNewLockedInd(CmrConstants.YES_NO.N.toString());
+        if (StringUtils.isNotEmpty(model.getCmrIssuingCntry()) && "649".equals(model.getCmrIssuingCntry())) {
+          trans.setNewReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
+          trans.setNewLockedInd(CmrConstants.YES_NO.N.toString());
+        } else {
+          trans.setNewReqStatus(CmrConstants.REQUEST_STATUS.SVA.toString());
+          trans.setNewLockedInd(CmrConstants.YES_NO.N.toString());
+        }
       } else if (CmrConstants.REQ_TYPE_MASS_CREATE.equalsIgnoreCase(admin.getReqType())
           && CmrConstants.Create_Update_CMR().equalsIgnoreCase(model.getAction())
           && CmrConstants.REQUEST_STATUS.PVA.toString().equals(trans.getId().getCurrReqStatus())) {
@@ -1723,6 +1733,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     long reqId = 0;
     String token = null;
     int newIterId = 0;
+    String extName = ".xlsx"; // default file extension
 
     boolean massCreate = false;
     for (FileItem item : items) {
@@ -1733,6 +1744,12 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         }
         if ("massTokenId".equals(item.getFieldName())) {
           token = item.getString();
+        }
+      }
+      if ("massFile".equals(item.getFieldName())) {
+        String massFileName = item.getName();
+        if (!StringUtils.isBlank(massFileName)) {
+          extName = "." + FilenameUtils.getExtension(massFileName);
         }
       }
     }
@@ -1776,7 +1793,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         // MASS FILE | set filename
         String fileName = null;
         if (CmrConstants.REQ_TYPE_MASS_CREATE.equals(admin.getReqType())) {
-          fileName = "MassCreate_" + reqId + "_Iter" + (newIterId) + ".xlsm";
+          fileName = "MassCreate_" + reqId + "_Iter" + (newIterId) + extName;
           massCreate = true;
         } else {
           fileName = "MassUpdate_" + reqId + "_Iter" + (newIterId) + ".xlsx";
@@ -1788,8 +1805,15 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
 
               // MASS FILE | validate the mass file
               if (massCreate) {
-                if (!validateMassCreateFile(item.getInputStream(), reqId, newIterId)) {
-                  throw new CmrException(MessageUtil.ERROR_MASS_FILE);
+                if (PageManager.fromGeo("CA", cmrIssuingCntry)) {
+                  if (!validateMassCreateCA(item.getInputStream())) {
+                    throw new CmrException(MessageUtil.ERROR_MASS_FILE);
+                  }
+                } // else default US
+                else {
+                  if (!validateMassCreateFile(item.getInputStream(), reqId, newIterId)) {
+                    throw new CmrException(MessageUtil.ERROR_MASS_FILE);
+                  }
                 }
                 log.info("mass create file validated");
               } else {
@@ -1965,7 +1989,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     } else if (ValidationResult.Passed == data.getValidationResult() && data.getRows() != null) {
       String maxRows = SystemConfiguration.getValue("MASS_CREATE_MAX_ROWS", "100");
       if (data.getRows() != null && (data.getRows().size() >= Integer.parseInt(maxRows))) {
-        log.error("Total cmrRecords exceed theh maximum limit of " + maxRows);
+        log.error("Total cmrRecords exceed the maximum limit of " + maxRows);
         throw new CmrException(MessageUtil.ERROR_MASS_FILE_ROWS, maxRows);
       }
     }
@@ -5731,4 +5755,51 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       }
     }
   }
+
+  private boolean validateMassCreateCA(InputStream fileStream) throws Exception {
+    XSSFWorkbook book = new XSSFWorkbook(fileStream);
+    XSSFSheet sheet = book.getSheet(MASS_DATA);
+    XSSFCell rowCell = null;
+    XSSFRow sheetRow = null;
+
+    int rowIndex = 0;
+    int maxRows = Integer.parseInt(SystemConfiguration.getValue("MASS_CREATE_MAX_ROWS", "100"));
+    StringBuilder sbErrorRow = new StringBuilder();
+    boolean isInvalidRow = false;
+    for (Row row : sheet) {
+      sheetRow = (XSSFRow) row;
+      // validate CMR No if numeric
+      if (rowIndex > 0) {
+        rowCell = sheetRow.getCell(0);
+        if (rowCell == null) {
+          rowCell = sheetRow.createCell(0);
+        }
+
+        if (rowIndex > maxRows) {
+          log.error("Total cmrRecords exceed the maximum limit of " + maxRows);
+          throw new CmrException(MessageUtil.ERROR_MASS_FILE_ROWS, "" + maxRows);
+        }
+
+        String cellValue = rowCell.getStringCellValue();
+        if (StringUtils.isBlank(cellValue) || (StringUtils.isNotBlank(cellValue) && !StringUtils.isNumeric(cellValue))) {
+          isInvalidRow = true;
+          sbErrorRow.append("" + rowIndex);
+          sbErrorRow.append(",");
+        }
+      }
+
+      rowIndex++;
+    }
+
+    book.close();
+    if (isInvalidRow) {
+      String errorRow = sbErrorRow.toString();
+      errorRow = StringUtils.removeEnd(errorRow, ",");
+      log.error("CMR number field is required and should be numeric: row " + errorRow);
+      throw new CmrException(MessageUtil.ERROR_MASS_FILE_INVALID_CMRNO, errorRow);
+    }
+
+    return !isInvalidRow;
+  }
+
 }
