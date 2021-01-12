@@ -46,7 +46,10 @@ AppUser user = AppUser.getUser(request);
           <div >
           <table id="codeTable" cellspacing="0" cellpadding="0" border="0" summary="System Parameters" class="ibm-data-table ibm-sortable-table ibm-alternating">
             <tbody>
-            <%if (user != null && (user.isAdmin() || user.isCmde() || user.isProcessor()) ){%>
+              <tr>
+                <td><a style="cursor:pointer;font-size:13px" title="Search Denied Parties List (DPL)" href="${contextPath}/dplsearch">Search Denied Parties List (DPL)</a></td>
+                <td style="font-size:13px">Searches against the Denied Parties List (DPL) from the Export Regulartions Office (ERO).</td>
+              </tr>
               <tr>
                 <td><a style="cursor:pointer;font-size:13px" title="Search Legacy DB2 Records" href="${contextPath}/legacysearch">Search Legacy DB2 Records</a></td>
                 <td style="font-size:13px">Searches against the Legacy DB2 (CMRDB2D).</td>
@@ -55,15 +58,12 @@ AppUser user = AppUser.getUser(request);
                 <td><a style="cursor:pointer;font-size:13px" title="Search SOF/WTAAS Records" href="${contextPath}/mqsearch">Search SOF/WTAAS Records</a></td>
                 <td style="font-size:13px">Searches against SOF and WTAAS using the MQ query services.</td>
               </tr>
+            <%if (user != null && (user.isAdmin() || user.isCmde() || user.isProcessor()) ){%>
               <tr>
                 <td><a style="cursor:pointer;font-size:13px" title="File Attachments" href="${contextPath}/attachlist">File Attachments</a></td>
                 <td style="font-size:13px">Lists file attachments related to requests.</td>
               </tr>
             <%}%>
-              <tr>
-                <td><a style="cursor:pointer;font-size:13px" title="Search Denied Parties List (DPL)" href="${contextPath}/dplsearch">Search Denied Parties List (DPL)</a></td>
-                <td style="font-size:13px">Searches against the Denied Parties List (DPL) from the Export Regulartions Office (ERO).</td>
-              </tr>
             </tbody>
           </table>
           </div>
