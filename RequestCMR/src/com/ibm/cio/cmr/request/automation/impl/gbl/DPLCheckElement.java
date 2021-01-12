@@ -45,6 +45,7 @@ import com.ibm.comexp.at.exportchecks.ews.EWSProperties;
 public class DPLCheckElement extends ValidatingElement {
 
   private static final Logger log = Logger.getLogger(DPLCheckElement.class);
+  private static final DPLSearchService dplService = new DPLSearchService();
 
   public DPLCheckElement(String requestTypes, String actionOnError, boolean overrideData, boolean stopOnError) {
     super(requestTypes, actionOnError, overrideData, stopOnError);
@@ -111,9 +112,16 @@ public class DPLCheckElement extends ValidatingElement {
           if (!isDPLApprovalPresent(entityManager, data.getCmrIssuingCntry(), admin.getReqType())) {
             validation.setSuccess(false);
             validation.setMessage("AF".equals(scorecard.getDplChkResult()) ? "All Failed" : "Some Failed");
-            output.setOnError(true);
-            engineData.addRejectionComment("OTH", "DPL check failed for one or more addresses on the request.", "", "");
-            output.setDetails("DPL check failed for one or more addresses on the request.");
+            details.setLength(0);
+            details.append("DPL check failed for one or more addresses on the request.\n");
+            if (dplService.getResultCount(entityManager, reqId, user) == 0) {
+              details.append("No actual results found during the search.");
+              output.setOnError(false);
+            } else {
+              output.setOnError(true);
+              engineData.addRejectionComment("OTH", "DPL check failed for one or more addresses on the request.", "", "");
+            }
+            output.setDetails(details.toString());
           } else {
             validation.setSuccess(true);
             validation.setMessage("Approval Required");
@@ -145,7 +153,6 @@ public class DPLCheckElement extends ValidatingElement {
 
       DPLCheckResult dplResult = null;
       String errorInfo = null;
-
       AddressService addrService = new AddressService();
       for (Addr addr : addresses) {
         errorInfo = null;
@@ -244,14 +251,26 @@ public class DPLCheckElement extends ValidatingElement {
         break;
       case "SF":
         validation.setSuccess(false);
-        output.setOnError(true);
-        engineData.addRejectionComment("OTH", "DPL Check Failed for some addresses.", "", "");
+        if (dplService.getResultCount(entityManager, reqId, user) == 0) {
+          details.append(details.length() > 0 ? "\n" : "");
+          details.append("No actual results found during the search.");
+          output.setOnError(false);
+        } else {
+          output.setOnError(true);
+          engineData.addRejectionComment("OTH", "DPL Check Failed for some addresses.", "", "");
+        }
         validation.setMessage("Some Failed");
         break;
       case "AF":
         validation.setSuccess(false);
-        output.setOnError(true);
-        engineData.addRejectionComment("OTH", "DPL Check Failed for all addresses.", "", "");
+        if (dplService.getResultCount(entityManager, reqId, user) == 0) {
+          details.append(details.length() > 0 ? "\n" : "");
+          details.append("No actual results found during the search.");
+          output.setOnError(false);
+        } else {
+          output.setOnError(true);
+          engineData.addRejectionComment("OTH", "DPL Check Failed for all addresses.", "", "");
+        }
         validation.setMessage("All Failed");
         break;
       default:
@@ -345,7 +364,6 @@ public class DPLCheckElement extends ValidatingElement {
       params.addParam("filePrefix", "AutoDPLSearch_");
 
       try {
-        DPLSearchService dplService = new DPLSearchService();
         dplService.process(null, params);
       } catch (Exception e) {
         log.warn("DPL results not attached to the request", e);
