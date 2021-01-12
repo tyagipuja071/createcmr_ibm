@@ -1255,7 +1255,8 @@ function setDummySIRETOnCustSubGrpChange(value) {
   if (reqType == 'U' || FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
-  if (value == "COMME" || value == "HOSTC" || value == "THDPT") {
+  if (value == "COMME" || value == "HOSTC" || value == "THDPT" || value == "BUSPR" || value == "GOVRN" || value == "INTER" || value == "INTSO"
+      || value == "LCFIN") {
     FormManager.enable('taxCd1');
     FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'SIRET' ], 'MAIN_CUST_TAB');
   } else if (value == 'PRICU' || value == 'XBLUM' || value == 'IBMEM' || value == 'CBIEM') {
@@ -3499,7 +3500,7 @@ dojo.addOnLoad(function() {
   // GEOHandler.addToggleAddrTypeFunction(toggleAddrTypesForFR, '706');
   GEOHandler.addAddrFunction(addFRLandedCountryHandler, '706');
   GEOHandler.enableCopyAddress('706', validateFRCopy, [ 'ZD01' ]);
-  GEOHandler.registerValidator(addGenericVATValidator('706', 'MAIN_CUST_TAB', 'frmCMR', 'ZP01'), [ '706' ], null, true);
+  GEOHandler.registerValidator(addGenericVATValidator('706', 'MAIN_CUST_TAB', 'frmCMR', 'ZS01'), [ '706' ], null, true);
   GEOHandler.addAddrFunction(disableLandCntry, [ '706' ]);
   // GEOHandler.registerValidator(addIBOUpdate453Validator, '706', null, true);
   // GEOHandler.registerValidator(addPostalCodeLengthValidator, '706' , null,
