@@ -74,10 +74,21 @@ function submitMassFile() {
     cmr.showAlert('Invalid mass file type selected. Please select \".xlsx\" file only.');
     return;
   }
-  if ((FormManager.getActualValue('massFile').endsWith(".xlsm") != true && FormManager.getActualValue('reqType') == 'N')) {
+
+  var massCreateCountryXLSMSupport = [ '897' ];
+  if (massCreateCountryXLSMSupport.indexOf(FormManager.getActualValue('cmrIssuingCntry')) > -1
+      && (FormManager.getActualValue('massFile').endsWith(".xlsm") != true && FormManager.getActualValue('reqType') == 'N')) {
     cmr.showAlert('Invalid mass file type selected. Please select \".xlsm\" file only.');
     return;
   }
+
+  var massCreateCountryXLSXSupport = [ '649' ];
+  if (massCreateCountryXLSXSupport.indexOf(FormManager.getActualValue('cmrIssuingCntry')) > -1
+      && (FormManager.getActualValue('massFile').endsWith(".xlsx") != true && FormManager.getActualValue('reqType') == 'N')) {
+    cmr.showAlert('Invalid mass file type selected. Please select \".xlsx\" file only.');
+    return;
+  }
+
   cmr.aftertoken = refreshMassProcess;
   FormManager.doHiddenFileAction('frmCMRProcess', 'SUBMIT_FILE', cmr.CONTEXT_ROOT + '/massrequest/process.json', true, massTokenId, false);
 
