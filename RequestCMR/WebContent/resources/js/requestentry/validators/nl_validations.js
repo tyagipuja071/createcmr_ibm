@@ -700,8 +700,6 @@ function addNLAddressTypeValidator() {
             return new ValidationResult(null, false, 'Only one Billing address can be defined. Please remove the additional Bill-to address.');
           } else if (soldToCnt > 1) {
             return new ValidationResult(null, false, 'Only one Sold-to address can be defined. Please remove the additional Sold-to address.');
-          } else if (installAtCnt > 1) {
-            return new ValidationResult(null, false, 'Only one Install-at address can be defined. Please remove the additional Install-at address.');
           } else {
             return new ValidationResult(null, true);
           }
