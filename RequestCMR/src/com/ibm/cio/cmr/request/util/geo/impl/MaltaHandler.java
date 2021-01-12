@@ -716,7 +716,9 @@ public class MaltaHandler extends BaseSOFHandler {
       }
       address.setTransportZone("");
       String addrSeq = address.getId().getAddrSeq();
-      addrSeq = StringUtils.leftPad(addrSeq, 5, '0');
+      if (currentRecord.getCmrAddrSeq() != null && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+        addrSeq = StringUtils.leftPad(addrSeq, 5, '0');
+      }
       address.getId().setAddrSeq(addrSeq);
     }
   }
