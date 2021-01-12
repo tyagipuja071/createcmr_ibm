@@ -96,7 +96,7 @@ boolean approver = user != null && user.isApprover();
           <%} %>
           <li id="FORCE_CHANGE_TAB"><a href="javascript: goToUrl('${contextPath}/statuschange')">Forced Status Change</a></li>
           <li id="APPROVALS_ADMIN_TAB"><a href="javascript: goToUrl('${contextPath}/approvalsadminlist')">Approvals Override</a></li>
-          <%if (SystemConfiguration.isAdmin(request)){ %> 
+          <%if (user != null && (SystemConfiguration.isAdmin(request) || user.isCmde())){ %> 
             <li id="USER_ADMIN_TAB"><a href="javascript: goToUrl('${contextPath}/users')">User Maintenance</a></li>
           <%} %>
           <li id="CODE_ADMIN_TAB"><a href="javascript: goToUrl('${contextPath}/code')">Code Maintenance</a></li>
