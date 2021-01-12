@@ -46,10 +46,9 @@ public class UsersController extends BaseController {
   private static final Logger LOG = Logger.getLogger(UsersController.class);
 
   @RequestMapping(value = "/users", method = RequestMethod.GET)
-  public @ResponseBody
-  ModelAndView showUsers(HttpServletRequest request, ModelMap model) {
+  public @ResponseBody ModelAndView showUsers(HttpServletRequest request, ModelMap model) {
     AppUser user = AppUser.getUser(request);
-    if (!user.isAdmin()) {
+    if (!user.isAdmin() && !user.isCmde()) {
       LOG.warn("User " + user.getIntranetId() + " (" + user.getBluePagesName() + ") tried accessing the Users system function.");
       ModelAndView mv = new ModelAndView("noaccess", "users", new UserModel());
       return mv;
@@ -62,10 +61,9 @@ public class UsersController extends BaseController {
   }
 
   @RequestMapping(value = "/user")
-  public @ResponseBody
-  ModelAndView maintainUser(HttpServletRequest request, HttpServletResponse response, UserModel model) throws CmrException {
+  public @ResponseBody ModelAndView maintainUser(HttpServletRequest request, HttpServletResponse response, UserModel model) throws CmrException {
     AppUser user = AppUser.getUser(request);
-    if (!user.isAdmin()) {
+    if (!user.isAdmin() && !user.isCmde()) {
       LOG.warn("User " + user.getIntranetId() + " (" + user.getBluePagesName() + ") tried accessing the Users system function.");
       ModelAndView mv = new ModelAndView("noaccess", "users", new UserModel());
       return mv;
@@ -105,10 +103,10 @@ public class UsersController extends BaseController {
   }
 
   @RequestMapping(value = "/userroles")
-  public @ResponseBody
-  ModelAndView maintainUserRoles(HttpServletRequest request, HttpServletResponse response, UserRoleModel model) throws CmrException {
+  public @ResponseBody ModelAndView maintainUserRoles(HttpServletRequest request, HttpServletResponse response, UserRoleModel model)
+      throws CmrException {
     AppUser user = AppUser.getUser(request);
-    if (!user.isAdmin()) {
+    if (!user.isAdmin() && !user.isCmde()) {
       LOG.warn("User " + user.getIntranetId() + " (" + user.getBluePagesName() + ") tried accessing the Users system function.");
       ModelAndView mv = new ModelAndView("noaccess", "users", new UserModel());
       return mv;
