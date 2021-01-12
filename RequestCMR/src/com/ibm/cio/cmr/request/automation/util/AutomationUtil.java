@@ -951,6 +951,14 @@ public abstract class AutomationUtil {
     return "";
   }
 
+  public static String getCleanStringWithoutSpace(String str) {
+    str = getCleanString(str);
+    if (str.length() > 0) {
+      str = str.replaceAll("\\s", "");
+    }
+    return str;
+  }
+
   /**
    * 
    * Extended legal endings apart from the global values. Override in
@@ -1187,6 +1195,32 @@ public abstract class AutomationUtil {
       }
     }
     return rejectRequest;
+  }
+
+  /**
+   * Returns true if addresses on name are same
+   * 
+   * @param addr1
+   * @param addr2
+   * @return
+   */
+
+  public static boolean compareCustomerNames(Addr addr1, Addr addr2) {
+    String customerName1 = addr1.getCustNm1() + (StringUtils.isNotBlank(addr1.getCustNm2()) ? " " + addr1.getCustNm2() : "");
+    String customerName2 = addr2.getCustNm1() + (StringUtils.isNotBlank(addr2.getCustNm2()) ? " " + addr2.getCustNm2() : "");
+
+    String compareName1 = getCleanStringWithoutSpace(customerName1);
+    String compareName2 = getCleanStringWithoutSpace(customerName2);
+
+    if (compareName1 != null && compareName1.equals(compareName2)) {
+      return true;
+    } else {
+      // get a common words util filter for the customer names and match that
+      compareName1 = CommonWordsUtil.minimize(getCleanString(customerName1));
+      compareName2 = CommonWordsUtil.minimize(getCleanString(customerName2));
+
+      return compareName1 != null && compareName1.equals(compareName2);
+    }
   }
 
 }
