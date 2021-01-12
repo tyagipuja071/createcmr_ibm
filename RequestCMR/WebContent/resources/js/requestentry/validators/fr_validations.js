@@ -219,33 +219,30 @@ function setINACOnScenario() {
 }
 function setISICAndSubindustryOnScenario() {
   var role = null;
-  var reqType = FormManager.getActualValue('reqType');
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
   }
-  if (reqType == 'U') {
+
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
 
   var custSubGrp = FormManager.getActualValue('custSubGrp');
 
-  // if (custSubGrp == 'PRICU' || custSubGrp == 'CBICU' || custSubGrp == 'IBMEM'
-  // || custSubGrp == 'CBIEM') {
-  if (custSubGrp == 'PRICU' || custSubGrp == 'XBLUM' || custSubGrp == 'IBMEM' || custSubGrp == 'CBIEM') {
-    if (role == 'Requester') {
-      FormManager.setValue('isicCd', '9500');
+  if (role == 'Requester' || role == 'Processor') {
+    if (custSubGrp == 'PRICU' || custSubGrp == 'XBLUM' || custSubGrp == 'IBMEM' || custSubGrp == 'CBIEM') {
       FormManager.setValue('subIndustryCd', 'WQ');
-      FormManager.readOnly('isicCd');
       FormManager.readOnly('subIndustryCd');
-    } else if (role == 'Processor') {
-      FormManager.enable('isicCd');
+
+      FormManager.setValue('isicCd', '9500');
+      FormManager.readOnly('isicCd');
+    } else {
+      FormManager.setValue('subIndustryCd', '');
       FormManager.enable('subIndustryCd');
+
+      FormManager.setValue('isicCd', '');
+      FormManager.enable('isicCd');
     }
-  } else {
-    FormManager.setValue('isicCd', '');
-    FormManager.setValue('subIndustryCd', '');
-    FormManager.enable('isicCd');
-    FormManager.enable('subIndustryCd');
   }
 }
 // function setVATOnScenario() {
