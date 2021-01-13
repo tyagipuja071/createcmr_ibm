@@ -187,7 +187,19 @@ public class RequestSearchService extends BaseService<RequestSearchCriteriaModel
 
       if (!StringUtils.isEmpty(model.getPendingAppr())) {
         query.append(ExternalizedQuery.getSql("WORKFLOW.CLAUSE_PENDING_APPR"));
+      }
 
+      if (!StringUtils.isBlank(model.getPayGo())) {
+        query.append(ExternalizedQuery.getSql("WORKFLOW.CLAUSE_PAYGO"));
+      }
+
+      if (!StringUtils.isBlank(model.getPool())) {
+        query.append(ExternalizedQuery.getSql("WORKFLOW.CLAUSE_POOL"));
+      }
+
+      if (!StringUtils.isBlank(model.getSourceSystem())) {
+        query.append(ExternalizedQuery.getSql("WORKFLOW.CLAUSE_SOURCE"));
+        query.setParameter("SOURCE", model.getSourceSystem().toUpperCase());
       }
 
       query.append(" ORDER BY a.REQ_ID " + order + " ");
