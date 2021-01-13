@@ -67,7 +67,7 @@
           <label>Industry Solution Unit (ISU)</label>
           <dbColumn>ISU_CD</dbColumn>
           <width>25</width>
-          <bdsId>SpainISU</bdsId>
+          <lovId>ISU</lovId>
         </column>
         <column>
           <label>Client Tier</label>

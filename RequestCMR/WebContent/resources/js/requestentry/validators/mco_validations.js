@@ -619,11 +619,11 @@ function setClientTierValues(value) {
     } else if (value == '21' || value == '60') {
       tierValues = [ '7' ];
     } else if (value == '34') {
-      tierValues = [ 'V', '6', 'A' ];
+      tierValues = [ 'V', '6', 'A', 'Q' ];
     }
   } else if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.SPAIN) {
     if (value == '34') {
-      tierValues = [ '6', 'A', 'V', 'Z' ];
+      tierValues = [ '6', 'A', 'V', 'Z', 'Q' ];
     } else if (value == '32') {
       tierValues = [ 'B', 'S', 'T', 'N', 'Z', 'M' ];
     } else if (value == '21' || value == '5B' || value == '04' || value == '3T' || value == '60') {
@@ -697,7 +697,7 @@ function setEnterpriseValues(clientTier) {
   // LocNo
   var isuCtc = isuCd + clientTier;
   if (custGroup != 'CROSS') {
-    if (cntry == SysLoc.SPAIN && (isuCtc == '32B' || isuCtc == '32N' || isuCtc == '32S' || isuCtc == '32T' || isuCtc == '217')) {
+    if (cntry == SysLoc.SPAIN && (isuCtc == '32B' || isuCtc == '32T' || isuCtc == '217' || isuCtc == '34Q')) {
       // FormManager.readOnly('enterprise');
       setSBOAndEBO();
       return;
@@ -795,7 +795,7 @@ function setSBOAndEBO() {
         }
       }
       // For Spain, domestic with 32 & 21 ISU, set enterprise based on LocNo
-      if (isuCtc == '32B' || isuCtc == '32S' || isuCtc == '32T' || isuCtc == '217' || isuCtc == '32N') {
+      if (isuCtc == '32B' || isuCtc == '34Q' || isuCtc == '32T' || isuCtc == '217') {
         if (ent == undefined) {
           FormManager.setValue('enterprise', '');
         } else {
@@ -2100,8 +2100,8 @@ function isuCtcBasedOnISIC() {
   }
   var isicCd = FormManager.getActualValue('isicCd');
   if (isicCd == '7230' || isicCd == '7240' || isicCd == '7290' || isicCd == '7210' || isicCd == '7221' || isicCd == '7229') {
-    FormManager.setValue('isuCd', '32');
-    FormManager.setValue('clientTier', 'N');
+    FormManager.setValue('isuCd', '34');
+    FormManager.setValue('clientTier', 'Q');
   }
   FormManager.disable('subIndustryCd');
 }
@@ -2298,10 +2298,10 @@ function setISUCTCOnISIC() {
   var isicList = new Set([ '7230', '7240', '7290', '7210', '7221', '7229' ]);
   if (reqType == 'C' && role == 'REQUESTER') {
     if (!(custSubGrp == 'INTER' || custSubGrp == 'INTSO' || custSubGrp == 'PRICU' || custSubGrp == 'XIGS' || custSubGrp == 'BUSPR' || custSubGrp == 'XBP' || custSubGrp == 'XCRO')) {
-      if ('32' == isuCd && 'S' == clientTier && isicList.has(isic)) {
-        FormManager.setValue('clientTier', 'N');
-      } else if ('32' == isuCd && 'N' == clientTier && !isicList.has(isic)) {
-        FormManager.setValue('clientTier', 'S');
+      if ('34' == isuCd && 'Q' == clientTier && isicList.has(isic)) {
+        FormManager.setValue('clientTier', 'Q');
+      } else if ('34' == isuCd && 'Q' == clientTier && !isicList.has(isic)) {
+        FormManager.setValue('clientTier', 'Q');
       }
     }
   }
