@@ -1269,7 +1269,7 @@ function setDummySIRETOnCustSubGrpChange(value) {
     };
     var landCntryResult = cmr.query('ADDR.GET.CNTRY_CITY_PSCD.BY_REQID_ADDRTYPE', qParams);
     var landCntry = landCntryResult.ret1;
-    var siretEnabledCntryList = [ 'GP', 'GF', 'MQ', 'RE', 'PM', 'KM' ];
+    var siretEnabledCntryList = [ 'GP', 'GF', 'MQ', 'RE', 'PM', 'KM', 'FR' ];
     if (siretEnabledCntryList.indexOf(landCntry) > -1) {
       FormManager.enable('taxCd1');
     } else {
