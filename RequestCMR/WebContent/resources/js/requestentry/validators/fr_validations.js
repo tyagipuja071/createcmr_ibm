@@ -1257,6 +1257,7 @@ function setDummySIRETOnCustSubGrpChange(value) {
     FormManager.enable('taxCd1');
     FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'SIRET' ], 'MAIN_CUST_TAB');
   } else if (value == 'PRICU' || value == 'XBLUM' || value == 'IBMEM' || value == 'CBIEM') {
+    FormManager.removeValidator('taxCd1', Validators.REQUIRED);
     FormManager.setValue('taxCd1', '');
     FormManager.readOnly('taxCd1');
   } else {
