@@ -47,6 +47,10 @@ function afterConfigForBELUX() {
     FormManager.removeValidator('subIndustryCd', Validators.REQUIRED);
     FormManager.removeValidator('economicCd', Validators.REQUIRED);
     FormManager.removeValidator('searchTerm', Validators.REQUIRED);
+
+    if (custSubGrp == 'BECOM' || custSubGrp == 'BE3PA') {
+      FormManager.addValidator('collectionCd', Validators.REQUIRED, [ 'Collection Code' ], 'MAIN_CUST_TAB');
+    }
   }
 
   // 2020-08-24 George make INAC optional for those cases (Internal, Internal SO
@@ -108,7 +112,7 @@ function afterConfigForBELUX() {
     FormManager.resetValidations('taxCd1');
   }
   if (reqType == 'C' && role != 'Processor') {
-    FormManager.readOnly('collectionCd');
+    // FormManager.readOnly('collectionCd');
   }
 
   var landCntry = '';
@@ -571,28 +575,72 @@ function setCollectionCodeValues(isicCd) {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var geoCd = FormManager.getActualValue('countryUse').substring(3, 5);
   var isicCd = FormManager.getActualValue('isicCd');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var countryUse = FormManager.getActualValue('countryUse');
+  var isuCd = FormManager.getActualValue('isuCd');
+  var clientTier = FormManager.getActualValue('clientTier');
+
+  if ((isicCd == _pagemodel.isicCd) && (custSubGrp == _pagemodel.custSubGrp)) {
+    return;
+  }
 
   var collectionCode = [];
 
-  if (isicCd != '') {
-    var qParams = {
-      _qall : 'Y',
-      ISSUING_CNTRY : cntry + geoCd,
-      REP_TEAM_CD : '%' + isicCd + '%'
-    };
-    var results = cmr.query('GET.CCLIST.BYISIC', qParams);
-    if (results != null) {
-      for (var i = 0; i < results.length; i++) {
-        collectionCode.push(results[i].ret1);
+  if (countryUse == '624LU') {
+    if (isicCd != '') {
+      var qParams = {
+        _qall : 'Y',
+        ISSUING_CNTRY : cntry + geoCd,
+        REP_TEAM_CD : '%' + isicCd + '%'
+      };
+      var results = cmr.query('GET.CCLIST.BYISIC', qParams);
+      if (results != null) {
+        for (var i = 0; i < results.length; i++) {
+          collectionCode.push(results[i].ret1);
+        }
+        if (collectionCode != null) {
+          FormManager.limitDropdownValues(FormManager.getField('collectionCd'), collectionCode);
+
+          if (collectionCode.length == 1) {
+            FormManager.setValue('collectionCd', collectionCode[0]);
+          }
+        }
       }
-      if (collectionCode != null) {
-        FormManager.limitDropdownValues(FormManager.getField('collectionCd'), collectionCode);
-        if (collectionCode.length == 1) {
+    }
+  } else if (countryUse == '624') {
+    var colleCd32SList = [];
+    if (isicCd != '') {
+      var qParams = {
+        _qall : 'Y',
+        ISSUING_CNTRY : cntry + geoCd
+      };
+      var results = cmr.query('GET.CCLIST.BYCNTRY', qParams);
+      if (results != null) {
+        for (var i = 0; i < results.length; i++) {
+          colleCd32SList.push(results[i].ret1);
+        }
+        if (colleCd32SList != null) {
+          FormManager.limitDropdownValues(FormManager.getField('collectionCd'), colleCd32SList);
+        }
+      }
+
+      var qParams = {
+        _qall : 'Y',
+        ISSUING_CNTRY : cntry + geoCd,
+        REP_TEAM_CD : '%' + isicCd + '%'
+      };
+      var results = cmr.query('GET.CCLIST.BYISIC', qParams);
+      if (results != null) {
+        for (var i = 0; i < results.length; i++) {
+          collectionCode.push(results[i].ret1);
+        }
+        if (collectionCode != null && collectionCode.length == 1) {
           FormManager.setValue('collectionCd', collectionCode[0]);
         }
       }
     }
   }
+
 }
 
 /*
@@ -921,23 +969,6 @@ function addAddressFieldValidators() {
       }
     };
   })(), null, 'frmCMR_addressModal');
-
-  // Street mandatory for Mailing & Billing
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var addrType = FormManager.getActualValue('addrType');
-        var cntry = FormManager.getActualValue('landCntry');
-        if (cntry != '' && (addrType == 'ZI01' || addrType == 'ZP01')) {
-          var street = FormManager.getActualValue('addrTxt');
-          if (street == null || street == '') {
-            return new ValidationResult(null, false, 'Street is mandatory for Mailing & Billing even when PO BOX is filled');
-          }
-        }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), null, 'frmCMR_addressModal');
 }
 
 function setVatInfoBubble() {
@@ -1208,8 +1239,8 @@ function addCmrNoValidator() {
             return new ValidationResult(null, false, 'CMR Number should be only numbers.');
           } else if (cmrNo == "000000") {
             return new ValidationResult(null, false, 'CMR Number should not be 000000.');
-          } else if (custSubType != '' && (custSubType.includes('INT') && (!cmrNo.startsWith('99')))) {
-            return new ValidationResult(null, false, 'CMR Number should be in 99XXXX format for internal scenario');
+          } else if (custSubType != '' && (custSubType.includes('INT') && (cmrNo < '990000' || cmrNo > '996999'))) {
+            return new ValidationResult(null, false, 'for internal scenario the scope of CMR Number is 990000 ~ 996999');
           } else if (custSubType != '' && (custSubType.includes('ISO') && ((!cmrNo.startsWith('997')) && (!cmrNo.startsWith('998'))))) {
             return new ValidationResult(null, false, 'CMR Number should be in 997XXX or 998XXX format for internal SO scenario');
           } else if (custSubType != '' && !custSubType.includes('IN') && cmrNo.startsWith('99')) {
