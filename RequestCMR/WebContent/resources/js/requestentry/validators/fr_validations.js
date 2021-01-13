@@ -31,6 +31,8 @@ function afterConfigForFR() {
   }
   FormManager.readOnly('capInd');
 
+  FormManager.readOnly('subIndustryCd');
+
   affacturageLogic();
   setFieldsRequiredForCreateRequester();
   setIERPSitePartyIDForFR()
@@ -237,10 +239,6 @@ function setISICAndSubindustryOnScenario() {
       FormManager.setValue('isicCd', '9500');
       FormManager.readOnly('isicCd');
     } else {
-      FormManager.setValue('subIndustryCd', '');
-      FormManager.enable('subIndustryCd');
-
-      FormManager.setValue('isicCd', '');
       FormManager.enable('isicCd');
     }
   }
