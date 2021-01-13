@@ -969,23 +969,6 @@ function addAddressFieldValidators() {
       }
     };
   })(), null, 'frmCMR_addressModal');
-
-  // Street mandatory for Mailing & Billing
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var addrType = FormManager.getActualValue('addrType');
-        var cntry = FormManager.getActualValue('landCntry');
-        if (cntry != '' && (addrType == 'ZI01' || addrType == 'ZP01')) {
-          var street = FormManager.getActualValue('addrTxt');
-          if (street == null || street == '') {
-            return new ValidationResult(null, false, 'Street is mandatory for Mailing & Billing even when PO BOX is filled');
-          }
-        }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), null, 'frmCMR_addressModal');
 }
 
 function setVatInfoBubble() {
@@ -1256,8 +1239,8 @@ function addCmrNoValidator() {
             return new ValidationResult(null, false, 'CMR Number should be only numbers.');
           } else if (cmrNo == "000000") {
             return new ValidationResult(null, false, 'CMR Number should not be 000000.');
-          } else if (custSubType != '' && (custSubType.includes('INT') && (!cmrNo.startsWith('99')))) {
-            return new ValidationResult(null, false, 'CMR Number should be in 99XXXX format for internal scenario');
+          } else if (custSubType != '' && (custSubType.includes('INT') && (cmrNo < '990000' || cmrNo > '996999'))) {
+            return new ValidationResult(null, false, 'for internal scenario the scope of CMR Number is 990000 ~ 996999');
           } else if (custSubType != '' && (custSubType.includes('ISO') && ((!cmrNo.startsWith('997')) && (!cmrNo.startsWith('998'))))) {
             return new ValidationResult(null, false, 'CMR Number should be in 997XXX or 998XXX format for internal SO scenario');
           } else if (custSubType != '' && !custSubType.includes('IN') && cmrNo.startsWith('99')) {
