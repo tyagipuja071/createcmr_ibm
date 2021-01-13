@@ -65,6 +65,11 @@ div.cmr-sub {
   <form:hidden path="processedBy" />
   <form:hidden path="processedByName" />
   <form:hidden path="pendingAppr" />
+
+  <form:hidden path="payGo" />
+  <form:hidden path="pool" />
+  <form:hidden path="sourceSystem" />
+
   
 
 
@@ -105,6 +110,9 @@ div.cmr-sub {
         <cmr:gridParam fieldId="processedBy" value="${requestSearchCriteriaModel.processedBy}" />
         <cmr:gridParam fieldId="processedByName" value="${requestSearchCriteriaModel.processedByName}" />
         <cmr:gridParam fieldId="pendingAppr" value="${requestSearchCriteriaModel.pendingAppr}" />
+        <cmr:gridParam fieldId="payGo" value="${requestSearchCriteriaModel.payGo}" />
+        <cmr:gridParam fieldId="pool" value="${requestSearchCriteriaModel.pool}" />
+        <cmr:gridParam fieldId="sourceSystem" value="${requestSearchCriteriaModel.sourceSystem}" />
         
 
 
