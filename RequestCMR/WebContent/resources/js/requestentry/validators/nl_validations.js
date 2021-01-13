@@ -245,6 +245,7 @@ function setClientTierValues(isuCd) {
 
   isuCd = FormManager.getActualValue('isuCd');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var clientTierUI = FormManager.getActualValue('clientTier');
   var clientTiers = [];
   if (isuCd != '') {
     var qParams = {
@@ -259,6 +260,9 @@ function setClientTierValues(isuCd) {
         clientTiers.push(results[i].ret1);
       }
       if (clientTiers != null) {
+        if ('7' == clientTierUI && ('5B' == isuCd || '04' == isuCd || '15' == isuCd)) {
+          FormManager.setValue('clientTier', '');
+        }
         FormManager.limitDropdownValues(FormManager.getField('clientTier'), clientTiers);
         if (clientTiers.length == 1) {
           FormManager.setValue('clientTier', clientTiers[0]);
