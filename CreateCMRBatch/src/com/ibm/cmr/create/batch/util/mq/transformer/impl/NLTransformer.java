@@ -59,7 +59,7 @@ public class NLTransformer extends EMEATransformer {
 
   private static final String[] NO_UPDATE_FIELDS = { "OrganizationNo", "CurrencyCode" };
 
-  public static String DEFAULT_LANDED_COUNTRY = "AE";
+  public static String DEFAULT_LANDED_COUNTRY = "NL";
   public static final String CMR_REQUEST_REASON_TEMP_REACT_EMBARGO = "TREC";
   public static final String CMR_REQUEST_STATUS_CPR = "CPR";
   public static final String CMR_REQUEST_STATUS_PCR = "PCR";
@@ -750,11 +750,7 @@ public class NLTransformer extends EMEATransformer {
         addrLine5.append(addr.getCity1() + " ");
       }
     }
-
-    if (!StringUtils.isBlank(addr.getCustLangCd())) {
-      legacyAddr.setLanguage(addr.getCustLangCd());
-
-    }
+    legacyAddr.setLanguage("");
 
     if (!StringUtils.isBlank(addrLine5.toString())) {
       legacyAddr.setAddrLine5(addrLine5.toString());
@@ -902,7 +898,9 @@ public class NLTransformer extends EMEATransformer {
       legacyCust.setCustType("");
       // George CREATCMR-546
       legacyCust.setTaxCd(data.getTaxCd1() == null ? "" : data.getTaxCd1());
-      legacyCust.setLangCd(data.getCustPrefLang() == null ? "" : data.getCustPrefLang());
+      legacyCust.setLangCd("");
+      // legacyCust.setLangCd(data.getCustPrefLang() == null ? "" :
+      // data.getCustPrefLang());
       legacyCust.setBankAcctNo("");
 
       if (SystemLocation.ABU_DHABI.equals(data.getCmrIssuingCntry()) && !StringUtils.isBlank(data.getBpAcctTyp())) {
@@ -1513,11 +1511,7 @@ public class NLTransformer extends EMEATransformer {
     if (!StringUtils.isBlank(data.getBpSalesRepNo())) {
       legacyCustExt.setTeleCovRep(data.getBpSalesRepNo());
     }
-
-    // Morocco use Phone3 to store ICE field
-    if (SystemLocation.MOROCCO.equals(data.getCmrIssuingCntry()) && !StringUtils.isBlank(data.getPhone3())) {
-      legacyCustExt.setiTaxCode(data.getPhone3());
-    }
+    legacyCustExt.setiTaxCode(data.getTaxCd2() == null ? "" : data.getTaxCd2());
   }
 
   @Override
