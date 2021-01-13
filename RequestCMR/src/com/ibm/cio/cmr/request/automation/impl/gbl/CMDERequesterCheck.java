@@ -44,11 +44,15 @@ public class CMDERequesterCheck extends ValidatingElement {
       if (query.exists()) {
         // skip checks if requester is from CMDE team
         countryUtil.skipAllChecks(engineData);
+        admin.setScenarioVerifiedIndc("Y");
+        engineData.addPositiveCheckStatus("SKIP_APPROVALS");
+        engineData.addPositiveCheckStatus("SKIP_DPL_CHECK");
+        engineData.addPositiveCheckStatus("SKIP_UPDATE_SWITCH");
         log.debug("Requester is from CMDE team, skipping Automation checks.");
         output.setDetails("Requester is from CMDE team, skipping Automation checks.\n");
         validation.setMessage("Automation checks Skipped");
         validation.setSuccess(true);
-      } else {
+      } else if (!"C".equals(admin.getReqType()) && !"U".equals(admin.getReqType())) {
         String message = "Requester not from CMDE team.";
         if (ActionOnError.Proceed.equals(getActionOnError())) {
           message += "Further processing validation will be required before proceeding.";
