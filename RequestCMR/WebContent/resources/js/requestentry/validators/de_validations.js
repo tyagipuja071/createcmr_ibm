@@ -730,11 +730,11 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(autoSetIBMDeptCostCenter, GEOHandler.DE);
   GEOHandler.addAfterTemplateLoad(disableVatExemptForScenarios, GEOHandler.DE);
   GEOHandler.addAfterTemplateLoad(setPrivacyIndcReqdForProc, GEOHandler.DE);
-  GEOHandler.addAfterTemplateLoad(limitClientTierValuesOnCreate, GEOHandler.DE);
+//  GEOHandler.addAfterTemplateLoad(limitClientTierValuesOnCreate, GEOHandler.DE);
   GEOHandler.setRevertIsicBehavior(false);
   GEOHandler.addAfterTemplateLoad(setISUValues, GEOHandler.DE);
   GEOHandler.addAfterTemplateLoad(disableAutoProcForProcessor, GEOHandler.DE);
-  GEOHandler.addAfterConfig(limitClientTierValuesOnUpdate, GEOHandler.DE);
+//  GEOHandler.addAfterConfig(limitClientTierValuesOnUpdate, GEOHandler.DE);
   GEOHandler.addAfterConfig(setISUValuesOnUpdate, GEOHandler.DE);
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.GERMANY, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.GERMANY ], null, true);
   GEOHandler.addAfterConfig(defaultCapIndicator, SysLoc.GERMANY);
