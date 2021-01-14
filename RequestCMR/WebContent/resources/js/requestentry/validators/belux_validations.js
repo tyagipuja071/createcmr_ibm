@@ -10,7 +10,6 @@ function afterConfigForBELUX() {
   var custLang = FormManager.getActualValue('custPrefLang');
   FormManager.readOnly('cmrOwner');
   FormManager.readOnly('capInd');
-  FormManager.readOnly('salesBusOffCd');
   FormManager.setValue('capInd', true);
   FormManager.resetValidations('enterprise');
 
@@ -136,6 +135,8 @@ function afterConfigForBELUX() {
   setVatValidatorBELUX();
   addHandlerForReqRsn();
   disableCmrNo();
+  setAccountTeamNumberOnScenarios();
+  disableSBO();
 }
 
 function disableCmrNo() {
@@ -150,6 +151,159 @@ function disableCmrNo() {
       FormManager.readOnly('cmrNo');
     } else if (role == 'Processor') {
       FormManager.enable('cmrNo');
+    }
+  }
+}
+
+function setAccountTeamNumberOnScenarios() {
+  var cntryUse = FormManager.getActualValue('countryUse');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var reqType = FormManager.getActualValue('reqType');
+  if (typeof (_pagemodel) != 'undefined') {
+    reqType = FormManager.getActualValue('reqType');
+    role = _pagemodel.userRole;
+  }
+
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+
+  if (reqType != 'C') {
+    return;
+  }
+
+  if (custSubGrp == _pagemodel.custSubGrp) {
+    return;
+  }
+
+  switch (custSubGrp) {
+  case 'BECOM':
+  case 'BE3PA':
+  case 'BEPUB':
+  case 'CBCOM':
+    if (role == 'Requester') {
+      FormManager.enable('searchTerm');
+      FormManager.removeValidator('searchTerm', Validators.REQUIRED);
+    } else if (role == 'processor') {
+      FormManager.enable('searchTerm');
+      FormManager.addValidator('searchTerm', Validators.REQUIRED, [ 'Account Team Number' ], 'MAIN_IBM_TAB');
+    }
+    break;
+  case 'BEBUS':
+    if (role == 'Requester') {
+      FormManager.setValue('searchTerm', 'BP0000');
+      FormManager.readOnly('searchTerm');
+      FormManager.addValidator('searchTerm', Validators.REQUIRED, [ 'Account Team Number' ], 'MAIN_IBM_TAB');
+    } else if (role == 'processor') {
+      FormManager.enable('searchTerm');
+      FormManager.addValidator('searchTerm', Validators.REQUIRED, [ 'Account Team Number' ], 'MAIN_IBM_TAB');
+    }
+    break;
+  case 'BEINT':
+    FormManager.setValue('searchTerm', 'BU0000');
+    FormManager.readOnly('searchTerm');
+    FormManager.removeValidator('searchTerm', Validators.REQUIRED);
+    break;
+  case 'BEISO':
+    FormManager.setValue('searchTerm', 'BU0000');
+    FormManager.readOnly('searchTerm');
+    FormManager.addValidator('searchTerm', Validators.REQUIRED, [ 'Account Team Number' ], 'MAIN_IBM_TAB');
+    break;
+  case 'BEPRI':
+    FormManager.setValue('searchTerm', 'BU0000');
+    FormManager.readOnly('searchTerm');
+    FormManager.addValidator('searchTerm', Validators.REQUIRED, [ 'Account Team Number' ], 'MAIN_IBM_TAB');
+    break;
+  case 'CBBUS':
+    if (cntryUse == '624') {
+      if (role == 'Requester') {
+        FormManager.setValue('searchTerm', 'BP0000');
+        FormManager.readOnly('searchTerm');
+        FormManager.addValidator('searchTerm', Validators.REQUIRED, [ 'Account Team Number' ], 'MAIN_IBM_TAB');
+      } else if (role == 'processor') {
+        FormManager.enable('searchTerm');
+        FormManager.addValidator('searchTerm', Validators.REQUIRED, [ 'Account Team Number' ], 'MAIN_IBM_TAB');
+      }
+    } else if (cntryUse == '624LU') {
+      if (role == 'Requester') {
+        FormManager.setValue('searchTerm', 'LP0000');
+        FormManager.readOnly('searchTerm');
+        FormManager.addValidator('searchTerm', Validators.REQUIRED, [ 'Account Team Number' ], 'MAIN_IBM_TAB');
+      } else if (role == 'processor') {
+        FormManager.enable('searchTerm');
+        FormManager.addValidator('searchTerm', Validators.REQUIRED, [ 'Account Team Number' ], 'MAIN_IBM_TAB');
+      }
+    }
+    break;
+  case 'LU3PA':
+  case 'LUCOM':
+  case 'LUPUB':
+    if (role == 'Requester') {
+      FormManager.enable('searchTerm');
+      FormManager.removeValidator('searchTerm', Validators.REQUIRED);
+    } else if (role == 'processor') {
+      FormManager.enable('searchTerm');
+      FormManager.addValidator('searchTerm', Validators.REQUIRED, [ 'Account Team Number' ], 'MAIN_IBM_TAB');
+    }
+    break;
+  case 'LUBUS':
+    if (role == 'Requester') {
+      FormManager.setValue('searchTerm', 'LP0000');
+      FormManager.readOnly('searchTerm');
+      FormManager.addValidator('searchTerm', Validators.REQUIRED, [ 'Account Team Number' ], 'MAIN_IBM_TAB');
+    } else if (role == 'processor') {
+      FormManager.enable('searchTerm');
+      FormManager.addValidator('searchTerm', Validators.REQUIRED, [ 'Account Team Number' ], 'MAIN_IBM_TAB');
+    }
+    break;
+  case 'LUINT':
+    FormManager.setValue('searchTerm', 'LU0000');
+    FormManager.readOnly('searchTerm');
+    FormManager.removeValidator('searchTerm', Validators.REQUIRED);
+    break;
+  case 'LUISO':
+    FormManager.setValue('searchTerm', 'LU0000');
+    FormManager.readOnly('searchTerm');
+    FormManager.addValidator('searchTerm', Validators.REQUIRED, [ 'Account Team Number' ], 'MAIN_IBM_TAB');
+    break;
+  case 'LUPRI':
+    FormManager.setValue('searchTerm', 'LU0000');
+    FormManager.readOnly('searchTerm');
+    FormManager.addValidator('searchTerm', Validators.REQUIRED, [ 'Account Team Number' ], 'MAIN_IBM_TAB');
+    break;
+  default:
+    break;
+  }
+}
+
+function disableSBO() {
+  var cntryUse = FormManager.getActualValue('countryUse');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var reqType = FormManager.getActualValue('reqType');
+  if (typeof (_pagemodel) != 'undefined') {
+    reqType = FormManager.getActualValue('reqType');
+    role = _pagemodel.userRole;
+  }
+
+  FormManager.readOnly('salesBusOffCd');
+
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+
+  if (reqType != 'C') {
+    return;
+  }
+
+  if (custSubGrp == _pagemodel.custSubGrp) {
+    return;
+  }
+
+  if (custSubGrp != '') {
+    if (custSubGrp == 'BEPRI') {
+      FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SBO' ], 'MAIN_IBM_TAB');
+    } else {
+      FormManager.removeValidator('salesBusOffCd', Validators.REQUIRED);
     }
   }
 }
@@ -353,7 +507,8 @@ function setVatValidatorBELUX() {
       return;
     }
     FormManager.resetValidations('vat');
-    if (!dijit.byId('vatExempt').get('checked')) {
+    // if (!dijit.byId('vatExempt').get('checked')) {
+    if (dojo.byId('vatExempt') && !dojo.byId('vatExempt').checked) {
       checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
     }
   }
@@ -857,8 +1012,8 @@ function addAddressFieldValidators() {
               return new ValidationResult(null, false, 'Total computed length of Street and Street no. should not exceed 29 characters.');
           }
         } else if (addrFldCnt == 3) {
-          if (computedLength.length > 21) {
-            return new ValidationResult(null, false, 'Total computed length of Street, Street no. and PostBOX should not exceed 21 characters.');
+          if (computedLength.length > 30) {
+            return new ValidationResult(null, false, 'Total computed length of Street, Street no. and PostBOX should not exceed 30 characters.');
           }
         }
         return new ValidationResult(null, true);
