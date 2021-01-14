@@ -54,8 +54,7 @@ public class NLTransformer extends EMEATransformer {
   protected boolean duplicateRecordFound = false;
   protected Map<String, String> dupCMRValues = new HashMap<String, String>();
   protected List<String> dupShippingSequences = null;
-  private static final List<String> SUB_TYPES_INTERNAL = Arrays.asList("BEINT", "LUINT", "INTER");
-  private static final List<String> SUB_TYPES_INTERNAL_SO = Arrays.asList("BEISO", "LUISO");
+  private static final List<String> SUB_TYPES_INTERNAL = Arrays.asList("INTER");
 
   private static final String[] NO_UPDATE_FIELDS = { "OrganizationNo", "CurrencyCode" };
 
@@ -652,18 +651,11 @@ public class NLTransformer extends EMEATransformer {
     System.out.println("_custSubGrp = " + custSubGrp);
 
     LOG.debug("Set max and min range of cmrNo..");
-    // 624 and 788
-    // Internal - 99xxxx
-    // Internal SO - 997xxx or 998xxx
-
+    // 788 Internal - 99xxxx
     if (SUB_TYPES_INTERNAL.contains(custSubGrp)) {
       generateCMRNoObj.setMin(990000);
       generateCMRNoObj.setMax(999999);
-    } else if (SUB_TYPES_INTERNAL_SO.contains(custSubGrp)) {
-      generateCMRNoObj.setMin(997000);
-      generateCMRNoObj.setMax(998999);
     }
-
   }
 
   @Override
@@ -891,7 +883,7 @@ public class NLTransformer extends EMEATransformer {
       legacyCust.setAuthRemarketerInd("0");
       legacyCust.setCeDivision("2");
 
-      legacyCust.setDeptCd("");
+      legacyCust.setDeptCd(data.getIbmDeptCostCenter() == null ? "" : data.getIbmDeptCostCenter());
       legacyCust.setCurrencyCd("");
       legacyCust.setOverseasTerritory("");
       legacyCust.setInvoiceCpyReqd("");
@@ -1065,22 +1057,6 @@ public class NLTransformer extends EMEATransformer {
     } else {
       legacyCust.setVat("");
     }
-    // }
-
-    // if (!StringUtils.isEmpty(dummyHandler.messageHash.get("EconomicCode"))) {
-    // legacyCust.setEconomicCd(dummyHandler.messageHash.get("EconomicCode"));
-    // }
-
-    if (!StringUtils.isEmpty(data.getIbmDeptCostCenter())) {
-      legacyCust.setBankBranchNo(data.getIbmDeptCostCenter());
-    }
-
-    // remove DistrictCd
-    // if (!StringUtils.isEmpty(data.getCollectionCd())) {
-    // legacyCust.setDistrictCd(data.getCollectionCd().substring(0, 2));
-    // }
-    // legacyCust.setBankBranchNo(data.getIbmDeptCostCenter() != null ?
-    // data.getIbmDeptCostCenter() : "");
 
     if (StringUtils.isEmpty(data.getCustSubGrp())) {
       legacyCust.setMrcCd("3");
@@ -1512,6 +1488,7 @@ public class NLTransformer extends EMEATransformer {
       legacyCustExt.setTeleCovRep(data.getBpSalesRepNo());
     }
     legacyCustExt.setiTaxCode(data.getTaxCd2() == null ? "" : data.getTaxCd2());
+    legacyCustExt.setAeciSubDt(SystemUtil.getDummyDefaultDate());
   }
 
   @Override
