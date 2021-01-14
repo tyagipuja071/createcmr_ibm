@@ -2806,6 +2806,11 @@ function lockIBMTabForFR() {
   var reqType = FormManager.getActualValue('reqType');
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubType = FormManager.getActualValue('custSubGrp');
+
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    FormManager.readOnly('isuCd');
+  }
+
   if (reqType == 'C' && (role == 'REQUESTER' || role == 'PROCESSOR')) {// CMR-234
     // start
     FormManager.readOnly('isuCd');
