@@ -55,7 +55,7 @@ public class BELUXTransformer extends EMEATransformer {
 
   private static final Logger LOG = Logger.getLogger(EMEATransformer.class);
 
-  public static String DEFAULT_LANDED_COUNTRY = "BE";
+  public String DEFAULT_LANDED_COUNTRY = "BE";
   public static final String CMR_REQUEST_REASON_TEMP_REACT_EMBARGO = "TREC";
   public static final String CMR_REQUEST_STATUS_CPR = "CPR";
   public static final String CMR_REQUEST_STATUS_PCR = "PCR";
@@ -532,21 +532,16 @@ public class BELUXTransformer extends EMEATransformer {
   private void formatAddressLinesLD(MQMessageHandler handler, CmrtAddr legacyAddr) {
 
     Addr addrData = handler.addrData;
-    Data cmrData = handler.cmrData;
+    Data data = handler.cmrData;
     boolean update = "U".equals(handler.adminData.getReqType());
     boolean crossBorder = isCrossBorder(addrData);
 
     LOG.debug("Legacy Direct -Handling Address for " + (update ? "update" : "create") + " request.");
 
-    String addrType = addrData.getId().getAddrType();
     String phone = "";
     String addrLineT = "";
-    String nameCont = addrData.getCustNm2();
-    String title = addrData.getDept();
-    String firstName = addrData.getCustNm3();
-    String lastName = addrData.getCustNm4();
-    LOG.trace("Handling " + (update ? "update" : "create") + " request.");
 
+    LOG.trace("Handling " + (update ? "update" : "create") + " request.");
     LOG.debug("Handling  Data for " + addrData.getCustNm1());
     // <XXXAddress1> -> Customer Name
     // <XXXAddress2> -> Name Con't
@@ -578,33 +573,67 @@ public class BELUXTransformer extends EMEATransformer {
 
     // Street/F and Street number/G or PO BOX/J
     String line4 = "";
-    if (!StringUtils.isBlank(addrData.getAddrTxt())) {
-      line4 += (line4.length() > 0 ? " " : "") + addrData.getAddrTxt();
-    }
-    if (!StringUtils.isBlank(addrData.getAddrTxt2())) {
-      line4 += (line4.length() > 0 ? " " : "") + addrData.getAddrTxt2();
-    }
-    if (line4.length() == 0) {
-      if (!StringUtils.isBlank(addrData.getPoBox())) {
-        line4 += (line4.length() > 0 ? " " : "") + addrData.getPoBox();
-      }
-    }
     // Postal Code/H and City/I
     String line5 = "";
-
-    if (!StringUtils.isBlank(addrData.getPostCd())) {
-      line5 += (line5.length() > 0 ? " " : "") + addrData.getPostCd();
-    }
-    if (!StringUtils.isBlank(addrData.getCity1())) {
-      line5 += (line5.length() > 0 ? " " : "") + addrData.getCity1();
-    }
-
-    line5 = line5.trim();
+    // country
+    String line6 = "";
 
     String countryName = LandedCountryMap.getCountryName(addrData.getLandCntry());
 
-    // country
-    String line6 = countryName;
+    if (!crossBorder) {
+
+      if (!StringUtils.isBlank(addrData.getAddrTxt())) {
+        line4 += (line4.length() > 0 ? " " : "") + addrData.getAddrTxt();
+      }
+      if (!StringUtils.isBlank(addrData.getAddrTxt2())) {
+        line4 += (line4.length() > 0 ? " " : "") + addrData.getAddrTxt2();
+      }
+      if (line4.length() == 0) {
+        if (!StringUtils.isBlank(addrData.getPoBox())) {
+          line4 += (line4.length() > 0 ? " " : "") + addrData.getPoBox();
+        }
+      }
+
+      if (!StringUtils.isBlank(addrData.getPostCd())) {
+        line5 += (line5.length() > 0 ? " " : "") + addrData.getPostCd();
+      }
+      if (!StringUtils.isBlank(addrData.getCity1())) {
+        line5 += (line5.length() > 0 ? " " : "") + addrData.getCity1();
+      }
+
+      line5 = line5.trim();
+
+      // country
+      line6 = countryName;
+    } else if (crossBorder) {
+
+      if ("BE".equalsIgnoreCase(this.DEFAULT_LANDED_COUNTRY)) {
+        if (!StringUtils.isBlank(addrData.getPostCd())) {
+          line4 += (line4.length() > 0 ? " " : "") + addrData.getPostCd();
+        }
+
+        if (!StringUtils.isBlank(addrData.getCity1())) {
+          line5 += (line5.length() > 0 ? " " : "") + addrData.getCity1();
+        }
+        if (!StringUtils.isBlank(countryName)) {
+          line5 += (line5.length() > 0 ? " " : "") + countryName;
+        }
+        line5 = line5.trim();
+      } else if ("LU".equalsIgnoreCase(data.getCountryUse())) {
+        if (!StringUtils.isBlank(addrData.getPostCd())) {
+          line4 += (line4.length() > 0 ? " " : "") + addrData.getPostCd();
+        }
+
+        if (!StringUtils.isBlank(addrData.getCity1())) {
+          line4 += (line4.length() > 0 ? " " : "") + addrData.getCity1();
+        }
+        if (!StringUtils.isBlank(countryName)) {
+          line5 += (line5.length() > 0 ? " " : "") + countryName;
+        }
+        line5 = line5.trim();
+      }
+
+    }
 
     if (!StringUtils.isBlank(addrData.getTaxOffice())) {
       addrLineT = addrData.getTaxOffice();
