@@ -662,12 +662,20 @@ function setEconomicCodeValues(searchTerm) {
 
   var role = _pagemodel.userRole;
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  searchTerm = FormManager.getActualValue('searchTerm');
+  var searchTerm = FormManager.getActualValue('searchTerm');
   var geoCd = FormManager.getActualValue('countryUse').substring(3, 5);
   var custSubGrp = FormManager.getActualValue('custSubGrp').substring(2, 5);
   var custSGrp = FormManager.getActualValue('custSubGrp');
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
+
+  if (custSGrp == '') {
+    return;
+  }
+
+  if ((custSGrp == _pagemodel.custSubGrp) && (searchTerm == _pagemodel.searchTerm)) {
+    return;
+  }
 
   var economicCode = [];
   if (searchTerm != '' && (custSubGrp == 'COM' || custSubGrp == 'PUB' || custSubGrp == '3PA')) {
@@ -734,6 +742,10 @@ function setCollectionCodeValues(isicCd) {
   var countryUse = FormManager.getActualValue('countryUse');
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
+
+  if (custSubGrp == '') {
+    return;
+  }
 
   if ((isicCd == _pagemodel.isicCd) && (custSubGrp == _pagemodel.custSubGrp)) {
     return;
