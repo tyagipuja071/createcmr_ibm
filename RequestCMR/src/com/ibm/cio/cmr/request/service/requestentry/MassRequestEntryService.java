@@ -1865,6 +1865,10 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                   if (!validateMassUpdateFileJP(item.getInputStream(), data, admin)) {
                     throw new CmrException(MessageUtil.ERROR_MASS_FILE);
                   }
+                } else if (PageManager.fromGeo("CA", cmrIssuingCntry)) {
+                  if (!validateMassUpdateCA(item.getInputStream())) {
+                    throw new CmrException(MessageUtil.ERROR_MASS_FILE);
+                  }
                 } else if (IERPRequestUtils.isCountryDREnabled(entityManager, cmrIssuingCntry)) {
                   if (!validateDRMassUpdateFile(filePath, data, admin, cmrIssuingCntry)) {
                     throw new CmrException(MessageUtil.ERROR_MASS_FILE);
@@ -5370,8 +5374,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       e.printStackTrace();
     }
   }
-  
-   private void setMassUpdateListForDR(EntityManager entityManager, Map<String, Object> massUpdtCol, String filepath, long reqId, int newIterId,
+
+  private void setMassUpdateListForDR(EntityManager entityManager, Map<String, Object> massUpdtCol, String filepath, long reqId, int newIterId,
       String filePath, String cmrIssuingCntry) throws Exception {
 
     // 1. get the config file and get all the valid tabs
