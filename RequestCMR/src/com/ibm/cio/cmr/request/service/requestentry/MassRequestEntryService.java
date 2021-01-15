@@ -1961,6 +1961,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                     setMassUpdateListFR(modelList, item.getInputStream(), reqId, newIterId, filePath);
                   } else if (PageManager.fromGeo("JP", cmrIssuingCntry)) {
                     setMassUpdateListJP(modelList, item.getInputStream(), reqId, newIterId, filePath);
+                  } else if (PageManager.fromGeo("CA", cmrIssuingCntry)) {
+                    setMassUpdateListCA(modelList, item.getInputStream(), reqId, newIterId, filePath);
                   } else {
                     setMassUpdateList(modelList, item.getInputStream(), reqId, newIterId, filePath);
                   }
@@ -3028,6 +3030,11 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
   }
 
   private void setMassUpdateListJP(List<MassUpdateModel> modelList, InputStream mfStream, long reqId, int newIterId, String filePath)
+      throws Exception {
+    // noop
+  }
+
+  private void setMassUpdateListCA(List<MassUpdateModel> modelList, InputStream mfStream, long reqId, int newIterId, String filePath)
       throws Exception {
     // noop
   }
@@ -6076,6 +6083,52 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
   }
 
   private boolean validateMassCreateCA(InputStream fileStream) throws Exception {
+    XSSFWorkbook book = new XSSFWorkbook(fileStream);
+    XSSFSheet sheet = book.getSheet(MASS_DATA);
+    XSSFCell rowCell = null;
+    XSSFRow sheetRow = null;
+
+    int rowIndex = 0;
+    int maxRows = Integer.parseInt(SystemConfiguration.getValue("MASS_CREATE_MAX_ROWS", "100"));
+    StringBuilder sbErrorRow = new StringBuilder();
+    boolean isInvalidRow = false;
+    for (Row row : sheet) {
+      sheetRow = (XSSFRow) row;
+      // validate CMR No if numeric
+      if (rowIndex > 0) {
+        rowCell = sheetRow.getCell(0);
+        if (rowCell == null) {
+          rowCell = sheetRow.createCell(0);
+        }
+
+        if (rowIndex > maxRows) {
+          log.error("Total cmrRecords exceed the maximum limit of " + maxRows);
+          throw new CmrException(MessageUtil.ERROR_MASS_FILE_ROWS, "" + maxRows);
+        }
+
+        String cellValue = rowCell.getStringCellValue();
+        if (StringUtils.isBlank(cellValue) || (StringUtils.isNotBlank(cellValue) && !StringUtils.isNumeric(cellValue))) {
+          isInvalidRow = true;
+          sbErrorRow.append("" + rowIndex);
+          sbErrorRow.append(",");
+        }
+      }
+
+      rowIndex++;
+    }
+
+    book.close();
+    if (isInvalidRow) {
+      String errorRow = sbErrorRow.toString();
+      errorRow = StringUtils.removeEnd(errorRow, ",");
+      log.error("CMR number field is required and should be numeric: row " + errorRow);
+      throw new CmrException(MessageUtil.ERROR_MASS_FILE_INVALID_CMRNO, errorRow);
+    }
+
+    return !isInvalidRow;
+  }
+
+  private boolean validateMassUpdateCA(InputStream fileStream) throws Exception {
     XSSFWorkbook book = new XSSFWorkbook(fileStream);
     XSSFSheet sheet = book.getSheet(MASS_DATA);
     XSSFCell rowCell = null;
