@@ -47,6 +47,7 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
+import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
@@ -795,6 +796,34 @@ public class BELUXHandler extends BaseSOFHandler {
 
     data.setInstallBranchOff("");
     data.setInacType("");
+    data.setIbmDeptCostCenter(getInternalDepartment(mainRecord.getCmrNum()));
+  }
+
+  private String getInternalDepartment(String cmrNo) throws Exception {
+    String department = "";
+    List<String> results = new ArrayList<String>();
+
+    EntityManager entityManager = JpaManager.getEntityManager();
+    try {
+      String mandt = SystemConfiguration.getValue("MANDT");
+      String sql = ExternalizedQuery.getSql("GET.DEPT.KNA1.BYCMR");
+      sql = StringUtils.replace(sql, ":ZZKV_CUSNO", "'" + cmrNo + "'");
+      sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
+      sql = StringUtils.replace(sql, ":KATR6", "'" + "624" + "'");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      results = query.getResults(String.class);
+      if (results != null && results.size() > 0) {
+        department = results.get(0);
+
+        if (department != null && department.length() > 6) {
+          department = department.substring(department.length() - 6, department.length());
+        }
+      }
+    } finally {
+      entityManager.clear();
+      entityManager.close();
+    }
+    return department;
   }
 
   @Override
