@@ -898,15 +898,14 @@ public class BELUXTransformer extends EMEATransformer {
       CMRRequestContainer cmrObjects) {
     Admin admin = cmrObjects.getAdmin();
     Data data = cmrObjects.getData();
-    String landedCntry = "";
 
     setDefaultLandedCountry(data);
     formatDataLines(dummyHandler);
 
+    String landedCntry = "";
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
 
       legacyCust.setAccAdminBo(data.getIbmDeptCostCenter() == null ? "" : data.getIbmDeptCostCenter());
-      legacyCust.setCeDivision("");
       // CMR-5993
       String cntry = legacyCust.getId().getSofCntryCode().trim();
 
@@ -915,7 +914,7 @@ public class BELUXTransformer extends EMEATransformer {
       legacyCust.setDcRepeatAgreement("0");
       legacyCust.setLeasingInd("0");
       legacyCust.setAuthRemarketerInd("0");
-      legacyCust.setCeDivision("2");
+      legacyCust.setCeDivision("3");
       legacyCust.setLangCd("");
       legacyCust.setDeptCd("");
       legacyCust.setCurrencyCd("");
@@ -923,6 +922,9 @@ public class BELUXTransformer extends EMEATransformer {
       legacyCust.setOverseasTerritory("");
       legacyCust.setInvoiceCpyReqd("");
       legacyCust.setCustType("");
+
+      legacyCust.setCurrencyCd("EU");
+      legacyCust.setInvoiceCpyReqd("02");
 
       if ("624".equals(data.getCountryUse())) {
         legacyCust.setRealCtyCd("624");
@@ -1479,10 +1481,7 @@ public class BELUXTransformer extends EMEATransformer {
       legacyCustExt.setTeleCovRep(data.getBpSalesRepNo());
     }
 
-    // Morocco use Phone3 to store ICE field
-    if (SystemLocation.MOROCCO.equals(data.getCmrIssuingCntry()) && !StringUtils.isBlank(data.getPhone3())) {
-      legacyCustExt.setiTaxCode(data.getPhone3());
-    }
+    legacyCustExt.setAeciSubDt(SystemUtil.getDummyDefaultDate());
   }
 
   @Override
