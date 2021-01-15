@@ -117,10 +117,44 @@ public class MCOSaHandler extends MCOHandler {
           for (FindCMRRecordModel record : source.getItems()) {
             seqNo = record.getCmrAddrSeq();
             if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo)) {
-              sofUses = this.legacyObjects.getUsesBySequenceNo(seqNo);
-              for (String sofUse : sofUses) {
-                addrType = getAddressTypeByUse(sofUse);
+
+              // added PG condn
+              if (StringUtils.isNotBlank(record.getCmrAddrSeq()) && !"PG".equals(record.getCmrOrderBlock())) {
+
+                sofUses = this.legacyObjects.getUsesBySequenceNo(seqNo);
+                for (String sofUse : sofUses) {
+                  addrType = getAddressTypeByUse(sofUse);
+                  if (!StringUtils.isEmpty(addrType)) {
+                    addr = cloneAddress(record, addrType);
+                    LOG.trace("Adding address type " + addrType + " for sequence " + seqNo);
+
+                    // name3 in rdc = Address Con't on SOF
+                    if (record.getCmrName4() != null && (!record.getCmrName4().startsWith("ATT") && !record.getCmrName4().startsWith("ATT: "))) {
+                      addr.setCmrStreetAddressCont(record.getCmrName4());
+                    }
+                    addr.setCmrName3(null);
+                    if (record.getCmrName3() != null && (record.getCmrName3().startsWith("ATT") || record.getCmrName3().startsWith("ATT: "))) {
+                      addr.setCmrName4(record.getCmrName3());
+                    }
+
+                    if (!StringUtils.isBlank(record.getCmrPOBox())) {
+                      String poBox = record.getCmrPOBox().trim();
+                      addr.setCmrPOBox(LegacyCommonUtil.doFormatPoBox(poBox));
+                    }
+
+                    if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
+                      addr.setCmrAddrSeq("00001");
+                    }
+                    converted.add(addr);
+                    importedAddr.add(addrType);
+                  }
+                }
+
+              } else {
+                record.setCmrAddrTypeCode("PG01");
+                addrType = record.getCmrAddrTypeCode();
                 if (!StringUtils.isEmpty(addrType)) {
+
                   addr = cloneAddress(record, addrType);
                   LOG.trace("Adding address type " + addrType + " for sequence " + seqNo);
 
@@ -143,9 +177,11 @@ public class MCOSaHandler extends MCOHandler {
                   }
                   converted.add(addr);
                   importedAddr.add(addrType);
+
                 }
-              }
-            }
+              } 
+            } 
+
           }
 
         }
