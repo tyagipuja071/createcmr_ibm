@@ -321,9 +321,11 @@ function isDPLCheckNeeded() {
 function isCompanyProofNeeded() {
   console.log('>> Executing isCompanyProofNeeded()');
   var reqId = FormManager.getActualValue('procReqId');
+  var iterId = FormManager.getActualValue('iterId');
 
   var qParams = {
     ID : reqId,
+    ITER_ID : iterId,
   };
 
   var result = cmr.query('COUNT.LD_MASS_UPDT_ADDR_ZS01_ZP01', qParams);
