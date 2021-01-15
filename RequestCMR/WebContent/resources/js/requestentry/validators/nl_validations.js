@@ -1154,39 +1154,42 @@ dojo.addOnLoad(function() {
   GEOHandler.NL = [ '788' ];
   console.log('adding NETHERLANDS functions...');
   GEOHandler.enableCustomerNamesOnAddress(GEOHandler.NL);
-  GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.NL);
+  GEOHandler.enableCopyAddress(GEOHandler.NL, validateNLCopy, [ 'ZD01' ]);
+
   GEOHandler.addAfterConfig(lockEmbargo, GEOHandler.NL);
   GEOHandler.addAfterConfig(afterConfigForNL, GEOHandler.NL);
   GEOHandler.addAfterConfig(addHandlersForNL, GEOHandler.NL);
   GEOHandler.addAfterConfig(addHandlerForReqRsn, GEOHandler.NL);
   GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.NL);
+  GEOHandler.addAfterConfig(setAddressDetailsForView, GEOHandler.NL);
+  GEOHandler.addAfterConfig(disbleCreateByModel, GEOHandler.NL);
+
   GEOHandler.addAfterTemplateLoad(setAbbrvNmLoc, GEOHandler.NL);
   GEOHandler.addAfterTemplateLoad(afterConfigForNL, GEOHandler.NL);
   GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.NL);
   GEOHandler.addAfterTemplateLoad(setBOTeamValues, GEOHandler.NL);
   // GEOHandler.addAfterTemplateLoad(setINACValues, GEOHandler.NL);
   GEOHandler.addAfterTemplateLoad(setEconomicCodeValues, GEOHandler.NL);
-  GEOHandler.registerValidator(addKVKLengthValidator, GEOHandler.NL, null, true);
   GEOHandler.addAfterTemplateLoad(setFieldsMandtOnSc, GEOHandler.NL);
-  GEOHandler.registerValidator(addCrossBorderValidatorNL, GEOHandler.NL, null, true);
-  // GEOHandler.registerValidator(addAbrrevNameLengthValidator, GEOHandler.NL,
-  // null, true);
 
-  GEOHandler.registerValidator(checkForBnkruptcy, GEOHandler.NL, null, true);
-  GEOHandler.registerValidator(addNLVATValidator('', 'MAIN_CUST_TAB', 'frmCMR', 'ZP01'), GEOHandler.NL, null, true);
-  GEOHandler.enableCopyAddress(GEOHandler.NL, validateNLCopy, [ 'ZD01' ]);
+  GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.NL);
   GEOHandler.addAddrFunction(updateAddrTypeList, GEOHandler.NL);
   GEOHandler.addAddrFunction(addLandedCountryHandler, GEOHandler.NL);
-  GEOHandler.registerValidator(addNLAddressTypeValidator, GEOHandler.NL, null, true);
-  GEOHandler.registerValidator(addAddressFieldValidators, GEOHandler.NL, null, true);
   GEOHandler.addAddrFunction(hideCustPhone, GEOHandler.NL);
   GEOHandler.addAddrFunction(addPhoneValidatorNL, GEOHandler.NL);
   GEOHandler.addAddrFunction(disableLandCntry, GEOHandler.NL);
-  GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.NL, GEOHandler.ROLE_PROCESSOR, true);
-  GEOHandler.addAfterConfig(setAddressDetailsForView, GEOHandler.NL);
 
+  GEOHandler.registerValidator(addKVKLengthValidator, GEOHandler.NL, null, true);
+  GEOHandler.registerValidator(addCrossBorderValidatorNL, GEOHandler.NL, null, true);
+  // GEOHandler.registerValidator(addAbrrevNameLengthValidator, GEOHandler.NL,
+  // null, true);
+  GEOHandler.registerValidator(checkForBnkruptcy, GEOHandler.NL, null, true);
+  GEOHandler.registerValidator(addNLVATValidator('', 'MAIN_CUST_TAB', 'frmCMR', 'ZP01'), GEOHandler.NL, null, true);
+  GEOHandler.registerValidator(addNLAddressTypeValidator, GEOHandler.NL, null, true);
+  GEOHandler.registerValidator(addAddressFieldValidators, GEOHandler.NL, null, true);
+  GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.NL, GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(addCMRSearchValidator, GEOHandler.NL, null, true);
   GEOHandler.registerValidator(addDnBSearchValidator, GEOHandler.NL, null, true);
   GEOHandler.registerValidator(addCmrNoValidator, GEOHandler.NL, null, true);
-  GEOHandler.addAfterConfig(disbleCreateByModel, GEOHandler.NL);
+
 });
