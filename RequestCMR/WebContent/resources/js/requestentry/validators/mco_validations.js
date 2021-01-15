@@ -611,6 +611,9 @@ function addHandlersForPTES() {
 }
 
 function setClientTierValues(value) {
+  if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
   value = FormManager.getActualValue('isuCd');
   var tierValues = null;
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.PORTUGAL) {
