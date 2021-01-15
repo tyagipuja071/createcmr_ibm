@@ -1805,7 +1805,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
 
               // MASS FILE | validate the mass file
               if (massCreate) {
-                if (PageManager.fromGeo("c", cmrIssuingCntry)) {
+                if (PageManager.fromGeo("CA", cmrIssuingCntry)) {
                   if (!validateMassCreateCA(item.getInputStream())) {
                     throw new CmrException(MessageUtil.ERROR_MASS_FILE);
                   }
