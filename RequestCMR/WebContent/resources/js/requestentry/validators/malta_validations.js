@@ -184,28 +184,6 @@ function addAddressTypeValidator() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
-function addAddressFieldValidators() {
-  // City + PostCd should not exceed 28 characters
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var city = FormManager.getActualValue('city1');
-        var postCd = FormManager.getActualValue('postCd');
-        var val = city;
-
-        if (postCd != '') {
-          val += postCd;
-          if (val.length > 28) {
-            return new ValidationResult(null, false, 'Total computed length of City and Postal Code should not exceed 28 characters.');
-          }
-        }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), null, 'frmCMR_addressModal');
-
-}
-
 function changeAbbrevNmLocn(cntry, addressMode, saving, finalSave, force) {
   if (finalSave || force || addressMode == 'COPY') {
     var copyTypes = document.getElementsByName('copyTypes');
@@ -635,42 +613,6 @@ function enterpriseValidation() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
-function streetValidatorCustom() {
-  console.log("streetValidatorCustom..............");
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var addrPlain = FormManager.getActualValue('addrTxt').trim();
-        var cntry = FormManager.getActualValue('cmrIssuingCntry');
-        var isFST = false;
-        var isOthers = false;
-
-        if (fstCEWA.indexOf(cntry) > -1) {
-          isFST = true;
-        } else if (othCEWA.indexOf(cntry) > -1) {
-          isOthers = true;
-        }
-
-        if (isFST) {
-          if (addrPlain != null && addrPlain.length > 30) {
-            return new ValidationResult(FormManager.getField('addrTxt'), false, 'Street value should be at most 23 CHAR long + "Avenue".');
-          } else {
-            return new ValidationResult(null, true);
-          }
-        } else if (isOthers) {
-          if (addrPlain != null && addrPlain.length > 30) {
-            return new ValidationResult(FormManager.getField('addrTxt'), false, 'Street value should be at most 23 CHAR long + "Street".');
-          } else {
-            return new ValidationResult(null, true);
-          }
-        } else {
-          return new ValidationResult(null, true);
-        }
-      }
-    };
-  })(), null, 'frmCMR_addressModal');
-}
-
 /* 1430539 - do not allow delete of imported addresses on update requests */
 
 function canRemoveAddress(value, rowIndex, grid) {
@@ -1000,7 +942,6 @@ dojo.addOnLoad(function() {
   // GEOHandler.REQUESTER,true);
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.TANZANIA, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.TANZANIA ], null, true);
   GEOHandler.registerValidator(requireVATForCrossBorder, GEOHandler.MCO2, null, true);
-  GEOHandler.registerValidator(streetValidatorCustom, GEOHandler.MCO2, null, true);
 
   /* 1438717 - add DPL match validation for failed dpl checks */
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.MCO2, GEOHandler.ROLE_PROCESSOR, true);
@@ -1016,7 +957,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addOrdBlkValidator, [ SysLoc.MALTA ], null, true);
   GEOHandler.registerValidator(enterpriseValidation, [ SysLoc.MALTA ], null, true);
   GEOHandler.registerValidator(addAddressTypeValidator, [ SysLoc.MALTA ], null, true);
-  GEOHandler.registerValidator(addAddressFieldValidators, [ SysLoc.MALTA ], null, true);
   // GEOHandler.registerValidator(addISICValidatorForScenario, [ SysLoc.MALTA ],
   // null, true);
   GEOHandler.registerValidator(addIsicClassificationCodeValidator, [ SysLoc.MALTA ], null, true);
