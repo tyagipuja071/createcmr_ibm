@@ -1717,8 +1717,10 @@ function addNonLatinCharValidator() {
       checkAndAddValidator('dept', Validators.NON_LATIN, [ 'Attention Person' ]);
       checkAndAddValidator('custNm1', Validators.NON_LATIN, [ 'Customer Name' ]);
     } else if (cntry == SysLoc.GREECE) {
-      //checkAndAddValidator('custNm1', Validators.NON_LATIN, [ 'Customer Name' ]);
-      //checkAndAddValidator('custNm2', Validators.NON_LATIN, [ 'Customer Name Con\'t' ]);
+      // checkAndAddValidator('custNm1', Validators.NON_LATIN, [ 'Customer Name'
+      // ]);
+      // checkAndAddValidator('custNm2', Validators.NON_LATIN, [ 'Customer Name
+      // Con\'t' ]);
       checkAndAddValidator('addrTxt2', Validators.NON_LATIN, [ 'Address Con\'t/Occupation' ]);
       checkAndAddValidator('dept', Validators.NON_LATIN, [ 'District' ]);
       checkAndAddValidator('taxOffice', Validators.NON_LATIN, [ 'Tax Office' ]);
@@ -3315,19 +3317,21 @@ function setClientTierForCreates(value) {
       if (value == '6') {
         enterpriseLov = [ '822836', '822835' ];
       }
-    } else if (isuCd == '32') {
-      if (value == 'S') {
+      if (value == 'Q') {
         enterpriseLov = [ '822806', '822830' ];
       }
-    }
+    } 
   }
 
   if (reqType == 'C') {
     enterpriseLov = [];
     if (isuCd == '34') {
-      tierValues = [ 'V', '6', 'A' ];
+      tierValues = [ 'V', '6', 'A' ,'Q'];
       if (clientTiers == '6') {
         enterpriseLov = [ '822836', '822835' ];
+      }
+      if (clientTiers == 'Q') {
+        enterpriseLov = [ '822806', '822830' ];
       }
     } else if (isuCd == '32') {
       tierValues = [ 'N', 'S' ];
@@ -3337,8 +3341,6 @@ function setClientTierForCreates(value) {
     } else if (isuCd == '21') {
       tierValues = [ '7' ];
     }
-  } else if (reqType == 'U') {
-    tierValues = [ 'V', '6', 'A', 'N', 'S', '7' ];
   }
   if (tierValues != null) {
     FormManager.limitDropdownValues(FormManager.getField('clientTier'), tierValues);
