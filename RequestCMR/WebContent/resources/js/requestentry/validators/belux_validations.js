@@ -13,6 +13,10 @@ function afterConfigForBELUX() {
   FormManager.setValue('capInd', true);
   FormManager.resetValidations('enterprise');
 
+  if (typeof (_pagemodel) != 'undefined') {
+    role = _pagemodel.userRole;
+  }
+
   if ((custSubGrp.substring(2, 5) == 'LUINT' || custSubGrp == 'CBBUS' || custSubGrp.substring(2, 5) == 'PRI')) {
     FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
 
@@ -44,6 +48,12 @@ function afterConfigForBELUX() {
     if (custSubGrp == 'BECOM' || custSubGrp == 'BE3PA') {
       FormManager.addValidator('collectionCd', Validators.REQUIRED, [ 'Collection Code' ], 'MAIN_CUST_TAB');
     }
+
+    if (custSubGrp.substring(2, 5) == '3PA' || custSubGrp == 'BEBUS' || custSubGrp == 'BECOM' || custSubGrp == 'LUBUS' || custSubGrp == 'LUCOM') {
+      if (role == 'Processor') {
+        FormManager.addValidator('economicCd', Validators.REQUIRED, [ 'Economic Code' ], 'MAIN_IBM_TAB');
+      }
+    }
   }
 
   var custSubGrpLst3 = custSubGrp.substring(2, 5);
@@ -51,9 +61,6 @@ function afterConfigForBELUX() {
     FormManager.removeValidator('inacCd', Validators.REQUIRED);
   }
 
-  if (typeof (_pagemodel) != 'undefined') {
-    role = _pagemodel.userRole;
-  }
   if ((custLang == null || custLang == '') && reqType == 'U') {
     FormManager.setValue('custPrefLang', 'V');
   }
