@@ -683,28 +683,28 @@ function addAttachmentValidator() {
 
                 if (resultOldAddr != null && resultOldAddr != '') {
                   // pulled from addr_rdc
-                  oldCustName = resultOldAddr.ret2;
-                  oldCustNameCon = resultOldAddr.ret3;
-                  oldAddlName = resultOldAddr.ret4;
-                  oldStreet = resultOldAddr.ret5;
-                  oldStreetCont = resultOldAddr.ret6;
-                  oldCity = resultOldAddr.ret7;
-                  oldPostCd = resultOldAddr.ret8;
-                  oldLandedCntry = resultOldAddr.ret9;
-                  oldPoBox = resultOldAddr.ret10;
-                  oldPhone = resultOldAddr.ret11;
+                  oldCustName = resultOldAddr.ret2 != null ? resultOldAddr.ret2 : '';
+                  oldCustNameCon = resultOldAddr.ret3 != null ? resultOldAddr.ret3 : '';
+                  oldAddlName = resultOldAddr.ret4 != null ? resultOldAddr.ret4 : '';
+                  oldStreet = resultOldAddr.ret5 != null ? resultOldAddr.ret5 : '';
+                  oldStreetCont = resultOldAddr.ret6 != null ? resultOldAddr.ret6 : '';
+                  oldCity = resultOldAddr.ret7 != null ? resultOldAddr.ret7 : '';
+                  oldPostCd = resultOldAddr.ret8 != null ? resultOldAddr.ret8 : '';
+                  oldLandedCntry = resultOldAddr.ret9 != null ? resultOldAddr.ret9 : '';
+                  oldPoBox = resultOldAddr.ret10 != null ? resultOldAddr.ret10 : '';
+                  oldPhone = resultOldAddr.ret11 != null ? resultOldAddr.ret11 : '';
 
                   // current address value
-                  currentCustName = record.custNm1[0];
-                  currentCustNameCon = record.custNm2[0];
-                  currentAddlName = record.custNm4[0];
-                  currentStreet = record.addrTxt[0];
-                  currentStreetCont = record.addrTxt2[0];
-                  currentCity = record.city1[0];
-                  currentPostCd = record.postCd[0];
-                  currentLandedCntry = record.landCntry[0];
-                  currentPoBox = record.poBox[0];
-                  currentPhone = record.custPhone[0];
+                  currentCustName = record.custNm1[0] != null ? record.custNm1[0] : '';
+                  currentCustNameCon = record.custNm2[0] != null ? record.custNm2[0] : '';
+                  currentAddlName = record.custNm4[0] != null ? record.custNm4[0] : '';
+                  currentStreet = record.addrTxt[0] != null ? record.addrTxt[0] : '';
+                  currentStreetCont = record.addrTxt2[0] != null ? record.addrTxt2[0] : '';
+                  currentCity = record.city1[0] != null ? record.city1[0] : '';
+                  currentPostCd = record.postCd[0] != null ? record.postCd[0] : '';
+                  currentLandedCntry = record.landCntry[0] != null ? record.landCntry[0] : '';
+                  currentPoBox = record.poBox[0] != null ? record.poBox[0] : '';
+                  currentPhone = record.custPhone[0] != null ? record.custPhone[0] : '';
 
                   if (oldCustName == currentCustName && oldCustNameCon == currentCustNameCon && oldAddlName == currentAddlName && oldStreet == currentStreet && oldStreetCont == currentStreetCont
                       && oldCity == currentCity && oldPostCd == currentPostCd && oldLandedCntry == currentLandedCntry && oldPoBox == currentPoBox) {

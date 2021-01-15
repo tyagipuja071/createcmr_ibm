@@ -318,6 +318,30 @@ function isDPLCheckNeeded() {
   }
 }
 
+function isCompanyProofNeeded() {
+  console.log('>> Executing isCompanyProofNeeded()');
+  var reqId = FormManager.getActualValue('procReqId');
+
+  var qParams = {
+    ID : reqId,
+  };
+
+  var result = cmr.query('COUNT.LD_MASS_UPDT_ADDR_ZS01_ZP01', qParams);
+
+  if (result != null && result.ret1 > 0) {
+
+    var resultAttachment = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', qParams);
+    var attachmentCount = resultAttachment.ret1;
+
+    if (attachmentCount > 0) {
+      return false;
+    }
+    return true;
+  } else {
+    return false;
+  }
+}
+
 function isNewMassTemplateUsed() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   qParams = {
@@ -341,6 +365,8 @@ function doValidateRequest() {
     MessageMgr.showErrorMessage('DPL Check is needed for uploaded template.');
   } else if (isAttachmentNeeded() && _pagemodel.userRole.toUpperCase() == "PROCESSOR" && isNewMassTemplateUsed()) {
     MessageMgr.showErrorMessage('DPL Matching results has not been attached to the request. This is required since DPL checks failed for one or more addresses.');
+  } else if (isCompanyProofNeeded()) {
+    MessageMgr.showErrorMessage('Proof of address is mandatory. Please attach Company Proof.');
   } else if (FormManager.validate('frmCMR')) {
     MessageMgr.showInfoMessage('The request has no errors.', null, true);
   } else {
