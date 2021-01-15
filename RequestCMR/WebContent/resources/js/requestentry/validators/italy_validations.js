@@ -1303,8 +1303,6 @@ function autoSetSBOSROnPostalCode(clientTier, currPostCd) {
       } else if (postCode >= 90 && postCode <= 98) {
         FormManager.setValue('collectionCd', 'CIT14');
       }
-    } else if ((custGrp != 'LOCAL') && isuCode != '' && isuCode == '32' && ctc == 'S') {
-      FormManager.setValue('collectionCd', 'CIT16');
     } else if (isuCode != '32') {
       FormManager.clearValue('collectionCd');
     }
@@ -1357,11 +1355,6 @@ function autoSetSBOSROnPostalCode(clientTier, currPostCd) {
         FormManager.setValue('repTeamMemberNo', '09NMMM');
         FormManager.setValue('salesBusOffCd', 'NM');
       }
-    } else if (isuCode != ''
-        && isuCode == '32'
-        && ctc == 'S'
-        && (custSubType == 'CRO3P' || custSubType == 'CROCM' || custSubType == 'CROCIN' || custSubType == 'CROPR' || custSubType == 'CROBP' || custSubType == 'CROGO' || custSubType == 'CROLC' || custSubType == 'CROUN')) {
-      FormManager.setValue('salesBusOffCd', 'NP');
     }
 
     // CMR-1496 - set specific SR/SBO for VA/SM fresh creates
@@ -2509,8 +2502,8 @@ function setStateProvReqdPostalCodeIT() {
  */
 function autoSetSBOOnSRValueIT() {
   var reqType = FormManager.getActualValue('reqType');
-  var scenario = FormManager.getActualValue('custGrp');
-  if (reqType != 'C' || scenario != 'LOCAL') {
+  var scenario = FormManager.getActualValue('custSubGrp');
+  if (reqType != 'C' || scenario == 'CROCM' || scenario == 'CROGO' || scenario == 'CROPR') {
     return;
   }
   var sbo = FormManager.getActualValue('salesBusOffCd');
