@@ -112,7 +112,7 @@ function afterConfigForFR() {
     // 'Installing BO' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [ 'Sales Rep No' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('subIndustryCd', Validators.REQUIRED, [ 'Subindustry' ], 'MAIN_CUST_TAB');
-    FormManager.readOnly('ordBlk');
+    // FormManager.readOnly('ordBlk');
     // FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Abbreviated
     // Name (TELX1)' ], 'MAIN_CUST_TAB');
     // FormManager.addValidator('abbrevLocn', Validators.REQUIRED, [
@@ -239,6 +239,9 @@ function setISICAndSubindustryOnScenario() {
       FormManager.setValue('isicCd', '9500');
       FormManager.readOnly('isicCd');
     } else {
+      if (role == 'Processor') {
+        FormManager.enable('subIndustryCd');
+      }
       FormManager.enable('isicCd');
     }
   }
@@ -2811,11 +2814,17 @@ function lockIBMTabForFR() {
     FormManager.readOnly('isuCd');
   }
 
-  if (reqType == 'C' && (role == 'REQUESTER' || role == 'PROCESSOR')) {// CMR-234
+  if (reqType == 'C' && (role == 'REQUESTER')) {// CMR-234
     // start
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
   }// CMR-234 -end
+
+  if (role == 'PROCESSOR' && (reqType == 'C' || reqType == 'U')) {
+    FormManager.enable('isuCd');
+    FormManager.enable('clientTier');
+  }
+
   if (reqType == 'C' && role == 'REQUESTER') {
     FormManager.readOnly('cmrNo');
     FormManager.readOnly('cmrOwner');
