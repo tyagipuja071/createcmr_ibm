@@ -1284,6 +1284,9 @@ function setClientTierValues(isuCd) {
 
   isuCd = FormManager.getActualValue('isuCd');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  if(SysLoc.Austria == cntry){
+    return;
+  }
   var clientTiers = [];
   if (isuCd != '') {
     if (SysLoc.SLOVAKIA == cntry
@@ -2147,7 +2150,7 @@ function custNmAttnPersonPhoneValidationOnChange() {
   }
 }
 
-function reqReasonOnChange() {
+function reqReasonOnChangeAT() {
   var reqReason = FormManager.getActualValue('reqReason');
   if (reqReason == 'IGF' && isZD01OrZP01ExistOnCMR()) {
     // FormManager.limitDropdownValues(FormManager.getField('custSubGrp'), [
@@ -4181,7 +4184,7 @@ dojo.addOnLoad(function() {
   // GEOHandler.addAddrFunction(setScenarioTo3PAOnAddrSave, [ SysLoc.AUSTRIA ]);
 
   GEOHandler.addAfterConfig(custNmAttnPersonPhoneValidationOnChange, [ SysLoc.AUSTRIA ]);
-  GEOHandler.addAfterConfig(reqReasonOnChange, [ SysLoc.AUSTRIA ]);
+  GEOHandler.addAfterConfig(reqReasonOnChangeAT, [ SysLoc.AUSTRIA ]);
   GEOHandler.addAfterConfig(phoneNoValidation, [ SysLoc.AUSTRIA ]);
   GEOHandler.addAfterConfig(phoneNoValidationOnChange, [ SysLoc.AUSTRIA ]);
   GEOHandler.addAfterConfig(setEnterpriseValues, GEOHandler.CEMEA);
