@@ -318,45 +318,19 @@ function isDPLCheckNeeded() {
   }
 }
 
-function isCompanyProofNeeded() {
-  console.log('>> Executing isCompanyProofNeeded()');
-  var reqId = FormManager.getActualValue('procReqId');
-  var iterId = FormManager.getActualValue('iterId');
-
-  var qParams = {
-    ID : reqId,
-    ITER_ID : iterId,
+function isNewMassTemplateUsed() {
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  qParams = {
+    CNTRY : cntry,
   };
+  var recordLD = cmr.query('CHECK_LD_MASS_NEW_TEMP', qParams);
+  var countrecordLD = recordLD.ret1;
 
-  var result = cmr.query('COUNT.LD_MASS_UPDT_ADDR_ZS01_ZP01', qParams);
-
-  if (result != null && result.ret1 > 0) {
-
-    var resultAttachment = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', qParams);
-    var attachmentCount = resultAttachment.ret1;
-
-    if (attachmentCount > 0) {
-      return false;
-    }
+  if (Number(countrecordLD) > 0) {
     return true;
   } else {
     return false;
   }
-}
-
-function isNewMassTemplateUsed() {
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  qParams = {
-      CNTRY : cntry,
-    };
-    var recordLD = cmr.query('CHECK_LD_MASS_NEW_TEMP', qParams);
-    var countrecordLD = recordLD.ret1;
-
-    if (Number(countrecordLD) > 0) {
-      return true;
-    } else {
-      return false;
-    }
 }
 
 /**
@@ -367,8 +341,6 @@ function doValidateRequest() {
     MessageMgr.showErrorMessage('DPL Check is needed for uploaded template.');
   } else if (isAttachmentNeeded() && _pagemodel.userRole.toUpperCase() == "PROCESSOR" && isNewMassTemplateUsed()) {
     MessageMgr.showErrorMessage('DPL Matching results has not been attached to the request. This is required since DPL checks failed for one or more addresses.');
-  } else if (isCompanyProofNeeded()) {
-    MessageMgr.showErrorMessage('Proof of address is mandatory. Please attach Company Proof.');
   } else if (FormManager.validate('frmCMR')) {
     MessageMgr.showInfoMessage('The request has no errors.', null, true);
   } else {
