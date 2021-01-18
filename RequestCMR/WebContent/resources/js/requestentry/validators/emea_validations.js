@@ -2270,7 +2270,7 @@ function addILClientTierISULogic() {
     if (value == '32') {
       tierValues = [ 'B', 'M', 'N', 'S', 'Z' ];
     } else if (value == '34') {
-      tierValues = [ 'A', 'E', 'V', '4', '6', 'Z' ];
+      tierValues = [ 'A', 'E', 'V', '4', '6', 'Z', 'Q' ];
     } else if (value != '') {
       tierValues = [ '7', 'Z' ];
     }
