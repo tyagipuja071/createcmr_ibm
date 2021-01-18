@@ -3230,23 +3230,15 @@ function setClientTierAndISR(value) {
     // FormManager.setValue('clientTier', '');
   }
   tierValues = null;
-  enterpriseLov = null;
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE) {
     if (reqType == 'C') {
-      enterpriseLov = [];
       if (value == '34') {
         tierValues = [ 'V', '6', 'A' ,'Q'];
-        if (clientTier == '6') {
-          enterpriseLov = [ '822836', '822835' ];
-        }
         if (clientTier == 'Q') {
           enterpriseLov = [ '822806', '822830' ];
         }
       } else if (value == '32') {
         tierValues = [ 'N', 'S' ];
-        if (clientTier == 'S') {
-          enterpriseLov = [ '822806', '822830' ];
-        }
       } else if (value == '21') {
         tierValues = [ '7' ];
       }
@@ -3325,20 +3317,10 @@ function setClientTierForCreates(value) {
   }
 
   if (reqType == 'C') {
-    enterpriseLov = [];
     if (isuCd == '34') {
       tierValues = [ 'V', '6', 'A' ,'Q'];
-      if (clientTiers == '6') {
-        enterpriseLov = [ '822836', '822835' ];
-      }
-      if (clientTiers == 'Q') {
-        enterpriseLov = [ '822806', '822830' ];
-      }
     } else if (isuCd == '32') {
       tierValues = [ 'N', 'S' ];
-      if (clientTiers == 'S') {
-        enterpriseLov = [ '822806', '822830' ];
-      }
     } else if (isuCd == '21') {
       tierValues = [ '7' ];
     }
