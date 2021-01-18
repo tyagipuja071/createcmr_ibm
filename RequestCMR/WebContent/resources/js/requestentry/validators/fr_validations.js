@@ -2460,6 +2460,10 @@ function addFRClientTierLogic() {
       var countryUse = FormManager.getActualValue('countryUse');
       var custSubGrp = FormManager.getActualValue('custSubGrp');
 
+      if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+        return;
+      }
+
       // Unlock ISU for Update and Processor
       if (FormManager.getActualValue('reqType') == 'U') {
         FormManager.enable('isuCd');
@@ -2812,7 +2816,8 @@ function lockIBMTabForFR() {
   var custSubType = FormManager.getActualValue('custSubGrp');
 
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    FormManager.readOnly('isuCd');
+    // FormManager.readOnly('isuCd');
+    return;
   }
 
   if (reqType == 'C' && (role == 'REQUESTER')) {// CMR-234
