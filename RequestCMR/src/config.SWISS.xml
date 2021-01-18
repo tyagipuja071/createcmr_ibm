@@ -55,7 +55,7 @@
           <label>Muboty</label>
           <dbColumn>SEARCH_TERM</dbColumn>
           <width>25</width>
-          <length>7</length>
+          <length>8</length>
         </column>
         
         <column>
