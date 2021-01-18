@@ -1877,14 +1877,6 @@ public class GreeceHandler extends BaseSOFHandler {
             data.setCollectionCd(rdcData.getCollectionCd());
           }
         }
-
-        if (isUserBlankOut(entityManager, data.getEnterprise(), rdcData.getEnterprise(), "##Enterprise")) {
-          data.setEnterprise(data.getEnterprise());
-        } else {
-          if (StringUtils.isEmpty(data.getEnterprise()) && !StringUtils.isEmpty(rdcData.getEnterprise())) {
-            data.setEnterprise(rdcData.getEnterprise());
-          }
-        }
       }
     }
   }
