@@ -619,7 +619,7 @@ public class BELUXTransformer extends EMEATransformer {
           line5 += (line5.length() > 0 ? " " : "") + countryName;
         }
         line5 = line5.trim();
-      } else if ("LU".equalsIgnoreCase(data.getCountryUse())) {
+      } else if ("LU".equalsIgnoreCase(this.DEFAULT_LANDED_COUNTRY)) {
         if (!StringUtils.isBlank(addrData.getPostCd())) {
           line4 += (line4.length() > 0 ? " " : "") + addrData.getPostCd();
         }
