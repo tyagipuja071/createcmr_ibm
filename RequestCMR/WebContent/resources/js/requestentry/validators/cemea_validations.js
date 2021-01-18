@@ -1284,7 +1284,7 @@ function setClientTierValues(isuCd) {
 
   isuCd = FormManager.getActualValue('isuCd');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  if(SysLoc.Austria == cntry){
+  if(SysLoc.AUSTRIA == cntry){// CMR-710 
     return;
   }
   var clientTiers = [];
@@ -1381,15 +1381,6 @@ function setClientTierValues(isuCd) {
       } else if (isuCd == '32') {
         clientTiers = [ 'S', 'N' ];
       } else if (isuCd == '5B') {
-        clientTiers = [ '7' ];
-      }
-    } else if (SysLoc.AUSTRIA == cntry) {
-      // CMR-710 set default CTC value for AUSTRIA
-      if (isuCd == '34') {
-        clientTiers = [ 'Q' ];
-      } else if (isuCd == '8B') {
-        clientTiers = [ '7' ];
-      } else if (isuCd == '21') {
         clientTiers = [ '7' ];
       }
     } else {
