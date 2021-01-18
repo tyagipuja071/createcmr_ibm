@@ -41,14 +41,14 @@
           <label>ISU Code</label>
           <dbColumn>ISU_CD</dbColumn>
           <width>25</width>
-          <lovId>ISU</lovId>
+          <bdsId>ISU</bdsId>
         </column>
         
         <column>
           <label>Client Tier</label>
           <dbColumn>CLIENT_TIER</dbColumn>
           <width>25</width>
-          <lovId>ClientTier</lovId>
+          <bdsId>ClientTier</bdsId>
         </column>
         
         <column exactLength="true">
