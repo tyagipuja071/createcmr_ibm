@@ -96,37 +96,37 @@
 					<label>Customer Name</label>
 					<dbColumn>CUST_NM1</dbColumn>
 					<width>40</width>
-					<length>30</length>
+					<length>35</length>
 				</column>
 				<column>
 					<label>Name 2</label>
 					<dbColumn>CUST_NM2</dbColumn>
 					<width>40</width>
-					<length>30</length>
+					<length>35</length>
 				</column>
 				<column>
 					<label>Name 3</label>
 					<dbColumn>CUST_NM3</dbColumn>
 					<width>40</width>
-					<length>30</length>
+					<length>35</length>
 				</column>
 				<column>
 					<label>Name 4</label>
 					<dbColumn>CUST_NM4</dbColumn>
 					<width>40</width>
-					<length>30</length>
+					<length>35</length>
 				</column>
 				<column>
 					<label>Street</label>
 					<dbColumn>ADDR_TXT</dbColumn>
 					<width>40</width>
-					<length>30</length>
+					<length>35</length>
 				</column>
 				<column>
 					<label>City</label>
 					<dbColumn>CITY1</dbColumn>
 					<width>40</width>
-					<length>30</length>
+					<length>35</length>
 				</column>
 				<column>
 					<label>Postal Code</label>
@@ -167,37 +167,37 @@
 					<label>Customer Name</label>
 					<dbColumn>CUST_NM1</dbColumn>
 					<width>40</width>
-					<length>30</length>
+					<length>35</length>
 				</column>
 				<column>
 					<label>Name 2</label>
 					<dbColumn>CUST_NM2</dbColumn>
 					<width>40</width>
-					<length>30</length>
+					<length>35</length>
 				</column>
 				<column>
 					<label>Name 3</label>
 					<dbColumn>CUST_NM3</dbColumn>
 					<width>40</width>
-					<length>30</length>
+					<length>35</length>
 				</column>
 				<column>
 					<label>Name 4</label>
 					<dbColumn>CUST_NM4</dbColumn>
 					<width>40</width>
-					<length>30</length>
+					<length>35</length>
 				</column>
 				<column>
 					<label>Street</label>
 					<dbColumn>ADDR_TXT</dbColumn>
 					<width>40</width>
-					<length>30</length>
+					<length>35</length>
 				</column>
 				<column>
 					<label>City</label>
 					<dbColumn>CITY1</dbColumn>
 					<width>40</width>
-					<length>30</length>
+					<length>35</length>
 				</column>
 				<column>
 					<label>Postal Code</label>
@@ -237,37 +237,37 @@
 					<label>Customer Name</label>
 					<dbColumn>CUST_NM1</dbColumn>
 					<width>40</width>
-					<length>30</length>
+					<length>35</length>
 				</column>
 				<column>
 					<label>Name 2</label>
 					<dbColumn>CUST_NM2</dbColumn>
 					<width>40</width>
-					<length>30</length>
+					<length>35</length>
 				</column>
 				<column>
 					<label>Name 3</label>
 					<dbColumn>CUST_NM3</dbColumn>
 					<width>40</width>
-					<length>30</length>
+					<length>35</length>
 				</column>
 				<column>
 					<label>Name 4</label>
 					<dbColumn>CUST_NM4</dbColumn>
 					<width>40</width>
-					<length>30</length>
+					<length>35</length>
 				</column>
 				<column>
 					<label>Street</label>
 					<dbColumn>ADDR_TXT</dbColumn>
 					<width>40</width>
-					<length>30</length>
+					<length>35</length>
 				</column>
 				<column>
 					<label>City</label>
 					<dbColumn>CITY1</dbColumn>
 					<width>40</width>
-					<length>30</length>
+					<length>35</length>
 				</column>
 				<column>
 					<label>Postal Code</label>
@@ -301,37 +301,37 @@
 					<label>Customer Name</label>
 					<dbColumn>CUST_NM1</dbColumn>
 					<width>40</width>
-					<length>30</length>
+					<length>35</length>
 				</column>
 				<column>
 					<label>Name 2</label>
 					<dbColumn>CUST_NM2</dbColumn>
 					<width>40</width>
-					<length>30</length>
+					<length>35</length>
 				</column>
 				<column>
 					<label>Name 3</label>
 					<dbColumn>CUST_NM3</dbColumn>
 					<width>40</width>
-					<length>30</length>
+					<length>35</length>
 				</column>
 				<column>
 					<label>Name 4</label>
 					<dbColumn>CUST_NM4</dbColumn>
 					<width>40</width>
-					<length>30</length>
+					<length>35</length>
 				</column>
 				<column>
 					<label>Street</label>
 					<dbColumn>ADDR_TXT</dbColumn>
 					<width>40</width>
-					<length>30</length>
+					<length>35</length>
 				</column>
 				<column>
 					<label>City</label>
 					<dbColumn>CITY1</dbColumn>
 					<width>40</width>
-					<length>30</length>
+					<length>35</length>
 				</column>
 				<column>
 					<label>Postal Code</label>
