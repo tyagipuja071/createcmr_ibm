@@ -38,7 +38,7 @@ public abstract class MCOTransformer extends MessageTransformer {
 
   private static final Logger LOG = Logger.getLogger(MCOTransformer.class);
 
-  protected static final String[] ADDRESS_ORDER = { "ZS01", "ZP01", "ZI01", "ZD01", "ZS02" };
+  protected static final String[] ADDRESS_ORDER = { "ZS01", "ZP01", "ZI01", "ZD01", "ZS02", "PG01" };
 
   protected static Map<String, String> SOURCE_CODE_MAP = new HashMap<String, String>();
 
