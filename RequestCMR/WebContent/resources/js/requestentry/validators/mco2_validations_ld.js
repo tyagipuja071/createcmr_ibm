@@ -33,7 +33,7 @@ function addHandlersForMCO2() {
 
   if (_ISUHandler == null) {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
-      limitClientTierValues(value);
+      // limitClientTierValues(value);
       setSalesRepValues(value);
     });
   }
@@ -212,7 +212,7 @@ function lockCmrOwnerPrefLang() {
   }
 }
 function afterConfigForMCO2() {
-  limitClientTierValues();
+  // limitClientTierValues();
   FormManager.setValue('capInd', true);
   FormManager.readOnly('capInd');
   FormManager.addValidator('ibmDeptCostCenter', Validators.DIGIT, [ 'Internal Department Number' ], 'MAIN_IBM_TAB');
@@ -808,21 +808,21 @@ function setSalesRepValues(isuCd, clientTier) {
   }
   var salesReps = [];
   if (isuCd != '') {
-    var qParams = {
-      _qall : 'Y',
-      ISSUING_CNTRY : cntry,
-      ISU : '%' + isuCd + '%',
-    };
-    results = cmr.query('GET.MCO2SR.BYISU', qParams);
     if (cntry == '764' || cntry == '831' || cntry == '851' || cntry == '857') {
-      if (isuCd == '32' && (clientTier == 'S' || clientTier == 'C' || clientTier == 'T')) {
+      if ((isuCd == '32' && (clientTier == 'C' || clientTier == 'T')) || (isuCd == '34' && clientTier == 'Q')) {
         FormManager.setValue('salesBusOffCd', '0080');
       } else {
         FormManager.setValue('salesBusOffCd', '0010');
       }
     } else if (cntry == '698' || cntry == '745') {
-      if (isuCd == '32' && (clientTier == 'S' || clientTier == 'C' || clientTier == 'T')) {
+      if ((isuCd == '32' && (clientTier == 'C' || clientTier == 'T')) || (isuCd == '34' && clientTier == 'Q')) {
         FormManager.setValue('salesBusOffCd', '0060');
+      } else {
+        FormManager.setValue('salesBusOffCd', '0010');
+      }
+    } else if (cntry == '645' || cntry == '835' || cntry == '842') {
+      if (isuCd == '34' && clientTier == 'Q') {
+        FormManager.setValue('salesBusOffCd', '0040');
       } else {
         FormManager.setValue('salesBusOffCd', '0010');
       }
@@ -1636,37 +1636,38 @@ function resetNumeroRequired() {
   }
 }
 
-function limitClientTierValues(value) {
-  var reqType = FormManager.getActualValue('reqType');
+// function limitClientTierValues(value) {
+// var reqType = FormManager.getActualValue('reqType');
+//
+// if (!value) {
+// value = FormManager.getActualValue('isuCd');
+// }
+//
+// var tierValues = null;
+// tierValues = [ '', 'C', 'S', 'T', 'N', 'V', 'A', '7' ]
+//
+// if (reqType == 'C') {
+// if (value == '32') {
+// tierValues = [ 'C', 'S', 'T', 'N' ];
+// } else if (value == '34') {
+// tierValues = [ 'V', 'A' ];
+// } else if (value == '21' || value == '8B') {
+// tierValues = [ '7' ];
+// }
+// }
+//
+// if (tierValues != null) {
+// FormManager.limitDropdownValues(FormManager.getField('clientTier'),
+// tierValues);
+// preSelectSingleValue(value, tierValues)
+// }
+// }
 
-  if (!value) {
-    value = FormManager.getActualValue('isuCd');
-  }
-
-  var tierValues = null;
-  tierValues = [ '', 'C', 'S', 'T', 'N', 'V', 'A', '7' ]
-
-  if (reqType == 'C') {
-    if (value == '32') {
-      tierValues = [ 'C', 'S', 'T', 'N' ];
-    } else if (value == '34') {
-      tierValues = [ 'V', 'A' ];
-    } else if (value == '21' || value == '8B') {
-      tierValues = [ '7' ];
-    }
-  }
-
-  if (tierValues != null) {
-    FormManager.limitDropdownValues(FormManager.getField('clientTier'), tierValues);
-    preSelectSingleValue(value, tierValues)
-  }
-}
-
-function preSelectSingleValue(value, tierValues) {
-  if ((value == '21' || value == '8B') && tierValues.includes('7')) {
-    FormManager.setValue('clientTier', '7');
-  }
-}
+// function preSelectSingleValue(value, tierValues) {
+// if ((value == '21' || value == '8B') && tierValues.includes('7')) {
+// FormManager.setValue('clientTier', '7');
+// }
+// }
 
 function validateCollectionCd() {
   FormManager.addFormValidator((function() {
@@ -2090,7 +2091,7 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(addAbbrvNmAndLocValidator, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(setStreetContBehavior, GEOHandler.MCO2);
-  GEOHandler.addAfterTemplateLoad(limitClientTierValues, GEOHandler.MCO2);
+  // GEOHandler.addAfterTemplateLoad(limitClientTierValues, GEOHandler.MCO2);
   GEOHandler.registerValidator(validateCollectionCd, GEOHandler.MCO2, null, true);
   GEOHandler.registerValidator(addEmbargoCodeValidator, GEOHandler.MCO2, null, true);
 
