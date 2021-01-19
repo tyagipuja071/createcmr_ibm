@@ -1388,7 +1388,7 @@ public class ItalyHandler extends BaseSOFHandler {
     map.put("##GlobalBuyingGroupID", "gbgId");
     map.put("##CoverageID", "covId");
     map.put("##OriginatorID", "originatorId");
-    map.put("##BPRelationType", "bpRelType");
+  //  map.put("##BPRelationType", "bpRelType");
     map.put("##LocalTax1", "taxCd1");
     map.put("##CAP", "capInd");
     map.put("##RequestReason", "reqReason");
@@ -1441,7 +1441,7 @@ public class ItalyHandler extends BaseSOFHandler {
     map.put("##BuyingGroupID", "bgId");
     map.put("##RequesterID", "requesterId");
     map.put("##GeoLocationCode", "geoLocationCd");
-    map.put("##MembLevel", "memLvl");
+  //  map.put("##MembLevel", "memLvl");
     map.put("##RequestType", "reqType");
     map.put("##CustomerScenarioSubType", "custSubGrp");
     map.put("##StreetAbbrev", "divn");
