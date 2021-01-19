@@ -1676,11 +1676,6 @@ public class GreeceHandler extends BaseSOFHandler {
     } // End of Story 1389065
 
     if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && SystemLocation.GREECE.equalsIgnoreCase(data.getCmrIssuingCntry())) {
-      String abbrNm = mainRecord.getCmrShortName() != null ? mainRecord.getCmrShortName() : "";
-      if (abbrNm.length() > 22) {
-        abbrNm = abbrNm.substring(0, 22);
-      }
-      data.setAbbrevNm(abbrNm);
       data.setMemLvl(mainRecord.getCmrMembLevel());
       data.setBpRelType(mainRecord.getCmrBPRelType());
       data.setEnterprise(mainRecord.getCmrEnterpriseNumber());
@@ -3759,51 +3754,27 @@ public class GreeceHandler extends BaseSOFHandler {
   }
 
   private boolean compareTwoRows(XSSFRow row1, XSSFRow row2, List<TemplateValidation> validations) {
-    int firstCell = 0;
-    int lastCell = 0;
     if ((row1 == null) && (row2 == null)) {
       return true;
-    } else if ((row1 != null) && (row2 == null)) {
-      firstCell = row1.getFirstCellNum();
-      lastCell = row1.getLastCellNum();
-    } else if ((row1 == null) && (row2 != null)) {
-      firstCell = row2.getFirstCellNum();
-      lastCell = row2.getLastCellNum();
-    } else if ((row1 != null) && (row2 != null)) {
-      firstCell = row1.getFirstCellNum();
-      lastCell = row1.getLastCellNum();
     } else if ((row1 == null) || (row2 == null)) {
       return false;
     }
 
+    int firstCell1 = row1.getFirstCellNum();
+    int lastCell1 = row1.getLastCellNum();
     boolean equalRows = true;
+
     // Compare all cells in a row
-    for (int i = firstCell; i <= lastCell; i++) {
+    for (int i = firstCell1 + 2; i <= lastCell1; i++) {
       XSSFCell currCell1 = null;
       String locallang = "";
       String soldto = "";
+      currCell1 = row1.getCell(i);
+      locallang = validateColValFromCell(currCell1);
+      currCell1 = row2.getCell(i);
+      soldto = validateColValFromCell(currCell1);
 
-      if ((row1 != null) && (row2 != null)) {
-        currCell1 = row1.getCell(i);
-        locallang = validateColValFromCell(currCell1);
-        currCell1 = row2.getCell(i);
-        soldto = validateColValFromCell(currCell1);
-      } else if ((row1 == null) && (row2 != null)) {
-        currCell1 = row2.getCell(i);
-        soldto = validateColValFromCell(currCell1);
-      } else if ((row1 != null) && (row2 == null)) {
-        currCell1 = row1.getCell(i);
-        locallang = validateColValFromCell(currCell1);
-      }
-
-      int rowNo = 0;
-      if (row1 != null) {
-        rowNo = row1.getRowNum();
-      } else if (row2 != null) {
-        rowNo = row2.getRowNum();
-      }
-
-      if (rowNo == 2001) {
+      if (row1.getRowNum() == 2001) {
         continue;
       }
       if (i == 13) {
@@ -3812,15 +3783,15 @@ public class GreeceHandler extends BaseSOFHandler {
 
       TemplateValidation error = new TemplateValidation("Local Lang/Sold To");
       String msg = "Same fields needs to be filled for both Local Language and Sold to address. Please fix and upload the template again.";
-
+      int rowNo = row1.getRowNum() + 1;
       if (!StringUtils.isEmpty(soldto) && StringUtils.isEmpty(locallang)) {
         LOG.trace(msg);
-        error.addError(rowNo, "", "Row" + rowNo + ": " + msg);
+        error.addError(row1.getRowNum(), "", "Row" + rowNo + ": " + msg);
         validations.add(error);
       }
       if (StringUtils.isEmpty(soldto) && !StringUtils.isEmpty(locallang)) {
         LOG.trace(msg);
-        error.addError(rowNo, "", "Row" + rowNo + ": " + msg);
+        error.addError(row1.getRowNum(), "", "Row" + rowNo + ": " + msg);
         validations.add(error);
       }
     }
