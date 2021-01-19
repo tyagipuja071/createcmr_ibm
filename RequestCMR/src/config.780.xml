@@ -42,7 +42,7 @@
 					<label>Industry Solution Unit (ISU)</label>
 					<dbColumn>ISU_CD</dbColumn>
 					<width>25</width>
-					<bdsId>ISU</bdsId>
+					<lovId>ISU</lovId>
 				</column>
 				<column exactLength="true">
 					<label>INAC/NAC</label>
@@ -60,7 +60,7 @@
 					<label>Client Tier</label>
 					<dbColumn>CLIENT_TIER</dbColumn>
 					<width>25</width>
-					<bdsId>ClientTier</bdsId>
+					<lovId>ClientTier</lovId>
 				</column>
 				<column>
 					<label>Classification Code</label>
