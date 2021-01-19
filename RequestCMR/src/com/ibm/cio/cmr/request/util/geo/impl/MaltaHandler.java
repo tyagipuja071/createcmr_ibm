@@ -1066,16 +1066,15 @@ public class MaltaHandler extends BaseSOFHandler {
                       "Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
                   // validations.add(error);
                 }
-
-                if (!StringUtils.isBlank(city) && !StringUtils.isBlank(postalCode)) {
-                  int count = city.length() + postalCode.length();
-                  if (count > 28) {
-                    LOG.trace("Total computed length of City and Postal Code should not exceed 28 characters.");
-                    error.addError(row.getRowNum(), rowNumber + "City",
-                        "Total computed length of City and Postal Code should not exceed 28 characters.");
-                    // validations.add(error);
-                  }
-                }
+                /*
+                 * if (!StringUtils.isBlank(city) &&
+                 * !StringUtils.isBlank(postalCode)) { int count = city.length()
+                 * + postalCode.length(); if (count > 28) { LOG.
+                 * trace("Total computed length of City and Postal Code should not exceed 28 characters."
+                 * ); error.addError(row.getRowNum(), rowNumber + "City",
+                 * "Total computed length of City and Postal Code should not exceed 28 characters."
+                 * ); // validations.add(error); } }
+                 */
               }
             } else if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
               currCell = (XSSFCell) row.getCell(0);
