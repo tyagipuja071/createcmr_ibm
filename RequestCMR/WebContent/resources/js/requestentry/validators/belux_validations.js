@@ -24,7 +24,8 @@ function afterConfigForBELUX() {
     FormManager.removeValidator('inacCd', Validators.REQUIRED);
   }
 
-  if ((custSubGrp.substring(2, 5) == 'INT' || custSubGrp == 'CBBUS' || custSubGrp.substring(2, 5) == 'PRI' || custSubGrp.substring(2, 5) == 'ISO' || custSubGrp == 'BECOM' || custSubGrp == 'BEDAT' || custSubGrp == 'LUCOM')) {
+  if ((custSubGrp.substring(2, 5) == 'INT' || custSubGrp == 'CBBUS' || custSubGrp.substring(2, 5) == 'PRI' || custSubGrp.substring(2, 5) == 'ISO' || custSubGrp == 'BECOM' || custSubGrp == 'BEDAT'
+      || custSubGrp == 'LUCOM' || custSubGrp == 'LUDAT')) {
     FormManager.addValidator('isicCd', Validators.REQUIRED, [ 'ISIC' ], 'MAIN_CUST_TAB');
   } else {
     FormManager.removeValidator('isicCd', Validators.REQUIRED);
@@ -49,7 +50,7 @@ function afterConfigForBELUX() {
       FormManager.addValidator('collectionCd', Validators.REQUIRED, [ 'Collection Code' ], 'MAIN_CUST_TAB');
     }
 
-    if (custSubGrp.substring(2, 5) == '3PA' || custSubGrp == 'BEBUS' || custSubGrp == 'BECOM' || custSubGrp == 'BEDAT' || custSubGrp == 'LUBUS' || custSubGrp == 'LUCOM') {
+    if (custSubGrp.substring(2, 5) == '3PA' || custSubGrp == 'BEBUS' || custSubGrp == 'BECOM' || custSubGrp == 'BEDAT' || custSubGrp == 'LUBUS' || custSubGrp == 'LUCOM' || custSubGrp == 'LUDAT') {
       if (role == 'Processor') {
         FormManager.addValidator('economicCd', Validators.REQUIRED, [ 'Economic Code' ], 'MAIN_IBM_TAB');
       }
@@ -196,6 +197,7 @@ function setAccTemNumValueOnScenarios() {
     break;
   case 'LU3PA':
   case 'LUCOM':
+  case 'LUDAT':
   case 'LUPUB':
     break;
   case 'LUBUS':
@@ -292,6 +294,7 @@ function addAccTemNumValidate() {
     break;
   case 'LU3PA':
   case 'LUCOM':
+  case 'LUDAT':
   case 'LUPUB':
     if (role == 'Requester') {
       FormManager.enable('searchTerm');
@@ -729,7 +732,7 @@ function setEconomicCodeValues(searchTerm) {
   }
 
   var economicCode = [];
-  if (searchTerm != '' && (custSubGrp == 'COM' || custSGrp == 'BEDAT' || custSubGrp == 'PUB' || custSubGrp == '3PA')) {
+  if (searchTerm != '' && (custSubGrp == 'COM' || custSGrp == 'BEDAT' || custSubGrp == 'PUB' || custSubGrp == '3PA' || custSubGrp == 'LUDAT')) {
     var qParams = {
       _qall : 'Y',
       ISSUING_CNTRY : cntry + geoCd,
@@ -751,7 +754,7 @@ function setEconomicCodeValues(searchTerm) {
       }
     }
   }
-  if (custSubGrp == 'PUB' || custSubGrp == 'COM' || custSGrp == 'BEDAT' || custSubGrp == '3PA') {
+  if (custSubGrp == 'PUB' || custSubGrp == 'COM' || custSGrp == 'BEDAT' || custSubGrp == '3PA' || custSubGrp == 'LUDAT') {
     // FormManager.setValue('economicCd', 'K11');
     if ('32' == isuCd && 'N' == clientTier) {
       FormManager.setValue('economicCd', 'K43');
