@@ -33,7 +33,7 @@ function addHandlersForMCO2() {
 
   if (_ISUHandler == null) {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
-      // limitClientTierValues(value);
+      limitClientTierValues(value);
       setSalesRepValues(value);
     });
   }
@@ -212,7 +212,7 @@ function lockCmrOwnerPrefLang() {
   }
 }
 function afterConfigForMCO2() {
-  // limitClientTierValues();
+  limitClientTierValues();
   FormManager.setValue('capInd', true);
   FormManager.readOnly('capInd');
   FormManager.addValidator('ibmDeptCostCenter', Validators.DIGIT, [ 'Internal Department Number' ], 'MAIN_IBM_TAB');
@@ -586,8 +586,11 @@ function addAttachmentValidator() {
         var role = FormManager.getActualValue('userRole').toUpperCase();
         var req = FormManager.getActualValue('reqType').toUpperCase();
         var subCustGrp = FormManager.getActualValue('custSubGrp');
-        if (req == 'C') {
+        if (role == 'REQUESTER' && req != 'U') {
           switch (subCustGrp.toUpperCase()) {
+          case 'SOFTL':
+            return new ValidationResult(null, true);
+            break;
           case 'BUSPR':
             return new ValidationResult(null, true);
             break;
@@ -627,7 +630,7 @@ function addAttachmentValidator() {
             }
             break;
           }
-        } else if (req == 'U') {
+        } else if (role == 'REQUESTER' && req == 'U') {
           if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
             var record = null;
             var updateInd = null;
@@ -639,92 +642,59 @@ function addAttachmentValidator() {
               updateInd = record.updateInd;
               importInd = record.importInd;
 
-              if ((updateInd == 'U' && type == 'ZS01') || (updateInd == 'U' && type == 'ZP01')) {
-
+              if (updateInd == 'U') {
                 var reqId = FormManager.getActualValue('reqId');
                 if (reqId != null) {
                   reqParam = {
                     ID : reqId
                   };
                 }
-                var resultAttachment = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', reqParam);
-                var attachmentCount = resultAttachment.ret1;
+                var results = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', reqParam);
+                var recordCount = results.ret1;
 
-                if (reqId != null) {
-                  reqParam = {
-                    REQ_ID : reqId,
-                    ADDR_TYPE : type,
-                  };
-                }
-
-                var resultOldAddr = cmr.query('ADDR.GET.OLDADDR.BY_REQID_ADDRTYP', reqParam);
-
-                var oldCustName; // CUST_NM1
-                var oldCustNameCon; // CUST_NM2
-                var oldAddlName; // CUST_NM4
-                var oldStreet; // ADDR_TXT
-                var oldStreetCont; // ADDR_TXT_2
-                var oldCity; // CITY1
-                var oldPostCd; // POST_CD
-                var oldLandedCntry; // LAND_CNTRY
-                var oldPoBox; // PO_BOX
-                var oldPhone; // CUST_PHONE
-
-                var currentCustName;
-                var currentCustNameCon;
-                var currentAddlName;
-                var currentStreet;
-                var currentStreetCont;
-                var currentCity;
-                var currentPostCd;
-                var currentLandedCntry;
-                var currentPoBox;
-                var currentPhone;
-
-                if (resultOldAddr != null && resultOldAddr != '') {
-                  // pulled from addr_rdc
-                  oldCustName = resultOldAddr.ret2 != null ? resultOldAddr.ret2 : '';
-                  oldCustNameCon = resultOldAddr.ret3 != null ? resultOldAddr.ret3 : '';
-                  oldAddlName = resultOldAddr.ret4 != null ? resultOldAddr.ret4 : '';
-                  oldStreet = resultOldAddr.ret5 != null ? resultOldAddr.ret5 : '';
-                  oldStreetCont = resultOldAddr.ret6 != null ? resultOldAddr.ret6 : '';
-                  oldCity = resultOldAddr.ret7 != null ? resultOldAddr.ret7 : '';
-                  oldPostCd = resultOldAddr.ret8 != null ? resultOldAddr.ret8 : '';
-                  oldLandedCntry = resultOldAddr.ret9 != null ? resultOldAddr.ret9 : '';
-                  oldPoBox = resultOldAddr.ret10 != null ? resultOldAddr.ret10 : '';
-                  oldPhone = resultOldAddr.ret11 != null ? resultOldAddr.ret11 : '';
-
-                  // current address value
-                  currentCustName = record.custNm1[0] != null ? record.custNm1[0] : '';
-                  currentCustNameCon = record.custNm2[0] != null ? record.custNm2[0] : '';
-                  currentAddlName = record.custNm4[0] != null ? record.custNm4[0] : '';
-                  currentStreet = record.addrTxt[0] != null ? record.addrTxt[0] : '';
-                  currentStreetCont = record.addrTxt2[0] != null ? record.addrTxt2[0] : '';
-                  currentCity = record.city1[0] != null ? record.city1[0] : '';
-                  currentPostCd = record.postCd[0] != null ? record.postCd[0] : '';
-                  currentLandedCntry = record.landCntry[0] != null ? record.landCntry[0] : '';
-                  currentPoBox = record.poBox[0] != null ? record.poBox[0] : '';
-                  currentPhone = record.custPhone[0] != null ? record.custPhone[0] : '';
-
-                  if (oldCustName == currentCustName && oldCustNameCon == currentCustNameCon && oldAddlName == currentAddlName && oldStreet == currentStreet && oldStreetCont == currentStreetCont
-                      && oldCity == currentCity && oldPostCd == currentPostCd && oldLandedCntry == currentLandedCntry && oldPoBox == currentPoBox) {
-                    if (type == 'ZP01' && oldPhone != currentPhone) {
-                      if (attachmentCount > 0) {
-                        return new ValidationResult(null, true);
-                      }
-                      return new ValidationResult(null, false, 'Proof of address is mandatory. Please attach Company Proof.');
-                    }
+                if (recordCount != null) {
+                  if (recordCount > 0) {
                     return new ValidationResult(null, true);
-                  } else {
-                    if (attachmentCount > 0) {
-                      return new ValidationResult(null, true);
-                    }
+                  } else if (recordCount == 0) {
                     return new ValidationResult(null, false, 'Proof of address is mandatory. Please attach Company Proof.');
                   }
+                } else {
+                  return new ValidationResult(null, false, 'Proof of address is mandatory. Please attach Company Proof.');
                 }
+              } else if (importInd != 'Y') {
+                var reqId = FormManager.getActualValue('reqId');
+                if (reqId != null) {
+                  reqParam = {
+                    ID : reqId
+                  };
+                }
+                var results = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', reqParam);
+                var recordCount = results.ret1;
+
+                if (recordCount != null) {
+                  if (recordCount > 0) {
+                    return new ValidationResult(null, true);
+                  } else if (recordCount == 0) {
+                    return new ValidationResult(null, false, 'Proof of address is mandatory. Please attach Company Proof.');
+                  }
+                } else {
+                  return new ValidationResult(null, false, 'Proof of address is mandatory. Please attach Company Proof.');
+                }
+              } else {
+                counter = counter + 1;
               }
             }
+
+            if (counter > 0) {
+              return new ValidationResult(null, true);
+            } else {
+              return new ValidationResult(null, false, 'Proof of address is mandatory. Please attach Company Proof.');
+            }
+          } else {
+            return new ValidationResult(null, true);
           }
+        } else {
+          return new ValidationResult(null, true);
         }
       }
     };
@@ -808,21 +778,21 @@ function setSalesRepValues(isuCd, clientTier) {
   }
   var salesReps = [];
   if (isuCd != '') {
+    var qParams = {
+      _qall : 'Y',
+      ISSUING_CNTRY : cntry,
+      ISU : '%' + isuCd + '%',
+    };
+    results = cmr.query('GET.MCO2SR.BYISU', qParams);
     if (cntry == '764' || cntry == '831' || cntry == '851' || cntry == '857') {
-      if ((isuCd == '32' && (clientTier == 'C' || clientTier == 'T')) || (isuCd == '34' && clientTier == 'Q')) {
+      if (isuCd == '32' && (clientTier == 'S' || clientTier == 'C' || clientTier == 'T')) {
         FormManager.setValue('salesBusOffCd', '0080');
       } else {
         FormManager.setValue('salesBusOffCd', '0010');
       }
     } else if (cntry == '698' || cntry == '745') {
-      if ((isuCd == '32' && (clientTier == 'C' || clientTier == 'T')) || (isuCd == '34' && clientTier == 'Q')) {
+      if (isuCd == '32' && (clientTier == 'S' || clientTier == 'C' || clientTier == 'T')) {
         FormManager.setValue('salesBusOffCd', '0060');
-      } else {
-        FormManager.setValue('salesBusOffCd', '0010');
-      }
-    } else if (cntry == '645' || cntry == '835' || cntry == '842') {
-      if (isuCd == '34' && clientTier == 'Q') {
-        FormManager.setValue('salesBusOffCd', '0040');
       } else {
         FormManager.setValue('salesBusOffCd', '0010');
       }
@@ -1026,15 +996,11 @@ function addAdditionalNameStreetContPOBoxValidator() {
     return {
       validate : function() {
 
+        var isUpdate = FormManager.getActualValue('reqType') == 'U';
         var isLocalBasedOnLanded = FormManager.getActualValue('defaultLandedCountry') == FormManager.getActualValue('landCntry');
         var custSubGrp = FormManager.getActualValue('custSubGrp');
         var isGmllcScenario = custSubGrp == 'LLC' || custSubGrp == 'LLCBP' || custSubGrp == 'LLCEX';
-        var addrType = FormManager.getActualValue('addrType');
-        var kenyaCntryCd = '764';
-        var isIssuingCntryKenya = FormManager.getActualValue('cmrIssuingCntry') == kenyaCntryCd;
-        var isKenyaLocalGmllc = isIssuingCntryKenya && addrType == 'ZS01' && isLocalBasedOnLanded && (custSubGrp == 'LLC' || custSubGrp == 'LLCBP');
-
-        if ((isLocalBasedOnLanded && !(isGmllcScenario && addrType == 'ZS01')) || isKenyaLocalGmllc) {
+        if ((FormManager.getActualValue('custGrp') == 'LOCAL' || (isUpdate && isLocalBasedOnLanded)) && !isGmllcScenario) {
           return new ValidationResult(null, true);
         }
 
@@ -1636,38 +1602,37 @@ function resetNumeroRequired() {
   }
 }
 
-// function limitClientTierValues(value) {
-// var reqType = FormManager.getActualValue('reqType');
-//
-// if (!value) {
-// value = FormManager.getActualValue('isuCd');
-// }
-//
-// var tierValues = null;
-// tierValues = [ '', 'C', 'S', 'T', 'N', 'V', 'A', '7' ]
-//
-// if (reqType == 'C') {
-// if (value == '32') {
-// tierValues = [ 'C', 'S', 'T', 'N' ];
-// } else if (value == '34') {
-// tierValues = [ 'V', 'A' ];
-// } else if (value == '21' || value == '8B') {
-// tierValues = [ '7' ];
-// }
-// }
-//
-// if (tierValues != null) {
-// FormManager.limitDropdownValues(FormManager.getField('clientTier'),
-// tierValues);
-// preSelectSingleValue(value, tierValues)
-// }
-// }
+function limitClientTierValues(value) {
+  var reqType = FormManager.getActualValue('reqType');
 
-// function preSelectSingleValue(value, tierValues) {
-// if ((value == '21' || value == '8B') && tierValues.includes('7')) {
-// FormManager.setValue('clientTier', '7');
-// }
-// }
+  if (!value) {
+    value = FormManager.getActualValue('isuCd');
+  }
+
+  var tierValues = null;
+  tierValues = [ '', 'C', 'S', 'T', 'N', 'V', 'A', '7' ]
+
+  if (reqType == 'C') {
+    if (value == '32') {
+      tierValues = [ 'C', 'S', 'T', 'N' ];
+    } else if (value == '34') {
+      tierValues = [ 'V', 'A' ];
+    } else if (value == '21' || value == '8B') {
+      tierValues = [ '7' ];
+    }
+  }
+
+  if (tierValues != null) {
+    FormManager.limitDropdownValues(FormManager.getField('clientTier'), tierValues);
+    preSelectSingleValue(value, tierValues)
+  }
+}
+
+function preSelectSingleValue(value, tierValues) {
+  if ((value == '21' || value == '8B') && tierValues.includes('7')) {
+    FormManager.setValue('clientTier', '7');
+  }
+}
 
 function validateCollectionCd() {
   FormManager.addFormValidator((function() {
@@ -1953,62 +1918,6 @@ function isVatRequired() {
   return false;
 }
 
-function addAddressGridValidatorGMLLC() {
-  console.log("addAddressGridValidatorGMLLC..............");
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var custSubGrp = FormManager.getActualValue('custSubGrp');
-        var isGmllcScenario = custSubGrp == 'LLC' || custSubGrp == 'LLCBP' || custSubGrp == 'LLCEX';
-        var kenyaCntryCd = '764';
-        var isIssuingCntryKenya = FormManager.getActualValue('cmrIssuingCntry') == kenyaCntryCd;
-        var isKenyaLocalGmllc = isIssuingCntryKenya && (custSubGrp == 'LLC' || custSubGrp == 'LLCBP');
-
-        if (!isGmllcScenario || isKenyaLocalGmllc) {
-          return new ValidationResult(null, true);
-        }
-        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
-          var record = null;
-          var type = null;
-
-          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
-            record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
-            if (record == null && _allAddressData != null && _allAddressData[i] != null) {
-              record = _allAddressData[i];
-            }
-            type = record.addrType;
-            if (typeof (type) == 'object') {
-              type = type[0];
-            }
-
-            if (type != 'ZS01') {
-              continue;
-            }
-
-            var streetCont;
-            var isAddlNameFilled = false;
-            var isStreetContPOBOXFilled = false;
-
-            if ((record.custNm4[0] != '' && record.custNm4[0] != null)) {
-              isAddlNameFilled = true;
-            }
-
-            if ((record.addrTxt2[0] != '' && record.addrTxt2[0] != null) || (record.poBox[0] != '' && record.poBox[0] != null)) {
-              isStreetContPOBOXFilled = true;
-            }
-
-            if (isAddlNameFilled && isStreetContPOBOXFilled) {
-              return new ValidationResult(null, false,
-                  'Please update Sold-to (Main) Address. Fill-out either \'Additional Name or Address Information\' or \'Street Continuation\' and/or \'PO Box\' only.');
-            }
-          }
-          return new ValidationResult(null, true);
-        }
-      }
-    };
-  })(), 'MAIN_NAME_TAB', 'frmCMR');
-}
-
 /* End 1430539 */
 dojo.addOnLoad(function() {
   GEOHandler.MCO2 = [ '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770',
@@ -2068,7 +1977,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(clearPhoneNoFromGrid, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(clearPOBoxFromGrid, GEOHandler.MCO2);
   GEOHandler.registerValidator(addAddressGridValidatorStreetPOBox, GEOHandler.MCO2, null, true);
-  GEOHandler.registerValidator(addAddressGridValidatorGMLLC, GEOHandler.MCO2, null, true);
   GEOHandler.registerValidator(addInternalDeptNumberValidator, GEOHandler.MCO2, null, true);
   GEOHandler.registerValidator(addTaxRegFormatValidationMadagascar, [ SysLoc.MADAGASCAR ], null, true);
   GEOHandler.registerValidator(addAttachmentValidatorOnTaxRegMadagascar, [ SysLoc.MADAGASCAR ], null, true);
@@ -2091,7 +1999,7 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(addAbbrvNmAndLocValidator, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(setStreetContBehavior, GEOHandler.MCO2);
-  // GEOHandler.addAfterTemplateLoad(limitClientTierValues, GEOHandler.MCO2);
+  GEOHandler.addAfterTemplateLoad(limitClientTierValues, GEOHandler.MCO2);
   GEOHandler.registerValidator(validateCollectionCd, GEOHandler.MCO2, null, true);
   GEOHandler.registerValidator(addEmbargoCodeValidator, GEOHandler.MCO2, null, true);
 

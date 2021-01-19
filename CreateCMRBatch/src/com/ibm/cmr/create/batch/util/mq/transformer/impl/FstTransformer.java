@@ -495,7 +495,7 @@ public class FstTransformer extends MCOTransformer {
           legacyCust.setIbo("0010000");
           legacyCust.setInacCd("");
         } else {
-          legacyCust.setIsuCd("34Q");
+          legacyCust.setIsuCd("32S");
           legacyCust.setSalesRepNo("DUMMY1");
           legacyCust.setSbo("0080000");
           legacyCust.setIbo("0080000");
