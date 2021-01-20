@@ -1644,13 +1644,13 @@ function limitClientTierValues(value) {
   }
 
   var tierValues = null;
- // tierValues = [ '', 'C', 'S', 'T', 'N', 'V', 'A', '7' ]
+  // tierValues = [ '', 'C', 'S', 'T', 'N', 'V', 'A', '7' ]
 
   if (reqType == 'C') {
     if (value == '32') {
       tierValues = [ 'C', 'S', 'T', 'N' ];
     } else if (value == '34') {
-      tierValues = [ 'V', 'A' ];
+      tierValues = [ 'V', 'A', 'Q' ];
     } else if (value == '21' || value == '8B') {
       tierValues = [ '7' ];
     } else {
