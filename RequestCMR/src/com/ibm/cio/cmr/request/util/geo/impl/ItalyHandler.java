@@ -1546,7 +1546,7 @@ public class ItalyHandler extends BaseSOFHandler {
     List<String> fields = new ArrayList<>();
     fields.addAll(Arrays.asList("SALES_BO_CD", "REP_TEAM_MEMBER_NO", "SPECIAL_TAX_CD", "VAT", "ISIC_CD", "EMBARGO_CD", "COLLECTION_CD", "ABBREV_NM",
         "SENSITIVE_FLAG", "CLIENT_TIER", "COMPANY", "INAC_TYPE", "INAC_CD", "ISU_CD", "SUB_INDUSTRY_CD", "ABBREV_LOCN", "PPSCEID", "MEM_LVL",
-        "BP_REL_TYPE", "TAX_CD1", "NATIONAL_CUS_IND", "MODE_OF_PAYMENT", "ENTERPRISE"));
+        "BP_REL_TYPE","CROS_SUB_TYP", "TAX_CD1", "NATIONAL_CUS_IND", "MODE_OF_PAYMENT", "ENTERPRISE"));
     return fields;
   }
 
