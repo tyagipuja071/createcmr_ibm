@@ -69,7 +69,8 @@ function afterConfigForNL() {
 
   var custSubScnrio = FormManager.getActualValue('custSubGrp');
   var vatExemptChecked = dijit.byId('vatExempt').get('checked');
-  if (custSubScnrio == 'PRICU' || custSubScnrio == 'PUBCU' || custSubScnrio == 'CBCOM' || custSubScnrio == 'CBBUS' || (custSubScnrio == 'INTER' && vatExemptChecked)) {
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+  if (custSubScnrio == 'PRICU' || custSubScnrio == 'PUBCU' || custSubScnrio == 'CBCOM' || custSubScnrio == 'CBBUS' || (custSubScnrio == 'INTER' && vatExemptChecked) || viewOnlyPage == 'true') {
     FormManager.removeValidator('taxCd2', Validators.REQUIRED);
   } else if (reqType != 'U') {
     FormManager.addValidator('taxCd2', Validators.REQUIRED, [ 'KVK' ], 'MAIN_CUST_TAB');
@@ -131,6 +132,11 @@ function setKVKValidatorNL() {
 }
 
 function setDeptartmentNumber() {
+
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnlyPage == 'true') {
+    return;
+  }
   var reqType = FormManager.getActualValue('reqType');
   var custSubScnrio = FormManager.getActualValue('custSubGrp');
   var cmrNo = FormManager.getActualValue('cmrNo');
