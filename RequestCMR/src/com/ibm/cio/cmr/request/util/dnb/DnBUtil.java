@@ -570,7 +570,9 @@ public class DnBUtil {
     address = address.trim();
 
     String dnbAddress = dnbRecord.getDnbStreetLine1() != null ? dnbRecord.getDnbStreetLine1() : "";
-    dnbAddress += StringUtils.isNotBlank(dnbRecord.getDnbStreetLine2()) ? " " + dnbRecord.getDnbStreetLine2() : "";
+    if (StringUtils.isNotBlank(addr.getAddrTxt2())) {
+      dnbAddress += StringUtils.isNotBlank(dnbRecord.getDnbStreetLine2()) ? " " + dnbRecord.getDnbStreetLine2() : "";
+    }
     dnbAddress = dnbAddress.trim();
 
     if (StringUtils.isNotBlank(address) && StringUtils.isNotBlank(dnbAddress)
