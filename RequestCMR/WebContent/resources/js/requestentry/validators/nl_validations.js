@@ -68,7 +68,7 @@ function afterConfigForNL() {
   setVatValidatorNL();
 
   var custSubScnrio = FormManager.getActualValue('custSubGrp');
-  if (custSubScnrio == 'PRICU' || custSubScnrio == 'PUBCU' || custSubScnrio == 'CBCOM' || custSubScnrio == 'CBBUS' ) {
+  if (custSubScnrio == 'PRICU' || custSubScnrio == 'PUBCU' || custSubScnrio == 'CBCOM' || custSubScnrio == 'CBBUS') {
     FormManager.removeValidator('taxCd2', Validators.REQUIRED);
   } else if (reqType != 'U') {
     FormManager.addValidator('taxCd2', Validators.REQUIRED, [ 'KVK' ], 'MAIN_CUST_TAB');
@@ -119,10 +119,10 @@ function setKVKValidatorNL() {
     return;
   }
   var custSubScnrio = FormManager.getActualValue('custSubGrp');
-  if (custSubScnrio == 'PRICU' || dijit.byId('vatExempt').get('checked')) {
+  if (custSubScnrio == 'PRICU' && dijit.byId('vatExempt').get('checked')) {
     FormManager.removeValidator('taxCd2', Validators.REQUIRED);
   }
-  if (custSubScnrio == 'PRICU' || !dijit.byId('vatExempt').get('checked')) {
+  if (custSubScnrio == 'PRICU' && !dijit.byId('vatExempt').get('checked')) {
     FormManager.addValidator('taxCd2', Validators.REQUIRED, [ 'KVK' ], 'MAIN_CUST_TAB');
   }
 }
@@ -138,7 +138,7 @@ function setDeptartmentNumber() {
     if (deptNum && deptNum != '') {
       FormManager.setValue('ibmDeptCostCenter', deptNum);
     }
-    if (custSubScnrio != 'INTER' && custSubScnrio != '' && custSubScnrio) {
+    if (custSubScnrio != '' && custSubScnrio) {
       FormManager.readOnly('ibmDeptCostCenter');
       FormManager.setValue('ibmDeptCostCenter', '');
     } else {

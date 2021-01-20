@@ -883,7 +883,7 @@ public class NLTransformer extends EMEATransformer {
       legacyCust.setAuthRemarketerInd("0");
       legacyCust.setCeDivision("2");
 
-      legacyCust.setDeptCd(data.getIbmDeptCostCenter() == null ? "" : data.getIbmDeptCostCenter());
+      legacyCust.setDeptCd("");
       legacyCust.setCurrencyCd("");
       legacyCust.setOverseasTerritory("");
       legacyCust.setInvoiceCpyReqd("");
