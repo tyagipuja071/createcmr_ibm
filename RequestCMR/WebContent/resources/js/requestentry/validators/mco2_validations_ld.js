@@ -1609,7 +1609,7 @@ function limitClientTierValues(value) {
   }
 
   var tierValues = null;
-  tierValues = [ '', 'C', 'S', 'T', 'N', 'V', 'A', '7' ]
+ // tierValues = [ '', 'C', 'S', 'T', 'N', 'V', 'A', '7' ]
 
   if (reqType == 'C') {
     if (value == '32') {
