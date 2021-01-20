@@ -44,24 +44,34 @@ public class UserAdminService extends BaseService<UserModel, Users> {
     PreparedQuery q = new PreparedQuery(entityManager, sql);
     String userId = model.getUserId();
     String userName = model.getUserName();
-    if (StringUtils.isBlank(userId) && StringUtils.isBlank(userName)) {
+    q.append(" 1 = 1");
+    if (StringUtils.isBlank(userId) && StringUtils.isBlank(userName) && StringUtils.isBlank(model.getRole())
+        && StringUtils.isBlank(model.getRequesterFor())) {
       // do not retrieve
-      q.append(" USER_ID = 'xxx'");
+      q.append(" and USER_ID = 'xxx'");
     } else {
-      boolean hasName = false;
       if (!StringUtils.isBlank(userName)) {
-        q.append(" upper(USER_NAME) like :USER_NAME ");
+        q.append(" and upper(USER_NAME) like :USER_NAME ");
         q.setParameter("USER_NAME", "%" + userName.toUpperCase() + "%");
-        hasName = true;
       }
       if (!StringUtils.isBlank(userId)) {
-        if (hasName) {
-          q.append(" and ");
-        }
-        q.append(" upper(USER_ID) like :USER_ID ");
+        q.append(" and upper(USER_ID) like :USER_ID ");
         q.setParameter("USER_ID", "%" + userId.toUpperCase() + "%");
       }
+
+      if (!StringUtils.isBlank(model.getRole())) {
+        q.append(" and exists (select 1 from CMMA.USER_ROLES r where CMMA.USERS.USER_ID = r.USER_ID and r.ROLE_ID = :ROLE) ");
+        q.setParameter("ROLE", model.getRole());
+      }
+
+      if (!StringUtils.isBlank(model.getRequesterFor())) {
+        q.append(
+            " and exists (select 1 from CREQCMR.ADMIN a, CREQCMR.DATA d where a.REQ_ID = d.REQ_ID and a.REQ_STATUS in ('PRJ', 'COM', 'AUT', 'RET', 'REP', 'CPN', 'PPN') and d.CMR_ISSUING_CNTRY = :COUNTRY and lower(a.REQUESTER_ID) = lower(CMMA.USERS.USER_ID))");
+        q.setParameter("COUNTRY", model.getRequesterFor());
+      }
+
     }
+
     q.append(" order by USER_NAME");
     q.setForReadOnly(true);
     List<Users> users = q.getResults(Users.class);

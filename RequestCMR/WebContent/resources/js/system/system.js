@@ -125,7 +125,7 @@ var UserService = (function() {
       cmr.showModal('addRolesModal');
     },
     filterUsers : function() {
-      CmrGrid.refresh('userListGrid', cmr.CONTEXT_ROOT + '/userlist.json', 'userName=:userName&userId=:userId');
+      CmrGrid.refresh('userListGrid', cmr.CONTEXT_ROOT + '/userlist.json', 'userName=:userName&userId=:userId&role=:role&requesterFor=:requesterFor');
     }
 
   };

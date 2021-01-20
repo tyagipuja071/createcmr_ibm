@@ -71,7 +71,7 @@
           <dbColumn>CLIENT_TIER</dbColumn>
           <width>25</width>
           <length>1</length>
-          <bdsId>ClientTier</bdsId>
+          <lovId>ClientTier</lovId>
         </column>
         <column>
           <label>Mode of Payment</label>

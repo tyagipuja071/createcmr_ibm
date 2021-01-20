@@ -43,6 +43,10 @@ public class RequestSearchCriteriaModel extends BaseModel {
   private long childRequestId;
   private String childRequestStatus;
 
+  private String payGo;
+  private String pool;
+  private String sourceSystem;
+
   public String getResultRows() {
     return resultRows;
   }
@@ -593,6 +597,30 @@ public class RequestSearchCriteriaModel extends BaseModel {
 
   public void setChildRequestStatus(String childRequestStatus) {
     this.childRequestStatus = childRequestStatus;
+  }
+
+  public String getPayGo() {
+    return payGo;
+  }
+
+  public void setPayGo(String payGo) {
+    this.payGo = payGo;
+  }
+
+  public String getPool() {
+    return pool;
+  }
+
+  public void setPool(String pool) {
+    this.pool = pool;
+  }
+
+  public String getSourceSystem() {
+    return sourceSystem;
+  }
+
+  public void setSourceSystem(String sourceSystem) {
+    this.sourceSystem = sourceSystem;
   }
 
 }
