@@ -79,6 +79,7 @@ function afterConfigForBELUX() {
   // ppsceid
   if (role == 'Requester') {
     if (custSubGrpLst3 == 'BUS') {
+      console.log("test");
       FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
     }
   } else {
