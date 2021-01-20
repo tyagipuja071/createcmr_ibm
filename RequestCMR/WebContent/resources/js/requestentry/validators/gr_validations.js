@@ -1717,8 +1717,10 @@ function addNonLatinCharValidator() {
       checkAndAddValidator('dept', Validators.NON_LATIN, [ 'Attention Person' ]);
       checkAndAddValidator('custNm1', Validators.NON_LATIN, [ 'Customer Name' ]);
     } else if (cntry == SysLoc.GREECE) {
-      //checkAndAddValidator('custNm1', Validators.NON_LATIN, [ 'Customer Name' ]);
-      //checkAndAddValidator('custNm2', Validators.NON_LATIN, [ 'Customer Name Con\'t' ]);
+      // checkAndAddValidator('custNm1', Validators.NON_LATIN, [ 'Customer Name'
+      // ]);
+      // checkAndAddValidator('custNm2', Validators.NON_LATIN, [ 'Customer Name
+      // Con\'t' ]);
       checkAndAddValidator('addrTxt2', Validators.NON_LATIN, [ 'Address Con\'t/Occupation' ]);
       checkAndAddValidator('dept', Validators.NON_LATIN, [ 'District' ]);
       checkAndAddValidator('custNm4', Validators.NON_LATIN, [ 'Att. Person' ]);
@@ -1793,16 +1795,16 @@ function isicScenarioHandler(value) {
   if (value != null) {
     if (isicUnderB.has(value)) {
       if (custSubGrp == "COMME" || custSubGrp == "GOVRN" || custSubGrp == "CROSS") {
-        FormManager.setValue('isuCd', '32');
-        setClientTierAndISR('32');
-        FormManager.setValue('clientTier', 'N');
+        FormManager.setValue('isuCd', '34');
+        setClientTierAndISR('34');
+        FormManager.setValue('clientTier', 'Q');
       }
     } else {
       var scen32S = ['COMME', 'PRICU', 'GOVRN', 'CROSS', 'SPAS'];
       if(scen32S.includes(custSubGrp)) {
-        FormManager.setValue('isuCd', '32');
-        setClientTierAndISR('32');
-        FormManager.setValue('clientTier', 'S');
+        FormManager.setValue('isuCd', '34');
+        setClientTierAndISR('34');
+        FormManager.setValue('clientTier', 'Q');
       }
     }
   }
@@ -3226,26 +3228,16 @@ function setClientTierAndISR(value) {
     // FormManager.setValue('clientTier', '');
   }
   tierValues = null;
-  enterpriseLov = null;
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE) {
     if (reqType == 'C') {
-      enterpriseLov = [];
       if (value == '34') {
-        tierValues = [ 'V', '6', 'A' ];
-        if (clientTier == '6') {
-          enterpriseLov = [ '822836', '822835' ];
-        }
+        tierValues = [ 'V', '6', 'A' ,'Q'];
       } else if (value == '32') {
         tierValues = [ 'N', 'S' ];
-        if (clientTier == 'S') {
-          enterpriseLov = [ '822806', '822830' ];
-        }
       } else if (value == '21') {
         tierValues = [ '7' ];
       }
-    } else if (reqType == 'U') {
-      tierValues = [ 'V', '6', 'A', 'N', 'S', '7' ];
-    }
+    } 
   } else if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.CYPRUS) {
     if (value == '34') {
       tierValues = [ 'V', '6', 'A', 'Z' ];
@@ -3271,16 +3263,6 @@ function setClientTierAndISR(value) {
   } else {
     FormManager.resetDropdownValues(FormManager.getField('clientTier'));
   }
-
-  if (enterpriseLov != null) {
-    FormManager.limitDropdownValues(FormManager.getField('enterprise'), enterpriseLov);
-    if (enterpriseLov.length == 1) {
-      FormManager.setValue('enterprise', enterpriseLov[0]);
-    }
-  } else {
-    FormManager.resetDropdownValues(FormManager.getField('enterprise'));
-  }
-
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE
       && (FormManager.getActualValue('custSubGrp') != 'COMME' || FormManager.getActualValue('custSubGrp') != 'CROSS' || FormManager.getActualValue('custSubGrp') != 'GOVRN' || FormManager
           .getActualValue('custSubGrp') != 'PRICU')) {
@@ -3304,39 +3286,15 @@ function setClientTierForCreates(value) {
   if (!value) {
     value = FormManager.getActualValue('clientTier');
   }
-  enterpriseLov = null;
-  if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE) {
-    if (reqType == 'C') {
-      enterpriseLov = [];
-    }
-    if (isuCd == '34') {
-      if (value == '6') {
-        enterpriseLov = [ '822836', '822835' ];
-      }
-    } else if (isuCd == '32') {
-      if (value == 'S') {
-        enterpriseLov = [ '822806', '822830' ];
-      }
-    }
-  }
 
   if (reqType == 'C') {
-    enterpriseLov = [];
     if (isuCd == '34') {
-      tierValues = [ 'V', '6', 'A' ];
-      if (clientTiers == '6') {
-        enterpriseLov = [ '822836', '822835' ];
-      }
+      tierValues = [ 'V', '6', 'A' ,'Q'];
     } else if (isuCd == '32') {
       tierValues = [ 'N', 'S' ];
-      if (clientTiers == 'S') {
-        enterpriseLov = [ '822806', '822830' ];
-      }
     } else if (isuCd == '21') {
       tierValues = [ '7' ];
     }
-  } else if (reqType == 'U') {
-    tierValues = [ 'V', '6', 'A', 'N', 'S', '7' ];
   }
   if (tierValues != null) {
     FormManager.limitDropdownValues(FormManager.getField('clientTier'), tierValues);
@@ -3345,15 +3303,6 @@ function setClientTierForCreates(value) {
     }
   } else {
     FormManager.resetDropdownValues(FormManager.getField('clientTier'));
-  }
-
-  if (enterpriseLov != null) {
-    FormManager.limitDropdownValues(FormManager.getField('enterprise'), enterpriseLov);
-    if (enterpriseLov.length == 1) {
-      FormManager.setValue('enterprise', enterpriseLov[0]);
-    }
-  } else {
-    FormManager.resetDropdownValues(FormManager.getField('enterprise'));
   }
 }
 
@@ -3601,20 +3550,14 @@ function setISRValues() {
   }
 }
 
-var _oldEnterpriseValue = '';
 function setEnterprise(value) {
   var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
   var isu = FormManager.getActualValue('isuCd');
   var ctc = FormManager.getActualValue('clientTier');
   var repTeam = FormManager.getActualValue('repTeamMemberNo');
-  var valueChanged = false;
   var shouldSetEnterprise = false;
-
-  if (cmr.currentTab == 'IBM_REQ_TAB') {
-    valueChanged = _oldEnterpriseValue != value;
-  }
-
-  if (_subindustryChanged || valueChanged || _isScenarioChanged) {
+  
+  if (_subindustryChanged || _isScenarioChanged) {
     shouldSetEnterprise = true;
   }
 
@@ -3624,34 +3567,31 @@ function setEnterprise(value) {
       var subindustry = FormManager.getActualValue('subIndustryCd');
       var isicBasedChange = /^(A|B|C|E|G|J|M|P|T|X)/.test(subindustry);
 
-      if (isu == '32' && ctc == 'S' && isicBasedChange) {
+      if (isu == '34' && ctc == 'Q' && isicBasedChange) {
         if (repTeam == 'R21180' && FormManager.getActualValue('enterprise') != '') {
           FormManager.setValue('enterprise', '');
         } else {
           FormManager.setValue('enterprise', '822806');
           FormManager.setValue('repTeamMemberNo', 'D31180');
         }
-      } else if (isu == '32' && ctc == 'S' && subindustry != '' && !isicBasedChange) {
+      } else if (isu == '34' && ctc == 'Q' && subindustry != '' && !isicBasedChange) {
         if (repTeam == 'D31180' && FormManager.getActualValue('enterprise') != '') {
           FormManager.setValue('enterprise', '');
         } else {
           FormManager.setValue('enterprise', '822830');
           FormManager.setValue('repTeamMemberNo', 'R21180');
         }
-      } else if (isu == '32' && ctc == 'S' && isicBasedChange && repTeam == 'D31180') {
+      } else if (isu == '34' && ctc == 'Q' && isicBasedChange && repTeam == 'D31180') {
         FormManager.setValue('enterprise', '822806');
-      } else if (isu == '32' && ctc == 'S' && subindustry != '' && !isicBasedChange && repTeam == 'R21180') {
+      } else if (isu == '34' && ctc == 'Q' && subindustry != '' && !isicBasedChange && repTeam == 'R21180') {
         FormManager.setValue('enterprise', '822830');
       } else if (getImportedIndcForGreece() == 'Y' && FormManager.getActualValue('reqType') == 'C'
           && (FormManager.getActualValue('custSubGrp') == 'COMME' || FormManager.getActualValue('custSubGrp') == 'GOVRN' || FormManager.getActualValue('custSubGrp') == 'CROSS')) {
         // DO NOTHING -- Don't overwrite imported value
-      } else {
-        FormManager.setValue('enterprise', '');
       }
       _subindustryChanged = false;
       FormManager.readOnly('subIndustryCd');
     }
-    _oldEnterpriseValue = value;
   }
 
   if (cmrCntry == SysLoc.CYPRUS) {

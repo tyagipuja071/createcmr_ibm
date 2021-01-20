@@ -3473,7 +3473,7 @@ function setClientTierAndISR(value) {
   tierValues = null;
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.CYPRUS) {
     if (value == '34') {
-      tierValues = [ 'V', '6'];
+      tierValues = [ 'V', '6','Q'];
     } else if (value == '32') {
       tierValues = ['N', 'S'];
     } else if (value == '21') {
@@ -3696,7 +3696,7 @@ function setEnterprise() {
       ISU : '%' + isu + ctc + '%'
     };
     var results = cmr.query('GET.ENTLIST.BYISU', qParams);
-    if (results != null) {
+    if (results != null && results.length>0) {
       FormManager.resetDropdownValues(FormManager.getField('enterprise'));
       for (var i = 0; i < results.length; i++) {
         enterprises.push(results[i].ret1);
@@ -4174,9 +4174,9 @@ function setCustSubTypeBpGRTRCY(fromAddress, scenario, scenarioChanged) {
       }
     } else if (custType == 'SAASP') {
       FormManager.readOnly('clientTier');
-      FormManager.setValue('clientTier', 'S');
+      FormManager.setValue('clientTier', 'Q');
       FormManager.readOnly('isuCd');
-      FormManager.setValue('isuCd', '32');
+      FormManager.setValue('isuCd', '34');
       if(scenarioChanged){
         FormManager.resetValidations('vat');
         FormManager.setValue('vatExempt', 'Y');

@@ -79,11 +79,6 @@ public class LegacySearchController extends BaseController {
 
     if (user == null) {
       map.put("ERROR", ERROR_MSG);
-    } else {
-      if (!user.isAdmin() && !user.isCmde()) {
-        map.put("ERROR", ERROR_MSG);
-      } else {
-      }
     }
 
     ModelAndView mv = new ModelAndView("legacysearch", "model", new LegacySearchModel());
@@ -152,11 +147,6 @@ public class LegacySearchController extends BaseController {
 
     if (user == null) {
       map.put("ERROR", ERROR_MSG);
-    } else {
-      if (!user.isAdmin() && !user.isCmde()) {
-        map.put("ERROR", ERROR_MSG);
-      } else {
-      }
     }
 
     ModelAndView mv = new ModelAndView("searchhome");
@@ -180,11 +170,6 @@ public class LegacySearchController extends BaseController {
 
     if (user == null) {
       map.put("ERROR", ERROR_MSG);
-    } else {
-      if (!user.isAdmin() && !user.isCmde()) {
-        map.put("ERROR", ERROR_MSG);
-      } else {
-      }
     }
 
     ModelAndView mv = new ModelAndView("mqsearch");
@@ -224,7 +209,7 @@ public class LegacySearchController extends BaseController {
     if (user == null) {
       map.put("ERROR", ERROR_MSG);
     } else {
-      if (!user.isAdmin() && !user.isCmde()) {
+      if (!user.isAdmin() && !user.isCmde() && !user.isProcessor()) {
         map.put("ERROR", ERROR_MSG);
       } else {
       }

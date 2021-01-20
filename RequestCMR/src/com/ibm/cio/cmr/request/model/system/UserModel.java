@@ -37,6 +37,10 @@ public class UserModel extends BaseModel {
 
   private String comments;
 
+  private String role;
+
+  private String requesterFor;
+
   public String getUserId() {
     return userId;
   }
@@ -135,6 +139,22 @@ public class UserModel extends BaseModel {
 
   public void setUpdateTs(Date updateTs) {
     this.updateTs = updateTs;
+  }
+
+  public String getRole() {
+    return role;
+  }
+
+  public void setRole(String role) {
+    this.role = role;
+  }
+
+  public String getRequesterFor() {
+    return requesterFor;
+  }
+
+  public void setRequesterFor(String requesterFor) {
+    this.requesterFor = requesterFor;
   }
 
 }
