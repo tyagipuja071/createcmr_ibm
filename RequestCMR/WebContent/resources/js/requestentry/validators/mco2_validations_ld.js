@@ -1644,7 +1644,7 @@ function limitClientTierValues(value) {
   }
 
   var tierValues = null;
-  tierValues = [ '', 'C', 'S', 'T', 'N', 'V', 'A', '7' ]
+ // tierValues = [ '', 'C', 'S', 'T', 'N', 'V', 'A', '7' ]
 
   if (reqType == 'C') {
     if (value == '32') {
@@ -1653,6 +1653,8 @@ function limitClientTierValues(value) {
       tierValues = [ 'V', 'A' ];
     } else if (value == '21' || value == '8B') {
       tierValues = [ '7' ];
+    } else {
+      FormManager.resetDropdownValues(FormManager.getField('clientTier'));
     }
   }
 
