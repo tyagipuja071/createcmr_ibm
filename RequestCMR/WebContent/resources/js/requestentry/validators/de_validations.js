@@ -181,7 +181,11 @@ function setISUValues(value) {
   } else if (_custSubGrp == 'CROSS' && _pagemodel.userRole.toUpperCase() != "PROCESSOR") {
     FormManager.readOnly('isuCd');
   }
-
+  //CREATCMR-710 Comments fix
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  if (reqType == 'C' && role == 'REQUESTER' && (_custSubGrp == 'GOVMT' || _custSubGrp == 'PRIPE')) {
+    FormManager.readOnly('isuCd');
+  }
 }
 
 function limitClientTierValuesOnCreate() {
