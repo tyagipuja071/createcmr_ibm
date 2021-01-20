@@ -68,7 +68,9 @@ function afterConfigForNL() {
   setVatValidatorNL();
 
   var custSubScnrio = FormManager.getActualValue('custSubGrp');
-  if (custSubScnrio == 'PRICU' || custSubScnrio == 'PUBCU' || custSubScnrio == 'CBCOM' || custSubScnrio == 'CBBUS') {
+  var vatExemptChecked = dijit.byId('vatExempt').get('checked');
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+  if (custSubScnrio == 'PRICU' || custSubScnrio == 'PUBCU' || custSubScnrio == 'CBCOM' || custSubScnrio == 'CBBUS' || (custSubScnrio == 'INTER' && vatExemptChecked) || viewOnlyPage == 'true') {
     FormManager.removeValidator('taxCd2', Validators.REQUIRED);
   } else if (reqType != 'U') {
     FormManager.addValidator('taxCd2', Validators.REQUIRED, [ 'KVK' ], 'MAIN_CUST_TAB');
@@ -119,15 +121,22 @@ function setKVKValidatorNL() {
     return;
   }
   var custSubScnrio = FormManager.getActualValue('custSubGrp');
-  if (custSubScnrio == 'PRICU' && dijit.byId('vatExempt').get('checked')) {
-    FormManager.removeValidator('taxCd2', Validators.REQUIRED);
-  }
-  if (custSubScnrio == 'PRICU' && !dijit.byId('vatExempt').get('checked')) {
-    FormManager.addValidator('taxCd2', Validators.REQUIRED, [ 'KVK' ], 'MAIN_CUST_TAB');
+  var vatExemptChecked = dijit.byId('vatExempt').get('checked');
+  if (custSubScnrio == 'INTER') {
+    if (vatExemptChecked) {
+      FormManager.removeValidator('taxCd2', Validators.REQUIRED);
+    } else {
+      FormManager.addValidator('taxCd2', Validators.REQUIRED, [ 'KVK' ], 'MAIN_CUST_TAB');
+    }
   }
 }
 
 function setDeptartmentNumber() {
+
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnlyPage == 'true') {
+    return;
+  }
   var reqType = FormManager.getActualValue('reqType');
   var custSubScnrio = FormManager.getActualValue('custSubGrp');
   var cmrNo = FormManager.getActualValue('cmrNo');
