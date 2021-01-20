@@ -119,11 +119,13 @@ function setKVKValidatorNL() {
     return;
   }
   var custSubScnrio = FormManager.getActualValue('custSubGrp');
-  if (custSubScnrio == 'PRICU' && dijit.byId('vatExempt').get('checked')) {
-    FormManager.removeValidator('taxCd2', Validators.REQUIRED);
-  }
-  if (custSubScnrio == 'PRICU' && !dijit.byId('vatExempt').get('checked')) {
-    FormManager.addValidator('taxCd2', Validators.REQUIRED, [ 'KVK' ], 'MAIN_CUST_TAB');
+  var vatExemptChecked = dijit.byId('vatExempt').get('checked');
+  if (custSubScnrio == 'INTER') {
+    if (vatExemptChecked) {
+      FormManager.removeValidator('taxCd2', Validators.REQUIRED);
+    } else {
+      FormManager.addValidator('taxCd2', Validators.REQUIRED, [ 'KVK' ], 'MAIN_CUST_TAB');
+    }
   }
 }
 
