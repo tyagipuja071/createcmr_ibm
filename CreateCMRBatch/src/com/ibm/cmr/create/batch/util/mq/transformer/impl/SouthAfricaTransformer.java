@@ -763,4 +763,11 @@ public class SouthAfricaTransformer extends MCOTransformer {
     return true;
   }
 
+  @Override
+  public boolean skipLegacyAddressData(EntityManager entityManager, CMRRequestContainer cmrObjects, Addr currAddr, boolean flag) {
+    if ("PG01".equals(currAddr.getId().getAddrType())) {
+      return true;
+    }
+    return false;
+  }
 }
