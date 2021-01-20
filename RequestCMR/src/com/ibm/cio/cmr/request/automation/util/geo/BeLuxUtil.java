@@ -33,8 +33,8 @@ public class BeLuxUtil extends AutomationUtil {
   public static final String SCENARIO_LOCAL_COMMERCIAL_LU = "LUCOM";
   public static final String SCENARIO_INTERNAL_LU = "LUINT";
   public static final String SCENARIO_INTERNAL_SO_LU = "LUISO";
-  public static final String SCENARIO_THIRD_PARTY_LU = "LUBUS";
-  public static final String SCENARIO_BP_LOCAL_LU = "LU3PA";
+  public static final String SCENARIO_THIRD_PARTY_LU = "LU3PA";
+  public static final String SCENARIO_BP_LOCAL_LU = "LUBUS";
 
   @Override
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
