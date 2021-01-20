@@ -3230,10 +3230,18 @@ function setClientTierAndISR(value) {
     // FormManager.setValue('clientTier', '');
   }
   tierValues = null;
+  enterpriseLov = null;
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE) {
     if (reqType == 'C') {
+      enterpriseLov = [];
       if (value == '34') {
         tierValues = [ 'V', '6', 'A' ,'Q'];
+        if (clientTier == '6') {
+          enterpriseLov = [ '822836', '822835' ];
+        }
+        if (clientTier == 'Q') {
+          enterpriseLov = [ '822806', '822830' ];
+        }
       } else if (value == '32') {
         tierValues = [ 'N', 'S' ];
       } else if (value == '21') {
@@ -3265,6 +3273,16 @@ function setClientTierAndISR(value) {
   } else {
     FormManager.resetDropdownValues(FormManager.getField('clientTier'));
   }
+
+  if (enterpriseLov != null) {
+    FormManager.limitDropdownValues(FormManager.getField('enterprise'), enterpriseLov);
+    if (enterpriseLov.length == 1) {
+      FormManager.setValue('enterprise', enterpriseLov[0]);
+    }
+  } else {
+    FormManager.resetDropdownValues(FormManager.getField('enterprise'));
+  }
+
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE
       && (FormManager.getActualValue('custSubGrp') != 'COMME' || FormManager.getActualValue('custSubGrp') != 'CROSS' || FormManager.getActualValue('custSubGrp') != 'GOVRN' || FormManager
           .getActualValue('custSubGrp') != 'PRICU')) {
@@ -3288,10 +3306,31 @@ function setClientTierForCreates(value) {
   if (!value) {
     value = FormManager.getActualValue('clientTier');
   }
+  enterpriseLov = null;
+  if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE) {
+    if (reqType == 'C') {
+      enterpriseLov = [];
+    }
+    if (isuCd == '34') {
+      if (value == '6') {
+        enterpriseLov = [ '822836', '822835' ];
+      }
+      if (value == 'Q') {
+        enterpriseLov = [ '822806', '822830' ];
+      }
+    } 
+  }
 
   if (reqType == 'C') {
+    enterpriseLov = [];
     if (isuCd == '34') {
       tierValues = [ 'V', '6', 'A' ,'Q'];
+      if (clientTiers == '6') {
+        enterpriseLov = [ '822836', '822835' ];
+      }
+      if (clientTiers == 'Q') {
+        enterpriseLov = [ '822806', '822830' ];
+      }
     } else if (isuCd == '32') {
       tierValues = [ 'N', 'S' ];
     } else if (isuCd == '21') {
@@ -3305,6 +3344,15 @@ function setClientTierForCreates(value) {
     }
   } else {
     FormManager.resetDropdownValues(FormManager.getField('clientTier'));
+  }
+
+  if (enterpriseLov != null) {
+    FormManager.limitDropdownValues(FormManager.getField('enterprise'), enterpriseLov);
+    if (enterpriseLov.length == 1) {
+      FormManager.setValue('enterprise', enterpriseLov[0]);
+    }
+  } else {
+    FormManager.resetDropdownValues(FormManager.getField('enterprise'));
   }
 }
 
@@ -3552,14 +3600,20 @@ function setISRValues() {
   }
 }
 
+var _oldEnterpriseValue = '';
 function setEnterprise(value) {
   var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
   var isu = FormManager.getActualValue('isuCd');
   var ctc = FormManager.getActualValue('clientTier');
   var repTeam = FormManager.getActualValue('repTeamMemberNo');
+  var valueChanged = false;
   var shouldSetEnterprise = false;
-  
-  if (_subindustryChanged || _isScenarioChanged) {
+
+  if (cmr.currentTab == 'IBM_REQ_TAB') {
+    valueChanged = _oldEnterpriseValue != value;
+  }
+
+  if (_subindustryChanged || valueChanged || _isScenarioChanged) {
     shouldSetEnterprise = true;
   }
 
@@ -3590,10 +3644,13 @@ function setEnterprise(value) {
       } else if (getImportedIndcForGreece() == 'Y' && FormManager.getActualValue('reqType') == 'C'
           && (FormManager.getActualValue('custSubGrp') == 'COMME' || FormManager.getActualValue('custSubGrp') == 'GOVRN' || FormManager.getActualValue('custSubGrp') == 'CROSS')) {
         // DO NOTHING -- Don't overwrite imported value
+      } else {
+        FormManager.setValue('enterprise', '');
       }
       _subindustryChanged = false;
       FormManager.readOnly('subIndustryCd');
     }
+    _oldEnterpriseValue = value;
   }
 
   if (cmrCntry == SysLoc.CYPRUS) {
