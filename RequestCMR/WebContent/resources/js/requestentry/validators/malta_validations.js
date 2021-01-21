@@ -388,10 +388,6 @@ function streetAvenueValidator() {
         if (addrPlain != null && addrPlain.length > 0) {
           FormManager.setValue('addrTxt', addrPlain.trim() + ' Avenue');
         }
-      } else if (isOthers) {
-        if (addrPlain != null && addrPlain.length > 0) {
-          FormManager.setValue('addrTxt', addrPlain.trim() + ' Street');
-        }
       }
     }
   });
