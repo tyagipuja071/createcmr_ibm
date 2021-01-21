@@ -167,7 +167,7 @@ public class BeLuxUtil extends AutomationUtil {
         engineData.addRejectionComment("OTH", "Install-at address should be present for Internal SO Scenario.", "", "");
         return false;
       }
-
+      break;
     case SCENARIO_PRIVATE_CUSTOMER:
     case SCENARIO_PRIVATE_CUSTOMER_LU:
       return doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details, false, requestData);
