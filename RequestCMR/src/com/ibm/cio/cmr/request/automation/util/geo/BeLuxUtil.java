@@ -189,19 +189,6 @@ public class BeLuxUtil extends AutomationUtil {
   }
 
   @Override
-  public String getAddressTypeForGbgCovCalcs(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData) throws Exception {
-    Data data = requestData.getData();
-    String scenario = data.getCustSubGrp();
-    String address = "ZS01";
-
-    LOG.debug("Address for the scenario to check: " + scenario);
-    if (SCENARIO_INTERNAL_SO.equals(scenario) || SCENARIO_INTERNAL_SO_LU.equals(scenario)) {
-      address = "ZI01";
-    }
-    return address;
-  }
-
-  @Override
   public boolean performCountrySpecificCoverageCalculations(CalculateCoverageElement covElement, EntityManager entityManager,
       AutomationResult<OverrideOutput> results, StringBuilder details, OverrideOutput overrides, RequestData requestData,
       AutomationEngineData engineData, String covFrom, CoverageContainer container, boolean isCoverageCalculated) throws Exception {
