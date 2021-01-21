@@ -216,12 +216,13 @@ public class FranceUtil extends AutomationUtil {
             "Requests for " + scenarioDesc + " cannot be processed automatically. Manual processing would be required.");
       }
       if ((SCENARIO_HOSTING.equals(scenario) || SCENARIO_CROSSBORDER_HOSTING.equals(scenario) || SCENARIO_THIRD_PARTY.equals(scenario)
-          || SCENARIO_CROSSBORDER_THIRD_PARTY.equals(scenario)) && compareCustomerNames(zs01, zi01)) {
+          || SCENARIO_CROSSBORDER_THIRD_PARTY.equals(scenario)) && (zi01 != null) && compareCustomerNames(zs01, zi01)) {
         details.append("Customer Names on Sold-to and Install-at address should be different for Third Party and Hosting Scenario").append("\n");
         engineData.addRejectionComment("OTH",
             "Customer Names on Sold-to and Install-at address should be different for Third Party and Hosting Scenario", "", "");
         return false;
-      } else if ((SCENARIO_COMMERCIAL.equals(scenario) || SCENARIO_CROSSBORDER_COMMERCIAL.equals(scenario)) && !compareCustomerNames(zs01, zi01)) {
+      } else if ((SCENARIO_COMMERCIAL.equals(scenario) || SCENARIO_CROSSBORDER_COMMERCIAL.equals(scenario)) && (zi01 != null)
+          && !compareCustomerNames(zs01, zi01)) {
         details.append("Sold-to and Installing name are not identical. Request will require CMDE review before proceeding.").append("\n");
         engineData.addNegativeCheckStatus("SOLDTO_INSTALL_DIFF", "Sold-to and Installing addresses are not identical.");
       }
