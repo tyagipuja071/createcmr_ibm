@@ -203,7 +203,10 @@ public class FranceUtil extends AutomationUtil {
     Addr zs01 = requestData.getAddress("ZS01");
     String customerName = getCustomerFullName(zs01);
     Addr zi01 = requestData.getAddress("ZI01");
-
+    if (zs01 != null) {
+      // remove duplicate address
+      removeDuplicateAddresses(entityManager, requestData, details);
+    }
     String scenario = data.getCustSubGrp();
     if (StringUtils.isNotBlank(scenario)) {
       String scenarioDesc = getScenarioDescription(entityManager, data);
@@ -227,8 +230,7 @@ public class FranceUtil extends AutomationUtil {
       case SCENARIO_PRIVATE_PERSON:
       case SCENARIO_CROSSBORDER_IBM_EMPLOYEE:
       case SCENARIO_IBM_EMPLOYEE:
-        return doPrivatePersonChecks(engineData, SystemLocation.FRANCE, zs01.getLandCntry(), customerName, details,
-            false, requestData);
+        return doPrivatePersonChecks(engineData, SystemLocation.FRANCE, zs01.getLandCntry(), customerName, details, false, requestData);
 
       case SCENARIO_INTERNAL:
       case SCENARIO_CROSSBORDER_INTERNAL:
@@ -242,13 +244,6 @@ public class FranceUtil extends AutomationUtil {
               return false;
             }
           }
-        }
-        break;
-      case SCENARIO_COMMERCIAL:
-      case SCENARIO_CROSSBORDER_COMMERCIAL:
-        if (zs01 != null) {
-          // remove duplicate address
-          removeDuplicateAddresses(entityManager, requestData, details);
         }
         break;
       case SCENARIO_BUSINESS_PARTNER:
