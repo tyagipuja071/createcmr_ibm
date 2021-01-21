@@ -388,10 +388,6 @@ function streetAvenueValidator() {
         if (addrPlain != null && addrPlain.length > 0) {
           FormManager.setValue('addrTxt', addrPlain.trim() + ' Avenue');
         }
-      } else if (isOthers) {
-        if (addrPlain != null && addrPlain.length > 0) {
-          FormManager.setValue('addrTxt', addrPlain.trim() + ' Street');
-        }
       }
     }
   });
@@ -600,7 +596,7 @@ function enterpriseValidation() {
         if (enterprise.length >= 1 && enterprise.length != 6) {
           return new ValidationResult(null, false, 'Enterprise Number should be 6 digit long.');
         }
-        if (enterprise.length > 1 && !enterprise.match(numPattern)) {
+        if (enterprise.length > 1 && !enterprise.match(numPattern) && (reqType != 'C')) {
           return new ValidationResult({
             id : 'enterprise',
             type : 'text',
