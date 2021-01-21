@@ -63,7 +63,7 @@ function afterConfigForBELUX() {
   }
 
   // collectionCd
-  if (custSubGrp == 'LUCOM' || custSubGrp == 'LUBUS' || custSubGrp == 'LUPUB' || custSubGrp == 'LU3PA' || custSubGrp == 'CBCOM' || custSubGrp == 'CBBUS') {
+  if (custSubGrp == 'LUCOM' || custSubGrp == 'LUBUS' || custSubGrp == 'LUPUB' || custSubGrp == 'LU3PA' || custSubGrp == 'LUDAT' || custSubGrp == 'CBCOM' || custSubGrp == 'CBBUS') {
     if (role == 'Requester') {
       FormManager.readOnly('collectionCd');
     } else if (role == 'Processor') {
@@ -79,7 +79,6 @@ function afterConfigForBELUX() {
   // ppsceid
   if (role == 'Requester') {
     if (custSubGrpLst3 == 'BUS') {
-      console.log("test");
       FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
     }
   } else {
@@ -583,9 +582,6 @@ function setVatValidatorBELUX() {
   if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
     if (custSubGrp == 'BEPRI' || custSubGrp == 'LUPRI') {
       // FormManager.removeValidator('vat', Validators.REQUIRED);
-      return;
-    } else if (custSubGrp == 'BEINT' || custSubGrp == 'LUINT' || custSubGrp == 'BE3PA') {
-      FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
       return;
     } else if (custSubGrp == 'BEPUB' || custSubGrp == 'LUPUB') {
       FormManager.removeValidator('vat', Validators.REQUIRED);
