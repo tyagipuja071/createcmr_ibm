@@ -4532,7 +4532,7 @@ function afterConfigForIT() {
 
   if (_ISUHandlerIT == null) {
     _ISUHandlerIT = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
-      setClientTierValuesIT(value);
+      // setClientTierValuesIT(value);
       setSalesRepValuesIT(value);
       setAffiliateEnterpriseRequired();
       blankedOutCollectionCD();
@@ -5161,46 +5161,46 @@ function autoSetSBOSROnPostalCode(clientTier, currPostCd) {
         && (custSubType == 'COMME' || custSubType == '3PAIT' || custSubType == 'NGOIT' || custSubType == 'GOVST' || custSubType == 'LOCEN' || custSubType == 'PRICU' || custSubType == 'UNIVE'
             || custSubType == 'CROCM' || custSubType == 'CRO3P' || custSubType == 'CROLC' || custSubType == 'CROUN' || custSubType == 'CROGO' || custSubType == 'CROPR')) {
       if (postCode >= 00 && postCode <= 04) {
-        FormManager.setValue('repTeamMemberNo', '09NCMM');
+        // FormManager.setValue('repTeamMemberNo', '09NCMM');
         FormManager.setValue('salesBusOffCd', 'NC');
       } else if (postCode == 05 || postCode == 06) {
-        FormManager.setValue('repTeamMemberNo', '09NAMM');
+        // FormManager.setValue('repTeamMemberNo', '09NAMM');
         FormManager.setValue('salesBusOffCd', 'NA');
       } else if (postCode == 10 || postCode == 11 || postCode == 28) {
-        FormManager.setValue('repTeamMemberNo', '09NBMM');
+        // FormManager.setValue('repTeamMemberNo', '09NBMM');
         FormManager.setValue('salesBusOffCd', 'NB');
       } else if (postCode > 11 && postCode <= 19) {
-        FormManager.setValue('repTeamMemberNo', '09GEMM');
+        // FormManager.setValue('repTeamMemberNo', '09GEMM');
         FormManager.setValue('salesBusOffCd', 'GE');
       } else if ((postCode >= 21 && postCode <= 24) || postCode == 27) {
-        FormManager.setValue('repTeamMemberNo', '09NLMM');
+        // FormManager.setValue('repTeamMemberNo', '09NLMM');
         FormManager.setValue('salesBusOffCd', 'NL');
       } else if (postCode == 23 || postCode == 25 || postCode == 26) {
-        FormManager.setValue('repTeamMemberNo', '09GJMM');
+        // FormManager.setValue('repTeamMemberNo', '09GJMM');
         FormManager.setValue('salesBusOffCd', 'GJ');
       } else if (postCode == 20) {
-        FormManager.setValue('repTeamMemberNo', '09GHMM');
+        // FormManager.setValue('repTeamMemberNo', '09GHMM');
         FormManager.setValue('salesBusOffCd', 'GH');
       } else if ((postCode >= 30 && postCode <= 35) || postCode == 45) {
-        FormManager.setValue('repTeamMemberNo', '09NFMM');
+        // FormManager.setValue('repTeamMemberNo', '09NFMM');
         FormManager.setValue('salesBusOffCd', 'NF');
       } else if ((postCode >= 36 && postCode <= 39) || postCode == 46) {
-        FormManager.setValue('repTeamMemberNo', '09GKMM');
+        // FormManager.setValue('repTeamMemberNo', '09GKMM');
         FormManager.setValue('salesBusOffCd', 'GK');
       } else if ((postCode >= 40 && postCode <= 44) || postCode == 29 || postCode == 47 || postCode == 48) {
-        FormManager.setValue('repTeamMemberNo', '09NIMM');
+        // FormManager.setValue('repTeamMemberNo', '09NIMM');
         FormManager.setValue('salesBusOffCd', 'NI');
       } else if ((postCode >= 50 && postCode <= 59)) {
-        FormManager.setValue('repTeamMemberNo', '09RPMM');
+        // FormManager.setValue('repTeamMemberNo', '09RPMM');
         FormManager.setValue('salesBusOffCd', 'RP');
       } else if ((postCode == 60 || postCode == 61 || postCode >= 62 && postCode <= 67) || (postCode >= 70 && postCode <= 76) || (postCode >= 85 && postCode <= 89) || (postCode >= 7 && postCode <= 9)) {
-        FormManager.setValue('repTeamMemberNo', '09CPMM');
+        // FormManager.setValue('repTeamMemberNo', '09CPMM');
         FormManager.setValue('salesBusOffCd', 'CP');
       } else if (postCode >= 80 && postCode <= 84) {
-        FormManager.setValue('repTeamMemberNo', '09NGMM');
+        // FormManager.setValue('repTeamMemberNo', '09NGMM');
         FormManager.setValue('salesBusOffCd', 'NG');
       } else if (postCode >= 90 && postCode <= 98) {
-        FormManager.setValue('repTeamMemberNo', '09NMMM');
+        // FormManager.setValue('repTeamMemberNo', '09NMMM');
         FormManager.setValue('salesBusOffCd', 'NM');
       }
     }
@@ -8029,39 +8029,23 @@ function addEmbargoCodeValidatorIT() {
 /**
  * Set Client Tier Value
  */
-function setClientTierValuesIT(isuCd) {
-
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-
-  if (FormManager.getActualValue('reqType') != 'C') {
-    return;
-  }
-
-  isuCd = FormManager.getActualValue('isuCd');
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var clientTiers = [];
-  if (isuCd != '') {
-    var qParams = {
-      _qall : 'Y',
-      ISSUING_CNTRY : cntry,
-      ISU : '%' + isuCd + '%'
-    };
-    var results = cmr.query('GET.CTCLIST.BYISU', qParams);
-    if (results != null) {
-      for (var i = 0; i < results.length; i++) {
-        clientTiers.push(results[i].ret1);
-      }
-      if (clientTiers != null) {
-        FormManager.limitDropdownValues(FormManager.getField('clientTier'), clientTiers);
-        if (clientTiers.length == 1) {
-          FormManager.setValue('clientTier', clientTiers[0]);
-        }
-      }
-    }
-  }
-}
+/*
+ * function setClientTierValuesIT(isuCd) {
+ * 
+ * if (FormManager.getActualValue('viewOnlyPage') == 'true') { return; }
+ * 
+ * if (FormManager.getActualValue('reqType') != 'C') { return; }
+ * 
+ * isuCd = FormManager.getActualValue('isuCd'); var cntry =
+ * FormManager.getActualValue('cmrIssuingCntry'); var clientTiers = []; if
+ * (isuCd != '') { var qParams = { _qall : 'Y', ISSUING_CNTRY : cntry, ISU : '%' +
+ * isuCd + '%' }; var results = cmr.query('GET.CTCLIST.BYISU', qParams); if
+ * (results != null) { for (var i = 0; i < results.length; i++) {
+ * clientTiers.push(results[i].ret1); } if (clientTiers != null) {
+ * FormManager.limitDropdownValues(FormManager.getField('clientTier'),
+ * clientTiers); if (clientTiers.length == 1) {
+ * FormManager.setValue('clientTier', clientTiers[0]); } } } } }
+ */
 
 function validateExistingCMRNo() {
   FormManager.addFormValidator((function() {
@@ -8223,7 +8207,7 @@ function addAfterTemplateLoadItaly(fromAddress, scenario, scenarioChanged) {
   typeOfCustomer();
   setSpecialTaxCodeOnScenarioIT();
   enableDisableTaxCodeCollectionCdIT();
-  setClientTierValuesIT();
+  // setClientTierValuesIT();
   addAfterTemplateLoadIT();
   setSalesRepValuesIT();
   blankedOutCollectionCD();
