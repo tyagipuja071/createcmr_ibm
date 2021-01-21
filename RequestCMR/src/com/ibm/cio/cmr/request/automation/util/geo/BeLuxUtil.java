@@ -228,8 +228,7 @@ public class BeLuxUtil extends AutomationUtil {
         }
         results.setResults("Calculated");
         results.setDetails(details.toString());
-      } else if (StringUtils.isNotBlank(data.getSearchTerm()) && StringUtils.isNotBlank(data.getSalesBusOffCd())
-          && StringUtils.isNotBlank(data.getEnterprise())) {
+      } else if (StringUtils.isNotBlank(data.getSearchTerm()) && StringUtils.isNotBlank(data.getSalesBusOffCd())) {
         details.append("Coverage could not be calculated using 32S logic. Using values from request").append("\n");
         details.append("Sales Rep : " + data.getRepTeamMemberNo()).append("\n");
         details.append("SBO : " + data.getSalesBusOffCd()).append("\n");
