@@ -1676,6 +1676,11 @@ public class GreeceHandler extends BaseSOFHandler {
     } // End of Story 1389065
 
     if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && SystemLocation.GREECE.equalsIgnoreCase(data.getCmrIssuingCntry())) {
+      String abbrNm = mainRecord.getCmrShortName() != null ? mainRecord.getCmrShortName() : "";
+      if (abbrNm.length() > 22) {
+        abbrNm = abbrNm.substring(0, 22);
+      }
+      data.setAbbrevNm(abbrNm);
       data.setMemLvl(mainRecord.getCmrMembLevel());
       data.setBpRelType(mainRecord.getCmrBPRelType());
       data.setEnterprise(mainRecord.getCmrEnterpriseNumber());
