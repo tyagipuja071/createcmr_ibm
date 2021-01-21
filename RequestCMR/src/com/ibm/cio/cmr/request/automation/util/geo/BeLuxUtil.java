@@ -1,5 +1,6 @@
 package com.ibm.cio.cmr.request.automation.util.geo;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -10,18 +11,21 @@ import org.apache.log4j.Logger;
 import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
+import com.ibm.cio.cmr.request.automation.impl.gbl.CalculateCoverageElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
+import com.ibm.cio.cmr.request.automation.util.CoverageContainer;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
-import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
 
 public class BeLuxUtil extends AutomationUtil {
 
@@ -35,6 +39,8 @@ public class BeLuxUtil extends AutomationUtil {
   public static final String SCENARIO_THIRD_PARTY = "BE3PA";
   public static final String SCENARIO_INTERNAL = "BEINT";
   public static final String SCENARIO_INTERNAL_SO = "BEISO";
+  public static final String SCENARIO_DATA_CENTER = "BEDAT";
+
   // Lux
   public static final String SCENARIO_CROSS_LU = "LUCRO";
   public static final String SCENARIO_LOCAL_PUBLIC_LU = "LUPUB";
@@ -44,70 +50,69 @@ public class BeLuxUtil extends AutomationUtil {
   public static final String SCENARIO_INTERNAL_SO_LU = "LUISO";
   public static final String SCENARIO_THIRD_PARTY_LU = "LU3PA";
   public static final String SCENARIO_BP_LOCAL_LU = "LUBUS";
+  public static final String SCENARIO_DATA_CENTER_LU = "LUDAT";
 
   @Override
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {
-	  Admin admin = requestData.getAdmin();
-	    Data data = requestData.getData();
-	    String scenario = data.getCustSubGrp();
-	    if (!"C".equals(admin.getReqType())) {
-	      details.append("Field Computation skipped for Updates.");
-	      results.setResults("Skipped");
-	      results.setDetails(details.toString());
-	      return results;
-	    }
-	    if (SCENARIO_INTERNAL_SO.equals(scenario) || SCENARIO_INTERNAL_SO_LU.equals(scenario)) {
-	      Addr zi01 = requestData.getAddress("ZI01");
-	      boolean highQualityMatchExists = false;
-	      List<DnBMatchingResponse> response = getMatches(requestData, engineData, zi01, false);
-	      if (response != null && response.size() > 0) {
-	        for (DnBMatchingResponse dnbRecord : response) {
-	          boolean closelyMatches = DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), zi01, admin, dnbRecord);
-	          if (closelyMatches) {
-	            engineData.put("ZI01_DNB_MATCH", dnbRecord);
-	            highQualityMatchExists = true;
-	            details.append("High Quality DnB Match found for Installing address.\n");
-	            details.append(" - Confidence Code:  " + dnbRecord.getConfidenceCode() + " \n");
-	            details.append(" - DUNS No.:  " + dnbRecord.getDunsNo() + " \n");
-	            details.append(" - Name:  " + dnbRecord.getDnbName() + " \n");
-	            details.append(" - Address:  " + dnbRecord.getDnbStreetLine1() + " " + dnbRecord.getDnbCity() + " " + dnbRecord.getDnbPostalCode() + " "
-	                + dnbRecord.getDnbCountry() + "\n\n");
-	            details.append("Overriding ISIC and Sub Industry Code using DnB Match retrieved.\n");
-	            LOG.debug("Connecting to D&B details service..");
-	            DnBCompany dnbData = DnBUtil.getDnBDetails(dnbRecord.getDunsNo());
-	            if (dnbData != null) {
-	              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISIC_CD", data.getIsicCd(), dnbData.getIbmIsic());
-	              details.append("ISIC =  " + dnbData.getIbmIsic() + " (" + dnbData.getIbmIsicDesc() + ")").append("\n");
-	              String subInd = RequestUtils.getSubIndustryCd(entityManager, dnbData.getIbmIsic(), data.getCmrIssuingCntry());
-	              if (subInd != null) {
-	                overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), subInd);
-	                details.append("Subindustry Code  =  " + subInd).append("\n");
-	              }
-	            }
-	            results.setResults("Calculated.");
-	            results.setProcessOutput(overrides);
-	            break;
-	          }
-	        }
-	      }
-	      if (!highQualityMatchExists && "C".equals(admin.getReqType())) {
-	        LOG.debug("No High Quality DnB Match found for Installing address.");
-	        details.append("No High Quality DnB Match found for Installing address. Request will require CMDE review before proceeding.").append("\n");
-	        engineData.addNegativeCheckStatus("NOMATCHFOUND",
-	            "No High Quality DnB Match found for Installing address. Request cannot be processed automatically.");
-	      }
-	    } else {
-	      details.append("No specific fields to calculate.");
-	      results.setResults("Skipped.");
-	      results.setProcessOutput(overrides);
-	    }
-	    results.setDetails(details.toString());
-	    LOG.debug(results.getDetails());
-	    return results;
-	  }
-
-	 
+    Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
+    String scenario = data.getCustSubGrp();
+    if (!"C".equals(admin.getReqType())) {
+      details.append("Field Computation skipped for Updates.");
+      results.setResults("Skipped");
+      results.setDetails(details.toString());
+      return results;
+    }
+    if (SCENARIO_INTERNAL_SO.equals(scenario) || SCENARIO_INTERNAL_SO_LU.equals(scenario)) {
+      Addr zi01 = requestData.getAddress("ZI01");
+      boolean highQualityMatchExists = false;
+      List<DnBMatchingResponse> response = getMatches(requestData, engineData, zi01, false);
+      if (response != null && response.size() > 0) {
+        for (DnBMatchingResponse dnbRecord : response) {
+          boolean closelyMatches = DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), zi01, admin, dnbRecord);
+          if (closelyMatches) {
+            engineData.put("ZI01_DNB_MATCH", dnbRecord);
+            highQualityMatchExists = true;
+            details.append("High Quality DnB Match found for Installing address.\n");
+            details.append(" - Confidence Code:  " + dnbRecord.getConfidenceCode() + " \n");
+            details.append(" - DUNS No.:  " + dnbRecord.getDunsNo() + " \n");
+            details.append(" - Name:  " + dnbRecord.getDnbName() + " \n");
+            details.append(" - Address:  " + dnbRecord.getDnbStreetLine1() + " " + dnbRecord.getDnbCity() + " " + dnbRecord.getDnbPostalCode() + " "
+                + dnbRecord.getDnbCountry() + "\n\n");
+            details.append("Overriding ISIC and Sub Industry Code using DnB Match retrieved.\n");
+            LOG.debug("Connecting to D&B details service..");
+            DnBCompany dnbData = DnBUtil.getDnBDetails(dnbRecord.getDunsNo());
+            if (dnbData != null) {
+              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISIC_CD", data.getIsicCd(), dnbData.getIbmIsic());
+              details.append("ISIC =  " + dnbData.getIbmIsic() + " (" + dnbData.getIbmIsicDesc() + ")").append("\n");
+              String subInd = RequestUtils.getSubIndustryCd(entityManager, dnbData.getIbmIsic(), data.getCmrIssuingCntry());
+              if (subInd != null) {
+                overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), subInd);
+                details.append("Subindustry Code  =  " + subInd).append("\n");
+              }
+            }
+            results.setResults("Calculated.");
+            results.setProcessOutput(overrides);
+            break;
+          }
+        }
+      }
+      if (!highQualityMatchExists && "C".equals(admin.getReqType())) {
+        LOG.debug("No High Quality DnB Match found for Installing address.");
+        details.append("No High Quality DnB Match found for Installing address. Request will require CMDE review before proceeding.").append("\n");
+        engineData.addNegativeCheckStatus("NOMATCHFOUND",
+            "No High Quality DnB Match found for Installing address. Request cannot be processed automatically.");
+      }
+    } else {
+      details.append("No specific fields to calculate.");
+      results.setResults("Skipped.");
+      results.setProcessOutput(overrides);
+    }
+    results.setDetails(details.toString());
+    LOG.debug(results.getDetails());
+    return results;
+  }
 
   @Override
   public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
@@ -158,7 +163,7 @@ public class BeLuxUtil extends AutomationUtil {
     case SCENARIO_BP_CROSS:
     case SCENARIO_BP_LOCAL_LU:
       return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
-    
+
     case SCENARIO_INTERNAL_SO:
     case SCENARIO_INTERNAL_SO_LU:
       if (zi01 == null) {
@@ -166,13 +171,15 @@ public class BeLuxUtil extends AutomationUtil {
         engineData.addRejectionComment("OTH", "Install-at address should be present for Internal SO Scenario.", "", "");
         return false;
       }
-      
+      break;
     case SCENARIO_PRIVATE_CUSTOMER:
     case SCENARIO_PRIVATE_CUSTOMER_LU:
       return doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details, false, requestData);
 
     case SCENARIO_THIRD_PARTY:
     case SCENARIO_THIRD_PARTY_LU:
+    case SCENARIO_DATA_CENTER:
+    case SCENARIO_DATA_CENTER_LU:
       details.append("Processor Review will be required for Third Party Scenario/Data Center.\n");
       engineData.addNegativeCheckStatus("Scenario_Validation", "3rd Party/Data Center request will require CMDE review before proceeding.\n");
       break;
@@ -180,4 +187,108 @@ public class BeLuxUtil extends AutomationUtil {
 
     return true;
   }
+
+  @Override
+  public boolean performCountrySpecificCoverageCalculations(CalculateCoverageElement covElement, EntityManager entityManager,
+      AutomationResult<OverrideOutput> results, StringBuilder details, OverrideOutput overrides, RequestData requestData,
+      AutomationEngineData engineData, String covFrom, CoverageContainer container, boolean isCoverageCalculated) throws Exception {
+
+    if (!"C".equals(requestData.getAdmin().getReqType())) {
+      details.append("Coverage Calculation skipped for Updates.");
+      results.setResults("Skipped");
+      results.setDetails(details.toString());
+      return true;
+    }
+
+    Data data = requestData.getData();
+    String coverageId = container.getFinalCoverage();
+
+    if (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && CalculateCoverageElement.COV_BG.equals(covFrom)) {
+      engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
+    } else if (!isCoverageCalculated) {
+      // if not calculated using bg/gbg try calculation using 32/S logic
+      details.setLength(0);// clear string builder
+      overrides.clearOverrides(); // clear existing overrides
+
+      BeLuxFieldsContainer fields = calculate32SValuesFromIMSBeLux(entityManager, data.getCmrIssuingCntry(), data.getCountryUse(),
+          data.getSubIndustryCd(), data.getIsuCd(), data.getClientTier());
+      if (fields != null) {
+        details.append("Coverage calculated successfully using 32S logic.").append("\n");
+        details.append("Sales Rep : " + fields.getSalesRep()).append("\n");
+        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getSearchTerm(), fields.getSalesRep());
+        if (StringUtils.isNotBlank(fields.getSalesRep())) {
+          String sbo = "";
+          if (data.getCountryUse().equalsIgnoreCase("624")) {
+            sbo = "0" + fields.getSalesRep().substring(0, 2) + "0000";
+          } else if (data.getCountryUse().equalsIgnoreCase("624LU")) {
+            sbo = "0" + fields.getSalesRep().substring(0, 2) + "0001";
+          }
+          details.append("SBO : " + sbo).append("\n");
+          overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sbo);
+        }
+        results.setResults("Calculated");
+        results.setDetails(details.toString());
+      } else if (StringUtils.isNotBlank(data.getSearchTerm()) && StringUtils.isNotBlank(data.getSalesBusOffCd())) {
+        details.append("Coverage could not be calculated using 32S logic. Using values from request").append("\n");
+        details.append("Sales Rep : " + data.getRepTeamMemberNo()).append("\n");
+        details.append("SBO : " + data.getSalesBusOffCd()).append("\n");
+        results.setResults("Calculated");
+        results.setDetails(details.toString());
+      } else {
+        String msg = "Coverage cannot be calculated. No valid 32S mapping found from request data.";
+        details.append(msg);
+        results.setResults("Cannot Calculate");
+        results.setDetails(details.toString());
+        engineData.addNegativeCheckStatus("_beluxCoverage", msg);
+      }
+    }
+    return true;
+  }
+
+  private BeLuxFieldsContainer calculate32SValuesFromIMSBeLux(EntityManager entityManager, String cmrIssuingctry, String countryUse,
+      String subIndustryCd, String isuCd, String clientTier) {
+    BeLuxFieldsContainer container = new BeLuxFieldsContainer();
+    List<Object[]> salesRepRes = new ArrayList<>();
+    String isuCtc = (StringUtils.isNotBlank(isuCd) ? isuCd : "") + (StringUtils.isNotBlank(clientTier) ? clientTier : "");
+    String geoCd = countryUse.substring(3, 5);
+    String cmrCntry = cmrIssuingctry + geoCd;
+    if (StringUtils.isNotBlank(subIndustryCd) && ("32S".equals(isuCtc))) {
+      String ims = subIndustryCd.substring(0, 1);
+      String sql = ExternalizedQuery.getSql("QUERY.GET.SRLIST.BYISUCTC");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("ISU", "%" + isuCtc + "%");
+      query.setParameter("ISSUING_CNTRY", cmrCntry);
+      query.setParameter("CLIENT_TIER", "%" + ims + "%");
+      query.setForReadOnly(true);
+      salesRepRes = query.getResults();
+    } else {
+      String sql = ExternalizedQuery.getSql("QUERY.GET.SRLIST.BYISU");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("ISU", "%" + isuCtc + "%");
+      query.setParameter("ISSUING_CNTRY", cmrCntry);
+      salesRepRes = query.getResults();
+    }
+    if (salesRepRes != null && salesRepRes.size() == 1) {
+      String salesRep = (String) salesRepRes.get(0)[1];
+      container.setSalesRep(salesRep);
+      return container;
+    } else {
+      return null;
+    }
+
+  }
+
+  private class BeLuxFieldsContainer {
+    private String salesRep;
+
+    public String getSalesRep() {
+      return salesRep;
+    }
+
+    public void setSalesRep(String salesRep) {
+      this.salesRep = salesRep;
+    }
+
+  }
+
 }
