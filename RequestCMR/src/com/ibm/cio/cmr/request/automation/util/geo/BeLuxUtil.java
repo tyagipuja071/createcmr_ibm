@@ -107,15 +107,7 @@ public class BeLuxUtil extends AutomationUtil {
 	    return results;
 	  }
 
-	  @Override
-	  public GBGFinderRequest createRequest(Admin admin, Data data, Addr addr, Boolean isOrgIdMatchOnly) {
-	    GBGFinderRequest request = super.createRequest(admin, data, addr, isOrgIdMatchOnly);
-	    String scenarioType = data.getCustSubGrp();
-	    if (("C".equals(admin.getReqType())) && (SCENARIO_INTERNAL_SO.equals(scenarioType) || SCENARIO_INTERNAL_SO_LU.equals(scenarioType))) {
-	      request.setOrgId("");
-	    }
-	    return request;
-	  }
+	 
 
   @Override
   public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
