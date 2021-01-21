@@ -108,10 +108,6 @@ function setVatValidatorNL() {
 }
 
 function setKVKValidatorNL() {
-  var role = FormManager.getActualValue('userRole').toUpperCase();
-  if (role != 'REQUESTER') {
-    return;
-  }
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
   if (viewOnlyPage == 'true') {
     return;
