@@ -63,10 +63,6 @@ public class BeLuxUtil extends AutomationUtil {
       customerNameZP01 = StringUtils.isBlank(zp01.getCustNm1()) ? "" : zp01.getCustNm1();
       landedCountryZP01 = StringUtils.isBlank(zp01.getLandCntry()) ? "" : zp01.getLandCntry();
     }
-    if ("C".equals(requestData.getAdmin().getReqType())) {
-      // remove duplicates
-      removeDuplicateAddresses(entityManager, requestData, details);
-    }
 
     if ((SCENARIO_BP_LOCAL.equals(scenario) || SCENARIO_BP_CROSS.equals(scenario) || SCENARIO_BP_LOCAL_LU.equals(scenario)) && zp01 != null
         && (!StringUtils.equals(getCleanString(customerName), getCleanString(customerNameZP01))
