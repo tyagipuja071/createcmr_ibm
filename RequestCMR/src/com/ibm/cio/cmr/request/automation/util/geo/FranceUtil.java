@@ -248,7 +248,11 @@ public class FranceUtil extends AutomationUtil {
         }
         break;
       case SCENARIO_BUSINESS_PARTNER:
+        return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
+
       case SCENARIO_CROSSBORDER_BUSINESS_PARTNER:
+        engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
+        engineData.hasPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
         return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
       case SCENARIO_INTERNAL_SO:
       case SCENARIO_CROSSBORDER_INTERNAL_SO:
