@@ -50,7 +50,7 @@
 					<width>20</width>
 					<length>4</length>
 				</column>
-				<column>
+				<column exactLength="true">
 				    <label>Enterprise Number</label>
 				    <dbColumn>ENTERPRISE</dbColumn>
 				    <width>30</width>
