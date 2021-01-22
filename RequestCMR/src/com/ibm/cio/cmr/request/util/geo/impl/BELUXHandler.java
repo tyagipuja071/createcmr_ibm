@@ -130,13 +130,6 @@ public class BELUXHandler extends BaseSOFHandler {
           // map RDc - SOF - CreateCMR by sequence no
           for (FindCMRRecordModel record : source.getItems()) {
             seqNo = record.getCmrAddrSeq();
-
-            // if
-            // ((CmrConstants.ADDR_TYPE.ZD01.toString().equals(record.getCmrAddrTypeCode()))
-            // && (parvmCount > 1)) {
-            // record.setCmrAddrTypeCode("ZS02");
-            // }
-
             System.out.println("seqNo = " + seqNo);
             if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo)) {
               addrType = record.getCmrAddrTypeCode();
@@ -144,242 +137,37 @@ public class BELUXHandler extends BaseSOFHandler {
                 addr = cloneAddress(record, addrType);
                 addr.setCmrDept(record.getCmrCity2());
                 addr.setCmrName4(record.getCmrName4());
-                if (ME_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry())
-                    && (CmrConstants.ADDR_TYPE.ZD01.toString().equals(addr.getCmrAddrTypeCode())) && "598".equals(addr.getCmrAddrSeq())) {
-                  addr.setCmrAddrTypeCode("ZD02");
-                }
-                if (ME_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry())
-                    && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(addr.getCmrAddrTypeCode())) && "599".equals(addr.getCmrAddrSeq())) {
-                  addr.setCmrAddrTypeCode("ZP03");
-                }
+
                 if ((CmrConstants.ADDR_TYPE.ZD01.toString().equals(addr.getCmrAddrTypeCode()))) {
                   String stkzn = "";
                   stkzn = getStkznFromDataRdc(entityManager, addr.getCmrSapNumber(), SystemConfiguration.getValue("MANDT"));
                   int parvmCount = getCeeKnvpParvmCount(addr.getCmrSapNumber());
                   if ("0".equals(stkzn) || parvmCount > 0) {
-                    addr.setCmrAddrTypeCode("ZS02");
+                    addr.setCmrAddrTypeCode("ZI01");
                   }
                 }
                 converted.add(addr);
               }
-              if (CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode())) {
-                String kunnr = addr.getCmrSapNumber();
-                String adrnr = getaddAddressAdrnr(entityManager, cmrIssueCd, SystemConfiguration.getValue("MANDT"), kunnr, addr.getCmrAddrTypeCode(),
-                    addr.getCmrAddrSeq());
-                int maxintSeq = getMaxSequenceOnAddr(entityManager, SystemConfiguration.getValue("MANDT"), reqEntry.getCmrIssuingCntry(),
-                    record.getCmrNum());
-                int maxintSeqLegacy = getMaxSequenceOnLegacyAddr(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum());
-                String maxSeq = StringUtils.leftPad(String.valueOf(maxintSeqLegacy), 5, '0');
-                String legacyGaddrSeq = getGaddressSeqFromLegacy(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum());
-                String legacyzs01Seq = getZS01SeqFromLegacy(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum());
-                String legacyGaddrLN6 = getGaddressAddLN6FromLegacy(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum());
-                String gAddrSeq = "";
-                if (!StringUtils.isEmpty(legacyGaddrSeq) && !legacyzs01Seq.equals(legacyGaddrSeq)) {
-                  gAddrSeq = legacyGaddrSeq;
-                } else {
-                  gAddrSeq = maxSeq;
-                  maxintSeqLegacy++;
-                }
-                if (!StringUtils.isBlank(adrnr)) {
-                  Sadr sadr = getCEEAddtlAddr(entityManager, adrnr, SystemConfiguration.getValue("MANDT"));
-                  if (sadr != null) {
-                    LOG.debug("Adding installing to the records");
-                    FindCMRRecordModel installing = new FindCMRRecordModel();
-                    PropertyUtils.copyProperties(installing, mainRecord);
-                    installing.setCmrAddrTypeCode("ZP02");
-                    installing.setCmrAddrSeq(gAddrSeq);
-                    // installing.setParentCMRNo(mainRecord.getCmrNum());
-                    installing.setCmrName1Plain(sadr.getName1());
-                    installing.setCmrName2Plain(sadr.getName2());
-                    installing.setCmrCity(sadr.getOrt01());
-                    installing.setCmrCity2(sadr.getOrt02());
-                    installing.setCmrStreetAddress(sadr.getStras());
-                    installing.setCmrName3(sadr.getName3());
-                    installing.setCmrName4(sadr.getName4());
-                    installing.setCmrCountryLanded(sadr.getLand1());
-                    installing.setCmrCountry(sadr.getSpras());
-                    installing.setCmrStreetAddressCont(sadr.getStrs2());
-                    installing.setCmrState(sadr.getRegio());
-                    installing.setCmrPostalCode(sadr.getPstlz());
-                    installing.setCmrDept(sadr.getOrt02());
-                    installing.setCmrBldg(legacyGaddrLN6);
-                    if (!StringUtils.isBlank(sadr.getTxjcd())) {
-                      installing.setCmrTaxOffice(sadr.getTxjcd());
-                    }
-                    if (!StringUtils.isBlank(sadr.getTxjcd()) && !StringUtils.isBlank(sadr.getPfort())) {
-                      installing.setCmrTaxOffice(sadr.getTxjcd() + sadr.getPfort());
-                    }
-                    installing.setCmrSapNumber("");
-                    converted.add(installing);
-                  } else {
-                    CmrtAddr gAddr = getLegacyGAddress(entityManager, reqEntry.getCmrIssuingCntry(), searchModel.getCmrNum());
-                    String legacycity = "";
-                    if (gAddr != null) {
-                      LOG.debug("Adding installing to the records");
-                      FindCMRRecordModel installing = new FindCMRRecordModel();
-                      PropertyUtils.copyProperties(installing, mainRecord);
-                      // copyAddrData(installing, installingAddr, gAddrSeq);
-                      installing.setCmrAddrTypeCode("ZP02");
-                      installing.setCmrAddrSeq(gAddrSeq);
-                      String gline5 = gAddr.getAddrLine5();
-                      if (!StringUtils.isBlank(gline5)) {
-                        String legacyposcd = gline5.split(" ")[0];
-                        legacycity = gline5.substring(legacyposcd.length() + 1, gline5.length());
-                      }
-                      // add value
-                      installing.setCmrName1Plain(gAddr.getAddrLine1());
-                      if (!StringUtils.isBlank(gAddr.getAddrLine2())) {
-                        installing.setCmrName2Plain(gAddr.getAddrLine2());
-                      } else {
-                        installing.setCmrName2Plain("");
-                      }
-                      // installing.setCmrStreetAddress(gAddr.getAddrLine3());
-                      if (!StringUtils.isBlank(gAddr.getAddrLine3())) {
-                        installing.setCmrStreetAddress(gAddr.getAddrLine3());
-                      } else {
-                        installing.setCmrStreetAddress(gAddr.getAddrLine4());
-                      }
-                      installing.setCmrCity(record.getCmrCity());
-                      if ("865".equals(reqEntry.getCmrIssuingCntry())) {
-                        installing.setCmrCity(legacycity);
-                      }
-                      installing.setCmrCity2(record.getCmrCity2());
-                      installing.setCmrCountry(gAddr.getAddrLine6());
-                      installing.setCmrCountryLanded("");
-                      installing.setCmrPostalCode(record.getCmrPostalCode());
-                      installing.setCmrState(record.getCmrState());
-                      installing.setCmrBldg(legacyGaddrLN6);
-                      if (StringUtils.isBlank(gAddr.getAddrLine3())) {
-                        installing.setCmrStreetAddressCont("");
-                      } else {
-                        installing.setCmrStreetAddressCont(gAddr.getAddrLine4());
-                      }
-                      converted.add(installing);
-                    }
-                  }
-                }
-                if (StringUtils.isBlank(adrnr)) {
-                  CmrtAddr gAddr = getLegacyGAddress(entityManager, reqEntry.getCmrIssuingCntry(), searchModel.getCmrNum());
-                  String legacycity = "";
-                  if (gAddr != null) {
-                    LOG.debug("Adding installing to the records");
-                    FindCMRRecordModel installing = new FindCMRRecordModel();
-                    PropertyUtils.copyProperties(installing, mainRecord);
-                    // copyAddrData(installing, installingAddr, gAddrSeq);
-                    installing.setCmrAddrTypeCode("ZP02");
-                    installing.setCmrAddrSeq(gAddrSeq);
-                    String gline5 = gAddr.getAddrLine5();
-                    if (!StringUtils.isBlank(gline5)) {
-                      String legacyposcd = gline5.split(" ")[0];
-                      if (gline5.length() > legacyposcd.length()) {
-                        legacycity = gline5.substring(legacyposcd.length() + 1, gline5.length());
-                      }
-                    }
-                    // add value
-                    installing.setCmrName1Plain(gAddr.getAddrLine1());
-                    if (!StringUtils.isBlank(gAddr.getAddrLine2())) {
-                      installing.setCmrName2Plain(gAddr.getAddrLine2());
-                    } else {
-                      installing.setCmrName2Plain("");
-                    }
-                    // installing.setCmrStreetAddress(gAddr.getAddrLine3());
-                    if (!StringUtils.isBlank(gAddr.getAddrLine3())) {
-                      installing.setCmrStreetAddress(gAddr.getAddrLine3());
-                    } else {
-                      installing.setCmrStreetAddress(gAddr.getAddrLine4());
-                    }
-                    installing.setCmrCity(record.getCmrCity());
-                    if ("865".equals(reqEntry.getCmrIssuingCntry())) {
-                      installing.setCmrCity(legacycity);
-                    }
-                    installing.setCmrCity2(record.getCmrCity2());
-                    installing.setCmrCountry(gAddr.getAddrLine6());
-                    installing.setCmrCountryLanded("");
-                    installing.setCmrPostalCode(record.getCmrPostalCode());
-                    installing.setCmrState(record.getCmrState());
-                    installing.setCmrBldg(legacyGaddrLN6);
-                    if (StringUtils.isBlank(gAddr.getAddrLine3())) {
-                      installing.setCmrStreetAddressCont("");
-                    } else {
-                      installing.setCmrStreetAddressCont(gAddr.getAddrLine4());
-                    }
-                    converted.add(installing);
-                  }
-                }
-                // add new here
-                String soldtoseq = getSoldtoaddrSeqFromLegacy(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum());
-                // int maxintSeqadd = getMaxSequenceOnLegacyAddr(entityManager,
-                // reqEntry.getCmrIssuingCntry(), record.getCmrNum());
-                // String maxSeqs =
-                // StringUtils.leftPad(String.valueOf(maxintSeqLegacy), 5, '0');
-
-                // check if share seq address
-                String isShareZP01 = isShareZP01(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), soldtoseq);
-                String isShareZS02 = isShareZS02(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), soldtoseq);
-                String isShareZD01 = isShareZD01(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), soldtoseq);
-                String isShareZI01 = isShareZI01(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), soldtoseq);
-
-                // add share ZP01
-                if (isShareZP01 != null) {
-                  FindCMRRecordModel sharezp01 = new FindCMRRecordModel();
-                  PropertyUtils.copyProperties(sharezp01, mainRecord);
-                  sharezp01.setCmrAddrTypeCode("ZP01");
-                  sharezp01.setCmrAddrSeq(StringUtils.leftPad(String.valueOf(maxintSeqLegacy), 5, '0'));
-                  maxintSeqLegacy++;
-                  sharezp01.setParentCMRNo("");
-                  sharezp01.setCmrSapNumber(mainRecord.getCmrSapNumber());
-                  sharezp01.setCmrDept(mainRecord.getCmrCity2());
-                  converted.add(sharezp01);
-                }
-                // add share ZS02
-                if (isShareZS02 != null) {
-                  FindCMRRecordModel sharezs02 = new FindCMRRecordModel();
-                  PropertyUtils.copyProperties(sharezs02, mainRecord);
-                  sharezs02.setCmrAddrTypeCode("ZS02");
-                  sharezs02.setCmrAddrSeq(StringUtils.leftPad(String.valueOf(maxintSeqLegacy), 5, '0'));
-                  maxintSeqLegacy++;
-                  sharezs02.setParentCMRNo("");
-                  sharezs02.setCmrSapNumber(mainRecord.getCmrSapNumber());
-                  sharezs02.setCmrDept(mainRecord.getCmrCity2());
-                  converted.add(sharezs02);
-                }
-                // add share ZD01
-                if (isShareZD01 != null) {
-                  FindCMRRecordModel sharezd01 = new FindCMRRecordModel();
-                  PropertyUtils.copyProperties(sharezd01, mainRecord);
-                  sharezd01.setCmrAddrTypeCode("ZD01");
-                  sharezd01.setCmrAddrSeq(StringUtils.leftPad(String.valueOf(maxintSeqLegacy), 5, '0'));
-                  maxintSeqLegacy++;
-                  sharezd01.setParentCMRNo("");
-                  sharezd01.setCmrSapNumber(mainRecord.getCmrSapNumber());
-                  sharezd01.setCmrDept(mainRecord.getCmrCity2());
-                  converted.add(sharezd01);
-                }
-                // add share ZI01
-                if (isShareZI01 != null) {
-                  FindCMRRecordModel sharezi01 = new FindCMRRecordModel();
-                  PropertyUtils.copyProperties(sharezi01, mainRecord);
-                  sharezi01.setCmrAddrTypeCode("ZI01");
-                  sharezi01.setCmrAddrSeq(StringUtils.leftPad(String.valueOf(maxintSeqLegacy), 5, '0'));
-                  maxintSeqLegacy++;
-                  sharezi01.setParentCMRNo("");
-                  sharezi01.setCmrSapNumber(mainRecord.getCmrSapNumber());
-                  sharezi01.setCmrDept(mainRecord.getCmrCity2());
-                  converted.add(sharezi01);
-                }
-
-              }
             }
 
-            // int parvmCount = getKnvpParvmCount(record.getCmrSapNumber());
-            // System.out.println("parvmCount = " + parvmCount);
-            //
-            // if
-            // ((CmrConstants.ADDR_TYPE.ZD01.toString().equals(record.getCmrAddrTypeCode()))
-            // && (parvmCount > 1)) {
-            // record.setCmrAddrTypeCode("ZS02");
-            // }
           }
+
+          // add mail-to addresses from cmrtaddr
+          List<CmrtAddr> cmrtAddres = this.legacyObjects.getAddresses();
+          if (cmrtAddres != null) {
+            for (CmrtAddr cmrtAddr : cmrtAddres) {
+              if ("Y".equals(cmrtAddr.getIsAddrUseMailing())) {
+                FindCMRRecordModel zs02Addr = new FindCMRRecordModel();
+                PropertyUtils.copyProperties(zs02Addr, mainRecord);
+                mapZs02Addr(zs02Addr, cmrtAddr);
+                zs02Addr.setCmrAddrTypeCode("ZS02");
+                converted.add(zs02Addr);
+              } else {
+                // do nothing for shared seq. Imported already.
+              }
+            }
+          }
+
         }
       } else {
 
@@ -483,6 +271,298 @@ public class BELUXHandler extends BaseSOFHandler {
         }
       }
     }
+  }
+
+  private void mapZs02Addr(FindCMRRecordModel zs02Addr, CmrtAddr cmrtAddr) {
+    if (cmrtAddr == null) {
+      return;
+    }
+    String countryNm = null;
+    String cmrNo = cmrtAddr.getId().getCustomerNo() != null ? (String) cmrtAddr.getId().getCustomerNo() : "";
+    String addrSeq = cmrtAddr.getId().getAddrNo() != null ? (String) cmrtAddr.getId().getAddrNo() : "";
+    String addrl1 = cmrtAddr.getAddrLine1() != null ? (String) cmrtAddr.getAddrLine1() : "";
+    String addrl2 = cmrtAddr.getAddrLine2() != null ? (String) cmrtAddr.getAddrLine2() : "";
+    String addrl3 = cmrtAddr.getAddrLine3() != null ? (String) cmrtAddr.getAddrLine3() : "";
+    String addrl4 = cmrtAddr.getAddrLine4() != null ? (String) cmrtAddr.getAddrLine4() : "";
+    String addrl5 = cmrtAddr.getAddrLine5() != null ? (String) cmrtAddr.getAddrLine5() : "";
+    String addrl6 = cmrtAddr.getAddrLine6() != null ? (String) cmrtAddr.getAddrLine6() : "";
+    String addrli = cmrtAddr.getAddrLineI() != null ? (String) cmrtAddr.getAddrLineI() : "";
+    String addrInst = cmrtAddr.getIsAddrUseInstalling() != null ? (String) cmrtAddr.getIsAddrUseInstalling() : "";
+    String addrBill = cmrtAddr.getIsAddrUseBilling() != null ? (String) cmrtAddr.getIsAddrUseBilling() : "";
+    String addrShip = cmrtAddr.getIsAddrUseShipping() != null ? (String) cmrtAddr.getIsAddrUseShipping() : "";
+    String addrMail = cmrtAddr.getIsAddrUseMailing() != null ? (String) cmrtAddr.getIsAddrUseMailing() : "";
+    String addrEpl = cmrtAddr.getIsAddrUseEPL() != null ? (String) cmrtAddr.getIsAddrUseEPL() : "";
+
+    String postCd = null;
+    String city1 = null;
+    String dept = null;
+    String custNm2 = null;
+    String custNm3 = null;
+    String custNm4 = null;
+    String pobox = null;
+    String addrTxt = null;
+    String addrTxt2 = null;
+    String poBox = null;
+    boolean isLocal = true;
+
+    zs02Addr.setCmrAddrSeq(addrSeq);
+    zs02Addr.setCmrNum(cmrNo);
+
+    zs02Addr.setCmrName1Plain(addrl1);
+
+    if ("".equals(addrl3) && !"".equals(addrl4) && !"".equals(addrl5) && !"".equals(addrl6)) {
+
+      if (hasPostCd(addrl5)) {
+        postCd = getPostCd(addrl5);
+        city1 = getCity1(addrl5);
+        zs02Addr.setCmrName2(addrl2);
+        zs02Addr.setCmrName2Plain(addrl2);
+        zs02Addr.setCmrStreetAddress(addrl4);
+        zs02Addr.setCmrPostalCode(postCd);
+        zs02Addr.setCmrCity(city1);
+
+        if (!"".equals(addrl6)) {
+          isLocal = false;
+          countryNm = addrl6;
+        }
+      }
+    } else if (!"".equals(addrl3) && "".equals(addrl4) && "".equals(addrl5) && "".equals(addrl6)) {
+
+      if (hasPostCd(addrl3)) {
+        postCd = getPostCd(addrl3);
+        city1 = getCity1(addrl3);
+        zs02Addr.setCmrPostalCode(postCd);
+        zs02Addr.setCmrCity(city1);
+        zs02Addr.setCmrStreetAddress(addrl2);
+
+        if (!"".equals(addrl4)) {
+          isLocal = false;
+          countryNm = addrl6;
+        }
+      }
+    } else if (!"".equals(addrl3) && !"".equals(addrl4) && !"".equals(addrl5) && !"".equals(addrl6)) {
+
+      if (!hasPoBox(addrl2) && !hasPoBox(addrl3) && !hasPoBox(addrl4) && !hasPoBox(addrl5) && !hasPoBox(addrl6)) {
+        if (hasPostCd(addrl6)) {
+          isLocal = true;
+          postCd = getPostCd(addrl6);
+          city1 = getCity1(addrl6);
+          dept = getTitle(addrl3);
+          custNm3 = getFirstNm(addrl3);
+          custNm4 = getLastNm(addrl3);
+          zs02Addr.setCmrPostalCode(postCd);
+          zs02Addr.setCmrCity(city1);
+          zs02Addr.setCmrName2(addrl2);
+          zs02Addr.setCmrName2Plain(addrl2);
+          zs02Addr.setCmrDept(dept);
+          zs02Addr.setCmrName3(custNm3);
+          zs02Addr.setCmrName4(custNm4);
+          zs02Addr.setCmrStreetAddress(addrl4);
+          zs02Addr.setCmrStreetAddressCont(addrl5);
+        }
+      }
+    }
+    if (isLocal) {
+      if (postCd.startsWith("L")) {
+        zs02Addr.setCmrCountryLanded("LU");
+      } else {
+        zs02Addr.setCmrCountryLanded("BE");
+      }
+    } else {
+      if (!StringUtils.isBlank(countryNm)) {
+        String countryCd = getCountryCode(countryNm);
+        zs02Addr.setCmrCountryLanded(countryCd);
+      }
+    }
+
+  }
+
+  protected String getCountryCode(String desc) {
+    String countryCd = "";
+    EntityManager entityManager = JpaManager.getEntityManager();
+    try {
+      String sql = ExternalizedQuery.getSql("GEN.GET_COUNTRY_CD");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("DESC", desc.toUpperCase());
+      query.setParameter("DESC2", "%" + desc.toUpperCase() + "%");
+      if (desc.length() > 6) {
+        query.setParameter("DESC3", "%" + desc.toUpperCase().substring(0, 7) + "%");
+      } else {
+        query.setParameter("DESC3", "%" + desc.toUpperCase() + "%");
+      }
+      if (desc.length() > 5) {
+        query.setParameter("DESC4", "%" + desc.toUpperCase().substring(0, 6) + "%");
+      } else {
+        query.setParameter("DESC4", "%" + desc.toUpperCase() + "%");
+      }
+      query.setParameter("DESC5", desc != null ? desc.toUpperCase().trim() : "");
+      List<String> codes = query.getResults(String.class);
+      if (codes != null && !codes.isEmpty()) {
+        countryCd = codes.get(0);
+      }
+    } finally {
+      entityManager.clear();
+      entityManager.close();
+    }
+    return countryCd;
+  }
+
+  private boolean hasPostCd(String input) {
+    if (input == null) {
+      return false;
+    }
+    String regEx1 = "^[0-9]{4}[ ]";
+    String regEx2 = "^[L][ ][0-9]{4}[ ]";
+    Pattern pattern1 = Pattern.compile(regEx1);
+    Pattern pattern2 = Pattern.compile(regEx2);
+    Matcher matcher1 = pattern1.matcher(input);
+    Matcher matcher2 = pattern2.matcher(input);
+    if (matcher1.find()) {
+      return true;
+    } else if (matcher2.find()) {
+      return true;
+    }
+    return false;
+  }
+
+  private String getPostCd(String input) {
+    if (input == null) {
+      return null;
+    }
+    String regEx1 = "^[0-9]{4}[ ]";
+    String regEx2 = "^[L][ ][0-9]{4}[ ]";
+    int regExStart = 0;
+    int regExEnd = 0;
+    Pattern pattern1 = Pattern.compile(regEx1);
+    Pattern pattern2 = Pattern.compile(regEx2);
+    Matcher matcher1 = pattern1.matcher(input);
+    Matcher matcher2 = pattern2.matcher(input);
+    if (matcher1.find()) {
+      regExStart = matcher1.start();
+      regExEnd = matcher1.end();
+      String postCd = input.substring(regExStart, regExStart + 4);
+      return postCd;
+    } else if (matcher2.find()) {
+      regExStart = matcher2.start();
+      regExEnd = matcher2.end();
+      String postCd = input.substring(regExStart, regExStart + 4);
+      return postCd;
+    }
+    return null;
+  }
+
+  private String getCity1(String input) {
+    if (input == null) {
+      return null;
+    }
+    String regEx1 = "^[0-9]{4}[ ]";
+    String regEx2 = "^[L][ ][0-9]{4}[ ]";
+    int regExStart = 0;
+    int regExEnd = 0;
+    Pattern pattern1 = Pattern.compile(regEx1);
+    Pattern pattern2 = Pattern.compile(regEx2);
+    Matcher matcher1 = pattern1.matcher(input);
+    Matcher matcher2 = pattern2.matcher(input);
+    if (matcher1.find()) {
+      regExStart = matcher1.start();
+      regExEnd = matcher1.end();
+      String city1 = input.substring(regExEnd);
+      return city1;
+    } else if (matcher2.find()) {
+      regExStart = matcher2.start();
+      regExEnd = matcher2.end();
+      String city1 = input.substring(regExEnd);
+      return city1;
+    }
+    return null;
+  }
+
+  private boolean hasPoBox(String input) {
+    if (input == null) {
+      return false;
+    }
+    String regEx1 = "^[0-9]{4}[ ]";
+    String regEx2 = "^[L ][0-9]{4}[ ]";
+    Pattern pattern1 = Pattern.compile(regEx1);
+    Pattern pattern2 = Pattern.compile(regEx2);
+    Matcher matcher1 = pattern1.matcher(input);
+    Matcher matcher2 = pattern2.matcher(input);
+    if (matcher1.find()) {
+      return false;
+    } else if (matcher2.find()) {
+      return false;
+    }
+    if (StringUtils.isNumeric(input)) {
+      return true;
+    }
+    return false;
+  }
+
+  private boolean hasStreetNo(String input) {
+    if (input == null) {
+      return false;
+    }
+    String regEx1 = "[A-Za-z][ ][0-9]+$";
+    Pattern pattern1 = Pattern.compile(regEx1);
+    Matcher matcher1 = pattern1.matcher(input);
+    if (matcher1.find()) {
+      return true;
+    }
+    return false;
+  }
+
+  private String getTitle(String input) {
+    if (input == null) {
+      return null;
+    }
+    String output = null;
+    int spaceInd1 = input.indexOf(" "); // get first space
+    String title = input.substring(0, spaceInd1);
+    String temp = input.substring(spaceInd1);
+    int spaceInd2 = temp.indexOf(" "); // get second space
+    String firstNm = temp.substring(0, spaceInd2);
+    String lastNm = temp.substring(spaceInd2);
+
+    if (lastNm.indexOf(" ") < 0) {
+      output = title;
+    }
+    return output;
+  }
+
+  private String getFirstNm(String input) {
+    if (input == null) {
+      return null;
+    }
+    String output = null;
+    int spaceInd1 = input.indexOf(" "); // get first space
+    String title = input.substring(0, spaceInd1);
+    String temp = input.substring(spaceInd1);
+    int spaceInd2 = temp.indexOf(" "); // get second space
+    String firstNm = temp.substring(0, spaceInd2);
+    String lastNm = temp.substring(spaceInd2);
+
+    if (lastNm.indexOf(" ") < 0) {
+      output = firstNm;
+    }
+    return output;
+  }
+
+  private String getLastNm(String input) {
+    if (input == null) {
+      return null;
+    }
+    String output = null;
+    int spaceInd1 = input.indexOf(" "); // get first space
+    String title = input.substring(0, spaceInd1);
+    String temp = input.substring(spaceInd1);
+    int spaceInd2 = temp.indexOf(" "); // get second space
+    String firstNm = temp.substring(0, spaceInd2);
+    String lastNm = temp.substring(spaceInd2);
+
+    if (lastNm.indexOf(" ") < 0) {
+      output = lastNm;
+    }
+    return output;
   }
 
   protected void importOtherSOFAddresses(EntityManager entityManager, String cmrCountry, Map<String, FindCMRRecordModel> zi01Map,
@@ -887,6 +967,205 @@ public class BELUXHandler extends BaseSOFHandler {
   @Override
   public void doBeforeDataSave(EntityManager entityManager, Admin admin, Data data, String cmrIssuingCntry) throws Exception {
 
+    // handle changed share_seq address
+    if ("U".equals(admin.getReqType())) {
+      Long reqId = data.getId().getReqId();
+      List<Addr> addresses = getAddresses(entityManager, reqId);
+      List<CmrtAddr> legacyAddrs = getCmrtaddr(entityManager, cmrIssuingCntry, data.getCmrNo());
+
+      if (addresses == null || addresses.size() == 0) {
+        return;
+      }
+
+      String addrSeq = null;
+      String addrType = null;
+      String cmrtAddrSeq = null;
+      List<String> cmrtAddrTypeList = null;
+
+      int maxSeq = 1;
+      int maxIntSeq = getMaxSequenceOnAddr(entityManager, SystemConfiguration.getValue("MANDT"), data.getCmrIssuingCntry(), data.getCmrNo());
+      int maxintSeqLegacy = getMaxSequenceOnLegacyAddr(entityManager, data.getCmrIssuingCntry(), data.getCmrNo());
+
+      if (maxIntSeq > 0 && maxintSeqLegacy > 0) {
+        if (maxIntSeq > maxintSeqLegacy) {
+          maxSeq = maxIntSeq;
+        } else {
+          maxSeq = maxintSeqLegacy;
+        }
+      }
+
+      // check changed share seq
+      for (Addr addr : addresses) {
+        if ("Y".equals(addr.getChangedIndc()) && "Y".equals(addr.getImportInd())
+            && isSharedSeq(addr.getId().getAddrSeq(), addr.getId().getAddrType(), legacyAddrs)) {
+          addrSeq = addr.getId().getAddrSeq() != null ? (String) addr.getId().getAddrSeq() : "";
+          addrType = addr.getId().getAddrType();
+          for (CmrtAddr cmrtAddr : legacyAddrs) {
+            cmrtAddrSeq = cmrtAddr.getId().getAddrNo() != null ? (String) cmrtAddr.getId().getAddrNo() : "";
+            cmrtAddrTypeList = getAddrTypeList(cmrtAddr);
+            for (String cmrtAddrType : cmrtAddrTypeList) {
+              if (addrSeq.equals(cmrtAddrSeq)) {
+                switch (cmrtAddrType) {
+                case "ZS01":
+                  updateSeq4SharedAddr(addr, maxSeq);
+                  updateImportInd4SharedAddr("N", addr);
+                  maxSeq++;
+                  break;
+                case "ZP01":
+                  updateSeq4SharedAddr(addr, maxSeq);
+                  updateImportInd4SharedAddr("N", addr);
+                  maxSeq++;
+                  break;
+                case "ZD01":
+                  updateSeq4SharedAddr(addr, maxSeq);
+                  updateImportInd4SharedAddr("N", addr);
+                  maxSeq++;
+                  break;
+                case "ZI01":
+                  updateSeq4SharedAddr(addr, maxSeq);
+                  updateImportInd4SharedAddr("N", addr);
+                  maxSeq++;
+                  break;
+                case "ZS02":
+                  updateSeq4SharedAddr(addr, maxSeq);
+                  updateImportInd4SharedAddr("N", addr);
+                  maxSeq++;
+                  break;
+                }
+              }
+            }
+
+          }
+        }
+        entityManager.merge(addr);
+        entityManager.flush();
+      }
+
+    }
+  }
+
+  private List<Addr> getAddresses(EntityManager entityManager, Long reqId) {
+    List<Addr> addresses = null;
+    String sql = ExternalizedQuery.getSql("BENELUX.GET_ADDR_BYID");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    addresses = query.getResults(Addr.class);
+    return addresses;
+  }
+
+  private List<CmrtAddr> getCmrtaddr(EntityManager entityManager, String country, String cmrNo) {
+    List<CmrtAddr> addresses = null;
+    String sql = ExternalizedQuery.getSql("LEGACYD.GETADDR");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("COUNTRY", country);
+    query.setParameter("CMR_NO", cmrNo);
+    addresses = query.getResults(CmrtAddr.class);
+    return addresses;
+  }
+
+  private boolean isSharedSeq(String seq, String addrType, List<CmrtAddr> legacyAddrs) {
+    if (seq == null || addrType == null || legacyAddrs == null) {
+      return false;
+    }
+    String addrSeq = null;
+    String addrMail = null;
+    String addrBill = null;
+    String addrInst = null;
+    String addrShip = null;
+    String addrEpl = null;
+    int shareCount = 0;
+    boolean typeIncluded = false;
+
+    for (CmrtAddr addr : legacyAddrs) {
+
+      addrSeq = addr.getId().getAddrNo();
+      if (addrSeq != null && seq.equals(addrSeq)) {
+        addrMail = addr.getIsAddrUseMailing();
+        addrBill = addr.getIsAddrUseBilling();
+        addrInst = addr.getIsAddrUseInstalling();
+        addrShip = addr.getIsAddrUseShipping();
+        addrEpl = addr.getIsAddrUseEPL();
+
+        if ("Y".equals(addrMail)) {
+          shareCount++;
+          if ("ZS02".equals(addrType)) {
+            typeIncluded = true;
+          }
+        }
+        if ("Y".equals(addrBill)) {
+          shareCount++;
+          if ("ZP01".equals(addrType)) {
+            typeIncluded = true;
+          }
+        }
+        if ("Y".equals(addrInst)) {
+          shareCount++;
+          if ("ZS01".equals(addrType)) {
+            typeIncluded = true;
+          }
+        }
+        if ("Y".equals(addrShip)) {
+          shareCount++;
+          if ("ZD01".equals(addrType)) {
+            typeIncluded = true;
+          }
+        }
+        if ("Y".equals(addrEpl)) {
+          shareCount++;
+          if ("ZI01".equals(addrType)) {
+            typeIncluded = true;
+          }
+        }
+      }
+    }
+    if (shareCount > 1 && typeIncluded) {
+      return true;
+    }
+    return false;
+  }
+
+  private List<String> getAddrTypeList(CmrtAddr cmrtAddr) {
+    List<String> output = new ArrayList<>();
+    if (cmrtAddr == null) {
+      return null;
+    }
+    String addrMail = cmrtAddr.getIsAddrUseMailing();
+    String addrBill = cmrtAddr.getIsAddrUseBilling();
+    String addrInst = cmrtAddr.getIsAddrUseInstalling();
+    String addrShip = cmrtAddr.getIsAddrUseShipping();
+    String addrEpl = cmrtAddr.getIsAddrUseEPL();
+    if ("Y".equals(addrMail)) {
+      output.add("ZS02");
+    }
+    if ("Y".equals(addrBill)) {
+      output.add("ZP01");
+    }
+    if ("Y".equals(addrInst)) {
+      output.add("ZS01");
+    }
+    if ("Y".equals(addrShip)) {
+      output.add("ZD01");
+    }
+    if ("Y".equals(addrEpl)) {
+      output.add("ZI01");
+    }
+
+    return output;
+  }
+
+  private void updateSeq4SharedAddr(Addr addr, int maxSeq) {
+    if (addr == null || maxSeq < 1) {
+      return;
+    }
+    String maxSeqStr = StringUtils.leftPad(String.valueOf(maxSeq), 5, '0');
+    addr.getId().setAddrSeq(maxSeqStr);
+  }
+
+  private void updateImportInd4SharedAddr(String indc, Addr addr) {
+    if (addr == null) {
+      return;
+    }
+    addr.setImportInd(indc);
   }
 
   @Override
@@ -1283,15 +1562,6 @@ public class BELUXHandler extends BaseSOFHandler {
     sadr = query.getSingleResult(Sadr.class);
 
     return sadr;
-  }
-
-  private CmrtAddr getLegacyGAddress(EntityManager entityManager, String rcyaa, String cmrNo) {
-    String sql = ExternalizedQuery.getSql("CEE.GETLEGACYGADDR");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("RCYAA", rcyaa);
-    query.setParameter("CMR_NO", cmrNo);
-    query.setForReadOnly(true);
-    return query.getSingleResult(CmrtAddr.class);
   }
 
   private int getMaxSequenceOnAddr(EntityManager entityManager, String mandt, String katr6, String cmrNo) {

@@ -759,7 +759,7 @@ function setEconomicCodeValues(searchTerm) {
   }
 
   var economicCode = [];
-  if (searchTerm != '' && (custSubGrp == 'COM' || custSGrp == 'BEDAT' || custSubGrp == 'PUB' || custSubGrp == '3PA' || custSubGrp == 'LUDAT')) {
+  if (searchTerm != '' && (custSubGrp == 'COM' || custSGrp == 'BEDAT' || custSubGrp == 'PUB' || custSubGrp == '3PA' || custSGrp == 'LUDAT')) {
     var qParams = {
       _qall : 'Y',
       ISSUING_CNTRY : cntry + geoCd,
@@ -781,7 +781,7 @@ function setEconomicCodeValues(searchTerm) {
       }
     }
   }
-  if (custSubGrp == 'PUB' || custSubGrp == 'COM' || custSGrp == 'BEDAT' || custSubGrp == '3PA' || custSubGrp == 'LUDAT') {
+  if (custSubGrp == 'PUB' || custSubGrp == 'COM' || custSGrp == 'BEDAT' || custSubGrp == '3PA' || custSGrp == 'LUDAT') {
     // FormManager.setValue('economicCd', 'K11');
     if ('32' == isuCd && 'N' == clientTier) {
       FormManager.setValue('economicCd', 'K43');
@@ -1458,6 +1458,20 @@ function addCMRSearchValidator() {
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
 
+/**
+ * Override WW validator Validator to check whether D&B search has been
+ * performed
+ */
+function addDnBSearchValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+
 function disbleCreateByModel() {
   var reqType = FormManager.getActualValue('reqType');
   if (reqType == 'C') {
@@ -1571,6 +1585,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addBELUXAddressTypeValidator, GEOHandler.BELUX, null, true);
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.BELUX, GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(addCMRSearchValidator, GEOHandler.BELUX, null, true);
+  GEOHandler.registerValidator(addDnBSearchValidator, GEOHandler.BELUX, null, true);
   GEOHandler.registerValidator(addCmrNoValidator, GEOHandler.BELUX, null, true);
 
 });
