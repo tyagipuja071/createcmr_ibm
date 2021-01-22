@@ -1014,7 +1014,7 @@ function addBELUXAddressTypeValidator() {
     return {
       validate : function() {
         if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount == 0) {
-          return new ValidationResult(null, false, 'Sold-to, Mail-To address are mandatory. Only one address for each address type should be defined when sending for processing.');
+          return new ValidationResult(null, false, 'Sold-to, Mail-To, Bill-to address are mandatory. Only one address for each address type should be defined when sending for processing.');
         }
         if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
           var record = null;
@@ -1046,8 +1046,8 @@ function addBELUXAddressTypeValidator() {
               mailToCnt++;
             }
           }
-          if (soldToCnt == 0 || mailToCnt == 0) {
-            return new ValidationResult(null, false, 'Sold-to, Mail-To address are mandatory.');
+          if (soldToCnt == 0 || mailToCnt == 0 || billToCnt == 0) {
+            return new ValidationResult(null, false, 'Sold-to, Mail-To, Bill-To address are mandatory.');
           } else if (billToCnt > 1) {
             return new ValidationResult(null, false, 'Only one Bill-to address can be defined. Please remove the additional Bill-to address.');
           } else if (mailToCnt > 1) {
