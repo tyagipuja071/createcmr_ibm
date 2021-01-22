@@ -18,14 +18,9 @@ import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.CoverageContainer;
 import com.ibm.cio.cmr.request.entity.Addr;
-import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
-import com.ibm.cio.cmr.request.util.RequestUtils;
-import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
-import com.ibm.cmr.services.client.dnb.DnBCompany;
-import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 
 public class BeLuxUtil extends AutomationUtil {
 
@@ -51,68 +46,6 @@ public class BeLuxUtil extends AutomationUtil {
   public static final String SCENARIO_THIRD_PARTY_LU = "LU3PA";
   public static final String SCENARIO_BP_LOCAL_LU = "LUBUS";
   public static final String SCENARIO_DATA_CENTER_LU = "LUDAT";
-
-  @Override
-  public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
-      StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {
-    Admin admin = requestData.getAdmin();
-    Data data = requestData.getData();
-    String scenario = data.getCustSubGrp();
-    if (!"C".equals(admin.getReqType())) {
-      details.append("Field Computation skipped for Updates.");
-      results.setResults("Skipped");
-      results.setDetails(details.toString());
-      return results;
-    }
-    if (SCENARIO_INTERNAL_SO.equals(scenario) || SCENARIO_INTERNAL_SO_LU.equals(scenario)) {
-      Addr zi01 = requestData.getAddress("ZI01");
-      boolean highQualityMatchExists = false;
-      List<DnBMatchingResponse> response = getMatches(requestData, engineData, zi01, false);
-      if (response != null && response.size() > 0) {
-        for (DnBMatchingResponse dnbRecord : response) {
-          boolean closelyMatches = DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), zi01, admin, dnbRecord);
-          if (closelyMatches) {
-            engineData.put("ZI01_DNB_MATCH", dnbRecord);
-            highQualityMatchExists = true;
-            details.append("High Quality DnB Match found for Installing address.\n");
-            details.append(" - Confidence Code:  " + dnbRecord.getConfidenceCode() + " \n");
-            details.append(" - DUNS No.:  " + dnbRecord.getDunsNo() + " \n");
-            details.append(" - Name:  " + dnbRecord.getDnbName() + " \n");
-            details.append(" - Address:  " + dnbRecord.getDnbStreetLine1() + " " + dnbRecord.getDnbCity() + " " + dnbRecord.getDnbPostalCode() + " "
-                + dnbRecord.getDnbCountry() + "\n\n");
-            details.append("Overriding ISIC and Sub Industry Code using DnB Match retrieved.\n");
-            LOG.debug("Connecting to D&B details service..");
-            DnBCompany dnbData = DnBUtil.getDnBDetails(dnbRecord.getDunsNo());
-            if (dnbData != null) {
-              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISIC_CD", data.getIsicCd(), dnbData.getIbmIsic());
-              details.append("ISIC =  " + dnbData.getIbmIsic() + " (" + dnbData.getIbmIsicDesc() + ")").append("\n");
-              String subInd = RequestUtils.getSubIndustryCd(entityManager, dnbData.getIbmIsic(), data.getCmrIssuingCntry());
-              if (subInd != null) {
-                overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), subInd);
-                details.append("Subindustry Code  =  " + subInd).append("\n");
-              }
-            }
-            results.setResults("Calculated.");
-            results.setProcessOutput(overrides);
-            break;
-          }
-        }
-      }
-      if (!highQualityMatchExists && "C".equals(admin.getReqType())) {
-        LOG.debug("No High Quality DnB Match found for Installing address.");
-        details.append("No High Quality DnB Match found for Installing address. Request will require CMDE review before proceeding.").append("\n");
-        engineData.addNegativeCheckStatus("NOMATCHFOUND",
-            "No High Quality DnB Match found for Installing address. Request cannot be processed automatically.");
-      }
-    } else {
-      details.append("No specific fields to calculate.");
-      results.setResults("Skipped.");
-      results.setProcessOutput(overrides);
-    }
-    results.setDetails(details.toString());
-    LOG.debug(results.getDetails());
-    return results;
-  }
 
   @Override
   public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
@@ -289,6 +222,13 @@ public class BeLuxUtil extends AutomationUtil {
       this.salesRep = salesRep;
     }
 
+  }
+
+  @Override
+  public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
+      StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {
+    // TODO Auto-generated method stub
+    return null;
   }
 
 }
