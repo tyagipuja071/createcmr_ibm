@@ -52,9 +52,13 @@
   <cmr:column span="1" width="130">
         <label><cmr:fieldLabel fieldId="EmbargoCode" />: </label>
       </cmr:column>
-      <cmr:column span="1" width="240">
+      <cmr:column span="1" width="240" exceptForCountry="780">
         ${summary.data.embargoCd}
       </cmr:column>
+      <cmr:column span="1" width="240" forCountry="780">
+        ${summary.data.custAcctType}
+      </cmr:column>
+      
      <cmr:column span="1" width="90" exceptForCountry="780">
       <label><cmr:fieldLabel fieldId="SpecialTaxCd" />: </label>
      </cmr:column>
