@@ -9741,14 +9741,14 @@ function disableProcpectCmrIT() {
 /**
  * CMR-2279:Turkey - sets SBO based on isuCtc
  */
-function setSBOValuesForIsuCtc() {
+function setSBOValuesForIsuCtc(value) {
 
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var clientTier = FormManager.getActualValue('clientTier');
   var isuCd = FormManager.getActualValue('isuCd');
-  var isuCtc = isuCd + clientTier;
+  var isuCtc = ((value!=undefined ? value : isuCd )+ clientTier );
   
   var reqType = FormManager.getActualValue('reqType');
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
@@ -9758,14 +9758,15 @@ function setSBOValuesForIsuCtc() {
     return;
   }
 
- /*
-   * if (role == "REQUESTER") { if (custSubGrp == 'INTER' || custSubGrp == 'XINT ') {
-   * FormManager.setValue('salesBusOffCd', "A10");
-   * FormManager.disable("salesBusOffCd"); } else if (custSubGrp == 'BUSPR' ||
-   * custSubGrp == 'XBP') { FormManager.setValue('salesBusOffCd', "140");
-   * FormManager.disable("salesBusOffCd"); } } else {
-   * FormManager.enable("salesBusOffCd"); }
-   */
+ 
+/*
+ * if (role == "REQUESTER") { if (custSubGrp == 'INTER' || custSubGrp == 'XINT ') {
+ * FormManager.setValue('salesBusOffCd', "A10");
+ * FormManager.disable("salesBusOffCd"); } else if (custSubGrp == 'BUSPR' ||
+ * custSubGrp == 'XBP') { FormManager.setValue('salesBusOffCd', "140");
+ * FormManager.disable("salesBusOffCd"); } } else {
+ * FormManager.enable("salesBusOffCd"); }
+ */   
 
   var qParams = null;
   console.log("begin setSBO:" + '%' + isuCtc + '%');
@@ -9783,10 +9784,13 @@ function setSBOValuesForIsuCtc() {
       for (var i = 0; i < results.length; i++) {
         sboList[i] = results[i].ret1;
       }
-      FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), sboList);
+      if(results.length != 0){
+        FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), sboList);
+      }
+      // if (sboList.length == 1) {
       if (sboList.length == 1) {
         FormManager.setValue('salesBusOffCd', sboList[0]);
-      } else {
+      } else if(!_isScenarioChanged){
         var oldSbo = null;
         qParams = {
           REQ_ID : FormManager.getActualValue('reqId')
@@ -9823,20 +9827,21 @@ function setSBOValuesForIsuCtc() {
 function setSBOLogicOnISUChange() {
   if (_isuCdHandler == null && FormManager.getField('isuCd')) {
     _isuCdHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
-      setSBOValuesForIsuCtc();
+      setSBOValuesForIsuCtc(value);
     });
   }
-  if (_isuCdHandler && _isuCdHandler[0]) {
-    _isuCdHandler[0].onChange();
-  }
+/*
+ * if (_isuCdHandler && _isuCdHandler[0]) { _isuCdHandler[0].onChange(); }
+ */
   if (_clientTierHandler == null && FormManager.getField('clientTier')) {
     _clientTierHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
-      setSBOValuesForIsuCtc();
+      setSBOValuesForIsuCtc(FormManager.getActualValue('isuCd'));
     });
   }
-  if (_clientTierHandler && _clientTierHandler[0]) {
-    _clientTierHandler[0].onChange();
-  }
+ /*
+   * if (_clientTierHandler && _clientTierHandler[0]) {
+   * _clientTierHandler[0].onChange(); }
+   */
 }
 
 function setISUCTCBasedScenarios() {
@@ -10163,6 +10168,12 @@ function afterConfigForTR() {
   }
 }
 
+var _isScenarioChanged = false;
+function checkScenarioChanged(fromAddress, scenario, scenarioChanged) {
+  _isScenarioChanged = scenarioChanged;
+  setSBOValuesForIsuCtc(FormManager.getActualValue('isuCd'));
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding EMEA functions...');
@@ -10262,7 +10273,7 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(showClassificationForTRUpd, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(setSBOValuesForIsuCtc, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterTemplateLoad(setSBOValuesForIsuCtc, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterTemplateLoad(checkScenarioChanged, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(setSBOLogicOnISUChange, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(setSBOLogicOnISUChange, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(setISUCTCBasedScenarios, [ SysLoc.TURKEY ]);
