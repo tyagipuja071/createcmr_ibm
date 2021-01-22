@@ -36,14 +36,12 @@
           <length>4</length>
           <width>20</width>
         </column>
-        
         <column>
           <label>ISU Code</label>
           <dbColumn>ISU_CD</dbColumn>
           <width>25</width>
           <bdsId>ISU</bdsId>
         </column>
-        
         <column>
           <label>Client Tier</label>
           <dbColumn>CLIENT_TIER</dbColumn>
