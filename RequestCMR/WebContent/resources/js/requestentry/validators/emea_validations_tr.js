@@ -239,10 +239,10 @@ function setDefaultValueForISU() {
       FormManager.enable('isuCd');
     }
     // Commercial
-    /*
-     * else if (subType == 'COMME' || subType == 'XINTS') {
-     * FormManager.setValue('isuCd', '32'); FormManager.enable('isuCd'); }
-     */
+    else if (subType == 'COMME' || subType == 'XINTS') {
+      FormManager.setValue('isuCd', '32');
+      FormManager.enable('isuCd');
+    }
   }
 }
 
@@ -5177,7 +5177,8 @@ function setVatValidatorGRCYTR() {
 function setClientTierAndISR(value) {
   var reqType = null;
   reqType = FormManager.getActualValue('reqType');
-  if (reqType != 'C') {
+  // Turkey update request also need this function, so skip
+  if (reqType != 'C' && FormManager.getActualValue('cmrIssuingCntry') != SysLoc.TURKEY) {
     return;
   }
   /*
@@ -5210,7 +5211,7 @@ function setClientTierAndISR(value) {
     }
   } else if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.TURKEY) {
     if (value == '34') {
-      tierValues = [ 'V', 'Q' ];
+      tierValues = [ 'V' ];
     } else if (value == '32') {
       // remove ISU+CTC=32B from all scenarioes
       tierValues = [ 'N', 'S', 'T' ];
@@ -5879,9 +5880,9 @@ function setCustSubTypeBpGRTRCY() {
       FormManager.setValue('isuCd', '21');
     } else if (custType == 'PRICU' || custType == 'XPC') {
       FormManager.enable('clientTier');
-      FormManager.setValue('clientTier', 'Q');
+      FormManager.setValue('clientTier', 'S');
       FormManager.enable('isuCd');
-      FormManager.setValue('isuCd', '34');
+      FormManager.setValue('isuCd', '32');
     } else {
       // NOT enable ctc and isu for turkey internal and bp scenario
       if (custType != 'XINT' && custType != 'XBP') {
@@ -9741,32 +9742,26 @@ function disableProcpectCmrIT() {
 /**
  * CMR-2279:Turkey - sets SBO based on isuCtc
  */
-function setSBOValuesForIsuCtc(value) {
+function setSBOValuesForIsuCtc() {
 
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var clientTier = FormManager.getActualValue('clientTier');
   var isuCd = FormManager.getActualValue('isuCd');
-  var isuCtc = ((value!=undefined ? value : isuCd )+ clientTier );
-  
-  var reqType = FormManager.getActualValue('reqType');
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-  if (reqType != 'C') {
-    return;
-  }
+  var isuCtc = isuCd + clientTier;
 
- 
-/*
- * if (role == "REQUESTER") { if (custSubGrp == 'INTER' || custSubGrp == 'XINT ') {
- * FormManager.setValue('salesBusOffCd', "A10");
- * FormManager.disable("salesBusOffCd"); } else if (custSubGrp == 'BUSPR' ||
- * custSubGrp == 'XBP') { FormManager.setValue('salesBusOffCd', "140");
- * FormManager.disable("salesBusOffCd"); } } else {
- * FormManager.enable("salesBusOffCd"); }
- */   
+  if (role == "REQUESTER") {
+    if (custSubGrp == 'INTER' || custSubGrp == 'XINT ') {
+      FormManager.setValue('salesBusOffCd', "A10");
+      FormManager.disable("salesBusOffCd");
+    } else if (custSubGrp == 'BUSPR' || custSubGrp == 'XBP') {
+      FormManager.setValue('salesBusOffCd', "140");
+      FormManager.disable("salesBusOffCd");
+    }
+  } else {
+    FormManager.enable("salesBusOffCd");
+  }
 
   var qParams = null;
   console.log("begin setSBO:" + '%' + isuCtc + '%');
@@ -9784,13 +9779,10 @@ function setSBOValuesForIsuCtc(value) {
       for (var i = 0; i < results.length; i++) {
         sboList[i] = results[i].ret1;
       }
-      if(results.length != 0){
-        FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), sboList);
-      }
-      // if (sboList.length == 1) {
+      FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), sboList);
       if (sboList.length == 1) {
         FormManager.setValue('salesBusOffCd', sboList[0]);
-      } else if(!_isScenarioChanged){
+      } else {
         var oldSbo = null;
         qParams = {
           REQ_ID : FormManager.getActualValue('reqId')
@@ -9827,21 +9819,20 @@ function setSBOValuesForIsuCtc(value) {
 function setSBOLogicOnISUChange() {
   if (_isuCdHandler == null && FormManager.getField('isuCd')) {
     _isuCdHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
-      setSBOValuesForIsuCtc(value);
+      setSBOValuesForIsuCtc();
     });
   }
-/*
- * if (_isuCdHandler && _isuCdHandler[0]) { _isuCdHandler[0].onChange(); }
- */
+  if (_isuCdHandler && _isuCdHandler[0]) {
+    _isuCdHandler[0].onChange();
+  }
   if (_clientTierHandler == null && FormManager.getField('clientTier')) {
     _clientTierHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
-      setSBOValuesForIsuCtc(FormManager.getActualValue('isuCd'));
+      setSBOValuesForIsuCtc();
     });
   }
- /*
-   * if (_clientTierHandler && _clientTierHandler[0]) {
-   * _clientTierHandler[0].onChange(); }
-   */
+  if (_clientTierHandler && _clientTierHandler[0]) {
+    _clientTierHandler[0].onChange();
+  }
 }
 
 function setISUCTCBasedScenarios() {
@@ -9866,16 +9857,19 @@ function setISUCTCBasedScenarios() {
   if (custSubGrp == 'COMME' || custSubGrp == 'IGF' || custSubGrp == 'GOVRN' || custSubGrp == 'OEM' || custSubGrp == 'THDPT' || custSubGrp == 'XINTS' || custSubGrp == 'XIGF' || custSubGrp == 'XGOV'
       || custSubGrp == 'XTP') {
     // remove ISU=5B
-   /*
-     * for (var i = 0; i < valueList.length; i++) { if ('5B' == valueList[i]) {
-     * valueList.splice(i, 1); } }
-     */    FormManager.limitDropdownValues(FormManager.getField('isuCd'), valueList);
+    for (var i = 0; i < valueList.length; i++) {
+      if ('5B' == valueList[i]) {
+        valueList.splice(i, 1);
+      }
+    }
+    FormManager.limitDropdownValues(FormManager.getField('isuCd'), valueList);
   } else if (custSubGrp == 'PRICU' || custSubGrp == 'XPC') {
-    // remove ISU=5B
-   /*
-     * for (var i = 0; i < valueList.length; i++) { if ('5B' == valueList[i] ) {
-     * valueList.splice(i, 1); } }
-     */
+    // remove ISU=5B,34
+    for (var i = 0; i < valueList.length; i++) {
+      if ('5B' == valueList[i] || '34' == valueList[i]) {
+        valueList.splice(i, 1);
+      }
+    }
     FormManager.limitDropdownValues(FormManager.getField('isuCd'), valueList);
   } else {
     FormManager.resetDropdownValues(FormManager.getField('isuCd'));
@@ -10168,12 +10162,6 @@ function afterConfigForTR() {
   }
 }
 
-var _isScenarioChanged = false;
-function checkScenarioChanged(fromAddress, scenario, scenarioChanged) {
-  _isScenarioChanged = scenarioChanged;
-  setSBOValuesForIsuCtc(FormManager.getActualValue('isuCd'));
-}
-
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding EMEA functions...');
@@ -10273,7 +10261,7 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(showClassificationForTRUpd, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(setSBOValuesForIsuCtc, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterTemplateLoad(checkScenarioChanged, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterTemplateLoad(setSBOValuesForIsuCtc, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(setSBOLogicOnISUChange, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(setSBOLogicOnISUChange, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(setISUCTCBasedScenarios, [ SysLoc.TURKEY ]);
