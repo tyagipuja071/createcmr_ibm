@@ -116,7 +116,7 @@
           <label>Client Tier</label>
           <dbColumn>CLIENT_TIER</dbColumn>
           <width>25</width>
-          <lovId>ClientTier</lovId>
+          <bdsId>ClientTier</bdsId>
         </column>
         <column>
           <label>Mode of Payment</label>
