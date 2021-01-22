@@ -1567,8 +1567,8 @@ function addBillingAddrValidator() {
         }else if (Number(zp01Reccount == 1)) {
 	     if (role == "REQUESTER" && (custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'CRO3P')){
 		    var checkImportIndc = getImportedIndcForItalyBillingAddr();
-            if(checkImportIndc=='Y'){
-		     return new ValidationResult(null, false, 'For 3rd party scenario  Billing Address can not be imported.User needs to create new Billing Address');
+              if(checkImportIndc=='Y'){
+		        return new ValidationResult(null, false, 'For 3rd party scenario  Billing Address can not be imported.User needs to create new Billing Address');
            }
          }
         } else if (Number(zp01Reccount == 0)) {
