@@ -130,40 +130,112 @@ public class BELUXHandler extends BaseSOFHandler {
           // map RDc - SOF - CreateCMR by sequence no
           for (FindCMRRecordModel record : source.getItems()) {
             seqNo = record.getCmrAddrSeq();
-            System.out.println("seqNo = " + seqNo);
             if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo)) {
               addrType = record.getCmrAddrTypeCode();
               if (!StringUtils.isEmpty(addrType)) {
                 addr = cloneAddress(record, addrType);
                 addr.setCmrDept(record.getCmrCity2());
                 addr.setCmrName4(record.getCmrName4());
-
-                if ((CmrConstants.ADDR_TYPE.ZD01.toString().equals(addr.getCmrAddrTypeCode()))) {
-                  String stkzn = "";
-                  stkzn = getStkznFromDataRdc(entityManager, addr.getCmrSapNumber(), SystemConfiguration.getValue("MANDT"));
-                  int parvmCount = getCeeKnvpParvmCount(addr.getCmrSapNumber());
-                  if ("0".equals(stkzn) || parvmCount > 0) {
-                    addr.setCmrAddrTypeCode("ZI01");
-                  }
-                }
                 converted.add(addr);
               }
             }
-
           }
 
-          // add mail-to addresses from cmrtaddr
+          // BELUX logic
           List<CmrtAddr> cmrtAddres = this.legacyObjects.getAddresses();
-          if (cmrtAddres != null) {
-            for (CmrtAddr cmrtAddr : cmrtAddres) {
-              if ("Y".equals(cmrtAddr.getIsAddrUseMailing())) {
-                FindCMRRecordModel zs02Addr = new FindCMRRecordModel();
-                PropertyUtils.copyProperties(zs02Addr, mainRecord);
-                mapZs02Addr(zs02Addr, cmrtAddr);
-                zs02Addr.setCmrAddrTypeCode("ZS02");
-                converted.add(zs02Addr);
-              } else {
-                // do nothing for shared seq. Imported already.
+          String cmrAddrSeq = null;
+
+          // todo - add seq mismatch message
+
+          // import legacy addr which not in rdc
+          for (CmrtAddr cmrAddr : cmrtAddres) {
+            cmrAddrSeq = cmrAddr.getId().getAddrNo();
+            if (!isShareSeq(cmrAddr)) {
+              if (!seqIsIncluded(cmrAddr, source.getItems())) {
+                FindCMRRecordModel newRecord = new FindCMRRecordModel();
+                PropertyUtils.copyProperties(newRecord, mainRecord);
+                mapCmrtAddr2FindCMRRec(newRecord, cmrAddr);
+                newRecord.setCmrAddrTypeCode(getSingleAddrType(cmrAddr));
+                converted.add(newRecord);
+              }
+            }
+          }
+
+          // handle share_seq addr
+          int maxSeq = 1;
+          int maxIntSeq = getMaxSequenceOnAddr(entityManager, SystemConfiguration.getValue("MANDT"), reqEntry.getCmrIssuingCntry(),
+              mainRecord.getCmrNum());
+          int maxintSeqLegacy = getMaxSequenceOnLegacyAddr(entityManager, reqEntry.getCmrIssuingCntry(), mainRecord.getCmrNum());
+
+          if (maxIntSeq > 0 && maxintSeqLegacy > 0) {
+            if (maxIntSeq > maxintSeqLegacy) {
+              maxSeq = maxIntSeq;
+            } else {
+              maxSeq = maxintSeqLegacy;
+            }
+          }
+
+          for (CmrtAddr cmrtaddr : cmrtAddres) {
+            String seq = cmrtaddr.getId().getAddrNo();
+            String addrUseMail = cmrtaddr.getIsAddrUseMailing();
+            String addrUseBill = cmrtaddr.getIsAddrUseBilling();
+            String addrUseInst = cmrtaddr.getIsAddrUseInstalling();
+            String addrUseShip = cmrtaddr.getIsAddrUseShipping();
+            String addrUseEpl = cmrtaddr.getIsAddrUseEPL();
+
+            if ("Y".equals(addrUseInst)) {
+              if ("Y".equals(addrUseMail)) {
+                splitSharedAddr("ZS01", seq, mainRecord, "ZS02", maxSeq, converted);
+                maxSeq++;
+              }
+              if ("Y".equals(addrUseBill)) {
+                splitSharedAddr("ZS01", seq, mainRecord, "ZP01", maxSeq, converted);
+                maxSeq++;
+              }
+              if ("Y".equals(addrUseShip)) {
+                splitSharedAddr("ZS01", seq, mainRecord, "ZD01", maxSeq, converted);
+                maxSeq++;
+              }
+              if ("Y".equals(addrUseEpl)) {
+                splitSharedAddr("ZS01", seq, mainRecord, "ZS02", maxSeq, converted);
+                maxSeq++;
+              }
+            } else if ("N".equals(addrUseInst)) {
+              if ("Y".equals(addrUseBill)) {
+                // FindCMRRecordModel SharedAddrBill =
+                // getSharedAddrBill("ZP01", seq, converted);
+                if ("Y".equals(addrUseMail)) {
+                  splitSharedAddr("ZP01", seq, null, "ZS02", maxSeq, converted);
+                  maxSeq++;
+                }
+                if ("Y".equals(addrUseShip)) {
+                  splitSharedAddr("ZP01", seq, null, "ZD01", maxSeq, converted);
+                  maxSeq++;
+                }
+                if ("Y".equals(addrUseEpl)) {
+                  splitSharedAddr("ZP01", seq, null, "ZI01", maxSeq, converted);
+                  maxSeq++;
+                }
+              } else if ("N".equals(addrUseBill)) {
+                if ("Y".equals(addrUseShip)) {
+                  if ("Y".equals(addrUseMail)) {
+                    splitSharedAddr("ZD01", seq, null, "ZS02", maxSeq, converted);
+                    maxSeq++;
+                  }
+                  if ("Y".equals(addrUseEpl)) {
+                    splitSharedAddr("ZD01", seq, null, "ZI01", maxSeq, converted);
+                    maxSeq++;
+                  }
+                } else if ("N".equals(addrUseShip)) {
+                  if ("Y".equals(addrUseEpl)) {
+                    if ("Y".equals(addrUseMail)) {
+                      splitSharedAddr("ZI01", seq, null, "ZS02", maxSeq, converted);
+                      maxSeq++;
+                    }
+                  } else if ("N".equals(addrUseEpl)) {
+                    // there is not shared seq any more
+                  }
+                }
               }
             }
           }
@@ -273,7 +345,115 @@ public class BELUXHandler extends BaseSOFHandler {
     }
   }
 
-  private void mapZs02Addr(FindCMRRecordModel zs02Addr, CmrtAddr cmrtAddr) {
+  private boolean isShareSeq(CmrtAddr cmrtAddr) {
+    boolean result = false;
+    String addrMail = cmrtAddr.getIsAddrUseMailing();
+    String addrBill = cmrtAddr.getIsAddrUseBilling();
+    String addrInst = cmrtAddr.getIsAddrUseInstalling();
+    String addrShip = cmrtAddr.getIsAddrUseShipping();
+    String addrEpl = cmrtAddr.getIsAddrUseEPL();
+    int shareCount = 0;
+    if ("Y".equals(addrMail)) {
+      shareCount++;
+    }
+    if ("Y".equals(addrBill)) {
+      shareCount++;
+    }
+    if ("Y".equals(addrInst)) {
+      shareCount++;
+    }
+    if ("Y".equals(addrShip)) {
+      shareCount++;
+    }
+    if ("Y".equals(addrEpl)) {
+      shareCount++;
+    }
+    if (shareCount > 1) {
+      result = true;
+    }
+    return result;
+  }
+
+  private boolean seqIsIncluded(CmrtAddr cmrtAddr, List<FindCMRRecordModel> findCMRRecordList) {
+    boolean result = false;
+    if (findCMRRecordList == null || isShareSeq(cmrtAddr)) {
+      return false;
+    }
+    String cmrtAddrSeq = cmrtAddr.getId().getAddrNo();
+    String cmrtAddrTYpe = getSingleAddrType(cmrtAddr);
+    List<String> rdcAddrSeqList = new ArrayList<String>();
+    for (FindCMRRecordModel record : findCMRRecordList) {
+      if (cmrtAddrTYpe.equals(record.getCmrAddrTypeCode())) {
+        rdcAddrSeqList.add(StringUtils.leftPad(String.valueOf(record.getCmrAddrSeq()), 5, '0'));
+      }
+    }
+    if (rdcAddrSeqList.contains(cmrtAddrSeq)) {
+      result = true;
+    } else {
+      result = false;
+    }
+    return result;
+  }
+
+  private String getSingleAddrType(CmrtAddr cmrtAddr) {
+    String result = "";
+    String addrMail = cmrtAddr.getIsAddrUseMailing();
+    String addrBill = cmrtAddr.getIsAddrUseBilling();
+    String addrInst = cmrtAddr.getIsAddrUseInstalling();
+    String addrShip = cmrtAddr.getIsAddrUseShipping();
+    String addrEpl = cmrtAddr.getIsAddrUseEPL();
+    if ("Y".equals(addrMail)) {
+      result = "ZS02";
+    }
+    if ("Y".equals(addrBill)) {
+      result = "ZP01";
+    }
+    if ("Y".equals(addrInst)) {
+      result = "ZS01";
+    }
+    if ("Y".equals(addrShip)) {
+      result = "ZD01";
+    }
+    if ("Y".equals(addrEpl)) {
+      result = "ZI01";
+    }
+    return result;
+  }
+
+  private void splitSharedAddr(String sourceAddrType, String SourceAddrSeq, FindCMRRecordModel sourceAddr, String targetAddrType, int targetAddrSeq,
+      List<FindCMRRecordModel> converted) {
+    FindCMRRecordModel newAddr = new FindCMRRecordModel();
+
+    if (sourceAddr == null) {
+      sourceAddr = getSourceAddr(sourceAddrType, SourceAddrSeq, converted);
+    }
+
+    try {
+      PropertyUtils.copyProperties(newAddr, sourceAddr);
+    } catch (Exception e) {
+      // TODO Auto-generated catch block
+      LOG.error("Importing Mail-to address failed.");
+    }
+
+    newAddr.setCmrAddrTypeCode(targetAddrType);
+    newAddr.setCmrAddrSeq(StringUtils.leftPad(String.valueOf(targetAddrSeq), 5, '0'));
+    newAddr.setParentCMRNo("");
+    newAddr.setCmrSapNumber(sourceAddr.getCmrSapNumber());
+    newAddr.setCmrDept(sourceAddr.getCmrCity2());
+    converted.add(newAddr);
+  }
+
+  private FindCMRRecordModel getSourceAddr(String addrType, String addrSeq, List<FindCMRRecordModel> converted) {
+    FindCMRRecordModel output = new FindCMRRecordModel();
+    for (FindCMRRecordModel addr : converted) {
+      if (addrType.equals(addr.getCmrAddrTypeCode()) && addrSeq.equals(StringUtils.leftPad(addr.getCmrAddrSeq(), 5, '0'))) {
+        output = addr;
+      }
+    }
+    return output;
+  }
+
+  private void mapCmrtAddr2FindCMRRec(FindCMRRecordModel zs02Addr, CmrtAddr cmrtAddr) {
     if (cmrtAddr == null) {
       return;
     }
@@ -334,11 +514,16 @@ public class BELUXHandler extends BaseSOFHandler {
         zs02Addr.setCmrPostalCode(postCd);
         zs02Addr.setCmrCity(city1);
         zs02Addr.setCmrStreetAddress(addrl2);
+      }
+    } else if (!"".equals(addrl3) && !"".equals(addrl4) && "".equals(addrl5) && "".equals(addrl6)) {
 
-        if (!"".equals(addrl4)) {
-          isLocal = false;
-          countryNm = addrl6;
-        }
+      if (hasPostCd(addrl4)) {
+        postCd = getPostCd(addrl4);
+        city1 = getCity1(addrl4);
+        zs02Addr.setCmrPostalCode(postCd);
+        zs02Addr.setCmrCity(city1);
+        zs02Addr.setCmrName2Plain(addrl2);
+        zs02Addr.setCmrStreetAddress(addrl3);
       }
     } else if (!"".equals(addrl3) && !"".equals(addrl4) && !"".equals(addrl5) && !"".equals(addrl6)) {
 
@@ -359,6 +544,29 @@ public class BELUXHandler extends BaseSOFHandler {
           zs02Addr.setCmrName4(custNm4);
           zs02Addr.setCmrStreetAddress(addrl4);
           zs02Addr.setCmrStreetAddressCont(addrl5);
+        }
+      }
+    } else if (!"".equals(addrl3) && !"".equals(addrl4) && !"".equals(addrl5) && "".equals(addrl6)) {
+
+      if (!hasPoBox(addrl2) && !hasPoBox(addrl3) && !hasPoBox(addrl4) && !hasPoBox(addrl5)) {
+        if (hasPostCd(addrl5)) {
+          isLocal = true;
+          postCd = getPostCd(addrl5);
+          city1 = getCity1(addrl5);
+          dept = getTitle(addrl3);
+          custNm3 = getFirstNm(addrl3);
+          custNm4 = getLastNm(addrl3);
+          addrTxt = getStreet(custNm4);
+          addrTxt2 = getStreetNo(custNm4);
+          zs02Addr.setCmrPostalCode(postCd);
+          zs02Addr.setCmrCity(city1);
+          zs02Addr.setCmrName2(addrl2);
+          zs02Addr.setCmrName2Plain(addrl2);
+          zs02Addr.setCmrDept(dept);
+          zs02Addr.setCmrName3(custNm3);
+          zs02Addr.setCmrName4(custNm4);
+          zs02Addr.setCmrStreetAddress(addrTxt);
+          zs02Addr.setCmrStreetAddressCont(addrTxt2);
         }
       }
     }
@@ -412,7 +620,7 @@ public class BELUXHandler extends BaseSOFHandler {
       return false;
     }
     String regEx1 = "^[0-9]{4}[ ]";
-    String regEx2 = "^[L][ ][0-9]{4}[ ]";
+    String regEx2 = "^[L][- ][0-9]{4}[ ]";
     Pattern pattern1 = Pattern.compile(regEx1);
     Pattern pattern2 = Pattern.compile(regEx2);
     Matcher matcher1 = pattern1.matcher(input);
@@ -430,7 +638,7 @@ public class BELUXHandler extends BaseSOFHandler {
       return null;
     }
     String regEx1 = "^[0-9]{4}[ ]";
-    String regEx2 = "^[L][ ][0-9]{4}[ ]";
+    String regEx2 = "^[L][- ][0-9]{4}[ ]";
     int regExStart = 0;
     int regExEnd = 0;
     Pattern pattern1 = Pattern.compile(regEx1);
@@ -445,7 +653,7 @@ public class BELUXHandler extends BaseSOFHandler {
     } else if (matcher2.find()) {
       regExStart = matcher2.start();
       regExEnd = matcher2.end();
-      String postCd = input.substring(regExStart, regExStart + 4);
+      String postCd = input.substring(regExStart, regExStart + 6);
       return postCd;
     }
     return null;
@@ -456,7 +664,7 @@ public class BELUXHandler extends BaseSOFHandler {
       return null;
     }
     String regEx1 = "^[0-9]{4}[ ]";
-    String regEx2 = "^[L][ ][0-9]{4}[ ]";
+    String regEx2 = "^[L][- ][0-9]{4}[ ]";
     int regExStart = 0;
     int regExEnd = 0;
     Pattern pattern1 = Pattern.compile(regEx1);
@@ -482,7 +690,7 @@ public class BELUXHandler extends BaseSOFHandler {
       return false;
     }
     String regEx1 = "^[0-9]{4}[ ]";
-    String regEx2 = "^[L ][0-9]{4}[ ]";
+    String regEx2 = "^[L- ][0-9]{4}[ ]";
     Pattern pattern1 = Pattern.compile(regEx1);
     Pattern pattern2 = Pattern.compile(regEx2);
     Matcher matcher1 = pattern1.matcher(input);
@@ -503,12 +711,69 @@ public class BELUXHandler extends BaseSOFHandler {
       return false;
     }
     String regEx1 = "[A-Za-z][ ][0-9]+$";
+    String regEx2 = "^[0-9]+[ ][A-Za-z]*";
     Pattern pattern1 = Pattern.compile(regEx1);
+    Pattern pattern2 = Pattern.compile(regEx2);
     Matcher matcher1 = pattern1.matcher(input);
+    Matcher matcher2 = pattern2.matcher(input);
     if (matcher1.find()) {
+      return true;
+    } else if (matcher2.find()) {
       return true;
     }
     return false;
+  }
+
+  private String getStreet(String input) {
+    if (input == null) {
+      return null;
+    }
+    String regEx1 = "[ ][0-9]+$";
+    String regEx2 = "^[0-9]+[ ]";
+    int regExStart = 0;
+    int regExEnd = 0;
+    Pattern pattern1 = Pattern.compile(regEx1);
+    Pattern pattern2 = Pattern.compile(regEx2);
+    Matcher matcher1 = pattern1.matcher(input);
+    Matcher matcher2 = pattern2.matcher(input);
+    if (matcher1.find()) {
+      regExStart = matcher1.start();
+      regExEnd = matcher1.end();
+      String street = input.substring(0, regExStart);
+      return street;
+    } else if (matcher2.find()) {
+      regExStart = matcher2.start();
+      regExEnd = matcher2.end();
+      String street = input.substring(regExEnd);
+      return street;
+    }
+    return null;
+  }
+
+  private String getStreetNo(String input) {
+    if (input == null) {
+      return null;
+    }
+    String regEx1 = "[ ][0-9]+$";
+    String regEx2 = "^[0-9]+[ ]";
+    int regExStart = 0;
+    int regExEnd = 0;
+    Pattern pattern1 = Pattern.compile(regEx1);
+    Pattern pattern2 = Pattern.compile(regEx2);
+    Matcher matcher1 = pattern1.matcher(input);
+    Matcher matcher2 = pattern2.matcher(input);
+    if (matcher1.find()) {
+      regExStart = matcher1.start();
+      regExEnd = matcher1.end();
+      String streetNo = input.substring(regExStart + 1);
+      return streetNo;
+    } else if (matcher2.find()) {
+      regExStart = matcher2.start();
+      regExEnd = matcher2.end();
+      String streetNo = input.substring(0, regExEnd - 1);
+      return streetNo;
+    }
+    return null;
   }
 
   private String getTitle(String input) {
@@ -967,11 +1232,29 @@ public class BELUXHandler extends BaseSOFHandler {
   @Override
   public void doBeforeDataSave(EntityManager entityManager, Admin admin, Data data, String cmrIssuingCntry) throws Exception {
 
+  }
+
+  @Override
+  public void doBeforeAddrSave(EntityManager entityManager, Addr addr, String cmrIssuingCntry) throws Exception {
+    if (!"Y".equals(addr.getImportInd())) {
+      String addrSeq = addr.getId().getAddrSeq();
+      addrSeq = StringUtils.leftPad(addrSeq, 5, '0');
+      addr.getId().setAddrSeq(addrSeq);
+    }
+  }
+
+  @Override
+  public void doAfterImport(EntityManager entityManager, Admin admin, Data data) {
+
     // handle changed share_seq address
+    // 1, get shared seq addr list, might be two
+    // 2, set importInd "N" for new splited addr
+    // 3, set changeInd "Y" for the shared seq addr that did not splited
+    // tips: new splited addr has the biggest addrSeq in its addrType
     if ("U".equals(admin.getReqType())) {
       Long reqId = data.getId().getReqId();
       List<Addr> addresses = getAddresses(entityManager, reqId);
-      List<CmrtAddr> legacyAddrs = getCmrtaddr(entityManager, cmrIssuingCntry, data.getCmrNo());
+      List<CmrtAddr> legacyAddrs = getCmrtaddr(entityManager, data.getCmrIssuingCntry(), data.getCmrNo());
 
       if (addresses == null || addresses.size() == 0) {
         return;
@@ -982,65 +1265,158 @@ public class BELUXHandler extends BaseSOFHandler {
       String cmrtAddrSeq = null;
       List<String> cmrtAddrTypeList = null;
 
-      int maxSeq = 1;
-      int maxIntSeq = getMaxSequenceOnAddr(entityManager, SystemConfiguration.getValue("MANDT"), data.getCmrIssuingCntry(), data.getCmrNo());
-      int maxintSeqLegacy = getMaxSequenceOnLegacyAddr(entityManager, data.getCmrIssuingCntry(), data.getCmrNo());
+      // get share seq list
+      // there are max two shared-seq addresses exist
+      boolean shareSeq1ExistInd = false;
+      boolean shareSeq2ExistInd = false;
+      List<String> shareSeqAddrList1 = new ArrayList<String>();
+      List<String> shareSeqAddrList2 = new ArrayList<String>();
+      String shareSeq1 = null;
+      String shareSeq2 = null;
 
-      if (maxIntSeq > 0 && maxintSeqLegacy > 0) {
-        if (maxIntSeq > maxintSeqLegacy) {
-          maxSeq = maxIntSeq;
-        } else {
-          maxSeq = maxintSeqLegacy;
-        }
-      }
+      String addrUseMail = null;
+      String addrUseBill = null;
+      String addrUseInst = null;
+      String addrUseShip = null;
+      String addrUseEpl = null;
+      boolean typeIncluded = false;
 
-      // check changed share seq
-      for (Addr addr : addresses) {
-        if ("Y".equals(addr.getChangedIndc()) && "Y".equals(addr.getImportInd())
-            && isSharedSeq(addr.getId().getAddrSeq(), addr.getId().getAddrType(), legacyAddrs)) {
-          addrSeq = addr.getId().getAddrSeq() != null ? (String) addr.getId().getAddrSeq() : "";
-          addrType = addr.getId().getAddrType();
-          for (CmrtAddr cmrtAddr : legacyAddrs) {
-            cmrtAddrSeq = cmrtAddr.getId().getAddrNo() != null ? (String) cmrtAddr.getId().getAddrNo() : "";
-            cmrtAddrTypeList = getAddrTypeList(cmrtAddr);
-            for (String cmrtAddrType : cmrtAddrTypeList) {
-              if (addrSeq.equals(cmrtAddrSeq)) {
-                switch (cmrtAddrType) {
-                case "ZS01":
-                  updateSeq4SharedAddr(addr, maxSeq);
-                  updateImportInd4SharedAddr("N", addr);
-                  maxSeq++;
-                  break;
-                case "ZP01":
-                  updateSeq4SharedAddr(addr, maxSeq);
-                  updateImportInd4SharedAddr("N", addr);
-                  maxSeq++;
-                  break;
-                case "ZD01":
-                  updateSeq4SharedAddr(addr, maxSeq);
-                  updateImportInd4SharedAddr("N", addr);
-                  maxSeq++;
-                  break;
-                case "ZI01":
-                  updateSeq4SharedAddr(addr, maxSeq);
-                  updateImportInd4SharedAddr("N", addr);
-                  maxSeq++;
-                  break;
-                case "ZS02":
-                  updateSeq4SharedAddr(addr, maxSeq);
-                  updateImportInd4SharedAddr("N", addr);
-                  maxSeq++;
-                  break;
+      for (CmrtAddr cmrtaddr : legacyAddrs) {
+        cmrtAddrSeq = cmrtaddr.getId().getAddrNo();
+        addrUseMail = cmrtaddr.getIsAddrUseMailing();
+        addrUseBill = cmrtaddr.getIsAddrUseBilling();
+        addrUseInst = cmrtaddr.getIsAddrUseInstalling();
+        addrUseShip = cmrtaddr.getIsAddrUseShipping();
+        addrUseEpl = cmrtaddr.getIsAddrUseEPL();
+
+        if ("Y".equals(addrUseInst)) {
+          if ("Y".equals(addrUseMail)) {
+            shareSeq1ExistInd = true;
+            shareSeqAddrList1.add("ZS02");
+          }
+          if ("Y".equals(addrUseBill)) {
+            shareSeq1ExistInd = true;
+            shareSeqAddrList1.add("ZP01");
+          }
+          if ("Y".equals(addrUseShip)) {
+            shareSeq1ExistInd = true;
+            shareSeqAddrList1.add("ZD01");
+          }
+          if ("Y".equals(addrUseEpl)) {
+            shareSeq1ExistInd = true;
+            shareSeqAddrList1.add("ZI01");
+          }
+          if (shareSeq1ExistInd) {
+            shareSeqAddrList1.add("ZS01");
+            shareSeq1 = cmrtaddr.getId().getAddrNo();
+          }
+        } else if ("N".equals(addrUseInst)) {
+          if ("Y".equals(addrUseBill)) {
+            if ("Y".equals(addrUseMail)) {
+              if (!shareSeq1ExistInd) {
+                shareSeq1ExistInd = true;
+                shareSeqAddrList1.add("ZS02");
+              } else {
+                shareSeq2ExistInd = true;
+                shareSeqAddrList2.add("ZS02");
+              }
+            }
+            if ("Y".equals(addrUseShip)) {
+              if (!shareSeq1ExistInd) {
+                shareSeq1ExistInd = true;
+                shareSeqAddrList1.add("ZD01");
+              } else {
+                shareSeq2ExistInd = true;
+                shareSeqAddrList2.add("ZD01");
+              }
+            }
+            if ("Y".equals(addrUseEpl)) {
+              if (!shareSeq1ExistInd) {
+                shareSeq1ExistInd = true;
+                shareSeqAddrList1.add("ZI01");
+              } else {
+                shareSeq2ExistInd = true;
+                shareSeqAddrList2.add("ZI01");
+              }
+            }
+            if (shareSeq1ExistInd && cmrtAddrSeq.equals(shareSeq1)) {
+              shareSeqAddrList1.add("ZP01");
+              shareSeq1 = cmrtaddr.getId().getAddrNo();
+            } else if (shareSeq2ExistInd) {
+              shareSeqAddrList2.add("ZP01");
+              shareSeq2 = cmrtaddr.getId().getAddrNo();
+            }
+          } else if ("N".equals(addrUseBill)) {
+            if ("Y".equals(addrUseShip)) {
+              if ("Y".equals(addrUseMail)) {
+                if (!shareSeq1ExistInd) {
+                  shareSeq1ExistInd = true;
+                  shareSeqAddrList1.add("ZS02");
+                } else {
+                  shareSeq2ExistInd = true;
+                  shareSeqAddrList2.add("ZS02");
+                }
+              }
+              if ("Y".equals(addrUseEpl)) {
+                if (!shareSeq1ExistInd) {
+                  shareSeq1ExistInd = true;
+                  shareSeqAddrList1.add("ZI01");
+                } else {
+                  shareSeq2ExistInd = true;
+                  shareSeqAddrList2.add("ZI01");
+                }
+              }
+              if (shareSeq1ExistInd) {
+                shareSeqAddrList1.add("ZD01");
+                shareSeq1 = cmrtaddr.getId().getAddrNo();
+              } else if (shareSeq2ExistInd) {
+                shareSeqAddrList2.add("ZD01");
+                shareSeq2 = cmrtaddr.getId().getAddrNo();
+              }
+            } else if ("N".equals(addrUseShip)) {
+              if ("Y".equals(addrUseEpl)) {
+                if ("Y".equals(addrUseMail)) {
+                  if (!shareSeq1ExistInd) {
+                    shareSeq1ExistInd = true;
+                    shareSeqAddrList1.add("ZS02");
+                  } else {
+                    shareSeq2ExistInd = true;
+                    shareSeqAddrList2.add("ZS021");
+                  }
+                }
+                if (shareSeq1ExistInd && cmrtAddrSeq.equals(shareSeq1)) {
+                  shareSeqAddrList1.add("ZI01");
+                  shareSeq1 = cmrtaddr.getId().getAddrNo();
+                } else if (shareSeq2ExistInd) {
+                  shareSeqAddrList2.add("ZI01");
+                  shareSeq2 = cmrtaddr.getId().getAddrNo();
                 }
               }
             }
+          }
+        }
+      }
 
+      for (Addr addr : addresses) {
+        addrSeq = addr.getId().getAddrSeq();
+        addrType = addr.getId().getAddrType();
+        if (isSharedSeqType(addrType, shareSeqAddrList1, shareSeqAddrList2)) {
+          if (isMaxSeq4AddrType(addr, addresses)) {
+            // max addrSeq of its addrType is the one splited
+            if (!shouldSplitInd(addrType, shareSeqAddrList1, shareSeqAddrList2)) {
+              addr.setChangedIndc("Y");
+            } else {
+              addr.setImportInd("N");
+            }
+          } else if ((shareSeq1.equals(addrSeq) && shareSeqAddrList1.contains(addrType))
+              || (shareSeq2.equals(addrSeq) && shareSeqAddrList2.contains(addrType))) {
+            // shareSeq but did not split
+            addr.setChangedIndc("Y");
           }
         }
         entityManager.merge(addr);
-        entityManager.flush();
       }
-
+      entityManager.flush();
     }
   }
 
@@ -1061,6 +1437,44 @@ public class BELUXHandler extends BaseSOFHandler {
     query.setParameter("CMR_NO", cmrNo);
     addresses = query.getResults(CmrtAddr.class);
     return addresses;
+  }
+
+  private boolean isSharedSeqType(String addrType, List<String> shareSeqAddrList1, List<String> shareSeqAddrList2) {
+    boolean result = false;
+    if (shareSeqAddrList1.contains(addrType) || shareSeqAddrList2.contains(addrType)) {
+      result = true;
+    }
+    return result;
+  }
+
+  private boolean isSharedSeq(String addrSeq, String addrType, String shareSeq1, List<String> shareSeqAddrList1, String shareSeq2,
+      List<String> shareSeqAddrList2) {
+    boolean result = false;
+    if (addrSeq.equals(shareSeq1) && shareSeqAddrList1.contains(addrType)) {
+      result = true;
+    } else if (addrSeq.equals(shareSeq2) && shareSeqAddrList2.contains(addrType)) {
+      result = true;
+    }
+    return result;
+  }
+
+  private boolean shouldSplitInd(String addrType, List<String> shareSeqAddrList1, List<String> shareSeqAddrList2) {
+    boolean result = false;
+    String addrOrder = "ZS01ZP01ZD01ZI01ZS02";
+    if (shareSeqAddrList1.contains(addrType)) {
+      for (String compairAddr : shareSeqAddrList1) {
+        if (addrOrder.indexOf(compairAddr) < addrOrder.indexOf(addrType)) {
+          result = true;
+        }
+      }
+    } else if (shareSeqAddrList2.contains(addrType)) {
+      for (String compairAddr : shareSeqAddrList2) {
+        if (addrOrder.indexOf(compairAddr) < addrOrder.indexOf(addrType)) {
+          result = true;
+        }
+      }
+    }
+    return result;
   }
 
   private boolean isSharedSeq(String seq, String addrType, List<CmrtAddr> legacyAddrs) {
@@ -1153,6 +1567,27 @@ public class BELUXHandler extends BaseSOFHandler {
     return output;
   }
 
+  private boolean isMaxSeq4AddrType(Addr addr, List<Addr> addresses) {
+    boolean result = true;
+    if (addr == null || addresses == null) {
+      return false;
+    }
+    String addrSeq = addr.getId().getAddrSeq();
+    String addrType = addr.getId().getAddrType();
+    String tempAddrSeq = null;
+    String tempAddrType = null;
+    for (Addr tempAddr : addresses) {
+      tempAddrType = tempAddr.getId().getAddrType();
+      tempAddrSeq = tempAddr.getId().getAddrSeq();
+      if (addrType.equals(tempAddrType)) {
+        if (Integer.parseInt(addrSeq) < Integer.parseInt(tempAddrSeq)) {
+          result = false;
+        }
+      }
+    }
+    return result;
+  }
+
   private void updateSeq4SharedAddr(Addr addr, int maxSeq) {
     if (addr == null || maxSeq < 1) {
       return;
@@ -1166,20 +1601,6 @@ public class BELUXHandler extends BaseSOFHandler {
       return;
     }
     addr.setImportInd(indc);
-  }
-
-  @Override
-  public void doBeforeAddrSave(EntityManager entityManager, Addr addr, String cmrIssuingCntry) throws Exception {
-    if (!"Y".equals(addr.getImportInd())) {
-      String addrSeq = addr.getId().getAddrSeq();
-      addrSeq = StringUtils.leftPad(addrSeq, 5, '0');
-      addr.getId().setAddrSeq(addrSeq);
-    }
-  }
-
-  @Override
-  public void doAfterImport(EntityManager entityManager, Admin admin, Data data) {
-
   }
 
   @Override
@@ -1563,7 +1984,7 @@ public class BELUXHandler extends BaseSOFHandler {
 
     return sadr;
   }
-
+  
   private int getMaxSequenceOnAddr(EntityManager entityManager, String mandt, String katr6, String cmrNo) {
     String maxAddrSeq = null;
     int addrSeq = 0;
