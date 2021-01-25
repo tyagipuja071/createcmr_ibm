@@ -1576,7 +1576,6 @@ function setVATForItaly() {
 
   }
   var ident = FormManager.getActualValue('identClient');
-
   var reqId = FormManager.getActualValue('reqId');
   /*
    * var euCntryList = [ 'AT', 'IT', 'BE', 'LV', 'BG', 'LT', 'HR', 'LU', 'CY',
