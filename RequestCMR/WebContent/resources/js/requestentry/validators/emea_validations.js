@@ -4482,9 +4482,11 @@ function addFieldValidationForProcessorItaly() {
       console.log("addFieldValidationForProcessorItaly>>processor labal enable collection code");
     }
   }
-  if (requestType == 'C' && role == GEOHandler.ROLE_PROCESSOR && (custSubType == 'UNISM' || custSubType == 'LOCSM' || custSubType == 'GOVSM')) {
-    FormManager.enable('repTeamMemberNo');
-  }
+  /*
+   * if (requestType == 'C' && role == GEOHandler.ROLE_PROCESSOR && (custSubType ==
+   * 'UNISM' || custSubType == 'LOCSM' || custSubType == 'GOVSM')) {
+   * FormManager.enable('repTeamMemberNo'); }
+   */
 }
 
 function addAddrValidationForProcItaly() {
