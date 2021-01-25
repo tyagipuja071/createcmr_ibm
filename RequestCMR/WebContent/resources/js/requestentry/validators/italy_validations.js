@@ -51,7 +51,7 @@ var _landCntryHandlerUK = null;
 var _postalCdUKHandler = null;
 var _cityUKHandler = null;
 var _custGrpIT = null;
-var _importedIndcBilling = null;
+
 var _importedIndc = null;
 
 function getImportedIndcForItaly() {
@@ -69,24 +69,6 @@ function getImportedIndcForItaly() {
   }
   console.log('saving imported ind as ' + _importedIndc);
   return _importedIndc;
-
-}
-
-function getImportedIndcForItalyBillingAddr() {
-  if (_importedIndcBilling) {
-    console.log('Returning imported indc for Billing Address = ' + _importedIndcBilling);
-    return _importedIndcBilling;
-  }
-  var results = cmr.query('IMPORTED_ADDR_ZP01', {
-    REQID : FormManager.getActualValue('reqId')
-  });
-  if (results != null && results.ret1) {
-    _importedIndcBilling = results.ret1;
-  } else {
-    _importedIndcBilling = 'N';
-  }
-  console.log('saving imported ind as for Billing Address' + _importedIndc);
-  return _importedIndcBilling;
 
 }
 
@@ -1550,19 +1532,7 @@ function addCompanyAddrValidator() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
-function addCMRValidator(){
-	var role = FormManager.getActualValue('userRole').toUpperCase();
-    var custSubType = FormManager.getActualValue('custSubGrp');
-	 if (FormManager.getActualValue('reqType') == 'C' && (FormManager.getActualValue('findCmrResult') == 'NOT DONE' || FormManager.getActualValue('findCmrResult') == 'REJECTED')) {
-      if (role == "REQUESTER" && (custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'CRO3P')) {
-       return new ValidationResult(null, false,'For 3rd party scenario please import a CMR via CMR search');
-        }
-      } 
-}
-
 function addBillingAddrValidator() {
-  var role = FormManager.getActualValue('userRole').toUpperCase();
-  var custSubType = FormManager.getActualValue('custSubGrp');
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
@@ -1574,13 +1544,6 @@ function addBillingAddrValidator() {
         var zp01Reccount = record.ret1;
         if (Number(zp01Reccount) > 1) {
           return new ValidationResult(null, false, 'Only one Billing Address can be defined.');
-        }else if (Number(zp01Reccount == 1)) {
-	     if (role == "REQUESTER" && (custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'CRO3P')){
-	var checkImportIndc = getImportedIndcForItalyBillingAddr();
-              if(checkImportIndc=='Y'){
-		        return new ValidationResult(null, false, 'For 3rd party scenario  Billing Address can not be imported.User needs to create new Billing Address');
-           }
-         }
         } else if (Number(zp01Reccount == 0)) {
           return new ValidationResult(null, false, 'At least one Billing Address must be defined.');
         } else {
@@ -1590,6 +1553,16 @@ function addBillingAddrValidator() {
       }
     };
   })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
+function addCMRValidator(){
+	var role = FormManager.getActualValue('userRole').toUpperCase();
+    var custSubType = FormManager.getActualValue('custSubGrp');
+	 if (FormManager.getActualValue('reqType') == 'C' && (FormManager.getActualValue('findCmrResult') == 'NOT DONE' || FormManager.getActualValue('findCmrResult') == 'REJECTED')) {
+      if (role == "REQUESTER" && (custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'CRO3P')) {
+       return new ValidationResult(null, false,'For 3rd party scenario please import a CMR via CMR search');
+        }
+      } 
 }
 
 function setVATForItaly() {
