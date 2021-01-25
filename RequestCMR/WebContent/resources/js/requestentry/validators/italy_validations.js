@@ -1555,7 +1555,7 @@ function addBillingAddrValidator() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
-function addCMRValidator(){
+/*function addCMRValidator(){
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubType = FormManager.getActualValue('custSubGrp');
    if (FormManager.getActualValue('reqType') == 'C'){
@@ -1565,7 +1565,7 @@ function addCMRValidator(){
         }
       }
     } 
-}
+}*/
 
 function setVATForItaly() {
   var reqType = FormManager.getActualValue('reqType');
@@ -3627,7 +3627,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addAfterConfigItaly, [ SysLoc.ITALY ]);
   GEOHandler.addAddrFunction(addAddrFunctionItaly, [ SysLoc.ITALY ]);
   GEOHandler.addAfterTemplateLoad(addAfterTemplateLoadItaly, [ SysLoc.ITALY ]);
-  GEOHandler.registerValidator(addCMRValidator,[ SysLoc.ITALY ], null, true);
+//GEOHandler.registerValidator(addCMRValidator,[ SysLoc.ITALY ], null, true);
   GEOHandler.registerValidator(validateSBOForIT, [ SysLoc.ITALY ]);
   GEOHandler.registerValidator(checkIsicCodeValidationIT, [ SysLoc.ITALY ]);
   GEOHandler.registerValidator(validateCodiceDesIT, [ SysLoc.ITALY ], null, true);
