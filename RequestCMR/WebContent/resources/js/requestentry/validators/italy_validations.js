@@ -1556,8 +1556,8 @@ function addBillingAddrValidator() {
 }
 
 function addCMRValidator(){
-	var role = FormManager.getActualValue('userRole').toUpperCase();
-	var custSubType = FormManager.getActualValue('custSubGrp');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var custSubType = FormManager.getActualValue('custSubGrp');
    if (FormManager.getActualValue('reqType') == 'C'){
 	if(FormManager.getActualValue('findCmrResult') == 'NOT DONE' || FormManager.getActualValue('findCmrResult') == 'REJECTED')) {
       if (role == "REQUESTER" && (custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'CRO3P')) {
