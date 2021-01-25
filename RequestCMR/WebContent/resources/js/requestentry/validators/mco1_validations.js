@@ -127,7 +127,7 @@ function setCtcSalesRepSBO(value) {
       FormManager.setValue('salesBusOffCd', '');
       FormManager.setValue('repTeamMemberNo', '');
     }
-    if (scenario != null && !internalBUScenarios.includes(scenario) && isuCtc != '34V' && isuCtc != '32C' && countryUse == '864NA') {
+    if (scenario != null && !internalBUScenarios.includes(scenario) && isuCtc != '34V' && isuCtc != '34Q' && countryUse == '864NA') {
       FormManager.setValue('salesBusOffCd', '');
       FormManager.setValue('repTeamMemberNo', '');
     }
@@ -137,7 +137,7 @@ function setCtcSalesRepSBO(value) {
       FormManager.setValue('salesBusOffCd', '');
       FormManager.setValue('repTeamMemberNo', '');
     }
-    if (scenario != null && !internalBUScenarios.includes(scenario) && isuCtc != '34V' && isuCtc != '32C' && countryUse == '864NA') {
+    if (scenario != null && !internalBUScenarios.includes(scenario) && isuCtc != '34V' && isuCtc != '34Q' && countryUse == '864NA') {
       FormManager.setValue('salesBusOffCd', '');
       FormManager.setValue('repTeamMemberNo', '');
     }
