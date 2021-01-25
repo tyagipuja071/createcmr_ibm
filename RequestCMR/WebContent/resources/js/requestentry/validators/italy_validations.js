@@ -1557,8 +1557,8 @@ function addBillingAddrValidator() {
 
 function addCMRValidator(){
 	var role = FormManager.getActualValue('userRole').toUpperCase();
-    var custSubType = FormManager.getActualValue('custSubGrp');
-	 if (FormManager.getActualValue('reqType') == 'C' && (FormManager.getActualValue('findCmrResult') == 'NOT DONE' || FormManager.getActualValue('findCmrResult') == 'REJECTED')) {
+	var custSubType = FormManager.getActualValue('custSubGrp');
+   if (FormManager.getActualValue('reqType') == 'C' && (FormManager.getActualValue('findCmrResult') == 'NOT DONE' || FormManager.getActualValue('findCmrResult') == 'REJECTED')) {
       if (role == "REQUESTER" && (custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'CRO3P')) {
        return new ValidationResult(null, false,'For 3rd party scenario please import a CMR via CMR search');
         }
@@ -1574,6 +1574,7 @@ function setVATForItaly() {
 
   }
   var ident = FormManager.getActualValue('identClient');
+
   var reqId = FormManager.getActualValue('reqId');
   /*
    * var euCntryList = [ 'AT', 'IT', 'BE', 'LV', 'BG', 'LT', 'HR', 'LU', 'CY',
