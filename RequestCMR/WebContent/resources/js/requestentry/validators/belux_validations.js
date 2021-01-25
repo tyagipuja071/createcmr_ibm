@@ -1538,6 +1538,33 @@ function addCmrNoValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+function addDepartmentNumberValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqType = FormManager.getActualValue('reqType');
+        var departmentNumber = FormManager.getActualValue('ibmDeptCostCenter');
+        var pattern = /^[0-9A-Za-z]+$/;
+        if (reqType == 'C') {
+          if (departmentNumber != null && departmentNumber != '') {
+            if (departmentNumber.length >= 1 && departmentNumber.length != 6) {
+              return new ValidationResult(null, false, 'Department number should be exactly 6 digits.');
+            }
+            if (departmentNumber.length >= 1 && !departmentNumber.match(pattern)) {
+              return new ValidationResult({
+                id : 'ibmDeptCostCenter',
+                type : 'text',
+                name : 'ibmDeptCostCenter'
+              }, false, 'Department Number should be 6 digits.');
+            }
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.BELUX = [ '624' ];
 
@@ -1587,5 +1614,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addCMRSearchValidator, GEOHandler.BELUX, null, true);
   GEOHandler.registerValidator(addDnBSearchValidator, GEOHandler.BELUX, null, true);
   GEOHandler.registerValidator(addCmrNoValidator, GEOHandler.BELUX, null, true);
+  GEOHandler.registerValidator(addDepartmentNumberValidator, GEOHandler.BELUX, null, true);
 
 });
