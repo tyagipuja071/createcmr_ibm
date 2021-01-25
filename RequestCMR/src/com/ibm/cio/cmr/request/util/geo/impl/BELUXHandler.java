@@ -1408,8 +1408,8 @@ public class BELUXHandler extends BaseSOFHandler {
             } else {
               addr.setImportInd("N");
             }
-          } else if ((shareSeq1.equals(addrSeq) && shareSeqAddrList1.contains(addrType))
-              || (shareSeq2.equals(addrSeq) && shareSeqAddrList2.contains(addrType))) {
+          } else if ((shareSeq2 != null && !shareSeqAddrList2.isEmpty()) && ((shareSeq1.equals(addrSeq) && shareSeqAddrList1.contains(addrType)))
+              || ((shareSeq2 != null && !shareSeqAddrList2.isEmpty()) && (shareSeq2.equals(addrSeq) && shareSeqAddrList2.contains(addrType)))) {
             // shareSeq but did not split
             addr.setChangedIndc("Y");
           }
@@ -1984,7 +1984,7 @@ public class BELUXHandler extends BaseSOFHandler {
 
     return sadr;
   }
-  
+
   private int getMaxSequenceOnAddr(EntityManager entityManager, String mandt, String katr6, String cmrNo) {
     String maxAddrSeq = null;
     int addrSeq = 0;
