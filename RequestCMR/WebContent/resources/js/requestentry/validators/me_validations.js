@@ -626,7 +626,7 @@ function addHandlersForCEMEA() {
 
   if (_ISUHandler == null) {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
-      setClientTierValues(value);
+      // setClientTierValues(value);
       if (ME_INCL.has(FormManager.getActualValue('cmrIssuingCntry'))) {
         togglePPSCeidME();
       }
@@ -1187,157 +1187,223 @@ function setPreferredLang() {
   }
 }
 
-function setClientTierValues(isuCd) {
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-
-  isuCd = FormManager.getActualValue('isuCd');
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var clientTiers = [];
-  if (isuCd != '') {
-    if (SysLoc.SLOVAKIA == cntry
-        && (FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'THDPT' || FormManager.getActualValue('custSubGrp') == 'COMME'
-            || FormManager.getActualValue('custSubGrp') == 'XCOM' || FormManager.getActualValue('custSubGrp') == 'PRICU' || FormManager.getActualValue('custSubGrp') == 'XPC')) {
-      if (isuCd == '34') {
-        clientTiers = [ '6', 'V' ];
-      } else if (isuCd == '32') {
-        clientTiers = [ 'N', 'S' ];
-      } else if (isuCd == '5B') {
-        clientTiers = [ '7' ];
-      }
-    } else if ((SysLoc.TURKMENISTAN == cntry || SysLoc.TAJIKISTAN == cntry || SysLoc.ALBANIA == cntry || SysLoc.ARMENIA == cntry || SysLoc.BELARUS == cntry || SysLoc.BULGARIA == cntry
-        || SysLoc.GEORGIA == cntry || SysLoc.KAZAKHSTAN == cntry || SysLoc.KYRGYZSTAN == cntry || SysLoc.MACEDONIA == cntry || SysLoc.SERBIA == cntry || SysLoc.UZBEKISTAN == cntry || SysLoc.UKRAINE == cntry)
-        && (FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'XCE' || FormManager.getActualValue('custSubGrp') == 'THDPT'
-            || FormManager.getActualValue('custSubGrp') == 'COMME' || FormManager.getActualValue('custSubGrp') == 'XCOM' || FormManager.getActualValue('custSubGrp') == 'PRICU'
-            || FormManager.getActualValue('custSubGrp') == 'XPC' || FormManager.getActualValue('custSubGrp') == 'CSCOM' || FormManager.getActualValue('custSubGrp') == 'CSPC'
-            || FormManager.getActualValue('custSubGrp') == 'CSTP' || FormManager.getActualValue('custSubGrp') == 'MECOM' || FormManager.getActualValue('custSubGrp') == 'MEPC'
-            || FormManager.getActualValue('custSubGrp') == 'METP' || FormManager.getActualValue('custSubGrp') == 'RSXCO' || FormManager.getActualValue('custSubGrp') == 'RSXPC'
-            || FormManager.getActualValue('custSubGrp') == 'RSXTP' || FormManager.getActualValue('custSubGrp') == 'RSCOM' || FormManager.getActualValue('custSubGrp') == 'RSPC' || FormManager
-            .getActualValue('custSubGrp') == 'RSTP')) {
-      if (isuCd == '34') {
-        clientTiers = [ 'V' ];
-      } else if (isuCd == '32') {
-        clientTiers = [ 'S' ];
-      }
-    } else if ((SysLoc.AZERBAIJAN == cntry)
-        && (FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'XCE' || FormManager.getActualValue('custSubGrp') == 'THDPT'
-            || FormManager.getActualValue('custSubGrp') == 'COMME' || FormManager.getActualValue('custSubGrp') == 'XCOM' || FormManager.getActualValue('custSubGrp') == 'PRICU'
-            || FormManager.getActualValue('custSubGrp') == 'XPC' || FormManager.getActualValue('custSubGrp') == 'CSCOM' || FormManager.getActualValue('custSubGrp') == 'CSPC'
-            || FormManager.getActualValue('custSubGrp') == 'CSTP' || FormManager.getActualValue('custSubGrp') == 'MECOM' || FormManager.getActualValue('custSubGrp') == 'MEPC'
-            || FormManager.getActualValue('custSubGrp') == 'METP' || FormManager.getActualValue('custSubGrp') == 'RSXCO' || FormManager.getActualValue('custSubGrp') == 'RSXPC'
-            || FormManager.getActualValue('custSubGrp') == 'RSXTP' || FormManager.getActualValue('custSubGrp') == 'RSCOM' || FormManager.getActualValue('custSubGrp') == 'RSPC' || FormManager
-            .getActualValue('custSubGrp') == 'RSTP')) {
-      if (isuCd == '34') {
-        clientTiers = [ 'V' ];
-      } else if (isuCd == '32') {
-        clientTiers = [ 'S' ];
-      }
-    } else if ((SysLoc.CZECH_REPUBLIC == cntry)
-        && (FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'THDPT' || FormManager.getActualValue('custSubGrp') == 'COMME'
-            || FormManager.getActualValue('custSubGrp') == 'XCOM' || FormManager.getActualValue('custSubGrp') == 'PRICU' || FormManager.getActualValue('custSubGrp') == 'XPC')) {
-      if (isuCd == '34') {
-        clientTiers = [ '6', 'V' ];
-      } else if (isuCd == '32') {
-        clientTiers = [ 'S', 'N' ];
-      } else if (isuCd == '5B') {
-        clientTiers = [ '7' ];
-      }
-    } else if ((SysLoc.BOSNIA_HERZEGOVINA == cntry || SysLoc.SLOVENIA == cntry)
-        && (FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'THDPT' || FormManager.getActualValue('custSubGrp') == 'COMME'
-            || FormManager.getActualValue('custSubGrp') == 'XCOM' || FormManager.getActualValue('custSubGrp') == 'PRICU' || FormManager.getActualValue('custSubGrp') == 'XPC')) {
-      if (isuCd == '34') {
-        clientTiers = [ 'V' ];
-      } else if (isuCd == '32') {
-        clientTiers = [ 'S', 'M' ];
-      }
-    } else if ((SysLoc.CROATIA == cntry)
-        && (FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'THDPT' || FormManager.getActualValue('custSubGrp') == 'COMME'
-            || FormManager.getActualValue('custSubGrp') == 'XCOM' || FormManager.getActualValue('custSubGrp') == 'PRICU' || FormManager.getActualValue('custSubGrp') == 'XPC')) {
-      if (isuCd == '34') {
-        clientTiers = [ '6', 'V' ];
-      } else if (isuCd == '32') {
-        clientTiers = [ 'S' ];
-      }
-    } else if ((SysLoc.HUNGARY == cntry)
-        && (FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'THDPT' || FormManager.getActualValue('custSubGrp') == 'COMME'
-            || FormManager.getActualValue('custSubGrp') == 'XCOM' || FormManager.getActualValue('custSubGrp') == 'PRICU' || FormManager.getActualValue('custSubGrp') == 'XPC')) {
-      if (isuCd == '34') {
-        clientTiers = [ '6', 'V', 'A' ];
-      } else if (isuCd == '32') {
-        clientTiers = [ 'S' ];
-      } else if (isuCd == '5B') {
-        clientTiers = [ '7' ];
-      }
-    } else if ((SysLoc.MOLDOVA == cntry || SysLoc.ROMANIA == cntry)
-        && (FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'THDPT' || FormManager.getActualValue('custSubGrp') == 'COMME'
-            || FormManager.getActualValue('custSubGrp') == 'XCOM' || FormManager.getActualValue('custSubGrp') == 'PRICU' || FormManager.getActualValue('custSubGrp') == 'XPC')) {
-      if (isuCd == '34') {
-        clientTiers = [ 'V' ];
-      } else if (isuCd == '32') {
-        clientTiers = [ 'S', 'M' ];
-      } else if (isuCd == '5B') {
-        clientTiers = [ '7' ];
-      }
-
-    } else if ((SysLoc.POLAND == cntry || SysLoc.RUSSIA == cntry)
-        && (FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'THDPT' || FormManager.getActualValue('custSubGrp') == 'COMME'
-            || FormManager.getActualValue('custSubGrp') == 'XCOM' || FormManager.getActualValue('custSubGrp') == 'PRICU' || FormManager.getActualValue('custSubGrp') == 'XPC')) {
-      if (isuCd == '34') {
-        clientTiers = [ '6', 'V', 'A' ];
-      } else if (isuCd == '32') {
-        clientTiers = [ 'S', 'N' ];
-      } else if (isuCd == '5B') {
-        clientTiers = [ '7' ];
-      }
-    } else if ((SysLoc.TUNISIA == cntry)// CMR-6057
-        && (FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'THDPT' || FormManager.getActualValue('custSubGrp') == 'COMME'
-            || FormManager.getActualValue('custSubGrp') == 'XCOM' || FormManager.getActualValue('custSubGrp') == 'PRICU')) {
-      if (isuCd == '34') {
-        clientTiers = [ 'V' ];
-      } else if (isuCd == '32') {
-        clientTiers = [ 'S', 'N', 'T', 'C' ];
-      }
-    } else if ('808' == cntry && FormManager.getActualValue('custSubGrp') != '') {// 808(Afganistan/Pakistan)
-      if (FormManager.getActualValue('custSubGrp') == 'AFTP' || FormManager.getActualValue('custSubGrp') == 'AFPC' || FormManager.getActualValue('custSubGrp') == 'AFCOM') {
-        if (isuCd == '34') {
-          clientTiers = [ 'V', 'A' ];
-        } else if (isuCd == '32') {
-          clientTiers = [ 'C', 'T', 'N' ];
-        }
-      } else if (FormManager.getActualValue('custSubGrp') == 'PKTP' || FormManager.getActualValue('custSubGrp') == 'PKXTP' || FormManager.getActualValue('custSubGrp') == 'PKCOM'
-          || FormManager.getActualValue('custSubGrp') == 'PKXCO' || FormManager.getActualValue('custSubGrp') == 'PKPC') {
-
-        if (isuCd == '34') {
-          clientTiers = [ 'V' ];
-        } else if (isuCd == '32') {
-          clientTiers = [ 'S', 'T', 'N' ];
-        }
-      } else {
-        clientTiers = [ '7' ];
-      }
-      // End of CMR6057
-    } else {
-      var qParams = {
-        _qall : 'Y',
-        ISSUING_CNTRY : cntry,
-        ISU : '%' + isuCd + '%'
-      };
-      var results = cmr.query('GET.CTCLIST.BYISU', qParams);
-      if (results != null) {
-        for (var i = 0; i < results.length; i++) {
-          clientTiers.push(results[i].ret1);
-        }
-      }
-    }
-    if (clientTiers != null) {
-      FormManager.limitDropdownValues(FormManager.getField('clientTier'), clientTiers);
-      if (clientTiers.length == 1) {
-        FormManager.setValue('clientTier', clientTiers[0]);
-      }
-    }
-  }
-}
+// function setClientTierValues(isuCd) {
+// if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+// return;
+// }
+//
+// isuCd = FormManager.getActualValue('isuCd');
+// var cntry = FormManager.getActualValue('cmrIssuingCntry');
+// var clientTiers = [];
+// if (isuCd != '') {
+// if (SysLoc.SLOVAKIA == cntry
+// && (FormManager.getActualValue('custSubGrp') == 'XTP' ||
+// FormManager.getActualValue('custSubGrp') == 'THDPT' ||
+// FormManager.getActualValue('custSubGrp') == 'COMME'
+// || FormManager.getActualValue('custSubGrp') == 'XCOM' ||
+// FormManager.getActualValue('custSubGrp') == 'PRICU' ||
+// FormManager.getActualValue('custSubGrp') == 'XPC')) {
+// if (isuCd == '34') {
+// clientTiers = [ '6', 'V' ];
+// } else if (isuCd == '32') {
+// clientTiers = [ 'N', 'S' ];
+// } else if (isuCd == '5B') {
+// clientTiers = [ '7' ];
+// }
+// } else if ((SysLoc.TURKMENISTAN == cntry || SysLoc.TAJIKISTAN == cntry ||
+// SysLoc.ALBANIA == cntry || SysLoc.ARMENIA == cntry || SysLoc.BELARUS == cntry
+// || SysLoc.BULGARIA == cntry
+// || SysLoc.GEORGIA == cntry || SysLoc.KAZAKHSTAN == cntry || SysLoc.KYRGYZSTAN
+// == cntry || SysLoc.MACEDONIA == cntry || SysLoc.SERBIA == cntry ||
+// SysLoc.UZBEKISTAN == cntry || SysLoc.UKRAINE == cntry)
+// && (FormManager.getActualValue('custSubGrp') == 'XTP' ||
+// FormManager.getActualValue('custSubGrp') == 'XCE' ||
+// FormManager.getActualValue('custSubGrp') == 'THDPT'
+// || FormManager.getActualValue('custSubGrp') == 'COMME' ||
+// FormManager.getActualValue('custSubGrp') == 'XCOM' ||
+// FormManager.getActualValue('custSubGrp') == 'PRICU'
+// || FormManager.getActualValue('custSubGrp') == 'XPC' ||
+// FormManager.getActualValue('custSubGrp') == 'CSCOM' ||
+// FormManager.getActualValue('custSubGrp') == 'CSPC'
+// || FormManager.getActualValue('custSubGrp') == 'CSTP' ||
+// FormManager.getActualValue('custSubGrp') == 'MECOM' ||
+// FormManager.getActualValue('custSubGrp') == 'MEPC'
+// || FormManager.getActualValue('custSubGrp') == 'METP' ||
+// FormManager.getActualValue('custSubGrp') == 'RSXCO' ||
+// FormManager.getActualValue('custSubGrp') == 'RSXPC'
+// || FormManager.getActualValue('custSubGrp') == 'RSXTP' ||
+// FormManager.getActualValue('custSubGrp') == 'RSCOM' ||
+// FormManager.getActualValue('custSubGrp') == 'RSPC' || FormManager
+// .getActualValue('custSubGrp') == 'RSTP')) {
+// if (isuCd == '34') {
+// clientTiers = [ 'V' ];
+// } else if (isuCd == '32') {
+// clientTiers = [ 'S' ];
+// }
+// } else if ((SysLoc.AZERBAIJAN == cntry)
+// && (FormManager.getActualValue('custSubGrp') == 'XTP' ||
+// FormManager.getActualValue('custSubGrp') == 'XCE' ||
+// FormManager.getActualValue('custSubGrp') == 'THDPT'
+// || FormManager.getActualValue('custSubGrp') == 'COMME' ||
+// FormManager.getActualValue('custSubGrp') == 'XCOM' ||
+// FormManager.getActualValue('custSubGrp') == 'PRICU'
+// || FormManager.getActualValue('custSubGrp') == 'XPC' ||
+// FormManager.getActualValue('custSubGrp') == 'CSCOM' ||
+// FormManager.getActualValue('custSubGrp') == 'CSPC'
+// || FormManager.getActualValue('custSubGrp') == 'CSTP' ||
+// FormManager.getActualValue('custSubGrp') == 'MECOM' ||
+// FormManager.getActualValue('custSubGrp') == 'MEPC'
+// || FormManager.getActualValue('custSubGrp') == 'METP' ||
+// FormManager.getActualValue('custSubGrp') == 'RSXCO' ||
+// FormManager.getActualValue('custSubGrp') == 'RSXPC'
+// || FormManager.getActualValue('custSubGrp') == 'RSXTP' ||
+// FormManager.getActualValue('custSubGrp') == 'RSCOM' ||
+// FormManager.getActualValue('custSubGrp') == 'RSPC' || FormManager
+// .getActualValue('custSubGrp') == 'RSTP')) {
+// if (isuCd == '34') {
+// clientTiers = [ 'V' ];
+// } else if (isuCd == '32') {
+// clientTiers = [ 'S' ];
+// }
+// } else if ((SysLoc.CZECH_REPUBLIC == cntry)
+// && (FormManager.getActualValue('custSubGrp') == 'XTP' ||
+// FormManager.getActualValue('custSubGrp') == 'THDPT' ||
+// FormManager.getActualValue('custSubGrp') == 'COMME'
+// || FormManager.getActualValue('custSubGrp') == 'XCOM' ||
+// FormManager.getActualValue('custSubGrp') == 'PRICU' ||
+// FormManager.getActualValue('custSubGrp') == 'XPC')) {
+// if (isuCd == '34') {
+// clientTiers = [ '6', 'V' ];
+// } else if (isuCd == '32') {
+// clientTiers = [ 'S', 'N' ];
+// } else if (isuCd == '5B') {
+// clientTiers = [ '7' ];
+// }
+// } else if ((SysLoc.BOSNIA_HERZEGOVINA == cntry || SysLoc.SLOVENIA == cntry)
+// && (FormManager.getActualValue('custSubGrp') == 'XTP' ||
+// FormManager.getActualValue('custSubGrp') == 'THDPT' ||
+// FormManager.getActualValue('custSubGrp') == 'COMME'
+// || FormManager.getActualValue('custSubGrp') == 'XCOM' ||
+// FormManager.getActualValue('custSubGrp') == 'PRICU' ||
+// FormManager.getActualValue('custSubGrp') == 'XPC')) {
+// if (isuCd == '34') {
+// clientTiers = [ 'V' ];
+// } else if (isuCd == '32') {
+// clientTiers = [ 'S', 'M' ];
+// }
+// } else if ((SysLoc.CROATIA == cntry)
+// && (FormManager.getActualValue('custSubGrp') == 'XTP' ||
+// FormManager.getActualValue('custSubGrp') == 'THDPT' ||
+// FormManager.getActualValue('custSubGrp') == 'COMME'
+// || FormManager.getActualValue('custSubGrp') == 'XCOM' ||
+// FormManager.getActualValue('custSubGrp') == 'PRICU' ||
+// FormManager.getActualValue('custSubGrp') == 'XPC')) {
+// if (isuCd == '34') {
+// clientTiers = [ '6', 'V' ];
+// } else if (isuCd == '32') {
+// clientTiers = [ 'S' ];
+// }
+// } else if ((SysLoc.HUNGARY == cntry)
+// && (FormManager.getActualValue('custSubGrp') == 'XTP' ||
+// FormManager.getActualValue('custSubGrp') == 'THDPT' ||
+// FormManager.getActualValue('custSubGrp') == 'COMME'
+// || FormManager.getActualValue('custSubGrp') == 'XCOM' ||
+// FormManager.getActualValue('custSubGrp') == 'PRICU' ||
+// FormManager.getActualValue('custSubGrp') == 'XPC')) {
+// if (isuCd == '34') {
+// clientTiers = [ '6', 'V', 'A' ];
+// } else if (isuCd == '32') {
+// clientTiers = [ 'S' ];
+// } else if (isuCd == '5B') {
+// clientTiers = [ '7' ];
+// }
+// } else if ((SysLoc.MOLDOVA == cntry || SysLoc.ROMANIA == cntry)
+// && (FormManager.getActualValue('custSubGrp') == 'XTP' ||
+// FormManager.getActualValue('custSubGrp') == 'THDPT' ||
+// FormManager.getActualValue('custSubGrp') == 'COMME'
+// || FormManager.getActualValue('custSubGrp') == 'XCOM' ||
+// FormManager.getActualValue('custSubGrp') == 'PRICU' ||
+// FormManager.getActualValue('custSubGrp') == 'XPC')) {
+// if (isuCd == '34') {
+// clientTiers = [ 'V' ];
+// } else if (isuCd == '32') {
+// clientTiers = [ 'S', 'M' ];
+// } else if (isuCd == '5B') {
+// clientTiers = [ '7' ];
+// }
+//
+// } else if ((SysLoc.POLAND == cntry || SysLoc.RUSSIA == cntry)
+// && (FormManager.getActualValue('custSubGrp') == 'XTP' ||
+// FormManager.getActualValue('custSubGrp') == 'THDPT' ||
+// FormManager.getActualValue('custSubGrp') == 'COMME'
+// || FormManager.getActualValue('custSubGrp') == 'XCOM' ||
+// FormManager.getActualValue('custSubGrp') == 'PRICU' ||
+// FormManager.getActualValue('custSubGrp') == 'XPC')) {
+// if (isuCd == '34') {
+// clientTiers = [ '6', 'V', 'A' ];
+// } else if (isuCd == '32') {
+// clientTiers = [ 'S', 'N' ];
+// } else if (isuCd == '5B') {
+// clientTiers = [ '7' ];
+// }
+// } else if ((SysLoc.TUNISIA == cntry)// CMR-6057
+// && (FormManager.getActualValue('custSubGrp') == 'XTP' ||
+// FormManager.getActualValue('custSubGrp') == 'THDPT' ||
+// FormManager.getActualValue('custSubGrp') == 'COMME'
+// || FormManager.getActualValue('custSubGrp') == 'XCOM' ||
+// FormManager.getActualValue('custSubGrp') == 'PRICU')) {
+// if (isuCd == '34') {
+// clientTiers = [ 'V' ];
+// } else if (isuCd == '32') {
+// clientTiers = [ 'S', 'N', 'T', 'C' ];
+// }
+// } else if ('808' == cntry && FormManager.getActualValue('custSubGrp') != '')
+// {// 808(Afganistan/Pakistan)
+// if (FormManager.getActualValue('custSubGrp') == 'AFTP' ||
+// FormManager.getActualValue('custSubGrp') == 'AFPC' ||
+// FormManager.getActualValue('custSubGrp') == 'AFCOM') {
+// if (isuCd == '34') {
+// clientTiers = [ 'V', 'A' ];
+// } else if (isuCd == '32') {
+// clientTiers = [ 'C', 'T', 'N' ];
+// }
+// } else if (FormManager.getActualValue('custSubGrp') == 'PKTP' ||
+// FormManager.getActualValue('custSubGrp') == 'PKXTP' ||
+// FormManager.getActualValue('custSubGrp') == 'PKCOM'
+// || FormManager.getActualValue('custSubGrp') == 'PKXCO' ||
+// FormManager.getActualValue('custSubGrp') == 'PKPC') {
+//
+// if (isuCd == '34') {
+// clientTiers = [ 'V' ];
+// } else if (isuCd == '32') {
+// clientTiers = [ 'S', 'T', 'N' ];
+// }
+// } else {
+// clientTiers = [ '7' ];
+// }
+// // End of CMR6057
+// } else {
+// var qParams = {
+// _qall : 'Y',
+// ISSUING_CNTRY : cntry,
+// ISU : '%' + isuCd + '%'
+// };
+// var results = cmr.query('GET.CTCLIST.BYISU', qParams);
+// if (results != null) {
+// for (var i = 0; i < results.length; i++) {
+// clientTiers.push(results[i].ret1);
+// }
+// }
+// }
+// if (clientTiers != null) {
+// FormManager.limitDropdownValues(FormManager.getField('clientTier'),
+// clientTiers);
+// if (clientTiers.length == 1) {
+// FormManager.setValue('clientTier', clientTiers[0]);
+// }
+// }
+// }
+// }
 
 function setClientTier2Values(dupIsuCd) {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
@@ -4165,6 +4231,36 @@ function addVATAttachValidation() {
     };
   })(), 'MAIN_ATTACH_TAB', 'frmCMR');
 }
+var currentChosenScenarioME = '';
+function setIsuCtcOnScenarioChange() {
+  var reqType = FormManager.getActualValue('reqType');
+  if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType != 'C') {
+    return;
+  }
+  var scenario = FormManager.getActualValue('custSubGrp');
+  var scenarioChanged = false;
+  if (typeof (_pagemodel) != 'undefined' && _pagemodel['custSubGrp'] != scenario) {
+    scenarioChanged = true;
+  }
+  scenarioChanged = scenarioChanged || (currentChosenScenarioME != '' && currentChosenScenarioME != scenario);
+  currentChosenScenarioME = scenario;
+  if(scenario == 'BUSPR' || scenario.includes('BP')){
+    FormManager.setValue('isuCd', '8B');
+    FormManager.setValue('clientTier', '7');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('clientTier');
+  }else if(scenario.includes('IN')){
+    FormManager.setValue('isuCd', '21');
+    FormManager.setValue('clientTier', '7');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('clientTier');
+  }else if(scenarioChanged){
+    FormManager.setValue('isuCd', '34');
+    FormManager.setValue('clientTier', 'Q');
+    FormManager.enable('isuCd');
+    FormManager.enable('clientTier');
+  }
+} 
 
 dojo.addOnLoad(function() {
   GEOHandler.CEMEA_COPY = [ '358', '359', '363', '603', '607', '620', '626', '644', '642', '651', '668', '677', '680', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '752',
@@ -4240,8 +4336,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(afterConfigForCEMEA, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(setCountryDuplicateFields, SysLoc.RUSSIA);
   GEOHandler.addAfterTemplateLoad(setCountryDuplicateFields, SysLoc.RUSSIA);
-  GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.CEMEA);
-  GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.CEMEA);
+  // GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.CEMEA);
+  // GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(setSBOValuesForIsuCtc, [ SysLoc.AUSTRIA ]); // CMR-2101
   GEOHandler.addAfterConfig(resetVatExempt, GEOHandler.CEMEA);
   GEOHandler.addAfterTemplateLoad(resetVatExempt, GEOHandler.CEMEA);
@@ -4362,6 +4458,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(lockIsicCdME, GEOHandler.ME);
   GEOHandler.addAfterConfig(resetVatExemptMandatoryForLocalScenario, GEOHandler.ME);
   GEOHandler.addAfterTemplateLoad(resetVatExemptMandatoryForLocalScenario, GEOHandler.ME);
+  GEOHandler.addAfterTemplateLoad(setIsuCtcOnScenarioChange, GEOHandler.ME);
   GEOHandler.registerValidator(addVATAttachValidation, [ SysLoc.EGYPT ], null, true);
   // GEOHandler.addAfterConfig(addPrefixVat, GEOHandler.CEE);
   // GEOHandler.addAfterTemplateLoad(addPrefixVat, GEOHandler.CEE);
