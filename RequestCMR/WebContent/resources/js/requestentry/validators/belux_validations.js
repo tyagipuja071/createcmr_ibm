@@ -138,6 +138,7 @@ function afterConfigForBELUX() {
   setVatValidatorBELUX();
   addHandlerForReqRsn();
   disableCmrNo();
+  disableModeOfPayment();
   setAccTemNumValueOnScenarios();
   addAccTemNumValidate();
   disableSBO();
@@ -156,6 +157,16 @@ function disableCmrNo() {
     } else if (role == 'Processor') {
       FormManager.enable('cmrNo');
     }
+  }
+}
+
+function disableModeOfPayment() {
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType == 'U') {
+    // do nothing for Update request
+  } else if (reqType == 'C') {
+    FormManager.readOnly('modeOfPayment');
+    FormManager.clearValue('modeOfPayment');
   }
 }
 
