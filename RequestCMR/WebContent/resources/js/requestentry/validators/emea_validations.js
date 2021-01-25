@@ -4524,7 +4524,7 @@ function afterConfigForIT() {
 
   if (_CTCHandlerIT == null) {
     _CTCHandlerIT = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
-      setSalesRepValuesIT(value);
+      // setSalesRepValuesIT(value);
       // autoSetSBOSROnPostalCode(value, false);
       blankedOutCollectionCD();
     });
@@ -4533,7 +4533,7 @@ function afterConfigForIT() {
   if (_ISUHandlerIT == null) {
     _ISUHandlerIT = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       // setClientTierValuesIT(value);
-      setSalesRepValuesIT(value);
+      // setSalesRepValuesIT(value);
       setAffiliateEnterpriseRequired();
       blankedOutCollectionCD();
 
@@ -4542,7 +4542,7 @@ function afterConfigForIT() {
 
   if (_salesRepHandlerIT == null) {
     _salesRepHandlerIT = dojo.connect(FormManager.getField('repTeamMemberNo'), 'onChange', function(value) {
-      autoSetSBOOnSRValueIT();
+      // autoSetSBOOnSRValueIT();
     });
   }
 
@@ -4673,7 +4673,7 @@ function afterConfigForIT() {
 
     } else {
       var custSubType = FormManager.getActualValue('custSubGrp');
-      if (FormManager.getActualValue('isuCd') != null && "32" == FormManager.getActualValue('isuCd')) {
+      if (FormManager.getActualValue('isuCd') != null && "34" == FormManager.getActualValue('isuCd')) {
         if (custSubType == 'CROGO' || custSubType == 'CROUN' || custSubType == 'CROLC' || custSubType == 'CROCM' || custSubType == 'CROBP') {
           FormManager.setValue('collectionCd', 'CIT16');
           FormManager.readOnly('collectionCd');
@@ -5943,7 +5943,7 @@ function getOldValuesIT(fromAddress, scenario, scenarioChanged) {
           FormManager.resetValidations('clientTier');
           FormManager.readOnly('inacCd');
         }
-        if (FormManager.getActualValue('isuCd') != null && "32" == FormManager.getActualValue('isuCd')) {
+        if (FormManager.getActualValue('isuCd') != null && "34" == FormManager.getActualValue('isuCd')) {
           if (custSubType == 'CROGO' || custSubType == 'CROUN' || custSubType == 'CROLC' || custSubType == 'CROCM' || custSubType == 'CROBP') {
             // console.log("For CB getOld set default value of collection code
             // CIT16");
@@ -8208,7 +8208,7 @@ function addAfterTemplateLoadItaly(fromAddress, scenario, scenarioChanged) {
   enableDisableTaxCodeCollectionCdIT();
   // setClientTierValuesIT();
   addAfterTemplateLoadIT();
-  setSalesRepValuesIT();
+  // setSalesRepValuesIT();
   blankedOutCollectionCD();
   setAffiliateEnterpriseRequired();
   addFieldValidationForRequestorItaly();
