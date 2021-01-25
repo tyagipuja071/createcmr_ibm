@@ -123,7 +123,7 @@ function setCtcSalesRepSBO(value) {
   }
 
   if(role == 'REQUESTER'){
-    if (scenario != null && !internalBUScenarios.includes(scenario) && isuCtc != '32S' && isuCtc != '34V' && (countryUse == '864' || countryUse == '864LS' || countryUse == '864SZ')) {
+    if (scenario != null && !internalBUScenarios.includes(scenario) && isuCtc != '34Q' && isuCtc != '34V' && (countryUse == '864' || countryUse == '864LS' || countryUse == '864SZ')) {
       FormManager.setValue('salesBusOffCd', '');
       FormManager.setValue('repTeamMemberNo', '');
     }
@@ -133,7 +133,7 @@ function setCtcSalesRepSBO(value) {
     }
   }
   if(role != 'REQUESTER' && _isScenarioChanged){
-    if (scenario != null && !internalBUScenarios.includes(scenario) && isuCtc != '32S' && isuCtc != '34V' && (countryUse == '864' || countryUse == '864LS' || countryUse == '864SZ')) {
+    if (scenario != null && !internalBUScenarios.includes(scenario) && isuCtc != '34Q' && isuCtc != '34V' && (countryUse == '864' || countryUse == '864LS' || countryUse == '864SZ')) {
       FormManager.setValue('salesBusOffCd', '');
       FormManager.setValue('repTeamMemberNo', '');
     }
@@ -1867,7 +1867,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(mandatoryForBusinessPartner, [ SysLoc.SOUTH_AFRICA ]);
   GEOHandler.addAfterConfig(validateTypeOfCustomer, GEOHandler.MCO1);
 
-  //GEOHandler.registerValidator(addInacCodeValidator, [ SysLoc.SOUTH_AFRICA ], null, true);
+  // GEOHandler.registerValidator(addInacCodeValidator, [ SysLoc.SOUTH_AFRICA ],
+  // null, true);
   GEOHandler.registerValidator(embargoCdValidator, [ SysLoc.SOUTH_AFRICA ], null, true);
   GEOHandler.registerValidator(validateCMRNumForProspect, [ SysLoc.SOUTH_AFRICA ], GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(addStreetAddressValidator, [ SysLoc.SOUTH_AFRICA ], null, true);
