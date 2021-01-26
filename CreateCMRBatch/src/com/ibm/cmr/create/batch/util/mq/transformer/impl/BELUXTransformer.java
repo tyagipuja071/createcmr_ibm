@@ -999,14 +999,8 @@ public class BELUXTransformer extends EMEATransformer {
 
       String dataEmbargoCd = data.getEmbargoCd();
       String rdcEmbargoCd = LegacyDirectUtil.getEmbargoCdFromDataRdc(entityManager, admin);
-      String cof = data.getCommercialFinanced();
-      if (!StringUtils.isBlank(cof)) {
-        if ("R".equals(cof) || "S".equals(cof) || "T".equals(cof)) {
-          legacyCust.setModeOfPayment(cof);
-        }
-      } else {
-        legacyCust.setModeOfPayment("");
-      }
+
+      legacyCust.setModeOfPayment(data.getModeOfPayment() == null ? "" : data.getModeOfPayment());
 
       // permanent removal-single inactivation
       if (admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason()) && !"TREC".equals(admin.getReqReason())) {
