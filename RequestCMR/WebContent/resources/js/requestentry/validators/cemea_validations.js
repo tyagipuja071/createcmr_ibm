@@ -638,7 +638,14 @@ function addHandlersForCEMEA() {
 
   if (_CTCHandler == null) {
     _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
-      setEnterpriseValues(value);
+      // CreateCMR -811 change start
+      var cntry = FormManager.getActualValue('cmrIssuingCntry');
+      if (CEE_INCL.has(cntry)) {
+        setCompanyNoForCEE(value);
+      } else {
+        setEnterpriseValues(value);
+      }
+
       // CMR-2101 Austria remove ISR
       if (FormManager.getActualValue('cmrIssuingCntry') != SysLoc.AUSTRIA) {
         setSalesRepValues(value);
@@ -736,13 +743,13 @@ function setCISFieldHandlers() {
   if (_DupIssuingCntryCdHandler == null) {
     _DupIssuingCntryCdHandler = dojo.connect(FormManager.getField('dupIssuingCntryCd'), 'onChange', function(value) {
       setDropdownField2Values(value);
-      setDupISUValues(value);
+      setDupISUCTCValues(value);
     });
   }
 
   if (_ISU2Handler == null) {
     _ISU2Handler = dojo.connect(FormManager.getField('dupIsuCd'), 'onChange', function(value) {
-      setClientTier2Values(value);
+      // setClientTier2Values(value);
     });
   }
 
@@ -1297,6 +1304,11 @@ function setClientTierValues(isuCd) {
   if (SysLoc.AUSTRIA == cntry) {// CMR-710
     return;
   }
+
+  if (CEE_INCL.has(cntry)) {// CreateCMR-811
+    return;
+  }
+
   var clientTiers = [];
   if (isuCd != '') {
     if (SysLoc.SLOVAKIA == cntry
@@ -1429,37 +1441,46 @@ function setClientTierValues(isuCd) {
   }
 }
 
-function setClientTier2Values(dupIsuCd) {
+/*
+ * Change to comment for CreateCMR-811 function setClientTier2Values(dupIsuCd) {
+ * if (FormManager.getActualValue('viewOnlyPage') == 'true') { return; }
+ * 
+ * dupIsuCd = FormManager.getActualValue('dupIsuCd'); var dupIssuingCntryCd =
+ * FormManager.getActualValue('dupIssuingCntryCd'); var clientTiers = []; if
+ * (dupIsuCd != '') { var qParams = { _qall : 'Y', ISSUING_CNTRY :
+ * dupIssuingCntryCd, ISU : '%' + dupIsuCd + '%' }; var results =
+ * cmr.query('GET.CTCLIST.BYISU', qParams); if (results != null) { for (var i =
+ * 0; i < results.length; i++) { clientTiers.push(results[i].ret1); } if
+ * (clientTiers != null) {
+ * FormManager.limitDropdownValues(FormManager.getField('dupClientTierCd'),
+ * clientTiers); if (clientTiers.length == 1) {
+ * FormManager.setValue('dupClientTierCd', clientTiers[0]); } } } } }
+ */
+
+// CreateCMR-811 coverage update for CEE
+function setISUCTCValuesForCEE(isuCd) {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
+  isuCd = FormManager.getActualValue('isuCd');
 
-  dupIsuCd = FormManager.getActualValue('dupIsuCd');
-  var dupIssuingCntryCd = FormManager.getActualValue('dupIssuingCntryCd');
-  var clientTiers = [];
-  if (dupIsuCd != '') {
-    var qParams = {
-      _qall : 'Y',
-      ISSUING_CNTRY : dupIssuingCntryCd,
-      ISU : '%' + dupIsuCd + '%'
-    };
-    var results = cmr.query('GET.CTCLIST.BYISU', qParams);
-    if (results != null) {
-      for (var i = 0; i < results.length; i++) {
-        clientTiers.push(results[i].ret1);
-      }
-      if (clientTiers != null) {
-        FormManager.limitDropdownValues(FormManager.getField('dupClientTierCd'), clientTiers);
-        if (clientTiers.length == 1) {
-          FormManager.setValue('dupClientTierCd', clientTiers[0]);
-        }
-      }
-    }
+  if ((FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'XCE'
+      || FormManager.getActualValue('custSubGrp') == 'THDPT' || FormManager.getActualValue('custSubGrp') == 'COMME'
+      || FormManager.getActualValue('custSubGrp') == 'XCOM' || FormManager.getActualValue('custSubGrp') == 'PRICU'
+      || FormManager.getActualValue('custSubGrp') == 'XPC' || FormManager.getActualValue('custSubGrp') == 'CSCOM'
+      || FormManager.getActualValue('custSubGrp') == 'CSPC' || FormManager.getActualValue('custSubGrp') == 'CSTP'
+      || FormManager.getActualValue('custSubGrp') == 'MECOM' || FormManager.getActualValue('custSubGrp') == 'MEPC'
+      || FormManager.getActualValue('custSubGrp') == 'METP' || FormManager.getActualValue('custSubGrp') == 'RSXCO'
+      || FormManager.getActualValue('custSubGrp') == 'RSXPC' || FormManager.getActualValue('custSubGrp') == 'RSXTP'
+      || FormManager.getActualValue('custSubGrp') == 'RSCOM' || FormManager.getActualValue('custSubGrp') == 'RSPC' || FormManager
+      .getActualValue('custSubGrp') == 'RSTP')) {
+    FormManager.setValue('isuCd', '34');
+    FormManager.setValue('clientTier', 'Q');
   }
-}
+}// End of CreateCMR-811
 
 // CMR-6057 setup ISU value for 821 Dup countries
-function setDupISUValues(custSubGrp) {
+function setDupISUCTCValues(custSubGrp) {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
@@ -1471,19 +1492,17 @@ function setDupISUValues(custSubGrp) {
     if (FormManager.getActualValue('custSubGrp') == 'XBP' || FormManager.getActualValue('custSubGrp') == 'BUSPR'
         || FormManager.getActualValue('custSubGrp') == 'EXBP' || FormManager.getActualValue('custSubGrp') == 'ELBP') {
       isuCds = [ '8B' ];
+      FormManager.setValue('dupClientTierCd', '7');
     } else if (FormManager.getActualValue('custSubGrp') == 'XINT' || FormManager.getActualValue('custSubGrp') == 'INTER') {
       isuCds = [ '21' ];
+      FormManager.setValue('dupClientTierCd', '7');
     } else if (FormManager.getActualValue('custSubGrp') == 'XCOM' || FormManager.getActualValue('custSubGrp') == 'XTP'
         || FormManager.getActualValue('custSubGrp') == 'COMME' || FormManager.getActualValue('custSubGrp') == 'PRICU'
         || FormManager.getActualValue('custSubGrp') == 'THDPT' || FormManager.getActualValue('custSubGrp') == 'EXCOM'
         || FormManager.getActualValue('custSubGrp') == 'ELCOM') {
-      if (SysLoc.UKRAINE == cntry || SysLoc.AZERBAIJAN == cntry) {
-        isuCds = [ '32', '34' ];
-      } else if (SysLoc.MOLDOVA == cntry) {
-        isuCds = [ '32', '34', '5B' ];
-      } else {
-        isuCds = [ '32' ];
-      }
+      isuCds = [ '4', '5', '11', '12', '14', '15', '18', '19', '1R', '21', '27', '28', '31', '32', '34', '3T', '40', '4A', '4D', '4F', '5B', '5E',
+          '60', '8B', '8C' ];// CreateCMR-811
+      FormManager.setValue('dupClientTierCd', 'Q');
     }
   }
 
@@ -1491,6 +1510,8 @@ function setDupISUValues(custSubGrp) {
     FormManager.limitDropdownValues(FormManager.getField('dupIsuCd'), isuCds);
     if (isuCds.length == 1) {
       FormManager.setValue('dupIsuCd', isuCds[0]);
+    } else {
+      FormManager.setValue('dupIsuCd', '34');
     }
   }
 }
@@ -2244,6 +2265,10 @@ function setEnterpriseValues(clientTier) {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  if (CEE_INCL.has(cntry)) { // CreateCMR-811
+    return;
+  }
+
   if (!CEE_INCL.has(cntry)) {
     if (FormManager.getActualValue('viewOnlyPage') == 'true' || custSubGrp == 'IBMEM' || custSubGrp == 'PRICU' || custSubGrp == 'BUSPR'
         || custSubGrp == 'XBP' || custSubGrp == 'INTER' || custSubGrp == 'INTSO') {
@@ -2384,6 +2409,104 @@ function setEnterpriseValues(clientTier) {
     }
   }
 }
+
+// CreateCMR-811 coverage update for CEE
+function setCompanyNoForCEE(clientTier) {
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+
+  if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
+
+  var isuCd = FormManager.getActualValue('isuCd');
+  if (role != 'REQUESTER') {
+    FormManager.enable('enterprise');
+  }
+  clientTier = FormManager.getActualValue('clientTier');
+
+  var enterprises = [];
+  if (isuCd != '' && clientTier != '') {
+
+    if (FormManager.getActualValue('custSubGrp') == 'INTER' || FormManager.getActualValue('custSubGrp') == 'XINT'
+        || FormManager.getActualValue('custSubGrp') == 'CSINT' || FormManager.getActualValue('custSubGrp') == 'MEINT'
+        || FormManager.getActualValue('custSubGrp') == 'RSXIN' || FormManager.getActualValue('custSubGrp') == 'RSINT') {
+      enterprises = [ '900090' ];
+    } else if (FormManager.getActualValue('custSubGrp') == 'BUSPR' || FormManager.getActualValue('custSubGrp') == 'XBP'
+        || FormManager.getActualValue('custSubGrp') == 'BP' || FormManager.getActualValue('custSubGrp') == 'CSBP'
+        || FormManager.getActualValue('custSubGrp') == 'MEBP' || FormManager.getActualValue('custSubGrp') == 'RSXBP'
+        || FormManager.getActualValue('custSubGrp') == 'RSBP') {
+      enterprises = [ '' ];
+    } else if (isuCd == '34' && clientTier == 'Q') {
+      if (SysLoc.UKRAINE == cntry) {
+        enterprises = [ '985050', '985024' ];
+        FormManager.setValue('enterprise', '985024');
+      } else if (SysLoc.CZECH_REPUBLIC == cntry) {
+        enterprises = [ '985003', '985013', '985014', '985015', '985050', '985055', '985069', '985070' ];
+        FormManager.setValue('enterprise', '985050');
+      } else if (SysLoc.SLOVAKIA == cntry) {
+        enterprises = [ '985004', '985013', '985050', '985069', '985070' ];
+        FormManager.setValue('enterprise', '985050');
+      } else if (SysLoc.POLAND == cntry) {
+        enterprises = [ '985003', '985004', '985011', '985012', '985013', '985014', '985016', '985050', '985055', '985062', '985063', '985064',
+            '985065', '985066', '985068', '985069', '985070' ];
+        FormManager.setValue('enterprise', '985050');
+      } else if (SysLoc.BULGARIA == cntry) {
+        enterprises = [ '985024', '985050' ];
+        FormManager.setValue('enterprise', '985050');
+      } else if (SysLoc.HUNGARY == cntry) {
+        enterprises = [ '985014', '985050', '985055', '985069', '985070' ];
+        FormManager.setValue('enterprise', '985050');
+      } else if (SysLoc.CROATIA == cntry || SysLoc.MOLDOVA == cntry || SysLoc.ROMANIA == cntry || SysLoc.BOSNIA_HERZEGOVINA == cntry
+          || SysLoc.SLOVENIA == cntry) {
+        enterprises = [ '985024', '985050', '985069', '985070' ];
+        FormManager.setValue('enterprise', '985050');
+
+      } else if (SysLoc.RUSSIA == cntry) {
+        enterprises = [ '985012', '985013', '985014', '985016', '985017', '985018', '985021', '985026', '985031', '985040', ' 985041', ' 985042',
+            '985051', ' 985052', '985053', '985054', '985055', ' 985067', '  985069', ' 985070', ' 985081', '985082', '985083', ' 985084' ];
+        FormManager.setValue('enterprise', '985051');
+      }
+    } else {
+      var qParams = {
+        _qall : 'Y',
+        ISSUING_CNTRY : cntry,
+        ISU : '%' + isuCd + clientTier + '%'
+      };
+      var results = cmr.query('GET.ENTLIST.BYISU', qParams);
+      if (results != null) {
+        for (var i = 0; i < results.length; i++) {
+          enterprises.push(results[i].ret1);
+        }
+      }
+    }
+    if (enterprises != null) {// Need check-CreateCMR-811
+      var field = FormManager.getField('enterprise');
+      FormManager.limitDropdownValues(field, enterprises);
+      if (enterprises.length == 1) {
+        FormManager.setValue('enterprise', enterprises[0]);
+      } else {
+        if (isuCd == '34' && clientTier == 'Q') {
+          if (SysLoc.UKRAINE == cntry) {
+            FormManager.setValue('enterprise', '985024');
+          } else if (SysLoc.CZECH_REPUBLIC == cntry || SysLoc.SLOVAKIA == cntry || SysLoc.POLAND == cntry || SysLoc.BULGARIA == cntry
+              || SysLoc.HUNGARY == cntry || SysLoc.CROATIA == cntry || SysLoc.MOLDOVA == cntry || SysLoc.ROMANIA == cntry
+              || SysLoc.BOSNIA_HERZEGOVINA == cntry || SysLoc.SLOVENIA == cntry) {
+            FormManager.setValue('enterprise', '985050');
+          } else if (SysLoc.RUSSIA == cntry) {
+            FormManager.setValue('enterprise', '985051');
+          }
+        }
+      }
+    }
+  }
+}
+// CreateCMR-811 Change End
 
 function addCmrNoValidatorForCEE() {
   FormManager
@@ -4391,14 +4514,21 @@ dojo
       GEOHandler.registerValidator(restrictDuplicateAddr, GEOHandler.CEE, null, true);
       GEOHandler.registerValidator(validateIsicCEEValidator, GEOHandler.CEE, null, true);
       GEOHandler.registerValidator(addAddressTypeValidatorCEE, GEOHandler.CEE, null, true);
+      GEOHandler.addAfterConfig(setISUCTCValuesForCEE, GEOHandler.CEE);// CreateCMR-811
+      GEOHandler.addAfterTemplateLoad(setISUCTCValuesForCEE, GEOHandler.CEE); // CreateCMR-811
+      GEOHandler.addAfterConfig(setCompanyNoForCEE, GEOHandler.CEE);
+      GEOHandler.addAfterTemplateLoad(setCompanyNoForCEE, GEOHandler.CEE); // CreateCMR-811
+
       // CMR-4606 DupCMR exist
       GEOHandler.registerValidator(dupCMRExistCheckForRuCIS, [ SysLoc.RUSSIA ], null, true);
       GEOHandler.registerValidator(checkGAddressExist, [ SysLoc.RUSSIA ], null, true);
       GEOHandler.addAfterConfig(validatorsDIGITForDupField, [ SysLoc.RUSSIA ]);
-      GEOHandler.addAfterConfig(setClientTier2Values, [ SysLoc.RUSSIA ]);
-      GEOHandler.addAfterTemplateLoad(setClientTier2Values, [ SysLoc.RUSSIA ]);
-      // GEOHandler.addAfterConfig(setDupISUValues, [ SysLoc.RUSSIA ]);
-      GEOHandler.addAfterTemplateLoad(setDupISUValues, [ SysLoc.RUSSIA ]);
+      // GEOHandler.addAfterConfig(setClientTier2Values, [ SysLoc.RUSSIA
+      // ]);-CreateCMR-811
+      // GEOHandler.addAfterTemplateLoad(setClientTier2Values, [ SysLoc.RUSSIA
+      // ]);
+      GEOHandler.addAfterConfig(setDupISUCTCValues, [ SysLoc.RUSSIA ]);
+      GEOHandler.addAfterTemplateLoad(setDupISUCTCValues, [ SysLoc.RUSSIA ]);
       // Slovakia
       GEOHandler.addAfterConfig(afterConfigForSlovakia, [ SysLoc.SLOVAKIA ]);
       GEOHandler.addAfterTemplateLoad(afterConfigForSlovakia, [ SysLoc.SLOVAKIA ]);
