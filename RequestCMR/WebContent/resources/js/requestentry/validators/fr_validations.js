@@ -1970,17 +1970,18 @@ function addCrossBorderValidatorForFR() {
           scenario = 'CROSS';
         }
 
-        var cntryRegion = FormManager.getActualValue('countryUse');
+        // var cntryRegion = FormManager.getActualValue('countryUse');
         var landCntry = 'FR'; // default to France
-        if (cntryRegion != '' && cntryRegion.length > 3) {
-          landCntry = cntryRegion.substring(3, 5);
-        }
+        // if (cntryRegion != '' && cntryRegion.length > 3) {
+        // landCntry = cntryRegion.substring(3, 5);
+        // }
 
         var reqId = FormManager.getActualValue('reqId');
         var defaultLandCntry = landCntry;
         var result = cmr.query('VALIDATOR.CROSSBORDER', {
           REQID : reqId
         });
+
         if (result != null && result.ret1 != '' && result.ret1 != undefined && defaultLandCntry != '' && result.ret1 != defaultLandCntry
             && scenario != 'CROSS') {
           return new ValidationResult(null, false, 'Landed Country value of the Sold-to (Main) Address should be \'' + defaultLandCntry
@@ -2364,8 +2365,26 @@ function addLengthValidatorForSIRET() {
 // })(), 'MAIN_NAME_TAB', 'frmCMR');
 // }
 
+var _addrTypeHandler = [];
+
 function disableLandCntry() {
+
   var custType = FormManager.getActualValue('custGrp');
+
+  for (var i = 0; i < _addrTypesForFR.length; i++) {
+    _addrTypeHandler[i] = null;
+    if (_addrTypeHandler[i] == null) {
+      _addrTypeHandler[i] = dojo.connect(FormManager.getField('addrType_' + _addrTypesForFR[i]), 'onClick', function(value) {
+        var addrTypeVal = FormManager.getActualValue('addrType');
+        if (custType == 'LOCAL' && (addrTypeVal == 'ZS01')) {
+          FormManager.readOnly('landCntry');
+        } else {
+          FormManager.enable('landCntry');
+        }
+      });
+    }
+  }
+
   if (custType == 'LOCAL' && FormManager.getActualValue('addrType') == 'ZS01') {
     FormManager.readOnly('landCntry');
   } else {
