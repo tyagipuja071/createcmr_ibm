@@ -779,13 +779,13 @@ function setSalesRepValues(isuCd, clientTier) {
   var salesReps = [];
   if (isuCd != '') {
     if (cntry == '764' || cntry == '831' || cntry == '851' || cntry == '857') {
-      if ((isuCd == '32' && (clientTier == 'C' || clientTier == 'T')) || (isuCd == '34' && clientTier == 'Q')) {
+      if ((isuCd == '32' && clientTier == 'T') || (isuCd == '34' && clientTier == 'Q')) {
         FormManager.setValue('salesBusOffCd', '0080');
       } else {
         FormManager.setValue('salesBusOffCd', '0010');
       }
     } else if (cntry == '698' || cntry == '745') {
-      if ((isuCd == '32' && (clientTier == 'C' || clientTier == 'T')) || (isuCd == '34' && clientTier == 'Q')) {
+      if ((isuCd == '32' && clientTier == 'T') || (isuCd == '34' && clientTier == 'Q')) {
         FormManager.setValue('salesBusOffCd', '0060');
       } else {
         FormManager.setValue('salesBusOffCd', '0010');
