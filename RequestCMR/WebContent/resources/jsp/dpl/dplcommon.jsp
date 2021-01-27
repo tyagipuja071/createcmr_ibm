@@ -152,8 +152,8 @@ table.search-results-dpl td, table.search-results-dpl th {
           <tr > 
             <td colspan="6">
               <input type="button" class="btn-search" value="Assess Results" style="margin-left:10px" ng-click="reassess = true" ng-show="!reassess"> 
-              <input type="button" class="btn-search dpl-y" value="Yes, the Customer is on DPL" style="margin-left:10px" ng-click="assessDPL('Y')" ng-show="searchSuccess && reassess"> 
-              <input type="button" class="btn-search dpl-n" value="No, the Customer is not on DPL" style="margin-left:10px" ng-click="assessDPL('N')" ng-show="searchSuccess && reassess"> 
+              <input type="button" class="btn-search dpl-y" value="Yes, the Customer is on DPL" style="margin-left:10px" ng-click="assessDPL('Y')" ng-show="searchSuccess && results && results.length > 0 && reassess"> 
+              <input type="button" class="btn-search dpl-n" value="No, the Customer is not on DPL" style="margin-left:10px" ng-click="assessDPL('N')" ng-show="searchSuccess && results && results.length > 0 && reassess"> 
               <input type="button" class="btn-search dpl-u" value="Needs further review" style="margin-left:10px" ng-click="assessDPL('U')" ng-show="reassess"> 
             </td>
           </tr>
@@ -163,10 +163,17 @@ table.search-results-dpl td, table.search-results-dpl th {
       
       <br>
       <br>
-      <div ng-show="searchSuccess && (!results || results.length == 0)">
+      <div ng-show="searchSuccess && (!results || results.length == 0) && !plain">
         <table cellspacing="0" cellpadding="0" border="0" summary="Customer Information" class="ibm-data-table ibm-sortable-table ibm-alternating search-results search-results-dpl">
           <caption>
-            <em>No results found</em>
+            <em><strong>Non-deterministic results returned. The DPL check and matching needs further review.</strong></em>
+          </caption>
+        </table>
+      </div>
+      <div ng-show="searchSuccess && (!results || results.length == 0) && plain">
+        <table cellspacing="0" cellpadding="0" border="0" summary="Customer Information" class="ibm-data-table ibm-sortable-table ibm-alternating search-results search-results-dpl">
+          <caption>
+            <em><strong>Non-deterministic results returned. Please try searching against the DPL Database directly.</strong></em>
           </caption>
         </table>
       </div>
