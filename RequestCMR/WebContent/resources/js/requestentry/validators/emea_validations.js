@@ -8035,6 +8035,14 @@ function addAfterTemplateLoadIT() {
   }
   autoSetSboCollCdOnPostalCode(false, false);
 
+  if (_custSubGrp == 'INTER' || _custSubGrp == 'CROIN' || _custSubGrp == 'INTSM' || _custSubGrp == 'INTVA') {
+    FormManager.setValue('repTeamMemberNo', '');
+    FormManager.setValue('salesBusOffCd', '');
+    FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [ 'SalRepNameNo' ], 'MAIN_IBM_TAB');
+  } else {
+    FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
+  }
+
   var ident = FormManager.getActualValue('identClient');
   if (FormManager.getActualValue('reqType') == 'C' && 'CROSS' == FormManager.getActualValue('custGrp')) {
 
@@ -8049,11 +8057,6 @@ function addAfterTemplateLoadIT() {
         FormManager.resetValidations('taxCd1');
         FormManager.setValue('taxCd1', '');
         FormManager.readOnly('taxCd1');
-      }
-
-      if (_custSubGrp == 'INTER' || _custSubGrp == 'CROIN' || _custSubGrp == 'INTSM' || _custSubGrp == 'INTVA') {
-        FormManager.setValue('repTeamMemberNo', '');
-        FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [ 'SalRepNameNo' ], 'MAIN_IBM_TAB');
       }
     }
   }
