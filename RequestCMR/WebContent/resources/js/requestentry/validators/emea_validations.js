@@ -4692,7 +4692,7 @@ function afterConfigForIT() {
       FormManager.readOnly('vat');
     }
   }
-  addAfterTemplateLoadIT();
+  addAfterTemplateLoadIT(false, false, false);
   // CMR-1363
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     FormManager.readOnly('cmrNo');
@@ -5851,7 +5851,7 @@ function getOldValuesIT(fromAddress, scenario, scenarioChanged) {
       }
 
       if (FormManager.getActualValue('isuCd') != null
-          && "32" != FormManager.getActualValue('isuCd')
+          && "34" != FormManager.getActualValue('isuCd')
           && (custSubType == 'GOVSM' || custSubType == 'GOVVA' || custSubType == 'CROGO' || custSubType == 'UNISM' || custSubType == 'UNIVA' || custSubType == 'CROUN' || custSubType == 'LOCSM'
               || custSubType == 'LOCVA' || custSubType == 'CROLC' || custSubType == 'COMSM' || custSubType == 'COMVA' || custSubType == 'CROCM' || custSubType == 'BUSSM' || custSubType == 'BUSVA'
               || custSubType == 'CROBP' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'NGOSM' || custSubType == 'NGOVA' || custSubType == 'PRISM' || custSubType == 'PRIVA')) {
@@ -5871,7 +5871,7 @@ function getOldValuesIT(fromAddress, scenario, scenarioChanged) {
           FormManager.resetValidations('clientTier');
           FormManager.readOnly('inacCd');
         }
-        if (FormManager.getActualValue('isuCd') != null && "32" == FormManager.getActualValue('isuCd')) {
+        if (FormManager.getActualValue('isuCd') != null && "34" == FormManager.getActualValue('isuCd')) {
           if (custSubType == 'CROGO' || custSubType == 'CROUN' || custSubType == 'CROLC' || custSubType == 'CROCM' || custSubType == 'CROBP') {
             // console.log("For CB getOld set default value of collection code
             // CIT16");
@@ -8019,7 +8019,7 @@ function validateExistingCMRNo() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
-function addAfterTemplateLoadIT() {
+function addAfterTemplateLoadIT(fromAddress, scenario, scenarioChanged) {
   var _custSubGrp = FormManager.getActualValue('custSubGrp');
   var role = FormManager.getActualValue('userRole').toUpperCase();
 
@@ -8035,7 +8035,7 @@ function addAfterTemplateLoadIT() {
   }
   autoSetSboCollCdOnPostalCode(false, false);
 
-  if (_custSubGrp == 'INTER' || _custSubGrp == 'CROIN' || _custSubGrp == 'INTSM' || _custSubGrp == 'INTVA') {
+  if ((_custSubGrp == 'INTER' || _custSubGrp == 'CROIN' || _custSubGrp == 'INTSM' || _custSubGrp == 'INTVA') && scenarioChanged) {
     FormManager.setValue('repTeamMemberNo', '');
     FormManager.setValue('salesBusOffCd', '');
     FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [ 'SalRepNameNo' ], 'MAIN_IBM_TAB');
@@ -8142,7 +8142,7 @@ function addAfterTemplateLoadItaly(fromAddress, scenario, scenarioChanged) {
   setSpecialTaxCodeOnScenarioIT();
   enableDisableTaxCodeCollectionCdIT();
   // setClientTierValuesIT();
-  addAfterTemplateLoadIT();
+  addAfterTemplateLoadIT(fromAddress, scenario, scenarioChanged);
   setSalesRepValuesIT();
   blankedOutCollectionCD();
   setAffiliateEnterpriseRequired();
