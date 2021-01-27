@@ -5079,20 +5079,19 @@ var _gtcAddrTypeHandler = [];
 var _gtcVatExemptHandler = null;
 function addHandlersForGRCYTR() {
   var custType = FormManager.getActualValue('custGrp');
-  if (_gtcISUHandler == null) {
-    // Turkey create/update both need setClientTierAndISR
-    if (FormManager.getActualValue('reqType') == 'C' || FormManager.getActualValue('cmrIssuingCntry') == SysLoc.TURKEY) {
-      _gtcISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
-        if (FormManager.getActualValue('cmrIssuingCntry') != SysLoc.TURKEY) {
-          FormManager.clearValue('repTeamMemberNo');
-          FormManager.setValue('salesBusOffCd', '');
-          FormManager.setValue('salesTeamCd', '');
-        }
-        setClientTierAndISR(value);
-      });
-    }
-  }
-
+ /*
+   * if (_gtcISUHandler == null) { // Turkey create/update both need
+   * setClientTierAndISR
+   * 
+   * if (FormManager.getActualValue('reqType') == 'C' ||
+   * FormManager.getActualValue('cmrIssuingCntry') == SysLoc.TURKEY) {
+   * _gtcISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange',
+   * function(value) { if (FormManager.getActualValue('cmrIssuingCntry') !=
+   * SysLoc.TURKEY) { FormManager.clearValue('repTeamMemberNo');
+   * FormManager.setValue('salesBusOffCd', '');
+   * FormManager.setValue('salesTeamCd', ''); } setClientTierAndISR(value); }); } }
+   */
+     
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE) {
     if (_custSalesRepHandlerGr == null) {
       _custSalesRepHandlerGr = dojo.connect(FormManager.getField('repTeamMemberNo'), 'onChange', function(value) {
@@ -5126,7 +5125,7 @@ function addHandlersForGRCYTR() {
 
   if (_gtcISRHandler == null) {
     dojo.connect(FormManager.getField('repTeamMemberNo'), 'onChange', function(value) {
-      setSalesBoSboIbo();
+     // setSalesBoSboIbo();
     });
   }
 
@@ -5359,7 +5358,7 @@ function setISRValues() {
         setEnterprise(isrs[0]);
         FormManager.setValue('repTeamMemberNo', isrs[0]);
       }
-      setSalesBoSboIbo();
+      // setSalesBoSboIbo();
     }
   }
 }
@@ -5408,7 +5407,7 @@ function setSalesBoSboIbo() {
     FormManager.setValue('salesBusOffCd', salesBoCd);
     FormManager.setValue('salesTeamCd', selsr);
   } else {
-    FormManager.setValue('salesBusOffCd', '');
+    // FormManager.setValue('salesBusOffCd', '');
   }
 }
 
@@ -5846,7 +5845,7 @@ function hideCustPhoneonSummary() {
 function addHandlerForCustSubTypeBpGRTRCY() {
   if (_custSubTypeHandler == null) {
     _custSubTypeHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
-      setCustSubTypeBpGRTRCY();
+     // setCustSubTypeBpGRTRCY();
     });
   }
 }
@@ -5960,14 +5959,14 @@ function viewOnlyAddressDetails() {
 
 function salesSRforUpdate() {
   if (FormManager.getActualValue('reqType') == 'U') {
-    setSalesBoSboIbo();
+    // setSalesBoSboIbo();
   }
 }
 
 function salesSRforUpdateOnChange() {
   if (FormManager.getActualValue('reqType') == 'U') {
     dojo.connect(FormManager.getField('repTeamMemberNo'), 'onChange', function(value) {
-      setSalesBoSboIbo();
+     // setSalesBoSboIbo();
     });
   }
 
@@ -9788,7 +9787,7 @@ function setSBOValuesForIsuCtc(value) {
         FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), sboList);
       }
       // if (sboList.length == 1) {
-      if (sboList.length == 1) {
+      if (sboList.length == 1 || (sboList.length >1 && _isScenarioChanged)) {
         FormManager.setValue('salesBusOffCd', sboList[0]);
       } else if(!_isScenarioChanged){
         var oldSbo = null;
@@ -9803,7 +9802,9 @@ function setSBOValuesForIsuCtc(value) {
         }
       }
     } else {
-      FormManager.setValue('salesBusOffCd', "");
+      // FormManager.setValue('salesBusOffCd', "");
+      console.log("Reset sbo as no list available for "+ isuCtc);
+      FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
     }
   } else {
     FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
@@ -10172,6 +10173,9 @@ var _isScenarioChanged = false;
 function checkScenarioChanged(fromAddress, scenario, scenarioChanged) {
   _isScenarioChanged = scenarioChanged;
   setSBOValuesForIsuCtc(FormManager.getActualValue('isuCd'));
+  if(_isScenarioChanged){
+    setCustSubTypeBpGRTRCY();
+  }
 }
 
 dojo.addOnLoad(function() {
@@ -10276,7 +10280,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(checkScenarioChanged, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(setSBOLogicOnISUChange, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(setSBOLogicOnISUChange, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterTemplateLoad(setISUCTCBasedScenarios, [ SysLoc.TURKEY ]);
+  // GEOHandler.addAfterTemplateLoad(setISUCTCBasedScenarios, [ SysLoc.TURKEY
+  // ]);
   GEOHandler.addAfterTemplateLoad(setVatValidatorGRCYTR, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(toggleBPRelMemTypeForTurkey, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(controlFieldsBySubScenarioTR, [ SysLoc.TURKEY ]);
@@ -10291,7 +10296,8 @@ dojo.addOnLoad(function() {
 
   // Greece
   GEOHandler.addAfterConfig(addHandlersForGRCYTR, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
-  GEOHandler.addAfterConfig(setClientTierAndISR, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
+ // GEOHandler.addAfterConfig(setClientTierAndISR, [ SysLoc.GREECE,
+  // SysLoc.CYPRUS, SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(addVATDisabler, [ SysLoc.GREECE, SysLoc.CYPRUS ]);
   GEOHandler.addAfterConfig(hideMOPAFieldForGR, [ SysLoc.GREECE ]);
   GEOHandler.addAfterConfig(setTypeOfCustomerBehaviorForGR, [ SysLoc.GREECE ]);
@@ -10322,7 +10328,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.GREECE, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.GREECE ], null, true);
   GEOHandler.addAfterConfig(hideCustPhoneonSummary, [ SysLoc.GREECE ]);
   GEOHandler.addAfterConfig(addHandlerForCustSubTypeBpGRTRCY, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
-  GEOHandler.addAfterTemplateLoad(setCustSubTypeBpGRTRCY, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
+  // GEOHandler.addAfterTemplateLoad(setCustSubTypeBpGRTRCY, [ SysLoc.GREECE,
+  // SysLoc.CYPRUS, SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(setISRValuesGROnUpdate, [ SysLoc.GREECE ]);
 
   // Cyprus
