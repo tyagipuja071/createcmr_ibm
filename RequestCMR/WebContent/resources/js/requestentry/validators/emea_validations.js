@@ -5070,8 +5070,9 @@ function autoSetSboCollCdOnPostalCode(clientTier, currPostCd) {
   var custType = FormManager.getActualValue('custGrp');
   var custSubType = FormManager.getActualValue('custSubGrp');
   var isuCode = FormManager.getActualValue('isuCd');
+  var countryUse = FormManager.getActualValue('countryUse');
   var ctc = FormManager.getActualValue('clientTier');
-  if (requestType != 'C') {
+  if (requestType != 'C' || (countryUse == '758SM' || countryUse == '758VA')) {
     return;
   }
   var reqId = FormManager.getActualValue('reqId');
