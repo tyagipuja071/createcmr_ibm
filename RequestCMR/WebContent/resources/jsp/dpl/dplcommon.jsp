@@ -149,11 +149,11 @@ table.search-results-dpl td, table.search-results-dpl th {
               </div>
             </td>
           </tr>
-          <tr ng-show="results && results.length > 0"> 
+          <tr > 
             <td colspan="6">
               <input type="button" class="btn-search" value="Assess Results" style="margin-left:10px" ng-click="reassess = true" ng-show="!reassess"> 
-              <input type="button" class="btn-search dpl-y" value="Yes, the Customer is on DPL" style="margin-left:10px" ng-click="assessDPL('Y')" ng-show="reassess"> 
-              <input type="button" class="btn-search dpl-n" value="No, the Customer is not on DPL" style="margin-left:10px" ng-click="assessDPL('N')" ng-show="reassess"> 
+              <input type="button" class="btn-search dpl-y" value="Yes, the Customer is on DPL" style="margin-left:10px" ng-click="assessDPL('Y')" ng-show="searchSuccess && reassess"> 
+              <input type="button" class="btn-search dpl-n" value="No, the Customer is not on DPL" style="margin-left:10px" ng-click="assessDPL('N')" ng-show="searchSuccess && reassess"> 
               <input type="button" class="btn-search dpl-u" value="Needs further review" style="margin-left:10px" ng-click="assessDPL('U')" ng-show="reassess"> 
             </td>
           </tr>
@@ -163,6 +163,20 @@ table.search-results-dpl td, table.search-results-dpl th {
       
       <br>
       <br>
+      <div ng-show="searchSuccess && (!results || results.length == 0)">
+        <table cellspacing="0" cellpadding="0" border="0" summary="Customer Information" class="ibm-data-table ibm-sortable-table ibm-alternating search-results search-results-dpl">
+          <caption>
+            <em>No results found</em>
+          </caption>
+        </table>
+      </div>
+      <div ng-show="!searchSuccess">
+        <table cellspacing="0" cellpadding="0" border="0" summary="Customer Information" class="ibm-data-table ibm-sortable-table ibm-alternating search-results search-results-dpl">
+          <caption>
+            <em>Search not yet done or encountered an error.</em>
+          </caption>
+        </table>
+      </div>
       <div ng-show="results && results.length > 0">
         <div class="filter" style="display:inline-block;float:left;margin-bottom:20px;font-size:14px;width:700px;font-weight:bold">
           Showing results for searches against the name and variations. Results after the first one already filter out
