@@ -1201,8 +1201,8 @@ public class BELUXHandler extends BaseSOFHandler {
     address.setCustNm4(currentRecord.getCmrName4());
     address.setDept(currentRecord.getCmrDept());
     address.setCity1(currentRecord.getCmrCity());
-
-    address.setTransportZone("");
+    address.setCustPhone(currentRecord.getCmrCustPhone());
+    address.setTransportZone(currentRecord.getCmrTransportZone());
   }
 
   @Override
