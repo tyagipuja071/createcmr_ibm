@@ -197,7 +197,7 @@ public class BELUXHandler extends BaseSOFHandler {
                 maxSeq++;
               }
               if ("Y".equals(addrUseEpl)) {
-                splitSharedAddr("ZS01", seq, mainRecord, "ZS02", maxSeq, converted);
+                splitSharedAddr("ZS01", seq, mainRecord, "ZI01", maxSeq, converted);
                 maxSeq++;
               }
             } else if ("N".equals(addrUseInst)) {
@@ -1139,6 +1139,12 @@ public class BELUXHandler extends BaseSOFHandler {
     data.setIbmDeptCostCenter(this.currentImportValues.get("AccAdBo"));
     LOG.trace("AccAdBo: " + data.getIbmDeptCostCenter());
 
+    data.setEconomicCd(this.currentImportValues.get("EconomicCd"));
+    LOG.trace("Economic Code: " + data.getEconomicCd());
+
+    data.setEnterprise(this.currentImportValues.get("EnterpriseNo"));
+    LOG.trace("Enterprise: " + data.getEnterprise());
+
     data.setInstallBranchOff("");
     data.setInacType("");
     data.setIbmDeptCostCenter(getInternalDepartment(mainRecord.getCmrNum()));
@@ -1194,6 +1200,7 @@ public class BELUXHandler extends BaseSOFHandler {
     address.setCustNm3(currentRecord.getCmrName3());
     address.setCustNm4(currentRecord.getCmrName4());
     address.setDept(currentRecord.getCmrDept());
+    address.setCity1(currentRecord.getCmrCity());
 
     address.setTransportZone("");
   }
