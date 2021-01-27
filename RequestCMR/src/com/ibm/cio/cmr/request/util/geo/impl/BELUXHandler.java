@@ -197,7 +197,7 @@ public class BELUXHandler extends BaseSOFHandler {
                 maxSeq++;
               }
               if ("Y".equals(addrUseEpl)) {
-                splitSharedAddr("ZS01", seq, mainRecord, "ZS02", maxSeq, converted);
+                splitSharedAddr("ZS01", seq, mainRecord, "ZI01", maxSeq, converted);
                 maxSeq++;
               }
             } else if ("N".equals(addrUseInst)) {
