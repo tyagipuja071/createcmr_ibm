@@ -629,6 +629,7 @@ function addHandlersForCEMEA() {
 
   if (_ISUHandler == null) {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+      var cntry = FormManager.getActualValue('cmrIssuingCntry');
       if (CEE_INCL.has(cntry)) {// CreateCMR-811
         setCompanyNoForCEE(value);
       } else {
@@ -746,7 +747,7 @@ var _CTC2Handler = null;
 function setCISFieldHandlers() {
   if (_DupIssuingCntryCdHandler == null) {
     _DupIssuingCntryCdHandler = dojo.connect(FormManager.getField('dupIssuingCntryCd'), 'onChange', function(value) {
-      setDropdownField2Values(value);
+      // setDropdownField2Values(value);
       setDupISUCTCValues(value);
       setEnterprise2Values(value);
     });
@@ -1530,7 +1531,8 @@ function setDropdownField2Values() {
   var dupIssuingCntryCd = FormManager.getActualValue('dupIssuingCntryCd');
   // FilteringDropdown.loadItems('dupSalesRepNo', 'dupSalesRepNo_spinner',
   // 'lov', 'fieldId=SalRepNameNo&cmrIssuingCntry=' + dupIssuingCntryCd);
-  FilteringDropdown.loadItems('dupEnterpriseNo', 'dupEnterpriseNo_spinner', 'lov', 'fieldId=Enterprise&cmrIssuingCntry=' + dupIssuingCntryCd);
+  // FilteringDropdown.loadItems('dupEnterpriseNo', 'dupEnterpriseNo_spinner',
+  // 'lov', 'fieldId=Enterprise&cmrIssuingCntry=' + dupIssuingCntryCd);
 }
 
 function setVatRequired(value) {
@@ -1614,8 +1616,7 @@ function setCountryDuplicateFields(value) {
       // } else {
       // FormManager.hide('SalesBusOff2', 'dupSalesBoCd');
       // }
-
-      setDropdownField2Values();
+      // setDropdownField2Values();
       if (viewOnlyPage != 'true') {
         FormManager.enable('dupIssuingCntryCd');
         checkAndAddValidator('dupIssuingCntryCd', Validators.REQUIRED, [ 'Country of Duplicate CMR' ]);
@@ -2438,7 +2439,6 @@ function setCompanyNoForCEE(clientTier) {
 
   var enterprises = [];
   if (isuCd != '' && clientTier != '') {
-
     if (FormManager.getActualValue('custSubGrp') == 'INTER' || FormManager.getActualValue('custSubGrp') == 'XINT'
         || FormManager.getActualValue('custSubGrp') == 'CSINT' || FormManager.getActualValue('custSubGrp') == 'MEINT'
         || FormManager.getActualValue('custSubGrp') == 'RSXIN' || FormManager.getActualValue('custSubGrp') == 'RSINT') {
@@ -2647,8 +2647,8 @@ function setEnterprise2Values(dupClientTierCd) {
   var dupIsuCd = FormManager.getActualValue('dupIsuCd');
   FormManager.enable('dupEnterpriseNo');
   dupClientTierCd = FormManager.getActualValue('dupClientTierCd');
-
   var enterprises = [];
+
   if (isuCd != '' && dupClientTierCd != '') {
     var qParams = {
       _qall : 'Y',
@@ -2660,19 +2660,19 @@ function setEnterprise2Values(dupClientTierCd) {
       for (var i = 0; i < results.length; i++) {
         enterprises.push(results[i].ret1);
       }
-      if (enterprises != null) {
-        FormManager.limitDropdownValues(FormManager.getField('dupEnterpriseNo'), enterprises);
-        if (enterprises.length == 1) {
-          FormManager.setValue('dupEnterpriseNo', enterprises[0]);
-        } else {
-          if (dupIsuCd == '34' && dupClientTierCd == 'Q') {
-            if (SysLoc.UKRAINE == dupIssuingCntryCd) {
-              FormManager.setValue('dupEnterpriseNo', '985024');
-            } else if (SysLoc.MOLDOVA == dupIssuingCntryCd) {
-              FormManager.setValue('dupEnterpriseNo', '985050');
-            }
-          }
-        }
+    }
+  }
+
+  if (enterprises != null) {
+    FormManager.limitDropdownValues(FormManager.getField('dupEnterpriseNo'), enterprises);
+    if (enterprises.length == 1) {
+      FormManager.setValue('dupEnterpriseNo', enterprises[0]);
+    }
+    if (dupIsuCd == '34' && dupClientTierCd == 'Q') {
+      if (SysLoc.UKRAINE == dupIssuingCntryCd) {
+        FormManager.setValue('dupEnterpriseNo', '985024');
+      } else if (SysLoc.MOLDOVA == dupIssuingCntryCd) {
+        FormManager.setValue('dupEnterpriseNo', '985050');
       }
     }
   }
@@ -4543,6 +4543,8 @@ dojo
       // ]);
       GEOHandler.addAfterConfig(setDupISUCTCValues, [ SysLoc.RUSSIA ]);
       GEOHandler.addAfterTemplateLoad(setDupISUCTCValues, [ SysLoc.RUSSIA ]);
+      GEOHandler.addAfterConfig(setEnterprise2Values, [ SysLoc.RUSSIA ]);
+      GEOHandler.addAfterTemplateLoad(setEnterprise2Values, [ SysLoc.RUSSIA ]); // CreateCMR-811
       // Slovakia
       GEOHandler.addAfterConfig(afterConfigForSlovakia, [ SysLoc.SLOVAKIA ]);
       GEOHandler.addAfterTemplateLoad(afterConfigForSlovakia, [ SysLoc.SLOVAKIA ]);
