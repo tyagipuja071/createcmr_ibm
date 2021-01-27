@@ -5141,10 +5141,7 @@ function autoSetSboCollCdOnPostalCode(clientTier, currPostCd) {
         FormManager.setValue('salesBusOffCd', 'NM');
         FormManager.setValue('collectionCd', 'CIT14');
       }
-    } else if (isuCode != '34' && ctc != 'Q') {
-      FormManager.clearValue('collectionCd');
     }
-
   }
 }
 
@@ -5931,7 +5928,6 @@ function blankedOutCollectionCD() {
       autoSetSboCollCdOnPostalCode();
     } else {
       FormManager.enable('collectionCd');
-      FormManager.clearValue('collectionCd');
     }
   }
 }
