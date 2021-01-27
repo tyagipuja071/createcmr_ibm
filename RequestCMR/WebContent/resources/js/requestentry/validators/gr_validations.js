@@ -3157,6 +3157,7 @@ function addHandlersForGRCYTR() {
       if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE) {
         setISRValuesGR();
         setClientTierForCreates(value);
+        addEnterpriseValidatorGR();
       } else {
         if (FormManager.getActualValue('cmrIssuingCntry') != SysLoc.TURKEY) {
           setISRValues();
@@ -3192,6 +3193,19 @@ function addHandlersForGRCYTR() {
     _gtcVatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
       setVatValidatorGRCYTR();
     });
+  }
+}
+
+function addEnterpriseValidatorGR() {
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var reqType = FormManager.getActualValue('reqType');
+  var clientTier = FormManager.getActualValue('clientTier');
+  var isuCd = FormManager.getActualValue('isuCd');
+  
+  if (reqType == 'C' && role == 'PROCESSOR' && isuCd == '34' && clientTier == '6') {
+    FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise Number' ], 'MAIN_IBM_TAB');  
+  } else {
+    FormManager.resetValidations('enterprise');  
   }
 }
 
@@ -3598,7 +3612,8 @@ function setISRValues() {
   }
 }
 
-var _oldEnterpriseValue = '';
+var _oldIsuCtc = '';
+var _oldSalesRep = '';
 function setEnterprise(value) {
   var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
   var isu = FormManager.getActualValue('isuCd');
@@ -3608,9 +3623,10 @@ function setEnterprise(value) {
   var shouldSetEnterprise = false;
   var isicCdValue = FormManager.getActualValue('isicCd');
   var isicUnderB = new Set([ '7230', '7240', '7290', '7210', '7221', '7229' ]);
-
+  var curIsuCtc = isu + ctc;
+  
   if (cmr.currentTab == 'IBM_REQ_TAB') {
-    valueChanged = _oldEnterpriseValue != value;
+    valueChanged = (_oldIsuCtc != curIsuCtc) || (_oldSalesRep != repTeam);
   }
 
   if (_subindustryChanged || valueChanged || _isScenarioChanged) {
@@ -3655,7 +3671,8 @@ function setEnterprise(value) {
       _subindustryChanged = false;
       FormManager.readOnly('subIndustryCd');
     }
-    _oldEnterpriseValue = value;
+    _oldIsuCtc = curIsuCtc;
+    _oldSalesRep = repTeam;
   }
 
   if (cmrCntry == SysLoc.CYPRUS) {
@@ -3670,7 +3687,9 @@ function setEnterprise(value) {
 function addHandlersForSubindustryCd() {
   if (_subindustryCdHandler == null && FormManager.getField('subIndustryCd')) {
     _subindustryCdHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
-      _subindustryChanged = true;
+      if (cmr.currentTab == "CUST_REQ_TAB") {
+        _subindustryChanged = true;
+      }
       var repTeamMemberNo = FormManager.getActualValue('repTeamMemberNo');
       setEnterprise(repTeamMemberNo);
     });
