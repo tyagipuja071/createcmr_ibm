@@ -663,6 +663,9 @@ public class BELUXTransformer extends EMEATransformer {
     legacyAddr.setLastName(addrData.getCustNm4() == null ? "" : addrData.getCustNm4());
     legacyAddr.setTitle(addrData.getDept() == null ? "" : addrData.getDept());
     legacyAddr.setName(addrData.getCustNm1() == null ? "" : addrData.getCustNm1());
+
+    if (!StringUtils.isEmpty(addrData.getPoBox()))
+      legacyAddr.setPoBox("PO BOX " + addrData.getPoBox());
   }
 
   @Override
