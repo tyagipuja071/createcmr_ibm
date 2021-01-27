@@ -5093,7 +5093,7 @@ function autoSetSboCollCdOnPostalCode(clientTier, currPostCd) {
 
   // set collection code based on postalcode logic
   var checkImportIndc = getImportedIndcForItaly();
-  if (checkImportIndc != 'Y' && custType != 'CROSS') {
+  if (checkImportIndc != 'Y' && custType != '' && custType != undefined && custType != 'CROSS') {
     if (postCodeOrg != '' && isuCode != '' && isuCode == '34' && ctc == 'Q') {
       if (postCode >= 00 && postCode <= 04) {
         FormManager.setValue('salesBusOffCd', 'NC');
