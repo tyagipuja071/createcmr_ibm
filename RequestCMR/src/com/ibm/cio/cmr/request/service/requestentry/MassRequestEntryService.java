@@ -1848,9 +1848,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                     throw new CmrException(MessageUtil.ERROR_MASS_FILE);
                   }
                 } else if (PageManager.fromGeo("CA", cmrIssuingCntry)) {
-                  // if (!validateMassUpdateCA(item.getInputStream())) {
-                  // throw new CmrException(MessageUtil.ERROR_MASS_FILE);
-                  // }
+                  if (!validateMassUpdateCA(item.getInputStream())) {
+                    throw new CmrException(MessageUtil.ERROR_MASS_FILE);
+                  }
                 } else {
                   if (!validateMassUpdateFile(item.getInputStream())) {
                     throw new CmrException(MessageUtil.ERROR_MASS_FILE);
@@ -5815,7 +5815,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
 
   private boolean validateMassUpdateCA(InputStream fileStream) throws Exception {
     XSSFWorkbook book = new XSSFWorkbook(fileStream);
-    XSSFSheet sheet = book.getSheet(MASS_DATA);
+    XSSFSheet sheet = book.getSheet("Update");
     XSSFCell rowCell = null;
     XSSFRow sheetRow = null;
 
