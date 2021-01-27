@@ -1148,6 +1148,11 @@ public class BELUXHandler extends BaseSOFHandler {
     data.setInstallBranchOff("");
     data.setInacType("");
     data.setIbmDeptCostCenter(getInternalDepartment(mainRecord.getCmrNum()));
+
+    boolean prospectCmrChosen = mainRecord != null && CmrConstants.PROSPECT_ORDER_BLOCK.equals(mainRecord.getCmrOrderBlock());
+    if (prospectCmrChosen) {
+      data.setCmrNo("");
+    }
   }
 
   private String getInternalDepartment(String cmrNo) throws Exception {
