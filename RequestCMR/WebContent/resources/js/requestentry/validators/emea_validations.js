@@ -8039,6 +8039,8 @@ function addAfterTemplateLoadIT() {
     FormManager.setValue('repTeamMemberNo', '');
     FormManager.setValue('salesBusOffCd', '');
     FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [ 'SalRepNameNo' ], 'MAIN_IBM_TAB');
+  } else {
+    FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
   }
 
   var ident = FormManager.getActualValue('identClient');
