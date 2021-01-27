@@ -629,7 +629,11 @@ function addHandlersForCEMEA() {
 
   if (_ISUHandler == null) {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
-      setClientTierValues(value);
+      if (CEE_INCL.has(cntry)) {// CreateCMR-811
+        setCompanyNoForCEE(value);
+      } else {
+        setClientTierValues(value);
+      }
       if (CEE_INCL.has(FormManager.getActualValue('cmrIssuingCntry'))) {
         togglePPSCeidCEE();
       }
@@ -744,12 +748,14 @@ function setCISFieldHandlers() {
     _DupIssuingCntryCdHandler = dojo.connect(FormManager.getField('dupIssuingCntryCd'), 'onChange', function(value) {
       setDropdownField2Values(value);
       setDupISUCTCValues(value);
+      setEnterprise2Values(value);
     });
   }
 
   if (_ISU2Handler == null) {
     _ISU2Handler = dojo.connect(FormManager.getField('dupIsuCd'), 'onChange', function(value) {
       // setClientTier2Values(value);
+      setEnterprise2Values(value);
     });
   }
 
@@ -2662,7 +2668,7 @@ function setEnterprise2Values(dupClientTierCd) {
           if (dupIsuCd == '34' && dupClientTierCd == 'Q') {
             if (SysLoc.UKRAINE == dupIssuingCntryCd) {
               FormManager.setValue('dupEnterpriseNo', '985024');
-            } else if (SysLoc.ROMANIA == dupIssuingCntryCd) {
+            } else if (SysLoc.MOLDOVA == dupIssuingCntryCd) {
               FormManager.setValue('dupEnterpriseNo', '985050');
             }
           }
