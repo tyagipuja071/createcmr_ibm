@@ -827,6 +827,11 @@ public class NLHandler extends BaseSOFHandler {
     data.setInstallBranchOff("");
     data.setInacType("");
     data.setIbmDeptCostCenter(getInternalDepartment(mainRecord.getCmrNum()));
+
+    boolean prospectCmrChosen = mainRecord != null && CmrConstants.PROSPECT_ORDER_BLOCK.equals(mainRecord.getCmrOrderBlock());
+    if (prospectCmrChosen) {
+      data.setCmrNo("");
+    }
   }
 
   private String getInternalDepartment(String cmrNo) throws Exception {
@@ -925,7 +930,7 @@ public class NLHandler extends BaseSOFHandler {
       address.getId().setAddrSeq("29901");
     }
     if (currentRecord.getCmrAddrTypeCode().equals("ZS01")) {
-      address.getId().setAddrSeq("99901");
+      address.getId().setAddrSeq("00001");
     }
     if (currentRecord.getCmrAddrTypeCode().equals("ZKVK")) {
       address.getId().setAddrSeq("21102");
@@ -1281,7 +1286,7 @@ public class NLHandler extends BaseSOFHandler {
       addrSeq = 29901;
     }
     if (addrType.equals("ZS01")) {
-      addrSeq = 99901;
+      addrSeq = 00001;
     }
     try {
       addrSeq = Integer.parseInt(newAddrSeq);
@@ -1726,7 +1731,7 @@ public class NLHandler extends BaseSOFHandler {
   public String generateModifyAddrSeqOnCopy(EntityManager entityManager, String addrType, long reqId, String oldAddrSeq, String cmrIssuingCntry) {
     String newSeq = null;
     if ("ZS01".equals(addrType)) {
-      newSeq = "99901";
+      newSeq = "00001";
     }
     if ("ZI01".equals(addrType)) {
       newSeq = "20701";
