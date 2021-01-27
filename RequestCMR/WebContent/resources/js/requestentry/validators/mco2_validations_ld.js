@@ -586,11 +586,8 @@ function addAttachmentValidator() {
         var role = FormManager.getActualValue('userRole').toUpperCase();
         var req = FormManager.getActualValue('reqType').toUpperCase();
         var subCustGrp = FormManager.getActualValue('custSubGrp');
-        if (role == 'REQUESTER' && req != 'U') {
+        if (req == 'C') {
           switch (subCustGrp.toUpperCase()) {
-          case 'SOFTL':
-            return new ValidationResult(null, true);
-            break;
           case 'BUSPR':
             return new ValidationResult(null, true);
             break;
@@ -630,7 +627,7 @@ function addAttachmentValidator() {
             }
             break;
           }
-        } else if (role == 'REQUESTER' && req == 'U') {
+        } else if (req == 'U') {
           if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
             var record = null;
             var updateInd = null;
@@ -642,59 +639,92 @@ function addAttachmentValidator() {
               updateInd = record.updateInd;
               importInd = record.importInd;
 
-              if (updateInd == 'U') {
+              if ((updateInd == 'U' && type == 'ZS01') || (updateInd == 'U' && type == 'ZP01')) {
+
                 var reqId = FormManager.getActualValue('reqId');
                 if (reqId != null) {
                   reqParam = {
                     ID : reqId
                   };
                 }
-                var results = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', reqParam);
-                var recordCount = results.ret1;
+                var resultAttachment = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', reqParam);
+                var attachmentCount = resultAttachment.ret1;
 
-                if (recordCount != null) {
-                  if (recordCount > 0) {
-                    return new ValidationResult(null, true);
-                  } else if (recordCount == 0) {
-                    return new ValidationResult(null, false, 'Proof of address is mandatory. Please attach Company Proof.');
-                  }
-                } else {
-                  return new ValidationResult(null, false, 'Proof of address is mandatory. Please attach Company Proof.');
-                }
-              } else if (importInd != 'Y') {
-                var reqId = FormManager.getActualValue('reqId');
                 if (reqId != null) {
                   reqParam = {
-                    ID : reqId
+                    REQ_ID : reqId,
+                    ADDR_TYPE : type,
                   };
                 }
-                var results = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', reqParam);
-                var recordCount = results.ret1;
 
-                if (recordCount != null) {
-                  if (recordCount > 0) {
+                var resultOldAddr = cmr.query('ADDR.GET.OLDADDR.BY_REQID_ADDRTYP', reqParam);
+
+                var oldCustName; // CUST_NM1
+                var oldCustNameCon; // CUST_NM2
+                var oldAddlName; // CUST_NM4
+                var oldStreet; // ADDR_TXT
+                var oldStreetCont; // ADDR_TXT_2
+                var oldCity; // CITY1
+                var oldPostCd; // POST_CD
+                var oldLandedCntry; // LAND_CNTRY
+                var oldPoBox; // PO_BOX
+                var oldPhone; // CUST_PHONE
+
+                var currentCustName;
+                var currentCustNameCon;
+                var currentAddlName;
+                var currentStreet;
+                var currentStreetCont;
+                var currentCity;
+                var currentPostCd;
+                var currentLandedCntry;
+                var currentPoBox;
+                var currentPhone;
+
+                if (resultOldAddr != null && resultOldAddr != '') {
+                  // pulled from addr_rdc
+                  oldCustName = resultOldAddr.ret2 != null ? resultOldAddr.ret2 : '';
+                  oldCustNameCon = resultOldAddr.ret3 != null ? resultOldAddr.ret3 : '';
+                  oldAddlName = resultOldAddr.ret4 != null ? resultOldAddr.ret4 : '';
+                  oldStreet = resultOldAddr.ret5 != null ? resultOldAddr.ret5 : '';
+                  oldStreetCont = resultOldAddr.ret6 != null ? resultOldAddr.ret6 : '';
+                  oldCity = resultOldAddr.ret7 != null ? resultOldAddr.ret7 : '';
+                  oldPostCd = resultOldAddr.ret8 != null ? resultOldAddr.ret8 : '';
+                  oldLandedCntry = resultOldAddr.ret9 != null ? resultOldAddr.ret9 : '';
+                  oldPoBox = resultOldAddr.ret10 != null ? resultOldAddr.ret10 : '';
+                  oldPhone = resultOldAddr.ret11 != null ? resultOldAddr.ret11 : '';
+
+                  // current address value
+                  currentCustName = record.custNm1[0] != null ? record.custNm1[0] : '';
+                  currentCustNameCon = record.custNm2[0] != null ? record.custNm2[0] : '';
+                  currentAddlName = record.custNm4[0] != null ? record.custNm4[0] : '';
+                  currentStreet = record.addrTxt[0] != null ? record.addrTxt[0] : '';
+                  currentStreetCont = record.addrTxt2[0] != null ? record.addrTxt2[0] : '';
+                  currentCity = record.city1[0] != null ? record.city1[0] : '';
+                  currentPostCd = record.postCd[0] != null ? record.postCd[0] : '';
+                  currentLandedCntry = record.landCntry[0] != null ? record.landCntry[0] : '';
+                  currentPoBox = record.poBox[0] != null ? record.poBox[0] : '';
+                  currentPhone = record.custPhone[0] != null ? record.custPhone[0] : '';
+
+                  if (oldCustName == currentCustName && oldCustNameCon == currentCustNameCon && oldAddlName == currentAddlName && oldStreet == currentStreet && oldStreetCont == currentStreetCont
+                      && oldCity == currentCity && oldPostCd == currentPostCd && oldLandedCntry == currentLandedCntry && oldPoBox == currentPoBox) {
+                    if (type == 'ZP01' && oldPhone != currentPhone) {
+                      if (attachmentCount > 0) {
+                        return new ValidationResult(null, true);
+                      }
+                      return new ValidationResult(null, false, 'Proof of address is mandatory. Please attach Company Proof.');
+                    }
                     return new ValidationResult(null, true);
-                  } else if (recordCount == 0) {
+                  } else {
+                    if (attachmentCount > 0) {
+                      return new ValidationResult(null, true);
+                    }
                     return new ValidationResult(null, false, 'Proof of address is mandatory. Please attach Company Proof.');
                   }
-                } else {
-                  return new ValidationResult(null, false, 'Proof of address is mandatory. Please attach Company Proof.');
                 }
-              } else {
-                counter = counter + 1;
               }
             }
-
-            if (counter > 0) {
-              return new ValidationResult(null, true);
-            } else {
-              return new ValidationResult(null, false, 'Proof of address is mandatory. Please attach Company Proof.');
-            }
-          } else {
-            return new ValidationResult(null, true);
           }
-        } else {
-          return new ValidationResult(null, true);
         }
       }
     };
