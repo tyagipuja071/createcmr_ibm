@@ -1806,9 +1806,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
               // MASS FILE | validate the mass file
               if (massCreate) {
                 if (PageManager.fromGeo("CA", cmrIssuingCntry)) {
-                  if (!validateMassCreateCA(item.getInputStream())) {
-                    throw new CmrException(MessageUtil.ERROR_MASS_FILE);
-                  }
+                  // if (!validateMassCreateCA(item.getInputStream())) {
+                  // throw new CmrException(MessageUtil.ERROR_MASS_FILE);
+                  // }
                 } // else default US
                 else {
                   if (!validateMassCreateFile(item.getInputStream(), reqId, newIterId)) {
@@ -1848,9 +1848,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                     throw new CmrException(MessageUtil.ERROR_MASS_FILE);
                   }
                 } else if (PageManager.fromGeo("CA", cmrIssuingCntry)) {
-                  if (!validateMassUpdateCA(item.getInputStream())) {
-                    throw new CmrException(MessageUtil.ERROR_MASS_FILE);
-                  }
+                  // if (!validateMassUpdateCA(item.getInputStream())) {
+                  // throw new CmrException(MessageUtil.ERROR_MASS_FILE);
+                  // }
                 } else {
                   if (!validateMassUpdateFile(item.getInputStream())) {
                     throw new CmrException(MessageUtil.ERROR_MASS_FILE);
