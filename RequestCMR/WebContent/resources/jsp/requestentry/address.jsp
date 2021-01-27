@@ -414,7 +414,7 @@ visibility: hidden !IMPORTANT;
         
         
         <!--  City except for JP -->
-        <cmr:view exceptForGEO="BELUX,JP">
+        <cmr:view exceptForGEO="JP">
           <cmr:gridCol width="80px" field="city1" header="${ui.grid.city1}" />
         </cmr:view>
         
