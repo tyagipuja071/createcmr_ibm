@@ -2658,6 +2658,14 @@ function setEnterprise2Values(dupClientTierCd) {
         FormManager.limitDropdownValues(FormManager.getField('dupEnterpriseNo'), enterprises);
         if (enterprises.length == 1) {
           FormManager.setValue('dupEnterpriseNo', enterprises[0]);
+        } else {
+          if (dupIsuCd == '34' && dupClientTierCd == 'Q') {
+            if (SysLoc.UKRAINE == dupIssuingCntryCd) {
+              FormManager.setValue('dupEnterpriseNo', '985024');
+            } else if (SysLoc.ROMANIA == dupIssuingCntryCd) {
+              FormManager.setValue('dupEnterpriseNo', '985050');
+            }
+          }
         }
       }
     }
