@@ -51,7 +51,7 @@ var _landCntryHandlerUK = null;
 var _postalCdUKHandler = null;
 var _cityUKHandler = null;
 var _custGrpIT = null;
-
+var _importedIndcBilling = null;
 var _importedIndc = null;
 
 function getImportedIndcForItaly() {
@@ -70,6 +70,23 @@ function getImportedIndcForItaly() {
   console.log('saving imported ind as ' + _importedIndc);
   return _importedIndc;
 
+}
+
+function getImportedIndcForItalyBillingAddr() {
+  if (_importedIndcBilling) {
+    console.log('Returning imported indc for Billing Address = ' + _importedIndcBilling);
+    return _importedIndcBilling;
+  }
+  var results = cmr.query('IMPORTED_ADDR_ZP01', {
+    REQID : FormManager.getActualValue('reqId')
+  });
+  if (results != null && results.ret1) {
+    _importedIndcBilling = results.ret1;
+  } else {
+    _importedIndcBilling = 'N';
+  }
+  console.log('saving imported ind as for Billing Address' + _importedIndc);
+  return _importedIndcBilling;
 }
 
 function addEMEALandedCountryHandler(cntry, addressMode, saving, finalSave) {
@@ -1555,17 +1572,44 @@ function addBillingAddrValidator() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
-/*function addCMRValidator(){
-  var role = FormManager.getActualValue('userRole').toUpperCase();
-  var custSubType = FormManager.getActualValue('custSubGrp');
-   if (FormManager.getActualValue('reqType') == 'C'){
-	if(FormManager.getActualValue('findCmrResult') == 'NOT DONE' || FormManager.getActualValue('findCmrResult') == 'REJECTED')) {
-      if (role == "REQUESTER" && (custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'CRO3P')) {
-       return new ValidationResult(null, false,'For 3rd party scenario please import a CMR via CMR search');
+function addBillingValidator() {
+ var role = FormManager.getActualValue('userRole').toUpperCase();
+ var custSubType = FormManager.getActualValue('custSubGrp');
+  FormManager.addFormValidator((function() {
+    return {
+	validate : function() {
+		var zp01ReqId = FormManager.getActualValue('reqId');
+		qParams = {
+          REQ_ID : zp01ReqId,
+        };
+        var record = cmr.query('GETZP01VALRECORDS', qParams);
+        var zp01Reccount = record.ret1;
+        if (Number(zp01Reccount == 1)) {
+         if (FormManager.getActualValue('reqType') == 'C' && role == "REQUESTER") 
+         if(custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'CRO3P') 
+         var checkImportIndc = getImportedIndcForItalyBillingAddr();
+         if(checkImportIndc=='Y') 
+          return new ValidationResult(null, false, 'For 3rd party scenario  Billing Address can not be imported.User needs to create new Billing Address');
         }
       }
-    } 
-}*/
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
+function addCMRValidator() {
+ var role = FormManager.getActualValue('userRole').toUpperCase();
+ var custSubType = FormManager.getActualValue('custSubGrp');
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+       if (FormManager.getActualValue('reqType') == 'C')
+       if(FormManager.getActualValue('findCmrResult') == 'NOT DONE' || FormManager.getActualValue('findCmrResult') == 'REJECTED')
+       if (role == "REQUESTER" && (custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'CRO3P')) 
+        return new ValidationResult(null, false,'For 3rd party scenario please import a CMR via CMR search'); 
+      }
+    };
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
 
 function setVATForItaly() {
   var reqType = FormManager.getActualValue('reqType');
@@ -3440,7 +3484,8 @@ function addAfterConfigItaly() {
   disableAutoProcessingOnFiscalUpdate();
   enableDisableTaxCodeCollectionCdIT();
   addFieldValidationForRequestorItaly();
-
+  addCMRValidator();
+  addBillingValidator();
 }
 
 function addAfterTemplateLoadItaly(fromAddress, scenario, scenarioChanged) {
@@ -3461,6 +3506,8 @@ function addAfterTemplateLoadItaly(fromAddress, scenario, scenarioChanged) {
   setAffiliateEnterpriseRequired();
   addFieldValidationForRequestorItaly();
   disableProcpectCmrIT();
+  addCMRValidator();
+  addBillingValidator();
 }
 
 function addAddrFunctionItaly(cntry, addressMode, saving, finalSave) {
@@ -3627,7 +3674,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addAfterConfigItaly, [ SysLoc.ITALY ]);
   GEOHandler.addAddrFunction(addAddrFunctionItaly, [ SysLoc.ITALY ]);
   GEOHandler.addAfterTemplateLoad(addAfterTemplateLoadItaly, [ SysLoc.ITALY ]);
-//GEOHandler.registerValidator(addCMRValidator,[ SysLoc.ITALY ], null, true);
+  GEOHandler.registerValidator(addCMRValidator,[ SysLoc.ITALY ], null, true);
+  GEOHandler.registerValidator(addBillingValidator,[ SysLoc.ITALY ], null, true);
   GEOHandler.registerValidator(validateSBOForIT, [ SysLoc.ITALY ]);
   GEOHandler.registerValidator(checkIsicCodeValidationIT, [ SysLoc.ITALY ]);
   GEOHandler.registerValidator(validateCodiceDesIT, [ SysLoc.ITALY ], null, true);
