@@ -1509,7 +1509,7 @@ function setDupISUCTCValues(custSubGrp) {
         || FormManager.getActualValue('custSubGrp') == 'COMME' || FormManager.getActualValue('custSubGrp') == 'PRICU'
         || FormManager.getActualValue('custSubGrp') == 'THDPT' || FormManager.getActualValue('custSubGrp') == 'EXCOM'
         || FormManager.getActualValue('custSubGrp') == 'ELCOM') {
-      isuCds = [ '4', '5', '11', '12', '14', '15', '18', '19', '1R', '21', '27', '28', '31', '32', '34', '3T', '40', '4A', '4D', '4F', '5B', '5E',
+      isuCds = [ '04', '05', '11', '12', '14', '15', '18', '19', '1R', '21', '27', '28', '31', '32', '34', '3T', '40', '4A', '4D', '4F', '5B', '5E',
           '60', '8B', '8C' ];// CreateCMR-811
       FormManager.setValue('dupClientTierCd', 'Q');
     }
