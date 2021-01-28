@@ -1858,13 +1858,19 @@ function fieldsReadOnlyItaly(fromAddress, scenario, scenarioChanged) {
   }
   var checkImportIndc = getImportedIndcForItaly();
 
-  if (reqType == 'C' && checkImportIndc == 'N' && scenarioChanged) {
+  if (reqType == 'C' && scenarioChanged) {
     if (custSubType == 'BUSPR' || custSubType == 'INTER' || custSubType == 'CROBP' || custSubType == 'CROIN' || custSubType == 'BUSSM' || custSubType == 'INTSM' || custSubType == 'BUSVA'
         || custSubType == 'INTVA') {
       FormManager.setValue('isuCd', '21');
       FormManager.readOnly('isuCd');
       FormManager.setValue('clientTier', '7');
       FormManager.readOnly('clientTier');
+    } else if (custSubType == 'BUSPR' || custSubType == 'CROBP' || custSubType == 'BUSSM' || custSubType == 'BUSVA') {
+      FormManager.readOnly('collectionCd');
+      FormManager.readOnly('repTeamMemberNo');
+      FormManager.setValue('repTeamMemberNo', '09ZPB0');
+      FormManager.readOnly('salesBusOffCd');
+      FormManager.setValue('salesBusOffCd', 'ZP');
     }
   }
   if (reqType == 'C' && role == 'REQUESTER') {
@@ -4574,15 +4580,17 @@ function afterConfigForIT() {
   } else if ((reqType == 'U' || reqType == 'X') && role == 'PROCESSOR') {
     FormManager.enable('sensitiveFlag');
   }
-  if (reqType == 'C' && role == 'REQUESTER' && FormManager.getActualValue('isuCd') == '32') {
-    FormManager.readOnly('collectionCd');
-  } else if (reqType == 'C' && role == 'PROCESSOR' && FormManager.getActualValue('isuCd') == '32') {
-    FormManager.enable('collectionCd');
-  }
-
-  if (FormManager.getActualValue('isuCd') != '32') {
-    FormManager.enable('collectionCd');
-  }
+  // if (reqType == 'C' && role == 'REQUESTER' &&
+  // FormManager.getActualValue('isuCd') == '32') {
+  // FormManager.readOnly('collectionCd');
+  // } else if (reqType == 'C' && role == 'PROCESSOR' &&
+  // FormManager.getActualValue('isuCd') == '32') {
+  // FormManager.enable('collectionCd');
+  // }
+  //
+  // if (FormManager.getActualValue('isuCd') != '32') {
+  // FormManager.enable('collectionCd');
+  // }
 
   if (reqType == 'U' || reqType == 'X') {
     var reqId = FormManager.getActualValue('reqId');
@@ -4648,22 +4656,32 @@ function afterConfigForIT() {
       }
       FormManager.readOnly('identClient');
 
-    } else {
-      var custSubType = FormManager.getActualValue('custSubGrp');
-      if (FormManager.getActualValue('isuCd') != null && "34" == FormManager.getActualValue('isuCd')) {
-        if (custSubType == 'CROGO' || custSubType == 'CROUN' || custSubType == 'CROLC' || custSubType == 'CROCM' || custSubType == 'CROBP') {
-          FormManager.setValue('collectionCd', 'CIT16');
-          FormManager.readOnly('collectionCd');
-        }
-        if (custSubType == 'GOVSM' || custSubType == 'GOVVA' || custSubType == 'UNISM' || custSubType == 'UNIVA' || custSubType == 'LOCSM' || custSubType == 'LOCVA' || custSubType == 'COMSM'
-            || custSubType == 'COMVA' || custSubType == 'BUSSM' || custSubType == 'BUSVA' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'NGOSM' || custSubType == 'NGOVA'
-            || custSubType == 'PRISM' || custSubType == 'PRIVA') {
-          console.log("For SM/VA after config set default value of collection code CIT14");
-          FormManager.setValue('collectionCd', 'CIT14');
-          FormManager.readOnly('collectionCd');
-        }
-      }
-    }
+    } // else {
+    // var custSubType = FormManager.getActualValue('custSubGrp');
+    // if (FormManager.getActualValue('isuCd') != null && "34" ==
+    // FormManager.getActualValue('isuCd')) {
+    // if (custSubType == 'CROGO' || custSubType == 'CROUN' || custSubType ==
+    // 'CROLC' || custSubType == 'CROCM' || custSubType == 'CROBP') {
+    // FormManager.setValue('collectionCd', 'CIT16');
+    // FormManager.enable('collectionCd');
+    // }
+    // if (custSubType == 'GOVSM' || custSubType == 'GOVVA' || custSubType ==
+    // 'UNISM' || custSubType == 'UNIVA' || custSubType == 'LOCSM' ||
+    // custSubType ==
+    // 'LOCVA' || custSubType == 'COMSM'
+    // || custSubType == 'COMVA' || custSubType == 'BUSSM' || custSubType ==
+    // 'BUSVA'
+    // || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType ==
+    // 'NGOSM'
+    // || custSubType == 'NGOVA'
+    // || custSubType == 'PRISM' || custSubType == 'PRIVA') {
+    // console.log("For SM/VA after config set default value of collection code
+    // CIT14");
+    // FormManager.setValue('collectionCd', 'CIT14');
+    // FormManager.readOnly('collectionCd');
+    // }
+    // }
+    // }
   }
   // CMR-1257
   if ('C' == FormManager.getActualValue('reqType')) {
@@ -5877,14 +5895,14 @@ function getOldValuesIT(fromAddress, scenario, scenarioChanged) {
             // console.log("For CB getOld set default value of collection code
             // CIT16");
             FormManager.setValue('collectionCd', 'CIT16');
-            FormManager.readOnly('collectionCd');
+            // FormManager.readOnly('collectionCd');
           }
           if (custSubType == 'GOVSM' || custSubType == 'GOVVA' || custSubType == 'UNISM' || custSubType == 'UNIVA' || custSubType == 'LOCSM' || custSubType == 'LOCVA' || custSubType == 'COMSM'
               || custSubType == 'COMVA' || custSubType == 'BUSSM' || custSubType == 'BUSVA' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'NGOSM' || custSubType == 'NGOVA'
               || custSubType == 'PRISM' || custSubType == 'PRIVA') {
             console.log("For SM/VA getOld set default value of collection code CIT14");
             FormManager.setValue('collectionCd', 'CIT14');
-            FormManager.readOnly('collectionCd');
+            // FormManager.readOnly('collectionCd');
           }
         }
       }
@@ -5925,10 +5943,11 @@ function blankedOutCollectionCD() {
   if (checkImportIndc != 'Y' && reqType == 'C') {
     FormManager.resetValidations('collectionCd');
     if (isuCd == '34' && ctc == 'Q') {
-      FormManager.readOnly('collectionCd');
+      FormManager.enable('collectionCd');
       autoSetSboCollCdOnPostalCode();
     } else {
-      FormManager.enable('collectionCd');
+      FormManager.clearValue('collectionCd');
+      FormManager.readOnly('collectionCd');
     }
   }
 }
@@ -8144,7 +8163,6 @@ function addAfterTemplateLoadItaly(fromAddress, scenario, scenarioChanged) {
   enableDisableTaxCodeCollectionCdIT();
   // setClientTierValuesIT();
   addAfterTemplateLoadIT(fromAddress, scenario, scenarioChanged);
-  setSalesRepValuesIT();
   blankedOutCollectionCD();
   setAffiliateEnterpriseRequired();
   addFieldValidationForRequestorItaly();
