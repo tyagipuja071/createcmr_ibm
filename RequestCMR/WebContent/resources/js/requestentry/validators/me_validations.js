@@ -4260,6 +4260,15 @@ function setIsuCtcOnScenarioChange() {
     FormManager.enable('isuCd');
     FormManager.enable('clientTier');
   }
+  //CREATCMR-816 No.3 Set company number 985518
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  if((SysLoc.UNITED_ARAB_EMIRATES == cntry || SysLoc.ABU_DHABI == cntry) && scenarioChanged){
+    if(scenario == 'BUSPR' || scenario.includes('BP') || scenario.includes('IN')){
+      FormManager.setValue('enterprise', '');
+    }else{
+      FormManager.setValue('enterprise', '985518');
+    }
+  }
 } 
 
 dojo.addOnLoad(function() {
