@@ -1871,6 +1871,12 @@ function fieldsReadOnlyItaly(fromAddress, scenario, scenarioChanged) {
       FormManager.setValue('repTeamMemberNo', '09ZPB0');
       FormManager.readOnly('salesBusOffCd');
       FormManager.setValue('salesBusOffCd', 'ZP');
+    } else if (custSubType == 'PRICU' || custSubType == 'CROPR' || custSubType == 'PRISM' || custSubType == 'PRIVA') {
+      FormManager.readOnly('salesBusOffCd');
+      FormManager.readOnly('repTeamMemberNo');
+    } else {
+      FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SalesBusOff' ], 'MAIN_IBM_TAB');
+      FormManager.enable('salesBusOffCd');
     }
   }
   if (reqType == 'C' && role == 'REQUESTER') {
@@ -5090,7 +5096,7 @@ function autoSetSboCollCdOnPostalCode(clientTier, currPostCd) {
   var isuCode = FormManager.getActualValue('isuCd');
   var countryUse = FormManager.getActualValue('countryUse');
   var ctc = FormManager.getActualValue('clientTier');
-  if (requestType != 'C' || (countryUse == '758SM' || countryUse == '758VA')) {
+  if (requestType != 'C') {
     return;
   }
   var reqId = FormManager.getActualValue('reqId');
@@ -5112,54 +5118,66 @@ function autoSetSboCollCdOnPostalCode(clientTier, currPostCd) {
 
   // set collection code based on postalcode logic
   var checkImportIndc = getImportedIndcForItaly();
-  if (checkImportIndc != 'Y' && custType != '' && custType != undefined && custType != 'CROSS') {
-    if (postCodeOrg != '' && isuCode != '' && isuCode == '34' && ctc == 'Q') {
-      if (postCode >= 00 && postCode <= 04) {
-        FormManager.setValue('salesBusOffCd', 'NC');
-        FormManager.setValue('collectionCd', 'CIT14');
-      } else if (postCode == 05 || postCode == 06) {
-        FormManager.setValue('salesBusOffCd', 'NA');
-        FormManager.setValue('collectionCd', 'CIT14');
-      } else if (postCode == 10 || postCode == 11 || postCode == 28) {
-        FormManager.setValue('salesBusOffCd', 'NB');
-        FormManager.setValue('collectionCd', 'CIT04');
-      } else if (postCode > 11 && postCode <= 19) {
-        FormManager.setValue('salesBusOffCd', 'GE');
-        FormManager.setValue('collectionCd', 'CIT04');
-      } else if ((postCode >= 21 && postCode <= 24) || postCode == 27) {
-        FormManager.setValue('salesBusOffCd', 'NL');
-        FormManager.setValue('collectionCd', 'CIT02');
-      } else if (postCode == 23 || postCode == 25 || postCode == 26) {
-        FormManager.setValue('salesBusOffCd', 'GJ');
-        FormManager.setValue('collectionCd', 'CIT02');
-      } else if (postCode == 20) {
-        FormManager.setValue('salesBusOffCd', 'GH');
-        FormManager.setValue('collectionCd', 'CIT16');
-      } else if ((postCode >= 30 && postCode <= 35) || postCode == 45) {
-        FormManager.setValue('salesBusOffCd', 'NF');
-        FormManager.setValue('collectionCd', 'CIT19');
-      } else if ((postCode >= 36 && postCode <= 39) || postCode == 46) {
-        FormManager.setValue('salesBusOffCd', 'GK');
-        FormManager.setValue('collectionCd', 'CIT19');
-      } else if ((postCode >= 40 && postCode <= 44) || postCode == 29 || postCode == 47 || postCode == 48) {
-        FormManager.setValue('salesBusOffCd', 'NI');
-        FormManager.setValue('collectionCd', 'CIT03');
-      } else if (postCode >= 50 && postCode <= 59) {
-        FormManager.setValue('salesBusOffCd', 'RP');
-        FormManager.setValue('collectionCd', 'CIT03');
-      } else if (postCode == 60 || postCode == 61) {
-        FormManager.setValue('salesBusOffCd', 'CP');
-        FormManager.setValue('collectionCd', 'CIT03');
-      } else if ((postCode >= 62 && postCode <= 67) || (postCode >= 70 && postCode <= 76) || (postCode >= 85 && postCode <= 89) || (postCode >= 7 && postCode <= 9)) {
-        FormManager.setValue('salesBusOffCd', 'CP');
-        FormManager.setValue('collectionCd', 'CIT14');
-      } else if (postCode >= 80 && postCode <= 84) {
-        FormManager.setValue('salesBusOffCd', 'NG');
-        FormManager.setValue('collectionCd', 'CIT14');
-      } else if (postCode >= 90 && postCode <= 98) {
-        FormManager.setValue('salesBusOffCd', 'NM');
-        FormManager.setValue('collectionCd', 'CIT14');
+  if (countryUse != '758VA' || countryUse != '758VA') {
+    if (checkImportIndc != 'Y' && custType != '' && custType != undefined && custType != 'CROSS') {
+      if (postCodeOrg != '' && isuCode != '' && isuCode == '34' && ctc == 'Q') {
+        if (postCode >= 00 && postCode <= 04) {
+          FormManager.setValue('salesBusOffCd', 'NC');
+          FormManager.setValue('collectionCd', 'CIT14');
+        } else if (postCode == 05 || postCode == 06) {
+          FormManager.setValue('salesBusOffCd', 'NA');
+          FormManager.setValue('collectionCd', 'CIT14');
+        } else if (postCode == 10 || postCode == 11 || postCode == 28) {
+          FormManager.setValue('salesBusOffCd', 'NB');
+          FormManager.setValue('collectionCd', 'CIT04');
+        } else if (postCode > 11 && postCode <= 19) {
+          FormManager.setValue('salesBusOffCd', 'GE');
+          FormManager.setValue('collectionCd', 'CIT04');
+        } else if ((postCode >= 21 && postCode <= 24) || postCode == 27) {
+          FormManager.setValue('salesBusOffCd', 'NL');
+          FormManager.setValue('collectionCd', 'CIT02');
+        } else if (postCode == 23 || postCode == 25 || postCode == 26) {
+          FormManager.setValue('salesBusOffCd', 'GJ');
+          FormManager.setValue('collectionCd', 'CIT02');
+        } else if (postCode == 20) {
+          FormManager.setValue('salesBusOffCd', 'GH');
+          FormManager.setValue('collectionCd', 'CIT16');
+        } else if ((postCode >= 30 && postCode <= 35) || postCode == 45) {
+          FormManager.setValue('salesBusOffCd', 'NF');
+          FormManager.setValue('collectionCd', 'CIT19');
+        } else if ((postCode >= 36 && postCode <= 39) || postCode == 46) {
+          FormManager.setValue('salesBusOffCd', 'GK');
+          FormManager.setValue('collectionCd', 'CIT19');
+        } else if ((postCode >= 40 && postCode <= 44) || postCode == 29 || postCode == 47 || postCode == 48) {
+          FormManager.setValue('salesBusOffCd', 'NI');
+          FormManager.setValue('collectionCd', 'CIT03');
+        } else if (postCode >= 50 && postCode <= 59) {
+          FormManager.setValue('salesBusOffCd', 'RP');
+          FormManager.setValue('collectionCd', 'CIT03');
+        } else if (postCode == 60 || postCode == 61) {
+          FormManager.setValue('salesBusOffCd', 'CP');
+          FormManager.setValue('collectionCd', 'CIT03');
+        } else if ((postCode >= 62 && postCode <= 67) || (postCode >= 70 && postCode <= 76) || (postCode >= 85 && postCode <= 89) || (postCode >= 7 && postCode <= 9)) {
+          FormManager.setValue('salesBusOffCd', 'CP');
+          FormManager.setValue('collectionCd', 'CIT14');
+        } else if (postCode >= 80 && postCode <= 84) {
+          FormManager.setValue('salesBusOffCd', 'NG');
+          FormManager.setValue('collectionCd', 'CIT14');
+        } else if (postCode >= 90 && postCode <= 98) {
+          FormManager.setValue('salesBusOffCd', 'NM');
+          FormManager.setValue('collectionCd', 'CIT14');
+        }
       }
+    }
+  }
+  if (countryUse && isuCode == '34' && ctc == 'Q' && checkImportIndc != 'Y') {
+    if (countryUse == '758VA') {
+      FormManager.setValue('repTeamMemberNo', '012345');
+      FormManager.setValue('salesBusOffCd', 'NC');
+    }
+    if (countryUse == '758SM') {
+      FormManager.setValue('repTeamMemberNo', '012345');
+      FormManager.setValue('salesBusOffCd', 'NI');
     }
   }
 }
@@ -5940,6 +5958,7 @@ function blankedOutCollectionCD() {
   var reqType = FormManager.getActualValue('reqType');
   var isuCd = FormManager.getActualValue('isuCd');
   var ctc = FormManager.getActualValue('clientTier');
+  var custSubType = FormManager.getActualValue('custSubGrp');
   if (checkImportIndc != 'Y' && reqType == 'C') {
     FormManager.resetValidations('collectionCd');
     if (isuCd == '34' && ctc == 'Q') {
@@ -5949,6 +5968,8 @@ function blankedOutCollectionCD() {
       FormManager.clearValue('collectionCd');
       FormManager.readOnly('collectionCd');
     }
+  } else if (custSubType == 'PRICU' || custSubType == 'CROPR' || custSubType == 'PRISM' || custSubType == 'PRIVA') {
+    FormManager.readOnly('collectionCd');
   }
 }
 
