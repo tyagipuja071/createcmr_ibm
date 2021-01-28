@@ -571,7 +571,7 @@ public class BELUXHandler extends BaseSOFHandler {
       }
     }
     if (isLocal) {
-      if (postCd.startsWith("L")) {
+      if (postCd != null && postCd.startsWith("L")) {
         zs02Addr.setCmrCountryLanded("LU");
       } else {
         zs02Addr.setCmrCountryLanded("BE");
@@ -690,7 +690,7 @@ public class BELUXHandler extends BaseSOFHandler {
       return false;
     }
     String regEx1 = "^[0-9]{4}[ ]";
-    String regEx2 = "^[L- ][0-9]{4}[ ]";
+    String regEx2 = "^L[- ][0-9]{4}[ ]";
     Pattern pattern1 = Pattern.compile(regEx1);
     Pattern pattern2 = Pattern.compile(regEx2);
     Matcher matcher1 = pattern1.matcher(input);
