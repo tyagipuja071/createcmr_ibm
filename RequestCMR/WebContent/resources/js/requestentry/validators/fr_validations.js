@@ -1368,6 +1368,11 @@ function updateAbbrNameWithZS01() {
     var result = cmr.query('DATA.GET.ABBREV_NM.BY_REQID', qParams);
     var oldAbbrName = result.ret1;
 
+    if (oldAbbrName != '' || oldAbbrName != null) {
+      FormManager.setValue('abbrevNm', oldAbbrName);
+      return;
+    }
+
     if (abbrName != oldAbbrName) {
       return;
     }
@@ -1410,7 +1415,12 @@ function updateAbbrNameWithZS01_ZI01() {
     };
     var result = cmr.query('DATA.GET.ABBREV_NM.BY_REQID', qParams);
     var oldAbbrName = result.ret1;
-
+    
+    if (oldAbbrName != '' || oldAbbrName != null) {
+      FormManager.setValue('abbrevNm', oldAbbrName);
+      return;
+    }
+    
     if (abbrName != oldAbbrName) {
       return;
     }
@@ -1471,6 +1481,11 @@ function updateAbbrNameWithTPZS01_ZI01() {
     };
     var result = cmr.query('DATA.GET.ABBREV_NM.BY_REQID', qParams);
     var oldAbbrName = result.ret1;
+
+    if (oldAbbrName != '' || oldAbbrName != null) {
+      FormManager.setValue('abbrevNm', oldAbbrName);
+      return;
+    }
 
     if (abbrName != oldAbbrName) {
       return;
