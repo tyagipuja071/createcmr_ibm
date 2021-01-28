@@ -1106,9 +1106,10 @@ public class MaltaHandler extends BaseSOFHandler {
               }
 
               if (!StringUtils.isBlank(inac) && inac.length() == 4 && !StringUtils.isNumeric(inac) && !"@@@@".equals(inac)
-                  && !inac.matches("^[a-zA-Z][a-zA-Z][0-9][0-9]$")) {
-                LOG.trace("INAC should have all 4 digits or 2 letters and 2 digits in order.");
-                error.addError(row.getRowNum(), rowNumber + "INAC/NAC", "INAC should have all 4 digits or 2 letters and 2 digits in order.");
+                  && !inac.matches("^[a-zA-Z][a-zA-Z][0-9][0-9]$") && !inac.matches("^[a-zA-Z][0-9][0-9][0-9]$")) {
+                LOG.trace("INAC should have all 4 digits or 2 letters and 2 digits or 1 letter and 3 digits in order.");
+                error.addError(row.getRowNum(), rowNumber + "INAC/NAC",
+                    "INAC should have all 4 digits or 2 letters and 2 digits or 1 letter and 3 digits in order.");
               }
 
               if (!StringUtils.isBlank(sbo) && !StringUtils.isAlphanumeric(sbo)) {
