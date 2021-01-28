@@ -5837,12 +5837,23 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
           throw new CmrException(MessageUtil.ERROR_MASS_FILE_ROWS, "" + maxRows);
         }
 
-        String cellValue = rowCell.getStringCellValue();
-        if (StringUtils.isBlank(cellValue) || (StringUtils.isNotBlank(cellValue) && !StringUtils.isNumeric(cellValue))) {
+        // String cellValue = rowCell.getStringCellValue();
+
+        try {
+          rowCell.getNumericCellValue();
+        } catch (Exception e) {
           isInvalidRow = true;
           sbErrorRow.append("" + rowIndex);
           sbErrorRow.append(",");
         }
+
+        // if (StringUtils.isBlank(cellValue) ||
+        // (StringUtils.isNotBlank(cellValue) &&
+        // !StringUtils.isNumeric(cellValue))) {
+        // isInvalidRow = true;
+        // sbErrorRow.append("" + rowIndex);
+        // sbErrorRow.append(",");
+        // }
       }
 
       rowIndex++;
