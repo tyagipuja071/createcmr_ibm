@@ -785,29 +785,23 @@ public class NLHandler extends BaseSOFHandler {
 
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
-    boolean hasKVK = false;
-    String kvk = null;
+
     super.setDataValuesOnImport(admin, data, results, mainRecord);
 
     data.setEngineeringBo(this.currentImportValues.get("DPCEBO"));
     LOG.trace("DPCEBO: " + data.getEngineeringBo());
 
-    kvk = this.currentImportValues.get("KVK");
-    hasKVK = !StringUtils.isEmpty(kvk) ? true : false;
-    if (hasKVK && kvk.length() >= 8) {
-      kvk = kvk.substring(0, 8);
-    }
-    data.setTaxCd2(kvk);
+    data.setTaxCd2(getKna1KVK(mainRecord.getCmrNum()));
     LOG.trace("KVK: " + data.getTaxCd2());
 
     data.setTaxCd1(this.currentImportValues.get("TaxCode"));
     LOG.trace("TaxCode: " + data.getTaxCd1());
 
-    data.setEconomicCd(this.currentImportValues.get("EconomicCode"));
-    LOG.trace("EconomicCode: " + data.getEconomicCd());
+    data.setEconomicCd(this.currentImportValues.get("EconomicCd"));
+    LOG.trace("EconomicCd: " + data.getEconomicCd());
 
-    data.setEngineeringBo(this.currentImportValues.get("SBO"));
-    LOG.trace("BOTeam: " + data.getEngineeringBo());
+    // data.setEngineeringBo(this.currentImportValues.get("SBO"));
+    // LOG.trace("BOTeam: " + data.getEngineeringBo());
 
     data.setIbmDeptCostCenter(this.currentImportValues.get("DepartmentNumber"));
     LOG.trace("DepartmentNumber: " + data.getIbmDeptCostCenter());
@@ -859,6 +853,32 @@ public class NLHandler extends BaseSOFHandler {
       entityManager.close();
     }
     return department;
+  }
+
+  private String getKna1KVK(String cmrNo) throws Exception {
+    String kvk = "";
+    List<String> results = new ArrayList<String>();
+
+    EntityManager entityManager = JpaManager.getEntityManager();
+    try {
+      String mandt = SystemConfiguration.getValue("MANDT");
+      String sql = ExternalizedQuery.getSql("GET.KVK.KNA1.ZZKV_NODE2");
+      sql = StringUtils.replace(sql, ":ZZKV_CUSNO", "'" + cmrNo + "'");
+      sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
+      sql = StringUtils.replace(sql, ":KATR6", "'" + "788" + "'");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      results = query.getResults(String.class);
+      if (results != null && results.size() > 0) {
+        kvk = results.get(0);
+        if (kvk != null && kvk.length() >= 8) {
+          kvk = kvk.substring(0, 8);
+        }
+      }
+    } finally {
+      entityManager.clear();
+      entityManager.close();
+    }
+    return kvk;
   }
 
   private boolean loadDuplicateCMR(Data data, String dupCntry, String dupCmrNo) throws Exception {
