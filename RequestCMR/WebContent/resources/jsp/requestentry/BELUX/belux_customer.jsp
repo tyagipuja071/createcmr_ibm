@@ -80,6 +80,7 @@
         </p>
       </cmr:column>
       
+      <c:if test="${reqentry.reqType == 'U'}">
 		<cmr:column span="2" containerForField="ModeOfPayment">
 		 <p>
 			<cmr:label fieldId="modeOfPayment">
@@ -88,6 +89,7 @@
 			<cmr:field path="paymentMode" id="modeOfPayment" fieldId="ModeOfPayment" tabId="MAIN_CUST_TAB" />		 
 		 </p>
 		</cmr:column>
+	  </c:if>
     </cmr:row>
 </cmr:view>
 
