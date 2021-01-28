@@ -620,7 +620,7 @@ public class NLTransformer extends EMEATransformer {
       addrLineT = "";
     }
 
-    legacyAddr.setItCompanyProvCd(!StringUtils.isBlank(addrData.getStateProv()) ? addrData.getStateProv() : "");
+    legacyAddr.setItCompanyProvCd("");
 
     legacyAddr.setAddrLine1(line1);
     legacyAddr.setAddrLine2(line2);
