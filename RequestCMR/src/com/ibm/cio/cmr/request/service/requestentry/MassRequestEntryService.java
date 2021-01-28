@@ -5841,6 +5841,13 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
 
         try {
           rowCell.getNumericCellValue();
+        } catch (IllegalStateException ie) {
+          String sRowCellValue = rowCell.getStringCellValue();
+          if (!StringUtils.isNumeric(sRowCellValue)) {
+            isInvalidRow = true;
+            sbErrorRow.append("" + rowIndex);
+            sbErrorRow.append(",");
+          }
         } catch (Exception e) {
           isInvalidRow = true;
           sbErrorRow.append("" + rowIndex);
