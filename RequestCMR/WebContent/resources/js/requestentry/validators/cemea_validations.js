@@ -1500,9 +1500,11 @@ function setDupISUCTCValues(custSubGrp) {
         || FormManager.getActualValue('custSubGrp') == 'EXBP' || FormManager.getActualValue('custSubGrp') == 'ELBP') {
       isuCds = [ '8B' ];
       FormManager.setValue('dupClientTierCd', '7');
+      FormManager.readOnly('dupClientTierCd');
     } else if (FormManager.getActualValue('custSubGrp') == 'XINT' || FormManager.getActualValue('custSubGrp') == 'INTER') {
       isuCds = [ '21' ];
       FormManager.setValue('dupClientTierCd', '7');
+      FormManager.readOnly('dupClientTierCd')
     } else if (FormManager.getActualValue('custSubGrp') == 'XCOM' || FormManager.getActualValue('custSubGrp') == 'XTP'
         || FormManager.getActualValue('custSubGrp') == 'COMME' || FormManager.getActualValue('custSubGrp') == 'PRICU'
         || FormManager.getActualValue('custSubGrp') == 'THDPT' || FormManager.getActualValue('custSubGrp') == 'EXCOM'
@@ -1517,6 +1519,7 @@ function setDupISUCTCValues(custSubGrp) {
     FormManager.limitDropdownValues(FormManager.getField('dupIsuCd'), isuCds);
     if (isuCds.length == 1) {
       FormManager.setValue('dupIsuCd', isuCds[0]);
+      FormManager.readOnly('dupIsuCd')
     } else {
       FormManager.setValue('dupIsuCd', '34');
     }
@@ -2357,34 +2360,6 @@ function setEnterpriseValues(clientTier) {
       }
     } else if (SysLoc.ALBANIA == cntry) {
       enterprises = [ '' ];
-    } else if (SysLoc.POLAND == cntry
-        && (FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'THDPT'
-            || FormManager.getActualValue('custSubGrp') == 'XPC' || FormManager.getActualValue('custSubGrp') == 'PRICU'
-            || FormManager.getActualValue('custSubGrp') == 'COMME' || FormManager.getActualValue('custSubGrp') == 'XCOM')) {
-      if (isuCd == '32' && clientTier == 'S') {
-        enterprises = [ '985050', '985065', '985066', '985062', '985063', '985064', '985068' ];
-      } else if (isuCd == '32' && clientTier == 'N') {
-        enterprises = [ '985003', '985004', '985067' ];
-      } else if (isuCd == '34' && clientTier == '6') {
-        enterprises = [ '985069', '985070' ];
-      } else if (isuCd == '34' && clientTier == 'V') {
-        enterprises = [ '985011', '985012', '985013', '985014', '985016', '985055' ];
-      }
-    } else if (SysLoc.RUSSIA == cntry
-        && (FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'THDPT'
-            || FormManager.getActualValue('custSubGrp') == 'XPC' || FormManager.getActualValue('custSubGrp') == 'PRICU'
-            || FormManager.getActualValue('custSubGrp') == 'COMME' || FormManager.getActualValue('custSubGrp') == 'XCOM')) {
-      if (isuCd == '32' && clientTier == 'S') {
-        enterprises = [ '985026', '985031', '985042', '985051', '985052', '985053', '985054' ];
-      } else if (isuCd == '32' && clientTier == 'N') {
-        enterprises = [ '985083', '985084', '985067' ];
-      } else if (isuCd == '34' && clientTier == '6') {
-        enterprises = [ '985069', '985070' ];
-      } else if (isuCd == '34' && clientTier == 'A') {
-        enterprises = [ '985081' ];
-      } else if (isuCd == '34' && clientTier == 'V') {
-        enterprises = [ '985012', '985013', '985014', '985016', '985017', '985018', '985021', '985040', '985041', '985055', '985082' ];
-      }
     } else if (FormManager.getActualValue('custSubGrp') == 'XINT' || FormManager.getActualValue('custSubGrp') == 'INTER'
         || FormManager.getActualValue('custSubGrp') == 'CSINT' || FormManager.getActualValue('custSubGrp') == 'MEINT'
         || FormManager.getActualValue('custSubGrp') == 'RSXIN' || FormManager.getActualValue('custSubGrp') == 'RSINT'
@@ -2474,8 +2449,8 @@ function setCompanyNoForCEE(clientTier) {
         FormManager.setValue('enterprise', '985050');
 
       } else if (SysLoc.RUSSIA == cntry) {
-        enterprises = [ '985012', '985013', '985014', '985016', '985017', '985018', '985021', '985026', '985031', '985040', ' 985041', ' 985042',
-            '985051', ' 985052', '985053', '985054', '985055', ' 985067', '  985069', ' 985070', ' 985081', '985082', '985083', ' 985084' ];
+        enterprises = [ '985012', '985013', '985014', '985016', '985017', '985018', '985021', '985026', '985031', '985040', '985041', '985042',
+            '985051', '985052', '985053', '985054', '985055', '985067', '985069', '985070', '985081', '985082', '985083', '985084' ];
         FormManager.setValue('enterprise', '985051');
       }
     } else {
