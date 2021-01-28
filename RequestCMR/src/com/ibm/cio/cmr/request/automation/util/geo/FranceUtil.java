@@ -235,6 +235,8 @@ public class FranceUtil extends AutomationUtil {
 
       case SCENARIO_INTERNAL:
       case SCENARIO_CROSSBORDER_INTERNAL:
+    	engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
+        engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
         for (String addrType : RELEVANT_ADDRESSES) {
           List<Addr> addresses = requestData.getAddresses(addrType);
           for (Addr addr : addresses) {
@@ -252,7 +254,7 @@ public class FranceUtil extends AutomationUtil {
 
       case SCENARIO_CROSSBORDER_BUSINESS_PARTNER:
         engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
-        engineData.hasPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
+        engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
         return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
       case SCENARIO_INTERNAL_SO:
       case SCENARIO_CROSSBORDER_INTERNAL_SO:
