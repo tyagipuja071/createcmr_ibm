@@ -1389,7 +1389,7 @@ public class ItalyHandler extends BaseSOFHandler {
     map.put("##GlobalBuyingGroupID", "gbgId");
     map.put("##CoverageID", "covId");
     map.put("##OriginatorID", "originatorId");
-    map.put("##BPRelationType", "bpRelType");
+  //  map.put("##BPRelationType", "bpRelType");
     map.put("##LocalTax1", "taxCd1");
     map.put("##CAP", "capInd");
     map.put("##RequestReason", "reqReason");
@@ -1442,7 +1442,7 @@ public class ItalyHandler extends BaseSOFHandler {
     map.put("##BuyingGroupID", "bgId");
     map.put("##RequesterID", "requesterId");
     map.put("##GeoLocationCode", "geoLocationCd");
-    map.put("##MembLevel", "memLvl");
+  //  map.put("##MembLevel", "memLvl");
     map.put("##RequestType", "reqType");
     map.put("##CustomerScenarioSubType", "custSubGrp");
     map.put("##StreetAbbrev", "divn");
@@ -1545,9 +1545,8 @@ public class ItalyHandler extends BaseSOFHandler {
   @Override
   public List<String> getDataFieldsForUpdateCheckLegacy(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
-    fields.addAll(Arrays.asList("SALES_BO_CD", "REP_TEAM_MEMBER_NO","CUST_CLASS", "SPECIAL_TAX_CD", "VAT", "ISIC_CD", "EMBARGO_CD", "COLLECTION_CD", "ABBREV_NM",
-        "SENSITIVE_FLAG", "CLIENT_TIER", "COMPANY", "INAC_TYPE", "INAC_CD", "ISU_CD", "SUB_INDUSTRY_CD", "ABBREV_LOCN", "PPSCEID", "MEM_LVL",
-        "BP_REL_TYPE","CROS_SUB_TYP", "TAX_CD1", "NATIONAL_CUS_IND", "MODE_OF_PAYMENT", "ENTERPRISE"));
+    fields.addAll(Arrays.asList("SALES_BO_CD", "REP_TEAM_MEMBER_NO", "SPECIAL_TAX_CD", "VAT", "ISIC_CD", "EMBARGO_CD", "COLLECTION_CD", "ABBREV_NM","CROS_SUB_TYP",
+        "SENSITIVE_FLAG", "CLIENT_TIER", "COMPANY", "INAC_TYPE", "INAC_CD", "ISU_CD", "SUB_INDUSTRY_CD", "ABBREV_LOCN", "PPSCEID", "TAX_CD1", "NATIONAL_CUS_IND", "MODE_OF_PAYMENT", "ENTERPRISE"));
     return fields;
   }
 
