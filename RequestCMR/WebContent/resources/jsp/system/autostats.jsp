@@ -247,7 +247,7 @@ table.partner-table th {
           <p>
             <form:select dojoType="dijit.form.FilteringSelect" id="reqType" searchAttr="name" style="display: block;" maxHeight="200"
               required="false" path="reqType" placeHolder="Filter by Request Type">
-              <option value="C"></option>
+              <option value=""></option>
               <option value="C">Create</option>
               <option value="U">Update</option>
               <option value="M">Mass Update</option>
