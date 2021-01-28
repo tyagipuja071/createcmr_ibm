@@ -135,7 +135,7 @@ function addHandlersForNORDX() {
 
   if (_ISUHandler == null) {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
-      setClientTierValues(value);
+//      setClientTierValues(value);
     });
   }
 
@@ -243,39 +243,39 @@ function setVatValidatorNORDX() {
 /**
  * Set Client Tier Value
  */
-function setClientTierValues(isuCd) {
-
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-
-  if (FormManager.getActualValue('reqType') != 'C') {
-    return;
-  }
-
-  isuCd = FormManager.getActualValue('isuCd');
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var clientTiers = [];
-  if (isuCd != '') {
-    var qParams = {
-      _qall : 'Y',
-      ISSUING_CNTRY : cntry,
-      ISU : '%' + isuCd + '%'
-    };
-    var results = cmr.query('GET.CTCLIST.BYISU', qParams);
-    if (results != null) {
-      for (var i = 0; i < results.length; i++) {
-        clientTiers.push(results[i].ret1);
-      }
-      if (clientTiers != null) {
-        FormManager.limitDropdownValues(FormManager.getField('clientTier'), clientTiers);
-        if (clientTiers.length == 1) {
-          FormManager.setValue('clientTier', clientTiers[0]);
-        }
-      }
-    }
-  }
-}
+//function setClientTierValues(isuCd) {
+//
+//  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+//    return;
+//  }
+//
+//  if (FormManager.getActualValue('reqType') != 'C') {
+//    return;
+//  }
+//
+//  isuCd = FormManager.getActualValue('isuCd');
+//  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+//  var clientTiers = [];
+//  if (isuCd != '') {
+//    var qParams = {
+//      _qall : 'Y',
+//      ISSUING_CNTRY : cntry,
+//      ISU : '%' + isuCd + '%'
+//    };
+//    var results = cmr.query('GET.CTCLIST.BYISU', qParams);
+//    if (results != null) {
+//      for (var i = 0; i < results.length; i++) {
+//        clientTiers.push(results[i].ret1);
+//      }
+//      if (clientTiers != null) {
+//        FormManager.limitDropdownValues(FormManager.getField('clientTier'), clientTiers);
+//        if (clientTiers.length == 1) {
+//          FormManager.setValue('clientTier', clientTiers[0]);
+//        }
+//      }
+//    }
+//  }
+//}
 
 /**
  * NORDIX - sets SBO based on Postal Code value
@@ -1591,8 +1591,8 @@ dojo.addOnLoad(function() {
   GEOHandler.enableCopyAddress(GEOHandler.NORDX, validateNORDXCopy, [ 'ZD01', 'ZP02' ]);
   GEOHandler.addAddrFunction(updateAddrTypeList, GEOHandler.NORDX);
   GEOHandler.registerValidator(addCrossBorderValidatorNORS, GEOHandler.NORDX, null, true);
-  GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.NORDX);
-  GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.NORDX);
+//  GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.NORDX);
+//  GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.NORDX);
   // GEOHandler.addAfterTemplateLoad(setSalesRepValues, GEOHandler.NORDX);
   // GEOHandler.addAfterTemplateLoad(setAdminDSCValues, GEOHandler.NORDX);
   // GEOHandler.addAfterConfig(setSalesRepValues, GEOHandler.NORDX);
