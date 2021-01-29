@@ -137,33 +137,20 @@ public class EUVatValidationElement extends ValidatingElement implements Company
     return output;
   }
 
-  private String getLandedCountryForVies(String cmrIssuingCntry, String landCntry, String subRegion) {
-
-    String defaultLandedCountry = PageManager.getDefaultLandedCountry(cmrIssuingCntry);
-
-    if (landCntry == null && !StringUtils.isBlank(defaultLandedCountry)) {
-      return defaultLandedCountry;
-    }
-    if (landCntry == null && StringUtils.isBlank(defaultLandedCountry)) {
-      return null;
-    }
-
-    if (!landCntry.equals(defaultLandedCountry)) {
-      // handle cross-border and subregions
-
-      if (!EU_COUNTRIES.contains(landCntry)) {
-        // the landed country is not an EU country
-
-        if (!StringUtils.isBlank(subRegion) && subRegion.length() > 3 && subRegion.startsWith(cmrIssuingCntry)) {
-          // this is a subregion under the main country, use main country's
-          // landed country
-          return defaultLandedCountry;
-        }
-      }
-    }
-
-    return landCntry;
-  }
+  private String getLandedCountryForVies(String cmrIssuingCntry, String landCntry, String countryUse) {
+	    String defaultLandedCountry = PageManager.getDefaultLandedCountry(cmrIssuingCntry);
+	    String subRegion = !StringUtils.isBlank(countryUse) && countryUse.length() > 3 ? countryUse.substring(3) : "";
+	    if (StringUtils.isNotBlank(subRegion) && EU_COUNTRIES.contains(subRegion)) {
+	      // if subregion is part of EU countries eligible for VAT matching, use
+	      // subregion as default country
+	      defaultLandedCountry = subRegion;
+	    }
+	    if (!landCntry.equals(defaultLandedCountry) && !landCntry.equals(subRegion)) {
+	      // if landed country is crossborder and not part of subregions
+	      return landCntry;
+	    }
+	    return defaultLandedCountry;
+	  }
 
   private AutomationResponse<VatLayerResponse> getVatLayerInfo(Admin admin, Data data, String landCntryForVies) throws Exception {
     AutomationServiceClient autoClient = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
