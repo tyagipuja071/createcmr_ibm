@@ -3247,7 +3247,7 @@ function setClientTierAndISR(value) {
     if (reqType == 'C') {
       enterpriseLov = [];
       if (value == '34') {
-        tierValues = [ 'V', '6', 'A' ,'Q'];
+        tierValues = [ 'V', '6', 'A' ,'Q', 'Z'];
         if (clientTier == '6') {
           enterpriseLov = [ '822836', '822835' ];
         }
@@ -3336,7 +3336,7 @@ function setClientTierForCreates(value) {
   if (reqType == 'C') {
     enterpriseLov = [];
     if (isuCd == '34') {
-      tierValues = [ 'V', '6', 'A' ,'Q'];
+      tierValues = [ 'V', '6', 'A' ,'Q', 'Z'];
       if (clientTiers == '6') {
         enterpriseLov = [ '822836', '822835' ];
       }
@@ -3638,6 +3638,10 @@ function setEnterprise(value) {
 
       var subindustry = FormManager.getActualValue('subIndustryCd');
       var isicBasedChange = /^(A|B|C|E|G|J|M|P|T|X)/.test(subindustry);
+      var isuCtc217Scen = new Set([ 'BUSPR', 'INTER', 'XBP', 'XINTR']);
+      var curScenario = FormManager.getActualValue('custSubGrp');
+      var is34ZManualSelect = (valueChanged && isu == '34' && ctc == 'Z');
+      var is217ScenarioSelect = (isuCtc217Scen.has(curScenario) && _isScenarioChanged && !_subindustryChanged && !valueChanged && isu == '21' && ctc == '7');
 
       if (isu == '34' && ctc == 'Q' && isicBasedChange) {
         if (repTeam == 'R21180' && FormManager.getActualValue('enterprise') != '') {
@@ -3646,7 +3650,7 @@ function setEnterprise(value) {
           FormManager.setValue('enterprise', '822806');
           FormManager.setValue('repTeamMemberNo', 'D31180');
         } else if(/^B/.test(subindustry) && isicUnderB.has(isicCdValue)){
-          FormManager.setValue('enterprise', '');
+          FormManager.setValue('enterprise', '822810');
         } else if(/^B/.test(subindustry) == false){
           FormManager.setValue('enterprise', '822806');
           FormManager.setValue('repTeamMemberNo', 'D31180');
@@ -3662,6 +3666,8 @@ function setEnterprise(value) {
         FormManager.setValue('enterprise', '822806');
       } else if (isu == '34' && ctc == 'Q' && subindustry != '' && !isicBasedChange && repTeam == 'R21180') {
         FormManager.setValue('enterprise', '822830');
+      } else if (is34ZManualSelect || is217ScenarioSelect) {
+        FormManager.setValue('enterprise', '985999');
       } else if (getImportedIndcForGreece() == 'Y' && FormManager.getActualValue('reqType') == 'C'
           && (FormManager.getActualValue('custSubGrp') == 'COMME' || FormManager.getActualValue('custSubGrp') == 'GOVRN' || FormManager.getActualValue('custSubGrp') == 'CROSS')) {
         // DO NOTHING -- Don't overwrite imported value
@@ -3669,6 +3675,7 @@ function setEnterprise(value) {
         FormManager.setValue('enterprise', '');
       }
       _subindustryChanged = false;
+      _isScenarioChanged = false;
       FormManager.readOnly('subIndustryCd');
     }
     _oldIsuCtc = curIsuCtc;
