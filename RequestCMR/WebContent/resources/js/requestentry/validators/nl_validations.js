@@ -1065,7 +1065,7 @@ function addPhoneValidatorNL() {
 
 function setFieldsMandtOnSc() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  if (custSubGrp == 'COMME') {
+  if (custSubGrp == 'COMME' || custSubGrp == 'NLDAT') {
     FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'Tax Code' ]);
   }
 }
