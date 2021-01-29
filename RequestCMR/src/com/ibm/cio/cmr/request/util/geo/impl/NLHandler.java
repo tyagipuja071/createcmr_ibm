@@ -788,8 +788,8 @@ public class NLHandler extends BaseSOFHandler {
 
     super.setDataValuesOnImport(admin, data, results, mainRecord);
 
-    data.setEngineeringBo(this.currentImportValues.get("DPCEBO"));
-    LOG.trace("DPCEBO: " + data.getEngineeringBo());
+    // data.setEngineeringBo(this.currentImportValues.get("DPCEBO"));
+    // LOG.trace("DPCEBO: " + data.getEngineeringBo());
 
     data.setTaxCd2(getKna1KVK(mainRecord.getCmrNum()));
     LOG.trace("KVK: " + data.getTaxCd2());
@@ -800,8 +800,8 @@ public class NLHandler extends BaseSOFHandler {
     data.setEconomicCd(this.currentImportValues.get("EconomicCd"));
     LOG.trace("EconomicCd: " + data.getEconomicCd());
 
-    // data.setEngineeringBo(this.currentImportValues.get("SBO"));
-    // LOG.trace("BOTeam: " + data.getEngineeringBo());
+    data.setEngineeringBo(this.currentImportValues.get("SBO"));
+    LOG.trace("BOTeam: " + data.getEngineeringBo());
 
     data.setIbmDeptCostCenter(this.currentImportValues.get("DepartmentNumber"));
     LOG.trace("DepartmentNumber: " + data.getIbmDeptCostCenter());
@@ -862,7 +862,7 @@ public class NLHandler extends BaseSOFHandler {
     EntityManager entityManager = JpaManager.getEntityManager();
     try {
       String mandt = SystemConfiguration.getValue("MANDT");
-      String sql = ExternalizedQuery.getSql("GET.KVK.KNA1.ZZKV_NODE2");
+      String sql = ExternalizedQuery.getSql("GET.KVK.KNA1.STCD1");
       sql = StringUtils.replace(sql, ":ZZKV_CUSNO", "'" + cmrNo + "'");
       sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
       sql = StringUtils.replace(sql, ":KATR6", "'" + "788" + "'");
