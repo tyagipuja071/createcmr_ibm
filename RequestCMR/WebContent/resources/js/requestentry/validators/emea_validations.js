@@ -5118,7 +5118,7 @@ function autoSetSboCollCdOnPostalCode(clientTier, currPostCd) {
 
   // set collection code based on postalcode logic
   var checkImportIndc = getImportedIndcForItaly();
-  if (countryUse != '758VA' || countryUse != '758VA') {
+  if (!(countryUse == '758SM' || countryUse == '758VA')) {
     if (checkImportIndc != 'Y' && custType != '' && custType != undefined && custType != 'CROSS') {
       if (postCodeOrg != '' && isuCode != '' && isuCode == '34' && ctc == 'Q') {
         if (postCode >= 00 && postCode <= 04) {
@@ -5174,10 +5174,12 @@ function autoSetSboCollCdOnPostalCode(clientTier, currPostCd) {
     if (countryUse == '758VA') {
       FormManager.setValue('repTeamMemberNo', '012345');
       FormManager.setValue('salesBusOffCd', 'NC');
+      FormManager.setValue('collectionCd', 'CIT14');
     }
     if (countryUse == '758SM') {
       FormManager.setValue('repTeamMemberNo', '012345');
       FormManager.setValue('salesBusOffCd', 'NI');
+      FormManager.setValue('collectionCd', 'CIT03');
     }
   }
 }
@@ -5961,15 +5963,22 @@ function blankedOutCollectionCD() {
   var custSubType = FormManager.getActualValue('custSubGrp');
   if (checkImportIndc != 'Y' && reqType == 'C') {
     FormManager.resetValidations('collectionCd');
-    if (isuCd == '34' && ctc == 'Q') {
+    if ((isuCd == '34' && ctc == 'Q') && !(custSubType == 'PRICU' || custSubType == 'CROPR' || custSubType == 'PRISM' || custSubType == 'PRIVA')) {
       FormManager.enable('collectionCd');
+      autoSetSboCollCdOnPostalCode();
+    } else if ((isuCd == '34' && ctc == 'Q') && (custSubType == 'PRICU' || custSubType == 'CROPR' || custSubType == 'PRISM' || custSubType == 'PRIVA')) {
+      FormManager.readOnly('collectionCd');
       autoSetSboCollCdOnPostalCode();
     } else {
       FormManager.clearValue('collectionCd');
       FormManager.readOnly('collectionCd');
     }
-  } else if (custSubType == 'PRICU' || custSubType == 'CROPR' || custSubType == 'PRISM' || custSubType == 'PRIVA') {
-    FormManager.readOnly('collectionCd');
+  } else if (checkImportIndc == 'Y' && reqType == 'C') {
+    if (custSubType == 'INTER' || custSubType == 'CRINT' || custSubType == 'INTSM' || custSubType == 'INTVA' || custSubType == 'PRICU' || custSubType == 'CROPR' || custSubType == 'PRISM'
+        || custSubType == 'PRIVA') {
+      FormManager.clearValue('collectionCd');
+      FormManager.readOnly('collectionCd');
+    }
   }
 }
 
