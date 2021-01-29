@@ -50,7 +50,7 @@
 					<width>20</width>
 					<length>4</length>
 				</column>
-				<column exactLength="true">
+				<column exactLength="true" number="true">
 				    <label>Enterprise Number</label>
 				    <dbColumn>ENTERPRISE</dbColumn>
 				    <width>30</width>
@@ -138,7 +138,7 @@
 					<label>PO Box</label>
 					<dbColumn>PO_BOX</dbColumn>
 					<width>18</width>
-					<length>20</length>
+					<length>10</length>
 				</column>
 				<column>
 					<label>Landed Country</label>
@@ -209,7 +209,7 @@
 					<label>PO Box</label>
 					<dbColumn>PO_BOX</dbColumn>
 					<width>18</width>
-					<length>20</length>
+					<length>10</length>
 				</column>
 				<column>
 					<label>Landed Country</label>
