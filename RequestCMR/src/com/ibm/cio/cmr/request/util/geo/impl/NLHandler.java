@@ -159,8 +159,8 @@ public class NLHandler extends BaseSOFHandler {
                   addr.setCmrAddrTypeCode("ZD02");
                 }
                 if (NL_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry())
-                    && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(addr.getCmrAddrTypeCode())) && "599".equals(addr.getCmrAddrSeq())) {
-                  addr.setCmrAddrTypeCode("ZP03");
+                    && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(addr.getCmrAddrTypeCode())) && "28801".equals(addr.getCmrAddrSeq())) {
+                  addr.setCmrAddrTypeCode("ZP02");
                 }
                 if ((CmrConstants.ADDR_TYPE.ZD01.toString().equals(addr.getCmrAddrTypeCode()))) {
                   String stkzn = "";
@@ -444,8 +444,8 @@ public class NLHandler extends BaseSOFHandler {
               record.setCmrAddrTypeCode("ZD02");
             }
 
-            if ("618".equals(reqEntry.getCmrIssuingCntry()) && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(record.getCmrAddrTypeCode()))
-                && "599".equals(record.getCmrAddrSeq())) {
+            if ("788".equals(reqEntry.getCmrIssuingCntry()) && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(record.getCmrAddrTypeCode()))
+                && "28801".equals(record.getCmrAddrSeq())) {
               record.setCmrAddrTypeCode("ZP02");
             }
 
@@ -958,6 +958,9 @@ public class NLHandler extends BaseSOFHandler {
     if (currentRecord.getCmrAddrTypeCode().equals("ZVAT")) {
       address.getId().setAddrSeq("21400");
     }
+    if (currentRecord.getCmrAddrTypeCode().equals("ZP02")) {
+      address.getId().setAddrSeq("28801");
+    }
   }
 
   @Override
@@ -1228,7 +1231,7 @@ public class NLHandler extends BaseSOFHandler {
       newAddrSeq = generateShippingAddrSeqNL(entityManager, addrType, reqId);
     } else if ("ZI01".equals(addrType)) {
       newAddrSeq = generateZI01AddrSeq(entityManager, addrType, reqId);
-    } else if ("ZP01".equals(addrType) || "ZS01".equals(addrType)) {
+    } else if ("ZP01".equals(addrType) || "ZS01".equals(addrType) || "ZP02".equals(addrType)) {
       newAddrSeq = generateAddrSeqNL(entityManager, addrType, reqId);
     }
     return newAddrSeq;
@@ -1307,6 +1310,9 @@ public class NLHandler extends BaseSOFHandler {
     }
     if (addrType.equals("ZS01")) {
       addrSeq = 00001;
+    }
+    if (addrType.equals("ZP02")) {
+      addrSeq = 28801;
     }
     try {
       addrSeq = Integer.parseInt(newAddrSeq);
@@ -1758,6 +1764,9 @@ public class NLHandler extends BaseSOFHandler {
     }
     if ("ZP01".equals(addrType)) {
       newSeq = "29901";
+    }
+    if ("ZP02".equals(addrType)) {
+      newSeq = "28801";
     }
     if ("ZD01".equals(addrType)) {
       newSeq = generateShippingAddrSeqNLCopy(entityManager, addrType, reqId);
