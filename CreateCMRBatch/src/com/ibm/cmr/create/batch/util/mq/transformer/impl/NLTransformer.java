@@ -116,6 +116,8 @@ public class NLTransformer extends EMEATransformer {
       return "Ship-To";
     case "ZI01":
       return "EPL";
+    case "ZP02":
+      return "IGF Bill-To";
     default:
       return "";
     }
@@ -871,7 +873,13 @@ public class NLTransformer extends EMEATransformer {
     setDefaultLandedCountry(data);
     formatDataLines(dummyHandler);
 
+    // CREATCMR-1042 2021-1-29
+    legacyCust.setSbo(data.getEngineeringBo() == null ? "" : data.getEngineeringBo());
+    legacyCust.setIbo(data.getEngineeringBo() == null ? "" : data.getEngineeringBo());
+
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      // CREATCMR-1042 2021-1-29
+      legacyCust.setCeBo("211");
 
       legacyCust.setAccAdminBo("");
       legacyCust.setCeDivision("");
@@ -885,12 +893,12 @@ public class NLTransformer extends EMEATransformer {
       legacyCust.setAuthRemarketerInd("0");
       legacyCust.setCeDivision("2");
 
-      legacyCust.setDeptCd("");
       legacyCust.setCurrencyCd("");
       legacyCust.setOverseasTerritory("");
       legacyCust.setInvoiceCpyReqd("");
       legacyCust.setCustType("");
       // George CREATCMR-546
+      legacyCust.setDeptCd(data.getIbmDeptCostCenter() == null ? "" : data.getIbmDeptCostCenter());
       legacyCust.setTaxCd(data.getTaxCd1() == null ? "" : data.getTaxCd1());
       legacyCust.setLangCd("");
       // legacyCust.setLangCd(data.getCustPrefLang() == null ? "" :
@@ -990,23 +998,6 @@ public class NLTransformer extends EMEATransformer {
       legacyCust.setCeBo(cebo);
     } else {
       legacyCust.setCeBo("");
-    }
-
-    if (!StringUtils.isBlank(data.getSalesBusOffCd())) {
-      String sbo = StringUtils.rightPad(data.getSalesBusOffCd(), 7, '0');
-      if (sbo.length() < 7) {
-        sbo = StringUtils.rightPad(sbo, 7, '0');
-      }
-      // CMR-5993
-      if ((SCENARIO_TYPE_SBM.equals(data.getCustGrp()) || SCENARIO_TYPE_GBM.equals(data.getCustGrp()))
-          && Arrays.asList(BELUX_GBMSBM_COUNTRIES).contains(legacyCust.getId().getSofCntryCode())) {
-        sbo = "5300000";
-      }
-      legacyCust.setSbo(sbo);
-      legacyCust.setIbo(sbo);
-    } else {
-      legacyCust.setSbo("");
-      legacyCust.setIbo("");
     }
 
     // common data for C/U
