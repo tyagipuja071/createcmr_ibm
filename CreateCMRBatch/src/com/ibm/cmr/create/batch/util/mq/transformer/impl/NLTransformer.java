@@ -558,11 +558,12 @@ public class NLTransformer extends EMEATransformer {
     LOG.trace("Handling " + (update ? "update" : "create") + " request.");
 
     LOG.debug("Handling  Data for " + addrData.getCustNm1());
-    // <XXXAddress1> -> Customer Name
-    // <XXXAddress2> -> Name Con't
-    // <XXXAddress3> -> Title/A and First name/c and Last name
-    // <XXXAddress4> -> Street/F and Street number/G or PO BOX
-    // <XXXAddress5> -> Postal Code/H and City/I
+    // https://jsw.ibm.com/browse/CREATCMR-990 2021-1-29
+    // <XXXAddress1> -> Customer Name 1
+    // <XXXAddress2> -> Customer Name 2 []
+    // <XXXAddress3> -> Customer name3 + Attention Person + PO BOX []
+    // <XXXAddress4> -> Street Address []
+    // <XXXAddress5> -> Postal Code + City <>
     // <XXXAddress6> -> Country
 
     // customer name
@@ -574,33 +575,35 @@ public class NLTransformer extends EMEATransformer {
       line2 += (line2.length() > 0 ? " " : "") + addrData.getCustNm2();
     }
 
-    // Title/A and First name/c and Last name/B
+    // line 3 = Customer name3 + Attention Person + PO BOX
     String line3 = "";
-    if (!StringUtils.isBlank(addrData.getDept())) {
-      line3 += (line3.length() > 0 ? " " : "") + addrData.getDept();
-    }
+
     if (!StringUtils.isBlank(addrData.getCustNm3())) {
       line3 += (line3.length() > 0 ? " " : "") + addrData.getCustNm3();
     }
-    if (!StringUtils.isBlank(addrData.getCustNm4())) {
-      line3 += (line3.length() > 0 ? " " : "") + addrData.getCustNm4();
+
+    if (StringUtils.isEmpty(line3)) {
+      if (!StringUtils.isBlank(addrData.getCustNm4())) {
+        line3 += (line3.length() > 0 ? " " : "") + "ATT" + addrData.getCustNm4();
+      }
+    }
+    if (StringUtils.isEmpty(line3)) {
+      if (!StringUtils.isBlank(addrData.getPoBox())) {
+        line3 += (line3.length() > 0 ? " " : "") + "PO BOX" + addrData.getPoBox();
+      }
     }
 
-    // Street/F and Street number/G or PO BOX/J
+    // Street Address
     String line4 = "";
+    // Postal Code + City
+    String line5 = "";
+    // country
+    String line6 = "";
+
+    String countryName = LandedCountryMap.getCountryName(addrData.getLandCntry());
     if (!StringUtils.isBlank(addrData.getAddrTxt())) {
       line4 += (line4.length() > 0 ? " " : "") + addrData.getAddrTxt();
     }
-    if (!StringUtils.isBlank(addrData.getAddrTxt2())) {
-      line4 += (line4.length() > 0 ? " " : "") + addrData.getAddrTxt2();
-    }
-    if (line4.length() == 0) {
-      if (!StringUtils.isBlank(addrData.getPoBox())) {
-        line4 += (line4.length() > 0 ? " " : "") + addrData.getPoBox();
-      }
-    }
-    // Postal Code/H and City/I
-    String line5 = "";
 
     if (!StringUtils.isBlank(addrData.getPostCd())) {
       line5 += (line5.length() > 0 ? " " : "") + addrData.getPostCd();
@@ -611,10 +614,24 @@ public class NLTransformer extends EMEATransformer {
 
     line5 = line5.trim();
 
-    String countryName = LandedCountryMap.getCountryName(addrData.getLandCntry());
+    if (StringUtils.isEmpty(line2)) {
+      if (StringUtils.isEmpty(line3)) {
+        line2 = line4;
+        line3 = line5;
+      } else if (!StringUtils.isEmpty(line3)) {
+        line2 = line3;
+        line3 = line4;
+        line4 = line5;
+      }
 
-    // country
-    String line6 = countryName;
+    }
+
+    if (!crossBorder) {
+      line6 = "";
+    } else if (crossBorder) {
+      // country
+      line6 = countryName;
+    }
 
     if (!StringUtils.isBlank(addrData.getTaxOffice())) {
       addrLineT = addrData.getTaxOffice();
