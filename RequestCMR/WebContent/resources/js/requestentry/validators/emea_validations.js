@@ -4455,13 +4455,13 @@ function addFieldValidationForProcessorItaly() {
             || custSubType == 'CROCM' || custSubType == 'NGOIT' || custSubType == 'NGOSM' || custSubType == 'NGOVA' || custSubType == 'BUSPR' || custSubType == 'BUSSM' || custSubType == 'BUSVA' || custSubType == 'CROBP')) {
       FormManager.resetValidations('enterprise');
       FormManager.resetValidations('affiliate');
-      if ("" != FormManager.getActualValue('isuCd') && ("32" != FormManager.getActualValue('isuCd') || "21" != FormManager.getActualValue('isuCd'))) {
+      if ("" != FormManager.getActualValue('isuCd') && ("34" != FormManager.getActualValue('isuCd') || "21" != FormManager.getActualValue('isuCd'))) {
         FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise' ], 'MAIN_IBM_TAB');
         FormManager.addValidator('affiliate', Validators.REQUIRED, [ 'Affiliate' ], 'MAIN_IBM_TAB');
         FormManager.enable('enterprise');
         FormManager.enable('affiliate');
       }
-      if ("32" == FormManager.getActualValue('isuCd') || "21" == FormManager.getActualValue('isuCd')) {
+      if ("34" == FormManager.getActualValue('isuCd') || "21" == FormManager.getActualValue('isuCd')) {
         FormManager.resetValidations('enterprise');
         FormManager.resetValidations('affiliate');
         FormManager.enable('enterprise');
@@ -5803,7 +5803,7 @@ function setAffiliateEnterpriseRequired() {
           FormManager.enable('enterprise');
           FormManager.readOnly('affiliate');
           FormManager.readOnly('inacCd');
-        } else if (isu == '32') {
+        } else if (isu == '34') {
           FormManager.enable('enterprise');
           FormManager.enable('affiliate');
           FormManager.enable('inacCd');
