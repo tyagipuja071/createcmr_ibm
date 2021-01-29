@@ -5924,9 +5924,10 @@ function getOldValuesIT(fromAddress, scenario, scenarioChanged) {
         FormManager.setValue('inacCd', _oldINACIT);
         FormManager.setValue('affiliate', _oldAffiliateIT);
         FormManager.setValue('collectionCd', _oldCollectionIT);
-      } else if ((custSubType == 'INTER' || custSubType == 'INTSM' || custSubType == 'INTVA' || custSubType == 'CROIN' || custSubType == 'BUSPR' || custSubType == 'BUSSM' || custSubType == 'BUSVA' || custSubType == 'CROBP')) {
+      } else if (custSubType == 'BUSPR' || custSubType == 'BUSSM' || custSubType == 'BUSVA' || custSubType == 'CROBP') {
         FormManager.setValue('repTeamMemberNo', '09ZPB0');
         FormManager.setValue('salesBusOffCd', 'ZP');
+        FormManager.clearValue('collectionCd');
       } else {
         FormManager.clearValue('affiliate');
       }
