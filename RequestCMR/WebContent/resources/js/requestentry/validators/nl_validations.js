@@ -1,5 +1,5 @@
 /* Register NETHERLANDS Javascripts */
-var _addrTypesForNL = [ 'ZS01', 'ZP01', 'ZD01', 'ZI01' ];
+var _addrTypesForNL = [ 'ZS01', 'ZP01', 'ZD01', 'ZI01', 'ZP02' ];
 var _poBOXHandler = [];
 var _reqReasonHandler = null;
 function afterConfigForNL() {
@@ -689,6 +689,9 @@ function updateAddrTypeList(cntry, addressMode, saving) {
     cmr.hideNode('radiocont_ZKVK');
     cmr.hideNode('radiocont_ZVAT');
   }
+  if ((addressMode == 'newAddress' || addressMode == 'copyAddress') && (cmr.currentRequestType == 'C' || cmr.currentRequestType == 'U') && (cmr.requestingLob != 'IGF' || cmr.reqReason != 'IGF')) {
+    cmr.hideNode('radiocont_ZP02');
+  }
 }
 
 /*
@@ -709,6 +712,7 @@ function addNLAddressTypeValidator() {
           var soldToCnt = 0;
           var shipToCnt = 0;
           var installAtCnt = 0;
+          var igfCnt = 0;
 
           for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
             record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
@@ -727,14 +731,18 @@ function addNLAddressTypeValidator() {
               shipToCnt++;
             } else if (type == 'ZI01') {
               installAtCnt++;
+            } else if (type == 'ZP02') {
+              igfCnt++;
             }
           }
           if (soldToCnt == 0) {
             return new ValidationResult(null, false, 'Sold-to Address is mandatory.');
           } else if (billToCnt > 1) {
-            return new ValidationResult(null, false, 'Only one Billing address can be defined. Please remove the additional Bill-to address.');
+            return new ValidationResult(null, false, 'Only one Bill-to address can be defined. Please remove the additional Bill-to address.');
           } else if (soldToCnt > 1) {
             return new ValidationResult(null, false, 'Only one Sold-to address can be defined. Please remove the additional Sold-to address.');
+          } else if (igfCnt > 1) {
+            return new ValidationResult(null, false, 'Only one IGF Billing address can be defined. Please remove the additional Sold-to address.');
           } else {
             return new ValidationResult(null, true);
           }
@@ -1001,8 +1009,10 @@ function hideCustPhone() {
       if (_poBOXHandler[i] == null) {
         _poBOXHandler[i] = dojo.connect(FormManager.getField('addrType_' + _addrTypesForNL[i]), 'onClick', function(value) {
           setPhone();
+          setPoBox();
         });
       }
+      setPoBox();
     }
   }
   if (cmr.addressMode == 'updateAddress') {
@@ -1013,6 +1023,7 @@ function hideCustPhone() {
       FormManager.setValue('custPhone', '');
 
     }
+    setPoBox();
   }
 }
 function setPhone() {
@@ -1021,6 +1032,14 @@ function setPhone() {
   } else {
     FormManager.disable('custPhone');
     FormManager.setValue('custPhone', '');
+  }
+}
+function setPoBox() {
+  if (FormManager.getField('addrType_ZS01').checked) {
+    FormManager.disable('poBox');
+    FormManager.setValue('poBox', '');
+  } else {
+    FormManager.enable('poBox');
   }
 }
 
