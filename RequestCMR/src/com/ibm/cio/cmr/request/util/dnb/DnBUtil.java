@@ -62,7 +62,7 @@ public class DnBUtil {
   static {
     // register here all DNB code is relevant per country
 
-    registerDnBVATCode("BE", 99); // VAT Number
+    registerDnBVATCode("BE", 800); // VAT Number
     registerDnBVATCode("DE", 6867); // VAT Number
     registerDnBVATCode("ES", 2472); // VAT Number
     registerDnBVATCode("FR", 2080); // VAT Number
@@ -138,15 +138,21 @@ public class DnBUtil {
     registerDnBVATCode("VN", 1397); // Business Registration Number (Vietnam)
     registerDnBVATCode("SG", 1386); // Singapore Registration File Number
     registerDnBVATCode("ZA", 15169); // Value Added Tax Number(ZA)
+    registerDnBVATCode("MQ", 2080); // VAT Number
+    registerDnBVATCode("RE", 2080);
 
     // Tax Cd1
     registerDnBTaxCd1Code("NL", 6256); // NetherLand Tax Registration Number
     registerDnBTaxCd1Code("FR", 2081); // SIRET
     registerDnBTaxCd1Code("GB", 2541); // UK CRO Number
     registerDnBTaxCd1Code("IE", 9134); // Ireland CRO Number
+    registerDnBTaxCd1Code("MQ", 2081); // SIRET
+    registerDnBTaxCd1Code("RE", 2081);
 
     // other codes
-    registerOtherDnBCode("FR", CODE_SIREN, 2078); // SIREN
+    registerOtherDnBCode("FR", CODE_SIREN, 2078);
+    registerOtherDnBCode("MQ", CODE_SIREN, 2078);
+    registerOtherDnBCode("RE", CODE_SIREN, 2078);
 
   }
 
