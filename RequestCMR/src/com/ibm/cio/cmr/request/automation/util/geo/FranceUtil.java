@@ -231,11 +231,12 @@ public class FranceUtil extends AutomationUtil {
       case SCENARIO_PRIVATE_PERSON:
       case SCENARIO_CROSSBORDER_IBM_EMPLOYEE:
       case SCENARIO_IBM_EMPLOYEE:
+        engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
         return doPrivatePersonChecks(engineData, SystemLocation.FRANCE, zs01.getLandCntry(), customerName, details, false, requestData);
 
       case SCENARIO_INTERNAL:
       case SCENARIO_CROSSBORDER_INTERNAL:
-    	engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
+        engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
         engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
         for (String addrType : RELEVANT_ADDRESSES) {
           List<Addr> addresses = requestData.getAddresses(addrType);
