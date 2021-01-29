@@ -18,14 +18,12 @@ import com.ibm.cio.cmr.request.entity.AddrRdc;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
-import com.ibm.cio.cmr.request.entity.CmrtCustExt;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
 import com.ibm.cio.cmr.request.entity.MassUpdtData;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.SystemLocation;
-import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.legacy.LegacyCommonUtil;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectObjectContainer;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
@@ -329,10 +327,10 @@ public class CyprusTransformer extends EMEATransformer {
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       for (Addr addr : cmrObjects.getAddresses()) {
         if ("ZS01".equals(addr.getId().getAddrType())) {
-          if(StringUtils.isEmpty(addr.getCustPhone())){
+          if (StringUtils.isEmpty(addr.getCustPhone())) {
             legacyCust.setTelNoOrVat("");
-          }else{
-            legacyCust.setTelNoOrVat(addr.getCustPhone());  
+          } else {
+            legacyCust.setTelNoOrVat(addr.getCustPhone());
           }
           landedCntry = addr.getLandCntry();
           break;
@@ -477,7 +475,7 @@ public class CyprusTransformer extends EMEATransformer {
 
   }
 
-	@Override
+  @Override
   public boolean hasCmrtCustExt() {
     return true;
   }
@@ -534,9 +532,17 @@ public class CyprusTransformer extends EMEATransformer {
   public void transformLegacyCustomerDataMassUpdate(EntityManager entityManager, CmrtCust cust, CMRRequestContainer cmrObjects, MassUpdtData muData) {
     LOG.debug("CY >> Mapping default Data values..");
     LegacyCommonUtil.setlegacyCustDataMassUpdtFields(entityManager, cust, muData);
-    
+
     if (!StringUtils.isBlank(muData.getSubIndustryCd())) {
       cust.setImsCd(muData.getSubIndustryCd());
+    }
+
+    if (!StringUtils.isBlank(muData.getEnterprise())) {
+      if ("@@@@@@".equals(muData.getEnterprise().trim())) {
+        cust.setEnterpriseNo("");
+      } else {
+        cust.setEnterpriseNo(muData.getEnterprise());
+      }
     }
 
     List<MassUpdtAddr> muaList = cmrObjects.getMassUpdateAddresses();
