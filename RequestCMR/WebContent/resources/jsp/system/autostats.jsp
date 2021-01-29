@@ -237,27 +237,25 @@ table.partner-table th {
           </p>
         </cmr:column>
       </cmr:row>
-      <cmr:row >
+      <cmr:row>
         <cmr:column span="1" width="150">
           <p>
+            <cmr:label fieldId="reqType">Request Type:</cmr:label>
           </p>
         </cmr:column>
-        <cmr:column span="2" width="300">
+        <cmr:column span="2" width="235">
           <p>
-            <form:checkbox path="excludeUnsubmitted" value="Y"/>
-            <label for="OEMInd" class=" cmr-radio-check-label">
-               <span id="cmr-fld-lbl-OEMInd">Completed Requests Only</span>
-               <cmr:info text="Generates statistics for requests that have be completed already." />
-            </label>            
-          </p>
-        </cmr:column>
-        <cmr:column span="2" width="300">
-          <p>
-            <form:checkbox path="reqType" value="Y"/>
-            <label for="RequestType" class=" cmr-radio-check-label">
-               <span id="cmr-fld-lbl-OEMInd">Create Requests Only</span>
-               <cmr:info text="Generates statistics for create requests only." />
-            </label>            
+            <form:select dojoType="dijit.form.FilteringSelect" id="reqType" searchAttr="name" style="display: block;" maxHeight="200"
+              required="false" path="reqType" placeHolder="Filter by Request Type">
+              <option value="C"></option>
+              <option value="C">Create</option>
+              <option value="U">Update</option>
+              <option value="M">Mass Update</option>
+              <option value="N">Mass Create</option>
+              <option value="E">Update by Enterprise #</option>
+              <option value="Delete">Delete/Inactivate</option>
+              <option value="R">Reactivate</option>
+            </form:select>
           </p>
         </cmr:column>
       </cmr:row>
@@ -281,6 +279,21 @@ table.partner-table th {
             <label for="ExcludeChildRequests" class=" cmr-radio-check-label">
                <span id="cmr-fld-lbl-OEMInd">Exclude Child Requests</span>
                <cmr:info text="Excludes child requests created by Automation" />
+            </label>            
+          </p>
+        </cmr:column>
+      </cmr:row>
+      <cmr:row >
+        <cmr:column span="1" width="150">
+          <p>
+          </p>
+        </cmr:column>
+        <cmr:column span="2" width="300">
+          <p>
+            <form:checkbox path="excludeUnsubmitted" value="Y"/>
+            <label for="OEMInd" class=" cmr-radio-check-label">
+               <span id="cmr-fld-lbl-OEMInd">Completed Requests Only</span>
+               <cmr:info text="Generates statistics for requests that have be completed already." />
             </label>            
           </p>
         </cmr:column>
