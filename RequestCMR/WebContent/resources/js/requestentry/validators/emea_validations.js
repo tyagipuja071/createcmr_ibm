@@ -44,6 +44,8 @@ var _oldCTCIT = "";
 var _oldINACIT = "";
 var _oldSpecialTaxCdIT = "";
 var _oldAffiliateIT = "";
+var _oldAffiliateIT = "";
+var _oldCollectionIT = "";
 // DTN: Defect 1858294 : UKI: Internal FSL sub-scenario rules for abbreviated
 // name
 var _lobHandler = null;
@@ -1860,7 +1862,7 @@ function fieldsReadOnlyItaly(fromAddress, scenario, scenarioChanged) {
   }
   var checkImportIndc = getImportedIndcForItaly();
 
-  if (reqType == 'C' && scenarioChanged) {
+  if (reqType == 'C' && checkImportIndc == 'Y' && scenarioChanged) {
     if (custSubType == 'BUSPR' || custSubType == 'INTER' || custSubType == 'CROBP' || custSubType == 'CROIN' || custSubType == 'BUSSM' || custSubType == 'INTSM' || custSubType == 'BUSVA'
         || custSubType == 'INTVA') {
       FormManager.setValue('isuCd', '21');
@@ -5872,6 +5874,7 @@ function getOldValuesIT(fromAddress, scenario, scenarioChanged) {
         _oldCTCIT = result.ret2;
         _oldSalesRepIT = result.ret3;
         _oldSBOIT = result.ret4;
+        _oldCollectionIT = result.ret5;
         _oldINACIT = result.ret6;
         _oldSpecialTaxCdIT = result.ret7;
         _oldAffiliateIT = result.ret8;
@@ -5902,16 +5905,6 @@ function getOldValuesIT(fromAddress, scenario, scenarioChanged) {
         FormManager.resetValidations('repTeamMemberNo');
       }
 
-      if (FormManager.getActualValue('isuCd') != null
-          && "34" != FormManager.getActualValue('isuCd')
-          && (custSubType == 'GOVSM' || custSubType == 'GOVVA' || custSubType == 'CROGO' || custSubType == 'UNISM' || custSubType == 'UNIVA' || custSubType == 'CROUN' || custSubType == 'LOCSM'
-              || custSubType == 'LOCVA' || custSubType == 'CROLC' || custSubType == 'COMSM' || custSubType == 'COMVA' || custSubType == 'CROCM' || custSubType == 'BUSSM' || custSubType == 'BUSVA'
-              || custSubType == 'CROBP' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'NGOSM' || custSubType == 'NGOVA' || custSubType == 'PRISM' || custSubType == 'PRIVA')) {
-        FormManager.setValue('collectionCd', '');
-        FormManager.enable('collectionCd');
-        console.log("isu!=32 , collection code -blank and locked for the requester for CB/SM or VA ");
-      }
-
       // Story 1544496: Imported codes should not get overwritten
       if (checkImportIndc == 'Y') {
         console
@@ -5922,21 +5915,6 @@ function getOldValuesIT(fromAddress, scenario, scenarioChanged) {
           FormManager.readOnly('affiliate');
           FormManager.resetValidations('clientTier');
           FormManager.readOnly('inacCd');
-        }
-        if (FormManager.getActualValue('isuCd') != null && "34" == FormManager.getActualValue('isuCd')) {
-          if (custSubType == 'CROGO' || custSubType == 'CROUN' || custSubType == 'CROLC' || custSubType == 'CROCM' || custSubType == 'CROBP') {
-            // console.log("For CB getOld set default value of collection code
-            // CIT16");
-            FormManager.setValue('collectionCd', 'CIT16');
-            // FormManager.readOnly('collectionCd');
-          }
-          if (custSubType == 'GOVSM' || custSubType == 'GOVVA' || custSubType == 'UNISM' || custSubType == 'UNIVA' || custSubType == 'LOCSM' || custSubType == 'LOCVA' || custSubType == 'COMSM'
-              || custSubType == 'COMVA' || custSubType == 'BUSSM' || custSubType == 'BUSVA' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'NGOSM' || custSubType == 'NGOVA'
-              || custSubType == 'PRISM' || custSubType == 'PRIVA') {
-            console.log("For SM/VA getOld set default value of collection code CIT14");
-            FormManager.setValue('collectionCd', 'CIT14');
-            // FormManager.readOnly('collectionCd');
-          }
         }
       }
     }
@@ -5958,6 +5936,11 @@ function getOldValuesIT(fromAddress, scenario, scenarioChanged) {
         FormManager.setValue('salesBusOffCd', _oldSBOIT);
         FormManager.setValue('inacCd', _oldINACIT);
         FormManager.setValue('affiliate', _oldAffiliateIT);
+        FormManager.setValue('collectionCd', _oldCollectionIT);
+      } else if (custSubType == 'BUSPR' || custSubType == 'BUSSM' || custSubType == 'BUSVA' || custSubType == 'CROBP') {
+        FormManager.setValue('repTeamMemberNo', '09ZPB0');
+        FormManager.setValue('salesBusOffCd', 'ZP');
+        FormManager.clearValue('collectionCd');
       } else {
         FormManager.clearValue('affiliate');
       }
@@ -5987,10 +5970,12 @@ function blankedOutCollectionCD() {
       FormManager.readOnly('collectionCd');
     }
   } else if (checkImportIndc == 'Y' && reqType == 'C') {
-    if (custSubType == 'INTER' || custSubType == 'CRINT' || custSubType == 'INTSM' || custSubType == 'INTVA' || custSubType == 'PRICU' || custSubType == 'CROPR' || custSubType == 'PRISM'
-        || custSubType == 'PRIVA') {
+    if (custSubType == 'INTER' || custSubType == 'CRINT' || custSubType == 'INTSM' || custSubType == 'INTVA') {
       FormManager.clearValue('collectionCd');
       FormManager.readOnly('collectionCd');
+    } else if (custSubType == 'PRICU' || custSubType == 'CROPR' || custSubType == 'PRISM' || custSubType == 'PRIVA') {
+      FormManager.readOnly('collectionCd');
+      getOldValuesIT();
     }
   }
 }
