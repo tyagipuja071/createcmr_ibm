@@ -919,9 +919,8 @@ public class BELUXTransformer extends EMEATransformer {
       legacyCust.setAuthRemarketerInd("0");
       legacyCust.setCeDivision("3");
       legacyCust.setLangCd("");
-      legacyCust.setDeptCd("");
+      legacyCust.setDeptCd(data.getIbmDeptCostCenter() == null ? "" : data.getIbmDeptCostCenter());
       legacyCust.setCurrencyCd("");
-      legacyCust.setTaxCd(data.getTaxCd1() == null ? "" : data.getTaxCd1());
       legacyCust.setOverseasTerritory("");
       legacyCust.setInvoiceCpyReqd("");
       legacyCust.setCustType("");
@@ -940,6 +939,8 @@ public class BELUXTransformer extends EMEATransformer {
       // George CREATCMR-546
       legacyCust.setTaxCd(data.getTaxCd1() == null ? "" : data.getTaxCd1());
       legacyCust.setLangCd(data.getCustPrefLang() == null ? "" : data.getCustPrefLang());
+      legacyCust.setDeptCd(data.getIbmDeptCostCenter() == null ? "" : data.getIbmDeptCostCenter());
+
       legacyCust.setBankAcctNo("");
 
       // George CREATCMR-675
@@ -964,6 +965,12 @@ public class BELUXTransformer extends EMEATransformer {
       legacyCust.setEnterpriseNo(data.getEnterprise() == null ? "" : data.getEnterprise());
 
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+
+      // George CREATCMR-1030 1031 1032
+      legacyCust.setTaxCd(data.getTaxCd1() == null ? "" : data.getTaxCd1());
+      legacyCust.setLangCd(data.getCustPrefLang() == null ? "" : data.getCustPrefLang());
+      legacyCust.setDeptCd(data.getIbmDeptCostCenter() == null ? "" : data.getIbmDeptCostCenter());
+
       for (Addr addr : cmrObjects.getAddresses()) {
         if ("ZS01".equals(addr.getId().getAddrType())) {
           if (!StringUtils.isEmpty(addr.getCustPhone())) {
