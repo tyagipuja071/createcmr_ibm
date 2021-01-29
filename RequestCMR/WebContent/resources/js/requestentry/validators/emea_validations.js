@@ -56,6 +56,8 @@ var _custGrpIT = null;
 
 var _importedIndc = null;
 
+var _landedIT = null;
+
 function getImportedIndcForItaly() {
   if (_importedIndc) {
     console.log('Returning imported indc = ' + _importedIndc);
@@ -5098,6 +5100,7 @@ function autoSetSboCollCdOnPostalCode(clientTier, currPostCd) {
   var isuCode = FormManager.getActualValue('isuCd');
   var countryUse = FormManager.getActualValue('countryUse');
   var ctc = FormManager.getActualValue('clientTier');
+  var landCntryVal = getLandedCntryForItaly();
   if (requestType != 'C') {
     return;
   }
@@ -5170,7 +5173,16 @@ function autoSetSboCollCdOnPostalCode(clientTier, currPostCd) {
           FormManager.setValue('collectionCd', 'CIT14');
         }
       }
+    } else if (checkImportIndc != 'Y' && custType != '' && custType != undefined && custType == 'CROSS' && landCntryVal != undefined && landCntryVal != '' && landCntryVal == 'SM'
+        && custSubType != undefined && custSubType != '' && custSubType != 'CROBP') {
+      FormManager.setValue('salesBusOffCd', 'NI');
+      FormManager.setValue('collectionCd', 'CIT03');
+    } else if (checkImportIndc != 'Y' && custType != '' && custType != undefined && custType == 'CROSS' && landCntryVal != undefined && landCntryVal != '' && landCntryVal == 'VA'
+        && custSubType != undefined && custSubType != '' && custSubType != 'CROBP') {
+      FormManager.setValue('salesBusOffCd', 'NC');
+      FormManager.setValue('collectionCd', 'CIT14');
     }
+
   }
   if (countryUse && isuCode == '34' && ctc == 'Q' && checkImportIndc != 'Y') {
     if (countryUse == '758VA') {
@@ -5183,6 +5195,7 @@ function autoSetSboCollCdOnPostalCode(clientTier, currPostCd) {
       FormManager.setValue('salesBusOffCd', 'NI');
       FormManager.setValue('collectionCd', 'CIT03');
     }
+
   }
 }
 
@@ -8827,6 +8840,24 @@ function disableSitePartyIdTR() {
 
 function afterConfigForTR() {
   disableSitePartyIdTR();
+}
+
+function getLandedCntryForItaly() {
+  if (_landedIT) {
+    console.log('Returning landed cntry = ' + _landedIT);
+    return _landedIT;
+  }
+  var results = cmr.query('VALIDATOR.LANDED_IT', {
+    REQID : FormManager.getActualValue('reqId')
+  });
+  if (results != null && results.ret1) {
+    _landedIT = results.ret1;
+  } else {
+    _landedIT = '';
+  }
+  console.log('saving landed cntry as ' + _landedIT);
+  return _landedIT;
+
 }
 
 dojo.addOnLoad(function() {
