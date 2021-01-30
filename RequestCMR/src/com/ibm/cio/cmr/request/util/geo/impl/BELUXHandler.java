@@ -34,6 +34,7 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataRdc;
+import com.ibm.cio.cmr.request.entity.Kna1;
 import com.ibm.cio.cmr.request.entity.Sadr;
 import com.ibm.cio.cmr.request.entity.UpdatedAddr;
 import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation;
@@ -142,6 +143,7 @@ public class BELUXHandler extends BaseSOFHandler {
           }
 
           // BELUX logic
+          List<FindCMRRecordModel> rdcRecords = source.getItems();
           List<CmrtAddr> cmrtAddres = this.legacyObjects.getAddresses();
           String cmrAddrSeq = null;
 
@@ -151,7 +153,7 @@ public class BELUXHandler extends BaseSOFHandler {
           for (CmrtAddr cmrAddr : cmrtAddres) {
             cmrAddrSeq = cmrAddr.getId().getAddrNo();
             if (!isShareSeq(cmrAddr)) {
-              if (!seqIsIncluded(cmrAddr, source.getItems())) {
+              if (!seqIsIncluded(cmrAddr, source.getItems()) && isLegalDb2Addr(cmrAddr)) {
                 FindCMRRecordModel newRecord = new FindCMRRecordModel();
                 PropertyUtils.copyProperties(newRecord, mainRecord);
                 mapCmrtAddr2FindCMRRec(newRecord, cmrAddr);
@@ -175,6 +177,8 @@ public class BELUXHandler extends BaseSOFHandler {
             }
           }
 
+          String benchmarkAddrType = null;
+          List<String> shareSeqAddrList = new ArrayList<String>();
           for (CmrtAddr cmrtaddr : cmrtAddres) {
             String seq = cmrtaddr.getId().getAddrNo();
             String addrUseMail = cmrtaddr.getIsAddrUseMailing();
@@ -183,61 +187,18 @@ public class BELUXHandler extends BaseSOFHandler {
             String addrUseShip = cmrtaddr.getIsAddrUseShipping();
             String addrUseEpl = cmrtaddr.getIsAddrUseEPL();
 
-            if ("Y".equals(addrUseInst)) {
-              if ("Y".equals(addrUseMail)) {
-                splitSharedAddr("ZS01", seq, mainRecord, "ZS02", maxSeq, converted);
-                maxSeq++;
-              }
-              if ("Y".equals(addrUseBill)) {
-                splitSharedAddr("ZS01", seq, mainRecord, "ZP01", maxSeq, converted);
-                maxSeq++;
-              }
-              if ("Y".equals(addrUseShip)) {
-                splitSharedAddr("ZS01", seq, mainRecord, "ZD01", maxSeq, converted);
-                maxSeq++;
-              }
-              if ("Y".equals(addrUseEpl)) {
-                splitSharedAddr("ZS01", seq, mainRecord, "ZI01", maxSeq, converted);
-                maxSeq++;
-              }
-            } else if ("N".equals(addrUseInst)) {
-              if ("Y".equals(addrUseBill)) {
-                // FindCMRRecordModel SharedAddrBill =
-                // getSharedAddrBill("ZP01", seq, converted);
-                if ("Y".equals(addrUseMail)) {
-                  splitSharedAddr("ZP01", seq, null, "ZS02", maxSeq, converted);
+            benchmarkAddrType = getBenchmarkAddr(seq, rdcRecords);
+            shareSeqAddrList = getShareSeqAddrList(cmrtaddr);
+
+            if (isShareSeq(cmrtaddr) && !benchmarkAddrType.isEmpty() && !shareSeqAddrList.isEmpty()) {
+              for (String shareSeqAddrType : shareSeqAddrList) {
+                if (!benchmarkAddrType.equals(shareSeqAddrType)) {
+                  splitSharedAddr(benchmarkAddrType, seq, null, shareSeqAddrType, maxSeq, converted);
                   maxSeq++;
-                }
-                if ("Y".equals(addrUseShip)) {
-                  splitSharedAddr("ZP01", seq, null, "ZD01", maxSeq, converted);
-                  maxSeq++;
-                }
-                if ("Y".equals(addrUseEpl)) {
-                  splitSharedAddr("ZP01", seq, null, "ZI01", maxSeq, converted);
-                  maxSeq++;
-                }
-              } else if ("N".equals(addrUseBill)) {
-                if ("Y".equals(addrUseShip)) {
-                  if ("Y".equals(addrUseMail)) {
-                    splitSharedAddr("ZD01", seq, null, "ZS02", maxSeq, converted);
-                    maxSeq++;
-                  }
-                  if ("Y".equals(addrUseEpl)) {
-                    splitSharedAddr("ZD01", seq, null, "ZI01", maxSeq, converted);
-                    maxSeq++;
-                  }
-                } else if ("N".equals(addrUseShip)) {
-                  if ("Y".equals(addrUseEpl)) {
-                    if ("Y".equals(addrUseMail)) {
-                      splitSharedAddr("ZI01", seq, null, "ZS02", maxSeq, converted);
-                      maxSeq++;
-                    }
-                  } else if ("N".equals(addrUseEpl)) {
-                    // there is not shared seq any more
-                  }
                 }
               }
             }
+
           }
 
         }
@@ -395,6 +356,19 @@ public class BELUXHandler extends BaseSOFHandler {
     return result;
   }
 
+  private boolean isLegalDb2Addr(CmrtAddr cmrtAddr) {
+    boolean output = true;
+    String addrMail = cmrtAddr.getIsAddrUseMailing();
+    String addrBill = cmrtAddr.getIsAddrUseBilling();
+    String addrInst = cmrtAddr.getIsAddrUseInstalling();
+    String addrShip = cmrtAddr.getIsAddrUseShipping();
+    String addrEpl = cmrtAddr.getIsAddrUseEPL();
+    if (!"Y".equals(addrMail) && !"Y".equals(addrBill) && !"Y".equals(addrInst) && !"Y".equals(addrShip) && !"Y".equals(addrEpl)) {
+      output = false;
+    }
+    return output;
+  }
+
   private String getSingleAddrType(CmrtAddr cmrtAddr) {
     String result = "";
     String addrMail = cmrtAddr.getIsAddrUseMailing();
@@ -418,6 +392,53 @@ public class BELUXHandler extends BaseSOFHandler {
       result = "ZI01";
     }
     return result;
+  }
+
+  private String getBenchmarkAddr(String seq, List<FindCMRRecordModel> rdcRecords) {
+    String output = null;
+    String addrSeq = null;
+    String addrType = null;
+    if (seq == null || rdcRecords == null) {
+      return null;
+    }
+    for (FindCMRRecordModel addr : rdcRecords) {
+      addrSeq = addr.getCmrAddrSeq();
+      addrType = addr.getCmrAddrTypeCode();
+      if (seq.equals((StringUtils.leftPad(String.valueOf(addrSeq), 5, '0')))) {
+        output = addrType;
+      }
+    }
+    return output;
+  }
+
+  private List<String> getShareSeqAddrList(CmrtAddr cmrtaddr) {
+    List<String> output = new ArrayList<String>();
+    String addrMail = cmrtaddr.getIsAddrUseMailing();
+    String addrBill = cmrtaddr.getIsAddrUseBilling();
+    String addrInst = cmrtaddr.getIsAddrUseInstalling();
+    String addrShip = cmrtaddr.getIsAddrUseShipping();
+    String addrEpl = cmrtaddr.getIsAddrUseEPL();
+
+    if ("Y".equals(addrInst)) {
+      output.add("ZS01");
+    }
+    if ("Y".equals(addrBill)) {
+      output.add("ZP01");
+    }
+    if ("Y".equals(addrMail)) {
+      output.add("ZS02");
+    }
+    if ("Y".equals(addrEpl)) {
+      output.add("ZI01");
+    }
+    if ("Y".equals(addrShip)) {
+      output.add("ZD01");
+    }
+    if (!output.isEmpty() && output.size() > 1) {
+      return output;
+    } else {
+      return null;
+    }
   }
 
   private void splitSharedAddr(String sourceAddrType, String SourceAddrSeq, FindCMRRecordModel sourceAddr, String targetAddrType, int targetAddrSeq,
@@ -1266,23 +1287,17 @@ public class BELUXHandler extends BaseSOFHandler {
     if ("U".equals(admin.getReqType())) {
       Long reqId = data.getId().getReqId();
       List<Addr> addresses = getAddresses(entityManager, reqId);
+      List<Kna1> kna1Records = getKna1Records(entityManager, data.getCmrIssuingCntry(), data.getCmrNo());
       List<CmrtAddr> legacyAddrs = getCmrtaddr(entityManager, data.getCmrIssuingCntry(), data.getCmrNo());
-
-      if (addresses == null || addresses.size() == 0) {
-        return;
-      }
 
       String addrSeq = null;
       String addrType = null;
       String cmrtAddrSeq = null;
       List<String> cmrtAddrTypeList = null;
 
-      // get share seq list
-      // there are max two shared-seq addresses exist
       boolean shareSeq1ExistInd = false;
       boolean shareSeq2ExistInd = false;
-      List<String> shareSeqAddrList1 = new ArrayList<String>();
-      List<String> shareSeqAddrList2 = new ArrayList<String>();
+      List<List<String>> shareSeqAddrList = new ArrayList<List<String>>();
       String shareSeq1 = null;
       String shareSeq2 = null;
 
@@ -1293,142 +1308,40 @@ public class BELUXHandler extends BaseSOFHandler {
       String addrUseEpl = null;
       boolean typeIncluded = false;
 
-      for (CmrtAddr cmrtaddr : legacyAddrs) {
-        cmrtAddrSeq = cmrtaddr.getId().getAddrNo();
-        addrUseMail = cmrtaddr.getIsAddrUseMailing();
-        addrUseBill = cmrtaddr.getIsAddrUseBilling();
-        addrUseInst = cmrtaddr.getIsAddrUseInstalling();
-        addrUseShip = cmrtaddr.getIsAddrUseShipping();
-        addrUseEpl = cmrtaddr.getIsAddrUseEPL();
+      if (addresses == null || addresses.size() == 0) {
+        return;
+      }
 
-        if ("Y".equals(addrUseInst)) {
-          if ("Y".equals(addrUseMail)) {
-            shareSeq1ExistInd = true;
-            shareSeqAddrList1.add("ZS02");
-          }
-          if ("Y".equals(addrUseBill)) {
-            shareSeq1ExistInd = true;
-            shareSeqAddrList1.add("ZP01");
-          }
-          if ("Y".equals(addrUseShip)) {
-            shareSeq1ExistInd = true;
-            shareSeqAddrList1.add("ZD01");
-          }
-          if ("Y".equals(addrUseEpl)) {
-            shareSeq1ExistInd = true;
-            shareSeqAddrList1.add("ZI01");
-          }
-          if (shareSeq1ExistInd) {
-            shareSeqAddrList1.add("ZS01");
-            shareSeq1 = cmrtaddr.getId().getAddrNo();
-          }
-        } else if ("N".equals(addrUseInst)) {
-          if ("Y".equals(addrUseBill)) {
-            if ("Y".equals(addrUseMail)) {
-              if (!shareSeq1ExistInd) {
-                shareSeq1ExistInd = true;
-                shareSeqAddrList1.add("ZS02");
-              } else {
-                shareSeq2ExistInd = true;
-                shareSeqAddrList2.add("ZS02");
-              }
-            }
-            if ("Y".equals(addrUseShip)) {
-              if (!shareSeq1ExistInd) {
-                shareSeq1ExistInd = true;
-                shareSeqAddrList1.add("ZD01");
-              } else {
-                shareSeq2ExistInd = true;
-                shareSeqAddrList2.add("ZD01");
-              }
-            }
-            if ("Y".equals(addrUseEpl)) {
-              if (!shareSeq1ExistInd) {
-                shareSeq1ExistInd = true;
-                shareSeqAddrList1.add("ZI01");
-              } else {
-                shareSeq2ExistInd = true;
-                shareSeqAddrList2.add("ZI01");
-              }
-            }
-            if (shareSeq1ExistInd && cmrtAddrSeq.equals(shareSeq1)) {
-              shareSeqAddrList1.add("ZP01");
-              shareSeq1 = cmrtaddr.getId().getAddrNo();
-            } else if (shareSeq2ExistInd) {
-              shareSeqAddrList2.add("ZP01");
-              shareSeq2 = cmrtaddr.getId().getAddrNo();
-            }
-          } else if ("N".equals(addrUseBill)) {
-            if ("Y".equals(addrUseShip)) {
-              if ("Y".equals(addrUseMail)) {
-                if (!shareSeq1ExistInd) {
-                  shareSeq1ExistInd = true;
-                  shareSeqAddrList1.add("ZS02");
-                } else {
-                  shareSeq2ExistInd = true;
-                  shareSeqAddrList2.add("ZS02");
-                }
-              }
-              if ("Y".equals(addrUseEpl)) {
-                if (!shareSeq1ExistInd) {
-                  shareSeq1ExistInd = true;
-                  shareSeqAddrList1.add("ZI01");
-                } else {
-                  shareSeq2ExistInd = true;
-                  shareSeqAddrList2.add("ZI01");
-                }
-              }
-              if (shareSeq1ExistInd) {
-                shareSeqAddrList1.add("ZD01");
-                shareSeq1 = cmrtaddr.getId().getAddrNo();
-              } else if (shareSeq2ExistInd) {
-                shareSeqAddrList2.add("ZD01");
-                shareSeq2 = cmrtaddr.getId().getAddrNo();
-              }
-            } else if ("N".equals(addrUseShip)) {
-              if ("Y".equals(addrUseEpl)) {
-                if ("Y".equals(addrUseMail)) {
-                  if (!shareSeq1ExistInd) {
-                    shareSeq1ExistInd = true;
-                    shareSeqAddrList1.add("ZS02");
-                  } else {
-                    shareSeq2ExistInd = true;
-                    shareSeqAddrList2.add("ZS021");
-                  }
-                }
-                if (shareSeq1ExistInd && cmrtAddrSeq.equals(shareSeq1)) {
-                  shareSeqAddrList1.add("ZI01");
-                  shareSeq1 = cmrtaddr.getId().getAddrNo();
-                } else if (shareSeq2ExistInd) {
-                  shareSeqAddrList2.add("ZI01");
-                  shareSeq2 = cmrtaddr.getId().getAddrNo();
-                }
-              }
-            }
-          }
+      // get share seq list
+      // there are max two shared-seq addresses exist
+      for (CmrtAddr cmrtaddr : legacyAddrs) {
+        List<String> shareSeqAddrList1 = getShareSeqAddrList(cmrtaddr);
+        if (shareSeqAddrList1 != null && !shareSeqAddrList1.isEmpty()) {
+          shareSeqAddrList.add(shareSeqAddrList1);
         }
       }
 
+      // handle addr importIndc and changeIndc
+      // changeIndc = "Y" means "Changed" on GUI addr grid
+      // importIndc = "N" means "New" on GUI addr grid
       for (Addr addr : addresses) {
         addrSeq = addr.getId().getAddrSeq();
         addrType = addr.getId().getAddrType();
-        if (isSharedSeqType(addrType, shareSeqAddrList1, shareSeqAddrList2)) {
-          if (isMaxSeq4AddrType(addr, addresses)) {
-            // max addrSeq of its addrType is the one splited
-            if (!shouldSplitInd(addrType, shareSeqAddrList1, shareSeqAddrList2)) {
-              addr.setChangedIndc("Y");
-            } else {
+        if (isSharedSeq(addrSeq, addrType, legacyAddrs)) {
+          if (benchmarkAddrType(addrSeq, addrType, kna1Records, legacyAddrs, shareSeqAddrList)) {
+            addr.setChangedIndc("Y");
+          } else {
+            if (isNewSplitedAddrType(addr, kna1Records, legacyAddrs)) {
               addr.setImportInd("N");
             }
-          } else if ((shareSeq2 != null && !shareSeqAddrList2.isEmpty()) && ((shareSeq1.equals(addrSeq) && shareSeqAddrList1.contains(addrType)))
-              || ((shareSeq2 != null && !shareSeqAddrList2.isEmpty()) && (shareSeq2.equals(addrSeq) && shareSeqAddrList2.contains(addrType)))) {
-            // shareSeq but did not split
-            addr.setChangedIndc("Y");
           }
+        } else if (isNewSplitedAddrType(addr, kna1Records, legacyAddrs)) {
+          addr.setImportInd("N");
         }
         entityManager.merge(addr);
       }
       entityManager.flush();
+
     }
   }
 
@@ -1438,6 +1351,18 @@ public class BELUXHandler extends BaseSOFHandler {
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", reqId);
     addresses = query.getResults(Addr.class);
+    return addresses;
+  }
+
+  private List<Kna1> getKna1Records(EntityManager entityManager, String country, String cmrNo) {
+    List<Kna1> addresses = null;
+    String mandt = SystemConfiguration.getValue("MANDT");
+    String sql = ExternalizedQuery.getSql("QUERY.GET.CMR.CEE");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CNTRY", country);
+    query.setParameter("CMRNO", cmrNo);
+    query.setParameter("MANDT", mandt);
+    addresses = query.getResults(Kna1.class);
     return addresses;
   }
 
@@ -1451,39 +1376,33 @@ public class BELUXHandler extends BaseSOFHandler {
     return addresses;
   }
 
-  private boolean isSharedSeqType(String addrType, List<String> shareSeqAddrList1, List<String> shareSeqAddrList2) {
+  private boolean isSharedSeqType(String addrType, List<List<String>> shareSeqAddrList) {
     boolean result = false;
-    if (shareSeqAddrList1.contains(addrType) || shareSeqAddrList2.contains(addrType)) {
-      result = true;
+    String type = addrType;
+    if (addrType == null || shareSeqAddrList.isEmpty()) {
+      return false;
     }
-    return result;
-  }
-
-  private boolean isSharedSeq(String addrSeq, String addrType, String shareSeq1, List<String> shareSeqAddrList1, String shareSeq2,
-      List<String> shareSeqAddrList2) {
-    boolean result = false;
-    if (addrSeq.equals(shareSeq1) && shareSeqAddrList1.contains(addrType)) {
-      result = true;
-    } else if (addrSeq.equals(shareSeq2) && shareSeqAddrList2.contains(addrType)) {
-      result = true;
+    if ("ZP02".equals(addrType)) {
+      type = "ZP01";
     }
-    return result;
-  }
-
-  private boolean shouldSplitInd(String addrType, List<String> shareSeqAddrList1, List<String> shareSeqAddrList2) {
-    boolean result = false;
-    String addrOrder = "ZS01ZP01ZD01ZI01ZS02";
-    if (shareSeqAddrList1.contains(addrType)) {
-      for (String compairAddr : shareSeqAddrList1) {
-        if (addrOrder.indexOf(compairAddr) < addrOrder.indexOf(addrType)) {
-          result = true;
-        }
+    for (List<String> list : shareSeqAddrList) {
+      if (list.contains(addrType)) {
+        result = true;
       }
-    } else if (shareSeqAddrList2.contains(addrType)) {
-      for (String compairAddr : shareSeqAddrList2) {
-        if (addrOrder.indexOf(compairAddr) < addrOrder.indexOf(addrType)) {
-          result = true;
-        }
+    }
+    return result;
+  }
+
+  // benchmark : is share seq in db2 and exist in rdc
+  private boolean benchmarkAddrType(String addrSeq, String addrType, List<Kna1> kna1Records, List<CmrtAddr> cmrtaddrRecords,
+      List<List<String>> shareSeqAddrMap) {
+    boolean result = false;
+    String type = addrType;
+
+    for (Kna1 record : kna1Records) {
+      if (type != null && addrSeq != null && type.equals(record.getKtokd()) && addrSeq.equals(record.getZzkvSeqno())) {
+        // share seq in db2 and exist in kna1, then split other addresses
+        result = true;
       }
     }
     return result;
@@ -1493,6 +1412,7 @@ public class BELUXHandler extends BaseSOFHandler {
     if (seq == null || addrType == null || legacyAddrs == null) {
       return false;
     }
+    seq = StringUtils.leftPad(String.valueOf(seq), 5, '0');
     String addrSeq = null;
     String addrMail = null;
     String addrBill = null;
@@ -1579,21 +1499,62 @@ public class BELUXHandler extends BaseSOFHandler {
     return output;
   }
 
-  private boolean isMaxSeq4AddrType(Addr addr, List<Addr> addresses) {
+  private boolean isNewSplitedAddrType(Addr addr, List<Kna1> kna1Records, List<CmrtAddr> legacyAddrs) {
     boolean result = true;
-    if (addr == null || addresses == null) {
+    if (addr == null || kna1Records == null || legacyAddrs == null) {
       return false;
     }
+    if (isExistInRdc(addr, kna1Records) || isExistInDb2(addr, legacyAddrs)) {
+      result = false;
+    }
+    return result;
+  }
+
+  private boolean isExistInRdc(Addr addr, List<Kna1> kna1Records) {
+    boolean result = false;
     String addrSeq = addr.getId().getAddrSeq();
     String addrType = addr.getId().getAddrType();
-    String tempAddrSeq = null;
-    String tempAddrType = null;
-    for (Addr tempAddr : addresses) {
-      tempAddrType = tempAddr.getId().getAddrType();
-      tempAddrSeq = tempAddr.getId().getAddrSeq();
-      if (addrType.equals(tempAddrType)) {
-        if (Integer.parseInt(addrSeq) < Integer.parseInt(tempAddrSeq)) {
-          result = false;
+    for (Kna1 kna1 : kna1Records) {
+      if (addrType.equals(kna1.getKtokd()) && addrSeq.equals(kna1.getZzkvSeqno())) {
+        result = true;
+      }
+    }
+    return result;
+  }
+
+  private boolean isExistInDb2(Addr addr, List<CmrtAddr> legacyAddrs) {
+    boolean result = false;
+    String addrSeq = StringUtils.leftPad(String.valueOf(addr.getId().getAddrSeq()), 5, '0');
+    String addrType = addr.getId().getAddrType();
+    String addrMail = null;
+    String addrBill = null;
+    String addrInst = null;
+    String addrShip = null;
+    String addrEpl = null;
+    String cmrtAddrSeq = null;
+    for (CmrtAddr cmrtAddr : legacyAddrs) {
+      addrMail = cmrtAddr.getIsAddrUseMailing();
+      addrBill = cmrtAddr.getIsAddrUseBilling();
+      addrInst = cmrtAddr.getIsAddrUseInstalling();
+      addrShip = cmrtAddr.getIsAddrUseShipping();
+      addrEpl = cmrtAddr.getIsAddrUseEPL();
+      cmrtAddrSeq = cmrtAddr.getId().getAddrNo();
+
+      if (addrSeq.equals(cmrtAddrSeq)) {
+        if ("ZS01".equals(addrType) && "Y".equals(addrInst)) {
+          result = true;
+        }
+        if ("ZS02".equals(addrType) && "Y".equals(addrMail)) {
+          result = true;
+        }
+        if ("ZP01".equals(addrType) && "Y".equals(addrBill)) {
+          result = true;
+        }
+        if ("ZD01".equals(addrType) && "Y".equals(addrShip)) {
+          result = true;
+        }
+        if ("ZI01".equals(addrType) && "Y".equals(addrEpl)) {
+          result = true;
         }
       }
     }
