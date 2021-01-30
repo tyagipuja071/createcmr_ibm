@@ -1055,9 +1055,9 @@ public class MaltaHandler extends BaseSOFHandler {
                   // validations.add(error);
                 }
 
-                if (!StringUtils.isBlank(phone) && !phone.contains("@") && !StringUtils.isNumeric(phone)) {
-                  LOG.trace("Phone Number should contain only digits.");
-                  error.addError(row.getRowNum(), rowNumber + "Phone #", "Phone Number should contain only digits.");
+                if (!StringUtils.isBlank(phone) && !phone.contains("@") && !StringUtils.isAlphanumeric(phone)) {
+                  LOG.trace("Phone Number should contain only digits  & letters.");
+                  error.addError(row.getRowNum(), rowNumber + "Phone #", "Phone Number should contain only digits & letters.");
                   // validations.add(error);
                 }
               } else {
