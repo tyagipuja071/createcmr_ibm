@@ -517,7 +517,7 @@ public class BELUXHandler extends BaseSOFHandler {
         postCd = getPostCd(addrl5);
         city1 = getCity1(addrl5);
         zs02Addr.setCmrName2(addrl2);
-        zs02Addr.setCmrName2Plain(addrl2);
+        handleAddrL3(zs02Addr, addrl3);
         zs02Addr.setCmrStreetAddress(addrl4);
         zs02Addr.setCmrPostalCode(postCd);
         zs02Addr.setCmrCity(city1);
@@ -545,6 +545,10 @@ public class BELUXHandler extends BaseSOFHandler {
         zs02Addr.setCmrCity(city1);
         zs02Addr.setCmrName2Plain(addrl2);
         zs02Addr.setCmrStreetAddress(addrl3);
+      } else if (hasStreetNo(addrl4)) {
+        zs02Addr.setCmrName2Plain(addrl2);
+        zs02Addr.setCmrStreetAddress(addrl4);
+        handleAddrL3(zs02Addr, addrl3);
       }
     } else if (!"".equals(addrl3) && !"".equals(addrl4) && !"".equals(addrl5) && !"".equals(addrl6)) {
 
@@ -574,20 +578,12 @@ public class BELUXHandler extends BaseSOFHandler {
           isLocal = true;
           postCd = getPostCd(addrl5);
           city1 = getCity1(addrl5);
-          dept = getTitle(addrl3);
-          custNm3 = getFirstNm(addrl3);
-          custNm4 = getLastNm(addrl3);
-          addrTxt = getStreet(custNm4);
-          addrTxt2 = getStreetNo(custNm4);
           zs02Addr.setCmrPostalCode(postCd);
           zs02Addr.setCmrCity(city1);
           zs02Addr.setCmrName2(addrl2);
           zs02Addr.setCmrName2Plain(addrl2);
-          zs02Addr.setCmrDept(dept);
-          zs02Addr.setCmrName3(custNm3);
-          zs02Addr.setCmrName4(custNm4);
-          zs02Addr.setCmrStreetAddress(addrTxt);
-          zs02Addr.setCmrStreetAddressCont(addrTxt2);
+          handleAddrL3(zs02Addr, addrl3);
+          zs02Addr.setCmrStreetAddress(addrl4);
         }
       }
     }
@@ -849,6 +845,29 @@ public class BELUXHandler extends BaseSOFHandler {
       output = lastNm;
     }
     return output;
+  }
+
+  private void handleAddrL3(FindCMRRecordModel zs02Addr, String addrl3) {
+    if (addrl3 == null || zs02Addr == null) {
+      return;
+    }
+    if (addrl3.startsWith("PO BOX")) {
+      if (addrl3.indexOf("PO BOX ") > 0 || addrl3.indexOf("PO BOX-") > 0) {
+        zs02Addr.setCmrPOBox(addrl3.substring(7));
+      } else {
+        zs02Addr.setCmrPOBox(addrl3.substring(6));
+      }
+    } else if (hasPoBox(addrl3)) {
+      zs02Addr.setCmrPOBox(addrl3);
+    } else if (addrl3.startsWith("ATT")) {
+      if (addrl3.indexOf("ATT ") > 0 || addrl3.indexOf("ATT:") > 0) {
+        zs02Addr.setCmrName4(addrl3.substring(4));
+      } else {
+        zs02Addr.setCmrName4(addrl3.substring(3));
+      }
+    } else {
+      zs02Addr.setCmrName3(addrl3);
+    }
   }
 
   protected void importOtherSOFAddresses(EntityManager entityManager, String cmrCountry, Map<String, FindCMRRecordModel> zi01Map,
