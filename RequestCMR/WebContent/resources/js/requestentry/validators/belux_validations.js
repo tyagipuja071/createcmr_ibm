@@ -1076,9 +1076,7 @@ function addAddressFieldValidators() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
-        var cntry = FormManager.getActualValue('cmrIssuingCntry');
         var addrTxt = FormManager.getActualValue('addrTxt');
-        var addrTxt2 = FormManager.getActualValue('addrTxt2');
         var poBox = FormManager.getActualValue('poBox');
 
         var addrFldCnt = 0;
@@ -1091,34 +1089,27 @@ function addAddressFieldValidators() {
           addrFldCnt++;
         }
 
-        if (FormManager.getActualValue('addrTxt2') != '') {
-          addrFldCnt++;
-          computedLength += addrTxt2;
-        }
-
         if (addrFldCnt == 1) {
           if (poBox != null && poBox != '' && poBox.length > 23) {
-            return new ValidationResult(null, false, 'PostBOX should not exceed 23 characters.');
+            return new ValidationResult(null, false, 'PO BOX should not exceed 23 characters.');
           } else if (addrTxt != null && addrTxt != '' && addrTxt.length > 30) {
-            return new ValidationResult(null, false, 'Street should not exceed 30 characters.');
-          } else if (addrTxt2 != null && addrTxt2 != '' && addrTxt2.length > 30) {
-            return new ValidationResult(null, false, 'Street no. should not exceed 30 characters.');
+            return new ValidationResult(null, false, 'Street Address should not exceed 30 characters.');
           }
-        } else if (addrFldCnt == 2) {
-          if (poBox != null && poBox != '') {
-            if (addrTxt != null && addrTxt != '' && computedLength.length > 22) {
-              return new ValidationResult(null, false, 'Total computed length of Street and PostBOX should not exceed 22 characters.');
-            } else if (addrTxt2 != null && addrTxt2 != '' && computedLength.length > 22) {
-              return new ValidationResult(null, false, 'Total computed length of Street no. and PostBOX should not exceed 22 characters.');
-            }
-          } else {
-            if (computedLength.length > 29)
-              return new ValidationResult(null, false, 'Total computed length of Street and Street no. should not exceed 29 characters.');
-          }
-        } else if (addrFldCnt == 3) {
-          if (computedLength.length > 30) {
-            return new ValidationResult(null, false, 'Total computed length of Street, Street no. and PostBOX should not exceed 30 characters.');
-          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+
+  // post code + city
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var city = FormManager.getActualValue('city1');
+        var postCd = FormManager.getActualValue('postCd');
+        var val = postCd + ' ' + city;
+        if (val.length > 30) {
+          return new ValidationResult(null, false, 'Total computed length of City and Postal Code should not exceed 30 characters.');
         }
         return new ValidationResult(null, true);
       }
@@ -1140,70 +1131,32 @@ function addAddressFieldValidators() {
           addrFldCnt1++;
         }
         if (addrFldCnt1 < 1) {
-          return new ValidationResult(null, false, 'For Street and PostBox, atleast one should be filled.');
+          return new ValidationResult(null, false, 'For Street Address and PO Box, atleast one should be filled.');
         }
         return new ValidationResult(null, true);
       }
     };
   })(), null, 'frmCMR_addressModal');
 
+  // only 1 out of 3 can be filled
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
-        var title = FormManager.getActualValue('dept');
-        var firstName = FormManager.getActualValue('custNm3');
-        var lastName = FormManager.getActualValue('custNm4');
-
-        var val = title;
-        if (firstName != '') {
-          val += firstName;
-          if (lastName != '') {
-            val += lastName;
-
-            if (val.length > 30) {
-              return new ValidationResult(null, false, 'Total computed length of Title, First Name and Last Name should not exceed 30 characters.');
-            }
-          } else {
-            if (val.length > 30) {
-              return new ValidationResult(null, false, 'Total computed length of Title and First Name should not exceed 30 characters.');
-            }
-          }
-        } else {
-          if (val.length > 30) {
-            return new ValidationResult(null, false, 'Title should not exceed 30 characters.');
-          }
-        }
-
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), null, 'frmCMR_addressModal');
-
-  // only 3 out of 4 can be filled
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var street = FormManager.getActualValue('addrTxt');
-        var nameCont = FormManager.getActualValue('custNm2');
+        var custNm3 = FormManager.getActualValue('custNm3');
         var poBox = FormManager.getActualValue('poBox');
-        var title = FormManager.getActualValue('dept');
-        var firstName = FormManager.getActualValue('custNm3');
-        var lastName = FormManager.getActualValue('custNm4');
-        var addrFldCnt = 0;
-        if (street != '') {
-          addrFldCnt++;
-        }
-        if (nameCont != '') {
-          addrFldCnt++;
+        var attPerson = FormManager.getActualValue('custNm4');
+        var addrFldCnt1 = 0;
+        if (custNm3 != '') {
+          addrFldCnt1++;
         }
         if (poBox != '') {
-          addrFldCnt++;
+          addrFldCnt1++;
         }
-        if (title != '' || firstName != '' || lastName != '') {
-          addrFldCnt++;
+        if (attPerson != '') {
+          addrFldCnt1++;
         }
-        if (addrFldCnt > 3) {
-          return new ValidationResult(null, false, ' Street, PostBox, Attention person (Title, First name, Last name) and Name Con\'t - only 3 out of 4 can be filled.');
+        if (addrFldCnt1 > 1) {
+          return new ValidationResult(null, false, 'Customer Name 3, Attention person and PO Box - only 1 out of 3 can be filled.');
         }
         return new ValidationResult(null, true);
       }
@@ -1219,7 +1172,7 @@ function addAddressFieldValidators() {
         if (cntry != '') {
           var POBox = FormManager.getActualValue('poBox');
           if (isNaN(POBox)) {
-            return new ValidationResult(null, false, 'PostBox should be Numeric.');
+            return new ValidationResult(null, false, 'PO Box should be Numeric.');
           }
 
         }
@@ -1427,23 +1380,19 @@ function setAddressDetailsForView() {
 function streetValueFormatterBELUX(value, rowIndex) {
   var display = value ? value : '';
   var rowData = this.grid.getItem(rowIndex);
-  var streetCont = rowData.addrTxt2;
-  if (streetCont && streetCont[0]) {
-    display += ' ' + streetCont;
+  var custNm3 = rowData.custNm3;
+  if (custNm3 && custNm3[0]) {
+    display += ' ' + custNm3;
+  }
+  var custNm4 = rowData.custNm4;
+  if (custNm4 && custNm4[0]) {
+    display += (display ? '<br>' : '') + 'ATT ' + custNm4;
   }
   var poBox = rowData.poBox;
   if (poBox && poBox[0]) {
     display += (display ? '<br>' : '') + 'PO BOX ' + poBox;
   }
   return display;
-}
-
-function attnFormatterBELUX(value, rowIndex) {
-  var rowData = this.grid.getItem(rowIndex);
-  var title = rowData.dept[0] ? rowData.dept[0] : '';
-  var firstName = rowData.custNm3[0] ? rowData.custNm3[0] : '';
-  var lastName = rowData.custNm4[0] ? rowData.custNm4[0] : '';
-  return title + (firstName ? ' ' + firstName : '') + (lastName ? ' ' + lastName : '');
 }
 
 /**

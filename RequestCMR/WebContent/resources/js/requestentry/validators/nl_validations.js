@@ -849,23 +849,22 @@ function addAddressFieldValidators() {
           addrFldCnt++;
         }
         if (addrFldCnt < 1 && addrType != 'ZS01') {
-          return new ValidationResult(null, false, 'For Street+NBR and PostBox, atleast one should be filled.');
+          return new ValidationResult(null, false, 'For Street Address and PO Box, atleast one should be filled.');
         }
         return new ValidationResult(null, true);
       }
     };
   })(), null, 'frmCMR_addressModal');
 
-  // only 2 out of 4 can be filled
+  // only 1 out of 3 can be filled
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
-        var nameCont = FormManager.getActualValue('custNm2');
+        var custNm3 = FormManager.getActualValue('custNm3');
         var poBox = FormManager.getActualValue('poBox');
         var attPerson = FormManager.getActualValue('custNm4');
-        var dept = FormManager.getActualValue('dept');
         var addrFldCnt1 = 0;
-        if (nameCont != '') {
+        if (custNm3 != '') {
           addrFldCnt1++;
         }
         if (poBox != '') {
@@ -874,11 +873,8 @@ function addAddressFieldValidators() {
         if (attPerson != '') {
           addrFldCnt1++;
         }
-        if (dept != '') {
-          addrFldCnt1++;
-        }
-        if (addrFldCnt1 > 2) {
-          return new ValidationResult(null, false, 'department, PostBox, Attention person and Name Con\'t - only 2 out of 4 can be filled.');
+        if (addrFldCnt1 > 1) {
+          return new ValidationResult(null, false, 'Customer Name 3, Attention person and PO Box - only 1 out of 3 can be filled.');
         }
         return new ValidationResult(null, true);
       }
@@ -894,7 +890,7 @@ function addAddressFieldValidators() {
         if (cntry != '') {
           var POBox = FormManager.getActualValue('poBox');
           if (isNaN(POBox)) {
-            return new ValidationResult(null, false, 'PostBox should be Numeric.');
+            return new ValidationResult(null, false, 'PO Box should be Numeric.');
           }
 
         }
@@ -904,17 +900,15 @@ function addAddressFieldValidators() {
     };
   })(), null, 'frmCMR_addressModal');
 
+  // post code + city
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
-        var cntryCd = FormManager.getActualValue('landCntry');
-        var custGrp = FormManager.getActualValue('custGrp');
         var city = FormManager.getActualValue('city1');
         var postCd = FormManager.getActualValue('postCd');
-        var cntry = getLandCntryDesc(cntryCd);
-        var val = city + postCd + cntry;
-        if (val.length > 30 && custGrp == 'CROSS') {
-          return new ValidationResult(null, false, 'Total computed length of City,Country and Postal Code should not exceed 30 characters.');
+        var val = postCd + ' ' + city;
+        if (val.length > 30) {
+          return new ValidationResult(null, false, 'Total computed length of City and Postal Code should not exceed 30 characters.');
         }
         return new ValidationResult(null, true);
       }
@@ -1068,13 +1062,6 @@ function setFieldsMandtOnSc() {
   if (custSubGrp == 'COMME' || custSubGrp == 'NLDAT') {
     FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'Tax Code' ]);
   }
-}
-
-function attnFormatterNL(value, rowIndex) {
-  var rowData = this.grid.getItem(rowIndex);
-  var attPerson = rowData.custNm4[0] ? rowData.custNm4[0] : '';
-  var department = rowData.dept[0] ? rowData.dept[0] : '';
-  return department + '<br>' + (attPerson ? ' ' + attPerson : '');
 }
 
 /**
@@ -1244,6 +1231,24 @@ function restrictDuplicateAddr(cntry, addressMode, saving, finalSave, force) {
           }
         };
       })(), null, 'frmCMR_addressModal');
+}
+
+function streetValueFormatterBELUX(value, rowIndex) {
+  var display = value ? value : '';
+  var rowData = this.grid.getItem(rowIndex);
+  var custNm3 = rowData.custNm3;
+  if (custNm3 && custNm3[0]) {
+    display += ' ' + custNm3;
+  }
+  var custNm4 = rowData.custNm4;
+  if (custNm4 && custNm4[0]) {
+    display += (display ? '<br>' : '') + 'ATT ' + custNm4;
+  }
+  var poBox = rowData.poBox;
+  if (poBox && poBox[0]) {
+    display += (display ? '<br>' : '') + 'PO BOX ' + poBox;
+  }
+  return display;
 }
 
 dojo.addOnLoad(function() {
