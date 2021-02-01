@@ -3093,6 +3093,9 @@ function addCmrNoValidator() {
           } else if (cmrNo != '' && custSubType != ''
               && (custSubType == 'CBTER' || custSubType == 'CBTSO' || custSubType == 'INTER' || custSubType == 'INTSO') && !cmrNo.startsWith('99')) {
             return new ValidationResult(null, false, 'CMR Number should be in 99XXXX format for internal scenarios');
+          } else if (cmrNo != '' && custSubType != '' && custSubType != 'CBTER' && custSubType != 'CBTSO' && custSubType != 'INTER'
+              && custSubType != 'INTSO' && cmrNo.startsWith('99')) {
+            return new ValidationResult(null, false, 'Non Internal CMR Number should not be in 99XXXX for scenarios');
           } else {
             var qParams = {
               CMRNO : cmrNo,
