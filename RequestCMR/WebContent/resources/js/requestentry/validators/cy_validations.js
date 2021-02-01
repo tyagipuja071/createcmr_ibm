@@ -3472,7 +3472,7 @@ function setClientTierAndISR(value) {
   tierValues = null;
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.CYPRUS) {
     if (value == '34') {
-      tierValues = [ 'V', '6','Q'];
+      tierValues = [ 'V', '6','Q','Z'];
     } else if (value == '32') {
       tierValues = ['N', 'S'];
     } else if (value == '21') {
