@@ -262,6 +262,17 @@ public class FranceUtil extends AutomationUtil {
           engineData.addRejectionComment("OTH", "Install-at address should be present for Internal SO Scenario.", "", "");
           return false;
         }
+
+        List<Addr> addresses = requestData.getAddresses(CmrConstants.RDC_BILL_TO);
+        for (Addr addr : addresses) {
+          String custNmTrimmed = getCustomerFullName(addr);
+          if (!(custNmTrimmed.toUpperCase().contains("IBM") || custNmTrimmed.toUpperCase().contains("International Business Machines"))) {
+            details.append("Wrong Customer Name on the main address. IBM should be part of the name.").append("\n");
+            engineData.addRejectionComment("OTH", "Wrong Customer Name on the main address. IBM should be part of the name.", "", "");
+            return false;
+          }
+        }
+
       case SCENARIO_THIRD_PARTY:
       case SCENARIO_CROSSBORDER_THIRD_PARTY:
         if (zi01 == null) {
@@ -325,8 +336,7 @@ public class FranceUtil extends AutomationUtil {
       if (!FRANCE_SUBREGIONS.contains(addr.getLandCntry())) {
         details.append("Calculating Coverage using SIREN.").append("\n\n");
         String siren = StringUtils.isNotBlank(data.getTaxCd1())
-            ? (data.getTaxCd1().length() > 9 ? data.getTaxCd1().substring(0, 9) : data.getTaxCd1())
-            : "";
+            ? (data.getTaxCd1().length() > 9 ? data.getTaxCd1().substring(0, 9) : data.getTaxCd1()) : "";
         if (StringUtils.isNotBlank(siren)) {
           details.append("SIREN: " + siren).append("\n");
           List<CoverageContainer> coverages = covElement.computeCoverageFromRDCQuery(entityManager, "AUTO.COV.GET_COV_FROM_TAX_CD1", siren + "%",
