@@ -57,6 +57,7 @@ var _custGrpIT = null;
 var _importedIndc = null;
 
 var _landedIT = null;
+var _sboHandlerIT = null;
 
 function getImportedIndcForItaly() {
   if (_importedIndc) {
@@ -4557,6 +4558,12 @@ function afterConfigForIT() {
     });
   }
 
+  if (_sboHandlerIT == null) {
+    _sboHandlerIT = dojo.connect(FormManager.getField('salesBusOffCd'), 'onChange', function(value) {
+      setCollCdOnSBOIT(value);
+    });
+  }
+
   var reqType = FormManager.getActualValue('reqType');
   var role = null;
   if (typeof (_pagemodel) != 'undefined') {
@@ -7992,25 +7999,35 @@ function addEmbargoCodeValidatorIT() {
 }
 
 /**
- * Set Client Tier Value
+ * Set Collection Code
  */
-/*
- * function setClientTierValuesIT(isuCd) {
- * 
- * if (FormManager.getActualValue('viewOnlyPage') == 'true') { return; }
- * 
- * if (FormManager.getActualValue('reqType') != 'C') { return; }
- * 
- * isuCd = FormManager.getActualValue('isuCd'); var cntry =
- * FormManager.getActualValue('cmrIssuingCntry'); var clientTiers = []; if
- * (isuCd != '') { var qParams = { _qall : 'Y', ISSUING_CNTRY : cntry, ISU : '%' +
- * isuCd + '%' }; var results = cmr.query('GET.CTCLIST.BYISU', qParams); if
- * (results != null) { for (var i = 0; i < results.length; i++) {
- * clientTiers.push(results[i].ret1); } if (clientTiers != null) {
- * FormManager.limitDropdownValues(FormManager.getField('clientTier'),
- * clientTiers); if (clientTiers.length == 1) {
- * FormManager.setValue('clientTier', clientTiers[0]); } } } } }
- */
+
+function setCollCdOnSBOIT(salesBusOffCd) {
+  if (FormManager.getActualValue('reqType') != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  sbo = FormManager.getActualValue('salesBusOffCd');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var collectionCds = [];
+  if (sbo != '') {
+    var qParams = {
+      _qall : 'Y',
+      ISSUING_CNTRY : cntry,
+      SALES_BO_CD : '%' + salesBusOffCd + '%'
+    };
+    var results = cmr.query('GET.CCLIST.BYSBO', qParams);
+    if (results != null) {
+      for (var i = 0; i < results.length; i++) {
+        collectionCds.push(results[i].ret1);
+      }
+      if (collectionCds != null) {
+        if (collectionCds.length == 1) {
+          FormManager.setValue('collectionCd', collectionCds[0]);
+        }
+      }
+    }
+  }
+}
 
 function validateExistingCMRNo() {
   FormManager.addFormValidator((function() {
@@ -8177,7 +8194,7 @@ function addAfterTemplateLoadItaly(fromAddress, scenario, scenarioChanged) {
   typeOfCustomer();
   setSpecialTaxCodeOnScenarioIT();
   enableDisableTaxCodeCollectionCdIT();
-  // setClientTierValuesIT();
+  setCollCdOnSBOIT();
   addAfterTemplateLoadIT(fromAddress, scenario, scenarioChanged);
   blankedOutCollectionCD();
   setAffiliateEnterpriseRequired();
