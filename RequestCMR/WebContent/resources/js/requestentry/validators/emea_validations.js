@@ -5093,7 +5093,7 @@ function lockCmrOwner() {
   FormManager.readOnly('cmrOwner');
 }
 
-function autoSetSboCollCdOnPostalCode(clientTier, currPostCd) {
+function autoSetSboOnPostalCode(clientTier, currPostCd) {
   var requestType = FormManager.getActualValue('reqType');
   var custType = FormManager.getActualValue('custGrp');
   var custSubType = FormManager.getActualValue('custSubGrp');
@@ -5128,49 +5128,34 @@ function autoSetSboCollCdOnPostalCode(clientTier, currPostCd) {
       if (postCodeOrg != '' && isuCode != '' && isuCode == '34' && ctc == 'Q') {
         if (postCode >= 00 && postCode <= 04) {
           FormManager.setValue('salesBusOffCd', 'NC');
-          FormManager.setValue('collectionCd', 'CIT14');
         } else if (postCode == 05 || postCode == 06) {
           FormManager.setValue('salesBusOffCd', 'NA');
-          FormManager.setValue('collectionCd', 'CIT14');
         } else if (postCode == 10 || postCode == 11 || postCode == 28) {
           FormManager.setValue('salesBusOffCd', 'NB');
-          FormManager.setValue('collectionCd', 'CIT04');
         } else if (postCode > 11 && postCode <= 19) {
           FormManager.setValue('salesBusOffCd', 'GE');
-          FormManager.setValue('collectionCd', 'CIT04');
         } else if ((postCode >= 21 && postCode <= 24) || postCode == 27) {
           FormManager.setValue('salesBusOffCd', 'NL');
-          FormManager.setValue('collectionCd', 'CIT02');
         } else if (postCode == 23 || postCode == 25 || postCode == 26) {
           FormManager.setValue('salesBusOffCd', 'GJ');
-          FormManager.setValue('collectionCd', 'CIT02');
         } else if (postCode == 20) {
           FormManager.setValue('salesBusOffCd', 'GH');
-          FormManager.setValue('collectionCd', 'CIT16');
         } else if ((postCode >= 30 && postCode <= 35) || postCode == 45) {
           FormManager.setValue('salesBusOffCd', 'NF');
-          FormManager.setValue('collectionCd', 'CIT19');
         } else if ((postCode >= 36 && postCode <= 39) || postCode == 46) {
           FormManager.setValue('salesBusOffCd', 'GK');
-          FormManager.setValue('collectionCd', 'CIT19');
         } else if ((postCode >= 40 && postCode <= 44) || postCode == 29 || postCode == 47 || postCode == 48) {
           FormManager.setValue('salesBusOffCd', 'NI');
-          FormManager.setValue('collectionCd', 'CIT03');
         } else if (postCode >= 50 && postCode <= 59) {
           FormManager.setValue('salesBusOffCd', 'RP');
-          FormManager.setValue('collectionCd', 'CIT03');
         } else if (postCode == 60 || postCode == 61) {
           FormManager.setValue('salesBusOffCd', 'CP');
-          FormManager.setValue('collectionCd', 'CIT03');
         } else if ((postCode >= 62 && postCode <= 67) || (postCode >= 70 && postCode <= 76) || (postCode >= 85 && postCode <= 89) || (postCode >= 7 && postCode <= 9)) {
           FormManager.setValue('salesBusOffCd', 'CP');
-          FormManager.setValue('collectionCd', 'CIT14');
         } else if (postCode >= 80 && postCode <= 84) {
           FormManager.setValue('salesBusOffCd', 'NG');
-          FormManager.setValue('collectionCd', 'CIT14');
         } else if (postCode >= 90 && postCode <= 98) {
           FormManager.setValue('salesBusOffCd', 'NM');
-          FormManager.setValue('collectionCd', 'CIT14');
         }
       }
     } else if (checkImportIndc != 'Y' && custType != '' && custType != undefined && custType == 'CROSS' && landCntryVal != undefined && landCntryVal != '' && landCntryVal == 'SM'
@@ -5572,7 +5557,7 @@ function autoSetSBOSRForCompany() {
   var addrType = FormManager.getActualValue('addrType');
   if (addrType != null && addrType == 'ZS01') {
     var currPostCd = FormManager.getActualValue('postCd');
-    autoSetSboCollCdOnPostalCode(false, currPostCd);
+    autoSetSboOnPostalCode(false, currPostCd);
   }
 }
 
@@ -5832,6 +5817,7 @@ function setAffiliateEnterpriseRequired() {
           FormManager.enable('inacCd');
         }
       }
+
     } else if ('C' == FormManager.getActualValue('reqType') && checkImportIndc == 'Y') {
       if (custSubType == 'INTER' || custSubType == 'INTSM' || custSubType == 'INTVA' || custSubType == 'CROIN' || custSubType == 'BUSPR' || custSubType == 'BUSSM' || custSubType == 'BUSVA'
           || custSubType == 'CROBP') {
@@ -5840,11 +5826,18 @@ function setAffiliateEnterpriseRequired() {
         FormManager.readOnly('inacCd');
         FormManager.readOnly('affiliate');
       } else if (role == "REQUESTER" && (custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'CRO3P')) {
+        FormManager.enable('isuCd');
+        FormManager.enable('clientTier');
         FormManager.enable('inacCd');
         FormManager.enable('affiliate');
+        FormManager.enable('salesBusOffCd');
+        FormManager.enable('repTeamMemberNo');
       } else if (role == "REQUESTER" && !(custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'CRO3P')) {
         FormManager.readOnly('inacCd');
-        // FormManager.readOnly('affiliate');
+        FormManager.readOnly('isuCd');
+        FormManager.readOnly('clientTier');
+        FormManager.readOnly('repTeamMemberNo');
+        FormManager.readOnly('salesBusOffCd');
       } else {
         FormManager.enable('inacCd');
         FormManager.enable('affiliate');
@@ -5852,9 +5845,6 @@ function setAffiliateEnterpriseRequired() {
       if ((role != "REQUESTER") && (custSubType == 'PRISM' || custSubType == 'PRICU' || custSubType == 'PRIVA' || custSubType == 'CROPR')) {
         FormManager.enable('isuCd');
         FormManager.enable('clientTier');
-      }
-      if (role == "REQUESTER" && !(custSubType == 'INTER' || custSubType == 'INTSM' || custSubType == 'INTVA' || custSubType == 'CROIN')) {
-        FormManager.enable('repTeamMemberNo');
       }
     }
   }
@@ -5961,10 +5951,10 @@ function blankedOutCollectionCD() {
     FormManager.resetValidations('collectionCd');
     if ((isuCd == '34' && ctc == 'Q') && !(custSubType == 'PRICU' || custSubType == 'CROPR' || custSubType == 'PRISM' || custSubType == 'PRIVA')) {
       FormManager.enable('collectionCd');
-      autoSetSboCollCdOnPostalCode();
+      autoSetSboOnPostalCode();
     } else if ((isuCd == '34' && ctc == 'Q') && (custSubType == 'PRICU' || custSubType == 'CROPR' || custSubType == 'PRISM' || custSubType == 'PRIVA')) {
       FormManager.readOnly('collectionCd');
-      autoSetSboCollCdOnPostalCode();
+      autoSetSboOnPostalCode();
     } else {
       FormManager.clearValue('collectionCd');
       FormManager.readOnly('collectionCd');
@@ -8080,23 +8070,20 @@ function addAfterTemplateLoadIT(fromAddress, scenario, scenarioChanged) {
     if (role == "PROCESSOR") {
       FormManager.enable('cmrNo');
     }
-  }
-  autoSetSboCollCdOnPostalCode(false, false);
-
-  if ((_custSubGrp == 'INTER' || _custSubGrp == 'CROIN' || _custSubGrp == 'INTSM' || _custSubGrp == 'INTVA') && scenarioChanged) {
-    FormManager.setValue('repTeamMemberNo', '');
-    FormManager.setValue('salesBusOffCd', '');
-    FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [ 'SalRepNameNo' ], 'MAIN_IBM_TAB');
-  } else {
-    FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
+    if ((_custSubGrp == 'INTER' || _custSubGrp == 'CROIN' || _custSubGrp == 'INTSM' || _custSubGrp == 'INTVA') && scenarioChanged) {
+      FormManager.setValue('repTeamMemberNo', '');
+      FormManager.setValue('salesBusOffCd', '');
+      FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [ 'SalRepNameNo' ], 'MAIN_IBM_TAB');
+    } else {
+      FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
+    }
   }
 
-  var ident = FormManager.getActualValue('identClient');
-  if (FormManager.getActualValue('reqType') == 'C' && 'CROSS' == FormManager.getActualValue('custGrp')) {
-
-    var reqId = FormManager.getActualValue('reqId');
-    var checkImportIndc = getImportedIndcForItaly();
-    if (checkImportIndc != 'Y') {
+  if (checkImportIndc != 'Y') {
+    var ident = FormManager.getActualValue('identClient');
+    if (FormManager.getActualValue('reqType') == 'C' && 'CROSS' == FormManager.getActualValue('custGrp')) {
+      var reqId = FormManager.getActualValue('reqId');
+      var checkImportIndc = getImportedIndcForItaly();
       FormManager.enable('identClient');
       if (ident == 'N') {
         FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'Fiscal Code' ], 'MAIN_CUST_TAB');
@@ -8108,6 +8095,7 @@ function addAfterTemplateLoadIT(fromAddress, scenario, scenarioChanged) {
       }
     }
   }
+  autoSetSboOnPostalCode(false, false);
 }
 
 function checkIsicCodeValidationIT() {
