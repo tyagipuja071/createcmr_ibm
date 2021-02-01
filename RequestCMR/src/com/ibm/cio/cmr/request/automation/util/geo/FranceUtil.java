@@ -242,7 +242,7 @@ public class FranceUtil extends AutomationUtil {
           List<Addr> addresses = requestData.getAddresses(addrType);
           for (Addr addr : addresses) {
             String custNmTrimmed = getCustomerFullName(addr);
-            if (!(custNmTrimmed.toUpperCase().contains("IBM") || custNmTrimmed.toUpperCase().contains("International Business Machines"))) {
+            if (!(custNmTrimmed.toUpperCase().contains("IBM") || custNmTrimmed.toUpperCase().contains("INTERNATIONAL BUSINESS MACHINES"))) {
               details.append("Wrong Customer Name on the main address. IBM should be part of the name.").append("\n");
               engineData.addRejectionComment("OTH", "Wrong Customer Name on the main address. IBM should be part of the name.", "", "");
               return false;
@@ -266,7 +266,7 @@ public class FranceUtil extends AutomationUtil {
         List<Addr> addresses = requestData.getAddresses(CmrConstants.RDC_BILL_TO);
         for (Addr addr : addresses) {
           String custNmTrimmed = getCustomerFullName(addr);
-          if (!(custNmTrimmed.toUpperCase().contains("IBM") || custNmTrimmed.toUpperCase().contains("International Business Machines"))) {
+          if (!(custNmTrimmed.toUpperCase().contains("IBM") || custNmTrimmed.toUpperCase().contains("INTERNATIONAL BUSINESS MACHINES"))) {
             details.append("Wrong Customer Name on the main address. IBM should be part of the name.").append("\n");
             engineData.addRejectionComment("OTH", "Wrong Customer Name on the main address. IBM should be part of the name.", "", "");
             return false;
