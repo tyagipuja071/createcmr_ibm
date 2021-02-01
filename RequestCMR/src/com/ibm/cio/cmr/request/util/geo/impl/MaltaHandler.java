@@ -1054,12 +1054,6 @@ public class MaltaHandler extends BaseSOFHandler {
                       "Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
                   // validations.add(error);
                 }
-
-                if (!StringUtils.isBlank(phone) && !phone.contains("@") && !StringUtils.isAlphanumeric(phone)) {
-                  LOG.trace("Phone Number should contain only digits  & letters.");
-                  error.addError(row.getRowNum(), rowNumber + "Phone #", "Phone Number should contain only digits & letters.");
-                  // validations.add(error);
-                }
               } else {
                 if (!StringUtils.isBlank(cmrNo) && StringUtils.isBlank(seqNo) && !"Data".equalsIgnoreCase(sheet.getSheetName())) {
                   LOG.trace("Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
