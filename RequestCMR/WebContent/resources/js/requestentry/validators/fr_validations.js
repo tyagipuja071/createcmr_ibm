@@ -870,7 +870,7 @@ function add32PostCdCntrySBOlogic() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (!((countyCd == "FR" || countyCd == "KM" || countyCd == "WF") && (custSubGrp == 'COMME' || custSubGrp == 'PRICU' || custSubGrp == 'GOVRN'
       || custSubGrp == 'INTER' || custSubGrp == 'INTSO' || custSubGrp == 'IBMEM' || custSubGrp == 'LCOEM' || custSubGrp == 'HOSTC'
-      || custSubGrp == 'THDPT' || custSubGrp == 'CBTER'))) {
+      || custSubGrp == 'THDPT' || custSubGrp == 'CBTER' || custSubGrp == 'LCFIN'))) {
     return;
   }
 
@@ -1416,12 +1416,12 @@ function updateAbbrNameWithZS01_ZI01() {
     };
     var result = cmr.query('DATA.GET.ABBREV_NM.BY_REQID', qParams);
     var oldAbbrName = result.ret1;
-    
+
     if (oldAbbrName != '' || oldAbbrName != null) {
       FormManager.setValue('abbrevNm', oldAbbrName);
       return;
     }
-    
+
     if (abbrName != oldAbbrName) {
       return;
     }
@@ -1792,7 +1792,7 @@ function add32SBODependcyOnPostCdOnAddrSave() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (!((countyCd == "FR" || countyCd == "KM" || countyCd == "WF") && (custSubGrp == 'COMME' || custSubGrp == 'PRICU' || custSubGrp == 'GOVRN'
       || custSubGrp == 'INTER' || custSubGrp == 'LCIFF' || custSubGrp == 'LCIFL' || custSubGrp == 'OTFIN' || custSubGrp == 'IBMEM'
-      || custSubGrp == 'LCOEM' || custSubGrp == 'INTSO' || custSubGrp == 'HOSTC' || custSubGrp == 'THDPT' || custSubGrp == 'CBTER'))) {
+      || custSubGrp == 'LCOEM' || custSubGrp == 'INTSO' || custSubGrp == 'HOSTC' || custSubGrp == 'THDPT' || custSubGrp == 'CBTER' || custSubGrp == 'LCFIN'))) {
     return;
   }
 
