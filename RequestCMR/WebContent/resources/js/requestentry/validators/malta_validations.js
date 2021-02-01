@@ -669,6 +669,7 @@ function addAfterConfigMalta() {
   cmrNoforProspect();
   classFieldBehaviour();
   setVatValidatorMalta();
+  setVatExemptValidatorMalta();
   disableEnableFieldsForMT();
   setAddressDetailsForView();
   // disable copy address
@@ -685,6 +686,7 @@ function addAfterTemplateLoadMalta(fromAddress, scenario, scenarioChanged) {
   enterpriseMalta();
   hidePpsceidExceptBP();
   setVatValidatorMalta();
+  setVatExemptValidatorMalta();
 }
 
 function canCopyAddress(value, rowIndex, grid) {
@@ -912,6 +914,26 @@ function hideCustPhoneonSummary() {
 
 }
 
+var _isScenarioChanged = false;
+function checkScenarioChanged(fromAddress, scenario, scenarioChanged) {
+  _isScenarioChanged = scenarioChanged;
+}
+
+function setVatExemptValidatorMalta() {
+  var custGrp = FormManager.getActualValue('custGrp');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (custGrp == 'CROSS') {
+    return;
+  }
+  console.log("setVatExemptValidatorMalta for Malta..");
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
+    if (_isScenarioChanged && custSubGrp == 'COMME') {
+      FormManager.setValue('vatExempt', false);
+    }
+  }
+}
+
 /* End 1430539 */
 dojo.addOnLoad(function() {
   GEOHandler.MCO2 = [ '780' ];
@@ -958,4 +980,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addIsicClassificationCodeValidator, [ SysLoc.MALTA ], null, true);
   GEOHandler.registerValidator(validateCMRNumForProspect, [ SysLoc.MALTA ], GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.addAfterConfig(hideCustPhoneonSummary, [ SysLoc.MALTA ]);
+  GEOHandler.addAfterTemplateLoad(checkScenarioChanged, [ SysLoc.MALTA ]);
 });
