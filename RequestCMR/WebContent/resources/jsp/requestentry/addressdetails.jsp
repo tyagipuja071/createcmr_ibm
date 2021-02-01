@@ -691,6 +691,24 @@
   </cmr:view>
   <cmr:view exceptForGEO="CN,JP,SWISS">
     <cmr:row addBackground="true" topPad="10">
+      <cmr:view forGEO="FR" forCountry="706">
+        <cmr:column span="1">
+          <cmr:label fieldId="custNm1_view">
+            <span class="lbl-CustomerName1">Customer legal name</span>:</cmr:label>
+        </cmr:column>
+        <cmr:column span="2">
+          <div id="custNm1_view">-</div>
+        </cmr:column>
+        <cmr:column span="1">
+          <cmr:label fieldId="custNm2_view">
+            <span class="lbl-CustomerName2">Legal name continued</span>:</cmr:label>
+        </cmr:column>
+        <cmr:column span="2">
+          <div id="custNm2_view">-</div>
+        </cmr:column>
+      </cmr:view>
+    </cmr:row>
+    <cmr:row addBackground="true" topPad="10">
       <cmr:column span="1">
         <cmr:label fieldId="addrTxt_view">
           <span class="lbl-StreetAddress1">${ui.street}</span>:</cmr:label>
