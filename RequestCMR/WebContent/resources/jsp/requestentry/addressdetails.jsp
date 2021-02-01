@@ -287,6 +287,17 @@
         <div id="custNm2_view">-</div>
       </cmr:column>
     </cmr:row>
+    
+    <cmr:row>
+      <cmr:column span="1" forCountry="780">
+        <cmr:label fieldId="custNm3_view">
+          <span class="lbl-CustomerName3">${ui.custName3}:</span>
+        </cmr:label>:
+      </cmr:column>
+      <cmr:column span="2" forCountry="780">
+        <div id="custNm3_view">-</div>
+      </cmr:column>
+    </cmr:row>
   </cmr:view>
 
   <cmr:view forGEO="CN">
@@ -520,7 +531,7 @@
         <div id="bldg_view">-</div>
       </cmr:column>
     </cmr:view>
-    <cmr:view forGEO="MCO,MCO1,MCO2">
+    <cmr:view forGEO="MCO,MCO1,MCO2" exceptForCountry="780">
       <cmr:column span="1">
         <cmr:label fieldId="custNm4_view">
           <span class="lbl-CustomerName4">${ui.custName4}</span>
@@ -1017,6 +1028,16 @@
        </c:if>
     </cmr:view>
    
+    <cmr:view forCountry="780">
+      <cmr:column span="1">
+        <cmr:label fieldId="custPhone_view">
+          <span class="lbl-CustPhone">${ui.phone}</span>:</cmr:label>
+      </cmr:column>
+      <cmr:column span="2">
+        <div id="custPhone_view">-</div>
+      </cmr:column>
+    </cmr:view>
+    
     <cmr:view exceptForGEO="IERP,CND,MCO1,MCO2,CEMEA,CN,NORDX,BELUX,NL,JP,AP,SWISS" exceptForCountry="862,726,666,822,838,758,631,760">
       <cmr:column span="1">
         <cmr:label fieldId="divn_view">

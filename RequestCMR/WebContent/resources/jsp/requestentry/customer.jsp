@@ -282,7 +282,6 @@
         </cmr:column>
       </c:if>
     </cmr:view>
-
   </cmr:row>
 
   <!-- Include Here Customer Specific fields for GEOs -->
