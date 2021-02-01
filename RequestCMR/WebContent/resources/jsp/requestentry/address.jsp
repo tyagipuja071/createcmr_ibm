@@ -292,8 +292,8 @@ visibility: hidden !IMPORTANT;
             <cmr:gridCol width="100px" field="custNm3" header="Full English Name" />
           </cmr:view>
 
-          <!--  Customer Name and Name Con't except for JP -->
-          <cmr:view exceptForGEO="JP">
+          <!--  Customer Name and Name Con't except for JP,FR -->
+          <cmr:view exceptForGEO="JP,FR">
             <cmr:gridCol width="120px" field="custNm1" header="${ui.grid.custNameUKI1}" >
               <cmr:formatter functionName="customerNameFormatter" />
             </cmr:gridCol>
