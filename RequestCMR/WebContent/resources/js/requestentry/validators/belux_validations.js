@@ -1505,7 +1505,7 @@ function addDepartmentNumberValidator() {
         var reqType = FormManager.getActualValue('reqType');
         var departmentNumber = FormManager.getActualValue('ibmDeptCostCenter');
         var pattern = /^[0-9A-Za-z]+$/;
-        if (reqType == 'C') {
+        if (reqType == 'C' || reqType == 'U') {
           if (departmentNumber != null && departmentNumber != '') {
             if (departmentNumber.length >= 1 && departmentNumber.length != 6) {
               return new ValidationResult(null, false, 'Department number should be exactly 6 digits.');
