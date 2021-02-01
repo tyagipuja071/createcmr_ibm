@@ -791,14 +791,14 @@ public class NLHandler extends BaseSOFHandler {
     // data.setEngineeringBo(this.currentImportValues.get("DPCEBO"));
     // LOG.trace("DPCEBO: " + data.getEngineeringBo());
 
-    String Kna1KVK = getKna1KVK(mainRecord.getCmrNum());
-    String CmrtcextKVK = getCmrtcextKVK(mainRecord.getCmrNum());
+    String kna1KVK = getKna1KVK(mainRecord.getCmrNum());
+    String cmrtcextKVK = getCmrtcextKVK(mainRecord.getCmrNum());
 
-    if (StringUtils.isNotEmpty(Kna1KVK)) {
-      data.setTaxCd2(Kna1KVK);
+    if (StringUtils.isNotEmpty(kna1KVK)) {
+      data.setTaxCd2(kna1KVK);
       LOG.trace("KVK: " + data.getTaxCd2());
     } else {
-      data.setTaxCd2(CmrtcextKVK);
+      data.setTaxCd2(cmrtcextKVK);
       LOG.trace("KVK: " + data.getTaxCd2());
     }
 
