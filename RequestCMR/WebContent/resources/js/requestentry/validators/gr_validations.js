@@ -3205,7 +3205,7 @@ function addEnterpriseValidatorGR() {
   if (reqType == 'C' && role == 'PROCESSOR' && isuCd == '34' && clientTier == '6') {
     FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise Number' ], 'MAIN_IBM_TAB');  
   } else {
-    FormManager.resetValidations('enterprise');  
+    FormManager.removeValidator('enterprise', Validators.REQUIRED);
   }
 }
 
@@ -5622,6 +5622,20 @@ function countryScenarioProcessorRules() {
   return true;
 }
 
+function addEnterpriseValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var entNo = FormManager.getActualValue('enterprise');
+        if (entNo != '' && entNo.length != 6) {
+          return new ValidationResult(null, false, 'Enterprise Number should have exactly 6 digits.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding EMEA functions...');
@@ -5798,5 +5812,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addHandlersForSubindustryCd, [ SysLoc.GREECE ]);
   GEOHandler.addAfterTemplateLoad(setClientTierForCreates, [ SysLoc.GREECE ]);
   GEOHandler.registerValidator(addPaymentModeValidator, [ SysLoc.GREECE ], null, true);
-
+  GEOHandler.registerValidator(addEnterpriseValidator,  [ SysLoc.GREECE ], null, true);
 });
