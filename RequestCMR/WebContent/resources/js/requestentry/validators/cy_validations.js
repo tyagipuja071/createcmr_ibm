@@ -3700,7 +3700,7 @@ function setEnterprise(scenarioChanged) {
     isuCtcValueChanged = (_oldIsuCtc != isuCtc);
   }
   
-  if (!(scenarioChanged || isuCtcValueChanged || _subindustryChanged) || is217ScenarioSelect) {
+  if (!(scenarioChanged || isuCtcValueChanged || _subindustryChanged)) {
     return;
   }
 
@@ -3716,6 +3716,11 @@ function setEnterprise(scenarioChanged) {
       for (var i = 0; i < results.length; i++) {
         enterprises.push(results[i].ret1);
       }
+      
+      if(is217ScenarioSelect) {
+        enterprises = ['985999'];
+      }
+      
       if (enterprises != null) {
         if(isuCtc == '34Q' && !isicUnderB.has(isicCdValue)) {
           enterprises = [];
