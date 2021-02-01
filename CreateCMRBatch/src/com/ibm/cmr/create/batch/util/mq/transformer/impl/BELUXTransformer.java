@@ -891,7 +891,6 @@ public class BELUXTransformer extends EMEATransformer {
     String landedCntry = "";
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
 
-      legacyCust.setAccAdminBo(data.getIbmDeptCostCenter() == null ? "" : data.getIbmDeptCostCenter());
       // CMR-5993
       String cntry = legacyCust.getId().getSofCntryCode().trim();
 
@@ -902,7 +901,7 @@ public class BELUXTransformer extends EMEATransformer {
       legacyCust.setAuthRemarketerInd("0");
       legacyCust.setCeDivision("3");
       legacyCust.setLangCd("");
-      legacyCust.setDeptCd(data.getIbmDeptCostCenter() == null ? "" : data.getIbmDeptCostCenter());
+
       legacyCust.setCurrencyCd("");
       legacyCust.setOverseasTerritory("");
       legacyCust.setInvoiceCpyReqd("");
@@ -922,7 +921,7 @@ public class BELUXTransformer extends EMEATransformer {
       // George CREATCMR-546
       legacyCust.setTaxCd(data.getTaxCd1() == null ? "" : data.getTaxCd1());
       legacyCust.setLangCd(data.getCustPrefLang() == null ? "" : data.getCustPrefLang());
-      legacyCust.setDeptCd(data.getIbmDeptCostCenter() == null ? "" : data.getIbmDeptCostCenter());
+      legacyCust.setAccAdminBo(data.getIbmDeptCostCenter() == null ? "" : data.getIbmDeptCostCenter());
 
       legacyCust.setBankAcctNo("");
 
@@ -952,7 +951,7 @@ public class BELUXTransformer extends EMEATransformer {
       // George CREATCMR-1030 1031 1032
       legacyCust.setTaxCd(data.getTaxCd1() == null ? "" : data.getTaxCd1());
       legacyCust.setLangCd(data.getCustPrefLang() == null ? "" : data.getCustPrefLang());
-      legacyCust.setDeptCd(data.getIbmDeptCostCenter() == null ? "" : data.getIbmDeptCostCenter());
+      legacyCust.setAccAdminBo(data.getIbmDeptCostCenter() == null ? "" : data.getIbmDeptCostCenter());
 
       for (Addr addr : cmrObjects.getAddresses()) {
         if ("ZS01".equals(addr.getId().getAddrType())) {
@@ -1050,9 +1049,7 @@ public class BELUXTransformer extends EMEATransformer {
       legacyCust.setVat("");
     }
 
-    if (!StringUtils.isEmpty(data.getIbmDeptCostCenter())) {
-      legacyCust.setBankBranchNo(data.getIbmDeptCostCenter());
-    }
+    legacyCust.setBankBranchNo("");
 
     if (StringUtils.isEmpty(data.getCustSubGrp())) {
       legacyCust.setMrcCd("3");
@@ -1111,12 +1108,12 @@ public class BELUXTransformer extends EMEATransformer {
         cust.setEmbargoCd(muData.getMiscBillCd());
       }
     }
-    // we use RestrictTo to store CoF in muData
+    // CREATCMR-845
     if (!StringUtils.isBlank(muData.getRestrictTo())) {
-      if ("@".equals(muData.getRestrictTo())) {
+      if ("@".equals(muData.getModeOfPayment())) {
         cust.setModeOfPayment("");
       } else {
-        cust.setModeOfPayment(muData.getRestrictTo());
+        cust.setModeOfPayment(muData.getModeOfPayment());
       }
     }
 

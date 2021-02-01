@@ -249,7 +249,7 @@ public class NLTransformer extends EMEATransformer {
     }
     messageHash.put("EconomicCode", cmrData.getEconomicCd());
     messageHash.put("InvNumber", "");
-    messageHash.put("TaxCode", "");
+    messageHash.put("TaxCode", cmrData.getTaxCd1());
     messageHash.put("EnterpriseNo", cmrData.getEnterprise());
 
     String sbo = messageHash.get("SBO");
@@ -962,14 +962,8 @@ public class NLTransformer extends EMEATransformer {
 
       String dataEmbargoCd = data.getEmbargoCd();
       String rdcEmbargoCd = LegacyDirectUtil.getEmbargoCdFromDataRdc(entityManager, admin);
-      String cof = data.getCommercialFinanced();
-      if (!StringUtils.isBlank(cof)) {
-        if ("R".equals(cof) || "S".equals(cof) || "T".equals(cof)) {
-          legacyCust.setModeOfPayment(cof);
-        }
-      } else {
-        legacyCust.setModeOfPayment("");
-      }
+      // CREATCMR-845
+      legacyCust.setModeOfPayment(data.getModeOfPayment() == null ? "" : data.getModeOfPayment());
 
       // permanent removal-single inactivation
       if (admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason()) && !"TREC".equals(admin.getReqReason())) {
@@ -1008,13 +1002,6 @@ public class NLTransformer extends EMEATransformer {
       legacyCust.setEmbargoCd(dataEmbargoCd);
     } else {
       legacyCust.setEmbargoCd("");
-    }
-
-    String cebo = data.getEngineeringBo();
-    if (!StringUtils.isBlank(cebo)) {
-      legacyCust.setCeBo(cebo);
-    } else {
-      legacyCust.setCeBo("");
     }
 
     // common data for C/U
@@ -1141,12 +1128,12 @@ public class NLTransformer extends EMEATransformer {
         cust.setEmbargoCd(muData.getMiscBillCd());
       }
     }
-    // we use RestrictTo to store CoF in muData
-    if (!StringUtils.isBlank(muData.getRestrictTo())) {
+    // CREATCMR-845
+    if (!StringUtils.isBlank(muData.getModeOfPayment())) {
       if ("@".equals(muData.getRestrictTo())) {
         cust.setModeOfPayment("");
       } else {
-        cust.setModeOfPayment(muData.getRestrictTo());
+        cust.setModeOfPayment(muData.getModeOfPayment());
       }
     }
 
