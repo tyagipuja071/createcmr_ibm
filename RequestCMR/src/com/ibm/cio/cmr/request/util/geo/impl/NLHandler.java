@@ -791,8 +791,16 @@ public class NLHandler extends BaseSOFHandler {
     // data.setEngineeringBo(this.currentImportValues.get("DPCEBO"));
     // LOG.trace("DPCEBO: " + data.getEngineeringBo());
 
-    data.setTaxCd2(getKna1KVK(mainRecord.getCmrNum()));
-    LOG.trace("KVK: " + data.getTaxCd2());
+    String kna1KVK = getKna1KVK(mainRecord.getCmrNum());
+    String cmrtcextKVK = getCmrtcextKVK(mainRecord.getCmrNum());
+
+    if (StringUtils.isNotEmpty(kna1KVK)) {
+      data.setTaxCd2(kna1KVK);
+      LOG.trace("KVK: " + data.getTaxCd2());
+    } else {
+      data.setTaxCd2(cmrtcextKVK);
+      LOG.trace("KVK: " + data.getTaxCd2());
+    }
 
     data.setTaxCd1(this.currentImportValues.get("TaxCode"));
     LOG.trace("TaxCode: " + data.getTaxCd1());
@@ -874,6 +882,32 @@ public class NLHandler extends BaseSOFHandler {
           kvk = kvk.substring(0, 8);
         }
       }
+      LOG.debug("KVK of SAPR3.KNA1.STCD1 " + kvk);
+    } finally {
+      entityManager.clear();
+      entityManager.close();
+    }
+    return kvk;
+  }
+
+  private String getCmrtcextKVK(String cmrNo) throws Exception {
+
+    String kvk = "";
+    List<String> results = new ArrayList<String>();
+    EntityManager entityManager = JpaManager.getEntityManager();
+    try {
+      String sql = ExternalizedQuery.getSql("GET.KVK.CMRTCEXT.CODFIS");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("COUNTRY", "788");
+      query.setParameter("CMR_NO", cmrNo);
+      results = query.getResults(String.class);
+      if (results != null && results.size() > 0) {
+        kvk = results.get(0);
+        if (kvk != null && kvk.length() >= 8) {
+          kvk = kvk.substring(0, 8);
+        }
+      }
+      LOG.debug("KVK of CMRDB2D.CMRTCEXT.CODFIS " + kvk);
     } finally {
       entityManager.clear();
       entityManager.close();
