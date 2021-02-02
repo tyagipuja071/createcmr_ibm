@@ -3759,13 +3759,6 @@ public class GreeceHandler extends BaseSOFHandler {
                 validations.add(error);
               }
 
-              if (!StringUtils.isBlank(cmrNo) && StringUtils.isBlank(seqNo)) {
-                LOG.trace("Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
-                error.addError(row.getRowNum(), "Address Sequence No.",
-                    "Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
-                validations.add(error);
-              }
-
               if (poBox1.contains("+")) {
                 LOG.trace("Please input value in numeric format. Please fix and upload the template again.");
                 error.addError(row.getRowNum(), "PO Box", "Please input value in numeric format. Please fix and upload the template again.");
@@ -3779,6 +3772,13 @@ public class GreeceHandler extends BaseSOFHandler {
                 error.addError(row.getRowNum(), "Phone No.", "Please input value in numeric format. Please fix and upload the template again.");
                 validations.add(error);
               }
+            }
+
+            if ((!StringUtils.isBlank(cmrNo) && StringUtils.isBlank(seqNo)) || (StringUtils.isBlank(cmrNo) && !StringUtils.isBlank(seqNo))) {
+              LOG.trace("Note that CMR No. and Sequence No. should be filled at same time. ");
+              error.addError(row.getRowNum(), "Address Sequence No.",
+                  "Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
+              validations.add(error);
             }
 
             if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
@@ -3820,6 +3820,16 @@ public class GreeceHandler extends BaseSOFHandler {
               error.addError(row.getRowNum(), "Cross Border Postal Code",
                   "Field contains invalid character. Please fix and upload the template again.");
               validations.add(error);
+            }
+
+            if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
+              if (!StringUtils.isBlank(dataEnterprise)) {
+                if (!StringUtils.isNumeric(dataEnterprise)) {
+                  LOG.trace("Enterprise number should have numeric values only.");
+                  error.addError(row.getRowNum(), "Enterprise No.", "Enterprise number should have numeric values only. ");
+                  validations.add(error);
+                }
+              }
             }
           }
         }
