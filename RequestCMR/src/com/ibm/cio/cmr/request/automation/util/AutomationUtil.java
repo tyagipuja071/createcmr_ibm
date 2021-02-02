@@ -43,6 +43,7 @@ import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
+import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
@@ -582,6 +583,7 @@ public abstract class AutomationUtil {
    */
   protected boolean doPrivatePersonChecks(AutomationEngineData engineData, String country, String landCntry, String name, StringBuilder details,
       boolean checkBluepages, RequestData reqData) {
+    EntityManager entityManager = JpaManager.getEntityManager();
     boolean legalEndingExists = false;
     for (Addr addr : reqData.getAddresses()) {
       String customerName = getCustomerFullName(addr);
@@ -603,6 +605,16 @@ public abstract class AutomationUtil {
         details.append("Scenario chosen is incorrect, should be " + commentSpecific).append("\n");
       }
       return false;
+    }
+
+    // Duplicate Request check with customer name
+
+    if (checkDuplicateRequest(entityManager, reqData)) {
+      details.append("Duplicate request found with matching customer name.").append("\n");
+      engineData.addRejectionComment("OTH", "Duplicate request found with matching customer name.", "", "");
+      return false;
+    } else {
+      details.append("No duplicate requests found");
     }
 
     PrivatePersonCheckResult checkResult = checkPrivatePersonRecord(country, landCntry, name, checkBluepages);
