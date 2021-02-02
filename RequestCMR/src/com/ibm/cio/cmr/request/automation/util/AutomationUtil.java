@@ -1216,6 +1216,34 @@ public abstract class AutomationUtil {
 
       return compareName1 != null && compareName1.equals(compareName2);
     }
+
+  }
+
+  public boolean checkDuplicateRequest(EntityManager entityManager, RequestData requestData) {
+    Data data = requestData.getData();
+    Admin admin = requestData.getAdmin();
+    Addr zs01 = requestData.getAddress("ZS01");
+    String custNm = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? zs01.getCustNm2() : "");
+    String sql = ExternalizedQuery.getSql("REQ.NM_MATCH");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("LAND_CNTRY", zs01.getLandCntry().toUpperCase());
+    query.setParameter("SCENARIO", StringUtils.isNotBlank(data.getCustSubGrp()) ? data.getCustSubGrp().toUpperCase() : "%%");
+    query.setParameter("ISSUING_CNTRY", data.getCmrIssuingCntry());
+    query.setParameter("ADDR_TYPE", zs01.getId().getAddrType());
+    query.setParameter("REQ_ID", admin.getId().getReqId());
+    query.setForReadOnly(true);
+    List<Addr> results = query.getResults(Addr.class);
+    if (results != null && !results.isEmpty()) {
+      Iterator<Addr> it = results.iterator();
+      while (it.hasNext()) {
+        Addr addr = it.next();
+        String custNm2 = addr.getCustNm1() + (StringUtils.isNotBlank(addr.getCustNm2()) ? addr.getCustNm2() : "");
+        if (custNm.equals(custNm2)) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
 }
