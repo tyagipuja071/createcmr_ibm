@@ -226,7 +226,8 @@ public class IERPProcessService extends BaseBatchService {
               massUpdt.setErrorTxt(record.getMessage());
               if (CmrConstants.RDC_STATUS_NOT_COMPLETED.equals(record.getStatus())) {
                 massUpdt.setRowStatusCd("RDCER");
-              } else if (CmrConstants.RDC_STATUS_COMPLETED.equals(record.getStatus())) {
+              } else if (CmrConstants.RDC_STATUS_COMPLETED.equals(record.getStatus())
+                  || CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equals(record.getStatus())) {
                 massUpdt.setRowStatusCd("DONE");
               }
               LOG.info("Mass Update Record Updated [Request ID: " + massUpdt.getId().getParReqId() + " CMR_NO: " + massUpdt.getCmrNo() + " SEQ No: "
