@@ -195,6 +195,9 @@ function autoSetISUBasedOnSubindustry() {
       case 'B':
         FormManager.setValue('isuCd', '5B');
         break;
+      case 'C':
+        FormManager.setValue('isuCd', '5B');
+        break;
       case 'D':
         FormManager.setValue('isuCd', '18');
         break;
@@ -248,9 +251,6 @@ function autoSetISUBasedOnSubindustry() {
         break;
       case 'Y':
         FormManager.setValue('isuCd', '28');
-        break;
-      default:
-        break;
       }
     }
   }
