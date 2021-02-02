@@ -341,7 +341,7 @@ function setSalesRepValues(clientTier) {
     var results = null;
 
     // SalRep will be based on IMS for 32S/32T for Finland Subregion
-    if (ims.length > 1 && (isuCtc == '32S' || isuCtc == '32T') && (geoCd == 'EE' || geoCd == 'LT' || geoCd == 'LV' || geoCd == 'IS' || cntry == '806')) {
+    if (ims.length > 1 && (isuCtc == '34Q' || isuCtc == '32T') && (geoCd == 'EE' || geoCd == 'LT' || geoCd == 'LV' || geoCd == 'IS' || cntry == '806')) {
       qParams = {
         _qall : 'Y',
         ISSUING_CNTRY : cntry + geoCd,
@@ -349,7 +349,7 @@ function setSalesRepValues(clientTier) {
         CLIENT_TIER : '%%'
       };
       results = cmr.query('GET.SRLIST.BYISUCTC', qParams);
-    } else if (ims != '' && ims.length > 1 && (isuCtc == '32S' || isuCtc == '32T') && (cntry == '846')) {
+    } else if (ims != '' && ims.length > 1 && (isuCtc == '34Q' || isuCtc == '32T') && (cntry == '846')) {
       qParams = {
         _qall : 'Y',
         ISSUING_CNTRY : cntry + geoCd,
@@ -358,7 +358,7 @@ function setSalesRepValues(clientTier) {
       // UPDATE_BY_ID : '%' + ims.substring(0, 1) + '%'
       };
       results = cmr.query('GET.SRLIST.SWEDEN', qParams);
-    } else if (ims != '' && ims.length > 1 && (isuCtc == '32S' || isuCtc == '32T')) {
+    } else if (ims != '' && ims.length > 1 && (isuCtc == '34Q' || isuCtc == '32T')) {
       qParams = {
         _qall : 'Y',
         ISSUING_CNTRY : cntry + geoCd,
@@ -407,7 +407,7 @@ function setSalesRepValues(clientTier) {
 
         var ind = ims.substring(0, 1);
         // DK/FO/GL 678
-        if (cntry == '678') {
+        if (cntry == '678' && ind != '') {
           if (MSD996.indexOf(ind) >= 0)
             FormManager.setValue('repTeamMemberNo', "MSD996");
           if (MSD992.indexOf(ind) >= 0)
@@ -418,7 +418,7 @@ function setSalesRepValues(clientTier) {
             FormManager.setValue('repTeamMemberNo', "MSD302");
         }
         // Sweden 846
-        if (cntry == '846') {
+        if (cntry == '846' && ind != '') {
           if (MSS596.indexOf(ind) >= 0)
             FormManager.setValue('repTeamMemberNo', "MSS596");
           if (MSS599.indexOf(ind) >= 0)
@@ -427,7 +427,7 @@ function setSalesRepValues(clientTier) {
             FormManager.setValue('repTeamMemberNo', "MSS315");
         }
         // Finland 702
-        if (cntry == '702') {
+        if (cntry == '702' && ind != '') {
           if (MSF109.indexOf(ind) >= 0)
             FormManager.setValue('repTeamMemberNo', "MSF109");
           if (MSF107.indexOf(ind) >= 0)
