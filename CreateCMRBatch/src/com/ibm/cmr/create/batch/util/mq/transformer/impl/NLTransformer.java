@@ -584,12 +584,12 @@ public class NLTransformer extends EMEATransformer {
 
     if (StringUtils.isEmpty(line3)) {
       if (!StringUtils.isBlank(addrData.getCustNm4())) {
-        line3 += (line3.length() > 0 ? " " : "") + "ATT" + addrData.getCustNm4();
+        line3 += (line3.length() > 0 ? " " : "") + "ATT " + addrData.getCustNm4();
       }
     }
     if (StringUtils.isEmpty(line3)) {
       if (!StringUtils.isBlank(addrData.getPoBox())) {
-        line3 += (line3.length() > 0 ? " " : "") + "PO BOX" + addrData.getPoBox();
+        line3 += (line3.length() > 0 ? " " : "") + "PO BOX " + addrData.getPoBox();
       }
     }
 
