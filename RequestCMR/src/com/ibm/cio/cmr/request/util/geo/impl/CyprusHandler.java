@@ -69,7 +69,7 @@ public class CyprusHandler extends BaseSOFHandler {
   private static final Logger LOG = Logger.getLogger(CyprusHandler.class);
 
   protected static final String[] CY_MASS_UPDATE_SHEET_NAMES = { "Billing Address", "Mailing Address", "Installing Address",
-      "Shipping Address (Update)", "EPL Address" };
+      "Shipping Address (Update)", "EPL Address", "Data" };
 
   private static Map<String, List<List<String>>> MASS_UPDT_DUP_ENTRY_MAP = new HashMap<String, List<List<String>>>();
 
@@ -3392,6 +3392,7 @@ public class CyprusHandler extends BaseSOFHandler {
       if (sheet != null) {
         for (Row row : sheet) {
           if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
+            String dataCmrNo = ""; // 0
             String cmrNo = ""; // 0
             String seqNo = "";// 1
             String street = ""; // 4
@@ -3403,7 +3404,8 @@ public class CyprusHandler extends BaseSOFHandler {
             String cbPostal = ""; // 10
             String phoneNo = ""; // 12
             String poBox = ""; // 13
-            String landCountry = ""; //11
+            String landCountry = ""; // 11
+            String enterpriseNo = ""; // 5
             List<String> checkList = null;
             long count = 0;
             if (row.getRowNum() == 2001) {
@@ -3444,14 +3446,14 @@ public class CyprusHandler extends BaseSOFHandler {
 
               currCell = (XSSFCell) row.getCell(13);
               poBox = validateColValFromCell(currCell);
-              
+
               currCell = (XSSFCell) row.getCell(11);
               landCountry = validateColValFromCell(currCell);
             }
 
             checkList = Arrays.asList(street, addressCont, poBox, attPerson);
             count = checkList.stream().filter(field -> !field.isEmpty()).count();
-            
+
             if ("Mailing Address".equalsIgnoreCase(sheet.getSheetName())) {
               if (currCell != null) {
                 DataFormatter df = new DataFormatter();
@@ -3466,6 +3468,13 @@ public class CyprusHandler extends BaseSOFHandler {
                 DataFormatter df = new DataFormatter();
                 phoneNo = df.formatCellValue(row.getCell(12));
               }
+            }
+
+            if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              dataCmrNo = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(5);
+              enterpriseNo = validateColValFromCell(currCell);
             }
 
             TemplateValidation error = new TemplateValidation(name);
@@ -3492,7 +3501,7 @@ public class CyprusHandler extends BaseSOFHandler {
                 validations.add(error);
               }
             }
-            if(count > 2){
+            if (count > 2) {
               LOG.trace("Out of Street, Address Con't, PO BOX and Att Person only 2 can be filled at the same time .");
               error.addError(row.getRowNum(), "Address Con't/PO BOX",
                   "Out of Street, Address Con't, PO BOX and Att Person only 2 can be filled at the same time . ");
@@ -3500,24 +3509,26 @@ public class CyprusHandler extends BaseSOFHandler {
               count = 0;
             }
             if (!StringUtils.isEmpty(crossCity) && !StringUtils.isEmpty(localPostal)) {
-              LOG.trace("Cross Border City and Local Postal Code must not be populated at the same time. If one is populated, the other must be empty.");
+              LOG.trace(
+                  "Cross Border City and Local Postal Code must not be populated at the same time. If one is populated, the other must be empty.");
               error.addError(row.getRowNum(), "Local Postal Code",
                   "Cross Border City and Local Postal Code must not be populated at the same time. If one is populated, the other must be empty.");
               validations.add(error);
             }
             if (!StringUtils.isEmpty(localCity) && !StringUtils.isEmpty(cbPostal)) {
-              LOG.trace("Local City and Cross Border Postal Code must not be populated at the same time. If one is populated, the other must be empty.");
+              LOG.trace(
+                  "Local City and Cross Border Postal Code must not be populated at the same time. If one is populated, the other must be empty.");
               error.addError(row.getRowNum(), "Local City",
                   "Local City and Cross Border Postal Code must not be populated at the same time. If one is populated, the other must be empty.");
               validations.add(error);
             }
-            
+
             if (!StringUtils.isEmpty(landCountry)) {
-              if (!("CY").equals(landCountry) && ( !StringUtils.isEmpty(localCity) || !StringUtils.isEmpty(localPostal))) {
+              if (!("CY").equals(landCountry) && (!StringUtils.isEmpty(localCity) || !StringUtils.isEmpty(localPostal))) {
                 LOG.trace("Landed Country should be CY for Local Scenario.");
                 error.addError(row.getRowNum(), "Landed Country", "Landed Country should be CY for Local Scenario.");
                 validations.add(error);
-              }else if(("CY").equals(landCountry) && ( !StringUtils.isEmpty(crossCity) || !StringUtils.isEmpty(cbPostal))){
+              } else if (("CY").equals(landCountry) && (!StringUtils.isEmpty(crossCity) || !StringUtils.isEmpty(cbPostal))) {
                 LOG.trace("Landed Country shouldn't be CY for Cross Borders.");
                 error.addError(row.getRowNum(), "Landed Country", "Landed Country shouldn't be CY for Cross Borders.");
                 validations.add(error);
@@ -3549,30 +3560,29 @@ public class CyprusHandler extends BaseSOFHandler {
                   "Address Con't cannot be filled if Street is empty .Please fix and upload the template again.");
               validations.add(error);
             }
-            
+
             if (!StringUtils.isEmpty(addressCont) && !StringUtils.isEmpty(attPerson)) {
               LOG.trace("Note that Address Con't/Att. Person cannot be filled at same time. Please fix and upload the template again.");
               error.addError(row.getRowNum(), "Address Con't/Att. Person",
                   "Note that Address Con't/Att. Person cannot be filled at same time. Please fix and upload the template again.");
               validations.add(error);
             }
-            
+
             if (!StringUtils.isBlank(cmrNo) && StringUtils.isBlank(seqNo)) {
               LOG.trace("Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
               error.addError(row.getRowNum(), "Address Sequence No.",
                   "Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
               validations.add(error);
             }
-            
-            if (StringUtils.isEmpty(cmrNo) ) {
+
+            if (StringUtils.isEmpty(dataCmrNo)) {
               LOG.trace("Note that CMR No. is mandatory. Please fix and upload the template again.");
-              error.addError(row.getRowNum(), "CMR No.",
-                  "Note that CMR No. is mandatory. Please fix and upload the template again.");
+              error.addError(row.getRowNum(), "CMR No.", "Note that CMR No. is mandatory. Please fix and upload the template again.");
               validations.add(error);
             }
 
             if ("Mailing Address".equalsIgnoreCase(sheet.getSheetName()) || "Shipping Address (Update)".equalsIgnoreCase(sheet.getSheetName())) {
-              if (phoneNo.contains("+") || ( !StringUtils.isEmpty(phoneNo)  && !phoneNo.matches("-?\\d+(\\.\\d+)?"))) {
+              if (phoneNo.contains("+") || (!StringUtils.isEmpty(phoneNo) && !phoneNo.matches("-?\\d+(\\.\\d+)?"))) {
                 LOG.trace("Please input value in numeric format. Please fix and upload the template again.");
                 error.addError(row.getRowNum(), "Phone No.", "Please input value in numeric format. Please fix and upload the template again.");
                 validations.add(error);
@@ -3602,6 +3612,17 @@ public class CyprusHandler extends BaseSOFHandler {
               error.addError(row.getRowNum(), "Cross Border Postal Code",
                   "Field contains invalid character. Please fix and upload the template again.");
               validations.add(error);
+            }
+
+            if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
+              if (!StringUtils.isBlank(enterpriseNo)) {
+                if (!StringUtils.isNumeric(enterpriseNo)) {
+                  LOG.trace("Enterprise number should have numeric values only.");
+                  error.addError(row.getRowNum(), "Enterprise No.", "Enterprise number should have numeric values only. ");
+                  validations.add(error);
+
+                }
+              }
             }
           }
         }

@@ -3583,20 +3583,79 @@ public class GreeceHandler extends BaseSOFHandler {
       if (sheet != null) {
         for (Row row : sheet) {
           if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
+            String dataCmrNo = ""; // 0
+            boolean isDataFilled = false;
+            boolean isAddrFilled = false;
+            String dataAbbrevName = ""; // 1
+            String dataAbbrevLoc = ""; // 2
+            String dataIsic = ""; // 3
+            String dataVat = ""; // 4
+            String dataEmbargo = ""; // 5
+            String dataCollection = ""; // 6
+            String dataEnterprise = ""; // 7
+            String dataInac = ""; // 8
+            String dataIsu = ""; // 9
+            String dataCtc = ""; // 10
+            String dataModeOfPayment = ""; // 11
+            String dataSalesRep = ""; // 13
             String cmrNo = ""; // 0
             String seqNo = "";// 1
-            String localCity = ""; // 7
-            String crossCity = ""; // 8
-            String localPostal = ""; // 9
-            String cbPostal = ""; // 10
+            String custName = "";// 2
+            String custNameCont = "";// 3
             String street = ""; // 4
             String addressCont = ""; // 5
-            String poBox = ""; // 12
+            String localCity = ""; // 6
+            String crossCity = ""; // 7
+            String localPostal = ""; // 8
+            String cbPostal = ""; // 9
+            String landed = ""; // 10
             String attPerson = ""; // 11
+            String poBox = ""; // 12
             String poBox1 = ""; // 12
             String phoneNo = ""; // 12
+            String taxOffice = ""; // 13
+
             if (row.getRowNum() == 2001) {
               continue;
+            }
+
+            if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              dataCmrNo = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(1);
+              dataAbbrevName = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(2);
+              dataAbbrevLoc = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(3);
+              dataIsic = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(4);
+              dataVat = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(5);
+              dataEmbargo = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(6);
+              dataCollection = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(7);
+              dataEnterprise = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(8);
+              dataInac = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(9);
+              dataIsu = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(10);
+              dataCtc = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(11);
+              dataModeOfPayment = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(12);
+              phoneNo = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(13);
+              dataSalesRep = validateColValFromCell(currCell);
+
+              if (StringUtils.isNotBlank(dataAbbrevName) || StringUtils.isNotBlank(dataAbbrevLoc) || StringUtils.isNotBlank(dataIsic)
+                  || StringUtils.isNotBlank(dataVat) || StringUtils.isNotBlank(dataEmbargo) || StringUtils.isNotBlank(dataCollection)
+                  || StringUtils.isNotBlank(dataEnterprise) || StringUtils.isNotBlank(dataInac) || StringUtils.isNotBlank(dataIsu)
+                  || StringUtils.isNotBlank(dataCtc) || StringUtils.isNotBlank(dataModeOfPayment) || StringUtils.isNotBlank(phoneNo)
+                  || StringUtils.isNotBlank(dataSalesRep)) {
+                isDataFilled = true;
+              }
             }
 
             if (!"Data".equalsIgnoreCase(sheet.getSheetName())) {
@@ -3605,6 +3664,10 @@ public class GreeceHandler extends BaseSOFHandler {
               cmrNo = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(1);
               seqNo = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(2);
+              custName = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(3);
+              custNameCont = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(6);
               localCity = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(7);
@@ -3613,6 +3676,8 @@ public class GreeceHandler extends BaseSOFHandler {
               localPostal = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(9);
               cbPostal = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(10);
+              landed = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(4);
               street = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(5);
@@ -3621,6 +3686,8 @@ public class GreeceHandler extends BaseSOFHandler {
               attPerson = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(12);
               poBox = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(13);
+              taxOffice = validateColValFromCell(currCell);
             }
 
             if ("Sold To Address".equalsIgnoreCase(sheet.getSheetName()) || "Local Lang translation Sold-to".equalsIgnoreCase(sheet.getSheetName())) {
@@ -3637,6 +3704,14 @@ public class GreeceHandler extends BaseSOFHandler {
                 DataFormatter df = new DataFormatter();
                 phoneNo = df.formatCellValue(row.getCell(12));
               }
+            }
+
+            if (StringUtils.isNotBlank(custName) || StringUtils.isNotBlank(custNameCont) || StringUtils.isNotBlank(localCity)
+                || StringUtils.isNotBlank(crossCity) || StringUtils.isNotBlank(localPostal) || StringUtils.isNotBlank(cbPostal)
+                || StringUtils.isNotBlank(landed) || StringUtils.isNotBlank(street) || StringUtils.isNotBlank(addressCont)
+                || StringUtils.isNotBlank(attPerson) || StringUtils.isNotBlank(poBox) || StringUtils.isNotBlank(phoneNo)
+                || StringUtils.isNotBlank(taxOffice)) {
+              isAddrFilled = true;
             }
 
             TemplateValidation error = new TemplateValidation(name);
@@ -3702,6 +3777,22 @@ public class GreeceHandler extends BaseSOFHandler {
               if (phoneNo.contains("+")) {
                 LOG.trace("Please input value in numeric format. Please fix and upload the template again.");
                 error.addError(row.getRowNum(), "Phone No.", "Please input value in numeric format. Please fix and upload the template again.");
+                validations.add(error);
+              }
+            }
+
+            if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
+              if ((isDataFilled) && StringUtils.isBlank(dataCmrNo)) {
+                LOG.trace("Please input CMR No. Please fix and upload the template again.");
+                error.addError(row.getRowNum(), "CMR No.", "Please input CMR No. Please fix and upload the template again.");
+                validations.add(error);
+              }
+            }
+
+            if (!"Data".equalsIgnoreCase(sheet.getSheetName())) {
+              if ((isAddrFilled) && (StringUtils.isBlank(cmrNo) || StringUtils.isBlank(seqNo))) {
+                LOG.trace("Please input CMR Number and Address Sequence Number.");
+                error.addError(row.getRowNum(), "", "Please input CMR Number and Address Sequence Number.");
                 validations.add(error);
               }
             }
