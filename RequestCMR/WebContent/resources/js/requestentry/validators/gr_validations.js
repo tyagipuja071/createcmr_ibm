@@ -5813,4 +5813,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setClientTierForCreates, [ SysLoc.GREECE ]);
   GEOHandler.registerValidator(addPaymentModeValidator, [ SysLoc.GREECE ], null, true);
   GEOHandler.registerValidator(addEnterpriseValidator,  [ SysLoc.GREECE ], null, true);
+  GEOHandler.addAfterConfig(addEnterpriseValidatorGR, [ SysLoc.GREECE ]);
 });
