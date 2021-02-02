@@ -232,6 +232,13 @@ public class FranceUtil extends AutomationUtil {
       case SCENARIO_CROSSBORDER_IBM_EMPLOYEE:
       case SCENARIO_IBM_EMPLOYEE:
         engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
+        // Duplicate Request check with customer name
+        if (checkDuplicateRequest(entityManager, requestData)) {
+          details.append("Duplicate request found with matching customer name.").append("\n");
+          engineData.addRejectionComment("OTH", "Duplicate Request Found with matching customer name.", "", "");
+        } else {
+          details.append("No duplicate requests found.");
+        }
         return doPrivatePersonChecks(engineData, SystemLocation.FRANCE, zs01.getLandCntry(), customerName, details, false, requestData);
 
       case SCENARIO_INTERNAL:
