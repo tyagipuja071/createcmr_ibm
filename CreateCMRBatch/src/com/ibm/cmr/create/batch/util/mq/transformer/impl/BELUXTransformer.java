@@ -603,10 +603,13 @@ public class BELUXTransformer extends EMEATransformer {
       if (StringUtils.isEmpty(line3)) {
         line2 = line4;
         line3 = line5;
+        line4 = "";
+        line5 = "";
       } else if (!StringUtils.isEmpty(line3)) {
         line2 = line3;
         line3 = line4;
         line4 = line5;
+        line5 = "";
       }
 
     }
@@ -1630,12 +1633,14 @@ public class BELUXTransformer extends EMEATransformer {
     legacyCust.setSbo(sbo.toString());
 
     if ("624".equalsIgnoreCase(legacyCust.getRealCtyCd())) {
-      if (!StringUtils.isEmpty(data.getCustSubGrp())
-          && (data.getCustSubGrp().contains("COM") || data.getCustSubGrp().contains("PUB") || data.getCustSubGrp().contains("3PA"))) {
-        legacyCust.setIbo(sbo.toString());
-      } else {
-        legacyCust.setIbo("");
-      }
+      // if (!StringUtils.isEmpty(data.getCustSubGrp())
+      // && (data.getCustSubGrp().contains("COM") ||
+      // data.getCustSubGrp().contains("PUB") ||
+      // data.getCustSubGrp().contains("3PA"))) {
+      legacyCust.setIbo(sbo.toString());
+      // } else {
+      // legacyCust.setIbo("");
+      // }
     } else if ("623".equalsIgnoreCase(legacyCust.getRealCtyCd())) {
       if (!StringUtils.isEmpty(sbo.toString())) {
         legacyCust.setIbo(sbo.replace(6, 7, "0").toString());

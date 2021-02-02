@@ -618,10 +618,13 @@ public class NLTransformer extends EMEATransformer {
       if (StringUtils.isEmpty(line3)) {
         line2 = line4;
         line3 = line5;
+        line4 = "";
+        line5 = "";
       } else if (!StringUtils.isEmpty(line3)) {
         line2 = line3;
         line3 = line4;
         line4 = line5;
+        line5 = "";
       }
 
     }
@@ -669,7 +672,7 @@ public class NLTransformer extends EMEATransformer {
   public void generateCMRNoByLegacy(EntityManager entityManager, GenerateCMRNoRequest generateCMRNoObj, CMRRequestContainer cmrObjects) {
     Data data = cmrObjects.getData();
     String custSubGrp = data.getCustSubGrp();
-    System.out.println("_custSubGrp = " + custSubGrp);
+    LOG.debug("_custSubGrp = " + custSubGrp);
 
     LOG.debug("Set max and min range of cmrNo..");
     // 788 Internal - 99xxxx
