@@ -5828,30 +5828,34 @@ function setAffiliateEnterpriseRequired() {
     } else if ('C' == FormManager.getActualValue('reqType') && checkImportIndc == 'Y') {
       if (custSubType == 'INTER' || custSubType == 'INTSM' || custSubType == 'INTVA' || custSubType == 'CROIN' || custSubType == 'BUSPR' || custSubType == 'BUSSM' || custSubType == 'BUSVA'
           || custSubType == 'CROBP') {
-        FormManager.clearValue('inacCd');
-        FormManager.clearValue('affiliate');
         FormManager.readOnly('inacCd');
         FormManager.readOnly('affiliate');
-      } else if (role == "REQUESTER" && (custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'CRO3P')) {
-        FormManager.enable('isuCd');
-        FormManager.enable('clientTier');
-        FormManager.enable('inacCd');
-        FormManager.enable('affiliate');
-        FormManager.enable('salesBusOffCd');
-        FormManager.enable('repTeamMemberNo');
+        FormManager.clearValue('inacCd');
+        FormManager.clearValue('affiliate');
       } else if (role == "REQUESTER" && !(custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'CRO3P')) {
-        FormManager.readOnly('inacCd');
         FormManager.readOnly('isuCd');
+        FormManager.readOnly('inacCd');
         FormManager.readOnly('clientTier');
         FormManager.readOnly('repTeamMemberNo');
         FormManager.readOnly('salesBusOffCd');
+        FormManager.removeValidator('isuCd', Validators.REQUIRED);
+        FormManager.removeValidator('clientTier', Validators.REQUIRED);
+        FormManager.removeValidator('salesBusOffCd', Validators.REQUIRED);
+        FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
+      } else if ((role != "REQUESTER")
+          && (custSubType == 'PRICU' || custSubType == 'PRISM' || custSubType == 'PRIVA' || custSubType == 'CROPR' || custSubType == 'INTER' || custSubType == 'CROIN' || custSubType == 'INTSM' || custSubType == 'INTVA')) {
+        FormManager.enable('collectionCd');
       } else {
+        FormManager.enable('isuCd');
         FormManager.enable('inacCd');
         FormManager.enable('affiliate');
-      }
-      if ((role != "REQUESTER") && (custSubType == 'PRISM' || custSubType == 'PRICU' || custSubType == 'PRIVA' || custSubType == 'CROPR')) {
-        FormManager.enable('isuCd');
         FormManager.enable('clientTier');
+        FormManager.enable('salesBusOffCd');
+        FormManager.enable('repTeamMemberNo');
+        FormManager.addValidator('isuCd', Validators.REQUIRED, [ 'ISU' ], 'MAIN_IBM_TAB');
+        FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SBO' ], 'MAIN_IBM_TAB');
+        FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
+        FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [ 'Sales Rep' ], 'MAIN_IBM_TAB');
       }
     }
   }
