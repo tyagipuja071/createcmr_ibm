@@ -615,18 +615,29 @@ public class NLTransformer extends EMEATransformer {
     line5 = line5.trim();
 
     if (StringUtils.isEmpty(line2)) {
-      if (StringUtils.isEmpty(line3)) {
+      if (StringUtils.isEmpty(line3) && !StringUtils.isEmpty(line4) && !StringUtils.isEmpty(line5)) {
         line2 = line4;
         line3 = line5;
         line4 = "";
         line5 = "";
-      } else if (!StringUtils.isEmpty(line3)) {
+      } else if (!StringUtils.isEmpty(line3) && !StringUtils.isEmpty(line4) && !StringUtils.isEmpty(line5)) {
         line2 = line3;
         line3 = line4;
         line4 = line5;
         line5 = "";
       }
-
+    } else if (!StringUtils.isEmpty(line2)) {
+      if (StringUtils.isEmpty(line3) && !StringUtils.isEmpty(line4) && !StringUtils.isEmpty(line5)) {
+        line3 = line4;
+        line4 = line5;
+        line5 = "";
+      } else if (StringUtils.isEmpty(line3) && !StringUtils.isEmpty(line4) && StringUtils.isEmpty(line5)) {
+        line3 = line4;
+        line4 = "";
+      } else if (!StringUtils.isEmpty(line3) && StringUtils.isEmpty(line4) && !StringUtils.isEmpty(line5)) {
+        line4 = line5;
+        line5 = "";
+      }
     }
 
     if (!crossBorder) {
