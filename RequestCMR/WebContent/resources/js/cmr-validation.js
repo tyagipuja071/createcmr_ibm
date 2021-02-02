@@ -269,6 +269,18 @@ var Validators = (function() {
         return new ValidationResult(input, true);
       }
     },
+    LATIN1 : function(input) {
+      var value = FormManager.getActualValue(input);
+      if (!value || value == '' || value.length == 0) {
+        return true;
+      }
+      var reg = /[^\u0000-\u024F]+/;
+      if (reg.test(value)) {
+        return new ValidationResult(input, false, MessageMgr.MESSAGES.LATIN1);
+      } else {
+        return new ValidationResult(input, true);
+      }
+    },
     NON_LATIN : function(input) {
       var value = FormManager.getActualValue(input);
       if (!value || value == '' || value.length == 0) {
@@ -917,7 +929,7 @@ var FormManager = (function() {
       return null;
     },
     disable : function(fieldId) {
-      if (cmr.isSuperUserMode()){
+      if (cmr.isSuperUserMode()) {
         return;
       }
       var field = dijit.byId(fieldId);
@@ -986,7 +998,7 @@ var FormManager = (function() {
       }
     },
     readOnly : function(fieldId) {
-      if (cmr.isSuperUserMode()){
+      if (cmr.isSuperUserMode()) {
         return;
       }
       var field = dijit.byId(fieldId);

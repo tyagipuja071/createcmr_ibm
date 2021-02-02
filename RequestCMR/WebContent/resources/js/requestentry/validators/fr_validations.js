@@ -718,12 +718,12 @@ function addFRAddressTypeValidator() {
  * No non-Latin characters for FR
  */
 function addLatinCharValidatorFR() {
-  FormManager.addValidator('custNm1', Validators.LATIN, [ 'Customer Name' ]);
-  FormManager.addValidator('custNm2', Validators.LATIN, [ 'Customer Name Continuation' ]);
-  FormManager.addValidator('custNm3', Validators.LATIN, [ 'Customer Name/ Additional Address Information' ]);
-  FormManager.addValidator('addrTxt', Validators.LATIN, [ 'Street' ]);
-  FormManager.addValidator('addrTxt2', Validators.LATIN, [ 'Street Continuation' ]);
-  FormManager.addValidator('city1', Validators.LATIN, [ 'City' ]);
+  FormManager.addValidator('custNm1', Validators.LATIN1, [ 'Customer Name' ]);
+  FormManager.addValidator('custNm2', Validators.LATIN1, [ 'Customer Name Continuation' ]);
+  FormManager.addValidator('custNm3', Validators.LATIN1, [ 'Customer Name/ Additional Address Information' ]);
+  FormManager.addValidator('addrTxt', Validators.LATIN1, [ 'Street' ]);
+  FormManager.addValidator('addrTxt2', Validators.LATIN1, [ 'Street Continuation' ]);
+  FormManager.addValidator('city1', Validators.LATIN1, [ 'City' ]);
 }
 
 // function addALPHANUMSPACEValidatorFR() {
@@ -788,16 +788,16 @@ function addALPHANUMSPACEValidatorFR() {
     role = _pagemodel.userRole;
   }
   if (role == 'Processor' || (role == 'Requester' && FormManager.getActualValue('reqType') == 'U')) {
-    FormManager.addValidator('abbrevLocn', Validators.LATIN, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
-    FormManager.addValidator('abbrevNm', Validators.LATIN, [ 'Abbreviated Name' ], 'MAIN_CUST_TAB');
+    FormManager.addValidator('abbrevLocn', Validators.LATIN1, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
+    FormManager.addValidator('abbrevNm', Validators.LATIN1, [ 'Abbreviated Name' ], 'MAIN_CUST_TAB');
   }
 
-  FormManager.addValidator('custNm1', Validators.LATIN, [ 'Customer Name' ]);
-  FormManager.addValidator('custNm2', Validators.LATIN, [ 'Customer Name Continuation' ]);
-  FormManager.addValidator('custNm3', Validators.LATIN, [ 'Customer Name/ Additional Address Information' ]);
-  FormManager.addValidator('addrTxt', Validators.LATIN, [ 'Street' ]);
-  FormManager.addValidator('addrTxt2', Validators.LATIN, [ 'Street Continuation' ]);
-  FormManager.addValidator('city1', Validators.LATIN, [ 'City' ]);
+  FormManager.addValidator('custNm1', Validators.LATIN1, [ 'Customer Name' ]);
+  FormManager.addValidator('custNm2', Validators.LATIN1, [ 'Customer Name Continuation' ]);
+  FormManager.addValidator('custNm3', Validators.LATIN1, [ 'Customer Name/ Additional Address Information' ]);
+  FormManager.addValidator('addrTxt', Validators.LATIN1, [ 'Street' ]);
+  FormManager.addValidator('addrTxt2', Validators.LATIN1, [ 'Street Continuation' ]);
+  FormManager.addValidator('city1', Validators.LATIN1, [ 'City' ]);
 }
 
 /**
