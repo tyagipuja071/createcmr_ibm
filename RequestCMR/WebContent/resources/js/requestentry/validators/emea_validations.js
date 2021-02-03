@@ -4521,16 +4521,9 @@ function afterConfigForIT() {
     });
   }
 
-  if (_CTCHandlerIT == null) {
-    _CTCHandlerIT = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
-      blankedOutCollectionCD();
-    });
-  }
-
   if (_ISUHandlerIT == null) {
     _ISUHandlerIT = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       setAffiliateEnterpriseRequired();
-      blankedOutCollectionCD();
     });
   }
 
@@ -5842,9 +5835,6 @@ function setAffiliateEnterpriseRequired() {
         FormManager.removeValidator('clientTier', Validators.REQUIRED);
         FormManager.removeValidator('salesBusOffCd', Validators.REQUIRED);
         FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
-      } else if ((role != "REQUESTER")
-          && (custSubType == 'PRICU' || custSubType == 'PRISM' || custSubType == 'PRIVA' || custSubType == 'CROPR' || custSubType == 'INTER' || custSubType == 'CROIN' || custSubType == 'INTSM' || custSubType == 'INTVA')) {
-        FormManager.enable('collectionCd');
       } else {
         FormManager.enable('isuCd');
         FormManager.enable('inacCd');
@@ -5950,33 +5940,30 @@ function getOldValuesIT(fromAddress, scenario, scenarioChanged) {
   }
 }
 
-// Blanking Out Collection Code Based On ISU and CTC and Scenario
-function blankedOutCollectionCD() {
-  console.log("---->> blankedOutCollectionCD. <<----");
+// Collection Code Behaviour in create by scratch and model !!
+function collectionCDBehaviour() {
+  console.log("---->> collectionCDBehaviour. <<----");
   var checkImportIndc = getImportedIndcForItaly();
   var reqType = FormManager.getActualValue('reqType');
   var isuCd = FormManager.getActualValue('isuCd');
   var ctc = FormManager.getActualValue('clientTier');
   var custSubType = FormManager.getActualValue('custSubGrp');
-  if (checkImportIndc != 'Y' && reqType == 'C') {
-    FormManager.resetValidations('collectionCd');
-    if ((isuCd == '34' && ctc == 'Q') && !(custSubType == 'PRICU' || custSubType == 'CROPR' || custSubType == 'PRISM' || custSubType == 'PRIVA')) {
-      FormManager.enable('collectionCd');
-      autoSetSboOnPostalCode();
-    } else if ((isuCd == '34' && ctc == 'Q') && (custSubType == 'PRICU' || custSubType == 'CROPR' || custSubType == 'PRISM' || custSubType == 'PRIVA')) {
-      FormManager.readOnly('collectionCd');
-      autoSetSboOnPostalCode();
-    } else {
-      FormManager.clearValue('collectionCd');
-      FormManager.readOnly('collectionCd');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  if (reqType == 'C') {
+    if (role != 'REQUESTER' && checkImportIndc == 'Y') {
+      if (custSubType == 'PRICU' || custSubType == 'CROPR' || custSubType == 'PRISM' || custSubType == 'PRIVA' || custSubType == 'INTER' || custSubType == 'CRINT' || custSubType == 'INTSM'
+          || custSubType == 'INTVA') {
+        FormManager.enable('collectionCd');
+      } else {
+        FormManager.readOnly('collectionCd');
+      }
     }
-  } else if (checkImportIndc == 'Y' && reqType == 'C') {
-    if (custSubType == 'INTER' || custSubType == 'CRINT' || custSubType == 'INTSM' || custSubType == 'INTVA') {
-      FormManager.clearValue('collectionCd');
-      FormManager.readOnly('collectionCd');
-    } else if (custSubType == 'PRICU' || custSubType == 'CROPR' || custSubType == 'PRISM' || custSubType == 'PRIVA') {
-      FormManager.readOnly('collectionCd');
-      getOldValuesIT();
+    getOldValuesIT();
+    if (checkImportIndc != 'Y') {
+      if (custSubType == 'INTER' || custSubType == 'CRINT' || custSubType == 'INTSM' || custSubType == 'INTVA') {
+        FormManager.clearValue('collectionCd');
+        FormManager.readOnly('collectionCd');
+      }
     }
   }
 }
@@ -8028,6 +8015,9 @@ function setCollCdOnSBOIT(salesBusOffCd) {
         if (collectionCds.length == 1) {
           FormManager.setValue('collectionCd', collectionCds[0]);
         }
+        if (collectionCds.length == 0) {
+          FormManager.setValue('collectionCd', '');
+        }
       }
     }
   }
@@ -8200,7 +8190,7 @@ function addAfterTemplateLoadItaly(fromAddress, scenario, scenarioChanged) {
   enableDisableTaxCodeCollectionCdIT();
   setCollCdOnSBOIT();
   addAfterTemplateLoadIT(fromAddress, scenario, scenarioChanged);
-  blankedOutCollectionCD();
+  collectionCDBehaviour();
   setAffiliateEnterpriseRequired();
   addFieldValidationForRequestorItaly();
   disableProcpectCmrIT();
