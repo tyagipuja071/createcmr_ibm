@@ -1640,6 +1640,20 @@ public class BELUXHandler extends BaseSOFHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getEconomicCd(), "EconomicCd2", cmrCountry));
       results.add(update);
     }
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getModeOfPayment(), newData.getModeOfPayment())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "ModeOfPayment", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getModeOfPayment(), "ModeOfPayment", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getModeOfPayment(), "ModeOfPayment", cmrCountry));
+      results.add(update);
+    }
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getSoProjectCd(), newData.getIbmDeptCostCenter())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "IbmDeptCostCenter", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getIbmDeptCostCenter(), "IbmDeptCostCenter", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getSoProjectCd(), "IbmDeptCostCenter", cmrCountry));
+      results.add(update);
+    }
   }
 
   @Override
