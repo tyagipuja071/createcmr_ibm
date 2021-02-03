@@ -1378,7 +1378,7 @@ function setAddressDetailsForView() {
 }
 
 function streetValueFormatterBELUX(value, rowIndex) {
-  var display = value ? value : '';
+  var display = '';
   var rowData = this.grid.getItem(rowIndex);
   var custNm3 = rowData.custNm3;
   if (custNm3 && custNm3[0]) {

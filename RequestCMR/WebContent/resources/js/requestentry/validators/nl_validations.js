@@ -706,6 +706,7 @@ function addNLAddressTypeValidator() {
           return new ValidationResult(null, false, 'Sold-to address is mandatory. Only one address for each address type should be defined when sending for processing.');
         }
         if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+          var reqType = FormManager.getActualValue('reqType');
           var record = null;
           var type = null;
           var billToCnt = 0;
@@ -737,6 +738,8 @@ function addNLAddressTypeValidator() {
           }
           if (soldToCnt == 0) {
             return new ValidationResult(null, false, 'Sold-to Address is mandatory.');
+          } else if (reqType == 'C' && billToCnt == 0) {
+            return new ValidationResult(null, false, 'Bill-to Address is mandatory.');
           } else if (billToCnt > 1) {
             return new ValidationResult(null, false, 'Only one Bill-to address can be defined. Please remove the additional Bill-to address.');
           } else if (soldToCnt > 1) {
@@ -1234,7 +1237,7 @@ function restrictDuplicateAddr(cntry, addressMode, saving, finalSave, force) {
 }
 
 function streetValueFormatterBELUX(value, rowIndex) {
-  var display = value ? value : '';
+  var display = '';
   var rowData = this.grid.getItem(rowIndex);
   var custNm3 = rowData.custNm3;
   if (custNm3 && custNm3[0]) {
