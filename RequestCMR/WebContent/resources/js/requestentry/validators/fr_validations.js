@@ -718,11 +718,13 @@ function addFRAddressTypeValidator() {
  * No non-Latin characters for FR
  */
 function addLatinCharValidatorFR() {
-  FormManager.addValidator('custNm1', Validators.LATIN1, [ 'Customer Name' ]);
-  FormManager.addValidator('custNm2', Validators.LATIN1, [ 'Customer Name Continuation' ]);
-  FormManager.addValidator('custNm3', Validators.LATIN1, [ 'Customer Name/ Additional Address Information' ]);
-  FormManager.addValidator('addrTxt', Validators.LATIN1, [ 'Street' ]);
-  FormManager.addValidator('addrTxt2', Validators.LATIN1, [ 'Street Continuation' ]);
+  FormManager.addValidator('custNm1', Validators.LATIN1, [ 'Customer legal name' ]);
+  FormManager.addValidator('custNm2', Validators.LATIN1, [ 'Legal name continued' ]);
+  FormManager.addValidator('custNm3', Validators.LATIN1, [ 'Division/Department' ]);
+  FormManager.addValidator('custNm4', Validators.LATIN1, [ 'Attention to/Building/Floor/Office' ]);
+  FormManager.addValidator('addrTxt', Validators.LATIN1, [ 'Street name and number' ]);
+  // FormManager.addValidator('addrTxt2', Validators.LATIN1, [ 'Street
+  // Continuation' ]);
   FormManager.addValidator('city1', Validators.LATIN1, [ 'City' ]);
 }
 
