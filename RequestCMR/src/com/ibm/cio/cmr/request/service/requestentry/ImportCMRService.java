@@ -335,9 +335,6 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
         if (rdc != null) {
           PropertyUtils.copyProperties(rdc, data);
           rdc.setCmrNo(cmrNo); // retain CMR no in old file
-          if("624".equals(data.getCmrIssuingCntry())) {
-            rdc.setSoProjectCd(data.getIbmDeptCostCenter());// use data_rdc's SO_PRJ_CD field as Department Number fidld
-          }
           reqEntryService.updateEntity(rdc, entityManager);
         } else {
           // recreate missing one
@@ -347,9 +344,6 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
           rdc.setId(rdcpk);
           PropertyUtils.copyProperties(rdc, data);
           rdc.setCmrNo(cmrNo); // retain CMR no in old file
-          if("624".equals(data.getCmrIssuingCntry())) {
-            rdc.setSoProjectCd(data.getIbmDeptCostCenter());// use data_rdc's SO_PRJ_CD field as Department Number fidld
-          }
           reqEntryService.createEntity(rdc, entityManager);
         }
 
@@ -379,9 +373,6 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
         rdc.setId(rdcpk);
         PropertyUtils.copyProperties(rdc, data);
         rdc.setCmrNo(cmrNo); // retain CMR no in old file
-        if("624".equals(data.getCmrIssuingCntry())) {
-          rdc.setSoProjectCd(data.getIbmDeptCostCenter());// use data_rdc's SO_PRJ_CD field as Department Number fidld
-        }
         reqEntryService.createEntity(rdc, entityManager);
       }
 
