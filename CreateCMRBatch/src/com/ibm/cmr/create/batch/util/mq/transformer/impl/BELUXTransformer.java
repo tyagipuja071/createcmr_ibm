@@ -605,6 +605,11 @@ public class BELUXTransformer extends EMEATransformer {
         line3 = line5;
         line4 = "";
         line5 = "";
+      } else if (!StringUtils.isEmpty(line3) && StringUtils.isEmpty(line4) && !StringUtils.isEmpty(line5)) {
+        line2 = line3;
+        line3 = line5;
+        line3 = "";
+        line5 = "";
       } else if (!StringUtils.isEmpty(line3) && !StringUtils.isEmpty(line4) && !StringUtils.isEmpty(line5)) {
         line2 = line3;
         line3 = line4;
@@ -625,13 +630,19 @@ public class BELUXTransformer extends EMEATransformer {
       }
     }
 
-    if (!crossBorder)
-
-    {
+    if (!crossBorder) {
       line6 = "";
     } else if (crossBorder) {
       // country
       line6 = countryName;
+    }
+    if (!StringUtils.isEmpty(line6) && StringUtils.isEmpty(line5)) {
+      line5 = line6;
+      line6 = "";
+      if (StringUtils.isEmpty(line4)) {
+        line4 = line5;
+        line5 = "";
+      }
     }
 
     if (!StringUtils.isBlank(addrData.getTaxOffice())) {
