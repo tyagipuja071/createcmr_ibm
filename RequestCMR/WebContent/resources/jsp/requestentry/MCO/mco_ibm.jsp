@@ -109,7 +109,7 @@
         </p>
       </cmr:column>
       
-			<cmr:column span="2" containerForField="InternalDept" exceptForCountry="780">
+			<cmr:column span="2" containerForField="InternalDept" exceptForCountry="864,780">
 				<p>
 					<cmr:label fieldId="ibmDeptCostCenter">
 						<cmr:fieldLabel fieldId="InternalDept" />: 
