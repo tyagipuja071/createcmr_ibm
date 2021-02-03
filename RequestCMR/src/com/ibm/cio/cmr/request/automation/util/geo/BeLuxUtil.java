@@ -395,8 +395,9 @@ public class BeLuxUtil extends AutomationUtil {
       }
     }
     if (resultCodes.contains("R")) {
+      output.setOnError(true);
       validation.setSuccess(false);
-      validation.setMessage("Not Validated");
+      validation.setMessage("Rejected.");
       engineData.addNegativeCheckStatus("_esCheckFailed", "Updated elements cannot be checked automatically.");
     } else {
       validation.setSuccess(true);
