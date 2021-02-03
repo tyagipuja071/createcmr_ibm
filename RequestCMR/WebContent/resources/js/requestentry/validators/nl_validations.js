@@ -689,8 +689,13 @@ function updateAddrTypeList(cntry, addressMode, saving) {
     cmr.hideNode('radiocont_ZKVK');
     cmr.hideNode('radiocont_ZVAT');
   }
-  if ((addressMode == 'newAddress' || addressMode == 'copyAddress') && (cmr.currentRequestType == 'C' || cmr.currentRequestType == 'U') && (cmr.requestingLob != 'IGF' || cmr.reqReason != 'IGF')) {
-    cmr.hideNode('radiocont_ZP02');
+  if ((addressMode == 'newAddress' || addressMode == 'copyAddress') && (cmr.currentRequestType == 'C' || cmr.currentRequestType == 'U')) {
+    var requestingLob = FormManager.getActualValue('requestingLob');
+    var reqReason = FormManager.getActualValue('reqReason');
+    if (requestingLob != 'IGF' || reqReason != 'IGF') {
+      cmr.hideNode('radiocont_ZP02');
+    }
+
   }
 }
 
