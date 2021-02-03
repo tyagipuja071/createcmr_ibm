@@ -29,6 +29,7 @@ import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 
 public class BeLuxUtil extends AutomationUtil {
@@ -293,6 +294,22 @@ public class BeLuxUtil extends AutomationUtil {
       case "ISIC":
       case "INAC/NAC Code":
         cmdeReview = true;
+        break;
+      case "Economic Code":
+        String newEcoCd = change.getNewData();
+        String oldEcoCd = change.getOldData();
+        String regUser = SystemParameters.getString("BELUX_ECO_CD_UPDT");
+        String currentUser = admin.getRequesterId();
+        if (StringUtils.isNotBlank(newEcoCd) && StringUtils.isNotBlank(oldEcoCd) && newEcoCd.length() == 3 && oldEcoCd.length() == 3) {
+          if (!newEcoCd.substring(0, 1).equals(oldEcoCd.substring(0, 1))
+              && newEcoCd.substring(1, newEcoCd.length()).equals(oldEcoCd.substring(1, oldEcoCd.length())) && currentUser.equalsIgnoreCase(regUser)) {
+            details.append("Economic Code has been updated by registered user.\n");
+          } else {
+            cmdeReview = true;
+            engineData.addNegativeCheckStatus("_beluxEconomicCdUpdt", "Economic code was updated incorrectly or by non registered user.");
+            details.append("Economic code was updated incorrectly or by non registered user.\n");
+          }
+        }
         break;
       default:
         ignoredUpdates.add(change.getDataField());
