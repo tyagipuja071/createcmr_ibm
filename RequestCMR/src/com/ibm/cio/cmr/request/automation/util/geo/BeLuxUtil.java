@@ -386,7 +386,7 @@ public class BeLuxUtil extends AutomationUtil {
               if (duplicate) {
                 LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
                 duplicateDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");
-                resultCodes.add("D");
+                resultCodes.add("R");
               }
             }
 
