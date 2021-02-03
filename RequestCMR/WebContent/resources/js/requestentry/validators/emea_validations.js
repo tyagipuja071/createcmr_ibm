@@ -5779,7 +5779,7 @@ function streetValueFormatter(value, rowIndex) {
   }
   return value;
 }
-// Defect 1459920: Enterprise number, Affiliate number :Mukesh
+
 function setAffiliateEnterpriseRequired() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubType = FormManager.getActualValue('custSubGrp');
@@ -5817,8 +5817,18 @@ function setAffiliateEnterpriseRequired() {
           FormManager.enable('inacCd');
         }
       }
+    }
+  }
+}
 
-    } else if ('C' == FormManager.getActualValue('reqType') && checkImportIndc == 'Y') {
+// IBM Tab Fields Behaviour In CreateByModel
+function ibmFieldsBehaviourInCreateByModelIT() {
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var custSubType = FormManager.getActualValue('custSubGrp');
+  var reqId = FormManager.getActualValue('reqId');
+  if (FormManager.getActualValue('reqType') == 'C') {
+    var checkImportIndc = getImportedIndcForItaly();
+    if ('C' == FormManager.getActualValue('reqType') && checkImportIndc == 'Y') {
       if (custSubType == 'INTER' || custSubType == 'INTSM' || custSubType == 'INTVA' || custSubType == 'CROIN' || custSubType == 'BUSPR' || custSubType == 'BUSSM' || custSubType == 'BUSVA'
           || custSubType == 'CROBP') {
         FormManager.readOnly('inacCd');
@@ -5833,6 +5843,13 @@ function setAffiliateEnterpriseRequired() {
         FormManager.readOnly('salesBusOffCd');
         FormManager.removeValidator('isuCd', Validators.REQUIRED);
         FormManager.removeValidator('clientTier', Validators.REQUIRED);
+        FormManager.removeValidator('salesBusOffCd', Validators.REQUIRED);
+        FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
+      } else if ((role == "REQUESTER")
+          && (custSubType == 'INTER' || custSubType == 'INTSM' || custSubType == 'INTVA' || custSubType == 'CROIN' || custSubType == 'BUSPR' || custSubType == 'BUSSM' || custSubType == 'BUSVA' || custSubType == 'CROBP')) {
+        FormManager.enable('collectionCd');
+        FormManager.readOnly('salesBusOffCd');
+        FormManager.clearValue('salesBusOffCd');
         FormManager.removeValidator('salesBusOffCd', Validators.REQUIRED);
         FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
       } else {
@@ -8192,6 +8209,7 @@ function addAfterTemplateLoadItaly(fromAddress, scenario, scenarioChanged) {
   addAfterTemplateLoadIT(fromAddress, scenario, scenarioChanged);
   collectionCDBehaviour();
   setAffiliateEnterpriseRequired();
+  ibmFieldsBehaviourInCreateByModelIT();
   addFieldValidationForRequestorItaly();
   disableProcpectCmrIT();
   autoSetSBOOnSRValueIT();
