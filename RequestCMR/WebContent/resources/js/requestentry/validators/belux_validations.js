@@ -1365,15 +1365,15 @@ function setAddressDetailsForView() {
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
 
   if (viewOnlyPage == 'true') {
-    $('label[for="custNm1_view"]').text('Customer Name:');
-    $('label[for="dept_view"]').text('Title:');
-    $('label[for="custNm3_view"]').text('First Name');
-    $('label[for="custNm4_view"]').text('Last Name');
+    $('label[for="custNm1_view"]').text('Customer Name 1:');
+    $('label[for="custNm2_view"]').text('Customer Name 2');
+    $('label[for="custNm3_view"]').text('Customer Name 3');
+    $('label[for="custNm4_view"]').text('Attention Person');
     $('label[for="landCntry_view"]').text('Country (Landed):');
-    $('label[for="addrTxt_view"]').text('Street:');
-    $('label[for="custNm2_view"]').text('Name Con' + '\'' + 't:');
-    $('label[for="addrTxt2_view"]').text('Street No.:');
-    $('label[for="poBox_view"]').text('PostBox:');
+    $('label[for="addrTxt_view"]').text('Street Address:');
+    $('label[for="poBox_view"]').text('PO Box:');
+    $('label[for="stateProv_view"]').text('State/Prov');
+    $('label[for="postCd_view"]').text('Postal Code:');
   }
 }
 

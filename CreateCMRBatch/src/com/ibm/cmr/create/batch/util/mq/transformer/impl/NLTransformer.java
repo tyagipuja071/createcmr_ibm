@@ -907,7 +907,7 @@ public class NLTransformer extends EMEATransformer {
     // CREATCMR-1042 2021-1-29
     legacyCust.setSbo(data.getEngineeringBo() == null ? "" : data.getEngineeringBo());
     legacyCust.setIbo(data.getEngineeringBo() == null ? "" : data.getEngineeringBo());
-
+    legacyCust.setTaxCd(data.getTaxCd1() == null ? "" : data.getTaxCd1());
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       // CREATCMR-1042 2021-1-29
       legacyCust.setCeBo("211");
@@ -930,7 +930,7 @@ public class NLTransformer extends EMEATransformer {
       legacyCust.setCustType("");
       // George CREATCMR-546
       legacyCust.setDeptCd(data.getIbmDeptCostCenter() == null ? "" : data.getIbmDeptCostCenter());
-      legacyCust.setTaxCd(data.getTaxCd1() == null ? "" : data.getTaxCd1());
+
       legacyCust.setLangCd("");
       // legacyCust.setLangCd(data.getCustPrefLang() == null ? "" :
       // data.getCustPrefLang());
@@ -953,6 +953,7 @@ public class NLTransformer extends EMEATransformer {
       legacyCust.setEnterpriseNo(data.getEnterprise() == null ? "" : data.getEnterprise());
       legacyCust.setRealCtyCd("788");
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+      legacyCust.setCeBo("211");
       for (Addr addr : cmrObjects.getAddresses()) {
         if ("ZS01".equals(addr.getId().getAddrType())) {
           if (!StringUtils.isEmpty(addr.getCustPhone())) {
