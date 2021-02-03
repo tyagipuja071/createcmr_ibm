@@ -50,7 +50,7 @@ public class NLTransformer extends EMEATransformer {
 
   private static final Logger LOG = Logger.getLogger(NLTransformer.class);
 
-  private static final String[] ADDRESS_ORDER = { "ZS01", "ZP01", "ZI01", "ZD01", "ZS02" };
+  private static final String[] ADDRESS_ORDER = { "ZS01", "ZP01", "ZI01", "ZD01", "ZS02", "ZP02" };
   protected boolean duplicateRecordFound = false;
   protected Map<String, String> dupCMRValues = new HashMap<String, String>();
   protected List<String> dupShippingSequences = null;
@@ -153,6 +153,8 @@ public class NLTransformer extends EMEATransformer {
   public String getAddressUse(Addr addr) {
     switch (addr.getId().getAddrType()) {
     case MQMsgConstants.ADDR_ZP01:
+      return MQMsgConstants.SOF_ADDRESS_USE_BILLING;
+    case MQMsgConstants.ADDR_ZP02:
       return MQMsgConstants.SOF_ADDRESS_USE_BILLING;
     case MQMsgConstants.ADDR_ZS01:
       return MQMsgConstants.SOF_ADDRESS_USE_INSTALLING;
