@@ -557,16 +557,11 @@ public class BELUXHandler extends BaseSOFHandler {
           isLocal = true;
           postCd = getPostCd(addrl6);
           city1 = getCity1(addrl6);
-          dept = getTitle(addrl3);
-          custNm3 = getFirstNm(addrl3);
-          custNm4 = getLastNm(addrl3);
           zs02Addr.setCmrPostalCode(postCd);
           zs02Addr.setCmrCity(city1);
           zs02Addr.setCmrName2(addrl2);
           zs02Addr.setCmrName2Plain(addrl2);
-          zs02Addr.setCmrDept(dept);
-          zs02Addr.setCmrName3(custNm3);
-          zs02Addr.setCmrName4(custNm4);
+          handleAddrL3(zs02Addr, addrl3);
           zs02Addr.setCmrStreetAddress(addrl4);
           zs02Addr.setCmrStreetAddressCont(addrl5);
         }
@@ -670,7 +665,7 @@ public class BELUXHandler extends BaseSOFHandler {
     } else if (matcher2.find()) {
       regExStart = matcher2.start();
       regExEnd = matcher2.end();
-      String postCd = input.substring(regExStart, regExStart + 6);
+      String postCd = input.substring(regExStart + 2, regExStart + 6);
       return postCd;
     }
     return null;
@@ -1228,23 +1223,12 @@ public class BELUXHandler extends BaseSOFHandler {
 
   @Override
   public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo) throws Exception {
-    if (currentRecord.getCmrStreetAddress() != null) {
-      String streetAddr = currentRecord.getCmrStreetAddress();
-      if (StringUtils.isBlank(currentRecord.getCmrStreetAddressCont())) {
-        String strAddrTxt = streetAddr.replaceAll("[0-9]", "");
-        String strNo = streetAddr.replaceAll("[^0-9]", "");
-        address.setAddrTxt(strAddrTxt);
-        address.setAddrTxt2(strNo);
-      } else {
-        address.setAddrTxt(streetAddr);
-        address.setAddrTxt2(currentRecord.getCmrStreetAddressCont());
-      }
-    }
+
     address.setCustNm1(currentRecord.getCmrName1Plain());
     address.setCustNm2(currentRecord.getCmrName2Plain());
     address.setCustNm3(currentRecord.getCmrName3());
     address.setCustNm4(currentRecord.getCmrName4());
-    address.setDept(currentRecord.getCmrDept());
+    // address.setDept(currentRecord.getCmrDept());
     address.setCity1(currentRecord.getCmrCity());
     address.setCustPhone(currentRecord.getCmrCustPhone());
     address.setTransportZone(currentRecord.getCmrTransportZone());
@@ -1638,6 +1622,20 @@ public class BELUXHandler extends BaseSOFHandler {
       update.setDataField(PageManager.getLabel(cmrCountry, "EconomicCd2", "-"));
       update.setNewData(service.getCodeAndDescription(newData.getEconomicCd(), "EconomicCd2", cmrCountry));
       update.setOldData(service.getCodeAndDescription(oldData.getEconomicCd(), "EconomicCd2", cmrCountry));
+      results.add(update);
+    }
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getModeOfPayment(), newData.getModeOfPayment())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "ModeOfPayment", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getModeOfPayment(), "ModeOfPayment", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getModeOfPayment(), "ModeOfPayment", cmrCountry));
+      results.add(update);
+    }
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getSoProjectCd(), newData.getIbmDeptCostCenter())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "IbmDeptCostCenter", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getIbmDeptCostCenter(), "IbmDeptCostCenter", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getSoProjectCd(), "IbmDeptCostCenter", cmrCountry));
       results.add(update);
     }
   }
