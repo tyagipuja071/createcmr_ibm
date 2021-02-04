@@ -4525,12 +4525,14 @@ function afterConfigForIT() {
     _ISUHandlerIT = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       setAffiliateEnterpriseRequired();
       autoSetSboOnPostalCode();
+      lockCollectionCode();
     });
   }
 
   if (_CTCHandlerIT == null) {
     _CTCHandlerIT = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
       autoSetSboOnPostalCode();
+      lockCollectionCode();
     });
   }
 
@@ -8032,14 +8034,21 @@ function addEmbargoCodeValidatorIT() {
  */
 function setCollCdOnSBOIT(salesBusOffCd) {
   var checkImportIndc = getImportedIndcForItaly();
+  var custSubType = FormManager.getActualValue('custSubGrp');
   if (FormManager.getActualValue('reqType') != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
   if (checkImportIndc == 'Y') {
     return;
   }
+
   sbo = FormManager.getActualValue('salesBusOffCd');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
+
+  if (salesBusOffCd == sbo && custSubType != undefined && custSubType != '' && custSubType == 'PRICU') {
+    return;
+  }
+
   var collectionCds = [];
   if (sbo != '') {
     var qParams = {
@@ -8914,6 +8923,34 @@ function getLandedCntryForItaly() {
   console.log('saving landed cntry as ' + _landedIT);
   return _landedIT;
 
+}
+
+function lockCollectionCode() {
+  var isuCd = FormManager.getActualValue('isuCd');
+  var clientTier = FormManager.getActualValue('clientTier');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var custSubType = FormManager.getActualValue('custSubGrp');
+  var checkImportIndc = getImportedIndcForItaly();
+  if (FormManager.getActualValue('reqType') != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  if (checkImportIndc == 'Y') {
+    return;
+  }
+  if (role != 'REQUESTER') {
+    return;
+  }
+  if (custSubType != undefined && custSubType != ''
+      && (custSubType == 'BUSPR' || custSubType == 'BUSSM' || custSubType == 'BUSVA' || custSubType == 'INTER' || custSubType == 'INTSM' || custSubType == 'INTVA')) {
+    return;
+  }
+
+  if (isuCd == '34' && clientTier == 'Q') {
+    FormManager.enable('collectionCd');
+  } else {
+    FormManager.setValue('collectionCd', '');
+    FormManager.readOnly('collectionCd');
+  }
 }
 
 dojo.addOnLoad(function() {
