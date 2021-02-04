@@ -1343,6 +1343,18 @@ public class BELUXHandler extends BaseSOFHandler {
         }
         entityManager.merge(addr);
       }
+      // update data_rdc table with SO_PRJ_CD field as Department Number field
+      String sql = ExternalizedQuery.getSql("SUMMARY.OLDDATA");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("REQ_ID", data.getId().getReqId());
+      List<DataRdc> records = query.getResults(DataRdc.class);
+      if (records != null && records.size() > 0) {
+        DataRdc rdc = records.get(0);
+        if ("624".equals(data.getCmrIssuingCntry())) {
+          rdc.setSoProjectCd(data.getIbmDeptCostCenter());
+        }
+        entityManager.merge(rdc);
+      }
       entityManager.flush();
 
     }
