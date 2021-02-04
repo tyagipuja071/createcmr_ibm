@@ -5835,7 +5835,20 @@ function ibmFieldsBehaviourInCreateByModelIT() {
         FormManager.readOnly('affiliate');
         FormManager.clearValue('inacCd');
         FormManager.clearValue('affiliate');
-      } else if (role == "REQUESTER" && !(custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'CRO3P')) {
+      }
+      if (role == "REQUESTER"
+          && (custSubType == 'INTER' || custSubType == 'INTSM' || custSubType == 'INTVA' || custSubType == 'CROIN' || custSubType == 'BUSPR' || custSubType == 'BUSSM' || custSubType == 'BUSVA' || custSubType == 'CROBP')) {
+        FormManager.enable('collectionCd');
+        FormManager.readOnly('salesBusOffCd');
+        FormManager.clearValue('salesBusOffCd');
+        FormManager.removeValidator('salesBusOffCd', Validators.REQUIRED);
+        FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
+      }
+      if (role == 'REQUESTER' && (custSubType == 'PRICU' || custSubType == 'CROPR' || custSubType == 'PRISM' || custSubType == 'PRIVA')) {
+        FormManager.clearValue('collectionCd');
+        FormManager.enable('collectionCd');
+      }
+      if (role == "REQUESTER" && !(custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'CRO3P')) {
         FormManager.readOnly('isuCd');
         FormManager.readOnly('inacCd');
         FormManager.readOnly('clientTier');
@@ -5843,13 +5856,6 @@ function ibmFieldsBehaviourInCreateByModelIT() {
         FormManager.readOnly('salesBusOffCd');
         FormManager.removeValidator('isuCd', Validators.REQUIRED);
         FormManager.removeValidator('clientTier', Validators.REQUIRED);
-        FormManager.removeValidator('salesBusOffCd', Validators.REQUIRED);
-        FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
-      } else if ((role == "REQUESTER")
-          && (custSubType == 'INTER' || custSubType == 'INTSM' || custSubType == 'INTVA' || custSubType == 'CROIN' || custSubType == 'BUSPR' || custSubType == 'BUSSM' || custSubType == 'BUSVA' || custSubType == 'CROBP')) {
-        FormManager.enable('collectionCd');
-        FormManager.readOnly('salesBusOffCd');
-        FormManager.clearValue('salesBusOffCd');
         FormManager.removeValidator('salesBusOffCd', Validators.REQUIRED);
         FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
       } else {
@@ -5962,19 +5968,22 @@ function collectionCDBehaviour() {
   console.log("---->> collectionCDBehaviour. <<----");
   var checkImportIndc = getImportedIndcForItaly();
   var reqType = FormManager.getActualValue('reqType');
-  var isuCd = FormManager.getActualValue('isuCd');
-  var ctc = FormManager.getActualValue('clientTier');
   var custSubType = FormManager.getActualValue('custSubGrp');
   var role = FormManager.getActualValue('userRole').toUpperCase();
   if (reqType == 'C') {
-    if (role != 'REQUESTER' && checkImportIndc == 'Y') {
-      if (custSubType == 'PRICU' || custSubType == 'CROPR' || custSubType == 'PRISM' || custSubType == 'PRIVA' || custSubType == 'INTER' || custSubType == 'CRINT' || custSubType == 'INTSM'
-          || custSubType == 'INTVA') {
+    if (checkImportIndc == 'Y') {
+      if (role == 'REQUESTER' && (custSubType == 'PRICU' || custSubType == 'CROPR' || custSubType == 'PRISM' || custSubType == 'PRIVA')) {
+        FormManager.clearValue('collectionCd');
+        FormManager.enable('collectionCd');
+      }
+      if (role != 'REQUESTER'
+          && (custSubType == 'PRICU' || custSubType == 'CROPR' || custSubType == 'PRISM' || custSubType == 'PRIVA' || custSubType == 'INTER' || custSubType == 'CRINT' || custSubType == 'INTSM' || custSubType == 'INTVA')) {
         FormManager.enable('collectionCd');
       } else {
         FormManager.readOnly('collectionCd');
       }
     }
+
     getOldValuesIT();
     if (checkImportIndc != 'Y') {
       if (custSubType == 'INTER' || custSubType == 'CRINT' || custSubType == 'INTSM' || custSubType == 'INTVA') {
@@ -8007,11 +8016,14 @@ function addEmbargoCodeValidatorIT() {
 }
 
 /**
- * Set Collection Code
+ * Set Collection Code on SBO
  */
-
 function setCollCdOnSBOIT(salesBusOffCd) {
+  var checkImportIndc = getImportedIndcForItaly();
   if (FormManager.getActualValue('reqType') != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  if (checkImportIndc == 'Y') {
     return;
   }
   sbo = FormManager.getActualValue('salesBusOffCd');
@@ -8023,7 +8035,7 @@ function setCollCdOnSBOIT(salesBusOffCd) {
       ISSUING_CNTRY : cntry,
       SALES_BO_CD : '%' + salesBusOffCd + '%'
     };
-    var results = cmr.query('GET.CCLIST.BYSBO', qParams);
+    var results = cmr.query('GET.CCVALUE.BYSBO', qParams);
     if (results != null) {
       for (var i = 0; i < results.length; i++) {
         collectionCds.push(results[i].ret1);
