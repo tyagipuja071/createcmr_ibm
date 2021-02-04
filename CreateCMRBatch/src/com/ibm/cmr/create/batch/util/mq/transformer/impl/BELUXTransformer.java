@@ -661,21 +661,20 @@ public class BELUXTransformer extends EMEATransformer {
     legacyAddr.setCity(addrData.getCity1() == null ? "" : addrData.getCity1());
     legacyAddr.setZipCode(addrData.getPostCd() == null ? "" : addrData.getPostCd());
     legacyAddr.setAddrLine6(line6);
-    legacyAddr.setStreet(addrData.getAddrTxt() == null ? "" : addrData.getAddrTxt());
-    legacyAddr.setStreetNo(addrData.getAddrTxt2() == null ? "" : addrData.getAddrTxt2());
+
     legacyAddr.setAddrPhone(phone);
     legacyAddr.setAddrLineT(addrLineT);
     legacyAddr.setDistrict(addrData.getDivn() == null ? "" : addrData.getDivn());
     legacyAddr.setContact(addrData.getContact() == null ? "" : addrData.getContact());
     legacyAddr.setAddrLineU("");
 
-    legacyAddr.setFirstName(addrData.getCustNm3() == null ? "" : addrData.getCustNm3());
-    legacyAddr.setLastName(addrData.getCustNm4() == null ? "" : addrData.getCustNm4());
-    legacyAddr.setTitle(addrData.getDept() == null ? "" : addrData.getDept());
-    legacyAddr.setName(addrData.getCustNm1() == null ? "" : addrData.getCustNm1());
-
-    if (!StringUtils.isEmpty(addrData.getPoBox()))
-      legacyAddr.setPoBox("PO BOX " + addrData.getPoBox());
+    legacyAddr.setFirstName("");
+    legacyAddr.setLastName("");
+    legacyAddr.setTitle("");
+    legacyAddr.setName("");
+    legacyAddr.setPoBox("");
+    legacyAddr.setStreet("");
+    legacyAddr.setStreetNo("");
   }
 
   @Override
