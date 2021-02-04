@@ -46,7 +46,7 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
     StringBuilder details = new StringBuilder();
 
     if (zs01 != null) {
-      AutomationResponse<SosResponse> response = getSosMatches(admin.getId().getReqId(), zs01);
+      AutomationResponse<SosResponse> response = getSosMatches(admin.getId().getReqId(), zs01, admin);
       if (response != null && response.isSuccess() && response.getRecord() != null) {
         admin.setCompVerifiedIndc("Y");
         validation.setSuccess(true);
@@ -71,7 +71,7 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
     return output;
   }
 
-  private AutomationResponse<SosResponse> getSosMatches(long reqId, Addr zs01) throws Exception {
+  private AutomationResponse<SosResponse> getSosMatches(long reqId, Addr zs01, Admin admin) throws Exception {
     AutomationServiceClient autoClient = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
         AutomationServiceClient.class);
     autoClient.setReadTimeout(1000 * 60 * 5);
@@ -80,9 +80,11 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
     // calling SOS-RPA Service
     log.debug("Calling SOS-RPA Service for Install - At (ZS01) address for Req_id : " + reqId);
     SosRequest requestInstallAt = new SosRequest();
-    requestInstallAt.setName(zs01.getCustNm1() + zs01.getCustNm2());
+    requestInstallAt.setName((StringUtils.isNotBlank(admin.getMainCustNm1()) ? admin.getMainCustNm1() : "")
+        + (StringUtils.isNotBlank(admin.getMainCustNm2()) ? admin.getMainCustNm2() : ""));
     requestInstallAt.setCity1(zs01.getCity1());
-    requestInstallAt.setAddrTxt(zs01.getAddrTxt() + zs01.getAddrTxt2());
+    requestInstallAt.setAddrTxt((StringUtils.isNotBlank(zs01.getAddrTxt()) ? zs01.getAddrTxt() : "")
+        + (StringUtils.isNotBlank(zs01.getAddrTxt2()) ? zs01.getAddrTxt2() : ""));
     requestInstallAt.setState(zs01.getStateProv());
 
     log.debug("Connecting to the SOS - RPA Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
