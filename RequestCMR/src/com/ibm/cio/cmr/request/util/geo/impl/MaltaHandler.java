@@ -749,6 +749,7 @@ public class MaltaHandler extends BaseSOFHandler {
   public void addSummaryUpdatedFields(RequestSummaryService service, String type, String cmrCountry, Data newData, DataRdc oldData,
       List<UpdatedDataModel> results) {
     UpdatedDataModel update = null;
+    super.addSummaryUpdatedFields(service, type, cmrCountry, newData, oldData, results);
     if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCustClass(), newData.getCustClass())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "CustClass", "-"));
@@ -772,15 +773,6 @@ public class MaltaHandler extends BaseSOFHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getCustPrefLang(), "CustLang", cmrCountry));
       results.add(update);
     }
-
-    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getSalesBusOffCd(), newData.getSalesBusOffCd())) {
-      update = new UpdatedDataModel();
-      update.setDataField(PageManager.getLabel(cmrCountry, "SalesBusOff", "-"));
-      update.setNewData(service.getCodeAndDescription(newData.getSalesBusOffCd(), "SalesBusOff", cmrCountry));
-      update.setOldData(service.getCodeAndDescription(oldData.getSalesBusOffCd(), "SalesBusOff", cmrCountry));
-      results.add(update);
-    }
-
   }
 
   @Override
