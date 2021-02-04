@@ -156,6 +156,9 @@ public class BELUXHandler extends BaseSOFHandler {
               if (!seqIsIncluded(cmrAddr, source.getItems()) && isLegalDb2Addr(cmrAddr)) {
                 FindCMRRecordModel newRecord = new FindCMRRecordModel();
                 PropertyUtils.copyProperties(newRecord, mainRecord);
+                newRecord.setCmrName2(null);
+                newRecord.setCmrName3(null);
+                newRecord.setCmrName4(null);
                 mapCmrtAddr2FindCMRRec(newRecord, cmrAddr);
                 newRecord.setCmrAddrTypeCode(getSingleAddrType(cmrAddr));
                 converted.add(newRecord);
@@ -505,6 +508,7 @@ public class BELUXHandler extends BaseSOFHandler {
     String addrTxt2 = null;
     String poBox = null;
     boolean isLocal = true;
+    boolean luxIndc = false;
 
     zs02Addr.setCmrAddrSeq(addrSeq);
     zs02Addr.setCmrNum(cmrNo);
@@ -514,6 +518,7 @@ public class BELUXHandler extends BaseSOFHandler {
     if ("".equals(addrl3) && !"".equals(addrl4) && !"".equals(addrl5) && !"".equals(addrl6)) {
 
       if (hasPostCd(addrl5)) {
+        luxIndc = isLux(addrl5);
         postCd = getPostCd(addrl5);
         city1 = getCity1(addrl5);
         zs02Addr.setCmrName2(addrl2);
@@ -530,6 +535,8 @@ public class BELUXHandler extends BaseSOFHandler {
     } else if (!"".equals(addrl3) && "".equals(addrl4) && "".equals(addrl5) && "".equals(addrl6)) {
 
       if (hasPostCd(addrl3)) {
+        isLocal = true;
+        luxIndc = isLux(addrl3);
         postCd = getPostCd(addrl3);
         city1 = getCity1(addrl3);
         zs02Addr.setCmrPostalCode(postCd);
@@ -539,6 +546,8 @@ public class BELUXHandler extends BaseSOFHandler {
     } else if (!"".equals(addrl3) && !"".equals(addrl4) && "".equals(addrl5) && "".equals(addrl6)) {
 
       if (hasPostCd(addrl4)) {
+        isLocal = true;
+        luxIndc = isLux(addrl4);
         postCd = getPostCd(addrl4);
         city1 = getCity1(addrl4);
         zs02Addr.setCmrPostalCode(postCd);
@@ -555,6 +564,7 @@ public class BELUXHandler extends BaseSOFHandler {
       if (!hasPoBox(addrl2) && !hasPoBox(addrl3) && !hasPoBox(addrl4) && !hasPoBox(addrl5) && !hasPoBox(addrl6)) {
         if (hasPostCd(addrl6)) {
           isLocal = true;
+          luxIndc = isLux(addrl6);
           postCd = getPostCd(addrl6);
           city1 = getCity1(addrl6);
           zs02Addr.setCmrPostalCode(postCd);
@@ -571,6 +581,7 @@ public class BELUXHandler extends BaseSOFHandler {
       if (!hasPoBox(addrl2) && !hasPoBox(addrl3) && !hasPoBox(addrl4) && !hasPoBox(addrl5)) {
         if (hasPostCd(addrl5)) {
           isLocal = true;
+          luxIndc = isLux(addrl5);
           postCd = getPostCd(addrl5);
           city1 = getCity1(addrl5);
           zs02Addr.setCmrPostalCode(postCd);
@@ -583,7 +594,7 @@ public class BELUXHandler extends BaseSOFHandler {
       }
     }
     if (isLocal) {
-      if (postCd != null && postCd.startsWith("L")) {
+      if (postCd != null && luxIndc) {
         zs02Addr.setCmrCountryLanded("LU");
       } else {
         zs02Addr.setCmrCountryLanded("BE");
@@ -639,6 +650,24 @@ public class BELUXHandler extends BaseSOFHandler {
     Matcher matcher2 = pattern2.matcher(input);
     if (matcher1.find()) {
       return true;
+    } else if (matcher2.find()) {
+      return true;
+    }
+    return false;
+  }
+
+  private boolean isLux(String input) {
+    if (input == null) {
+      return false;
+    }
+    String regEx1 = "^[0-9]{4}[ ]";
+    String regEx2 = "^[L][- ][0-9]{4}[ ]";
+    Pattern pattern1 = Pattern.compile(regEx1);
+    Pattern pattern2 = Pattern.compile(regEx2);
+    Matcher matcher1 = pattern1.matcher(input);
+    Matcher matcher2 = pattern2.matcher(input);
+    if (matcher1.find()) {
+      return false;
     } else if (matcher2.find()) {
       return true;
     }

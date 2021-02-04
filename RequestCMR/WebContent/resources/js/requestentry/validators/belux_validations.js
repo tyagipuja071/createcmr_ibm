@@ -910,14 +910,18 @@ function setPreferredLanguage() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
+  if (FormManager.getActualValue('countryUse') == '') {
+    window.setTimeout('setPreferredLanguage()', 500);
+  } else {
+    FormManager.enable('custPrefLang');
+    var cntry = FormManager.getActualValue('cmrIssuingCntry');
+    var geoCd = FormManager.getActualValue('countryUse').substring(3, 5);
 
-  FormManager.enable('custPrefLang');
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var geoCd = FormManager.getActualValue('countryUse').substring(3, 5);
-
-  if (cntry == '624' && geoCd == 'LU') {
-    FormManager.limitDropdownValues(FormManager.getField('custPrefLang'), [ 'F', 'V' ]);
+    if (cntry == '624' && geoCd == 'LU') {
+      FormManager.limitDropdownValues(FormManager.getField('custPrefLang'), [ 'F', 'V' ]);
+    }
   }
+
 }
 
 function addAbbrevLocnLengthValidator() {
