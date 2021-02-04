@@ -3616,7 +3616,7 @@ public class CyprusHandler extends BaseSOFHandler {
 
             if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
               if (!StringUtils.isBlank(enterpriseNo)) {
-                if (!StringUtils.isNumeric(enterpriseNo)) {
+                if (!StringUtils.isNumeric(enterpriseNo) && !enterpriseNo.equals("@@@@@@")) {
                   LOG.trace("Enterprise number should have numeric values only.");
                   error.addError(row.getRowNum(), "Enterprise No.", "Enterprise number should have numeric values only. ");
                   validations.add(error);
