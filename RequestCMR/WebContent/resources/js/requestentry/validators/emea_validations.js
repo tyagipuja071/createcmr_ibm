@@ -8274,14 +8274,17 @@ function ibmFieldsBehaviourInCreateByScratchIT() {
     if (role == 'REQUESTER') {
       FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SBO' ], 'MAIN_IBM_TAB');
     }
-    if (custSubGrp == 'PRICU' || custSubGrp == 'CROPR' || custSubGrp == 'PRISM' || custSubGrp == 'PRIVA') {
+    if (custSubGrp == 'BUSPR' || custSubGrp == 'BUSSM' || custSubGrp == 'BUSVA' || custSubGrp == 'CROBP' || custSubGrp == 'PRICU' || custSubGrp == 'CROPR' || custSubGrp == 'PRISM'
+        || custSubGrp == 'PRIVA') {
       FormManager.readOnly('salesBusOffCd');
       FormManager.removeValidator('salesBusOffCd', Validators.REQUIRED);
     } else {
       FormManager.enable('salesBusOffCd');
     }
+    FormManager.removeValidator('collectionCd', Validators.REQUIRED);
   }
 }
+
 function disableProcpectCmrIT() {
   if (FormManager.getActualValue('reqType') != 'C') {
     return;
