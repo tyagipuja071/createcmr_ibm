@@ -4525,12 +4525,14 @@ function afterConfigForIT() {
     _ISUHandlerIT = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       setAffiliateEnterpriseRequired();
       autoSetSboOnPostalCode();
+      ibmFieldsBehaviourInCreateByScratchIT();
     });
   }
 
   if (_CTCHandlerIT == null) {
     _CTCHandlerIT = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
       autoSetSboOnPostalCode();
+      ibmFieldsBehaviourInCreateByScratchIT();
     });
   }
 
@@ -8256,7 +8258,10 @@ function ibmFieldsBehaviourInCreateByScratchIT() {
   var requestType = FormManager.getActualValue('reqType');
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var scenario = FormManager.getActualValue('custGrp');
+  var isuCd = FormManager.getActualValue('isuCd');
+  var clientTier = FormManager.getActualValue('clientTier');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var countryUse = FormManager.getActualValue('countryUse');
   if (requestType != 'C') {
     return;
   }
@@ -8278,8 +8283,24 @@ function ibmFieldsBehaviourInCreateByScratchIT() {
         || custSubGrp == 'PRIVA') {
       FormManager.readOnly('salesBusOffCd');
       FormManager.removeValidator('salesBusOffCd', Validators.REQUIRED);
+    }
+
+    if (isuCd == '34' && clientTier == 'Q') {
+      FormManager.removeValidator('affiliate', Validators.REQUIRED);
+      FormManager.removeValidator('enterprise', Validators.REQUIRED);
     } else {
-      FormManager.enable('salesBusOffCd');
+      FormManager.addValidator('affiliate', Validators.REQUIRED, [ 'Affiliate' ], 'MAIN_IBM_TAB');
+      FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise' ], 'MAIN_IBM_TAB');
+    }
+
+    if (countryUse == '758SM' || countryUse == '758VA') {
+      if (isuCd == '34' && clientTier == 'Q') {
+        FormManager.readOnly('salesBusOffCd');
+        FormManager.readOnly('repTeamMemberNo');
+      } else {
+        FormManager.enable('salesBusOffCd');
+        FormManager.enable('repTeamMemberNo');
+      }
     }
     FormManager.removeValidator('collectionCd', Validators.REQUIRED);
   }
