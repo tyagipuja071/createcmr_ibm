@@ -3700,6 +3700,11 @@ function setEnterprise(scenarioChanged) {
     isuCtcValueChanged = (_oldIsuCtc != isuCtc);
   }
   
+  if(isuCtc217Scen.has(curScenario)) {
+    isuCtcValueChanged = false;
+    _subindustryChanged = false;
+  }
+  
   if (!(scenarioChanged || isuCtcValueChanged || _subindustryChanged)) {
     return;
   }
