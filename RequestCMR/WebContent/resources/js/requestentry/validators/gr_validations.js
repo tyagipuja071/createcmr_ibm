@@ -3624,9 +3624,16 @@ function setEnterprise(value) {
   var isicCdValue = FormManager.getActualValue('isicCd');
   var isicUnderB = new Set([ '7230', '7240', '7290', '7210', '7221', '7229' ]);
   var curIsuCtc = isu + ctc;
+  var isuCtc217Scen = new Set([ 'BUSPR', 'INTER', 'XBP', 'XINTR']);
+  var curScenario = FormManager.getActualValue('custSubGrp');
+
   
   if (cmr.currentTab == 'IBM_REQ_TAB') {
     valueChanged = (_oldIsuCtc != curIsuCtc) || (_oldSalesRep != repTeam);
+  }
+  
+  if(isuCtc217Scen.has(curScenario)) {
+    valueChanged = false;
   }
 
   if (_subindustryChanged || valueChanged || _isScenarioChanged) {
@@ -3638,8 +3645,6 @@ function setEnterprise(value) {
 
       var subindustry = FormManager.getActualValue('subIndustryCd');
       var isicBasedChange = /^(A|B|C|E|G|J|M|P|T|X)/.test(subindustry);
-      var isuCtc217Scen = new Set([ 'BUSPR', 'INTER', 'XBP', 'XINTR']);
-      var curScenario = FormManager.getActualValue('custSubGrp');
       var is34ZManualSelect = (valueChanged && isu == '34' && ctc == 'Z');
       var is217ScenarioSelect = (isuCtc217Scen.has(curScenario) && _isScenarioChanged && !_subindustryChanged && !valueChanged && isu == '21' && ctc == '7');
 

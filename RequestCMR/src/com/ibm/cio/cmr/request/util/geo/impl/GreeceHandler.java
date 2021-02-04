@@ -3795,7 +3795,7 @@ public class GreeceHandler extends BaseSOFHandler {
 
             if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
               if (!StringUtils.isBlank(dataEnterprise)) {
-                if (!StringUtils.isNumeric(dataEnterprise)) {
+                if (!StringUtils.isNumeric(dataEnterprise) && !dataEnterprise.equals("@@@@@@")) {
                   LOG.trace("Enterprise number should have numeric values only.");
                   error.addError(row.getRowNum(), "Enterprise No.", "Enterprise number should have numeric values only. ");
                   validations.add(error);
