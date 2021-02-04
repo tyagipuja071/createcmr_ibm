@@ -59,7 +59,7 @@ public class BeLuxUtil extends AutomationUtil {
 
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
       CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO, CmrConstants.RDC_SECONDARY_SOLD_TO);
-  private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Name Con't", "Phone #");
+  private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Attention Person", "Phone #");
 
   @Override
   public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
@@ -342,15 +342,16 @@ public class BeLuxUtil extends AutomationUtil {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
     StringBuilder duplicateDetails = new StringBuilder();
-
+    StringBuilder nonRelAddrFdsDetails = new StringBuilder();
     List<Addr> addresses = null;
+    int ignoredAddr = 0;
     StringBuilder checkDetails = new StringBuilder();
     Set<String> resultCodes = new HashSet<String>();// R - review
     for (String addrType : RELEVANT_ADDRESSES) {
       addresses = requestData.getAddresses(addrType);
       if (changes.isAddressChanged(addrType)) {
         for (Addr addr : addresses) {
-          if (isRelevantAddressFieldUpdated(changes, addr)) {
+          if (isRelevantAddressFieldUpdated(changes, addr, nonRelAddrFdsDetails)) {
 
             if ((addrType.equalsIgnoreCase(CmrConstants.RDC_SOLD_TO) && "Y".equals(addr.getImportInd()))
                 || addrType.equalsIgnoreCase(CmrConstants.RDC_BILL_TO) || addrType.equalsIgnoreCase(CmrConstants.RDC_SECONDARY_SOLD_TO)) {
@@ -390,6 +391,9 @@ public class BeLuxUtil extends AutomationUtil {
               }
             }
 
+            if (addrType.equalsIgnoreCase(CmrConstants.RDC_SHIP_TO) && "Y".equals(addr.getImportInd())) {
+              ignoredAddr++;
+            }
           }
         }
       }
@@ -403,15 +407,20 @@ public class BeLuxUtil extends AutomationUtil {
       validation.setSuccess(true);
       validation.setMessage("Successful");
     }
+
+    if (ignoredAddr > 0) {
+      checkDetails.append("Updates to imported Address Ship-To(ZD01) ignored. ");
+    }
     String details = (output.getDetails() != null && output.getDetails().length() > 0) ? output.getDetails() : "";
     details += duplicateDetails.length() > 0 ? duplicateDetails.toString() : "";
     details += checkDetails.length() > 0 ? "\n" + checkDetails.toString() : "";
+    details += nonRelAddrFdsDetails.length() > 0 ? "Following updates ignored - \n" + nonRelAddrFdsDetails.toString() : "";
     output.setDetails(details);
     output.setProcessOutput(validation);
     return true;
   }
 
-  private boolean isRelevantAddressFieldUpdated(RequestChangeContainer changes, Addr addr) {
+  private boolean isRelevantAddressFieldUpdated(RequestChangeContainer changes, Addr addr, StringBuilder details) {
     List<UpdatedNameAddrModel> addrChanges = changes.getAddressChanges(addr.getId().getAddrType(), addr.getId().getAddrSeq());
     if (addrChanges == null) {
       return false;
@@ -419,6 +428,8 @@ public class BeLuxUtil extends AutomationUtil {
     for (UpdatedNameAddrModel change : addrChanges) {
       if (!NON_RELEVANT_ADDRESS_FIELDS.contains(change.getDataField())) {
         return true;
+      } else {
+        details.append(change.getDataField() + " of address " + addr.getId().getAddrType() + " \n");
       }
     }
     return false;
