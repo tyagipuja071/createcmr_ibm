@@ -11,6 +11,7 @@ var _oldOrdBlk = null;
 var _importedIndc = null;
 var _postalCodeHandler = null;
 var _ISICHandler = null;
+var _isicCdHandler = null;
 
 function afterConfigPT() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
@@ -556,7 +557,7 @@ function addHandlersForPTES() {
   if (_CTCHandler == null) {
     _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
       setSalesRepValues(value);
-      setEnterpriseValues(value);
+      setEnterpriseValues(false);
     });
   }
 
@@ -622,7 +623,7 @@ function setClientTierValues(value) {
     } else if (value == '21' || value == '60') {
       tierValues = [ '7' ];
     } else if (value == '34') {
-      tierValues = [ 'V', '6', 'A', 'Q' ];
+      tierValues = [ 'V', '6', 'A', 'Q', 'Z' ];
     }
   } else if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.SPAIN) {
     if (value == '34') {
@@ -638,7 +639,7 @@ function setClientTierValues(value) {
     if (tierValues.length == 1) {
       FormManager.setValue('clientTier', tierValues[0]);
       setSalesRepValues();
-      setEnterpriseValues();
+      setEnterpriseValues(false);
     }
   } else {
     FormManager.resetDropdownValues(FormManager.getField('clientTier'));
@@ -682,7 +683,24 @@ function setSalesRepValues(clientTier) {
   }
 }
 
-function setEnterpriseValues(clientTier) {
+function checkScenarioChanged(fromAddress, scenario, scenarioChanged) {
+  setEnterpriseValues(scenarioChanged)
+}
+
+var _subindustryChanged = false;
+function setEnterpriseBasedOnSubIndustry() {
+  if (_isicCdHandler == null && FormManager.getField('isicCd')) {
+    _isicCdHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
+      if (cmr.currentTab == "CUST_REQ_TAB") {
+        _subindustryChanged = true;
+        setEnterpriseValues(false);
+      }
+    });
+  }
+}
+
+var _oldIsuCtc = '';
+function setEnterpriseValues(scenarioChanged) {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
@@ -694,7 +712,7 @@ function setEnterpriseValues(clientTier) {
   var custGroup = FormManager.getActualValue('custGrp');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var isuCd = FormManager.getActualValue('isuCd');
-  clientTier = FormManager.getActualValue('clientTier');
+  var clientTier = FormManager.getActualValue('clientTier');
 
   // For Spain, domestic with 32B, 32S, 32T & 217 ISUs, set enterprise based on
   // LocNo
@@ -705,6 +723,18 @@ function setEnterpriseValues(clientTier) {
       setSBOAndEBO();
       return;
     }
+  }
+
+  var isuCtcValueChanged = false;
+  var isuCtc217Scen = new Set([ 'BUSPR', 'INTER', 'CRBUS', 'CRINT' ]);
+  var is217ScenarioSelect = (isuCtc217Scen.has(custSubGrp) && scenarioChanged && isuCtc == '217');
+
+  if (cmr.currentTab == 'IBM_REQ_TAB') {
+    isuCtcValueChanged = (_oldIsuCtc != isuCtc);
+  }
+
+  if (!(scenarioChanged || isuCtcValueChanged || _subindustryChanged)) {
+    return;
   }
 
   var enterprises = [];
@@ -720,13 +750,29 @@ function setEnterpriseValues(clientTier) {
       for (var i = 0; i < results.length; i++) {
         enterprises.push(results[i].ret1);
       }
+
+      if (cntry == SysLoc.PORTUGAL) {
+        var isicUnderB = new Set([ '7230', '7240', '7290', '7210', '7221', '7229' ]);
+        var isicCdValue = FormManager.getActualValue('isicCd');
+        if (isuCtc == '34Q' && isicUnderB.has(isicCdValue)) {
+          enterprises = [ '990301' ];
+        }
+      }
+
+      if (is217ScenarioSelect) {
+        enterprises = [ '985999' ];
+      }
+
       if (enterprises != null) {
-        FormManager.limitDropdownValues(FormManager.getField('enterprise'), enterprises);
         if (enterprises.length == 1) {
           FormManager.setValue('enterprise', enterprises[0]);
+        } else {
+          FormManager.setValue('enterprise', '');
         }
       }
     }
+    _oldIsuCtc = isuCtc;
+    _subindustryChanged = false;
   }
 }
 
@@ -2634,5 +2680,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addAbbrevLocationValidatorPT, [ SysLoc.PORTUGAL ], GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(addEmbargoCodeValidatorPT, [ SysLoc.PORTUGAL ], null, true);
   GEOHandler.registerValidator(addTypeOfCustomerValidatorPT, [ SysLoc.PORTUGAL ], null, true);
-
+  GEOHandler.addAfterTemplateLoad(checkScenarioChanged, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
+  GEOHandler.addAfterConfig(setEnterpriseBasedOnSubIndustry, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
 });
