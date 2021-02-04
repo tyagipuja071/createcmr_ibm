@@ -619,7 +619,7 @@ public class METransformer extends EMEATransformer {
     line5 = (addrData.getPostCd() == null ? "" : addrData.getPostCd()) + " " + (addrData.getCity1() == null ? "" : addrData.getCity1());
 
     // if (!StringUtils.isBlank(addrData.getPoBox())) {
-      legacyAddr.setPoBox(addrData.getPoBox());
+    legacyAddr.setPoBox(addrData.getPoBox());
     // }
 
     if (SystemLocation.JORDAN.equals(cmrData.getCmrIssuingCntry())) {
@@ -872,7 +872,7 @@ public class METransformer extends EMEATransformer {
       LOG.debug("that is ME BP CMR");
     }
 
-    if ("Y".equals(data.getDupCmrIndc()) || "677, 680, 805, 849, 620, 767, 823, 772, 762, 768, 832".indexOf(data.getCmrIssuingCntry()) > -1) {
+    if ("Y".equals(data.getDupCmrIndc()) || "677, 680, 805, 849, 620, 767, 823, 772, 762, 768, 832,752".indexOf(data.getCmrIssuingCntry()) > -1) {
       generateCMRNoObj.setLoc2("675");
     }
   }
@@ -1184,7 +1184,7 @@ public class METransformer extends EMEATransformer {
       } else {
         legacyCust.setEnterpriseNo("");
       }
-      
+
       if (SystemLocation.ABU_DHABI.equals(data.getCmrIssuingCntry()) && !StringUtils.isBlank(data.getBpAcctTyp())) {
         legacyCust.setCustType(data.getBpAcctTyp());
       }
