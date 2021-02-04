@@ -677,7 +677,8 @@ public class NLTransformer extends EMEATransformer {
     legacyAddr.setCity(addrData.getCity1() == null ? "" : addrData.getCity1());
     legacyAddr.setZipCode(addrData.getPostCd() == null ? "" : addrData.getPostCd());
     legacyAddr.setAddrLine6(line6);
-    legacyAddr.setStreet(addrData.getAddrTxt() == null ? "" : addrData.getAddrTxt());
+    // legacyAddr.setStreet(addrData.getAddrTxt() == null ? "" :
+    // addrData.getAddrTxt());
     legacyAddr.setStreetNo(addrData.getAddrTxt2() == null ? "" : addrData.getAddrTxt2());
     legacyAddr.setAddrPhone(phone);
     legacyAddr.setAddrLineT(addrLineT);
@@ -685,10 +686,11 @@ public class NLTransformer extends EMEATransformer {
     legacyAddr.setContact(addrData.getContact() == null ? "" : addrData.getContact());
     legacyAddr.setAddrLineU("");
 
-    legacyAddr.setFirstName(addrData.getCustNm3() == null ? "" : addrData.getCustNm3());
-    legacyAddr.setLastName(addrData.getCustNm4() == null ? "" : addrData.getCustNm4());
+    legacyAddr.setFirstName("");
+    legacyAddr.setLastName("");
     legacyAddr.setTitle(addrData.getDept() == null ? "" : addrData.getDept());
-    legacyAddr.setName(addrData.getCustNm1() == null ? "" : addrData.getCustNm1());
+    legacyAddr.setName("");
+    legacyAddr.setStreet("");
     if (!StringUtils.isEmpty(addrData.getPoBox()))
       legacyAddr.setPoBox("PO BOX " + addrData.getPoBox());
   }
