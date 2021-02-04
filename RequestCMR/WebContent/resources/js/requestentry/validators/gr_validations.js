@@ -3636,6 +3636,7 @@ function setEnterprise(value) {
   
   if(isuCtc217Scen.has(curScenario)) {
     valueChanged = false;
+    _subindustryChanged = false;
   }
 
   if (_subindustryChanged || valueChanged || _isScenarioChanged) {
