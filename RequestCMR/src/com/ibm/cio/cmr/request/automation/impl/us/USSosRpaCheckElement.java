@@ -50,14 +50,14 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
       if (response != null && response.isSuccess() && response.getRecord() != null) {
         admin.setCompVerifiedIndc("Y");
         validation.setSuccess(true);
-        validation.setMessage("Execution Done.");
+        validation.setMessage("Successful Execution");
         log.debug(response.getMessage());
         details.append("Record found in SOS.");
         details.append("\nCompany Id = " + (StringUtils.isBlank(response.getRecord().getCompanyId()) ? "" : response.getRecord().getCompanyId()));
         details.append("\nCustomer Name = " + (StringUtils.isBlank(response.getRecord().getLegalName()) ? "" : response.getRecord().getLegalName()));
         details.append("\nAddress = " + (StringUtils.isBlank(response.getRecord().getAddress1()) ? "" : response.getRecord().getAddress1()));
         details.append("\nState = " + (StringUtils.isBlank(response.getRecord().getState()) ? "" : response.getRecord().getState()));
-        details.append("\nZip = " + (StringUtils.isBlank(response.getRecord().getLegalName()) ? "" : response.getRecord().getLegalName()));
+        details.append("\nZip = " + (StringUtils.isBlank(response.getRecord().getZip()) ? "" : response.getRecord().getZip()));
         output.setDetails(details.toString());
       } else {
         validation.setSuccess(true);
