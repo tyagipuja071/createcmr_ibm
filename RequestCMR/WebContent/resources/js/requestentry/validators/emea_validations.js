@@ -8201,7 +8201,7 @@ function addAfterConfigItaly() {
   typeOfCustomer();
   enableDisableTaxCodeCollectionCdIT();
   disableCompanyLevelFieldsIT();
-  addFieldValidationForRequestorItaly();
+  ibmFieldsBehaviourInCreateByScratchIT();
   disableProcpectCmrIT();
 
 }
@@ -8217,12 +8217,11 @@ function addAfterTemplateLoadItaly(fromAddress, scenario, scenarioChanged) {
   typeOfCustomer();
   setSpecialTaxCodeOnScenarioIT();
   enableDisableTaxCodeCollectionCdIT();
-  setCollCdOnSBOIT();
   addAfterTemplateLoadIT(fromAddress, scenario, scenarioChanged);
   collectionCDBehaviour();
   setAffiliateEnterpriseRequired();
   ibmFieldsBehaviourInCreateByModelIT();
-  addFieldValidationForRequestorItaly();
+  ibmFieldsBehaviourInCreateByScratchIT();
   disableProcpectCmrIT();
   autoSetSBOOnSRValueIT();
 }
@@ -8240,11 +8239,12 @@ function addAddrFunctionItaly(cntry, addressMode, saving, finalSave) {
   setPostCdItalyVA(cntry, addressMode, saving, finalSave);
 
 }
-// CMR-1524 ITALY - Ident Client for CBs
-function addFieldValidationForRequestorItaly() {
+
+function ibmFieldsBehaviourInCreateByScratchIT() {
   var requestType = FormManager.getActualValue('reqType');
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var scenario = FormManager.getActualValue('custGrp');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (requestType != 'C') {
     return;
   }
@@ -8255,6 +8255,18 @@ function addFieldValidationForRequestorItaly() {
       FormManager.addValidator('identClient', Validators.REQUIRED, [ 'Ident Client' ], 'MAIN_CUST_TAB');
     } else {
       FormManager.resetValidations('identClient');
+    }
+  }
+  var checkImportIndc = getImportedIndcForItaly();
+  if (checkImportIndc != 'Y') {
+    if (role == 'REQUESTER') {
+      FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SBO' ], 'MAIN_IBM_TAB');
+    }
+    if (custSubGrp == 'PRICU' || custSubGrp == 'CROPR' || custSubGrp == 'PRISM' || custSubGrp == 'PRIVA') {
+      FormManager.readOnly('salesBusOffCd');
+      FormManager.removeValidator('salesBusOffCd', Validators.REQUIRED);
+    } else {
+      FormManager.enable('salesBusOffCd');
     }
   }
 }
