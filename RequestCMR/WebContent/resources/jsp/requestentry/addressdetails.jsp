@@ -1211,15 +1211,6 @@
   </cmr:view>
   
     <cmr:view forGEO="BELUX" >
-    <cmr:row>
-      <cmr:column span="1">
-        <cmr:label fieldId="transportZone_view">
-          <span class="lbl-addrUpdateDt">${ui.transportZone}</span>:</cmr:label>
-      </cmr:column>
-      <cmr:column span="2">
-        <div id="transportZone_view">-</div>
-      </cmr:column>
-    </cmr:row>
   </cmr:view>
 
 

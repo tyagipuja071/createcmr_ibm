@@ -152,16 +152,6 @@
 
   <cmr:column span="2">
     <p>
-      <cmr:label fieldId="transportZone">
-        <cmr:fieldLabel fieldId="TransportZone" />:
-             <cmr:delta text="-" id="delta-transportZone" code="L" />
-        <cmr:info text="${ui.info.addrTransportZone}" />
-      </cmr:label>
-      <cmr:field fieldId="TransportZone" id="transportZone" path="transportZone" />
-    </p>
-  </cmr:column>
-  <cmr:column span="2">
-    <p>
       <cmr:label fieldId="sapNo" cssClass="cmr-inline">
         <cmr:fieldLabel fieldId="SAPNumber" />:</cmr:label>
       <cmr:delta text="-" id="delta-sapNo" />
