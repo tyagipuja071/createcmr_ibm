@@ -634,11 +634,13 @@ public class FranceUtil extends AutomationUtil {
   @Override
   public void filterDuplicateCMRMatches(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
       MatchingResponse<DuplicateCMRCheckResponse> response) {
-    String[] scenariosToBeChecked = { "COMME", "CBMME", "GOVRN", "CBVRN", "BPIEU", "CBIEU" };
+    String[] scenariosToBeChecked = { "COMME", "CBMME", "GOVRN", "CBVRN", "BPIEU", "CBIEU", "CBIEM", "XBLUM" };
     String scenario = requestData.getData().getCustSubGrp();
     String[] kuklaComme = { "11" };
     String[] kuklaGovrn = { "13", "14", "17" };
     String[] kuklaBuspr = { "42", "43", "45", "46", "47", "48" };
+    String[] kuklaCBIEM = { "71" };
+    String[] kuklaXBLUM = { "60" };
 
     if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
       List<DuplicateCMRCheckResponse> matches = response.getMatches();
@@ -651,6 +653,10 @@ public class FranceUtil extends AutomationUtil {
           } else if (Arrays.asList(kuklaGovrn).contains(kukla) && ("GOVRN".equals(scenario) || "CBVRN".equals(scenario))) {
             filteredMatches.add(match);
           } else if (Arrays.asList(kuklaBuspr).contains(kukla) && ("BPIEU".equals(scenario) || "CBIEU".equals(scenario))) {
+            filteredMatches.add(match);
+          } else if (Arrays.asList(kuklaCBIEM).contains(kukla) && ("CBIEM".equals(scenario))) {
+            filteredMatches.add(match);
+          } else if (Arrays.asList(kuklaXBLUM).contains(kukla) && ("XBLUM".equals(scenario))) {
             filteredMatches.add(match);
           }
         }
