@@ -3168,7 +3168,7 @@ function setClassificationCode() {
           FormManager.setValue(field, '11');
           FormManager.readOnly('custClass');
         } else if (custSubGrp == 'BUSPR' || custSubGrp == 'XBUSP') {
-          var custSubGrpCodeArray = [ '42', '43', '44', '45', '46', '47', '48' ];
+          var custSubGrpCodeArray = [ '41', '42', '43', '44', '45', '46', '47', '48' ];
           FormManager.limitDropdownValues(field, custSubGrpCodeArray);
           FormManager.enable(field);
           if (pageModelFlag == 'Y') {
@@ -3216,8 +3216,8 @@ function setClassificationCode() {
         FormManager.readOnly('custClass');
       }
     } else if (reqType == 'U') {
-      FormManager.limitDropdownValues(field, [ '11', '13', '14', '17', '32', '33', '34', '35', '36', '42', '43', '44', '45', '46', '47', '48', '60',
-          '71', '81', '85' ]);
+      FormManager.limitDropdownValues(field, [ '11', '13', '14', '17', '32', '33', '34', '35', '36', '41', '42', '43', '44', '45', '46', '47', '48',
+          '60', '71', '81', '85' ]);
       FormManager.setValue(field, _pagemodel.custClass);
       FormManager.readOnly('custClass');
     }
@@ -3229,7 +3229,7 @@ function setClassificationCode() {
           FormManager.setValue(field, '11');
           FormManager.readOnly('custClass');
         } else if (custSubGrp == 'BUSPR' || custSubGrp == 'XBUSP') {
-          var custSubGrpCodeArray = [ '42', '43', '44', '45', '46', '47', '48' ];
+          var custSubGrpCodeArray = [ '41', '42', '43', '44', '45', '46', '47', '48' ];
           FormManager.limitDropdownValues(field, custSubGrpCodeArray);
           FormManager.enable(field);
           if (pageModelFlag == 'Y') {
@@ -3276,13 +3276,13 @@ function setClassificationCode() {
         FormManager.readOnly('custClass');
       }
     } else if (reqType == 'U') {
-      FormManager.limitDropdownValues(field, [ '11', '13', '14', '17', '32', '33', '34', '35', '36', '42', '43', '44', '45', '46', '47', '48', '60',
-          '71', '81', '85' ]);
+      FormManager.limitDropdownValues(field, [ '11', '13', '14', '17', '32', '33', '34', '35', '36', '41', '42', '43', '44', '45', '46', '47', '48',
+          '60', '71', '81', '85' ]);
       FormManager.setValue(field, _pagemodel.custClass);
     }
   } else if (role == 'Viewer') {
-    FormManager.limitDropdownValues(field, [ '11', '13', '14', '17', '32', '33', '34', '35', '36', '42', '43', '44', '45', '46', '47', '48', '60',
-        '71', '81', '85' ]);
+    FormManager.limitDropdownValues(field, [ '11', '13', '14', '17', '32', '33', '34', '35', '36', '41', '42', '43', '44', '45', '46', '47', '48',
+        '60', '71', '81', '85' ]);
     FormManager.setValue(field, _pagemodel.custClass);
     FormManager.readOnly('custClass');
   }
