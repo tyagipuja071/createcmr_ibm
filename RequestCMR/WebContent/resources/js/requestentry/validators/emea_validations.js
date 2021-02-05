@@ -8304,13 +8304,15 @@ function ibmFieldsBehaviourInCreateByScratchIT() {
       FormManager.removeValidator('salesBusOffCd', Validators.REQUIRED);
     }
 
-    if (isuCd == '34' && clientTier == 'Q') {
+    if ((isuCd == '34' && clientTier == 'Q')
+        || (custSubGrp == 'BUSPR' || custSubGrp == 'BUSSM' || custSubGrp == 'BUSVA' || custSubGrp == 'CROBP' || custSubGrp == 'INTER' || custSubGrp == 'INTSM' || custSubGrp == 'INTVA' || custSubGrp == 'CROIN')) {
       FormManager.removeValidator('affiliate', Validators.REQUIRED);
       FormManager.removeValidator('enterprise', Validators.REQUIRED);
     } else {
       FormManager.addValidator('affiliate', Validators.REQUIRED, [ 'Affiliate' ], 'MAIN_IBM_TAB');
       FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise' ], 'MAIN_IBM_TAB');
     }
+
     FormManager.removeValidator('collectionCd', Validators.REQUIRED);
   }
 }
