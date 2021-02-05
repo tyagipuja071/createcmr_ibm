@@ -552,8 +552,19 @@ public class BELUXHandler extends BaseSOFHandler {
         city1 = getCity1(addrl4);
         zs02Addr.setCmrPostalCode(postCd);
         zs02Addr.setCmrCity(city1);
-        zs02Addr.setCmrName2Plain(addrl2);
-        zs02Addr.setCmrStreetAddress(addrl3);
+
+        if (hasStreetNo(addrl3)) {
+          if (addrl2 != null && (addrl2.startsWith("ATT") || addrl2.startsWith("PO"))) {
+            handleAddrL3(zs02Addr, addrl2);
+          } else {
+            zs02Addr.setCmrName3(addrl2);
+          }
+          zs02Addr.setCmrStreetAddress(addrl3);
+        } else {
+          zs02Addr.setCmrName2Plain(addrl2);
+          zs02Addr.setCmrStreetAddress(addrl3);
+        }
+
       } else if (hasStreetNo(addrl4)) {
         zs02Addr.setCmrName2Plain(addrl2);
         zs02Addr.setCmrStreetAddress(addrl4);
@@ -1256,7 +1267,20 @@ public class BELUXHandler extends BaseSOFHandler {
     address.setCustNm1(currentRecord.getCmrName1Plain());
     address.setCustNm2(currentRecord.getCmrName2Plain());
     address.setCustNm3(currentRecord.getCmrName3());
-    address.setCustNm4(currentRecord.getCmrName4());
+    if (currentRecord.getCmrName4() != null && currentRecord.getCmrName4().startsWith("ATT ")) {
+      String custNm4 = currentRecord.getCmrName4().substring(currentRecord.getCmrName4().indexOf("ATT ") + 4);
+      address.setCustNm4(custNm4);
+    } else {
+      address.setCustNm4(currentRecord.getCmrName4());
+    }
+
+    if (currentRecord.getCmrPOBox() != null && currentRecord.getCmrPOBox().startsWith("PO BOX ")) {
+      String pobox = currentRecord.getCmrPOBox().substring(currentRecord.getCmrPOBox().indexOf("PO BOX ") + 7);
+      address.setPoBox(pobox);
+    } else {
+      address.setPoBox(currentRecord.getCmrPOBox());
+    }
+
     // address.setDept(currentRecord.getCmrDept());
     address.setCity1(currentRecord.getCmrCity());
     address.setCustPhone(currentRecord.getCmrCustPhone());
