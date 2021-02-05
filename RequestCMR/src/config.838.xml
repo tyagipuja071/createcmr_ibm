@@ -51,11 +51,11 @@
           <width>30</width>
         </column>
          -->
-        <column>
+        <column exactLength="true">
           <label>Enterprise Number</label>
           <dbColumn>ENTERPRISE</dbColumn>
           <width>30</width>
-          <lovId>Enterprise</lovId>
+          <length>6</length>
         </column>
         <column>
           <label>INAC/NAC</label>

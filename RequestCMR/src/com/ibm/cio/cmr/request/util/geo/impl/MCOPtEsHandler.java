@@ -54,7 +54,7 @@ public class MCOPtEsHandler extends MCOHandler {
   private static final Logger LOG = Logger.getLogger(MCOPtEsHandler.class);
 
   protected static final String[] PT_MASS_UPDATE_SHEET_NAMES = { "Billing Address", "Mailing Address", "Installing Address",
-      "Shipping Address (Update)", "EPL Address" };
+      "Shipping Address (Update)", "EPL Address", "Data" };
 
   private static final String[] SPAIN_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "LocalTax1" };
 
@@ -1284,6 +1284,8 @@ public class MCOPtEsHandler extends MCOHandler {
             String phoneNo = ""; // 12
             String poBox = ""; // 13
             String landCountry = ""; // 11
+            String dataCmrNo = ""; // 0
+            String dataEnterpriseNo = ""; // 5
             List<String> checkList = null;
             long count = 0;
             if (row.getRowNum() == 2001) {
@@ -1329,6 +1331,18 @@ public class MCOPtEsHandler extends MCOHandler {
               landCountry = validateColValFromCell(currCell);
             }
 
+            if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              dataCmrNo = validateColValFromCell(currCell);
+              if (country.equals("822")) {
+                currCell = (XSSFCell) row.getCell(5);
+                dataEnterpriseNo = validateColValFromCell(currCell);
+              } else {
+                currCell = (XSSFCell) row.getCell(7);
+                dataEnterpriseNo = validateColValFromCell(currCell);
+              }
+            }
+
             checkList = Arrays.asList(addressCont, poBox, attPerson);
             count = checkList.stream().filter(field -> !field.isEmpty()).count();
             if ("Billing Address".equalsIgnoreCase(sheet.getSheetName())) {
@@ -1350,7 +1364,7 @@ public class MCOPtEsHandler extends MCOHandler {
             }
 
             TemplateValidation error = new TemplateValidation(name);
-            if (StringUtils.isEmpty(cmrNo)) {
+            if (StringUtils.isEmpty(dataCmrNo)) {
               LOG.trace("Note that CMR No. is mandatory. Please fix and upload the template again.");
               error.addError(row.getRowNum(), "CMR No.", "Note that CMR No. is mandatory. Please fix and upload the template again.");
               validations.add(error);
@@ -1469,6 +1483,17 @@ public class MCOPtEsHandler extends MCOHandler {
                   "Field contains invalid character. Please fix and upload the template again.");
               validations.add(error);
             }
+
+            if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
+              if (!StringUtils.isBlank(dataEnterpriseNo) && !dataEnterpriseNo.equals("@@@@@@")) {
+                if (!StringUtils.isNumeric(dataEnterpriseNo)) {
+                  LOG.trace("Enterprise Number should have numeric values only.");
+                  error.addError(row.getRowNum(), "Enterprise No.", "Enterprise Number should have numeric values only. ");
+                  validations.add(error);
+                }
+              }
+            }
+
           }
         }
       }

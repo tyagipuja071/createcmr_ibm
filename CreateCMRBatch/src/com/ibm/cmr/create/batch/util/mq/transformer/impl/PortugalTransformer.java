@@ -625,7 +625,7 @@ public class PortugalTransformer extends MessageTransformer {
     }
 
     if (!StringUtils.isBlank(muData.getEnterprise())) {
-      if (DEFAULT_CLEAR_CHAR.equals(muData.getEnterprise())) {
+      if ("@@@@@@".equals(muData.getEnterprise())) {
         legacyCust.setEnterpriseNo("");
       } else {
         legacyCust.setEnterpriseNo(muData.getEnterprise());
