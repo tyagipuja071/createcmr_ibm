@@ -8963,8 +8963,9 @@ function lockCollectionCode() {
   if (role != 'REQUESTER') {
     return;
   }
-  if (custSubType != undefined && custSubType != ''
-      && (custSubType == 'BUSPR' || custSubType == 'BUSSM' || custSubType == 'BUSVA' || custSubType == 'INTER' || custSubType == 'INTSM' || custSubType == 'INTVA')) {
+  if (custSubType != undefined
+      && custSubType != ''
+      && (custSubType == 'BUSPR' || custSubType == 'BUSSM' || custSubType == 'BUSVA' || custSubType == 'INTER' || custSubType == 'INTSM' || custSubType == 'INTVA' || custSubType == 'CROBP' || custSubType == 'CROIN')) {
     return;
   }
 
