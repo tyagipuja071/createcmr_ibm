@@ -8300,6 +8300,7 @@ function ibmFieldsBehaviourInCreateByScratchIT() {
     if (custSubGrp == 'BUSPR' || custSubGrp == 'BUSSM' || custSubGrp == 'BUSVA' || custSubGrp == 'CROBP' || custSubGrp == 'PRICU' || custSubGrp == 'CROPR' || custSubGrp == 'PRISM'
         || custSubGrp == 'PRIVA') {
       FormManager.readOnly('salesBusOffCd');
+      FormManager.readOnly('repTeamMemberNo');
       FormManager.removeValidator('salesBusOffCd', Validators.REQUIRED);
     }
 
