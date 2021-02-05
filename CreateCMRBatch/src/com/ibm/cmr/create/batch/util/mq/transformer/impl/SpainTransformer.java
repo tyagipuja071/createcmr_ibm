@@ -722,7 +722,12 @@ public class SpainTransformer extends MessageTransformer {
     }
 
     if (!StringUtils.isBlank(muData.getEnterprise())) {
-      cust.setEnterpriseNo(muData.getEnterprise());
+      if ("@@@@@@".equals(muData.getEnterprise())) {
+        cust.setEnterpriseNo("");
+      } else {
+        cust.setEnterpriseNo(muData.getEnterprise());
+      }
+
     }
 
     if (!StringUtils.isBlank(muData.getCustNm2())) {
