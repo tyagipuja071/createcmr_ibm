@@ -726,11 +726,16 @@ function setEnterpriseValues(scenarioChanged) {
   }
 
   var isuCtcValueChanged = false;
-  var isuCtc217Scen = new Set([ 'BUSPR', 'INTER', 'CRBUS', 'CRINT' ]);
+  var isuCtc217Scen = new Set([ 'BUSPR', 'INTER', 'XBP', 'CRINT', 'INTSO' ]);
   var is217ScenarioSelect = (isuCtc217Scen.has(custSubGrp) && scenarioChanged && isuCtc == '217');
 
   if (cmr.currentTab == 'IBM_REQ_TAB') {
     isuCtcValueChanged = (_oldIsuCtc != isuCtc);
+  }
+
+  if (isuCtc217Scen.has(custSubGrp)) {
+    isuCtcValueChanged = false;
+    _subindustryChanged = false;
   }
 
   if (!(scenarioChanged || isuCtcValueChanged || _subindustryChanged)) {
