@@ -8288,7 +8288,7 @@ function ibmFieldsBehaviourInCreateByScratchIT() {
     if (role == 'REQUESTER') {
       FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SBO' ], 'MAIN_IBM_TAB');
       if (countryUse == '758SM' || countryUse == '758VA') {
-        if (isuCd == '34' && clientTier == 'Q') {
+        if ((isuCd == '34' && clientTier == 'Q') || custSubType == 'BUSSM' || custSubType == 'BUSVA') {
           FormManager.readOnly('salesBusOffCd');
           FormManager.readOnly('repTeamMemberNo');
         } else {
