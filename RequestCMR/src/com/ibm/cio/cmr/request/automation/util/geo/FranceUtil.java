@@ -336,7 +336,8 @@ public class FranceUtil extends AutomationUtil {
       if (!FRANCE_SUBREGIONS.contains(addr.getLandCntry())) {
         details.append("Calculating Coverage using SIREN.").append("\n\n");
         String siren = StringUtils.isNotBlank(data.getTaxCd1())
-            ? (data.getTaxCd1().length() > 9 ? data.getTaxCd1().substring(0, 9) : data.getTaxCd1()) : "";
+            ? (data.getTaxCd1().length() > 9 ? data.getTaxCd1().substring(0, 9) : data.getTaxCd1())
+            : "";
         if (StringUtils.isNotBlank(siren)) {
           details.append("SIREN: " + siren).append("\n");
           List<CoverageContainer> coverages = covElement.computeCoverageFromRDCQuery(entityManager, "AUTO.COV.GET_COV_FROM_TAX_CD1", siren + "%",
@@ -351,13 +352,15 @@ public class FranceUtil extends AutomationUtil {
             String sboValue = "";
             if (overrides.getData().containsKey(sboKey)) {
               sboValue = overrides.getData().get(sboKey).getNewValue();
-              overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(), sboValue);
+              overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(),
+                  sboValue + sboValue);
             } else {
               sboValue = getSBOfromCoverage(entityManager, coverage.getFinalCoverage());
               if (StringUtils.isNotBlank(sboValue)) {
-                details.append("SORTL calculated on basis of Existing CMR Data: " + sboValue);
-                overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(), sboValue);
-                overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sboValue);
+                details.append("SORTL calculated on basis of Existing CMR Data: " + sboValue + sboValue);
+                overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(),
+                    sboValue + sboValue);
+                overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sboValue + sboValue);
               }
             }
             isCoverageCalculated = true;
@@ -387,9 +390,10 @@ public class FranceUtil extends AutomationUtil {
           if (StringUtils.isNotBlank(response.get(MATCHING))) {
             switch (response.get(MATCHING)) {
             case "Exact Match":
-              overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), response.get(SBO));
+              overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(),
+                  response.get(SBO) + response.get(SBO));
               details.append("Coverage calculation Successful.").append("\n");
-              details.append("Computed SBO = " + response.get(SBO)).append("\n\n");
+              details.append("Computed SORTL = " + response.get(SBO) + response.get(SBO)).append("\n\n");
               details.append("Matched Rule:").append("\n");
               details.append("ISIC = " + data.getIsicCd()).append("\n");
               details.append("ISU = " + data.getIsuCd()).append("\n");
