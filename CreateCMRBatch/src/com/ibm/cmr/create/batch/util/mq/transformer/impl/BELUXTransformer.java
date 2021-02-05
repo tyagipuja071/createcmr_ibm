@@ -608,7 +608,6 @@ public class BELUXTransformer extends EMEATransformer {
       } else if (!StringUtils.isEmpty(line3) && StringUtils.isEmpty(line4) && !StringUtils.isEmpty(line5)) {
         line2 = line3;
         line3 = line5;
-        line3 = "";
         line5 = "";
       } else if (!StringUtils.isEmpty(line3) && !StringUtils.isEmpty(line4) && !StringUtils.isEmpty(line5)) {
         line2 = line3;
@@ -658,14 +657,14 @@ public class BELUXTransformer extends EMEATransformer {
     legacyAddr.setAddrLine3(line3);
     legacyAddr.setAddrLine4(line4);
     legacyAddr.setAddrLine5(line5);
-    legacyAddr.setCity(addrData.getCity1() == null ? "" : addrData.getCity1());
-    legacyAddr.setZipCode(addrData.getPostCd() == null ? "" : addrData.getPostCd());
+    legacyAddr.setCity("");
+    legacyAddr.setZipCode("");
     legacyAddr.setAddrLine6(line6);
 
     legacyAddr.setAddrPhone(phone);
     legacyAddr.setAddrLineT(addrLineT);
-    legacyAddr.setDistrict(addrData.getDivn() == null ? "" : addrData.getDivn());
-    legacyAddr.setContact(addrData.getContact() == null ? "" : addrData.getContact());
+    legacyAddr.setDistrict("");
+    legacyAddr.setContact("");
     legacyAddr.setAddrLineU("");
 
     legacyAddr.setFirstName("");
