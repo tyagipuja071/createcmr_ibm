@@ -167,6 +167,7 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
     FormManager.setValue('taxCd1', '');
     $scope.records = [];
     $scope.searched = false;
+    FormManager.setValue('taxCd1', '');
   };
 
   $scope.confirmImport = function(rec, update) {
