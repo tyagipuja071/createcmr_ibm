@@ -1301,6 +1301,7 @@ public class BELUXHandler extends BaseSOFHandler {
 
   @Override
   public void doBeforeAddrSave(EntityManager entityManager, Addr addr, String cmrIssuingCntry) throws Exception {
+    addr.setTransportZone("Z000000001");
     if (!"Y".equals(addr.getImportInd())) {
       String addrSeq = addr.getId().getAddrSeq();
       addrSeq = StringUtils.leftPad(addrSeq, 5, '0');
