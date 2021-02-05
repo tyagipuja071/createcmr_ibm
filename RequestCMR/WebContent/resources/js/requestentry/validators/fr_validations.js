@@ -1330,7 +1330,8 @@ function setDummySIRETOnCustSubGrpChange(value) {
 // }
 // }
 function setAbbrevNmLocnOnAddressSave(cntry, addressMode, saving, finalSave, force) {
-  if (cmr.currentRequestType == 'U') {
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType == 'U') {
     return;
   }
   if (finalSave || force || addressMode == 'ZS01') {
@@ -1354,10 +1355,10 @@ function setAbbrevNmLocnOnAddressSave(cntry, addressMode, saving, finalSave, for
 }
 
 function updateAbbrNameWithZS01() {
-  if (cmr.currentRequestType == 'U') {
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType == 'U') {
     return;
   }
-  var reqType = FormManager.getActualValue('reqType');
   var abbrName = FormManager.getActualValue("abbrevNm");
   var newAddrName1 = FormManager.getActualValue("custNm1");
   var role = FormManager.getActualValue('userRole').toUpperCase();
@@ -1402,10 +1403,10 @@ function updateAbbrNameWithZS01() {
 }
 
 function updateAbbrNameWithZS01_ZI01() {
-  if (cmr.currentRequestType == 'U') {
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType == 'U') {
     return;
   }
-  var reqType = FormManager.getActualValue('reqType');
   var abbrName = FormManager.getActualValue("abbrevNm");
   var newAddrName1 = FormManager.getActualValue("custNm1");
   var role = FormManager.getActualValue('userRole').toUpperCase();
@@ -1468,10 +1469,10 @@ function updateAbbrNameWithZS01_ZI01() {
 }
 
 function updateAbbrNameWithTPZS01_ZI01() {
-  if (cmr.currentRequestType == 'U') {
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType == 'U') {
     return;
   }
-  var reqType = FormManager.getActualValue('reqType');
   var abbrName = FormManager.getActualValue("abbrevNm");
   var newAddrName1 = FormManager.getActualValue("custNm1");
   var role = FormManager.getActualValue('userRole').toUpperCase();
