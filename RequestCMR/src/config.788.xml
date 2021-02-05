@@ -1,4 +1,4 @@
-<template id="808" for="UPDATE">
+<template id="788" for="UPDATE">
 	<tabs>
 		<tab name="Data" type="Data">
 			<columns>
@@ -196,102 +196,6 @@
 					<width>18</width>
 					<bdsId>LandedCountry</bdsId>
 				</column>
-				<column>
-					<label>Local Country Name</label>
-					<dbColumn>DIVN</dbColumn>
-					<width>18</width>
-					<length>50</length>
-				</column>					
-				<column>
-					<label>Hardware Master</label>
-					<dbColumn>HW_INSTL_MSTR_FLG</dbColumn>
-					<width>10</width>
-					<length>1</length>
-					<lovId>HwInstlMasterFlag</lovId>
-				</column>
-			</columns>
-		</tab>
-		<tab name="Mail to" type="Address" typeCode="ZS02">
-			<columns>
-				<column exactLength="true">
-					<label>CMR. No</label>
-					<dbColumn>CMR_NO</dbColumn>
-					<width>20</width>
-					<length>6</length>
-				</column>
-				<column>
-					<label>Address Seq. No.</label>
-					<dbColumn>ADDR_SEQUENCE_NO</dbColumn>
-					<width>20</width>
-					<length>15</length>
-				</column>
-				<column>
-					<label>Customer Name 1</label>
-					<dbColumn>CUST_NM1</dbColumn>
-					<width>40</width>
-					<length>30</length>
-				</column>
-				<column>
-					<label>Customer Name 2</label>
-					<dbColumn>CUST_NM2</dbColumn>
-					<width>40</width>
-					<length>30</length>
-				</column>
-				<column>
-					<label>Customer Name 3</label>
-					<dbColumn>CUST_NM3</dbColumn>
-					<width>40</width>
-					<length>30</length>
-				</column>
-				<column>
-					<label>Att. Person</label>
-					<dbColumn>CUST_NM4</dbColumn>
-					<width>40</width>
-					<length>30</length>
-				</column>
-				<column>
-					<label>Street</label>
-					<dbColumn>ADDR_TXT</dbColumn>
-					<width>40</width>
-					<length>30</length>
-				</column>
-				<column>
-					<label>Postal Code</label>
-					<dbColumn>POST_CD</dbColumn>
-					<width>20</width>
-					<length>10</length>
-				</column>
-				<column>
-					<label>PO Box</label>
-					<dbColumn>PO_BOX</dbColumn>
-					<width>20</width>
-					<length>10</length>
-				</column>
-				<column>
-					<label>City</label>
-					<dbColumn>CITY1</dbColumn>
-					<width>40</width>
-					<length>24</length>
-				</column>
-				<column>
-					<label>Country</label>
-					<dbColumn>LAND_CNTRY</dbColumn>
-					<width>18</width>
-					<bdsId>LandedCountry</bdsId>
-				</column>
-				<column>
-					<label>Local Country Name</label>
-					<dbColumn>DIVN</dbColumn>
-					<width>18</width>
-					<length>50</length>
-				</column>					
-				<column>
-					<label>Hardware Master</label>
-					<dbColumn>HW_INSTL_MSTR_FLG</dbColumn>
-					<width>10</width>
-					<length>1</length>
-					<lovId>HwInstlMasterFlag</lovId>
-				</column>
 			</columns>
 		</tab>
 		<tab name="Bill To" type="Address" typeCode="ZP01">
@@ -361,19 +265,6 @@
 					<dbColumn>LAND_CNTRY</dbColumn>
 					<width>18</width>
 					<bdsId>LandedCountry</bdsId>
-				</column>
-				<column>
-					<label>Local Country Name</label>
-					<dbColumn>DIVN</dbColumn>
-					<width>18</width>
-					<length>50</length>
-				</column>					
-				<column>
-					<label>Hardware Master</label>
-					<dbColumn>HW_INSTL_MSTR_FLG</dbColumn>
-					<width>10</width>
-					<length>1</length>
-					<lovId>HwInstlMasterFlag</lovId>
 				</column>
 			</columns>
 		</tab>
@@ -445,19 +336,6 @@
 					<width>18</width>
 					<bdsId>LandedCountry</bdsId>
 				</column>
-				<column>
-					<label>Local Country Name</label>
-					<dbColumn>DIVN</dbColumn>
-					<width>18</width>
-					<length>50</length>
-				</column>					
-				<column>
-					<label>Hardware Master</label>
-					<dbColumn>HW_INSTL_MSTR_FLG</dbColumn>
-					<width>10</width>
-					<length>1</length>
-					<lovId>HwInstlMasterFlag</lovId>
-				</column>
 			</columns>
 		</tab>
 		<tab name="Install At" data="false" type="Address" typeCode="ZI01">
@@ -528,23 +406,9 @@
 					<width>18</width>
 					<bdsId>LandedCountry</bdsId>
 				</column>
-				<column>
-					<label>Local Country Name</label>
-					<dbColumn>DIVN</dbColumn>
-					<width>18</width>
-					<length>50</length>
-				</column>					
-				<column>
-					<label>Hardware Master</label>
-					<dbColumn>HW_INSTL_MSTR_FLG</dbColumn>
-					<width>10</width>
-					<length>1</length>
-					<lovId>HwInstlMasterFlag</lovId>
-				</column>
 			</columns>
 		</tab>
-		<tab name="Address in Local language" data="false" type="Address"
-			typeCode="ZP02">
+		<tab name="IGF Bill to" type="Address" typeCode="ZP02">
 			<columns>
 				<column exactLength="true">
 					<label>CMR. No</label>
@@ -611,19 +475,6 @@
 					<dbColumn>LAND_CNTRY</dbColumn>
 					<width>18</width>
 					<bdsId>LandedCountry</bdsId>
-				</column>
-				<column>
-					<label>Local Country Name</label>
-					<dbColumn>DIVN</dbColumn>
-					<width>18</width>
-					<length>50</length>
-				</column>				
-				<column>
-					<label>Hardware Master</label>
-					<dbColumn>HW_INSTL_MSTR_FLG</dbColumn>
-					<width>10</width>
-					<length>1</length>
-					<lovId>HwInstlMasterFlag</lovId>
 				</column>
 			</columns>
 		</tab>
