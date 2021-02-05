@@ -608,7 +608,6 @@ public class BELUXTransformer extends EMEATransformer {
       } else if (!StringUtils.isEmpty(line3) && StringUtils.isEmpty(line4) && !StringUtils.isEmpty(line5)) {
         line2 = line3;
         line3 = line5;
-        line3 = "";
         line5 = "";
       } else if (!StringUtils.isEmpty(line3) && !StringUtils.isEmpty(line4) && !StringUtils.isEmpty(line5)) {
         line2 = line3;
