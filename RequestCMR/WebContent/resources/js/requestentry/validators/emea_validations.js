@@ -8288,7 +8288,7 @@ function ibmFieldsBehaviourInCreateByScratchIT() {
     if (role == 'REQUESTER') {
       FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SBO' ], 'MAIN_IBM_TAB');
       if (countryUse == '758SM' || countryUse == '758VA') {
-        if ((isuCd == '34' && clientTier == 'Q') || custSubType == 'BUSSM' || custSubType == 'BUSVA') {
+        if ((isuCd == '34' && clientTier == 'Q') || custSubGrp == 'BUSSM' || custSubGrp == 'BUSVA') {
           FormManager.readOnly('salesBusOffCd');
           FormManager.readOnly('repTeamMemberNo');
         } else {
@@ -8300,6 +8300,7 @@ function ibmFieldsBehaviourInCreateByScratchIT() {
     if (custSubGrp == 'BUSPR' || custSubGrp == 'BUSSM' || custSubGrp == 'BUSVA' || custSubGrp == 'CROBP' || custSubGrp == 'PRICU' || custSubGrp == 'CROPR' || custSubGrp == 'PRISM'
         || custSubGrp == 'PRIVA') {
       FormManager.readOnly('salesBusOffCd');
+      FormManager.readOnly('repTeamMemberNo');
       FormManager.removeValidator('salesBusOffCd', Validators.REQUIRED);
     }
 
