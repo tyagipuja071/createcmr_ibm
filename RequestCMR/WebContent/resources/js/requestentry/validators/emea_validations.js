@@ -8287,6 +8287,15 @@ function ibmFieldsBehaviourInCreateByScratchIT() {
   if (checkImportIndc != 'Y') {
     if (role == 'REQUESTER') {
       FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SBO' ], 'MAIN_IBM_TAB');
+      if (countryUse == '758SM' || countryUse == '758VA') {
+        if (isuCd == '34' && clientTier == 'Q') {
+          FormManager.readOnly('salesBusOffCd');
+          FormManager.readOnly('repTeamMemberNo');
+        } else {
+          FormManager.enable('salesBusOffCd');
+          FormManager.enable('repTeamMemberNo');
+        }
+      }
     }
     if (custSubGrp == 'BUSPR' || custSubGrp == 'BUSSM' || custSubGrp == 'BUSVA' || custSubGrp == 'CROBP' || custSubGrp == 'PRICU' || custSubGrp == 'CROPR' || custSubGrp == 'PRISM'
         || custSubGrp == 'PRIVA') {
@@ -8300,16 +8309,6 @@ function ibmFieldsBehaviourInCreateByScratchIT() {
     } else {
       FormManager.addValidator('affiliate', Validators.REQUIRED, [ 'Affiliate' ], 'MAIN_IBM_TAB');
       FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise' ], 'MAIN_IBM_TAB');
-    }
-
-    if (countryUse == '758SM' || countryUse == '758VA') {
-      if (isuCd == '34' && clientTier == 'Q') {
-        FormManager.readOnly('salesBusOffCd');
-        FormManager.readOnly('repTeamMemberNo');
-      } else {
-        FormManager.enable('salesBusOffCd');
-        FormManager.enable('repTeamMemberNo');
-      }
     }
     FormManager.removeValidator('collectionCd', Validators.REQUIRED);
   }
