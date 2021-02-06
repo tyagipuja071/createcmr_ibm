@@ -694,6 +694,8 @@ function updateAddrTypeList(cntry, addressMode, saving) {
     var reqReason = FormManager.getActualValue('reqReason');
     if (requestingLob != 'IGF' || reqReason != 'IGF') {
       cmr.hideNode('radiocont_ZP02');
+    } else {
+      cmr.showNode('radiocont_ZP02');
     }
 
   }
@@ -1212,7 +1214,7 @@ function restrictDuplicateAddr(cntry, addressMode, saving, finalSave, force) {
             var dummyseq = "xx";
             var showDuplicateIGFBillToError = false;
             var qParams;
-            if (addressMode == 'updateAddress') {
+            if (cmr.addressMode == 'updateAddress') {
               qParams = {
                 REQ_ID : requestId,
                 ADDR_SEQ : addressSeq,
@@ -1259,6 +1261,34 @@ function streetValueFormatterBELUX(value, rowIndex) {
   return display;
 }
 
+function rdcDupZP01Check(cntry, addressMode, saving, finalSave, force) {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqType = FormManager.getActualValue('reqType');
+        var addressType = FormManager.getActualValue('addrType');
+        var addressSeq = FormManager.getActualValue('addrSeq');
+        var cmrNo = FormManager.getActualValue('cmrNo');
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        if (cmr.currentRequestType == 'U' && addressType == 'ZP01' && (cmr.addressMode == 'newAddress' || cmr.addressMode == 'copyAddress')) {
+          var qParams = {
+            KATR6 : cntry,
+            MANDT : cmr.MANDT,
+            ZZKV_SEQNO : "29901",
+            ZZKV_CUSNO : cmrNo,
+            KTOKD : "ZP01"
+          };
+          var result = cmr.query('BENELUX.CHECK_RDC_ZP01', qParams);
+          if (result != null && result.ret1 != null) {
+            return new ValidationResult(null, false, 'Existing Bill-to address was identified in RDc and new one cannot be created, please contact CMR team for further assistence.');
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.NL = [ '788' ];
   console.log('adding NETHERLANDS functions...');
@@ -1301,5 +1331,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addDnBSearchValidator, GEOHandler.NL, null, true);
   GEOHandler.registerValidator(addCmrNoValidator, GEOHandler.NL, null, true);
   GEOHandler.registerValidator(restrictDuplicateAddr, GEOHandler.NL, null, true);
+  GEOHandler.registerValidator(rdcDupZP01Check, GEOHandler.NL, null, true);
 
 });
