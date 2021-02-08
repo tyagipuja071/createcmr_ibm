@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mappings>
+	<mapping>
+		<country>838</country>
+		<sbo>076</sbo>
+	</mapping>
+	<mapping>
+		<country>862</country>
+		<sbo>077</sbo>
+	</mapping>
+	<mapping>
+		<country>822</country>
+		<sbo>078</sbo>
+	</mapping>
+	<mapping>
+		<country>758</country>
+		<sbo>079</sbo>
+	</mapping>
+</mappings>

@@ -135,7 +135,37 @@
     <class>com.ibm.cio.cmr.request.entity.ReservedCMRNos</class>
     <class>com.ibm.cio.cmr.request.entity.ReservedCMRNosPK</class> 
 	<class>com.ibm.cio.cmr.request.entity.Kna1</class>
-    <class>com.ibm.cio.cmr.request.entity.Kna1PK</class> 
+    <class>com.ibm.cio.cmr.request.entity.Kna1PK</class>
+    
+    <!--  CMR Cloning --> 
+    <class>com.ibm.cio.cmr.request.entity.CmrCloningQueue</class>
+    <class>com.ibm.cio.cmr.request.entity.CmrCloningQueuePK</class>
+    <class>com.ibm.cio.cmr.request.entity.RdcCloningRefn</class>
+    <class>com.ibm.cio.cmr.request.entity.RdcCloningRefnPK</class>
+    <class>com.ibm.cio.cmr.request.entity.Knb1</class>
+    <class>com.ibm.cio.cmr.request.entity.Knb1PK</class>
+    <class>com.ibm.cio.cmr.request.entity.Knvv</class>
+    <class>com.ibm.cio.cmr.request.entity.KnvvPK</class>
+    <class>com.ibm.cio.cmr.request.entity.Knvi</class>
+    <class>com.ibm.cio.cmr.request.entity.KnviPK</class>
+    <class>com.ibm.cio.cmr.request.entity.Knvk</class>
+    <class>com.ibm.cio.cmr.request.entity.KnvkPK</class>
+    <class>com.ibm.cio.cmr.request.entity.Knvp</class>
+    <class>com.ibm.cio.cmr.request.entity.KnvpPK</class>
+    <class>com.ibm.cio.cmr.request.entity.Knex</class>
+    <class>com.ibm.cio.cmr.request.entity.KnexPK</class>
+    <class>com.ibm.cio.cmr.request.entity.Addlctrydata</class>
+    <class>com.ibm.cio.cmr.request.entity.AddlctrydataPK</class>
+    <class>com.ibm.cio.cmr.request.entity.KunnrExt</class>
+    <class>com.ibm.cio.cmr.request.entity.KunnrExtPK</class>
+    <class>com.ibm.cio.cmr.request.entity.Knbk</class>
+    <class>com.ibm.cio.cmr.request.entity.KnbkPK</class>
+    <class>com.ibm.cio.cmr.request.entity.Knva</class>
+    <class>com.ibm.cio.cmr.request.entity.KnvaPK</class>
+    <class>com.ibm.cio.cmr.request.entity.Knvl</class>
+    <class>com.ibm.cio.cmr.request.entity.KnvlPK</class>
+    <class>com.ibm.cio.cmr.request.entity.Sizeinfo</class>
+    <class>com.ibm.cio.cmr.request.entity.SizeinfoPK</class>
 
     <properties>
 
