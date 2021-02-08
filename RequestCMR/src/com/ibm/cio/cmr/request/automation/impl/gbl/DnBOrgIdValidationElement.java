@@ -33,7 +33,7 @@ import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 
 /**
- * {@link AutomationElement} implementation for the advanced D&B matching
+ * {@link AutomationElement} implementation for the D&B Org Id Validation
  *
  * @author RoopakChugh
  *
