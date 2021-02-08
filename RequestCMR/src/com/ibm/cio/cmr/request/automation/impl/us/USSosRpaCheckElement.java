@@ -81,10 +81,10 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
     log.debug("Calling SOS-RPA Service for Install - At (ZS01) address for Req_id : " + reqId);
     SosRequest requestInstallAt = new SosRequest();
     requestInstallAt.setName((StringUtils.isNotBlank(admin.getMainCustNm1()) ? admin.getMainCustNm1() : "")
-        + (StringUtils.isNotBlank(admin.getMainCustNm2()) ? admin.getMainCustNm2() : ""));
+        + (StringUtils.isNotBlank(admin.getMainCustNm2()) ? " " + admin.getMainCustNm2() : ""));
     requestInstallAt.setCity1(zs01.getCity1());
     requestInstallAt.setAddrTxt((StringUtils.isNotBlank(zs01.getAddrTxt()) ? zs01.getAddrTxt() : "")
-        + (StringUtils.isNotBlank(zs01.getAddrTxt2()) ? zs01.getAddrTxt2() : ""));
+        + (StringUtils.isNotBlank(zs01.getAddrTxt2()) ? " " + zs01.getAddrTxt2() : ""));
     requestInstallAt.setState(zs01.getStateProv());
 
     log.debug("Connecting to the SOS - RPA Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
