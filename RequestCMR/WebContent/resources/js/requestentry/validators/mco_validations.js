@@ -721,7 +721,9 @@ function setEnterpriseValues(scenarioChanged) {
     if (cntry == SysLoc.SPAIN && (isuCtc == '32B' || isuCtc == '32T' || isuCtc == '217' || isuCtc == '34Q')) {
       // FormManager.readOnly('enterprise');
       setSBOAndEBO();
-      return;
+      if (!isuCtc == '217') {
+        return;
+      }
     }
   }
 
@@ -766,6 +768,12 @@ function setEnterpriseValues(scenarioChanged) {
 
       if (is217ScenarioSelect) {
         enterprises = [ '985999' ];
+      }
+
+      if (cntry == SysLoc.SPAIN) {
+        if (isuCtc == '34Z') {
+          enterprises = [ '985999' ];
+        }
       }
 
       if (enterprises != null) {
