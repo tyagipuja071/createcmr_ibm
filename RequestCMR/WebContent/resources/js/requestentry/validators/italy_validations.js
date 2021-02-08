@@ -1585,11 +1585,14 @@ function addBillingValidator() {
         var record = cmr.query('GETZP01VALRECORDS', qParams);
         var zp01Reccount = record.ret1;
         if (Number(zp01Reccount == 1)) {
-         if (FormManager.getActualValue('reqType') == 'C' && role == "REQUESTER") 
-         if(custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'CRO3P') 
-         var checkImportIndc = getImportedIndcForItalyBillingAddr();
-         if(checkImportIndc=='Y') 
-          return new ValidationResult(null, false, 'For 3rd party scenario  Billing Address can not be imported.User needs to create new Billing Address');
+         if (FormManager.getActualValue('reqType') == 'C' && role == "REQUESTER") {
+          if(custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'CRO3P') {
+           var checkImportIndc = getImportedIndcForItalyBillingAddr();
+           if(checkImportIndc=='Y') {
+            return new ValidationResult(null, false, 'For 3rd party scenario  Billing Address can not be imported.User needs to create new Billing Address');
+           }
+          }
+         }
         }
       }
     };
@@ -1602,10 +1605,13 @@ function addCMRValidator() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
-       if (FormManager.getActualValue('reqType') == 'C')
-       if(FormManager.getActualValue('findCmrResult') == 'NOT DONE' || FormManager.getActualValue('findCmrResult') == 'REJECTED')
-       if (role == "REQUESTER" && (custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'CRO3P')) 
-        return new ValidationResult(null, false,'For 3rd party scenario please import a CMR via CMR search'); 
+       if (FormManager.getActualValue('reqType') == 'C') {
+        if(FormManager.getActualValue('findCmrResult') == 'NOT DONE' || FormManager.getActualValue('findCmrResult') == 'REJECTED') {
+         if (role == "REQUESTER" && (custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'CRO3P')) {
+          return new ValidationResult(null, false,'For 3rd party scenario please import a CMR via CMR search'); 
+         }
+        }
+       }
       }
     };
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
