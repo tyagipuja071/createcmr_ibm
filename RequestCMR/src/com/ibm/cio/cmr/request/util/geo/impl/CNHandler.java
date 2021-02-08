@@ -64,8 +64,8 @@ import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
 public class CNHandler extends GEOHandler {
 
   private static final Logger LOG = Logger.getLogger(DEHandler.class);
-  private static final String[] DE_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "LocalTax1", "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity",
-      "CustFAX", "City2", "Affiliate", "Company", "INACType" };
+  private static final String[] DE_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "LocalTax1", "LocalTax2", "SitePartyID", "Division", "POBoxCity", "CustFAX",
+      "City2", "Affiliate", "Company", "INACType" };
   public static final int CN_STREET_ADD_TXT = 70;
   public static final int CN_STREET_ADD_TXT2 = 70;
   public static final int CN_CUST_NAME_1 = 70;
@@ -198,6 +198,18 @@ public class CNHandler extends GEOHandler {
   @Override
   public void addSummaryUpdatedFields(RequestSummaryService service, String type, String cmrCountry, Data newData, DataRdc oldData,
       List<UpdatedDataModel> results) {
+
+    UpdatedDataModel update = null;
+    super.addSummaryUpdatedFields(service, type, cmrCountry, newData, oldData, results);
+
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getSearchTerm(), newData.getSearchTerm())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "SearchTerm", "-"));
+      update.setNewData(newData.getSearchTerm());
+      update.setOldData(oldData.getSearchTerm());
+      results.add(update);
+    }
+
   }
 
   @Override
