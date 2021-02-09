@@ -109,7 +109,7 @@ public class UKIUtil extends AutomationUtil {
     case SCENARIO_BUSINESS_PARTNER:
       return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
     case SCENARIO_PRIVATE_PERSON:
-      return doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details, false, requestData.getData());
+      return doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details, false);
     case SCENARIO_INTERNAL:
       if (!customerName.contains("IBM") && !customerNameZI01.contains("IBM")) {
         details.append("Mailing and Billing addresses should have IBM in them.");
