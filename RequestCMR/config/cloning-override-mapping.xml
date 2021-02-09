@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mappings>
+    <override>
+    <table>CMRTCUST</table>
+    <field>SBO</field>
+    <value>001</value>
+    <countries>822,862</countries>
+	</override>
+	<override>
+    <table>KNB1</table>
+    <field>BUKRS</field>
+    <value>1234</value>
+    <countries>862,822</countries>
+	</override>
+	<override>
+    <table>KNA1</table>
+    <field>KUKLA</field>
+    <value>01</value>
+    <countries>862,822</countries>
+	</override>
+	<override>
+    <table>CMRTADDR</table>
+    <field>ADDRLN</field>
+    <value>TESTING</value>
+    <countries>822</countries>
+	</override>
+</mappings>

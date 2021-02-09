@@ -1,7 +1,7 @@
 package com.ibm.cmr.create.batch.service;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.Column;
 import javax.persistence.EntityManager;
 
 import org.apache.commons.beanutils.PropertyUtils;
@@ -63,9 +64,10 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.legacy.CloningMapping;
+import com.ibm.cio.cmr.request.util.legacy.CloningOverrideMapping;
+import com.ibm.cio.cmr.request.util.legacy.CloningOverrideUtil;
 import com.ibm.cio.cmr.request.util.legacy.CloningRDCConfiguration;
 import com.ibm.cio.cmr.request.util.legacy.CloningRDCUtil;
-import com.ibm.cio.cmr.request.util.legacy.CloningSboUtil;
 import com.ibm.cio.cmr.request.util.legacy.CloningUtil;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectObjectContainer;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
@@ -86,7 +88,16 @@ public class CloningProcessService extends BaseBatchService {
   private static final String ADRNR_KEY = "ADRNR";
   private static final String PARNR_KEY = "PARNR";
 
+  private static final String LEGACY_CUST_TABLE = "CMRTCUST";
+  private static final String LEGACY_CUSTEXT_TABLE = "CMRTCEXT";
+  private static final String LEGACY_ADDR_TABLE = "CMRTADDR";
+  private static final String KNA1_TABLE = "KNA1";
+
   private static final List<String> KNB1_ADDR = Arrays.asList("ZS01", "ZS02");
+  private static final List<String> KNVI_PK = Arrays.asList("aland", "tatyp");
+  private static final List<String> KNVP_PK = Arrays.asList("vkorg", "vtweg", "spart", "parvw", "parza");
+  private static final List<String> KNBK_PK = Arrays.asList("banks", "bankl", "bankn");
+  private static final List<String> KNVL_PK = Arrays.asList("aland", "tatyp", "licnr");
 
   @Override
   protected Boolean executeBatch(EntityManager entityManager) throws Exception {
@@ -182,9 +193,13 @@ public class CloningProcessService extends BaseBatchService {
       CloningRDCUtil rdcUtil = new CloningRDCUtil();
       CloningRDCConfiguration rdcConfig = rdcUtil.getConfigDetails();
 
+      List<CloningOverrideMapping> overrideValues = null;
+      CloningOverrideUtil overrideUtil = new CloningOverrideUtil();
+
       for (RdcCloningRefn rdcCloningRefn : pendingCloningRefn) {
         try {
-          processCloningKNA1RDC(entityManager, rdcCloningRefn, rdcConfig);
+          overrideValues = overrideUtil.getOverrideValueFromMapping(rdcCloningRefn.getCmrIssuingCntry());
+          processCloningKNA1RDC(entityManager, rdcCloningRefn, rdcConfig, overrideValues);
         } catch (Exception e) {
           partialRollback(entityManager);
           LOG.error("Unexpected error occurred during kna1 cloning process for CMR No : " + rdcCloningRefn.getCmrNo(), e);
@@ -206,7 +221,8 @@ public class CloningProcessService extends BaseBatchService {
         try {
           kna1 = getKna1ByKunnr(entityManager, rdcCloningRefn.getId().getMandt(), rdcCloningRefn.getId().getKunnr());
           kna1Clone = getKna1ByKunnr(entityManager, rdcCloningRefn.getTargetMandt(), rdcCloningRefn.getTargetKunnr());
-          processKna1Children(entityManager, kna1, kna1Clone, rdcConfig);
+          overrideValues = overrideUtil.getOverrideValueFromMapping(rdcCloningRefn.getCmrIssuingCntry());
+          processKna1Children(entityManager, kna1, kna1Clone, rdcConfig, overrideValues);
           rdcCloningRefn.setStatus("C");
           updateEntity(rdcCloningRefn, entityManager);
           // if all rdcCloningRefn complete update cmr queue to completed
@@ -312,7 +328,7 @@ public class CloningProcessService extends BaseBatchService {
       throw new Exception("CMR not found in Legacy");
     }
 
-    CloningSboUtil sboUtil = new CloningSboUtil();
+    CloningOverrideUtil overrideUtil = new CloningOverrideUtil();
     // DB2 Cust Table
     CmrtCust custClone = initEmpty(CmrtCust.class);
 
@@ -329,10 +345,19 @@ public class CloningProcessService extends BaseBatchService {
     PropertyUtils.copyProperties(custClone, cust);
     custClone.setId(custPkClone);
 
+    // override config changes
+    List<CloningOverrideMapping> overrideValues = null;
     if ("NA".equals(targetCntry))
-      custClone.setSbo(sboUtil.getSBOFromMapping(cntry)); // from config file
+      overrideValues = overrideUtil.getOverrideValueFromMapping(cntry);
     else
-      custClone.setSbo(sboUtil.getSBOFromMapping(targetCntry));
+      overrideValues = overrideUtil.getOverrideValueFromMapping(targetCntry);
+
+    overrideConfigChanges(entityManager, overrideValues, custClone, LEGACY_CUST_TABLE, custPkClone);
+
+    // if ("NA".equals(targetCntry))
+    // custClone.setSbo(sboUtil.getSBOFromMapping(cntry)); // from config file
+    // else
+    // custClone.setSbo(sboUtil.getSBOFromMapping(targetCntry));
 
     custClone.setCreateTs(SystemUtil.getCurrentTimestamp());
     custClone.setUpdateTs(SystemUtil.getCurrentTimestamp());
@@ -357,6 +382,9 @@ public class CloningProcessService extends BaseBatchService {
       // copy value same as old from addr object
       PropertyUtils.copyProperties(legacyAddrClone, addr);
       legacyAddrClone.setId(legacyAddrPkClone);
+
+      overrideConfigChanges(entityManager, overrideValues, legacyAddrClone, LEGACY_ADDR_TABLE, legacyAddrPkClone);
+
       legacyAddrClone.setCreateTs(SystemUtil.getCurrentTimestamp());
       legacyAddrClone.setUpdateTs(SystemUtil.getCurrentTimestamp());
       legacyObjectsClone.addAddress(legacyAddrClone);
@@ -383,6 +411,9 @@ public class CloningProcessService extends BaseBatchService {
       // copy value same as old from cust ext object
       PropertyUtils.copyProperties(custExtClone, custExt);
       custExtClone.setId(custExtPkClone);
+
+      overrideConfigChanges(entityManager, overrideValues, custExtClone, LEGACY_CUSTEXT_TABLE, custExtPkClone);
+
       custExtClone.setUpdateTs(SystemUtil.getCurrentTimestamp());
       // need to check regarding CODCC and CODCP field
       legacyObjectsClone.setCustomerExt(custExtClone);
@@ -650,7 +681,8 @@ public class CloningProcessService extends BaseBatchService {
     return query.getResults(RdcCloningRefn.class);
   }
 
-  private void processCloningKNA1RDC(EntityManager entityManager, RdcCloningRefn rdcCloningRefn, CloningRDCConfiguration rdcConfig) throws Exception {
+  private void processCloningKNA1RDC(EntityManager entityManager, RdcCloningRefn rdcCloningRefn, CloningRDCConfiguration rdcConfig,
+      List<CloningOverrideMapping> overrideValues) throws Exception {
     CmrCloningQueuePK cloningPk = new CmrCloningQueuePK();
     cloningPk.setCmrCloningProcessId(rdcCloningRefn.getId().getCmrCloningProcessId());
     cloningPk.setCmrIssuingCntry(rdcCloningRefn.getCmrIssuingCntry());
@@ -683,20 +715,15 @@ public class CloningProcessService extends BaseBatchService {
             kna1Clone.setAdrnr(adrnr);
           }
 
+          overrideConfigChanges(entityManager, overrideValues, kna1Clone, KNA1_TABLE, kna1PkClone);
+
           kna1Clone.setSapTs(ts);
           kna1Clone.setShadUpdateInd("I");
           kna1Clone.setShadUpdateTs(ts);
 
           createEntity(kna1Clone, entityManager);
-        } catch (IllegalAccessException e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
-        } catch (InvocationTargetException e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
+        } catch (Exception e) {
+          processError(entityManager, rdcCloningRefn, cmrCloningQueue, "Issue in Copy KNA1 record");
         }
       }
 
@@ -723,7 +750,7 @@ public class CloningProcessService extends BaseBatchService {
   private String generateId(String mandt, String key, EntityManager entityManager) {
     LOG.debug("Calling stored procedure to produce next " + key);
     String generatedId = "";
-    // mandt = "030";
+    mandt = "030";
     try {
       Connection conn = entityManager.unwrap(Connection.class);
       CallableStatement stmt = null;
@@ -782,36 +809,38 @@ public class CloningProcessService extends BaseBatchService {
 
   }
 
-  protected void processKna1Children(EntityManager rdcMgr, Kna1 kna1, Kna1 kna1Clone, CloningRDCConfiguration rdcConfig) throws Exception {
+  protected void processKna1Children(EntityManager rdcMgr, Kna1 kna1, Kna1 kna1Clone, CloningRDCConfiguration rdcConfig,
+      List<CloningOverrideMapping> overrideValues) throws Exception {
 
-    processKnb1(rdcMgr, kna1, kna1Clone, rdcConfig);
+    processKnb1(rdcMgr, kna1, kna1Clone, rdcConfig, overrideValues);
 
-    processKnvv(rdcMgr, kna1, kna1Clone, rdcConfig);
+    processKnvv(rdcMgr, kna1, kna1Clone, rdcConfig, overrideValues);
 
-    processKnvi(rdcMgr, kna1, kna1Clone, rdcConfig);
+    processKnvi(rdcMgr, kna1, kna1Clone, rdcConfig, overrideValues);
 
-    processKnex(rdcMgr, kna1, kna1Clone, rdcConfig);
+    processKnex(rdcMgr, kna1, kna1Clone, rdcConfig, overrideValues);
 
-    processKnvp(rdcMgr, kna1, kna1Clone, rdcConfig);
+    processKnvp(rdcMgr, kna1, kna1Clone, rdcConfig, overrideValues);
 
-    processSadr(rdcMgr, kna1, kna1Clone, rdcConfig);
+    processSadr(rdcMgr, kna1, kna1Clone, rdcConfig, overrideValues);
 
-    processAddlCtryData(rdcMgr, kna1, kna1Clone, rdcConfig);
+    processAddlCtryData(rdcMgr, kna1, kna1Clone, rdcConfig, overrideValues);
 
-    processKnvk(rdcMgr, kna1, kna1Clone, rdcConfig);
+    processKnvk(rdcMgr, kna1, kna1Clone, rdcConfig, overrideValues);
 
-    processKunnrExt(rdcMgr, kna1, kna1Clone, rdcConfig);
+    processKunnrExt(rdcMgr, kna1, kna1Clone, rdcConfig, overrideValues);
 
-    processKnbk(rdcMgr, kna1, kna1Clone, rdcConfig);
+    processKnbk(rdcMgr, kna1, kna1Clone, rdcConfig, overrideValues);
 
-    processKnva(rdcMgr, kna1, kna1Clone, rdcConfig);
+    processKnva(rdcMgr, kna1, kna1Clone, rdcConfig, overrideValues);
 
-    processKnvl(rdcMgr, kna1, kna1Clone, rdcConfig);
+    processKnvl(rdcMgr, kna1, kna1Clone, rdcConfig, overrideValues);
 
-    processSizeInfo(rdcMgr, kna1, kna1Clone, rdcConfig);
+    processSizeInfo(rdcMgr, kna1, kna1Clone, rdcConfig, overrideValues);
   }
 
-  private void processKnb1(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, CloningRDCConfiguration rdcConfig) throws Exception {
+  private void processKnb1(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, CloningRDCConfiguration rdcConfig,
+      List<CloningOverrideMapping> overrideValues) throws Exception {
 
     Knb1 knb1 = null;
     Knb1 knb1Clone = null;
@@ -828,6 +857,10 @@ public class CloningProcessService extends BaseBatchService {
           knb1PKClone.setKunnr(kna1Clone.getId().getKunnr());
           knb1PKClone.setBukrs(knb1.getId().getBukrs());
           PropertyUtils.copyProperties(knb1Clone, knb1);
+
+          // knb1Clone.setId(knb1PKClone);
+
+          overrideConfigChanges(entityManager, overrideValues, knb1Clone, "KNB1", knb1PKClone);
 
           knb1Clone.setId(knb1PKClone);
 
@@ -856,7 +889,8 @@ public class CloningProcessService extends BaseBatchService {
     return query.getSingleResult(Knb1.class);
   }
 
-  private void processKnvv(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, CloningRDCConfiguration rdcConfig) throws Exception {
+  private void processKnvv(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, CloningRDCConfiguration rdcConfig,
+      List<CloningOverrideMapping> overrideValues) throws Exception {
 
     Knvv knvv = null;
     Knvv knvvClone = null;
@@ -904,7 +938,8 @@ public class CloningProcessService extends BaseBatchService {
     return query.getSingleResult(Knvv.class);
   }
 
-  private void processKnex(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, CloningRDCConfiguration rdcConfig) throws Exception {
+  private void processKnex(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, CloningRDCConfiguration rdcConfig,
+      List<CloningOverrideMapping> overrideValues) throws Exception {
 
     Knex knex = null;
     Knex knexClone = null;
@@ -950,7 +985,8 @@ public class CloningProcessService extends BaseBatchService {
     return query.getSingleResult(Knex.class);
   }
 
-  private void processSadr(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, CloningRDCConfiguration rdcConfig) throws Exception {
+  private void processSadr(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, CloningRDCConfiguration rdcConfig,
+      List<CloningOverrideMapping> overrideValues) throws Exception {
 
     Sadr sadr = null;
     Sadr sadrClone = null;
@@ -996,7 +1032,8 @@ public class CloningProcessService extends BaseBatchService {
     return query.getSingleResult(Sadr.class);
   }
 
-  private void processKnvi(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, CloningRDCConfiguration rdcConfig) throws Exception {
+  private void processKnvi(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, CloningRDCConfiguration rdcConfig,
+      List<CloningOverrideMapping> overrideValues) throws Exception {
 
     List<Knvi> knvi = null;
     List<Knvi> knviClone = null;
@@ -1046,7 +1083,8 @@ public class CloningProcessService extends BaseBatchService {
     return query.getResults(Knvi.class);
   }
 
-  private void processKnvk(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, CloningRDCConfiguration rdcConfig) throws Exception {
+  private void processKnvk(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, CloningRDCConfiguration rdcConfig,
+      List<CloningOverrideMapping> overrideValues) throws Exception {
 
     Knvk knvk = null;
     Knvk knvkClone = null;
@@ -1092,7 +1130,8 @@ public class CloningProcessService extends BaseBatchService {
     return query.getSingleResult(Knvk.class);
   }
 
-  private void processKnvp(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, CloningRDCConfiguration rdcConfig) throws Exception {
+  private void processKnvp(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, CloningRDCConfiguration rdcConfig,
+      List<CloningOverrideMapping> overrideValues) throws Exception {
 
     List<Knvp> knvp = null;
     List<Knvp> knvpClone = null;
@@ -1145,7 +1184,8 @@ public class CloningProcessService extends BaseBatchService {
     return query.getResults(Knvp.class);
   }
 
-  private void processAddlCtryData(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, CloningRDCConfiguration rdcConfig) throws Exception {
+  private void processAddlCtryData(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, CloningRDCConfiguration rdcConfig,
+      List<CloningOverrideMapping> overrideValues) throws Exception {
 
     Addlctrydata addlctrydata = null;
     Addlctrydata addlctrydataClone = null;
@@ -1190,7 +1230,8 @@ public class CloningProcessService extends BaseBatchService {
     return query.getSingleResult(Addlctrydata.class);
   }
 
-  private void processKunnrExt(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, CloningRDCConfiguration rdcConfig) throws Exception {
+  private void processKunnrExt(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, CloningRDCConfiguration rdcConfig,
+      List<CloningOverrideMapping> overrideValues) throws Exception {
 
     KunnrExt kunnrExt = null;
     KunnrExt kunnrExtClone = null;
@@ -1235,7 +1276,8 @@ public class CloningProcessService extends BaseBatchService {
     return query.getSingleResult(KunnrExt.class);
   }
 
-  private void processKnbk(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, CloningRDCConfiguration rdcConfig) throws Exception {
+  private void processKnbk(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, CloningRDCConfiguration rdcConfig,
+      List<CloningOverrideMapping> overrideValues) throws Exception {
 
     Knbk knbk = null;
     Knbk knbkClone = null;
@@ -1283,7 +1325,8 @@ public class CloningProcessService extends BaseBatchService {
     return query.getSingleResult(Knbk.class);
   }
 
-  private void processKnva(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, CloningRDCConfiguration rdcConfig) throws Exception {
+  private void processKnva(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, CloningRDCConfiguration rdcConfig,
+      List<CloningOverrideMapping> overrideValues) throws Exception {
 
     Knva knva = null;
     Knva knvaClone = null;
@@ -1329,7 +1372,8 @@ public class CloningProcessService extends BaseBatchService {
     return query.getSingleResult(Knva.class);
   }
 
-  private void processKnvl(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, CloningRDCConfiguration rdcConfig) throws Exception {
+  private void processKnvl(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, CloningRDCConfiguration rdcConfig,
+      List<CloningOverrideMapping> overrideValues) throws Exception {
 
     Knvl knvl = null;
     Knvl knvlClone = null;
@@ -1377,7 +1421,8 @@ public class CloningProcessService extends BaseBatchService {
     return query.getSingleResult(Knvl.class);
   }
 
-  private void processSizeInfo(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, CloningRDCConfiguration rdcConfig) throws Exception {
+  private void processSizeInfo(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, CloningRDCConfiguration rdcConfig,
+      List<CloningOverrideMapping> overrideValues) throws Exception {
 
     Sizeinfo sizeInfo = null;
     Sizeinfo sizeInfoClone = null;
@@ -1469,6 +1514,100 @@ public class CloningProcessService extends BaseBatchService {
       LOG.debug("No duplicate cmr in rdc for target country :" + targetCntry);
     }
 
+  }
+
+  private void overrideConfigChanges(EntityManager entityManager, List<CloningOverrideMapping> overrideValues, Object entity, String table,
+      Object entityPK) throws Exception {
+    LOG.debug("Inside ovverideConfigChanges method with table : " + table + " Entity : " + entity.getClass().getName());
+    boolean pkUpdate = false;
+    if (overrideValues != null && overrideValues.size() > 0) {
+      if (overrideValues.size() == 1) {
+        if (table.equalsIgnoreCase(overrideValues.get(0).getTable())) {
+          pkUpdate = checkPrimaryKeyOverride(entityManager, table, overrideValues.get(0).getField());
+          if (pkUpdate)
+            setEntityValue(entityPK, overrideValues.get(0).getField(), overrideValues.get(0).getValue());
+          else
+            setEntityValue(entity, overrideValues.get(0).getField(), overrideValues.get(0).getValue());
+        }
+      } else {
+        for (CloningOverrideMapping mapping : overrideValues) {
+          if (table.equalsIgnoreCase(mapping.getTable())) {
+            pkUpdate = checkPrimaryKeyOverride(entityManager, table, mapping.getField());
+            if (pkUpdate)
+              setEntityValue(entityPK, mapping.getField(), mapping.getValue());
+            else
+              setEntityValue(entity, mapping.getField(), mapping.getValue());
+          }
+        }
+      }
+    }
+
+  }
+
+  private boolean checkPrimaryKeyOverride(EntityManager entityManager, String table, String field) throws Exception {
+    LOG.debug("Inside checkPrimaryKeyOverride method ");
+    if ("KNB1".equalsIgnoreCase(table) && "BUKRS".equalsIgnoreCase(field))
+      return true;
+    else if ("KNVV".equalsIgnoreCase(table) && "VKORG".equalsIgnoreCase(field))
+      return true;
+    else if ("KNVI".equalsIgnoreCase(table) && (KNVI_PK.contains(field.toLowerCase())))
+      return true;
+    else if ("KNVP".equalsIgnoreCase(table) && (KNVP_PK.contains(field.toLowerCase())))
+      return true;
+    else if ("KNEX".equalsIgnoreCase(table) && "lndex".equalsIgnoreCase(field))
+      return true;
+    else if ("ADDLCTRYDATA".equalsIgnoreCase(table) && "fieldName".equalsIgnoreCase(field))
+      return true;
+    else if ("KNBK".equalsIgnoreCase(table) && (KNBK_PK.contains(field.toLowerCase())))
+      return true;
+    else if ("KNVA".equalsIgnoreCase(table) && "ablad".equalsIgnoreCase(field))
+      return true;
+    else if ("KNVL".equalsIgnoreCase(table) && (KNVL_PK.contains(field.toLowerCase())))
+      return true;
+    else if ("SIZEINFO".equalsIgnoreCase(table) && "sizeunittype".equalsIgnoreCase(field))
+      return true;
+
+    return false;
+
+  }
+
+  /**
+   * Sets the data value by finding the relevant column having the given field
+   * name
+   * 
+   * @param entity
+   * @param fieldName
+   * @param value
+   */
+  protected void setEntityValue(Object entity, String fieldName, Object value) {
+    boolean fieldMatched = false;
+    for (Field field : entity.getClass().getDeclaredFields()) {
+      // match the entity name to field name
+      fieldMatched = false;
+      Column col = field.getAnnotation(Column.class);
+      if (col != null && fieldName.toUpperCase().equals(col.name().toUpperCase())) {
+        fieldMatched = true;
+      } else if (field.getName().toUpperCase().equals(fieldName.toUpperCase())) {
+        fieldMatched = true;
+      }
+      if (fieldMatched) {
+        try {
+          field.setAccessible(true);
+          try {
+            Method set = entity.getClass().getDeclaredMethod("set" + (field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1)),
+                value != null ? value.getClass() : String.class);
+            if (set != null) {
+              set.invoke(entity, value);
+            }
+          } catch (Exception e) {
+            LOG.trace("Field " + fieldName + " cannot be set vis method.", e);
+            field.set(entity, value);
+          }
+        } catch (Exception e) {
+          LOG.trace("Field " + fieldName + " cannot be assigned. ", e);
+        }
+      }
+    }
   }
 
 }
