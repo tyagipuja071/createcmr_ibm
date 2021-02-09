@@ -133,6 +133,7 @@ public class DnBOrgIdValidationElement extends ValidatingElement implements Comp
             output.setMessage("Org ID validated");
             result.setProcessOutput(output);
             processDnBFields(entityManager, data, highestCloseMatch, details);
+            result.setDetails(details.toString());
             LOG.trace(new ObjectMapper().writeValueAsString(highestCloseMatch));
           } else {
             LOG.debug("Org ID not validated");
@@ -142,6 +143,8 @@ public class DnBOrgIdValidationElement extends ValidatingElement implements Comp
             output.setMessage("Org ID not validated");
             result.setProcessOutput(output);
             processDnBFields(entityManager, data, dnbMatches.get(0), details);
+            result.setDetails(details.toString());
+            result.setOnError(true);
             LOG.trace(new ObjectMapper().writeValueAsString(highestCloseMatch));
           }
           result.setDetails(details.toString().trim());
