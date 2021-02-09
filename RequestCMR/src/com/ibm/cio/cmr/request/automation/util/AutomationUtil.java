@@ -519,7 +519,7 @@ public abstract class AutomationUtil {
    * @return
    */
   protected boolean doPrivatePersonChecks(AutomationEngineData engineData, String country, String landCntry, String name, StringBuilder details,
-      boolean checkBluepages) {
+      boolean checkBluepages, Data data) {
 
     if (hasLegalEndings(name)) {
       engineData.addRejectionComment("OTH", "Scenario chosen is incorrect, should be Commercial.", "", "");
@@ -527,7 +527,7 @@ public abstract class AutomationUtil {
       return false;
     }
 
-    PrivatePersonCheckResult checkResult = checkPrivatePersonRecord(country, landCntry, name, checkBluepages);
+    PrivatePersonCheckResult checkResult = checkPrivatePersonRecord(country, landCntry, name, checkBluepages, data);
     PrivatePersonCheckStatus checkStatus = checkResult.getStatus();
 
     switch (checkStatus) {
@@ -605,7 +605,7 @@ public abstract class AutomationUtil {
       details.append("No duplicate requests found");
     }
 
-    PrivatePersonCheckResult checkResult = checkPrivatePersonRecord(country, landCntry, name, checkBluepages);
+    PrivatePersonCheckResult checkResult = checkPrivatePersonRecord(country, landCntry, name, checkBluepages, reqData.getData());
     PrivatePersonCheckStatus checkStatus = checkResult.getStatus();
 
     switch (checkStatus) {
@@ -644,10 +644,10 @@ public abstract class AutomationUtil {
    * @param checkBluePages
    * @return
    */
-  protected PrivatePersonCheckResult checkPrivatePersonRecord(String country, String landCntry, String name, boolean checkBluePages) {
+  protected PrivatePersonCheckResult checkPrivatePersonRecord(String country, String landCntry, String name, boolean checkBluePages, Data data) {
     LOG.debug("Validating Private Person record for " + name);
     try {
-      DuplicateCMRCheckResponse checkResponse = checkDuplicatePrivatePersonRecord(name, country, landCntry);
+      DuplicateCMRCheckResponse checkResponse = checkDuplicatePrivatePersonRecord(name, country, landCntry, data);
       String cmrNo = "";
       if (checkResponse != null) {
         cmrNo = checkResponse.getCmrNo();
@@ -692,7 +692,8 @@ public abstract class AutomationUtil {
    * @param landedCountry
    * @return CMR No. of the duplicate record
    */
-  protected DuplicateCMRCheckResponse checkDuplicatePrivatePersonRecord(String name, String issuingCountry, String landedCountry) throws Exception {
+  protected DuplicateCMRCheckResponse checkDuplicatePrivatePersonRecord(String name, String issuingCountry, String landedCountry, Data data)
+      throws Exception {
     MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
         MatchingServiceClient.class);
     DuplicateCMRCheckRequest request = new DuplicateCMRCheckRequest();
@@ -701,6 +702,18 @@ public abstract class AutomationUtil {
     request.setLandedCountry(landedCountry);
     request.setIsicCd(AutomationConst.ISIC_PRIVATE_PERSON);
     request.setNameMatch("Y");
+    if (SystemLocation.FRANCE.equals(issuingCountry)) {
+      switch (data.getCustSubGrp()) {
+      case "PRICU":
+      case "XBLUM":
+        request.setCustClass("60");
+        break;
+      case "CBIEM":
+      case "IBMEM":
+        request.setCustClass("71");
+        break;
+      }
+    }
     client.setReadTimeout(1000 * 60 * 5);
     LOG.debug("Connecting to the Duplicate CMR Check Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
     MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.CMR_SERVICE_ID, request, MatchingResponse.class);
