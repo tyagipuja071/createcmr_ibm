@@ -978,7 +978,7 @@ public class FranceUtil extends AutomationUtil {
     return true;
   }
 
-  protected PrivatePersonCheckResult chkPrivatePersonRecordFR(String country, String landCntry, String name, boolean checkBluePages, Data data) {
+  private PrivatePersonCheckResult chkPrivatePersonRecordFR(String country, String landCntry, String name, boolean checkBluePages, Data data) {
     LOG.debug("Validating Private Person record for " + name);
     try {
       DuplicateCMRCheckResponse checkResponse = chkDupPrivatePersonRecordFR(name, country, landCntry, data);
