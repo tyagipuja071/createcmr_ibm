@@ -791,7 +791,7 @@ public class FranceUtil extends AutomationUtil {
                 checkDetails.append("Addition of new address (" + addr.getId().getAddrSeq() + ") address skipped in the checks.\n");
               }
             }
-            if (CmrConstants.RDC_INSTALL_AT.equals(addrType)) {
+            if (CmrConstants.RDC_INSTALL_AT.equals(addrType) || CmrConstants.RDC_BILL_TO.equals(addrType)) {
               String addrName = addr.getCustNm1() + (StringUtils.isNotBlank(addr.getCustNm2()) ? addr.getCustNm2() : "");
               String soldToName = "";
               Addr zs01 = requestData.getAddress("ZS01");
@@ -813,13 +813,6 @@ public class FranceUtil extends AutomationUtil {
                 checkDetails.append("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") has different customer name than sold-to.\n");
                 resultCodes.add("D");
               }
-            }
-            if (CmrConstants.RDC_BILL_TO.equals(addrType)) {
-
-              LOG.debug("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified");
-              checkDetails.append("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified \n");
-              resultCodes.add("D");
-
             }
           } else if ("Y".equals(addr.getChangedIndc())) {
             // update address
