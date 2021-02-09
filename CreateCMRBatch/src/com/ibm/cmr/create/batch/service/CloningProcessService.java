@@ -354,11 +354,6 @@ public class CloningProcessService extends BaseBatchService {
 
     overrideConfigChanges(entityManager, overrideValues, custClone, LEGACY_CUST_TABLE, custPkClone);
 
-    // if ("NA".equals(targetCntry))
-    // custClone.setSbo(sboUtil.getSBOFromMapping(cntry)); // from config file
-    // else
-    // custClone.setSbo(sboUtil.getSBOFromMapping(targetCntry));
-
     custClone.setCreateTs(SystemUtil.getCurrentTimestamp());
     custClone.setUpdateTs(SystemUtil.getCurrentTimestamp());
     custClone.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
@@ -473,7 +468,6 @@ public class CloningProcessService extends BaseBatchService {
       request.setMax(999999);
     }
 
-    // }
     GenerateCMRNoClient client = CmrServicesFactory.getInstance().createClient(BATCH_SERVICE_URL, GenerateCMRNoClient.class);
 
     LOG.debug("Generating Cloning CMR No. for Issuing Country " + cmrIssuingCntry);
@@ -750,7 +744,7 @@ public class CloningProcessService extends BaseBatchService {
   private String generateId(String mandt, String key, EntityManager entityManager) {
     LOG.debug("Calling stored procedure to produce next " + key);
     String generatedId = "";
-    mandt = "030";
+    // mandt = "030";
     try {
       Connection conn = entityManager.unwrap(Connection.class);
       CallableStatement stmt = null;
@@ -790,7 +784,7 @@ public class CloningProcessService extends BaseBatchService {
   }
 
   /**
-   * Rettieves the KNA1 record by KUNNR and MANDT
+   * Retrieves the KNA1 record by KUNNR and MANDT
    * 
    * @param rdcMgr
    * @param mandt
@@ -911,6 +905,8 @@ public class CloningProcessService extends BaseBatchService {
 
           PropertyUtils.copyProperties(knvvClone, knvv);
 
+          overrideConfigChanges(entityManager, overrideValues, knvvClone, "KNVV", knvvPKClone);
+
           knvvClone.setId(knvvPKClone);
 
           knvvClone.setSapTs(ts);
@@ -958,6 +954,8 @@ public class CloningProcessService extends BaseBatchService {
 
           PropertyUtils.copyProperties(knexClone, knex);
 
+          overrideConfigChanges(entityManager, overrideValues, knexClone, "KNEX", knexPKClone);
+
           knexClone.setId(knexPKClone);
 
           knexClone.setSapTs(ts);
@@ -1004,6 +1002,8 @@ public class CloningProcessService extends BaseBatchService {
           sadrPKClone.setNatio(sadr.getId().getNatio());
 
           PropertyUtils.copyProperties(sadrClone, sadr);
+
+          overrideConfigChanges(entityManager, overrideValues, sadrClone, "SADR", sadrPKClone);
 
           sadrClone.setId(sadrPKClone);
 
@@ -1055,6 +1055,8 @@ public class CloningProcessService extends BaseBatchService {
 
             PropertyUtils.copyProperties(knviCloneInsert, currentKnvi);
 
+            overrideConfigChanges(entityManager, overrideValues, knviCloneInsert, "KNVI", knviPKClone);
+
             knviCloneInsert.setId(knviPKClone);
 
             knviCloneInsert.setSapTs(ts);
@@ -1102,6 +1104,8 @@ public class CloningProcessService extends BaseBatchService {
           knvkPKClone.setParnr(parnr);
 
           PropertyUtils.copyProperties(knvkClone, knvk);
+
+          overrideConfigChanges(entityManager, overrideValues, knvkClone, "KNVK", knvkPKClone);
 
           knvkClone.setId(knvkPKClone);
 
@@ -1156,6 +1160,8 @@ public class CloningProcessService extends BaseBatchService {
 
             PropertyUtils.copyProperties(knvpCloneInsert, currentKnvp);
 
+            overrideConfigChanges(entityManager, overrideValues, knvpCloneInsert, "KNVP", knvpPKClone);
+
             knvpCloneInsert.setId(knvpPKClone);
 
             knvpCloneInsert.setSapTs(ts);
@@ -1204,6 +1210,8 @@ public class CloningProcessService extends BaseBatchService {
 
           PropertyUtils.copyProperties(addlctrydataClone, addlctrydata);
 
+          overrideConfigChanges(entityManager, overrideValues, addlctrydataClone, "ADDLCTRYDATA", pk);
+
           addlctrydataClone.setId(pk);
 
           addlctrydataClone.setCreateDt(ts);
@@ -1248,6 +1256,8 @@ public class CloningProcessService extends BaseBatchService {
           pk.setMandt(kna1Clone.getId().getMandt());
 
           PropertyUtils.copyProperties(kunnrExtClone, kunnrExt);
+
+          overrideConfigChanges(entityManager, overrideValues, kunnrExtClone, "KUNNR_EXT", pk);
 
           kunnrExtClone.setId(pk);
 
@@ -1298,6 +1308,8 @@ public class CloningProcessService extends BaseBatchService {
 
           PropertyUtils.copyProperties(knbkClone, knbk);
 
+          overrideConfigChanges(entityManager, overrideValues, knbkClone, "KNBK", knbkPKClone);
+
           knbkClone.setId(knbkPKClone);
 
           knbkClone.setSapTs(ts);
@@ -1344,6 +1356,8 @@ public class CloningProcessService extends BaseBatchService {
           knvaPKClone.setMandt(kna1Clone.getId().getMandt());
 
           PropertyUtils.copyProperties(knvaClone, knva);
+
+          overrideConfigChanges(entityManager, overrideValues, knvaClone, "KNVA", knvaPKClone);
 
           knvaClone.setId(knvaPKClone);
 
@@ -1394,6 +1408,8 @@ public class CloningProcessService extends BaseBatchService {
 
           PropertyUtils.copyProperties(knvlClone, knvl);
 
+          overrideConfigChanges(entityManager, overrideValues, knvlClone, "KNVL", knvlPKClone);
+
           knvlClone.setId(knvlPKClone);
 
           knvlClone.setSapTs(ts);
@@ -1440,6 +1456,8 @@ public class CloningProcessService extends BaseBatchService {
           pk.setSizeunittype(sizeInfo.getId().getSizeunittype());
 
           PropertyUtils.copyProperties(sizeInfoClone, sizeInfo);
+
+          overrideConfigChanges(entityManager, overrideValues, sizeInfoClone, "SIZEINFO", pk);
 
           sizeInfoClone.setId(pk);
 
