@@ -113,7 +113,6 @@ public class DnBOrgIdValidationElement extends ValidatingElement implements Comp
         DnBMatchingResponse highestCloseMatch = null;
 
         for (DnBMatchingResponse dnbRecord : dnbMatches) {
-
           if (dnbRecord.getConfidenceCode() > 7 && DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), soldTo, admin, dnbRecord)) {
             String dnbOrgId = DnBUtil.getTaxCode1(dnbRecord.getDnbCountry(), dnbRecord.getOrgIdDetails());
             if (data.getTaxCd1().equals(dnbOrgId)) {
@@ -122,34 +121,28 @@ public class DnBOrgIdValidationElement extends ValidatingElement implements Comp
               break;
             }
           }
-
-          // assess the matches here
-          if (isOrgIdMatched) {
-            LOG.debug("Org ID validated successfully");
-            result.setResults("Org ID validated");
-            details.append("Org ID validated successfully with high confidence DnB match "
-                + (highestCloseMatch != null ? "[Duns-" + highestCloseMatch.getDunsNo() + "]" : ""));
-            output.setSuccess(true);
-            output.setMessage("Org ID validated");
-            result.setProcessOutput(output);
-            processDnBFields(entityManager, data, highestCloseMatch, details);
-            result.setDetails(details.toString());
-            LOG.trace(new ObjectMapper().writeValueAsString(highestCloseMatch));
-          } else {
-            LOG.debug("Org ID not validated");
-            result.setResults("Org ID not validated");
-            details.append("Org ID value did not match with the highest confidence D&B match.");
-            output.setSuccess(false);
-            output.setMessage("Org ID not validated");
-            result.setProcessOutput(output);
-            processDnBFields(entityManager, data, dnbMatches.get(0), details);
-            result.setDetails(details.toString());
-            result.setOnError(true);
-            LOG.trace(new ObjectMapper().writeValueAsString(highestCloseMatch));
-          }
-          result.setDetails(details.toString().trim());
-          result.setProcessOutput(output);
         }
+        if (isOrgIdMatched) {
+          LOG.debug("Org ID validated successfully");
+          result.setResults("Org ID validated");
+          details.append("Org ID validated successfully with high confidence DnB match "
+              + (highestCloseMatch != null ? "[Duns-" + highestCloseMatch.getDunsNo() + "]" : ""));
+          output.setSuccess(true);
+          output.setMessage("Org ID validated");
+          processDnBFields(entityManager, data, highestCloseMatch, details);
+          LOG.trace(new ObjectMapper().writeValueAsString(highestCloseMatch));
+        } else {
+          LOG.debug("Org ID not validated");
+          result.setResults("Org ID not validated");
+          details.append("Org ID value did not match with the highest confidence D&B match.");
+          output.setSuccess(false);
+          output.setMessage("Org ID not validated");
+          processDnBFields(entityManager, data, dnbMatches.get(0), details);
+          result.setOnError(true);
+          LOG.trace(new ObjectMapper().writeValueAsString(highestCloseMatch));
+        }
+        result.setDetails(details.toString().trim());
+        result.setProcessOutput(output);
       } else {
         result.setDetails("No D&B record was found using advanced matching.");
         engineData.addRejectionComment("OTH", "No matches with D&B records. Please import from D&B search.", "", "");
