@@ -54,6 +54,10 @@ var _isuHandler = null;
 var _ctcHandler = null;
 var _reqReasonHandler = null;
 var _vatExemptHandler = null;
+var calledByIsuHandler = false;
+var calledByCtcHandler = false;
+var scenarioChangeSalesRepSBO = false;
+
 function addHandlersForZA() {
   for (var i = 0; i < _addrTypesForZA.length; i++) {
     _addrTypeHandler[i] = null;
@@ -73,6 +77,8 @@ function addHandlersForZA() {
   if (_isuHandler == null) {
     if (FormManager.getActualValue('reqType') == 'C') {
       _isuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+        calledByIsuHandler = true;
+        calledByCtcHandler = false;
         setCtcSalesRepSBO(value);
       });
     }
@@ -80,6 +86,8 @@ function addHandlersForZA() {
   if (_ctcHandler == null) {
     if (FormManager.getActualValue('reqType') == 'C') {
       _ctcHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
+        calledByIsuHandler = false;
+        calledByCtcHandler = true;
         setCtcSalesRepSBO(FormManager.getField('isuCd'));
       });
     }
@@ -121,29 +129,21 @@ function setCtcSalesRepSBO(value) {
   if (reqType != 'C') {
     return;
   }
-
-  if(role == 'REQUESTER'){
-    if (scenario != null && !internalBUScenarios.includes(scenario) && isuCtc != '34Q' && isuCtc != '34V' && (countryUse == '864' || countryUse == '864LS' || countryUse == '864SZ')) {
-      FormManager.setValue('salesBusOffCd', '');
-      FormManager.setValue('repTeamMemberNo', '');
+  if (scenario != null && !internalBUScenarios.includes(scenario) && isuCtc != '34Q' && isuCtc != '34V' && (countryUse == '864' || countryUse == '864LS' || countryUse == '864SZ' || countryUse == '864NA')) {
+    if (calledByIsuHandler) {
+      if (!scenarioChangeSalesRepSBO) {
+        FormManager.setValue('salesBusOffCd', '');
+        FormManager.setValue('repTeamMemberNo', '');
+        calledByIsuHandler = false;
+      }
+    } else if (calledByCtcHandler) {
+      if (!scenarioChangeSalesRepSBO) {
+        FormManager.setValue('salesBusOffCd', '');
+        FormManager.setValue('repTeamMemberNo', '');
+        calledByCtcHandler = false;
+      }
+      scenarioChangeSalesRepSBO = false;
     }
-    if (scenario != null && !internalBUScenarios.includes(scenario) && isuCtc != '34V' && isuCtc != '34Q' && countryUse == '864NA') {
-      FormManager.setValue('salesBusOffCd', '');
-      FormManager.setValue('repTeamMemberNo', '');
-    }
-  }
-  if(role != 'REQUESTER' && _isScenarioChanged){
-    if (scenario != null && !internalBUScenarios.includes(scenario) && isuCtc != '34Q' && isuCtc != '34V' && (countryUse == '864' || countryUse == '864LS' || countryUse == '864SZ')) {
-      FormManager.setValue('salesBusOffCd', '');
-      FormManager.setValue('repTeamMemberNo', '');
-    }
-    if (scenario != null && !internalBUScenarios.includes(scenario) && isuCtc != '34V' && isuCtc != '34Q' && countryUse == '864NA') {
-      FormManager.setValue('salesBusOffCd', '');
-      FormManager.setValue('repTeamMemberNo', '');
-    }
-  } else if( role != 'REQUESTER' && !_isScenarioChanged){
-    FormManager.setValue('salesBusOffCd', _pagemodel.salesBusOffCd);
-    FormManager.setValue('repTeamMemberNo', _pagemodel.repTeamMemberNo);
   }
 }
 
@@ -1737,6 +1737,7 @@ function requireVATForCrossBorder() {
 var _isScenarioChanged = false;
 function checkScenarioChanged(fromAddress, scenario, scenarioChanged) {
   _isScenarioChanged = scenarioChanged;
+  scenarioChangeSalesRepSBO = scenarioChanged;
   setCtcSalesRepSBO(FormManager.getActualValue('isuCd'));
 }
 
@@ -1853,7 +1854,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addCityPostalCodeLengthValidator, GEOHandler.MCO1, null, true);
   GEOHandler.registerValidator(addCrossLandedCntryFormValidator, GEOHandler.MCO1, null, true);
   GEOHandler.registerValidator(addIbmDeptCostCntrValidator, GEOHandler.MCO1, null, true);
-  GEOHandler.addAfterTemplateLoad(retainImportedValues, GEOHandler.MCO1);
 
   GEOHandler.addAfterConfig(onLobchange, GEOHandler.MCO1);
   GEOHandler.addAfterTemplateLoad(onLobchange, GEOHandler.MCO1);
@@ -1878,6 +1878,7 @@ dojo.addOnLoad(function() {
   
 
   GEOHandler.addAfterTemplateLoad(checkScenarioChanged, GEOHandler.MCO1);
+  GEOHandler.addAfterTemplateLoad(retainImportedValues, GEOHandler.MCO1);
   GEOHandler.addAfterTemplateLoad(resetVatRequired, GEOHandler.MCO1);
   GEOHandler.addAfterConfig(resetVatExempt, GEOHandler.MCO1);
   GEOHandler.addAfterTemplateLoad(resetVatExempt, GEOHandler.MCO1);
