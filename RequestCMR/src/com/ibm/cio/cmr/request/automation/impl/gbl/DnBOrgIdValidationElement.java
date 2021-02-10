@@ -70,12 +70,13 @@ public class DnBOrgIdValidationElement extends ValidatingElement implements Comp
       return result;
     }
     if (StringUtils.isBlank(data.getTaxCd1())) {
-      result.setResults("OrgID not foumd");
+      result.setResults("OrgID not found");
       result.setDetails("Org ID was not provided on the request.");
       output.setSuccess(false);
-      output.setMessage("OrgID not foumd");
+      output.setMessage("OrgID not found");
       result.setProcessOutput(output);
-      engineData.addNegativeCheckStatus("_orgIdMissing", "Org ID was not provided on the request.");
+      // engineData.addNegativeCheckStatus("_orgIdMissing", "Org ID was not
+      // provided on the request.");
       result.setOnError(false);
       return result;
     }
