@@ -148,9 +148,11 @@ function setInacByCluster() {
         if(inacType != '' && inacTypeSelected[0].includes(",I") && !inacTypeSelected[0].includes(',IN')){
           FormManager.limitDropdownValues(FormManager.getField('inacType'), 'I');
           FormManager.setValue('inacType', 'I');
-        }else if(inacType != '' && inacTypeSelected[0].includes(',N')){
+        } else if(inacType != '' && inacTypeSelected[0].includes(',N')){
           FormManager.limitDropdownValues(FormManager.getField('inacType'), 'N');
           FormManager.setValue('inacType', 'N');
+        } else {
+          FormManager.resetDropdownValues(FormManager.getField('inacType'));
         }
       }
     } else {
