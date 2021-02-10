@@ -14,6 +14,8 @@ import javax.persistence.EntityManager;
 import org.apache.commons.digester.Digester;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
 
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
@@ -24,6 +26,7 @@ import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.FieldResultKey;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
+import com.ibm.cio.cmr.request.automation.util.AutomationConst;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.CoverageContainer;
 import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
@@ -35,12 +38,18 @@ import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.ConfigUtil;
+import com.ibm.cio.cmr.request.util.JpaManager;
+import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
+import com.ibm.cmr.services.client.CmrServicesFactory;
+import com.ibm.cmr.services.client.MatchingServiceClient;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
+import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckRequest;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
@@ -336,8 +345,7 @@ public class FranceUtil extends AutomationUtil {
       if (!FRANCE_SUBREGIONS.contains(addr.getLandCntry())) {
         details.append("Calculating Coverage using SIREN.").append("\n\n");
         String siren = StringUtils.isNotBlank(data.getTaxCd1())
-            ? (data.getTaxCd1().length() > 9 ? data.getTaxCd1().substring(0, 9) : data.getTaxCd1())
-            : "";
+            ? (data.getTaxCd1().length() > 9 ? data.getTaxCd1().substring(0, 9) : data.getTaxCd1()) : "";
         if (StringUtils.isNotBlank(siren)) {
           details.append("SIREN: " + siren).append("\n");
           List<CoverageContainer> coverages = covElement.computeCoverageFromRDCQuery(entityManager, "AUTO.COV.GET_COV_FROM_TAX_CD1", siren + "%",
@@ -907,4 +915,173 @@ public class FranceUtil extends AutomationUtil {
     }
     return isFR;
   }
+
+  /**
+   * @param entityManager
+   * @param requestData
+   * @param engineData
+   * @param result
+   * @param details
+   * @param output
+   * @return
+   */
+  @Override
+  protected boolean doPrivatePersonChecks(AutomationEngineData engineData, String country, String landCntry, String name, StringBuilder details,
+      boolean checkBluepages, RequestData reqData) {
+    EntityManager entityManager = JpaManager.getEntityManager();
+    boolean legalEndingExists = false;
+    for (Addr addr : reqData.getAddresses()) {
+      String customerName = getCustomerFullName(addr);
+      if (hasLegalEndings(customerName)) {
+        legalEndingExists = true;
+        break;
+      }
+    }
+    if (legalEndingExists) {
+      String commentSpecific = "Commercial.";
+      String commentGeneric = "Changed.";
+      String[] arrCntries = { "834", "616" };
+      List<String> genericCmtCntries = Arrays.asList(arrCntries);
+      if (genericCmtCntries.contains(country)) {
+        engineData.addRejectionComment("OTH", "Scenario chosen is incorrect, should be " + commentGeneric, "", "");
+        details.append("Scenario chosen is incorrect, should be " + commentGeneric).append("\n");
+      } else {
+        engineData.addRejectionComment("OTH", "Scenario chosen is incorrect, should be " + commentSpecific, "", "");
+        details.append("Scenario chosen is incorrect, should be " + commentSpecific).append("\n");
+      }
+      return false;
+    }
+
+    // Duplicate Request check with customer name
+
+    if (checkDuplicateRequest(entityManager, reqData)) {
+      details.append("Duplicate request found with matching customer name.").append("\n");
+      engineData.addRejectionComment("OTH", "Duplicate request found with matching customer name.", "", "");
+      return false;
+    } else {
+      details.append("No duplicate requests found");
+    }
+
+    PrivatePersonCheckResult checkResult = chkPrivatePersonRecordFR(country, landCntry, name, checkBluepages, reqData.getData());
+    PrivatePersonCheckStatus checkStatus = checkResult.getStatus();
+
+    switch (checkStatus) {
+    case BluepagesError:
+      engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED", "Not able to check the name against bluepages.");
+      break;
+    case DuplicateCMR:
+      details.append("The name already matches a current record with CMR No. " + checkResult.getCmrNo()).append("\n");
+      engineData.addRejectionComment("DUPC", "The name already has matches a current record with CMR No. " + checkResult.getCmrNo(),
+          checkResult.getCmrNo(), "");
+      return false;
+    case DuplicateCheckError:
+      details.append("Duplicate CMR check using customer name match failed to execute.").append("\n");
+      engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name match failed to execute.");
+      break;
+    case NoIBMRecord:
+      engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
+      details.append("Employee details not found in IBM BluePages.").append("\n");
+      return false;
+    case Passed:
+      details.append("No Duplicate CMRs were found.").append("\n");
+      break;
+    case PassedBoth:
+      details.append("No Duplicate CMRs were found.").append("\n");
+      details.append("Name validated against IBM BluePages successfully.").append("\n");
+      break;
+    }
+    return true;
+  }
+
+  private PrivatePersonCheckResult chkPrivatePersonRecordFR(String country, String landCntry, String name, boolean checkBluePages, Data data) {
+    LOG.debug("Validating Private Person record for " + name);
+    try {
+      DuplicateCMRCheckResponse checkResponse = chkDupPrivatePersonRecordFR(name, country, landCntry, data);
+      String cmrNo = "";
+      if (checkResponse != null) {
+        cmrNo = checkResponse.getCmrNo();
+      }
+      // TODO find kunnr String kunnr = checkResponse.get
+      if (!StringUtils.isBlank(cmrNo)) {
+        LOG.debug("Duplicate CMR No. found: " + checkResponse.getCmrNo());
+        return new PrivatePersonCheckResult(PrivatePersonCheckStatus.DuplicateCMR, cmrNo, null);
+      }
+    } catch (Exception e) {
+      LOG.warn("Duplicate CMR check error.", e);
+      return new PrivatePersonCheckResult(PrivatePersonCheckStatus.DuplicateCheckError);
+    }
+    if (checkBluePages) {
+      LOG.debug("Checking against BluePages..");
+      Person person = null;
+      try {
+        person = BluePagesHelper.getPersonByName(name);
+        if (person == null) {
+          LOG.debug("NO BluePages record found");
+          return new PrivatePersonCheckResult(PrivatePersonCheckStatus.NoIBMRecord);
+        } else {
+          LOG.debug("BluePages record found: " + person.getName() + "/" + person.getEmail());
+          return new PrivatePersonCheckResult(PrivatePersonCheckStatus.PassedBoth);
+        }
+      } catch (Exception e) {
+        LOG.warn("BluePages check error.", e);
+        return new PrivatePersonCheckResult(PrivatePersonCheckStatus.BluepagesError);
+      }
+    } else {
+      LOG.debug("No duplicate CMR found.");
+      return new PrivatePersonCheckResult(PrivatePersonCheckStatus.Passed);
+    }
+
+  }
+
+  /**
+   * Generic matching logic to check NAME against private person records
+   * 
+   * @param name
+   * @param issuingCountry
+   * @param landedCountry
+   * @return CMR No. of the duplicate record
+   */
+
+  private DuplicateCMRCheckResponse chkDupPrivatePersonRecordFR(String name, String issuingCountry, String landedCountry, Data data)
+      throws Exception {
+    MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
+        MatchingServiceClient.class);
+    DuplicateCMRCheckRequest request = new DuplicateCMRCheckRequest();
+    request.setCustomerName(name);
+    request.setIssuingCountry(issuingCountry);
+    request.setLandedCountry(landedCountry);
+    request.setIsicCd(AutomationConst.ISIC_PRIVATE_PERSON);
+    request.setNameMatch("Y");
+    if (SystemLocation.FRANCE.equals(issuingCountry)) {
+      switch (data.getCustSubGrp()) {
+      case "PRICU":
+      case "XBLUM":
+        request.setCustClass("60");
+        break;
+      case "CBIEM":
+      case "IBMEM":
+        request.setCustClass("71");
+        break;
+      }
+    }
+    client.setReadTimeout(1000 * 60 * 5);
+    LOG.debug("Connecting to the Duplicate CMR Check Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
+    MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.CMR_SERVICE_ID, request, MatchingResponse.class);
+    ObjectMapper mapper = new ObjectMapper();
+    String json = mapper.writeValueAsString(rawResponse);
+
+    TypeReference<MatchingResponse<DuplicateCMRCheckResponse>> ref = new TypeReference<MatchingResponse<DuplicateCMRCheckResponse>>() {
+    };
+
+    MatchingResponse<DuplicateCMRCheckResponse> response = mapper.readValue(json, ref);
+
+    if (response.getSuccess()) {
+      if (response.getMatched() && response.getMatches().size() > 0) {
+        return response.getMatches().get(0);
+      }
+    }
+    return null;
+
+  }
+
 }
