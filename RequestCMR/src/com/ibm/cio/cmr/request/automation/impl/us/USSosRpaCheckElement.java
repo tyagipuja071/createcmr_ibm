@@ -17,6 +17,7 @@ import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cmr.services.client.AutomationServiceClient;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.ServiceClient.Method;
@@ -26,6 +27,11 @@ import com.ibm.cmr.services.client.automation.us.SosResponse;
 
 public class USSosRpaCheckElement extends ValidatingElement implements CompanyVerifier {
 
+  // Business Partner
+  public static final String SC_BP_END_USER = "END USER";
+  public static final String SC_BP_POOL = "POOL";
+  public static final String SC_BP_DEVELOP = "DEVELOP";
+  public static final String SC_BP_E_HOST = "E-HOST";
   private static final Logger log = Logger.getLogger(USSosRpaCheckElement.class);
 
   public USSosRpaCheckElement(String requestTypes, String actionOnError, boolean overrideData, boolean stopOnError) {
@@ -38,9 +44,18 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
     log.debug("Performing US SOS - RPA Check Element");
 
     Admin admin = requestData.getAdmin();
-
+    Data data = requestData.getData();
+    String scenario = data.getCustSubGrp();
     AutomationResult<ValidationOutput> output = buildResult(admin.getId().getReqId());
     ValidationOutput validation = new ValidationOutput();
+
+    if (SC_BP_END_USER.equals(scenario) && SC_BP_POOL.equals(scenario) && SC_BP_DEVELOP.equals(scenario) && SC_BP_E_HOST.equals(scenario)) {
+      validation.setSuccess(true);
+      validation.setMessage("Skipped");
+      output.setDetails("Skipping SOS-RPA Check Element for US BP Scenario");
+      log.debug("Skipping SOS-RPA Check Element for US BP Scenario");
+      return output;
+    }
 
     Addr zs01 = requestData.getAddress("ZS01");
     StringBuilder details = new StringBuilder();
