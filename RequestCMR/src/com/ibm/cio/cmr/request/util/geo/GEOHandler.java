@@ -856,4 +856,8 @@ public abstract class GEOHandler {
     // noop. override on converter if needed
     return false;
   }
+
+  public String getCMRNo(EntityManager rdcMgr, String kukla, String mandt, String katr6, String cmrNo) {
+    return null;
+  }
 }
