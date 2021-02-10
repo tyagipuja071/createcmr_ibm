@@ -1,7 +1,6 @@
 /* Register AP Javascripts */
-
+var clusterHandler = null;
 function addAfterConfigAP() {
-
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var reqType = FormManager.getActualValue('reqType');
   var custType = FormManager.getActualValue('custGrp');
@@ -109,7 +108,29 @@ function addAfterConfigAP() {
       else
         FormManager.enable('clientTier');
     }
+    setInacByCluster();
   }
+}
+
+function setInacByCluster() {
+  var _clusterHandlerAP = dojo.connect(FormManager.getField('apCustClusterId'), 'onChange', function(value) {
+    var clusterVal = FormManager.getActualValue('apCustClusterId');
+    var cntry = FormManager.getActualValue('cmrIssuingCntry');
+    if (!clusterVal) {
+      return;
+    }
+    var _cluster = FormManager.getActualValue('apCustClusterId');
+    if (_cluster.includes('BLAN')) {
+      FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
+      FormManager.removeValidator('clientTier', Validators.REQUIRED);
+      FormManager.setValue('mrcCd', '2');
+    } else {
+      FormManager.removeValidator('inacCd', Validators.REQUIRED);
+      FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'ClientTier' ], 'MAIN_IBM_TAB');
+      updateMRCAseanAnzIsa();
+      return;
+    }
+  });
 }
 
 /* SG defect : 1795335 */
@@ -1732,9 +1753,9 @@ function addCmrNoValidator() {
 function removeStateValidatorForHkMoNZ() {
   var _landCntryHandler = dojo.connect(FormManager.getField('landCntry'), 'onChange', function(value) {
     var landCntry = FormManager.getActualValue('landCntry');
-      var custGrp = FormManager.getActualValue('custGrp');
-      if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.AUSTRALIA) {
-        if (custGrp == 'CROSS') {
+    var custGrp = FormManager.getActualValue('custGrp');
+    if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.AUSTRALIA) {
+      if (custGrp == 'CROSS') {
         FormManager.resetValidations('stateProv');
       } else {
         FormManager.addValidator('stateProv', Validators.REQUIRED, [ 'State/Province' ], null);
@@ -2133,7 +2154,7 @@ function addContactInfoValidator() {
               var custGrp = FormManager.getActualValue('custGrp');
               if (custGrp != 'CROSS' && (custName == null || streetAddr == null || postCd == null || city == null || state == null)) {
                 mandtDetails_2++;
-              }else if (custGrp == 'CROSS' && (custName == null || streetAddr == null || postCd == null || city == null)) {
+              } else if (custGrp == 'CROSS' && (custName == null || streetAddr == null || postCd == null || city == null)) {
                 mandtDetails_2++;
               }
               break;
