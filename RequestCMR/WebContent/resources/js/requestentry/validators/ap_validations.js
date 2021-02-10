@@ -1250,7 +1250,7 @@ function onInacTypeChange() {
           var inacCdValue = [];
           var qParams = {
             _qall : 'Y',
-            CMT : value,
+            CMT : value + '%',
           };
           var results = cmr.query('GET.INAC_CD', qParams);
           if (results != null) {
@@ -2641,6 +2641,54 @@ function validateStreetAddrCont2() {
   })(), null, 'frmCMR_addressModal');
 }
 
+function setInacByCluster() {
+  var _clusterHandler = dojo.connect(FormManager.getField('apCustClusterId'), 'onChange', function(value) {
+    var clusterVal = FormManager.getActualValue('apCustClusterId');
+    var cntry = FormManager.getActualValue('cmrIssuingCntry');
+    if (!clusterVal) {
+      return;
+    }
+    var _cluster = FormManager.getActualValue('apCustClusterId');
+    if (_cluster.includes('BLAN')) {
+      FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
+      FormManager.setValue('mrcCd', '2');
+      var qParams = {
+        _qall : 'Y',
+        ISSUING_CNTRY : cntry,
+      };
+      var results = cmr.query('GET.INAC_BY_CLUSTER', qParams);
+      if (results != null) {  
+        var inacList = results.filter(function(list) {
+          return (list.ret2).includes(_cluster);
+        });
+        var inacType = inacList.filter(function(list) {
+          return (list.ret2).includes(',I') || (list.ret2).includes(',N') || (list.ret2).includes(',IN');
+        });
+        var inacTypeSelected ='';
+        if (inacList != '') {
+          var arr =  inacList.map(inacList => inacList.ret1);
+          inacTypeSelected  =  inacList.map(inacList => inacList.ret2);
+          FormManager.limitDropdownValues(FormManager.getField('inacCd'), arr);
+          if (inacList.length == 1){
+            FormManager.setValue('inacCd', arr[0]);}       
+        }
+        if(inacType != '' && inacTypeSelected[0].includes(",I") && !inacTypeSelected[0].includes(',IN')){
+          FormManager.limitDropdownValues(FormManager.getField('inacType'), 'I');
+          FormManager.setValue('inacType', 'I');
+        }else if(inacType != '' && inacTypeSelected[0].includes(',N')){
+          FormManager.limitDropdownValues(FormManager.getField('inacType'), 'N');
+          FormManager.setValue('inacType', 'N');
+        }
+    }
+    } else {
+      FormManager.removeValidator('inacCd', Validators.REQUIRED);
+      FormManager.resetDropdownValues(FormManager.getField('inacCd'));
+      FormManager.resetDropdownValues(FormManager.getField('inacType'));
+      return;
+    }
+  });
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.AP = [ SysLoc.AUSTRALIA, SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE, SysLoc.VIETNAM,
       SysLoc.THAILAND, SysLoc.HONG_KONG, SysLoc.NEW_ZEALAND, SysLoc.LAOS, SysLoc.MACAO, SysLoc.MALASIA, SysLoc.NEPAL, SysLoc.CAMBODIA ];
@@ -2751,5 +2799,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(onIsicChangeHandler, [ SysLoc.AUSTRALIA, SysLoc.SINGAPORE ]);
   GEOHandler.addAfterConfig(onIsicChange, [ SysLoc.AUSTRALIA, SysLoc.SINGAPORE ]);
   GEOHandler.addAfterTemplateLoad(onIsicChange, [ SysLoc.AUSTRALIA, SysLoc.SINGAPORE ]);
-
+  GEOHandler.addAfterConfig(setInacByCluster, [ SysLoc.AUSTRALIA, SysLoc.INDIA ]);
 });
