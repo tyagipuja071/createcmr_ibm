@@ -1,7 +1,6 @@
 /* Register AP Javascripts */
-
+var clusterHandler = null;
 function addAfterConfigAP() {
-
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var reqType = FormManager.getActualValue('reqType');
   var custType = FormManager.getActualValue('custGrp');
@@ -109,7 +108,60 @@ function addAfterConfigAP() {
       else
         FormManager.enable('clientTier');
     }
+    setInacByCluster();
   }
+}
+
+function setInacByCluster() {
+  var _clusterHandlerAP = dojo.connect(FormManager.getField('apCustClusterId'), 'onChange', function(value) {
+    var clusterVal = FormManager.getActualValue('apCustClusterId');
+    var cntry = FormManager.getActualValue('cmrIssuingCntry');
+    if (!clusterVal) {
+      return;
+    }
+    var _cluster = FormManager.getActualValue('apCustClusterId');
+    if (_cluster.includes('BLAN')) {
+      FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
+      FormManager.removeValidator('clientTier', Validators.REQUIRED);
+      FormManager.setValue('mrcCd', '2');
+      var qParams = {
+        _qall : 'Y',
+        ISSUING_CNTRY : cntry,
+      };
+      var results = cmr.query('GET.INAC_BY_CLUSTER', qParams);
+      if (results != null) {
+        var inacList = results.filter(function(list) {
+          return (list.ret2).includes(_cluster);
+        });
+        var inacType = inacList.filter(function(list) {
+          return (list.ret2).includes(',I') || (list.ret2).includes(',N') || (list.ret2).includes(',IN');
+        });
+        var inacTypeSelected ='';
+        if (inacList != '') {
+          var arr =  inacList.map(inacList => inacList.ret1);
+          inacTypeSelected  =  inacList.map(inacList => inacList.ret2);
+          FormManager.limitDropdownValues(FormManager.getField('inacCd'), arr);
+          if (inacList.length == 1){
+            FormManager.setValue('inacCd', arr[0]);
+            }       
+        }
+        if(inacType != '' && inacTypeSelected[0].includes(",I") && !inacTypeSelected[0].includes(',IN')){
+          FormManager.limitDropdownValues(FormManager.getField('inacType'), 'I');
+          FormManager.setValue('inacType', 'I');
+        }else if(inacType != '' && inacTypeSelected[0].includes(',N')){
+          FormManager.limitDropdownValues(FormManager.getField('inacType'), 'N');
+          FormManager.setValue('inacType', 'N');
+        }
+      }
+    } else {
+      FormManager.removeValidator('inacCd', Validators.REQUIRED);
+      FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'ClientTier' ], 'MAIN_IBM_TAB');
+      updateMRCAseanAnzIsa();
+      FormManager.resetDropdownValues(FormManager.getField('inacCd'));
+      FormManager.resetDropdownValues(FormManager.getField('inacType'));
+      return;
+    }
+  });
 }
 
 /* SG defect : 1795335 */
@@ -1250,7 +1302,7 @@ function onInacTypeChange() {
           var inacCdValue = [];
           var qParams = {
             _qall : 'Y',
-            CMT : value,
+            CMT : value + '%',
           };
           var results = cmr.query('GET.INAC_CD', qParams);
           if (results != null) {
@@ -1732,9 +1784,9 @@ function addCmrNoValidator() {
 function removeStateValidatorForHkMoNZ() {
   var _landCntryHandler = dojo.connect(FormManager.getField('landCntry'), 'onChange', function(value) {
     var landCntry = FormManager.getActualValue('landCntry');
-      var custGrp = FormManager.getActualValue('custGrp');
-      if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.AUSTRALIA) {
-        if (custGrp == 'CROSS') {
+    var custGrp = FormManager.getActualValue('custGrp');
+    if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.AUSTRALIA) {
+      if (custGrp == 'CROSS') {
         FormManager.resetValidations('stateProv');
       } else {
         FormManager.addValidator('stateProv', Validators.REQUIRED, [ 'State/Province' ], null);
@@ -2133,7 +2185,7 @@ function addContactInfoValidator() {
               var custGrp = FormManager.getActualValue('custGrp');
               if (custGrp != 'CROSS' && (custName == null || streetAddr == null || postCd == null || city == null || state == null)) {
                 mandtDetails_2++;
-              }else if (custGrp == 'CROSS' && (custName == null || streetAddr == null || postCd == null || city == null)) {
+              } else if (custGrp == 'CROSS' && (custName == null || streetAddr == null || postCd == null || city == null)) {
                 mandtDetails_2++;
               }
               break;
