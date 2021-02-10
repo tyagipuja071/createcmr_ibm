@@ -513,6 +513,8 @@ public class SpainTransformer extends MessageTransformer {
         legacyCust.setMrcCd("3");
       }
 
+      legacyCust.setSalesGroupRep(data.getRepTeamMemberNo() != null ? data.getRepTeamMemberNo() : "");
+
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       for (Addr addr : cmrObjects.getAddresses()) {
         if ("ZS01".equals(addr.getId().getAddrType())) {

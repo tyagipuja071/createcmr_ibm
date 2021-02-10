@@ -730,6 +730,7 @@ function setEnterpriseValues(scenarioChanged) {
   var isuCtcValueChanged = false;
   var isuCtc217Scen = new Set([ 'BUSPR', 'INTER', 'XBP', 'CRINT', 'INTSO' ]);
   var is217ScenarioSelect = (isuCtc217Scen.has(custSubGrp) && scenarioChanged && isuCtc == '217');
+  var is217ScenarioSelectEs = (isuCtc217Scen.has(custSubGrp) && isuCtc == '217' && cntry == SysLoc.SPAIN);
 
   if (cmr.currentTab == 'IBM_REQ_TAB') {
     isuCtcValueChanged = (_oldIsuCtc != isuCtc);
@@ -740,7 +741,7 @@ function setEnterpriseValues(scenarioChanged) {
     _subindustryChanged = false;
   }
 
-  if (!(scenarioChanged || isuCtcValueChanged || _subindustryChanged)) {
+  if (!(scenarioChanged || isuCtcValueChanged || _subindustryChanged) && !is217ScenarioSelectEs) {
     return;
   }
 
@@ -771,7 +772,7 @@ function setEnterpriseValues(scenarioChanged) {
       }
 
       if (cntry == SysLoc.SPAIN) {
-        if (isuCtc == '34Z') {
+        if (isuCtc == '34Z' || is217ScenarioSelectEs) {
           enterprises = [ '985999' ];
         }
       }
