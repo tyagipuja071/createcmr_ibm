@@ -18,7 +18,7 @@ import com.ibm.cmr.services.client.cmrno.GenerateCMRNoResponse;
 
 public class IndiaTransformer extends ISATransformer {
   private static final Logger LOG = Logger.getLogger(IndiaTransformer.class);
-  
+
   public IndiaTransformer() throws Exception {
     super(SystemLocation.INDIA);
 
@@ -35,10 +35,17 @@ public class IndiaTransformer extends ISATransformer {
   @Override
   public void formatDataLines(MQMessageHandler handler) {
     handleDataDefaults(handler);
+    String clusterID = handler.cmrData.getApCustClusterId();
+    if (clusterID.contains("BLAN")) {
+      handler.messageHash.put("ClusterNo", "");
+    } else {
+      handler.messageHash.put("ClusterNo", clusterID);
+    }
+
     handler.messageHash.put("CntryNo", SystemLocation.INDIA);
     String cmrPrefix = !StringUtils.isEmpty(handler.cmrData.getCmrNoPrefix()) ? handler.cmrData.getCmrNoPrefix() : "";
     String inacType = !StringUtils.isEmpty(handler.cmrData.getInacType()) ? handler.cmrData.getInacType() : "";
-    
+
     // handle reprocessing of dual create request when cmr number supplied
     if (MQMsgConstants.REQ_TYPE_CREATE.equals(handler.mqIntfReqQueue.getReqType())
         && MQMsgConstants.REQ_STATUS_NEW.equals(handler.mqIntfReqQueue.getReqStatus()) && isDoubleCreateProcess(handler)
@@ -59,8 +66,8 @@ public class IndiaTransformer extends ISATransformer {
       }
     } else if (!StringUtils.isEmpty(handler.mqIntfReqQueue.getCorrelationId())) {
       // for correlated requests, add the CN
-      LOG.debug("Correlated request with MQ ID " + handler.mqIntfReqQueue.getCorrelationId() + ", setting CMR No. "
-          + handler.mqIntfReqQueue.getCmrNo());
+      LOG.debug(
+          "Correlated request with MQ ID " + handler.mqIntfReqQueue.getCorrelationId() + ", setting CMR No. " + handler.mqIntfReqQueue.getCmrNo());
       handler.messageHash.put("CustNo", handler.mqIntfReqQueue.getCmrNo());
       handler.messageHash.put("TransCode", "N");
     }
@@ -117,10 +124,9 @@ public class IndiaTransformer extends ISATransformer {
     // should be
     // a. not a correlated request
     // b. create and scenario is ASL/OEM
-    return StringUtils.isEmpty(handler.mqIntfReqQueue.getCorrelationId())
-        && !SystemLocation.SINGAPORE.equals(cmrData.getCmrIssuingCntry())
-        && (create && !StringUtils.isEmpty(cmrData.getCustSubGrp()) && ("ESOSW".equalsIgnoreCase(cmrData.getCustSubGrp()) || "XESO"
-            .equalsIgnoreCase(cmrData.getCustSubGrp())));
+    return StringUtils.isEmpty(handler.mqIntfReqQueue.getCorrelationId()) && !SystemLocation.SINGAPORE.equals(cmrData.getCmrIssuingCntry())
+        && (create && !StringUtils.isEmpty(cmrData.getCustSubGrp())
+            && ("ESOSW".equalsIgnoreCase(cmrData.getCustSubGrp()) || "XESO".equalsIgnoreCase(cmrData.getCustSubGrp())));
   }
 
   @Override

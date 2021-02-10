@@ -30,14 +30,21 @@ public abstract class ANZTransformer extends APTransformer {
     handler.messageHash.put("SellDept", "0000");
     handler.messageHash.put("InstBrnchOff", "000");
     handler.messageHash.put("InstDept", "");
-    
+
     String isu = handler.cmrData.getIsuCd();
     if ("32".equalsIgnoreCase(isu) || "34".equalsIgnoreCase(isu) || "21".equalsIgnoreCase(isu)) {
       handler.messageHash.put("MrktRespCode", "3");
     } else {
       handler.messageHash.put("MrktRespCode", "2");
     }
-    
+
+    String clusterID = handler.cmrData.getApCustClusterId();
+    if (clusterID.contains("BLAN")) {
+      handler.messageHash.put("ClusterNo", "");
+    } else {
+      handler.messageHash.put("ClusterNo", clusterID);
+    }
+
   }
 
   @Override
