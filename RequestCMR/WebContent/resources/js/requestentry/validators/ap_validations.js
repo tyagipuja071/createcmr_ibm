@@ -186,6 +186,11 @@ function setIsuOnIsic(){
     return;
   }
   
+  var _cluster = FormManager.getActualValue('apCustClusterId');
+  if (!(_cluster.includes('BLAN'))) {
+    return;
+  }
+  
   var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
   var isicCd = FormManager.getActualValue('isicCd');
   
