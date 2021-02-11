@@ -40,6 +40,7 @@ import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
+import com.ibm.cio.cmr.request.util.legacy.CloningRDCDirectUtil;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.QueryClient;
 import com.ibm.cmr.services.client.query.QueryRequest;
@@ -1189,6 +1190,32 @@ public class SWISSHandler extends GEOHandler {
   @Override
   public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
     return true;
+  }
+
+  @Override
+  public String getCMRNo(EntityManager rdcMgr, String kukla, String mandt, String katr6, String cmrNo) {
+    LOG.debug("generateCNDCmr :: START");
+    String cndCMR = "";
+    int i = 0;
+
+    while (i < 5) {
+      cndCMR = CloningRDCDirectUtil.genNumericNumberSeries(6, kukla);
+      LOG.debug("Generated CMR No.:" + cndCMR);
+
+      if (CloningRDCDirectUtil.checkCustNoForDuplicateRecord(rdcMgr, cndCMR, mandt, katr6)) {
+        i++;
+        LOG.debug("Alredy exist CMR No.: " + cndCMR + "  in rdc. Trying to generate next times:");
+        if (i == 5) {
+          LOG.debug("Max limit is 5 times to generate CMR No.: " + cndCMR + " Tried times:" + i);
+          cndCMR = "";
+        }
+      } else
+        break;
+    }
+
+    LOG.debug("generateCNDCmr :: returnung cndCMR = " + cndCMR);
+    LOG.debug("generateCNDCmr :: END");
+    return cndCMR;
   }
 
 }

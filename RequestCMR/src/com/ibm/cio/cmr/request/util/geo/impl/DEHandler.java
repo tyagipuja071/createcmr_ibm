@@ -34,6 +34,7 @@ import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
+import com.ibm.cio.cmr.request.util.legacy.CloningRDCDirectUtil;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.QueryClient;
 import com.ibm.cmr.services.client.query.QueryRequest;
@@ -659,5 +660,32 @@ public class DEHandler extends GEOHandler {
   @Override
   public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
     return false;
+  }
+
+  @Override
+  public String getCMRNo(EntityManager rdcMgr, String kukla, String mandt, String katr6, String cmrNo) {
+    // auto generate and store to zzkvCusNo
+    String zzkvCusNo = "";
+    LOG.debug("Generating Cmr no... ");
+    int i = 0;
+    while (i < 5) {
+      CloningRDCDirectUtil rs = new CloningRDCDirectUtil(5);
+      String newSpid1 = CloningRDCDirectUtil.genSingleRandomCharExcludeP();
+      String newSpid2 = rs.nextString();
+      zzkvCusNo = newSpid1.concat(newSpid2);
+      LOG.debug("Generated CMR No.:" + zzkvCusNo);
+
+      if (CloningRDCDirectUtil.checkCustNoForDuplicateRecord(rdcMgr, zzkvCusNo, mandt, katr6)) {
+        i++;
+        LOG.debug("Alredy exist CMR No.: " + zzkvCusNo + "  in rdc. Trying to generate next times:");
+        if (i == 5) {
+          zzkvCusNo = "";
+          LOG.debug("Max limit is 5 times to generate CMR No.: " + zzkvCusNo + " Tried times:" + i);
+        }
+      } else
+        break;
+
+    }
+    return zzkvCusNo;
   }
 }

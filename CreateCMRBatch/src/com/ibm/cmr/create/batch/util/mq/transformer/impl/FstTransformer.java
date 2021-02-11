@@ -963,4 +963,14 @@ public class FstTransformer extends MCOTransformer {
     return addresses;
   }
 
+  @Override
+  public String getDupCreationCountryId(EntityManager entityManager, String cntry, String cmrNo) {
+    return "764";
+  }
+
+  @Override
+  public void getTargetCountryId(EntityManager entityManager, GenerateCMRNoRequest generateCMRNoObj, String cntry, String cmrNo) {
+    generateCMRNoObj.setLoc2("764");
+  }
+
 }
