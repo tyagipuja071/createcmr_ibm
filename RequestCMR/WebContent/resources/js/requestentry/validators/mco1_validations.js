@@ -129,7 +129,7 @@ function setCtcSalesRepSBO(value) {
   if (reqType != 'C') {
     return;
   }
-  if (scenario != null && !internalBUScenarios.includes(scenario) && isuCtc != '34Q' && isuCtc != '34V' && (countryUse == '864' || countryUse == '864LS' || countryUse == '864SZ' || countryUse == '864NA')) {
+  if (scenario && scenario != null && !internalBUScenarios.includes(scenario) && isuCtc != '34Q' && isuCtc != '34V' && (countryUse == '864' || countryUse == '864LS' || countryUse == '864SZ' || countryUse == '864NA')) {
     if (calledByIsuHandler) {
       if (!scenarioChangeSalesRepSBO) {
         FormManager.setValue('salesBusOffCd', '');
