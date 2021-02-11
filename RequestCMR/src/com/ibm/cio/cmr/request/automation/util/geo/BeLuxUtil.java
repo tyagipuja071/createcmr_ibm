@@ -22,6 +22,7 @@ import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.CoverageContainer;
 import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
+import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
@@ -64,7 +65,8 @@ public class BeLuxUtil extends AutomationUtil {
   @Override
   public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
       AutomationResult<ValidationOutput> result, StringBuilder details, ValidationOutput output) {
-
+	  
+    ScenarioExceptionsUtil scenarioExceptions = (ScenarioExceptionsUtil) engineData.get("SCENARIO_EXCEPTIONS");
     Data data = requestData.getData();
     String scenario = data.getCustSubGrp();
     Addr zs01 = requestData.getAddress("ZS01");
@@ -77,6 +79,9 @@ public class BeLuxUtil extends AutomationUtil {
       customerNameZP01 = StringUtils.isBlank(zp01.getCustNm1()) ? "" : zp01.getCustNm1();
       landedCountryZP01 = StringUtils.isBlank(zp01.getLandCntry()) ? "" : zp01.getLandCntry();
     }
+    if (!StringUtils.equals(zs01.getLandCntry(), zp01.getLandCntry())) {
+    	scenarioExceptions.setCheckVATForDnB(false);
+      }
 
     if ((SCENARIO_BP_LOCAL.equals(scenario) || SCENARIO_BP_CROSS.equals(scenario) || SCENARIO_BP_LOCAL_LU.equals(scenario)) && zp01 != null
         && (!StringUtils.equals(getCleanString(customerName), getCleanString(customerNameZP01))
