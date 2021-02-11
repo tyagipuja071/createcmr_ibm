@@ -128,41 +128,35 @@ function addAfterConfigAP() {
 
 function setInacByCluster() {
   var _clusterHandlerAP = dojo.connect(FormManager.getField('apCustClusterId'), 'onChange', function(value) {
-    var clusterVal = FormManager.getActualValue('apCustClusterId');
+    var _cluster = FormManager.getActualValue('apCustClusterId');
     var cntry = FormManager.getActualValue('cmrIssuingCntry');
-    if (!clusterVal) {
+    if (!_cluster) {
       return;
     }
-    var _cluster = FormManager.getActualValue('apCustClusterId');
     if (_cluster.includes('BLAN')) {
       FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
+      FormManager.addValidator('inacType', Validators.REQUIRED, [ 'INAC Type' ], 'MAIN_IBM_TAB');
       FormManager.removeValidator('clientTier', Validators.REQUIRED);
+      FormManager.removeValidator('isuCd', Validators.REQUIRED);
       FormManager.setValue('mrcCd', '2');
       var qParams = {
         _qall : 'Y',
         ISSUING_CNTRY : cntry,
+        CMT : '%' + _cluster + '%'
       };
-      var results = cmr.query('GET.INAC_BY_CLUSTER', qParams);
-      if (results != null) {
-        var inacList = results.filter(function(list) {
-          return (list.ret2).includes(_cluster);
-        });
-        var inacType = inacList.filter(function(list) {
-          return (list.ret2).includes(',I') || (list.ret2).includes(',N') || (list.ret2).includes(',IN');
-        });
+      var inacList = cmr.query('GET.INAC_BY_CLUSTER', qParams);
+      if (inacList != null) {
         var inacTypeSelected ='';
-        if (inacList != '') {
-          var arr =  inacList.map(inacList => inacList.ret1);
-          inacTypeSelected  =  inacList.map(inacList => inacList.ret2);
-          FormManager.limitDropdownValues(FormManager.getField('inacCd'), arr);
-          if (inacList.length == 1){
-            FormManager.setValue('inacCd', arr[0]);
-            }       
-        }
-        if(inacType != '' && inacTypeSelected[0].includes(",I") && !inacTypeSelected[0].includes(',IN')){
+        var arr =  inacList.map(inacList => inacList.ret1);
+        inacTypeSelected  =  inacList.map(inacList => inacList.ret2);
+        FormManager.limitDropdownValues(FormManager.getField('inacCd'), arr);
+        if (inacList.length == 1) {
+          FormManager.setValue('inacCd', arr[0]);
+        }       
+        if (inacType != '' && inacTypeSelected[0].includes(",I") && !inacTypeSelected[0].includes(',IN')) {
           FormManager.limitDropdownValues(FormManager.getField('inacType'), 'I');
           FormManager.setValue('inacType', 'I');
-        } else if(inacType != '' && inacTypeSelected[0].includes(',N')){
+        } else if (inacType != '' && inacTypeSelected[0].includes(',N')) {
           FormManager.limitDropdownValues(FormManager.getField('inacType'), 'N');
           FormManager.setValue('inacType', 'N');
         } else {
@@ -171,7 +165,8 @@ function setInacByCluster() {
       }
     } else {
       FormManager.removeValidator('inacCd', Validators.REQUIRED);
-      FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'ClientTier' ], 'MAIN_IBM_TAB');
+      FormManager.removeValidator('inacType', Validators.REQUIRED);
+      FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'GB Segment' ], 'MAIN_IBM_TAB');
       updateMRCAseanAnzIsa();
       FormManager.resetDropdownValues(FormManager.getField('inacCd'));
       FormManager.resetDropdownValues(FormManager.getField('inacType'));
@@ -1343,6 +1338,10 @@ function onSubIndustryChange() {
 // Story -2125 drop down list needed in INAC/NAC FIELD based on INAC Type
 var _inacCdHandler = null;
 function onInacTypeChange() {
+  var _cluster = FormManager.getActualValue('apCustClusterId');
+  if (_cluster.includes('BLAN')) {
+    return;
+  }
   var reqType = null;
   reqType = FormManager.getActualValue('reqType');
   if (reqType == 'C') {
