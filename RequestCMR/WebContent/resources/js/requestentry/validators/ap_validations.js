@@ -1347,25 +1347,27 @@ function onInacTypeChange() {
   if (reqType == 'C') {
     if (_inacCdHandler == null) {
       _inacCdHandler = dojo.connect(FormManager.getField('inacType'), 'onChange', function(value) {
-        var value = FormManager.getActualValue('inacType');
-        console.log(value);
-        if (value != null) {
-          var inacCdValue = [];
-          var qParams = {
-            _qall : 'Y',
-            CMT : value + '%',
-          };
-          var results = cmr.query('GET.INAC_CD', qParams);
-          if (results != null) {
-            for (var i = 0; i < results.length; i++) {
-              inacCdValue.push(results[i].ret1);
-            }
-            if (value == 'N') {
-              inacCdValue.push('new');
-            }
-            FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacCdValue);
-            if (inacCdValue.length == 1) {
-              FormManager.setValue('inacCd', inacCdValue[0]);
+        if (!_cluster.includes('BLAN')) {
+          var value = FormManager.getActualValue('inacType');
+          console.log(value);
+          if (value != null) {
+            var inacCdValue = [];
+            var qParams = {
+              _qall : 'Y',
+              CMT : value + '%',
+            };
+            var results = cmr.query('GET.INAC_CD', qParams);
+            if (results != null) {
+              for (var i = 0; i < results.length; i++) {
+                inacCdValue.push(results[i].ret1);
+              }
+              if (value == 'N') {
+                inacCdValue.push('new');
+              }
+              FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacCdValue);
+              if (inacCdValue.length == 1) {
+                FormManager.setValue('inacCd', inacCdValue[0]);
+              }
             }
           }
         }
