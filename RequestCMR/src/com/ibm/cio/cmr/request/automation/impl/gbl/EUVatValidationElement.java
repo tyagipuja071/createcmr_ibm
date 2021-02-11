@@ -56,9 +56,16 @@ public class EUVatValidationElement extends ValidatingElement implements Company
     ValidationOutput validation = new ValidationOutput();
 
     Addr zs01 = requestData.getAddress("ZS01");
+    Addr zp01 = requestData.getAddress("ZP01");
     StringBuilder details = new StringBuilder();
     try {
-      String landCntryForVies = getLandedCountryForVies(data.getCmrIssuingCntry(), zs01.getLandCntry(), data.getCountryUse());
+    	String landCntry;
+        if (data.getCmrIssuingCntry() == "624" || data.getCmrIssuingCntry() == "788") {
+          landCntry = zp01.getLandCntry();
+        } else {
+          landCntry = zs01.getLandCntry();
+        }
+      String landCntryForVies = getLandedCountryForVies(data.getCmrIssuingCntry(), landCntry, data.getCountryUse());
       if (landCntryForVies == null) {
         validation.setSuccess(true);
         validation.setMessage("No Landed Country");
