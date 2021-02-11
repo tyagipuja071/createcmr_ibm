@@ -434,7 +434,7 @@ public class TransConnService extends BaseBatchService {
   private void monitorLegacyPending(EntityManager entityManager) {
     // Search the records with Status PCP and check if current timestamp falls
     // within host down outage
-    String sql = ExternalizedQuery.getSql("");
+    String sql = ExternalizedQuery.getSql("BATCH.MONITOR_LEGACY_PENDING");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("PROC_TYPE", SystemConfiguration.getValue("BATCH_CMR_POOL_PROCESSING_TYPE"));
     query.setParameter("ISSU_CNTRY", SystemConfiguration.getValue("BATCH_CMR_POOL_ISSUING_CNTRY"));
