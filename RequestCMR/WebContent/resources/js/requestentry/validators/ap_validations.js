@@ -1371,6 +1371,7 @@ function onInacTypeChange() {
 }
 
 var _isicHandler = null;
+
 function onIsicChangeHandler() {
   if (_isicHandler == null) {
     _isicHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
