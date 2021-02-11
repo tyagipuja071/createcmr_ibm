@@ -1573,26 +1573,26 @@ function addBillingAddrValidator() {
 }
 
 function addBillingValidator() {
- var role = FormManager.getActualValue('userRole').toUpperCase();
- var custSubType = FormManager.getActualValue('custSubGrp');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var custSubType = FormManager.getActualValue('custSubGrp');
   FormManager.addFormValidator((function() {
     return {
-	validate : function() {
-		var zp01ReqId = FormManager.getActualValue('reqId');
-		qParams = {
+      validate : function() {
+        var zp01ReqId = FormManager.getActualValue('reqId');
+        qParams = {
           REQ_ID : zp01ReqId,
         };
         var record = cmr.query('GETZP01VALRECORDS', qParams);
         var zp01Reccount = record.ret1;
         if (Number(zp01Reccount == 1)) {
-         if (FormManager.getActualValue('reqType') == 'C' && role == "REQUESTER") {
-          if(custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'CRO3P') {
-           var checkImportIndc = getImportedIndcForItalyBillingAddr();
-           if(checkImportIndc=='Y') {
-            return new ValidationResult(null, false, 'For 3rd party scenario  Billing Address can not be imported.User needs to create new Billing Address');
-           }
+          if (FormManager.getActualValue('reqType') == 'C' && role == "REQUESTER") {
+            if (custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'CRO3P') {
+              var checkImportIndc = getImportedIndcForItalyBillingAddr();
+              if (checkImportIndc == 'Y') {
+                return new ValidationResult(null, false, 'For 3rd party scenario  Billing Address can not be imported.User needs to create new Billing Address');
+              }
+            }
           }
-         }
         }
       }
     };
@@ -1600,18 +1600,18 @@ function addBillingValidator() {
 }
 
 function addCMRValidator() {
- var role = FormManager.getActualValue('userRole').toUpperCase();
- var custSubType = FormManager.getActualValue('custSubGrp');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var custSubType = FormManager.getActualValue('custSubGrp');
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
-       if (FormManager.getActualValue('reqType') == 'C') {
-        if(FormManager.getActualValue('findCmrResult') == 'NOT DONE' || FormManager.getActualValue('findCmrResult') == 'REJECTED') {
-         if (role == "REQUESTER" && (custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'CRO3P')) {
-          return new ValidationResult(null, false,'For 3rd party scenario please import a CMR via CMR search'); 
-         }
+        if (FormManager.getActualValue('reqType') == 'C') {
+          if (FormManager.getActualValue('findCmrResult') == 'NOT DONE' || FormManager.getActualValue('findCmrResult') == 'REJECTED') {
+            if (role == "REQUESTER" && (custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'CRO3P')) {
+              return new ValidationResult(null, false, 'For 3rd party scenario please import a CMR via CMR search');
+            }
+          }
         }
-       }
       }
     };
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
@@ -3005,30 +3005,32 @@ function toggleBPRelMemType() {
     if (_custType == 'BUSPR' || _custType == 'BUSSM' || _custType == 'BUSVA' || _custType == 'CROBP') {
       FormManager.show('PPSCEID', 'ppsceid');
       FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
-     // FormManager.show('MembLevel', 'memLvl');
-    //  FormManager.show('BPRelationType', 'bpRelType');
-     // FormManager.resetValidations('bpRelType');
-     // FormManager.resetValidations('memLvl');
+      // FormManager.show('MembLevel', 'memLvl');
+      // FormManager.show('BPRelationType', 'bpRelType');
+      // FormManager.resetValidations('bpRelType');
+      // FormManager.resetValidations('memLvl');
       // FormManager.readOnly('bpRelType');
       // FormManager.readOnly('memLvl');
-   //   FormManager.addValidator('memLvl', Validators.REQUIRED, [ 'Membership Level' ], 'MAIN_IBM_TAB');
-     // FormManager.addValidator('bpRelType', Validators.REQUIRED, [ 'BP Relation Type' ], 'MAIN_IBM_TAB');
+      // FormManager.addValidator('memLvl', Validators.REQUIRED, [ 'Membership
+      // Level' ], 'MAIN_IBM_TAB');
+      // FormManager.addValidator('bpRelType', Validators.REQUIRED, [ 'BP
+      // Relation Type' ], 'MAIN_IBM_TAB');
     } else {
       FormManager.resetValidations('ppsceid');
       FormManager.hide('PPSCEID', 'ppsceid');
-    //  FormManager.hide('MembLevel', 'memLvl');
-    //  FormManager.hide('BPRelationType', 'bpRelType');
+      // FormManager.hide('MembLevel', 'memLvl');
+      // FormManager.hide('BPRelationType', 'bpRelType');
       FormManager.removeValidator('ppsceid', Validators.REQUIRED);
-    //  FormManager.removeValidator('memLvl', Validators.REQUIRED);
-   //   FormManager.removeValidator('bpRelType', Validators.REQUIRED);
+      // FormManager.removeValidator('memLvl', Validators.REQUIRED);
+      // FormManager.removeValidator('bpRelType', Validators.REQUIRED);
     }
   } else if ((reqType == 'U' || reqType == 'X') && role == 'REQUESTER') {
     FormManager.readOnly('ppsceid');
     FormManager.resetValidations('ppsceid');
-  //  FormManager.readOnly('memLvl');
-  //  FormManager.resetValidations('memLvl');
-  //  FormManager.readOnly('bpRelType');
-  //  FormManager.resetValidations('bpRelType');
+    // FormManager.readOnly('memLvl');
+    // FormManager.resetValidations('memLvl');
+    // FormManager.readOnly('bpRelType');
+    // FormManager.resetValidations('bpRelType');
   } else if ((reqType == 'U' || reqType == 'X') && role == 'PROCESSOR') {
     FormManager.enable('ppsceid');
     if (FormManager.getActualValue('ppsceid') != '') {
@@ -3680,8 +3682,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addAfterConfigItaly, [ SysLoc.ITALY ]);
   GEOHandler.addAddrFunction(addAddrFunctionItaly, [ SysLoc.ITALY ]);
   GEOHandler.addAfterTemplateLoad(addAfterTemplateLoadItaly, [ SysLoc.ITALY ]);
-  GEOHandler.registerValidator(addCMRValidator,[ SysLoc.ITALY ], null, true);
-  GEOHandler.registerValidator(addBillingValidator,[ SysLoc.ITALY ], null, true);
+  GEOHandler.registerValidator(addCMRValidator, [ SysLoc.ITALY ], null, true);
+  GEOHandler.registerValidator(addBillingValidator, [ SysLoc.ITALY ], null, true);
   GEOHandler.registerValidator(validateSBOForIT, [ SysLoc.ITALY ]);
   GEOHandler.registerValidator(checkIsicCodeValidationIT, [ SysLoc.ITALY ]);
   GEOHandler.registerValidator(validateCodiceDesIT, [ SysLoc.ITALY ], null, true);
