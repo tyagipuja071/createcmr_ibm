@@ -1,5 +1,13 @@
 /* Register AP Javascripts */
-var clusterHandler = null;
+var _isicHandlerAP = null;
+function onIsicChangeHandlerAP() {
+  if (_isicHandlerAP == null) {
+    _isicHandlerAP = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
+      setIsuOnIsic();
+    });
+  }
+}
+
 function addAfterConfigAP() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var reqType = FormManager.getActualValue('reqType');
@@ -109,6 +117,12 @@ function addAfterConfigAP() {
         FormManager.enable('clientTier');
     }
     setInacByCluster();
+    
+    if (_ISICHandler == null && FormManager.getActualValue('cmrIssuingCntry')) {
+      _IMSHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
+        setSalesRepValues();
+      });
+    }
   }
 }
 
@@ -166,8 +180,39 @@ function setInacByCluster() {
   });
 }
 
-/* SG defect : 1795335 */
+/* ASEAN ANZ ISIC MAPPING */
+function setIsuOnIsic(){
+  if (FormManager.getActualValue('reqType') != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  
+  var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var isicCd = FormManager.getActualValue('isicCd');
+  
+  var ISU = [];
+  if (isicCd != '') {
+    var qParams = {
+      _qall : 'Y',
+      ISSUING_CNTRY : cmrIssuingCntry,
+      REP_TEAM_CD : '%' + isicCd + '%'
+    };
+    var results = cmr.query('GET.ISULIST.BYISIC', qParams);
+    if (results != null) {
+      for (var i = 0; i < results.length; i++) {
+        ISU.push(results[i].ret1);
+      }
+      if (ISU != null) {
+        FormManager.limitDropdownValues(FormManager.getField('isuCd'), ISU);
+        if (ISU.length >= 1) {
+          FormManager.setValue('isuCd', ISU[0]);
+        }
+      }
+    }
+  }
+}
 
+
+/* SG defect : 1795335 */
 function addFormatForCMRNumValidator() {
   FormManager.addFormValidator((function() {
     return {
@@ -2805,5 +2850,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(onIsicChangeHandler, [ SysLoc.AUSTRALIA, SysLoc.SINGAPORE ]);
   GEOHandler.addAfterConfig(onIsicChange, [ SysLoc.AUSTRALIA, SysLoc.SINGAPORE ]);
   GEOHandler.addAfterTemplateLoad(onIsicChange, [ SysLoc.AUSTRALIA, SysLoc.SINGAPORE ]);
+  
+  GEOHandler.addAfterConfig(onIsicChangeHandlerAP, GEOHandler.ASEAN);
 
 });
