@@ -117,12 +117,6 @@ function addAfterConfigAP() {
         FormManager.enable('clientTier');
     }
     setInacByCluster();
-    
-    if (_ISICHandler == null && FormManager.getActualValue('cmrIssuingCntry')) {
-      _IMSHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
-        setSalesRepValues();
-      });
-    }
   }
 }
 
