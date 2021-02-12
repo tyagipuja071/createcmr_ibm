@@ -116,6 +116,8 @@ function addAfterConfigAP() {
       else
         FormManager.enable('clientTier');
     }
+  }
+  if(reqType == 'C'){
     setInacByCluster();
   }
 }
@@ -1531,8 +1533,8 @@ function onIsuCdChangeAseanAnzIsa() {
   var reqType = null;
   reqType = FormManager.getActualValue('reqType');
   var cmrIssuingCntry = dojo.byId('cmrIssuingCntry').value;
-  var asean_isa_cntries = [ 'Indonesia - 749', 'Brunei Darussalam - 643', 'Thailand - 856', 'Philippines - 818', 'New Zealand - 749', 'Malaysia - 778', 'Singapore - 834', 'Vietnam - 852',
-      'Bangladesh - 615', 'India - 744', 'Sri Lanka - 652', 'Australia - 616' ];
+  var asean_isa_cntries = [ 'Indonesia - 749', 'Brunei Darussalam - 643', 'Philippines - 818', 'Malaysia - 778', 'Vietnam - 852',
+      'Bangladesh - 615', 'India - 744', 'Sri Lanka - 652'];
 
   if (reqType == 'U') {
     console.log(">>>> Exit onIsuCdChangeAseanAnz for Update.");
