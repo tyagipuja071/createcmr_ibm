@@ -123,7 +123,7 @@ public class MaltaHandler extends BaseSOFHandler {
                 }
                 addr = cloneAddress(record, addrType);
                 LOG.trace("Adding address type " + addrType + " for sequence " + seqNo);
-                addr.setCmrStreetAddressCont(record.getCmrName3());
+                // addr.setCmrStreetAddressCont(record.getCmrName3());
 
                 // Name3 in rdc = CustNm3 on SOF
                 if (!StringUtils.isEmpty(record.getCmrName3())) {
