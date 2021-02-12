@@ -1,14 +1,7 @@
 /* Register AP Javascripts */
-var _isicHandlerAP = null;
-function onIsicChangeHandlerAP() {
-  if (_isicHandlerAP == null) {
-    _isicHandlerAP = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
-      setIsuOnIsic();
-    });
-  }
-}
 
 function addAfterConfigAP() {
+
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var reqType = FormManager.getActualValue('reqType');
   var custType = FormManager.getActualValue('custGrp');
@@ -117,98 +110,10 @@ function addAfterConfigAP() {
         FormManager.enable('clientTier');
     }
   }
-  if(reqType == 'C'){
-    setInacByCluster();
-  }
 }
-
-function setInacByCluster() {
-  var _clusterHandlerAP = dojo.connect(FormManager.getField('apCustClusterId'), 'onChange', function(value) {
-    var _cluster = FormManager.getActualValue('apCustClusterId');
-    var cntry = FormManager.getActualValue('cmrIssuingCntry');
-    if (!_cluster) {
-      return;
-    }
-    if (_cluster.includes('BLAN')) {
-      FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
-      FormManager.addValidator('inacType', Validators.REQUIRED, [ 'INAC Type' ], 'MAIN_IBM_TAB');
-      FormManager.removeValidator('clientTier', Validators.REQUIRED);
-      FormManager.removeValidator('isuCd', Validators.REQUIRED);
-      FormManager.setValue('mrcCd', '2');
-      var qParams = {
-        _qall : 'Y',
-        ISSUING_CNTRY : cntry,
-        CMT : '%' + _cluster + '%'
-      };
-      var inacList = cmr.query('GET.INAC_BY_CLUSTER', qParams);
-      if (inacList != null) {
-        var inacTypeSelected ='';
-        var arr =  inacList.map(inacList => inacList.ret1);
-        inacTypeSelected  =  inacList.map(inacList => inacList.ret2);
-        FormManager.limitDropdownValues(FormManager.getField('inacCd'), arr);
-        if (inacList.length == 1) {
-          FormManager.setValue('inacCd', arr[0]);
-        }       
-        if (inacType != '' && inacTypeSelected[0].includes(",I") && !inacTypeSelected[0].includes(',IN')) {
-          FormManager.limitDropdownValues(FormManager.getField('inacType'), 'I');
-          FormManager.setValue('inacType', 'I');
-        } else if (inacType != '' && inacTypeSelected[0].includes(',N')) {
-          FormManager.limitDropdownValues(FormManager.getField('inacType'), 'N');
-          FormManager.setValue('inacType', 'N');
-        } else {
-          FormManager.resetDropdownValues(FormManager.getField('inacType'));
-        }
-      }
-    } else {
-      FormManager.removeValidator('inacCd', Validators.REQUIRED);
-      FormManager.removeValidator('inacType', Validators.REQUIRED);
-      FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'GB Segment' ], 'MAIN_IBM_TAB');
-      updateMRCAseanAnzIsa();
-      FormManager.resetDropdownValues(FormManager.getField('inacCd'));
-      FormManager.resetDropdownValues(FormManager.getField('inacType'));
-      return;
-    }
-  });
-}
-
-/* ASEAN ANZ ISIC MAPPING */
-function setIsuOnIsic(){
-  if (FormManager.getActualValue('reqType') != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-  
-  var _cluster = FormManager.getActualValue('apCustClusterId');
-  if (!(_cluster.includes('BLAN'))) {
-    return;
-  }
-  
-  var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
-  var isicCd = FormManager.getActualValue('isicCd');
-  
-  var ISU = [];
-  if (isicCd != '') {
-    var qParams = {
-      _qall : 'Y',
-      ISSUING_CNTRY : cmrIssuingCntry,
-      REP_TEAM_CD : '%' + isicCd + '%'
-    };
-    var results = cmr.query('GET.ISULIST.BYISIC', qParams);
-    if (results != null) {
-      for (var i = 0; i < results.length; i++) {
-        ISU.push(results[i].ret1);
-      }
-      if (ISU != null) {
-        FormManager.limitDropdownValues(FormManager.getField('isuCd'), ISU);
-        if (ISU.length >= 1) {
-          FormManager.setValue('isuCd', ISU[0]);
-        }
-      }
-    }
-  }
-}
-
 
 /* SG defect : 1795335 */
+
 function addFormatForCMRNumValidator() {
   FormManager.addFormValidator((function() {
     return {
@@ -1334,36 +1239,30 @@ function onSubIndustryChange() {
 // Story -2125 drop down list needed in INAC/NAC FIELD based on INAC Type
 var _inacCdHandler = null;
 function onInacTypeChange() {
-  var _cluster = FormManager.getActualValue('apCustClusterId');
-  if (_cluster.includes('BLAN')) {
-    return;
-  }
   var reqType = null;
   reqType = FormManager.getActualValue('reqType');
   if (reqType == 'C') {
     if (_inacCdHandler == null) {
       _inacCdHandler = dojo.connect(FormManager.getField('inacType'), 'onChange', function(value) {
-        if (!_cluster.includes('BLAN')) {
-          var value = FormManager.getActualValue('inacType');
-          console.log(value);
-          if (value != null) {
-            var inacCdValue = [];
-            var qParams = {
-              _qall : 'Y',
-              CMT : value + '%',
-            };
-            var results = cmr.query('GET.INAC_CD', qParams);
-            if (results != null) {
-              for (var i = 0; i < results.length; i++) {
-                inacCdValue.push(results[i].ret1);
-              }
-              if (value == 'N') {
-                inacCdValue.push('new');
-              }
-              FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacCdValue);
-              if (inacCdValue.length == 1) {
-                FormManager.setValue('inacCd', inacCdValue[0]);
-              }
+        var value = FormManager.getActualValue('inacType');
+        console.log(value);
+        if (value != null) {
+          var inacCdValue = [];
+          var qParams = {
+            _qall : 'Y',
+            CMT : value,
+          };
+          var results = cmr.query('GET.INAC_CD', qParams);
+          if (results != null) {
+            for (var i = 0; i < results.length; i++) {
+              inacCdValue.push(results[i].ret1);
+            }
+            if (value == 'N') {
+              inacCdValue.push('new');
+            }
+            FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacCdValue);
+            if (inacCdValue.length == 1) {
+              FormManager.setValue('inacCd', inacCdValue[0]);
             }
           }
         }
@@ -1373,7 +1272,6 @@ function onInacTypeChange() {
 }
 
 var _isicHandler = null;
-
 function onIsicChangeHandler() {
   if (_isicHandler == null) {
     _isicHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
@@ -1533,8 +1431,8 @@ function onIsuCdChangeAseanAnzIsa() {
   var reqType = null;
   reqType = FormManager.getActualValue('reqType');
   var cmrIssuingCntry = dojo.byId('cmrIssuingCntry').value;
-  var asean_isa_cntries = [ 'Indonesia - 749', 'Brunei Darussalam - 643', 'Philippines - 818', 'Malaysia - 778', 'Vietnam - 852',
-      'Bangladesh - 615', 'India - 744', 'Sri Lanka - 652'];
+  var asean_isa_cntries = [ 'Indonesia - 749', 'Brunei Darussalam - 643', 'Thailand - 856', 'Philippines - 818', 'New Zealand - 749', 'Malaysia - 778', 'Singapore - 834', 'Vietnam - 852',
+      'Bangladesh - 615', 'India - 744', 'Sri Lanka - 652', 'Australia - 616' ];
 
   if (reqType == 'U') {
     console.log(">>>> Exit onIsuCdChangeAseanAnz for Update.");
@@ -1834,9 +1732,9 @@ function addCmrNoValidator() {
 function removeStateValidatorForHkMoNZ() {
   var _landCntryHandler = dojo.connect(FormManager.getField('landCntry'), 'onChange', function(value) {
     var landCntry = FormManager.getActualValue('landCntry');
-    var custGrp = FormManager.getActualValue('custGrp');
-    if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.AUSTRALIA) {
-      if (custGrp == 'CROSS') {
+      var custGrp = FormManager.getActualValue('custGrp');
+      if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.AUSTRALIA) {
+        if (custGrp == 'CROSS') {
         FormManager.resetValidations('stateProv');
       } else {
         FormManager.addValidator('stateProv', Validators.REQUIRED, [ 'State/Province' ], null);
@@ -2235,7 +2133,7 @@ function addContactInfoValidator() {
               var custGrp = FormManager.getActualValue('custGrp');
               if (custGrp != 'CROSS' && (custName == null || streetAddr == null || postCd == null || city == null || state == null)) {
                 mandtDetails_2++;
-              } else if (custGrp == 'CROSS' && (custName == null || streetAddr == null || postCd == null || city == null)) {
+              }else if (custGrp == 'CROSS' && (custName == null || streetAddr == null || postCd == null || city == null)) {
                 mandtDetails_2++;
               }
               break;
@@ -2853,8 +2751,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(onIsicChangeHandler, [ SysLoc.AUSTRALIA, SysLoc.SINGAPORE ]);
   GEOHandler.addAfterConfig(onIsicChange, [ SysLoc.AUSTRALIA, SysLoc.SINGAPORE ]);
   GEOHandler.addAfterTemplateLoad(onIsicChange, [ SysLoc.AUSTRALIA, SysLoc.SINGAPORE ]);
-  
-  GEOHandler.addAfterConfig(onIsicChangeHandlerAP, GEOHandler.ANZ);
-  GEOHandler.addAfterConfig(onIsicChangeHandlerAP, GEOHandler.ASEAN);
 
 });
