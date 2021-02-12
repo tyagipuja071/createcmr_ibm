@@ -560,6 +560,14 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
           }
         }
       }
+
+      if (SystemLocation.FRANCE.equals(reqModel.getCmrIssuingCntry())) {
+        if (street != null && street.length() > addrLength) {
+          street = street.substring(0, addrLength);
+        }
+        addr.setAddrTxt(street);
+        addr.setAddrTxt2(null); // addr con't removed from UI of FR
+      }
       cmr.setCmrStreet(addr.getAddrTxt());
       cmr.setCmrStreetAddress(addr.getAddrTxt());
       cmr.setCmrStreetAddressCont(addr.getAddrTxt2());
