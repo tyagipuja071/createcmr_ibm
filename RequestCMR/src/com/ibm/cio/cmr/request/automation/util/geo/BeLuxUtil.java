@@ -65,7 +65,7 @@ public class BeLuxUtil extends AutomationUtil {
   @Override
   public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
       AutomationResult<ValidationOutput> result, StringBuilder details, ValidationOutput output) {
-	  
+
     ScenarioExceptionsUtil scenarioExceptions = (ScenarioExceptionsUtil) engineData.get("SCENARIO_EXCEPTIONS");
     Data data = requestData.getData();
     String scenario = data.getCustSubGrp();
@@ -80,8 +80,8 @@ public class BeLuxUtil extends AutomationUtil {
       landedCountryZP01 = StringUtils.isBlank(zp01.getLandCntry()) ? "" : zp01.getLandCntry();
     }
     if (!StringUtils.equals(zs01.getLandCntry(), zp01.getLandCntry())) {
-    	scenarioExceptions.setCheckVATForDnB(false);
-      }
+      scenarioExceptions.setCheckVATForDnB(false);
+    }
 
     if ((SCENARIO_BP_LOCAL.equals(scenario) || SCENARIO_BP_CROSS.equals(scenario) || SCENARIO_BP_LOCAL_LU.equals(scenario)) && zp01 != null
         && (!StringUtils.equals(getCleanString(customerName), getCleanString(customerNameZP01))
@@ -314,6 +314,23 @@ public class BeLuxUtil extends AutomationUtil {
             engineData.addNegativeCheckStatus("_beluxEconomicCdUpdt", "Economic code was updated incorrectly or by non registered user.");
             details.append("Economic code was updated incorrectly or by non registered user.\n");
           }
+        }
+        break;
+      case "Order Block Code":
+        String newOrdBlk = change.getNewData();
+        String oldOrdBlk = change.getOldData();
+        // ADD
+        if (StringUtils.isBlank(oldOrdBlk) && !StringUtils.isBlank(newOrdBlk) && "P".equalsIgnoreCase(newOrdBlk)) {
+          cmdeReview = true;
+          engineData.addNegativeCheckStatus("_beluxOrdBlkUpdt", "Embargo Code P was added.");
+          details.append("Embargo Code P was added.\n");
+        }
+
+        // DELETE
+        if (!StringUtils.isBlank(oldOrdBlk) && StringUtils.isBlank(newOrdBlk) && "P".equalsIgnoreCase(oldOrdBlk)) {
+          cmdeReview = true;
+          engineData.addNegativeCheckStatus("_beluxOrdBlkUpdt", "Embargo Code P was deleted.");
+          details.append("Embargo Code P was deleted.\n");
         }
         break;
       default:
