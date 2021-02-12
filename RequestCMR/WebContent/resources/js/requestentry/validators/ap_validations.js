@@ -1,6 +1,7 @@
 /* Register AP Javascripts */
 
 function addAfterConfigAP() {
+
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var reqType = FormManager.getActualValue('reqType');
   var custType = FormManager.getActualValue('custGrp');
@@ -112,6 +113,7 @@ function addAfterConfigAP() {
 }
 
 /* SG defect : 1795335 */
+
 function addFormatForCMRNumValidator() {
   FormManager.addFormValidator((function() {
     return {
@@ -345,132 +347,6 @@ function defaultCMRNumberPrefix() {
   if (FormManager.getActualValue('reqType') == 'U') {
     return
 
-    
-
-        
-
-    
-
-            
-
-    
-
-        
-
-    
-
-                
-
-    
-
-        
-
-    
-
-            
-
-    
-
-        
-
-    
-
-                    
-
-    
-
-        
-
-    
-
-            
-
-    
-
-        
-
-    
-
-                
-
-    
-
-        
-
-    
-
-            
-
-    
-
-        
-
-    
-
-                        
-
-    
-
-        
-
-    
-
-            
-
-    
-
-        
-
-    
-
-                
-
-    
-
-        
-
-    
-
-            
-
-    
-
-        
-
-    
-
-                    
-
-    
-
-        
-
-    
-
-            
-
-    
-
-        
-
-    
-
-                
-
-    
-
-        
-
-    
-
-            
-
-    
-
-        
-
-    
-
   }
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubGrp = FormManager.getActualValue('custSubGrp');
@@ -515,132 +391,6 @@ function onCustSubGrpChange() {
 
   if (FormManager.getActualValue('reqType') == 'U') {
     return
-
-    
-
-        
-
-    
-
-            
-
-    
-
-        
-
-    
-
-                
-
-    
-
-        
-
-    
-
-            
-
-    
-
-        
-
-    
-
-                    
-
-    
-
-        
-
-    
-
-            
-
-    
-
-        
-
-    
-
-                
-
-    
-
-        
-
-    
-
-            
-
-    
-
-        
-
-    
-
-                        
-
-    
-
-        
-
-    
-
-            
-
-    
-
-        
-
-    
-
-                
-
-    
-
-        
-
-    
-
-            
-
-    
-
-        
-
-    
-
-                    
-
-    
-
-        
-
-    
-
-            
-
-    
-
-        
-
-    
-
-                
-
-    
-
-        
-
-    
-
-            
-
-    
-
-        
-
-    
 
   }
 
@@ -1522,7 +1272,6 @@ function onInacTypeChange() {
 }
 
 var _isicHandler = null;
-
 function onIsicChangeHandler() {
   if (_isicHandler == null) {
     _isicHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
@@ -1983,9 +1732,9 @@ function addCmrNoValidator() {
 function removeStateValidatorForHkMoNZ() {
   var _landCntryHandler = dojo.connect(FormManager.getField('landCntry'), 'onChange', function(value) {
     var landCntry = FormManager.getActualValue('landCntry');
-    var custGrp = FormManager.getActualValue('custGrp');
-    if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.AUSTRALIA) {
-      if (custGrp == 'CROSS') {
+      var custGrp = FormManager.getActualValue('custGrp');
+      if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.AUSTRALIA) {
+        if (custGrp == 'CROSS') {
         FormManager.resetValidations('stateProv');
       } else {
         FormManager.addValidator('stateProv', Validators.REQUIRED, [ 'State/Province' ], null);
@@ -2384,7 +2133,7 @@ function addContactInfoValidator() {
               var custGrp = FormManager.getActualValue('custGrp');
               if (custGrp != 'CROSS' && (custName == null || streetAddr == null || postCd == null || city == null || state == null)) {
                 mandtDetails_2++;
-              } else if (custGrp == 'CROSS' && (custName == null || streetAddr == null || postCd == null || city == null)) {
+              }else if (custGrp == 'CROSS' && (custName == null || streetAddr == null || postCd == null || city == null)) {
                 mandtDetails_2++;
               }
               break;
