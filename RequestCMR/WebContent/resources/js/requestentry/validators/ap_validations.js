@@ -112,7 +112,6 @@ function addAfterConfigAP() {
 }
 
 /* SG defect : 1795335 */
-
 function addFormatForCMRNumValidator() {
   FormManager.addFormValidator((function() {
     return {
@@ -408,6 +407,70 @@ function defaultCMRNumberPrefix() {
 
     
 
+                        
+
+    
+
+        
+
+    
+
+            
+
+    
+
+        
+
+    
+
+                
+
+    
+
+        
+
+    
+
+            
+
+    
+
+        
+
+    
+
+                    
+
+    
+
+        
+
+    
+
+            
+
+    
+
+        
+
+    
+
+                
+
+    
+
+        
+
+    
+
+            
+
+    
+
+        
+
+    
+
   }
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubGrp = FormManager.getActualValue('custSubGrp');
@@ -452,6 +515,70 @@ function onCustSubGrpChange() {
 
   if (FormManager.getActualValue('reqType') == 'U') {
     return
+
+    
+
+        
+
+    
+
+            
+
+    
+
+        
+
+    
+
+                
+
+    
+
+        
+
+    
+
+            
+
+    
+
+        
+
+    
+
+                    
+
+    
+
+        
+
+    
+
+            
+
+    
+
+        
+
+    
+
+                
+
+    
+
+        
+
+    
+
+            
+
+    
+
+        
+
+    
+
+                        
 
     
 
