@@ -6,23 +6,23 @@ public class CloningMapping {
 
   private static final Logger LOG = Logger.getLogger(CloningMapping.class);
 
-  private String cmrNoMin;
-  private String cmrNoMax;
+  private String cmrNoRange;
+  private String countries;
 
-  public String getCmrNoMin() {
-    return cmrNoMin;
+  public String getCmrNoRange() {
+    return cmrNoRange;
   }
 
-  public void setCmrNoMin(String cmrNoMin) {
-    this.cmrNoMin = cmrNoMin;
+  public void setCmrNoRange(String cmrNoRange) {
+    this.cmrNoRange = cmrNoRange;
   }
 
-  public String getCmrNoMax() {
-    return cmrNoMax;
+  public String getCountries() {
+    return countries;
   }
 
-  public void setCmrNoMax(String cmrNoMax) {
-    this.cmrNoMax = cmrNoMax;
+  public void setCountries(String countries) {
+    this.countries = countries;
   }
 
 }

@@ -18,6 +18,7 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 
+import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addlctrydata;
 import com.ibm.cio.cmr.request.entity.AddlctrydataPK;
@@ -62,7 +63,10 @@ import com.ibm.cio.cmr.request.entity.SizeinfoPK;
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.ui.PageManager;
+import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemUtil;
+import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.legacy.CloningMapping;
 import com.ibm.cio.cmr.request.util.legacy.CloningOverrideMapping;
 import com.ibm.cio.cmr.request.util.legacy.CloningOverrideUtil;
@@ -98,6 +102,8 @@ public class CloningProcessService extends BaseBatchService {
   private static final List<String> KNVP_PK = Arrays.asList("vkorg", "vtweg", "spart", "parvw", "parza");
   private static final List<String> KNBK_PK = Arrays.asList("banks", "bankl", "bankn");
   private static final List<String> KNVL_PK = Arrays.asList("aland", "tatyp", "licnr");
+
+  private static final List<String> PROCESSING_TYPES = Arrays.asList("DR", "MA", "MD");
 
   @Override
   protected Boolean executeBatch(EntityManager entityManager) throws Exception {
@@ -275,7 +281,13 @@ public class CloningProcessService extends BaseBatchService {
     String cntry = cloningQueue.getId().getCmrIssuingCntry();
     LOG.debug("Started Cloning process for CMR No " + cmrNo);
 
-    String cloningCmrNo = generateCMRNo(entityManager, cntry, cmrNo);
+    String cloningCmrNo = "";
+    String processingType = PageManager.getProcessingType(cntry, "U");
+    if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType))
+      cloningCmrNo = generateCMRNoLegacy(entityManager, cntry, cmrNo);
+    else if (PROCESSING_TYPES.contains(processingType))
+      cloningCmrNo = generateCMRNoNonLegacy(entityManager, cntry, cmrNo);
+
     LOG.debug("Cloning CMR No. " + cloningCmrNo + " generated and assigned.");
 
     // Cloning CMR No entry in Reserved CMR No table
@@ -435,7 +447,7 @@ public class CloningProcessService extends BaseBatchService {
 
   }
 
-  private String generateCMRNo(EntityManager entityManager, String cmrIssuingCntry, String cmrNo) throws Exception {
+  private String generateCMRNoLegacy(EntityManager entityManager, String cmrIssuingCntry, String cmrNo) throws Exception {
     GenerateCMRNoRequest request = new GenerateCMRNoRequest();
     request.setLoc1(cmrIssuingCntry);
     request.setLoc2(cmrIssuingCntry);
@@ -455,15 +467,12 @@ public class CloningProcessService extends BaseBatchService {
     int CmrNoVal = Integer.parseInt(cmrNo);
     CloningMapping cMapping = null;
     try {
-      cMapping = getCMRNoRangeFromMapping(cmrIssuingCntry, CmrNoVal);
+      cMapping = getCMRNoRangeFromMapping(cmrIssuingCntry, CmrNoVal, request);
     } catch (Exception e) {
       LOG.error("Error occured while digesting xml.", e);
     }
 
-    if (cMapping != null) {
-      request.setMin(Integer.parseInt(cMapping.getCmrNoMin()));
-      request.setMax(Integer.parseInt(cMapping.getCmrNoMax()));
-    } else if (CmrNoVal >= 990000 && CmrNoVal <= 999999) {
+    if (cMapping == null && (CmrNoVal >= 990000 && CmrNoVal <= 999999)) {
       request.setMin(990000);
       request.setMax(999999);
     }
@@ -481,15 +490,24 @@ public class CloningProcessService extends BaseBatchService {
     }
   }
 
-  public CloningMapping getCMRNoRangeFromMapping(String countryId, int cmrNo) throws Exception {
-    List<CloningMapping> countryMappingList = CloningUtil.getCloningCofigCountry(countryId);
-    if (countryMappingList != null && countryMappingList.size() > 0) {
-      for (CloningMapping mapping : countryMappingList) {
-        if (StringUtils.isNotBlank(mapping.getCmrNoMin()) && StringUtils.isNotBlank(mapping.getCmrNoMax())) {
-          int start = Integer.parseInt(mapping.getCmrNoMin());
-          int end = Integer.parseInt(mapping.getCmrNoMax());
-          if (cmrNo >= start && cmrNo <= end)
-            return mapping;
+  public CloningMapping getCMRNoRangeFromMapping(String countryId, int cmrNo, GenerateCMRNoRequest generateCMRNoObj) throws Exception {
+    CloningMapping mapping = new CloningUtil().getCmrNoRangeFromMapping(countryId);
+    if (mapping != null) {
+      if (StringUtils.isNotBlank(mapping.getCmrNoRange())) {
+        String[] cmrNoRanges = mapping.getCmrNoRange().replaceAll("\n", "").replaceAll(" ", "").split(",");
+        for (String cmrNoRange : cmrNoRanges) {
+          String[] range = cmrNoRange.split("to");
+          if (range.length == 2) {
+            int start = Integer.parseInt(range[0]);
+            int end = Integer.parseInt(range[1]);
+            System.out.println("start=" + start);
+            System.out.println("end=" + end);
+            if (cmrNo >= start && cmrNo <= end) {
+              generateCMRNoObj.setMin(start);
+              generateCMRNoObj.setMax(end);
+              return mapping;
+            }
+          }
         }
       }
     }
@@ -1626,6 +1644,25 @@ public class CloningProcessService extends BaseBatchService {
         }
       }
     }
+  }
+
+  private String generateCMRNoNonLegacy(EntityManager entityManager, String cmrIssuingCntry, String cmrNo) throws Exception {
+    LOG.debug("Inside generateCMRNoNonLegacy method ");
+    String mandt = SystemConfiguration.getValue("MANDT");
+    CloningUtil cUtil = new CloningUtil();
+    String kukla = cUtil.getKuklaFromCMR(entityManager, cmrIssuingCntry, cmrNo, mandt);
+    GEOHandler geoHandler = RequestUtils.getGEOHandler(cmrIssuingCntry);
+    String generatedCmrNo = "";
+    if (geoHandler != null) {
+      generatedCmrNo = geoHandler.getCMRNo(entityManager, kukla, mandt, cmrIssuingCntry, cmrNo);
+      if (StringUtils.isNotBlank(generatedCmrNo))
+        return generatedCmrNo;
+      else {
+        LOG.error("CMR No cannot be generated due to some Error");
+        throw new Exception("CMR No cannot be generated.");
+      }
+    }
+    return generatedCmrNo;
   }
 
 }
