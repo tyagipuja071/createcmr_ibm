@@ -2850,6 +2850,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(onIsicChange, [ SysLoc.AUSTRALIA, SysLoc.SINGAPORE ]);
   GEOHandler.addAfterTemplateLoad(onIsicChange, [ SysLoc.AUSTRALIA, SysLoc.SINGAPORE ]);
   
+  GEOHandler.addAfterConfig(onIsicChangeHandlerAP, GEOHandler.ANZ);
   GEOHandler.addAfterConfig(onIsicChangeHandlerAP, GEOHandler.ASEAN);
 
 });
