@@ -1533,8 +1533,7 @@ function onIsuCdChangeAseanAnzIsa() {
   var reqType = null;
   reqType = FormManager.getActualValue('reqType');
   var cmrIssuingCntry = dojo.byId('cmrIssuingCntry').value;
-  var asean_isa_cntries = [ 'Indonesia - 749', 'Brunei Darussalam - 643', 'Philippines - 818', 'Malaysia - 778', 'Vietnam - 852',
-      'Bangladesh - 615', 'India - 744', 'Sri Lanka - 652'];
+  var asean_isa_cntries = [ 'Bangladesh - 615', 'India - 744', 'Sri Lanka - 652'];
 
   if (reqType == 'U') {
     console.log(">>>> Exit onIsuCdChangeAseanAnz for Update.");
