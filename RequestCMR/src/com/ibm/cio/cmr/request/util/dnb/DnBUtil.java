@@ -118,7 +118,7 @@ public class DnBUtil {
     registerDnBVATCode("NO", 1699); // Register of Business Enterprises Number
     registerDnBVATCode("NZ", 578); // New Zealand Company Number
     registerDnBVATCode("PE", 1382); // Peruvian Sole Commercial Registry Number
-    registerDnBVATCode("PF", 17890); // Business Registration Number (Australia)
+    registerDnBVATCode("AU", 17890); // Business Registration Number (Australia)
     registerDnBVATCode("PL", 1385); // Polish Tax Identifier
     registerDnBVATCode("PT", 11659); // Chamber Of Commerce Number
     registerDnBVATCode("PY", 1381); // Paraguayan Unique Tax Registration
@@ -138,21 +138,74 @@ public class DnBUtil {
     registerDnBVATCode("VN", 1397); // Business Registration Number (Vietnam)
     registerDnBVATCode("SG", 1386); // Singapore Registration File Number
     registerDnBVATCode("ZA", 15169); // Value Added Tax Number(ZA)
+
     registerDnBVATCode("MQ", 2080); // VAT Number
     registerDnBVATCode("RE", 2080);
+    registerDnBVATCode("MC", 2080);
+    registerDnBVATCode("GP", 2080);
+    registerDnBVATCode("GF", 2080);
+    registerDnBVATCode("PM", 2080);
+    registerDnBVATCode("KM", 2080);
+    registerDnBVATCode("VU", 2080);
+    registerDnBVATCode("PF", 2080);
+    registerDnBVATCode("YT", 2080);
+    registerDnBVATCode("NC", 2080);
+    registerDnBVATCode("WF", 2080);
+    registerDnBVATCode("AD", 2080);
+    registerDnBVATCode("DZ", 2080);
 
     // Tax Cd1
     registerDnBTaxCd1Code("NL", 6256); // NetherLand Tax Registration Number
     registerDnBTaxCd1Code("FR", 2081); // SIRET
     registerDnBTaxCd1Code("GB", 2541); // UK CRO Number
     registerDnBTaxCd1Code("IE", 9134); // Ireland CRO Number
+
+    // France Sub Regions
+    registerDnBVATCode("MQ", 2080); // VAT Number
+    registerDnBVATCode("RE", 2080);
+    registerDnBVATCode("MC", 2080);
+    registerDnBVATCode("GP", 2080);
+    registerDnBVATCode("GF", 2080);
+    registerDnBVATCode("PM", 2080);
+    registerDnBVATCode("KM", 2080);
+    registerDnBVATCode("VU", 2080);
+    registerDnBVATCode("PF", 2080);
+    registerDnBVATCode("YT", 2080);
+    registerDnBVATCode("NC", 2080);
+    registerDnBVATCode("WF", 2080);
+    registerDnBVATCode("AD", 2080);
+    registerDnBVATCode("DZ", 2080);
     registerDnBTaxCd1Code("MQ", 2081); // SIRET
     registerDnBTaxCd1Code("RE", 2081);
+    registerDnBTaxCd1Code("MC", 2081);
+    registerDnBTaxCd1Code("GP", 2081);
+    registerDnBTaxCd1Code("GF", 2081);
+    registerDnBTaxCd1Code("PM", 2081);
+    registerDnBTaxCd1Code("KM", 2081);
+    registerDnBTaxCd1Code("VU", 2081);
+    registerDnBTaxCd1Code("PF", 2081);
+    registerDnBTaxCd1Code("YT", 2081);
+    registerDnBTaxCd1Code("NC", 2081);
+    registerDnBTaxCd1Code("WF", 2081);
+    registerDnBTaxCd1Code("AD", 2081);
+    registerDnBTaxCd1Code("DZ", 2081);
 
     // other codes
     registerOtherDnBCode("FR", CODE_SIREN, 2078);
     registerOtherDnBCode("MQ", CODE_SIREN, 2078);
     registerOtherDnBCode("RE", CODE_SIREN, 2078);
+    registerOtherDnBCode("MC", CODE_SIREN, 2078);
+    registerOtherDnBCode("GP", CODE_SIREN, 2078);
+    registerOtherDnBCode("GF", CODE_SIREN, 2078);
+    registerOtherDnBCode("PM", CODE_SIREN, 2078);
+    registerOtherDnBCode("KM", CODE_SIREN, 2078);
+    registerOtherDnBCode("VU", CODE_SIREN, 2078);
+    registerOtherDnBCode("PF", CODE_SIREN, 2078);
+    registerOtherDnBCode("YT", CODE_SIREN, 2078);
+    registerOtherDnBCode("NC", CODE_SIREN, 2078);
+    registerOtherDnBCode("WF", CODE_SIREN, 2078);
+    registerOtherDnBCode("AD", CODE_SIREN, 2078);
+    registerOtherDnBCode("DZ", CODE_SIREN, 2078);
 
   }
 
