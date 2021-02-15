@@ -287,6 +287,8 @@ public class CloningProcessService extends BaseBatchService {
       cloningCmrNo = generateCMRNoLegacy(entityManager, cntry, cmrNo);
     else if (PROCESSING_TYPES.contains(processingType))
       cloningCmrNo = generateCMRNoNonLegacy(entityManager, cntry, cmrNo);
+    else
+      throw new Exception("CMR no generation not supported for this country");
 
     LOG.debug("Cloning CMR No. " + cloningCmrNo + " generated and assigned.");
 
@@ -500,8 +502,6 @@ public class CloningProcessService extends BaseBatchService {
           if (range.length == 2) {
             int start = Integer.parseInt(range[0]);
             int end = Integer.parseInt(range[1]);
-            System.out.println("start=" + start);
-            System.out.println("end=" + end);
             if (cmrNo >= start && cmrNo <= end) {
               generateCMRNoObj.setMin(start);
               generateCMRNoObj.setMax(end);
