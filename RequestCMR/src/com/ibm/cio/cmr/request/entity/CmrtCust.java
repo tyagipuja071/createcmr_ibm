@@ -422,7 +422,7 @@ public class CmrtCust extends BaseEntity<CmrtCustPK> implements Serializable {
 
   @PreUpdate
   @PrePersist
-  public void setDefaultKatr10() {
+  public void setDefaultSBO() {
     String sbo = SystemParameters.getString("COMPANY_CD_SBO");
     if (!StringUtils.isBlank(this.sbo) && this.sbo.equals(sbo)) {
       this.sbo = "";
