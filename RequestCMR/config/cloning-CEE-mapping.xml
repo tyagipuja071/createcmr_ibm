@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mappings>
+	<mapping>
+		<cmrNoMin>1000</cmrNoMin>
+		<cmrNoMax>9999</cmrNoMax>
+	</mapping>
+	<mapping>
+		<cmrNoMin>369320</cmrNoMin>
+		<cmrNoMax>979999</cmrNoMax>
+	</mapping>
+	<mapping>
+		<cmrNoMin>510000</cmrNoMin>
+		<cmrNoMax>799999</cmrNoMax>
+	</mapping>
+	<mapping>
+		<cmrNoMin>985001</cmrNoMin>
+		<cmrNoMax>985999</cmrNoMax>
+	</mapping>
+	<mapping>
+		<cmrNoMin>993110</cmrNoMin>
+		<cmrNoMax>998899</cmrNoMax>
+	</mapping>
+</mappings>
