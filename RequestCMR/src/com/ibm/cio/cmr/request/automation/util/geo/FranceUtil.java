@@ -938,13 +938,15 @@ public class FranceUtil extends AutomationUtil {
     }
 
     // Duplicate Request check with customer name
-
-    if (checkDuplicateRequest(entityManager, reqData)) {
-      details.append("Duplicate request found with matching customer name.").append("\n");
-      engineData.addRejectionComment("OTH", "Duplicate request found with matching customer name.", "", "");
-      return false;
+    
+    List<String> dupReqIds=checkDuplicateRequest(entityManager, reqData);
+    if(!dupReqIds.isEmpty()) {
+    	details.append("Duplicate request found with matching customer name.\nMatch found with Req id :").append("\n");
+    	details.append(StringUtils.join(dupReqIds, "\n"));
+    	engineData.addRejectionComment("OTH", "Duplicate request found with matching customer name.","" , "");
+    	return false;
     } else {
-      details.append("No duplicate requests found");
+    	details.append("No duplicate requests found");
     }
 
     PrivatePersonCheckResult checkResult = chkPrivatePersonRecordFR(country, landCntry, name, checkBluepages, reqData.getData());
