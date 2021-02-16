@@ -1389,12 +1389,27 @@ public class FranceHandler extends GEOHandler {
 
               currCell = (XSSFCell) row.getCell(6);
               street = validateColValFromCell(currCell);
-
+              int loopFlag = 9;
               if ("Bill To".equals(name)) {
+                loopFlag = 10;
                 currCell = (XSSFCell) row.getCell(9);
               } else {
                 currCell = (XSSFCell) row.getCell(8);
               }
+
+              boolean dummyUpd = true;
+              for (int i = 2; i < loopFlag; i++) {
+                XSSFCell cell = (XSSFCell) row.getCell(i);
+                String addrField = validateColValFromCell(cell);
+                if (StringUtils.isNotBlank(addrField)) {
+                  dummyUpd = false;
+                  break;
+                }
+              }
+              if (dummyUpd) {
+                continue;
+              }
+
               city = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(7);
@@ -1404,6 +1419,7 @@ public class FranceHandler extends GEOHandler {
                 currCell = (XSSFCell) row.getCell(8);
                 poBox = validateColValFromCell(currCell);
               }
+
 
               if (StringUtils.isEmpty(legalName)) {
                 TemplateValidation error = new TemplateValidation(name);
