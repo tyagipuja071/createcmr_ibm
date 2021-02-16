@@ -820,6 +820,7 @@ public abstract class AutomationUtil {
     String sql = ExternalizedQuery.getSql("AUTO.CHECK_IF_ADDRESS_EXIST");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", addrToCheck.getId().getReqId());
+    query.setParameter("ADDR_TYPE", addrToCheck.getId().getAddrType());
     query.setParameter("ADDR_SEQ", addrToCheck.getId().getAddrSeq());
     query.setParameter("NAME1", addrToCheck.getCustNm1());
     query.setParameter("LAND_CNTRY", addrToCheck.getLandCntry());
@@ -1229,6 +1230,7 @@ public abstract class AutomationUtil {
 
       return compareName1 != null && compareName1.equals(compareName2);
     }
+<<<<<<< HEAD
 
   }
 
@@ -1259,6 +1261,8 @@ public abstract class AutomationUtil {
 		  }
 	  }
 	  return dupReqIds;
+=======
+>>>>>>> refs/remotes/origin/common_code
   }
 
 }

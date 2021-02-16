@@ -1107,4 +1107,11 @@ public class FranceUtil extends AutomationUtil {
 
   }
 
+<<<<<<< HEAD
+=======
+  @Override
+  public List<String> getSkipChecksRequestTypesforCMDE() {
+    return Arrays.asList("C", "U", "M", "D", "R");
+  }
+>>>>>>> refs/remotes/origin/common_code
 }
