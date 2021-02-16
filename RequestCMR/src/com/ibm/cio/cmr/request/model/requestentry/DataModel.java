@@ -252,6 +252,8 @@ public class DataModel extends BaseModel {
 
   private String apCustClusterId;
 
+  private String custAcctType;
+
   public String getCreditCd() {
     return creditCd;
   }
@@ -1205,13 +1207,21 @@ public class DataModel extends BaseModel {
   public void setCusInvoiceCopies(String cusInvoiceCopies) {
     this.cusInvoiceCopies = cusInvoiceCopies;
   }
-  
+
   public String getApCustClusterId() {
     return apCustClusterId;
   }
 
   public void setApCustClusterId(String apCustClusterId) {
     this.apCustClusterId = apCustClusterId;
+  }
+
+  public String getCustAcctType() {
+    return custAcctType;
+  }
+
+  public void setCustAcctType(String custAcctType) {
+    this.custAcctType = custAcctType;
   }
 
 }

@@ -2985,7 +2985,8 @@ public class LegacyDirectService extends TransConnService {
           for (Addr addr : addresses) {
             if ("ZS01".equals(addr.getId().getAddrType())) {
               AddrRdc addrRdc = getAddrRdcRecord(entityManager, addr);
-              if (addrRdc == null || (addrRdc != null && !addr.getCustPhone().equals(addrRdc.getCustPhone()))) {
+              if (addrRdc == null || (addrRdc != null && StringUtils.isBlank(addr.getCustPhone()) && !StringUtils.isBlank(addrRdc.getCustPhone()))
+                  || (addrRdc != null && addr.getCustPhone() != null && !addr.getCustPhone().equals(addrRdc.getCustPhone()))) {
                 isDataUpdated = true;
               }
             }
