@@ -93,6 +93,16 @@ public class CMRRefreshService extends BaseBatchService {
     int processed = 0;
     int error = 0;
 
+    int maxRecords = SystemParameters.getInt("CMR.REFRESH.MAX");
+    if (maxRecords <= 0) {
+      maxRecords = 10000;
+    }
+
+    if (results != null && results.size() > maxRecords) {
+      LOG.warn("More than " + maxRecords + " records retrieved. Processing will be skipped.");
+      return true;
+    }
+
     if (results != null && !results.isEmpty()) {
       LOG.info("Processing " + results.size() + " distinct CMR(s)..");
 

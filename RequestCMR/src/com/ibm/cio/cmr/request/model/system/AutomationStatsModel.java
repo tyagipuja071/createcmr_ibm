@@ -76,6 +76,17 @@ public class AutomationStatsModel {
 
   private String paygo;
 
+  @Column(name = "OVERALL_TAT")
+  private long overallTat = -1;
+
+  @Column(name = "PAYGO_INDC")
+  private String paygoIndc;
+
+  private String pool;
+
+  @Column(name = "CREATE_TS")
+  private String createTs;
+
   public StatsPK getId() {
     return id;
   }
@@ -258,6 +269,38 @@ public class AutomationStatsModel {
 
   public void setPaygo(String paygo) {
     this.paygo = paygo;
+  }
+
+  public long getOverallTat() {
+    return overallTat;
+  }
+
+  public void setOverallTat(long overallTat) {
+    this.overallTat = overallTat;
+  }
+
+  public String getPaygoIndc() {
+    return paygoIndc;
+  }
+
+  public void setPaygoIndc(String paygoIndc) {
+    this.paygoIndc = paygoIndc;
+  }
+
+  public String getPool() {
+    return pool;
+  }
+
+  public void setPool(String pool) {
+    this.pool = pool;
+  }
+
+  public String getCreateTs() {
+    return createTs;
+  }
+
+  public void setCreateTs(String createTs) {
+    this.createTs = createTs;
   }
 
 }

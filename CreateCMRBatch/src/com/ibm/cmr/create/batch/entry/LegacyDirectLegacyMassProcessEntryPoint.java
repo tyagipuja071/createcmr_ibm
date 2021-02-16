@@ -18,7 +18,7 @@ public class LegacyDirectLegacyMassProcessEntryPoint extends BatchEntryPoint {
    * @param args
    */
   public static void main(String[] args) throws CmrException {
-    BatchEntryPoint.initContext("LegacyDirectLegacyMassProcessEntryPoint");
+    BatchEntryPoint.initContext("LegacyDirectLegacyMassProcess");
 
     LegacyDirectLegacyMassProcessService service = new LegacyDirectLegacyMassProcessService();
     service.setDevMode(args != null && args.length > 0 && "DEV".equals(args[0]));

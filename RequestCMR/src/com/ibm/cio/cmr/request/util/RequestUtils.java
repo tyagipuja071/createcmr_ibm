@@ -14,7 +14,9 @@ import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 import javax.persistence.Column;
@@ -36,6 +38,7 @@ import com.ibm.cio.cmr.request.entity.AddrRdc;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrInternalTypes;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.Lov;
 import com.ibm.cio.cmr.request.entity.NotifList;
 import com.ibm.cio.cmr.request.entity.NotifListPK;
 import com.ibm.cio.cmr.request.entity.ReqCmtLog;
@@ -79,6 +82,7 @@ public class RequestUtils {
   public static final String STATUS_REJECTED = "Rejected";
   public static final String STATUS_INPUT_REQUIRED = "Input Required";
   public static final String US_CMRISSUINGCOUNTRY = "897";
+  private static Map<String, String> rejectionReasons = new HashMap<String, String>();
 
   public static void refresh() {
     emailTemplate = null;
@@ -214,6 +218,12 @@ public class RequestUtils {
 
     if (sendToNm != null) {
       hist.setSentToNm(sendToNm);
+    }
+    if (StringUtils.isNotBlank(rejReasonCd) && StringUtils.isBlank(rejectReason)) {
+      hist.setRejReason(getRejectionReason(entityManager, rejReasonCd));
+    }
+    if (StringUtils.isNotBlank(hist.getRejReason()) && hist.getRejReason().length() > 60) {
+      hist.setRejReason(hist.getRejReason().substring(0, 60));
     }
 
     if (complete) {
@@ -1595,6 +1605,29 @@ public class RequestUtils {
     query.setParameter("SYST_ID", sourceSystId);
     query.setForReadOnly(true);
     return query.exists();
+  }
+
+  /**
+   * Initializes the LOVs for Rejection Reason
+   * 
+   * @param entityManager
+   */
+  public static String getRejectionReason(EntityManager entityManager, String rejectionReasonCd) {
+    if (rejectionReasons == null || rejectionReasons.isEmpty()) {
+      rejectionReasons = new HashMap<String, String>();
+      LOG.debug("Initializing Rejection Reasons");
+      String sql = ExternalizedQuery.getSql("AUTO.REJECTION_CODES");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setForReadOnly(true);
+      List<Lov> codes = query.getResults(Lov.class);
+      if (codes != null) {
+        for (Lov code : codes) {
+          rejectionReasons.put(code.getId().getCd(), code.getTxt());
+        }
+      }
+    }
+
+    return rejectionReasons.get(rejectionReasonCd);
   }
 
 }
