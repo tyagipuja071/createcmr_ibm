@@ -32,12 +32,11 @@
 					<width>30</width>
 					<lovId>CollectionCd</lovId>
 				</column>
-				<column>
+				<column exactLength="true">
 					<label>Enterprise Number</label>
 					<dbColumn>ENTERPRISE</dbColumn>
 					<width>30</width>
 					<length>6</length>
-					<lovId>Enterprise</lovId>
 				</column>
 				<column>
 					<label>INAC/NAC</label>

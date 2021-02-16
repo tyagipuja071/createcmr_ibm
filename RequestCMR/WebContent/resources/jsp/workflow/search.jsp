@@ -16,6 +16,23 @@
     FilteringDropdown.loadItems('cmrOwnerCriteria', 'cmrOwnerCriteria_spinner', 'lov', 'fieldId=CMROwner');
     FilteringDropdown.loadItems('requestType', 'requestType_spinner', 'lov', 'fieldId=SearchRequestType');
     FilteringDropdown.loadItems('procStatus', 'procStatus_spinner', 'lov', 'fieldId=ProcessingStatus');
+    
+    var sources = cmr.query('METRICS.SOURCES', {_qall : 'Y'});
+    
+    var dropdown2 = {
+        listItems : {
+          identifier : "id", 
+          label : "name",
+          items : [{ id : '', name : ''}]
+        }
+    };
+    if (sources){
+      sources.forEach(function(src,i){
+        dropdown2.listItems.items.push({ id : src.ret1, name : src.ret1});
+      });
+    }
+    FilteringDropdown.loadFixedItems('sourceSystem', null, dropdown2);
+    
     if (FormManager) {
       FormManager.addValidator('wfProcCentre', validateWorkflow, []);
       FormManager.addValidator('cmrNoCriteria', validateCMRNum, []);
@@ -71,13 +88,8 @@
         </cmr:column>
         <cmr:column span="2">
           <p>
-            <cmr:label fieldId="wfProcCentre">
-							${ui.wfProcCentre}:
-							<cmr:spinner fieldId="wfProcCentre" />
-
-            </cmr:label>
-            <form:select dojoType="dijit.form.FilteringSelect" id="wfProcCentre" searchAttr="name" style="display: block;" maxHeight="200" required="false" path="wfProcCentre" placeHolder="${ui.procCenterNmPH}">
-            </form:select>
+            <label for="requestId">${ui.requestId}: </label>
+            <form:input size="30" id="requestId" path="requestId" />
           </p>
         </cmr:column>
       </cmr:row>
@@ -105,8 +117,13 @@
         </cmr:column>
         <cmr:column span="2">
           <p>
-            <label for="requestId">${ui.requestId}: </label>
-            <form:input size="30" id="requestId" path="requestId" />
+            <cmr:label fieldId="wfProcCentre">
+              ${ui.wfProcCentre}:
+              <cmr:spinner fieldId="wfProcCentre" />
+
+            </cmr:label>
+            <form:select dojoType="dijit.form.FilteringSelect" id="wfProcCentre" searchAttr="name" style="display: block;" maxHeight="200" required="false" path="wfProcCentre" placeHolder="${ui.procCenterNmPH}">
+            </form:select>
           </p>
         </cmr:column>
       </cmr:row>
@@ -180,6 +197,28 @@
           <br />
           <label for="pendingAppr" style="display: inline"> ${ui.pendingApprCrit}:&nbsp; </label>
           <form:checkbox id="pendingAppr" path="pendingAppr" value="Y" />
+        </cmr:column>
+      </cmr:row>
+      <cmr:row>
+        <cmr:column span="2">
+          <p>
+            <cmr:label fieldId="sourceSystem">
+              Source System:
+              <cmr:spinner fieldId="sourceSystem" />
+            </cmr:label>
+            <form:select dojoType="dijit.form.FilteringSelect" id="sourceSystem" searchAttr="name" style="display: block;" maxHeight="200" path="sourceSystem" placeHolder="">
+            </form:select>
+          </p>
+        </cmr:column>
+        <cmr:column span="2">
+          <br />
+          <label for="payGo" style="display: inline"> PayGo Requests Only:&nbsp; </label>
+          <form:checkbox id="payGo" path="payGo" value="Y" />
+        </cmr:column>
+        <cmr:column span="2">
+          <br />
+          <label for="pool" style="display: inline"> Pool Processed Only:&nbsp; </label>
+          <form:checkbox id="pool" path="pool" value="Y" />
         </cmr:column>
       </cmr:row>
       <cmr:row>

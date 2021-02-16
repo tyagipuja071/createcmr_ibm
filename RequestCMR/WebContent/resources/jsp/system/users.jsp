@@ -10,6 +10,7 @@
 <script src="${resourcesPath}/js/system/system.js?${cmrv}" type="text/javascript"></script>
 <script>
   dojo.addOnLoad(function() {
+    FilteringDropdown.loadItems('requesterFor', null, 'bds', 'fieldId=CMRIssuingCountry');
   });
 </script>
 <form:form method="POST" action="${contextPath}/users" name="frmCMRSearch" class="ibm-column-form ibm-styled-form" modelAttribute="users">
@@ -34,6 +35,29 @@
           <cmr:button label="Filter" onClick="UserService.filterUsers()"></cmr:button>
         </cmr:column>
       </cmr:row>
+      <cmr:row topPad="10">
+        <cmr:column span="2">
+          <cmr:label fieldId="role">Role:</cmr:label>
+            <form:select dojoType="dijit.form.FilteringSelect" id="role" searchAttr="name" style="display: block;" maxHeight="200"
+              required="false" path="role" placeHolder="Filter by Role">
+                <option value=""></option>
+                <option value="REQUESTER">Requester</option>
+                <option value="PROCESSOR">Processor</option>
+                <option value="CMDE">CMDE Administrator</option>
+                <option value="ADMIN">System Administrator</option>
+                <option value="WS_ADMIN">WebService Administrator</option>
+                <option value="USER">FindCMR User</option>
+            </form:select>
+        </cmr:column>
+        <cmr:column span="2">
+          <cmr:label fieldId="requesterFor">Requester For:
+            <cmr:info text="Filters the users who have SUBMITTED requests under the chosen country. Users who have created drafts only will not be part of the results." />
+          </cmr:label>
+            <form:select dojoType="dijit.form.FilteringSelect" id="requesterFor" searchAttr="name" style="display: block;" maxHeight="200"
+              required="false" path="requesterFor" placeHolder="Filter by Country">
+            </form:select>
+        </cmr:column>
+      </cmr:row>
       <cmr:row>
          &nbsp;
       </cmr:row>
@@ -51,9 +75,11 @@
       </cmr:row>
       <cmr:row topPad="10" addBackground="false">
         <cmr:column span="6">
-          <cmr:grid url="/userlist.json" id="userListGrid" span="6" useFilter="true" loadOnStartup="true">
+          <cmr:grid url="/userlist.json" id="userListGrid" span="6" useFilter="true" loadOnStartup="true" >
             <cmr:gridParam fieldId="userName" />
             <cmr:gridParam fieldId="userId" />
+            <cmr:gridParam fieldId="role" />
+            <cmr:gridParam fieldId="requesterFor" />
             <cmr:gridCol width="15%" field="userName" header="Name">
               <cmr:formatter functionName="UserService.userIdFormatter" />
             </cmr:gridCol>

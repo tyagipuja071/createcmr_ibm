@@ -52,6 +52,7 @@ public abstract class ASEANTransformer extends APTransformer {
     else
       handler.messageHash.put("MrktRespCode", "2");
     setAbbLoc(handler);
+
   }
 
   @Override
