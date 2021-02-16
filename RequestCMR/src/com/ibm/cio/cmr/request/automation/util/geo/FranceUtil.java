@@ -862,7 +862,7 @@ public class FranceUtil extends AutomationUtil {
                     }
                   }
                   if (!siretMatches) {
-                    resultCodes.add("R");
+                    resultCodes.add("D");
                     checkDetails.append("Updates to Address " + addrType + " with SIRET could not be validated agianst DnB.").append("\n");
                   }
                 }
