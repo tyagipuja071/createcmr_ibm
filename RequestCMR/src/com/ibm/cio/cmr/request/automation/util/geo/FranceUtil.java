@@ -336,6 +336,12 @@ public class FranceUtil extends AutomationUtil {
     Addr addr = requestData.getAddress("ZS01");
     details.append("\n");
     if (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && CalculateCoverageElement.COV_BG.equals(covFrom)) {
+      String sboValue = data.getSalesBusOffCd();
+      if (StringUtils.isNotBlank(sboValue)) {
+        sboValue = sboValue.substring(0, 3);
+        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sboValue + sboValue);
+        details.append("SORTL: " + sboValue + sboValue);
+      }
       engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
     } else {
       isCoverageCalculated = false;
@@ -394,7 +400,7 @@ public class FranceUtil extends AutomationUtil {
           }
           HashMap<String, String> response = getSBOFromPostalCodeMapping(data.getCountryUse(), data.getIsicCd(), addr.getPostCd(), data.getIsuCd(),
               data.getClientTier());
-          LOG.debug("Calculated SBO: " + response.get(SBO));
+          LOG.debug("Calculated SBO: " + response.get(SBO) + response.get(SBO));
           if (StringUtils.isNotBlank(response.get(MATCHING))) {
             switch (response.get(MATCHING)) {
             case "Exact Match":
@@ -835,9 +841,11 @@ public class FranceUtil extends AutomationUtil {
                   checkDetails.append("Update to InstallAt (" + addr.getId().getAddrSeq() + ") has different customer name than sold-to .\n");
                 }
               } else if (CmrConstants.RDC_SOLD_TO.equals(addrType) || CmrConstants.RDC_BILL_TO.equals(addrType)) {
-                LOG.debug("Update to Address " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified");
-                checkDetails.append("Update to address " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified \n");
-                resultCodes.add("D");
+                // LOG.debug("Update to Address " + addrType + "(" +
+                // addr.getId().getAddrSeq() + ") needs to be verified");
+                // checkDetails.append("Update to address " + addrType + "(" +
+                // addr.getId().getAddrSeq() + ") needs to be verified \n");
+                // resultCodes.add("D");
 
                 // validate the address on DnB with SIRET
 
@@ -862,7 +870,7 @@ public class FranceUtil extends AutomationUtil {
                     }
                   }
                   if (!siretMatches) {
-                    resultCodes.add("R");
+                    resultCodes.add("D");
                     checkDetails.append("Updates to Address " + addrType + " with SIRET could not be validated agianst DnB.").append("\n");
                   }
                 }
