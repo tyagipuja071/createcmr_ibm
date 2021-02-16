@@ -1341,9 +1341,9 @@ public class FranceHandler extends GEOHandler {
               String siret = "";// 10
 
               currCell = (XSSFCell) row.getCell(10);
-              String txt = df.formatCellValue(currCell);
+              String siretTxt = df.formatCellValue(currCell);
               siret = validateColValFromCell(currCell);
-              if (!StringUtils.isBlank(siret) && !txt.matches("\\d+.\\d*")) {
+              if (!StringUtils.isBlank(siret) && !siretTxt.matches("\\d+.\\d*")) {
                 TemplateValidation error = new TemplateValidation(name);
                 LOG.trace("The row " + (row.getRowNum() + 1) + " Note that SIRET should be numeric. Please fix and upload the template again.");
                 error.addError((row.getRowNum() + 1), "SIRET",
