@@ -212,8 +212,9 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
           } else if (dupCMRFound) {
             List<String> dupFiltered = removeDupEntriesFrmList(duplicateList);
             List<String> kunnrsFiltered = removeDupEntriesFrmList(soldToKunnrsList);
-            engineData.addRejectionComment("DUPC", "There were possible duplicate CMRs found with the same data.",
-                StringUtils.join(dupFiltered, ", "), StringUtils.join(kunnrsFiltered, ", "));
+            String supplInfo1 = StringUtils.isNotBlank(dupFiltered.get(0)) ? dupFiltered.get(0) : "";
+            String supplInfo2 = StringUtils.isNotBlank(kunnrsFiltered.get(0)) ? kunnrsFiltered.get(0) : "";
+            engineData.addRejectionComment("DUPC", "There were possible duplicate CMRs found with the same data.", supplInfo1, supplInfo2);
             admin.setMatchIndc("C");
           }
           result.setOnError(true);
