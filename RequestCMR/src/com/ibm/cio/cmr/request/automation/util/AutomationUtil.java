@@ -50,7 +50,6 @@ import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.MatchingServiceClient;
 import com.ibm.cmr.services.client.PPSServiceClient;
 import com.ibm.cmr.services.client.QueryClient;
-import com.ibm.cmr.services.client.ServiceClient.Method;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckRequest;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
@@ -596,16 +595,16 @@ public abstract class AutomationUtil {
     }
 
     // Duplicate Request check with customer name
-    List<String> dupReqIds=checkDuplicateRequest(entityManager, reqData);
-    if(!dupReqIds.isEmpty()) {
-	details.append("Duplicate request found with matching customer name.\nMatch found with Req id :").append("\n");
-	details.append(StringUtils.join(dupReqIds, "\n"));
-   	engineData.addRejectionComment("OTH", "Duplicate request found with matching customer name.",StringUtils.join(dupReqIds, ", ") , "");
-   	return false;
-   } else {
-   	details.append("No duplicate requests found");
-   
-   }
+    List<String> dupReqIds = checkDuplicateRequest(entityManager, reqData);
+    if (!dupReqIds.isEmpty()) {
+      details.append("Duplicate request found with matching customer name.\nMatch found with Req id :").append("\n");
+      details.append(StringUtils.join(dupReqIds, "\n"));
+      engineData.addRejectionComment("OTH", "Duplicate request found with matching customer name.", StringUtils.join(dupReqIds, ", "), "");
+      return false;
+    } else {
+      details.append("No duplicate requests found");
+
+    }
     PrivatePersonCheckResult checkResult = checkPrivatePersonRecord(country, landCntry, name, checkBluepages);
     PrivatePersonCheckStatus checkStatus = checkResult.getStatus();
 
@@ -1230,39 +1229,35 @@ public abstract class AutomationUtil {
 
       return compareName1 != null && compareName1.equals(compareName2);
     }
-<<<<<<< HEAD
 
   }
 
-
   public List<String> checkDuplicateRequest(EntityManager entityManager, RequestData requestData) {
-	  List<String> dupReqIds = new ArrayList<>();
-	  Data data = requestData.getData();
-	  Admin admin = requestData.getAdmin();
-	  Addr zs01 = requestData.getAddress("ZS01");
-	  String custNm = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? zs01.getCustNm2() : "");
-	  String sql = ExternalizedQuery.getSql("REQ.NM_MATCH");
-	  PreparedQuery query = new PreparedQuery(entityManager, sql);
-	  query.setParameter("LAND_CNTRY", zs01.getLandCntry().toUpperCase());
-	  query.setParameter("SCENARIO", StringUtils.isNotBlank(data.getCustSubGrp()) ? data.getCustSubGrp().toUpperCase() : "%%");
-	  query.setParameter("ISSUING_CNTRY", data.getCmrIssuingCntry());
-	  query.setParameter("ADDR_TYPE", zs01.getId().getAddrType());
-	  query.setParameter("REQ_ID", admin.getId().getReqId());
-	  query.setForReadOnly(true);
-	  List<Addr> results = query.getResults(Addr.class);
-	  if (results != null && !results.isEmpty()) {
-		  Iterator<Addr> it = results.iterator();
-		  while (it.hasNext()) {
-			  Addr addr = it.next();
-			  String custNm2 = addr.getCustNm1() + (StringUtils.isNotBlank(addr.getCustNm2()) ? addr.getCustNm2() : "");
-			  if (custNm.equals(custNm2)) {
-				  dupReqIds.add(Long.toString( addr.getId().getReqId()));
-			  }
-		  }
-	  }
-	  return dupReqIds;
-=======
->>>>>>> refs/remotes/origin/common_code
+    List<String> dupReqIds = new ArrayList<>();
+    Data data = requestData.getData();
+    Admin admin = requestData.getAdmin();
+    Addr zs01 = requestData.getAddress("ZS01");
+    String custNm = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? zs01.getCustNm2() : "");
+    String sql = ExternalizedQuery.getSql("REQ.NM_MATCH");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("LAND_CNTRY", zs01.getLandCntry().toUpperCase());
+    query.setParameter("SCENARIO", StringUtils.isNotBlank(data.getCustSubGrp()) ? data.getCustSubGrp().toUpperCase() : "%%");
+    query.setParameter("ISSUING_CNTRY", data.getCmrIssuingCntry());
+    query.setParameter("ADDR_TYPE", zs01.getId().getAddrType());
+    query.setParameter("REQ_ID", admin.getId().getReqId());
+    query.setForReadOnly(true);
+    List<Addr> results = query.getResults(Addr.class);
+    if (results != null && !results.isEmpty()) {
+      Iterator<Addr> it = results.iterator();
+      while (it.hasNext()) {
+        Addr addr = it.next();
+        String custNm2 = addr.getCustNm1() + (StringUtils.isNotBlank(addr.getCustNm2()) ? addr.getCustNm2() : "");
+        if (custNm.equals(custNm2)) {
+          dupReqIds.add(Long.toString(addr.getId().getReqId()));
+        }
+      }
+    }
+    return dupReqIds;
   }
 
 }
