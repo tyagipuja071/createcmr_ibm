@@ -327,6 +327,12 @@ public class FranceUtil extends AutomationUtil {
     Addr addr = requestData.getAddress("ZS01");
     details.append("\n");
     if (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && CalculateCoverageElement.COV_BG.equals(covFrom)) {
+      String sboValue = data.getSalesBusOffCd();
+      if (StringUtils.isNotBlank(sboValue)) {
+        sboValue = sboValue.substring(0, 3);
+        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getInstallBranchOff(), sboValue + sboValue);
+        details.append("SORTL: " + sboValue + sboValue);
+      }
       engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
     } else {
       isCoverageCalculated = false;
@@ -386,7 +392,7 @@ public class FranceUtil extends AutomationUtil {
           }
           HashMap<String, String> response = getSBOFromPostalCodeMapping(data.getCountryUse(), data.getIsicCd(), addr.getPostCd(), data.getIsuCd(),
               data.getClientTier());
-          LOG.debug("Calculated SBO: " + response.get(SBO));
+          LOG.debug("Calculated SBO: " + response.get(SBO) + response.get(SBO));
           if (StringUtils.isNotBlank(response.get(MATCHING))) {
             switch (response.get(MATCHING)) {
             case "Exact Match":
