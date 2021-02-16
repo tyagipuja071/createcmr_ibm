@@ -1550,6 +1550,7 @@ function addCompanyAddrValidator() {
 }
 
 function addBillingAddrValidator() {
+  var custSubType = FormManager.getActualValue('custSubGrp');
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
@@ -1562,7 +1563,11 @@ function addBillingAddrValidator() {
         if (Number(zp01Reccount) > 1) {
           return new ValidationResult(null, false, 'Only one Billing Address can be defined.');
         } else if (Number(zp01Reccount == 0)) {
-          return new ValidationResult(null, false, 'At least one Billing Address must be defined.');
+	       if (custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'CRO3P') {
+		    return new ValidationResult(null, false, 'For 3rd party scenario please import a CMR via CMR search');
+           } else {
+           return new ValidationResult(null, false, 'At least one Billing Address must be defined.');
+          }
         } else {
           return new ValidationResult(null, true);
         }
