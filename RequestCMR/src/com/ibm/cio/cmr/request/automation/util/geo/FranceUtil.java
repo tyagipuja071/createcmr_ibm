@@ -838,6 +838,34 @@ public class FranceUtil extends AutomationUtil {
                 LOG.debug("Update to Address " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified");
                 checkDetails.append("Update to address " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified \n");
                 resultCodes.add("D");
+
+                // validate the address on DnB with SIRET
+
+                Addr addrToBeMatched = requestData.getAddress(addrType);
+                Addr soldTo = requestData.getAddress(addrType);
+                List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addrToBeMatched, true);
+                boolean siretMatches = false;
+                if (matches.isEmpty()) {
+                  // get DnB matches based on all address details
+                  matches = getMatches(requestData, engineData, soldTo, false);
+                }
+                boolean matchesDnb = false;
+                if (!matches.isEmpty()) {
+                  for (DnBMatchingResponse dnbRecord : matches) {
+                    matchesDnb = DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), addrToBeMatched, admin, dnbRecord);
+                    if (matchesDnb) {
+                      String dnbSIRET = DnBUtil.getTaxCode1(dnbRecord.getDnbCountry(), dnbRecord.getOrgIdDetails());
+                      if (StringUtils.isNotBlank(data.getTaxCd1()) && data.getTaxCd1().equalsIgnoreCase(dnbSIRET)) {
+                        siretMatches = true;
+                        break;
+                      }
+                    }
+                  }
+                  if (!siretMatches) {
+                    resultCodes.add("R");
+                    checkDetails.append("Updates to Address " + addrType + " with SIRET could not be validated agianst DnB.").append("\n");
+                  }
+                }
               } else {
                 // proceed
                 LOG.debug("Update to Address " + addrType + "(" + addr.getId().getAddrSeq() + ") skipped in the checks.\\n");
@@ -953,15 +981,15 @@ public class FranceUtil extends AutomationUtil {
     }
 
     // Duplicate Request check with customer name
-    
-    List<String> dupReqIds=checkDuplicateRequest(entityManager, reqData);
-    if(!dupReqIds.isEmpty()) {
-    	details.append("Duplicate request found with matching customer name.\nMatch found with Req id :").append("\n");
-    	details.append(StringUtils.join(dupReqIds, "\n"));
-    	engineData.addRejectionComment("OTH", "Duplicate request found with matching customer name.","" , "");
-    	return false;
+
+    List<String> dupReqIds = checkDuplicateRequest(entityManager, reqData);
+    if (!dupReqIds.isEmpty()) {
+      details.append("Duplicate request found with matching customer name.\nMatch found with Req id :").append("\n");
+      details.append(StringUtils.join(dupReqIds, "\n"));
+      engineData.addRejectionComment("OTH", "Duplicate request found with matching customer name.", "", "");
+      return false;
     } else {
-    	details.append("No duplicate requests found");
+      details.append("No duplicate requests found");
     }
 
     PrivatePersonCheckResult checkResult = chkPrivatePersonRecordFR(country, landCntry, name, checkBluepages, reqData.getData());
