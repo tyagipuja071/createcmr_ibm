@@ -596,16 +596,16 @@ public abstract class AutomationUtil {
     }
 
     // Duplicate Request check with customer name
-    List<String> dupReqIds=checkDuplicateRequest(entityManager, reqData);
-    if(!dupReqIds.isEmpty()) {
-	details.append("Duplicate request found with matching customer name.\nMatch found with Req id :").append("\n");
-	details.append(StringUtils.join(dupReqIds, "\n"));
-   	engineData.addRejectionComment("OTH", "Duplicate request found with matching customer name.",StringUtils.join(dupReqIds, ", ") , "");
-   	return false;
-   } else {
-   	details.append("No duplicate requests found");
-   
-   }
+    List<String> dupReqIds = checkDuplicateRequest(entityManager, reqData);
+    if (!dupReqIds.isEmpty()) {
+      details.append("Duplicate request found with matching customer name.\nMatch found with Req id :").append("\n");
+      details.append(StringUtils.join(dupReqIds, "\n"));
+      engineData.addRejectionComment("OTH", "Duplicate request found with matching customer name.", StringUtils.join(dupReqIds, ", "), "");
+      return false;
+    } else {
+      details.append("No duplicate requests found");
+
+    }
     PrivatePersonCheckResult checkResult = checkPrivatePersonRecord(country, landCntry, name, checkBluepages);
     PrivatePersonCheckStatus checkStatus = checkResult.getStatus();
 
@@ -820,6 +820,7 @@ public abstract class AutomationUtil {
     String sql = ExternalizedQuery.getSql("AUTO.CHECK_IF_ADDRESS_EXIST");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", addrToCheck.getId().getReqId());
+    query.setParameter("ADDR_TYPE", addrToCheck.getId().getAddrType());
     query.setParameter("ADDR_SEQ", addrToCheck.getId().getAddrSeq());
     query.setParameter("NAME1", addrToCheck.getCustNm1());
     query.setParameter("LAND_CNTRY", addrToCheck.getLandCntry());
@@ -1232,33 +1233,32 @@ public abstract class AutomationUtil {
 
   }
 
-
   public List<String> checkDuplicateRequest(EntityManager entityManager, RequestData requestData) {
-	  List<String> dupReqIds = new ArrayList<>();
-	  Data data = requestData.getData();
-	  Admin admin = requestData.getAdmin();
-	  Addr zs01 = requestData.getAddress("ZS01");
-	  String custNm = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? zs01.getCustNm2() : "");
-	  String sql = ExternalizedQuery.getSql("REQ.NM_MATCH");
-	  PreparedQuery query = new PreparedQuery(entityManager, sql);
-	  query.setParameter("LAND_CNTRY", zs01.getLandCntry().toUpperCase());
-	  query.setParameter("SCENARIO", StringUtils.isNotBlank(data.getCustSubGrp()) ? data.getCustSubGrp().toUpperCase() : "%%");
-	  query.setParameter("ISSUING_CNTRY", data.getCmrIssuingCntry());
-	  query.setParameter("ADDR_TYPE", zs01.getId().getAddrType());
-	  query.setParameter("REQ_ID", admin.getId().getReqId());
-	  query.setForReadOnly(true);
-	  List<Addr> results = query.getResults(Addr.class);
-	  if (results != null && !results.isEmpty()) {
-		  Iterator<Addr> it = results.iterator();
-		  while (it.hasNext()) {
-			  Addr addr = it.next();
-			  String custNm2 = addr.getCustNm1() + (StringUtils.isNotBlank(addr.getCustNm2()) ? addr.getCustNm2() : "");
-			  if (custNm.equals(custNm2)) {
-				  dupReqIds.add(Long.toString( addr.getId().getReqId()));
-			  }
-		  }
-	  }
-	  return dupReqIds;
+    List<String> dupReqIds = new ArrayList<>();
+    Data data = requestData.getData();
+    Admin admin = requestData.getAdmin();
+    Addr zs01 = requestData.getAddress("ZS01");
+    String custNm = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? zs01.getCustNm2() : "");
+    String sql = ExternalizedQuery.getSql("REQ.NM_MATCH");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("LAND_CNTRY", zs01.getLandCntry().toUpperCase());
+    query.setParameter("SCENARIO", StringUtils.isNotBlank(data.getCustSubGrp()) ? data.getCustSubGrp().toUpperCase() : "%%");
+    query.setParameter("ISSUING_CNTRY", data.getCmrIssuingCntry());
+    query.setParameter("ADDR_TYPE", zs01.getId().getAddrType());
+    query.setParameter("REQ_ID", admin.getId().getReqId());
+    query.setForReadOnly(true);
+    List<Addr> results = query.getResults(Addr.class);
+    if (results != null && !results.isEmpty()) {
+      Iterator<Addr> it = results.iterator();
+      while (it.hasNext()) {
+        Addr addr = it.next();
+        String custNm2 = addr.getCustNm1() + (StringUtils.isNotBlank(addr.getCustNm2()) ? addr.getCustNm2() : "");
+        if (custNm.equals(custNm2)) {
+          dupReqIds.add(Long.toString(addr.getId().getReqId()));
+        }
+      }
+    }
+    return dupReqIds;
   }
 
 }

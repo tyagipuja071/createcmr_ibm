@@ -513,6 +513,8 @@ public class SpainTransformer extends MessageTransformer {
         legacyCust.setMrcCd("3");
       }
 
+      legacyCust.setSalesGroupRep(data.getRepTeamMemberNo() != null ? data.getRepTeamMemberNo() : "");
+
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       for (Addr addr : cmrObjects.getAddresses()) {
         if ("ZS01".equals(addr.getId().getAddrType())) {
@@ -722,7 +724,12 @@ public class SpainTransformer extends MessageTransformer {
     }
 
     if (!StringUtils.isBlank(muData.getEnterprise())) {
-      cust.setEnterpriseNo(muData.getEnterprise());
+      if ("@@@@@@".equals(muData.getEnterprise())) {
+        cust.setEnterpriseNo("");
+      } else {
+        cust.setEnterpriseNo(muData.getEnterprise());
+      }
+
     }
 
     if (!StringUtils.isBlank(muData.getCustNm2())) {

@@ -555,6 +555,9 @@ public class CmrClientService extends BaseSimpleService<Object> {
       if ((!queryResults.isEmpty() || queryResults != null) && queryResults.size() > 1) {
         // return blank if there are more than one results
         oneResult = "";
+        if ("Q".equals(mrcCode) && "34".equals(isuCode)) {
+          oneResult = queryResults.get(0);
+        }
       } else if (queryResults.isEmpty() || queryResults == null) {
         oneResult = "";
       } else {

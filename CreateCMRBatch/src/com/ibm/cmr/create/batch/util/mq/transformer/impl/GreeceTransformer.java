@@ -853,7 +853,7 @@ public class GreeceTransformer extends EMEATransformer {
     }
 
     if (!StringUtils.isBlank(muData.getEnterprise())) {
-      if (DEFAULT_CLEAR_CHAR.equals(muData.getEnterprise())) {
+      if ("@@@@@@".equals(muData.getEnterprise())) {
         cust.setEnterpriseNo("");
       } else {
         cust.setEnterpriseNo(muData.getEnterprise());

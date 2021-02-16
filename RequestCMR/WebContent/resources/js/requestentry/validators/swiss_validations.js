@@ -539,8 +539,9 @@ function setClientTierValues(isuCd) {
 
   isuCd = FormManager.getActualValue('isuCd');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var clientT = FormManager.getActualValue('clientTier');// CMR-710
   var clientTiers = [];
-  if (isuCd != '') {
+  if (isuCd != '' && clientT == null) {
     var qParams = {
       _qall : 'Y',
       ISSUING_CNTRY : cntry,
@@ -618,7 +619,8 @@ function setMubotyOnPostalCodeIMS(postCd, subIndustryCd, clientTier) {
 
   if (isuCd == null || isuCd == undefined || isuCd == '') {
     return;
-  } else if (isuCd == '32') {
+    // CMR-710 use 34Q to replace 32S/N
+  } else if (isuCd == '34') {
     if (postCd >= 3000) {
       postCd = 2;
     } else {

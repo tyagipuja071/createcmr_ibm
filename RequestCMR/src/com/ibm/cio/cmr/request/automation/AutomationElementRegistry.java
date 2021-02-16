@@ -32,6 +32,7 @@ import com.ibm.cio.cmr.request.automation.impl.la.br.ScenarioCheckElement;
 import com.ibm.cio.cmr.request.automation.impl.us.USBusinessPartnerElement;
 import com.ibm.cio.cmr.request.automation.impl.us.USDelReacCheckElement;
 import com.ibm.cio.cmr.request.automation.impl.us.USDuplicateCheckElement;
+import com.ibm.cio.cmr.request.automation.impl.us.USSosRpaCheckElement;
 
 /**
  * Registry of all {@link AutomationElement} classes with their corresponding
@@ -78,6 +79,7 @@ public class AutomationElementRegistry extends HashMap<String, Class<? extends A
   public static final String US_DEL_REAC_CHECK = "US_DEL_REAC_CHECK";
   public static final String US_DUP_CHK = "US_DUP_CHK";
   public static final String US_BP_PROCESS = "US_BP_PROCESS";
+  public static final String US_SOS_RPA_CHECK = "US_SOS_RPA_CHECK";
 
   private static AutomationElementRegistry registry = new AutomationElementRegistry();
 
@@ -123,6 +125,7 @@ public class AutomationElementRegistry extends HashMap<String, Class<? extends A
     put(US_DEL_REAC_CHECK, USDelReacCheckElement.class);
     put(US_DUP_CHK, USDuplicateCheckElement.class);
     put(US_BP_PROCESS, USBusinessPartnerElement.class);
+    put(US_SOS_RPA_CHECK, USSosRpaCheckElement.class);
   }
 
   @Override

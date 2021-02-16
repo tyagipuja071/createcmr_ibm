@@ -47,6 +47,7 @@ app.controller('DPLSearchController', [ '$scope', '$document', '$http', '$timeou
       $scope.searchString = '';
       $scope.allTextFilter = '';
       $scope.reassess = false;
+      $scope.searchSuccess = false;
       $scope.request = {
           admin : {},
           data : {},
@@ -162,6 +163,12 @@ app.controller('DPLSearchController', [ '$scope', '$document', '$http', '$timeou
           console.log(response.data);
           if (response.data) {
             $scope.results = response.data.data;
+            if (response.data.error){
+              alert('An error occurred while processing. Please try again later.');
+              $scope.searchSuccess = false;
+            } else {
+              $scope.searchSuccess = true;
+            }
             if ($scope.results){
               $scope.results.forEach(function(res, i){
                 res.exp = true;
@@ -180,12 +187,14 @@ app.controller('DPLSearchController', [ '$scope', '$document', '$http', '$timeou
               });
             }
           } else {
+            $scope.searchSuccess = false;
             alert('An error occurred while processing. Please try again later.');
           }
         }, function(response) {
           cmr.hideProgress();
           console.log('error: ');
           console.log(response);
+          $scope.searchSuccess = false;
           alert('An error occurred while processing. Please try again later.');
         });
       };
