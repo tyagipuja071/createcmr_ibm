@@ -9,7 +9,7 @@ function addHandlersForAP() {
     });
   }
   
-  if (_clusterHandlerAP == null) {
+  if (_clusterHandlerAP == null && FormManager.getActualValue('reqType') != 'U') {
     _clusterHandlerAP = dojo.connect(FormManager.getField('apCustClusterId'), 'onChange', function(value) {
       setInacByCluster();
       setIsuOnIsic();
