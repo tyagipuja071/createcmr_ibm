@@ -1296,6 +1296,8 @@ public class FranceHandler extends GEOHandler {
             String legalName = ""; // 2
             String street = "";// 6
             String city = ""; // 8, billTo:9
+            String poBox = ""; // billTo :8
+
             currCell = (XSSFCell) row.getCell(0);
             cmrNo = validateColValFromCell(currCell);
 
@@ -1398,6 +1400,11 @@ public class FranceHandler extends GEOHandler {
               currCell = (XSSFCell) row.getCell(7);
               postCd = validateColValFromCell(currCell);
 
+              if ("Bill To".equals(name)) {
+                currCell = (XSSFCell) row.getCell(8);
+                poBox = validateColValFromCell(currCell);
+              }
+
               if (StringUtils.isEmpty(legalName)) {
                 TemplateValidation error = new TemplateValidation(name);
                 LOG.trace("Customer legal name is mandatory field. Please fix and upload the template again.");
@@ -1406,12 +1413,22 @@ public class FranceHandler extends GEOHandler {
                 validations.add(error);
               }
 
-              if (StringUtils.isEmpty(street)) {
-                TemplateValidation error = new TemplateValidation(name);
-                LOG.trace("Street is mandatory field. Please fix and upload the template again.");
-                error.addError((row.getRowNum() + 1), "Street",
-                    "The row " + (row.getRowNum() + 1) + ":Street is mandatory field. Please fix and upload the template again.<br>");
-                validations.add(error);
+              if (!"Bill To".equals(name)) {
+                if (StringUtils.isEmpty(street)) {
+                  TemplateValidation error = new TemplateValidation(name);
+                  LOG.trace("Street is mandatory field. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "Street",
+                      "The row " + (row.getRowNum() + 1) + ":Street is mandatory field. Please fix and upload the template again.<br>");
+                  validations.add(error);
+                }
+              } else {
+                if (StringUtils.isEmpty(street) && StringUtils.isEmpty(poBox)) {
+                  TemplateValidation error = new TemplateValidation(name);
+                  LOG.trace("Street/Po Box is required to be filled one of them at least. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "Street/Po Box", "The row " + (row.getRowNum() + 1)
+                      + ":Street/ PoBox is required to be filled one of them at least. Please fix and upload the template again.<br>");
+                  validations.add(error);
+                }
               }
 
               if (StringUtils.isEmpty(city)) {
