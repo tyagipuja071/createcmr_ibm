@@ -1,8 +1,17 @@
 /* Register AP Javascripts */
 var _isicHandlerAP = null;
-function onIsicChangeHandlerAP() {
+var _clusterHandlerAP = null;
+
+function addHandlersForAP() {
   if (_isicHandlerAP == null) {
     _isicHandlerAP = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
+      setIsuOnIsic();
+    });
+  }
+  
+  if (_clusterHandlerAP == null && FormManager.getActualValue('reqType') != 'U') {
+    _clusterHandlerAP = dojo.connect(FormManager.getField('apCustClusterId'), 'onChange', function(value) {
+      setInacByCluster();
       setIsuOnIsic();
     });
   }
@@ -117,7 +126,6 @@ function addAfterConfigAP() {
 }
 
 function setInacByCluster() {
-  var _clusterHandlerAP = dojo.connect(FormManager.getField('apCustClusterId'), 'onChange', function(value) {
     var _cluster = FormManager.getActualValue('apCustClusterId');
     var cntry = FormManager.getActualValue('cmrIssuingCntry');
     if (!_cluster) {
@@ -162,7 +170,6 @@ function setInacByCluster() {
       FormManager.resetDropdownValues(FormManager.getField('inacType'));
       return;
     }
-  });
 }
 
 /* ASEAN ANZ ISIC MAPPING */
@@ -2847,6 +2854,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(onIsicChange, [ SysLoc.AUSTRALIA, SysLoc.SINGAPORE ]);
   GEOHandler.addAfterTemplateLoad(onIsicChange, [ SysLoc.AUSTRALIA, SysLoc.SINGAPORE ]);
   
-  GEOHandler.addAfterConfig(onIsicChangeHandlerAP, GEOHandler.AP);
+  GEOHandler.addAfterConfig(addHandlersForAP, GEOHandler.AP);
 
 });
