@@ -15,6 +15,7 @@ import javax.persistence.EntityManager;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -1289,6 +1290,7 @@ public class FranceHandler extends GEOHandler {
       if (sheet != null) {
         for (Row row : sheet) {
           if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
+            DataFormatter df = new DataFormatter();
             String cmrNo = ""; // 0
             String seqNo = "";// 1
             String postCd = "";// 7
@@ -1297,6 +1299,7 @@ public class FranceHandler extends GEOHandler {
             String street = "";// 6
             String city = ""; // 8, billTo:9
             String poBox = ""; // billTo :8
+            String phone = ""; // 10, BillTo:11
 
             currCell = (XSSFCell) row.getCell(0);
             cmrNo = validateColValFromCell(currCell);
@@ -1315,16 +1318,38 @@ public class FranceHandler extends GEOHandler {
               String vat = "";// 12
               currCell = (XSSFCell) row.getCell(12);
               vat = validateColValFromCell(currCell);
+              String vatTxt = df.formatCellValue(currCell);
+
+              if (!StringUtils.isBlank(vat) && !vatTxt.matches("\\d+.\\d*")) {
+                TemplateValidation error = new TemplateValidation(name);
+                LOG.trace("The row " + (row.getRowNum() + 1) + " Note that VAT should be numeric. Please fix and upload the template again.");
+                error.addError((row.getRowNum() + 1), "VAT",
+                    "The row " + (row.getRowNum() + 1) + ":Note that VAT should be numeric. Please fix and upload the template again.<br>");
+                validations.add(error);
+              }
+
               String isic = "";// 3
               currCell = (XSSFCell) row.getCell(3);
-              vat = validateColValFromCell(currCell);
+              isic = validateColValFromCell(currCell);
               String classificationCd = "";// 11
               currCell = (XSSFCell) row.getCell(11);
-              vat = validateColValFromCell(currCell);
+              classificationCd = validateColValFromCell(currCell);
               String inac = "";// 4
               currCell = (XSSFCell) row.getCell(4);
-              vat = validateColValFromCell(currCell);
+              inac = validateColValFromCell(currCell);
 
+              String siret = "";// 10
+
+              currCell = (XSSFCell) row.getCell(10);
+              String siretTxt = df.formatCellValue(currCell);
+              siret = validateColValFromCell(currCell);
+              if (!StringUtils.isBlank(siret) && !siretTxt.matches("\\d+.\\d*")) {
+                TemplateValidation error = new TemplateValidation(name);
+                LOG.trace("The row " + (row.getRowNum() + 1) + " Note that SIRET should be numeric. Please fix and upload the template again.");
+                error.addError((row.getRowNum() + 1), "SIRET",
+                    "The row " + (row.getRowNum() + 1) + ":Note that SIRET should be numeric. Please fix and upload the template again.<br>");
+                validations.add(error);
+              }
               // try{
               // if (!StringUtils.isBlank(vat)) {
               // if (!validateVAT(country, vat)) {
@@ -1389,12 +1414,38 @@ public class FranceHandler extends GEOHandler {
 
               currCell = (XSSFCell) row.getCell(6);
               street = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(7);
+              postCd = validateColValFromCell(currCell);
+
               int loopFlag = 9;
+              String phoneTxt = "";
               if ("Bill To".equals(name)) {
                 loopFlag = 10;
                 currCell = (XSSFCell) row.getCell(9);
+                city = validateColValFromCell(currCell);
+
+                currCell = (XSSFCell) row.getCell(11);
+                phone = validateColValFromCell(currCell);
+                phoneTxt = df.formatCellValue(currCell);
+
+                currCell = (XSSFCell) row.getCell(8);
+                poBox = validateColValFromCell(currCell);
               } else {
                 currCell = (XSSFCell) row.getCell(8);
+                city = validateColValFromCell(currCell);
+
+                currCell = (XSSFCell) row.getCell(10);
+                phone = validateColValFromCell(currCell);
+                phoneTxt = df.formatCellValue(currCell);
+              }
+
+              if (!StringUtils.isBlank(phone) && !phoneTxt.matches("\\d+.\\d*")) {
+                TemplateValidation error = new TemplateValidation(name);
+                LOG.trace("The row " + (row.getRowNum() + 1) + " Note that Phone should be numeric. Please fix and upload the template again.");
+                error.addError((row.getRowNum() + 1), "Phone",
+                    "The row " + (row.getRowNum() + 1) + ":Note that Phone should be numeric. Please fix and upload the template again.<br>");
+                validations.add(error);
               }
 
               boolean dummyUpd = true;
@@ -1409,17 +1460,6 @@ public class FranceHandler extends GEOHandler {
               if (dummyUpd) {
                 continue;
               }
-
-              city = validateColValFromCell(currCell);
-
-              currCell = (XSSFCell) row.getCell(7);
-              postCd = validateColValFromCell(currCell);
-
-              if ("Bill To".equals(name)) {
-                currCell = (XSSFCell) row.getCell(8);
-                poBox = validateColValFromCell(currCell);
-              }
-
 
               if (StringUtils.isEmpty(legalName)) {
                 TemplateValidation error = new TemplateValidation(name);
