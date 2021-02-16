@@ -92,13 +92,13 @@ function addAfterConfigAP() {
 
   if (role == 'REQUESTER' && reqType == 'C') {
     if (cntry == SysLoc.SINGAPORE) {
-      if (custSubGrp == 'DUMMY' || custSubGrp == 'BLUMX' || custSubGrp == 'MKTPC')
+      if (custSubGrp == 'INTER'|| custSubGrp == 'XINT'|| custSubGrp == 'DUMMY' || custSubGrp == 'BLUMX' || custSubGrp == 'MKTPC')
         FormManager.readOnly('clientTier');
       else
         FormManager.enable('clientTier');
     }
-    if (cntry == SysLoc.PHILIPPINES) {
-      if (custSubGrp == 'DUMMY' || custSubGrp == 'XDUMM')
+    if (cntry == SysLoc.PHILIPPINES || cntry == SysLoc.MALASIA || cntry == SysLoc.BRUNEI || cntry == SysLoc.INDONESIA || cntry == SysLoc.THAILAND) {
+      if (custSubGrp == 'INTER'|| custSubGrp == 'XINT' || custSubGrp == 'DUMMY' || custSubGrp == 'XDUMM')
         FormManager.readOnly('clientTier');
       else
         FormManager.enable('clientTier');
@@ -106,12 +106,6 @@ function addAfterConfigAP() {
     if (cntry == SysLoc.NEW_ZEALAND) {
       if (custSubGrp == 'INTER' || custSubGrp == 'XINT' || custSubGrp == 'DUMMY' || custSubGrp == 'XDUMM' || custSubGrp == 'BLUMX' || custSubGrp == 'XBLUM' || custSubGrp == 'MKTPC'
           || custSubGrp == 'XMKTP')
-        FormManager.readOnly('clientTier');
-      else
-        FormManager.enable('clientTier');
-    }
-    if (cntry == SysLoc.MALASIA) {
-      if (custSubGrp == 'DUMMY' || custSubGrp == 'XDUMM')
         FormManager.readOnly('clientTier');
       else
         FormManager.enable('clientTier');
@@ -2853,7 +2847,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(onIsicChange, [ SysLoc.AUSTRALIA, SysLoc.SINGAPORE ]);
   GEOHandler.addAfterTemplateLoad(onIsicChange, [ SysLoc.AUSTRALIA, SysLoc.SINGAPORE ]);
   
-  GEOHandler.addAfterConfig(onIsicChangeHandlerAP, GEOHandler.ANZ);
-  GEOHandler.addAfterConfig(onIsicChangeHandlerAP, GEOHandler.ASEAN);
+  GEOHandler.addAfterConfig(onIsicChangeHandlerAP, GEOHandler.AP);
 
 });
