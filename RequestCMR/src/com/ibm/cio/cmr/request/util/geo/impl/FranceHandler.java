@@ -1293,6 +1293,11 @@ public class FranceHandler extends GEOHandler {
             String seqNo = "";// 1
             String postCd = "";// 7
             String countryAddr = ""; // BillTo:10, other:9
+            String legalName = ""; // 2
+            String street = "";// 6
+            String city = ""; // 8, billTo:9
+            String poBox = ""; // billTo :8
+
             currCell = (XSSFCell) row.getCell(0);
             cmrNo = validateColValFromCell(currCell);
 
@@ -1379,15 +1384,100 @@ public class FranceHandler extends GEOHandler {
 
             }
             if (!"Data".equals(name)) {
+              currCell = (XSSFCell) row.getCell(2);
+              legalName = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(6);
+              street = validateColValFromCell(currCell);
+              int loopFlag = 9;
+              if ("Bill To".equals(name)) {
+                loopFlag = 10;
+                currCell = (XSSFCell) row.getCell(9);
+              } else {
+                currCell = (XSSFCell) row.getCell(8);
+              }
+
+              boolean dummyUpd = true;
+              for (int i = 2; i < loopFlag; i++) {
+                XSSFCell cell = (XSSFCell) row.getCell(i);
+                String addrField = validateColValFromCell(cell);
+                if (StringUtils.isNotBlank(addrField)) {
+                  dummyUpd = false;
+                  break;
+                }
+              }
+              if (dummyUpd) {
+                continue;
+              }
+
+              city = validateColValFromCell(currCell);
+
               currCell = (XSSFCell) row.getCell(7);
               postCd = validateColValFromCell(currCell);
-              if (!StringUtils.isEmpty(postCd)) {
-                if ("Bill To".equals(name)) {
-                  currCell = (XSSFCell) row.getCell(10);
-                } else {
-                  currCell = (XSSFCell) row.getCell(9);
+
+              if ("Bill To".equals(name)) {
+                currCell = (XSSFCell) row.getCell(8);
+                poBox = validateColValFromCell(currCell);
+              }
+
+
+              if (StringUtils.isEmpty(legalName)) {
+                TemplateValidation error = new TemplateValidation(name);
+                LOG.trace("Customer legal name is mandatory field. Please fix and upload the template again.");
+                error.addError((row.getRowNum() + 1), "Customer legal name",
+                    "The row " + (row.getRowNum() + 1) + ":Customer legal name is mandatory field. Please fix and upload the template again.<br>");
+                validations.add(error);
+              }
+
+              if (!"Bill To".equals(name)) {
+                if (StringUtils.isEmpty(street)) {
+                  TemplateValidation error = new TemplateValidation(name);
+                  LOG.trace("Street is mandatory field. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "Street",
+                      "The row " + (row.getRowNum() + 1) + ":Street is mandatory field. Please fix and upload the template again.<br>");
+                  validations.add(error);
                 }
-                countryAddr = validateColValFromCell(currCell);
+              } else {
+                if (StringUtils.isEmpty(street) && StringUtils.isEmpty(poBox)) {
+                  TemplateValidation error = new TemplateValidation(name);
+                  LOG.trace("Street/Po Box is required to be filled one of them at least. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "Street/Po Box", "The row " + (row.getRowNum() + 1)
+                      + ":Street/ PoBox is required to be filled one of them at least. Please fix and upload the template again.<br>");
+                  validations.add(error);
+                }
+              }
+
+              if (StringUtils.isEmpty(city)) {
+                TemplateValidation error = new TemplateValidation(name);
+                LOG.trace("City is mandatory field. Please fix and upload the template again.");
+                error.addError((row.getRowNum() + 1), "City",
+                    "The row " + (row.getRowNum() + 1) + ":City is mandatory field. Please fix and upload the template again.<br>");
+                validations.add(error);
+              }
+
+              if (StringUtils.isEmpty(postCd)) {
+                TemplateValidation error = new TemplateValidation(name);
+                LOG.trace("Postal Code is mandatory field. Please fix and upload the template again.");
+                error.addError((row.getRowNum() + 1), "Postal Code",
+                    "The row " + (row.getRowNum() + 1) + ":Postal Code is mandatory field. Please fix and upload the template again.<br>");
+                validations.add(error);
+              }
+
+              if ("Bill To".equals(name)) {
+                currCell = (XSSFCell) row.getCell(10);
+              } else {
+                currCell = (XSSFCell) row.getCell(9);
+              }
+              countryAddr = validateColValFromCell(currCell);
+              if (StringUtils.isEmpty(countryAddr)) {
+                TemplateValidation error = new TemplateValidation(name);
+                LOG.trace("Landed Country is mandatory field. Please fix and upload the template again.");
+                error.addError((row.getRowNum() + 1), "Country (Landed)",
+                    "The row " + (row.getRowNum() + 1) + ":Landed Country is mandatory field. Please fix and upload the template again.<br>");
+                validations.add(error);
+              }
+
+              if (!StringUtils.isEmpty(postCd)) {
                 if (StringUtils.isEmpty(countryAddr)) {
                   TemplateValidation error = new TemplateValidation(name);
                   LOG.trace("Please input landed Country when postal code is filled. Please fix and upload the template again.");
