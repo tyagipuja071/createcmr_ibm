@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.ibm.cio.cmr.request.util;
 
@@ -7,14 +7,19 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.CmrException;
@@ -23,20 +28,135 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.WfHist;
 import com.ibm.cio.cmr.request.entity.WfHistPK;
+import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation;
+import com.ibm.cio.cmr.request.model.ParamContainer;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.service.DropDownService;
+import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.mail.Email;
 import com.ibm.cio.cmr.request.util.mail.MessageType;
 
 /**
  * @author Dennis Natad
- * 
+ *
  */
 public class IERPRequestUtils extends RequestUtils {
 
   private static final Logger LOG = Logger.getLogger(RequestUtils.class);
   private static String emailTemplate = null;
   private static String batchemailTemplate = null;
+
+  private static final List<String> FIELDS_CLEAR_LIST = new ArrayList<String>();
+
+  static {
+    FIELDS_CLEAR_LIST.add("CollectionCd");
+    FIELDS_CLEAR_LIST.add("SpecialTaxCd");
+    FIELDS_CLEAR_LIST.add("ModeOfPayment");
+    FIELDS_CLEAR_LIST.add("CrosSubTyp");
+    FIELDS_CLEAR_LIST.add("TipoCliente");
+    FIELDS_CLEAR_LIST.add("CommercialFinanced");
+    FIELDS_CLEAR_LIST.add("EmbargoCode");
+    FIELDS_CLEAR_LIST.add("OrderBlock");
+    FIELDS_CLEAR_LIST.add("Enterprise");
+    FIELDS_CLEAR_LIST.add("TypeOfCustomer");
+    FIELDS_CLEAR_LIST.add("CodFlag");
+  }
+
+  public static boolean isCountryDREnabled(EntityManager entityManager, String cntry) {
+
+    if (entityManager == null) {
+      entityManager = JpaManager.getEntityManager();
+    }
+
+    boolean isDR = false;
+    String sql = ExternalizedQuery.getSql("DR.GET_SUPP_CNTRY_BY_ID");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CNTRY", cntry);
+    query.setForReadOnly(true);
+    List<Integer> records = query.getResults(Integer.class);
+    Integer singleObject = null;
+
+    if (records != null && records.size() > 0) {
+      singleObject = records.get(0);
+      Integer val = singleObject != null ? singleObject : null;
+
+      if (val != null) {
+        isDR = true;
+      } else {
+        isDR = false;
+      }
+
+    } else {
+      isDR = false;
+    }
+
+    return isDR;
+  }
+
+  public static List<String> getLovsDR(EntityManager entityManager, String lovId, String country, boolean codeOnly) {
+    List<String> choices = new ArrayList<String>();
+    String sql = ExternalizedQuery.getSql("LOV");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("FIELD_ID", "##" + lovId);
+    query.setParameter("CMR_CNTRY", country);
+    query.setForReadOnly(true);
+    List<Object[]> results = query.getResults();
+    if (results != null && results.size() > 0) {
+      for (Object[] result : results) {
+        if (codeOnly) {
+          choices.add((String) result[0]);
+        }
+      }
+    }
+    return choices;
+  }
+
+  public static List<String> getBDSChoicesDR(EntityManager entityManager, String bdsId, String country, boolean codeOnly) {
+    ParamContainer params = new ParamContainer();
+    List<String> choices = new ArrayList<String>();
+    DropDownService service = new DropDownService();
+    PreparedQuery query = service.getBDSSql(bdsId, entityManager, params, country);
+    query.setForReadOnly(true);
+    List<Object[]> results = query.getResults();
+    if (results != null && results.size() > 0) {
+      for (Object[] result : results) {
+        if (codeOnly) {
+          choices.add((String) result[0]);
+        }
+      }
+    }
+    return choices;
+  }
+
+  public static List<String> addSpecialCharToLovDR(List<String> lovList, String cntry, boolean codeOnly, String fieldId) {
+    List<String> tempList = new ArrayList<String>();
+    // if (SystemLocation.UNITED_KINGDOM.equals(cntry) ||
+    // SystemLocation.IRELAND.equals(cntry)) {
+    if (FIELDS_CLEAR_LIST.contains(fieldId)) {
+      LOG.debug("***Field " + fieldId + " is on clear list. Adding '@'");
+      if (codeOnly) {
+        tempList.add("@");
+      } /*
+         * else { tempList.add("@ | Clear field"); }
+         */
+      for (String choice : lovList) {
+        tempList.add(choice);
+      }
+    } else {
+      LOG.debug("***Field " + fieldId + " is NOT on clear list. Returning ORIGINAL list.");
+      tempList = lovList;
+    }
+    // } else {
+    // tempList = lovList;
+    // }
+    return tempList;
+  }
+
+  public static void validateMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country) {
+    GEOHandler handler = getGEOHandler(country);
+    handler.validateMassUpdateTemplateDupFills(validations, book, maxRows, country);
+  }
 
   public static void sendEmailNotifications(EntityManager entityManager, Admin admin, WfHist history, String siteIds, String emailCmt) {
     String cmrno = "";
@@ -224,7 +344,7 @@ public class IERPRequestUtils extends RequestUtils {
 
   /**
    * String gets the fully qualified country name
-   * 
+   *
    * @param entityManager
    * @param country
    * @return
@@ -349,6 +469,67 @@ public class IERPRequestUtils extends RequestUtils {
       LOG.error("Error when loading Email template.", e);
       return null;
     }
+  }
+
+  public static String getOrderBlockFromDataRdc(EntityManager entityManager, Admin admin) {
+    LOG.debug("Batch: Order block in DATA_RDC req_id:" + admin.getId().getReqId());
+    String oldOrderBlock = "";
+    String sql = ExternalizedQuery.getSql("GET.ORDER_BLOCK_BY_REQID");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", admin.getId().getReqId());
+
+    List<Object[]> results = query.getResults();
+    if (results != null && results.size() > 0) {
+      Object[] result = results.get(0);
+      oldOrderBlock = result[0] != null ? (String) result[0] : "";
+    }
+
+    LOG.debug("Order block of Data_RDC>" + oldOrderBlock);
+    return oldOrderBlock;
+  }
+
+  public static boolean isTimeStampEquals(Date date) {
+    @SuppressWarnings("serial")
+    Timestamp ts = new Timestamp(Long.MIN_VALUE) {
+      @Override
+      public String toString() {
+        return "0000-00-00 00:00:00.000";
+      }
+    };
+    String sDate1 = ts.toString().substring(0, 3);
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
+    String sDate2 = sdf.format(date).substring(0, 3);
+
+    LOG.info("Check equality of sDate1 :" + sDate1 + " sDate2 :" + sDate2);
+    return sDate1.equals(sDate2) ? true : false;
+  }
+
+  public static int checked2WorkingDays(Date processedTs, Timestamp currentTimestamp) {
+    LOG.debug("processedTs=" + processedTs + " currentTimestamp=" + currentTimestamp);
+
+    int workingDays = 0;
+    String curStringDate = currentTimestamp.toString();
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
+    try {
+
+      Calendar start = Calendar.getInstance();
+      start.setTime(processedTs);
+
+      Calendar end = Calendar.getInstance();
+      end.setTime(sdf.parse(curStringDate));
+
+      while (!start.after(end)) {
+        int day = start.get(Calendar.DAY_OF_WEEK);
+        if ((day != Calendar.SATURDAY) && (day != Calendar.SUNDAY))
+          workingDays++;
+        start.add(Calendar.DATE, 1);
+      }
+      LOG.debug("No of workingDays=" + workingDays);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+    return workingDays;
   }
 
 }

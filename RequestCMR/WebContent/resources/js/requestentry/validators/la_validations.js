@@ -131,6 +131,7 @@ var _salesBranchOffHandler = null;
 var _mrcCdHandler = null;
 var _customerTypeHandler = null;
 var _subindustryHandler = null;
+var _sboMrcHandler = null;
 var wwSubindustries = [ 'A9', 'AA', 'AW', 'B9', 'BB', 'BD', 'BG', 'BI', 'BW', 'CB', 'CC', 'CD', 'CW', 'D9', 'DI', 'DJ', 'DK', 'DL', 'DW', 'E9', 'EA', 'ER', 'EW', 'F9', 'FA', 'FW', 'GA', 'GE', 'GW',
     'H9', 'HA', 'HB', 'HE', 'HW', 'J9', 'JA', 'JB', 'JC', 'JD', 'JW', 'K9', 'KA', 'KB', 'KC', 'KD', 'KE', 'KF', 'KW', 'KZ', 'L9', 'LA', 'LB', 'LW', 'MC', 'ME', 'MH', 'MI', 'MJ', 'MK', 'ML', 'MW',
     'N9', 'NA', 'NB', 'NI', 'NW', 'NZ', 'P9', 'PC', 'PO', 'PW', 'R9', 'RA', 'RC', 'RD', 'RE', 'RF', 'RG', 'RH', 'RR', 'RW', 'S9', 'SB', 'SW', 'T9', 'TA', 'TC', 'TD', 'TE', 'TF', 'TG', 'TH', 'TJ',
@@ -174,6 +175,86 @@ function autoSetMrcIsu() {
   }
 }
 
+/*
+ * function to set ISU based on SBO 161, MRC A and Subindustry
+ */
+function autoSetISUBasedOnSubindustry() {
+  var sboCd = FormManager.getActualValue('salesBusOffCd');
+  var mrcCd = FormManager.getActualValue('mrcCd');
+  var subIndustryCd = FormManager.getActualValue('subIndustryCd');
+
+  // check if SBO 161 - Dummy Segment 1 + MRC A
+  if ((sboCd && sboCd == '161') && (mrcCd && mrcCd == 'A')) {
+    if (subIndustryCd && subIndustryCd.length > 0) {
+      var subindustryStartsWith = subIndustryCd.substring(0, 1);
+
+      switch (subindustryStartsWith) {
+      case 'A':
+        FormManager.setValue('isuCd', '3T');
+        break;
+      case 'B':
+        FormManager.setValue('isuCd', '5B');
+        break;
+      case 'C':
+        FormManager.setValue('isuCd', '5B');
+        break;
+      case 'D':
+        FormManager.setValue('isuCd', '18');
+        break;
+      case 'E':
+        FormManager.setValue('isuCd', '40');
+        break;
+      case 'F':
+        FormManager.setValue('isuCd', '04');
+        break;
+      case 'G':
+        FormManager.setValue('isuCd', '28');
+        break;
+      case 'H':
+        FormManager.setValue('isuCd', '11');
+        break;
+      case 'J':
+        FormManager.setValue('isuCd', '4A');
+        break;
+      case 'K':
+        FormManager.setValue('isuCd', '05');
+        break;
+      case 'L':
+        FormManager.setValue('isuCd', '5E');
+        break;
+      case 'M':
+        FormManager.setValue('isuCd', '4D');
+        break;
+      case 'N':
+        FormManager.setValue('isuCd', '31');
+        break;
+      case 'P':
+        FormManager.setValue('isuCd', '15');
+        break;
+      case 'R':
+        FormManager.setValue('isuCd', '1R');
+        break;
+      case 'S':
+        FormManager.setValue('isuCd', '4F');
+        break;
+      case 'T':
+        FormManager.setValue('isuCd', '19');
+        break;
+      case 'U':
+        FormManager.setValue('isuCd', '12');
+        break;
+      case 'V':
+        FormManager.setValue('isuCd', '14');
+        break;
+      case 'X':
+        FormManager.setValue('isuCd', '8C');
+        break;
+      case 'Y':
+        FormManager.setValue('isuCd', '28');
+      }
+    }
+  }
+}
 function autoSetMrcIsuCov2018() {
   // var sboCd = FormManager.getActualValue('salesBusOffCd');
   // console.log(">>> process SBO >> " + sboCd);
@@ -426,6 +507,18 @@ function afterConfigForLA() {
   if (_mrcCdHandler == null) {
     _mrcCdHandler = dojo.connect(FormManager.getField('mrcIsu'), 'onChange', function(value) {
       autoSetMrcIsuCov2018();
+    });
+  }
+
+  if (_sboMrcHandler == null) {
+    _sboMrcHandler = dojo.connect(FormManager.getField('mrcCd'), 'onChange', function(value) {
+      autoSetISUBasedOnSubindustry();
+    });
+  }
+
+  if (_subindustryHandler == null) {
+    _subindustryHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
+      autoSetISUBasedOnSubindustry();
     });
   }
 

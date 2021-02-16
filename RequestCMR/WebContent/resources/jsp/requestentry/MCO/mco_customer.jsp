@@ -1,6 +1,5 @@
 <%@page import="com.ibm.cio.cmr.request.model.BaseModel"%>
-<%@page
-	import="com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel"%>
+<%@page import="com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles"%>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
@@ -19,12 +18,12 @@
 
 <cmr:view forGEO="MCO,MCO1,MCO2">
 
-	<!-- Add hidden fields to keep imported values -->
-	<form:hidden path="orgNo" />
-	<form:hidden path="sourceCd" />
-	<form:hidden path="mrcCd" />
-	<form:hidden path="sitePartyId" />
-	<form:hidden path="searchTerm" />
+  <!-- Add hidden fields to keep imported values -->
+  <form:hidden path="orgNo" />
+  <form:hidden path="sourceCd" />
+  <form:hidden path="mrcCd" />
+  <form:hidden path="sitePartyId" />
+  <form:hidden path="searchTerm" />
 
   <cmr:view forCountry="851">
   	<cmr:row addBackground="true">
@@ -68,7 +67,7 @@
       </c:if>
   	</cmr:row>
   </cmr:view>
-	<cmr:row addBackground="false">
+  	<cmr:row addBackground="false">
 		<%--     <cmr:column span="2" containerForField="LocationNumber" forCountry="838">
       <p>
         <cmr:label fieldId="locationNumber">
@@ -87,8 +86,9 @@
 					path="specialTaxCd" tabId="MAIN_CUST_TAB" />
 			</p>
 		</cmr:column>
-		<cmr:view forGEO="MCO1,MCO2">
-			<cmr:column span="2" containerForField="SpecialTaxCd">
+  <cmr:view forGEO="MCO1,MCO2">
+			<cmr:column span="2" containerForField="SpecialTaxCd"
+				exceptForCountry="780">
 				<p>
 					<label for="specialTaxCd"> <cmr:fieldLabel
 							fieldId="SpecialTaxCd" />:
@@ -108,12 +108,12 @@
 					path="abbrevLocn" tabId="MAIN_CUST_TAB" />
 			</p>
 		</cmr:column>
-		<cmr:view forGEO="MCO,MCO1,MCO2">
+		<cmr:view forGEO="MCO,MCO1,MCO2" exceptForCountry="780">
 			<cmr:column span="2" containerForField="EmbargoCode">
 				<p>
 					<cmr:label fieldId="embargoCd">
 						<cmr:fieldLabel fieldId="EmbargoCode" />:
-            <cmr:delta text="${rdcdata.embargoCd}"
+            			<cmr:delta text="${rdcdata.embargoCd}"
 							oldValue="${reqentry.embargoCd}" />
 					</cmr:label>
 					<cmr:field path="embargoCd" id="embargoCd" fieldId="EmbargoCode"
@@ -121,8 +121,8 @@
 				</p>
 			</cmr:column>
 		</cmr:view>
-
-		<!-- Type Of Customer for MCO,MCO1 -->
+	
+	<!-- Type Of Customer for MCO,MCO1 -->
 		<!-- CommercialFinanced,CodFlag MCO1 -->
 		<cmr:view forGEO="MCO,MCO1" exceptForCountry="838">
 			<c:if test="${reqentry.reqType != 'C'}">
@@ -156,6 +156,30 @@
 						</p>
 					</cmr:column>
 			</c:if>
+		</cmr:view>
+		<cmr:view forCountry="780">
+			<%--New Fields for Malta --%>
+			<cmr:column span="2" containerForField="OrderBlock" forCountry="780">
+				<p>
+					<cmr:label fieldId="custAcctType">
+						<cmr:fieldLabel fieldId="OrderBlock" />:
+						<cmr:delta text="${rdcdata.custAcctType}"
+							oldValue="${reqentry.custAcctType}" />
+					</cmr:label>
+					<cmr:field path="custAcctType" id="custAcctType" fieldId="OrderBlock"
+						tabId="MAIN_CUST_TAB" />
+				</p>
+			</cmr:column>
+			
+			<cmr:column span="2" containerForField="CustClass" forCountry="780">
+				<p>
+					<cmr:label fieldId="custClass">
+						<cmr:fieldLabel fieldId="CustClass" />:
+          			</cmr:label>
+					<cmr:field path="custClass" id="custClass" fieldId="CustClass"
+						tabId="MAIN_CUST_TAB" />
+				</p>
+			</cmr:column>
 		</cmr:view>
 	</cmr:row>
 

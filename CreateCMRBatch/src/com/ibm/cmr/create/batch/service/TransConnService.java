@@ -714,7 +714,7 @@ public class TransConnService extends BaseBatchService {
           }
           newAdmin.setReqStatus("PCP");
           newAdmin.setPoolCmrIndc(CmrConstants.YES_NO.Y.toString());
-          admin.setChildReqId(newAdmin.getChildReqId());
+          admin.setChildReqId(newAdmin.getId().getReqId());
           updateEntity(newAdmin, entityManager);
           updateEntity(admin, entityManager);
 
