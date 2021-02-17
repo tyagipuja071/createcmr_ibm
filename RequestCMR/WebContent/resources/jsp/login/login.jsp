@@ -66,7 +66,7 @@ div#ibm-top {
                 <img src="${resourcesPath}/images/key.png" class="key">
                   Access to the tool can be requested using AccessHUB. 
                   For access instructions and the user guide please follow this 
-                  <a href="https://w3-connections.ibm.com/wikis/home?lang=en-us#!/wiki/FindCMR%20Access%20and%20Support" target="_blank">link</a> or go to 
+                  <a href="<%=SystemParameters.getString("ACCESS_LINK")%>" target="_blank">link</a> or go to 
                   <a href="https://ibm.idaccesshub.com/ECM/login/index" target="_blank">AccessHUB</a> directly              
               </div> 
               <div class="login-info" style="padding-bottom:10px">
