@@ -58,6 +58,7 @@ var _importedIndc = null;
 
 var _landedIT = null;
 var _sboHandlerIT = null;
+var _importedIndcBilling = null;
 
 function getImportedIndcForItaly() {
   if (_importedIndc) {
@@ -76,6 +77,25 @@ function getImportedIndcForItaly() {
   return _importedIndc;
 
 }
+
+function getImportedIndcForItalyBillingAddr() {
+  if (_importedIndcBilling) {
+    console.log('Returning imported indc for Billing Address = ' + _importedIndcBilling);
+    return _importedIndcBilling;
+  }
+  var results = cmr.query('IMPORTED_ADDR_ZP01', {
+    REQID : FormManager.getActualValue('reqId')
+  });
+  if (results != null && results.ret1) {
+    _importedIndcBilling = results.ret1;
+  } else {
+    _importedIndcBilling = 'N';
+  }
+    console.log('saving imported ind as for Billing Address' + _importedIndc);
+    return _importedIndcBilling;
+  }
+}
+
 function addEMEALandedCountryHandler(cntry, addressMode, saving, finalSave) {
   if (!saving) {
     if (addressMode == 'newAddress') {
@@ -5403,7 +5423,11 @@ function addBillingAddrValidator() {
         if (Number(zp01Reccount) > 1) {
           return new ValidationResult(null, false, 'Only one Billing Address can be defined.');
         } else if (Number(zp01Reccount == 0)) {
-          return new ValidationResult(null, false, 'At least one Billing Address must be defined.');
+          if (custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'CRO3P') {
+            return new ValidationResult(null, false, 'For 3rd party scenario please import a CMR via CMR search');
+           } else {
+           return new ValidationResult(null, false, 'At least one Billing Address must be defined.');
+          }
         } else {
           return new ValidationResult(null, true);
         }
@@ -5411,6 +5435,52 @@ function addBillingAddrValidator() {
       }
     };
   })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
+function addBillingValidator() {
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var custSubType = FormManager.getActualValue('custSubGrp');
+  FormManager.addFormValidator((function() {
+    return {
+       validate : function() {
+         var zp01ReqId = FormManager.getActualValue('reqId');
+         qParams = {
+            REQ_ID : zp01ReqId,
+         };
+         var record = cmr.query('GETZP01VALRECORDS', qParams);
+         var zp01Reccount = record.ret1;
+         if (Number(zp01Reccount == 1)) {
+          if (FormManager.getActualValue('reqType') == 'C' && role == "REQUESTER") {
+            if (custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'CRO3P') {
+              var checkImportIndc = getImportedIndcForItalyBillingAddr();
+              if (checkImportIndc == 'Y') {
+                return new ValidationResult(null, false, 'Please remove the imported billing address and create a new one for the 3rd party customer.');
+              }
+            }
+          }
+        }
+      }
+     };
+    })(), 'MAIN_NAME_TAB', 'frmCMR');
+  }
+}
+
+function addCMRValidator() {
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var custSubType = FormManager.getActualValue('custSubGrp');
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        if (FormManager.getActualValue('reqType') == 'C') {
+          if (FormManager.getActualValue('findCmrResult') == 'NOT DONE' || FormManager.getActualValue('findCmrResult') == 'REJECTED') {
+            if (role == "REQUESTER" && (custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'CRO3P')) {
+              return new ValidationResult(null, false, 'For 3rd party scenario please import a CMR via CMR search');
+            }
+          }
+        }
+      }
+    };
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
 
 function setVATForItaly() {
@@ -9210,6 +9280,8 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(addAfterConfigItaly, [ SysLoc.ITALY ]);
   GEOHandler.addAfterTemplateLoad(addAfterTemplateLoadItaly, [ SysLoc.ITALY ]);
+  GEOHandler.registerValidator(addCMRValidator, [ SysLoc.ITALY ], null, true);
+  GEOHandler.registerValidator(addBillingValidator, [ SysLoc.ITALY ], null, true);
   GEOHandler.addAddrFunction(addAddrFunctionItaly, [ SysLoc.ITALY ]);
   // CMR-2205
   GEOHandler.addAfterConfig(autoSetAbbrevNmOnChanageTR, [ SysLoc.TURKEY ]);
