@@ -2984,6 +2984,21 @@ function reqReasonOnChange() {
   });
 }
 
+function showIGFOnOpen(cntry, addressMode, saving, afterValidate) {
+  if (!saving) {
+    var reqReason = FormManager.getActualValue('reqReason');
+    var addressListIGF = [ 'ZP02', 'ZD02' ];
+    for (var i = 0; i < addressListIGF.length; i++) {
+      var addressType = addressListIGF[i];
+      if (reqReason == 'IGF' && isZD01OrZP01ExistOnCMR(addressType)) {
+        dojo.byId('radiocont_' + addressType).style.display = 'inline-block';
+      } else {
+        dojo.byId('radiocont_' + addressType).style.display = 'none';
+      }
+    }
+  }
+}
+
 function isZD01OrZP01ExistOnCMR(addressType) {
   if (addressType == 'ZP02') {
     addressType = 'ZP01';
@@ -3645,4 +3660,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setSensitiveFlag, '706');
   GEOHandler.addAddrFunction(setIERPSitePartyIDForFR, '706');
   GEOHandler.registerValidator(addAddressFieldValidators, [ '706' ], null, true);
+  GEOHandler.addAddrFunction(showIGFOnOpen, '706');
 });
