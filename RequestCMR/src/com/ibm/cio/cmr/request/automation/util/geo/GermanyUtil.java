@@ -453,7 +453,7 @@ public class GermanyUtil extends AutomationUtil {
     } else if ("34".equals(data.getIsuCd()) && "Q".equals(data.getClientTier())) {
       details.setLength(0); // clearing details
       overrides.clearOverrides();
-      details.append("Calculating coverage using 32S-PostalCode logic.").append("\n");
+      details.append("Calculating coverage using 34Q-PostalCode logic.").append("\n");
       HashMap<String, String> response = getSORTLFromPostalCodeMapping(data.getSubIndustryCd(), zs01.getPostCd(), data.getIsuCd(),
           data.getClientTier());
       LOG.debug("Calculated SORTL: " + response.get(SORTL));

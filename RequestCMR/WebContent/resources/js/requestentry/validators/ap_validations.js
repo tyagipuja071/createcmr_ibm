@@ -1,8 +1,17 @@
 /* Register AP Javascripts */
 var _isicHandlerAP = null;
-function onIsicChangeHandlerAP() {
+var _clusterHandlerAP = null;
+
+function addHandlersForAP() {
   if (_isicHandlerAP == null) {
     _isicHandlerAP = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
+      setIsuOnIsic();
+    });
+  }
+  
+  if (_clusterHandlerAP == null && FormManager.getActualValue('reqType') != 'U') {
+    _clusterHandlerAP = dojo.connect(FormManager.getField('apCustClusterId'), 'onChange', function(value) {
+      setInacByCluster();
       setIsuOnIsic();
     });
   }
@@ -92,13 +101,13 @@ function addAfterConfigAP() {
 
   if (role == 'REQUESTER' && reqType == 'C') {
     if (cntry == SysLoc.SINGAPORE) {
-      if (custSubGrp == 'DUMMY' || custSubGrp == 'BLUMX' || custSubGrp == 'MKTPC')
+      if (custSubGrp == 'INTER'|| custSubGrp == 'XINT'|| custSubGrp == 'DUMMY' || custSubGrp == 'BLUMX' || custSubGrp == 'MKTPC')
         FormManager.readOnly('clientTier');
       else
         FormManager.enable('clientTier');
     }
-    if (cntry == SysLoc.PHILIPPINES) {
-      if (custSubGrp == 'DUMMY' || custSubGrp == 'XDUMM')
+    if (cntry == SysLoc.PHILIPPINES || cntry == SysLoc.MALASIA || cntry == SysLoc.BRUNEI || cntry == SysLoc.INDONESIA || cntry == SysLoc.THAILAND) {
+      if (custSubGrp == 'INTER'|| custSubGrp == 'XINT' || custSubGrp == 'DUMMY' || custSubGrp == 'XDUMM')
         FormManager.readOnly('clientTier');
       else
         FormManager.enable('clientTier');
@@ -110,12 +119,6 @@ function addAfterConfigAP() {
       else
         FormManager.enable('clientTier');
     }
-    if (cntry == SysLoc.MALASIA) {
-      if (custSubGrp == 'DUMMY' || custSubGrp == 'XDUMM')
-        FormManager.readOnly('clientTier');
-      else
-        FormManager.enable('clientTier');
-    }
   }
   if(reqType == 'C'){
     setInacByCluster();
@@ -123,7 +126,6 @@ function addAfterConfigAP() {
 }
 
 function setInacByCluster() {
-  var _clusterHandlerAP = dojo.connect(FormManager.getField('apCustClusterId'), 'onChange', function(value) {
     var _cluster = FormManager.getActualValue('apCustClusterId');
     var cntry = FormManager.getActualValue('cmrIssuingCntry');
     if (!_cluster) {
@@ -168,7 +170,6 @@ function setInacByCluster() {
       FormManager.resetDropdownValues(FormManager.getField('inacType'));
       return;
     }
-  });
 }
 
 /* ASEAN ANZ ISIC MAPPING */
@@ -2853,7 +2854,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(onIsicChange, [ SysLoc.AUSTRALIA, SysLoc.SINGAPORE ]);
   GEOHandler.addAfterTemplateLoad(onIsicChange, [ SysLoc.AUSTRALIA, SysLoc.SINGAPORE ]);
   
-  GEOHandler.addAfterConfig(onIsicChangeHandlerAP, GEOHandler.ANZ);
-  GEOHandler.addAfterConfig(onIsicChangeHandlerAP, GEOHandler.ASEAN);
+  GEOHandler.addAfterConfig(addHandlersForAP, GEOHandler.AP);
 
 });
