@@ -319,7 +319,7 @@ public class CanadaHandler extends GEOHandler {
 
   @Override
   public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
-    return false;
+    return true;
   }
 
   /* new functions for Canada only */
