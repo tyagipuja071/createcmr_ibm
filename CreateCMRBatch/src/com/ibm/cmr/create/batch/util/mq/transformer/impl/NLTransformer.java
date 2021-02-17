@@ -949,12 +949,6 @@ public class NLTransformer extends EMEATransformer {
       // data.getCustPrefLang());
       legacyCust.setBankAcctNo("");
 
-      if (SystemLocation.ABU_DHABI.equals(data.getCmrIssuingCntry()) && !StringUtils.isBlank(data.getBpAcctTyp())) {
-        legacyCust.setCustType(data.getBpAcctTyp());
-      } else {
-        legacyCust.setCustType("N");
-      }
-
       // extract the phone from billing as main phone
       for (Addr addr : cmrObjects.getAddresses()) {
         if (MQMsgConstants.ADDR_ZS01.equals(addr.getId().getAddrType())) {
@@ -978,10 +972,7 @@ public class NLTransformer extends EMEATransformer {
       }
 
       legacyCust.setRealCtyCd("788");
-
-      if (SystemLocation.ABU_DHABI.equals(data.getCmrIssuingCntry()) && !StringUtils.isBlank(data.getBpAcctTyp())) {
-        legacyCust.setCustType(data.getBpAcctTyp());
-      }
+      legacyCust.setCustType("");
 
       // CMR-5993
       String cntry = legacyCust.getId().getSofCntryCode().trim();
@@ -1113,14 +1104,7 @@ public class NLTransformer extends EMEATransformer {
         cust.setLangCd(muData.getSvcArOffice());
       }
     }
-
-    if (SystemLocation.ABU_DHABI.equals(cust.getId().getSofCntryCode()) && !StringUtils.isBlank(muData.getCurrencyCd())) {
-      if ("@".equals(muData.getCurrencyCd())) {
-        cust.setCustType("");
-      } else {
-        cust.setCustType(muData.getCurrencyCd());
-      }
-    }
+    cust.setCustType("");
 
     if (!StringUtils.isBlank(muData.getSubIndustryCd())) {
       cust.setLocNo(cust.getId().getSofCntryCode() + muData.getSubIndustryCd());
