@@ -50,26 +50,23 @@ public abstract class ANZTransformer extends APTransformer {
   @Override
   protected void handleAddressDefaults(MQMessageHandler handler) {
     super.handleAddressDefaults(handler);
-    
-    /*Addr addrData = handler.addrData;
 
-    String line3 = "";
-    if (!StringUtils.isBlank(addrData.getDept()) && StringUtils.isBlank(addrData.getAddrTxt2())) {
-      line3 += addrData.getDept();
-    }
-    if (StringUtils.isBlank(addrData.getDept()) && !StringUtils.isBlank(addrData.getAddrTxt2())) {
-      line3 += addrData.getAddrTxt2();
-    }
-    if (!StringUtils.isBlank(addrData.getDept()) && !StringUtils.isBlank(addrData.getAddrTxt2())) {
-      line3 += addrData.getDept();
-    }
-
-    String line4 = "";
-    if (!StringUtils.isBlank(addrData.getAddrTxt())) {
-      line4 += addrData.getAddrTxt();
-    }
-
-    handler.messageHash.put("AddrLine3", line3);
-    handler.messageHash.put("AddrLine4", line4);*/
+    /*
+     * Addr addrData = handler.addrData;
+     * 
+     * String line3 = ""; if (!StringUtils.isBlank(addrData.getDept()) &&
+     * StringUtils.isBlank(addrData.getAddrTxt2())) { line3 +=
+     * addrData.getDept(); } if (StringUtils.isBlank(addrData.getDept()) &&
+     * !StringUtils.isBlank(addrData.getAddrTxt2())) { line3 +=
+     * addrData.getAddrTxt2(); } if (!StringUtils.isBlank(addrData.getDept()) &&
+     * !StringUtils.isBlank(addrData.getAddrTxt2())) { line3 +=
+     * addrData.getDept(); }
+     * 
+     * String line4 = ""; if (!StringUtils.isBlank(addrData.getAddrTxt())) {
+     * line4 += addrData.getAddrTxt(); }
+     * 
+     * handler.messageHash.put("AddrLine3", line3);
+     * handler.messageHash.put("AddrLine4", line4);
+     */
   }
 }
