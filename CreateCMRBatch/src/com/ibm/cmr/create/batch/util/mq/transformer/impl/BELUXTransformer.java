@@ -27,7 +27,6 @@ import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
 import com.ibm.cio.cmr.request.entity.MassUpdtData;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
-import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectObjectContainer;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
@@ -909,13 +908,24 @@ public class BELUXTransformer extends EMEATransformer {
       CMRRequestContainer cmrObjects) {
     Admin admin = cmrObjects.getAdmin();
     Data data = cmrObjects.getData();
-
+    Addr addrs = (Addr) cmrObjects.getAddresses();
     setDefaultLandedCountry(data);
     formatDataLines(dummyHandler);
 
     String landedCntry = "";
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
 
+      boolean crossBorder = isCrossBorder(addrs);
+      if (crossBorder)
+        legacyCust.setMailingCond("2");
+      else if (!crossBorder) {
+        if ("BE".equalsIgnoreCase(DEFAULT_LANDED_COUNTRY)) {
+          legacyCust.setMailingCond("");
+        }
+        if ("LU".equalsIgnoreCase(DEFAULT_LANDED_COUNTRY)) {
+          legacyCust.setMailingCond("1");
+        }
+      }
       // CMR-5993
       String cntry = legacyCust.getId().getSofCntryCode().trim();
 
@@ -925,15 +935,11 @@ public class BELUXTransformer extends EMEATransformer {
       legacyCust.setLeasingInd("0");
       legacyCust.setAuthRemarketerInd("0");
       legacyCust.setCeDivision("3");
-      legacyCust.setLangCd("");
-
       legacyCust.setCurrencyCd("");
       legacyCust.setOverseasTerritory("");
-      legacyCust.setInvoiceCpyReqd("");
       legacyCust.setCustType("");
-
       legacyCust.setCurrencyCd("EU");
-      legacyCust.setInvoiceCpyReqd("02");
+      legacyCust.setInvoiceCpyReqd("00");
 
       if ("624".equals(data.getCountryUse())) {
         legacyCust.setRealCtyCd("624");
@@ -953,12 +959,8 @@ public class BELUXTransformer extends EMEATransformer {
       // George CREATCMR-675
 
       setSBOIBO(legacyCust, data);
-
-      if (SystemLocation.ABU_DHABI.equals(data.getCmrIssuingCntry()) && !StringUtils.isBlank(data.getBpAcctTyp())) {
-        legacyCust.setCustType(data.getBpAcctTyp());
-      } else {
-        legacyCust.setCustType("N");
-      }
+      // CREATCMR-1215 GEORGE 20210217
+      legacyCust.setCustType("");
 
       // extract the phone from billing as main phone
       for (Addr addr : cmrObjects.getAddresses()) {
@@ -972,7 +974,7 @@ public class BELUXTransformer extends EMEATransformer {
       legacyCust.setEnterpriseNo(data.getEnterprise() == null ? "" : data.getEnterprise());
 
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
-
+      legacyCust.setEnterpriseNo(data.getEnterprise() == null ? "" : data.getEnterprise());
       // George CREATCMR-1030 1031 1032
       legacyCust.setTaxCd(data.getTaxCd1() == null ? "" : data.getTaxCd1());
       legacyCust.setLangCd(data.getCustPrefLang() == null ? "" : data.getCustPrefLang());
@@ -996,9 +998,6 @@ public class BELUXTransformer extends EMEATransformer {
         legacyCust.setRealCtyCd("788");
       }
       legacyCust.setSalesRepNo(data.getSearchTerm() == null ? "" : data.getSearchTerm());
-      if (SystemLocation.ABU_DHABI.equals(data.getCmrIssuingCntry()) && !StringUtils.isBlank(data.getBpAcctTyp())) {
-        legacyCust.setCustType(data.getBpAcctTyp());
-      }
 
       // CMR-5993
       String cntry = legacyCust.getId().getSofCntryCode().trim();
@@ -1106,14 +1105,7 @@ public class BELUXTransformer extends EMEATransformer {
         cust.setLangCd(muData.getSvcArOffice());
       }
     }
-
-    if (SystemLocation.ABU_DHABI.equals(cust.getId().getSofCntryCode()) && !StringUtils.isBlank(muData.getCurrencyCd())) {
-      if ("@".equals(muData.getCurrencyCd())) {
-        cust.setCustType("");
-      } else {
-        cust.setCustType(muData.getCurrencyCd());
-      }
-    }
+    cust.setCustType("");
 
     if (!StringUtils.isBlank(muData.getSubIndustryCd())) {
       cust.setLocNo(cust.getId().getSofCntryCode() + muData.getSubIndustryCd());
