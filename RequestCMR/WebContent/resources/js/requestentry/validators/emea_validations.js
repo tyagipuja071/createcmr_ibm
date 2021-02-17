@@ -44,7 +44,6 @@ var _oldCTCIT = "";
 var _oldINACIT = "";
 var _oldSpecialTaxCdIT = "";
 var _oldAffiliateIT = "";
-var _oldAffiliateIT = "";
 var _oldCollectionIT = "";
 // DTN: Defect 1858294 : UKI: Internal FSL sub-scenario rules for abbreviated
 // name
@@ -91,9 +90,8 @@ function getImportedIndcForItalyBillingAddr() {
   } else {
     _importedIndcBilling = 'N';
   }
-    console.log('saving imported ind as for Billing Address' + _importedIndc);
-    return _importedIndcBilling;
-  }
+  console.log('saving imported ind as for Billing Address' + _importedIndc);
+  return _importedIndcBilling;
 }
 
 function addEMEALandedCountryHandler(cntry, addressMode, saving, finalSave) {
@@ -5425,8 +5423,8 @@ function addBillingAddrValidator() {
         } else if (Number(zp01Reccount == 0)) {
           if (custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'CRO3P') {
             return new ValidationResult(null, false, 'For 3rd party scenario please import a CMR via CMR search');
-           } else {
-           return new ValidationResult(null, false, 'At least one Billing Address must be defined.');
+          } else {
+            return new ValidationResult(null, false, 'At least one Billing Address must be defined.');
           }
         } else {
           return new ValidationResult(null, true);
@@ -5442,14 +5440,14 @@ function addBillingValidator() {
   var custSubType = FormManager.getActualValue('custSubGrp');
   FormManager.addFormValidator((function() {
     return {
-       validate : function() {
-         var zp01ReqId = FormManager.getActualValue('reqId');
-         qParams = {
-            REQ_ID : zp01ReqId,
-         };
-         var record = cmr.query('GETZP01VALRECORDS', qParams);
-         var zp01Reccount = record.ret1;
-         if (Number(zp01Reccount == 1)) {
+      validate : function() {
+        var zp01ReqId = FormManager.getActualValue('reqId');
+        qParams = {
+          REQ_ID : zp01ReqId,
+        };
+        var record = cmr.query('GETZP01VALRECORDS', qParams);
+        var zp01Reccount = record.ret1;
+        if (Number(zp01Reccount == 1)) {
           if (FormManager.getActualValue('reqType') == 'C' && role == "REQUESTER") {
             if (custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'CRO3P') {
               var checkImportIndc = getImportedIndcForItalyBillingAddr();
@@ -5460,9 +5458,8 @@ function addBillingValidator() {
           }
         }
       }
-     };
-    })(), 'MAIN_NAME_TAB', 'frmCMR');
-  }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
 function addCMRValidator() {
