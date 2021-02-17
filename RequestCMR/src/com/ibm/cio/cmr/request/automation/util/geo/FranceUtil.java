@@ -336,11 +336,12 @@ public class FranceUtil extends AutomationUtil {
     Addr addr = requestData.getAddress("ZS01");
     details.append("\n");
     if (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && CalculateCoverageElement.COV_BG.equals(covFrom)) {
-      String sboValue = data.getSalesBusOffCd();
-      if (StringUtils.isNotBlank(sboValue)) {
-        sboValue = sboValue.substring(0, 3);
-        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sboValue + sboValue);
-        details.append("SORTL: " + sboValue + sboValue);
+      FieldResultKey sboKeyVal = new FieldResultKey("DATA", "SALES_BO_CD");
+      String sboVal = "";
+      if (overrides.getData().containsKey(sboKeyVal)) {
+        sboVal = overrides.getData().get(sboKeyVal).getNewValue();
+        sboVal = sboVal.substring(0, 3);
+        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sboVal + sboVal);
       }
       engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
     } else {
