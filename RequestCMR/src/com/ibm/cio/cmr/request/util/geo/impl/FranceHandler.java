@@ -543,9 +543,11 @@ public class FranceHandler extends GEOHandler {
   @Override
   public void doBeforeDataSave(EntityManager entityManager, Admin admin, Data data, String cmrIssuingCntry) throws Exception {
     data.setCountryUse("706");
-    // if ("C".equals(admin.getReqType())) {
-    // data.setCurrencyCd("CHF");
-    // }
+
+    String CMRDataRdc = getCmrFromDatardc(entityManager, data.getId().getReqId());
+    if (!StringUtils.isBlank(CMRDataRdc) && CMRDataRdc.contains("P")) {
+      admin.setProspLegalInd("Y");
+    }
 
   }
 
@@ -1730,6 +1732,20 @@ public class FranceHandler extends GEOHandler {
       LOG.debug("***RETURNING ZZKV_DEPT > " + department + " WHERE KUNNR IS > " + kunnr);
     }
     return department;
+  }
+
+  public static String getCmrFromDatardc(EntityManager rdcMgr, long req_id) {
+    String cmrdatardc = "";
+    String sql = ExternalizedQuery.getSql("FR.GET_CMR_DATARDC");
+    PreparedQuery query = new PreparedQuery(rdcMgr, sql);
+    query.setParameter("REQ_ID", req_id);
+    String result = query.getSingleResult(String.class);
+
+    if (result != null) {
+      cmrdatardc = result;
+    }
+    LOG.debug("cmrdatardc" + cmrdatardc);
+    return cmrdatardc;
   }
 
 }
