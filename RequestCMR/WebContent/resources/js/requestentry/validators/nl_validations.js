@@ -101,7 +101,12 @@ function disableCmrNo() {
 /* Vat Handler */
 function setVatValidatorNL() {
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
+    if (custSubGrp == 'PRICU') {
+      FormManager.readOnly('vat');
+      return;
+    }
     FormManager.resetValidations('vat');
     if (!dijit.byId('vatExempt').get('checked')) {
       checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
@@ -164,10 +169,18 @@ function setDeptartmentNumber() {
 
 function disableLandCntry() {
   var custType = FormManager.getActualValue('custGrp');
+  var reqType = FormManager.getActualValue('reqType');
   if (custType == 'LOCAL' && FormManager.getActualValue('addrType') == 'ZS01') {
     FormManager.readOnly('landCntry');
   } else {
     FormManager.enable('landCntry');
+  }
+  if (reqType == 'U') {
+    if (FormManager.getActualValue('addrType') == 'ZS01' || FormManager.getActualValue('addrType') == 'ZP01') {
+      FormManager.readOnly('landCntry');
+    } else {
+      FormManager.enable('landCntry');
+    }
   }
 }
 
