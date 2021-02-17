@@ -342,6 +342,7 @@ public class FranceUtil extends AutomationUtil {
         sboVal = overrides.getData().get(sboKeyVal).getNewValue();
         sboVal = sboVal.substring(0, 3);
         overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sboVal + sboVal);
+        details.append("SORTL: " + sboVal + sboVal);
       }
       engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
     } else {
