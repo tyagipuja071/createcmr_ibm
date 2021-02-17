@@ -700,28 +700,6 @@ public class FranceUtil extends AutomationUtil {
     List<String> ignoredUpdates = new ArrayList<String>();
     for (UpdatedDataModel change : changes.getDataUpdates()) {
       switch (change.getDataField()) {
-      case "VAT #":
-        if ((StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())) || (!StringUtils.isBlank(change.getOldData())
-            && !StringUtils.isBlank(change.getNewData()) && !(change.getOldData().equals(change.getNewData())))) {
-          // ADD and Update
-          List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
-          boolean matchesDnb = false;
-          if (matches != null) {
-            // check against D&B
-            matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
-          }
-          if (!matchesDnb) {
-            cmdeReview = true;
-            engineData.addNegativeCheckStatus("_esVATCheckFailed", "VAT # on the request did not match D&B");
-            details.append("VAT # on the request did not match D&B\n");
-          } else {
-            details.append("VAT # on the request matches D&B\n");
-          }
-        }
-        if (!StringUtils.isBlank(change.getOldData()) && (StringUtils.isBlank(change.getNewData()))) {
-          // noop, for switch handling only
-        }
-        break;
       case "ISU Code":
       case "Client Tier":
       case "Search Term (SORTL)":
@@ -738,6 +716,7 @@ public class FranceUtil extends AutomationUtil {
       case "ISIC":
       case "INAC/NAC Code":
       case "SIRET":
+      case "VAT #":
         cmdeReview = true;
         details.append("Updates to one or more fields cannot be validated.\n");
         details.append("-" + change.getDataField() + " needs to be verified.\n");
@@ -842,18 +821,12 @@ public class FranceUtil extends AutomationUtil {
                   checkDetails.append("Update to InstallAt (" + addr.getId().getAddrSeq() + ") has different customer name than sold-to .\n");
                 }
               } else if (CmrConstants.RDC_SOLD_TO.equals(addrType) || CmrConstants.RDC_BILL_TO.equals(addrType)) {
-                // LOG.debug("Update to Address " + addrType + "(" +
-                // addr.getId().getAddrSeq() + ") needs to be verified");
-                // checkDetails.append("Update to address " + addrType + "(" +
-                // addr.getId().getAddrSeq() + ") needs to be verified \n");
-                // resultCodes.add("D");
-
-                // validate the address on DnB with SIRET
+                // validate the address on DnB with SIRET and VAT
 
                 Addr addrToBeMatched = requestData.getAddress(addrType);
                 Addr soldTo = requestData.getAddress(addrType);
                 List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addrToBeMatched, true);
-                boolean siretMatches = false;
+                boolean siretVatMatches = false;
                 if (matches.isEmpty()) {
                   // get DnB matches based on all address details
                   matches = getMatches(requestData, engineData, soldTo, false);
@@ -864,15 +837,17 @@ public class FranceUtil extends AutomationUtil {
                     matchesDnb = DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), addrToBeMatched, admin, dnbRecord);
                     if (matchesDnb) {
                       String dnbSIRET = DnBUtil.getTaxCode1(dnbRecord.getDnbCountry(), dnbRecord.getOrgIdDetails());
-                      if (StringUtils.isNotBlank(data.getTaxCd1()) && data.getTaxCd1().equalsIgnoreCase(dnbSIRET)) {
-                        siretMatches = true;
+                      String dnbVAT = DnBUtil.getVAT(dnbRecord.getDnbCountry(), dnbRecord.getOrgIdDetails());
+                      if (StringUtils.isNotBlank(data.getTaxCd1()) && StringUtils.isNotBlank(data.getVat())
+                          && data.getTaxCd1().equalsIgnoreCase(dnbSIRET) && data.getVat().equalsIgnoreCase(dnbVAT)) {
+                        siretVatMatches = true;
                         break;
                       }
                     }
                   }
-                  if (!siretMatches) {
-                    resultCodes.add("D");
-                    checkDetails.append("Updates to Address " + addrType + " with SIRET could not be validated agianst DnB.").append("\n");
+                  if (!siretVatMatches) {
+                    resultCodes.add("R");
+                    checkDetails.append("Updates to Address " + addrType + " with SIRET/VAT could not be validated against DnB.").append("\n");
                   }
                 }
               } else {
