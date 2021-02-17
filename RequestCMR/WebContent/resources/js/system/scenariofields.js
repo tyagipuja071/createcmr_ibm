@@ -616,7 +616,38 @@ var SCENARIO_FIELDS = [ {
   name : 'restrictInd',
   tab : 'MAIN_CUST_TAB',
   address : false
-} ];
+}, {
+  id : '##CustomerData',
+  lbl : 'Customer Data',
+  name : 'taxCd3',
+  tab : 'MAIN_CUST_TAB',
+  address : false
+}, {
+  id : '##SalesSR',
+  lbl : 'SalesSR',
+  name : 'repTeamMemberNo',
+  tab : 'MAIN_CUST_TAB',
+  address : false
+}, {
+  id : '##SizeCode',
+  lbl : 'SizeCode',
+  name : 'orgNo',
+  tab : 'MAIN_CUST_TAB',
+  address : false
+}, {
+  id : '##CreditCd',
+  lbl : 'CreditCd',
+  name : 'creditCd',
+  tab : 'MAIN_CUST_TAB',
+  address : false
+}, {
+  id : '##MarketingARDept',
+  lbl : 'AR-FAAR',
+  name : 'adminDeptCd',
+  tab : 'MAIN_CUST_TAB',
+  address : false
+}   
+  ];
 
 function scenariofieldSort(field1, field2) {
   return field1.lbl.toUpperCase() < field2.lbl.toUpperCase() ? -1 : (field1.lbl.toUpperCase() > field2.lbl.toUpperCase() ? 1 : 0);

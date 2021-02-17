@@ -135,7 +135,7 @@ function addHandlersForNORDX() {
 
   if (_ISUHandler == null) {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
-      setClientTierValues(value);
+      // setClientTierValues(value);
     });
   }
 
@@ -243,40 +243,40 @@ function setVatValidatorNORDX() {
 /**
  * Set Client Tier Value
  */
-function setClientTierValues(isuCd) {
-
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-
-  if (FormManager.getActualValue('reqType') != 'C') {
-    return;
-  }
-
-  isuCd = FormManager.getActualValue('isuCd');
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var clientTiers = [];
-  if (isuCd != '') {
-    var qParams = {
-      _qall : 'Y',
-      ISSUING_CNTRY : cntry,
-      ISU : '%' + isuCd + '%'
-    };
-    var results = cmr.query('GET.CTCLIST.BYISU', qParams);
-    if (results != null) {
-      for (var i = 0; i < results.length; i++) {
-        clientTiers.push(results[i].ret1);
-      }
-      if (clientTiers != null) {
-        FormManager.limitDropdownValues(FormManager.getField('clientTier'), clientTiers);
-        if (clientTiers.length == 1) {
-          FormManager.setValue('clientTier', clientTiers[0]);
-        }
-      }
-    }
-  }
-}
-
+// function setClientTierValues(isuCd) {
+//
+// if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+// return;
+// }
+//
+// if (FormManager.getActualValue('reqType') != 'C') {
+// return;
+// }
+//
+// isuCd = FormManager.getActualValue('isuCd');
+// var cntry = FormManager.getActualValue('cmrIssuingCntry');
+// var clientTiers = [];
+// if (isuCd != '') {
+// var qParams = {
+// _qall : 'Y',
+// ISSUING_CNTRY : cntry,
+// ISU : '%' + isuCd + '%'
+// };
+// var results = cmr.query('GET.CTCLIST.BYISU', qParams);
+// if (results != null) {
+// for (var i = 0; i < results.length; i++) {
+// clientTiers.push(results[i].ret1);
+// }
+// if (clientTiers != null) {
+// FormManager.limitDropdownValues(FormManager.getField('clientTier'),
+// clientTiers);
+// if (clientTiers.length == 1) {
+// FormManager.setValue('clientTier', clientTiers[0]);
+// }
+// }
+// }
+// }
+// }
 /**
  * NORDIX - sets SBO based on Postal Code value
  */
@@ -341,7 +341,7 @@ function setSalesRepValues(clientTier) {
     var results = null;
 
     // SalRep will be based on IMS for 32S/32T for Finland Subregion
-    if (ims.length > 1 && (isuCtc == '32S' || isuCtc == '32T') && (geoCd == 'EE' || geoCd == 'LT' || geoCd == 'LV' || geoCd == 'IS' || cntry == '806')) {
+    if (ims.length > 1 && (isuCtc == '34Q' || isuCtc == '32T') && (geoCd == 'EE' || geoCd == 'LT' || geoCd == 'LV' || geoCd == 'IS' || cntry == '806')) {
       qParams = {
         _qall : 'Y',
         ISSUING_CNTRY : cntry + geoCd,
@@ -349,7 +349,7 @@ function setSalesRepValues(clientTier) {
         CLIENT_TIER : '%%'
       };
       results = cmr.query('GET.SRLIST.BYISUCTC', qParams);
-    } else if (ims != '' && ims.length > 1 && (isuCtc == '32S' || isuCtc == '32T') && (cntry == '846')) {
+    } else if (ims != '' && ims.length > 1 && (isuCtc == '34Q' || isuCtc == '32T') && (cntry == '846')) {
       qParams = {
         _qall : 'Y',
         ISSUING_CNTRY : cntry + geoCd,
@@ -358,7 +358,7 @@ function setSalesRepValues(clientTier) {
       // UPDATE_BY_ID : '%' + ims.substring(0, 1) + '%'
       };
       results = cmr.query('GET.SRLIST.SWEDEN', qParams);
-    } else if (ims != '' && ims.length > 1 && (isuCtc == '32S' || isuCtc == '32T')) {
+    } else if (ims != '' && ims.length > 1 && (isuCtc == '34Q' || isuCtc == '32T')) {
       qParams = {
         _qall : 'Y',
         ISSUING_CNTRY : cntry + geoCd,
@@ -407,7 +407,7 @@ function setSalesRepValues(clientTier) {
 
         var ind = ims.substring(0, 1);
         // DK/FO/GL 678
-        if (cntry == '678') {
+        if (cntry == '678' && ind != '') {
           if (MSD996.indexOf(ind) >= 0)
             FormManager.setValue('repTeamMemberNo', "MSD996");
           if (MSD992.indexOf(ind) >= 0)
@@ -418,7 +418,7 @@ function setSalesRepValues(clientTier) {
             FormManager.setValue('repTeamMemberNo', "MSD302");
         }
         // Sweden 846
-        if (cntry == '846') {
+        if (cntry == '846' && ind != '') {
           if (MSS596.indexOf(ind) >= 0)
             FormManager.setValue('repTeamMemberNo', "MSS596");
           if (MSS599.indexOf(ind) >= 0)
@@ -427,7 +427,7 @@ function setSalesRepValues(clientTier) {
             FormManager.setValue('repTeamMemberNo', "MSS315");
         }
         // Finland 702
-        if (cntry == '702') {
+        if (cntry == '702' && ind != '') {
           if (MSF109.indexOf(ind) >= 0)
             FormManager.setValue('repTeamMemberNo', "MSF109");
           if (MSF107.indexOf(ind) >= 0)
@@ -1591,8 +1591,8 @@ dojo.addOnLoad(function() {
   GEOHandler.enableCopyAddress(GEOHandler.NORDX, validateNORDXCopy, [ 'ZD01', 'ZP02' ]);
   GEOHandler.addAddrFunction(updateAddrTypeList, GEOHandler.NORDX);
   GEOHandler.registerValidator(addCrossBorderValidatorNORS, GEOHandler.NORDX, null, true);
-  GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.NORDX);
-  GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.NORDX);
+  // GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.NORDX);
+  // GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.NORDX);
   // GEOHandler.addAfterTemplateLoad(setSalesRepValues, GEOHandler.NORDX);
   // GEOHandler.addAfterTemplateLoad(setAdminDSCValues, GEOHandler.NORDX);
   // GEOHandler.addAfterConfig(setSalesRepValues, GEOHandler.NORDX);

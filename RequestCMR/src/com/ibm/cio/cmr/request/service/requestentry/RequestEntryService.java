@@ -60,8 +60,10 @@ import com.ibm.cio.cmr.request.service.CmrClientService;
 import com.ibm.cio.cmr.request.service.approval.ApprovalService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.user.AppUser;
+import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.MessageUtil;
+import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
@@ -332,6 +334,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
         geoHandler.doBeforeAdminSave(entityManager, admin, model.getCmrIssuingCntry());
       }
 
+      setLockByName(admin);
       saveAccessToken(admin, request);
       updateEntity(admin, entityManager);
 
@@ -520,6 +523,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     }
 
     saveAccessToken(admin, request);
+    setLockByName(admin);
     updateEntity(admin, entityManager);
 
     if (CmrConstants.REQ_TYPE_UPDATE.equals(model.getReqType()) && LAHandler.isLACountry(model.getCmrIssuingCntry())
@@ -1529,8 +1533,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
           cmrRecord.setCmrTier("");
           cmrRecord.setCmrInacType("");
           cmrRecord.setCmrIsic(!StringUtils.isEmpty(kna1.getZzkvSic())
-              ? (kna1.getZzkvSic().trim().length() > 4 ? kna1.getZzkvSic().trim().substring(0, 4) : kna1.getZzkvSic().trim())
-              : "");
+              ? (kna1.getZzkvSic().trim().length() > 4 ? kna1.getZzkvSic().trim().substring(0, 4) : kna1.getZzkvSic().trim()) : "");
           cmrRecord.setCmrSortl("");
           cmrRecord.setCmrIssuedByDesc("");
           cmrRecord.setCmrRdcCreateDate("");
@@ -1553,5 +1556,18 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       entityManager.close();
     }
 
+  }
+
+  private void setLockByName(Admin admin) {
+    if (StringUtils.isBlank(admin.getLockByNm()) && !StringUtils.isBlank(admin.getLockBy())) {
+      try {
+        Person person = BluePagesHelper.getPerson(admin.getLockBy());
+        if (person != null) {
+          admin.setLockByNm(person.getName());
+        }
+      } catch (CmrException e) {
+        this.log.warn("Name for " + admin.getLockBy() + " cannot be retrieved.");
+      }
+    }
   }
 }

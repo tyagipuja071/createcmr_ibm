@@ -120,6 +120,25 @@ div#filterlabels table {
   background:white;
   border: 1px Solid Gray;
 }
+div.partner-head {
+  font-size: 12px;
+  color: #444;
+  font-weight: bold;
+  width: 100%;
+  text-align: center;
+}
+table.partner-table {
+  padding: 10px;
+  margin: 20px;
+  width: 100%;
+}
+table.partner-table td {
+  padding-left: 10px;
+}
+table.partner-table th {
+  width: 150px;
+  padding: 5px;
+}
 </style>
 <cmr:boxContent>
   <cmr:tabs />
@@ -218,6 +237,52 @@ div#filterlabels table {
           </p>
         </cmr:column>
       </cmr:row>
+      <cmr:row>
+        <cmr:column span="1" width="150">
+          <p>
+            <cmr:label fieldId="reqType">Request Type:</cmr:label>
+          </p>
+        </cmr:column>
+        <cmr:column span="2" width="235">
+          <p>
+            <form:select dojoType="dijit.form.FilteringSelect" id="reqType" searchAttr="name" style="display: block;" maxHeight="200"
+              required="false" path="reqType" placeHolder="Filter by Request Type">
+              <option value=""></option>
+              <option value="C">Create</option>
+              <option value="U">Update</option>
+              <option value="M">Mass Update</option>
+              <option value="N">Mass Create</option>
+              <option value="E">Update by Enterprise #</option>
+              <option value="Delete">Delete/Inactivate</option>
+              <option value="R">Reactivate</option>
+            </form:select>
+          </p>
+        </cmr:column>
+      </cmr:row>
+      <cmr:row >
+        <cmr:column span="1" width="150">
+          <p>
+          </p>
+        </cmr:column>
+        <cmr:column span="2" width="300">
+          <p>
+            <form:checkbox path="excludeExternal" value="Y"/>
+            <label for="OEMInd" class=" cmr-radio-check-label">
+               <span id="cmr-fld-lbl-OEMInd">Exclude External Requests</span>
+               <cmr:info text="Excludes requests created by external systems via APIs or applications." />
+            </label>            
+          </p>
+        </cmr:column>
+        <cmr:column span="2" width="300">
+          <p>
+            <form:checkbox path="excludeChildRequests" value="Y"/>
+            <label for="ExcludeChildRequests" class=" cmr-radio-check-label">
+               <span id="cmr-fld-lbl-OEMInd">Exclude Child Requests</span>
+               <cmr:info text="Excludes child requests created by Automation" />
+            </label>            
+          </p>
+        </cmr:column>
+      </cmr:row>
       <cmr:row >
         <cmr:column span="1" width="150">
           <p>
@@ -238,28 +303,10 @@ div#filterlabels table {
           <p>
           </p>
         </cmr:column>
-        <cmr:column span="2" width="300">
-          <p>
-            <form:checkbox path="excludeExternal" value="Y"/>
-            <label for="OEMInd" class=" cmr-radio-check-label">
-               <span id="cmr-fld-lbl-OEMInd">Exclude External Requests</span>
-               <cmr:info text="Excludes requests created by external systems via APIs or applications." />
-            </label>            
-          </p>
-        </cmr:column>
       </cmr:row>
       <cmr:row >
         <cmr:column span="1" width="150">
           <p>
-          </p>
-        </cmr:column>
-        <cmr:column span="2" width="300">
-          <p>
-            <form:checkbox path="reqType" value="Y"/>
-            <label for="RequestType" class=" cmr-radio-check-label">
-               <span id="cmr-fld-lbl-OEMInd">Create Requests Only</span>
-               <cmr:info text="Generates statistics for create requests only." />
-            </label>            
           </p>
         </cmr:column>
       </cmr:row>

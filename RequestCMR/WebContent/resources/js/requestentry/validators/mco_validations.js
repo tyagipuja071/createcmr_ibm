@@ -11,6 +11,7 @@ var _oldOrdBlk = null;
 var _importedIndc = null;
 var _postalCodeHandler = null;
 var _ISICHandler = null;
+var _isicCdHandler = null;
 
 function afterConfigPT() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
@@ -556,7 +557,7 @@ function addHandlersForPTES() {
   if (_CTCHandler == null) {
     _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
       setSalesRepValues(value);
-      setEnterpriseValues(value);
+      setEnterpriseValues(false);
     });
   }
 
@@ -611,6 +612,9 @@ function addHandlersForPTES() {
 }
 
 function setClientTierValues(value) {
+  if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
   value = FormManager.getActualValue('isuCd');
   var tierValues = null;
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.PORTUGAL) {
@@ -619,11 +623,11 @@ function setClientTierValues(value) {
     } else if (value == '21' || value == '60') {
       tierValues = [ '7' ];
     } else if (value == '34') {
-      tierValues = [ 'V', '6', 'A' ];
+      tierValues = [ 'V', '6', 'A', 'Q', 'Z' ];
     }
   } else if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.SPAIN) {
     if (value == '34') {
-      tierValues = [ '6', 'A', 'V', 'Z' ];
+      tierValues = [ '6', 'A', 'V', 'Z', 'Q' ];
     } else if (value == '32') {
       tierValues = [ 'B', 'S', 'T', 'N', 'Z', 'M' ];
     } else if (value == '21' || value == '5B' || value == '04' || value == '3T' || value == '60') {
@@ -635,7 +639,7 @@ function setClientTierValues(value) {
     if (tierValues.length == 1) {
       FormManager.setValue('clientTier', tierValues[0]);
       setSalesRepValues();
-      setEnterpriseValues();
+      setEnterpriseValues(false);
     }
   } else {
     FormManager.resetDropdownValues(FormManager.getField('clientTier'));
@@ -679,7 +683,24 @@ function setSalesRepValues(clientTier) {
   }
 }
 
-function setEnterpriseValues(clientTier) {
+function checkScenarioChanged(fromAddress, scenario, scenarioChanged) {
+  setEnterpriseValues(scenarioChanged)
+}
+
+var _subindustryChanged = false;
+function setEnterpriseBasedOnSubIndustry() {
+  if (_isicCdHandler == null && FormManager.getField('isicCd')) {
+    _isicCdHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
+      if (cmr.currentTab == "CUST_REQ_TAB") {
+        _subindustryChanged = true;
+        setEnterpriseValues(false);
+      }
+    });
+  }
+}
+
+var _oldIsuCtc = '';
+function setEnterpriseValues(scenarioChanged) {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
@@ -691,17 +712,37 @@ function setEnterpriseValues(clientTier) {
   var custGroup = FormManager.getActualValue('custGrp');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var isuCd = FormManager.getActualValue('isuCd');
-  clientTier = FormManager.getActualValue('clientTier');
+  var clientTier = FormManager.getActualValue('clientTier');
 
   // For Spain, domestic with 32B, 32S, 32T & 217 ISUs, set enterprise based on
   // LocNo
   var isuCtc = isuCd + clientTier;
   if (custGroup != 'CROSS') {
-    if (cntry == SysLoc.SPAIN && (isuCtc == '32B' || isuCtc == '32N' || isuCtc == '32S' || isuCtc == '32T' || isuCtc == '217')) {
+    if (cntry == SysLoc.SPAIN && (isuCtc == '32B' || isuCtc == '32T' || isuCtc == '217' || isuCtc == '34Q')) {
       // FormManager.readOnly('enterprise');
       setSBOAndEBO();
-      return;
+      if (!isuCtc == '217') {
+        return;
+      }
     }
+  }
+
+  var isuCtcValueChanged = false;
+  var isuCtc217Scen = new Set([ 'BUSPR', 'INTER', 'XBP', 'CRINT', 'INTSO' ]);
+  var is217ScenarioSelect = (isuCtc217Scen.has(custSubGrp) && scenarioChanged && isuCtc == '217');
+  var is217ScenarioSelectEs = (isuCtc217Scen.has(custSubGrp) && isuCtc == '217' && cntry == SysLoc.SPAIN);
+
+  if (cmr.currentTab == 'IBM_REQ_TAB') {
+    isuCtcValueChanged = (_oldIsuCtc != isuCtc);
+  }
+
+  if (isuCtc217Scen.has(custSubGrp)) {
+    isuCtcValueChanged = false;
+    _subindustryChanged = false;
+  }
+
+  if (!(scenarioChanged || isuCtcValueChanged || _subindustryChanged) && !is217ScenarioSelectEs) {
+    return;
   }
 
   var enterprises = [];
@@ -717,13 +758,35 @@ function setEnterpriseValues(clientTier) {
       for (var i = 0; i < results.length; i++) {
         enterprises.push(results[i].ret1);
       }
+
+      if (cntry == SysLoc.PORTUGAL) {
+        var isicUnderB = new Set([ '7230', '7240', '7290', '7210', '7221', '7229' ]);
+        var isicCdValue = FormManager.getActualValue('isicCd');
+        if (isuCtc == '34Q' && isicUnderB.has(isicCdValue)) {
+          enterprises = [ '990301' ];
+        }
+      }
+
+      if (is217ScenarioSelect) {
+        enterprises = [ '985999' ];
+      }
+
+      if (cntry == SysLoc.SPAIN) {
+        if (isuCtc == '34Z' || is217ScenarioSelectEs) {
+          enterprises = [ '985999' ];
+        }
+      }
+
       if (enterprises != null) {
-        FormManager.limitDropdownValues(FormManager.getField('enterprise'), enterprises);
         if (enterprises.length == 1) {
           FormManager.setValue('enterprise', enterprises[0]);
+        } else {
+          FormManager.setValue('enterprise', '');
         }
       }
     }
+    _oldIsuCtc = isuCtc;
+    _subindustryChanged = false;
   }
 }
 
@@ -795,7 +858,7 @@ function setSBOAndEBO() {
         }
       }
       // For Spain, domestic with 32 & 21 ISU, set enterprise based on LocNo
-      if (isuCtc == '32B' || isuCtc == '32S' || isuCtc == '32T' || isuCtc == '217' || isuCtc == '32N') {
+      if (isuCtc == '32B' || isuCtc == '34Q' || isuCtc == '32T' || isuCtc == '217') {
         if (ent == undefined) {
           FormManager.setValue('enterprise', '');
         } else {
@@ -2100,8 +2163,8 @@ function isuCtcBasedOnISIC() {
   }
   var isicCd = FormManager.getActualValue('isicCd');
   if (isicCd == '7230' || isicCd == '7240' || isicCd == '7290' || isicCd == '7210' || isicCd == '7221' || isicCd == '7229') {
-    FormManager.setValue('isuCd', '32');
-    FormManager.setValue('clientTier', 'N');
+    FormManager.setValue('isuCd', '34');
+    FormManager.setValue('clientTier', 'Q');
   }
   FormManager.disable('subIndustryCd');
 }
@@ -2298,10 +2361,10 @@ function setISUCTCOnISIC() {
   var isicList = new Set([ '7230', '7240', '7290', '7210', '7221', '7229' ]);
   if (reqType == 'C' && role == 'REQUESTER') {
     if (!(custSubGrp == 'INTER' || custSubGrp == 'INTSO' || custSubGrp == 'PRICU' || custSubGrp == 'XIGS' || custSubGrp == 'BUSPR' || custSubGrp == 'XBP' || custSubGrp == 'XCRO')) {
-      if ('32' == isuCd && 'S' == clientTier && isicList.has(isic)) {
-        FormManager.setValue('clientTier', 'N');
-      } else if ('32' == isuCd && 'N' == clientTier && !isicList.has(isic)) {
-        FormManager.setValue('clientTier', 'S');
+      if ('34' == isuCd && 'Q' == clientTier && isicList.has(isic)) {
+        FormManager.setValue('clientTier', 'Q');
+      } else if ('34' == isuCd && 'Q' == clientTier && !isicList.has(isic)) {
+        FormManager.setValue('clientTier', 'Q');
       }
     }
   }
@@ -2631,5 +2694,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addAbbrevLocationValidatorPT, [ SysLoc.PORTUGAL ], GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(addEmbargoCodeValidatorPT, [ SysLoc.PORTUGAL ], null, true);
   GEOHandler.registerValidator(addTypeOfCustomerValidatorPT, [ SysLoc.PORTUGAL ], null, true);
-
+  GEOHandler.addAfterTemplateLoad(checkScenarioChanged, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
+  GEOHandler.addAfterConfig(setEnterpriseBasedOnSubIndustry, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
 });
