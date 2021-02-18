@@ -18,7 +18,7 @@
 <cmr:section id="CUST_REQ_TAB" hidden="true">
   <jsp:include page="detailstrip.jsp" />
   <cmr:row addBackground="true">
-    <cmr:view exceptForGEO="CN">
+    <cmr:view exceptForGEO="CN,FR">
       <cmr:column span="2" containerForField="AbbrevName">
         <p>
 
@@ -28,6 +28,27 @@
         </p>
       </cmr:column>
     </cmr:view>
+    
+    <cmr:view forGEO="FR">
+      <cmr:column span="2" containerForField="AbbrevName">
+        <p>
+          <label for="abbrevNm"> <cmr:fieldLabel fieldId="AbbrevName" />: <cmr:delta text="${rdcdata.abbrevNm}"
+              oldValue="${reqentry.abbrevNm}" /> </label>
+          <cmr:field fieldId="AbbrevName" id="abbrevNm" path="abbrevNm" tabId="MAIN_CUST_TAB" />
+        </p>
+      </cmr:column>
+      
+      <cmr:column span="2" containerForField="AbbrevLocation">
+        <p>
+          <label for="abbrevLocn"> 
+            <cmr:fieldLabel fieldId="AbbrevLocation" />: 
+          </label>
+          <cmr:field fieldId="AbbrevLocation" id="abbrevLocn" path="abbrevLocn" tabId="MAIN_CUST_TAB" />
+        </p>
+      </cmr:column>
+      
+    </cmr:view>
+    
     <cmr:view forGEO="CA">
       <cmr:column span="2" containerForField="AbbrevLocation">
         <p>
@@ -51,7 +72,7 @@
   </cmr:row>
 
   <cmr:row>
-    <cmr:view exceptForGEO="CEMEA" exceptForCountry="848">
+    <cmr:view exceptForGEO="CEMEA" exceptForCountry="848,706">
       <cmr:column span="2" containerForField="CustLang">
         <p>
           <cmr:label fieldId="custPrefLang">
@@ -102,7 +123,7 @@
   </cmr:row>
 
   <cmr:row>
-    <cmr:view exceptForCountry="643,749,778,818,834,852,856,646,714,720,760">
+    <cmr:view exceptForCountry="643,749,778,818,834,852,856,646,714,720,760,706">
       <cmr:column span="2" containerForField="SensitiveFlag">
         <p>
           <cmr:label fieldId="sensitiveFlag">
@@ -157,6 +178,17 @@
         </p>
       </cmr:column>
     </cmr:view>
+    <cmr:view forCountry="706">
+      <cmr:column span="2" containerForField="LocalTax2">
+        <p>
+          <label for="taxCd2">
+          <cmr:fieldLabel fieldId="LocalTax2" />: <cmr:delta text="${rdcdata.taxCd2}" oldValue="${reqentry.taxCd2}" />
+          <span id="taxCd2MandatoryFlag" style="color:red;font-size:16px;font-weight:bold">*</span>
+          </label>
+          <cmr:field path="taxCd2" id="taxCd2" fieldId="LocalTax2" tabId="MAIN_CUST_TAB" />
+        </p>
+      </cmr:column>
+    </cmr:view>
 
     <cmr:view forCountry="897">
       <!-- // 1164558 -->
@@ -180,10 +212,12 @@
   <cmr:row addBackground="true">
     <!-- // 1164558 -->
     <cmr:view exceptForCountry="631,848,649" exceptForGEO="LA,JP">
-      <cmr:view exceptForGEO="EMEA,AP,MCO1,MCO,MCO2,CEMEA,NORDX,BELUX,NL,CN">
+      <cmr:view exceptForGEO="EMEA,AP,MCO1,MCO,MCO2,CEMEA,NORDX,BELUX,NL,CN,FR">
         <cmr:column span="2" containerForField="LocalTax2">
           <p>
-            <label for="taxCd2"> <cmr:fieldLabel fieldId="LocalTax2" />: <cmr:delta text="${rdcdata.taxCd2}" oldValue="${reqentry.taxCd2}" />
+            <label for="taxCd2">
+            <cmr:fieldLabel fieldId="LocalTax2" />: <cmr:delta text="${rdcdata.taxCd2}" oldValue="${reqentry.taxCd2}" />
+            <span id="taxCd2MandatoryFlag" style="color:red;font-size:16px;font-weight:bold">*</span>
             </label>
             <cmr:field path="taxCd2" id="taxCd2" fieldId="LocalTax2" tabId="MAIN_CUST_TAB" />
           </p>
@@ -242,7 +276,7 @@
           <cmr:field path="vat" id="vat" fieldId="VAT" tabId="MAIN_CUST_TAB" />
         </p>
       </cmr:column>
-      <cmr:view forGEO="EMEA,MCO,CEMEA,NL,BELUX,NORDX">
+      <cmr:view forGEO="EMEA,MCO,CEMEA,NL,BELUX,NORDX,FR">
         <cmr:column span="1" containerForField="VATExempt">
           <p>
             <cmr:label fieldId="vatExempt2">&nbsp;</cmr:label>
