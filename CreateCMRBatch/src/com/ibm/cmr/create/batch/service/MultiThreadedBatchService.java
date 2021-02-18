@@ -30,16 +30,17 @@ import com.ibm.cmr.create.batch.util.masscreate.WorkerThreadFactory;
  * @author JeffZAMORA
  * 
  */
-public abstract class MultiThreadedBatchService extends BaseBatchService {
+public abstract class MultiThreadedBatchService<T> extends BaseBatchService {
 
   private static final Logger LOG = Logger.getLogger(MultiThreadedBatchService.class);
 
+  @SuppressWarnings({ "rawtypes", "unchecked" })
   @Override
   public Boolean process(HttpServletRequest request, ParamContainer params) throws CmrException {
 
     LOG.debug("Retrieving requests to process..");
     // get first all request ids using one entitymanager
-    Queue<Long> requestIds = null;
+    Queue<T> requestIds = null;
     EntityManager entityManager = JpaManager.getEntityManager();
     try {
       requestIds = getRequestsToProcess(entityManager);
@@ -65,14 +66,14 @@ public abstract class MultiThreadedBatchService extends BaseBatchService {
     // WorkerThreadFactory(getThreadName()));
     ScheduledExecutorService executor = Executors.newScheduledThreadPool(threads, new WorkerThreadFactory(getThreadName()));
 
-    List<List<Long>> allocatedRequests = allocateRequests(requestIds, threads);
+    List<List<T>> allocatedRequests = allocateRequests(requestIds, threads);
 
     BatchThreadWorker worker = null;
     List<BatchThreadWorker> workers = new ArrayList<BatchThreadWorker>();
 
     int delay = 15;
     int currCount = 1;
-    for (List<Long> requestBatch : allocatedRequests) {
+    for (List<T> requestBatch : allocatedRequests) {
       worker = new BatchThreadWorker(this, requestBatch);
       if (worker != null) {
         executor.schedule(worker, delay * currCount, TimeUnit.SECONDS);
@@ -118,11 +119,11 @@ public abstract class MultiThreadedBatchService extends BaseBatchService {
    * @param threadCount
    * @return
    */
-  private static List<List<Long>> allocateRequests(Queue<Long> requests, int threadCount) {
-    List<List<Long>> lists = new ArrayList<List<Long>>();
+  private List<List<T>> allocateRequests(Queue<T> requests, int threadCount) {
+    List<List<T>> lists = new ArrayList<List<T>>();
     if (requests.size() < threadCount) {
       for (int i = 0; i < threadCount; i++) {
-        Long reqId = requests.poll();
+        T reqId = requests.poll();
         if (reqId != null) {
           lists.add(Collections.singletonList(reqId));
         }
@@ -131,11 +132,11 @@ public abstract class MultiThreadedBatchService extends BaseBatchService {
       while (requests.peek() != null) {
         for (int i = 0; i < threadCount; i++) {
           if (lists.size() < threadCount) {
-            lists.add(new ArrayList<Long>());
+            lists.add(new ArrayList<T>());
           }
-          Long reqId = requests.poll();
+          T reqId = requests.poll();
           if (reqId != null) {
-            List<Long> queueForThread = lists.get(i);
+            List<T> queueForThread = lists.get(i);
             queueForThread.add(reqId);
           }
         }
@@ -181,7 +182,7 @@ public abstract class MultiThreadedBatchService extends BaseBatchService {
    * @return
    * @throws Exception
    */
-  public abstract Boolean executeBatchForRequests(EntityManager entityManager, List<Long> requests) throws Exception;
+  public abstract Boolean executeBatchForRequests(EntityManager entityManager, List<T> requests) throws Exception;
 
   /**
    * Queries the requests on the database and returns a list of the IDs to be
@@ -190,7 +191,7 @@ public abstract class MultiThreadedBatchService extends BaseBatchService {
    * @param entityManager
    * @return
    */
-  protected abstract Queue<Long> getRequestsToProcess(EntityManager entityManager);
+  protected abstract Queue<T> getRequestsToProcess(EntityManager entityManager);
 
   /**
    * Gets the thread name to assign to the worker threads
