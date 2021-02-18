@@ -12,6 +12,7 @@ function afterConfigForBELUX() {
   FormManager.readOnly('capInd');
   FormManager.setValue('capInd', true);
   FormManager.resetValidations('enterprise');
+  FormManager.clearValue('inacCd');
 
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
