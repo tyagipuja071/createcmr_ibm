@@ -53,15 +53,13 @@ public abstract class ASEANTransformer extends APTransformer {
       handler.messageHash.put("MrktRespCode", "2");
     setAbbLoc(handler);
 
-<<<<<<< HEAD
     String clusterID = handler.cmrData.getApCustClusterId();
     if (clusterID.contains("BLAN")) {
       handler.messageHash.put("ClusterNo", "");
     } else {
       handler.messageHash.put("ClusterNo", clusterID);
     }
-=======
->>>>>>> common_code
+
   }
 
   @Override
