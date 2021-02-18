@@ -13,16 +13,10 @@ function afterConfigForBELUX() {
   FormManager.setValue('capInd', true);
   FormManager.resetValidations('enterprise');
   FormManager.clearValue('inacCd');
+  FormManager.removeValidator('inacCd', Validators.REQUIRED);
 
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
-  }
-
-  if ((custSubGrp.substring(2, 5) == 'LUINT' || custSubGrp == 'CBBUS' || custSubGrp.substring(2, 5) == 'PRI')) {
-    FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
-
-  } else {
-    FormManager.removeValidator('inacCd', Validators.REQUIRED);
   }
 
   if ((custSubGrp.substring(2, 5) == 'INT' || custSubGrp == 'CBBUS' || custSubGrp.substring(2, 5) == 'PRI' || custSubGrp.substring(2, 5) == 'ISO' || custSubGrp == 'BECOM' || custSubGrp == 'BEDAT'
@@ -59,10 +53,6 @@ function afterConfigForBELUX() {
   }
 
   var custSubGrpLst3 = custSubGrp.substring(2, 5);
-  if (custSubGrpLst3 == 'INT' || custSubGrpLst3 == 'BUS' || custSubGrpLst3 == 'ISO') {
-    FormManager.removeValidator('inacCd', Validators.REQUIRED);
-  }
-
   // collectionCd
   if (custSubGrp == 'LUCOM' || custSubGrp == 'LUBUS' || custSubGrp == 'LUPUB' || custSubGrp == 'LU3PA' || custSubGrp == 'LUDAT' || custSubGrp == 'CBCOM' || custSubGrp == 'CBBUS') {
     if (role == 'Requester') {
@@ -926,10 +916,6 @@ function setPreferredLanguage() {
     FormManager.enable('custPrefLang');
     var cntry = FormManager.getActualValue('cmrIssuingCntry');
     var geoCd = FormManager.getActualValue('countryUse').substring(3, 5);
-
-    if (cntry == '624' && geoCd == 'LU') {
-      FormManager.limitDropdownValues(FormManager.getField('custPrefLang'), [ 'F', 'V' ]);
-    }
   }
 
 }
@@ -1009,9 +995,6 @@ function addHandlerForReqRsn() {
 function setINACfrLux() {
   var custSubScnrio = FormManager.getActualValue('custSubGrp');
   var geoCd = FormManager.getActualValue('countryUse').substring(3, 5);
-  if (custSubScnrio == 'CBBUS' && geoCd == 'LU') {
-    FormManager.setValue('inacCd', 'LP98');
-  }
 }
 
 /* 1430539 - do not allow delete of imported addresses on update requests */
