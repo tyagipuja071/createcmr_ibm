@@ -822,34 +822,9 @@ public class FranceUtil extends AutomationUtil {
                   checkDetails.append("Update to InstallAt (" + addr.getId().getAddrSeq() + ") has different customer name than sold-to .\n");
                 }
               } else if (CmrConstants.RDC_SOLD_TO.equals(addrType) || CmrConstants.RDC_BILL_TO.equals(addrType)) {
-                // validate the address on DnB with SIRET
-                Addr addrToBeMatched = requestData.getAddress(addrType);
-                Addr soldTo = requestData.getAddress(addrType);
-                List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addrToBeMatched, true);
-                boolean siretVatMatches = false;
-                if (matches.isEmpty()) {
-                  // get DnB matches based on all address details
-                  matches = getMatches(requestData, engineData, soldTo, false);
-                }
-                boolean matchesDnb = false;
-                if (!matches.isEmpty()) {
-                  for (DnBMatchingResponse dnbRecord : matches) {
-                    matchesDnb = DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), addrToBeMatched, admin, dnbRecord);
-                    if (matchesDnb) {
-                      String dnbSIRET = DnBUtil.getTaxCode1(dnbRecord.getDnbCountry(), dnbRecord.getOrgIdDetails());
-                      String dnbVAT = DnBUtil.getVAT(dnbRecord.getDnbCountry(), dnbRecord.getOrgIdDetails());
-                      if (StringUtils.isNotBlank(data.getTaxCd1()) && StringUtils.isNotBlank(data.getVat())
-                          && data.getTaxCd1().equalsIgnoreCase(dnbSIRET) && data.getVat().equalsIgnoreCase(dnbVAT)) {
-                        siretVatMatches = true;
-                        break;
-                      }
-                    }
-                  }
-                  if (!siretVatMatches) {
-                    resultCodes.add("R");
-                    checkDetails.append("Updates to Address " + addrType + " with SIRET/VAT could not be validated against DnB.").append("\n");
-                  }
-                }
+                LOG.debug("Update to Address " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified");
+                checkDetails.append("Update to address " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified \n");
+                resultCodes.add("D");
               } else {
                 // proceed
                 LOG.debug("Update to Address " + addrType + "(" + addr.getId().getAddrSeq() + ") skipped in the checks.\\n");
