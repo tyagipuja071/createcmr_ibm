@@ -61,7 +61,7 @@ public class DupCMRProcessService extends LegacyDirectService {
   private static final String ADDRESS_USE_NOT_EXISTS = "N";
   private static final List<String> ME_DUPCOUNTRY_LIST = Arrays.asList(SystemLocation.UNITED_ARAB_EMIRATES, SystemLocation.ABU_DHABI,
       SystemLocation.BAHRAIN, SystemLocation.SAUDI_ARABIA, SystemLocation.OMAN, SystemLocation.KUWAIT, SystemLocation.QATAR, SystemLocation.JORDAN,
-      SystemLocation.LEBANON, SystemLocation.LIBYA, SystemLocation.YEMEN, SystemLocation.IRAQ);
+      SystemLocation.LEBANON, SystemLocation.LIBYA, SystemLocation.YEMEN);
   private static final List<String> ME_CUSTEXT_LIST = Arrays.asList(SystemLocation.UNITED_ARAB_EMIRATES, SystemLocation.ABU_DHABI,
       SystemLocation.BAHRAIN, SystemLocation.SAUDI_ARABIA, SystemLocation.OMAN, SystemLocation.KUWAIT, SystemLocation.QATAR, SystemLocation.GULF);
 
@@ -770,7 +770,7 @@ public class DupCMRProcessService extends LegacyDirectService {
           continue;
         }
         boolean addrUpdated = RequestUtils.isUpdated(entityManager, addr, data.getCmrIssuingCntry());
-        boolean dupAddrMatch = true;// Add for dup addr data math check
+        boolean dupAddrMatch = true;//Add for dup addr data math check
         // iterate each address on the request and check if it needs to be
         // processed
         dummyHandler.addrData = addr;
