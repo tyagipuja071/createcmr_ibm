@@ -402,10 +402,18 @@ function disableSBO() {
 
 function disableLandCntry() {
   var custType = FormManager.getActualValue('custGrp');
+  var reqType = FormManager.getActualValue('reqType');
   if ((custType == 'LOCAL' || custType.substring(2, 5) == 'LOC') && FormManager.getActualValue('addrType') == 'ZS01') {
     FormManager.readOnly('landCntry');
   } else {
     FormManager.enable('landCntry');
+  }
+  if (reqType == 'U') {
+    if (FormManager.getActualValue('addrType') == 'ZS01' || FormManager.getActualValue('addrType') == 'ZP01') {
+      FormManager.readOnly('landCntry');
+    } else {
+      FormManager.enable('landCntry');
+    }
   }
 }
 
@@ -593,6 +601,7 @@ function setVatValidatorBELUX() {
   if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
     if (custSubGrp == 'BEPRI' || custSubGrp == 'LUPRI') {
       // FormManager.removeValidator('vat', Validators.REQUIRED);
+      FormManager.readOnly('vat');
       return;
     } else if (custSubGrp == 'BEPUB' || custSubGrp == 'LUPUB') {
       FormManager.removeValidator('vat', Validators.REQUIRED);
