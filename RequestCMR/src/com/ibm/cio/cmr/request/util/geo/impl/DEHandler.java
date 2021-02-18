@@ -125,6 +125,9 @@ public class DEHandler extends GEOHandler {
     parts = splitName(name1, name2, 35, 35);
     address.setCustNm1(parts[0]);
     address.setCustNm2(parts[1]);
+    // addrtxt2 issue
+    String name4 = currentRecord.getCmrName4();
+    address.setBldg(name4);
 
     if (!StringUtils.isEmpty(parts[2])) {
       address.setDept(parts[2]);
