@@ -42,6 +42,7 @@ var MessageMgr = (function() {
         clientMessages.NO_SINGLE_BYTE = data.m5024;
         clientMessages.TWO_DASHES_FORMAT = data.m5025;
         clientMessages.NO_HALF_ANGLE = data.m5026;
+        clientMessages.LATIN1 = data.m5027;
       },
       error : function(error, ioargs) {
       }
@@ -163,7 +164,8 @@ var MessageMgr = (function() {
           fieldId = error.field.name;
         }
 
-        var focus = error.tabId ? 'focusActualField(\'' + fieldId + '\', \'' + error.tabId + '\', ' + modal + ')' : 'focusActualField(\'' + fieldId + '\', null, ' + modal + ')';
+        var focus = error.tabId ? 'focusActualField(\'' + fieldId + '\', \'' + error.tabId + '\', ' + modal + ')' : 'focusActualField(\'' + fieldId
+            + '\', null, ' + modal + ')';
         html += '<li onclick="' + focus + '">' + i + '. ' + msg + '</li>';
 
         // add the error icon to label
@@ -175,7 +177,8 @@ var MessageMgr = (function() {
 
         if (error.tabId) {
           // add the error icon to tab
-          var icon2 = '<img src="' + cmr.CONTEXT_ROOT + '/resources/images/error-icon.png" class="cmr-input-error-icon" title="Some fields have errors.">';
+          var icon2 = '<img src="' + cmr.CONTEXT_ROOT
+              + '/resources/images/error-icon.png" class="cmr-input-error-icon" title="Some fields have errors.">';
           var tab = dojo.query('#' + error.tabId);
           if (tab && tab[0].innerHTML.indexOf('cmr-input-error-icon') < 0) {
             tab[0].innerHTML = tab[0].innerHTML + icon2;
