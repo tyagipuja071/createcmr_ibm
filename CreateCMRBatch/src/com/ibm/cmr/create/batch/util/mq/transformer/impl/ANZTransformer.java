@@ -38,7 +38,6 @@ public abstract class ANZTransformer extends APTransformer {
       handler.messageHash.put("MrktRespCode", "2");
     }
 
-<<<<<<< HEAD
     String clusterID = handler.cmrData.getApCustClusterId();
     if (clusterID.contains("BLAN")) {
       handler.messageHash.put("ClusterNo", "");
@@ -46,8 +45,6 @@ public abstract class ANZTransformer extends APTransformer {
       handler.messageHash.put("ClusterNo", clusterID);
     }
 
-=======
->>>>>>> common_code
   }
 
   @Override
