@@ -3015,8 +3015,7 @@ function isZD01OrZP01ExistOnCMR(addressType) {
       type = type[0];
     }
     var importInd = record.importInd[0];
-    var reqType = FormManager.getActualValue('reqType');
-    if ('U' == reqType && 'Y' == importInd && type == addressType) {
+    if ('U' == cmr.currentRequestType && 'Y' == importInd && type == addressType) {
       return true;
     }
   }
