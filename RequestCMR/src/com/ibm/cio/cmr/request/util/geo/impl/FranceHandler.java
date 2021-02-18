@@ -1317,18 +1317,21 @@ public class FranceHandler extends GEOHandler {
             }
 
             if ("Data".equals(name)) {
-              String vat = "";// 12
-              currCell = (XSSFCell) row.getCell(12);
-              vat = validateColValFromCell(currCell);
-              String vatTxt = df.formatCellValue(currCell);
+              // String vat = "";// 12
+              // currCell = (XSSFCell) row.getCell(12);
+              // vat = validateColValFromCell(currCell);
+              // String vatTxt = df.formatCellValue(currCell);
 
-              if (!StringUtils.isBlank(vat) && !vatTxt.matches("\\d+.\\d*")) {
-                TemplateValidation error = new TemplateValidation(name);
-                LOG.trace("The row " + (row.getRowNum() + 1) + " Note that VAT should be numeric. Please fix and upload the template again.");
-                error.addError((row.getRowNum() + 1), "VAT",
-                    "The row " + (row.getRowNum() + 1) + ":Note that VAT should be numeric. Please fix and upload the template again.<br>");
-                validations.add(error);
-              }
+              // if (!StringUtils.isBlank(vat) &&
+              // !vatTxt.substring(2).matches("\\d+.\\d*")) {
+              // TemplateValidation error = new TemplateValidation(name);
+              // LOG.trace("The row " + (row.getRowNum() + 1) + " Note that VAT
+              // should be numeric. Please fix and upload the template again.");
+              // error.addError((row.getRowNum() + 1), "VAT",
+              // "The row " + (row.getRowNum() + 1) + ":Note that VAT should be
+              // numeric. Please fix and upload the template again.<br>");
+              // validations.add(error);
+              // }
 
               String isic = "";// 3
               currCell = (XSSFCell) row.getCell(3);
