@@ -123,7 +123,7 @@ public class MaltaHandler extends BaseSOFHandler {
                 }
                 addr = cloneAddress(record, addrType);
                 LOG.trace("Adding address type " + addrType + " for sequence " + seqNo);
-                addr.setCmrStreetAddressCont(record.getCmrName3());
+                // addr.setCmrStreetAddressCont(record.getCmrName3());
 
                 // Name3 in rdc = CustNm3 on SOF
                 if (!StringUtils.isEmpty(record.getCmrName3())) {
@@ -1046,6 +1046,7 @@ public class MaltaHandler extends BaseSOFHandler {
                       "Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
                   // validations.add(error);
                 }
+
 
               } else {
                 if (!StringUtils.isBlank(cmrNo) && StringUtils.isBlank(seqNo) && !"Data".equalsIgnoreCase(sheet.getSheetName())) {
