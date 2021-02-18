@@ -908,7 +908,7 @@ public class BELUXTransformer extends EMEATransformer {
       CMRRequestContainer cmrObjects) {
     Admin admin = cmrObjects.getAdmin();
     Data data = cmrObjects.getData();
-    Addr addrs = (Addr) cmrObjects.getAddresses();
+    Addr addrs = dummyHandler.addrData;
     setDefaultLandedCountry(data);
     formatDataLines(dummyHandler);
 
