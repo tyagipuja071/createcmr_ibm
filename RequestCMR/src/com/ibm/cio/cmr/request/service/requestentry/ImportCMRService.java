@@ -693,7 +693,7 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
       addr.setPoBoxCity(cmr.getCmrPOBoxCity());
       addr.setPoBoxPostCd(cmr.getCmrPOBoxPostCode());
       addr.setBldg(cmr.getCmrBldg());
-      if ("788".equals(reqModel.getCmrIssuingCntry())) {
+      if ("724".equals(reqModel.getCmrIssuingCntry())) {
         addr.setBldg(cmr.getCmrName4());
       }
 
