@@ -12,6 +12,7 @@ var _isuHandler = null;
 var _searchTermHandler = null;
 var _govTypeHandler = null;
 var _goeTypeHandler = null;
+var _isicHandlerCN = null;
 var CNHandler = {
   CN_NAME1_MAX_BYTE_LEN : 70,
   CN_NAME2_MAX_BYTE_LEN : 70,
@@ -72,8 +73,15 @@ function afterConfigForCN() {
       if (!value) {
         return;
       }
+      setIsuOnIsic();
       filterISUOnChange();
       addValidationForParentCompanyNo();
+    });
+  }
+
+  if (_isicHandlerCN == null) {
+    _isicHandlerCN = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
+      setIsuOnIsic();
     });
   }
 
@@ -139,6 +147,43 @@ function afterConfigForCN() {
     _govTypeHandler[0].onChange();
   }
 
+}
+
+function setIsuOnIsic() {
+  if (FormManager.getActualValue('reqType') != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+
+  var searchTerm = FormManager.getActualValue('searchTerm');
+  if (!(searchTerm == '04687' || searchTerm == '04488' || searchTerm == '04630' || searchTerm == '04472' || searchTerm == '04474' || searchTerm == '04480' || searchTerm == '04484'
+      || searchTerm == '04486' || searchTerm == '04491' || searchTerm == '04493' || searchTerm == '04495' || searchTerm == '04497' || searchTerm == '04499' || searchTerm == '04502'
+      || searchTerm == '04629' || searchTerm == '04689' || searchTerm == '04489')) {
+    return;
+  }
+
+  var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var isicCd = FormManager.getActualValue('isicCd');
+
+  var ISU = [];
+  if (isicCd != '') {
+    var qParams = {
+      _qall : 'Y',
+      ISSUING_CNTRY : cmrIssuingCntry,
+      REP_TEAM_CD : '%' + isicCd + '%'
+    };
+    var results = cmr.query('GET.ISULIST.BYISIC', qParams);
+    if (results != null) {
+      for (var i = 0; i < results.length; i++) {
+        ISU.push(results[i].ret1);
+      }
+      if (ISU != null) {
+        FormManager.limitDropdownValues(FormManager.getField('isuCd'), ISU);
+        if (ISU.length >= 1) {
+          FormManager.setValue('isuCd', ISU[0]);
+        }
+      }
+    }
+  }
 }
 
 function autoSetIBMDeptCostCenter() {
@@ -525,11 +570,11 @@ function setValuesForScenarios() {
             FormManager.setValue('rdcComment', 'Acquisition');
           }
         }
-      } else if(_custSubGrp == 'MRKT'){
-        FormManager.setValue('rdcComment', 'For Market place use only');       
-      }else if(_custSubGrp == 'BLUMX'){
-        FormManager.setValue('rdcComment', 'For Bluemix use only');       
-      }else {
+      } else if (_custSubGrp == 'MRKT') {
+        FormManager.setValue('rdcComment', 'For Market place use only');
+      } else if (_custSubGrp == 'BLUMX') {
+        FormManager.setValue('rdcComment', 'For Bluemix use only');
+      } else {
         FormManager.resetValidations('rdcComment');
       }
     }
@@ -647,12 +692,11 @@ function showHideCityCN() {
       FormManager.resetValidations('custPhone');
       FormManager.resetValidations('cnCustContJobTitle');
       FormManager.resetValidations('cnCustContNm');
-    } else if(_custSubGrp == 'MRKT' || _custSubGrp == 'BLUMX'){
+    } else if (_custSubGrp == 'MRKT' || _custSubGrp == 'BLUMX') {
       FormManager.resetValidations('custPhone');
       FormManager.resetValidations('cnCustContJobTitle');
-      FormManager.resetValidations('cnCustContNm');     
-    }
-    else {
+      FormManager.resetValidations('cnCustContNm');
+    } else {
       FormManager.addValidator('cnCity', Validators.REQUIRED, [ 'City Chinese' ], null);
       FormManager.addValidator('cnAddrTxt', Validators.REQUIRED, [ 'Street Address Chinese' ], null);
       FormManager.addValidator('cnCustName1', Validators.REQUIRED, [ 'Customer Name Chinese' ], null);
@@ -871,8 +915,7 @@ function addContactInfoValidator() {
     return {
       validate : function() {
         var custSubType = FormManager.getActualValue('custSubGrp');
-        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0 && FormManager.getActualValue('reqType') == 'C'
-            && (custSubType == 'EMBSA' || custSubType == 'NRML')) {
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0 && FormManager.getActualValue('reqType') == 'C' && (custSubType == 'EMBSA' || custSubType == 'NRML')) {
           var record = null;
           var type = null;
 
