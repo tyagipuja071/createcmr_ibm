@@ -78,6 +78,11 @@ function afterConfigForNL() {
     FormManager.addValidator('taxCd2', Validators.REQUIRED, [ 'KVK' ], 'MAIN_CUST_TAB');
   }
 
+  var custGrp = FormManager.getActualValue('custGrp');
+  if (custGrp == 'CROSS') {
+    FormManager.setValue('custPrefLang', 'E');
+  }
+
   setDeptartmentNumber();
   disableCmrNo();
 }

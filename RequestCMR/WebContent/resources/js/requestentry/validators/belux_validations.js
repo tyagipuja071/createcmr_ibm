@@ -6,6 +6,7 @@ var _reqReasonHandler = null;
 function afterConfigForBELUX() {
   var cntryUse = FormManager.getActualValue('countryUse');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var custGrp = FormManager.getActualValue('custGrp');
   var reqType = FormManager.getActualValue('reqType');
   var custLang = FormManager.getActualValue('custPrefLang');
   FormManager.readOnly('cmrOwner');
@@ -82,6 +83,9 @@ function afterConfigForBELUX() {
 
   if ((custLang == null || custLang == '') && reqType == 'U') {
     FormManager.setValue('custPrefLang', 'V');
+  }
+  if (custGrp.substring(2, 5) == 'CRO') {
+    FormManager.setValue('custPrefLang', 'I');
   }
 
   if (role == 'Processor') {
@@ -1536,7 +1540,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(afterConfigForBELUX, GEOHandler.BELUX);
   // GEOHandler.addAfterConfig(setAbbrvNmLoc, GEOHandler.BELUX);
   // GEOHandler.addAfterConfig(addHandlerForReqRsn, GEOHandler.BELUX);
-  GEOHandler.addAfterConfig(setPreferredLanguage, GEOHandler.BELUX);
+  // GEOHandler.addAfterConfig(setPreferredLanguage, GEOHandler.BELUX);
   GEOHandler.addAfterConfig(lockEmbargo, GEOHandler.BELUX);
   GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.BELUX);
   GEOHandler.addAfterConfig(setVatInfoBubble, GEOHandler.BELUX);
@@ -1549,7 +1553,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(afterConfigForBELUX, GEOHandler.BELUX);
   GEOHandler.addAfterTemplateLoad(setAbbrvNmLoc, GEOHandler.BELUX);
   // GEOHandler.addAfterTemplateLoad(setINACfrLux, GEOHandler.BELUX);
-  GEOHandler.addAfterTemplateLoad(setPreferredLanguage, GEOHandler.BELUX);
+  // GEOHandler.addAfterTemplateLoad(setPreferredLanguage, GEOHandler.BELUX);
   // GEOHandler.addAfterTemplateLoad(setINACValues, GEOHandler.BELUX);
   GEOHandler.addAfterTemplateLoad(setEconomicCodeValues, GEOHandler.BELUX);
   GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.BELUX);
