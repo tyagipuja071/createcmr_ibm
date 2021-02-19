@@ -158,7 +158,9 @@ boolean approver = user != null && user.isApprover();
 						<iframe id="exportFrame" style="display:none" name="exportFrame"></iframe>
 
 						<!-- LEADSPACE_END -->
-						
+						<div style="position:fixed;right:5px;bottom:5px;">
+							<img src="${resourcesPath}/images/cedp.png" style = "width: 40px;height: 40px;">
+					    </div>
 						
 					</div>
 				</div>
