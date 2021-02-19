@@ -86,7 +86,7 @@ public class NLHandler extends BaseSOFHandler {
 
   private static final List<String> NL_COUNTRIES_LIST = Arrays.asList(SystemLocation.NETHERLANDS);
 
-  protected static final String[] NL_MASS_UPDATE_SHEET_NAMES = { "Sold To", "Bill To", "Ship To", "Install At", "IGF Bill To", };
+  protected static final String[] NL_MASS_UPDATE_SHEET_NAMES = { "Sold-to", "Bill-to", "Ship-to", "Install-at", "IGF Bill-to", };
 
   @Override
   protected void handleSOFConvertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry,
