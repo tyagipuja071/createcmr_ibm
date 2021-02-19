@@ -13,11 +13,14 @@ function afterConfigForBELUX() {
   FormManager.readOnly('capInd');
   FormManager.setValue('capInd', true);
   FormManager.resetValidations('enterprise');
-  FormManager.clearValue('inacCd');
   FormManager.removeValidator('inacCd', Validators.REQUIRED);
 
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
+  }
+
+  if (custGrp != null && custGrp != '') {
+    FormManager.clearValue('inacCd');
   }
 
   if ((custSubGrp.substring(2, 5) == 'INT' || custSubGrp == 'CBBUS' || custSubGrp.substring(2, 5) == 'PRI' || custSubGrp.substring(2, 5) == 'ISO' || custSubGrp == 'BECOM' || custSubGrp == 'BEDAT'
@@ -84,7 +87,7 @@ function afterConfigForBELUX() {
   if ((custLang == null || custLang == '') && reqType == 'U') {
     FormManager.setValue('custPrefLang', 'V');
   }
-  if (custGrp.substring(2, 5) == 'CRO') {
+  if (custGrp == 'CROSS') {
     FormManager.setValue('custPrefLang', 'I');
   }
 
