@@ -75,6 +75,7 @@ function afterConfigForCN() {
       }
       setIsuOnIsic();
       filterISUOnChange();
+      setInacBySearchTerm();
       addValidationForParentCompanyNo();
     });
   }
@@ -147,6 +148,59 @@ function afterConfigForCN() {
     _govTypeHandler[0].onChange();
   }
 
+}
+
+function setInacBySearchTerm() {
+  if (FormManager.getActualValue('reqType') != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var searchTerm = FormManager.getActualValue('searchTerm');
+  if (!(searchTerm == '04687' || searchTerm == '04488' || searchTerm == '04630' || searchTerm == '04472' || searchTerm == '04474' || searchTerm == '04480' || searchTerm == '04484'
+      || searchTerm == '04486' || searchTerm == '04491' || searchTerm == '04493' || searchTerm == '04495' || searchTerm == '04497' || searchTerm == '04499' || searchTerm == '04502'
+      || searchTerm == '04629' || searchTerm == '04689' || searchTerm == '04489')) {
+    return;
+  }
+  if ((searchTerm == '04687' || searchTerm == '04488' || searchTerm == '04630' || searchTerm == '04472' || searchTerm == '04474' || searchTerm == '04480' || searchTerm == '04484'
+      || searchTerm == '04486' || searchTerm == '04491' || searchTerm == '04493' || searchTerm == '04495' || searchTerm == '04497' || searchTerm == '04499' || searchTerm == '04502'
+      || searchTerm == '04629' || searchTerm == '04689' || searchTerm == '04489')) {
+    FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
+    FormManager.addValidator('inacType', Validators.REQUIRED, [ 'INAC Type' ], 'MAIN_IBM_TAB');
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    FormManager.removeValidator('isuCd', Validators.REQUIRED);
+    var qParams = {
+      _qall : 'Y',
+      ISSUING_CNTRY : cntry,
+      CMT : '%' + _cluster + '%'
+    };
+    var inacList = cmr.query('GET.INAC_BY_CLUSTER', qParams);
+    if (inacList != null) {
+      var inacTypeSelected ='';
+      var arr =  inacList.map(inacList => inacList.ret1);
+      inacTypeSelected  =  inacList.map(inacList => inacList.ret2);
+      FormManager.limitDropdownValues(FormManager.getField('inacCd'), arr);
+      if (inacList.length == 1) {
+        FormManager.setValue('inacCd', arr[0]);
+      }       
+      if (inacType != '' && inacTypeSelected[0].includes(",I") && !inacTypeSelected[0].includes(',IN')) {
+        FormManager.limitDropdownValues(FormManager.getField('inacType'), 'I');
+        FormManager.setValue('inacType', 'I');
+      } else if (inacType != '' && inacTypeSelected[0].includes(',N')) {
+        FormManager.limitDropdownValues(FormManager.getField('inacType'), 'N');
+        FormManager.setValue('inacType', 'N');
+      } else {
+        FormManager.resetDropdownValues(FormManager.getField('inacType'));
+      }
+    }
+  } else {
+    FormManager.removeValidator('inacCd', Validators.REQUIRED);
+    FormManager.removeValidator('inacType', Validators.REQUIRED);
+    FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
+    updateMRCAseanAnzIsa();
+    FormManager.resetDropdownValues(FormManager.getField('inacCd'));
+    FormManager.resetDropdownValues(FormManager.getField('inacType'));
+    return;
+  }
 }
 
 function setIsuOnIsic() {
