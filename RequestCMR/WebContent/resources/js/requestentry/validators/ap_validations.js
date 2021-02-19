@@ -1,6 +1,8 @@
 /* Register AP Javascripts */
 var _isicHandlerAP = null;
 var _clusterHandlerAP = null;
+var _isicHandlerGCG = null;
+var _clusterHandlerGCG = null;
 
 function addHandlersForAP() {
   if (_isicHandlerAP == null) {
@@ -12,6 +14,20 @@ function addHandlersForAP() {
   if (_clusterHandlerAP == null && FormManager.getActualValue('reqType') != 'U') {
     _clusterHandlerAP = dojo.connect(FormManager.getField('apCustClusterId'), 'onChange', function(value) {
       setInacByCluster();
+      setIsuOnIsic();
+    });
+  }
+}
+
+function addHandlersForGCG() {
+  if (_isicHandlerGCG == null) {
+    _isicHandlerGCG = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
+      setIsuOnIsic();
+    });
+  }
+  
+  if (_clusterHandlerGCG == null && FormManager.getActualValue('reqType') != 'U') {
+    _clusterHandlerGCG = dojo.connect(FormManager.getField('apCustClusterId'), 'onChange', function(value) {
       setIsuOnIsic();
     });
   }
@@ -172,18 +188,31 @@ function setInacByCluster() {
     }
 }
 
-/* ASEAN ANZ ISIC MAPPING */
+/* ASEAN ANZ GCG ISIC MAPPING */
 function setIsuOnIsic(){
   if (FormManager.getActualValue('reqType') != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
   
   var _cluster = FormManager.getActualValue('apCustClusterId');
-  if (!(_cluster.includes('BLAN'))) {
-    return;
+  var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  if (_cluster != '') {    
+    var qParams = {
+      _qall : 'Y',
+      ISSUING_CNTRY : cmrIssuingCntry,
+      CLUSTER : _cluster
+    };
+  
+    var clusterDesc = cmr.query('GET.DESC_BY_CLUSTER', qParams);
+    if((cmrIssuingCntry == '738' || cmrIssuingCntry == '736' ) &&(clusterDesc[0] != '' && !(clusterDesc[0].ret1.includes('S1')))){
+      return;
+    }
+    else if (!(cmrIssuingCntry == '738' || cmrIssuingCntry == '736' ) && !(_cluster.includes('BLAN'))) {
+      return;
+    }
   }
   
-  var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  
   var isicCd = FormManager.getActualValue('isicCd');
   
   var ISU = [];
@@ -1534,7 +1563,7 @@ function onIsuCdChangeAseanAnzIsa() {
   var reqType = null;
   reqType = FormManager.getActualValue('reqType');
   var cmrIssuingCntry = dojo.byId('cmrIssuingCntry').value;
-  var asean_isa_cntries = [ 'Bangladesh - 615', 'India - 744', 'Sri Lanka - 652'];
+  var asean_isa_cntries = [ 'Bangladesh - 615', 'Sri Lanka - 652'];
 
   if (reqType == 'U') {
     console.log(">>>> Exit onIsuCdChangeAseanAnz for Update.");
@@ -2850,10 +2879,12 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateStreetAddrCont2, [ SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE,
       SysLoc.VIETNAM, SysLoc.THAILAND, SysLoc.HONG_KONG, SysLoc.LAOS, SysLoc.MACAO, SysLoc.MALASIA, SysLoc.NEPAL, SysLoc.CAMBODIA ], null, true);
   // isic validation for Singapore and Australia
-  GEOHandler.addAfterConfig(onIsicChangeHandler, [ SysLoc.AUSTRALIA, SysLoc.SINGAPORE ]);
-  GEOHandler.addAfterConfig(onIsicChange, [ SysLoc.AUSTRALIA, SysLoc.SINGAPORE ]);
-  GEOHandler.addAfterTemplateLoad(onIsicChange, [ SysLoc.AUSTRALIA, SysLoc.SINGAPORE ]);
+  GEOHandler.addAfterConfig(onIsicChangeHandler, [ SysLoc.AUSTRALIA, SysLoc.SINGAPORE, SysLoc.HONG_KONG, SysLoc.MACAO]);
+  GEOHandler.addAfterConfig(onIsicChange, [ SysLoc.AUSTRALIA, SysLoc.SINGAPORE, SysLoc.HONG_KONG, SysLoc.MACAO ]);
+  GEOHandler.addAfterTemplateLoad(onIsicChange, [ SysLoc.AUSTRALIA, SysLoc.SINGAPORE, SysLoc.HONG_KONG, SysLoc.MACAO ]);
   
   GEOHandler.addAfterConfig(addHandlersForAP, GEOHandler.AP);
-
+  GEOHandler.addAfterConfig(addHandlersForGCG, GEOHandler.GCG);
+  GEOHandler.addAfterConfig(setInacByCluster, SysLoc.INDIA);
+  GEOHandler.addAfterTemplateLoad(setInacByCluster, SysLoc.INDIA);
 });
