@@ -1803,7 +1803,7 @@ public class BELUXHandler extends BaseSOFHandler {
 
   @Override
   public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
-    return false;
+    return true;
   }
 
   public static List<String> getDataFieldsForUpdateCheck(String cmrIssuingCntry) {
