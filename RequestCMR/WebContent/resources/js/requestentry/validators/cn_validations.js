@@ -67,22 +67,22 @@ var CNHandler = {
 };
 
 function afterConfigForCN() {
+  if (_isicHandlerCN == null) {
+    _isicHandlerCN = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
+      setIsuOnIsic();
+    });
+  }
+  
   if (_searchTermHandler == null) {
     _searchTermHandler = dojo.connect(FormManager.getField('searchTerm'), 'onChange', function(value) {
       console.log(">>> RUNNING SORTL HANDLER!!!!");
       if (!value) {
         return;
       }
-      setIsuOnIsic();
       filterISUOnChange();
+      setIsuOnIsic();
       setInacBySearchTerm();
       addValidationForParentCompanyNo();
-    });
-  }
-
-  if (_isicHandlerCN == null) {
-    _isicHandlerCN = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
-      setIsuOnIsic();
     });
   }
 
@@ -171,7 +171,7 @@ function setInacBySearchTerm() {
     var qParams = {
       _qall : 'Y',
       ISSUING_CNTRY : cntry,
-      CMT : '%' + _cluster + '%'
+      CMT : '%' + searchTerm + '%'
     };
     var inacList = cmr.query('GET.INAC_BY_CLUSTER', qParams);
     if (inacList != null) {
@@ -313,6 +313,7 @@ function filterISUOnChange() {
   console.log(isuCdResult);
 
   if (isuCdResult != null) {
+    FormManager.resetDropdownValues(FormManager.getField('isuCd'));
     FormManager.setValue('isuCd', isuCdResult.ret2);
   }
 
