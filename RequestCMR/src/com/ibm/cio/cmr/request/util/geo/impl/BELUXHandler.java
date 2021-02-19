@@ -85,7 +85,7 @@ public class BELUXHandler extends BaseSOFHandler {
       SystemLocation.LEBANON, SystemLocation.LIBYA, SystemLocation.OMAN, SystemLocation.PAKISTAN, SystemLocation.QATAR, SystemLocation.SAUDI_ARABIA,
       SystemLocation.YEMEN, SystemLocation.SYRIAN_ARAB_REPUBLIC, SystemLocation.EGYPT, SystemLocation.TUNISIA_SOF, SystemLocation.GULF);
 
-  protected static final String[] MASS_UPDATE_SHEET_NAMES = { "Sold To", "Mail to", "Bill To", "Ship To", "Install At" };
+  protected static final String[] MASS_UPDATE_SHEET_NAMES = { "Sold-to", "Mail-to", "Bill-to", "Ship-to", "Install-at" };
 
   @Override
   protected void handleSOFConvertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry,
@@ -2212,7 +2212,7 @@ public class BELUXHandler extends BaseSOFHandler {
 
     XSSFSheet sheet = book.getSheet("Data");// validate Data sheet
     row = sheet.getRow(0);// data field name row
-    int ordBlkIndex = 14;// default index
+    int ordBlkIndex = 16;// default index
     for (int cellIndex = 0; cellIndex < row.getLastCellNum(); cellIndex++) {
       currCell = row.getCell(cellIndex);
       String cellVal = validateColValFromCell(currCell);
