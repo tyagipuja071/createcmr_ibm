@@ -33,6 +33,7 @@ String processingType = PageManager.getProcessingType(reqentry.getCmrIssuingCntr
   <script src="${resourcesPath}/js/requestentry/contactinfo.js?${cmrv}" type="text/javascript"></script>
 </cmr:view>
 
+<!-- EMEA -->
 <cmr:view forGEO="EMEA">
   <cmr:view forCountry="666">
   <script src="${resourcesPath}/js/requestentry/validators/cy_validations.js?${cmrv}" type="text/javascript"></script>
