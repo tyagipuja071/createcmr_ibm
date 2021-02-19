@@ -31,6 +31,9 @@ function afterConfigForNL() {
     FormManager.readOnly('subIndustryCd');
     FormManager.resetValidations('engineeringBo');
   }
+  if (custSubType == 'PRICU') {
+    FormManager.clearValue('enterprise');
+  }
 
   if (role == 'Processor' && reqType == 'C') {
     FormManager.enable('abbrevNm');
