@@ -212,10 +212,7 @@ public class FranceUtil extends AutomationUtil {
     Addr zs01 = requestData.getAddress("ZS01");
     String customerName = getCustomerFullName(zs01);
     Addr zi01 = requestData.getAddress("ZI01");
-    if (zs01 != null) {
-      // remove duplicate address
-      removeDuplicateAddresses(entityManager, requestData, details);
-    }
+    
     String scenario = data.getCustSubGrp();
     if (StringUtils.isNotBlank(scenario)) {
       String scenarioDesc = getScenarioDescription(entityManager, data);
@@ -235,6 +232,10 @@ public class FranceUtil extends AutomationUtil {
         details.append("Sold-to and Installing name are not identical. Request will require CMDE review before proceeding.").append("\n");
         engineData.addNegativeCheckStatus("SOLDTO_INSTALL_DIFF", "Sold-to and Installing addresses are not identical.");
       }
+      if (zs01 != null) {
+          // remove duplicate address
+          removeDuplicateAddresses(entityManager, requestData, details);
+        }
       switch (scenario) {
       case SCENARIO_CROSSBORDER_PRIVATE_PERSON:
       case SCENARIO_PRIVATE_PERSON:
@@ -955,7 +956,7 @@ public class FranceUtil extends AutomationUtil {
       engineData.addRejectionComment("OTH", "Duplicate request found with matching customer name.", "", "");
       return false;
     } else {
-      details.append("No duplicate requests found");
+      details.append("No duplicate requests found").append("\n");
     }
 
     PrivatePersonCheckResult checkResult = chkPrivatePersonRecordFR(country, landCntry, name, checkBluepages, reqData.getData());
