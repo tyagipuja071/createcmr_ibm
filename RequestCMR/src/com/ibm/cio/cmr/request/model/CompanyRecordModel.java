@@ -52,6 +52,7 @@ public class CompanyRecordModel implements Comparable<CompanyRecordModel> {
   private boolean highestRevenue;
   private String operStatusCode;
   private boolean isPoolRecord;
+  private String addDnBMatches;
 
   @Override
   public int compareTo(CompanyRecordModel o) {
@@ -337,10 +338,18 @@ public class CompanyRecordModel implements Comparable<CompanyRecordModel> {
   }
 
   public boolean isPoolRecord() {
-	return isPoolRecord;
+    return isPoolRecord;
   }
 
   public void setPoolRecord(boolean isPoolRecord) {
-	this.isPoolRecord = isPoolRecord;
+    this.isPoolRecord = isPoolRecord;
+  }
+
+  public String getAddDnBMatches() {
+    return addDnBMatches;
+  }
+
+  public void setAddDnBMatches(String addDnBMatches) {
+    this.addDnBMatches = addDnBMatches;
   }
 }
