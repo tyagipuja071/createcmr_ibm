@@ -212,10 +212,7 @@ public class FranceUtil extends AutomationUtil {
     Addr zs01 = requestData.getAddress("ZS01");
     String customerName = getCustomerFullName(zs01);
     Addr zi01 = requestData.getAddress("ZI01");
-    if (zs01 != null) {
-      // remove duplicate address
-      removeDuplicateAddresses(entityManager, requestData, details);
-    }
+
     String scenario = data.getCustSubGrp();
     if (StringUtils.isNotBlank(scenario)) {
       String scenarioDesc = getScenarioDescription(entityManager, data);
@@ -234,6 +231,10 @@ public class FranceUtil extends AutomationUtil {
           && !compareCustomerNames(zs01, zi01)) {
         details.append("Sold-to and Installing name are not identical. Request will require CMDE review before proceeding.").append("\n");
         engineData.addNegativeCheckStatus("SOLDTO_INSTALL_DIFF", "Sold-to and Installing addresses are not identical.");
+      }
+      if (zs01 != null) {
+        // remove duplicate address
+        removeDuplicateAddresses(entityManager, requestData, details);
       }
       switch (scenario) {
       case SCENARIO_CROSSBORDER_PRIVATE_PERSON:
@@ -353,7 +354,8 @@ public class FranceUtil extends AutomationUtil {
       if (!FRANCE_SUBREGIONS.contains(addr.getLandCntry())) {
         details.append("Calculating Coverage using SIREN.").append("\n\n");
         String siren = StringUtils.isNotBlank(data.getTaxCd1())
-            ? (data.getTaxCd1().length() > 9 ? data.getTaxCd1().substring(0, 9) : data.getTaxCd1()) : "";
+            ? (data.getTaxCd1().length() > 9 ? data.getTaxCd1().substring(0, 9) : data.getTaxCd1())
+            : "";
         if (StringUtils.isNotBlank(siren)) {
           details.append("SIREN: " + siren).append("\n");
           List<CoverageContainer> coverages = covElement.computeCoverageFromRDCQuery(entityManager, "AUTO.COV.GET_COV_FROM_TAX_CD1", siren + "%",
@@ -701,36 +703,35 @@ public class FranceUtil extends AutomationUtil {
     List<String> ignoredUpdates = new ArrayList<String>();
     for (UpdatedDataModel change : changes.getDataUpdates()) {
       switch (change.getDataField()) {
-
-//      case "VAT #":
-        // if ((StringUtils.isBlank(change.getOldData()) &&
-        // !StringUtils.isBlank(change.getNewData())) ||
-        // (!StringUtils.isBlank(change.getOldData())
-        // && !StringUtils.isBlank(change.getNewData()) &&
-        // !(change.getOldData().equals(change.getNewData())))) {
-        // // ADD and Update
-        // List<DnBMatchingResponse> matches = getMatches(requestData,
-        // engineData, soldTo, true);
-        // boolean matchesDnb = false;
-        // if (matches != null) {
-        // // check against D&B
-        // matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin,
-        // data.getCmrIssuingCntry());
-        // }
-        // if (!matchesDnb) {
-        // cmdeReview = true;
-        // engineData.addNegativeCheckStatus("_esVATCheckFailed", "VAT # on the
-        // request did not match D&B");
-        // details.append("VAT # on the request did not match D&B\n");
-        // } else {
-        // details.append("VAT # on the request matches D&B\n");
-        // }
-        // }
-        // if (!StringUtils.isBlank(change.getOldData()) &&
-        // (StringUtils.isBlank(change.getNewData()))) {
-        // // noop, for switch handling only
-        // }
-//        break;
+      // case "VAT #":
+      // if ((StringUtils.isBlank(change.getOldData()) &&
+      // !StringUtils.isBlank(change.getNewData())) ||
+      // (!StringUtils.isBlank(change.getOldData())
+      // && !StringUtils.isBlank(change.getNewData()) &&
+      // !(change.getOldData().equals(change.getNewData())))) {
+      // // ADD and Update
+      // List<DnBMatchingResponse> matches = getMatches(requestData,
+      // engineData, soldTo, true);
+      // boolean matchesDnb = false;
+      // if (matches != null) {
+      // // check against D&B
+      // matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin,
+      // data.getCmrIssuingCntry());
+      // }
+      // if (!matchesDnb) {
+      // cmdeReview = true;
+      // engineData.addNegativeCheckStatus("_esVATCheckFailed", "VAT # on the
+      // request did not match D&B");
+      // details.append("VAT # on the request did not match D&B\n");
+      // } else {
+      // details.append("VAT # on the request matches D&B\n");
+      // }
+      // }
+      // if (!StringUtils.isBlank(change.getOldData()) &&
+      // (StringUtils.isBlank(change.getNewData()))) {
+      // // noop, for switch handling only
+      // }
+      // break;
       case "ISU Code":
       case "Client Tier":
       case "Search Term (SORTL)":
@@ -746,8 +747,7 @@ public class FranceUtil extends AutomationUtil {
         break;
       case "ISIC":
       case "INAC/NAC Code":
-      case "SIRET":
-      case "VAT #":
+        // case "SIRET":
         cmdeReview = true;
         details.append("Updates to one or more fields cannot be validated.\n");
         details.append("-" + change.getDataField() + " needs to be verified.\n");
@@ -852,9 +852,41 @@ public class FranceUtil extends AutomationUtil {
                   checkDetails.append("Update to InstallAt (" + addr.getId().getAddrSeq() + ") has different customer name than sold-to .\n");
                 }
               } else if (CmrConstants.RDC_SOLD_TO.equals(addrType) || CmrConstants.RDC_BILL_TO.equals(addrType)) {
-                LOG.debug("Update to Address " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified");
-                checkDetails.append("Update to address " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified \n");
-                resultCodes.add("D");
+                // LOG.debug("Update to Address " + addrType + "(" +
+                // addr.getId().getAddrSeq() + ") needs to be verified");
+                // checkDetails.append("Update to address " + addrType + "(" +
+                // addr.getId().getAddrSeq() + ") needs to be verified \n");
+                // resultCodes.add("D");
+
+                // CMR - 1218
+                UpdatedDataModel siretChange = changes.getDataChange("SIRET");
+                if (siretChange != null) {
+                  // means address and siret both have bene updated
+                  resultCodes.add("D"); // send to cmde for review
+                  engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_DNB_ORGID_VAL);
+                  LOG.debug("Updates to Address " + addrType + "(" + addr.getId().getAddrSeq()
+                      + ") could not be verified because of SIRET update. CMDE review required.\\n");
+                  checkDetails.append("Updates to Address " + addrType + "(" + addr.getId().getAddrSeq()
+                      + ") could not be verified because of SIRET update. CMDE review required.\n");
+                } else {
+                  // if only address has been updated , validate vat with DnB
+                  Addr addrToChk = requestData.getAddress(addrType);
+                  List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addrToChk, true);
+                  boolean matchesDnb = false;
+                  if (matches != null) {
+                    // check against D&B
+                    matchesDnb = ifaddressCloselyMatchesDnb(matches, addrToChk, admin, data.getCmrIssuingCntry());
+                  }
+                  if (!matchesDnb) {
+                    engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_DNB_ORGID_VAL);
+                    resultCodes.add("R"); // reject
+                    engineData.addNegativeCheckStatus("_frVATCheckFailed", "VAT # on the request did not match D&B");
+                    checkDetails.append("VAT # on the request did not match D&B\n");
+                  } else {
+                    checkDetails.append("VAT # on the request matches D&B\n");
+                  }
+
+                }
               } else {
                 // proceed
                 LOG.debug("Update to Address " + addrType + "(" + addr.getId().getAddrSeq() + ") skipped in the checks.\\n");
@@ -902,36 +934,21 @@ public class FranceUtil extends AutomationUtil {
     return false;
   }
 
-  @Override
-  public List<String> getSkipChecksRequestTypesforCMDE() {
-    return Arrays.asList("C", "U", "M", "D", "R");
-  }
-
-  public static boolean isCountryFREnabled(EntityManager entityManager, String cntry) {
-
-    boolean isFR = false;
-
-    String sql = ExternalizedQuery.getSql("FRANCE.GET_SUPP_CNTRY_BY_ID");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("CNTRY", cntry);
-    query.setForReadOnly(true);
-    List<Integer> records = query.getResults(Integer.class);
-    Integer singleObject = null;
-
-    if (records != null && records.size() > 0) {
-      singleObject = records.get(0);
-      Integer val = singleObject != null ? singleObject : null;
-
-      if (val != null) {
-        isFR = true;
-      } else {
-        isFR = false;
-      }
-    } else {
-      isFR = false;
-    }
-    return isFR;
-  }
+  /*
+   * private boolean isRelevantFieldUpdated(RequestChangeContainer changes) {
+   * boolean isRelevantFieldUpdated = false; List<UpdatedNameAddrModel>
+   * updatedAddrList = changes.getAddressUpdates(); String[] addressFields = {
+   * "Customer Name", "Customer Name Continuation",
+   * "Customer Name/ Additional Address Information", "Country (Landed)",
+   * "Street", "Street Continuation", "Postal Code", "City", "PostBox" };
+   * List<String> relevantFieldNames = Arrays.asList(addressFields); for
+   * (UpdatedNameAddrModel updatedAddrModel : updatedAddrList) { String fieldId
+   * = updatedAddrModel.getDataField(); if (StringUtils.isNotEmpty(fieldId) &&
+   * relevantFieldNames.contains(fieldId)) { isRelevantFieldUpdated = true;
+   * break; } }
+   * 
+   * return isRelevantFieldUpdated; }
+   */
 
   /**
    * @param entityManager
@@ -978,7 +995,7 @@ public class FranceUtil extends AutomationUtil {
       engineData.addRejectionComment("OTH", "Duplicate request found with matching customer name.", "", "");
       return false;
     } else {
-      details.append("No duplicate requests found");
+      details.append("No duplicate requests found").append("\n");
     }
 
     PrivatePersonCheckResult checkResult = chkPrivatePersonRecordFR(country, landCntry, name, checkBluepages, reqData.getData());
@@ -1103,4 +1120,34 @@ public class FranceUtil extends AutomationUtil {
 
   }
 
+  @Override
+  public List<String> getSkipChecksRequestTypesforCMDE() {
+    return Arrays.asList("C", "U", "M", "D", "R");
+  }
+
+  public static boolean isCountryFREnabled(EntityManager entityManager, String cntry) {
+
+    boolean isFR = false;
+
+    String sql = ExternalizedQuery.getSql("FRANCE.GET_SUPP_CNTRY_BY_ID");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CNTRY", cntry);
+    query.setForReadOnly(true);
+    List<Integer> records = query.getResults(Integer.class);
+    Integer singleObject = null;
+
+    if (records != null && records.size() > 0) {
+      singleObject = records.get(0);
+      Integer val = singleObject != null ? singleObject : null;
+
+      if (val != null) {
+        isFR = true;
+      } else {
+        isFR = false;
+      }
+    } else {
+      isFR = false;
+    }
+    return isFR;
+  }
 }
