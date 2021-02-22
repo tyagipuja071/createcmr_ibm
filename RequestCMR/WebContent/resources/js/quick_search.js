@@ -635,6 +635,7 @@ function buildSearchCriteria() {
     vat : FormManager.getActualValue('vat'),
     taxCd1 : FormManager.getActualValue('taxCd1'),
     restrictTo : FormManager.getActualValue('restrictTo'),
+    addDnBMatches : FormManager.getActualValue('addDnBMatches'),
   };
   var issuingCntry = FormManager.getActualValue('issuingCntry');
   if (issuingCntry.length > 3) {
