@@ -162,7 +162,6 @@ boolean approver = user != null && user.isApprover();
 							<img src="${resourcesPath}/images/cedp.png" style = "width: 40px;height: 40px;">
 					    </div>
 						
-						
 					</div>
 				</div>
 					<!-- CONTENT_BODY_END -->

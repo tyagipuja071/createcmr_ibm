@@ -187,6 +187,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         performLegacyDirectMassUpdate(model, entityManager, request);
       } else if (ATUtil.isCountryATEnabled(entityManager, cmrIssuingCntry)) {// CMR-803
         performLegacyDirectMassUpdate(model, entityManager, request);
+
       } else if (FranceUtil.isCountryFREnabled(entityManager, cmrIssuingCntry)) {
         performLegacyDirectMassUpdate(model, entityManager, request);
       } else if (IERPRequestUtils.isCountryDREnabled(entityManager, cmrIssuingCntry)) {
@@ -1871,6 +1872,10 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                   }
                 } else if (IERPRequestUtils.isCountryDREnabled(entityManager, cmrIssuingCntry)) {
                   if (!validateDRMassUpdateFile(filePath, data, admin, cmrIssuingCntry)) {
+                    throw new CmrException(MessageUtil.ERROR_MASS_FILE);
+                  }
+                } else if (PageManager.fromGeo("CA", cmrIssuingCntry)) {
+                  if (!validateMassUpdateCA(item.getInputStream())) {
                     throw new CmrException(MessageUtil.ERROR_MASS_FILE);
                   }
                 } else {
@@ -5116,7 +5121,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         this.log.error("Error in processing file for mass change.");
         request.getSession().setAttribute(token, "N," + MessageUtil.getMessage(MessageUtil.ERROR_GENERAL));
       }
-    } catch (Exception e) {
+    } catch (
+
+    Exception e) {
       this.log.error("Error in processing file for mass change.", e);
       if (e instanceof CmrException) {
         CmrException cmre = (CmrException) e;
