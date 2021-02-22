@@ -912,6 +912,7 @@ public class NLTransformer extends EMEATransformer {
       CMRRequestContainer cmrObjects) {
     Admin admin = cmrObjects.getAdmin();
     Data data = cmrObjects.getData();
+    Addr addrs = dummyHandler.addrData;
     String landedCntry = "";
 
     setDefaultLandedCountry(data);
@@ -922,6 +923,19 @@ public class NLTransformer extends EMEATransformer {
     legacyCust.setIbo(data.getEngineeringBo() == null ? "" : data.getEngineeringBo());
     legacyCust.setTaxCd(data.getTaxCd1() == null ? "" : data.getTaxCd1());
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+
+      boolean crossBorder = isCrossBorder(addrs);
+      String langCd = data.getCustPrefLang();
+
+      if (crossBorder) {
+        if (langCd != null && "E".equalsIgnoreCase(langCd)) {
+          legacyCust.setLangCd("1");
+        }
+      } else if (!crossBorder) {
+        if (langCd != null && "N".equalsIgnoreCase(langCd)) {
+          legacyCust.setLangCd("");
+        }
+      }
       // CREATCMR-1042 2021-1-29
       legacyCust.setCeBo("211");
 
@@ -944,7 +958,6 @@ public class NLTransformer extends EMEATransformer {
       // George CREATCMR-546
       legacyCust.setDeptCd(data.getIbmDeptCostCenter() == null ? "" : data.getIbmDeptCostCenter());
 
-      legacyCust.setLangCd("");
       // legacyCust.setLangCd(data.getCustPrefLang() == null ? "" :
       // data.getCustPrefLang());
       legacyCust.setBankAcctNo("");
