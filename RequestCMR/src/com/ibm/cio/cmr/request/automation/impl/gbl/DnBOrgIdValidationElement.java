@@ -56,6 +56,15 @@ public class DnBOrgIdValidationElement extends ValidatingElement implements Comp
     AutomationResult<ValidationOutput> result = buildResult(admin.getId().getReqId());
     ValidationOutput output = new ValidationOutput();
 
+    if ("U".equals(admin.getReqType()) && engineData.hasPositiveCheckStatus(AutomationEngineData.SKIP_DNB_ORGID_VAL)) {
+      output.setSuccess(true);
+      output.setMessage("Skipped");
+      result.setDetails("Processing is skipped as DnB validation NOT DONE or FAILED.");
+      result.setResults("Skipped");
+      result.setProcessOutput(output);
+      LOG.debug("Processing is skipped as DnB validation NOT DONE or FAILED.");
+      return result;
+    }
     if ("Y".equals(admin.getMatchOverrideIndc()) && DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
       result.setResults("Overriden");
       output.setSuccess(true);

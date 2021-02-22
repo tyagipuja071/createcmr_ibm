@@ -1358,7 +1358,10 @@ public abstract class APHandler extends GEOHandler {
       String[] arryISUCdForSectorGMB = { "32", "34" };
 
       String subIndCd = data.getSubIndustryCd();
-      String IndCd = subIndCd.substring(0, 1);
+      String IndCd = "";
+      if (subIndCd != null) {
+        IndCd = subIndCd.substring(0, 1);
+      }
       String isuCd = data.getIsuCd();
       Boolean mrcFlag3 = false;
       data.setSectorCd("");
@@ -1419,7 +1422,10 @@ public abstract class APHandler extends GEOHandler {
   private void setISBU(Admin admin, Data data) {
     if (admin.getReqType().equals("C")) {
       String mrcCd = data.getMrcCd();
-      String industryCd = data.getSubIndustryCd().substring(0, 1);
+      String industryCd = "";
+      if (data.getSubIndustryCd() != null) {
+        industryCd = data.getSubIndustryCd().substring(0, 1);
+      }
       String sectorCd = data.getSectorCd();
       String isbuCd = "";
       // data.setIsbuCd("");

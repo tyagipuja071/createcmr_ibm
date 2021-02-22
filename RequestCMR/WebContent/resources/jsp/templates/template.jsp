@@ -161,7 +161,10 @@ boolean approver = user != null && user.isApprover();
 						<div style="position:fixed;right:5px;bottom:5px;">
 							<img src="${resourcesPath}/images/cedp.png" style = "width: 40px;height: 40px;">
 					    </div>
+<<<<<<< HEAD
 						
+=======
+>>>>>>> refs/remotes/origin/CREATCMR-1218_France_Prod_issue_Updt_Chks
 						
 					</div>
 				</div>

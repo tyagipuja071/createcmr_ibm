@@ -701,6 +701,36 @@ public class FranceUtil extends AutomationUtil {
     List<String> ignoredUpdates = new ArrayList<String>();
     for (UpdatedDataModel change : changes.getDataUpdates()) {
       switch (change.getDataField()) {
+
+//      case "VAT #":
+        // if ((StringUtils.isBlank(change.getOldData()) &&
+        // !StringUtils.isBlank(change.getNewData())) ||
+        // (!StringUtils.isBlank(change.getOldData())
+        // && !StringUtils.isBlank(change.getNewData()) &&
+        // !(change.getOldData().equals(change.getNewData())))) {
+        // // ADD and Update
+        // List<DnBMatchingResponse> matches = getMatches(requestData,
+        // engineData, soldTo, true);
+        // boolean matchesDnb = false;
+        // if (matches != null) {
+        // // check against D&B
+        // matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin,
+        // data.getCmrIssuingCntry());
+        // }
+        // if (!matchesDnb) {
+        // cmdeReview = true;
+        // engineData.addNegativeCheckStatus("_esVATCheckFailed", "VAT # on the
+        // request did not match D&B");
+        // details.append("VAT # on the request did not match D&B\n");
+        // } else {
+        // details.append("VAT # on the request matches D&B\n");
+        // }
+        // }
+        // if (!StringUtils.isBlank(change.getOldData()) &&
+        // (StringUtils.isBlank(change.getNewData()))) {
+        // // noop, for switch handling only
+        // }
+//        break;
       case "ISU Code":
       case "Client Tier":
       case "Search Term (SORTL)":
