@@ -217,7 +217,7 @@ public class BeLuxUtil extends AutomationUtil {
       salesRepRes = query.getResults();
     }
     if (salesRepRes != null && salesRepRes.size() == 1) {
-      String salesRep = (String) salesRepRes.get(0)[1];
+      String salesRep = (String) salesRepRes.get(0)[0];
       container.setSalesRep(salesRep);
       return container;
     } else {
