@@ -13,12 +13,12 @@ import com.ibm.cio.cmr.request.util.ConfigUtil;
 public class CloningOverrideUtil {
 
   private static final Logger LOG = Logger.getLogger(CloningOverrideUtil.class);
-  private static List<CloningOverrideMapping> sboMappings = new ArrayList<CloningOverrideMapping>();
+  private static List<CloningOverrideMapping> overrideMappings = new ArrayList<CloningOverrideMapping>();
   private static List<CloningOverrideMapping> returnMappings = new ArrayList<CloningOverrideMapping>();
 
   @SuppressWarnings("unchecked")
   public CloningOverrideUtil() {
-    if (CloningOverrideUtil.sboMappings.isEmpty()) {
+    if (CloningOverrideUtil.overrideMappings.isEmpty()) {
       Digester digester = new Digester();
       digester.setValidating(false);
       digester.addObjectCreate("mappings", ArrayList.class);
@@ -32,7 +32,7 @@ public class CloningOverrideUtil {
       digester.addSetNext("mappings/override", "add");
       try {
         InputStream is = ConfigUtil.getResourceStream("cloning-override-mapping.xml");
-        CloningOverrideUtil.sboMappings = (ArrayList<CloningOverrideMapping>) digester.parse(is);
+        CloningOverrideUtil.overrideMappings = (ArrayList<CloningOverrideMapping>) digester.parse(is);
       } catch (Exception e) {
         LOG.error("Error occured while digesting xml.", e);
       }
@@ -40,8 +40,8 @@ public class CloningOverrideUtil {
   }
 
   public List<CloningOverrideMapping> getOverrideValueFromMapping(String country) {
-    if (!sboMappings.isEmpty()) {
-      for (CloningOverrideMapping mapping : sboMappings) {
+    if (!overrideMappings.isEmpty()) {
+      for (CloningOverrideMapping mapping : overrideMappings) {
         List<String> countryValues = Arrays.asList(mapping.getCountries().replaceAll("\n", "").replaceAll(" ", "").split(","));
         if (countryValues.contains(country)) {
           returnMappings.add(mapping);

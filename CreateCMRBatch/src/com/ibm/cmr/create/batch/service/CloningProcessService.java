@@ -9,15 +9,19 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 import javax.persistence.Column;
 import javax.persistence.EntityManager;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 
+import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addlctrydata;
 import com.ibm.cio.cmr.request.entity.AddlctrydataPK;
@@ -62,7 +66,10 @@ import com.ibm.cio.cmr.request.entity.SizeinfoPK;
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.ui.PageManager;
+import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemUtil;
+import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.legacy.CloningMapping;
 import com.ibm.cio.cmr.request.util.legacy.CloningOverrideMapping;
 import com.ibm.cio.cmr.request.util.legacy.CloningOverrideUtil;
@@ -79,7 +86,9 @@ import com.ibm.cmr.services.client.GenerateCMRNoClient;
 import com.ibm.cmr.services.client.cmrno.GenerateCMRNoRequest;
 import com.ibm.cmr.services.client.cmrno.GenerateCMRNoResponse;
 
-public class CloningProcessService extends BaseBatchService {
+public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQueue> {
+
+  private static final Logger LOG = Logger.getLogger(CloningProcessService.class);
 
   private static final String BATCH_SERVICE_URL = SystemConfiguration.getValue("BATCH_SERVICES_URL");
   private static final String COMMENT_LOGGER = "Cloning Process Service";
@@ -99,153 +108,14 @@ public class CloningProcessService extends BaseBatchService {
   private static final List<String> KNBK_PK = Arrays.asList("banks", "bankl", "bankn");
   private static final List<String> KNVL_PK = Arrays.asList("aland", "tatyp", "licnr");
 
-  @Override
-  protected Boolean executeBatch(EntityManager entityManager) throws Exception {
-    // TODO Auto-generated method stub
-    if (this.devMode) {
-      LOG.info("RUNNING IN DEVELOPMENT MODE");
-    } else {
-      LOG.info("RUNNING IN NON-DEVELOPMENT MODE");
-    }
-    try {
+  private static final List<String> PROCESSING_TYPES = Arrays.asList("DR", "MA", "MD");
 
-      ChangeLogListener.setUser(COMMENT_LOGGER);
-
-      LOG.info("Initializing Country Map..");
-      LandedCountryMap.init(entityManager);
-
-      // Retrieve the Pending records set by Admin as Pending
-      LOG.info("Retreiving cloning pending records for processing..");
-      List<CmrCloningQueue> pending = getCloningPendingRecords(entityManager);
-
-      LOG.debug((pending != null ? pending.size() : 0) + " records to process for cloning.");
-
-      for (CmrCloningQueue cloningQueue : pending) {
-        try {
-          processCloningRecord(entityManager, cloningQueue);
-        } catch (Exception e) {
-          partialRollback(entityManager);
-          LOG.error("Unexpected error occurred during reservedcmr and cloning queue insertion " + cloningQueue.getId().getCmrNo(), e);
-          // processError(entityManager, null, e.getMessage());
-        }
-        partialCommit(entityManager);
-      }
-
-      // Retrieve the Pending records for Legacy process
-      LOG.info("Retreiving legacy pending records for processing..");
-      pending = getLegacyPendingRecords(entityManager);
-
-      LOG.debug((pending != null ? pending.size() : 0) + " records to process for legacy.");
-
-      MessageTransformer transformer = null;
-      String cntryDup = "";
-
-      for (CmrCloningQueue cloningQueue : pending) {
-        try {
-          processLegacyCloningProcess(entityManager, cloningQueue, "NA");
-          transformer = TransformerManager.getTransformer(cloningQueue.getId().getCmrIssuingCntry());
-          cntryDup = transformer.getDupCreationCountryId(entityManager, cloningQueue.getId().getCmrIssuingCntry(), cloningQueue.getId().getCmrNo());
-          if (!"NA".equals(cntryDup)) {
-            processLegacyCloningDupCreate(entityManager, cloningQueue, cntryDup);
-          }
-        } catch (Exception e) {
-          partialRollback(entityManager);
-          cloningQueue.setStatus("LEGACY_ERR");
-          cloningQueue.setErrorMsg("Error occured during legacy cloning");
-          updateEntity(cloningQueue, entityManager);
-          LOG.error("Unexpected error occurred during legacy cloning process for CMR No :" + cloningQueue.getId().getCmrNo(), e);
-          // processError(entityManager, null, e.getMessage());
-        }
-        partialCommit(entityManager);
-      }
-
-      // fresh cache for send to rdc
-      entityManager.clear();
-
-      // now start cloning at RDc end for KNA1 table
-      LOG.info("Retrieving pending RDc records for processing..");
-      pending = getPendingCloningRecordsRDC(entityManager);
-
-      LOG.debug((pending != null ? pending.size() : 0) + " records to process to RDc.");
-
-      for (CmrCloningQueue cloningQueue : pending) {
-        try {
-          processCloningRDC(entityManager, cloningQueue, "NA");
-          transformer = TransformerManager.getTransformer(cloningQueue.getId().getCmrIssuingCntry());
-          cntryDup = transformer.getDupCreationCountryId(entityManager, cloningQueue.getId().getCmrIssuingCntry(), cloningQueue.getId().getCmrNo());
-          if (!"NA".equals(cntryDup)) {
-            processRdcCloningDupCreate(entityManager, cloningQueue, cntryDup);
-          }
-        } catch (Exception e) {
-          partialRollback(entityManager);
-          LOG.error("Unexpected error occurred during RDC_CLONING_REFN insertion for CMR No :" + cloningQueue.getId().getCmrNo(), e);
-          // processError(entityManager, null, e.getMessage());
-        }
-        partialCommit(entityManager);
-      }
-
-      // now start cloning kna1 rdc
-      LOG.info("Retrieving pending KNA1 RDc records for processing..");
-      List<RdcCloningRefn> pendingCloningRefn = getPendingCloningRecordsKNA1RDC(entityManager);
-
-      LOG.debug((pendingCloningRefn != null ? pendingCloningRefn.size() : 0) + " records to process to KNA1 RDc.");
-
-      CloningRDCUtil rdcUtil = new CloningRDCUtil();
-      CloningRDCConfiguration rdcConfig = rdcUtil.getConfigDetails();
-
-      List<CloningOverrideMapping> overrideValues = null;
-      CloningOverrideUtil overrideUtil = new CloningOverrideUtil();
-
-      for (RdcCloningRefn rdcCloningRefn : pendingCloningRefn) {
-        try {
-          overrideValues = overrideUtil.getOverrideValueFromMapping(rdcCloningRefn.getCmrIssuingCntry());
-          processCloningKNA1RDC(entityManager, rdcCloningRefn, rdcConfig, overrideValues);
-        } catch (Exception e) {
-          partialRollback(entityManager);
-          LOG.error("Unexpected error occurred during kna1 cloning process for CMR No : " + rdcCloningRefn.getCmrNo(), e);
-          // processError(entityManager, null, e.getMessage());
-        }
-        partialCommit(entityManager);
-      }
-
-      // now start cloning at RDc end for KNA1 child tables
-      LOG.info("Retrieving pending RDc records for kna1 child processing..");
-      pendingCloningRefn = getPendingRecordsRDCKna1Child(entityManager);
-
-      LOG.debug((pendingCloningRefn != null ? pendingCloningRefn.size() : 0) + " records to process to KNA1 child RDc.");
-
-      Kna1 kna1 = null;
-      Kna1 kna1Clone = null;
-
-      for (RdcCloningRefn rdcCloningRefn : pendingCloningRefn) {
-        try {
-          kna1 = getKna1ByKunnr(entityManager, rdcCloningRefn.getId().getMandt(), rdcCloningRefn.getId().getKunnr());
-          kna1Clone = getKna1ByKunnr(entityManager, rdcCloningRefn.getTargetMandt(), rdcCloningRefn.getTargetKunnr());
-          overrideValues = overrideUtil.getOverrideValueFromMapping(rdcCloningRefn.getCmrIssuingCntry());
-          processKna1Children(entityManager, kna1, kna1Clone, rdcConfig, overrideValues);
-          rdcCloningRefn.setStatus("C");
-          updateEntity(rdcCloningRefn, entityManager);
-          // if all rdcCloningRefn complete update cmr queue to completed
-          cmrCloningQueueStatusUpdate(entityManager, rdcCloningRefn);
-        } catch (Exception e) {
-          partialRollback(entityManager);
-          LOG.error("Unexpected error occurred during kna1 child cloning process for CMR No : " + rdcCloningRefn.getCmrNo(), e);
-          processError(entityManager, rdcCloningRefn, null, "Issue while cloning KNA1 child records");
-          updateEntity(rdcCloningRefn, entityManager);
-        }
-        partialCommit(entityManager);
-      }
-
-    } catch (Exception e) {
-      e.printStackTrace();
-      addError(e);
-      return false;
-    }
-    return true;
-  }
+  private static final List<String> STATUS_CLONING = Arrays.asList("IN_PROG", "LEGACY_ERR");
+  private static final List<String> STATUS_LEGACY = Arrays.asList("LEGACY_OK", "LEGACYSKIP");
+  private static final List<String> STATUS_RDC = Arrays.asList("RDC_INPROG", "RDC_ERR");
 
   @Override
-  protected boolean isTransactional() {
+  public boolean isTransactional() {
     // TODO Auto-generated method stub
     return true;
   }
@@ -264,18 +134,24 @@ public class CloningProcessService extends BaseBatchService {
     return query.getResults(CmrCloningQueue.class);
   }
 
-  private List<CmrCloningQueue> getLegacyPendingRecords(EntityManager entityManager) {
-    String sql = ExternalizedQuery.getSql("LEGACYD.CLONING_PENDING_RECORDS");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    return query.getResults(CmrCloningQueue.class);
-  }
-
   private void processCloningRecord(EntityManager entityManager, CmrCloningQueue cloningQueue) throws Exception {
     String cmrNo = cloningQueue.getId().getCmrNo();
     String cntry = cloningQueue.getId().getCmrIssuingCntry();
     LOG.debug("Started Cloning process for CMR No " + cmrNo);
 
-    String cloningCmrNo = generateCMRNo(entityManager, cntry, cmrNo);
+    String cloningCmrNo = "";
+    String processingType = PageManager.getProcessingType(cntry, "U");
+    // String processingType = "DR";
+    if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType))
+      cloningCmrNo = generateCMRNoLegacy(entityManager, cntry, cmrNo);
+    else if (PROCESSING_TYPES.contains(processingType))
+      cloningCmrNo = generateCMRNoNonLegacy(entityManager, cntry, cmrNo);
+    else {
+      cloningQueue.setErrorMsg("CMR no generation not supported for this country");
+      cloningQueue.setStatus("STOP");
+      throw new Exception("CMR no generation not supported for this country");
+    }
+
     LOG.debug("Cloning CMR No. " + cloningCmrNo + " generated and assigned.");
 
     // Cloning CMR No entry in Reserved CMR No table
@@ -299,6 +175,7 @@ public class CloningProcessService extends BaseBatchService {
     // Update CMR_CLONING_QUEUE and set the CLONED_CMR_NO to the generated CMR
     // Update STATUS to 'IN_PROG'.
     cloningQueue.setClonedCmrNo(cloningCmrNo);
+
     if ("LEGACYSKIP".equalsIgnoreCase(cloningQueue.getCloningProcessCd()))
       cloningQueue.setStatus("LEGACYSKIP");
     else
@@ -435,7 +312,7 @@ public class CloningProcessService extends BaseBatchService {
 
   }
 
-  private String generateCMRNo(EntityManager entityManager, String cmrIssuingCntry, String cmrNo) throws Exception {
+  private String generateCMRNoLegacy(EntityManager entityManager, String cmrIssuingCntry, String cmrNo) throws Exception {
     GenerateCMRNoRequest request = new GenerateCMRNoRequest();
     request.setLoc1(cmrIssuingCntry);
     request.setLoc2(cmrIssuingCntry);
@@ -455,15 +332,12 @@ public class CloningProcessService extends BaseBatchService {
     int CmrNoVal = Integer.parseInt(cmrNo);
     CloningMapping cMapping = null;
     try {
-      cMapping = getCMRNoRangeFromMapping(cmrIssuingCntry, CmrNoVal);
+      cMapping = getCMRNoRangeFromMapping(cmrIssuingCntry, CmrNoVal, request);
     } catch (Exception e) {
       LOG.error("Error occured while digesting xml.", e);
     }
 
-    if (cMapping != null) {
-      request.setMin(Integer.parseInt(cMapping.getCmrNoMin()));
-      request.setMax(Integer.parseInt(cMapping.getCmrNoMax()));
-    } else if (CmrNoVal >= 990000 && CmrNoVal <= 999999) {
+    if (cMapping == null && (CmrNoVal >= 990000 && CmrNoVal <= 999999)) {
       request.setMin(990000);
       request.setMax(999999);
     }
@@ -481,15 +355,22 @@ public class CloningProcessService extends BaseBatchService {
     }
   }
 
-  public CloningMapping getCMRNoRangeFromMapping(String countryId, int cmrNo) throws Exception {
-    List<CloningMapping> countryMappingList = CloningUtil.getCloningCofigCountry(countryId);
-    if (countryMappingList != null && countryMappingList.size() > 0) {
-      for (CloningMapping mapping : countryMappingList) {
-        if (StringUtils.isNotBlank(mapping.getCmrNoMin()) && StringUtils.isNotBlank(mapping.getCmrNoMax())) {
-          int start = Integer.parseInt(mapping.getCmrNoMin());
-          int end = Integer.parseInt(mapping.getCmrNoMax());
-          if (cmrNo >= start && cmrNo <= end)
-            return mapping;
+  public CloningMapping getCMRNoRangeFromMapping(String countryId, int cmrNo, GenerateCMRNoRequest generateCMRNoObj) throws Exception {
+    CloningMapping mapping = new CloningUtil().getCmrNoRangeFromMapping(countryId);
+    if (mapping != null) {
+      if (StringUtils.isNotBlank(mapping.getCmrNoRange())) {
+        String[] cmrNoRanges = mapping.getCmrNoRange().replaceAll("\n", "").replaceAll(" ", "").split(",");
+        for (String cmrNoRange : cmrNoRanges) {
+          String[] range = cmrNoRange.split("to");
+          if (range.length == 2) {
+            int start = Integer.parseInt(range[0]);
+            int end = Integer.parseInt(range[1]);
+            if (cmrNo >= start && cmrNo <= end) {
+              generateCMRNoObj.setMin(start);
+              generateCMRNoObj.setMax(end);
+              return mapping;
+            }
+          }
         }
       }
     }
@@ -521,18 +402,6 @@ public class CloningProcessService extends BaseBatchService {
     } catch (Exception e) {
       throw new Exception("Cannot initialize " + entityClass.getSimpleName() + " object.");
     }
-  }
-
-  /**
-   * Retrieves all records with STATUS = 'LEGACY_OK' or 'LEGACYSKIP'
-   * 
-   * @param entityManager
-   * @return
-   */
-  private List<CmrCloningQueue> getPendingCloningRecordsRDC(EntityManager entityManager) {
-    String sql = ExternalizedQuery.getSql("RDC.CLONING_PENDING_RECORDS");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    return query.getResults(CmrCloningQueue.class);
   }
 
   private void processCloningRDC(EntityManager entityManager, CmrCloningQueue cloningQueue, String targetCntry) throws Exception {
@@ -613,31 +482,21 @@ public class CloningProcessService extends BaseBatchService {
       return false;
   }
 
-  private void cmrCloningQueueStatusUpdate(EntityManager entityManager, RdcCloningRefn rdcCloningRefn) throws Exception {
-    boolean statusCheck = false;
+  private void cmrCloningQueueStatusUpdate(EntityManager entityManager, CmrCloningQueue cloningQueue) throws Exception {
+    LOG.info("Inside cmrCloningQueueStatusUpdate for CMR No : " + cloningQueue.getId().getCmrNo());
     String sql = ExternalizedQuery.getSql("CLONING_CMR_STATUS_CHK");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("MANDT", rdcCloningRefn.getId().getMandt());
-    query.setParameter("CNTRY", rdcCloningRefn.getCmrIssuingCntry());
-    query.setParameter("CMR_NO", rdcCloningRefn.getCmrNo());
+    query.setParameter("ID", cloningQueue.getId().getCmrCloningProcessId());
+    // query.setParameter("CNTRY", cloningQueue.getId().getCmrIssuingCntry());
+    query.setParameter("CMR_NO", cloningQueue.getId().getCmrNo());
     List<Object[]> status = query.getResults();
     if (status.size() == 1) {
       String curentStatus = String.valueOf(status.get(0));
-      if ("C".equals(curentStatus))
-        statusCheck = true;
-    }
-    if (statusCheck) {
-      CmrCloningQueuePK cloningPk = new CmrCloningQueuePK();
-      cloningPk.setCmrCloningProcessId(rdcCloningRefn.getId().getCmrCloningProcessId());
-      cloningPk.setCmrIssuingCntry(rdcCloningRefn.getCmrIssuingCntry());
-      cloningPk.setCmrNo(rdcCloningRefn.getCmrNo());
-      CmrCloningQueue cmrCloningQueue = entityManager.find(CmrCloningQueue.class, cloningPk);
-      if (cmrCloningQueue == null) {
-        throw new Exception("Cannot locate CmrCloningQueue record");
+      if ("C".equals(curentStatus)) {
+        cloningQueue.setStatus("COMPLETED");
+        updateEntity(cloningQueue, entityManager);
       }
 
-      cmrCloningQueue.setStatus("COMPLETED");
-      updateEntity(cmrCloningQueue, entityManager);
     }
 
   }
@@ -667,25 +526,24 @@ public class CloningProcessService extends BaseBatchService {
 
     rdcCloningRefn.setErrorMsg(errorMsg);
 
+    updateEntity(cmrCloningQueue, entityManager);
+    updateEntity(rdcCloningRefn, entityManager);
+
   }
 
-  private List<RdcCloningRefn> getPendingCloningRecordsKNA1RDC(EntityManager entityManager) {
+  private List<RdcCloningRefn> getPendingCloningRecordsKNA1RDC(EntityManager entityManager, CmrCloningQueue cmrCloningQueue) {
     String sql = ExternalizedQuery.getSql("CLONING_CMR_CLONING_RDC_REF_PENDING");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("ID", cmrCloningQueue.getId().getCmrCloningProcessId());
+    // query.setParameter("CNTRY",
+    // cmrCloningQueue.getId().getCmrIssuingCntry());
+    query.setParameter("CMR", cmrCloningQueue.getId().getCmrNo());
     return query.getResults(RdcCloningRefn.class);
   }
 
   private void processCloningKNA1RDC(EntityManager entityManager, RdcCloningRefn rdcCloningRefn, CloningRDCConfiguration rdcConfig,
-      List<CloningOverrideMapping> overrideValues) throws Exception {
-    CmrCloningQueuePK cloningPk = new CmrCloningQueuePK();
-    cloningPk.setCmrCloningProcessId(rdcCloningRefn.getId().getCmrCloningProcessId());
-    cloningPk.setCmrIssuingCntry(rdcCloningRefn.getCmrIssuingCntry());
-    cloningPk.setCmrNo(rdcCloningRefn.getCmrNo());
-    CmrCloningQueue cmrCloningQueue = entityManager.find(CmrCloningQueue.class, cloningPk);
-    if (cmrCloningQueue == null) {
-      throw new Exception("Cannot locate CmrCloningQueue record");
-    }
-
+      List<CloningOverrideMapping> overrideValues, CmrCloningQueue cloningQueue) throws Exception {
+    LOG.info("processCloningKNA1RDC CMR No: " + rdcCloningRefn.getCmrNo());
     try {
       Kna1 kna1 = null;
       String kunnr = "";
@@ -702,12 +560,16 @@ public class CloningProcessService extends BaseBatchService {
           PropertyUtils.copyProperties(kna1Clone, kna1);
           kna1Clone.setId(kna1PkClone);
           kna1Clone.setBran5("S" + kunnr.substring(1));
-          kna1Clone.setZzkvCusno(cmrCloningQueue.getClonedCmrNo());
+          kna1Clone.setZzkvCusno(cloningQueue.getClonedCmrNo());
           kna1Clone.setKatr10(rdcConfig.getKatr10());// from config file
           if (StringUtils.isNotBlank(kna1.getAdrnr())) {
             String adrnr = generateId(rdcConfig.getTargetMandt(), ADRNR_KEY, entityManager);
             kna1Clone.setAdrnr(adrnr);
           }
+
+          // dual create case handling
+          if (!cloningQueue.getId().getCmrIssuingCntry().equals(rdcCloningRefn.getCmrIssuingCntry()))
+            kna1Clone.setKatr6(rdcCloningRefn.getCmrIssuingCntry());
 
           overrideConfigChanges(entityManager, overrideValues, kna1Clone, KNA1_TABLE, kna1PkClone);
 
@@ -717,7 +579,7 @@ public class CloningProcessService extends BaseBatchService {
 
           createEntity(kna1Clone, entityManager);
         } catch (Exception e) {
-          processError(entityManager, rdcCloningRefn, cmrCloningQueue, "Issue in Copy KNA1 record");
+          processError(entityManager, rdcCloningRefn, cloningQueue, "Issue in Copy KNA1 record");
         }
       }
 
@@ -725,19 +587,23 @@ public class CloningProcessService extends BaseBatchService {
       rdcCloningRefn.setTargetKunnr(kunnr);
 
     } catch (Exception e) {
-      processError(entityManager, rdcCloningRefn, cmrCloningQueue, "Issue in Creating KNA1 record");
+      processError(entityManager, rdcCloningRefn, cloningQueue, "Issue in Creating KNA1 record");
     }
 
-    updateEntity(cmrCloningQueue, entityManager);
+    updateEntity(cloningQueue, entityManager);
     updateEntity(rdcCloningRefn, entityManager);
     LOG.debug("CMR No " + rdcCloningRefn.getCmrNo() + " Status: " + rdcCloningRefn.getStatus() + " Message: " + rdcCloningRefn.getErrorMsg());
 
     partialCommit(entityManager);
   }
 
-  private List<RdcCloningRefn> getPendingRecordsRDCKna1Child(EntityManager entityManager) {
+  private List<RdcCloningRefn> getPendingRecordsRDCKna1Child(EntityManager entityManager, CmrCloningQueue cmrCloningQueue) {
     String sql = ExternalizedQuery.getSql("CLONING_CMR_CLONING_RDC_REF_PENDING_CHILD");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("ID", cmrCloningQueue.getId().getCmrCloningProcessId());
+    // query.setParameter("CNTRY",
+    // cmrCloningQueue.getId().getCmrIssuingCntry());
+    query.setParameter("CMR", cmrCloningQueue.getId().getCmrNo());
     return query.getResults(RdcCloningRefn.class);
   }
 
@@ -1626,6 +1492,199 @@ public class CloningProcessService extends BaseBatchService {
         }
       }
     }
+  }
+
+  private String generateCMRNoNonLegacy(EntityManager entityManager, String cmrIssuingCntry, String cmrNo) throws Exception {
+    LOG.debug("Inside generateCMRNoNonLegacy method ");
+    String mandt = SystemConfiguration.getValue("MANDT");
+    CloningUtil cUtil = new CloningUtil();
+    String kukla = cUtil.getKuklaFromCMR(entityManager, cmrIssuingCntry, cmrNo, mandt);
+    GEOHandler geoHandler = RequestUtils.getGEOHandler(cmrIssuingCntry);
+    String generatedCmrNo = "";
+    if (geoHandler != null) {
+      generatedCmrNo = geoHandler.getCMRNo(entityManager, kukla, mandt, cmrIssuingCntry, cmrNo);
+      if (StringUtils.isNotBlank(generatedCmrNo))
+        return generatedCmrNo;
+      else {
+        LOG.error("CMR No cannot be generated due to some Error");
+        throw new Exception("CMR No cannot be generated.");
+      }
+    }
+    return generatedCmrNo;
+  }
+
+  @Override
+  public Boolean executeBatchForRequests(EntityManager entityManager, List<CmrCloningQueue> pendingLists) throws Exception {
+    // TODO Auto-generated method stub
+    LOG.info("Inside executeBatchForRequests method");
+    // CmrCloningQueue pendingCloning = null;
+    MessageTransformer transformer = null;
+    String cntryDup = "";
+
+    for (CmrCloningQueue cloningQueue : pendingLists) {
+      switch (cloningQueue.getStatus()) {
+      case "PENDING":
+        try {
+          processCloningRecord(entityManager, cloningQueue);
+        } catch (Exception e) {
+          partialRollback(entityManager);
+          LOG.error("Unexpected error occurred during reservedcmr and cloning queue insertion " + cloningQueue.getId().getCmrNo(), e);
+          // processError(entityManager, null, e.getMessage());
+          break;
+        }
+        partialCommit(entityManager);
+
+      case "IN_PROG":
+      case "LEGACY_ERR":
+        if (!"LEGACYSKIP".equalsIgnoreCase(cloningQueue.getStatus())) {
+          try {
+            processLegacyCloningProcess(entityManager, cloningQueue, "NA");
+            transformer = TransformerManager.getTransformer(cloningQueue.getId().getCmrIssuingCntry());
+            if (transformer != null) {
+              cntryDup = transformer.getDupCreationCountryId(entityManager, cloningQueue.getId().getCmrIssuingCntry(),
+                  cloningQueue.getId().getCmrNo());
+              if (!"NA".equals(cntryDup)) {
+                processLegacyCloningDupCreate(entityManager, cloningQueue, cntryDup);
+              }
+            }
+
+          } catch (Exception e) {
+            partialRollback(entityManager);
+            cloningQueue.setStatus("LEGACY_ERR");
+            cloningQueue.setErrorMsg("Error occured during legacy cloning");
+            updateEntity(cloningQueue, entityManager);
+            LOG.error("Unexpected error occurred during legacy cloning process for CMR No :" + cloningQueue.getId().getCmrNo(), e);
+            // processError(entityManager, null, e.getMessage());
+            break;
+          }
+          partialCommit(entityManager);
+        }
+
+      case "LEGACY_OK":
+      case "LEGACYSKIP":
+        try {
+          processCloningRDC(entityManager, cloningQueue, "NA");
+          transformer = TransformerManager.getTransformer(cloningQueue.getId().getCmrIssuingCntry());
+          if (transformer != null) {
+            cntryDup = transformer.getDupCreationCountryId(entityManager, cloningQueue.getId().getCmrIssuingCntry(), cloningQueue.getId().getCmrNo());
+            if (!"NA".equals(cntryDup)) {
+              processRdcCloningDupCreate(entityManager, cloningQueue, cntryDup);
+            }
+          }
+
+        } catch (Exception e) {
+          partialRollback(entityManager);
+          LOG.error("Unexpected error occurred during RDC_CLONING_REFN insertion for CMR No :" + cloningQueue.getId().getCmrNo(), e);
+          // processError(entityManager, null, e.getMessage());
+          break;
+        }
+        partialCommit(entityManager);
+
+      case "RDC_INPROG":
+      case "RDC_ERR":
+        processRDCParentChildRecords(entityManager, cloningQueue);
+
+      }
+
+    }
+
+    return true;
+  }
+
+  @Override
+  protected Queue<CmrCloningQueue> getRequestsToProcess(EntityManager entityManager) {
+    LOG.info("Inside getRequestsToProcess method");
+    if (this.devMode) {
+      LOG.info("RUNNING IN DEVELOPMENT MODE");
+    } else {
+      LOG.info("RUNNING IN NON-DEVELOPMENT MODE");
+    }
+
+    LinkedList<CmrCloningQueue> cloningList = new LinkedList<>();
+
+    try {
+
+      ChangeLogListener.setUser(COMMENT_LOGGER);
+
+      LOG.info("Initializing Country Map..");
+      LandedCountryMap.init(entityManager);
+
+      // Retrieve all Pending records for cloning
+      LOG.info("Retreiving cloning pending records for processing..");
+      List<CmrCloningQueue> pendingCloning = getCloningPendingRecords(entityManager);
+      LOG.debug((pendingCloning != null ? pendingCloning.size() : 0) + " records to process for cloning.");
+      if (pendingCloning != null) {
+        cloningList.addAll(pendingCloning);
+      }
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      addError(e);
+      // return false;
+    }
+    return cloningList;
+  }
+
+  @Override
+  protected String getThreadName() {
+    // TODO Auto-generated method stub
+    return "CloningProcessService";
+  }
+
+  private void processRDCParentChildRecords(EntityManager entityManager, CmrCloningQueue cloningQueue) throws Exception {
+    // now start cloning kna1 rdc
+    LOG.info("Retrieving pending KNA1 RDc records for processing.." + cloningQueue.getId().getCmrNo());
+    List<RdcCloningRefn> pendingCloningRefn = getPendingCloningRecordsKNA1RDC(entityManager, cloningQueue);
+
+    LOG.debug((pendingCloningRefn != null ? pendingCloningRefn.size() : 0) + " records to process to KNA1 RDc.");
+
+    CloningRDCUtil rdcUtil = new CloningRDCUtil();
+    CloningRDCConfiguration rdcConfig = rdcUtil.getConfigDetails();
+
+    List<CloningOverrideMapping> overrideValues = null;
+    CloningOverrideUtil overrideUtil = new CloningOverrideUtil();
+
+    for (RdcCloningRefn rdcCloningRefn : pendingCloningRefn) {
+      try {
+        overrideValues = overrideUtil.getOverrideValueFromMapping(rdcCloningRefn.getCmrIssuingCntry());
+        processCloningKNA1RDC(entityManager, rdcCloningRefn, rdcConfig, overrideValues, cloningQueue);
+      } catch (Exception e) {
+        partialRollback(entityManager);
+        LOG.error("Unexpected error occurred during kna1 cloning process for CMR No : " + rdcCloningRefn.getCmrNo(), e);
+        // processError(entityManager, null, e.getMessage());
+      }
+      partialCommit(entityManager);
+    }
+
+    // now start cloning at RDc end for KNA1 child tables
+    LOG.info("Retrieving pending RDc records for kna1 child processing..");
+    pendingCloningRefn = getPendingRecordsRDCKna1Child(entityManager, cloningQueue);
+
+    LOG.debug((pendingCloningRefn != null ? pendingCloningRefn.size() : 0) + " records to process to KNA1 child RDc.");
+
+    Kna1 kna1 = null;
+    Kna1 kna1Clone = null;
+
+    for (RdcCloningRefn rdcCloningRefn : pendingCloningRefn) {
+      try {
+        kna1 = getKna1ByKunnr(entityManager, rdcCloningRefn.getId().getMandt(), rdcCloningRefn.getId().getKunnr());
+        kna1Clone = getKna1ByKunnr(entityManager, rdcCloningRefn.getTargetMandt(), rdcCloningRefn.getTargetKunnr());
+        overrideValues = overrideUtil.getOverrideValueFromMapping(rdcCloningRefn.getCmrIssuingCntry());
+        processKna1Children(entityManager, kna1, kna1Clone, rdcConfig, overrideValues);
+        rdcCloningRefn.setStatus("C");
+        updateEntity(rdcCloningRefn, entityManager);
+
+      } catch (Exception e) {
+        partialRollback(entityManager);
+        LOG.error("Unexpected error occurred during kna1 child cloning process for CMR No : " + rdcCloningRefn.getCmrNo(), e);
+        processError(entityManager, rdcCloningRefn, null, "Issue while cloning KNA1 child records");
+        updateEntity(rdcCloningRefn, entityManager);
+      }
+      partialCommit(entityManager);
+    }
+
+    // all rdcCloningRefn status complete then update cloningQueue completed
+    cmrCloningQueueStatusUpdate(entityManager, cloningQueue);
   }
 
 }
