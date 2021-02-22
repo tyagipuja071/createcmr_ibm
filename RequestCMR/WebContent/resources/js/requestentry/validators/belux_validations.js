@@ -88,7 +88,7 @@ function afterConfigForBELUX() {
     FormManager.setValue('custPrefLang', 'V');
   }
   if (custGrp == 'CROSS') {
-    FormManager.setValue('custPrefLang', 'I');
+    FormManager.setValue('custPrefLang', 'E');
   }
 
   if (role == 'Processor') {
