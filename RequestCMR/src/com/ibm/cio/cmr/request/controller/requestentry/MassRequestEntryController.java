@@ -552,7 +552,7 @@ public class MassRequestEntryController extends BaseController {
             docLink = SystemConfiguration.getSystemProperty("massupdateauto." + cmrIssuingCntry);
           } else if (SWISSHandler.isCHIssuingCountry(cmrIssuingCntry)) {
             docLink = SystemConfiguration.getSystemProperty("massupdateauto." + cmrIssuingCntry);
-          } else if ("618".equals(cmrIssuingCntry)) {
+          } else if ("618".equals(cmrIssuingCntry) || "706".equals(cmrIssuingCntry)) {
             docLink = SystemConfiguration.getSystemProperty("massupdateauto." + cmrIssuingCntry);
           } else if (LegacyDirectUtil.isCountryDREnabled(eManager, cmrIssuingCntry)) {
             docLink = SystemConfiguration.getSystemProperty("massupdateauto." + cmrIssuingCntry);

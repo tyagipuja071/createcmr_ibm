@@ -4231,6 +4231,45 @@ function addVATAttachValidation() {
     };
   })(), 'MAIN_ATTACH_TAB', 'frmCMR');
 }
+var currentChosenScenarioME = '';
+function setIsuCtcOnScenarioChange() {
+  var reqType = FormManager.getActualValue('reqType');
+  if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType != 'C') {
+    return;
+  }
+  var scenario = FormManager.getActualValue('custSubGrp');
+  var scenarioChanged = false;
+  if (typeof (_pagemodel) != 'undefined' && _pagemodel['custSubGrp'] != scenario) {
+    scenarioChanged = true;
+  }
+  scenarioChanged = scenarioChanged || (currentChosenScenarioME != '' && currentChosenScenarioME != scenario);
+  currentChosenScenarioME = scenario;
+  if(scenario == 'BUSPR' || scenario.includes('BP')){
+    FormManager.setValue('isuCd', '8B');
+    FormManager.setValue('clientTier', '7');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('clientTier');
+  }else if(scenario.includes('IN')){
+    FormManager.setValue('isuCd', '21');
+    FormManager.setValue('clientTier', '7');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('clientTier');
+  }else if(scenarioChanged){
+    FormManager.setValue('isuCd', '34');
+    FormManager.setValue('clientTier', 'Q');
+    FormManager.enable('isuCd');
+    FormManager.enable('clientTier');
+  }
+  //CREATCMR-816 No.3 Set company number 985518
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  if((SysLoc.UNITED_ARAB_EMIRATES == cntry || SysLoc.ABU_DHABI == cntry) && scenarioChanged){
+    if(scenario == 'BUSPR' || scenario.includes('BP') || scenario.includes('IN')){
+      FormManager.setValue('enterprise', '');
+    }else{
+      FormManager.setValue('enterprise', '985518');
+    }
+  }
+} 
 
 var currentChosenScenarioME = '';
 function setIsuCtcOnScenarioChange() {
