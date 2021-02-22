@@ -188,7 +188,7 @@ div#filterlabels table {
       <a style="font-size:13px" href="javascript: CmrMetrics.selectFilters(false)">Remove All</a><br>
       <cmr:button label="Update Chart" onClick="CmrMetrics.updateChart()" highlight="true"></cmr:button>
     </div>
-    <iframe id="exportFrame" name="exportFrame" style="display:none">
+    <iframe id="exportFrame" name="exportFrame" style="display:none"></iframe>
   </cmr:section>
 
 </cmr:boxContent>
