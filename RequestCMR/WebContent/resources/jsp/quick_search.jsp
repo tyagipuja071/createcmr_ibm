@@ -433,7 +433,22 @@ form.ibm-column-form .dijitTextBox INPUT {
           </cmr:column>
         </div>
       </cmr:row>
-
+      <%if (user != null && (user.isProcessor() || user.isCmde())){ %>
+      <cmr:row>
+        <cmr:column span="1" width="185">
+          &nbsp;
+        </cmr:column>     
+        <cmr:column span="2" width="300">
+          <p>
+            <form:checkbox path="addDnBMatches" value="Y"/>
+            <label for="addDnBMatches" class="cmr-radio-check-label">
+               <span id="cmr-fld-lbl-addDnBMatches">Include D&B Matches</span>
+               <cmr:info text="Search D&B and get the results even if the search matches CMRs" />
+            </label>            
+          </p>
+        </cmr:column>     
+      </cmr:row>
+      <%}%>
 
       <cmr:row>
         &nbsp;

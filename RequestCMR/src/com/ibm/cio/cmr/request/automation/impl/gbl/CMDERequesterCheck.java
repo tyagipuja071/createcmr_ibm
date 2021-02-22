@@ -62,6 +62,11 @@ public class CMDERequesterCheck extends ValidatingElement {
         output.setOnError(true);
         validation.setMessage("Validation Failed");
         validation.setSuccess(false);
+      } else {
+        output.setDetails("Requester is not from CMDE team.");
+        output.setOnError(false);
+        validation.setMessage("Automation checks required.");
+        validation.setSuccess(true);
       }
     } else {
       output.setDetails("Element execution skipped for current request type based on country configurations.");
