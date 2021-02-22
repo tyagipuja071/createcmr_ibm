@@ -202,14 +202,12 @@ function setInacByClusterHKMO() {
   if (!_cluster) {
     return;
   }
-  if (!(_cluster == '04501' || _cluster == '04683' || _cluster == '04690')) {
-    return;
-  }
   if (_cluster == '04501' || _cluster == '04683' || _cluster == '04690') {
     FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('inacType', Validators.REQUIRED, [ 'INAC Type' ], 'MAIN_IBM_TAB');
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
     FormManager.removeValidator('isuCd', Validators.REQUIRED);
+    FormManager.setValue('mrcCd', '2');
     var qParams = {
       _qall : 'Y',
       ISSUING_CNTRY : cntry,
@@ -237,10 +235,9 @@ function setInacByClusterHKMO() {
   } else {
     FormManager.removeValidator('inacCd', Validators.REQUIRED);
     FormManager.removeValidator('inacType', Validators.REQUIRED);
-    FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
-    updateMRCAseanAnzIsa();
     FormManager.resetDropdownValues(FormManager.getField('inacCd'));
     FormManager.resetDropdownValues(FormManager.getField('inacType'));
+    FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
     return;
   }
 }
