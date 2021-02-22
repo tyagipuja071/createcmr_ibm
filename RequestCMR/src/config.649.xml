@@ -9,70 +9,60 @@
 					<length>6</length>
 				</column>
 				<column>
-					<label>Abbreviated Name</label>
-					<dbColumn>ABBREV_NM</dbColumn>
-					<width>40</width>
-					<length>22</length>
-				</column>
-				<column>
-					<label>Abbreviated Location</label>
-					<dbColumn>ABBREV_LOCN</dbColumn>
+					<label>AR-FAAR</label>
+					<dbColumn>MKTG_AR_DEPT</dbColumn>
 					<width>20</width>
-					<length>12</length>
 				</column>
 				<column>
-					<label>Subindustry</label>
-					<dbColumn>SUB_INDUSTRY_CD</dbColumn>
+					<label>Credit Code</label>
+					<dbColumn>ORD_BLK</dbColumn>
 					<width>20</width>
-					<bdsId>Subindustry</bdsId>
 				</column>
 				<column>
-					<label>ISIC</label>
-					<dbColumn>ISIC_CD</dbColumn>
-					<width>20</width>
-					<bdsId>ISIC</bdsId>
-				</column>
-				<column>
-					<label>SBO/Search Term</label>
-					<dbColumn>SALES_BO_CD</dbColumn>
-					<width>20</width>
-					<length>4</length>
-				</column>
-				<column>
-					<label>Industry Solution Unit (ISU)</label>
-					<dbColumn>ISU_CD</dbColumn>
-					<width>25</width>
-					<lovId>ISU</lovId>
-				</column>
-				<column exactLength="true">
-					<label>INAC/NAC</label>
+					<label>NAT/INAT</label>
 					<dbColumn>INAC_CD</dbColumn>
 					<width>20</width>
-					<length>4</length>
 				</column>
 				<column>
-					<label>Client Tier</label>
-					<dbColumn>CLIENT_TIER</dbColumn>
-					<width>25</width>
-					<lovId>ClientTier</lovId>
-				</column>
-				<column>
-					<label>Classification Code</label>
-					<dbColumn>CUST_CLASS</dbColumn>
+					<label>SBR</label>
+					<dbColumn>SALES_BO_CD</dbColumn>
 					<width>20</width>
-					<lovId>CustClass</lovId>
 				</column>
 				<column>
-					<label>Order Block Code</label>
-					<dbColumn>ORD_BLK</dbColumn>
-					<width>25</width>
-					 <length>2</length> 
-					<lovId>OrderBlock</lovId>
+					<label>SIC Code</label>
+					<dbColumn>ISIC_CD</dbColumn>
+					<width>20</width>
+				</column>
+				<column>
+					<label>MKTG Rep</label>
+					<dbColumn>REP_TEAM_MEMBER_NO</dbColumn>
+					<width>20</width>
+				</column>
+				<column>
+					<label>Remove PO</label>
+					<!--NOTE: TEMPORARY DB MAPPING -->
+					<dbColumn>OUT_CITY_LIMIT</dbColumn>
+					<width>20</width>
+				</column>
+				<column>
+					<label>Abbreviated Name</label>
+					<dbColumn>ABBREV_NM</dbColumn>
+					<width>20</width>
+				</column>
+				<column>
+					<label>EFC</label>
+					<dbColumn>TAX_CD1</dbColumn>
+					<width>20</width>
+				</column>
+				<column>
+					<label>No. of Invoices</label>
+					<!--NOTE: TEMPORARY DB MAPPING -->
+					<dbColumn>ENTERPRISE</dbColumn>
+					<width>20</width>
 				</column>
 			</columns>
 		</tab>
-
-		<tab name="Install At" type="Address" typeCode="ZS01">
+		<tab name="Install at" type="Address" typeCode="ZS01">
 			<columns>
 				<column exactLength="true">
 					<label>CMR. No</label>
@@ -163,7 +153,7 @@
 					<width>18</width>
 					<length>20</length>
 				</column>
-					<column>
+				<column>
 					<label>PostBox City</label>
 					<dbColumn>PO_BOX_CITY</dbColumn>
 					<width>40</width>
@@ -177,6 +167,7 @@
 				</column>
 			</columns>
 		</tab>
+
 		<tab name="Maintenance Billing" type="Address" typeCode="ZP01">
 			<columns>
 				<column exactLength="true">
@@ -268,112 +259,7 @@
 					<width>18</width>
 					<length>20</length>
 				</column>
-					<column>
-					<label>PostBox City</label>
-					<dbColumn>PO_BOX_CITY</dbColumn>
-					<width>40</width>
-					<length>70</length>
-				</column>
 				<column>
-					<label>Landed Country</label>
-					<dbColumn>LAND_CNTRY</dbColumn>
-					<width>18</width>
-					<bdsId>LandedCountry</bdsId>
-				</column>
-			</columns>
-		</tab>
-		<tab name="Invoice To" type="Address" typeCode="ZI01">
-			<columns>
-				<column exactLength="true">
-					<label>CMR. No</label>
-					<dbColumn>CMR_NO</dbColumn>
-					<width>20</width>
-					<length>6</length>
-				</column>
-				<column exactLength="true">
-					<label>Address Seq. No.</label>
-					<dbColumn>ADDR_SEQUENCE_NO</dbColumn>
-					<width>10</width>
-				</column>
-				<column>
-					<label>Number + Street</label>
-					<dbColumn>ADDR_TXT</dbColumn>
-					<width>40</width>
-					<length>30</length>
-				</column>
-				<column>
-					<label>Street con't</label>
-					<dbColumn>ADDR_TXT_2</dbColumn>
-					<width>40</width>
-					<length>30</length>
-				</column>
-				<column>
-					<label>Division</label>
-					<dbColumn>DIVN</dbColumn>
-					<width>40</width>
-					<length>30</length>
-				</column>
-				<column>
-					<label>City</label>
-					<dbColumn>CITY1</dbColumn>
-					<width>40</width>
-					<length>30</length>
-				</column>
-				<column>
-					<label>Department / Attn.</label>
-					<dbColumn>DEPT</dbColumn>
-					<width>40</width>
-					<length>30</length>
-				</column>
-				<column>
-					<label>District</label>
-					<dbColumn>CITY2</dbColumn>
-					<width>40</width>
-					<length>70</length>
-				</column>
-				<column>
-					<label>Building</label>
-					<dbColumn>BLDG</dbColumn>
-					<width>40</width>
-					<length>100</length>
-				</column>
-				<column>
-					<label>State/Province</label>
-					<dbColumn>STATE_PROV</dbColumn>
-					<width>40</width>
-					<length>30</length>
-				</column>
-				<column>
-					<label>Floor</label>
-					<dbColumn>FLOOR</dbColumn>
-					<width>40</width>
-					<length>100</length>
-				</column>
-				<column>
-					<label>Postal Code</label>
-					<dbColumn>POST_CD</dbColumn>
-					<width>18</width>
-					<length>10</length>
-				</column>
-				<column>
-					<label>Office</label>
-					<dbColumn>OFFICE</dbColumn>
-					<width>40</width>
-					<length>100</length>
-				</column>
-				<column>
-					<label>Phone#</label>
-					<dbColumn>CUST_PHONE</dbColumn>
-					<width>18</width>
-					<length>16</length>
-				</column>
-				<column>
-					<label>PostBox</label>
-					<dbColumn>PO_BOX</dbColumn>
-					<width>18</width>
-					<length>20</length>
-				</column>
-					<column>
 					<label>PostBox City</label>
 					<dbColumn>PO_BOX_CITY</dbColumn>
 					<width>40</width>
