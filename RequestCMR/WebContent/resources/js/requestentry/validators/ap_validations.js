@@ -29,6 +29,7 @@ function addHandlersForGCG() {
   if (_clusterHandlerGCG == null && FormManager.getActualValue('reqType') != 'U') {
     _clusterHandlerGCG = dojo.connect(FormManager.getField('apCustClusterId'), 'onChange', function(value) {
       setIsuOnIsic();
+      setInacByClusterHKMO();
     });
   }
 }
@@ -138,12 +139,16 @@ function addAfterConfigAP() {
   }
   if(reqType == 'C'){
     setInacByCluster();
+    setInacByClusterHKMO();
   }
 }
 
 function setInacByCluster() {
     var _cluster = FormManager.getActualValue('apCustClusterId');
     var cntry = FormManager.getActualValue('cmrIssuingCntry');
+    if (cntry == '736' || cntry == '738') {
+      return;
+    }
     if (!_cluster) {
       return;
     }
@@ -186,6 +191,58 @@ function setInacByCluster() {
       FormManager.resetDropdownValues(FormManager.getField('inacType'));
       return;
     }
+}
+
+function setInacByClusterHKMO() {
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var _cluster = FormManager.getActualValue('apCustClusterId');
+  if (FormManager.getActualValue('reqType') != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  if (!_cluster) {
+    return;
+  }
+  if (!(_cluster == '04501' || _cluster == '04683' || _cluster == '04690')) {
+    return;
+  }
+  if (_cluster == '04501' || _cluster == '04683' || _cluster == '04690') {
+    FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
+    FormManager.addValidator('inacType', Validators.REQUIRED, [ 'INAC Type' ], 'MAIN_IBM_TAB');
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    FormManager.removeValidator('isuCd', Validators.REQUIRED);
+    var qParams = {
+      _qall : 'Y',
+      ISSUING_CNTRY : cntry,
+      CMT : '%' + _cluster + '%'
+    };
+    var inacList = cmr.query('GET.INAC_BY_CLUSTER', qParams);
+    if (inacList != null) {
+      var inacTypeSelected ='';
+      var arr =  inacList.map(inacList => inacList.ret1);
+      inacTypeSelected  =  inacList.map(inacList => inacList.ret2);
+      FormManager.limitDropdownValues(FormManager.getField('inacCd'), arr);
+      if (inacList.length == 1) {
+        FormManager.setValue('inacCd', arr[0]);
+      }       
+      if (inacType != '' && inacTypeSelected[0].includes(",I") && !inacTypeSelected[0].includes(',IN')) {
+        FormManager.limitDropdownValues(FormManager.getField('inacType'), 'I');
+        FormManager.setValue('inacType', 'I');
+      } else if (inacType != '' && inacTypeSelected[0].includes(',N')) {
+        FormManager.limitDropdownValues(FormManager.getField('inacType'), 'N');
+        FormManager.setValue('inacType', 'N');
+      } else {
+        FormManager.resetDropdownValues(FormManager.getField('inacType'));
+      }
+    }
+  } else {
+    FormManager.removeValidator('inacCd', Validators.REQUIRED);
+    FormManager.removeValidator('inacType', Validators.REQUIRED);
+    FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
+    updateMRCAseanAnzIsa();
+    FormManager.resetDropdownValues(FormManager.getField('inacCd'));
+    FormManager.resetDropdownValues(FormManager.getField('inacType'));
+    return;
+  }
 }
 
 /* ASEAN ANZ GCG ISIC MAPPING */
