@@ -159,7 +159,7 @@ public class SystemUtil {
     return getCurrentTimestamp();
   }
 
-  public static synchronized long getNextID(EntityManager entityManager, String mandt, String idType) throws CmrException, SQLException {
+  public static long getNextID(EntityManager entityManager, String mandt, String idType) throws CmrException, SQLException {
     return getNextID(entityManager, mandt, idType, "CREQCMR");
   }
 
@@ -171,7 +171,8 @@ public class SystemUtil {
    * @throws CmrException
    * @throws SQLException
    */
-  public static long getNextID(EntityManager entityManager, String mandt, String idType, String schema) throws CmrException, SQLException {
+  public static synchronized long getNextID(EntityManager entityManager, String mandt, String idType, String schema)
+      throws CmrException, SQLException {
 
     String schemaToUse = schema != null ? schema + "." : "";
     String sql = "select NEXT VALUE for " + schemaToUse + "SEQ_" + idType + ", '' from SYSIBM.SYSDUMMY1";
