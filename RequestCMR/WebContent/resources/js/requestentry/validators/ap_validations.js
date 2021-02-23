@@ -1964,17 +1964,13 @@ function setINACState() {
   var role = null;
   var isuCd = FormManager.getActualValue('isuCd');
   var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
-  var isaCntries = [ '615', '652', '744' ];
+  var isaCntries = [ ];
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
   }
   if (role == 'Requester' && (isuCd == '34' || isuCd == '04' || isuCd == '3T') && cmrCntry == '616') {
     FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('inacType', Validators.REQUIRED, [ 'INAC Type' ], 'MAIN_IBM_TAB');
-  } else if (role == 'Requester' && isuCd == '34') {
-    FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
-  } else if (role == 'Requester' && (isuCd == '34' || isuCd == '3T' || isuCd == '5B') && (isaCntries.indexOf(cmrCntry) >= 0)) {
-    FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
   } else {
     FormManager.removeValidator('inacCd', Validators.REQUIRED);
   }
@@ -2939,6 +2935,4 @@ dojo.addOnLoad(function() {
   
   GEOHandler.addAfterConfig(addHandlersForAP, GEOHandler.AP);
   GEOHandler.addAfterConfig(addHandlersForGCG, GEOHandler.GCG);
-  GEOHandler.addAfterConfig(setInacByCluster, SysLoc.INDIA);
-  GEOHandler.addAfterTemplateLoad(setInacByCluster, SysLoc.INDIA);
 });
