@@ -198,7 +198,11 @@ public class BeLuxUtil extends AutomationUtil {
     BeLuxFieldsContainer container = new BeLuxFieldsContainer();
     List<Object[]> salesRepRes = new ArrayList<>();
     String isuCtc = (StringUtils.isNotBlank(isuCd) ? isuCd : "") + (StringUtils.isNotBlank(clientTier) ? clientTier : "");
-    String geoCd = (StringUtils.isNotBlank(countryUse.substring(3, 5)) ? countryUse.substring(3, 5) : "");
+    String geoCd = "";
+    if (countryUse.length() > 3) {
+      geoCd = countryUse.substring(3, 5);
+    }
+
     String cmrCntry = cmrIssuingctry + geoCd;
     if (StringUtils.isNotBlank(subIndustryCd) && ("32S".equals(isuCtc))) {
       String ims = subIndustryCd.substring(0, 1);
