@@ -48,7 +48,7 @@ public class BELUXTransformer extends EMEATransformer {
 
   private static final String[] NO_UPDATE_FIELDS = { "OrganizationNo", "CurrencyCode" };
 
-  private static final String[] ADDRESS_ORDER = { "ZS01", "ZP01", "ZI01", "ZD01", "ZS02" };
+  private static final String[] ADDRESS_ORDER = { "ZS01", "ZP01", "ZI01", "ZD01", "ZS02", "PG01" };
   private static final List<String> SUB_TYPES_INTERNAL = Arrays.asList("BEINT", "LUINT", "INTER");
   private static final List<String> SUB_TYPES_INTERNAL_SO = Arrays.asList("BEISO", "LUISO");
 
@@ -1660,5 +1660,13 @@ public class BELUXTransformer extends EMEATransformer {
         legacyCust.setIbo(sbo.replace(6, 7, "0").toString());
       }
     }
+  }
+
+  @Override
+  public boolean skipLegacyAddressData(EntityManager entityManager, CMRRequestContainer cmrObjects, Addr currAddr, boolean flag) {
+    if ("PG01".equals(currAddr.getId().getAddrType())) {
+      return true;
+    }
+    return false;
   }
 }
