@@ -543,7 +543,7 @@ public class CanadaHandler extends GEOHandler {
 
   public String getReqType(EntityManager entityManager, long reqId) {
     String reqType = "";
-    String sql = ExternalizedQuery.getSql("ADMIN.GETREQTYPE.MT");
+    String sql = ExternalizedQuery.getSql("ADMIN.GETREQTYPE.CA");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", reqId);
 
