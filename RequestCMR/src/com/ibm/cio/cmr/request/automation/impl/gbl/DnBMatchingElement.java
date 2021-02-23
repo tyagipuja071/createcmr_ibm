@@ -83,7 +83,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
     }
 
     if (soldTo != null) {
-      boolean shouldThrowError = !"Y".equals(admin.getCompVerifiedIndc());
+      boolean shouldThrowError = !"Y".equals(admin.getCompVerifiedIndc()) && engineData.isSosVerified();
       boolean hasValidMatches = false;
       MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, engineData, "ZS01");
       hasValidMatches = DnBUtil.hasValidMatches(response);
