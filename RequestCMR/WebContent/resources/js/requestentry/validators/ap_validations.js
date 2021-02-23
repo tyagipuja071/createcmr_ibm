@@ -183,12 +183,14 @@ function setInacByCluster() {
           var value = FormManager.getField('inacType');
           var cmt = value + ','+ _cluster +'%';
           var value = FormManager.getActualValue('inacType');
+          var cntry =  FormManager.getActualValue('cmrIssuingCntry');
             console.log(value);
             if (value != null) {
               var inacCdValue = [];
               var qParams = {
                 _qall : 'Y',
-                 CMT : cmt ,
+                ISSUING_CNTRY : cntry ,
+                CMT : cmt ,
                };
               var results = cmr.query('GET.INAC_CD', qParams);
               if (results != null) {
@@ -256,12 +258,14 @@ function setInacByClusterHKMO() {
         var value = FormManager.getField('inacType');
         var cmt = value + ','+ _cluster +'%';
         var value = FormManager.getActualValue('inacType');
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
           console.log(value);
           if (value != null) {
             var inacCdValue = [];
             var qParams = {
               _qall : 'Y',
-               CMT : cmt ,
+              ISSUING_CNTRY : cntry ,
+              CMT : cmt ,
              };
             var results = cmr.query('GET.INAC_CD', qParams);
             if (results != null) {
@@ -1466,9 +1470,6 @@ function onSubIndustryChange() {
 var _inacCdHandler = null;
 function onInacTypeChange() {
   var cluster = FormManager.getActualValue('apCustClusterId');
-  if (cluster.includes('BLAN')) {
-    return;
-  }
   var reqType = null;
   reqType = FormManager.getActualValue('reqType');
   if (reqType == 'C') {
@@ -1477,19 +1478,23 @@ function onInacTypeChange() {
        
         var cluster = FormManager.getActualValue('apCustClusterId');
         var cmt = value + ','+ cluster +'%';
-        var value = FormManager.getActualValue('inacType');
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
           console.log(value);
           if (value != null) {
             var inacCdValue = [];
-            if(cluster.includes('BLAN')){
+            if(cluster.includes('BLAN') || 
+                ((cluster == '04501' || cluster == '04683' || cluster == '04690') && 
+                    (cntry == SysLoc.HONG_KONG || cntry == SysLoc.MACAO))){
               var qParams = {
               _qall : 'Y',
-               CMT : cmt ,
+              ISSUING_CNTRY : cntry ,
+              CMT : cmt ,
               };
             }else{
               var qParams = {
                   _qall : 'Y',
-                   CMT : value + '%' ,
+                  ISSUING_CNTRY : cntry ,
+                  CMT : value + '%' ,
                   };
             }
             var results = cmr.query('GET.INAC_CD', qParams);
@@ -1497,7 +1502,7 @@ function onInacTypeChange() {
               for (var i = 0; i < results.length; i++) {
                 inacCdValue.push(results[i].ret1);
               }
-              if (value == 'N' && !(cluster.includes('BLAN'))) {
+              if (value == 'N' && !(cluster.includes('BLAN')) && cntry == '616') {
                 inacCdValue.push('new');
               }
               FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacCdValue);
@@ -2935,7 +2940,7 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(addGovIndcHanlder, [ SysLoc.AUSTRALIA ]);
   GEOHandler.addAfterConfig(addGovCustTypHanlder, [ SysLoc.AUSTRALIA ]);
-  GEOHandler.addAfterConfig(onInacTypeChange, [ SysLoc.AUSTRALIA ]);
+  GEOHandler.addAfterConfig(onInacTypeChange, [ SysLoc.AUSTRALIA, SysLoc.NEW_ZEALAND, SysLoc.INDIA, SysLoc.SINGAPORE, SysLoc.THAILAND]);
 
   // ERO specific
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.GCG);
