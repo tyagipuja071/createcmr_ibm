@@ -178,6 +178,29 @@ function setInacByCluster() {
         } else if (inacType != '' && inacTypeSelected[0].includes(',N')) {
           FormManager.limitDropdownValues(FormManager.getField('inacType'), 'N');
           FormManager.setValue('inacType', 'N');
+        } else if(inacType != '' && inacTypeSelected[0].includes(',IN')){
+          FormManager.resetDropdownValues(FormManager.getField('inacType'));
+          var value = FormManager.getField('inacType');
+          var cmt = value + ','+ _cluster +'%';
+          var value = FormManager.getActualValue('inacType');
+            console.log(value);
+            if (value != null) {
+              var inacCdValue = [];
+              var qParams = {
+                _qall : 'Y',
+                 CMT : cmt ,
+               };
+              var results = cmr.query('GET.INAC_CD', qParams);
+              if (results != null) {
+                for (var i = 0; i < results.length; i++) {
+                  inacCdValue.push(results[i].ret1);
+                }
+                FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacCdValue);
+                if (inacCdValue.length == 1) {
+                  FormManager.setValue('inacCd', inacCdValue[0]);
+                }
+              }
+            }
         } else {
           FormManager.resetDropdownValues(FormManager.getField('inacType'));
         }
@@ -228,6 +251,29 @@ function setInacByClusterHKMO() {
       } else if (inacType != '' && inacTypeSelected[0].includes(',N')) {
         FormManager.limitDropdownValues(FormManager.getField('inacType'), 'N');
         FormManager.setValue('inacType', 'N');
+      }else if(inacType != '' && inacTypeSelected[0].includes(',IN')){
+        FormManager.resetDropdownValues(FormManager.getField('inacType'));
+        var value = FormManager.getField('inacType');
+        var cmt = value + ','+ _cluster +'%';
+        var value = FormManager.getActualValue('inacType');
+          console.log(value);
+          if (value != null) {
+            var inacCdValue = [];
+            var qParams = {
+              _qall : 'Y',
+               CMT : cmt ,
+             };
+            var results = cmr.query('GET.INAC_CD', qParams);
+            if (results != null) {
+              for (var i = 0; i < results.length; i++) {
+                inacCdValue.push(results[i].ret1);
+              }
+              FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacCdValue);
+              if (inacCdValue.length == 1) {
+                FormManager.setValue('inacCd', inacCdValue[0]);
+              }
+            }
+          }
       } else {
         FormManager.resetDropdownValues(FormManager.getField('inacType'));
       }
@@ -238,6 +284,7 @@ function setInacByClusterHKMO() {
     FormManager.resetDropdownValues(FormManager.getField('inacCd'));
     FormManager.resetDropdownValues(FormManager.getField('inacType'));
     FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
+    FormManager.setValue('mrcCd', '3');
     return;
   }
 }
@@ -1418,8 +1465,8 @@ function onSubIndustryChange() {
 // Story -2125 drop down list needed in INAC/NAC FIELD based on INAC Type
 var _inacCdHandler = null;
 function onInacTypeChange() {
-  var _cluster = FormManager.getActualValue('apCustClusterId');
-  if (_cluster.includes('BLAN')) {
+  var cluster = FormManager.getActualValue('apCustClusterId');
+  if (cluster.includes('BLAN')) {
     return;
   }
   var reqType = null;
@@ -1427,21 +1474,30 @@ function onInacTypeChange() {
   if (reqType == 'C') {
     if (_inacCdHandler == null) {
       _inacCdHandler = dojo.connect(FormManager.getField('inacType'), 'onChange', function(value) {
-        if (!_cluster.includes('BLAN')) {
-          var value = FormManager.getActualValue('inacType');
+       
+        var cluster = FormManager.getActualValue('apCustClusterId');
+        var cmt = value + ','+ cluster +'%';
+        var value = FormManager.getActualValue('inacType');
           console.log(value);
           if (value != null) {
             var inacCdValue = [];
-            var qParams = {
+            if(cluster.includes('BLAN')){
+              var qParams = {
               _qall : 'Y',
-              CMT : value + '%',
-            };
+               CMT : cmt ,
+              };
+            }else{
+              var qParams = {
+                  _qall : 'Y',
+                   CMT : value + '%' ,
+                  };
+            }
             var results = cmr.query('GET.INAC_CD', qParams);
             if (results != null) {
               for (var i = 0; i < results.length; i++) {
                 inacCdValue.push(results[i].ret1);
               }
-              if (value == 'N') {
+              if (value == 'N' && !(cluster.includes('BLAN'))) {
                 inacCdValue.push('new');
               }
               FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacCdValue);
@@ -1450,7 +1506,7 @@ function onInacTypeChange() {
               }
             }
           }
-        }
+        
       });
     }
   }

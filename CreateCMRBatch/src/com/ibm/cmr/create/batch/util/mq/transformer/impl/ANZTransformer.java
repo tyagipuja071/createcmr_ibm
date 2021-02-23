@@ -45,6 +45,10 @@ public abstract class ANZTransformer extends APTransformer {
       handler.messageHash.put("ClusterNo", clusterID);
     }
 
+    if ("0".equalsIgnoreCase(handler.cmrData.getClientTier())) {
+      handler.messageHash.put("GB_SegCode", "");
+    }
+
   }
 
   @Override
