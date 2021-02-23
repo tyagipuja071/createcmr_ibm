@@ -159,7 +159,7 @@ public class SystemUtil {
     return getCurrentTimestamp();
   }
 
-  public static long getNextID(EntityManager entityManager, String mandt, String idType) throws CmrException, SQLException {
+  public static synchronized long getNextID(EntityManager entityManager, String mandt, String idType) throws CmrException, SQLException {
     return getNextID(entityManager, mandt, idType, "CREQCMR");
   }
 
