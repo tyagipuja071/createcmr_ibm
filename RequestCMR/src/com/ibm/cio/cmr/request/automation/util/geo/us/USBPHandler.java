@@ -59,6 +59,7 @@ import com.ibm.cmr.services.client.MatchingServiceClient;
 import com.ibm.cmr.services.client.PPSServiceClient;
 import com.ibm.cmr.services.client.QueryClient;
 import com.ibm.cmr.services.client.ServiceClient.Method;
+import com.ibm.cmr.services.client.automation.us.SosResponse;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
 import com.ibm.cmr.services.client.dnb.DnbData;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
@@ -238,6 +239,43 @@ public abstract class USBPHandler {
    */
   protected abstract FindCMRRecordModel getIBMCMRBestMatch(AutomationEngineData engineData, RequestData requestData,
       List<DuplicateCMRCheckResponse> matches) throws CmrException;
+
+  /**
+   * Matches against SOS-RPA and gets only closely matching records.
+   * 
+   * @param handler
+   * @param requestData
+   * @param addr
+   * @param engineData
+   * @param details
+   * @throws Exception
+   */
+  public SosResponse matchAgainstSosRpa(GEOHandler handler, RequestData requestData, Addr addr, AutomationEngineData engineData,
+      StringBuilder details, OverrideOutput overrides, boolean hasExistingCmr) throws Exception {
+    List<SosResponse> sosRpaMatches = USUtil.getSosRpaMatchesForBPEndUser(handler, requestData, engineData);
+    if (!sosRpaMatches.isEmpty()) {
+      String msg = "Record found in SOS-RPA Service.";
+      details.append(msg + "\n");
+      SosResponse response = sosRpaMatches.get(0);
+      details.append("Record found in SOS.");
+      details.append("\nCompany Id = " + (StringUtils.isBlank(response.getCompanyId()) ? "" : response.getCompanyId()));
+      details.append("\nCustomer Name = " + (StringUtils.isBlank(response.getLegalName()) ? "" : response.getLegalName()));
+      details.append("\nAddress = " + (StringUtils.isBlank(response.getAddress1()) ? "" : response.getAddress1()));
+      details.append("\nState = " + (StringUtils.isBlank(response.getState()) ? "" : response.getState()));
+      details.append("\nZip = " + (StringUtils.isBlank(response.getZip()) ? "" : response.getZip()));
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ADMN", "COMP_VERIFIED_INDC", requestData.getAdmin().getCompVerifiedIndc(), "Y");
+      return response;
+    } else {
+      String msg = "No records found in SOS-RPA Service.";
+      details.append(msg + "\n");
+      if (hasExistingCmr) {
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ADMN", "COMP_VERIFIED_INDC", requestData.getAdmin().getCompVerifiedIndc(),
+            "Y");
+        details.append("- A current active CMR exists for the company.");
+      }
+      return null;
+    }
+  }
 
   /**
    * Matches against D&B and gets only closely matching records.
