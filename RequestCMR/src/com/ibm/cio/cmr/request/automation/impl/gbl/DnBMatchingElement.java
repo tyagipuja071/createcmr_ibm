@@ -69,6 +69,13 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
     AutomationResult<MatchingOutput> result = buildResult(admin.getId().getReqId());
     MatchingOutput output = new MatchingOutput();
 
+    // skip dnb matching if matching records are found in SOS-RPA
+    if (engineData.isSosVerified()) {
+      result.setResults("Skipped");
+      result.setDetails("Dnb Matching is skipped as matching records are found in SOS-RPA");
+      engineData.addPositiveCheckStatus(AutomationEngineData.SOS_MATCH);
+      return result;
+    }
     // skip dnb matching if dnb matches on UI are overriden and attachment is
     // provided
     if ("Y".equals(admin.getMatchOverrideIndc()) && DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
@@ -83,7 +90,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
     }
 
     if (soldTo != null) {
-      boolean shouldThrowError = !"Y".equals(admin.getCompVerifiedIndc()) && engineData.isSosVerified();
+      boolean shouldThrowError = !"Y".equals(admin.getCompVerifiedIndc());
       boolean hasValidMatches = false;
       MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, engineData, "ZS01");
       hasValidMatches = DnBUtil.hasValidMatches(response);
