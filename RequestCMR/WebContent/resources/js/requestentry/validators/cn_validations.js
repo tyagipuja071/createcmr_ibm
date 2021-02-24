@@ -13,6 +13,7 @@ var _searchTermHandler = null;
 var _govTypeHandler = null;
 var _goeTypeHandler = null;
 var _isicHandlerCN = null;
+var _inacCdHandler = null;
 var CNHandler = {
   CN_NAME1_MAX_BYTE_LEN : 70,
   CN_NAME2_MAX_BYTE_LEN : 70,
@@ -256,6 +257,50 @@ function setIsuOnIsic() {
           FormManager.setValue('isuCd', ISU[0]);
         }
       }
+    }
+  }
+}
+
+function onInacTypeChange() {
+  var searchTerm = FormManager.getActualValue('searchTerm');
+  var reqType = null;
+  reqType = FormManager.getActualValue('reqType');
+  if (reqType == 'C') {
+    if (_inacCdHandler == null) {
+      _inacCdHandler = dojo.connect(FormManager.getField('inacType'), 'onChange', function(value) {
+        var searchTerm = FormManager.getActualValue('searchTerm');
+        var cmt = value + ','+ searchTerm +'%';
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+          console.log(value);
+          if (value != null) {
+            var inacCdValue = [];
+            if(searchTerm == '04687' || searchTerm == '04488' || searchTerm == '04630' || searchTerm == '04472' || searchTerm == '04474' || searchTerm == '04480' || searchTerm == '04484'
+              || searchTerm == '04486' || searchTerm == '04491' || searchTerm == '04493' || searchTerm == '04495' || searchTerm == '04497' || searchTerm == '04499' || searchTerm == '04502'
+                || searchTerm == '04629' || searchTerm == '04689' || searchTerm == '04489'){
+              var qParams = {
+              _qall : 'Y',
+              ISSUING_CNTRY : cntry ,
+              CMT : cmt ,
+              };
+            } else {
+              var qParams = {
+                  _qall : 'Y',
+                  ISSUING_CNTRY : cntry ,
+                  CMT : value + '%' ,
+                  };
+            }
+            var results = cmr.query('GET.INAC_CD', qParams);
+            if (results != null) {
+              for (var i = 0; i < results.length; i++) {
+                inacCdValue.push(results[i].ret1);
+              }
+              FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacCdValue);
+              if (inacCdValue.length == 1) {
+                FormManager.setValue('inacCd', inacCdValue[0]);
+              }
+            }
+          }
+      });
     }
   }
 }
@@ -1144,5 +1189,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addSoltToAddressValidator, GEOHandler.CN, null, false, false);
   GEOHandler.registerValidator(addContactInfoValidator, GEOHandler.CN, GEOHandler.REQUESTER, false, false);
   GEOHandler.registerValidator(addCityRequiredOnUpdateValidatorAddrList, GEOHandler.CN, null, true);
-
+  GEOHandler.addAfterConfig(onInacTypeChange, GEOHandler.CN);
 });
