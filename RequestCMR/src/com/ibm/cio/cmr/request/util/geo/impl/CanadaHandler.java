@@ -280,20 +280,22 @@ public class CanadaHandler extends GEOHandler {
 
   @Override
   public void doBeforeAddrSave(EntityManager entityManager, Addr addr, String cmrIssuingCntry) throws Exception {
-    if (!"ZS01".equals(addr.getId().getAddrType())) {
-      // only update for main address
-      return;
-    }
     DataPK pk = new DataPK();
     pk.setReqId(addr.getId().getReqId());
     Data data = entityManager.find(Data.class, pk);
+    
     AdminPK apk = new AdminPK();
     apk.setReqId(addr.getId().getReqId());
     Admin admin = entityManager.find(Admin.class, apk);
 
-    String custNm1 = addr.getCustNm1() != null ? addr.getCustNm1() : "";
+    String custNm1 = admin.getMainCustNm1() != null ? admin.getMainCustNm1() : "";
     addr.setCustNm1(custNm1);
 
+	  if (!"ZS01".equals(addr.getId().getAddrType())) {
+      // only update for main address
+      return;
+    }
+    
     setAddressRelatedData(entityManager, admin, data, addr);
   }
 
