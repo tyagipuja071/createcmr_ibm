@@ -222,8 +222,6 @@ function setInacByClusterHKMO() {
   if (_cluster == '04501' || _cluster == '04683' || _cluster == '04690') {
     FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('inacType', Validators.REQUIRED, [ 'INAC Type' ], 'MAIN_IBM_TAB');
-    FormManager.removeValidator('clientTier', Validators.REQUIRED);
-    FormManager.removeValidator('isuCd', Validators.REQUIRED);
     FormManager.setValue('mrcCd', '2');
     var qParams = {
       _qall : 'Y',
@@ -245,7 +243,7 @@ function setInacByClusterHKMO() {
       } else if (inacType != '' && inacTypeSelected[0].includes(',N')) {
         FormManager.limitDropdownValues(FormManager.getField('inacType'), 'N');
         FormManager.setValue('inacType', 'N');
-      }else if(inacType != '' && inacTypeSelected[0].includes(',IN')){
+      } else if(inacType != '' && inacTypeSelected[0].includes(',IN')){
         FormManager.resetDropdownValues(FormManager.getField('inacType'));
         var value = FormManager.getField('inacType');
         var cmt = value + ','+ _cluster +'%';
