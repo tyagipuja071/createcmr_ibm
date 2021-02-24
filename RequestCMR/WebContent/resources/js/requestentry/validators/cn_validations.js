@@ -186,7 +186,7 @@ function setInacBySearchTerm() {
       } else if(inacType != '' && inacTypeSelected[0].includes(',IN')){
         FormManager.resetDropdownValues(FormManager.getField('inacType'));
         var value = FormManager.getField('inacType');
-        var cmt = value + ','+ _cluster +'%';
+        var cmt = value + ','+ searchTerm +'%';
         var value = FormManager.getActualValue('inacType');
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
           console.log(value);
