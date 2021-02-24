@@ -701,6 +701,15 @@ public class BELUXTransformer extends EMEATransformer {
   @Override
   public void transformLegacyAddressDataMassUpdate(EntityManager entityManager, CmrtAddr legacyAddr, MassUpdtAddr addr, String cntry, CmrtCust cust,
       Data data, LegacyDirectObjectContainer legacyObjects) {
+
+    if (!StringUtils.isBlank(addr.getCustPhone())) {
+      if ("@".equals(addr.getCustPhone())) {
+        cust.setTelNoOrVat("");
+      } else {
+        cust.setTelNoOrVat(addr.getCustPhone());
+      }
+    }
+
     legacyAddr.setForUpdate(true);
     String countryName = LandedCountryMap.getCountryName(addr.getLandCntry());
     boolean crossBorder = isCrossBorderForMass(addr, legacyAddr);
@@ -1149,6 +1158,68 @@ public class BELUXTransformer extends EMEATransformer {
   @Override
   public void transformLegacyCustomerDataMassUpdate(EntityManager entityManager, CmrtCust cust, CMRRequestContainer cmrObjects, MassUpdtData muData) { // default
     LOG.debug("Mapping default Data values..");
+
+    if (!StringUtils.isBlank(muData.getCustNm1())) {
+      if ("@".equals(muData.getCustNm1())) {
+        cust.setSbo("");
+      } else {
+        cust.setSbo(muData.getCustNm1());
+      }
+    }
+
+    if (!StringUtils.isBlank(muData.getSearchTerm())) {
+      if ("@".equals(muData.getSearchTerm())) {
+        cust.setSalesRepNo("");
+      } else {
+        cust.setSalesRepNo(muData.getSearchTerm());
+      }
+    }
+
+    if (!StringUtils.isBlank(muData.getCsoSite())) {
+      if ("@".equals(muData.getCsoSite())) {
+        cust.setEconomicCd("");
+      } else {
+        cust.setEconomicCd(muData.getCsoSite());
+      }
+    }
+
+    if (!StringUtils.isBlank(muData.getEnterprise())) {
+      if ("@".equals(muData.getEnterprise())) {
+        cust.setEnterpriseNo("");
+      } else {
+        cust.setEnterpriseNo(muData.getEnterprise());
+      }
+    }
+
+    if (!StringUtils.isBlank(muData.getAffiliate())) {
+      if ("@".equals(muData.getAffiliate())) {
+        cust.setDeptCd("");
+      } else {
+        cust.setDeptCd(muData.getAffiliate());
+      }
+    }
+    if (!StringUtils.isBlank(muData.getModeOfPayment())) {
+      if ("@".equals(muData.getModeOfPayment())) {
+        cust.setModeOfPayment("");
+      } else {
+        cust.setModeOfPayment(muData.getModeOfPayment());
+      }
+    }
+
+    if (!StringUtils.isBlank(muData.getSvcArOffice())) {
+      if ("@".equals(muData.getSvcArOffice())) {
+        cust.setLangCd("");
+      } else {
+        cust.setLangCd(muData.getSvcArOffice());
+      }
+    }
+    if (!StringUtils.isBlank(muData.getMiscBillCd())) {
+      if ("@".equals(muData.getMiscBillCd())) {
+        cust.setInvoiceCpyReqd("");
+      } else {
+        cust.setInvoiceCpyReqd(muData.getMiscBillCd());
+      }
+    }
 
     if (!StringUtils.isBlank(muData.getAbbrevNm())) {
       if ("@".equals(muData.getAbbrevNm())) {
