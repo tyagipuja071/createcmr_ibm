@@ -113,6 +113,11 @@ public class CanadaHandler extends GEOHandler {
 
   @Override
   public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo) throws Exception {
+    String addrSeq = address.getId().getAddrSeq();
+    if (currentRecord.getCmrAddrSeq() != null && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      addrSeq = StringUtils.leftPad(addrSeq, 5, '0');
+    }
+    address.getId().setAddrSeq(addrSeq);
   }
 
   @Override
@@ -285,6 +290,10 @@ public class CanadaHandler extends GEOHandler {
     AdminPK apk = new AdminPK();
     apk.setReqId(addr.getId().getReqId());
     Admin admin = entityManager.find(Admin.class, apk);
+
+    String custNm1 = addr.getCustNm1() != null ? addr.getCustNm1() : "";
+    addr.setCustNm1(custNm1);
+
     setAddressRelatedData(entityManager, admin, data, addr);
   }
 
@@ -347,9 +356,6 @@ public class CanadaHandler extends GEOHandler {
     if (mainAddr == null) {
       return;
     }
-
-    String custNm1 = mainAddr.getCustNm1() != null ? mainAddr.getCustNm1() : "";
-    mainAddr.setCustNm1(custNm1);
 
     // set preferred language to F for Quebec
     if ("QC".equals(mainAddr.getStateProv())) {
