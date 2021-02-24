@@ -1310,6 +1310,57 @@ function rdcDupZP01Check(cntry, addressMode, saving, finalSave, force) {
   })(), null, 'frmCMR_addressModal');
 }
 
+function rdcDupZP01CheckValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+          var reqType = FormManager.getActualValue('reqType');
+          var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+          var cmrNo = FormManager.getActualValue('cmrNo');
+          var record = null;
+          var type = null;
+          var billToCnt = 0;
+          var importInd = null;
+
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+            record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+            if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+              record = _allAddressData[i];
+            }
+            type = record.addrType;
+            if (typeof (type) == 'object') {
+              type = type[0];
+            }
+            if (type == 'ZP01') {
+              billToCnt++;
+              importInd = record.importInd;
+              if (typeof (importInd) == 'object') {
+                importInd = importInd[0];
+              }
+            }
+          }
+          if (billToCnt > 0 && importInd != 'Y' && reqType == 'U') {
+            var qParams = {
+              KATR6 : '788',
+              MANDT : cmr.MANDT,
+              ZZKV_SEQNO : "29901",
+              ZZKV_CUSNO : cmrNo,
+              KTOKD : "ZP01"
+            };
+            var result = cmr.query('BENELUX.CHECK_RDC_ZP01', qParams);
+            if (result != null && result.ret1 != null) {
+              return new ValidationResult(null, false, 'Existing Bill-to address was identified in RDc and new one cannot be created, please contact CMR team for further assistence.');
+            }
+          } else {
+            return new ValidationResult(null, true);
+          }
+        }
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.NL = [ '788' ];
   console.log('adding NETHERLANDS functions...');
@@ -1353,5 +1404,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addCmrNoValidator, GEOHandler.NL, null, true);
   GEOHandler.registerValidator(restrictDuplicateAddr, GEOHandler.NL, null, true);
   GEOHandler.registerValidator(rdcDupZP01Check, GEOHandler.NL, null, true);
+  GEOHandler.registerValidator(rdcDupZP01CheckValidator, GEOHandler.NL, null, true);
 
 });
