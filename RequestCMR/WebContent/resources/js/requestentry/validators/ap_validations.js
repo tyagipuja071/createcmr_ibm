@@ -51,13 +51,6 @@ function addAfterConfigAP() {
     FormManager.removeValidator('cmrNo', Validators.REQUIRED);
   }
 
-  // Story 1681465 - Code reverted
-  /*
-   * if (custSubGrp == 'BLUMX' || custSubGrp == 'MKTPC' || custSubGrp == 'XBLUM' ||
-   * custSubGrp == 'XMKTP'){ FormManager.show('RestrictedInd', 'restrictInd'); }
-   * else { FormManager.hide('RestrictedInd','restrictInd'); }
-   */
-
   if (FormManager.getActualValue('viewOnlyPage') == 'true')
     FormManager.readOnly('repTeamMemberName');
   FormManager.readOnly('isbuCd');
@@ -137,9 +130,8 @@ function addAfterConfigAP() {
         FormManager.enable('clientTier');
     }
   }
-  if(reqType == 'C'){
-    setInacByCluster();
-    setInacByClusterHKMO();
+  if (reqType == 'C') {
+    setIsuOnIsic();
   }
 }
 
@@ -1892,6 +1884,7 @@ function setIsuByClusterCTC() {
   if (_clientTierHandler && _clientTierHandler[0]) {
     _clientTierHandler[0].onChange();
   }
+  setIsuOnIsic();
 }
 
 function addAbnValidatorForAU() {
@@ -2729,6 +2722,7 @@ function setISUDropDownValues() {
       }
     }
   }
+  setIsuOnIsic();
 }
 
 function setCollCdFrSGOnAddrSave(cntry, addressMode, saving, finalSave, force) {
@@ -2993,7 +2987,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(onIsicChangeHandler, [ SysLoc.AUSTRALIA, SysLoc.SINGAPORE, SysLoc.HONG_KONG, SysLoc.MACAO]);
   GEOHandler.addAfterConfig(onIsicChange, [ SysLoc.AUSTRALIA, SysLoc.SINGAPORE, SysLoc.HONG_KONG, SysLoc.MACAO ]);
   GEOHandler.addAfterTemplateLoad(onIsicChange, [ SysLoc.AUSTRALIA, SysLoc.SINGAPORE, SysLoc.HONG_KONG, SysLoc.MACAO ]);
-  
+
   GEOHandler.addAfterConfig(addHandlersForAP, GEOHandler.AP);
   GEOHandler.addAfterConfig(addHandlersForGCG, GEOHandler.GCG);
 });
