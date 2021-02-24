@@ -2230,9 +2230,9 @@ public class BELUXHandler extends BaseSOFHandler {
       }
       currCell = row.getCell(ordBlkIndex);
       String ordBlk = validateColValFromCell(currCell);
-      if (StringUtils.isNotBlank(ordBlk) && !("@".equals(ordBlk) || "E".equals(ordBlk) || "S".equals(ordBlk))) {
-        LOG.trace("Order Block Code should only @, E, R. >> ");
-        error.addError(rowIndex, "Order Block Code", "Order Block Code should be only @, E, S. ");
+      if (StringUtils.isNotBlank(ordBlk) && !("@".equals(ordBlk) || "D".equals(ordBlk) || "P".equals(ordBlk) || "J".equals(ordBlk))) {
+        LOG.trace("Order Block Code should only @, D, P, J. >> ");
+        error.addError(rowIndex, "Order Block Code", "Order Block Code should be only @, D, P, J. ");
         validations.add(error);
       }
     }
@@ -2246,17 +2246,31 @@ public class BELUXHandler extends BaseSOFHandler {
           break; // stop immediately when row is blank
         }
         String name3 = ""; // 4
-        String pobox = ""; // 8
+        String attPerson = ""; // 5
+        String pobox = ""; // 7
+        int addrFldCnt1 = 0;
 
         currCell = row.getCell(4);
         name3 = validateColValFromCell(currCell);
-        currCell = row.getCell(8);
+        currCell = row.getCell(5);
+        attPerson = validateColValFromCell(currCell);
+        currCell = row.getCell(7);
         pobox = validateColValFromCell(currCell);
 
-        if (!StringUtils.isEmpty(name3) && !StringUtils.isEmpty(pobox)) {
+        if (!StringUtils.isEmpty(name3)) {
+          addrFldCnt1++;
+        }
+        if (!StringUtils.isEmpty(attPerson)) {
+          addrFldCnt1++;
+        }
+        if (!StringUtils.isEmpty(pobox)) {
+          addrFldCnt1++;
+        }
+
+        if (addrFldCnt1 > 1) {
           TemplateValidation errorAddr = new TemplateValidation(name);
           LOG.trace("Customer Name (3) and PO BOX should not be input at the sametime.");
-          errorAddr.addError(row.getRowNum(), "PO BOX", "Customer Name (3) and PO BOX should not be input at the sametime.");
+          errorAddr.addError(row.getRowNum(), "PO BOX", "Customer Name 3, Attention person and PO Box - only 1 out of 3 can be filled.");
           validations.add(errorAddr);
         }
       }
