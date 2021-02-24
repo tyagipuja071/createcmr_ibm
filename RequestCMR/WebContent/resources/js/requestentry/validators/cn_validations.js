@@ -161,8 +161,6 @@ function setInacBySearchTerm() {
       || searchTerm == '04629' || searchTerm == '04689' || searchTerm == '04489')) {
     FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('inacType', Validators.REQUIRED, [ 'INAC Type' ], 'MAIN_IBM_TAB');
-    FormManager.removeValidator('clientTier', Validators.REQUIRED);
-    FormManager.removeValidator('isuCd', Validators.REQUIRED);
     var qParams = {
       _qall : 'Y',
       ISSUING_CNTRY : cntry,
@@ -183,6 +181,31 @@ function setInacBySearchTerm() {
       } else if (inacType != '' && inacTypeSelected[0].includes(',N')) {
         FormManager.limitDropdownValues(FormManager.getField('inacType'), 'N');
         FormManager.setValue('inacType', 'N');
+      } else if(inacType != '' && inacTypeSelected[0].includes(',IN')){
+        FormManager.resetDropdownValues(FormManager.getField('inacType'));
+        var value = FormManager.getField('inacType');
+        var cmt = value + ','+ _cluster +'%';
+        var value = FormManager.getActualValue('inacType');
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+          console.log(value);
+          if (value != null) {
+            var inacCdValue = [];
+            var qParams = {
+              _qall : 'Y',
+              ISSUING_CNTRY : cntry ,
+              CMT : cmt ,
+             };
+            var results = cmr.query('GET.INAC_CD', qParams);
+            if (results != null) {
+              for (var i = 0; i < results.length; i++) {
+                inacCdValue.push(results[i].ret1);
+              }
+              FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacCdValue);
+              if (inacCdValue.length == 1) {
+                FormManager.setValue('inacCd', inacCdValue[0]);
+              }
+            }
+          }
       } else {
         FormManager.resetDropdownValues(FormManager.getField('inacType'));
       }
@@ -190,9 +213,6 @@ function setInacBySearchTerm() {
   } else {
     FormManager.removeValidator('inacCd', Validators.REQUIRED);
     FormManager.removeValidator('inacType', Validators.REQUIRED);
-    FormManager.resetDropdownValues(FormManager.getField('inacCd'));
-    FormManager.resetDropdownValues(FormManager.getField('inacType'));
-    FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
     return;
   }
 }

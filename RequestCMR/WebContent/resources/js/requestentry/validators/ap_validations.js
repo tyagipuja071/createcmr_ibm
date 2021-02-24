@@ -245,7 +245,7 @@ function setInacByClusterHKMO() {
       } else if (inacType != '' && inacTypeSelected[0].includes(',N')) {
         FormManager.limitDropdownValues(FormManager.getField('inacType'), 'N');
         FormManager.setValue('inacType', 'N');
-      }else if(inacType != '' && inacTypeSelected[0].includes(',IN')){
+      } else if(inacType != '' && inacTypeSelected[0].includes(',IN')){
         FormManager.resetDropdownValues(FormManager.getField('inacType'));
         var value = FormManager.getField('inacType');
         var cmt = value + ','+ _cluster +'%';
