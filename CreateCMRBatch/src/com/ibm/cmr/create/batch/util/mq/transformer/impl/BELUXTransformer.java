@@ -1207,17 +1207,29 @@ public class BELUXTransformer extends EMEATransformer {
     }
 
     // SBO
-    if (!StringUtils.isBlank(muData.getCustNm1())) {
-      if ("@".equals(muData.getCustNm1())) {
+    if (!StringUtils.isBlank(muData.getSalesBoCd())) {
+      if ("@".equals(muData.getSalesBoCd())) {
         cust.setSbo("");
         cust.setIbo("");
       } else {
-        String sbo = muData.getCustNm1();
+        String sbo = muData.getSalesBoCd();
         if (sbo.length() < 7) {
           sbo = StringUtils.rightPad(sbo, 7, '0');
         }
         cust.setSbo(sbo);
-        cust.setIbo(sbo);
+        // cust.setIbo(sbo);
+      }
+    }
+    // IBO
+    if (!StringUtils.isBlank(muData.getAffiliate())) {
+      if ("@".equals(muData.getAffiliate())) {
+        cust.setIbo("");
+      } else {
+        String ibo = muData.getAffiliate();
+        if (ibo.length() < 7) {
+          ibo = StringUtils.rightPad(ibo, 7, '0');
+        }
+        cust.setIbo(ibo);
       }
     }
 
