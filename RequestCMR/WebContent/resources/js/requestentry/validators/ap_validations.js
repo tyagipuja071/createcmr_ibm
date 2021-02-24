@@ -222,8 +222,6 @@ function setInacByClusterHKMO() {
   if (_cluster == '04501' || _cluster == '04683' || _cluster == '04690') {
     FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('inacType', Validators.REQUIRED, [ 'INAC Type' ], 'MAIN_IBM_TAB');
-    FormManager.removeValidator('clientTier', Validators.REQUIRED);
-    FormManager.removeValidator('isuCd', Validators.REQUIRED);
     FormManager.setValue('mrcCd', '2');
     var qParams = {
       _qall : 'Y',
