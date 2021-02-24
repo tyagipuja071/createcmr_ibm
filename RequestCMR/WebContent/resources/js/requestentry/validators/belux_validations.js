@@ -9,7 +9,6 @@ function afterConfigForBELUX() {
   var custGrp = FormManager.getActualValue('custGrp');
   var reqType = FormManager.getActualValue('reqType');
   var custLang = FormManager.getActualValue('custPrefLang');
-  FormManager.readOnly('cmrOwner');
   FormManager.readOnly('capInd');
   FormManager.setValue('capInd', true);
   FormManager.resetValidations('enterprise');
@@ -71,14 +70,6 @@ function afterConfigForBELUX() {
     FormManager.addValidator('isuCd', Validators.REQUIRED, [ 'ISU Code' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
   }
-  // ppsceid
-  if (role == 'Requester') {
-    if (custSubGrpLst3 == 'BUS') {
-      FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
-    }
-  } else {
-    FormManager.removeValidator('ppsceid', Validators.REQUIRED);
-  }
   // economicCd
   if (custSubGrpLst3 == 'BUS' || custSubGrpLst3 == 'INT' || custSubGrpLst3 == 'ISO') {
     FormManager.addValidator('economicCd', Validators.REQUIRED, [ 'Economic Code' ], 'MAIN_IBM_TAB');
@@ -135,26 +126,49 @@ function afterConfigForBELUX() {
 
   setVatValidatorBELUX();
   addHandlerForReqRsn();
-  disableCmrNo();
   disableModeOfPayment();
   setAccTemNumValueOnScenarios();
   addAccTemNumValidate();
   disableSBO();
+  disableIBMTab();
 }
 
-function disableCmrNo() {
+function disableIBMTab() {
+  // cmrNo cmrOwner
+  // isuCd clientTier inacCd searchTerm enterprise -- bgId gbgId bgRuleId covId
+  // geoLocationCd dunsNo--
+  // ppsceid salesBusOffCd economicCd
+  var reqType = FormManager.getActualValue('reqType');
+  var cntryUse = FormManager.getActualValue('countryUse');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
   }
-  var reqType = FormManager.getActualValue('reqType');
-  if (reqType == 'U') {
-    // do nothing for Update request
-  } else if (reqType == 'C') {
-    if (role == 'Requester') {
-      FormManager.readOnly('cmrNo');
-    } else if (role == 'Processor') {
-      FormManager.enable('cmrNo');
+  if (reqType == 'C' && role == 'Requester') {
+    FormManager.readOnly('cmrNo');
+    FormManager.readOnly('cmrOwner');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('clientTier');
+    FormManager.readOnly('inacCd');
+    FormManager.readOnly('searchTerm');
+    FormManager.readOnly('enterprise');
+
+    FormManager.readOnly('bgId');
+    FormManager.readOnly('gbgId');
+    FormManager.readOnly('bgRuleId');
+    FormManager.readOnly('covId');
+    FormManager.readOnly('geoLocationCd');
+    FormManager.readOnly('dunsNo');
+    if (custSubGrp.substring(2, 5) == 'BUS') {
+      FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
+      FormManager.enable('ppsceid');
+    } else {
+      FormManager.readOnly('ppsceid');
     }
+    FormManager.readOnly('salesBusOffCd');
+    FormManager.readOnly('economicCd');
+  } else if (reqType == 'C' && role == 'Processor') {
+    FormManager.enable('cmrNo');
   }
 }
 
@@ -267,6 +281,11 @@ function addAccTemNumValidate() {
   }
 
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+
+  if (reqType == 'U') {
+    FormManager.addValidator('searchTerm', Validators.REQUIRED, [ 'Account Team Number' ], 'MAIN_IBM_TAB');
     return;
   }
 
