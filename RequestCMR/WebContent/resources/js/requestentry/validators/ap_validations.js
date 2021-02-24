@@ -56,15 +56,17 @@ function addAfterConfigAP() {
   FormManager.readOnly('isbuCd');
 
   if (role == 'REQUESTER' || role == 'VIEWER') {
+    FormManager.readOnly('mrcCd');
     FormManager.readOnly('isbuCd');
     if (role == 'VIEWER')
-      FormManager.readOnly('abbrevNm');
+    FormManager.readOnly('abbrevNm');
     FormManager.readOnly('sectorCd');
     FormManager.readOnly('abbrevLocn');
     FormManager.readOnly('territoryCd');
     FormManager.readOnly('IndustryClass');
     FormManager.readOnly('subIndustryCd');
   } else {
+    FormManager.enable('mrcCd');
     FormManager.enable('isbuCd');
     FormManager.enable('abbrevNm');
     FormManager.enable('sectorCd');
@@ -132,6 +134,7 @@ function addAfterConfigAP() {
   }
   if (reqType == 'C') {
     setIsuOnIsic();
+    onInacTypeChange();
   }
 }
 
