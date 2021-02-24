@@ -147,7 +147,9 @@ function afterConfigForCN() {
   if (_govTypeHandler && _govTypeHandler[0]) {
     _govTypeHandler[0].onChange();
   }
-
+  if (FormManager.getActualValue('reqType') != 'U') {
+    setInacBySearchTerm();
+  }
 }
 
 function setInacBySearchTerm() {
@@ -211,6 +213,10 @@ function setInacBySearchTerm() {
       }
     }
   } else {
+    FormManager.clearValue('inacCd');
+    FormManager.clearValue('inacType');
+    FormManager.resetDropdownValues(FormManager.getField('inacCd'));
+    FormManager.resetDropdownValues(FormManager.getField('inacType'));
     FormManager.removeValidator('inacCd', Validators.REQUIRED);
     FormManager.removeValidator('inacType', Validators.REQUIRED);
     return;
