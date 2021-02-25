@@ -151,6 +151,8 @@ function afterConfigForCN() {
   if (FormManager.getActualValue('reqType') != 'U') {
     setInacBySearchTerm();
   }
+  
+  setInacBySearchTerm();
 }
 
 function setInacBySearchTerm() {

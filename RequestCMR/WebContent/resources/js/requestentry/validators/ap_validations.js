@@ -283,7 +283,9 @@ function setInacByClusterHKMO() {
     FormManager.resetDropdownValues(FormManager.getField('inacCd'));
     FormManager.resetDropdownValues(FormManager.getField('inacType'));
     var custSubGrp = FormManager.getActualValue('custSubGrp');
-    if (custSubGrp !='BUSPR' || custSubGrp !='XBUSP') {
+    if (custSubGrp =='BUSPR' || custSubGrp =='XBUSP') {
+      FormManager.setValue('mrcCd', '2');
+    } else {
       FormManager.setValue('mrcCd', '3');
     }
     return;
@@ -2995,4 +2997,6 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(addHandlersForAP, GEOHandler.AP);
   GEOHandler.addAfterConfig(addHandlersForGCG, GEOHandler.GCG);
+  GEOHandler.addAfterTemplateLoad(setInacByClusterHKMO, GEOHandler.GCG);
+  
 });
