@@ -985,6 +985,8 @@ public class BELUXTransformer extends EMEATransformer {
     String landedCntry = "";
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
 
+      legacyCust.setLocNo("");
+
       boolean crossBorder = isCrossBorder(addrs);
       if (crossBorder)
         legacyCust.setMailingCond("2");
@@ -1116,9 +1118,10 @@ public class BELUXTransformer extends EMEATransformer {
       }
     }
 
-    if (!StringUtils.isBlank(data.getSubIndustryCd())) {
-      legacyCust.setLocNo(legacyCust.getId().getSofCntryCode() + data.getSubIndustryCd());
-    }
+    // if (!StringUtils.isBlank(data.getSubIndustryCd())) {
+    // legacyCust.setLocNo(legacyCust.getId().getSofCntryCode() +
+    // data.getSubIndustryCd());
+    // }
 
     String dataEmbargoCd = data.getEmbargoCd();
     if (dataEmbargoCd != null) {
@@ -1229,19 +1232,12 @@ public class BELUXTransformer extends EMEATransformer {
       }
     }
 
-    // use svcArOffice to store custLang
-    if (!StringUtils.isBlank(muData.getSvcArOffice())) {
-      if ("@".equals(muData.getSvcArOffice())) {
-        cust.setLangCd("");
-      } else {
-        cust.setLangCd(muData.getSvcArOffice());
-      }
-    }
     cust.setCustType("");
 
-    if (!StringUtils.isBlank(muData.getSubIndustryCd())) {
-      cust.setLocNo(cust.getId().getSofCntryCode() + muData.getSubIndustryCd());
-    }
+    // if (!StringUtils.isBlank(muData.getSubIndustryCd())) {
+    // cust.setLocNo(cust.getId().getSofCntryCode() +
+    // muData.getSubIndustryCd());
+    // }
 
     // RABXA :Bank Account Number
     cust.setBankAcctNo("");
@@ -1250,21 +1246,14 @@ public class BELUXTransformer extends EMEATransformer {
       cust.setAbbrevLocn(muData.getAbbrevLocn());
     }
 
-    if (!StringUtils.isBlank(muData.getMiscBillCd())) {
-      if ("@".equals(muData.getMiscBillCd())) {
-        cust.setEmbargoCd("");
-      } else {
-        cust.setEmbargoCd(muData.getMiscBillCd());
-      }
-    }
     // CREATCMR-845
-    if (!StringUtils.isBlank(muData.getRestrictTo())) {
-      if ("@".equals(muData.getModeOfPayment())) {
-        cust.setModeOfPayment("");
-      } else {
-        cust.setModeOfPayment(muData.getModeOfPayment());
-      }
-    }
+    // if (!StringUtils.isBlank(muData.getRestrictTo())) {
+    // if ("@".equals(muData.getModeOfPayment())) {
+    // cust.setModeOfPayment("");
+    // } else {
+    // cust.setModeOfPayment(muData.getModeOfPayment());
+    // }
+    // }
 
     String isuClientTier = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "")
         + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
@@ -1272,16 +1261,6 @@ public class BELUXTransformer extends EMEATransformer {
       cust.setIsuCd(isuClientTier);
     } else if (isuClientTier.contains("@")) {
       cust.setIsuCd("");
-    }
-
-    if (!StringUtils.isBlank(muData.getRepTeamMemberNo())) {
-      if ("@".equals(muData.getRepTeamMemberNo())) {
-        cust.setSalesRepNo("");
-        cust.setSalesGroupRep("");
-      } else {
-        cust.setSalesRepNo(muData.getRepTeamMemberNo());
-        cust.setSalesGroupRep(muData.getRepTeamMemberNo());
-      }
     }
 
     String cebo = "";
@@ -1294,23 +1273,6 @@ public class BELUXTransformer extends EMEATransformer {
         cust.setCeBo("");
       } else {
         cust.setCeBo(cebo);
-      }
-    }
-
-    if (!StringUtils.isBlank(muData.getCompany())) {
-      if ("@".equals(muData.getCompany())) {
-        cust.setEnterpriseNo("");
-      } else {
-        cust.setEnterpriseNo(muData.getCompany());
-      }
-    }
-
-    // Email1 used to store phone
-    if (!StringUtils.isBlank(muData.getEmail1())) {
-      if ("@".equals(muData.getEmail1())) {
-        cust.setTelNoOrVat("");
-      } else {
-        cust.setTelNoOrVat(muData.getEmail1());
       }
     }
 
@@ -1339,31 +1301,31 @@ public class BELUXTransformer extends EMEATransformer {
     }
 
     // SBO
-    if (!StringUtils.isBlank(muData.getSalesBoCd())) {
-      if ("@".equals(muData.getSalesBoCd())) {
-        cust.setSbo("");
-        cust.setIbo("");
-      } else {
-        String sbo = muData.getSalesBoCd();
-        if (sbo.length() < 7) {
-          sbo = StringUtils.rightPad(sbo, 7, '0');
-        }
-        cust.setSbo(sbo);
-        // cust.setIbo(sbo);
-      }
-    }
-    // IBO
-    if (!StringUtils.isBlank(muData.getAffiliate())) {
-      if ("@".equals(muData.getAffiliate())) {
-        cust.setIbo("");
-      } else {
-        String ibo = muData.getAffiliate();
-        if (ibo.length() < 7) {
-          ibo = StringUtils.rightPad(ibo, 7, '0');
-        }
-        cust.setIbo(ibo);
-      }
-    }
+    // if (!StringUtils.isBlank(muData.getSalesBoCd())) {
+    // if ("@".equals(muData.getSalesBoCd())) {
+    // cust.setSbo("");
+    // cust.setIbo("");
+    // } else {
+    // String sbo = muData.getSalesBoCd();
+    // if (sbo.length() < 7) {
+    // sbo = StringUtils.rightPad(sbo, 7, '0');
+    // }
+    // cust.setSbo(sbo);
+    // // cust.setIbo(sbo);
+    // }
+    // }
+    // // IBO
+    // if (!StringUtils.isBlank(muData.getAffiliate())) {
+    // if ("@".equals(muData.getAffiliate())) {
+    // cust.setIbo("");
+    // } else {
+    // String ibo = muData.getAffiliate();
+    // if (ibo.length() < 7) {
+    // ibo = StringUtils.rightPad(ibo, 7, '0');
+    // }
+    // cust.setIbo(ibo);
+    // }
+    // }
 
     if (!StringUtils.isBlank(muData.getInacCd())) {
       if ("@".equals(muData.getInacCd())) {
