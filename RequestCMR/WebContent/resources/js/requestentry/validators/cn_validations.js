@@ -148,9 +148,6 @@ function afterConfigForCN() {
   if (_govTypeHandler && _govTypeHandler[0]) {
     _govTypeHandler[0].onChange();
   }
-  if (FormManager.getActualValue('reqType') != 'U') {
-    setInacBySearchTerm();
-  }
 }
 
 function setInacBySearchTerm() {
