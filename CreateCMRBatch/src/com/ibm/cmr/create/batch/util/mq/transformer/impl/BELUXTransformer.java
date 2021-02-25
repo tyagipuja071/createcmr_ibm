@@ -1196,9 +1196,9 @@ public class BELUXTransformer extends EMEATransformer {
 
     if (!StringUtils.isBlank(muData.getAffiliate())) {
       if ("@".equals(muData.getAffiliate())) {
-        cust.setDeptCd("");
+        cust.setAccAdminBo("");
       } else {
-        cust.setDeptCd(muData.getAffiliate());
+        cust.setAccAdminBo(muData.getAffiliate());
       }
     }
     if (!StringUtils.isBlank(muData.getModeOfPayment())) {
