@@ -827,7 +827,7 @@ public abstract class GEOHandler {
         break;
       case NUMERIC:
         double nvalue = cell.getNumericCellValue();
-        if (nvalue > 0) {
+        if (nvalue >= 0) {
           colVal = "" + nvalue;
         }
 
