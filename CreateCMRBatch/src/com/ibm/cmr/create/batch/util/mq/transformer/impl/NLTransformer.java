@@ -1255,11 +1255,11 @@ public class NLTransformer extends EMEATransformer {
       }
     }
 
-    if (!StringUtils.isBlank(muData.getCompany())) {
-      if ("@".equals(muData.getCompany())) {
+    if (!StringUtils.isBlank(muData.getEnterprise())) {
+      if ("@".equals(muData.getEnterprise())) {
         cust.setEnterpriseNo("");
       } else {
-        cust.setEnterpriseNo(muData.getCompany());
+        cust.setEnterpriseNo(muData.getEnterprise());
       }
     }
 
