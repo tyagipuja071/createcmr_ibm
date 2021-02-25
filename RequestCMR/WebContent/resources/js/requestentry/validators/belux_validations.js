@@ -1605,6 +1605,36 @@ function addDepartmentNumberValidator() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
+function addREALCTYValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqType = FormManager.getActualValue('reqType');
+        var countryUse = FormManager.getActualValue('countryUse');
+        var cmrNo = FormManager.getActualValue('cmrNo');
+        if (reqType == 'U') {
+          var qParams = {
+            KATR6 : '624',
+            ZZKV_CUSNO : cmrNo
+          };
+          var result = cmr.query('BENELUX.CHECK_REALCTY', qParams);
+          if (result != null && result.ret1 != null) {
+            console.log(result);
+            var realcty = result.ret1;
+            if (realcty == '623' && countryUse != '624LU') {
+              return new ValidationResult(null, false, 'Please create request for Issuing country Luxembourg.');
+            } else if (realcty == '624' && countryUse != '624') {
+              return new ValidationResult(null, false, 'Please create request for Issuing country Belgium.');
+            }
+            return new ValidationResult(null, true);
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.BELUX = [ '624' ];
 
@@ -1659,5 +1689,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addDnBSearchValidator, GEOHandler.BELUX, null, true);
   GEOHandler.registerValidator(addCmrNoValidator, GEOHandler.BELUX, null, true);
   GEOHandler.registerValidator(addDepartmentNumberValidator, GEOHandler.BELUX, null, true);
+  GEOHandler.registerValidator(addREALCTYValidator, GEOHandler.BELUX, null, true);
 
 });
