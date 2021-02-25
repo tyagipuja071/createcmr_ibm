@@ -1348,7 +1348,7 @@ public class FranceHandler extends GEOHandler {
               currCell = (XSSFCell) row.getCell(10);
               String siretTxt = df.formatCellValue(currCell);
               siret = validateColValFromCell(currCell);
-              if (!StringUtils.isBlank(siret) && !siretTxt.matches("\\d+.\\d*")) {
+              if (!StringUtils.isBlank(siret) && !siretTxt.matches("^[0-9]*$")) {
                 TemplateValidation error = new TemplateValidation(name);
                 LOG.trace("The row " + (row.getRowNum() + 1) + " Note that SIRET should be numeric. Please fix and upload the template again.");
                 error.addError((row.getRowNum() + 1), "SIRET",
@@ -1445,7 +1445,7 @@ public class FranceHandler extends GEOHandler {
                 phoneTxt = df.formatCellValue(currCell);
               }
 
-              if (!StringUtils.isBlank(phone) && !phoneTxt.matches("\\d+.\\d*")) {
+              if (!StringUtils.isBlank(phone) && !phoneTxt.matches("^[0-9]*$")) {
                 TemplateValidation error = new TemplateValidation(name);
                 LOG.trace("The row " + (row.getRowNum() + 1) + " Note that Phone should be numeric. Please fix and upload the template again.");
                 error.addError((row.getRowNum() + 1), "Phone",
