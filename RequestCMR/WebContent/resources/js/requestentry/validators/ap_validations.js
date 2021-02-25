@@ -53,7 +53,7 @@ function addAfterConfigAP() {
 
   if (FormManager.getActualValue('viewOnlyPage') == 'true')
     FormManager.readOnly('repTeamMemberName');
-  FormManager.readOnly('isbuCd');
+    FormManager.readOnly('isbuCd');
 
   if (role == 'REQUESTER' || role == 'VIEWER') {
     FormManager.readOnly('mrcCd');
@@ -135,6 +135,7 @@ function addAfterConfigAP() {
   if (reqType == 'C') {
     setIsuOnIsic();
     onInacTypeChange();
+    setInacByCluster();
   }
 }
 
@@ -150,8 +151,6 @@ function setInacByCluster() {
     if (_cluster.includes('BLAN')) {
       FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
       FormManager.addValidator('inacType', Validators.REQUIRED, [ 'INAC Type' ], 'MAIN_IBM_TAB');
-      FormManager.removeValidator('clientTier', Validators.REQUIRED);
-      FormManager.removeValidator('isuCd', Validators.REQUIRED);
       FormManager.setValue('mrcCd', '2');
       var qParams = {
         _qall : 'Y',
@@ -203,12 +202,13 @@ function setInacByCluster() {
         }
       }
     } else {
+      FormManager.clearValue('inacType');
+      FormManager.clearValue('inacCd');
       FormManager.removeValidator('inacCd', Validators.REQUIRED);
       FormManager.removeValidator('inacType', Validators.REQUIRED);
-      FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'GB Segment' ], 'MAIN_IBM_TAB');
-      updateMRCAseanAnzIsa();
       FormManager.resetDropdownValues(FormManager.getField('inacCd'));
       FormManager.resetDropdownValues(FormManager.getField('inacType'));
+      updateMRCAseanAnzIsa();
       return;
     }
 }
@@ -276,12 +276,16 @@ function setInacByClusterHKMO() {
       }
     }
   } else {
+    FormManager.clearValue('inacType');
+    FormManager.clearValue('inacCd');
     FormManager.removeValidator('inacCd', Validators.REQUIRED);
     FormManager.removeValidator('inacType', Validators.REQUIRED);
     FormManager.resetDropdownValues(FormManager.getField('inacCd'));
     FormManager.resetDropdownValues(FormManager.getField('inacType'));
-    FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
-    FormManager.setValue('mrcCd', '3');
+    var custSubGrp = FormManager.getActualValue('custSubGrp');
+    if (custSubGrp !='BUSPR' || custSubGrp !='XBUSP') {
+      FormManager.setValue('mrcCd', '3');
+    }
     return;
   }
 }
