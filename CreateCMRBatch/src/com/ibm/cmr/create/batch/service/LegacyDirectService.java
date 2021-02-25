@@ -1496,8 +1496,9 @@ public class LegacyDirectService extends TransConnService {
     cust.setCollectionCd(data.getCollectionCd() != null ? data.getCollectionCd() : "");
     // cust.setDistrictCd(data.getCollectionCd() != null ?
     // data.getCollectionCd() : "");
-
-    cust.setMailingCond(data.getMailingCondition() != null ? data.getMailingCondition() : "");
+    if (!StringUtils.isBlank(data.getMailingCondition())) {
+      cust.setMailingCond(data.getMailingCondition());
+    }
     if (!StringUtils.isBlank(data.getAcAdminBo())) {
       cust.setAccAdminBo(data.getAcAdminBo());
     }
