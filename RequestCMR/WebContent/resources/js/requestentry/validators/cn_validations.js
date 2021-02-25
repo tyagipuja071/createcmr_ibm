@@ -211,8 +211,6 @@ function setInacBySearchTerm() {
       }
     }
   } else {
-    FormManager.clearValue('inacCd');
-    FormManager.clearValue('inacType');
     FormManager.resetDropdownValues(FormManager.getField('inacCd'));
     FormManager.resetDropdownValues(FormManager.getField('inacType'));
     FormManager.removeValidator('inacCd', Validators.REQUIRED);
@@ -279,21 +277,17 @@ function onInacTypeChange() {
               ISSUING_CNTRY : cntry ,
               CMT : cmt ,
               };
-            } else {
-              var qParams = {
-                  _qall : 'Y',
-                  ISSUING_CNTRY : cntry ,
-                  CMT : value + '%' ,
-                  };
             }
-            var results = cmr.query('GET.INAC_CD', qParams);
-            if (results != null) {
-              for (var i = 0; i < results.length; i++) {
-                inacCdValue.push(results[i].ret1);
-              }
-              FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacCdValue);
-              if (inacCdValue.length == 1) {
-                FormManager.setValue('inacCd', inacCdValue[0]);
+            if(qParams != undefined){
+              var results = cmr.query('GET.INAC_CD', qParams);
+              if (results != null) {
+                for (var i = 0; i < results.length; i++) {
+                  inacCdValue.push(results[i].ret1);
+                }
+                FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacCdValue);
+                if (inacCdValue.length == 1) {
+                  FormManager.setValue('inacCd', inacCdValue[0]);
+                }
               }
             }
           }
