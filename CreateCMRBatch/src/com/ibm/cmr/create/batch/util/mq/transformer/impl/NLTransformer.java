@@ -983,6 +983,7 @@ public class NLTransformer extends EMEATransformer {
     legacyCust.setTaxCd(data.getTaxCd1() == null ? "" : data.getTaxCd1());
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
 
+      legacyCust.setLocNo("");
       boolean crossBorder = isCrossBorder(addrs);
       String langCd = data.getCustPrefLang();
 
@@ -1084,9 +1085,10 @@ public class NLTransformer extends EMEATransformer {
       }
     }
 
-    if (!StringUtils.isBlank(data.getSubIndustryCd())) {
-      legacyCust.setLocNo(legacyCust.getId().getSofCntryCode() + data.getSubIndustryCd());
-    }
+    // if (!StringUtils.isBlank(data.getSubIndustryCd())) {
+    // // legacyCust.setLocNo(legacyCust.getId().getSofCntryCode() +
+    // // data.getSubIndustryCd());
+    // }
 
     String dataEmbargoCd = data.getEmbargoCd();
     if (dataEmbargoCd != null) {
@@ -1178,9 +1180,10 @@ public class NLTransformer extends EMEATransformer {
     }
     cust.setCustType("");
 
-    if (!StringUtils.isBlank(muData.getSubIndustryCd())) {
-      cust.setLocNo(cust.getId().getSofCntryCode() + muData.getSubIndustryCd());
-    }
+    // if (!StringUtils.isBlank(muData.getSubIndustryCd())) {
+    // cust.setLocNo(cust.getId().getSofCntryCode() +
+    // muData.getSubIndustryCd());
+    // }
 
     // RABXA :Bank Account Number
     if (SystemLocation.CROATIA.equals(cust.getId().getSofCntryCode())) {
@@ -1205,13 +1208,13 @@ public class NLTransformer extends EMEATransformer {
       cust.setAbbrevLocn(muData.getAbbrevLocn());
     }
 
-    if (!StringUtils.isBlank(muData.getMiscBillCd())) {
-      if ("@".equals(muData.getMiscBillCd())) {
-        cust.setEmbargoCd("");
-      } else {
-        cust.setEmbargoCd(muData.getMiscBillCd());
-      }
-    }
+    // if (!StringUtils.isBlank(muData.getMiscBillCd())) {
+    // if ("@".equals(muData.getMiscBillCd())) {
+    // cust.setEmbargoCd("");
+    // } else {
+    // cust.setEmbargoCd(muData.getMiscBillCd());
+    // }
+    // }
     // CREATCMR-845
     if (!StringUtils.isBlank(muData.getModeOfPayment())) {
       if ("@".equals(muData.getRestrictTo())) {
@@ -1229,13 +1232,13 @@ public class NLTransformer extends EMEATransformer {
       cust.setIsuCd("");
     }
 
-    if (!StringUtils.isBlank(muData.getRepTeamMemberNo())) {
-      if ("@".equals(muData.getRepTeamMemberNo())) {
+    if (!StringUtils.isBlank(muData.getSearchTerm())) {
+      if ("@".equals(muData.getSearchTerm())) {
         cust.setSalesRepNo("");
         cust.setSalesGroupRep("");
       } else {
-        cust.setSalesRepNo(muData.getRepTeamMemberNo());
-        cust.setSalesGroupRep(muData.getRepTeamMemberNo());
+        cust.setSalesRepNo(muData.getSearchTerm());
+        cust.setSalesGroupRep(muData.getSearchTerm());
       }
     }
 
