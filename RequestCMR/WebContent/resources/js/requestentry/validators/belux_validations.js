@@ -637,23 +637,28 @@ function setISUDropDown() {
     return;
   }
 
-  if (FormManager.getActualValue('reqType') != 'U') {
-    return;
-  }
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var isuCds = [];
-  if (cntry != '') {
-    var qParams = {
-      _qall : 'Y',
-      ISSUING_CNTRY : cntry
-    };
-    var results = cmr.query('GET.ISULIST.UPDATE', qParams);
-    if (results != null) {
-      for (var i = 0; i < results.length; i++) {
-        isuCds.push(results[i].ret1);
-      }
-      if (isuCds != null) {
-        FormManager.limitDropdownValues(FormManager.getField('isuCd'), isuCds);
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType == '') {
+    window.setTimeout('setISUDropDown()', 500);
+  } else {
+    if (reqType != 'U') {
+      return;
+    }
+    var cntry = FormManager.getActualValue('cmrIssuingCntry');
+    var isuCds = [];
+    if (cntry != '') {
+      var qParams = {
+        _qall : 'Y',
+        ISSUING_CNTRY : cntry
+      };
+      var results = cmr.query('GET.ISULIST.UPDATE', qParams);
+      if (results != null) {
+        for (var i = 0; i < results.length; i++) {
+          isuCds.push(results[i].ret1);
+        }
+        if (isuCds != null) {
+          FormManager.limitDropdownValues(FormManager.getField('isuCd'), isuCds);
+        }
       }
     }
   }
@@ -667,23 +672,28 @@ function setClientTierDropDown() {
     return;
   }
 
-  if (FormManager.getActualValue('reqType') != 'U') {
-    return;
-  }
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var clientTiers = [];
-  if (cntry != '') {
-    var qParams = {
-      _qall : 'Y',
-      ISSUING_CNTRY : cntry
-    };
-    var results = cmr.query('GET.CTCLIST.UPDATE', qParams);
-    if (results != null) {
-      for (var i = 0; i < results.length; i++) {
-        clientTiers.push(results[i].ret1);
-      }
-      if (clientTiers != null) {
-        FormManager.limitDropdownValues(FormManager.getField('clientTier'), clientTiers);
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType == '') {
+    window.setTimeout('setClientTierDropDown()', 500);
+  } else {
+    if (reqType != 'U') {
+      return;
+    }
+    var cntry = FormManager.getActualValue('cmrIssuingCntry');
+    var clientTiers = [];
+    if (cntry != '') {
+      var qParams = {
+        _qall : 'Y',
+        ISSUING_CNTRY : cntry
+      };
+      var results = cmr.query('GET.CTCLIST.UPDATE', qParams);
+      if (results != null) {
+        for (var i = 0; i < results.length; i++) {
+          clientTiers.push(results[i].ret1);
+        }
+        if (clientTiers != null) {
+          FormManager.limitDropdownValues(FormManager.getField('clientTier'), clientTiers);
+        }
       }
     }
   }
