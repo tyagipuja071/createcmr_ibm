@@ -728,7 +728,7 @@ public class NLTransformer extends EMEATransformer {
     }
 
     if (!StringUtils.isBlank(addr.getAddrTxt())) {
-      legacyAddr.setStreet(addr.getAddrTxt());
+      // legacyAddr.setStreet(addr.getAddrTxt());
       legacyAddr.setAddrLine4(addr.getAddrTxt());
 
     }
@@ -789,7 +789,7 @@ public class NLTransformer extends EMEATransformer {
         legacyAddr.setZipCode("");
         // addrLine5.append(" ");
       } else {
-        legacyAddr.setZipCode(addr.getPostCd());
+        // legacyAddr.setZipCode(addr.getPostCd());
         addrLine5.append(addr.getPostCd() + " ");
       }
     }
@@ -799,7 +799,7 @@ public class NLTransformer extends EMEATransformer {
         legacyAddr.setCity("");
         // addrLine5.append(" ");
       } else {
-        legacyAddr.setCity(addr.getCity1());
+        // legacyAddr.setCity(addr.getCity1());
         addrLine5.append(addr.getCity1() + " ");
       }
     }
@@ -1208,13 +1208,6 @@ public class NLTransformer extends EMEATransformer {
       cust.setAbbrevLocn(muData.getAbbrevLocn());
     }
 
-    // if (!StringUtils.isBlank(muData.getMiscBillCd())) {
-    // if ("@".equals(muData.getMiscBillCd())) {
-    // cust.setEmbargoCd("");
-    // } else {
-    // cust.setEmbargoCd(muData.getMiscBillCd());
-    // }
-    // }
     // CREATCMR-845
     if (!StringUtils.isBlank(muData.getModeOfPayment())) {
       if ("@".equals(muData.getRestrictTo())) {
@@ -1239,19 +1232,6 @@ public class NLTransformer extends EMEATransformer {
       } else {
         cust.setSalesRepNo(muData.getSearchTerm());
         cust.setSalesGroupRep(muData.getSearchTerm());
-      }
-    }
-
-    String cebo = "";
-    if (!StringUtils.isBlank(muData.getCustNm2())) {
-      cebo = muData.getCustNm2();
-      // if (cebo.length() < 7) {
-      // cebo = StringUtils.rightPad(cebo, 7, '0');
-      // }
-      if ("@".equals(muData.getCustNm2())) {
-        cust.setCeBo("");
-      } else {
-        cust.setCeBo(cebo);
       }
     }
 
@@ -1296,30 +1276,14 @@ public class NLTransformer extends EMEATransformer {
       }
     }
 
-    // SBO
-    if (!StringUtils.isBlank(muData.getSalesBoCd())) {
-      if ("@".equals(muData.getSalesBoCd())) {
+    // SBO IBO
+    if (!StringUtils.isBlank(muData.getCustNm2())) {
+      if ("@".equals(muData.getCustNm2())) {
         cust.setSbo("");
         cust.setIbo("");
       } else {
-        String sbo = muData.getSalesBoCd();
-        if (sbo.length() < 7) {
-          sbo = StringUtils.rightPad(sbo, 7, '0');
-        }
-        cust.setSbo(sbo);
-        // cust.setIbo(sbo);
-      }
-    }
-    // IBO
-    if (!StringUtils.isBlank(muData.getAffiliate())) {
-      if ("@".equals(muData.getAffiliate())) {
-        cust.setIbo("");
-      } else {
-        String ibo = muData.getAffiliate();
-        if (ibo.length() < 7) {
-          ibo = StringUtils.rightPad(ibo, 7, '0');
-        }
-        cust.setIbo(ibo);
+        cust.setSbo(muData.getCustNm2());
+        cust.setIbo(muData.getCustNm2());
       }
     }
 
@@ -1340,6 +1304,29 @@ public class NLTransformer extends EMEATransformer {
     cust.setUpdateTs(SystemUtil.getCurrentTimestamp());
     cust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
 
+    if (!StringUtils.isBlank(muData.getCsoSite())) {
+      if ("@".equals(muData.getCsoSite())) {
+        cust.setEconomicCd("");
+      } else {
+        cust.setEconomicCd(muData.getCsoSite());
+      }
+    }
+
+    if (!StringUtils.isBlank(muData.getSvcArOffice())) {
+      if ("@".equals(muData.getSvcArOffice())) {
+        cust.setLangCd("");
+      } else {
+        cust.setLangCd(muData.getSvcArOffice());
+      }
+    }
+
+    if (!StringUtils.isBlank(muData.getOrdBlk())) {
+      if ("@".equals(muData.getOrdBlk())) {
+        cust.setEmbargoCd("");
+      } else {
+        cust.setEmbargoCd(muData.getOrdBlk());
+      }
+    }
   }
 
   private void resetOrdBlockToData(EntityManager entityManager, Data data) {
@@ -1609,23 +1596,31 @@ public class NLTransformer extends EMEATransformer {
     // }
     // }
 
-    if (!StringUtils.isBlank(muData.getNewEntpName1())) {
-      if ("@".equals(muData.getNewEntpName1())) {
-        custExt.setiTaxCode("");
-      } else {
-        if (muData.getNewEntpName1().length() > 9) {
-          custExt.setiTaxCode(muData.getNewEntpName1().substring(0, 8));
-        } else {
-          custExt.setiTaxCode(muData.getNewEntpName1());
-        }
-      }
-    }
+    // if (!StringUtils.isBlank(muData.getNewEntpName1())) {
+    // if ("@".equals(muData.getNewEntpName1())) {
+    // custExt.setiTaxCode("");
+    // } else {
+    // if (muData.getNewEntpName1().length() > 9) {
+    // custExt.setiTaxCode(muData.getNewEntpName1().substring(0, 8));
+    // } else {
+    // custExt.setiTaxCode(muData.getNewEntpName1());
+    // }
+    // }
+    // }
 
     if (!StringUtils.isBlank(muData.getAffiliate())) {
       if ("@".equals(muData.getAffiliate())) {
         custExt.setTeleCovRep("");
       } else {
         custExt.setTeleCovRep(muData.getAffiliate());
+      }
+    }
+
+    if (!StringUtils.isBlank(muData.getRestrictTo())) {
+      if ("@".equals(muData.getRestrictTo())) {
+        custExt.setiTaxCode("");
+      } else {
+        custExt.setiTaxCode(muData.getRestrictTo());
       }
     }
 
