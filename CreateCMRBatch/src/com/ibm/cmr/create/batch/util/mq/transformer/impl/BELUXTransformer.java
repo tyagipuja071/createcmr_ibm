@@ -702,7 +702,7 @@ public class BELUXTransformer extends EMEATransformer {
   public void transformLegacyAddressDataMassUpdate(EntityManager entityManager, CmrtAddr legacyAddr, MassUpdtAddr addr, String cntry, CmrtCust cust,
       Data data, LegacyDirectObjectContainer legacyObjects) {
 
-    if (!StringUtils.isBlank(addr.getCustPhone())) {
+    if (!StringUtils.isBlank(addr.getCustPhone()) && "ZS01".equalsIgnoreCase(addr.getId().getAddrType())) {
       if ("@".equals(addr.getCustPhone())) {
         cust.setTelNoOrVat("");
       } else {

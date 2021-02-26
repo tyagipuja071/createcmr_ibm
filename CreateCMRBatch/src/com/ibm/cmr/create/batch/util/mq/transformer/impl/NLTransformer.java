@@ -709,6 +709,14 @@ public class NLTransformer extends EMEATransformer {
   @Override
   public void transformLegacyAddressDataMassUpdate(EntityManager entityManager, CmrtAddr legacyAddr, MassUpdtAddr addr, String cntry, CmrtCust cust,
       Data data, LegacyDirectObjectContainer legacyObjects) {
+
+    if (!StringUtils.isBlank(addr.getCustPhone()) && "ZS01".equalsIgnoreCase(addr.getId().getAddrType())) {
+      if ("@".equals(addr.getCustPhone())) {
+        cust.setTelNoOrVat("");
+      } else {
+        cust.setTelNoOrVat(addr.getCustPhone());
+      }
+    }
     legacyAddr.setForUpdate(true);
     String countryName = LandedCountryMap.getCountryName(addr.getLandCntry());
     boolean crossBorder = isCrossBorderForMass(addr, legacyAddr);
@@ -1240,15 +1248,6 @@ public class NLTransformer extends EMEATransformer {
         cust.setEnterpriseNo("");
       } else {
         cust.setEnterpriseNo(muData.getEnterprise());
-      }
-    }
-
-    // Email1 used to store phone
-    if (!StringUtils.isBlank(muData.getEmail1())) {
-      if ("@".equals(muData.getEmail1())) {
-        cust.setTelNoOrVat("");
-      } else {
-        cust.setTelNoOrVat(muData.getEmail1());
       }
     }
 
