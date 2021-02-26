@@ -36,6 +36,7 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataRdc;
+import com.ibm.cio.cmr.request.entity.Kna1;
 import com.ibm.cio.cmr.request.entity.Sadr;
 import com.ibm.cio.cmr.request.entity.UpdatedAddr;
 import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation;
@@ -1908,6 +1909,8 @@ public class NLHandler extends BaseSOFHandler {
       XSSFSheet sheet = book.getSheet("Data");// validate Data sheet
       row = sheet.getRow(0);// data field name row
       int ordBlkIndex = 14;// default index
+      int cmrNoIndex = 0;// 0
+      String cmrNo = null;
       for (int cellIndex = 0; cellIndex < row.getLastCellNum(); cellIndex++) {
         currCell = row.getCell(cellIndex);
         String cellVal = validateColValFromCell(currCell);
@@ -1931,6 +1934,22 @@ public class NLHandler extends BaseSOFHandler {
           error.addError(rowIndex, "Order Block Code", "Order Block Code should be only @, E, P, 5, 6, 7, J. ");
           validations.add(error);
         }
+
+        currCell = row.getCell(cmrNoIndex);
+        cmrNo = validateColValFromCell(currCell);
+        if (isDivCMR(cmrNo)) {
+          LOG.trace("The row " + (row.getRowNum() + 1) + ":Note the CMR number is a divestiture CMR records.");
+          error.addError((row.getRowNum() + 1), "CMR No.",
+              "The row " + (row.getRowNum() + 1) + ":Note the CMR number is a divestiture CMR records.<br>");
+          validations.add(error);
+        }
+        if (is93CMR(cmrNo)) {
+          LOG.trace("The row " + (row.getRowNum() + 1) + ":Note the CMR number is a deleted record in RDC.");
+          error.addError((row.getRowNum() + 1), "CMR No.",
+              "The row " + (row.getRowNum() + 1) + ":Note the CMR number is a deleted record in RDC.<br>");
+          validations.add(error);
+        }
+
       }
 
       for (String name : countryAddrss) {
@@ -1972,6 +1991,59 @@ public class NLHandler extends BaseSOFHandler {
         }
       }
     }
+  }
+
+  private static boolean isDivCMR(String cmrNo) {
+    boolean isDivestiture = false;
+    if (StringUtils.isEmpty(cmrNo)) {
+      return false;
+    }
+    String mandt = SystemConfiguration.getValue("MANDT");
+    EntityManager entityManager = JpaManager.getEntityManager();
+    String sql = ExternalizedQuery.getSql("FR.GET.ZS01KATR10");
+
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setForReadOnly(true);
+    query.setParameter("KATR6", "624");
+    query.setParameter("MANDT", mandt);
+    query.setParameter("CMR", cmrNo);
+
+    Kna1 zs01 = query.getSingleResult(Kna1.class);
+    if (zs01 != null) {
+      if (!StringUtils.isBlank(zs01.getKatr10())) {
+        isDivestiture = true;
+      }
+    }
+    entityManager.close();
+    return isDivestiture;
+  }
+
+  private static boolean is93CMR(String cmrNo) {
+    boolean is93cmr = false;
+    if (StringUtils.isEmpty(cmrNo)) {
+      return false;
+    }
+    String mandt = SystemConfiguration.getValue("MANDT");
+    EntityManager entityManager = JpaManager.getEntityManager();
+    String sql = ExternalizedQuery.getSql("BENELUX.GET_RDC_ZS01");
+
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setForReadOnly(true);
+    query.setParameter("CNTRY", "788");
+    query.setParameter("MANDT", mandt);
+    query.setParameter("CMRNO", cmrNo);
+    query.setParameter("ADDRTYPE", "ZS01");
+
+    Object[] result = query.getSingleResult();
+    if (result != null) {
+      String aufsd = result[0].toString();
+      String loevm = result[1].toString();
+      if ("93".equals(aufsd) || "X".equals(loevm)) {
+        is93cmr = true;
+      }
+    }
+    entityManager.close();
+    return is93cmr;
   }
 
   private int getCeeKnvpParvmCount(String kunnr) throws Exception {
