@@ -977,9 +977,6 @@ public class NLHandler extends BaseSOFHandler {
     if (StringUtils.isEmpty(currentRecord.getCmrAddrTypeCode())) {
       return;
     }
-    if (currentRecord.getCmrAddrTypeCode().equals("ZI01")) {
-      address.getId().setAddrSeq("20701");
-    }
     if (currentRecord.getCmrAddrTypeCode().equals("ZP01")) {
       address.getId().setAddrSeq("29901");
     }
