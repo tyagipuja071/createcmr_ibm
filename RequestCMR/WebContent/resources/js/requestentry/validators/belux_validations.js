@@ -1624,8 +1624,8 @@ function addREALCTYValidator() {
         var cmrNo = FormManager.getActualValue('cmrNo');
         if (reqType == 'U') {
           var qParams = {
-            KATR6 : '624',
-            ZZKV_CUSNO : cmrNo
+            COUNTRY : '624',
+            CMR_NO : cmrNo
           };
           var result = cmr.query('BENELUX.CHECK_REALCTY', qParams);
           if (result != null && result.ret1 != null) {
