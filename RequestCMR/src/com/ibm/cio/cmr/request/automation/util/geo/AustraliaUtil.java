@@ -94,8 +94,11 @@ public class AustraliaUtil extends AutomationUtil {
         details.append("\nThe combination of Salesman No. and Cluster is invalid.\n");
       } else {
         LOG.debug("Salesman No.-Cluster combination not present.");
-        engineData.addRejectionComment("OTH", "No combination of Salesman No. and Cluster is present.", "", "");
-        results.setOnError(true);
+        /*
+         * engineData.addRejectionComment("OTH",
+         * "No combination of Salesman No. and Cluster is present.", "", "");
+         * results.setOnError(true);
+         */
         // eleResults.append("No combination of Salesman No. and Cluster
         // present.\n");
         details.append("\nNo combination of Salesman No. and Cluster is present.\n");
