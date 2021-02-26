@@ -2001,7 +2001,7 @@ public class NLHandler extends BaseSOFHandler {
 
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setForReadOnly(true);
-    query.setParameter("KATR6", "624");
+    query.setParameter("KATR6", "788");
     query.setParameter("MANDT", mandt);
     query.setParameter("CMR", cmrNo);
 
