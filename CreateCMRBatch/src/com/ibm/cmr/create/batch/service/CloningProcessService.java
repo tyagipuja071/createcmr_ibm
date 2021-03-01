@@ -416,7 +416,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
     RdcCloningRefn cloningRefn = null;
 
-    String sql = ExternalizedQuery.getSql("BATCH.GET.KNA1_MANDT_CMRNO");
+    String sql = ExternalizedQuery.getSql("CLONING.KNA1_MANDT_CMRNO");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     if ("NA".equals(targetCntry))
       query.setParameter("KATR6", cloningQueue.getId().getCmrIssuingCntry());
@@ -523,7 +523,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
       }
     }
 
-    cmrCloningQueue.setStatus("RDC_ERROR");
+    cmrCloningQueue.setStatus("RDC_ERR");
 
     if ("P".equals(rdcCloningRefn.getStatus())) {
       rdcCloningRefn.setStatus("R");
