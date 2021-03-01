@@ -722,8 +722,11 @@ public class NLTransformer extends EMEATransformer {
     boolean crossBorder = isCrossBorderForMass(addr, legacyAddr);
 
     if (!StringUtils.isBlank(addr.getCustNm1())) {
-      legacyAddr.setAddrLine1(addr.getCustNm1());
-
+      if ("@".equals(addr.getCustNm1())) {
+        legacyAddr.setAddrLine1("");
+      } else {
+        legacyAddr.setAddrLine1(addr.getCustNm1());
+      }
     }
 
     if (!StringUtils.isBlank(addr.getCustNm2())) {
@@ -731,12 +734,10 @@ public class NLTransformer extends EMEATransformer {
         legacyAddr.setAddrLine2("");
       } else {
         legacyAddr.setAddrLine2(addr.getCustNm2());
-
       }
     }
 
     if (!StringUtils.isBlank(addr.getAddrTxt())) {
-      // legacyAddr.setStreet(addr.getAddrTxt());
       legacyAddr.setAddrLine4(addr.getAddrTxt());
 
     }
@@ -770,7 +771,9 @@ public class NLTransformer extends EMEATransformer {
           line33 += (line33.length() > 0 ? " " : "") + "PO BOX " + pobox;
       }
     }
-
+    if (!StringUtils.isBlank(line33.toString())) {
+      legacyAddr.setAddrLine3(line33);
+    }
     if (!StringUtils.isBlank(addr.getPoBox())) {
       if ("@".equals(addr.getPoBox())) {
         legacyAddr.setPoBox("");
@@ -832,61 +835,67 @@ public class NLTransformer extends EMEATransformer {
       }
     }
 
-    String line2 = legacyAddr.getAddrLine2();
-    String line3 = legacyAddr.getAddrLine3();
-    String line4 = legacyAddr.getAddrLine4();
-    String line5 = legacyAddr.getAddrLine5();
-    String line6 = legacyAddr.getAddrLine6();
-
-    if (StringUtils.isEmpty(line2)) {
-      if (StringUtils.isEmpty(line3) && !StringUtils.isEmpty(line4) && !StringUtils.isEmpty(line5)) {
-        line2 = line4;
-        line3 = line5;
-        line4 = "";
-        line5 = "";
-      } else if (!StringUtils.isEmpty(line3) && StringUtils.isEmpty(line4) && !StringUtils.isEmpty(line5)) {
-        line2 = line3;
-        line3 = line5;
-        line5 = "";
-      } else if (!StringUtils.isEmpty(line3) && !StringUtils.isEmpty(line4) && !StringUtils.isEmpty(line5)) {
-        line2 = line3;
-        line3 = line4;
-        line4 = line5;
-        line5 = "";
-      }
-    } else if (!StringUtils.isEmpty(line2)) {
-      if (StringUtils.isEmpty(line3) && !StringUtils.isEmpty(line4) && !StringUtils.isEmpty(line5)) {
-        line3 = line4;
-        line4 = line5;
-        line5 = "";
-      } else if (StringUtils.isEmpty(line3) && !StringUtils.isEmpty(line4) && StringUtils.isEmpty(line5)) {
-        line3 = line4;
-        line4 = "";
-      } else if (!StringUtils.isEmpty(line3) && StringUtils.isEmpty(line4) && !StringUtils.isEmpty(line5)) {
-        line4 = line5;
-        line5 = "";
-      }
-    }
-
-    if (!crossBorder) {
-      line6 = "";
-    } else if (crossBorder) {
-      // country
-      line6 = countryName;
-    }
-    if (!StringUtils.isEmpty(line6) && StringUtils.isEmpty(line5)) {
-      line5 = line6;
-      line6 = "";
-      if (StringUtils.isEmpty(line4)) {
-        line4 = line5;
-        line5 = "";
-      }
-    }
-    legacyAddr.setAddrLine2(line2);
-    legacyAddr.setAddrLine3(line3);
-    legacyAddr.setAddrLine4(line4);
-    legacyAddr.setAddrLine5(line5);
-    legacyAddr.setAddrLine6(line6);
+    // String line2 = legacyAddr.getAddrLine2();
+    // String line3 = legacyAddr.getAddrLine3();
+    // String line4 = legacyAddr.getAddrLine4();
+    // String line5 = legacyAddr.getAddrLine5();
+    // String line6 = legacyAddr.getAddrLine6();
+    //
+    // if (StringUtils.isEmpty(line2)) {
+    // if (StringUtils.isEmpty(line3) && !StringUtils.isEmpty(line4) &&
+    // !StringUtils.isEmpty(line5)) {
+    // line2 = line4;
+    // line3 = line5;
+    // line4 = "";
+    // line5 = "";
+    // } else if (!StringUtils.isEmpty(line3) && StringUtils.isEmpty(line4) &&
+    // !StringUtils.isEmpty(line5)) {
+    // line2 = line3;
+    // line3 = line5;
+    // line5 = "";
+    // } else if (!StringUtils.isEmpty(line3) && !StringUtils.isEmpty(line4) &&
+    // !StringUtils.isEmpty(line5)) {
+    // line2 = line3;
+    // line3 = line4;
+    // line4 = line5;
+    // line5 = "";
+    // }
+    // } else if (!StringUtils.isEmpty(line2)) {
+    // if (StringUtils.isEmpty(line3) && !StringUtils.isEmpty(line4) &&
+    // !StringUtils.isEmpty(line5)) {
+    // line3 = line4;
+    // line4 = line5;
+    // line5 = "";
+    // } else if (StringUtils.isEmpty(line3) && !StringUtils.isEmpty(line4) &&
+    // StringUtils.isEmpty(line5)) {
+    // line3 = line4;
+    // line4 = "";
+    // } else if (!StringUtils.isEmpty(line3) && StringUtils.isEmpty(line4) &&
+    // !StringUtils.isEmpty(line5)) {
+    // line4 = line5;
+    // line5 = "";
+    // }
+    // }
+    //
+    // if (!crossBorder) {
+    // line6 = "";
+    // } else if (crossBorder) {
+    // // country
+    // line6 = countryName;
+    // }
+    // if (!StringUtils.isEmpty(line6) && StringUtils.isEmpty(line5)) {
+    // line5 = line6;
+    // line6 = "";
+    // if (StringUtils.isEmpty(line4)) {
+    // line4 = line5;
+    // line5 = "";
+    // }
+    // }
+    // legacyAddr.setAddrLine2(line2);
+    // legacyAddr.setAddrLine3(line3);
+    // legacyAddr.setAddrLine4(line4);
+    // legacyAddr.setAddrLine5(line5);
+    // legacyAddr.setAddrLine6(line6);
   }
 
   @Override

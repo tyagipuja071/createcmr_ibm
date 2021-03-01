@@ -702,8 +702,6 @@ public class BELUXTransformer extends EMEATransformer {
   public void transformLegacyAddressDataMassUpdate(EntityManager entityManager, CmrtAddr legacyAddr, MassUpdtAddr addr, String cntry, CmrtCust cust,
       Data data, LegacyDirectObjectContainer legacyObjects) {
 
-    boolean l2c = false, l3c = false, l4c = false, l5c = false;
-
     if (!StringUtils.isBlank(addr.getCustPhone()) && "ZS01".equalsIgnoreCase(addr.getId().getAddrType())) {
       if ("@".equals(addr.getCustPhone())) {
         cust.setTelNoOrVat("");
@@ -722,17 +720,14 @@ public class BELUXTransformer extends EMEATransformer {
     if (!StringUtils.isBlank(addr.getCustNm2())) {
       if ("@".equals(addr.getCustNm2())) {
         legacyAddr.setAddrLine2("");
-        l2c = true;
       } else {
         legacyAddr.setAddrLine2(addr.getCustNm2());
-        l2c = true;
       }
     }
 
     if (!StringUtils.isBlank(addr.getAddrTxt())) {
-      legacyAddr.setStreet(addr.getAddrTxt());
+      // legacyAddr.setStreet(addr.getAddrTxt());
       legacyAddr.setAddrLine4(addr.getAddrTxt());
-      l4c = true;
     }
 
     String pobox = addr.getPoBox();
@@ -744,10 +739,8 @@ public class BELUXTransformer extends EMEATransformer {
     if (!StringUtils.isBlank(name3)) {
       if ("@".equals(name3)) {
         line33 = "";
-        l3c = true;
       } else if (!"@".equals(name3)) {
         line33 += (line33.length() > 0 ? " " : "") + name3;
-        l3c = true;
       }
     }
 
@@ -755,10 +748,8 @@ public class BELUXTransformer extends EMEATransformer {
       if (!StringUtils.isBlank(attPer)) {
         if ("@".equals(attPer)) {
           line33 = "";
-          l3c = true;
         } else if (!"@".equals(attPer)) {
           line33 += (line33.length() > 0 ? " " : "") + "ATT " + attPer;
-          l3c = true;
         }
       }
     }
@@ -766,14 +757,14 @@ public class BELUXTransformer extends EMEATransformer {
       if (!StringUtils.isBlank(pobox)) {
         if ("@".equals(pobox)) {
           line33 = "";
-          l3c = true;
         } else if (!"@".equals(pobox)) {
           line33 += (line33.length() > 0 ? " " : "") + "PO BOX " + pobox;
-          l3c = true;
         }
       }
     }
-
+    if (!StringUtils.isBlank(line33.toString())) {
+      legacyAddr.setAddrLine3(line33);
+    }
     if (!StringUtils.isBlank(addr.getPoBox())) {
       if ("@".equals(addr.getPoBox())) {
         legacyAddr.setPoBox("");
@@ -781,43 +772,33 @@ public class BELUXTransformer extends EMEATransformer {
         legacyAddr.setPoBox(addr.getPoBox());
       }
     }
-    if (!StringUtils.isBlank(line33.toString())) {
-      legacyAddr.setAddrLine3(line33);
-      l3c = true;
-    }
     // legacy addr line5 is set in order district+postCd+City
     StringBuilder addrLine5 = new StringBuilder();
 
     if (!StringUtils.isBlank(addr.getDept())) {
       if ("@".equals(addr.getDept())) {
         legacyAddr.setDistrict("");
-        l5c = true;
       } else {
         addrLine5.append(addr.getDept() + " ");
         legacyAddr.setDistrict(addr.getDept());
-        l5c = true;
       }
     }
 
     if (!StringUtils.isBlank(addr.getPostCd())) {
       if ("@".equals(addr.getPostCd())) {
         legacyAddr.setZipCode("");
-        l5c = true;
       } else {
-        legacyAddr.setZipCode(addr.getPostCd());
+        // legacyAddr.setZipCode(addr.getPostCd());
         addrLine5.append(addr.getPostCd() + " ");
-        l5c = true;
       }
     }
 
     if (!StringUtils.isBlank(addr.getCity1())) {
       if ("@".equals(addr.getCity1())) {
         legacyAddr.setCity("");
-        l5c = true;
       } else {
-        legacyAddr.setCity(addr.getCity1());
+        // legacyAddr.setCity(addr.getCity1());
         addrLine5.append(addr.getCity1() + " ");
-        l5c = true;
       }
     }
 
@@ -827,7 +808,6 @@ public class BELUXTransformer extends EMEATransformer {
 
     if (!StringUtils.isBlank(addrLine5.toString())) {
       legacyAddr.setAddrLine5(addrLine5.toString());
-      l5c = true;
     }
 
     if ("ZP02".equals(addr.getId().getAddrType())) {
@@ -843,73 +823,79 @@ public class BELUXTransformer extends EMEATransformer {
         legacyAddr.setAddrLine6(LandedCountryMap.getCountryName(addr.getLandCntry()));
       }
     }
-
-    String line2 = "", line3 = "", line4 = "", line5 = "", line6 = "";
-    if (l2c)
-      line2 = legacyAddr.getAddrLine2();
-    if (l3c)
-      line3 = legacyAddr.getAddrLine3();
-    if (l4c)
-      line4 = legacyAddr.getAddrLine4();
-    if (l5c)
-      line5 = legacyAddr.getAddrLine5();
-    line6 = legacyAddr.getAddrLine6();
-
-    if (!crossBorder) {
-      line6 = "";
-    } else if (crossBorder) {
-      line6 = countryName;
-    }
-    if (StringUtils.isEmpty(line2)) {
-      if (StringUtils.isEmpty(line3) && !StringUtils.isEmpty(line4) && !StringUtils.isEmpty(line5)) {
-        line2 = line4;
-        line3 = line5;
-        line4 = "";
-        line5 = "";
-      } else if (!StringUtils.isEmpty(line3) && StringUtils.isEmpty(line4) && !StringUtils.isEmpty(line5)) {
-        line2 = line3;
-        line3 = line5;
-        line5 = "";
-      } else if (!StringUtils.isEmpty(line3) && !StringUtils.isEmpty(line4) && !StringUtils.isEmpty(line5)) {
-        line2 = line3;
-        line3 = line4;
-        line4 = line5;
-        line5 = "";
-      }
-    } else if (!StringUtils.isEmpty(line2)) {
-      if (StringUtils.isEmpty(line3) && !StringUtils.isEmpty(line4) && !StringUtils.isEmpty(line5)) {
-        line3 = line4;
-        line4 = line5;
-        line5 = "";
-      } else if (StringUtils.isEmpty(line3) && !StringUtils.isEmpty(line4) && StringUtils.isEmpty(line5)) {
-        line3 = line4;
-        line4 = "";
-      } else if (!StringUtils.isEmpty(line3) && StringUtils.isEmpty(line4) && !StringUtils.isEmpty(line5)) {
-        line4 = line5;
-        line5 = "";
-      }
-    }
-
-    if (!crossBorder) {
-      line6 = "";
-    } else if (crossBorder) {
-      // country
-      line6 = countryName;
-    }
-    if (!StringUtils.isEmpty(line6) && StringUtils.isEmpty(line5)) {
-      line5 = line6;
-      line6 = "";
-      if (StringUtils.isEmpty(line4)) {
-        line4 = line5;
-        line5 = "";
-      }
-    }
-
-    legacyAddr.setAddrLine2(line2);
-    legacyAddr.setAddrLine3(line3);
-    legacyAddr.setAddrLine4(line4);
-    legacyAddr.setAddrLine5(line5);
-    legacyAddr.setAddrLine6(line6);
+    //
+    // String line2 = "", line3 = "", line4 = "", line5 = "", line6 = "";
+    // if (l2c)
+    // line2 = legacyAddr.getAddrLine2();
+    // if (l3c)
+    // line3 = legacyAddr.getAddrLine3();
+    // if (l4c)
+    // line4 = legacyAddr.getAddrLine4();
+    // if (l5c)
+    // line5 = legacyAddr.getAddrLine5();
+    // line6 = legacyAddr.getAddrLine6();
+    //
+    // if (!crossBorder) {
+    // line6 = "";
+    // } else if (crossBorder) {
+    // line6 = countryName;
+    // }
+    // if (StringUtils.isEmpty(line2)) {
+    // if (StringUtils.isEmpty(line3) && !StringUtils.isEmpty(line4) &&
+    // !StringUtils.isEmpty(line5)) {
+    // line2 = line4;
+    // line3 = line5;
+    // line4 = "";
+    // line5 = "";
+    // } else if (!StringUtils.isEmpty(line3) && StringUtils.isEmpty(line4) &&
+    // !StringUtils.isEmpty(line5)) {
+    // line2 = line3;
+    // line3 = line5;
+    // line5 = "";
+    // } else if (!StringUtils.isEmpty(line3) && !StringUtils.isEmpty(line4) &&
+    // !StringUtils.isEmpty(line5)) {
+    // line2 = line3;
+    // line3 = line4;
+    // line4 = line5;
+    // line5 = "";
+    // }
+    // } else if (!StringUtils.isEmpty(line2)) {
+    // if (StringUtils.isEmpty(line3) && !StringUtils.isEmpty(line4) &&
+    // !StringUtils.isEmpty(line5)) {
+    // line3 = line4;
+    // line4 = line5;
+    // line5 = "";
+    // } else if (StringUtils.isEmpty(line3) && !StringUtils.isEmpty(line4) &&
+    // StringUtils.isEmpty(line5)) {
+    // line3 = line4;
+    // line4 = "";
+    // } else if (!StringUtils.isEmpty(line3) && StringUtils.isEmpty(line4) &&
+    // !StringUtils.isEmpty(line5)) {
+    // line4 = line5;
+    // line5 = "";
+    // }
+    // }
+    //
+    // if (!crossBorder) {
+    // line6 = "";
+    // } else if (crossBorder) {
+    // // country
+    // line6 = countryName;
+    // }
+    // if (!StringUtils.isEmpty(line6) && StringUtils.isEmpty(line5)) {
+    // line5 = line6;
+    // line6 = "";
+    // if (StringUtils.isEmpty(line4)) {
+    // line4 = line5;
+    // line5 = "";
+    // }
+    // }
+    //
+    // legacyAddr.setAddrLine2(line2);
+    // legacyAddr.setAddrLine3(line3);
+    // legacyAddr.setAddrLine4(line4);
+    // legacyAddr.setAddrLine5(line5);
+    // legacyAddr.setAddrLine6(line6);
 
   }
 
