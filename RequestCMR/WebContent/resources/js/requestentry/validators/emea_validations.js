@@ -5478,11 +5478,11 @@ function canRemoveAddress(value, rowIndex, grid) {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var rowData = grid.getItem(rowIndex);
   var addrType = rowData.addrType[0];
-  if (addrType == 'PG01'){
+  if (addrType == 'PG01') {
     // no removes for paygo addresses
     return false;
   }
-  
+
   if (cntry != '758') {
     var importInd = rowData.importInd[0];
     var reqType = FormManager.getActualValue('reqType');
@@ -5517,7 +5517,7 @@ function canUpdateAddress(value, rowIndex, grid) {
   var rowData = grid.getItem(rowIndex);
   var addrType = rowData.addrType[0];
   var role = FormManager.getActualValue('userRole').toUpperCase();
-  if (addrType == 'PG01' && role != 'PROCESSOR'){
+  if (addrType == 'PG01' && role != 'PROCESSOR') {
     // no updates for non processors for paygo addresses
     return false;
   }
@@ -5558,7 +5558,7 @@ function canCopyAddress(value, rowIndex, grid) {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var rowData = grid.getItem(rowIndex);
   var addrType = rowData.addrType[0];
-  if (addrType == 'PG01'){
+  if (addrType == 'PG01') {
     // no copy for paygo addresses
     return false;
   }
@@ -9262,5 +9262,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(autoSetVAT, [ SysLoc.UK, SysLoc.IRELAND ]);
 
   GEOHandler.registerValidator(validateVATForINFSLScenarioUKI, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
+  GEOHandler.addAfterConfig(resetVATValidationsForPayGo, [ SysLoc.UK, SysLoc.IRELAND ]);
+  GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, [ SysLoc.UK, SysLoc.IRELAND ]);
 
 });

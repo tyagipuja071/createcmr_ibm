@@ -1214,5 +1214,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setAddressDetailsForView, GEOHandler.BELUX);
   /* 1596058: All BeLux - DPL check failed */
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.BELUX, GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.addAfterConfig(resetVATValidationsForPayGo, GEOHandler.BELUX);
+  GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, GEOHandler.BELUX);
 
 });

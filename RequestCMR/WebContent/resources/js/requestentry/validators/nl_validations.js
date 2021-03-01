@@ -1022,4 +1022,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(disableLandCntry, GEOHandler.NL);
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.NL, GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.addAfterConfig(setAddressDetailsForView, GEOHandler.NL);
+  GEOHandler.addAfterConfig(resetVATValidationsForPayGo, GEOHandler.NL);
+  GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, GEOHandler.NL);
 });

@@ -424,10 +424,10 @@ function setISUCTCOnIMSChange() {
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
   var subIndustryCd = FormManager.getActualValue('subIndustryCd');
-	if (FormManager.getActualValue('reqType') != 'C') {
+  if (FormManager.getActualValue('reqType') != 'C') {
     return;
   }
-	if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
   if (!(custSubGrp == 'CHINT' || custSubGrp == 'LIINT' || custSubGrp == 'CHPRI' || custSubGrp == 'LIPRI' || custSubGrp == 'CHIBM' || custSubGrp == 'LIIBM' || custSubGrp == 'CHBUS' || custSubGrp == 'LIBUS')) {
@@ -840,7 +840,7 @@ function addAddressTypeValidator() {
               installingCnt++;
             }
           }
-          if(contractCnt == 0) {
+          if (contractCnt == 0) {
             return new ValidationResult(null, false, 'Contract(Sold-to) Address is mandatory.');
           } else if (contractCnt > 1) {
             return new ValidationResult(null, false, 'Only one Contract address can be defined. Please remove the additional Contract address.');
@@ -1561,4 +1561,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setISUCTCOnIMSChange, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(lockIBMTabForSWISS, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(lockIBMTabForSWISS, GEOHandler.SWISS);
+  GEOHandler.addAfterConfig(resetVATValidationsForPayGo, GEOHandler.SWISS);
+  GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, GEOHandler.SWISS);
 });

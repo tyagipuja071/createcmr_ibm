@@ -346,6 +346,12 @@ public class AutomationEngine {
             && nonCompanyVerificationErrorCount == 0 && engineData.get().getTrackedNegativeCheckCount() == 0 && payGoAddredited) {
           moveForPayGo = true;
         }
+
+        if ("C".equals(admin.getReqType()) && !actionsOnError.isEmpty() && payGoAddredited) {
+          admin.setPaygoProcessIndc("Y");
+          createComment(entityManager, "Pay-Go accredited partner.", reqId, appUser);
+        }
+
         if (moveForPayGo) {
           createComment(entityManager, "Pay-Go accredited partner. Request passed all other checks, moving to processing.", reqId, appUser);
           admin.setPaygoProcessIndc("Y");
