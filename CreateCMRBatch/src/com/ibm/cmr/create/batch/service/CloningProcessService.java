@@ -26,7 +26,6 @@ import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addlctrydata;
 import com.ibm.cio.cmr.request.entity.AddlctrydataPK;
 import com.ibm.cio.cmr.request.entity.CmrCloningQueue;
-import com.ibm.cio.cmr.request.entity.CmrCloningQueuePK;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtAddrPK;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
@@ -508,20 +507,8 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
   }
 
-  private void processError(EntityManager entityManager, RdcCloningRefn rdcCloningRefn, CmrCloningQueue cmrCloningQueue, String errorMsg)
-      throws Exception {
+  private void processError(EntityManager entityManager, RdcCloningRefn rdcCloningRefn, CmrCloningQueue cmrCloningQueue, String errorMsg) {
     LOG.info("Processing error for CMR No: " + rdcCloningRefn.getCmrNo() + ": " + errorMsg);
-
-    if (cmrCloningQueue == null) {
-      CmrCloningQueuePK cloningPk = new CmrCloningQueuePK();
-      cloningPk.setCmrCloningProcessId(rdcCloningRefn.getId().getCmrCloningProcessId());
-      cloningPk.setCmrIssuingCntry(rdcCloningRefn.getCmrIssuingCntry());
-      cloningPk.setCmrNo(rdcCloningRefn.getCmrNo());
-      cmrCloningQueue = entityManager.find(CmrCloningQueue.class, cloningPk);
-      if (cmrCloningQueue == null) {
-        throw new Exception("Cannot locate CmrCloningQueue record");
-      }
-    }
 
     cmrCloningQueue.setStatus("RDC_ERR");
 
@@ -1606,7 +1593,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
       } catch (Exception e) {
         partialRollback(entityManager);
         LOG.error("Unexpected error occurred during kna1 cloning process for CMR No : " + rdcCloningRefn.getCmrNo(), e);
-        // processError(entityManager, null, e.getMessage());
+        processError(entityManager, rdcCloningRefn, cloningQueue, "Issue while cloning KNA1 records");
       }
       partialCommit(entityManager);
     }
@@ -1632,8 +1619,8 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
       } catch (Exception e) {
         partialRollback(entityManager);
         LOG.error("Unexpected error occurred during kna1 child cloning process for CMR No : " + rdcCloningRefn.getCmrNo(), e);
-        processError(entityManager, rdcCloningRefn, null, "Issue while cloning KNA1 child records");
-        updateEntity(rdcCloningRefn, entityManager);
+        processError(entityManager, rdcCloningRefn, cloningQueue, "Issue while cloning KNA1 child records");
+        // updateEntity(rdcCloningRefn, entityManager);
       }
       partialCommit(entityManager);
     }
