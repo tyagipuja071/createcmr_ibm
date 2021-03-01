@@ -430,6 +430,8 @@ public class RequestEntryModel extends BaseModel {
   private String invoiceDistCd;
   private String cusInvoiceCopies;
 
+  private String sourceSystId;
+
   public String getMatchIndc() {
     return matchIndc;
   }
@@ -3081,6 +3083,14 @@ public class RequestEntryModel extends BaseModel {
 
   public void setCusInvoiceCopies(String cusInvoiceCopies) {
     this.cusInvoiceCopies = cusInvoiceCopies;
+  }
+
+  public String getSourceSystId() {
+    return sourceSystId;
+  }
+
+  public void setSourceSystId(String sourceSystId) {
+    this.sourceSystId = sourceSystId;
   }
 
 }
