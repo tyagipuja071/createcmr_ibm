@@ -1,12 +1,12 @@
 <application>
-  <targetMandt>120</targetMandt>
+  <targetMandt>030</targetMandt>
   <katr10>GTS</katr10>
   
   <processKnb1>true</processKnb1>
   <createKnb1Countries>
   	<country>822</country>
-    <country>20</country>
-    <country>30</country>
+    <country>838</country>
+    <country>758</country>
   </createKnb1Countries>
   
   <processKnvv>true</processKnvv>

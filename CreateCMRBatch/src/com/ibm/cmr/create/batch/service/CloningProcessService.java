@@ -66,7 +66,6 @@ import com.ibm.cio.cmr.request.entity.SizeinfoPK;
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
-import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
@@ -140,8 +139,16 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     LOG.debug("Started Cloning process for CMR No " + cmrNo);
 
     String cloningCmrNo = "";
-    String processingType = PageManager.getProcessingType(cntry, "U");
-    // String processingType = "DR";
+    String processingType = "";
+    String sql = ExternalizedQuery.getSql("GET.PROCESSING_TYPE");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CNTRY", cntry);
+
+    List<String> results = query.getResults(String.class);
+    if (results != null && results.size() > 0) {
+      processingType = results.get(0);
+    }
+
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType))
       cloningCmrNo = generateCMRNoLegacy(entityManager, cntry, cmrNo);
     else if (PROCESSING_TYPES.contains(processingType))
@@ -706,38 +713,36 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     Knb1 knb1Clone = null;
     Timestamp ts = SystemUtil.getCurrentTimestamp();
 
-    if (rdcConfig.getCountriesForKnb1Create().contains(kna1.getKatr6()) && KNB1_ADDR.contains(kna1.getKtokd())) {
-      knb1 = getKnb1ByKunnr(entityManager, kna1.getId().getMandt(), kna1.getId().getKunnr());
-      knb1Clone = getKnb1ByKunnr(entityManager, kna1Clone.getId().getMandt(), kna1Clone.getId().getKunnr());
-      if (knb1 != null && knb1Clone == null) {
-        try {
-          knb1Clone = new Knb1();
-          Knb1PK knb1PKClone = new Knb1PK();
-          knb1PKClone.setMandt(kna1Clone.getId().getMandt());
-          knb1PKClone.setKunnr(kna1Clone.getId().getKunnr());
-          knb1PKClone.setBukrs(knb1.getId().getBukrs());
-          PropertyUtils.copyProperties(knb1Clone, knb1);
+    knb1 = getKnb1ByKunnr(entityManager, kna1.getId().getMandt(), kna1.getId().getKunnr());
+    knb1Clone = getKnb1ByKunnr(entityManager, kna1Clone.getId().getMandt(), kna1Clone.getId().getKunnr());
+    if (knb1 != null && knb1Clone == null) {
+      try {
+        knb1Clone = new Knb1();
+        Knb1PK knb1PKClone = new Knb1PK();
+        knb1PKClone.setMandt(kna1Clone.getId().getMandt());
+        knb1PKClone.setKunnr(kna1Clone.getId().getKunnr());
+        knb1PKClone.setBukrs(knb1.getId().getBukrs());
+        PropertyUtils.copyProperties(knb1Clone, knb1);
 
-          // knb1Clone.setId(knb1PKClone);
+        // knb1Clone.setId(knb1PKClone);
 
-          overrideConfigChanges(entityManager, overrideValues, knb1Clone, "KNB1", knb1PKClone);
+        overrideConfigChanges(entityManager, overrideValues, knb1Clone, "KNB1", knb1PKClone);
 
-          knb1Clone.setId(knb1PKClone);
+        knb1Clone.setId(knb1PKClone);
 
-          knb1Clone.setSapTs(ts);
-          knb1Clone.setShadUpdateInd("I");
-          knb1Clone.setShadUpdateTs(ts);
+        knb1Clone.setSapTs(ts);
+        knb1Clone.setShadUpdateInd("I");
+        knb1Clone.setShadUpdateTs(ts);
 
-          createEntity(knb1Clone, entityManager);
-        } catch (Exception e) {
-          LOG.debug("Error in copy knb1");
-        }
-      } else {
-        LOG.info("KNB1 record not exist with KUNNR " + kna1.getId().getKunnr());
+        createEntity(knb1Clone, entityManager);
+      } catch (Exception e) {
+        LOG.debug("Error in copy knb1");
       }
-
-      logObject(knb1Clone);
+    } else {
+      LOG.info("KNB1 record not exist with KUNNR " + kna1.getId().getKunnr());
     }
+
+    logObject(knb1Clone);
 
   }
 
@@ -756,39 +761,37 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     Knvv knvvClone = null;
     Timestamp ts = SystemUtil.getCurrentTimestamp();
 
-    if (rdcConfig.getCountriesForKnvvCreate().contains(kna1.getKatr6())) {
-      knvv = getKnvvByKunnr(entityManager, kna1.getId().getMandt(), kna1.getId().getKunnr());
-      knvvClone = getKnvvByKunnr(entityManager, kna1Clone.getId().getMandt(), kna1Clone.getId().getKunnr());
-      if (knvv != null && knvvClone == null) {
-        try {
-          knvvClone = new Knvv();
-          KnvvPK knvvPKClone = new KnvvPK();
-          knvvPKClone.setKunnr(kna1Clone.getId().getKunnr());
-          knvvPKClone.setMandt(kna1Clone.getId().getMandt());
-          knvvPKClone.setSpart(knvv.getId().getSpart());
-          knvvPKClone.setVkorg(knvv.getId().getVkorg());
-          knvvPKClone.setVtweg(knvv.getId().getVtweg());
+    knvv = getKnvvByKunnr(entityManager, kna1.getId().getMandt(), kna1.getId().getKunnr());
+    knvvClone = getKnvvByKunnr(entityManager, kna1Clone.getId().getMandt(), kna1Clone.getId().getKunnr());
+    if (knvv != null && knvvClone == null) {
+      try {
+        knvvClone = new Knvv();
+        KnvvPK knvvPKClone = new KnvvPK();
+        knvvPKClone.setKunnr(kna1Clone.getId().getKunnr());
+        knvvPKClone.setMandt(kna1Clone.getId().getMandt());
+        knvvPKClone.setSpart(knvv.getId().getSpart());
+        knvvPKClone.setVkorg(knvv.getId().getVkorg());
+        knvvPKClone.setVtweg(knvv.getId().getVtweg());
 
-          PropertyUtils.copyProperties(knvvClone, knvv);
+        PropertyUtils.copyProperties(knvvClone, knvv);
 
-          overrideConfigChanges(entityManager, overrideValues, knvvClone, "KNVV", knvvPKClone);
+        overrideConfigChanges(entityManager, overrideValues, knvvClone, "KNVV", knvvPKClone);
 
-          knvvClone.setId(knvvPKClone);
+        knvvClone.setId(knvvPKClone);
 
-          knvvClone.setSapTs(ts);
-          knvvClone.setShadUpdateInd("I");
-          knvvClone.setShadUpdateTs(ts);
+        knvvClone.setSapTs(ts);
+        knvvClone.setShadUpdateInd("I");
+        knvvClone.setShadUpdateTs(ts);
 
-          createEntity(knvvClone, entityManager);
-        } catch (Exception e) {
-          LOG.debug("Error in copy knvv");
-        }
-      } else {
-        LOG.info("KNVV record not exist with KUNNR " + kna1.getId().getKunnr());
+        createEntity(knvvClone, entityManager);
+      } catch (Exception e) {
+        LOG.debug("Error in copy knvv");
       }
-
-      logObject(knvvClone);
+    } else {
+      LOG.info("KNVV record not exist with KUNNR " + kna1.getId().getKunnr());
     }
+
+    logObject(knvvClone);
 
   }
 
@@ -807,37 +810,35 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     Knex knexClone = null;
     Timestamp ts = SystemUtil.getCurrentTimestamp();
 
-    if (rdcConfig.getCountriesForKnexCreate().contains(kna1.getKatr6())) {
-      knex = getKnexByKunnr(entityManager, kna1.getId().getMandt(), kna1.getId().getKunnr());
-      knexClone = getKnexByKunnr(entityManager, kna1Clone.getId().getMandt(), kna1Clone.getId().getKunnr());
-      if (knex != null && knexClone == null) {
-        try {
-          knexClone = new Knex();
-          KnexPK knexPKClone = new KnexPK();
-          knexPKClone.setKunnr(kna1Clone.getId().getKunnr());
-          knexPKClone.setLndex(knex.getId().getLndex());
-          knexPKClone.setMandt(kna1Clone.getId().getMandt());
+    knex = getKnexByKunnr(entityManager, kna1.getId().getMandt(), kna1.getId().getKunnr());
+    knexClone = getKnexByKunnr(entityManager, kna1Clone.getId().getMandt(), kna1Clone.getId().getKunnr());
+    if (knex != null && knexClone == null) {
+      try {
+        knexClone = new Knex();
+        KnexPK knexPKClone = new KnexPK();
+        knexPKClone.setKunnr(kna1Clone.getId().getKunnr());
+        knexPKClone.setLndex(knex.getId().getLndex());
+        knexPKClone.setMandt(kna1Clone.getId().getMandt());
 
-          PropertyUtils.copyProperties(knexClone, knex);
+        PropertyUtils.copyProperties(knexClone, knex);
 
-          overrideConfigChanges(entityManager, overrideValues, knexClone, "KNEX", knexPKClone);
+        overrideConfigChanges(entityManager, overrideValues, knexClone, "KNEX", knexPKClone);
 
-          knexClone.setId(knexPKClone);
+        knexClone.setId(knexPKClone);
 
-          knexClone.setSapTs(ts);
-          knexClone.setShadUpdateInd("I");
-          knexClone.setShadUpdateTs(ts);
+        knexClone.setSapTs(ts);
+        knexClone.setShadUpdateInd("I");
+        knexClone.setShadUpdateTs(ts);
 
-          createEntity(knexClone, entityManager);
-        } catch (Exception e) {
-          LOG.debug("Error in copy knex");
-        }
-      } else {
-        LOG.info("KNEX record not exist with KUNNR " + kna1.getId().getKunnr());
+        createEntity(knexClone, entityManager);
+      } catch (Exception e) {
+        LOG.debug("Error in copy knex");
       }
-
-      logObject(knexClone);
+    } else {
+      LOG.info("KNEX record not exist with KUNNR " + kna1.getId().getKunnr());
     }
+
+    logObject(knexClone);
 
   }
 
@@ -856,37 +857,35 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     Sadr sadrClone = null;
     Timestamp ts = SystemUtil.getCurrentTimestamp();
 
-    if (rdcConfig.getCountriesForSadrCreate().contains(kna1.getKatr6())) {
-      sadr = getSadrByAdrnr(entityManager, kna1);
-      sadrClone = getSadrByAdrnr(entityManager, kna1Clone);
-      if (sadr != null && sadrClone == null) {
-        try {
-          sadrClone = new Sadr();
-          SadrPK sadrPKClone = new SadrPK();
-          sadrPKClone.setAdrnr(kna1Clone.getAdrnr());
-          sadrPKClone.setMandt(kna1Clone.getId().getMandt());
-          sadrPKClone.setNatio(sadr.getId().getNatio());
+    sadr = getSadrByAdrnr(entityManager, kna1);
+    sadrClone = getSadrByAdrnr(entityManager, kna1Clone);
+    if (sadr != null && sadrClone == null) {
+      try {
+        sadrClone = new Sadr();
+        SadrPK sadrPKClone = new SadrPK();
+        sadrPKClone.setAdrnr(kna1Clone.getAdrnr());
+        sadrPKClone.setMandt(kna1Clone.getId().getMandt());
+        sadrPKClone.setNatio(sadr.getId().getNatio());
 
-          PropertyUtils.copyProperties(sadrClone, sadr);
+        PropertyUtils.copyProperties(sadrClone, sadr);
 
-          overrideConfigChanges(entityManager, overrideValues, sadrClone, "SADR", sadrPKClone);
+        overrideConfigChanges(entityManager, overrideValues, sadrClone, "SADR", sadrPKClone);
 
-          sadrClone.setId(sadrPKClone);
+        sadrClone.setId(sadrPKClone);
 
-          sadrClone.setSapTs(ts);
-          sadrClone.setShadUpdateInd("I");
-          sadrClone.setShadUpdateTs(ts);
+        sadrClone.setSapTs(ts);
+        sadrClone.setShadUpdateInd("I");
+        sadrClone.setShadUpdateTs(ts);
 
-          createEntity(sadrClone, entityManager);
-        } catch (Exception e) {
-          LOG.debug("Error in copy sadr");
-        }
-      } else {
-        LOG.info("SADR record not exist with ADRNR " + kna1.getAdrnr());
+        createEntity(sadrClone, entityManager);
+      } catch (Exception e) {
+        LOG.debug("Error in copy sadr");
       }
-
-      logObject(sadrClone);
+    } else {
+      LOG.info("SADR record not exist with ADRNR " + kna1.getAdrnr());
     }
+
+    logObject(sadrClone);
 
   }
 
@@ -906,40 +905,38 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     Knvi knviCloneInsert = null;
     Timestamp ts = SystemUtil.getCurrentTimestamp();
 
-    if (rdcConfig.getCountriesForKnviCreate().contains(kna1.getKatr6())) {
-      knvi = getKnviByKunnr(entityManager, kna1.getId().getMandt(), kna1.getId().getKunnr());
-      knviClone = getKnviByKunnr(entityManager, kna1Clone.getId().getMandt(), kna1Clone.getId().getKunnr());
-      if (knvi != null && knviClone.size() == 0) {
-        try {
-          for (Knvi currentKnvi : knvi) {
-            knviCloneInsert = new Knvi();
-            KnviPK knviPKClone = new KnviPK();
-            knviPKClone.setAland(currentKnvi.getId().getAland());
-            knviPKClone.setKunnr(kna1Clone.getId().getKunnr());
-            knviPKClone.setMandt(kna1Clone.getId().getMandt());
-            knviPKClone.setTatyp(currentKnvi.getId().getTatyp());
+    knvi = getKnviByKunnr(entityManager, kna1.getId().getMandt(), kna1.getId().getKunnr());
+    knviClone = getKnviByKunnr(entityManager, kna1Clone.getId().getMandt(), kna1Clone.getId().getKunnr());
+    if (knvi != null && knviClone.size() == 0) {
+      try {
+        for (Knvi currentKnvi : knvi) {
+          knviCloneInsert = new Knvi();
+          KnviPK knviPKClone = new KnviPK();
+          knviPKClone.setAland(currentKnvi.getId().getAland());
+          knviPKClone.setKunnr(kna1Clone.getId().getKunnr());
+          knviPKClone.setMandt(kna1Clone.getId().getMandt());
+          knviPKClone.setTatyp(currentKnvi.getId().getTatyp());
 
-            PropertyUtils.copyProperties(knviCloneInsert, currentKnvi);
+          PropertyUtils.copyProperties(knviCloneInsert, currentKnvi);
 
-            overrideConfigChanges(entityManager, overrideValues, knviCloneInsert, "KNVI", knviPKClone);
+          overrideConfigChanges(entityManager, overrideValues, knviCloneInsert, "KNVI", knviPKClone);
 
-            knviCloneInsert.setId(knviPKClone);
+          knviCloneInsert.setId(knviPKClone);
 
-            knviCloneInsert.setSapTs(ts);
-            knviCloneInsert.setShadUpdateInd("I");
-            knviCloneInsert.setShadUpdateTs(ts);
+          knviCloneInsert.setSapTs(ts);
+          knviCloneInsert.setShadUpdateInd("I");
+          knviCloneInsert.setShadUpdateTs(ts);
 
-            createEntity(knviCloneInsert, entityManager);
-          }
-        } catch (Exception e) {
-          LOG.debug("Error in copy knvi");
+          createEntity(knviCloneInsert, entityManager);
         }
-      } else {
-        LOG.info("KNVI record not exist with KUNNR " + kna1.getId().getKunnr());
+      } catch (Exception e) {
+        LOG.debug("Error in copy knvi");
       }
-
-      logObject(knviCloneInsert);
+    } else {
+      LOG.info("KNVI record not exist with KUNNR " + kna1.getId().getKunnr());
     }
+
+    logObject(knviCloneInsert);
 
   }
 
@@ -958,37 +955,35 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     Knvk knvkClone = null;
     Timestamp ts = SystemUtil.getCurrentTimestamp();
 
-    if (rdcConfig.getCountriesForKnvkCreate().contains(kna1.getKatr6())) {
-      knvk = getKnvkByKunnr(entityManager, kna1.getId().getMandt(), kna1.getId().getKunnr());
-      knvkClone = getKnvkByKunnr(entityManager, kna1Clone.getId().getMandt(), kna1Clone.getId().getKunnr());
-      if (knvk != null && knvkClone == null) {
-        try {
-          knvkClone = new Knvk();
-          KnvkPK knvkPKClone = new KnvkPK();
-          knvkPKClone.setMandt(kna1Clone.getId().getMandt());
-          String parnr = generateId(kna1Clone.getId().getMandt(), PARNR_KEY, entityManager);
-          knvkPKClone.setParnr(parnr);
+    knvk = getKnvkByKunnr(entityManager, kna1.getId().getMandt(), kna1.getId().getKunnr());
+    knvkClone = getKnvkByKunnr(entityManager, kna1Clone.getId().getMandt(), kna1Clone.getId().getKunnr());
+    if (knvk != null && knvkClone == null) {
+      try {
+        knvkClone = new Knvk();
+        KnvkPK knvkPKClone = new KnvkPK();
+        knvkPKClone.setMandt(kna1Clone.getId().getMandt());
+        String parnr = generateId(kna1Clone.getId().getMandt(), PARNR_KEY, entityManager);
+        knvkPKClone.setParnr(parnr);
 
-          PropertyUtils.copyProperties(knvkClone, knvk);
+        PropertyUtils.copyProperties(knvkClone, knvk);
 
-          overrideConfigChanges(entityManager, overrideValues, knvkClone, "KNVK", knvkPKClone);
+        overrideConfigChanges(entityManager, overrideValues, knvkClone, "KNVK", knvkPKClone);
 
-          knvkClone.setId(knvkPKClone);
+        knvkClone.setId(knvkPKClone);
 
-          knvkClone.setSapTs(ts);
-          knvkClone.setShadUpdateInd("I");
-          knvkClone.setShadUpdateTs(ts);
+        knvkClone.setSapTs(ts);
+        knvkClone.setShadUpdateInd("I");
+        knvkClone.setShadUpdateTs(ts);
 
-          createEntity(knvkClone, entityManager);
-        } catch (Exception e) {
-          LOG.debug("Error in copy knvk");
-        }
-      } else {
-        LOG.info("KNVK record not exist with KUNNR " + kna1.getId().getKunnr());
+        createEntity(knvkClone, entityManager);
+      } catch (Exception e) {
+        LOG.debug("Error in copy knvk");
       }
-
-      logObject(knvkClone);
+    } else {
+      LOG.info("KNVK record not exist with KUNNR " + kna1.getId().getKunnr());
     }
+
+    logObject(knvkClone);
 
   }
 
@@ -1008,43 +1003,41 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     Knvp knvpCloneInsert = null;
     Timestamp ts = SystemUtil.getCurrentTimestamp();
 
-    if (rdcConfig.getCountriesForKnvpCreate().contains(kna1.getKatr6())) {
-      knvp = getKnvpByKunnr(entityManager, kna1.getId().getMandt(), kna1.getId().getKunnr());
-      knvpClone = getKnvpByKunnr(entityManager, kna1Clone.getId().getMandt(), kna1Clone.getId().getKunnr());
-      if (knvp != null && knvpClone.size() == 0) {
-        try {
-          for (Knvp currentKnvp : knvp) {
-            knvpCloneInsert = new Knvp();
-            KnvpPK knvpPKClone = new KnvpPK();
-            knvpPKClone.setKunnr(kna1Clone.getId().getKunnr());
-            knvpPKClone.setMandt(kna1Clone.getId().getMandt());
-            knvpPKClone.setParvw(currentKnvp.getId().getParvw());
-            knvpPKClone.setParza(currentKnvp.getId().getParza());
-            knvpPKClone.setSpart(currentKnvp.getId().getSpart());
-            knvpPKClone.setVkorg(currentKnvp.getId().getVkorg());
-            knvpPKClone.setVtweg(currentKnvp.getId().getVtweg());
+    knvp = getKnvpByKunnr(entityManager, kna1.getId().getMandt(), kna1.getId().getKunnr());
+    knvpClone = getKnvpByKunnr(entityManager, kna1Clone.getId().getMandt(), kna1Clone.getId().getKunnr());
+    if (knvp != null && knvpClone.size() == 0) {
+      try {
+        for (Knvp currentKnvp : knvp) {
+          knvpCloneInsert = new Knvp();
+          KnvpPK knvpPKClone = new KnvpPK();
+          knvpPKClone.setKunnr(kna1Clone.getId().getKunnr());
+          knvpPKClone.setMandt(kna1Clone.getId().getMandt());
+          knvpPKClone.setParvw(currentKnvp.getId().getParvw());
+          knvpPKClone.setParza(currentKnvp.getId().getParza());
+          knvpPKClone.setSpart(currentKnvp.getId().getSpart());
+          knvpPKClone.setVkorg(currentKnvp.getId().getVkorg());
+          knvpPKClone.setVtweg(currentKnvp.getId().getVtweg());
 
-            PropertyUtils.copyProperties(knvpCloneInsert, currentKnvp);
+          PropertyUtils.copyProperties(knvpCloneInsert, currentKnvp);
 
-            overrideConfigChanges(entityManager, overrideValues, knvpCloneInsert, "KNVP", knvpPKClone);
+          overrideConfigChanges(entityManager, overrideValues, knvpCloneInsert, "KNVP", knvpPKClone);
 
-            knvpCloneInsert.setId(knvpPKClone);
+          knvpCloneInsert.setId(knvpPKClone);
 
-            knvpCloneInsert.setSapTs(ts);
-            knvpCloneInsert.setShadUpdateInd("I");
-            knvpCloneInsert.setShadUpdateTs(ts);
+          knvpCloneInsert.setSapTs(ts);
+          knvpCloneInsert.setShadUpdateInd("I");
+          knvpCloneInsert.setShadUpdateTs(ts);
 
-            createEntity(knvpCloneInsert, entityManager);
-          }
-        } catch (Exception e) {
-          LOG.debug("Error in copy knvp");
+          createEntity(knvpCloneInsert, entityManager);
         }
-      } else {
-        LOG.info("KNVP record not exist with KUNNR " + kna1.getId().getKunnr());
+      } catch (Exception e) {
+        LOG.debug("Error in copy knvp");
       }
-
-      logObject(knvpCloneInsert);
+    } else {
+      LOG.info("KNVP record not exist with KUNNR " + kna1.getId().getKunnr());
     }
+
+    logObject(knvpCloneInsert);
 
   }
 
@@ -1063,36 +1056,34 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     Addlctrydata addlctrydataClone = null;
     Timestamp ts = SystemUtil.getCurrentTimestamp();
 
-    if (rdcConfig.getCountriesForAddlCtryDataCreate().contains(kna1.getKatr6())) {
-      addlctrydata = getAddlCtryDataByKunnr(entityManager, kna1.getId().getMandt(), kna1.getId().getKunnr());
-      addlctrydataClone = getAddlCtryDataByKunnr(entityManager, kna1Clone.getId().getMandt(), kna1Clone.getId().getKunnr());
-      if (addlctrydata != null && addlctrydataClone == null) {
-        try {
-          addlctrydataClone = new Addlctrydata();
-          AddlctrydataPK pk = new AddlctrydataPK();
-          pk.setFieldName(addlctrydata.getId().getFieldName());
-          pk.setKunnr(kna1Clone.getId().getKunnr());
-          pk.setMandt(kna1Clone.getId().getMandt());
+    addlctrydata = getAddlCtryDataByKunnr(entityManager, kna1.getId().getMandt(), kna1.getId().getKunnr());
+    addlctrydataClone = getAddlCtryDataByKunnr(entityManager, kna1Clone.getId().getMandt(), kna1Clone.getId().getKunnr());
+    if (addlctrydata != null && addlctrydataClone == null) {
+      try {
+        addlctrydataClone = new Addlctrydata();
+        AddlctrydataPK pk = new AddlctrydataPK();
+        pk.setFieldName(addlctrydata.getId().getFieldName());
+        pk.setKunnr(kna1Clone.getId().getKunnr());
+        pk.setMandt(kna1Clone.getId().getMandt());
 
-          PropertyUtils.copyProperties(addlctrydataClone, addlctrydata);
+        PropertyUtils.copyProperties(addlctrydataClone, addlctrydata);
 
-          overrideConfigChanges(entityManager, overrideValues, addlctrydataClone, "ADDLCTRYDATA", pk);
+        overrideConfigChanges(entityManager, overrideValues, addlctrydataClone, "ADDLCTRYDATA", pk);
 
-          addlctrydataClone.setId(pk);
+        addlctrydataClone.setId(pk);
 
-          addlctrydataClone.setCreateDt(ts);
-          addlctrydataClone.setUpdateDt(ts);
+        addlctrydataClone.setCreateDt(ts);
+        addlctrydataClone.setUpdateDt(ts);
 
-          createEntity(addlctrydataClone, entityManager);
-        } catch (Exception e) {
-          LOG.debug("Error in copy addlctrydata");
-        }
-      } else {
-        LOG.info("ADDLCTRYDATA record not exist with KUNNR " + kna1.getId().getKunnr());
+        createEntity(addlctrydataClone, entityManager);
+      } catch (Exception e) {
+        LOG.debug("Error in copy addlctrydata");
       }
-
-      logObject(addlctrydataClone);
+    } else {
+      LOG.info("ADDLCTRYDATA record not exist with KUNNR " + kna1.getId().getKunnr());
     }
+
+    logObject(addlctrydataClone);
 
   }
 
@@ -1111,36 +1102,34 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     KunnrExt kunnrExtClone = null;
     Timestamp ts = SystemUtil.getCurrentTimestamp();
 
-    if (rdcConfig.getCountriesForKunnrExtCreate().contains(kna1.getKatr6())) {
-      kunnrExt = getKunnrExtByKunnr(entityManager, kna1.getId().getMandt(), kna1.getId().getKunnr());
-      kunnrExtClone = getKunnrExtByKunnr(entityManager, kna1Clone.getId().getMandt(), kna1Clone.getId().getKunnr());
-      if (kunnrExt != null && kunnrExtClone == null) {
-        try {
-          kunnrExtClone = new KunnrExt();
-          KunnrExtPK pk = new KunnrExtPK();
-          pk.setKunnr(kna1Clone.getId().getKunnr());
-          pk.setMandt(kna1Clone.getId().getMandt());
+    kunnrExt = getKunnrExtByKunnr(entityManager, kna1.getId().getMandt(), kna1.getId().getKunnr());
+    kunnrExtClone = getKunnrExtByKunnr(entityManager, kna1Clone.getId().getMandt(), kna1Clone.getId().getKunnr());
+    if (kunnrExt != null && kunnrExtClone == null) {
+      try {
+        kunnrExtClone = new KunnrExt();
+        KunnrExtPK pk = new KunnrExtPK();
+        pk.setKunnr(kna1Clone.getId().getKunnr());
+        pk.setMandt(kna1Clone.getId().getMandt());
 
-          PropertyUtils.copyProperties(kunnrExtClone, kunnrExt);
+        PropertyUtils.copyProperties(kunnrExtClone, kunnrExt);
 
-          overrideConfigChanges(entityManager, overrideValues, kunnrExtClone, "KUNNR_EXT", pk);
+        overrideConfigChanges(entityManager, overrideValues, kunnrExtClone, "KUNNR_EXT", pk);
 
-          kunnrExtClone.setId(pk);
+        kunnrExtClone.setId(pk);
 
-          kunnrExtClone.setCreateTs(ts);
-          kunnrExtClone.setUpdateInd("I");
-          kunnrExtClone.setUpdateTs(ts);
+        kunnrExtClone.setCreateTs(ts);
+        kunnrExtClone.setUpdateInd("I");
+        kunnrExtClone.setUpdateTs(ts);
 
-          createEntity(kunnrExtClone, entityManager);
-        } catch (Exception e) {
-          LOG.debug("Error in copy kunnrext");
-        }
-      } else {
-        LOG.info("KUNNR_EXT record not exist with KUNNR " + kna1.getId().getKunnr());
+        createEntity(kunnrExtClone, entityManager);
+      } catch (Exception e) {
+        LOG.debug("Error in copy kunnrext");
       }
-
-      logObject(kunnrExtClone);
+    } else {
+      LOG.info("KUNNR_EXT record not exist with KUNNR " + kna1.getId().getKunnr());
     }
+
+    logObject(kunnrExtClone);
 
   }
 
@@ -1159,39 +1148,37 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     Knbk knbkClone = null;
     Timestamp ts = SystemUtil.getCurrentTimestamp();
 
-    if (rdcConfig.getCountriesForKnbkCreate().contains(kna1.getKatr6())) {
-      knbk = getKnbkByKunnr(entityManager, kna1.getId().getMandt(), kna1.getId().getKunnr());
-      knbkClone = getKnbkByKunnr(entityManager, kna1Clone.getId().getMandt(), kna1Clone.getId().getKunnr());
-      if (knbk != null && knbkClone == null) {
-        try {
-          knbkClone = new Knbk();
-          KnbkPK knbkPKClone = new KnbkPK();
-          knbkPKClone.setBankl(knbk.getId().getBankl());
-          knbkPKClone.setBankn(knbk.getId().getBankn());
-          knbkPKClone.setBanks(knbk.getId().getBanks());
-          knbkPKClone.setKunnr(kna1Clone.getId().getKunnr());
-          knbkPKClone.setMandt(kna1Clone.getId().getMandt());
+    knbk = getKnbkByKunnr(entityManager, kna1.getId().getMandt(), kna1.getId().getKunnr());
+    knbkClone = getKnbkByKunnr(entityManager, kna1Clone.getId().getMandt(), kna1Clone.getId().getKunnr());
+    if (knbk != null && knbkClone == null) {
+      try {
+        knbkClone = new Knbk();
+        KnbkPK knbkPKClone = new KnbkPK();
+        knbkPKClone.setBankl(knbk.getId().getBankl());
+        knbkPKClone.setBankn(knbk.getId().getBankn());
+        knbkPKClone.setBanks(knbk.getId().getBanks());
+        knbkPKClone.setKunnr(kna1Clone.getId().getKunnr());
+        knbkPKClone.setMandt(kna1Clone.getId().getMandt());
 
-          PropertyUtils.copyProperties(knbkClone, knbk);
+        PropertyUtils.copyProperties(knbkClone, knbk);
 
-          overrideConfigChanges(entityManager, overrideValues, knbkClone, "KNBK", knbkPKClone);
+        overrideConfigChanges(entityManager, overrideValues, knbkClone, "KNBK", knbkPKClone);
 
-          knbkClone.setId(knbkPKClone);
+        knbkClone.setId(knbkPKClone);
 
-          knbkClone.setSapTs(ts);
-          knbkClone.setShadUpdateInd("I");
-          knbkClone.setShadUpdateTs(ts);
+        knbkClone.setSapTs(ts);
+        knbkClone.setShadUpdateInd("I");
+        knbkClone.setShadUpdateTs(ts);
 
-          createEntity(knbkClone, entityManager);
-        } catch (Exception e) {
-          LOG.debug("Error in copy knbk");
-        }
-      } else {
-        LOG.info("KNBK record not exist with KUNNR " + kna1.getId().getKunnr());
+        createEntity(knbkClone, entityManager);
+      } catch (Exception e) {
+        LOG.debug("Error in copy knbk");
       }
-
-      logObject(knbkClone);
+    } else {
+      LOG.info("KNBK record not exist with KUNNR " + kna1.getId().getKunnr());
     }
+
+    logObject(knbkClone);
 
   }
 
@@ -1210,37 +1197,35 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     Knva knvaClone = null;
     Timestamp ts = SystemUtil.getCurrentTimestamp();
 
-    if (rdcConfig.getCountriesForKnvaCreate().contains(kna1.getKatr6())) {
-      knva = getKnvaByKunnr(entityManager, kna1.getId().getMandt(), kna1.getId().getKunnr());
-      knvaClone = getKnvaByKunnr(entityManager, kna1Clone.getId().getMandt(), kna1Clone.getId().getKunnr());
-      if (knva != null && knvaClone == null) {
-        try {
-          knvaClone = new Knva();
-          KnvaPK knvaPKClone = new KnvaPK();
-          knvaPKClone.setAblad(knva.getId().getAblad());
-          knvaPKClone.setKunnr(kna1Clone.getId().getKunnr());
-          knvaPKClone.setMandt(kna1Clone.getId().getMandt());
+    knva = getKnvaByKunnr(entityManager, kna1.getId().getMandt(), kna1.getId().getKunnr());
+    knvaClone = getKnvaByKunnr(entityManager, kna1Clone.getId().getMandt(), kna1Clone.getId().getKunnr());
+    if (knva != null && knvaClone == null) {
+      try {
+        knvaClone = new Knva();
+        KnvaPK knvaPKClone = new KnvaPK();
+        knvaPKClone.setAblad(knva.getId().getAblad());
+        knvaPKClone.setKunnr(kna1Clone.getId().getKunnr());
+        knvaPKClone.setMandt(kna1Clone.getId().getMandt());
 
-          PropertyUtils.copyProperties(knvaClone, knva);
+        PropertyUtils.copyProperties(knvaClone, knva);
 
-          overrideConfigChanges(entityManager, overrideValues, knvaClone, "KNVA", knvaPKClone);
+        overrideConfigChanges(entityManager, overrideValues, knvaClone, "KNVA", knvaPKClone);
 
-          knvaClone.setId(knvaPKClone);
+        knvaClone.setId(knvaPKClone);
 
-          knvaClone.setSapTs(ts);
-          knvaClone.setShadUpdateInd("I");
-          knvaClone.setShadUpdateTs(ts);
+        knvaClone.setSapTs(ts);
+        knvaClone.setShadUpdateInd("I");
+        knvaClone.setShadUpdateTs(ts);
 
-          createEntity(knvaClone, entityManager);
-        } catch (Exception e) {
-          LOG.debug("Error in copy knva");
-        }
-      } else {
-        LOG.info("KNVA record not exist with KUNNR " + kna1.getId().getKunnr());
+        createEntity(knvaClone, entityManager);
+      } catch (Exception e) {
+        LOG.debug("Error in copy knva");
       }
-
-      logObject(knvaClone);
+    } else {
+      LOG.info("KNVA record not exist with KUNNR " + kna1.getId().getKunnr());
     }
+
+    logObject(knvaClone);
 
   }
 
@@ -1259,39 +1244,37 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     Knvl knvlClone = null;
     Timestamp ts = SystemUtil.getCurrentTimestamp();
 
-    if (rdcConfig.getCountriesForKnvlCreate().contains(kna1.getKatr6())) {
-      knvl = getKnvlByKunnr(entityManager, kna1.getId().getMandt(), kna1.getId().getKunnr());
-      knvlClone = getKnvlByKunnr(entityManager, kna1Clone.getId().getMandt(), kna1Clone.getId().getKunnr());
-      if (knvl != null && knvlClone == null) {
-        try {
-          knvlClone = new Knvl();
-          KnvlPK knvlPKClone = new KnvlPK();
-          knvlPKClone.setAland(knvl.getId().getAland());
-          knvlPKClone.setKunnr(kna1Clone.getId().getKunnr());
-          knvlPKClone.setLicnr(knvl.getId().getLicnr());
-          knvlPKClone.setMandt(kna1Clone.getId().getMandt());
-          knvlPKClone.setTatyp(knvl.getId().getTatyp());
+    knvl = getKnvlByKunnr(entityManager, kna1.getId().getMandt(), kna1.getId().getKunnr());
+    knvlClone = getKnvlByKunnr(entityManager, kna1Clone.getId().getMandt(), kna1Clone.getId().getKunnr());
+    if (knvl != null && knvlClone == null) {
+      try {
+        knvlClone = new Knvl();
+        KnvlPK knvlPKClone = new KnvlPK();
+        knvlPKClone.setAland(knvl.getId().getAland());
+        knvlPKClone.setKunnr(kna1Clone.getId().getKunnr());
+        knvlPKClone.setLicnr(knvl.getId().getLicnr());
+        knvlPKClone.setMandt(kna1Clone.getId().getMandt());
+        knvlPKClone.setTatyp(knvl.getId().getTatyp());
 
-          PropertyUtils.copyProperties(knvlClone, knvl);
+        PropertyUtils.copyProperties(knvlClone, knvl);
 
-          overrideConfigChanges(entityManager, overrideValues, knvlClone, "KNVL", knvlPKClone);
+        overrideConfigChanges(entityManager, overrideValues, knvlClone, "KNVL", knvlPKClone);
 
-          knvlClone.setId(knvlPKClone);
+        knvlClone.setId(knvlPKClone);
 
-          knvlClone.setSapTs(ts);
-          knvlClone.setShadUpdateInd("I");
-          knvlClone.setShadUpdateTs(ts);
+        knvlClone.setSapTs(ts);
+        knvlClone.setShadUpdateInd("I");
+        knvlClone.setShadUpdateTs(ts);
 
-          createEntity(knvlClone, entityManager);
-        } catch (Exception e) {
-          LOG.debug("Error in copy knvl");
-        }
-      } else {
-        LOG.info("KNVL record not exist with KUNNR " + kna1.getId().getKunnr());
+        createEntity(knvlClone, entityManager);
+      } catch (Exception e) {
+        LOG.debug("Error in copy knvl");
       }
-
-      logObject(knvlClone);
+    } else {
+      LOG.info("KNVL record not exist with KUNNR " + kna1.getId().getKunnr());
     }
+
+    logObject(knvlClone);
 
   }
 
@@ -1310,36 +1293,34 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     Sizeinfo sizeInfoClone = null;
     Timestamp ts = SystemUtil.getCurrentTimestamp();
 
-    if (rdcConfig.getCountriesForSizeInfoCreate().contains(kna1.getKatr6())) {
-      sizeInfo = getSizeInfoByKunnr(entityManager, kna1.getId().getMandt(), kna1.getId().getKunnr());
-      sizeInfoClone = getSizeInfoByKunnr(entityManager, kna1Clone.getId().getMandt(), kna1Clone.getId().getKunnr());
-      if (sizeInfo != null && sizeInfoClone == null) {
-        try {
-          sizeInfoClone = new Sizeinfo();
-          SizeinfoPK pk = new SizeinfoPK();
-          pk.setKunnr(kna1Clone.getId().getKunnr());
-          pk.setMandt(kna1Clone.getId().getMandt());
-          pk.setSizeunittype(sizeInfo.getId().getSizeunittype());
+    sizeInfo = getSizeInfoByKunnr(entityManager, kna1.getId().getMandt(), kna1.getId().getKunnr());
+    sizeInfoClone = getSizeInfoByKunnr(entityManager, kna1Clone.getId().getMandt(), kna1Clone.getId().getKunnr());
+    if (sizeInfo != null && sizeInfoClone == null) {
+      try {
+        sizeInfoClone = new Sizeinfo();
+        SizeinfoPK pk = new SizeinfoPK();
+        pk.setKunnr(kna1Clone.getId().getKunnr());
+        pk.setMandt(kna1Clone.getId().getMandt());
+        pk.setSizeunittype(sizeInfo.getId().getSizeunittype());
 
-          PropertyUtils.copyProperties(sizeInfoClone, sizeInfo);
+        PropertyUtils.copyProperties(sizeInfoClone, sizeInfo);
 
-          overrideConfigChanges(entityManager, overrideValues, sizeInfoClone, "SIZEINFO", pk);
+        overrideConfigChanges(entityManager, overrideValues, sizeInfoClone, "SIZEINFO", pk);
 
-          sizeInfoClone.setId(pk);
+        sizeInfoClone.setId(pk);
 
-          sizeInfoClone.setChgTs(ts);
-          sizeInfoClone.setCreateDate(ts);
+        sizeInfoClone.setChgTs(ts);
+        sizeInfoClone.setCreateDate(ts);
 
-          createEntity(sizeInfoClone, entityManager);
-        } catch (Exception e) {
-          LOG.debug("Error in copy sizeInfo");
-        }
-      } else {
-        LOG.info("SIZEINFO record not exist with KUNNR " + kna1.getId().getKunnr());
+        createEntity(sizeInfoClone, entityManager);
+      } catch (Exception e) {
+        LOG.debug("Error in copy sizeInfo");
       }
-
-      logObject(sizeInfoClone);
+    } else {
+      LOG.info("SIZEINFO record not exist with KUNNR " + kna1.getId().getKunnr());
     }
+
+    logObject(sizeInfoClone);
 
   }
 
