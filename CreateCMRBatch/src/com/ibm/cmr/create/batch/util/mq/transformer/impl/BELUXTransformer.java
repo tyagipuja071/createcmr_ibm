@@ -1227,7 +1227,6 @@ public class BELUXTransformer extends EMEATransformer {
         cust.setModeOfPayment(muData.getModeOfPayment());
       }
     }
-
     if (!StringUtils.isBlank(muData.getSvcArOffice())) {
       if ("@".equals(muData.getSvcArOffice())) {
         cust.setLangCd("");

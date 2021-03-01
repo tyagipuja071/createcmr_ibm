@@ -1188,11 +1188,17 @@ public class NLTransformer extends EMEATransformer {
     }
 
     // use svcArOffice to store custLang
+    // for 788, E - 1, N - ""
     if (!StringUtils.isBlank(muData.getSvcArOffice())) {
       if ("@".equals(muData.getSvcArOffice())) {
         cust.setLangCd("");
       } else {
-        cust.setLangCd(muData.getSvcArOffice());
+        String langCd = "";
+        if ("N".equalsIgnoreCase(muData.getSvcArOffice()))
+          langCd = "";
+        if ("E".equalsIgnoreCase(muData.getSvcArOffice()))
+          langCd = "1";
+        cust.setLangCd(langCd);
       }
     }
     cust.setCustType("");
