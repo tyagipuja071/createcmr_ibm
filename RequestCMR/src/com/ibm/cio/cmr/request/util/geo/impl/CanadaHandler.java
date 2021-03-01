@@ -162,6 +162,61 @@ public class CanadaHandler extends GEOHandler {
 
   @Override
   public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo) throws Exception {
+    if (currentRecord != null) {
+      // -- District
+      if (!StringUtils.isBlank(currentRecord.getCmrCity2())) {
+        // address.setCity2(currentRecord.getCmrCity2());
+      }
+
+      // -- Phone #
+      if (!StringUtils.isBlank(currentRecord.getCmrCustPhone())) {
+        // address.setCustPhone(currentRecord.getCmrCustPhone());
+      }
+
+      // -- PostBox
+      address.setPoBox("");
+
+      // -- SAP Number (KUNNR)
+      if (!StringUtils.isBlank(currentRecord.getCmrSapNumber())) {
+        address.setSapNo(currentRecord.getCmrSapNumber());
+      }
+
+      // -- Division
+      if (!StringUtils.isBlank(currentRecord.getCmrName3())) {
+        // address.setDivn(currentRecord.getCmrName3() + " Division");
+      }
+
+      // -- Street con't
+      if (!StringUtils.isBlank(currentRecord.getCmrStreetAddressCont())) {
+        // address.setAddrTxt2(currentRecord.getCmrStreetAddressCont());
+      }
+
+      // -- Department / Attn.
+      if (!StringUtils.isBlank(currentRecord.getCmrName3())) {
+        // address.setDept(currentRecord.getCmrName3() + " Department/Attn");
+      }
+
+      // -- Building
+      if (!StringUtils.isBlank(currentRecord.getCmrBldg())) {
+        // address.setBldg(currentRecord.getCmrBldg());
+      }
+
+      // -- Floor
+      if (!StringUtils.isBlank(currentRecord.getCmrName4())) {
+        // address.setFloor(currentRecord.getCmrName4() + " Floor");
+      }
+
+      // -- Office
+      if (!(StringUtils.isBlank(currentRecord.getCmrPostalCode()) && currentRecord.getCmrPOBoxPostCode().length() > 3)) {
+        // address.setOffice(currentRecord.getCmrPostalCode().substring(0, 3));
+      }
+
+      // -- PostBox City
+      if (!StringUtils.isBlank(currentRecord.getCmrPOBoxCity())) {
+        // address.setPoBoxCity(currentRecord.getCmrPOBoxCity());
+      }
+
+    }
     String addrSeq = address.getId().getAddrSeq();
     if (currentRecord.getCmrAddrSeq() != null && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       addrSeq = StringUtils.leftPad(addrSeq, 5, '0');
