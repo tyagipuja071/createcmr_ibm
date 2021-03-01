@@ -913,4 +913,11 @@ public class CmrConstants {
   public static final List<String> DE_CND_ISSUING_COUNTRY_VAL = Arrays.asList("724", "619", "621", "627", "647", "791", "640", "759", "839", "843",
       "859");
   public static final List<String> ORDER_BLK_LIST = Arrays.asList("88");
+
+  public static final String CN_KUKLA81 = "81";
+  public static final String CN_KUKLA45 = "45";
+  public static final String CN_KUKLA81_KEYID = "CMRNO_ZS01_81";
+  public static final String CN_KUKLA45_KEYID = "CMRNO_ZS01_45";
+  public static final String CN_DEFAULT_KEYID = "CMRNO_ZS01";
+
 }

@@ -10,13 +10,18 @@ import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 import com.ibm.cio.cmr.request.entity.listeners.TrimListener;
+import com.ibm.cio.cmr.request.util.SystemParameters;
 
 /**
  * The persistent class for the KNA1 database table.
@@ -24,7 +29,9 @@ import com.ibm.cio.cmr.request.entity.listeners.TrimListener;
  * @author Dhananjay Yadav
  */
 @Entity
-@Table(name = "KNA1", schema = "SAPR3")
+@Table(
+    name = "KNA1",
+    schema = "SAPR3")
 @EntityListeners({ TrimListener.class, ChangeLogListener.class })
 public class Kna1 extends BaseEntity<Kna1PK> implements Serializable {
   private static final long serialVersionUID = 1L;
@@ -310,7 +317,8 @@ public class Kna1 extends BaseEntity<Kna1PK> implements Serializable {
       name = "ZZKV_NODE2")
   private String zzkvNode2;
 
-  @Column(name = "SHAD_UPDATE_TS")
+  @Column(
+      name = "SHAD_UPDATE_TS")
   @Temporal(TemporalType.TIMESTAMP)
   private Date shadUpdateTs;
 
@@ -318,7 +326,8 @@ public class Kna1 extends BaseEntity<Kna1PK> implements Serializable {
       name = "SHAD_UPDATE_IND")
   private String shadUpdateInd;
 
-  @Column(name = "SAP_TS")
+  @Column(
+      name = "SAP_TS")
   @Temporal(TemporalType.TIMESTAMP)
   private Date sapTs;
 
@@ -370,6 +379,15 @@ public class Kna1 extends BaseEntity<Kna1PK> implements Serializable {
 
   @Transient
   private String legacyUse;
+
+  @PreUpdate
+  @PrePersist
+  public void setDefaultKatr10() {
+    String sbo = SystemParameters.getString("COMPANY_CD_SBO");
+    if (!StringUtils.isBlank(this.katr10) && this.katr10.equals(sbo)) {
+      this.katr10 = "";
+    }
+  }
 
   public String getAdrnr() {
     return this.adrnr;

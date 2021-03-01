@@ -26,6 +26,7 @@ import org.eclipse.persistence.config.QueryHints;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.BaseEntity;
 import com.ibm.cio.cmr.request.entity.CompoundEntity;
+import com.ibm.cio.cmr.request.util.SystemParameters;
 
 /**
  * Query class to use for JPA prepared query to ease the hanlding of parameters
@@ -197,6 +198,11 @@ public class PreparedQuery {
     if (!this.valueMap.containsKey("MANDT")) {
       String mandt = SystemConfiguration.getValue("MANDT");
       setParameter("MANDT", mandt);
+    }
+    if (!this.valueMap.containsKey("COMPANY_CD_SBO")) {
+      String sbo = SystemParameters.getString("COMPANY_CD_SBO");
+      sbo = sbo != null ? sbo : "GTS";
+      setParameter("COMPANY_CD_SBO", sbo);
     }
     String preparedSql = prepareSql();
     LOG.debug("Prepared Query: " + preparedSql);

@@ -23,17 +23,17 @@ import com.ibm.cmr.create.batch.service.MultiThreadedBatchService;
  * @author JeffZAMORA
  * 
  */
-public class BatchThreadWorker implements Runnable {
+public class BatchThreadWorker<T> implements Runnable {
 
   private static final Logger LOG = Logger.getLogger(BatchThreadWorker.class);
 
-  private MultiThreadedBatchService batchService;
-  private List<Long> requestIds;
+  private MultiThreadedBatchService<T> batchService;
+  private List<T> requestIds;
 
   private boolean error;
   private String errorMessage;
 
-  public BatchThreadWorker(MultiThreadedBatchService batchService, List<Long> requestIds) {
+  public BatchThreadWorker(MultiThreadedBatchService<T> batchService, List<T> requestIds) {
     this.batchService = batchService;
     this.requestIds = requestIds;
   }

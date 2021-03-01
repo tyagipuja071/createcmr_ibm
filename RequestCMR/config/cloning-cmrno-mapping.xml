@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mappings>
+	<mapping>
+		<cmrNoRange>1000 to 9999, 369320 to 979999, 510000 to 799999, 985001 to 985999, 993110 to 998899</cmrNoRange>
+		<countries>693,695,358,359,363,603,607,626,644,651,668,694,699,704,705,707,708,740,741,787,820,821,826,889</countries>
+	</mapping>
+	<mapping>
+		<cmrNoRange>990000 to 996999, 997000 to 997999</cmrNoRange>
+		<countries>838</countries>
+	</mapping>
+	<mapping>
+		<cmrNoRange>369320 to 999999, 993110 to 998899</cmrNoRange>
+		<countries>862</countries>
+	</mapping>
+	<mapping>
+		<cmrNoRange>997000 to 999999, 990000 to 998999</cmrNoRange>
+		<countries>822</countries>
+	</mapping>
+</mappings>
