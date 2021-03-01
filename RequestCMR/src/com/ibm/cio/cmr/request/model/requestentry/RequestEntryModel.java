@@ -423,12 +423,14 @@ public class RequestEntryModel extends BaseModel {
   // canada fields
   private String invoiceDistCd;
   private String cusInvoiceCopies;
-  
+
   // dpl assessment internal fields
   private String intDplAssessmentResult;
   private String intDplAssessmentDate;
   private String intDplAssessmentBy;
-  private String intDplAssessmentCmt;  
+  private String intDplAssessmentCmt;
+
+  private String sourceSystId;
 
   public String getMatchIndc() {
     return matchIndc;
@@ -3050,7 +3052,7 @@ public class RequestEntryModel extends BaseModel {
   public void setCusInvoiceCopies(String cusInvoiceCopies) {
     this.cusInvoiceCopies = cusInvoiceCopies;
   }
-  
+
   public String getIntDplAssessmentResult() {
     return intDplAssessmentResult;
   }
@@ -3081,6 +3083,14 @@ public class RequestEntryModel extends BaseModel {
 
   public void setIntDplAssessmentCmt(String intDplAssessmentCmt) {
     this.intDplAssessmentCmt = intDplAssessmentCmt;
+  }
+
+  public String getSourceSystId() {
+    return sourceSystId;
+  }
+
+  public void setSourceSystId(String sourceSystId) {
+    this.sourceSystId = sourceSystId;
   }
 
 }

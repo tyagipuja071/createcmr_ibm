@@ -83,7 +83,7 @@ public class EUVatValidationElement extends ValidatingElement implements Company
           validation.setMessage("VAT not updated");
           output.setDetails("Skipping VAT validation as VAT was not updated on the request.");
           LOG.debug("VAT not updated.");
-        } else if (StringUtils.isBlank(data.getVat())) {
+        } else if (StringUtils.isBlank(data.getVat()) && !"Y".equals(admin.getPaygoProcessIndc())) {
           validation.setSuccess(true);
           validation.setMessage("VAT not found");
           output.setDetails("No VAT specified on the request.");

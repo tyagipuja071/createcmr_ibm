@@ -2295,4 +2295,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(unlockAbbrevNmForInternalScenario, '706');
   GEOHandler.addAfterConfig(lockIBMTabForFR, '706');
   GEOHandler.addAfterTemplateLoad(lockIBMTabForFR, '706');
+  GEOHandler.addAfterConfig(resetVATValidationsForPayGo, [ '706' ]);
+  GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, [ '706' ]);
 });
