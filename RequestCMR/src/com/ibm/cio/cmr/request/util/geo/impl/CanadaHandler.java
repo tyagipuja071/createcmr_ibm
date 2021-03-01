@@ -91,6 +91,55 @@ public class CanadaHandler extends GEOHandler {
         data.setAbbrevNm(custName.length() > 20 ? custName.substring(0, 20).toUpperCase() : custName);
       }
     }
+
+    // -- Sales Branch Office
+    if (!(StringUtils.isBlank(mainRecord.getCmrSapNumber()))) {
+      /*
+       * if (mainRecord.getCmrSapNumber().length() > 3) {
+       * data.setSalesBusOffCd(mainRecord.getCmrSapNumber().substring(0, 3)); }
+       * else { data.setSalesBusOffCd(mainRecord.getCmrSapNumber()); }
+       */
+    }
+
+    // -- CS Branch
+    // -- will be set on setAddressRelatedData first 3 digits of postal code
+    if (!(StringUtils.isBlank(mainRecord.getSalesTeamCd()))) {
+    }
+
+    // -- Credit Code
+    // -- will use K as default based on mapping doc
+    if (!(StringUtils.isBlank(mainRecord.getCreditCd()))) {
+      // data.setCreditCd(mainRecord.getCreditCd());
+    }
+
+    // -- PPS CEID
+    if (!(StringUtils.isBlank(mainRecord.getCmrPpsceid()))) {
+      // data.setPpsceid(mainRecord.getCmrPpsceid());
+    }
+
+    // -- Install Branch Office
+    // -- will set 051 as default per mapping doc
+    data.setInstallBranchOff("051");
+
+    // -- Distribution Mktg Branch
+    data.setInvoiceDistCd("000");
+
+    // -- S/W Billing Frequency
+    // -- will set 03 as default per mapping doc
+    data.setCollectorNameNo("3");
+
+    // -- VAD-VAD Number
+    // -- Leave This Field Blank per mapping doc
+    data.setTaxCd2("");
+
+    // -- AR-FAAR
+    data.setAdminDeptCd("051Z"); // default per mapping doc
+
+    // -- Customer Data
+    data.setTaxCd3("NETNEW"); // default per mapping doc
+
+    // -- Number of Invoices
+    data.setCusInvoiceCopies("01"); // default per mapping doc
   }
 
   @Override
