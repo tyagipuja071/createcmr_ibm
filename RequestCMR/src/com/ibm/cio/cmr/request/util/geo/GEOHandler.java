@@ -951,4 +951,7 @@ public abstract class GEOHandler {
     return null;
   }
 
+  public String getCMRNo(EntityManager rdcMgr, String kukla, String mandt, String katr6, String cmrNo) {
+    return null;
+  }
 }

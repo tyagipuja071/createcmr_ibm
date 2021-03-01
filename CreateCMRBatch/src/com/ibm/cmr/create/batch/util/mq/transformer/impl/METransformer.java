@@ -65,6 +65,10 @@ public class METransformer extends EMEATransformer {
       SystemLocation.LEBANON, SystemLocation.LIBYA, SystemLocation.OMAN, SystemLocation.PAKISTAN, SystemLocation.QATAR, SystemLocation.SAUDI_ARABIA,
       SystemLocation.YEMEN, SystemLocation.SYRIAN_ARAB_REPUBLIC, SystemLocation.EGYPT, SystemLocation.TUNISIA_SOF, SystemLocation.GULF);
 
+  private static final List<String> ME_DUPCOUNTRY_LIST = Arrays.asList(SystemLocation.UNITED_ARAB_EMIRATES, SystemLocation.ABU_DHABI,
+      SystemLocation.BAHRAIN, SystemLocation.SAUDI_ARABIA, SystemLocation.OMAN, SystemLocation.KUWAIT, SystemLocation.QATAR, SystemLocation.JORDAN,
+      SystemLocation.LEBANON, SystemLocation.LIBYA, SystemLocation.YEMEN);
+
   private static final Logger LOG = Logger.getLogger(EMEATransformer.class);
 
   public static String DEFAULT_LANDED_COUNTRY = "AE";
@@ -619,7 +623,7 @@ public class METransformer extends EMEATransformer {
     line5 = (addrData.getPostCd() == null ? "" : addrData.getPostCd()) + " " + (addrData.getCity1() == null ? "" : addrData.getCity1());
 
     // if (!StringUtils.isBlank(addrData.getPoBox())) {
-      legacyAddr.setPoBox(addrData.getPoBox());
+    legacyAddr.setPoBox(addrData.getPoBox());
     // }
 
     if (SystemLocation.JORDAN.equals(cmrData.getCmrIssuingCntry())) {
@@ -1184,7 +1188,7 @@ public class METransformer extends EMEATransformer {
       } else {
         legacyCust.setEnterpriseNo("");
       }
-      
+
       if (SystemLocation.ABU_DHABI.equals(data.getCmrIssuingCntry()) && !StringUtils.isBlank(data.getBpAcctTyp())) {
         legacyCust.setCustType(data.getBpAcctTyp());
       }
@@ -1982,6 +1986,21 @@ public class METransformer extends EMEATransformer {
     q.setParameter("SAP_NO", kunnr);
     LOG.debug("CEE - Assigning address sequence " + newSeq + " to " + addrType + " address.");
     q.executeSql();
+  }
+
+  @Override
+  public String getDupCreationCountryId(EntityManager entityManager, String cntry, String cmrNo) {
+    if (ME_DUPCOUNTRY_LIST.contains(cntry))
+      return "675";
+    else
+      return "NA";
+  }
+
+  @Override
+  public void getTargetCountryId(EntityManager entityManager, GenerateCMRNoRequest generateCMRNoObj, String cntry, String cmrNo) {
+    if ("677, 680, 805, 849, 620, 767, 823, 772, 762, 768, 832".indexOf(cntry) > -1) {
+      generateCMRNoObj.setLoc2("675");
+    }
   }
 
 }
