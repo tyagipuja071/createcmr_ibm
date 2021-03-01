@@ -4592,4 +4592,7 @@ dojo.addOnLoad(function() {
   // GEOHandler.addAfterTemplateLoad(addPrefixVat, GEOHandler.CEE);
   // GEOHandler.addAddrFunction(addPrefixVat, GEOHandler.CEE);
 
+  GEOHandler.addAfterConfig(resetVATValidationsForPayGo, [ SysLoc.AUSTRIA ]);
+  GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, [ SysLoc.AUSTRIA ]);
+
 });
