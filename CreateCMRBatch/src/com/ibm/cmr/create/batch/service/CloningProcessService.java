@@ -742,8 +742,6 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
       LOG.info("KNB1 record not exist with KUNNR " + kna1.getId().getKunnr());
     }
 
-    logObject(knb1Clone);
-
   }
 
   public Knb1 getKnb1ByKunnr(EntityManager rdcMgr, String mandt, String kunnr) throws Exception {
@@ -791,8 +789,6 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
       LOG.info("KNVV record not exist with KUNNR " + kna1.getId().getKunnr());
     }
 
-    logObject(knvvClone);
-
   }
 
   public Knvv getKnvvByKunnr(EntityManager rdcMgr, String mandt, String kunnr) throws Exception {
@@ -838,8 +834,6 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
       LOG.info("KNEX record not exist with KUNNR " + kna1.getId().getKunnr());
     }
 
-    logObject(knexClone);
-
   }
 
   public Knex getKnexByKunnr(EntityManager rdcMgr, String mandt, String kunnr) throws Exception {
@@ -884,8 +878,6 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     } else {
       LOG.info("SADR record not exist with ADRNR " + kna1.getAdrnr());
     }
-
-    logObject(sadrClone);
 
   }
 
@@ -936,8 +928,6 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
       LOG.info("KNVI record not exist with KUNNR " + kna1.getId().getKunnr());
     }
 
-    logObject(knviCloneInsert);
-
   }
 
   public List<Knvi> getKnviByKunnr(EntityManager rdcMgr, String mandt, String kunnr) throws Exception {
@@ -982,8 +972,6 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     } else {
       LOG.info("KNVK record not exist with KUNNR " + kna1.getId().getKunnr());
     }
-
-    logObject(knvkClone);
 
   }
 
@@ -1037,8 +1025,6 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
       LOG.info("KNVP record not exist with KUNNR " + kna1.getId().getKunnr());
     }
 
-    logObject(knvpCloneInsert);
-
   }
 
   public List<Knvp> getKnvpByKunnr(EntityManager rdcMgr, String mandt, String kunnr) throws Exception {
@@ -1083,8 +1069,6 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
       LOG.info("ADDLCTRYDATA record not exist with KUNNR " + kna1.getId().getKunnr());
     }
 
-    logObject(addlctrydataClone);
-
   }
 
   public Addlctrydata getAddlCtryDataByKunnr(EntityManager rdcMgr, String mandt, String kunnr) throws Exception {
@@ -1128,8 +1112,6 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     } else {
       LOG.info("KUNNR_EXT record not exist with KUNNR " + kna1.getId().getKunnr());
     }
-
-    logObject(kunnrExtClone);
 
   }
 
@@ -1178,8 +1160,6 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
       LOG.info("KNBK record not exist with KUNNR " + kna1.getId().getKunnr());
     }
 
-    logObject(knbkClone);
-
   }
 
   public Knbk getKnbkByKunnr(EntityManager rdcMgr, String mandt, String kunnr) throws Exception {
@@ -1224,8 +1204,6 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     } else {
       LOG.info("KNVA record not exist with KUNNR " + kna1.getId().getKunnr());
     }
-
-    logObject(knvaClone);
 
   }
 
@@ -1274,8 +1252,6 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
       LOG.info("KNVL record not exist with KUNNR " + kna1.getId().getKunnr());
     }
 
-    logObject(knvlClone);
-
   }
 
   public Knvl getKnvlByKunnr(EntityManager rdcMgr, String mandt, String kunnr) throws Exception {
@@ -1319,8 +1295,6 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     } else {
       LOG.info("SIZEINFO record not exist with KUNNR " + kna1.getId().getKunnr());
     }
-
-    logObject(sizeInfoClone);
 
   }
 
