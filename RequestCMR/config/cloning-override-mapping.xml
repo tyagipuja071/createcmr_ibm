@@ -3,25 +3,1275 @@
     <override>
     <table>CMRTCUST</table>
     <field>SBO</field>
-    <value>001</value>
-    <countries>822,862</countries>
+    <value>0760000</value>
+    <countries>373,610,666,668,675,678,693,695,700,702,704,707,708,725,726,740,764,767,804,808,820,821,822,823,826,832,851,857,862,864,865,876,881,883,889</countries>
 	</override>
+	
 	<override>
-    <table>KNB1</table>
-    <field>BUKRS</field>
-    <value>1234</value>
-    <countries>862,822</countries>
+    <table>CMRTCUST</table>
+    <field>SBO</field>
+    <value>076N</value>
+    <countries>706</countries>
 	</override>
+	
 	<override>
-    <table>KNA1</table>
-    <field>KUKLA</field>
-    <value>01</value>
-    <countries>862,822</countries>
+    <table>CMRTCUST</table>
+    <field>SBO</field>
+    <value>076</value>
+    <countries>754,866</countries>
 	</override>
+	
 	<override>
-    <table>CMRTADDR</table>
-    <field>ADDRLN</field>
-    <value>TESTING</value>
-    <countries>822</countries>
+    <table>CMRTCUST</table>
+    <field>SBO</field>
+    <value>076A000</value>
+    <countries>758</countries>
 	</override>
+	
+	<override>
+    <table>CMRTCUST</table>
+    <field>SBO</field>
+    <value>0767600</value>
+    <countries>838</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y048</value>
+	<countries>603</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y048</value>
+	<countries>603</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0004</value>
+	<countries>603</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y078</value>
+	<countries>610</countries>
+	</override>
+
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y078</value>
+	<countries>610</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0534</value>
+	<countries>610</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y004</value>
+	<countries>618</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y004</value>
+	<countries>618</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0009</value>
+	<countries>618</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y048</value>
+	<countries>358</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y048</value>
+	<countries>358</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0531</value>
+	<countries>358</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y070</value>
+	<countries>620</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y070</value>
+	<countries>620</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0013</value>
+	<countries>620</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y009</value>
+	<countries>621</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y009</value>
+	<countries>621</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0892</value>
+	<countries>621</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y005</value>
+	<countries>624</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y005</value>
+	<countries>624</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0016</value>
+	<countries>624</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y008</value>
+	<countries>644</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y008</value>
+	<countries>644</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0023</value>
+	<countries>644</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y078</value>
+	<countries>841</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y078</value>
+	<countries>841</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0589</value>
+	<countries>841</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y078</value>
+	<countries>692</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y078</value>
+	<countries>692</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0460</value>
+	<countries>692</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y009</value>
+	<countries>649</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y009</value>
+	<countries>649</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0026</value>
+	<countries>649</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y078</value>
+	<countries>881</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y078</value>
+	<countries>881</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0592</value>
+	<countries>881</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y015</value>
+	<countries>704</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y015</value>
+	<countries>704</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0033</value>
+	<countries>704</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y016</value>
+	<countries>666</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y016</value>
+	<countries>666</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0034</value>
+	<countries>666</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y021</value>
+	<countries>865</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y021</value>
+	<countries>865</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0040</value>
+	<countries>865</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y078</value>
+	<countries>656</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y078</value>
+	<countries>656</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0593</value>
+	<countries>656</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y026</value>
+	<countries>724</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y026</value>
+	<countries>724</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0365</value>
+	<countries>724</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y078</value>
+	<countries>725</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y078</value>
+	<countries>725</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0054</value>
+	<countries>725</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y027</value>
+	<countries>726</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y027</value>
+	<countries>726</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0055</value>
+	<countries>726</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y029</value>
+	<countries>740</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y029</value>
+	<countries>740</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0059</value>
+	<countries>740</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y070</value>
+	<countries>752</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y070</value>
+	<countries>752</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0542</value>
+	<countries>752</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y035</value>
+	<countries>758</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y035</value>
+	<countries>758</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0072</value>
+	<countries>758</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y009</value>
+	<countries>759</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y009</value>
+	<countries>759</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0073</value>
+	<countries>759</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y070</value>
+	<countries>762</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y070</value>
+	<countries>762</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0075</value>
+	<countries>762</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y048</value>
+	<countries>694</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y048</value>
+	<countries>694</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0076</value>
+	<countries>694</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y078</value>
+	<countries>764</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y078</value>
+	<countries>764</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0077</value>
+	<countries>764</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y039</value>
+	<countries>767</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y039</value>
+	<countries>767</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0080</value>
+	<countries>767</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y070</value>
+	<countries>768</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y070</value>
+	<countries>768</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0082</value>
+	<countries>768</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y048</value>
+	<countries>705</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y048</value>
+	<countries>705</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0086</value>
+	<countries>705</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y078</value>
+	<countries>700</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y078</value>
+	<countries>700</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0639</value>
+	<countries>700</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y048</value>
+	<countries>780</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y048</value>
+	<countries>780</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0089</value>
+	<countries>780</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y078</value>
+	<countries>373</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y078</value>
+	<countries>373</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0636</value>
+	<countries>373</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y078</value>
+	<countries>642</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y078</value>
+	<countries>642</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0470</value>
+	<countries>642</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y078</value>
+	<countries>880</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y078</value>
+	<countries>880</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0831</value>
+	<countries>880</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y078</value>
+	<countries>804</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y078</value>
+	<countries>804</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0100</value>
+	<countries>804</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y070</value>
+	<countries>805</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y070</value>
+	<countries>805</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0103</value>
+	<countries>805</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y051</value>
+	<countries>808</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y051</value>
+	<countries>808</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0104</value>
+	<countries>808</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y056</value>
+	<countries>822</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y056</value>
+	<countries>822</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0110</value>
+	<countries>822</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y070</value>
+	<countries>823</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y070</value>
+	<countries>823</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0111</value>
+	<countries>823</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y057</value>
+	<countries>826</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y057</value>
+	<countries>826</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0112</value>
+	<countries>826</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y059</value>
+	<countries>832</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y059</value>
+	<countries>832</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0117</value>
+	<countries>832</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y078</value>
+	<countries>635</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y078</value>
+	<countries>635</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0459</value>
+	<countries>635</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y048</value>
+	<countries>707</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y048</value>
+	<countries>707</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0118</value>
+	<countries>707</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y078</value>
+	<countries>876</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y078</value>
+	<countries>876</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0638</value>
+	<countries>876</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y078</value>
+	<countries>833</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y078</value>
+	<countries>833</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0547</value>
+	<countries>833</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y061</value>
+	<countries>693</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y061</value>
+	<countries>693</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0121</value>
+	<countries>693</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y062</value>
+	<countries>708</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y062</value>
+	<countries>708</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0120</value>
+	<countries>708</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y063</value>
+	<countries>864</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y063</value>
+	<countries>864</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0123</value>
+	<countries>864</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y064</value>
+	<countries>838</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y064</value>
+	<countries>838</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0126</value>
+	<countries>838</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y009</value>
+	<countries>843</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y009</value>
+	<countries>843</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0129</value>
+	<countries>843</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y066</value>
+	<countries>848</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y066</value>
+	<countries>848</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0131</value>
+	<countries>848</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y078</value>
+	<countries>851</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y078</value>
+	<countries>851</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0135</value>
+	<countries>851</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y078</value>
+	<countries>729</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y078</value>
+	<countries>729</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0401</value>
+	<countries>729</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y069</value>
+	<countries>862</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y069</value>
+	<countries>862</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0139</value>
+	<countries>862</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y078</value>
+	<countries>857</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y078</value>
+	<countries>857</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0141</value>
+	<countries>857</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y071</value>
+	<countries>889</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y071</value>
+	<countries>889</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0142</value>
+	<countries>889</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y072</value>
+	<countries>866</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y072</value>
+	<countries>866</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>8660</value>
+	<countries>866</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y073</value>
+	<countries>866</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value></value>
+	<countries>866</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value></value>
+	<countries>866</countries>
+	</override>
+	
+	<override>
+	<table>KNB1</table>
+	<field>BUKRS</field>
+	<value>Y078</value>
+	<countries>883</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKORG</field>
+	<value>Y078</value>
+	<countries>883</countries>
+	</override>
+	
+	<override>
+	<table>KNVV</table>
+	<field>VKBUR</field>
+	<value>0150</value>
+	<countries>883</countries>
+	</override>
+		
 </mappings>
