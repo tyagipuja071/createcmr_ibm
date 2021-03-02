@@ -79,6 +79,7 @@ public class CMRRefreshService extends BaseBatchService {
     sql += "from SAPR3.KNA1 ";
     sql += "where MANDT = :MANDT  ";
     sql += "and LOEVM <> 'X'  ";
+    sql += "and KATR10 <> 'GTS'  ";
     sql += "and SHAD_UPDATE_TS >= :TS ";
     if (this.country != null) {
       sql += " and KATR6 = :KATR6";
