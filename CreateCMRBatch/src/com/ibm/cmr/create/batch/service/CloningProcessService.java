@@ -189,6 +189,12 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
     updateEntity(cloningQueue, entityManager);
 
+    if ("641".equals(cntry)) {
+      CloningUtil cUtil = new CloningUtil();
+      String kukla = cUtil.getKuklaFromCMR(entityManager, cntry, cmrNo, SystemConfiguration.getValue("MANDT"));
+      setCNLastUsedCMR(entityManager, cloningCmrNo, SystemConfiguration.getValue("MANDT"), kukla, cntry);
+    }
+
   }
 
   private void processLegacyCloningProcess(EntityManager entityManager, CmrCloningQueue cloningQueue, String targetCntry) throws Exception {
@@ -1627,6 +1633,27 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
     // all rdcCloningRefn status complete then update cloningQueue completed
     cmrCloningQueueStatusUpdate(entityManager, cloningQueue);
+  }
+
+  public void setCNLastUsedCMR(EntityManager rdcMgr, String newLastUsed, String mandt, String kukla, String katr6) {
+    LOG.debug("setCNLastUsedCMR :: START");
+    String sql = ExternalizedQuery.getSql("UPDATE.KEY_AUTO_GEN.LST_USED");
+    sql = StringUtils.replaceOnce(sql, ":MANDT", "'" + mandt + "'");
+    sql = StringUtils.replaceOnce(sql, ":KATR6", "'" + katr6 + "'");
+    sql = StringUtils.replaceOnce(sql, ":LST_USED", "'" + newLastUsed + "'");
+
+    if (CmrConstants.CN_KUKLA81.equals(kukla)) {
+      sql = StringUtils.replaceOnce(sql, ":KEYID", "'" + CmrConstants.CN_KUKLA81_KEYID + "'");
+    } else if (CmrConstants.CN_KUKLA45.equals(kukla)) {
+      sql = StringUtils.replaceOnce(sql, ":KEYID", "'" + CmrConstants.CN_KUKLA45_KEYID + "'");
+    } else { // use default key_id
+      sql = StringUtils.replaceOnce(sql, ":KEYID", "'" + CmrConstants.CN_DEFAULT_KEYID + "'");
+    }
+
+    int rows = rdcMgr.createNativeQuery(sql).executeUpdate();
+    LOG.debug("****" + rows + " ROWS WERE AFFECTED BY THE UPDATE");
+    LOG.debug("setCNLastUsedCMR :: END :: NEW VALUE >> " + newLastUsed);
+
   }
 
 }
