@@ -21,7 +21,7 @@
   <cmr:row>
     <cmr:column span="1" width="127">
     </cmr:column>
-    <cmr:column span="1" width="130">
+    <cmr:column span="1" width="130" exceptForCountry="780">
       <label><cmr:fieldLabel fieldId="SalRepNameNo" />: </label>
     </cmr:column>
     <cmr:column span="1" width="240">
@@ -50,7 +50,7 @@
       %>
       <%=sbo != null ? sbo : ""%>
     </cmr:column>
-    <cmr:view exceptForGEO="MCO1,MCO2" exceptForCountry="822">
+    <cmr:view exceptForGEO="MCO1,MCO2" exceptForCountry="822,780">
       <cmr:column span="1" width="130">
         <label><cmr:fieldLabel fieldId="EngineeringBo" />: </label>
       </cmr:column>
@@ -61,7 +61,7 @@
         <%=cebo != null ? cebo : ""%>
       </cmr:column>
     </cmr:view>
-    <cmr:view forGEO="MCO1,MCO2">
+    <cmr:view forGEO="MCO1,MCO2" exceptForCountry="780">
       <cmr:column span="1" width="130">
         <label><cmr:fieldLabel fieldId="InternalDept" />: </label>
       </cmr:column>

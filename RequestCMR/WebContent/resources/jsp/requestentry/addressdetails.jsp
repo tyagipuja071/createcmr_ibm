@@ -287,6 +287,17 @@
         <div id="custNm2_view">-</div>
       </cmr:column>
     </cmr:row>
+    
+    <cmr:row>
+      <cmr:column span="1" forCountry="780">
+        <cmr:label fieldId="custNm3_view">
+          <span class="lbl-CustomerName3">${ui.custName3}:</span>
+        </cmr:label>:
+      </cmr:column>
+      <cmr:column span="2" forCountry="780">
+        <div id="custNm3_view">-</div>
+      </cmr:column>
+    </cmr:row>
   </cmr:view>
 
   <cmr:view forGEO="CN">
@@ -520,7 +531,7 @@
         <div id="bldg_view">-</div>
       </cmr:column>
     </cmr:view>
-    <cmr:view forGEO="MCO,MCO1,MCO2">
+    <cmr:view forGEO="MCO,MCO1,MCO2" exceptForCountry="780">
       <cmr:column span="1">
         <cmr:label fieldId="custNm4_view">
           <span class="lbl-CustomerName4">${ui.custName4}</span>
@@ -672,6 +683,24 @@
  </cmr:row>
   </cmr:view>
   <cmr:view exceptForGEO="CN,JP,SWISS">
+    <cmr:row addBackground="true" topPad="10">
+      <cmr:view forGEO="FR" forCountry="706">
+        <cmr:column span="1">
+          <cmr:label fieldId="custNm1_view">
+            <span class="lbl-CustomerName1">Customer legal name</span>:</cmr:label>
+        </cmr:column>
+        <cmr:column span="2">
+          <div id="custNm1_view">-</div>
+        </cmr:column>
+        <cmr:column span="1">
+          <cmr:label fieldId="custNm2_view">
+            <span class="lbl-CustomerName2">Legal name continued</span>:</cmr:label>
+        </cmr:column>
+        <cmr:column span="2">
+          <div id="custNm2_view">-</div>
+        </cmr:column>
+      </cmr:view>
+    </cmr:row>
     <cmr:row addBackground="true" topPad="10">
       <cmr:column span="1">
         <cmr:label fieldId="addrTxt_view">
@@ -871,13 +900,22 @@
       <cmr:column span="2">
         <div id="city1_view">-</div>
       </cmr:column>
-      <cmr:view exceptForGEO="MCO1,MCO2,CEMEA,NORDX,BELUX,SWISS" exceptForCountry="666,726,822,838,758">
+      <cmr:view exceptForGEO="MCO1,MCO2,CEMEA,NORDX,BELUX,SWISS,FR" exceptForCountry="666,726,822,838,758">
         <cmr:column span="1">
           <cmr:label fieldId="dept_view">
             <span class="lbl-Department">${ui.dept}</span>:</cmr:label>
         </cmr:column>
         <cmr:column span="2">
           <div id="dept_view">-</div>
+        </cmr:column>
+      </cmr:view>
+      <cmr:view forGEO="FR" forCountry="706">
+        <cmr:column span="1">
+          <cmr:label fieldId="custNm3_view">
+            <span class="lbl-CustomerName3">Division/Department</span>:</cmr:label>
+        </cmr:column>
+        <cmr:column span="2">
+          <div id="custNm3_view">-</div>
         </cmr:column>
       </cmr:view>
        <cmr:view forGEO="SWISS">
@@ -912,7 +950,7 @@
         <div id="city2_view">-</div>
       </cmr:column>
     </cmr:view>
-    <cmr:view exceptForGEO="MCO1,MCO2,CEMEA,CN,NORDX,BELUX,NL,JP,AP" exceptForCountry="862,726,666,822,838,758,760">
+    <cmr:view exceptForGEO="MCO1,MCO2,CEMEA,CN,NORDX,BELUX,NL,JP,AP,FR" exceptForCountry="862,726,666,822,838,758,760">
       <cmr:column span="1">
         <cmr:label fieldId="bldg_view">
           <span class="lbl-Building">${ui.bldng}</span>:</cmr:label>
@@ -944,13 +982,22 @@
         <div id="stateProv_view">-</div>
       </cmr:column>
     </cmr:view>
-    <cmr:view exceptForGEO="MCO1,MCO2,CEMEA,CN,NORDX,BELUX,NL,JP,AP" exceptForCountry="862,726,666,822,838,758,760">
+    <cmr:view exceptForGEO="MCO1,MCO2,CEMEA,CN,NORDX,BELUX,NL,JP,AP,FR" exceptForCountry="862,726,666,822,838,758,760">
       <cmr:column span="1">
         <cmr:label fieldId="floor_view">
           <span class="lbl-Floor">${ui.floor}</span>:</cmr:label>
       </cmr:column>
       <cmr:column span="2">
         <div id="floor_view">-</div>
+      </cmr:column>
+    </cmr:view>
+    <cmr:view forGEO="FR" forCountry="706">
+      <cmr:column span="1">
+        <cmr:label fieldId="custNm4_view">
+          <span class="lbl-CustomerName4">Attention to/Building/Floor/Office</span>:</cmr:label>
+      </cmr:column>
+      <cmr:column span="2">
+        <div id="custNm4_view">-</div>
       </cmr:column>
     </cmr:view>
   </cmr:row>
@@ -984,6 +1031,8 @@
       <cmr:column span="2">
         <div id="county_view">-</div>
       </cmr:column>
+    </cmr:view>
+    <cmr:view exceptForGEO="MCO1,MCO2,CEMEA,CN,NORDX,BELUX,NL,JP,AP,SWISS,FR" exceptForCountry="862,726,666,822,838,758,760">
       <cmr:column span="1">
         <cmr:label fieldId="office_view">
           <span class="lbl-Office">${ui.office}</span>:</cmr:label>
@@ -1017,7 +1066,17 @@
        </c:if>
     </cmr:view>
    
-    <cmr:view exceptForGEO="IERP,CND,MCO1,MCO2,CEMEA,CN,NORDX,BELUX,NL,JP,AP,SWISS" exceptForCountry="862,726,666,822,838,758,631,760">
+    <cmr:view forCountry="780">
+      <cmr:column span="1">
+        <cmr:label fieldId="custPhone_view">
+          <span class="lbl-CustPhone">${ui.phone}</span>:</cmr:label>
+      </cmr:column>
+      <cmr:column span="2">
+        <div id="custPhone_view">-</div>
+      </cmr:column>
+    </cmr:view>
+    
+    <cmr:view exceptForGEO="IERP,CND,MCO1,MCO2,CEMEA,CN,NORDX,BELUX,NL,JP,AP,SWISS,FR" exceptForCountry="862,726,666,822,838,758,631,760">
       <cmr:column span="1">
         <cmr:label fieldId="divn_view">
           <span class="lbl-Division">${ui.divn}</span>:</cmr:label>

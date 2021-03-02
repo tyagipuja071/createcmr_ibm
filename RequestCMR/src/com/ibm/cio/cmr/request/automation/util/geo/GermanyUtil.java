@@ -450,10 +450,10 @@ public class GermanyUtil extends AutomationUtil {
       details.append("Computed SORTL = " + coverageId).append("\n");
       results.setResults("Coverage Calculated");
       engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
-    } else if ("32".equals(data.getIsuCd()) && "S".equals(data.getClientTier())) {
+    } else if ("34".equals(data.getIsuCd()) && "Q".equals(data.getClientTier())) {
       details.setLength(0); // clearing details
       overrides.clearOverrides();
-      details.append("Calculating coverage using 32S-PostalCode logic.").append("\n");
+      details.append("Calculating coverage using 34Q-PostalCode logic.").append("\n");
       HashMap<String, String> response = getSORTLFromPostalCodeMapping(data.getSubIndustryCd(), zs01.getPostCd(), data.getIsuCd(),
           data.getClientTier());
       LOG.debug("Calculated SORTL: " + response.get(SORTL));
@@ -771,6 +771,11 @@ public class GermanyUtil extends AutomationUtil {
       }
     }
     return isDnBRelevantFieldUpdated;
+  }
+
+  @Override
+  public List<String> getSkipChecksRequestTypesforCMDE() {
+    return Arrays.asList("C", "U", "M");
   }
 
 }

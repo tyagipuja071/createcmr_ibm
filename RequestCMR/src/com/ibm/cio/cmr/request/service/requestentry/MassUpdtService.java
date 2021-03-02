@@ -7,6 +7,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
@@ -105,22 +106,24 @@ public class MassUpdtService extends BaseService<MassUpdateModel, MassUpdt> {
       }
 
       // Defect 1751169-Temp Fix
-      if ("R".equalsIgnoreCase(model.getParReqType())) {
-        String cmrIssuingCntry = "";
-        String issuingCntry = "";
-        boolean cntryFlag = false;
-        sql = ExternalizedQuery.getSql("DATA_ISSUING_CNTRY");
-        query = new PreparedQuery(entityManager, sql);
-        query.setParameter("REQ_ID", model.getParReqId());
+      String cmrIssuingCntry = "";
+      String issuingCntry = "";
+      boolean cntryFlag = false;
+      sql = ExternalizedQuery.getSql("DATA_ISSUING_CNTRY");
+      query = new PreparedQuery(entityManager, sql);
+      query.setParameter("REQ_ID", model.getParReqId());
 
-        List<Object[]> resultsCntry = query.getResults();
-        if (resultsCntry != null && resultsCntry.size() > 0) {
-          Object[] resultCntry = resultsCntry.get(0);
-          cmrIssuingCntry = resultCntry[0] != null ? (String) resultCntry[0] : "";
-          if ("838".equals(cmrIssuingCntry) || "866".equals(cmrIssuingCntry) || "754".equals(cmrIssuingCntry) || "758".equals(cmrIssuingCntry)
-              || "822".equals(cmrIssuingCntry) || "666".equals(cmrIssuingCntry) || "864".equals(cmrIssuingCntry))
-            cntryFlag = true;
-        }
+      List<Object[]> resultsCntry = query.getResults();
+      if (resultsCntry != null && resultsCntry.size() > 0) {
+        Object[] resultCntry = resultsCntry.get(0);
+        cmrIssuingCntry = resultCntry[0] != null ? (String) resultCntry[0] : "";
+      }
+
+      if ("R".equalsIgnoreCase(model.getParReqType())) {
+
+        if (!StringUtils.isBlank(cmrIssuingCntry) && ("838".equals(cmrIssuingCntry) || "866".equals(cmrIssuingCntry) || "754".equals(cmrIssuingCntry)
+            || "758".equals(cmrIssuingCntry) || "822".equals(cmrIssuingCntry) || "666".equals(cmrIssuingCntry) || "864".equals(cmrIssuingCntry)))
+          cntryFlag = true;
 
         if (cntryFlag) {
           sql = ExternalizedQuery.getSql("REACTIVATE_KNA1_COUNT");
@@ -180,6 +183,9 @@ public class MassUpdtService extends BaseService<MassUpdateModel, MassUpdt> {
           }
         }
       }
+      if ("780".equals(cmrIssuingCntry)) {
+        handleReactivateDeleteMalta(entityManager, cmractualList, cmrIssuingCntry, model.getParReqType());
+      }
 
       for (int i = 0; i < cmractualList.size(); i++) {
         createMassUpdt(this, entityManager, model, cmractualList.get(i), model.getParReqId());
@@ -191,6 +197,44 @@ public class MassUpdtService extends BaseService<MassUpdateModel, MassUpdt> {
         model.setDisplayMsg(false);
       }
 
+    }
+  }
+
+  private void handleReactivateDeleteMalta(EntityManager entityManager, List<String> cmractualList, String cmrIssuingCntry, String reqType)
+      throws CmrException {
+    PreparedQuery query = null;
+    String issuingCntry;
+    if ("R".equalsIgnoreCase(reqType)) {
+      query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("REACTIVATE_KNA1_COUNT"));
+    } else if ("D".equalsIgnoreCase(reqType)) {
+      query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("DELETE_KNA1_COUNT"));
+    }
+
+    String katr10 = "";
+    boolean rdcFlag = false;
+
+    for (int i = 0; i < cmractualList.size(); i++) {
+      rdcFlag = false;
+      issuingCntry = cmrIssuingCntry;
+      query.setParameter("CMR_NO", cmractualList.get(i));
+      query.setParameter("CNTRY", issuingCntry);
+      query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+      List<Object[]> results = query.getResults();
+
+      if (results != null && results.size() > 0) {
+        Object[] result = results.get(0);
+        katr10 = result[0] != null ? (String) result[0] : "";
+        if (!"".equals(katr10)) {
+          rdcFlag = true;
+          throw new CmrException(MessageUtil.ERROR_LEGACY_RETRIEVE, cmractualList.get(i));
+        }
+      } else {
+        rdcFlag = true;
+        throw new CmrException(MessageUtil.ERROR_LEGACY_RETRIEVE, cmractualList.get(i));
+      }
+
+      if (rdcFlag)
+        continue;
     }
   }
 

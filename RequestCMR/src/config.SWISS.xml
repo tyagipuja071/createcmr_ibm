@@ -36,26 +36,23 @@
           <length>4</length>
           <width>20</width>
         </column>
-        
         <column>
           <label>ISU Code</label>
           <dbColumn>ISU_CD</dbColumn>
           <width>25</width>
           <lovId>ISU</lovId>
         </column>
-        
         <column>
           <label>Client Tier</label>
           <dbColumn>CLIENT_TIER</dbColumn>
           <width>25</width>
           <lovId>ClientTier</lovId>
         </column>
-        
         <column exactLength="true">
           <label>Muboty</label>
           <dbColumn>SEARCH_TERM</dbColumn>
           <width>25</width>
-          <length>7</length>
+          <length>8</length>
         </column>
         
         <column>

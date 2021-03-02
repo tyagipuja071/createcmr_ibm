@@ -9,8 +9,10 @@ import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -100,8 +102,10 @@ public class AutoStatsService extends BaseSimpleService<RequestStatsContainer> {
 
     }
 
+    if (!StringUtils.isBlank(model.getReqType()) && model.getReqType().length() == 1 && StringUtils.isAlpha(model.getReqType())) {
+      sql += "and admin.REQ_TYPE = '" + model.getReqType() + "' ";
+    }
     if ("Y".equals(model.getReqType())) {
-      sql += "and admin.REQ_TYPE = 'C' ";
     }
 
     if (!StringUtils.isBlank(model.getSourceSystId())) {
@@ -153,6 +157,7 @@ public class AutoStatsService extends BaseSimpleService<RequestStatsContainer> {
     Map<String, AutomationSummaryModel> scenarioMap = new HashMap<String, AutomationSummaryModel>();
     Map<String, Long> partnerMap = new HashMap<String, Long>();
 
+    String country = null;
     for (AutomationStatsModel stat : stats) {
       if (!generalMap.containsKey(stat.getCmrIssuingCntry())) {
         generalMap.put(stat.getCmrIssuingCntry(), new AutomationSummaryModel());
@@ -184,6 +189,7 @@ public class AutoStatsService extends BaseSimpleService<RequestStatsContainer> {
       }
 
       if (buildCountrySummary) {
+        country = stat.getCmrIssuingCntry();
         if (!weeklyMap.containsKey(stat.getCmrIssuingCntry())) {
           weeklyMap.put(stat.getCmrIssuingCntry(), new HashMap<String, AutomationSummaryModel>());
         }
@@ -251,6 +257,17 @@ public class AutoStatsService extends BaseSimpleService<RequestStatsContainer> {
     }
     container.setAutomationSummary(generalMap);
     if (buildCountrySummary) {
+      Map<String, AutomationSummaryModel> raw = weeklyMap.get(country);
+      if (raw != null) {
+        Map<String, AutomationSummaryModel> ordered = new LinkedHashMap<>();
+        List<String> weekKeys = new ArrayList<String>();
+        weekKeys.addAll(raw.keySet());
+        Collections.sort(weekKeys);
+        for (String week : weekKeys) {
+          ordered.put(week, raw.get(week));
+        }
+        weeklyMap.put(country, ordered);
+      }
       container.setWeeklyAutomationSummary(weeklyMap);
       container.setScenarioSummary(scenarioMap);
     }

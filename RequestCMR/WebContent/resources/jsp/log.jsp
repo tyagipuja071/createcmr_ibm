@@ -54,6 +54,17 @@ ul {
       </tr>
     </thead>
     <tbody>
+      <tr>
+      <td>R5.0 b-R5406</td>
+      <td>February, 2021</td>
+      <td>
+        <ul>
+          <li>Malta RDC Direct</li>
+          <li>Internal CreateCMR Fixes & 1H2021 Coverage Changes</li>
+        </ul>
+      </td>
+    </tr> 
+    <tr>
     <tr>
       <td>R5.0 b-R5296</td>
       <td>November 21, 2020</td>

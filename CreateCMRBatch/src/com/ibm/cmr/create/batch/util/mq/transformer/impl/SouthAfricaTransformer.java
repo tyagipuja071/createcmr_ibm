@@ -562,7 +562,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
           legacyCust.setMrcCd("5");
           legacyCust.setLeadingAccNo(legacyCust.getId().getCustomerNo() + legacyCust.getMrcCd());
         } else {
-          legacyCust.setIsuCd("32S");
+          legacyCust.setIsuCd("34Q");
           legacyCust.setSalesRepNo("DUMMY1");
           legacyCust.setSalesGroupRep("DUMMY1");
           legacyCust.setSbo("0080000");

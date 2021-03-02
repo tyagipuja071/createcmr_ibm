@@ -541,17 +541,20 @@ public class MassRequestEntryController extends BaseController {
       if (admin != null) {
         if (CmrConstants.REQ_TYPE_MASS_CREATE.equals(admin.getReqType())) {
           docLink = SystemConfiguration.getSystemProperty("masscreate." + cmrIssuingCntry);
+          templateName = docLink;
           if (StringUtils.isEmpty(docLink)) {
             docLink = MASS_CREATE_TEMPLATE + ".xlsm";
+            templateName = MASS_CREATE_TEMPLATE + "v" + SystemConfiguration.getValue("MASS_CREATE_TEMPLATE_VER") + ".xlsm";
           }
-          templateName = MASS_CREATE_TEMPLATE + "v" + SystemConfiguration.getValue("MASS_CREATE_TEMPLATE_VER") + ".xlsm";
         } else {
           EntityManager eManager = JpaManager.getEntityManager();
           if (LegacyDirectUtil.isCountryLegacyDirectEnabled(eManager, cmrIssuingCntry)) {
             docLink = SystemConfiguration.getSystemProperty("massupdateauto." + cmrIssuingCntry);
           } else if (SWISSHandler.isCHIssuingCountry(cmrIssuingCntry)) {
             docLink = SystemConfiguration.getSystemProperty("massupdateauto." + cmrIssuingCntry);
-          } else if ("618".equals(cmrIssuingCntry)) {
+          } else if ("618".equals(cmrIssuingCntry) || "706".equals(cmrIssuingCntry)) {
+            docLink = SystemConfiguration.getSystemProperty("massupdateauto." + cmrIssuingCntry);
+          } else if (LegacyDirectUtil.isCountryDREnabled(eManager, cmrIssuingCntry)) {
             docLink = SystemConfiguration.getSystemProperty("massupdateauto." + cmrIssuingCntry);
           } else {
             docLink = SystemConfiguration.getSystemProperty("massupdate." + cmrIssuingCntry);
@@ -775,11 +778,13 @@ public class MassRequestEntryController extends BaseController {
    */
 
   @RequestMapping(value = "/requestentry/reactivate/cmrNolist")
-  public ModelMap getCMRList(HttpServletRequest request, HttpServletResponse response, @RequestParam("reqId") long reqId) throws CmrException {
+  public ModelMap getCMRList(HttpServletRequest request, HttpServletResponse response, @RequestParam("reqId") long reqId,
+      @RequestParam("reqType") String reqType) throws CmrException {
 
     List<DeleteReactivateModel> drModel = new ArrayList<DeleteReactivateModel>();
     ParamContainer params = new ParamContainer();
     params.addParam("reqId", reqId);
+    params.addParam("reqType", reqType);
     try {
       drModel = delReactivateService.process(request, params);
     } catch (Exception e) {

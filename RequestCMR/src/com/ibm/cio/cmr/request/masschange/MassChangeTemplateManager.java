@@ -43,7 +43,7 @@ public class MassChangeTemplateManager {
     configList.put("693", "config.693.xml");
     configList.put("695", "config.695.xml");
     configList.put("707", "config.707.xml");
-    
+
     configList.put("358", "config.358.xml");
     configList.put("359", "config.359.xml");
     configList.put("363", "config.363.xml");
@@ -87,8 +87,11 @@ public class MassChangeTemplateManager {
     configList.put("675", "config.675.xml");
     configList.put("822", "config.822.xml");
     configList.put("666", "config.666.xml");
+    configList.put("780", "config.780.xml");
 		configList.put("864", "config.864.xml");
     // configList.put("848", "config.SWISS.xml");
+    
+    configList.put("706", "config.706.xml");
     configList.put("610", "config.CEWA.xml");
     configList.put("636", "config.CEWA.xml");
     configList.put("645", "config.CEWA.xml");
