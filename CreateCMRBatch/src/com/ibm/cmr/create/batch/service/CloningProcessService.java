@@ -111,6 +111,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
   private static final List<String> STATUS_CLONING = Arrays.asList("IN_PROG", "LEGACY_ERR");
   private static final List<String> STATUS_LEGACY = Arrays.asList("LEGACY_OK", "LEGACYSKIP");
   private static final List<String> STATUS_RDC = Arrays.asList("RDC_INPROG", "RDC_ERR");
+  private static final List<String> STATUS_CLONING_REFN = Arrays.asList("E", "X", "C");
 
   @Override
   public boolean isTransactional() {
@@ -496,6 +497,8 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
   private void cmrCloningQueueStatusUpdate(EntityManager entityManager, CmrCloningQueue cloningQueue) throws Exception {
     LOG.info("Inside cmrCloningQueueStatusUpdate for CMR No : " + cloningQueue.getId().getCmrNo());
+    boolean statusCheck = false;
+    String curentStatus = "";
     String sql = ExternalizedQuery.getSql("CLONING_CMR_STATUS_CHK");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("ID", cloningQueue.getId().getCmrCloningProcessId());
@@ -503,12 +506,29 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     query.setParameter("CMR_NO", cloningQueue.getId().getCmrNo());
     List<Object[]> status = query.getResults();
     if (status.size() == 1) {
-      String curentStatus = String.valueOf(status.get(0));
+      curentStatus = String.valueOf(status.get(0));
       if ("C".equals(curentStatus)) {
         cloningQueue.setStatus("COMPLETED");
         updateEntity(cloningQueue, entityManager);
       }
 
+    } else if (status.size() > 1) {
+      for (int index = 0; index < status.size(); index++) {
+        curentStatus = String.valueOf(status.get(index));
+        if (STATUS_CLONING_REFN.contains(curentStatus)) {
+          statusCheck = true;
+        } else {
+          statusCheck = false;
+          break;
+        }
+
+      }
+
+      if (statusCheck) {
+        cloningQueue.setStatus("STOP");
+        cloningQueue.setErrorMsg("Some data issue with kna1 or child tables");
+        updateEntity(cloningQueue, entityManager);
+      }
     }
 
   }
