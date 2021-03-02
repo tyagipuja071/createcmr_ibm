@@ -4380,6 +4380,23 @@ function checkGAddressExist() {
     };
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
+function validateDeptBldg() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqType = FormManager.getActualValue('reqType');
+        var custNm3 = FormManager.getActualValue('custNm3');
+        var custNm4 = FormManager.getActualValue('custNm4');
+        var bldg = FormManager.getActualValue('bldg');
+        var dept = FormManager.getActualValue('dept');
+        if ((custNm3 != '' && (custNm3 == bldg || custNm3 == dept)) || (custNm4 != '' && (custNm4 == bldg || custNm4 == dept))) {
+          return new ValidationResult(null, false, 'Department_ext and Building_ext must contain unique information.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+}
 
 dojo.addOnLoad(function() {
   GEOHandler.CEMEA_COPY = [ '358', '359', '363', '603', '607', '620', '626', '644', '642', '651', '668', '677', '680', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '752',
@@ -4587,12 +4604,13 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(lockIsicCdCEE, GEOHandler.CEE);
   GEOHandler.addAfterTemplateLoad(lockIsicCdCEE, GEOHandler.CEE);
-
+  GEOHandler.registerValidator(validateDeptBldg, SysLoc.AUSTRIA);
   // GEOHandler.addAfterConfig(addPrefixVat, GEOHandler.CEE);
   // GEOHandler.addAfterTemplateLoad(addPrefixVat, GEOHandler.CEE);
   // GEOHandler.addAddrFunction(addPrefixVat, GEOHandler.CEE);
 
   GEOHandler.addAfterConfig(resetVATValidationsForPayGo, [ SysLoc.AUSTRIA ]);
   GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, [ SysLoc.AUSTRIA ]);
+  
 
 });
