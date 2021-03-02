@@ -419,6 +419,8 @@ public class StatisticsService extends BaseSimpleService<RequestStatsContainer> 
     config.add(new StatXLSConfig("D&B Search", "FIND_DNB_RESULT", 16, null));
     config.add(new StatXLSConfig("DPL Check", "DPL_CHK_RESULT", 16, null));
     config.add(new StatXLSConfig("DPL Assessment", "DPL_ASSESSMENT_RESULT", 16, null));
+    config.add(new StatXLSConfig("DnB Matching", "DNB_MATCHING_RESULT", 16, "Indicates whether the DnB matches were found."));
+    config.add(new StatXLSConfig("RPA Matching", "RPA_MATCHING_RESULT", 16, "Indicates whether the RPA matches were found."));
     config.add(new StatXLSConfig("# of Rejections", "REJECT_TOTAL", 14, null));
     config.add(
         new StatXLSConfig("Last Reject Reason", "LAST_REJ_REASON", 25, "If at anytime the request was rejected, the reason for the last rejection"));
