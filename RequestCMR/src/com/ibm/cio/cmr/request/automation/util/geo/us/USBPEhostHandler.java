@@ -24,7 +24,6 @@ import com.ibm.cio.cmr.request.util.CompanyFinder;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
-import com.ibm.cmr.services.client.automation.us.SosResponse;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckRequest;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
@@ -125,15 +124,9 @@ public class USBPEhostHandler extends USBPHandler {
       output.setOnError(true);
       return false;
     }
-    DnBMatchingResponse dnbMatch = null;
-
-    // match against SOS-RPA
-    SosResponse sosMatch = matchAgainstSosRpa(handler, requestData, zs01, engineData, details, overrides, ibmCmr != null);
 
     // match against D&B
-    if (sosMatch == null) {
-      dnbMatch = matchAgainstDnB(handler, requestData, zs01, engineData, details, overrides, ibmCmr != null);
-    }
+    DnBMatchingResponse dnbMatch = matchAgainstDnB(handler, requestData, zs01, engineData, details, overrides, ibmCmr != null);
 
     if (ibmCmr == null) {
 

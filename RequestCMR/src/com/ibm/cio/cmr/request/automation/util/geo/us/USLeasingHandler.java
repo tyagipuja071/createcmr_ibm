@@ -36,7 +36,6 @@ import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.QueryClient;
-import com.ibm.cmr.services.client.automation.us.SosResponse;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.matching.gbg.GBGResponse;
@@ -336,15 +335,9 @@ public class USLeasingHandler extends USBPHandler {
     Admin admin = requestData.getAdmin();
     Addr addr = requestData.getAddress("ZS01");
     long childReqId = admin.getChildReqId();
-    DnBMatchingResponse dnbMatch = null;
-
-    // match against SOS-RPA
-    SosResponse sosMatch = matchAgainstSosRpa(handler, requestData, addr, engineData, details, overrides, ibmCmr != null);
 
     // match against D&B
-    if (sosMatch == null) {
-      dnbMatch = matchAgainstDnB(handler, requestData, addr, engineData, details, overrides, ibmCmr != null);
-    }
+    DnBMatchingResponse dnbMatch = matchAgainstDnB(handler, requestData, addr, engineData, details, overrides, ibmCmr != null);
 
     if (ibmCmr == null) {
 
