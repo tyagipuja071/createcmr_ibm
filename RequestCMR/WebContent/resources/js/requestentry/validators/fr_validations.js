@@ -3659,4 +3659,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(setIERPSitePartyIDForFR, '706');
   GEOHandler.registerValidator(addAddressFieldValidators, [ '706' ], null, true);
   GEOHandler.addAddrFunction(showIGFOnOpen, '706');
+  GEOHandler.addAfterConfig(resetVATValidationsForPayGo, [ '706' ]);
+  GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, [ '706' ]);
 });
