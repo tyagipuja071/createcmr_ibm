@@ -340,6 +340,9 @@ public class DPLSearchService extends BaseSimpleService<Object> {
           DPLSearchResults result = resp.getResults();
           result.setSearchArgument(searchString);
           results.add(result);
+        } else {
+          LOG.debug("An error was encountered when trying to search: " + resp.getMsg());
+          break;
         }
       } catch (Exception e) {
         LOG.warn("DPL Search encountered an error for " + searchString, e);

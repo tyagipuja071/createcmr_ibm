@@ -43,7 +43,6 @@ import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.model.requestentry.ImportCMRModel;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
-import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
@@ -64,8 +63,8 @@ import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
 public class CNHandler extends GEOHandler {
 
   private static final Logger LOG = Logger.getLogger(DEHandler.class);
-  private static final String[] DE_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "LocalTax1", "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity",
-      "CustFAX", "City2", "Affiliate", "Company", "INACType" };
+  private static final String[] DE_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "LocalTax1", "LocalTax2", "SitePartyID", "Division", "POBoxCity", "CustFAX",
+      "City2", "Affiliate", "Company", "INACType" };
   public static final int CN_STREET_ADD_TXT = 70;
   public static final int CN_STREET_ADD_TXT2 = 70;
   public static final int CN_CUST_NAME_1 = 70;
@@ -193,11 +192,6 @@ public class CNHandler extends GEOHandler {
 
   @Override
   public void handleImportByType(String requestType, Admin admin, Data data, boolean importing) {
-  }
-
-  @Override
-  public void addSummaryUpdatedFields(RequestSummaryService service, String type, String cmrCountry, Data newData, DataRdc oldData,
-      List<UpdatedDataModel> results) {
   }
 
   @Override

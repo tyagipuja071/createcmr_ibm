@@ -60,6 +60,12 @@ public abstract class ISATransformer extends APTransformer {
     }
     handler.messageHash.put("AbbrLoc", "   " + abbloc);
 
+    String clusterID = handler.cmrData.getApCustClusterId();
+    if (clusterID.contains("BLAN")) {
+      handler.messageHash.put("ClusterNo", "");
+    } else {
+      handler.messageHash.put("ClusterNo", clusterID);
+    }
   }
 
   @Override
@@ -82,11 +88,11 @@ public abstract class ISATransformer extends APTransformer {
     if (!StringUtils.isBlank(addrData.getDept())) {
       line5 += addrData.getDept();
     }
-    
+
     handler.messageHash.put("AddrLine3", line3);
     handler.messageHash.put("AddrLine4", line4);
     handler.messageHash.put("AddrLine5", line5);
-    
+
   }
 
   @Override

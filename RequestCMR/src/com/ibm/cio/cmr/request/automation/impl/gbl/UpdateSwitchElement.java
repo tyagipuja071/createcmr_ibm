@@ -65,6 +65,11 @@ public class UpdateSwitchElement extends ValidatingElement {
       validation.setMessage("Skipped");
       output.setDetails("Processing is skipped for non Update requests.");
       log.debug("Processing is skipped for non Update requests.");
+    } else if ("U".equals(admin.getReqType()) && engineData.hasPositiveCheckStatus("SKIP_UPDATE_SWITCH")) {
+      validation.setSuccess(true);
+      validation.setMessage("Skipped");
+      output.setDetails("Processing is skipped as requester is from CMDE team.");
+      log.debug("Processing is skipped as requester is from CMDE team.");
     } else if ("U".equals(admin.getReqType())) {
 
       GEOHandler handler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());

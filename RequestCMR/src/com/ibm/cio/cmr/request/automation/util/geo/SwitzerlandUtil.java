@@ -135,7 +135,7 @@ public class SwitzerlandUtil extends AutomationUtil {
         engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
       case SCENARIO_IBM_EMPLOYEE:
         return doPrivatePersonChecks(engineData, SystemLocation.SWITZERLAND, soldTo.getLandCntry(), customerName, details,
-            SCENARIO_IBM_EMPLOYEE.equals(actualScenario));
+            SCENARIO_IBM_EMPLOYEE.equals(actualScenario), requestData);
       case SCENARIO_INTERNAL:
         break;
       case SCENARIO_GOVERNMENT:
@@ -536,4 +536,8 @@ public class SwitzerlandUtil extends AutomationUtil {
     return null;
   }
 
+  @Override
+  public List<String> getSkipChecksRequestTypesforCMDE() {
+    return Arrays.asList("C", "U", "M", "D", "R");
+  }
 }

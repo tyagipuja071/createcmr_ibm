@@ -46,12 +46,11 @@
           <length>6</length>
           <lovId>CollectionCd</lovId>
         </column>
-        <column>
+        <column exactLength="true">
           <label>Enterprise Number</label>
           <dbColumn>ENTERPRISE</dbColumn>
           <width>30</width>
          <length>6</length>
-         <lovId>Enterprise</lovId>
         </column>
         <column exactLength="true">
           <label>INAC/NAC Code</label>
@@ -71,7 +70,7 @@
           <dbColumn>CLIENT_TIER</dbColumn>
           <width>25</width>
           <length>1</length>
-          <bdsId>ClientTier</bdsId>
+          <lovId>ClientTier</lovId>
         </column>
         <column>
           <label>Mode of Payment</label>
