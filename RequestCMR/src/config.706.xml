@@ -54,8 +54,8 @@
 				<column>
 					<label>SORTL</label>
 					<dbColumn>SALES_BO_CD</dbColumn>
-					<width>5</width>
-					<length>4</length>
+					<width>7</width>
+					<length>6</length>
 				</column>
 
 				<column>
