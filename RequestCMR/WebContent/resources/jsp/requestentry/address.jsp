@@ -293,14 +293,14 @@ visibility: hidden !IMPORTANT;
           </cmr:view>
 
           <!--  Customer Name and Name Con't except for JP -->
-          <cmr:view exceptForGEO="JP">
+          <cmr:view exceptForGEO="JP" exceptForCountry="618">
             <cmr:gridCol width="120px" field="custNm1" header="${ui.grid.custNameUKI1}" >
               <cmr:formatter functionName="customerNameFormatter" />
             </cmr:gridCol>
           </cmr:view>
           
           <!--  Customer Name-KANJI and Name-KANJI Continue for JP -->
-          <cmr:view forGEO="JP">
+          <cmr:view forGEO="JP" exceptForCountry="618">
             <cmr:gridCol width="120px" field="custNm1" header="Customer Name-KANJI" >
               <cmr:formatter functionName="customerNameFormatter" />
             </cmr:gridCol>
@@ -309,11 +309,18 @@ visibility: hidden !IMPORTANT;
 			<!-- MALTA LEGACY -->
 			<cmr:view forCountry="780">
 				<cmr:gridCol width="120px" field="custNm3" header="Name 3" />
-			</cmr:view>				
+			</cmr:view>		
 
 			<cmr:view forGEO="FR">
             	<cmr:gridCol width="120px" field="custNm3" header="Customer Name/ Additional Address Information" />
           	</cmr:view>
+          	
+          	<cmr:view forCountry="618">
+				<cmr:gridCol width="120px" field="custNm1" header="Customer Legal name" />
+				<cmr:gridCol width="120px" field="custNm3" header="Division/Department" />
+				<cmr:gridCol width="100px" field="bldg" header="Building_Ext" />
+				<cmr:gridCol width="100px" field="dept" header="Department_Ext" />
+			</cmr:view>
         <%} %>
         
         <cmr:view forCountry="649">
@@ -327,8 +334,8 @@ visibility: hidden !IMPORTANT;
         </cmr:view>
         
         <cmr:view forGEO="SWISS">
-          <cmr:gridCol width="70px" field="custNm4" header="${ui.grid.custNm4}" />
           <cmr:gridCol width="70px" field="custNm3" header="${ui.grid.custNm3}" />
+          <cmr:gridCol width="70px" field="custNm4" header="${ui.grid.custNm4}" />
         </cmr:view>
         
         <cmr:view forCountry="862">
