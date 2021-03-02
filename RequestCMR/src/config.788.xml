@@ -123,7 +123,7 @@
 					<dbColumn>SVC_AR_OFFICE</dbColumn>
 					<width>20</width>
 					<length>1</length>
-					<bdsId>CustLang</bdsId>
+					<lovId>CustLang</lovId>
 				</column>
 				<column>
 					<label>PPS CEID</label>
