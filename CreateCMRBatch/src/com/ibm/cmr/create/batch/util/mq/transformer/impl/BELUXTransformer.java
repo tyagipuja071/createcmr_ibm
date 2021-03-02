@@ -769,7 +769,7 @@ public class BELUXTransformer extends EMEATransformer {
       if ("@".equals(addr.getPoBox())) {
         legacyAddr.setPoBox("");
       } else {
-        legacyAddr.setPoBox(addr.getPoBox());
+        // legacyAddr.setPoBox(addr.getPoBox());
       }
     }
     // legacy addr line5 is set in order district+postCd+City
