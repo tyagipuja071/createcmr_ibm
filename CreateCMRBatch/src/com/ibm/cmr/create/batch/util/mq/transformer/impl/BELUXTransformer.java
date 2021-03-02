@@ -1080,26 +1080,17 @@ public class BELUXTransformer extends EMEATransformer {
       } else if ("788".equals(data.getCmrIssuingCntry())) {
         legacyCust.setRealCtyCd("788");
       }
-      legacyCust.setSalesRepNo(data.getSearchTerm() == null ? "" : data.getSearchTerm());
-
-      // CMR-5993
-      String cntry = legacyCust.getId().getSofCntryCode().trim();
-      String sales_Rep_ID = cntry + cntry;
-      if ((SCENARIO_TYPE_SBM.equals(data.getCustGrp()) || SCENARIO_TYPE_GBM.equals(data.getCustGrp()))
-          && Arrays.asList(BELUX_GBMSBM_COUNTRIES).contains(cntry)) {
-        sales_Rep_ID = "530530";
-      }
+      if (!StringUtils.isBlank(data.getSearchTerm()))
+        legacyCust.setSalesRepNo(data.getSearchTerm());
 
       if (!StringUtils.isBlank(data.getRepTeamMemberNo())) {
         legacyCust.setSalesGroupRep(data.getRepTeamMemberNo());
-      } else {
-        legacyCust.setSalesGroupRep(sales_Rep_ID);
       }
 
       String dataEmbargoCd = data.getEmbargoCd();
       String rdcEmbargoCd = LegacyDirectUtil.getEmbargoCdFromDataRdc(entityManager, admin);
-
-      legacyCust.setModeOfPayment(data.getModeOfPayment() == null ? "" : data.getModeOfPayment());
+      if (!StringUtils.isBlank(data.getModeOfPayment()))
+        legacyCust.setModeOfPayment(data.getModeOfPayment());
 
       // permanent removal-single inactivation
       if (admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason()) && !"TREC".equals(admin.getReqReason())) {
@@ -1140,7 +1131,8 @@ public class BELUXTransformer extends EMEATransformer {
     } else {
       legacyCust.setEmbargoCd("");
     }
-    legacyCust.setCeBo(data.getEngineeringBo() == null ? "" : data.getEngineeringBo());
+    if (!StringUtils.isEmpty(data.getEngineeringBo()))
+      legacyCust.setCeBo(data.getEngineeringBo());
     setSBOIBO(legacyCust, data);
 
     // common data for C/U
