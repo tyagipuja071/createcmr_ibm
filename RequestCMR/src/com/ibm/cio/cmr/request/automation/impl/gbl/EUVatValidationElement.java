@@ -25,6 +25,7 @@ import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.ui.PageManager;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cmr.services.client.AutomationServiceClient;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.ServiceClient.Method;
@@ -56,9 +57,16 @@ public class EUVatValidationElement extends ValidatingElement implements Company
     ValidationOutput validation = new ValidationOutput();
 
     Addr zs01 = requestData.getAddress("ZS01");
+    Addr zp01 = requestData.getAddress("ZP01");
     StringBuilder details = new StringBuilder();
     try {
-      String landCntryForVies = getLandedCountryForVies(data.getCmrIssuingCntry(), zs01.getLandCntry(), data.getCountryUse());
+      String landCntry;
+      if (SystemLocation.BELGIUM.equals(data.getCmrIssuingCntry()) || SystemLocation.NETHERLANDS.equals(data.getCmrIssuingCntry())) {
+        landCntry = zp01.getLandCntry();
+      } else {
+        landCntry = zs01.getLandCntry();
+      }
+      String landCntryForVies = getLandedCountryForVies(data.getCmrIssuingCntry(), landCntry, data.getCountryUse());
       if (landCntryForVies == null) {
         validation.setSuccess(true);
         validation.setMessage("No Landed Country");
@@ -137,32 +145,19 @@ public class EUVatValidationElement extends ValidatingElement implements Company
     return output;
   }
 
-  private String getLandedCountryForVies(String cmrIssuingCntry, String landCntry, String subRegion) {
-
+  private String getLandedCountryForVies(String cmrIssuingCntry, String landCntry, String countryUse) {
     String defaultLandedCountry = PageManager.getDefaultLandedCountry(cmrIssuingCntry);
-
-    if (landCntry == null && !StringUtils.isBlank(defaultLandedCountry)) {
-      return defaultLandedCountry;
+    String subRegion = !StringUtils.isBlank(countryUse) && countryUse.length() > 3 ? countryUse.substring(3) : "";
+    if (StringUtils.isNotBlank(subRegion) && EU_COUNTRIES.contains(subRegion)) {
+      // if subregion is part of EU countries eligible for VAT matching, use
+      // subregion as default country
+      defaultLandedCountry = subRegion;
     }
-    if (landCntry == null && StringUtils.isBlank(defaultLandedCountry)) {
-      return null;
+    if (!landCntry.equals(defaultLandedCountry) && !landCntry.equals(subRegion)) {
+      // if landed country is crossborder and not part of subregions
+      return landCntry;
     }
-
-    if (!landCntry.equals(defaultLandedCountry)) {
-      // handle cross-border and subregions
-
-      if (!EU_COUNTRIES.contains(landCntry)) {
-        // the landed country is not an EU country
-
-        if (!StringUtils.isBlank(subRegion) && subRegion.length() > 3 && subRegion.startsWith(cmrIssuingCntry)) {
-          // this is a subregion under the main country, use main country's
-          // landed country
-          return defaultLandedCountry;
-        }
-      }
-    }
-
-    return landCntry;
+    return defaultLandedCountry;
   }
 
   private AutomationResponse<VatLayerResponse> getVatLayerInfo(Admin admin, Data data, String landCntryForVies) throws Exception {
