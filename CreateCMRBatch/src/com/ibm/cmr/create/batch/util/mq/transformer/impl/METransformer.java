@@ -876,7 +876,7 @@ public class METransformer extends EMEATransformer {
       LOG.debug("that is ME BP CMR");
     }
 
-    if ("Y".equals(data.getDupCmrIndc()) || "677, 680, 805, 849, 620, 767, 823, 772, 762, 768, 832".indexOf(data.getCmrIssuingCntry()) > -1) {
+    if ("Y".equals(data.getDupCmrIndc()) || "677, 680, 805, 849, 620, 767, 823, 772, 762, 768, 832,752".indexOf(data.getCmrIssuingCntry()) > -1) {
       generateCMRNoObj.setLoc2("675");
     }
   }
