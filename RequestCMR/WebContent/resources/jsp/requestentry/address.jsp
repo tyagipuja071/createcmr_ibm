@@ -293,14 +293,14 @@ visibility: hidden !IMPORTANT;
           </cmr:view>
 
           <!--  Customer Name and Name Con't except for JP -->
-          <cmr:view exceptForGEO="JP" exceptForCountry="618">
+          <cmr:view exceptForGEO="JP" exceptForCountry="618,724">
             <cmr:gridCol width="120px" field="custNm1" header="${ui.grid.custNameUKI1}" >
               <cmr:formatter functionName="customerNameFormatter" />
             </cmr:gridCol>
           </cmr:view>
           
           <!--  Customer Name-KANJI and Name-KANJI Continue for JP -->
-          <cmr:view forGEO="JP" exceptForCountry="618">
+          <cmr:view forGEO="JP" exceptForCountry="618,724">
             <cmr:gridCol width="120px" field="custNm1" header="Customer Name-KANJI" >
               <cmr:formatter functionName="customerNameFormatter" />
             </cmr:gridCol>
@@ -315,8 +315,10 @@ visibility: hidden !IMPORTANT;
             	<cmr:gridCol width="120px" field="custNm3" header="Customer Name/ Additional Address Information" />
           	</cmr:view>
           	
-          	<cmr:view forCountry="618">
-				<cmr:gridCol width="120px" field="custNm1" header="Customer Legal name" />
+          	<cmr:view forCountry="618,724">
+				<cmr:gridCol width="120px" field="custNm1" header="Customer Legal name"> 
+				<cmr:formatter functionName="customerNameFormatter" />
+				</cmr:gridCol>
 				<cmr:gridCol width="120px" field="custNm3" header="Division/Department" />
 				<cmr:gridCol width="100px" field="bldg" header="Building_Ext" />
 				<cmr:gridCol width="100px" field="dept" header="Department_Ext" />
