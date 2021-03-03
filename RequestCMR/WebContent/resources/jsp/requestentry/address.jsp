@@ -293,7 +293,7 @@ visibility: hidden !IMPORTANT;
           </cmr:view>
 
           <!--  Customer Name and Name Con't except for JP,FR -->
-          <cmr:view exceptForGEO="JP,FR" exceptForCountry="618,724">
+          <cmr:view exceptForGEO="JP,FR" exceptForCountry="618,724,848">
             <cmr:gridCol width="120px" field="custNm1" header="${ui.grid.custNameUKI1}" >
               <cmr:formatter functionName="customerNameFormatter" />
             </cmr:gridCol>
@@ -325,13 +325,24 @@ visibility: hidden !IMPORTANT;
          </cmr:view>
 			    	
         <cmr:view forCountry="618,724">
-				<cmr:gridCol width="120px" field="custNm1" header="Customer Legal name"> 
+				<cmr:gridCol width="120px" field="custNm1" header="Customer Legal name <br> Legal Name Continued"> 
 				<cmr:formatter functionName="customerNameFormatter" />
 				</cmr:gridCol>
-				<cmr:gridCol width="120px" field="custNm3" header="Division/Department" />
+				<cmr:gridCol width="120px" field="custNm3" header="Division/Department"/>
+				<cmr:gridCol width="120px" field="custNm4" header="Attention to /Building/Floor/Office"/>
 				<cmr:gridCol width="100px" field="bldg" header="Building_Ext" />
 				<cmr:gridCol width="100px" field="dept" header="Department_Ext" />
-			  </cmr:view>
+				<cmr:gridCol width="140px" field="addrTxt" header="Street Name and Number" />
+			</cmr:view>
+			
+			<cmr:view forCountry="848">
+				<cmr:gridCol width="140px" field="custNm1" header="Customer Legal name <br> Legal Name Continued" > 
+				<cmr:formatter functionName="customerNameFormatter" />
+				</cmr:gridCol>
+				<cmr:gridCol width="120px" field="divn" header="Division/Department"/>
+				<cmr:gridCol width="120px" field="city2" header="Attention to /Building/Floor/Office"/>
+				<cmr:gridCol width="140px" field="addrTxt" header="Street Name and Number" />
+			</cmr:view>
         <%} %>
         
         <cmr:view forCountry="649">
@@ -344,17 +355,12 @@ visibility: hidden !IMPORTANT;
           <cmr:gridCol width="70px" field="ierpSitePrtyId" header="${ui.grid.ierpSitePrtyId}" />
         </cmr:view>
         
-        <cmr:view forGEO="SWISS">
-          <cmr:gridCol width="70px" field="custNm3" header="${ui.grid.custNm3}" />
-          <cmr:gridCol width="70px" field="custNm4" header="${ui.grid.custNm4}" />
-        </cmr:view>
-        
         <cmr:view forCountry="862">
           <cmr:gridCol width="70px" field="custNm4" header="Name 4" />
         </cmr:view>
         
         <!-- Street and Street Con't except BELUX,NL,JP -->
-        <cmr:view exceptForGEO="BELUX,NL,JP,AP,FR">
+        <cmr:view exceptForGEO="BELUX,NL,JP,AP,FR" exceptForCountry="618,724,848">
           <cmr:gridCol width="130px" field="addrTxt" header="${ui.grid.addrTxt}" >
               <cmr:formatter functionName="streetValueFormatter" />
           </cmr:gridCol>
@@ -394,11 +400,6 @@ visibility: hidden !IMPORTANT;
           <cmr:gridCol width="110px" field="dept" header="Address. Cont2" />
         </cmr:view>
 
-		<!-- Address for Swiss -->
-        <cmr:view forGEO="SWISS">
-          <cmr:gridCol width="80px" field="custLangCd" header="Preferred Language" >
-          </cmr:gridCol>
-        </cmr:view>
         
         <!-- State Province -->
         <cmr:view forGEO="LA,US">
@@ -449,9 +450,6 @@ visibility: hidden !IMPORTANT;
         </cmr:view>
         <cmr:view forCountry="848">
 			<cmr:gridCol width="100px" field="bldg" header="Building"></cmr:gridCol>  		    	
-        </cmr:view>
-        <cmr:view forCountry="848">
-			<cmr:gridCol width="100px" field="floor" header="Floor"></cmr:gridCol>  		    	
         </cmr:view>
         
          <cmr:view forCountry="848">
