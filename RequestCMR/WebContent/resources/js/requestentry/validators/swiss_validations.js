@@ -424,10 +424,10 @@ function setISUCTCOnIMSChange() {
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
   var subIndustryCd = FormManager.getActualValue('subIndustryCd');
-	if (FormManager.getActualValue('reqType') != 'C') {
+  if (FormManager.getActualValue('reqType') != 'C') {
     return;
   }
-	if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
   if (!(custSubGrp == 'CHINT' || custSubGrp == 'LIINT' || custSubGrp == 'CHPRI' || custSubGrp == 'LIPRI' || custSubGrp == 'CHIBM' || custSubGrp == 'LIIBM' || custSubGrp == 'CHBUS' || custSubGrp == 'LIBUS')) {
@@ -840,7 +840,7 @@ function addAddressTypeValidator() {
               installingCnt++;
             }
           }
-          if(contractCnt == 0) {
+          if (contractCnt == 0) {
             return new ValidationResult(null, false, 'Contract(Sold-to) Address is mandatory.');
           } else if (contractCnt > 1) {
             return new ValidationResult(null, false, 'Only one Contract address can be defined. Please remove the additional Contract address.');
@@ -1508,6 +1508,37 @@ function lockIBMTabForSWISS() {
   }
 }
 
+function validateDeptAttnBldg() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var division = FormManager.getActualValue('divn');
+        var attn = FormManager.getActualValue('city2');
+        var bldg = FormManager.getActualValue('bldg');
+        var dept = FormManager.getActualValue('dept');
+        if ((division != '' && (division == bldg || division == dept)) || (attn != '' && (attn == bldg || attn == dept))) {
+          return new ValidationResult(null, false, 'Department_ext and Building_ext must contain unique information.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+}
+
+function setAddressDetailsForView() {
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+  var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  if (viewOnlyPage == 'true') {
+    $('label[for="custNm1_view"]').text('Customer legal name:');
+    $('label[for="custNm2_view"]').text('Legal name continued:');
+    $('label[for="divn_view"]').text('Division/Department:');
+    $('label[for="city2_view"]').text('Attention To /Building/Floor/Office:');
+    $('label[for="addrTxt_view"]').text('Street Name And Number:');
+    $('label[for="bldg_view"]').text('Building_ext:');
+    $('label[for="dept_view"]').text('Department_ext:');
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.SWISS = [ '848' ];
   console.log('adding SWISS functions...');
@@ -1561,4 +1592,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setISUCTCOnIMSChange, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(lockIBMTabForSWISS, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(lockIBMTabForSWISS, GEOHandler.SWISS);
+  GEOHandler.registerValidator(validateDeptAttnBldg, GEOHandler.SWISS);
+  GEOHandler.addAfterConfig(setAddressDetailsForView, GEOHandler.SWISS);
 });
