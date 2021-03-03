@@ -90,9 +90,10 @@ public class PreparedQuery {
   public List<CompoundEntity> getCompundResults(int maxRows, Class<? extends BaseEntity<?>> entityClass, String annotatedSqlName) {
     String preparedSql = prepareSql();
     LOG.debug("Prepared Query (Compound): " + preparedSql);
-    if (!this.valueMap.containsKey("COMPANY_CD_SBO")) {
+    if (this.rawSql.toString().contains(":COMPANY_CD_SBO")) {
       String sboFilterQuery = SBOFilterUtil.getSBOFilterQuery();
-      setParameter("COMPANY_CD_SBO", sboFilterQuery);
+      int index = this.rawSql.indexOf(":COMPANY_CD_SBO");
+      this.rawSql.replace(index, index + 15, sboFilterQuery);
     }
     if (LOG.isDebugEnabled()) {
       StringBuilder sb = new StringBuilder();
@@ -203,9 +204,10 @@ public class PreparedQuery {
       String mandt = SystemConfiguration.getValue("MANDT");
       setParameter("MANDT", mandt);
     }
-    if (!this.valueMap.containsKey("COMPANY_CD_SBO")) {
+    if (this.rawSql.toString().contains(":COMPANY_CD_SBO")) {
       String sboFilterQuery = SBOFilterUtil.getSBOFilterQuery();
-      setParameter("COMPANY_CD_SBO", sboFilterQuery);
+      int index = this.rawSql.indexOf(":COMPANY_CD_SBO");
+      this.rawSql.replace(index, index + 15, sboFilterQuery);
     }
     String preparedSql = prepareSql();
     LOG.debug("Prepared Query: " + preparedSql);
