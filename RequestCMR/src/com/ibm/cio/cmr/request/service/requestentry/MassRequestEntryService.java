@@ -5682,6 +5682,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       case "DIVN":
         muaModel.setDivn(tempVal);
         break;
+      case "STATE_PROV":
+        muaModel.setStateProv(tempVal);
+        break;
       default:
         LOG.debug("Default condition was executed [nothing is saved] for DB column >> " + col.getLabel());
         break;

@@ -1326,14 +1326,6 @@ public class NLTransformer extends EMEATransformer {
       }
     }
 
-    if (!StringUtils.isBlank(muData.getSvcArOffice())) {
-      if ("@".equals(muData.getSvcArOffice())) {
-        cust.setLangCd("");
-      } else {
-        cust.setLangCd(muData.getSvcArOffice());
-      }
-    }
-
     if (!StringUtils.isBlank(muData.getOrdBlk())) {
       if ("@".equals(muData.getOrdBlk())) {
         cust.setEmbargoCd("");
