@@ -861,6 +861,10 @@ public abstract class GEOHandler {
     return false;
   }
 
+  public String getCMRNo(EntityManager rdcMgr, String kukla, String mandt, String katr6, String cmrNo) {
+    return null;
+  }
+  
   /**
    * Checks if this {@link Data} record has been updated. This method compares
    * with the {@link DataRdc} equivalent and compares per field and filters
@@ -951,7 +955,4 @@ public abstract class GEOHandler {
     return null;
   }
 
-  public String getCMRNo(EntityManager rdcMgr, String kukla, String mandt, String katr6, String cmrNo) {
-    return null;
-  }
 }

@@ -51,6 +51,7 @@ import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.SBOFilterUtil;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.validator.BlueGroupValidator;
@@ -133,6 +134,15 @@ public class SystemUtilityController extends BaseController {
             status.put("msg", "Y");
           } catch (Exception e) {
             status.put("msg", "N");
+          }
+        }
+
+        if ("sbo".equalsIgnoreCase(rid) || "all".equalsIgnoreCase(rid)) {
+          try {
+            SBOFilterUtil.refresh();
+            status.put("sbo", "Y");
+          } catch (Exception e1) {
+            status.put("sbo", "N");
           }
         }
 

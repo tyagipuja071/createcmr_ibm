@@ -27,6 +27,7 @@ import com.ibm.cio.cmr.request.util.ConfigUtil;
 import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.MQProcessUtil;
 import com.ibm.cio.cmr.request.util.MessageUtil;
+import com.ibm.cio.cmr.request.util.SBOFilterUtil;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 
@@ -91,6 +92,14 @@ public class CmrContextListener implements ServletContextListener, HttpSessionLi
       logger.debug("Message Util initialized.");
     } catch (Exception e1) {
       logger.error("Error in initializing Message Util", e1);
+    }
+
+    logger.debug("Initializing SBO Filter Util...");
+    try {
+      SBOFilterUtil.refresh();
+      logger.debug("SBO Filter Util initialized.");
+    } catch (Exception e1) {
+      logger.error("Error in initializing SBO Filter Util", e1);
     }
 
     logger.debug("Initializing MQ Util...");
