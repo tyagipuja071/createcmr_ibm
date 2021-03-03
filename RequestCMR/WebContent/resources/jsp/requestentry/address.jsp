@@ -316,10 +316,10 @@ visibility: hidden !IMPORTANT;
           	</cmr:view>
           	
           	<cmr:view forCountry="618,724">
-				<cmr:gridCol width="120px" field="custNm1" header="Customer Legal name"> 
+				<cmr:gridCol width="120px" field="custNm1" header="Customer Legal name <br> Legal Name Continued" > 
 				<cmr:formatter functionName="customerNameFormatter" />
 				</cmr:gridCol>
-				<cmr:gridCol width="120px" field="custNm3" header="Division/Department" />
+				<cmr:gridCol width="120px" field="custNm3" header="Division/Department"/>
 				<cmr:gridCol width="100px" field="bldg" header="Building_Ext" />
 				<cmr:gridCol width="100px" field="dept" header="Department_Ext" />
 				<cmr:gridCol width="140px" field="addrTxt" header="Street Name and Number" />
@@ -346,7 +346,7 @@ visibility: hidden !IMPORTANT;
         </cmr:view>
         
         <!-- Street and Street Con't except BELUX,JP -->
-        <cmr:view exceptForGEO="BELUX,JP,AP">
+        <cmr:view exceptForGEO="BELUX,JP,AP" exceptForCountry="618">
           <cmr:gridCol width="130px" field="addrTxt" header="${ui.grid.addrTxt}" >
               <cmr:formatter functionName="streetValueFormatter" />
           </cmr:gridCol>
