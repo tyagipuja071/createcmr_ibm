@@ -223,7 +223,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     CmrtCust custClone = initEmpty(CmrtCust.class);
 
     // default mapping for DATA and CMRTCUST
-    LOG.debug("Mapping default Data values..");
+    LOG.debug("Mapping default Data values.." + cmrNo);
     CmrtCustPK custPkClone = new CmrtCustPK();
     custPkClone.setCustomerNo(cloningQueue.getClonedCmrNo());
     if ("NA".equals(targetCntry))
@@ -281,27 +281,30 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
     boolean isCustExt = transformer.hasCmrtCustExt();
     if (isCustExt) {
-      LOG.debug("Mapping default Data values with Legacy CmrtCustExt table.....");
+      LOG.debug("Mapping default Data values with Legacy CmrtCustExt table....." + cmrNo);
       CmrtCustExt custExt = legacyObjects.getCustomerExt();
-      // Initialize the object
-      custExtClone = initEmpty(CmrtCustExt.class);
-      // default mapping for ADDR and CMRTCEXT
-      custExtPkClone = new CmrtCustExtPK();
-      custExtPkClone.setCustomerNo(cloningQueue.getClonedCmrNo());
-      if ("NA".equals(targetCntry))
-        custExtPkClone.setSofCntryCode(cntry);
-      else
-        custExtPkClone.setSofCntryCode(targetCntry);
+      if (custExt != null) {
+        // Initialize the object
+        custExtClone = initEmpty(CmrtCustExt.class);
+        // default mapping for ADDR and CMRTCEXT
+        custExtPkClone = new CmrtCustExtPK();
+        custExtPkClone.setCustomerNo(cloningQueue.getClonedCmrNo());
+        if ("NA".equals(targetCntry))
+          custExtPkClone.setSofCntryCode(cntry);
+        else
+          custExtPkClone.setSofCntryCode(targetCntry);
 
-      // copy value same as old from cust ext object
-      PropertyUtils.copyProperties(custExtClone, custExt);
-      custExtClone.setId(custExtPkClone);
+        // copy value same as old from cust ext object
+        PropertyUtils.copyProperties(custExtClone, custExt);
+        custExtClone.setId(custExtPkClone);
 
-      overrideConfigChanges(entityManager, overrideValues, custExtClone, LEGACY_CUSTEXT_TABLE, custExtPkClone);
+        overrideConfigChanges(entityManager, overrideValues, custExtClone, LEGACY_CUSTEXT_TABLE, custExtPkClone);
 
-      custExtClone.setUpdateTs(SystemUtil.getCurrentTimestamp());
-      // need to check regarding CODCC and CODCP field
-      legacyObjectsClone.setCustomerExt(custExtClone);
+        custExtClone.setUpdateTs(SystemUtil.getCurrentTimestamp());
+        // need to check regarding CODCC and CODCP field
+        legacyObjectsClone.setCustomerExt(custExtClone);
+      }
+
     }
 
     // finally persist all data
