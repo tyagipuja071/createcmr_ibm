@@ -105,7 +105,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
   private static final List<String> KNBK_PK = Arrays.asList("banks", "bankl", "bankn");
   private static final List<String> KNVL_PK = Arrays.asList("aland", "tatyp", "licnr");
 
-  private static final List<String> PROCESSING_TYPES = Arrays.asList("DR", "MA", "MD");
+  private static final List<String> PROCESSING_TYPES = Arrays.asList("DR", "MA", "MD", "FR");
 
   private static final List<String> STATUS_CLONING_REFN = Arrays.asList("E", "X", "C");
 
