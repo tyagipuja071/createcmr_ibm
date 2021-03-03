@@ -1274,6 +1274,11 @@ public class METransformer extends EMEATransformer {
         legacyCust.setEmbargoCd(rdcEmbargoCd);
         resetOrdBlockToData(entityManager, data);
       }
+      if (CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason()) && CMR_REQUEST_STATUS_PCR.equals(admin.getReqStatus())
+          && "Wx".equals(admin.getProcessedFlag())) {
+        legacyCust.setEmbargoCd("E");
+        resetOrdBlockToData(entityManager, data);
+      }
     }
 
     if (!StringUtils.isBlank(data.getSubIndustryCd())) {
@@ -1595,6 +1600,7 @@ public class METransformer extends EMEATransformer {
 
   private void resetOrdBlockToData(EntityManager entityManager, Data data) {
     data.setOrdBlk("88");
+    data.setEmbargoCd("E");
     entityManager.merge(data);
     entityManager.flush();
   }
