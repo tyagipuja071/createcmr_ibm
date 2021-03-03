@@ -4245,6 +4245,20 @@ function checkGAddressExist() {
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
 
+function setAddressDetailsForViewAT() {
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+  var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  if (viewOnlyPage == 'true' && cmrIssuingCntry == SysLoc.AUSTRIA) {
+    $('label[for="custNm1_view"]').text('Customer Legal name:');
+    $('label[for="custNm2_view"]').text('Legal Name Continued:');
+    $('label[for="custNm3_view"]').text('Division' + '\'' + 'Department:');
+    $('label[for="custNm4_view"]').text('Attention To' + '\'' + 'Building' + '\'' + 'Floor' + '\'' + 'Office:');
+    $('label[for="addrTxt_view"]').text('Street Name And Number:');
+    $('label[for="bldg_view"]').text('Building_Ext:');
+    $('label[for="dept_view"]').text('Department_Ext:');
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.CEMEA_COPY = [ '358', '359', '363', '603', '607', '620', '626', '644', '642', '651', '668', '677', '680', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '752',
       '762', '767', '768', '772', '787', '805', '808', '820', '821', '823', '826', '832', '849', '850', '865', '889' ];
@@ -4441,6 +4455,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(lockIsicCdCEE, GEOHandler.CEE);
   GEOHandler.addAfterTemplateLoad(lockIsicCdCEE, GEOHandler.CEE);
   GEOHandler.registerValidator(validateDeptBldg, SysLoc.AUSTRIA);
+  GEOHandler.addAfterConfig(setAddressDetailsForViewAT, SysLoc.AUSTRIA);
   // GEOHandler.addAfterConfig(addPrefixVat, GEOHandler.CEE);
   // GEOHandler.addAfterTemplateLoad(addPrefixVat, GEOHandler.CEE);
   // GEOHandler.addAddrFunction(addPrefixVat, GEOHandler.CEE);

@@ -52,9 +52,7 @@ var _landCntryHandlerUK = null;
 var _postalCdUKHandler = null;
 var _cityUKHandler = null;
 var _custGrpIT = null;
-
 var _importedIndc = null;
-
 var _landedIT = null;
 var _sboHandlerIT = null;
 var _importedIndcBilling = null;
@@ -157,7 +155,6 @@ function typeOfCustomer() {
     FormManager.readOnly('crosSubTyp');
     FormManager.setValue('crosSubTyp', '');
   }
-
   if (((custSubGrp == 'BUSPR') || (custSubGrp == 'BUSSM') || (custSubGrp == 'BUSVA') || (custSubGrp == 'CROBP')) && role != 'REQUESTER') {
     FormManager.enable('crosSubTyp');
     FormManager.limitDropdownValues(FormManager.getField('crosSubTyp'), [ '51', '52', '53' ]);
@@ -1655,7 +1652,6 @@ function addDistrictPostCodeCityValidator() {
         if (val.length > 30) {
           return new ValidationResult(null, false, 'Total computed length of District, Postal Code, and City should be less than 30 characters.');
         }
-
         return new ValidationResult(null, true);
       }
     };
@@ -1734,7 +1730,6 @@ function addStreetAddressFormValidatorGR() {
 
 function addCrossLandedCntryFormValidatorGR() {
   console.log("addCrossLandedCntryFormValidatorGR..............");
-
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
@@ -6121,7 +6116,9 @@ function checkIfVATFiscalUpdatedIT() {
         var oldVAT = result.ret1;
         var oldFiscalCode = result.ret2;
         var oldCompany = result.ret3;
-        if (result != null && oldVAT != null && oldFiscalCode != null && (oldFiscalCode != currentFiscalCode || oldVAT != currentVAT)) {
+        if (currentFiscalCode == '' && currentVAT == '') {
+          return new ValidationResult(null, true);
+        } else if (result != null && oldVAT != null && oldFiscalCode != null && (oldFiscalCode != currentFiscalCode || oldVAT != currentVAT)) {
           if (fiscalStatus == null || fiscalStatus == '') {
             return new ValidationResult(null, false, 'Fiscal Data has been modified, please validate fiscal data');
           }
