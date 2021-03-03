@@ -29,6 +29,7 @@ import com.ibm.cio.cmr.request.automation.util.geo.BeLuxUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.BrazilUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.FranceUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.GermanyUtil;
+import com.ibm.cio.cmr.request.automation.util.geo.NetherlandsUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.SingaporeUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.SpainUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.SwitzerlandUtil;
@@ -103,6 +104,7 @@ public abstract class AutomationUtil {
       put(SystemLocation.UNITED_KINGDOM, UKIUtil.class);
       put(SystemLocation.IRELAND, UKIUtil.class);
       put(SystemLocation.BELGIUM, BeLuxUtil.class);
+      put(SystemLocation.NETHERLANDS, NetherlandsUtil.class);
 
     }
   };
@@ -112,13 +114,13 @@ public abstract class AutomationUtil {
       "Companhia", "companhia", "COMPANHIA", "company", "Company", "COMPANY", "cooperacao", "Cooperacao", "COOPERACAO", "COOPERATIVA", "Corp", "corp",
       "CORP", "Corp.", "corp.", "CORP.", "Corporation", "corporation", "CORPORATION", "CVBA", "d.d.", "d.n.o.", "d.o.o.", "EBVBA", "EEIG", "EURL",
       "FCP", "FZCO", "Ges.M.B.H.", "Gesellschaft", "gesmbh", "Gesmbh", "GmbH", "gmbh", "GMBH", "HOLDING", "HOLDINGS", "I/S", "Incorporated",
-      "incorporated", "INTERNATIONAL", "k.d.", "k.s.", "k/s", "K/S", "kansainvalinen", "KFT", "kg", "Kg", "KG",
-      "Kommanditgesellschaft", "KOOP", "LDA", "lda", "LIMITADA", "Limited", "limited", "limtada", "llc", "LLP", "Ltd", "ltd", "Ltd.", "ltd.", "LTD.",
-      "Ltda", "ltda", "ltda.", "MANAGEMENT", "MBH", "N.V.", "n.v.", "OHG", "OJSC", "PLC", "PTE", "PTY", "PTY.", "PVT", "RTE", "RTM", "s.a.r.l.",
-      "S.A.R.L.", "S.A.S.", "s.a.s.", "S.A.U.", "s.a.u.", "s.c.", "S.C.A.", "s.c.a.", "s.c.s.", "s.l.", "S.L.", "s.p.", "S.P.A.", "S.p.A.", "s.p.a.",
-      "S.P.R.L.", "s.p.r.l.", "s.r.l.", "S.R.L.", "s.r.o.", "sarl", "SARL", "SCOP", "SCP", "SCRL", "SCS", "SERVICE", "Services", "SERVICES",
-      "services", "SHA", "SICAV", "SLU", "snc", "SNC", "sociedada", "SOCIEDADE", "societe", "Societe", "sp. z o.o.", "SPJ", "spol. s r.o.", "SPRL",
-      "sprl", "srl", "SRL", "SRLS", "T/A", "T/AS", "TRADING", "UAB", "ULC", "UNIPESSOAL", "unipessoal");
+      "incorporated", "INTERNATIONAL", "k.d.", "k.s.", "k/s", "K/S", "kansainvalinen", "KFT", "kg", "Kg", "KG", "Kommanditgesellschaft", "KOOP",
+      "LDA", "lda", "LIMITADA", "Limited", "limited", "limtada", "llc", "LLP", "Ltd", "ltd", "Ltd.", "ltd.", "LTD.", "Ltda", "ltda", "ltda.",
+      "MANAGEMENT", "MBH", "N.V.", "n.v.", "OHG", "OJSC", "PLC", "PTE", "PTY", "PTY.", "PVT", "RTE", "RTM", "s.a.r.l.", "S.A.R.L.", "S.A.S.",
+      "s.a.s.", "S.A.U.", "s.a.u.", "s.c.", "S.C.A.", "s.c.a.", "s.c.s.", "s.l.", "S.L.", "s.p.", "S.P.A.", "S.p.A.", "s.p.a.", "S.P.R.L.",
+      "s.p.r.l.", "s.r.l.", "S.R.L.", "s.r.o.", "sarl", "SARL", "SCOP", "SCP", "SCRL", "SCS", "SERVICE", "Services", "SERVICES", "services", "SHA",
+      "SICAV", "SLU", "snc", "SNC", "sociedada", "SOCIEDADE", "societe", "Societe", "sp. z o.o.", "SPJ", "spol. s r.o.", "SPRL", "sprl", "srl", "SRL",
+      "SRLS", "T/A", "T/AS", "TRADING", "UAB", "ULC", "UNIPESSOAL", "unipessoal");
 
   /**
    * Holds the possible return values of
