@@ -720,7 +720,6 @@ function validateDeptAttnBldg() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
-        var reqType = FormManager.getActualValue('reqType');
         var custNm3 = FormManager.getActualValue('custNm3');
         var custNm4 = FormManager.getActualValue('custNm4');
         var bldg = FormManager.getActualValue('bldg');
@@ -732,6 +731,20 @@ function validateDeptAttnBldg() {
       }
     };
   })(), null, 'frmCMR_addressModal');
+}
+
+function setAddressDetailsForView() {
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+  var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  if (viewOnlyPage == 'true') {
+    $('label[for="custNm1_view"]').text('Customer legal name:');
+    $('label[for="custNm2_view"]').text('Legal name continued:');
+    $('label[for="custNm3_view"]').text('Division/Department:');
+    $('label[for="custNm4_view"]').text('Attention To /Building/Floor/Office:');
+    $('label[for="addrTxt_view"]').text('Street Name And Number:');
+    $('label[for="bldg_view"]').text('Building_ext:');
+    $('label[for="dept_view"]').text('Department_ext:');
+  }
 }
 
 dojo.addOnLoad(function() {
@@ -776,4 +789,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(resetVATValidationsForPayGo, GEOHandler.DE);
   GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, GEOHandler.DE);
   GEOHandler.registerValidator(validateDeptAttnBldg, GEOHandler.DE, null, true);
+  GEOHandler.addAfterConfig(setAddressDetailsForView, SysLoc.GERMANY);
 });

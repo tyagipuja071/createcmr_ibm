@@ -1602,6 +1602,37 @@ function lockIBMTabForSWISS() {
   }
 }
 
+function validateDeptAttnBldg() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var division = FormManager.getActualValue('divn');
+        var attn = FormManager.getActualValue('city2');
+        var bldg = FormManager.getActualValue('bldg');
+        var dept = FormManager.getActualValue('dept');
+        if ((division != '' && (division == bldg || division == dept)) || (attn != '' && (attn == bldg || attn == dept))) {
+          return new ValidationResult(null, false, 'Department_ext and Building_ext must contain unique information.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+}
+
+function setAddressDetailsForView() {
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+  var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  if (viewOnlyPage == 'true') {
+    $('label[for="custNm1_view"]').text('Customer legal name:');
+    $('label[for="custNm2_view"]').text('Legal name continued:');
+    $('label[for="divn_view"]').text('Division/Department:');
+    $('label[for="city2_view"]').text('Attention To /Building/Floor/Office:');
+    $('label[for="addrTxt_view"]').text('Street Name And Number:');
+    $('label[for="bldg_view"]').text('Building_ext:');
+    $('label[for="dept_view"]').text('Department_ext:');
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.SWISS = [ '848' ];
   console.log('adding SWISS functions...');
@@ -1657,4 +1688,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(lockIBMTabForSWISS, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(resetVATValidationsForPayGo, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, GEOHandler.SWISS);
+  GEOHandler.registerValidator(validateDeptAttnBldg, GEOHandler.SWISS);
+  GEOHandler.addAfterConfig(setAddressDetailsForView, GEOHandler.SWISS);
 });

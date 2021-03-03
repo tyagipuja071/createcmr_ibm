@@ -1211,6 +1211,10 @@ public class CEMEAHandler extends BaseSOFHandler {
         && "ZS01".equalsIgnoreCase(address.getId().getAddrType()) && CEE_COUNTRIES_LIST.contains(country)) {
       address.getId().setAddrSeq("00001");
     }
+
+    if (address.getDept() != null) {
+      address.setDept(currentRecord.getCmrDept());
+    }
   }
 
   @Override
