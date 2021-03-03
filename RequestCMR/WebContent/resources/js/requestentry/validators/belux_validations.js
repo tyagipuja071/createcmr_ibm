@@ -134,10 +134,7 @@ function afterConfigForBELUX() {
 }
 
 function disableIBMTab() {
-  // cmrNo cmrOwner
-  // isuCd clientTier inacCd searchTerm enterprise -- bgId gbgId bgRuleId covId
-  // geoLocationCd dunsNo--
-  // ppsceid salesBusOffCd economicCd
+
   var reqType = FormManager.getActualValue('reqType');
   var cntryUse = FormManager.getActualValue('countryUse');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
@@ -628,6 +625,76 @@ function setVatValidatorBELUX() {
     // if (!dijit.byId('vatExempt').get('checked')) {
     if (dojo.byId('vatExempt') && !dojo.byId('vatExempt').checked) {
       checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
+    }
+  }
+}
+
+/**
+ * Set ISU drop down list on update request
+ */
+function setISUDropDown() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType == '') {
+    window.setTimeout('setISUDropDown()', 500);
+  } else {
+    if (reqType != 'U') {
+      return;
+    }
+    var cntry = FormManager.getActualValue('cmrIssuingCntry');
+    var isuCds = [];
+    if (cntry != '') {
+      var qParams = {
+        _qall : 'Y',
+        ISSUING_CNTRY : cntry
+      };
+      var results = cmr.query('GET.ISULIST.UPDATE', qParams);
+      if (results != null) {
+        for (var i = 0; i < results.length; i++) {
+          isuCds.push(results[i].ret1);
+        }
+        if (isuCds != null) {
+          FormManager.limitDropdownValues(FormManager.getField('isuCd'), isuCds);
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Set Client Tier drop down list on update request
+ */
+function setClientTierDropDown() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType == '') {
+    window.setTimeout('setClientTierDropDown()', 500);
+  } else {
+    if (reqType != 'U') {
+      return;
+    }
+    var cntry = FormManager.getActualValue('cmrIssuingCntry');
+    var clientTiers = [];
+    if (cntry != '') {
+      var qParams = {
+        _qall : 'Y',
+        ISSUING_CNTRY : cntry
+      };
+      var results = cmr.query('GET.CTCLIST.UPDATE', qParams);
+      if (results != null) {
+        for (var i = 0; i < results.length; i++) {
+          clientTiers.push(results[i].ret1);
+        }
+        if (clientTiers != null) {
+          FormManager.limitDropdownValues(FormManager.getField('clientTier'), clientTiers);
+        }
+      }
     }
   }
 }
@@ -1548,6 +1615,36 @@ function addDepartmentNumberValidator() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
+function addREALCTYValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqType = FormManager.getActualValue('reqType');
+        var countryUse = FormManager.getActualValue('countryUse');
+        var cmrNo = FormManager.getActualValue('cmrNo');
+        if (reqType == 'U') {
+          var qParams = {
+            COUNTRY : '624',
+            CMR_NO : cmrNo
+          };
+          var result = cmr.query('BENELUX.CHECK_REALCTY', qParams);
+          if (result != null && result.ret1 != null) {
+            console.log(result);
+            var realcty = result.ret1;
+            if (realcty == '623' && countryUse != '624LU') {
+              return new ValidationResult(null, false, 'Please create request for Issuing country Luxembourg.');
+            } else if (realcty == '624' && countryUse != '624') {
+              return new ValidationResult(null, false, 'Please create request for Issuing country Belgium.');
+            }
+            return new ValidationResult(null, true);
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.BELUX = [ '624' ];
 
@@ -1568,6 +1665,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setVatInfoBubble, GEOHandler.BELUX);
   GEOHandler.addAfterConfig(setAddressDetailsForView, GEOHandler.BELUX);
   GEOHandler.addAfterConfig(disbleCreateByModel, GEOHandler.BELUX);
+  GEOHandler.addAfterConfig(setISUDropDown, GEOHandler.BELUX);
+  GEOHandler.addAfterConfig(setClientTierDropDown, GEOHandler.BELUX);
 
   GEOHandler.addAfterTemplateLoad(setAccountTeamNumberValues, GEOHandler.BELUX);
   GEOHandler.addAfterTemplateLoad(addHandlersForBELUX, GEOHandler.BELUX);
@@ -1579,6 +1678,8 @@ dojo.addOnLoad(function() {
   // GEOHandler.addAfterTemplateLoad(setINACValues, GEOHandler.BELUX);
   GEOHandler.addAfterTemplateLoad(setEconomicCodeValues, GEOHandler.BELUX);
   GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.BELUX);
+  GEOHandler.addAfterTemplateLoad(setISUDropDown, GEOHandler.BELUX);
+  GEOHandler.addAfterTemplateLoad(setClientTierDropDown, GEOHandler.BELUX);
 
   GEOHandler.addAddrFunction(disableLandCntry, GEOHandler.BELUX);
   GEOHandler.addAddrFunction(addLandedCountryHandler, GEOHandler.BELUX);
@@ -1598,5 +1699,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addDnBSearchValidator, GEOHandler.BELUX, null, true);
   GEOHandler.registerValidator(addCmrNoValidator, GEOHandler.BELUX, null, true);
   GEOHandler.registerValidator(addDepartmentNumberValidator, GEOHandler.BELUX, null, true);
+  GEOHandler.registerValidator(addREALCTYValidator, GEOHandler.BELUX, null, true);
 
 });

@@ -66,13 +66,13 @@
 				</column>
 				<column>
 					<label>IBO</label>
-					<dbColumn>AFFILIATE</dbColumn>
+					<dbColumn>REP_TEAM_MEMBER_NO</dbColumn>
 					<width>15</width>
 					<length>7</length>
 				</column>
 				<column>
 					<label>Economic code</label>
-					<dbColumn>ECONOMIC_CD</dbColumn>
+					<dbColumn>CSO_SITE</dbColumn>
 					<width>15</width>
 					<length>3</length>
 				</column>
@@ -90,7 +90,7 @@
 				</column>
 				<column>
 					<label>Order block code</label>
-					<dbColumn>EMBARGO_CD</dbColumn>
+					<dbColumn>ORD_BLK</dbColumn>
 					<width>10</width>
 					<length>1</length>
 				</column>
@@ -102,7 +102,7 @@
 				</column>
 				<column>
 					<label>KVK</label>
-					<dbColumn>TAX_CD2</dbColumn>
+					<dbColumn>RESTRICT_TO</dbColumn>
 					<width>10</width>
 					<length>8</length>
 				</column>
@@ -120,14 +120,14 @@
 				</column>
 				<column>
 					<label>Preferred Language</label>
-					<dbColumn>CUST_PREF_LANG</dbColumn>
+					<dbColumn>SVC_AR_OFFICE</dbColumn>
 					<width>20</width>
 					<length>1</length>
-					<bdsId>CustLang</bdsId>
+					<lovId>CustLang</lovId>
 				</column>
 				<column>
 					<label>PPS CEID</label>
-					<dbColumn>PPSCEID</dbColumn>
+					<dbColumn>COMPANY</dbColumn>
 					<width>15</width>
 					<length>8</length>
 				</column>

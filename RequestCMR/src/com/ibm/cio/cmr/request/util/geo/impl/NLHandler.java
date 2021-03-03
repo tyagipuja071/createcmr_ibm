@@ -36,6 +36,7 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataRdc;
+import com.ibm.cio.cmr.request.entity.Kna1;
 import com.ibm.cio.cmr.request.entity.Sadr;
 import com.ibm.cio.cmr.request.entity.UpdatedAddr;
 import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation;
@@ -1007,9 +1008,6 @@ public class NLHandler extends BaseSOFHandler {
     if (StringUtils.isEmpty(currentRecord.getCmrAddrTypeCode())) {
       return;
     }
-    if (currentRecord.getCmrAddrTypeCode().equals("ZI01")) {
-      address.getId().setAddrSeq("20701");
-    }
     if (currentRecord.getCmrAddrTypeCode().equals("ZP01")) {
       address.getId().setAddrSeq("29901");
     }
@@ -1302,73 +1300,130 @@ public class NLHandler extends BaseSOFHandler {
   }
 
   protected String generateShippingAddrSeqNL(EntityManager entityManager, String addrType, long reqId) {
-    int addrSeq = 20800;
-    String maxAddrSeq = null;
-    String newAddrSeq = null;
-    String sql = ExternalizedQuery.getSql("ADDRESS.GETADDRSEQ");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("REQ_ID", reqId);
-    query.setParameter("ADDR_TYPE", addrType);
+    String resultStr = null;
+    int result = 0;
+    String maxAddrSeqStr = getMaxAddrSeq(entityManager, reqId, "ZD01");
+    int maxAddrSeq = StringUtils.isEmpty(maxAddrSeqStr) ? Integer.valueOf(maxAddrSeqStr) : 0;
+    int maxZD01SeqKna1 = 0;
+    int maxZD01SeqCmrtaddr = 0;
 
-    List<Object[]> results = query.getResults();
-    if (results != null && results.size() > 0) {
-      Object[] result = results.get(0);
-      maxAddrSeq = (String) (result != null && result.length > 0 && result[0] != null ? result[0] : "20800");
-
-      if (!(Integer.valueOf(maxAddrSeq) >= 20800 && Integer.valueOf(maxAddrSeq) <= 20849)) {
-        maxAddrSeq = "";
-      }
-      if (StringUtils.isEmpty(maxAddrSeq)) {
-        maxAddrSeq = "20800";
-      }
-      try {
-        addrSeq = Integer.parseInt(maxAddrSeq);
-      } catch (Exception e) {
-        // if returned value is invalid
-      }
-      addrSeq++;
+    String cmrNo = getCmrNo(entityManager, reqId);
+    List<Kna1> kna1Records = getKna1Records(entityManager, "788", cmrNo);
+    String maxZD01SeqKna1Str = getMaxAddrSeqKna1(kna1Records, "ZD01");
+    if (!StringUtils.isEmpty(maxZD01SeqKna1Str)) {
+      maxZD01SeqKna1 = Integer.valueOf(maxZD01SeqKna1Str);
     }
-    newAddrSeq = Integer.toString(addrSeq);
-    return newAddrSeq;
+
+    List<CmrtAddr> legacyAddrs = getCmrtaddr(entityManager, "788", cmrNo);
+    String maxZD01SeqCmrtaddrStr = getMaxAddrSeqCmrtaddr(legacyAddrs, "ZD01");
+    if (!StringUtils.isEmpty(maxZD01SeqCmrtaddrStr)) {
+      maxZD01SeqCmrtaddr = Integer.valueOf(maxZD01SeqCmrtaddrStr);
+    }
+
+    result = maxAddrSeq;
+    resultStr = maxAddrSeqStr;
+    if (maxZD01SeqKna1 > result) {
+      result = maxZD01SeqKna1;
+      resultStr = maxZD01SeqKna1Str;
+    }
+    if (maxZD01SeqCmrtaddr > result) {
+      result = maxZD01SeqCmrtaddr;
+      resultStr = maxZD01SeqCmrtaddrStr;
+    }
+
+    // get next max seq
+    if (!StringUtils.isEmpty(resultStr)) {
+      result += 1;
+      resultStr = String.valueOf(result);
+    } else {
+      // in case there is no ZD01 in addr, kna1 and cmrtaddr
+      resultStr = "20801";
+      result = 20801;
+    }
+
+    if (result >= 20801 && result <= 20849) {
+      // resultStr is a selectable seq.
+      // do nothing
+    } else {
+      // max seq is not an option,
+      // select an un-used seq from 20801 to 20849
+      List<String> kna1ZD01SeqList = getKna1AddrSeqList(kna1Records, "ZD01");
+      List<String> cmrtaddrZD01SeqList = getCmrtaddrAddrSeqList(legacyAddrs, "ZD01");
+      for (int i = 20801; i <= 20849; i++) {
+        String temStr = String.valueOf(i);
+        if (!kna1ZD01SeqList.contains(temStr) && !cmrtaddrZD01SeqList.contains(temStr) && i > maxAddrSeq) {
+          resultStr = temStr;
+          return resultStr;
+        }
+      }
+    }
+    return resultStr;
   }
 
   protected String generateZI01AddrSeq(EntityManager entityManager, String addrType, long reqId) {
-    int addrSeq = 20700;
-    String maxAddrSeq = null;
-    String newAddrSeq = null;
-    String sql = ExternalizedQuery.getSql("ADDRESS.GETADDRSEQ");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("REQ_ID", reqId);
-    query.setParameter("ADDR_TYPE", addrType);
+    String resultStr = null;
+    int result = 0;
+    String maxAddrSeqStr = getMaxAddrSeq(entityManager, reqId, "ZI01");
+    int maxAddrSeq = StringUtils.isEmpty(maxAddrSeqStr) ? Integer.valueOf(maxAddrSeqStr) : 0;
+    int maxZI01SeqKna1 = 0;
+    int maxZI01SeqCmrtaddr = 0;
 
-    List<Object[]> results = query.getResults();
-    if (results != null && results.size() > 0) {
-      Object[] result = results.get(0);
-      maxAddrSeq = (String) (result != null && result.length > 0 && result[0] != null ? result[0] : "20700");
-
-      if (!(Integer.valueOf(maxAddrSeq) >= 20700 && Integer.valueOf(maxAddrSeq) <= 20749)) {
-        maxAddrSeq = "";
-      }
-      if (StringUtils.isEmpty(maxAddrSeq)) {
-        maxAddrSeq = "20700";
-      }
-      try {
-        addrSeq = Integer.parseInt(maxAddrSeq);
-      } catch (Exception e) {
-        // if returned value is invalid
-      }
-      addrSeq++;
+    String cmrNo = getCmrNo(entityManager, reqId);
+    List<Kna1> kna1Records = getKna1Records(entityManager, "788", cmrNo);
+    String maxZI01SeqKna1Str = getMaxAddrSeqKna1(kna1Records, "ZI01");
+    if (!StringUtils.isEmpty(maxZI01SeqKna1Str)) {
+      maxZI01SeqKna1 = Integer.valueOf(maxZI01SeqKna1Str);
     }
-    newAddrSeq = Integer.toString(addrSeq);
-    return newAddrSeq;
+
+    List<CmrtAddr> legacyAddrs = getCmrtaddr(entityManager, "788", cmrNo);
+    String maxZI01SeqCmrtaddrStr = getMaxAddrSeqCmrtaddr(legacyAddrs, "ZI01");
+    if (!StringUtils.isEmpty(maxZI01SeqCmrtaddrStr)) {
+      maxZI01SeqCmrtaddr = Integer.valueOf(maxZI01SeqCmrtaddrStr);
+    }
+
+    result = maxAddrSeq;
+    resultStr = maxAddrSeqStr;
+    if (maxZI01SeqKna1 > result) {
+      result = maxZI01SeqKna1;
+      resultStr = maxZI01SeqKna1Str;
+    }
+    if (maxZI01SeqCmrtaddr > result) {
+      result = maxZI01SeqCmrtaddr;
+      resultStr = maxZI01SeqCmrtaddrStr;
+    }
+
+    // get next max seq
+    if (!StringUtils.isEmpty(resultStr)) {
+      result += 1;
+      resultStr = String.valueOf(result);
+    } else {
+      // in case there is no ZD01 in addr, kna1 and cmrtaddr
+      resultStr = "20701";
+      result = 20701;
+    }
+
+    if (result >= 20701 && result <= 20749) {
+      // resultStr is a selectable seq.
+      // do nothing
+    } else {
+      // max seq is not an option,
+      // select an un-used seq from 207001 to 20749
+      List<String> kna1ZI01SeqList = getKna1AddrSeqList(kna1Records, "ZI01");
+      List<String> cmrtaddrZI01SeqList = getCmrtaddrAddrSeqList(legacyAddrs, "ZI01");
+      for (int i = 20701; i <= 20749; i++) {
+        String temStr = String.valueOf(i);
+        if (!kna1ZI01SeqList.contains(temStr) && !cmrtaddrZI01SeqList.contains(temStr) && i > maxAddrSeq) {
+          resultStr = temStr;
+          return resultStr;
+        }
+      }
+    }
+    return resultStr;
   }
 
   protected String generateAddrSeqNL(EntityManager entityManager, String addrType, long reqId) {
     int addrSeq = 1;
     String newAddrSeq = null;
-    if (addrType.equals("ZI01")) {
-      addrSeq = 20701;
-    }
     if (addrType.equals("ZP01")) {
       addrSeq = 29901;
     }
@@ -1385,6 +1440,141 @@ public class NLHandler extends BaseSOFHandler {
     }
     newAddrSeq = Integer.toString(addrSeq);
     return newAddrSeq;
+  }
+
+  private String getMaxAddrSeq(EntityManager entityManager, long reqId, String addrType) {
+    String maxAddrSeq = null;
+    String sql = ExternalizedQuery.getSql("ADDRESS.GETADDRSEQ");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    query.setParameter("ADDR_TYPE", addrType);
+
+    List<Object[]> results = query.getResults();
+    if (results != null && results.size() > 0) {
+      Object[] result = results.get(0);
+      maxAddrSeq = (String) (result != null && result.length > 0 && result[0] != null ? result[0] : "");
+    }
+    return maxAddrSeq;
+  }
+
+  private String getCmrNo(EntityManager entityManager, long reqId) {
+    String cmrNo = "";
+    String sql = ExternalizedQuery.getSql("DATA.GETCMRNO.SWISS");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+
+    List<String> results = query.getResults(String.class);
+    if (results != null && results.size() > 0) {
+      cmrNo = results.get(0);
+    }
+    return cmrNo;
+  }
+
+  private List<Kna1> getKna1Records(EntityManager entityManager, String country, String cmrNo) {
+    List<Kna1> addresses = null;
+    String mandt = SystemConfiguration.getValue("MANDT");
+    String sql = ExternalizedQuery.getSql("QUERY.GET.CMR.ME");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CNTRY", country);
+    query.setParameter("CMRNO", cmrNo);
+    query.setParameter("MANDT", mandt);
+    addresses = query.getResults(Kna1.class);
+    return addresses;
+  }
+
+  private List<CmrtAddr> getCmrtaddr(EntityManager entityManager, String country, String cmrNo) {
+    List<CmrtAddr> addresses = null;
+    String sql = ExternalizedQuery.getSql("LEGACYD.GETADDR");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("COUNTRY", country);
+    query.setParameter("CMR_NO", cmrNo);
+    addresses = query.getResults(CmrtAddr.class);
+    return addresses;
+  }
+
+  private String getMaxAddrSeqCmrtaddr(List<CmrtAddr> cmrtaddrRecords, String addrType) {
+    String maxSeqStr = null;
+    String seq = null;
+    int maxSeq = 0;
+
+    for (CmrtAddr record : cmrtaddrRecords) {
+      switch (addrType) {
+      case "ZI01":
+        if ("Y".equals(record.getIsAddrUseEPL())) {
+          seq = record.getId().getAddrNo() != null ? record.getId().getAddrNo() : "";
+          if (!StringUtils.isEmpty(seq) && Integer.valueOf(seq) > maxSeq) {
+            maxSeq = Integer.valueOf(seq);
+          }
+        }
+        break;
+      case "ZD01":
+        if ("Y".equals(record.getIsAddrUseShipping())) {
+          seq = record.getId().getAddrNo() != null ? record.getId().getAddrNo() : "";
+          if (!StringUtils.isEmpty(seq) && Integer.valueOf(seq) > maxSeq) {
+            maxSeq = Integer.valueOf(seq);
+          }
+        }
+        break;
+      }
+
+    }
+    maxSeqStr = String.valueOf(maxSeq);
+    return maxSeqStr;
+  }
+
+  private String getMaxAddrSeqKna1(List<Kna1> kna1Records, String addrType) {
+    String maxSeqStr = null;
+    String seq = null;
+    int maxSeq = 0;
+
+    for (Kna1 record : kna1Records) {
+      if (addrType != null && addrType.equals(record.getKtokd())) {
+        seq = record.getZzkvSeqno();
+        if (seq != null && Integer.valueOf(seq) > maxSeq) {
+          maxSeq = Integer.valueOf(seq);
+        }
+      }
+    }
+
+    return maxSeqStr;
+  }
+
+  private List<String> getKna1AddrSeqList(List<Kna1> kna1Records, String addrType) {
+    List<String> list = new ArrayList<String>();
+    String seq = null;
+    for (Kna1 record : kna1Records) {
+      if (addrType != null && addrType.equals(record.getKtokd())) {
+        seq = record.getZzkvSeqno();
+        list.add(seq);
+      }
+    }
+    return list;
+  }
+
+  private List<String> getCmrtaddrAddrSeqList(List<CmrtAddr> cmrtaddrRecords, String addrType) {
+    List<String> list = new ArrayList<String>();
+    String seq = null;
+    for (CmrtAddr record : cmrtaddrRecords) {
+      switch (addrType) {
+      case "ZI01":
+        if ("Y".equals(record.getIsAddrUseEPL())) {
+          seq = record.getId().getAddrNo() != null ? record.getId().getAddrNo() : "";
+          if (!StringUtils.isEmpty(seq)) {
+            list.add(seq);
+          }
+        }
+        break;
+      case "ZD01":
+        if ("Y".equals(record.getIsAddrUseShipping())) {
+          seq = record.getId().getAddrNo() != null ? record.getId().getAddrNo() : "";
+          if (!StringUtils.isEmpty(seq)) {
+            list.add(seq);
+          }
+        }
+        break;
+      }
+    }
+    return list;
   }
 
   @Override
@@ -1824,7 +2014,7 @@ public class NLHandler extends BaseSOFHandler {
       newSeq = "00001";
     }
     if ("ZI01".equals(addrType)) {
-      newSeq = "20701";
+      newSeq = generateZI01AddrSeq(entityManager, addrType, reqId);
     }
     if ("ZP01".equals(addrType)) {
       newSeq = "29901";
@@ -1939,6 +2129,8 @@ public class NLHandler extends BaseSOFHandler {
       XSSFSheet sheet = book.getSheet("Data");// validate Data sheet
       row = sheet.getRow(0);// data field name row
       int ordBlkIndex = 14;// default index
+      int cmrNoIndex = 0;// 0
+      String cmrNo = null;
       for (int cellIndex = 0; cellIndex < row.getLastCellNum(); cellIndex++) {
         currCell = row.getCell(cellIndex);
         String cellVal = validateColValFromCell(currCell);
@@ -1962,6 +2154,22 @@ public class NLHandler extends BaseSOFHandler {
           error.addError(rowIndex, "Order Block Code", "Order Block Code should be only @, E, P, 5, 6, 7, J. ");
           validations.add(error);
         }
+
+        currCell = row.getCell(cmrNoIndex);
+        cmrNo = validateColValFromCell(currCell);
+        if (isDivCMR(cmrNo)) {
+          LOG.trace("The row " + (row.getRowNum() + 1) + ":Note the CMR number is a divestiture CMR records.");
+          error.addError((row.getRowNum() + 1), "CMR No.",
+              "The row " + (row.getRowNum() + 1) + ":Note the CMR number is a divestiture CMR records.<br>");
+          validations.add(error);
+        }
+        if (is93CMR(cmrNo)) {
+          LOG.trace("The row " + (row.getRowNum() + 1) + ":Note the CMR number is a deleted record in RDC.");
+          error.addError((row.getRowNum() + 1), "CMR No.",
+              "The row " + (row.getRowNum() + 1) + ":Note the CMR number is a deleted record in RDC.<br>");
+          validations.add(error);
+        }
+
       }
 
       for (String name : countryAddrss) {
@@ -2003,6 +2211,59 @@ public class NLHandler extends BaseSOFHandler {
         }
       }
     }
+  }
+
+  private static boolean isDivCMR(String cmrNo) {
+    boolean isDivestiture = false;
+    if (StringUtils.isEmpty(cmrNo)) {
+      return false;
+    }
+    String mandt = SystemConfiguration.getValue("MANDT");
+    EntityManager entityManager = JpaManager.getEntityManager();
+    String sql = ExternalizedQuery.getSql("FR.GET.ZS01KATR10");
+
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setForReadOnly(true);
+    query.setParameter("KATR6", "788");
+    query.setParameter("MANDT", mandt);
+    query.setParameter("CMR", cmrNo);
+
+    Kna1 zs01 = query.getSingleResult(Kna1.class);
+    if (zs01 != null) {
+      if (!StringUtils.isBlank(zs01.getKatr10())) {
+        isDivestiture = true;
+      }
+    }
+    entityManager.close();
+    return isDivestiture;
+  }
+
+  private static boolean is93CMR(String cmrNo) {
+    boolean is93cmr = false;
+    if (StringUtils.isEmpty(cmrNo)) {
+      return false;
+    }
+    String mandt = SystemConfiguration.getValue("MANDT");
+    EntityManager entityManager = JpaManager.getEntityManager();
+    String sql = ExternalizedQuery.getSql("BENELUX.GET_RDC_ZS01");
+
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setForReadOnly(true);
+    query.setParameter("CNTRY", "788");
+    query.setParameter("MANDT", mandt);
+    query.setParameter("CMRNO", cmrNo);
+    query.setParameter("ADDRTYPE", "ZS01");
+
+    Object[] result = query.getSingleResult();
+    if (result != null) {
+      String aufsd = result[0].toString();
+      String loevm = result[1].toString();
+      if ("93".equals(aufsd) || "X".equals(loevm)) {
+        is93cmr = true;
+      }
+    }
+    entityManager.close();
+    return is93cmr;
   }
 
   private int getCeeKnvpParvmCount(String kunnr) throws Exception {
