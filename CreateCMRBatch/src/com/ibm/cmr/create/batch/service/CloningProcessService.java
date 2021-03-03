@@ -1626,19 +1626,20 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
     // now start cloning at RDc end for KNA1 child tables
     LOG.info("Retrieving pending RDc records for kna1 child processing..");
-    pendingCloningRefn = getPendingRecordsRDCKna1Child(entityManager, cloningQueue);
+    List<RdcCloningRefn> pendingCloningRefnChild = getPendingRecordsRDCKna1Child(entityManager, cloningQueue);
 
-    LOG.debug((pendingCloningRefn != null ? pendingCloningRefn.size() : 0) + " records to process to KNA1 child RDc.");
+    LOG.debug((pendingCloningRefnChild != null ? pendingCloningRefnChild.size() : 0) + " records to process to KNA1 child RDc.");
 
     Kna1 kna1 = null;
     Kna1 kna1Clone = null;
+    List<CloningOverrideMapping> overrideValuesChild = null;
 
-    for (RdcCloningRefn rdcCloningRefn : pendingCloningRefn) {
+    for (RdcCloningRefn rdcCloningRefn : pendingCloningRefnChild) {
       try {
         kna1 = getKna1ByKunnr(entityManager, rdcCloningRefn.getId().getMandt(), rdcCloningRefn.getId().getKunnr());
         kna1Clone = getKna1ByKunnr(entityManager, rdcCloningRefn.getTargetMandt(), rdcCloningRefn.getTargetKunnr());
-        overrideValues = overrideUtil.getOverrideValueFromMapping(rdcCloningRefn.getCmrIssuingCntry());
-        processKna1Children(entityManager, kna1, kna1Clone, rdcConfig, overrideValues);
+        overrideValuesChild = overrideUtil.getOverrideValueFromMapping(rdcCloningRefn.getCmrIssuingCntry());
+        processKna1Children(entityManager, kna1, kna1Clone, rdcConfig, overrideValuesChild);
         rdcCloningRefn.setStatus("C");
         updateEntity(rdcCloningRefn, entityManager);
 
