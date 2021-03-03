@@ -111,6 +111,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
   private static final List<String> STATUS_CLONING = Arrays.asList("IN_PROG", "LEGACY_ERR");
   private static final List<String> STATUS_LEGACY = Arrays.asList("LEGACY_OK", "LEGACYSKIP");
   private static final List<String> STATUS_RDC = Arrays.asList("RDC_INPROG", "RDC_ERR");
+  private static final List<String> STATUS_CLONING_REFN = Arrays.asList("E", "X", "C");
 
   @Override
   public boolean isTransactional() {
@@ -188,6 +189,12 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
       cloningQueue.setStatus("IN_PROG");
 
     updateEntity(cloningQueue, entityManager);
+
+    if ("641".equals(cntry)) {
+      CloningUtil cUtil = new CloningUtil();
+      String kukla = cUtil.getKuklaFromCMR(entityManager, cntry, cmrNo, SystemConfiguration.getValue("MANDT"));
+      setCNLastUsedCMR(entityManager, cloningCmrNo, SystemConfiguration.getValue("MANDT"), kukla, cntry);
+    }
 
   }
 
@@ -490,6 +497,8 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
   private void cmrCloningQueueStatusUpdate(EntityManager entityManager, CmrCloningQueue cloningQueue) throws Exception {
     LOG.info("Inside cmrCloningQueueStatusUpdate for CMR No : " + cloningQueue.getId().getCmrNo());
+    boolean statusCheck = false;
+    String curentStatus = "";
     String sql = ExternalizedQuery.getSql("CLONING_CMR_STATUS_CHK");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("ID", cloningQueue.getId().getCmrCloningProcessId());
@@ -497,12 +506,29 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     query.setParameter("CMR_NO", cloningQueue.getId().getCmrNo());
     List<Object[]> status = query.getResults();
     if (status.size() == 1) {
-      String curentStatus = String.valueOf(status.get(0));
+      curentStatus = String.valueOf(status.get(0));
       if ("C".equals(curentStatus)) {
         cloningQueue.setStatus("COMPLETED");
         updateEntity(cloningQueue, entityManager);
       }
 
+    } else if (status.size() > 1) {
+      for (int index = 0; index < status.size(); index++) {
+        curentStatus = String.valueOf(status.get(index));
+        if (STATUS_CLONING_REFN.contains(curentStatus)) {
+          statusCheck = true;
+        } else {
+          statusCheck = false;
+          break;
+        }
+
+      }
+
+      if (statusCheck) {
+        cloningQueue.setStatus("STOP");
+        cloningQueue.setErrorMsg("Some data issue with kna1 or child tables");
+        updateEntity(cloningQueue, entityManager);
+      }
     }
 
   }
@@ -1600,19 +1626,20 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
     // now start cloning at RDc end for KNA1 child tables
     LOG.info("Retrieving pending RDc records for kna1 child processing..");
-    pendingCloningRefn = getPendingRecordsRDCKna1Child(entityManager, cloningQueue);
+    List<RdcCloningRefn> pendingCloningRefnChild = getPendingRecordsRDCKna1Child(entityManager, cloningQueue);
 
-    LOG.debug((pendingCloningRefn != null ? pendingCloningRefn.size() : 0) + " records to process to KNA1 child RDc.");
+    LOG.debug((pendingCloningRefnChild != null ? pendingCloningRefnChild.size() : 0) + " records to process to KNA1 child RDc.");
 
     Kna1 kna1 = null;
     Kna1 kna1Clone = null;
+    List<CloningOverrideMapping> overrideValuesChild = null;
 
-    for (RdcCloningRefn rdcCloningRefn : pendingCloningRefn) {
+    for (RdcCloningRefn rdcCloningRefn : pendingCloningRefnChild) {
       try {
         kna1 = getKna1ByKunnr(entityManager, rdcCloningRefn.getId().getMandt(), rdcCloningRefn.getId().getKunnr());
         kna1Clone = getKna1ByKunnr(entityManager, rdcCloningRefn.getTargetMandt(), rdcCloningRefn.getTargetKunnr());
-        overrideValues = overrideUtil.getOverrideValueFromMapping(rdcCloningRefn.getCmrIssuingCntry());
-        processKna1Children(entityManager, kna1, kna1Clone, rdcConfig, overrideValues);
+        overrideValuesChild = overrideUtil.getOverrideValueFromMapping(rdcCloningRefn.getCmrIssuingCntry());
+        processKna1Children(entityManager, kna1, kna1Clone, rdcConfig, overrideValuesChild);
         rdcCloningRefn.setStatus("C");
         updateEntity(rdcCloningRefn, entityManager);
 
@@ -1627,6 +1654,27 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
     // all rdcCloningRefn status complete then update cloningQueue completed
     cmrCloningQueueStatusUpdate(entityManager, cloningQueue);
+  }
+
+  public void setCNLastUsedCMR(EntityManager rdcMgr, String newLastUsed, String mandt, String kukla, String katr6) {
+    LOG.debug("setCNLastUsedCMR :: START");
+    String sql = ExternalizedQuery.getSql("UPDATE.KEY_AUTO_GEN.LST_USED");
+    sql = StringUtils.replaceOnce(sql, ":MANDT", "'" + mandt + "'");
+    sql = StringUtils.replaceOnce(sql, ":KATR6", "'" + katr6 + "'");
+    sql = StringUtils.replaceOnce(sql, ":LST_USED", "'" + newLastUsed + "'");
+
+    if (CmrConstants.CN_KUKLA81.equals(kukla)) {
+      sql = StringUtils.replaceOnce(sql, ":KEYID", "'" + CmrConstants.CN_KUKLA81_KEYID + "'");
+    } else if (CmrConstants.CN_KUKLA45.equals(kukla)) {
+      sql = StringUtils.replaceOnce(sql, ":KEYID", "'" + CmrConstants.CN_KUKLA45_KEYID + "'");
+    } else { // use default key_id
+      sql = StringUtils.replaceOnce(sql, ":KEYID", "'" + CmrConstants.CN_DEFAULT_KEYID + "'");
+    }
+
+    int rows = rdcMgr.createNativeQuery(sql).executeUpdate();
+    LOG.debug("****" + rows + " ROWS WERE AFFECTED BY THE UPDATE");
+    LOG.debug("setCNLastUsedCMR :: END :: NEW VALUE >> " + newLastUsed);
+
   }
 
 }

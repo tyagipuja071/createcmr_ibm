@@ -277,7 +277,7 @@ function onInacTypeChange() {
               ISSUING_CNTRY : cntry ,
               CMT : cmt ,
               };
-            }
+            } 
             if(qParams != undefined){
               var results = cmr.query('GET.INAC_CD', qParams);
               if (results != null) {
