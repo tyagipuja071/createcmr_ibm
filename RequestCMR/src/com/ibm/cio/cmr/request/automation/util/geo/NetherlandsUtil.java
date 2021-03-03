@@ -2,6 +2,7 @@ package com.ibm.cio.cmr.request.automation.util.geo;
 
 import javax.persistence.EntityManager;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
@@ -12,6 +13,8 @@ import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.CoverageContainer;
+import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
+import com.ibm.cio.cmr.request.entity.Addr;
 
 public class NetherlandsUtil extends AutomationUtil {
 
@@ -20,6 +23,13 @@ public class NetherlandsUtil extends AutomationUtil {
   @Override
   public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
       AutomationResult<ValidationOutput> result, StringBuilder details, ValidationOutput output) {
+
+    ScenarioExceptionsUtil scenarioExceptions = (ScenarioExceptionsUtil) engineData.get("SCENARIO_EXCEPTIONS");
+    Addr zs01 = requestData.getAddress("ZS01");
+    Addr zp01 = requestData.getAddress("ZP01");
+    if (!StringUtils.equals(zs01.getLandCntry(), zp01.getLandCntry())) {
+      scenarioExceptions.setCheckVATForDnB(false);
+    }
     return true;
   }
 
