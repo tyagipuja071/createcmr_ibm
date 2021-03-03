@@ -322,6 +322,7 @@ visibility: hidden !IMPORTANT;
 				<cmr:gridCol width="120px" field="custNm3" header="Division/Department" />
 				<cmr:gridCol width="100px" field="bldg" header="Building_Ext" />
 				<cmr:gridCol width="100px" field="dept" header="Department_Ext" />
+				<cmr:gridCol width="140px" field="addrTxt" header="Street Name and Number" />
 			</cmr:view>
         <%} %>
         
