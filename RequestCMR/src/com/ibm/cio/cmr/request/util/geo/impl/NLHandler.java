@@ -1272,7 +1272,7 @@ public class NLHandler extends BaseSOFHandler {
     String resultStr = null;
     int result = 0;
     String maxAddrSeqStr = getMaxAddrSeq(entityManager, reqId, "ZD01");
-    int maxAddrSeq = StringUtils.isEmpty(maxAddrSeqStr) ? Integer.valueOf(maxAddrSeqStr) : 0;
+    int maxAddrSeq = !StringUtils.isEmpty(maxAddrSeqStr) ? Integer.valueOf(maxAddrSeqStr) : 0;
     int maxZD01SeqKna1 = 0;
     int maxZD01SeqCmrtaddr = 0;
 
@@ -1333,7 +1333,7 @@ public class NLHandler extends BaseSOFHandler {
     String resultStr = null;
     int result = 0;
     String maxAddrSeqStr = getMaxAddrSeq(entityManager, reqId, "ZI01");
-    int maxAddrSeq = StringUtils.isEmpty(maxAddrSeqStr) ? Integer.valueOf(maxAddrSeqStr) : 0;
+    int maxAddrSeq = !StringUtils.isEmpty(maxAddrSeqStr) ? Integer.valueOf(maxAddrSeqStr) : 0;
     int maxZI01SeqKna1 = 0;
     int maxZI01SeqCmrtaddr = 0;
 
