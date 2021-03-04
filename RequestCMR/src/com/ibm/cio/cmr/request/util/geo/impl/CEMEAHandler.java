@@ -1286,8 +1286,10 @@ public class CEMEAHandler extends BaseSOFHandler {
     pk.setReqId(addr.getId().getReqId());
     Data data = entityManager.find(Data.class, pk);
 
-    if (!"ZP01".equals(addr.getId().getAddrType())) {
-      addr.setDept("");
+    if (!("618".equals(cmrIssuingCntry))) {
+      if (!"ZP01".equals(addr.getId().getAddrType())) {
+        addr.setDept("");
+      }
     }
 
     if (CEE_COUNTRIES_LIST.contains(data.getCmrIssuingCntry()) && data != null && "ZP02".equals(addr.getId().getAddrType())) {
