@@ -15,20 +15,65 @@ import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.CoverageContainer;
 import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
 import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.Data;
 
 public class NetherlandsUtil extends AutomationUtil {
 
   private static final Logger LOG = Logger.getLogger(NetherlandsUtil.class);
+  public static final String SCENARIO_LOCAL_COMMERCIAL = "COMME";
+  public static final String SCENARIO_CROSS_COMMERCIAL = "CBCOM";
+  public static final String SCENARIO_LOCAL_PUBLIC = "PUBCU";
+  public static final String SCENARIO_BP_LOCAL = "BUSPR";
+  public static final String SCENARIO_BP_CROSS = "CBBUS";
+  public static final String SCENARIO_PRIVATE_CUSTOMER = "PRICU";
 
   @Override
   public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
       AutomationResult<ValidationOutput> result, StringBuilder details, ValidationOutput output) {
 
     ScenarioExceptionsUtil scenarioExceptions = (ScenarioExceptionsUtil) engineData.get("SCENARIO_EXCEPTIONS");
+    Data data = requestData.getData();
+    String scenario = data.getCustSubGrp();
     Addr zs01 = requestData.getAddress("ZS01");
     Addr zp01 = requestData.getAddress("ZP01");
+    String customerName = zs01.getCustNm1();
+    String customerNameZP01 = "";
+    String landedCountryZP01 = "";
+    if (zp01 != null) {
+      customerNameZP01 = StringUtils.isBlank(zp01.getCustNm1()) ? "" : zp01.getCustNm1();
+      landedCountryZP01 = StringUtils.isBlank(zp01.getLandCntry()) ? "" : zp01.getLandCntry();
+    }
     if (!StringUtils.equals(zs01.getLandCntry(), zp01.getLandCntry())) {
       scenarioExceptions.setCheckVATForDnB(false);
+    }
+    if ((SCENARIO_BP_LOCAL.equals(scenario) || SCENARIO_BP_CROSS.equals(scenario)) && zp01 != null
+            && (!StringUtils.equals(getCleanString(customerName), getCleanString(customerNameZP01))
+                || !StringUtils.equals(zs01.getLandCntry(), landedCountryZP01))) {
+          details.append("Customer Name and Landed Country on Sold-to and Bill-to address should be same for Business Partner Scenario.").append("\n");
+          engineData.addNegativeCheckStatus("SOLDTO_BILLTO_DIFF",
+              "Customer Name and Landed Country on Sold-to and Bill-to address should be same for Business Partner Scenario.");
+        }
+    
+    switch (scenario) {
+
+    case SCENARIO_LOCAL_COMMERCIAL :
+    case SCENARIO_CROSS_COMMERCIAL :
+    case SCENARIO_LOCAL_PUBLIC :
+    	if (zp01 != null && (!StringUtils.equals(getCleanString(customerName), getCleanString(customerNameZP01))
+    	          || !StringUtils.equals(zs01.getLandCntry(), landedCountryZP01))) {
+    	        details.append("Customer Name and Landed Country on Sold-to and Bill-to address should be same for Commercial and Public Customer Scenario.")
+    	            .append("\n");
+    	        engineData.addNegativeCheckStatus("SOLDTO_BILLTO_DIFF",
+    	            "Customer Name and Landed Country on Sold-to and Bill-to address should be same for Commercial and Public Customer Scenario.");
+    	      }
+    	      break;
+      
+    case SCENARIO_BP_LOCAL:
+    case SCENARIO_BP_CROSS:
+    	return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
+    
+      case SCENARIO_PRIVATE_CUSTOMER:
+    	  return doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details, false, requestData);
     }
     return true;
   }
