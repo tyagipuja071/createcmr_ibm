@@ -746,31 +746,33 @@ public class NLTransformer extends EMEATransformer {
     String attPer = addr.getCustNm4();
     String name3 = addr.getCustNm3();
     // line 3 = Customer name3 + Attention Person + PO BOX
-    String line33 = "";
+    String line33 = legacyAddr.getAddrLine3();
 
     if (!StringUtils.isBlank(name3)) {
-      if ("@".equals(name3))
+      if ("@".equals(name3)) {
         line33 = "";
-      else if (!"@".equals(name3))
-        line33 += (line33.length() > 0 ? " " : "") + name3;
+      } else if (!"@".equals(name3)) {
+        line33 = name3;
+        legacyAddr.setAddrLine4(legacyAddr.getAddrLine3());
+      }
     }
 
-    if (StringUtils.isEmpty(line33)) {
-      if (!StringUtils.isBlank(attPer)) {
-        if ("@".equals(attPer))
-          line33 = "";
-        else if (!"@".equals(attPer))
-          line33 += (line33.length() > 0 ? " " : "") + "ATT " + attPer;
+    if (!StringUtils.isBlank(attPer)) {
+      if ("@".equals(attPer)) {
+        line33 = "";
+      } else if (!"@".equals(attPer)) {
+        line33 += (line33.length() > 0 ? " " : "") + "ATT " + attPer;
       }
     }
-    if (StringUtils.isEmpty(line33)) {
-      if (!StringUtils.isBlank(pobox)) {
-        if ("@".equals(pobox))
-          line33 = "";
-        else if (!"@".equals(pobox))
-          line33 += (line33.length() > 0 ? " " : "") + "PO BOX " + pobox;
+
+    if (!StringUtils.isBlank(pobox)) {
+      if ("@".equals(pobox)) {
+        line33 = "";
+      } else if (!"@".equals(pobox)) {
+        line33 += (line33.length() > 0 ? " " : "") + "PO BOX " + pobox;
       }
     }
+
     if (!StringUtils.isBlank(line33.toString())) {
       legacyAddr.setAddrLine3(line33);
     }
