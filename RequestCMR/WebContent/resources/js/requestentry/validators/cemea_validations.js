@@ -1198,6 +1198,9 @@ function addAddressFieldValidators() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
+        if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.AUSTRIA) {
+          return new ValidationResult(null, true);
+        }
         var att = FormManager.getActualValue('custNm4');
         var custPhone = FormManager.getActualValue('custPhone');
         var val = att;
@@ -1227,7 +1230,29 @@ function addAddressFieldValidators() {
         if (poBox != null && poBox != '') {
           val += poBox;
           if (val != null && val.length > 21) {
-            return new ValidationResult(null, false, 'Total computed length of Street and PO BOX should not exceed 21 characters.');
+            return new ValidationResult(null, false, 'Total computed length of Street Name And Number and PO BOX should not exceed 21 characters.');
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+
+  // AT: phone + ATT should not exceed 30 characters
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        if (FormManager.getActualValue('cmrIssuingCntry') != SysLoc.AUSTRIA) {
+          return new ValidationResult(null, true);
+        }
+        var att = FormManager.getActualValue('custNm4');
+        var custPhone = FormManager.getActualValue('custPhone');
+        var val = att;
+
+        if (custPhone != '') {
+          val += custPhone;
+          if (val != null && val.length > 30) {
+            return new ValidationResult(null, false, 'Total computed length of Attention to/Building/Floor/Office and Phone should not exceed 30 characters.');
           }
         }
         return new ValidationResult(null, true);
