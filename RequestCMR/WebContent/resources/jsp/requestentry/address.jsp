@@ -446,10 +446,10 @@ visibility: hidden !IMPORTANT;
         <!-- Story : 1830918 -->
         
         <cmr:view forCountry="848">
-			<cmr:gridCol width="100px" field="dept" header="Department"></cmr:gridCol>  		    	
+			<cmr:gridCol width="100px" field="dept" header="Department_ext"></cmr:gridCol>  		    	
         </cmr:view>
         <cmr:view forCountry="848">
-			<cmr:gridCol width="100px" field="bldg" header="Building"></cmr:gridCol>  		    	
+			<cmr:gridCol width="100px" field="bldg" header="Building_ext"></cmr:gridCol>  		    	
         </cmr:view>
         
          <cmr:view forCountry="848">
