@@ -151,12 +151,14 @@ public class BeLuxUtil extends AutomationUtil {
       return true;
     }
 
-    GBGResponse gbg = getGbgDetails(engineData);
+    String gbgCntry = chkFrAffiliateCntry(engineData, requestData, entityManager);
 
     Data data = requestData.getData();
     String coverageId = container.getFinalCoverage();
 
-    if (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && CalculateCoverageElement.COV_BG.equals(covFrom)) {
+    if (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && CalculateCoverageElement.COV_BG.equals(covFrom)
+        && StringUtils.isNotBlank(gbgCntry)) {
+      details.append("Coverage calculated for: " + gbgCntry);
       FieldResultKey sboKeyVal = new FieldResultKey("DATA", "SALES_BO_CD");
       String sboVal = "";
       if (overrides.getData().containsKey(sboKeyVal)) {
@@ -206,25 +208,28 @@ public class BeLuxUtil extends AutomationUtil {
     return true;
   }
 
-  private GBGResponse getGbgDetails(AutomationEngineData engineData, RequestData reqData, EntityManager entityManager) {
+  private String chkFrAffiliateCntry(AutomationEngineData engineData, RequestData reqData, EntityManager entityManager) {
     GBGResponse gbg = (GBGResponse) engineData.get(AutomationEngineData.GBG_MATCH);
+    String gbgCntry = "";
     if (gbg != null && gbg.isDomesticGBG()) {
       // check konsz
 
       Data data = reqData.getData();
-      String gbgCntry = gbg.getCountry();
-      String konsz = "624LU".equalsIgnoreCase(data.getCountryUse()) ? "0502" : "0016";
+      int count = 0;
       String sql = ExternalizedQuery.getSql("AUTO.GBG.COV.KNA1.KONSZ");
+      String bgId = gbg.getBgId();
       PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("CNTRY", data.getCmrIssuingCntry());
       query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
-      query.setParameter("KATR6", data.getCmrIssuingCntry());
-      query.setParameter("ZZKV_CUSNO", "%" + ims + "%");
-      query.setParameter("KONZS", konsz);
+      query.setParameter("BG_ID", bgId);
+      query.setParameter("AFFILIATE", "0016");
 
-      query.setForReadOnly(true);
-      salesRepRes = query.getResults();
+      count = query.getSingleResult(Integer.class);
+      gbgCntry = count > 0 ? "Belgium" : "Luxembourg";
+
     }
-    return gbg;
+
+    return gbgCntry;
   }
 
   private BeLuxFieldsContainer calculate32SValuesFromIMSBeLux(EntityManager entityManager, String cmrIssuingctry, String countryUse,
