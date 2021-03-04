@@ -377,8 +377,8 @@ public class BeLuxUtil extends AutomationUtil {
       }
     }
     if (cmdeReview) {
-      engineData.addNegativeCheckStatus("_beluxDataCheckFailed", "Updates to one or more data fields cannot be validated.");
-      details.append("Updates to one or more data fields cannot be validated.\n");
+      engineData.addNegativeCheckStatus("_beluxDataCheckFailed", "Updates to one or more data fields will require CMDE review.");
+      details.append("Updates to one or more data fields will require CMDE review.\n");
       validation.setSuccess(false);
       validation.setMessage("Not Validated");
     } else {
