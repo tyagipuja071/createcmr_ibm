@@ -1373,7 +1373,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addHandlerForReqRsn, GEOHandler.NL);
   GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.NL);
   GEOHandler.addAfterConfig(setAddressDetailsForView, GEOHandler.NL);
-  GEOHandler.addAfterConfig(disbleCreateByModel, GEOHandler.NL);
+  // GEOHandler.addAfterConfig(disbleCreateByModel, GEOHandler.NL);
 
   GEOHandler.addAfterTemplateLoad(setAbbrvNmLoc, GEOHandler.NL);
   GEOHandler.addAfterTemplateLoad(afterConfigForNL, GEOHandler.NL);
