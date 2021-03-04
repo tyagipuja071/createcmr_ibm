@@ -83,6 +83,18 @@
 </cmr:row>
 
 <cmr:row addBackground="true">
+	<cmr:column span="4" forCountry="618">
+		<cmr:column span="2" width="370" containerForField="CustomerName4">
+			<cmr:label fieldId="custNm4">
+				<cmr:fieldLabel fieldId="CustomerName4" />: 
+        <cmr:delta text="-" id="delta-custNm4" />
+			</cmr:label>
+			<cmr:field fieldId="CustomerName4" id="custNm4" path="custNm4" size="400" />
+		</cmr:column>
+	</cmr:column>
+</cmr:row>
+
+<cmr:row addBackground="true">
   <cmr:column span="4" forCountry="758,760,603,607,626,644,651,668,693,694,695,699,704,705,707,708,740,741,787,820,821,826,889,358,359,363,620,642,677,680,752,762,767,768,772,805,808,823,832,849,850,865,729,675">
     <cmr:label fieldId="custNm4">
       <cmr:fieldLabel fieldId="CustomerName4" />: 
@@ -128,18 +140,22 @@
 <cmr:row>
 	<cmr:view forCountry="618">
 		<cmr:column span="2" containerForField="Building">
-			<cmr:label fieldId="bldg">
-				<cmr:fieldLabel fieldId="Building" />:
+			<p>
+				<cmr:label fieldId="bldg">
+					<cmr:fieldLabel fieldId="Building" />:
              <cmr:delta text="-" id="delta-bldg" />
-			</cmr:label>
-			<cmr:field fieldId="Building" id="bldg" path="bldg" />
+				</cmr:label>
+				<cmr:field fieldId="Building" id="bldg" path="bldg" />
+			</p>
 		</cmr:column>
-		<cmr:column span="2" width="370" containerForField="Department">
-			<cmr:label fieldId="dept">
-				<cmr:fieldLabel fieldId="Department" />:
+		<cmr:column span="2" containerForField="Department">
+			<p>
+				<cmr:label fieldId="dept">
+					<cmr:fieldLabel fieldId="Department" />:
              <cmr:delta text="-" id="delta-dept" />
-			</cmr:label>
-			<cmr:field fieldId="Department" id="dept" path="dept" />
+				</cmr:label>
+				<cmr:field fieldId="Department" id="dept" path="dept" />
+			</p>
 		</cmr:column>
 		<cmr:column span="2">
 			<p>
@@ -150,13 +166,6 @@
 				</cmr:label>
 				<cmr:field fieldId="StateProv" id="stateProv" path="stateProv" />
 			</p>
-		</cmr:column>
-		<cmr:column span="2" width="370" containerForField="CustomerName4">
-			<cmr:label fieldId="custNm4">
-				<cmr:fieldLabel fieldId="CustomerName4" />: 
-        <cmr:delta text="-" id="delta-custNm4" />
-			</cmr:label>
-			<cmr:field fieldId="CustomerName4" id="custNm4" path="custNm4" />
 		</cmr:column>
 	</cmr:view>
 </cmr:row>
