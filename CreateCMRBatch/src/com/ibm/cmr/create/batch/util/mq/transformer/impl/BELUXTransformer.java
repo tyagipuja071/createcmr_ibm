@@ -761,9 +761,8 @@ public class BELUXTransformer extends EMEATransformer {
       }
     }
 
-    if (!StringUtils.isBlank(line33.toString())) {
-      legacyAddr.setAddrLine3(line33);
-    }
+    legacyAddr.setAddrLine3(line33);
+
     if (!StringUtils.isBlank(addr.getPoBox())) {
       if ("@".equals(addr.getPoBox())) {
         legacyAddr.setPoBox("");
