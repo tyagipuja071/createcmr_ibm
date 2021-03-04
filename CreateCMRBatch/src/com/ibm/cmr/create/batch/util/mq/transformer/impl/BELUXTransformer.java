@@ -740,7 +740,8 @@ public class BELUXTransformer extends EMEATransformer {
       if ("@".equals(name3)) {
         line33 = "";
       } else if (!"@".equals(name3)) {
-        line33 += (line33.length() > 0 ? " " : "") + name3;
+        line33 = name3;
+        legacyAddr.setAddrLine4(legacyAddr.getAddrLine3());
       }
     }
 
