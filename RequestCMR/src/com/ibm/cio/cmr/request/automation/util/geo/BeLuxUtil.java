@@ -17,12 +17,14 @@ import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.impl.gbl.CalculateCoverageElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
+import com.ibm.cio.cmr.request.automation.out.FieldResultKey;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.CoverageContainer;
 import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
 import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
+import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
@@ -32,6 +34,7 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
+import com.ibm.cmr.services.client.matching.gbg.GBGResponse;
 
 public class BeLuxUtil extends AutomationUtil {
 
@@ -78,11 +81,11 @@ public class BeLuxUtil extends AutomationUtil {
     if (zp01 != null) {
       customerNameZP01 = StringUtils.isBlank(zp01.getCustNm1()) ? "" : zp01.getCustNm1();
       landedCountryZP01 = StringUtils.isBlank(zp01.getLandCntry()) ? "" : zp01.getLandCntry();
-    }
-    if (!StringUtils.equals(zs01.getLandCntry(), zp01.getLandCntry())) {
-      scenarioExceptions.setCheckVATForDnB(false);
-    }
 
+      if (!StringUtils.equals(zs01.getLandCntry(), zp01.getLandCntry())) {
+        scenarioExceptions.setCheckVATForDnB(false);
+      }
+    }
     if ((SCENARIO_BP_LOCAL.equals(scenario) || SCENARIO_BP_CROSS.equals(scenario) || SCENARIO_BP_LOCAL_LU.equals(scenario)) && zp01 != null
         && (!StringUtils.equals(getCleanString(customerName), getCleanString(customerNameZP01))
             || !StringUtils.equals(zs01.getLandCntry(), landedCountryZP01))) {
@@ -148,10 +151,22 @@ public class BeLuxUtil extends AutomationUtil {
       return true;
     }
 
+    String gbgCntry = chkFrAffiliateCntry(engineData, requestData, entityManager);
+
     Data data = requestData.getData();
     String coverageId = container.getFinalCoverage();
 
-    if (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && CalculateCoverageElement.COV_BG.equals(covFrom)) {
+    if (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && CalculateCoverageElement.COV_BG.equals(covFrom)
+        && StringUtils.isNotBlank(gbgCntry)) {
+      details.append("Coverage calculated for: " + gbgCntry);
+      FieldResultKey sboKeyVal = new FieldResultKey("DATA", "SALES_BO_CD");
+      String sboVal = "";
+      if (overrides.getData().containsKey(sboKeyVal)) {
+        sboVal = overrides.getData().get(sboKeyVal).getNewValue();
+        sboVal = sboVal.substring(0, 3);
+        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sboVal + sboVal);
+        details.append("SORTL: " + sboVal + sboVal);
+      }
       engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
     } else if (!isCoverageCalculated) {
       // if not calculated using bg/gbg try calculation using 32/S logic
@@ -191,6 +206,30 @@ public class BeLuxUtil extends AutomationUtil {
       }
     }
     return true;
+  }
+
+  private String chkFrAffiliateCntry(AutomationEngineData engineData, RequestData reqData, EntityManager entityManager) {
+    GBGResponse gbg = (GBGResponse) engineData.get(AutomationEngineData.GBG_MATCH);
+    String gbgCntry = "";
+    if (gbg != null && gbg.isDomesticGBG()) {
+      // check konsz
+
+      Data data = reqData.getData();
+      int count = 0;
+      String sql = ExternalizedQuery.getSql("AUTO.GBG.COV.KNA1.KONSZ");
+      String bgId = gbg.getBgId();
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("CNTRY", data.getCmrIssuingCntry());
+      query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+      query.setParameter("BG_ID", bgId);
+      query.setParameter("AFFILIATE", "0016");
+
+      count = query.getSingleResult(Integer.class);
+      gbgCntry = count > 0 ? "Belgium" : "Luxembourg";
+
+    }
+
+    return gbgCntry;
   }
 
   private BeLuxFieldsContainer calculate32SValuesFromIMSBeLux(EntityManager entityManager, String cmrIssuingctry, String countryUse,
