@@ -1139,11 +1139,11 @@
       </cmr:column>
     </cmr:view>
     <cmr:view exceptForGEO="MCO1,MCO2,CEMEA,CN,NORDX,BELUX,NL,JP,AP,SWISS,FR" exceptForCountry="862,726,666,822,838,758,760">
-      <cmr:column span="1">
+      <cmr:column span="1" exceptForCountry="724">
         <cmr:label fieldId="office_view">
           <span class="lbl-Office">${ui.office}</span>:</cmr:label>
       </cmr:column>
-      <cmr:column span="2">
+      <cmr:column span="2" exceptForCountry="724">
         <div id="office_view">-</div>
       </cmr:column>
     </cmr:view>
@@ -1369,11 +1369,11 @@
       <cmr:column span="2">
         <div id="poBoxPostCd_view">-</div>
       </cmr:column>
-      <cmr:column span="1">
-        <cmr:label fieldId="transportZone_view">
+      <cmr:column span="1" exceptForCountry="724">
+        <cmr:label fieldId="transportZone_view" >
           <span class="lbl-addrUpdateDt">${ui.transportZone}</span>:</cmr:label>
       </cmr:column>
-      <cmr:column span="2">
+      <cmr:column span="2" exceptForCountry="724">
         <div id="transportZone_view">-</div>
       </cmr:column>
     </cmr:row>
