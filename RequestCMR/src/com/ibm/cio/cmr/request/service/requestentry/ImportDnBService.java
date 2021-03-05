@@ -546,8 +546,14 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
             addr.setAddrTxt2(cmr.getCmrStreetAddressCont());
           }
         } else {
+        	String[] streetParts;
           // no street address con't, overflow
-          String[] streetParts = converter.doSplitName(street, "", 30, 30);
+        	if (SystemLocation.AUSTRIA.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.GERMANY.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.LIECHTENSTEIN.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.SWITZERLAND.equals(reqModel.getCmrIssuingCntry())){
+        		streetParts = converter.doSplitName(street, "", 35, 35);
+        	}else {
+        		streetParts = converter.doSplitName(street, "", 30, 30);
+        	}
+          
           String street1 = streetParts[0];
           String street2 = streetParts[1];
           addr.setAddrTxt(street1);
