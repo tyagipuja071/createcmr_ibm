@@ -171,38 +171,6 @@ function resetAddrTypeValidation() {
   })(), null, 'frmCMR_addressModal');
 }
 
-function name3LengthValidation() {
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var dept = FormManager.getActualValue('dept');
-        var buidling = FormManager.getActualValue('bldg');
-        var floor = FormManager.getActualValue('floor');
-        var addrDetailsArr = [];
-        var details = "";
-        if (dept != null && dept != '')
-          addrDetailsArr.push(dept);
-        if (buidling != null && buidling != '')
-          addrDetailsArr.push(buidling);
-        if (floor != null && floor != '')
-          addrDetailsArr.push(floor);
-
-        if (addrDetailsArr.length > 0)
-          details = addrDetailsArr.join(", ");
-
-        var length = details.length;
-        if (cmr.addressMode == 'newAddress' || cmr.addressMode == 'updateAddress' || cmr.addressMode == 'copyAddress') {
-          if (length > 30)
-            return new ValidationResult(null, false, 'Computed length of Customer Name 3(Department,Building & Floor) cannot exceed 30 chars.');
-        } else {
-          return new ValidationResult(null, true);
-        }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), null, 'frmCMR_addressModal');
-}
-
 var _custCdHandler = null;
 function setTaxCdFrCustClass() {
   if (_custCdHandler == null) {
@@ -1584,7 +1552,6 @@ dojo.addOnLoad(function() {
   }
   GEOHandler.registerValidator(addCrossBorderValidatorFrSWISS, SysLoc.SWITZERLAND, null, true);
   GEOHandler.registerValidator(resetAddrTypeValidation, GEOHandler.SWISS, null, true);
-  GEOHandler.registerValidator(name3LengthValidation, GEOHandler.SWISS, null, true);
   GEOHandler.registerValidator(restrictDuplicateAddr, GEOHandler.SWISS, null, true);
 
   // new phase 2
