@@ -129,7 +129,13 @@ public class DEHandler extends GEOHandler {
     // addrtxt2 issue
     String name4 = currentRecord.getCmrName4();
     address.setBldg(name4);
-
+    
+    boolean doSplit = currentRecord.getCmrStreetAddress() != null && currentRecord.getCmrStreetAddress().length() > 35;
+    if (doSplit) {
+      splitAddress(address, currentRecord.getCmrStreetAddress(), currentRecord.getCmrStreetAddressCont(), 35, 35);
+    } else {
+      address.setAddrTxt2(currentRecord.getCmrStreetAddressCont());
+    }
     if (!StringUtils.isEmpty(parts[2])) {
       address.setDept(parts[2]);
     }

@@ -1162,19 +1162,28 @@ public class CEMEAHandler extends BaseSOFHandler {
   @Override
   public void setAdminValuesOnImport(Admin admin, FindCMRRecordModel currentRecord) throws Exception {
   }
+  
+  @Override
+  public int getName1Length() {
+    return 35;
+  }
 
   @Override
+  public int getName2Length() {
+    return 35;
+  }
+  
+  @Override
   public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo) throws Exception {
-    boolean doSplit = (currentRecord.getCmrName1Plain() != null && currentRecord.getCmrName1Plain().length() > 30)
-        || (currentRecord.getCmrName2Plain() != null && currentRecord.getCmrName2Plain().length() > 30);
+    boolean doSplit = (currentRecord.getCmrName1Plain() != null && currentRecord.getCmrName1Plain().length() > 35)
+        || (currentRecord.getCmrName2Plain() != null && currentRecord.getCmrName2Plain().length() > 35);
 
     String country = currentRecord.getCmrIssuedBy();
-
     if (doSplit) {
-      String[] names = splitName(currentRecord.getCmrName1Plain(), currentRecord.getCmrName2Plain(), 30, 100);
+      String[] names = splitName(currentRecord.getCmrName1Plain(), currentRecord.getCmrName2Plain(), 35, 100);
       address.setCustNm1(names[0]);
       String extendedName = names[1];
-      names = splitName(extendedName, currentRecord.getCmrName3(), 30, 30);
+      names = splitName(extendedName, currentRecord.getCmrName3(), 35, 30);
       address.setCustNm2(names[0]);
       address.setCustNm3(names[1]);
     } else {
@@ -1184,18 +1193,18 @@ public class CEMEAHandler extends BaseSOFHandler {
     }
 
     // FINAL TRIM
-    if (address.getCustNm1() != null && address.getCustNm1().trim().length() > 30) {
-      address.setCustNm1(address.getCustNm1().trim().substring(0, 30));
+    if (address.getCustNm1() != null && address.getCustNm1().trim().length() > 35) {
+      address.setCustNm1(address.getCustNm1().trim().substring(0, 35));
     }
-    if (address.getCustNm2() != null && address.getCustNm2().trim().length() > 30) {
-      address.setCustNm2(address.getCustNm2().trim().substring(0, 30));
+    if (address.getCustNm2() != null && address.getCustNm2().trim().length() > 35) {
+      address.setCustNm2(address.getCustNm2().trim().substring(0, 35));
     }
     if (address.getCustNm3() != null && address.getCustNm3().trim().length() > 30) {
       address.setCustNm3(address.getCustNm3().trim().substring(0, 30));
     }
-    doSplit = currentRecord.getCmrStreetAddress() != null && currentRecord.getCmrStreetAddress().length() > 30;
+    doSplit = currentRecord.getCmrStreetAddress() != null && currentRecord.getCmrStreetAddress().length() > 35;
     if (doSplit) {
-      splitAddress(address, currentRecord.getCmrStreetAddress(), currentRecord.getCmrStreetAddressCont(), 30, 30);
+      splitAddress(address, currentRecord.getCmrStreetAddress(), currentRecord.getCmrStreetAddressCont(), 35, 35);
     } else {
       address.setAddrTxt2(currentRecord.getCmrStreetAddressCont());
     }
