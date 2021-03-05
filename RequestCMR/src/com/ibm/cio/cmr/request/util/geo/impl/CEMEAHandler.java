@@ -1289,8 +1289,10 @@ public class CEMEAHandler extends BaseSOFHandler {
   @Override
   public void doBeforeAddrSave(EntityManager entityManager, Addr addr, String cmrIssuingCntry) throws Exception {
 
-    if (!"ZP01".equals(addr.getId().getAddrType())) {
-      addr.setDept("");
+    if (!("618".equals(cmrIssuingCntry))) {
+      if (!"ZP01".equals(addr.getId().getAddrType())) {
+        addr.setDept("");
+      }
     }
   }
 

@@ -309,7 +309,7 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
             ${summary.addr.city2}
   				</cmr:column>
           </cmr:view>
-          <cmr:view forGEO="JP">
+          <cmr:view forGEO="JP" exceptForCountry="724">
           <cmr:column span="1" width="130">
             <label> <cmr:fieldLabel fieldId="Office" />:</label>
           </cmr:column>
@@ -336,10 +336,10 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
             ${summary.addr.stateProv}
             ${summary.stateprovdesc != null ? " - ".concat(summary.stateprovdesc) : ""}
   				</cmr:column>
-          <cmr:column span="1" width="130">
+          <cmr:column span="1" width="130" exceptForCountry="724">
             <label> <cmr:fieldLabel fieldId="Floor" />:</label>
           </cmr:column>
-          <cmr:column span="1" width="170">
+          <cmr:column span="1" width="170" exceptForCountry="724">
             ${summary.addr.floor}
           </cmr:column>
         </cmr:row>
@@ -353,10 +353,10 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
           <cmr:column span="1" width="240">
             ${summary.countyDesc}
           </cmr:column>
-          <cmr:column span="1" width="130">
+          <cmr:column span="1" width="130" exceptForCountry="724">
             <label> <cmr:fieldLabel fieldId="Office" />:</label>
           </cmr:column>
-          <cmr:column span="1" width="170">
+          <cmr:column span="1" width="170" exceptForCountry="724">
             ${summary.addr.office}
           </cmr:column>
         </cmr:row>
@@ -628,7 +628,7 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
         <cmr:column span="1" width="127">
           <label>${ui.customerInfo}:</label>
         </cmr:column>
-        <cmr:view exceptForGEO="CEMEA,FR">
+        <cmr:view exceptForGEO="CEMEA,FR,SWISS">
           <cmr:column span="1" width="130">
             <label><cmr:fieldLabel fieldId="CustLang" />:</label>
           </cmr:column>
