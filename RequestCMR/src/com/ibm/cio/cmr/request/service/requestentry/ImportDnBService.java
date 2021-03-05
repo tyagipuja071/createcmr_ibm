@@ -548,7 +548,7 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
         } else {
         	String[] streetParts;
           // no street address con't, overflow
-        	if (SystemLocation.AUSTRIA.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.GERMANY.equals(reqModel.getCmrIssuingCntry())){
+        	if (SystemLocation.AUSTRIA.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.GERMANY.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.LIECHTENSTEIN.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.SWITZERLAND.equals(reqModel.getCmrIssuingCntry())){
         		streetParts = converter.doSplitName(street, "", 35, 35);
         	}else {
         		streetParts = converter.doSplitName(street, "", 30, 30);
