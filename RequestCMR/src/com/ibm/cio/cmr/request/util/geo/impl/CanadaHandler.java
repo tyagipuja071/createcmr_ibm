@@ -387,7 +387,7 @@ public class CanadaHandler extends GEOHandler {
     DataPK pk = new DataPK();
     pk.setReqId(addr.getId().getReqId());
     Data data = entityManager.find(Data.class, pk);
-    
+
     AdminPK apk = new AdminPK();
     apk.setReqId(addr.getId().getReqId());
     Admin admin = entityManager.find(Admin.class, apk);
@@ -395,11 +395,11 @@ public class CanadaHandler extends GEOHandler {
     String custNm1 = admin.getMainCustNm1() != null ? admin.getMainCustNm1() : "";
     addr.setCustNm1(custNm1);
 
-	  if (!"ZS01".equals(addr.getId().getAddrType())) {
+    if (!"ZS01".equals(addr.getId().getAddrType())) {
       // only update for main address
       return;
     }
-    
+
     setAddressRelatedData(entityManager, admin, data, addr);
   }
 
@@ -651,6 +651,16 @@ public class CanadaHandler extends GEOHandler {
       }
     }
     return newAddrSeq;
+  }
+
+  @Override
+  public List<String> getDataFieldsForUpdate(String cmrIssuingCntry) {
+    List<String> fields = new ArrayList<>();
+    fields.addAll(Arrays.asList("ABBREV_NM", "CLIENT_TIER", "CUST_CLASS", "CUST_PREF_LANG", "INAC_CD", "ISU_CD", "ENTERPRISE", "SEARCH_TERM",
+        "ISIC_CD", "SUB_INDUSTRY_CD", "VAT", "COV_DESC", "COV_ID", "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC",
+        "GEO_LOCATION_CD", "DUNS_NO", "CUST_ACCT_TYP", "PPSCEID", "SENSITIVE_FLAG", "CMR_NO", "CMR_OWNER", "INAC_TYPE", "SALES_BO_CD", "VAT_EXEMPT",
+        "CUST_CLASS", "ABBREV_LOCN"));
+    return fields;
   }
 
   public String getReqType(EntityManager entityManager, long reqId) {
