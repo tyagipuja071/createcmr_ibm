@@ -851,7 +851,7 @@ public class FranceUtil extends AutomationUtil {
                   resultCodes.add("D");
                   checkDetails.append("Update to InstallAt (" + addr.getId().getAddrSeq() + ") has different customer name than sold-to .\n");
                 }
-              } else if (CmrConstants.RDC_SOLD_TO.equals(addrType) || CmrConstants.RDC_BILL_TO.equals(addrType)) {
+              } else if (CmrConstants.RDC_SOLD_TO.equals(addrType)) {
                 // LOG.debug("Update to Address " + addrType + "(" +
                 // addr.getId().getAddrSeq() + ") needs to be verified");
                 // checkDetails.append("Update to address " + addrType + "(" +
