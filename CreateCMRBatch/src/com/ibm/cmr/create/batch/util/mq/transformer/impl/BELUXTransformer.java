@@ -1086,6 +1086,12 @@ public class BELUXTransformer extends EMEATransformer {
       }
 
       String dataEmbargoCd = data.getEmbargoCd();
+      if (dataEmbargoCd != null) {
+        legacyCust.setEmbargoCd(dataEmbargoCd);
+      } else {
+        legacyCust.setEmbargoCd("");
+      }
+
       String rdcEmbargoCd = LegacyDirectUtil.getEmbargoCdFromDataRdc(entityManager, admin);
       if (!StringUtils.isBlank(data.getModeOfPayment()))
         legacyCust.setModeOfPayment(data.getModeOfPayment());
@@ -1123,12 +1129,6 @@ public class BELUXTransformer extends EMEATransformer {
     // data.getSubIndustryCd());
     // }
 
-    String dataEmbargoCd = data.getEmbargoCd();
-    if (dataEmbargoCd != null) {
-      legacyCust.setEmbargoCd(dataEmbargoCd);
-    } else {
-      legacyCust.setEmbargoCd("");
-    }
     if (!StringUtils.isEmpty(data.getEngineeringBo()))
       legacyCust.setCeBo(data.getEngineeringBo());
     setSBOIBO(legacyCust, data);
