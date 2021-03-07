@@ -1071,6 +1071,12 @@ public class NLTransformer extends EMEATransformer {
       legacyCust.setBankAcctNo("");
 
       String dataEmbargoCd = data.getEmbargoCd();
+      if (dataEmbargoCd != null) {
+        legacyCust.setEmbargoCd(dataEmbargoCd);
+      } else {
+        legacyCust.setEmbargoCd("");
+      }
+
       String rdcEmbargoCd = LegacyDirectUtil.getEmbargoCdFromDataRdc(entityManager, admin);
       // CREATCMR-845
       legacyCust.setModeOfPayment(data.getModeOfPayment() == null ? "" : data.getModeOfPayment());
@@ -1107,13 +1113,6 @@ public class NLTransformer extends EMEATransformer {
     // // legacyCust.setLocNo(legacyCust.getId().getSofCntryCode() +
     // // data.getSubIndustryCd());
     // }
-
-    String dataEmbargoCd = data.getEmbargoCd();
-    if (dataEmbargoCd != null) {
-      legacyCust.setEmbargoCd(dataEmbargoCd);
-    } else {
-      legacyCust.setEmbargoCd("");
-    }
 
     // common data for C/U
     // formatted data
