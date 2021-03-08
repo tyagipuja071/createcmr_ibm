@@ -1716,7 +1716,7 @@ public class CEETransformer extends EMEATransformer {
   public boolean hasCmrtCustExt() {
     // return true;
     if ("SK".equals(DEFAULT_LANDED_COUNTRY) || "BG".equals(DEFAULT_LANDED_COUNTRY) || "RU".equals(DEFAULT_LANDED_COUNTRY)
-        || SystemLocation.CZECH_REPUBLIC.equals(DEFAULT_LANDED_COUNTRY)) {
+        || "CZ".equals(DEFAULT_LANDED_COUNTRY)) {
       return true;
     } else {
       return false;
