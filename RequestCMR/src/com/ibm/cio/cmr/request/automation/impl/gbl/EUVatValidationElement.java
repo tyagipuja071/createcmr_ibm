@@ -88,6 +88,11 @@ public class EUVatValidationElement extends ValidatingElement implements Company
           validation.setMessage("VAT not found");
           output.setDetails("No VAT specified on the request.");
           LOG.debug("No VAT specified on the request.");
+        } else if (StringUtils.isBlank(data.getVat()) && "Y".equals(admin.getPaygoProcessIndc())) {
+          validation.setSuccess(true);
+          validation.setMessage("VAT not found");
+          output.setDetails("This is a PayGo request.");
+          LOG.debug("This is a PayGo request.Partner have VAT EXCEPTION approval");
         } else if (engineData.hasPositiveCheckStatus(AutomationEngineData.SKIP_VAT_CHECKS)) {
           validation.setSuccess(true);
           validation.setMessage("Skipped");
