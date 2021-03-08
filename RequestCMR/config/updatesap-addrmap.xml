@@ -1,0 +1,26 @@
+<convertor>
+  <typeMappings>
+    <mapping>
+      <countries>866,754</countries>
+      <typeMap>
+        <inputType>ZP01</inputType>
+        <outputType>ZD01</outputType>
+      </typeMap>
+      <typeMap>
+        <inputType>ZS02</inputType>
+        <outputType>ZI01</outputType>
+      </typeMap>
+      <typeMap>
+        <inputType>PG01</inputType>
+        <outputType>ZP01</outputType>
+      </typeMap>  
+    </mapping>
+    <mapping>
+    <countries>618</countries>
+      <typeMap>
+        <inputType>ZS02</inputType>
+        <outputType>ZD01</outputType>
+      </typeMap>
+      </mapping>
+  </typeMappings>
+</convertor>
