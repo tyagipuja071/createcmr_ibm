@@ -114,14 +114,14 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
           <cmr:column span="1" width="130">
             <label><cmr:fieldLabel fieldId="CustomerName1" />:</label>
           </cmr:column>
-          <cmr:column span="1" width="240">
-            ${summary.addr.custNm1}
+          <cmr:column span="1" width="240"><span style="word-wrap: break-word">
+            ${summary.addr.custNm1}</span>
           </cmr:column>
           <cmr:column span="1" width="130" exceptForCountry="755">
             <label><cmr:fieldLabel fieldId="CustomerName2" />:</label>
           </cmr:column>
-          <cmr:column span="1" width="170" exceptForCountry="755">
-            ${summary.addr.custNm2}
+          <cmr:column span="1" width="170" exceptForCountry="755"><span style="word-wrap: break-word">
+            ${summary.addr.custNm2}</span>
           </cmr:column>
         </cmr:row>
       </cmr:view>
@@ -249,8 +249,8 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
           <cmr:column span="1" width="130">
             <label><cmr:fieldLabel fieldId="StreetAddress1" />:</label>
           </cmr:column>
-          <cmr:column span="1" width="240">
-            ${summary.addr.addrTxt}
+          <cmr:column span="1" width="240"><span style="word-wrap: break-word">
+            ${summary.addr.addrTxt}</span>
 		  </cmr:column>
 		</cmr:view>
 		<cmr:view forGEO="JP">
@@ -290,8 +290,8 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
           <cmr:column span="1" width="130">
             <label><cmr:fieldLabel fieldId="City1" />:</label>
           </cmr:column>
-          <cmr:column span="1" width="240">
-            ${summary.addr.city1}
+          <cmr:column span="1" width="240"><span style="word-wrap: break-word">
+            ${summary.addr.city1}</span>
 		  </cmr:column>
 		</cmr:view>
 		<cmr:view forGEO="JP">
