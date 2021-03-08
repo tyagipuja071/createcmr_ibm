@@ -368,6 +368,33 @@ public class BeLuxUtil extends AutomationUtil {
           }
         }
         break;
+      case "PPS CEID":
+          String newppsceid = change.getNewData();
+          String oldppsceid = change.getOldData();
+          String Kukla = data.getCustClass();
+          // ADD
+          if (StringUtils.isBlank(oldppsceid) && !StringUtils.isBlank(newppsceid)) {
+        	  if("49".equalsIgnoreCase(Kukla) && checkPPSCEID(data.getPpsceid())){
+        		  details.append("PPS CE ID validated successfully with PartnerWorld Profile Systems.").append("\n");
+        	  } else {
+        		 details.append("PPS CE ID was added.").append("\n");
+        		 engineData.addRejectionComment("OTH", "PPSCEID was added.", "", "");
+                  return false ;
+        	  }
+            }
+          // DELETE
+          if (!StringUtils.isBlank(oldppsceid) && StringUtils.isBlank(newppsceid)) {
+            cmdeReview = true;
+            engineData.addNegativeCheckStatus("_beluxPpsCeidUpdt", "PPSCEID was deleted.\n");
+            details.append("PPSCEID was deleted.\n");
+          }
+          //UPDATE
+          if (!StringUtils.isBlank(oldppsceid) && !StringUtils.isBlank(newppsceid) && !oldppsceid.equalsIgnoreCase(newppsceid)){
+        	  cmdeReview = true;
+              engineData.addNegativeCheckStatus("_beluxPpsCeidUpdt", "PPSCEID was updated.\n");
+              details.append("PPSCEID was updated.\n");
+          }
+          break;
       case "Order Block Code":
         String newOrdBlk = change.getNewData();
         String oldOrdBlk = change.getOldData();
