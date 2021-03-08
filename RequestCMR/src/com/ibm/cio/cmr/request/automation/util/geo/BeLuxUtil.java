@@ -17,12 +17,14 @@ import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.impl.gbl.CalculateCoverageElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
+import com.ibm.cio.cmr.request.automation.out.FieldResultKey;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.CoverageContainer;
 import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
 import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
+import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
@@ -30,8 +32,8 @@ import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
-import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
+import com.ibm.cmr.services.client.matching.gbg.GBGResponse;
 
 public class BeLuxUtil extends AutomationUtil {
 
@@ -78,11 +80,11 @@ public class BeLuxUtil extends AutomationUtil {
     if (zp01 != null) {
       customerNameZP01 = StringUtils.isBlank(zp01.getCustNm1()) ? "" : zp01.getCustNm1();
       landedCountryZP01 = StringUtils.isBlank(zp01.getLandCntry()) ? "" : zp01.getLandCntry();
-    }
-    if (!StringUtils.equals(zs01.getLandCntry(), zp01.getLandCntry())) {
-      scenarioExceptions.setCheckVATForDnB(false);
-    }
 
+      if (!StringUtils.equals(zs01.getLandCntry(), zp01.getLandCntry())) {
+        scenarioExceptions.setCheckVATForDnB(false);
+      }
+    }
     if ((SCENARIO_BP_LOCAL.equals(scenario) || SCENARIO_BP_CROSS.equals(scenario) || SCENARIO_BP_LOCAL_LU.equals(scenario)) && zp01 != null
         && (!StringUtils.equals(getCleanString(customerName), getCleanString(customerNameZP01))
             || !StringUtils.equals(zs01.getLandCntry(), landedCountryZP01))) {
@@ -148,10 +150,22 @@ public class BeLuxUtil extends AutomationUtil {
       return true;
     }
 
+    String gbgCntry = chkFrAffiliateCntry(engineData, requestData, entityManager);
+
     Data data = requestData.getData();
     String coverageId = container.getFinalCoverage();
 
-    if (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && CalculateCoverageElement.COV_BG.equals(covFrom)) {
+    if (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && CalculateCoverageElement.COV_BG.equals(covFrom)
+        && StringUtils.isNotBlank(gbgCntry)) {
+      details.append("Coverage calculated for: " + gbgCntry);
+      FieldResultKey sboKeyVal = new FieldResultKey("DATA", "SALES_BO_CD");
+      String sboVal = "";
+      if (overrides.getData().containsKey(sboKeyVal)) {
+        sboVal = overrides.getData().get(sboKeyVal).getNewValue();
+        sboVal = sboVal.substring(0, 3);
+        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sboVal + sboVal);
+        details.append("SORTL: " + sboVal + sboVal);
+      }
       engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
     } else if (!isCoverageCalculated) {
       // if not calculated using bg/gbg try calculation using 32/S logic
@@ -191,6 +205,30 @@ public class BeLuxUtil extends AutomationUtil {
       }
     }
     return true;
+  }
+
+  private String chkFrAffiliateCntry(AutomationEngineData engineData, RequestData reqData, EntityManager entityManager) {
+    GBGResponse gbg = (GBGResponse) engineData.get(AutomationEngineData.GBG_MATCH);
+    String gbgCntry = "";
+    if (gbg != null && gbg.isDomesticGBG()) {
+      // check konsz
+
+      Data data = reqData.getData();
+      int count = 0;
+      String sql = ExternalizedQuery.getSql("AUTO.GBG.COV.KNA1.KONSZ");
+      String bgId = gbg.getBgId();
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("CNTRY", data.getCmrIssuingCntry());
+      query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+      query.setParameter("BG_ID", bgId);
+      query.setParameter("AFFILIATE", "0016");
+
+      count = query.getSingleResult(Integer.class);
+      gbgCntry = count > 0 ? "Belgium" : "Luxembourg";
+
+    }
+
+    return gbgCntry;
   }
 
   private BeLuxFieldsContainer calculate32SValuesFromIMSBeLux(EntityManager entityManager, String cmrIssuingctry, String countryUse,
@@ -257,7 +295,7 @@ public class BeLuxUtil extends AutomationUtil {
     Data data = requestData.getData();
     StringBuilder details = new StringBuilder();
     boolean cmdeReview = false;
-
+    Set<String> resultCodes = new HashSet<String>();
     List<String> ignoredUpdates = new ArrayList<String>();
     for (UpdatedDataModel change : changes.getDataUpdates()) {
       switch (change.getDataField()) {
@@ -307,12 +345,22 @@ public class BeLuxUtil extends AutomationUtil {
       case "Economic Code":
         String newEcoCd = change.getNewData();
         String oldEcoCd = change.getOldData();
-        String regUser = SystemParameters.getString("BELUX_ECO_CD_UPDT");
-        String currentUser = admin.getRequesterId();
+        List<String> ls = Arrays.asList("A", "F", "C", "R");
         if (StringUtils.isNotBlank(newEcoCd) && StringUtils.isNotBlank(oldEcoCd) && newEcoCd.length() == 3 && oldEcoCd.length() == 3) {
           if (!newEcoCd.substring(0, 1).equals(oldEcoCd.substring(0, 1))
-              && newEcoCd.substring(1, newEcoCd.length()).equals(oldEcoCd.substring(1, oldEcoCd.length())) && currentUser.equalsIgnoreCase(regUser)) {
-            details.append("Economic Code has been updated by registered user.\n");
+              && newEcoCd.substring(1, newEcoCd.length()).equals(oldEcoCd.substring(1, oldEcoCd.length()))) {
+            if (ls.contains(newEcoCd.substring(0, 1)) && oldEcoCd.substring(0, 1).equals("K")
+                || ls.contains(oldEcoCd.substring(0, 1)) && newEcoCd.substring(0, 1).equals("K")) {
+              admin.setScenarioVerifiedIndc("Y");
+              details.append("Economic Code has been updated by registered user to " + newEcoCd + "\n");
+            } else {
+              cmdeReview = true;
+            }
+          } else if (newEcoCd.substring(0, 1).equals(oldEcoCd.substring(0, 1))
+              && (newEcoCd.substring(1, 3).equals("11") || newEcoCd.substring(1, 3).equals("13") || newEcoCd.substring(1, 3).equals("49"))) {
+            cmdeReview = true;
+            engineData.addNegativeCheckStatus("_beluxEconomicCdUpdt", "Economic code is updated from " + oldEcoCd + " to " + newEcoCd);
+            details.append("Economic code is updated to " + newEcoCd + "\n");
           } else {
             cmdeReview = true;
             engineData.addNegativeCheckStatus("_beluxEconomicCdUpdt", "Economic code was updated incorrectly or by non registered user.");
@@ -320,6 +368,33 @@ public class BeLuxUtil extends AutomationUtil {
           }
         }
         break;
+      case "PPS CEID":
+          String newppsceid = change.getNewData();
+          String oldppsceid = change.getOldData();
+          String Kukla = data.getCustClass();
+          // ADD
+          if (StringUtils.isBlank(oldppsceid) && !StringUtils.isBlank(newppsceid)) {
+        	  if("49".equalsIgnoreCase(Kukla) && checkPPSCEID(data.getPpsceid())){
+        		  details.append("PPS CE ID validated successfully with PartnerWorld Profile Systems.").append("\n");
+        	  } else {
+        		 resultCodes.add("D");
+        		 details.append("PPS CE ID was added.").append("\n");
+        		 
+        	  }
+            }
+          // DELETE
+          if (!StringUtils.isBlank(oldppsceid) && StringUtils.isBlank(newppsceid)) {
+            cmdeReview = true;
+            engineData.addNegativeCheckStatus("_beluxPpsCeidUpdt", "PPSCEID was deleted.\n");
+            details.append("PPSCEID was deleted.\n");
+          }
+          //UPDATE
+          if (!StringUtils.isBlank(oldppsceid) && !StringUtils.isBlank(newppsceid) && !oldppsceid.equalsIgnoreCase(newppsceid)){
+        	  cmdeReview = true;
+              engineData.addNegativeCheckStatus("_beluxPpsCeidUpdt", "PPSCEID was updated.\n");
+              details.append("PPSCEID was updated.\n");
+          }
+          break;
       case "Order Block Code":
         String newOrdBlk = change.getNewData();
         String oldOrdBlk = change.getOldData();
@@ -342,15 +417,19 @@ public class BeLuxUtil extends AutomationUtil {
         break;
       }
     }
-    if (cmdeReview) {
-      engineData.addNegativeCheckStatus("_beluxDataCheckFailed", "Updates to one or more data fields will require CMDE review.");
-      details.append("Updates to one or more data fields will require CMDE review.\n");
-      validation.setSuccess(false);
-      validation.setMessage("Not Validated");
-    } else {
-      validation.setSuccess(true);
-      validation.setMessage("Successful");
-    }
+    if (resultCodes.contains("D")) {
+        output.setOnError(true);
+        validation.setSuccess(false);
+        validation.setMessage("Rejected");
+      } else if (cmdeReview) {
+        engineData.addNegativeCheckStatus("_esDataCheckFailed", "Updates to one or more fields cannot be validated.");
+        details.append("Updates to one or more fields cannot be validated.\n");
+        validation.setSuccess(false);
+        validation.setMessage("Not Validated");
+      } else {
+        validation.setSuccess(true);
+        validation.setMessage("Successful");
+      }
     if (!ignoredUpdates.isEmpty()) {
       details.append("Updates to the following fields skipped validation:\n");
       for (String field : ignoredUpdates) {
