@@ -50,6 +50,16 @@ public class UpdateSapNumberController extends BaseController {
   @Autowired
   AddressService service;
 
+  UpdateSapNoService updateSapNoService;
+
+  public UpdateSapNumberController() {
+    try {
+      this.updateSapNoService = getParserInstance();
+    } catch (Exception e) {
+      LOG.debug(e.getMessage());
+    }
+  }
+
   /**
    * Handles the refresh page
    * 
@@ -118,18 +128,12 @@ public class UpdateSapNumberController extends BaseController {
 
     List<Addr> addressList = getAddressRecords(entityManager, Long.parseLong(reqId));
     List<Kna1> kna1List = getKna1ForCMR(cmrNo, issuingCntry, entityManager);
-    UpdateSapNoService instance = null;
     String output = "";
-    try {
-      instance = getParserInstance();
-    } catch (Exception e) {
-      LOG.debug(e.getMessage());
-    }
     if (addressList != null && !addressList.isEmpty() && kna1List != null && !kna1List.isEmpty()) {
       for (Addr addr : addressList) {
         if (StringUtils.isEmpty(addr.getSapNo())) {
           try {
-            output = instance.getKNA1AddressType(addr.getId().getAddrType(), issuingCntry);
+            output = updateSapNoService.getKNA1AddressType(addr.getId().getAddrType(), issuingCntry);
             LOG.debug("Output AddrType = " + output);
           } catch (Exception e) {
             LOG.debug(e.getMessage());
