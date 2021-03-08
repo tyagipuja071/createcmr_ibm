@@ -737,13 +737,13 @@ function setAddressDetailsForView() {
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
   var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
   if (viewOnlyPage == 'true') {
-    $('label[for="custNm1_view"]').text('Customer legal name:');
-    $('label[for="custNm2_view"]').text('Legal name continued:');
-    $('label[for="custNm3_view"]').text('Division/Department:');
-    $('label[for="custNm4_view"]').text('Attention To /Building/Floor/Office:');
-    $('label[for="addrTxt_view"]').text('Street Name And Number:');
-    $('label[for="bldg_view"]').text('Building_ext:');
-    $('label[for="dept_view"]').text('Department_ext:');
+    $('label[for="custNm1_view"]').text('Customer legal name');
+    $('label[for="custNm2_view"]').text('Legal name continued');
+    $('label[for="custNm3_view"]').text('Division/Department');
+    $('label[for="custNm4_view"]').text('Attention To /Building/Floor/Office');
+    $('label[for="addrTxt_view"]').text('Street Name And Number');
+    $('label[for="bldg_view"]').text('Building_ext');
+    $('label[for="dept_view"]').text('Department_ext');
   }
 }
 
