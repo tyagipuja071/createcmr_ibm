@@ -5408,6 +5408,7 @@ function addBillingAddrValidator() {
     return {
       validate : function() {
         var zp01ReqId = FormManager.getActualValue('reqId');
+        var custSubType = FormManager.getActualValue('custSubGrp');
         qParams = {
           REQ_ID : zp01ReqId,
         };
@@ -5416,11 +5417,14 @@ function addBillingAddrValidator() {
         if (Number(zp01Reccount) > 1) {
           return new ValidationResult(null, false, 'Only one Billing Address can be defined.');
         } else if (Number(zp01Reccount == 0)) {
-          if (custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'CRO3P') {
-            return new ValidationResult(null, false, 'For 3rd party scenario please import a CMR via CMR search');
-          } else {
-            return new ValidationResult(null, false, 'At least one Billing Address must be defined.');
-          }
+          /*
+           * if (custSubType == '3PAIT' || custSubType == '3PASM' || custSubType ==
+           * '3PAVA' || custSubType == 'CRO3P') { return new
+           * ValidationResult(null, false, 'For 3rd party scenario please import
+           * a CMR via CMR search'); } else {
+           */
+          return new ValidationResult(null, false, 'At least one Billing Address must be defined.');
+          /* } */
         } else {
           return new ValidationResult(null, true);
         }
@@ -5459,12 +5463,12 @@ function addBillingValidator() {
 
 function addCMRValidator() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
-  var custSubType = FormManager.getActualValue('custSubGrp');
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
         if (FormManager.getActualValue('reqType') == 'C') {
-          if (FormManager.getActualValue('findCmrResult') == 'NOT DONE' || FormManager.getActualValue('findCmrResult') == 'REJECTED') {
+          if (FormManager.getActualValue('findCmrResult') == 'Not Done' || FormManager.getActualValue('findCmrResult') == 'Rejected') {
+            var custSubType = FormManager.getActualValue('custSubGrp');
             if (role == "REQUESTER" && (custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'CRO3P')) {
               return new ValidationResult(null, false, 'For 3rd party scenario please import a CMR via CMR search');
             }
@@ -8290,6 +8294,7 @@ function addAfterConfigItaly() {
   disableCompanyLevelFieldsIT();
   ibmFieldsBehaviourInCreateByScratchIT();
   disableProcpectCmrIT();
+  addBillingValidator();
 
 }
 
@@ -8311,6 +8316,7 @@ function addAfterTemplateLoadItaly(fromAddress, scenario, scenarioChanged) {
   ibmFieldsBehaviourInCreateByScratchIT();
   disableProcpectCmrIT();
   autoSetSBOOnSRValueIT();
+  addBillingValidator();
 }
 
 function addAddrFunctionItaly(cntry, addressMode, saving, finalSave) {
