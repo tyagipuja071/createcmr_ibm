@@ -295,7 +295,7 @@ public class BeLuxUtil extends AutomationUtil {
     Data data = requestData.getData();
     StringBuilder details = new StringBuilder();
     boolean cmdeReview = false;
-
+    Set<String> resultCodes = new HashSet<String>();
     List<String> ignoredUpdates = new ArrayList<String>();
     for (UpdatedDataModel change : changes.getDataUpdates()) {
       switch (change.getDataField()) {
@@ -377,9 +377,9 @@ public class BeLuxUtil extends AutomationUtil {
         	  if("49".equalsIgnoreCase(Kukla) && checkPPSCEID(data.getPpsceid())){
         		  details.append("PPS CE ID validated successfully with PartnerWorld Profile Systems.").append("\n");
         	  } else {
+        		 resultCodes.add("D");
         		 details.append("PPS CE ID was added.").append("\n");
-        		 engineData.addRejectionComment("OTH", "PPSCEID was added.", "", "");
-                  return false ;
+        		 
         	  }
             }
           // DELETE
@@ -417,15 +417,19 @@ public class BeLuxUtil extends AutomationUtil {
         break;
       }
     }
-    if (cmdeReview) {
-      engineData.addNegativeCheckStatus("_beluxDataCheckFailed", "Updates to one or more data fields will require CMDE review.");
-      details.append("Updates to one or more data fields will require CMDE review.\n");
-      validation.setSuccess(false);
-      validation.setMessage("Not Validated");
-    } else {
-      validation.setSuccess(true);
-      validation.setMessage("Successful");
-    }
+    if (resultCodes.contains("D")) {
+        output.setOnError(true);
+        validation.setSuccess(false);
+        validation.setMessage("Rejected");
+      } else if (cmdeReview) {
+        engineData.addNegativeCheckStatus("_esDataCheckFailed", "Updates to one or more fields cannot be validated.");
+        details.append("Updates to one or more fields cannot be validated.\n");
+        validation.setSuccess(false);
+        validation.setMessage("Not Validated");
+      } else {
+        validation.setSuccess(true);
+        validation.setMessage("Successful");
+      }
     if (!ignoredUpdates.isEmpty()) {
       details.append("Updates to the following fields skipped validation:\n");
       for (String field : ignoredUpdates) {
