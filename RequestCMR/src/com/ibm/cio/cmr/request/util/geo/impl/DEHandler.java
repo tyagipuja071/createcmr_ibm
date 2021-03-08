@@ -130,7 +130,7 @@ public class DEHandler extends GEOHandler {
     // addrtxt2 issue
     String name4 = currentRecord.getCmrName4();
     address.setBldg(name4);
-    
+
     boolean doSplit = currentRecord.getCmrStreetAddress() != null && currentRecord.getCmrStreetAddress().length() > 35;
     if (doSplit) {
       splitAddress(address, currentRecord.getCmrStreetAddress(), currentRecord.getCmrStreetAddressCont(), 35, 35);
@@ -706,7 +706,8 @@ public class DEHandler extends GEOHandler {
 
     }
     return zzkvCusNo;
-    
+  }
+
   /* Story : 1834659 - Import from KUNNR_EXT table */
   private KunnrExt getKunnrExtDetails(String kunnr) throws Exception {
     KunnrExt ke = new KunnrExt();
