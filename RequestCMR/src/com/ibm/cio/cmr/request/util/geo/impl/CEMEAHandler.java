@@ -37,6 +37,7 @@ import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtCustExt;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataRdc;
+import com.ibm.cio.cmr.request.entity.KunnrExt;
 import com.ibm.cio.cmr.request.entity.Sadr;
 import com.ibm.cio.cmr.request.entity.UpdatedAddr;
 import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation;
@@ -189,7 +190,6 @@ public class CEMEAHandler extends BaseSOFHandler {
       // (CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode())
       // && "AT".equals(record.getCmrCountryLanded())) {
       if (CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode()) && "618".equals(reqEntry.getCmrIssuingCntry())) {
-
         record.setCmrAddrSeq("1");
       }
       converted.add(record);
@@ -1168,6 +1168,38 @@ public class CEMEAHandler extends BaseSOFHandler {
     return 35;
   }
 
+  /* CREATCMR-1308 - Import from KUNNR_EXT table */
+  private KunnrExt getKunnrExtDetails(String kunnr) throws Exception {
+    KunnrExt ke = new KunnrExt();
+    String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
+    String mandt = SystemConfiguration.getValue("MANDT");
+    String sql = ExternalizedQuery.getSql("GET.KUNNR_EXT.BY_KUNNR_MANDT_AUSTRIA");
+    sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
+    sql = StringUtils.replace(sql, ":KUNNR", "'" + kunnr + "'");
+    String dbId = QueryClient.RDC_APP_ID;
+
+    QueryRequest query = new QueryRequest();
+    query.setSql(sql);
+    query.addField("BUILDING");
+    query.addField("DEPARTMENT");
+
+    LOG.debug("Getting existing KUNNNR_EXT details from RDc DB..");
+    QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
+    QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
+
+    if (response.isSuccess() && response.getRecords() != null && response.getRecords().size() != 0) {
+      List<Map<String, Object>> records = response.getRecords();
+      Map<String, Object> record = records.get(0);
+
+      ke.setBuilding(record.get("BUILDING") != null ? record.get("BUILDING").toString() : "");
+      ke.setDepartment(record.get("DEPARTMENT") != null ? record.get("DEPARTMENT").toString() : "");
+
+      LOG.debug("***RETURNING BUILDING > " + ke.getBuilding());
+      LOG.debug("***RETURNING DEPARTMENT > " + ke.getDepartment());
+    }
+    return ke;
+  }
+
   @Override
   public int getName2Length() {
     return 35;
@@ -1179,6 +1211,7 @@ public class CEMEAHandler extends BaseSOFHandler {
         || (currentRecord.getCmrName2Plain() != null && currentRecord.getCmrName2Plain().length() > 35);
 
     String country = currentRecord.getCmrIssuedBy();
+    ArrayList<String> addrDetailsList = new ArrayList<String>();
     if (doSplit) {
       String[] names = splitName(currentRecord.getCmrName1Plain(), currentRecord.getCmrName2Plain(), 35, 100);
       address.setCustNm1(names[0]);
@@ -1221,8 +1254,17 @@ public class CEMEAHandler extends BaseSOFHandler {
       address.getId().setAddrSeq("00001");
     }
 
-    if (address.getDept() != null) {
-      address.setDept(currentRecord.getCmrDept());
+    KunnrExt addlAddDetail = getKunnrExtDetails(currentRecord.getCmrSapNumber());
+    if (addlAddDetail != null) {
+      address.setBldg(addlAddDetail.getBuilding() != null ? addlAddDetail.getBuilding() : "");
+      address.setDept(addlAddDetail.getDepartment() != null ? addlAddDetail.getDepartment() : "");
+
+      if (!StringUtils.isEmpty(address.getDept())) {
+        addrDetailsList.add(address.getDept());
+      }
+      if (!StringUtils.isEmpty(address.getBldg())) {
+        addrDetailsList.add(address.getBldg());
+      }
     }
   }
 
