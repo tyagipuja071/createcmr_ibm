@@ -2171,38 +2171,30 @@ function setAddressDetailsForView() {
   }
 }
 
-function custNmAttnPersonPhoneValidation() {
-  var attn = FormManager.getActualValue('custNm4');
-  var phone = FormManager.getActualValue('custPhone');
-  var cust3 = FormManager.getActualValue('custNm3');
-
-  if (cust3 != null && cust3.trim().length > 0) {
-    FormManager.clearValue('custNm4');
-    FormManager.disable('custNm4');
-    FormManager.clearValue('custPhone');
-    FormManager.disable('custPhone');
-  } else if (cust3 == null || cust3.trim().length == 0) {
-    FormManager.enable('custNm4');
-    FormManager.enable('custPhone');
-  }
-
-  if ((attn != null && attn.trim().length > 0) || (phone != null && phone.trim().length > 0)) {
-    FormManager.clearValue('custNm3');
-    FormManager.disable('custNm3');
-  } else if ((attn == null || attn.trim().length == 0) && (phone == null || phone.trim().length == 0)) {
-    FormManager.enable('custNm3');
-  }
-}
-
-function custNmAttnPersonPhoneValidationOnChange() {
-  var fields = [ 'custNm3', 'custNm4', 'custPhone' ];
-
-  for (var i = 0; i < fields.length; i++) {
-    dojo.connect(FormManager.getField(fields[i]), 'onChange', function(value) {
-      custNmAttnPersonPhoneValidation();
-    });
-  }
-}
+/*
+ * function custNmAttnPersonPhoneValidation() { var attn =
+ * FormManager.getActualValue('custNm4'); var cust3 =
+ * FormManager.getActualValue('custNm3'); var phone =
+ * FormManager.getActualValue('custPhone'); if (cust3 != null &&
+ * cust3.trim().length > 0) { FormManager.clearValue('custNm4');
+ * FormManager.disable('custNm4'); FormManager.clearValue('custPhone');
+ * FormManager.disable('custPhone'); } else if (cust3 == null ||
+ * cust3.trim().length == 0) { FormManager.enable('custNm4');
+ * FormManager.enable('custPhone'); }
+ * 
+ * if ((attn != null && attn.trim().length > 0) || (phone != null &&
+ * phone.trim().length > 0)) { FormManager.clearValue('custNm3');
+ * FormManager.disable('custNm3'); } else if ((attn == null ||
+ * attn.trim().length == 0) && (phone == null || phone.trim().length == 0)) {
+ * FormManager.enable('custNm3'); } }
+ * 
+ * function custNmAttnPersonPhoneValidationOnChange() { var fields = [
+ * 'custNm3', 'custNm4', 'custPhone' ];
+ * 
+ * for (var i = 0; i < fields.length; i++) {
+ * dojo.connect(FormManager.getField(fields[i]), 'onChange', function(value) {
+ * custNmAttnPersonPhoneValidation(); }); } }
+ */
 
 function reqReasonOnChangeAT() {
   var reqReason = FormManager.getActualValue('reqReason');
@@ -2248,22 +2240,22 @@ function isZD01OrZP01ExistOnCMR() {
   return false;
 }
 
-function phoneNoValidation() {
-  var phone = FormManager.getActualValue('custPhone');
-  var attn = FormManager.getActualValue('custNm4');
-  if (phone != null && phone.trim().length > 0) {
-    FormManager.clearValue('custNm3');
-    FormManager.disable('custNm3');
-  } else if (attn == null || attn.trim().length == 0) {
-    FormManager.enable('custNm3');
-  }
-}
-
-function phoneNoValidationOnChange() {
-  dojo.connect(FormManager.getField('custPhone'), 'onChange', function(value) {
-    phoneNoValidation();
-  });
-}
+// function phoneNoValidation() {
+// var phone = FormManager.getActualValue('custPhone');
+// var attn = FormManager.getActualValue('custNm4');
+// if (phone != null && phone.trim().length > 0) {
+// FormManager.clearValue('custNm3');
+// FormManager.disable('custNm3');
+// } else if (attn == null || attn.trim().length == 0) {
+// FormManager.enable('custNm3');
+// }
+// }
+//
+// function phoneNoValidationOnChange() {
+// dojo.connect(FormManager.getField('custPhone'), 'onChange', function(value) {
+// phoneNoValidation();
+// });
+// }
 
 function setEnterpriseValues(clientTier) {
   var role = FormManager.getActualValue('userRole').toUpperCase();
@@ -4315,16 +4307,18 @@ dojo.addOnLoad(function() {
   // CMR-2096-Austria - "Central order block code"
   GEOHandler.addAfterConfig(lockOrdBlk, SysLoc.AUSTRIA);
 
-  GEOHandler.addAfterConfig(custNmAttnPersonPhoneValidation, [ SysLoc.AUSTRIA ]);
+  // GEOHandler.addAfterConfig(custNmAttnPersonPhoneValidation, [ SysLoc.AUSTRIA
+  // ]);
   // GEOHandler.addAfterConfig(setScenarioTo3PA, [ SysLoc.AUSTRIA ]);
   GEOHandler.addAfterTemplateLoad(lockAbbrvLocnForScenrio, [ SysLoc.AUSTRIA ]);
   GEOHandler.addAddrFunction(lockAbbrvLocnForScenrio, [ SysLoc.AUSTRIA ]);
   // GEOHandler.addAddrFunction(setScenarioTo3PAOnAddrSave, [ SysLoc.AUSTRIA ]);
 
-  GEOHandler.addAfterConfig(custNmAttnPersonPhoneValidationOnChange, [ SysLoc.AUSTRIA ]);
+  // GEOHandler.addAfterConfig(custNmAttnPersonPhoneValidationOnChange, [
+  // SysLoc.AUSTRIA ]);
   GEOHandler.addAfterConfig(reqReasonOnChangeAT, [ SysLoc.AUSTRIA ]);
-  GEOHandler.addAfterConfig(phoneNoValidation, [ SysLoc.AUSTRIA ]);
-  GEOHandler.addAfterConfig(phoneNoValidationOnChange, [ SysLoc.AUSTRIA ]);
+  // GEOHandler.addAfterConfig(phoneNoValidation, [ SysLoc.AUSTRIA ]);
+  // GEOHandler.addAfterConfig(phoneNoValidationOnChange, [ SysLoc.AUSTRIA ]);
   GEOHandler.addAfterConfig(setEnterpriseValues, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(setVatRequired, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(setPreferredLang, GEOHandler.CEMEA);
