@@ -3,6 +3,11 @@ package com.ibm.cio.cmr.request.util.legacy;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author PriyRanjan
+ * 
+ */
+
 public class CloningRDCConfiguration {
 
   private List<String> countriesForKnb1Create = new ArrayList<String>();
