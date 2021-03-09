@@ -6,6 +6,11 @@ import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.util.ConfigUtil;
 
+/**
+ * @author PriyRanjan
+ * 
+ */
+
 public class CloningRDCUtil {
 
   private static final Logger LOG = Logger.getLogger(CloningRDCUtil.class);

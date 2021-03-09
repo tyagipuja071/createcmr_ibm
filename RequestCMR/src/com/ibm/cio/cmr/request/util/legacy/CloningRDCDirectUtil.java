@@ -12,6 +12,11 @@ import com.ibm.cio.cmr.request.entity.Kna1;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 
+/**
+ * @author PriyRanjan
+ * 
+ */
+
 public class CloningRDCDirectUtil {
 
   private static final Logger LOG = Logger.getLogger(CloningRDCDirectUtil.class);

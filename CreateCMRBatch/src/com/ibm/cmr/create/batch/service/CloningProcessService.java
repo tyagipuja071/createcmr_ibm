@@ -7,6 +7,8 @@ import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
@@ -84,6 +86,11 @@ import com.ibm.cmr.services.client.GenerateCMRNoClient;
 import com.ibm.cmr.services.client.cmrno.GenerateCMRNoRequest;
 import com.ibm.cmr.services.client.cmrno.GenerateCMRNoResponse;
 
+/**
+ * @author PriyRanjan
+ * 
+ */
+
 public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQueue> {
 
   private static final Logger LOG = Logger.getLogger(CloningProcessService.class);
@@ -109,6 +116,8 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
   private static final List<String> STATUS_CLONING_REFN = Arrays.asList("E", "X", "C");
 
+  private SimpleDateFormat ERDAT_FORMATTER = new SimpleDateFormat("yyyyMMdd");
+
   @Override
   public boolean isTransactional() {
     // TODO Auto-generated method stub
@@ -133,6 +142,10 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     String cmrNo = cloningQueue.getId().getCmrNo();
     String cntry = cloningQueue.getId().getCmrIssuingCntry();
     LOG.debug("Inside processCloningRecord Started Cloning process for CMR No " + cmrNo);
+
+    if (StringUtils.isBlank(cntry) || StringUtils.isBlank(cmrNo)) {
+      throw new Exception("CMR No or Country missing");
+    }
 
     String cloningCmrNo = "";
     String processingType = "";
@@ -498,14 +511,28 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
       return false;
   }
 
-  private void cmrCloningQueueStatusUpdate(EntityManager entityManager, CmrCloningQueue cloningQueue) throws Exception {
+  private void cmrCloningQueueStatusUpdate(EntityManager entityManager, CmrCloningQueue cloningQueue, String cntryDup) throws Exception {
     LOG.info("Inside cmrCloningQueueStatusUpdate for CMR No : " + cloningQueue.getId().getCmrNo());
     boolean statusCheck = false;
     String curentStatus = "";
-    String sql = ExternalizedQuery.getSql("CLONING_CMR_STATUS_CHK");
+    String sql = "";
+    if (!"NA".equals(cntryDup)) {
+      List<String> duplicateCntryList = new ArrayList<String>();
+      duplicateCntryList.add(cloningQueue.getId().getCmrIssuingCntry());
+      duplicateCntryList.add(cntryDup);
+      String cntryList = convertToIssuingCntry(duplicateCntryList);
+      sql = ExternalizedQuery.getSql("CLONING_CMR_STATUS_CHK_DC");
+
+      sql = sql.replace("<CMR_ISSUING_CNTRY>", cntryList);
+    } else {
+      sql = ExternalizedQuery.getSql("CLONING_CMR_STATUS_CHK");
+    }
+    // String sql = ExternalizedQuery.getSql("CLONING_CMR_STATUS_CHK");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("ID", cloningQueue.getId().getCmrCloningProcessId());
-    // query.setParameter("CNTRY", cloningQueue.getId().getCmrIssuingCntry());
+    if ("NA".equals(cntryDup))
+      query.setParameter("CNTRY", cloningQueue.getId().getCmrIssuingCntry());
+
     query.setParameter("CMR_NO", cloningQueue.getId().getCmrNo());
     List<Object[]> status = query.getResults();
     if (status.size() == 1) {
@@ -554,12 +581,26 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
   }
 
-  private List<RdcCloningRefn> getPendingCloningRecordsKNA1RDC(EntityManager entityManager, CmrCloningQueue cmrCloningQueue) {
-    String sql = ExternalizedQuery.getSql("CLONING_CMR_CLONING_RDC_REF_PENDING");
+  private List<RdcCloningRefn> getPendingCloningRecordsKNA1RDC(EntityManager entityManager, CmrCloningQueue cmrCloningQueue, String cntryDup) {
+    String sql = "";
+    if (!"NA".equals(cntryDup)) {
+      List<String> duplicateCntryList = new ArrayList<String>();
+      duplicateCntryList.add(cmrCloningQueue.getId().getCmrIssuingCntry());
+      duplicateCntryList.add(cntryDup);
+      String cntryList = convertToIssuingCntry(duplicateCntryList);
+      sql = ExternalizedQuery.getSql("CLONING_CMR_CLONING_RDC_REF_PENDING_DC");
+
+      sql = sql.replace("<CMR_ISSUING_CNTRY>", cntryList);
+    } else {
+      sql = ExternalizedQuery.getSql("CLONING_CMR_CLONING_RDC_REF_PENDING");
+    }
+    // String sql =
+    // ExternalizedQuery.getSql("CLONING_CMR_CLONING_RDC_REF_PENDING");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("ID", cmrCloningQueue.getId().getCmrCloningProcessId());
-    // query.setParameter("CNTRY",
-    // cmrCloningQueue.getId().getCmrIssuingCntry());
+    if ("NA".equals(cntryDup))
+      query.setParameter("CNTRY", cmrCloningQueue.getId().getCmrIssuingCntry());
+
     query.setParameter("CMR", cmrCloningQueue.getId().getCmrNo());
     return query.getResults(RdcCloningRefn.class);
   }
@@ -599,6 +640,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
           kna1Clone.setSapTs(ts);
           kna1Clone.setShadUpdateInd("I");
           kna1Clone.setShadUpdateTs(ts);
+          kna1Clone.setErdat(ERDAT_FORMATTER.format(ts));
 
           createEntity(kna1Clone, entityManager);
         } catch (Exception e) {
@@ -620,10 +662,26 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     partialCommit(entityManager);
   }
 
-  private List<RdcCloningRefn> getPendingRecordsRDCKna1Child(EntityManager entityManager, CmrCloningQueue cmrCloningQueue) {
-    String sql = ExternalizedQuery.getSql("CLONING_CMR_CLONING_RDC_REF_PENDING_CHILD");
+  private List<RdcCloningRefn> getPendingRecordsRDCKna1Child(EntityManager entityManager, CmrCloningQueue cmrCloningQueue, String cntryDup) {
+    String sql = "";
+    if (!"NA".equals(cntryDup)) {
+      List<String> duplicateCntryList = new ArrayList<String>();
+      duplicateCntryList.add(cmrCloningQueue.getId().getCmrIssuingCntry());
+      duplicateCntryList.add(cntryDup);
+      String cntryList = convertToIssuingCntry(duplicateCntryList);
+      sql = ExternalizedQuery.getSql("CLONING_CMR_CLONING_RDC_REF_PENDING_CHILD_DC");
+
+      sql = sql.replace("<CMR_ISSUING_CNTRY>", cntryList);
+    } else {
+      sql = ExternalizedQuery.getSql("CLONING_CMR_CLONING_RDC_REF_PENDING_CHILD");
+    }
+    // String sql =
+    // ExternalizedQuery.getSql("CLONING_CMR_CLONING_RDC_REF_PENDING_CHILD");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("ID", cmrCloningQueue.getId().getCmrCloningProcessId());
+    if ("NA".equals(cntryDup))
+      query.setParameter("CNTRY", cmrCloningQueue.getId().getCmrIssuingCntry());
+
     query.setParameter("CMR", cmrCloningQueue.getId().getCmrNo());
     return query.getResults(RdcCloningRefn.class);
   }
@@ -1498,7 +1556,11 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
         } catch (Exception e) {
           partialRollback(entityManager);
           LOG.error("Unexpected error occurred during reservedcmr and cloning queue insertion " + cloningQueue.getId().getCmrNo(), e);
-          // processError(entityManager, null, e.getMessage());
+          if ("CMR No or Country missing".equals(e.getMessage())) {
+            cloningQueue.setStatus("STOP");
+            cloningQueue.setErrorMsg("CMR No or Country missing");
+            updateEntity(cloningQueue, entityManager);
+          }
           break;
         }
         partialCommit(entityManager);
@@ -1557,7 +1619,13 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
       case "RDC_INPROG":
       case "RDC_ERR":
-        processRDCParentChildRecords(entityManager, cloningQueue);
+        try {
+          processRDCParentChildRecords(entityManager, cloningQueue);
+        } catch (Exception e) {
+          partialRollback(entityManager);
+          LOG.error("Error occurred during kna1 and kna1 child cloning process for CMR No : " + cloningQueue.getId().getCmrNo());
+          break;
+        }
 
       }
 
@@ -1609,7 +1677,20 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
   private void processRDCParentChildRecords(EntityManager entityManager, CmrCloningQueue cloningQueue) throws Exception {
     // now start cloning kna1 rdc
     LOG.info("Retrieving pending KNA1 RDc records for processing.." + cloningQueue.getId().getCmrNo());
-    List<RdcCloningRefn> pendingCloningRefn = getPendingCloningRecordsKNA1RDC(entityManager, cloningQueue);
+
+    MessageTransformer transformer = TransformerManager.getTransformer(cloningQueue.getId().getCmrIssuingCntry());
+    String cntryDup = "NA";
+    boolean dupCreateFlag = false;
+    if (transformer != null) {
+      cntryDup = transformer.getDupCreationCountryId(entityManager, cloningQueue.getId().getCmrIssuingCntry(), cloningQueue.getId().getCmrNo());
+      if (!"NA".equals(cntryDup)) {
+        dupCreateFlag = getKNA1Count(entityManager, cntryDup, cloningQueue.getId().getCmrNo());
+        if (!dupCreateFlag)
+          cntryDup = "NA";
+      }
+    }
+
+    List<RdcCloningRefn> pendingCloningRefn = getPendingCloningRecordsKNA1RDC(entityManager, cloningQueue, cntryDup);
 
     LOG.debug((pendingCloningRefn != null ? pendingCloningRefn.size() : 0) + " records to process to KNA1 RDc.");
 
@@ -1633,7 +1714,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
     // now start cloning at RDc end for KNA1 child tables
     LOG.info("Retrieving pending RDc records for kna1 child processing..");
-    List<RdcCloningRefn> pendingCloningRefnChild = getPendingRecordsRDCKna1Child(entityManager, cloningQueue);
+    List<RdcCloningRefn> pendingCloningRefnChild = getPendingRecordsRDCKna1Child(entityManager, cloningQueue, cntryDup);
 
     LOG.debug((pendingCloningRefnChild != null ? pendingCloningRefnChild.size() : 0) + " records to process to KNA1 child RDc.");
 
@@ -1660,7 +1741,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     }
 
     // all rdcCloningRefn status complete then update cloningQueue completed
-    cmrCloningQueueStatusUpdate(entityManager, cloningQueue);
+    cmrCloningQueueStatusUpdate(entityManager, cloningQueue, cntryDup);
   }
 
   public void setCNLastUsedCMR(EntityManager rdcMgr, String newLastUsed, String mandt, String kukla, String katr6) {
@@ -1682,6 +1763,23 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     LOG.debug("****" + rows + " ROWS WERE AFFECTED BY THE UPDATE");
     LOG.debug("setCNLastUsedCMR :: END :: NEW VALUE >> " + newLastUsed);
 
+  }
+
+  private String convertToIssuingCntry(List<String> list) {
+    String ret = "";
+
+    if (list != null && list.size() > 0) {
+      for (int i = 0; i < list.size(); i++) {
+        String cntry = list.get(i);
+        if (StringUtils.isEmpty(ret)) {
+          ret = ret + "'" + cntry + "'";
+        } else {
+          ret = ret + "," + "'" + cntry + "'";
+        }
+      }
+    }
+
+    return ret;
   }
 
 }
