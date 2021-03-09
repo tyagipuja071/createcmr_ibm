@@ -200,8 +200,8 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     updateEntity(cloningQueue, entityManager);
 
     if ("641".equals(cntry)) {
-      CloningUtil cUtil = new CloningUtil();
-      String kukla = cUtil.getKuklaFromCMR(entityManager, cntry, cmrNo, SystemConfiguration.getValue("MANDT"));
+      // CloningUtil cUtil = new CloningUtil();
+      String kukla = CloningUtil.getKuklaFromCMR(entityManager, cntry, cmrNo, SystemConfiguration.getValue("MANDT"));
       setCNLastUsedCMR(entityManager, cloningCmrNo, SystemConfiguration.getValue("MANDT"), kukla, cntry);
     }
 
@@ -1400,15 +1400,21 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     LOG.debug("Inside legacy duplicate create check for CMR No : " + cloningQueue.getId().getCmrNo() + ": Country : "
         + cloningQueue.getId().getCmrIssuingCntry());
 
-    LegacyDirectObjectContainer legacyObjects = LegacyDirectUtil.getLegacyDBValues(entityManager, targetCntry, cloningQueue.getId().getCmrNo(), false,
-        false);
-
-    CmrtCust cust = legacyObjects.getCustomer();
-
-    if (cust == null) {
+    LegacyDirectObjectContainer legacyObjects = null;
+    try {
+      legacyObjects = CloningUtil.getLegacyDBValues(entityManager, targetCntry, cloningQueue.getId().getCmrNo(), false, false);
+    } catch (Exception e) {
       LOG.debug("No duplicate cmr in legacy for target country :" + targetCntry);
-    } else {
-      processLegacyCloningProcess(entityManager, cloningQueue, targetCntry);
+    }
+
+    if (legacyObjects != null) {
+      CmrtCust cust = legacyObjects.getCustomer();
+
+      if (cust == null) {
+        LOG.debug("No duplicate cmr in legacy for target country :" + targetCntry);
+      } else {
+        processLegacyCloningProcess(entityManager, cloningQueue, targetCntry);
+      }
     }
 
   }
@@ -1524,8 +1530,8 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
   private String generateCMRNoNonLegacy(EntityManager entityManager, String cmrIssuingCntry, String cmrNo) throws Exception {
     LOG.debug("Inside generateCMRNoNonLegacy method ");
     String mandt = SystemConfiguration.getValue("MANDT");
-    CloningUtil cUtil = new CloningUtil();
-    String kukla = cUtil.getKuklaFromCMR(entityManager, cmrIssuingCntry, cmrNo, mandt);
+    // CloningUtil cUtil = new CloningUtil();
+    String kukla = CloningUtil.getKuklaFromCMR(entityManager, cmrIssuingCntry, cmrNo, mandt);
     GEOHandler geoHandler = RequestUtils.getGEOHandler(cmrIssuingCntry);
     String generatedCmrNo = "";
     if (geoHandler != null) {
