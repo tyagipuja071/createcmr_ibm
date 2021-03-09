@@ -390,6 +390,7 @@ function setBOTeamValues(clientTier) {
       if (selectedResults != null) {
         for (var i = 0; i < selectedResults.length; i++) {
           selectedBoTeam.push(selectedResults[i].ret1);
+          FormManager.setValue('engineeringBo', selectedBoTeam[0]);
         }
       }
 
@@ -403,7 +404,7 @@ function setBOTeamValues(clientTier) {
 
       if (FormManager.getActualValue('custSubGrp') != null && FormManager.getActualValue('custSubGrp') != '' && FormManager.getActualValue('custSubGrp') != _pagemodel.custSubGrp
           || (FormManager.getActualValue('custSubGrp') == _pagemodel.custSubGrp && FormManager.getActualValue('subIndustryCd') != _pagemodel.subIndustryCd)) {
-        FormManager.setValue('engineeringBo', selectedBoTeam);
+        FormManager.setValue('engineeringBo', selectedBoTeam[0]);
 
         var custSubScnrio = FormManager.getActualValue('custSubGrp');
         if (custSubScnrio == 'BUSPR' || custSubScnrio == 'CBBUS') {
