@@ -9,7 +9,7 @@ import com.ibm.cmr.create.batch.service.CloningProcessService;
 /**
  * Entry point for the {@link CloningProcessEntryPoint} process
  * 
- * @author Priy Ranjan
+ * @author PriyRanjan
  * 
  */
 public class CloningProcessEntryPoint extends BatchEntryPoint {
