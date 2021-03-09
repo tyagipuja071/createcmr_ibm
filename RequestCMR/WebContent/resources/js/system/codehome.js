@@ -280,6 +280,13 @@ var _allGroups = [ {
     "subType" : false,
     "parent" : 'System',
   }, {
+    "href" : cmr.CONTEXT_ROOT + '/code/updatesapno',
+    "name" : "Update SAP Number",
+    "description" : "Updates missing Sap number on the request",
+    "table" : null,
+    "subType" : false,
+    "parent" : 'System',
+  }, {
     "href" : null,
     "name" : "Approvals",
     "description" : null,
@@ -377,8 +384,7 @@ var _allGroups = [ {
     "table" : "CREQCMR.AP_CUST_CLUSTER_TIER_MAP",
     "subType" : false,
     "parent" : "Asia Pacific"
-  },
-  {
+  }, {
     "href" : null,
     "name" : "Germany",
     "description" : null,
@@ -392,6 +398,5 @@ var _allGroups = [ {
     "table" : "CREQCMR.LOV",
     "subType" : false,
     "parent" : "Germany"
-  }, 
-  ]
+  }, ]
 } ];
