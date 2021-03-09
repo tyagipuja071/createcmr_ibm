@@ -26,6 +26,7 @@ public class NetherlandsUtil extends AutomationUtil {
   public static final String SCENARIO_BP_LOCAL = "BUSPR";
   public static final String SCENARIO_BP_CROSS = "CBBUS";
   public static final String SCENARIO_PRIVATE_CUSTOMER = "PRICU";
+  public static final String SCENARIO_INTERNAL = "INTER";
 
   @Override
   public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
