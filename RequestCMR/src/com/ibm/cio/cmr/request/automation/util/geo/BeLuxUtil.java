@@ -378,21 +378,24 @@ public class BeLuxUtil extends AutomationUtil {
         		  details.append("PPS CE ID validated successfully with PartnerWorld Profile Systems.").append("\n");
         	  } else {
         		 resultCodes.add("D");
-        		 details.append("PPS CE ID was added.").append("\n");
-        		 
-        	  }
+        		 if(!"49".equalsIgnoreCase(Kukla)){
+            		 details.append("PS Ceid added for CMR with Kukla other than 49").append("\n");
+            		 } else{
+            	     details.append("PPS ceid on the request is invalid").append("\n");
+            		 }	 
+        	     }
             }
           // DELETE
           if (!StringUtils.isBlank(oldppsceid) && StringUtils.isBlank(newppsceid)) {
             cmdeReview = true;
-            engineData.addNegativeCheckStatus("_beluxPpsCeidUpdt", "PPSCEID was deleted.\n");
-            details.append("PPSCEID was deleted.\n");
+            engineData.addNegativeCheckStatus("_beluxPpsCeidUpdt", " Deletion of ppsceid needs cmde review.\n");
+            details.append(" Deletion of ppsceid needs cmde review.\n");
           }
           //UPDATE
           if (!StringUtils.isBlank(oldppsceid) && !StringUtils.isBlank(newppsceid) && !oldppsceid.equalsIgnoreCase(newppsceid)){
         	  cmdeReview = true;
-              engineData.addNegativeCheckStatus("_beluxPpsCeidUpdt", "PPSCEID was updated.\n");
-              details.append("PPSCEID was updated.\n");
+              engineData.addNegativeCheckStatus("_beluxPpsCeidUpdt", " Update of ppsceid needs cmde review.\n");
+              details.append(" Update of ppsceid needs cmde review.\n");
           }
           break;
       case "Order Block Code":
@@ -422,8 +425,8 @@ public class BeLuxUtil extends AutomationUtil {
         validation.setSuccess(false);
         validation.setMessage("Rejected");
       } else if (cmdeReview) {
-        engineData.addNegativeCheckStatus("_esDataCheckFailed", "Updates to one or more fields cannot be validated.");
-        details.append("Updates to one or more fields cannot be validated.\n");
+        engineData.addNegativeCheckStatus("_esDataCheckFailed", "Updates to one or more fields requires CMDE review.");
+        details.append("Updates to one or more fields requires CMDE review.\n");
         validation.setSuccess(false);
         validation.setMessage("Not Validated");
       } else {

@@ -28,6 +28,7 @@ import com.ibm.cio.cmr.request.entity.MassUpdtData;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.SystemUtil;
+import com.ibm.cio.cmr.request.util.legacy.LegacyCommonUtil;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectObjectContainer;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
 import com.ibm.cmr.create.batch.util.CMRRequestContainer;
@@ -701,6 +702,9 @@ public class BELUXTransformer extends EMEATransformer {
   @Override
   public void transformLegacyAddressDataMassUpdate(EntityManager entityManager, CmrtAddr legacyAddr, MassUpdtAddr addr, String cntry, CmrtCust cust,
       Data data, LegacyDirectObjectContainer legacyObjects) {
+    legacyAddr.setForUpdate(true);
+    formatMassUpdateAddressLines(entityManager, legacyAddr, addr, false);
+    legacyObjects.addAddress(legacyAddr);
 
     if (!StringUtils.isBlank(addr.getCustPhone()) && "ZS01".equalsIgnoreCase(addr.getId().getAddrType())) {
       if ("@".equals(addr.getCustPhone())) {
@@ -709,196 +713,14 @@ public class BELUXTransformer extends EMEATransformer {
         cust.setTelNoOrVat(addr.getCustPhone());
       }
     }
-
-    legacyAddr.setForUpdate(true);
-    String countryName = LandedCountryMap.getCountryName(addr.getLandCntry());
-    boolean crossBorder = isCrossBorderForMass(addr, legacyAddr);
-    if (!StringUtils.isBlank(addr.getCustNm1())) {
-      legacyAddr.setAddrLine1(addr.getCustNm1());
-    }
-
-    if (!StringUtils.isBlank(addr.getCustNm2())) {
-      if ("@".equals(addr.getCustNm2())) {
-        legacyAddr.setAddrLine2("");
-      } else {
-        legacyAddr.setAddrLine2(addr.getCustNm2());
-      }
-    }
-
-    if (!StringUtils.isBlank(addr.getAddrTxt())) {
-      // legacyAddr.setStreet(addr.getAddrTxt());
-      legacyAddr.setAddrLine4(addr.getAddrTxt());
-    }
-
-    String pobox = addr.getPoBox();
-    String attPer = addr.getCustNm4();
-    String name3 = addr.getCustNm3();
-    // line 3 = Customer name3 + Attention Person + PO BOX
-    String line33 = legacyAddr.getAddrLine3();
-
-    if (!StringUtils.isBlank(name3)) {
-      if ("@".equals(name3)) {
-        line33 = "";
-      } else if (!"@".equals(name3)) {
-        line33 = name3;
-        legacyAddr.setAddrLine4(legacyAddr.getAddrLine3());
-      }
-    }
-
-    if (!StringUtils.isBlank(attPer)) {
-      if ("@".equals(attPer)) {
-        line33 = "";
-      } else if (!"@".equals(attPer)) {
-        line33 += (line33.length() > 0 ? " " : "") + "ATT " + attPer;
-      }
-    }
-
-    if (!StringUtils.isBlank(pobox)) {
-      if ("@".equals(pobox)) {
-        line33 = "";
-      } else if (!"@".equals(pobox)) {
-        line33 += (line33.length() > 0 ? " " : "") + "PO BOX " + pobox;
-      }
-    }
-
-    legacyAddr.setAddrLine3(line33);
-
-    if (!StringUtils.isBlank(addr.getPoBox())) {
-      if ("@".equals(addr.getPoBox())) {
-        legacyAddr.setPoBox("");
-      } else {
-        // legacyAddr.setPoBox(addr.getPoBox());
-      }
-    }
-    // legacy addr line5 is set in order district+postCd+City
-    StringBuilder addrLine5 = new StringBuilder();
-
-    if (!StringUtils.isBlank(addr.getDept())) {
-      if ("@".equals(addr.getDept())) {
-        legacyAddr.setDistrict("");
-      } else {
-        addrLine5.append(addr.getDept() + " ");
-        legacyAddr.setDistrict(addr.getDept());
-      }
-    }
-
-    if (!StringUtils.isBlank(addr.getPostCd())) {
-      if ("@".equals(addr.getPostCd())) {
-        legacyAddr.setZipCode("");
-      } else {
-        // legacyAddr.setZipCode(addr.getPostCd());
-        addrLine5.append(addr.getPostCd() + " ");
-      }
-    }
-
-    if (!StringUtils.isBlank(addr.getCity1())) {
-      if ("@".equals(addr.getCity1())) {
-        legacyAddr.setCity("");
-      } else {
-        // legacyAddr.setCity(addr.getCity1());
-        addrLine5.append(addr.getCity1() + " ");
-      }
-    }
-
-    if (!StringUtils.isBlank(addr.getCustLangCd())) {
-      legacyAddr.setLanguage(addr.getCustLangCd());
-    }
-
-    if (!StringUtils.isBlank(addrLine5.toString())) {
-      legacyAddr.setAddrLine5(addrLine5.toString());
-    }
-
-    if ("ZP02".equals(addr.getId().getAddrType())) {
-      if (!StringUtils.isBlank(addr.getDivn())) {
-        if ("@".equals(addr.getDivn())) {
-          legacyAddr.setAddrLine6("");
-        } else {
-          legacyAddr.setAddrLine6(addr.getDivn());
-        }
-      }
-    } else {
-      if (!StringUtils.isBlank(addr.getLandCntry())) {
-        legacyAddr.setAddrLine6(LandedCountryMap.getCountryName(addr.getLandCntry()));
-      }
-    }
-    //
-    // String line2 = "", line3 = "", line4 = "", line5 = "", line6 = "";
-    // if (l2c)
-    // line2 = legacyAddr.getAddrLine2();
-    // if (l3c)
-    // line3 = legacyAddr.getAddrLine3();
-    // if (l4c)
-    // line4 = legacyAddr.getAddrLine4();
-    // if (l5c)
-    // line5 = legacyAddr.getAddrLine5();
-    // line6 = legacyAddr.getAddrLine6();
-    //
-    // if (!crossBorder) {
-    // line6 = "";
-    // } else if (crossBorder) {
-    // line6 = countryName;
-    // }
-    // if (StringUtils.isEmpty(line2)) {
-    // if (StringUtils.isEmpty(line3) && !StringUtils.isEmpty(line4) &&
-    // !StringUtils.isEmpty(line5)) {
-    // line2 = line4;
-    // line3 = line5;
-    // line4 = "";
-    // line5 = "";
-    // } else if (!StringUtils.isEmpty(line3) && StringUtils.isEmpty(line4) &&
-    // !StringUtils.isEmpty(line5)) {
-    // line2 = line3;
-    // line3 = line5;
-    // line5 = "";
-    // } else if (!StringUtils.isEmpty(line3) && !StringUtils.isEmpty(line4) &&
-    // !StringUtils.isEmpty(line5)) {
-    // line2 = line3;
-    // line3 = line4;
-    // line4 = line5;
-    // line5 = "";
-    // }
-    // } else if (!StringUtils.isEmpty(line2)) {
-    // if (StringUtils.isEmpty(line3) && !StringUtils.isEmpty(line4) &&
-    // !StringUtils.isEmpty(line5)) {
-    // line3 = line4;
-    // line4 = line5;
-    // line5 = "";
-    // } else if (StringUtils.isEmpty(line3) && !StringUtils.isEmpty(line4) &&
-    // StringUtils.isEmpty(line5)) {
-    // line3 = line4;
-    // line4 = "";
-    // } else if (!StringUtils.isEmpty(line3) && StringUtils.isEmpty(line4) &&
-    // !StringUtils.isEmpty(line5)) {
-    // line4 = line5;
-    // line5 = "";
-    // }
-    // }
-    //
-    // if (!crossBorder) {
-    // line6 = "";
-    // } else if (crossBorder) {
-    // // country
-    // line6 = countryName;
-    // }
-    // if (!StringUtils.isEmpty(line6) && StringUtils.isEmpty(line5)) {
-    // line5 = line6;
-    // line6 = "";
-    // if (StringUtils.isEmpty(line4)) {
-    // line4 = line5;
-    // line5 = "";
-    // }
-    // }
-    //
-    // legacyAddr.setAddrLine2(line2);
-    // legacyAddr.setAddrLine3(line3);
-    // legacyAddr.setAddrLine4(line4);
-    // legacyAddr.setAddrLine5(line5);
-    // legacyAddr.setAddrLine6(line6);
-
   }
 
   @Override
   public void formatMassUpdateAddressLines(EntityManager entityManager, CmrtAddr legacyAddr, MassUpdtAddr massUpdtAddr, boolean isFAddr) {
+    LOG.debug("*** START BE formatMassUpdateAddressLines >>>");
+    if (LegacyCommonUtil.isCheckDummyUpdate(massUpdtAddr)) {
+      return; // dummy update , skip address update
+    }
     boolean crossBorder = isCrossBorderForMass(massUpdtAddr, legacyAddr);
     String addrKey = getAddressKey(massUpdtAddr.getId().getAddrType());
     Map<String, String> messageHash = new LinkedHashMap<String, String>();
@@ -916,70 +738,47 @@ public class BELUXTransformer extends EMEATransformer {
     String line5 = "";
     String line6 = "";
 
-    line1 = legacyAddr.getAddrLine1();
-    line2 = legacyAddr.getAddrLine2();
+    // line1 is always customer name
+    line1 = massUpdtAddr.getCustNm1();
+    line2 = massUpdtAddr.getCustNm2();
+    line4 = massUpdtAddr.getAddrTxt();
 
-    if (StringUtils.isEmpty(line2) && crossBorder) {
-      if (!StringUtils.isEmpty(line2) && !line2.toUpperCase().startsWith("ATT ") && !line2.toUpperCase().startsWith("ATT:")) {
-        line2 = "ATT " + line2;
-      }
-      if (line2.length() > 30) {
-        line2 = line2.substring(0, 30);
-      }
+    line3 = massUpdtAddr.getCustNm3();
+    if (!StringUtils.isBlank(massUpdtAddr.getCustNm4())) {
+      line3 += (line3.length() > 0 ? " " : "") + "ATT " + massUpdtAddr.getCustNm4();
+    }
+    if (!StringUtils.isBlank(massUpdtAddr.getPoBox())) {
+      line3 += (line3.length() > 0 ? " " : "") + "PO BOX " + massUpdtAddr.getPoBox();
     }
 
-    line3 = legacyAddr.getAddrLine3() != null ? legacyAddr.getAddrLine3().trim() : "";
-
-    String poBox = !StringUtils.isEmpty(legacyAddr.getPoBox()) ? legacyAddr.getPoBox() : "";
-    if (!StringUtils.isEmpty(poBox) && !poBox.toUpperCase().startsWith("APTO")) {
-      poBox = " APTO " + poBox;
+    if (!StringUtils.isBlank(massUpdtAddr.getPostCd())) {
+      line5 += (line5.length() > 0 ? " " : "") + massUpdtAddr.getPostCd();
+    }
+    if (!StringUtils.isBlank(massUpdtAddr.getCity1())) {
+      line5 += (line5.length() > 0 ? " " : "") + massUpdtAddr.getCity1();
     }
 
-    line4 = (legacyAddr.getZipCode() != null ? legacyAddr.getZipCode().trim() : "") + " "
-        + (legacyAddr.getCity() != null ? legacyAddr.getCity().trim() : "");
-
-    if (!crossBorder) {
-      line5 = !StringUtils.isEmpty(legacyAddr.getAddrLine5()) ? legacyAddr.getAddrLine5().trim() : "";
-      if (!StringUtils.isEmpty(line5) && !line5.toUpperCase().startsWith("ATT ") && !line5.toUpperCase().startsWith("ATT:")) {
-        // Defect 1740670: SPAIN - attention person - ATT
-        line5 = "ATT " + line5;
-      }
-      if (line5.length() > 30) {
-        line5 = line5.substring(0, 30);
-      }
-    } else {
-      if (!StringUtils.isEmpty(massUpdtAddr.getLandCntry())) {
-        line5 = massUpdtAddr.getLandCntry();
-      } else {
-        line5 = legacyAddr.getAddrLine5();
-      }
+    if (crossBorder && !StringUtils.isEmpty(massUpdtAddr.getLandCntry())) {
+      line6 = LandedCountryMap.getCountryName(massUpdtAddr.getLandCntry());
     }
 
-    line6 = "";
-    if ("Y".equalsIgnoreCase(legacyAddr.getIsAddrUseShipping())) {
-      // DTN: Commented because we are not passing phone numbers on
-      // the
-      // template
-      // line6 = legacyAddr.getAddrPhone();
-    }
-
-    String[] lines = new String[] { (line1 != null ? line1.trim() : ""), (line2 != null ? line2.trim() : ""), (line3 != null ? line3.trim() : ""),
-        (line4 != null ? line4.trim() : ""), (line5 != null ? line5.trim() : "") };
+    String[] lines = new String[] { line1, line2, line3, line4, line5, line6 };
     int lineNo = 1;
-    LOG.debug("Lines: " + (line1 != null ? line1.trim() : "") + " | " + (line2 != null ? line2.trim() : "") + " | "
-        + (line3 != null ? line3.trim() : "") + " | " + (line4 != null ? line4.trim() : "") + " | " + (line5 != null ? line5.trim() : ""));
+    LOG.debug("Lines: " + line1 + " | " + line2 + " | " + line3 + " | " + line4 + " | " + line5 + " | " + line6);
 
     for (String line : lines) {
-      messageHash.put(getAddressKey((massUpdtAddr.getId().getAddrType()) + "Address" + lineNo).toString(), line);
-      lineNo++;
+      if (StringUtils.isNotBlank(line)) {
+        messageHash.put(addrKey + "Address" + lineNo, line.trim());
+        lineNo++;
+      }
     }
 
-    legacyAddr.setAddrLine1(line1 != null ? line1.trim() : "");
-    legacyAddr.setAddrLine2(line2 != null ? line2.trim() : "");
-    legacyAddr.setAddrLine3(line3 != null ? line3.trim() : "");
-    legacyAddr.setAddrLine4(line4 != null ? line4.trim() : "");
-    legacyAddr.setAddrLine5(line5 != null ? line5.trim() : "");
-
+    legacyAddr.setAddrLine1(messageHash.get(addrKey + "Address1") != null ? messageHash.get(addrKey + "Address1") : "");
+    legacyAddr.setAddrLine2(messageHash.get(addrKey + "Address2") != null ? messageHash.get(addrKey + "Address2") : "");
+    legacyAddr.setAddrLine3(messageHash.get(addrKey + "Address3") != null ? messageHash.get(addrKey + "Address3") : "");
+    legacyAddr.setAddrLine4(messageHash.get(addrKey + "Address4") != null ? messageHash.get(addrKey + "Address4") : "");
+    legacyAddr.setAddrLine5(messageHash.get(addrKey + "Address5") != null ? messageHash.get(addrKey + "Address5") : "");
+    legacyAddr.setAddrLine6(messageHash.get(addrKey + "Address6") != null ? messageHash.get(addrKey + "Address6") : "");
   }
 
   @Override
@@ -1098,7 +897,7 @@ public class BELUXTransformer extends EMEATransformer {
 
       // permanent removal-single inactivation
       if (admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason()) && !"TREC".equals(admin.getReqReason())) {
-        if (!StringUtils.isBlank(rdcEmbargoCd) && "E".equals(rdcEmbargoCd)) {
+        if (!StringUtils.isBlank(rdcEmbargoCd) && "D".equals(rdcEmbargoCd)) {
           if (StringUtils.isBlank(data.getEmbargoCd())) {
             legacyCust.setEmbargoCd("");
           }
@@ -1110,7 +909,7 @@ public class BELUXTransformer extends EMEATransformer {
       if (admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason())
           && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason()) && admin.getReqStatus() != null
           && admin.getReqStatus().equals(CMR_REQUEST_STATUS_CPR) && (rdcEmbargoCd != null && !StringUtils.isBlank(rdcEmbargoCd))
-          && "E".equals(rdcEmbargoCd) && (dataEmbargoCd == null || StringUtils.isBlank(dataEmbargoCd))) {
+          && "D".equals(rdcEmbargoCd) && (dataEmbargoCd == null || StringUtils.isBlank(dataEmbargoCd))) {
         legacyCust.setEmbargoCd("");
         blankOrdBlockFromData(entityManager, data);
       }
@@ -1118,7 +917,7 @@ public class BELUXTransformer extends EMEATransformer {
       if (admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason())
           && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason()) && admin.getReqStatus() != null
           && admin.getReqStatus().equals(CMR_REQUEST_STATUS_PCR) && (rdcEmbargoCd != null && !StringUtils.isBlank(rdcEmbargoCd))
-          && "E".equals(rdcEmbargoCd) && (dataEmbargoCd == null || StringUtils.isBlank(dataEmbargoCd))) {
+          && "D".equals(rdcEmbargoCd) && (dataEmbargoCd == null || StringUtils.isBlank(dataEmbargoCd))) {
         legacyCust.setEmbargoCd(rdcEmbargoCd);
         resetOrdBlockToData(entityManager, data);
       }

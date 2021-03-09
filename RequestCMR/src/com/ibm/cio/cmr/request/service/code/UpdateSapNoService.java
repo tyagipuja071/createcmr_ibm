@@ -1,11 +1,8 @@
 package com.ibm.cio.cmr.request.service.code;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.lang.StringUtils;
 import org.xml.sax.Attributes;
@@ -55,7 +52,7 @@ public class UpdateSapNoService extends DefaultHandler {
   public void endElement(String uri, String localName, String qName) throws SAXException {
     String value = this.buffer.toString().trim();
     if ("typeMappings".equals(qName)) {
-      this.setTypeMapping(this.countries, this.addrMapping);
+      setAddrTypeMapping(this.countries, this.addrMapping);
       this.readTypeMapping = false;
     }
 
@@ -77,7 +74,7 @@ public class UpdateSapNoService extends DefaultHandler {
     this.buffer.delete(0, this.buffer.length());
   }
 
-  protected void setTypeMapping(String countries, AddressTypeMapping mapping) {
+  protected void setAddrTypeMapping(String countries, AddressTypeMapping mapping) {
     for (String country : countries.split(",")) {
       this.addressTypeMappings.put(country, mapping);
     }
@@ -85,7 +82,7 @@ public class UpdateSapNoService extends DefaultHandler {
 
   public String getKNA1AddressType(String cmrAddrType, String country) {
     String outputType = "";
-    AddressTypeMapping mapping = this.addressTypeMappings.get(country);
+    AddressTypeMapping mapping = getAddressTypeMapping(country);
     if (mapping == null) {
       // no transformation
       return "";
@@ -107,12 +104,16 @@ public class UpdateSapNoService extends DefaultHandler {
   }
 
   /**
-   * Initializes
+   * Gets the {@link AddressTypeMapping} registered for the given country. Falls
+   * back to ZS01 and ZP01 if no mapping is registered for the country
    * 
-   * @throws ParserConfigurationException
-   * @throws SAXException
-   * @throws IOException
+   * @param country
+   * @return
    */
-  public static synchronized void init() throws ParserConfigurationException, SAXException, IOException {
+  public AddressTypeMapping getAddressTypeMapping(String country) {
+    if (this.addressTypeMappings.containsKey(country)) {
+      return this.addressTypeMappings.get(country);
+    }
+    return AddressTypeMapping.DEFAULT;
   }
 }
