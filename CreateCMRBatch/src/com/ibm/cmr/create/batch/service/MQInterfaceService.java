@@ -3,12 +3,14 @@
  */
 package com.ibm.cmr.create.batch.service;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -18,6 +20,7 @@ import java.util.Properties;
 
 import javax.persistence.EntityManager;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jdom.JDOMException;
 
@@ -55,6 +58,7 @@ public class MQInterfaceService extends BaseBatchService {
   private static final int ONE_MINUTE = 1000 * 60;
   private static final int ONE_HOUR = ONE_MINUTE * 60;
 
+  private static final SimpleDateFormat XML_DATE_FORMAT = new SimpleDateFormat("yyyyMMddHHmmss");
   private String mode;
 
   @Override
@@ -383,21 +387,49 @@ public class MQInterfaceService extends BaseBatchService {
             LOG.debug("The UniqueNumber is : " + uniqueNum);
 
             if (uniqueNum != null) {
-              mqIntfReqQueue = getQueueRecordById(entityManager, uniqueNum);
-              if (mqIntfReqQueue != null) {
-                LOG.debug("Processing MQ ID " + mqIntfReqQueue.getId().getQueryReqId());
-                msgHandler = MessageHandlerFactory.createMessageHandler(entityManager, mqIntfReqQueue);
-                try {
-                  msgHandler.processMQMessage(xmlString);
-                  partialCommit(entityManager);
-                } catch (Exception e) {
-                  LOG.warn("Error has been encountered for MQ Request ID " + mqIntfReqQueue.getId().getQueryReqId(), e);
-                  partialRollback(entityManager);
+              if (uniqueNum.startsWith("G")) {
+                LOG.debug("GTS Unique Number " + uniqueNum + " found. Creating local XML.");
+                String gtsXmlDir = SystemParameters.getString("GTS.XML.DIR");
+                if (!StringUtils.isBlank(gtsXmlDir)) {
+                  File xmlDir = new File(gtsXmlDir);
+                  if (!xmlDir.exists() || !xmlDir.isDirectory()) {
+                    LOG.error("GTS XML Directory " + gtsXmlDir + " does not exist or is not a directory. Skipping this record.");
+                  } else {
+                    String xmlFileName = XML_DATE_FORMAT.format(new Date()) + "_" + uniqueNum + ".xml";
+                    LOG.debug("Storing GTS XML " + uniqueNum + " as " + xmlFileName);
+                    try {
+                      try (FileOutputStream fos = new FileOutputStream(xmlDir.getAbsolutePath() + File.separator + xmlFileName)) {
+                        try (OutputStreamWriter osw = new OutputStreamWriter(fos, "UTF-8")) {
+                          try (ByteArrayInputStream bis = new ByteArrayInputStream(xmlString.getBytes())) {
+                            IOUtils.copy(bis, osw);
+                            LOG.debug(" - XML written successfully.");
+                          }
+                        }
+                      }
+                    } catch (Exception e) {
+                      LOG.error("Error in writing GTS XML.", e);
+                    }
+                  }
+                } else {
+                  LOG.error("GTS XML Directory not defined. Skipping this record.");
                 }
-                collectCount++;
               } else {
-                LOG.warn("Queue Request " + uniqueNum + " cannot be located.");
-                saveUnrecognizedMsg(xmlString);
+                mqIntfReqQueue = getQueueRecordById(entityManager, uniqueNum);
+                if (mqIntfReqQueue != null) {
+                  LOG.debug("Processing MQ ID " + mqIntfReqQueue.getId().getQueryReqId());
+                  msgHandler = MessageHandlerFactory.createMessageHandler(entityManager, mqIntfReqQueue);
+                  try {
+                    msgHandler.processMQMessage(xmlString);
+                    partialCommit(entityManager);
+                  } catch (Exception e) {
+                    LOG.warn("Error has been encountered for MQ Request ID " + mqIntfReqQueue.getId().getQueryReqId(), e);
+                    partialRollback(entityManager);
+                  }
+                  collectCount++;
+                } else {
+                  LOG.warn("Queue Request " + uniqueNum + " cannot be located.");
+                  saveUnrecognizedMsg(xmlString);
+                }
               }
             } else {
               LOG.warn("Incorrect or empty unique number format. Cannot process message.");

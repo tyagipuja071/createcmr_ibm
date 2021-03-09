@@ -750,6 +750,9 @@ public class WTAASMessageHandler extends MQMessageHandler {
 
       String uniqueNum = reply.getRefNo();
 
+      if (uniqueNum.startsWith("G")) {
+        return uniqueNum;
+      }
       if (StringUtils.isNumeric(uniqueNum)) {
         return String.valueOf(Integer.parseInt(uniqueNum));
       } else {
