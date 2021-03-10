@@ -962,6 +962,14 @@ public class BELUXTransformer extends EMEATransformer {
   public void transformLegacyCustomerDataMassUpdate(EntityManager entityManager, CmrtCust cust, CMRRequestContainer cmrObjects, MassUpdtData muData) { // default
     LOG.debug("Mapping default Data values..");
 
+    if (!StringUtils.isBlank(muData.getOrdBlk())) {
+      if ("@".equals(muData.getOrdBlk())) {
+        cust.setEmbargoCd("");
+      } else {
+        cust.setEmbargoCd(muData.getOrdBlk());
+      }
+    }
+
     if (!StringUtils.isBlank(muData.getTaxCd1())) {
       if ("@".equals(muData.getTaxCd1())) {
         cust.setTaxCd("");
