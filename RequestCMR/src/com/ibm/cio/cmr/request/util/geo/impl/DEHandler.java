@@ -23,6 +23,7 @@ import com.ibm.cio.cmr.request.entity.AddrRdc;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataRdc;
+import com.ibm.cio.cmr.request.entity.KunnrExt;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.model.requestentry.ImportCMRModel;
@@ -52,7 +53,7 @@ public class DEHandler extends GEOHandler {
   private static final List<String> IERP_ISSUING_COUNTRY_VAL = Arrays.asList("724");
 
   private static final String[] DE_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "LocalTax1", "LocalTax2", "SitePartyID", "Division", "POBoxCity", "CustFAX",
-      "City2", "Affiliate", "Company", "INACType" };
+      "City2", "Affiliate", "Company", "INACType", "TransportZone", "Office", "Floor" };
 
   @Override
   public void convertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry, ImportCMRModel searchModel)
@@ -125,6 +126,9 @@ public class DEHandler extends GEOHandler {
     parts = splitName(name1, name2, 35, 35);
     address.setCustNm1(parts[0]);
     address.setCustNm2(parts[1]);
+    // addrtxt2 issue
+    String name4 = currentRecord.getCmrName4();
+    address.setBldg(name4);
 
     if (!StringUtils.isEmpty(parts[2])) {
       address.setDept(parts[2]);
@@ -136,6 +140,15 @@ public class DEHandler extends GEOHandler {
     // {
     address.setPairedAddrSeq(currentRecord.getCmrAddrSeq());
     // }
+    KunnrExt addlAddDetail = getKunnrExtDetails(currentRecord.getCmrSapNumber());
+    if (addlAddDetail != null) {
+      address.setBldg(addlAddDetail.getBuilding() != null ? addlAddDetail.getBuilding() : "");
+      address.setDept(addlAddDetail.getDepartment() != null ? addlAddDetail.getDepartment() : "");
+    }
+
+    address.setCustNm3(getName3FrmKna1(currentRecord.getCmrSapNumber()));
+    address.setCustNm4(getName4FrmKna1(currentRecord.getCmrSapNumber()));
+
   }
 
   @Override
@@ -659,5 +672,99 @@ public class DEHandler extends GEOHandler {
   @Override
   public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
     return false;
+  }
+
+  /* Story : 1834659 - Import from KUNNR_EXT table */
+  private KunnrExt getKunnrExtDetails(String kunnr) throws Exception {
+    KunnrExt ke = new KunnrExt();
+    String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
+    String mandt = SystemConfiguration.getValue("MANDT");
+    String sql = ExternalizedQuery.getSql("GET.KUNNR_EXT.BY_KUNNR_MANDT_SWISS");
+    sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
+    sql = StringUtils.replace(sql, ":KUNNR", "'" + kunnr + "'");
+    String dbId = QueryClient.RDC_APP_ID;
+
+    QueryRequest query = new QueryRequest();
+    query.setSql(sql);
+    query.addField("BUILDING");
+    query.addField("FLOOR");
+    query.addField("DEPARTMENT");
+
+    LOG.debug("Getting existing KUNNNR_EXT details from RDc DB..");
+    QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
+    QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
+
+    if (response.isSuccess() && response.getRecords() != null && response.getRecords().size() != 0) {
+      List<Map<String, Object>> records = response.getRecords();
+      Map<String, Object> record = records.get(0);
+
+      ke.setBuilding(record.get("BUILDING") != null ? record.get("BUILDING").toString() : "");
+      ke.setFloor(record.get("FLOOR") != null ? record.get("FLOOR").toString() : "");
+      ke.setDepartment(record.get("DEPARTMENT") != null ? record.get("DEPARTMENT").toString() : "");
+
+      LOG.debug("***RETURNING BUILDING > " + ke.getBuilding());
+      LOG.debug("***RETURNING DEPARTMENT > " + ke.getDepartment());
+    }
+    return ke;
+  }
+
+  private String getName3FrmKna1(String kunnr) throws Exception {
+    String name3 = "";
+    String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
+    String mandt = SystemConfiguration.getValue("MANDT");
+    String sql = ExternalizedQuery.getSql("GET.NAME3.KNA1.BYKUNNR");
+    sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
+    sql = StringUtils.replace(sql, ":KUNNR", "'" + kunnr + "'");
+    String dbId = QueryClient.RDC_APP_ID;
+
+    QueryRequest query = new QueryRequest();
+    query.setSql(sql);
+    query.addField("MANDT");
+    query.addField("KUNNR");
+    query.addField("NAME3");
+
+    LOG.debug("Getting existing NAME3  from RDc DB..");
+    QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
+    QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
+
+    if (response.isSuccess() && response.getRecords() != null && response.getRecords().size() != 0) {
+      List<Map<String, Object>> records = response.getRecords();
+      Map<String, Object> record = records.get(0);
+      name3 = record.get("NAME3") != null ? record.get("NAME3").toString() : "";
+      LOG.debug("***RETURNING NAME3 > " + name3);
+    }
+    if (name3.length() > 30) {
+      return name3.substring(0, 30);
+    } else {
+      return name3;
+    }
+  }
+
+  private String getName4FrmKna1(String kunnr) throws Exception {
+    String name4 = "";
+    String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
+    String mandt = SystemConfiguration.getValue("MANDT");
+    String sql = ExternalizedQuery.getSql("GET.NAME4.KNA1.BYKUNNR");
+    sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
+    sql = StringUtils.replace(sql, ":KUNNR", "'" + kunnr + "'");
+    String dbId = QueryClient.RDC_APP_ID;
+
+    QueryRequest query = new QueryRequest();
+    query.setSql(sql);
+    query.addField("MANDT");
+    query.addField("KUNNR");
+    query.addField("NAME4");
+
+    LOG.debug("Getting existing NAME4  from RDc DB..");
+    QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
+    QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
+
+    if (response.isSuccess() && response.getRecords() != null && response.getRecords().size() != 0) {
+      List<Map<String, Object>> records = response.getRecords();
+      Map<String, Object> record = records.get(0);
+      name4 = record.get("NAME4") != null ? record.get("NAME4").toString() : "";
+      LOG.debug("***RETURNING NAME4 > " + name4);
+    }
+    return name4;
   }
 }
