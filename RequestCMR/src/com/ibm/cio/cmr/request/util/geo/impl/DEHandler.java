@@ -125,7 +125,14 @@ public class DEHandler extends GEOHandler {
     parts = splitName(name1, name2, 35, 35);
     address.setCustNm1(parts[0]);
     address.setCustNm2(parts[1]);
-
+    
+    boolean doSplit = currentRecord.getCmrStreetAddress() != null && currentRecord.getCmrStreetAddress().length() > 35;
+    if (doSplit) {
+      splitAddress(address, currentRecord.getCmrStreetAddress(), currentRecord.getCmrStreetAddressCont(), 35, 35);
+    } else {
+      address.setAddrTxt2(currentRecord.getCmrStreetAddressCont());
+    }
+    
     if (!StringUtils.isEmpty(parts[2])) {
       address.setDept(parts[2]);
     }
