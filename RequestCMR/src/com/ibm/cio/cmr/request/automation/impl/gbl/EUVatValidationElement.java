@@ -57,12 +57,12 @@ public class EUVatValidationElement extends ValidatingElement implements Company
     ValidationOutput validation = new ValidationOutput();
 
     Addr zs01 = requestData.getAddress("ZS01");
-    Addr zp01 = requestData.getAddress("ZP01");
+
     StringBuilder details = new StringBuilder();
     try {
       String landCntry;
       if (SystemLocation.BELGIUM.equals(data.getCmrIssuingCntry()) || SystemLocation.NETHERLANDS.equals(data.getCmrIssuingCntry())) {
-        landCntry = zp01.getLandCntry();
+        landCntry = getBillToCntry(entityManager, requestData);
       } else {
         landCntry = zs01.getLandCntry();
       }
@@ -143,6 +143,19 @@ public class EUVatValidationElement extends ValidatingElement implements Company
     output.setResults(validation.getMessage());
     output.setProcessOutput(validation);
     return output;
+  }
+
+  private String getBillToCntry(EntityManager entityManager, RequestData requestData) {
+    String zp01 = "";
+    String sql = ExternalizedQuery.getSql("AUTO.GET_LAND_CNTRY");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", requestData.getAdmin().getId().getReqId());
+    query.setForReadOnly(true);
+    List<String> landedCntry = query.getResults(String.class);
+    if (landedCntry != null && !landedCntry.isEmpty()) {
+      zp01 = landedCntry.get(0);
+    }
+    return zp01;
   }
 
   private String getLandedCountryForVies(String cmrIssuingCntry, String landCntry, String countryUse) {
