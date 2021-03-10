@@ -252,8 +252,11 @@ public abstract class USBPHandler {
    */
   public SosResponse matchAgainstSosRpa(GEOHandler handler, RequestData requestData, Addr addr, AutomationEngineData engineData,
       StringBuilder details, OverrideOutput overrides, boolean hasExistingCmr) throws Exception {
+    Scorecard scorecard = requestData.getScorecard();
+    scorecard.setRpaMatchingResult("");
     List<SosResponse> sosRpaMatches = USUtil.getSosRpaMatchesForBPEndUser(handler, requestData, engineData);
     if (!sosRpaMatches.isEmpty()) {
+      scorecard.setRpaMatchingResult("Y");
       String msg = "Record found in SOS-RPA Service.";
       details.append(msg + "\n");
       SosResponse response = sosRpaMatches.get(0);
@@ -266,6 +269,7 @@ public abstract class USBPHandler {
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ADMN", "COMP_VERIFIED_INDC", requestData.getAdmin().getCompVerifiedIndc(), "Y");
       return response;
     } else {
+      scorecard.setRpaMatchingResult("N");
       String msg = "No records found in SOS-RPA Service.";
       details.append(msg + "\n");
       if (hasExistingCmr) {
@@ -289,8 +293,11 @@ public abstract class USBPHandler {
    */
   public DnBMatchingResponse matchAgainstDnB(GEOHandler handler, RequestData requestData, Addr addr, AutomationEngineData engineData,
       StringBuilder details, OverrideOutput overrides, boolean hasExistingCmr) throws Exception {
+    Scorecard scorecard = requestData.getScorecard();
+    scorecard.setDnbMatchingResult("");
     List<DnBMatchingResponse> dnbMatches = USUtil.getMatchesForBPEndUser(handler, requestData, engineData);
     if (dnbMatches.isEmpty()) {
+      scorecard.setDnbMatchingResult("N");
       LOG.debug("No D&B matches found for the End User " + addr.getDivn()
           + ((!StringUtils.isBlank(addr.getDept()) && useDeptForMatching(requestData)) ? " " + addr.getDept() : ""));
       String msg = "No high quality D&B matches for the End User " + addr.getDivn()
@@ -306,6 +313,7 @@ public abstract class USBPHandler {
       details.append("\n");
       return null;
     } else {
+      scorecard.setDnbMatchingResult("Y");
       DnBMatchingResponse dnbMatch = dnbMatches.get(0);
       LOG.debug("D&B match found for " + addr.getDivn()
           + ((!StringUtils.isBlank(addr.getDept()) && useDeptForMatching(requestData)) ? " " + addr.getDept() : "") + " with DUNS "

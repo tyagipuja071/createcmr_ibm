@@ -1165,7 +1165,7 @@ public class CEMEAHandler extends BaseSOFHandler {
   @Override
   public void setAdminValuesOnImport(Admin admin, FindCMRRecordModel currentRecord) throws Exception {
   }
-
+  
   @Override
   public int getName1Length() {
     return 35;
@@ -1202,7 +1202,11 @@ public class CEMEAHandler extends BaseSOFHandler {
     }
     return ke;
   }
-
+  
+  public int getName2Length() {
+    return 35;
+  }
+  
   @Override
   public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo) throws Exception {
     boolean doSplit = (currentRecord.getCmrName1Plain() != null && currentRecord.getCmrName1Plain().length() > 35)

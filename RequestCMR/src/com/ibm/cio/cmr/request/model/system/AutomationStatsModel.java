@@ -86,6 +86,12 @@ public class AutomationStatsModel {
 
   @Column(name = "CREATE_TS")
   private String createTs;
+  @Column(
+      name = "DNB_MATCHING_RESULT")
+  private String dnbMatchingResult;
+  @Column(
+      name = "RPA_MATCHING_RESULT")
+  private String rpaMatchingResult;
 
   public StatsPK getId() {
     return id;
@@ -125,6 +131,22 @@ public class AutomationStatsModel {
 
   public void setReqType(String reqType) {
     this.reqType = reqType;
+  }
+
+  public String getDnbMatchingResult() {
+    return dnbMatchingResult;
+  }
+
+  public void setDnbMatchingResult(String dnbMatchingResult) {
+    this.dnbMatchingResult = dnbMatchingResult;
+  }
+
+  public String getRpaMatchingResult() {
+    return rpaMatchingResult;
+  }
+
+  public void setRpaMatchingResult(String rpaMatchingResult) {
+    this.rpaMatchingResult = rpaMatchingResult;
   }
 
   public String getCmrNo() {

@@ -414,7 +414,7 @@ if (readOnly){
         </cmr:column>             
       </cmr:row>
     </cmr:view>
-    <cmr:view forCountry="677,680,620,832,805,767,823,762,768,772,849">
+    <cmr:view forCountry="677,680,620,832,805,767,823,762,768,772,849,752">
       <cmr:row>    
         <cmr:column span="2">
           <p>
