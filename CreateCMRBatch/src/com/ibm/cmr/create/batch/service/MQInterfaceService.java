@@ -150,22 +150,26 @@ public class MQInterfaceService extends BaseBatchService {
     partialCommit(entityManager);
 
     // delete old xmls
-    LOG.info("Cleaning XML files...");
-    int cleanPeriod = Integer.parseInt(BatchUtil.getProperty("XMLOVERLAMPDAYS"));
-    String outPath = BatchUtil.getProperty("XMLOUTPATH");
-    String cmrHome = SystemConfiguration.getValue("CMR_HOME");
-    if (!StringUtils.isEmpty(cmrHome)) {
-      outPath = cmrHome + "/createcmr/xml/sof/output/";
-    }
-    if (!MQProcessUtil.deleteFile(outPath, cleanPeriod)) {
-      LOG.warn("Can't delete XML files in " + outPath);
-    }
+    // LOG.info("Cleaning XML files...");
+    // int cleanPeriod =
+    // Integer.parseInt(BatchUtil.getProperty("XMLOVERLAMPDAYS"));
+    // String outPath = BatchUtil.getProperty("XMLOUTPATH");
+    // String cmrHome = SystemConfiguration.getValue("CMR_HOME");
+    // if (!StringUtils.isEmpty(cmrHome)) {
+    // outPath = cmrHome + "/createcmr/xml/sof/output/";
+    // }
+    // if (!MQProcessUtil.deleteFile(outPath, cleanPeriod)) {
+    // LOG.warn("Can't delete XML files in " + outPath);
+    // }
 
     // get pending data from MQ_INTF_REQ_QUEUE
     LOG.info("Getting pending files from interface queue...");
+
     List<MqIntfReqQueue> pendingList = getRecordsToPublish(entityManager);
 
-    pendingList.addAll(processRetryRecords(entityManager));
+    pendingList.addAll(
+
+        processRetryRecords(entityManager));
 
     if (pendingList == null || pendingList.isEmpty()) {
       LOG.info("Nothing to publish at this point");
