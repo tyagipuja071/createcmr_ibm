@@ -4108,7 +4108,7 @@ function setTaxCd1MandatoryCzech() {
   } else {
     var _custType = FormManager.getActualValue('custSubGrp');
     var role = FormManager.getActualValue('userRole').toUpperCase();
-    if (role == 'REQUESTER' && (_custType == 'BUSPR' || _custType == 'COMME' || _custType == 'THDPT')) {
+    if ((role == 'REQUESTER' || role == 'PROCESSOR') && (_custType == 'BUSPR' || _custType == 'COMME' || _custType == 'THDPT')) {
       FormManager.resetValidations('company');
       FormManager.addValidator('company', Validators.REQUIRED, [ 'IČO' ], 'MAIN_CUST_TAB');
       FormManager.resetValidations('taxCd1');
