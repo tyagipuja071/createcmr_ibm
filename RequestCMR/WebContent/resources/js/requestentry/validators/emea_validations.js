@@ -8294,7 +8294,6 @@ function addAfterConfigItaly() {
   disableCompanyLevelFieldsIT();
   ibmFieldsBehaviourInCreateByScratchIT();
   disableProcpectCmrIT();
-  addBillingValidator();
 
 }
 
@@ -8316,7 +8315,6 @@ function addAfterTemplateLoadItaly(fromAddress, scenario, scenarioChanged) {
   ibmFieldsBehaviourInCreateByScratchIT();
   disableProcpectCmrIT();
   autoSetSBOOnSRValueIT();
-  addBillingValidator();
 }
 
 function addAddrFunctionItaly(cntry, addressMode, saving, finalSave) {
