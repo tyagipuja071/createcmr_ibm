@@ -38,6 +38,7 @@ public class NetherlandsUtil extends AutomationUtil {
   public static final String SCENARIO_BP_LOCAL = "BUSPR";
   public static final String SCENARIO_BP_CROSS = "CBBUS";
   public static final String SCENARIO_PRIVATE_CUSTOMER = "PRICU";
+  public static final String SCENARIO_INTERNAL = "INTER";
 
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
       CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO);
