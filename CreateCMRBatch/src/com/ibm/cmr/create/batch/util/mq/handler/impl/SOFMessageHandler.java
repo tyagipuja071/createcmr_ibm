@@ -466,7 +466,8 @@ public class SOFMessageHandler extends MQMessageHandler {
       } finally {
         sw.close();
       }
-      xmlOutputter.output(document, new FileOutputStream(outPath + fileName));
+      // xmlOutputter.output(document, new FileOutputStream(outPath +
+      // fileName));
     } catch (Exception e) {
       LOG.debug("Cannot save XML to DB", e);
     }
