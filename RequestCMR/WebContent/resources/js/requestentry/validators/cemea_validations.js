@@ -2177,7 +2177,7 @@ function setAddressDetailsForView() {
   }
 }
 
-/*function custNmAttnPersonPhoneValidation() {
+function custNmAttnPersonPhoneValidation() {
   var attn = FormManager.getActualValue('custNm4');
   var phone = FormManager.getActualValue('custPhone');
   var cust3 = FormManager.getActualValue('custNm3');
@@ -2208,7 +2208,7 @@ function custNmAttnPersonPhoneValidationOnChange() {
       custNmAttnPersonPhoneValidation();
     });
   }
-}*/
+}
 
 function reqReasonOnChangeAT() {
   var reqReason = FormManager.getActualValue('reqReason');
@@ -2254,7 +2254,7 @@ function isZD01OrZP01ExistOnCMR() {
   return false;
 }
 
-/*function phoneNoValidation() {
+function phoneNoValidation() {
   var phone = FormManager.getActualValue('custPhone');
   var attn = FormManager.getActualValue('custNm4');
   if (phone != null && phone.trim().length > 0) {
@@ -2269,7 +2269,7 @@ function phoneNoValidationOnChange() {
   dojo.connect(FormManager.getField('custPhone'), 'onChange', function(value) {
     phoneNoValidation();
   });
-}*/
+}
 
 function setEnterpriseValues(clientTier) {
   var role = FormManager.getActualValue('userRole').toUpperCase();
@@ -4108,7 +4108,7 @@ function setTaxCd1MandatoryCzech() {
   } else {
     var _custType = FormManager.getActualValue('custSubGrp');
     var role = FormManager.getActualValue('userRole').toUpperCase();
-    if (role == 'REQUESTER' && (_custType == 'BUSPR' || _custType == 'COMME' || _custType == 'THDPT')) {
+    if ((role == 'REQUESTER' || role == 'PROCESSOR') && (_custType == 'BUSPR' || _custType == 'COMME' || _custType == 'THDPT')) {
       FormManager.resetValidations('company');
       FormManager.addValidator('company', Validators.REQUIRED, [ 'IČO' ], 'MAIN_CUST_TAB');
       FormManager.resetValidations('taxCd1');
@@ -4365,17 +4365,17 @@ dojo
       // CMR-2096-Austria - "Central order block code"
       GEOHandler.addAfterConfig(lockOrdBlk, SysLoc.AUSTRIA);
 
-      //GEOHandler.addAfterConfig(custNmAttnPersonPhoneValidation, [ SysLoc.AUSTRIA ]);
+      GEOHandler.addAfterConfig(custNmAttnPersonPhoneValidation, [ SysLoc.AUSTRIA ]);
       // GEOHandler.addAfterConfig(setScenarioTo3PA, [ SysLoc.AUSTRIA ]);
       GEOHandler.addAfterTemplateLoad(lockAbbrvLocnForScenrio, [ SysLoc.AUSTRIA ]);
       GEOHandler.addAddrFunction(lockAbbrvLocnForScenrio, [ SysLoc.AUSTRIA ]);
       // GEOHandler.addAddrFunction(setScenarioTo3PAOnAddrSave, [ SysLoc.AUSTRIA
       // ]);
 
-      //GEOHandler.addAfterConfig(custNmAttnPersonPhoneValidationOnChange, [ SysLoc.AUSTRIA ]);
+      GEOHandler.addAfterConfig(custNmAttnPersonPhoneValidationOnChange, [ SysLoc.AUSTRIA ]);
       GEOHandler.addAfterConfig(reqReasonOnChangeAT, [ SysLoc.AUSTRIA ]);
-      //GEOHandler.addAfterConfig(phoneNoValidation, [ SysLoc.AUSTRIA ]);
-      //GEOHandler.addAfterConfig(phoneNoValidationOnChange, [ SysLoc.AUSTRIA ]);
+      GEOHandler.addAfterConfig(phoneNoValidation, [ SysLoc.AUSTRIA ]);
+      GEOHandler.addAfterConfig(phoneNoValidationOnChange, [ SysLoc.AUSTRIA ]);
       GEOHandler.addAfterConfig(setEnterpriseValues, GEOHandler.CEMEA);
       GEOHandler.addAfterConfig(setVatRequired, GEOHandler.CEMEA);
       GEOHandler.addAfterConfig(setPreferredLang, GEOHandler.CEMEA);
