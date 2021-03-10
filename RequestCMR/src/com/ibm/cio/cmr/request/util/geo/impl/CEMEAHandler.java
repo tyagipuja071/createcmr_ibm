@@ -1041,13 +1041,17 @@ public class CEMEAHandler extends BaseSOFHandler {
     if (SystemLocation.SLOVAKIA.equals(data.getCmrIssuingCntry())) {
       data.setCompany(this.currentImportValues.get("BankBranchNo"));
       LOG.trace("BankBranchNo: " + data.getCompany());
+    } else if (SystemLocation.CZECH_REPUBLIC.equals(data.getCmrIssuingCntry())) {
+      data.setCompany(this.currentImportValues.get("BankAccountNo"));// RABXA->ICO
+      data.setTaxCd1(mainRecord.getCmrBusinessReg());// kna1.stcd1->DIC
+      LOG.trace("BankAccountNo: " + data.getCompany());
+      LOG.trace("DIC: " + data.getTaxCd1());
     } else {
       data.setCompany("");
     }
 
     // DIC and OIB fields
-    if (SystemLocation.SLOVAKIA.equals(data.getCmrIssuingCntry()) || SystemLocation.CROATIA.equals(data.getCmrIssuingCntry())
-        || SystemLocation.CZECH_REPUBLIC.equals(data.getCmrIssuingCntry())) {
+    if (SystemLocation.SLOVAKIA.equals(data.getCmrIssuingCntry()) || SystemLocation.CROATIA.equals(data.getCmrIssuingCntry())) {
       data.setTaxCd1(this.currentImportValues.get("BankAccountNo"));
       LOG.trace("BankAccountNo: " + data.getTaxCd1());
     }

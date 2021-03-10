@@ -969,10 +969,18 @@ public class CEETransformer extends EMEATransformer {
         legacyCust.setTelNoOrVat(data.getPhone1());
       }
 
+      if (SystemLocation.CZECH_REPUBLIC.equals(data.getCmrIssuingCntry())) {
+        if (!StringUtils.isBlank(data.getCompany())) {
+          legacyCust.setBankAcctNo(data.getCompany());
+        } else {
+          legacyCust.setBankAcctNo("");
+        }
+      } else {
       if (!StringUtils.isBlank(data.getTaxCd1())) {
         legacyCust.setBankAcctNo(data.getTaxCd1());
       } else {
         legacyCust.setBankAcctNo("");
+      }
       }
 
       if ("693".equals(data.getCmrIssuingCntry())) {
@@ -1029,11 +1037,20 @@ public class CEETransformer extends EMEATransformer {
         legacyCust.setTelNoOrVat(data.getPhone1());
       }
 
+      if (SystemLocation.CZECH_REPUBLIC.equals(data.getCmrIssuingCntry())) {
+        if (!StringUtils.isBlank(data.getCompany())) {
+          legacyCust.setBankAcctNo(data.getCompany());
+        } else {
+          legacyCust.setBankAcctNo("");
+        }
+      } else {
       if (!StringUtils.isBlank(data.getTaxCd1())) {
         legacyCust.setBankAcctNo(data.getTaxCd1());
       } else {
         legacyCust.setBankAcctNo("");
       }
+      }
+
       if ("693".equals(data.getCmrIssuingCntry())) {
 
         if (!StringUtils.isBlank(data.getCompany())) {
@@ -1254,14 +1271,26 @@ public class CEETransformer extends EMEATransformer {
     // RBBXA :Bank Branch Number
     if (!StringUtils.isBlank(muData.getNewEntpName1())) {
       if ("@".equals(muData.getNewEntpName1())) {
+        if (SystemLocation.CZECH_REPUBLIC.equals(cust.getId().getSofCntryCode())) {
+          cust.setBankAcctNo("");
+        } else {
         cust.setBankBranchNo("");
+        }
       } else {
         if (muData.getNewEntpName1().length() > 9) {
+          if (SystemLocation.CZECH_REPUBLIC.equals(cust.getId().getSofCntryCode())) {
+            cust.setBankAcctNo(muData.getNewEntpName1().substring(0, 8));
+          } else {
           cust.setBankBranchNo(muData.getNewEntpName1().substring(0, 8));
+          }
+        } else {
+          if (SystemLocation.CZECH_REPUBLIC.equals(cust.getId().getSofCntryCode())) {
+            cust.setBankAcctNo(muData.getNewEntpName1());
         } else {
           cust.setBankBranchNo(muData.getNewEntpName1());
         }
       }
+    }
     }
 
     if (!StringUtils.isBlank(muData.getSubIndustryCd())) {
@@ -1277,7 +1306,7 @@ public class CEETransformer extends EMEATransformer {
           cust.setBankAcctNo(muData.getSearchTerm());
         }
       }
-    } else {
+    } else if (!SystemLocation.CZECH_REPUBLIC.equals(cust.getId().getSofCntryCode())) {
       if (!StringUtils.isBlank(muData.getEmail2())) {
         if ("@".equals(muData.getEmail2())) {
           cust.setBankAcctNo("");
@@ -1686,7 +1715,8 @@ public class CEETransformer extends EMEATransformer {
   @Override
   public boolean hasCmrtCustExt() {
     // return true;
-    if ("SK".equals(DEFAULT_LANDED_COUNTRY) || "BG".equals(DEFAULT_LANDED_COUNTRY) || "RU".equals(DEFAULT_LANDED_COUNTRY)) {
+    if ("SK".equals(DEFAULT_LANDED_COUNTRY) || "BG".equals(DEFAULT_LANDED_COUNTRY) || "RU".equals(DEFAULT_LANDED_COUNTRY)
+        || "CZ".equals(DEFAULT_LANDED_COUNTRY)) {
       return true;
     } else {
       return false;
@@ -1714,6 +1744,13 @@ public class CEETransformer extends EMEATransformer {
         String itax = vat.replaceAll("BG", "");
         legacyCustExt.setiTaxCode(itax);
       }
+    } else if (SystemLocation.CZECH_REPUBLIC.equals(data.getCmrIssuingCntry())) {
+      // data.company is used for other field
+      if (!StringUtils.isBlank(data.getTaxCd1())) {
+        legacyCustExt.setBankAcctNo(data.getTaxCd1());
+      } else {
+        legacyCustExt.setBankAcctNo("");
+      }
     } else {
       if (!StringUtils.isBlank(data.getCompany())) {
         if (data.getCompany().length() > 9) {
@@ -1726,6 +1763,7 @@ public class CEETransformer extends EMEATransformer {
       }
     }
   }
+
 
   @Override
   public void transformLegacyCustomerExtDataMassUpdate(EntityManager entityManager, CmrtCustExt custExt, CMRRequestContainer cmrObjects,
@@ -1750,7 +1788,7 @@ public class CEETransformer extends EMEATransformer {
     // }
 
     // RBBXA :Bank Branch Number
-    if (!StringUtils.isBlank(muData.getNewEntpName1())) {
+    if (!SystemLocation.CZECH_REPUBLIC.equals(custExt.getId().getSofCntryCode()) && !StringUtils.isBlank(muData.getNewEntpName1())) {
       if ("@".equals(muData.getNewEntpName1())) {
         custExt.setiTaxCode("");
       } else {
