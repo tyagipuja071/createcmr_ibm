@@ -1873,6 +1873,11 @@ function applyAddrChangesModal_onLoad() {
         }
       } else if (cntry == '788') {
         if (type.ret1 != 'ZKVK' && type.ret1 != 'ZVAT') {
+          var requestingLob = FormManager.getActualValue('requestingLob');
+          var reqReason = FormManager.getActualValue('reqReason');
+          if ((requestingLob != 'IGF' || reqReason != 'IGF') && type.ret1 == 'ZP02') {
+            continue;
+          }
           if (cmr.currentAddressType && type.ret1 != cmr.currentAddressType) {
             if (reqType != 'C' && typeof (GEOHandler) != 'undefined' && !GEOHandler.canCopyAddressType(type.ret1) && !single) {
               choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (create additional only)</label><br>';
