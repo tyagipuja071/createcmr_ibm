@@ -154,7 +154,7 @@ public class MEHandler extends BaseSOFHandler {
       "Address in Local language", };
 
   private static final List<String> GULF_ORIGINAL_COUNTRIES = Arrays.asList("677", "680", "620", "832", "805", "767", "823", "762", "768", "772",
-      "849");
+      "849", "752");
 
   @Override
   protected void handleSOFConvertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry,
@@ -349,7 +349,7 @@ public class MEHandler extends BaseSOFHandler {
                     if (!StringUtils.isBlank(gline5)) {
                       String legacyposcd = gline5.split(" ")[0];
                       if (gline5.length() > legacyposcd.length()) {
-                          legacycity = gline5.substring(legacyposcd.length() + 1, gline5.length());
+                        legacycity = gline5.substring(legacyposcd.length() + 1, gline5.length());
                       }
                     }
                     // add value
