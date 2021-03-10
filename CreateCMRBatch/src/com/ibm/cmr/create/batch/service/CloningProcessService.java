@@ -494,6 +494,9 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
       cloningRefn.setLastUpdtBy(BATCH_USER_ID);
       cloningRefn.setLastUpdtTs(SystemUtil.getCurrentTimestamp());
       createEntity(cloningRefn, entityManager);
+
+      cloningQueue.setStatus("STOP");
+      updateEntity(cloningQueue, entityManager);
     }
 
   }
