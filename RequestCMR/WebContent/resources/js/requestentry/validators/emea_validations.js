@@ -5436,7 +5436,6 @@ function addBillingAddrValidator() {
 
 function addBillingValidator() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
-  var custSubType = FormManager.getActualValue('custSubGrp');
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
@@ -5445,6 +5444,7 @@ function addBillingValidator() {
           REQ_ID : zp01ReqId,
         };
         var record = cmr.query('GETZP01VALRECORDS', qParams);
+        var custSubType = FormManager.getActualValue('custSubGrp');
         var zp01Reccount = record.ret1;
         if (Number(zp01Reccount == 1)) {
           if (FormManager.getActualValue('reqType') == 'C' && role == "REQUESTER") {
