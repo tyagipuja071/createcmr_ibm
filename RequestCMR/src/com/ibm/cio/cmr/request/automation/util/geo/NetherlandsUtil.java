@@ -188,7 +188,8 @@ public class NetherlandsUtil extends AutomationUtil {
         break;
       case "KVK":
         cmdeReview = true;
-        details.append("KVK has been updated.\n");
+        details.append("KVK is updated to " + change.getNewData()).append("\n");
+        break;
       case "PPS CEID":
         String newppsceid = change.getNewData();
         String oldppsceid = change.getOldData();
