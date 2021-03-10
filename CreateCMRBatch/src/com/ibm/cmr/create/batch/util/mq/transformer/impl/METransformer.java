@@ -2021,4 +2021,14 @@ public class METransformer extends EMEATransformer {
     }
   }
 
+  @Override
+  public boolean isUpdateNeededOnAllAddressType(EntityManager entityManager, CMRRequestContainer cmrObjects) {
+    Admin admin = cmrObjects.getAdmin();
+    if (CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason())) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
 }
