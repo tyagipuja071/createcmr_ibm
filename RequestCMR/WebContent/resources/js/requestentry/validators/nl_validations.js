@@ -1362,6 +1362,41 @@ function rdcDupZP01CheckValidator() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
+function addIGFZP02Validator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+          var requestingLob = FormManager.getActualValue('requestingLob');
+          var reqReason = FormManager.getActualValue('reqReason');
+          var record = null;
+          var type = null;
+          var igfBillToCnt = 0;
+
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+            record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+            if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+              record = _allAddressData[i];
+            }
+            type = record.addrType;
+            if (typeof (type) == 'object') {
+              type = type[0];
+            }
+            if (type == 'ZP02') {
+              igfBillToCnt++;
+            }
+          }
+          if (igfBillToCnt > 0 && (requestingLob != 'IGF' || reqReason != 'IGF')) {
+            return new ValidationResult(null, false, 'IGF Bill-to address is only available when Requesting LOB and Request Reason are IGF');
+          } else {
+            return new ValidationResult(null, true);
+          }
+        }
+      }
+    };
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.NL = [ '788' ];
   console.log('adding NETHERLANDS functions...');
@@ -1406,5 +1441,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(restrictDuplicateAddr, GEOHandler.NL, null, true);
   GEOHandler.registerValidator(rdcDupZP01Check, GEOHandler.NL, null, true);
   GEOHandler.registerValidator(rdcDupZP01CheckValidator, GEOHandler.NL, null, true);
+  GEOHandler.registerValidator(addIGFZP02Validator, GEOHandler.NL, null, true);
 
 });
