@@ -1274,24 +1274,17 @@ public class CEETransformer extends EMEATransformer {
         if (SystemLocation.CZECH_REPUBLIC.equals(cust.getId().getSofCntryCode())) {
           cust.setBankAcctNo("");
         } else {
-        cust.setBankBranchNo("");
+          cust.setBankBranchNo("");
         }
       } else {
-        if (muData.getNewEntpName1().length() > 9) {
-          if (SystemLocation.CZECH_REPUBLIC.equals(cust.getId().getSofCntryCode())) {
-            cust.setBankAcctNo(muData.getNewEntpName1().substring(0, 8));
-          } else {
-          cust.setBankBranchNo(muData.getNewEntpName1().substring(0, 8));
-          }
-        } else {
-          if (SystemLocation.CZECH_REPUBLIC.equals(cust.getId().getSofCntryCode())) {
-            cust.setBankAcctNo(muData.getNewEntpName1());
+        if (SystemLocation.CZECH_REPUBLIC.equals(cust.getId().getSofCntryCode())) {
+          cust.setBankAcctNo(muData.getNewEntpName1());
         } else {
           cust.setBankBranchNo(muData.getNewEntpName1());
         }
       }
     }
-    }
+      
 
     if (!StringUtils.isBlank(muData.getSubIndustryCd())) {
       cust.setLocNo(cust.getId().getSofCntryCode() + muData.getSubIndustryCd());
