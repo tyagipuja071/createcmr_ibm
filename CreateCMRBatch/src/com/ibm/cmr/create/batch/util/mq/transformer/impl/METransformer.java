@@ -1270,6 +1270,11 @@ public class METransformer extends EMEATransformer {
         legacyCust.setEmbargoCd(rdcEmbargoCd);
         resetOrdBlockToData(entityManager, data);
       }
+      if (CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason()) && CMR_REQUEST_STATUS_PCR.equals(admin.getReqStatus())
+          && "Wx".equals(admin.getProcessedFlag())) {
+        legacyCust.setEmbargoCd("E");
+        resetOrdBlockToData(entityManager, data);
+      }
     }
 
     if (!StringUtils.isBlank(data.getSubIndustryCd())) {
@@ -1591,6 +1596,7 @@ public class METransformer extends EMEATransformer {
 
   private void resetOrdBlockToData(EntityManager entityManager, Data data) {
     data.setOrdBlk("88");
+    data.setEmbargoCd("E");
     entityManager.merge(data);
     entityManager.flush();
   }
@@ -1992,8 +1998,18 @@ public class METransformer extends EMEATransformer {
     q.setParameter("TYPE", addrType);
     q.setParameter("OLD_SEQ", oldSeq);
     q.setParameter("SAP_NO", kunnr);
-    LOG.debug("CEE - Assigning address sequence " + newSeq + " to " + addrType + " address.");
+    LOG.debug("ME - Assigning address sequence " + newSeq + " to " + addrType + " address.");
     q.executeSql();
+  }
+
+  @Override
+  public boolean isUpdateNeededOnAllAddressType(EntityManager entityManager, CMRRequestContainer cmrObjects) {
+    Admin admin = cmrObjects.getAdmin();
+    if (CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason())) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
 }
