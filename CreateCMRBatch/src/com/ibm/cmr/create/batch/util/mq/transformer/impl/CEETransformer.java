@@ -1279,9 +1279,9 @@ public class CEETransformer extends EMEATransformer {
       } else {
         if (muData.getNewEntpName1().length() > 9) {
           if (SystemLocation.CZECH_REPUBLIC.equals(cust.getId().getSofCntryCode())) {
-            cust.setBankAcctNo(muData.getNewEntpName1().substring(0, 8));
+            cust.setBankAcctNo(muData.getNewEntpName1().substring(0, 9));
           } else {
-            cust.setBankBranchNo(muData.getNewEntpName1().substring(0, 8));
+            cust.setBankBranchNo(muData.getNewEntpName1());
           }
         } else {
           if (SystemLocation.CZECH_REPUBLIC.equals(cust.getId().getSofCntryCode())) {
