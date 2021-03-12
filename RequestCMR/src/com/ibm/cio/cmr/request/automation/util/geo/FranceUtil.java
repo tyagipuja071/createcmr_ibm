@@ -747,7 +747,7 @@ public class FranceUtil extends AutomationUtil {
         break;
       case "ISIC":
       case "INAC/NAC Code":
-        // case "SIRET":
+      case "SIRET":
         cmdeReview = true;
         details.append("Updates to one or more fields cannot be validated.\n");
         details.append("-" + change.getDataField() + " needs to be verified.\n");
