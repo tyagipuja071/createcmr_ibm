@@ -210,8 +210,13 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
   }
 
   private void processLegacyCloningProcess(EntityManager entityManager, CmrCloningQueue cloningQueue, String targetCntry) throws Exception {
+    String cntry = "";
     String cmrNo = cloningQueue.getId().getCmrNo();
-    String cntry = cloningQueue.getId().getCmrIssuingCntry();
+    if ("NA".equals(targetCntry))
+      cntry = cloningQueue.getId().getCmrIssuingCntry();
+    else
+      cntry = targetCntry;
+
     LOG.debug("Inside processLegacyCloningProcess Started Cloning process for CMR No " + cmrNo + " country " + cntry);
 
     MessageTransformer transformer = TransformerManager.getTransformer(cntry);
@@ -241,21 +246,23 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     LOG.debug("Mapping default Data values.." + cmrNo);
     CmrtCustPK custPkClone = new CmrtCustPK();
     custPkClone.setCustomerNo(cloningQueue.getClonedCmrNo());
-    if ("NA".equals(targetCntry))
-      custPkClone.setSofCntryCode(cntry);
-    else
-      custPkClone.setSofCntryCode(targetCntry);
+    custPkClone.setSofCntryCode(cntry);
+    /*
+     * if ("NA".equals(targetCntry)) custPkClone.setSofCntryCode(cntry); else
+     * custPkClone.setSofCntryCode(targetCntry);
+     */
 
     // copy value same as old from cust object
     PropertyUtils.copyProperties(custClone, cust);
     custClone.setId(custPkClone);
 
     // override config changes
-    List<CloningOverrideMapping> overrideValues = null;
-    if ("NA".equals(targetCntry))
-      overrideValues = overrideUtil.getOverrideValueFromMapping(cntry);
-    else
-      overrideValues = overrideUtil.getOverrideValueFromMapping(targetCntry);
+    List<CloningOverrideMapping> overrideValues = overrideUtil.getOverrideValueFromMapping(cntry);
+    /*
+     * if ("NA".equals(targetCntry)) overrideValues =
+     * overrideUtil.getOverrideValueFromMapping(cntry); else overrideValues =
+     * overrideUtil.getOverrideValueFromMapping(targetCntry);
+     */
 
     overrideConfigChanges(entityManager, overrideValues, custClone, LEGACY_CUST_TABLE, custPkClone);
 
@@ -272,10 +279,11 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
       legacyAddrClone = initEmpty(CmrtAddr.class);
       legacyAddrPkClone = new CmrtAddrPK();
       legacyAddrPkClone.setCustomerNo(cloningQueue.getClonedCmrNo());
-      if ("NA".equals(targetCntry))
-        legacyAddrPkClone.setSofCntryCode(cntry);
-      else
-        legacyAddrPkClone.setSofCntryCode(targetCntry);
+      legacyAddrPkClone.setSofCntryCode(cntry);
+      /*
+       * if ("NA".equals(targetCntry)) legacyAddrPkClone.setSofCntryCode(cntry);
+       * else legacyAddrPkClone.setSofCntryCode(targetCntry);
+       */
 
       legacyAddrPkClone.setAddrNo(addr.getId().getAddrNo());
 
@@ -304,10 +312,11 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
         // default mapping for ADDR and CMRTCEXT
         custExtPkClone = new CmrtCustExtPK();
         custExtPkClone.setCustomerNo(cloningQueue.getClonedCmrNo());
-        if ("NA".equals(targetCntry))
-          custExtPkClone.setSofCntryCode(cntry);
-        else
-          custExtPkClone.setSofCntryCode(targetCntry);
+        custExtPkClone.setSofCntryCode(cntry);
+        /*
+         * if ("NA".equals(targetCntry)) custExtPkClone.setSofCntryCode(cntry);
+         * else custExtPkClone.setSofCntryCode(targetCntry);
+         */
 
         // copy value same as old from cust ext object
         PropertyUtils.copyProperties(custExtClone, custExt);
@@ -1409,13 +1418,15 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
         + cloningQueue.getId().getCmrIssuingCntry());
 
     LegacyDirectObjectContainer legacyObjects = null;
+    boolean targetCntryFlag = false;
     try {
       legacyObjects = CloningUtil.getLegacyDBValues(entityManager, targetCntry, cloningQueue.getId().getCmrNo(), false, false);
+      targetCntryFlag = getLegacyCustCount(entityManager, targetCntry, cloningQueue.getClonedCmrNo());
     } catch (Exception e) {
       LOG.debug("No duplicate cmr in legacy for target country :" + targetCntry);
     }
 
-    if (legacyObjects != null) {
+    if (legacyObjects != null && targetCntryFlag) {
       CmrtCust cust = legacyObjects.getCustomer();
 
       if (cust == null) {
@@ -1875,6 +1886,18 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
     return retVal;
 
+  }
+
+  private boolean getLegacyCustCount(EntityManager entityManager, String targetCntry, String cmrNo) {
+    String sql = ExternalizedQuery.getSql("CLONING_LEGACY_CUST_COUNT");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("COUNTRY", targetCntry);
+    query.setParameter("CMR_NO", cmrNo);
+    int count = query.getSingleResult(Integer.class);
+    if (count > 0)
+      return false;
+    else
+      return true;
   }
 
 }
