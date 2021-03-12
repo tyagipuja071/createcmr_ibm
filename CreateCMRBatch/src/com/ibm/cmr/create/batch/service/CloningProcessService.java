@@ -498,6 +498,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
       createEntity(cloningRefn, entityManager);
 
       cloningQueue.setStatus("STOP");
+      cloningQueue.setErrorMsg("KNA1 record not found");
       updateEntity(cloningQueue, entityManager);
     }
 
