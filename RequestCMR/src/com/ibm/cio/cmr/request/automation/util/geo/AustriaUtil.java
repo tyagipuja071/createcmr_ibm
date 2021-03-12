@@ -409,7 +409,7 @@ public class AustriaUtil extends AutomationUtil {
   private String getSBOFromIMS(EntityManager entityManager, String subIndustryCd, String isuCd, String clientTier) {
     List<String> sboValues = new ArrayList<>();
     String isuCtc = (StringUtils.isNotBlank(isuCd) ? isuCd : "") + (StringUtils.isNotBlank(clientTier) ? clientTier : "");
-    if (StringUtils.isNotBlank(subIndustryCd) && ("32S".equals(isuCtc) || "32N".equals(isuCtc) || "32T".equals(isuCtc))) {
+    if (StringUtils.isNotBlank(subIndustryCd) && ("32S".equals(isuCtc) || "32N".equals(isuCtc) || "32T".equals(isuCtc) || "34Q".equals(isuCtc))) {
       String ims = subIndustryCd.substring(0, 1);
       String sql = ExternalizedQuery.getSql("AUTO.AT.GET_SBOLIST_FROM_ISUCTC");
       PreparedQuery query = new PreparedQuery(entityManager, sql);
