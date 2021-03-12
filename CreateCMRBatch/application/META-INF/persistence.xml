@@ -166,6 +166,8 @@
     <class>com.ibm.cio.cmr.request.entity.KnvlPK</class>
     <class>com.ibm.cio.cmr.request.entity.Sizeinfo</class>
     <class>com.ibm.cio.cmr.request.entity.SizeinfoPK</class>
+    <class>com.ibm.cio.cmr.request.entity.TransService</class>
+    <class>com.ibm.cio.cmr.request.entity.TransServicePK</class>
 
     <properties>
 
