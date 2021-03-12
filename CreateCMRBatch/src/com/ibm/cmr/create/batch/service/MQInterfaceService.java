@@ -417,6 +417,7 @@ public class MQInterfaceService extends BaseBatchService {
                 } else {
                   LOG.error("GTS XML Directory not defined. Skipping this record.");
                 }
+                collectCount++;
               } else {
                 mqIntfReqQueue = getQueueRecordById(entityManager, uniqueNum);
                 if (mqIntfReqQueue != null) {

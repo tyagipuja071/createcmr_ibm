@@ -64,6 +64,8 @@ import com.ibm.cio.cmr.request.entity.Sadr;
 import com.ibm.cio.cmr.request.entity.SadrPK;
 import com.ibm.cio.cmr.request.entity.Sizeinfo;
 import com.ibm.cio.cmr.request.entity.SizeinfoPK;
+import com.ibm.cio.cmr.request.entity.TransService;
+import com.ibm.cio.cmr.request.entity.TransServicePK;
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
@@ -494,6 +496,9 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
       cloningRefn.setLastUpdtBy(BATCH_USER_ID);
       cloningRefn.setLastUpdtTs(SystemUtil.getCurrentTimestamp());
       createEntity(cloningRefn, entityManager);
+
+      cloningQueue.setStatus("STOP");
+      updateEntity(cloningQueue, entityManager);
     }
 
   }
@@ -776,6 +781,8 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     processKnvl(rdcMgr, kna1, kna1Clone, rdcConfig, overrideValues);
 
     processSizeInfo(rdcMgr, kna1, kna1Clone, rdcConfig, overrideValues);
+
+    processTransService(rdcMgr, kna1, kna1Clone, rdcConfig, overrideValues);
   }
 
   private void processKnb1(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, CloningRDCConfiguration rdcConfig,
@@ -1786,6 +1793,87 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     }
 
     return ret;
+  }
+
+  private void processTransService(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, CloningRDCConfiguration rdcConfig,
+      List<CloningOverrideMapping> overrideValues) throws Exception {
+
+    TransService transSer = null;
+    TransService transSerClone = null;
+    Timestamp ts = SystemUtil.getCurrentTimestamp();
+
+    transSer = getTransSerByKunnr(entityManager, kna1.getKatr6(), kna1.getId().getKunnr());
+    transSerClone = getTransSerByKunnr(entityManager, kna1Clone.getKatr6(), kna1Clone.getId().getKunnr());
+    if (transSer != null && transSerClone == null) {
+      try {
+        transSerClone = new TransService();
+        TransServicePK pk = new TransServicePK();
+        String transServiceId = generateTransServId(entityManager);
+        pk.setTransServiceId(transServiceId);
+
+        PropertyUtils.copyProperties(transSerClone, transSer);
+
+        if ("ZS01".equalsIgnoreCase(kna1Clone.getKtokd()))
+          transSerClone.setParSitePrtyId(kna1Clone.getBran5());
+        else {
+          String parSitePartyid = getParSitePartyId(entityManager, kna1Clone);
+          transSerClone.setChildSitePrtyId(kna1Clone.getBran5());
+          transSerClone.setParSitePrtyId(parSitePartyid);
+        }
+
+        overrideConfigChanges(entityManager, overrideValues, transSerClone, "TRANS_SERVICE", pk);
+
+        transSerClone.setId(pk);
+
+        transSerClone.setCmrNum(kna1Clone.getZzkvCusno());
+        transSerClone.setMppNum(kna1Clone.getId().getKunnr());
+        transSerClone.setInsTimestamp(ts);
+        transSerClone.setUpdTimestamp(ts);
+        transSerClone.setInsUserid("CreateCMR");
+
+        createEntity(transSerClone, entityManager);
+      } catch (Exception e) {
+        LOG.debug("Error in copy TransService");
+      }
+    } else {
+      LOG.info("TransService record not exist with KUNNR " + kna1.getId().getKunnr());
+    }
+
+  }
+
+  public TransService getTransSerByKunnr(EntityManager rdcMgr, String cntry, String kunnr) throws Exception {
+    String sql = ExternalizedQuery.getSql("GET.TRANS.SERVICE.RECORD");
+    PreparedQuery query = new PreparedQuery(rdcMgr, sql);
+    query.setParameter("COUNTRY", cntry);
+    query.setParameter("KUNNR", kunnr);
+    return query.getSingleResult(TransService.class);
+  }
+
+  public String generateTransServId(EntityManager entityManager) {
+    String sql = ExternalizedQuery.getSql("SERVICE.TRANS_SERV.ID");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    return query.getSingleResult(String.class);
+  }
+
+  private String getParSitePartyId(EntityManager rdcMgr, Kna1 kna1) {
+    String retVal = "";
+
+    String sql = ExternalizedQuery.getSql("LD.GET.IERP.SOLDTO.BRAN5");
+    PreparedQuery query = new PreparedQuery(rdcMgr, sql);
+    query.setParameter("CMR", kna1.getZzkvCusno());
+    query.setParameter("KATR6", kna1.getKatr6());
+    query.setParameter("MANDT", kna1.getId().getMandt());
+    query.setForReadOnly(true);
+
+    List<Object[]> results = query.getResults();
+
+    if (results != null && results.size() > 0) {
+      Object[] result = results.get(0);
+      retVal = (String) result[0];
+    }
+
+    return retVal;
+
   }
 
 }
