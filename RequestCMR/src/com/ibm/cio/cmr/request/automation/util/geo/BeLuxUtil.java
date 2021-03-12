@@ -165,6 +165,12 @@ public class BeLuxUtil extends AutomationUtil {
         sboVal = sboVal.substring(0, 3);
         overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sboVal + sboVal);
         details.append("SORTL: " + sboVal + sboVal);
+      } else {
+        sboVal = getSBOfromCoverage(entityManager, container.getFinalCoverage());
+        if (StringUtils.isNotBlank(sboVal)) {
+          details.append("SORTL calculated on basis of Existing CMR Data: " + sboVal + sboVal);
+          overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sboVal + sboVal);
+        }
       }
       engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
     } else if (!isCoverageCalculated) {
@@ -215,19 +221,22 @@ public class BeLuxUtil extends AutomationUtil {
 
       Data data = reqData.getData();
       int count = 0;
+      String affiliate = data.getCountryUse().length() > 3 ? "0502" : "0016";
       String sql = ExternalizedQuery.getSql("AUTO.GBG.COV.KNA1.KONSZ");
       String bgId = gbg.getBgId();
       PreparedQuery query = new PreparedQuery(entityManager, sql);
       query.setParameter("CNTRY", data.getCmrIssuingCntry());
       query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
       query.setParameter("BG_ID", bgId);
-      query.setParameter("AFFILIATE", "0016");
+      query.setParameter("AFFILIATE", affiliate);
 
       count = query.getSingleResult(Integer.class);
-      gbgCntry = count > 0 ? "Belgium" : "Luxembourg";
-
+      if (count > 0 && data.getCountryUse().length() == 3) {
+        gbgCntry = "Belgium";
+      } else if (count > 0 && data.getCountryUse().length() > 3) {
+        gbgCntry = "Luxembourg";
+      }
     }
-
     return gbgCntry;
   }
 
@@ -541,6 +550,28 @@ public class BeLuxUtil extends AutomationUtil {
       }
     }
     return false;
+  }
+
+  /**
+   * Computes the SBO by getting the SORTL most used by the COverage ID
+   * 
+   * @param entityManager
+   * @param coverage
+   * @return
+   */
+  private String getSBOfromCoverage(EntityManager entityManager, String coverage) {
+    LOG.debug("Computing SBO for Coverage " + coverage);
+    String sql = ExternalizedQuery.getSql("AUTO.FR.COV.SORTL");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("COVID", coverage);
+    query.setForReadOnly(true);
+    String sortl = query.getSingleResult(String.class);
+    if (sortl != null && !StringUtils.isBlank(sortl)) {
+      sortl = StringUtils.rightPad(sortl, 6, '0');
+      return sortl.substring(0, 3);
+    }
+    return null;
   }
 
 }
