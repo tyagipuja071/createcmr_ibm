@@ -387,6 +387,13 @@ public class CEMEAPDFConverter extends DefaultPDFConverter {
       customer.addCell(createValueCell(data.getTaxCd1()));
     }
 
+    if (cmrCntry.equals("668")) {
+      customer.addCell(createLabelCell("ICO:"));
+      customer.addCell(createValueCell(data.getCompany()));
+      customer.addCell(createLabelCell("DIC:"));
+      customer.addCell(createValueCell(data.getTaxCd1()));
+    }
+
     if (cmrCntry.equals("704")) {
       customer.addCell(createLabelCell("OIB:"));
       customer.addCell(createValueCell(data.getTaxCd1()));
