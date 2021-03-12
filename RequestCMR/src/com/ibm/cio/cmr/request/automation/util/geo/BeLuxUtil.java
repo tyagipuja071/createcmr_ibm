@@ -157,7 +157,7 @@ public class BeLuxUtil extends AutomationUtil {
 
     if (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && CalculateCoverageElement.COV_BG.equals(covFrom)
         && StringUtils.isNotBlank(gbgCntry)) {
-      details.append("Coverage calculated for: " + gbgCntry);
+      details.append("Coverage calculated for: " + gbgCntry).append("\n");
       FieldResultKey sboKeyVal = new FieldResultKey("DATA", "SALES_BO_CD");
       String sboVal = "";
       if (overrides.getData().containsKey(sboKeyVal)) {
@@ -378,35 +378,35 @@ public class BeLuxUtil extends AutomationUtil {
         }
         break;
       case "PPS CEID":
-          String newppsceid = change.getNewData();
-          String oldppsceid = change.getOldData();
-          String Kukla = data.getCustClass();
-          // ADD
-          if (StringUtils.isBlank(oldppsceid) && !StringUtils.isBlank(newppsceid)) {
-        	  if("49".equalsIgnoreCase(Kukla) && checkPPSCEID(data.getPpsceid())){
-        		  details.append("PPS CE ID validated successfully with PartnerWorld Profile Systems.").append("\n");
-        	  } else {
-        		 resultCodes.add("D");
-        		 if(!"49".equalsIgnoreCase(Kukla)){
-            		 details.append("PS Ceid added for CMR with Kukla other than 49").append("\n");
-            		 } else{
-            	     details.append("PPS ceid on the request is invalid").append("\n");
-            		 }	 
-        	     }
+        String newppsceid = change.getNewData();
+        String oldppsceid = change.getOldData();
+        String Kukla = data.getCustClass();
+        // ADD
+        if (StringUtils.isBlank(oldppsceid) && !StringUtils.isBlank(newppsceid)) {
+          if ("49".equalsIgnoreCase(Kukla) && checkPPSCEID(data.getPpsceid())) {
+            details.append("PPS CE ID validated successfully with PartnerWorld Profile Systems.").append("\n");
+          } else {
+            resultCodes.add("D");
+            if (!"49".equalsIgnoreCase(Kukla)) {
+              details.append("PS Ceid added for CMR with Kukla other than 49").append("\n");
+            } else {
+              details.append("PPS ceid on the request is invalid").append("\n");
             }
-          // DELETE
-          if (!StringUtils.isBlank(oldppsceid) && StringUtils.isBlank(newppsceid)) {
-            cmdeReview = true;
-            engineData.addNegativeCheckStatus("_beluxPpsCeidUpdt", " Deletion of ppsceid needs cmde review.\n");
-            details.append(" Deletion of ppsceid needs cmde review.\n");
           }
-          //UPDATE
-          if (!StringUtils.isBlank(oldppsceid) && !StringUtils.isBlank(newppsceid) && !oldppsceid.equalsIgnoreCase(newppsceid)){
-        	  cmdeReview = true;
-              engineData.addNegativeCheckStatus("_beluxPpsCeidUpdt", " Update of ppsceid needs cmde review.\n");
-              details.append(" Update of ppsceid needs cmde review.\n");
-          }
-          break;
+        }
+        // DELETE
+        if (!StringUtils.isBlank(oldppsceid) && StringUtils.isBlank(newppsceid)) {
+          cmdeReview = true;
+          engineData.addNegativeCheckStatus("_beluxPpsCeidUpdt", " Deletion of ppsceid needs cmde review.\n");
+          details.append(" Deletion of ppsceid needs cmde review.\n");
+        }
+        // UPDATE
+        if (!StringUtils.isBlank(oldppsceid) && !StringUtils.isBlank(newppsceid) && !oldppsceid.equalsIgnoreCase(newppsceid)) {
+          cmdeReview = true;
+          engineData.addNegativeCheckStatus("_beluxPpsCeidUpdt", " Update of ppsceid needs cmde review.\n");
+          details.append(" Update of ppsceid needs cmde review.\n");
+        }
+        break;
       case "Order Block Code":
         String newOrdBlk = change.getNewData();
         String oldOrdBlk = change.getOldData();
@@ -430,18 +430,18 @@ public class BeLuxUtil extends AutomationUtil {
       }
     }
     if (resultCodes.contains("D")) {
-        output.setOnError(true);
-        validation.setSuccess(false);
-        validation.setMessage("Rejected");
-      } else if (cmdeReview) {
-        engineData.addNegativeCheckStatus("_esDataCheckFailed", "Updates to one or more fields requires CMDE review.");
-        details.append("Updates to one or more fields requires CMDE review.\n");
-        validation.setSuccess(false);
-        validation.setMessage("Not Validated");
-      } else {
-        validation.setSuccess(true);
-        validation.setMessage("Successful");
-      }
+      output.setOnError(true);
+      validation.setSuccess(false);
+      validation.setMessage("Rejected");
+    } else if (cmdeReview) {
+      engineData.addNegativeCheckStatus("_esDataCheckFailed", "Updates to one or more fields requires CMDE review.");
+      details.append("Updates to one or more fields requires CMDE review.\n");
+      validation.setSuccess(false);
+      validation.setMessage("Not Validated");
+    } else {
+      validation.setSuccess(true);
+      validation.setMessage("Successful");
+    }
     if (!ignoredUpdates.isEmpty()) {
       details.append("Updates to the following fields skipped validation:\n");
       for (String field : ignoredUpdates) {
