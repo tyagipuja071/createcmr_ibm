@@ -157,7 +157,7 @@ public class BeLuxUtil extends AutomationUtil {
 
     if (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && CalculateCoverageElement.COV_BG.equals(covFrom)
         && StringUtils.isNotBlank(gbgCntry)) {
-      details.append("Coverage calculated for: " + gbgCntry);
+      details.append("Coverage calculated for: " + gbgCntry).append("\n");
       FieldResultKey sboKeyVal = new FieldResultKey("DATA", "SALES_BO_CD");
       String sboVal = "";
       if (overrides.getData().containsKey(sboKeyVal)) {
@@ -165,6 +165,12 @@ public class BeLuxUtil extends AutomationUtil {
         sboVal = sboVal.substring(0, 3);
         overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sboVal + sboVal);
         details.append("SORTL: " + sboVal + sboVal);
+      } else {
+        sboVal = getSBOfromCoverage(entityManager, container.getFinalCoverage());
+        if (StringUtils.isNotBlank(sboVal)) {
+          details.append("SORTL calculated on basis of Existing CMR Data: " + sboVal + sboVal);
+          overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sboVal + sboVal);
+        }
       }
       engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
     } else if (!isCoverageCalculated) {
@@ -215,19 +221,22 @@ public class BeLuxUtil extends AutomationUtil {
 
       Data data = reqData.getData();
       int count = 0;
+      String affiliate = data.getCountryUse().length() > 3 ? "0502" : "0016";
       String sql = ExternalizedQuery.getSql("AUTO.GBG.COV.KNA1.KONSZ");
       String bgId = gbg.getBgId();
       PreparedQuery query = new PreparedQuery(entityManager, sql);
       query.setParameter("CNTRY", data.getCmrIssuingCntry());
       query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
       query.setParameter("BG_ID", bgId);
-      query.setParameter("AFFILIATE", "0016");
+      query.setParameter("AFFILIATE", affiliate);
 
       count = query.getSingleResult(Integer.class);
-      gbgCntry = count > 0 ? "Belgium" : "Luxembourg";
-
+      if (count > 0 && data.getCountryUse().length() == 3) {
+        gbgCntry = "Belgium";
+      } else if (count > 0 && data.getCountryUse().length() > 3) {
+        gbgCntry = "Luxembourg";
+      }
     }
-
     return gbgCntry;
   }
 
@@ -369,35 +378,35 @@ public class BeLuxUtil extends AutomationUtil {
         }
         break;
       case "PPS CEID":
-          String newppsceid = change.getNewData();
-          String oldppsceid = change.getOldData();
-          String Kukla = data.getCustClass();
-          // ADD
-          if (StringUtils.isBlank(oldppsceid) && !StringUtils.isBlank(newppsceid)) {
-        	  if("49".equalsIgnoreCase(Kukla) && checkPPSCEID(data.getPpsceid())){
-        		  details.append("PPS CE ID validated successfully with PartnerWorld Profile Systems.").append("\n");
-        	  } else {
-        		 resultCodes.add("D");
-        		 if(!"49".equalsIgnoreCase(Kukla)){
-            		 details.append("PS Ceid added for CMR with Kukla other than 49").append("\n");
-            		 } else{
-            	     details.append("PPS ceid on the request is invalid").append("\n");
-            		 }	 
-        	     }
+        String newppsceid = change.getNewData();
+        String oldppsceid = change.getOldData();
+        String Kukla = data.getCustClass();
+        // ADD
+        if (StringUtils.isBlank(oldppsceid) && !StringUtils.isBlank(newppsceid)) {
+          if ("49".equalsIgnoreCase(Kukla) && checkPPSCEID(data.getPpsceid())) {
+            details.append("PPS CE ID validated successfully with PartnerWorld Profile Systems.").append("\n");
+          } else {
+            resultCodes.add("D");
+            if (!"49".equalsIgnoreCase(Kukla)) {
+              details.append("PS Ceid added for CMR with Kukla other than 49").append("\n");
+            } else {
+              details.append("PPS ceid on the request is invalid").append("\n");
             }
-          // DELETE
-          if (!StringUtils.isBlank(oldppsceid) && StringUtils.isBlank(newppsceid)) {
-            cmdeReview = true;
-            engineData.addNegativeCheckStatus("_beluxPpsCeidUpdt", " Deletion of ppsceid needs cmde review.\n");
-            details.append(" Deletion of ppsceid needs cmde review.\n");
           }
-          //UPDATE
-          if (!StringUtils.isBlank(oldppsceid) && !StringUtils.isBlank(newppsceid) && !oldppsceid.equalsIgnoreCase(newppsceid)){
-        	  cmdeReview = true;
-              engineData.addNegativeCheckStatus("_beluxPpsCeidUpdt", " Update of ppsceid needs cmde review.\n");
-              details.append(" Update of ppsceid needs cmde review.\n");
-          }
-          break;
+        }
+        // DELETE
+        if (!StringUtils.isBlank(oldppsceid) && StringUtils.isBlank(newppsceid)) {
+          cmdeReview = true;
+          engineData.addNegativeCheckStatus("_beluxPpsCeidUpdt", " Deletion of ppsceid needs cmde review.\n");
+          details.append(" Deletion of ppsceid needs cmde review.\n");
+        }
+        // UPDATE
+        if (!StringUtils.isBlank(oldppsceid) && !StringUtils.isBlank(newppsceid) && !oldppsceid.equalsIgnoreCase(newppsceid)) {
+          cmdeReview = true;
+          engineData.addNegativeCheckStatus("_beluxPpsCeidUpdt", " Update of ppsceid needs cmde review.\n");
+          details.append(" Update of ppsceid needs cmde review.\n");
+        }
+        break;
       case "Order Block Code":
         String newOrdBlk = change.getNewData();
         String oldOrdBlk = change.getOldData();
@@ -421,18 +430,18 @@ public class BeLuxUtil extends AutomationUtil {
       }
     }
     if (resultCodes.contains("D")) {
-        output.setOnError(true);
-        validation.setSuccess(false);
-        validation.setMessage("Rejected");
-      } else if (cmdeReview) {
-        engineData.addNegativeCheckStatus("_esDataCheckFailed", "Updates to one or more fields requires CMDE review.");
-        details.append("Updates to one or more fields requires CMDE review.\n");
-        validation.setSuccess(false);
-        validation.setMessage("Not Validated");
-      } else {
-        validation.setSuccess(true);
-        validation.setMessage("Successful");
-      }
+      output.setOnError(true);
+      validation.setSuccess(false);
+      validation.setMessage("Rejected");
+    } else if (cmdeReview) {
+      engineData.addNegativeCheckStatus("_esDataCheckFailed", "Updates to one or more fields requires CMDE review.");
+      details.append("Updates to one or more fields requires CMDE review.\n");
+      validation.setSuccess(false);
+      validation.setMessage("Not Validated");
+    } else {
+      validation.setSuccess(true);
+      validation.setMessage("Successful");
+    }
     if (!ignoredUpdates.isEmpty()) {
       details.append("Updates to the following fields skipped validation:\n");
       for (String field : ignoredUpdates) {
@@ -541,6 +550,28 @@ public class BeLuxUtil extends AutomationUtil {
       }
     }
     return false;
+  }
+
+  /**
+   * Computes the SBO by getting the SORTL most used by the COverage ID
+   * 
+   * @param entityManager
+   * @param coverage
+   * @return
+   */
+  private String getSBOfromCoverage(EntityManager entityManager, String coverage) {
+    LOG.debug("Computing SBO for Coverage " + coverage);
+    String sql = ExternalizedQuery.getSql("AUTO.FR.COV.SORTL");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("COVID", coverage);
+    query.setForReadOnly(true);
+    String sortl = query.getSingleResult(String.class);
+    if (sortl != null && !StringUtils.isBlank(sortl)) {
+      sortl = StringUtils.rightPad(sortl, 6, '0');
+      return sortl.substring(0, 3);
+    }
+    return null;
   }
 
 }
