@@ -75,8 +75,6 @@ import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.legacy.CloningMapping;
 import com.ibm.cio.cmr.request.util.legacy.CloningOverrideMapping;
 import com.ibm.cio.cmr.request.util.legacy.CloningOverrideUtil;
-import com.ibm.cio.cmr.request.util.legacy.CloningRDCConfiguration;
-import com.ibm.cio.cmr.request.util.legacy.CloningRDCUtil;
 import com.ibm.cio.cmr.request.util.legacy.CloningUtil;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectObjectContainer;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
@@ -119,6 +117,8 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
   private static final List<String> STATUS_CLONING_REFN = Arrays.asList("E", "X", "C");
 
   private SimpleDateFormat ERDAT_FORMATTER = new SimpleDateFormat("yyyyMMdd");
+
+  private static final String targetMandt = SystemConfiguration.getValue("TARGET_MANDT");
 
   @Override
   public boolean isTransactional() {
@@ -621,8 +621,8 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     return query.getResults(RdcCloningRefn.class);
   }
 
-  private void processCloningKNA1RDC(EntityManager entityManager, RdcCloningRefn rdcCloningRefn, CloningRDCConfiguration rdcConfig,
-      List<CloningOverrideMapping> overrideValues, CmrCloningQueue cloningQueue) throws Exception {
+  private void processCloningKNA1RDC(EntityManager entityManager, RdcCloningRefn rdcCloningRefn, List<CloningOverrideMapping> overrideValues,
+      CmrCloningQueue cloningQueue) throws Exception {
     LOG.info("Inside processCloningKNA1RDC CMR No: " + rdcCloningRefn.getCmrNo() + " and Country: " + rdcCloningRefn.getCmrIssuingCntry());
     try {
       Kna1 kna1 = null;
@@ -631,19 +631,19 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
       kna1 = getKna1ByKunnr(entityManager, SystemConfiguration.getValue("MANDT"), rdcCloningRefn.getId().getKunnr());
       if (kna1 != null) {
         // generate kunnr, prepare the kna1 clone data
-        kunnr = generateId(rdcConfig.getTargetMandt(), KUNNR_KEY, entityManager);
+        kunnr = generateId(targetMandt, KUNNR_KEY, entityManager);
         Kna1 kna1Clone = new Kna1();
         Kna1PK kna1PkClone = new Kna1PK();
-        kna1PkClone.setMandt(rdcConfig.getTargetMandt());// from config file
+        kna1PkClone.setMandt(targetMandt);// from config file
         kna1PkClone.setKunnr(kunnr);
         try {
           PropertyUtils.copyProperties(kna1Clone, kna1);
           kna1Clone.setId(kna1PkClone);
           kna1Clone.setBran5("S" + kunnr.substring(1));
           kna1Clone.setZzkvCusno(cloningQueue.getClonedCmrNo());
-          kna1Clone.setKatr10(rdcConfig.getKatr10());// from config file
+          // kna1Clone.setKatr10(rdcConfig.getKatr10());// from config file
           if (StringUtils.isNotBlank(kna1.getAdrnr())) {
-            String adrnr = generateId(rdcConfig.getTargetMandt(), ADRNR_KEY, entityManager);
+            String adrnr = generateId(targetMandt, ADRNR_KEY, entityManager);
             kna1Clone.setAdrnr(adrnr);
           }
 
@@ -664,7 +664,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
         }
       }
 
-      rdcCloningRefn.setTargetMandt(rdcConfig.getTargetMandt()); // from config
+      rdcCloningRefn.setTargetMandt(targetMandt); // from config
       rdcCloningRefn.setTargetKunnr(kunnr);
 
     } catch (Exception e) {
@@ -764,40 +764,38 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
   }
 
-  protected void processKna1Children(EntityManager rdcMgr, Kna1 kna1, Kna1 kna1Clone, CloningRDCConfiguration rdcConfig,
-      List<CloningOverrideMapping> overrideValues) throws Exception {
+  protected void processKna1Children(EntityManager rdcMgr, Kna1 kna1, Kna1 kna1Clone, List<CloningOverrideMapping> overrideValues) throws Exception {
 
-    processKnb1(rdcMgr, kna1, kna1Clone, rdcConfig, overrideValues);
+    processKnb1(rdcMgr, kna1, kna1Clone, overrideValues);
 
-    processKnvv(rdcMgr, kna1, kna1Clone, rdcConfig, overrideValues);
+    processKnvv(rdcMgr, kna1, kna1Clone, overrideValues);
 
-    processKnvi(rdcMgr, kna1, kna1Clone, rdcConfig, overrideValues);
+    processKnvi(rdcMgr, kna1, kna1Clone, overrideValues);
 
-    processKnex(rdcMgr, kna1, kna1Clone, rdcConfig, overrideValues);
+    processKnex(rdcMgr, kna1, kna1Clone, overrideValues);
 
-    processKnvp(rdcMgr, kna1, kna1Clone, rdcConfig, overrideValues);
+    processKnvp(rdcMgr, kna1, kna1Clone, overrideValues);
 
-    processSadr(rdcMgr, kna1, kna1Clone, rdcConfig, overrideValues);
+    processSadr(rdcMgr, kna1, kna1Clone, overrideValues);
 
-    processAddlCtryData(rdcMgr, kna1, kna1Clone, rdcConfig, overrideValues);
+    processAddlCtryData(rdcMgr, kna1, kna1Clone, overrideValues);
 
-    processKnvk(rdcMgr, kna1, kna1Clone, rdcConfig, overrideValues);
+    processKnvk(rdcMgr, kna1, kna1Clone, overrideValues);
 
-    processKunnrExt(rdcMgr, kna1, kna1Clone, rdcConfig, overrideValues);
+    processKunnrExt(rdcMgr, kna1, kna1Clone, overrideValues);
 
-    processKnbk(rdcMgr, kna1, kna1Clone, rdcConfig, overrideValues);
+    processKnbk(rdcMgr, kna1, kna1Clone, overrideValues);
 
-    processKnva(rdcMgr, kna1, kna1Clone, rdcConfig, overrideValues);
+    processKnva(rdcMgr, kna1, kna1Clone, overrideValues);
 
-    processKnvl(rdcMgr, kna1, kna1Clone, rdcConfig, overrideValues);
+    processKnvl(rdcMgr, kna1, kna1Clone, overrideValues);
 
-    processSizeInfo(rdcMgr, kna1, kna1Clone, rdcConfig, overrideValues);
+    processSizeInfo(rdcMgr, kna1, kna1Clone, overrideValues);
 
-    processTransService(rdcMgr, kna1, kna1Clone, rdcConfig, overrideValues);
+    processTransService(rdcMgr, kna1, kna1Clone, overrideValues);
   }
 
-  private void processKnb1(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, CloningRDCConfiguration rdcConfig,
-      List<CloningOverrideMapping> overrideValues) throws Exception {
+  private void processKnb1(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, List<CloningOverrideMapping> overrideValues) throws Exception {
 
     Knb1 knb1 = null;
     Knb1 knb1Clone = null;
@@ -842,8 +840,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     return query.getSingleResult(Knb1.class);
   }
 
-  private void processKnvv(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, CloningRDCConfiguration rdcConfig,
-      List<CloningOverrideMapping> overrideValues) throws Exception {
+  private void processKnvv(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, List<CloningOverrideMapping> overrideValues) throws Exception {
 
     Knvv knvv = null;
     Knvv knvvClone = null;
@@ -889,8 +886,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     return query.getSingleResult(Knvv.class);
   }
 
-  private void processKnex(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, CloningRDCConfiguration rdcConfig,
-      List<CloningOverrideMapping> overrideValues) throws Exception {
+  private void processKnex(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, List<CloningOverrideMapping> overrideValues) throws Exception {
 
     Knex knex = null;
     Knex knexClone = null;
@@ -934,8 +930,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     return query.getSingleResult(Knex.class);
   }
 
-  private void processSadr(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, CloningRDCConfiguration rdcConfig,
-      List<CloningOverrideMapping> overrideValues) throws Exception {
+  private void processSadr(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, List<CloningOverrideMapping> overrideValues) throws Exception {
 
     Sadr sadr = null;
     Sadr sadrClone = null;
@@ -979,8 +974,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     return query.getSingleResult(Sadr.class);
   }
 
-  private void processKnvi(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, CloningRDCConfiguration rdcConfig,
-      List<CloningOverrideMapping> overrideValues) throws Exception {
+  private void processKnvi(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, List<CloningOverrideMapping> overrideValues) throws Exception {
 
     List<Knvi> knvi = null;
     List<Knvi> knviClone = null;
@@ -1028,8 +1022,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     return query.getResults(Knvi.class);
   }
 
-  private void processKnvk(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, CloningRDCConfiguration rdcConfig,
-      List<CloningOverrideMapping> overrideValues) throws Exception {
+  private void processKnvk(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, List<CloningOverrideMapping> overrideValues) throws Exception {
 
     Knvk knvk = null;
     Knvk knvkClone = null;
@@ -1073,8 +1066,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     return query.getSingleResult(Knvk.class);
   }
 
-  private void processKnvp(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, CloningRDCConfiguration rdcConfig,
-      List<CloningOverrideMapping> overrideValues) throws Exception {
+  private void processKnvp(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, List<CloningOverrideMapping> overrideValues) throws Exception {
 
     List<Knvp> knvp = null;
     List<Knvp> knvpClone = null;
@@ -1125,8 +1117,8 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     return query.getResults(Knvp.class);
   }
 
-  private void processAddlCtryData(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, CloningRDCConfiguration rdcConfig,
-      List<CloningOverrideMapping> overrideValues) throws Exception {
+  private void processAddlCtryData(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, List<CloningOverrideMapping> overrideValues)
+      throws Exception {
 
     Addlctrydata addlctrydata = null;
     Addlctrydata addlctrydataClone = null;
@@ -1169,8 +1161,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     return query.getSingleResult(Addlctrydata.class);
   }
 
-  private void processKunnrExt(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, CloningRDCConfiguration rdcConfig,
-      List<CloningOverrideMapping> overrideValues) throws Exception {
+  private void processKunnrExt(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, List<CloningOverrideMapping> overrideValues) throws Exception {
 
     KunnrExt kunnrExt = null;
     KunnrExt kunnrExtClone = null;
@@ -1213,8 +1204,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     return query.getSingleResult(KunnrExt.class);
   }
 
-  private void processKnbk(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, CloningRDCConfiguration rdcConfig,
-      List<CloningOverrideMapping> overrideValues) throws Exception {
+  private void processKnbk(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, List<CloningOverrideMapping> overrideValues) throws Exception {
 
     Knbk knbk = null;
     Knbk knbkClone = null;
@@ -1260,8 +1250,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     return query.getSingleResult(Knbk.class);
   }
 
-  private void processKnva(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, CloningRDCConfiguration rdcConfig,
-      List<CloningOverrideMapping> overrideValues) throws Exception {
+  private void processKnva(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, List<CloningOverrideMapping> overrideValues) throws Exception {
 
     Knva knva = null;
     Knva knvaClone = null;
@@ -1305,8 +1294,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     return query.getSingleResult(Knva.class);
   }
 
-  private void processKnvl(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, CloningRDCConfiguration rdcConfig,
-      List<CloningOverrideMapping> overrideValues) throws Exception {
+  private void processKnvl(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, List<CloningOverrideMapping> overrideValues) throws Exception {
 
     Knvl knvl = null;
     Knvl knvlClone = null;
@@ -1352,8 +1340,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     return query.getSingleResult(Knvl.class);
   }
 
-  private void processSizeInfo(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, CloningRDCConfiguration rdcConfig,
-      List<CloningOverrideMapping> overrideValues) throws Exception {
+  private void processSizeInfo(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, List<CloningOverrideMapping> overrideValues) throws Exception {
 
     Sizeinfo sizeInfo = null;
     Sizeinfo sizeInfoClone = null;
@@ -1720,8 +1707,8 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
     LOG.debug((pendingCloningRefn != null ? pendingCloningRefn.size() : 0) + " records to process to KNA1 RDc.");
 
-    CloningRDCUtil rdcUtil = new CloningRDCUtil();
-    CloningRDCConfiguration rdcConfig = rdcUtil.getConfigDetails();
+    // CloningRDCUtil rdcUtil = new CloningRDCUtil();
+    // CloningRDCConfiguration rdcConfig = rdcUtil.getConfigDetails();
 
     List<CloningOverrideMapping> overrideValues = null;
     CloningOverrideUtil overrideUtil = new CloningOverrideUtil();
@@ -1729,7 +1716,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     for (RdcCloningRefn rdcCloningRefn : pendingCloningRefn) {
       try {
         overrideValues = overrideUtil.getOverrideValueFromMapping(rdcCloningRefn.getCmrIssuingCntry());
-        processCloningKNA1RDC(entityManager, rdcCloningRefn, rdcConfig, overrideValues, cloningQueue);
+        processCloningKNA1RDC(entityManager, rdcCloningRefn, overrideValues, cloningQueue);
       } catch (Exception e) {
         partialRollback(entityManager);
         LOG.error("Unexpected error occurred during kna1 cloning process for CMR No : " + rdcCloningRefn.getCmrNo(), e);
@@ -1753,7 +1740,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
         kna1 = getKna1ByKunnr(entityManager, rdcCloningRefn.getId().getMandt(), rdcCloningRefn.getId().getKunnr());
         kna1Clone = getKna1ByKunnr(entityManager, rdcCloningRefn.getTargetMandt(), rdcCloningRefn.getTargetKunnr());
         overrideValuesChild = overrideUtil.getOverrideValueFromMapping(rdcCloningRefn.getCmrIssuingCntry());
-        processKna1Children(entityManager, kna1, kna1Clone, rdcConfig, overrideValuesChild);
+        processKna1Children(entityManager, kna1, kna1Clone, overrideValuesChild);
         rdcCloningRefn.setStatus("C");
         updateEntity(rdcCloningRefn, entityManager);
 
@@ -1808,43 +1795,47 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     return ret;
   }
 
-  private void processTransService(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, CloningRDCConfiguration rdcConfig,
-      List<CloningOverrideMapping> overrideValues) throws Exception {
+  private void processTransService(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, List<CloningOverrideMapping> overrideValues)
+      throws Exception {
 
-    TransService transSer = null;
-    TransService transSerClone = null;
+    List<TransService> transSer = null;
+    List<TransService> transSerClone = null;
+    TransService cloneInsert = null;
     Timestamp ts = SystemUtil.getCurrentTimestamp();
 
     transSer = getTransSerByKunnr(entityManager, kna1.getKatr6(), kna1.getId().getKunnr());
     transSerClone = getTransSerByKunnr(entityManager, kna1Clone.getKatr6(), kna1Clone.getId().getKunnr());
-    if (transSer != null && transSerClone == null) {
+    if (transSer != null && transSerClone.size() == 0) {
       try {
-        transSerClone = new TransService();
-        TransServicePK pk = new TransServicePK();
-        String transServiceId = generateTransServId(entityManager);
-        pk.setTransServiceId(transServiceId);
+        for (TransService current : transSer) {
+          cloneInsert = new TransService();
+          TransServicePK pk = new TransServicePK();
+          String transServiceId = generateTransServId(entityManager);
+          pk.setTransServiceId(transServiceId);
 
-        PropertyUtils.copyProperties(transSerClone, transSer);
+          PropertyUtils.copyProperties(cloneInsert, current);
 
-        if ("ZS01".equalsIgnoreCase(kna1Clone.getKtokd()))
-          transSerClone.setParSitePrtyId(kna1Clone.getBran5());
-        else {
-          String parSitePartyid = getParSitePartyId(entityManager, kna1Clone);
-          transSerClone.setChildSitePrtyId(kna1Clone.getBran5());
-          transSerClone.setParSitePrtyId(parSitePartyid);
+          overrideConfigChanges(entityManager, overrideValues, cloneInsert, "TRANS_SERVICE", pk);
+
+          cloneInsert.setId(pk);
+
+          if ("ZS01".equalsIgnoreCase(kna1Clone.getKtokd()))
+            cloneInsert.setParSitePrtyId(kna1Clone.getBran5());
+          else {
+            String parSitePartyid = getParSitePartyId(entityManager, kna1Clone);
+            cloneInsert.setChildSitePrtyId(kna1Clone.getBran5());
+            cloneInsert.setParSitePrtyId(parSitePartyid);
+          }
+
+          cloneInsert.setCmrNum(kna1Clone.getZzkvCusno());
+          cloneInsert.setMppNum(kna1Clone.getId().getKunnr());
+          cloneInsert.setInsTimestamp(ts);
+          cloneInsert.setUpdTimestamp(ts);
+          cloneInsert.setInsUserid("CreateCMR");
+
+          createEntity(cloneInsert, entityManager);
         }
 
-        overrideConfigChanges(entityManager, overrideValues, transSerClone, "TRANS_SERVICE", pk);
-
-        transSerClone.setId(pk);
-
-        transSerClone.setCmrNum(kna1Clone.getZzkvCusno());
-        transSerClone.setMppNum(kna1Clone.getId().getKunnr());
-        transSerClone.setInsTimestamp(ts);
-        transSerClone.setUpdTimestamp(ts);
-        transSerClone.setInsUserid("CreateCMR");
-
-        createEntity(transSerClone, entityManager);
       } catch (Exception e) {
         LOG.debug("Error in copy TransService");
       }
@@ -1854,12 +1845,12 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
   }
 
-  public TransService getTransSerByKunnr(EntityManager rdcMgr, String cntry, String kunnr) throws Exception {
+  public List<TransService> getTransSerByKunnr(EntityManager rdcMgr, String cntry, String kunnr) throws Exception {
     String sql = ExternalizedQuery.getSql("GET.TRANS.SERVICE.RECORD");
     PreparedQuery query = new PreparedQuery(rdcMgr, sql);
     query.setParameter("COUNTRY", cntry);
     query.setParameter("KUNNR", kunnr);
-    return query.getSingleResult(TransService.class);
+    return query.getResults(TransService.class);
   }
 
   public String generateTransServId(EntityManager entityManager) {
