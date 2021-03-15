@@ -151,6 +151,7 @@ public class DnBOrgIdValidationElement extends ValidatingElement implements Comp
           output.setMessage("Org ID not validated");
           processDnBFields(entityManager, data, dnbMatches.get(0), details);
           result.setOnError(shouldThrowError);
+          engineData.addRejectionComment("_orgIdMatchNotFound", "Org ID value did not match with the highest confidence D&B match.", "", "");
           LOG.trace(new ObjectMapper().writeValueAsString(highestCloseMatch));
         }
         result.setDetails(details.toString().trim());

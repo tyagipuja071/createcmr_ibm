@@ -27,6 +27,8 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 
 public class NetherlandsUtil extends AutomationUtil {
@@ -125,8 +127,8 @@ public class NetherlandsUtil extends AutomationUtil {
         if (StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())) {
           // ADD
           Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
-          Addr billTo = requestData.getAddress(CmrConstants.RDC_BILL_TO);
-          if (soldTo.getLandCntry().equals(billTo.getLandCntry())) {
+          String billToCntry = getBillToLandCntry(entityManager, requestData);
+          if (soldTo.getLandCntry().equals(billToCntry)) {
             List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
             boolean matchesDnb = false;
             if (matches != null) {
@@ -294,37 +296,36 @@ public class NetherlandsUtil extends AutomationUtil {
         for (Addr addr : addresses) {
           if (isRelevantAddressFieldUpdated(changes, addr, nonRelAddrFdsDetails)) {
 
-            if (addrType.equalsIgnoreCase(CmrConstants.RDC_BILL_TO)) {
-              String billToCustNm = addr.getCustNm1() + (!StringUtils.isBlank(addr.getCustNm2()) ? " " + addr.getCustNm2() : "");
-              if (!soldToCustNm.equals(billToCustNm)) {
-                LOG.debug("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified");
-                checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") has different customer name than sold-to.\n");
-                resultCodes.add("D");
-              }
-            }
-
             if ((addrType.equalsIgnoreCase(CmrConstants.RDC_SOLD_TO) && "Y".equals(addr.getImportInd()))
                 || addrType.equalsIgnoreCase(CmrConstants.RDC_BILL_TO)) {
-              List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addr, false);
-              boolean matchesDnb = false;
-              if (matches != null) {
-                // check against D&B
-                matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
-              }
-              if (!matchesDnb) {
-                LOG.debug("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
-                resultCodes.add("R");
-                checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
+              String billToCustNm = addr.getCustNm1() + (!StringUtils.isBlank(addr.getCustNm2()) ? " " + addr.getCustNm2() : "");
+              if (addrType.equalsIgnoreCase(CmrConstants.RDC_BILL_TO)) {
+                if (!soldToCustNm.equals(billToCustNm)) {
+                  LOG.debug("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified");
+                  checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") has different customer name than sold-to.\n");
+                  resultCodes.add("D");
+                }
               } else {
-                checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
-                for (DnBMatchingResponse dnb : matches) {
-                  checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
-                  checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
-                  checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
-                      + dnb.getDnbCountry() + "\n\n");
+                List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addr, false);
+                boolean matchesDnb = false;
+                if (matches != null) {
+                  // check against D&B
+                  matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
+                }
+                if (!matchesDnb) {
+                  LOG.debug("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
+                  resultCodes.add("R");
+                  checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
+                } else {
+                  checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
+                  for (DnBMatchingResponse dnb : matches) {
+                    checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
+                    checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
+                    checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
+                        + dnb.getDnbCountry() + "\n\n");
+                  }
                 }
               }
-
             }
 
             if (CmrConstants.RDC_INSTALL_AT.equals(addrType)) {
@@ -404,4 +405,16 @@ public class NetherlandsUtil extends AutomationUtil {
     return false;
   }
 
+  private String getBillToLandCntry(EntityManager entityManager, RequestData requestData) {
+    String zp01 = "";
+    String sql = ExternalizedQuery.getSql("AUTO.GET_LAND_CNTRY");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", requestData.getAdmin().getId().getReqId());
+    query.setForReadOnly(true);
+    List<String> landedCntry = query.getResults(String.class);
+    if (landedCntry != null && !landedCntry.isEmpty()) {
+      zp01 = landedCntry.get(0);
+    }
+    return zp01;
+  }
 }
