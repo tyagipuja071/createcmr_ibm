@@ -489,7 +489,8 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
       RdcCloningRefnPK cloningRefnPk = new RdcCloningRefnPK();
       cloningRefnPk.setCmrCloningProcessId(cloningQueue.getId().getCmrCloningProcessId());
       cloningRefnPk.setMandt(SystemConfiguration.getValue("MANDT"));
-      cloningRefnPk.setKunnr("(missing)");
+      // cloningRefnPk.setKunnr("(missing)");
+      cloningRefnPk.setKunnr("?" + cloningQueue.getId().getCmrNo());
       cloningRefn.setId(cloningRefnPk);
 
       if ("NA".equals(targetCntry))
