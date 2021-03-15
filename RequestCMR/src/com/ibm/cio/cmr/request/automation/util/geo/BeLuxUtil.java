@@ -144,7 +144,7 @@ public class BeLuxUtil extends AutomationUtil {
       AutomationEngineData engineData, String covFrom, CoverageContainer container, boolean isCoverageCalculated) throws Exception {
 
     if (!"C".equals(requestData.getAdmin().getReqType())) {
-      details.append("Coverage Calculation skipped for Updates.");
+      details.append(" Coverage Calculation skipped for Updates.");
       results.setResults("Skipped");
       results.setDetails(details.toString());
       return true;
@@ -155,9 +155,12 @@ public class BeLuxUtil extends AutomationUtil {
     Data data = requestData.getData();
     String coverageId = container.getFinalCoverage();
 
-    if (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && CalculateCoverageElement.COV_BG.equals(covFrom)
-        && StringUtils.isNotBlank(gbgCntry)) {
+    if (StringUtils.isNotBlank(gbgCntry)) {
       details.append("Coverage calculated for: " + gbgCntry).append("\n");
+    }
+
+    if (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && (CalculateCoverageElement.COV_BG.equals(covFrom))
+        || CalculateCoverageElement.COV_VAT.equals(covFrom)) {
       FieldResultKey sboKeyVal = new FieldResultKey("DATA", "SALES_BO_CD");
       String sboVal = "";
       if (overrides.getData().containsKey(sboKeyVal)) {
@@ -166,10 +169,17 @@ public class BeLuxUtil extends AutomationUtil {
         overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sboVal + sboVal);
         details.append("SORTL: " + sboVal + sboVal);
       } else {
-        sboVal = getSBOfromCoverage(entityManager, container.getFinalCoverage());
+        sboVal = getSORTLfromCoverage(entityManager, container.getFinalCoverage());
         if (StringUtils.isNotBlank(sboVal)) {
-          details.append("SORTL calculated on basis of Existing CMR Data: " + sboVal + sboVal);
-          overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sboVal + sboVal);
+          details.append("SORTL calculated on basis of Existing CMR Data: " + sboVal);
+          overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getSearchTerm(), sboVal);
+          if (data.getCountryUse().equalsIgnoreCase("624")) {
+            sboVal = "0" + sboVal.substring(0, 2) + "0000";
+          } else if (data.getCountryUse().equalsIgnoreCase("624LU")) {
+            sboVal = "0" + sboVal.substring(0, 2) + "0001";
+          }
+          details.append("SBO: " + sboVal);
+          overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sboVal);
         }
       }
       engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
@@ -181,18 +191,21 @@ public class BeLuxUtil extends AutomationUtil {
       BeLuxFieldsContainer fields = calculate32SValuesFromIMSBeLux(entityManager, data.getCmrIssuingCntry(), data.getCountryUse(),
           data.getSubIndustryCd(), data.getIsuCd(), data.getClientTier());
       if (fields != null) {
-        details.append("Coverage calculated successfully using 32S logic.").append("\n");
-        details.append("Sales Rep : " + fields.getSalesRep()).append("\n");
-        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getSearchTerm(), fields.getSalesRep());
-        if (StringUtils.isNotBlank(fields.getSalesRep())) {
+        if (StringUtils.isNotBlank(fields.getSearchterm())) {
+          details.append("Coverage calculated successfully using 32S logic.").append("\n");
+          details.append("Account Team Number : " + fields.getSearchterm()).append("\n");
+          overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getSearchTerm(), fields.getSearchterm());
           String sbo = "";
           if (data.getCountryUse().equalsIgnoreCase("624")) {
-            sbo = "0" + fields.getSalesRep().substring(0, 2) + "0000";
+            sbo = "0" + fields.getSearchterm().substring(0, 2) + "0000";
           } else if (data.getCountryUse().equalsIgnoreCase("624LU")) {
-            sbo = "0" + fields.getSalesRep().substring(0, 2) + "0001";
+            sbo = "0" + fields.getSearchterm().substring(0, 2) + "0001";
           }
           details.append("SBO : " + sbo).append("\n");
           overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sbo);
+
+          details.append(" INAC/NAC Code : " + fields.getInacCd()).append("\n");
+          overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "INAC_CD", data.getInacCd(), fields.getInacCd());
         }
         results.setResults("Calculated");
         results.setDetails(details.toString());
@@ -243,7 +256,7 @@ public class BeLuxUtil extends AutomationUtil {
   private BeLuxFieldsContainer calculate32SValuesFromIMSBeLux(EntityManager entityManager, String cmrIssuingctry, String countryUse,
       String subIndustryCd, String isuCd, String clientTier) {
     BeLuxFieldsContainer container = new BeLuxFieldsContainer();
-    List<Object[]> salesRepRes = new ArrayList<>();
+    List<Object[]> searchTerms = new ArrayList<>();
     String isuCtc = (StringUtils.isNotBlank(isuCd) ? isuCd : "") + (StringUtils.isNotBlank(clientTier) ? clientTier : "");
     String geoCd = "";
     if (countryUse.length() > 3) {
@@ -259,33 +272,58 @@ public class BeLuxUtil extends AutomationUtil {
       query.setParameter("ISSUING_CNTRY", cmrCntry);
       query.setParameter("CLIENT_TIER", "%" + ims + "%");
       query.setForReadOnly(true);
-      salesRepRes = query.getResults();
+      searchTerms = query.getResults();
     } else {
       String sql = ExternalizedQuery.getSql("QUERY.GET.SRLIST.BYISU");
       PreparedQuery query = new PreparedQuery(entityManager, sql);
       query.setParameter("ISU", "%" + isuCtc + "%");
       query.setParameter("ISSUING_CNTRY", cmrCntry);
-      salesRepRes = query.getResults();
+      searchTerms = query.getResults();
     }
-    if (salesRepRes != null && salesRepRes.size() == 1) {
-      String salesRep = (String) salesRepRes.get(0)[0];
-      container.setSalesRep(salesRep);
-      return container;
-    } else {
-      return null;
+    if (searchTerms != null && searchTerms.size() == 1) {
+      String searchTerm = (String) searchTerms.get(0)[0];
+      container.setSearchterm(searchTerm);
     }
+
+    // inac
+    List<Object[]> inacs = new ArrayList<>();
+
+    if (StringUtils.isNotBlank(container.getSearchterm())) {
+      String sql = ExternalizedQuery.getSql("QUERY.GET.INACLIST.BYST");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("SEARCHTERM", "%" + container.getSearchterm() + "%");
+      query.setParameter("ISSUING_CNTRY", cmrCntry);
+      query.setForReadOnly(true);
+      inacs = query.getResults();
+    }
+
+    if (inacs != null && inacs.size() == 1) {
+      String inacCd = (String) inacs.get(0)[0];
+      container.setInacCd(inacCd);
+    }
+
+    return container;
 
   }
 
   private class BeLuxFieldsContainer {
-    private String salesRep;
+    private String searchTerm;
+    private String inacCd;
 
-    public String getSalesRep() {
-      return salesRep;
+    public String getSearchterm() {
+      return searchTerm;
     }
 
-    public void setSalesRep(String salesRep) {
-      this.salesRep = salesRep;
+    public void setSearchterm(String searchTerm) {
+      this.searchTerm = searchTerm;
+    }
+
+    public String getInacCd() {
+      return inacCd;
+    }
+
+    public void setInacCd(String inacCd) {
+      this.inacCd = inacCd;
     }
 
   }
@@ -559,7 +597,7 @@ public class BeLuxUtil extends AutomationUtil {
    * @param coverage
    * @return
    */
-  private String getSBOfromCoverage(EntityManager entityManager, String coverage) {
+  private String getSORTLfromCoverage(EntityManager entityManager, String coverage) {
     LOG.debug("Computing SBO for Coverage " + coverage);
     String sql = ExternalizedQuery.getSql("AUTO.FR.COV.SORTL");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
@@ -568,8 +606,7 @@ public class BeLuxUtil extends AutomationUtil {
     query.setForReadOnly(true);
     String sortl = query.getSingleResult(String.class);
     if (sortl != null && !StringUtils.isBlank(sortl)) {
-      sortl = StringUtils.rightPad(sortl, 6, '0');
-      return sortl.substring(0, 3);
+      return sortl;
     }
     return null;
   }
