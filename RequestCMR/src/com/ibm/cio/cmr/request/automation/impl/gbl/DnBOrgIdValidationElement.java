@@ -56,6 +56,15 @@ public class DnBOrgIdValidationElement extends ValidatingElement implements Comp
     AutomationResult<ValidationOutput> result = buildResult(admin.getId().getReqId());
     ValidationOutput output = new ValidationOutput();
 
+    if ("U".equals(admin.getReqType()) && engineData.hasPositiveCheckStatus(AutomationEngineData.SKIP_DNB_ORGID_VAL)) {
+      output.setSuccess(true);
+      output.setMessage("Skipped");
+      result.setDetails("Processing is skipped as DnB validation NOT DONE or FAILED.");
+      result.setResults("Skipped");
+      result.setProcessOutput(output);
+      LOG.debug("Processing is skipped as DnB validation NOT DONE or FAILED.");
+      return result;
+    }
     if ("Y".equals(admin.getMatchOverrideIndc()) && DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
       result.setResults("Overriden");
       output.setSuccess(true);
@@ -82,7 +91,10 @@ public class DnBOrgIdValidationElement extends ValidatingElement implements Comp
     }
 
     if (soldTo != null) {
-      boolean shouldThrowError = !"Y".equals(admin.getCompVerifiedIndc());
+      boolean shouldThrowError = !"Y".equals(admin.getCompVerifiedIndc()) && StringUtils.isBlank(admin.getSourceSystId());
+      if ("U".equalsIgnoreCase(admin.getReqType())) {
+        shouldThrowError = false;
+      }
       boolean hasValidMatches = false;
       List<DnBMatchingResponse> dnbMatches = new ArrayList<DnBMatchingResponse>();
       DnBMatchingResponse dnbMatch = (DnBMatchingResponse) engineData.get("dnbMatching");
@@ -96,7 +108,6 @@ public class DnBOrgIdValidationElement extends ValidatingElement implements Comp
           dnbMatches = response.getMatches();
           if (!hasValidMatches) {
             // if no valid matches - do not process records
-            result.setOnError(shouldThrowError);
             result.setResults("No Matches");
             result.setDetails("No high quality matches with D&B records. Please import from D&B search.");
             engineData.addNegativeCheckStatus("DnBMatch", "No high quality matches with D&B records. Please import from D&B search.");
@@ -139,19 +150,19 @@ public class DnBOrgIdValidationElement extends ValidatingElement implements Comp
           output.setSuccess(false);
           output.setMessage("Org ID not validated");
           processDnBFields(entityManager, data, dnbMatches.get(0), details);
-          result.setOnError(true);
+          result.setOnError(shouldThrowError);
+          engineData.addRejectionComment("_orgIdMatchNotFound", "Org ID value did not match with the highest confidence D&B match.", "", "");
           LOG.trace(new ObjectMapper().writeValueAsString(highestCloseMatch));
         }
         result.setDetails(details.toString().trim());
         result.setProcessOutput(output);
       } else {
         result.setDetails("No D&B record was found using advanced matching.");
-        engineData.addRejectionComment("OTH", "No matches with D&B records. Please import from D&B search.", "", "");
+        engineData.addNegativeCheckStatus("_nodnbmatchOrg", "No matches with D&B records. Please import from D&B search.");
         output.setSuccess(false);
         output.setMessage("No D&B match found");
         result.setProcessOutput(output);
         result.setResults("No Matches");
-        result.setOnError(true);
       }
 
     } else {
