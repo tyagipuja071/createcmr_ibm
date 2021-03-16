@@ -11,9 +11,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.EntityManager;
@@ -776,7 +778,9 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
     processKnvp(rdcMgr, kna1, kna1Clone, overrideValues);
 
-    processSadr(rdcMgr, kna1, kna1Clone, overrideValues);
+    if (StringUtils.isNotBlank(kna1.getAdrnr())) {
+      processSadr(rdcMgr, kna1, kna1Clone, overrideValues);
+    }
 
     processAddlCtryData(rdcMgr, kna1, kna1Clone, overrideValues);
 
@@ -797,32 +801,39 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
   private void processKnb1(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, List<CloningOverrideMapping> overrideValues) throws Exception {
 
-    Knb1 knb1 = null;
-    Knb1 knb1Clone = null;
+    List<Knb1> knb1 = null;
+    List<Knb1> knb1Clone = null;
+    Knb1 cloneInsert = null;
     Timestamp ts = SystemUtil.getCurrentTimestamp();
 
     knb1 = getKnb1ByKunnr(entityManager, kna1.getId().getMandt(), kna1.getId().getKunnr());
     knb1Clone = getKnb1ByKunnr(entityManager, kna1Clone.getId().getMandt(), kna1Clone.getId().getKunnr());
-    if (knb1 != null && knb1Clone == null) {
+    if (knb1 != null && knb1.size() > 0 && knb1Clone.size() == 0) {
       try {
-        knb1Clone = new Knb1();
-        Knb1PK knb1PKClone = new Knb1PK();
-        knb1PKClone.setMandt(kna1Clone.getId().getMandt());
-        knb1PKClone.setKunnr(kna1Clone.getId().getKunnr());
-        knb1PKClone.setBukrs(knb1.getId().getBukrs());
-        PropertyUtils.copyProperties(knb1Clone, knb1);
+        int count = 0;
+        for (Knb1 current : knb1) {
+          cloneInsert = new Knb1();
+          Knb1PK knb1PKClone = new Knb1PK();
+          knb1PKClone.setMandt(kna1Clone.getId().getMandt());
+          knb1PKClone.setKunnr(kna1Clone.getId().getKunnr());
+          knb1PKClone.setBukrs(current.getId().getBukrs());
+          count++;
 
-        // knb1Clone.setId(knb1PKClone);
+          PropertyUtils.copyProperties(cloneInsert, current);
 
-        overrideConfigChanges(entityManager, overrideValues, knb1Clone, "KNB1", knb1PKClone);
+          overrideConfigChanges(entityManager, overrideValues, cloneInsert, "KNB1", knb1PKClone);
 
-        knb1Clone.setId(knb1PKClone);
+          cloneInsert.setId(knb1PKClone);
 
-        knb1Clone.setSapTs(ts);
-        knb1Clone.setShadUpdateInd("I");
-        knb1Clone.setShadUpdateTs(ts);
+          if (!(cloneInsert.getId().getBukrs().equalsIgnoreCase(current.getId().getBukrs())) && count > 1)
+            break;
 
-        createEntity(knb1Clone, entityManager);
+          cloneInsert.setSapTs(ts);
+          cloneInsert.setShadUpdateInd("I");
+          cloneInsert.setShadUpdateTs(ts);
+
+          createEntity(cloneInsert, entityManager);
+        }
       } catch (Exception e) {
         LOG.debug("Error in copy knb1");
       }
@@ -832,43 +843,55 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
   }
 
-  public Knb1 getKnb1ByKunnr(EntityManager rdcMgr, String mandt, String kunnr) throws Exception {
+  public List<Knb1> getKnb1ByKunnr(EntityManager rdcMgr, String mandt, String kunnr) throws Exception {
     String sql = ExternalizedQuery.getSql("GET.KNB1.RECORD");
     PreparedQuery query = new PreparedQuery(rdcMgr, sql);
     query.setParameter("MANDT", mandt);
     query.setParameter("KUNNR", kunnr);
-    return query.getSingleResult(Knb1.class);
+    return query.getResults(Knb1.class);
   }
 
   private void processKnvv(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, List<CloningOverrideMapping> overrideValues) throws Exception {
 
-    Knvv knvv = null;
-    Knvv knvvClone = null;
+    List<Knvv> knvv = null;
+    List<Knvv> knvvClone = null;
+    Knvv cloneInsert = null;
     Timestamp ts = SystemUtil.getCurrentTimestamp();
 
     knvv = getKnvvByKunnr(entityManager, kna1.getId().getMandt(), kna1.getId().getKunnr());
     knvvClone = getKnvvByKunnr(entityManager, kna1Clone.getId().getMandt(), kna1Clone.getId().getKunnr());
-    if (knvv != null && knvvClone == null) {
+    if (knvv != null && knvv.size() > 0 && knvvClone.size() == 0) {
       try {
-        knvvClone = new Knvv();
-        KnvvPK knvvPKClone = new KnvvPK();
-        knvvPKClone.setKunnr(kna1Clone.getId().getKunnr());
-        knvvPKClone.setMandt(kna1Clone.getId().getMandt());
-        knvvPKClone.setSpart(knvv.getId().getSpart());
-        knvvPKClone.setVkorg(knvv.getId().getVkorg());
-        knvvPKClone.setVtweg(knvv.getId().getVtweg());
+        Set<String> usedSpart = new HashSet<String>();
+        Set<String> usedVtweg = new HashSet<String>();
+        for (Knvv current : knvv) {
+          cloneInsert = new Knvv();
+          KnvvPK knvvPKClone = new KnvvPK();
+          knvvPKClone.setKunnr(kna1Clone.getId().getKunnr());
+          knvvPKClone.setMandt(kna1Clone.getId().getMandt());
+          knvvPKClone.setSpart(current.getId().getSpart());
+          knvvPKClone.setVkorg(current.getId().getVkorg());
+          knvvPKClone.setVtweg(current.getId().getVtweg());
 
-        PropertyUtils.copyProperties(knvvClone, knvv);
+          PropertyUtils.copyProperties(cloneInsert, current);
 
-        overrideConfigChanges(entityManager, overrideValues, knvvClone, "KNVV", knvvPKClone);
+          overrideConfigChanges(entityManager, overrideValues, cloneInsert, "KNVV", knvvPKClone);
 
-        knvvClone.setId(knvvPKClone);
+          cloneInsert.setId(knvvPKClone);
 
-        knvvClone.setSapTs(ts);
-        knvvClone.setShadUpdateInd("I");
-        knvvClone.setShadUpdateTs(ts);
+          if (!(cloneInsert.getId().getVkorg().equalsIgnoreCase(current.getId().getVkorg())) && usedSpart.contains(cloneInsert.getId().getSpart())
+              && usedVtweg.contains(cloneInsert.getId().getVtweg()))
+            continue;
 
-        createEntity(knvvClone, entityManager);
+          cloneInsert.setSapTs(ts);
+          cloneInsert.setShadUpdateInd("I");
+          cloneInsert.setShadUpdateTs(ts);
+
+          createEntity(cloneInsert, entityManager);
+          usedSpart.add(cloneInsert.getId().getSpart());
+          usedVtweg.add(cloneInsert.getId().getVtweg());
+        }
+
       } catch (Exception e) {
         LOG.debug("Error in copy knvv");
       }
@@ -878,41 +901,45 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
   }
 
-  public Knvv getKnvvByKunnr(EntityManager rdcMgr, String mandt, String kunnr) throws Exception {
+  public List<Knvv> getKnvvByKunnr(EntityManager rdcMgr, String mandt, String kunnr) throws Exception {
     String sql = ExternalizedQuery.getSql("GET.KNVV.RECORD");
     PreparedQuery query = new PreparedQuery(rdcMgr, sql);
     query.setParameter("MANDT", mandt);
     query.setParameter("KUNNR", kunnr);
-    return query.getSingleResult(Knvv.class);
+    return query.getResults(Knvv.class);
   }
 
   private void processKnex(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, List<CloningOverrideMapping> overrideValues) throws Exception {
 
-    Knex knex = null;
-    Knex knexClone = null;
+    List<Knex> knex = null;
+    List<Knex> knexClone = null;
+    Knex cloneInsert = null;
     Timestamp ts = SystemUtil.getCurrentTimestamp();
 
     knex = getKnexByKunnr(entityManager, kna1.getId().getMandt(), kna1.getId().getKunnr());
     knexClone = getKnexByKunnr(entityManager, kna1Clone.getId().getMandt(), kna1Clone.getId().getKunnr());
-    if (knex != null && knexClone == null) {
+    if (knex != null && knex.size() > 0 && knexClone.size() == 0) {
       try {
-        knexClone = new Knex();
-        KnexPK knexPKClone = new KnexPK();
-        knexPKClone.setKunnr(kna1Clone.getId().getKunnr());
-        knexPKClone.setLndex(knex.getId().getLndex());
-        knexPKClone.setMandt(kna1Clone.getId().getMandt());
+        for (Knex current : knex) {
+          cloneInsert = new Knex();
+          KnexPK knexPKClone = new KnexPK();
+          knexPKClone.setKunnr(kna1Clone.getId().getKunnr());
+          knexPKClone.setLndex(current.getId().getLndex());
+          knexPKClone.setMandt(kna1Clone.getId().getMandt());
 
-        PropertyUtils.copyProperties(knexClone, knex);
+          PropertyUtils.copyProperties(cloneInsert, current);
 
-        overrideConfigChanges(entityManager, overrideValues, knexClone, "KNEX", knexPKClone);
+          overrideConfigChanges(entityManager, overrideValues, cloneInsert, "KNEX", knexPKClone);
 
-        knexClone.setId(knexPKClone);
+          cloneInsert.setId(knexPKClone);
 
-        knexClone.setSapTs(ts);
-        knexClone.setShadUpdateInd("I");
-        knexClone.setShadUpdateTs(ts);
+          cloneInsert.setSapTs(ts);
+          cloneInsert.setShadUpdateInd("I");
+          cloneInsert.setShadUpdateTs(ts);
 
-        createEntity(knexClone, entityManager);
+          createEntity(cloneInsert, entityManager);
+        }
+
       } catch (Exception e) {
         LOG.debug("Error in copy knex");
       }
@@ -922,41 +949,45 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
   }
 
-  public Knex getKnexByKunnr(EntityManager rdcMgr, String mandt, String kunnr) throws Exception {
+  public List<Knex> getKnexByKunnr(EntityManager rdcMgr, String mandt, String kunnr) throws Exception {
     String sql = ExternalizedQuery.getSql("GET.KNEX.RECORD");
     PreparedQuery query = new PreparedQuery(rdcMgr, sql);
     query.setParameter("MANDT", mandt);
     query.setParameter("KUNNR", kunnr);
-    return query.getSingleResult(Knex.class);
+    return query.getResults(Knex.class);
   }
 
   private void processSadr(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, List<CloningOverrideMapping> overrideValues) throws Exception {
 
-    Sadr sadr = null;
-    Sadr sadrClone = null;
+    List<Sadr> sadr = null;
+    List<Sadr> sadrClone = null;
+    Sadr cloneInsert = null;
     Timestamp ts = SystemUtil.getCurrentTimestamp();
 
     sadr = getSadrByAdrnr(entityManager, kna1);
     sadrClone = getSadrByAdrnr(entityManager, kna1Clone);
-    if (sadr != null && sadrClone == null) {
+    if (sadr != null && sadr.size() > 0 && sadrClone.size() == 0) {
       try {
-        sadrClone = new Sadr();
-        SadrPK sadrPKClone = new SadrPK();
-        sadrPKClone.setAdrnr(kna1Clone.getAdrnr());
-        sadrPKClone.setMandt(kna1Clone.getId().getMandt());
-        sadrPKClone.setNatio(sadr.getId().getNatio());
+        for (Sadr current : sadr) {
+          cloneInsert = new Sadr();
+          SadrPK sadrPKClone = new SadrPK();
+          sadrPKClone.setAdrnr(kna1Clone.getAdrnr());
+          sadrPKClone.setMandt(kna1Clone.getId().getMandt());
+          sadrPKClone.setNatio(current.getId().getNatio());
 
-        PropertyUtils.copyProperties(sadrClone, sadr);
+          PropertyUtils.copyProperties(cloneInsert, current);
 
-        overrideConfigChanges(entityManager, overrideValues, sadrClone, "SADR", sadrPKClone);
+          overrideConfigChanges(entityManager, overrideValues, cloneInsert, "SADR", sadrPKClone);
 
-        sadrClone.setId(sadrPKClone);
+          cloneInsert.setId(sadrPKClone);
 
-        sadrClone.setSapTs(ts);
-        sadrClone.setShadUpdateInd("I");
-        sadrClone.setShadUpdateTs(ts);
+          cloneInsert.setSapTs(ts);
+          cloneInsert.setShadUpdateInd("I");
+          cloneInsert.setShadUpdateTs(ts);
 
-        createEntity(sadrClone, entityManager);
+          createEntity(cloneInsert, entityManager);
+        }
+
       } catch (Exception e) {
         LOG.debug("Error in copy sadr");
       }
@@ -966,12 +997,12 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
   }
 
-  public Sadr getSadrByAdrnr(EntityManager rdcMgr, Kna1 kna1) throws Exception {
+  public List<Sadr> getSadrByAdrnr(EntityManager rdcMgr, Kna1 kna1) throws Exception {
     String sql = ExternalizedQuery.getSql("GET.SADR.RECORD");
     PreparedQuery query = new PreparedQuery(rdcMgr, sql);
     query.setParameter("MANDT", kna1.getId().getMandt());
     query.setParameter("ADRNR", kna1.getAdrnr());
-    return query.getSingleResult(Sadr.class);
+    return query.getResults(Sadr.class);
   }
 
   private void processKnvi(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, List<CloningOverrideMapping> overrideValues) throws Exception {
@@ -983,7 +1014,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
     knvi = getKnviByKunnr(entityManager, kna1.getId().getMandt(), kna1.getId().getKunnr());
     knviClone = getKnviByKunnr(entityManager, kna1Clone.getId().getMandt(), kna1Clone.getId().getKunnr());
-    if (knvi != null && knviClone.size() == 0) {
+    if (knvi != null && knvi.size() > 0 && knviClone.size() == 0) {
       try {
         for (Knvi currentKnvi : knvi) {
           knviCloneInsert = new Knvi();
@@ -1024,31 +1055,35 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
   private void processKnvk(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, List<CloningOverrideMapping> overrideValues) throws Exception {
 
-    Knvk knvk = null;
-    Knvk knvkClone = null;
+    List<Knvk> knvk = null;
+    List<Knvk> knvkClone = null;
+    Knvk cloneInsert = null;
     Timestamp ts = SystemUtil.getCurrentTimestamp();
 
     knvk = getKnvkByKunnr(entityManager, kna1.getId().getMandt(), kna1.getId().getKunnr());
     knvkClone = getKnvkByKunnr(entityManager, kna1Clone.getId().getMandt(), kna1Clone.getId().getKunnr());
-    if (knvk != null && knvkClone == null) {
+    if (knvk != null && knvk.size() > 0 && knvkClone.size() == 0) {
       try {
-        knvkClone = new Knvk();
-        KnvkPK knvkPKClone = new KnvkPK();
-        knvkPKClone.setMandt(kna1Clone.getId().getMandt());
-        String parnr = generateId(kna1Clone.getId().getMandt(), PARNR_KEY, entityManager);
-        knvkPKClone.setParnr(parnr);
+        for (Knvk current : knvk) {
+          cloneInsert = new Knvk();
+          KnvkPK knvkPKClone = new KnvkPK();
+          knvkPKClone.setMandt(kna1Clone.getId().getMandt());
+          String parnr = generateId(kna1Clone.getId().getMandt(), PARNR_KEY, entityManager);
+          knvkPKClone.setParnr(parnr);
 
-        PropertyUtils.copyProperties(knvkClone, knvk);
+          PropertyUtils.copyProperties(cloneInsert, current);
 
-        overrideConfigChanges(entityManager, overrideValues, knvkClone, "KNVK", knvkPKClone);
+          overrideConfigChanges(entityManager, overrideValues, cloneInsert, "KNVK", knvkPKClone);
 
-        knvkClone.setId(knvkPKClone);
+          cloneInsert.setId(knvkPKClone);
 
-        knvkClone.setSapTs(ts);
-        knvkClone.setShadUpdateInd("I");
-        knvkClone.setShadUpdateTs(ts);
+          cloneInsert.setSapTs(ts);
+          cloneInsert.setShadUpdateInd("I");
+          cloneInsert.setShadUpdateTs(ts);
 
-        createEntity(knvkClone, entityManager);
+          createEntity(cloneInsert, entityManager);
+        }
+
       } catch (Exception e) {
         LOG.debug("Error in copy knvk");
       }
@@ -1058,12 +1093,12 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
   }
 
-  public Knvk getKnvkByKunnr(EntityManager rdcMgr, String mandt, String kunnr) throws Exception {
+  public List<Knvk> getKnvkByKunnr(EntityManager rdcMgr, String mandt, String kunnr) throws Exception {
     String sql = ExternalizedQuery.getSql("GET.KNVK.RECORD");
     PreparedQuery query = new PreparedQuery(rdcMgr, sql);
     query.setParameter("MANDT", mandt);
     query.setParameter("KUNNR", kunnr);
-    return query.getSingleResult(Knvk.class);
+    return query.getResults(Knvk.class);
   }
 
   private void processKnvp(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, List<CloningOverrideMapping> overrideValues) throws Exception {
@@ -1075,7 +1110,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
     knvp = getKnvpByKunnr(entityManager, kna1.getId().getMandt(), kna1.getId().getKunnr());
     knvpClone = getKnvpByKunnr(entityManager, kna1Clone.getId().getMandt(), kna1Clone.getId().getKunnr());
-    if (knvp != null && knvpClone.size() == 0) {
+    if (knvp != null && knvp.size() > 0 && knvpClone.size() == 0) {
       try {
         for (Knvp currentKnvp : knvp) {
           knvpCloneInsert = new Knvp();
@@ -1120,30 +1155,34 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
   private void processAddlCtryData(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, List<CloningOverrideMapping> overrideValues)
       throws Exception {
 
-    Addlctrydata addlctrydata = null;
-    Addlctrydata addlctrydataClone = null;
+    List<Addlctrydata> addlctrydata = null;
+    List<Addlctrydata> addlctrydataClone = null;
+    Addlctrydata cloneInsert = null;
     Timestamp ts = SystemUtil.getCurrentTimestamp();
 
     addlctrydata = getAddlCtryDataByKunnr(entityManager, kna1.getId().getMandt(), kna1.getId().getKunnr());
     addlctrydataClone = getAddlCtryDataByKunnr(entityManager, kna1Clone.getId().getMandt(), kna1Clone.getId().getKunnr());
-    if (addlctrydata != null && addlctrydataClone == null) {
+    if (addlctrydata != null && addlctrydata.size() > 0 && addlctrydataClone.size() == 0) {
       try {
-        addlctrydataClone = new Addlctrydata();
-        AddlctrydataPK pk = new AddlctrydataPK();
-        pk.setFieldName(addlctrydata.getId().getFieldName());
-        pk.setKunnr(kna1Clone.getId().getKunnr());
-        pk.setMandt(kna1Clone.getId().getMandt());
+        for (Addlctrydata current : addlctrydata) {
+          cloneInsert = new Addlctrydata();
+          AddlctrydataPK pk = new AddlctrydataPK();
+          pk.setFieldName(current.getId().getFieldName());
+          pk.setKunnr(kna1Clone.getId().getKunnr());
+          pk.setMandt(kna1Clone.getId().getMandt());
 
-        PropertyUtils.copyProperties(addlctrydataClone, addlctrydata);
+          PropertyUtils.copyProperties(cloneInsert, current);
 
-        overrideConfigChanges(entityManager, overrideValues, addlctrydataClone, "ADDLCTRYDATA", pk);
+          overrideConfigChanges(entityManager, overrideValues, cloneInsert, "ADDLCTRYDATA", pk);
 
-        addlctrydataClone.setId(pk);
+          cloneInsert.setId(pk);
 
-        addlctrydataClone.setCreateDt(ts);
-        addlctrydataClone.setUpdateDt(ts);
+          cloneInsert.setCreateDt(ts);
+          cloneInsert.setUpdateDt(ts);
 
-        createEntity(addlctrydataClone, entityManager);
+          createEntity(cloneInsert, entityManager);
+        }
+
       } catch (Exception e) {
         LOG.debug("Error in copy addlctrydata");
       }
@@ -1153,40 +1192,44 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
   }
 
-  public Addlctrydata getAddlCtryDataByKunnr(EntityManager rdcMgr, String mandt, String kunnr) throws Exception {
+  public List<Addlctrydata> getAddlCtryDataByKunnr(EntityManager rdcMgr, String mandt, String kunnr) throws Exception {
     String sql = ExternalizedQuery.getSql("GET.ADDLCTRYDATA.RECORD");
     PreparedQuery query = new PreparedQuery(rdcMgr, sql);
     query.setParameter("MANDT", mandt);
     query.setParameter("KUNNR", kunnr);
-    return query.getSingleResult(Addlctrydata.class);
+    return query.getResults(Addlctrydata.class);
   }
 
   private void processKunnrExt(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, List<CloningOverrideMapping> overrideValues) throws Exception {
 
-    KunnrExt kunnrExt = null;
-    KunnrExt kunnrExtClone = null;
+    List<KunnrExt> kunnrExt = null;
+    List<KunnrExt> kunnrExtClone = null;
+    KunnrExt cloneInsert = null;
     Timestamp ts = SystemUtil.getCurrentTimestamp();
 
     kunnrExt = getKunnrExtByKunnr(entityManager, kna1.getId().getMandt(), kna1.getId().getKunnr());
     kunnrExtClone = getKunnrExtByKunnr(entityManager, kna1Clone.getId().getMandt(), kna1Clone.getId().getKunnr());
-    if (kunnrExt != null && kunnrExtClone == null) {
+    if (kunnrExt != null && kunnrExt.size() > 0 && kunnrExtClone.size() == 0) {
       try {
-        kunnrExtClone = new KunnrExt();
-        KunnrExtPK pk = new KunnrExtPK();
-        pk.setKunnr(kna1Clone.getId().getKunnr());
-        pk.setMandt(kna1Clone.getId().getMandt());
+        for (KunnrExt current : kunnrExt) {
+          cloneInsert = new KunnrExt();
+          KunnrExtPK pk = new KunnrExtPK();
+          pk.setKunnr(kna1Clone.getId().getKunnr());
+          pk.setMandt(kna1Clone.getId().getMandt());
 
-        PropertyUtils.copyProperties(kunnrExtClone, kunnrExt);
+          PropertyUtils.copyProperties(cloneInsert, current);
 
-        overrideConfigChanges(entityManager, overrideValues, kunnrExtClone, "KUNNR_EXT", pk);
+          overrideConfigChanges(entityManager, overrideValues, cloneInsert, "KUNNR_EXT", pk);
 
-        kunnrExtClone.setId(pk);
+          cloneInsert.setId(pk);
 
-        kunnrExtClone.setCreateTs(ts);
-        kunnrExtClone.setUpdateInd("I");
-        kunnrExtClone.setUpdateTs(ts);
+          cloneInsert.setCreateTs(ts);
+          cloneInsert.setUpdateInd("I");
+          cloneInsert.setUpdateTs(ts);
 
-        createEntity(kunnrExtClone, entityManager);
+          createEntity(cloneInsert, entityManager);
+        }
+
       } catch (Exception e) {
         LOG.debug("Error in copy kunnrext");
       }
@@ -1196,43 +1239,47 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
   }
 
-  public KunnrExt getKunnrExtByKunnr(EntityManager rdcMgr, String mandt, String kunnr) throws Exception {
+  public List<KunnrExt> getKunnrExtByKunnr(EntityManager rdcMgr, String mandt, String kunnr) throws Exception {
     String sql = ExternalizedQuery.getSql("GET.KUNNR_EXT.RECORD");
     PreparedQuery query = new PreparedQuery(rdcMgr, sql);
     query.setParameter("MANDT", mandt);
     query.setParameter("KUNNR", kunnr);
-    return query.getSingleResult(KunnrExt.class);
+    return query.getResults(KunnrExt.class);
   }
 
   private void processKnbk(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, List<CloningOverrideMapping> overrideValues) throws Exception {
 
-    Knbk knbk = null;
-    Knbk knbkClone = null;
+    List<Knbk> knbk = null;
+    List<Knbk> knbkClone = null;
+    Knbk cloneInsert = null;
     Timestamp ts = SystemUtil.getCurrentTimestamp();
 
     knbk = getKnbkByKunnr(entityManager, kna1.getId().getMandt(), kna1.getId().getKunnr());
     knbkClone = getKnbkByKunnr(entityManager, kna1Clone.getId().getMandt(), kna1Clone.getId().getKunnr());
-    if (knbk != null && knbkClone == null) {
+    if (knbk != null && knbk.size() > 0 && knbkClone.size() == 0) {
       try {
-        knbkClone = new Knbk();
-        KnbkPK knbkPKClone = new KnbkPK();
-        knbkPKClone.setBankl(knbk.getId().getBankl());
-        knbkPKClone.setBankn(knbk.getId().getBankn());
-        knbkPKClone.setBanks(knbk.getId().getBanks());
-        knbkPKClone.setKunnr(kna1Clone.getId().getKunnr());
-        knbkPKClone.setMandt(kna1Clone.getId().getMandt());
+        for (Knbk current : knbk) {
+          cloneInsert = new Knbk();
+          KnbkPK knbkPKClone = new KnbkPK();
+          knbkPKClone.setBankl(current.getId().getBankl());
+          knbkPKClone.setBankn(current.getId().getBankn());
+          knbkPKClone.setBanks(current.getId().getBanks());
+          knbkPKClone.setKunnr(kna1Clone.getId().getKunnr());
+          knbkPKClone.setMandt(kna1Clone.getId().getMandt());
 
-        PropertyUtils.copyProperties(knbkClone, knbk);
+          PropertyUtils.copyProperties(cloneInsert, current);
 
-        overrideConfigChanges(entityManager, overrideValues, knbkClone, "KNBK", knbkPKClone);
+          overrideConfigChanges(entityManager, overrideValues, cloneInsert, "KNBK", knbkPKClone);
 
-        knbkClone.setId(knbkPKClone);
+          cloneInsert.setId(knbkPKClone);
 
-        knbkClone.setSapTs(ts);
-        knbkClone.setShadUpdateInd("I");
-        knbkClone.setShadUpdateTs(ts);
+          cloneInsert.setSapTs(ts);
+          cloneInsert.setShadUpdateInd("I");
+          cloneInsert.setShadUpdateTs(ts);
 
-        createEntity(knbkClone, entityManager);
+          createEntity(cloneInsert, entityManager);
+        }
+
       } catch (Exception e) {
         LOG.debug("Error in copy knbk");
       }
@@ -1242,41 +1289,45 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
   }
 
-  public Knbk getKnbkByKunnr(EntityManager rdcMgr, String mandt, String kunnr) throws Exception {
+  public List<Knbk> getKnbkByKunnr(EntityManager rdcMgr, String mandt, String kunnr) throws Exception {
     String sql = ExternalizedQuery.getSql("GET.KNBK.RECORD");
     PreparedQuery query = new PreparedQuery(rdcMgr, sql);
     query.setParameter("MANDT", mandt);
     query.setParameter("KUNNR", kunnr);
-    return query.getSingleResult(Knbk.class);
+    return query.getResults(Knbk.class);
   }
 
   private void processKnva(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, List<CloningOverrideMapping> overrideValues) throws Exception {
 
-    Knva knva = null;
-    Knva knvaClone = null;
+    List<Knva> knva = null;
+    List<Knva> knvaClone = null;
+    Knva cloneInsert = null;
     Timestamp ts = SystemUtil.getCurrentTimestamp();
 
     knva = getKnvaByKunnr(entityManager, kna1.getId().getMandt(), kna1.getId().getKunnr());
     knvaClone = getKnvaByKunnr(entityManager, kna1Clone.getId().getMandt(), kna1Clone.getId().getKunnr());
-    if (knva != null && knvaClone == null) {
+    if (knva != null && knva.size() > 0 && knvaClone.size() == 0) {
       try {
-        knvaClone = new Knva();
-        KnvaPK knvaPKClone = new KnvaPK();
-        knvaPKClone.setAblad(knva.getId().getAblad());
-        knvaPKClone.setKunnr(kna1Clone.getId().getKunnr());
-        knvaPKClone.setMandt(kna1Clone.getId().getMandt());
+        for (Knva current : knva) {
+          cloneInsert = new Knva();
+          KnvaPK knvaPKClone = new KnvaPK();
+          knvaPKClone.setAblad(current.getId().getAblad());
+          knvaPKClone.setKunnr(kna1Clone.getId().getKunnr());
+          knvaPKClone.setMandt(kna1Clone.getId().getMandt());
 
-        PropertyUtils.copyProperties(knvaClone, knva);
+          PropertyUtils.copyProperties(cloneInsert, current);
 
-        overrideConfigChanges(entityManager, overrideValues, knvaClone, "KNVA", knvaPKClone);
+          overrideConfigChanges(entityManager, overrideValues, cloneInsert, "KNVA", knvaPKClone);
 
-        knvaClone.setId(knvaPKClone);
+          cloneInsert.setId(knvaPKClone);
 
-        knvaClone.setSapTs(ts);
-        knvaClone.setShadUpdateInd("I");
-        knvaClone.setShadUpdateTs(ts);
+          cloneInsert.setSapTs(ts);
+          cloneInsert.setShadUpdateInd("I");
+          cloneInsert.setShadUpdateTs(ts);
 
-        createEntity(knvaClone, entityManager);
+          createEntity(cloneInsert, entityManager);
+        }
+
       } catch (Exception e) {
         LOG.debug("Error in copy knva");
       }
@@ -1286,43 +1337,47 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
   }
 
-  public Knva getKnvaByKunnr(EntityManager rdcMgr, String mandt, String kunnr) throws Exception {
+  public List<Knva> getKnvaByKunnr(EntityManager rdcMgr, String mandt, String kunnr) throws Exception {
     String sql = ExternalizedQuery.getSql("GET.KNVA.RECORD");
     PreparedQuery query = new PreparedQuery(rdcMgr, sql);
     query.setParameter("MANDT", mandt);
     query.setParameter("KUNNR", kunnr);
-    return query.getSingleResult(Knva.class);
+    return query.getResults(Knva.class);
   }
 
   private void processKnvl(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, List<CloningOverrideMapping> overrideValues) throws Exception {
 
-    Knvl knvl = null;
-    Knvl knvlClone = null;
+    List<Knvl> knvl = null;
+    List<Knvl> knvlClone = null;
+    Knvl cloneInsert = null;
     Timestamp ts = SystemUtil.getCurrentTimestamp();
 
     knvl = getKnvlByKunnr(entityManager, kna1.getId().getMandt(), kna1.getId().getKunnr());
     knvlClone = getKnvlByKunnr(entityManager, kna1Clone.getId().getMandt(), kna1Clone.getId().getKunnr());
-    if (knvl != null && knvlClone == null) {
+    if (knvl != null && knvl.size() > 0 && knvlClone.size() == 0) {
       try {
-        knvlClone = new Knvl();
-        KnvlPK knvlPKClone = new KnvlPK();
-        knvlPKClone.setAland(knvl.getId().getAland());
-        knvlPKClone.setKunnr(kna1Clone.getId().getKunnr());
-        knvlPKClone.setLicnr(knvl.getId().getLicnr());
-        knvlPKClone.setMandt(kna1Clone.getId().getMandt());
-        knvlPKClone.setTatyp(knvl.getId().getTatyp());
+        for (Knvl current : knvl) {
+          cloneInsert = new Knvl();
+          KnvlPK knvlPKClone = new KnvlPK();
+          knvlPKClone.setAland(current.getId().getAland());
+          knvlPKClone.setKunnr(kna1Clone.getId().getKunnr());
+          knvlPKClone.setLicnr(current.getId().getLicnr());
+          knvlPKClone.setMandt(kna1Clone.getId().getMandt());
+          knvlPKClone.setTatyp(current.getId().getTatyp());
 
-        PropertyUtils.copyProperties(knvlClone, knvl);
+          PropertyUtils.copyProperties(cloneInsert, current);
 
-        overrideConfigChanges(entityManager, overrideValues, knvlClone, "KNVL", knvlPKClone);
+          overrideConfigChanges(entityManager, overrideValues, cloneInsert, "KNVL", knvlPKClone);
 
-        knvlClone.setId(knvlPKClone);
+          cloneInsert.setId(knvlPKClone);
 
-        knvlClone.setSapTs(ts);
-        knvlClone.setShadUpdateInd("I");
-        knvlClone.setShadUpdateTs(ts);
+          cloneInsert.setSapTs(ts);
+          cloneInsert.setShadUpdateInd("I");
+          cloneInsert.setShadUpdateTs(ts);
 
-        createEntity(knvlClone, entityManager);
+          createEntity(cloneInsert, entityManager);
+        }
+
       } catch (Exception e) {
         LOG.debug("Error in copy knvl");
       }
@@ -1332,40 +1387,44 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
   }
 
-  public Knvl getKnvlByKunnr(EntityManager rdcMgr, String mandt, String kunnr) throws Exception {
+  public List<Knvl> getKnvlByKunnr(EntityManager rdcMgr, String mandt, String kunnr) throws Exception {
     String sql = ExternalizedQuery.getSql("GET.KNVL.RECORD");
     PreparedQuery query = new PreparedQuery(rdcMgr, sql);
     query.setParameter("MANDT", mandt);
     query.setParameter("KUNNR", kunnr);
-    return query.getSingleResult(Knvl.class);
+    return query.getResults(Knvl.class);
   }
 
   private void processSizeInfo(EntityManager entityManager, Kna1 kna1, Kna1 kna1Clone, List<CloningOverrideMapping> overrideValues) throws Exception {
 
-    Sizeinfo sizeInfo = null;
-    Sizeinfo sizeInfoClone = null;
+    List<Sizeinfo> sizeInfo = null;
+    List<Sizeinfo> sizeInfoClone = null;
+    Sizeinfo cloneInsert = null;
     Timestamp ts = SystemUtil.getCurrentTimestamp();
 
     sizeInfo = getSizeInfoByKunnr(entityManager, kna1.getId().getMandt(), kna1.getId().getKunnr());
     sizeInfoClone = getSizeInfoByKunnr(entityManager, kna1Clone.getId().getMandt(), kna1Clone.getId().getKunnr());
-    if (sizeInfo != null && sizeInfoClone == null) {
+    if (sizeInfo != null && sizeInfo.size() > 0 && sizeInfoClone.size() == 0) {
       try {
-        sizeInfoClone = new Sizeinfo();
-        SizeinfoPK pk = new SizeinfoPK();
-        pk.setKunnr(kna1Clone.getId().getKunnr());
-        pk.setMandt(kna1Clone.getId().getMandt());
-        pk.setSizeunittype(sizeInfo.getId().getSizeunittype());
+        for (Sizeinfo current : sizeInfo) {
+          cloneInsert = new Sizeinfo();
+          SizeinfoPK pk = new SizeinfoPK();
+          pk.setKunnr(kna1Clone.getId().getKunnr());
+          pk.setMandt(kna1Clone.getId().getMandt());
+          pk.setSizeunittype(current.getId().getSizeunittype());
 
-        PropertyUtils.copyProperties(sizeInfoClone, sizeInfo);
+          PropertyUtils.copyProperties(cloneInsert, current);
 
-        overrideConfigChanges(entityManager, overrideValues, sizeInfoClone, "SIZEINFO", pk);
+          overrideConfigChanges(entityManager, overrideValues, cloneInsert, "SIZEINFO", pk);
 
-        sizeInfoClone.setId(pk);
+          cloneInsert.setId(pk);
 
-        sizeInfoClone.setChgTs(ts);
-        sizeInfoClone.setCreateDate(ts);
+          cloneInsert.setChgTs(ts);
+          cloneInsert.setCreateDate(ts);
 
-        createEntity(sizeInfoClone, entityManager);
+          createEntity(cloneInsert, entityManager);
+        }
+
       } catch (Exception e) {
         LOG.debug("Error in copy sizeInfo");
       }
@@ -1375,12 +1434,12 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
   }
 
-  public Sizeinfo getSizeInfoByKunnr(EntityManager rdcMgr, String mandt, String kunnr) throws Exception {
+  public List<Sizeinfo> getSizeInfoByKunnr(EntityManager rdcMgr, String mandt, String kunnr) throws Exception {
     String sql = ExternalizedQuery.getSql("GET.SIZEINFO.RECORD");
     PreparedQuery query = new PreparedQuery(rdcMgr, sql);
     query.setParameter("MANDT", mandt);
     query.setParameter("KUNNR", kunnr);
-    return query.getSingleResult(Sizeinfo.class);
+    return query.getResults(Sizeinfo.class);
   }
 
   /**
@@ -1805,7 +1864,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
     transSer = getTransSerByKunnr(entityManager, kna1.getKatr6(), kna1.getId().getKunnr());
     transSerClone = getTransSerByKunnr(entityManager, kna1Clone.getKatr6(), kna1Clone.getId().getKunnr());
-    if (transSer != null && transSerClone.size() == 0) {
+    if (transSer != null && transSer.size() > 0 && transSerClone.size() == 0) {
       try {
         for (TransService current : transSer) {
           cloneInsert = new TransService();
