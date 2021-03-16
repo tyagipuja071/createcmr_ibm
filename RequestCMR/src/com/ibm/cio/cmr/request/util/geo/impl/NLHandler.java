@@ -1248,8 +1248,15 @@ public class NLHandler extends BaseSOFHandler {
     if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCollectionCd(), newData.getCollectionCd())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "CollectionCd", "-"));
-      update.setNewData(newData.getCollectionCd());
-      update.setOldData(oldData.getCollectionCd());
+      update.setNewData(service.getCodeAndDescription(newData.getCollectionCd(), "CollectionCd", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getCollectionCd(), "CollectionCd", cmrCountry));
+      results.add(update);
+    }
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getModeOfPayment(), newData.getModeOfPayment())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "ModeOfPayment", "-"));
+      update.setNewData(newData.getModeOfPayment());
+      update.setOldData(oldData.getModeOfPayment());
       results.add(update);
     }
     if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getEmbargoCd(), newData.getEmbargoCd())) {
