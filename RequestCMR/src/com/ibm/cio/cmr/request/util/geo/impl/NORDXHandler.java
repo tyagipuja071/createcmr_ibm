@@ -15,8 +15,9 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.servlet.ModelAndView;
@@ -28,6 +29,7 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataRdc;
+import com.ibm.cio.cmr.request.entity.Kna1;
 import com.ibm.cio.cmr.request.entity.MachinesToInstall;
 import com.ibm.cio.cmr.request.entity.MachinesToInstallPK;
 import com.ibm.cio.cmr.request.entity.Sadr;
@@ -45,6 +47,7 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
+import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cmr.services.client.CmrServicesFactory;
@@ -806,61 +809,147 @@ public class NORDXHandler extends BaseSOFHandler {
 
   @Override
   public void validateMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country) {
-    XSSFRow row = null;
+    String[] sheetNames = { "Data", "Mailing", "Billing", "Shiping", "Installing", "EPL" };
     XSSFCell currCell = null;
+    for (String name : sheetNames) {
+      XSSFSheet sheet = book.getSheet(name);
+      LOG.debug("validating for sheet " + name);
+      if (sheet != null) {
+        for (Row row : sheet) {
+          if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
+            DataFormatter df = new DataFormatter();
+            String cmrNo = ""; // 0
+            String abbName = ""; // 1
+            String abbLocation = ""; // 2
+            String ISIC = ""; // 3
+            String currencyCd = ""; // 4
+            String tax = ""; // 5
+            String inac = ""; // 6
+            String collection = ""; // 7
+            String payment = ""; // 8
+            String embargo = ""; // 9
+            String isu = ""; // 10
+            String ctc = ""; // 11
+            String leadingAccount = ""; // 12
+            String acAdmin = ""; // 13
+            String vat = ""; // 14
+            String salesRep = ""; // 15
+            String phone = ""; // 16
+            String language = ""; // 17
 
-    String[] countryAddrss = null;
-    if (ND_COUNTRIES_LIST.contains(country)) {
-      countryAddrss = ND_MASS_UPDATE_SHEET_NAMES;
+            currCell = (XSSFCell) row.getCell(0);
+            cmrNo = validateColValFromCell(currCell);
 
-      XSSFSheet sheet = book.getSheet("Data");// validate Data sheet
-      row = sheet.getRow(0);// data field name row
-      int ordBlkIndex = 14;// default index
-      for (int cellIndex = 0; cellIndex < row.getLastCellNum(); cellIndex++) {
-        currCell = row.getCell(cellIndex);
-        String cellVal = validateColValFromCell(currCell);
-        if ("Order block code".equals(cellVal)) {
-          ordBlkIndex = cellIndex;
-          break;
-        }
-      }
 
-      TemplateValidation error = new TemplateValidation("Data");
-      for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
-        row = sheet.getRow(rowIndex);
-        if (row == null) {
-          break; // stop immediately when row is blank
-        }
-        currCell = row.getCell(ordBlkIndex);
-        String ordBlk = validateColValFromCell(currCell);
-        if (StringUtils.isNotBlank(ordBlk) && !("@".equals(ordBlk) || "E".equals(ordBlk) || "S".equals(ordBlk))) {
-          LOG.trace("Order Block Code should only @, E, R. >> ");
-          error.addError(rowIndex, "Order Block Code", "Order Block Code should be only @, E, S. ");
-          validations.add(error);
-        }
-      }
+            if (row.getRowNum() == 2001) {
+              continue;
+            }
 
-      for (String name : countryAddrss) {
-        sheet = book.getSheet(name);
-        for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
+            if (StringUtils.isEmpty(cmrNo)) {
+              TemplateValidation error = new TemplateValidation(name);
+              LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that CMR No. is mandatory. Please fix and upload the template again.");
+              error.addError((row.getRowNum() + 1), "CMR No.",
+                  "The row " + (row.getRowNum() + 1) + ":Note that CMR No. is mandatory. Please fix and upload the template again.<br>");
+              validations.add(error);
+            }
+            if (isDivCMR(cmrNo, country)) {
+              TemplateValidation error = new TemplateValidation(name);
+              LOG.trace("The row " + (row.getRowNum() + 1) + ":Note the CMR number is not existed or a divestiture CMR records.");
+              error.addError((row.getRowNum() + 1), "CMR No.",
+                  "The row " + (row.getRowNum() + 1) + ":Note the CMR number is not existed or a divestiture CMR records.<br>");
+              validations.add(error);
+            }
 
-          row = sheet.getRow(rowIndex);
-          if (row == null) {
-            break; // stop immediately when row is blank
-          }
-          String name3 = ""; // 4
-          String pobox = ""; // 8
+            boolean dummyUpd = true;
+            int loopFlag = "Data".equals(name) ? 16 : 9;// assume addr 9 field
+            int beginPos = "Data".equals(name) ? 1 : 2;
+            for (int i = beginPos; i < loopFlag; i++) {
+              XSSFCell cell = (XSSFCell) row.getCell(i);
+              String addrField = validateColValFromCell(cell);
+              if (StringUtils.isNotBlank(addrField)) {
+                dummyUpd = false;
+                break;
+              }
+            }
+            if ("Data".equals(name)) {
+                currCell = (XSSFCell) row.getCell(1);
+                abbName = validateColValFromCell(currCell);
+                if ("@".equals(abbName)) {
+                  TemplateValidation error = new TemplateValidation(name);
+                  LOG.trace(
+                      "The row " + (row.getRowNum() + 1)
+                          + ":Note that Abbreviated Name is not allowed blank out. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "CMR No.",
+                      "The row " + (row.getRowNum() + 1)
+                          + ":Note that Abbreviated Name is not allowed blank out. Please fix and upload the template again.<br>");
+                  validations.add(error);
+                }
 
-          currCell = row.getCell(4);
-          name3 = validateColValFromCell(currCell);
-          currCell = row.getCell(8);
-          pobox = validateColValFromCell(currCell);
+                currCell = (XSSFCell) row.getCell(2);
+                abbLocation = validateColValFromCell(currCell);
+                if ("@".equals(abbLocation)) {
+                  TemplateValidation error = new TemplateValidation(name);
+                  LOG.trace(
+                      "The row " + (row.getRowNum() + 1)
+                          + ":Note that Abbreviated Location is not allowed blank out. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "CMR No.", "The row " + (row.getRowNum() + 1)
+                      + ":Note that Abbreviated Location is mandatory. Please fix and upload the template again.<br>");
+                  validations.add(error);
+                }
 
-          if (!StringUtils.isEmpty(name3) && !StringUtils.isEmpty(pobox)) {
-            TemplateValidation errorAddr = new TemplateValidation(name);
-            LOG.trace("Customer Name (3) and PO BOX should not be input at the sametime.");
-            errorAddr.addError(row.getRowNum(), "PO BOX", "Customer Name (3) and PO BOX should not be input at the sametime.");
-            validations.add(errorAddr);
+                currCell = (XSSFCell) row.getCell(8);
+                payment = validateColValFromCell(currCell);
+                if ("@".equals(payment)) {
+                  TemplateValidation error = new TemplateValidation(name);
+                  LOG.trace("The row " + (row.getRowNum() + 1)
+                      + ":Note that Payment terms is not allowed blank out. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "CMR No.",
+                      "The row " + (row.getRowNum() + 1)
+                          + ":Note that Payment terms is not allowed blank out. Please fix and upload the template again.<br>");
+                  validations.add(error);
+                }
+
+                currCell = (XSSFCell) row.getCell(12);
+                leadingAccount = validateColValFromCell(currCell);
+                if ("@".equals(leadingAccount)) {
+                  TemplateValidation error = new TemplateValidation(name);
+                  LOG.trace("The row " + (row.getRowNum() + 1)
+                      + ":Note that Leading Account Number is not allowed blank out. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "CMR No.", "The row " + (row.getRowNum() + 1)
+                      + ":Note that Leading Account Number is not allowed blank out. Please fix and upload the template again.<br>");
+                  validations.add(error);
+                }
+
+                currCell = (XSSFCell) row.getCell(13);
+                acAdmin = validateColValFromCell(currCell);
+                if ("@".equals(acAdmin)) {
+                  TemplateValidation error = new TemplateValidation(name);
+                  LOG.trace("The row " + (row.getRowNum() + 1)
+                      + ":Note that A/C Admin DSC is not allowed blank out. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "CMR No.",
+                      "The row " + (row.getRowNum() + 1)
+                          + ":Note that A/C Admin DSC is not allowed blank out. Please fix and upload the template again.<br>");
+                  validations.add(error);
+                }
+
+                currCell = (XSSFCell) row.getCell(15);
+                salesRep = validateColValFromCell(currCell);
+                if ("@".equals(salesRep)) {
+                  TemplateValidation error = new TemplateValidation(name);
+                  LOG.trace("The row " + (row.getRowNum() + 1)
+                      + ":Note that Sales Rep is not allowed blank out. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "CMR No.",
+                      "The row " + (row.getRowNum() + 1)
+                          + ":Note that Sales Rep is not allowed blank out. Please fix and upload the template again.<br>");
+                  validations.add(error);
+                }
+
+            } else {
+              if (dummyUpd) {
+                continue;
+              }
+
+            }
           }
         }
       }
@@ -1576,4 +1665,24 @@ public class NORDXHandler extends BaseSOFHandler {
     query.executeSql();
   }
 
+  private static boolean isDivCMR(String cmrNo, String cntry) {
+    boolean isDivestiture = true;
+    String mandt = SystemConfiguration.getValue("MANDT");
+    EntityManager entityManager = JpaManager.getEntityManager();
+    String sql = ExternalizedQuery.getSql("ND.GET.ZS01KATR10");
+
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setForReadOnly(true);
+    query.setParameter("KATR6", cntry);
+    query.setParameter("MANDT", mandt);
+    query.setParameter("CMR", cmrNo);
+
+    Kna1 zs01 = query.getSingleResult(Kna1.class);
+    if (zs01 != null) {
+      if (StringUtils.isBlank(zs01.getKatr10())) {
+        isDivestiture = false;
+      }
+    }
+    return isDivestiture;
+  }
 }
