@@ -1046,7 +1046,7 @@ public class CEMEAHandler extends BaseSOFHandler {
       data.setCompany(this.currentImportValues.get("BankBranchNo"));
       LOG.trace("BankBranchNo: " + data.getCompany());
     } else if (SystemLocation.CZECH_REPUBLIC.equals(data.getCmrIssuingCntry())) {
-      data.setCompany(this.currentImportValues.get("BankAccountNo"));// RABXA->ICO
+      data.setCompany(this.currentImportValues.get("BankBranchNo"));// RBBXA->ICO
       data.setTaxCd1(mainRecord.getCmrBusinessReg());// kna1.stcd1->DIC
       LOG.trace("BankAccountNo: " + data.getCompany());
       LOG.trace("DIC: " + data.getTaxCd1());
