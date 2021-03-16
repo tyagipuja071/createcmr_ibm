@@ -1160,32 +1160,6 @@ public class CEETransformer extends EMEATransformer {
         legacyCust.setEmbargoCd(rdcEmbargoCd);
         resetOrdBlockToData(entityManager, data);
       }
-
-      // if (SystemLocation.SLOVAKIA.equals(data.getCmrIssuingCntry()) ||
-      // SystemLocation.CZECH_REPUBLIC.equals(data.getCmrIssuingCntry())) {
-      // CmrtCustExt custExt = null;
-      // CmrtCustExtPK custExtPk = null;
-      // boolean isCustExt = hasCmrtCustExt();
-      // if (isCustExt) {
-      // LOG.debug("Mapping default Data values with Legacy CmrtCustExt
-      // table.....");
-      // // Initialize the object
-      // try {
-      // custExt = initEmpty(CmrtCustExt.class);
-      // } catch (Exception e) {
-      // e.printStackTrace();
-      // }
-      // custExtPk = new CmrtCustExtPK();
-      // custExtPk.setCustomerNo(data.getCmrNo());
-      // custExtPk.setSofCntryCode(data.getCmrIssuingCntry());
-      // custExt.setId(custExtPk);
-      //
-      // custExt.setUpdateTs(SystemUtil.getCurrentTimestamp());
-      // custExt.setAeciSubDt(SystemUtil.getDummyDefaultDate());
-      // entityManager.persist(custExt);
-      // entityManager.flush();
-      // }
-      // }
     }
 
     if (!StringUtils.isBlank(data.getSubIndustryCd())) {
