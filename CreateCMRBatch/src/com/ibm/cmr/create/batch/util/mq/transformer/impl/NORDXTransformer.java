@@ -1410,7 +1410,7 @@ public class NORDXTransformer extends EMEATransformer {
       }
     }
 
-    if (SystemLocation.ABU_DHABI.equals(cust.getId().getSofCntryCode()) && !StringUtils.isBlank(muData.getCurrencyCd())) {
+    if (!StringUtils.isBlank(muData.getCurrencyCd())) {
       if ("@".equals(muData.getCurrencyCd())) {
         cust.setCustType("");
       } else {
@@ -1423,7 +1423,6 @@ public class NORDXTransformer extends EMEATransformer {
     }
 
     // RABXA :Bank Account Number
-    if (SystemLocation.CROATIA.equals(cust.getId().getSofCntryCode())) {
       if (!StringUtils.isBlank(muData.getSearchTerm())) {
         if ("@".equals(muData.getSearchTerm())) {
           cust.setBankAcctNo("");
@@ -1431,7 +1430,7 @@ public class NORDXTransformer extends EMEATransformer {
           cust.setBankAcctNo(muData.getSearchTerm());
         }
       }
-    } else {
+
       if (!StringUtils.isBlank(muData.getEmail2())) {
         if ("@".equals(muData.getEmail2())) {
           cust.setBankAcctNo("");
@@ -1439,7 +1438,6 @@ public class NORDXTransformer extends EMEATransformer {
           cust.setBankAcctNo(muData.getEmail2());
         }
       }
-    }
 
     if (!StringUtils.isBlank(muData.getAbbrevLocn())) {
       cust.setAbbrevLocn(muData.getAbbrevLocn());
@@ -1482,9 +1480,6 @@ public class NORDXTransformer extends EMEATransformer {
     String cebo = "";
     if (!StringUtils.isBlank(muData.getCustNm2())) {
       cebo = muData.getCustNm2();
-      // if (cebo.length() < 7) {
-      // cebo = StringUtils.rightPad(cebo, 7, '0');
-      // }
       if ("@".equals(muData.getCustNm2())) {
         cust.setCeBo("");
       } else {
@@ -1500,17 +1495,6 @@ public class NORDXTransformer extends EMEATransformer {
       }
     }
 
-    // if (!cust.getId().getCustomerNo().startsWith("99") &&
-    // !StringUtils.isBlank(muData.getCompany())) {
-    // if ("@".equals(muData.getCompany())) {
-    // cust.setEnterpriseNo("");
-    // } else {
-    // cust.setEnterpriseNo(muData.getCompany());
-    // }
-    // } else if (cust.getId().getCustomerNo().startsWith("99")) {
-    // cust.setEnterpriseNo("");
-    // }
-
     // Email1 used to store phone
     if (!StringUtils.isBlank(muData.getEmail1())) {
       if ("@".equals(muData.getEmail1())) {
@@ -1519,22 +1503,6 @@ public class NORDXTransformer extends EMEATransformer {
         cust.setTelNoOrVat(muData.getEmail1());
       }
     }
-
-    // List<MassUpdtAddr> muaList = cmrObjects.getMassUpdateAddresses();
-    // if (muaList != null && muaList.size() > 0) {
-    // for (MassUpdtAddr mua : muaList) {
-    // if ("ZP01".equals(mua.getId().getAddrType())) {
-    // if (!StringUtils.isBlank(mua.getCustPhone())) {
-    // if (DEFAULT_CLEAR_CHAR.equals(mua.getCustPhone())) {
-    // cust.setTelNoOrVat("");
-    // } else {
-    // cust.setTelNoOrVat(mua.getCustPhone());
-    // }
-    // break;
-    // }
-    // }
-    // }
-    // }
 
     if (!StringUtils.isBlank(muData.getCollectionCd())) {
       if ("@".equals(muData.getCollectionCd())) {
@@ -1557,21 +1525,6 @@ public class NORDXTransformer extends EMEATransformer {
         cust.setVat("");
       } else {
         cust.setVat(muData.getVat());
-      }
-    }
-
-    // SBO
-    if (!StringUtils.isBlank(muData.getCustNm1())) {
-      if ("@".equals(muData.getCustNm1())) {
-        cust.setSbo("");
-        cust.setIbo("");
-      } else {
-        String sbo = muData.getCustNm1();
-        if (sbo.length() < 7) {
-          sbo = StringUtils.rightPad(sbo, 7, '0');
-        }
-        cust.setSbo(sbo);
-        cust.setIbo(sbo);
       }
     }
 
