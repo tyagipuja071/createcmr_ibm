@@ -1057,12 +1057,12 @@ public class CEETransformer extends EMEATransformer {
         } else {
           legacyCust.setBankBranchNo("");
         }
+
         if (!StringUtils.isBlank(data.getTaxCd1())) {
           legacyCust.setBankAcctNo(data.getTaxCd1());
         } else {
           legacyCust.setBankAcctNo("");
         }
-
       } else {
         if (!StringUtils.isBlank(data.getTaxCd1())) {
           legacyCust.setBankAcctNo(data.getTaxCd1());
@@ -1074,7 +1074,7 @@ public class CEETransformer extends EMEATransformer {
       if ("693".equals(data.getCmrIssuingCntry())) {
 
         if (!StringUtils.isBlank(data.getCompany())) {
-          if (data.getCompany().length() > 9) {
+          if (data.getCompany().length() > 8) {
             legacyCust.setBankBranchNo(data.getCompany().substring(0, 8));
           } else {
             legacyCust.setBankBranchNo(data.getCompany());
