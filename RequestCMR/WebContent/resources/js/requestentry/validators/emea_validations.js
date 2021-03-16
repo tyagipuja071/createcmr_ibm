@@ -138,6 +138,9 @@ function typeOfCustomer() {
   if ((custSubGrp == 'INTER') || (custSubGrp == 'INTSM') || (custSubGrp == 'INTVA') || (custSubGrp == 'CROIN')) {
     FormManager.enable('crosSubTyp');
     FormManager.limitDropdownValues(FormManager.getField('crosSubTyp'), [ '91', '92' ]);
+  } else if ((custSubGrp == 'IBMIT') || (custSubGrp == 'XIBM')) {
+    FormManager.setValue('crosSubTyp', '98');
+    FormManager.readOnly('crosSubTyp');
   } else if (custSubGrp == 'LOCEN' || custSubGrp == 'LOCSM' || custSubGrp == 'LOCVA' || custSubGrp == 'CROLC') {
     FormManager.setValue('crosSubTyp', 'E');
     FormManager.readOnly('crosSubTyp');
