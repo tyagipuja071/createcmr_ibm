@@ -1211,6 +1211,7 @@ public class CEMEAHandler extends BaseSOFHandler {
     return ke;
   }
   
+  @Override
   public int getName2Length() {
     return 35;
   }
@@ -1568,7 +1569,7 @@ public class CEMEAHandler extends BaseSOFHandler {
     }
 
     if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCompany(), newData.getCompany())
-        && SystemLocation.CZECH_REPUBLIC.equals(cmrCountry)) {
+        && (SystemLocation.SLOVAKIA.equals(cmrCountry) || SystemLocation.CZECH_REPUBLIC.equals(cmrCountry))) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "Company", "-"));
       update.setNewData(service.getCodeAndDescription(newData.getCompany(), "Company", cmrCountry));
