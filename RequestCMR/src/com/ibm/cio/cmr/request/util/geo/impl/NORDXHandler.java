@@ -809,7 +809,7 @@ public class NORDXHandler extends BaseSOFHandler {
 
   @Override
   public void validateMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country) {
-    String[] sheetNames = { "Data", "Mailing", "Billing", "Shiping", "Installing", "EPL" };
+    String[] sheetNames = { "Data", "Mailing", "Billing", "Shipping", "Installing", "EPL" };
     XSSFCell currCell = null;
     for (String name : sheetNames) {
       XSSFSheet sheet = book.getSheet(name);
