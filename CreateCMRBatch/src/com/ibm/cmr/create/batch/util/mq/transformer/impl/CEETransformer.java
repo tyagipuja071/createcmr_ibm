@@ -1,8 +1,11 @@
+
 /**
  * 
  */
 package com.ibm.cmr.create.batch.util.mq.transformer.impl;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
@@ -1157,6 +1160,32 @@ public class CEETransformer extends EMEATransformer {
         legacyCust.setEmbargoCd(rdcEmbargoCd);
         resetOrdBlockToData(entityManager, data);
       }
+
+      // if (SystemLocation.SLOVAKIA.equals(data.getCmrIssuingCntry()) ||
+      // SystemLocation.CZECH_REPUBLIC.equals(data.getCmrIssuingCntry())) {
+      // CmrtCustExt custExt = null;
+      // CmrtCustExtPK custExtPk = null;
+      // boolean isCustExt = hasCmrtCustExt();
+      // if (isCustExt) {
+      // LOG.debug("Mapping default Data values with Legacy CmrtCustExt
+      // table.....");
+      // // Initialize the object
+      // try {
+      // custExt = initEmpty(CmrtCustExt.class);
+      // } catch (Exception e) {
+      // e.printStackTrace();
+      // }
+      // custExtPk = new CmrtCustExtPK();
+      // custExtPk.setCustomerNo(data.getCmrNo());
+      // custExtPk.setSofCntryCode(data.getCmrIssuingCntry());
+      // custExt.setId(custExtPk);
+      //
+      // custExt.setUpdateTs(SystemUtil.getCurrentTimestamp());
+      // custExt.setAeciSubDt(SystemUtil.getDummyDefaultDate());
+      // entityManager.persist(custExt);
+      // entityManager.flush();
+      // }
+      // }
     }
 
     if (!StringUtils.isBlank(data.getSubIndustryCd())) {
@@ -1938,4 +1967,23 @@ public class CEETransformer extends EMEATransformer {
     q.executeSql();
   }
 
+  public <T> T initEmpty(Class<T> entityClass) throws Exception {
+    try {
+      T object = entityClass.newInstance();
+      Field[] fields = entityClass.getDeclaredFields();
+      for (Field field : fields) {
+        if (String.class.equals(field.getType()) && !Modifier.isAbstract(field.getModifiers()) && !Modifier.isFinal(field.getModifiers())) {
+          field.setAccessible(true);
+          field.set(object, "");
+        }
+        if (Date.class.equals(field.getType()) && !Modifier.isAbstract(field.getModifiers()) && !Modifier.isFinal(field.getModifiers())) {
+          field.setAccessible(true);
+          field.set(object, SystemUtil.getCurrentTimestamp());
+        }
+      }
+      return object;
+    } catch (Exception e) {
+      throw new Exception("Cannot initialize " + entityClass.getSimpleName() + " object.");
+    }
+  }
 }
