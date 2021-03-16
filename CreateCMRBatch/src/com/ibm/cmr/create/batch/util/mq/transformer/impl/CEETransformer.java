@@ -1736,20 +1736,21 @@ public class CEETransformer extends EMEATransformer {
         String itax = vat.replaceAll("BG", "");
         legacyCustExt.setiTaxCode(itax);
       }
-    } else if (SystemLocation.CZECH_REPUBLIC.equals(data.getCmrIssuingCntry())) {// data.company
-                                                                                 // is
-                                                                                 // used
-                                                                                 // for
-                                                                                 // other
-                                                                                 // field
+    } else if (SystemLocation.CZECH_REPUBLIC.equals(data.getCmrIssuingCntry())) {
       if (!StringUtils.isBlank(data.getTaxCd1())) {
         legacyCustExt.setBankAcctNo(data.getTaxCd1());
       } else {
         legacyCustExt.setBankAcctNo("");
       }
+      if (!StringUtils.isBlank(data.getCompany())) {
+        legacyCustExt.setiTaxCode(data.getCompany());
+      } else {
+        legacyCustExt.setiTaxCode("");
+      }
+
     } else {
       if (!StringUtils.isBlank(data.getCompany())) {
-        if (data.getCompany().length() > 9) {
+        if (data.getCompany().length() > 8) {
           legacyCustExt.setiTaxCode(data.getCompany().substring(0, 8));
         } else {
           legacyCustExt.setiTaxCode(data.getCompany());
