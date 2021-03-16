@@ -1439,6 +1439,15 @@ public class NORDXTransformer extends EMEATransformer {
         }
       }
 
+    // leading Account number
+    if (!StringUtils.isBlank(muData.getNewEntpName1())) {
+      if ("@".equals(muData.getNewEntpName1())) {
+        cust.setLeadingAccNo("");
+      } else {
+        cust.setLeadingAccNo(muData.getNewEntpName1() + cust.getMrcCd());
+      }
+    }
+
     if (!StringUtils.isBlank(muData.getAbbrevLocn())) {
       cust.setAbbrevLocn(muData.getAbbrevLocn());
     }
