@@ -1,8 +1,11 @@
+
 /**
  * 
  */
 package com.ibm.cmr.create.batch.util.mq.transformer.impl;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
@@ -971,10 +974,17 @@ public class CEETransformer extends EMEATransformer {
 
       if (SystemLocation.CZECH_REPUBLIC.equals(data.getCmrIssuingCntry())) {
         if (!StringUtils.isBlank(data.getCompany())) {
-          legacyCust.setBankAcctNo(data.getCompany());
+          legacyCust.setBankBranchNo(data.getCompany());
+        } else {
+          legacyCust.setBankBranchNo("");
+        }
+
+        if (!StringUtils.isBlank(data.getTaxCd1())) {
+          legacyCust.setBankAcctNo(data.getTaxCd1());
         } else {
           legacyCust.setBankAcctNo("");
         }
+
       } else {
         if (!StringUtils.isBlank(data.getTaxCd1())) {
           legacyCust.setBankAcctNo(data.getTaxCd1());
@@ -986,7 +996,7 @@ public class CEETransformer extends EMEATransformer {
       if ("693".equals(data.getCmrIssuingCntry())) {
 
         if (!StringUtils.isBlank(data.getCompany())) {
-          if (data.getCompany().length() > 9) {
+          if (data.getCompany().length() > 8) {
             legacyCust.setBankBranchNo(data.getCompany().substring(0, 8));
           } else {
             legacyCust.setBankBranchNo(data.getCompany());
@@ -994,6 +1004,13 @@ public class CEETransformer extends EMEATransformer {
         } else {
           legacyCust.setBankBranchNo("");
         }
+
+        if (!StringUtils.isBlank(data.getTaxCd1())) {
+          legacyCust.setBankAcctNo(data.getTaxCd1());
+        } else {
+          legacyCust.setBankAcctNo("");
+        }
+
       }
 
       if ("707ME".equals(data.getCountryUse())) {
@@ -1039,7 +1056,13 @@ public class CEETransformer extends EMEATransformer {
 
       if (SystemLocation.CZECH_REPUBLIC.equals(data.getCmrIssuingCntry())) {
         if (!StringUtils.isBlank(data.getCompany())) {
-          legacyCust.setBankAcctNo(data.getCompany());
+          legacyCust.setBankBranchNo(data.getCompany());
+        } else {
+          legacyCust.setBankBranchNo("");
+        }
+
+        if (!StringUtils.isBlank(data.getTaxCd1())) {
+          legacyCust.setBankAcctNo(data.getTaxCd1());
         } else {
           legacyCust.setBankAcctNo("");
         }
@@ -1054,7 +1077,7 @@ public class CEETransformer extends EMEATransformer {
       if ("693".equals(data.getCmrIssuingCntry())) {
 
         if (!StringUtils.isBlank(data.getCompany())) {
-          if (data.getCompany().length() > 9) {
+          if (data.getCompany().length() > 8) {
             legacyCust.setBankBranchNo(data.getCompany().substring(0, 8));
           } else {
             legacyCust.setBankBranchNo(data.getCompany());
@@ -1062,6 +1085,13 @@ public class CEETransformer extends EMEATransformer {
         } else {
           legacyCust.setBankBranchNo("");
         }
+
+        if (!StringUtils.isBlank(data.getTaxCd1())) {
+          legacyCust.setBankAcctNo(data.getTaxCd1());
+        } else {
+          legacyCust.setBankAcctNo("");
+        }
+
       }
       //
       // if (!StringUtils.isBlank(data.getCrosSubTyp())) {
@@ -1277,17 +1307,9 @@ public class CEETransformer extends EMEATransformer {
     // RBBXA :Bank Branch Number
     if (!StringUtils.isBlank(muData.getNewEntpName1())) {
       if ("@".equals(muData.getNewEntpName1())) {
-        if (SystemLocation.CZECH_REPUBLIC.equals(cust.getId().getSofCntryCode())) {
-          cust.setBankAcctNo("");
-        } else {
           cust.setBankBranchNo("");
-        }
       } else {
-          if (SystemLocation.CZECH_REPUBLIC.equals(cust.getId().getSofCntryCode())) {
-            cust.setBankAcctNo(muData.getNewEntpName1());
-          } else {
             cust.setBankBranchNo(muData.getNewEntpName1());
-          }
         }
     }
 
@@ -1304,7 +1326,7 @@ public class CEETransformer extends EMEATransformer {
           cust.setBankAcctNo(muData.getSearchTerm());
         }
       }
-    } else if (!SystemLocation.CZECH_REPUBLIC.equals(cust.getId().getSofCntryCode())) {
+    } else {
       if (!StringUtils.isBlank(muData.getEmail2())) {
         if ("@".equals(muData.getEmail2())) {
           cust.setBankAcctNo("");
@@ -1743,20 +1765,21 @@ public class CEETransformer extends EMEATransformer {
         String itax = vat.replaceAll("BG", "");
         legacyCustExt.setiTaxCode(itax);
       }
-    } else if (SystemLocation.CZECH_REPUBLIC.equals(data.getCmrIssuingCntry())) {// data.company
-                                                                                 // is
-                                                                                 // used
-                                                                                 // for
-                                                                                 // other
-                                                                                 // field
+    } else if (SystemLocation.CZECH_REPUBLIC.equals(data.getCmrIssuingCntry())) {
       if (!StringUtils.isBlank(data.getTaxCd1())) {
         legacyCustExt.setBankAcctNo(data.getTaxCd1());
       } else {
         legacyCustExt.setBankAcctNo("");
       }
+      if (!StringUtils.isBlank(data.getCompany())) {
+        legacyCustExt.setiTaxCode(data.getCompany());
+      } else {
+        legacyCustExt.setiTaxCode("");
+      }
+
     } else {
       if (!StringUtils.isBlank(data.getCompany())) {
-        if (data.getCompany().length() > 9) {
+        if (data.getCompany().length() > 8) {
           legacyCustExt.setiTaxCode(data.getCompany().substring(0, 8));
         } else {
           legacyCustExt.setiTaxCode(data.getCompany());
@@ -1790,11 +1813,11 @@ public class CEETransformer extends EMEATransformer {
     // }
 
     // RBBXA :Bank Branch Number
-    if (!SystemLocation.CZECH_REPUBLIC.equals(custExt.getId().getSofCntryCode()) && !StringUtils.isBlank(muData.getNewEntpName1())) {
+    if (!StringUtils.isBlank(muData.getNewEntpName1())) {
       if ("@".equals(muData.getNewEntpName1())) {
         custExt.setiTaxCode("");
       } else {
-        if (muData.getNewEntpName1().length() > 9) {
+        if (muData.getNewEntpName1().length() > 8) {
           custExt.setiTaxCode(muData.getNewEntpName1().substring(0, 8));
         } else {
           custExt.setiTaxCode(muData.getNewEntpName1());
@@ -1971,4 +1994,23 @@ public class CEETransformer extends EMEATransformer {
     }
   }
 
+  public <T> T initEmpty(Class<T> entityClass) throws Exception {
+    try {
+      T object = entityClass.newInstance();
+      Field[] fields = entityClass.getDeclaredFields();
+      for (Field field : fields) {
+        if (String.class.equals(field.getType()) && !Modifier.isAbstract(field.getModifiers()) && !Modifier.isFinal(field.getModifiers())) {
+          field.setAccessible(true);
+          field.set(object, "");
+        }
+        if (Date.class.equals(field.getType()) && !Modifier.isAbstract(field.getModifiers()) && !Modifier.isFinal(field.getModifiers())) {
+          field.setAccessible(true);
+          field.set(object, SystemUtil.getCurrentTimestamp());
+        }
+      }
+      return object;
+    } catch (Exception e) {
+      throw new Exception("Cannot initialize " + entityClass.getSimpleName() + " object.");
+    }
+  }
 }
