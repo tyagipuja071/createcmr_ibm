@@ -135,6 +135,11 @@ public class MassChangeTemplateManager {
     configList.put("879", "config.FST.xml");
     configList.put("880", "config.FST.xml");
     configList.put("881", "config.FST.xml");
+
+    configList.put("846", "config.846.xml");
+    configList.put("702", "config.702.xml");
+    configList.put("678", "config.678.xml");
+    configList.put("806", "config.806.xml");
   }
 
   /**

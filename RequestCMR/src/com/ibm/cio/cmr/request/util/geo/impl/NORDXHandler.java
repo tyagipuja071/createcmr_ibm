@@ -15,6 +15,11 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.ibm.cio.cmr.request.CmrConstants;
@@ -24,11 +29,13 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataRdc;
+import com.ibm.cio.cmr.request.entity.Kna1;
 import com.ibm.cio.cmr.request.entity.MachinesToInstall;
 import com.ibm.cio.cmr.request.entity.MachinesToInstallPK;
 import com.ibm.cio.cmr.request.entity.Sadr;
 import com.ibm.cio.cmr.request.entity.UpdatedAddr;
 import com.ibm.cio.cmr.request.listener.CmrContextListener;
+import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.model.requestentry.ImportCMRModel;
@@ -40,6 +47,7 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
+import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cmr.services.client.CmrServicesFactory;
@@ -73,10 +81,10 @@ public class NORDXHandler extends BaseSOFHandler {
       "CustClassCode", "LocalTax2", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office", "Floor",
       "Building", "County", "City2", "Department", "SearchTerm", "SpecialTaxCd" };
 
-  private static final List<String> ME_COUNTRIES_LIST = Arrays.asList(SystemLocation.BAHRAIN, SystemLocation.MOROCCO, SystemLocation.GULF,
-      SystemLocation.UNITED_ARAB_EMIRATES, SystemLocation.ABU_DHABI, SystemLocation.IRAQ, SystemLocation.JORDAN, SystemLocation.KUWAIT,
-      SystemLocation.LEBANON, SystemLocation.LIBYA, SystemLocation.OMAN, SystemLocation.PAKISTAN, SystemLocation.QATAR, SystemLocation.SAUDI_ARABIA,
-      SystemLocation.YEMEN, SystemLocation.SYRIAN_ARAB_REPUBLIC, SystemLocation.EGYPT, SystemLocation.TUNISIA_SOF, SystemLocation.GULF);
+  private static final List<String> ND_COUNTRIES_LIST = Arrays.asList(SystemLocation.SWEDEN, SystemLocation.NORWAY, SystemLocation.FINLAND,
+      SystemLocation.DENMARK);
+
+  protected static final String[] ND_MASS_UPDATE_SHEET_NAMES = { "Mailing", "Billing", "Shipping", "Installing", "EPL", };
 
   public static boolean isNordicsCountry(String issuingCntry) {
     if (SystemLocation.SWEDEN.equals(issuingCntry) || SystemLocation.NORWAY.equals(issuingCntry) || SystemLocation.DENMARK.equals(issuingCntry)) {
@@ -151,11 +159,11 @@ public class NORDXHandler extends BaseSOFHandler {
                 addr = cloneAddress(record, addrType);
                 addr.setCmrDept(record.getCmrCity2());
                 addr.setCmrName4(record.getCmrName4());
-                if (ME_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry())
+                if (ND_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry())
                     && (CmrConstants.ADDR_TYPE.ZD01.toString().equals(addr.getCmrAddrTypeCode())) && "598".equals(addr.getCmrAddrSeq())) {
                   addr.setCmrAddrTypeCode("ZD02");
                 }
-                if (ME_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry())
+                if (ND_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry())
                     && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(addr.getCmrAddrTypeCode())) && "599".equals(addr.getCmrAddrSeq())) {
                   addr.setCmrAddrTypeCode("ZP03");
                 }
@@ -800,6 +808,155 @@ public class NORDXHandler extends BaseSOFHandler {
   }
 
   @Override
+  public void validateMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country) {
+    String[] sheetNames = { "Data", "Mailing", "Billing", "Shipping", "Installing", "EPL" };
+    XSSFCell currCell = null;
+    for (String name : sheetNames) {
+      XSSFSheet sheet = book.getSheet(name);
+      LOG.debug("validating for sheet " + name);
+      if (sheet != null) {
+        for (Row row : sheet) {
+          if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
+            DataFormatter df = new DataFormatter();
+            String cmrNo = ""; // 0
+            String abbName = ""; // 1
+            String abbLocation = ""; // 2
+            String ISIC = ""; // 3
+            String currencyCd = ""; // 4
+            String tax = ""; // 5
+            String inac = ""; // 6
+            String collection = ""; // 7
+            String payment = ""; // 8
+            String embargo = ""; // 9
+            String isu = ""; // 10
+            String ctc = ""; // 11
+            String leadingAccount = ""; // 12
+            String acAdmin = ""; // 13
+            String vat = ""; // 14
+            String salesRep = ""; // 15
+            String phone = ""; // 16
+            String language = ""; // 17
+
+            currCell = (XSSFCell) row.getCell(0);
+            cmrNo = validateColValFromCell(currCell);
+
+
+            if (row.getRowNum() == 2001) {
+              continue;
+            }
+
+            if (StringUtils.isEmpty(cmrNo)) {
+              TemplateValidation error = new TemplateValidation(name);
+              LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that CMR No. is mandatory. Please fix and upload the template again.");
+              error.addError((row.getRowNum() + 1), "CMR No.",
+                  "The row " + (row.getRowNum() + 1) + ":Note that CMR No. is mandatory. Please fix and upload the template again.<br>");
+              validations.add(error);
+            }
+            if (isDivCMR(cmrNo, country)) {
+              TemplateValidation error = new TemplateValidation(name);
+              LOG.trace("The row " + (row.getRowNum() + 1) + ":Note the CMR number is not existed or a divestiture CMR records.");
+              error.addError((row.getRowNum() + 1), "CMR No.",
+                  "The row " + (row.getRowNum() + 1) + ":Note the CMR number is not existed or a divestiture CMR records.<br>");
+              validations.add(error);
+            }
+
+            boolean dummyUpd = true;
+            int loopFlag = "Data".equals(name) ? 16 : 9;// assume addr 9 field
+            int beginPos = "Data".equals(name) ? 1 : 2;
+            for (int i = beginPos; i < loopFlag; i++) {
+              XSSFCell cell = (XSSFCell) row.getCell(i);
+              String addrField = validateColValFromCell(cell);
+              if (StringUtils.isNotBlank(addrField)) {
+                dummyUpd = false;
+                break;
+              }
+            }
+            if ("Data".equals(name)) {
+                currCell = (XSSFCell) row.getCell(1);
+                abbName = validateColValFromCell(currCell);
+                if ("@".equals(abbName)) {
+                  TemplateValidation error = new TemplateValidation(name);
+                  LOG.trace(
+                      "The row " + (row.getRowNum() + 1)
+                          + ":Note that Abbreviated Name is not allowed blank out. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "CMR No.",
+                      "The row " + (row.getRowNum() + 1)
+                          + ":Note that Abbreviated Name is not allowed blank out. Please fix and upload the template again.<br>");
+                  validations.add(error);
+                }
+
+                currCell = (XSSFCell) row.getCell(2);
+                abbLocation = validateColValFromCell(currCell);
+                if ("@".equals(abbLocation)) {
+                  TemplateValidation error = new TemplateValidation(name);
+                  LOG.trace(
+                      "The row " + (row.getRowNum() + 1)
+                          + ":Note that Abbreviated Location is not allowed blank out. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "CMR No.", "The row " + (row.getRowNum() + 1)
+                      + ":Note that Abbreviated Location is mandatory. Please fix and upload the template again.<br>");
+                  validations.add(error);
+                }
+
+                currCell = (XSSFCell) row.getCell(8);
+                payment = validateColValFromCell(currCell);
+                if ("@".equals(payment)) {
+                  TemplateValidation error = new TemplateValidation(name);
+                  LOG.trace("The row " + (row.getRowNum() + 1)
+                      + ":Note that Payment terms is not allowed blank out. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "CMR No.",
+                      "The row " + (row.getRowNum() + 1)
+                          + ":Note that Payment terms is not allowed blank out. Please fix and upload the template again.<br>");
+                  validations.add(error);
+                }
+
+                currCell = (XSSFCell) row.getCell(12);
+                leadingAccount = validateColValFromCell(currCell);
+                if ("@".equals(leadingAccount)) {
+                  TemplateValidation error = new TemplateValidation(name);
+                  LOG.trace("The row " + (row.getRowNum() + 1)
+                      + ":Note that Leading Account Number is not allowed blank out. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "CMR No.", "The row " + (row.getRowNum() + 1)
+                      + ":Note that Leading Account Number is not allowed blank out. Please fix and upload the template again.<br>");
+                  validations.add(error);
+                }
+
+                currCell = (XSSFCell) row.getCell(13);
+                acAdmin = validateColValFromCell(currCell);
+                if ("@".equals(acAdmin)) {
+                  TemplateValidation error = new TemplateValidation(name);
+                  LOG.trace("The row " + (row.getRowNum() + 1)
+                      + ":Note that A/C Admin DSC is not allowed blank out. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "CMR No.",
+                      "The row " + (row.getRowNum() + 1)
+                          + ":Note that A/C Admin DSC is not allowed blank out. Please fix and upload the template again.<br>");
+                  validations.add(error);
+                }
+
+                currCell = (XSSFCell) row.getCell(15);
+                salesRep = validateColValFromCell(currCell);
+                if ("@".equals(salesRep)) {
+                  TemplateValidation error = new TemplateValidation(name);
+                  LOG.trace("The row " + (row.getRowNum() + 1)
+                      + ":Note that Sales Rep is not allowed blank out. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "CMR No.",
+                      "The row " + (row.getRowNum() + 1)
+                          + ":Note that Sales Rep is not allowed blank out. Please fix and upload the template again.<br>");
+                  validations.add(error);
+                }
+
+            } else {
+              if (dummyUpd) {
+                continue;
+              }
+
+            }
+          }
+        }
+      }
+    }
+  }
+
+  @Override
   public void convertCoverageInput(EntityManager entityManager, CoverageInput request, Addr mainAddr, RequestEntryModel data) {
     // request.setSORTL(data.getSalesBusOffCd());
     // request.setCompanyNumber(data.getEnterprise());
@@ -867,7 +1024,7 @@ public class NORDXHandler extends BaseSOFHandler {
       }
     }
 
-    if (ME_COUNTRIES_LIST.contains(data.getCmrIssuingCntry())) {
+    if (ND_COUNTRIES_LIST.contains(data.getCmrIssuingCntry())) {
       String soldtoseq = getSoldtoaddrSeqFromLegacy(entityManager, data.getCmrIssuingCntry(), data.getCmrNo());
       // check if share seq address
       String isShareZP01 = isShareZP01(entityManager, data.getCmrIssuingCntry(), data.getCmrNo(), soldtoseq);
@@ -1159,7 +1316,7 @@ public class NORDXHandler extends BaseSOFHandler {
 
   @Override
   public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
-    return false;
+    return true;
   }
 
   public static String getStkznFromDataRdc(EntityManager entityManager, String kunnr, String mandt) {
@@ -1508,4 +1665,24 @@ public class NORDXHandler extends BaseSOFHandler {
     query.executeSql();
   }
 
+  private static boolean isDivCMR(String cmrNo, String cntry) {
+    boolean isDivestiture = true;
+    String mandt = SystemConfiguration.getValue("MANDT");
+    EntityManager entityManager = JpaManager.getEntityManager();
+    String sql = ExternalizedQuery.getSql("ND.GET.ZS01KATR10");
+
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setForReadOnly(true);
+    query.setParameter("KATR6", cntry);
+    query.setParameter("MANDT", mandt);
+    query.setParameter("CMR", cmrNo);
+
+    Kna1 zs01 = query.getSingleResult(Kna1.class);
+    if (zs01 != null) {
+      if (StringUtils.isBlank(zs01.getKatr10())) {
+        isDivestiture = false;
+      }
+    }
+    return isDivestiture;
+  }
 }
