@@ -12,10 +12,12 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.CmrConstants;
+import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.impl.gbl.CalculateCoverageElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
+import com.ibm.cio.cmr.request.automation.out.FieldResultKey;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
@@ -29,6 +31,7 @@ import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 
 public class NetherlandsUtil extends AutomationUtil {
@@ -102,7 +105,158 @@ public class NetherlandsUtil extends AutomationUtil {
   public boolean performCountrySpecificCoverageCalculations(CalculateCoverageElement covElement, EntityManager entityManager,
       AutomationResult<OverrideOutput> results, StringBuilder details, OverrideOutput overrides, RequestData requestData,
       AutomationEngineData engineData, String covFrom, CoverageContainer container, boolean isCoverageCalculated) throws Exception {
+
+    if (!"C".equals(requestData.getAdmin().getReqType())) {
+      details.append("Coverage Calculation skipped for Updates.");
+      results.setResults("Skipped");
+      results.setDetails(details.toString());
+      return true;
+    }
+
+    Data data = requestData.getData();
+    String coverageId = container.getFinalCoverage();
+
+    if (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && CalculateCoverageElement.COV_BG.equals(covFrom)) {
+      FieldResultKey sboKeyVal = new FieldResultKey("DATA", "SALES_BO_CD");
+      String sboVal = "";
+      if (overrides.getData().containsKey(sboKeyVal)) {
+        sboVal = overrides.getData().get(sboKeyVal).getNewValue();
+        sboVal = sboVal.substring(0, 3);
+        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sboVal + sboVal);
+        details.append("SORTL: " + sboVal + sboVal);
+      }
+      engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
+    } else if (!isCoverageCalculated) {
+      // if not calculated using bg/gbg try calculation using 32/S logic
+      details.setLength(0);// clear string builder
+      overrides.clearOverrides(); // clear existing overrides
+
+      NLFieldsContainer fields = calculate32SValuesFromIMSNL(entityManager, requestData.getData());
+      if (fields != null) {
+        details.append("Coverage calculated successfully using 32S logic.").append("\n");
+        if (StringUtils.isNotBlank(fields.getEngineeringBO())) {
+          String eBO = "";
+          details.append("BO Team : " + eBO).append("\n");
+          overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getEngineeringBo(), fields.getEngineeringBO());
+        }
+        if (StringUtils.isNotBlank(fields.getInac())) {
+          details.append(" INAC/NAC Code : " + fields.getInac()).append("\n");
+          overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "INAC_CD", data.getInacCd(), fields.getInac());
+        }
+        if (StringUtils.isNotBlank(fields.getEcoCd())) {
+          details.append(" Economic Code : " + fields.getEcoCd()).append("\n");
+          overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ECONOMIC_CD", data.getEconomicCd(), fields.getEcoCd());
+        }
+        results.setResults("Calculated");
+        results.setDetails(details.toString());
+      } else if (StringUtils.isNotBlank(data.getSearchTerm()) && StringUtils.isNotBlank(data.getSalesBusOffCd())) {
+        details.append("Coverage could not be calculated using 32S logic. Using values from request").append("\n");
+        details.append("Sales Rep : " + data.getRepTeamMemberNo()).append("\n");
+        details.append("SBO : " + data.getSalesBusOffCd()).append("\n");
+        results.setResults("Calculated");
+        results.setDetails(details.toString());
+      } else {
+        String msg = "Coverage cannot be calculated. No valid 32S mapping found from request data.";
+        details.append(msg);
+        results.setResults("Cannot Calculate");
+        results.setDetails(details.toString());
+        engineData.addNegativeCheckStatus("_beluxCoverage", msg);
+      }
+    }
     return true;
+  }
+
+  private NLFieldsContainer calculate32SValuesFromIMSNL(EntityManager entityManager, Data data) {
+    NLFieldsContainer container = new NLFieldsContainer();
+
+    // setEngineeringBO
+    List<Object[]> engineeringBOs = new ArrayList<>();
+    String isuCtc = (StringUtils.isNotBlank(data.getIsuCd()) ? data.getIsuCd() : "")
+        + (StringUtils.isNotBlank(data.getClientTier()) ? data.getClientTier() : "");
+
+    if (StringUtils.isNotBlank(data.getSubIndustryCd()) && data.getSubIndustryCd().length() > 1 && ("32S".equals(isuCtc))) {
+      String ims = data.getSubIndustryCd().substring(0, 1);
+      String sql = ExternalizedQuery.getSql("QUERY.GET.BOTEAMLIST.BYISUCTC");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("ISU", "%" + isuCtc + "%");
+      query.setParameter("ISSUING_CNTRY", SystemLocation.NETHERLANDS);
+      query.setParameter("CLIENT_TIER", "%" + ims + "%");
+      query.setForReadOnly(true);
+      engineeringBOs = query.getResults();
+    } else {
+      String sql = ExternalizedQuery.getSql("QUERY.GET.SRLIST.BYISU");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("ISU", "%" + isuCtc + "%");
+      query.setParameter("ISSUING_CNTRY", SystemLocation.NETHERLANDS);
+      engineeringBOs = query.getResults();
+    }
+    if (engineeringBOs != null && engineeringBOs.size() == 1) {
+      String engineeringBO = (String) engineeringBOs.get(0)[0];
+      container.setEngineeringBO(engineeringBO);
+    }
+
+    // setINACValues
+    List<Object[]> inacValues = new ArrayList<>();
+    if (StringUtils.isNotBlank(container.getEngineeringBO())) {
+      String sql = ExternalizedQuery.getSql("QUERY.GET.INACLIST.BYBO");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("ISSUING_CNTRY", SystemLocation.NETHERLANDS);
+      query.setParameter("EngineeringBo", "%" + container.getEngineeringBO() + "%");
+      query.setForReadOnly(true);
+      inacValues = query.getResults();
+    }
+    if (inacValues != null && inacValues.size() == 1) {
+      String inacValue = (String) inacValues.get(0)[0];
+      container.setInac(inacValue);
+    }
+
+    // setEcoCode
+    List<Object[]> ecoCodeValues = new ArrayList<>();
+    if (StringUtils.isNotBlank(container.getEngineeringBO())) {
+      String sql = ExternalizedQuery.getSql("QUERY.GET.ECONOMICLIST.BYST.NL");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("ISSUING_CNTRY", SystemLocation.NETHERLANDS);
+      query.setParameter("REP_TEAM_MEMBER_NO", "%" + container.getEngineeringBO() + "%");
+      query.setForReadOnly(true);
+      inacValues = query.getResults();
+    }
+    if (ecoCodeValues != null && ecoCodeValues.size() == 1) {
+      String ecoCd = (String) ecoCodeValues.get(0)[0];
+      container.setEcoCd(ecoCd);
+    }
+
+    return container;
+  }
+
+  private class NLFieldsContainer {
+    private String engineeringBO;
+    private String inac;
+    private String ecoCd;
+
+    public String getEngineeringBO() {
+      return engineeringBO;
+    }
+
+    public void setEngineeringBO(String engineeringBO) {
+      this.engineeringBO = engineeringBO;
+    }
+
+    public String getInac() {
+      return inac;
+    }
+
+    public void setInac(String inac) {
+      this.inac = inac;
+    }
+
+    public String getEcoCd() {
+      return ecoCd;
+    }
+
+    public void setEcoCd(String ecoCd) {
+      this.ecoCd = ecoCd;
+    }
+
   }
 
   @Override
