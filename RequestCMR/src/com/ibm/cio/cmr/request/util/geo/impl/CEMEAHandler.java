@@ -1049,7 +1049,7 @@ public class CEMEAHandler extends BaseSOFHandler {
       data.setCompany(this.currentImportValues.get("BankBranchNo"));
       LOG.trace("BankBranchNo: " + data.getCompany());
     } else if (SystemLocation.CZECH_REPUBLIC.equals(data.getCmrIssuingCntry())) {
-      data.setCompany(this.currentImportValues.get("BankAccountNo"));// RABXA->ICO
+      data.setCompany(this.currentImportValues.get("BankBranchNo"));// RBBXA->ICO
       data.setTaxCd1(mainRecord.getCmrBusinessReg());// kna1.stcd1->DIC
       LOG.trace("BankAccountNo: " + data.getCompany());
       LOG.trace("DIC: " + data.getTaxCd1());
@@ -1558,7 +1558,7 @@ public class CEMEAHandler extends BaseSOFHandler {
     }
 
     if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCompany(), newData.getCompany())
-        && SystemLocation.CZECH_REPUBLIC.equals(cmrCountry)) {
+        && (SystemLocation.SLOVAKIA.equals(cmrCountry) || SystemLocation.CZECH_REPUBLIC.equals(cmrCountry))) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "Company", "-"));
       update.setNewData(service.getCodeAndDescription(newData.getCompany(), "Company", cmrCountry));

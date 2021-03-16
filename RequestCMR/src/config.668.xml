@@ -98,13 +98,13 @@
 					<label>IČO</label>
 					<dbColumn>NEW_ENTP_NAME1</dbColumn>
 					<width>10</width>
-					<length>11</length>
+					<length>8</length>
 				</column>
 				<column>
 					<label>DIČ</label>
 					<dbColumn>EMAIL2</dbColumn>
 					<width>10</width>
-					<length>16</length>
+					<length>12</length>
 				</column>				
 				<column>
 					<label>Collection Code</label>
