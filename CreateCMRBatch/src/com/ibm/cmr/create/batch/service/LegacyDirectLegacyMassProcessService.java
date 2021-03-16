@@ -28,6 +28,7 @@ import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtAddrUse;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
 import com.ibm.cio.cmr.request.entity.CmrtCustExt;
+import com.ibm.cio.cmr.request.entity.CmrtCustExtPK;
 import com.ibm.cio.cmr.request.entity.CompoundEntity;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataPK;
@@ -1123,7 +1124,27 @@ public class LegacyDirectLegacyMassProcessService extends TransConnService {
         custExt.setUpdateTs(SystemUtil.getCurrentTimestamp());
         custExt.setAeciSubDt(SystemUtil.getDummyDefaultDate());
         legacyObjects.setCustomerExt(custExt);
+      } else if (transformer != null
+          && (SystemLocation.SLOVAKIA.equals(data.getCmrIssuingCntry()) || SystemLocation.CZECH_REPUBLIC.equals(data.getCmrIssuingCntry()))) {
+        CmrtCustExtPK custExtPk = null;
+        LOG.debug("Mapping default Data values with Legacy CmrtCustExt table.....");
+        // Initialize the object
+        custExt = initEmpty(CmrtCustExt.class);
+        // default mapping for ADDR and CMRTCEXT
+        custExtPk = new CmrtCustExtPK();
+        custExtPk.setCustomerNo(data.getCmrNo());
+        custExtPk.setSofCntryCode(cntry);
+        custExt.setId(custExtPk);
+
+        if (transformer != null) {
+          transformer.transformLegacyCustomerExtData(entityManager, null, custExt, cmrObjects);
+        }
+        custExt.setUpdateTs(SystemUtil.getCurrentTimestamp());
+        custExt.setAeciSubDt(SystemUtil.getDummyDefaultDate());
+        createEntity(custExt, entityManager);
+        legacyObjects.setCustomerExt(custExt);
       }
+
     }
 
     capsAndFillNulls(cust, true);
