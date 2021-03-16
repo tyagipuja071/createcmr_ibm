@@ -15,6 +15,10 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.ibm.cio.cmr.request.CmrConstants;
@@ -29,6 +33,7 @@ import com.ibm.cio.cmr.request.entity.MachinesToInstallPK;
 import com.ibm.cio.cmr.request.entity.Sadr;
 import com.ibm.cio.cmr.request.entity.UpdatedAddr;
 import com.ibm.cio.cmr.request.listener.CmrContextListener;
+import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.model.requestentry.ImportCMRModel;
@@ -73,10 +78,10 @@ public class NORDXHandler extends BaseSOFHandler {
       "CustClassCode", "LocalTax2", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office", "Floor",
       "Building", "County", "City2", "Department", "SearchTerm", "SpecialTaxCd" };
 
-  private static final List<String> ME_COUNTRIES_LIST = Arrays.asList(SystemLocation.BAHRAIN, SystemLocation.MOROCCO, SystemLocation.GULF,
-      SystemLocation.UNITED_ARAB_EMIRATES, SystemLocation.ABU_DHABI, SystemLocation.IRAQ, SystemLocation.JORDAN, SystemLocation.KUWAIT,
-      SystemLocation.LEBANON, SystemLocation.LIBYA, SystemLocation.OMAN, SystemLocation.PAKISTAN, SystemLocation.QATAR, SystemLocation.SAUDI_ARABIA,
-      SystemLocation.YEMEN, SystemLocation.SYRIAN_ARAB_REPUBLIC, SystemLocation.EGYPT, SystemLocation.TUNISIA_SOF, SystemLocation.GULF);
+  private static final List<String> ND_COUNTRIES_LIST = Arrays.asList(SystemLocation.SWEDEN, SystemLocation.NORWAY, SystemLocation.FINLAND,
+      SystemLocation.DENMARK);
+
+  protected static final String[] ND_MASS_UPDATE_SHEET_NAMES = { "Mailing", "Billing", "Shipping", "Installing", "EPL", };
 
   public static boolean isNordicsCountry(String issuingCntry) {
     if (SystemLocation.SWEDEN.equals(issuingCntry) || SystemLocation.NORWAY.equals(issuingCntry) || SystemLocation.DENMARK.equals(issuingCntry)) {
@@ -151,11 +156,11 @@ public class NORDXHandler extends BaseSOFHandler {
                 addr = cloneAddress(record, addrType);
                 addr.setCmrDept(record.getCmrCity2());
                 addr.setCmrName4(record.getCmrName4());
-                if (ME_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry())
+                if (ND_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry())
                     && (CmrConstants.ADDR_TYPE.ZD01.toString().equals(addr.getCmrAddrTypeCode())) && "598".equals(addr.getCmrAddrSeq())) {
                   addr.setCmrAddrTypeCode("ZD02");
                 }
-                if (ME_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry())
+                if (ND_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry())
                     && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(addr.getCmrAddrTypeCode())) && "599".equals(addr.getCmrAddrSeq())) {
                   addr.setCmrAddrTypeCode("ZP03");
                 }
@@ -800,6 +805,69 @@ public class NORDXHandler extends BaseSOFHandler {
   }
 
   @Override
+  public void validateMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country) {
+    XSSFRow row = null;
+    XSSFCell currCell = null;
+
+    String[] countryAddrss = null;
+    if (ND_COUNTRIES_LIST.contains(country)) {
+      countryAddrss = ND_MASS_UPDATE_SHEET_NAMES;
+
+      XSSFSheet sheet = book.getSheet("Data");// validate Data sheet
+      row = sheet.getRow(0);// data field name row
+      int ordBlkIndex = 14;// default index
+      for (int cellIndex = 0; cellIndex < row.getLastCellNum(); cellIndex++) {
+        currCell = row.getCell(cellIndex);
+        String cellVal = validateColValFromCell(currCell);
+        if ("Order block code".equals(cellVal)) {
+          ordBlkIndex = cellIndex;
+          break;
+        }
+      }
+
+      TemplateValidation error = new TemplateValidation("Data");
+      for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
+        row = sheet.getRow(rowIndex);
+        if (row == null) {
+          break; // stop immediately when row is blank
+        }
+        currCell = row.getCell(ordBlkIndex);
+        String ordBlk = validateColValFromCell(currCell);
+        if (StringUtils.isNotBlank(ordBlk) && !("@".equals(ordBlk) || "E".equals(ordBlk) || "S".equals(ordBlk))) {
+          LOG.trace("Order Block Code should only @, E, R. >> ");
+          error.addError(rowIndex, "Order Block Code", "Order Block Code should be only @, E, S. ");
+          validations.add(error);
+        }
+      }
+
+      for (String name : countryAddrss) {
+        sheet = book.getSheet(name);
+        for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
+
+          row = sheet.getRow(rowIndex);
+          if (row == null) {
+            break; // stop immediately when row is blank
+          }
+          String name3 = ""; // 4
+          String pobox = ""; // 8
+
+          currCell = row.getCell(4);
+          name3 = validateColValFromCell(currCell);
+          currCell = row.getCell(8);
+          pobox = validateColValFromCell(currCell);
+
+          if (!StringUtils.isEmpty(name3) && !StringUtils.isEmpty(pobox)) {
+            TemplateValidation errorAddr = new TemplateValidation(name);
+            LOG.trace("Customer Name (3) and PO BOX should not be input at the sametime.");
+            errorAddr.addError(row.getRowNum(), "PO BOX", "Customer Name (3) and PO BOX should not be input at the sametime.");
+            validations.add(errorAddr);
+          }
+        }
+      }
+    }
+  }
+
+  @Override
   public void convertCoverageInput(EntityManager entityManager, CoverageInput request, Addr mainAddr, RequestEntryModel data) {
     // request.setSORTL(data.getSalesBusOffCd());
     // request.setCompanyNumber(data.getEnterprise());
@@ -867,7 +935,7 @@ public class NORDXHandler extends BaseSOFHandler {
       }
     }
 
-    if (ME_COUNTRIES_LIST.contains(data.getCmrIssuingCntry())) {
+    if (ND_COUNTRIES_LIST.contains(data.getCmrIssuingCntry())) {
       String soldtoseq = getSoldtoaddrSeqFromLegacy(entityManager, data.getCmrIssuingCntry(), data.getCmrNo());
       // check if share seq address
       String isShareZP01 = isShareZP01(entityManager, data.getCmrIssuingCntry(), data.getCmrNo(), soldtoseq);
@@ -1159,7 +1227,7 @@ public class NORDXHandler extends BaseSOFHandler {
 
   @Override
   public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
-    return false;
+    return true;
   }
 
   public static String getStkznFromDataRdc(EntityManager entityManager, String kunnr, String mandt) {
