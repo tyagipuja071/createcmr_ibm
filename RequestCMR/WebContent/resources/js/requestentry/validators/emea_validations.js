@@ -5470,7 +5470,7 @@ function addCMRValidator() {
     return {
       validate : function() {
         if (FormManager.getActualValue('reqType') == 'C') {
-          if (FormManager.getActualValue('findCmrResult') == 'Not Done' || FormManager.getActualValue('findCmrResult') == 'Rejected') {
+          if (FormManager.getActualValue('findCmrResult') == 'Not Done' || FormManager.getActualValue('findCmrResult') == 'Rejected' || FormManager.getActualValue('findCmrResult') == 'No Results') {
             var custSubType = FormManager.getActualValue('custSubGrp');
             if (role == "REQUESTER" && (custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'CRO3P')) {
               return new ValidationResult(null, false, 'For 3rd party scenario please import a CMR via CMR search');
@@ -7731,21 +7731,45 @@ function validateFiscalCodeForCreatesIT() {
       validate : function() {
         var role = FormManager.getActualValue('userRole');
         var taxCd1 = FormManager.getActualValue('taxCd1');
+        var vat = FormManager.getActualValue('vat');
         var reqId = FormManager.getActualValue('reqId');
         var checkImportIndc = getImportedIndcForItaly();
         if (FormManager.getActualValue('reqType') == 'C' && checkImportIndc == 'N') {
-          if ((taxCd1 != null && taxCd1.length != 0)) {
+          if ((taxCd1 != null && taxCd1.length != 0) || (vat != null && vat.length != 0)) {
             qParams = {
               FISCAL_CODE : FormManager.getActualValue('taxCd1'),
               MANDT : cmr.MANDT
             }
             var result = cmr.query('IT.CHECK.DUPLICATE_FISCAL_ADDRESS', qParams);
-            if (result.ret1 != null && result.ret1 != '') {
+
+            qParams = {
+              VAT : FormManager.getActualValue('vat'),
+              MANDT : cmr.MANDT
+            }
+            var result1 = cmr.query('IT.CHECK.DUPLICATE_VAT', qParams);
+
+            if (result.ret1 != null && result.ret1 != '' && vat == null && vat.length == 0) {
               return new ValidationResult({
                 id : 'taxCd1',
                 type : 'text',
                 name : 'taxCd1'
               }, false, 'Fiscal Code on the request is already available on CMR No. ' + result.ret1 + '. Please mention another new fiscal code or import the CMR into the request.');
+            }
+
+            if (result1.ret1 != null && result1.ret1 != '' && taxCd1 == null && taxCd1.length == 0) {
+              return new ValidationResult({
+                id : 'vat',
+                type : 'text',
+                name : 'vat'
+              }, false, 'Vat on the request is already available on CMR No. ' + result.ret1 + '. Please mention another new VAT or import the CMR into the request.');
+            }
+
+            if (result.ret1 != null && result.ret1 != '' && result1.ret1 != null && result1.ret1 != '') {
+              return new ValidationResult({
+                id : 'taxCd1',
+                type : 'text',
+                name : 'taxCd1'
+              }, false, 'Fiscal Code and VAT on the request is already available on CMR No. ' + result.ret1 + '. Please mention another new fiscal code and VAT or import the CMR into the request.');
             }
           }
         }
