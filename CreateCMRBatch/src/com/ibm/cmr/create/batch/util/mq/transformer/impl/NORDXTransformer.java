@@ -1422,12 +1422,11 @@ public class NORDXTransformer extends EMEATransformer {
       cust.setLocNo(cust.getId().getSofCntryCode() + muData.getSubIndustryCd());
     }
 
-    // RABXA :Bank Account Number
       if (!StringUtils.isBlank(muData.getSearchTerm())) {
         if ("@".equals(muData.getSearchTerm())) {
-          cust.setBankAcctNo("");
+        cust.setAccAdminBo("");
         } else {
-          cust.setBankAcctNo(muData.getSearchTerm());
+        cust.setAccAdminBo(muData.getSearchTerm());
         }
       }
 
@@ -1438,6 +1437,14 @@ public class NORDXTransformer extends EMEATransformer {
           cust.setBankAcctNo(muData.getEmail2());
         }
       }
+
+    if (!StringUtils.isBlank(muData.getSpecialTaxCd())) {
+      if ("@".equals(muData.getSpecialTaxCd())) {
+        cust.setTaxCd("");
+      } else {
+        cust.setTaxCd(muData.getSpecialTaxCd());
+      }
+    }
 
     // leading Account number
     if (!StringUtils.isBlank(muData.getNewEntpName1())) {
@@ -1486,16 +1493,6 @@ public class NORDXTransformer extends EMEATransformer {
       }
     }
 
-    String cebo = "";
-    if (!StringUtils.isBlank(muData.getCustNm2())) {
-      cebo = muData.getCustNm2();
-      if ("@".equals(muData.getCustNm2())) {
-        cust.setCeBo("");
-      } else {
-        cust.setCeBo(cebo);
-      }
-    }
-
     if (!StringUtils.isBlank(muData.getCompany())) {
       if ("@".equals(muData.getCompany())) {
         cust.setEnterpriseNo("");
@@ -1538,7 +1535,7 @@ public class NORDXTransformer extends EMEATransformer {
     }
 
     if (!StringUtils.isBlank(muData.getInacCd())) {
-      if ("@".equals(muData.getInacCd())) {
+      if ("@@@@".equals(muData.getInacCd())) {
         cust.setInacCd("");
       } else {
         cust.setInacCd(muData.getInacCd());

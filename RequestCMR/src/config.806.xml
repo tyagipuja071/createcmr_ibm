@@ -87,7 +87,7 @@
 				</column>
 				<column exactLength="6">
 					<label>A/C Admin DSC</label>
-					<dbColumn></dbColumn>
+					<dbColumn>SEARCH_TERM</dbColumn>
 					<width>10</width>
 					<lovId>CustClass</lovId>
 					<length>4</length>
