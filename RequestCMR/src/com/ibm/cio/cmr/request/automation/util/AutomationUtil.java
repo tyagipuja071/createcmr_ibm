@@ -1151,11 +1151,11 @@ public abstract class AutomationUtil {
   }
 
   protected String getCustomerFullName(Addr addr) {
-    String custNm1 = addr.getCustNm1();
-    String custNm2 = StringUtils.isNotBlank(addr.getCustNm2()) ? addr.getCustNm2() : "";
-    String custNm3 = StringUtils.isNotBlank(addr.getCustNm3()) ? addr.getCustNm3() : "";
-    String custNm4 = StringUtils.isNotBlank(addr.getCustNm4()) ? addr.getCustNm4() : "";
-    return custNm1 + custNm2 + custNm3 + custNm4;
+	  String custNm1 = addr.getCustNm1();
+	    String custNm2 = StringUtils.isNotBlank(addr.getCustNm2()) ? " " + addr.getCustNm2() : "";
+	    String custNm3 = StringUtils.isNotBlank(addr.getCustNm3()) ? " " + addr.getCustNm3() : "";
+	    String custNm4 = StringUtils.isNotBlank(addr.getCustNm4()) ? " " + addr.getCustNm4() : "";
+	    return custNm1 + custNm2 + custNm3 + custNm4;
   }
 
   /**
