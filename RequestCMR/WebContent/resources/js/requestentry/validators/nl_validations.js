@@ -736,6 +736,8 @@ function addNLAddressTypeValidator() {
         }
         if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
           var reqType = FormManager.getActualValue('reqType');
+          var requestingLob = FormManager.getActualValue('requestingLob');
+          var reqReason = FormManager.getActualValue('reqReason');
           var record = null;
           var type = null;
           var billToCnt = 0;
@@ -767,7 +769,7 @@ function addNLAddressTypeValidator() {
           }
           if (soldToCnt == 0) {
             return new ValidationResult(null, false, 'Sold-to Address is mandatory.');
-          } else if (reqType == 'C' && billToCnt == 0) {
+          } else if (billToCnt == 0) {
             return new ValidationResult(null, false, 'Bill-to Address is mandatory.');
           } else if (billToCnt > 1) {
             return new ValidationResult(null, false, 'Only one Bill-to address can be defined. Please remove the additional Bill-to address.');
@@ -775,6 +777,8 @@ function addNLAddressTypeValidator() {
             return new ValidationResult(null, false, 'Only one Sold-to address can be defined. Please remove the additional Sold-to address.');
           } else if (igfCnt > 1) {
             return new ValidationResult(null, false, 'Only one IGF Billing address can be defined. Please remove the additional Sold-to address.');
+          } else if (igfCnt == 0 && requestingLob == 'IGF' && reqReason == 'IGF') {
+            return new ValidationResult(null, false, 'IGF Bill-to Address is mandatory when LOB is IGF and request reason is IGF.');
           } else {
             return new ValidationResult(null, true);
           }
