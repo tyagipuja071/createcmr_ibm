@@ -867,11 +867,6 @@ function toggleAddrTypesForJP(cntry, addressMode) {
       cmr.hideNode('radiocont_ZP06');
       cmr.hideNode('radiocont_ZP07');
       cmr.hideNode('radiocont_ZP08');
-      var custSubGrp = FormManager.getActualValue('custSubGrp');
-      if (custSubGrp == 'BPWPQ') {
-        cmr.hideNode('radiocont_ZI02');
-        cmr.hideNode('radiocont_ZP09');
-      }
     }
   }
   return;
