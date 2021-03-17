@@ -1136,7 +1136,7 @@ public class LegacyDirectLegacyMassProcessService extends TransConnService {
         custExt.setId(custExtPk);
 
         if (transformer != null) {
-          transformer.transformLegacyCustomerExtData(entityManager, null, custExt, cmrObjects);
+          transformer.transformLegacyCustomerExtDataMassUpdate(entityManager, custExt, cmrObjects, muData, massUpdt.getCmrNo());
         }
         custExt.setUpdateTs(SystemUtil.getCurrentTimestamp());
         custExt.setAeciSubDt(SystemUtil.getDummyDefaultDate());
