@@ -93,7 +93,7 @@ public class METransformer extends EMEATransformer {
   private static final String ADDRESS_USE_COUNTRY_F = "F";
   private static final String ADDRESS_USE_COUNTRY_G = "G";
   private static final String ADDRESS_USE_COUNTRY_H = "H";
-  private static final String[] GULF_ORIGINAL_COUNTRIES = { "677", "680", "620", "832", "805", "767", "823", "762", "768", "772", "849" };
+  private static final String[] GULF_ORIGINAL_COUNTRIES = { "677", "680", "620", "832", "805", "767", "823", "762", "768", "772", "849", "752" };
   private static final String[] ME_GBMSBM_COUNTRIES = { "677", "680", "620", "832", "805", "767", "823", "675" };
   private static final String SCENARIO_TYPE_SBM = "SBM";
   private static final String SCENARIO_TYPE_GBM = "GBM";
@@ -2002,7 +2002,7 @@ public class METransformer extends EMEATransformer {
     q.setParameter("TYPE", addrType);
     q.setParameter("OLD_SEQ", oldSeq);
     q.setParameter("SAP_NO", kunnr);
-    LOG.debug("CEE - Assigning address sequence " + newSeq + " to " + addrType + " address.");
+    LOG.debug("ME - Assigning address sequence " + newSeq + " to " + addrType + " address.");
     q.executeSql();
   }
 
