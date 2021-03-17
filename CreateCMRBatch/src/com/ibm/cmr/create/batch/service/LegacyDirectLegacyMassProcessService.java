@@ -1132,7 +1132,7 @@ public class LegacyDirectLegacyMassProcessService extends TransConnService {
         custExt = initEmpty(CmrtCustExt.class);
         // default mapping for ADDR and CMRTCEXT
         custExtPk = new CmrtCustExtPK();
-        custExtPk.setCustomerNo(data.getCmrNo());
+        custExtPk.setCustomerNo(massUpdt.getCmrNo());
         custExtPk.setSofCntryCode(cntry);
         custExt.setId(custExtPk);
 
