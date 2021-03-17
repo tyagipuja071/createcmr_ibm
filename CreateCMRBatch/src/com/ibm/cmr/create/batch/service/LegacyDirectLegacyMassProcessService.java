@@ -109,15 +109,6 @@ public class LegacyDirectLegacyMassProcessService extends TransConnService {
     LOG.info("Retreiving pending records for processing..");
     List<Admin> pending = getPendingRecords(entityManager);
 
-    String reqId = "183339";
-    List<Admin> delList = new ArrayList<Admin>();
-    for (Admin a : pending) {
-      if (!String.valueOf(a.getId().getReqId()).equals(reqId)) {
-        delList.add(a);
-      }
-    }
-    pending.removeAll(delList);
-
     LOG.debug((pending != null ? pending.size() : 0) + " records to process.");
     // pending = new ArrayList<Admin>();
     for (Admin admin : pending) {
