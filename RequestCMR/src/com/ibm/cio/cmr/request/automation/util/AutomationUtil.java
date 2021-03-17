@@ -42,6 +42,7 @@ import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
+import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
@@ -104,8 +105,18 @@ public abstract class AutomationUtil {
     }
   };
 
-  private static final List<String> GLOBAL_LEGAL_ENDINGS = Arrays.asList("COMPANY", "CO", "CORP", "CORPORATION", "LTD", "LIMITED", "LLC", "INC",
-      "INCORPORATED");
+  private static final List<String> GLOBAL_LEGAL_ENDINGS = Arrays.asList("CO", "LTD", "LIMITED", "LLC", "INC", "INCORPORATED", "a.s.", "A/S", "a/s",
+      "Aktienges.", "Aktiengesellschaft", "asbl", "ASBL", "b.v.", "B.V.", "BVBA", "bvba", "C/O", "CBC", "CCC", "chez", "CIC", "CJSC", "CLG", "CLS",
+      "Companhia", "companhia", "COMPANHIA", "company", "Company", "COMPANY", "cooperacao", "Cooperacao", "COOPERACAO", "COOPERATIVA", "Corp", "corp",
+      "CORP", "Corp.", "corp.", "CORP.", "Corporation", "corporation", "CORPORATION", "CVBA", "d.d.", "d.n.o.", "d.o.o.", "EBVBA", "EEIG", "EURL",
+      "FCP", "FZCO", "Ges.M.B.H.", "Gesellschaft", "gesmbh", "Gesmbh", "GmbH", "gmbh", "GMBH", "HOLDING", "HOLDINGS", "I/S", "Incorporated",
+      "incorporated", "INTERNATIONAL", "k.d.", "k.s.", "k/s", "K/S", "kansainvalinen", "KFT", "kg", "Kg", "KG",
+      "Kommanditgesellschaft", "KOOP", "LDA", "lda", "LIMITADA", "Limited", "limited", "limtada", "llc", "LLP", "Ltd", "ltd", "Ltd.", "ltd.", "LTD.",
+      "Ltda", "ltda", "ltda.", "MANAGEMENT", "MBH", "N.V.", "n.v.", "OHG", "OJSC", "PLC", "PTE", "PTY", "PTY.", "PVT", "RTE", "RTM", "s.a.r.l.",
+      "S.A.R.L.", "S.A.S.", "s.a.s.", "S.A.U.", "s.a.u.", "s.c.", "S.C.A.", "s.c.a.", "s.c.s.", "s.l.", "S.L.", "s.p.", "S.P.A.", "S.p.A.", "s.p.a.",
+      "S.P.R.L.", "s.p.r.l.", "s.r.l.", "S.R.L.", "s.r.o.", "sarl", "SARL", "SCOP", "SCP", "SCRL", "SCS", "SERVICE", "Services", "SERVICES",
+      "services", "SHA", "SICAV", "SLU", "snc", "SNC", "sociedada", "SOCIEDADE", "societe", "Societe", "sp. z o.o.", "SPJ", "spol. s r.o.", "SPRL",
+      "sprl", "srl", "SRL", "SRLS", "T/A", "T/AS", "TRADING", "UAB", "ULC", "UNIPESSOAL", "unipessoal");
 
   /**
    * Holds the possible return values of
@@ -570,6 +581,7 @@ public abstract class AutomationUtil {
    */
   protected boolean doPrivatePersonChecks(AutomationEngineData engineData, String country, String landCntry, String name, StringBuilder details,
       boolean checkBluepages, RequestData reqData) {
+    EntityManager entityManager = JpaManager.getEntityManager();
     boolean legalEndingExists = false;
     for (Addr addr : reqData.getAddresses()) {
       String customerName = getCustomerFullName(addr);
@@ -593,6 +605,17 @@ public abstract class AutomationUtil {
       return false;
     }
 
+    // Duplicate Request check with customer name
+    List<String> dupReqIds = checkDuplicateRequest(entityManager, reqData);
+    if (!dupReqIds.isEmpty()) {
+      details.append("Duplicate request found with matching customer name.\nMatch found with Req id :").append("\n");
+      details.append(StringUtils.join(dupReqIds, "\n"));
+      engineData.addRejectionComment("OTH", "Duplicate request found with matching customer name.", StringUtils.join(dupReqIds, ", "), "");
+      return false;
+    } else {
+      details.append("No duplicate requests found");
+
+    }
     PrivatePersonCheckResult checkResult = checkPrivatePersonRecord(country, landCntry, name, checkBluepages);
     PrivatePersonCheckStatus checkStatus = checkResult.getStatus();
 
@@ -612,7 +635,7 @@ public abstract class AutomationUtil {
     case NoIBMRecord:
       engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
       details.append("Employee details not found in IBM BluePages.").append("\n");
-      break;
+      return false;
     case Passed:
       details.append("No Duplicate CMRs were found.").append("\n");
       break;
@@ -807,6 +830,7 @@ public abstract class AutomationUtil {
     String sql = ExternalizedQuery.getSql("AUTO.CHECK_IF_ADDRESS_EXIST");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", addrToCheck.getId().getReqId());
+    query.setParameter("ADDR_TYPE", addrToCheck.getId().getAddrType());
     query.setParameter("ADDR_SEQ", addrToCheck.getId().getAddrSeq());
     query.setParameter("NAME1", addrToCheck.getCustNm1());
     query.setParameter("LAND_CNTRY", addrToCheck.getLandCntry());
@@ -868,9 +892,6 @@ public abstract class AutomationUtil {
    */
   protected boolean removeDuplicateAddresses(EntityManager entityManager, RequestData requestData, StringBuilder details) {
     Addr zs01 = requestData.getAddress("ZS01");
-    String custNm1 = StringUtils.isNotBlank(zs01.getCustNm1()) ? zs01.getCustNm1().trim() : "";
-    String custNm2 = StringUtils.isNotBlank(zs01.getCustNm2()) ? zs01.getCustNm2().trim() : "";
-    String mainCustNm = (custNm1 + (StringUtils.isNotBlank(custNm2) ? " " + custNm2 : "")).toUpperCase();
     String mainStreetAddress1 = (StringUtils.isNotBlank(zs01.getAddrTxt()) ? zs01.getAddrTxt() : "").trim().toUpperCase();
     String mainCity = (StringUtils.isNotBlank(zs01.getCity1()) ? zs01.getCity1() : "").trim().toUpperCase();
     String mainPostalCd = (StringUtils.isNotBlank(zs01.getPostCd()) ? zs01.getPostCd() : "").trim();
@@ -880,8 +901,7 @@ public abstract class AutomationUtil {
     while (it.hasNext()) {
       Addr addr = it.next();
       if (!"ZS01".equals(addr.getId().getAddrType())) {
-        String custNm = (addr.getCustNm1().trim() + (StringUtils.isNotBlank(addr.getCustNm2()) ? " " + addr.getCustNm2().trim() : "")).toUpperCase();
-        if (custNm.equals(mainCustNm) && addr.getAddrTxt().trim().toUpperCase().equals(mainStreetAddress1)
+        if (compareCustomerNames(zs01, addr) && addr.getAddrTxt().trim().toUpperCase().equals(mainStreetAddress1)
             && addr.getCity1().trim().toUpperCase().equals(mainCity) && addr.getPostCd().trim().equals(mainPostalCd)) {
           details.append("Removing duplicate address record: " + addr.getId().getAddrType() + " from the request.").append("\n");
           Addr merged = entityManager.merge(addr);
@@ -948,6 +968,14 @@ public abstract class AutomationUtil {
       return str;
     }
     return "";
+  }
+
+  public static String getCleanStringWithoutSpace(String str) {
+    str = getCleanString(str);
+    if (str.length() > 0) {
+      str = str.replaceAll("\\s", "");
+    }
+    return str;
   }
 
   /**
@@ -1186,6 +1214,61 @@ public abstract class AutomationUtil {
       }
     }
     return rejectRequest;
+  }
+
+  /**
+   * Returns true if addresses on name are same
+   * 
+   * @param addr1
+   * @param addr2
+   * @return
+   */
+
+  public static boolean compareCustomerNames(Addr addr1, Addr addr2) {
+    String customerName1 = addr1.getCustNm1() + (StringUtils.isNotBlank(addr1.getCustNm2()) ? " " + addr1.getCustNm2() : "");
+    String customerName2 = addr2.getCustNm1() + (StringUtils.isNotBlank(addr2.getCustNm2()) ? " " + addr2.getCustNm2() : "");
+
+    String compareName1 = getCleanStringWithoutSpace(customerName1);
+    String compareName2 = getCleanStringWithoutSpace(customerName2);
+
+    if (compareName1 != null && compareName1.equals(compareName2)) {
+      return true;
+    } else {
+      // get a common words util filter for the customer names and match that
+      compareName1 = CommonWordsUtil.minimize(getCleanString(customerName1));
+      compareName2 = CommonWordsUtil.minimize(getCleanString(customerName2));
+
+      return compareName1 != null && compareName1.equals(compareName2);
+    }
+
+  }
+
+  public List<String> checkDuplicateRequest(EntityManager entityManager, RequestData requestData) {
+    List<String> dupReqIds = new ArrayList<>();
+    Data data = requestData.getData();
+    Admin admin = requestData.getAdmin();
+    Addr zs01 = requestData.getAddress("ZS01");
+    String custNm = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? zs01.getCustNm2() : "");
+    String sql = ExternalizedQuery.getSql("REQ.NM_MATCH");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("LAND_CNTRY", zs01.getLandCntry().toUpperCase());
+    query.setParameter("SCENARIO", StringUtils.isNotBlank(data.getCustSubGrp()) ? data.getCustSubGrp().toUpperCase() : "%%");
+    query.setParameter("ISSUING_CNTRY", data.getCmrIssuingCntry());
+    query.setParameter("ADDR_TYPE", zs01.getId().getAddrType());
+    query.setParameter("REQ_ID", admin.getId().getReqId());
+    query.setForReadOnly(true);
+    List<Addr> results = query.getResults(Addr.class);
+    if (results != null && !results.isEmpty()) {
+      Iterator<Addr> it = results.iterator();
+      while (it.hasNext()) {
+        Addr addr = it.next();
+        String custNm2 = addr.getCustNm1() + (StringUtils.isNotBlank(addr.getCustNm2()) ? addr.getCustNm2() : "");
+        if (custNm.equals(custNm2)) {
+          dupReqIds.add(Long.toString(addr.getId().getReqId()));
+        }
+      }
+    }
+    return dupReqIds;
   }
 
 }

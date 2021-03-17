@@ -171,38 +171,6 @@ function resetAddrTypeValidation() {
   })(), null, 'frmCMR_addressModal');
 }
 
-function name3LengthValidation() {
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var dept = FormManager.getActualValue('dept');
-        var buidling = FormManager.getActualValue('bldg');
-        var floor = FormManager.getActualValue('floor');
-        var addrDetailsArr = [];
-        var details = "";
-        if (dept != null && dept != '')
-          addrDetailsArr.push(dept);
-        if (buidling != null && buidling != '')
-          addrDetailsArr.push(buidling);
-        if (floor != null && floor != '')
-          addrDetailsArr.push(floor);
-
-        if (addrDetailsArr.length > 0)
-          details = addrDetailsArr.join(", ");
-
-        var length = details.length;
-        if (cmr.addressMode == 'newAddress' || cmr.addressMode == 'updateAddress' || cmr.addressMode == 'copyAddress') {
-          if (length > 30)
-            return new ValidationResult(null, false, 'Computed length of Customer Name 3(Department,Building & Floor) cannot exceed 30 chars.');
-        } else {
-          return new ValidationResult(null, true);
-        }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), null, 'frmCMR_addressModal');
-}
-
 var _custCdHandler = null;
 function setTaxCdFrCustClass() {
   if (_custCdHandler == null) {
@@ -539,8 +507,9 @@ function setClientTierValues(isuCd) {
 
   isuCd = FormManager.getActualValue('isuCd');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var clientT = FormManager.getActualValue('clientTier');// CMR-710
   var clientTiers = [];
-  if (isuCd != '') {
+  if (isuCd != '' && clientT == null) {
     var qParams = {
       _qall : 'Y',
       ISSUING_CNTRY : cntry,
@@ -618,7 +587,8 @@ function setMubotyOnPostalCodeIMS(postCd, subIndustryCd, clientTier) {
 
   if (isuCd == null || isuCd == undefined || isuCd == '') {
     return;
-  } else if (isuCd == '32') {
+    // CMR-710 use 34Q to replace 32S/N
+  } else if (isuCd == '34') {
     if (postCd >= 3000) {
       postCd = 2;
     } else {
@@ -1506,6 +1476,37 @@ function lockIBMTabForSWISS() {
   }
 }
 
+function validateDeptAttnBldg() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var division = FormManager.getActualValue('divn');
+        var attn = FormManager.getActualValue('city2');
+        var bldg = FormManager.getActualValue('bldg');
+        var dept = FormManager.getActualValue('dept');
+        if ((division != '' && (division == bldg || division == dept)) || (attn != '' && (attn == bldg || attn == dept))) {
+          return new ValidationResult(null, false, 'Department_ext and Building_ext must contain unique information.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+}
+
+function setAddressDetailsForView() {
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+  var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  if (viewOnlyPage == 'true') {
+    $('label[for="custNm1_view"]').text('Customer legal name');
+    $('label[for="custNm2_view"]').text('Legal name continued');
+    $('label[for="divn_view"]').text('Division/Department');
+    $('label[for="city2_view"]').text('Attention To /Building/Floor/Office');
+    $('label[for="addrTxt_view"]').text('Street Name And Number');
+    $('label[for="bldg_view"]').text('Building_ext');
+    $('label[for="dept_view"]').text('Department_ext');
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.SWISS = [ '848' ];
   console.log('adding SWISS functions...');
@@ -1551,7 +1552,6 @@ dojo.addOnLoad(function() {
   }
   GEOHandler.registerValidator(addCrossBorderValidatorFrSWISS, SysLoc.SWITZERLAND, null, true);
   GEOHandler.registerValidator(resetAddrTypeValidation, GEOHandler.SWISS, null, true);
-  GEOHandler.registerValidator(name3LengthValidation, GEOHandler.SWISS, null, true);
   GEOHandler.registerValidator(restrictDuplicateAddr, GEOHandler.SWISS, null, true);
 
   // new phase 2
@@ -1559,4 +1559,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setISUCTCOnIMSChange, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(lockIBMTabForSWISS, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(lockIBMTabForSWISS, GEOHandler.SWISS);
+  GEOHandler.registerValidator(validateDeptAttnBldg, GEOHandler.SWISS);
 });

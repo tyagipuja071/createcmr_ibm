@@ -245,7 +245,7 @@
             <form:input path="reqId" dojoType="dijit.form.TextBox" cssStyle="width:100px" />
           </p>
         </cmr:column>
-        <cmr:column span="1" width="70">
+        <cmr:column span="1" width="90">
           <p>
             <label>Unique ID: </label>
           </p>

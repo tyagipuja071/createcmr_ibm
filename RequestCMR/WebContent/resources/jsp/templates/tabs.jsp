@@ -96,7 +96,7 @@ boolean approver = user != null && user.isApprover();
           <%} %>
           <li id="FORCE_CHANGE_TAB"><a href="javascript: goToUrl('${contextPath}/statuschange')">Forced Status Change</a></li>
           <li id="APPROVALS_ADMIN_TAB"><a href="javascript: goToUrl('${contextPath}/approvalsadminlist')">Approvals Override</a></li>
-          <%if (SystemConfiguration.isAdmin(request)){ %> 
+          <%if (user != null && (SystemConfiguration.isAdmin(request) || user.isCmde())){ %> 
             <li id="USER_ADMIN_TAB"><a href="javascript: goToUrl('${contextPath}/users')">User Maintenance</a></li>
           <%} %>
           <li id="CODE_ADMIN_TAB"><a href="javascript: goToUrl('${contextPath}/code')">Code Maintenance</a></li>
@@ -111,12 +111,12 @@ boolean approver = user != null && user.isApprover();
         </c:if>
 
         <c:if test="${primaryTabId ==  'SEARCH_HOME'}">
-            <%if (user != null && (user.isAdmin() || user.isCmde() || user.isProcessor()) ){%>
+            <li id="DPLSEARCH_TAB"><a href="javascript: goToUrl('${contextPath}/dplsearch')">DPL Search</a></li>
             <li id="LSEARCH_TAB"><a href="javascript: goToUrl('${contextPath}/legacysearch')">Legacy DB2</a></li>
             <li id="MQSEARCH_TAB"><a href="javascript: goToUrl('${contextPath}/mqsearch')">SOF/WTAAS</a></li>
+            <%if (user != null && (user.isAdmin() || user.isCmde() || user.isProcessor()) ){%>
             <li id="FILEATTACH_TAB"><a href="javascript: goToUrl('${contextPath}/attachlist')">File Attachments</a></li>
             <%}%>
-            <li id="DPLSEARCH_TAB"><a href="javascript: goToUrl('${contextPath}/dplsearch')">DPL Search</a></li>
         </c:if>
         
 

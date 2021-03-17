@@ -91,7 +91,7 @@ public class SpainUtil extends AutomationUtil {
     if ("C".equals(requestData.getAdmin().getReqType())) {
       if ((SCENARIO_COMMERCIAL.equals(scenario) || SCENARIO_IGS_GSE.equals(scenario) || SCENARIO_CROSSBORDER.equals(scenario)
           || SCENARIO_CROSSBORDER_IGS.equals(scenario) || SCENARIO_GOVERNMENT.equals(scenario) || SCENARIO_GOVERNMENT_IGS.equals(scenario))
-          && !StringUtils.equals(getCleanString(customerName), getCleanString(customerNameZI01))) {
+          && !compareCustomerNames(soldTo, installAt)) {
         engineData.addRejectionComment("SCENARIO_CHECK",
             "Customer names on billing and installing address are not identical, 3rd Party should be selected.", "", "");
         details.append("Customer names on billing and installing address are not identical, 3rd Party should be selected.");
@@ -509,7 +509,7 @@ public class SpainUtil extends AutomationUtil {
       overrides.clearOverrides();
       SpainFieldsCompContainer fields = new SpainFieldsCompContainer(entityManager, data, data.getIsuCd(), data.getClientTier());
       if (fields != null && fields.allFieldsCalculated()) {
-        details.append("Coverage calculated successfully using 32S logic.").append("\n");
+        details.append("Coverage calculated successfully using 34Q logic.").append("\n");
         details.append("Sales Rep : " + fields.getSalesRep()).append("\n");
         details.append("Enterprise : " + fields.getEnterprise()).append("\n");
         details.append("SBO : " + fields.getSbo()).append("\n");
@@ -520,14 +520,14 @@ public class SpainUtil extends AutomationUtil {
         results.setDetails(details.toString());
       } else if (StringUtils.isNotBlank(data.getRepTeamMemberNo()) && StringUtils.isNotBlank(data.getSalesBusOffCd())
           && StringUtils.isNotBlank(data.getEnterprise())) {
-        details.append("Coverage could not be calculated using 32S logic. Using values from request").append("\n");
+        details.append("Coverage could not be calculated using 34Q logic. Using values from request").append("\n");
         details.append("Sales Rep : " + fields.getSalesRep()).append("\n");
         details.append("Enterprise : " + fields.getEnterprise()).append("\n");
         details.append("SBO : " + fields.getSbo()).append("\n");
         results.setResults("Calculated");
         results.setDetails(details.toString());
       } else {
-        String msg = "Coverage cannot be calculated. No valid 32S mapping found from request data.";
+        String msg = "Coverage cannot be calculated. No valid 34Q mapping found from request data.";
         details.append(msg);
         results.setResults("Cannot Calculate");
         results.setDetails(details.toString());
@@ -549,6 +549,11 @@ public class SpainUtil extends AutomationUtil {
       }
     }
 
+  }
+
+  @Override
+  public List<String> getSkipChecksRequestTypesforCMDE() {
+    return Arrays.asList("C", "U", "M", "D", "R");
   }
 
 }

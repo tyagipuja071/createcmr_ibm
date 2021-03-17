@@ -28,6 +28,7 @@ public class AutomationEngineData extends HashMap<String, Object> {
   public static final String POSITIVE_CHECKS = "positive_checks";
   public static final String GBG_MATCH = "gbgMatch";
   public static final String COVERAGE_CALCULATED = "coverageCalculated";
+  public static final String SOS_MATCH = "sosMatching";
   public static final String DNB_MATCH = "dnbMatching";
   public static final String DNB_ALL_MATCHES = "dnbAllMatches";
   public static final String VAT_VERIFIED = "vatVerified";
@@ -36,7 +37,9 @@ public class AutomationEngineData extends HashMap<String, Object> {
   public static final String COMPANY_INFO_SOURCE = "compInfoSrc";
   public static final String SCENARIO_VERIFIED_INDC = "scenarioVerifiedIndc";
   public static final String MATCH_DEPARTMENT = "matchDepartment";
-
+  public static final String SKIP_APPROVALS = "defaultApproval";
+  public static final String SKIP_DPL_CHECK = "skipDplChecks";
+  public static final String SKIP_UPDATE_SWITCH = "skipUpdateSwitch";  
   public static final String BO_COMPUTATION = "_usBOComputation";
 
   public static final String SKIP_GBG = "_gblSkipGbg";
@@ -291,6 +294,15 @@ public class AutomationEngineData extends HashMap<String, Object> {
    */
   public boolean isVatVerified() {
     return hasPositiveCheckStatus(VAT_VERIFIED);
+  }
+
+  /**
+   * Returns true if SOS-RPA has been verified for a request
+   * 
+   * @return
+   */
+  public boolean isSosVerified() {
+    return hasPositiveCheckStatus(SOS_MATCH);
   }
 
   /**

@@ -76,8 +76,9 @@ if (readOnly){
                 <cmr:fieldLabel fieldId="ProspectToLegalCMR" />
                 <cmr:info text="${ui.info.makeProspectsLegal}"/>
               </cmr:label></cmr:column></cmr:view>
-              
-              <%if (laReactivateCapable){%>  
+			<%
+				if (laReactivateCapable) {
+			%>  
             <cmr:view forGEO="LA">
             <cmr:column span="2" containerForField="DeactivateToActivateCMR">
               <cmr:field fieldId="DeactivateToActivateCMR" path="func" tabId="MAIN_GENERAL_TAB"/>
@@ -413,7 +414,7 @@ if (readOnly){
         </cmr:column>             
       </cmr:row>
     </cmr:view>
-    <cmr:view forCountry="677,680,620,832,805,767,823,762,768,772,849">
+    <cmr:view forCountry="677,680,620,832,805,767,823,762,768,772,849,752">
       <cmr:row>    
         <cmr:column span="2">
           <p>

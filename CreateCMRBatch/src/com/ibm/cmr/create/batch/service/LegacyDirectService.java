@@ -1836,6 +1836,24 @@ public class LegacyDirectService extends TransConnService {
           custExt.setUpdateTs(SystemUtil.getCurrentTimestamp());
           custExt.setAeciSubDt(SystemUtil.getDummyDefaultDate());
           legacyObjects.setCustomerExt(custExt);
+        } else if (SystemLocation.SLOVAKIA.equals(data.getCmrIssuingCntry()) || SystemLocation.CZECH_REPUBLIC.equals(data.getCmrIssuingCntry())) {
+          CmrtCustExtPK custExtPk = null;
+          LOG.debug("Mapping default Data values with Legacy CmrtCustExt table.....");
+          // Initialize the object
+          custExt = initEmpty(CmrtCustExt.class);
+          // default mapping for ADDR and CMRTCEXT
+          custExtPk = new CmrtCustExtPK();
+          custExtPk.setCustomerNo(cmrNo);
+          custExtPk.setSofCntryCode(cntry);
+          custExt.setId(custExtPk);
+
+          if (transformer != null) {
+            transformer.transformLegacyCustomerExtData(entityManager, dummyHandler, custExt, cmrObjects);
+          }
+          custExt.setUpdateTs(SystemUtil.getCurrentTimestamp());
+          custExt.setAeciSubDt(SystemUtil.getDummyDefaultDate());
+          createEntity(custExt, entityManager);
+          legacyObjects.setCustomerExt(custExt);
         }
       }
       // rebuild the address use table
@@ -2985,7 +3003,8 @@ public class LegacyDirectService extends TransConnService {
           for (Addr addr : addresses) {
             if ("ZS01".equals(addr.getId().getAddrType())) {
               AddrRdc addrRdc = getAddrRdcRecord(entityManager, addr);
-              if (addrRdc == null || (addrRdc != null && !addr.getCustPhone().equals(addrRdc.getCustPhone()))) {
+              if (addrRdc == null || (addrRdc != null && StringUtils.isBlank(addr.getCustPhone()) && !StringUtils.isBlank(addrRdc.getCustPhone()))
+                  || (addrRdc != null && addr.getCustPhone() != null && !addr.getCustPhone().equals(addrRdc.getCustPhone()))) {
                 isDataUpdated = true;
               }
             }

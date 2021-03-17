@@ -3,6 +3,8 @@
  */
 package com.ibm.cmr.create.batch.util.mq.transformer.impl;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
@@ -635,7 +637,7 @@ public class CEETransformer extends EMEATransformer {
         } else if ("707ME".equals(cntryUse)) {
           line6 = "Montenegro";
         } else {
-          if (cmrData.getCustGrp().contains("CRO") || crossBorder) {
+          if ((StringUtils.isNotBlank(cmrData.getCustGrp()) && cmrData.getCustGrp().contains("CRO")) || crossBorder) {
             if (!StringUtils.isBlank(addrData.getLandCntry())) {
               line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
             } else {
@@ -969,16 +971,31 @@ public class CEETransformer extends EMEATransformer {
         legacyCust.setTelNoOrVat(data.getPhone1());
       }
 
-      if (!StringUtils.isBlank(data.getTaxCd1())) {
-        legacyCust.setBankAcctNo(data.getTaxCd1());
+      if (SystemLocation.CZECH_REPUBLIC.equals(data.getCmrIssuingCntry())) {
+        if (!StringUtils.isBlank(data.getCompany())) {
+          legacyCust.setBankBranchNo(data.getCompany());
+        } else {
+          legacyCust.setBankBranchNo("");
+        }
+
+        if (!StringUtils.isBlank(data.getTaxCd1())) {
+          legacyCust.setBankAcctNo(data.getTaxCd1());
+        } else {
+          legacyCust.setBankAcctNo("");
+        }
+
       } else {
-        legacyCust.setBankAcctNo("");
+        if (!StringUtils.isBlank(data.getTaxCd1())) {
+          legacyCust.setBankAcctNo(data.getTaxCd1());
+        } else {
+          legacyCust.setBankAcctNo("");
+        }
       }
 
       if ("693".equals(data.getCmrIssuingCntry())) {
 
         if (!StringUtils.isBlank(data.getCompany())) {
-          if (data.getCompany().length() > 9) {
+          if (data.getCompany().length() > 8) {
             legacyCust.setBankBranchNo(data.getCompany().substring(0, 8));
           } else {
             legacyCust.setBankBranchNo(data.getCompany());
@@ -986,6 +1003,13 @@ public class CEETransformer extends EMEATransformer {
         } else {
           legacyCust.setBankBranchNo("");
         }
+
+        if (!StringUtils.isBlank(data.getTaxCd1())) {
+          legacyCust.setBankAcctNo(data.getTaxCd1());
+        } else {
+          legacyCust.setBankAcctNo("");
+        }
+
       }
 
       if ("707ME".equals(data.getCountryUse())) {
@@ -1029,15 +1053,30 @@ public class CEETransformer extends EMEATransformer {
         legacyCust.setTelNoOrVat(data.getPhone1());
       }
 
-      if (!StringUtils.isBlank(data.getTaxCd1())) {
-        legacyCust.setBankAcctNo(data.getTaxCd1());
+      if (SystemLocation.CZECH_REPUBLIC.equals(data.getCmrIssuingCntry())) {
+        if (!StringUtils.isBlank(data.getCompany())) {
+          legacyCust.setBankBranchNo(data.getCompany());
+        } else {
+          legacyCust.setBankBranchNo("");
+        }
+
+        if (!StringUtils.isBlank(data.getTaxCd1())) {
+          legacyCust.setBankAcctNo(data.getTaxCd1());
+        } else {
+          legacyCust.setBankAcctNo("");
+        }
       } else {
-        legacyCust.setBankAcctNo("");
+        if (!StringUtils.isBlank(data.getTaxCd1())) {
+          legacyCust.setBankAcctNo(data.getTaxCd1());
+        } else {
+          legacyCust.setBankAcctNo("");
+        }
       }
+
       if ("693".equals(data.getCmrIssuingCntry())) {
 
         if (!StringUtils.isBlank(data.getCompany())) {
-          if (data.getCompany().length() > 9) {
+          if (data.getCompany().length() > 8) {
             legacyCust.setBankBranchNo(data.getCompany().substring(0, 8));
           } else {
             legacyCust.setBankBranchNo(data.getCompany());
@@ -1045,6 +1084,13 @@ public class CEETransformer extends EMEATransformer {
         } else {
           legacyCust.setBankBranchNo("");
         }
+
+        if (!StringUtils.isBlank(data.getTaxCd1())) {
+          legacyCust.setBankAcctNo(data.getTaxCd1());
+        } else {
+          legacyCust.setBankAcctNo("");
+        }
+
       }
       //
       // if (!StringUtils.isBlank(data.getCrosSubTyp())) {
@@ -1111,6 +1157,11 @@ public class CEETransformer extends EMEATransformer {
           && admin.getReqStatus().equals(CMR_REQUEST_STATUS_PCR) && (rdcEmbargoCd != null && !StringUtils.isBlank(rdcEmbargoCd))
           && "E".equals(rdcEmbargoCd) && (dataEmbargoCd == null || StringUtils.isBlank(dataEmbargoCd))) {
         legacyCust.setEmbargoCd(rdcEmbargoCd);
+        resetOrdBlockToData(entityManager, data);
+      }
+      if (CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason()) && CMR_REQUEST_STATUS_PCR.equals(admin.getReqStatus())
+          && "Wx".equals(admin.getProcessedFlag())) {
+        legacyCust.setEmbargoCd("E");
         resetOrdBlockToData(entityManager, data);
       }
     }
@@ -1255,14 +1306,11 @@ public class CEETransformer extends EMEATransformer {
     if (!StringUtils.isBlank(muData.getNewEntpName1())) {
       if ("@".equals(muData.getNewEntpName1())) {
         cust.setBankBranchNo("");
-      } else {
-        if (muData.getNewEntpName1().length() > 9) {
-          cust.setBankBranchNo(muData.getNewEntpName1().substring(0, 8));
-        } else {
+    } else {
           cust.setBankBranchNo(muData.getNewEntpName1());
-        }
       }
-    }
+  }
+      
 
     if (!StringUtils.isBlank(muData.getSubIndustryCd())) {
       cust.setLocNo(cust.getId().getSofCntryCode() + muData.getSubIndustryCd());
@@ -1444,6 +1492,7 @@ public class CEETransformer extends EMEATransformer {
 
   private void resetOrdBlockToData(EntityManager entityManager, Data data) {
     data.setOrdBlk("88");
+    data.setEmbargoCd("E");
     entityManager.merge(data);
     entityManager.flush();
   }
@@ -1686,7 +1735,8 @@ public class CEETransformer extends EMEATransformer {
   @Override
   public boolean hasCmrtCustExt() {
     // return true;
-    if ("SK".equals(DEFAULT_LANDED_COUNTRY) || "BG".equals(DEFAULT_LANDED_COUNTRY) || "RU".equals(DEFAULT_LANDED_COUNTRY)) {
+    if ("SK".equals(DEFAULT_LANDED_COUNTRY) || "BG".equals(DEFAULT_LANDED_COUNTRY) || "RU".equals(DEFAULT_LANDED_COUNTRY)
+        || "CZ".equals(DEFAULT_LANDED_COUNTRY)) {
       return true;
     } else {
       return false;
@@ -1714,9 +1764,21 @@ public class CEETransformer extends EMEATransformer {
         String itax = vat.replaceAll("BG", "");
         legacyCustExt.setiTaxCode(itax);
       }
+    } else if (SystemLocation.CZECH_REPUBLIC.equals(data.getCmrIssuingCntry())) {
+      if (!StringUtils.isBlank(data.getTaxCd1())) {
+        legacyCustExt.setBankAcctNo(data.getTaxCd1());
+      } else {
+        legacyCustExt.setBankAcctNo("");
+      }
+      if (!StringUtils.isBlank(data.getCompany())) {
+        legacyCustExt.setiTaxCode(data.getCompany());
+      } else {
+        legacyCustExt.setiTaxCode("");
+      }
+
     } else {
       if (!StringUtils.isBlank(data.getCompany())) {
-        if (data.getCompany().length() > 9) {
+        if (data.getCompany().length() > 8) {
           legacyCustExt.setiTaxCode(data.getCompany().substring(0, 8));
         } else {
           legacyCustExt.setiTaxCode(data.getCompany());
@@ -1726,6 +1788,7 @@ public class CEETransformer extends EMEATransformer {
       }
     }
   }
+
 
   @Override
   public void transformLegacyCustomerExtDataMassUpdate(EntityManager entityManager, CmrtCustExt custExt, CMRRequestContainer cmrObjects,
@@ -1754,7 +1817,7 @@ public class CEETransformer extends EMEATransformer {
       if ("@".equals(muData.getNewEntpName1())) {
         custExt.setiTaxCode("");
       } else {
-        if (muData.getNewEntpName1().length() > 9) {
+        if (muData.getNewEntpName1().length() > 8) {
           custExt.setiTaxCode(muData.getNewEntpName1().substring(0, 8));
         } else {
           custExt.setiTaxCode(muData.getNewEntpName1());
@@ -1885,4 +1948,32 @@ public class CEETransformer extends EMEATransformer {
     q.executeSql();
   }
 
+  @Override
+  public boolean isUpdateNeededOnAllAddressType(EntityManager entityManager, CMRRequestContainer cmrObjects) {
+    Admin admin = cmrObjects.getAdmin();
+    if (CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason())) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+  public <T> T initEmpty(Class<T> entityClass) throws Exception {
+    try {
+      T object = entityClass.newInstance();
+      Field[] fields = entityClass.getDeclaredFields();
+      for (Field field : fields) {
+        if (String.class.equals(field.getType()) && !Modifier.isAbstract(field.getModifiers()) && !Modifier.isFinal(field.getModifiers())) {
+          field.setAccessible(true);
+          field.set(object, "");
+        }
+        if (Date.class.equals(field.getType()) && !Modifier.isAbstract(field.getModifiers()) && !Modifier.isFinal(field.getModifiers())) {
+          field.setAccessible(true);
+          field.set(object, SystemUtil.getCurrentTimestamp());
+        }
+      }
+      return object;
+    } catch (Exception e) {
+      throw new Exception("Cannot initialize " + entityClass.getSimpleName() + " object.");
+    }
+  }
 }
