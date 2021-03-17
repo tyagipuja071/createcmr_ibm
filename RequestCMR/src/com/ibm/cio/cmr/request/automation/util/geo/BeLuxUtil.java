@@ -17,7 +17,6 @@ import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.impl.gbl.CalculateCoverageElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
-import com.ibm.cio.cmr.request.automation.out.FieldResultKey;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
@@ -151,40 +150,18 @@ public class BeLuxUtil extends AutomationUtil {
       return true;
     }
 
-    String gbgCntry = chkFrAffiliateCntry(engineData, requestData, entityManager);
-
     Data data = requestData.getData();
-    String coverageId = container.getFinalCoverage();
+    String gbgCntry = chkFrAffiliateCntry(engineData, requestData, entityManager);
+    String cmrCntry = data.getCountryUse().length() == 3 ? "Belgium" : "Luxembourg";
 
-    if (StringUtils.isNotBlank(gbgCntry)) {
+    if (StringUtils.isNotBlank(gbgCntry) && cmrCntry.equalsIgnoreCase(gbgCntry)) {
       details.append("Coverage calculated for: " + gbgCntry).append("\n");
+    } else if (StringUtils.isNotBlank(gbgCntry) && !cmrCntry.equalsIgnoreCase(gbgCntry)) {
+      details.append("Coverage calculated for: " + gbgCntry + " hence skipping overrides.").append("\n");
+      overrides.clearOverrides(); // clear existing overrides
     }
 
-    if (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && (CalculateCoverageElement.COV_BG.equals(covFrom))
-        || CalculateCoverageElement.COV_VAT.equals(covFrom)) {
-      FieldResultKey sboKeyVal = new FieldResultKey("DATA", "SALES_BO_CD");
-      String sboVal = "";
-      if (overrides.getData().containsKey(sboKeyVal)) {
-        sboVal = overrides.getData().get(sboKeyVal).getNewValue();
-        sboVal = sboVal.substring(0, 3);
-        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sboVal + sboVal);
-        details.append("SORTL: " + sboVal + sboVal);
-      } else {
-        sboVal = getSORTLfromCoverage(entityManager, container.getFinalCoverage());
-        if (StringUtils.isNotBlank(sboVal)) {
-          details.append("SORTL calculated on basis of Existing CMR Data: " + sboVal);
-          overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getSearchTerm(), sboVal);
-          if (data.getCountryUse().equalsIgnoreCase("624")) {
-            sboVal = "0" + sboVal.substring(0, 2) + "0000";
-          } else if (data.getCountryUse().equalsIgnoreCase("624LU")) {
-            sboVal = "0" + sboVal.substring(0, 2) + "0001";
-          }
-          details.append("SBO: " + sboVal);
-          overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sboVal);
-        }
-      }
-      engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
-    } else if (!isCoverageCalculated) {
+    if (!isCoverageCalculated) {
       // if not calculated using bg/gbg try calculation using 32/S logic
       details.setLength(0);// clear string builder
       overrides.clearOverrides(); // clear existing overrides
