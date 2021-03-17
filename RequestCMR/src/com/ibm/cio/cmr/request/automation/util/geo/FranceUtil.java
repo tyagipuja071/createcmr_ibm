@@ -887,6 +887,29 @@ public class FranceUtil extends AutomationUtil {
                   }
 
                 }
+              } else if (CmrConstants.RDC_BILL_TO.equals(addrType)) {
+                // CMR - 1606
+                // if address has been updated , validate vat with DnB
+                Addr addrToChk = requestData.getAddress(addrType);
+                List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addrToChk, true);
+                if (matches.isEmpty() && matches != null && matches.size() > 0) {
+                  // check against D&B
+                  for (DnBMatchingResponse dnb : matches) {
+                    String siret = DnBUtil.getTaxCode1(dnb.getDnbCountry(), dnb.getOrgIdDetails());
+                    if (StringUtils.isNotBlank(siret) && siret.equalsIgnoreCase(data.getTaxCd1()) && "O".equalsIgnoreCase(dnb.getOperStatusCode())) {
+                      checkDetails.append("SIRET found in DnB for the CMR and is active.\n");
+                    } else {
+                      resultCodes.add("D"); // send to cmde for review
+                      engineData.addNegativeCheckStatus("_frSIRETCheckFailed", "SIRET could not be found in DnB for the CMR.");
+                      checkDetails.append("SIRET could not be found in DnB for the CMR.\n");
+                    }
+
+                  }
+                } else {
+                  resultCodes.add("D"); // CMDE review
+                  engineData.addNegativeCheckStatus("_frSIRETCheckFailed", "SIRET could not be found in DnB for the CMR.");
+                  checkDetails.append("SIRET could not be found in DnB for the CMR.\n");
+                }
               } else {
                 // proceed
                 LOG.debug("Update to Address " + addrType + "(" + addr.getId().getAddrSeq() + ") skipped in the checks.\\n");
