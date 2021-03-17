@@ -18,6 +18,10 @@
   <script src="${resourcesPath}/js/requestentry/validators_mass/fr_validations_mass.js?${cmrv}" type="text/javascript"></script>
 </cmr:view>
 
+<cmr:view forGEO="NORDX">
+  <script src="${resourcesPath}/js/requestentry/validators_mass/nordx_validations_mass.js?${cmrv}" type="text/javascript"></script>
+</cmr:view>
+
 <cmr:view forGEO="JP">
   <script src="${resourcesPath}/js/requestentry/validators_mass/jp_validations_mass.js?${cmrv}" type="text/javascript"></script>
 </cmr:view>

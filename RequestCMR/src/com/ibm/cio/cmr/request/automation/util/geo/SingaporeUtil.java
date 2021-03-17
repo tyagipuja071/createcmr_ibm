@@ -259,8 +259,7 @@ public class SingaporeUtil extends AutomationUtil {
       break;
     case SCENARIO_PRIVATE_CUSTOMER:
     case SCENARIO_CROSS_PRIVATE_CUSTOMER:
-      return doPrivatePersonChecks(engineData, SystemLocation.SINGAPORE, soldTo.getLandCntry(), customerName, details,
-          (SCENARIO_PRIVATE_CUSTOMER.equals(scenario) || SCENARIO_CROSS_PRIVATE_CUSTOMER.equals(scenario)), requestData);
+      return doPrivatePersonChecks(engineData, SystemLocation.SINGAPORE, soldTo.getLandCntry(), customerName, details, false, requestData);
     }
     result.setDetails(details.toString());
     return true;

@@ -1198,6 +1198,9 @@ function addAddressFieldValidators() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
+        if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.AUSTRIA) {
+          return new ValidationResult(null, true);
+        }
         var att = FormManager.getActualValue('custNm4');
         var custPhone = FormManager.getActualValue('custPhone');
         var val = att;
@@ -1227,7 +1230,29 @@ function addAddressFieldValidators() {
         if (poBox != null && poBox != '') {
           val += poBox;
           if (val != null && val.length > 21) {
-            return new ValidationResult(null, false, 'Total computed length of Street and PO BOX should not exceed 21 characters.');
+            return new ValidationResult(null, false, 'Total computed length of Street Name And Number and PO BOX should not exceed 21 characters.');
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+
+  // AT: phone + ATT should not exceed 30 characters
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        if (FormManager.getActualValue('cmrIssuingCntry') != SysLoc.AUSTRIA) {
+          return new ValidationResult(null, true);
+        }
+        var att = FormManager.getActualValue('custNm4');
+        var custPhone = FormManager.getActualValue('custPhone');
+        var val = att;
+
+        if (custPhone != '') {
+          val += custPhone;
+          if (val != null && val.length > 30) {
+            return new ValidationResult(null, false, 'Total computed length of Attention to/Building/Floor/Office and Phone should not exceed 30 characters.');
           }
         }
         return new ValidationResult(null, true);
@@ -2147,7 +2172,7 @@ function setAddressDetailsForView() {
   }
 }
 
-function custNmAttnPersonPhoneValidation() {
+/*function custNmAttnPersonPhoneValidation() {
   var attn = FormManager.getActualValue('custNm4');
   var phone = FormManager.getActualValue('custPhone');
   var cust3 = FormManager.getActualValue('custNm3');
@@ -2178,7 +2203,7 @@ function custNmAttnPersonPhoneValidationOnChange() {
       custNmAttnPersonPhoneValidation();
     });
   }
-}
+}*/
 
 function reqReasonOnChangeAT() {
   var reqReason = FormManager.getActualValue('reqReason');
@@ -2224,7 +2249,7 @@ function isZD01OrZP01ExistOnCMR() {
   return false;
 }
 
-function phoneNoValidation() {
+/*function phoneNoValidation() {
   var phone = FormManager.getActualValue('custPhone');
   var attn = FormManager.getActualValue('custNm4');
   if (phone != null && phone.trim().length > 0) {
@@ -2239,7 +2264,7 @@ function phoneNoValidationOnChange() {
   dojo.connect(FormManager.getField('custPhone'), 'onChange', function(value) {
     phoneNoValidation();
   });
-}
+}*/
 
 function setEnterpriseValues(clientTier) {
   var role = FormManager.getActualValue('userRole').toUpperCase();
@@ -4026,6 +4051,24 @@ function setCustomerName2LblAndBubble() {
   }
 }
 
+function validateDeptBldg() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqType = FormManager.getActualValue('reqType');
+        var custNm3 = FormManager.getActualValue('custNm3');
+        var custNm4 = FormManager.getActualValue('custNm4');
+        var bldg = FormManager.getActualValue('bldg');
+        var dept = FormManager.getActualValue('dept');
+        if ((custNm3 != '' && (custNm3 == bldg || custNm3 == dept)) || (custNm4 != '' && (custNm4 == bldg || custNm4 == dept))) {
+          return new ValidationResult(null, false, 'Department_ext and Building_ext must contain unique information.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+}
+
 function setTaxCd1MandatoryCzech() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
@@ -4259,6 +4302,20 @@ function checkGAddressExist() {
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
 
+function setAddressDetailsForViewAT() {
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+  var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  if (viewOnlyPage == 'true' && cmrIssuingCntry == SysLoc.AUSTRIA) {
+    $('label[for="custNm1_view"]').text('Customer Legal name:');
+    $('label[for="custNm2_view"]').text('Legal Name Continued:');
+    $('label[for="custNm3_view"]').text('Division/Department:');
+    $('label[for="custNm4_view"]').text('Attention To/Building/Floor/Office:');
+    $('label[for="addrTxt_view"]').text('Street Name And Number:');
+    $('label[for="bldg_view"]').text('Building_Ext:');
+    $('label[for="dept_view"]').text('Department_Ext:');
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.CEMEA_COPY = [ '358', '359', '363', '603', '607', '620', '626', '644', '642', '651', '668', '677', '680', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '752',
       '762', '767', '768', '772', '787', '805', '808', '820', '821', '823', '826', '832', '849', '850', '865', '889' ];
@@ -4290,17 +4347,17 @@ dojo.addOnLoad(function() {
   // CMR-2096-Austria - "Central order block code"
   GEOHandler.addAfterConfig(lockOrdBlk, SysLoc.AUSTRIA);
 
-  GEOHandler.addAfterConfig(custNmAttnPersonPhoneValidation, [ SysLoc.AUSTRIA ]);
+      //GEOHandler.addAfterConfig(custNmAttnPersonPhoneValidation, [ SysLoc.AUSTRIA ]);
   // GEOHandler.addAfterConfig(setScenarioTo3PA, [ SysLoc.AUSTRIA ]);
   GEOHandler.addAfterTemplateLoad(lockAbbrvLocnForScenrio, [ SysLoc.AUSTRIA ]);
   GEOHandler.addAddrFunction(lockAbbrvLocnForScenrio, [ SysLoc.AUSTRIA ]);
   // GEOHandler.addAddrFunction(setScenarioTo3PAOnAddrSave, [ SysLoc.AUSTRIA
   // ]);
 
-  GEOHandler.addAfterConfig(custNmAttnPersonPhoneValidationOnChange, [ SysLoc.AUSTRIA ]);
+      //GEOHandler.addAfterConfig(custNmAttnPersonPhoneValidationOnChange, [ SysLoc.AUSTRIA ]);
   GEOHandler.addAfterConfig(reqReasonOnChangeAT, [ SysLoc.AUSTRIA ]);
-  GEOHandler.addAfterConfig(phoneNoValidation, [ SysLoc.AUSTRIA ]);
-  GEOHandler.addAfterConfig(phoneNoValidationOnChange, [ SysLoc.AUSTRIA ]);
+      //GEOHandler.addAfterConfig(phoneNoValidation, [ SysLoc.AUSTRIA ]);
+      //GEOHandler.addAfterConfig(phoneNoValidationOnChange, [ SysLoc.AUSTRIA ]);
   GEOHandler.addAfterConfig(setEnterpriseValues, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(setVatRequired, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(setPreferredLang, GEOHandler.CEMEA);
@@ -4465,7 +4522,8 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(lockIsicCdCEE, GEOHandler.CEE);
   GEOHandler.addAfterTemplateLoad(lockIsicCdCEE, GEOHandler.CEE);
-
+  GEOHandler.registerValidator(validateDeptBldg, SysLoc.AUSTRIA);
+  GEOHandler.addAfterConfig(setAddressDetailsForViewAT, SysLoc.AUSTRIA);
   // GEOHandler.addAfterConfig(addPrefixVat, GEOHandler.CEE);
   // GEOHandler.addAfterTemplateLoad(addPrefixVat, GEOHandler.CEE);
   // GEOHandler.addAddrFunction(addPrefixVat, GEOHandler.CEE);
