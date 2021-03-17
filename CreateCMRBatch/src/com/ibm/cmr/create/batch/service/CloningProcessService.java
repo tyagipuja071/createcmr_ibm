@@ -248,11 +248,10 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     LOG.debug("Mapping default Data values.." + cmrNo);
     CmrtCustPK custPkClone = new CmrtCustPK();
     custPkClone.setCustomerNo(cloningQueue.getClonedCmrNo());
-    custPkClone.setSofCntryCode(cntry);
-    /*
-     * if ("NA".equals(targetCntry)) custPkClone.setSofCntryCode(cntry); else
-     * custPkClone.setSofCntryCode(targetCntry);
-     */
+    if ("754".equals(cntry))
+      custPkClone.setSofCntryCode("866");
+    else
+      custPkClone.setSofCntryCode(cntry);
 
     // copy value same as old from cust object
     PropertyUtils.copyProperties(custClone, cust);
@@ -260,11 +259,6 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
     // override config changes
     List<CloningOverrideMapping> overrideValues = overrideUtil.getOverrideValueFromMapping(cntry);
-    /*
-     * if ("NA".equals(targetCntry)) overrideValues =
-     * overrideUtil.getOverrideValueFromMapping(cntry); else overrideValues =
-     * overrideUtil.getOverrideValueFromMapping(targetCntry);
-     */
 
     overrideConfigChanges(entityManager, overrideValues, custClone, LEGACY_CUST_TABLE, custPkClone);
 
@@ -281,11 +275,10 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
       legacyAddrClone = initEmpty(CmrtAddr.class);
       legacyAddrPkClone = new CmrtAddrPK();
       legacyAddrPkClone.setCustomerNo(cloningQueue.getClonedCmrNo());
-      legacyAddrPkClone.setSofCntryCode(cntry);
-      /*
-       * if ("NA".equals(targetCntry)) legacyAddrPkClone.setSofCntryCode(cntry);
-       * else legacyAddrPkClone.setSofCntryCode(targetCntry);
-       */
+      if ("754".equals(cntry))
+        legacyAddrPkClone.setSofCntryCode("866");
+      else
+        legacyAddrPkClone.setSofCntryCode(cntry);
 
       legacyAddrPkClone.setAddrNo(addr.getId().getAddrNo());
 
@@ -314,11 +307,10 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
         // default mapping for ADDR and CMRTCEXT
         custExtPkClone = new CmrtCustExtPK();
         custExtPkClone.setCustomerNo(cloningQueue.getClonedCmrNo());
-        custExtPkClone.setSofCntryCode(cntry);
-        /*
-         * if ("NA".equals(targetCntry)) custExtPkClone.setSofCntryCode(cntry);
-         * else custExtPkClone.setSofCntryCode(targetCntry);
-         */
+        if ("754".equals(cntry))
+          custExtPkClone.setSofCntryCode("866");
+        else
+          custExtPkClone.setSofCntryCode(cntry);
 
         // copy value same as old from cust ext object
         PropertyUtils.copyProperties(custExtClone, custExt);
@@ -612,8 +604,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     } else {
       sql = ExternalizedQuery.getSql("CLONING_CMR_CLONING_RDC_REF_PENDING");
     }
-    // String sql =
-    // ExternalizedQuery.getSql("CLONING_CMR_CLONING_RDC_REF_PENDING");
+
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("ID", cmrCloningQueue.getId().getCmrCloningProcessId());
     if ("NA".equals(cntryDup))
@@ -693,8 +684,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     } else {
       sql = ExternalizedQuery.getSql("CLONING_CMR_CLONING_RDC_REF_PENDING_CHILD");
     }
-    // String sql =
-    // ExternalizedQuery.getSql("CLONING_CMR_CLONING_RDC_REF_PENDING_CHILD");
+
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("ID", cmrCloningQueue.getId().getCmrCloningProcessId());
     if ("NA".equals(cntryDup))
@@ -1765,9 +1755,6 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     List<RdcCloningRefn> pendingCloningRefn = getPendingCloningRecordsKNA1RDC(entityManager, cloningQueue, cntryDup);
 
     LOG.debug((pendingCloningRefn != null ? pendingCloningRefn.size() : 0) + " records to process to KNA1 RDc.");
-
-    // CloningRDCUtil rdcUtil = new CloningRDCUtil();
-    // CloningRDCConfiguration rdcConfig = rdcUtil.getConfigDetails();
 
     List<CloningOverrideMapping> overrideValues = null;
     CloningOverrideUtil overrideUtil = new CloningOverrideUtil();
