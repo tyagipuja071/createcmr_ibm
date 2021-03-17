@@ -919,6 +919,25 @@ public class NORDXHandler extends BaseSOFHandler {
                       + ":Note that Leading Account Number is not allowed blank out. Please fix and upload the template again.<br>");
                   validations.add(error);
                 }
+              if (!StringUtils.isBlank(leadingAccount) && !leadingAccount.matches("^[0-9]*$")) {
+                TemplateValidation error = new TemplateValidation(name);
+                LOG.trace("The row " + (row.getRowNum() + 1)
+                    + ":Note that Leading Account Number should be only numeric. Please fix and upload the template again.");
+                error.addError((row.getRowNum() + 1), "CMR No.", "The row " + (row.getRowNum() + 1)
+                    + ":Note that Leading Account Number should be only numeric. Please fix and upload the template again.<br>");
+                validations.add(error);
+              }
+
+              currCell = (XSSFCell) row.getCell(6);
+              inac = validateColValFromCell(currCell);
+              if (!StringUtils.isBlank(inac) && !(inac.matches("^[a-zA-z]{2}[0-9]{2}") || inac.matches("^[a-zA-z]{4}"))) {
+                TemplateValidation error = new TemplateValidation(name);
+                LOG.trace("The row " + (row.getRowNum() + 1)
+                    + ":Note that INAC format is incorrect. Please fix and upload the template again.");
+                error.addError((row.getRowNum() + 1), "CMR No.", "The row " + (row.getRowNum() + 1)
+                    + ":Note that INAC format is incorrect. Please fix and upload the template again.<br>");
+                validations.add(error);
+              }
 
                 currCell = (XSSFCell) row.getCell(13);
                 acAdmin = validateColValFromCell(currCell);
