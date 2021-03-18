@@ -157,8 +157,10 @@ public class BeLuxUtil extends AutomationUtil {
     if (StringUtils.isNotBlank(gbgCntry) && cmrCntry.equalsIgnoreCase(gbgCntry)) {
       details.append("Coverage calculated for: " + gbgCntry).append("\n");
     } else if (StringUtils.isNotBlank(gbgCntry) && !cmrCntry.equalsIgnoreCase(gbgCntry)) {
+      results.setOnError(true);
       details.append("Coverage calculated for: " + gbgCntry + " hence skipping overrides.").append("\n");
       overrides.clearOverrides(); // clear existing overrides
+      return true;
     }
 
     if (!isCoverageCalculated) {
