@@ -13,6 +13,7 @@ import com.ibm.cio.cmr.request.automation.impl.gbl.DPLSearchElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.DefaultApprovalsElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.DnBCheckElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.DnBMatchingElement;
+import com.ibm.cio.cmr.request.automation.impl.gbl.DnBOrgIdValidationElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.DupCMRCheckElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.DupReqCheckElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.EUVatValidationElement;
@@ -61,6 +62,7 @@ public class AutomationElementRegistry extends HashMap<String, Class<? extends A
   public static final String GBL_UPDATE_SWITCH = "GBL_UPDATE_SWITCH";
   public static final String GBL_DNB_CHECK = "GBL_DNB_CHECK";
   public static final String GBL_CMDE_CHECK = "GBL_CMDE_CHECK";
+  public static final String GBL_DNB_ORGID = "GBL_DNB_ORGID";
   // Brazil
   public static final String BR_SCENARIO = "BR_SCENARIO";
   public static final String BR_CALCULATE = "BR_CALCULATE";
@@ -106,6 +108,7 @@ public class AutomationElementRegistry extends HashMap<String, Class<? extends A
     put(GBL_UPDATE_SWITCH, UpdateSwitchElement.class);
     put(GBL_DNB_CHECK, DnBCheckElement.class);
     put(GBL_CMDE_CHECK, CMDERequesterCheck.class);
+    put(GBL_DNB_ORGID, DnBOrgIdValidationElement.class);
     // Brazil - 631
     put(BR_SCENARIO, ScenarioCheckElement.class);
     put(BR_DUP_CHECK, BrazilDupCMRCheckElement.class);

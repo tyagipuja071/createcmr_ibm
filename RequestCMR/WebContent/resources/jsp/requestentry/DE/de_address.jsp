@@ -24,24 +24,7 @@
     <div id="addrTypeStaticText" style="display: none">ZS01</div>
   </cmr:column>
   </cmr:row>
-  <cmr:row>
-    <cmr:column span="2">
-    <p>
-      <cmr:label fieldId="ierpSitePrtyId" cssClass="cmr-inline">
-        <cmr:fieldLabel fieldId="IERPSitePrtyId" />:</cmr:label>
-      <cmr:delta text="-" id="delta-ierpSitePrtyId" />
-      <cmr:field fieldId="IERPSitePrtyId" id="ierpSitePrtyId" path="ierpSitePrtyId" />
-    </p>
-  </cmr:column>
-  <cmr:column span="2">
-    <p>
-      <cmr:label fieldId="sapNo" cssClass="cmr-inline">
-        <cmr:fieldLabel fieldId="SAPNumber" />:</cmr:label>
-      <cmr:delta text="-" id="delta-sapNo" />
-      <cmr:field fieldId="SAPNumber" id="sapNo" path="sapNo" size="100" />
-    </p>
-  </cmr:column>
-</cmr:row>
+  
 
 <cmr:row addBackground="true">
   <cmr:column span="4">
@@ -74,18 +57,7 @@
       <cmr:field fieldId="Department" id="dept" path="dept" />
     </p>
   </cmr:column>
-  <cmr:column span="2" containerForField="Floor">
-    <p>
-      <cmr:label fieldId="floor">
-        <cmr:fieldLabel fieldId="Floor" />:
-             <cmr:delta text="-" id="delta-floor" />
-      </cmr:label>
-      <cmr:field fieldId="Floor" id="floor" path="floor" />
-    </p>
-  </cmr:column>
-  </cmr:row>
-<cmr:row>
- <cmr:column span="2" containerForField="Building">
+   <cmr:column span="2" containerForField="Building">
     <p>
       <cmr:label fieldId="bldg">
         <cmr:fieldLabel fieldId="Building" />:
@@ -94,15 +66,27 @@
       <cmr:field fieldId="Building" id="bldg" path="bldg" />
     </p>
   </cmr:column>
-  <cmr:column span="2" containerForField="Office">
+ </cmr:row>
+<cmr:row>
+ <cmr:column span="2">
     <p>
-      <cmr:label fieldId="office">
-        <cmr:fieldLabel fieldId="Office" />:
-             <cmr:delta text="-" id="delta-office" />
-      </cmr:label>
-      <cmr:field fieldId="Office" id="office" path="office" />
+	    <cmr:label fieldId="custNm3">
+	      <cmr:fieldLabel fieldId="CustomerName3" />: 
+	    </cmr:label>
+	    <cmr:delta text="-" id="delta-custNm3" />
+	    <cmr:field fieldId="CustomerName3" id="custNm3" path="custNm3"/>
     </p>
   </cmr:column>
+
+  <cmr:column span="2">
+    <p>
+	    <cmr:label fieldId="custNm4">
+	      <cmr:fieldLabel fieldId="CustomerName4" />: 
+	    </cmr:label>
+	    <cmr:delta text="-" id="delta-custNm4" />
+	    <cmr:field fieldId="CustomerName4" id="custNm4" path="custNm4"  />
+    </p>
+  </cmr:column>  
 </cmr:row>
 
 <cmr:row>
@@ -200,17 +184,46 @@
       <cmr:field fieldId="CustPhone" id="custPhone" path="custPhone" />
     </p>
   </cmr:column>
+</cmr:row>
+
+<cmr:row topPad="10" addBackground="true">
+    <cmr:column span="2">
+    <p>
+     <cmr:label fieldId="sapNo" cssClass="cmr-inline">
+        <cmr:fieldLabel fieldId="SAPNumber" />:</cmr:label>
+      <cmr:delta text="-" id="delta-sapNo" />
+      <cmr:field fieldId="SAPNumber" id="sapNo" path="sapNo" />
+    </p>
+  </cmr:column>
   <cmr:column span="2">
     <p>
-      <cmr:label fieldId="transportZone">
-        <cmr:fieldLabel fieldId="TransportZone" />:
-             <cmr:delta text="-" id="delta-transportZone" code="L" />
-        <cmr:info text="${ui.info.addrTransportZone}" />
-      </cmr:label>
-      <cmr:field fieldId="TransportZone" id="transportZone" path="transportZone" />
+      <cmr:label fieldId="ierpSitePrtyId">
+        <cmr:fieldLabel fieldId="IERPSitePrtyId" />:</cmr:label>
+      <cmr:delta text="-" id="delta-ierpSitePrtyId" />
+      <cmr:field fieldId="IERPSitePrtyId" id="ierpSitePrtyId" path="ierpSitePrtyId" />
     </p>
   </cmr:column>
 </cmr:row>
+
+<%-- <cmr:row topPad="10" addBackground="true">
+  <cmr:column span="2">
+    <p>
+      <cmr:label fieldId="sapNo" cssClass="cmr-inline">
+        <cmr:fieldLabel fieldId="SAPNumber" />:</cmr:label>
+      <cmr:delta text="-" id="delta-sapNo" />
+      <cmr:field fieldId="SAPNumber" id="sapNo" path="sapNo" />
+    </p>
+  </cmr:column>
+  <!-- defect : 1444422  -->
+  <cmr:column span="2">
+    <p>
+      <cmr:label fieldId="ierpSitePrtyId">
+        <cmr:fieldLabel fieldId="IERPSitePrtyId" />:</cmr:label>
+      <cmr:delta text="-" id="delta-ierpSitePrtyId" />
+      <cmr:field fieldId="IERPSitePrtyId" id="ierpSitePrtyId" path="ierpSitePrtyId" />
+    </p>
+  </cmr:column>
+</cmr:row> --%>
 
 <%-- <cmr:row>
   

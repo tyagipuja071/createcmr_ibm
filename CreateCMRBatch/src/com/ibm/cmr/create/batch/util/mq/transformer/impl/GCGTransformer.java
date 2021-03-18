@@ -87,6 +87,10 @@ public abstract class GCGTransformer extends APTransformer {
       handler.messageHash.put("InstDept", bussinessPartner);
       handler.messageHash.put("EngrDept", bussinessPartner);
     }
+
+    if ("0".equalsIgnoreCase(handler.cmrData.getClientTier())) {
+      handler.messageHash.put("GB_SegCode", "");
+    }
   }
 
   @Override

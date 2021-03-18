@@ -531,6 +531,10 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
     } else {
       addr.setPostCd(cmr.getCmrPostalCode());
       int addrLength = SystemLocation.UNITED_STATES.equals(reqModel.getCmrIssuingCntry()) ? 24 : 30;
+      if (SystemLocation.FRANCE.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.GERMANY.equals(reqModel.getCmrIssuingCntry()) || 
+    		  SystemLocation.AUSTRIA.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.SWITZERLAND.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.LIECHTENSTEIN.equals(reqModel.getCmrIssuingCntry())) {
+        addrLength = 35;
+      }
       String street = cmr.getCmrStreet();
       if (street != null && street.length() > addrLength) {
         if (!StringUtils.isBlank(cmr.getCmrStreetAddressCont())) {
@@ -543,7 +547,12 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
           }
         } else {
           // no street address con't, overflow
-          String[] streetParts = converter.doSplitName(street, "", 30, 30);
+        	String[] streetParts;
+        	if (SystemLocation.AUSTRIA.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.GERMANY.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.LIECHTENSTEIN.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.SWITZERLAND.equals(reqModel.getCmrIssuingCntry())){
+        		streetParts = converter.doSplitName(street, "", 35, 35);
+        	}else {
+        		streetParts = converter.doSplitName(street, "", 30, 30);
+        	}
           String street1 = streetParts[0];
           String street2 = streetParts[1];
           addr.setAddrTxt(street1);
@@ -558,6 +567,14 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
             addr.setAddrTxt2(cmr.getCmrStreetAddressCont());
           }
         }
+      }
+
+      if (SystemLocation.FRANCE.equals(reqModel.getCmrIssuingCntry())) {
+        if (street != null && street.length() > addrLength) {
+          street = street.substring(0, addrLength);
+        }
+        addr.setAddrTxt(street);
+        addr.setAddrTxt2(null); // addr con't removed from UI of FR
       }
       cmr.setCmrStreet(addr.getAddrTxt());
       cmr.setCmrStreetAddress(addr.getAddrTxt());

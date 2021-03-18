@@ -164,7 +164,7 @@
       <p>
         <label for="massFile"> ${ui.massUplNewVer}: </label>
         <c:if test="${fn:trim(reqentry.reqType) == 'N'}">
-          <input type="file" id="massFile" accept=".xlsm" name="massFile">
+          <input type="file" id="massFile" accept=".xlsm,.xlsx" name="massFile">
         </c:if>
         <c:if test="${fn:trim(reqentry.reqType) == 'M'}">
           <input type="file" id="massFile" accept=".xlsx" name="massFile">
