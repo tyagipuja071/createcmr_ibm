@@ -95,7 +95,7 @@ public class NetherlandsUtil extends AutomationUtil {
       return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
 
     case SCENARIO_PRIVATE_CUSTOMER:
-    	String customerNameFull = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
+      String customerNameFull = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
       return doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerNameFull, details, false, requestData);
     }
     return true;
@@ -316,6 +316,7 @@ public class NetherlandsUtil extends AutomationUtil {
       case "ISIC":
       case "INAC/NAC Code":
         cmdeReview = true;
+        details.append(change.getDataField() + " updation needs review.").append("\n");
         break;
       case "Economic Code":
         cmdeReview = true;
@@ -427,14 +428,33 @@ public class NetherlandsUtil extends AutomationUtil {
         for (Addr addr : addresses) {
           if (isRelevantAddressFieldUpdated(changes, addr, nonRelAddrFdsDetails)) {
 
-            if ((addrType.equalsIgnoreCase(CmrConstants.RDC_SOLD_TO) && "Y".equals(addr.getImportInd()))
-                || addrType.equalsIgnoreCase(CmrConstants.RDC_BILL_TO)) {
-              if (addrType.equalsIgnoreCase(CmrConstants.RDC_BILL_TO)) {
-                if (!compareCustomerNames(zs01, addr)) {
-                  LOG.debug("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified");
-                  checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") has different customer name than sold-to.\n");
-                  resultCodes.add("D");
+            if ((addrType.equalsIgnoreCase(CmrConstants.RDC_SOLD_TO) && "Y".equals(addr.getImportInd()))) {
+              List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addr, false);
+              boolean matchesDnb = false;
+              if (matches != null) {
+                // check against D&B
+                matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
+              }
+              if (!matchesDnb) {
+                LOG.debug("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
+                resultCodes.add("R");
+                checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
+              } else {
+                checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
+                for (DnBMatchingResponse dnb : matches) {
+                  checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
+                  checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
+                  checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
+                      + dnb.getDnbCountry() + "\n\n");
                 }
+              }
+            }
+
+            if (addrType.equalsIgnoreCase(CmrConstants.RDC_BILL_TO)) {
+              if (!compareCustomerNames(zs01, addr)) {
+                LOG.debug("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified");
+                checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") has different customer name than sold-to.\n");
+                resultCodes.add("D");
               } else {
                 List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addr, false);
                 boolean matchesDnb = false;
@@ -455,6 +475,7 @@ public class NetherlandsUtil extends AutomationUtil {
                         + dnb.getDnbCountry() + "\n\n");
                   }
                 }
+
               }
             }
 
