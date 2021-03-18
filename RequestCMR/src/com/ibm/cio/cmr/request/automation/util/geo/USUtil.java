@@ -53,9 +53,14 @@ import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
+import com.ibm.cmr.services.client.AutomationServiceClient;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.MatchingServiceClient;
 import com.ibm.cmr.services.client.QueryClient;
+import com.ibm.cmr.services.client.ServiceClient.Method;
+import com.ibm.cmr.services.client.automation.AutomationResponse;
+import com.ibm.cmr.services.client.automation.us.SosRequest;
+import com.ibm.cmr.services.client.automation.us.SosResponse;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
@@ -1377,6 +1382,54 @@ public class USUtil extends AutomationUtil {
     usDetails.setPccArDept(pccArDept);
     usDetailsMap.put(cmrNo, usDetails);
     return usDetails;
+  }
+
+  /**
+   * Gets SOS-RPA matches for BP end users
+   * 
+   * @param handler
+   * @param requestData
+   * @param engineData
+   * @return
+   * @throws Exception
+   */
+  public static List<SosResponse> getSosRpaMatchesForBPEndUser(GEOHandler handler, RequestData requestData, AutomationEngineData engineData)
+      throws Exception {
+    List<SosResponse> closeMatch = new ArrayList<SosResponse>();
+    AutomationResponse<SosResponse> response = new AutomationResponse<SosResponse>();
+    Admin admin = requestData.getAdmin();
+    Addr zs01 = requestData.getAddress("ZS01");
+    long reqId = admin.getId().getReqId();
+    if (zs01 != null) {
+      AutomationServiceClient autoClient = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
+          AutomationServiceClient.class);
+      autoClient.setReadTimeout(1000 * 60 * 5);
+      autoClient.setRequestMethod(Method.Post);
+
+      // calling SOS-RPA Service
+      LOG.debug("Calling SOS-RPA Service for Install - At (ZS01) address for Req_id : " + reqId);
+      SosRequest requestInstallAt = new SosRequest();
+      requestInstallAt.setName((StringUtils.isNotBlank(zs01.getDivn()) ? zs01.getDivn() : ""));
+      requestInstallAt.setCity1(zs01.getCity1());
+      requestInstallAt.setAddrTxt((StringUtils.isNotBlank(zs01.getAddrTxt()) ? zs01.getAddrTxt() : "")
+          + (StringUtils.isNotBlank(zs01.getAddrTxt2()) ? " " + zs01.getAddrTxt2() : ""));
+      requestInstallAt.setState(zs01.getStateProv());
+
+      LOG.debug("Connecting to the SOS - RPA Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
+      AutomationResponse<?> rawResponseInstallAt = autoClient.executeAndWrap(AutomationServiceClient.US_SOS_RPA_SERVICE_ID, requestInstallAt,
+          AutomationResponse.class);
+
+      ObjectMapper mapper = new ObjectMapper();
+      String json = mapper.writeValueAsString(rawResponseInstallAt);
+      LOG.trace("SOS-RPA Service Response : " + json);
+      TypeReference<AutomationResponse<SosResponse>> ref = new TypeReference<AutomationResponse<SosResponse>>() {
+      };
+      response = mapper.readValue(json, ref);
+      if (response != null && response.isSuccess() && response.getRecord() != null) {
+        closeMatch.add(response.getRecord());
+      }
+    }
+    return closeMatch;
   }
 
   /**

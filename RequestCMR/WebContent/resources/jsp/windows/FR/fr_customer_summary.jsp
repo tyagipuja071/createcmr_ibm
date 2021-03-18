@@ -53,9 +53,37 @@
     </cmr:column>
     <cmr:column span="1" width="240">
       <%
-        String taxCd = DropdownListController.getDescription("SpecialTaxCd", data.getSpecialTaxCd(), cntry);
+        String taxCd = DropdownListController.getDescription("LocalTax2", data.getTaxCd2(), cntry);
       %>
       <%=taxCd != null ? taxCd : ""%>
+    </cmr:column>
+    
+    <cmr:column span="1" width="130">
+      <cmr:view>
+        <label><cmr:fieldLabel fieldId="CustClass" />: </label>
+      </cmr:view> 
+    </cmr:column>
+    <cmr:column span="1" width="240">
+      <%
+        String custClass = DropdownListController.getDescription("CustClass", data.getCustClass(), cntry);
+      %>
+      <%= custClass != null ? custClass : "" %>
+    </cmr:column>
+  </cmr:row>
+  
+  <cmr:row addBackground="true">
+    <cmr:column span="1" width="127">
+    </cmr:column>
+    <cmr:column span="1" width="130">
+      <cmr:view>
+        <label><cmr:fieldLabel fieldId="LocalTax1" />: </label>
+      </cmr:view> 
+    </cmr:column>
+    <cmr:column span="1" width="240">
+      <%
+        String taxCd1 = DropdownListController.getDescription("LocalTax1", data.getTaxCd1(), cntry);
+      %>
+      <%=taxCd1 != null ? taxCd1 : ""%>
     </cmr:column>
   </cmr:row>
 

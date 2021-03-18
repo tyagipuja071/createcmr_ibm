@@ -157,7 +157,12 @@ public class RequestStatsModel {
 
   @Column(name = "POOL_CMR_INDC")
   private String poolCmrIndc;
-
+  @Column(
+      name = "DNB_MATCHING_RESULT")
+  private String dnbMatchingResult;
+  @Column(
+      name = "RPA_MATCHING_RESULT")
+  private String rpaMatchingResult;
   private String market;
 
   public String getCntryCd() {
@@ -558,5 +563,21 @@ public class RequestStatsModel {
 
   public void setMarket(String market) {
     this.market = market;
+  }
+
+  public String getDnbMatchingResult() {
+    return dnbMatchingResult;
+  }
+
+  public void setDnbMatchingResult(String dnbMatchingResult) {
+    this.dnbMatchingResult = dnbMatchingResult;
+  }
+
+  public String getRpaMatchingResult() {
+    return rpaMatchingResult;
+  }
+
+  public void setRpaMatchingResult(String rpaMatchingResult) {
+    this.rpaMatchingResult = rpaMatchingResult;
   }
 }
