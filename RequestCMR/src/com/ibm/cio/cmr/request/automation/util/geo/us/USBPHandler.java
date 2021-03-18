@@ -59,6 +59,7 @@ import com.ibm.cmr.services.client.MatchingServiceClient;
 import com.ibm.cmr.services.client.PPSServiceClient;
 import com.ibm.cmr.services.client.QueryClient;
 import com.ibm.cmr.services.client.ServiceClient.Method;
+import com.ibm.cmr.services.client.automation.us.SosResponse;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
 import com.ibm.cmr.services.client.dnb.DnbData;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
@@ -240,6 +241,47 @@ public abstract class USBPHandler {
       List<DuplicateCMRCheckResponse> matches) throws CmrException;
 
   /**
+   * Matches against SOS-RPA and gets only closely matching records.
+   * 
+   * @param handler
+   * @param requestData
+   * @param addr
+   * @param engineData
+   * @param details
+   * @throws Exception
+   */
+  public SosResponse matchAgainstSosRpa(GEOHandler handler, RequestData requestData, Addr addr, AutomationEngineData engineData,
+      StringBuilder details, OverrideOutput overrides, boolean hasExistingCmr) throws Exception {
+    Scorecard scorecard = requestData.getScorecard();
+    scorecard.setRpaMatchingResult("");
+    List<SosResponse> sosRpaMatches = USUtil.getSosRpaMatchesForBPEndUser(handler, requestData, engineData);
+    if (!sosRpaMatches.isEmpty()) {
+      scorecard.setRpaMatchingResult("Y");
+      String msg = "Record found in SOS-RPA Service.";
+      details.append(msg + "\n");
+      SosResponse response = sosRpaMatches.get(0);
+      details.append("Record found in SOS.");
+      details.append("\nCompany Id = " + (StringUtils.isBlank(response.getCompanyId()) ? "" : response.getCompanyId()));
+      details.append("\nCustomer Name = " + (StringUtils.isBlank(response.getLegalName()) ? "" : response.getLegalName()));
+      details.append("\nAddress = " + (StringUtils.isBlank(response.getAddress1()) ? "" : response.getAddress1()));
+      details.append("\nState = " + (StringUtils.isBlank(response.getState()) ? "" : response.getState()));
+      details.append("\nZip = " + (StringUtils.isBlank(response.getZip()) ? "" : response.getZip()));
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ADMN", "COMP_VERIFIED_INDC", requestData.getAdmin().getCompVerifiedIndc(), "Y");
+      return response;
+    } else {
+      scorecard.setRpaMatchingResult("N");
+      String msg = "No records found in SOS-RPA Service.";
+      details.append(msg + "\n");
+      if (hasExistingCmr) {
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ADMN", "COMP_VERIFIED_INDC", requestData.getAdmin().getCompVerifiedIndc(),
+            "Y");
+        details.append("- A current active CMR exists for the company.");
+      }
+      return null;
+    }
+  }
+
+  /**
    * Matches against D&B and gets only closely matching records.
    * 
    * @param handler
@@ -251,8 +293,11 @@ public abstract class USBPHandler {
    */
   public DnBMatchingResponse matchAgainstDnB(GEOHandler handler, RequestData requestData, Addr addr, AutomationEngineData engineData,
       StringBuilder details, OverrideOutput overrides, boolean hasExistingCmr) throws Exception {
+    Scorecard scorecard = requestData.getScorecard();
+    scorecard.setDnbMatchingResult("");
     List<DnBMatchingResponse> dnbMatches = USUtil.getMatchesForBPEndUser(handler, requestData, engineData);
     if (dnbMatches.isEmpty()) {
+      scorecard.setDnbMatchingResult("N");
       LOG.debug("No D&B matches found for the End User " + addr.getDivn()
           + ((!StringUtils.isBlank(addr.getDept()) && useDeptForMatching(requestData)) ? " " + addr.getDept() : ""));
       String msg = "No high quality D&B matches for the End User " + addr.getDivn()
@@ -268,6 +313,7 @@ public abstract class USBPHandler {
       details.append("\n");
       return null;
     } else {
+      scorecard.setDnbMatchingResult("Y");
       DnBMatchingResponse dnbMatch = dnbMatches.get(0);
       LOG.debug("D&B match found for " + addr.getDivn()
           + ((!StringUtils.isBlank(addr.getDept()) && useDeptForMatching(requestData)) ? " " + addr.getDept() : "") + " with DUNS "
