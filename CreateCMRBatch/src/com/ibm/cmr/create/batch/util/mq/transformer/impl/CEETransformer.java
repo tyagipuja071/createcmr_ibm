@@ -1,4 +1,3 @@
-
 /**
  * 
  */
@@ -1165,7 +1164,6 @@ public class CEETransformer extends EMEATransformer {
         legacyCust.setEmbargoCd("E");
         resetOrdBlockToData(entityManager, data);
       }
-
     }
 
     if (!StringUtils.isBlank(data.getSubIndustryCd())) {
@@ -1307,11 +1305,12 @@ public class CEETransformer extends EMEATransformer {
     // RBBXA :Bank Branch Number
     if (!StringUtils.isBlank(muData.getNewEntpName1())) {
       if ("@".equals(muData.getNewEntpName1())) {
-          cust.setBankBranchNo("");
-      } else {
-            cust.setBankBranchNo(muData.getNewEntpName1());
-        }
-    }
+        cust.setBankBranchNo("");
+    } else {
+          cust.setBankBranchNo(muData.getNewEntpName1());
+      }
+  }
+      
 
     if (!StringUtils.isBlank(muData.getSubIndustryCd())) {
       cust.setLocNo(cust.getId().getSofCntryCode() + muData.getSubIndustryCd());
@@ -1790,6 +1789,7 @@ public class CEETransformer extends EMEATransformer {
     }
   }
 
+
   @Override
   public void transformLegacyCustomerExtDataMassUpdate(EntityManager entityManager, CmrtCustExt custExt, CMRRequestContainer cmrObjects,
       MassUpdtData muData, String cmr) throws Exception {
@@ -1949,42 +1949,6 @@ public class CEETransformer extends EMEATransformer {
   }
 
   @Override
-  public String getDupCreationCountryId(EntityManager entityManager, String cntry, String cmrNo) {
-    if ("821".equals(cntry)) {
-      String dupCntry = "NA";
-      String sql = ExternalizedQuery.getSql("CLONING_CEE_DUPLICATE_CREATE");
-      PreparedQuery query = new PreparedQuery(entityManager, sql);
-      query.setParameter("CMR_NO", cmrNo);
-
-      List<String> results = query.getResults(String.class);
-      if (results != null && results.size() > 0) {
-        dupCntry = results.get(0);
-      }
-      return dupCntry;
-    } else {
-      return "NA";
-    }
-  }
-
-  @Override
-  public void getTargetCountryId(EntityManager entityManager, GenerateCMRNoRequest generateCMRNoObj, String cntry, String cmrNo) {
-    if ("821".equals(cntry)) {
-      String dupCntry = "NA";
-      String sql = ExternalizedQuery.getSql("CLONING_CEE_DUPLICATE_CREATE");
-      PreparedQuery query = new PreparedQuery(entityManager, sql);
-      query.setParameter("CMR_NO", cmrNo);
-
-      List<String> results = query.getResults(String.class);
-      if (results != null && results.size() > 0) {
-        dupCntry = results.get(0);
-        generateCMRNoObj.setLoc2(dupCntry);
-      }
-
-    }
-
-  }
-
-  @Override
   public boolean isUpdateNeededOnAllAddressType(EntityManager entityManager, CMRRequestContainer cmrObjects) {
     Admin admin = cmrObjects.getAdmin();
     if (CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason())) {
@@ -1993,7 +1957,6 @@ public class CEETransformer extends EMEATransformer {
       return false;
     }
   }
-
   public <T> T initEmpty(Class<T> entityClass) throws Exception {
     try {
       T object = entityClass.newInstance();

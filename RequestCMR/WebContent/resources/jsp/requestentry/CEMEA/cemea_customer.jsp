@@ -48,6 +48,46 @@
       <cmr:column span="2" containerForField="LocalTax1">
         <p>
           <cmr:label fieldId="taxCd1">
+            <cmr:fieldLabel fieldId="LocalTax1" />: 
+              <cmr:delta text="${rdcdata.taxCd1}" oldValue="${reqentry.taxCd1}" />
+          </cmr:label>
+          <cmr:field fieldId="LocalTax1" id="taxCd1" path="taxCd1" tabId="MAIN_CUST_TAB" />
+        </p>
+      </cmr:column>
+    </cmr:view>        
+    <cmr:view forCountry="668">
+      <cmr:column span="2" containerForField="Company">
+        <p>
+          <cmr:label fieldId="company">
+            <cmr:fieldLabel fieldId="Company" />: 
+              <cmr:delta text="${rdcdata.company}" oldValue="${reqentry.company}" />
+          </cmr:label>
+          <cmr:field fieldId="Company" id="company" path="company" tabId="MAIN_CUST_TAB" />
+        </p>
+      </cmr:column>
+      <cmr:column span="2" containerForField="LocalTax1">
+        <p>
+          <cmr:label fieldId="taxCd1">
+            <cmr:fieldLabel fieldId="LocalTax1" />:
+              <cmr:delta text="${rdcdata.taxCd1}" oldValue="${reqentry.taxCd1}" />
+          </cmr:label>
+          <cmr:field fieldId="LocalTax1" id="taxCd1" path="taxCd1" tabId="MAIN_CUST_TAB" />
+        </p>
+      </cmr:column>
+    </cmr:view>
+    <cmr:view forCountry="668">
+      <cmr:column span="2" containerForField="Company">
+        <p>
+          <cmr:label fieldId="company">
+            <cmr:fieldLabel fieldId="Company" />: 
+              <cmr:delta text="${rdcdata.company}" oldValue="${reqentry.company}" />
+          </cmr:label>
+          <cmr:field fieldId="Company" id="company" path="company" tabId="MAIN_CUST_TAB" />
+        </p>
+      </cmr:column>
+      <cmr:column span="2" containerForField="LocalTax1">
+        <p>
+          <cmr:label fieldId="taxCd1">
             <cmr:fieldLabel fieldId="LocalTax1" />:
               <cmr:delta text="${rdcdata.taxCd1}" oldValue="${reqentry.taxCd1}" />
           </cmr:label>
