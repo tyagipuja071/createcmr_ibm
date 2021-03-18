@@ -318,30 +318,8 @@ public class NetherlandsUtil extends AutomationUtil {
         cmdeReview = true;
         break;
       case "Economic Code":
-        String newEcoCd = change.getNewData();
-        String oldEcoCd = change.getOldData();
-        List<String> ls = Arrays.asList("A", "F", "C", "R");
-        if (StringUtils.isNotBlank(newEcoCd) && StringUtils.isNotBlank(oldEcoCd) && newEcoCd.length() == 3 && oldEcoCd.length() == 3) {
-          if (!newEcoCd.substring(0, 1).equals(oldEcoCd.substring(0, 1))
-              && newEcoCd.substring(1, newEcoCd.length()).equals(oldEcoCd.substring(1, oldEcoCd.length()))) {
-            if (ls.contains(newEcoCd.substring(0, 1)) && oldEcoCd.substring(0, 1).equals("K")
-                || ls.contains(oldEcoCd.substring(0, 1)) && newEcoCd.substring(0, 1).equals("K")) {
-              admin.setScenarioVerifiedIndc("Y");
-              details.append("Economic Code has been updated by registered user to " + newEcoCd + "\n");
-            } else {
-              cmdeReview = true;
-            }
-          } else if (newEcoCd.substring(0, 1).equals(oldEcoCd.substring(0, 1))
-              && (newEcoCd.substring(1, 3).equals("11") || newEcoCd.substring(1, 3).equals("13") || newEcoCd.substring(1, 3).equals("49"))) {
-            cmdeReview = true;
-            engineData.addNegativeCheckStatus("_beluxEconomicCdUpdt", "Economic code is updated from " + oldEcoCd + " to " + newEcoCd);
-            details.append("Economic code is updated to " + newEcoCd + "\n");
-          } else {
-            cmdeReview = true;
-            engineData.addNegativeCheckStatus("_beluxEconomicCdUpdt", "Economic code was updated incorrectly or by non registered user.");
-            details.append("Economic code was updated incorrectly or by non registered user.\n");
-          }
-        }
+        cmdeReview = true;
+        details.append("Eco is updated to " + change.getNewData()).append("\n");
         break;
       case "KVK":
         cmdeReview = true;
@@ -411,7 +389,7 @@ public class NetherlandsUtil extends AutomationUtil {
       validation.setSuccess(false);
       validation.setMessage("Rejected");
     } else if (cmdeReview) {
-      engineData.addNegativeCheckStatus("_esDataCheckFailed", "Updates to one or more fields cannot be validated.");
+      engineData.addNegativeCheckStatus("_esDataCheckFailed", "Updates to one or more fields need review.");
       details.append("Updates to one or more fields cannot be validated.\n");
       validation.setSuccess(false);
       validation.setMessage("Not Validated");
@@ -442,7 +420,6 @@ public class NetherlandsUtil extends AutomationUtil {
     StringBuilder checkDetails = new StringBuilder();
     Set<String> resultCodes = new HashSet<String>();// R - review
     Addr zs01 = requestData.getAddress("ZS01");
-    String soldToCustNm = zs01.getCustNm1() + (!StringUtils.isBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
 
     for (String addrType : RELEVANT_ADDRESSES) {
       addresses = requestData.getAddresses(addrType);
@@ -452,9 +429,8 @@ public class NetherlandsUtil extends AutomationUtil {
 
             if ((addrType.equalsIgnoreCase(CmrConstants.RDC_SOLD_TO) && "Y".equals(addr.getImportInd()))
                 || addrType.equalsIgnoreCase(CmrConstants.RDC_BILL_TO)) {
-              String billToCustNm = addr.getCustNm1() + (!StringUtils.isBlank(addr.getCustNm2()) ? " " + addr.getCustNm2() : "");
               if (addrType.equalsIgnoreCase(CmrConstants.RDC_BILL_TO)) {
-                if (!soldToCustNm.equals(billToCustNm)) {
+                if (!compareCustomerNames(zs01, addr)) {
                   LOG.debug("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified");
                   checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") has different customer name than sold-to.\n");
                   resultCodes.add("D");
@@ -533,7 +509,7 @@ public class NetherlandsUtil extends AutomationUtil {
     }
 
     if (ignoredAddr > 0) {
-      checkDetails.append("Updates to imported Address Ship-To(ZD01) ignored. ");
+      checkDetails.append("Updates to imported Address Ship-To(ZD01) is skipped. ");
     }
     String details = (output.getDetails() != null && output.getDetails().length() > 0) ? output.getDetails() : "";
     details += checkDetails.length() > 0 ? "\n" + checkDetails.toString() : "";
