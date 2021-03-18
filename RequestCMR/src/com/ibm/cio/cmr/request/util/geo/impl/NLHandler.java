@@ -1214,6 +1214,13 @@ public class NLHandler extends BaseSOFHandler {
     UpdatedDataModel update = null;
     super.addSummaryUpdatedFields(service, type, cmrCountry, newData, oldData, results);
 
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getEconomicCd(), newData.getEconomicCd())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "EconomicCd", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getEconomicCd(), "EconomicCd", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getEconomicCd(), "EconomicCd", cmrCountry));
+      results.add(update);
+    }
     if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCollectionCd(), newData.getCollectionCd())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "CollectionCd", "-"));
