@@ -391,7 +391,7 @@ public class NetherlandsUtil extends AutomationUtil {
       validation.setMessage("Rejected");
     } else if (cmdeReview) {
       engineData.addNegativeCheckStatus("_esDataCheckFailed", "Updates to one or more fields need review.");
-      details.append("Updates to one or more fields cannot be validated.\n");
+      details.append("Updates to one or more fields need review.\n");
       validation.setSuccess(false);
       validation.setMessage("Not Validated");
     } else {
