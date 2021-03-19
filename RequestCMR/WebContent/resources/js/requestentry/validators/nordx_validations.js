@@ -1596,7 +1596,7 @@ function norwayCustomVATValidator(cntry, tabName, formName, aType) {
 function setPPSCEID() {
   var custSubType = FormManager.getActualValue('custSubGrp');
   var reqType = FormManager.getActualValue('reqType');
-  checkAndAddValidator('ppsceid', Validators.LATIN, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
+  checkAndAddValidator('ppsceid', LATINNORDX, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
   checkAndAddValidator('ppsceid', lowercaseLatinValidatorNordx, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
   if (reqType == 'C' && custSubType != '' && custSubType != undefined && custSubType != null) {
     if (custSubType.includes('BUS')) {
@@ -1613,11 +1613,24 @@ function setPPSCEID() {
 function lowercaseLatinValidatorNordx(input) {
   var value = FormManager.getActualValue(input);
   if (!value || value == '' || value.length == 0) {
-    return true;
+    return new ValidationResult(input, true);
   }
   var lowercaseValue = value.toLowerCase();
   if (lowercaseValue != value) {
     return new ValidationResult(input, false, '{0} Should be lowercase latin');
+  } else {
+    return new ValidationResult(input, true);
+  }
+}
+
+function LATINNORDX(input) {
+  var value = FormManager.getActualValue(input);
+  if (!value || value == '' || value.length == 0) {
+    return new ValidationResult(input, true);
+  }
+  var reg = /[^\u0000-\u007f]/;
+  if (reg.test(value)) {
+    return new ValidationResult(input, false, MessageMgr.MESSAGES.LATIN);
   } else {
     return new ValidationResult(input, true);
   }
