@@ -195,6 +195,9 @@ public class BELUXPDFConverter extends DefaultPDFConverter {
 
         address.addCell(createLabelCell("Customer Name 3:"));
         address.addCell(createValueCell(addr.getCustNm3(), 1, 3));
+
+        address.addCell(createLabelCell("Attention Person:"));
+        address.addCell(createValueCell(addr.getCustNm4(), 1, 3));
       }
       address.addCell(createLabelCell("Address Type:"));
       address.addCell(createValueCell(addr.getId().getAddrType()));
@@ -300,7 +303,7 @@ public class BELUXPDFConverter extends DefaultPDFConverter {
     customer.addCell(createLabelCell("Collection Code:"));
     customer.addCell(createValueCell(data.getCollectionCd()));
 
-    customer.addCell(createLabelCell("Order Block Code:"));
+    customer.addCell(createLabelCell("Embargo Code:"));
     customer.addCell(createValueCell(data.getEmbargoCd()));
 
     customer.addCell(createLabelCell("Department Number:"));
