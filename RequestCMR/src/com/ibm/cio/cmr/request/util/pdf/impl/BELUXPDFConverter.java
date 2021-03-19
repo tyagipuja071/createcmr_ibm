@@ -187,89 +187,83 @@ public class BELUXPDFConverter extends DefaultPDFConverter {
       GEOHandler handler = RequestUtils.getGEOHandler(cmrCntry);
 
       if (handler.customerNamesOnAddress()) {
-      	address.addCell(createLabelCell("Customer Name:"));
-      	address.addCell(createValueCell(addr.getCustNm1(), 1, 3));
-      	address.addCell(createLabelCell("Title:"));
-      	address.addCell(createValueCell(addr.getDept(), 1, 3));
-      	address.addCell(createLabelCell("First Name::"));
-      	address.addCell(createValueCell(addr.getCustNm3(), 1, 3));
-      	address.addCell(createLabelCell("last Name:"));
-      	address.addCell(createValueCell(addr.getCustNm4(), 1, 3)); 
+        address.addCell(createLabelCell("Customer Name 1:"));
+        address.addCell(createValueCell(addr.getCustNm1(), 1, 3));
+
+        address.addCell(createLabelCell("Customer Name 2:"));
+        address.addCell(createValueCell(addr.getCustNm2()));
+
+        address.addCell(createLabelCell("Customer Name 3:"));
+        address.addCell(createValueCell(addr.getCustNm3(), 1, 3));
       }
-      	address.addCell(createLabelCell("Address Type:"));
-      	address.addCell(createValueCell(addr.getId().getAddrType()));
-      	address.addCell(createLabelCell("Landed Country:"));
-      	address.addCell(createValueCell(addr.getLandCntry()));
-      	
-      	address.addCell(createLabelCell("Street:"));
-      	address.addCell(createValueCell(addr.getAddrTxt()));
+      address.addCell(createLabelCell("Address Type:"));
+      address.addCell(createValueCell(addr.getId().getAddrType()));
+      address.addCell(createLabelCell("Landed Country:"));
+      address.addCell(createValueCell(addr.getLandCntry()));
 
-      	address.addCell(createLabelCell("Street No:"));
-      	address.addCell(createValueCell(addr.getAddrTxt2()));
-      	
-      	address.addCell(createLabelCell("Name Con't:"));
-      	address.addCell(createValueCell(addr.getCustNm2()));
-      	
-      	address.addCell(createLabelCell("State/Province:"));
-      	address.addCell(createValueCell(addr.getStateProv()));
-      	
-      	address.addCell(createLabelCell("Phone #:"));
-      	address.addCell(createValueCell(addr.getCustPhone()));
-      	
-      	address.addCell(createLabelCell("PostBox:"));
-      	address.addCell(createValueCell(addr.getPoBox()));
-      	
-      	address.addCell(createLabelCell("Transport Zone:"));
-      	address.addCell(createValueCell(addr.getTransportZone()));
-      	
-      	address.addCell(createLabelCell("SAP Number (KUNNR):"));
-      	address.addCell(createValueCell(addr.getSapNo()));
-      	
-      	String lbl = "Address";
-        /*address.addCell(createLabelCell(lbl + ":"));
-        address.addCell(createValueCell(addr.getAddrTxt() + (StringUtils.isBlank(addr.getAddrTxt2()) ? "" : " " + addr.getAddrTxt2()), 1, 3));*/
-        
-        lbl = PageManager.getLabel(data.getCmrIssuingCntry(), "PostalCode", "Postal Code");
-        address.addCell(createLabelCell(lbl + ":"));
-        address.addCell(createValueCell(addr.getPostCd()));
+      address.addCell(createLabelCell("Street:"));
+      address.addCell(createValueCell(addr.getAddrTxt()));
 
-        lbl = PageManager.getLabel(data.getCmrIssuingCntry(), "City1", "City");
-        address.addCell(createLabelCell(lbl + ":"));
-        address.addCell(createValueCell(addr.getCity1()));
-        
-        lbl = PageManager.getLabel(data.getCmrIssuingCntry(), "City1", "City");
-        address.addCell(createLabelCell(lbl + ":"));
-        address.addCell(createValueCell(addr.getCity1()));
-        
-        address.addCell(createLabelCell("DPL Check Result:"));
-        String dplCheck = addr.getDplChkResult();
-        String dplCheckText = "";
-        if ("P".equals(dplCheck)) {
-          dplCheckText = "Passed";
-        } else if ("F".equals(dplCheck)) {
-          dplCheckText = "FAILED";
-        } else {
-          dplCheckText = "Not Done";
-        }
-        Cell dplCell = createValueCell(dplCheckText, 1, 3);
+      address.addCell(createLabelCell("State/Province:"));
+      address.addCell(createValueCell(addr.getStateProv()));
+
+      address.addCell(createLabelCell("Phone #:"));
+      address.addCell(createValueCell(addr.getCustPhone()));
+
+      address.addCell(createLabelCell("PostBox:"));
+      address.addCell(createValueCell(addr.getPoBox()));
+
+      address.addCell(createLabelCell("Transport Zone:"));
+      address.addCell(createValueCell(addr.getTransportZone()));
+
+      address.addCell(createLabelCell("SAP Number (KUNNR):"));
+      address.addCell(createValueCell(addr.getSapNo()));
+
+      String lbl = "Address";
+      /*
+       * address.addCell(createLabelCell(lbl + ":"));
+       * address.addCell(createValueCell(addr.getAddrTxt() +
+       * (StringUtils.isBlank(addr.getAddrTxt2()) ? "" : " " +
+       * addr.getAddrTxt2()), 1, 3));
+       */
+
+      lbl = PageManager.getLabel(data.getCmrIssuingCntry(), "PostalCode", "Postal Code");
+      address.addCell(createLabelCell(lbl + ":"));
+      address.addCell(createValueCell(addr.getPostCd()));
+
+      lbl = PageManager.getLabel(data.getCmrIssuingCntry(), "City1", "City");
+      address.addCell(createLabelCell(lbl + ":"));
+      address.addCell(createValueCell(addr.getCity1()));
+
+      address.addCell(createLabelCell("DPL Check Result:"));
+      String dplCheck = addr.getDplChkResult();
+      String dplCheckText = "";
+      if ("P".equals(dplCheck)) {
+        dplCheckText = "Passed";
+      } else if ("F".equals(dplCheck)) {
+        dplCheckText = "FAILED";
+      } else {
+        dplCheckText = "Not Done";
+      }
+      Cell dplCell = createValueCell(dplCheckText, 1, 3);
+      if ("F".equals(dplCheck)) {
+        dplCell.setFontColor(Color.RED);
+      }
+      address.addCell(dplCell);
+
+      if ("P".equals(dplCheck) || "F".equals(dplCheck)) {
+        address.addCell(createLabelCell("DPL Check Date:"));
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss");
+        address.addCell(createValueCell(addr.getDplChkTs() != null ? sdf.format(addr.getDplChkTs()) : ""));
         if ("F".equals(dplCheck)) {
-          dplCell.setFontColor(Color.RED);
+          address.addCell(createLabelCell("DPL Error Information:"));
+          address.addCell(createValueCell(addr.getDplChkInfo()));
+        } else {
+          address.addCell(createValueCell(null));
+          address.addCell(createValueCell(null));
         }
-        address.addCell(dplCell);
+      }
 
-        if ("P".equals(dplCheck) || "F".equals(dplCheck)) {
-          address.addCell(createLabelCell("DPL Check Date:"));
-          SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss");
-          address.addCell(createValueCell(addr.getDplChkTs() != null ? sdf.format(addr.getDplChkTs()) : ""));
-          if ("F".equals(dplCheck)) {
-            address.addCell(createLabelCell("DPL Error Information:"));
-            address.addCell(createValueCell(addr.getDplChkInfo()));
-          } else {
-            address.addCell(createValueCell(null));
-            address.addCell(createValueCell(null));
-          }
-        }
-        
       addConverterAddressDetails(entityManager, address, addr);
 
       document.add(address);
@@ -284,79 +278,81 @@ public class BELUXPDFConverter extends DefaultPDFConverter {
 
   @Override
   protected void addConverterCustomerDetails(EntityManager entityManager, Table customer, Data data) {
-	  
-	  customer.addCell(createLabelCell("Preferred Language:"));
-	  customer.addCell(createValueCell(data.getCustPrefLang()));
 
-	  customer.addCell(createLabelCell("VAT:"));
-	  customer.addCell(createValueCell(data.getVat()));
-	  
-	  customer.addCell(createLabelCell("VAT Exempt:"));
-	  customer.addCell(createValueCell("Y".equals(data.getVatExempt()) ? "Yes" : "No"));
+    customer.addCell(createLabelCell("Preferred Language:"));
+    customer.addCell(createValueCell(data.getCustPrefLang()));
 
-	  customer.addCell(createLabelCell("Abbreviated Location:"));
-	  customer.addCell(createValueCell(data.getAbbrevLocn()));
-	  
-	  customer.addCell(createLabelCell("Sensitive Flag:"));
-	  customer.addCell(createValueCell(data.getSensitiveFlag()));
-	  
-	  customer.addCell(createLabelCell("Tax Code:"));
-	  customer.addCell(createValueCell(data.getTaxCd1()));
-	  
-	  customer.addCell(createLabelCell("Collection Code:"));
-	  customer.addCell(createValueCell(data.getCollectionCd()));
-	  
-	  customer.addCell(createLabelCell("Embargo Code:"));
-	  customer.addCell(createValueCell(data.getEmbargoCd()));
-	  
-	  customer.addCell(createLabelCell("Department Number:"));
-	  customer.addCell(createValueCell(data.getIbmDeptCostCenter()));
-	  
+    customer.addCell(createLabelCell("VAT:"));
+    customer.addCell(createValueCell(data.getVat()));
+
+    customer.addCell(createLabelCell("VAT Exempt:"));
+    customer.addCell(createValueCell("Y".equals(data.getVatExempt()) ? "Yes" : "No"));
+
+    customer.addCell(createLabelCell("Abbreviated Location:"));
+    customer.addCell(createValueCell(data.getAbbrevLocn()));
+
+    customer.addCell(createLabelCell("Sensitive Flag:"));
+    customer.addCell(createValueCell(data.getSensitiveFlag()));
+
+    customer.addCell(createLabelCell("Tax Code:"));
+    customer.addCell(createValueCell(data.getTaxCd1()));
+
+    customer.addCell(createLabelCell("Collection Code:"));
+    customer.addCell(createValueCell(data.getCollectionCd()));
+
+    customer.addCell(createLabelCell("Order Block Code:"));
+    customer.addCell(createValueCell(data.getEmbargoCd()));
+
+    customer.addCell(createLabelCell("Department Number:"));
+    customer.addCell(createValueCell(data.getIbmDeptCostCenter()));
+
   }
 
   @Override
   protected void addIBMDetails(EntityManager entityManager, Data data, Document document) {
     document.add(createSubHeader("IBM Information"));
-    
+
     Table ibm = createDetailsTable();
-    
-     ibm.addCell(createLabelCell("ISU Code:"));
-     ibm.addCell(createValueCell(data.getIsuCd()));
-     
-     ibm.addCell(createLabelCell("Client Tier:"));
-     ibm.addCell(createValueCell(data.getClientTier()));
-     
-     ibm.addCell(createLabelCell("Enterprise No.:"));
-     ibm.addCell(createValueCell(data.getEnterprise()));
-      
-     ibm.addCell(createLabelCell("Coverage:")); if (data.getCovId() != null) {
-     ibm.addCell(createValueCell(data.getCovId() + (data.getCovDesc() != null
-      ? " - " + data.getCovDesc() : ""))); } else {
-     ibm.addCell(createValueCell(null)); }
-      
-     ibm.addCell(createLabelCell("Buying Group:")); 
-     if(!StringUtils.isEmpty(data.getBgId())) {
-    	 ibm.addCell(createValueCell(data.getBgId() + " - " + data.getBgDesc()));
-     } else { 
-    	 ibm.addCell(createValueCell(null)); 
-     }
-      
-     ibm.addCell(createLabelCell("Global Buying Group:")); 
-     if (!StringUtils.isEmpty(data.getGbgId())) {
-    	 ibm.addCell(createValueCell(data.getGbgId() + " - " + data.getGbgDesc()));
-     } else { 
-    	 ibm.addCell(createValueCell(null)); 
-     }
-      
-     ibm.addCell(createLabelCell("GEO Location Code:"));
-     if (!StringUtils.isEmpty(data.getGeoLocationCd())) {
-     ibm.addCell(createValueCell(data.getGeoLocationCd() + " - " + data.getGeoLocDesc())); 
-     } else {
-    	 ibm.addCell(createValueCell(null)); 
-     }
-     
-     ibm.addCell(createLabelCell("DUNS:"));
-     ibm.addCell(createValueCell(data.getDunsNo()));
+
+    ibm.addCell(createLabelCell("ISU Code:"));
+    ibm.addCell(createValueCell(data.getIsuCd()));
+
+    ibm.addCell(createLabelCell("Client Tier:"));
+    ibm.addCell(createValueCell(data.getClientTier()));
+
+    ibm.addCell(createLabelCell("Enterprise No.:"));
+    ibm.addCell(createValueCell(data.getEnterprise()));
+
+    ibm.addCell(createLabelCell("Coverage:"));
+    if (data.getCovId() != null) {
+      ibm.addCell(createValueCell(data.getCovId() + (data.getCovDesc() != null ? " - " + data.getCovDesc() : "")));
+    } else {
+      ibm.addCell(createValueCell(null));
+    }
+
+    ibm.addCell(createLabelCell("Buying Group:"));
+    if (!StringUtils.isEmpty(data.getBgId())) {
+      ibm.addCell(createValueCell(data.getBgId() + " - " + data.getBgDesc()));
+    } else {
+      ibm.addCell(createValueCell(null));
+    }
+
+    ibm.addCell(createLabelCell("Global Buying Group:"));
+    if (!StringUtils.isEmpty(data.getGbgId())) {
+      ibm.addCell(createValueCell(data.getGbgId() + " - " + data.getGbgDesc()));
+    } else {
+      ibm.addCell(createValueCell(null));
+    }
+
+    ibm.addCell(createLabelCell("GEO Location Code:"));
+    if (!StringUtils.isEmpty(data.getGeoLocationCd())) {
+      ibm.addCell(createValueCell(data.getGeoLocationCd() + " - " + data.getGeoLocDesc()));
+    } else {
+      ibm.addCell(createValueCell(null));
+    }
+
+    ibm.addCell(createLabelCell("DUNS:"));
+    ibm.addCell(createValueCell(data.getDunsNo()));
 
     addConverterIBMDetails(entityManager, ibm, data);
 
@@ -366,18 +362,18 @@ public class BELUXPDFConverter extends DefaultPDFConverter {
   @Override
   protected void addConverterIBMDetails(EntityManager entityManager, Table ibm, Data data) {
 
-	  ibm.addCell(createLabelCell("INAC Code:"));
-	  ibm.addCell(createValueCell(data.getInacCd()));
-	  
-	  ibm.addCell(createLabelCell("Account Team Number:"));
-	  ibm.addCell(createValueCell(data.getSearchTerm()));
-	  
-	  ibm.addCell(createLabelCell("Economic Code:"));
-	  ibm.addCell(createValueCell(data.getEconomicCd()));
+    ibm.addCell(createLabelCell("INAC Code:"));
+    ibm.addCell(createValueCell(data.getInacCd()));
 
-	  ibm.addCell(createLabelCell("Selling Branch Office:"));
-	  ibm.addCell(createValueCell(data.getSalesBusOffCd()));
-	  
+    ibm.addCell(createLabelCell("Account Team Number:"));
+    ibm.addCell(createValueCell(data.getSearchTerm()));
+
+    ibm.addCell(createLabelCell("Economic Code:"));
+    ibm.addCell(createValueCell(data.getEconomicCd()));
+
+    ibm.addCell(createLabelCell("Selling Branch Office:"));
+    ibm.addCell(createValueCell(data.getSalesBusOffCd()));
+
   }
 
   public String textContainingLanguage(String text) {
