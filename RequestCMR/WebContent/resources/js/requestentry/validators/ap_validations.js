@@ -2883,6 +2883,30 @@ function validateStreetAddrCont2() {
   })(), null, 'frmCMR_addressModal');
 }
 
+function setPostCdANZ(cntry, addressMode, saving, finalSave) {
+	  if (addressMode == 'newAddress' || addressMode == 'updateAddress' || addressMode == 'copyAddress' && cmr.currentRequestType == 'C') {
+	      var custGroup = FormManager.getActualValue('custGrp');
+	      var addrType = FormManager.getActualValue('addrType');
+	      var issuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+	      if(issuingCntry == SysLoc.AUSTRALIA || issuingCntry == SysLoc.NEW_ZEALAND){
+	      console.log("issuing Cntry:" + issuingCntry + " addrType:" + addrType);
+	      if (FormManager.getActualValue('reqType') == 'C' && custGroup == 'CROSS' && addrType != null) {
+	         if (_pagemodel.userRole.toUpperCase() == 'REQUESTER') {
+	          FormManager.setValue('postCd', '0120');
+	          FormManager.readOnly('postCd');
+	        } else {
+	            if (FormManager.getActualValue('postCd') == '') {
+	            FormManager.setValue('postCd', '0120');
+	          }
+	          FormManager.enable('postCd');
+	        }
+	      } else {
+	        FormManager.enable('postCd');
+	      }
+     	 }
+       }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.AP = [ SysLoc.AUSTRALIA, SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE, SysLoc.VIETNAM,
       SysLoc.THAILAND, SysLoc.HONG_KONG, SysLoc.NEW_ZEALAND, SysLoc.LAOS, SysLoc.MACAO, SysLoc.MALASIA, SysLoc.NEPAL, SysLoc.CAMBODIA ];
@@ -2916,7 +2940,7 @@ dojo.addOnLoad(function() {
   GEOHandler.enableCustomerNamesOnAddress(GEOHandler.AP);
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.AP);
   GEOHandler.addAddrFunction(setAbbrevNmLocnOnAddressSave, GEOHandler.AP);
-
+  GEOHandler.addAddrFunction(setPostCdANZ, GEOHandler.ANZ);
   // GEOHandler.addAddrFunction(addMandateCmrNoForSG, [ SysLoc.SINGAPORE ]);
 
   GEOHandler.addAfterConfig(onCustSubGrpChange, GEOHandler.AP);
