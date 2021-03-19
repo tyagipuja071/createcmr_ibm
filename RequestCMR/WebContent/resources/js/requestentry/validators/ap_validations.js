@@ -2884,27 +2884,26 @@ function validateStreetAddrCont2() {
 }
 
 function setPostCdANZ(cntry, addressMode, saving, finalSave) {
-	  if (addressMode == 'newAddress' || addressMode == 'updateAddress' || addressMode == 'copyAddress' && cmr.currentRequestType == 'C') {
-	      var custGroup = FormManager.getActualValue('custGrp');
-	      var addrType = FormManager.getActualValue('addrType');
-	      var issuingCntry = FormManager.getActualValue('cmrIssuingCntry');
-	      if(issuingCntry == SysLoc.AUSTRALIA || issuingCntry == SysLoc.NEW_ZEALAND){
-	      console.log("issuing Cntry:" + issuingCntry + " addrType:" + addrType);
-	      if (FormManager.getActualValue('reqType') == 'C' && custGroup == 'CROSS' && addrType != null) {
-	         if (_pagemodel.userRole.toUpperCase() == 'REQUESTER') {
-	          FormManager.setValue('postCd', '0120');
-	          FormManager.readOnly('postCd');
-	        } else {
-	            if (FormManager.getActualValue('postCd') == '') {
-	            FormManager.setValue('postCd', '0120');
-	          }
-	          FormManager.enable('postCd');
-	        }
-	      } else {
-	        FormManager.enable('postCd');
+	console.log("set postal code ANZ");
+	var issuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+	if ((issuingCntry == SysLoc.AUSTRALIA || issuingCntry == SysLoc.NEW_ZEALAND) && cmr.currentRequestType == 'C') {
+	  var custGroup = FormManager.getActualValue('custGrp');
+	  var role = FormManager.getActualValue('userRole').toUpperCase();
+	  var addrType = FormManager.getActualValue('addrType');
+	  if (custGroup == 'CROSS' && addrType != null) {
+	    if (role == 'REQUESTER') {
+	     FormManager.setValue('postCd', '0120');
+	     FormManager.readOnly('postCd');
+	    } else {
+	      if (FormManager.getActualValue('postCd') == '') {
+	        FormManager.setValue('postCd', '0120');
 	      }
-     	 }
-       }
+	      FormManager.enable('postCd');
+	    }
+	  } else {
+	      FormManager.enable('postCd');
+	 }
+   }
 }
 
 dojo.addOnLoad(function() {
@@ -2941,6 +2940,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.AP);
   GEOHandler.addAddrFunction(setAbbrevNmLocnOnAddressSave, GEOHandler.AP);
   GEOHandler.addAddrFunction(setPostCdANZ, GEOHandler.ANZ);
+  GEOHandler.addAfterTemplateLoad(setPostCdANZ, GEOHandler.ANZ);
   // GEOHandler.addAddrFunction(addMandateCmrNoForSG, [ SysLoc.SINGAPORE ]);
 
   GEOHandler.addAfterConfig(onCustSubGrpChange, GEOHandler.AP);
