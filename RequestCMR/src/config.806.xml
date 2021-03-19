@@ -36,7 +36,7 @@
 				<column>
 					<label>Tax code</label>
 					<dbColumn>SPECIAL_TAX_CD</dbColumn>
-					<lovId>LocalTax2</lovId>
+					<lovId>LocalTax1</lovId>
 					<width>10</width>
 				</column>
 				<column>
