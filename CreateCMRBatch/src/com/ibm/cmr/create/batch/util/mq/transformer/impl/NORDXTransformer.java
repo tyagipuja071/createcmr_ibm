@@ -947,36 +947,74 @@ public class NORDXTransformer extends EMEATransformer {
     formatDataLines(dummyHandler);
 
     String landedCntry = "";
+    String mailPostCode = "";
     for (Addr addr : cmrObjects.getAddresses()) {
       if (MQMsgConstants.ADDR_ZS01.equals(addr.getId().getAddrType())) {
         legacyCust.setTelNoOrVat(addr.getCustPhone());
         landedCntry = addr.getLandCntry();
+        mailPostCode = addr.getPostCd();
         break;
       }
     }
 
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
 
-      legacyCust.setAccAdminBo("");
-      legacyCust.setCeDivision("");
-      // CMR-5993
       String cntry = legacyCust.getId().getSofCntryCode().trim();
 
+      legacyCust.setCeDivision("");
       legacyCust.setDcRepeatAgreement("0");
       legacyCust.setLeasingInd("0");
       legacyCust.setAuthRemarketerInd("0");
       legacyCust.setCeDivision("2");
-      legacyCust.setLangCd("");
       legacyCust.setDeptCd("");
-      legacyCust.setCurrencyCd("");
-      legacyCust.setTaxCd("");
-      legacyCust.setOverseasTerritory("");
-      legacyCust.setInvoiceCpyReqd("");
-      legacyCust.setCustType("");
+      legacyCust.setEnterpriseNo("");
+      
+      if (SystemLocation.NORWAY.equals(data.getCmrIssuingCntry())) {
+        legacyCust.setCeBo("");
+      } else if (SystemLocation.FINLAND.equals(data.getCmrIssuingCntry())) {
+        legacyCust.setCeBo("X900000");
+      }
 
+      if (SystemLocation.NORWAY.equals(data.getCmrIssuingCntry())) {
+        legacyCust.setOverseasTerritory("");
+      } else if (SystemLocation.SWEDEN.equals(data.getCmrIssuingCntry())) {
+        legacyCust.setOverseasTerritory("");
+      } else if (SystemLocation.DENMARK.equals(data.getCmrIssuingCntry())) {
+        if ("678".equals(data.getCountryUse())) {
+          legacyCust.setOverseasTerritory("");
+        } else if ("678FO".equals(data.getCountryUse())) {
+          legacyCust.setOverseasTerritory("103");
+        } else if ("678GL".equals(data.getCountryUse())) {
+          legacyCust.setOverseasTerritory("103");
+        } else if ("678IS".equals(data.getCountryUse())) {
+          legacyCust.setOverseasTerritory("103");
+        }
+      } else if (SystemLocation.FINLAND.equals(data.getCmrIssuingCntry())) {
+        if ("702".equals(data.getCountryUse())) {
+          legacyCust.setOverseasTerritory("");
+        } else if ("702EE".equals(data.getCountryUse())) {
+          legacyCust.setOverseasTerritory("104");
+        } else if ("702LT".equals(data.getCountryUse())) {
+          legacyCust.setOverseasTerritory("106");
+        } else if ("702LV".equals(data.getCountryUse())) {
+          legacyCust.setOverseasTerritory("105");
+        }
+      }
+
+      // MRC BP scenario set 5, else 2
+      if (!StringUtils.isEmpty(data.getCustSubGrp())
+          && Arrays.asList("BUSPR", "CBBUS", "DKBUS", "EEBUS", "FIBUS", "FOBUS", "GLBUS", "ISBUS", "LTBUS", "LVBUS").contains(data.getCustSubGrp())) {
+        legacyCust.setMrcCd("5");
+      } else {
+        legacyCust.setMrcCd("2");
+      }
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
 
       String cntry = legacyCust.getId().getSofCntryCode().trim();
+
+      if (!StringUtils.isBlank(data.getTerritoryCd())) {
+        legacyCust.setOverseasTerritory(data.getTerritoryCd());
+      }
 
       String dataEmbargoCd = data.getEmbargoCd();
       String rdcEmbargoCd = LegacyDirectUtil.getEmbargoCdFromDataRdc(entityManager, admin);
@@ -1014,10 +1052,62 @@ public class NORDXTransformer extends EMEATransformer {
       }
     }
 
-    if (!StringUtils.isBlank(data.getModeOfPayment())) {
-      legacyCust.setModeOfPayment(data.getModeOfPayment());
+    legacyCust.setLocNo(landedCntry + "000");
+
+    if (!StringUtils.isBlank(data.getCustPrefLang())) {
+      legacyCust.setLangCd(data.getCustPrefLang());
     } else {
-      legacyCust.setModeOfPayment("");
+      legacyCust.setLangCd("");
+    }
+
+    if (!StringUtils.isBlank(data.getCustClass())) {
+      if ("71".equals(data.getCustClass())) {
+        legacyCust.setCustType("98");
+      } else if ("85".equals(data.getCustClass())) {
+        legacyCust.setCustType("97");
+      } else if (Arrays.asList("33", "35", "43", "45", "46").contains(data.getCustClass())) {
+        legacyCust.setCustType(data.getCustClass());
+      } else {
+        legacyCust.setCustType("");
+      }
+    }
+
+    if (!StringUtils.isBlank(data.getAcAdminBo())) {
+      legacyCust.setAccAdminBo(data.getAcAdminBo());
+    } else {
+      legacyCust.setAccAdminBo("");
+    }
+
+    if (!StringUtils.isBlank(data.getTaxCd1())) {
+      legacyCust.setTaxCd(data.getTaxCd1());
+    } else {
+      legacyCust.setTaxCd("");
+    }
+
+    if (!StringUtils.isBlank(data.getCurrencyCd())) {
+      legacyCust.setCurrencyCd(data.getCurrencyCd());
+    } else {
+      legacyCust.setCurrencyCd("");
+    }
+
+    if (!StringUtils.isBlank(data.getModeOfPayment())) {
+      if (SystemLocation.NORWAY.equals(data.getCmrIssuingCntry()) || SystemLocation.SWEDEN.equals(data.getCmrIssuingCntry())
+          || SystemLocation.DENMARK.equals(data.getCmrIssuingCntry())) {
+        if ("WCFI".equals(data.getModeOfPayment())) {
+          legacyCust.setModeOfPayment(data.getModeOfPayment());
+        } else if ("A001".equals(data.getModeOfPayment())) {
+          legacyCust.setModeOfPayment("");
+        }
+      } else if (SystemLocation.FINLAND.equals(data.getCmrIssuingCntry())) {
+        if ("WCFI".equals(data.getModeOfPayment())) {
+          legacyCust.setModeOfPayment(data.getModeOfPayment());
+        } else if ("A001".equals(data.getModeOfPayment())) {
+          legacyCust.setModeOfPayment("");
+        } else if ("P004".equals(data.getModeOfPayment())) {
+          legacyCust.setModeOfPayment("5");
+        }
+      }
+
     }
 
     if (!StringUtils.isEmpty(data.getVat())) {
@@ -1026,34 +1116,12 @@ public class NORDXTransformer extends EMEATransformer {
       legacyCust.setVat("");
     }
 
-    if (!StringUtils.isEmpty(data.getIbmDeptCostCenter())) {
-      legacyCust.setBankBranchNo(data.getIbmDeptCostCenter());
-    }
-
-    if (!StringUtils.isEmpty(data.getMrcCd())) {
-      legacyCust.setMrcCd(data.getMrcCd());
-    } else {
-      legacyCust.setMrcCd("");
-    }
-
-    if (!StringUtils.isBlank(data.getEnterprise())) {
-      legacyCust.setEnterpriseNo(data.getEnterprise());
-    } else {
-      legacyCust.setEnterpriseNo("");
-    }
-
     if (!StringUtils.isBlank(data.getRepTeamMemberNo())) {
       legacyCust.setSalesGroupRep(data.getRepTeamMemberNo());
       legacyCust.setSalesRepNo(data.getRepTeamMemberNo());
     } else {
       legacyCust.setSalesGroupRep("");
       legacyCust.setSalesRepNo("");
-    }
-
-    if (!StringUtils.isBlank(data.getTaxCd1())) {
-      legacyCust.setBankAcctNo(data.getTaxCd1());
-    } else {
-      legacyCust.setBankAcctNo("");
     }
 
     String dataEmbargoCd = data.getEmbargoCd();
@@ -1067,30 +1135,88 @@ public class NORDXTransformer extends EMEATransformer {
       legacyCust.setLocNo(legacyCust.getId().getSofCntryCode() + data.getSubIndustryCd());
     }
 
-    String cebo = data.getEngineeringBo();
-    if (!StringUtils.isBlank(cebo)) {
-      legacyCust.setCeBo(cebo);
-    } else {
-      legacyCust.setCeBo("");
-    }
-
-    if (!StringUtils.isBlank(data.getSalesBusOffCd())) {
-      String sbo = StringUtils.rightPad(data.getSalesBusOffCd(), 7, '0');
-      if (sbo.length() < 7) {
-        sbo = StringUtils.rightPad(sbo, 7, '0');
+    if (SystemLocation.SWEDEN.equals(data.getCmrIssuingCntry())) {
+      int beginPost = Integer.valueOf(mailPostCode.substring(0, 1));
+      if (beginPost > 9 && beginPost < 20) {
+        legacyCust.setCeBo("130");
+      } else if (beginPost > 19 && beginPost < 40) {
+        legacyCust.setCeBo("140");
+      } else if (beginPost > 39 && beginPost < 58) {
+        legacyCust.setCeBo("110");
+      } else if (beginPost > 57 && beginPost < 77) {
+        legacyCust.setCeBo("130");
+      } else if (beginPost > 76 && beginPost < 99) {
+        legacyCust.setCeBo("130");
+      } else if (!DEFAULT_LANDED_COUNTRY.equals(landedCntry)) {
+        legacyCust.setCeBo("130");
       }
-      legacyCust.setSbo(sbo);
-      legacyCust.setIbo(sbo);
-    } else {
-      legacyCust.setSbo("");
-      legacyCust.setIbo("");
+
+    } else if (SystemLocation.DENMARK.equals(data.getCmrIssuingCntry())) {
+      if ("678".equals(data.getCountryUse())) {
+        int postCd = Integer.valueOf(mailPostCode.trim());
+        if (postCd >= 0 && postCd < 5000) {
+          legacyCust.setCeBo("000281X");
+        } else if (postCd > 4999 && postCd < 7400) {
+          legacyCust.setCeBo("000246X");
+        } else if (postCd > 7399 && postCd < 10000) {
+          legacyCust.setCeBo("000245X");
+        } else if (!DEFAULT_LANDED_COUNTRY.equals(landedCntry)) {
+          legacyCust.setCeBo("000281X");
+        }
+      } else if ("678FO".equals(data.getCountryUse())) {
+        legacyCust.setCeBo("000200F");
+      } else if ("678GL".equals(data.getCountryUse())) {
+        legacyCust.setCeBo("000200G");
+      } else if ("678IS".equals(data.getCountryUse())) {
+        legacyCust.setCeBo("000200I");
+      }
+    } 
+    
+    String newSbo = "";
+    if (SystemLocation.DENMARK.equals(data.getCmrIssuingCntry())) {
+      newSbo="3420ISU";
+    } else if (SystemLocation.FINLAND.equals(data.getCmrIssuingCntry())) {
+      if ("702".equals(data.getCountryUse())) {
+        newSbo="3450ISU";
+      } else if ("702EE".equals(data.getCountryUse())) {
+        newSbo="0370ISU";
+      } else if ("702LT".equals(data.getCountryUse())) {
+        newSbo="0390ISU";
+      } else if ("702LV".equals(data.getCountryUse())) {
+        newSbo="0380ISU";
+      }
+    } else if (SystemLocation.SWEDEN.equals(data.getCmrIssuingCntry())) {
+      newSbo="3420ISU";
+    } else if (SystemLocation.NORWAY.equals(data.getCmrIssuingCntry())) {
+      int postCd = Integer.valueOf(mailPostCode.trim());
+      if (postCd >= 0 && postCd < 4000) {
+        newSbo="1000ISU";
+      } else if (postCd > 3999 && postCd < 5000) {
+        newSbo="4000ISU";
+      } else if (postCd > 4999 && postCd < 7000) {
+        newSbo="5000ISU";
+      } else if (postCd > 6999 && postCd < 10000) {
+        newSbo="7000ISU";
+      }
     }
+    if("C".equals(admin.getReqType())){
+      legacyCust.setSbo(newSbo);
+      legacyCust.setIbo(newSbo);
+    }else if ("U".equals(admin.getReqType())){
+      if (!newSbo.equals(legacyCust.getSbo())) {
+        legacyCust.setSbo(newSbo);
+        legacyCust.setIbo(newSbo);
+      }
+    }
+    
+      
 
   }
 
   @Override
   public void transformLegacyCustomerDataMassUpdate(EntityManager entityManager, CmrtCust cust, CMRRequestContainer cmrObjects, MassUpdtData muData) { // default
     LOG.debug("Mapping default Data values..");
+    String issuingCntry = cust.getId().getSofCntryCode();
 
     if (!StringUtils.isBlank(muData.getAbbrevNm())) {
       if ("@".equals(muData.getAbbrevNm())) {
@@ -1129,14 +1255,6 @@ public class NORDXTransformer extends EMEATransformer {
         }
       }
 
-      if (!StringUtils.isBlank(muData.getEmail2())) {
-        if ("@".equals(muData.getEmail2())) {
-          cust.setBankAcctNo("");
-        } else {
-          cust.setBankAcctNo(muData.getEmail2());
-        }
-      }
-
     if (!StringUtils.isBlank(muData.getSpecialTaxCd())) {
       if ("@".equals(muData.getSpecialTaxCd())) {
         cust.setTaxCd("");
@@ -1166,13 +1284,24 @@ public class NORDXTransformer extends EMEATransformer {
       }
     }
     // we use RestrictTo to store CoF in muData
-    if (!StringUtils.isBlank(muData.getRestrictTo())) {
-      if ("@".equals(muData.getRestrictTo())) {
-        cust.setModeOfPayment("");
-      } else {
-        cust.setModeOfPayment(muData.getRestrictTo());
+    if (!StringUtils.isBlank(muData.getModeOfPayment())) {
+      if (SystemLocation.NORWAY.equals(issuingCntry) || SystemLocation.SWEDEN.equals(issuingCntry) || SystemLocation.DENMARK.equals(issuingCntry)) {
+        if ("WCFI".equals(muData.getModeOfPayment())) {
+          cust.setModeOfPayment(muData.getModeOfPayment());
+        } else if ("A001".equals(muData.getModeOfPayment())) {
+          cust.setModeOfPayment("");
+        }
+      } else if (SystemLocation.FINLAND.equals(issuingCntry)) {
+        if ("WCFI".equals(muData.getModeOfPayment())) {
+          cust.setModeOfPayment(muData.getModeOfPayment());
+        } else if ("A001".equals(muData.getModeOfPayment())) {
+          cust.setModeOfPayment("");
+        } else if ("P004".equals(muData.getModeOfPayment())) {
+          cust.setModeOfPayment("5");
+        }
       }
-    }
+
+      }
 
     String isuClientTier = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "")
         + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
