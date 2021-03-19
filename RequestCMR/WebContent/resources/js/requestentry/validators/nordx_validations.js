@@ -911,9 +911,9 @@ function hidePOBoxandHandleStreet() {
       FormManager.resetValidations('addrTxt');
     }
     if (FormManager.getActualValue('addrType') == 'ZS01') {
-      FormManager.enable('custPhone');
+      FormManager.show('CustPhone', 'custPhone');
     } else {
-      FormManager.disable('custPhone');
+      FormManager.hide('CustPhone', 'custPhone');
       FormManager.setValue('custPhone', '');
 
     }
@@ -938,11 +938,10 @@ function setPOBOXandSteet(value) {
 
 function setPhone(value) {
   if (FormManager.getField('addrType_ZS01').checked) {
-    FormManager.enable('custPhone');
+    FormManager.show('CustPhone', 'custPhone');
     FormManager.setValue('custPhone', value);
   } else {
-
-    FormManager.disable('custPhone');
+    FormManager.hide('CustPhone', 'custPhone');
     FormManager.setValue('custPhone', '');
   }
 }
