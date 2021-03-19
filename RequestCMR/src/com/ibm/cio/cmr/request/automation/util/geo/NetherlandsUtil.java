@@ -316,7 +316,7 @@ public class NetherlandsUtil extends AutomationUtil {
       case "ISIC":
       case "INAC/NAC Code":
         cmdeReview = true;
-        details.append(change.getDataField() + " updation needs review.").append("\n");
+        details.append(change.getDataField() + " is updated.").append("\n");
         break;
       case "Economic Code":
         cmdeReview = true;
