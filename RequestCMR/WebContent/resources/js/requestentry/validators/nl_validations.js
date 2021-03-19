@@ -769,7 +769,7 @@ function addNLAddressTypeValidator() {
           }
           if (soldToCnt == 0) {
             return new ValidationResult(null, false, 'Sold-to Address is mandatory.');
-          } else if (billToCnt == 0) {
+          } else if (reqType == 'C' && billToCnt == 0) {
             return new ValidationResult(null, false, 'Bill-to Address is mandatory.');
           } else if (billToCnt > 1) {
             return new ValidationResult(null, false, 'Only one Bill-to address can be defined. Please remove the additional Bill-to address.');
