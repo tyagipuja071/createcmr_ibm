@@ -586,9 +586,9 @@ public class BeLuxUtil extends AutomationUtil {
    * @return
    */
   private String getSORTLfromCoverage(EntityManager entityManager, String coverage, String gbgCntry) {
+    String sortl = "";
     try {
       LOG.debug("Computing SORTL for Coverage " + coverage);
-      String sortl = "";
       String gbgCntryCd = gbgCntry.equalsIgnoreCase("Belgium") ? "BE" : "LU";
       String sql = ExternalizedQuery.getSql("AUTO.FR.COV.SORTL");
       PreparedQuery query = new PreparedQuery(entityManager, sql);
