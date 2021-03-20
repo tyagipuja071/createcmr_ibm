@@ -123,7 +123,7 @@ public class BeLuxUtil extends AutomationUtil {
       break;
     case SCENARIO_PRIVATE_CUSTOMER:
     case SCENARIO_PRIVATE_CUSTOMER_LU:
-    String customerNameFull = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
+      String customerNameFull = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
       return doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerNameFull, details, false, requestData);
 
     case SCENARIO_THIRD_PARTY:
@@ -161,6 +161,14 @@ public class BeLuxUtil extends AutomationUtil {
       details.append("Coverage calculated for: " + gbgCntry + " hence skipping overrides.").append("\n");
       overrides.clearOverrides(); // clear existing overrides
       return true;
+    }
+
+    if (StringUtils.isNotBlank(gbgCntry)) {
+      String sortl = getSORTLfromCoverage(entityManager, container.getFinalCoverage(), gbgCntry);
+      if (StringUtils.isNotBlank(sortl)) {
+        details.append("SORTL calculated on basis of Existing CMR Data: " + sortl);
+        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getSearchTerm(), sortl);
+      }
     }
 
     if (!isCoverageCalculated) {
@@ -577,14 +585,21 @@ public class BeLuxUtil extends AutomationUtil {
    * @param coverage
    * @return
    */
-  private String getSORTLfromCoverage(EntityManager entityManager, String coverage) {
-    LOG.debug("Computing SBO for Coverage " + coverage);
-    String sql = ExternalizedQuery.getSql("AUTO.FR.COV.SORTL");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
-    query.setParameter("COVID", coverage);
-    query.setForReadOnly(true);
-    String sortl = query.getSingleResult(String.class);
+  private String getSORTLfromCoverage(EntityManager entityManager, String coverage, String gbgCntry) {
+    try {
+      LOG.debug("Computing SORTL for Coverage " + coverage);
+      String sortl = "";
+      String gbgCntryCd = gbgCntry.equalsIgnoreCase("Belgium") ? "BE" : "LU";
+      String sql = ExternalizedQuery.getSql("AUTO.FR.COV.SORTL");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+      query.setParameter("COVID", coverage);
+      query.setParameter("LAND1", gbgCntryCd);
+      query.setForReadOnly(true);
+      sortl = query.getSingleResult(String.class);
+    } catch (Exception e) {
+      LOG.debug("Error while computing SORTL for Coverage " + coverage + " from RDc query.");
+    }
     if (sortl != null && !StringUtils.isBlank(sortl)) {
       return sortl;
     }
