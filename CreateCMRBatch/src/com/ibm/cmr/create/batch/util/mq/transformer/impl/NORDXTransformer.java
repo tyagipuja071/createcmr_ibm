@@ -439,57 +439,19 @@ public class NORDXTransformer extends EMEATransformer {
   }
 
   public void setDefaultLandedCountry(Data data) {
-    if ("620".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "BH";
+    if ("846".equals(data.getCmrIssuingCntry())) {
+      DEFAULT_LANDED_COUNTRY = "SE";// Sweden
     }
-    if ("642".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "MA";
+    if ("806".equals(data.getCmrIssuingCntry())) {
+      DEFAULT_LANDED_COUNTRY = "NO";// Norway
     }
-    if ("677".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "AE";
+    if ("702".equals(data.getCmrIssuingCntry())) {
+      DEFAULT_LANDED_COUNTRY = "FI";// Finland
     }
-    if ("680".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "AE";
+    if ("678".equals(data.getCmrIssuingCntry())) {
+      DEFAULT_LANDED_COUNTRY = "DK";// Denmark
     }
-    if ("752".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "IQ";
-    }
-    if ("762".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "JO";
-    }
-    if ("767".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "KW";
-    }
-    if ("768".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "LB";
-    }
-    if ("772".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "LY";
-    }
-    if ("805".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "OM";
-    }
-    if ("808".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "PK";
-    }
-    if ("823".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "QA";
-    }
-    if ("832".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "SA";
-    }
-    if ("849".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "YE";
-    }
-    if ("850".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "SY";
-    }
-    if ("865".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "EG";
-    }
-    if ("729".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "TN";
-    }
+
   }
 
   /**
