@@ -75,7 +75,10 @@ public class NetherlandsUtil extends AutomationUtil {
       engineData.addNegativeCheckStatus("SOLDTO_BILLTO_DIFF",
           "Customer Name and Landed Country on Sold-to and Bill-to address should be same for Business Partner Scenario.");
     }
-
+    if (!SCENARIO_BP_LOCAL.equals(scenario) && !SCENARIO_LOCAL_COMMERCIAL.equals(scenario) && !SCENARIO_INTERNAL.equals(scenario)
+        && !SCENARIO_LOCAL_PUBLIC.equals(scenario)) {
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_DNB_ORGID_VAL);
+    }
     switch (scenario) {
 
     case SCENARIO_LOCAL_COMMERCIAL:
