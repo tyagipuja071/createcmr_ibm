@@ -1203,6 +1203,7 @@ public class CEMEAHandler extends BaseSOFHandler {
     return ke;
   }
   
+  @Override
   public int getName2Length() {
     return 35;
   }
@@ -1256,6 +1257,7 @@ public class CEMEAHandler extends BaseSOFHandler {
       address.getId().setAddrSeq("00001");
     }
 
+    if (!CEE_COUNTRIES_LIST.contains(currentRecord.getCmrIssuedBy())) {
     KunnrExt addlAddDetail = getKunnrExtDetails(currentRecord.getCmrSapNumber());
     if (addlAddDetail != null) {
       address.setBldg(addlAddDetail.getBuilding() != null ? addlAddDetail.getBuilding() : "");
@@ -1267,6 +1269,7 @@ public class CEMEAHandler extends BaseSOFHandler {
       if (!StringUtils.isEmpty(address.getBldg())) {
         addrDetailsList.add(address.getBldg());
       }
+    }
     }
   }
 
