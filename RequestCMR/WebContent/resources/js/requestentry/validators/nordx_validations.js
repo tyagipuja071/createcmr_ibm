@@ -83,6 +83,7 @@ function afterConfigForNORDX() {
   setTaxCdValuesCROSS();
   setSBOForFinlandSubRegion();
   setPPSCEID();
+  filterCmrnoP();
 }
 
 function disableLandCntry() {
@@ -1634,6 +1635,19 @@ function LATINNORDX(input) {
   } else {
     return new ValidationResult(input, true);
   }
+}
+
+function filterCmrnoP() {
+  var cmrNo = FormManager.getActualValue('cmrNo');
+  if (cmrNo.length > 0 && cmrNo.substr(0, 1).toUpperCase() == 'P') {
+    FormManager.setValue('cmrNo', '');
+  }
+
+  dojo.connect(FormManager.getField('cmrNo'), 'onChange', function(value) {
+    if (value.length > 0 && value.substr(0, 1).toUpperCase() == 'P') {
+      FormManager.setValue('cmrNo', '');
+    }
+  });
 }
 
 dojo.addOnLoad(function() {
