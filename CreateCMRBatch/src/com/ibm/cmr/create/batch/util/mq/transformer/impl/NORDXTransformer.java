@@ -925,11 +925,12 @@ public class NORDXTransformer extends EMEATransformer {
 
       legacyCust.setCeDivision("");
       legacyCust.setDcRepeatAgreement("0");
-      legacyCust.setLeasingInd("0");
       legacyCust.setAuthRemarketerInd("0");
       legacyCust.setCeDivision("2");
       legacyCust.setDeptCd("");
       legacyCust.setEnterpriseNo("");
+      legacyCust.setEducAllowance("");
+      legacyCust.setLeasingInd("");
       
       if (SystemLocation.NORWAY.equals(data.getCmrIssuingCntry())) {
         legacyCust.setCeBo("");
@@ -949,7 +950,7 @@ public class NORDXTransformer extends EMEATransformer {
         } else if ("678GL".equals(data.getCountryUse())) {
           legacyCust.setOverseasTerritory("103");
         } else if ("678IS".equals(data.getCountryUse())) {
-          legacyCust.setOverseasTerritory("103");
+          legacyCust.setOverseasTerritory("742");
         }
       } else if (SystemLocation.FINLAND.equals(data.getCmrIssuingCntry())) {
         if ("702".equals(data.getCountryUse())) {
@@ -963,11 +964,13 @@ public class NORDXTransformer extends EMEATransformer {
         }
       }
 
-      // MRC BP scenario set 5, else 2
+      // MRC BP scenario set 5, else 2;CIEXJ BP set 1, else 0
       if (!StringUtils.isEmpty(data.getCustSubGrp())
           && Arrays.asList("BUSPR", "CBBUS", "DKBUS", "EEBUS", "FIBUS", "FOBUS", "GLBUS", "ISBUS", "LTBUS", "LVBUS").contains(data.getCustSubGrp())) {
         legacyCust.setMrcCd("5");
+        legacyCust.setAuthRemarketerInd("1");
       } else {
+        legacyCust.setAuthRemarketerInd("0");
         legacyCust.setMrcCd("2");
       }
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
@@ -1015,6 +1018,9 @@ public class NORDXTransformer extends EMEATransformer {
     }
 
     legacyCust.setLocNo(landedCntry + "000");
+    legacyCust.setAbbrevNm(StringUtils.isBlank(data.getAbbrevNm()) ? "" : data.getAbbrevNm());
+    legacyCust.setAbbrevLocn(StringUtils.isBlank(data.getAbbrevLocn()) ? "" : data.getAbbrevLocn());
+    legacyCust.setInacCd(StringUtils.isBlank(data.getInacCd()) ? "" : data.getInacCd());
 
     if (!StringUtils.isBlank(data.getCustPrefLang())) {
       legacyCust.setLangCd(data.getCustPrefLang());
@@ -1032,6 +1038,12 @@ public class NORDXTransformer extends EMEATransformer {
       } else {
         legacyCust.setCustType("");
       }
+    }
+
+    if (!StringUtils.isBlank(data.getCollectionCd())) {
+      legacyCust.setCollectionCd(data.getCollectionCd());
+    } else {
+      legacyCust.setCollectionCd("");
     }
 
     if (!StringUtils.isBlank(data.getAcAdminBo())) {
@@ -1091,6 +1103,18 @@ public class NORDXTransformer extends EMEATransformer {
       legacyCust.setEmbargoCd(dataEmbargoCd);
     } else {
       legacyCust.setEmbargoCd("");
+    }
+
+    if (!StringUtils.isBlank(data.getIsicCd())) {
+      legacyCust.setImsCd(data.getIsicCd());
+    } else {
+      legacyCust.setImsCd("");
+    }
+
+    if (!StringUtils.isBlank(data.getIsbuCd())) {
+      legacyCust.setIsuCd(data.getIsbuCd());
+    } else {
+      legacyCust.setIsuCd("");
     }
 
     if (!StringUtils.isBlank(data.getSubIndustryCd())) {
@@ -1161,18 +1185,8 @@ public class NORDXTransformer extends EMEATransformer {
         newSbo="7000ISU";
       }
     }
-    if("C".equals(admin.getReqType())){
       legacyCust.setSbo(newSbo);
       legacyCust.setIbo(newSbo);
-    }else if ("U".equals(admin.getReqType())){
-      if (!newSbo.equals(legacyCust.getSbo())) {
-        legacyCust.setSbo(newSbo);
-        legacyCust.setIbo(newSbo);
-      }
-    }
-    
-      
-
   }
 
   @Override
