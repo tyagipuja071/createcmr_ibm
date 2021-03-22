@@ -276,7 +276,7 @@ public class AustriaUtil extends AutomationUtil {
     if (resultCodes.contains("D")) {
       // prioritize duplicates, set error
       output.setOnError(true);
-      engineData.addRejectionComment("_atDupAddr", "One or more new addresses matches existing addresses on record.", "", "");
+      engineData.addRejectionComment("DUPADDR", "One or more new addresses matches existing addresses on record.", "", "");
       validation.setSuccess(false);
       validation.setMessage("Duplicate Address");
     } else if (resultCodes.contains("R")) {
