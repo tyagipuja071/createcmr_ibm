@@ -590,7 +590,7 @@ public class BeLuxUtil extends AutomationUtil {
     try {
       LOG.debug("Computing SORTL for Coverage " + coverage);
       String gbgCntryCd = gbgCntry.equalsIgnoreCase("Belgium") ? "BE" : "LU";
-      String sql = ExternalizedQuery.getSql("AUTO.FR.COV.SORTL");
+      String sql = ExternalizedQuery.getSql("AUTO.BELUX.COV.SORTL");
       PreparedQuery query = new PreparedQuery(entityManager, sql);
       query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
       query.setParameter("COVID", coverage);
