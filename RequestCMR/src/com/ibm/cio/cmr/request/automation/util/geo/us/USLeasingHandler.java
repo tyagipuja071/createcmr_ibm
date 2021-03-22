@@ -78,7 +78,7 @@ public class USLeasingHandler extends USBPHandler {
 
   @Override
   protected void performAction(AutomationEngineData engineData, String msg) {
-    engineData.addRejectionComment("_usLeasingNoMatch", msg, "", "");
+    engineData.addRejectionComment("OTH", msg, "", "");
   }
 
   @Override
