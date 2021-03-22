@@ -451,5 +451,10 @@ dojo.addOnLoad(function(){
        <!--  Canada fields -->
     <jsp:include page="CA/ca_ibm.jsp" />
     
+       <!--  Taiwan fields -->
+    <jsp:include page="TW/tw_ibm.jsp" />
+
+       <!--  Korea, Republic of, fields -->
+    <jsp:include page="KR/kr_ibm.jsp" />
      
 	</cmr:section>

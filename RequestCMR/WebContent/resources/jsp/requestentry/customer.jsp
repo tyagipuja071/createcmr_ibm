@@ -367,5 +367,11 @@
 
    <!--  Canada fields -->
   <jsp:include page="CA/ca_customer.jsp" />
+  
+   <!--  Taiwan fields -->
+  <jsp:include page="TW/tw_customer.jsp" />
+
+   <!--  Korea, Republic of, fields -->
+  <jsp:include page="KR/kr_customer.jsp" />
 
 </cmr:section>
