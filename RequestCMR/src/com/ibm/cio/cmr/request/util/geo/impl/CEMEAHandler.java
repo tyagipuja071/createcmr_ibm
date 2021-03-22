@@ -140,10 +140,10 @@ public class CEMEAHandler extends BaseSOFHandler {
       "CustClassCode", "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office",
       "Floor", "Building", "County", "City2", "Department" };
 
-  private static final String[] CZ_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "CustLang", "GeoLocationCode", "Affiliate", "CAP", "CMROwner",
-      "CustClassCode", "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office",
-      "Floor", "Building", "County", "City2", "Department", "Company", "LocalTax1" };
-  
+  private static final String[] CZ_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "CustLang", "GeoLocationCode", "Affiliate", "CAP", "CMROwner", "CustClassCode",
+      "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office", "Floor", "Building",
+      "County", "City2", "Department", "Company", "LocalTax1" };
+
   private static final String[] AUSTRIA_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "GeoLocationCode", "Affiliate", "Company", "CAP", "CMROwner",
       "CustClassCode", "CurrencyCode", "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX",
       "TransportZone", "Office", "Floor", "Building", "County", "City2", "Department" };
@@ -1173,7 +1173,7 @@ public class CEMEAHandler extends BaseSOFHandler {
   @Override
   public void setAdminValuesOnImport(Admin admin, FindCMRRecordModel currentRecord) throws Exception {
   }
-  
+
   @Override
   public int getName1Length() {
     return 35;
@@ -1210,12 +1210,12 @@ public class CEMEAHandler extends BaseSOFHandler {
     }
     return ke;
   }
-  
+
   @Override
   public int getName2Length() {
     return 35;
   }
-  
+
   @Override
   public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo) throws Exception {
     boolean doSplit = (currentRecord.getCmrName1Plain() != null && currentRecord.getCmrName1Plain().length() > 35)
@@ -1267,8 +1267,10 @@ public class CEMEAHandler extends BaseSOFHandler {
 
     KunnrExt addlAddDetail = getKunnrExtDetails(currentRecord.getCmrSapNumber());
     if (addlAddDetail != null) {
-      address.setBldg(addlAddDetail.getBuilding() != null ? addlAddDetail.getBuilding() : "");
-      address.setDept(addlAddDetail.getDepartment() != null ? addlAddDetail.getDepartment() : "");
+      if (SystemLocation.AUSTRIA.equals(country)) {
+        address.setBldg(addlAddDetail.getBuilding() != null ? addlAddDetail.getBuilding() : "");
+        address.setDept(addlAddDetail.getDepartment() != null ? addlAddDetail.getDepartment() : "");
+      }
 
       if (!StringUtils.isEmpty(address.getDept())) {
         addrDetailsList.add(address.getDept());
