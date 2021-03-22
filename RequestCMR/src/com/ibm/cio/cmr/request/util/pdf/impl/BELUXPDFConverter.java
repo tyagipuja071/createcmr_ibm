@@ -303,7 +303,7 @@ public class BELUXPDFConverter extends DefaultPDFConverter {
     customer.addCell(createLabelCell("Collection Code:"));
     customer.addCell(createValueCell(data.getCollectionCd()));
 
-    customer.addCell(createLabelCell("Embargo Code:"));
+    customer.addCell(createLabelCell("Order Block Code:"));
     customer.addCell(createValueCell(data.getEmbargoCd()));
 
     customer.addCell(createLabelCell("Department Number:"));
