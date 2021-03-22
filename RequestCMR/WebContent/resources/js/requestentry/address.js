@@ -457,6 +457,14 @@ function AddressDetailsModal_onLoad() {
       _assignDetailsValue('#AddressDetailsModal #custPhone_view', '');
     }
   }
+  if (FormManager.getActualValue('cmrIssuingCntry') == '706') {
+    var reqTypes = FormManager.getActualValue('reqType');
+    if (reqTypes == 'U') {
+      if (details.ret30 != null) {
+        _assignDetailsValue('#AddressDetailsModal #ierpSitePrtyId_view', 'S' + details.ret30);
+      }
+    }
+  }
 }
 
 function displayHwMstInstallFlagNew() {
@@ -1957,6 +1965,19 @@ function applyAddrChangesModal_onLoad() {
       } else if (cEECountries.indexOf(cntry) > -1) {
         var reqReason = FormManager.getActualValue('reqReason');
         if ((type.ret1 == 'ZP03' || type.ret1 == 'ZD02') && (reqReason != 'IGF' || !isZD01OrZP01ExistOnCMR(type.ret1))) {
+          continue;
+        }
+        if (reqType != 'C' && typeof (GEOHandler) != 'undefined' && !GEOHandler.canCopyAddressType(type.ret1) && !single) {
+          choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (create additional only)</label><br>';
+        } else if (cmr.currentAddressType && type.ret1 != cmr.currentAddressType) {
+          choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + '</label><br>';
+        } else {
+          choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (copy only if others exist)</label><br>';
+          addressDesc = type.ret2;
+        }
+      } else if (cntry == '706') {
+        var reqReason = FormManager.getActualValue('reqReason');
+        if ((type.ret1 == 'ZP02' || type.ret1 == 'ZD02') && (reqReason != 'IGF' || !isZD01OrZP01ExistOnCMR(type.ret1))) {
           continue;
         }
         if (reqType != 'C' && typeof (GEOHandler) != 'undefined' && !GEOHandler.canCopyAddressType(type.ret1) && !single) {

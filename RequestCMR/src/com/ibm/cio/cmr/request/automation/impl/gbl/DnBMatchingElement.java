@@ -31,6 +31,7 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AutomationMatching;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.Scorecard;
 import com.ibm.cio.cmr.request.service.requestentry.ImportDnBService;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.RequestUtils;
@@ -68,7 +69,15 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
     ScenarioExceptionsUtil scenarioExceptions = getScenarioExceptions(entityManager, requestData, engineData);
     AutomationResult<MatchingOutput> result = buildResult(admin.getId().getReqId());
     MatchingOutput output = new MatchingOutput();
-
+    Scorecard scorecard = requestData.getScorecard();
+    scorecard.setDnbMatchingResult("");
+    // skip dnb matching if matching records are found in SOS-RPA
+    if (engineData.isSosVerified()) {
+      result.setResults("Skipped");
+      result.setDetails("Dnb Matching is skipped as matching records are found in SOS-RPA");
+      engineData.addPositiveCheckStatus(AutomationEngineData.SOS_MATCH);
+      return result;
+    }
     // skip dnb matching if dnb matches on UI are overriden and attachment is
     // provided
     if ("Y".equals(admin.getMatchOverrideIndc()) && DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
@@ -93,6 +102,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
         engineData.put(AutomationEngineData.DNB_ALL_MATCHES, dnbMatches);
         if (!hasValidMatches) {
           // if no valid matches - do not process records
+          scorecard.setDnbMatchingResult("N");
           result.setOnError(shouldThrowError);
           result.setResults("No Matches");
           result.setDetails("No high quality matches with D&B records. Please import from D&B search.");
@@ -169,6 +179,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
                   + "on the D&B record does not match the one on the request but country is not configured to match "
                   + (isTaxCdMatch ? "Org ID " : "VAT ") + ".\n");
             }
+            scorecard.setDnbMatchingResult("Y");
             processDnBFields(entityManager, data, perfectMatch, output, details, 1);
             if (scenarioExceptions.isImportDnbInfo()) {
               // Create Address Records only if Levenshtein Distance
@@ -188,6 +199,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
             result.setResults((isTaxCdMatch ? "Org ID " : "VAT ") + " not matched");
             details.append("High Quality match D&B record matched the request name/address information but the " + (isTaxCdMatch ? "Org ID " : "VAT ")
                 + " on record did not match request data.\n");
+            scorecard.setDnbMatchingResult("N");
             processDnBFields(entityManager, data, highestCloseMatch, output, details, 1);
             if (scenarioExceptions.isImportDnbInfo()) {
               // Create Address Records only if Levenshtein Distance
@@ -204,7 +216,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
             }
             LOG.trace(new ObjectMapper().writeValueAsString(highestCloseMatch));
           } else {
-
+            scorecard.setDnbMatchingResult("N");
             LOG.debug("No D&B record matched the request data.");
             // by now this is sure to be on error with no data match
             details.append("Matches against D&B were found but no record matched the request data.\n");
@@ -241,6 +253,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
           result.setProcessOutput(output);
         }
       } else {
+        scorecard.setDnbMatchingResult("N");
         result.setDetails("No D&B record was found using advanced matching.");
         engineData.addRejectionComment("OTH", "No matches with D&B records. Please import from D&B search.", "", "");
         result.setResults("No Matches");

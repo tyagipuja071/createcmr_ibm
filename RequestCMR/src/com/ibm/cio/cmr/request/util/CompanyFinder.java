@@ -86,6 +86,10 @@ public class CompanyFinder {
         }
         matches.addAll(findRequests(searchModel));
 
+        if ("Y".equals(searchModel.getAddDnBMatches())) {
+          // make the dnb append available for processors
+          searchDnb = true;
+        }
         if (matches.isEmpty() || searchDnb) {
           matches.addAll(searchDnB(searchModel));
         }
@@ -488,7 +492,7 @@ public class CompanyFinder {
         dnbMatches.add(match);
       }
     }
-    if (sbDuns.length() > 0) {
+    if (sbDuns.length() > 0 && !"Y".equals(searchModel.getAddDnBMatches())) {
       // try to do a secondary matching against FindCMR using DUNS Information
       LOG.debug("Trying to find CMRs with DUNS: " + sbDuns.toString());
       String params = "showCmrType=R,P&addressType=" + ("897".equals(searchModel.getIssuingCntry()) ? "ZS01,ZI01" : "ZS01") + "&dunsNumberList="

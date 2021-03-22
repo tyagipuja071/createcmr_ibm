@@ -567,6 +567,8 @@ public class AutoStatsService extends BaseSimpleService<RequestStatsContainer> {
     config.add(new StatXLSConfig("Source System", "SOURCE_SYST_ID", 20, null));
     config.add(new StatXLSConfig("PayGo", "PAYGO_INDC", 10, null));
     config.add(new StatXLSConfig("Pool", "POOL", 10, null));
+    config.add(new StatXLSConfig("DnB Matching", "DNB_MATCHING_RESULT", 16, "Indicates whether the DnB matches were found."));
+    config.add(new StatXLSConfig("RPA Matching", "RPA_MATCHING_RESULT", 16, "Indicates whether the RPA matches were found."));
     config.add(new StatXLSConfig("Touchless", "FULL_AUTO", 16, "Indicates whether the request was completed without any form of manual work."));
     config.add(new StatXLSConfig("Review Required", "REVIEW", 16, "Indicates whether the request needed manual CMDE review."));
     config.add(new StatXLSConfig("Review Cause", "PROCESS_CD", 25, "Specifies the first automation element that caused automation to stop."));
