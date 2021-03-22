@@ -65,6 +65,7 @@ public class NetherlandsUtil extends AutomationUtil {
       customerNameZP01 = StringUtils.isBlank(zp01.getCustNm1()) ? "" : zp01.getCustNm1();
       landedCountryZP01 = StringUtils.isBlank(zp01.getLandCntry()) ? "" : zp01.getLandCntry();
     }
+
     if (!StringUtils.equals(zs01.getLandCntry(), zp01.getLandCntry())) {
       scenarioExceptions.setCheckVATForDnB(false);
     }
@@ -278,6 +279,9 @@ public class NetherlandsUtil extends AutomationUtil {
     boolean cmdeReview = false;
     Set<String> resultCodes = new HashSet<String>();
     List<String> ignoredUpdates = new ArrayList<String>();
+    if (admin.getReqType().equals("U")) {
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_DNB_ORGID_VAL);
+    }
     for (UpdatedDataModel change : changes.getDataUpdates()) {
       switch (change.getDataField()) {
       case "VAT #":
@@ -424,6 +428,9 @@ public class NetherlandsUtil extends AutomationUtil {
     StringBuilder checkDetails = new StringBuilder();
     Set<String> resultCodes = new HashSet<String>();// R - review
     Addr zs01 = requestData.getAddress("ZS01");
+    if (admin.getReqType().equals("U")) {
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_DNB_ORGID_VAL);
+    }
 
     for (String addrType : RELEVANT_ADDRESSES) {
       addresses = requestData.getAddresses(addrType);
