@@ -119,6 +119,12 @@ public class EUVatValidationElement extends ValidatingElement implements Company
               output.setDetails(details.toString());
               engineData.setCompanySource("VIES");
               updateEntity(admin, entityManager);
+            } else if (data.getCustSubGrp().equals("PUBCU") && SystemLocation.NETHERLANDS.equals(data.getCmrIssuingCntry())) {
+              validation.setSuccess(true);
+              validation.setMessage("Review needed.");
+              output.setDetails("VAT is invalid. Need review.");
+              output.setOnError(false);
+              LOG.debug("VAT is invalid.Needs review.");
             } else {
               validation.setSuccess(false);
               validation.setMessage("Review needed.");
@@ -127,6 +133,12 @@ public class EUVatValidationElement extends ValidatingElement implements Company
               engineData.addRejectionComment("OTH", "VAT is invalid.", "", "");
               LOG.debug("VAT is invalid.Need review.");
             }
+          } else if (data.getCustSubGrp().equals("PUBCU") && SystemLocation.NETHERLANDS.equals(data.getCmrIssuingCntry())) {
+            validation.setSuccess(true);
+            validation.setMessage("Vat Validation fails.\nSkipping for Public Scenario");
+            output.setDetails(response.getMessage());
+            output.setOnError(false);
+            LOG.debug("Vat Validation fails.\nSkipping for Public Scenario.");
           } else {
             validation.setSuccess(false);
             validation.setMessage("Execution failed.");
