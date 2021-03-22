@@ -13,6 +13,10 @@ import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.ibm.cio.cmr.request.CmrConstants;
@@ -23,6 +27,7 @@ import com.ibm.cio.cmr.request.entity.AdminPK;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.entity.DataRdc;
+import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation;
 import com.ibm.cio.cmr.request.model.requestentry.AddressModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
@@ -336,9 +341,13 @@ public class FRHandler extends BaseSOFHandler {
     super.setDataValuesOnImport(admin, data, results, mainRecord);
     data.setCurrencyCd(this.currentImportValues.get("CurrencyCode"));
     LOG.trace("Currency: " + data.getCurrencyCd());
-    String sBO = this.currentImportValues.get("SBO");
-    if (!StringUtils.isEmpty(sBO) && sBO.length() >= 4)
-      data.setSalesBusOffCd(sBO.substring(1, 4));
+    // String sBO = this.currentImportValues.get("SBO");
+    String search_term = data.getSearchTerm();
+    // if (!StringUtils.isEmpty(sBO) && sBO.length() >= 4)
+    // data.setSalesBusOffCd(sBO.substring(1, 4));
+    // else
+    data.setSalesBusOffCd(search_term);
+    LOG.trace("SORTL: " + search_term);
     String iBO = this.currentImportValues.get("IBO");
     if (!StringUtils.isEmpty(iBO) && iBO.length() > 3)
       data.setInstallBranchOff(iBO.substring(iBO.length() - 3, iBO.length()));
@@ -438,8 +447,8 @@ public class FRHandler extends BaseSOFHandler {
 
   @Override
   public void doBeforeDataSave(EntityManager entityManager, Admin admin, Data data, String cmrIssuingCntry) throws Exception {
-    if(admin.getReqType().equals("U")){
-      setAbbrevNameOnDataSave(entityManager,data);
+    if (admin.getReqType().equals("U")) {
+      setAbbrevNameOnDataSave(entityManager, data);
     }
     // autoSetAbbrevNmAfterImport(entityManager, admin, data);
   }
@@ -713,12 +722,12 @@ public class FRHandler extends BaseSOFHandler {
         abbrevNmValue = abbrevNmValue + ' ' + singleIndValue;
         data.setAbbrevNm(abbrevNmValue);
       }
-    } else if (admin.getReqType().equalsIgnoreCase("U") && "ZS01".equals(addr.getId().getAddrType())){
+    } else if (admin.getReqType().equalsIgnoreCase("U") && "ZS01".equals(addr.getId().getAddrType())) {
       abbrevNmValue = addr.getCustNm1();
-      if(!isZS01CustNameUpdated(entityManager,data.getId().getReqId(),abbrevNmValue)){
+      if (!isZS01CustNameUpdated(entityManager, data.getId().getReqId(), abbrevNmValue)) {
         return;
       }
-      if(StringUtils.isNotBlank(abbrevNmValue) && abbrevNmValue.length()>22){
+      if (StringUtils.isNotBlank(abbrevNmValue) && abbrevNmValue.length() > 22) {
         abbrevNmValue.substring(0, 22);
       }
       data.setAbbrevNm(abbrevNmValue);
@@ -1174,11 +1183,11 @@ public class FRHandler extends BaseSOFHandler {
 
   @Override
   public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
-    return false;
+    return true;
   }
-  
-  private void setAbbrevNameOnDataSave(EntityManager entityManager, Data data){
-    String abbrevNmValue ="";
+
+  private void setAbbrevNameOnDataSave(EntityManager entityManager, Data data) {
+    String abbrevNmValue = "";
     String abbNmSql = ExternalizedQuery.getSql("QUERY.ADDR.GET.CUSTNM1.BY_REQID_ADDRTYP");
     PreparedQuery abbNmQuery = new PreparedQuery(entityManager, abbNmSql);
     abbNmQuery.setParameter("REQ_ID", data.getId().getReqId());
@@ -1186,34 +1195,71 @@ public class FRHandler extends BaseSOFHandler {
     List<String> abbNmResults = abbNmQuery.getResults(String.class);
     if (abbNmResults != null && !abbNmResults.isEmpty()) {
       abbrevNmValue = abbNmResults.get(0);
-      if(!isZS01CustNameUpdated(entityManager,data.getId().getReqId(),abbrevNmValue)){
+      if (!isZS01CustNameUpdated(entityManager, data.getId().getReqId(), abbrevNmValue)) {
         return;
       }
     } else if (abbNmResults == null || abbNmResults.isEmpty()) {
-      abbrevNmValue="";
-    } 
-    if(StringUtils.isNotBlank(abbrevNmValue) && abbrevNmValue.length()>22){
+      abbrevNmValue = "";
+    }
+    if (StringUtils.isNotBlank(abbrevNmValue) && abbrevNmValue.length() > 22) {
       abbrevNmValue.substring(0, 22);
     }
     data.setAbbrevNm(abbrevNmValue);
-  
-      entityManager.merge(data);
-      entityManager.flush();
-      return;
+
+    entityManager.merge(data);
+    entityManager.flush();
+    return;
   }
-  
-  private boolean isZS01CustNameUpdated(EntityManager entityManager, Long requestId, String currentCustNm){
-    boolean isNameUpdated= false;
+
+  private boolean isZS01CustNameUpdated(EntityManager entityManager, Long requestId, String currentCustNm) {
+    boolean isNameUpdated = false;
     String sql = ExternalizedQuery.getSql("QUERY.GETZS01OLDCUSTNAME");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", requestId);
     List<String> results = query.getResults(String.class);
-    if(results!=null && !results.isEmpty()){
-      String oldCustNm=results.get(0);
-      if(!oldCustNm.equals(currentCustNm)){
-        isNameUpdated=true;
+    if (results != null && !results.isEmpty()) {
+      String oldCustNm = results.get(0);
+      if (!oldCustNm.equals(currentCustNm)) {
+        isNameUpdated = true;
       }
     }
     return isNameUpdated;
+  }
+
+  public static void validateFRMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country) {
+    String[] sheetNames = { "Sold To", "Mail to", "Bill To", "Ship To", "Install At" };
+    for (String name : sheetNames) {
+      XSSFSheet sheet = book.getSheet(name);
+      LOG.debug("validating name 3 for sheet " + name);
+      for (Row row : sheet) {
+        if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
+          Cell cmrCell1 = row.getCell(4);
+          if (cmrCell1 != null) {
+            String name3 = "";
+            switch (cmrCell1.getCellTypeEnum()) {
+            case STRING:
+              name3 = cmrCell1.getStringCellValue();
+              break;
+            case NUMERIC:
+              double nvalue = cmrCell1.getNumericCellValue();
+              if (nvalue > 0) {
+                name3 = "" + nvalue;
+                break;
+              }
+            default:
+              continue;
+            }
+            if (name3.length() > 30) {
+              LOG.debug("Total computed length of name3 should not exeed 30. Sheet: " + name + ", Row: " + row.getRowNum() + ", Name3:" + name3);
+              TemplateValidation error = new TemplateValidation(name);
+              error.addError(row.getRowNum(), "Customer Name 3", "Total computed length of customer name3 should not exeed 30");
+              validations.add(error);
+            }
+          }
+        }
+      }
+    }
+    HashMap<String, String> hwFlagMap = new HashMap<>();
+
   }
 }

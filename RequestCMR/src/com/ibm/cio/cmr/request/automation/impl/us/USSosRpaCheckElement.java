@@ -18,6 +18,7 @@ import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.Scorecard;
 import com.ibm.cmr.services.client.AutomationServiceClient;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.ServiceClient.Method;
@@ -48,7 +49,7 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
     String scenario = data.getCustSubGrp();
     AutomationResult<ValidationOutput> output = buildResult(admin.getId().getReqId());
     ValidationOutput validation = new ValidationOutput();
-
+    Scorecard scorecard = requestData.getScorecard();
     if (SC_BP_END_USER.equals(scenario) && SC_BP_POOL.equals(scenario) && SC_BP_DEVELOP.equals(scenario) && SC_BP_E_HOST.equals(scenario)) {
       validation.setSuccess(true);
       validation.setMessage("Skipped");
@@ -62,8 +63,10 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
 
     if (zs01 != null) {
       AutomationResponse<SosResponse> response = getSosMatches(admin.getId().getReqId(), zs01, admin);
+      scorecard.setRpaMatchingResult("");
       if (response != null && response.isSuccess() && response.getRecord() != null) {
         admin.setCompVerifiedIndc("Y");
+        scorecard.setRpaMatchingResult("Y");
         validation.setSuccess(true);
         validation.setMessage("Successful Execution");
         log.debug(response.getMessage());
@@ -74,7 +77,9 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
         details.append("\nState = " + (StringUtils.isBlank(response.getRecord().getState()) ? "" : response.getRecord().getState()));
         details.append("\nZip = " + (StringUtils.isBlank(response.getRecord().getZip()) ? "" : response.getRecord().getZip()));
         output.setDetails(details.toString());
+        engineData.addPositiveCheckStatus(AutomationEngineData.SOS_MATCH);
       } else {
+        scorecard.setRpaMatchingResult("N");
         validation.setSuccess(true);
         validation.setMessage("No Matches found");
         output.setDetails(response.getMessage());

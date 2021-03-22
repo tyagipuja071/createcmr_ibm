@@ -59,7 +59,7 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
       <jsp:include page="summary_main.jsp" />
 
       <!--  Customer Name Handling -->
-      <cmr:view exceptForGEO="EMEA,IERP,CND"  exceptForCountry="706,864,838">
+      <cmr:view exceptForGEO="EMEA,IERP,CND"  exceptForCountry="706,864,838,848">
         <c:if test="${summary.admin.mainCustNm1 != summary.admin.oldCustNm1}">
           <cmr:row addBackground="true" topPad="10">
             <cmr:column span="1" width="130">
@@ -111,6 +111,66 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
           <cmr:row addBackground="true" topPad="10">
             <cmr:column span="1" width="130">
               <label>${ui.customerName} 2:</label>
+            </cmr:column>
+            <cmr:column span="4">
+              No changes
+            </cmr:column>
+          </cmr:row>
+        </c:if>
+      </cmr:view>
+      
+      <cmr:view forCountry="848">
+        <c:if test="${summary.admin.mainCustNm1 != summary.admin.oldCustNm1}">
+          <cmr:row addBackground="true" topPad="10">
+            <cmr:column span="1" width="130">
+              <label>Customer legal name:</label>
+            </cmr:column>
+            <cmr:column span="2">
+              <cmr:note text="${ui.grid.originalCMRData}:" />  ${summary.admin.oldCustNm1}
+              </cmr:column>
+          </cmr:row>
+          <cmr:row addBackground="true" topPad="10">
+            <cmr:column span="1" width="130">
+              &nbsp;
+            </cmr:column>
+            <cmr:column span="2">
+              <cmr:note text="${ui.grid.changeToData}:" /> ${summary.admin.mainCustNm1}
+              </cmr:column>
+          </cmr:row>
+        </c:if>
+        <c:if test="${summary.admin.mainCustNm1 == summary.admin.oldCustNm1}">
+          <cmr:row addBackground="true" topPad="10">
+            <cmr:column span="1" width="130" forCountry="848">
+              <label>Customer legal name:</label>
+            </cmr:column>
+            <cmr:column span="4">
+              No changes
+            </cmr:column>
+          </cmr:row>
+        </c:if>
+
+        <c:if test="${summary.admin.mainCustNm2 != summary.admin.oldCustNm2}">
+          <cmr:row addBackground="true" topPad="10">
+            <cmr:column span="1" width="130">
+              <label>Legal name continued:</label>
+            </cmr:column>
+            <cmr:column span="2">
+              <cmr:note text="${ui.grid.originalCMRData}:" />  ${summary.admin.oldCustNm2}
+              </cmr:column>
+          </cmr:row>
+          <cmr:row addBackground="true" topPad="10">
+            <cmr:column span="1" width="130">
+              &nbsp;
+            </cmr:column>
+            <cmr:column span="2">
+              <cmr:note text="${ui.grid.changeToData}:" /> ${summary.admin.mainCustNm2}
+              </cmr:column>
+          </cmr:row>
+        </c:if>
+        <c:if test="${summary.admin.mainCustNm2 == summary.admin.oldCustNm2}">
+          <cmr:row addBackground="true" topPad="10">
+            <cmr:column span="1" width="130">
+              <label>Legal name continued:</label>
             </cmr:column>
             <cmr:column span="4">
               No changes

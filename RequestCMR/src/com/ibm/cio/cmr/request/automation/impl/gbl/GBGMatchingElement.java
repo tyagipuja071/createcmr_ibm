@@ -130,6 +130,8 @@ public class GBGMatchingElement extends MatchingElement {
         if (dnbMatching != null && dnbMatching.getConfidenceCode() > 7) {
           request.setDunsNo(dnbMatching.getDunsNo());
         }
+      } else {
+        request.setDunsNo(data.getDunsNo());
       }
 
       if (automationUtil != null) {

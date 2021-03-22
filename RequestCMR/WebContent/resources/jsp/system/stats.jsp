@@ -200,7 +200,7 @@ div#filterlabels table {
         <canvas id="canvas" style="height:20px"></canvas>
       </div>
     </cmr:row>
-    <iframe id="exportFrame" name="exportFrame" style="display:none">
+    <iframe id="exportFrame" name="exportFrame" style="display:none"></iframe>
   </cmr:section>
 
 </cmr:boxContent>
