@@ -24,6 +24,7 @@ import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.CoverageContainer;
 import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
 import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
+import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
@@ -66,7 +67,7 @@ public class NetherlandsUtil extends AutomationUtil {
       landedCountryZP01 = StringUtils.isBlank(zp01.getLandCntry()) ? "" : zp01.getLandCntry();
     }
 
-    if (!StringUtils.equals(zs01.getLandCntry(), zp01.getLandCntry())) {
+    if (zp01 != null && !StringUtils.equals(zs01.getLandCntry(), zp01.getLandCntry())) {
       scenarioExceptions.setCheckVATForDnB(false);
     }
     if ((SCENARIO_BP_LOCAL.equals(scenario) || SCENARIO_BP_CROSS.equals(scenario)) && zp01 != null
@@ -578,4 +579,33 @@ public class NetherlandsUtil extends AutomationUtil {
     }
     return zp01;
   }
+
+  /**
+   * Computes the SBO by getting the SORTL most used by the COverage ID
+   * 
+   * @param entityManager
+   * @param coverage
+   * @return
+   */
+  private String getSORTLfromCoverage(EntityManager entityManager, String coverage, String gbgCntry) {
+    String sortl = "";
+    try {
+      LOG.debug("Computing SORTL for Coverage " + coverage);
+      String gbgCntryCd = gbgCntry.equalsIgnoreCase("Belgium") ? "BE" : "LU";
+      String sql = ExternalizedQuery.getSql("AUTO.NL.COV.SORTL");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+      query.setParameter("COVID", coverage);
+      query.setParameter("LAND1", gbgCntryCd);
+      query.setForReadOnly(true);
+      sortl = query.getSingleResult(String.class);
+    } catch (Exception e) {
+      LOG.debug("Error while computing SORTL for Coverage " + coverage + " from RDc query.");
+    }
+    if (sortl != null && !StringUtils.isBlank(sortl)) {
+      return sortl;
+    }
+    return null;
+  }
+
 }
