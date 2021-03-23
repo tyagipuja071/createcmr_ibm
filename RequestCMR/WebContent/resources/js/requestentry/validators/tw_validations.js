@@ -18,6 +18,7 @@ dojo.addOnLoad(function() {
   GEOHandler.TW = [ '858' ];
   console.log('adding Taiwan functions...');
   GEOHandler.enableCustomerNamesOnAddress(GEOHandler.TW);
+  GEOHandler.setRevertIsicBehavior(false);
 
   GEOHandler.addAfterConfig(afterConfigTW, GEOHandler.TW);
 

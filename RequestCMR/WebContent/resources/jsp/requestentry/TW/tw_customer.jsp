@@ -35,13 +35,13 @@
         <cmr:field path="collectionCd" id="collectionCd" fieldId="CollectionCd" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
-    <cmr:column span="2" containerForField="LocalTax2">
+    <%-- <cmr:column span="2" containerForField="LocalTax2">
         <p>
           <label for="taxCd2"> <cmr:fieldLabel fieldId="LocalTax2" />:
            <cmr:delta text="${rdcdata.taxCd2}" oldValue="${reqentry.taxCd2}" /> </label>
           <cmr:field path="taxCd2" id="taxCd2" fieldId="LocalTax2" tabId="MAIN_CUST_TAB" />
         </p>
-      </cmr:column>
+      </cmr:column> --%>
   </cmr:row>
   <cmr:row addBackground="false">
     <cmr:column span="2" containerForField="EmbargoCode">

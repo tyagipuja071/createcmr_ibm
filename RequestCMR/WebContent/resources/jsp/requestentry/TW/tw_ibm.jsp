@@ -17,15 +17,6 @@
 %>
 <cmr:view forGEO="TW">
   <cmr:row topPad="10">
- <!--   <cmr:column span="2" containerForField="SalesBusOff">
-      <p>
-        <cmr:label fieldId="salesBusOffCd">
-          <cmr:fieldLabel fieldId="SalesBusOff" />:
-             <cmr:delta text="${rdcdata.salesBusOffCd}" oldValue="${reqentry.salesBusOffCd}" id="delta-salesBusOffCd" />
-        </cmr:label>
-        <cmr:field fieldId="SalesBusOff" id="salesBusOffCd" path="salesBusOffCd" tabId="MAIN_IBM_TAB" />
-      </p>
-    </cmr:column>  --> 
         <cmr:column span="2" containerForField="EngineeringBo">
       <p>
         <cmr:label fieldId="engineeringBo">
@@ -36,6 +27,5 @@
       </p>
     </cmr:column>  
   </cmr:row>
-    <form:hidden path="salesBusOffCd" id="salesBusOffCd"/>
   
 </cmr:view>

@@ -15,9 +15,10 @@ function afterConfigTW() {
 }
 
 dojo.addOnLoad(function() {
-  GEOHandler.TW = [ '766' ];
+  GEOHandler.KR = [ '766' ];
   console.log('adding KOREA functions...');
   GEOHandler.enableCustomerNamesOnAddress(GEOHandler.KR);
+  GEOHandler.setRevertIsicBehavior(false);
 
   GEOHandler.addAfterConfig(afterConfigTW, GEOHandler.KR);
 
