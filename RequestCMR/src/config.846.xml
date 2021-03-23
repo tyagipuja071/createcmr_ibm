@@ -36,7 +36,7 @@
 				<column>
 					<label>Tax code</label>
 					<dbColumn>SPECIAL_TAX_CD</dbColumn>
-					<lovId>LocalTax2</lovId>
+					<lovId>LocalTax1</lovId>
 					<width>10</width>
 				</column>
 				<column>
@@ -87,7 +87,7 @@
 				</column>
 				<column exactLength="6">
 					<label>A/C Admin DSC</label>
-					<dbColumn></dbColumn>
+					<dbColumn>SEARCH_TERM</dbColumn>
 					<width>10</width>
 					<lovId>CustClass</lovId>
 					<length>4</length>
@@ -129,41 +129,47 @@
 					<width>10</width>
 					<length>6</length>
 				</column>
-				<column>
+				<column exactLength="true">
 					<label>sequence</label>
 					<dbColumn>ADDR_SEQUENCE_NO</dbColumn>
 					<width>20</width>
 					<length>5</length>
 				</column>
 				<column>
-					<label>Customer legal name </label>
+					<label>Customer name </label>
 					<dbColumn>CUST_NM1</dbColumn>
 					<width>40</width>
-					<length>35</length>
+					<length>30</length>
 				</column>
 				<column>
-					<label>Legal name continued</label>
+					<label>Customer name con't </label>
 					<dbColumn>CUST_NM2</dbColumn>
 					<width>40</width>
-					<length>35</length>
+					<length>30</length>
 				</column>
 				<column>
-					<label>Division/Department</label>
+					<label>Additional Info</label>
 					<dbColumn>CUST_NM3</dbColumn>
 					<width>40</width>
 					<length>35</length>
 				</column>
 				<column>
-					<label>Attention to/Building/Floor/Office</label>
+					<label>Att. person</label>
 					<dbColumn>CUST_NM4</dbColumn>
 					<width>40</width>
 					<length>35</length>
 				</column>
 				<column>
-					<label>Street name and number</label>
+					<label>Street</label>
 					<dbColumn>ADDR_TXT</dbColumn>
 					<width>40</width>
-					<length>35</length>
+					<length>30</length>
+				</column>
+				<column>
+					<label>Street con't</label>
+					<dbColumn>ADDR_TXT2</dbColumn>
+					<width>40</width>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Postal Code</label>
@@ -175,20 +181,20 @@
 					<label>City</label>
 					<dbColumn>CITY1</dbColumn>
 					<width>40</width>
-					<length>35</length>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Country (Landed)</label>
 					<dbColumn>LAND_CNTRY</dbColumn>
-					<width>18</width>
+					<width>5</width>
 					<bdsId>LandedCountry</bdsId>
 				</column>
 				<column>
-					<label>Phone</label>
-					<dbColumn>CUST_PHONE</dbColumn>
-					<width>20</width>
-					<length>10</length>
-				</column>
+					<label>PO BOX</label>
+					<dbColumn>PO_BOX</dbColumn>
+					<width>30</width>
+					<length>20</length>
+				</column>					
 			</columns>
 		</tab>
 		<tab name="Billing" type="Address" typeCode="ZP01">
@@ -199,72 +205,72 @@
 					<width>10</width>
 					<length>6</length>
 				</column>
-				<column>
+				<column exactLength="true">
 					<label>sequence</label>
 					<dbColumn>ADDR_SEQUENCE_NO</dbColumn>
 					<width>20</width>
 					<length>5</length>
 				</column>
 				<column>
-					<label>Customer legal name </label>
+					<label>Customer name </label>
 					<dbColumn>CUST_NM1</dbColumn>
 					<width>40</width>
-					<length>35</length>
+					<length>30</length>
 				</column>
 				<column>
-					<label>Legal name continued</label>
+					<label>Customer name con't </label>
 					<dbColumn>CUST_NM2</dbColumn>
 					<width>40</width>
-					<length>35</length>
+					<length>30</length>
 				</column>
 				<column>
-					<label>Division/Department</label>
+					<label>Additional Info</label>
 					<dbColumn>CUST_NM3</dbColumn>
 					<width>40</width>
 					<length>35</length>
 				</column>
 				<column>
-					<label>Attention to/Building/Floor/Office</label>
+					<label>Att. person</label>
 					<dbColumn>CUST_NM4</dbColumn>
 					<width>40</width>
 					<length>35</length>
 				</column>
 				<column>
-					<label>Street name and number</label>
+					<label>Street</label>
 					<dbColumn>ADDR_TXT</dbColumn>
 					<width>40</width>
-					<length>35</length>
+					<length>30</length>
+				</column>
+				<column>
+					<label>Street con't</label>
+					<dbColumn>ADDR_TXT2</dbColumn>
+					<width>40</width>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Postal Code</label>
 					<dbColumn>POST_CD</dbColumn>
-					<width>18</width>
-					<length>10</length>
-				</column>
-				<column>
-					<label>PO BOX</label>
-					<dbColumn>PO_BOX</dbColumn>
 					<width>20</width>
-					<length>6</length>
+					<length>10</length>
 				</column>
 				<column>
 					<label>City</label>
 					<dbColumn>CITY1</dbColumn>
 					<width>40</width>
-					<length>24</length>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Country (Landed)</label>
 					<dbColumn>LAND_CNTRY</dbColumn>
-					<width>18</width>
+					<width>5</width>
 					<bdsId>LandedCountry</bdsId>
 				</column>
 				<column>
-					<label>Phone</label>
-					<dbColumn>CUST_PHONE</dbColumn>
-					<width>20</width>
-					<length>11</length>
-				</column>
+					<label>PO BOX</label>
+					<dbColumn>PO_BOX</dbColumn>
+					<width>30</width>
+					<length>20</length>
+				</column>					
 			</columns>
 		</tab>
 		<tab name="Installing" data="false" type="Address" typeCode="ZI01">
@@ -275,41 +281,47 @@
 					<width>10</width>
 					<length>6</length>
 				</column>
-				<column>
+				<column exactLength="true">
 					<label>sequence</label>
 					<dbColumn>ADDR_SEQUENCE_NO</dbColumn>
 					<width>20</width>
 					<length>5</length>
 				</column>
 				<column>
-					<label>Customer legal name </label>
+					<label>Customer name </label>
 					<dbColumn>CUST_NM1</dbColumn>
 					<width>40</width>
-					<length>35</length>
+					<length>30</length>
 				</column>
 				<column>
-					<label>Legal name continued</label>
+					<label>Customer name con't </label>
 					<dbColumn>CUST_NM2</dbColumn>
 					<width>40</width>
-					<length>35</length>
+					<length>30</length>
 				</column>
 				<column>
-					<label>Division/Department</label>
+					<label>Additional Info</label>
 					<dbColumn>CUST_NM3</dbColumn>
 					<width>40</width>
 					<length>35</length>
 				</column>
 				<column>
-					<label>Attention to/Building/Floor/Office</label>
+					<label>Att. person</label>
 					<dbColumn>CUST_NM4</dbColumn>
 					<width>40</width>
 					<length>35</length>
 				</column>
 				<column>
-					<label>Street name and number</label>
+					<label>Street</label>
 					<dbColumn>ADDR_TXT</dbColumn>
 					<width>40</width>
-					<length>35</length>
+					<length>30</length>
+				</column>
+				<column>
+					<label>Street con't</label>
+					<dbColumn>ADDR_TXT2</dbColumn>
+					<width>40</width>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Postal Code</label>
@@ -321,19 +333,13 @@
 					<label>City</label>
 					<dbColumn>CITY1</dbColumn>
 					<width>40</width>
-					<length>35</length>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Country (Landed)</label>
 					<dbColumn>LAND_CNTRY</dbColumn>
-					<width>18</width>
+					<width>5</width>
 					<bdsId>LandedCountry</bdsId>
-				</column>
-				<column>
-					<label>Phone</label>
-					<dbColumn>CUST_PHONE</dbColumn>
-					<width>20</width>
-					<length>10</length>
 				</column>
 			</columns>
 		</tab>
@@ -345,41 +351,47 @@
 					<width>10</width>
 					<length>6</length>
 				</column>
-				<column>
+				<column exactLength="true">
 					<label>sequence</label>
 					<dbColumn>ADDR_SEQUENCE_NO</dbColumn>
 					<width>20</width>
 					<length>5</length>
 				</column>
 				<column>
-					<label>Customer legal name </label>
+					<label>Customer name </label>
 					<dbColumn>CUST_NM1</dbColumn>
 					<width>40</width>
-					<length>35</length>
+					<length>30</length>
 				</column>
 				<column>
-					<label>Legal name continued</label>
+					<label>Customer name con't </label>
 					<dbColumn>CUST_NM2</dbColumn>
 					<width>40</width>
-					<length>35</length>
+					<length>30</length>
 				</column>
 				<column>
-					<label>Division/Department</label>
+					<label>Additional Info</label>
 					<dbColumn>CUST_NM3</dbColumn>
 					<width>40</width>
 					<length>35</length>
 				</column>
 				<column>
-					<label>Attention to/Building/Floor/Office</label>
+					<label>Att. person</label>
 					<dbColumn>CUST_NM4</dbColumn>
 					<width>40</width>
 					<length>35</length>
 				</column>
 				<column>
-					<label>Street name and number</label>
+					<label>Street</label>
 					<dbColumn>ADDR_TXT</dbColumn>
 					<width>40</width>
-					<length>35</length>
+					<length>30</length>
+				</column>
+				<column>
+					<label>Street con't</label>
+					<dbColumn>ADDR_TXT2</dbColumn>
+					<width>40</width>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Postal Code</label>
@@ -391,24 +403,18 @@
 					<label>City</label>
 					<dbColumn>CITY1</dbColumn>
 					<width>40</width>
-					<length>35</length>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Country (Landed)</label>
 					<dbColumn>LAND_CNTRY</dbColumn>
-					<width>18</width>
+					<width>5</width>
 					<bdsId>LandedCountry</bdsId>
-				</column>
-				<column>
-					<label>Phone</label>
-					<dbColumn>CUST_PHONE</dbColumn>
-					<width>20</width>
-					<length>10</length>
 				</column>
 			</columns>
 		</tab>
 
-		<tab name="EPL" data="false" type="Address" typeCode="ZI01">
+		<tab name="EPL" data="false" type="Address" typeCode="ZS02">
 			<columns>
 				<column exactLength="true">
 					<label>CMR. No</label>
@@ -416,41 +422,47 @@
 					<width>10</width>
 					<length>6</length>
 				</column>
-				<column>
+				<column exactLength="true">
 					<label>sequence</label>
 					<dbColumn>ADDR_SEQUENCE_NO</dbColumn>
 					<width>20</width>
 					<length>5</length>
 				</column>
 				<column>
-					<label>Customer legal name </label>
+					<label>Customer name </label>
 					<dbColumn>CUST_NM1</dbColumn>
 					<width>40</width>
-					<length>35</length>
+					<length>30</length>
 				</column>
 				<column>
-					<label>Legal name continued</label>
+					<label>Customer name con't </label>
 					<dbColumn>CUST_NM2</dbColumn>
 					<width>40</width>
-					<length>35</length>
+					<length>30</length>
 				</column>
 				<column>
-					<label>Division/Department</label>
+					<label>Additional Info</label>
 					<dbColumn>CUST_NM3</dbColumn>
 					<width>40</width>
 					<length>35</length>
 				</column>
 				<column>
-					<label>Attention to/Building/Floor/Office</label>
+					<label>Att. person</label>
 					<dbColumn>CUST_NM4</dbColumn>
 					<width>40</width>
 					<length>35</length>
 				</column>
 				<column>
-					<label>Street name and number</label>
+					<label>Street</label>
 					<dbColumn>ADDR_TXT</dbColumn>
 					<width>40</width>
-					<length>35</length>
+					<length>30</length>
+				</column>
+				<column>
+					<label>Street con't</label>
+					<dbColumn>ADDR_TXT2</dbColumn>
+					<width>40</width>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Postal Code</label>
@@ -462,19 +474,13 @@
 					<label>City</label>
 					<dbColumn>CITY1</dbColumn>
 					<width>40</width>
-					<length>35</length>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Country (Landed)</label>
 					<dbColumn>LAND_CNTRY</dbColumn>
-					<width>18</width>
+					<width>5</width>
 					<bdsId>LandedCountry</bdsId>
-				</column>
-				<column>
-					<label>Phone</label>
-					<dbColumn>CUST_PHONE</dbColumn>
-					<width>20</width>
-					<length>10</length>
 				</column>
 			</columns>
 		</tab>
