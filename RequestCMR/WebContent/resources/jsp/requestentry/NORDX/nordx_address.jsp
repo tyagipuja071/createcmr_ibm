@@ -51,6 +51,21 @@
     <cmr:field fieldId="CustomerName2" id="custNm2" path="custNm2" size="400" />
   </cmr:column>
 </cmr:row>
+
+<!-- CREATCMR-1752 -->
+<cmr:row addBackground="true">
+  <cmr:column span="4">
+    <cmr:label fieldId="custNm3">
+      <cmr:fieldLabel fieldId="CustomerName3" />: 
+      <cmr:delta text="-" id="delta-custNm3" code="L" />
+        <cmr:info text="${ui.info.NordicsForAdditionalInfo}" />
+    </cmr:label>
+    <cmr:delta text="-" id="delta-custNm3" />
+    <cmr:field fieldId="CustomerName3" id="custNm3" path="custNm3" size="400" />
+  </cmr:column>
+</cmr:row>
+<!-- CREATCMR-1752 -->
+
 <cmr:row addBackground="true">
   <cmr:column span="4">
     <cmr:label fieldId="custNm4">

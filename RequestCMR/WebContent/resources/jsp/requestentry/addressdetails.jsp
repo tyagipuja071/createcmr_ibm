@@ -100,6 +100,19 @@
         <div id="custNm2_view">-</div>
       </cmr:column>
     </cmr:row>
+    <cmr:view forGEO="NORDX">
+      <cmr:row>
+        <cmr:column span="1">
+          <cmr:label fieldId="custNm3_view">
+            <span class="lbl-CustomerName3">${ui.custName3}:</span>
+            <cmr:info text="${ui.info.NordicsForAdditionalInfo}" />
+          </cmr:label>:
+        </cmr:column>
+        <cmr:column span="2">
+          <div id="custNm3_view">-</div>
+        </cmr:column>
+      </cmr:row>
+    </cmr:view>
     <cmr:row>
       <cmr:column span="1" exceptForCountry="618">
         <cmr:label fieldId="custNm4_view">

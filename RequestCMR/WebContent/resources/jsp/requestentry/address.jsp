@@ -312,6 +312,11 @@ visibility: hidden !IMPORTANT;
               <cmr:formatter functionName="customerNameFormatter" />
             </cmr:gridCol>
           </cmr:view>
+          
+          <!-- Additional Info for Nordics -->
+          <cmr:view forGEO="NORDX" exceptForCountry="780">
+            <cmr:gridCol width="100px" field="custNm3" header="Additional Info" />
+          </cmr:view>
 
 			<!-- MALTA LEGACY -->
 			<cmr:view forCountry="780">
