@@ -4,6 +4,7 @@
 package com.ibm.cmr.create.batch.util.mq.transformer.impl;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -541,7 +542,6 @@ public class NORDXTransformer extends EMEATransformer {
 
     LOG.debug("Legacy Direct -Handling Address for " + (update ? "update" : "create") + " request.");
 
-    String line1 = "";
     String line2 = "";
     String line3 = "";
     String line4 = "";
@@ -551,7 +551,7 @@ public class NORDXTransformer extends EMEATransformer {
     String phone = "";
     String addrLineT = "";
 
-    String custName = StringUtils.isNotBlank(addrData.getCustNm1()) ? addrData.getCustNm1() : "";
+    String line1 = StringUtils.isNotBlank(addrData.getCustNm1()) ? addrData.getCustNm1() : "";
     String custNameCond = StringUtils.isNotBlank(addrData.getCustNm2()) ? addrData.getCustNm2() : "";
     String additionalInfo = StringUtils.isNotBlank(addrData.getCustNm3()) ? addrData.getCustNm3() : "";
     String attPerson = StringUtils.isNotBlank(addrData.getCustNm4()) ? addrData.getCustNm4() : "";
@@ -562,7 +562,6 @@ public class NORDXTransformer extends EMEATransformer {
     String postCode = StringUtils.isNotBlank(addrData.getPostCd()) ? addrData.getPostCd() : "";
     String landedCntry = StringUtils.isNotBlank(addrData.getLandCntry()) ? addrData.getLandCntry() : "";
 
-    line1 = custName;
     List<String> addrAttrList = Arrays.asList(custNameCond, additionalInfo, attPerson, street, streetCond, pobox);
 
     for (int i = 0; i < 2; i++) {
@@ -602,13 +601,29 @@ public class NORDXTransformer extends EMEATransformer {
       }
       line6 = postCode + " " + city;
     }
-
+    String[] lines = new String[] {line2, line3, line4, line5, line6 };
+    ArrayList<String> addrLnList = new ArrayList<>();
+    for (int i = 0; i < lines.length; i++) {
+      if (StringUtils.isNotBlank(lines[i])) {
+        addrLnList.add(lines[i]);
+      }
+    }
+    if (!addrLnList.isEmpty()) {
+      for (int i = 0; i < lines.length; i++) {
+        if (i < addrLnList.size()) {
+          lines[i] = addrLnList.get(i);
+        } else {
+          lines[i] = "";
+        }
+      }
+    }
+    
     legacyAddr.setAddrLine1(line1);
-    legacyAddr.setAddrLine2(line2);
-    legacyAddr.setAddrLine3(line3);
-    legacyAddr.setAddrLine4(line4);
-    legacyAddr.setAddrLine5(line5);
-    legacyAddr.setAddrLine6(line6);
+    legacyAddr.setAddrLine2(lines[0]);
+    legacyAddr.setAddrLine3(lines[1]);
+    legacyAddr.setAddrLine4(lines[2]);
+    legacyAddr.setAddrLine5(lines[3]);
+    legacyAddr.setAddrLine6(lines[4]);
     legacyAddr.setCity(addrData.getCity1());
     legacyAddr.setZipCode(addrData.getPostCd());
     legacyAddr.setStreet(addrData.getAddrTxt());
