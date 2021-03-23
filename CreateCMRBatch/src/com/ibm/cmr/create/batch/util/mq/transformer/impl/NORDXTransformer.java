@@ -601,7 +601,7 @@ public class NORDXTransformer extends EMEATransformer {
       }
       line6 = postCode + " " + city;
     }
-    String[] lines = new String[] {line2, line3, line4, line5, line6 };
+    String[] lines = new String[] { line2, line3, line4, line5, line6 };
     ArrayList<String> addrLnList = new ArrayList<>();
     for (int i = 0; i < lines.length; i++) {
       if (StringUtils.isNotBlank(lines[i])) {
@@ -617,7 +617,7 @@ public class NORDXTransformer extends EMEATransformer {
         }
       }
     }
-    
+
     legacyAddr.setAddrLine1(line1);
     legacyAddr.setAddrLine2(lines[0]);
     legacyAddr.setAddrLine3(lines[1]);
@@ -902,7 +902,7 @@ public class NORDXTransformer extends EMEATransformer {
       legacyCust.setEnterpriseNo("");
       legacyCust.setEducAllowance("");
       legacyCust.setLeasingInd("");
-      
+
       if (SystemLocation.NORWAY.equals(data.getCmrIssuingCntry())) {
         legacyCust.setCeBo("");
       } else if (SystemLocation.FINLAND.equals(data.getCmrIssuingCntry())) {
@@ -1076,8 +1076,8 @@ public class NORDXTransformer extends EMEATransformer {
       legacyCust.setEmbargoCd("");
     }
 
-    if (!StringUtils.isBlank(data.getIsicCd())) {
-      legacyCust.setImsCd(data.getIsicCd());
+    if (!StringUtils.isBlank(data.getSubIndustryCd())) {
+      legacyCust.setImsCd(data.getSubIndustryCd());
     } else {
       legacyCust.setImsCd("");
     }
@@ -1127,37 +1127,37 @@ public class NORDXTransformer extends EMEATransformer {
       } else if ("678IS".equals(data.getCountryUse())) {
         legacyCust.setCeBo("000200I");
       }
-    } 
-    
+    }
+
     String newSbo = "";
     if (SystemLocation.DENMARK.equals(data.getCmrIssuingCntry())) {
-      newSbo="3420ISU";
+      newSbo = "3420ISU";
     } else if (SystemLocation.FINLAND.equals(data.getCmrIssuingCntry())) {
       if ("702".equals(data.getCountryUse())) {
-        newSbo="3450ISU";
+        newSbo = "3450ISU";
       } else if ("702EE".equals(data.getCountryUse())) {
-        newSbo="0370ISU";
+        newSbo = "0370ISU";
       } else if ("702LT".equals(data.getCountryUse())) {
-        newSbo="0390ISU";
+        newSbo = "0390ISU";
       } else if ("702LV".equals(data.getCountryUse())) {
-        newSbo="0380ISU";
+        newSbo = "0380ISU";
       }
     } else if (SystemLocation.SWEDEN.equals(data.getCmrIssuingCntry())) {
-      newSbo="3420ISU";
+      newSbo = "3420ISU";
     } else if (SystemLocation.NORWAY.equals(data.getCmrIssuingCntry())) {
       int postCd = Integer.valueOf(mailPostCode.trim());
       if (postCd >= 0 && postCd < 4000) {
-        newSbo="1000ISU";
+        newSbo = "1000ISU";
       } else if (postCd > 3999 && postCd < 5000) {
-        newSbo="4000ISU";
+        newSbo = "4000ISU";
       } else if (postCd > 4999 && postCd < 7000) {
-        newSbo="5000ISU";
+        newSbo = "5000ISU";
       } else if (postCd > 6999 && postCd < 10000) {
-        newSbo="7000ISU";
+        newSbo = "7000ISU";
       }
     }
-      legacyCust.setSbo(newSbo);
-      legacyCust.setIbo(newSbo);
+    legacyCust.setSbo(newSbo);
+    legacyCust.setIbo(newSbo);
   }
 
   @Override
@@ -1194,13 +1194,13 @@ public class NORDXTransformer extends EMEATransformer {
       cust.setLocNo(cust.getId().getSofCntryCode() + muData.getSubIndustryCd());
     }
 
-      if (!StringUtils.isBlank(muData.getSearchTerm())) {
-        if ("@".equals(muData.getSearchTerm())) {
+    if (!StringUtils.isBlank(muData.getSearchTerm())) {
+      if ("@".equals(muData.getSearchTerm())) {
         cust.setAccAdminBo("");
-        } else {
+      } else {
         cust.setAccAdminBo(muData.getSearchTerm());
-        }
       }
+    }
 
     if (!StringUtils.isBlank(muData.getSpecialTaxCd())) {
       if ("@".equals(muData.getSpecialTaxCd())) {
@@ -1248,7 +1248,7 @@ public class NORDXTransformer extends EMEATransformer {
         }
       }
 
-      }
+    }
 
     String isuClientTier = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "")
         + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
