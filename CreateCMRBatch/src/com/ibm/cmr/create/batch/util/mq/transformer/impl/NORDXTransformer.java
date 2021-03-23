@@ -554,7 +554,7 @@ public class NORDXTransformer extends EMEATransformer {
     String custName = StringUtils.isNotBlank(addrData.getCustNm1()) ? addrData.getCustNm1() : "";
     String custNameCond = StringUtils.isNotBlank(addrData.getCustNm2()) ? addrData.getCustNm2() : "";
     String additionalInfo = StringUtils.isNotBlank(addrData.getCustNm3()) ? addrData.getCustNm3() : "";
-    String attPerson = StringUtils.isNotBlank(addrData.getContact()) ? addrData.getContact() : "";
+    String attPerson = StringUtils.isNotBlank(addrData.getCustNm4()) ? addrData.getCustNm4() : "";
     String street = StringUtils.isNotBlank(addrData.getAddrTxt()) ? addrData.getAddrTxt() : "";
     String streetCond = StringUtils.isNotBlank(addrData.getAddrTxt2()) ? addrData.getAddrTxt2() : "";
     String pobox = StringUtils.isNotBlank(addrData.getPoBox()) ? addrData.getPoBox() : "";
