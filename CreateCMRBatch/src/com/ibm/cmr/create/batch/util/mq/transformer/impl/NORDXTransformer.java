@@ -551,114 +551,70 @@ public class NORDXTransformer extends EMEATransformer {
     String phone = "";
     String addrLineT = "";
 
-    LOG.trace("Handling " + (update ? "update" : "create") + " request.");
+    String custName = StringUtils.isNotBlank(addrData.getCustNm1()) ? addrData.getCustNm1() : "";
+    String custNameCond = StringUtils.isNotBlank(addrData.getCustNm2()) ? addrData.getCustNm2() : "";
+    String additionalInfo = StringUtils.isNotBlank(addrData.getCustNm3()) ? addrData.getCustNm3() : "";
+    String attPerson = StringUtils.isNotBlank(addrData.getContact()) ? addrData.getContact() : "";
+    String street = StringUtils.isNotBlank(addrData.getAddrTxt()) ? addrData.getAddrTxt() : "";
+    String streetCond = StringUtils.isNotBlank(addrData.getAddrTxt2()) ? addrData.getAddrTxt2() : "";
+    String pobox = StringUtils.isNotBlank(addrData.getPoBox()) ? addrData.getPoBox() : "";
+    String city = StringUtils.isNotBlank(addrData.getCity1()) ? addrData.getCity1() : "";
+    String postCode = StringUtils.isNotBlank(addrData.getPostCd()) ? addrData.getPostCd() : "";
+    String landedCntry = StringUtils.isNotBlank(addrData.getLandCntry()) ? addrData.getLandCntry() : "";
 
-    // line1
-    line1 = addrData.getCustNm1();
+    line1 = custName;
+    List<String> addrAttrList = Arrays.asList(custNameCond, additionalInfo, attPerson, street, streetCond, pobox);
 
-    if (!StringUtils.isBlank(addrData.getCustNm2())) {
-      line2 = addrData.getCustNm2();
-    } else {
-      line2 = "";
-    }
-
-    String pobox = addrData.getPoBox();
-    String name3 = addrData.getCustNm3();
-    if (StringUtils.isNotBlank(name3)) {
-      line3 = name3;
-    } else if (StringUtils.isNotBlank(pobox)) {
-      line3 = "ZP02".equals(addrType) ? "" : "PO BOX ";
-      line3 = line3 + pobox;
-    }
-
-    if (!StringUtils.isBlank(addrData.getAddrTxt())) {
-      line4 = addrData.getAddrTxt();
-    } else {
-      line4 = "";
-    }
-
-    // Dept + Postal code + City
-    line5 = (addrData.getPostCd() == null ? "" : addrData.getPostCd()) + " " + (addrData.getCity1() == null ? "" : addrData.getCity1());
-
-    // if (!StringUtils.isBlank(addrData.getPoBox())) {
-    legacyAddr.setPoBox(addrData.getPoBox());
-    // }
-
-    if (SystemLocation.JORDAN.equals(cmrData.getCmrIssuingCntry())) {
-      String cntryUse = cmrData.getCountryUse();
-      if ("ZP02".equals(addrData.getId().getAddrType())) {
-        line6 = addrData.getBldg() == null ? "" : addrData.getBldg();
-      } else {
-        if (!StringUtils.isBlank(cntryUse)) {
-          if ("762PS".equals(cntryUse)) {
-            line6 = "Palestine";
-          } else {
-            if (!StringUtils.isBlank(addrData.getLandCntry())) {
-              line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
-            } else {
-              line6 = "";
-            }
-          }
-        }
-      }
-
-    } else if (SystemLocation.PAKISTAN.equals(cmrData.getCmrIssuingCntry())) {
-      String cntryUse = cmrData.getCountryUse();
-
-      if ("ZP02".equals(addrData.getId().getAddrType())) {
-        line6 = addrData.getBldg() == null ? "" : addrData.getBldg();
-      } else {
-        if (!StringUtils.isBlank(cntryUse)) {
-          if ("808AF".equals(cntryUse)) {
-            line6 = "Afganistan";
-          } else {
-            if (!StringUtils.isBlank(addrData.getLandCntry())) {
-              line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
-            } else {
-              line6 = "";
-            }
-          }
-        }
-      }
-    } else {
-      if ("ZP02".equals(addrData.getId().getAddrType())) {
-        line6 = addrData.getBldg() == null ? "" : addrData.getBldg();
-      } else {
-        if (!StringUtils.isBlank(addrData.getLandCntry())) {
-          line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
-        } else {
-          line6 = "";
-        }
+    for (int i = 0; i < 2; i++) {
+      if (StringUtils.isNotBlank(addrAttrList.get(i))) {
+        line2 = addrAttrList.get(i);
+        addrAttrList.set(i, "");
+        break;
       }
     }
 
-    // if (!StringUtils.isBlank(addrData.getCustPhone())) {
-    // phone = addrData.getCustPhone().trim();
-    // } else {
-    // phone = "";
-    // }
-
-    if (!StringUtils.isBlank(addrData.getTaxOffice())) {
-      addrLineT = addrData.getTaxOffice();
-    } else {
-      addrLineT = "";
+    for (int i = 1; i < 4; i++) {
+      if (StringUtils.isNotBlank(addrAttrList.get(i))) {
+        line3 = addrAttrList.get(i);
+        addrAttrList.set(i, "");
+        break;
+      }
     }
 
-    legacyAddr.setItCompanyProvCd(!StringUtils.isBlank(addrData.getStateProv()) ? addrData.getStateProv() : "");
+    for (int i = 2; i < 6; i++) {
+      if (StringUtils.isNotBlank(addrAttrList.get(i))) {
+        line4 = addrAttrList.get(i);
+        addrAttrList.set(i, "");
+        break;
+      }
+    }
+
+    if (crossBorder) {
+      line5 = postCode + " " + city;
+      line6 = landedCntry;
+    } else {
+      for (int i = 3; i < 6; i++) {
+        if (StringUtils.isNotBlank(addrAttrList.get(i))) {
+          line5 = addrAttrList.get(i);
+          addrAttrList.set(i, "");
+          break;
+        }
+      }
+      line6 = postCode + " " + city;
+    }
 
     legacyAddr.setAddrLine1(line1);
     legacyAddr.setAddrLine2(line2);
     legacyAddr.setAddrLine3(line3);
     legacyAddr.setAddrLine4(line4);
     legacyAddr.setAddrLine5(line5);
+    legacyAddr.setAddrLine6(line6);
     legacyAddr.setCity(addrData.getCity1());
     legacyAddr.setZipCode(addrData.getPostCd());
-    legacyAddr.setAddrLine6(line6);
-    legacyAddr.setStreet(line4);
+    legacyAddr.setStreet(addrData.getAddrTxt());
     legacyAddr.setAddrPhone(phone);
     legacyAddr.setAddrLineT(addrLineT);
     legacyAddr.setDistrict(addrData.getDept());
-    // CMR-4937
     legacyAddr.setAddrLineU("");
 
   }
