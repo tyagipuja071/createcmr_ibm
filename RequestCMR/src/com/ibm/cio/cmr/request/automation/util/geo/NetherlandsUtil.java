@@ -17,13 +17,13 @@ import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.impl.gbl.CalculateCoverageElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
-import com.ibm.cio.cmr.request.automation.out.FieldResultKey;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.CoverageContainer;
 import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
 import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
+import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
@@ -66,7 +66,7 @@ public class NetherlandsUtil extends AutomationUtil {
       landedCountryZP01 = StringUtils.isBlank(zp01.getLandCntry()) ? "" : zp01.getLandCntry();
     }
 
-    if (!StringUtils.equals(zs01.getLandCntry(), zp01.getLandCntry())) {
+    if (zp01 != null && !StringUtils.equals(zs01.getLandCntry(), zp01.getLandCntry())) {
       scenarioExceptions.setCheckVATForDnB(false);
     }
     if ((SCENARIO_BP_LOCAL.equals(scenario) || SCENARIO_BP_CROSS.equals(scenario)) && zp01 != null
@@ -120,15 +120,13 @@ public class NetherlandsUtil extends AutomationUtil {
     Data data = requestData.getData();
     String coverageId = container.getFinalCoverage();
 
-    if (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && CalculateCoverageElement.COV_BG.equals(covFrom)) {
-      FieldResultKey sboKeyVal = new FieldResultKey("DATA", "SALES_BO_CD");
-      String sboVal = "";
-      if (overrides.getData().containsKey(sboKeyVal)) {
-        sboVal = overrides.getData().get(sboKeyVal).getNewValue();
-        sboVal = sboVal.substring(0, 3);
-        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sboVal + sboVal);
-        details.append("SORTL: " + sboVal + sboVal);
-      }
+    if (StringUtils.isNotBlank(coverageId)) {
+      String sortl = getSORTLfromCoverage(entityManager, container.getFinalCoverage());
+      overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ENGINEERING_BO", data.getEngineeringBo(), sortl);
+      details.append("-BO Team: " + sortl);
+    }
+
+    if (isCoverageCalculated && StringUtils.isNotBlank(coverageId)) {
       engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
     } else if (!isCoverageCalculated) {
       // if not calculated using bg/gbg try calculation using 32/S logic
@@ -139,8 +137,7 @@ public class NetherlandsUtil extends AutomationUtil {
       if (fields != null) {
         details.append("Coverage calculated successfully using 32S logic.").append("\n");
         if (StringUtils.isNotBlank(fields.getEngineeringBO())) {
-          String eBO = "";
-          details.append("BO Team : " + eBO).append("\n");
+          details.append("BO Team : " + fields.getEngineeringBO()).append("\n");
           overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getEngineeringBo(), fields.getEngineeringBO());
         }
         if (StringUtils.isNotBlank(fields.getInac())) {
@@ -578,4 +575,32 @@ public class NetherlandsUtil extends AutomationUtil {
     }
     return zp01;
   }
+
+  /**
+   * Computes the SBO by getting the SORTL most used by the COverage ID
+   * 
+   * @param entityManager
+   * @param coverage
+   * @return
+   */
+  private String getSORTLfromCoverage(EntityManager entityManager, String coverage) {
+    String sortl = "";
+    try {
+      LOG.debug("Computing SORTL for Coverage " + coverage);
+      String sql = ExternalizedQuery.getSql("AUTO.NL.COV.SORTL");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+      query.setParameter("COVID", coverage);
+      query.setParameter("KATR6", SystemLocation.NETHERLANDS);
+      query.setForReadOnly(true);
+      sortl = query.getSingleResult(String.class);
+    } catch (Exception e) {
+      LOG.debug("Error while computing SORTL for Coverage " + coverage + " from RDc query.");
+    }
+    if (sortl != null && !StringUtils.isBlank(sortl)) {
+      return sortl;
+    }
+    return null;
+  }
+
 }
