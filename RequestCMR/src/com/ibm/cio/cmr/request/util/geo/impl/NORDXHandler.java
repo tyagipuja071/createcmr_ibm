@@ -1040,6 +1040,7 @@ public class NORDXHandler extends BaseSOFHandler {
                   }
                 }
               }
+
               String city = "";// 9
               currCell = (XSSFCell) row.getCell(9);
               city = validateColValFromCell(currCell);

@@ -558,12 +558,15 @@ public class NORDXTransformer extends EMEATransformer {
     String street = StringUtils.isNotBlank(addrData.getAddrTxt()) ? addrData.getAddrTxt() : "";
     String streetCond = StringUtils.isNotBlank(addrData.getAddrTxt2()) ? addrData.getAddrTxt2() : "";
     String pobox = StringUtils.isNotBlank(addrData.getPoBox()) ? addrData.getPoBox() : "";
+
+    String comboStreetCondPobox = streetCond + (StringUtils.isBlank(pobox) ? "" : ", PO BOX ") + pobox;
     String city = StringUtils.isNotBlank(addrData.getCity1()) ? addrData.getCity1() : "";
     String postCode = StringUtils.isNotBlank(addrData.getPostCd()) ? addrData.getPostCd() : "";
     String landedCntry = StringUtils.isNotBlank(addrData.getLandCntry()) ? addrData.getLandCntry() : "";
 
     line1 = custName;
-    List<String> addrAttrList = Arrays.asList(custNameCond, additionalInfo, attPerson, street, streetCond, pobox);
+    List<String> addrAttrList = Arrays.asList(custNameCond, additionalInfo, attPerson, street, comboStreetCondPobox);
+
 
     for (int i = 0; i < 2; i++) {
       if (StringUtils.isNotBlank(addrAttrList.get(i))) {
@@ -581,7 +584,7 @@ public class NORDXTransformer extends EMEATransformer {
       }
     }
 
-    for (int i = 2; i < 6; i++) {
+    for (int i = 2; i < addrAttrList.size(); i++) {
       if (StringUtils.isNotBlank(addrAttrList.get(i))) {
         line4 = addrAttrList.get(i);
         addrAttrList.set(i, "");
@@ -593,7 +596,7 @@ public class NORDXTransformer extends EMEATransformer {
       line5 = postCode + " " + city;
       line6 = landedCntry;
     } else {
-      for (int i = 3; i < 6; i++) {
+      for (int i = 3; i < addrAttrList.size(); i++) {
         if (StringUtils.isNotBlank(addrAttrList.get(i))) {
           line5 = addrAttrList.get(i);
           addrAttrList.set(i, "");
