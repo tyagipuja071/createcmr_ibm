@@ -163,8 +163,8 @@ public class BeLuxUtil extends AutomationUtil {
       return true;
     }
 
-    if (StringUtils.isNotBlank(gbgCntry)) {
-      String sortl = getSORTLfromCoverage(entityManager, container.getFinalCoverage(), gbgCntry);
+    if (StringUtils.isNotBlank(cmrCntry)) {
+      String sortl = getSORTLfromCoverage(entityManager, container.getFinalCoverage(), cmrCntry);
       if (StringUtils.isNotBlank(sortl)) {
         details.append("SORTL calculated on basis of Existing CMR Data: " + sortl);
         overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getSearchTerm(), sortl);
@@ -590,11 +590,13 @@ public class BeLuxUtil extends AutomationUtil {
     try {
       LOG.debug("Computing SORTL for Coverage " + coverage);
       String gbgCntryCd = gbgCntry.equalsIgnoreCase("Belgium") ? "BE" : "LU";
+      String konzs = "BE".equalsIgnoreCase(gbgCntryCd) ? "0016" : "0502";
       String sql = ExternalizedQuery.getSql("AUTO.BELUX.COV.SORTL");
       PreparedQuery query = new PreparedQuery(entityManager, sql);
       query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
       query.setParameter("COVID", coverage);
       query.setParameter("LAND1", gbgCntryCd);
+      query.setParameter("KONZS", konzs);
       query.setForReadOnly(true);
       sortl = query.getSingleResult(String.class);
     } catch (Exception e) {
