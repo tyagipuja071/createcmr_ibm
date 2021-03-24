@@ -74,8 +74,7 @@ function afterConfigForNL() {
   var vatExempt = dojo.byId('vatExempt');
   var vatExemptChecked = dojo.byId('vatExempt').checked;
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
-  if (custSubScnrio == 'PRICU' || custSubScnrio == 'PUBCU' || custSubScnrio == 'CBCOM' || custSubScnrio == 'CBBUS' || (custSubScnrio == 'INTER' && vatExempt && vatExemptChecked)
-      || viewOnlyPage == 'true') {
+  if (custSubScnrio == 'PRICU' || custSubScnrio == 'CBCOM' || custSubScnrio == 'CBBUS' || (custSubScnrio == 'INTER' && vatExempt && vatExemptChecked) || viewOnlyPage == 'true') {
     FormManager.removeValidator('taxCd2', Validators.REQUIRED);
   } else if (reqType != 'U') {
     FormManager.addValidator('taxCd2', Validators.REQUIRED, [ 'KVK' ], 'MAIN_CUST_TAB');
