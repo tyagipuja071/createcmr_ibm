@@ -167,7 +167,7 @@ public class BeLuxUtil extends AutomationUtil {
     if (StringUtils.isNotBlank(cmrCntry)) {
       String sortl = getSORTLfromCoverage(entityManager, container.getFinalCoverage(), cmrCntry);
       if (StringUtils.isNotBlank(sortl)) {
-        details.append("SORTL calculated on basis of Existing CMR Data: " + sortl);
+        details.append("SORTL calculated on basis of Existing CMR Data: " + sortl).append("\n");
         overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getSearchTerm(), sortl);
         String sbo = "";
         if (data.getCountryUse().length() == 3) {
