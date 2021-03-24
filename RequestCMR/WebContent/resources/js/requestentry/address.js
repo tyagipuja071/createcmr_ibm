@@ -204,8 +204,9 @@ function openAddressDetails(reqId, addrType, addrSeq, mandt) {
   cmr.showModal('AddressDetailsModal');
   openAddressDetails.addrType = addrType;
   if (nordx_cntries.indexOf(cntry) > -1 && (addrType == 'ZP02' || addrType == 'ZI01') && (reqType == 'U' || reqType == 'X')) {
-    cmr.showNode("machineSerialAddrDetails");
-    setAddrDetailsForView(addrType, addrSeq);
+    // cmr.showNode("machineSerialAddrDetails");
+    // setAddrDetailsForView(addrType, addrSeq);
+    cmr.hideNode("machineSerialAddrDetails");
   } else if (nordx_cntries.indexOf(cntry) > -1 || cntry == '702') {
     cmr.hideNode("machineSerialAddrDetails");
   }
@@ -1826,16 +1827,33 @@ function applyAddrChangesModal_onLoad() {
       if ((cntry == '702' || cntry == '846' || cntry == '678' || cntry == '806') && (FormManager.getActualValue('reqType') == 'C' || FormManager.getActualValue('reqType') == 'U')) {
 
         if (SysLoc.FINLAND == cntry && cntryRegion == '702') {
+          // if (cmr.currentAddressType && type.ret1 != cmr.currentAddressType)
+          // {
+          // if (type.ret2 != 'Shipping' && type.ret2 != 'Installing
+          // (Additional)') {
+          // choices += '<input type="checkbox" name="copyTypes" value ="' +
+          // type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2
+          // + '</label><br>';
+          // }
+          // } else {
+          // if (type.ret2 != 'Shipping' && type.ret2 != 'Installing
+          // (Additional)') {
+          // choices += '<input type="checkbox" name="copyTypes" value ="' +
+          // type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2
+          // + ' (copy only if others exist)</label><br>';
+          // addressDesc = type.ret2;
+          // }
+          //
+          // }
           if (cmr.currentAddressType && type.ret1 != cmr.currentAddressType) {
-            if (type.ret2 != 'Shipping' && type.ret2 != 'Installing (Additional)') {
+            if (type.ret2 != 'Installing (Additional)') {
               choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + '</label><br>';
             }
           } else {
-            if (type.ret2 != 'Shipping' && type.ret2 != 'Installing (Additional)') {
+            if (type.ret2 != 'Installing (Additional)') {
               choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (copy only if others exist)</label><br>';
               addressDesc = type.ret2;
             }
-
           }
         } else {
           if (cmr.currentAddressType && type.ret1 != cmr.currentAddressType) {
@@ -1861,23 +1879,47 @@ function applyAddrChangesModal_onLoad() {
         }
 
       } else if (SysLoc.FINLAND == cntry && cntryRegion == '702') {
+        // if (cmr.currentAddressType && type.ret1 != cmr.currentAddressType) {
+        // if (type.ret2 != 'Shipping') {
+        // if (reqType != 'C' && typeof (GEOHandler) != 'undefined' &&
+        // !GEOHandler.canCopyAddressType(type.ret1) && !single) {
+        // choices += '<input type="checkbox" name="copyTypes" value ="' +
+        // type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + '
+        // (create additional only)</label><br>';
+        // } else {
+        // choices += '<input type="checkbox" name="copyTypes" value ="' +
+        // type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 +
+        // '</label><br>';
+        // }
+        // }
+        // } else {
+        // if (type.ret2 != 'Shipping') {
+        // if (reqType != 'C' && typeof (GEOHandler) != 'undefined' &&
+        // !GEOHandler.canCopyAddressType(type.ret1) && !single) {
+        // choices += '<input type="checkbox" name="copyTypes" value ="' +
+        // type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + '
+        // (create additional only)</label><br>';
+        // } else {
+        // choices += '<input type="checkbox" name="copyTypes" value ="' +
+        // type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + '
+        // (copy only if others exist)</label><br>';
+        // }
+        // addressDesc = type.ret2;
+        // }
+        // }
         if (cmr.currentAddressType && type.ret1 != cmr.currentAddressType) {
-          if (type.ret2 != 'Shipping') {
-            if (reqType != 'C' && typeof (GEOHandler) != 'undefined' && !GEOHandler.canCopyAddressType(type.ret1) && !single) {
-              choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (create additional only)</label><br>';
-            } else {
-              choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + '</label><br>';
-            }
+          if (reqType != 'C' && typeof (GEOHandler) != 'undefined' && !GEOHandler.canCopyAddressType(type.ret1) && !single) {
+            choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (create additional only)</label><br>';
+          } else {
+            choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + '</label><br>';
           }
         } else {
-          if (type.ret2 != 'Shipping') {
-            if (reqType != 'C' && typeof (GEOHandler) != 'undefined' && !GEOHandler.canCopyAddressType(type.ret1) && !single) {
-              choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (create additional only)</label><br>';
-            } else {
-              choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (copy only if others exist)</label><br>';
-            }
-            addressDesc = type.ret2;
+          if (reqType != 'C' && typeof (GEOHandler) != 'undefined' && !GEOHandler.canCopyAddressType(type.ret1) && !single) {
+            choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (create additional only)</label><br>';
+          } else {
+            choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (copy only if others exist)</label><br>';
           }
+          addressDesc = type.ret2;
         }
       } else if (cntry == '788') {
         if (type.ret1 != 'ZKVK' && type.ret1 != 'ZVAT') {
