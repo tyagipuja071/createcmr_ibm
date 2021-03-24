@@ -673,110 +673,102 @@ public class NORDXTransformer extends EMEATransformer {
   public void transformLegacyAddressDataMassUpdate(EntityManager entityManager, CmrtAddr legacyAddr, MassUpdtAddr addr, String cntry, CmrtCust cust,
       Data data, LegacyDirectObjectContainer legacyObjects) {
     legacyAddr.setForUpdate(true);
-
-    if (!StringUtils.isBlank(addr.getCustNm1())) {
-      legacyAddr.setAddrLine1(addr.getCustNm1());
-
+    boolean dummyReq = false;
+    if (StringUtils.isBlank(addr.getCustNm1())) {
+      dummyReq = true;
     }
+    if (dummyReq) {
+      return;
+    }
+    boolean crossBorder = !DEFAULT_LANDED_COUNTRY.equals(addr.getLandCntry());
 
-    if (!StringUtils.isBlank(addr.getCustNm2())) {
-      if ("@".equals(addr.getCustNm2())) {
-        legacyAddr.setAddrLine2("");
-      } else {
-        legacyAddr.setAddrLine2(addr.getCustNm2());
+    String line2 = "";
+    String line3 = "";
+    String line4 = "";
+    String line5 = "";
+    String line6 = "";
+    String addrType = addr.getId().getAddrType();
+    String phone = "";
+    String addrLineT = "";
 
+    String custNameCond = StringUtils.isNotBlank(addr.getCustNm2()) ? addr.getCustNm2() : "";
+    String additionalInfo = StringUtils.isNotBlank(addr.getCustNm3()) ? addr.getCustNm3() : "";
+    String attPerson = StringUtils.isNotBlank(addr.getCustNm4()) ? addr.getCustNm4() : "";
+    String street = StringUtils.isNotBlank(addr.getAddrTxt()) ? addr.getAddrTxt() : "";
+    String streetCond = StringUtils.isNotBlank(addr.getAddrTxt2()) ? addr.getAddrTxt2() : "";
+    String pobox = StringUtils.isNotBlank(addr.getPoBox()) ? addr.getPoBox() : "";
+    String comboStreetCondPobox = streetCond + (StringUtils.isBlank(pobox) ? "" : ", PO BOX ") + pobox;
+    String city = StringUtils.isNotBlank(addr.getCity1()) ? addr.getCity1() : "";
+    String postCode = StringUtils.isNotBlank(addr.getPostCd()) ? addr.getPostCd() : "";
+    String landedCntry = StringUtils.isNotBlank(addr.getLandCntry()) ? addr.getLandCntry() : "";
+
+    List<String> addrAttrList = Arrays.asList(custNameCond, additionalInfo, attPerson, street, comboStreetCondPobox);
+
+    for (int i = 0; i < 2; i++) {
+      if (StringUtils.isNotBlank(addrAttrList.get(i))) {
+        line2 = addrAttrList.get(i);
+        addrAttrList.set(i, "");
+        break;
       }
     }
 
-    if (!StringUtils.isBlank(addr.getAddrTxt())) {
-      legacyAddr.setStreet(addr.getAddrTxt());
-      legacyAddr.setAddrLine4(addr.getAddrTxt());
-
-    }
-
-    String pobox = addr.getPoBox();
-    String name3 = addr.getCustNm3();
-
-    if (!StringUtils.isBlank(name3)) {
-      if ("@".equals(name3)) {
-        legacyAddr.setAddrLine3("");
-      } else {
-        legacyAddr.setAddrLine3(name3);
-      }
-    } else if (!StringUtils.isBlank(pobox)) {
-      String line3 = "ZP02".equals(addr.getAddrTxt()) ? "" : "PO BOX ";
-      line3 = line3 + pobox;
-      if ("@".equals(pobox)) {
-        legacyAddr.setAddrLine3(line3);
-      } else {
-        legacyAddr.setAddrLine3(line3);
+    for (int i = 1; i < 4; i++) {
+      if (StringUtils.isNotBlank(addrAttrList.get(i))) {
+        line3 = addrAttrList.get(i);
+        addrAttrList.set(i, "");
+        break;
       }
     }
 
-    if (!StringUtils.isBlank(addr.getPoBox())) {
-      if ("@".equals(addr.getPoBox())) {
-        legacyAddr.setPoBox("");
-      } else {
-        legacyAddr.setPoBox(addr.getPoBox());
-      }
-    }
-    // legacy addr line5 is set in order district+postCd+City
-    StringBuilder addrLine5 = new StringBuilder();
-
-    if (!StringUtils.isBlank(addr.getDept())) {
-      if ("@".equals(addr.getDept())) {
-        legacyAddr.setDistrict("");
-        // addrLine5.append(" ");
-      } else {
-        addrLine5.append(addr.getDept() + " ");
-        legacyAddr.setDistrict(addr.getDept());
-
+    for (int i = 2; i < addrAttrList.size(); i++) {
+      if (StringUtils.isNotBlank(addrAttrList.get(i))) {
+        line4 = addrAttrList.get(i);
+        addrAttrList.set(i, "");
+        break;
       }
     }
 
-    if (!StringUtils.isBlank(addr.getPostCd())) {
-      if ("@".equals(addr.getPostCd())) {
-        legacyAddr.setZipCode("");
-        // addrLine5.append(" ");
-      } else {
-        legacyAddr.setZipCode(addr.getPostCd());
-        addrLine5.append(addr.getPostCd() + " ");
-      }
-    }
-
-    if (!StringUtils.isBlank(addr.getCity1())) {
-      if ("@".equals(addr.getCity1())) {
-        legacyAddr.setCity("");
-        // addrLine5.append(" ");
-      } else {
-        legacyAddr.setCity(addr.getCity1());
-        addrLine5.append(addr.getCity1() + " ");
-      }
-    }
-
-    if (!StringUtils.isBlank(addr.getCustLangCd())) {
-      legacyAddr.setLanguage(addr.getCustLangCd());
-
-    }
-
-    if (!StringUtils.isBlank(addrLine5.toString())) {
-      legacyAddr.setAddrLine5(addrLine5.toString());
-
-    }
-
-    if ("ZP02".equals(addr.getId().getAddrType())) {
-      if (!StringUtils.isBlank(addr.getDivn())) {
-        if ("@".equals(addr.getDivn())) {
-          legacyAddr.setAddrLine6("");
-        } else {
-          legacyAddr.setAddrLine6(addr.getDivn());
+    if (crossBorder) {
+      line5 = postCode + " " + city;
+      line6 = landedCntry;
+    } else {
+      for (int i = 3; i < addrAttrList.size(); i++) {
+        if (StringUtils.isNotBlank(addrAttrList.get(i))) {
+          line5 = addrAttrList.get(i);
+          addrAttrList.set(i, "");
+          break;
         }
       }
-    } else {
-      if (!StringUtils.isBlank(addr.getLandCntry())) {
-        legacyAddr.setAddrLine6(LandedCountryMap.getCountryName(addr.getLandCntry()));
+      line6 = postCode + " " + city;
+    }
+    String[] lines = new String[] { line2, line3, line4, line5, line6 };
+    ArrayList<String> addrLnList = new ArrayList<>();
+    for (int i = 0; i < lines.length; i++) {
+      if (StringUtils.isNotBlank(lines[i])) {
+        addrLnList.add(lines[i]);
       }
     }
+    if (!addrLnList.isEmpty()) {
+      for (int i = 0; i < lines.length; i++) {
+        if (i < addrLnList.size()) {
+          lines[i] = addrLnList.get(i);
+        } else {
+          lines[i] = "";
+        }
+      }
+    }
+
+    legacyAddr.setAddrLine1(addr.getCustNm1());
+    legacyAddr.setAddrLine2(lines[0]);
+    legacyAddr.setAddrLine3(lines[1]);
+    legacyAddr.setAddrLine4(lines[2]);
+    legacyAddr.setAddrLine5(lines[3]);
+    legacyAddr.setAddrLine6(lines[4]);
+    legacyAddr.setCity(city);
+    legacyAddr.setZipCode(postCode);
+    legacyAddr.setStreet(street);
+    legacyAddr.setAddrPhone(phone);
+    legacyAddr.setAddrLineU("");
 
     // boolean crossBorder = false;
     // if (!StringUtils.isEmpty(addr.getLandCntry()) &&
@@ -787,7 +779,7 @@ public class NORDXTransformer extends EMEATransformer {
     // }
     // formatMassUpdateAddressLines(entityManager, legacyAddr, addr, false);
 
-  }
+      }
 
   @Override
   public void formatMassUpdateAddressLines(EntityManager entityManager, CmrtAddr legacyAddr, MassUpdtAddr massUpdtAddr, boolean isFAddr) {
@@ -1168,7 +1160,19 @@ public class NORDXTransformer extends EMEATransformer {
   public void transformLegacyCustomerDataMassUpdate(EntityManager entityManager, CmrtCust cust, CMRRequestContainer cmrObjects, MassUpdtData muData) { // default
     LOG.debug("Mapping default Data values..");
     String issuingCntry = cust.getId().getSofCntryCode();
-
+    
+    if (!(StringUtils.isNotBlank(muData.getAbbrevNm()) || StringUtils.isNotBlank(muData.getSvcArOffice())
+        || StringUtils.isNotBlank(muData.getCurrencyCd()) || StringUtils.isNotBlank(muData.getSubIndustryCd())
+        || StringUtils.isNotBlank(muData.getSearchTerm()) || StringUtils.isNotBlank(muData.getSpecialTaxCd())
+        || StringUtils.isNotBlank(muData.getNewEntpName1()) || StringUtils.isNotBlank(muData.getAbbrevLocn())
+        || StringUtils.isNotBlank(muData.getMiscBillCd()) || StringUtils.isNotBlank(muData.getModeOfPayment())
+        || StringUtils.isNotBlank(muData.getIsuCd()) || StringUtils.isNotBlank(muData.getRepTeamMemberNo())
+        || StringUtils.isNotBlank(muData.getCompany()) || StringUtils.isNotBlank(muData.getEmail1())
+        || StringUtils.isNotBlank(muData.getCollectionCd()) || StringUtils.isNotBlank(muData.getIsicCd()) || StringUtils.isNotBlank(muData.getVat())
+        || StringUtils.isNotBlank(muData.getInacCd()))) {
+      // dummyReq
+      return;
+    }
     if (!StringUtils.isBlank(muData.getAbbrevNm())) {
       if ("@".equals(muData.getAbbrevNm())) {
         cust.setAbbrevNm("");
@@ -1557,13 +1561,7 @@ public class NORDXTransformer extends EMEATransformer {
 
   @Override
   public boolean hasCmrtCustExt() {
-    if ("BH".equals(DEFAULT_LANDED_COUNTRY) || "MA".equals(DEFAULT_LANDED_COUNTRY) || "AE".equals(DEFAULT_LANDED_COUNTRY)
-        || "KW".equals(DEFAULT_LANDED_COUNTRY) || "OM".equals(DEFAULT_LANDED_COUNTRY) || "QA".equals(DEFAULT_LANDED_COUNTRY)
-        || "SA".equals(DEFAULT_LANDED_COUNTRY) || "GC".equals(DEFAULT_LANDED_COUNTRY)) {
       return true;
-    } else {
-      return false;
-    }
   }
 
   @Override

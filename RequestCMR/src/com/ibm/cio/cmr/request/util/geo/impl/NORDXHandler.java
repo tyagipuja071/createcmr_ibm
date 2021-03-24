@@ -883,6 +883,9 @@ public class NORDXHandler extends BaseSOFHandler {
               }
             }
             if ("Data".equals(name)) {
+              if (dummyUpd) {
+                continue;
+              }
                 currCell = (XSSFCell) row.getCell(1);
                 abbName = validateColValFromCell(currCell);
                 if ("@".equals(abbName)) {
@@ -979,9 +982,73 @@ public class NORDXHandler extends BaseSOFHandler {
                 continue;
               }
 
+              String custNm = "";// 2
+              String additionalInfo = "";// 4
+              String street = "";// 6
+              String streetCon = "";// 7
+              String postCd = "";// 8
+              String city = "";// 9
+              String landedCntry = "";// 10
               String poBox = "";// 11
+
+              currCell = (XSSFCell) row.getCell(2);
+              custNm = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(4);
+              additionalInfo = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(6);
+              street = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(7);
+              streetCon = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(11);
               poBox = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(8);
+              postCd = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(9);
+              city = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(10);
+              landedCntry = validateColValFromCell(currCell);
+
+              if ("Installing,Shipping,EPL".contains(name)) {
+                if (StringUtils.isBlank(custNm) || StringUtils.isBlank(street) || StringUtils.isBlank(city) || StringUtils.isBlank(landedCntry)) {
+                  TemplateValidation error = new TemplateValidation(name);
+                  LOG.trace("The row " + (row.getRowNum() + 1)
+                      + ":Note that Customer name, Street, City, Landed Country must be filled. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "CMR No.",
+                      "The row " + (row.getRowNum() + 1)
+                          + ":Note that Customer name, Street, City, Landed Country must be filled. Please fix and upload the template again.<br>");
+                  validations.add(error);
+                }
+              } else {
+                if (StringUtils.isBlank(custNm) || StringUtils.isBlank(city) || StringUtils.isBlank(landedCntry)) {
+                  TemplateValidation error = new TemplateValidation(name);
+                  LOG.trace("The row " + (row.getRowNum() + 1)
+                      + ":Note that Customer name, City, Landed Country must be filled. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "CMR No.", "The row " + (row.getRowNum() + 1)
+                      + ":Note that Customer name, City, Landed Country must be filled. Please fix and upload the template again.<br>");
+                  validations.add(error);
+                }
+              }
+
+              if (StringUtils.isNotBlank(street)) {
+                if (!(StringUtils.isNotBlank(streetCon) || StringUtils.isNotBlank(additionalInfo))) {
+                  TemplateValidation error = new TemplateValidation(name);
+                  LOG.trace("The row " + (row.getRowNum() + 1)
+                      + ":Note that Street Cond and Additional Info both blank not allowed. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "CMR No.", "The row " + (row.getRowNum() + 1)
+                      + ":Note that Street Cond and Additional Info both blank not allowed. Please fix and upload the template again.<br>");
+                  validations.add(error);
+                }
+
+                if (!(StringUtils.isBlank(streetCon) || StringUtils.isBlank(additionalInfo))) {
+                  TemplateValidation error = new TemplateValidation(name);
+                  LOG.trace("The row " + (row.getRowNum() + 1)
+                      + ":Note that Street Cond and Additional Info both filled not allowed. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "CMR No.", "The row " + (row.getRowNum() + 1)
+                      + ":Note that Street Cond and Additional Info both filled not allowed. Please fix and upload the template again.<br>");
+                  validations.add(error);
+                }
+              }
+
               if (StringUtils.isNotBlank(poBox) && !StringUtils.isNumericSpace(poBox)) {
                 TemplateValidation error = new TemplateValidation(name);
                 LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that PO Box only accept digits. Please fix and upload the template again.");
@@ -991,11 +1058,8 @@ public class NORDXHandler extends BaseSOFHandler {
 
               }
 
-              String StreetCon = "";// 7
-              currCell = (XSSFCell) row.getCell(7);
-              StreetCon = validateColValFromCell(currCell);
               if (StringUtils.isBlank(poBox)) {
-                if (StreetCon.length() > 30) {
+                if (streetCon.length() > 30) {
                   TemplateValidation error = new TemplateValidation(name);
                   LOG.trace("The row " + (row.getRowNum() + 1)
                       + ":Note that Street Cond should less than 30 chars. Please fix and upload the template again.");
@@ -1005,7 +1069,7 @@ public class NORDXHandler extends BaseSOFHandler {
 
                 }
               } else {
-                String combingStr = StreetCon + ", PO BOX " + poBox;
+                String combingStr = streetCon + ", PO BOX " + poBox;
                 if (combingStr.length() > 30) {
                   TemplateValidation error = new TemplateValidation(name);
                   LOG.trace("The row " + (row.getRowNum() + 1)
@@ -1015,14 +1079,6 @@ public class NORDXHandler extends BaseSOFHandler {
                   validations.add(error);
                 }
               }
-
-              String postCd = "";// 8
-              currCell = (XSSFCell) row.getCell(8);
-              postCd = validateColValFromCell(currCell);
-
-              String landedCntry = "";
-              currCell = (XSSFCell) row.getCell(8);
-              landedCntry = validateColValFromCell(currCell);
 
               if (!StringUtils.isEmpty(postCd)) {
                 if (StringUtils.isEmpty(landedCntry)) {
@@ -1048,9 +1104,6 @@ public class NORDXHandler extends BaseSOFHandler {
                 }
               }
 
-              String city = "";// 9
-              currCell = (XSSFCell) row.getCell(9);
-              city = validateColValFromCell(currCell);
               if (StringUtils.isNotBlank(city)) {
                 if (city.length() > 30) {
                   TemplateValidation error = new TemplateValidation(name);
