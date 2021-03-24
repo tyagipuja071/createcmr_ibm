@@ -83,7 +83,9 @@ public class DnBOrgIdValidationElement extends ValidatingElement implements Comp
 
     if (soldTo != null) {
       boolean shouldThrowError = !"Y".equals(admin.getCompVerifiedIndc()) && StringUtils.isBlank(admin.getSourceSystId());
-
+      if ("U".equalsIgnoreCase(admin.getReqType())) {
+        shouldThrowError = false;
+      }
       boolean hasValidMatches = false;
       List<DnBMatchingResponse> dnbMatches = new ArrayList<DnBMatchingResponse>();
       DnBMatchingResponse dnbMatch = (DnBMatchingResponse) engineData.get("dnbMatching");
