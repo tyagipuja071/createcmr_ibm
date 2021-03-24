@@ -893,7 +893,7 @@ public class NORDXHandler extends BaseSOFHandler {
                   LOG.trace(
                       "The row " + (row.getRowNum() + 1)
                           + ":Note that Abbreviated Name is not allowed blank out. Please fix and upload the template again.");
-                  error.addError((row.getRowNum() + 1), "CMR No.",
+                error.addError((row.getRowNum() + 1), "Abbreviated Name",
                       "The row " + (row.getRowNum() + 1)
                           + ":Note that Abbreviated Name is not allowed blank out. Please fix and upload the template again.<br>");
                   validations.add(error);
@@ -906,7 +906,7 @@ public class NORDXHandler extends BaseSOFHandler {
                   LOG.trace(
                       "The row " + (row.getRowNum() + 1)
                           + ":Note that Abbreviated Location is not allowed blank out. Please fix and upload the template again.");
-                  error.addError((row.getRowNum() + 1), "CMR No.", "The row " + (row.getRowNum() + 1)
+                error.addError((row.getRowNum() + 1), "Abbreviated Location", "The row " + (row.getRowNum() + 1)
                       + ":Note that Abbreviated Location is mandatory. Please fix and upload the template again.<br>");
                   validations.add(error);
                 }
@@ -917,7 +917,7 @@ public class NORDXHandler extends BaseSOFHandler {
                   TemplateValidation error = new TemplateValidation(name);
                   LOG.trace("The row " + (row.getRowNum() + 1)
                       + ":Note that Payment terms is not allowed blank out. Please fix and upload the template again.");
-                  error.addError((row.getRowNum() + 1), "CMR No.",
+                error.addError((row.getRowNum() + 1), "Payment terms",
                       "The row " + (row.getRowNum() + 1)
                           + ":Note that Payment terms is not allowed blank out. Please fix and upload the template again.<br>");
                   validations.add(error);
@@ -929,7 +929,7 @@ public class NORDXHandler extends BaseSOFHandler {
                   TemplateValidation error = new TemplateValidation(name);
                   LOG.trace("The row " + (row.getRowNum() + 1)
                       + ":Note that Leading Account Number is not allowed blank out. Please fix and upload the template again.");
-                  error.addError((row.getRowNum() + 1), "CMR No.", "The row " + (row.getRowNum() + 1)
+                error.addError((row.getRowNum() + 1), "Leading Account Number", "The row " + (row.getRowNum() + 1)
                       + ":Note that Leading Account Number is not allowed blank out. Please fix and upload the template again.<br>");
                   validations.add(error);
                 }
@@ -937,18 +937,19 @@ public class NORDXHandler extends BaseSOFHandler {
                 TemplateValidation error = new TemplateValidation(name);
                 LOG.trace("The row " + (row.getRowNum() + 1)
                     + ":Note that Leading Account Number should be only numeric. Please fix and upload the template again.");
-                error.addError((row.getRowNum() + 1), "CMR No.", "The row " + (row.getRowNum() + 1)
+                error.addError((row.getRowNum() + 1), "Leading Account Number", "The row " + (row.getRowNum() + 1)
                     + ":Note that Leading Account Number should be only numeric. Please fix and upload the template again.<br>");
                 validations.add(error);
               }
 
               currCell = (XSSFCell) row.getCell(6);
               inac = validateColValFromCell(currCell);
-              if (!StringUtils.isBlank(inac) && !(inac.matches("^[a-zA-z]{2}[0-9]{2}") || inac.matches("^[a-zA-z]{4}"))) {
+              if (!StringUtils.isBlank(inac) && !(inac.matches("^[a-zA-z]{2}[0-9]{2}") || inac.matches("^[a-zA-z]{4}") || "@@@@".equals(inac))) {
                 TemplateValidation error = new TemplateValidation(name);
                 LOG.trace("The row " + (row.getRowNum() + 1)
                     + ":Note that INAC format is incorrect. Please fix and upload the template again.");
-                error.addError((row.getRowNum() + 1), "CMR No.", "The row " + (row.getRowNum() + 1)
+                error.addError((row.getRowNum() + 1), "INAC",
+                    "The row " + (row.getRowNum() + 1)
                     + ":Note that INAC format is incorrect. Please fix and upload the template again.<br>");
                 validations.add(error);
               }
@@ -959,7 +960,7 @@ public class NORDXHandler extends BaseSOFHandler {
                   TemplateValidation error = new TemplateValidation(name);
                   LOG.trace("The row " + (row.getRowNum() + 1)
                       + ":Note that A/C Admin DSC is not allowed blank out. Please fix and upload the template again.");
-                  error.addError((row.getRowNum() + 1), "CMR No.",
+                error.addError((row.getRowNum() + 1), "A/C Admin DSC",
                       "The row " + (row.getRowNum() + 1)
                           + ":Note that A/C Admin DSC is not allowed blank out. Please fix and upload the template again.<br>");
                   validations.add(error);
@@ -971,7 +972,7 @@ public class NORDXHandler extends BaseSOFHandler {
                   TemplateValidation error = new TemplateValidation(name);
                   LOG.trace("The row " + (row.getRowNum() + 1)
                       + ":Note that Sales Rep is not allowed blank out. Please fix and upload the template again.");
-                  error.addError((row.getRowNum() + 1), "CMR No.",
+                error.addError((row.getRowNum() + 1), "Sales Rep",
                       "The row " + (row.getRowNum() + 1)
                           + ":Note that Sales Rep is not allowed blank out. Please fix and upload the template again.<br>");
                   validations.add(error);
@@ -981,9 +982,10 @@ public class NORDXHandler extends BaseSOFHandler {
               if (dummyUpd) {
                 continue;
               }
-
               String custNm = "";// 2
+              String custNmCond = "";//3
               String additionalInfo = "";// 4
+              String attPerson = "";// 5
               String street = "";// 6
               String streetCon = "";// 7
               String postCd = "";// 8
@@ -993,57 +995,128 @@ public class NORDXHandler extends BaseSOFHandler {
 
               currCell = (XSSFCell) row.getCell(2);
               custNm = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(3);
+              custNmCond = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(4);
               additionalInfo = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(5);
+              attPerson = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(6);
               street = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(7);
               streetCon = validateColValFromCell(currCell);
-              currCell = (XSSFCell) row.getCell(11);
-              poBox = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(8);
               postCd = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(9);
               city = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(10);
               landedCntry = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(11);
+              poBox = validateColValFromCell(currCell);
+
+              boolean isCrossBoarder = true;
+              String cntryDesc = "";
+              if (SystemLocation.DENMARK.equals(country)) {
+                cntryDesc = "DE";
+              } else if (SystemLocation.FINLAND.equals(country)) {
+                cntryDesc = "FI";
+              } else if (SystemLocation.NORWAY.equals(country)) {
+                cntryDesc = "NO";
+              } else if (SystemLocation.SWEDEN.equals(country)) {
+                cntryDesc = "SE";
+              }
+              if (cntryDesc.equals(landedCntry.substring(0, 2))) {
+                isCrossBoarder = false;
+              }
+              
+              int fieldCount=0;
+              if (StringUtils.isNotBlank(custNmCond)) {
+                fieldCount++;
+              }
+              if (StringUtils.isNotBlank(additionalInfo)) {
+                fieldCount++;
+              }
+              if (StringUtils.isNotBlank(attPerson)) {
+                fieldCount++;
+              }
+              if (StringUtils.isNotBlank(street)) {
+                fieldCount++;
+              }
+              if (StringUtils.isNotBlank(poBox)) {
+                fieldCount++;
+              }
+              if(isCrossBoarder){
+                if (fieldCount > 3) {
+                  TemplateValidation error = new TemplateValidation(name);
+                  LOG.trace("The row " + (row.getRowNum() + 1)
+                      + ":Note that only 3 fields of Customer name Cond,Addtional Info, Att Person, Street, Po Box can be filled at once. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), name, "The row " + (row.getRowNum() + 1)
+                      + ":Note that only 3 fields of Customer name Cond,Addtional Info, Att Person, Street, Po Box can be filled at once. Please fix and upload the template again.<br>");
+                  validations.add(error);
+                }
+              }else{
+                if (fieldCount == 5) {
+                  TemplateValidation error = new TemplateValidation(name);
+                  LOG.trace("The row " + (row.getRowNum() + 1)
+                      + ":Note that only 4 fields of Customer name Cond,Addtional Info, Att Person, Street, Po Box can be filled at once. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), name, "The row " + (row.getRowNum() + 1)
+                      + ":Note that only 4 fields of Customer name Cond,Addtional Info, Att Person, Street, Po Box can be filled at once. Please fix and upload the template again.<br>");
+                  validations.add(error);
+                }
+              }
+              fieldCount = 0;
 
               if ("Installing,Shipping,EPL".contains(name)) {
-                if (StringUtils.isBlank(custNm) || StringUtils.isBlank(street) || StringUtils.isBlank(city) || StringUtils.isBlank(landedCntry)) {
+                if (!(StringUtils.isBlank(custNm) || StringUtils.isBlank(street) || StringUtils.isBlank(city) || StringUtils.isBlank(landedCntry))) {
                   TemplateValidation error = new TemplateValidation(name);
                   LOG.trace("The row " + (row.getRowNum() + 1)
                       + ":Note that Customer name, Street, City, Landed Country must be filled. Please fix and upload the template again.");
-                  error.addError((row.getRowNum() + 1), "CMR No.",
+                  error.addError((row.getRowNum() + 1), name,
                       "The row " + (row.getRowNum() + 1)
                           + ":Note that Customer name, Street, City, Landed Country must be filled. Please fix and upload the template again.<br>");
                   validations.add(error);
                 }
               } else {
-                if (StringUtils.isBlank(custNm) || StringUtils.isBlank(city) || StringUtils.isBlank(landedCntry)) {
-                  TemplateValidation error = new TemplateValidation(name);
-                  LOG.trace("The row " + (row.getRowNum() + 1)
-                      + ":Note that Customer name, City, Landed Country must be filled. Please fix and upload the template again.");
-                  error.addError((row.getRowNum() + 1), "CMR No.", "The row " + (row.getRowNum() + 1)
-                      + ":Note that Customer name, City, Landed Country must be filled. Please fix and upload the template again.<br>");
-                  validations.add(error);
+                if (SystemLocation.DENMARK.equals(country) || (SystemLocation.FINLAND.equals(country) && !"FI".equals(landedCntry))) {
+                  boolean streetPoBoxValid = false;
+                  if (StringUtils.isBlank(street)) {
+                    if (StringUtils.isNotBlank(poBox)) {
+                      streetPoBoxValid = true;
+                    }
+                  } else {
+                    if (StringUtils.isBlank(poBox)) {
+                      streetPoBoxValid = true;
+                    }
+                  }
+                  if (StringUtils.isBlank(custNm) || StringUtils.isBlank(city) || !streetPoBoxValid || StringUtils.isBlank(landedCntry)) {
+                    TemplateValidation error = new TemplateValidation(name);
+                    LOG.trace("The row " + (row.getRowNum() + 1)
+                        + ":Note that Customer name, Street OR POBox, City, Landed Country all must be filled. Please fix and upload the template again.");
+                    error.addError((row.getRowNum() + 1), name,
+                        "The row " + (row.getRowNum() + 1)
+                            + ":Note that Customer name, Street OR POBox, City, Landed Country must be filled. Please fix and upload the template again.<br>");
+                    validations.add(error);
+                  
+                  }
+                } else if (SystemLocation.NORWAY.equals(country) || SystemLocation.SWEDEN.equals(country)
+                    || (SystemLocation.FINLAND.equals(country) && "FI".equals(landedCntry))) {
+                  if (StringUtils.isBlank(custNm) || StringUtils.isBlank(city) || StringUtils.isBlank(landedCntry)) {
+                    TemplateValidation error = new TemplateValidation(name);
+                    LOG.trace("The row " + (row.getRowNum() + 1)
+                        + ":Note that Customer name, City, Landed Country must be filled. Please fix and upload the template again.");
+                    error.addError((row.getRowNum() + 1), name, "The row " + (row.getRowNum() + 1)
+                        + ":Note that Customer name, City, Landed Country must be filled. Please fix and upload the template again.<br>");
+                    validations.add(error);
+                  }                  
                 }
               }
 
               if (StringUtils.isNotBlank(street)) {
-                if (!(StringUtils.isNotBlank(streetCon) || StringUtils.isNotBlank(additionalInfo))) {
-                  TemplateValidation error = new TemplateValidation(name);
-                  LOG.trace("The row " + (row.getRowNum() + 1)
-                      + ":Note that Street Cond and Additional Info both blank not allowed. Please fix and upload the template again.");
-                  error.addError((row.getRowNum() + 1), "CMR No.", "The row " + (row.getRowNum() + 1)
-                      + ":Note that Street Cond and Additional Info both blank not allowed. Please fix and upload the template again.<br>");
-                  validations.add(error);
-                }
-
                 if (!(StringUtils.isBlank(streetCon) || StringUtils.isBlank(additionalInfo))) {
                   TemplateValidation error = new TemplateValidation(name);
                   LOG.trace("The row " + (row.getRowNum() + 1)
                       + ":Note that Street Cond and Additional Info both filled not allowed. Please fix and upload the template again.");
-                  error.addError((row.getRowNum() + 1), "CMR No.", "The row " + (row.getRowNum() + 1)
+                  error.addError((row.getRowNum() + 1), "Street", "The row " + (row.getRowNum() + 1)
                       + ":Note that Street Cond and Additional Info both filled not allowed. Please fix and upload the template again.<br>");
                   validations.add(error);
                 }
@@ -1052,7 +1125,7 @@ public class NORDXHandler extends BaseSOFHandler {
               if (StringUtils.isNotBlank(poBox) && !StringUtils.isNumericSpace(poBox)) {
                 TemplateValidation error = new TemplateValidation(name);
                 LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that PO Box only accept digits. Please fix and upload the template again.");
-                error.addError((row.getRowNum() + 1), "CMR No.",
+                error.addError((row.getRowNum() + 1), "PO BOX",
                     "The row " + (row.getRowNum() + 1) + ":Note that PO Box only accept digits. Please fix and upload the template again.<br>");
                 validations.add(error);
 
@@ -1063,7 +1136,7 @@ public class NORDXHandler extends BaseSOFHandler {
                   TemplateValidation error = new TemplateValidation(name);
                   LOG.trace("The row " + (row.getRowNum() + 1)
                       + ":Note that Street Cond should less than 30 chars. Please fix and upload the template again.");
-                  error.addError((row.getRowNum() + 1), "CMR No.", "The row " + (row.getRowNum() + 1)
+                  error.addError((row.getRowNum() + 1), "Street Cond", "The row " + (row.getRowNum() + 1)
                       + ":Note that Street Cond should less than 30 chars. Please fix and upload the template again.<br>");
                   validations.add(error);
 
@@ -1074,7 +1147,7 @@ public class NORDXHandler extends BaseSOFHandler {
                   TemplateValidation error = new TemplateValidation(name);
                   LOG.trace("The row " + (row.getRowNum() + 1)
                       + ":Note that Combo Street Cond and PO Box(with prefix) should less than 30 chars. Please fix and upload the template again.");
-                  error.addError((row.getRowNum() + 1), "CMR No.", "The row " + (row.getRowNum() + 1)
+                  error.addError((row.getRowNum() + 1), "PO Box", "The row " + (row.getRowNum() + 1)
                       + ":Note that Combo Street Cond and PO Box(with prefix) should less than 30 chars. Please fix and upload the template again.<br>");
                   validations.add(error);
                 }
@@ -1109,7 +1182,7 @@ public class NORDXHandler extends BaseSOFHandler {
                   TemplateValidation error = new TemplateValidation(name);
                   LOG.trace(
                       "The row " + (row.getRowNum() + 1) + ":Note that City should less than 30 chars. Please fix and upload the template again.");
-                  error.addError((row.getRowNum() + 1), "CMR No.", "The row " + (row.getRowNum() + 1)
+                  error.addError((row.getRowNum() + 1), "City", "The row " + (row.getRowNum() + 1)
                       + ":Note that City should less than 30 chars. Please fix and upload the template again.<br>");
                   validations.add(error);
                 }
@@ -1118,7 +1191,7 @@ public class NORDXHandler extends BaseSOFHandler {
                     TemplateValidation error = new TemplateValidation(name);
                     LOG.trace("The row " + (row.getRowNum() + 1)
                         + ":Note that Combo City and postal code should less than 30 chars. Please fix and upload the template again.");
-                    error.addError((row.getRowNum() + 1), "CMR No.", "The row " + (row.getRowNum() + 1)
+                    error.addError((row.getRowNum() + 1), "Post Code", "The row " + (row.getRowNum() + 1)
                         + ":Note that Combo City and postal code should less than 30 chars. Please fix and upload the template again.<br>");
                     validations.add(error);
 
