@@ -176,7 +176,7 @@ public class BeLuxUtil extends AutomationUtil {
           sbo = "0" + sortl.substring(0, 2) + "0001";
         }
         details.append("SBO calculated from Account Team: " + sbo);
-        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getSalesBusOffCd(), sbo);
+        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sbo);
 
       }
     }
