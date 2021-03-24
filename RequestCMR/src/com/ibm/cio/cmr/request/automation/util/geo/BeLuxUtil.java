@@ -168,6 +168,15 @@ public class BeLuxUtil extends AutomationUtil {
       if (StringUtils.isNotBlank(sortl)) {
         details.append("SORTL calculated on basis of Existing CMR Data: " + sortl);
         overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getSearchTerm(), sortl);
+        String sbo = "";
+        if (data.getCountryUse().length() == 3) {
+          sbo = "0" + sortl.substring(0, 2) + "0000";
+        } else if (data.getCountryUse().length() > 3) {
+          sbo = "0" + sortl.substring(0, 2) + "0001";
+        }
+        details.append("SBO calculated from Account Team: " + sbo);
+        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getSalesBusOffCd(), sbo);
+
       }
     }
 
