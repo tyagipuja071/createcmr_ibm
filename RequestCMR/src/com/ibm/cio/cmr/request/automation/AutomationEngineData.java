@@ -39,8 +39,9 @@ public class AutomationEngineData extends HashMap<String, Object> {
   public static final String MATCH_DEPARTMENT = "matchDepartment";
   public static final String SKIP_APPROVALS = "defaultApproval";
   public static final String SKIP_DPL_CHECK = "skipDplChecks";
-  public static final String SKIP_UPDATE_SWITCH = "skipUpdateSwitch";  
+  public static final String SKIP_UPDATE_SWITCH = "skipUpdateSwitch";
   public static final String BO_COMPUTATION = "_usBOComputation";
+  public static final String SKIP_DNB_ORGID_VAL = null;
 
   public static final String SKIP_GBG = "_gblSkipGbg";
   public static final String SKIP_COVERAGE = "_gblSkipCoverage";
