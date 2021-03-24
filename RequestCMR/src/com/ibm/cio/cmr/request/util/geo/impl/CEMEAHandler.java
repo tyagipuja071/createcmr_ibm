@@ -1265,6 +1265,7 @@ public class CEMEAHandler extends BaseSOFHandler {
       address.getId().setAddrSeq("00001");
     }
 
+    if (!CEE_COUNTRIES_LIST.contains(currentRecord.getCmrIssuedBy())) {
     KunnrExt addlAddDetail = getKunnrExtDetails(currentRecord.getCmrSapNumber());
     if (addlAddDetail != null) {
       if (SystemLocation.AUSTRIA.equals(country)) {
@@ -1279,6 +1280,7 @@ public class CEMEAHandler extends BaseSOFHandler {
         addrDetailsList.add(address.getBldg());
       }
     }
+  }
   }
 
   @Override
