@@ -84,6 +84,8 @@ function afterConfigForNORDX() {
   setSBOForFinlandSubRegion();
   setPPSCEID();
   filterCmrnoP();
+  // CMR-1650
+  cmr.hideNode("container-SalesBusOff");
 }
 
 function disableLandCntry() {

@@ -27,12 +27,12 @@
     <cmr:column span="1" width="240">
         ${summary.data.repTeamMemberNo}
       </cmr:column>
-    <cmr:column span="1" width="130">
+   <!-- CMR-1650 <cmr:column span="1" width="130">
       <label><cmr:fieldLabel fieldId="SalesBusOff" />: </label>
     </cmr:column>
     <cmr:column span="1" width="200">
        ${summary.data.salesBusOffCd}
-      </cmr:column>
+      </cmr:column> -->
   </cmr:row>
   <cmr:row>
     <cmr:column span="1" width="127">
