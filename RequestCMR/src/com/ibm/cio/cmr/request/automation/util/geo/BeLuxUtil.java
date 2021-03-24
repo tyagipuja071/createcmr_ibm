@@ -31,6 +31,7 @@ import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.matching.gbg.GBGResponse;
 
@@ -289,7 +290,7 @@ public class BeLuxUtil extends AutomationUtil {
       String sql = ExternalizedQuery.getSql("QUERY.GET.INACLIST.BYST");
       PreparedQuery query = new PreparedQuery(entityManager, sql);
       query.setParameter("SEARCHTERM", "%" + container.getSearchterm() + "%");
-      query.setParameter("ISSUING_CNTRY", cmrCntry);
+      query.setParameter("ISSUING_CNTRY", SystemLocation.BELGIUM);
       query.setForReadOnly(true);
       inacs = query.getResults();
     }
