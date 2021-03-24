@@ -25,6 +25,8 @@ import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.ui.PageManager;
+import com.ibm.cio.cmr.request.util.SystemParameters;
+import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cmr.services.client.AutomationServiceClient;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.ServiceClient.Method;
@@ -112,20 +114,31 @@ public class EUVatValidationElement extends ValidatingElement implements Company
               engineData.setCompanySource("VIES");
               updateEntity(admin, entityManager);
             } else {
-              validation.setSuccess(false);
-              validation.setMessage("Review needed.");
-              output.setDetails("VAT is invalid. Need review.");
-              output.setOnError(true);
-              engineData.addRejectionComment("OTH", "VAT is invalid.", "", "");
-              LOG.debug("VAT is invalid.Need review.");
+              details.append("VAT is invalid. Need review.");
+              if ("Y".equals(admin.getMatchOverrideIndc()) && DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+                output.setOnError(false);
+                details.append(
+                    "\nD&B matches were chosen to be overridden by the requester.\nSupporting documentation is provided by the requester as attachment.");
+                List<String> dnbOverrideCountryList = SystemParameters.getList("DNB_OVR_CNTRY_LIST");
+                if (dnbOverrideCountryList == null || !dnbOverrideCountryList.contains(data.getCmrIssuingCntry())) {
+                  engineData.addNegativeCheckStatus("_dnbOverride", "D&B matches were chosen to be overridden by the requester.");
+                  LOG.debug("D&B matches were chosen to be overridden by the requester.");
+                }
+              } else {
+                engineData.addRejectionComment("OTH", "VAT is invalid.", "", "");
+                output.setOnError(true);
+              }
+              output.setDetails(details.toString());
             }
           } else {
-            validation.setSuccess(false);
-            validation.setMessage("Execution failed.");
-            output.setDetails(response.getMessage());
-            output.setOnError(true);
-            engineData.addRejectionComment("OTH", response.getMessage(), null, null);
-            LOG.debug(response.getMessage());
+            if ("Y".equals(admin.getMatchOverrideIndc()) && DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+              output.setOnError(true);
+              engineData.addNegativeCheckStatus("_dnbOverride", "D&B matches were chosen to be overridden by the requester.");
+              LOG.debug("D&B matches were chosen to be overridden by the requester.");
+            } else {
+              output.setOnError(true);
+              engineData.addRejectionComment("OTH", response.getMessage(), null, null);
+            }
           }
         }
       }
