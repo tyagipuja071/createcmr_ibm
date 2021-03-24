@@ -2893,17 +2893,10 @@ function setPostCdANZ(cntry, addressMode, saving, finalSave) {
 	  if (custGroup == 'CROSS' && addrType != null) {
 	    if (role == 'REQUESTER') {
 	     FormManager.setValue('postCd', '0120');
-	     FormManager.readOnly('postCd');
-	    } else {
-	      if (FormManager.getActualValue('postCd') == '') {
-	        FormManager.setValue('postCd', '0120');
-	      }
-	      FormManager.enable('postCd');
 	    }
-	  } else {
-	      FormManager.enable('postCd');
-	 }
+	  FormManager.enable('postCd');
    }
+ }
 }
 
 dojo.addOnLoad(function() {
