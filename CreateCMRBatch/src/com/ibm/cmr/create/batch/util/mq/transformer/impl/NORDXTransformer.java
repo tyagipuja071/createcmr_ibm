@@ -4,6 +4,7 @@
 package com.ibm.cmr.create.batch.util.mq.transformer.impl;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -541,7 +542,6 @@ public class NORDXTransformer extends EMEATransformer {
 
     LOG.debug("Legacy Direct -Handling Address for " + (update ? "update" : "create") + " request.");
 
-    String line1 = "";
     String line2 = "";
     String line3 = "";
     String line4 = "";
@@ -551,7 +551,7 @@ public class NORDXTransformer extends EMEATransformer {
     String phone = "";
     String addrLineT = "";
 
-    String custName = StringUtils.isNotBlank(addrData.getCustNm1()) ? addrData.getCustNm1() : "";
+    String line1 = StringUtils.isNotBlank(addrData.getCustNm1()) ? addrData.getCustNm1() : "";
     String custNameCond = StringUtils.isNotBlank(addrData.getCustNm2()) ? addrData.getCustNm2() : "";
     String additionalInfo = StringUtils.isNotBlank(addrData.getCustNm3()) ? addrData.getCustNm3() : "";
     String attPerson = StringUtils.isNotBlank(addrData.getCustNm4()) ? addrData.getCustNm4() : "";
@@ -566,7 +566,6 @@ public class NORDXTransformer extends EMEATransformer {
 
     line1 = custName;
     List<String> addrAttrList = Arrays.asList(custNameCond, additionalInfo, attPerson, street, comboStreetCondPobox);
-
 
     for (int i = 0; i < 2; i++) {
       if (StringUtils.isNotBlank(addrAttrList.get(i))) {
@@ -605,13 +604,29 @@ public class NORDXTransformer extends EMEATransformer {
       }
       line6 = postCode + " " + city;
     }
+    String[] lines = new String[] { line2, line3, line4, line5, line6 };
+    ArrayList<String> addrLnList = new ArrayList<>();
+    for (int i = 0; i < lines.length; i++) {
+      if (StringUtils.isNotBlank(lines[i])) {
+        addrLnList.add(lines[i]);
+      }
+    }
+    if (!addrLnList.isEmpty()) {
+      for (int i = 0; i < lines.length; i++) {
+        if (i < addrLnList.size()) {
+          lines[i] = addrLnList.get(i);
+        } else {
+          lines[i] = "";
+        }
+      }
+    }
 
     legacyAddr.setAddrLine1(line1);
-    legacyAddr.setAddrLine2(line2);
-    legacyAddr.setAddrLine3(line3);
-    legacyAddr.setAddrLine4(line4);
-    legacyAddr.setAddrLine5(line5);
-    legacyAddr.setAddrLine6(line6);
+    legacyAddr.setAddrLine2(lines[0]);
+    legacyAddr.setAddrLine3(lines[1]);
+    legacyAddr.setAddrLine4(lines[2]);
+    legacyAddr.setAddrLine5(lines[3]);
+    legacyAddr.setAddrLine6(lines[4]);
     legacyAddr.setCity(addrData.getCity1());
     legacyAddr.setZipCode(addrData.getPostCd());
     legacyAddr.setStreet(addrData.getAddrTxt());
@@ -890,7 +905,7 @@ public class NORDXTransformer extends EMEATransformer {
       legacyCust.setEnterpriseNo("");
       legacyCust.setEducAllowance("");
       legacyCust.setLeasingInd("");
-      
+
       if (SystemLocation.NORWAY.equals(data.getCmrIssuingCntry())) {
         legacyCust.setCeBo("");
       } else if (SystemLocation.FINLAND.equals(data.getCmrIssuingCntry())) {
@@ -1064,8 +1079,8 @@ public class NORDXTransformer extends EMEATransformer {
       legacyCust.setEmbargoCd("");
     }
 
-    if (!StringUtils.isBlank(data.getIsicCd())) {
-      legacyCust.setImsCd(data.getIsicCd());
+    if (!StringUtils.isBlank(data.getSubIndustryCd())) {
+      legacyCust.setImsCd(data.getSubIndustryCd());
     } else {
       legacyCust.setImsCd("");
     }
@@ -1115,37 +1130,37 @@ public class NORDXTransformer extends EMEATransformer {
       } else if ("678IS".equals(data.getCountryUse())) {
         legacyCust.setCeBo("000200I");
       }
-    } 
-    
+    }
+
     String newSbo = "";
     if (SystemLocation.DENMARK.equals(data.getCmrIssuingCntry())) {
-      newSbo="3420ISU";
+      newSbo = "3420ISU";
     } else if (SystemLocation.FINLAND.equals(data.getCmrIssuingCntry())) {
       if ("702".equals(data.getCountryUse())) {
-        newSbo="3450ISU";
+        newSbo = "3450ISU";
       } else if ("702EE".equals(data.getCountryUse())) {
-        newSbo="0370ISU";
+        newSbo = "0370ISU";
       } else if ("702LT".equals(data.getCountryUse())) {
-        newSbo="0390ISU";
+        newSbo = "0390ISU";
       } else if ("702LV".equals(data.getCountryUse())) {
-        newSbo="0380ISU";
+        newSbo = "0380ISU";
       }
     } else if (SystemLocation.SWEDEN.equals(data.getCmrIssuingCntry())) {
-      newSbo="3420ISU";
+      newSbo = "3420ISU";
     } else if (SystemLocation.NORWAY.equals(data.getCmrIssuingCntry())) {
       int postCd = Integer.valueOf(mailPostCode.trim());
       if (postCd >= 0 && postCd < 4000) {
-        newSbo="1000ISU";
+        newSbo = "1000ISU";
       } else if (postCd > 3999 && postCd < 5000) {
-        newSbo="4000ISU";
+        newSbo = "4000ISU";
       } else if (postCd > 4999 && postCd < 7000) {
-        newSbo="5000ISU";
+        newSbo = "5000ISU";
       } else if (postCd > 6999 && postCd < 10000) {
-        newSbo="7000ISU";
+        newSbo = "7000ISU";
       }
     }
-      legacyCust.setSbo(newSbo);
-      legacyCust.setIbo(newSbo);
+    legacyCust.setSbo(newSbo);
+    legacyCust.setIbo(newSbo);
   }
 
   @Override
@@ -1182,13 +1197,13 @@ public class NORDXTransformer extends EMEATransformer {
       cust.setLocNo(cust.getId().getSofCntryCode() + muData.getSubIndustryCd());
     }
 
-      if (!StringUtils.isBlank(muData.getSearchTerm())) {
-        if ("@".equals(muData.getSearchTerm())) {
+    if (!StringUtils.isBlank(muData.getSearchTerm())) {
+      if ("@".equals(muData.getSearchTerm())) {
         cust.setAccAdminBo("");
-        } else {
+      } else {
         cust.setAccAdminBo(muData.getSearchTerm());
-        }
       }
+    }
 
     if (!StringUtils.isBlank(muData.getSpecialTaxCd())) {
       if ("@".equals(muData.getSpecialTaxCd())) {
@@ -1236,7 +1251,7 @@ public class NORDXTransformer extends EMEATransformer {
         }
       }
 
-      }
+    }
 
     String isuClientTier = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "")
         + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");

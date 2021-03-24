@@ -88,8 +88,14 @@ function afterConfigForNORDX() {
 
 function disableLandCntry() {
   var custType = FormManager.getActualValue('custGrp');
-  if ((custType == 'LOCAL' || custType.substring(2, 5) == 'LOC') && FormManager.getActualValue('addrType') == 'ZS01') {
-    FormManager.readOnly('landCntry');
+  if (FormManager.getActualValue('addrType') == 'ZS01') {
+    var reqType = FormManager.getActualValue('reqType');
+    if (custType == 'LOCAL' || custType.substring(2, 5) == 'LOC' || reqType == 'U') {
+      FormManager.readOnly('landCntry');
+    }
+    if (custType == 'LOCAL' || custType.substring(2, 5) == 'LOC') {
+      FormManager.setValue('landCntry', FormManager.getActualValue('defaultLandedCountry'));
+    }
   } else {
     FormManager.enable('landCntry');
   }
@@ -100,6 +106,10 @@ function addLandedCountryHandler(cntry, addressMode, saving, finalSave) {
     if (addressMode == 'newAddress') {
       FilteringDropdown['val_landCntry'] = FormManager.getActualValue('defaultLandedCountry');
       FormManager.setValue('landCntry', FormManager.getActualValue('defaultLandedCountry'));
+      var custType = FormManager.getActualValue('custGrp');
+      if (custType == 'CROSS' || custType.substring(2, 5) == 'CRO') {
+        FormManager.clearValue('landCntry');
+      }
     } else {
       FilteringDropdown['val_landCntry'] = null;
     }
@@ -894,6 +904,7 @@ function hidePOBoxandHandleStreet() {
         _poBOXHandler[i] = dojo.connect(FormManager.getField('addrType_' + _addrTypesForNORDX[i]), 'onClick', function(value) {
           setPOBOXandSteet(poValue);
           setPhone(phValue);
+          disableLandCntry();
         });
       }
     }
@@ -922,7 +933,9 @@ function hidePOBoxandHandleStreet() {
 }
 
 function setPOBOXandSteet(value) {
-  if (FormManager.getField('addrType_ZI01').checked || FormManager.getField('addrType_ZD01').checked || FormManager.getField('addrType_ZP02').checked) {
+  if ((FormManager.getField('addrType_ZI01') != undefined && FormManager.getField('addrType_ZI01').checked)
+      || (FormManager.getField('addrType_ZD01') != undefined && FormManager.getField('addrType_ZD01').checked)
+      || (FormManager.getField('addrType_ZP02') != undefined && FormManager.getField('addrType_ZP02').checked)) {
     FormManager.disable('poBox');
     FormManager.setValue('poBox', '');
     var cntryRegion = FormManager.getActualValue('countryUse');

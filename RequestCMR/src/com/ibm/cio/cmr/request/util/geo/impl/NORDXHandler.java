@@ -26,8 +26,10 @@ import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.entity.AdminPK;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.entity.Kna1;
 import com.ibm.cio.cmr.request.entity.MachinesToInstall;
@@ -77,7 +79,12 @@ public class NORDXHandler extends BaseSOFHandler {
     LANDED_CNTRY_MAP.put(SystemLocation.NORWAY, "NO");
     LANDED_CNTRY_MAP.put(SystemLocation.FINLAND, "FI");
     LANDED_CNTRY_MAP.put(SystemLocation.DENMARK, "DK");
-
+    LANDED_CNTRY_MAP.put("702LV", "LV");
+    LANDED_CNTRY_MAP.put("702LT", "LT");
+    LANDED_CNTRY_MAP.put("702EE", "EE");
+    LANDED_CNTRY_MAP.put("678GL", "GL");
+    LANDED_CNTRY_MAP.put("678FO", "FO");
+    LANDED_CNTRY_MAP.put("678IS", "IS");
   }
 
   private static final String[] NORDX_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "CustLang", "GeoLocationCode", "Affiliate", "CAP", "CMROwner",
@@ -1111,15 +1118,34 @@ public class NORDXHandler extends BaseSOFHandler {
 
   @Override
   public void doBeforeAddrSave(EntityManager entityManager, Addr addr, String cmrIssuingCntry) throws Exception {
-
+    DataPK pk = new DataPK();
+    pk.setReqId(addr.getId().getReqId());
+    Data data = entityManager.find(Data.class, pk);
+    AdminPK adminPK = new AdminPK();
+    adminPK.setReqId(addr.getId().getReqId());
+    Admin admin = entityManager.find(Admin.class, adminPK);
     if ("ZI01".equals(addr.getId().getAddrType()) || "ZD01".equals(addr.getId().getAddrType()) || "ZP02".equals(addr.getId().getAddrType())) {
       addr.setPoBox("");
     }
-
     if (!"ZS01".equals(addr.getId().getAddrType())) {
       addr.setCustPhone("");
     }
-
+    if ("ZS01".equals(addr.getId().getAddrType())) {
+      String landCntry = addr.getLandCntry();
+      if (data.getCustGrp() != null && data.getCustGrp().contains("LOC")) {
+        landCntry = data.getCountryUse().isEmpty() ? LANDED_CNTRY_MAP.get(cmrIssuingCntry) : LANDED_CNTRY_MAP.get(data.getCountryUse());
+      }
+      if ("U".equals(admin.getReqType())) {
+        String sql = ExternalizedQuery.getSql("QUERY.ADDR.GET.LANDCNTRY.BY_REQID");
+        PreparedQuery query = new PreparedQuery(entityManager, sql);
+        query.setParameter("REQ_ID", data.getId().getReqId());
+        List<String> results = query.getResults(String.class);
+        if (results != null && !results.isEmpty()) {
+          landCntry = results.get(0);
+        }
+      }
+      addr.setLandCntry(landCntry);
+    }
   }
 
   @Override
