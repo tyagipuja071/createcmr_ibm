@@ -322,7 +322,7 @@ table.partner-table th {
     </cmr:row>
     <div id="charts-cont">
     </div>
-    <iframe id="exportFrame" name="exportFrame" style="display:none">
+    <iframe id="exportFrame" name="exportFrame" style="display:none"></iframe>
   </cmr:section>
 
 </cmr:boxContent>

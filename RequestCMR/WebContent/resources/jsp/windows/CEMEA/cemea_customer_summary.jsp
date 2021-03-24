@@ -87,7 +87,7 @@
       </cmr:column>
      </cmr:row>
    </cmr:view>
-   <cmr:view forCountry="693">
+   <cmr:view forCountry="693,668">
      <cmr:row addBackground="true">
       <cmr:column span="1" width="127">
       </cmr:column>

@@ -95,7 +95,13 @@
 					<length>20</length>
 				</column>
 				<column>
-					<label>IČ</label>
+					<label>IČO</label>
+					<dbColumn>NEW_ENTP_NAME1</dbColumn>
+					<width>10</width>
+					<length>8</length>
+				</column>
+				<column>
+					<label>DIČ</label>
 					<dbColumn>EMAIL2</dbColumn>
 					<width>10</width>
 					<length>12</length>

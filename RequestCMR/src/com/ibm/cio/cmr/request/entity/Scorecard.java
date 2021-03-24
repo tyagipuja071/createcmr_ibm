@@ -110,6 +110,12 @@ public class Scorecard extends BaseEntity<ScorecardPK> implements Serializable {
 
   @Column(name = "DPL_ASSESSMENT_CMT")
   private String dplAssessmentCmt;
+  @Column(
+      name = "DNB_MATCHING_RESULT")
+  private String dnbMatchingResult;
+  @Column(
+      name = "RPA_MATCHING_RESULT ")
+  private String rpaMatchingResult;
 
   public String getDplChkResult() {
     return this.dplChkResult;
@@ -275,4 +281,19 @@ public class Scorecard extends BaseEntity<ScorecardPK> implements Serializable {
     this.dplAssessmentCmt = dplAssessmentCmt;
   }
 
+  public String getDnbMatchingResult() {
+    return dnbMatchingResult;
+  }
+
+  public void setDnbMatchingResult(String dnbMatchingResult) {
+    this.dnbMatchingResult = dnbMatchingResult;
+  }
+
+  public String getRpaMatchingResult() {
+    return rpaMatchingResult;
+  }
+
+  public void setRpaMatchingResult(String rpaMatchingResult) {
+    this.rpaMatchingResult = rpaMatchingResult;
+  }
 }

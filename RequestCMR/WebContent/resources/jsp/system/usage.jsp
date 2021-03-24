@@ -224,7 +224,7 @@ div#filterlabels table td, div#filterlabels table th {
       <a style="font-size:12px" href="javascript: SvcUsage.selectFilters(false)">Remove All</a><br>
       <cmr:button label="Update Chart" onClick="SvcUsage.updateChart()" highlight="true"></cmr:button>
     </div>
-    <iframe id="exportFrame" name="exportFrame" style="display:none">
+    <iframe id="exportFrame" name="exportFrame" style="display:none"></iframe>
   </cmr:section>
 
 </cmr:boxContent>
