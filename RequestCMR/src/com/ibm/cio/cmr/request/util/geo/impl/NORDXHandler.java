@@ -54,8 +54,11 @@ import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.QueryClient;
+import com.ibm.cmr.services.client.ValidatorClient;
 import com.ibm.cmr.services.client.query.QueryRequest;
 import com.ibm.cmr.services.client.query.QueryResponse;
+import com.ibm.cmr.services.client.validator.PostalCodeValidateRequest;
+import com.ibm.cmr.services.client.validator.ValidationResult;
 import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
 
 /**
@@ -868,7 +871,8 @@ public class NORDXHandler extends BaseSOFHandler {
             }
 
             boolean dummyUpd = true;
-            int loopFlag = "Data".equals(name) ? 16 : 9;// assume addr 9 field
+            // assume mailing/billing addr 12 fields,other 11 fields
+            int loopFlag = "Data".equals(name) ? 16 : "Mailing,Billing".contains(name) ? 12 : 11;
             int beginPos = "Data".equals(name) ? 1 : 2;
             for (int i = beginPos; i < loopFlag; i++) {
               XSSFCell cell = (XSSFCell) row.getCell(i);
@@ -975,10 +979,125 @@ public class NORDXHandler extends BaseSOFHandler {
                 continue;
               }
 
+              String poBox = "";// 11
+              currCell = (XSSFCell) row.getCell(11);
+              poBox = validateColValFromCell(currCell);
+              if (StringUtils.isNotBlank(poBox) && !StringUtils.isNumericSpace(poBox)) {
+                TemplateValidation error = new TemplateValidation(name);
+                LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that PO Box only accept digits. Please fix and upload the template again.");
+                error.addError((row.getRowNum() + 1), "CMR No.",
+                    "The row " + (row.getRowNum() + 1) + ":Note that PO Box only accept digits. Please fix and upload the template again.<br>");
+                validations.add(error);
+
+              }
+
+              String StreetCon = "";// 7
+              currCell = (XSSFCell) row.getCell(7);
+              StreetCon = validateColValFromCell(currCell);
+              if (StringUtils.isBlank(poBox)) {
+                if (StreetCon.length() > 30) {
+                  TemplateValidation error = new TemplateValidation(name);
+                  LOG.trace("The row " + (row.getRowNum() + 1)
+                      + ":Note that Street Cond should less than 30 chars. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "CMR No.", "The row " + (row.getRowNum() + 1)
+                      + ":Note that Street Cond should less than 30 chars. Please fix and upload the template again.<br>");
+                  validations.add(error);
+
+                }
+              } else {
+                String combingStr = StreetCon + ", PO BOX " + poBox;
+                if (combingStr.length() > 30) {
+                  TemplateValidation error = new TemplateValidation(name);
+                  LOG.trace("The row " + (row.getRowNum() + 1)
+                      + ":Note that Combo Street Cond and PO Box(with prefix) should less than 30 chars. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "CMR No.", "The row " + (row.getRowNum() + 1)
+                      + ":Note that Combo Street Cond and PO Box(with prefix) should less than 30 chars. Please fix and upload the template again.<br>");
+                  validations.add(error);
+                }
+              }
+
+              String postCd = "";// 8
+              currCell = (XSSFCell) row.getCell(8);
+              postCd = validateColValFromCell(currCell);
+
+              String landedCntry = "";
+              currCell = (XSSFCell) row.getCell(8);
+              landedCntry = validateColValFromCell(currCell);
+
+              if (!StringUtils.isEmpty(postCd)) {
+                if (StringUtils.isEmpty(landedCntry)) {
+                  TemplateValidation error = new TemplateValidation(name);
+                  LOG.trace("Please input landed Country when postal code is filled. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "Landed Country", "The row " + (row.getRowNum() + 1)
+                      + ":Please input landed Country when postal code is filled. Please fix and upload the template again.<br>");
+                  validations.add(error);
+                } else {
+                  try {
+                    ValidationResult validation = checkPostalCode(landedCntry.substring(0, 2), postCd, country);
+                    if (!validation.isSuccess()) {
+                      TemplateValidation error = new TemplateValidation(name);
+                      LOG.trace(validation.getErrorMessage());
+                      error.addError((row.getRowNum() + 1), "Postal code.",
+                          "The row " + (row.getRowNum() + 1) + ":" + validation.getErrorMessage() + "<br>");
+                      validations.add(error);
+                    }
+                  } catch (Exception e) {
+                    LOG.error("Error occured on connecting postal code validation service.");
+                    e.printStackTrace();
+                  }
+                }
+              }
+
+              String city = "";// 9
+              currCell = (XSSFCell) row.getCell(9);
+              city = validateColValFromCell(currCell);
+              if (StringUtils.isNotBlank(city)) {
+                if (city.length() > 30) {
+                  TemplateValidation error = new TemplateValidation(name);
+                  LOG.trace(
+                      "The row " + (row.getRowNum() + 1) + ":Note that City should less than 30 chars. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "CMR No.", "The row " + (row.getRowNum() + 1)
+                      + ":Note that City should less than 30 chars. Please fix and upload the template again.<br>");
+                  validations.add(error);
+                }
+                if (StringUtils.isNotBlank(postCd)) {
+                  if ((city + postCd).length() > 30) {
+                    TemplateValidation error = new TemplateValidation(name);
+                    LOG.trace("The row " + (row.getRowNum() + 1)
+                        + ":Note that Combo City and postal code should less than 30 chars. Please fix and upload the template again.");
+                    error.addError((row.getRowNum() + 1), "CMR No.", "The row " + (row.getRowNum() + 1)
+                        + ":Note that Combo City and postal code should less than 30 chars. Please fix and upload the template again.<br>");
+                    validations.add(error);
+
+                  }
+                }
+              }
             }
           }
         }
       }
+    }
+  }
+
+  private static ValidationResult checkPostalCode(String landedCountry, String postalCode, String cntryCode) throws Exception {
+    String baseUrl = SystemConfiguration.getValue("CMR_SERVICES_URL");
+    String mandt = SystemConfiguration.getValue("MANDT");
+
+    PostalCodeValidateRequest zipRequest = new PostalCodeValidateRequest();
+    zipRequest.setMandt(mandt);
+    zipRequest.setPostalCode(postalCode);
+    zipRequest.setSysLoc(cntryCode);
+    zipRequest.setCountry(landedCountry);
+
+    LOG.debug("Validating Postal Code " + postalCode + " for landedCountry " + landedCountry + " (mandt: " + mandt + " sysloc:  " + cntryCode + ")");
+
+    ValidatorClient client = CmrServicesFactory.getInstance().createClient(baseUrl, ValidatorClient.class);
+    try {
+      ValidationResult validation = client.executeAndWrap(ValidatorClient.POSTAL_CODE_APP_ID, zipRequest, ValidationResult.class);
+      return validation;
+    } catch (Exception e) {
+      LOG.error("Error in postal code validation", e);
+      return null;
     }
   }
 
