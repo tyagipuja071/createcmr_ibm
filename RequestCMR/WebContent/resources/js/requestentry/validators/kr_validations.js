@@ -1,6 +1,6 @@
 /* Register KR Javascripts */
 
-function afterConfigTW() {
+function afterConfigKR() {
   var reqType = FormManager.getActualValue('reqType');
   var role = null;
   FormManager.readOnly('capInd');
@@ -20,7 +20,7 @@ dojo.addOnLoad(function() {
   GEOHandler.enableCustomerNamesOnAddress(GEOHandler.KR);
   GEOHandler.setRevertIsicBehavior(false);
 
-  GEOHandler.addAfterConfig(afterConfigTW, GEOHandler.KR);
+  GEOHandler.addAfterConfig(afterConfigKR, GEOHandler.KR);
 
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.KR);
 
