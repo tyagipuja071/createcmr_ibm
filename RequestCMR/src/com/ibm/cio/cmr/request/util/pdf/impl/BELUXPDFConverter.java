@@ -201,7 +201,7 @@ public class BELUXPDFConverter extends DefaultPDFConverter {
       address.addCell(createLabelCell("Landed Country:"));
       address.addCell(createValueCell(addr.getLandCntry()));
 
-      address.addCell(createLabelCell("Street:"));
+      address.addCell(createLabelCell("Street Address:"));
       address.addCell(createValueCell(addr.getAddrTxt()));
 
       address.addCell(createLabelCell("State/Province:"));
@@ -210,11 +210,8 @@ public class BELUXPDFConverter extends DefaultPDFConverter {
       address.addCell(createLabelCell("Phone #:"));
       address.addCell(createValueCell(addr.getCustPhone()));
 
-      address.addCell(createLabelCell("PostBox:"));
+      address.addCell(createLabelCell("PO Box:"));
       address.addCell(createValueCell(addr.getPoBox()));
-
-      address.addCell(createLabelCell("Transport Zone:"));
-      address.addCell(createValueCell(addr.getTransportZone()));
 
       address.addCell(createLabelCell("SAP Number (KUNNR):"));
       address.addCell(createValueCell(addr.getSapNo()));
