@@ -1,5 +1,6 @@
 /* Register NORDX Javascripts */
-var _addrTypesForNORDX = [ 'ZS01', 'ZP01', 'ZI01', 'ZD01', 'ZS02', 'ZP02' ];
+//var _addrTypesForNORDX = [ 'ZS01', 'ZP01', 'ZI01', 'ZD01', 'ZS02', 'ZP02' ];
+var _addrTypesForNORDX = [ 'ZS01', 'ZP01', 'ZI01', 'ZD01', 'ZS02' ];
 var _poBOXHandler = [];
 var _MachineHandler = [];
 var _collCdArraySubTypes = [ 'INTER', 'INTSO', 'CBINT', 'CBISO' ];
@@ -663,54 +664,58 @@ function setAbbrevName(cntry, addressMode, saving, finalSave, force) {
   }
 }
 
-function machineValidator() {
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var reqId = FormManager.getActualValue('reqId');
-        var reqParam = {
-          _qall : 'Y',
-          REQ_ID : reqId,
-          ADDR_TYPE : "ZP02",
-        };
-        var results = cmr.query('GET_ZP02_COUNT', reqParam);
-        if (results != null) {
-          for (var i = 0; i < results.length; i++) {
-            var ADDR_SEQ1 = results[i].ret1;
-            var reqParam1 = {
-              REQ_ID : reqId,
-              ADDR_TYPE : "ZP02",
-              ADDR_SEQ : ADDR_SEQ1,
-            };
-            var newResults = cmr.query('ZP02_SEARCH_MACHINES', reqParam1);
-            if (newResults.ret1 == '0') {
-              return new ValidationResult(null, false, 'All Additional Installing Address should have at least one Machine');
-            }
-
-          }
-          return new ValidationResult(null, true);
-        } else {
-          return new ValidationResult(null, true);
-        }
-      }
-    };
-  })(), 'MAIN_CUST_TAB', 'frmCMR');
-
-}
+// function machineValidator() {
+// FormManager.addFormValidator((function() {
+// return {
+// validate : function() {
+// var reqId = FormManager.getActualValue('reqId');
+// var reqParam = {
+// _qall : 'Y',
+// REQ_ID : reqId,
+// ADDR_TYPE : "ZP02",
+// };
+// var results = cmr.query('GET_ZP02_COUNT', reqParam);
+// if (results != null) {
+// for (var i = 0; i < results.length; i++) {
+// var ADDR_SEQ1 = results[i].ret1;
+// var reqParam1 = {
+// REQ_ID : reqId,
+// ADDR_TYPE : "ZP02",
+// ADDR_SEQ : ADDR_SEQ1,
+// };
+// var newResults = cmr.query('ZP02_SEARCH_MACHINES', reqParam1);
+// if (newResults.ret1 == '0') {
+// return new ValidationResult(null, false, 'All Additional Installing Address
+// should have at least one Machine');
+// }
+//
+// }
+// return new ValidationResult(null, true);
+// } else {
+// return new ValidationResult(null, true);
+// }
+// }
+// };
+// })(), 'MAIN_CUST_TAB', 'frmCMR');
+//
+// }
 
 function handleMahcineModel() {
-  if (FormManager.getActualValue('cmrIssuingCntry') == '702' || reqType == 'C') {
-    cmr.hideNode("machineSerialDiv");
-    return;
-  }
-  if (cmr.addressMode == 'newAddress' || cmr.addressMode == 'copyAddress') {
-    if (FormManager.getActualValue('addrType') == 'ZI01' || FormManager.getActualValue('addrType') == 'ZP02') {
-      cmr.showNode("machineSerialDiv");
-
-    } else {
-      cmr.hideNode("machineSerialDiv");
-    }
-  }
+  // if (FormManager.getActualValue('cmrIssuingCntry') == '702' || reqType ==
+  // 'C') {
+  // cmr.hideNode("machineSerialDiv");
+  // return;
+  // }
+  // if (cmr.addressMode == 'newAddress' || cmr.addressMode == 'copyAddress') {
+  // if (FormManager.getActualValue('addrType') == 'ZI01' ||
+  // FormManager.getActualValue('addrType') == 'ZP02') {
+  // cmr.showNode("machineSerialDiv");
+  //
+  // } else {
+  // cmr.hideNode("machineSerialDiv");
+  // }
+  // }
+  cmr.hideNode("machineSerialDiv");
 }
 
 /*
@@ -860,38 +865,43 @@ function addISUClientMandatory() {
 }
 
 function handleMachineType() {
-  if (FormManager.getActualValue('cmrIssuingCntry') == '702' || reqType == 'C') {
-    cmr.hideNode("machineSerialDiv");
-    return;
-  }
-  if (cmr.addressMode == 'newAddress' || cmr.addressMode == 'copyAddress') {
-    cmr.hideNode("machineSerialDiv");
-    for (var i = 0; i < _addrTypesForNORDX.length; i++) {
-      _MachineHandler[i] = null;
-      if (_MachineHandler[i] == null) {
-        var xx = FormManager.getField('addrType_ZP02');
-        _MachineHandler[i] = dojo.connect(FormManager.getField('addrType_' + _addrTypesForNORDX[i]), 'onClick', function(value) {
-          if (FormManager.getField('addrType_ZI01').checked || FormManager.getField('addrType_ZP02').checked) {
-            cmr.showNode("machineSerialDiv");
-            cmr.hideNode('addMachineButton');
-
-          } else {
-            cmr.hideNode("machineSerialDiv");
-          }
-        });
-      }
-    }
-  }
-
-  if (cmr.addressMode == 'updateAddress') {
-    if (FormManager.getActualValue('addrType') == 'ZI01' || FormManager.getActualValue('addrType') == 'ZP02') {
-      cmr.showNode("machineSerialDiv");
-      cmr.showNode("addMachineButton");
-
-    } else {
-      cmr.hideNode("machineSerialDiv");
-    }
-  }
+  // if (FormManager.getActualValue('cmrIssuingCntry') == '702' || reqType ==
+  // 'C') {
+  // cmr.hideNode("machineSerialDiv");
+  // return;
+  // }
+  // if (cmr.addressMode == 'newAddress' || cmr.addressMode == 'copyAddress') {
+  // cmr.hideNode("machineSerialDiv");
+  // for (var i = 0; i < _addrTypesForNORDX.length; i++) {
+  // _MachineHandler[i] = null;
+  // if (_MachineHandler[i] == null) {
+  // var xx = FormManager.getField('addrType_ZP02');
+  // _MachineHandler[i] = dojo.connect(FormManager.getField('addrType_' +
+  // _addrTypesForNORDX[i]), 'onClick', function(value) {
+  // if (FormManager.getField('addrType_ZI01').checked ||
+  // FormManager.getField('addrType_ZP02').checked) {
+  // cmr.showNode("machineSerialDiv");
+  // cmr.hideNode('addMachineButton');
+  //
+  // } else {
+  // cmr.hideNode("machineSerialDiv");
+  // }
+  // });
+  // }
+  // }
+  // }
+  //
+  // if (cmr.addressMode == 'updateAddress') {
+  // if (FormManager.getActualValue('addrType') == 'ZI01' ||
+  // FormManager.getActualValue('addrType') == 'ZP02') {
+  // cmr.showNode("machineSerialDiv");
+  // cmr.showNode("addMachineButton");
+  //
+  // } else {
+  // cmr.hideNode("machineSerialDiv");
+  // }
+  // }
+  cmr.hideNode("machineSerialDiv");
 }
 
 function hidePOBoxandHandleStreet() {
@@ -1127,97 +1137,102 @@ function addAddressFieldValidators() {
   })(), null, 'frmCMR_addressModal');
 
   // Machine Type and Serial Number
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
+  // FormManager.addFormValidator((function() {
+  // return {
+  // validate : function() {
+  //
+  // if (FormManager.getActualValue('machineTyp').length == 0 &&
+  // FormManager.getActualValue('machineSerialNo').length == 0) {
+  // if (cmr.addressMode == 'updateAddress') {
+  // if (FormManager.getActualValue('addrType') == 'ZP02') {
+  // var qParams = {
+  // _qall : 'Y',
+  // REQ_ID : FormManager.getActualValue('reqId'),
+  // ADDR_TYPE : FormManager.getActualValue('addrType'),
+  // ADDR_SEQ : FormManager.getActualValue('addrSeq'),
+  // };
+  // var results = cmr.query('SEARCH_MACHINES', qParams);
+  // if (results != null) {
+  // if (results.length > 0) {
+  // return new ValidationResult(null, true);
+  // } else {
+  // return new ValidationResult({
+  // id : 'machineTyp',
+  // }, false, 'Machine Type and Serial Number are Mandatory.');
+  // }
+  // } else {
+  // return new ValidationResult({
+  // id : 'machineTyp',
+  // }, false, 'Machine Type and Serial Number are Mandatory.');
+  // }
+  // } else {
+  //
+  // return new ValidationResult(null, true);
+  // }
+  //
+  // } else if (FormManager.getActualValue('addrType') == 'ZP02' &&
+  // (cmr.addressMode == 'newAddress' || cmr.addressMode == 'copyAddress')) {
+  // // FormManager.addValidator('machineTyp', Validators.REQUIRED, [
+  // // 'Machine Type' ], '');
+  // // FormManager.addValidator('machineSerialNo', Validators.REQUIRED,
+  // // [ 'Machine Serial Number' ], '');
+  // return new ValidationResult({
+  // id : 'machineTyp',
+  // }, false, 'Machine Type and Serial Number are Mandatory.');
+  // }
+  //
+  // }
+  // if ((FormManager.getActualValue('addrType') == 'ZP02') && reqType != 'C') {
+  //
+  // if (FormManager.getActualValue('machineTyp').length != 4 &&
+  // FormManager.getActualValue('machineSerialNo').length != 7) {
+  // return new ValidationResult({
+  // id : 'machineTyp',
+  // }, false, 'Machine Type and Serial number should be 4 and 7 characters
+  // long.');
+  // }
+  // if (FormManager.getActualValue('machineTyp').length != 4) {
+  // return new ValidationResult({
+  // id : 'machineTyp',
+  // }, false, 'Machine Type should be 4 characters long.');
+  // }
+  // if (FormManager.getActualValue('machineSerialNo').length != 7) {
+  // return new ValidationResult({
+  // id : 'machineSerialNo',
+  // }, false, 'Machine Serial Number should be 7 characters long.');
+  // }
+  // }
+  //
+  // return new ValidationResult(null, true);
+  // }
+  // };
+  // })(), null, 'frmCMR_addressModal');
 
-        if (FormManager.getActualValue('machineTyp').length == 0 && FormManager.getActualValue('machineSerialNo').length == 0) {
-          if (cmr.addressMode == 'updateAddress') {
-            if (FormManager.getActualValue('addrType') == 'ZP02') {
-              var qParams = {
-                _qall : 'Y',
-                REQ_ID : FormManager.getActualValue('reqId'),
-                ADDR_TYPE : FormManager.getActualValue('addrType'),
-                ADDR_SEQ : FormManager.getActualValue('addrSeq'),
-              };
-              var results = cmr.query('SEARCH_MACHINES', qParams);
-              if (results != null) {
-                if (results.length > 0) {
-                  return new ValidationResult(null, true);
-                } else {
-                  return new ValidationResult({
-                    id : 'machineTyp',
-                  }, false, 'Machine Type and Serial Number are Mandatory.');
-                }
-              } else {
-                return new ValidationResult({
-                  id : 'machineTyp',
-                }, false, 'Machine Type and Serial Number are Mandatory.');
-              }
-            } else {
-
-              return new ValidationResult(null, true);
-            }
-
-          } else if (FormManager.getActualValue('addrType') == 'ZP02' && (cmr.addressMode == 'newAddress' || cmr.addressMode == 'copyAddress')) {
-            // FormManager.addValidator('machineTyp', Validators.REQUIRED, [
-            // 'Machine Type' ], '');
-            // FormManager.addValidator('machineSerialNo', Validators.REQUIRED,
-            // [ 'Machine Serial Number' ], '');
-            return new ValidationResult({
-              id : 'machineTyp',
-            }, false, 'Machine Type and Serial Number are Mandatory.');
-          }
-
-        }
-        if ((FormManager.getActualValue('addrType') == 'ZP02') && reqType != 'C') {
-
-          if (FormManager.getActualValue('machineTyp').length != 4 && FormManager.getActualValue('machineSerialNo').length != 7) {
-            return new ValidationResult({
-              id : 'machineTyp',
-            }, false, 'Machine Type and Serial number should be 4 and 7 characters long.');
-          }
-          if (FormManager.getActualValue('machineTyp').length != 4) {
-            return new ValidationResult({
-              id : 'machineTyp',
-            }, false, 'Machine Type should be 4 characters long.');
-          }
-          if (FormManager.getActualValue('machineSerialNo').length != 7) {
-            return new ValidationResult({
-              id : 'machineSerialNo',
-            }, false, 'Machine Serial Number should be 7 characters long.');
-          }
-        }
-
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), null, 'frmCMR_addressModal');
-
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var reqId = FormManager.getActualValue('reqId');
-        var addrType = FormManager.getActualValue('addrType');
-        var reqType = FormManager.getActualValue('reqType');
-        var addrSeq = FormManager.getActualValue('addrSeq');
-
-        if (addrSeq != null && addrType == 'ZP02' && reqType != 'C') {
-          var reqParam = {
-            REQ_ID : reqId,
-            ADDR_TYPE : "ZP02",
-            ADDR_SEQ : addrSeq,
-          };
-          var results = cmr.query('ZP02_SEARCH_MACHINES', reqParam);
-          if (results.ret1 == '0') {
-            return new ValidationResult(null, false, 'All Additional Installing Address should have at least one entry of Machine details');
-          }
-          return new ValidationResult(null, true);
-        }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), null, 'frmCMR_addressModal');
+  // FormManager.addFormValidator((function() {
+  // return {
+  // validate : function() {
+  // var reqId = FormManager.getActualValue('reqId');
+  // var addrType = FormManager.getActualValue('addrType');
+  // var reqType = FormManager.getActualValue('reqType');
+  // var addrSeq = FormManager.getActualValue('addrSeq');
+  //
+  // if (addrSeq != null && addrType == 'ZP02' && reqType != 'C') {
+  // var reqParam = {
+  // REQ_ID : reqId,
+  // ADDR_TYPE : "ZP02",
+  // ADDR_SEQ : addrSeq,
+  // };
+  // var results = cmr.query('ZP02_SEARCH_MACHINES', reqParam);
+  // if (results.ret1 == '0') {
+  // return new ValidationResult(null, false, 'All Additional Installing Address
+  // should have at least one entry of Machine details');
+  // }
+  // return new ValidationResult(null, true);
+  // }
+  // return new ValidationResult(null, true);
+  // }
+  // };
+  // })(), null, 'frmCMR_addressModal');
 }
 
 /* 1430539 - do not allow delete of imported addresses on update requests */
@@ -1237,16 +1252,17 @@ function ADDRESS_GRID_showCheck(value, rowIndex, grid) {
 }
 
 function updateAddrTypeList(cntry, addressMode) {
-  var cntryRegion = FormManager.getActualValue('countryUse');
-  if (cntryRegion == '702') {
-    if (addressMode == 'newAddress' || addressMode == 'copyAddress') {
-      cmr.hideNode('radiocont_ZD01');
-    }
-  }
-  if ((addressMode == 'newAddress' || addressMode == 'copyAddress') && cmr.currentRequestType == 'C') {
-    cmr.hideNode('radiocont_ZP02');
-  }
-
+  // var cntryRegion = FormManager.getActualValue('countryUse');
+  // if (cntryRegion == '702') {
+  // if (addressMode == 'newAddress' || addressMode == 'copyAddress') {
+  // cmr.hideNode('radiocont_ZD01');
+  // }
+  // }
+  // if ((addressMode == 'newAddress' || addressMode == 'copyAddress') &&
+  // cmr.currentRequestType == 'C') {
+  // cmr.hideNode('radiocont_ZP02');
+  // }
+  cmr.hideNode('radiocont_ZP02');
 }
 
 function addCrossBorderValidatorNORS() {

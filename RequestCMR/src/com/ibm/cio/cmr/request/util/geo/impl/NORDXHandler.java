@@ -52,6 +52,7 @@ import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
+import com.ibm.cio.cmr.request.util.legacy.LegacyCommonUtil;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.QueryClient;
 import com.ibm.cmr.services.client.query.QueryRequest;
@@ -1262,6 +1263,143 @@ public class NORDXHandler extends BaseSOFHandler {
       return true;
     else
       return computedChangeInd;
+  }
+
+  @Override
+  public boolean checkCopyToAdditionalAddress(EntityManager entityManager, Addr copyAddr, String cmrIssuingCntry) throws Exception {
+
+    if (copyAddr != null && copyAddr.getId() != null) {
+      Admin adminRec = LegacyCommonUtil.getAdminByReqId(entityManager, copyAddr.getId().getReqId());
+      if (adminRec != null) {
+        boolean isCreateReq = CmrConstants.REQ_TYPE_CREATE.equals(adminRec.getReqType());
+        if (isCreateReq && copyAddr.getId().getAddrSeq().compareTo("00006") >= 0) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  @Override
+  public String generateAddrSeq(EntityManager entityManager, String addrType, long reqId, String cmrIssuingCntry) {
+    String newAddrSeq = "";
+    if (!StringUtils.isEmpty(addrType)) {
+      int addrSeq = 0;
+      if ("ZS01".equals(addrType)) {
+        addrSeq = 1;
+      } else if ("ZP01".equals(addrType)) {
+        addrSeq = 2;
+      } else if ("ZI01".equals(addrType)) {
+        addrSeq = 3;
+      } else if ("ZD01".equals(addrType)) {
+        addrSeq = 4;
+      } else if ("ZS02".equals(addrType)) {
+        addrSeq = 5;
+      }
+
+      String reqType = getReqType(entityManager, reqId);
+      String sql = ExternalizedQuery.getSql("ADDRESS.GETMADDRSEQ_CREATECMR");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("REQ_ID", reqId);
+
+      List<Object[]> resultsCMR = query.getResults();
+      int maxSeq = 0;
+      if (resultsCMR != null && resultsCMR.size() > 0) {
+        boolean seqExistCMR = false;
+        List<Integer> seqListCMR = new ArrayList<Integer>();
+        // Get create cmr seq list
+        for (int i = 0; i < resultsCMR.size(); i++) {
+          String item = String.valueOf(resultsCMR.get(i));
+          if (!StringUtils.isEmpty(item)) {
+            seqListCMR.add(Integer.parseInt(item));
+          }
+        }
+        // Check if seq is already exist in create cmr
+        seqExistCMR = seqListCMR.contains(addrSeq);
+        // Get Max seq from create cmr
+        maxSeq = seqListCMR.get(0);
+        for (int i = 0; i < seqListCMR.size(); i++) {
+          if (maxSeq < seqListCMR.get(i)) {
+            maxSeq = seqListCMR.get(i);
+          }
+        }
+        if (seqExistCMR) {
+          if (maxSeq < 6) {
+            addrSeq = 6;
+          } else {
+            addrSeq = maxSeq + 1;
+          }
+        }
+      }
+      if (CmrConstants.REQ_TYPE_UPDATE.equals(reqType)) {
+        String cmrNo = getCMRNo(entityManager, reqId);
+        if (!StringUtils.isEmpty(cmrNo)) {
+          String sqlRDC = ExternalizedQuery.getSql("FR.ADDRESS.GETMADDRSEQ_RDC");
+          PreparedQuery queryRDC = new PreparedQuery(entityManager, sqlRDC);
+          queryRDC.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+          queryRDC.setParameter("ZZKV_CUSNO", cmrNo);
+          List<Object[]> resultsRDC = queryRDC.getResults();
+          List<Integer> seqListRDC = new ArrayList<Integer>();
+          for (int i = 0; i < resultsRDC.size(); i++) {
+            String item = String.valueOf(resultsRDC.get(i));
+            if (!StringUtils.isEmpty(item)) {
+              seqListRDC.add(Integer.parseInt(item));
+            }
+          }
+          if (addrSeq < 6 && seqListRDC.contains(addrSeq)) {
+            if (maxSeq < 6) {
+              addrSeq = 6;
+            } else {
+              addrSeq = maxSeq + 1;
+            }
+          }
+          while (seqListRDC.contains(addrSeq)) {
+            addrSeq++;
+          }
+        }
+      }
+
+      // Old logic:if seq range is not 0-99999, set seq to 1
+      if (!(addrSeq >= 1 && addrSeq <= 99999)) {
+        addrSeq = 1;
+      }
+      newAddrSeq = "0000" + Integer.toString(addrSeq);
+      newAddrSeq = newAddrSeq.substring(newAddrSeq.length() - 5, newAddrSeq.length());
+    }
+    return newAddrSeq;
+  }
+
+  @Override
+  public String generateModifyAddrSeqOnCopy(EntityManager entityManager, String addrType, long reqId, String oldAddrSeq, String cmrIssuingCntry) {
+    String newAddrSeq = "";
+    newAddrSeq = generateAddrSeq(entityManager, addrType, reqId, cmrIssuingCntry);
+    return newAddrSeq;
+  }
+
+  public String getReqType(EntityManager entityManager, long reqId) {
+    String reqType = "";
+    String sql = ExternalizedQuery.getSql("ADMIN.GETREQTYPE.FR");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+
+    List<String> results = query.getResults(String.class);
+    if (results != null && results.size() > 0) {
+      reqType = results.get(0);
+    }
+    return reqType;
+  }
+
+  public String getCMRNo(EntityManager entityManager, long reqId) {
+    String cmrNo = "";
+    String sql = ExternalizedQuery.getSql("DATA.GETCMRNO.FR");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+
+    List<String> results = query.getResults(String.class);
+    if (results != null && results.size() > 0) {
+      cmrNo = results.get(0);
+    }
+    return cmrNo;
   }
 
   public boolean isMachineUpdated(EntityManager entityManager, Addr addr) {
