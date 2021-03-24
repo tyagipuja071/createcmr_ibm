@@ -473,17 +473,17 @@ public class NORDXTransformer extends EMEATransformer {
     case MQMsgConstants.ADDR_ZP03:
       return MQMsgConstants.SOF_ADDRESS_USE_BILLING;
     case MQMsgConstants.ADDR_ZS01:
-      return MQMsgConstants.SOF_ADDRESS_USE_INSTALLING;
+      return MQMsgConstants.SOF_ADDRESS_USE_MAILING;
     case MQMsgConstants.ADDR_ZD01:
       return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
     case MQMsgConstants.ADDR_ZD02:
       return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
     case MQMsgConstants.ADDR_ZI01:
-      return MQMsgConstants.SOF_ADDRESS_USE_EPL;
+      return MQMsgConstants.SOF_ADDRESS_USE_INSTALLING;
     case MQMsgConstants.ADDR_ZS02:
-      return MQMsgConstants.SOF_ADDRESS_USE_MAILING;
+      return MQMsgConstants.SOF_ADDRESS_USE_EPL;
     case MQMsgConstants.ADDR_ZP02:
-      return MQMsgConstants.SOF_ADDRESS_USE_COUNTRY_USE_G;
+      return MQMsgConstants.SOF_ADDRESS_USE_INSTALLING;
     default:
       return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
     }
@@ -493,18 +493,20 @@ public class NORDXTransformer extends EMEATransformer {
     switch (addrType) {
     case MQMsgConstants.ADDR_ZP01:
       return MQMsgConstants.SOF_ADDRESS_USE_BILLING;
-    case MQMsgConstants.ADDR_ZS01:
-      return MQMsgConstants.SOF_ADDRESS_USE_INSTALLING;
-    case MQMsgConstants.ADDR_ZD01:
-      return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
-    case MQMsgConstants.ADDR_ZI01:
-      return MQMsgConstants.SOF_ADDRESS_USE_EPL;
-    case MQMsgConstants.ADDR_ZS02:
-      return MQMsgConstants.SOF_ADDRESS_USE_MAILING;
-    case MQMsgConstants.ADDR_ZP02:
-      return MQMsgConstants.SOF_ADDRESS_USE_COUNTRY_USE_G;
     case MQMsgConstants.ADDR_ZP03:
       return MQMsgConstants.SOF_ADDRESS_USE_BILLING;
+    case MQMsgConstants.ADDR_ZS01:
+      return MQMsgConstants.SOF_ADDRESS_USE_MAILING;
+    case MQMsgConstants.ADDR_ZD01:
+      return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
+    case MQMsgConstants.ADDR_ZD02:
+      return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
+    case MQMsgConstants.ADDR_ZI01:
+      return MQMsgConstants.SOF_ADDRESS_USE_INSTALLING;
+    case MQMsgConstants.ADDR_ZS02:
+      return MQMsgConstants.SOF_ADDRESS_USE_EPL;
+    case MQMsgConstants.ADDR_ZP02:
+      return MQMsgConstants.SOF_ADDRESS_USE_INSTALLING;
     default:
       return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
     }
@@ -564,7 +566,6 @@ public class NORDXTransformer extends EMEATransformer {
     String postCode = StringUtils.isNotBlank(addrData.getPostCd()) ? addrData.getPostCd() : "";
     String landedCntry = StringUtils.isNotBlank(addrData.getLandCntry()) ? addrData.getLandCntry() : "";
 
-    line1 = custName;
     List<String> addrAttrList = Arrays.asList(custNameCond, additionalInfo, attPerson, street, comboStreetCondPobox);
 
     for (int i = 0; i < 2; i++) {
