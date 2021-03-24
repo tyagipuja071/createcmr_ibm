@@ -129,9 +129,6 @@ public class BELUXPDFConverter extends DefaultPDFConverter {
 
     main.addCell(createLabelCell("Customer Name:"));
     String customerName = StringUtils.isBlank(admin.getMainCustNm1()) ? "" : admin.getMainCustNm1();
-    if (!StringUtils.isBlank(admin.getMainCustNm2())) {
-      customerName += " " + admin.getMainCustNm2();
-    }
     main.addCell(createValueCell(customerName, 1, 3));
 
     String[] cmrString = data.getCmrIssuingCntry().split("-");
