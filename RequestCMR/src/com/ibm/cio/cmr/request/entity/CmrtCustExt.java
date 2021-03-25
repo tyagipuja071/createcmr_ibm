@@ -169,6 +169,18 @@ public class CmrtCustExt extends BaseEntity<CmrtCustExtPK> implements Serializab
   @Column(name = "IVA")
   private String itIVA;
 
+  @Column(
+      name = "RACDS")
+  private String acAdminBo;
+
+  public String getAcAdminBo() {
+    return acAdminBo;
+  }
+
+  public void setAcAdminBo(String acAdminBo) {
+    this.acAdminBo = acAdminBo;
+  }
+
   /**
    * DIC (Turkey- RABXA)
    */
