@@ -35,6 +35,7 @@ import com.ibm.cio.cmr.request.entity.AdminPK;
 import com.ibm.cio.cmr.request.entity.CompoundEntity;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataPK;
+import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.entity.Kna1;
 import com.ibm.cio.cmr.request.entity.MassUpdt;
 import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
@@ -59,6 +60,7 @@ import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.impl.LAHandler;
+import com.ibm.cio.cmr.request.util.geo.impl.USHandler;
 import com.ibm.cmr.create.batch.model.CmrServiceInput;
 import com.ibm.cmr.create.batch.model.MQIntfReqQueueModel;
 import com.ibm.cmr.create.batch.model.MassUpdateServiceInput;
@@ -1363,13 +1365,17 @@ public class TransConnService extends BaseBatchService {
 
       StringBuilder rdcProcessingMsg = new StringBuilder();
       List<String> statusCodes = new ArrayList<String>();
-
-      boolean continueUpdate = true;
+      DataRdc dataRdc = getDataRdcRecords(entityManager, data);
+      boolean isDataUpdated = false;
+      isDataUpdated = USHandler.isDataUpdated(data, dataRdc, data.getCmrIssuingCntry());
+      boolean continueUpdate = false;
       StringBuilder comment = new StringBuilder();
 
       boolean ignoreWfhistory = false;
       for (Addr addr : addresses) {
-
+        if (isDataUpdated || addr.getChangedIndc().equals("Y") || addr.getImportInd().equals("N")) {
+          continueUpdate = true;
+        }
         if (continueUpdate) {
           request.setSapNo(addr.getSapNo());
 
@@ -2318,5 +2324,14 @@ public class TransConnService extends BaseBatchService {
 
   public void setDeleteRDcTargets(boolean deleteRDcTargets) {
     this.deleteRDcTargets = deleteRDcTargets;
+  }
+
+  private DataRdc getDataRdcRecords(EntityManager entityManager, Data data) {
+    LOG.debug("Searching for DATA_RDC records for Swiss Processing " + data.getId().getReqId());
+    String sql = ExternalizedQuery.getSql("SUMMARY.OLDDATA");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", data.getId().getReqId());
+    query.setForReadOnly(true);
+    return query.getSingleResult(DataRdc.class);
   }
 }
