@@ -891,26 +891,29 @@ public class FranceUtil extends AutomationUtil {
                 // CMR - 1606
                 // if address has been updated , validate vat with DnB
                 Addr addrToChk = requestData.getAddress(addrType);
+                boolean matchesDnb = false;
                 List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addrToChk, true);
-                if (!matches.isEmpty() && matches != null && matches.size() > 0) {
+                matchesDnb = ifaddressCloselyMatchesDnb(matches, addrToChk, admin, data.getCmrIssuingCntry());
+
+                if (!matches.isEmpty() && matches != null && matches.size() > 0 && matchesDnb) {
                   // check against D&B
                   for (DnBMatchingResponse dnb : matches) {
                     String siret = DnBUtil.getTaxCode1(dnb.getDnbCountry(), dnb.getOrgIdDetails());
                     if (StringUtils.isNotBlank(siret) && siret.equalsIgnoreCase(data.getTaxCd1()) && !"O".equalsIgnoreCase(dnb.getOperStatusCode())) {
-                      checkDetails.append("SIRET found in DnB for the CMR and is active.\n");
+                      checkDetails.append("SIRET found in DnB for the request and is active.\n");
                       break;
                     } else {
                       resultCodes.add("D"); // send to cmde for review
                       engineData.addNegativeCheckStatus("_frSIRETCheckFailed",
-                          "SIRET for Bill-To address update could not be found in DnB for the CMR.");
-                      checkDetails.append("SIRET for Bill-To address update could not be found in DnB for the CMR.\n");
+                          "SIRET on the request data doesn't match in DnB.");
+                      checkDetails.append("SIRET on the request data doesn't match in DnB.\n");
                     }
 
                   }
                 } else {
                   resultCodes.add("D"); // CMDE review
-                  engineData.addNegativeCheckStatus("_frSIRETCheckFailed", "SIRET for Bill-To address update could not be found in DnB for the CMR.");
-                  checkDetails.append("SIRET for Bill-To address update could not be found in DnB for the CMR.\n");
+                  engineData.addNegativeCheckStatus("_frSIRETCheckFailed", "Updated Bill-To address could not be validated in DnB.");
+                  checkDetails.append("Updated Bill-To address could not be validated in DnB.\n");
                 }
               } else {
                 // proceed
@@ -1149,7 +1152,7 @@ public class FranceUtil extends AutomationUtil {
   public List<String> getSkipChecksRequestTypesforCMDE() {
     return Arrays.asList("C", "U", "M", "D", "R");
   }
-  
+
   public static boolean isCountryFREnabled(EntityManager entityManager, String cntry) {
 
     boolean isFR = false;
