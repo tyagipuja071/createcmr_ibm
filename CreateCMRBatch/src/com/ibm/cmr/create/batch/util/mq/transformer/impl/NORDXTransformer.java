@@ -1573,55 +1573,20 @@ public class NORDXTransformer extends EMEATransformer {
     Data data = cmrObjects.getData();
     Admin admin = cmrObjects.getAdmin();
 
-    if (!StringUtils.isBlank(data.getBpSalesRepNo())) {
-      legacyCustExt.setTeleCovRep(data.getBpSalesRepNo());
+    if (!StringUtils.isBlank(data.getAcAdminBo())) {
+      legacyCustExt.setAcAdminBo(data.getAcAdminBo());
     }
 
-    // Morocco use Phone3 to store ICE field
-    if (SystemLocation.MOROCCO.equals(data.getCmrIssuingCntry()) && !StringUtils.isBlank(data.getPhone3())) {
-      legacyCustExt.setiTaxCode(data.getPhone3());
-    }
   }
 
   @Override
   public void transformLegacyCustomerExtDataMassUpdate(EntityManager entityManager, CmrtCustExt custExt, CMRRequestContainer cmrObjects,
       MassUpdtData muData, String cmr) throws Exception {
-
-    // for tax office
-    // List<MassUpdtAddr> muaList = cmrObjects.getMassUpdateAddresses();
-    // if (muaList != null && muaList.size() > 0) {
-    // for (MassUpdtAddr mua : muaList) {
-    // if ("ZP01".equals(mua.getId().getAddrType())) {
-    // if (!StringUtils.isBlank(mua.getFloor())) {
-    // if (DEFAULT_CLEAR_CHAR.equals(mua.getFloor())) {
-    // custExt.setiTaxCode("");
-    // } else {
-    // custExt.setiTaxCode(mua.getFloor());
-    // }
-    // break;
-    // }
-    //
-    // }
-    // }
-    // }
-
-    if (!StringUtils.isBlank(muData.getNewEntpName1())) {
-      if ("@".equals(muData.getNewEntpName1())) {
-        custExt.setiTaxCode("");
+    if (!StringUtils.isBlank(muData.getSearchTerm())) {
+      if ("@".equals(muData.getSearchTerm())) {
+        custExt.setAcAdminBo("");
       } else {
-        if (muData.getNewEntpName1().length() > 9) {
-          custExt.setiTaxCode(muData.getNewEntpName1().substring(0, 8));
-        } else {
-          custExt.setiTaxCode(muData.getNewEntpName1());
-        }
-      }
-    }
-
-    if (!StringUtils.isBlank(muData.getAffiliate())) {
-      if ("@".equals(muData.getAffiliate())) {
-        custExt.setTeleCovRep("");
-      } else {
-        custExt.setTeleCovRep(muData.getAffiliate());
+        custExt.setAcAdminBo(muData.getSearchTerm());
       }
     }
 
