@@ -134,6 +134,9 @@ public class EUVatValidationElement extends ValidatingElement implements Company
               LOG.debug("VAT is invalid.Need review.");
             }
           } else {
+            validation.setSuccess(false);
+            validation.setMessage("Execution failed.");
+            output.setDetails(response.getMessage());
             if ("Y".equals(admin.getMatchOverrideIndc()) && DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
               output.setOnError(true);
               engineData.addNegativeCheckStatus("_dnbOverride", "D&B matches were chosen to be overridden by the requester.");
@@ -142,6 +145,7 @@ public class EUVatValidationElement extends ValidatingElement implements Company
               output.setOnError(true);
               engineData.addRejectionComment("OTH", response.getMessage(), null, null);
             }
+            LOG.debug(response.getMessage());
           }
         }
       }
