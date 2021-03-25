@@ -69,7 +69,7 @@ if (readOnly){
               </cmr:label></cmr:column></cmr:view>
         </p>
             </cmr:column>
-            <cmr:view forGEO="IERP,CND,KR">
+            <cmr:view forGEO="IERP,CND">
             <cmr:column span="2" containerForField="ProspectToLegalCMR">
               <cmr:field fieldId="ProspectToLegalCMR" path="prospLegalInd" tabId="MAIN_GENERAL_TAB"/>
               <cmr:label fieldId="prospLegalInd" forRadioOrCheckbox="true">
