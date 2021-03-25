@@ -924,6 +924,16 @@ public class NORDXHandler extends BaseSOFHandler {
                   validations.add(error);
                 }
 
+              currCell = (XSSFCell) row.getCell(9);
+              embargo = validateColValFromCell(currCell);
+              if (StringUtils.isNotBlank(embargo) && !"@JDK".contains(embargo)) {
+                TemplateValidation error = new TemplateValidation(name);
+                LOG.trace("The row " + (row.getRowNum() + 1)
+                    + ":Note that Embargo code only accept @,J,D,K values. Please fix and upload the template again.");
+                error.addError((row.getRowNum() + 1), "Embargo code", "The row " + (row.getRowNum() + 1)
+                    + ":Note that Embargo code only accept @,J,D,K values. Please fix and upload the template again.<br>");
+                validations.add(error);
+              }
                 currCell = (XSSFCell) row.getCell(12);
                 leadingAccount = validateColValFromCell(currCell);
                 if ("@".equals(leadingAccount)) {

@@ -1164,14 +1164,13 @@ public class NORDXTransformer extends EMEATransformer {
     String issuingCntry = cust.getId().getSofCntryCode();
     
     if (!(StringUtils.isNotBlank(muData.getAbbrevNm()) || StringUtils.isNotBlank(muData.getSvcArOffice())
-        || StringUtils.isNotBlank(muData.getCurrencyCd()) || StringUtils.isNotBlank(muData.getSubIndustryCd())
-        || StringUtils.isNotBlank(muData.getSearchTerm()) || StringUtils.isNotBlank(muData.getSpecialTaxCd())
+        || StringUtils.isNotBlank(muData.getCurrencyCd()) || StringUtils.isNotBlank(muData.getSearchTerm())
+        || StringUtils.isNotBlank(muData.getSpecialTaxCd()) || StringUtils.isNotBlank(muData.getInacCd())
         || StringUtils.isNotBlank(muData.getNewEntpName1()) || StringUtils.isNotBlank(muData.getAbbrevLocn())
         || StringUtils.isNotBlank(muData.getMiscBillCd()) || StringUtils.isNotBlank(muData.getModeOfPayment())
         || StringUtils.isNotBlank(muData.getIsuCd()) || StringUtils.isNotBlank(muData.getRepTeamMemberNo())
-        || StringUtils.isNotBlank(muData.getCompany()) || StringUtils.isNotBlank(muData.getEmail1())
-        || StringUtils.isNotBlank(muData.getCollectionCd()) || StringUtils.isNotBlank(muData.getIsicCd()) || StringUtils.isNotBlank(muData.getVat())
-        || StringUtils.isNotBlank(muData.getInacCd()))) {
+        || StringUtils.isNotBlank(muData.getEmail1()) || StringUtils.isNotBlank(muData.getCollectionCd())
+        || StringUtils.isNotBlank(muData.getIsicCd()) || StringUtils.isNotBlank(muData.getVat()))) {
       // dummyReq
       return;
     }
@@ -1198,10 +1197,6 @@ public class NORDXTransformer extends EMEATransformer {
       } else {
         cust.setCustType(muData.getCurrencyCd());
       }
-    }
-
-    if (!StringUtils.isBlank(muData.getSubIndustryCd())) {
-      cust.setLocNo(cust.getId().getSofCntryCode() + muData.getSubIndustryCd());
     }
 
     if (!StringUtils.isBlank(muData.getSearchTerm())) {
@@ -1275,14 +1270,6 @@ public class NORDXTransformer extends EMEATransformer {
       } else {
         cust.setSalesRepNo(muData.getRepTeamMemberNo());
         cust.setSalesGroupRep(muData.getRepTeamMemberNo());
-      }
-    }
-
-    if (!StringUtils.isBlank(muData.getCompany())) {
-      if ("@".equals(muData.getCompany())) {
-        cust.setEnterpriseNo("");
-      } else {
-        cust.setEnterpriseNo(muData.getCompany());
       }
     }
 
