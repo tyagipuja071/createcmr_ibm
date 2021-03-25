@@ -79,6 +79,7 @@ function afterConfigForBELUX() {
 
   if ((custLang == null || custLang == '') && reqType == 'U') {
     FormManager.setValue('custPrefLang', 'N');
+
   }
   if (custGrp == 'CROSS' || custGrp == 'LUCRO') {
     FormManager.setValue('custPrefLang', 'E');
