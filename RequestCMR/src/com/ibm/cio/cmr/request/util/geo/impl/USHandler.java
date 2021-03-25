@@ -3,8 +3,6 @@
  */
 package com.ibm.cio.cmr.request.util.geo.impl;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -12,10 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.Column;
 import javax.persistence.EntityManager;
 
-import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.log4j.Logger;
@@ -1060,89 +1056,5 @@ public class USHandler extends GEOHandler {
       return subInd;
     }
     return subInd;
-  }
-
-  /**
-   * Checks if this {@link Data} record has been updated. This method compares
-   * with the {@link DataRdc} equivalent and compares per field and filters
-   * given the configuration on the corresponding {@link GEOHandler} for the
-   * given CMR issuing country. If at least one field is not empty, it will
-   * return true.
-   * 
-   * @param data
-   * @param dataRdc
-   * @param cmrIssuingCntry
-   * @return
-   */
-  public static boolean isDataUpdated(Data data, DataRdc dataRdc, String cmrIssuingCntry) {
-    String srcName = null;
-    Column srcCol = null;
-    Field trgField = null;
-
-    for (Field field : Data.class.getDeclaredFields()) {
-      if (!(Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers()) || Modifier.isAbstract(field.getModifiers()))) {
-        srcCol = field.getAnnotation(Column.class);
-        if (srcCol != null) {
-          srcName = srcCol.name();
-        } else {
-          srcName = field.getName().toUpperCase();
-        }
-
-        // check if at least one of the fields is updated
-        if (getDataFieldsForUpdateCheck(cmrIssuingCntry).contains(srcName)) {
-          try {
-            trgField = DataRdc.class.getDeclaredField(field.getName());
-
-            field.setAccessible(true);
-            trgField.setAccessible(true);
-
-            Object srcVal = field.get(data);
-            Object trgVal = trgField.get(dataRdc);
-
-            if (String.class.equals(field.getType())) {
-              String srcStringVal = (String) srcVal;
-              if (srcStringVal == null) {
-                srcStringVal = "";
-              }
-              String trgStringVal = (String) trgVal;
-              if (trgStringVal == null) {
-                trgStringVal = "";
-              }
-              if (!StringUtils.equals(srcStringVal.trim(), trgStringVal.trim())) {
-                LOG.trace(" - Field: " + srcName + " Not equal " + srcVal + " - " + trgVal);
-                return true;
-              }
-            } else {
-              if (!ObjectUtils.equals(srcVal, trgVal)) {
-                LOG.trace(" - Field: " + srcName + " Not equal " + srcVal + " - " + trgVal);
-                return true;
-              }
-            }
-          } catch (NoSuchFieldException e) {
-            // noop
-            continue;
-          } catch (Exception e) {
-            LOG.trace("General error when trying to access field.", e);
-            // no stored value or field not on addr rdc, return null for no
-            // changes
-            continue;
-          }
-        } else {
-          continue;
-        }
-      }
-    }
-
-    return false;
-  }
-
-  public static List<String> getDataFieldsForUpdateCheck(String cmrIssuingCntry) {
-    List<String> fields = new ArrayList<>();
-    fields.addAll(Arrays.asList("ABBREV_NM", "CLIENT_TIER", "CUST_PREF_LANG", "INAC_CD", "SEARCH_TERM", "ISIC_CD", "SUB_INDUSTRY_CD",
-        "SENSITIVE_FLAG", "TAX_CD1", "TAX_CD2", "TAX_CD3", "RESTRICT_IND", "OEM_IND", "CSO_SITE", "OUT_CITY_LIMIT", "FED_SITE_IND",
-        "NON_IBM_COMPANY_IND", "ICC_TAX_CLASS", "ICC_TAX_EXEMPT_STATUS", "SIZE_CD", "MISC_BILL_CD", "BP_ACCT_TYP", "BP_NAME", "INAC_TYPE", "PPSCEID",
-        "ENTERPRISE", "AFFILIATE", "MEM_LVL", "BP_REL_TYPE", "MKTG_DEPT", "MTKG_AR_DEPT", "PCC_MKTG_DEPT", "PCC_AR_DEPT", "SVC_AR_OFFICE",
-        "SVC_TERRITORY_ZONE"));
-    return fields;
   }
 }

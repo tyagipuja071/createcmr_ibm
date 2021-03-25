@@ -26,6 +26,7 @@ import com.ibm.cio.cmr.create.entity.NotifyReq;
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.automation.util.DummyServletRequest;
+import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
 import com.ibm.cio.cmr.request.automation.util.geo.USUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
@@ -35,7 +36,6 @@ import com.ibm.cio.cmr.request.entity.AdminPK;
 import com.ibm.cio.cmr.request.entity.CompoundEntity;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataPK;
-import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.entity.Kna1;
 import com.ibm.cio.cmr.request.entity.MassUpdt;
 import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
@@ -60,7 +60,6 @@ import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.impl.LAHandler;
-import com.ibm.cio.cmr.request.util.geo.impl.USHandler;
 import com.ibm.cmr.create.batch.model.CmrServiceInput;
 import com.ibm.cmr.create.batch.model.MQIntfReqQueueModel;
 import com.ibm.cmr.create.batch.model.MassUpdateServiceInput;
@@ -1351,6 +1350,7 @@ public class TransConnService extends BaseBatchService {
     String resultCode = null;
     String processingStatus = admin.getRdcProcessingStatus() != null ? admin.getRdcProcessingStatus() : "";
     long reqId = admin.getId().getReqId();
+    RequestChangeContainer changes = new RequestChangeContainer(entityManager, data.getCmrIssuingCntry(), admin, reqId);
 
     try {
 
@@ -1365,15 +1365,16 @@ public class TransConnService extends BaseBatchService {
 
       StringBuilder rdcProcessingMsg = new StringBuilder();
       List<String> statusCodes = new ArrayList<String>();
-      DataRdc dataRdc = getDataRdcRecords(entityManager, data);
       boolean isDataUpdated = false;
-      isDataUpdated = USHandler.isDataUpdated(data, dataRdc, data.getCmrIssuingCntry());
+      if (changes != null && changes.hasDataChanges()) {
+        isDataUpdated = true;
+      }
       boolean continueUpdate = false;
       StringBuilder comment = new StringBuilder();
 
       boolean ignoreWfhistory = false;
       for (Addr addr : addresses) {
-        if (isDataUpdated || addr.getChangedIndc().equals("Y") || addr.getImportInd().equals("N")) {
+        if (isDataUpdated || "Y".equals(addr.getChangedIndc()) || "N".equals(addr.getImportInd())) {
           continueUpdate = true;
         }
         if (continueUpdate) {
@@ -2326,12 +2327,4 @@ public class TransConnService extends BaseBatchService {
     this.deleteRDcTargets = deleteRDcTargets;
   }
 
-  private DataRdc getDataRdcRecords(EntityManager entityManager, Data data) {
-    LOG.debug("Searching for DATA_RDC records for Swiss Processing " + data.getId().getReqId());
-    String sql = ExternalizedQuery.getSql("SUMMARY.OLDDATA");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("REQ_ID", data.getId().getReqId());
-    query.setForReadOnly(true);
-    return query.getSingleResult(DataRdc.class);
-  }
 }
