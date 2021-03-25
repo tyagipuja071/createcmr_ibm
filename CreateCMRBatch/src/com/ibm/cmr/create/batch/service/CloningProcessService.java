@@ -1102,6 +1102,11 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     knvpClone = getKnvpByKunnr(entityManager, kna1Clone.getId().getMandt(), kna1Clone.getId().getKunnr());
     if (knvp != null && knvp.size() > 0 && knvpClone.size() == 0) {
       try {
+        Set<String> usedVtweg = new HashSet<String>();
+        Set<String> usedSpart = new HashSet<String>();
+        Set<String> usedParvw = new HashSet<String>();
+        Set<String> usedParza = new HashSet<String>();
+
         for (Knvp currentKnvp : knvp) {
           knvpCloneInsert = new Knvp();
           KnvpPK knvpPKClone = new KnvpPK();
@@ -1119,11 +1124,20 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
           knvpCloneInsert.setId(knvpPKClone);
 
+          if (!(knvpCloneInsert.getId().getVkorg().equalsIgnoreCase(currentKnvp.getId().getVkorg()))
+              && usedVtweg.contains(knvpCloneInsert.getId().getVtweg()) && usedSpart.contains(knvpCloneInsert.getId().getSpart())
+              && usedParvw.contains(knvpCloneInsert.getId().getParvw()) && usedParza.contains(knvpCloneInsert.getId().getParza()))
+            continue;
+
           knvpCloneInsert.setSapTs(ts);
           knvpCloneInsert.setShadUpdateInd("I");
           knvpCloneInsert.setShadUpdateTs(ts);
 
           createEntity(knvpCloneInsert, entityManager);
+          usedVtweg.add(knvpCloneInsert.getId().getVtweg());
+          usedSpart.add(knvpCloneInsert.getId().getSpart());
+          usedParvw.add(knvpCloneInsert.getId().getParvw());
+          usedParza.add(knvpCloneInsert.getId().getParza());
         }
       } catch (Exception e) {
         LOG.debug("Error in copy knvp");
