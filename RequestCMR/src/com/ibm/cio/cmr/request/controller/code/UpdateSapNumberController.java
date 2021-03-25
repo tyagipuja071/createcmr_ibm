@@ -90,7 +90,7 @@ public class UpdateSapNumberController extends BaseController {
    * @throws CmrException
    */
   @RequestMapping(value = "/code/updatesapno/addressList/get", method = RequestMethod.GET)
-  public @ResponseBody ModelMap getAttachmentList(HttpServletRequest request) throws CmrException {
+  public @ResponseBody ModelMap doUpdateSapNumber(HttpServletRequest request) throws CmrException {
     ModelMap map = new ModelMap();
     String reqId = request.getParameter("reqId");
     String cmrNo = "";
@@ -128,13 +128,22 @@ public class UpdateSapNumberController extends BaseController {
 
     List<Addr> addressList = getAddressRecords(entityManager, Long.parseLong(reqId));
     List<Kna1> kna1List = getKna1ForCMR(cmrNo, issuingCntry, entityManager);
+    if (kna1List == null || kna1List.size() == 0) {
+      map.addAttribute("success", false);
+      map.addAttribute("msg", "No Addresses Found on KNA1 for CMR No " + cmrNo);
+      map.addAttribute("data", null);
+      return map;
+    }
     String output = "";
+    String addrTypeToBeSKipped = null;
     if (addressList != null && !addressList.isEmpty() && kna1List != null && !kna1List.isEmpty()) {
       for (Addr addr : addressList) {
         if (StringUtils.isEmpty(addr.getSapNo())) {
           try {
             output = updateSapNoService.getKNA1AddressType(addr.getId().getAddrType(), issuingCntry);
+            addrTypeToBeSKipped = updateSapNoService.getAddressTypeToBeSkipped(issuingCntry);
             LOG.debug("Output AddrType = " + output);
+            LOG.debug("Addr to be skipped = " + addrTypeToBeSKipped);
           } catch (Exception e) {
             LOG.debug(e.getMessage());
           }
@@ -144,10 +153,11 @@ public class UpdateSapNumberController extends BaseController {
             addr.setSapNo(sapNo);
             LOG.debug("Updating SAP NO=" + sapNo + "For Address Type =" + addr.getId().getAddrType());
             updateEntity(addr, entityManager);
-          } else {
-            LOG.debug("SAP Number not found in KNA1 for address type=" + output);
+          } else if (StringUtils.isEmpty(addrTypeToBeSKipped)
+              || (!StringUtils.isEmpty(addrTypeToBeSKipped) && !addrTypeToBeSKipped.equals(addr.getId().getAddrType()))) {
+            LOG.debug("SAP Number not found in KNA1 for address type=" + output + " Sequence =" + addr.getId().getAddrSeq());
             ifError = true;
-            errorText.append("SAP Number not found in KNA1 for address type=" + output + "\n");
+            errorText.append("SAP Number not found in KNA1 for address type=" + output + " Sequence =" + addr.getId().getAddrSeq() + "\n");
           }
         }
       }
@@ -177,7 +187,8 @@ public class UpdateSapNumberController extends BaseController {
   private String getSapNumberForAddrType(List<Kna1> kna1List, String addressType, String seqno) {
     if (kna1List != null && !kna1List.isEmpty()) {
       for (Kna1 addrKna1 : kna1List) {
-        if (!StringUtils.isEmpty(addressType) && addressType.equals(addrKna1.getKtokd()) && seqno.equals(addrKna1.getZzkvSeqno())) {
+        if (!StringUtils.isEmpty(addressType) && addressType.equals(addrKna1.getKtokd()) && (seqno.equals(addrKna1.getZzkvSeqno())
+            || seqno.equals(Integer.parseInt(addrKna1.getZzkvSeqno())) || seqno.equals(StringUtils.leftPad(addrKna1.getZzkvSeqno(), 5, '0')))) {
           return addrKna1.getId().getKunnr();
         }
       }

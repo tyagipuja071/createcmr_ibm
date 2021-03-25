@@ -10,6 +10,7 @@ public class AddressTypeMapping {
   public static final AddressTypeMapping DEFAULT = new AddressTypeMapping();
 
   private List<String> countries = new ArrayList<>();
+  private List<String> typeToBeSkipped = new ArrayList<>();
 
   private Map<String, String> inTypeMapping = new HashMap<String, String>();
 
@@ -68,6 +69,14 @@ public class AddressTypeMapping {
       }
     }
     return null;
+  }
+
+  public List<String> getTypeToBeSkipped() {
+    return typeToBeSkipped;
+  }
+
+  public void setTypeToBeSkipped(List<String> typeToBeSkipped) {
+    this.typeToBeSkipped = typeToBeSkipped;
   }
 
 }
