@@ -109,6 +109,10 @@ function disableCmrNo() {
 function setVatValidatorNL() {
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (custSubGrp == 'PUBCU') {
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+    return;
+  }
   if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
     if (custSubGrp == 'PRICU') {
       FormManager.readOnly('vat');
