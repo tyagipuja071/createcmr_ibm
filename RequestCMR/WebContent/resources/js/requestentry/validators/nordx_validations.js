@@ -87,6 +87,9 @@ function afterConfigForNORDX() {
   filterCmrnoP();
   // CMR-1650
   cmr.hideNode("container-SalesBusOff");
+
+  // CREATCMR-1758
+  vatInfoBubbleShowAndhide();
 }
 
 function disableLandCntry() {
@@ -1679,6 +1682,37 @@ function filterCmrnoP() {
       FormManager.setValue('cmrNo', '');
     }
   });
+}
+
+// CREATCMR-1758
+function vatInfoBubbleShowAndhide() {
+  if (reqType == 'C') {
+    var custType = FormManager.getActualValue('custGrp');
+    if (custType == 'LOCAL' || custType == 'FOLOC' || custType == 'GLLOC' || custType == 'ISLOC' || custType == 'EELOC' || custType == 'LTLOC'
+        || custType == 'LVLOC') {
+      $("span[id='vatInfoBubble'] img[class='cmr-info-bubble']").show();
+    } else {
+      $("span[id='vatInfoBubble'] img[class='cmr-info-bubble']").hide();
+    }
+  } else if (reqType == 'U') {
+    var landCntry = FormManager.getActualValue('defaultLandedCountry');
+    var zs01Cntry = '';
+
+    var ret = cmr.query('VAT.GET_ZS01_CNTRY', {
+      REQID : FormManager.getActualValue('reqId'),
+      TYPE : 'ZS01'
+    });
+
+    if (ret && ret.ret1 && ret.ret1 != '') {
+      zs01Cntry = ret.ret1;
+    }
+
+    if (zs01Cntry == landCntry) {
+      $("span[id='vatInfoBubble'] img[class='cmr-info-bubble']").show();
+    } else {
+      $("span[id='vatInfoBubble'] img[class='cmr-info-bubble']").hide();
+    }
+  }
 }
 
 dojo.addOnLoad(function() {

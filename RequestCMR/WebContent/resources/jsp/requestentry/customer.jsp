@@ -273,34 +273,54 @@
                 </a>
               </cmr:view>
               <c:if test="${reqentry.countryUse == '678'}">
-                <cmr:info text="${ui.info.NordicsForDKVat}" />
+                <span id="vatInfoBubble">
+                  <cmr:info text="${ui.info.NordicsForDKVat}" />
+                </span>
               </c:if>
               <c:if test="${reqentry.countryUse == '678GL'}">
-                <cmr:info text="${ui.info.NordicsForGLVat}" />
+                <span id="vatInfoBubble">
+                  <cmr:info text="${ui.info.NordicsForGLVat}" />
+                </span>
               </c:if>
               <c:if test="${reqentry.countryUse == '678FO'}">
-                <cmr:info text="${ui.info.NordicsForFOVat}" />
+                <span id="vatInfoBubble">
+                  <cmr:info text="${ui.info.NordicsForFOVat}" />
+                </span>
               </c:if>
               <c:if test="${reqentry.countryUse == '678IS'}">
-                <cmr:info text="${ui.info.NordicsForISVat}" />
+                <span id="vatInfoBubble">
+                  <cmr:info text="${ui.info.NordicsForISVat}" />
+                </span>
               </c:if>
               <c:if test="${reqentry.countryUse == '702'}">
-                <cmr:info text="${ui.info.NordicsForFIVat}" />
+                <span id="vatInfoBubble">
+                  <cmr:info text="${ui.info.NordicsForFIVat}" />
+                </span>
               </c:if>
               <c:if test="${reqentry.countryUse == '702LV'}">
-                <cmr:info text="${ui.info.NordicsForLVVat}" />
+                <span id="vatInfoBubble">
+                  <cmr:info text="${ui.info.NordicsForLVVat}" />
+                </span>
               </c:if>
               <c:if test="${reqentry.countryUse == '702LT'}">
-                <cmr:info text="${ui.info.NordicsForLTVat}" />
+                <span id="vatInfoBubble">
+                  <cmr:info text="${ui.info.NordicsForLTVat}" />
+                </span>
               </c:if>
               <c:if test="${reqentry.countryUse == '702EE'}">
-                <cmr:info text="${ui.info.NordicsForEEVat}" />
+                <span id="vatInfoBubble">
+                  <cmr:info text="${ui.info.NordicsForEEVat}" />
+                </span>
               </c:if>
               <c:if test="${reqentry.cmrIssuingCntry == '806'}">
-                <cmr:info text="${ui.info.NordicsForNOVat}" />
+                <span id="vatInfoBubble">
+                  <cmr:info text="${ui.info.NordicsForNOVat}" />
+                </span>
               </c:if>
               <c:if test="${reqentry.cmrIssuingCntry == '846'}">
-                <cmr:info text="${ui.info.NordicsForSEVat}" />
+                <span id="vatInfoBubble">
+                  <cmr:info text="${ui.info.NordicsForSEVat}" />
+                </span>
               </c:if>
           </label>
           <cmr:field path="vat" id="vat" fieldId="VAT" tabId="MAIN_CUST_TAB" />
