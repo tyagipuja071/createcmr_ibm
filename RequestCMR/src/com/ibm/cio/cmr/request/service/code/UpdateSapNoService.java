@@ -16,11 +16,13 @@ public class UpdateSapNoService extends DefaultHandler {
   // internals
   private StringBuffer buffer;
   private String countries = null;
+  private String typeToBeSkipped = null;
   private AddressTypeMapping addrMapping;
   private boolean readTypeMapping;
   private String inputType;
   private String outputType;
   private Map<String, AddressTypeMapping> addressTypeMappings = new HashMap<>();
+  private Map<String, String> typesToBeSkipped = new HashMap<>();
 
   @Override
   public void startDocument() throws SAXException {
@@ -52,7 +54,7 @@ public class UpdateSapNoService extends DefaultHandler {
   public void endElement(String uri, String localName, String qName) throws SAXException {
     String value = this.buffer.toString().trim();
     if ("typeMappings".equals(qName)) {
-      setAddrTypeMapping(this.countries, this.addrMapping);
+      setAddrTypeMapping(this.countries, this.addrMapping, this.typeToBeSkipped);
       this.readTypeMapping = false;
     }
 
@@ -70,13 +72,18 @@ public class UpdateSapNoService extends DefaultHandler {
       if ("typeMap".equals(qName)) {
         this.addrMapping.setTypeMapping(this.inputType, this.outputType);
       }
+      if ("typeToBeSkipped".equals(qName)) {
+        this.typeToBeSkipped = value;
+        this.addrMapping.setTypeToBeSkipped(Arrays.asList(value.split(",")));
+      }
     }
     this.buffer.delete(0, this.buffer.length());
   }
 
-  protected void setAddrTypeMapping(String countries, AddressTypeMapping mapping) {
+  protected void setAddrTypeMapping(String countries, AddressTypeMapping mapping, String addrTypesToBeSkipped) {
     for (String country : countries.split(",")) {
       this.addressTypeMappings.put(country, mapping);
+      this.typesToBeSkipped.put(country, addrTypesToBeSkipped);
     }
   }
 
@@ -115,5 +122,12 @@ public class UpdateSapNoService extends DefaultHandler {
       return this.addressTypeMappings.get(country);
     }
     return AddressTypeMapping.DEFAULT;
+  }
+
+  public String getAddressTypeToBeSkipped(String country) {
+    if (this.typesToBeSkipped.containsKey(country)) {
+      return this.typesToBeSkipped.get(country);
+    }
+    return null;
   }
 }

@@ -25,4 +25,23 @@
       </typeMap>
       </mapping>
   </typeMappings>
+  <typeMappings>
+    <mapping>
+  <countries>624</countries>
+      <typeMap>
+        <inputType>PG01</inputType>
+        <outputType>ZP01</outputType>
+      </typeMap>
+      <typeToBeSkipped>ZS02</typeToBeSkipped>
+      </mapping>
+  </typeMappings>
+  <typeMappings>
+    <mapping>
+  <countries>788</countries>
+      <typeMap>
+        <inputType>PG01</inputType>
+        <outputType>ZP01</outputType>
+      </typeMap>
+      </mapping>
+  </typeMappings>
 </convertor>
