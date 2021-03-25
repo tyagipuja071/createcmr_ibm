@@ -62,8 +62,6 @@
 					<dbColumn>EMBARGO_CD</dbColumn>
 					<width>10</width>
 					<length>1</length>
-					<lovId>EmbargoCode</lovId>
-					<length>1</length>
 				</column>
 				<column>
 					<label>ISU Code</label>
@@ -185,7 +183,7 @@
 				<column>
 					<label>Country (Landed)</label>
 					<dbColumn>LAND_CNTRY</dbColumn>
-					<width>5</width>
+					<width>15</width>
 					<bdsId>LandedCountry</bdsId>
 				</column>
 				<column>
@@ -261,7 +259,7 @@
 				<column>
 					<label>Country (Landed)</label>
 					<dbColumn>LAND_CNTRY</dbColumn>
-					<width>5</width>
+					<width>15</width>
 					<bdsId>LandedCountry</bdsId>
 				</column>
 				<column>
@@ -337,7 +335,7 @@
 				<column>
 					<label>Country (Landed)</label>
 					<dbColumn>LAND_CNTRY</dbColumn>
-					<width>5</width>
+					<width>15</width>
 					<bdsId>LandedCountry</bdsId>
 				</column>
 			</columns>
@@ -407,7 +405,7 @@
 				<column>
 					<label>Country (Landed)</label>
 					<dbColumn>LAND_CNTRY</dbColumn>
-					<width>5</width>
+					<width>15</width>
 					<bdsId>LandedCountry</bdsId>
 				</column>
 			</columns>
@@ -478,7 +476,7 @@
 				<column>
 					<label>Country (Landed)</label>
 					<dbColumn>LAND_CNTRY</dbColumn>
-					<width>5</width>
+					<width>15</width>
 					<bdsId>LandedCountry</bdsId>
 				</column>
 			</columns>

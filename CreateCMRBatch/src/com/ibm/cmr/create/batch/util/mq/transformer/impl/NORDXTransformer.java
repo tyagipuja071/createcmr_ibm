@@ -1084,10 +1084,6 @@ public class NORDXTransformer extends EMEATransformer {
       legacyCust.setIsuCd("");
     }
 
-    if (!StringUtils.isBlank(data.getSubIndustryCd())) {
-      legacyCust.setLocNo(legacyCust.getId().getSofCntryCode() + data.getSubIndustryCd());
-    }
-
     if (SystemLocation.SWEDEN.equals(data.getCmrIssuingCntry())) {
       int beginPost = Integer.valueOf(mailPostCode.substring(0, 1));
       if (beginPost > 9 && beginPost < 20) {
@@ -1198,10 +1194,6 @@ public class NORDXTransformer extends EMEATransformer {
       } else {
         cust.setCustType(muData.getCurrencyCd());
       }
-    }
-
-    if (!StringUtils.isBlank(muData.getSubIndustryCd())) {
-      cust.setLocNo(cust.getId().getSofCntryCode() + muData.getSubIndustryCd());
     }
 
     if (!StringUtils.isBlank(muData.getSearchTerm())) {
