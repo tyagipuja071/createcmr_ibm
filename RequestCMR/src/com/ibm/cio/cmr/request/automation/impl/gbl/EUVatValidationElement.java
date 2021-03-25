@@ -114,6 +114,8 @@ public class EUVatValidationElement extends ValidatingElement implements Company
               engineData.setCompanySource("VIES");
               updateEntity(admin, entityManager);
             } else {
+              validation.setSuccess(false);
+              validation.setMessage("Review needed.");
               details.append("VAT is invalid. Need review.");
               if ("Y".equals(admin.getMatchOverrideIndc()) && DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
                 output.setOnError(false);
@@ -129,6 +131,7 @@ public class EUVatValidationElement extends ValidatingElement implements Company
                 output.setOnError(true);
               }
               output.setDetails(details.toString());
+              LOG.debug("VAT is invalid.Need review.");
             }
           } else {
             if ("Y".equals(admin.getMatchOverrideIndc()) && DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
