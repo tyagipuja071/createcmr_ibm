@@ -496,13 +496,15 @@ if (readOnly){
               <cmr:field id="reqReason" path="reqReason" fieldId="RequestReason" tabId="MAIN_GENERAL_TAB" size="250"/>
             </p>
             </cmr:column>
-        <cmr:view forGEO="JP,KR">
+        <cmr:view forGEO="JP">
             <cmr:column span="2">
               <p>
                 <label for="requesterId">Requester ID:</label>
                 ${reqentry.requesterId} (${requesterId_UID})
               </p>
             </cmr:column>
+        </cmr:view>
+        <cmr:view forGEO="JP,KR">
             <cmr:column span="2">
               <p>
                 <label for="reqFor"><cmr:fieldLabel fieldId="OriginatorName" />:<cmr:info text="${ui.info.orgName}" /></label>
