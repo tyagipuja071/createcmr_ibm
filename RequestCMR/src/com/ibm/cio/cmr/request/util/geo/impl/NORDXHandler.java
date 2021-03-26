@@ -795,6 +795,10 @@ public class NORDXHandler extends BaseSOFHandler {
     address.setCustNm4(currentRecord.getCmrName4());
     address.setAddrTxt2(currentRecord.getCmrStreetAddressCont());
     address.setTransportZone("");
+    if (currentRecord.getCmrAddrSeq() != null && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())
+        && "ZS01".equalsIgnoreCase(address.getId().getAddrType())) {
+      address.getId().setAddrSeq("00001");
+    }
   }
 
   @Override
