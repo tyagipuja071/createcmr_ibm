@@ -38,22 +38,27 @@ function afterConfigForNORDX() {
     if (role == 'Requester') {
       FormManager.readOnly('abbrevNm');
       FormManager.readOnly('abbrevLocn');
-      if ((custSubGrp == 'LTBUS' || custSubGrp == 'EEBUS' || custSubGrp == 'LVBUS') || (custSubGrp == 'CBBUS' && geoCd != 'FI')) {
-        FormManager.readOnly('engineeringBo');
-      }
+      // if ((custSubGrp == 'LTBUS' || custSubGrp == 'EEBUS' || custSubGrp ==
+      // 'LVBUS') || (custSubGrp == 'CBBUS' && geoCd != 'FI')) {
+      // FormManager.readOnly('engineeringBo');
+      // } // CMR-1903 commented
     }
     if (role == 'Processor') {
       FormManager.enable('abbrevNm');
+      FormManager.enable('repTeamMemberNo');
+      FormManager.enable('engineeringBo');
       FormManager.addValidator('isuCd', Validators.REQUIRED, [ 'ISU Code' ], 'MAIN_IBM_TAB');
       FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
       FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Abbreviated Name' ], 'MAIN_CUST_TAB');
       FormManager.addValidator('abbrevLocn', Validators.REQUIRED, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
-      if ((custSubGrp != 'LTBUS' && custSubGrp != 'EEBUS' && custSubGrp != 'LVBUS' && custSubGrp != 'CBBUS')) {
-        FormManager.addValidator('engineeringBo', Validators.REQUIRED, [ 'A/C Admin DSC' ], 'MAIN_IBM_TAB');
-      } else {
-        FormManager.resetValidations('engineeringBo');
-        FormManager.readOnly('engineeringBo');
-      }
+      // if ((custSubGrp != 'LTBUS' && custSubGrp != 'EEBUS' && custSubGrp !=
+      // 'LVBUS' && custSubGrp != 'CBBUS')) {
+      // FormManager.addValidator('engineeringBo', Validators.REQUIRED, [ 'A/C
+      // Admin DSC' ], 'MAIN_IBM_TAB');
+      // } else {
+      // FormManager.resetValidations('engineeringBo');
+      // FormManager.readOnly('engineeringBo');
+      // } // CMR-1903 commented
     }
   }
   if (reqType == 'C') {
@@ -66,8 +71,12 @@ function afterConfigForNORDX() {
 
   if (role == 'Processor' && reqType == 'C') {
     FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [ 'Sales Rep' ], 'MAIN_IBM_TAB');
+    FormManager.addValidator('engineeringBo', Validators.REQUIRED, [ 'A/C Admin DSC' ], 'MAIN_IBM_TAB'); // CMR-1903
   } else {
     FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
+    FormManager.removeValidator('engineeringBo', Validators.REQUIRED); // add
+    // for
+    // CMR-1903
   }
 
   var landCntry = '';
