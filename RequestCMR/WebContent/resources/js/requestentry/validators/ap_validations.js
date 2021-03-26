@@ -2892,7 +2892,7 @@ function setPostCdANZ(cntry, addressMode, saving, finalSave) {
 	  var addrType = FormManager.getActualValue('addrType');
 	  if (custGroup == 'CROSS' && addrType != null) {
 	    if (role == 'REQUESTER') {
-	     FormManager.setValue('postCd', '0120');
+	     FormManager.setValue('postCd', '0121');
 	    }
 	  FormManager.enable('postCd');
    }
