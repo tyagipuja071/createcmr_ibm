@@ -496,7 +496,7 @@ if (readOnly){
               <cmr:field id="reqReason" path="reqReason" fieldId="RequestReason" tabId="MAIN_GENERAL_TAB" size="250"/>
             </p>
             </cmr:column>
-        <cmr:view forGEO="JP">
+        <cmr:view forGEO="JP,KR">
             <cmr:column span="2">
               <p>
                 <label for="requesterId">Requester ID:</label>
