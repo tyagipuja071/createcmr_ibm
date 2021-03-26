@@ -178,11 +178,12 @@ public class NORDXHandler extends BaseSOFHandler {
                     && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(addr.getCmrAddrTypeCode())) && "599".equals(addr.getCmrAddrSeq())) {
                   addr.setCmrAddrTypeCode("ZP03");
                 }
-                if ((CmrConstants.ADDR_TYPE.ZD01.toString().equals(addr.getCmrAddrTypeCode()))) {
+                if ((CmrConstants.ADDR_TYPE.ZI01.toString().equals(addr.getCmrAddrTypeCode()))) {
                   String stkzn = "";
                   stkzn = getStkznFromDataRdc(entityManager, addr.getCmrSapNumber(), SystemConfiguration.getValue("MANDT"));
-                  int parvmCount = getCeeKnvpParvmCount(addr.getCmrSapNumber());
-                  if ("0".equals(stkzn) || parvmCount > 0) {
+                  int parvmCount = getNorKnvpParvmCount(addr.getCmrSapNumber());
+                  LOG.debug("---------parvmCount---------------" + parvmCount);
+                  if ("0".equals(stkzn) || parvmCount > 2) {
                     addr.setCmrAddrTypeCode("ZS02");
                   }
                 }
@@ -1767,12 +1768,12 @@ public class NORDXHandler extends BaseSOFHandler {
     return stkzn;
   }
 
-  private int getCeeKnvpParvmCount(String kunnr) throws Exception {
+  private int getNorKnvpParvmCount(String kunnr) throws Exception {
     int knvpParvmCount = 0;
 
     String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
     String mandt = SystemConfiguration.getValue("MANDT");
-    String sql = ExternalizedQuery.getSql("CEE.GET.KNVP.PARVW");
+    String sql = ExternalizedQuery.getSql("ND.GET.KNVP.PARVW");
     sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
     sql = StringUtils.replace(sql, ":KUNNR", "'" + kunnr + "'");
     String dbId = QueryClient.RDC_APP_ID;
