@@ -513,7 +513,7 @@ if (readOnly){
         <cmr:view exceptForGEO="JP">
               <cmr:column span="2">
                 <p>
-                  <label for="requesterId">Requested for Name (Originator):</label>
+                  <label for="requesterId">Requester:</label>
                   <cmr:field model="reqentry" path="originatorNm" idPath="originatorId" fieldId="OriginatorName"/>
                 </p>
               </cmr:column>
