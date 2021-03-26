@@ -74,9 +74,7 @@ function afterConfigForNORDX() {
     FormManager.addValidator('engineeringBo', Validators.REQUIRED, [ 'A/C Admin DSC' ], 'MAIN_IBM_TAB'); // CMR-1903
   } else {
     FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
-    FormManager.removeValidator('engineeringBo', Validators.REQUIRED); // add
-    // for
-    // CMR-1903
+    FormManager.removeValidator('engineeringBo', Validators.REQUIRED); // CMR-1903
   }
 
   var landCntry = '';
