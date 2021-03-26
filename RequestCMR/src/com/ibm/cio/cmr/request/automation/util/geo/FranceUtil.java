@@ -900,7 +900,7 @@ public class FranceUtil extends AutomationUtil {
                   for (DnBMatchingResponse dnb : matches) {
                     String siret = DnBUtil.getTaxCode1(dnb.getDnbCountry(), dnb.getOrgIdDetails());
                     if (StringUtils.isNotBlank(siret) && siret.equalsIgnoreCase(data.getTaxCd1()) && !"O".equalsIgnoreCase(dnb.getOperStatusCode())) {
-                      checkDetails.append("SIRET found in DnB for the request and is active.\n");
+                      checkDetails.append("Bill-To address is validated in DnB and SIRET found in DnB for the request and is active.\n");
                       break;
                     } else {
                       resultCodes.add("D"); // send to cmde for review
