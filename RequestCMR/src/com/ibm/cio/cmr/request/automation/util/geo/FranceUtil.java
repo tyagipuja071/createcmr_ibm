@@ -892,7 +892,7 @@ public class FranceUtil extends AutomationUtil {
                 // if address has been updated , validate vat with DnB
                 Addr addrToChk = requestData.getAddress(addrType);
                 boolean matchesDnb = false;
-                List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addrToChk, true);
+                List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addrToChk, false);
                 matchesDnb = ifaddressCloselyMatchesDnb(matches, addrToChk, admin, data.getCmrIssuingCntry());
 
                 if (!matches.isEmpty() && matches != null && matches.size() > 0 && matchesDnb) {
@@ -904,8 +904,7 @@ public class FranceUtil extends AutomationUtil {
                       break;
                     } else {
                       resultCodes.add("D"); // send to cmde for review
-                      engineData.addNegativeCheckStatus("_frSIRETCheckFailed",
-                          "SIRET on the request data doesn't match in DnB.");
+                      engineData.addNegativeCheckStatus("_frSIRETCheckFailed","SIRET on the request data doesn't match in DnB.");
                       checkDetails.append("SIRET on the request data doesn't match in DnB.\n");
                     }
 
