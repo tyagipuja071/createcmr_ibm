@@ -89,7 +89,11 @@ function afterConfigForNORDX() {
   cmr.hideNode("container-SalesBusOff");
 
   // CREATCMR-1758
-  vatInfoBubbleShowAndhide();
+  vatInfoBubbleShowAndHide();
+
+  // CREATCMR-1653
+  currencyUIShowAndHide();
+
 }
 
 function disableLandCntry() {
@@ -1685,7 +1689,7 @@ function filterCmrnoP() {
 }
 
 // CREATCMR-1758
-function vatInfoBubbleShowAndhide() {
+function vatInfoBubbleShowAndHide() {
   if (reqType == 'C') {
     var custType = FormManager.getActualValue('custGrp');
     if (custType == 'LOCAL' || custType == 'FOLOC' || custType == 'GLLOC' || custType == 'ISLOC' || custType == 'EELOC' || custType == 'LTLOC'
@@ -1712,6 +1716,19 @@ function vatInfoBubbleShowAndhide() {
     } else {
       $("span[id='vatInfoBubble'] img[class='cmr-info-bubble']").hide();
     }
+  }
+}
+
+// CREATCMR-1653
+function currencyUIShowAndHide() {
+  reqType = FormManager.getActualValue('reqType');
+
+  if (reqType == 'C') {
+    FormManager.hide('CurrencyCd', 'currencyCd');
+  }
+
+  if (reqType == 'U') {
+    FormManager.show('CurrencyCd', 'currencyCd');
   }
 }
 

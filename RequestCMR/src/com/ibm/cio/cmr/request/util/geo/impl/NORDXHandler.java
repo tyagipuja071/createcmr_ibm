@@ -758,6 +758,12 @@ public class NORDXHandler extends BaseSOFHandler {
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
     super.setDataValuesOnImport(admin, data, results, mainRecord);
 
+    // CREATCMR-1653
+    String zs01sapNo = getKunnrSapr3Kna1ForNordx(data.getCmrNo(), mainRecord.getCmrOrderBlock(), data.getCmrIssuingCntry());
+    String currencyCd = geCurrencyCode(zs01sapNo);
+    data.setCurrencyCd(currencyCd);
+    // CREATCMR-1653
+
     data.setEngineeringBo(this.currentImportValues.get("ACAdmDSC"));
     LOG.trace("ACAdmDSC: " + data.getEngineeringBo());
 
@@ -851,7 +857,6 @@ public class NORDXHandler extends BaseSOFHandler {
             currCell = (XSSFCell) row.getCell(0);
             cmrNo = validateColValFromCell(currCell);
 
-
             if (row.getRowNum() == 2001) {
               continue;
             }
@@ -887,42 +892,38 @@ public class NORDXHandler extends BaseSOFHandler {
               if (dummyUpd) {
                 continue;
               }
-                currCell = (XSSFCell) row.getCell(1);
-                abbName = validateColValFromCell(currCell);
-                if ("@".equals(abbName)) {
-                  TemplateValidation error = new TemplateValidation(name);
-                  LOG.trace(
-                      "The row " + (row.getRowNum() + 1)
-                          + ":Note that Abbreviated Name is not allowed blank out. Please fix and upload the template again.");
-                error.addError((row.getRowNum() + 1), "Abbreviated Name",
-                      "The row " + (row.getRowNum() + 1)
-                          + ":Note that Abbreviated Name is not allowed blank out. Please fix and upload the template again.<br>");
-                  validations.add(error);
-                }
+              currCell = (XSSFCell) row.getCell(1);
+              abbName = validateColValFromCell(currCell);
+              if ("@".equals(abbName)) {
+                TemplateValidation error = new TemplateValidation(name);
+                LOG.trace("The row " + (row.getRowNum() + 1)
+                    + ":Note that Abbreviated Name is not allowed blank out. Please fix and upload the template again.");
+                error.addError((row.getRowNum() + 1), "Abbreviated Name", "The row " + (row.getRowNum() + 1)
+                    + ":Note that Abbreviated Name is not allowed blank out. Please fix and upload the template again.<br>");
+                validations.add(error);
+              }
 
-                currCell = (XSSFCell) row.getCell(2);
-                abbLocation = validateColValFromCell(currCell);
-                if ("@".equals(abbLocation)) {
-                  TemplateValidation error = new TemplateValidation(name);
-                  LOG.trace(
-                      "The row " + (row.getRowNum() + 1)
-                          + ":Note that Abbreviated Location is not allowed blank out. Please fix and upload the template again.");
+              currCell = (XSSFCell) row.getCell(2);
+              abbLocation = validateColValFromCell(currCell);
+              if ("@".equals(abbLocation)) {
+                TemplateValidation error = new TemplateValidation(name);
+                LOG.trace("The row " + (row.getRowNum() + 1)
+                    + ":Note that Abbreviated Location is not allowed blank out. Please fix and upload the template again.");
                 error.addError((row.getRowNum() + 1), "Abbreviated Location", "The row " + (row.getRowNum() + 1)
-                      + ":Note that Abbreviated Location is mandatory. Please fix and upload the template again.<br>");
-                  validations.add(error);
-                }
+                    + ":Note that Abbreviated Location is mandatory. Please fix and upload the template again.<br>");
+                validations.add(error);
+              }
 
-                currCell = (XSSFCell) row.getCell(8);
-                payment = validateColValFromCell(currCell);
-                if ("@".equals(payment)) {
-                  TemplateValidation error = new TemplateValidation(name);
-                  LOG.trace("The row " + (row.getRowNum() + 1)
-                      + ":Note that Payment terms is not allowed blank out. Please fix and upload the template again.");
-                error.addError((row.getRowNum() + 1), "Payment terms",
-                      "The row " + (row.getRowNum() + 1)
-                          + ":Note that Payment terms is not allowed blank out. Please fix and upload the template again.<br>");
-                  validations.add(error);
-                }
+              currCell = (XSSFCell) row.getCell(8);
+              payment = validateColValFromCell(currCell);
+              if ("@".equals(payment)) {
+                TemplateValidation error = new TemplateValidation(name);
+                LOG.trace("The row " + (row.getRowNum() + 1)
+                    + ":Note that Payment terms is not allowed blank out. Please fix and upload the template again.");
+                error.addError((row.getRowNum() + 1), "Payment terms", "The row " + (row.getRowNum() + 1)
+                    + ":Note that Payment terms is not allowed blank out. Please fix and upload the template again.<br>");
+                validations.add(error);
+              }
 
               currCell = (XSSFCell) row.getCell(9);
               embargo = validateColValFromCell(currCell);
@@ -934,16 +935,16 @@ public class NORDXHandler extends BaseSOFHandler {
                     + ":Note that Embargo code only accept @,J,D,K values. Please fix and upload the template again.<br>");
                 validations.add(error);
               }
-                currCell = (XSSFCell) row.getCell(12);
-                leadingAccount = validateColValFromCell(currCell);
-                if ("@".equals(leadingAccount)) {
-                  TemplateValidation error = new TemplateValidation(name);
-                  LOG.trace("The row " + (row.getRowNum() + 1)
-                      + ":Note that Leading Account Number is not allowed blank out. Please fix and upload the template again.");
+              currCell = (XSSFCell) row.getCell(12);
+              leadingAccount = validateColValFromCell(currCell);
+              if ("@".equals(leadingAccount)) {
+                TemplateValidation error = new TemplateValidation(name);
+                LOG.trace("The row " + (row.getRowNum() + 1)
+                    + ":Note that Leading Account Number is not allowed blank out. Please fix and upload the template again.");
                 error.addError((row.getRowNum() + 1), "Leading Account Number", "The row " + (row.getRowNum() + 1)
-                      + ":Note that Leading Account Number is not allowed blank out. Please fix and upload the template again.<br>");
-                  validations.add(error);
-                }
+                    + ":Note that Leading Account Number is not allowed blank out. Please fix and upload the template again.<br>");
+                validations.add(error);
+              }
               if (!StringUtils.isBlank(leadingAccount) && !leadingAccount.matches("^[0-9]*$")) {
                 TemplateValidation error = new TemplateValidation(name);
                 LOG.trace("The row " + (row.getRowNum() + 1)
@@ -957,44 +958,40 @@ public class NORDXHandler extends BaseSOFHandler {
               inac = validateColValFromCell(currCell);
               if (!StringUtils.isBlank(inac) && !(inac.matches("^[a-zA-z]{2}[0-9]{2}") || inac.matches("^[a-zA-z]{4}") || "@@@@".equals(inac))) {
                 TemplateValidation error = new TemplateValidation(name);
-                LOG.trace("The row " + (row.getRowNum() + 1)
-                    + ":Note that INAC format is incorrect. Please fix and upload the template again.");
+                LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that INAC format is incorrect. Please fix and upload the template again.");
                 error.addError((row.getRowNum() + 1), "INAC",
-                    "The row " + (row.getRowNum() + 1)
-                    + ":Note that INAC format is incorrect. Please fix and upload the template again.<br>");
+                    "The row " + (row.getRowNum() + 1) + ":Note that INAC format is incorrect. Please fix and upload the template again.<br>");
                 validations.add(error);
               }
 
-                currCell = (XSSFCell) row.getCell(13);
-                acAdmin = validateColValFromCell(currCell);
-                if ("@".equals(acAdmin)) {
-                  TemplateValidation error = new TemplateValidation(name);
-                  LOG.trace("The row " + (row.getRowNum() + 1)
-                      + ":Note that A/C Admin DSC is not allowed blank out. Please fix and upload the template again.");
-                error.addError((row.getRowNum() + 1), "A/C Admin DSC",
-                      "The row " + (row.getRowNum() + 1)
-                          + ":Note that A/C Admin DSC is not allowed blank out. Please fix and upload the template again.<br>");
-                  validations.add(error);
-                }
+              currCell = (XSSFCell) row.getCell(13);
+              acAdmin = validateColValFromCell(currCell);
+              if ("@".equals(acAdmin)) {
+                TemplateValidation error = new TemplateValidation(name);
+                LOG.trace("The row " + (row.getRowNum() + 1)
+                    + ":Note that A/C Admin DSC is not allowed blank out. Please fix and upload the template again.");
+                error.addError((row.getRowNum() + 1), "A/C Admin DSC", "The row " + (row.getRowNum() + 1)
+                    + ":Note that A/C Admin DSC is not allowed blank out. Please fix and upload the template again.<br>");
+                validations.add(error);
+              }
 
-                currCell = (XSSFCell) row.getCell(15);
-                salesRep = validateColValFromCell(currCell);
-                if ("@".equals(salesRep)) {
-                  TemplateValidation error = new TemplateValidation(name);
-                  LOG.trace("The row " + (row.getRowNum() + 1)
-                      + ":Note that Sales Rep is not allowed blank out. Please fix and upload the template again.");
-                error.addError((row.getRowNum() + 1), "Sales Rep",
-                      "The row " + (row.getRowNum() + 1)
-                          + ":Note that Sales Rep is not allowed blank out. Please fix and upload the template again.<br>");
-                  validations.add(error);
-                }
+              currCell = (XSSFCell) row.getCell(15);
+              salesRep = validateColValFromCell(currCell);
+              if ("@".equals(salesRep)) {
+                TemplateValidation error = new TemplateValidation(name);
+                LOG.trace(
+                    "The row " + (row.getRowNum() + 1) + ":Note that Sales Rep is not allowed blank out. Please fix and upload the template again.");
+                error.addError((row.getRowNum() + 1), "Sales Rep", "The row " + (row.getRowNum() + 1)
+                    + ":Note that Sales Rep is not allowed blank out. Please fix and upload the template again.<br>");
+                validations.add(error);
+              }
 
             } else {
               if (dummyUpd) {
                 continue;
               }
               String custNm = "";// 2
-              String custNmCond = "";//3
+              String custNmCond = "";// 3
               String additionalInfo = "";// 4
               String attPerson = "";// 5
               String street = "";// 6
@@ -1039,8 +1036,8 @@ public class NORDXHandler extends BaseSOFHandler {
               if (cntryDesc.equals(landedCntry.substring(0, 2))) {
                 isCrossBoarder = false;
               }
-              
-              int fieldCount=0;
+
+              int fieldCount = 0;
               if (StringUtils.isNotBlank(custNmCond)) {
                 fieldCount++;
               }
@@ -1056,7 +1053,7 @@ public class NORDXHandler extends BaseSOFHandler {
               if (StringUtils.isNotBlank(poBox)) {
                 fieldCount++;
               }
-              if(isCrossBoarder){
+              if (isCrossBoarder) {
                 if (fieldCount > 3) {
                   TemplateValidation error = new TemplateValidation(name);
                   LOG.trace("The row " + (row.getRowNum() + 1)
@@ -1065,7 +1062,7 @@ public class NORDXHandler extends BaseSOFHandler {
                       + ":Note that only 3 fields of Customer name Cond,Addtional Info, Att Person, Street, Po Box can be filled at once. Please fix and upload the template again.<br>");
                   validations.add(error);
                 }
-              }else{
+              } else {
                 if (fieldCount == 5) {
                   TemplateValidation error = new TemplateValidation(name);
                   LOG.trace("The row " + (row.getRowNum() + 1)
@@ -1082,9 +1079,8 @@ public class NORDXHandler extends BaseSOFHandler {
                   TemplateValidation error = new TemplateValidation(name);
                   LOG.trace("The row " + (row.getRowNum() + 1)
                       + ":Note that Customer name, Street, City, Landed Country must be filled. Please fix and upload the template again.");
-                  error.addError((row.getRowNum() + 1), name,
-                      "The row " + (row.getRowNum() + 1)
-                          + ":Note that Customer name, Street, City, Landed Country must be filled. Please fix and upload the template again.<br>");
+                  error.addError((row.getRowNum() + 1), name, "The row " + (row.getRowNum() + 1)
+                      + ":Note that Customer name, Street, City, Landed Country must be filled. Please fix and upload the template again.<br>");
                   validations.add(error);
                 }
               } else {
@@ -1103,11 +1099,10 @@ public class NORDXHandler extends BaseSOFHandler {
                     TemplateValidation error = new TemplateValidation(name);
                     LOG.trace("The row " + (row.getRowNum() + 1)
                         + ":Note that Customer name, Street OR POBox, City, Landed Country all must be filled. Please fix and upload the template again.");
-                    error.addError((row.getRowNum() + 1), name,
-                        "The row " + (row.getRowNum() + 1)
-                            + ":Note that Customer name, Street OR POBox, City, Landed Country must be filled. Please fix and upload the template again.<br>");
+                    error.addError((row.getRowNum() + 1), name, "The row " + (row.getRowNum() + 1)
+                        + ":Note that Customer name, Street OR POBox, City, Landed Country must be filled. Please fix and upload the template again.<br>");
                     validations.add(error);
-                  
+
                   }
                 } else if (SystemLocation.NORWAY.equals(country) || SystemLocation.SWEDEN.equals(country)
                     || (SystemLocation.FINLAND.equals(country) && "FI".equals(landedCntry))) {
@@ -1118,7 +1113,7 @@ public class NORDXHandler extends BaseSOFHandler {
                     error.addError((row.getRowNum() + 1), name, "The row " + (row.getRowNum() + 1)
                         + ":Note that Customer name, City, Landed Country must be filled. Please fix and upload the template again.<br>");
                     validations.add(error);
-                  }                  
+                  }
                 }
               }
 
@@ -2123,4 +2118,69 @@ public class NORDXHandler extends BaseSOFHandler {
     }
     return isDivestiture;
   }
+
+  // CREATCMR-1653
+  private String getKunnrSapr3Kna1ForNordx(String cmrNo, String ordBlk, String countryCd) throws Exception {
+    String kunnr = "";
+
+    String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
+    String mandt = SystemConfiguration.getValue("MANDT");
+    String sql = ExternalizedQuery.getSql("GET.KNA1.KUNNR_U_NORDX");
+    sql = StringUtils.replace(sql, ":KATR6", "'" + countryCd + "'");
+    sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
+    sql = StringUtils.replace(sql, ":ZZKV_CUSNO", "'" + cmrNo + "'");
+    sql = StringUtils.replace(sql, ":AUFSD", "'" + ordBlk + "'");
+
+    String dbId = QueryClient.RDC_APP_ID;
+
+    QueryRequest query = new QueryRequest();
+    query.setSql(sql);
+    query.addField("KUNNR");
+    query.addField("ZZKV_CUSNO");
+
+    LOG.debug("Getting existing KUNNR value from RDc DB..");
+
+    QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
+    QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
+
+    if (response.isSuccess() && response.getRecords() != null && response.getRecords().size() != 0) {
+      List<Map<String, Object>> records = response.getRecords();
+      Map<String, Object> record = records.get(0);
+      kunnr = record.get("KUNNR") != null ? record.get("KUNNR").toString() : "";
+      LOG.debug("***RETURNING KUNNR > " + kunnr);
+    }
+    return kunnr;
+  }
+
+  private String geCurrencyCode(String kunnr) throws Exception {
+    String currCode = "";
+
+    String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
+    String mandt = SystemConfiguration.getValue("MANDT");
+    String sql = ExternalizedQuery.getSql("GET.KNVV.WAERS");
+    sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
+    sql = StringUtils.replace(sql, ":KUNNR", "'" + kunnr + "'");
+    String dbId = QueryClient.RDC_APP_ID;
+
+    QueryRequest query = new QueryRequest();
+    query.setSql(sql);
+    query.addField("WAERS");
+    query.addField("MANDT");
+    query.addField("KUNNR");
+
+    LOG.debug("Getting existing WAERS value from RDc DB..");
+
+    QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
+    QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
+
+    if (response.isSuccess() && response.getRecords() != null && response.getRecords().size() != 0) {
+      List<Map<String, Object>> records = response.getRecords();
+      Map<String, Object> record = records.get(0);
+      currCode = record.get("WAERS") != null ? record.get("WAERS").toString() : "";
+      LOG.debug("***RETURNING WAERS > " + currCode + " WHERE KUNNR IS > " + kunnr);
+    }
+    return currCode;
+  }
+  // CREATCMR-1653
+
 }
