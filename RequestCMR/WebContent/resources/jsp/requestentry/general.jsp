@@ -506,7 +506,7 @@ if (readOnly){
             <cmr:column span="2">
               <p>
                 <label for="reqFor"><cmr:fieldLabel fieldId="OriginatorName" />:<cmr:info text="${ui.info.orgName}" /></label>
-                <cmr:bluepages model="reqentry" namePath="originatorNm"  idPath="originatorId" useBothIds="true" showId="true"></cmr:bluepages>
+                <cmr:bluepages model="reqentry" namePath="originatorNm"  idPath="originatorId" useBothIds="false" showId="true"></cmr:bluepages>
               </p>
             </cmr:column>
         </cmr:view>
@@ -559,6 +559,14 @@ if (readOnly){
               <cmr:date id="requestDueDateTemp" path="requestDueDateTemp" format="yyyy-MM-dd" />
             </p>
           </cmr:column>
+          <cmr:column span="2">
+              <p>
+              <cmr:label fieldId="email3">
+                <cmr:fieldLabel fieldId="Email3" />:
+              </cmr:label>
+              <cmr:field id="email3" path="email3" fieldId="Email3" tabId="MAIN_GENERAL_TAB" size="255"/>
+              </p>
+            </cmr:column>
         </cmr:row>
       </cmr:view>
       
