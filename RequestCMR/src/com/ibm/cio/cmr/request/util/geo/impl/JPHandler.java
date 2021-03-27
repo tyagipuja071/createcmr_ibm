@@ -1291,6 +1291,7 @@ public class JPHandler extends GEOHandler {
     if ("C".equalsIgnoreCase(admin.getReqType())) {
       switch (custSubGrp) {
       case "NORML":
+      case "EUCMR":
       case "OUTSC":
       case "STOSB":
       case "STOSC":
@@ -1308,6 +1309,7 @@ public class JPHandler extends GEOHandler {
     } else if ("U".equalsIgnoreCase(admin.getReqType())) {
       switch (custSubGrp) {
       case "NORML":
+      case "EUCMR":
       case "OUTSC":
       case "BPWPQ":
       case "ISOCU":
@@ -1482,6 +1484,7 @@ public class JPHandler extends GEOHandler {
       if ("C".equalsIgnoreCase(admin.getReqType())) {
         switch (custSubGrp) {
         case "NORML":
+        case "EUCMR":
         case "OUTSC":
         case "STOSB":
         case "STOSC":
@@ -1519,6 +1522,7 @@ public class JPHandler extends GEOHandler {
       } else if ("U".equalsIgnoreCase(admin.getReqType())) {
         switch (custSubGrp) {
         case "NORML":
+        case "EUCMR":
         case "OUTSC":
         case "BPWPQ":
         case "ISOCU":
@@ -1919,6 +1923,7 @@ public class JPHandler extends GEOHandler {
     if ("C".equalsIgnoreCase(admin.getReqType())) {
       switch (custSubGrp) {
       case "NORML":
+      case "EUCMR":
       case "OUTSC":
       case "STOSB":
       case "STOSC":
@@ -1956,6 +1961,7 @@ public class JPHandler extends GEOHandler {
     } else if ("U".equalsIgnoreCase(admin.getReqType())) {
       switch (custSubGrp) {
       case "NORML":
+      case "EUCMR":
       case "OUTSC":
       case "BPWPQ":
       case "ISOCU":
