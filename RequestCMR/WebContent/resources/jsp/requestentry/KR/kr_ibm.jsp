@@ -26,6 +26,15 @@
         <cmr:field fieldId="EngineeringBo" id="engineeringBo" path="engineeringBo" tabId="MAIN_IBM_TAB"/>
       </p>
     </cmr:column>  
+
+    <cmr:column span="2" containerForField="CmrNoPrefix">
+        <p>
+          <cmr:label fieldId="cmrNoPrefix">
+            <cmr:fieldLabel fieldId="CmrNoPrefix" />:
+          </cmr:label>
+          <cmr:field path="cmrNoPrefix" id="cmrNoPrefix" fieldId="CmrNoPrefix" tabId="MAIN_IBM_TAB" />
+        </p>
+      </cmr:column> 
   </cmr:row>
   
 </cmr:view>
