@@ -1827,7 +1827,7 @@ public class NORDXHandler extends BaseSOFHandler {
 
   public static String getSoldtoaddrSeqFromLegacy(EntityManager entityManager, String rcyaa, String cmr_no) {
     String zs01Seq = "";
-    String sql = ExternalizedQuery.getSql("CEE.GET_SOLDTO_SEQ_FROM_LEGACY");
+    String sql = ExternalizedQuery.getSql("ND.GET_SOLDTO_SEQ_FROM_LEGACY");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("RCYAA", rcyaa);
     query.setParameter("RCUXA", cmr_no);
