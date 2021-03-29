@@ -5,6 +5,7 @@ package com.ibm.cio.cmr.request.util.geo.impl;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -20,11 +21,19 @@ import org.apache.log4j.Logger;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.ibm.cio.cmr.request.CmrConstants;
+import com.ibm.cio.cmr.request.CmrException;
+import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.AddrRdc;
 import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.entity.AdminPK;
+import com.ibm.cio.cmr.request.entity.ApprovalReq;
+import com.ibm.cio.cmr.request.entity.ApprovalReqPK;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataRdc;
+import com.ibm.cio.cmr.request.entity.DefaultApprovalRecipients;
+import com.ibm.cio.cmr.request.entity.DefaultApprovals;
 import com.ibm.cio.cmr.request.entity.UpdatedAddr;
 import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
@@ -35,8 +44,12 @@ import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
+import com.ibm.cio.cmr.request.user.AppUser;
+import com.ibm.cio.cmr.request.util.BluePagesHelper;
+import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
 
@@ -489,4 +502,73 @@ public class KRHandler extends GEOHandler {
     return true;
   }
 
+  @Override
+  public ApprovalReq handleBPMANAGERApproval(EntityManager entityManager, long reqId, ApprovalReq approver, DefaultApprovals defaultApprovals,
+      DefaultApprovalRecipients recipients, AppUser user, RequestEntryModel model) throws CmrException, SQLException {
+    ApprovalReq theApprovalReq = saveAproval(entityManager, reqId, approver, defaultApprovals, recipients, user);
+
+    if (theApprovalReq != null) {
+      Person ibmer = null;
+
+      String originatorIdInAdmin = getOriginatorIdInAdmin(entityManager, reqId);
+
+      if (originatorIdInAdmin != null && !originatorIdInAdmin.isEmpty()) {
+        Person ibmerManager = null;
+        ibmerManager = BluePagesHelper.getPerson(originatorIdInAdmin);
+        ibmer = BluePagesHelper.getPerson(BluePagesHelper.getManagerEmail(ibmerManager == null ? "" : ibmerManager.getEmployeeId()));
+      } else {
+        ibmer = BluePagesHelper.getPerson(BluePagesHelper.getManagerEmail(user.getUserCnum()));
+      }
+
+      // }
+
+      if (ibmer != null && theApprovalReq != null) {
+
+        theApprovalReq.setIntranetId(ibmer.getEmail());
+        theApprovalReq.setNotesId(ibmer.getNotesEmail());
+        theApprovalReq.setDisplayName(ibmer.getName());
+
+        entityManager.merge(theApprovalReq);
+        entityManager.flush();
+      }
+
+    }
+    return theApprovalReq;
+  }
+
+  private ApprovalReq saveAproval(EntityManager entityManager, long reqId, ApprovalReq approver, DefaultApprovals defaultApprovals,
+      DefaultApprovalRecipients recipients, AppUser user) throws CmrException, SQLException {
+
+    long approverId = SystemUtil.getNextID(entityManager, SystemConfiguration.getValue("MANDT"), "APPROVAL_ID", "CREQCMR");
+    ApprovalReqPK approverPk = new ApprovalReqPK();
+    approverPk.setApprovalId(approverId);
+    approver.setId(approverPk);
+    approver.setReqId(reqId);
+    approver.setTypId(defaultApprovals.getTypId());
+    approver.setGeoCd(defaultApprovals.getGeoCd());
+    approver.setIntranetId(recipients.getId().getIntranetId());
+    approver.setNotesId(recipients.getNotesId());
+    approver.setDisplayName(recipients.getDisplayName());
+    approver.setStatus(CmrConstants.APPROVAL_PENDING_MAIL);
+    approver.setCreateBy(user.getIntranetId());
+    approver.setLastUpdtBy(user.getIntranetId());
+    approver.setCreateTs(SystemUtil.getCurrentTimestamp());
+    approver.setLastUpdtTs(SystemUtil.getCurrentTimestamp());
+    approver.setRequiredIndc(CmrConstants.APPROVAL_DEFLT_REQUIRED_INDC);
+    entityManager.persist(approver);
+    entityManager.flush();
+
+    return approver;
+  }
+
+  private String getOriginatorIdInAdmin(EntityManager entityManager, long reqId) {
+
+    AdminPK adminPk = new AdminPK();
+    adminPk.setReqId(reqId);
+    Admin admin = entityManager.find(Admin.class, adminPk);
+
+    String originatorIdInAdmin = null;
+    originatorIdInAdmin = admin.getOriginatorId();
+    return originatorIdInAdmin;
+  };
 }
