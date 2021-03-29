@@ -95,8 +95,8 @@ function afterConfigForNL() {
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
   }
-  if (role == 'Processor' && clientTier !=null ){
-     setBOTeamValues(clientTier);
+  if (role == 'Processor' && clientTier != null) {
+    setBOTeamValues(clientTier);
   }
 }
 
@@ -126,6 +126,7 @@ function setVatValidatorNL() {
   }
   if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
     if (custSubGrp == 'PRICU') {
+      FormManager.removeValidator('vat', Validators.REQUIRED);
       FormManager.readOnly('vat');
       return;
     }
