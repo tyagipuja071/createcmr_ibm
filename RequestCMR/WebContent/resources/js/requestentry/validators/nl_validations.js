@@ -91,6 +91,13 @@ function afterConfigForNL() {
 
   setDeptartmentNumber();
   disableCmrNo();
+  var clientTier = FormManager.getField('clientTier');
+  if (typeof (_pagemodel) != 'undefined') {
+    role = _pagemodel.userRole;
+  }
+  if (role == 'Processor' && clientTier !=null ){
+     setBOTeamValues(clientTier);
+  }
 }
 
 function disableCmrNo() {
@@ -438,7 +445,18 @@ function setBOTeamValues(clientTier) {
         }
       }
     }
+    lockEngineeringBo();
+  }
+}
 
+function lockEngineeringBo() {
+  var role = null;
+  var reqType = FormManager.getActualValue('reqType');
+  if (typeof (_pagemodel) != 'undefined') {
+    role = _pagemodel.userRole;
+  }
+  if (role == 'Requester' && reqType == 'C') {
+    FormManager.readOnly('engineeringBo');
   }
 }
 
