@@ -779,7 +779,7 @@ public class NORDXTransformer extends EMEATransformer {
     // }
     // formatMassUpdateAddressLines(entityManager, legacyAddr, addr, false);
 
-      }
+  }
 
   @Override
   public void formatMassUpdateAddressLines(EntityManager entityManager, CmrtAddr legacyAddr, MassUpdtAddr massUpdtAddr, boolean isFAddr) {
@@ -965,7 +965,7 @@ public class NORDXTransformer extends EMEATransformer {
       if (admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason())
           && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason()) && admin.getReqStatus() != null
           && admin.getReqStatus().equals(CMR_REQUEST_STATUS_CPR) && (rdcEmbargoCd != null && !StringUtils.isBlank(rdcEmbargoCd))
-          && "E".equals(rdcEmbargoCd) && (dataEmbargoCd == null || StringUtils.isBlank(dataEmbargoCd))) {
+          && "D".equals(rdcEmbargoCd) && (dataEmbargoCd == null || StringUtils.isBlank(dataEmbargoCd))) {
         legacyCust.setEmbargoCd("");
         blankOrdBlockFromData(entityManager, data);
       }
@@ -973,13 +973,13 @@ public class NORDXTransformer extends EMEATransformer {
       if (admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason())
           && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason()) && admin.getReqStatus() != null
           && admin.getReqStatus().equals(CMR_REQUEST_STATUS_PCR) && (rdcEmbargoCd != null && !StringUtils.isBlank(rdcEmbargoCd))
-          && "E".equals(rdcEmbargoCd) && (dataEmbargoCd == null || StringUtils.isBlank(dataEmbargoCd))) {
+          && "D".equals(rdcEmbargoCd) && (dataEmbargoCd == null || StringUtils.isBlank(dataEmbargoCd))) {
         legacyCust.setEmbargoCd(rdcEmbargoCd);
         resetOrdBlockToData(entityManager, data);
       }
       if (CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason()) && CMR_REQUEST_STATUS_PCR.equals(admin.getReqStatus())
           && "Wx".equals(admin.getProcessedFlag())) {
-        legacyCust.setEmbargoCd("E");
+        legacyCust.setEmbargoCd("D");
         resetOrdBlockToData(entityManager, data);
       }
     }
@@ -1158,7 +1158,7 @@ public class NORDXTransformer extends EMEATransformer {
   public void transformLegacyCustomerDataMassUpdate(EntityManager entityManager, CmrtCust cust, CMRRequestContainer cmrObjects, MassUpdtData muData) { // default
     LOG.debug("Mapping default Data values..");
     String issuingCntry = cust.getId().getSofCntryCode();
-    
+
     if (!(StringUtils.isNotBlank(muData.getAbbrevNm()) || StringUtils.isNotBlank(muData.getSvcArOffice())
         || StringUtils.isNotBlank(muData.getCurrencyCd()) || StringUtils.isNotBlank(muData.getSubIndustryCd())
         || StringUtils.isNotBlank(muData.getSearchTerm()) || StringUtils.isNotBlank(muData.getSpecialTaxCd())
@@ -1332,7 +1332,7 @@ public class NORDXTransformer extends EMEATransformer {
 
   private void resetOrdBlockToData(EntityManager entityManager, Data data) {
     data.setOrdBlk("88");
-    data.setEmbargoCd("E");
+    data.setEmbargoCd("D");
     entityManager.merge(data);
     entityManager.flush();
   }
@@ -1555,7 +1555,7 @@ public class NORDXTransformer extends EMEATransformer {
 
   @Override
   public boolean hasCmrtCustExt() {
-      return true;
+    return true;
   }
 
   @Override
