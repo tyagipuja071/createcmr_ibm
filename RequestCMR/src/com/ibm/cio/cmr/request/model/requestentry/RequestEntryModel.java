@@ -432,6 +432,10 @@ public class RequestEntryModel extends BaseModel {
 
   private String sourceSystId;
 
+  // taiwan fields
+  private String footnoteTxt1;
+  private String footnoteTxt2;
+
   public String getMatchIndc() {
     return matchIndc;
   }
@@ -3091,6 +3095,22 @@ public class RequestEntryModel extends BaseModel {
 
   public void setSourceSystId(String sourceSystId) {
     this.sourceSystId = sourceSystId;
+  }
+
+  public String getFootnoteTxt1() {
+    return footnoteTxt1;
+  }
+
+  public void setFootnoteTxt1(String footnoteTxt1) {
+    this.footnoteTxt1 = footnoteTxt1;
+  }
+
+  public String getFootnoteTxt2() {
+    return footnoteTxt2;
+  }
+
+  public void setFootnoteTxt2(String footnoteTxt2) {
+    this.footnoteTxt2 = footnoteTxt2;
   }
 
 }
