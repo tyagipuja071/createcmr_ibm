@@ -778,9 +778,6 @@ function addNORDXAddressTypeValidator() {
           }
           if (billingCnt == 0 || mailingCnt == 0) {
             return new ValidationResult(null, false, 'Billing, Mailing address are mandatory.');
-          } else if (installingCnt > 1) {
-            return new ValidationResult(null, false,
-                'Only one Main Installing address can be defined. Please remove the other Main Installing address.');
           } else if (billingCnt > 1) {
             return new ValidationResult(null, false, 'Only one Billing address can be defined. Please remove the additional Billing address.');
           } else if (mailingCnt > 1) {
