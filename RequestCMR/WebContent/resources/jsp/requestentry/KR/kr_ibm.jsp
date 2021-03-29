@@ -15,9 +15,10 @@
   }
   boolean newEntry = BaseModel.STATE_NEW == reqentry.getState();
 %>
+
 <cmr:view forGEO="KR">
-  <cmr:row topPad="10">
-        <cmr:column span="2" containerForField="EngineeringBo">
+  <cmr:row addBackground="true">
+     <cmr:column span="2" containerForField="EngineeringBo">
       <p>
         <cmr:label fieldId="engineeringBo">
           <cmr:fieldLabel fieldId="EngineeringBo" />:
@@ -25,8 +26,8 @@
         </cmr:label>
         <cmr:field fieldId="EngineeringBo" id="engineeringBo" path="engineeringBo" tabId="MAIN_IBM_TAB"/>
       </p>
-    </cmr:column>  
-
+    </cmr:column>
+ 
     <cmr:column span="2" containerForField="CmrNoPrefix">
         <p>
           <cmr:label fieldId="cmrNoPrefix">
@@ -34,7 +35,17 @@
           </cmr:label>
           <cmr:field path="cmrNoPrefix" id="cmrNoPrefix" fieldId="CmrNoPrefix" tabId="MAIN_IBM_TAB" />
         </p>
-      </cmr:column> 
+      </cmr:column>
+ 
+    <cmr:column span="2" containerForField="SalRepNameNo">
+      <p>
+        <cmr:label fieldId="repTeamMemberNo">
+          <cmr:fieldLabel fieldId="SalRepNameNo" />:
+           <cmr:delta text="${rdcdata.repTeamMemberNo}" oldValue="${reqentry.repTeamMemberNo}" id="delta-repTeamMemberNo" />
+        </cmr:label>
+        <cmr:field fieldId="SalRepNameNo" id="repTeamMemberNo" path="repTeamMemberNo" tabId="MAIN_IBM_TAB" />
+      </p>
+    </cmr:column>
   </cmr:row>
   
 </cmr:view>
