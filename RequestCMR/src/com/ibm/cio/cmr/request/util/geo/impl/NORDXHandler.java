@@ -207,132 +207,7 @@ public class NORDXHandler extends BaseSOFHandler {
                   gAddrSeq = maxSeq;
                   maxintSeqLegacy++;
                 }
-                if (!StringUtils.isBlank(adrnr)) {
-                  Sadr sadr = getCEEAddtlAddr(entityManager, adrnr, SystemConfiguration.getValue("MANDT"));
-                  if (sadr != null) {
-                    LOG.debug("Adding installing to the records");
-                    FindCMRRecordModel installing = new FindCMRRecordModel();
-                    PropertyUtils.copyProperties(installing, mainRecord);
-                    installing.setCmrAddrTypeCode("ZP02");
-                    installing.setCmrAddrSeq(gAddrSeq);
-                    // installing.setParentCMRNo(mainRecord.getCmrNum());
-                    installing.setCmrName1Plain(sadr.getName1());
-                    installing.setCmrName2Plain(sadr.getName2());
-                    installing.setCmrCity(sadr.getOrt01());
-                    installing.setCmrCity2(sadr.getOrt02());
-                    installing.setCmrStreetAddress(sadr.getStras());
-                    installing.setCmrName3(sadr.getName3());
-                    installing.setCmrName4(sadr.getName4());
-                    installing.setCmrCountryLanded(sadr.getLand1());
-                    installing.setCmrCountry(sadr.getSpras());
-                    installing.setCmrStreetAddressCont(sadr.getStrs2());
-                    installing.setCmrState(sadr.getRegio());
-                    installing.setCmrPostalCode(sadr.getPstlz());
-                    installing.setCmrDept(sadr.getOrt02());
-                    installing.setCmrBldg(legacyGaddrLN6);
-                    if (!StringUtils.isBlank(sadr.getTxjcd())) {
-                      installing.setCmrTaxOffice(sadr.getTxjcd());
-                    }
-                    if (!StringUtils.isBlank(sadr.getTxjcd()) && !StringUtils.isBlank(sadr.getPfort())) {
-                      installing.setCmrTaxOffice(sadr.getTxjcd() + sadr.getPfort());
-                    }
-                    installing.setCmrSapNumber("");
-                    converted.add(installing);
-                  } else {
-                    CmrtAddr gAddr = getLegacyGAddress(entityManager, reqEntry.getCmrIssuingCntry(), searchModel.getCmrNum());
-                    String legacycity = "";
-                    if (gAddr != null) {
-                      LOG.debug("Adding installing to the records");
-                      FindCMRRecordModel installing = new FindCMRRecordModel();
-                      PropertyUtils.copyProperties(installing, mainRecord);
-                      // copyAddrData(installing, installingAddr, gAddrSeq);
-                      installing.setCmrAddrTypeCode("ZP02");
-                      installing.setCmrAddrSeq(gAddrSeq);
-                      String gline5 = gAddr.getAddrLine5();
-                      if (!StringUtils.isBlank(gline5)) {
-                        String legacyposcd = gline5.split(" ")[0];
-                        legacycity = gline5.substring(legacyposcd.length() + 1, gline5.length());
-                      }
-                      // add value
-                      installing.setCmrName1Plain(gAddr.getAddrLine1());
-                      if (!StringUtils.isBlank(gAddr.getAddrLine2())) {
-                        installing.setCmrName2Plain(gAddr.getAddrLine2());
-                      } else {
-                        installing.setCmrName2Plain("");
-                      }
-                      // installing.setCmrStreetAddress(gAddr.getAddrLine3());
-                      if (!StringUtils.isBlank(gAddr.getAddrLine3())) {
-                        installing.setCmrStreetAddress(gAddr.getAddrLine3());
-                      } else {
-                        installing.setCmrStreetAddress(gAddr.getAddrLine4());
-                      }
-                      installing.setCmrCity(record.getCmrCity());
-                      if ("865".equals(reqEntry.getCmrIssuingCntry())) {
-                        installing.setCmrCity(legacycity);
-                      }
-                      installing.setCmrCity2(record.getCmrCity2());
-                      installing.setCmrCountry(gAddr.getAddrLine6());
-                      installing.setCmrCountryLanded("");
-                      installing.setCmrPostalCode(record.getCmrPostalCode());
-                      installing.setCmrState(record.getCmrState());
-                      installing.setCmrBldg(legacyGaddrLN6);
-                      if (StringUtils.isBlank(gAddr.getAddrLine3())) {
-                        installing.setCmrStreetAddressCont("");
-                      } else {
-                        installing.setCmrStreetAddressCont(gAddr.getAddrLine4());
-                      }
-                      converted.add(installing);
-                    }
-                  }
-                }
-                if (StringUtils.isBlank(adrnr)) {
-                  CmrtAddr gAddr = getLegacyGAddress(entityManager, reqEntry.getCmrIssuingCntry(), searchModel.getCmrNum());
-                  String legacycity = "";
-                  if (gAddr != null) {
-                    LOG.debug("Adding installing to the records");
-                    FindCMRRecordModel installing = new FindCMRRecordModel();
-                    PropertyUtils.copyProperties(installing, mainRecord);
-                    // copyAddrData(installing, installingAddr, gAddrSeq);
-                    installing.setCmrAddrTypeCode("ZP02");
-                    installing.setCmrAddrSeq(gAddrSeq);
-                    String gline5 = gAddr.getAddrLine5();
-                    if (!StringUtils.isBlank(gline5)) {
-                      String legacyposcd = gline5.split(" ")[0];
-                      if (gline5.length() > legacyposcd.length()) {
-                        legacycity = gline5.substring(legacyposcd.length() + 1, gline5.length());
-                      }
-                    }
-                    // add value
-                    installing.setCmrName1Plain(gAddr.getAddrLine1());
-                    if (!StringUtils.isBlank(gAddr.getAddrLine2())) {
-                      installing.setCmrName2Plain(gAddr.getAddrLine2());
-                    } else {
-                      installing.setCmrName2Plain("");
-                    }
-                    // installing.setCmrStreetAddress(gAddr.getAddrLine3());
-                    if (!StringUtils.isBlank(gAddr.getAddrLine3())) {
-                      installing.setCmrStreetAddress(gAddr.getAddrLine3());
-                    } else {
-                      installing.setCmrStreetAddress(gAddr.getAddrLine4());
-                    }
-                    installing.setCmrCity(record.getCmrCity());
-                    if ("865".equals(reqEntry.getCmrIssuingCntry())) {
-                      installing.setCmrCity(legacycity);
-                    }
-                    installing.setCmrCity2(record.getCmrCity2());
-                    installing.setCmrCountry(gAddr.getAddrLine6());
-                    installing.setCmrCountryLanded("");
-                    installing.setCmrPostalCode(record.getCmrPostalCode());
-                    installing.setCmrState(record.getCmrState());
-                    installing.setCmrBldg(legacyGaddrLN6);
-                    if (StringUtils.isBlank(gAddr.getAddrLine3())) {
-                      installing.setCmrStreetAddressCont("");
-                    } else {
-                      installing.setCmrStreetAddressCont(gAddr.getAddrLine4());
-                    }
-                    converted.add(installing);
-                  }
-                }
+
                 // add new here
                 String soldtoseq = getSoldtoaddrSeqFromLegacy(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum());
                 // int maxintSeqadd = getMaxSequenceOnLegacyAddr(entityManager,
@@ -1251,6 +1126,11 @@ public class NORDXHandler extends BaseSOFHandler {
   @Override
   public void doBeforeDataSave(EntityManager entityManager, Admin admin, Data data, String cmrIssuingCntry) throws Exception {
 
+    if (!StringUtils.isBlank(data.getCustSubGrp())) {
+      if (data.getCustSubGrp().contains("BP") || data.getCustSubGrp().contains("BUS")) {
+        data.setBpRelType("CA");
+      }
+    }
   }
 
   @Override
@@ -1962,7 +1842,7 @@ public class NORDXHandler extends BaseSOFHandler {
 
   public static String isShareZP01(EntityManager entityManager, String rcyaa, String cmr_no, String seq) {
     String zp01Seq = null;
-    String sql = ExternalizedQuery.getSql("CEE.ISSHAREZP01");
+    String sql = ExternalizedQuery.getSql("ND.ISSHAREZP01");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("RCYAA", rcyaa);
     query.setParameter("RCUXA", cmr_no);
@@ -1977,7 +1857,7 @@ public class NORDXHandler extends BaseSOFHandler {
 
   public static String isShareZS02(EntityManager entityManager, String rcyaa, String cmr_no, String seq) {
     String zs02Seq = null;
-    String sql = ExternalizedQuery.getSql("CEE.ISSHAREZS02");
+    String sql = ExternalizedQuery.getSql("ND.ISSHAREZS02");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("RCYAA", rcyaa);
     query.setParameter("RCUXA", cmr_no);
@@ -1992,7 +1872,7 @@ public class NORDXHandler extends BaseSOFHandler {
 
   public static String isShareZD01(EntityManager entityManager, String rcyaa, String cmr_no, String seq) {
     String zd01Seq = null;
-    String sql = ExternalizedQuery.getSql("CEE.ISSHAREZD01");
+    String sql = ExternalizedQuery.getSql("ND.ISSHAREZD01");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("RCYAA", rcyaa);
     query.setParameter("RCUXA", cmr_no);
@@ -2007,7 +1887,7 @@ public class NORDXHandler extends BaseSOFHandler {
 
   public static String isShareZI01(EntityManager entityManager, String rcyaa, String cmr_no, String seq) {
     String zi01Seq = null;
-    String sql = ExternalizedQuery.getSql("CEE.ISSHAREZI01");
+    String sql = ExternalizedQuery.getSql("ND.ISSHAREZI01");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("RCYAA", rcyaa);
     query.setParameter("RCUXA", cmr_no);
