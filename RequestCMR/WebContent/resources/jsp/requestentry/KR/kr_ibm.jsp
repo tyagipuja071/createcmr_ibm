@@ -48,4 +48,33 @@
     </cmr:column>
   </cmr:row>
   
+  
+  <cmr:row addBackground="true"> 
+  <cmr:column span="2" containerForField="ParentCompanyNo">
+        <p>
+          <cmr:label fieldId="dealerNo">
+            <cmr:fieldLabel fieldId="ParentCompanyNo" />:
+            <cmr:info text="${ui.info.parentcompanyNo}"></cmr:info>
+          </cmr:label>
+          <cmr:field path="dealerNo" id="dealerNo" fieldId="ParentCompanyNo" tabId="MAIN_IBM_TAB" />
+        </p>
+    </cmr:column>
+    
+          <cmr:column span="2" containerForField="MrcCd">
+      		<p>
+        	<cmr:label fieldId="mrcCd"> <cmr:fieldLabel fieldId="MrcCd" />: </cmr:label>
+        	<cmr:field path="mrcCd" id="mrcCd" fieldId="MrcCd" tabId="MAIN_IBM_TAB" />
+      		</p>
+    	  </cmr:column>
+    	  
+    	  <cmr:column span="2" containerForField="SOENumber">
+          <p>
+           <cmr:label fieldId="soeReqNo">
+              <cmr:fieldLabel fieldId="SOENumber" />:
+            </cmr:label>
+            <cmr:field fieldId="SOENumber" id="soeReqNo" path="soeReqNo" tabId="MAIN_IBM_TAB" />
+          </p>
+        </cmr:column>
+</cmr:row> 
+  
 </cmr:view>
