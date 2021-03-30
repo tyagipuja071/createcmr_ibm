@@ -57,6 +57,7 @@ import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
+import com.ibm.cio.cmr.request.util.legacy.CloningRDCDirectUtil;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.QueryClient;
 import com.ibm.cmr.services.client.query.QueryRequest;
@@ -2526,6 +2527,69 @@ public class CEMEAHandler extends BaseSOFHandler {
         addr.setTaxOffice(addressDataMap.get("taxOffice"));
       }
     }
+  }
+
+  @Override
+  public String getCMRNo(EntityManager rdcMgr, String kukla, String mandt, String katr6, String cmrNo) {
+    if (SystemLocation.AUSTRIA.equals(katr6)) {
+      LOG.debug("generateCNDCmr :: START");
+      String cndCMR = "";
+      boolean internal = false;
+
+      if (cmrNo.startsWith("99"))
+        internal = true;
+
+      int i = 0;
+
+      if (internal) {
+        while (i < 5) {
+          String ran1 = "";
+          ran1 = String.valueOf((int) ((Math.random() * 9 + 1) * 1000));
+          // cndCMR = "99" + RDCRandomString.genNumericNumberSeries(4, kukla);
+          cndCMR = "99" + ran1;
+
+          LOG.debug("Generated AT Internal CMR No.:" + cndCMR);
+
+          if (CloningRDCDirectUtil.checkCustNoForDuplicateRecord(rdcMgr, cndCMR, mandt, katr6)) {
+            i++;
+            LOG.debug("Alredy exist CMR No.: " + cndCMR + "  in rdc. Trying to generate next times:");
+            if (i == 5) {
+              LOG.debug("Max limit is 5 times to generate CMR No.: " + cndCMR + " Tried times:" + i);
+              cndCMR = "";
+            }
+          } else
+            break;
+        }
+      } else {
+
+        while (i < 5) {
+
+          int ran3 = (int) ((Math.random() * 9 + 1) * 100000);
+          if (ran3 > 990000) {
+            ran3 = ran3 - (int) ((Math.random() * 9 + 1) * 10000);
+          }
+
+          cndCMR = String.valueOf(ran3);
+          // cndCMR = "6" + RDCRandomString.genNumericNumberSeries(5, kukla);
+
+          LOG.debug("Generated AT Non Internal CMR No.:" + cndCMR);
+
+          if (CloningRDCDirectUtil.checkCustNoForDuplicateRecord(rdcMgr, cndCMR, mandt, katr6)) {
+            i++;
+            LOG.debug("Alredy exist CMR No.: " + cndCMR + "  in rdc. Trying to generate next times:");
+            if (i == 5) {
+              LOG.debug("Max limit is 5 times to generate CMR No.: " + cndCMR + " Tried times:" + i);
+              cndCMR = "";
+            }
+          } else
+            break;
+        }
+      }
+      LOG.debug("generateCNDCmr :: returnung cndCMR = " + cndCMR);
+      LOG.debug("generateCNDCmr :: END");
+      return cndCMR;
+    }
+    return null;
   }
 
 }

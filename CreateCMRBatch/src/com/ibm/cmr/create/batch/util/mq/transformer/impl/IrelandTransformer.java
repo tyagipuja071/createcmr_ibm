@@ -1262,4 +1262,13 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
     // Customer Tab
     legacyCustExt.setiTaxCode(!StringUtils.isBlank(data.getTaxCd1()) ? data.getTaxCd1() : "");
   }
+
+  @Override
+  public void getTargetCountryId(EntityManager entityManager, GenerateCMRNoRequest generateCMRNoObj, String cntry, String cmrNo) {
+    LOG.debug("Set LOC1 = 866 in case of IssuingCntry = 754");
+    if (cntry.equals("754")) {
+      generateCMRNoObj.setLoc1("866");
+    }
+  }
+
 }

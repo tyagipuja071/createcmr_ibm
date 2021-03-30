@@ -831,4 +831,19 @@ public class CEWATransformer extends MCOTransformer {
     }
     return addresses;
   }
+
+  @Override
+  public String getDupCreationCountryId(EntityManager entityManager, String cntry, String cmrNo) {
+    if ("764".equals(cntry))
+      return "NA";
+    else
+      return "764";
+  }
+
+  @Override
+  public void getTargetCountryId(EntityManager entityManager, GenerateCMRNoRequest generateCMRNoObj, String cntry, String cmrNo) {
+    if (!"764".equals(cntry)) {
+      generateCMRNoObj.setLoc2("764");
+    }
+  }
 }
