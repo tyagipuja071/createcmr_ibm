@@ -1442,4 +1442,39 @@ public class CNHandler extends GEOHandler {
   public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
     return false;
   }
+
+  @Override
+  public String getCMRNo(EntityManager rdcMgr, String kukla, String mandt, String katr6, String cmrNo) {
+    LOG.debug("getChinaCMR :: START");
+    List<Object[]> results;
+    String cmr = "";
+    String sql = ExternalizedQuery.getSql("GET.KEY_AUTO_GEN.SEQNO");
+    sql = StringUtils.replaceOnce(sql, ":MANDT", "'" + mandt + "'");
+    sql = StringUtils.replaceOnce(sql, ":KATR6", "'" + katr6 + "'");
+
+    if (CmrConstants.CN_KUKLA81.equals(kukla)) {
+      LOG.debug("getChinaCMR :: RETRIEVING KUKLA 81 CMR");
+      sql = StringUtils.replaceOnce(sql, ":KEYID", "'" + CmrConstants.CN_KUKLA81_KEYID + "'");
+    } else if (CmrConstants.CN_KUKLA45.equals(kukla)) {
+      LOG.debug("getChinaCMR :: RETRIEVING KUKLA 45 CMR");
+      sql = StringUtils.replaceOnce(sql, ":KEYID", "'" + CmrConstants.CN_KUKLA45_KEYID + "'");
+    } else { // use default key_id
+      LOG.debug("getChinaCMR :: RETRIEVING DEFAULT CMR");
+      sql = StringUtils.replaceOnce(sql, ":KEYID", "'" + CmrConstants.CN_DEFAULT_KEYID + "'");
+    }
+
+    results = rdcMgr.createNativeQuery(sql).getResultList();
+    if (results != null && results.size() > 0) {
+      String tempcmr = (String) results.get(0)[2];
+
+      if (tempcmr != null) {
+        int num = new Integer(tempcmr).intValue();
+        num = num + 1;
+        cmr = String.valueOf(num);
+      }
+    }
+    LOG.debug("getChinaCMR :: GENERATED CMR >> " + cmr + " :: END");
+    LOG.debug("getChinaCMR :: END");
+    return cmr;
+  }
 }

@@ -286,7 +286,8 @@ public class WTAASMessageHandler extends MQMessageHandler {
     }
 
     try {
-      xmlOutputter.output(document, new FileOutputStream(outPath + fileName));
+      // xmlOutputter.output(document, new FileOutputStream(outPath +
+      // fileName));
     } catch (Exception e) {
       LOG.warn("XML source cannot be saved for " + fileName);
     }
@@ -750,12 +751,18 @@ public class WTAASMessageHandler extends MQMessageHandler {
 
       String uniqueNum = reply.getRefNo();
 
+      if (uniqueNum.startsWith("G")) {
+        return uniqueNum;
+      }
       if (StringUtils.isNumeric(uniqueNum)) {
         return String.valueOf(Integer.parseInt(uniqueNum));
       } else {
         String test = uniqueNum.substring(0, uniqueNum.length() - 1);
         if (StringUtils.isNumeric(test)) {
           return String.valueOf(Integer.parseInt(test));
+        }
+        if (test.contains("G")) {
+          return test.substring(test.indexOf("G")); // newco
         }
         return uniqueNum;
       }
