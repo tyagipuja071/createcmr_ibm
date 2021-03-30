@@ -31,6 +31,7 @@ import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.matching.gbg.GBGResponse;
 
@@ -163,11 +164,20 @@ public class BeLuxUtil extends AutomationUtil {
       return true;
     }
 
-    if (StringUtils.isNotBlank(gbgCntry)) {
-      String sortl = getSORTLfromCoverage(entityManager, container.getFinalCoverage(), gbgCntry);
+    if (StringUtils.isNotBlank(cmrCntry)) {
+      String sortl = getSORTLfromCoverage(entityManager, container.getFinalCoverage(), cmrCntry);
       if (StringUtils.isNotBlank(sortl)) {
-        details.append("SORTL calculated on basis of Existing CMR Data: " + sortl);
+        details.append("SORTL calculated on basis of Existing CMR Data: " + sortl).append("\n");
         overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getSearchTerm(), sortl);
+        String sbo = "";
+        if (data.getCountryUse().length() == 3) {
+          sbo = "0" + sortl.substring(0, 2) + "0000";
+        } else if (data.getCountryUse().length() > 3) {
+          sbo = "0" + sortl.substring(0, 2) + "0001";
+        }
+        details.append("SBO calculated from Account Team: " + sbo);
+        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sbo);
+
       }
     }
 
@@ -280,7 +290,7 @@ public class BeLuxUtil extends AutomationUtil {
       String sql = ExternalizedQuery.getSql("QUERY.GET.INACLIST.BYST");
       PreparedQuery query = new PreparedQuery(entityManager, sql);
       query.setParameter("SEARCHTERM", "%" + container.getSearchterm() + "%");
-      query.setParameter("ISSUING_CNTRY", cmrCntry);
+      query.setParameter("ISSUING_CNTRY", SystemLocation.BELGIUM);
       query.setForReadOnly(true);
       inacs = query.getResults();
     }
@@ -450,6 +460,9 @@ public class BeLuxUtil extends AutomationUtil {
           details.append("Embargo Code P was deleted.\n");
         }
         break;
+      case "Preferred Language":
+        details.append("Preferred Language data field was updated.\n");
+        break;
       default:
         ignoredUpdates.add(change.getDataField());
         break;
@@ -590,11 +603,13 @@ public class BeLuxUtil extends AutomationUtil {
     try {
       LOG.debug("Computing SORTL for Coverage " + coverage);
       String gbgCntryCd = gbgCntry.equalsIgnoreCase("Belgium") ? "BE" : "LU";
+      String konzs = "BE".equalsIgnoreCase(gbgCntryCd) ? "0016" : "0502";
       String sql = ExternalizedQuery.getSql("AUTO.BELUX.COV.SORTL");
       PreparedQuery query = new PreparedQuery(entityManager, sql);
       query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
       query.setParameter("COVID", coverage);
       query.setParameter("LAND1", gbgCntryCd);
+      query.setParameter("KONZS", konzs);
       query.setForReadOnly(true);
       sortl = query.getSingleResult(String.class);
     } catch (Exception e) {
