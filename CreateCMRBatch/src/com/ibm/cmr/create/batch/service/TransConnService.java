@@ -26,6 +26,7 @@ import com.ibm.cio.cmr.create.entity.NotifyReq;
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.automation.util.DummyServletRequest;
+import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
 import com.ibm.cio.cmr.request.automation.util.geo.USUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
@@ -1349,6 +1350,7 @@ public class TransConnService extends BaseBatchService {
     String resultCode = null;
     String processingStatus = admin.getRdcProcessingStatus() != null ? admin.getRdcProcessingStatus() : "";
     long reqId = admin.getId().getReqId();
+    RequestChangeContainer changes = new RequestChangeContainer(entityManager, data.getCmrIssuingCntry(), admin, reqId);
 
     try {
 
@@ -1363,13 +1365,18 @@ public class TransConnService extends BaseBatchService {
 
       StringBuilder rdcProcessingMsg = new StringBuilder();
       List<String> statusCodes = new ArrayList<String>();
-
-      boolean continueUpdate = true;
+      boolean isDataUpdated = false;
+      if (changes != null && changes.hasDataChanges()) {
+        isDataUpdated = true;
+      }
+      boolean continueUpdate = false;
       StringBuilder comment = new StringBuilder();
 
       boolean ignoreWfhistory = false;
       for (Addr addr : addresses) {
-
+        if (isDataUpdated || "Y".equals(addr.getChangedIndc()) || "N".equals(addr.getImportInd())) {
+          continueUpdate = true;
+        }
         if (continueUpdate) {
           request.setSapNo(addr.getSapNo());
 
@@ -2319,4 +2326,5 @@ public class TransConnService extends BaseBatchService {
   public void setDeleteRDcTargets(boolean deleteRDcTargets) {
     this.deleteRDcTargets = deleteRDcTargets;
   }
+
 }
