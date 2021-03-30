@@ -395,5 +395,8 @@ public abstract class MessageTransformer {
    public boolean skipCreditCodeUpdateForCountry() {
     return false;
   }
-  
+
+  public boolean isPG01Supported() {
+    return false;
+  }
 }

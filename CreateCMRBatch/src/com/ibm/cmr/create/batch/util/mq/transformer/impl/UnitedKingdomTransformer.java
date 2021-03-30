@@ -1491,4 +1491,9 @@ public class UnitedKingdomTransformer extends EMEATransformer {
     // Customer Tab
     legacyCustExt.setiTaxCode(!StringUtils.isBlank(data.getTaxCd1()) ? data.getTaxCd1() : "");
   }
+
+  @Override
+  public boolean isPG01Supported() {
+    return true;
+  }
 }
