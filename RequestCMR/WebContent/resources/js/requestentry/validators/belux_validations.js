@@ -10,6 +10,7 @@ function afterConfigForBELUX() {
   var reqType = FormManager.getActualValue('reqType');
   var custLang = FormManager.getActualValue('custPrefLang');
   FormManager.readOnly('capInd');
+  FormManager.readOnly('sensitiveFlag');
   FormManager.setValue('capInd', true);
   FormManager.resetValidations('enterprise');
   FormManager.removeValidator('inacCd', Validators.REQUIRED);

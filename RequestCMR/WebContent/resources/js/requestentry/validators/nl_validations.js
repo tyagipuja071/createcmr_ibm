@@ -9,6 +9,7 @@ function afterConfigForNL() {
   FormManager.setValue('capInd', true);
   FormManager.readOnly('cmrOwner');
   FormManager.resetValidations('enterprise');
+  FormManager.readOnly('sensitiveFlag');
 
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
