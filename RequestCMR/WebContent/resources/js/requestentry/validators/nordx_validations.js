@@ -3,7 +3,7 @@
 var _addrTypesForNORDX = [ 'ZS01', 'ZP01', 'ZI01', 'ZD01', 'ZS02' ];
 var _poBOXHandler = [];
 var _MachineHandler = [];
-var _collCdArraySubTypes = [ 'INTER', 'INTSO', 'CBINT', 'CBISO' ];
+// var _collCdArraySubTypes = [ 'INTER', 'INTSO', 'CBINT', 'CBISO' ];
 var EU_COUNTRIES = [ "AT", "BE", "BG", "HR", "CY", "CZ", "DE", "DK", "EE", "ES", "GL", "GR", "FI", "FO", "FR", "GB", "HU", "IE", "IT", "LT", "LV",
     "LU", "MT", "NL", "PL", "PT", "RO", "SE", "SI", "SK" ];
 var reqType = null;
@@ -24,14 +24,14 @@ function afterConfigForNORDX() {
     if (FormManager.getActualValue('viewOnlyPage') == 'true') {
       return;
     }
-    FormManager.enable('collectionCd');
+    // FormManager.enable('collectionCd');
     FormManager.resetValidations('inacCd');
     FormManager.resetValidations('sitePartyId');
     FormManager.resetValidations('engineeringBo');
   }
 
   if (reqType == 'C') {
-    FormManager.readOnly('collectionCd');
+    // FormManager.readOnly('collectionCd');
     FormManager.readOnly('capInd');
     FormManager.readOnly('modeOfPayment');
     FormManager.setValue('capInd', true);
@@ -47,6 +47,7 @@ function afterConfigForNORDX() {
       FormManager.enable('abbrevNm');
       FormManager.enable('repTeamMemberNo');
       FormManager.enable('engineeringBo');
+
       FormManager.addValidator('isuCd', Validators.REQUIRED, [ 'ISU Code' ], 'MAIN_IBM_TAB');
       FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
       FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Abbreviated Name' ], 'MAIN_CUST_TAB');
@@ -61,13 +62,17 @@ function afterConfigForNORDX() {
       // } // CMR-1903 commented
     }
   }
-  if (reqType == 'C') {
-    if (!(_collCdArraySubTypes.indexOf(custSubGrp) > -1) && custSubGrp.substring(2, 5) != 'INT' && custSubGrp.substring(2, 5) != 'ISO') {
-      FormManager.limitDropdownValues(FormManager.getField('collectionCd'), [ '' ]);
-    } else {
-      FormManager.resetDropdownValues(FormManager.getField('collectionCd'), [ '' ]);
-    }
-  }
+  // if (reqType == 'C') {
+  // if (!(_collCdArraySubTypes.indexOf(custSubGrp) > -1) &&
+  // custSubGrp.substring(2, 5) != 'INT' && custSubGrp.substring(2, 5) != 'ISO')
+  // {
+  // FormManager.limitDropdownValues(FormManager.getField('collectionCd'), [ ''
+  // ]);
+  // } else {
+  // FormManager.resetDropdownValues(FormManager.getField('collectionCd'), [ ''
+  // ]);
+  // }
+  // }
 
   if (role == 'Processor' && reqType == 'C') {
     FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [ 'Sales Rep' ], 'MAIN_IBM_TAB');
@@ -100,6 +105,9 @@ function afterConfigForNORDX() {
 
   // CREATCMR-1653
   currencyUIShowAndHide();
+
+  // CREATCMR-1648
+  setCollectionCd();
 
 }
 
@@ -1736,6 +1744,93 @@ function currencyUIShowAndHide() {
   }
 }
 
+// CREATCMR-1648
+function setCollectionCd() {
+  reqType = FormManager.getActualValue('reqType');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+
+  var role = null;
+
+  if (typeof (_pagemodel) != 'undefined') {
+    role = _pagemodel.userRole;
+  }
+  if (role == 'Requester') {
+    if (reqType == 'C') {
+      cmr.hideNode("container-CollectionCd");
+      if (custSubGrp == 'CBINT' || custSubGrp == 'DKINT' || custSubGrp == 'FOINT' || custSubGrp == 'GLINT' || custSubGrp == 'ISINT'
+          || custSubGrp == 'FIINT' || custSubGrp == 'EEINT' || custSubGrp == 'LTINT' || custSubGrp == 'LVINT' || custSubGrp == 'INTER') {
+        FormManager.setValue('collectionCd', '000INT');
+      } else if (custSubGrp == 'CBISO' || custSubGrp == 'DKISO' || custSubGrp == 'FOISO' || custSubGrp == 'GLISO' || custSubGrp == 'ISISO'
+          || custSubGrp == 'FIISO' || custSubGrp == 'EEISO' || custSubGrp == 'LTISO' || custSubGrp == 'LVISO' || custSubGrp == 'INTSO') {
+        FormManager.setValue('collectionCd', '0000SO');
+      } else {
+        FormManager.setValue('collectionCd', '');
+      }
+    }
+
+    if (reqType == 'U') {
+      var requestingLob = FormManager.getActualValue('requestingLob');
+      if (requestingLob == 'AR' || requestingLob == 'SCT') {
+        FormManager.enable('collectionCd');
+      } else {
+        FormManager.readOnly('collectionCd');
+      }
+    }
+  }
+}
+
+function requestingLobOnChange() {
+
+  var role = null;
+
+  if (typeof (_pagemodel) != 'undefined') {
+    role = _pagemodel.userRole;
+  }
+
+  if (role == 'Requester') {
+    dojo.connect(FormManager.getField('requestingLob'), 'onChange', function(value) {
+      var requestingLob = FormManager.getActualValue('requestingLob');
+
+      if (requestingLob == 'AR' || requestingLob == 'SCT') {
+        FormManager.setValue('collectionCd', _pagemodel.collectionCd);
+        FormManager.enable('collectionCd');
+        collectionCdValidation();
+      } else {
+        FormManager.setValue('collectionCd', '');
+        FormManager.readOnly('collectionCd');
+      }
+    });
+  }
+
+  if (role == 'Processor') {
+    FormManager.enable('collectionCd');
+    collectionCdValidation();
+  }
+}
+
+function collectionCdValidation() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var collectionCd = FormManager.getActualValue('collectionCd');
+        var alphanumeric = /^[0-9a-zA-Z]*$/;
+        if (collectionCd == '') {
+          return new ValidationResult(null, true);
+        } else {
+          if (!collectionCd.match(alphanumeric)) {
+            return new ValidationResult({
+              id : 'collectionCd',
+              type : 'text',
+              name : 'collectionCd'
+            }, false, 'The value of Collection Code is invalid, please input digitals or letter.');
+          }
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.NORDX = [ '846', '806', '702', '678' ];
 
@@ -1788,4 +1883,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setSBO, GEOHandler.NORDX);
   GEOHandler.addAfterTemplateLoad(setSBO, GEOHandler.NORDX);
 
+  GEOHandler.addAfterConfig(requestingLobOnChange, GEOHandler.NORDX);
+  GEOHandler.addAfterTemplateLoad(requestingLobOnChange, GEOHandler.NORDX);
 });
