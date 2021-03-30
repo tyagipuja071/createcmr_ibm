@@ -5413,6 +5413,51 @@ function addBillingAddrValidator() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
+function addBillingValidator() {
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var zp01ReqId = FormManager.getActualValue('reqId');
+        qParams = {
+          REQ_ID : zp01ReqId,
+        };
+        var record = cmr.query('GETZP01VALRECORDS', qParams);
+        var custSubType = FormManager.getActualValue('custSubGrp');
+        var zp01Reccount = record.ret1;
+        if (Number(zp01Reccount == 1)) {
+          if (FormManager.getActualValue('reqType') == 'C' && role == "REQUESTER") {
+            if (custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'CRO3P') {
+              var checkImportIndc = getImportedIndcForItalyBillingAddr();
+              if (checkImportIndc == 'Y') {
+                return new ValidationResult(null, false, 'Please remove the imported billing address and create a new one for the 3rd party customer.');
+              }
+            }
+          }
+        }
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
+function addCMRValidator() {
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        if (FormManager.getActualValue('reqType') == 'C') {
+          if (FormManager.getActualValue('findCmrResult') == 'Not Done' || FormManager.getActualValue('findCmrResult') == 'Rejected' || FormManager.getActualValue('findCmrResult') == 'No Results') {
+            var custSubType = FormManager.getActualValue('custSubGrp');
+            if (role == "REQUESTER" && (custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'CRO3P')) {
+              return new ValidationResult(null, false, 'For 3rd party scenario please import a CMR via CMR search');
+            }
+          }
+        }
+      }
+    };
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+
 function setVATForItaly() {
   var reqType = FormManager.getActualValue('reqType');
   var role = FormManager.getActualValue('userRole').toUpperCase();
@@ -6054,7 +6099,9 @@ function checkIfVATFiscalUpdatedIT() {
         var oldVAT = result.ret1;
         var oldFiscalCode = result.ret2;
         var oldCompany = result.ret3;
-        if (result != null && oldVAT != null && oldFiscalCode != null && (oldFiscalCode != currentFiscalCode || oldVAT != currentVAT)) {
+        if (currentFiscalCode == '' && currentVAT == '') {
+          return new ValidationResult(null, true);
+        } else if (result != null && oldVAT != null && oldFiscalCode != null && (oldFiscalCode != currentFiscalCode || oldVAT != currentVAT)) {
           if (fiscalStatus == null || fiscalStatus == '') {
             return new ValidationResult(null, false, 'Fiscal Data has been modified, please validate fiscal data');
           }
@@ -7660,21 +7707,45 @@ function validateFiscalCodeForCreatesIT() {
       validate : function() {
         var role = FormManager.getActualValue('userRole');
         var taxCd1 = FormManager.getActualValue('taxCd1');
+        var vat = FormManager.getActualValue('vat');
         var reqId = FormManager.getActualValue('reqId');
         var checkImportIndc = getImportedIndcForItaly();
         if (FormManager.getActualValue('reqType') == 'C' && checkImportIndc == 'N') {
-          if ((taxCd1 != null && taxCd1.length != 0)) {
+          if ((taxCd1 != null && taxCd1.length != 0) || (vat != null && vat.length != 0)) {
             qParams = {
               FISCAL_CODE : FormManager.getActualValue('taxCd1'),
               MANDT : cmr.MANDT
             }
             var result = cmr.query('IT.CHECK.DUPLICATE_FISCAL_ADDRESS', qParams);
-            if (result.ret1 != null && result.ret1 != '') {
+
+            qParams = {
+              VAT : FormManager.getActualValue('vat'),
+              MANDT : cmr.MANDT
+            }
+            var result1 = cmr.query('IT.CHECK.DUPLICATE_VAT', qParams);
+
+            if (result.ret1 != null && result.ret1 != '' && vat == '' && vat.length == 0) {
               return new ValidationResult({
                 id : 'taxCd1',
                 type : 'text',
                 name : 'taxCd1'
               }, false, 'Fiscal Code on the request is already available on CMR No. ' + result.ret1 + '. Please mention another new fiscal code or import the CMR into the request.');
+            }
+
+            if (result1.ret1 != null && result1.ret1 != '' && taxCd1 == '' && taxCd1.length == 0) {
+              return new ValidationResult({
+                id : 'vat',
+                type : 'text',
+                name : 'vat'
+              }, false, 'Vat on the request is already available on CMR No. ' + result.ret1 + '. Please mention another new VAT or import the CMR into the request.');
+            }
+
+            if (result.ret1 != null && result.ret1 != '' && result1.ret1 != null && result1.ret1 != '' && result.ret1 == result1.ret1) {
+              return new ValidationResult({
+                id : 'taxCd1',
+                type : 'text',
+                name : 'taxCd1'
+              }, false, 'Fiscal Code and VAT on the request is already available on CMR No. ' + result.ret1 + '. Please mention another new fiscal code and VAT or import the CMR into the request.');
             }
           }
         }
@@ -9210,6 +9281,8 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(addAfterConfigItaly, [ SysLoc.ITALY ]);
   GEOHandler.addAfterTemplateLoad(addAfterTemplateLoadItaly, [ SysLoc.ITALY ]);
+  GEOHandler.registerValidator(addCMRValidator, [ SysLoc.ITALY ], null, true);
+  GEOHandler.registerValidator(addBillingValidator, [ SysLoc.ITALY ], null, true);
   GEOHandler.addAddrFunction(addAddrFunctionItaly, [ SysLoc.ITALY ]);
   // CMR-2205
   GEOHandler.addAfterConfig(autoSetAbbrevNmOnChanageTR, [ SysLoc.TURKEY ]);
@@ -9243,6 +9316,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(autoSetVAT, [ SysLoc.UK, SysLoc.IRELAND ]);
   GEOHandler.addAfterConfig(autoSetVAT, [ SysLoc.UK, SysLoc.IRELAND ]);
 
-  GEOHandler.registerValidator(validateVATForINFSLScenarioUKI, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
+  GEOHandler.registerValidator(validateVATForINFSLScenarioUKI, [ SysLoc.IRELAND ], null, true);
 
 });

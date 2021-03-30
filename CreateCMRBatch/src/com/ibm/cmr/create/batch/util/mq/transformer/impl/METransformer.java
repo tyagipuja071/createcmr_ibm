@@ -93,7 +93,7 @@ public class METransformer extends EMEATransformer {
   private static final String ADDRESS_USE_COUNTRY_F = "F";
   private static final String ADDRESS_USE_COUNTRY_G = "G";
   private static final String ADDRESS_USE_COUNTRY_H = "H";
-  private static final String[] GULF_ORIGINAL_COUNTRIES = { "677", "680", "620", "832", "805", "767", "823", "762", "768", "772", "849" };
+  private static final String[] GULF_ORIGINAL_COUNTRIES = { "677", "680", "620", "832", "805", "767", "823", "762", "768", "772", "849", "752" };
   private static final String[] ME_GBMSBM_COUNTRIES = { "677", "680", "620", "832", "805", "767", "823", "675" };
   private static final String SCENARIO_TYPE_SBM = "SBM";
   private static final String SCENARIO_TYPE_GBM = "GBM";
@@ -737,33 +737,36 @@ public class METransformer extends EMEATransformer {
           generateCMRNoObj.setMax(985999);
         } else if ("677".equals(data.getCmrIssuingCntry())) {
           generateCMRNoObj.setMin(985001);
-          generateCMRNoObj.setMax(985090);
+          generateCMRNoObj.setMax(985082);
         } else if ("680".equals(data.getCmrIssuingCntry())) {
-          generateCMRNoObj.setMin(985091);
-          generateCMRNoObj.setMax(985180);
+          generateCMRNoObj.setMin(985083);
+          generateCMRNoObj.setMax(985164);
         } else if ("805".equals(data.getCmrIssuingCntry())) {
-          generateCMRNoObj.setMin(985181);
-          generateCMRNoObj.setMax(985270);
+          generateCMRNoObj.setMin(985165);
+          generateCMRNoObj.setMax(985246);
         } else if ("849".equals(data.getCmrIssuingCntry())) {
-          generateCMRNoObj.setMin(985271);
-          generateCMRNoObj.setMax(985360);
+          generateCMRNoObj.setMin(985247);
+          generateCMRNoObj.setMax(985328);
         } else if ("620".equals(data.getCmrIssuingCntry())) {
-          generateCMRNoObj.setMin(985361);
-          generateCMRNoObj.setMax(985450);
+          generateCMRNoObj.setMin(985329);
+          generateCMRNoObj.setMax(985410);
         } else if ("767".equals(data.getCmrIssuingCntry())) {
-          generateCMRNoObj.setMin(985451);
-          generateCMRNoObj.setMax(985540);
+          generateCMRNoObj.setMin(985411);
+          generateCMRNoObj.setMax(985492);
         } else if ("823".equals(data.getCmrIssuingCntry())) {
-          generateCMRNoObj.setMin(985541);
-          generateCMRNoObj.setMax(985630);
+          generateCMRNoObj.setMin(985493);
+          generateCMRNoObj.setMax(985574);
         } else if ("772".equals(data.getCmrIssuingCntry())) {
-          generateCMRNoObj.setMin(985631);
-          generateCMRNoObj.setMax(985720);
+          generateCMRNoObj.setMin(985575);
+          generateCMRNoObj.setMax(985656);
         } else if ("762".equals(data.getCmrIssuingCntry())) {
-          generateCMRNoObj.setMin(985721);
-          generateCMRNoObj.setMax(985810);
+          generateCMRNoObj.setMin(985657);
+          generateCMRNoObj.setMax(985738);
         } else if ("768".equals(data.getCmrIssuingCntry())) {
-          generateCMRNoObj.setMin(985811);
+          generateCMRNoObj.setMin(985739);
+          generateCMRNoObj.setMax(985820);
+        } else if ("752".equals(data.getCmrIssuingCntry())) {
+          generateCMRNoObj.setMin(985821);
           generateCMRNoObj.setMax(985900);
         }
       } else {
@@ -772,33 +775,36 @@ public class METransformer extends EMEATransformer {
           generateCMRNoObj.setMax(999999);
         } else if ("677".equals(data.getCmrIssuingCntry())) {
           generateCMRNoObj.setMin(990000);
-          generateCMRNoObj.setMax(990900);
+          generateCMRNoObj.setMax(990820);
         } else if ("680".equals(data.getCmrIssuingCntry())) {
-          generateCMRNoObj.setMin(990901);
-          generateCMRNoObj.setMax(991800);
+          generateCMRNoObj.setMin(990821);
+          generateCMRNoObj.setMax(991640);
         } else if ("805".equals(data.getCmrIssuingCntry())) {
-          generateCMRNoObj.setMin(991801);
-          generateCMRNoObj.setMax(992700);
+          generateCMRNoObj.setMin(991641);
+          generateCMRNoObj.setMax(992460);
         } else if ("849".equals(data.getCmrIssuingCntry())) {
-          generateCMRNoObj.setMin(992701);
-          generateCMRNoObj.setMax(993600);
+          generateCMRNoObj.setMin(992461);
+          generateCMRNoObj.setMax(993280);
         } else if ("620".equals(data.getCmrIssuingCntry())) {
-          generateCMRNoObj.setMin(993601);
-          generateCMRNoObj.setMax(994500);
+          generateCMRNoObj.setMin(993281);
+          generateCMRNoObj.setMax(994100);
         } else if ("767".equals(data.getCmrIssuingCntry())) {
-          generateCMRNoObj.setMin(994501);
-          generateCMRNoObj.setMax(995400);
+          generateCMRNoObj.setMin(994101);
+          generateCMRNoObj.setMax(994290);
         } else if ("823".equals(data.getCmrIssuingCntry())) {
-          generateCMRNoObj.setMin(995401);
-          generateCMRNoObj.setMax(996300);
+          generateCMRNoObj.setMin(994291);
+          generateCMRNoObj.setMax(995740);
         } else if ("772".equals(data.getCmrIssuingCntry())) {
-          generateCMRNoObj.setMin(996301);
-          generateCMRNoObj.setMax(997200);
+          generateCMRNoObj.setMin(995741);
+          generateCMRNoObj.setMax(996560);
         } else if ("762".equals(data.getCmrIssuingCntry())) {
-          generateCMRNoObj.setMin(997201);
-          generateCMRNoObj.setMax(998100);
+          generateCMRNoObj.setMin(996561);
+          generateCMRNoObj.setMax(997380);
         } else if ("768".equals(data.getCmrIssuingCntry())) {
-          generateCMRNoObj.setMin(998101);
+          generateCMRNoObj.setMin(997381);
+          generateCMRNoObj.setMax(998200);
+        } else if ("752".equals(data.getCmrIssuingCntry())) {
+          generateCMRNoObj.setMin(998201);
           generateCMRNoObj.setMax(999000);
         }
       }
@@ -808,33 +814,36 @@ public class METransformer extends EMEATransformer {
         generateCMRNoObj.setMax(9999);
       } else if ("677".equals(data.getCmrIssuingCntry())) {
         generateCMRNoObj.setMin(1000);
-        generateCMRNoObj.setMax(1800);
+        generateCMRNoObj.setMax(1725);
       } else if ("680".equals(data.getCmrIssuingCntry())) {
-        generateCMRNoObj.setMin(1801);
-        generateCMRNoObj.setMax(2600);
+        generateCMRNoObj.setMin(1726);
+        generateCMRNoObj.setMax(2450);
       } else if ("805".equals(data.getCmrIssuingCntry())) {
-        generateCMRNoObj.setMin(2601);
-        generateCMRNoObj.setMax(3400);
+        generateCMRNoObj.setMin(2451);
+        generateCMRNoObj.setMax(3175);
       } else if ("849".equals(data.getCmrIssuingCntry())) {
-        generateCMRNoObj.setMin(3401);
-        generateCMRNoObj.setMax(4200);
+        generateCMRNoObj.setMin(3176);
+        generateCMRNoObj.setMax(3900);
       } else if ("620".equals(data.getCmrIssuingCntry())) {
-        generateCMRNoObj.setMin(4201);
-        generateCMRNoObj.setMax(5000);
+        generateCMRNoObj.setMin(3901);
+        generateCMRNoObj.setMax(4625);
       } else if ("767".equals(data.getCmrIssuingCntry())) {
-        generateCMRNoObj.setMin(5001);
-        generateCMRNoObj.setMax(5800);
+        generateCMRNoObj.setMin(4626);
+        generateCMRNoObj.setMax(5350);
       } else if ("823".equals(data.getCmrIssuingCntry())) {
-        generateCMRNoObj.setMin(5801);
-        generateCMRNoObj.setMax(6600);
+        generateCMRNoObj.setMin(5351);
+        generateCMRNoObj.setMax(6075);
       } else if ("772".equals(data.getCmrIssuingCntry())) {
-        generateCMRNoObj.setMin(6601);
-        generateCMRNoObj.setMax(7200);
+        generateCMRNoObj.setMin(6076);
+        generateCMRNoObj.setMax(6800);
       } else if ("762".equals(data.getCmrIssuingCntry())) {
-        generateCMRNoObj.setMin(7201);
-        generateCMRNoObj.setMax(8000);
+        generateCMRNoObj.setMin(6801);
+        generateCMRNoObj.setMax(7525);
       } else if ("768".equals(data.getCmrIssuingCntry())) {
-        generateCMRNoObj.setMin(8001);
+        generateCMRNoObj.setMin(7526);
+        generateCMRNoObj.setMax(8250);
+      } else if ("752".equals(data.getCmrIssuingCntry())) {
+        generateCMRNoObj.setMin(8251);
         generateCMRNoObj.setMax(8800);
       }
       LOG.debug("that is ME BP CMR");
@@ -847,36 +856,39 @@ public class METransformer extends EMEATransformer {
         generateCMRNoObj.setMax(90000);
       } else if ("680".equals(data.getCmrIssuingCntry())) {
         generateCMRNoObj.setMin(90001);
-        generateCMRNoObj.setMax(180000);
+        generateCMRNoObj.setMax(171000);
       } else if ("805".equals(data.getCmrIssuingCntry())) {
-        generateCMRNoObj.setMin(180001);
-        generateCMRNoObj.setMax(270000);
+        generateCMRNoObj.setMin(171001);
+        generateCMRNoObj.setMax(252000);
       } else if ("849".equals(data.getCmrIssuingCntry())) {
-        generateCMRNoObj.setMin(270001);
-        generateCMRNoObj.setMax(360000);
+        generateCMRNoObj.setMin(252001);
+        generateCMRNoObj.setMax(333000);
       } else if ("620".equals(data.getCmrIssuingCntry())) {
-        generateCMRNoObj.setMin(360001);
-        generateCMRNoObj.setMax(450000);
+        generateCMRNoObj.setMin(333001);
+        generateCMRNoObj.setMax(414000);
       } else if ("767".equals(data.getCmrIssuingCntry())) {
-        generateCMRNoObj.setMin(450001);
-        generateCMRNoObj.setMax(540000);
+        generateCMRNoObj.setMin(414001);
+        generateCMRNoObj.setMax(495000);
       } else if ("823".equals(data.getCmrIssuingCntry())) {
-        generateCMRNoObj.setMin(540001);
-        generateCMRNoObj.setMax(630000);
+        generateCMRNoObj.setMin(495001);
+        generateCMRNoObj.setMax(576000);
       } else if ("772".equals(data.getCmrIssuingCntry())) {
-        generateCMRNoObj.setMin(630001);
-        generateCMRNoObj.setMax(720000);
+        generateCMRNoObj.setMin(576001);
+        generateCMRNoObj.setMax(657000);
       } else if ("762".equals(data.getCmrIssuingCntry())) {
-        generateCMRNoObj.setMin(720001);
-        generateCMRNoObj.setMax(810000);
+        generateCMRNoObj.setMin(657001);
+        generateCMRNoObj.setMax(738000);
       } else if ("768".equals(data.getCmrIssuingCntry())) {
-        generateCMRNoObj.setMin(810001);
+        generateCMRNoObj.setMin(738001);
+        generateCMRNoObj.setMax(819000);
+      } else if ("752".equals(data.getCmrIssuingCntry())) {
+        generateCMRNoObj.setMin(819001);
         generateCMRNoObj.setMax(900000);
       }
       LOG.debug("that is ME BP CMR");
     }
 
-    if ("Y".equals(data.getDupCmrIndc()) || "677, 680, 805, 849, 620, 767, 823, 772, 762, 768, 832".indexOf(data.getCmrIssuingCntry()) > -1) {
+    if ("Y".equals(data.getDupCmrIndc()) || "677, 680, 805, 849, 620, 767, 823, 772, 762, 768, 832, 752".indexOf(data.getCmrIssuingCntry()) > -1) {
       generateCMRNoObj.setLoc2("675");
     }
   }
@@ -1262,6 +1274,11 @@ public class METransformer extends EMEATransformer {
         legacyCust.setEmbargoCd(rdcEmbargoCd);
         resetOrdBlockToData(entityManager, data);
       }
+      if (CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason()) && CMR_REQUEST_STATUS_PCR.equals(admin.getReqStatus())
+          && "Wx".equals(admin.getProcessedFlag())) {
+        legacyCust.setEmbargoCd("E");
+        resetOrdBlockToData(entityManager, data);
+      }
     }
 
     if (!StringUtils.isBlank(data.getSubIndustryCd())) {
@@ -1583,6 +1600,7 @@ public class METransformer extends EMEATransformer {
 
   private void resetOrdBlockToData(EntityManager entityManager, Data data) {
     data.setOrdBlk("88");
+    data.setEmbargoCd("E");
     entityManager.merge(data);
     entityManager.flush();
   }
@@ -1984,7 +2002,7 @@ public class METransformer extends EMEATransformer {
     q.setParameter("TYPE", addrType);
     q.setParameter("OLD_SEQ", oldSeq);
     q.setParameter("SAP_NO", kunnr);
-    LOG.debug("CEE - Assigning address sequence " + newSeq + " to " + addrType + " address.");
+    LOG.debug("ME - Assigning address sequence " + newSeq + " to " + addrType + " address.");
     q.executeSql();
   }
 
@@ -2000,6 +2018,15 @@ public class METransformer extends EMEATransformer {
   public void getTargetCountryId(EntityManager entityManager, GenerateCMRNoRequest generateCMRNoObj, String cntry, String cmrNo) {
     if ("677, 680, 805, 849, 620, 767, 823, 772, 762, 768, 832".indexOf(cntry) > -1) {
       generateCMRNoObj.setLoc2("675");
+    }
+  }
+  
+  public boolean isUpdateNeededOnAllAddressType(EntityManager entityManager, CMRRequestContainer cmrObjects) {
+    Admin admin = cmrObjects.getAdmin();
+    if (CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason())) {
+      return true;
+    } else {
+      return false;
     }
   }
 

@@ -38,6 +38,7 @@ import com.ibm.cio.cmr.request.entity.CmrtCustExt;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.entity.DataRdc;
+import com.ibm.cio.cmr.request.entity.KunnrExt;
 import com.ibm.cio.cmr.request.entity.Sadr;
 import com.ibm.cio.cmr.request.entity.UpdatedAddr;
 import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation;
@@ -139,6 +140,10 @@ public class CEMEAHandler extends BaseSOFHandler {
   private static final String[] CEEME_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "CustLang", "GeoLocationCode", "Affiliate", "Company", "CAP", "CMROwner",
       "CustClassCode", "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office",
       "Floor", "Building", "County", "City2", "Department" };
+
+  private static final String[] CZ_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "CustLang", "GeoLocationCode", "Affiliate", "CAP", "CMROwner", "CustClassCode",
+      "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office", "Floor", "Building",
+      "County", "City2", "Department", "Company", "LocalTax1" };
 
   private static final String[] AUSTRIA_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "GeoLocationCode", "Affiliate", "Company", "CAP", "CMROwner",
       "CustClassCode", "CurrencyCode", "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX",
@@ -1041,13 +1046,17 @@ public class CEMEAHandler extends BaseSOFHandler {
     if (SystemLocation.SLOVAKIA.equals(data.getCmrIssuingCntry())) {
       data.setCompany(this.currentImportValues.get("BankBranchNo"));
       LOG.trace("BankBranchNo: " + data.getCompany());
+    } else if (SystemLocation.CZECH_REPUBLIC.equals(data.getCmrIssuingCntry())) {
+      data.setCompany(this.currentImportValues.get("BankBranchNo"));// RBBXA->ICO
+      data.setTaxCd1(mainRecord.getCmrBusinessReg());// kna1.stcd1->DIC
+      LOG.trace("BankAccountNo: " + data.getCompany());
+      LOG.trace("DIC: " + data.getTaxCd1());
     } else {
       data.setCompany("");
     }
 
     // DIC and OIB fields
-    if (SystemLocation.SLOVAKIA.equals(data.getCmrIssuingCntry()) || SystemLocation.CROATIA.equals(data.getCmrIssuingCntry())
-        || SystemLocation.CZECH_REPUBLIC.equals(data.getCmrIssuingCntry())) {
+    if (SystemLocation.SLOVAKIA.equals(data.getCmrIssuingCntry()) || SystemLocation.CROATIA.equals(data.getCmrIssuingCntry())) {
       data.setTaxCd1(this.currentImportValues.get("BankAccountNo"));
       LOG.trace("BankAccountNo: " + data.getTaxCd1());
     }
@@ -1167,17 +1176,59 @@ public class CEMEAHandler extends BaseSOFHandler {
   }
 
   @Override
+  public int getName1Length() {
+    return 35;
+  }
+
+  /* CREATCMR-1308 - Import from KUNNR_EXT table */
+  private KunnrExt getKunnrExtDetails(String kunnr) throws Exception {
+    KunnrExt ke = new KunnrExt();
+    String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
+    String mandt = SystemConfiguration.getValue("MANDT");
+    String sql = ExternalizedQuery.getSql("GET.KUNNR_EXT.BY_KUNNR_MANDT_AUSTRIA");
+    sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
+    sql = StringUtils.replace(sql, ":KUNNR", "'" + kunnr + "'");
+    String dbId = QueryClient.RDC_APP_ID;
+
+    QueryRequest query = new QueryRequest();
+    query.setSql(sql);
+    query.addField("BUILDING");
+    query.addField("DEPARTMENT");
+
+    LOG.debug("Getting existing KUNNNR_EXT details from RDc DB..");
+    QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
+    QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
+
+    if (response.isSuccess() && response.getRecords() != null && response.getRecords().size() != 0) {
+      List<Map<String, Object>> records = response.getRecords();
+      Map<String, Object> record = records.get(0);
+
+      ke.setBuilding(record.get("BUILDING") != null ? record.get("BUILDING").toString() : "");
+      ke.setDepartment(record.get("DEPARTMENT") != null ? record.get("DEPARTMENT").toString() : "");
+
+      LOG.debug("***RETURNING BUILDING > " + ke.getBuilding());
+      LOG.debug("***RETURNING DEPARTMENT > " + ke.getDepartment());
+    }
+    return ke;
+  }
+
+  @Override
+  public int getName2Length() {
+    return 35;
+  }
+
+  @Override
   public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo) throws Exception {
-    boolean doSplit = (currentRecord.getCmrName1Plain() != null && currentRecord.getCmrName1Plain().length() > 30)
-        || (currentRecord.getCmrName2Plain() != null && currentRecord.getCmrName2Plain().length() > 30);
+    boolean doSplit = (currentRecord.getCmrName1Plain() != null && currentRecord.getCmrName1Plain().length() > 35)
+        || (currentRecord.getCmrName2Plain() != null && currentRecord.getCmrName2Plain().length() > 35);
 
     String country = currentRecord.getCmrIssuedBy();
-
+    ArrayList<String> addrDetailsList = new ArrayList<String>();
     if (doSplit) {
-      String[] names = splitName(currentRecord.getCmrName1Plain(), currentRecord.getCmrName2Plain(), 30, 100);
+      String[] names = splitName(currentRecord.getCmrName1Plain(), currentRecord.getCmrName2Plain(), 35, 100);
       address.setCustNm1(names[0]);
       String extendedName = names[1];
-      names = splitName(extendedName, currentRecord.getCmrName3(), 30, 30);
+      names = splitName(extendedName, currentRecord.getCmrName3(), 35, 30);
       address.setCustNm2(names[0]);
       address.setCustNm3(names[1]);
     } else {
@@ -1187,18 +1238,18 @@ public class CEMEAHandler extends BaseSOFHandler {
     }
 
     // FINAL TRIM
-    if (address.getCustNm1() != null && address.getCustNm1().trim().length() > 30) {
-      address.setCustNm1(address.getCustNm1().trim().substring(0, 30));
+    if (address.getCustNm1() != null && address.getCustNm1().trim().length() > 35) {
+      address.setCustNm1(address.getCustNm1().trim().substring(0, 35));
     }
-    if (address.getCustNm2() != null && address.getCustNm2().trim().length() > 30) {
-      address.setCustNm2(address.getCustNm2().trim().substring(0, 30));
+    if (address.getCustNm2() != null && address.getCustNm2().trim().length() > 35) {
+      address.setCustNm2(address.getCustNm2().trim().substring(0, 35));
     }
     if (address.getCustNm3() != null && address.getCustNm3().trim().length() > 30) {
       address.setCustNm3(address.getCustNm3().trim().substring(0, 30));
     }
-    doSplit = currentRecord.getCmrStreetAddress() != null && currentRecord.getCmrStreetAddress().length() > 30;
+    doSplit = currentRecord.getCmrStreetAddress() != null && currentRecord.getCmrStreetAddress().length() > 35;
     if (doSplit) {
-      splitAddress(address, currentRecord.getCmrStreetAddress(), currentRecord.getCmrStreetAddressCont(), 30, 30);
+      splitAddress(address, currentRecord.getCmrStreetAddress(), currentRecord.getCmrStreetAddressCont(), 35, 35);
     } else {
       address.setAddrTxt2(currentRecord.getCmrStreetAddressCont());
     }
@@ -1214,6 +1265,23 @@ public class CEMEAHandler extends BaseSOFHandler {
         && "ZS01".equalsIgnoreCase(address.getId().getAddrType()) && CEE_COUNTRIES_LIST.contains(country)) {
       address.getId().setAddrSeq("00001");
     }
+
+    if (!CEE_COUNTRIES_LIST.contains(currentRecord.getCmrIssuedBy())) {
+    KunnrExt addlAddDetail = getKunnrExtDetails(currentRecord.getCmrSapNumber());
+    if (addlAddDetail != null) {
+      if (SystemLocation.AUSTRIA.equals(country)) {
+        address.setBldg(addlAddDetail.getBuilding() != null ? addlAddDetail.getBuilding() : "");
+        address.setDept(addlAddDetail.getDepartment() != null ? addlAddDetail.getDepartment() : "");
+      }
+
+      if (!StringUtils.isEmpty(address.getDept())) {
+        addrDetailsList.add(address.getDept());
+      }
+      if (!StringUtils.isEmpty(address.getBldg())) {
+        addrDetailsList.add(address.getBldg());
+      }
+    }
+  }
   }
 
   @Override
@@ -1283,8 +1351,10 @@ public class CEMEAHandler extends BaseSOFHandler {
     pk.setReqId(addr.getId().getReqId());
     Data data = entityManager.find(Data.class, pk);
 
-    if (!"ZP01".equals(addr.getId().getAddrType())) {
-      addr.setDept("");
+    if (!("618".equals(cmrIssuingCntry))) {
+      if (!"ZP01".equals(addr.getId().getAddrType())) {
+        addr.setDept("");
+      }
     }
 
     if (CEE_COUNTRIES_LIST.contains(data.getCmrIssuingCntry()) && data != null && "ZP02".equals(addr.getId().getAddrType())) {
@@ -1494,6 +1564,24 @@ public class CEMEAHandler extends BaseSOFHandler {
       results.add(update);
     }
 
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getTaxCd1(), newData.getTaxCd1())
+        && SystemLocation.CZECH_REPUBLIC.equals(cmrCountry)) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "LocalTax1", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getTaxCd1(), "LocalTax1", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getTaxCd1(), "LocalTax1", cmrCountry));
+      results.add(update);
+    }
+
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCompany(), newData.getCompany())
+        && (SystemLocation.SLOVAKIA.equals(cmrCountry) || SystemLocation.CZECH_REPUBLIC.equals(cmrCountry))) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "Company", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getCompany(), "Company", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getCompany(), "Company", cmrCountry));
+      results.add(update);
+    }
+
   }
 
   @Override
@@ -1501,6 +1589,8 @@ public class CEMEAHandler extends BaseSOFHandler {
     switch (cntry) {
     case SystemLocation.AUSTRIA:
       return Arrays.asList(AUSTRIA_SKIP_ON_SUMMARY_UPDATE_FIELDS).contains(field);
+    case SystemLocation.CZECH_REPUBLIC:
+      return Arrays.asList(CZ_SKIP_ON_SUMMARY_UPDATE_FIELDS).contains(field);
     default:
       return Arrays.asList(CEEME_SKIP_ON_SUMMARY_UPDATE_FIELDS).contains(field);
     }

@@ -331,7 +331,7 @@ form.ibm-column-form .dijitTextBox INPUT {
         </cmr:column>
         <cmr:column span="2" width="250">
           <p>
-            <form:input path="streetAddress1" placeHolder="Street Line 1" dojoType="dijit.form.TextBox" maxlength="30"/>
+            <form:input path="streetAddress1" placeHolder="Street Line 1" dojoType="dijit.form.TextBox" maxlength="35"/>
           </p>
         </cmr:column>
         <cmr:column span="1" width="150">
@@ -341,7 +341,7 @@ form.ibm-column-form .dijitTextBox INPUT {
         </cmr:column>
         <cmr:column span="2" width="250">
           <p>
-            <form:input path="city" placeHolder="City" dojoType="dijit.form.TextBox" maxlength="30"/>
+            <form:input path="city" placeHolder="City" dojoType="dijit.form.TextBox" maxlength="35"/>
           </p>
         </cmr:column>
       </cmr:row>
