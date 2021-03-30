@@ -48,8 +48,7 @@
     </cmr:column>
   </cmr:row>
   
-  
-  <cmr:row addBackground="true"> 
+   <cmr:row addBackground="true"> 
   <cmr:column span="2" containerForField="ParentCompanyNo">
         <p>
           <cmr:label fieldId="dealerNo">
@@ -76,5 +75,4 @@
           </p>
         </cmr:column>
 </cmr:row> 
-  
 </cmr:view>
