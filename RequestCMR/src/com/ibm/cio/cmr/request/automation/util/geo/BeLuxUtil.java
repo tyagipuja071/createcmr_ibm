@@ -460,6 +460,9 @@ public class BeLuxUtil extends AutomationUtil {
           details.append("Embargo Code P was deleted.\n");
         }
         break;
+      case "Preferred Language":
+        details.append("Preferred Language data field was updated.\n");
+        break;
       default:
         ignoredUpdates.add(change.getDataField());
         break;
