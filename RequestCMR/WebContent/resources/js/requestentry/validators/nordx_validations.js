@@ -1736,7 +1736,18 @@ function currencyUIShowAndHide() {
   reqType = FormManager.getActualValue('reqType');
 
   if (reqType == 'C') {
-    FormManager.hide('CurrencyCd', 'currencyCd');
+
+    var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+    if (cmrIssuingCntry == '678') {
+      FormManager.setValue('currencyCd', 'DKK');
+    } else if (cmrIssuingCntry == '702') {
+      FormManager.setValue('currencyCd', 'EUR');
+    } else if (cmrIssuingCntry == '806') {
+      FormManager.setValue('currencyCd', 'NOK');
+    } else if (cmrIssuingCntry == '846') {
+      FormManager.setValue('currencyCd', 'SEK');
+    }
+    cmr.hideNode("container-CurrencyCd");
   }
 
   if (reqType == 'U') {
