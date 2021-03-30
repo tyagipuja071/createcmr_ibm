@@ -1262,4 +1262,9 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
     // Customer Tab
     legacyCustExt.setiTaxCode(!StringUtils.isBlank(data.getTaxCd1()) ? data.getTaxCd1() : "");
   }
+
+  @Override
+  public boolean isPG01Supported() {
+    return true;
+  }
 }
