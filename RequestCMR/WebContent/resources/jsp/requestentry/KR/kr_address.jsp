@@ -87,8 +87,7 @@
     <p>
       <cmr:label fieldId="stateProv">
         <cmr:fieldLabel fieldId="StateProv" />:
-             <cmr:delta text="-" id="delta-stateProv" code="L" />
-             <cmr:info text="${ui.info.addrStateProv}" />
+             <cmr:delta text="-" id="delta-stateProv" code="R" />
       </cmr:label>
       <cmr:field fieldId="StateProv" id="stateProv" path="stateProv" />
     </p>
@@ -109,7 +108,7 @@
     <p>
       <cmr:label fieldId="city2">
         <cmr:fieldLabel fieldId="City2" />:
-             <cmr:delta text="-" id="delta-city1" />
+             <cmr:delta text="-" id="delta-city2" />
       </cmr:label>
       <cmr:field fieldId="City2" id="city2" path="city2" />
     </p>
@@ -130,6 +129,7 @@
     <p>
       <cmr:label fieldId="addrTxt2">
         <cmr:fieldLabel fieldId="StreetAddress2" />: 
+        <cmr:delta text="-" id="delta-addrTxt2" />
       </cmr:label>
       <cmr:field fieldId="StreetAddress2" id="addrTxt2" path="addrTxt2" />
     </p>
@@ -166,7 +166,7 @@
       <cmr:field fieldId="TransportZone" id="transportZone" path="transportZone" />
     </p>
   </cmr:column>
-  <cmr:column span="2" containerForField="Contact">
+  <cmr:column span="2" >
     <p>
       <cmr:label fieldId="contact">
         <cmr:fieldLabel fieldId="Contact" />:
@@ -178,7 +178,7 @@
 </cmr:row>
 
 <cmr:row>
-  <cmr:column span="2" containerForField="Department">
+  <cmr:column span="2">
     <p>
       <cmr:label fieldId="dept">
         <cmr:fieldLabel fieldId="Department" />:
@@ -187,7 +187,7 @@
       <cmr:field fieldId="Department" id="dept" path="dept" />
     </p>
   </cmr:column>
-  <cmr:column span="2" containerForField="Floor">
+  <cmr:column span="2">
     <p>
       <cmr:label fieldId="floor">
         <cmr:fieldLabel fieldId="Floor" />:
@@ -199,16 +199,16 @@
 </cmr:row>
 
  <cmr:row>
-    <cmr:column span="2" containerForField="LocalLangCountryName">
+    <cmr:column span="2">
       <p>
-        <cmr:label fieldId="bldg">
+        <cmr:label fieldId="countyName">
           <cmr:fieldLabel fieldId="LocalLangCountryName" />: 
-               <cmr:delta text="-" id="delta-bldg" />
+               <cmr:delta text="-" id="delta-countyName" />
         </cmr:label>
-        <cmr:field fieldId="LocalLangCountryName" id="bldg" path="bldg" />
+        <cmr:field fieldId="LocalLangCountryName" id="countyName" path="countyName" />
       </p>
     </cmr:column>
-    <cmr:column span="2" containerForField="POBoxCity">
+    <cmr:column span="2">
     <p>
       <cmr:label fieldId="poBoxCity">
         <cmr:fieldLabel fieldId="POBoxCity" />:
@@ -219,7 +219,7 @@
    </cmr:column>
 </cmr:row>
  <cmr:row>
-  <cmr:column span="2" containerForField="Office">
+  <cmr:column span="2">
     <p>
       <cmr:label fieldId="office">
         <cmr:fieldLabel fieldId="Office" />:
@@ -228,17 +228,18 @@
       <cmr:field fieldId="Office" id="office" path="office" />
     </p>
   </cmr:column>
-  <cmr:column span="2" containerForField="TaxOffice">
+  <cmr:column span="2">
     <p>
       <cmr:label fieldId="taxOffice">
         <cmr:fieldLabel fieldId="TaxOffice" />:
+          <cmr:delta text="-" id="delta-taxOffice" />
       </cmr:label>
       <cmr:field fieldId="TaxOffice" id="taxOffice" path="taxOffice" />
     </p>
   </cmr:column>
 </cmr:row>
 <cmr:row>
-  <cmr:column span="2" containerForField="Building">
+  <cmr:column span="2">
     <p>
       <cmr:label fieldId="bldg">
         <cmr:fieldLabel fieldId="Building" />:
