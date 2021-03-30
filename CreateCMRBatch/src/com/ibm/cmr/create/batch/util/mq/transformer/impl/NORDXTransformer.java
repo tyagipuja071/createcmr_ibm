@@ -1173,7 +1173,7 @@ public class NORDXTransformer extends EMEATransformer {
       } else if (postCd > 6999 && postCd < 10000) {
         newSbo = "7000ISU";
       } else {
-        newSbo = data.getSalesBusOffCd() + "0ISU";// CMR-1650
+        newSbo = "1000ISU";// CMR-1650 SBO value for cross
       }
     }
     legacyCust.setSbo(newSbo);

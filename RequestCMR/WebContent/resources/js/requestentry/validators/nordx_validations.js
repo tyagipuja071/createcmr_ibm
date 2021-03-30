@@ -92,7 +92,7 @@ function afterConfigForNORDX() {
   }
   setVatValidatorNORDX();
   setSalesRepValues();
-  setAdminDSCValues();
+  // setAdminDSCValues();
   setTaxCdValuesCROSS();
   setSBOForFinlandSubRegion();
   setPPSCEID();
@@ -179,7 +179,7 @@ function addHandlersForNORDX() {
 
   if (_CTCHandler == null) {
     _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
-      // setSalesRepValues(value);
+      setSalesRepValues(value);
     });
   }
 
@@ -356,7 +356,7 @@ function setSBOFORCross() {
 }
 
 /*
- * NORDX - sets Sales rep based on isuCtc
+ * NORDX - sets Sales rep based on isuCtc Changed by CMR-1746
  */
 function setSalesRepValues(clientTier) {
 
@@ -374,133 +374,135 @@ function setSalesRepValues(clientTier) {
   var isuCd = FormManager.getActualValue('isuCd');
   var geoCd = FormManager.getActualValue('countryUse').substring(3, 5);
 
-  var salesReps = [];
   if (isuCd != '') {
     var isuCtc = isuCd + clientTier;
-    var qParams = null;
-    var results = null;
+    // SalRep for Denmark & its Subregion
+    if (cntry == '678') {
+      if (isuCtc == '34Q') {
+        if (geoCd == 'IS') {
+          FormManager.setValue('repTeamMemberNo', "MSD997");
+          FormManager.setValue('engineeringBo', '1376');
+        } else {
+          // DK/FO/GL
+          var MSD993_34Q = "B,C,D,J,L,P,T,V";
+          var MSD992_6644 = "G,Y,E,H,X,U";
+          var MSD992_1375 = "A,K,F,N,S,Z";
+          var MSD302_34Q = "M,R,W";
 
-    // SalRep will be based on IMS for 32S/32T for Finland Subregion
-    if (ims.length > 1 && (isuCtc == '34Q' || isuCtc == '32T')
-        && (geoCd == 'EE' || geoCd == 'LT' || geoCd == 'LV' || geoCd == 'IS' || cntry == '806')) {
-      qParams = {
-        _qall : 'Y',
-        ISSUING_CNTRY : cntry + geoCd,
-        ISU : '%' + isuCd + clientTier + '%',
-        CLIENT_TIER : '%%'
-      };
-      results = cmr.query('GET.SRLIST.BYISUCTC', qParams);
-    } else if (ims != '' && ims.length > 1 && (isuCtc == '34Q' || isuCtc == '32T') && (cntry == '846')) {
-      qParams = {
-        _qall : 'Y',
-        ISSUING_CNTRY : cntry + geoCd,
-        ISU : '%' + isuCd + clientTier + '%'
-      // George 2020-09-01 CMR-5079
-      // UPDATE_BY_ID : '%' + ims.substring(0, 1) + '%'
-      };
-      results = cmr.query('GET.SRLIST.SWEDEN', qParams);
-    } else if (ims != '' && ims.length > 1 && (isuCtc == '34Q' || isuCtc == '32T')) {
-      qParams = {
-        _qall : 'Y',
-        ISSUING_CNTRY : cntry + geoCd,
-        ISU : '%' + isuCd + clientTier + '%',
-        CLIENT_TIER : '%%'
-      };
-      results = cmr.query('GET.SRLIST.BYISUCTC', qParams);
-    } else {
-      qParams = {
-        _qall : 'Y',
-        ISSUING_CNTRY : cntry + geoCd,
-        ISU : '%' + isuCd + clientTier + '%',
-      };
-      results = cmr.query('GET.SRLIST.BYISU', qParams);
-    }
-
-    if (results != null) {
-      for (var i = 0; i < results.length; i++) {
-        salesReps.push(results[i].ret1);
-      }
-      FormManager.limitDropdownValues(FormManager.getField('repTeamMemberNo'), salesReps);
-
-      // 2020-08-27 George CMR-5079 2H20 Coverage - NORDICS (change of LOVs &
-      // Logic)
-
-      // 2020-09-15 George CMR-5079 fix the value of rep team member changed
-      // onced request saved.
-      console.log('custSubGrp==' + FormManager.getActualValue('custSubGrp'));
-      console.log('pagemodel custSubGrp==' + _pagemodel.custSubGrp);
-      if (clientTier != '' && FormManager.getActualValue('custSubGrp') != '' && FormManager.getActualValue('custSubGrp') != null
-          && FormManager.getActualValue('custSubGrp') != _pagemodel.custSubGrp) {
-
-        // DK/FO/GL
-        var MSD996 = "A,K,F,N,S";
-        var MSD992 = "G,Y,E,H,X,Y,U";
-        var MSD993 = "D,T";
-        var MSD302 = "V,J,P,L,M,W,R,B,C,Z";
-        // Sweden
-        var INS003 = "A,U,J,L,M,P,V,E,G,H,X,Y,Z,B,C,D,K,R,T,W,F,N,S";
-        var MSS596 = "B,C,D,R,T,W";
-        var MSS599 = "F,J,L,M,N,P,S,V";
-        var MSS315 = "A,E,G,H,K,U,X,Y";
-        // Finland
-        var MSF109 = "A,K,U,J,L,M,P,V,E,G,H,X,Y,Z";
-        var MSF107 = "B,C,D,R,T,W,F,N,S";
-        var NOREP0 = INS003;
-
-        var ind = ims.substring(0, 1);
-        // DK/FO/GL 678
-        if (cntry == '678' && ind != '') {
-          if (MSD996.indexOf(ind) >= 0)
-            FormManager.setValue('repTeamMemberNo', "MSD996");
-          if (MSD992.indexOf(ind) >= 0)
-            FormManager.setValue('repTeamMemberNo', "MSD992");
-          if (MSD993.indexOf(ind) >= 0)
-            FormManager.setValue('repTeamMemberNo', "MSD993");
-          if (MSD302.indexOf(ind) >= 0)
+          var ind = ims.substring(0, 1);
+          if (ind != '') {
+            if (MSD993_34Q.indexOf(ind) >= 0) {
+              FormManager.setValue('repTeamMemberNo', "MSD993");
+              FormManager.setValue('engineeringBo', '6680');
+            } else if (MSD992_6644.indexOf(ind) >= 0) {
+              FormManager.setValue('repTeamMemberNo', "MSD992");
+              FormManager.setValue('engineeringBo', '6644');
+            } else if (MSD992_1375.indexOf(ind) >= 0) {
+              FormManager.setValue('repTeamMemberNo', "MSD992");
+              FormManager.setValue('engineeringBo', '1375');
+            } else if (MSD302_34Q.indexOf(ind) >= 0) {
+              FormManager.setValue('repTeamMemberNo', "MSD302");
+              FormManager.setValue('engineeringBo', '6680');
+            }
+          } else {
             FormManager.setValue('repTeamMemberNo', "MSD302");
-        }
-        // Sweden 846
-        if (cntry == '846' && ind != '') {
-          if (MSS596.indexOf(ind) >= 0)
-            FormManager.setValue('repTeamMemberNo', "MSS596");
-          if (MSS599.indexOf(ind) >= 0)
-            FormManager.setValue('repTeamMemberNo', "MSS599");
-          if (MSS315.indexOf(ind) >= 0)
-            FormManager.setValue('repTeamMemberNo', "MSS315");
-        }
-        // Finland 702
-        if (cntry == '702' && ind != '') {
-          if (MSF109.indexOf(ind) >= 0)
-            FormManager.setValue('repTeamMemberNo', "MSF109");
-          if (MSF107.indexOf(ind) >= 0)
-            FormManager.setValue('repTeamMemberNo', "MSF107");
-        }
-        var cntryUse = FormManager.getActualValue('countryUse');
-        var custSubGrp = FormManager.getActualValue('custSubGrp');
-        if ((custSubGrp == 'CBCOM' || custSubGrp == 'CBISO')) {
-          if ((cntryUse == '678IS')) {
-            FormManager.setValue('repTeamMemberNo', 'MSD997');
-          } else if ((cntryUse == '702FI')) {
-            FormManager.setValue('repTeamMemberNo', 'MSF107');
-          } else if ((cntryUse == '702EE')) {
-            FormManager.setValue('repTeamMemberNo', 'NOREP9');
-          } else if ((cntryUse == '702LT')) {
-            FormManager.setValue('repTeamMemberNo', 'NOREP9');
-          } else if ((cntryUse == '702LV')) {
-            FormManager.setValue('repTeamMemberNo', 'NOREP9');
+            FormManager.setValue('engineeringBo', '6681');
           }
         }
+      } else if (isuCtc == '047') {
+        FormManager.setValue('repTeamMemberNo', "FSD001");
+        FormManager.setValue('engineeringBo', '1243');
+      } else if (isuCtc == '197') {
+        FormManager.setValue('repTeamMemberNo', "APD200");
+        FormManager.setValue('engineeringBo', '0139');
+      } else if (isuCtc == '217' || isuCtc == '219') {
+        FormManager.setValue('repTeamMemberNo', "NOREP09");
+        FormManager.setValue('engineeringBo', '4680');
+      } else if (isuCtc == '8B7') {
+        FormManager.setValue('repTeamMemberNo', "NOREP09");
+        FormManager.setValue('engineeringBo', '0070');
       }
-      if (salesReps.length == 1) {
-        FormManager.setValue('repTeamMemberNo', salesReps[0]);
+
+    } else if (cntry == '702') {
+      // SalRep for Finland & its Subregion
+      FormManager.setValue('repTeamMemberNo', "NOREP9");
+      if (isuCtc == '34Q') {
+        if (geoCd == 'EE') {
+          FormManager.setValue('engineeringBo', '4422');
+        } else if (geoCd == 'LV') {
+          FormManager.setValue('engineeringBo', '4390');
+        } else if (geoCd == 'LT') {
+          FormManager.setValue('engineeringBo', '4394');
+        } else {
+          // Finland
+          var MSF107_6949 = "A,E,G,J,L,M,P,U,V,X,Y,Z";
+          var MSF107_1379 = "B,D,R,T,W";
+          var MSF702 = "C,F,H,K,N,S";
+
+          var ind = ims.substring(0, 1);
+          if (ind != '') {
+            if (MSF107_6949.indexOf(ind) >= 0) {
+              FormManager.setValue('repTeamMemberNo', "MSF107");
+              FormManager.setValue('engineeringBo', '6949');
+            } else if (MSF107_1379.indexOf(ind) >= 0) {
+              FormManager.setValue('repTeamMemberNo', "MSF107");
+              FormManager.setValue('engineeringBo', '1379');
+            } else if (MSF702.indexOf(ind) >= 0) {
+              FormManager.setValue('repTeamMemberNo', "MSF702");
+              FormManager.setValue('engineeringBo', '7864');
+            }
+          }
+        }
+      } else if ((isuCtc == '217' || isuCtc == '8B7') && (geoCd == 'EE' || geoCd == 'LV' || geoCd == 'LT')) {
+        FormManager.setValue('engineeringBo', '1640');
+      } else if (isuCtc == '219' || isuCtc == '217') {
+        FormManager.setValue('engineeringBo', '4710');
+      } else if (isuCtc == '8B7') {
+        FormManager.setValue('engineeringBo', '0070');
+      }
+    } else if (cntry == '806') {
+      if ((isuCtc == '34Q')) {
+        FormManager.setValue('repTeamMemberNo', "MSN502");
+        FormManager.setValue('engineeringBo', '1383');
+      } else if (isuCtc == '217') {
+        FormManager.setValue('repTeamMemberNo', "NOREP09");
+        FormManager.setValue('engineeringBo', '4900');
+      } else if (isuCtc == '8B7') {
+        FormManager.setValue('repTeamMemberNo', "NOREP09");
+        FormManager.setValue('engineeringBo', '0070');
+      }
+    } else if (cntry == '846') {
+      if ((isuCtc == '34Q')) {
+        var MSS315 = "A,E,G,H,K,U,V,X,Y";
+        var MSS596_1387 = "B,C,D,R,T,W,L,Z";
+        var MSS596_6966 = "F,J,M,N,P,S,V";
+
+        var ind = ims.substring(0, 1);
+        if (ind != '') {
+          if (MSS315.indexOf(ind) >= 0) {
+            FormManager.setValue('repTeamMemberNo', "MSS315");
+            FormManager.setValue('engineeringBo', '6888');
+          } else if (MSS596_1387.indexOf(ind) >= 0) {
+            FormManager.setValue('repTeamMemberNo', "MSS596");
+            FormManager.setValue('engineeringBo', '1387');
+          } else if (MSS596_6966.indexOf(ind) >= 0) {
+            FormManager.setValue('repTeamMemberNo', "MSS596");
+            FormManager.setValue('engineeringBo', '6966');
+          }
+        }
+      } else if (isuCtc == '217') {
+        FormManager.setValue('repTeamMemberNo', "NOREP09");
+        FormManager.setValue('engineeringBo', '4990');
+      } else if (isuCtc == '8B7') {
+        FormManager.setValue('repTeamMemberNo', "NOREP09");
+        FormManager.setValue('engineeringBo', '0070');
       }
     }
   }
-
 }
 
 /*
- * Set Admin DSC Values based on isuCtc and SalsRep
+ * Set Admin DSC Values based on isuCtc and SalsRep Change by CMR-1746
  */
 function setAdminDSCValues(repTeamMemberNo) {
 
@@ -517,27 +519,104 @@ function setAdminDSCValues(repTeamMemberNo) {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var repTeamMemberNo = FormManager.getActualValue('repTeamMemberNo');
   var geoCd = FormManager.getActualValue('countryUse').substring(3, 5);
+  var ims = FormManager.getActualValue('subIndustryCd');
 
-  var adminDSC = [];
+  var isuCtc = isuCd + clientTier;
 
-  if (repTeamMemberNo != '') {
-    var qParams = {
-      _qall : 'Y',
-      ISSUING_CNTRY : cntry + geoCd,
-      ISU : '%' + isuCd + clientTier + '%',
-      REP_TEAM_CD : '%' + repTeamMemberNo + '%'
-    };
-    var results = cmr.query('GET.DSCLIST.BYSR', qParams);
-    if (results != null) {
-      for (var i = 0; i < results.length; i++) {
-        adminDSC.push(results[i].ret1);
-      }
-      if (adminDSC != null) {
-        FormManager.limitDropdownValues(FormManager.getField('engineeringBo'), adminDSC);
-        if (adminDSC.length >= 1) {
-          FormManager.setValue('engineeringBo', adminDSC[0]);
+  // SalRep for Denmark & its Subregion
+  if (cntry == '678') {
+    if (isuCtc == '34Q') {
+      if (geoCd == 'IS') {
+        FormManager.setValue('engineeringBo', '1376');
+      } else {
+        // DK/FO/GL
+        var MSD992_6644 = "G,Y,E,H,X,U";
+        var MSD992_1375 = "A,K,F,N,S,Z";
+
+        var ind = ims.substring(0, 1);
+        if (ind != '') {
+          if (repTeamMemberNo == 'MSD993') {
+            FormManager.setValue('engineeringBo', '6680');
+          } else if (repTeamMemberNo == 'MSD992' && (MSD992_6644.indexOf(ind) >= 0)) {
+            FormManager.setValue('engineeringBo', '6644');
+          } else if (repTeamMemberNo == 'MSD992' && MSD992_1375.indexOf(ind) >= 0) {
+            FormManager.setValue('engineeringBo', '1375');
+          } else if (repTeamMemberNo == 'MSD302') {
+            FormManager.setValue('engineeringBo', '6681');
+          }
+        } else {
+          FormManager.setValue('engineeringBo', '6681');
         }
       }
+    } else if (isuCtc == '047' && repTeamMemberNo == 'FSD001') {
+      FormManager.setValue('engineeringBo', '1243');
+    } else if (isuCtc == '197' && repTeamMemberNo == 'APD200') {
+      FormManager.setValue('engineeringBo', '0139');
+    } else if ((isuCtc == '217' || isuCtc == '219') && repTeamMemberNo == 'NOREP09') {
+      FormManager.setValue('engineeringBo', '4680');
+    } else if (isuCtc == '8B7' && repTeamMemberNo == 'NOREP09') {
+      FormManager.setValue('engineeringBo', '0070');
+    }
+
+  } else if (cntry == '702') {
+    // SalRep for Finland & its Subregion
+    if (isuCtc == '34Q') {
+      if (geoCd == 'EE') {
+        FormManager.setValue('engineeringBo', '4422');
+      } else if (geoCd == 'LV') {
+        FormManager.setValue('engineeringBo', '4390');
+      } else if (geoCd == 'LT') {
+        FormManager.setValue('engineeringBo', '4394');
+      } else {
+        // Finland
+        var MSF107_6949 = "A,E,G,J,L,M,P,U,V,X,Y,Z";
+        var MSF107_1379 = "B,D,R,T,W";
+
+        var ind = ims.substring(0, 1);
+        if (ind != '') {
+          if (MSF107_6949.indexOf(ind) >= 0 && repTeamMemberNo == 'MSF107') {
+            FormManager.setValue('engineeringBo', '6949');
+          } else if (MSF107_1379.indexOf(ind) >= 0 && repTeamMemberNo == 'MSF107') {
+            FormManager.setValue('engineeringBo', '1379');
+          } else if (repTeamMemberNo == 'MSF702') {
+            FormManager.setValue('engineeringBo', '7864');
+          }
+        }
+      }
+    } else if ((isuCtc == '217' || isuCtc == '8B7') && (geoCd == 'EE' || geoCd == 'LV' || geoCd == 'LT')) {
+      FormManager.setValue('engineeringBo', '1640');
+    } else if (isuCtc == '219' || isuCtc == '217') {
+      FormManager.setValue('engineeringBo', '4710');
+    } else if (isuCtc == '8B7') {
+      FormManager.setValue('engineeringBo', '0070');
+    }
+  } else if (cntry == '806') {
+    if (isuCtc == '34Q' && repTeamMemberNo == 'MSN502') {
+      FormManager.setValue('engineeringBo', '1383');
+    } else if (isuCtc == '217' && repTeamMemberNo == 'NOREP09') {
+      FormManager.setValue('engineeringBo', '4900');
+    } else if (isuCtc == '8B7' && repTeamMemberNo == 'NOREP09') {
+      FormManager.setValue('engineeringBo', '0070');
+    }
+  } else if (cntry == '846') {
+    if ((isuCtc == '34Q')) {
+      var MSS596_1387 = "B,C,D,R,T,W,L,Z";
+      var MSS596_6966 = "F,J,M,N,P,S,V";
+
+      var ind = ims.substring(0, 1);
+      if (ind != '') {
+        if (repTeamMemberNo == 'MSS315') {
+          FormManager.setValue('engineeringBo', '6888');
+        } else if (MSS596_1387.indexOf(ind) >= 0 && repTeamMemberNo == 'MSS596') {
+          FormManager.setValue('engineeringBo', '1387');
+        } else if (MSS596_6966.indexOf(ind) >= 0 && repTeamMemberNo == 'MSS596') {
+          FormManager.setValue('engineeringBo', '6966');
+        }
+      }
+    } else if (isuCtc == '217' && repTeamMemberNo == 'NOREP09') {
+      FormManager.setValue('engineeringBo', '4990');
+    } else if (isuCtc == '8B7' && repTeamMemberNo == 'NOREP09') {
+      FormManager.setValue('engineeringBo', '0070');
     }
   }
 
@@ -556,6 +635,27 @@ function setAdminDSCValues(repTeamMemberNo) {
       FormManager.setValue('engineeringBo', '4390');
     }
   }
+}
+
+/*
+ * Validate Admin DSC Values when it was filled
+ */
+function addACAdminValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var acAdmin = FormManager.getActualValue('engineeringBo');
+        if (acAdmin != '' && acAdmin != null) {
+          if (acAdmin.length != 4) {
+            return new ValidationResult(null, false, 'A/C Adimn DSC should be exactly 4 digits long.');
+          } else if (isNaN(acAdmin)) {
+            return new ValidationResult(null, false, 'A/C Adimn DSC should be only numbers.');
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
 function setSBOForFinlandSubRegion() {
@@ -1883,6 +1983,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addGenericVATValidator('', 'MAIN_CUST_TAB', 'frmCMR', 'ZS01'), [ SysLoc.DENMARK, SysLoc.FINLAND, SysLoc.SWEDEN ],
       null, true);
   GEOHandler.registerValidator(norwayCustomVATValidator('', 'MAIN_CUST_TAB', 'frmCMR', 'ZS01'), [ SysLoc.NORWAY ], null, true);
+  GEOHandler.registerValidator(addACAdminValidator, GEOHandler.NORDX, null, true);// CMR-1746
   GEOHandler.addAddrFunction(disableLandCntry, GEOHandler.NORDX);
   GEOHandler.addAddrFunction(loadMachinesList, GEOHandler.NORDX);
   GEOHandler.addAddrFunction(handleMahcineModel, GEOHandler.NORDX);

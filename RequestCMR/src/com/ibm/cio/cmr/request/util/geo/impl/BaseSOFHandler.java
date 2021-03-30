@@ -385,7 +385,8 @@ public abstract class BaseSOFHandler extends GEOHandler {
       results.add(update);
     }
 
-    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getSalesBusOffCd(), newData.getSalesBusOffCd())) {
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getSalesBusOffCd(), newData.getSalesBusOffCd())
+        && !geoHandler.skipOnSummaryUpdate(cmrCountry, "SalesBusOff")) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "SalesBusOff", "-"));
       update.setNewData(service.getCodeAndDescription(newData.getSalesBusOffCd(), "SalesBusOff", cmrCountry));

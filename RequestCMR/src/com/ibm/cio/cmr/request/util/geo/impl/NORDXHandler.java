@@ -90,7 +90,7 @@ public class NORDXHandler extends BaseSOFHandler {
 
   private static final String[] NORDX_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "CustLang", "GeoLocationCode", "Affiliate", "CAP", "CMROwner",
       "CustClassCode", "LocalTax2", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office", "Floor",
-      "Building", "County", "City2", "Department", "SearchTerm", "SpecialTaxCd" };
+      "Building", "County", "City2", "Department", "SearchTerm", "SpecialTaxCd", "SalesBusOff" };
 
   private static final List<String> ND_COUNTRIES_LIST = Arrays.asList(SystemLocation.SWEDEN, SystemLocation.NORWAY, SystemLocation.FINLAND,
       SystemLocation.DENMARK);
