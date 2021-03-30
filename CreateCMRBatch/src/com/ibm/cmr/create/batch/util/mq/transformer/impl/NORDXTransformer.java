@@ -1025,10 +1025,36 @@ public class NORDXTransformer extends EMEATransformer {
       legacyCust.setTaxCd("");
     }
 
-    if (!StringUtils.isBlank(data.getCurrencyCd())) {
-      legacyCust.setCurrencyCd(data.getCurrencyCd());
-    } else {
-      legacyCust.setCurrencyCd("");
+    if (SystemLocation.DENMARK.equals(data.getCurrencyCd())) {
+      if ("DKK".equals(data.getCurrencyCd())) {
+        legacyCust.setCurrencyCd("");
+      } else if ("EUR".equals(data.getCurrencyCd())) {
+        legacyCust.setCurrencyCd("EU");
+      } else if ("USD".equals(data.getCurrencyCd())) {
+        legacyCust.setCurrencyCd("US");
+      }
+    } else if (SystemLocation.FINLAND.equals(data.getCurrencyCd())) {
+      if ("EUR".equals(data.getCurrencyCd())) {
+        legacyCust.setCurrencyCd("EU");
+      } else if ("USD".equals(data.getCurrencyCd())) {
+        legacyCust.setCurrencyCd("US");
+      }
+    } else if (SystemLocation.NORWAY.equals(data.getCurrencyCd())) {
+      if ("NOK".equals(data.getCurrencyCd())) {
+        legacyCust.setCurrencyCd("");
+      } else if ("EUR".equals(data.getCurrencyCd())) {
+        legacyCust.setCurrencyCd("EU");
+      } else if ("USD".equals(data.getCurrencyCd())) {
+        legacyCust.setCurrencyCd("US");
+      }
+    } else if (SystemLocation.SWEDEN.equals(data.getCurrencyCd())) {
+      if ("SEK".equals(data.getCurrencyCd())) {
+        legacyCust.setCurrencyCd("");
+      } else if ("EUR".equals(data.getCurrencyCd())) {
+        legacyCust.setCurrencyCd("EU");
+      } else if ("USD".equals(data.getCurrencyCd())) {
+        legacyCust.setCurrencyCd("US");
+      }
     }
 
     if (!StringUtils.isBlank(data.getModeOfPayment())) {
@@ -1189,10 +1215,36 @@ public class NORDXTransformer extends EMEATransformer {
     }
 
     if (!StringUtils.isBlank(muData.getCurrencyCd())) {
-      if ("@".equals(muData.getCurrencyCd())) {
-        cust.setCustType("");
-      } else {
-        cust.setCustType(muData.getCurrencyCd());
+      if (SystemLocation.DENMARK.equals(cust.getId().getSofCntryCode())) {
+        if ("DKK".equals(muData.getCurrencyCd())) {
+          cust.setCurrencyCd("");
+        } else if ("EUR".equals(muData.getCurrencyCd())) {
+          cust.setCurrencyCd("EU");
+        } else if ("USD".equals(muData.getCurrencyCd())) {
+          cust.setCurrencyCd("US");
+        }
+      } else if (SystemLocation.FINLAND.equals(cust.getId().getSofCntryCode())) {
+        if ("EUR".equals(muData.getCurrencyCd())) {
+          cust.setCurrencyCd("EU");
+        } else if ("USD".equals(muData.getCurrencyCd())) {
+          cust.setCurrencyCd("US");
+        }
+      } else if (SystemLocation.NORWAY.equals(cust.getId().getSofCntryCode())) {
+        if ("NOK".equals(muData.getCurrencyCd())) {
+          cust.setCurrencyCd("");
+        } else if ("EUR".equals(muData.getCurrencyCd())) {
+          cust.setCurrencyCd("EU");
+        } else if ("USD".equals(muData.getCurrencyCd())) {
+          cust.setCurrencyCd("US");
+        }
+      } else if (SystemLocation.SWEDEN.equals(cust.getId().getSofCntryCode())) {
+        if ("SEK".equals(muData.getCurrencyCd())) {
+          cust.setCurrencyCd("");
+        } else if ("EUR".equals(muData.getCurrencyCd())) {
+          cust.setCurrencyCd("EU");
+        } else if ("USD".equals(muData.getCurrencyCd())) {
+          cust.setCurrencyCd("US");
+        }
       }
     }
 
