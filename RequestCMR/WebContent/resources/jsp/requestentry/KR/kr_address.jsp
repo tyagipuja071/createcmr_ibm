@@ -269,21 +269,3 @@
     </p>
   </cmr:column>
 </cmr:row>
-<cmr:row addBackground="true">
-  <cmr:column span="2">
-    <p>
-      <cmr:label fieldId="addrCreateDt">
-        <cmr:fieldLabel fieldId="RDcCreateDate" />:
-          </cmr:label>
-    <div id="addrCreateDt_updt">-</div>
-    </p>
-  </cmr:column>
-  <cmr:column span="2">
-    <p>
-      <cmr:label fieldId="addrUpdateDt">
-        <cmr:fieldLabel fieldId="RDCLastUpdateDate" />:
-          </cmr:label>
-    <div id="addrUpdateDt_updt">-</div>
-    </p>
-  </cmr:column>
-</cmr:row>
