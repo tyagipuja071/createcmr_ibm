@@ -91,6 +91,7 @@ function afterConfigForNORDX() {
   if (landCntry != '') {
     FormManager.setValue('defaultLandedCountry', landCntry);
   }
+  FormManager.hide('StateProv', 'stateProv');
   setVatValidatorNORDX();
   setSalesRepValues();
   // setAdminDSCValues();
@@ -208,50 +209,47 @@ function addHandlersForNORDX() {
     });
   }
 
+  // if (_poSteertNorwayFin == null) {
+  // if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.NORWAY
+  // || (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.FINLAND &&
+  // FormManager.getActualValue('countryUse') == SysLoc.FINLAND)) {
+  // _poSteertNorwayFin = dojo.connect(FormManager.getField('poBox'),
+  // 'onChange', function(value) {
+  // if (FormManager.getActualValue('poBox').length > 0 &&
+  // FormManager.getActualValue('importInd') != 'Y') {
+  // FormManager.disable('addrTxt');
+  // FormManager.disable('addrTxt2');
+  // } else {
+  // FormManager.enable('addrTxt');
+  // FormManager.enable('addrTxt2');
+  // }
+  //
+  // });
+  //
   if (_poSteertNorwayFin == null) {
-    if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.NORWAY
-        || (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.FINLAND && FormManager.getActualValue('countryUse') == SysLoc.FINLAND)) {
-      _poSteertNorwayFin = dojo.connect(FormManager.getField('poBox'), 'onChange', function(value) {
-        if (FormManager.getActualValue('poBox').length > 0 && FormManager.getActualValue('importInd') != 'Y') {
-          FormManager.disable('addrTxt');
-          FormManager.disable('addrTxt2');
-        } else {
-          FormManager.enable('addrTxt');
-          FormManager.enable('addrTxt2');
-        }
-
-      });
-
-      _poSteertNorwayFin = dojo.connect(FormManager.getField('addrTxt'), 'onChange', function(value) {
-
-        if (FormManager.getActualValue('addrTxt').length > 0 && FormManager.getActualValue('importInd') != 'Y') {
-          FormManager.disable('poBox');
-        } else {
-          if ((FormManager.getField('addrType_ZI01').checked || FormManager.getField('addrType_ZD01').checked)
-              && FormManager.getActualValue('importInd') != 'Y') {
-
-          } else {
-            FormManager.enable('poBox');
-          }
-        }
-
-      });
-      _poSteertNorwayFin = dojo.connect(FormManager.getField('addrTxt2'), 'onChange', function(value) {
-
-        if (FormManager.getActualValue('addrTxt2').length > 0 && FormManager.getActualValue('importInd') != 'Y') {
-          FormManager.disable('poBox');
-        } else {
-          if ((FormManager.getField('addrType_ZI01').checked || FormManager.getField('addrType_ZD01').checked)
-              && FormManager.getActualValue('importInd') != 'Y') {
-
-          } else {
-            FormManager.enable('poBox');
-          }
-        }
-
-      });
-    }
+    _poSteertNorwayFin = dojo.connect(FormManager.getField('addrTxt'), 'onChange', function(value) {
+      streetContControll();
+    });
   }
+  // _poSteertNorwayFin = dojo.connect(FormManager.getField('addrTxt2'),
+  // 'onChange', function(value) {
+  //
+  // if (FormManager.getActualValue('addrTxt2').length > 0 &&
+  // FormManager.getActualValue('importInd') != 'Y') {
+  // FormManager.disable('poBox');
+  // } else {
+  // if ((FormManager.getField('addrType_ZI01').checked ||
+  // FormManager.getField('addrType_ZD01').checked)
+  // && FormManager.getActualValue('importInd') != 'Y') {
+  //
+  // } else {
+  // FormManager.enable('poBox');
+  // }
+  // }
+  //
+  // });
+  // }
+  // }
 
   if (_ExpediteHandler == null) {
     _ExpediteHandler = dojo.connect(FormManager.getField('expediteInd'), 'onChange', function(value) {
@@ -1043,15 +1041,15 @@ function hidePOBoxandHandleStreet() {
   }
   if (cmr.addressMode == 'updateAddress') {
     if (FormManager.getActualValue('addrType') == 'ZI01' || FormManager.getActualValue('addrType') == 'ZD01'
-        || FormManager.getActualValue('addrType') == 'ZP02') {
-      FormManager.disable('poBox');
+        || FormManager.getActualValue('addrType') == 'ZS02') {
+      FormManager.hide('POBox', 'poBox');
       FormManager.setValue('poBox', '');
       var cntryRegion = FormManager.getActualValue('countryUse');
       if (cntryRegion != '' && (cntryRegion == '678FO' || cntryRegion == SysLoc.DENMARK)) {
         FormManager.addValidator('addrTxt', Validators.REQUIRED, [ 'Street' ], '');
       }
     } else {
-      FormManager.enable('poBox');
+      FormManager.show('POBox', 'poBox');
       FormManager.resetValidations('addrTxt');
     }
     if (FormManager.getActualValue('addrType') == 'ZS01') {
@@ -1067,8 +1065,10 @@ function hidePOBoxandHandleStreet() {
 function setPOBOXandSteet(value) {
   if ((FormManager.getField('addrType_ZI01') != undefined && FormManager.getField('addrType_ZI01').checked)
       || (FormManager.getField('addrType_ZD01') != undefined && FormManager.getField('addrType_ZD01').checked)
-      || (FormManager.getField('addrType_ZP02') != undefined && FormManager.getField('addrType_ZP02').checked)) {
-    FormManager.disable('poBox');
+      || (FormManager.getField('addrType_ZS02') != undefined && FormManager.getField('addrType_ZS02').checked)) {
+    // FormManager.disable('poBox');
+    // FormManager.setValue('poBox', '');
+    FormManager.hide('POBox', 'poBox');
     FormManager.setValue('poBox', '');
     var cntryRegion = FormManager.getActualValue('countryUse');
     if (cntryRegion != '' && (cntryRegion == '678FO' || cntryRegion == SysLoc.DENMARK)) {
@@ -1076,8 +1076,9 @@ function setPOBOXandSteet(value) {
     }
 
   } else {
-    FormManager.enable('poBox');
-    FormManager.setValue('poBox', value);
+    // FormManager.enable('poBox');
+    // FormManager.setValue('poBox', value);
+    FormManager.show('POBox', 'poBox');
     FormManager.resetValidations('addrTxt');
   }
 }
@@ -1146,67 +1147,151 @@ function addAddressFieldValidators() {
   })(), null, 'frmCMR_addressModal');
 
   // Name Con't and Attention person ( 1 out of 2) Defect 1609336 fix
-  FormManager
-      .addFormValidator(
-          (function() {
-            return {
-              validate : function() {
-                var showError = false;
+  // FormManager
+  // .addFormValidator(
+  // (function() {
+  // return {
+  // validate : function() {
+  // var showError = false;
+  //
+  // if (FormManager.getActualValue('custNm1') != '' &&
+  // FormManager.getActualValue('custNm2') != ''
+  // && FormManager.getActualValue('custNm4') != '' &&
+  // FormManager.getActualValue('addrTxt') != ''
+  // && FormManager.getActualValue('poBox') != '' &&
+  // FormManager.getActualValue('postCd') != ''
+  // && FormManager.getActualValue('city1') != '') {
+  // showError = true;
+  // } else {
+  // showError = false;
+  // }
+  //
+  // var cntryRegion = FormManager.getActualValue('countryUse');
+  // if (cntryRegion != ''
+  // && (cntryRegion == '678FO' || cntryRegion == '678GL' || cntryRegion ==
+  // '678IS' || cntryRegion == '702EE'
+  // || cntryRegion == '702LT' || cntryRegion == '702LV')) {
+  //
+  // if (showError) {
+  // return new ValidationResult(null, false, 'For Customer Name Con\'t and Att.
+  // Person, only one can be filled.');
+  // }
+  // } else {
+  // var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  //
+  // if (cntry == SysLoc.SWEDEN || cntry == SysLoc.NORWAY || cntry ==
+  // SysLoc.DENMARK || cntry == SysLoc.FINLAND) {
+  //
+  // var landCntry = FormManager.getActualValue('landCntry');
+  //
+  // if (cntry == SysLoc.SWEDEN && landCntry != "SE") {
+  // if (showError) {
+  // return new ValidationResult(null, false, 'For Customer Name Con\'t and Att.
+  // Person, only one can be filled.');
+  // }
+  // }
+  // if (cntry == SysLoc.NORWAY && landCntry != "NO") {
+  // if (showError) {
+  // return new ValidationResult(null, false, 'For Customer Name Con\'t and Att.
+  // Person, only one can be filled.');
+  // }
+  // }
+  // if (cntry == SysLoc.DENMARK && landCntry != "DK") {
+  // if (showError) {
+  // return new ValidationResult(null, false, 'For Customer Name Con\'t and Att.
+  // Person, only one can be filled.');
+  // }
+  // }
+  // if (cntry == SysLoc.FINLAND && landCntry != "FI") {
+  // if (showError) {
+  // return new ValidationResult(null, false, 'For Customer Name Con\'t and Att.
+  // Person, only one can be filled.');
+  // }
+  // }
+  //
+  // }
+  //
+  // }
+  //
+  // return new ValidationResult(null, true);
+  // }
+  // };
+  // })(), null, 'frmCMR_addressModal');
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var showError = false;
+        var count = 0;
+        if (FormManager.getActualValue('custNm2') != '') {
+          count++
+        }
+        if (FormManager.getActualValue('custNm3') != '') {
+          count++
+        }
+        if (FormManager.getActualValue('custNm4') != '') {
+          count++
+        }
+        if (FormManager.getActualValue('poBox') != '') {
+          count++
+        }
+        if (FormManager.getActualValue('addrTxt') != '') {
+          count++
+        }
 
-                if (FormManager.getActualValue('custNm1') != '' && FormManager.getActualValue('custNm2') != ''
-                    && FormManager.getActualValue('custNm4') != '' && FormManager.getActualValue('addrTxt') != ''
-                    && FormManager.getActualValue('poBox') != '' && FormManager.getActualValue('postCd') != ''
-                    && FormManager.getActualValue('city1') != '') {
-                  showError = true;
-                } else {
-                  showError = false;
-                }
-
-                var cntryRegion = FormManager.getActualValue('countryUse');
-                if (cntryRegion != ''
-                    && (cntryRegion == '678FO' || cntryRegion == '678GL' || cntryRegion == '678IS' || cntryRegion == '702EE'
-                        || cntryRegion == '702LT' || cntryRegion == '702LV')) {
-
-                  if (showError) {
-                    return new ValidationResult(null, false, 'For Customer Name Con\'t and Att. Person, only one can be filled.');
-                  }
-                } else {
-                  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-
-                  if (cntry == SysLoc.SWEDEN || cntry == SysLoc.NORWAY || cntry == SysLoc.DENMARK || cntry == SysLoc.FINLAND) {
-
-                    var landCntry = FormManager.getActualValue('landCntry');
-
-                    if (cntry == SysLoc.SWEDEN && landCntry != "SE") {
-                      if (showError) {
-                        return new ValidationResult(null, false, 'For Customer Name Con\'t and Att. Person, only one can be filled.');
-                      }
-                    }
-                    if (cntry == SysLoc.NORWAY && landCntry != "NO") {
-                      if (showError) {
-                        return new ValidationResult(null, false, 'For Customer Name Con\'t and Att. Person, only one can be filled.');
-                      }
-                    }
-                    if (cntry == SysLoc.DENMARK && landCntry != "DK") {
-                      if (showError) {
-                        return new ValidationResult(null, false, 'For Customer Name Con\'t and Att. Person, only one can be filled.');
-                      }
-                    }
-                    if (cntry == SysLoc.FINLAND && landCntry != "FI") {
-                      if (showError) {
-                        return new ValidationResult(null, false, 'For Customer Name Con\'t and Att. Person, only one can be filled.');
-                      }
-                    }
-
-                  }
-
-                }
-
-                return new ValidationResult(null, true);
-              }
-            };
-          })(), null, 'frmCMR_addressModal');
-
+        var cntryRegion = FormManager.getActualValue('countryUse');
+        var cntryRegionSubString = cntryRegion.slice(-2);
+        var landCntry = FormManager.getActualValue('landCntry');
+        if (cntryRegion != '' && cntryRegionSubString == landCntry && count > 4) {
+          return new ValidationResult(null, false,
+              'Customer name con\'t, Additional info, Att. Person, Street and PO BOX only 4 fields can be filled at the same time.');
+        }
+        if (cntryRegion != '' && cntryRegionSubString != landCntry && count > 3) {
+          return new ValidationResult(null, false,
+              'Customer name con\'t, Additional info, Att. Person, Street and PO BOX only 3 fields can be filled at the same time.');
+        }
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        if (cntryRegion == '') {
+          if (cntry == SysLoc.SWEDEN) {
+            if (landCntry != "SE" && count > 3) {
+              return new ValidationResult(null, false,
+                  'Customer name con\'t, Additional info, Att. Person, Street and PO BOX only 3 fields can be filled at the same time.');
+            } else if (landCntry == "SE" && count > 4) {
+              return new ValidationResult(null, false,
+                  'Customer name con\'t, Additional info, Att. Person, Street and PO BOX only 4 fields can be filled at the same time.');
+            }
+          }
+          if (cntry == SysLoc.NORWAY) {
+            if (landCntry != "NO" && count > 3) {
+              return new ValidationResult(null, false,
+                  'Customer name con\'t, Additional info, Att. Person, Street and PO BOX only 3 fields can be filled at the same time.');
+            } else if (landCntry == "NO" && count > 4) {
+              return new ValidationResult(null, false,
+                  'Customer name con\'t, Additional info, Att. Person, Street and PO BOX only 4 fields can be filled at the same time.');
+            }
+          }
+          if (cntry == SysLoc.DENMARK) {
+            if (landCntry != "DK" && count > 3) {
+              return new ValidationResult(null, false,
+                  'Customer name con\'t, Additional info, Att. Person, Street and PO BOX only 3 fields can be filled at the same time.');
+            } else if (landCntry == "DK" && count > 4) {
+              return new ValidationResult(null, false,
+                  'Customer name con\'t, Additional info, Att. Person, Street and PO BOX only 4 fields can be filled at the same time.');
+            }
+          }
+          if (cntry == SysLoc.FINLAND) {
+            if (landCntry != "FI" && count > 3) {
+              return new ValidationResult(null, false,
+                  'Customer name con\'t, Additional info, Att. Person, Street and PO BOX only 3 fields can be filled at the same time.');
+            } else if (landCntry == "FI" && count > 4) {
+              return new ValidationResult(null, false,
+                  'Customer name con\'t, Additional info, Att. Person, Street and PO BOX only 4 fields can be filled at the same time.');
+            }
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
   // Street and PO BOX DENMARK and FO
   FormManager.addFormValidator((function() {
     return {
@@ -1230,7 +1315,7 @@ function addAddressFieldValidators() {
              * 'addrTxt', }, false, ''); } }
              */
             if (addrFldCnt < 1) {
-              return new ValidationResult(null, false, 'For Street and PostBox, atleast one should be filled.');
+              return new ValidationResult(null, false, 'For Street and PO BOX, atleast one should be filled.');
             }
           }
         }
@@ -1248,9 +1333,41 @@ function addAddressFieldValidators() {
         if (cntry != '') {
           var POBox = FormManager.getActualValue('poBox');
           if (isNaN(POBox)) {
-            return new ValidationResult(null, false, 'PostBox should be Numeric.');
+            return new ValidationResult(null, false, 'PO BOX should be Numeric.');
           }
 
+        }
+
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+  // Additional info and Street Con't can't be filled at the same time
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+
+        var addrTxt2 = FormManager.getActualValue('addrTxt2');
+        var additionalInfo = FormManager.getActualValue('custNm3');
+        if (addrTxt2 != '' && additionalInfo != '') {
+          return new ValidationResult(null, false, 'Additional info and Street Con\'t can\'t be filled at the same time.');
+        }
+
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+  // if both street con't and PO BOX are filled computed length must be 30
+  // characters
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+
+        var addrtxt2Length = FormManager.getActualValue('addrTxt2').length;
+        var poBoxLength = FormManager.getActualValue('poBox').length;
+        var totalLength = addrtxt2Length + poBoxLength;
+        if (totalLength > 30) {
+          return new ValidationResult(null, false, 'Total computed length of PO BOX and Street Con\'t should not exceed 30 characters.');
         }
 
         return new ValidationResult(null, true);
@@ -1940,7 +2057,17 @@ function collectionCdValidation() {
         }
       }
     };
-  })(), 'MAIN_CUST_TAB', 'frmCMR');
+  })(), 'MAIN_CUST_TAB', 'frmCMR')
+};
+
+function streetContControll() {
+  var streetValue = FormManager.getActualValue('addrTxt');
+  if (streetValue != undefined && streetValue.length > 0) {
+    FormManager.enable('addrTxt2');
+  } else {
+    FormManager.setValue('addrTxt2', '');
+    FormManager.disable('addrTxt2');
+  }
 }
 
 dojo.addOnLoad(function() {
@@ -1995,6 +2122,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.NORDX, GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.addAfterConfig(setSBO, GEOHandler.NORDX);
   GEOHandler.addAfterTemplateLoad(setSBO, GEOHandler.NORDX);
+  GEOHandler.addAddrFunction(streetContControll, GEOHandler.NORDX);
 
   GEOHandler.addAfterConfig(requestingLobOnChange, GEOHandler.NORDX);
   GEOHandler.addAfterTemplateLoad(requestingLobOnChange, GEOHandler.NORDX);

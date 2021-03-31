@@ -125,9 +125,9 @@ public class NORDXHandler extends BaseSOFHandler {
         record.setCmrName3(null);
       }
 
-      if (!StringUtils.isBlank(record.getCmrPOBox())) {
-        record.setCmrPOBox("PO BOX " + record.getCmrPOBox());
-      }
+      // if (!StringUtils.isBlank(record.getCmrPOBox())) {
+      // record.setCmrPOBox("PO BOX " + record.getCmrPOBox());
+      // }
       if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
         record.setCmrAddrSeq("00001");
       } else {
@@ -674,6 +674,7 @@ public class NORDXHandler extends BaseSOFHandler {
   public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo) throws Exception {
     address.setCustNm1(currentRecord.getCmrName1Plain());
     address.setCustNm2(currentRecord.getCmrName2Plain());
+    address.setCustNm3(currentRecord.getCmrName3());
     address.setCustNm4(currentRecord.getCmrName4());
     address.setAddrTxt2(currentRecord.getCmrStreetAddressCont());
     address.setTransportZone("");
@@ -1153,7 +1154,7 @@ public class NORDXHandler extends BaseSOFHandler {
     AdminPK adminPK = new AdminPK();
     adminPK.setReqId(addr.getId().getReqId());
     Admin admin = entityManager.find(Admin.class, adminPK);
-    if ("ZI01".equals(addr.getId().getAddrType()) || "ZD01".equals(addr.getId().getAddrType()) || "ZP02".equals(addr.getId().getAddrType())) {
+    if ("ZI01".equals(addr.getId().getAddrType()) || "ZD01".equals(addr.getId().getAddrType()) || "ZS02".equals(addr.getId().getAddrType())) {
       addr.setPoBox("");
     }
     if (!"ZS01".equals(addr.getId().getAddrType())) {
