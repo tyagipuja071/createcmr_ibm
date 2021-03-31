@@ -14,9 +14,10 @@
     readOnly = false;
   }
 %>
-<cmr:checklist title1="CMR Military and Proliferation Screening Checklist" title2="CUSTOMER ELIGIBILITY CHECKLIST">
+<cmr:checklist title1="DIVERSION RISK PROFILE/PROLIFERATION & MILITARY CHECKLIST">
+  <!--
   <cmr:chk-section name="Customer Information:">
-<cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label=" Customer Company: ">
+     <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label=" Customer Company: ">
      ${reqentry.mainCustNm1} ${reqentry.mainCustNm2}
      </cmr:chk-lbl-field>
    <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="Address: ">
@@ -28,71 +29,87 @@
        <span style="font-weight:bold">Is the customer/vendor on the Denied Party List ?</span>
     </cmr:chk-entry>
   </cmr:chk-section>
-    <cmr:chk-section name="Section A:  Diversion Risk Assessment" >
+  -->
+
+    <cmr:chk-section name="Section A" >
     <cmr:chk-entry number="1" section="A">
-      The order (hardware, software, solution) does not match the customer's business requirements.    
+      The order (hardware and software) does not match the customer's business requirements.    
     </cmr:chk-entry>
     <cmr:chk-entry number="2" section="A">
       The customer is not using normal installation, training and maintenance services.    
     </cmr:chk-entry>
     <cmr:chk-entry number="3" section="A">
-      The customer business needs and use of IBM products is not well known and understood by IBM.    
+      The customer's business needs and use of IBM's products is not well known and understand by IBM.    
     </cmr:chk-entry>
     <cmr:chk-entry number="4" section="A">
       The customer has requested unusual payment or delivery terms and conditions.
     </cmr:chk-entry>
-      <cmr:chk-entry number="5" section="A">
-      There is an indication that the products/services are destined for <span style="font-weight: bold;">restricted countries (Cuba, Iran, Sudan, North Korea, & Syria)</span>.   
+    <cmr:chk-entry number="5" section="A">
+      A Business Partner (BP) places a second order for the same or similar products for a new / different end user, soon after being informed that the order for the original end user was delayed or rejected due to US export control restrictions?   
+    </cmr:chk-entry>
+    <cmr:chk-entry number="6" section="A">
+      There is an indication that the products/services are destined for restricted countries (Cuba, Iran, Sudan, North Korea, & Syria).    
+    </cmr:chk-entry>
+    <cmr:chk-entry number="7" section="A">
+      There is an indication that the customer or supplier is owned or controlled by the government of an embargoed country?    
+    </cmr:chk-entry>
+    <cmr:chk-entry number="8" section="A">
+      There is an indication (anywhere in the world) that our products will be used in the design, development, production, stockpiling or use of nuclear, chemical or biological weapons and/or their delivery vehicles (a.k.a. rocket systems and/or unmanned air vehicles, a.k.a. missiles)?
+    </cmr:chk-entry>
+    <cmr:chk-entry number="9" section="A">
+      There is an indication that the products are destined for a prohibited proliferation end use/user(missiles, chemical & biological weapons, nuclear) in any of the following countries: 
+Nuclear: People's Republic of China, Cuba, Iran, Iraq, Israel, Korea (North), Libya, Pakistan, Russia.
+Chemical & Biological Weapons: Afghanistan, Armenia, Azerbaijan, Bahrain, Belarus, People's Republic of China, Cuba, Egypt, Georgia, Iran, Iraq, Israel, Jordan, Kazakhstan, Korea (North), Kuwait, Kyrgyzstan, Lebanon, Libya, Macao, Moldova, Mongolia, Myanmar (Burma), Oman, Pakistan, Qatar, Russia, Saudi Arabia, Syria, Taiwan, Tajikistan, Turkmenistan, United Arab Emirates, Uzbekistan, Vietnam, Yemen.
+Missile: Bahrain, People's Republic of China, Egypt, Iran, Iraq, Israel, Jordan, Korea (North), Kuwait, Lebanon, Libya, Macao, Oman, Pakistan, Qatar, Russia, Saudi Arabia, Syria, United Arab Emirates, Yemen   
     </cmr:chk-entry>
   </cmr:chk-section>
-  <cmr:chk-section name="Section B: Proliferation" >
-  
+    <cmr:chk-section name="Section B" >
+    <cmr:chk-entry>
+      There is an indication that the customer has unauthorized dealings with parties and/or products that
+      are destined for a prohibited proliferation end use/user (missiles, chemical & biological weapons, nuclear) in any of the following countries shown in each category:
+    </cmr:chk-entry>
     <cmr:chk-entry number="1" section="B">
-      <span style="font-weight: bold; text-decoration: underline">Missile:</span>
-      To the best of your knowledge or belief is your customer involved in the design,  
-      development, production or use of missiles (ie Rocket Systems and or/unmanned air vehicles)?
+      <span style="font-weight:bold;text-decoration:underline">Missile</span>
+      ----To the best of your knowledge or belief is your customer involved in the design, development, production or use of missiles in or by one of the countries listed below?   
+      <br>
+      <br>
+      Bahrain, People's Republic of China, 
+      Egypt, Iran, Iraq, Israel, Jordan, Kuwait, Korea (North), Lebanon, Libya, Macao, Oman, Pakistan, Qatar, Russia, Saudi Arabia, Syria, United Arab Emirates, Yemen                                                            
     </cmr:chk-entry>
     <cmr:chk-entry number="2" section="B">
-    <span style="font-weight: bold; text-decoration: underline">Chemical or Biological Weapons:</span>
-     To the best of your knowledge or belief is your customer involved with design, development, production,
-     stockpiling or use of Chemical or Biological Weapons ?
-    </cmr:chk-entry>
+      <span style="font-weight:bold;text-decoration:underline">Chemical or Biological Weapons</span> ----To the best of your knowledge or belief is your customer involved with design, development, production, stockpiling or use of Chemical or Biological Weapons involved with design, development, production, stockpiling or use of Chemical or Biological Weapons in or by one of the countries listed below?
+     <br>
+     Afghanistan, Armenia, Azerbaijan, Bahrain, Belarus, People's Republic of China, Cuba, Egypt, Georgia, Iran, Iraq, Israel, Jordan, Kazakhstan, Korea (North), Kuwait, Kyrgyzstan, Lebanon, Libya, Macao, Moldova, Mongolia, Myanmar (Burma), Oman, Pakistan, Qatar, Russia, Saudi Arabia, Syria, Taiwan, Tajikistan, Turkmenistan, United Arab Emirates, Uzbekistan, Vietnam, Yemen
+     </cmr:chk-entry>
     <cmr:chk-entry number="3" section="B">
-    <span style="font-weight: bold; text-decoration: underline">Nuclear:</span>
-     To the best of your knowledge or belief is your customer involved in any of the following nuclear activities :
+      <span style="font-weight:bold;text-decoration:underline">Nuclear</span> ----To the best of your knowledge or belief is your customer involved in nuclear activities in any of the countries listed below?
      <br>
-     A. <span style="font-weight: bold">Nuclear explosive activities </span> - including:   research on or development, design, manufacture,
-      construction, testing or maintenance of any nuclear explosive device, or components or subsystems of such a device. 
-      <br>
-     B. <span style="font-weight: bold">Nuclear activities</span> - including:  research on, or development, design, manufacture, construction, operation, or maintenance of any "nuclear reactor" (including for non-weapon-related nuclear power generation), critical facility, facility for the fabrication of nuclear fuel,
-        facility for the conversion of nuclear material from one chemical form to another, or separate storage. Or 
-       <br>
-     C. <span style="font-weight: bold">Sensitive nuclear activities</span> - including: nuclear fuel cycle activities, including research on or development, design, manufacture, construction, operation or maintenance of any of the following facilities, or components for such facilities:
-     <br>
-     <ul>
-     <li>Facilities for the chemical processing of irradiated special nuclear or source material; </li>
-     <li>Facilities for the production of heavy water; </li>
-     <li>Facilities for the separation of isotopes of source and special nuclear material; or </li>
-     <li>Facilities for the fabrication of nuclear reactor fuel containing plutonium. </li>
-     </ul>
+     People's Republic of China, Cuba, Iran, Iraq, Israel, Korea (North), Libya, Pakistan, Russia
     </cmr:chk-entry>
-    </cmr:chk-section>
-    <cmr:chk-section name="Section C: Military" > 
-    <cmr:chk-entry number="1" section="C">To the best of your knowledge or belief is your customer involved in
-     <span style="font-weight: bold; text-decoration: underline"> Defense and/or Military*</span> activities? 
-     <br>
-     Involved in Military activities means falling under any of the two definitions below:
-     <br>
-     <span style="font-weight: bold; text-decoration: underline">Definitions </span>
-     <br>
-     <span style="font-weight: bold">Military End Users</span>: Include army, navy, air force, marines, coast guard, national guard, security
-      or police, government defense, intelligence and reconnaissance organizations, and 
-      their contractors or any person or entity whose actions or functions are intended to support military end uses.
+  </cmr:chk-section>
+  
+  <cmr:chk-section name="Section C" >
+    <cmr:chk-entry>
+      There is an indication customer has an unauthorized dealings with parties and/or products are destined for a prohibited proliferation end use/user (missiles, chemical & biological weapons, nuclear) in any of the countries shown in each category:
+    </cmr:chk-entry>
+    <cmr:chk-entry number="1" section="C">
+      To the best of your knowledge or belief is your customer involved with Military end users or end uses (see definitions) in or by one of the countries listed below?   
       <br>
-      <span style="font-weight: bold">Military End Uses</span>: That will be directly part, component or subsystems 
-      of weapons or defense articles, or that indirectly supports or contributes to the operation,
-       installation, maintenance, repair, overhaul, refurbishing, development or production of military items.
-     </cmr:chk-entry>         
+      <br>
+      Afghanistan, Armenia, Azerbaijan, Belarus, Cambodia, People's Republic of China, Georgia, 
+      Iraq, Kazakhstan, Korea (North), Kyrgyzstan, Laos, Libya,  
+      Macao, Moldova, Mongolia, Myanmar (Burma), Russia, Sudan, Tajikistan, Turkmenistan, Ukraine, Uzbekistan, Venezuela, Vietnam.                                                            
+       <br>
+       <br>
+       <span style="font-weight: bold;">CERTIFICATION </span>
+    </cmr:chk-entry>     
+  </cmr:chk-section>
+    <cmr:chk-section name="Address Verification" > 
+    <cmr:chk-entry number="1" section="D">To the best of your knowledge or belief is your customer involved in
+     By selecting 'I confirm' you are certifying that any address you are entering into this customer record is a valid customer 
+     address (not a location owned, leased or otherwise controlled by IBM), and if not a customer address is specifically 
+     identified as an IBM or third party address in the entry.
+     </cmr:chk-entry>   
   </cmr:chk-section>   
   <cmr:chk-block boldText="false">
     If any of the above questions have answered 
