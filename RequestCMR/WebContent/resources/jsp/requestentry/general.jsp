@@ -293,7 +293,7 @@ if (readOnly){
     
     <cmr:row addBackground="false">
       <c:if test="${reqentry.reqType != 'U'}">
-      <cmr:view forCountry="631,724,815,661,629,613,655,663,681,683,731,735,781,799,811,813,829,869,871,641,846,806,702,678,788,624,848,858">
+      <cmr:view forCountry="631,724,815,661,629,613,655,663,681,683,731,735,781,799,811,813,829,869,871,641,846,806,702,678,788,624,848,858,766">
         <cmr:column span="2" containerForField="CustomerScenarioType">
           <p>
             <cmr:label fieldId="custGrp">
