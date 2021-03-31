@@ -18,7 +18,8 @@
 
 <cmr:view forGEO="KR">
 
-  <cmr:row addBackground="false">
+  <cmr:row addBackground="true">
+  
     <cmr:column span="2" containerForField="AbbrevLocation">
       <p>
         <label for="abbrevLocn"> <cmr:fieldLabel fieldId="AbbrevLocation" />: </label>
@@ -46,6 +47,7 @@
         <cmr:field path="embargoCd" id="embargoCd" fieldId="EmbargoCode" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
+    <!-- 
     <cmr:column span="2" containerForField="EconomicCd2">
         <p>
           <cmr:label fieldId="economicCd">
@@ -55,7 +57,7 @@
           <cmr:field path="economicCd" id="economicCd" fieldId="EconomicCd2" tabId="MAIN_CUST_TAB" />
         </p>
       </cmr:column>
-
+ 	-->
     <cmr:column span="2" containerForField="InternalDept">
         <p>
           <cmr:label fieldId="ibmDeptCostCenter">
