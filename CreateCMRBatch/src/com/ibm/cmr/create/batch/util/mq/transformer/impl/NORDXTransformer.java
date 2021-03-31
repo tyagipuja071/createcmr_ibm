@@ -650,6 +650,9 @@ public class NORDXTransformer extends EMEATransformer {
       if (!StringUtils.isBlank(data.getAbbrevNm()) && data.getAbbrevNm().startsWith("DUMMY")) {
         generateCMRNoObj.setMin(985001);
         generateCMRNoObj.setMax(985999);
+      } else if ("DKISO".equals(custSubGrp)) {
+        generateCMRNoObj.setMin(997000);
+        generateCMRNoObj.setMax(998899);
       } else {
         generateCMRNoObj.setMin(993110);
         generateCMRNoObj.setMax(998899);
