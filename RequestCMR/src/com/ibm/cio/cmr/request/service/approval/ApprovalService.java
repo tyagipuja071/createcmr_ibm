@@ -1244,7 +1244,8 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
           // statusCheck = true;
         } else {
 
-          if (SystemLocation.JAPAN.equals(model.getCmrIssuingCntry()) && recipients.getId().getIntranetId().equalsIgnoreCase(BP_MANAGER_ID)) {
+          if ((SystemLocation.JAPAN.equals(model.getCmrIssuingCntry()) || SystemLocation.KOREA.equals(model.getCmrIssuingCntry()))
+              && recipients.getId().getIntranetId().equalsIgnoreCase(BP_MANAGER_ID)) {
             ApprovalReq approver = new ApprovalReq();
             approver = geoHandler.handleBPMANAGERApproval(entityManager, reqId, approver, defaultApprovals, recipients, user, model);
             approverCreated = true;
