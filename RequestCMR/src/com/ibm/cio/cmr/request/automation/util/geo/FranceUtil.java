@@ -863,7 +863,7 @@ public class FranceUtil extends AutomationUtil {
     }
     if (resultCodes.contains("R")) {
       output.setOnError(true);
-      engineData.addRejectionComment("_atRejectAddr", "Add or update on the address is rejected", "", "");
+      engineData.addRejectionComment("DUPADDR", "Add or update on the address is rejected", "", "");
       validation.setSuccess(false);
       validation.setMessage("Rejected");
     } else if (resultCodes.contains("D")) {
