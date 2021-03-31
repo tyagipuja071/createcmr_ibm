@@ -650,9 +650,6 @@ public class NORDXTransformer extends EMEATransformer {
       if (!StringUtils.isBlank(data.getAbbrevNm()) && data.getAbbrevNm().startsWith("DUMMY")) {
         generateCMRNoObj.setMin(985001);
         generateCMRNoObj.setMax(985999);
-      } else if ("DKISO".equals(custSubGrp)) {
-        generateCMRNoObj.setMin(997000);
-        generateCMRNoObj.setMax(998899);
       } else {
         generateCMRNoObj.setMin(993110);
         generateCMRNoObj.setMax(998899);
@@ -987,32 +984,6 @@ public class NORDXTransformer extends EMEATransformer {
       }
     }
 
-    if (SystemLocation.NORWAY.equals(data.getCmrIssuingCntry())) {
-      legacyCust.setRealCtyCd("806");
-    } else if (SystemLocation.SWEDEN.equals(data.getCmrIssuingCntry())) {
-      legacyCust.setRealCtyCd("846");
-    } else if (SystemLocation.DENMARK.equals(data.getCmrIssuingCntry())) {
-      if ("678".equals(data.getCountryUse())) {
-        legacyCust.setRealCtyCd("678");
-      } else if ("678FO".equals(data.getCountryUse())) {
-        legacyCust.setRealCtyCd("678");
-      } else if ("678GL".equals(data.getCountryUse())) {
-        legacyCust.setRealCtyCd("678");
-      } else if ("678IS".equals(data.getCountryUse())) {
-        legacyCust.setRealCtyCd("742");
-      }
-    } else if (SystemLocation.FINLAND.equals(data.getCmrIssuingCntry())) {
-      if ("702".equals(data.getCountryUse())) {
-        legacyCust.setRealCtyCd("702");
-      } else if ("702EE".equals(data.getCountryUse())) {
-        legacyCust.setRealCtyCd("602");
-      } else if ("702LT".equals(data.getCountryUse())) {
-        legacyCust.setRealCtyCd("638");
-      } else if ("702LV".equals(data.getCountryUse())) {
-        legacyCust.setRealCtyCd("608");
-      }
-    }
-
     legacyCust.setLocNo(landedCntry + "000");
     legacyCust.setAbbrevNm(StringUtils.isBlank(data.getAbbrevNm()) ? "" : data.getAbbrevNm());
     legacyCust.setAbbrevLocn(StringUtils.isBlank(data.getAbbrevLocn()) ? "" : data.getAbbrevLocn());
@@ -1054,7 +1025,7 @@ public class NORDXTransformer extends EMEATransformer {
       legacyCust.setTaxCd("");
     }
 
-    if (SystemLocation.DENMARK.equals(data.getCurrencyCd())) {
+    if (SystemLocation.DENMARK.equals(data.getCmrIssuingCntry())) {
       if ("DKK".equals(data.getCurrencyCd())) {
         legacyCust.setCurrencyCd("");
       } else if ("EUR".equals(data.getCurrencyCd())) {
@@ -1062,13 +1033,13 @@ public class NORDXTransformer extends EMEATransformer {
       } else if ("USD".equals(data.getCurrencyCd())) {
         legacyCust.setCurrencyCd("US");
       }
-    } else if (SystemLocation.FINLAND.equals(data.getCurrencyCd())) {
+    } else if (SystemLocation.FINLAND.equals(data.getCmrIssuingCntry())) {
       if ("EUR".equals(data.getCurrencyCd())) {
         legacyCust.setCurrencyCd("EU");
       } else if ("USD".equals(data.getCurrencyCd())) {
         legacyCust.setCurrencyCd("US");
       }
-    } else if (SystemLocation.NORWAY.equals(data.getCurrencyCd())) {
+    } else if (SystemLocation.NORWAY.equals(data.getCmrIssuingCntry())) {
       if ("NOK".equals(data.getCurrencyCd())) {
         legacyCust.setCurrencyCd("");
       } else if ("EUR".equals(data.getCurrencyCd())) {
@@ -1076,7 +1047,7 @@ public class NORDXTransformer extends EMEATransformer {
       } else if ("USD".equals(data.getCurrencyCd())) {
         legacyCust.setCurrencyCd("US");
       }
-    } else if (SystemLocation.SWEDEN.equals(data.getCurrencyCd())) {
+    } else if (SystemLocation.SWEDEN.equals(data.getCmrIssuingCntry())) {
       if ("SEK".equals(data.getCurrencyCd())) {
         legacyCust.setCurrencyCd("");
       } else if ("EUR".equals(data.getCurrencyCd())) {
