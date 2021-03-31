@@ -1704,13 +1704,6 @@ public class BELUXHandler extends BaseSOFHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getSoProjectCd(), "IbmDeptCostCenter", cmrCountry));
       results.add(update);
     }
-    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getCustPrefLang(), newData.getCustPrefLang())) {
-      update = new UpdatedDataModel();
-      update.setDataField(PageManager.getLabel(cmrCountry, "CustPrefLang", "-"));
-      update.setNewData(service.getCodeAndDescription(newData.getCustPrefLang(), "CustPrefLang", cmrCountry));
-      update.setOldData(service.getCodeAndDescription(oldData.getCustPrefLang(), "CustPrefLang", cmrCountry));
-      results.add(update);
-    }
   }
 
   @Override
