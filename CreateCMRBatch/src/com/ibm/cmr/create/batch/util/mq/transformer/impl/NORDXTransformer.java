@@ -1029,6 +1029,32 @@ public class NORDXTransformer extends EMEATransformer {
       }
     }
 
+    if (SystemLocation.NORWAY.equals(data.getCmrIssuingCntry())) {
+      legacyCust.setRealCtyCd("806");
+    } else if (SystemLocation.SWEDEN.equals(data.getCmrIssuingCntry())) {
+      legacyCust.setRealCtyCd("846");
+    } else if (SystemLocation.DENMARK.equals(data.getCmrIssuingCntry())) {
+      if ("678".equals(data.getCountryUse())) {
+        legacyCust.setRealCtyCd("678");
+      } else if ("678FO".equals(data.getCountryUse())) {
+        legacyCust.setRealCtyCd("678");
+      } else if ("678GL".equals(data.getCountryUse())) {
+        legacyCust.setRealCtyCd("678");
+      } else if ("678IS".equals(data.getCountryUse())) {
+        legacyCust.setRealCtyCd("742");
+      }
+    } else if (SystemLocation.FINLAND.equals(data.getCmrIssuingCntry())) {
+      if ("702".equals(data.getCountryUse())) {
+        legacyCust.setRealCtyCd("702");
+      } else if ("702EE".equals(data.getCountryUse())) {
+        legacyCust.setRealCtyCd("602");
+      } else if ("702LT".equals(data.getCountryUse())) {
+        legacyCust.setRealCtyCd("638");
+      } else if ("702LV".equals(data.getCountryUse())) {
+        legacyCust.setRealCtyCd("608");
+      }
+    }
+
     legacyCust.setLocNo(landedCntry + "000");
     legacyCust.setAbbrevNm(StringUtils.isBlank(data.getAbbrevNm()) ? "" : data.getAbbrevNm());
     legacyCust.setAbbrevLocn(StringUtils.isBlank(data.getAbbrevLocn()) ? "" : data.getAbbrevLocn());
