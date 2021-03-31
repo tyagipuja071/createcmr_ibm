@@ -22,6 +22,7 @@ function afterConfigForNORDX() {
   }
   if (reqType == 'U') {
     if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+      cmr.hideNode("container-SalesBusOff"); // CMR-1650
       return;
     }
     // FormManager.enable('collectionCd');
