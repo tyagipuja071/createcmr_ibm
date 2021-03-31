@@ -14,21 +14,42 @@
     readOnly = false;
   }
 %>
-<cmr:checklist title1="CMR Military and Proliferation Screening Checklist" title2="CUSTOMER ELIGIBILITY CHECKLIST">
-  <cmr:chk-section name="Customer Information:">
-<cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label=" Customer Company: ">
-     ${reqentry.mainCustNm1} ${reqentry.mainCustNm2}
-     </cmr:chk-lbl-field>
-   <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="Address: ">
-   <%=RequestUtils.generateChecklistLocalAddress(request)%>
-  </cmr:chk-lbl-field>
-    </cmr:chk-section>
-  <cmr:chk-section name="DPL Check" >
-    <cmr:chk-entry dplField="true">
-       <span style="font-weight:bold">Is the customer/vendor on the Denied Party List ?</span>
-    </cmr:chk-entry>
-  </cmr:chk-section>
-    <cmr:chk-section name="Section A:  Diversion Risk Assessment" >
+<cmr:checklist title1="Customer Screening Checklist" title2="(Diversion Risk Profile / Proliferation / Military, Defense)">
+  <cmr:chk-section name="Customer Company Full Name (in English):">
+    <cmr:chk-block>
+    US DPL and UN Sanction List Check:    Yes   /   No"
+    <br>
+    Match / Potential Match Found:     Yes   /   No
+    <br> 
+    Please check the Customer Full Name against DPL database. (Notes workspace DPL database, DPL on IBM ERO Web Page and Monthly DPL file distributed to the functions.)
+    <br>
+    ***If there is any match found, please STOP and REPORT to your manager, providing following information to country ERC or your manager for further guidance. 
+  </cmr:chk-block>
+   <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="Customer Detail Address: ">
+      <%=RequestUtils.generateChecklistLocalAddress(request)%>
+   </cmr:chk-lbl-field>  
+   <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="Nature of Business: (Please provide web site if available): ">
+      <%=RequestUtils.generateChecklistFreeTxtField1(request)%>
+   </cmr:chk-lbl-field>
+   <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="What products/service etc. they want to buy? ">
+      <%=RequestUtils.generateChecklistFreeTxtField2(request)%>
+   </cmr:chk-lbl-field>
+   <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="Purpose of End Use: ">
+      <%=RequestUtils.generateChecklistFreeTxtField3(request)%>
+   </cmr:chk-lbl-field>
+   <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="Provide the completed the checklist: ">
+      <%=RequestUtils.generateChecklistLocalName(request)%>
+   </cmr:chk-lbl-field>
+   <br>
+   <cmr:chk-block>
+   Transactions (with customers found DPL matched) may only proceed as reviewed and authorized by IBM ERO (Export Regulation Office) and/or AP STC (Sensitive Transaction Council).
+   <br>
+   To be completed by Marketing / Client Representative for new customers.
+   <br>
+   <span style="text-decoration: underline">Please circle YES or NO to answer all questions on pages.</span>
+   </cmr:chk-block>
+  </cmr:chk-section> 
+    <cmr:chk-section name="Section A" >
     <cmr:chk-entry number="1" section="A">
       The order (hardware, software, solution) does not match the customer's business requirements.    
     </cmr:chk-entry>
@@ -42,56 +63,57 @@
       The customer has requested unusual payment or delivery terms and conditions.
     </cmr:chk-entry>
       <cmr:chk-entry number="5" section="A">
-      There is an indication that the products/services are destined for <span style="font-weight: bold;">restricted countries (Cuba, Iran, Sudan, North Korea, & Syria)</span>.   
+        There is an indication that the products are destined for <span style="font-weight: bold;">an embargoed/terrorist supporting country: Cuba, Iran, North Korea, Sudan, and Syria</span>.
+        <br> 
+        * Cases to Iraq, please stop and contact with country ERC immediately.
+        <br>
+        * Cases to <span style="color: red;">Myanmar (Burma),</span> please STOP and contact with country ERC immediately.
+    </cmr:chk-entry>
+    <cmr:chk-entry number="6" section="A">
+        There is an indication that the products are destined for a prohibited proliferation end use/user(missiles, chemical & biological weapons, nuclear) in any of the following countries: 
+        <br> 
+        <br>
+        Missile: Bahrain, People's Republic of China, Egypt, Iran, Iraq, Israel, Jordan, Kuwait, Korea (North), Lebanon, Libya, Macao, Oman, Pakistan, Qatar, Russia, Saudi Arabia, Syria, United Arab Emirates, Yemen
+        <br>
+        <br>
+        Chemical & Biological Weapons: Afghanistan, Armenia, Azerbaijan, Bahrain, Belarus, People's Republic of China, Cuba, Egypt, Georgia, Iran, Iraq, Israel, Jordan, Kazakhstan, Korea (North), Kuwait, Kyrgyzstan, Lebanon, Libya, Macao, Moldova, Mongolia, Myanmar (Burma), Oman, Pakistan, Qatar, Russia, Saudi Arabia, Syria, Taiwan, Tajikistan, Turkmenistan, United Arab Emirates, Uzbekistan, Vietnam, Yemen
+        <br>
+        <br>
+        Nuclear: People's Republic of China, Cuba, Iran, Iraq, Israel, Korea (North), Libya, Pakistan, Russia 
     </cmr:chk-entry>
   </cmr:chk-section>
-  <cmr:chk-section name="Section B: Proliferation" >
-  
+  <cmr:chk-section name="Section B" > 
+    <cmr:chk-entry >
+      There is an indication that customer has an unauthorized dealings with parties and/or products are destined for a prohibited proliferation end use/user (missiles, chemical & biological weapons, nuclear) in any of the following countries shown in each category:
+    </cmr:chk-entry>
     <cmr:chk-entry number="1" section="B">
-      <span style="font-weight: bold; text-decoration: underline">Missile:</span>
-      To the best of your knowledge or belief is your customer involved in the design,  
-      development, production or use of missiles (ie Rocket Systems and or/unmanned air vehicles)?
+    <span style="font-weight: bold; text-decoration: underline">Missile </span>
+      ----To the best of your knowledge or belief is your customer involved in the design, development, production or use of missiles in or by one of the 21 countries listed below?   
+      <br>
+      <br>
+      Bahrain, People's Republic of China, Egypt, Iran, Iraq, Israel, Jordan, Kuwait, Korea (North), Lebanon, Libya, Macao, Oman, Pakistan, Qatar, Russia, Saudi Arabia, Syria, United Arab Emirates, Yemen   
     </cmr:chk-entry>
     <cmr:chk-entry number="2" section="B">
-    <span style="font-weight: bold; text-decoration: underline">Chemical or Biological Weapons:</span>
-     To the best of your knowledge or belief is your customer involved with design, development, production,
-     stockpiling or use of Chemical or Biological Weapons ?
+    <span style="font-weight: bold; text-decoration: underline">Chemical or Biological Weapons</span>
+      ----To the best of your knowledge or belief is your customer involved with design, development, production, stockpiling or use of Chemical or Biological Weapons involved with design, development, production, stockpiling or use of Chemical or Biological Weapons in or by one of the 38 countries listed below?    
+     <br>
+     <br>
+     Afghanistan, Armenia, Azerbaijan, Bahrain, Belarus, People's Republic of China, Cuba, Egypt, Georgia, Iran, Iraq, Israel, Jordan, Kazakhstan, Korea (North), Kuwait, Kyrgyzstan, Lebanon, Libya, Macao, Moldova, Mongolia, <span style="color: red;">Myanmar (Burma),</span> Oman, Pakistan, Qatar, Russia, Saudi Arabia, Syria, Taiwan, Tajikistan, Turkmenistan, United Arab Emirates, Uzbekistan, Vietnam, Yemen
     </cmr:chk-entry>
     <cmr:chk-entry number="3" section="B">
-    <span style="font-weight: bold; text-decoration: underline">Nuclear:</span>
-     To the best of your knowledge or belief is your customer involved in any of the following nuclear activities :
+    <span style="font-weight: bold; text-decoration: underline">Nuclear</span>
+      ----To the best of your knowledge or belief is your customer involved with design, development, production, stockpiling or use of Chemical or Biological Weapons involved with design, development, production, stockpiling or use of Chemical or Biological Weapons in or by one of the 38 countries listed below?    
      <br>
-     A. <span style="font-weight: bold">Nuclear explosive activities </span> - including:   research on or development, design, manufacture,
-      construction, testing or maintenance of any nuclear explosive device, or components or subsystems of such a device. 
-      <br>
-     B. <span style="font-weight: bold">Nuclear activities</span> - including:  research on, or development, design, manufacture, construction, operation, or maintenance of any "nuclear reactor" (including for non-weapon-related nuclear power generation), critical facility, facility for the fabrication of nuclear fuel,
-        facility for the conversion of nuclear material from one chemical form to another, or separate storage. Or 
-       <br>
-     C. <span style="font-weight: bold">Sensitive nuclear activities</span> - including: nuclear fuel cycle activities, including research on or development, design, manufacture, construction, operation or maintenance of any of the following facilities, or components for such facilities:
      <br>
-     <ul>
-     <li>Facilities for the chemical processing of irradiated special nuclear or source material; </li>
-     <li>Facilities for the production of heavy water; </li>
-     <li>Facilities for the separation of isotopes of source and special nuclear material; or </li>
-     <li>Facilities for the fabrication of nuclear reactor fuel containing plutonium. </li>
-     </ul>
+     People's Republic of China, Cuba, Iran, Iraq, Israel, Korea (North), Libya, Pakistan, Russia      
     </cmr:chk-entry>
     </cmr:chk-section>
-    <cmr:chk-section name="Section C: Military" > 
-    <cmr:chk-entry number="1" section="C">To the best of your knowledge or belief is your customer involved in
-     <span style="font-weight: bold; text-decoration: underline"> Defense and/or Military*</span> activities? 
+    <cmr:chk-section name="Section C" > 
+    <cmr:chk-entry number="1" section="C">To the best of your knowledge or belief is your customer involved with  
+     <span style="font-weight: bold; text-decoration: underline">Military</span> end use in or by one of the 27 countries listed below?
      <br>
-     Involved in Military activities means falling under any of the two definitions below:
      <br>
-     <span style="font-weight: bold; text-decoration: underline">Definitions </span>
-     <br>
-     <span style="font-weight: bold">Military End Users</span>: Include army, navy, air force, marines, coast guard, national guard, security
-      or police, government defense, intelligence and reconnaissance organizations, and 
-      their contractors or any person or entity whose actions or functions are intended to support military end uses.
-      <br>
-      <span style="font-weight: bold">Military End Uses</span>: That will be directly part, component or subsystems 
-      of weapons or defense articles, or that indirectly supports or contributes to the operation,
-       installation, maintenance, repair, overhaul, refurbishing, development or production of military items.
+     Afghanistan, Armenia, Azerbaijan, Belarus, Cambodia, People’s Republic of China, Georgia, Iraq, Kazakhstan, Korea (North), Kyrgyzstan, <span style="color: red;">Laos,</span> Libya, Macao, Moldova, Mongolia, <span style="color: red;">Myanmar</span>(Burma), Russia, Sudan, Tajikistan, Turkmenistan, Ukraine, Uzbekistan, Venezuela, Vietnam.  
      </cmr:chk-entry>         
   </cmr:chk-section>   
   <cmr:chk-block boldText="false">
@@ -100,6 +122,5 @@
     , please STOP and CONTACT your Country ERC or legal counsel for further guidance. 
     Transactions (with customers found to be engaged in prohibited activities) may only proceed as authorized by CHQ ERO and/or AP STC.
   </cmr:chk-block>
- 
 </cmr:checklist>
 
