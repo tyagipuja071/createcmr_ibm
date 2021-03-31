@@ -663,6 +663,7 @@ public class NORDXHandler extends BaseSOFHandler {
     data.setInacType("");
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       data.setSitePartyId("");
+      data.setPpsceid("");
     }
   }
 
