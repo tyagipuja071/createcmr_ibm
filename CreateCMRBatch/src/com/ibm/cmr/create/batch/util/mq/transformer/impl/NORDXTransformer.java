@@ -1000,7 +1000,7 @@ public class NORDXTransformer extends EMEATransformer {
       }
     } else if (SystemLocation.FINLAND.equals(data.getCmrIssuingCntry())) {
       if ("702".equals(data.getCountryUse())) {
-        legacyCust.setRealCtyCd("");
+        legacyCust.setRealCtyCd("702");
       } else if ("702EE".equals(data.getCountryUse())) {
         legacyCust.setRealCtyCd("602");
       } else if ("702LT".equals(data.getCountryUse())) {
