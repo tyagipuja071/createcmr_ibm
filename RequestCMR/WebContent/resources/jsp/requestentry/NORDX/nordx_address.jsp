@@ -112,19 +112,19 @@
     </p>
   </cmr:column>
   <cmr:column span="2">
-  <!-- Defect : 1565616 <p>
+  	<p>
       <cmr:label fieldId="addrTxt2">
         <cmr:fieldLabel fieldId="StreetAddress2" />: 
           </cmr:label>
       <cmr:field fieldId="StreetAddress2" id="addrTxt2" path="addrTxt2" />
-    </p>  -->
+    </p> 
   </cmr:column>
 </cmr:row>
 <cmr:row>
 
 </cmr:row>
 <cmr:row>
-  <cmr:column span="2">
+  <cmr:column span="2" containerForField="StateProv">
     <p>
       <cmr:label fieldId="stateProv">
         <cmr:fieldLabel fieldId="StateProv" />:
