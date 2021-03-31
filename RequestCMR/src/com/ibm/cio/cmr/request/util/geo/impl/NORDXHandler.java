@@ -867,9 +867,21 @@ public class NORDXHandler extends BaseSOFHandler {
               }
 
             } else {
+              String seq = "";// 1
+              currCell = (XSSFCell) row.getCell(1);
+              seq = validateColValFromCell(currCell);
+              if (StringUtils.isEmpty(seq)) {
+                TemplateValidation error = new TemplateValidation(name);
+                LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that Sequence number is mandatory. Please fix and upload the template again.");
+                error.addError((row.getRowNum() + 1), "Seq Number",
+                    "The row " + (row.getRowNum() + 1) + ":Note that Sequence number is mandatory. Please fix and upload the template again.<br>");
+                validations.add(error);
+              }
+
               if (dummyUpd) {
                 continue;
               }
+
               String custNm = "";// 2
               String custNmCond = "";// 3
               String additionalInfo = "";// 4
@@ -901,58 +913,6 @@ public class NORDXHandler extends BaseSOFHandler {
               landedCntry = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(11);
               poBox = validateColValFromCell(currCell);
-
-              boolean isCrossBoarder = true;
-              String cntryDesc = "";
-              if (SystemLocation.DENMARK.equals(country)) {
-                cntryDesc = "DE";
-              } else if (SystemLocation.FINLAND.equals(country)) {
-                cntryDesc = "FI";
-              } else if (SystemLocation.NORWAY.equals(country)) {
-                cntryDesc = "NO";
-              } else if (SystemLocation.SWEDEN.equals(country)) {
-                cntryDesc = "SE";
-              }
-              if (cntryDesc.equals(landedCntry.substring(0, 2))) {
-                isCrossBoarder = false;
-              }
-
-              int fieldCount = 0;
-              if (StringUtils.isNotBlank(custNmCond)) {
-                fieldCount++;
-              }
-              if (StringUtils.isNotBlank(additionalInfo)) {
-                fieldCount++;
-              }
-              if (StringUtils.isNotBlank(attPerson)) {
-                fieldCount++;
-              }
-              if (StringUtils.isNotBlank(street)) {
-                fieldCount++;
-              }
-              if (StringUtils.isNotBlank(poBox)) {
-                fieldCount++;
-              }
-              if (isCrossBoarder) {
-                if (fieldCount > 3) {
-                  TemplateValidation error = new TemplateValidation(name);
-                  LOG.trace("The row " + (row.getRowNum() + 1)
-                      + ":Note that only 3 fields of Customer name Cond,Addtional Info, Att Person, Street, Po Box can be filled at once. Please fix and upload the template again.");
-                  error.addError((row.getRowNum() + 1), name, "The row " + (row.getRowNum() + 1)
-                      + ":Note that only 3 fields of Customer name Cond,Addtional Info, Att Person, Street, Po Box can be filled at once. Please fix and upload the template again.<br>");
-                  validations.add(error);
-                }
-              } else {
-                if (fieldCount == 5) {
-                  TemplateValidation error = new TemplateValidation(name);
-                  LOG.trace("The row " + (row.getRowNum() + 1)
-                      + ":Note that only 4 fields of Customer name Cond,Addtional Info, Att Person, Street, Po Box can be filled at once. Please fix and upload the template again.");
-                  error.addError((row.getRowNum() + 1), name, "The row " + (row.getRowNum() + 1)
-                      + ":Note that only 4 fields of Customer name Cond,Addtional Info, Att Person, Street, Po Box can be filled at once. Please fix and upload the template again.<br>");
-                  validations.add(error);
-                }
-              }
-              fieldCount = 0;
 
               if ("Installing,Shipping,EPL".contains(name)) {
                 if (!(StringUtils.isBlank(custNm) || StringUtils.isBlank(street) || StringUtils.isBlank(city) || StringUtils.isBlank(landedCntry))) {
@@ -996,6 +956,58 @@ public class NORDXHandler extends BaseSOFHandler {
                   }
                 }
               }
+
+              boolean isCrossBoarder = true;
+              String cntryDesc = "";
+              if (SystemLocation.DENMARK.equals(country)) {
+                cntryDesc = "DE";
+              } else if (SystemLocation.FINLAND.equals(country)) {
+                cntryDesc = "FI";
+              } else if (SystemLocation.NORWAY.equals(country)) {
+                cntryDesc = "NO";
+              } else if (SystemLocation.SWEDEN.equals(country)) {
+                cntryDesc = "SE";
+              }
+              if (StringUtils.isNotBlank(landedCntry) && cntryDesc.equals(landedCntry.substring(0, 2))) {
+                isCrossBoarder = false;
+              }
+
+              int fieldCount = 0;
+              if (StringUtils.isNotBlank(custNmCond)) {
+                fieldCount++;
+              }
+              if (StringUtils.isNotBlank(additionalInfo)) {
+                fieldCount++;
+              }
+              if (StringUtils.isNotBlank(attPerson)) {
+                fieldCount++;
+              }
+              if (StringUtils.isNotBlank(street)) {
+                fieldCount++;
+              }
+              if (StringUtils.isNotBlank(poBox)) {
+                fieldCount++;
+              }
+              if (isCrossBoarder) {
+                if (fieldCount > 3) {
+                  TemplateValidation error = new TemplateValidation(name);
+                  LOG.trace("The row " + (row.getRowNum() + 1)
+                      + ":Note that only 3 fields of Customer name Cond,Addtional Info, Att Person, Street, Po Box can be filled at once. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), name, "The row " + (row.getRowNum() + 1)
+                      + ":Note that only 3 fields of Customer name Cond,Addtional Info, Att Person, Street, Po Box can be filled at once. Please fix and upload the template again.<br>");
+                  validations.add(error);
+                }
+              } else {
+                if (fieldCount == 5) {
+                  TemplateValidation error = new TemplateValidation(name);
+                  LOG.trace("The row " + (row.getRowNum() + 1)
+                      + ":Note that only 4 fields of Customer name Cond,Addtional Info, Att Person, Street, Po Box can be filled at once. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), name, "The row " + (row.getRowNum() + 1)
+                      + ":Note that only 4 fields of Customer name Cond,Addtional Info, Att Person, Street, Po Box can be filled at once. Please fix and upload the template again.<br>");
+                  validations.add(error);
+                }
+              }
+              fieldCount = 0;
 
               if (StringUtils.isNotBlank(street)) {
                 if (!(StringUtils.isBlank(streetCon) || StringUtils.isBlank(additionalInfo))) {
