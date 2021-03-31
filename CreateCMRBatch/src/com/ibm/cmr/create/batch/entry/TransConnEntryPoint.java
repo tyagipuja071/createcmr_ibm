@@ -13,7 +13,7 @@ import com.ibm.cmr.create.batch.service.TransConnService;
 public class TransConnEntryPoint extends BatchEntryPoint {
 
   public static void main(String[] args) throws CmrException {
-    BatchEntryPoint.initContext("TransConn");
+    BatchEntryPoint.initContext("TransConn", true);
 
     TransConnService service = new TransConnService();
     if (args != null && args.length > 0 && "DELETE".equalsIgnoreCase(args[0].trim())) {
