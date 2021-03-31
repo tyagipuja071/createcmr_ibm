@@ -99,6 +99,18 @@ function afterConfigForNL() {
   if (role == 'Processor' && clientTier != null) {
     setBOTeamValues(clientTier);
   }
+  lockDunsNo();
+}
+
+function lockDunsNo() {
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType != 'C') {
+    return;
+  }
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  if (role == 'REQUESTER') {
+    FormManager.readOnly('dunsNo');
+  }
 }
 
 function disableCmrNo() {
@@ -132,7 +144,7 @@ function setVatValidatorNL() {
       return;
     }
     FormManager.resetValidations('vat');
-    if (!dijit.byId('vatExempt').get('checked')) {
+    if (!dojo.byId('vatExempt').get('checked')) {
       checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
     }
   }
