@@ -250,7 +250,6 @@ public class TWHandler extends GEOHandler {
     map.put("##CustomerName2", "custNm2");
     map.put("##LocalTax2", "taxCd2");
     map.put("##CustomerName1", "custNm1");
-    map.put("##ChinaCustomerName1", "custNm3");
     map.put("##PostalCode", "postCd");
     map.put("##LocalTax1", "taxCd1");
     map.put("##CustomerName4", "custNm4");
