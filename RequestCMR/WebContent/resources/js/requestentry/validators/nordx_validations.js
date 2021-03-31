@@ -4,8 +4,12 @@ var _addrTypesForNORDX = [ 'ZS01', 'ZP01', 'ZI01', 'ZD01', 'ZS02' ];
 var _poBOXHandler = [];
 var _MachineHandler = [];
 // var _collCdArraySubTypes = [ 'INTER', 'INTSO', 'CBINT', 'CBISO' ];
-var EU_COUNTRIES = [ "AT", "BE", "BG", "HR", "CY", "CZ", "DE", "DK", "EE", "ES", "GL", "GR", "FI", "FO", "FR", "GB", "HU", "IE", "IT", "LT", "LV",
-    "LU", "MT", "NL", "PL", "PT", "RO", "SE", "SI", "SK" ];
+// var EU_COUNTRIES = [ "AT", "BE", "BG", "HR", "CY", "CZ", "DE", "DK", "EE",
+// "ES", "GL", "GR", "FI", "FO", "FR", "GB", "HU", "IE", "IT", "LT", "LV", "LU",
+// "MT", "NL", "PL", "PT", "RO", "SE", "SI", "SK" ];
+var EU_COUNTRIES = [ "AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR", "DE", "GR", "HU", "IE", "IT", "LV", "LT", "LU", "MT", "NL", "PL",
+    "PT", "RO", "SK", "SI", "ES", "SE" ];
+
 var reqType = null;
 function afterConfigForNORDX() {
   reqType = FormManager.getActualValue('reqType');
@@ -95,7 +99,7 @@ function afterConfigForNORDX() {
   setVatValidatorNORDX();
   setSalesRepValues();
   // setAdminDSCValues();
-  setTaxCdValuesCROSS();
+  // setTaxCdValuesCROSS();
   setSBOForFinlandSubRegion();
   setPPSCEID();
   filterCmrnoP();
@@ -111,6 +115,9 @@ function afterConfigForNORDX() {
   // CREATCMR-1648
   setCollectionCd();
 
+  // CREATCMR-1748&1744
+  setTaxCdValues();
+  setTaxCdValuesByCustSubGrp();
 }
 
 function disableLandCntry() {
@@ -2068,6 +2075,276 @@ function streetContControll() {
     FormManager.setValue('addrTxt2', '');
     FormManager.disable('addrTxt2');
   }
+}
+
+// CREATCMR-1748&1744
+function setTaxCdValues() {
+  var field = FormManager.getField('taxCd1');
+
+  var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var countryUse = FormManager.getActualValue('countryUse');
+
+  if (cmrIssuingCntry == '678') {
+    // Faroe Islands, Greenland
+    if (countryUse == '678FO' || countryUse == '678GL') {
+      var taxCodeArray = [ '', '01', '14', '20', '24', '60', '61', '00', '25' ];
+      FormManager.limitDropdownValues(field, taxCodeArray);
+      FormManager.enable(field);
+    } else if (countryUse == '678IS') { // Iceland
+      var taxCodeArray = [ '', '00', '24' ];
+      FormManager.limitDropdownValues(field, taxCodeArray);
+      FormManager.enable(field);
+    } else { // Denmark
+      var taxCodeArray = [ '', '01', '14', '20', '24', '60', '61', '00', '25' ];
+      FormManager.limitDropdownValues(field, taxCodeArray);
+      FormManager.enable(field);
+    }
+  }
+}
+
+var pageModelFlag = 'N';
+
+function setTaxCdValuesByCustSubGrp() {
+
+  var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+
+  dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
+
+    var custSubGrp = FormManager.getActualValue('custSubGrp');
+
+    // Denmark, Faroe Islands, Greenland
+    if (custSubGrp == 'DKCOM' || custSubGrp == 'DKBUS' || custSubGrp == 'DKPRI' || custSubGrp == 'DKIBM' || custSubGrp == 'DKGOV'
+        || custSubGrp == 'DK3PA' || custSubGrp == 'FOCOM' || custSubGrp == 'FOBUS' || custSubGrp == 'FOPRI' || custSubGrp == 'FOIBM'
+        || custSubGrp == 'FOGOV' || custSubGrp == 'FO3PA' || custSubGrp == 'GLCOM' || custSubGrp == 'GLBUS' || custSubGrp == 'GLPRI'
+        || custSubGrp == 'GLIBM' || custSubGrp == 'GLGOV' || custSubGrp == 'GL3PA') {
+      if (pageModelFlag == 'Y') {
+        FormManager.setValue('taxCd1', '01');
+      } else {
+        FormManager.setValue('taxCd1', _pagemodel.taxCd1 == null ? '01' : _pagemodel.taxCd1);
+        pageModelFlag = 'Y';
+      }
+    } else if (custSubGrp == 'DKINT' || custSubGrp == 'DKISO' || custSubGrp == 'FOINT' || custSubGrp == 'FOISO' || custSubGrp == 'GLINT'
+        || custSubGrp == 'GLISO') {
+      if (pageModelFlag == 'Y') {
+        FormManager.setValue('taxCd1', '00');
+      } else {
+        FormManager.setValue('taxCd1', _pagemodel.taxCd1 == null ? '00' : _pagemodel.taxCd1);
+        pageModelFlag = 'Y';
+      }
+    }
+
+    // Iceland
+    if (custSubGrp == 'ISCOM' || custSubGrp == 'ISBUS' || custSubGrp == 'ISPRI' || custSubGrp == 'ISIBM' || custSubGrp == 'ISGOV'
+        || custSubGrp == 'IS3PA' || custSubGrp == 'ISINT' || custSubGrp == 'ISISO') {
+      if (pageModelFlag == 'Y') {
+        FormManager.setValue('taxCd1', '00');
+      } else {
+        FormManager.setValue('taxCd1', _pagemodel.taxCd1 == null ? '00' : _pagemodel.taxCd1);
+        pageModelFlag = 'Y';
+      }
+    }
+
+    // Finland
+    if (custSubGrp == 'FICOM' || custSubGrp == 'FIBUS' || custSubGrp == 'FIPRI' || custSubGrp == 'FIIBM' || custSubGrp == 'FIGOV'
+        || custSubGrp == 'FI3PA') {
+      if (pageModelFlag == 'Y') {
+        FormManager.setValue('taxCd1', '11');
+      } else {
+        FormManager.setValue('taxCd1', _pagemodel.taxCd1 == null ? '11' : _pagemodel.taxCd1);
+        pageModelFlag = 'Y';
+      }
+    } else if (custSubGrp == 'FIINT' || custSubGrp == 'FIISO') {
+      if (pageModelFlag == 'Y') {
+        FormManager.setValue('taxCd1', '00');
+      } else {
+        FormManager.setValue('taxCd1', _pagemodel.taxCd1 == null ? '00' : _pagemodel.taxCd1);
+        pageModelFlag = 'Y';
+      }
+    }
+
+    // Estonia, Lithuania, Latvia
+    if (custSubGrp == 'EECOM' || custSubGrp == 'EEBUS' || custSubGrp == 'EEPRI' || custSubGrp == 'EEIBM' || custSubGrp == 'EEGOV'
+        || custSubGrp == 'EE3PA' || custSubGrp == 'LTCOM' || custSubGrp == 'LTBUS' || custSubGrp == 'LTPRI' || custSubGrp == 'LTIBM'
+        || custSubGrp == 'LTGOV' || custSubGrp == 'LT3PA' || custSubGrp == 'LVCOM' || custSubGrp == 'LVBUS' || custSubGrp == 'LVPRI'
+        || custSubGrp == 'LVIBM' || custSubGrp == 'LVGOV' || custSubGrp == 'LV3PA') {
+      if (pageModelFlag == 'Y') {
+        FormManager.setValue('taxCd1', '01');
+      } else {
+        FormManager.setValue('taxCd1', _pagemodel.taxCd1 == null ? '01' : _pagemodel.taxCd1);
+        pageModelFlag = 'Y';
+      }
+    } else if (custSubGrp == 'EEINT' || custSubGrp == 'EEISO' || custSubGrp == 'LTINT' || custSubGrp == 'LTISO' || custSubGrp == 'LVINT'
+        || custSubGrp == 'LVISO') {
+      if (pageModelFlag == 'Y') {
+        FormManager.setValue('taxCd1', '00');
+      } else {
+        FormManager.setValue('taxCd1', _pagemodel.taxCd1 == null ? '00' : _pagemodel.taxCd1);
+        pageModelFlag = 'Y';
+      }
+    }
+
+    // Norway
+    if (cmrIssuingCntry == '806') {
+      if (custSubGrp == 'COMME' || custSubGrp == 'BUSPR' || custSubGrp == 'PRIPE' || custSubGrp == 'IBMEM' || custSubGrp == 'GOVRN'
+          || custSubGrp == 'THDPT') {
+        if (pageModelFlag == 'Y') {
+          FormManager.setValue('taxCd1', '07');
+        } else {
+          FormManager.setValue('taxCd1', _pagemodel.taxCd1 == null ? '07' : _pagemodel.taxCd1);
+          pageModelFlag = 'Y';
+        }
+      }
+
+      if (custSubGrp == 'INTER' || custSubGrp == 'INTSO') {
+        if (pageModelFlag == 'Y') {
+          FormManager.setValue('taxCd1', '00');
+        } else {
+          FormManager.setValue('taxCd1', _pagemodel.taxCd1 == null ? '00' : _pagemodel.taxCd1);
+          pageModelFlag = 'Y';
+        }
+      }
+    }
+
+    // Sweden
+    if (cmrIssuingCntry == '846') {
+      if (custSubGrp == 'COMME' || custSubGrp == 'BUSPR' || custSubGrp == 'PRIPE' || custSubGrp == 'IBMEM' || custSubGrp == 'GOVRN'
+          || custSubGrp == 'THDPT') {
+        if (pageModelFlag == 'Y') {
+          FormManager.setValue('taxCd1', '01');
+        } else {
+          FormManager.setValue('taxCd1', _pagemodel.taxCd1 == null ? '01' : _pagemodel.taxCd1);
+          pageModelFlag = 'Y';
+        }
+      }
+
+      if (custSubGrp == 'INTER' || custSubGrp == 'INTSO') {
+        if (pageModelFlag == 'Y') {
+          FormManager.setValue('taxCd1', '00');
+        } else {
+          FormManager.setValue('taxCd1', _pagemodel.taxCd1 == null ? '00' : _pagemodel.taxCd1);
+          pageModelFlag = 'Y';
+        }
+      }
+    }
+
+    if (custSubGrp == 'CBCOM' || custSubGrp == 'CBBUS') {
+      var isEUCntry = false;
+      var countryUse = FormManager.getActualValue('countryUse');
+
+      var reqId = FormManager.getActualValue('reqId');
+      var reqParam = {
+        REQ_ID : reqId,
+        ADDR_TYPE : 'ZS01',
+      };
+      var _result = cmr.query('ADDR.GET.LANDCNTRY.BY_REQID_ADDRTYP', reqParam);
+      var landCntry = _result.ret2;
+
+      if (EU_COUNTRIES.indexOf(landCntry) > 0) {
+        isEUCntry = true;
+      }
+
+      if (cmrIssuingCntry == '678') {
+        // Faroe Islands, Greenland, Iceland
+        if (countryUse == '678FO' || countryUse == '678GL' || countryUse == '678IS') {
+          if (pageModelFlag == 'Y') {
+            FormManager.setValue('taxCd1', '00');
+          } else {
+            FormManager.setValue('taxCd1', _pagemodel.taxCd1 == null ? '00' : _pagemodel.taxCd1);
+            pageModelFlag = 'Y';
+          }
+        } else { // Denmark
+          if (isEUCntry == true && landCntry != null) {
+            if (pageModelFlag == 'Y') {
+              FormManager.setValue('taxCd1', '14');
+            } else {
+              FormManager.setValue('taxCd1', _pagemodel.taxCd1 == null ? '14' : _pagemodel.taxCd1);
+              pageModelFlag = 'Y';
+            }
+          } else if (isEUCntry == false && landCntry != null) {
+            if (pageModelFlag == 'Y') {
+              FormManager.setValue('taxCd1', '20');
+            } else {
+              FormManager.setValue('taxCd1', _pagemodel.taxCd1 == null ? '20' : _pagemodel.taxCd1);
+              pageModelFlag = 'Y';
+            }
+          }
+        }
+      }
+
+      if (cmrIssuingCntry == '702') {
+        // Estonia, Lithuania, Latvia
+        if (countryUse == '702EE' || countryUse == '702LT' || countryUse == '702LV') {
+          if (pageModelFlag == 'Y') {
+            FormManager.setValue('taxCd1', '00');
+          } else {
+            FormManager.setValue('taxCd1', _pagemodel.taxCd1 == null ? '00' : _pagemodel.taxCd1);
+            pageModelFlag = 'Y';
+          }
+        } else { // Finland
+          if (isEUCntry == true && landCntry != null) {
+            if (pageModelFlag == 'Y') {
+              FormManager.setValue('taxCd1', '14');
+            } else {
+              FormManager.setValue('taxCd1', _pagemodel.taxCd1 == null ? '14' : _pagemodel.taxCd1);
+              pageModelFlag = 'Y';
+            }
+          } else if (isEUCntry == false && landCntry != null) {
+            if (pageModelFlag == 'Y') {
+              FormManager.setValue('taxCd1', '20');
+            } else {
+              FormManager.setValue('taxCd1', _pagemodel.taxCd1 == null ? '20' : _pagemodel.taxCd1);
+              pageModelFlag = 'Y';
+            }
+          }
+        }
+      }
+
+      // Norway
+      if (cmrIssuingCntry == '806') {
+        if (isEUCntry == true && landCntry != null) {
+          if (pageModelFlag == 'Y') {
+            FormManager.setValue('taxCd1', '00');
+          } else {
+            FormManager.setValue('taxCd1', _pagemodel.taxCd1 == null ? '00' : _pagemodel.taxCd1);
+            pageModelFlag = 'Y';
+          }
+        } else if (isEUCntry == false && landCntry != null) {
+          if (pageModelFlag == 'Y') {
+            FormManager.setValue('taxCd1', '00');
+          } else {
+            FormManager.setValue('taxCd1', _pagemodel.taxCd1 == null ? '00' : _pagemodel.taxCd1);
+            pageModelFlag = 'Y';
+          }
+        }
+      }
+
+      // Sweden
+      if (cmrIssuingCntry == '846') {
+        if (isEUCntry == true && landCntry != null) {
+          if (pageModelFlag == 'Y') {
+            FormManager.setValue('taxCd1', '14');
+          } else {
+            FormManager.setValue('taxCd1', _pagemodel.taxCd1 == null ? '14' : _pagemodel.taxCd1);
+            pageModelFlag = 'Y';
+          }
+        } else if (isEUCntry == false && landCntry != null) {
+          if (pageModelFlag == 'Y') {
+            FormManager.setValue('taxCd1', '20');
+          } else {
+            FormManager.setValue('taxCd1', _pagemodel.taxCd1 == null ? '20' : _pagemodel.taxCd1);
+            pageModelFlag = 'Y';
+          }
+        }
+      }
+    } else if (custSubGrp == 'CBINT' || custSubGrp == 'CBISO') {
+      if (pageModelFlag == 'Y') {
+        FormManager.setValue('taxCd1', '00');
+      } else {
+        FormManager.setValue('taxCd1', _pagemodel.taxCd1 == null ? '00' : _pagemodel.taxCd1);
+        pageModelFlag = 'Y';
+      }
+    }
+  });
 }
 
 dojo.addOnLoad(function() {
