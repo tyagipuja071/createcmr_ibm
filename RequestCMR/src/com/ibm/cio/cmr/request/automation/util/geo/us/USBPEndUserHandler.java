@@ -85,14 +85,13 @@ public class USBPEndUserHandler extends USBPHandler {
     Admin admin = requestData.getAdmin();
     Addr addr = requestData.getAddress("ZS01");
     long childReqId = admin.getChildReqId();
-    DnBMatchingResponse dnbMatch = null;
-
-    // match against SOS-RPA
-    SosResponse sosMatch = matchAgainstSosRpa(handler, requestData, addr, engineData, details, overrides, ibmCmr != null);
 
     // match against D&B
-    if (sosMatch == null) {
-      dnbMatch = matchAgainstDnB(handler, requestData, addr, engineData, details, overrides, ibmCmr != null);
+    DnBMatchingResponse dnbMatch = matchAgainstDnB(handler, requestData, addr, engineData, details, overrides, ibmCmr != null);
+
+    // match against SOS-RPA
+    if (dnbMatch == null) {
+      SosResponse sosMatch = matchAgainstSosRpa(handler, requestData, addr, engineData, details, overrides, ibmCmr != null);
     }
 
     // check CEID

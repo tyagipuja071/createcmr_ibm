@@ -297,6 +297,15 @@ public class AutomationEngineData extends HashMap<String, Object> {
   }
 
   /**
+   * Returns true if Dnb has been verified for a request
+   * 
+   * @return
+   */
+  public boolean isDnbVerified() {
+    return hasPositiveCheckStatus(DNB_MATCH);
+  }
+
+  /**
    * Returns true if SOS-RPA has been verified for a request
    * 
    * @return
