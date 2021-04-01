@@ -512,7 +512,7 @@ if (readOnly){
               </p>
             </cmr:column>
         </cmr:view>
-        <cmr:view exceptForGEO="JP">
+        <cmr:view exceptForGEO="JP,KR">
               <cmr:column span="2">
                 <p>
                   <label for="requesterId">Requester:</label>
