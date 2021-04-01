@@ -1241,16 +1241,16 @@ function addAddressFieldValidators() {
         var cntryRegion = FormManager.getActualValue('countryUse');
         var cntryRegionSubString = cntryRegion.slice(-2);
         var landCntry = FormManager.getActualValue('landCntry');
-        if (cntryRegion != '' && cntryRegionSubString == landCntry && count > 4) {
+        if (cntryRegion != '' && cntryRegion.length > 3 && cntryRegionSubString == landCntry && count > 4) {
           return new ValidationResult(null, false,
               'Customer name con\'t, Additional info, Att. Person, Street and PO BOX only 4 fields can be filled at the same time.');
         }
-        if (cntryRegion != '' && cntryRegionSubString != landCntry && count > 3) {
+        if (cntryRegion != '' && cntryRegion.length > 3 && cntryRegionSubString != landCntry && count > 3) {
           return new ValidationResult(null, false,
               'Customer name con\'t, Additional info, Att. Person, Street and PO BOX only 3 fields can be filled at the same time.');
         }
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
-        if (cntryRegion == '') {
+        if (cntryRegion == '' || cntryRegion.length == 3) {
           if (cntry == SysLoc.SWEDEN) {
             if (landCntry != "SE" && count > 3) {
               return new ValidationResult(null, false,

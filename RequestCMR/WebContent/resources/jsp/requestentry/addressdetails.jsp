@@ -1095,7 +1095,7 @@
   </cmr:row> --%>
 
   <cmr:row addBackground="true">
-    <cmr:view exceptForGEO="CEMEA,CN,JP,SWISS" exceptForCountry="862">
+    <cmr:view exceptForGEO="CEMEA,CN,JP,SWISS,NORDX" exceptForCountry="862">
       <cmr:column span="1">
         <cmr:label fieldId="stateProv_view">
           <span class="lbl-StateProv">${ui.stateProve}</span>:</cmr:label>
@@ -1124,7 +1124,7 @@
     </cmr:view>
   </cmr:row>
 
-  <cmr:view exceptForGEO="CN" exceptForCountry="618,724">
+  <cmr:view exceptForGEO="CN,NORDX" exceptForCountry="618,724">
     <cmr:row addBackground="true">
       <cmr:column span="1">
         <cmr:label fieldId="stateProv_view">
