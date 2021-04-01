@@ -138,7 +138,7 @@ public class NetherlandsUtil extends AutomationUtil {
         details.append("Coverage calculated successfully using 32S logic.").append("\n");
         if (StringUtils.isNotBlank(fields.getEngineeringBO())) {
           details.append("BO Team : " + fields.getEngineeringBO()).append("\n");
-          overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getEngineeringBo(), fields.getEngineeringBO());
+          overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ENGINEERING_BO", data.getEngineeringBo(), fields.getEngineeringBO());
         }
         if (StringUtils.isNotBlank(fields.getInac())) {
           details.append(" INAC/NAC Code : " + fields.getInac()).append("\n");
