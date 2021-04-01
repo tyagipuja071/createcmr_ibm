@@ -831,7 +831,7 @@
       <cmr:column span="2">
         <div id="addrTxt_view">-</div>
       </cmr:column>
-      <cmr:column span="1" exceptForGEO="IERP,CND,CEMEA,NL,NORDX,SWISS" exceptForCountry='758'>
+      <cmr:column span="1" exceptForGEO="IERP,CND,CEMEA,NL,SWISS" exceptForCountry='758'>
         <cmr:label fieldId="addrTxt2_view">
           <span class="lbl-StreetAddress2">${ui.street2}</span>:</cmr:label>
       </cmr:column>
