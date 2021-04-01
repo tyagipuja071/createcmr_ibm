@@ -901,7 +901,7 @@ public abstract class AutomationUtil {
     while (it.hasNext()) {
       Addr addr = it.next();
       if (!"ZS01".equals(addr.getId().getAddrType())) {
-        if (compareCustomerNames(zs01, addr) && addr.getAddrTxt().trim().toUpperCase().equals(mainStreetAddress1)
+        if (compareCustomerNames(zs01, addr) && (StringUtils.isNotBlank(addr.getAddrTxt()) && addr.getAddrTxt().trim().toUpperCase().equals(mainStreetAddress1))
             && addr.getCity1().trim().toUpperCase().equals(mainCity) && addr.getPostCd().trim().equals(mainPostalCd)) {
           details.append("Removing duplicate address record: " + addr.getId().getAddrType() + " from the request.").append("\n");
           Addr merged = entityManager.merge(addr);
