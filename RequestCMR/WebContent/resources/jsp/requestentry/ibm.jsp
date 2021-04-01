@@ -109,7 +109,7 @@ dojo.addOnLoad(function(){
 					<cmr:field id="dupCmrIndc" path="dupCmrIndc" fieldId="CMRDoubleCreation" tabId="MAIN_IBM_TAB" />
 				</p>
 			</cmr:column>
-  			<cmr:column span="1" containerForField="RestrictedInd">
+  			<cmr:column span="1" containerForField="RestrictedInd" forGEO="TW" forCountry="858">
   				<p>
             		<cmr:label fieldId="RestrictedInd">&nbsp;</cmr:label>
               		<cmr:field fieldId="RestrictedInd" path="restrictInd" tabId="MAIN_IBM_TAB"/>
