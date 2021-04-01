@@ -208,6 +208,7 @@ var TemplateService = (function() {
           }
 
           if (!FormManager.getField(name)) {
+            console.log('Scenario ERR ------------- ' + name);
             continue;
           }
 
