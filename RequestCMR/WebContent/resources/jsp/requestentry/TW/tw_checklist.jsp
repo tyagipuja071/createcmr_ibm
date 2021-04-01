@@ -102,19 +102,15 @@ Missile: Bahrain, People's Republic of China, Egypt, Iran, Iraq, Israel, Jordan,
        <span style="font-weight: bold;">CERTIFICATION </span>
     </cmr:chk-entry>     
   </cmr:chk-section>
-    <cmr:chk-section name="Address Verification" > 
+    <cmr:chk-section name="CERTIFICATION" >
+    <cmr:chk-entry>
+      Address Verification
+    </cmr:chk-entry> 
     <cmr:chk-entry number="1" section="D">
      By selecting 'I confirm' you are certifying that any address you are entering into this customer record is a valid customer 
      address (not a location owned, leased or otherwise controlled by IBM), and if not a customer address is specifically 
      identified as an IBM or third party address in the entry.
      </cmr:chk-entry>   
-  </cmr:chk-section>   
-  <cmr:chk-block boldText="false">
-    If any of the above questions have answered 
-    <span style="font-weight: bold; text-decoration: underline">YES</span>
-    , please STOP and CONTACT your Country ERC or legal counsel for further guidance. 
-    Transactions (with customers found to be engaged in prohibited activities) may only proceed as authorized by CHQ ERO and/or AP STC.
-  </cmr:chk-block>
- 
+  </cmr:chk-section>    
 </cmr:checklist>
 
