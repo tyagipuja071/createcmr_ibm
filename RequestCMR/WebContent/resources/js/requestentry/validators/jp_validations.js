@@ -422,6 +422,7 @@ function setFieldsRequired() {
     break;
   case 'NORML':
   case 'EUCMR':
+  case 'WHCMR':
     if (!isPageLoad && setFieldsRequiredCount > 2) {
       // Unlock Outsourcing Service Show zSeries SW
       FormManager.hide('DirectBp', 'creditBp');
@@ -1175,6 +1176,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
   switch (custSubGrp) {
   case 'NORML':
   case 'EUCMR':
+  case 'WHCMR':
   case 'OUTSC':
     if (custType == 'CEA') {
       if (addrType == 'ZC01') {
@@ -2047,8 +2049,8 @@ function convertBranchInDetails() {
   var branch = FormManager.getActualValue('office');
   FormManager.setValue('office', replaceBranchChar(branch));
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  if (custSubGrp == 'NORML' || custSubGrp == 'EUCMR' || custSubGrp == 'BIJSC' || custSubGrp == 'BQICL' || custSubGrp == 'STOSB'
-      || custSubGrp == 'STOSC' || custSubGrp == 'STOSI') {
+  if (custSubGrp == 'NORML' || custSubGrp == 'EUCMR' || custSubGrp == 'WHCMR' || custSubGrp == 'BIJSC' || custSubGrp == 'BQICL'
+      || custSubGrp == 'STOSB' || custSubGrp == 'STOSC' || custSubGrp == 'STOSI') {
     FormManager.setValue('office', convert2DBCSIgnoreCase(FormManager.getActualValue('office')));
     // FormManager.setValue('office',
     // convertHalfToFullKatakana(FormManager.getActualValue('office')));
@@ -2089,8 +2091,8 @@ function convertDeptInDetails() {
   var dept = FormManager.getActualValue('dept');
   // FormManager.setValue('dept', replaceDeptChar(dept));
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  if (custSubGrp == 'NORML' || custSubGrp == 'EUCMR' || custSubGrp == 'BIJSC' || custSubGrp == 'BQICL' || custSubGrp == 'STOSB'
-      || custSubGrp == 'STOSC' || custSubGrp == 'STOSI') {
+  if (custSubGrp == 'NORML' || custSubGrp == 'EUCMR' || custSubGrp == 'WHCMR' || custSubGrp == 'BIJSC' || custSubGrp == 'BQICL'
+      || custSubGrp == 'STOSB' || custSubGrp == 'STOSC' || custSubGrp == 'STOSI') {
     FormManager.setValue('dept', replaceDeptChar(dept));
     FormManager.setValue('dept', convert2DBCSIgnoreCase(FormManager.getActualValue('dept')));
     // FormManager.setValue('dept',
@@ -2459,6 +2461,7 @@ function setCSBOOnAddrSave() {
     switch (custSubGrp) {
     case 'NORML':
     case 'EUCMR':
+    case 'WHCMR':
     case 'OUTSC':
     case 'STOSB':
     case 'STOSC':
@@ -2498,6 +2501,7 @@ function setCSBOOnAddrSave() {
     switch (custSubGrp) {
     case 'NORML':
     case 'EUCMR':
+    case 'WHCMR':
     case 'OUTSC':
     case 'BPWPQ':
     case 'ISOCU':
@@ -2692,7 +2696,7 @@ function setINACCodeMandatory() {
     return;
   }
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  if (custSubGrp != 'NORML' && custSubGrp != 'EUCMR' && custSubGrp != 'OUTSC' && custSubGrp != 'BQICL') {
+  if (custSubGrp != 'NORML' && custSubGrp != 'EUCMR' && custSubGrp != 'WHCMR' && custSubGrp != 'OUTSC' && custSubGrp != 'BQICL') {
     return;
   }
 
@@ -2954,6 +2958,7 @@ function showHideJSIC() {
   switch (custSubGrp) {
   case 'NORML':
   case 'EUCMR':
+  case 'WHCMR':
   case 'OUTSC':
     if (_role == 'Requester' || _role == 'Processor') {
       FormManager.show('JSICCd', 'jsicCd');
@@ -3306,8 +3311,8 @@ function setCSBORequired() {
     }
   } else if (reqType == 'U') {
     if (role == 'REQUESTER') {
-      if (custSubGrp == 'NORML' || custSubGrp == 'EUCMR' || custSubGrp == 'OUTSC' || custSubGrp == 'BPWPQ' || custSubGrp == 'ISOCU'
-          || custSubGrp == 'STOSB' || custSubGrp == 'STOSC' || custSubGrp == 'STOSI' || custSubGrp == 'INTER') {
+      if (custSubGrp == 'NORML' || custSubGrp == 'EUCMR' || custSubGrp == 'WHCMR' || custSubGrp == 'OUTSC' || custSubGrp == 'BPWPQ'
+          || custSubGrp == 'ISOCU' || custSubGrp == 'STOSB' || custSubGrp == 'STOSC' || custSubGrp == 'STOSI' || custSubGrp == 'INTER') {
         FormManager.enable('csBo');
         FormManager.removeValidator('csBo', Validators.REQUIRED);
       } else {
@@ -3315,8 +3320,8 @@ function setCSBORequired() {
         FormManager.removeValidator('csBo', Validators.REQUIRED);
       }
     } else if (role == 'PROCESSOR') {
-      if (custSubGrp == 'NORML' || custSubGrp == 'EUCMR' || custSubGrp == 'OUTSC' || custSubGrp == 'BPWPQ' || custSubGrp == 'ISOCU'
-          || custSubGrp == 'STOSB' || custSubGrp == 'STOSC' || custSubGrp == 'STOSI' || custSubGrp == 'INTER') {
+      if (custSubGrp == 'NORML' || custSubGrp == 'EUCMR' || custSubGrp == 'WHCMR' || custSubGrp == 'OUTSC' || custSubGrp == 'BPWPQ'
+          || custSubGrp == 'ISOCU' || custSubGrp == 'STOSB' || custSubGrp == 'STOSC' || custSubGrp == 'STOSI' || custSubGrp == 'INTER') {
         FormManager.addValidator('csBo', Validators.REQUIRED, [ 'CS BO Code' ], 'MAIN_IBM_TAB');
       } else if (custSubGrp == 'BCEXA' || custSubGrp == 'BFKSC') {
         FormManager.readOnly('csBo');
@@ -3342,6 +3347,7 @@ function setCSBOOnScenarioChange() {
     switch (custSubGrp) {
     case 'NORML':
     case 'EUCMR':
+    case 'WHCMR':
     case 'OUTSC':
     case 'STOSB':
     case 'STOSC':
@@ -3381,6 +3387,7 @@ function setCSBOOnScenarioChange() {
     switch (custSubGrp) {
     case 'NORML':
     case 'EUCMR':
+    case 'WHCMR':
     case 'OUTSC':
     case 'BPWPQ':
     case 'ISOCU':
@@ -3766,6 +3773,7 @@ function removeDefaultValueTelNo() {
   switch (custSubGrp) {
   case 'NORML':
   case 'EUCMR':
+  case 'WHCMR':
   case 'OUTSC':
   case 'ABIJS':
   case 'AHIJE':
@@ -3950,6 +3958,7 @@ function disableFieldsForUpdateOnScenarios() {
   // break;
   case 'NORML':
   case 'EUCMR':
+  case 'WHCMR':
     FormManager.enable('icmsInd');
     FormManager.addValidator('icmsInd', Validators.REQUIRED, [ 'OFCD /Sales(Team) No/Rep Sales No Change' ], 'MAIN_GENERAL_TAB');
 
@@ -4695,7 +4704,7 @@ function ofcdJsicMismatchValidatorJP() {
         }
 
         if (FormManager.getActualValue('custSubGrp') != 'NORML' && FormManager.getActualValue('custSubGrp') != 'EUCMR'
-            && FormManager.getActualValue('custSubGrp') != 'OUTSC') {
+            && FormManager.getActualValue('custSubGrp') != 'WHCMR' && FormManager.getActualValue('custSubGrp') != 'OUTSC') {
           return new ValidationResult(null, true, null);
         }
 
@@ -4794,6 +4803,7 @@ function setOutsourcingServiceRequired() {
   case 'ISOCU':
   case 'NORML':
   case 'EUCMR':
+  case 'WHCMR':
     if (FormManager.getField('outsourcingService').set) {
       FormManager.getField('outsourcingService').set('checked', false);
     } else if (FormManager.getField('outsourcingService')) {
@@ -4999,7 +5009,7 @@ function ROLValidatorForZC01() {
               rol = rol[0];
             }
             if (reqType == 'C' && type == 'ZC01' && (rol == '' || rol == null)
-                && (custSubGrp == 'NORML' || custSubGrp == 'EUCMR' || custSubGrp == 'OUTSC') && custType.includes('C')) {
+                && (custSubGrp == 'NORML' || custSubGrp == 'EUCMR' || custSubGrp == 'WHCMR' || custSubGrp == 'OUTSC') && custType.includes('C')) {
               failInd = true;
             }
           }
