@@ -8540,6 +8540,7 @@ function autoSetAbbrNameUKI() {
   var reqId = FormManager.getActualValue('reqId');
   var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
   var abbName = FormManager.getActualValue('abbrevNm');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
   // CMR - 5063
   if (custSubGrp == 'THDPT') {
     var result = cmr.query('GET.CUSTNM1_ADDR_UKI', {
@@ -8584,11 +8585,17 @@ function autoSetAbbrNameUKI() {
     autoSetAbbrevNmFrmDept();
   } else {
 
-    var result = cmr.query('GET.CUSTNM1_ADDR_UKI', {
-      REQ_ID : reqId,
-      ADDR_TYPE : 'ZS01'
-    });
-    if (result.ret1 != undefined) {
+	  if (role == "PROCESSOR"){
+	        var result = cmr.query('UKI.GET_ABBNAME_DATA', {
+	  	       REQ_ID : reqId
+	  	    });
+	    } else if (role == "REQUESTER"){
+	    	var result = cmr.query('GET.CUSTNM1_ADDR_UKI', {
+	    	   REQ_ID : reqId,
+	    	   ADDR_TYPE : 'ZS01'
+	    	});
+	    }
+      if (result.ret1 != undefined) {
       {
         var _abbrevNmValue = result.ret1 + (result.ret2 != undefined ? result.ret2 : '');
         if (_abbrevNmValue != null && _abbrevNmValue.length > 22) {
