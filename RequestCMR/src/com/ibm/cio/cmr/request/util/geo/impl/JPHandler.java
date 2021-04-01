@@ -1292,6 +1292,7 @@ public class JPHandler extends GEOHandler {
       switch (custSubGrp) {
       case "NORML":
       case "EUCMR":
+      case "WHCMR":
       case "OUTSC":
       case "STOSB":
       case "STOSC":
@@ -1310,6 +1311,7 @@ public class JPHandler extends GEOHandler {
       switch (custSubGrp) {
       case "NORML":
       case "EUCMR":
+      case "WHCMR":
       case "OUTSC":
       case "BPWPQ":
       case "ISOCU":
@@ -1485,6 +1487,7 @@ public class JPHandler extends GEOHandler {
         switch (custSubGrp) {
         case "NORML":
         case "EUCMR":
+        case "WHCMR":
         case "OUTSC":
         case "STOSB":
         case "STOSC":
@@ -1523,6 +1526,7 @@ public class JPHandler extends GEOHandler {
         switch (custSubGrp) {
         case "NORML":
         case "EUCMR":
+        case "WHCMR":
         case "OUTSC":
         case "BPWPQ":
         case "ISOCU":
@@ -1924,6 +1928,7 @@ public class JPHandler extends GEOHandler {
       switch (custSubGrp) {
       case "NORML":
       case "EUCMR":
+      case "WHCMR":
       case "OUTSC":
       case "STOSB":
       case "STOSC":
@@ -1962,6 +1967,7 @@ public class JPHandler extends GEOHandler {
       switch (custSubGrp) {
       case "NORML":
       case "EUCMR":
+      case "WHCMR":
       case "OUTSC":
       case "BPWPQ":
       case "ISOCU":
