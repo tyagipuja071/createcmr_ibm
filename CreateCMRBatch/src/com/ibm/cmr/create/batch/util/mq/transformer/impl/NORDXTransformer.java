@@ -908,6 +908,16 @@ public class NORDXTransformer extends EMEATransformer {
         legacyCust.setCeBo("X900000");
       }
 
+      if (SystemLocation.DENMARK.equals(cntry)) {
+        legacyCust.setCurrencyCd("");
+      } else if (SystemLocation.FINLAND.equals(cntry)) {
+        legacyCust.setCurrencyCd("EU");
+      } else if (SystemLocation.NORWAY.equals(cntry)) {
+        legacyCust.setCurrencyCd("");
+      } else if (SystemLocation.SWEDEN.equals(cntry)) {
+        legacyCust.setCurrencyCd("");
+      }
+
       if (SystemLocation.NORWAY.equals(data.getCmrIssuingCntry())) {
         legacyCust.setOverseasTerritory("");
       } else if (SystemLocation.SWEDEN.equals(data.getCmrIssuingCntry())) {
@@ -949,6 +959,38 @@ public class NORDXTransformer extends EMEATransformer {
 
       if (!StringUtils.isBlank(data.getTerritoryCd())) {
         legacyCust.setOverseasTerritory(data.getTerritoryCd());
+      }
+
+      if (SystemLocation.DENMARK.equals(cntry)) {
+        if ("DKK".equals(data.getCurrencyCd())) {
+          legacyCust.setCurrencyCd("");
+        } else if ("EUR".equals(data.getCurrencyCd())) {
+          legacyCust.setCurrencyCd("EU");
+        } else if ("USD".equals(data.getCurrencyCd())) {
+          legacyCust.setCurrencyCd("US");
+        }
+      } else if (SystemLocation.FINLAND.equals(cntry)) {
+        if ("EUR".equals(data.getCurrencyCd())) {
+          legacyCust.setCurrencyCd("EU");
+        } else if ("USD".equals(data.getCurrencyCd())) {
+          legacyCust.setCurrencyCd("US");
+        }
+      } else if (SystemLocation.NORWAY.equals(cntry)) {
+        if ("NOK".equals(data.getCurrencyCd())) {
+          legacyCust.setCurrencyCd("");
+        } else if ("EUR".equals(data.getCurrencyCd())) {
+          legacyCust.setCurrencyCd("EU");
+        } else if ("USD".equals(data.getCurrencyCd())) {
+          legacyCust.setCurrencyCd("US");
+        }
+      } else if (SystemLocation.SWEDEN.equals(cntry)) {
+        if ("SEK".equals(data.getCurrencyCd())) {
+          legacyCust.setCurrencyCd("");
+        } else if ("EUR".equals(data.getCurrencyCd())) {
+          legacyCust.setCurrencyCd("EU");
+        } else if ("USD".equals(data.getCurrencyCd())) {
+          legacyCust.setCurrencyCd("US");
+        }
       }
 
       String dataEmbargoCd = data.getEmbargoCd();
@@ -1052,38 +1094,6 @@ public class NORDXTransformer extends EMEATransformer {
       legacyCust.setTaxCd(data.getTaxCd1());
     } else {
       legacyCust.setTaxCd("");
-    }
-
-    if (SystemLocation.DENMARK.equals(data.getCurrencyCd())) {
-      if ("DKK".equals(data.getCurrencyCd())) {
-        legacyCust.setCurrencyCd("");
-      } else if ("EUR".equals(data.getCurrencyCd())) {
-        legacyCust.setCurrencyCd("EU");
-      } else if ("USD".equals(data.getCurrencyCd())) {
-        legacyCust.setCurrencyCd("US");
-      }
-    } else if (SystemLocation.FINLAND.equals(data.getCurrencyCd())) {
-      if ("EUR".equals(data.getCurrencyCd())) {
-        legacyCust.setCurrencyCd("EU");
-      } else if ("USD".equals(data.getCurrencyCd())) {
-        legacyCust.setCurrencyCd("US");
-      }
-    } else if (SystemLocation.NORWAY.equals(data.getCurrencyCd())) {
-      if ("NOK".equals(data.getCurrencyCd())) {
-        legacyCust.setCurrencyCd("");
-      } else if ("EUR".equals(data.getCurrencyCd())) {
-        legacyCust.setCurrencyCd("EU");
-      } else if ("USD".equals(data.getCurrencyCd())) {
-        legacyCust.setCurrencyCd("US");
-      }
-    } else if (SystemLocation.SWEDEN.equals(data.getCurrencyCd())) {
-      if ("SEK".equals(data.getCurrencyCd())) {
-        legacyCust.setCurrencyCd("");
-      } else if ("EUR".equals(data.getCurrencyCd())) {
-        legacyCust.setCurrencyCd("EU");
-      } else if ("USD".equals(data.getCurrencyCd())) {
-        legacyCust.setCurrencyCd("US");
-      }
     }
 
     if (!StringUtils.isBlank(data.getModeOfPayment())) {
