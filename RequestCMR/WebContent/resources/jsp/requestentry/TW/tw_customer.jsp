@@ -20,7 +20,26 @@
 %>
 
 <cmr:view forGEO="TW">
-
+ 
+ <cmr:row>
+  <cmr:column span="2" containerForField="LocalTax1">
+      <p>
+        <label for="mktgDept"> 
+          <cmr:fieldLabel fieldId="LocalTax1" />: 
+          <cmr:delta text="${rdcdata.mktgDept}" oldValue="${reqentry.mktgDept}" />
+        </label>
+        <cmr:field path="mktgDept" id="mktgDept" fieldId="LocalTax1" tabId="MAIN_CUST_TAB" />
+      </p>
+    </cmr:column>
+      <cmr:column span="2" containerForField="LocalTax2">
+        <p>
+      <cmr:label fieldId="invoiceSplitCd">
+            <cmr:fieldLabel fieldId="LocalTax2" />:
+          </cmr:label>
+          <cmr:field path="invoiceSplitCd" id="invoiceSplitCd" fieldId="LocalTax2" tabId="MAIN_CUST_TAB" />
+        </p>
+      </cmr:column>
+  </cmr:row>
   <cmr:row>
     <cmr:column span="2" containerForField="CustAcctType">
         <p>
@@ -244,19 +263,20 @@
             <cmr:fieldLabel fieldId="Company" />: 
               <cmr:delta text="${rdcdata.company}" oldValue="${reqentry.company}" />
           </cmr:label>
-          <cmr:field fieldId="Company" id="company1" path="company" tabId="MAIN_CUST_TAB" />
+          <cmr:field fieldId="Company" id="company" path="company" tabId="MAIN_CUST_TAB" />
         </p>
       </cmr:column>
+      
    </cmr:row>
    
   <cmr:row>
-   <cmr:column span="2" containerForField="Affiliate">
+   <cmr:column span="2" containerForField="Affiliate" exceptForCountry="666,726,862,822,838,641" exceptForGEO="MCO1,MCO2,CEMEA,NORDX,BELUX,NL">
         <p>
           <cmr:label fieldId="affiliate">
             <cmr:fieldLabel fieldId="Affiliate" />: 
               <cmr:delta text="${rdcdata.affiliate}" oldValue="${reqentry.affiliate}" />
           </cmr:label>
-          <cmr:field fieldId="Affiliate" id="affiliate1" path="affiliate" tabId="MAIN_CUST_TAB" />
+          <cmr:field fieldId="Affiliate" id="affiliate" path="affiliate" tabId="MAIN_CUST_TAB" />
         </p>
       </cmr:column>
       
