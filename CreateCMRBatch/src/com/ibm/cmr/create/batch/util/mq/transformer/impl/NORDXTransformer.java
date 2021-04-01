@@ -652,10 +652,10 @@ public class NORDXTransformer extends EMEATransformer {
         generateCMRNoObj.setMax(985999);
       } else if ("DKISO".equals(custSubGrp)) {
         generateCMRNoObj.setMin(997000);
-        generateCMRNoObj.setMax(998899);
+        generateCMRNoObj.setMax(997999);
       } else {
-        generateCMRNoObj.setMin(993110);
-        generateCMRNoObj.setMax(998899);
+        generateCMRNoObj.setMin(990000);
+        generateCMRNoObj.setMax(996999);
       }
       LOG.debug("that is Nordics INTER CMR");
     } else if ("XBP".equals(custSubGrp) || "BUSPR".equals(custSubGrp) || "CSBP".equals(custSubGrp) || "MEBP".equals(custSubGrp)
