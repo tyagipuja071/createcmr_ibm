@@ -12,6 +12,7 @@ function afterConfigKR() {
   // FormManager.readOnly('isuCd');
   // Non editable for requester, same as TW
   FormManager.disable('isuCd');
+  FormManager.disable('cmrNoPrefix');
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
   }

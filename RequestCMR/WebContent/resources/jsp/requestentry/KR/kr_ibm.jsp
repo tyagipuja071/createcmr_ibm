@@ -14,6 +14,15 @@
     readOnly = false;
   }
   boolean newEntry = BaseModel.STATE_NEW == reqentry.getState();
+  
+  String prodType1 = reqentry.getCodCondition();
+  String prodType2 = reqentry.getRemoteCustInd();
+  String prodType3 = reqentry.getDecentralizedOptIndc();
+  String prodType4 = reqentry.getImportActIndc();
+  String prodType5 = reqentry.getMailingCondition();
+  String prodType6 = reqentry.getSizeCd();
+  String prodType7 = reqentry.getFootnoteNo();
+  String prodType8 = reqentry.getFomeZero();
 %>
 
 <cmr:view forGEO="KR">
@@ -75,4 +84,50 @@
           </p>
         </cmr:column>
 </cmr:row> 
+
+  <cmr:row addBackground="false">
+    <cmr:column span="4">
+      <cmr:label fieldId="ibmBankNumber">
+        <cmr:fieldLabel fieldId="ProdType" />: <span id="ast-ProdType"></span>
+          <cmr:delta text="-" id="delta-ibmBankNumber" code="L" />
+      </cmr:label>
+      <div id="prodTypeCheckboxes" style="display: block">
+        <div class="jp-chk">
+          <input type="checkbox" name="codCondition" value="1" id="prodType_1" <%= ("1".equals(prodType1))?"checked":"" %> />
+          <label class=" cmr-radio-check-label" for="prodType_1">AAS HW</label>
+        </div>
+        <div class="jp-chk">
+      		<input  type="checkbox" name="remoteCustInd" value="1" id="prodType_2" <%= ("1".equals(prodType2))?"checked":"" %> />
+      		<label class=" cmr-radio-check-label" for="prodType_2">AAS z9/zSeries SW</label>
+        </div>
+        <div class="jp-chk">
+      		<input type="checkbox" name="decentralizedOptIndc" value="1" id="prodType_3" <%= ("1".equals(prodType3))?"checked":"" %> />
+      		<label class=" cmr-radio-check-label" for="prodType_3">Others expect AAS z9/zSeries SW</label>
+        </div>
+        <div class="jp-chk">
+      		<input type="checkbox" name="importActIndc" value="1" id="prodType_4" <%= ("1".equals(prodType4))?"checked":"" %> />
+      		<label class=" cmr-radio-check-label" for="prodType_4">QCOS</label>
+        </div>
+        <div class="jp-chk">
+      		<input  type="checkbox" name="mailingCondition" value="1" id="prodType_5" <%= ("1".equals(prodType5))?"checked":"" %> />
+      		<label class=" cmr-radio-check-label" for="prodType_5">Lenovo</label>
+        </div>
+        <div class="jp-chk">
+      		<input type="checkbox" name="sizeCd" value="1" id="prodType_6" <%= ("1".equals(prodType6))?"checked":"" %> />
+      		<label class=" cmr-radio-check-label" for="prodType_6">CISCO</label>
+        </div>
+        <div class="jp-chk">
+      		<input  type="checkbox" name="footnoteNo" value="1" id="prodType_7" <%= ("1".equals(prodType7))?"checked":"" %> />
+      		<label class=" cmr-radio-check-label" for="prodType_7">Demo used</label>
+        </div>
+        <div class="jp-chk">
+      		<input type="checkbox" name="fomeZero" value="1" id="prodType_8" <%= ("1".equals(prodType8))?"checked":"" %> />
+      		<label class=" cmr-radio-check-label" for="prodType_8">Others</label>
+        </div>
+      </div>
+    </cmr:column>  
+    <br>
+    <br>
+    <br>
+  </cmr:row>
 </cmr:view>
