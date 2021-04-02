@@ -8,6 +8,10 @@ function afterConfigKR() {
   FormManager.readOnly('cmrOwner');
   FormManager.resetValidations('enterprise');
 
+  FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
+  // FormManager.readOnly('isuCd');
+  // Non editable for requester, same as TW
+  FormManager.disable('isuCd');
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
   }
