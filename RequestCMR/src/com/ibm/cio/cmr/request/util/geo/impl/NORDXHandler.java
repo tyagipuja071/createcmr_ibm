@@ -1164,7 +1164,11 @@ public class NORDXHandler extends BaseSOFHandler {
     if ("ZS01".equals(addr.getId().getAddrType())) {
       String landCntry = addr.getLandCntry();
       if (data.getCustGrp() != null && data.getCustGrp().contains("LOC")) {
-        landCntry = data.getCountryUse().isEmpty() ? LANDED_CNTRY_MAP.get(cmrIssuingCntry) : LANDED_CNTRY_MAP.get(data.getCountryUse());
+        if (data.getCountryUse() != null && !data.getCountryUse().isEmpty()) {
+          landCntry = LANDED_CNTRY_MAP.get(data.getCountryUse());
+        } else {
+          landCntry = LANDED_CNTRY_MAP.get(cmrIssuingCntry);
+        }
       }
       if ("U".equals(admin.getReqType())) {
         String sql = ExternalizedQuery.getSql("QUERY.ADDR.GET.LANDCNTRY.BY_REQID");
