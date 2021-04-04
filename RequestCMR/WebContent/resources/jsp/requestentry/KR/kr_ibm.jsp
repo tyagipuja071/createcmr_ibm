@@ -85,6 +85,26 @@
         </cmr:column>
 </cmr:row> 
 
+<cmr:row addBackground="true"> 
+    <cmr:column span="2" containerForField="OriginatorNo">
+        <p>
+          <cmr:label fieldId="OrgNo">
+            <cmr:fieldLabel fieldId="OrgNo" />:
+          </cmr:label>
+          <cmr:field path="orgNo" id="orgNo" fieldId="OriginatorNo" tabId="MAIN_IBM_TAB" />
+        </p>
+    </cmr:column>
+    
+        <cmr:column span="2" containerForField="CommercialFinanced" >
+        <p>
+          <cmr:label fieldId="commercialFinanced">
+            <cmr:fieldLabel fieldId="CommercialFinanced" />:
+              <cmr:delta text="${rdcdata.commercialFinanced}" oldValue="${reqentry.commercialFinanced}" />
+          </cmr:label>
+          <cmr:field path="commercialFinanced" id="commercialFinanced" fieldId="CommercialFinanced" tabId="MAIN_IBM_TAB" />
+        </p>
+      </cmr:column>
+    </cmr:row>
   <cmr:row addBackground="false">
     <cmr:column span="4">
       <cmr:label fieldId="ibmBankNumber">
