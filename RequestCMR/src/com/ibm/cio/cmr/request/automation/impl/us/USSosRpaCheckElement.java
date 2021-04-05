@@ -86,6 +86,7 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
         details.append("\nZip = " + (StringUtils.isBlank(response.getRecord().getZip()) ? "" : response.getRecord().getZip()));
         output.setDetails(details.toString());
         engineData.addPositiveCheckStatus(AutomationEngineData.SOS_MATCH);
+        engineData.clearNegativeCheckStatus("DnBMatch");
       } else {
         scorecard.setRpaMatchingResult("N");
         validation.setSuccess(true);
