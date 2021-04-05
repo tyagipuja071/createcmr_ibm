@@ -51,7 +51,7 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
     ValidationOutput validation = new ValidationOutput();
     Scorecard scorecard = requestData.getScorecard();
     // skip sos matching if matching records are found in SOS-RPA
-    if (engineData.isDnbVerified()) {
+    if (engineData.isDnbVerified() || "Y".equals(admin.getCompVerifiedIndc())) {
       validation.setSuccess(true);
       validation.setMessage("Skipped");
       output.setDetails("Sos-RPA Matching is skipped as matching records are found in DnB");
