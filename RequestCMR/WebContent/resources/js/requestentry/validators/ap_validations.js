@@ -2883,21 +2883,6 @@ function validateStreetAddrCont2() {
   })(), null, 'frmCMR_addressModal');
 }
 
-function setPostCdANZ(cntry, addressMode, saving, finalSave) {
-	console.log("set postal code ANZ");
-	var issuingCntry = FormManager.getActualValue('cmrIssuingCntry');
-	if ((issuingCntry == SysLoc.AUSTRALIA || issuingCntry == SysLoc.NEW_ZEALAND) && cmr.currentRequestType == 'C') {
-	  var custGroup = FormManager.getActualValue('custGrp');
-	  var role = FormManager.getActualValue('userRole').toUpperCase();
-	  var addrType = FormManager.getActualValue('addrType');
-	  if (custGroup == 'CROSS' && addrType != null) {
-	    if (role == 'REQUESTER') {
-	     FormManager.setValue('postCd', '0121');
-	    }
-	  FormManager.enable('postCd');
-   }
- }
-}
 
 dojo.addOnLoad(function() {
   GEOHandler.AP = [ SysLoc.AUSTRALIA, SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE, SysLoc.VIETNAM,
@@ -2932,8 +2917,6 @@ dojo.addOnLoad(function() {
   GEOHandler.enableCustomerNamesOnAddress(GEOHandler.AP);
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.AP);
   GEOHandler.addAddrFunction(setAbbrevNmLocnOnAddressSave, GEOHandler.AP);
-  GEOHandler.addAddrFunction(setPostCdANZ, GEOHandler.ANZ);
-  GEOHandler.addAfterTemplateLoad(setPostCdANZ, GEOHandler.ANZ);
   // GEOHandler.addAddrFunction(addMandateCmrNoForSG, [ SysLoc.SINGAPORE ]);
 
   GEOHandler.addAfterConfig(onCustSubGrpChange, GEOHandler.AP);
