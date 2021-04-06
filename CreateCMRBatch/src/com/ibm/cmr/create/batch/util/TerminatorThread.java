@@ -54,7 +54,7 @@ public class TerminatorThread extends Thread {
         } catch (Exception e) {
           // noop
         }
-        System.exit(1);
+        Runtime.getRuntime().halt(0);
       }
 
       try {

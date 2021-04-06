@@ -22,6 +22,7 @@ import com.ibm.cio.cmr.request.model.ParamContainer;
 import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cmr.create.batch.util.BatchThreadWorker;
 import com.ibm.cmr.create.batch.util.BatchUtil;
+import com.ibm.cmr.create.batch.util.TerminatorThread;
 import com.ibm.cmr.create.batch.util.masscreate.WorkerThreadFactory;
 
 /**
@@ -55,6 +56,20 @@ public abstract class MultiThreadedBatchService<T> extends BaseBatchService {
       entityManager.close();
     }
 
+    int terminatorTime = 40; // 40 mins default;
+    String terminatorMins = BatchUtil.getProperty("TERMINATOR.MINS");
+    if (!StringUtils.isEmpty(terminatorMins) && StringUtils.isNumeric(terminatorMins)) {
+      terminatorTime = Integer.parseInt(terminatorMins);
+    }
+
+    if (terminateOnLongExecution()) {
+      LOG.info("Starting terminator thread..");
+      this.terminator = new TerminatorThread(1000 * 60 * terminatorTime, entityManager);
+      this.terminator.start();
+    } else {
+      LOG.warn("Terminator thread skipped for the run.");
+    }
+
     // allocate the requests and start a fixed thread pool of workers
     int threads = 5;
     String threadCount = BatchUtil.getProperty("multithreaded.threadCount");
@@ -82,12 +97,13 @@ public abstract class MultiThreadedBatchService<T> extends BaseBatchService {
       currCount++;
     }
 
-    try {
-      executor.shutdown();
-      executor.awaitTermination(3, TimeUnit.HOURS);
-    } catch (InterruptedException e1) {
-      LOG.warn("Executor encountered an error while awaiting task execution", e1);
-    }
+    // try {
+    executor.shutdown();
+    // executor.awaitTermination(30, TimeUnit.MINUTES);
+    // } catch (InterruptedException e1) {
+    // LOG.warn("Executor encountered an error while awaiting task execution",
+    // e1);
+    // }
     // wait till execution finish
     // executor.shutdown();
 
