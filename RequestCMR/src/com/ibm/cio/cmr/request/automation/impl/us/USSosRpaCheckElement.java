@@ -50,6 +50,14 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
     AutomationResult<ValidationOutput> output = buildResult(admin.getId().getReqId());
     ValidationOutput validation = new ValidationOutput();
     Scorecard scorecard = requestData.getScorecard();
+    // skip sos matching if matching records are found in SOS-RPA
+    if (engineData.isDnbVerified() || "Y".equals(admin.getCompVerifiedIndc())) {
+      validation.setSuccess(true);
+      validation.setMessage("Skipped");
+      output.setDetails("Sos-RPA Matching is skipped as matching records are found in DnB");
+      engineData.addPositiveCheckStatus(AutomationEngineData.DNB_MATCH);
+      return output;
+    }
     if (SC_BP_END_USER.equals(scenario) && SC_BP_POOL.equals(scenario) && SC_BP_DEVELOP.equals(scenario) && SC_BP_E_HOST.equals(scenario)) {
       validation.setSuccess(true);
       validation.setMessage("Skipped");
@@ -78,6 +86,7 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
         details.append("\nZip = " + (StringUtils.isBlank(response.getRecord().getZip()) ? "" : response.getRecord().getZip()));
         output.setDetails(details.toString());
         engineData.addPositiveCheckStatus(AutomationEngineData.SOS_MATCH);
+        engineData.clearNegativeCheckStatus("DnBMatch");
       } else {
         scorecard.setRpaMatchingResult("N");
         validation.setSuccess(true);
