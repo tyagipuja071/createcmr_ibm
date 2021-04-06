@@ -2250,23 +2250,33 @@ public class NLHandler extends BaseSOFHandler {
 
       for (String name : countryAddrss) {
         sheet = book.getSheet(name);
+        TemplateValidation errorAddr = new TemplateValidation(name);
         for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
 
           row = sheet.getRow(rowIndex);
           if (row == null) {
             break; // stop immediately when row is blank
           }
+          String custName1 = ""; // 2
           String name3 = ""; // 4
           String attPerson = ""; // 5
+          String street = ""; // 6
           String pobox = ""; // 7
+          String city = ""; // 9
           int addrFldCnt1 = 0;
 
+          currCell = row.getCell(2);
+          custName1 = validateColValFromCell(currCell);
           currCell = row.getCell(4);
           name3 = validateColValFromCell(currCell);
           currCell = row.getCell(5);
           attPerson = validateColValFromCell(currCell);
+          currCell = row.getCell(6);
+          street = validateColValFromCell(currCell);
           currCell = row.getCell(7);
           pobox = validateColValFromCell(currCell);
+          currCell = row.getCell(9);
+          city = validateColValFromCell(currCell);
 
           if (!StringUtils.isEmpty(name3)) {
             addrFldCnt1++;
@@ -2279,11 +2289,26 @@ public class NLHandler extends BaseSOFHandler {
           }
 
           if (addrFldCnt1 > 1) {
-            TemplateValidation errorAddr = new TemplateValidation(name);
             LOG.trace("Customer Name (3) and PO BOX should not be input at the sametime.");
             errorAddr.addError(row.getRowNum(), "PO BOX", "Customer Name 3, Attention person and PO Box - only 1 out of 3 can be filled.");
-            validations.add(errorAddr);
           }
+
+          if (StringUtils.isBlank(custName1)) {
+            LOG.trace("Customer Name 1 is required. ");
+            errorAddr.addError(row.getRowNum(), "Customer Name 1", "Customer Name 1 is required. ");
+          }
+          if (StringUtils.isBlank(street)) {
+            LOG.trace("Street Address is required. ");
+            errorAddr.addError(row.getRowNum(), "Street Address", "Street Address is required. ");
+          }
+          if (StringUtils.isBlank(city)) {
+            LOG.trace("City is required. ");
+            errorAddr.addError(row.getRowNum(), "City", "City is required. ");
+          }
+
+        }
+        if (errorAddr.hasErrors()) {
+          validations.add(errorAddr);
         }
       }
     }
