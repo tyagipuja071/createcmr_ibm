@@ -13,6 +13,7 @@ function afterConfigTW() {
 
   FormManager.addValidator('custAcctType', Validators.REQUIRED, [ 'Customer Type' ], 'MAIN_CUST_TAB');
   FormManager.addValidator('mktgDept', Validators.REQUIRED, [ 'Tax Location' ], 'MAIN_CUST_TAB');
+  FormManager.addValidator('requesterId', Validators.REQUIRED, [ 'Requester' ], 'MAIN_GENERAL_TAB');
   FormManager.addValidator('originatorNm', Validators.REQUIRED, [ 'Requester' ], 'MAIN_GENERAL_TAB');
 
   if (typeof (_pagemodel) != 'undefined') {
