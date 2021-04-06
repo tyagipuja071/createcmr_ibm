@@ -13,6 +13,7 @@ function afterConfigTW() {
 
   FormManager.addValidator('custAcctType', Validators.REQUIRED, [ 'Customer Type' ], 'MAIN_CUST_TAB');
   FormManager.addValidator('mktgDept', Validators.REQUIRED, [ 'Tax Location' ], 'MAIN_CUST_TAB');
+  FormManager.addValidator('originatorNm', Validators.REQUIRED, [ 'Requester' ], 'MAIN_GENERAL_TAB');
 
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
@@ -29,7 +30,6 @@ function afterConfigTW() {
     FormManager.addValidator('abbrevLocn', Validators.REQUIRED, [ 'Customer Location' ], 'MAIN_CUST_TAB');
   }
   if (custSubGrp == 'LOINT') {
-    FormManager.addValidator('subIndustryCd', Validators.REQUIRED, [ 'Subindustry' ], 'MAIN_CUST_TAB');
     FormManager.addValidator('isicCd', Validators.REQUIRED, [ 'ISIC' ], 'MAIN_CUST_TAB');
   }
 
@@ -41,7 +41,7 @@ function afterConfigTW() {
  */
 var _taxTypeHandler = null;
 
-function addHandlersForBELUX() {
+function addHandlersForTW() {
   if (_taxTypeHandler == null) {
     _taxTypeHandler = dojo.connect(FormManager.getField('invoiceSplitCd'), 'onChange', function(value) {
       setVatValidator();
@@ -67,10 +67,10 @@ dojo.addOnLoad(function() {
   GEOHandler.setRevertIsicBehavior(false);
 
   GEOHandler.addAfterConfig(afterConfigTW, GEOHandler.TW);
-  GEOHandler.addAfterConfig(addHandlersForBELUX, GEOHandler.TW);
+  GEOHandler.addAfterConfig(addHandlersForTW, GEOHandler.TW);
 
   GEOHandler.addAfterTemplateLoad(afterConfigTW, GEOHandler.TW);
-  GEOHandler.addAfterTemplateLoad(addHandlersForBELUX, GEOHandler.TW);
+  GEOHandler.addAfterTemplateLoad(addHandlersForTW, GEOHandler.TW);
 
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.TW);
 
