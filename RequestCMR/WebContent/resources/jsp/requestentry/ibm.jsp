@@ -102,20 +102,20 @@ dojo.addOnLoad(function(){
 			</cmr:column>
 			<cmr:column span="2" containerForField="CMRDoubleCreation" forGEO="TW" forCountry="858" >
 				<p>
-					<cmr:label fieldId="CMRDoubleCreation">
-		            <cmr:fieldLabel fieldId="CMRDoubleCreation" />: 
-		           <%--  <cmr:delta text="${rdcdata.dupCmrIndc}" oldValue="${reqentry.dupCmrIndc}" /> --%>
+					<cmr:label fieldId="DuplicateCMR">
+		            <cmr:fieldLabel fieldId="DuplicateCMR" />: 
+		           <%--  <cmr:delta text="${rdcdata.dupCmrIndc}" oldValue="${reqentry.dupCmrIndc}" />DuplicateCMR --%>
           			</cmr:label>
-					<cmr:field id="dupCmrIndc" path="dupCmrIndc" fieldId="CMRDoubleCreation" tabId="MAIN_IBM_TAB" />
+					<cmr:field id="dupCmrIndc" path="dupCmrIndc" fieldId="DuplicateCMR" tabId="MAIN_IBM_TAB" />
 				</p>
 			</cmr:column>
-  			<cmr:column span="1" containerForField="RestrictedInd" forGEO="TW" forCountry="858">
+  			<cmr:column span="1" containerForField="CustomerIdCd" forGEO="TW" forCountry="858">
   				<p>
-            		<cmr:label fieldId="RestrictedInd">&nbsp;</cmr:label>
-              		<cmr:field fieldId="RestrictedInd" path="restrictInd" tabId="MAIN_IBM_TAB"/>
-              		<cmr:label fieldId="RestrictedInd" forRadioOrCheckbox="true">
-                 	<cmr:fieldLabel fieldId="RestrictedInd" />
-                 	<cmr:delta text="${rdcdata.restrictInd}" oldValue="${reqentry.restrictInd == 'Y' ? 'Yes' : 'No'}"/>
+            		<cmr:label fieldId="customerIdCd2">&nbsp;</cmr:label>
+              		<cmr:field fieldId="CustomerIdCd" path="customerIdCd" tabId="MAIN_IBM_TAB"/>
+              		<cmr:label fieldId="customerIdCd" forRadioOrCheckbox="true">
+                 	<cmr:fieldLabel fieldId="CustomerIdCd" />
+                 	<cmr:delta text="${rdcdata.customerIdCd}" oldValue="${reqentry.customerIdCd == 'Y' ? 'Yes' : 'No'}"/>
               		</cmr:label>
   				</p>
   			</cmr:column>

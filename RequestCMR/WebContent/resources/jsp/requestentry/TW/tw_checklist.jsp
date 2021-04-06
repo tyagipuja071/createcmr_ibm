@@ -96,11 +96,8 @@ Missile: Bahrain, People's Republic of China, Egypt, Iran, Iraq, Israel, Jordan,
       <br>
       Afghanistan, Armenia, Azerbaijan, Belarus, Cambodia, People's Republic of China, Georgia, 
       Iraq, Kazakhstan, Korea (North), Kyrgyzstan, Laos, Libya,  
-      Macao, Moldova, Mongolia, Myanmar (Burma), Russia, Sudan, Tajikistan, Turkmenistan, Ukraine, Uzbekistan, Venezuela, Vietnam.                                                            
-       <br>
-       <br>
-       <span style="font-weight: bold;">CERTIFICATION </span>
-    </cmr:chk-entry>     
+      Macao, Moldova, Mongolia, Myanmar (Burma), Russia, Sudan, Tajikistan, Turkmenistan, Ukraine, Uzbekistan, Venezuela, Vietnam.
+    </cmr:chk-entry>
   </cmr:chk-section>
     <cmr:chk-section name="CERTIFICATION" >
     <cmr:chk-entry>

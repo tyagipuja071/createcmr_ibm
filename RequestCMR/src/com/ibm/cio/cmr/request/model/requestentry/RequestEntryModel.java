@@ -435,6 +435,7 @@ public class RequestEntryModel extends BaseModel {
   // taiwan fields
   private String footnoteTxt1;
   private String footnoteTxt2;
+  private String customerIdCd;
 
   public String getMatchIndc() {
     return matchIndc;
@@ -3111,6 +3112,14 @@ public class RequestEntryModel extends BaseModel {
 
   public void setFootnoteTxt2(String footnoteTxt2) {
     this.footnoteTxt2 = footnoteTxt2;
+  }
+
+  public String getCustomerIdCd() {
+    return customerIdCd;
+  }
+
+  public void setCustomerIdCd(String customerIdCd) {
+    this.customerIdCd = customerIdCd;
   }
 
 }

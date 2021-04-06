@@ -273,6 +273,7 @@ public class TWHandler extends GEOHandler {
     map.put("##OriginatorName", "originatorNm");
     map.put("##ProspectToLegalCMR", "prospLegalInd");
     map.put("##CollectionCd", "collectionCd");
+    map.put("##CustomerIdCd", "customerIdCd");
     map.put("##CustPhone", "custPhone");
     map.put("##EmbargoCode", "embargoCd");
     map.put("##VATExempt", "vatExempt");
