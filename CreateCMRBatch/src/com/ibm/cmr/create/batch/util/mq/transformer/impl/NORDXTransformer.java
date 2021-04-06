@@ -1201,7 +1201,10 @@ public class NORDXTransformer extends EMEATransformer {
       newSbo = "3420ISU";
     } else if (SystemLocation.NORWAY.equals(data.getCmrIssuingCntry())) {
       int postCd = Integer.valueOf(mailPostCode.trim());
-      if (postCd >= 0 && postCd < 4000) {
+
+      if (!landedCntry.equals("NO")) {
+        newSbo = "1000ISU";// CMR-1650 SBO value for cross
+      } else if (postCd >= 0 && postCd < 4000) {
         newSbo = "1000ISU";
       } else if (postCd > 3999 && postCd < 5000) {
         newSbo = "4000ISU";

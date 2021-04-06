@@ -435,10 +435,10 @@ function setSalesRepValues(clientTier) {
         FormManager.setValue('repTeamMemberNo', "APD200");
         FormManager.setValue('engineeringBo', '0139');
       } else if (isuCtc == '217' || isuCtc == '219') {
-        FormManager.setValue('repTeamMemberNo', "NOREP09");
+        FormManager.setValue('repTeamMemberNo', "NOREP9");
         FormManager.setValue('engineeringBo', '4680');
       } else if (isuCtc == '8B7') {
-        FormManager.setValue('repTeamMemberNo', "NOREP09");
+        FormManager.setValue('repTeamMemberNo', "NOREP9");
         FormManager.setValue('engineeringBo', '0070');
       }
 
@@ -484,10 +484,10 @@ function setSalesRepValues(clientTier) {
         FormManager.setValue('repTeamMemberNo', "MSN502");
         FormManager.setValue('engineeringBo', '1383');
       } else if (isuCtc == '217') {
-        FormManager.setValue('repTeamMemberNo', "NOREP09");
+        FormManager.setValue('repTeamMemberNo', "NOREP9");
         FormManager.setValue('engineeringBo', '4900');
       } else if (isuCtc == '8B7') {
-        FormManager.setValue('repTeamMemberNo', "NOREP09");
+        FormManager.setValue('repTeamMemberNo', "NOREP9");
         FormManager.setValue('engineeringBo', '0070');
       }
     } else if (cntry == '846') {
@@ -510,10 +510,10 @@ function setSalesRepValues(clientTier) {
           }
         }
       } else if (isuCtc == '217') {
-        FormManager.setValue('repTeamMemberNo', "NOREP09");
+        FormManager.setValue('repTeamMemberNo', "NOREP9");
         FormManager.setValue('engineeringBo', '4990');
       } else if (isuCtc == '8B7') {
-        FormManager.setValue('repTeamMemberNo', "NOREP09");
+        FormManager.setValue('repTeamMemberNo', "NOREP9");
         FormManager.setValue('engineeringBo', '0070');
       }
     }
@@ -571,9 +571,9 @@ function setAdminDSCValues(repTeamMemberNo) {
       FormManager.setValue('engineeringBo', '1243');
     } else if (isuCtc == '197' && repTeamMemberNo == 'APD200') {
       FormManager.setValue('engineeringBo', '0139');
-    } else if ((isuCtc == '217' || isuCtc == '219') && repTeamMemberNo == 'NOREP09') {
+    } else if ((isuCtc == '217' || isuCtc == '219') && repTeamMemberNo == 'NOREP9') {
       FormManager.setValue('engineeringBo', '4680');
-    } else if (isuCtc == '8B7' && repTeamMemberNo == 'NOREP09') {
+    } else if (isuCtc == '8B7' && repTeamMemberNo == 'NOREP9') {
       FormManager.setValue('engineeringBo', '0070');
     }
 
@@ -612,9 +612,9 @@ function setAdminDSCValues(repTeamMemberNo) {
   } else if (cntry == '806') {
     if (isuCtc == '34Q' && repTeamMemberNo == 'MSN502') {
       FormManager.setValue('engineeringBo', '1383');
-    } else if (isuCtc == '217' && repTeamMemberNo == 'NOREP09') {
+    } else if (isuCtc == '217' && repTeamMemberNo == 'NOREP9') {
       FormManager.setValue('engineeringBo', '4900');
-    } else if (isuCtc == '8B7' && repTeamMemberNo == 'NOREP09') {
+    } else if (isuCtc == '8B7' && repTeamMemberNo == 'NOREP9') {
       FormManager.setValue('engineeringBo', '0070');
     }
   } else if (cntry == '846') {
@@ -632,9 +632,9 @@ function setAdminDSCValues(repTeamMemberNo) {
           FormManager.setValue('engineeringBo', '6966');
         }
       }
-    } else if (isuCtc == '217' && repTeamMemberNo == 'NOREP09') {
+    } else if (isuCtc == '217' && repTeamMemberNo == 'NOREP9') {
       FormManager.setValue('engineeringBo', '4990');
-    } else if (isuCtc == '8B7' && repTeamMemberNo == 'NOREP09') {
+    } else if (isuCtc == '8B7' && repTeamMemberNo == 'NOREP9') {
       FormManager.setValue('engineeringBo', '0070');
     }
   }
