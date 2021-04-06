@@ -136,28 +136,32 @@ public class UpdateSapNumberController extends BaseController {
     }
     String output = "";
     String addrTypeToBeSKipped = null;
+    String ifUsePairedSeq = "N";
+    String seqnum = null;
     if (addressList != null && !addressList.isEmpty() && kna1List != null && !kna1List.isEmpty()) {
       for (Addr addr : addressList) {
         if (StringUtils.isEmpty(addr.getSapNo())) {
           try {
             output = updateSapNoService.getKNA1AddressType(addr.getId().getAddrType(), issuingCntry);
             addrTypeToBeSKipped = updateSapNoService.getAddressTypeToBeSkipped(issuingCntry);
+            ifUsePairedSeq = updateSapNoService.getIfUsePairedSeqNo(issuingCntry);
             LOG.debug("Output AddrType = " + output);
             LOG.debug("Addr to be skipped = " + addrTypeToBeSKipped);
           } catch (Exception e) {
             LOG.debug(e.getMessage());
           }
           String kna1addr = StringUtils.isEmpty(output) ? addr.getId().getAddrType() : output;
-          String sapNo = getSapNumberForAddrType(kna1List, kna1addr, addr.getId().getAddrSeq());
+          seqnum = "Y".equals(ifUsePairedSeq) ? addr.getPairedAddrSeq() : addr.getId().getAddrSeq();
+          String sapNo = getSapNumberForAddrType(kna1List, kna1addr, seqnum);
           if (!StringUtils.isEmpty(sapNo)) {
             addr.setSapNo(sapNo);
             LOG.debug("Updating SAP NO=" + sapNo + "For Address Type =" + addr.getId().getAddrType());
             updateEntity(addr, entityManager);
           } else if (StringUtils.isEmpty(addrTypeToBeSKipped)
               || (!StringUtils.isEmpty(addrTypeToBeSKipped) && !addrTypeToBeSKipped.equals(addr.getId().getAddrType()))) {
-            LOG.debug("SAP Number not found in KNA1 for address type=" + output + " Sequence =" + addr.getId().getAddrSeq());
+            LOG.debug("SAP Number not found in KNA1 for address type=" + output + " Sequence =" + seqnum);
             ifError = true;
-            errorText.append("SAP Number not found in KNA1 for address type=" + output + " Sequence =" + addr.getId().getAddrSeq() + "\n");
+            errorText.append("SAP Number not found in KNA1 for address type=" + output + " Sequence =" + seqnum + "\n");
           }
         }
       }
@@ -188,7 +192,9 @@ public class UpdateSapNumberController extends BaseController {
     if (kna1List != null && !kna1List.isEmpty()) {
       for (Kna1 addrKna1 : kna1List) {
         if (!StringUtils.isEmpty(addressType) && addressType.equals(addrKna1.getKtokd()) && (seqno.equals(addrKna1.getZzkvSeqno())
-            || seqno.equals(Integer.parseInt(addrKna1.getZzkvSeqno())) || seqno.equals(StringUtils.leftPad(addrKna1.getZzkvSeqno(), 5, '0')))) {
+            || (seqno.matches("^[0-9]*$") && addrKna1.getZzkvSeqno().matches("^[0-9]*$") && seqno.equals(Integer.parseInt(addrKna1.getZzkvSeqno())))
+            || (seqno.matches("^[0-9]*$") && addrKna1.getZzkvSeqno().matches("^[0-9]*$")
+                && seqno.equals(StringUtils.leftPad(addrKna1.getZzkvSeqno(), 5, '0'))))) {
           return addrKna1.getId().getKunnr();
         }
       }
