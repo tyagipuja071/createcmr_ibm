@@ -90,7 +90,7 @@ public class NORDXHandler extends BaseSOFHandler {
 
   private static final String[] NORDX_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "CustLang", "GeoLocationCode", "Affiliate", "CAP", "CMROwner",
       "CustClassCode", "LocalTax2", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office", "Floor",
-      "Building", "County", "City2", "Department", "SearchTerm", "SpecialTaxCd", "SalesBusOff" };
+      "Building", "County", "City2", "Department", "SearchTerm", "SpecialTaxCd", "SalesBusOff", "CollectionCd" };
 
   private static final List<String> ND_COUNTRIES_LIST = Arrays.asList(SystemLocation.SWEDEN, SystemLocation.NORWAY, SystemLocation.FINLAND,
       SystemLocation.DENMARK);
@@ -639,6 +639,9 @@ public class NORDXHandler extends BaseSOFHandler {
     String currencyCd = geCurrencyCode(zs01sapNo);
     data.setCurrencyCd(currencyCd);
     // CREATCMR-1653
+
+    String kuklaCd = getKunnrSapr3Kna1ForNordxKUKLA(data.getCmrNo(), data.getCmrIssuingCntry());
+    data.setCustClass(kuklaCd);
 
     data.setEngineeringBo(this.currentImportValues.get("ACAdmDSC"));
     LOG.trace("ACAdmDSC: " + data.getEngineeringBo());
@@ -1291,11 +1294,20 @@ public class NORDXHandler extends BaseSOFHandler {
 
     if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCollectionCd(), newData.getCollectionCd())) {
       update = new UpdatedDataModel();
-      update.setDataField(PageManager.getLabel(cmrCountry, "CollectionCd", "-"));
+      update.setDataField(PageManager.getLabel(cmrCountry, "Collection Code", "Collection Code"));
       update.setNewData(newData.getCollectionCd());
       update.setOldData(oldData.getCollectionCd());
       results.add(update);
     }
+
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCurrencyCd(), newData.getCurrencyCd())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "Currency", "Currency"));
+      update.setNewData(newData.getCurrencyCd());
+      update.setOldData(oldData.getCurrencyCd());
+      results.add(update);
+    }
+
     if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getEmbargoCd(), newData.getEmbargoCd())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "EmbargoCode", "-"));
@@ -2096,6 +2108,41 @@ public class NORDXHandler extends BaseSOFHandler {
     return currCode;
   }
   // CREATCMR-1653
+
+  private String getKunnrSapr3Kna1ForNordxKUKLA(String cmrNo, String countryCd) throws Exception {
+    String kukla = "";
+
+    String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
+    String mandt = SystemConfiguration.getValue("MANDT");
+    String sql = ExternalizedQuery.getSql("QUERY.BR.AUTO.GET_UPDATE_INFO");
+    sql = StringUtils.replace(sql, ":KATR6", "'" + countryCd + "'");
+    sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
+    sql = StringUtils.replace(sql, ":ZZKV_CUSNO", "'" + cmrNo + "'");
+    sql = StringUtils.replace(sql, ":KTOKD", "'ZS01'");
+
+    String dbId = QueryClient.RDC_APP_ID;
+
+    QueryRequest query = new QueryRequest();
+    query.setSql(sql);
+    query.addField("KUKLA");
+    query.addField("STCEG");
+    query.addField("TELX1");
+    query.addField("AUFSD");
+
+    LOG.debug("Getting existing KUKLA value from RDc DB..");
+
+    QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
+    QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
+
+    if (response.isSuccess() && response.getRecords() != null && response.getRecords().size() != 0) {
+      List<Map<String, Object>> records = response.getRecords();
+      Map<String, Object> record = records.get(0);
+      kukla = record.get("KUKLA") != null ? record.get("KUKLA").toString() : "";
+
+      LOG.debug("***RETURNING KUKLA > " + kukla);
+    }
+    return kukla;
+  }
 
   @Override
   public List<String> getDataFieldsForUpdateCheckLegacy(String cmrIssuingCntry) {
