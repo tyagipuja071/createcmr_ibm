@@ -40,19 +40,21 @@ public abstract class BatchEntryPoint {
   }
 
   protected static void initContext(String batchAppName, boolean initUI) {
+    System.out.println("Initializing batch context");
     System.setProperty("BATCH_APP", batchAppName);
     // start entity manager
     startBatchContext("batch-log4j.properties", initUI);
   }
 
   protected static void initPlainContext(String batchAppName) {
+    System.out.println("Initializing plain batch context");
     System.setProperty("BATCH_APP", batchAppName);
     // start entity manager
     startPlainBatchContext("batch-log4j.properties");
   }
 
   private static void startBatchContext(String log4jFile, boolean initUI) {
-    ConfigUtil.init();
+    ConfigUtil.initFromBatch();
     System.err.println("CMR Home Dir: " + System.getProperty("cmr.home"));
     System.err.println("Initializing Log4J for Request CMR...");
     PropertyConfigurator.configure(CmrContextListener.class.getClassLoader().getResource(log4jFile));
