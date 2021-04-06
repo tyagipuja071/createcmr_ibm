@@ -1096,24 +1096,29 @@ public class NORDXTransformer extends EMEATransformer {
       legacyCust.setTaxCd("");
     }
 
+    String oldMopa = StringUtils.isBlank(legacyCust.getModeOfPayment()) ? "" : legacyCust.getModeOfPayment();
+    String newMopa = "";
     if (!StringUtils.isBlank(data.getModeOfPayment())) {
       if (SystemLocation.NORWAY.equals(data.getCmrIssuingCntry()) || SystemLocation.SWEDEN.equals(data.getCmrIssuingCntry())
           || SystemLocation.DENMARK.equals(data.getCmrIssuingCntry())) {
         if ("WCFI".equals(data.getModeOfPayment())) {
-          legacyCust.setModeOfPayment(data.getModeOfPayment());
+          newMopa = "R";
         } else if ("A001".equals(data.getModeOfPayment())) {
-          legacyCust.setModeOfPayment("");
+          newMopa = "";
         }
       } else if (SystemLocation.FINLAND.equals(data.getCmrIssuingCntry())) {
         if ("WCFI".equals(data.getModeOfPayment())) {
-          legacyCust.setModeOfPayment(data.getModeOfPayment());
+          newMopa = "R";
         } else if ("A001".equals(data.getModeOfPayment())) {
-          legacyCust.setModeOfPayment("");
+          newMopa = "";
         } else if ("P004".equals(data.getModeOfPayment())) {
-          legacyCust.setModeOfPayment("5");
+          newMopa = "5";
         }
       }
-
+    }
+    boolean mopaChanged = !StringUtils.equals(oldMopa, newMopa);
+    if ("C".equals(admin.getReqType()) || ("U".equals(admin.getReqType()) && mopaChanged)) {
+      legacyCust.setModeOfPayment(newMopa);
     }
 
     if (!StringUtils.isEmpty(data.getVat())) {
@@ -1323,24 +1328,28 @@ public class NORDXTransformer extends EMEATransformer {
         cust.setEmbargoCd(muData.getMiscBillCd());
       }
     }
-    // we use RestrictTo to store CoF in muData
+
     if (!StringUtils.isBlank(muData.getModeOfPayment())) {
+      String oldMopa = StringUtils.isBlank(cust.getModeOfPayment()) ? "" : cust.getModeOfPayment();
+      String newMopa = "";
       if (SystemLocation.NORWAY.equals(issuingCntry) || SystemLocation.SWEDEN.equals(issuingCntry) || SystemLocation.DENMARK.equals(issuingCntry)) {
         if ("WCFI".equals(muData.getModeOfPayment())) {
-          cust.setModeOfPayment(muData.getModeOfPayment());
+          newMopa = "R";
         } else if ("A001".equals(muData.getModeOfPayment())) {
-          cust.setModeOfPayment("");
+          newMopa = "";
         }
       } else if (SystemLocation.FINLAND.equals(issuingCntry)) {
         if ("WCFI".equals(muData.getModeOfPayment())) {
-          cust.setModeOfPayment(muData.getModeOfPayment());
+          newMopa = "R";
         } else if ("A001".equals(muData.getModeOfPayment())) {
-          cust.setModeOfPayment("");
+          newMopa = "";
         } else if ("P004".equals(muData.getModeOfPayment())) {
-          cust.setModeOfPayment("5");
+          newMopa = "5";
         }
       }
-
+      if (!StringUtils.equals(oldMopa, newMopa)) {
+        cust.setModeOfPayment(newMopa);
+      }
     }
 
     String isuClientTier = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "")
