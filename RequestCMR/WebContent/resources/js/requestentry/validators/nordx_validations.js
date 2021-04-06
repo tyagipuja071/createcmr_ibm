@@ -31,7 +31,7 @@ function afterConfigForNORDX() {
     }
     // FormManager.enable('collectionCd');
     FormManager.resetValidations('inacCd');
-    FormManager.resetValidations('sitePartyId');
+    // FormManager.resetValidations('sitePartyId');
     FormManager.resetValidations('engineeringBo');
   }
 

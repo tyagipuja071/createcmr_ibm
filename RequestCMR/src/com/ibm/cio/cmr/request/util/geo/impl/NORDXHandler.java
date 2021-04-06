@@ -683,6 +683,16 @@ public class NORDXHandler extends BaseSOFHandler {
         && "ZS01".equalsIgnoreCase(address.getId().getAddrType())) {
       address.getId().setAddrSeq("00001");
     }
+    if (!"ZS01".equalsIgnoreCase(address.getId().getAddrType())) {
+      address.setCustPhone("");
+    }
+    String spid = "";
+    if (CmrConstants.REQ_TYPE_UPDATE.equalsIgnoreCase(admin.getReqType())) {
+      spid = getRDcIerpSitePartyId(currentRecord.getCmrSapNumber());
+      address.setIerpSitePrtyId(spid);
+    } else {
+      address.setIerpSitePrtyId(spid);
+    }
   }
 
   @Override
@@ -1201,15 +1211,15 @@ public class NORDXHandler extends BaseSOFHandler {
     query.setParameter("REQ_ID", admin.getId().getReqId());
     List<Addr> addresses = query.getResults(Addr.class);
 
-    for (Addr addr : addresses) {
-      try {
-        addr.setIerpSitePrtyId(data.getSitePartyId());
-        entityManager.merge(addr);
-        entityManager.flush();
-      } catch (Exception e) {
-        LOG.error("Error occured on setting SPID after import.");
-      }
-    }
+    // for (Addr addr : addresses) {
+    // try {
+    // addr.setIerpSitePrtyId(data.getSitePartyId());
+    // entityManager.merge(addr);
+    // entityManager.flush();
+    // } catch (Exception e) {
+    // LOG.error("Error occured on setting SPID after import.");
+    // }
+    // }
 
     for (Addr addr : addresses) {
       if ("ZS01".equals(addr.getId().getAddrType())) {
@@ -1623,7 +1633,8 @@ public class NORDXHandler extends BaseSOFHandler {
     map.put("##ClientTier", "clientTier");
     map.put("##AbbrevLocation", "abbrevLocn");
     map.put("##SalRepNameNo", "repTeamMemberNo");
-    map.put("##SitePartyID", "sitePartyId");
+    // map.put("##SitePartyID", "sitePartyId");
+    map.put("##IERPSitePrtyId", "ierpSitePrtyId");
     map.put("##MachineSerialNo", "machineSerialNo");
     map.put("##SAPNumber", "sapNo");
     map.put("##StreetAddress2", "addrTxt2");
@@ -2093,6 +2104,35 @@ public class NORDXHandler extends BaseSOFHandler {
         "SENSITIVE_FLAG", "CLIENT_TIER", "COMPANY", "INAC_TYPE", "INAC_CD", "ISU_CD", "SUB_INDUSTRY_CD", "ABBREV_LOCN", "PPSCEID", "MEM_LVL",
         "BP_REL_TYPE", "COMMERCIAL_FINANCED", "ENTERPRISE", "PHONE1", "PHONE3"));
     return fields;
+  }
+
+  private String getRDcIerpSitePartyId(String kunnr) throws Exception {
+    String spid = "";
+
+    String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
+    String mandt = SystemConfiguration.getValue("MANDT");
+    String sql = ExternalizedQuery.getSql("GET.IERP.BRAN5");
+    sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
+    sql = StringUtils.replace(sql, ":KUNNR", "'" + kunnr + "'");
+    String dbId = QueryClient.RDC_APP_ID;
+
+    QueryRequest query = new QueryRequest();
+    query.setSql(sql);
+    query.addField("BRAN5");
+    query.addField("MANDT");
+    query.addField("KUNNR");
+
+    LOG.debug("Getting existing BRAN5 value from RDc DB..");
+    QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
+    QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
+
+    if (response.isSuccess() && response.getRecords() != null && response.getRecords().size() != 0) {
+      List<Map<String, Object>> records = response.getRecords();
+      Map<String, Object> record = records.get(0);
+      spid = record.get("BRAN5") != null ? record.get("BRAN5").toString() : "";
+      LOG.debug("***RETURNING BRAN5 > " + spid + " WHERE KUNNR IS > " + kunnr);
+    }
+    return spid;
   }
 
 }
