@@ -27,8 +27,14 @@ function afterConfigForNORDX() {
   if (reqType == 'U') {
     if (FormManager.getActualValue('viewOnlyPage') == 'true') {
       cmr.hideNode("container-SalesBusOff"); // CMR-1650
+      cmr.hideNode("container-CollectionCd");
       return;
     }
+
+    if (role == 'Processor') {
+      cmr.hideNode("container-CollectionCd");
+    }
+
     // FormManager.enable('collectionCd');
     FormManager.resetValidations('inacCd');
     FormManager.resetValidations('sitePartyId');
@@ -2039,7 +2045,12 @@ function requestingLobOnChange() {
         FormManager.enable('collectionCd');
         collectionCdValidation();
       } else {
-        FormManager.setValue('collectionCd', '');
+        reqType = FormManager.getActualValue('reqType');
+        if (reqType == 'C') {
+          FormManager.setValue('collectionCd', '');
+        } else if (reqType == 'U') {
+          FormManager.setValue('collectionCd', _pagemodel.collectionCd);
+        }
         FormManager.readOnly('collectionCd');
       }
     });
