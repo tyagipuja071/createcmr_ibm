@@ -44,4 +44,15 @@
       </typeMap>
       </mapping>
   </typeMappings>
+  <typeMappings>
+    <mapping>
+  <countries>724</countries>
+      <typeMap>
+        <inputType>ZP01</inputType>
+        <outputType>ZP01</outputType>
+      </typeMap>
+      <typeToBeSkipped></typeToBeSkipped>
+      <usePairedSeqNo>Y</usePairedSeqNo>
+      </mapping>
+  </typeMappings>
 </convertor>

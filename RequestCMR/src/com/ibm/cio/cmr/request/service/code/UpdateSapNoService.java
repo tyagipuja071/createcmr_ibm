@@ -17,12 +17,14 @@ public class UpdateSapNoService extends DefaultHandler {
   private StringBuffer buffer;
   private String countries = null;
   private String typeToBeSkipped = null;
+  private String usePairedSeqNo = null;
   private AddressTypeMapping addrMapping;
   private boolean readTypeMapping;
   private String inputType;
   private String outputType;
   private Map<String, AddressTypeMapping> addressTypeMappings = new HashMap<>();
   private Map<String, String> typesToBeSkipped = new HashMap<>();
+  private Map<String, String> usePairedSeqNoMap = new HashMap<>();
 
   @Override
   public void startDocument() throws SAXException {
@@ -54,7 +56,7 @@ public class UpdateSapNoService extends DefaultHandler {
   public void endElement(String uri, String localName, String qName) throws SAXException {
     String value = this.buffer.toString().trim();
     if ("typeMappings".equals(qName)) {
-      setAddrTypeMapping(this.countries, this.addrMapping, this.typeToBeSkipped);
+      setAddrTypeMapping(this.countries, this.addrMapping, this.typeToBeSkipped, this.usePairedSeqNo);
       this.readTypeMapping = false;
     }
 
@@ -76,14 +78,19 @@ public class UpdateSapNoService extends DefaultHandler {
         this.typeToBeSkipped = value;
         this.addrMapping.setTypeToBeSkipped(Arrays.asList(value.split(",")));
       }
+      if ("usePairedSeqNo".equals(qName)) {
+        this.usePairedSeqNo = value;
+        this.addrMapping.setUsePairedSeqNo(value);
+      }
     }
     this.buffer.delete(0, this.buffer.length());
   }
 
-  protected void setAddrTypeMapping(String countries, AddressTypeMapping mapping, String addrTypesToBeSkipped) {
+  protected void setAddrTypeMapping(String countries, AddressTypeMapping mapping, String addrTypesToBeSkipped, String ifUsePairedSeq) {
     for (String country : countries.split(",")) {
       this.addressTypeMappings.put(country, mapping);
       this.typesToBeSkipped.put(country, addrTypesToBeSkipped);
+      this.usePairedSeqNoMap.put(country, ifUsePairedSeq == null ? "N" : ifUsePairedSeq);
     }
   }
 
@@ -129,5 +136,12 @@ public class UpdateSapNoService extends DefaultHandler {
       return this.typesToBeSkipped.get(country);
     }
     return null;
+  }
+
+  public String getIfUsePairedSeqNo(String country) {
+    if (this.usePairedSeqNoMap.containsKey(country)) {
+      return this.usePairedSeqNoMap.get(country);
+    }
+    return AddressTypeMapping.DEFAULT.getUsePairedSeqNo();
   }
 }

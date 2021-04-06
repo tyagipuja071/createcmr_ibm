@@ -11,6 +11,7 @@ public class AddressTypeMapping {
 
   private List<String> countries = new ArrayList<>();
   private List<String> typeToBeSkipped = new ArrayList<>();
+  private String usePairedSeqNo;
 
   private Map<String, String> inTypeMapping = new HashMap<String, String>();
 
@@ -23,6 +24,7 @@ public class AddressTypeMapping {
     this.inTypeMapping.put("ZS02", "ZS02");
     this.inTypeMapping.put("EPL", null);
     this.inTypeMapping.put("MAIL", null);
+    this.usePairedSeqNo = "N";
 
   }
 
@@ -77,6 +79,14 @@ public class AddressTypeMapping {
 
   public void setTypeToBeSkipped(List<String> typeToBeSkipped) {
     this.typeToBeSkipped = typeToBeSkipped;
+  }
+
+  public String getUsePairedSeqNo() {
+    return usePairedSeqNo;
+  }
+
+  public void setUsePairedSeqNo(String usePairedSeqNo) {
+    this.usePairedSeqNo = usePairedSeqNo;
   }
 
 }
