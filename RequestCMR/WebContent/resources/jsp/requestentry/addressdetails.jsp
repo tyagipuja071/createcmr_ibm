@@ -52,7 +52,7 @@
     </cmr:column>
   </cmr:row>
   <!-- defect : 1444422 for FR -->
-  <cmr:view forGEO="IERP,CND,MCO1,MCO2,FR,CEMEA,CN,EMEA,SWISS" exceptForCountry="618,866,754,755,726,666">
+  <cmr:view forGEO="IERP,CND,MCO1,MCO2,FR,CEMEA,CN,EMEA,SWISS,NORDX" exceptForCountry="618,866,754,755,726,666">
     <cmr:row>
       <cmr:column span="1">
         <cmr:label fieldId="ierpSitePrtyId_view">
@@ -831,7 +831,7 @@
       <cmr:column span="2">
         <div id="addrTxt_view">-</div>
       </cmr:column>
-      <cmr:column span="1" exceptForGEO="IERP,CND,CEMEA,NL,NORDX,SWISS" exceptForCountry='758'>
+      <cmr:column span="1" exceptForGEO="IERP,CND,CEMEA,NL,SWISS" exceptForCountry='758'>
         <cmr:label fieldId="addrTxt2_view">
           <span class="lbl-StreetAddress2">${ui.street2}</span>:</cmr:label>
       </cmr:column>
@@ -1095,7 +1095,7 @@
   </cmr:row> --%>
 
   <cmr:row addBackground="true">
-    <cmr:view exceptForGEO="CEMEA,CN,JP,SWISS" exceptForCountry="862">
+    <cmr:view exceptForGEO="CEMEA,CN,JP,SWISS,NORDX" exceptForCountry="862">
       <cmr:column span="1">
         <cmr:label fieldId="stateProv_view">
           <span class="lbl-StateProv">${ui.stateProve}</span>:</cmr:label>
@@ -1124,7 +1124,7 @@
     </cmr:view>
   </cmr:row>
 
-  <cmr:view exceptForGEO="CN" exceptForCountry="618,724">
+  <cmr:view exceptForGEO="CN,NORDX" exceptForCountry="618,724">
     <cmr:row addBackground="true">
       <cmr:column span="1">
         <cmr:label fieldId="stateProv_view">

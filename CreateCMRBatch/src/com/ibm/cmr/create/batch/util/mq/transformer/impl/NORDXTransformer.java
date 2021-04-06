@@ -645,27 +645,23 @@ public class NORDXTransformer extends EMEATransformer {
     System.out.println("_custSubGrp = " + custSubGrp);
 
     LOG.debug("Set max and min range of cmrNo..");
-    if ("INTER".equals(custSubGrp) || "XINT".equals(custSubGrp) || "CSINT".equals(custSubGrp) || "RSXIN".equals(custSubGrp)
-        || "MEINT".equals(custSubGrp) || "RSINT".equals(custSubGrp)) {
-      if (!StringUtils.isBlank(data.getAbbrevNm()) && data.getAbbrevNm().startsWith("DUMMY")) {
-        generateCMRNoObj.setMin(985001);
-        generateCMRNoObj.setMax(985999);
-      } else {
-        generateCMRNoObj.setMin(993110);
-        generateCMRNoObj.setMax(998899);
-      }
+    if ("CBINT".equals(custSubGrp) || "DKINT".equals(custSubGrp) || "EEINT".equals(custSubGrp) || "FIINT".equals(custSubGrp)
+        || "FOINT".equals(custSubGrp) || "GLINT".equals(custSubGrp) || "INTER".equals(custSubGrp) || "ISINT".equals(custSubGrp)
+        || "LTINT".equals(custSubGrp) || "LVINT".equals(custSubGrp)) {
+      generateCMRNoObj.setMin(990000);
+      generateCMRNoObj.setMax(996999);
       LOG.debug("that is Nordics INTER CMR");
-    } else if ("XBP".equals(custSubGrp) || "BUSPR".equals(custSubGrp) || "CSBP".equals(custSubGrp) || "MEBP".equals(custSubGrp)
-        || "RSXBP".equals(custSubGrp) || "RSBP".equals(custSubGrp)) {
-      generateCMRNoObj.setMin(1000);
-      generateCMRNoObj.setMax(9999);
-    } else if ("XCE".equals(custSubGrp)) {
-      generateCMRNoObj.setMin(510000);
-      generateCMRNoObj.setMax(799999);
     } else {
       generateCMRNoObj.setMin(369320);
       generateCMRNoObj.setMax(979999);
       LOG.debug("that is Nordics No INTER CMR");
+    }
+    if ("CBISO".equals(custSubGrp) || "DKISO".equals(custSubGrp) || "EEISO".equals(custSubGrp) || "FIISO".equals(custSubGrp)
+        || "FOISO".equals(custSubGrp) || "GLISO".equals(custSubGrp) || "INTSO".equals(custSubGrp) || "ISISO".equals(custSubGrp)
+        || "LTISO".equals(custSubGrp) || "LVISO".equals(custSubGrp)) {
+      generateCMRNoObj.setMin(997000);
+      generateCMRNoObj.setMax(997999);
+      LOG.debug("that is Nordics INTER OS CMR");
     }
   }
 
@@ -905,6 +901,16 @@ public class NORDXTransformer extends EMEATransformer {
         legacyCust.setCeBo("X900000");
       }
 
+      if (SystemLocation.DENMARK.equals(cntry)) {
+        legacyCust.setCurrencyCd("");
+      } else if (SystemLocation.FINLAND.equals(cntry)) {
+        legacyCust.setCurrencyCd("EU");
+      } else if (SystemLocation.NORWAY.equals(cntry)) {
+        legacyCust.setCurrencyCd("");
+      } else if (SystemLocation.SWEDEN.equals(cntry)) {
+        legacyCust.setCurrencyCd("");
+      }
+
       if (SystemLocation.NORWAY.equals(data.getCmrIssuingCntry())) {
         legacyCust.setOverseasTerritory("");
       } else if (SystemLocation.SWEDEN.equals(data.getCmrIssuingCntry())) {
@@ -948,6 +954,38 @@ public class NORDXTransformer extends EMEATransformer {
         legacyCust.setOverseasTerritory(data.getTerritoryCd());
       }
 
+      if (SystemLocation.DENMARK.equals(cntry)) {
+        if ("DKK".equals(data.getCurrencyCd())) {
+          legacyCust.setCurrencyCd("");
+        } else if ("EUR".equals(data.getCurrencyCd())) {
+          legacyCust.setCurrencyCd("EU");
+        } else if ("USD".equals(data.getCurrencyCd())) {
+          legacyCust.setCurrencyCd("US");
+        }
+      } else if (SystemLocation.FINLAND.equals(cntry)) {
+        if ("EUR".equals(data.getCurrencyCd())) {
+          legacyCust.setCurrencyCd("EU");
+        } else if ("USD".equals(data.getCurrencyCd())) {
+          legacyCust.setCurrencyCd("US");
+        }
+      } else if (SystemLocation.NORWAY.equals(cntry)) {
+        if ("NOK".equals(data.getCurrencyCd())) {
+          legacyCust.setCurrencyCd("");
+        } else if ("EUR".equals(data.getCurrencyCd())) {
+          legacyCust.setCurrencyCd("EU");
+        } else if ("USD".equals(data.getCurrencyCd())) {
+          legacyCust.setCurrencyCd("US");
+        }
+      } else if (SystemLocation.SWEDEN.equals(cntry)) {
+        if ("SEK".equals(data.getCurrencyCd())) {
+          legacyCust.setCurrencyCd("");
+        } else if ("EUR".equals(data.getCurrencyCd())) {
+          legacyCust.setCurrencyCd("EU");
+        } else if ("USD".equals(data.getCurrencyCd())) {
+          legacyCust.setCurrencyCd("US");
+        }
+      }
+
       String dataEmbargoCd = data.getEmbargoCd();
       String rdcEmbargoCd = LegacyDirectUtil.getEmbargoCdFromDataRdc(entityManager, admin);
 
@@ -981,6 +1019,32 @@ public class NORDXTransformer extends EMEATransformer {
           && "Wx".equals(admin.getProcessedFlag())) {
         legacyCust.setEmbargoCd("D");
         resetOrdBlockToData(entityManager, data);
+      }
+    }
+
+    if (SystemLocation.NORWAY.equals(data.getCmrIssuingCntry())) {
+      legacyCust.setRealCtyCd("806");
+    } else if (SystemLocation.SWEDEN.equals(data.getCmrIssuingCntry())) {
+      legacyCust.setRealCtyCd("846");
+    } else if (SystemLocation.DENMARK.equals(data.getCmrIssuingCntry())) {
+      if ("678".equals(data.getCountryUse())) {
+        legacyCust.setRealCtyCd("678");
+      } else if ("678FO".equals(data.getCountryUse())) {
+        legacyCust.setRealCtyCd("678");
+      } else if ("678GL".equals(data.getCountryUse())) {
+        legacyCust.setRealCtyCd("678");
+      } else if ("678IS".equals(data.getCountryUse())) {
+        legacyCust.setRealCtyCd("742");
+      }
+    } else if (SystemLocation.FINLAND.equals(data.getCmrIssuingCntry())) {
+      if ("702".equals(data.getCountryUse())) {
+        legacyCust.setRealCtyCd("702");
+      } else if ("702EE".equals(data.getCountryUse())) {
+        legacyCust.setRealCtyCd("602");
+      } else if ("702LT".equals(data.getCountryUse())) {
+        legacyCust.setRealCtyCd("638");
+      } else if ("702LV".equals(data.getCountryUse())) {
+        legacyCust.setRealCtyCd("608");
       }
     }
 
@@ -1025,56 +1089,29 @@ public class NORDXTransformer extends EMEATransformer {
       legacyCust.setTaxCd("");
     }
 
-    if (SystemLocation.DENMARK.equals(data.getCurrencyCd())) {
-      if ("DKK".equals(data.getCurrencyCd())) {
-        legacyCust.setCurrencyCd("");
-      } else if ("EUR".equals(data.getCurrencyCd())) {
-        legacyCust.setCurrencyCd("EU");
-      } else if ("USD".equals(data.getCurrencyCd())) {
-        legacyCust.setCurrencyCd("US");
-      }
-    } else if (SystemLocation.FINLAND.equals(data.getCurrencyCd())) {
-      if ("EUR".equals(data.getCurrencyCd())) {
-        legacyCust.setCurrencyCd("EU");
-      } else if ("USD".equals(data.getCurrencyCd())) {
-        legacyCust.setCurrencyCd("US");
-      }
-    } else if (SystemLocation.NORWAY.equals(data.getCurrencyCd())) {
-      if ("NOK".equals(data.getCurrencyCd())) {
-        legacyCust.setCurrencyCd("");
-      } else if ("EUR".equals(data.getCurrencyCd())) {
-        legacyCust.setCurrencyCd("EU");
-      } else if ("USD".equals(data.getCurrencyCd())) {
-        legacyCust.setCurrencyCd("US");
-      }
-    } else if (SystemLocation.SWEDEN.equals(data.getCurrencyCd())) {
-      if ("SEK".equals(data.getCurrencyCd())) {
-        legacyCust.setCurrencyCd("");
-      } else if ("EUR".equals(data.getCurrencyCd())) {
-        legacyCust.setCurrencyCd("EU");
-      } else if ("USD".equals(data.getCurrencyCd())) {
-        legacyCust.setCurrencyCd("US");
-      }
-    }
-
+    String oldMopa = StringUtils.isBlank(legacyCust.getModeOfPayment()) ? "" : legacyCust.getModeOfPayment();
+    String newMopa = "";
     if (!StringUtils.isBlank(data.getModeOfPayment())) {
       if (SystemLocation.NORWAY.equals(data.getCmrIssuingCntry()) || SystemLocation.SWEDEN.equals(data.getCmrIssuingCntry())
           || SystemLocation.DENMARK.equals(data.getCmrIssuingCntry())) {
         if ("WCFI".equals(data.getModeOfPayment())) {
-          legacyCust.setModeOfPayment(data.getModeOfPayment());
+          newMopa = "R";
         } else if ("A001".equals(data.getModeOfPayment())) {
-          legacyCust.setModeOfPayment("");
+          newMopa = "";
         }
       } else if (SystemLocation.FINLAND.equals(data.getCmrIssuingCntry())) {
         if ("WCFI".equals(data.getModeOfPayment())) {
-          legacyCust.setModeOfPayment(data.getModeOfPayment());
+          newMopa = "R";
         } else if ("A001".equals(data.getModeOfPayment())) {
-          legacyCust.setModeOfPayment("");
+          newMopa = "";
         } else if ("P004".equals(data.getModeOfPayment())) {
-          legacyCust.setModeOfPayment("5");
+          newMopa = "5";
         }
       }
-
+    }
+    boolean mopaChanged = !StringUtils.equals(oldMopa, newMopa);
+    if ("C".equals(admin.getReqType()) || ("U".equals(admin.getReqType()) && mopaChanged)) {
+      legacyCust.setModeOfPayment(newMopa);
     }
 
     if (!StringUtils.isEmpty(data.getVat())) {
@@ -1284,24 +1321,28 @@ public class NORDXTransformer extends EMEATransformer {
         cust.setEmbargoCd(muData.getMiscBillCd());
       }
     }
-    // we use RestrictTo to store CoF in muData
+
     if (!StringUtils.isBlank(muData.getModeOfPayment())) {
+      String oldMopa = StringUtils.isBlank(cust.getModeOfPayment()) ? "" : cust.getModeOfPayment();
+      String newMopa = "";
       if (SystemLocation.NORWAY.equals(issuingCntry) || SystemLocation.SWEDEN.equals(issuingCntry) || SystemLocation.DENMARK.equals(issuingCntry)) {
         if ("WCFI".equals(muData.getModeOfPayment())) {
-          cust.setModeOfPayment(muData.getModeOfPayment());
+          newMopa = "R";
         } else if ("A001".equals(muData.getModeOfPayment())) {
-          cust.setModeOfPayment("");
+          newMopa = "";
         }
       } else if (SystemLocation.FINLAND.equals(issuingCntry)) {
         if ("WCFI".equals(muData.getModeOfPayment())) {
-          cust.setModeOfPayment(muData.getModeOfPayment());
+          newMopa = "R";
         } else if ("A001".equals(muData.getModeOfPayment())) {
-          cust.setModeOfPayment("");
+          newMopa = "";
         } else if ("P004".equals(muData.getModeOfPayment())) {
-          cust.setModeOfPayment("5");
+          newMopa = "5";
         }
       }
-
+      if (!StringUtils.equals(oldMopa, newMopa)) {
+        cust.setModeOfPayment(newMopa);
+      }
     }
 
     String isuClientTier = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "")

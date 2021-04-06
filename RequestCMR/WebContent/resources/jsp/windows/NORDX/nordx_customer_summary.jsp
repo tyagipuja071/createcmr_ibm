@@ -40,25 +40,6 @@
       <cmr:column span="1" width="127">
       </cmr:column>
       <cmr:column span="1" width="130">
-        <label><cmr:fieldLabel fieldId="CollectionCd" />: </label>
-      </cmr:column>
-      <cmr:column span="1" width="240">
-          ${summary.data.collectionCd}
-      </cmr:column>
-      <cmr:column span="1" width="130">
-        <label><cmr:fieldLabel fieldId="LocalTax1" />: </label>
-      </cmr:column>
-      <cmr:column span="1" width="200">
-        ${summary.data.taxCd1}
-      </cmr:column>
-    </cmr:row>
-  </cmr:view>
-
-  <cmr:view>
-    <cmr:row addBackground="true">
-      <cmr:column span="1" width="127">
-      </cmr:column>
-      <cmr:column span="1" width="130">
         <label><cmr:fieldLabel fieldId="ModeOfPayment" />:</label>
       </cmr:column>
       <cmr:column span="1" width="240">
@@ -69,6 +50,26 @@
       </cmr:column>
       <cmr:column span="1" width="200">
         ${summary.data.embargoCd}
+      </cmr:column>
+    </cmr:row>
+  </cmr:view>
+  
+  <cmr:view>
+    <cmr:row addBackground="true">
+      <cmr:column span="1" width="127">
+      </cmr:column>
+      <!-- 
+      <cmr:column span="1" width="130">
+        <label><cmr:fieldLabel fieldId="CollectionCd" />: </label>
+      </cmr:column>
+      <cmr:column span="1" width="240">
+          ${summary.data.collectionCd}
+      </cmr:column> -->
+      <cmr:column span="1" width="130">
+        <label><cmr:fieldLabel fieldId="LocalTax1" />: </label>
+      </cmr:column>
+      <cmr:column span="1" width="200">
+        ${summary.data.taxCd1}
       </cmr:column>
     </cmr:row>
   </cmr:view>

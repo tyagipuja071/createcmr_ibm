@@ -90,7 +90,7 @@ public class NORDXHandler extends BaseSOFHandler {
 
   private static final String[] NORDX_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "CustLang", "GeoLocationCode", "Affiliate", "CAP", "CMROwner",
       "CustClassCode", "LocalTax2", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office", "Floor",
-      "Building", "County", "City2", "Department", "SearchTerm", "SpecialTaxCd", "SalesBusOff" };
+      "Building", "County", "City2", "Department", "SearchTerm", "SpecialTaxCd", "SalesBusOff", "CollectionCd" };
 
   private static final List<String> ND_COUNTRIES_LIST = Arrays.asList(SystemLocation.SWEDEN, SystemLocation.NORWAY, SystemLocation.FINLAND,
       SystemLocation.DENMARK);
@@ -125,9 +125,9 @@ public class NORDXHandler extends BaseSOFHandler {
         record.setCmrName3(null);
       }
 
-      if (!StringUtils.isBlank(record.getCmrPOBox())) {
-        record.setCmrPOBox("PO BOX " + record.getCmrPOBox());
-      }
+      // if (!StringUtils.isBlank(record.getCmrPOBox())) {
+      // record.setCmrPOBox("PO BOX " + record.getCmrPOBox());
+      // }
       if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
         record.setCmrAddrSeq("00001");
       } else {
@@ -640,6 +640,9 @@ public class NORDXHandler extends BaseSOFHandler {
     data.setCurrencyCd(currencyCd);
     // CREATCMR-1653
 
+    String kuklaCd = getKunnrSapr3Kna1ForNordxKUKLA(data.getCmrNo(), data.getCmrIssuingCntry());
+    data.setCustClass(kuklaCd);
+
     data.setEngineeringBo(this.currentImportValues.get("ACAdmDSC"));
     LOG.trace("ACAdmDSC: " + data.getEngineeringBo());
 
@@ -663,6 +666,7 @@ public class NORDXHandler extends BaseSOFHandler {
     data.setInacType("");
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       data.setSitePartyId("");
+      data.setPpsceid("");
     }
   }
 
@@ -674,12 +678,23 @@ public class NORDXHandler extends BaseSOFHandler {
   public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo) throws Exception {
     address.setCustNm1(currentRecord.getCmrName1Plain());
     address.setCustNm2(currentRecord.getCmrName2Plain());
+    address.setCustNm3(currentRecord.getCmrName3());
     address.setCustNm4(currentRecord.getCmrName4());
     address.setAddrTxt2(currentRecord.getCmrStreetAddressCont());
     address.setTransportZone("");
     if (currentRecord.getCmrAddrSeq() != null && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())
         && "ZS01".equalsIgnoreCase(address.getId().getAddrType())) {
       address.getId().setAddrSeq("00001");
+    }
+    if (!"ZS01".equalsIgnoreCase(address.getId().getAddrType())) {
+      address.setCustPhone("");
+    }
+    String spid = "";
+    if (CmrConstants.REQ_TYPE_UPDATE.equalsIgnoreCase(admin.getReqType())) {
+      spid = getRDcIerpSitePartyId(currentRecord.getCmrSapNumber());
+      address.setIerpSitePrtyId(spid);
+    } else {
+      address.setIerpSitePrtyId(spid);
     }
   }
 
@@ -1153,7 +1168,7 @@ public class NORDXHandler extends BaseSOFHandler {
     AdminPK adminPK = new AdminPK();
     adminPK.setReqId(addr.getId().getReqId());
     Admin admin = entityManager.find(Admin.class, adminPK);
-    if ("ZI01".equals(addr.getId().getAddrType()) || "ZD01".equals(addr.getId().getAddrType()) || "ZP02".equals(addr.getId().getAddrType())) {
+    if ("ZI01".equals(addr.getId().getAddrType()) || "ZD01".equals(addr.getId().getAddrType()) || "ZS02".equals(addr.getId().getAddrType())) {
       addr.setPoBox("");
     }
     if (!"ZS01".equals(addr.getId().getAddrType())) {
@@ -1162,7 +1177,11 @@ public class NORDXHandler extends BaseSOFHandler {
     if ("ZS01".equals(addr.getId().getAddrType())) {
       String landCntry = addr.getLandCntry();
       if (data.getCustGrp() != null && data.getCustGrp().contains("LOC")) {
-        landCntry = data.getCountryUse().isEmpty() ? LANDED_CNTRY_MAP.get(cmrIssuingCntry) : LANDED_CNTRY_MAP.get(data.getCountryUse());
+        if (data.getCountryUse() != null && !data.getCountryUse().isEmpty()) {
+          landCntry = LANDED_CNTRY_MAP.get(data.getCountryUse());
+        } else {
+          landCntry = LANDED_CNTRY_MAP.get(cmrIssuingCntry);
+        }
       }
       if ("U".equals(admin.getReqType())) {
         String sql = ExternalizedQuery.getSql("QUERY.ADDR.GET.LANDCNTRY.BY_REQID");
@@ -1195,15 +1214,15 @@ public class NORDXHandler extends BaseSOFHandler {
     query.setParameter("REQ_ID", admin.getId().getReqId());
     List<Addr> addresses = query.getResults(Addr.class);
 
-    for (Addr addr : addresses) {
-      try {
-        addr.setIerpSitePrtyId(data.getSitePartyId());
-        entityManager.merge(addr);
-        entityManager.flush();
-      } catch (Exception e) {
-        LOG.error("Error occured on setting SPID after import.");
-      }
-    }
+    // for (Addr addr : addresses) {
+    // try {
+    // addr.setIerpSitePrtyId(data.getSitePartyId());
+    // entityManager.merge(addr);
+    // entityManager.flush();
+    // } catch (Exception e) {
+    // LOG.error("Error occured on setting SPID after import.");
+    // }
+    // }
 
     for (Addr addr : addresses) {
       if ("ZS01".equals(addr.getId().getAddrType())) {
@@ -1275,11 +1294,20 @@ public class NORDXHandler extends BaseSOFHandler {
 
     if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCollectionCd(), newData.getCollectionCd())) {
       update = new UpdatedDataModel();
-      update.setDataField(PageManager.getLabel(cmrCountry, "CollectionCd", "-"));
+      update.setDataField(PageManager.getLabel(cmrCountry, "Collection Code", "Collection Code"));
       update.setNewData(newData.getCollectionCd());
       update.setOldData(oldData.getCollectionCd());
       results.add(update);
     }
+
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCurrencyCd(), newData.getCurrencyCd())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "Currency", "Currency"));
+      update.setNewData(newData.getCurrencyCd());
+      update.setOldData(oldData.getCurrencyCd());
+      results.add(update);
+    }
+
     if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getEmbargoCd(), newData.getEmbargoCd())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "EmbargoCode", "-"));
@@ -1617,7 +1645,8 @@ public class NORDXHandler extends BaseSOFHandler {
     map.put("##ClientTier", "clientTier");
     map.put("##AbbrevLocation", "abbrevLocn");
     map.put("##SalRepNameNo", "repTeamMemberNo");
-    map.put("##SitePartyID", "sitePartyId");
+    // map.put("##SitePartyID", "sitePartyId");
+    map.put("##IERPSitePrtyId", "ierpSitePrtyId");
     map.put("##MachineSerialNo", "machineSerialNo");
     map.put("##SAPNumber", "sapNo");
     map.put("##StreetAddress2", "addrTxt2");
@@ -2080,6 +2109,41 @@ public class NORDXHandler extends BaseSOFHandler {
   }
   // CREATCMR-1653
 
+  private String getKunnrSapr3Kna1ForNordxKUKLA(String cmrNo, String countryCd) throws Exception {
+    String kukla = "";
+
+    String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
+    String mandt = SystemConfiguration.getValue("MANDT");
+    String sql = ExternalizedQuery.getSql("QUERY.BR.AUTO.GET_UPDATE_INFO");
+    sql = StringUtils.replace(sql, ":KATR6", "'" + countryCd + "'");
+    sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
+    sql = StringUtils.replace(sql, ":ZZKV_CUSNO", "'" + cmrNo + "'");
+    sql = StringUtils.replace(sql, ":KTOKD", "'ZS01'");
+
+    String dbId = QueryClient.RDC_APP_ID;
+
+    QueryRequest query = new QueryRequest();
+    query.setSql(sql);
+    query.addField("KUKLA");
+    query.addField("STCEG");
+    query.addField("TELX1");
+    query.addField("AUFSD");
+
+    LOG.debug("Getting existing KUKLA value from RDc DB..");
+
+    QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
+    QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
+
+    if (response.isSuccess() && response.getRecords() != null && response.getRecords().size() != 0) {
+      List<Map<String, Object>> records = response.getRecords();
+      Map<String, Object> record = records.get(0);
+      kukla = record.get("KUKLA") != null ? record.get("KUKLA").toString() : "";
+
+      LOG.debug("***RETURNING KUKLA > " + kukla);
+    }
+    return kukla;
+  }
+
   @Override
   public List<String> getDataFieldsForUpdateCheckLegacy(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
@@ -2087,6 +2151,35 @@ public class NORDXHandler extends BaseSOFHandler {
         "SENSITIVE_FLAG", "CLIENT_TIER", "COMPANY", "INAC_TYPE", "INAC_CD", "ISU_CD", "SUB_INDUSTRY_CD", "ABBREV_LOCN", "PPSCEID", "MEM_LVL",
         "BP_REL_TYPE", "COMMERCIAL_FINANCED", "ENTERPRISE", "PHONE1", "PHONE3"));
     return fields;
+  }
+
+  private String getRDcIerpSitePartyId(String kunnr) throws Exception {
+    String spid = "";
+
+    String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
+    String mandt = SystemConfiguration.getValue("MANDT");
+    String sql = ExternalizedQuery.getSql("GET.IERP.BRAN5");
+    sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
+    sql = StringUtils.replace(sql, ":KUNNR", "'" + kunnr + "'");
+    String dbId = QueryClient.RDC_APP_ID;
+
+    QueryRequest query = new QueryRequest();
+    query.setSql(sql);
+    query.addField("BRAN5");
+    query.addField("MANDT");
+    query.addField("KUNNR");
+
+    LOG.debug("Getting existing BRAN5 value from RDc DB..");
+    QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
+    QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
+
+    if (response.isSuccess() && response.getRecords() != null && response.getRecords().size() != 0) {
+      List<Map<String, Object>> records = response.getRecords();
+      Map<String, Object> record = records.get(0);
+      spid = record.get("BRAN5") != null ? record.get("BRAN5").toString() : "";
+      LOG.debug("***RETURNING BRAN5 > " + spid + " WHERE KUNNR IS > " + kunnr);
+    }
+    return spid;
   }
 
 }
