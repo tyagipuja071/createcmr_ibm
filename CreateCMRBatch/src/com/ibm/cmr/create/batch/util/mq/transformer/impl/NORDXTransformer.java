@@ -645,30 +645,23 @@ public class NORDXTransformer extends EMEATransformer {
     System.out.println("_custSubGrp = " + custSubGrp);
 
     LOG.debug("Set max and min range of cmrNo..");
-    if ("INTER".equals(custSubGrp) || "XINT".equals(custSubGrp) || "CSINT".equals(custSubGrp) || "RSXIN".equals(custSubGrp)
-        || "MEINT".equals(custSubGrp) || "RSINT".equals(custSubGrp)) {
-      if (!StringUtils.isBlank(data.getAbbrevNm()) && data.getAbbrevNm().startsWith("DUMMY")) {
-        generateCMRNoObj.setMin(985001);
-        generateCMRNoObj.setMax(985999);
-      } else if ("DKISO".equals(custSubGrp)) {
-        generateCMRNoObj.setMin(997000);
-        generateCMRNoObj.setMax(997999);
-      } else {
-        generateCMRNoObj.setMin(990000);
-        generateCMRNoObj.setMax(996999);
-      }
+    if ("CBINT".equals(custSubGrp) || "DKINT".equals(custSubGrp) || "EEINT".equals(custSubGrp) || "FIINT".equals(custSubGrp)
+        || "FOINT".equals(custSubGrp) || "GLINT".equals(custSubGrp) || "INTER".equals(custSubGrp) || "ISINT".equals(custSubGrp)
+        || "LTINT".equals(custSubGrp) || "LVINT".equals(custSubGrp)) {
+      generateCMRNoObj.setMin(990000);
+      generateCMRNoObj.setMax(996999);
       LOG.debug("that is Nordics INTER CMR");
-    } else if ("XBP".equals(custSubGrp) || "BUSPR".equals(custSubGrp) || "CSBP".equals(custSubGrp) || "MEBP".equals(custSubGrp)
-        || "RSXBP".equals(custSubGrp) || "RSBP".equals(custSubGrp)) {
-      generateCMRNoObj.setMin(1000);
-      generateCMRNoObj.setMax(9999);
-    } else if ("XCE".equals(custSubGrp)) {
-      generateCMRNoObj.setMin(510000);
-      generateCMRNoObj.setMax(799999);
     } else {
       generateCMRNoObj.setMin(369320);
       generateCMRNoObj.setMax(979999);
       LOG.debug("that is Nordics No INTER CMR");
+    }
+    if ("CBISO".equals(custSubGrp) || "DKISO".equals(custSubGrp) || "EEISO".equals(custSubGrp) || "FIISO".equals(custSubGrp)
+        || "FOISO".equals(custSubGrp) || "GLISO".equals(custSubGrp) || "INTSO".equals(custSubGrp) || "ISISO".equals(custSubGrp)
+        || "LTISO".equals(custSubGrp) || "LVISO".equals(custSubGrp)) {
+      generateCMRNoObj.setMin(997000);
+      generateCMRNoObj.setMax(997999);
+      LOG.debug("that is Nordics INTER OS CMR");
     }
   }
 
