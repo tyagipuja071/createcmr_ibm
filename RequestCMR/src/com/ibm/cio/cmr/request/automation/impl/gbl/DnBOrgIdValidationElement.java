@@ -25,6 +25,7 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
@@ -56,6 +57,15 @@ public class DnBOrgIdValidationElement extends ValidatingElement implements Comp
     AutomationResult<ValidationOutput> result = buildResult(admin.getId().getReqId());
     ValidationOutput output = new ValidationOutput();
 
+    if ("U".equals(admin.getReqType()) && engineData.hasPositiveCheckStatus(AutomationEngineData.SKIP_DNB_ORGID_VAL)) {
+      output.setSuccess(true);
+      output.setMessage("Skipped");
+      result.setDetails("Processing is skipped as DnB validation NOT DONE or FAILED.");
+      result.setResults("Skipped");
+      result.setProcessOutput(output);
+      LOG.debug("Processing is skipped as DnB validation NOT DONE or FAILED.");
+      return result;
+    }
     if ("Y".equals(admin.getMatchOverrideIndc()) && DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
       result.setResults("Overriden");
       output.setSuccess(true);
@@ -69,7 +79,7 @@ public class DnBOrgIdValidationElement extends ValidatingElement implements Comp
       }
       return result;
     }
-    if (StringUtils.isBlank(data.getTaxCd1())) {
+    if (StringUtils.isBlank(data.getTaxCd1()) && (!SystemLocation.NETHERLANDS.equals(data.getCmrIssuingCntry()))) {
       result.setResults("OrgID not found");
       result.setDetails("Org ID was not provided on the request.");
       output.setSuccess(false);
@@ -81,6 +91,15 @@ public class DnBOrgIdValidationElement extends ValidatingElement implements Comp
       return result;
     }
 
+    if (StringUtils.isBlank(data.getTaxCd2()) && (SystemLocation.NETHERLANDS.equals(data.getCmrIssuingCntry()))) {
+      result.setResults("OrgID not found");
+      result.setDetails("Org ID was not provided on the request.");
+      output.setSuccess(false);
+      output.setMessage("OrgID not found");
+      result.setProcessOutput(output);
+      result.setOnError(false);
+      return result;
+    }
     if (soldTo != null) {
       boolean shouldThrowError = !"Y".equals(admin.getCompVerifiedIndc()) && StringUtils.isBlank(admin.getSourceSystId());
       if ("U".equalsIgnoreCase(admin.getReqType())) {
@@ -118,7 +137,13 @@ public class DnBOrgIdValidationElement extends ValidatingElement implements Comp
         for (DnBMatchingResponse dnbRecord : dnbMatches) {
           if (dnbRecord.getConfidenceCode() > 7 && DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), soldTo, admin, dnbRecord)) {
             String dnbOrgId = DnBUtil.getTaxCode1(dnbRecord.getDnbCountry(), dnbRecord.getOrgIdDetails());
-            if (data.getTaxCd1().equals(dnbOrgId)) {
+            if (SystemLocation.NETHERLANDS.equals(data.getCmrIssuingCntry())) {
+              if (data.getTaxCd2().equals(dnbOrgId)) {
+                highestCloseMatch = dnbRecord;
+                isOrgIdMatched = true;
+                break;
+              }
+            } else if(data.getTaxCd1().equals(dnbOrgId)) {
               highestCloseMatch = dnbRecord;
               isOrgIdMatched = true;
               break;
@@ -141,7 +166,14 @@ public class DnBOrgIdValidationElement extends ValidatingElement implements Comp
           output.setSuccess(false);
           output.setMessage("Org ID not validated");
           processDnBFields(entityManager, data, dnbMatches.get(0), details);
-          result.setOnError(shouldThrowError);
+
+          if (SystemLocation.NETHERLANDS.equals(data.getCmrIssuingCntry())) {
+            result.setOnError(false);
+            engineData.addNegativeCheckStatus("_orgIdMatchNotFound", "Org ID value did not match with the highest confidence D&B match.");
+          } else {
+            result.setOnError(shouldThrowError);
+            engineData.addRejectionComment("_orgIdMatchNotFound", "Org ID value did not match with the highest confidence D&B match.", "", "");
+          }
           LOG.trace(new ObjectMapper().writeValueAsString(highestCloseMatch));
         }
         result.setDetails(details.toString().trim());
