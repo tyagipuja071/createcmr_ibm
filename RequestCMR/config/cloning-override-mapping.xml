@@ -1745,7 +1745,7 @@
 	<override>
 	<table>KNVV</table>
 	<field>WAERS</field>
-	<value>EGP</value>
+	<value>USD</value>
 	<countries>865</countries>
 	</override>
 
@@ -1794,7 +1794,7 @@
 	<override>
 	<table>KNVV</table>
 	<field>WAERS</field>
-	<value>PKR</value>
+	<value>USD</value>
 	<countries>808</countries>
 	</override>
 
