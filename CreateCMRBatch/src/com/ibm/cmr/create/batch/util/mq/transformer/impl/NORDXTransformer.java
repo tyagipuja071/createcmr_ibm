@@ -968,6 +968,13 @@ public class NORDXTransformer extends EMEATransformer {
         legacyCust.setAuthRemarketerInd("0");
         legacyCust.setMrcCd("2");
       }
+
+      // leading Account number
+      if (StringUtils.isNotBlank(data.getCompany())) {
+        legacyCust.setLeadingAccNo(data.getCompany() + legacyCust.getMrcCd());
+      } else {
+        legacyCust.setLeadingAccNo(data.getCmrNo() + legacyCust.getMrcCd());
+      }
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
 
       String cntry = legacyCust.getId().getSofCntryCode().trim();
@@ -1006,6 +1013,11 @@ public class NORDXTransformer extends EMEATransformer {
         } else if ("USD".equals(data.getCurrencyCd())) {
           legacyCust.setCurrencyCd("US");
         }
+      }
+
+      // leading Account number
+      if (StringUtils.isNotBlank(data.getCompany())) {
+        legacyCust.setLeadingAccNo(data.getCompany() + legacyCust.getMrcCd());
       }
 
       String dataEmbargoCd = data.getEmbargoCd();
