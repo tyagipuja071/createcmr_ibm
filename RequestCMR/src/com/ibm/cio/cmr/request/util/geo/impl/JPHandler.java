@@ -2336,6 +2336,9 @@ public class JPHandler extends GEOHandler {
   @Override
   public ApprovalReq handleBPMANAGERApproval(EntityManager entityManager, long reqId, ApprovalReq approver, DefaultApprovals defaultApprovals,
       DefaultApprovalRecipients recipients, AppUser user, RequestEntryModel model) throws CmrException, SQLException {
+    if (StringUtils.isNotBlank(model.getCustGrp()) && "BUSPR".equals(model.getCustGrp())) {
+      return null;
+    }
     ApprovalReq theApprovalReq = saveAproval(entityManager, reqId, approver, defaultApprovals, recipients, user);
     // String theSOUserId = null;
     // boolean flag = false;
