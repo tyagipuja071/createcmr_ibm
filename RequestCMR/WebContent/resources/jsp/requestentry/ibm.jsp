@@ -107,7 +107,8 @@ dojo.addOnLoad(function(){
 		           <%--  <cmr:delta text="${rdcdata.dupCmrIndc}" oldValue="${reqentry.dupCmrIndc}" />DuplicateCMR --%>
           			</cmr:label>
 					<cmr:field id="dupCmrIndc" path="dupCmrIndc" fieldId="DuplicateCMR" tabId="MAIN_IBM_TAB" />
-				</p>
+				</p>				
+				<p id="duplicateCMR"></p>
 			</cmr:column>
   			<cmr:column span="1" containerForField="CustomerIdCd" forGEO="TW" forCountry="858">
   				<p>

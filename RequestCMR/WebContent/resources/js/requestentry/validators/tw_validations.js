@@ -35,6 +35,7 @@ function afterConfigTW() {
   }
 
   setVatValidator();
+  setWarning();
 }
 
 /**
@@ -42,6 +43,7 @@ function afterConfigTW() {
  */
 var _taxTypeHandler = null;
 var _ISICHandler = null;
+var _dupCmrIndcHandler = null;
 
 function addHandlersForTW() {
   if (_taxTypeHandler == null) {
@@ -54,6 +56,32 @@ function addHandlersForTW() {
     _ISICHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
       setISUCodeValues(value);
     });
+  }
+
+  if (_dupCmrIndcHandler == null) {
+    _ISICHandler = dojo.connect(FormManager.getField('dupCmrIndc'), 'onChange', function(value) {
+      setWarning();
+    });
+  }
+}
+
+function setWarning() {
+  var dupCmrIndc = FormManager.getActualValue('dupCmrIndc');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (custSubGrp == null) {
+    return;
+  }
+  var duplicateCMR = $('#duplicateCMR');
+  if (duplicateCMR != null) {
+    if (dupCmrIndc == 'Y') {
+      $('#duplicateCMR').text('Singapore Offshore CMR request must be submitted also in CreateCMR');
+      $('#duplicateCMR').css({
+        "color" : "red",
+        "font-weight" : "bold"
+      });
+    } else {
+      $('#duplicateCMR').text('');
+    }
   }
 }
 
@@ -89,7 +117,7 @@ function setISUCodeValues(isicCd) {
     if (isicCd != '') {
       var qParams = {
         _qall : 'Y',
-        ISSUING_CNTRY : cntry + geoCd,
+        ISSUING_CNTRY : cntry + cntry,
         REP_TEAM_CD : '%' + isicCd + '%'
       };
       var results = cmr.query('GET.ICLIST.BYISIC', qParams);
@@ -129,10 +157,12 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(afterConfigTW, GEOHandler.TW);
   GEOHandler.addAfterConfig(addHandlersForTW, GEOHandler.TW);
   GEOHandler.addAfterConfig(setISUCodeValues, GEOHandler.TW);
+  GEOHandler.addAfterConfig(setWarning, GEOHandler.TW);
 
   GEOHandler.addAfterTemplateLoad(afterConfigTW, GEOHandler.TW);
   GEOHandler.addAfterTemplateLoad(addHandlersForTW, GEOHandler.TW);
   GEOHandler.addAfterTemplateLoad(setISUCodeValues, GEOHandler.TW);
+  GEOHandler.addAfterTemplateLoad(setWarning, GEOHandler.TW);
 
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.TW);
 
