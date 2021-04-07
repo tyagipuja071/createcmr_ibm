@@ -561,7 +561,17 @@ public class NORDXTransformer extends EMEATransformer {
     String streetCond = StringUtils.isNotBlank(addrData.getAddrTxt2()) ? addrData.getAddrTxt2() : "";
     String pobox = StringUtils.isNotBlank(addrData.getPoBox()) ? addrData.getPoBox() : "";
 
-    String comboStreetCondPobox = streetCond + (StringUtils.isBlank(pobox) ? "" : ", PO BOX ") + pobox;
+    String comboStreetCondPobox = "";
+    if (StringUtils.isNotBlank(streetCond)) {
+      comboStreetCondPobox = streetCond;
+    }
+    if (StringUtils.isNotBlank(pobox)) {
+      if (StringUtils.isNotBlank(comboStreetCondPobox)) {
+        comboStreetCondPobox += ", PO BOX " + pobox;
+      } else {
+        comboStreetCondPobox += pobox;
+      }
+    }
     String city = StringUtils.isNotBlank(addrData.getCity1()) ? addrData.getCity1() : "";
     String postCode = StringUtils.isNotBlank(addrData.getPostCd()) ? addrData.getPostCd() : "";
     String landedCntry = StringUtils.isNotBlank(addrData.getLandCntry()) ? addrData.getLandCntry() : "";
@@ -693,7 +703,19 @@ public class NORDXTransformer extends EMEATransformer {
     String street = StringUtils.isNotBlank(addr.getAddrTxt()) ? addr.getAddrTxt() : "";
     String streetCond = StringUtils.isNotBlank(addr.getAddrTxt2()) ? addr.getAddrTxt2() : "";
     String pobox = StringUtils.isNotBlank(addr.getPoBox()) ? addr.getPoBox() : "";
-    String comboStreetCondPobox = streetCond + (StringUtils.isBlank(pobox) ? "" : ", PO BOX ") + pobox;
+
+    String comboStreetCondPobox = "";
+    if (StringUtils.isNotBlank(streetCond)) {
+      comboStreetCondPobox = streetCond;
+    }
+    if (StringUtils.isNotBlank(pobox)) {
+      if (StringUtils.isNotBlank(comboStreetCondPobox)) {
+        comboStreetCondPobox += ", PO BOX " + pobox;
+      } else {
+        comboStreetCondPobox += pobox;
+      }
+    }
+
     String city = StringUtils.isNotBlank(addr.getCity1()) ? addr.getCity1() : "";
     String postCode = StringUtils.isNotBlank(addr.getPostCd()) ? addr.getPostCd() : "";
     String landedCntry = StringUtils.isNotBlank(addr.getLandCntry()) ? addr.getLandCntry() : "";
