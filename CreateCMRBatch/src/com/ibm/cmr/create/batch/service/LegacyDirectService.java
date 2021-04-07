@@ -4329,6 +4329,7 @@ public class LegacyDirectService extends TransConnService {
       List<Addr> addresses = new ArrayList<Addr>();
       addresses = cmrobjects.getAddresses();
       int maxseqno = 1;
+      boolean isUpdate = "U".equals(cmrobjects.getAdmin().getReqType());
       for (Addr addr : addresses) {
         if ("PG01".equals(addr.getId().getAddrType())) {
           pgs.add(addr);
@@ -4349,11 +4350,13 @@ public class LegacyDirectService extends TransConnService {
         maxseqno = maxseqno + 1;
 
         for (Addr pg : pgs) {
-          String newSeqNo = StringUtils.leftPad(Integer.toString(maxseqno), 5, '0');
-          updateAddrSeq(entityManager, cmrobjects.getAdmin().getId().getReqId(), pg.getId().getAddrType(), pg.getId().getAddrSeq(), newSeqNo,
-              pg.getSapNo(), false);
-          // updateEntity(pg, entityManager);
-          maxseqno++;
+          if ((isUpdate == false) || (isUpdate && ("N".equals(pg.getImportInd()) || "Y".equals(pg.getChangedIndc())))) {
+            String newSeqNo = StringUtils.leftPad(Integer.toString(maxseqno), 5, '0');
+            updateAddrSeq(entityManager, cmrobjects.getAdmin().getId().getReqId(), pg.getId().getAddrType(), pg.getId().getAddrSeq(), newSeqNo,
+                pg.getSapNo(), false);
+            // updateEntity(pg, entityManager);
+            maxseqno++;
+          }
         }
       }
 
