@@ -41,12 +41,71 @@ function afterConfigTW() {
  * After config handlers
  */
 var _taxTypeHandler = null;
+var _ISICHandler = null;
 
 function addHandlersForTW() {
   if (_taxTypeHandler == null) {
     _taxTypeHandler = dojo.connect(FormManager.getField('invoiceSplitCd'), 'onChange', function(value) {
       setVatValidator();
     });
+  }
+
+  if (_ISICHandler == null) {
+    _ISICHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
+      setISUCodeValues(value);
+    });
+  }
+}
+
+/*
+ * Set ISU Code Values based On ISIC
+ */
+function setISUCodeValues(isicCd) {
+
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+
+  if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
+
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var isicCd = FormManager.getActualValue('isicCd');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var isuCd = FormManager.getActualValue('isuCd');
+
+  if (custSubGrp == '') {
+    return;
+  }
+
+  if ((isicCd == _pagemodel.isicCd) && (custSubGrp == _pagemodel.custSubGrp)) {
+    return;
+  }
+
+  var isuCode = [];
+
+  if (cntry == '858') {
+    if (isicCd != '') {
+      var qParams = {
+        _qall : 'Y',
+        ISSUING_CNTRY : cntry + geoCd,
+        REP_TEAM_CD : '%' + isicCd + '%'
+      };
+      var results = cmr.query('GET.ICLIST.BYISIC', qParams);
+      if (results != null) {
+        for (var i = 0; i < results.length; i++) {
+          isuCode.push(results[i].ret1);
+        }
+        if (isuCode != null) {
+          FormManager.limitDropdownValues(FormManager.getField('isuCd'), isuCode);
+
+          if (isuCode.length == 1) {
+            FormManager.setValue('isuCd', isuCode[0]);
+          }
+        }
+      }
+    }
   }
 }
 
@@ -69,9 +128,11 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(afterConfigTW, GEOHandler.TW);
   GEOHandler.addAfterConfig(addHandlersForTW, GEOHandler.TW);
+  GEOHandler.addAfterConfig(setISUCodeValues, GEOHandler.TW);
 
   GEOHandler.addAfterTemplateLoad(afterConfigTW, GEOHandler.TW);
   GEOHandler.addAfterTemplateLoad(addHandlersForTW, GEOHandler.TW);
+  GEOHandler.addAfterTemplateLoad(setISUCodeValues, GEOHandler.TW);
 
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.TW);
 
