@@ -11,6 +11,8 @@ import javax.persistence.EntityManager;
 import org.apache.commons.lang.StringUtils;
 
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
+import com.ibm.cio.cmr.request.automation.util.geo.BeLuxUtil;
+import com.ibm.cio.cmr.request.automation.util.geo.NetherlandsUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.SpainUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.UKIUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.USUtil;
@@ -142,7 +144,39 @@ public class DuplicateChecksUtil {
       if (scenariosList.contains(data.getCustSubGrp())) {
         request.setCustClass(data.getCustClass());
       }
-
+    case SystemLocation.NETHERLANDS:
+        if (NetherlandsUtil.SCENARIO_INTERNAL.equals(data.getCustSubGrp())) {
+          if ("ZS01".equals(addr.getId().getAddrType())) {
+            request.setCustClass("81");
+          }
+        }
+        if (NetherlandsUtil.SCENARIO_PRIVATE_CUSTOMER.equals(data.getCustSubGrp())) {
+          if ("ZS01".equals(addr.getId().getAddrType())) {
+            request.setCustClass("60");
+          }
+        }
+        if (NetherlandsUtil.SCENARIO_BP_LOCAL.equals(data.getCustSubGrp()) || NetherlandsUtil.SCENARIO_BP_CROSS.equals(data.getCustSubGrp())) {
+          if ("ZS01".equals(addr.getId().getAddrType())) {
+            request.setCustClass("49");
+          }
+        }
+    case SystemLocation.BELGIUM:
+      if (BeLuxUtil.SCENARIO_INTERNAL.equals(data.getCustSubGrp()) || BeLuxUtil.SCENARIO_INTERNAL_LU.equals(data.getCustSubGrp())) {
+        if ("ZS01".equals(addr.getId().getAddrType())) {
+          request.setCustClass("81");
+        }
+      }
+      if (BeLuxUtil.SCENARIO_INTERNAL_SO.equals(data.getCustSubGrp()) || BeLuxUtil.SCENARIO_INTERNAL_SO_LU.equals(data.getCustSubGrp())) {
+        if ("ZS01".equals(addr.getId().getAddrType())) {
+          request.setCustClass("85");
+        }
+      }
+      if (BeLuxUtil.SCENARIO_BP_LOCAL.equals(data.getCustSubGrp()) || BeLuxUtil.SCENARIO_BP_LOCAL_LU.equals(data.getCustSubGrp())
+          || BeLuxUtil.SCENARIO_BP_CROSS.equals(data.getCustSubGrp())) {
+        if ("ZS01".equals(addr.getId().getAddrType())) {
+          request.setCustClass("49");
+        }
+      }
     }
 
   }
