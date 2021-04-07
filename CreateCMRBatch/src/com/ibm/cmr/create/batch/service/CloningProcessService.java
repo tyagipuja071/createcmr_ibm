@@ -11,11 +11,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.EntityManager;
@@ -852,8 +850,8 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     knvvClone = getKnvvByKunnr(entityManager, kna1Clone.getId().getMandt(), kna1Clone.getId().getKunnr());
     if (knvv != null && knvv.size() > 0 && knvvClone.size() == 0) {
       try {
-        Set<String> usedSpart = new HashSet<String>();
-        Set<String> usedVtweg = new HashSet<String>();
+        // Set<String> usedSpart = new HashSet<String>();
+        // Set<String> usedVtweg = new HashSet<String>();
         for (Knvv current : knvv) {
           cloneInsert = new Knvv();
           KnvvPK knvvPKClone = new KnvvPK();
@@ -869,17 +867,27 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
           cloneInsert.setId(knvvPKClone);
 
-          if (!(cloneInsert.getId().getVkorg().equalsIgnoreCase(current.getId().getVkorg())) && usedSpart.contains(cloneInsert.getId().getSpart())
-              && usedVtweg.contains(cloneInsert.getId().getVtweg()))
-            continue;
+          /*
+           * if
+           * (!(cloneInsert.getId().getVkorg().equalsIgnoreCase(current.getId().
+           * getVkorg())) && usedSpart.contains(cloneInsert.getId().getSpart())
+           * && usedVtweg.contains(cloneInsert.getId().getVtweg())) continue;
+           */
+
+          if (!(cloneInsert.getId().getVkorg().equalsIgnoreCase(current.getId().getVkorg()))) {
+            int exists = isExistKnvv(entityManager, cloneInsert.getId().getKunnr(), cloneInsert.getId().getMandt(), cloneInsert.getId().getVkorg(),
+                cloneInsert.getId().getSpart(), cloneInsert.getId().getVtweg());
+            if (exists != 0)
+              continue;
+          }
 
           cloneInsert.setSapTs(ts);
           cloneInsert.setShadUpdateInd("I");
           cloneInsert.setShadUpdateTs(ts);
 
           createEntity(cloneInsert, entityManager);
-          usedSpart.add(cloneInsert.getId().getSpart());
-          usedVtweg.add(cloneInsert.getId().getVtweg());
+          // usedSpart.add(cloneInsert.getId().getSpart());
+          // usedVtweg.add(cloneInsert.getId().getVtweg());
         }
 
       } catch (Exception e) {
@@ -1102,10 +1110,11 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     knvpClone = getKnvpByKunnr(entityManager, kna1Clone.getId().getMandt(), kna1Clone.getId().getKunnr());
     if (knvp != null && knvp.size() > 0 && knvpClone.size() == 0) {
       try {
-        Set<String> usedVtweg = new HashSet<String>();
-        Set<String> usedSpart = new HashSet<String>();
-        Set<String> usedParvw = new HashSet<String>();
-        Set<String> usedParza = new HashSet<String>();
+        /*
+         * Set<String> usedVtweg = new HashSet<String>(); Set<String> usedSpart
+         * = new HashSet<String>(); Set<String> usedParvw = new
+         * HashSet<String>(); Set<String> usedParza = new HashSet<String>();
+         */
 
         for (Knvp currentKnvp : knvp) {
           knvpCloneInsert = new Knvp();
@@ -1124,20 +1133,33 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
           knvpCloneInsert.setId(knvpPKClone);
 
-          if (!(knvpCloneInsert.getId().getVkorg().equalsIgnoreCase(currentKnvp.getId().getVkorg()))
-              && usedVtweg.contains(knvpCloneInsert.getId().getVtweg()) && usedSpart.contains(knvpCloneInsert.getId().getSpart())
-              && usedParvw.contains(knvpCloneInsert.getId().getParvw()) && usedParza.contains(knvpCloneInsert.getId().getParza()))
-            continue;
+          /*
+           * if
+           * (!(knvpCloneInsert.getId().getVkorg().equalsIgnoreCase(currentKnvp.
+           * getId().getVkorg())) &&
+           * usedVtweg.contains(knvpCloneInsert.getId().getVtweg()) &&
+           * usedSpart.contains(knvpCloneInsert.getId().getSpart()) &&
+           * usedParvw.contains(knvpCloneInsert.getId().getParvw()) &&
+           * usedParza.contains(knvpCloneInsert.getId().getParza())) continue;
+           */
+
+          if (!(knvpCloneInsert.getId().getVkorg().equalsIgnoreCase(currentKnvp.getId().getVkorg()))) {
+            int exists = isExistKnvp(entityManager, knvpCloneInsert.getId().getKunnr(), knvpCloneInsert.getId().getMandt(),
+                knvpCloneInsert.getId().getParvw(), knvpCloneInsert.getId().getParza(), knvpCloneInsert.getId().getVkorg(),
+                knvpCloneInsert.getId().getSpart(), knvpCloneInsert.getId().getVtweg());
+            if (exists != 0)
+              continue;
+          }
 
           knvpCloneInsert.setSapTs(ts);
           knvpCloneInsert.setShadUpdateInd("I");
           knvpCloneInsert.setShadUpdateTs(ts);
 
           createEntity(knvpCloneInsert, entityManager);
-          usedVtweg.add(knvpCloneInsert.getId().getVtweg());
-          usedSpart.add(knvpCloneInsert.getId().getSpart());
-          usedParvw.add(knvpCloneInsert.getId().getParvw());
-          usedParza.add(knvpCloneInsert.getId().getParza());
+          // usedVtweg.add(knvpCloneInsert.getId().getVtweg());
+          // usedSpart.add(knvpCloneInsert.getId().getSpart());
+          // usedParvw.add(knvpCloneInsert.getId().getParvw());
+          // usedParza.add(knvpCloneInsert.getId().getParza());
         }
       } catch (Exception e) {
         LOG.debug("Error in copy knvp");
@@ -1950,6 +1972,33 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
       return false;
     else
       return true;
+  }
+
+  private int isExistKnvp(EntityManager entityManager, String kunnr, String mandt, String parvw, String parza, String vkorg, String spart,
+      String vtweg) {
+    String sql = ExternalizedQuery.getSql("CLONING.KNVP.EXIST.RECORD");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("KUNNR", kunnr);
+    query.setParameter("MANDT", mandt);
+    query.setParameter("PARVW", parvw);
+    query.setParameter("PARZA", parza);
+    query.setParameter("VKORG", vkorg);
+    query.setParameter("SPART", spart);
+    query.setParameter("VTWEG", vtweg);
+    query.setForReadOnly(true);
+    return query.getSingleResult(Integer.class);
+  }
+
+  private int isExistKnvv(EntityManager entityManager, String kunnr, String mandt, String vkorg, String spart, String vtweg) {
+    String sql = ExternalizedQuery.getSql("CLONING.KNVV.EXIST.RECORD");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("KUNNR", kunnr);
+    query.setParameter("MANDT", mandt);
+    query.setParameter("VKORG", vkorg);
+    query.setParameter("SPART", spart);
+    query.setParameter("VTWEG", vtweg);
+    query.setForReadOnly(true);
+    return query.getSingleResult(Integer.class);
   }
 
 }

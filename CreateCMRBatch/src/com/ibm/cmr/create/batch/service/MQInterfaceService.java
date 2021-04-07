@@ -30,7 +30,6 @@ import com.ibm.cio.cmr.request.entity.MqIntfReqQueuePK;
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
-import com.ibm.cio.cmr.request.util.MQProcessUtil;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cmr.create.batch.util.BatchUtil;
@@ -325,17 +324,18 @@ public class MQInterfaceService extends BaseBatchService {
   protected int processMessagesFromMQ(EntityManager entityManager) throws Exception {
 
     // delete old xmls
-    LOG.info("Cleaning XML files...");
-    int cleanPeriod = Integer.parseInt(BatchUtil.getProperty("XMLOVERLAMPDAYS"));
-    String inPath = BatchUtil.getProperty("XMLINPATH");
-    String cmrHome = SystemConfiguration.getValue("CMR_HOME");
-    if (!StringUtils.isEmpty(cmrHome)) {
-      inPath = cmrHome + "/createcmr/xml/sof/input/";
-    }
-
-    if (!MQProcessUtil.deleteFile(inPath, cleanPeriod)) {
-      LOG.warn("Can't delete XML files in " + inPath);
-    }
+    // LOG.info("Cleaning XML files...");
+    // int cleanPeriod =
+    // Integer.parseInt(BatchUtil.getProperty("XMLOVERLAMPDAYS"));
+    // String inPath = BatchUtil.getProperty("XMLINPATH");
+    // String cmrHome = SystemConfiguration.getValue("CMR_HOME");
+    // if (!StringUtils.isEmpty(cmrHome)) {
+    // inPath = cmrHome + "/createcmr/xml/sof/input/";
+    // }
+    //
+    // if (!MQProcessUtil.deleteFile(inPath, cleanPeriod)) {
+    // LOG.warn("Can't delete XML files in " + inPath);
+    // }
 
     MQConfig mqConfig = null;
     Properties mqProps = null;

@@ -1,7 +1,6 @@
 package com.ibm.cmr.create.batch.util.mq.handler.impl;
 
 import java.io.ByteArrayInputStream;
-import java.io.FileOutputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
@@ -605,7 +604,7 @@ public class SOFMessageHandler extends MQMessageHandler {
     String fileName = uniqueNum.trim() + "_" + MQMsgConstants.FILE_TIME_FORMATTER.format(new Date()) + ".xml";
     String xmlFileName = inPath + fileName;
     try {
-      xmlOutputter.output(doc, new FileOutputStream(xmlFileName));
+      // xmlOutputter.output(doc, new FileOutputStream(xmlFileName));
     } catch (Exception e) {
       LOG.warn("Warning, physical file not saved.");
     }
