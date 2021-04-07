@@ -27,12 +27,7 @@ function afterConfigForNORDX() {
   if (reqType == 'U') {
     if (FormManager.getActualValue('viewOnlyPage') == 'true') {
       cmr.hideNode("container-SalesBusOff"); // CMR-1650
-      cmr.hideNode("container-CollectionCd");
       return;
-    }
-
-    if (role == 'Processor') {
-      cmr.hideNode("container-CollectionCd");
     }
 
     // FormManager.enable('collectionCd');
@@ -716,6 +711,7 @@ function setTaxCdValuesCROSS() {
   var landCntry = _result.ret2;
 
   if ((custSubGrp == 'CBBUS' || custSubGrp == 'CBCOM')) {
+
     if (EU_COUNTRIES.indexOf(landCntry) > 0) {
       isEUCntry = true;
     }
@@ -2026,6 +2022,13 @@ function setCollectionCd() {
       }
     }
   }
+
+  if (reqType == 'C') {
+    if (role == 'Viewer' || role == 'Processor') {
+      cmr.hideNode("container-CollectionCd");
+    }
+  }
+
 }
 
 function requestingLobOnChange() {
@@ -2258,7 +2261,7 @@ function setTaxCdValuesByCustSubGrp() {
       var _result = cmr.query('ADDR.GET.LANDCNTRY.BY_REQID_ADDRTYP', reqParam);
       var landCntry = _result.ret2;
 
-      if (EU_COUNTRIES.indexOf(landCntry) > 0) {
+      if (EU_COUNTRIES.indexOf(landCntry) > -1) {
         isEUCntry = true;
       }
 
