@@ -54,6 +54,7 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
     if (engineData.isDnbVerified() || "Y".equals(admin.getCompVerifiedIndc())) {
       validation.setSuccess(true);
       validation.setMessage("Skipped");
+      output.setResults("Skipped");
       output.setDetails("Sos-RPA Matching is skipped as matching records are found in DnB");
       engineData.addPositiveCheckStatus(AutomationEngineData.DNB_MATCH);
       return output;
@@ -61,6 +62,7 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
     if (SC_BP_END_USER.equals(scenario) && SC_BP_POOL.equals(scenario) && SC_BP_DEVELOP.equals(scenario) && SC_BP_E_HOST.equals(scenario)) {
       validation.setSuccess(true);
       validation.setMessage("Skipped");
+      output.setResults("Skipped");
       output.setDetails("Skipping SOS-RPA Check Element for US BP Scenario");
       log.debug("Skipping SOS-RPA Check Element for US BP Scenario");
       return output;
