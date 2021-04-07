@@ -36,6 +36,7 @@
         <cmr:field path="collectionCd" id="collectionCd" fieldId="CollectionCd" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
+
   </cmr:row>
   <cmr:row addBackground="false">
     <cmr:column span="2" containerForField="EmbargoCode">
@@ -68,8 +69,33 @@
         </p>
       </cmr:column>
     
+     <cmr:column span="2" containerForField="ContactName1">
+      <p>
+        <label for="contactName1"> <cmr:fieldLabel fieldId="ContactName1" />: </label>
+        <cmr:field fieldId="ContactName1" id="contactName1" path="contactName1" tabId="MAIN_CUST_TAB" />
+      </p>
+    </cmr:column>    
   </cmr:row>
-    <cmr:row  addBackground="false">
+  <cmr:row addBackground="false">
+     <cmr:column span="2" containerForField="RestrictTo" >
+      <p>
+        <label for="restrictTo"> 
+          <cmr:fieldLabel fieldId="RestrictTo" />: 
+          <cmr:delta text="${rdcdata.restrictTo}" oldValue="${reqentry.restrictTo}" code="L"/>
+        </label>
+        <cmr:field path="restrictTo" id="restrictTo" fieldId="RestrictTo" tabId="MAIN_CUST_TAB" />
+      </p>
+    </cmr:column>
+    
+     <cmr:column span="2" containerForField="installRep" >
+      <p>
+        <label for="InstallRep"> 
+          <cmr:fieldLabel fieldId="InstallRep" />: 
+			<cmr:delta text="-" id="delta-installRep" />
+        </label>
+        <%-- <cmr:field path="installRep" id="InstallRep" fieldId="InstallRep"/> --%>
+      </p>
+    </cmr:column>
       <c:if test="${reqentry.reqType == 'U'}">
 		<cmr:column span="2" containerForField="ModeOfPayment">
 		 <p>
@@ -79,8 +105,7 @@
 			<cmr:field path="paymentMode" id="modeOfPayment" fieldId="ModeOfPayment" tabId="MAIN_CUST_TAB" />		 
 		 </p>
 		</cmr:column>
-	  </c:if>
-	  
+	  </c:if>	  
     </cmr:row>
 </cmr:view>
 

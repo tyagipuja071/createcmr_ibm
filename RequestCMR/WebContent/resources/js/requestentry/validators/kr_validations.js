@@ -1,21 +1,26 @@
 /* Register KR Javascripts */
 
 function afterConfigKR() {
-  var reqType = FormManager.getActualValue('reqType');
   var role = null;
+  var reqType = null;
+
+   reqType = FormManager.getActualValue('reqType');
+   if (typeof (_pagemodel) != 'undefined') {
+    role = _pagemodel.userRole;
+  }
   FormManager.readOnly('capInd');
   FormManager.setValue('capInd', true);
   FormManager.readOnly('cmrOwner');
   FormManager.resetValidations('enterprise');
-
+  //FormManager.addValidator('OriginatorName',Validators.REQUIRED, ['Requested For Name (Originator)'], 'MAIN_GENERAL_TAB');
   FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
-  // FormManager.readOnly('isuCd');
-  // Non editable for requester, same as TW
-  FormManager.disable('isuCd');
+
+  
   FormManager.disable('cmrNoPrefix');
-  if (typeof (_pagemodel) != 'undefined') {
-    role = _pagemodel.userRole;
-  }
+  // Non editable for requester
+  if (reqType == 'C' && role == 'REQUESTER') {
+    FormManager.readOnly('isuCd');
+  } 
 
 }
 

@@ -504,7 +504,7 @@ if (readOnly){
               </p>
             </cmr:column>
         </cmr:view>
-        <cmr:view forGEO="JP,KR">
+        <cmr:view forGEO="JP">
             <cmr:column span="2">
               <p>
                 <label for="reqFor"><cmr:fieldLabel fieldId="OriginatorName" />:<cmr:info text="${ui.info.orgName}" /></label>
@@ -512,6 +512,13 @@ if (readOnly){
               </p>
             </cmr:column>
         </cmr:view>
+        <cmr:view forGEO="KR">
+            <cmr:column span="2">
+              <p>
+                <label for="reqFor"><cmr:fieldLabel fieldId="OriginatorName" />:<cmr:info text="${ui.info.orgName}" /></label>
+                <cmr:bluepages model="reqentry" namePath="originatorNm"  idPath="originatorId" useBothIds="false" showId="true"></cmr:bluepages>
+              </p>
+            </cmr:column></cmr:view>
         <cmr:view exceptForGEO="JP,KR">
               <cmr:column span="2">
                 <p>
