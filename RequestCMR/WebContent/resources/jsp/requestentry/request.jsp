@@ -504,6 +504,19 @@ div#cmr-info-box, div#cmr-error-box, div#cmr-validation-box {
       </cmr:row>
     <%} %>
     </cmr:view>
+    <br>
+      <cmr:view>
+    <%if (!StringUtils.isEmpty(reqentry.getPaygoProcessIndc()) && "Y".equals(reqentry.getPaygoProcessIndc()) && reqentry.getUserRole() != null && reqentry.getUserRole().equalsIgnoreCase("PROCESSOR")){%>
+      <cmr:row>
+        <cmr:column span="6">
+          <div class="paygoIndc">
+            <img src="${resourcesPath}/images/warn-icon.png" class="cmr-error-icon">
+            <cmr:note text="${ui.info.paygo}" />
+          </div>
+        </cmr:column>
+      </cmr:row>
+    <%} %>
+    </cmr:view>
     <!-- Tabs section -->
     <cmr:tabs>
       <cmr:tab label="${ui.tab.general}" id="MAIN_GENERAL_TAB" active="true" sectionId="GENERAL_REQ_TAB" gridIds="COMMENT_LIST_GRID" />
