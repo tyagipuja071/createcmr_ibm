@@ -5112,6 +5112,7 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterTemplateLoad(setCSBORequired, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setPageLoadDone, GEOHandler.JP);
+  GEOHandler.addAfterTemplateLoad(addScenarioDriven, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(removeDefaultValueTelNo, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setJSICSubIndustryCdOptional, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setOutsourcingServiceRequired, GEOHandler.JP);
