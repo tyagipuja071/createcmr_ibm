@@ -14,7 +14,9 @@ public class CloningOverrideUtil {
 
   private static final Logger LOG = Logger.getLogger(CloningOverrideUtil.class);
   private static List<CloningOverrideMapping> overrideMappings = new ArrayList<CloningOverrideMapping>();
-  private static List<CloningOverrideMapping> returnMappings = new ArrayList<CloningOverrideMapping>();
+  // private static List<CloningOverrideMapping> returnMappings = new
+  // ArrayList<CloningOverrideMapping>();
+  private List<CloningOverrideMapping> returnMappings = null;
 
   @SuppressWarnings("unchecked")
   public CloningOverrideUtil() {
@@ -41,6 +43,7 @@ public class CloningOverrideUtil {
 
   public List<CloningOverrideMapping> getOverrideValueFromMapping(String country) {
     if (!overrideMappings.isEmpty()) {
+      returnMappings = new ArrayList<CloningOverrideMapping>();
       for (CloningOverrideMapping mapping : overrideMappings) {
         List<String> countryValues = Arrays.asList(mapping.getCountries().replaceAll("\n", "").replaceAll(" ", "").split(","));
         if (countryValues.contains(country)) {
