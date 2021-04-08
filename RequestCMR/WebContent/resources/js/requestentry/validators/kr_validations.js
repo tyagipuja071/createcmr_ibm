@@ -16,6 +16,9 @@ function afterConfigKR() {
   FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
   FormManager.addValidator('phone1', Validators.REQUIRED, ['Business License Type'], 'MAIN_CUST_TAB');
   
+  FormManager.removeValidator('subIndustryCd', Validators.REQUIRED);  
+  FormManager.removeValidator('sensitiveFlag', Validators.REQUIRED);
+  FormManager.removeValidator('LocalTax2', Validators.REQUIRED);
   FormManager.disable('cmrNoPrefix');
   // Non editable for requester
   if (reqType == 'C' && role == 'Requester') {

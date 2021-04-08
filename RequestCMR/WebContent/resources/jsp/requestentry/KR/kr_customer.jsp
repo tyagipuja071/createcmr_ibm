@@ -26,7 +26,14 @@
         <cmr:field fieldId="AbbrevLocation" id="abbrevLocn" path="abbrevLocn" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
-
+<cmr:column span="2" containerForField="LocalTax2">
+            <label for="taxCd2">
+            <cmr:fieldLabel fieldId="LocalTax2" />: <cmr:delta text="${rdcdata.taxCd2}" oldValue="${reqentry.taxCd2}" />
+            <!-- <span id="taxCd2MandatoryFlag" style="color:red;font-size:16px;font-weight:bold">*</span> -->
+            </label>
+            <cmr:field path="taxCd2" id="taxCd2" fieldId="LocalTax2" tabId="MAIN_CUST_TAB" />
+            </cmr:column>
+            
     <cmr:column span="2" containerForField="CollectionCd">
       <p>
         <cmr:label fieldId="collectionCd">
