@@ -1022,9 +1022,10 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     // Knvi knviCloneInsert = null;
     Timestamp ts = SystemUtil.getCurrentTimestamp();
 
-    knvi = getKnviByKunnr(entityManager, kna1.getId().getMandt(), kna1.getId().getKunnr());
+    // knvi = getKnviByKunnr(entityManager, kna1.getId().getMandt(),
+    // kna1.getId().getKunnr());
     knviClone = getKnviByKunnr(entityManager, kna1Clone.getId().getMandt(), kna1Clone.getId().getKunnr());
-    if (knvi != null && knvi.size() > 0 && knviClone.size() == 0) {
+    if (knviClone != null && knviClone.size() == 0) {
       try {
         String sql = ExternalizedQuery.getSql("GET.KNVI.DEFAULT");
         PreparedQuery query = new PreparedQuery(entityManager, sql);
@@ -1059,10 +1060,10 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
         }
 
       } catch (Exception e) {
-        LOG.debug("Error in copy knvi");
+        LOG.debug("Error in inserting knvi");
       }
     } else {
-      LOG.info("KNVI record not exist with KUNNR " + kna1.getId().getKunnr());
+      LOG.info("KNVI record already exists with KUNNR " + kna1Clone.getId().getKunnr());
     }
 
   }
