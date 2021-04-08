@@ -96,6 +96,17 @@
         <cmr:field fieldId="InstallRep" path="installRep" id="installRep"/>
       </p>
     </cmr:column>
+    
+    <cmr:column span="2" containerForField="phone1" >
+      <p>
+        <label for="Phone1"> 
+          <cmr:fieldLabel fieldId="Phone1" />: 
+			<cmr:delta text="-" id="delta-phone1" />
+        </label>
+        <cmr:field fieldId="Phone1" path="phone1" id="phone1"/>
+      </p>
+    </cmr:column>
+    
       <c:if test="${reqentry.reqType == 'U'}">
 		<cmr:column span="2" containerForField="ModeOfPayment">
 		 <p>
