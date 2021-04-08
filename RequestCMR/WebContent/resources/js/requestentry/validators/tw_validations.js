@@ -150,9 +150,73 @@ function setVatValidator() {
     FormManager.addValidator('vat', Validators.REQUIRED, [ 'Unify Number' ], 'MAIN_CUST_TAB');
   }
 }
+function setChecklistStatus() {
+  console.log('validating checklist..');
+  var checklist = dojo.query('table.checklist');
+  document.getElementById("checklistStatus").innerHTML = "Not Done";
+  var reqId = FormManager.getActualValue('reqId');
+  var questions = checklist.query('input[type="radio"]');
 
+  if (reqId != null && reqId.length > 0 && reqId != 0) {
+    if (questions.length > 0) {
+      var noOfQuestions = questions.length / 2;
+      var checkCount = 0;
+      for (var i = 0; i < questions.length; i++) {
+        if (questions[i].checked) {
+          checkCount++;
+        }
+      }
+      if (noOfQuestions != checkCount) {
+        document.getElementById("checklistStatus").innerHTML = "Incomplete";
+        FormManager.setValue('checklistStatus', "Incomplete");
+      } else {
+        document.getElementById("checklistStatus").innerHTML = "Complete";
+        FormManager.setValue('checklistStatus', "Complete");
+      }
+    } else {
+      document.getElementById("checklistStatus").innerHTML = "Complete";
+      FormManager.setValue('checklistStatus', "Complete");
+    }
+  }
+}
+
+function addTWChecklistValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        console.log('validating checklist..');
+        var checklist = dojo.query('table.checklist');
+        var questions = checklist.query('input[type="radio"]');
+        if (questions.length > 0) {
+          var noOfQuestions = questions.length / 2;
+          var checkCount = 0;
+          for (var i = 0; i < questions.length; i++) {
+            if (questions[i].checked) {
+              checkCount++;
+            }
+          }
+          if (noOfQuestions != checkCount) {
+            return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
+          }
+          // add check for checklist on DB
+          var reqId = FormManager.getActualValue('reqId');
+          var record = cmr.getRecord('GBL_CHECKLIST', 'ProlifChecklist', {
+            REQID : reqId
+          });
+          if (!record || !record.sectionA1) {
+            return new ValidationResult(null, false,
+                'Checklist has not been registered yet. Please execute a \'Save\' action before sending for processing to avoid any data loss.');
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CHECKLIST_TAB', 'frmCMR');
+}
 dojo.addOnLoad(function() {
   GEOHandler.TW = [ '858' ];
+  GEOHandler.TW_CHECKLIST = [ '858' ];
+
   console.log('adding Taiwan functions...');
   GEOHandler.enableCustomerNamesOnAddress(GEOHandler.TW);
   GEOHandler.setRevertIsicBehavior(false);
@@ -166,6 +230,9 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(addHandlersForTW, GEOHandler.TW);
   // GEOHandler.addAfterTemplateLoad(setISUCodeValues, GEOHandler.TW);
   GEOHandler.addAfterTemplateLoad(setDupCmrIndcWarning, GEOHandler.TW);
+  // Checklist
+  GEOHandler.addAfterConfig(setChecklistStatus, GEOHandler.TW_CHECKLIST);
+  GEOHandler.registerValidator(addTWChecklistValidator, GEOHandler.TW_CHECKLIST);
 
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.TW);
 
