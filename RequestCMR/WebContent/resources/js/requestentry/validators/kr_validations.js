@@ -12,7 +12,8 @@ function afterConfigKR() {
   FormManager.setValue('capInd', true);
   FormManager.readOnly('cmrOwner');
   FormManager.resetValidations('enterprise');
-  //FormManager.addValidator('OriginatorName',Validators.REQUIRED, ['Requested For Name (Originator)'], 'MAIN_GENERAL_TAB');
+  
+  FormManager.addValidator('reqFor',Validators.REQUIRED, ['Requested For Name (Originator)'], 'MAIN_GENERAL_TAB');
   FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
   FormManager.addValidator('phone1', Validators.REQUIRED, ['Business License Type'], 'MAIN_CUST_TAB');
   
