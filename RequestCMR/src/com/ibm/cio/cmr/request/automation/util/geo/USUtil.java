@@ -503,6 +503,7 @@ public class USUtil extends AutomationUtil {
     if (StringUtils.isBlank(scenarioSubType) || Arrays.asList(scenarioList).contains(scenarioSubType)) {
       String scenarioDesc = getScenarioDesc(entityManager, scenarioSubType);
       if (SC_BYMODEL.equals(data.getCustSubGrp())) {
+        engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
         engineData.addNegativeCheckStatus("US_SCENARIO_CHK", "Processor review required as imported CMR belongs to " + scenarioDesc + " scenario.");
         details.append("Processor review required as imported CMR belongs to " + scenarioDesc + " scenario.").append("\n");
       } else {
