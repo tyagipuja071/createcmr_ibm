@@ -20,7 +20,7 @@ function afterConfigForNORDX() {
     role = _pagemodel.userRole;
   }
   FormManager.readOnly('cmrOwner');
-  FormManager.readOnly('salesBusOffCd');
+  FormManager.readOnly('subIndustryCd');// CMR-1993
   if (FormManager.getActualValue('countryUse') == '702') {
     FormManager.setValue('custPrefLang', 'U');
   }
@@ -41,13 +41,11 @@ function afterConfigForNORDX() {
     FormManager.readOnly('capInd');
     FormManager.readOnly('modeOfPayment');
     FormManager.setValue('capInd', true);
+    FormManager.addValidator('subIndustryCd', Validators.REQUIRED, [ 'subIndustry Code' ], 'MAIN_CUST_TAB');// CMR-1993
+    FormManager.addValidator('isicCd', Validators.REQUIRED, [ 'ISIC' ], 'MAIN_CUST_TAB'); // CMR-1993
     if (role == 'Requester') {
       FormManager.readOnly('abbrevNm');
       FormManager.readOnly('abbrevLocn');
-      // if ((custSubGrp == 'LTBUS' || custSubGrp == 'EEBUS' || custSubGrp ==
-      // 'LVBUS') || (custSubGrp == 'CBBUS' && geoCd != 'FI')) {
-      // FormManager.readOnly('engineeringBo');
-      // } // CMR-1903 commented
     }
     if (role == 'Processor') {
       FormManager.enable('abbrevNm');
@@ -185,12 +183,14 @@ var _vatExemptHandler = null;
 var _poSteertNorwayFin = null;
 var _PostalCodeHandler = null;
 var _ExpediteHandler = null;
+var _ISICHandler = null; // CMR-1993
 
 function addHandlersForNORDX() {
 
   if (_ISUHandler == null) {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       // setClientTierValues(value);
+      setSalesRepValues(); // CMR-1746
     });
   }
 
@@ -224,6 +224,11 @@ function addHandlersForNORDX() {
     });
   }
 
+  if (_ISICHandler == null) {
+    _ISICHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
+      FormManager.readOnly('subIndustryCd'); // CMR-1993
+    });
+  }
   // if (_poSteertNorwayFin == null) {
   // if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.NORWAY
   // || (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.FINLAND &&
@@ -407,7 +412,7 @@ function setSalesRepValues(clientTier) {
           if (ind != '') {
             if (MSD993_34Q.indexOf(ind) >= 0) {
               FormManager.setValue('repTeamMemberNo', "MSD993");
-              FormManager.setValue('engineeringBo', '6680');
+              FormManager.setValue('engineeringBo', '6880');
             } else if (MSD992_6644.indexOf(ind) >= 0) {
               FormManager.setValue('repTeamMemberNo', "MSD992");
               FormManager.setValue('engineeringBo', '6644');
@@ -416,11 +421,11 @@ function setSalesRepValues(clientTier) {
               FormManager.setValue('engineeringBo', '1375');
             } else if (MSD302_34Q.indexOf(ind) >= 0) {
               FormManager.setValue('repTeamMemberNo', "MSD302");
-              FormManager.setValue('engineeringBo', '6680');
+              FormManager.setValue('engineeringBo', '6881');
             }
           } else {
             FormManager.setValue('repTeamMemberNo', "MSD302");
-            FormManager.setValue('engineeringBo', '6681');
+            FormManager.setValue('engineeringBo', '6881');
           }
         }
       } else if (isuCtc == '047') {
@@ -510,6 +515,10 @@ function setSalesRepValues(clientTier) {
       } else if (isuCtc == '8B7') {
         FormManager.setValue('repTeamMemberNo', "NOREP9");
         FormManager.setValue('engineeringBo', '0070');
+      } else if (isuCtc == '047') {
+        FormManager.setValue('repTeamMemberNo', "NGA001");
+      } else if (isuCtc == '1R7') {
+        FormManager.setValue('repTeamMemberNo', "DIS001");
       }
     }
   }
@@ -550,16 +559,16 @@ function setAdminDSCValues(repTeamMemberNo) {
         var ind = ims.substring(0, 1);
         if (ind != '') {
           if (repTeamMemberNo == 'MSD993') {
-            FormManager.setValue('engineeringBo', '6680');
+            FormManager.setValue('engineeringBo', '6880');
           } else if (repTeamMemberNo == 'MSD992' && (MSD992_6644.indexOf(ind) >= 0)) {
             FormManager.setValue('engineeringBo', '6644');
           } else if (repTeamMemberNo == 'MSD992' && MSD992_1375.indexOf(ind) >= 0) {
             FormManager.setValue('engineeringBo', '1375');
           } else if (repTeamMemberNo == 'MSD302') {
-            FormManager.setValue('engineeringBo', '6681');
+            FormManager.setValue('engineeringBo', '6881');
           }
         } else {
-          FormManager.setValue('engineeringBo', '6681');
+          FormManager.setValue('engineeringBo', '6881');
         }
       }
     } else if (isuCtc == '047' && repTeamMemberNo == 'FSD001') {
@@ -631,6 +640,10 @@ function setAdminDSCValues(repTeamMemberNo) {
       FormManager.setValue('engineeringBo', '4990');
     } else if (isuCtc == '8B7' && repTeamMemberNo == 'NOREP9') {
       FormManager.setValue('engineeringBo', '0070');
+    } else if (isuCtc == '047' && repTeamMemberNo == 'NGA001') {
+      FormManager.setValue('engineeringBo', "3747");
+    } else if (isuCtc == '1R7' && repTeamMemberNo == 'DIS001') {
+      FormManager.setValue('engineeringBo', "1241");
     }
   }
 
@@ -670,6 +683,39 @@ function addACAdminValidator() {
       }
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
+/*
+ * Validate ISIC Values CMR-1993
+ */
+function addISICValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+
+        var isicCD = FormManager.getActualValue('isicCd');
+        var custSubType = FormManager.getActualValue('custSubGrp');
+        var reqType = FormManager.getActualValue('reqType');
+        var subCntryCustType = FormManager.getActualValue('custSubGrp').substring(2, 5);
+        var embargoCd = FormManager.getActualValue('embargoCd');
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+
+        if (isicCD == '9500') {
+          if (reqType == 'C') {
+            if (((cntry == '806' || cntry == '846') && custSubType != 'PRIPE' && custSubType != 'IBMEM')
+                || ((cntry == '678' || cntry == '702') && subCntryCustType != 'IBM' && subCntryCustType != 'PIR'))
+              return new ValidationResult(null, false, 'ISIC value 9500 is not allowed for other scenario than Private Person and IBM Employee');
+          }
+
+          if (reqType == 'U' && embargoCd != '71' && embargoCd != '60') {
+            return new ValidationResult(null, false,
+                'ISIC value 9500 can be entered only for CMR with KUKLA 60 (Private Person) and 71 (IBM Employee)');
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
 function setSBOForFinlandSubRegion() {
@@ -2556,9 +2602,6 @@ dojo.addOnLoad(function() {
   // GEOHandler.addAfterTemplateLoad(setAdminDSCValues, GEOHandler.NORDX);
   // GEOHandler.addAfterConfig(setSalesRepValues, GEOHandler.NORDX);
   // GEOHandler.addAfterConfig(setAdminDSCValues, GEOHandler.NORDX);
-  // GEOHandler.addAfterConfig(setSBOForFinlandSubRegion, GEOHandler.NORDX);
-  // GEOHandler.addAfterTemplateLoad(setSBOForFinlandSubRegion,
-  // GEOHandler.NORDX);
   GEOHandler.addAfterConfig(addHandlersForNORDX, GEOHandler.NORDX);
   GEOHandler.addAfterTemplateLoad(afterConfigForNORDX, GEOHandler.NORDX);
   GEOHandler.addAfterConfig(lockEmbargo, GEOHandler.NORDX);
@@ -2568,6 +2611,7 @@ dojo.addOnLoad(function() {
       null, true);
   GEOHandler.registerValidator(norwayCustomVATValidator('', 'MAIN_CUST_TAB', 'frmCMR', 'ZS01'), [ SysLoc.NORWAY ], null, true);
   GEOHandler.registerValidator(addACAdminValidator, GEOHandler.NORDX, null, true);// CMR-1746
+  GEOHandler.registerValidator(addISICValidator, GEOHandler.NORDX, null, true);// CMR-1993
   GEOHandler.addAddrFunction(disableLandCntry, GEOHandler.NORDX);
   GEOHandler.addAddrFunction(loadMachinesList, GEOHandler.NORDX);
   GEOHandler.addAddrFunction(handleMahcineModel, GEOHandler.NORDX);
