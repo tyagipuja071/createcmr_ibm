@@ -380,10 +380,16 @@ public class CanadaHandler extends GEOHandler {
   @Override
   public void doBeforeDataSave(EntityManager entityManager, Admin admin, Data data, String cmrIssuingCntry) throws Exception {
     setAddressRelatedData(entityManager, admin, data, null);
+    updateAddrCustNm1(entityManager, StringUtils.EMPTY, data.getId().getReqId());
   }
 
   @Override
   public void doBeforeAddrSave(EntityManager entityManager, Addr addr, String cmrIssuingCntry) throws Exception {
+    if (!"ZS01".equals(addr.getId().getAddrType())) {
+      // only update for main address
+      return;
+    }
+
     DataPK pk = new DataPK();
     pk.setReqId(addr.getId().getReqId());
     Data data = entityManager.find(Data.class, pk);
@@ -391,14 +397,6 @@ public class CanadaHandler extends GEOHandler {
     AdminPK apk = new AdminPK();
     apk.setReqId(addr.getId().getReqId());
     Admin admin = entityManager.find(Admin.class, apk);
-
-    String custNm1 = admin.getMainCustNm1() != null ? admin.getMainCustNm1() : "";
-    addr.setCustNm1(custNm1);
-
-    if (!"ZS01".equals(addr.getId().getAddrType())) {
-      // only update for main address
-      return;
-    }
 
     setAddressRelatedData(entityManager, admin, data, addr);
   }
@@ -682,4 +680,14 @@ public class CanadaHandler extends GEOHandler {
     newAddrSeq = generateAddrSeq(entityManager, addrType, reqId, cmrIssuingCntry);
     return newAddrSeq;
   }
+
+  private void updateAddrCustNm1(EntityManager entityManager, String custName, long reqId) throws Exception {
+    String custNm1 = custName != null ? custName : "";
+
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ADDR.UPDATE.CUSTNM1.CA"));
+    query.setParameter("CUST_NM1", custNm1);
+    query.setParameter("REQ_ID", reqId);
+    query.executeSql();
+  }
+
 }
