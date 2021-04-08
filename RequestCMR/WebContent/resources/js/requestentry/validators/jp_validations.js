@@ -2363,7 +2363,10 @@ function showOrHideDirectBpZSeriesSw() {
       FormManager.disable('creditBp');
 
       FormManager.show('zSeriesSw', 'zseriesSw');
-      FormManager.addValidator('zseriesSw', Validators.REQUIRED, [ 'zSeries SW' ], 'MAIN_CUST_TAB');
+      var custSubGrp = FormManager.getActualValue('custSubGrp');
+      if (custSubGrp != 'EUCMR' && custSubGrp != 'WHCMR') {
+        FormManager.addValidator('zseriesSw', Validators.REQUIRED, [ 'zSeries SW' ], 'MAIN_CUST_TAB');
+      }
       FormManager.enable('zseriesSw');
     }
   });
@@ -4820,8 +4823,6 @@ function setOutsourcingServiceRequired() {
   case 'INTER':
   case 'ISOCU':
   case 'NORML':
-  case 'EUCMR':
-  case 'WHCMR':
     if (FormManager.getField('outsourcingService').set) {
       FormManager.getField('outsourcingService').set('checked', false);
     } else if (FormManager.getField('outsourcingService')) {
@@ -4832,6 +4833,20 @@ function setOutsourcingServiceRequired() {
     FormManager.removeValidator('creditBp', Validators.REQUIRED);
     FormManager.show('zSeriesSw', 'zseriesSw');
     FormManager.addValidator('zseriesSw', Validators.REQUIRED, [ 'zSeries SW' ], 'MAIN_CUST_TAB');
+    FormManager.enable('zseriesSw');
+    break;
+  case 'EUCMR':
+  case 'WHCMR':
+    if (FormManager.getField('outsourcingService').set) {
+      FormManager.getField('outsourcingService').set('checked', false);
+    } else if (FormManager.getField('outsourcingService')) {
+      FormManager.getField('outsourcingService').checked = false;
+    }
+    FormManager.enable('outsourcingService');
+    FormManager.hide('DirectBp', 'creditBp');
+    FormManager.removeValidator('creditBp', Validators.REQUIRED);
+    FormManager.show('zSeriesSw', 'zseriesSw');
+    FormManager.removeValidator('zseriesSw', Validators.REQUIRED);
     FormManager.enable('zseriesSw');
     break;
   // Below are Subsidiary Scenario
@@ -5112,11 +5127,11 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterTemplateLoad(setCSBORequired, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setPageLoadDone, GEOHandler.JP);
-  GEOHandler.addAfterTemplateLoad(addScenarioDriven, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(removeDefaultValueTelNo, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setJSICSubIndustryCdOptional, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setOutsourcingServiceRequired, GEOHandler.JP);
   GEOHandler.addAfterTemplateLoad(setSalesBusOffCdRequired, GEOHandler.JP);
+  GEOHandler.addAfterTemplateLoad(addScenarioDriven, GEOHandler.JP);
 
   // 1686132: Special requirement for Subscenario = BQ - IBM Japan Credit LLC
   // under the scenario of Subsidiary
