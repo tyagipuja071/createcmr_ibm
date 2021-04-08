@@ -10,6 +10,7 @@ function afterConfigTW() {
   FormManager.setValue('capInd', true);
   FormManager.readOnly('cmrOwner');
   FormManager.resetValidations('enterprise');
+  FormManager.readOnly('isuCd');
 
   FormManager.addValidator('custAcctType', Validators.REQUIRED, [ 'Customer Type' ], 'MAIN_CUST_TAB');
   FormManager.addValidator('mktgDept', Validators.REQUIRED, [ 'Tax Location' ], 'MAIN_CUST_TAB');
@@ -35,7 +36,6 @@ function afterConfigTW() {
   }
 
   setVatValidator();
-  setWarning();
 }
 
 /**
@@ -60,12 +60,15 @@ function addHandlersForTW() {
 
   if (_dupCmrIndcHandler == null) {
     _ISICHandler = dojo.connect(FormManager.getField('dupCmrIndc'), 'onChange', function(value) {
-      setWarning();
+      setDupCmrIndcWarning();
     });
   }
 }
 
-function setWarning() {
+/*
+ * Set CMR Double Creation warning when its value is Y
+ */
+function setDupCmrIndcWarning() {
   var dupCmrIndc = FormManager.getActualValue('dupCmrIndc');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (custSubGrp == null) {
@@ -156,16 +159,17 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(afterConfigTW, GEOHandler.TW);
   GEOHandler.addAfterConfig(addHandlersForTW, GEOHandler.TW);
-  GEOHandler.addAfterConfig(setISUCodeValues, GEOHandler.TW);
-  GEOHandler.addAfterConfig(setWarning, GEOHandler.TW);
+  // GEOHandler.addAfterConfig(setISUCodeValues, GEOHandler.TW);
+  GEOHandler.addAfterConfig(setDupCmrIndcWarning, GEOHandler.TW);
 
   GEOHandler.addAfterTemplateLoad(afterConfigTW, GEOHandler.TW);
   GEOHandler.addAfterTemplateLoad(addHandlersForTW, GEOHandler.TW);
-  GEOHandler.addAfterTemplateLoad(setISUCodeValues, GEOHandler.TW);
-  GEOHandler.addAfterTemplateLoad(setWarning, GEOHandler.TW);
+  // GEOHandler.addAfterTemplateLoad(setISUCodeValues, GEOHandler.TW);
+  GEOHandler.addAfterTemplateLoad(setDupCmrIndcWarning, GEOHandler.TW);
 
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.TW);
 
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.TW, GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.registerValidator(addDPLCheckValidator, GEOHandler.TW, GEOHandler.ROLE_REQUESTER, true);
 
 });
