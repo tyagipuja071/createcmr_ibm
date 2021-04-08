@@ -4712,33 +4712,6 @@ function afterConfigForIT() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     FormManager.readOnly('cmrNo');
   }
-  
-  // else {
-    // var custSubType = FormManager.getActualValue('custSubGrp');
-    // if (FormManager.getActualValue('isuCd') != null && "34" ==
-    // FormManager.getActualValue('isuCd')) {
-    // if (custSubType == 'CROGO' || custSubType == 'CROUN' || custSubType ==
-    // 'CROLC' || custSubType == 'CROCM' || custSubType == 'CROBP') {
-    // FormManager.setValue('collectionCd', 'CIT16');
-    // FormManager.enable('collectionCd');
-    // }
-    // if (custSubType == 'GOVSM' || custSubType == 'GOVVA' || custSubType ==
-    // 'UNISM' || custSubType == 'UNIVA' || custSubType == 'LOCSM' ||
-    // custSubType ==
-    // 'LOCVA' || custSubType == 'COMSM'
-    // || custSubType == 'COMVA' || custSubType == 'BUSSM' || custSubType ==
-    // 'BUSVA'
-    // || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType ==
-    // 'NGOSM'
-    // || custSubType == 'NGOVA'
-    // || custSubType == 'PRISM' || custSubType == 'PRIVA') {
-    // console.log("For SM/VA after config set default value of collection code
-    // CIT14");
-    // FormManager.setValue('collectionCd', 'CIT14');
-    // FormManager.readOnly('collectionCd');
-    // }
-    // }
-    // }
 }
 
 /*
@@ -8397,7 +8370,8 @@ function ibmFieldsBehaviourInCreateByScratchIT() {
     }
 
     if ((isuCd == '34' && clientTier == 'Q')
-        || (custSubGrp == 'BUSPR' || custSubGrp == 'BUSSM' || custSubGrp == 'BUSVA' || custSubGrp == 'CROBP' || custSubGrp == 'INTER' || custSubGrp == 'INTSM' || custSubGrp == 'INTVA' || custSubGrp == 'CROIN')) {
+        || (custSubGrp == 'BUSPR' || custSubGrp == 'BUSSM' || custSubGrp == 'BUSVA' || custSubGrp == 'CROBP' || custSubGrp == 'INTER' || custSubGrp == 'INTSM' || custSubGrp == 'INTVA'
+            || custSubGrp == 'CROIN' || custSubGrp == 'IBMIT' || custSubGrp == 'XIBM')) {
       FormManager.removeValidator('affiliate', Validators.REQUIRED);
       FormManager.removeValidator('enterprise', Validators.REQUIRED);
     } else {
