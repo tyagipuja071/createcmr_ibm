@@ -842,6 +842,7 @@ public class FranceUtil extends AutomationUtil {
             // update address
             if (isRelevantAddressFieldUpdated(changes, addr)) {
               if (CmrConstants.RDC_INSTALL_AT.equals(addrType)) {
+                engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_DNB_ORGID_VAL);
                 if (null == changes.getAddressChange(addrType, "Customer legal name")
                     && null == changes.getAddressChange(addrType, "Legal name continued")) {
                   LOG.debug("Update to InstallAt " + addrType + "(" + addr.getId().getAddrSeq() + ")");
@@ -862,7 +863,7 @@ public class FranceUtil extends AutomationUtil {
                 if (siretChange != null) {
                   // means address and siret both have bene updated
                   resultCodes.add("D"); // send to cmde for review
-                  engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_DNB_ORGID_VAL);
+                  // engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_DNB_ORGID_VAL);
                   LOG.debug("Updates to Address " + addrType + "(" + addr.getId().getAddrSeq()
                       + ") could not be verified because of SIRET update. CMDE review required.\\n");
                   checkDetails.append("Updates to Address " + addrType + "(" + addr.getId().getAddrSeq()
@@ -877,7 +878,7 @@ public class FranceUtil extends AutomationUtil {
                     matchesDnb = ifaddressCloselyMatchesDnb(matches, addrToChk, admin, data.getCmrIssuingCntry());
                   }
                   if (!matchesDnb) {
-                    engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_DNB_ORGID_VAL);
+                    // engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_DNB_ORGID_VAL);
                     resultCodes.add("R"); // reject
                     engineData.addNegativeCheckStatus("_frVATCheckFailed", "VAT # on the request did not match D&B");
                     checkDetails.append("VAT # on the request did not match D&B\n");
@@ -933,6 +934,7 @@ public class FranceUtil extends AutomationUtil {
                 }
               } else {
                 // proceed
+                engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_DNB_ORGID_VAL);
                 LOG.debug("Update to Address " + addrType + "(" + addr.getId().getAddrSeq() + ") skipped in the checks.\\n");
                 checkDetails.append("Updates to Address (" + addr.getId().getAddrSeq() + ") skipped in the checks.\n");
               }
