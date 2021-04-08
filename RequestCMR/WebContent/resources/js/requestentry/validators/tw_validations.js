@@ -10,7 +10,6 @@ function afterConfigTW() {
   FormManager.setValue('capInd', true);
   FormManager.readOnly('cmrOwner');
   FormManager.resetValidations('enterprise');
-  FormManager.readOnly('isuCd');
 
   FormManager.addValidator('custAcctType', Validators.REQUIRED, [ 'Customer Type' ], 'MAIN_CUST_TAB');
   FormManager.addValidator('mktgDept', Validators.REQUIRED, [ 'Tax Location' ], 'MAIN_CUST_TAB');
@@ -19,6 +18,10 @@ function afterConfigTW() {
 
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
+  }
+
+  if (role == 'Requester') {
+    FormManager.readOnly('isuCd');
   }
 
   if (custSubGrp == 'LOECO' || custSubGrp == 'LOINT' || custSubGrp == 'LOBLU' || custSubGrp == 'LOMAR' || custSubGrp == 'LOOFF') {
