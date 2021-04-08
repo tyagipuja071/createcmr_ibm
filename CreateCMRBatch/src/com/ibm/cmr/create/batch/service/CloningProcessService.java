@@ -447,8 +447,10 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
     RdcCloningRefn cloningRefn = null;
 
+    boolean japanFlag = "760".equals(cloningQueue.getId().getCmrIssuingCntry()) ? true : false;
+
     String sql = "";
-    if ("760".equals(cloningQueue.getId().getCmrIssuingCntry()))
+    if (japanFlag)
       sql = ExternalizedQuery.getSql("CLONING.KNA1_MANDT_CMRNO_JP");
     else
       sql = ExternalizedQuery.getSql("CLONING.KNA1_MANDT_CMRNO");
@@ -461,6 +463,9 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
     query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
     query.setParameter("CMR_NO", cloningQueue.getId().getCmrNo());
+    if (japanFlag)
+      query.setParameter("CLONED_CMR_NO", cloningQueue.getClonedCmrNo());
+
     List<Kna1> kna1List = query.getResults(Kna1.class);
     if (kna1List != null && kna1List.size() > 0) {
       for (Kna1 kna1 : kna1List) {
@@ -503,7 +508,10 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
       cloningRefn.setCmrNo(cloningQueue.getId().getCmrNo());
       cloningRefn.setStatus("E");
-      cloningRefn.setErrorMsg("KNA1 record not found");
+      if (japanFlag)
+        cloningRefn.setErrorMsg("KNA1 record not found or cloned cmr already exists with same sequence");
+      else
+        cloningRefn.setErrorMsg("KNA1 record not found");
       cloningRefn.setCreatedBy(BATCH_USER_ID);
       cloningRefn.setCreateTs(SystemUtil.getCurrentTimestamp());
       cloningRefn.setLastUpdtBy(BATCH_USER_ID);
@@ -511,7 +519,11 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
       createEntity(cloningRefn, entityManager);
 
       cloningQueue.setStatus("STOP");
-      cloningQueue.setErrorMsg("KNA1 record not found");
+      if (japanFlag)
+        cloningQueue.setErrorMsg("KNA1 record not found or cloned cmr already exists with same sequence");
+      else
+        cloningQueue.setErrorMsg("KNA1 record not found");
+
       updateEntity(cloningQueue, entityManager);
     }
 
