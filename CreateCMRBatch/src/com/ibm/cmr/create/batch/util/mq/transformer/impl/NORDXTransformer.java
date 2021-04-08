@@ -1111,11 +1111,11 @@ public class NORDXTransformer extends EMEATransformer {
       legacyCust.setCollectionCd("");
     }
 
-    if (!StringUtils.isBlank(data.getAcAdminBo())) {
-      legacyCust.setAccAdminBo(data.getAcAdminBo());
-    } else {
-      legacyCust.setAccAdminBo("");
-    }
+    // if (!StringUtils.isBlank(data.getAcAdminBo())) {
+    // legacyCust.setAccAdminBo(data.getAcAdminBo());
+    // } else {
+    // legacyCust.setAccAdminBo("");
+    // }
 
     if (!StringUtils.isBlank(data.getTaxCd1())) {
       legacyCust.setTaxCd(data.getTaxCd1());
@@ -1322,13 +1322,13 @@ public class NORDXTransformer extends EMEATransformer {
       }
     }
 
-    if (!StringUtils.isBlank(muData.getSearchTerm())) {
-      if ("@".equals(muData.getSearchTerm())) {
-        cust.setAccAdminBo("");
-      } else {
-        cust.setAccAdminBo(muData.getSearchTerm());
-      }
-    }
+    // if (!StringUtils.isBlank(muData.getSearchTerm())) {
+    // if ("@".equals(muData.getSearchTerm())) {
+    // cust.setAccAdminBo("");
+    // } else {
+    // cust.setAccAdminBo(muData.getSearchTerm());
+    // }
+    // }
 
     if (!StringUtils.isBlank(muData.getSpecialTaxCd())) {
       if ("@".equals(muData.getSpecialTaxCd())) {
