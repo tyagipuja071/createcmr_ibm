@@ -127,6 +127,8 @@ function afterConfigForNORDX() {
   // CREATCMR-1638
   setModeOfPaymentValue();
 
+  // CREATCMR-1690
+  settingForProcessor();
 }
 
 function disableLandCntry() {
@@ -2633,21 +2635,18 @@ function setModeOfPaymentValue() {
       dojo.connect(FormManager.getField('requestingLob'), 'onChange', function(value) {
         var requestingLob = FormManager.getActualValue('requestingLob');
         if (requestingLob == 'AR' || requestingLob == 'IGF' || requestingLob == 'SCT') {
-          // FormManager.removeValidator('modeOfPayment', Validators.REQUIRED);
           FormManager.enable('modeOfPayment');
-          modeOfPaymentValidation();
-          modeOfPaymentValidationForValue();
         } else {
-          FormManager.setValue('modeOfPayment', _pagemodel.paymentMode == null ? 'A001' : _pagemodel.paymentMode);
+          FormManager.setValue('modeOfPayment', '');
           FormManager.readOnly('modeOfPayment');
         }
       });
+      modeOfPaymentValidation();
     }
 
     if (role == 'Processor') {
       FormManager.enable('modeOfPayment');
       modeOfPaymentValidation();
-      modeOfPaymentValidationForValue();
     }
 
   }
@@ -2663,6 +2662,7 @@ function modeOfPaymentValidation() {
         if (modeOfPayment == '') {
           return new ValidationResult(null, true);
         }
+
         if (!modeOfPayment.match(alphanumeric)) {
           return new ValidationResult({
             id : 'modeOfPayment',
@@ -2671,17 +2671,6 @@ function modeOfPaymentValidation() {
           }, false, 'The value of Payment Terms is invalid, please input digitals or letter.');
         }
 
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), 'MAIN_CUST_TAB', 'frmCMR');
-}
-
-function modeOfPaymentValidationForValue() {
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var modeOfPayment = FormManager.getActualValue('modeOfPayment');
         var modeOfpaymentArray = [ 'A001', 'A002', 'A003', 'A004', 'A005', 'A006', 'A007', 'A008', 'A009', 'A010', 'A014', 'A015', 'A016', 'A017',
             'A018', 'A019', 'A020', 'A021', 'A022', 'A023', 'A024', 'A025', 'A026', 'A027', 'A028', 'A029', 'A030', 'A031', 'A032', 'A033', 'A034',
             'A035', 'A036', 'A037', 'A038', 'A039', 'A040', 'A043', 'A044', 'A045', 'A046', 'A047', 'A048', 'A049', 'A050', 'A051', 'A052', 'A053',
@@ -2712,8 +2701,27 @@ function modeOfPaymentValidationForValue() {
       }
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
+
 }
+
 // CREATCMR-1638
+
+// CREATCMR-1690
+function settingForProcessor() {
+  reqType = FormManager.getActualValue('reqType');
+
+  var role = null;
+  if (typeof (_pagemodel) != 'undefined') {
+    role = _pagemodel.userRole;
+  }
+
+  if (reqType == 'C') {
+    if (role == 'Processor') {
+      FormManager.enable('cmrNo');
+    }
+  }
+}
+// CREATCMR-1690
 
 dojo.addOnLoad(function() {
   GEOHandler.NORDX = [ '846', '806', '702', '678' ];
