@@ -714,7 +714,7 @@ function addISICValidator() {
         var custSubType = FormManager.getActualValue('custSubGrp');
         var reqType = FormManager.getActualValue('reqType');
         var subCntryCustType = FormManager.getActualValue('custSubGrp').substring(2, 5);
-        var embargoCd = FormManager.getActualValue('embargoCd');
+        var kukla = FormManager.getActualValue('custClass');
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
 
         if (isicCD == '9500') {
@@ -724,7 +724,7 @@ function addISICValidator() {
               return new ValidationResult(null, false, 'ISIC value 9500 is not allowed for other scenario than Private Person and IBM Employee');
           }
 
-          if (reqType == 'U' && embargoCd != '71' && embargoCd != '60') {
+          if (reqType == 'U' && kukla != '71' && kukla != '60') {
             return new ValidationResult(null, false,
                 'ISIC value 9500 can be entered only for CMR with KUKLA 60 (Private Person) and 71 (IBM Employee)');
           }
