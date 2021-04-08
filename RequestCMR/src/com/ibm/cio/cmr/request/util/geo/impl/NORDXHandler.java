@@ -187,6 +187,32 @@ public class NORDXHandler extends BaseSOFHandler {
                     addr.setCmrAddrTypeCode("ZS02");
                   }
                 }
+
+                String seqSecondaryZS01 = getSecondaryZS01Seq(entityManager, cmrIssueCd, SystemConfiguration.getValue("MANDT"), reqEntry.getCmrNo());
+                System.out.println("---------seqSecondaryZS01---------------" + seqSecondaryZS01);
+                if (!StringUtils.isBlank(seqSecondaryZS01) && seqSecondaryZS01.equals(addr.getCmrAddrSeq())) {
+                  String seqSecondaryZS01Legacy = StringUtils.leftPad(seqSecondaryZS01, 5, '0');
+                  LOG.debug("---------seqSecondaryZS01Legacy---------------" + seqSecondaryZS01Legacy);
+                  System.out.println("---------seqSecondaryZS01Legacy---------------" + seqSecondaryZS01Legacy);
+                  String isSecondaryInst = isSecondaryInst(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), seqSecondaryZS01Legacy);
+                  String isSecondaryBill = isSecondaryBill(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), seqSecondaryZS01Legacy);
+                  String isSecondaryShip = isSecondaryShip(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), seqSecondaryZS01Legacy);
+                  String isSecondaryEpl = isSecondaryEpl(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), seqSecondaryZS01Legacy);
+
+                  if ("Y".equals(isSecondaryInst)) {
+                    addr.setCmrAddrTypeCode("ZI01");
+                  }
+                  if ("N".equals(isSecondaryInst) && "Y".equals(isSecondaryBill)) {
+                    addr.setCmrAddrTypeCode("ZP01");
+                  }
+                  if ("N".equals(isSecondaryInst) && "N".equals(isSecondaryBill) && "Y".equals(isSecondaryShip)) {
+                    addr.setCmrAddrTypeCode("ZD01");
+                  }
+                  if ("N".equals(isSecondaryInst) && "N".equals(isSecondaryBill) && "N".equals(isSecondaryShip) && "Y".equals(isSecondaryEpl)) {
+                    addr.setCmrAddrTypeCode("ZS02");
+                  }
+                }
+
                 converted.add(addr);
               }
               if (CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode())) {
@@ -2181,6 +2207,81 @@ public class NORDXHandler extends BaseSOFHandler {
       LOG.debug("***RETURNING BRAN5 > " + spid + " WHERE KUNNR IS > " + kunnr);
     }
     return spid;
+  }
+
+  public String getSecondaryZS01Seq(EntityManager entityManager, String katr6, String mandt, String cmrno) {
+    String hasSecondaryZS01 = null;
+    String sql = ExternalizedQuery.getSql("ND.GET.ADRND.FROMKNA1");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("KATR6", katr6);
+    query.setParameter("MANDT", mandt);
+    query.setParameter("ZZKV_CUSNO", cmrno);
+    query.setForReadOnly(true);
+    String result = query.getSingleResult(String.class);
+    if (result != null) {
+      hasSecondaryZS01 = result;
+    }
+    return hasSecondaryZS01;
+  }
+
+  public String isSecondaryInst(EntityManager entityManager, String rcyaa, String cmr_no, String seq) {
+    String secondaryInst = null;
+    String sql = ExternalizedQuery.getSql("ND.ISSECONDARYINST");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("RCYAA", rcyaa);
+    query.setParameter("RCUXA", cmr_no);
+    query.setParameter("SEQ", seq);
+    String result = query.getSingleResult(String.class);
+
+    if (result != null) {
+      secondaryInst = result;
+    }
+    return secondaryInst;
+  }
+
+  public String isSecondaryBill(EntityManager entityManager, String rcyaa, String cmr_no, String seq) {
+    String secondaryInst = null;
+    String sql = ExternalizedQuery.getSql("ND.ISSECONDARYBILL");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("RCYAA", rcyaa);
+    query.setParameter("RCUXA", cmr_no);
+    query.setParameter("SEQ", seq);
+    String result = query.getSingleResult(String.class);
+
+    if (result != null) {
+      secondaryInst = result;
+    }
+    return secondaryInst;
+  }
+
+  public String isSecondaryShip(EntityManager entityManager, String rcyaa, String cmr_no, String seq) {
+    String secondaryInst = null;
+    String sql = ExternalizedQuery.getSql("ND.ISSECONDARYSHIP");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("RCYAA", rcyaa);
+    query.setParameter("RCUXA", cmr_no);
+    query.setParameter("SEQ", seq);
+    String result = query.getSingleResult(String.class);
+
+    if (result != null) {
+      secondaryInst = result;
+    }
+    return secondaryInst;
+  }
+
+  public String isSecondaryEpl(EntityManager entityManager, String rcyaa, String cmr_no, String seq) {
+    String secondaryInst = null;
+    String sql = ExternalizedQuery.getSql("ND.ISSECONDARYEPL");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("RCYAA", rcyaa);
+    query.setParameter("RCUXA", cmr_no);
+    query.setParameter("SEQ", seq);
+    String result = query.getSingleResult(String.class);
+
+    if (result != null) {
+      secondaryInst = result;
+    }
+    return secondaryInst;
   }
 
 }
