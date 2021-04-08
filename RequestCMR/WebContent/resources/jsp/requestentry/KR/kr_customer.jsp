@@ -93,7 +93,7 @@
           <cmr:fieldLabel fieldId="InstallRep" />: 
 			<cmr:delta text="-" id="delta-installRep" />
         </label>
-        <%-- <cmr:field path="installRep" id="InstallRep" fieldId="InstallRep"/> --%>
+        <cmr:field fieldId="InstallRep" path="installRep" id="installRep"/>
       </p>
     </cmr:column>
       <c:if test="${reqentry.reqType == 'U'}">

@@ -295,6 +295,7 @@ public class KRHandler extends GEOHandler {
     map.put("##CustomerScenarioType", "custGrp");
     map.put("##GlobalBuyingGroupID", "gbgId");
     map.put("##ParentCompanyNo", "dealerNo");
+    map.put("##InstallRep","installRep");
     return map;
   }
 

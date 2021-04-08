@@ -437,6 +437,9 @@ public class RequestEntryModel extends BaseModel {
   private String footnoteTxt2;
   private String customerIdCd;
 
+  // korea fields
+  private String installRep;
+  
   public String getMatchIndc() {
     return matchIndc;
   }
@@ -3121,5 +3124,13 @@ public class RequestEntryModel extends BaseModel {
   public void setCustomerIdCd(String customerIdCd) {
     this.customerIdCd = customerIdCd;
   }
+
+public String getInstallRep() {
+	return installRep;
+}
+
+public void setInstallRep(String installRep) {
+	this.installRep = installRep;
+}
 
 }
