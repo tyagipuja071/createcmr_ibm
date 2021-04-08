@@ -169,6 +169,23 @@ function lockEmbargo() {
   } else {
     FormManager.enable('embargoCd');
   }
+
+  // CREATCMR-1700
+  reqType = FormManager.getActualValue('reqType');
+  if (reqType == 'C') {
+    if (role == 'PROCESSOR') {
+      embargoCodeValidator();
+    }
+  }
+
+  if (reqType == 'U') {
+    if (role == 'REQUESTER' || role == 'PROCESSOR') {
+      FormManager.enable('embargoCd');
+      embargoCodeValidator();
+    }
+  }
+  // CREATCMR-1700
+
 }
 
 /**
@@ -2571,6 +2588,27 @@ function getAbbreviatedNameByAddrType(_reqId, _addrType) {
   }
 
 }
+
+// CREATCMR-1700
+function embargoCodeValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var embargoCd = FormManager.getActualValue('embargoCd');
+        if (embargoCd == 'D' || embargoCd == 'J' || embargoCd == 'K' || embargoCd == '') {
+          return new ValidationResult(null, true);
+        } else {
+          return new ValidationResult({
+            id : 'embargoCd',
+            type : 'text',
+            name : 'embargoCd'
+          }, false, 'Embargo Code value should only \'D\', \'J\', \'K\' or blank.');
+        }
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+// CREATCMR-1700
 
 dojo.addOnLoad(function() {
   GEOHandler.NORDX = [ '846', '806', '702', '678' ];
