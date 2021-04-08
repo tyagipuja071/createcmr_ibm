@@ -14,13 +14,16 @@ function afterConfigKR() {
   FormManager.resetValidations('enterprise');
   //FormManager.addValidator('OriginatorName',Validators.REQUIRED, ['Requested For Name (Originator)'], 'MAIN_GENERAL_TAB');
   FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
-
+  FormManager.addValidator('phone1', Validators.REQUIRED, ['Business License Type'], 'MAIN_CUST_TAB');
   
   FormManager.disable('cmrNoPrefix');
   // Non editable for requester
-  if (reqType == 'C' && role == 'REQUESTER') {
+  if (reqType == 'C' && role == 'Requester') {
     FormManager.readOnly('isuCd');
   } 
+//  if (role == 'Requester') {
+//	    FormManager.readOnly('isuCd');
+//	  }
 
 }
 
