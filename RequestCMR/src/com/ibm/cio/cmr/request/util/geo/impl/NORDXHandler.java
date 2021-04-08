@@ -662,12 +662,19 @@ public class NORDXHandler extends BaseSOFHandler {
 
     // CREATCMR-1653
     String zs01sapNo = getKunnrSapr3Kna1ForNordx(data.getCmrNo(), mainRecord.getCmrOrderBlock(), data.getCmrIssuingCntry());
-    String currencyCd = geCurrencyCode(zs01sapNo);
+    String currencyCd = getCurrencyCode(zs01sapNo);
     data.setCurrencyCd(currencyCd);
     // CREATCMR-1653
 
+    // CREATCMR-1651
     String kuklaCd = getKunnrSapr3Kna1ForNordxKUKLA(data.getCmrNo(), data.getCmrIssuingCntry());
     data.setCustClass(kuklaCd);
+    // CREATCMR-1651
+
+    // CREATCMR-1638
+    String modeOfPayment = getModeOfPayment(zs01sapNo);
+    data.setModeOfPayment(modeOfPayment);
+    // CREATCMR-1638
 
     data.setEngineeringBo(this.currentImportValues.get("ACAdmDSC"));
     LOG.trace("ACAdmDSC: " + data.getEngineeringBo());
@@ -1332,6 +1339,14 @@ public class NORDXHandler extends BaseSOFHandler {
       update.setDataField(PageManager.getLabel(cmrCountry, "Currency", "Currency"));
       update.setNewData(newData.getCurrencyCd());
       update.setOldData(oldData.getCurrencyCd());
+      results.add(update);
+    }
+
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getModeOfPayment(), newData.getModeOfPayment())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "Payment Terms", "PaymentTerms"));
+      update.setNewData(newData.getModeOfPayment());
+      update.setOldData(oldData.getModeOfPayment());
       results.add(update);
     }
 
@@ -2105,7 +2120,8 @@ public class NORDXHandler extends BaseSOFHandler {
     return kunnr;
   }
 
-  private String geCurrencyCode(String kunnr) throws Exception {
+  // CREATCMR-1653
+  private String getCurrencyCode(String kunnr) throws Exception {
     String currCode = "";
 
     String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
@@ -2136,6 +2152,7 @@ public class NORDXHandler extends BaseSOFHandler {
   }
   // CREATCMR-1653
 
+  // CREATCMR-1651
   private String getKunnrSapr3Kna1ForNordxKUKLA(String cmrNo, String countryCd) throws Exception {
     String kukla = "";
 
@@ -2170,6 +2187,39 @@ public class NORDXHandler extends BaseSOFHandler {
     }
     return kukla;
   }
+  // CREATCMR-1651
+
+  // CREATCMR-1638
+  private String getModeOfPayment(String kunnr) throws Exception {
+    String paymentCode = "";
+    String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
+    String mandt = SystemConfiguration.getValue("MANDT");
+    String sql = ExternalizedQuery.getSql("GET.KNVV.ZTERM");
+    sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
+    sql = StringUtils.replace(sql, ":KUNNR", "'" + kunnr + "'");
+    String dbId = QueryClient.RDC_APP_ID;
+
+    QueryRequest query = new QueryRequest();
+    query.setSql(sql);
+    query.addField("ZTERM");
+    query.addField("MANDT");
+    query.addField("KUNNR");
+
+    LOG.debug("Getting existing WAERS value from RDc DB..");
+
+    QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
+    QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
+
+    if (response.isSuccess() && response.getRecords() != null && response.getRecords().size() != 0) {
+      List<Map<String, Object>> records = response.getRecords();
+      Map<String, Object> record = records.get(0);
+      paymentCode = record.get("ZTERM") != null ? record.get("ZTERM").toString() : "";
+      LOG.debug("***RETURNING ZTERM > " + paymentCode + " WHERE KUNNR IS > " + kunnr);
+    }
+
+    return paymentCode;
+  }
+  // CREATCMR-1638
 
   @Override
   public List<String> getDataFieldsForUpdateCheckLegacy(String cmrIssuingCntry) {

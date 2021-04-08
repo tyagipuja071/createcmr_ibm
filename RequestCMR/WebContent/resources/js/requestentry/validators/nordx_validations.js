@@ -39,7 +39,7 @@ function afterConfigForNORDX() {
   if (reqType == 'C') {
     // FormManager.readOnly('collectionCd');
     FormManager.readOnly('capInd');
-    FormManager.readOnly('modeOfPayment');
+    // FormManager.readOnly('modeOfPayment');
     FormManager.setValue('capInd', true);
     FormManager.addValidator('subIndustryCd', Validators.REQUIRED, [ 'subIndustry Code' ], 'MAIN_CUST_TAB');// CMR-1993
     FormManager.addValidator('isicCd', Validators.REQUIRED, [ 'ISIC' ], 'MAIN_CUST_TAB'); // CMR-1993
@@ -123,6 +123,9 @@ function afterConfigForNORDX() {
 
   // CREATCMR-1689
   setAbbreviatedNameValue();
+
+  // CREATCMR-1638
+  setModeOfPaymentValue();
 
 }
 
@@ -2148,7 +2151,7 @@ function collectionCdValidation() {
         }
       }
     };
-  })(), 'MAIN_CUST_TAB', 'frmCMR')
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
 function streetContControll() {
@@ -2609,6 +2612,108 @@ function embargoCodeValidator() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 // CREATCMR-1700
+
+// CREATCMR-1638
+function setModeOfPaymentValue() {
+  reqType = FormManager.getActualValue('reqType');
+  if (reqType == 'C') {
+    FormManager.setValue('modeOfPayment', 'A001');
+    cmr.hideNode("container-ModeOfPayment");
+  }
+
+  var role = null;
+  if (typeof (_pagemodel) != 'undefined') {
+    role = _pagemodel.userRole;
+  }
+
+  if (reqType == 'U') {
+    if (role == 'Requester') {
+
+      FormManager.readOnly('modeOfPayment');
+      dojo.connect(FormManager.getField('requestingLob'), 'onChange', function(value) {
+        var requestingLob = FormManager.getActualValue('requestingLob');
+        if (requestingLob == 'AR' || requestingLob == 'IGF' || requestingLob == 'SCT') {
+          // FormManager.removeValidator('modeOfPayment', Validators.REQUIRED);
+          FormManager.enable('modeOfPayment');
+          modeOfPaymentValidation();
+          modeOfPaymentValidationForValue();
+        } else {
+          FormManager.setValue('modeOfPayment', _pagemodel.paymentMode == null ? 'A001' : _pagemodel.paymentMode);
+          FormManager.readOnly('modeOfPayment');
+        }
+      });
+    }
+
+    if (role == 'Processor') {
+      FormManager.enable('modeOfPayment');
+      modeOfPaymentValidation();
+      modeOfPaymentValidationForValue();
+    }
+
+  }
+}
+
+function modeOfPaymentValidation() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var modeOfPayment = FormManager.getActualValue('modeOfPayment');
+
+        var alphanumeric = /^[0-9a-zA-Z]*$/;
+        if (modeOfPayment == '') {
+          return new ValidationResult(null, true);
+        }
+        if (!modeOfPayment.match(alphanumeric)) {
+          return new ValidationResult({
+            id : 'modeOfPayment',
+            type : 'text',
+            name : 'modeOfPayment'
+          }, false, 'The value of Payment Terms is invalid, please input digitals or letter.');
+        }
+
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
+function modeOfPaymentValidationForValue() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var modeOfPayment = FormManager.getActualValue('modeOfPayment');
+        var modeOfpaymentArray = [ 'A001', 'A002', 'A003', 'A004', 'A005', 'A006', 'A007', 'A008', 'A009', 'A010', 'A014', 'A015', 'A016', 'A017',
+            'A018', 'A019', 'A020', 'A021', 'A022', 'A023', 'A024', 'A025', 'A026', 'A027', 'A028', 'A029', 'A030', 'A031', 'A032', 'A033', 'A034',
+            'A035', 'A036', 'A037', 'A038', 'A039', 'A040', 'A043', 'A044', 'A045', 'A046', 'A047', 'A048', 'A049', 'A050', 'A051', 'A052', 'A053',
+            'A054', 'A055', 'A056', 'A075', 'A0XX', 'ACOD', 'AR15', 'AR1D', 'AR30', 'AR45', 'AR60', 'AR90', 'ARCC', 'ARPP', 'ARQT', 'AS10', 'AS11',
+            'AS12', 'AS13', 'AS14', 'AS15', 'BD00', 'BE00', 'BG00', 'BH00', 'BI00', 'BS00', 'BV00', 'CA00', 'CB00', 'CC00', 'CD00', 'CE00', 'CF00',
+            'CG00', 'CH00', 'CI00', 'CK00', 'CL00', 'CN00', 'CP00', 'CT00', 'CX00', 'CY00', 'DD00', 'DJ00', 'EB00', 'ED00', 'EF00', 'EH00', 'EJ00',
+            'EK00', 'EM00', 'ER00', 'FE00', 'FI00', 'FJ00', 'FK00', 'FL00', 'FV00', 'GA00', 'GC00', 'GD00', 'GE00', 'GF00', 'GG00', 'GH00', 'GH01',
+            'GI00', 'GJ00', 'GK00', 'GL00', 'GM00', 'GN00', 'GQ00', 'GR00', 'GS00', 'GT00', 'GU00', 'GV00', 'GZ00', 'HB00', 'HD00', 'IB00', 'IC00',
+            'ID00', 'IF00', 'IH00', 'IH01', 'II00', 'II30', 'IK00', 'IL00', 'IM00', 'IN00', 'IP00', 'IS00', 'IY00', 'JA00', 'JB00', 'JC00', 'KB00',
+            'KD00', 'KE00', 'LA01', 'LA02', 'LA03', 'LA04', 'LA05', 'LA06', 'MB00', 'MC00', 'MD00', 'NB00', 'NC00', 'ND00', 'NT08', 'NT30', 'NT45',
+            'NT60', 'P001', 'P003', 'P004', 'P015', 'P017', 'P021', 'P029', 'P037', 'P038', 'P039', 'P041', 'P042', 'P046', 'P100', 'P110', 'P120',
+            'P130', 'P140', 'P150', 'P190', 'P200', 'P210', 'P220', 'P230', 'P240', 'P250', 'P260', 'P263', 'P270', 'P300', 'P310', 'P400', 'P404',
+            'P700', 'P800', 'P900', 'P901', 'PA00', 'PA10', 'PB00', 'PC00', 'PD00', 'PE00', 'PF00', 'PG00', 'PH00', 'PI00', 'PI61', 'PI62', 'PJ00',
+            'PK00', 'PL00', 'PM00', 'PN00', 'PO00', 'PP00', 'PQ00', 'PR00', 'PS00', 'PT00', 'PU00', 'PV00', 'PW00', 'PY00', 'PZ00', 'RA65', 'RN01',
+            'RN03', 'T000', 'TB00', 'TC00', 'TD00', 'TE00', 'TF00', 'TG00', 'TH00', 'TI00', 'TJ00', 'TK00', 'TL00', 'TM00', 'TO00', 'TS00', 'TT00',
+            'WCFI', 'XA00', 'XC00', 'XG00', 'XK00', 'XL00', 'XM00', 'XP00', 'XR00', 'XS00', 'XT00', 'XU00', 'XV00', 'XW00', 'YA00', 'YB00', 'YB00',
+            'YC00', 'YC00', 'YC00', 'YD00', 'YD00', 'YD00', 'YE00', 'YE00', 'YE00', 'YE00', 'YG00', 'YG00', 'YG00', 'YG00', 'YG00', 'Z01S', 'ZSDD',
+            'ZZI1' ];
+        if (!modeOfpaymentArray.includes(modeOfPayment)) {
+          return new ValidationResult({
+            id : 'modeOfPayment',
+            type : 'text',
+            name : 'modeOfPayment'
+          }, false, 'The value of Payment Terms is invalid.');
+        }
+
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+// CREATCMR-1638
 
 dojo.addOnLoad(function() {
   GEOHandler.NORDX = [ '846', '806', '702', '678' ];

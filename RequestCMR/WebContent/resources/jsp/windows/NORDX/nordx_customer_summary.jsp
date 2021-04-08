@@ -43,8 +43,8 @@
         <label><cmr:fieldLabel fieldId="ModeOfPayment" />:</label>
       </cmr:column>
       <cmr:column span="1" width="240">
-      ${summary.data.phone1}
-    </cmr:column>
+        ${summary.data.modeOfPayment}
+      </cmr:column>
       <cmr:column span="1" width="130">
         <label><cmr:fieldLabel fieldId="EmbargoCode" />: </label>
       </cmr:column>
