@@ -149,6 +149,12 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
       throw new Exception("CMR No or Country missing");
     }
 
+    if ("760".equals(cntry)) {
+      cloningQueue.setStatus("LEGACYSKIP");
+      updateEntity(cloningQueue, entityManager);
+      return;
+    }
+
     String cloningCmrNo = "";
     String processingType = "";
     String sql = ExternalizedQuery.getSql("GET.PROCESSING_TYPE");
@@ -441,7 +447,12 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
     RdcCloningRefn cloningRefn = null;
 
-    String sql = ExternalizedQuery.getSql("CLONING.KNA1_MANDT_CMRNO");
+    String sql = "";
+    if ("760".equals(cloningQueue.getId().getCmrIssuingCntry()))
+      sql = ExternalizedQuery.getSql("CLONING.KNA1_MANDT_CMRNO_JP");
+    else
+      sql = ExternalizedQuery.getSql("CLONING.KNA1_MANDT_CMRNO");
+
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     if ("NA".equals(targetCntry))
       query.setParameter("KATR6", cloningQueue.getId().getCmrIssuingCntry());
@@ -760,7 +771,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
     processKnvv(rdcMgr, kna1, kna1Clone, overrideValues);
 
-    processKnvi(rdcMgr, kna1, kna1Clone, overrideValues);
+    // processKnvi(rdcMgr, kna1, kna1Clone, overrideValues);
 
     processKnex(rdcMgr, kna1, kna1Clone, overrideValues);
 
@@ -886,6 +897,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
           cloneInsert.setShadUpdateTs(ts);
 
           createEntity(cloneInsert, entityManager);
+          processKnvi(entityManager, kna1, kna1Clone, overrideValues);
           // usedSpart.add(cloneInsert.getId().getSpart());
           // usedVtweg.add(cloneInsert.getId().getVtweg());
         }
@@ -1007,33 +1019,45 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
     List<Knvi> knvi = null;
     List<Knvi> knviClone = null;
-    Knvi knviCloneInsert = null;
+    // Knvi knviCloneInsert = null;
     Timestamp ts = SystemUtil.getCurrentTimestamp();
 
     knvi = getKnviByKunnr(entityManager, kna1.getId().getMandt(), kna1.getId().getKunnr());
     knviClone = getKnviByKunnr(entityManager, kna1Clone.getId().getMandt(), kna1Clone.getId().getKunnr());
     if (knvi != null && knvi.size() > 0 && knviClone.size() == 0) {
       try {
-        for (Knvi currentKnvi : knvi) {
-          knviCloneInsert = new Knvi();
-          KnviPK knviPKClone = new KnviPK();
-          knviPKClone.setAland(currentKnvi.getId().getAland());
-          knviPKClone.setKunnr(kna1Clone.getId().getKunnr());
-          knviPKClone.setMandt(kna1Clone.getId().getMandt());
-          knviPKClone.setTatyp(currentKnvi.getId().getTatyp());
+        String sql = ExternalizedQuery.getSql("GET.KNVI.DEFAULT");
+        PreparedQuery query = new PreparedQuery(entityManager, sql);
+        query.setParameter("MANDT", kna1Clone.getId().getMandt());
+        query.setParameter("KUNNR", kna1Clone.getId().getKunnr());
+        query.setForReadOnly(true);
+        List<Object[]> defaultKnvi = query.getResults();
 
-          PropertyUtils.copyProperties(knviCloneInsert, currentKnvi);
+        Knvi newKnvi = null;
+        KnviPK newKnviPk = null;
+        LOG.debug("Creating " + defaultKnvi.size() + " KNVI records.");
+        for (Object[] result : defaultKnvi) {
+          newKnviPk = new KnviPK();
+          newKnviPk.setMandt(kna1Clone.getId().getMandt());
+          newKnviPk.setKunnr(kna1Clone.getId().getKunnr());
+          newKnviPk.setAland((String) result[2]);
+          newKnviPk.setTatyp((String) result[3]);
 
-          overrideConfigChanges(entityManager, overrideValues, knviCloneInsert, "KNVI", knviPKClone);
+          newKnvi = new Knvi();
+          newKnvi.setTaxkd((String) result[4]);
 
-          knviCloneInsert.setId(knviPKClone);
+          overrideConfigChanges(entityManager, overrideValues, newKnvi, "KNVI", newKnviPk);
 
-          knviCloneInsert.setSapTs(ts);
-          knviCloneInsert.setShadUpdateInd("I");
-          knviCloneInsert.setShadUpdateTs(ts);
+          newKnvi.setId(newKnviPk);
 
-          createEntity(knviCloneInsert, entityManager);
+          newKnvi.setSapTs(ts);
+          newKnvi.setShadUpdateInd("I");
+          newKnvi.setShadUpdateTs(ts);
+
+          createEntity(newKnvi, entityManager);
+
         }
+
       } catch (Exception e) {
         LOG.debug("Error in copy knvi");
       }
