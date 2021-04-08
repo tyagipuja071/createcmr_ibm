@@ -86,6 +86,7 @@
         <cmr:label fieldId="modeOfPayment">
           <cmr:fieldLabel fieldId="ModeOfPayment" />: 
             <cmr:delta text="${rdcdata.modeOfPayment}" oldValue="${reqentry.paymentMode}" id="delta-modeOfPayment" />
+            <cmr:info text="${ui.info.NordicsForPaymentTerms}" />
         </cmr:label>
         <cmr:field path="paymentMode" id="modeOfPayment" fieldId="ModeOfPayment" tabId="MAIN_CUST_TAB" />
       </p>
