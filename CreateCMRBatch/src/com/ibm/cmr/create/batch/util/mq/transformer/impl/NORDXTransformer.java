@@ -941,7 +941,7 @@ public class NORDXTransformer extends EMEATransformer {
         if ("678".equals(data.getCountryUse())) {
           legacyCust.setOverseasTerritory("");
         } else if ("678FO".equals(data.getCountryUse())) {
-          legacyCust.setOverseasTerritory("103");
+          legacyCust.setOverseasTerritory("102");
         } else if ("678GL".equals(data.getCountryUse())) {
           legacyCust.setOverseasTerritory("103");
         } else if ("678IS".equals(data.getCountryUse())) {
