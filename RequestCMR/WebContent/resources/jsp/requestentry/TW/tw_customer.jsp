@@ -60,7 +60,6 @@
     <cmr:column span="2">
                   <cmr:buttonsRow>
                     <cmr:button  id="dnbSearchBtn" label="${ui.btn.dnbSrch}" onClick="doDnBSearch()" highlight="true" styleClass="cmr-reqentry-btn"/>
-                    <span class="ibm-required cmr-required-spacer" id="dnbRequiredIndc" >*</span>
                     <cmr:info text="${ui.info.dnbSearch}" />
                     <%if (noFindCMR){%>
                     <img src="${resourcesPath}/images/warn-icon.png" class="cmr-warn-icon" title="${ui.info.nofindcmr}">
