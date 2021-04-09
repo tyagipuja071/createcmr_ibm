@@ -658,6 +658,39 @@ public class NORDXHandler extends BaseSOFHandler {
 
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
+    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      data.setAbbrevNm("");
+      data.setAffiliate("");
+      data.setClientTier("");
+      data.setCompany("");
+      data.setCustClass("");
+      data.setEnterprise("");
+      data.setInacCd("");
+      data.setInacType("");
+      data.setIsicCd("");
+      data.setIsuCd("");
+      data.setSearchTerm("");
+      data.setSitePartyId("");
+      data.setSubIndustryCd("");
+      data.setTaxCd1("");
+      data.setCustPrefLang("");
+      data.setTaxCd2("");
+      data.setPpsceid("");
+      data.setMemLvl("");
+      data.setBpRelType("");
+      data.setCovId("");
+      data.setBgId("");
+      data.setGeoLocationCd("");
+      data.setOrdBlk("");
+      data.setCovDesc("");
+      data.setBgDesc("");
+      data.setBgRuleId("");
+      data.setGeoLocDesc("");
+      data.setGbgId("");
+      data.setGbgDesc("");
+      data.setMilitary(null);
+      return;
+    }
     super.setDataValuesOnImport(admin, data, results, mainRecord);
 
     // CREATCMR-1653
@@ -697,10 +730,10 @@ public class NORDXHandler extends BaseSOFHandler {
 
     data.setInstallBranchOff("");
     data.setInacType("");
-    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
-      data.setSitePartyId("");
-      data.setPpsceid("");
-    }
+    // if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+    // data.setSitePartyId("");
+    // data.setPpsceid("");
+    // }
   }
 
   @Override
