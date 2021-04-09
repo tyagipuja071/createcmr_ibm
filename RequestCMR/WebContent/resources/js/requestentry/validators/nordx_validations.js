@@ -2420,6 +2420,7 @@ function setKukalValuesByCustSubGrp() {
         var requestingLob = FormManager.getActualValue('requestingLob');
         if (requestingLob == 'IGF' || requestingLob == 'SCT') {
           cmr.showNode("container-CustClass");
+          FormManager.enable('custClass');
 
           // Commercial
           FormManager.limitDropdownValues(field, [ '11', '33', '35' ]);
@@ -2431,8 +2432,8 @@ function setKukalValuesByCustSubGrp() {
             pageModelFlag1 = 'Y';
           }
         } else {
-          cmr.hideNode("container-CustClass");
-
+          cmr.showNode("container-CustClass");
+          FormManager.readOnly('custClass');
           FormManager.limitDropdownValues(field, [ '11' ]);
           FormManager.setValue(field, '11');
         }
@@ -2508,17 +2509,17 @@ function setKukalValuesByCustSubGrp() {
       if (custSubGrp == 'CBCOM' || custSubGrp == 'DKCOM' || custSubGrp == 'FOCOM' || custSubGrp == 'GLCOM' || custSubGrp == 'ISCOM'
           || custSubGrp == 'FICOM' || custSubGrp == 'EECOM' || custSubGrp == 'LTCOM' || custSubGrp == 'LVCOM' || custSubGrp == 'COMME') {
         cmr.showNode("container-CustClass");
+        FormManager.enable('custClass');
 
-        // Commercial
         FormManager.limitDropdownValues(FormManager.getField('custClass'), [ '11', '33', '35' ]);
         FormManager.setValue('custClass', '11');
       }
     } else {
       if (custSubGrp == 'CBCOM' || custSubGrp == 'DKCOM' || custSubGrp == 'FOCOM' || custSubGrp == 'GLCOM' || custSubGrp == 'ISCOM'
           || custSubGrp == 'FICOM' || custSubGrp == 'EECOM' || custSubGrp == 'LTCOM' || custSubGrp == 'LVCOM' || custSubGrp == 'COMME') {
-        cmr.hideNode("container-CustClass");
+        cmr.showNode("container-CustClass");
+        FormManager.readOnly('custClass');
 
-        // Commercial
         FormManager.limitDropdownValues(FormManager.getField('custClass'), [ '11' ]);
         FormManager.setValue('custClass', '11');
       }
@@ -2570,6 +2571,8 @@ function setAbbreviatedNameValue() {
       var custNm = getAbbreviatedNameByAddrType(_reqId, "ZI01");
       if (custNm != "") {
         FormManager.setValue('abbrevNm', "IBM c/o " + custNm.substring(0, 14));
+      } else {
+        FormManager.setValue('abbrevNm', "IBM c/o ");
       }
     }
 
