@@ -95,7 +95,7 @@ function afterConfigForNORDX() {
     FormManager.setValue('defaultLandedCountry', landCntry);
   }
   FormManager.hide('StateProv', 'stateProv');
-  setVatValidatorNORDX();
+  // setVatValidatorNORDX();
   setSalesRepValues();
   // setAdminDSCValues();
   // setTaxCdValuesCROSS();
@@ -129,6 +129,7 @@ function afterConfigForNORDX() {
 
   // CREATCMR-1690
   settingForProcessor();
+  vatAndVatExemptOnScenario();
 }
 
 function disableLandCntry() {
@@ -242,7 +243,8 @@ function addHandlersForNORDX() {
 
   if (_vatExemptHandler == null) {
     _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
-      setVatValidatorNORDX();
+      // setVatValidatorNORDX();
+      resetVatRequired('', true);
     });
   }
 
@@ -311,14 +313,91 @@ function setExpediteReason() {
 }
 
 /* Vat Handler */
-function setVatValidatorNORDX() {
+function resetVatRequired(zs01Cntry, vatExemptChangedFlag) {
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
   if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
     FormManager.resetValidations('vat');
-    if (dijit.byId('vatExempt') != undefined && !dijit.byId('vatExempt').get('checked')) {
+    if (vatExemptChangedFlag) {
+      zs01Cntry = getLandedCountryByAddType('ZS01');
+    }
+    var custType = FormManager.getActualValue('custGrp');
+    if (dijit.byId('vatExempt') != undefined && !dijit.byId('vatExempt').get('checked')
+        && (GEOHandler.VAT_RQD_CROSS_LNDCNTRY.indexOf(zs01Cntry) >= 0 || (custType != '' && custType.includes('LOC')))) {
       checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
+      FormManager.enable('vat');
+    }
+    if (dijit.byId('vatExempt') != undefined && !dijit.byId('vatExempt').get('checked')
+        && (!GEOHandler.VAT_RQD_CROSS_LNDCNTRY.indexOf(zs01Cntry) >= 0 && (custType != '' && custType.includes('CRO')))) {
+      FormManager.enable('vat');
+    }
+    if (dijit.byId('vatExempt') != undefined && dijit.byId('vatExempt').get('checked')) {
+      FormManager.setValue('vat', '');
+      FormManager.readOnly('vat');
     }
   }
+}
+var _isScenarioChanged = false;
+function checkScenarioChanged(fromAddress, scenario, scenarioChanged) {
+  _isScenarioChanged = scenarioChanged;
+}
+function vatAndVatExemptOnScenario(value) {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+  if (FormManager.getActualValue('reqType') == 'C') {
+    var custSubType = FormManager.getActualValue('custSubGrp');
+    var isIBPriv = custSubType != '' && (custSubType.includes('IBM') || custSubType.includes('PRI'));
+    var zs01Cntry = FormManager.getActualValue('cmrIssuingCntry');
+    var ret = cmr.query('VAT.GET_ZS01_CNTRY', {
+      REQID : FormManager.getActualValue('reqId'),
+      TYPE : 'ZS01'
+    });
+    if (ret && ret.ret1 && ret.ret1 != '') {
+      zs01Cntry = ret.ret1;
+    }
+    var custType = FormManager.getActualValue('custGrp');
+    if (GEOHandler.VAT_RQD_CROSS_LNDCNTRY.indexOf(zs01Cntry) >= 0 || (custType != '' && custType.includes('LOC'))) {
+      FormManager.show('VATExempt', 'vatExempt');
+      FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+      if (_isScenarioChanged) {
+        if (isIBPriv) {
+          FormManager.getField('vatExempt').set('checked', true);
+        } else {
+          FormManager.getField('vatExempt').set('checked', false);
+        }
+      }
+    } else {
+      FormManager.getField('vatExempt').set('checked', false);
+      FormManager.hide('VATExempt', 'vatExempt');
+      FormManager.removeValidator('vat', Validators.REQUIRED);
+    }
+    resetVatRequired(zs01Cntry, false);
+  }
+}
+function getLandedCountryByAddType(addType) {
+  var landCountry = '';
+  if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+    var record = null;
+    var type = null;
+    for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+      record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+      if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+        record = _allAddressData[i];
+      }
+      type = record.addrType;
+      if (typeof (type) == 'object') {
+        type = type[0];
+      }
+      if (type == addType) {
+        landCountry = record.landCntry;
+        if (typeof (landCountry) == 'object') {
+          landCountry = landCountry[0];
+        }
+      }
+    }
+  }
+  return landCountry;
 }
 
 /**
@@ -2727,6 +2806,7 @@ dojo.addOnLoad(function() {
   GEOHandler.NORDX = [ '846', '806', '702', '678' ];
 
   console.log('adding NORDX functions...');
+  GEOHandler.addAfterTemplateLoad(checkScenarioChanged, GEOHandler.NORDX);
   GEOHandler.setRevertIsicBehavior(false);
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.NORDX);
   GEOHandler.enableCustomerNamesOnAddress(GEOHandler.NORDX);
