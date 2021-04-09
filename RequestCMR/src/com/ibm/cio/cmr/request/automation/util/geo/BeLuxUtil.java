@@ -621,4 +621,8 @@ public class BeLuxUtil extends AutomationUtil {
     return null;
   }
 
+  @Override
+  public List<String> getSkipChecksRequestTypesforCMDE() {
+    return Arrays.asList("C", "U", "M", "D", "R");
+  }
 }
