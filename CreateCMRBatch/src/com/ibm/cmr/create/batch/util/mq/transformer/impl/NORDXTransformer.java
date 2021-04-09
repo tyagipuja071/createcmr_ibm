@@ -1695,8 +1695,8 @@ public class NORDXTransformer extends EMEATransformer {
     Data data = cmrObjects.getData();
     Admin admin = cmrObjects.getAdmin();
 
-    if (!StringUtils.isBlank(data.getAcAdminBo())) {
-      legacyCustExt.setAcAdminBo(data.getAcAdminBo());
+    if (!StringUtils.isBlank(data.getEngineeringBo())) {
+      legacyCustExt.setAcAdminBo(data.getEngineeringBo());
     }
 
   }
