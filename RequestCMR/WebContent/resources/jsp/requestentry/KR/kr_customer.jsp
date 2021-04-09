@@ -26,13 +26,25 @@
         <cmr:field fieldId="AbbrevLocation" id="abbrevLocn" path="abbrevLocn" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
+          <cmr:column span="2" containerForField="LocalTax1">
+        <p>
+          <label for="taxCd1"> <cmr:fieldLabel fieldId="LocalTax1" />: <cmr:delta text="${rdcdata.taxCd1}" oldValue="${reqentry.taxCd1}" />
+            <%-- <cmr:view forCountry="706">
+              <cmr:info text="${ui.info.sIRETFR}" />
+            </cmr:view> <cmr:view forCountry="758">
+              <cmr:info text="${ui.info.fiscalCdInfoIT}" />
+            </cmr:view>  --%>
+            </label>
+          <cmr:field path="taxCd1" id="taxCd1" fieldId="LocalTax1" tabId="MAIN_CUST_TAB" />
+        </p>
+      </cmr:column>
 <cmr:column span="2" containerForField="LocalTax2">
-            <label for="taxCd2">
+          <p>  <label for="taxCd2">
             <cmr:fieldLabel fieldId="LocalTax2" />: <cmr:delta text="${rdcdata.taxCd2}" oldValue="${reqentry.taxCd2}" />
             <!-- <span id="taxCd2MandatoryFlag" style="color:red;font-size:16px;font-weight:bold">*</span> -->
             </label>
             <cmr:field path="taxCd2" id="taxCd2" fieldId="LocalTax2" tabId="MAIN_CUST_TAB" />
-            </cmr:column>
+           </p> </cmr:column>
             
 <%--     <cmr:column span="2" containerForField="CollectionCd">
       <p>
