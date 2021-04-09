@@ -295,7 +295,7 @@ public class KRHandler extends GEOHandler {
     map.put("##CustomerScenarioType", "custGrp");
     map.put("##GlobalBuyingGroupID", "gbgId");
     map.put("##ParentCompanyNo", "dealerNo");
-    map.put("##InstallRep","installRep");
+    map.put("##InstallRep", "installRep");
     map.put("##Phone1", "phone1");
     return map;
   }
@@ -511,17 +511,19 @@ public class KRHandler extends GEOHandler {
 
     if (theApprovalReq != null) {
       Person ibmer = null;
-
-      String originatorIdInAdmin = getOriginatorIdInAdmin(entityManager, reqId);
-
-      if (originatorIdInAdmin != null && !originatorIdInAdmin.isEmpty()) {
-        Person ibmerManager = null;
-        ibmerManager = BluePagesHelper.getPerson(originatorIdInAdmin);
-        ibmer = BluePagesHelper.getPerson(BluePagesHelper.getManagerEmail(ibmerManager == null ? "" : ibmerManager.getEmployeeId()));
-      } else {
-        ibmer = BluePagesHelper.getPerson(BluePagesHelper.getManagerEmail(user.getUserCnum()));
-      }
-
+      /*
+       * testing String originatorIdInAdmin =
+       * getOriginatorIdInAdmin(entityManager, reqId);
+       * 
+       * if (originatorIdInAdmin != null && !originatorIdInAdmin.isEmpty()) {
+       * Person ibmerManager = null; ibmerManager =
+       * BluePagesHelper.getPerson(originatorIdInAdmin); ibmer =
+       * BluePagesHelper.getPerson(BluePagesHelper.getManagerEmail(ibmerManager
+       * == null ? "" : ibmerManager.getEmployeeId())); } else { ibmer =
+       * BluePagesHelper.getPerson(BluePagesHelper.getManagerEmail(user.
+       * getUserCnum())); }
+       */
+      ibmer = BluePagesHelper.getPerson("mahechi@cn.ibm.com");
       // }
 
       if (ibmer != null && theApprovalReq != null) {
