@@ -46,6 +46,7 @@ var _oldSpecialTaxCdIT = "";
 var _oldAffiliateIT = "";
 var _oldCollectionIT = "";
 var _oldIdentClientIT = "";
+var _oldVatIT = "";
 // DTN: Defect 1858294 : UKI: Internal FSL sub-scenario rules for abbreviated
 // name
 var _lobHandler = null;
@@ -5947,6 +5948,7 @@ function getOldValuesIT(fromAddress, scenario, scenarioChanged) {
         _oldSpecialTaxCdIT = result.ret7;
         _oldAffiliateIT = result.ret8;
         _oldIdentClientIT = result.ret9;
+        _oldVatIT = result.ret10;
       }
     }
 
@@ -6016,6 +6018,7 @@ function getOldValuesIT(fromAddress, scenario, scenarioChanged) {
 
         if (custSubType == 'IBMIT' || custSubType == 'XIBM') {
           FormManager.setValue('identClient', _oldIdentClientIT);
+          FormManager.setValue('vat', _oldVatIT);
         }
         FormManager.setValue('specialTaxCd', _oldSpecialTaxCdIT);
       }
