@@ -68,9 +68,24 @@
       <cmr:column span="1" width="130">
         <label><cmr:fieldLabel fieldId="LocalTax1" />: </label>
       </cmr:column>
-      <cmr:column span="1" width="200">
+      <cmr:column span="1" width="240">
         ${summary.data.taxCd1}
       </cmr:column>
+      <%
+        String[] custClassArray = {"CBCOM", "DKCOM", "FOCOM", "GLCOM", "ISCOM", "FICOM", "EECOM", "LTCOM", "LVCOM", "COMME", "CBBUS", "DKBUS", "FOBUS", "GLBUS", "ISBUS", "FIBUS", "EEBUS", "LTBUS", "LVBUS", "BUSPR"};
+        for (String str : custClassArray) {
+          if(str.equals(data.getCustSubGrp())){
+      %>
+	      <cmr:column span="1" width="130">
+	        <label><cmr:fieldLabel fieldId="CustClass" />: </label>
+	      </cmr:column>
+	      <cmr:column span="1" width="200">
+	        ${summary.data.custClass}
+	      </cmr:column>
+      <%
+          }
+        }
+      %>
     </cmr:row>
   </cmr:view>
 
