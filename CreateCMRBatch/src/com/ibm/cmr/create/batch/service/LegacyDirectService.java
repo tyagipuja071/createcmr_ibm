@@ -1264,8 +1264,7 @@ public class LegacyDirectService extends TransConnService {
     cust.setImsCd(data.getSubIndustryCd());
     cust.setCurrencyCd(data.getLegacyCurrencyCd());
     cust.setInvoiceCpyReqd(" "); // setting default value blank
-    cust.setLeadingAccNo(cmrNo + cust.getMrcCd());// setting leading account no
-                                                  // = cmr+mrc
+
     // do a dummy transfer here, reuse MQ objects for formatting
     MqIntfReqQueue dummyQueue = new MqIntfReqQueue();
     dummyQueue.setCmrNo(cmrNo);
@@ -1283,7 +1282,8 @@ public class LegacyDirectService extends TransConnService {
       dummyQueue.setReqStatus(MQMsgConstants.REQ_STATUS_NEW);
       transformer.transformLegacyCustomerData(entityManager, dummyHandler, cust, cmrObjects);
     }
-
+    cust.setLeadingAccNo(cmrNo + cust.getMrcCd());// setting leading account no
+    // = cmr+mrc
     capsAndFillNulls(cust, true);
     legacyObjects.setCustomer(cust);
 
