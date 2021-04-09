@@ -1628,7 +1628,16 @@ public class NORDXTransformer extends EMEATransformer {
 
     long reqId = cmrObjects.getAdmin().getId().getReqId();
     List<Addr> addrList = cmrObjects.getAddresses();
+    Data data = cmrObjects.getData();
     List<CmrtAddr> legacyAddrList = legacyObjects.getAddresses();
+    CmrtCust legacyCust = legacyObjects.getCustomer();
+
+    // leading Account number
+    if (StringUtils.isNotBlank(data.getCompany())) {
+      legacyCust.setLeadingAccNo(data.getCompany() + legacyCust.getMrcCd());
+    } else {
+      legacyCust.setLeadingAccNo(data.getCmrNo() + legacyCust.getMrcCd());
+    }
 
     int seqStartForRequiredAddr = 1;
     for (int i = 0; i < addrList.size(); i++) {
