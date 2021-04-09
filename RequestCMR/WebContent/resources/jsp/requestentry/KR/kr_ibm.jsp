@@ -104,6 +104,16 @@
           <cmr:field path="commercialFinanced" id="commercialFinanced" fieldId="CommercialFinanced" tabId="MAIN_IBM_TAB" />
         </p>
       </cmr:column>
+      	<!-- Membership Level-->      
+        	<cmr:column span="2" containerForField="MembLevel">
+          <p>
+            <cmr:label fieldId="memLvl">
+              <cmr:fieldLabel fieldId="MembLevel" />:
+              <cmr:delta text="${rdcdata.memLvl}" oldValue="${reqentry.memLvl}" code="L"/>
+            </cmr:label>
+            <cmr:field fieldId="MembLevel" id="memLvl" path="memLvl" tabId="MAIN_IBM_TAB" />
+          </p>
+  			</cmr:column>
     </cmr:row>
   <cmr:row addBackground="false">
     <cmr:column span="4">
