@@ -34,7 +34,7 @@
             <cmr:field path="taxCd2" id="taxCd2" fieldId="LocalTax2" tabId="MAIN_CUST_TAB" />
             </cmr:column>
             
-    <cmr:column span="2" containerForField="CollectionCd">
+<%--     <cmr:column span="2" containerForField="CollectionCd">
       <p>
         <cmr:label fieldId="collectionCd">
           <cmr:fieldLabel fieldId="CollectionCd" />: 
@@ -42,11 +42,11 @@
         </cmr:label>
         <cmr:field path="collectionCd" id="collectionCd" fieldId="CollectionCd" tabId="MAIN_CUST_TAB" />
       </p>
-    </cmr:column>
+    </cmr:column> --%>
 
   </cmr:row>
   <cmr:row addBackground="false">
-    <cmr:column span="2" containerForField="EmbargoCode">
+<%--     <cmr:column span="2" containerForField="EmbargoCode">
       <p>
         <cmr:label fieldId="embargoCd">
           <cmr:fieldLabel fieldId="EmbargoCode" />:
@@ -54,7 +54,7 @@
         </cmr:label>
         <cmr:field path="embargoCd" id="embargoCd" fieldId="EmbargoCode" tabId="MAIN_CUST_TAB" />
       </p>
-    </cmr:column>
+    </cmr:column> --%>
     <!-- 
     <cmr:column span="2" containerForField="EconomicCd2">
         <p>
