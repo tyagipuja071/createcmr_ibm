@@ -297,6 +297,8 @@ public class KRHandler extends GEOHandler {
     map.put("##ParentCompanyNo", "dealerNo");
     map.put("##InstallRep","installRep");
     map.put("##Phone1", "phone1");
+    map.put("##MrcCd", "mrcCd");
+    map.put("##CreditCd", "creditCd");
     return map;
   }
 

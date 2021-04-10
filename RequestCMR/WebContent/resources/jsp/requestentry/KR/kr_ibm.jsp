@@ -68,12 +68,22 @@
         </p>
     </cmr:column>
     
-          <cmr:column span="2" containerForField="MrcCd">
+<%--           <cmr:column span="2" containerForField="MrcCd">
       		<p>
         	<cmr:label fieldId="mrcCd"> <cmr:fieldLabel fieldId="MrcCd" />: </cmr:label>
-        	<cmr:field path="mrcCd" id="mrcCd" fieldId="MrcCd" tabId="MAIN_IBM_TAB" />
+        	<cmr:field path="mrcCd" id="mrcCd" fieldId="MrcCd"/>
       		</p>
-    	  </cmr:column>
+    	  </cmr:column> --%>
+    	  
+    <cmr:column span="2" containerForField="mrcCd" >
+      <p>
+        <label for="MrcCd"> 
+          <cmr:fieldLabel fieldId="MrcCd" />: 
+			<cmr:delta text="-" id="delta-mrcCd" />
+        </label>
+        <cmr:field fieldId="MrcCd" path="mrcCd" id="mrcCd"/>
+      </p>
+    </cmr:column>
     	  
     	  <cmr:column span="2" containerForField="SOENumber">
           <p>
@@ -115,6 +125,36 @@
           </p>
   			</cmr:column>
     </cmr:row>
+    <!-- Business Type for KR -->
+    <cmr:row>
+          <cmr:column span="2" containerForField="ContactName2">
+        <p>
+          <label for="contactName2"> <cmr:fieldLabel fieldId="ContactName2" />: </label>
+          <cmr:field fieldId="ContactName2" id="contactName2" path="contactName2" />
+        </p>
+      </cmr:column>
+      <!-- MCI Code  -->
+      <cmr:column span="2" containerForField="CreditCd">
+        <p>
+          <cmr:label fieldId="creditCd">
+            <cmr:fieldLabel fieldId="CreditCd" />:
+          </cmr:label>
+          <cmr:field path="creditCd" id="creditCd" fieldId="CreditCd" />
+        </p>
+      </cmr:column>
+      
+      <!-- BP Relation Type -->
+      <cmr:column span="2" containerForField="BPRelationType">
+                <p>
+            <cmr:label fieldId="bpRelType">
+              <cmr:fieldLabel fieldId="BPRelationType" />:
+              <cmr:delta text="${rdcdata.bpRelType}" oldValue="${reqentry.bpRelType}" code="L"/>
+            </cmr:label>
+            <cmr:field fieldId="BPRelationType" id="bpRelType" path="bpRelType" tabId="MAIN_IBM_TAB" />
+          </p>
+        </cmr:column>
+      </cmr:row>
+    
   <cmr:row addBackground="false">
     <cmr:column span="4">
       <cmr:label fieldId="ibmBankNumber">
