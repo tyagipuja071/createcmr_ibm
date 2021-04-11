@@ -97,11 +97,12 @@
 
 <cmr:row addBackground="true"> 
     <cmr:column span="2" containerForField="OriginatorNo">
+    
         <p>
-          <cmr:label fieldId="OrgNo">
-            <cmr:fieldLabel fieldId="OrgNo" />:
+          <cmr:label fieldId="orgNo">          
+            <cmr:fieldLabel fieldId="OrgNo" />:            
           </cmr:label>
-          <cmr:field path="orgNo" id="orgNo" fieldId="OriginatorNo" tabId="MAIN_IBM_TAB" />
+          <cmr:field path="orgNo" id="orgNo" fieldId="OrgNo" tabId="MAIN_IBM_TAB" />          
         </p>
     </cmr:column>
     
