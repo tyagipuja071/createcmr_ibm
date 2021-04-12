@@ -27,7 +27,7 @@
 
 <cmr:view forGEO="KR">
   <cmr:row addBackground="true">
-     <cmr:column span="2" containerForField="EngineeringBo">
+<%--      <cmr:column span="2" containerForField="EngineeringBo">
       <p>
         <cmr:label fieldId="engineeringBo">
           <cmr:fieldLabel fieldId="EngineeringBo" />:
@@ -35,7 +35,7 @@
         </cmr:label>
         <cmr:field fieldId="EngineeringBo" id="engineeringBo" path="engineeringBo" tabId="MAIN_IBM_TAB"/>
       </p>
-    </cmr:column>
+    </cmr:column> --%>
  
     <cmr:column span="2" containerForField="CmrNoPrefix">
         <p>
@@ -55,9 +55,9 @@
         <cmr:field fieldId="SalRepNameNo" id="repTeamMemberNo" path="repTeamMemberNo" tabId="MAIN_IBM_TAB" />
       </p>
     </cmr:column>
-  </cmr:row>
   
-   <cmr:row addBackground="true"> 
+  
+   <%-- <cmr:row addBackground="true">  --%>
   <cmr:column span="2" containerForField="ParentCompanyNo">
         <p>
           <cmr:label fieldId="dealerNo">
@@ -66,7 +66,7 @@
           </cmr:label>
           <cmr:field path="dealerNo" id="dealerNo" fieldId="ParentCompanyNo" tabId="MAIN_IBM_TAB" />
         </p>
-    </cmr:column>
+    </cmr:column></cmr:row>
     
 <%--           <cmr:column span="2" containerForField="MrcCd">
       		<p>
@@ -74,7 +74,7 @@
         	<cmr:field path="mrcCd" id="mrcCd" fieldId="MrcCd"/>
       		</p>
     	  </cmr:column> --%>
-    	  
+    	 <cmr:row addBackground="true"> 
     <cmr:column span="2" containerForField="mrcCd" >
       <p>
         <label for="MrcCd"> 
@@ -85,17 +85,17 @@
       </p>
     </cmr:column>
     	  
-    	  <cmr:column span="2" containerForField="SOENumber">
+<%--     	  <cmr:column span="2" containerForField="SOENumber">
           <p>
            <cmr:label fieldId="soeReqNo">
               <cmr:fieldLabel fieldId="SOENumber" />:
             </cmr:label>
             <cmr:field fieldId="SOENumber" id="soeReqNo" path="soeReqNo" tabId="MAIN_IBM_TAB" />
           </p>
-        </cmr:column>
-</cmr:row> 
+        </cmr:column> --%>
+ 
 
-<cmr:row addBackground="true"> 
+<%-- <cmr:row addBackground="true">  --%>
     <cmr:column span="2" containerForField="OriginatorNo">
     
         <p>
@@ -116,7 +116,7 @@
         </p>
       </cmr:column>
       	<!-- Membership Level-->      
-        	<cmr:column span="2" containerForField="MembLevel">
+<%--         	<cmr:column span="2" containerForField="MembLevel">
           <p>
             <cmr:label fieldId="memLvl">
               <cmr:fieldLabel fieldId="MembLevel" />:
@@ -124,7 +124,7 @@
             </cmr:label>
             <cmr:field fieldId="MembLevel" id="memLvl" path="memLvl" tabId="MAIN_IBM_TAB" />
           </p>
-  			</cmr:column>
+  			</cmr:column> --%>
     </cmr:row>
     <!-- Business Type for KR -->
     <cmr:row>
@@ -145,7 +145,7 @@
       </cmr:column>
       
       <!-- BP Relation Type -->
-      <cmr:column span="2" containerForField="BPRelationType">
+  <%--     <cmr:column span="2" containerForField="BPRelationType">
                 <p>
             <cmr:label fieldId="bpRelType">
               <cmr:fieldLabel fieldId="BPRelationType" />:
@@ -153,7 +153,7 @@
             </cmr:label>
             <cmr:field fieldId="BPRelationType" id="bpRelType" path="bpRelType" tabId="MAIN_IBM_TAB" />
           </p>
-        </cmr:column>
+        </cmr:column> --%>
       </cmr:row>
     
   <cmr:row addBackground="false">
