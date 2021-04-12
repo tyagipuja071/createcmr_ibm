@@ -2803,6 +2803,103 @@ function settingForProcessor() {
     }
   }
 }
+
+function addCmrNoValidatorForNordx() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var custSubType = FormManager.getActualValue('custSubGrp');
+        var cmrNo = FormManager.getActualValue('cmrNo');
+
+        if (cmrNo != '' && cmrNo != null) {
+          if (cmrNo.length != 6) {
+            return new ValidationResult({
+              id : 'cmrNo',
+              type : 'text',
+              name : 'cmrNo'
+            }, false, 'CMR Number should be exactly 6 digits long.');
+          } else if (isNaN(cmrNo)) {
+            return new ValidationResult({
+              id : 'cmrNo',
+              type : 'text',
+              name : 'cmrNo'
+            }, false, 'CMR Number should be only numbers.');
+          } else if (cmrNo == "000000") {
+            return new ValidationResult({
+              id : 'cmrNo',
+              type : 'text',
+              name : 'cmrNo'
+            }, false, 'CMR Number should not be 000000.');
+          } else if (cmrNo != '' && custSubType != '') {
+            if (custSubType == 'CBINT' || custSubType == 'DKINT' || custSubType == 'FOINT' || custSubType == 'GLINT' || custSubType == 'ISINT'
+                || custSubType == 'FIINT' || custSubType == 'EEINT' || custSubType == 'LTINT' || custSubType == 'LVINT' || custSubType == 'INTER') {
+              if (!cmrNo.startsWith('99')) {
+                return new ValidationResult({
+                  id : 'cmrNo',
+                  type : 'text',
+                  name : 'cmrNo'
+                }, false, 'CMR Number should be in 99XXXX format for Internal scenarios.');
+              }
+              if (cmrNo.startsWith('997')) {
+                return new ValidationResult({
+                  id : 'cmrNo',
+                  type : 'text',
+                  name : 'cmrNo'
+                }, false, 'Non Internal CMR Number should not be in 997XXX for Internal scenarios.');
+              }
+            } else if (custSubType == 'CBISO' || custSubType == 'DKISO' || custSubType == 'FOISO' || custSubType == 'GLISO' || custSubType == 'ISISO'
+                || custSubType == 'FIISO' || custSubType == 'EEISO' || custSubType == 'LTISO' || custSubType == 'LVISO' || custSubType == 'INTSO') {
+              if (!cmrNo.startsWith('997')) {
+                return new ValidationResult({
+                  id : 'cmrNo',
+                  type : 'text',
+                  name : 'cmrNo'
+                }, false, 'CMR Number should be in 997XXX format for Internal SO scenarios.');
+              }
+            } else {
+              if (cmrNo.startsWith('99')) {
+                return new ValidationResult({
+                  id : 'cmrNo',
+                  type : 'text',
+                  name : 'cmrNo'
+                }, false, 'Non Internal CMR Number should not be in 99XXXX for scenarios.');
+              }
+            }
+
+            var results = cmr.query('GET.CMR_BY_CNTRY_CUSNO_SAPR3', {
+              CMRNO : cmrNo,
+              CNTRY : cntry,
+              MANDT : cmr.MANDT
+            });
+            if (results.ret1 != null) {
+              return new ValidationResult({
+                id : 'cmrNo',
+                type : 'text',
+                name : 'cmrNo'
+              }, false, 'The CMR Number already exists.');
+            } else {
+              results = cmr.query('LD.CHECK_EXISTING_CMR_NO_RESERVED', {
+                COUNTRY : cntry,
+                CMR_NO : cmrNo,
+                MANDT : cmr.MANDT
+              });
+              if (results && results.ret1) {
+                return new ValidationResult({
+                  id : 'cmrNo',
+                  type : 'text',
+                  name : 'cmrNo'
+                }, false, 'The requested CMR Number ' + cmrNo + ' already exists in the system.');
+              }
+            }
+
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
 // CREATCMR-1690
 
 dojo.addOnLoad(function() {
@@ -2860,4 +2957,8 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(requestingLobOnChange, GEOHandler.NORDX);
   GEOHandler.addAfterTemplateLoad(requestingLobOnChange, GEOHandler.NORDX);
+
+  // CREATCMR-1690
+  GEOHandler.registerValidator(addCmrNoValidatorForNordx, GEOHandler.NORDX);
+
 });
