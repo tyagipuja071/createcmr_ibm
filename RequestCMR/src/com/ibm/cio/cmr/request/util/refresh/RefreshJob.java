@@ -17,6 +17,7 @@ import com.ibm.cio.cmr.request.ui.template.TemplateManager;
 import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.SBOFilterUtil;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 
 /**
@@ -50,6 +51,7 @@ public class RefreshJob implements Runnable {
           PageManager.init();
           TemplateManager.refresh();
           SystemParameters.refresh();
+          SBOFilterUtil.refresh();
 
           SystemConfiguration.LAST_REFRESH_TIME = lastRefresh;
         } catch (Exception e) {
