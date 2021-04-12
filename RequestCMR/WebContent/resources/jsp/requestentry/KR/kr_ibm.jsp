@@ -81,7 +81,7 @@
           <cmr:fieldLabel fieldId="MrcCd" />: 
 			<cmr:delta text="-" id="delta-mrcCd" />
         </label>
-        <cmr:field fieldId="MrcCd" path="mrcCd" id="mrcCd"/>
+        <cmr:field fieldId="MrcCd" path="mrcCd" id="mrcCd" tabId="MAIN_IBM_TAB"/>
       </p>
     </cmr:column>
     	  
