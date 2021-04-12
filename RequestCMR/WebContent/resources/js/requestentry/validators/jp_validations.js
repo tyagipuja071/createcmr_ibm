@@ -119,13 +119,13 @@ function addScenarioDriven() {
     FormManager.removeValidator('zseriesSw', Validators.REQUIRED)
     FormManager.removeValidator('salesBusOffCd', Validators.REQUIRED)
     FormManager.addValidator('email3', Validators.REQUIRED, [ 'BP Company Name' ])
+    FormManager.removeValidator('salesTeamCd', Validators.REQUIRED)
     FormManager.removeValidator('jsicCd', Validators.REQUIRED)
     if (_role == 'Processor') {
       FormManager.enable('cmrNo2', Validators.REQUIRED)
     }
     if (custType == 'A') {
       FormManager.enable('tier2', Validators.REQUIRED)
-      FormManager.removeValidator('salesTeamCd', Validators.REQUIRED)
       FormManager.removeValidator('custClass', Validators.REQUIRED)
       if (addrType == 'ZC01') {
         FormManager.enable('city2', Validators.REQUIRED);
@@ -1588,7 +1588,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
         setAddrFieldOptional('custNm2', 'CustomerName2');
         setAddrFieldMandatory('custNm3', 'CustomerName3', 'Full English Name');
         setAddrFieldOptional('custNm4', 'CustomerName4', 'Katakana');
-        setAddrFieldMandatory('postCd', 'PostalCode', 'Postal Code');
+        setAddrFieldOptional('postCd', 'PostalCode', 'Postal Code');
         if (role == 'REQUESTER') {
           setAddrFieldOptional('locationCode', 'LocationCode');
         } else if (role == 'PROCESSOR') {
