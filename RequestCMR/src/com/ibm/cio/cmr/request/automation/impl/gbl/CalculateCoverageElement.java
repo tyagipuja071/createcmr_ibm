@@ -260,6 +260,9 @@ public class CalculateCoverageElement extends OverridingElement {
         List<String> coverageIds = new ArrayList<String>();
         boolean logNegativeCheck = !COV_ODM.equals(covFrom);
         for (CoverageContainer container : coverages) {
+          if (coverages.size() > 3 && coverages.indexOf(container) > 3) {
+            break;
+          }
           LOG.debug("Logging Final Coverage ID: " + container.getFinalCoverage());
           logCoverage(entityManager, engineData, requestData, coverageIds, details, output, input, container, FINAL, covFrom, logNegativeCheck);
           logNegativeCheck = false;

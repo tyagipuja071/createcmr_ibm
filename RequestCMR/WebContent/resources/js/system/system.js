@@ -104,7 +104,7 @@ var UserService = (function() {
       dojo.byId('userrolecmt').value = comments;
       var roles = '';
       for ( var i = 0; i < _CMR_ROLES.length; i++) {
-        if (dojo.byId('chk_' + _CMR_ROLES[i]).checked) {
+        if (dojo.byId('chk_' + _CMR_ROLES[i]) && dojo.byId('chk_' + _CMR_ROLES[i]).checked) {
           roles += roles.length > 0 ? ',' : '';
           roles += _CMR_ROLES[i].replace('|', ':');
         }
@@ -208,11 +208,13 @@ function submitbds(value) {
   document.forms['frmCMRSearch'].submit();
 }
 
-var _CMR_ROLES = [ 'ADMIN|', 'REQUESTER|', 'PROCESSOR|PROC_BASIC', 'PROCESSOR|PROC_VALIDATOR', 'PROCESSOR|PROC_SUBMITTER', 'USER|', 'CMDE|', 'WS_ADMIN|' ];
+var _CMR_ROLES = [ 'ADMIN|', 'REQUESTER|', 'PROCESSOR|PROC_BASIC', 'PROCESSOR|PROC_VALIDATOR', 'PROCESSOR|PROC_SUBMITTER', 'USER|', 'CMDE|', 'WS_ADMIN|', 'GTS_CROSS|' ];
 function addRolesModal_onLoad() {
   for ( var i = 0; i < _CMR_ROLES.length; i++) {
     cmr.showNode(_CMR_ROLES[i]);
-    dojo.byId('chk_' + _CMR_ROLES[i]).checked = false;
+    if (dojo.byId('chk_' + _CMR_ROLES[i])){
+      dojo.byId('chk_' + _CMR_ROLES[i]).checked = false;
+    }
   }
 
   if (CmrGrid.GRIDS.userRoleListGrid_GRID == null) {
