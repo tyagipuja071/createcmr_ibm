@@ -197,6 +197,8 @@ public class USHandler extends GEOHandler {
         this.entityManager.close();
       }
       // setCodes(url, data);
+    } else if ("Y".equals(admin.getPoolCmrIndc())) {
+      // do nothing and return
     } else {
       throw new CmrException(MessageUtil.ERROR_LEGACY_RETRIEVE);
     }
