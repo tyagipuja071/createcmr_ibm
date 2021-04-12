@@ -970,7 +970,7 @@ public class NORDXTransformer extends EMEATransformer {
       }
 
       // leading Account number
-      if (StringUtils.isNotBlank(data.getCompany())) {
+      if (StringUtils.isNotBlank(data.getCompany()) && data.getCompany().length() > 4) {
         legacyCust.setLeadingAccNo(data.getCompany() + legacyCust.getMrcCd());
       } else {
         legacyCust.setLeadingAccNo(legacyCust.getId().getCustomerNo() + legacyCust.getMrcCd());
@@ -1633,7 +1633,7 @@ public class NORDXTransformer extends EMEATransformer {
     CmrtCust legacyCust = legacyObjects.getCustomer();
 
     // leading Account number
-    if (StringUtils.isNotBlank(data.getCompany())) {
+    if (StringUtils.isNotBlank(data.getCompany()) && data.getCompany().length() > 4) {
       legacyCust.setLeadingAccNo(data.getCompany() + legacyCust.getMrcCd());
     } else {
       legacyCust.setLeadingAccNo(legacyCust.getId().getCustomerNo() + legacyCust.getMrcCd());
