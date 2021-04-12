@@ -970,10 +970,10 @@ public class NORDXTransformer extends EMEATransformer {
       }
 
       // leading Account number
-      if (StringUtils.isNotBlank(data.getCompany())) {
+      if (StringUtils.isNotBlank(data.getCompany()) && data.getCompany().length() > 4) {
         legacyCust.setLeadingAccNo(data.getCompany() + legacyCust.getMrcCd());
       } else {
-        legacyCust.setLeadingAccNo(data.getCmrNo() + legacyCust.getMrcCd());
+        legacyCust.setLeadingAccNo(legacyCust.getId().getCustomerNo() + legacyCust.getMrcCd());
       }
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
 
@@ -1633,10 +1633,10 @@ public class NORDXTransformer extends EMEATransformer {
     CmrtCust legacyCust = legacyObjects.getCustomer();
 
     // leading Account number
-    if (StringUtils.isNotBlank(data.getCompany())) {
+    if (StringUtils.isNotBlank(data.getCompany()) && data.getCompany().length() > 4) {
       legacyCust.setLeadingAccNo(data.getCompany() + legacyCust.getMrcCd());
     } else {
-      legacyCust.setLeadingAccNo(data.getCmrNo() + legacyCust.getMrcCd());
+      legacyCust.setLeadingAccNo(legacyCust.getId().getCustomerNo() + legacyCust.getMrcCd());
     }
 
     int seqStartForRequiredAddr = 1;
