@@ -20,8 +20,10 @@ function afterConfigTW() {
     role = _pagemodel.userRole;
   }
 
-  if (role == 'Requester') {
+  if (role == 'Requester' && reqType == 'C') {
     FormManager.readOnly('isuCd');
+  } else {
+    FormManager.enable('isuCd');
   }
 
   if (custSubGrp == 'LOECO' || custSubGrp == 'LOINT' || custSubGrp == 'LOBLU' || custSubGrp == 'LOMAR' || custSubGrp == 'LOOFF') {
