@@ -1594,6 +1594,8 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
         setAddrFieldMandatory('custNm3', 'CustomerName3', 'Full English Name');
         setAddrFieldOptional('custNm4', 'CustomerName4', 'Katakana');
         setAddrFieldOptional('postCd', 'PostalCode', 'Postal Code');
+        setAddrFieldOptional('divn', 'Division', 'Estab No');
+        setAddrFieldOptional('city2', 'City2', 'Company No');
         if (role == 'REQUESTER') {
           setAddrFieldOptional('locationCode', 'LocationCode');
         } else if (role == 'PROCESSOR') {
@@ -1606,9 +1608,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
         setAddrFieldOptional('contact', 'Contact');
         setAddrFieldOptional('custFax', 'CustFax');
 
-        setAddrFieldHide('divn', 'Division');
         setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
-        setAddrFieldHide('city2', 'City2');
         setAddrFieldHide('companySize', 'CompanySize');
         setAddrFieldHide('rol', 'ROL');
       }
