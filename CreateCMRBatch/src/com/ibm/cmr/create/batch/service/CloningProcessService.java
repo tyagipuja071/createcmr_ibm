@@ -27,6 +27,8 @@ import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addlctrydata;
 import com.ibm.cio.cmr.request.entity.AddlctrydataPK;
+import com.ibm.cio.cmr.request.entity.Changelog;
+import com.ibm.cio.cmr.request.entity.ChangelogPK;
 import com.ibm.cio.cmr.request.entity.CmrCloningQueue;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtAddrPK;
@@ -641,6 +643,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     try {
       Kna1 kna1 = null;
       String kunnr = "";
+      Changelog changelog = null;
       Timestamp ts = SystemUtil.getCurrentTimestamp();
       kna1 = getKna1ByKunnr(entityManager, SystemConfiguration.getValue("MANDT"), rdcCloningRefn.getId().getKunnr());
       if (kna1 != null) {
@@ -673,6 +676,22 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
           kna1Clone.setErdat(ERDAT_FORMATTER.format(ts));
 
           createEntity(kna1Clone, entityManager);
+          changelog = new Changelog();
+          ChangelogPK changelogPk = new ChangelogPK();
+
+          changelogPk.setChgts(ts);
+          changelogPk.setField("");
+          changelogPk.setKunnr(kna1Clone.getId().getKunnr());
+          changelogPk.setMandt(kna1Clone.getId().getMandt());
+          changelogPk.setTab("KNA1");
+
+          changelog.setId(changelogPk);
+
+          changelog.setAction("I");
+          changelog.setUserid(kna1Clone.getErnam());
+          changelog.setChgpnt("Y");
+          entityManager.persist(changelog);
+          entityManager.flush();
         } catch (Exception e) {
           processError(entityManager, rdcCloningRefn, cloningQueue, "Issue in Copy KNA1 record");
         }
