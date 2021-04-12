@@ -121,6 +121,7 @@ function addScenarioDriven() {
     FormManager.addValidator('email3', Validators.REQUIRED, [ 'BP Company Name' ])
     FormManager.removeValidator('salesTeamCd', Validators.REQUIRED)
     FormManager.removeValidator('jsicCd', Validators.REQUIRED)
+    FormManager.removeValidator('subIndustryCd', Validators.REQUIRED)
     if (_role == 'Processor') {
       FormManager.enable('cmrNo2', Validators.REQUIRED)
     }
