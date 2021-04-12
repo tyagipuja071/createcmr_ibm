@@ -496,7 +496,7 @@ public class CalculateCoverageElement extends OverridingElement {
             && !data.getBgId().equals(bgResult.getNewValue())) {
           // calculated buying group is different from coverage buying group.
           details.append("Buying Group ID under coverage overrides is different from the one on request.\n");
-          engineData.addNegativeCheckStatus("BG_DIFFERENT", "Buying Group ID under coverage overrides is different from the one on request.");
+          //engineData.addNegativeCheckStatus("BG_DIFFERENT", "Buying Group ID under coverage overrides is different from the one on request.");
           output.getData().remove(bgKey);
         }
         FieldResultKey gbgKey = new FieldResultKey("DATA", "GBG_ID");
@@ -506,7 +506,7 @@ public class CalculateCoverageElement extends OverridingElement {
           // calculated global buying group is different from coverage global
           // buying group.
           details.append("Global Buying Group ID under coverage overrides is different from the one on request.\n");
-          engineData.addNegativeCheckStatus("GBG_DIFFERENT", "Buying Group ID under coverage overrides is different from the one on request.");
+          //engineData.addNegativeCheckStatus("GBG_DIFFERENT", "Buying Group ID under coverage overrides is different from the one on request.");
           output.getData().remove(gbgKey);
         }
       }
