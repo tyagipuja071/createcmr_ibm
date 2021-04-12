@@ -25,6 +25,9 @@ import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.ui.PageManager;
+import com.ibm.cio.cmr.request.util.SystemParameters;
+import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cmr.services.client.AutomationServiceClient;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.ServiceClient.Method;
@@ -56,9 +59,16 @@ public class EUVatValidationElement extends ValidatingElement implements Company
     ValidationOutput validation = new ValidationOutput();
 
     Addr zs01 = requestData.getAddress("ZS01");
+
     StringBuilder details = new StringBuilder();
     try {
-      String landCntryForVies = getLandedCountryForVies(data.getCmrIssuingCntry(), zs01.getLandCntry(), data.getCountryUse());
+      String landCntry;
+      if (SystemLocation.BELGIUM.equals(data.getCmrIssuingCntry()) || SystemLocation.NETHERLANDS.equals(data.getCmrIssuingCntry())) {
+        landCntry = getBillToCntry(entityManager, requestData);
+      } else {
+        landCntry = zs01.getLandCntry();
+      }
+      String landCntryForVies = getLandedCountryForVies(data.getCmrIssuingCntry(), landCntry, data.getCountryUse());
       if (landCntryForVies == null) {
         validation.setSuccess(true);
         validation.setMessage("No Landed Country");
@@ -111,20 +121,50 @@ public class EUVatValidationElement extends ValidatingElement implements Company
               output.setDetails(details.toString());
               engineData.setCompanySource("VIES");
               updateEntity(admin, entityManager);
+            } else if (data.getCustSubGrp().equals("PUBCU") && SystemLocation.NETHERLANDS.equals(data.getCmrIssuingCntry())) {
+              validation.setSuccess(true);
+              validation.setMessage("Review needed.");
+              output.setDetails("VAT is invalid. Need review.");
+              output.setOnError(false);
+              LOG.debug("VAT is invalid.Needs review.");
             } else {
               validation.setSuccess(false);
               validation.setMessage("Review needed.");
-              output.setDetails("VAT is invalid. Need review.");
-              output.setOnError(true);
-              engineData.addRejectionComment("OTH", "VAT is invalid.", "", "");
+              details.append("VAT is invalid. Need review.");
+              if ("Y".equals(admin.getMatchOverrideIndc()) && DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+                output.setOnError(false);
+                details.append(
+                    "\nD&B matches were chosen to be overridden by the requester.\nSupporting documentation is provided by the requester as attachment.");
+                List<String> dnbOverrideCountryList = SystemParameters.getList("DNB_OVR_CNTRY_LIST");
+                if (dnbOverrideCountryList == null || !dnbOverrideCountryList.contains(data.getCmrIssuingCntry())) {
+                  engineData.addNegativeCheckStatus("_dnbOverride", "D&B matches were chosen to be overridden by the requester.");
+                  LOG.debug("D&B matches were chosen to be overridden by the requester.");
+                }
+              } else {
+                engineData.addRejectionComment("OTH", "VAT is invalid.", "", "");
+                output.setOnError(true);
+              }
+              output.setDetails(details.toString());
               LOG.debug("VAT is invalid.Need review.");
             }
+          } else if (data.getCustSubGrp().equals("PUBCU") && SystemLocation.NETHERLANDS.equals(data.getCmrIssuingCntry())) {
+            validation.setSuccess(true);
+            validation.setMessage("Vat Validation fails.\nSkipping for Public Scenario");
+            output.setDetails(response.getMessage());
+            output.setOnError(false);
+            LOG.debug("Vat Validation fails.\nSkipping for Public Scenario.");
           } else {
             validation.setSuccess(false);
             validation.setMessage("Execution failed.");
             output.setDetails(response.getMessage());
-            output.setOnError(true);
-            engineData.addRejectionComment("OTH", response.getMessage(), null, null);
+            if ("Y".equals(admin.getMatchOverrideIndc()) && DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+              output.setOnError(true);
+              engineData.addNegativeCheckStatus("_dnbOverride", "D&B matches were chosen to be overridden by the requester.");
+              LOG.debug("D&B matches were chosen to be overridden by the requester.");
+            } else {
+              output.setOnError(true);
+              engineData.addRejectionComment("OTH", response.getMessage(), null, null);
+            }
             LOG.debug(response.getMessage());
           }
         }
@@ -137,32 +177,32 @@ public class EUVatValidationElement extends ValidatingElement implements Company
     return output;
   }
 
-  private String getLandedCountryForVies(String cmrIssuingCntry, String landCntry, String subRegion) {
+  private String getBillToCntry(EntityManager entityManager, RequestData requestData) {
+    String zp01 = "";
+    String sql = ExternalizedQuery.getSql("AUTO.GET_LAND_CNTRY");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", requestData.getAdmin().getId().getReqId());
+    query.setForReadOnly(true);
+    List<String> landedCntry = query.getResults(String.class);
+    if (landedCntry != null && !landedCntry.isEmpty()) {
+      zp01 = landedCntry.get(0);
+    }
+    return zp01;
+  }
 
+  private String getLandedCountryForVies(String cmrIssuingCntry, String landCntry, String countryUse) {
     String defaultLandedCountry = PageManager.getDefaultLandedCountry(cmrIssuingCntry);
-
-    if (landCntry == null && !StringUtils.isBlank(defaultLandedCountry)) {
-      return defaultLandedCountry;
+    String subRegion = !StringUtils.isBlank(countryUse) && countryUse.length() > 3 ? countryUse.substring(3) : "";
+    if (StringUtils.isNotBlank(subRegion) && EU_COUNTRIES.contains(subRegion)) {
+      // if subregion is part of EU countries eligible for VAT matching, use
+      // subregion as default country
+      defaultLandedCountry = subRegion;
     }
-    if (landCntry == null && StringUtils.isBlank(defaultLandedCountry)) {
-      return null;
+    if (!landCntry.equals(defaultLandedCountry) && !landCntry.equals(subRegion)) {
+      // if landed country is crossborder and not part of subregions
+      return landCntry;
     }
-
-    if (!landCntry.equals(defaultLandedCountry)) {
-      // handle cross-border and subregions
-
-      if (!EU_COUNTRIES.contains(landCntry)) {
-        // the landed country is not an EU country
-
-        if (!StringUtils.isBlank(subRegion) && subRegion.length() > 3 && subRegion.startsWith(cmrIssuingCntry)) {
-          // this is a subregion under the main country, use main country's
-          // landed country
-          return defaultLandedCountry;
-        }
-      }
-    }
-
-    return landCntry;
+    return defaultLandedCountry;
   }
 
   private AutomationResponse<VatLayerResponse> getVatLayerInfo(Admin admin, Data data, String landCntryForVies) throws Exception {

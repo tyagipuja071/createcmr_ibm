@@ -90,7 +90,7 @@
     <%if (null != reqentry.getCmrIssuingCntry() && ("852".equals(reqentry.getCmrIssuingCntry()) || "720".equals(reqentry.getCmrIssuingCntry()) || "738".equals(reqentry.getCmrIssuingCntry()) || "736".equals(reqentry.getCmrIssuingCntry()) || "646".equals(reqentry.getCmrIssuingCntry()) || "714".equals(reqentry.getCmrIssuingCntry()))) {%>
     getChecklistStatus();
     <%}%>
-    <%if (fromQs && "C".equals(reqentry.getReqType())){%>
+     <%if (fromQs && "C".equals(reqentry.getReqType()) && !"758".equals(reqentry.getCmrIssuingCntry())){%>
       cmr.showProgress('Check and verify address created.<br>Please wait while the system opens the address...');
       window.setTimeout('forceAddressValidationFromQS()', 1000);
     <%}%>
@@ -499,6 +499,19 @@ div#cmr-info-box, div#cmr-error-box, div#cmr-validation-box {
           <div class="govIndc">
             <img src="${resourcesPath}/images/warn-icon.png" class="cmr-error-icon">
             <cmr:note text="${ui.info.govTypeIndc}" />
+          </div>
+        </cmr:column>
+      </cmr:row>
+    <%} %>
+    </cmr:view>
+    <br>
+      <cmr:view>
+    <%if (!StringUtils.isEmpty(reqentry.getPaygoProcessIndc()) && "Y".equals(reqentry.getPaygoProcessIndc()) && reqentry.getUserRole() != null && reqentry.getUserRole().equalsIgnoreCase("PROCESSOR")){%>
+      <cmr:row>
+        <cmr:column span="6">
+          <div class="paygoIndc">
+            <img src="${resourcesPath}/images/warn-icon.png" class="cmr-error-icon">
+            <cmr:note text="${ui.info.paygo}" />
           </div>
         </cmr:column>
       </cmr:row>

@@ -173,7 +173,7 @@ public class UpdateSwitchElement extends ValidatingElement {
         // no updates/changes at all on the request
         validation.setSuccess(false);
         validation.setMessage("Not Validated");
-        engineData.addRejectionComment("NO_UPD", "No data/address changes made on request.", "", "");
+        engineData.addRejectionComment("NOUPD", "No data/address changes made on request.", "", "");
         output.setOnError(true);
         output.setDetails("No data/address changes made on request.");
         log.debug("No data/address changes made on request.");
