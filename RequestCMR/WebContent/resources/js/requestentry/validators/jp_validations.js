@@ -1425,6 +1425,8 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
         }
         setAddrFieldMandatory('custNm3', 'CustomerName3', 'Full English Name');
         setAddrFieldMandatory('companySize', 'CompanySize', 'Company Size');
+        setAddrFieldMandatory('postCd', 'PostalCode', 'Postal Code')
+
         setAddrFieldOptional('bldg', 'Building');
 
         setAddrFieldHide('divn', 'Division');
@@ -1438,6 +1440,8 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
         setAddrFieldMandatory('custNm3', 'CustomerName3', 'Full English Name');
         // setAddrFieldMandatory('divn', 'Division', 'Estab No');
         setAddrFieldMandatory('estabFuncCd', 'EstabFuncCd', 'Estab Function Code');
+        setAddrFieldMandatory('postCd', 'PostalCode', 'Postal Code')
+
         setAddrFieldOptional('bldg', 'Building');
 
         setAddrFieldHide('rol', 'ROL');
@@ -1456,6 +1460,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
         setAddrFieldOptional('dept', 'Department');
         setAddrFieldOptional('contact', 'Contact');
         setAddrFieldOptional('custFax', 'CustFax');
+        setAddrFieldOptional('postCd', 'PostalCode', 'Postal Code');
 
         setAddrFieldHide('divn', 'Division');
         setAddrFieldHide('estabFuncCd', 'EstabFuncCd');
@@ -1467,7 +1472,6 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
       setAddrFieldOptional('custNm2', 'CustomerName2');
       setAddrFieldMandatory('custNm4', 'CustomerName4', 'Katakana');
       setAddrFieldMandatory('addrTxt', 'AddressTxt', 'Address');
-      setAddrFieldMandatory('postCd', 'PostalCode', 'Postal Code');
       if (role == 'REQUESTER') {
         setAddrFieldOptional('locationCode', 'LocationCode');
       } else if (role == 'PROCESSOR') {
@@ -1521,7 +1525,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
         setAddrFieldOptional('custNm2', 'CustomerName2');
         setAddrFieldMandatory('custNm3', 'CustomerName3', 'Full English Name');
         setAddrFieldOptional('custNm4', 'CustomerName4', 'Katakana');
-        setAddrFieldMandatory('postCd', 'PostalCode', 'Postal Code');
+        setAddrFieldOptional('postCd', 'PostalCode', 'Postal Code');
         if (role == 'REQUESTER') {
           setAddrFieldOptional('locationCode', 'LocationCode');
         } else if (role == 'PROCESSOR') {
