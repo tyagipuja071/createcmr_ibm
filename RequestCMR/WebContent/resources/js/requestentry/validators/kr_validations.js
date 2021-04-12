@@ -18,7 +18,7 @@ function afterConfigKR() {
   FormManager.addValidator('reqFor',Validators.REQUIRED, ['Requested For Name (Originator)'], 'MAIN_GENERAL_TAB');
   FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
   FormManager.addValidator('phone1', Validators.REQUIRED, ['Business License Type'], 'MAIN_CUST_TAB');
-  FormManager.addValidator('ibmBankNumber', Validators.REQUIRED,['Product Type'],'MAIN_IBM_TAB');
+  FormManager.addValidator('contactName3', Validators.REQUIRED,['Product Type'],'MAIN_IBM_TAB');
 
   FormManager.removeValidator('subIndustryCd', Validators.REQUIRED);  
   FormManager.removeValidator('sensitiveFlag', Validators.REQUIRED);

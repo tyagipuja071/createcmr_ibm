@@ -158,11 +158,13 @@
     
   <cmr:row addBackground="false">
     <cmr:column span="4">
-      <cmr:label fieldId="ibmBankNumber">
-        <cmr:fieldLabel fieldId="ProdType" />: <span id="ast-ProdType"></span>
-          <cmr:delta text="-" id="delta-ibmBankNumber" code="L" />
+     <p> <cmr:label fieldId="contactName3">
+        <cmr:fieldLabel fieldId="ContactName3" />: <span id="ast-ProdType"></span>
+          <cmr:delta text="-" id="delta-contactName3" code="L" />
       </cmr:label>
-      <div id="prodTypeCheckboxes" style="display: block">
+      <cmr:field fieldId="ContactName3" id="contactName3" path="ibmBankNumber" tabId="MAIN_IBM_TAB" />
+      </p>      
+      <%-- <div id="prodTypeCheckboxes" style="display: block">
         <div class="jp-chk">
           <input type="checkbox" name="codCondition" value="1" id="prodType_1" <%= ("1".equals(prodType1))?"checked":"" %> />
           <label class=" cmr-radio-check-label" for="prodType_1">AAS HW</label>
@@ -195,7 +197,7 @@
       		<input type="checkbox" name="fomeZero" value="1" id="prodType_8" <%= ("1".equals(prodType8))?"checked":"" %> />
       		<label class=" cmr-radio-check-label" for="prodType_8">Others</label>
         </div>
-      </div>
+      </div> --%>
     </cmr:column>  
     <br>
     <br>
