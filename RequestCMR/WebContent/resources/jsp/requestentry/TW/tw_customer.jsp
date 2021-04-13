@@ -255,10 +255,11 @@
           <cmr:field fieldId="Email2" id="email2" path="email2" tabId="MAIN_CUST_TAB" />
         </p>
       </cmr:column>
-    <cmr:column span="2" containerForField="BusnType">
+      
+      <cmr:column span="2" containerForField="BusnType">
       <p>
         <cmr:label fieldId="busnType">
-          <cmr:fieldLabel fieldId="BusnType" />: 
+          <cmr:fieldLabel fieldId="BusnType" />:
          </cmr:label>
         <cmr:field path="busnType" id="busnType" fieldId="BusnType" tabId="MAIN_CUST_TAB" />
       </p>
