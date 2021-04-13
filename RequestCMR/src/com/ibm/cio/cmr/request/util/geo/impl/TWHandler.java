@@ -20,6 +20,7 @@ import org.apache.log4j.Logger;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.AddrRdc;
 import com.ibm.cio.cmr.request.entity.Admin;
@@ -68,6 +69,11 @@ public class TWHandler extends GEOHandler {
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
 
+    data.setIsuCd(mainRecord.getIsuCode());
+    data.setDunsNo(mainRecord.getCmrDuns());
+    data.setClientTier(mainRecord.getCmrTier());
+    data.setInvoiceSplitCd(mainRecord.getInvoiceSplitCode());
+
   }
 
   @Override
@@ -77,6 +83,9 @@ public class TWHandler extends GEOHandler {
   @Override
   public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo) throws Exception {
 
+    address.setCustNm1(currentRecord.getCmrName1Plain() == null ? currentRecord.getCmrName1Plain() : currentRecord.getCmrName1Plain().trim());
+    address.setCustNm3(currentRecord.getCmrIntlName1());
+    address.setBldg(currentRecord.getCmrIntlCity1());
   }
 
   @Override
@@ -462,7 +471,49 @@ public class TWHandler extends GEOHandler {
   public void convertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry, ImportCMRModel searchModel)
       throws Exception {
     // TODO Auto-generated method stub
+    List<FindCMRRecordModel> recordsFromSearch = source.getItems();
+    List<FindCMRRecordModel> filteredRecords = new ArrayList<>();
 
+    if (recordsFromSearch != null && !recordsFromSearch.isEmpty() && recordsFromSearch.size() > 0) {
+      doFilterAddresses(reqEntry, recordsFromSearch, filteredRecords);
+      if (!filteredRecords.isEmpty() && filteredRecords.size() > 0 && filteredRecords != null) {
+        source.setItems(filteredRecords);
+      }
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  public static void doFilterAddresses(RequestEntryModel reqEntry, Object mainRecords, Object filteredRecords) {
+    if (mainRecords instanceof java.util.List<?> && filteredRecords instanceof java.util.List<?>) {
+      // during convertFrom
+      if (reqEntry.getReqType().equalsIgnoreCase(CmrConstants.REQ_TYPE_UPDATE)) {
+        List<FindCMRRecordModel> recordsToCheck = (List<FindCMRRecordModel>) mainRecords;
+        List<FindCMRRecordModel> recordsToReturn = (List<FindCMRRecordModel>) filteredRecords;
+        for (Object tempRecObj : recordsToCheck) {
+          if (tempRecObj instanceof FindCMRRecordModel) {
+            FindCMRRecordModel tempRec = (FindCMRRecordModel) tempRecObj;
+
+            if (!StringUtils.isEmpty(tempRec.getCmrAddrSeq())) {
+              recordsToReturn.add(tempRec);
+            }
+          }
+        }
+      }
+
+      if (reqEntry.getReqType().equalsIgnoreCase(CmrConstants.REQ_TYPE_CREATE)) {
+        List<FindCMRRecordModel> recordsToCheck = (List<FindCMRRecordModel>) mainRecords;
+        List<FindCMRRecordModel> recordsToReturn = (List<FindCMRRecordModel>) filteredRecords;
+        for (Object tempRecObj : recordsToCheck) {
+          if (tempRecObj instanceof FindCMRRecordModel) {
+            FindCMRRecordModel tempRec = (FindCMRRecordModel) tempRecObj;
+            if (tempRec.getCmrAddrTypeCode().equalsIgnoreCase("ZS01")) {
+              // RETURN ONLY THE SOLD-TO ADDRESS FOR CREATES
+              recordsToReturn.add(tempRec);
+            }
+          }
+        }
+      }
+    }
   }
 
   @Override
