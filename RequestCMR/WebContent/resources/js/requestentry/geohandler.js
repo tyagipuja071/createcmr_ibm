@@ -112,8 +112,7 @@ var SysLoc = (function() {
     MOLDOVA : '787',
     BOSNIA_HERZEGOVINA : '699',
     MADAGASCAR : '700',
-    CANADA : '649',
-    KOREA : '766'
+    CANADA : '649'
   };
 })();
 
