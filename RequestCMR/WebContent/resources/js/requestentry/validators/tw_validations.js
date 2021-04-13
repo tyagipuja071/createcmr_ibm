@@ -20,51 +20,55 @@ function afterConfigTW() {
     role = _pagemodel.userRole;
   }
 
-  if (role == 'Requester' && reqType == 'C') {
-    FormManager.readOnly('isuCd');
+  if (!FormManager.getField('reqType') || reqType == '') {
+    window.setTimeout('afterConfigTW()', 500);
   } else {
-    FormManager.enable('isuCd');
-  }
+    if (role == 'Requester' && reqType == 'C') {
+      FormManager.readOnly('isuCd');
+    } else {
+      FormManager.enable('isuCd');
+    }
 
-  if (reqType == 'U') {
-    FormManager.removeValidator('vat', Validators.REQUIRED);
-    FormManager.removeValidator('mktgDept', Validators.REQUIRED);
-    FormManager.removeValidator('invoiceSplitCd', Validators.REQUIRED);
-    FormManager.removeValidator('custAcctType', Validators.REQUIRED);
-    FormManager.removeValidator('abbrevLocn', Validators.REQUIRED);
-    FormManager.removeValidator('orgNo', Validators.REQUIRED);
-    FormManager.removeValidator('restrictTo', Validators.REQUIRED);
-    FormManager.removeValidator('commercialFinanced', Validators.REQUIRED);
-    FormManager.removeValidator('csBo', Validators.REQUIRED);
-    FormManager.removeValidator('sectorCd', Validators.REQUIRED);
+    if (reqType == 'U') {
+      FormManager.removeValidator('vat', Validators.REQUIRED);
+      FormManager.removeValidator('mktgDept', Validators.REQUIRED);
+      FormManager.removeValidator('invoiceSplitCd', Validators.REQUIRED);
+      FormManager.removeValidator('custAcctType', Validators.REQUIRED);
+      FormManager.removeValidator('abbrevLocn', Validators.REQUIRED);
+      FormManager.removeValidator('orgNo', Validators.REQUIRED);
+      FormManager.removeValidator('restrictTo', Validators.REQUIRED);
+      FormManager.removeValidator('commercialFinanced', Validators.REQUIRED);
+      FormManager.removeValidator('csBo', Validators.REQUIRED);
+      FormManager.removeValidator('sectorCd', Validators.REQUIRED);
 
-    FormManager.removeValidator('footnoteTxt1', Validators.REQUIRED);
-    FormManager.removeValidator('bioChemMissleMfg', Validators.REQUIRED);
-    FormManager.removeValidator('contactName2', Validators.REQUIRED);
-    FormManager.removeValidator('email1', Validators.REQUIRED);
-    FormManager.removeValidator('contactName1', Validators.REQUIRED);
-    FormManager.removeValidator('footnoteTxt2', Validators.REQUIRED);
-    FormManager.removeValidator('contactName3', Validators.REQUIRED);
-    FormManager.removeValidator('email2', Validators.REQUIRED);
-    FormManager.removeValidator('company', Validators.REQUIRED);
-    FormManager.removeValidator('affiliate', Validators.REQUIRED);
-    FormManager.removeValidator('email3', Validators.REQUIRED);
-    FormManager.removeValidator('customerIdCd', Validators.REQUIRED);
-    FormManager.removeValidator('inacType', Validators.REQUIRED);
-    FormManager.removeValidator('inacCd', Validators.REQUIRED);
-    FormManager.removeValidator('covId', Validators.REQUIRED);
-    FormManager.removeValidator('dunsNo', Validators.REQUIRED);
-    FormManager.removeValidator('cmrNoPrefix', Validators.REQUIRED);
-    FormManager.removeValidator('bpName', Validators.REQUIRED);
-    FormManager.removeValidator('collectionCd', Validators.REQUIRED);
-    FormManager.removeValidator('mrcCd', Validators.REQUIRED);
+      FormManager.removeValidator('footnoteTxt1', Validators.REQUIRED);
+      FormManager.removeValidator('bioChemMissleMfg', Validators.REQUIRED);
+      FormManager.removeValidator('contactName2', Validators.REQUIRED);
+      FormManager.removeValidator('email1', Validators.REQUIRED);
+      FormManager.removeValidator('contactName1', Validators.REQUIRED);
+      FormManager.removeValidator('footnoteTxt2', Validators.REQUIRED);
+      FormManager.removeValidator('contactName3', Validators.REQUIRED);
+      FormManager.removeValidator('email2', Validators.REQUIRED);
+      FormManager.removeValidator('company', Validators.REQUIRED);
+      FormManager.removeValidator('affiliate', Validators.REQUIRED);
+      FormManager.removeValidator('email3', Validators.REQUIRED);
+      FormManager.removeValidator('customerIdCd', Validators.REQUIRED);
+      FormManager.removeValidator('inacType', Validators.REQUIRED);
+      FormManager.removeValidator('inacCd', Validators.REQUIRED);
+      FormManager.removeValidator('covId', Validators.REQUIRED);
+      FormManager.removeValidator('dunsNo', Validators.REQUIRED);
+      FormManager.removeValidator('cmrNoPrefix', Validators.REQUIRED);
+      FormManager.removeValidator('bpName', Validators.REQUIRED);
+      FormManager.removeValidator('collectionCd', Validators.REQUIRED);
+      FormManager.removeValidator('mrcCd', Validators.REQUIRED);
 
-    FormManager.removeValidator('dupCmrIndc', Validators.REQUIRED);
-    FormManager.removeValidator('bgId', Validators.REQUIRED);
-    FormManager.removeValidator('gbgId', Validators.REQUIRED);
-    FormManager.removeValidator('bgRuleId', Validators.REQUIRED);
-    FormManager.removeValidator('geoLocationCd', Validators.REQUIRED);
+      FormManager.removeValidator('dupCmrIndc', Validators.REQUIRED);
+      FormManager.removeValidator('bgId', Validators.REQUIRED);
+      FormManager.removeValidator('gbgId', Validators.REQUIRED);
+      FormManager.removeValidator('bgRuleId', Validators.REQUIRED);
+      FormManager.removeValidator('geoLocationCd', Validators.REQUIRED);
 
+    }
   }
 
   if (custSubGrp == 'LOECO' || custSubGrp == 'LOINT' || custSubGrp == 'LOBLU' || custSubGrp == 'LOMAR' || custSubGrp == 'LOOFF') {
