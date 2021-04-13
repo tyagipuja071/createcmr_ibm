@@ -59,6 +59,12 @@ function afterConfigTW() {
     FormManager.removeValidator('collectionCd', Validators.REQUIRED);
     FormManager.removeValidator('mrcCd', Validators.REQUIRED);
 
+    FormManager.removeValidator('dupCmrIndc', Validators.REQUIRED);
+    FormManager.removeValidator('bgId', Validators.REQUIRED);
+    FormManager.removeValidator('gbgId', Validators.REQUIRED);
+    FormManager.removeValidator('bgRuleId', Validators.REQUIRED);
+    FormManager.removeValidator('geoLocationCd', Validators.REQUIRED);
+
   }
 
   if (custSubGrp == 'LOECO' || custSubGrp == 'LOINT' || custSubGrp == 'LOBLU' || custSubGrp == 'LOMAR' || custSubGrp == 'LOOFF') {
