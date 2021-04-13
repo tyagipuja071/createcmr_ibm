@@ -130,6 +130,9 @@ function afterConfigForNORDX() {
   // CREATCMR-1690
   settingForProcessor();
   vatAndVatExemptOnScenario();
+
+  // CREATCMR-1656
+  setCapRecordActivate();
 }
 
 function disableLandCntry() {
@@ -2628,11 +2631,7 @@ function setAbbreviatedNameValue() {
         || custSubGrp == 'IBMEM' || custSubGrp == 'GOVRN') {
       var custNm = getAbbreviatedNameByAddrType(_reqId, "ZS01");
       if (custNm != "") {
-        if (custNm.length > 22) {
-          FormManager.setValue('abbrevNm', custNm.substring(0, 22));
-        } else {
-          FormManager.setValue('abbrevNm', custNm);
-        }
+        FormManager.setValue('abbrevNm', custNm.substring(0, 22));
       }
     }
 
@@ -2657,6 +2656,23 @@ function setAbbreviatedNameValue() {
 
   });
 
+  var qParams = {
+    REQ_ID : _reqId
+  };
+
+  var role = null;
+  if (typeof (_pagemodel) != 'undefined') {
+    role = _pagemodel.userRole;
+  }
+
+  if (role == 'Processor') {
+    var result = cmr.query('DATA.GET.ABBREV_NM.BY_REQID', qParams);
+    var abbrevNmDBValue = result.ret1;
+    if (abbrevNmDBValue != '') {
+      FormManager.setValue('abbrevNm', abbrevNmDBValue);
+    }
+  }
+
 }
 
 function getAbbreviatedNameByAddrType(_reqId, _addrType) {
@@ -2675,6 +2691,79 @@ function getAbbreviatedNameByAddrType(_reqId, _addrType) {
   }
 
 }
+
+function setAbbrevNmAddressSave(cntry, addressMode, saving, finalSave, force) {
+
+  var _reqId = FormManager.getActualValue('reqId');
+
+  if (finalSave || force || addressMode == 'ZS01' || addressMode == 'ZI01') {
+
+    var addrType = FormManager.getActualValue('addrType');
+    var zs01CustNm = '';
+    var zi01CustNm = '';
+
+    if (addrType == 'ZS01') {
+      zs01CustNm = FormManager.getActualValue('custNm1');
+    }
+
+    if (addrType == 'ZI01') {
+      zi01CustNm = FormManager.getActualValue('custNm1');
+    }
+
+    var custSubGrp = FormManager.getActualValue('custSubGrp');
+    if (custSubGrp == 'CBCOM' || custSubGrp == 'CBBUS' || custSubGrp == 'CBINT' || custSubGrp == 'DKCOM' || custSubGrp == 'DKBUS'
+        || custSubGrp == 'DKINT' || custSubGrp == 'DKPRI' || custSubGrp == 'DKIBM' || custSubGrp == 'DKGOV' || custSubGrp == 'FOCOM'
+        || custSubGrp == 'FOBUS' || custSubGrp == 'FOINT' || custSubGrp == 'FOPRI' || custSubGrp == 'FOIBM' || custSubGrp == 'FOGOV'
+        || custSubGrp == 'GLCOM' || custSubGrp == 'GLBUS' || custSubGrp == 'GLINT' || custSubGrp == 'GLPRI' || custSubGrp == 'GLIBM'
+        || custSubGrp == 'GLGOV' || custSubGrp == 'ISCOM' || custSubGrp == 'ISBUS' || custSubGrp == 'ISINT' || custSubGrp == 'ISPRI'
+        || custSubGrp == 'ISIBM' || custSubGrp == 'ISGOV' || custSubGrp == 'FICOM' || custSubGrp == 'FIBUS' || custSubGrp == 'FIINT'
+        || custSubGrp == 'FIPRI' || custSubGrp == 'FIIBM' || custSubGrp == 'FIGOV' || custSubGrp == 'EECOM' || custSubGrp == 'EEBUS'
+        || custSubGrp == 'EEINT' || custSubGrp == 'EEPRI' || custSubGrp == 'EEIBM' || custSubGrp == 'EEGOV' || custSubGrp == 'LTCOM'
+        || custSubGrp == 'LTBUS' || custSubGrp == 'LTINT' || custSubGrp == 'LTPRI' || custSubGrp == 'LTIBM' || custSubGrp == 'LTGOV'
+        || custSubGrp == 'LVCOM' || custSubGrp == 'LVBUS' || custSubGrp == 'LVINT' || custSubGrp == 'LVPRI' || custSubGrp == 'LVIBM'
+        || custSubGrp == 'LVGOV' || custSubGrp == 'COMME' || custSubGrp == 'BUSPR' || custSubGrp == 'INTER' || custSubGrp == 'PRIPE'
+        || custSubGrp == 'IBMEM' || custSubGrp == 'GOVRN' || custSubGrp == '') {
+      var custNmDBVal = getAbbreviatedNameByAddrType(_reqId, "ZS01");
+      if (custNmDBVal != "") {
+        if (zs01CustNm != custNmDBVal) {
+          FormManager.setValue('abbrevNm', zs01CustNm.substring(0, 22));
+        }
+      }
+    }
+
+    if (custSubGrp == 'DK3PA' || custSubGrp == 'FO3PA' || custSubGrp == 'GL3PA' || custSubGrp == 'IS3PA' || custSubGrp == 'FI3PA'
+        || custSubGrp == 'EE3PA' || custSubGrp == 'LT3PA' || custSubGrp == 'LV3PA' || custSubGrp == 'THDPT') {
+      var custNm1DBVal = getAbbreviatedNameByAddrType(_reqId, "ZS01");
+      var custNm2DBVal = getAbbreviatedNameByAddrType(_reqId, "ZI01");
+
+      if (addrType == 'ZS01') {
+        if (zs01CustNm != custNm1DBVal) {
+          FormManager.setValue('abbrevNm', zs01CustNm.substring(0, 8) + " c/o " + custNm2DBVal.substring(0, 9));
+
+        }
+      }
+
+      if (addrType == 'ZI01') {
+        if (zi01CustNm != custNm2DBVal) {
+          FormManager.setValue('abbrevNm', custNm1DBVal.substring(0, 8) + " c/o " + zi01CustNm.substring(0, 9));
+        }
+      }
+    }
+
+    if (custSubGrp == 'CBISO' || custSubGrp == 'DKISO' || custSubGrp == 'FOISO' || custSubGrp == 'GLISO' || custSubGrp == 'ISISO'
+        || custSubGrp == 'FIISO' || custSubGrp == 'EEISO' || custSubGrp == 'LTISO' || custSubGrp == 'LVISO' || custSubGrp == 'INTSO') {
+      var custNm = getAbbreviatedNameByAddrType(_reqId, "ZI01");
+      if (custNm != "") {
+        if (zi01CustNm != custNm) {
+          FormManager.setValue('abbrevNm', "IBM c/o " + zi01CustNm.substring(0, 14));
+        }
+      } else {
+        FormManager.setValue('abbrevNm', "IBM c/o ");
+      }
+    }
+  }
+}
+// CREATCMR-1689
 
 // CREATCMR-1700
 function embargoCodeValidator() {
@@ -2902,6 +2991,28 @@ function addCmrNoValidatorForNordx() {
 }
 // CREATCMR-1690
 
+// CREATCMR-1656
+function setCapRecordActivate() {
+  var params = {
+    USERID : _pagemodel.requesterId
+  };
+
+  var result1 = cmr.query('GET.ND.USER_ROLE', params);
+  var result2 = cmr.query('GET.ND.USER_PROC_CENTER_NM', params);
+
+  var role = null;
+  if (typeof (_pagemodel) != 'undefined') {
+    role = _pagemodel.userRole;
+  }
+
+  if (role == 'Processor') {
+    if (result1.ret1 > 0 && result2.ret1 == 'Bratislava') {
+      FormManager.enable('capInd');
+    }
+  }
+}
+// CREATCMR-1656
+
 dojo.addOnLoad(function() {
   GEOHandler.NORDX = [ '846', '806', '702', '678' ];
 
@@ -2960,5 +3071,8 @@ dojo.addOnLoad(function() {
 
   // CREATCMR-1690
   GEOHandler.registerValidator(addCmrNoValidatorForNordx, GEOHandler.NORDX);
+
+  // CREATCMR-1689
+  GEOHandler.addAddrFunction(setAbbrevNmAddressSave, GEOHandler.NORDX);
 
 });
