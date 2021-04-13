@@ -1191,7 +1191,8 @@ public class LegacyDirectService extends TransConnService {
     MessageTransformer transformer = TransformerManager.getTransformer(cntry);
     String targetCountry = null;
 
-    if (!StringUtils.isEmpty(cmrNo) && !"Y".equals(admin.getProspLegalInd())) {
+    // CREATCMR-1690
+    if (!StringUtils.isEmpty(cmrNo)) {
       boolean isCMRExist = LegacyDirectUtil.checkCMRNoInLegacyDB(entityManager, data);
       LOG.info("Checking existing CMR in create Process...");
       if (isCMRExist) {
