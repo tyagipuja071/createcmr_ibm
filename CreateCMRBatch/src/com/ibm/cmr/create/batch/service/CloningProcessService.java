@@ -697,7 +697,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
           entityManager.persist(changelog);
           entityManager.flush();
         } catch (Exception e) {
-          LOG.debug("Issue in Copy KNA1 record : " + e);
+          LOG.debug("Issue in Copy KNA1 record for cmr no : " + kna1Clone.getZzkvCusno() + " and KUNNR: " + kna1Clone.getId().getKunnr(), e);
           processError(entityManager, rdcCloningRefn, cloningQueue, "Issue in Copy KNA1 record");
         }
       }
@@ -706,7 +706,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
       rdcCloningRefn.setTargetKunnr(kunnr);
 
     } catch (Exception e) {
-      LOG.debug("Issue in Creating KNA1 record : " + e);
+      LOG.debug("Issue in Creating KNA1 record for cmr no : " + rdcCloningRefn.getCmrNo() + " and KUNNR: " + rdcCloningRefn.getTargetKunnr(), e);
       processError(entityManager, rdcCloningRefn, cloningQueue, "Issue in Creating KNA1 record");
     }
 
@@ -871,7 +871,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
           createEntity(cloneInsert, entityManager);
         }
       } catch (Exception e) {
-        LOG.debug("Error in copy knb1 : " + e);
+        LOG.debug("Error in copy knb1 :", e);
       }
     } else {
       LOG.info("KNB1 record not exist with KUNNR " + kna1.getId().getKunnr());
@@ -940,7 +940,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
         }
 
       } catch (Exception e) {
-        LOG.debug("Error in copy knvv : " + e);
+        LOG.debug("Error in copy knvv:", e);
       }
     } else {
       LOG.info("KNVV record not exist with KUNNR " + kna1.getId().getKunnr());
@@ -988,7 +988,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
         }
 
       } catch (Exception e) {
-        LOG.debug("Error in copy knex : " + e);
+        LOG.debug("Error in copy knex :", e);
       }
     } else {
       LOG.info("KNEX record not exist with KUNNR " + kna1.getId().getKunnr());
@@ -1036,7 +1036,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
         }
 
       } catch (Exception e) {
-        LOG.debug("Error in copy sadr : " + e);
+        LOG.debug("Error in copy sadr :", e);
       }
     } else {
       LOG.info("SADR record not exist with ADRNR " + kna1.getAdrnr());
@@ -1097,7 +1097,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
         }
 
       } catch (Exception e) {
-        LOG.debug("Error in inserting knvi : " + e);
+        LOG.debug("Error in inserting knvi :", e);
       }
     } else {
       LOG.info("KNVI record already exists with KUNNR " + kna1Clone.getId().getKunnr());
@@ -1145,7 +1145,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
         }
 
       } catch (Exception e) {
-        LOG.debug("Error in copy knvk : " + e);
+        LOG.debug("Error in copy knvk :", e);
       }
     } else {
       LOG.info("KNVK record not exist with KUNNR " + kna1.getId().getKunnr());
@@ -1224,7 +1224,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
           // usedParza.add(knvpCloneInsert.getId().getParza());
         }
       } catch (Exception e) {
-        LOG.debug("Error in copy knvp : " + e);
+        LOG.debug("Error in copy knvp :", e);
       }
     } else {
       LOG.info("KNVP record not exist with KUNNR " + kna1.getId().getKunnr());
@@ -1272,7 +1272,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
         }
 
       } catch (Exception e) {
-        LOG.debug("Error in copy addlctrydata : " + e);
+        LOG.debug("Error in copy addlctrydata :", e);
       }
     } else {
       LOG.info("ADDLCTRYDATA record not exist with KUNNR " + kna1.getId().getKunnr());
@@ -1319,7 +1319,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
         }
 
       } catch (Exception e) {
-        LOG.debug("Error in copy kunnrext : " + e);
+        LOG.debug("Error in copy kunnrext :", e);
       }
     } else {
       LOG.info("KUNNR_EXT record not exist with KUNNR " + kna1.getId().getKunnr());
@@ -1369,7 +1369,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
         }
 
       } catch (Exception e) {
-        LOG.debug("Error in copy knbk : " + e);
+        LOG.debug("Error in copy knbk :", e);
       }
     } else {
       LOG.info("KNBK record not exist with KUNNR " + kna1.getId().getKunnr());
@@ -1417,7 +1417,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
         }
 
       } catch (Exception e) {
-        LOG.debug("Error in copy knva : " + e);
+        LOG.debug("Error in copy knva :", e);
       }
     } else {
       LOG.info("KNVA record not exist with KUNNR " + kna1.getId().getKunnr());
@@ -1467,7 +1467,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
         }
 
       } catch (Exception e) {
-        LOG.debug("Error in copy knvl : " + e);
+        LOG.debug("Error in copy knvl :", e);
       }
     } else {
       LOG.info("KNVL record not exist with KUNNR " + kna1.getId().getKunnr());
@@ -1514,7 +1514,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
         }
 
       } catch (Exception e) {
-        LOG.debug("Error in copy sizeInfo : " + e);
+        LOG.debug("Error in copy sizeInfo :", e);
       }
     } else {
       LOG.info("SIZEINFO record not exist with KUNNR " + kna1.getId().getKunnr());
@@ -1981,7 +1981,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
         }
 
       } catch (Exception e) {
-        LOG.debug("Error in copy TransService : " + e);
+        LOG.debug("Error in copy TransService :", e);
       }
     } else {
       LOG.info("TransService record not exist with KUNNR " + kna1.getId().getKunnr());
