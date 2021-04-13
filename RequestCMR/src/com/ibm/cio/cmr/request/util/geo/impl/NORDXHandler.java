@@ -217,22 +217,25 @@ public class NORDXHandler extends BaseSOFHandler {
               }
               if (CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode())) {
                 String kunnr = addr.getCmrSapNumber();
-                String adrnr = getaddAddressAdrnr(entityManager, cmrIssueCd, SystemConfiguration.getValue("MANDT"), kunnr, addr.getCmrAddrTypeCode(),
-                    addr.getCmrAddrSeq());
-                int maxintSeq = getMaxSequenceOnAddr(entityManager, SystemConfiguration.getValue("MANDT"), reqEntry.getCmrIssuingCntry(),
-                    record.getCmrNum());
+                // String adrnr = getaddAddressAdrnr(entityManager, cmrIssueCd,
+                // SystemConfiguration.getValue("MANDT"), kunnr,
+                // addr.getCmrAddrTypeCode(),
+                // addr.getCmrAddrSeq());
+                // int maxintSeq = getMaxSequenceOnAddr(entityManager,
+                // SystemConfiguration.getValue("MANDT"),
+                // reqEntry.getCmrIssuingCntry(),
+                // record.getCmrNum());
                 int maxintSeqLegacy = getMaxSequenceOnLegacyAddr(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum());
-                String maxSeq = StringUtils.leftPad(String.valueOf(maxintSeqLegacy), 5, '0');
-                String legacyGaddrSeq = getGaddressSeqFromLegacy(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum());
-                String legacyzs01Seq = getZS01SeqFromLegacy(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum());
-                String legacyGaddrLN6 = getGaddressAddLN6FromLegacy(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum());
-                String gAddrSeq = "";
-                if (!StringUtils.isEmpty(legacyGaddrSeq) && !legacyzs01Seq.equals(legacyGaddrSeq)) {
-                  gAddrSeq = legacyGaddrSeq;
-                } else {
-                  gAddrSeq = maxSeq;
-                  maxintSeqLegacy++;
-                }
+                // String maxSeq =
+                // StringUtils.leftPad(String.valueOf(maxintSeqLegacy), 5, '0');
+                // String legacyGaddrSeq =
+                // getGaddressSeqFromLegacy(entityManager,
+                // reqEntry.getCmrIssuingCntry(), record.getCmrNum());
+                // String legacyzs01Seq = getZS01SeqFromLegacy(entityManager,
+                // reqEntry.getCmrIssuingCntry(), record.getCmrNum());
+                // String legacyGaddrLN6 =
+                // getGaddressAddLN6FromLegacy(entityManager,
+                // reqEntry.getCmrIssuingCntry(), record.getCmrNum());
 
                 // add new here
                 String soldtoseq = getSoldtoaddrSeqFromLegacy(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum());
@@ -709,15 +712,15 @@ public class NORDXHandler extends BaseSOFHandler {
     data.setModeOfPayment(modeOfPayment);
     // CREATCMR-1638
 
-   // data.setEngineeringBo(this.currentImportValues.get("ACAdmDSC"));
-   // LOG.trace("ACAdmDSC: " + data.getEngineeringBo());
+    // data.setEngineeringBo(this.currentImportValues.get("ACAdmDSC"));
+    // LOG.trace("ACAdmDSC: " + data.getEngineeringBo());
     // CMR-1746 Change Start
     String cmrNo = data.getCmrNo();
-    String cntry = data.getCmrIssuingCntry();     
+    String cntry = data.getCmrIssuingCntry();
 
     String engineeringBo = getACAdminFromLegacy(cntry, cmrNo);
-     data.setEngineeringBo(engineeringBo); 
-    LOG.trace("ACAdmDSC: " + data.getEngineeringBo());   
+    data.setEngineeringBo(engineeringBo);
+    LOG.trace("ACAdmDSC: " + data.getEngineeringBo());
 
     String salesRep = getSRFromLegacy(cntry, cmrNo);
     data.setRepTeamMemberNo(salesRep);
@@ -2273,8 +2276,8 @@ public class NORDXHandler extends BaseSOFHandler {
     return paymentCode;
   }
   // CREATCMR-1638
-  
-  //CMR-1746
+
+  // CMR-1746
   private String getACAdminFromLegacy(String rcyaa, String cmr_no) throws Exception {
     String acAdmin = "";
     String sql = ExternalizedQuery.getSql("ND.GETACADMIN");
@@ -2292,11 +2295,10 @@ public class NORDXHandler extends BaseSOFHandler {
     LOG.debug("acAdmin of Legacy" + acAdmin);
     return acAdmin;
   }
-  
-  
-//CMR-1746
+
+  // CMR-1746
   private String getSRFromLegacy(String rcyaa, String cmr_no) {
-    String salesRep = "";       
+    String salesRep = "";
     EntityManager entityManager = JpaManager.getEntityManager();
     String sql = ExternalizedQuery.getSql("ND.GETSALESREP");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
