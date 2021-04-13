@@ -256,15 +256,14 @@
         </p>
       </cmr:column>
       
-      <cmr:column span="2" containerForField="Company">
-        <p>
-          <cmr:label fieldId="company">
-            <cmr:fieldLabel fieldId="Company" />: 
-              <cmr:delta text="${rdcdata.company}" oldValue="${reqentry.company}" />
-          </cmr:label>
-          <cmr:field fieldId="Company" id="company" path="company" tabId="MAIN_CUST_TAB" />
-        </p>
-      </cmr:column>
+      <cmr:column span="2" containerForField="BusnType">
+      <p>
+        <cmr:label fieldId="busnType">
+          <cmr:fieldLabel fieldId="BusnType" />:
+         </cmr:label>
+        <cmr:field path="busnType" id="busnType" fieldId="BusnType" tabId="MAIN_CUST_TAB" />
+      </p>
+    </cmr:column>
       
    </cmr:row>
    
