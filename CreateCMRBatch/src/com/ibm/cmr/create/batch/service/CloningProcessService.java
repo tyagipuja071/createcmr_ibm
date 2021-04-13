@@ -690,6 +690,10 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
           changelog.setAction("I");
           changelog.setUserid(kna1Clone.getErnam());
           changelog.setChgpnt("Y");
+          changelog.setActgrp(kna1Clone.getKtokd());
+          changelog.setLoadfilename("Cloning");
+          changelog.setTabkey1(kna1Clone.getId().getKunnr());
+          changelog.setLinenumber(String.valueOf(cloningQueue.getId().getCmrCloningProcessId()));
           entityManager.persist(changelog);
           entityManager.flush();
         } catch (Exception e) {
