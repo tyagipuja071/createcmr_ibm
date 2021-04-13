@@ -709,8 +709,20 @@ public class NORDXHandler extends BaseSOFHandler {
     data.setModeOfPayment(modeOfPayment);
     // CREATCMR-1638
 
-    data.setEngineeringBo(this.currentImportValues.get("ACAdmDSC"));
-    LOG.trace("ACAdmDSC: " + data.getEngineeringBo());
+   // data.setEngineeringBo(this.currentImportValues.get("ACAdmDSC"));
+   // LOG.trace("ACAdmDSC: " + data.getEngineeringBo());
+    // CMR-1746 Change Start
+    String cmrNo = data.getCmrNo();
+    String cntry = data.getCmrIssuingCntry();     
+
+    String engineeringBo = getACAdminFromLegacy(cntry, cmrNo);
+     data.setEngineeringBo(engineeringBo); 
+    LOG.trace("ACAdmDSC: " + data.getEngineeringBo());   
+
+    String salesRep = getSRFromLegacy(cntry, cmrNo);
+    data.setRepTeamMemberNo(salesRep);
+    LOG.trace("Sales Rep No: " + data.getRepTeamMemberNo());
+    // CMR-1746 change end
 
     data.setTaxCd1(this.currentImportValues.get("TaxCode"));
     LOG.trace("TaxCode: " + data.getTaxCd1());
@@ -2261,6 +2273,44 @@ public class NORDXHandler extends BaseSOFHandler {
     return paymentCode;
   }
   // CREATCMR-1638
+  
+  //CMR-1746
+  private String getACAdminFromLegacy(String rcyaa, String cmr_no) throws Exception {
+    String acAdmin = "";
+    String sql = ExternalizedQuery.getSql("ND.GETACADMIN");
+    EntityManager em = JpaManager.getEntityManager();
+    PreparedQuery query = new PreparedQuery(em, sql);
+    query.setParameter("RCYAA", rcyaa);
+    query.setParameter("RCUXA", cmr_no);
+    List<String> results = new ArrayList<String>();
+    results = query.getResults(String.class);
+    if (results != null && !results.isEmpty()) {
+      if (results.get(0) != null) {
+        acAdmin = results.get(0);
+      }
+    }
+    LOG.debug("acAdmin of Legacy" + acAdmin);
+    return acAdmin;
+  }
+  
+  
+//CMR-1746
+  private String getSRFromLegacy(String rcyaa, String cmr_no) {
+    String salesRep = "";       
+    EntityManager entityManager = JpaManager.getEntityManager();
+    String sql = ExternalizedQuery.getSql("ND.GETSALESREP");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("RCYAA", rcyaa);
+    query.setParameter("RCUXA", cmr_no);
+    List<String> results = query.getResults(String.class);
+    if (results != null && !results.isEmpty()) {
+      if (results.get(0) != null) {
+        salesRep = results.get(0);
+      }
+    }
+    LOG.debug("saresRep of Legacy" + salesRep);
+    return salesRep;
+  }
 
   @Override
   public List<String> getDataFieldsForUpdateCheckLegacy(String cmrIssuingCntry) {
