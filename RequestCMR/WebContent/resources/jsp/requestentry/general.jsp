@@ -516,7 +516,7 @@ if (readOnly){
             <cmr:column span="2">
               <p>
                 <label for="reqFor"><cmr:fieldLabel fieldId="OriginatorName" />:<cmr:info text="${ui.info.orgName}" /></label>
-                <cmr:bluepages model="reqentry" namePath="originatorNm"  idPath="originatorId" useBothIds="false" showId="true"></cmr:bluepages>
+                <cmr:field model="reqentry" path="originatorNm"  idPath="originatorId" fieldId="OriginatorName"/>
               </p>
             </cmr:column></cmr:view>
         <cmr:view exceptForGEO="JP,KR">

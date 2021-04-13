@@ -104,9 +104,6 @@ function afterConfigForJP() {
   }
 }
 function addScenarioDriven() {
-  if (FormManager.getActualValue('reqType') != 'C') {
-    return;
-  }
   var custType = FormManager.getActualValue('custType');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var addrType = FormManager.getActualValue('addrType');
@@ -122,6 +119,9 @@ function addScenarioDriven() {
     FormManager.removeValidator('salesTeamCd', Validators.REQUIRED)
     FormManager.removeValidator('jsicCd', Validators.REQUIRED)
     FormManager.removeValidator('subIndustryCd', Validators.REQUIRED)
+    if (FormManager.getActualValue('reqType') != 'C') {
+      FormManager.removeValidator('email3', Validators.REQUIRED)
+    }
     if (_role == 'Processor') {
       FormManager.enable('cmrNo2', Validators.REQUIRED)
       FormManager.removeValidator('csBo', Validators.REQUIRED)
