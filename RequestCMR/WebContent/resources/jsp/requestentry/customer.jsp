@@ -18,10 +18,19 @@
 <cmr:section id="CUST_REQ_TAB" hidden="true">
   <jsp:include page="detailstrip.jsp" />
   <cmr:row addBackground="true">
-    <cmr:view exceptForGEO="CN,FR">
+    <cmr:view exceptForGEO="CN,FR,KR">
       <cmr:column span="2" containerForField="AbbrevName">
         <p>
 
+          <label for="abbrevNm"> <cmr:fieldLabel fieldId="AbbrevName" />: <cmr:delta text="${rdcdata.abbrevNm}"
+              oldValue="${reqentry.abbrevNm}" /> </label>
+          <cmr:field fieldId="AbbrevName" id="abbrevNm" path="abbrevNm" tabId="MAIN_CUST_TAB" />
+        </p>
+      </cmr:column>
+    </cmr:view>
+        <cmr:view forGEO="KR">
+      <cmr:column span="2" containerForField="AbbrevName">
+        <p>
           <label for="abbrevNm"> <cmr:fieldLabel fieldId="AbbrevName" />: <cmr:delta text="${rdcdata.abbrevNm}"
               oldValue="${reqentry.abbrevNm}" /> </label>
           <cmr:field fieldId="AbbrevName" id="abbrevNm" path="abbrevNm" tabId="MAIN_CUST_TAB" />

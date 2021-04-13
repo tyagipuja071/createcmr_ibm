@@ -19,9 +19,13 @@ function afterConfigKR() {
   FormManager.addValidator('originatorNm', Validators.REQUIRED, [ 'Requested For Name (Originator)' ], 'MAIN_GENERAL_TAB');
   FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
   FormManager.addValidator('phone1', Validators.REQUIRED, ['Business License Type'], 'MAIN_CUST_TAB');
+  FormManager.addValidator('Phone1', Validators.REQUIRED, ['Business License Type'], 'MAIN_CUST_TAB');
   FormManager.addValidator('installRep', Validators.REQUIRED, ['Tax Invoice Type'], 'MAIN_CUST_TAB');
+  
   FormManager.addValidator('contactName3', Validators.REQUIRED,['Product Type'],'MAIN_IBM_TAB');
-
+  FormManager.addValidator('MrcCd', Validators.REQUIRED,['Market Responsibility Code (MRC)'],'MAIN_IBM_TAB');
+  FormManager.addValidator('commercialFinanced', Validators.REQUIRED,['ROL Code'],'MAIN_IBM_TAB');
+  
   FormManager.removeValidator('subIndustryCd', Validators.REQUIRED);  
   FormManager.removeValidator('sensitiveFlag', Validators.REQUIRED);
   FormManager.removeValidator('LocalTax2', Validators.REQUIRED);

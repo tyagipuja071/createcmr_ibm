@@ -66,17 +66,7 @@
         <cmr:field path="embargoCd" id="embargoCd" fieldId="EmbargoCode" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column> --%>
-    <!-- 
-    <cmr:column span="2" containerForField="EconomicCd2">
-        <p>
-          <cmr:label fieldId="economicCd">
-            <cmr:fieldLabel fieldId="EconomicCd2" />:
-           <cmr:delta text="${rdcdata.economicCd}" oldValue="${reqentry.economicCd}" code="R" />
-          </cmr:label>
-          <cmr:field path="economicCd" id="economicCd" fieldId="EconomicCd2" tabId="MAIN_CUST_TAB" />
-        </p>
-      </cmr:column>
- 	-->
+
     <cmr:column span="2" containerForField="InternalDept">
         <p>
           <cmr:label fieldId="ibmDeptCostCenter">
