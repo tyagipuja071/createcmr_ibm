@@ -124,6 +124,7 @@ function addScenarioDriven() {
     FormManager.removeValidator('subIndustryCd', Validators.REQUIRED)
     if (_role == 'Processor') {
       FormManager.enable('cmrNo2', Validators.REQUIRED)
+      FormManager.removeValidator('csBo', Validators.REQUIRED)
     }
     if (custType == 'A') {
       FormManager.enable('tier2', Validators.REQUIRED)
@@ -1524,7 +1525,7 @@ function showOrHideAddrFieldInDetails(custSubGrp, custType, addrType, role) {
         setAddrFieldMandatory('custNm1', 'CustomerName1', 'Customer Name-KANJI');
         setAddrFieldOptional('custNm2', 'CustomerName2');
         setAddrFieldMandatory('custNm3', 'CustomerName3', 'Full English Name');
-        setAddrFieldOptional('custNm4', 'CustomerName4', 'Katakana');
+        setAddrFieldMandatory('custNm4', 'CustomerName4', 'Katakana');
         setAddrFieldOptional('postCd', 'PostalCode', 'Postal Code');
         if (role == 'REQUESTER') {
           setAddrFieldOptional('locationCode', 'LocationCode');
