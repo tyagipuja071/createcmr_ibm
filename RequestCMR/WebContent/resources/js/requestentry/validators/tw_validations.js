@@ -194,6 +194,9 @@ function setISUCodeValues(isicCd) {
 function setVatValidator() {
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
   var invoiceSplitCd = FormManager.getActualValue('invoiceSplitCd');
+  if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
   if (invoiceSplitCd == 'TN') {
     FormManager.removeValidator('vat', Validators.REQUIRED);
   } else {
