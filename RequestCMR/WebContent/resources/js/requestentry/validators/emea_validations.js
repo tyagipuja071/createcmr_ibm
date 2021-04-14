@@ -44,8 +44,9 @@ var _oldCTCIT = "";
 var _oldINACIT = "";
 var _oldSpecialTaxCdIT = "";
 var _oldAffiliateIT = "";
-var _oldAffiliateIT = "";
 var _oldCollectionIT = "";
+var _oldIdentClientIT = "";
+var _oldVatIT = "";
 // DTN: Defect 1858294 : UKI: Internal FSL sub-scenario rules for abbreviated
 // name
 var _lobHandler = null;
@@ -122,6 +123,9 @@ function typeOfCustomer() {
   if ((custSubGrp == 'INTER') || (custSubGrp == 'INTSM') || (custSubGrp == 'INTVA') || (custSubGrp == 'CROIN')) {
     FormManager.enable('crosSubTyp');
     FormManager.limitDropdownValues(FormManager.getField('crosSubTyp'), [ '91', '92' ]);
+  } else if ((custSubGrp == 'IBMIT') || (custSubGrp == 'XIBM')) {
+    FormManager.setValue('crosSubTyp', '98');
+    FormManager.readOnly('crosSubTyp');
   } else if (custSubGrp == 'LOCEN' || custSubGrp == 'LOCSM' || custSubGrp == 'LOCVA' || custSubGrp == 'CROLC') {
     FormManager.setValue('crosSubTyp', 'E');
     FormManager.readOnly('crosSubTyp');
@@ -2913,13 +2917,11 @@ function setSpecialTaxCodeOnScenarioIT() {
   var reqId = FormManager.getActualValue('reqId');
   var custGroup = FormManager.getActualValue('custGrp');
 
-  if (FormManager.getActualValue('reqType') == 'C' && custGroup == 'CROSS') {
+  if (FormManager.getActualValue('reqType') == 'C' && (custGroup == 'CROSS')) {
     landCntryZS01 = cmr.query('ADDR.GET.LAND_CNTRY.BY_REQID', {
       REQ_ID : reqId,
       ADDR_TYPE : 'ZS01'
     });
-
-    FormManager.setValue('specialTaxCd', '');
     if (landCntryZS01 != null && landCntryZS01.ret1 == 'IT') {
       FormManager.setValue('specialTaxCd', 'A');
     } else {
@@ -2930,12 +2932,11 @@ function setSpecialTaxCodeOnScenarioIT() {
 }
 
 function setSpecialTaxCodeOnAddressIT() {
-
   var custGroup = FormManager.getActualValue('custGrp');
   var landCntry = FormManager.getActualValue('landCntry');
   var addrType = FormManager.getActualValue('addrType');
   console.log("landCntry:" + landCntry + " addrType:" + addrType);
-  if (FormManager.getActualValue('reqType') == 'C' && custGroup == 'CROSS') {
+  if (FormManager.getActualValue('reqType') == 'C' && (custGroup == 'CROSS')) {
     if (landCntry != null && addrType != null && landCntry == 'IT' && addrType == 'ZS01') {
       FormManager.setValue('specialTaxCd', 'A');
     } else {
@@ -4676,34 +4677,8 @@ function afterConfigForIT() {
         FormManager.enable('inacCd');
       }
       FormManager.readOnly('identClient');
-
-    } // else {
-    // var custSubType = FormManager.getActualValue('custSubGrp');
-    // if (FormManager.getActualValue('isuCd') != null && "34" ==
-    // FormManager.getActualValue('isuCd')) {
-    // if (custSubType == 'CROGO' || custSubType == 'CROUN' || custSubType ==
-    // 'CROLC' || custSubType == 'CROCM' || custSubType == 'CROBP') {
-    // FormManager.setValue('collectionCd', 'CIT16');
-    // FormManager.enable('collectionCd');
-    // }
-    // if (custSubType == 'GOVSM' || custSubType == 'GOVVA' || custSubType ==
-    // 'UNISM' || custSubType == 'UNIVA' || custSubType == 'LOCSM' ||
-    // custSubType ==
-    // 'LOCVA' || custSubType == 'COMSM'
-    // || custSubType == 'COMVA' || custSubType == 'BUSSM' || custSubType ==
-    // 'BUSVA'
-    // || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType ==
-    // 'NGOSM'
-    // || custSubType == 'NGOVA'
-    // || custSubType == 'PRISM' || custSubType == 'PRIVA') {
-    // console.log("For SM/VA after config set default value of collection code
-    // CIT14");
-    // FormManager.setValue('collectionCd', 'CIT14');
-    // FormManager.readOnly('collectionCd');
-    // }
-    // }
-    // }
-  }
+		}
+  } 
   // CMR-1257
   if ('C' == FormManager.getActualValue('reqType')) {
     var _countryUse = '';
@@ -4717,6 +4692,9 @@ function afterConfigForIT() {
     }
     if (_countryUse != '' && _landCntry != '' && _landCntry == 'VA') {
       FormManager.setValue('identClient', 'Y');
+    }
+    if (_countryUse != '' && _landCntry != '' && _landCntry == 'IT') {
+      FormManager.setValue('taxCd1', '');
     }
   }
 
@@ -4732,7 +4710,6 @@ function afterConfigForIT() {
     }
   }
   addAfterTemplateLoadIT(false, false, false);
-  // CMR-1363
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     FormManager.readOnly('cmrNo');
   }
@@ -5250,6 +5227,7 @@ function addPhoneValidatorEMEA() {
 function addPOBOXValidatorEMEA() {
   FormManager.addValidator('poBox', Validators.DIGIT, [ 'PO Box' ]);
 }
+
 function autoPopulateIdentClientIT() {
   /*
    * var cntryWhereVATIsMandatory = [ 'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'EG',
@@ -5301,6 +5279,7 @@ function autoPopulateIdentClientIT() {
     FormManager.readOnly('vat');
     FormManager.resetValidations('taxCd1');
     FormManager.limitDropdownValues(FormManager.getField('identClient'), identClientValuesCross);
+
   } else if (scenario == 'LOCAL' && checkImportIndc != 'Y') {
     if (custSubType == 'COMME') {
       FormManager.limitDropdownValues(FormManager.getField('identClient'), [ 'A', 'D' ]);
@@ -5315,7 +5294,7 @@ function autoPopulateIdentClientIT() {
     } else {
       FormManager.limitDropdownValues(FormManager.getField('identClient'), identClientValuesLocal);
     }
-  } else if (scenario == 'LOCAL' && checkImportIndc == 'Y') {
+  } else if (scenario == 'LOCAL' && (custSubType != 'IBMIT') && checkImportIndc == 'Y') {
     FormManager.limitDropdownValues(FormManager.getField('identClient'), identClientValuesLocal);
   } else {
     FormManager.resetDropdownValues(FormManager.getField('identClient'));
@@ -5353,6 +5332,9 @@ function autoPopulateIdentClientIT() {
     if ((fiscalCode != '' && fiscalCode.length == 16) && (vat != '' && vat.length == 13)) {
       FormManager.setValue('identClient', 'D');
     }
+  }
+  if (checkImportIndc == 'Y') {
+    getOldValuesIT();
   }
 }
 
@@ -5411,6 +5393,51 @@ function addBillingAddrValidator() {
       }
     };
   })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
+function addBillingValidator() {
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var zp01ReqId = FormManager.getActualValue('reqId');
+        qParams = {
+          REQ_ID : zp01ReqId,
+        };
+        var record = cmr.query('GETZP01VALRECORDS', qParams);
+        var custSubType = FormManager.getActualValue('custSubGrp');
+        var zp01Reccount = record.ret1;
+        if (Number(zp01Reccount == 1)) {
+          if (FormManager.getActualValue('reqType') == 'C' && role == "REQUESTER") {
+            if (custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'CRO3P') {
+              var checkImportIndc = getImportedIndcForItalyBillingAddr();
+              if (checkImportIndc == 'Y') {
+                return new ValidationResult(null, false, 'Please remove the imported billing address and create a new one for the 3rd party customer.');
+              }
+            }
+          }
+        }
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
+function addCMRValidator() {
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        if (FormManager.getActualValue('reqType') == 'C') {
+          if (FormManager.getActualValue('findCmrResult') == 'Not Done' || FormManager.getActualValue('findCmrResult') == 'Rejected' || FormManager.getActualValue('findCmrResult') == 'No Results') {
+            var custSubType = FormManager.getActualValue('custSubGrp');
+            if (role == "REQUESTER" && (custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'CRO3P')) {
+              return new ValidationResult(null, false, 'For 3rd party scenario please import a CMR via CMR search');
+            }
+          }
+        }
+      }
+    };
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
 
 function setVATForItaly() {
@@ -5910,6 +5937,11 @@ function ibmFieldsBehaviourInCreateByModelIT() {
         FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
         FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [ 'Sales Rep' ], 'MAIN_IBM_TAB');
       }
+      if (custSubType == 'IBMIT' || custSubType == 'XIBM') {
+        FormManager.readOnly('identClient');
+        FormManager.enable('collectionCd');
+        getOldValuesIT();
+      }
       FormManager.removeValidator('collectionCd', Validators.REQUIRED);
     }
   }
@@ -5933,6 +5965,8 @@ function getOldValuesIT(fromAddress, scenario, scenarioChanged) {
         _oldINACIT = result.ret6;
         _oldSpecialTaxCdIT = result.ret7;
         _oldAffiliateIT = result.ret8;
+        _oldIdentClientIT = result.ret9;
+        _oldVatIT = result.ret10;
       }
     }
 
@@ -5964,42 +5998,48 @@ function getOldValuesIT(fromAddress, scenario, scenarioChanged) {
       if (checkImportIndc == 'Y') {
         console
             .log(">getOldValuesIT> importIndc is Y -Non editable fields- are ('clientTier', 'isuCd', 'repTeamMemberNo', 'salesBusOffCd', 'inacCd','affiliate', 'specialTaxCd' , 'collectionCd','vat', 'taxCd1')");
+        FormManager.readOnly('identClient');
+
         if (custSubType != undefined && custSubType != '' && (custSubType != '3PAIT' && custSubType != '3PASM' && custSubType != '3PAVA')) {
           FormManager.readOnly('isuCd');
-          FormManager.readOnly('clientTier');
-          FormManager.readOnly('affiliate');
-          FormManager.resetValidations('clientTier');
           FormManager.readOnly('inacCd');
+          FormManager.readOnly('affiliate');
+          FormManager.readOnly('clientTier');
+          FormManager.resetValidations('clientTier');
         }
-      }
-    }
-    if (checkImportIndc == 'Y') {
-      if (custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'CRO3P') {
-        if (custSubType != 'CRO3P') {
-          FormManager.enable('inacCd');
+
+        if (custSubType == '3PAIT' || custSubType == '3PASM' || custSubType == '3PAVA' || custSubType == 'CRO3P') {
+          if (custSubType != 'CRO3P') {
+            FormManager.enable('inacCd');
+          }
+          FormManager.enable('isuCd');
+          FormManager.enable('clientTier');
+          FormManager.enable('specialTaxCd');
         }
-        FormManager.enable('isuCd');
-        FormManager.enable('clientTier');
-        FormManager.enable('specialTaxCd');
+
+        // if imported and scenario is 3rd person
+        if (!(custSubType == 'INTER' || custSubType == 'INTSM' || custSubType == 'INTVA' || custSubType == 'CROIN' || custSubType == 'BUSPR' || custSubType == 'BUSSM' || custSubType == 'BUSVA' || custSubType == 'CROBP')) {
+          FormManager.setValue('isuCd', _oldISUIT);
+          FormManager.setValue('inacCd', _oldINACIT);
+          FormManager.setValue('clientTier', _oldCTCIT);
+          FormManager.setValue('salesBusOffCd', _oldSBOIT);
+          FormManager.setValue('affiliate', _oldAffiliateIT);
+          FormManager.setValue('collectionCd', _oldCollectionIT);
+          FormManager.setValue('repTeamMemberNo', _oldSalesRepIT);
+        } else if (custSubType == 'BUSPR' || custSubType == 'BUSSM' || custSubType == 'BUSVA' || custSubType == 'CROBP') {
+          FormManager.setValue('repTeamMemberNo', '09ZPB0');
+          FormManager.setValue('salesBusOffCd', 'ZP');
+          FormManager.clearValue('collectionCd');
+        } else {
+          FormManager.clearValue('affiliate');
+        }
+
+        if (custSubType == 'IBMIT' || custSubType == 'XIBM') {
+          FormManager.setValue('identClient', _oldIdentClientIT);
+          FormManager.setValue('vat', _oldVatIT);
+        }
+        FormManager.setValue('specialTaxCd', _oldSpecialTaxCdIT);
       }
-      FormManager.readOnly('identClient');
-      // if imported and scenario is 3rd person
-      if (!(custSubType == 'INTER' || custSubType == 'INTSM' || custSubType == 'INTVA' || custSubType == 'CROIN' || custSubType == 'BUSPR' || custSubType == 'BUSSM' || custSubType == 'BUSVA' || custSubType == 'CROBP')) {
-        FormManager.setValue('isuCd', _oldISUIT);
-        FormManager.setValue('clientTier', _oldCTCIT);
-        FormManager.setValue('repTeamMemberNo', _oldSalesRepIT);
-        FormManager.setValue('salesBusOffCd', _oldSBOIT);
-        FormManager.setValue('inacCd', _oldINACIT);
-        FormManager.setValue('affiliate', _oldAffiliateIT);
-        FormManager.setValue('collectionCd', _oldCollectionIT);
-      } else if (custSubType == 'BUSPR' || custSubType == 'BUSSM' || custSubType == 'BUSVA' || custSubType == 'CROBP') {
-        FormManager.setValue('repTeamMemberNo', '09ZPB0');
-        FormManager.setValue('salesBusOffCd', 'ZP');
-        FormManager.clearValue('collectionCd');
-      } else {
-        FormManager.clearValue('affiliate');
-      }
-      FormManager.setValue('specialTaxCd', _oldSpecialTaxCdIT);
     }
   }
 }
@@ -6017,10 +6057,11 @@ function collectionCDBehaviour() {
         FormManager.clearValue('collectionCd');
         FormManager.enable('collectionCd');
       }
+      getOldValuesIT();
     }
-    getOldValuesIT();
+
     if (checkImportIndc != 'Y') {
-      if (custSubType == 'INTER' || custSubType == 'CRINT' || custSubType == 'INTSM' || custSubType == 'INTVA') {
+      if (custSubType == 'INTER' || custSubType == 'CRINT' || custSubType == 'INTSM' || custSubType == 'INTVA' || custSubType == 'IBMIT' || custSubType == 'XIBM') {
         FormManager.clearValue('collectionCd');
         FormManager.readOnly('collectionCd');
       }
@@ -6072,7 +6113,9 @@ function checkIfVATFiscalUpdatedIT() {
         var oldVAT = result.ret1;
         var oldFiscalCode = result.ret2;
         var oldCompany = result.ret3;
-        if (result != null && oldVAT != null && oldFiscalCode != null && (oldFiscalCode != currentFiscalCode || oldVAT != currentVAT)) {
+        if (currentFiscalCode == '' && currentVAT == '') {
+          return new ValidationResult(null, true);
+        } else if (result != null && oldVAT != null && oldFiscalCode != null && (oldFiscalCode != currentFiscalCode || oldVAT != currentVAT)) {
           if (fiscalStatus == null || fiscalStatus == '') {
             return new ValidationResult(null, false, 'Fiscal Data has been modified, please validate fiscal data');
           }
@@ -7678,21 +7721,45 @@ function validateFiscalCodeForCreatesIT() {
       validate : function() {
         var role = FormManager.getActualValue('userRole');
         var taxCd1 = FormManager.getActualValue('taxCd1');
+        var vat = FormManager.getActualValue('vat');
         var reqId = FormManager.getActualValue('reqId');
         var checkImportIndc = getImportedIndcForItaly();
         if (FormManager.getActualValue('reqType') == 'C' && checkImportIndc == 'N') {
-          if ((taxCd1 != null && taxCd1.length != 0)) {
+          if ((taxCd1 != null && taxCd1.length != 0) || (vat != null && vat.length != 0)) {
             qParams = {
               FISCAL_CODE : FormManager.getActualValue('taxCd1'),
               MANDT : cmr.MANDT
             }
             var result = cmr.query('IT.CHECK.DUPLICATE_FISCAL_ADDRESS', qParams);
-            if (result.ret1 != null && result.ret1 != '') {
+
+            qParams = {
+              VAT : FormManager.getActualValue('vat'),
+              MANDT : cmr.MANDT
+            }
+            var result1 = cmr.query('IT.CHECK.DUPLICATE_VAT', qParams);
+
+            if (result.ret1 != null && result.ret1 != '' && vat == '' && vat.length == 0) {
               return new ValidationResult({
                 id : 'taxCd1',
                 type : 'text',
                 name : 'taxCd1'
               }, false, 'Fiscal Code on the request is already available on CMR No. ' + result.ret1 + '. Please mention another new fiscal code or import the CMR into the request.');
+            }
+
+            if (result1.ret1 != null && result1.ret1 != '' && taxCd1 == '' && taxCd1.length == 0) {
+              return new ValidationResult({
+                id : 'vat',
+                type : 'text',
+                name : 'vat'
+              }, false, 'Vat on the request is already available on CMR No. ' + result.ret1 + '. Please mention another new VAT or import the CMR into the request.');
+            }
+
+            if (result.ret1 != null && result.ret1 != '' && result1.ret1 != null && result1.ret1 != '' && result.ret1 == result1.ret1) {
+              return new ValidationResult({
+                id : 'taxCd1',
+                type : 'text',
+                name : 'taxCd1'
+              }, false, 'Fiscal Code and VAT on the request is already available on CMR No. ' + result.ret1 + '. Please mention another new fiscal code and VAT or import the CMR into the request.');
             }
           }
         }
@@ -8190,10 +8257,10 @@ function checkIsicCodeValidationIT() {
         var isicCode = FormManager.getActualValue('isicCd');
         var custSubGrp = FormManager.getActualValue('custSubGrp');
         if (isicCode == '9500') {
-          if (custSubGrp == 'PRISM' || custSubGrp == 'PRICU' || custSubGrp == 'PRIVA' || custSubGrp == 'CROPR') {
+          if (custSubGrp == 'PRISM' || custSubGrp == 'PRICU' || custSubGrp == 'PRIVA' || custSubGrp == 'CROPR' || custSubGrp == 'IBMIT' || custSubGrp == 'XIBM') {
             console.log('no validation required');
           } else {
-            return new ValidationResult(null, false, 'ISIC code value should be other than 9500 for Non-Private customer.');
+            return new ValidationResult(null, false, 'ISIC code value should be other than 9500 for Non-IBM/Private customer.');
           }
         }
         return new ValidationResult(null, true);
@@ -8242,9 +8309,10 @@ function addAfterConfigItaly() {
   typeOfCustomer();
   enableDisableTaxCodeCollectionCdIT();
   disableCompanyLevelFieldsIT();
+  ibmFieldsBehaviourInCreateByModelIT();
   ibmFieldsBehaviourInCreateByScratchIT();
   disableProcpectCmrIT();
-
+  getOldValuesIT();
 }
 
 function addAfterTemplateLoadItaly(fromAddress, scenario, scenarioChanged) {
@@ -8323,12 +8391,19 @@ function ibmFieldsBehaviourInCreateByScratchIT() {
     }
 
     if ((isuCd == '34' && clientTier == 'Q')
-        || (custSubGrp == 'BUSPR' || custSubGrp == 'BUSSM' || custSubGrp == 'BUSVA' || custSubGrp == 'CROBP' || custSubGrp == 'INTER' || custSubGrp == 'INTSM' || custSubGrp == 'INTVA' || custSubGrp == 'CROIN')) {
+        || (custSubGrp == 'BUSPR' || custSubGrp == 'BUSSM' || custSubGrp == 'BUSVA' || custSubGrp == 'CROBP' || custSubGrp == 'INTER' || custSubGrp == 'INTSM' || custSubGrp == 'INTVA'
+            || custSubGrp == 'CROIN' || custSubGrp == 'IBMIT' || custSubGrp == 'XIBM')) {
       FormManager.removeValidator('affiliate', Validators.REQUIRED);
       FormManager.removeValidator('enterprise', Validators.REQUIRED);
     } else {
       FormManager.addValidator('affiliate', Validators.REQUIRED, [ 'Affiliate' ], 'MAIN_IBM_TAB');
       FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise' ], 'MAIN_IBM_TAB');
+    }
+
+    if ((checkImportIndc == 'N') && (custSubGrp == 'IBMIT' || custSubGrp == 'XIBM')) {
+      FormManager.readOnly('vat');
+      FormManager.readOnly('collectionCd');
+      FormManager.setValue('specialTaxCd', 'A');
     }
 
     FormManager.removeValidator('collectionCd', Validators.REQUIRED);
@@ -8487,6 +8562,7 @@ function autoSetAbbrNameUKI() {
   var reqId = FormManager.getActualValue('reqId');
   var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
   var abbName = FormManager.getActualValue('abbrevNm');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
   // CMR - 5063
   if (custSubGrp == 'THDPT') {
     var result = cmr.query('GET.CUSTNM1_ADDR_UKI', {
@@ -8531,10 +8607,16 @@ function autoSetAbbrNameUKI() {
     autoSetAbbrevNmFrmDept();
   } else {
 
-    var result = cmr.query('GET.CUSTNM1_ADDR_UKI', {
-      REQ_ID : reqId,
-      ADDR_TYPE : 'ZS01'
-    });
+    if (role == "PROCESSOR") {
+      var result = cmr.query('UKI.GET_ABBNAME_DATA', {
+        REQ_ID : reqId
+      });
+    } else if (role == "REQUESTER") {
+      var result = cmr.query('GET.CUSTNM1_ADDR_UKI', {
+        REQ_ID : reqId,
+        ADDR_TYPE : 'ZS01'
+      });
+    }
     if (result.ret1 != undefined) {
       {
         var _abbrevNmValue = result.ret1 + (result.ret2 != undefined ? result.ret2 : '');
@@ -9228,6 +9310,8 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(addAfterConfigItaly, [ SysLoc.ITALY ]);
   GEOHandler.addAfterTemplateLoad(addAfterTemplateLoadItaly, [ SysLoc.ITALY ]);
+  GEOHandler.registerValidator(addCMRValidator, [ SysLoc.ITALY ], null, true);
+  GEOHandler.registerValidator(addBillingValidator, [ SysLoc.ITALY ], null, true);
   GEOHandler.addAddrFunction(addAddrFunctionItaly, [ SysLoc.ITALY ]);
   // CMR-2205
   GEOHandler.addAfterConfig(autoSetAbbrevNmOnChanageTR, [ SysLoc.TURKEY ]);

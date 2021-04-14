@@ -284,6 +284,13 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
               update.setDataField(PageManager.getLabel(cmrCountry, "CustLang", "-"));
               update.setNewData(getCodeAndDescription(newData.getCustPrefLang(), "CustLang", cmrCountry));
               update.setOldData(getCodeAndDescription(oldData.getCustPrefLang(), "CustLang", cmrCountry));
+              if ("624".equalsIgnoreCase(cmrCountry)) {
+                if ("Swedish".equalsIgnoreCase(update.getNewData()))
+                  update.setNewData("Dutch");
+                if ("Swedish".equalsIgnoreCase(update.getOldData()))
+                  update.setOldData("Dutch");
+                LOG.info("For 624, Swedish is replaced with Dutch.");
+              }
               results.add(update);
             }
           }
