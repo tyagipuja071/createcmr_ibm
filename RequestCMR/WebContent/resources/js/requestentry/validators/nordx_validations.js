@@ -2694,71 +2694,75 @@ function getAbbreviatedNameByAddrType(_reqId, _addrType) {
 
 function setAbbrevNmAddressSave(cntry, addressMode, saving, finalSave, force) {
 
-  var _reqId = FormManager.getActualValue('reqId');
+  reqType = FormManager.getActualValue('reqType');
+  if (reqType == 'C') {
 
-  if (finalSave || force || addressMode == 'ZS01' || addressMode == 'ZI01') {
+    var _reqId = FormManager.getActualValue('reqId');
 
-    var addrType = FormManager.getActualValue('addrType');
-    var zs01CustNm = '';
-    var zi01CustNm = '';
+    if (finalSave || force || addressMode == 'ZS01' || addressMode == 'ZI01') {
 
-    if (addrType == 'ZS01') {
-      zs01CustNm = FormManager.getActualValue('custNm1');
-    }
-
-    if (addrType == 'ZI01') {
-      zi01CustNm = FormManager.getActualValue('custNm1');
-    }
-
-    var custSubGrp = FormManager.getActualValue('custSubGrp');
-    if (custSubGrp == 'CBCOM' || custSubGrp == 'CBBUS' || custSubGrp == 'CBINT' || custSubGrp == 'DKCOM' || custSubGrp == 'DKBUS'
-        || custSubGrp == 'DKINT' || custSubGrp == 'DKPRI' || custSubGrp == 'DKIBM' || custSubGrp == 'DKGOV' || custSubGrp == 'FOCOM'
-        || custSubGrp == 'FOBUS' || custSubGrp == 'FOINT' || custSubGrp == 'FOPRI' || custSubGrp == 'FOIBM' || custSubGrp == 'FOGOV'
-        || custSubGrp == 'GLCOM' || custSubGrp == 'GLBUS' || custSubGrp == 'GLINT' || custSubGrp == 'GLPRI' || custSubGrp == 'GLIBM'
-        || custSubGrp == 'GLGOV' || custSubGrp == 'ISCOM' || custSubGrp == 'ISBUS' || custSubGrp == 'ISINT' || custSubGrp == 'ISPRI'
-        || custSubGrp == 'ISIBM' || custSubGrp == 'ISGOV' || custSubGrp == 'FICOM' || custSubGrp == 'FIBUS' || custSubGrp == 'FIINT'
-        || custSubGrp == 'FIPRI' || custSubGrp == 'FIIBM' || custSubGrp == 'FIGOV' || custSubGrp == 'EECOM' || custSubGrp == 'EEBUS'
-        || custSubGrp == 'EEINT' || custSubGrp == 'EEPRI' || custSubGrp == 'EEIBM' || custSubGrp == 'EEGOV' || custSubGrp == 'LTCOM'
-        || custSubGrp == 'LTBUS' || custSubGrp == 'LTINT' || custSubGrp == 'LTPRI' || custSubGrp == 'LTIBM' || custSubGrp == 'LTGOV'
-        || custSubGrp == 'LVCOM' || custSubGrp == 'LVBUS' || custSubGrp == 'LVINT' || custSubGrp == 'LVPRI' || custSubGrp == 'LVIBM'
-        || custSubGrp == 'LVGOV' || custSubGrp == 'COMME' || custSubGrp == 'BUSPR' || custSubGrp == 'INTER' || custSubGrp == 'PRIPE'
-        || custSubGrp == 'IBMEM' || custSubGrp == 'GOVRN' || custSubGrp == '') {
-      var custNmDBVal = getAbbreviatedNameByAddrType(_reqId, "ZS01");
-      if (custNmDBVal != "") {
-        if (zs01CustNm != custNmDBVal) {
-          FormManager.setValue('abbrevNm', zs01CustNm.substring(0, 22));
-        }
-      }
-    }
-
-    if (custSubGrp == 'DK3PA' || custSubGrp == 'FO3PA' || custSubGrp == 'GL3PA' || custSubGrp == 'IS3PA' || custSubGrp == 'FI3PA'
-        || custSubGrp == 'EE3PA' || custSubGrp == 'LT3PA' || custSubGrp == 'LV3PA' || custSubGrp == 'THDPT') {
-      var custNm1DBVal = getAbbreviatedNameByAddrType(_reqId, "ZS01");
-      var custNm2DBVal = getAbbreviatedNameByAddrType(_reqId, "ZI01");
+      var addrType = FormManager.getActualValue('addrType');
+      var zs01CustNm = '';
+      var zi01CustNm = '';
 
       if (addrType == 'ZS01') {
-        if (zs01CustNm != custNm1DBVal) {
-          FormManager.setValue('abbrevNm', zs01CustNm.substring(0, 8) + " c/o " + custNm2DBVal.substring(0, 9));
-
-        }
+        zs01CustNm = FormManager.getActualValue('custNm1');
       }
 
       if (addrType == 'ZI01') {
-        if (zi01CustNm != custNm2DBVal) {
-          FormManager.setValue('abbrevNm', custNm1DBVal.substring(0, 8) + " c/o " + zi01CustNm.substring(0, 9));
+        zi01CustNm = FormManager.getActualValue('custNm1');
+      }
+
+      var custSubGrp = FormManager.getActualValue('custSubGrp');
+      if (custSubGrp == 'CBCOM' || custSubGrp == 'CBBUS' || custSubGrp == 'CBINT' || custSubGrp == 'DKCOM' || custSubGrp == 'DKBUS'
+          || custSubGrp == 'DKINT' || custSubGrp == 'DKPRI' || custSubGrp == 'DKIBM' || custSubGrp == 'DKGOV' || custSubGrp == 'FOCOM'
+          || custSubGrp == 'FOBUS' || custSubGrp == 'FOINT' || custSubGrp == 'FOPRI' || custSubGrp == 'FOIBM' || custSubGrp == 'FOGOV'
+          || custSubGrp == 'GLCOM' || custSubGrp == 'GLBUS' || custSubGrp == 'GLINT' || custSubGrp == 'GLPRI' || custSubGrp == 'GLIBM'
+          || custSubGrp == 'GLGOV' || custSubGrp == 'ISCOM' || custSubGrp == 'ISBUS' || custSubGrp == 'ISINT' || custSubGrp == 'ISPRI'
+          || custSubGrp == 'ISIBM' || custSubGrp == 'ISGOV' || custSubGrp == 'FICOM' || custSubGrp == 'FIBUS' || custSubGrp == 'FIINT'
+          || custSubGrp == 'FIPRI' || custSubGrp == 'FIIBM' || custSubGrp == 'FIGOV' || custSubGrp == 'EECOM' || custSubGrp == 'EEBUS'
+          || custSubGrp == 'EEINT' || custSubGrp == 'EEPRI' || custSubGrp == 'EEIBM' || custSubGrp == 'EEGOV' || custSubGrp == 'LTCOM'
+          || custSubGrp == 'LTBUS' || custSubGrp == 'LTINT' || custSubGrp == 'LTPRI' || custSubGrp == 'LTIBM' || custSubGrp == 'LTGOV'
+          || custSubGrp == 'LVCOM' || custSubGrp == 'LVBUS' || custSubGrp == 'LVINT' || custSubGrp == 'LVPRI' || custSubGrp == 'LVIBM'
+          || custSubGrp == 'LVGOV' || custSubGrp == 'COMME' || custSubGrp == 'BUSPR' || custSubGrp == 'INTER' || custSubGrp == 'PRIPE'
+          || custSubGrp == 'IBMEM' || custSubGrp == 'GOVRN' || custSubGrp == '') {
+        var custNmDBVal = getAbbreviatedNameByAddrType(_reqId, "ZS01");
+        if (custNmDBVal != "") {
+          if (zs01CustNm != custNmDBVal) {
+            FormManager.setValue('abbrevNm', zs01CustNm.substring(0, 22));
+          }
         }
       }
-    }
 
-    if (custSubGrp == 'CBISO' || custSubGrp == 'DKISO' || custSubGrp == 'FOISO' || custSubGrp == 'GLISO' || custSubGrp == 'ISISO'
-        || custSubGrp == 'FIISO' || custSubGrp == 'EEISO' || custSubGrp == 'LTISO' || custSubGrp == 'LVISO' || custSubGrp == 'INTSO') {
-      var custNm = getAbbreviatedNameByAddrType(_reqId, "ZI01");
-      if (custNm != "") {
-        if (zi01CustNm != custNm) {
-          FormManager.setValue('abbrevNm', "IBM c/o " + zi01CustNm.substring(0, 14));
+      if (custSubGrp == 'DK3PA' || custSubGrp == 'FO3PA' || custSubGrp == 'GL3PA' || custSubGrp == 'IS3PA' || custSubGrp == 'FI3PA'
+          || custSubGrp == 'EE3PA' || custSubGrp == 'LT3PA' || custSubGrp == 'LV3PA' || custSubGrp == 'THDPT') {
+        var custNm1DBVal = getAbbreviatedNameByAddrType(_reqId, "ZS01");
+        var custNm2DBVal = getAbbreviatedNameByAddrType(_reqId, "ZI01");
+
+        if (addrType == 'ZS01') {
+          if (zs01CustNm != custNm1DBVal) {
+            FormManager.setValue('abbrevNm', zs01CustNm.substring(0, 8) + " c/o " + custNm2DBVal.substring(0, 9));
+
+          }
         }
-      } else {
-        FormManager.setValue('abbrevNm', "IBM c/o ");
+
+        if (addrType == 'ZI01') {
+          if (zi01CustNm != custNm2DBVal) {
+            FormManager.setValue('abbrevNm', custNm1DBVal.substring(0, 8) + " c/o " + zi01CustNm.substring(0, 9));
+          }
+        }
+      }
+
+      if (custSubGrp == 'CBISO' || custSubGrp == 'DKISO' || custSubGrp == 'FOISO' || custSubGrp == 'GLISO' || custSubGrp == 'ISISO'
+          || custSubGrp == 'FIISO' || custSubGrp == 'EEISO' || custSubGrp == 'LTISO' || custSubGrp == 'LVISO' || custSubGrp == 'INTSO') {
+        var custNm = getAbbreviatedNameByAddrType(_reqId, "ZI01");
+        if (custNm != "") {
+          if (zi01CustNm != custNm) {
+            FormManager.setValue('abbrevNm', "IBM c/o " + zi01CustNm.substring(0, 14));
+          }
+        } else {
+          FormManager.setValue('abbrevNm', "IBM c/o ");
+        }
       }
     }
   }
@@ -2808,7 +2812,7 @@ function setModeOfPaymentValue() {
         if (requestingLob == 'AR' || requestingLob == 'IGF' || requestingLob == 'SCT') {
           FormManager.enable('modeOfPayment');
         } else {
-          FormManager.setValue('modeOfPayment', '');
+          // FormManager.setValue('modeOfPayment', '');
           FormManager.readOnly('modeOfPayment');
         }
       });
