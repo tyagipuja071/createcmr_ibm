@@ -235,6 +235,7 @@ function addHandlersForNORDX() {
   if (_IMSHandler == null && FormManager.getActualValue('cmrIssuingCntry')) {
     _IMSHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
       setSalesRepValues();
+      FormManager.readOnly('subIndustryCd');// CMR-1993
     });
   }
 
