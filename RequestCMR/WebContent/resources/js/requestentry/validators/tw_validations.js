@@ -11,11 +11,6 @@ function afterConfigTW() {
   FormManager.readOnly('cmrOwner');
   FormManager.resetValidations('enterprise');
 
-  FormManager.addValidator('custAcctType', Validators.REQUIRED, [ 'Customer Type' ], 'MAIN_CUST_TAB');
-  FormManager.addValidator('mktgDept', Validators.REQUIRED, [ 'Tax Location' ], 'MAIN_CUST_TAB');
-  FormManager.addValidator('requesterId', Validators.REQUIRED, [ 'Requester' ], 'MAIN_GENERAL_TAB');
-  FormManager.addValidator('originatorNm', Validators.REQUIRED, [ 'Requester' ], 'MAIN_GENERAL_TAB');
-
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
   }
@@ -29,7 +24,12 @@ function afterConfigTW() {
       FormManager.enable('isuCd');
     }
 
-    if (reqType == 'U') {
+    if (reqType == 'C') {
+      FormManager.addValidator('custAcctType', Validators.REQUIRED, [ 'Custome Type' ], 'MAIN_CUST_TAB');
+      FormManager.addValidator('mktgDept', Validators.REQUIRED, [ 'Tax Location' ], 'MAIN_CUST_TAB');
+      FormManager.addValidator('requesterId', Validators.REQUIRED, [ 'Requester' ], 'MAIN_GENERAL_TAB');
+      FormManager.addValidator('originatorNm', Validators.REQUIRED, [ 'Requester' ], 'MAIN_GENERAL_TAB');
+    } else if (reqType == 'U') {
       FormManager.removeValidator('vat', Validators.REQUIRED);
       FormManager.removeValidator('mktgDept', Validators.REQUIRED);
       FormManager.removeValidator('invoiceSplitCd', Validators.REQUIRED);
@@ -69,6 +69,10 @@ function afterConfigTW() {
       FormManager.removeValidator('bgRuleId', Validators.REQUIRED);
       FormManager.removeValidator('geoLocationCd', Validators.REQUIRED);
 
+      FormManager.removeValidator('sitePartyId', Validators.REQUIRED);
+      FormManager.removeValidator('isuCd', Validators.REQUIRED);
+      FormManager.removeValidator('clientTier', Validators.REQUIRED);
+      FormManager.removeValidator('searchTerm', Validators.REQUIRED);
     }
   }
 
