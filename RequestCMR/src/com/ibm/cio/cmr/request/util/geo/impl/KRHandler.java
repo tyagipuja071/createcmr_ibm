@@ -51,6 +51,7 @@ import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
+import com.ibm.cio.cmr.request.util.wtaas.WtaasQueryKeys;
 import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
 
 /**
@@ -81,7 +82,16 @@ public class KRHandler extends GEOHandler {
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
 	  data.setAbbrevNm(mainRecord.getCmrName1Plain());
-	  //data.setAbbrevLocn(mainRecord.getAbbrewLOCN());
+	  
+	    //String cmrIssuingCntry = data.getCmrIssuingCntry();
+	    if (data.getAbbrevLocn() != null || data.getAbbrevLocn().length() > 12 ) {
+	      data.setAbbrevLocn(data.getAbbrevLocn().substring(0, 12));
+	    }
+	    else{
+	    	data.setAbbrevLocn("Korea");
+	    }
+	   
+	  
 	  data.setContactName1(mainRecord.getUsCmrRestrictTo());
 	  data.setContactName2(mainRecord.getCmrName2());
 	  
@@ -90,7 +100,10 @@ public class KRHandler extends GEOHandler {
           data.setClientTier(CmrConstants.CLIENT_TIER_UNASSIGNED);
         }
       data.setRepTeamMemberNo(mainRecord.getRepTeamMemberNo());
+      this.setMRC(admin,data);
+      data.setContactName2(data.getContactName2());
       
+      //autoSetAbbrevLocnNMOnImport(admin, data, results, mainRecord);
   }
 
   @Override
@@ -578,6 +591,28 @@ public class KRHandler extends GEOHandler {
     return approver;
   }
 
+  private void setMRC(Admin admin, Data data) {
+	    String[] arryISUCdForMRC3 = { "32", "34" };
+	    String isuCd = data.getIsuCd();
+	    Boolean mrcFlag3 = false;
+	    if (admin.getReqType().equals("C")) {
+	      data.setMrcCd("");
+	      if (!data.getIsuCd().isEmpty() && data.getIsuCd().length() > 0) {
+	        for (String s : arryISUCdForMRC3) {
+	          if (isuCd != null && s.equals(isuCd)) {
+	            mrcFlag3 = true;
+	          } else {
+	            // do nothing
+	          }
+	        }
+	      }
+	      if (mrcFlag3.equals(true)) {
+	        data.setMrcCd("3");
+	      } else if (mrcFlag3.equals(false)) {
+	        data.setMrcCd("2");
+	      }
+	    }
+	  }
   private String getOriginatorIdInAdmin(EntityManager entityManager, long reqId) {
 
     AdminPK adminPk = new AdminPK();
