@@ -11,6 +11,9 @@ function afterConfigTW() {
   FormManager.readOnly('cmrOwner');
   FormManager.resetValidations('enterprise');
 
+  FormManager.addValidator('requesterId', Validators.REQUIRED, [ 'Requester' ], 'MAIN_GENERAL_TAB');
+  FormManager.addValidator('originatorNm', Validators.REQUIRED, [ 'Requester' ], 'MAIN_GENERAL_TAB');
+
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
   }
@@ -27,8 +30,6 @@ function afterConfigTW() {
     if (reqType == 'C') {
       FormManager.addValidator('custAcctType', Validators.REQUIRED, [ 'Custome Type' ], 'MAIN_CUST_TAB');
       FormManager.addValidator('mktgDept', Validators.REQUIRED, [ 'Tax Location' ], 'MAIN_CUST_TAB');
-      FormManager.addValidator('requesterId', Validators.REQUIRED, [ 'Requester' ], 'MAIN_GENERAL_TAB');
-      FormManager.addValidator('originatorNm', Validators.REQUIRED, [ 'Requester' ], 'MAIN_GENERAL_TAB');
     } else if (reqType == 'U') {
       FormManager.clearValue('mktgDept');
       FormManager.removeValidator('vat', Validators.REQUIRED);
