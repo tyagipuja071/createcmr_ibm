@@ -30,7 +30,8 @@ function afterConfigKR() {
   FormManager.removeValidator('sensitiveFlag', Validators.REQUIRED);
   FormManager.removeValidator('LocalTax2', Validators.REQUIRED);
   FormManager.disable('cmrNoPrefix');
-  // Non editable for requester
+
+  // Non editable for requester role
   if (reqType == 'C' && role == 'Requester') {
     FormManager.readOnly('isuCd');
   }

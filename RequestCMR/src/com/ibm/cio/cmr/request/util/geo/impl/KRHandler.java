@@ -54,7 +54,7 @@ import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
 
 /**
- * Handler for NL
+ * Handler for KR
  * 
  * @author Paul
  * 
@@ -80,7 +80,17 @@ public class KRHandler extends GEOHandler {
 
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
-
+	  data.setAbbrevNm(mainRecord.getCmrName1Plain());
+	  //data.setAbbrevLocn(mainRecord.getAbbrewLOCN());
+	  data.setContactName1(mainRecord.getUsCmrRestrictTo());
+	  data.setContactName2(mainRecord.getCmrName2());
+	  
+	  //GB segment default setting
+      if (StringUtils.isEmpty(mainRecord.getCmrTier()) || CmrConstants.FIND_CMR_BLANK_CLIENT_TIER.equals(mainRecord.getCmrTier())) {
+          data.setClientTier(CmrConstants.CLIENT_TIER_UNASSIGNED);
+        }
+      data.setRepTeamMemberNo(mainRecord.getRepTeamMemberNo());
+      
   }
 
   @Override
