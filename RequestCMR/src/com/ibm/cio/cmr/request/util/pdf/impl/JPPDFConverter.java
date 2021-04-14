@@ -169,6 +169,9 @@ public class JPPDFConverter extends DefaultPDFConverter {
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
     main.addCell(createValueCell(data.getRequestDueDate() != null ? sdf.format(data.getRequestDueDate()) : ""));
 
+    main.addCell(createLabelCell("BP Company Name:"));
+    main.addCell(createValueCell(data.getEmail3()));
+
     document.add(main);
   }
 
