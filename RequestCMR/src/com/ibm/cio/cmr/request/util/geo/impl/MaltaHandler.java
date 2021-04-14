@@ -40,6 +40,7 @@ import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.legacy.CloningRDCDirectUtil;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.QueryClient;
 import com.ibm.cmr.services.client.query.QueryRequest;
@@ -1047,7 +1048,6 @@ public class MaltaHandler extends BaseSOFHandler {
                   // validations.add(error);
                 }
 
-
               } else {
                 if (!StringUtils.isBlank(cmrNo) && StringUtils.isBlank(seqNo) && !"Data".equalsIgnoreCase(sheet.getSheetName())) {
                   LOG.trace("Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
@@ -1233,6 +1233,46 @@ public class MaltaHandler extends BaseSOFHandler {
   @Override
   public String[] getAddressOrder() {
     return ADDRESS_ORDER;
+  }
+
+  @Override
+  public String getCMRNo(EntityManager rdcMgr, String kukla, String mandt, String katr6, String cmrNo) {
+    int minValue = 1;
+    int maxValue = 899999;
+
+    String loc1 = katr6;
+    String loc2 = katr6;
+
+    boolean internal = false;
+    if (cmrNo.startsWith("99"))
+      internal = true;
+
+    if (internal) {
+      minValue = 990000;
+      maxValue = 999999;
+    }
+
+    if (minValue <= 0) {
+      minValue = 1;
+    }
+    if (maxValue <= 0) {
+      maxValue = 899999;
+    }
+    if (minValue > maxValue) {
+      int temp = maxValue;
+      maxValue = minValue;
+      minValue = temp;
+    }
+
+    try {
+      cmrNo = CloningRDCDirectUtil.generateCMRNo(rdcMgr, loc1, loc2, mandt, minValue, maxValue);
+    } catch (Exception e) {
+      LOG.trace("Issue while generating Malta CMR No");
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    return cmrNo;
+
   }
 
 }

@@ -121,7 +121,7 @@ public class LegacyDirectService extends TransConnService {
   private static final String MASS_UPDATE_FAIL = "FAIL";
   private static final String MASS_UPDATE_DONE = "DONE";
   private static final String MASS_UDPATE_LEGACY_FAIL_MSG = "Errors happened in legacy mass updates. Pleaes see request summary for details.";
-  private static final List<String> EMBARGO_LIST = Arrays.asList("E", "Y");
+  private static final List<String> EMBARGO_LIST = Arrays.asList("D", "E", "Y");
 
   private static final List<String> CEE_COUNTRY_LIST = Arrays.asList(SystemLocation.SLOVAKIA, SystemLocation.KYRGYZSTAN, SystemLocation.SERBIA,
       SystemLocation.ARMENIA, SystemLocation.AZERBAIJAN, SystemLocation.TURKMENISTAN, SystemLocation.TAJIKISTAN, SystemLocation.ALBANIA,
@@ -1274,6 +1274,7 @@ public class LegacyDirectService extends TransConnService {
     cust.setImsCd(data.getSubIndustryCd());
     cust.setCurrencyCd(data.getLegacyCurrencyCd());
     cust.setInvoiceCpyReqd(" "); // setting default value blank
+
     // do a dummy transfer here, reuse MQ objects for formatting
     MqIntfReqQueue dummyQueue = new MqIntfReqQueue();
     dummyQueue.setCmrNo(cmrNo);
@@ -1292,7 +1293,7 @@ public class LegacyDirectService extends TransConnService {
       transformer.transformLegacyCustomerData(entityManager, dummyHandler, cust, cmrObjects);
     }
     cust.setLeadingAccNo(cmrNo + cust.getMrcCd());// setting leading account no
-                                                  // = cmr+mrc
+    // = cmr+mrc
     capsAndFillNulls(cust, true);
     legacyObjects.setCustomer(cust);
 
@@ -1506,8 +1507,9 @@ public class LegacyDirectService extends TransConnService {
     cust.setCollectionCd(data.getCollectionCd() != null ? data.getCollectionCd() : "");
     // cust.setDistrictCd(data.getCollectionCd() != null ?
     // data.getCollectionCd() : "");
-
-    cust.setMailingCond(data.getMailingCondition() != null ? data.getMailingCondition() : "");
+    if (!StringUtils.isBlank(data.getMailingCondition())) {
+      cust.setMailingCond(data.getMailingCondition());
+    }
     if (!StringUtils.isBlank(data.getAcAdminBo())) {
       cust.setAccAdminBo(data.getAcAdminBo());
     }

@@ -1,3 +1,4 @@
+<%@page import="com.ibm.cio.cmr.request.user.AppUser"%>
 <%@page import="com.ibm.cio.cmr.request.config.SystemConfiguration"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles"%>
@@ -6,6 +7,9 @@
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 <c:set var="resourcesPath" value="${contextPath}/resources" />
 <%@ taglib uri="/tags/cmr" prefix="cmr"%>
+<%
+  AppUser user = AppUser.getUser(request);
+%>
 <style>
   span.role {
     margin-left: 20px;
@@ -32,8 +36,11 @@
       <span class="role" id="USER|"><input type="checkbox" name="role" value="USER|" id="chk_USER|">General User [FindCMR]<br></span>
       <span class="role" id="WS_ADMIN|"><input type="checkbox" name="role" value="WS_ADMIN|" id="chk_WS_ADMIN|">WebService Administrator [FindCMR]<br></span>
 
+      
       <span class="role" id="CMDE|"><input type="checkbox" name="role" value="CMDE|" id="chk_CMDE|">CMDE Administrator [All]<br></span>
 
+      <span class="role" id="GTS_CROSS|"><input type="checkbox" name="role" value="GTS_CROSS|" id="chk_GTS_CROSS|">CMDE Team (Cross-Platform) [NewCo]<br></span>
+      
 
     </div>
     </cmr:column>

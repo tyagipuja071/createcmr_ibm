@@ -126,14 +126,12 @@ public class USBPEhostHandler extends USBPHandler {
       return false;
     }
 
-    DnBMatchingResponse dnbMatch = null;
+    // match against D&B
+    DnBMatchingResponse dnbMatch = matchAgainstDnB(handler, requestData, zs01, engineData, details, overrides, ibmCmr != null);
 
     // match against SOS-RPA
-    SosResponse sosMatch = matchAgainstSosRpa(handler, requestData, zs01, engineData, details, overrides, ibmCmr != null);
-
-    // match against D&B
-    if (sosMatch == null) {
-      dnbMatch = matchAgainstDnB(handler, requestData, zs01, engineData, details, overrides, ibmCmr != null);
+    if (dnbMatch == null) {
+      SosResponse sosMatch = matchAgainstSosRpa(handler, requestData, zs01, engineData, details, overrides, ibmCmr != null);
     }
 
     if (ibmCmr == null) {

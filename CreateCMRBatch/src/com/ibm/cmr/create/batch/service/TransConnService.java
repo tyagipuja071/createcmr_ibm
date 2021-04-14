@@ -1365,18 +1365,21 @@ public class TransConnService extends BaseBatchService {
 
       StringBuilder rdcProcessingMsg = new StringBuilder();
       List<String> statusCodes = new ArrayList<String>();
+
       boolean isDataUpdated = false;
+      boolean continueUpdate = false;
       if (changes != null && changes.hasDataChanges()) {
         isDataUpdated = true;
       }
-      boolean continueUpdate = false;
       StringBuilder comment = new StringBuilder();
 
       boolean ignoreWfhistory = false;
       for (Addr addr : addresses) {
+
         if (isDataUpdated || "Y".equals(addr.getChangedIndc()) || "N".equals(addr.getImportInd())) {
           continueUpdate = true;
         }
+
         if (continueUpdate) {
           request.setSapNo(addr.getSapNo());
 
