@@ -86,8 +86,14 @@ public class TWHandler extends GEOHandler {
   public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo) throws Exception {
 
     address.setCustNm1(currentRecord.getCmrName1Plain() == null ? currentRecord.getCmrName1Plain() : currentRecord.getCmrName1Plain().trim());
+    address.setCustNm2(currentRecord.getCmrName2Plain());
     address.setCustNm3(currentRecord.getCmrIntlName1());
-    address.setBldg(currentRecord.getCmrIntlCity1());
+    address.setCustNm4(currentRecord.getCmrIntlName2());
+    address.setAddrTxt(currentRecord.getCmrStreetAddress());
+    address.setAddrTxt2(currentRecord.getCmrStreetAddressCont());
+
+    address.setDept(currentRecord.getCmrIntlCity1());
+    address.setBldg(currentRecord.getCmrIntlCity2());
   }
 
   @Override
