@@ -1212,9 +1212,10 @@ function hidePOBoxandHandleStreet() {
       FormManager.hide('POBox', 'poBox');
       FormManager.setValue('poBox', '');
       var cntryRegion = FormManager.getActualValue('countryUse');
-      if (cntryRegion != '' && (cntryRegion == '678FO' || cntryRegion == SysLoc.DENMARK)) {
-        FormManager.addValidator('addrTxt', Validators.REQUIRED, [ 'Street' ], '');
-      }
+      // if (cntryRegion != '' && (cntryRegion == '678FO' || cntryRegion ==
+      // SysLoc.DENMARK)) {
+      FormManager.addValidator('addrTxt', Validators.REQUIRED, [ 'Street' ], '');
+      // }
     } else {
       FormManager.show('POBox', 'poBox');
       FormManager.resetValidations('addrTxt');
@@ -1238,9 +1239,10 @@ function setPOBOXandSteet(value) {
     FormManager.hide('POBox', 'poBox');
     FormManager.setValue('poBox', '');
     var cntryRegion = FormManager.getActualValue('countryUse');
-    if (cntryRegion != '' && (cntryRegion == '678FO' || cntryRegion == SysLoc.DENMARK)) {
-      FormManager.addValidator('addrTxt', Validators.REQUIRED, [ 'Street' ], '');
-    }
+    // if (cntryRegion != '' && (cntryRegion == '678FO' || cntryRegion ==
+    // SysLoc.DENMARK)) {
+    FormManager.addValidator('addrTxt', Validators.REQUIRED, [ 'Street' ], '');
+    // }
 
   } else {
     // FormManager.enable('poBox');
