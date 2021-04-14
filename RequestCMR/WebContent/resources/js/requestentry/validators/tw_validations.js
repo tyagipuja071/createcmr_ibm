@@ -298,4 +298,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.TW, GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(addDPLCheckValidator, GEOHandler.TW, GEOHandler.ROLE_REQUESTER, true);
 
+  // skip byte checks
+  FormManager.skipByteChecks([ 'cmt', 'bldg', 'dept', 'custNm3', 'custNm4', 'busnType', 'footnoteTxt2', 'contactName1', 'bpName', 'footnoteTxt1',
+      'contactName3' ]);
+
 });

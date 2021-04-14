@@ -54,7 +54,7 @@
 <!-- Taiwan 858 -->
   <cmr:view forCountry="858">
     <cmr:row>
-      <cmr:column span="1" width="200">
+      <cmr:column span="1" width="250">
         <cmr:label fieldId="custNm1_view">
           <span class="lbl-CustomerName1">${ui.custName1}:</span>
         </cmr:label>:
@@ -63,8 +63,18 @@
         <div id="custNm1_view">-</div>
       </cmr:column>
       </cmr:row>
+    <cmr:row>
+      <cmr:column span="1" width="250">
+        <cmr:label fieldId="custNm2_view">
+          <span class="lbl-CustomerName2">${ui.custName2}:</span>
+        </cmr:label>:
+      </cmr:column>
+      <cmr:column span="2">
+        <div id="custNm2_view">-</div>
+      </cmr:column>
+      </cmr:row>
       <cmr:row>
-      <cmr:column span="1" width="200">
+      <cmr:column span="1" width="250">
         <cmr:label fieldId="ChinaCustomerName1_view">
           <span class="lbl-ChinaCustomerName1">${ui.ChinaCustomerName1}:</span>
         </cmr:label>:
@@ -73,8 +83,19 @@
         <div id="custNm3_view">-</div>
       </cmr:column>
     </cmr:row>
+      <cmr:row>
+      <cmr:column span="1" width="250">
+        <cmr:label fieldId="ChinaCustomerName2_view">
+          <span class="lbl-ChinaCustomerName2">${ui.ChinaCustomerName2}:</span>
+        </cmr:label>:
+      </cmr:column>
+      <cmr:column span="2">
+        <div id="custNm4_view">-</div>
+      </cmr:column>
+    </cmr:row>
+    <br>
       <cmr:row addBackground="true">
-      <cmr:column  span="1" width="200">
+      <cmr:column  span="1" width="250">
        <cmr:label fieldId="StreetAddress1_view">
         <span class="lbl-StreetAddress1">${ui.StreetAddress1}</span>
        </cmr:label>:
@@ -84,9 +105,29 @@
       </cmr:column>
      </cmr:row>
       <cmr:row addBackground="true">
-      <cmr:column span="1" width="200">
+      <cmr:column  span="1" width="250">
+       <cmr:label fieldId="StreetAddress2_view">
+        <span class="lbl-StreetAddress2">${ui.StreetAddress2}</span>
+       </cmr:label>:
+      </cmr:column>
+      <cmr:column span="2">
+        <div id="addrTxt2_view">-</div>
+      </cmr:column>
+     </cmr:row>
+      <cmr:row addBackground="true">
+      <cmr:column span="1" width="250">
        <cmr:label fieldId="ChinaStreetAddress1_view">
-        <span class="lbl-ChinaStreetAddress1">${ui.bldg}</span>
+        <span class="lbl-ChinaStreetAddress1">${ui.dept}</span>
+       </cmr:label>:
+      </cmr:column>
+      <cmr:column span="2">
+       <div id="dept_view">-</div>
+      </cmr:column>
+     </cmr:row>
+      <cmr:row addBackground="true">
+      <cmr:column span="1" width="250">
+       <cmr:label fieldId="ChinaStreetAddress2_view">
+        <span class="lbl-ChinaStreetAddress2">${ui.bldg}</span>
        </cmr:label>:
       </cmr:column>
       <cmr:column span="2">
