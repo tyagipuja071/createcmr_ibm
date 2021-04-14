@@ -484,7 +484,10 @@ public class USUtil extends AutomationUtil {
           LOG.error("CMR Scenario for Create by model request could not be determined.", e);
         }
 
-        engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
+        if (data.getBgId() != null) {
+          engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
+        }
+
         // skip Dnb check and matching
         if (engineData.hasPositiveCheckStatus("SKIP_COMP_CHECK") || Arrays.asList(skipCompanyChecksScenarioList).contains(scenarioSubType)) {
           ScenarioExceptionsUtil scenarioExceptions = (ScenarioExceptionsUtil) engineData.get("SCENARIO_EXCEPTIONS");
