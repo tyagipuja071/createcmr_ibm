@@ -808,7 +808,7 @@ function addISICValidator() {
         if (isicCD == '9500') {
           if (reqType == 'C') {
             if (((cntry == '806' || cntry == '846') && custSubType != 'PRIPE' && custSubType != 'IBMEM')
-                || ((cntry == '678' || cntry == '702') && subCntryCustType != 'IBM' && subCntryCustType != 'PIR'))
+                || ((cntry == '678' || cntry == '702') && subCntryCustType != 'IBM' && subCntryCustType != 'PRI'))
               return new ValidationResult(null, false, 'ISIC value 9500 is not allowed for other scenario than Private Person and IBM Employee');
           }
 
