@@ -34,6 +34,8 @@ import com.ibm.cio.cmr.request.model.requestentry.ImportCMRModel;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.RequestUtils;
@@ -113,6 +115,21 @@ public class TWHandler extends GEOHandler {
 
   @Override
   public void doBeforeAdminSave(EntityManager entityManager, Admin admin, String cmrIssuingCntry) throws Exception {
+    if (StringUtils.isEmpty(admin.getMainCustNm1())) {
+      String sql = ExternalizedQuery.getSql("BATCH.GET_ADDR_FOR_SAP_NO_ZS01");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("REQ_ID", admin.getId().getReqId());
+      List<Addr> addresses = query.getResults(Addr.class);
+      Addr soldToAddr = new Addr();
+      if (addresses != null && addresses.size() > 0) {
+        soldToAddr = addresses.get(0);
+      }
+      if (soldToAddr != null) {
+        admin.setMainCustNm1(soldToAddr.getCustNm1());
+        admin.setMainCustNm2(soldToAddr.getCustNm2());
+      }
+
+    }
   }
 
   @Override
