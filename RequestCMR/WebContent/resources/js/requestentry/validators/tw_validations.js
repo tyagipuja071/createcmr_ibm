@@ -40,6 +40,7 @@ function afterConfigTW() {
       FormManager.removeValidator('commercialFinanced', Validators.REQUIRED);
       FormManager.removeValidator('csBo', Validators.REQUIRED);
       FormManager.removeValidator('sectorCd', Validators.REQUIRED);
+      FormManager.removeValidator('busnType', Validators.REQUIRED);
 
       FormManager.removeValidator('footnoteTxt1', Validators.REQUIRED);
       FormManager.removeValidator('bioChemMissleMfg', Validators.REQUIRED);
