@@ -30,6 +30,7 @@ function afterConfigTW() {
       FormManager.addValidator('requesterId', Validators.REQUIRED, [ 'Requester' ], 'MAIN_GENERAL_TAB');
       FormManager.addValidator('originatorNm', Validators.REQUIRED, [ 'Requester' ], 'MAIN_GENERAL_TAB');
     } else if (reqType == 'U') {
+      FormManager.clearValue('mktgDept');
       FormManager.removeValidator('vat', Validators.REQUIRED);
       FormManager.removeValidator('mktgDept', Validators.REQUIRED);
       FormManager.removeValidator('invoiceSplitCd', Validators.REQUIRED);
