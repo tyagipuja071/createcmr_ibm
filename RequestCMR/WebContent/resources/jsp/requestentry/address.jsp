@@ -293,8 +293,15 @@ visibility: hidden !IMPORTANT;
           </cmr:view>
 
           <!--  Customer Name and Name Con't except for JP,FR -->
-          <cmr:view exceptForGEO="JP,FR" exceptForCountry="618,724,848">
+          <cmr:view exceptForGEO="JP,FR,TW" exceptForCountry="618,724,848,858">
             <cmr:gridCol width="120px" field="custNm1" header="${ui.grid.custNameUKI1}" >
+              <cmr:formatter functionName="customerNameFormatter" />
+            </cmr:gridCol>
+          </cmr:view>
+          
+          <!--  Customer English Name For Taiwan -->
+          <cmr:view forGEO="TW" >
+            <cmr:gridCol width="180px" field="custNm1" header="Customer English Name" >
               <cmr:formatter functionName="customerNameFormatter" />
             </cmr:gridCol>
           </cmr:view>
@@ -360,12 +367,17 @@ visibility: hidden !IMPORTANT;
         </cmr:view>
         
         <!-- Street and Street Con't except BELUX,NL,JP -->
-        <cmr:view exceptForGEO="BELUX,NL,JP,AP,FR" exceptForCountry="618,724,848">
+        <cmr:view exceptForGEO="BELUX,NL,JP,AP,FR,TW" exceptForCountry="618,724,848,858">
           <cmr:gridCol width="130px" field="addrTxt" header="${ui.grid.addrTxt}" >
               <cmr:formatter functionName="streetValueFormatter" />
           </cmr:gridCol>
         </cmr:view>
-        
+        <!-- Customer English Address For Taiwan -->
+        <cmr:view forGEO="TW">
+          <cmr:gridCol width="180px" field="addrTxt" header="Customer English Address" >
+              <cmr:formatter functionName="streetValueFormatter" />
+          </cmr:gridCol>
+        </cmr:view>
         <!--  Street name and number for FR -->	
           <cmr:view forGEO="FR">	
             <cmr:gridCol width="120px" field="addrTxt" header="Street name and number" >	
@@ -426,7 +438,7 @@ visibility: hidden !IMPORTANT;
         
         
         <!--  City except for JP -->
-        <cmr:view exceptForGEO="JP">
+        <cmr:view exceptForGEO="JP,TW">
           <cmr:gridCol width="80px" field="city1" header="${ui.grid.city1}" />
         </cmr:view>
         
@@ -507,12 +519,12 @@ visibility: hidden !IMPORTANT;
         </cmr:view>
         
         <!-- PO Box for non ES/PT/IL/GR/CY/TU/CEE -->
-        <cmr:view exceptForGEO="BELUX,JP" exceptForCountry="838,755,822,726,666,862,758,358,359,363,603,607,626,644,651,668,693,694,695,699,704,705,707,708,740,741,787,820,821,826,889,866,754">
+        <cmr:view exceptForGEO="BELUX,JP,TW" exceptForCountry="838,755,822,726,666,862,758,358,359,363,603,607,626,644,651,668,693,694,695,699,704,705,707,708,740,741,787,820,821,826,889,866,754,858">
           <cmr:gridCol width="90px" field="poBox" header="PO Box" />
         </cmr:view>
 
         <!-- Phone -->
-        <cmr:view exceptForCountry="758,760,603,607,626,644,651,668,693,694,695,699,704,705,707,708,740,741,787,820,821,826,889,358,359,363,620,642,675,677,680,752,762,767,768,772,805,808,823,832,849,850,865,729">
+        <cmr:view exceptForCountry="758,760,603,607,626,644,651,668,693,694,695,699,704,705,707,708,740,741,787,820,821,826,889,358,359,363,620,642,675,677,680,752,762,767,768,772,805,808,823,832,849,850,865,729,858">
           <cmr:gridCol width="90px" field="custPhone" header="Phone #" />
         </cmr:view>
         
