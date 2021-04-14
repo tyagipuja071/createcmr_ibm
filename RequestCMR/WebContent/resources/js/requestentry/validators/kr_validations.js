@@ -33,11 +33,20 @@ function afterConfigKR() {
   // Non editable for requester
   if (reqType == 'C' && role == 'Requester') {
     FormManager.readOnly('isuCd');
-  } 
-//  if (role == 'Requester') {
-//	    FormManager.readOnly('isuCd');
-//	  }
+  }
+  // if (role == 'Requester') {
+  // FormManager.readOnly('isuCd');
+  // }
+  RemoveCrossAddressMandatory();
+}
 
+function RemoveCrossAddressMandatory() {
+  var custSubScnrio = FormManager.getActualValue('custSubGrp');
+  if (custSubScnrio == 'CROSS') {
+    FormManager.removeValidator('city2', Validators.REQUIRED);
+    FormManager.removeValidator('custNm3', Validators.REQUIRED);
+    FormManager.removeValidator('custNm4', Validators.REQUIRED);
+  }
 }
 
 dojo.addOnLoad(function() {
@@ -45,11 +54,9 @@ dojo.addOnLoad(function() {
   console.log('adding KOREA functions...');
   GEOHandler.enableCustomerNamesOnAddress(GEOHandler.KR);
   GEOHandler.setRevertIsicBehavior(false);
-
   GEOHandler.addAfterConfig(afterConfigKR, GEOHandler.KR);
-
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.KR);
-
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.KR, GEOHandler.ROLE_PROCESSOR, true);
-
+  GEOHandler.addAfterTemplateLoad(afterConfigKR, GEOHandler.KR);
+  FormManager.skipByteChecks([ 'billingPstlAddr', 'divn', 'custNm3', 'custNm4' ]);
 });
