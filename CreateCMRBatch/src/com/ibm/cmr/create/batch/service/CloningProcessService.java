@@ -671,6 +671,9 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
           overrideConfigChanges(entityManager, overrideValues, kna1Clone, KNA1_TABLE, kna1PkClone);
 
+          if ("ZS01".equals(kna1Clone.getKtokd()) && StringUtils.isNotBlank(kna1.getAufsd()))
+            kna1Clone.setAufsd(kna1.getAufsd());
+
           kna1Clone.setSapTs(ts);
           kna1Clone.setShadUpdateInd("I");
           kna1Clone.setShadUpdateTs(ts);
