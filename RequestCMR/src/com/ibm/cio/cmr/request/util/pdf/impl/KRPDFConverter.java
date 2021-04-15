@@ -439,7 +439,7 @@ public class KRPDFConverter extends DefaultPDFConverter {
   public String textContainingLanguage(String text) {
     for (char charac : text.toCharArray()) {
       if (Character.UnicodeBlock.of(charac) == Character.UnicodeBlock.HANGUL_SYLLABLES) {
-        LOG.debug("Character.UnicodeBlock.of(" + charac + ") == Hangul Syllables");
+
         return "KOREA";
       }
     }
@@ -452,7 +452,7 @@ public class KRPDFConverter extends DefaultPDFConverter {
     if ((text != null && (!text.isEmpty())) && (textContainingLanguage(text) != null)) {
       if (textContainingLanguage(text).equalsIgnoreCase("KOREA")) {
         cell.setFont(this.koreaFont);
-        LOG.debug("set " + text + " of rowSpan " + rowSpan + " and colSpan " + colSpan + " as KOREA font.");
+
         Paragraph label = new Paragraph();
         label.setFontSize(7);
         label.add(text);
