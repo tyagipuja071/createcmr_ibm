@@ -2810,12 +2810,19 @@ function setModeOfPaymentValue() {
     if (role == 'Requester') {
 
       FormManager.readOnly('modeOfPayment');
+
+      var requestingLob = FormManager.getActualValue('requestingLob');
+      if (requestingLob == 'AR' || requestingLob == 'IGF' || requestingLob == 'SCT') {
+        FormManager.enable('modeOfPayment');
+      } else {
+        FormManager.readOnly('modeOfPayment');
+      }
+
       dojo.connect(FormManager.getField('requestingLob'), 'onChange', function(value) {
         var requestingLob = FormManager.getActualValue('requestingLob');
         if (requestingLob == 'AR' || requestingLob == 'IGF' || requestingLob == 'SCT') {
           FormManager.enable('modeOfPayment');
         } else {
-          // FormManager.setValue('modeOfPayment', '');
           FormManager.readOnly('modeOfPayment');
         }
       });
@@ -2836,10 +2843,21 @@ function modeOfPaymentValidation() {
       validate : function() {
         var modeOfPayment = FormManager.getActualValue('modeOfPayment');
 
-        var alphanumeric = /^[0-9a-zA-Z]*$/;
+        var result = cmr.query('GET.ND.MODE_OF_PAYMENT_FOR_DATA_RDC', {
+          REQ_ID : FormManager.getActualValue('reqId')
+        });
+
         if (modeOfPayment == '') {
-          return new ValidationResult(null, true);
+          if (result.ref1 != '') {
+            return new ValidationResult({
+              id : 'modeOfPayment',
+              type : 'text',
+              name : 'modeOfPayment'
+            }, false, 'Payment Terms shouldn\'t be blanked.');
+          }
         }
+
+        var alphanumeric = /^[0-9a-zA-Z]*$/;
 
         if (!modeOfPayment.match(alphanumeric)) {
           return new ValidationResult({
@@ -2867,6 +2885,7 @@ function modeOfPaymentValidation() {
             'WCFI', 'XA00', 'XC00', 'XG00', 'XK00', 'XL00', 'XM00', 'XP00', 'XR00', 'XS00', 'XT00', 'XU00', 'XV00', 'XW00', 'YA00', 'YB00', 'YB00',
             'YC00', 'YC00', 'YC00', 'YD00', 'YD00', 'YD00', 'YE00', 'YE00', 'YE00', 'YE00', 'YG00', 'YG00', 'YG00', 'YG00', 'YG00', 'Z01S', 'ZSDD',
             'ZZI1' ];
+
         if (!modeOfpaymentArray.includes(modeOfPayment)) {
           return new ValidationResult({
             id : 'modeOfPayment',
@@ -2881,7 +2900,6 @@ function modeOfPaymentValidation() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 
 }
-
 // CREATCMR-1638
 
 // CREATCMR-1690
@@ -3007,12 +3025,9 @@ function setCapRecordActivate() {
   var result1 = cmr.query('GET.ND.USER_ROLE', params);
   var result2 = cmr.query('GET.ND.USER_PROC_CENTER_NM', params);
 
-  var role = null;
-  if (typeof (_pagemodel) != 'undefined') {
-    role = _pagemodel.userRole;
-  }
+  reqType = FormManager.getActualValue('reqType');
 
-  if (role == 'Processor') {
+  if (reqType == 'U') {
     if (result1.ret1 > 0 && result2.ret1 == 'Bratislava') {
       FormManager.enable('capInd');
     }
