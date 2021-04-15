@@ -123,9 +123,14 @@ public class KRHandler extends GEOHandler {
     address.setCity1(currentRecord.getCmrCity());
     address.setCity2(currentRecord.getCmrCity2());
     address.setCustNm1(currentRecord.getCmrName1Plain());
-    address.setCustNm2(currentRecord.getCmrName2());
+    address.setCustNm2(currentRecord.getCmrName2Plain());
     address.setCustNm3(currentRecord.getCmrName3());
     address.setCustNm4(currentRecord.getCmrName4());
+    address.setStateProv("");
+    address.setAddrTxt2(currentRecord.getCmrStreetAddressCont());
+    address.setTaxOffice(currentRecord.getCmrTaxOffice());
+    address.setDept(currentRecord.getCmrDept());
+    address.setPoBoxPostCd(currentRecord.getCmrPOBoxPostCode());
   }
 
   @Override
@@ -605,6 +610,9 @@ public class KRHandler extends GEOHandler {
     map.put("##MrcCd", "mrcCd");
     map.put("##CreditCd", "creditCd");
     map.put("##OrgNo", "orgNo");
+    map.put("##BillingPstlAddr", "billingPstlAddr");
+    map.put("##DIVN", "divn");
+    map.put("##Contact", "contact");
     return map;
   }
 

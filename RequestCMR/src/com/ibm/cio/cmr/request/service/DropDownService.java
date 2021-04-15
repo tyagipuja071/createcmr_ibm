@@ -332,8 +332,6 @@ public class DropDownService extends BaseSimpleService<DropdownModel> {
         }
         query.append("  and REFT_COUNTRY_KEY = (select REFT_COUNTRY_KEY from CMMA.REFT_COUNTRY_W where COUNTRY_CD = :LAND1) ");
         query.setParameter("LAND1", params.getParam("landCntry"));
-      } else if ("766".equalsIgnoreCase(cntry)) {
-        return;
       } else {
         query.append("  and REFT_COUNTRY_KEY = (select REFT_COUNTRY_KEY from CMMA.REFT_COUNTRY_W where COUNTRY_CD = :LAND1) ");
         query.setParameter("LAND1", params.getParam("landCntry"));
