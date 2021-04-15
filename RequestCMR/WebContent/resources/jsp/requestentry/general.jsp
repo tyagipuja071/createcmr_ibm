@@ -90,7 +90,7 @@ if (readOnly){
           </cmr:row>
        </cmr:column>
        <cmr:column span="2" >
-	<cmr:view forCountry="724" >
+	<cmr:view forCountry="724,858" >
  	<% autoProcCapable = true ;%>
         </cmr:view>
             <cmr:row topPad="15" noPad="true">
