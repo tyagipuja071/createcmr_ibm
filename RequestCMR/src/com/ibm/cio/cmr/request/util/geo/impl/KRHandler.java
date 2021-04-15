@@ -120,6 +120,12 @@ public class KRHandler extends GEOHandler {
   @Override
   public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo) throws Exception {
 
+    address.setCity1(currentRecord.getCmrCity());
+    address.setCity2(currentRecord.getCmrCity2());
+    address.setCustNm1(currentRecord.getCmrName1Plain());
+    address.setCustNm2(currentRecord.getCmrName2());
+    address.setCustNm3(currentRecord.getCmrName3());
+    address.setCustNm4(currentRecord.getCmrName4());
   }
 
   @Override
