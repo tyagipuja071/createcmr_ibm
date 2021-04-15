@@ -84,16 +84,22 @@ public class KRHandler extends GEOHandler {
 	  data.setAbbrevNm(mainRecord.getCmrName1Plain());
 	  
 	    //String cmrIssuingCntry = data.getCmrIssuingCntry();
-	    if (data.getAbbrevLocn() != null || data.getAbbrevLocn().length() > 12 ) {
+	    if (data.getAbbrevLocn() != null && data.getAbbrevLocn().length() > 12 ) {
 	      data.setAbbrevLocn(data.getAbbrevLocn().substring(0, 12));
 	    }
 	    else{
 	    	data.setAbbrevLocn("Korea");
 	    }
 	   
+	  // 【Representative(CEO) name in business license】
+	  //data.setContactName1(mainRecord.getUsCmrRestrictTo());
+//	    if(data.getContactName1()!= null && data.getContactName1().length() > 30){
+//	    	data.setContactName1(data.getContactName1().substring(0,30));
+//	    }else{
+	    	data.setContactName1(data.getContactName1());
+//	    }
 	  
-	  data.setContactName1(mainRecord.getUsCmrRestrictTo());
-	  data.setContactName2(mainRecord.getCmrName2());
+	    data.setContactName2(mainRecord.getCmrName2());
 	  
 	  //GB segment default setting
       if (StringUtils.isEmpty(mainRecord.getCmrTier()) || CmrConstants.FIND_CMR_BLANK_CLIENT_TIER.equals(mainRecord.getCmrTier())) {
