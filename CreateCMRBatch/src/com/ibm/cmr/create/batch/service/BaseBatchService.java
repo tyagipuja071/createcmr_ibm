@@ -96,7 +96,6 @@ public abstract class BaseBatchService extends BaseSimpleService<Boolean> {
 
     LOG.info("Starting application at " + TIME_FORMATTER.format(new Date(this.startTime)));
     LOG.info("Executing " + getClass().getSimpleName() + " batch application..");
-    int exitCode = 0;
     if (process(null, null)) {
       LOG.info("Successfully completed.");
     } else {
@@ -106,7 +105,6 @@ public abstract class BaseBatchService extends BaseSimpleService<Boolean> {
         LOG.error("Error " + cnt + " = " + e.getMessage());
         cnt++;
       }
-      exitCode = 1;
     }
     long endTime = new Date().getTime();
     long elapsed = (endTime - startTime) / 1000;

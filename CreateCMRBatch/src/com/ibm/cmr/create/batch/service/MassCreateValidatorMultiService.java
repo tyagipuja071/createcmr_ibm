@@ -419,4 +419,9 @@ public class MassCreateValidatorMultiService extends MultiThreadedBatchService<L
     return true;
   }
 
+  @Override
+  protected boolean useServicesConnections() {
+    return true;
+  }
+
 }
