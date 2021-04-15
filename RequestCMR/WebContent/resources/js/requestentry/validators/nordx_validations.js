@@ -133,6 +133,8 @@ function afterConfigForNORDX() {
 
   // CREATCMR-1656
   setCapRecordActivate();
+
+  resetKUKLAalt();
 }
 
 function disableLandCntry() {
@@ -3034,6 +3036,14 @@ function setCapRecordActivate() {
   }
 }
 // CREATCMR-1656
+
+function resetKUKLAalt() {
+  var alt = $("#custClass_label img").attr('title');
+  if (alt != "") {
+    var altArray = alt.split('-');
+    $("#custClass_label img").attr('title', altArray[0]);
+  }
+}
 
 dojo.addOnLoad(function() {
   GEOHandler.NORDX = [ '846', '806', '702', '678' ];
