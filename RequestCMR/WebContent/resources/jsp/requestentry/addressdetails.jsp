@@ -144,7 +144,7 @@
           <span class="lbl-CustomerName1">${ui.custName1}</span>:
         </cmr:label>
       </cmr:column>
-      <cmr:column span="2">
+      <cmr:column span="2" width="700">
         <div id="custNm1_view">-</div>
       </cmr:column>
       </cmr:row>
@@ -154,7 +154,7 @@
           <span class="lbl-CustomerName2">${ui.custName2}</span>:
         </cmr:label>
       </cmr:column>
-      <cmr:column span="2">
+      <cmr:column span="2" width="700">
         <div id="custNm2_view">-</div>
       </cmr:column>
       </cmr:row>
@@ -164,20 +164,40 @@
           <span class="lbl-CustomerName3">${ui.custName3}</span>:
         </cmr:label>
       </cmr:column>
-      <cmr:column span="2">
+      <cmr:column span="2" width="700">
         <div id="custNm3_view">-</div>
       </cmr:column>
-       </cmr:row>
+      </cmr:row>
       <cmr:row>
-      <cmr:column span="1" width="200">
+      <cmr:column span="1" width="300">
+        <cmr:label fieldId="billingPstlAddr_view">
+          <span class="lbl-BillingPstlAddr">${ui.billingPstlAddr}</span>:
+        </cmr:label>
+      </cmr:column>
+      <cmr:column span="2" width="700">
+        <div id="billingPstlAddr_view">-</div>
+      </cmr:column>
+      </cmr:row>
+      <cmr:row>
+      <cmr:column span="1" width="300">
         <cmr:label fieldId="custNm4_view">
           <span class="lbl-CustomerName4">${ui.custName4}</span>:
         </cmr:label>
       </cmr:column>
-      <cmr:column span="2">
+      <cmr:column span="2" width="700">
         <div id="custNm4_view">-</div>
       </cmr:column>
-      </cmr:row>       
+      </cmr:row>   
+      <cmr:row>
+      <cmr:column span="1" width="300">
+        <cmr:label fieldId="divn_view">
+          <span class="lbl-Divn">Street address_Korean Continue</span>:
+        </cmr:label>
+      </cmr:column>
+      <cmr:column span="2" width="700" >
+        <div id="divn_view">-</div>
+      </cmr:column>
+      </cmr:row>    
       <cmr:row>
         <cmr:column span="1">
 	      <cmr:label fieldId="city1_view">
