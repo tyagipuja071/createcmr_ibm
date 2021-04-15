@@ -40,17 +40,19 @@
       <cmr:column span="1" width="127">
       </cmr:column>
       <cmr:column span="1" width="130">
-        <label><cmr:fieldLabel fieldId="ModeOfPayment" />:</label>
-      </cmr:column>
-      <cmr:column span="1" width="240">
-        ${summary.data.modeOfPayment}
-      </cmr:column>
-      <cmr:column span="1" width="130">
         <label><cmr:fieldLabel fieldId="EmbargoCode" />: </label>
       </cmr:column>
-      <cmr:column span="1" width="200">
+      <cmr:column span="1" width="240">
         ${summary.data.embargoCd}
       </cmr:column>
+      <!-- 
+      <cmr:column span="1" width="130">
+        <label><cmr:fieldLabel fieldId="ModeOfPayment" />: </label>
+      </cmr:column>
+      <cmr:column span="1" width="200">
+        ${summary.data.modeOfPayment}
+      </cmr:column>
+       -->
     </cmr:row>
   </cmr:view>
   
