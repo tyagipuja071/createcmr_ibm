@@ -134,7 +134,7 @@ function afterConfigForNORDX() {
   // CREATCMR-1656
   setCapRecordActivate();
 
-  resetKUKLAalt();
+  removeKUKLAalt();
 }
 
 function disableLandCntry() {
@@ -3037,12 +3037,8 @@ function setCapRecordActivate() {
 }
 // CREATCMR-1656
 
-function resetKUKLAalt() {
-  var alt = $("#custClass_label img").attr('title');
-  if (alt != "") {
-    var altArray = alt.split('-');
-    $("#custClass_label img").attr('title', altArray[0]);
-  }
+function removeKUKLAalt() {
+  $("#custClass_label img").remove();
 }
 
 dojo.addOnLoad(function() {
