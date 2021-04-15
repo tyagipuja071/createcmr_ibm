@@ -252,10 +252,6 @@ function AddressDetailsModal_onLoad() {
   _assignDetailsValue('#AddressDetailsModal #custFax_view', details.ret22);
   _assignDetailsValue('#AddressDetailsModal #custPhone_view', details.ret23);
 
-  _assignDetailsValue('#AddressDetailsModal #billingPstlAddr_view', details.ret58);
-  _assignDetailsValue('#AddressDetailsModal #contact_view', details.ret71);
-  _assignDetailsValue('#AddressDetailsModal #countyName_view', details.ret45);
-
   if (FormManager.getActualValue('cmrIssuingCntry') == '897' && details.ret2 != 'ZI01' && details.ret2 != 'ZS01') {
     if (details.ret2 == 'ZP01' && role == 'PROCESSOR') {
       cmr.showNode('updateButtonFromView');
@@ -423,6 +419,12 @@ function AddressDetailsModal_onLoad() {
     _assignDetailsValue('#AddressDetailsModal #cnCustContJobTitle_view', details.ret66);
     _assignDetailsValue('#AddressDetailsModal #cnCustContPhone2_view', details.ret67);
     _assignDetailsValue('#AddressDetailsModal #cnCustName3_view', details.ret73);
+  }
+
+  if (FormManager.getActualValue('cmrIssuingCntry') == '766') {
+    _assignDetailsValue('#AddressDetailsModal #billingPstlAddr_view', details.ret58);
+    _assignDetailsValue('#AddressDetailsModal #contact_view', details.ret71);
+    _assignDetailsValue('#AddressDetailsModal #countyName_view', details.ret45);
   }
 
   if (FormManager.getActualValue('cmrIssuingCntry') == '760') {
