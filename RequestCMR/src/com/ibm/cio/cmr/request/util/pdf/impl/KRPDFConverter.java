@@ -429,7 +429,7 @@ public class KRPDFConverter extends DefaultPDFConverter {
 
   public String textContainingLanguage(String text) {
     for (char charac : text.toCharArray()) {
-      System.out.println(Character.UnicodeBlock.of(charac));
+      // System.out.println(Character.UnicodeBlock.of(charac));
       if (Character.UnicodeBlock.of(charac) == Character.UnicodeBlock.HANGUL_SYLLABLES) {
         LOG.debug("Character.UnicodeBlock.of(" + charac + ") == Hangul Syllables");
         return "KOREA";
