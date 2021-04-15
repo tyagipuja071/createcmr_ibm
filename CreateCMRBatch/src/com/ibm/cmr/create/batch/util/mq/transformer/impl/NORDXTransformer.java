@@ -915,7 +915,7 @@ public class NORDXTransformer extends EMEATransformer {
       legacyCust.setDeptCd("");
       legacyCust.setEnterpriseNo("");
       legacyCust.setEducAllowance("");
-      legacyCust.setLeasingInd("");
+      legacyCust.setLeasingInd("0");
 
       if (SystemLocation.NORWAY.equals(data.getCmrIssuingCntry())) {
         legacyCust.setCeBo("");
@@ -1086,6 +1086,7 @@ public class NORDXTransformer extends EMEATransformer {
     legacyCust.setAbbrevNm(StringUtils.isBlank(data.getAbbrevNm()) ? "" : data.getAbbrevNm());
     legacyCust.setAbbrevLocn(StringUtils.isBlank(data.getAbbrevLocn()) ? "" : data.getAbbrevLocn());
     legacyCust.setInacCd(StringUtils.isBlank(data.getInacCd()) ? "" : data.getInacCd());
+    legacyCust.setMailingCond("");
 
     if (!StringUtils.isBlank(data.getCustPrefLang())) {
       legacyCust.setLangCd(data.getCustPrefLang());
