@@ -56,7 +56,7 @@
     <cmr:row>
       <cmr:column span="1" width="250">
         <cmr:label fieldId="custNm1_view">
-          <span class="lbl-CustomerName1">${ui.custName1}:</span>
+          <span class="lbl-CustomerName1">Customer English Name</span>
         </cmr:label>:
       </cmr:column>
       <cmr:column span="2">
@@ -66,7 +66,7 @@
     <cmr:row>
       <cmr:column span="1" width="250">
         <cmr:label fieldId="custNm2_view">
-          <span class="lbl-CustomerName2">${ui.custName2}:</span>
+          <span class="lbl-CustomerName2">Customer English Name Con't</span>
         </cmr:label>:
       </cmr:column>
       <cmr:column span="2">
@@ -76,7 +76,7 @@
       <cmr:row>
       <cmr:column span="1" width="250">
         <cmr:label fieldId="ChinaCustomerName1_view">
-          <span class="lbl-ChinaCustomerName1">${ui.ChinaCustomerName1}:</span>
+          <span class="lbl-ChinaCustomerName1">Customer Chinese Name</span>
         </cmr:label>:
       </cmr:column>
       <cmr:column span="2">
@@ -86,7 +86,7 @@
       <cmr:row>
       <cmr:column span="1" width="250">
         <cmr:label fieldId="ChinaCustomerName2_view">
-          <span class="lbl-ChinaCustomerName2">${ui.ChinaCustomerName2}:</span>
+          <span class="lbl-ChinaCustomerName2">Customer Chinese Name Con't</span>
         </cmr:label>:
       </cmr:column>
       <cmr:column span="2">
@@ -97,7 +97,7 @@
       <cmr:row addBackground="true">
       <cmr:column  span="1" width="250">
        <cmr:label fieldId="StreetAddress1_view">
-        <span class="lbl-StreetAddress1">${ui.StreetAddress1}</span>
+        <span class="lbl-StreetAddress1">Customer English Address</span>
        </cmr:label>:
       </cmr:column>
       <cmr:column span="2">
@@ -107,7 +107,7 @@
       <cmr:row addBackground="true">
       <cmr:column  span="1" width="250">
        <cmr:label fieldId="StreetAddress2_view">
-        <span class="lbl-StreetAddress2">${ui.StreetAddress2}</span>
+        <span class="lbl-StreetAddress2">Customer English Address Con't</span>
        </cmr:label>:
       </cmr:column>
       <cmr:column span="2">
@@ -117,7 +117,7 @@
       <cmr:row addBackground="true">
       <cmr:column span="1" width="250">
        <cmr:label fieldId="ChinaStreetAddress1_view">
-        <span class="lbl-ChinaStreetAddress1">${ui.dept}</span>
+        <span class="lbl-ChinaStreetAddress1">Customer Chinese Address</span>
        </cmr:label>:
       </cmr:column>
       <cmr:column span="2">
@@ -127,7 +127,7 @@
       <cmr:row addBackground="true">
       <cmr:column span="1" width="250">
        <cmr:label fieldId="ChinaStreetAddress2_view">
-        <span class="lbl-ChinaStreetAddress2">${ui.bldg}</span>
+        <span class="lbl-ChinaStreetAddress2">Customer Chinese Address Con't</span>
        </cmr:label>:
       </cmr:column>
       <cmr:column span="2">
