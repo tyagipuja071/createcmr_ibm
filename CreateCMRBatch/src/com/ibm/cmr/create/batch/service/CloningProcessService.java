@@ -645,6 +645,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
       String kunnr = "";
       Changelog changelog = null;
       Timestamp ts = SystemUtil.getCurrentTimestamp();
+      boolean successFlag = true;
       kna1 = getKna1ByKunnr(entityManager, SystemConfiguration.getValue("MANDT"), rdcCloningRefn.getId().getKunnr());
       if (kna1 != null) {
         // generate kunnr, prepare the kna1 clone data
@@ -699,11 +700,14 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
         } catch (Exception e) {
           LOG.debug("Issue in Copy KNA1 record for cmr no : " + kna1Clone.getZzkvCusno() + " and KUNNR: " + kna1Clone.getId().getKunnr(), e);
           processError(entityManager, rdcCloningRefn, cloningQueue, "Issue in Copy KNA1 record");
+          successFlag = false;
         }
       }
 
-      rdcCloningRefn.setTargetMandt(targetMandt); // from config
-      rdcCloningRefn.setTargetKunnr(kunnr);
+      if (successFlag) {
+        rdcCloningRefn.setTargetMandt(targetMandt); // from config
+        rdcCloningRefn.setTargetKunnr(kunnr);
+      }
 
     } catch (Exception e) {
       LOG.debug("Issue in Creating KNA1 record for cmr no : " + rdcCloningRefn.getCmrNo() + " and KUNNR: " + rdcCloningRefn.getTargetKunnr(), e);
