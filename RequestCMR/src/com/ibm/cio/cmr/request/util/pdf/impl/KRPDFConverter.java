@@ -213,11 +213,17 @@ public class KRPDFConverter extends DefaultPDFConverter {
       address.addCell(createLabelCell("Street address_Korean Con't:"));
       address.addCell(createValueCell(addr.getDivn()));
 
-      address.addCell(createLabelCell("Postal Code:"));
+      address.addCell(createLabelCell("City:"));
       address.addCell(createValueCell(addr.getCity1()));
 
       address.addCell(createLabelCell("City Korean:"));
       address.addCell(createValueCell(addr.getCity2()));
+
+      address.addCell(createLabelCell("Postal Code:"));
+      address.addCell(createValueCell(addr.getPoBoxPostCd()));
+
+      address.addCell(createLabelCell(""));
+      address.addCell(createValueCell(""));
 
       address.addCell(createLabelCell("Name of person on Invoice_1:"));
       address.addCell(createValueCell(addr.getContact()));
@@ -425,11 +431,13 @@ public class KRPDFConverter extends DefaultPDFConverter {
     ibm.addCell(createLabelCell("Product Type:"));
     ibm.addCell(createValueCell(data.getContactName3()));
 
+    ibm.addCell(createLabelCell(""));
+    ibm.addCell(createValueCell(""));
+
   }
 
   public String textContainingLanguage(String text) {
     for (char charac : text.toCharArray()) {
-      // System.out.println(Character.UnicodeBlock.of(charac));
       if (Character.UnicodeBlock.of(charac) == Character.UnicodeBlock.HANGUL_SYLLABLES) {
         LOG.debug("Character.UnicodeBlock.of(" + charac + ") == Hangul Syllables");
         return "KOREA";

@@ -100,7 +100,9 @@ public class TWPDFConverter extends DefaultPDFConverter {
           pdf.close();
         }
       } finally {
-        writer.close();
+        if (!writer.isCloseStream()) {
+          writer.close();
+        }
       }
       return true;
     } catch (Exception e) {
