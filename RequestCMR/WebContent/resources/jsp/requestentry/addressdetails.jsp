@@ -307,18 +307,18 @@
      </cmr:row>    
      <cmr:row>
       <cmr:column span="1" width="300">
-	    <cmr:label fieldId="localLangCountryName_view">
-			<span class="lbl-LocalLangCountryName">${ui.CountyName}</span>:
+	    <cmr:label fieldId="countyName_view">
+			<span class="lbl-LocalLangCountryName">${ui.countyName}</span>:
 		</cmr:label>
       </cmr:column>
 		<cmr:column span="2">
-			<div id="localLangCountryName_view">-</div>
+			<div id="countyName_view">-</div>
 		</cmr:column>
 		</cmr:row>
       <cmr:row>
        <cmr:column span="1" width="300">
-        <cmr:label fieldId="Contact_view">
-          <span class="lbl-Contact">${ui.Concact}</span>:
+        <cmr:label fieldId="contact_view">
+          <span class="lbl-Contact">${ui.concact}</span>:
           </cmr:label>
        </cmr:column>
       <cmr:column span="2">

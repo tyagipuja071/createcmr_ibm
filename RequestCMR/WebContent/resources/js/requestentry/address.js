@@ -252,6 +252,10 @@ function AddressDetailsModal_onLoad() {
   _assignDetailsValue('#AddressDetailsModal #custFax_view', details.ret22);
   _assignDetailsValue('#AddressDetailsModal #custPhone_view', details.ret23);
 
+  _assignDetailsValue('#AddressDetailsModal #billingPstlAddr_view', details.ret58);
+  _assignDetailsValue('#AddressDetailsModal #contact_view', details.ret71);
+  _assignDetailsValue('#AddressDetailsModal #countyName_view', details.ret45);
+
   if (FormManager.getActualValue('cmrIssuingCntry') == '897' && details.ret2 != 'ZI01' && details.ret2 != 'ZS01') {
     if (details.ret2 == 'ZP01' && role == 'PROCESSOR') {
       cmr.showNode('updateButtonFromView');
@@ -264,7 +268,7 @@ function AddressDetailsModal_onLoad() {
 
   if (details.ret2 == 'PG01' && role != 'PROCESSOR') {
     cmr.hideNode('updateButtonFromView');
-  }  
+  }
   // Defect 1518423: PP: Update Address functionality is visible for Imported
   // Billing Address for SM Create :Mukesh
   if ('758' == FormManager.getActualValue('cmrIssuingCntry') && 'C' == FormManager.getActualValue('reqType') && 'Y' == details.ret31) {
@@ -920,7 +924,7 @@ function addEditAddressModal_onLoad() {
       FormManager.setValue('addrType', 'ZP01');
     }
     if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.PORTUGAL || FormManager.getActualValue('cmrIssuingCntry') == SysLoc.SPAIN
-     || FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE) {
+        || FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE) {
       FormManager.setValue('addrType', 'ZS01');
     }
     FormManager.clearValue('transportZone');
@@ -1784,21 +1788,21 @@ function applyAddrChangesModal_onLoad() {
         }
       }
 
-      if(SysLoc.GREECE == cntry && type.ret1 == 'ZP01') {
-    	  if(FormManager.getActualValue('custGrp') == 'LOCAL') {
-    		  continue;
-    	  } else if (FormManager.getActualValue('reqType') == 'U' && FormManager.getActualValue('landCntry') == 'GR') {
-    		  continue;
-    	  } else if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZS01') {
-    		  continue;
-    	  }
+      if (SysLoc.GREECE == cntry && type.ret1 == 'ZP01') {
+        if (FormManager.getActualValue('custGrp') == 'LOCAL') {
+          continue;
+        } else if (FormManager.getActualValue('reqType') == 'U' && FormManager.getActualValue('landCntry') == 'GR') {
+          continue;
+        } else if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZS01') {
+          continue;
+        }
       }
-      
-      if(SysLoc.GREECE == cntry && type.ret1 == 'ZS01') {
-    	  if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZP01') {
-    		  continue;
-    	  }
-      } 
+
+      if (SysLoc.GREECE == cntry && type.ret1 == 'ZS01') {
+        if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZP01') {
+          continue;
+        }
+      }
 
       if (SysLoc.TURKEY == cntry && type.ret1 == 'ZP01') {
         if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZS01') {
