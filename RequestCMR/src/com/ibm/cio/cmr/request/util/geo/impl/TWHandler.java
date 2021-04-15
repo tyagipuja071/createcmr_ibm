@@ -176,32 +176,139 @@ public class TWHandler extends GEOHandler {
     UpdatedDataModel update = null;
     super.addSummaryUpdatedFields(service, type, cmrCountry, newData, oldData, results);
 
-    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCollectionCd())) {
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getMtkgArDept(), newData.getMtkgArDept())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "LocalTax1", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getMtkgArDept(), "LocalTax1", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getMtkgArDept(), "LocalTax1", cmrCountry));
+      results.add(update);
+    }
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getInvoiceSplitCd(), newData.getInvoiceSplitCd())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "LocalTax2", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getInvoiceSplitCd(), "LocalTax2", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getInvoiceSplitCd(), "LocalTax2", cmrCountry));
+      results.add(update);
+    }
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCustAcctType(), newData.getCustAcctType())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "CustAcctType", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getCustAcctType(), "CustAcctType", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getCustAcctType(), "CustAcctType", cmrCountry));
+      results.add(update);
+    }
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getAbbrevLocn(), newData.getAbbrevLocn())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "AbbrevLocation", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getAbbrevLocn(), "AbbrevLocation", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getAbbrevLocn(), "AbbrevLocation", cmrCountry));
+      results.add(update);
+    }
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getOrgNo(), newData.getOrgNo())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "OriginatorNo", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getOrgNo(), "OriginatorNo", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getOrgNo(), "OriginatorNo", cmrCountry));
+      results.add(update);
+    }
+
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCommercialFinanced(), newData.getCommercialFinanced())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "CommercialFinanced", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getCommercialFinanced(), "CommercialFinanced", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getCommercialFinanced(), "CommercialFinanced", cmrCountry));
+      results.add(update);
+    }
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCsBo(), newData.getCsBo())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "CSBOCd", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getCsBo(), "CSBOCd", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getCsBo(), "CSBOCd", cmrCountry));
+      results.add(update);
+    }
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getContactName2(), newData.getContactName2())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "ContactName2", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getContactName2(), "ContactName2", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getContactName2(), "ContactName2", cmrCountry));
+      results.add(update);
+    }
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getEmail1(), newData.getEmail1())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "Email1", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getEmail1(), "Email1", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getEmail1(), "Email1", cmrCountry));
+      results.add(update);
+    }
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getContactName1(), newData.getContactName1())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "ContactName1", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getContactName1(), "ContactName1", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getContactName1(), "ContactName1", cmrCountry));
+      results.add(update);
+    }
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getContactName3(), newData.getContactName3())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "ContactName3", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getContactName3(), "ContactName3", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getContactName3(), "ContactName3", cmrCountry));
+      results.add(update);
+    }
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getBpName(), newData.getBpName())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "BPName", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getBpName(), "BPName", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getBpName(), "BPName", cmrCountry));
+      results.add(update);
+    }
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getEmail2(), newData.getEmail2())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "Email2", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getEmail2(), "Email2", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getEmail2(), "Email2", cmrCountry));
+      results.add(update);
+    }
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getBusnType(), newData.getBusnType())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "BusnType", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getBusnType(), "BusnType", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getBusnType(), "BusnType", cmrCountry));
+      results.add(update);
+    }
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getAffiliate(), newData.getAffiliate())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "Affiliate", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getAffiliate(), "Affiliate", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getAffiliate(), "Affiliate", cmrCountry));
+      results.add(update);
+    }
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getEmail3(), newData.getEmail3())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "Email3", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getEmail3(), "Email3", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getEmail3(), "Email3", cmrCountry));
+      results.add(update);
+    }
+
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getMrcCd(), newData.getMrcCd())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "MrcCd", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getMrcCd(), "MrcCd", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getMrcCd(), "MrcCd", cmrCountry));
+      results.add(update);
+    }
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getRepTeamMemberNo(), newData.getRepTeamMemberNo())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "SalRepNameNo", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getRepTeamMemberNo(), "SalRepNameNo", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getRepTeamMemberNo(), "SalRepNameNo", cmrCountry));
+      results.add(update);
+    }
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getCollectionCd(), newData.getCollectionCd())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "CollectionCd", "-"));
       update.setNewData(service.getCodeAndDescription(newData.getCollectionCd(), "CollectionCd", cmrCountry));
       update.setOldData(service.getCodeAndDescription(oldData.getCollectionCd(), "CollectionCd", cmrCountry));
-      results.add(update);
-    }
-    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getModeOfPayment(), newData.getModeOfPayment())) {
-      update = new UpdatedDataModel();
-      update.setDataField(PageManager.getLabel(cmrCountry, "ModeOfPayment", "-"));
-      update.setNewData(newData.getModeOfPayment());
-      update.setOldData(oldData.getModeOfPayment());
-      results.add(update);
-    }
-    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getEmbargoCd(), newData.getEmbargoCd())) {
-      update = new UpdatedDataModel();
-      update.setDataField(PageManager.getLabel(cmrCountry, "EmbargoCode", "-"));
-      update.setNewData(service.getCodeAndDescription(newData.getEmbargoCd(), "EmbargoCode", cmrCountry));
-      update.setOldData(service.getCodeAndDescription(oldData.getEmbargoCd(), "EmbargoCode", cmrCountry));
-      results.add(update);
-    }
-    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getTaxCd2(), newData.getTaxCd2())) {
-      update = new UpdatedDataModel();
-      update.setDataField(PageManager.getLabel(cmrCountry, "LocalTax2", "-"));
-      update.setNewData(service.getCodeAndDescription(newData.getTaxCd2(), "LocalTax2", cmrCountry));
-      update.setOldData(service.getCodeAndDescription(oldData.getTaxCd2(), "LocalTax2", cmrCountry));
       results.add(update);
     }
     if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getEngineeringBo(), newData.getEngineeringBo())) {
@@ -211,6 +318,21 @@ public class TWHandler extends GEOHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getEngineeringBo(), "EngineeringBo", cmrCountry));
       results.add(update);
     }
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getSitePartyId(), newData.getSitePartyId())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "SitePartyID", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getSitePartyId(), "SitePartyID", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getSitePartyId(), "SitePartyID", cmrCountry));
+      results.add(update);
+    }
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getSearchTerm(), newData.getSearchTerm())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "SearchTerm", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getSearchTerm(), "SearchTerm", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getSearchTerm(), "SearchTerm", cmrCountry));
+      results.add(update);
+    }
+
   }
 
   /**
@@ -242,6 +364,105 @@ public class TWHandler extends GEOHandler {
   public void addSummaryUpdatedFieldsForAddress(RequestSummaryService service, String cmrCountry, String addrTypeDesc, String sapNumber,
       UpdatedAddr addr, List<UpdatedNameAddrModel> results, EntityManager entityManager) {
 
+    if (!equals(addr.getCustNm1(), addr.getCustNm1Old())) {
+      UpdatedNameAddrModel update = new UpdatedNameAddrModel();
+      update.setAddrType(addrTypeDesc);
+      update.setSapNumber(sapNumber);
+      update.setDataField(PageManager.getLabel(cmrCountry, "CustomerName1", "-"));
+      update.setNewData(addr.getCustNm1());
+      update.setOldData(addr.getCustNm1Old());
+      results.add(update);
+    }
+    if (!equals(addr.getCustNm2(), addr.getCustNm2Old())) {
+      UpdatedNameAddrModel update = new UpdatedNameAddrModel();
+      update.setAddrType(addrTypeDesc);
+      update.setSapNumber(sapNumber);
+      update.setDataField(PageManager.getLabel(cmrCountry, "CustomerName2", "-"));
+      update.setNewData(addr.getCustNm2());
+      update.setOldData(addr.getCustNm2Old());
+      results.add(update);
+    }
+    if (!equals(addr.getCustNm3(), addr.getCustNm3Old())) {
+      UpdatedNameAddrModel update = new UpdatedNameAddrModel();
+      update.setAddrType(addrTypeDesc);
+      update.setSapNumber(sapNumber);
+      update.setDataField(PageManager.getLabel(cmrCountry, "ChinaCustomerName1", "-"));
+      update.setNewData(addr.getCustNm3());
+      update.setOldData(addr.getCustNm3Old());
+      results.add(update);
+    }
+    if (!equals(addr.getCustNm4(), addr.getCustNm4Old())) {
+      UpdatedNameAddrModel update = new UpdatedNameAddrModel();
+      update.setAddrType(addrTypeDesc);
+      update.setSapNumber(sapNumber);
+      update.setDataField(PageManager.getLabel(cmrCountry, "ChinaCustomerName2", "-"));
+      update.setNewData(addr.getCustNm4());
+      update.setOldData(addr.getCustNm4Old());
+      results.add(update);
+    }
+    if (!equals(addr.getAddrTxt(), addr.getAddrTxtOld())) {
+      UpdatedNameAddrModel update = new UpdatedNameAddrModel();
+      update.setAddrType(addrTypeDesc);
+      update.setSapNumber(sapNumber);
+      update.setDataField(PageManager.getLabel(cmrCountry, "StreetAddress1", "-"));
+      update.setNewData(addr.getAddrTxt());
+      update.setOldData(addr.getAddrTxtOld());
+      results.add(update);
+    }
+    if (!equals(addr.getAddrTxt2(), addr.getAddrTxt2Old())) {
+      UpdatedNameAddrModel update = new UpdatedNameAddrModel();
+      update.setAddrType(addrTypeDesc);
+      update.setSapNumber(sapNumber);
+      update.setDataField(PageManager.getLabel(cmrCountry, "StreetAddress2", "-"));
+      update.setNewData(addr.getAddrTxt2());
+      update.setOldData(addr.getAddrTxt2Old());
+      results.add(update);
+    }
+    if (!equals(addr.getDept(), addr.getDeptOld())) {
+      UpdatedNameAddrModel update = new UpdatedNameAddrModel();
+      update.setAddrType(addrTypeDesc);
+      update.setSapNumber(sapNumber);
+      update.setDataField(PageManager.getLabel(cmrCountry, "ChinaStreetAddress1", "-"));
+      update.setNewData(addr.getDept());
+      update.setOldData(addr.getDeptOld());
+      results.add(update);
+    }
+    if (!equals(addr.getBldg(), addr.getBldgOld())) {
+      UpdatedNameAddrModel update = new UpdatedNameAddrModel();
+      update.setAddrType(addrTypeDesc);
+      update.setSapNumber(sapNumber);
+      update.setDataField(PageManager.getLabel(cmrCountry, "ChinaStreetAddress2", "-"));
+      update.setNewData(addr.getBldg());
+      update.setOldData(addr.getBldgOld());
+      results.add(update);
+    }
+    if (!equals(addr.getPostCd(), addr.getPostCdOld())) {
+      UpdatedNameAddrModel update = new UpdatedNameAddrModel();
+      update.setAddrType(addrTypeDesc);
+      update.setSapNumber(sapNumber);
+      update.setDataField(PageManager.getLabel(cmrCountry, "PostalCode", "-"));
+      update.setNewData(addr.getPostCd());
+      update.setOldData(addr.getPostCdOld());
+      results.add(update);
+    }
+    if (!equals(addr.getLandCntry(), addr.getLandCntryOld())) {
+      UpdatedNameAddrModel update = new UpdatedNameAddrModel();
+      update.setAddrType(addrTypeDesc);
+      update.setSapNumber(sapNumber);
+      update.setDataField(PageManager.getLabel(cmrCountry, "LandedCountry", "-"));
+      update.setNewData(addr.getLandCntry());
+      update.setOldData(addr.getLandCntryOld());
+      results.add(update);
+    }
+    if (!equals(addr.getSapNo(), addr.getSapNoOld())) {
+      UpdatedNameAddrModel update = new UpdatedNameAddrModel();
+      update.setAddrType(addrTypeDesc);
+      update.setSapNumber(sapNumber);
+      update.setDataField(PageManager.getLabel(cmrCountry, "SAPNumber", "-"));
+      update.setNewData(addr.getSapNo());
+      update.setOldData(addr.getSapNoOld());
+      results.add(update);
+    }
   }
 
   @Override

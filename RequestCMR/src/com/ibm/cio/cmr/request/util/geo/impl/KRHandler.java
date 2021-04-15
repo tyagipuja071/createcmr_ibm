@@ -42,6 +42,8 @@ import com.ibm.cio.cmr.request.model.requestentry.ImportCMRModel;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.user.AppUser;
@@ -51,7 +53,6 @@ import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
-import com.ibm.cio.cmr.request.util.wtaas.WtaasQueryKeys;
 import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
 
 /**
@@ -81,35 +82,35 @@ public class KRHandler extends GEOHandler {
 
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
-	  data.setAbbrevNm(mainRecord.getCmrName1Plain());
-	  
-	    //String cmrIssuingCntry = data.getCmrIssuingCntry();
-	    if (data.getAbbrevLocn() != null && data.getAbbrevLocn().length() > 12 ) {
-	      data.setAbbrevLocn(data.getAbbrevLocn().substring(0, 12));
-	    }
-	    else{
-	    	data.setAbbrevLocn("Korea");
-	    }
-	   
-	  // 【Representative(CEO) name in business license】
-	  //data.setContactName1(mainRecord.getUsCmrRestrictTo());
-//	    if(data.getContactName1()!= null && data.getContactName1().length() > 30){
-//	    	data.setContactName1(data.getContactName1().substring(0,30));
-//	    }else{
-	    	data.setContactName1(data.getContactName1());
-//	    }
-	  
-	    data.setContactName2(mainRecord.getCmrName2());
-	  
-	  //GB segment default setting
-      if (StringUtils.isEmpty(mainRecord.getCmrTier()) || CmrConstants.FIND_CMR_BLANK_CLIENT_TIER.equals(mainRecord.getCmrTier())) {
-          data.setClientTier(CmrConstants.CLIENT_TIER_UNASSIGNED);
-        }
-      data.setRepTeamMemberNo(mainRecord.getRepTeamMemberNo());
-      this.setMRC(admin,data);
-      data.setContactName2(data.getContactName2());
-      
-      //autoSetAbbrevLocnNMOnImport(admin, data, results, mainRecord);
+    data.setAbbrevNm(mainRecord.getCmrName1Plain());
+
+    // String cmrIssuingCntry = data.getCmrIssuingCntry();
+    if (data.getAbbrevLocn() != null && data.getAbbrevLocn().length() > 12) {
+      data.setAbbrevLocn(data.getAbbrevLocn().substring(0, 12));
+    } else {
+      data.setAbbrevLocn("Korea");
+    }
+
+    // 【Representative(CEO) name in business license】
+    // data.setContactName1(mainRecord.getUsCmrRestrictTo());
+    // if(data.getContactName1()!= null && data.getContactName1().length() >
+    // 30){
+    // data.setContactName1(data.getContactName1().substring(0,30));
+    // }else{
+    data.setContactName1(data.getContactName1());
+    // }
+
+    data.setContactName2(mainRecord.getCmrName2());
+
+    // GB segment default setting
+    if (StringUtils.isEmpty(mainRecord.getCmrTier()) || CmrConstants.FIND_CMR_BLANK_CLIENT_TIER.equals(mainRecord.getCmrTier())) {
+      data.setClientTier(CmrConstants.CLIENT_TIER_UNASSIGNED);
+    }
+    data.setRepTeamMemberNo(mainRecord.getRepTeamMemberNo());
+    this.setMRC(admin, data);
+    data.setContactName2(data.getContactName2());
+
+    // autoSetAbbrevLocnNMOnImport(admin, data, results, mainRecord);
   }
 
   @Override
@@ -146,6 +147,20 @@ public class KRHandler extends GEOHandler {
 
   @Override
   public void doBeforeAdminSave(EntityManager entityManager, Admin admin, String cmrIssuingCntry) throws Exception {
+    if (StringUtils.isEmpty(admin.getMainCustNm1())) {
+      String sql = ExternalizedQuery.getSql("BATCH.GET_ADDR_FOR_SAP_NO_ZS01");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("REQ_ID", admin.getId().getReqId());
+      List<Addr> addresses = query.getResults(Addr.class);
+      Addr soldToAddr = new Addr();
+      if (addresses != null && addresses.size() > 0) {
+        soldToAddr = addresses.get(0);
+      }
+      if (soldToAddr != null) {
+        admin.setMainCustNm1(soldToAddr.getCustNm1());
+        admin.setMainCustNm2(soldToAddr.getCustNm2());
+      }
+    }
   }
 
   @Override
@@ -598,27 +613,28 @@ public class KRHandler extends GEOHandler {
   }
 
   private void setMRC(Admin admin, Data data) {
-	    String[] arryISUCdForMRC3 = { "32", "34" };
-	    String isuCd = data.getIsuCd();
-	    Boolean mrcFlag3 = false;
-	    if (admin.getReqType().equals("C")) {
-	      data.setMrcCd("");
-	      if (!data.getIsuCd().isEmpty() && data.getIsuCd().length() > 0) {
-	        for (String s : arryISUCdForMRC3) {
-	          if (isuCd != null && s.equals(isuCd)) {
-	            mrcFlag3 = true;
-	          } else {
-	            // do nothing
-	          }
-	        }
-	      }
-	      if (mrcFlag3.equals(true)) {
-	        data.setMrcCd("3");
-	      } else if (mrcFlag3.equals(false)) {
-	        data.setMrcCd("2");
-	      }
-	    }
-	  }
+    String[] arryISUCdForMRC3 = { "32", "34" };
+    String isuCd = data.getIsuCd();
+    Boolean mrcFlag3 = false;
+    if (admin.getReqType().equals("C")) {
+      data.setMrcCd("");
+      if (!data.getIsuCd().isEmpty() && data.getIsuCd().length() > 0) {
+        for (String s : arryISUCdForMRC3) {
+          if (isuCd != null && s.equals(isuCd)) {
+            mrcFlag3 = true;
+          } else {
+            // do nothing
+          }
+        }
+      }
+      if (mrcFlag3.equals(true)) {
+        data.setMrcCd("3");
+      } else if (mrcFlag3.equals(false)) {
+        data.setMrcCd("2");
+      }
+    }
+  }
+
   private String getOriginatorIdInAdmin(EntityManager entityManager, long reqId) {
 
     AdminPK adminPk = new AdminPK();
