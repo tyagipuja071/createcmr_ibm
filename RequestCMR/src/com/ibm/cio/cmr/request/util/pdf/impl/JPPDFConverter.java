@@ -172,6 +172,9 @@ public class JPPDFConverter extends DefaultPDFConverter {
     main.addCell(createLabelCell("BP Company Name:"));
     main.addCell(createValueCell(data.getEmail3()));
 
+    main.addCell(createLabelCell(""));
+    main.addCell(createValueCell(""));
+
     document.add(main);
   }
 
