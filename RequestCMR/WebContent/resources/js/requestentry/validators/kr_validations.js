@@ -57,7 +57,8 @@ dojo.addOnLoad(function() {
   GEOHandler.setRevertIsicBehavior(false);
   GEOHandler.addAfterConfig(afterConfigKR, GEOHandler.KR);
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.KR);
-  GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.KR, GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.addAfterTemplateLoad(afterConfigKR, GEOHandler.KR);
   // FormManager.skipByteChecks([ 'billingPstlAddr', 'divn', 'custNm3', 'custNm4' ]);
+  GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.KR, GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.registerValidator(addDPLCheckValidator, GEOHandler.KR, GEOHandler.ROLE_REQUESTER, true);
 });
