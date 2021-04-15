@@ -97,10 +97,12 @@ public class KRPDFConverter extends DefaultPDFConverter {
             document.close();
           }
         } finally {
-          pdf.close();
+          if (!pdf.isClosed())
+            pdf.close();
         }
       } finally {
-        writer.close();
+        if (!writer.isCloseStream())
+          writer.close();
       }
       return true;
     } catch (Exception e) {
@@ -429,6 +431,7 @@ public class KRPDFConverter extends DefaultPDFConverter {
     for (char charac : text.toCharArray()) {
       System.out.println(Character.UnicodeBlock.of(charac));
       if (Character.UnicodeBlock.of(charac) == Character.UnicodeBlock.HANGUL_SYLLABLES) {
+        LOG.debug("Character.UnicodeBlock.of(" + charac + ") == Hangul Syllables");
         return "KOREA";
       }
     }
@@ -441,6 +444,7 @@ public class KRPDFConverter extends DefaultPDFConverter {
     if ((text != null && (!text.isEmpty())) && (textContainingLanguage(text) != null)) {
       if (textContainingLanguage(text).equalsIgnoreCase("KOREA")) {
         cell.setFont(this.koreaFont);
+        LOG.debug("set " + text + " of rowSpan " + rowSpan + " and colSpan " + colSpan + " as KOREA font.");
         Paragraph label = new Paragraph();
         label.setFontSize(7);
         label.add(text);
