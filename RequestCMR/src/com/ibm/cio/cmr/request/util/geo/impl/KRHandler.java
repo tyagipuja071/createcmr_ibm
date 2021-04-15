@@ -793,7 +793,49 @@ public class KRHandler extends GEOHandler {
   public void convertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry, ImportCMRModel searchModel)
       throws Exception {
     // TODO Auto-generated method stub
+    List<FindCMRRecordModel> recordsFromSearch = source.getItems();
+    List<FindCMRRecordModel> filteredRecords = new ArrayList<>();
 
+    if (recordsFromSearch != null && !recordsFromSearch.isEmpty() && recordsFromSearch.size() > 0) {
+      doFilterAddresses(reqEntry, recordsFromSearch, filteredRecords);
+      if (!filteredRecords.isEmpty() && filteredRecords.size() > 0 && filteredRecords != null) {
+        source.setItems(filteredRecords);
+      }
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  public static void doFilterAddresses(RequestEntryModel reqEntry, Object mainRecords, Object filteredRecords) {
+    if (mainRecords instanceof java.util.List<?> && filteredRecords instanceof java.util.List<?>) {
+      // during convertFrom
+      if (reqEntry.getReqType().equalsIgnoreCase(CmrConstants.REQ_TYPE_UPDATE)) {
+        List<FindCMRRecordModel> recordsToCheck = (List<FindCMRRecordModel>) mainRecords;
+        List<FindCMRRecordModel> recordsToReturn = (List<FindCMRRecordModel>) filteredRecords;
+        for (Object tempRecObj : recordsToCheck) {
+          if (tempRecObj instanceof FindCMRRecordModel) {
+            FindCMRRecordModel tempRec = (FindCMRRecordModel) tempRecObj;
+
+            if (!StringUtils.isEmpty(tempRec.getCmrAddrSeq())) {
+              recordsToReturn.add(tempRec);
+            }
+          }
+        }
+      }
+
+      if (reqEntry.getReqType().equalsIgnoreCase(CmrConstants.REQ_TYPE_CREATE)) {
+        List<FindCMRRecordModel> recordsToCheck = (List<FindCMRRecordModel>) mainRecords;
+        List<FindCMRRecordModel> recordsToReturn = (List<FindCMRRecordModel>) filteredRecords;
+        for (Object tempRecObj : recordsToCheck) {
+          if (tempRecObj instanceof FindCMRRecordModel) {
+            FindCMRRecordModel tempRec = (FindCMRRecordModel) tempRecObj;
+            if (tempRec.getCmrAddrTypeCode().equalsIgnoreCase("ZS01")) {
+              // RETURN ONLY THE SOLD-TO ADDRESS FOR CREATES
+              recordsToReturn.add(tempRec);
+            }
+          }
+        }
+      }
+    }
   }
 
   @Override
