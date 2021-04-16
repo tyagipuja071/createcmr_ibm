@@ -756,7 +756,7 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
           ${summary.addr.postCd}
 				</cmr:column>
 		</cmr:view>
-		<cmr:view forGEO="JP,TW,KR">
+		<cmr:view forGEO="JP">
 		<cmr:column span="1" width="130">
           <label> <cmr:fieldLabel fieldId="Contact" />:</label>
         </cmr:column>
@@ -764,7 +764,7 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
           ${summary.addr.contact}
 				</cmr:column>
 		</cmr:view>
-        <cmr:view forGEO="MCO,MCO1,MCO2,FR,NORDX,BELUX,NL,JP,TW,KR">
+        <cmr:view forGEO="MCO,MCO1,MCO2,FR,NORDX,BELUX,NL,JP">
           <cmr:column span="1" width="130">
             <label><cmr:fieldLabel fieldId="CustPhone" />:</label>
           </cmr:column>
@@ -780,10 +780,10 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
             ${summary.addr.stateProv}
             ${summary.stateprovdesc != null ? " - ".concat(summary.stateprovdesc) : ""}
         </cmr:column>
-        <cmr:column span="1" width="130" exceptForGEO="EMEA,IERP,CND,MCO,MCO1,MCO2,CEMEA,FR,NORDX,BELUX,NL,JP" exceptForCountry="631">
+        <cmr:column span="1" width="130" exceptForGEO="EMEA,IERP,CND,MCO,MCO1,MCO2,CEMEA,FR,NORDX,BELUX,NL,JP,TW,KR" exceptForCountry="631">
           <label> <cmr:fieldLabel fieldId="Division" />:</label>
         </cmr:column>
-        <cmr:column span="1" width="170" exceptForGEO="EMEA,IERP,CND,MCO,MCO1,MCO2,CEMEA,FR,NORDX,BELUX,NL,JP" exceptForCountry="631">
+        <cmr:column span="1" width="170" exceptForGEO="EMEA,IERP,CND,MCO,MCO1,MCO2,CEMEA,FR,NORDX,BELUX,NL,JP,TW,KR" exceptForCountry="631">
           ${summary.addr.divn}
         </cmr:column>
       </cmr:row>
