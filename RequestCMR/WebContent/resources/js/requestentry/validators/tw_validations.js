@@ -6,6 +6,7 @@ function afterConfigTW() {
   var custGrp = FormManager.getActualValue('custGrp');
   var invoiceSplitCd = FormManager.getActualValue('invoiceSplitCd');
   var role = null;
+  var taxLocation = null;
   FormManager.readOnly('capInd');
   FormManager.setValue('capInd', true);
   FormManager.readOnly('cmrOwner');
@@ -16,6 +17,7 @@ function afterConfigTW() {
 
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
+    taxLocation = _pagemodel.mktgDept;
   }
 
   if (!FormManager.getField('reqType') || reqType == '') {
@@ -31,7 +33,9 @@ function afterConfigTW() {
       FormManager.addValidator('custAcctType', Validators.REQUIRED, [ 'Custome Type' ], 'MAIN_CUST_TAB');
       FormManager.addValidator('mktgDept', Validators.REQUIRED, [ 'Tax Location' ], 'MAIN_CUST_TAB');
     } else if (reqType == 'U') {
-      FormManager.clearValue('mktgDept');
+      if (taxLocation == null || taxLocation == '') {
+        FormManager.clearValue('mktgDept');
+      }
       FormManager.removeValidator('vat', Validators.REQUIRED);
       FormManager.removeValidator('mktgDept', Validators.REQUIRED);
       FormManager.removeValidator('invoiceSplitCd', Validators.REQUIRED);
