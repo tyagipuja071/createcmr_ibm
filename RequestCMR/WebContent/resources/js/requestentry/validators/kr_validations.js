@@ -69,6 +69,68 @@ function setChecklistStatus() {
   }
 }
 
+function addKRChecklistValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        console.log('validating checklist..');
+        var checklist = dojo.query('table.checklist');
+
+        // local customer name if found
+        var localNm = checklist.query('input[name="localCustNm"]');
+        if (localNm.length > 0 && localNm[0].value.trim() == '') {
+          return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
+        }
+
+        // local customer name if found
+        var localAddr = checklist.query('input[name="localAddr"]');
+        if (localAddr.length > 0 && localAddr[0].value.trim() == '') {
+          return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
+        }
+
+        var freeTxtField1 = checklist.query('input[name="freeTxtField1"]');
+        if (freeTxtField1.length > 0 && freeTxtField1[0].value.trim() == '') {
+          return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
+        }
+
+        var freeTxtField2 = checklist.query('input[name="freeTxtField2"]');
+        if (freeTxtField2.length > 0 && freeTxtField2[0].value.trim() == '') {
+          return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
+        }
+
+        var freeTxtField3 = checklist.query('input[name="freeTxtField3"]');
+        if (freeTxtField3.length > 0 && freeTxtField3[0].value.trim() == '') {
+          return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
+        }
+
+        var questions = checklist.query('input[type="radio"]');
+        if (questions.length > 0) {
+          var noOfQuestions = questions.length / 2;
+          var checkCount = 0;
+          for (var i = 0; i < questions.length; i++) {
+            if (questions[i].checked) {
+              checkCount++;
+            }
+          }
+          if (noOfQuestions != checkCount) {
+            return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
+          }
+        }
+
+        // add check for checklist on DB
+        var reqId = FormManager.getActualValue('reqId');
+        var record = cmr.getRecord('GBL_CHECKLIST', 'ProlifChecklist', {
+          REQID : reqId
+        });
+        if (!record || !record.sectionA1) {
+          return new ValidationResult(null, false, 'Checklist has not been registered yet. Please execute a \'Save\' action before sending for processing to avoid any data loss.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CHECKLIST_TAB', 'frmCMR');
+}
+
 function RemoveCrossAddressMandatory() {
   var custSubScnrio = FormManager.getActualValue('custSubGrp');
   if (custSubScnrio == 'CROSS') {
