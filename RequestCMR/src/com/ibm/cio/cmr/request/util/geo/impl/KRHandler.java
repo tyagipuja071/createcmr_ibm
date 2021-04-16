@@ -82,13 +82,13 @@ public class KRHandler extends GEOHandler {
 
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
-    data.setAbbrevNm(mainRecord.getCmrName1Plain());
-
-    // String cmrIssuingCntry = data.getCmrIssuingCntry();
-    if (data.getAbbrevLocn() != null && data.getAbbrevLocn().length() > 12) {
-      data.setAbbrevLocn(data.getAbbrevLocn().substring(0, 12));
+	  
+	  data.setAbbrevNm(mainRecord.getCmrName1Plain());	  
+	  
+    if (mainRecord.getCmrCountryLandedDesc() != null ) {
+      data.setAbbrevLocn(mainRecord.getCmrCountryLandedDesc());
     } else {
-      data.setAbbrevLocn("Korea");
+      data.setAbbrevLocn("South Korea");
     }
 
     // 【Representative(CEO) name in business license】
@@ -923,6 +923,14 @@ public class KRHandler extends GEOHandler {
     return approver;
   }
 
+  private void setAbbrevNM(Data data, String abbrevNM) {
+
+	    if (!StringUtils.isBlank(abbrevNM))
+	      if (abbrevNM.length() > 21)
+	        data.setAbbrevNm(abbrevNM.substring(0, 21));
+	      else
+	        data.setAbbrevNm(abbrevNM);
+	  }
   private void setMRC(Admin admin, Data data) {
     String[] arryISUCdForMRC3 = { "32", "34" };
     String isuCd = data.getIsuCd();
