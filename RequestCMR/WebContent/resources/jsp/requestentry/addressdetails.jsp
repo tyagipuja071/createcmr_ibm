@@ -138,7 +138,8 @@
   
   <!-- Korea -->
   <cmr:view forCountry="766">
-    <cmr:row>
+    <br>
+     <cmr:row addBackground="true">
       <cmr:column span="1" width="200">
         <cmr:label fieldId="custNm1_view">
           <span class="lbl-CustomerName1">${ui.custName1}</span>:
@@ -147,8 +148,9 @@
       <cmr:column span="2" width="700">
         <div id="custNm1_view">-</div>
       </cmr:column>
-      </cmr:row>
-      <cmr:row>
+      <br>
+      </cmr:row>    
+      <cmr:row addBackground="true">
       <cmr:column span="1" width="200">
         <cmr:label fieldId="custNm2_view">
           <span class="lbl-CustomerName2">${ui.custName2}</span>:
@@ -157,8 +159,9 @@
       <cmr:column span="2" width="700">
         <div id="custNm2_view">-</div>
       </cmr:column>
+      <br>
       </cmr:row>
-      <cmr:row>
+      <cmr:row addBackground="true">
       <cmr:column span="1" width="200">
         <cmr:label fieldId="custNm3_view">
           <span class="lbl-CustomerName3">${ui.custName3}</span>:
@@ -167,8 +170,9 @@
       <cmr:column span="2" width="700">
         <div id="custNm3_view">-</div>
       </cmr:column>
+      <br>
       </cmr:row>
-      <cmr:row>
+      <cmr:row addBackground="true">
       <cmr:column span="1" width="300">
         <cmr:label fieldId="billingPstlAddr_view">
           <span class="lbl-BillingPstlAddr">${ui.billingPstlAddr}</span>:
@@ -178,7 +182,28 @@
         <div id="billingPstlAddr_view">-</div>
       </cmr:column>
       </cmr:row>
+      <br> 
       <cmr:row>
+      <cmr:column  span="1" >
+       <cmr:label fieldId="StreetAddress1_view">
+        <span class="lbl-StreetAddress1">Street Address1</span>:
+       </cmr:label>
+      </cmr:column>
+      <cmr:column span="2">
+        <div id="addrTxt_view">-</div>
+      </cmr:column>
+      </cmr:row>
+      <cmr:row>
+      <cmr:column  span="1" >
+       <cmr:label fieldId="StreetAddress2_view">
+        <span class="lbl-StreetAddress2">${ui.addrTxt2}</span>:
+       </cmr:label>
+      </cmr:column>
+      <cmr:column span="2">
+        <div id="addrTxt2_view">-</div>
+      </cmr:column>
+      </cmr:row>         
+     <cmr:row>    
       <cmr:column span="1" width="300">
         <cmr:label fieldId="custNm4_view">
           <span class="lbl-CustomerName4">${ui.custName4}</span>:
@@ -197,7 +222,28 @@
       <cmr:column span="2" width="700" >
         <div id="divn_view">-</div>
       </cmr:column>
-      </cmr:row>    
+      </cmr:row>  
+      <cmr:row>
+      <cmr:column span="1" width="300">
+	    <cmr:label fieldId="countyName_view">
+			<span class="lbl-LocalLangCountryName">${ui.countyName}</span>:
+		</cmr:label>
+      </cmr:column>
+		<cmr:column span="2">
+			<div id="countyName_view">-</div>
+		</cmr:column>
+		</cmr:row>
+      <cmr:row>
+       <cmr:column span="1" width="300">
+        <cmr:label fieldId="contact_view">
+          <span class="lbl-Contact">${ui.concact}</span>:
+          </cmr:label>
+       </cmr:column>
+      <cmr:column span="2">
+        <div id="contact_view">-</div>
+     </cmr:column>
+     </cmr:row> 
+      <br>  
       <cmr:row>
         <cmr:column span="1">
 	      <cmr:label fieldId="city1_view">
@@ -232,25 +278,7 @@
       <cmr:column span="2">
         <div id="stateProv_view">-</div>
       </cmr:column>
-      </cmr:row> 
-      <cmr:row>
-      <cmr:column  span="1" >
-       <cmr:label fieldId="StreetAddress1_view">
-        <span class="lbl-StreetAddress1">Street Address1</span>:
-       </cmr:label>
-      </cmr:column>
-      <cmr:column span="2">
-        <div id="addrTxt_view">-</div>
-      </cmr:column>
-      <cmr:column  span="1" >
-       <cmr:label fieldId="StreetAddress2_view">
-        <span class="lbl-StreetAddress2">${ui.addrTxt2}</span>:
-       </cmr:label>
-      </cmr:column>
-      <cmr:column span="2">
-        <div id="addrTxt2_view">-</div>
-      </cmr:column>
-      </cmr:row>         
+      </cmr:row>      
       <cmr:row>
       <cmr:column span="1">
         <cmr:label fieldId="postCd_view">
@@ -261,16 +289,6 @@
         <div id="postCd_view">-</div>
       </cmr:column>
       <cmr:column span="1">
-        <cmr:label fieldId="poBox_view">
-          <span class="lbl-POBox">${ui.poBox}</span>:
-         </cmr:label>
-      </cmr:column>
-      <cmr:column span="2">
-        <div id="poBox_view">-</div>
-      </cmr:column>
-      </cmr:row>
-      <cmr:row>
-       <cmr:column span="1">
         <cmr:label fieldId="transportZone_view">
           <span class="lbl-addrUpdateDt">Transport Zone</span>:
           </cmr:label>
@@ -278,6 +296,16 @@
       <cmr:column span="2">
       <div id="transportZone_view">-</div>
       </cmr:column>
+      </cmr:row>
+      <cmr:row>
+      <cmr:column span="1">
+	    <cmr:label fieldId="dept_view">
+			<span class="lbl-Department">${ui.Department}</span>:
+		</cmr:label>
+      </cmr:column>
+		<cmr:column span="2">
+			<div id="dept_view">-</div>
+		</cmr:column>
       <cmr:column span="1">
         <cmr:label fieldId="poBoxCity_view">
           <span class="lbl-POBoxCity">${ui.poBoxCity}</span>:
@@ -288,51 +316,13 @@
       </cmr:column>
      </cmr:row>    
      <cmr:row>
-      <cmr:column span="1">
-	    <cmr:label fieldId="dept_view">
-			<span class="lbl-Department">${ui.Department}</span>:
-		</cmr:label>
-      </cmr:column>
-		<cmr:column span="2">
-			<div id="dept_view">-</div>
-		</cmr:column>
-      <cmr:column span="1">
-        <cmr:label fieldId="floor_view">
-          <span class="lbl-Floor">${ui.floor}</span>:
-          </cmr:label>
+       <cmr:column span="1">
+        <cmr:label fieldId="poBox_view">
+          <span class="lbl-POBox">${ui.poBox}</span>:
+         </cmr:label>
       </cmr:column>
       <cmr:column span="2">
-        <div id="floor_view">-</div>
-      </cmr:column>
-     </cmr:row>    
-     <cmr:row>
-      <cmr:column span="1" width="300">
-	    <cmr:label fieldId="countyName_view">
-			<span class="lbl-LocalLangCountryName">${ui.countyName}</span>:
-		</cmr:label>
-      </cmr:column>
-		<cmr:column span="2">
-			<div id="countyName_view">-</div>
-		</cmr:column>
-		</cmr:row>
-      <cmr:row>
-       <cmr:column span="1" width="300">
-        <cmr:label fieldId="contact_view">
-          <span class="lbl-Contact">${ui.concact}</span>:
-          </cmr:label>
-       </cmr:column>
-      <cmr:column span="2">
-        <div id="contact_view">-</div>
-     </cmr:column>
-     </cmr:row>     
-    <cmr:row>     
-      <cmr:column span="1">
-        <cmr:label fieldId="office_view">
-          <span class="lbl-Office">${ui.office}</span>:
-          </cmr:label>
-      </cmr:column>
-      <cmr:column span="2">
-        <div id="office_view">-</div>
+        <div id="poBox_view">-</div>
       </cmr:column>
       <cmr:column span="1" >
        <cmr:label fieldId="taxOffice_view">
@@ -342,6 +332,24 @@
       <cmr:column span="2">
         <div id="taxOffice_view">-</div>
      </cmr:column>
+     </cmr:row>    
+    <cmr:row>    
+      <cmr:column span="1">
+        <cmr:label fieldId="floor_view">
+          <span class="lbl-Floor">${ui.floor}</span>:
+          </cmr:label>
+      </cmr:column>
+      <cmr:column span="2">
+        <div id="floor_view">-</div>
+      </cmr:column>
+      <cmr:column span="1">
+        <cmr:label fieldId="office_view">
+          <span class="lbl-Office">${ui.office}</span>:
+          </cmr:label>
+      </cmr:column>
+      <cmr:column span="2">
+        <div id="office_view">-</div>
+      </cmr:column>
     </cmr:row>
     
     <cmr:row>     
