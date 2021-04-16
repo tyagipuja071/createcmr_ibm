@@ -134,7 +134,10 @@ function afterConfigForNORDX() {
   // CREATCMR-1656
   setCapRecordActivate();
 
-  removeKUKLAalt();
+  kuklaAltShowAndHide();
+
+  // CREATCMR-2144
+  setCustPrefLangByCountry();
 }
 
 function disableLandCntry() {
@@ -3037,9 +3040,102 @@ function setCapRecordActivate() {
 }
 // CREATCMR-1656
 
-function removeKUKLAalt() {
-  $("#custClass_label img").remove();
+function kuklaAltShowAndHide() {
+  var custClassLabel = $("#custClass_label img").attr('title');
+  var kukla = FormManager.getActualValue('custClass');
+
+  if (custClassLabel != undefined) {
+    if (custClassLabel.match(kukla)) {
+      $("#custClass_label img").remove();
+    } else {
+      var altArray = custClassLabel.split('-');
+      $("#custClass_label img").attr('title', altArray[0]);
+    }
+  }
 }
+
+// CREATCMR-2144
+function setCustPrefLangByCountry() {
+
+  var field = FormManager.getField('custPrefLang');
+
+  var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var countryUse = FormManager.getActualValue('countryUse');
+
+  reqType = FormManager.getActualValue('reqType');
+
+  // Denmark, Faroe Islands, Greenland, Iceland
+  if (cmrIssuingCntry == '678') {
+    if (countryUse == '678' || countryUse == '678FO' || countryUse == '678GL' || countryUse == '678IS') {
+      FormManager.limitDropdownValues(field, [ 'K', 'E' ]);
+      if (reqType == 'U') {
+        if (typeof (_pagemodel) != 'undefined') {
+          FormManager.setValue('custPrefLang', _pagemodel.custPrefLang);
+          return;
+        }
+      }
+      FormManager.setValue(field, 'K');
+    }
+  }
+
+  if (cmrIssuingCntry == '702') {
+    if (countryUse == '702') {
+      // Finland
+      FormManager.limitDropdownValues(field, [ 'U', 'V', 'E' ]);
+
+      if (reqType == 'U') {
+        if (typeof (_pagemodel) != 'undefined') {
+          FormManager.setValue('custPrefLang', _pagemodel.custPrefLang);
+          return;
+        }
+      }
+
+      FormManager.setValue(field, 'U');
+    } else if (countryUse == '702EE' || countryUse == '702LT' || countryUse == '702LV') {
+      // Estonia, Lithuania, Latvia
+      FormManager.limitDropdownValues(field, [ 'U', 'V', 'E' ]);
+
+      if (reqType == 'U') {
+        if (typeof (_pagemodel) != 'undefined') {
+          FormManager.setValue('custPrefLang', _pagemodel.custPrefLang);
+          return;
+        }
+      }
+
+      FormManager.setValue(field, 'E');
+    }
+  }
+
+  // Norway
+  if (cmrIssuingCntry == '806') {
+    FormManager.limitDropdownValues(field, [ 'O', 'E' ]);
+
+    if (reqType == 'U') {
+      if (typeof (_pagemodel) != 'undefined') {
+        FormManager.setValue('custPrefLang', _pagemodel.custPrefLang);
+        return;
+      }
+    }
+
+    FormManager.setValue(field, 'O');
+  }
+
+  // Sweden
+  if (cmrIssuingCntry == '846') {
+    FormManager.limitDropdownValues(field, [ 'V', 'E' ]);
+
+    if (reqType == 'U') {
+      if (typeof (_pagemodel) != 'undefined') {
+        FormManager.setValue('custPrefLang', _pagemodel.custPrefLang);
+        return;
+      }
+    }
+
+    FormManager.setValue(field, 'V');
+  }
+
+}
+// CREATCMR-2144
 
 dojo.addOnLoad(function() {
   GEOHandler.NORDX = [ '846', '806', '702', '678' ];
@@ -3102,5 +3198,4 @@ dojo.addOnLoad(function() {
 
   // CREATCMR-1689
   GEOHandler.addAddrFunction(setAbbrevNmAddressSave, GEOHandler.NORDX);
-
 });

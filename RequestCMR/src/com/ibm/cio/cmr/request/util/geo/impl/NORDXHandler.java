@@ -712,6 +712,11 @@ public class NORDXHandler extends BaseSOFHandler {
     data.setModeOfPayment(modeOfPayment);
     // CREATCMR-1638
 
+    // CREATCMR-2144
+    String sprasCd = getSprasSapr3Kna1ForNordx(data.getCmrNo(), mainRecord.getCmrOrderBlock(), data.getCmrIssuingCntry());
+    data.setCustPrefLang(sprasCd);
+    // CREATCMR-2144
+
     // data.setEngineeringBo(this.currentImportValues.get("ACAdmDSC"));
     // LOG.trace("ACAdmDSC: " + data.getEngineeringBo());
     // CMR-1746 Change Start
@@ -1240,6 +1245,13 @@ public class NORDXHandler extends BaseSOFHandler {
     // data.setBpRelType("CA");
     // }
     // }
+    if ("U".equals(admin.getReqType())) {
+      if ("Y".equals(data.getCapInd())) {
+        data.setCapInd("Y");
+      } else {
+        data.setCapInd("N");
+      }
+    }
   }
 
   @Override
@@ -1403,6 +1415,22 @@ public class NORDXHandler extends BaseSOFHandler {
       update.setDataField(PageManager.getLabel(cmrCountry, "KUKLA", "KUKLA"));
       update.setNewData(newData.getCustClass());
       update.setOldData(oldData.getCustClass());
+      results.add(update);
+    }
+
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getCapInd(), newData.getCapInd())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "CAP Record", "CAP Record"));
+      update.setNewData(newData.getCapInd());
+      update.setOldData(oldData.getCapInd());
+      results.add(update);
+    }
+
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCustPrefLang(), newData.getCustPrefLang())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "Preferred Language", "Preferred Language"));
+      update.setNewData(newData.getCustPrefLang());
+      update.setOldData(oldData.getCustPrefLang());
       results.add(update);
     }
 
@@ -2176,7 +2204,6 @@ public class NORDXHandler extends BaseSOFHandler {
     return kunnr;
   }
 
-  // CREATCMR-1653
   private String getCurrencyCode(String kunnr) throws Exception {
     String currCode = "";
 
@@ -2276,6 +2303,40 @@ public class NORDXHandler extends BaseSOFHandler {
     return paymentCode;
   }
   // CREATCMR-1638
+
+  // CREATCMR-2144
+  private String getSprasSapr3Kna1ForNordx(String cmrNo, String ordBlk, String countryCd) throws Exception {
+    String spras = "";
+
+    String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
+    String mandt = SystemConfiguration.getValue("MANDT");
+    String sql = ExternalizedQuery.getSql("GET.KNA1.SPRAS");
+    sql = StringUtils.replace(sql, ":KATR6", "'" + countryCd + "'");
+    sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
+    sql = StringUtils.replace(sql, ":ZZKV_CUSNO", "'" + cmrNo + "'");
+    sql = StringUtils.replace(sql, ":AUFSD", "'" + ordBlk + "'");
+
+    String dbId = QueryClient.RDC_APP_ID;
+
+    QueryRequest query = new QueryRequest();
+    query.setSql(sql);
+    query.addField("SPRAS");
+
+    LOG.debug("Getting existing SPRAS value from RDc DB..");
+
+    QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
+    QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
+
+    if (response.isSuccess() && response.getRecords() != null && response.getRecords().size() != 0) {
+      List<Map<String, Object>> records = response.getRecords();
+      Map<String, Object> record = records.get(0);
+      spras = record.get("SPRAS") != null ? record.get("SPRAS").toString() : "";
+
+      LOG.debug("***RETURNING SPRAS > " + spras);
+    }
+    return spras;
+  }
+  // CREATCMR-2144
 
   // CMR-1746
   private String getACAdminFromLegacy(String rcyaa, String cmr_no) throws Exception {
