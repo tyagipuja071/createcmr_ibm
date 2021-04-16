@@ -148,8 +148,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(afterConfigKR, GEOHandler.KR);
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.KR);
   GEOHandler.addAfterTemplateLoad(afterConfigKR, GEOHandler.KR);
-  // FormManager.skipByteChecks([ 'billingPstlAddr', 'divn', 'custNm3',
-  // 'custNm4' ]);
+  FormManager.skipByteChecks([ 'billingPstlAddr', 'divn', 'custNm3', 'custNm4', 'contact', 'dept', 'poBoxCity', 'countyName' ]);
   GEOHandler.addAfterConfig(setChecklistStatus, GEOHandler.KR);
   GEOHandler.registerValidator(addKRChecklistValidator, GEOHandler.KR);
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.KR, GEOHandler.ROLE_PROCESSOR, true);
