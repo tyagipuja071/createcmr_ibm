@@ -158,7 +158,7 @@ public class CalculateCoverageElement extends OverridingElement {
           result.setResults("Skipped");
           result.setProcessOutput(output);
         } else {
-          result.setDetails("GBG Matching skipped due to previous element execution results.");
+          result.setDetails("Coverage calculation skipped due to previous element execution results.");
           result.setResults("Skipped");
           result.setProcessOutput(output);
         }
@@ -185,8 +185,10 @@ public class CalculateCoverageElement extends OverridingElement {
             details.append("The preferred coverage '" + preferredCoverage.getFinalCoverage() + "' determined using Buying Group '" + bgId
                 + "' was not found in coverage rules.").append("\n");
             details.append("Proceeding with other calculated coverages - ").append("\n");
-            engineData.addNegativeCheckStatus("PREFERRED_COVERAGE_ERROR", "The preferred coverage '" + preferredCoverage.getFinalCoverage()
-                + "' determined using Buying Group '" + bgId + "' was not found in coverage rules.");
+            if (!(data.getCmrIssuingCntry() == "897")) {
+              engineData.addNegativeCheckStatus("PREFERRED_COVERAGE_ERROR", "The preferred coverage '" + preferredCoverage.getFinalCoverage()
+                  + "' determined using Buying Group '" + bgId + "' was not found in coverage rules.");
+            }
             coverages = getValidCoverages(coverages);
           }
         }
@@ -472,7 +474,7 @@ public class CalculateCoverageElement extends OverridingElement {
         for (String key : notDeterminedFields.keySet()) {
           String val = notDeterminedFields.get(key);
           details.append(" - " + key + " = " + (StringUtils.isNotBlank(val) ? val : "- no value defined -") + "\n");
-          if (logNegativeCheck) {
+          if (logNegativeCheck && !(data.getCmrIssuingCntry() == "897")) {
             engineData.addNegativeCheckStatus(key, "The override value could not be determined for '" + key + "' during coverage calculation.");
           }
         }
