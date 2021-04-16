@@ -179,11 +179,11 @@ public class TWHandler extends GEOHandler {
     UpdatedDataModel update = null;
     super.addSummaryUpdatedFields(service, type, cmrCountry, newData, oldData, results);
 
-    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getMtkgArDept(), newData.getMtkgArDept())) {
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getMktgDept(), newData.getMktgDept())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "LocalTax1", "-"));
-      update.setNewData(service.getCodeAndDescription(newData.getMtkgArDept(), "LocalTax1", cmrCountry));
-      update.setOldData(service.getCodeAndDescription(oldData.getMtkgArDept(), "LocalTax1", cmrCountry));
+      update.setNewData(service.getCodeAndDescription(newData.getMktgDept(), "LocalTax1", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getMktgDept(), "LocalTax1", cmrCountry));
       results.add(update);
     }
     if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getInvoiceSplitCd(), newData.getInvoiceSplitCd())) {

@@ -17,7 +17,7 @@
   Addr addr = summary.getAddr();
   String cntry = data.getCmrIssuingCntry();
 %>
-<cmr:view forGEO="TW">
+<cmr:view forGEO="KR">
   <cmr:row>
     <cmr:column span="1" width="127">
     </cmr:column>
