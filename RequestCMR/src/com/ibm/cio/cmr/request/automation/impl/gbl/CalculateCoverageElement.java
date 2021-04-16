@@ -148,8 +148,10 @@ public class CalculateCoverageElement extends OverridingElement {
       StringBuilder details = new StringBuilder();
 
       // added flow to skip gbg matching
+      LOG.debug("Before -Skip Coverage for Create By Model...");
       if (engineData.hasPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE)) {
         // ensure a GBG is set
+        LOG.debug("Skip Coverage for Create By Model contains Positive Check");
         String covId = (String) engineData.get(AutomationEngineData.COVERAGE_CALCULATED);
         if (covId != null) {
           details.append("Coverage already computed by external process: ");
@@ -161,6 +163,7 @@ public class CalculateCoverageElement extends OverridingElement {
           result.setDetails("Coverage calculation skipped due to previous element execution results.");
           result.setResults("Skipped");
           result.setProcessOutput(output);
+          LOG.debug("After Skip Coverage for Create By Model...");
         }
         return result;
       }
