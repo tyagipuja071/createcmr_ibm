@@ -828,7 +828,7 @@ public class KRHandler extends GEOHandler {
         for (Object tempRecObj : recordsToCheck) {
           if (tempRecObj instanceof FindCMRRecordModel) {
             FindCMRRecordModel tempRec = (FindCMRRecordModel) tempRecObj;
-            if (tempRec.getCmrAddrTypeCode().equalsIgnoreCase("ZS01")) {
+            if (tempRec.getCmrAddrTypeCode() != null && tempRec.getCmrAddrTypeCode().equalsIgnoreCase("ZS01")) {
               // RETURN ONLY THE SOLD-TO ADDRESS FOR CREATES
               recordsToReturn.add(tempRec);
             }
