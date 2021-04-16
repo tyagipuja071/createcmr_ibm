@@ -1176,8 +1176,8 @@ public class NORDXTransformer extends EMEATransformer {
       legacyCust.setImsCd("");
     }
 
-    if (!StringUtils.isBlank(data.getIsuCd())) {
-      legacyCust.setIsuCd(data.getIsuCd());
+    if (!StringUtils.isBlank(data.getIsuCd()) && !StringUtils.isBlank(data.getClientTier())) {
+      legacyCust.setIsuCd(data.getIsuCd() + data.getClientTier());
     } else {
       legacyCust.setIsuCd("");
     }
