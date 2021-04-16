@@ -89,17 +89,18 @@ public class KRHandler extends GEOHandler {
 
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
-	  this.currentRecord = retrieveWTAASValues(mainRecord);
+	  //this.currentRecord = retrieveWTAASValues(mainRecord);
 	  data.setAbbrevNm(mainRecord.getCmrName1Plain());	  
 	  
     if (mainRecord.getCmrCountryLandedDesc() != null && (mainRecord.getCmrCountryLandedDesc().length()!= 0)) {
       data.setAbbrevLocn(mainRecord.getCmrCountryLandedDesc());
     } 	
-    else 
-    {
-    	data.setAbbrevLocn(this.currentRecord.get(WtaasQueryKeys.Data.AbbrLoc));
-    }
-
+//    else 
+//    {
+//    	data.setAbbrevLocn(this.currentRecord.get(WtaasQueryKeys.Data.AbbrLoc));
+//    }
+    data.setClientTier(mainRecord.getCmrTier());
+    // data.setClientTier(this.currentRecord.get(WtaasQueryKeys.Data.GB_SegCode));
     // 【Representative(CEO) name in business license】
     // data.setContactName1(mainRecord.getUsCmrRestrictTo());
     // if(data.getContactName1()!= null && data.getContactName1().length() >
@@ -183,7 +184,7 @@ public class KRHandler extends GEOHandler {
     }
   }
 
-  private WtaasRecord retrieveWTAASValues(FindCMRRecordModel mainRecord) throws Exception {
+/*  private WtaasRecord retrieveWTAASValues(FindCMRRecordModel mainRecord) throws Exception {
 	    String cmrIssuingCntry = mainRecord.getCmrIssuedBy();
 	    String cmrNo = mainRecord.getCmrNum();
 
@@ -214,7 +215,7 @@ public class KRHandler extends GEOHandler {
 	    }
 
 	  }
-  @Override
+*/  @Override
   public void doBeforeDataSave(EntityManager entityManager, Admin admin, Data data, String cmrIssuingCntry) throws Exception {
 
   }
