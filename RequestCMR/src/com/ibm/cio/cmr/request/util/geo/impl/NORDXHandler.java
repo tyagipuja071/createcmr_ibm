@@ -2308,12 +2308,6 @@ public class NORDXHandler extends BaseSOFHandler {
   private String getSprasSapr3Kna1ForNordx(String cmrNo, String ordBlk, String countryCd) throws Exception {
     String spras = "";
 
-    System.out.println("============");
-    System.out.println("======cmrNo======" + cmrNo);
-    System.out.println("======ordBlk======" + ordBlk);
-    System.out.println("======countryCd======" + countryCd);
-    System.out.println("============");
-
     String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
     String mandt = SystemConfiguration.getValue("MANDT");
     String sql = ExternalizedQuery.getSql("GET.KNA1.SPRAS");
@@ -2337,10 +2331,6 @@ public class NORDXHandler extends BaseSOFHandler {
       List<Map<String, Object>> records = response.getRecords();
       Map<String, Object> record = records.get(0);
       spras = record.get("SPRAS") != null ? record.get("SPRAS").toString() : "";
-
-      System.out.println("=======================");
-      System.out.println("=======================" + spras);
-      System.out.println("=======================");
 
       LOG.debug("***RETURNING SPRAS > " + spras);
     }
