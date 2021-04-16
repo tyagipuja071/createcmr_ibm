@@ -185,10 +185,8 @@ public class CalculateCoverageElement extends OverridingElement {
             details.append("The preferred coverage '" + preferredCoverage.getFinalCoverage() + "' determined using Buying Group '" + bgId
                 + "' was not found in coverage rules.").append("\n");
             details.append("Proceeding with other calculated coverages - ").append("\n");
-            if (!(data.getCmrIssuingCntry() == "897")) {
-              engineData.addNegativeCheckStatus("PREFERRED_COVERAGE_ERROR", "The preferred coverage '" + preferredCoverage.getFinalCoverage()
-                  + "' determined using Buying Group '" + bgId + "' was not found in coverage rules.");
-            }
+            engineData.addNegativeCheckStatus("PREFERRED_COVERAGE_ERROR", "The preferred coverage '" + preferredCoverage.getFinalCoverage()
+                + "' determined using Buying Group '" + bgId + "' was not found in coverage rules.");
             coverages = getValidCoverages(coverages);
           }
         }
@@ -474,7 +472,7 @@ public class CalculateCoverageElement extends OverridingElement {
         for (String key : notDeterminedFields.keySet()) {
           String val = notDeterminedFields.get(key);
           details.append(" - " + key + " = " + (StringUtils.isNotBlank(val) ? val : "- no value defined -") + "\n");
-          if (logNegativeCheck && !(data.getCmrIssuingCntry() == "897")) {
+          if (logNegativeCheck) {
             engineData.addNegativeCheckStatus(key, "The override value could not be determined for '" + key + "' during coverage calculation.");
           }
         }
