@@ -48,19 +48,13 @@ import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
-import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
-import com.ibm.cio.cmr.request.util.wtaas.WtaasQueryKeys;
 import com.ibm.cio.cmr.request.util.wtaas.WtaasRecord;
-import com.ibm.cmr.services.client.CmrServicesFactory;
-import com.ibm.cmr.services.client.WtaasClient;
 import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
-import com.ibm.cmr.services.client.wtaas.WtaasQueryRequest;
-import com.ibm.cmr.services.client.wtaas.WtaasQueryResponse;
 
 /**
  * Handler for KR
@@ -81,24 +75,27 @@ public class KRHandler extends GEOHandler {
 
   }
 
-  private static final String[] SKIP_ON_SUMMARY_UPDATE_FIELDS = { "Affiliate", "Company", "CAP", "CMROwner", "CustClassCode", "LocalTax2",
-      "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office", "Floor", "Building", "County", "City2",
-      "Department", "SpecialTaxCd", "SearchTerm", "SalRepNameNo" };
+  private static final String[] SKIP_ON_SUMMARY_UPDATE_FIELDS = { "AbbrevLocation", "ContactName1", "RestrictTo", "Phone1", "ModeOfPayment",
+      "SalRepNameNo", "MrcCd", "OriginatorNo", "CommercialFinanced", "ContactName2", "CreditCd", "ContactName3", "CustomerName1", "CustomerName2",
+      "CustomerName3", "BillingPstlAddr", "CustomerName4", "DIVN", "LandedCountry", "StateProv", "City1", "City2", "StreetAddress1", "StreetAddress2",
+      "PostalCode", "POBox", "transportZone", "Contact", "Department", "Floor", "POBoxCity", "Office", "TaxOffice", "CustPhone", "SAPNumber",
+      "Affiliate", "Company", "CAP", "CMROwner", "CustClassCode", "LocalTax2", "SitePartyID", "Division", "POBoxPostalCode", "CustFAX", "Building",
+      "County", "SpecialTaxCd", "SearchTerm" };
 
   private static final List<String> COUNTRIES_LIST = Arrays.asList(SystemLocation.KOREA);
 
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
-	  //this.currentRecord = retrieveWTAASValues(mainRecord);
-	  data.setAbbrevNm(mainRecord.getCmrName1Plain());	  
-	  
-    if (mainRecord.getCmrCountryLandedDesc() != null && (mainRecord.getCmrCountryLandedDesc().length()!= 0)) {
+    // this.currentRecord = retrieveWTAASValues(mainRecord);
+    data.setAbbrevNm(mainRecord.getCmrName1Plain());
+
+    if (mainRecord.getCmrCountryLandedDesc() != null && (mainRecord.getCmrCountryLandedDesc().length() != 0)) {
       data.setAbbrevLocn(mainRecord.getCmrCountryLandedDesc());
-    } 	
-//    else 
-//    {
-//    	data.setAbbrevLocn(this.currentRecord.get(WtaasQueryKeys.Data.AbbrLoc));
-//    }
+    }
+    // else
+    // {
+    // data.setAbbrevLocn(this.currentRecord.get(WtaasQueryKeys.Data.AbbrLoc));
+    // }
     data.setClientTier(mainRecord.getCmrTier());
     // data.setClientTier(this.currentRecord.get(WtaasQueryKeys.Data.GB_SegCode));
     // 【Representative(CEO) name in business license】
@@ -184,38 +181,38 @@ public class KRHandler extends GEOHandler {
     }
   }
 
-/*  private WtaasRecord retrieveWTAASValues(FindCMRRecordModel mainRecord) throws Exception {
-	    String cmrIssuingCntry = mainRecord.getCmrIssuedBy();
-	    String cmrNo = mainRecord.getCmrNum();
-
-	    try {
-	      WtaasClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("CMR_SERVICES_URL"), WtaasClient.class);
-
-	      WtaasQueryRequest request = new WtaasQueryRequest();
-	      request.setCmrNo(cmrNo);
-	      request.setCountry(cmrIssuingCntry);
-
-	      WtaasQueryResponse response = client.executeAndWrap(WtaasClient.QUERY_ID, request, WtaasQueryResponse.class);
-	      if (response == null || !response.isSuccess()) {
-	        LOG.warn("Error or no response from WTAAS query.");
-	        throw new CmrException(MessageUtil.ERROR_LEGACY_RETRIEVE, new Exception("Error or no response from WTAAS query."));
-	      }
-	      if ("F".equals(response.getData().get("Status"))) {
-	        LOG.warn("Customer " + cmrNo + " does not exist in WTAAS.");
-	        throw new CmrException(MessageUtil.ERROR_LEGACY_RETRIEVE, new Exception("Customer " + cmrNo + " does not exist in WTAAS."));
-	      }
-
-	      WtaasRecord record = WtaasRecord.createFrom(response);
-	      // record = WtaasRecord.dummy();
-	      return record;
-
-	    } catch (Exception e) {
-	      LOG.warn("An error has occurred during retrieval of the values.", e);
-	      throw new CmrException(MessageUtil.ERROR_LEGACY_RETRIEVE, e);
-	    }
-
-	  }
-*/  @Override
+  /*
+   * private WtaasRecord retrieveWTAASValues(FindCMRRecordModel mainRecord)
+   * throws Exception { String cmrIssuingCntry = mainRecord.getCmrIssuedBy();
+   * String cmrNo = mainRecord.getCmrNum();
+   * 
+   * try { WtaasClient client =
+   * CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue(
+   * "CMR_SERVICES_URL"), WtaasClient.class);
+   * 
+   * WtaasQueryRequest request = new WtaasQueryRequest();
+   * request.setCmrNo(cmrNo); request.setCountry(cmrIssuingCntry);
+   * 
+   * WtaasQueryResponse response = client.executeAndWrap(WtaasClient.QUERY_ID,
+   * request, WtaasQueryResponse.class); if (response == null ||
+   * !response.isSuccess()) {
+   * LOG.warn("Error or no response from WTAAS query."); throw new
+   * CmrException(MessageUtil.ERROR_LEGACY_RETRIEVE, new
+   * Exception("Error or no response from WTAAS query.")); } if
+   * ("F".equals(response.getData().get("Status"))) { LOG.warn("Customer " +
+   * cmrNo + " does not exist in WTAAS."); throw new
+   * CmrException(MessageUtil.ERROR_LEGACY_RETRIEVE, new Exception("Customer " +
+   * cmrNo + " does not exist in WTAAS.")); }
+   * 
+   * WtaasRecord record = WtaasRecord.createFrom(response); // record =
+   * WtaasRecord.dummy(); return record;
+   * 
+   * } catch (Exception e) {
+   * LOG.warn("An error has occurred during retrieval of the values.", e); throw
+   * new CmrException(MessageUtil.ERROR_LEGACY_RETRIEVE, e); }
+   * 
+   * }
+   */ @Override
   public void doBeforeDataSave(EntityManager entityManager, Admin admin, Data data, String cmrIssuingCntry) throws Exception {
 
   }
@@ -966,12 +963,13 @@ public class KRHandler extends GEOHandler {
 
   private void setAbbrevNM(Data data, String abbrevNM) {
 
-	    if (!StringUtils.isBlank(abbrevNM))
-	      if (abbrevNM.length() > 21)
-	        data.setAbbrevNm(abbrevNM.substring(0, 21));
-	      else
-	        data.setAbbrevNm(abbrevNM);
-	  }
+    if (!StringUtils.isBlank(abbrevNM))
+      if (abbrevNM.length() > 21)
+        data.setAbbrevNm(abbrevNM.substring(0, 21));
+      else
+        data.setAbbrevNm(abbrevNM);
+  }
+
   private void setMRC(Admin admin, Data data) {
     String[] arryISUCdForMRC3 = { "32", "34" };
     String isuCd = data.getIsuCd();
