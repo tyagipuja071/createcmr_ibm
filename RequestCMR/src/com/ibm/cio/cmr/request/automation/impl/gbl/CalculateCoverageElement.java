@@ -158,7 +158,7 @@ public class CalculateCoverageElement extends OverridingElement {
           result.setResults("Skipped");
           result.setProcessOutput(output);
         } else {
-          result.setDetails("GBG Matching skipped due to previous element execution results.");
+          result.setDetails("Coverage calculation skipped due to previous element execution results.");
           result.setResults("Skipped");
           result.setProcessOutput(output);
         }
