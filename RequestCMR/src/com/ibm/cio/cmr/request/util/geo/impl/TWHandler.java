@@ -62,9 +62,12 @@ public class TWHandler extends GEOHandler {
 
   }
 
-  private static final String[] SKIP_ON_SUMMARY_UPDATE_FIELDS = { "Affiliate", "Company", "CAP", "CMROwner", "CustClassCode", "LocalTax2",
-      "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office", "Floor", "Building", "County", "City2",
-      "Department", "SpecialTaxCd", "SearchTerm", "SalRepNameNo" };
+  private static final String[] SKIP_ON_SUMMARY_UPDATE_FIELDS = { "CustomerName1", "CustomerName2", "ChinaCustomerName1", "ChinaCustomerName2",
+      "StreetAddress1", "StreetAddress2", "ChinaStreetAddress1", "ChinaStreetAddress2", "PostalCode", "LandedCountry", "SAPNumber", "LocalTax1",
+      "LocalTax2", "CustAcctType", "AbbrevLocation", "OriginatorNo", "CommercialFinanced", "CSBOCd", "ContactName2", "Email1", "ContactName1",
+      "ContactName3", "BPName", "Email2", "BusnType", "Affiliate", "Email3", "MrcCd", "SalRepNameNo", "CollectionCd", "EngineeringBo", "SitePartyID",
+      "SearchTerm", "Company", "CAP", "CMROwner", "CustClassCode", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office",
+      "Floor", "Building", "County", "City2", "Department", "SpecialTaxCd" };
 
   private static final List<String> COUNTRIES_LIST = Arrays.asList(SystemLocation.TAIWAN);
 
@@ -289,6 +292,13 @@ public class TWHandler extends GEOHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getEmail3(), "Email3", cmrCountry));
       results.add(update);
     }
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getRestrictTo(), newData.getRestrictTo())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "RestrictTo", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getRestrictTo(), "RestrictTo", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getRestrictTo(), "RestrictTo", cmrCountry));
+      results.add(update);
+    }
 
     if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getMrcCd(), newData.getMrcCd())) {
       update = new UpdatedDataModel();
@@ -463,6 +473,7 @@ public class TWHandler extends GEOHandler {
       update.setOldData(addr.getSapNoOld());
       results.add(update);
     }
+
   }
 
   @Override

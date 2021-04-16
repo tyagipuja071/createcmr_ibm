@@ -221,6 +221,128 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
 		</cmr:column>
 		
         </cmr:row>
+        
+      </cmr:view>
+      
+      <cmr:view forCountry="858">
+      	<cmr:row>
+        <cmr:column span="1" width="127">
+          </cmr:column>
+          <cmr:column span="1" width="130">
+            <label><cmr:fieldLabel fieldId="CustomerName1" />:</label>
+          </cmr:column>
+          <cmr:column span="1" width="170">
+            ${summary.addr.custNm1}
+          </cmr:column>
+        
+        <cmr:column span="1" width="50">
+          </cmr:column>
+		<cmr:column span="2" width="130">
+			<label><cmr:fieldLabel fieldId="CustomerName2" />:</label>
+		</cmr:column>
+        <cmr:column span="2" width="170">
+			${summary.addr.custNm2}
+		</cmr:column>		
+        </cmr:row>
+        
+        <cmr:row>
+        <cmr:column span="1" width="127">
+          </cmr:column>
+          <cmr:column span="1" width="130">
+            <label><cmr:fieldLabel fieldId="ChinaCustomerName1" />:</label>
+          </cmr:column>
+          <cmr:column span="1" width="170">
+            ${summary.addr.custNm3}
+          </cmr:column>
+        
+        <cmr:column span="1" width="50">
+          </cmr:column>
+		<cmr:column span="2" width="130">
+			<label><cmr:fieldLabel fieldId="ChinaCustomerName2" />:</label>
+		</cmr:column>
+        <cmr:column span="2" width="170">
+			${summary.addr.custNm4}
+		</cmr:column>	
+			
+        </cmr:row>
+        
+        <cmr:row>
+        <cmr:column span="1" width="127">
+          </cmr:column>
+          <cmr:column span="1" width="130">
+            <label><cmr:fieldLabel fieldId="StreetAddress1" />:</label>
+          </cmr:column>
+          <cmr:column span="1" width="170">
+            ${summary.addr.addrTxt}
+          </cmr:column>
+        
+        <cmr:column span="1" width="50">
+          </cmr:column>
+		<cmr:column span="2" width="130">
+			<label><cmr:fieldLabel fieldId="StreetAddress2" />:</label>
+		</cmr:column>
+        <cmr:column span="2" width="170">
+			${summary.addr.addrTxt2}
+		</cmr:column>		
+        </cmr:row>
+        
+        <cmr:row>
+        <cmr:column span="1" width="127">
+          </cmr:column>
+          <cmr:column span="1" width="130">
+            <label><cmr:fieldLabel fieldId="ChinaStreetAddress1" />:</label>
+          </cmr:column>
+          <cmr:column span="1" width="170">
+            ${summary.addr.dept}
+          </cmr:column>
+        
+        <cmr:column span="1" width="50">
+          </cmr:column>
+		<cmr:column span="2" width="130">
+			<label><cmr:fieldLabel fieldId="ChinaStreetAddress2" />:</label>
+		</cmr:column>
+        <cmr:column span="2" width="170">
+			${summary.addr.bldg}
+		</cmr:column>		
+        </cmr:row>
+        
+        <cmr:row>
+        <cmr:column span="1" width="127">
+          </cmr:column>
+          <cmr:column span="1" width="130">
+            <label><cmr:fieldLabel fieldId="PostalCode" />:</label>
+          </cmr:column>
+          <cmr:column span="1" width="170">
+            ${summary.addr.postCd}
+          </cmr:column>
+        
+        <cmr:column span="1" width="50">
+          </cmr:column>
+		<cmr:column span="2" width="130">
+			<label><cmr:fieldLabel fieldId="LandedCountry" />:</label>
+		</cmr:column>
+        <cmr:column span="2" width="170">
+			${summary.addr.landCntry}
+		</cmr:column>		
+        </cmr:row>
+        <cmr:row>
+        <cmr:column span="1" width="127">
+          </cmr:column>
+          <cmr:column span="1" width="130">
+            <label><cmr:fieldLabel fieldId="SAPNumber" />:</label>
+          </cmr:column>
+          <cmr:column span="1" width="170">
+            ${summary.addr.sapNo}
+          </cmr:column>
+	 	        <cmr:column span="1" width="50">
+          </cmr:column>
+		<cmr:column span="2" width="130">
+
+		</cmr:column>
+        <cmr:column span="2" width="170">
+		</cmr:column>
+        </cmr:row>
+        
       </cmr:view>
 
       <cmr:view forGEO="CEMEA,BELUX,JP" exceptForCountry="618">
@@ -320,7 +442,7 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
         </cmr:view>
       </cmr:row>
 
-      <cmr:view exceptForGEO="EMEA,MCO,MCO1,MCO2,CEMEA,NORDX,BELUX,NL">
+      <cmr:view exceptForGEO="EMEA,MCO,MCO1,MCO2,CEMEA,NORDX,BELUX,NL,TW">
         <cmr:row addBackground="false">
           <cmr:column span="1" width="127">
           </cmr:column>
@@ -348,7 +470,7 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
           </cmr:column>
         </cmr:row>
         
-        <cmr:view exceptForGEO="JP,SWISS">
+        <cmr:view exceptForGEO="JP,SWISS,TW">
         <cmr:row addBackground="false">
           <cmr:column span="1" width="127">
           </cmr:column>
@@ -391,7 +513,7 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
       <cmr:row addBackground="false">
         <cmr:column span="1" width="127">
         </cmr:column>
-        <cmr:view exceptForGEO="JP">
+        <cmr:view exceptForGEO="JP,TW">
         <cmr:column span="1" width="130">
           <label> <cmr:fieldLabel fieldId="PostalCode" />:</label>
         </cmr:column>
@@ -399,7 +521,7 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
           ${summary.addr.postCd}
 				</cmr:column>
 		</cmr:view>
-		<cmr:view forGEO="JP">
+		<cmr:view forGEO="JP,TW">
 		<cmr:column span="1" width="130">
           <label> <cmr:fieldLabel fieldId="Contact" />:</label>
         </cmr:column>
@@ -407,7 +529,7 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
           ${summary.addr.contact}
 				</cmr:column>
 		</cmr:view>
-        <cmr:view forGEO="MCO,MCO1,MCO2,FR,NORDX,BELUX,NL,JP">
+        <cmr:view forGEO="MCO,MCO1,MCO2,FR,NORDX,BELUX,NL,JP,TW">
           <cmr:column span="1" width="130">
             <label><cmr:fieldLabel fieldId="CustPhone" />:</label>
           </cmr:column>
@@ -760,6 +882,12 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
       
       <!-- CN Customer Fields -->
       <jsp:include page="CN/cn_customer_summary.jsp"></jsp:include>
+      
+      <!-- TW Customer Fields -->
+      <jsp:include page="TW/tw_customer_summary.jsp"></jsp:include>
+      
+      <!-- KR Customer Fields -->
+      <jsp:include page="KR/kr_customer_summary.jsp"></jsp:include>
 
 
       <!--  Start IBM Information -->
@@ -1025,6 +1153,12 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
       
       <!-- CN Fields -->
 	  <jsp:include page="CN/cn_ibm_summary.jsp" />
+	  
+	  <!-- TW Fields -->
+	  <jsp:include page="TW/tw_ibm_summary.jsp" />
+	  
+	  <!-- KR Fields -->
+	  <jsp:include page="KR/kr_ibm_summary.jsp" />
 	  
 
 	  
