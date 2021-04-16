@@ -480,12 +480,14 @@ public class USUtil extends AutomationUtil {
       if (SC_BYMODEL.equals(scenarioSubType)) {
         try {
           scenarioSubType = determineCustSubScenario(entityManager, admin.getModelCmrNo(), engineData, requestData);
+          LOG.debug("ScenarioSubType:" + scenarioSubType);
         } catch (Exception e) {
           LOG.error("CMR Scenario for Create by model request could not be determined.", e);
         }
 
         if (data.getBgId() != null) {
           engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
+          LOG.debug("Skip Coverage for Create By Model.");
         }
 
         // skip Dnb check and matching
@@ -506,9 +508,11 @@ public class USUtil extends AutomationUtil {
 
     if (StringUtils.isBlank(scenarioSubType) || Arrays.asList(scenarioList).contains(scenarioSubType)) {
       String scenarioDesc = getScenarioDesc(entityManager, scenarioSubType);
+      LOG.debug("Skip Coverage for Create By Model CMR if BgId is not null " + data.getBgId());
       if (SC_BYMODEL.equals(data.getCustSubGrp())) {
         if (data.getBgId() != null) {
           engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
+          LOG.debug("Skip Coverage for Create By Model.");
         }
         engineData.addNegativeCheckStatus("US_SCENARIO_CHK", "Processor review required as imported CMR belongs to " + scenarioDesc + " scenario.");
         details.append("Processor review required as imported CMR belongs to " + scenarioDesc + " scenario.").append("\n");
