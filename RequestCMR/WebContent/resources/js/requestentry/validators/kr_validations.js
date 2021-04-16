@@ -39,6 +39,36 @@ function afterConfigKR() {
   RemoveCrossAddressMandatory();
 }
 
+function setChecklistStatus() {
+  console.log('validating checklist..');
+  var checklist = dojo.query('table.checklist');
+  document.getElementById("checklistStatus").innerHTML = "Not Done";
+  var reqId = FormManager.getActualValue('reqId');
+  var questions = checklist.query('input[type="radio"]');
+
+  if (reqId != null && reqId.length > 0 && reqId != 0) {
+    if (questions.length > 0) {
+      var noOfQuestions = questions.length / 2;
+      var checkCount = 0;
+      for (var i = 0; i < questions.length; i++) {
+        if (questions[i].checked) {
+          checkCount++;
+        }
+      }
+      if (noOfQuestions != checkCount) {
+        document.getElementById("checklistStatus").innerHTML = "Incomplete";
+        FormManager.setValue('checklistStatus', "Incomplete");
+      } else {
+        document.getElementById("checklistStatus").innerHTML = "Complete";
+        FormManager.setValue('checklistStatus', "Complete");
+      }
+    } else {
+      document.getElementById("checklistStatus").innerHTML = "Complete";
+      FormManager.setValue('checklistStatus', "Complete");
+    }
+  }
+}
+
 function RemoveCrossAddressMandatory() {
   var custSubScnrio = FormManager.getActualValue('custSubGrp');
   if (custSubScnrio == 'CROSS') {
@@ -56,7 +86,10 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(afterConfigKR, GEOHandler.KR);
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.KR);
   GEOHandler.addAfterTemplateLoad(afterConfigKR, GEOHandler.KR);
-  // FormManager.skipByteChecks([ 'billingPstlAddr', 'divn', 'custNm3', 'custNm4' ]);
+  // FormManager.skipByteChecks([ 'billingPstlAddr', 'divn', 'custNm3',
+  // 'custNm4' ]);
+  GEOHandler.addAfterConfig(setChecklistStatus, GEOHandler.KR);
+  GEOHandler.registerValidator(addKRChecklistValidator, GEOHandler.KR);
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.KR, GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(addDPLCheckValidator, GEOHandler.KR, GEOHandler.ROLE_REQUESTER, true);
 });
