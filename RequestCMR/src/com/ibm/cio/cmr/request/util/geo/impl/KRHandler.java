@@ -48,12 +48,19 @@ import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
+import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
+import com.ibm.cio.cmr.request.util.wtaas.WtaasQueryKeys;
+import com.ibm.cio.cmr.request.util.wtaas.WtaasRecord;
+import com.ibm.cmr.services.client.CmrServicesFactory;
+import com.ibm.cmr.services.client.WtaasClient;
 import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
+import com.ibm.cmr.services.client.wtaas.WtaasQueryRequest;
+import com.ibm.cmr.services.client.wtaas.WtaasQueryResponse;
 
 /**
  * Handler for KR
@@ -67,7 +74,7 @@ public class KRHandler extends GEOHandler {
   private static final boolean RETRIEVE_INVALID_CUSTOMERS = true;
 
   public static Map<String, String> LANDED_CNTRY_MAP = new HashMap<String, String>();
-
+  protected WtaasRecord currentRecord;
   static {
 
     LANDED_CNTRY_MAP.put(SystemLocation.KOREA, "KR");
@@ -82,13 +89,15 @@ public class KRHandler extends GEOHandler {
 
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
-	  
+	  this.currentRecord = retrieveWTAASValues(mainRecord);
 	  data.setAbbrevNm(mainRecord.getCmrName1Plain());	  
 	  
-    if (mainRecord.getCmrCountryLandedDesc() != null ) {
+    if (mainRecord.getCmrCountryLandedDesc() != null && (mainRecord.getCmrCountryLandedDesc().length()!= 0)) {
       data.setAbbrevLocn(mainRecord.getCmrCountryLandedDesc());
-    } else {
-      data.setAbbrevLocn("South Korea");
+    } 	
+    else 
+    {
+    	data.setAbbrevLocn(this.currentRecord.get(WtaasQueryKeys.Data.AbbrLoc));
     }
 
     // 【Representative(CEO) name in business license】
@@ -174,6 +183,37 @@ public class KRHandler extends GEOHandler {
     }
   }
 
+  private WtaasRecord retrieveWTAASValues(FindCMRRecordModel mainRecord) throws Exception {
+	    String cmrIssuingCntry = mainRecord.getCmrIssuedBy();
+	    String cmrNo = mainRecord.getCmrNum();
+
+	    try {
+	      WtaasClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("CMR_SERVICES_URL"), WtaasClient.class);
+
+	      WtaasQueryRequest request = new WtaasQueryRequest();
+	      request.setCmrNo(cmrNo);
+	      request.setCountry(cmrIssuingCntry);
+
+	      WtaasQueryResponse response = client.executeAndWrap(WtaasClient.QUERY_ID, request, WtaasQueryResponse.class);
+	      if (response == null || !response.isSuccess()) {
+	        LOG.warn("Error or no response from WTAAS query.");
+	        throw new CmrException(MessageUtil.ERROR_LEGACY_RETRIEVE, new Exception("Error or no response from WTAAS query."));
+	      }
+	      if ("F".equals(response.getData().get("Status"))) {
+	        LOG.warn("Customer " + cmrNo + " does not exist in WTAAS.");
+	        throw new CmrException(MessageUtil.ERROR_LEGACY_RETRIEVE, new Exception("Customer " + cmrNo + " does not exist in WTAAS."));
+	      }
+
+	      WtaasRecord record = WtaasRecord.createFrom(response);
+	      // record = WtaasRecord.dummy();
+	      return record;
+
+	    } catch (Exception e) {
+	      LOG.warn("An error has occurred during retrieval of the values.", e);
+	      throw new CmrException(MessageUtil.ERROR_LEGACY_RETRIEVE, e);
+	    }
+
+	  }
   @Override
   public void doBeforeDataSave(EntityManager entityManager, Admin admin, Data data, String cmrIssuingCntry) throws Exception {
 
