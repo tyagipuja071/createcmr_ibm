@@ -220,7 +220,7 @@ public class KRPDFConverter extends DefaultPDFConverter {
       address.addCell(createValueCell(addr.getCity2()));
 
       address.addCell(createLabelCell("Postal Code:"));
-      address.addCell(createValueCell(addr.getPoBoxPostCd()));
+      address.addCell(createValueCell(addr.getPostCd()));
 
       address.addCell(createLabelCell(""));
       address.addCell(createValueCell(""));

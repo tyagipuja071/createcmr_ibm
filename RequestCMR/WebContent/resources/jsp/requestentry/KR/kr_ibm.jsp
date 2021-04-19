@@ -162,7 +162,7 @@
         <cmr:fieldLabel fieldId="ContactName3" />: <span id="ast-ProdType"></span>
           <cmr:delta text="-" id="delta-contactName3" code="L" />
       </cmr:label>
-      <cmr:field fieldId="ContactName3" id="contactName3" path="ibmBankNumber" tabId="MAIN_IBM_TAB" />
+      <cmr:field fieldId="ContactName3" id="contactName3" path="contactName3" tabId="MAIN_IBM_TAB" />
       </p>      
       <%-- <div id="prodTypeCheckboxes" style="display: block">
         <div class="jp-chk">
