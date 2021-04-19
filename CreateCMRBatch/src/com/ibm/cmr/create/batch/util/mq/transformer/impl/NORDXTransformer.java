@@ -1089,9 +1089,34 @@ public class NORDXTransformer extends EMEATransformer {
     legacyCust.setMailingCond("");
 
     if (!StringUtils.isBlank(data.getCustPrefLang())) {
-      legacyCust.setLangCd(data.getCustPrefLang());
-    } else {
-      legacyCust.setLangCd("");
+      if (SystemLocation.NORWAY.equals(data.getCmrIssuingCntry())) {
+        if ("E".equals(data.getCustPrefLang())) {
+          legacyCust.setLangCd("3");
+        } else {
+          legacyCust.setLangCd("S");
+        }
+      } else if (SystemLocation.SWEDEN.equals(data.getCmrIssuingCntry())) {
+        if ("E".equals(data.getCustPrefLang())) {
+          legacyCust.setLangCd("3");
+        } else {
+          legacyCust.setLangCd("1");
+        }
+
+      } else if (SystemLocation.DENMARK.equals(data.getCmrIssuingCntry())) {
+        if ("E".equals(data.getCustPrefLang())) {
+          legacyCust.setLangCd("3");
+        } else {
+          legacyCust.setLangCd("1");
+        }
+      } else if (SystemLocation.FINLAND.equals(data.getCmrIssuingCntry())) {
+        if ("E".equals(data.getCustPrefLang())) {
+          legacyCust.setLangCd("3");
+        } else if ("U".equals(data.getCustPrefLang())) {
+          legacyCust.setLangCd("1");
+        } else {// V
+          legacyCust.setLangCd("2");
+        }
+      }
     }
 
     if (!StringUtils.isBlank(data.getCustClass())) {
@@ -1282,10 +1307,33 @@ public class NORDXTransformer extends EMEATransformer {
 
     // use svcArOffice to store custLang
     if (!StringUtils.isBlank(muData.getSvcArOffice())) {
-      if ("@".equals(muData.getSvcArOffice())) {
-        cust.setLangCd("");
-      } else {
-        cust.setLangCd(muData.getSvcArOffice());
+      if (SystemLocation.NORWAY.equals(cust.getId().getSofCntryCode())) {
+        if ("E".equals(muData.getSvcArOffice())) {
+          cust.setLangCd("3");
+        } else {
+          cust.setLangCd("S");
+        }
+      } else if (SystemLocation.SWEDEN.equals(cust.getId().getSofCntryCode())) {
+        if ("E".equals(muData.getSvcArOffice())) {
+          cust.setLangCd("3");
+        } else {
+          cust.setLangCd("1");
+        }
+
+      } else if (SystemLocation.DENMARK.equals(cust.getId().getSofCntryCode())) {
+        if ("E".equals(muData.getSvcArOffice())) {
+          cust.setLangCd("3");
+        } else {
+          cust.setLangCd("1");
+        }
+      } else if (SystemLocation.FINLAND.equals(cust.getId().getSofCntryCode())) {
+        if ("E".equals(muData.getSvcArOffice())) {
+          cust.setLangCd("3");
+        } else if ("U".equals(muData.getSvcArOffice())) {
+          cust.setLangCd("1");
+        } else {// V
+          cust.setLangCd("2");
+        }
       }
     }
 
