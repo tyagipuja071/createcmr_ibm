@@ -859,9 +859,8 @@ function cleanupACdminDSAndSRValues() {
     ISUCTCLIST = "34Q,217,8B7";
   } else if (cntry == '846') {
     ISUCTCLIST = "34Q,047,1R7,217,8B7";
-
   }
-  var bumber = ISUCTCLIST.indexOf(isuCtc);
+
   if (ISUCTCLIST.indexOf(isuCtc) < 0) {
     FormManager.setValue('repTeamMemberNo', "");
     FormManager.setValue('engineeringBo', '');
