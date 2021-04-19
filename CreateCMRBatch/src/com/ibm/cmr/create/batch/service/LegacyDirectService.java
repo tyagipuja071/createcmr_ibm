@@ -638,7 +638,6 @@ public class LegacyDirectService extends TransConnService {
               cExt.setItBillingName(StringUtils.isEmpty(abbrevName) ? "" : abbrevName);
               cExt.setItBillingStreet(StringUtils.isEmpty(streetAbbrev) ? "" : streetAbbrev);
               cExt.setItBillingCity(StringUtils.isEmpty(abbrevLoc) ? "" : abbrevLoc);
-              cExt.setUpdateTs(SystemUtil.getCurrentTimestamp());
               updateEntity(cExt, entityManager);
             }
 
@@ -675,7 +674,6 @@ public class LegacyDirectService extends TransConnService {
               cExt.setItBillingName(StringUtils.isEmpty(abbrevName) ? "" : abbrevName);
               cExt.setItBillingStreet(StringUtils.isEmpty(streetAbbrev) ? "" : streetAbbrev);
               cExt.setItBillingCity(StringUtils.isEmpty(abbrevLoc) ? "" : abbrevLoc);
-              cExt.setUpdateTs(SystemUtil.getCurrentTimestamp());
               updateEntity(cExt, entityManager);
             }
 
