@@ -222,12 +222,14 @@ function addHandlersForNORDX() {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       // setClientTierValues(value);
       setSalesRepValues(); // CMR-1746
+      cleanupACdminDSAndSRValues();// CMR-1746
     });
   }
 
   if (_CTCHandler == null) {
     _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
       setSalesRepValues(value);
+      cleanupACdminDSAndSRValues();// CMR-1746
     });
   }
 
@@ -826,6 +828,44 @@ function addISICValidator() {
       }
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
+/*
+ * clean up SalsRep and AC Admin DSC value Create by CMR-1746
+ */
+function cleanupACdminDSAndSRValues() {
+
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+
+  if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
+
+  var isuCd = FormManager.getActualValue('isuCd');
+  var clientTier = FormManager.getActualValue('clientTier');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+
+  var isuCtc = isuCd + clientTier;
+  var ISUCTCLIST = "";
+
+  // SalRep for Denmark & its Subregion
+  if (cntry == '678') {
+    ISUCTCLIST = "34Q,047,197,217,219,8B7";
+  } else if (cntry == '702') {
+    ISUCTCLIST = "34Q,217,219,8B7";
+  } else if (cntry == '806') {
+    ISUCTCLIST = "34Q,217,8B7";
+  } else if (cntry == '846') {
+    ISUCTCLIST = "34Q,047,1R7,217,8B7";
+
+  }
+  var bumber = ISUCTCLIST.indexOf(isuCtc);
+  if (ISUCTCLIST.indexOf(isuCtc) < 0) {
+    FormManager.setValue('repTeamMemberNo', "");
+    FormManager.setValue('engineeringBo', '');
+  }
 }
 
 function setSBOForFinlandSubRegion() {
