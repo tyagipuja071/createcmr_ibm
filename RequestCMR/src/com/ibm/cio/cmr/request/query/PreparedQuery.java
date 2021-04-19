@@ -26,6 +26,7 @@ import org.eclipse.persistence.config.QueryHints;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.BaseEntity;
 import com.ibm.cio.cmr.request.entity.CompoundEntity;
+import com.ibm.cio.cmr.request.util.SBOFilterUtil;
 
 /**
  * Query class to use for JPA prepared query to ease the hanlding of parameters
@@ -89,6 +90,11 @@ public class PreparedQuery {
   public List<CompoundEntity> getCompundResults(int maxRows, Class<? extends BaseEntity<?>> entityClass, String annotatedSqlName) {
     String preparedSql = prepareSql();
     LOG.debug("Prepared Query (Compound): " + preparedSql);
+    if (this.rawSql.toString().contains(":COMPANY_CD_SBO")) {
+      String sboFilterQuery = SBOFilterUtil.getSBOFilterQuery();
+      int index = this.rawSql.indexOf(":COMPANY_CD_SBO");
+      this.rawSql.replace(index, index + 15, sboFilterQuery);
+    }
     if (LOG.isDebugEnabled()) {
       StringBuilder sb = new StringBuilder();
       for (Integer index : this.indexMap.keySet()) {
@@ -197,6 +203,11 @@ public class PreparedQuery {
     if (!this.valueMap.containsKey("MANDT")) {
       String mandt = SystemConfiguration.getValue("MANDT");
       setParameter("MANDT", mandt);
+    }
+    if (this.rawSql.toString().contains(":COMPANY_CD_SBO")) {
+      String sboFilterQuery = SBOFilterUtil.getSBOFilterQuery();
+      int index = this.rawSql.indexOf(":COMPANY_CD_SBO");
+      this.rawSql.replace(index, index + 15, sboFilterQuery);
     }
     String preparedSql = prepareSql();
     LOG.debug("Prepared Query: " + preparedSql);

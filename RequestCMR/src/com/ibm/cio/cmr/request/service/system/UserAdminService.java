@@ -72,6 +72,7 @@ public class UserAdminService extends BaseService<UserModel, Users> {
 
     }
 
+    q.append(" and nvl(COMP_CD,'') <> 'GTS'");
     q.append(" order by USER_NAME");
     q.setForReadOnly(true);
     List<Users> users = q.getResults(Users.class);

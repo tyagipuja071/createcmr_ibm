@@ -4149,14 +4149,18 @@ function setTaxCd1MandatoryCzech() {
     window.setTimeout('setTaxCd1MandatoryCzech()', 500);
   } else if (dijit.byId('vatExempt').get('checked')) {
     FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+    FormManager.removeValidator('company', Validators.REQUIRED);
   } else {
     var _custType = FormManager.getActualValue('custSubGrp');
     var role = FormManager.getActualValue('userRole').toUpperCase();
-    if (role == 'REQUESTER' && (_custType == 'BUSPR' || _custType == 'COMME' || _custType == 'THDPT')) {
+    if ((role == 'REQUESTER' || role == 'PROCESSOR') && (_custType == 'BUSPR' || _custType == 'COMME' || _custType == 'THDPT')) {
+      FormManager.resetValidations('company');
+      FormManager.addValidator('company', Validators.REQUIRED, [ 'IČO' ], 'MAIN_CUST_TAB');
       FormManager.resetValidations('taxCd1');
-      FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'IČ' ], 'MAIN_CUST_TAB');
+      FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'DIČ' ], 'MAIN_CUST_TAB');
     } else {
       FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+      FormManager.removeValidator('company', Validators.REQUIRED);
     }
   }
 }

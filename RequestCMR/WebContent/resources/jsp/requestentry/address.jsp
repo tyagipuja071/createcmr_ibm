@@ -364,8 +364,8 @@ visibility: hidden !IMPORTANT;
           <cmr:gridCol width="70px" field="custNm4" header="Name 4" />
         </cmr:view>
         
-        <!-- Street and Street Con't except BELUX,JP -->
-        <cmr:view exceptForGEO="BELUX,JP,AP,FR" exceptForCountry="618,724,848">
+        <!-- Street and Street Con't except BELUX,NL,JP -->
+        <cmr:view exceptForGEO="BELUX,NL,JP,AP,FR" exceptForCountry="618,724,848">
           <cmr:gridCol width="130px" field="addrTxt" header="${ui.grid.addrTxt}" >
               <cmr:formatter functionName="streetValueFormatter" />
           </cmr:gridCol>
@@ -387,9 +387,11 @@ visibility: hidden !IMPORTANT;
         
 
         <!-- Street and Street Con't for BELUX -->
-        <cmr:view forGEO="BELUX">
-          <cmr:gridCol width="140px" field="addrTxt" header="Stree/PO Box" >
+        <cmr:view forGEO="BELUX,NL">
+          <cmr:gridCol width="140px" field="custNm3" header="CustName3/ATT/PO Box" >
               <cmr:formatter functionName="streetValueFormatterBELUX" />
+          </cmr:gridCol>
+          <cmr:gridCol width="140px" field="addrTxt" header="Street Address" >
           </cmr:gridCol>
         </cmr:view>
         
@@ -429,7 +431,7 @@ visibility: hidden !IMPORTANT;
         
         
         <!--  City except for JP -->
-        <cmr:view exceptForGEO="BELUX,JP">
+        <cmr:view exceptForGEO="JP">
           <cmr:gridCol width="80px" field="city1" header="${ui.grid.city1}" />
         </cmr:view>
         
@@ -457,20 +459,6 @@ visibility: hidden !IMPORTANT;
         
          <cmr:view forCountry="848">
 			<cmr:gridCol width="100px" field="hwInstlMstrFlg" header="Hardware Master"></cmr:gridCol>     	
-        </cmr:view>
- 
-        <!-- Attn for BELUX -->
-        <cmr:view forGEO="BELUX">
-          <cmr:gridCol width="100px" field="custNm4" header="Dept/Attn" >
-            <cmr:formatter functionName="attnFormatterBELUX" />
-          </cmr:gridCol>
-        </cmr:view>
-
-		<!-- Attn for NL -->
-        <cmr:view forGEO="NL">
-          <cmr:gridCol width="100px" field="custNm4" header="Dept/Attn" >
-            <cmr:formatter functionName="attnFormatterNL" />
-          </cmr:gridCol>
         </cmr:view>
         
         <cmr:view forGEO="EMEA" exceptForCountry="862,758,726,666">

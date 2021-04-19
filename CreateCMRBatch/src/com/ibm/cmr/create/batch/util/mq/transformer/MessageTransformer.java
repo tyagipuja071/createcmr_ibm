@@ -391,9 +391,17 @@ public abstract class MessageTransformer {
   public String getReqStatusForSendingMail(String mailFlag) {
     return null;
   }
-  
-   public boolean skipCreditCodeUpdateForCountry() {
+
+  public boolean skipCreditCodeUpdateForCountry() {
     return false;
   }
-  
+
+  public String getDupCreationCountryId(EntityManager entityManager, String cntry, String cmrNo) {
+    return "NA";
+  }
+
+  public void getTargetCountryId(EntityManager entityManager, GenerateCMRNoRequest generateCMRNoObj, String cntry, String cmrNo) {
+    // noop for default class, override
+  }
+
 }
