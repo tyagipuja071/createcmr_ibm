@@ -263,7 +263,7 @@ public class CalculateCoverageElement extends OverridingElement {
 
         List<String> coverageIds = new ArrayList<String>();
         boolean logNegativeCheck = !COV_ODM.equals(covFrom);
-        if (COV_BG.equals(covFrom) && (!SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry()))) {
+        if (COV_BG.equals(covFrom) && SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry())) {
           logNegativeCheck = false;
         }
         for (CoverageContainer container : coverages) {
