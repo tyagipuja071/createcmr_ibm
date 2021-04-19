@@ -568,6 +568,8 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
         <cmr:column span="2" width="170">
 			${summary.addr.poBoxCity}
 		</cmr:column>		
+		<cmr:column span="1" width="50">
+          </cmr:column>
           <cmr:column span="1" width="130">
             <label><cmr:fieldLabel fieldId="SAPNumber" />:</label>
           </cmr:column>
@@ -1248,7 +1250,7 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
         <cmr:column span="1" width="127" forCountry="758,760">
           <!-- !I AM IMPORTANT for indention -->
         </cmr:column>
-        <cmr:column span="1" width="127" forGEO="NORDX,BELUX,NL">
+        <cmr:column span="1" width="127" forGEO="NORDX,BELUX,NL,TW,KR">
         </cmr:column>
         <cmr:column span="1" width="130">
           <label> <cmr:fieldLabel fieldId="BuyingGroupID" />: </label>

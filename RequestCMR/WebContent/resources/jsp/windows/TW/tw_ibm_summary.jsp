@@ -24,13 +24,9 @@
     <cmr:column span="1" width="130">
       <label><cmr:fieldLabel fieldId="MrcCd" />: </label>
     </cmr:column>
-    <cmr:column span="1" width="180">
+    <cmr:column span="1" width="240">
           ${summary.data.mrcCd}
    </cmr:column>
-   </cmr:row>
-    <cmr:row>
-    <cmr:column span="1" width="127">
-    </cmr:column>
       <cmr:column span="1" width="130">
       <label><cmr:fieldLabel fieldId="SalRepNameNo" />: </label>
     </cmr:column>
@@ -44,7 +40,7 @@
     <cmr:column span="1" width="130">
       <label><cmr:fieldLabel fieldId="CollectionCd" />: </label>
     </cmr:column>
-    <cmr:column span="1" width="180">
+    <cmr:column span="1" width="240">
           ${summary.data.collectionCd}
     </cmr:column>
   </cmr:row>
