@@ -188,7 +188,7 @@ public class NORDXHandler extends BaseSOFHandler {
                   }
                 }
 
-                String seqSecondaryZS01 = getSecondaryZS01Seq(entityManager, cmrIssueCd, SystemConfiguration.getValue("MANDT"), reqEntry.getCmrNo());
+                String seqSecondaryZS01 = getSecondaryZS01Seq(entityManager, cmrIssueCd, SystemConfiguration.getValue("MANDT"), record.getCmrNum());
                 System.out.println("---------seqSecondaryZS01---------------" + seqSecondaryZS01);
                 if (!StringUtils.isBlank(seqSecondaryZS01) && seqSecondaryZS01.equals(addr.getCmrAddrSeq())) {
                   String seqSecondaryZS01Legacy = StringUtils.leftPad(seqSecondaryZS01, 5, '0');
