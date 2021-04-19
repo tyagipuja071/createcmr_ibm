@@ -98,7 +98,7 @@ public class KRHandler extends GEOHandler {
     // }
     data.setClientTier(mainRecord.getCmrTier());
     // data.setClientTier(this.currentRecord.get(WtaasQueryKeys.Data.GB_SegCode));
-    // 【Representative(CEO) name in business license】
+    // ?Representative(CEO) name in business license?
     // data.setContactName1(mainRecord.getUsCmrRestrictTo());
     // if(data.getContactName1()!= null && data.getContactName1().length() >
     // 30){
@@ -332,6 +332,13 @@ public class KRHandler extends GEOHandler {
       update.setDataField(PageManager.getLabel(cmrCountry, "ContactName3", "-"));
       update.setNewData(service.getCodeAndDescription(newData.getContactName3(), "ContactName3", cmrCountry));
       update.setOldData(service.getCodeAndDescription(oldData.getContactName3(), "ContactName3", cmrCountry));
+      results.add(update);
+    }
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getSearchTerm(), newData.getSearchTerm())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "SearchTerm", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getSearchTerm(), "SearchTerm", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getSearchTerm(), "SearchTerm", cmrCountry));
       results.add(update);
     }
   }
