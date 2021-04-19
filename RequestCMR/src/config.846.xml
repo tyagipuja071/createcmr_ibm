@@ -113,7 +113,7 @@
 					<dbColumn>SVC_AR_OFFICE</dbColumn>
 					<width>20</width>
 					<length>1</length>
-					<bdsId>CustLang</bdsId>
+					<lovId>CustPrefLang</lovId>
 				</column>
 			</columns>
 		</tab>
