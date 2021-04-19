@@ -57,6 +57,7 @@ import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
+import com.ibm.cio.cmr.request.util.legacy.CloningRDCDirectUtil;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.QueryClient;
 import com.ibm.cmr.services.client.query.QueryRequest;
@@ -139,6 +140,10 @@ public class CEMEAHandler extends BaseSOFHandler {
   private static final String[] CEEME_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "CustLang", "GeoLocationCode", "Affiliate", "Company", "CAP", "CMROwner",
       "CustClassCode", "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office",
       "Floor", "Building", "County", "City2", "Department" };
+
+  private static final String[] CZ_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "CustLang", "GeoLocationCode", "Affiliate", "CAP", "CMROwner", "CustClassCode",
+      "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office", "Floor", "Building",
+      "County", "City2", "Department", "Company", "LocalTax1" };
 
   private static final String[] AUSTRIA_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "GeoLocationCode", "Affiliate", "Company", "CAP", "CMROwner",
       "CustClassCode", "CurrencyCode", "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX",
@@ -1041,13 +1046,17 @@ public class CEMEAHandler extends BaseSOFHandler {
     if (SystemLocation.SLOVAKIA.equals(data.getCmrIssuingCntry())) {
       data.setCompany(this.currentImportValues.get("BankBranchNo"));
       LOG.trace("BankBranchNo: " + data.getCompany());
+    } else if (SystemLocation.CZECH_REPUBLIC.equals(data.getCmrIssuingCntry())) {
+      data.setCompany(this.currentImportValues.get("BankBranchNo"));// RBBXA->ICO
+      data.setTaxCd1(mainRecord.getCmrBusinessReg());// kna1.stcd1->DIC
+      LOG.trace("BankAccountNo: " + data.getCompany());
+      LOG.trace("DIC: " + data.getTaxCd1());
     } else {
       data.setCompany("");
     }
 
     // DIC and OIB fields
-    if (SystemLocation.SLOVAKIA.equals(data.getCmrIssuingCntry()) || SystemLocation.CROATIA.equals(data.getCmrIssuingCntry())
-        || SystemLocation.CZECH_REPUBLIC.equals(data.getCmrIssuingCntry())) {
+    if (SystemLocation.SLOVAKIA.equals(data.getCmrIssuingCntry()) || SystemLocation.CROATIA.equals(data.getCmrIssuingCntry())) {
       data.setTaxCd1(this.currentImportValues.get("BankAccountNo"));
       LOG.trace("BankAccountNo: " + data.getTaxCd1());
     }
@@ -1165,7 +1174,7 @@ public class CEMEAHandler extends BaseSOFHandler {
   @Override
   public void setAdminValuesOnImport(Admin admin, FindCMRRecordModel currentRecord) throws Exception {
   }
-  
+
   @Override
   public int getName1Length() {
     return 35;
@@ -1202,12 +1211,11 @@ public class CEMEAHandler extends BaseSOFHandler {
     }
     return ke;
   }
-  
   @Override
   public int getName2Length() {
     return 35;
   }
-  
+
   @Override
   public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo) throws Exception {
     boolean doSplit = (currentRecord.getCmrName1Plain() != null && currentRecord.getCmrName1Plain().length() > 35)
@@ -1260,8 +1268,10 @@ public class CEMEAHandler extends BaseSOFHandler {
     if (!CEE_COUNTRIES_LIST.contains(currentRecord.getCmrIssuedBy())) {
     KunnrExt addlAddDetail = getKunnrExtDetails(currentRecord.getCmrSapNumber());
     if (addlAddDetail != null) {
-      address.setBldg(addlAddDetail.getBuilding() != null ? addlAddDetail.getBuilding() : "");
-      address.setDept(addlAddDetail.getDepartment() != null ? addlAddDetail.getDepartment() : "");
+      if (SystemLocation.AUSTRIA.equals(country)) {
+        address.setBldg(addlAddDetail.getBuilding() != null ? addlAddDetail.getBuilding() : "");
+        address.setDept(addlAddDetail.getDepartment() != null ? addlAddDetail.getDepartment() : "");
+      }
 
       if (!StringUtils.isEmpty(address.getDept())) {
         addrDetailsList.add(address.getDept());
@@ -1271,6 +1281,7 @@ public class CEMEAHandler extends BaseSOFHandler {
       }
     }
     }
+  }
   }
 
   @Override
@@ -1553,6 +1564,24 @@ public class CEMEAHandler extends BaseSOFHandler {
       results.add(update);
     }
 
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getTaxCd1(), newData.getTaxCd1())
+        && SystemLocation.CZECH_REPUBLIC.equals(cmrCountry)) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "LocalTax1", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getTaxCd1(), "LocalTax1", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getTaxCd1(), "LocalTax1", cmrCountry));
+      results.add(update);
+    }
+
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCompany(), newData.getCompany())
+        && (SystemLocation.SLOVAKIA.equals(cmrCountry) || SystemLocation.CZECH_REPUBLIC.equals(cmrCountry))) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "Company", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getCompany(), "Company", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getCompany(), "Company", cmrCountry));
+      results.add(update);
+    }
+
   }
 
   @Override
@@ -1560,6 +1589,8 @@ public class CEMEAHandler extends BaseSOFHandler {
     switch (cntry) {
     case SystemLocation.AUSTRIA:
       return Arrays.asList(AUSTRIA_SKIP_ON_SUMMARY_UPDATE_FIELDS).contains(field);
+    case SystemLocation.CZECH_REPUBLIC:
+      return Arrays.asList(CZ_SKIP_ON_SUMMARY_UPDATE_FIELDS).contains(field);
     default:
       return Arrays.asList(CEEME_SKIP_ON_SUMMARY_UPDATE_FIELDS).contains(field);
     }
@@ -2496,6 +2527,69 @@ public class CEMEAHandler extends BaseSOFHandler {
         addr.setTaxOffice(addressDataMap.get("taxOffice"));
       }
     }
+  }
+
+  @Override
+  public String getCMRNo(EntityManager rdcMgr, String kukla, String mandt, String katr6, String cmrNo) {
+    if (SystemLocation.AUSTRIA.equals(katr6)) {
+      LOG.debug("generateCNDCmr :: START");
+      String cndCMR = "";
+      boolean internal = false;
+
+      if (cmrNo.startsWith("99"))
+        internal = true;
+
+      int i = 0;
+
+      if (internal) {
+        while (i < 5) {
+          String ran1 = "";
+          ran1 = String.valueOf((int) ((Math.random() * 9 + 1) * 1000));
+          // cndCMR = "99" + RDCRandomString.genNumericNumberSeries(4, kukla);
+          cndCMR = "99" + ran1;
+
+          LOG.debug("Generated AT Internal CMR No.:" + cndCMR);
+
+          if (CloningRDCDirectUtil.checkCustNoForDuplicateRecord(rdcMgr, cndCMR, mandt, katr6)) {
+            i++;
+            LOG.debug("Alredy exist CMR No.: " + cndCMR + "  in rdc. Trying to generate next times:");
+            if (i == 5) {
+              LOG.debug("Max limit is 5 times to generate CMR No.: " + cndCMR + " Tried times:" + i);
+              cndCMR = "";
+            }
+          } else
+            break;
+        }
+      } else {
+
+        while (i < 5) {
+
+          int ran3 = (int) ((Math.random() * 9 + 1) * 100000);
+          if (ran3 > 990000) {
+            ran3 = ran3 - (int) ((Math.random() * 9 + 1) * 10000);
+          }
+
+          cndCMR = String.valueOf(ran3);
+          // cndCMR = "6" + RDCRandomString.genNumericNumberSeries(5, kukla);
+
+          LOG.debug("Generated AT Non Internal CMR No.:" + cndCMR);
+
+          if (CloningRDCDirectUtil.checkCustNoForDuplicateRecord(rdcMgr, cndCMR, mandt, katr6)) {
+            i++;
+            LOG.debug("Alredy exist CMR No.: " + cndCMR + "  in rdc. Trying to generate next times:");
+            if (i == 5) {
+              LOG.debug("Max limit is 5 times to generate CMR No.: " + cndCMR + " Tried times:" + i);
+              cndCMR = "";
+            }
+          } else
+            break;
+        }
+      }
+      LOG.debug("generateCNDCmr :: returnung cndCMR = " + cndCMR);
+      LOG.debug("generateCNDCmr :: END");
+      return cndCMR;
+    }
+    return null;
   }
 
 }

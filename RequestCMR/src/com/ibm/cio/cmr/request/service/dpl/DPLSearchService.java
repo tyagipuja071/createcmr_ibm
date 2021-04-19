@@ -294,7 +294,7 @@ public class DPLSearchService extends BaseSimpleService<Object> {
             // no DPL check for uwanted addresses
             continue;
           }
-          if (!"P".equals(addr.getDplChkResult()) && !"X".equals(addr.getDplChkResult())) {
+          if (!"P".equals(addr.getDplChkResult()) && !"X".equals(addr.getDplChkResult()) && !"N".equals(addr.getDplChkResult())) {
             String name = "";
             // for japan, name is on cust nm3, CMR-7419
             if (SystemLocation.JAPAN.equals(cntry)) {
