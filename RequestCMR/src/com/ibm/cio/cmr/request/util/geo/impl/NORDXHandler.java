@@ -201,15 +201,15 @@ public class NORDXHandler extends BaseSOFHandler {
 
                   if ("Y".equals(isSecondaryInst)) {
                     addr.setCmrAddrTypeCode("ZI01");
-                  }
-                  if ("N".equals(isSecondaryInst) && "Y".equals(isSecondaryBill)) {
+                  } else if ("N".equals(isSecondaryInst) && "Y".equals(isSecondaryBill)) {
                     addr.setCmrAddrTypeCode("ZP01");
-                  }
-                  if ("N".equals(isSecondaryInst) && "N".equals(isSecondaryBill) && "Y".equals(isSecondaryShip)) {
+                  } else if ("N".equals(isSecondaryInst) && "N".equals(isSecondaryBill) && "Y".equals(isSecondaryShip)) {
                     addr.setCmrAddrTypeCode("ZD01");
-                  }
-                  if ("N".equals(isSecondaryInst) && "N".equals(isSecondaryBill) && "N".equals(isSecondaryShip) && "Y".equals(isSecondaryEpl)) {
+                  } else if ("N".equals(isSecondaryInst) && "N".equals(isSecondaryBill) && "N".equals(isSecondaryShip)
+                      && "Y".equals(isSecondaryEpl)) {
                     addr.setCmrAddrTypeCode("ZS02");
+                  } else {
+                    addr.setCmrAddrTypeCode("ZI01");
                   }
                 }
 
