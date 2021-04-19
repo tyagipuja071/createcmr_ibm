@@ -1282,7 +1282,6 @@ public class CEMEAHandler extends BaseSOFHandler {
     }
     }
   }
-  }
 
   @Override
   public void setAdminDefaultsOnCreate(Admin admin) {

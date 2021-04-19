@@ -813,8 +813,10 @@ public class NORDXHandler extends BaseSOFHandler {
       XSSFSheet sheet = book.getSheet(name);
       LOG.debug("validating for sheet " + name);
       if (sheet != null) {
+        int rowCount = 0;
         for (Row row : sheet) {
           if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
+            rowCount++;
             DataFormatter df = new DataFormatter();
             String cmrNo = ""; // 0
             String abbName = ""; // 1
@@ -1199,6 +1201,14 @@ public class NORDXHandler extends BaseSOFHandler {
               }
             }
           }
+        }
+        if (rowCount < 2 && "Data".equals(name)) {
+          TemplateValidation error = new TemplateValidation(name);
+          LOG.trace("Note that Blank template uploaded is not allowed. Please input and upload the template again.");
+          error.addError((rowCount), "Data Sheet",
+              "Note that Blank template uploaded is not allowed. Please input and upload the template again.<br>");
+          validations.add(error);
+          rowCount = 0;
         }
       }
     }
