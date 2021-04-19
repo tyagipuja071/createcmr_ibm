@@ -3,11 +3,15 @@
  */
 package com.ibm.cmr.create.batch.service;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -110,8 +114,16 @@ public abstract class BaseBatchService extends BaseSimpleService<Boolean> {
     long elapsed = (endTime - startTime) / 1000;
     LOG.info("Application finished execution at " + TIME_FORMATTER.format(new Date(endTime)));
     LOG.info("Took " + elapsed + " seconds.");
-    LOG.info("System exiting...");
-    Runtime.getRuntime().halt(0);
+    Timer timer = new Timer();
+    timer.schedule(new TimerTask() {
+
+      @Override
+      public void run() {
+        LOG.info("System exiting...");
+        Runtime.getRuntime().halt(0);
+      }
+    }, 5000);
+
     // System.exit(0);
   }
 
@@ -405,6 +417,59 @@ public abstract class BaseBatchService extends BaseSimpleService<Boolean> {
     cmt.setReqId(reqId);
     cmt.setUpdateTs(cmt.getCreateTs());
     createEntity(cmt, entityManager);
+  }
+
+  /**
+   * Initializes an empty instance of the the entity object
+   * 
+   * @return
+   * @throws Exception
+   */
+  protected <T> T initEmpty(Class<T> entityClass) throws Exception {
+    try {
+      T object = entityClass.newInstance();
+      Field[] fields = entityClass.getDeclaredFields();
+      for (Field field : fields) {
+        if (String.class.equals(field.getType()) && !Modifier.isAbstract(field.getModifiers()) && !Modifier.isFinal(field.getModifiers())) {
+          field.setAccessible(true);
+          field.set(object, "");
+        }
+        if (Date.class.equals(field.getType()) && !Modifier.isAbstract(field.getModifiers()) && !Modifier.isFinal(field.getModifiers())) {
+          field.setAccessible(true);
+          field.set(object, SystemUtil.getCurrentTimestamp());
+        }
+      }
+      return object;
+    } catch (Exception e) {
+      throw new Exception("Cannot initialize " + entityClass.getSimpleName() + " object.");
+    }
+  }
+
+  /**
+   * Initializes an empty instance of the the entity object
+   * 
+   * @return
+   * @throws Exception
+   */
+  protected void capsAndFillNulls(Object entity, boolean capitalize) throws Exception {
+    try {
+      Class<?> entityClass = entity.getClass();
+      Field[] fields = entityClass.getDeclaredFields();
+      for (Field field : fields) {
+        if (String.class.equals(field.getType()) && !Modifier.isAbstract(field.getModifiers()) && !Modifier.isFinal(field.getModifiers())) {
+          field.setAccessible(true);
+          Object val = field.get(entity);
+          if (val == null) {
+            field.set(entity, "");
+          } else if (capitalize) {
+            field.set(entity, ((String) val).toUpperCase().trim());
+          }
+        }
+      }
+    } catch (Exception e) {
+      // noop
+      LOG.warn("Warning: caps and null fill failed. Error = " + e.getMessage());
+    }
   }
 
   protected boolean useServicesConnections() {

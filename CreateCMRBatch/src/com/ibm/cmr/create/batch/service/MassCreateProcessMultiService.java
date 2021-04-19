@@ -75,6 +75,7 @@ public class MassCreateProcessMultiService extends MultiThreadedBatchService<Str
 
     sql = ExternalizedQuery.getSql("BATCH.MONITOR_ABORTED_REC");
     query = new PreparedQuery(entityManager, sql);
+    query.append("and a.REQ_TYPE = 'N'");
     List<Admin> abortedReqList = query.getResults(Admin.class);
     LOG.debug("Size of abortedRecList : " + abortedReqList.size());
 
