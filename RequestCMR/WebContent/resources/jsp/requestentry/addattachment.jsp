@@ -73,12 +73,21 @@
     </cmr:row>
     </div>
     <cmr:row>
+    <cmr:view exceptForGEO="KR">
       <cmr:column span="2">
         <p>
           <cmr:label fieldId="docContent">${ui.content}:</cmr:label>
           <form:select dojoType="dijit.form.FilteringSelect" id="docContent" searchAttr="name" style="display: block;" maxHeight="200" required="false" path="docContent" placeHolder="Select a Content Type"></form:select>
         </p>
-      </cmr:column>
+      </cmr:column> 
+      </cmr:view>     
+              <cmr:view forGEO="KR">
+            <cmr:column span="2">
+              <p>
+                <cmr:label fieldId="docContent">${ui.content}:</cmr:label>
+                <form:select dojoType="dijit.form.FilteringSelect" id="docContent"  searchAttr="name" style="display: block;" maxHeight="200" required="true" path="docContent" placeHolder="Select a Content Type"></form:select>
+              </p>
+            </cmr:column></cmr:view>
     </cmr:row>
     <cmr:row>
       <cmr:column span="2" width="500">

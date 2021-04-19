@@ -36,6 +36,13 @@ function afterConfigKR() {
     FormManager.readOnly('cmrNoPrefix');
   }
 
+  // story: attachment Company Proof required
+  if( (reqType == 'C' || reqType == 'U') && (custSubType != 'INTER')){
+    //FormManager.addValidator('DocContent',Validators.REQUIRED,['Company Proof required']);
+    FormManager.addValidator('docContent', Validators.REQUIRED, [ '${ui.content}' ],'MAIN_ATTACH_TAB');
+  }
+
+
   RemoveCrossAddressMandatory();
 }
 
@@ -139,6 +146,36 @@ function RemoveCrossAddressMandatory() {
     FormManager.removeValidator('custNm4', Validators.REQUIRED);
   }
 }
+	//story:2139 Except Internal scenario, for all the other scenarios requester needs to attach a file of COMP(Company Proof)
+	function addAttachmentValidator() {
+	  FormManager.addFormValidator((function() {
+	    return {
+	      validate : function() {
+	        var reqType = FormManager.getActualValue('reqType');
+	        var custSubType = FormManager.getActualValue('custSubGrp');
+	        var cntryUse = FormManager.getActualValue('cntryUse');
+	        // var docContent = FormManager.getActualValue('docContent');
+	        if (typeof (_pagemodel) != 'undefined') {
+	          if ((reqType == 'C' || reqType == 'U')
+	              && (custSubType != 'INTER')) {
+	        	  var id = FormManager.getActualValue('reqId');
+	            var ret = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
+	              ID : id
+	            });
+
+	            if (ret == null || ret.ret1 == null) {
+	              return new ValidationResult(null, false, 'Company Proof  in Attachment tab is required.');
+	            } else {
+	              return new ValidationResult(null, true);
+	            }
+	          } else {
+	            return new ValidationResult(null, true);
+	          }
+	        }
+	      }
+	    };
+	  })(), 'MAIN_ATTACH_TAB', 'frmCMR');
+	}
 
 dojo.addOnLoad(function() {
   GEOHandler.KR = [ '766' ];
@@ -153,4 +190,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addKRChecklistValidator, GEOHandler.KR);
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.KR, GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(addDPLCheckValidator, GEOHandler.KR, GEOHandler.ROLE_REQUESTER, true);
+  GEOHandler.registerValidator(addAttachmentValidator, GEOHandler.KR);
 });
