@@ -787,6 +787,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(restrictDuplicateAddr, GEOHandler.DE, null, true);
   GEOHandler.addAfterConfig(lockIBMTabForDE, GEOHandler.DE);
   GEOHandler.addAfterTemplateLoad(lockIBMTabForDE, GEOHandler.DE);
-  GEOHandler.registerValidator(validateDeptAttnBldg, GEOHandler.DE, null, true);
   GEOHandler.addAfterConfig(setAddressDetailsForView, SysLoc.GERMANY);
 });

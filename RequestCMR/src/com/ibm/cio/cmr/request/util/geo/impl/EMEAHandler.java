@@ -3899,52 +3899,6 @@ public class EMEAHandler extends BaseSOFHandler {
       return;
     }
 
-    if (country.equals(SystemLocation.UNITED_KINGDOM) || country.equals(SystemLocation.IRELAND)) {
-      XSSFSheet sheet = book.getSheet("Data");
-      for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
-        String collectionCd = null;
-        String salesRep = null;
-        TemplateValidation error = new TemplateValidation("Data");
-        row = sheet.getRow(rowIndex);
-        if (row == null) {
-          return; // stop immediately when row is blank
-        }
-        if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
-          currCell = row.getCell(4);
-          collectionCd = validateColValFromCell(currCell);
-          if (country.equals(SystemLocation.IRELAND)) {
-            currCell = row.getCell(10);
-          } else {
-            currCell = row.getCell(11);
-          }
-          salesRep = validateColValFromCell(currCell);
-
-				}
-        if ((!("@").equals(collectionCd)) && (!StringUtils.isEmpty(collectionCd))) {
-          if (((collectionCd.length() == 2 && !collectionCd.chars().allMatch(Character::isDigit))
-              || (collectionCd.length() == 6 && !collectionCd.chars().allMatch(Character::isLetterOrDigit)))) {
-            LOG.trace(
-                "Note that Collection code can be either exactly 2 characters (both digits) or exactly 6 characters (alphanumeric). Please fix and upload the template again.");
-            error.addError(rowIndex, "Collection Code",
-                "Note that Collection code can be either exactly 2 characters (both digits) or exactly 6 characters (alphanumeric). Please fix and upload the template again.");
-            validations.add(error);
-          } else if (collectionCd.length() != 2 && collectionCd.length() != 6) {
-            LOG.trace(
-                "Note that Collection code can be either exactly 2 characters or exactly 6 characters. Please fix and upload the template again.");
-            error.addError(rowIndex, "Collection Code",
-                "Note that Collection code can be either exactly 2 characters or exactly 6 characters. Please fix and upload the template again.");
-            validations.add(error);
-          }
-        }
-
-        if ((!StringUtils.isEmpty(salesRep)) && !(salesRep.chars().allMatch(Character::isLetterOrDigit))) {
-          LOG.trace("Note that Sales Rep. No. should be alphanumeric. Please fix and upload the template again.");
-          error.addError(rowIndex, "Sales Rep. No.", "Note that Sales Rep. No. should be alphanumeric. Please fix and upload the template again.");
-          validations.add(error);
-        }
-      }
-    }
-
     for (String name : countryAddrss) {
       XSSFSheet sheet = book.getSheet(name);
       for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
