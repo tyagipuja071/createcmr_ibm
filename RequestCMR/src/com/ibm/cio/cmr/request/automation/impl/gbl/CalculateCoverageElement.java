@@ -39,6 +39,7 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
@@ -262,6 +263,9 @@ public class CalculateCoverageElement extends OverridingElement {
 
         List<String> coverageIds = new ArrayList<String>();
         boolean logNegativeCheck = !COV_ODM.equals(covFrom);
+        if (COV_BG.equals(covFrom) && (!SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry()))) {
+          logNegativeCheck = false;
+        }
         for (CoverageContainer container : coverages) {
           if (coverages.size() > 3 && coverages.indexOf(container) > 3) {
             break;
@@ -502,7 +506,8 @@ public class CalculateCoverageElement extends OverridingElement {
             && !data.getBgId().equals(bgResult.getNewValue())) {
           // calculated buying group is different from coverage buying group.
           details.append("Buying Group ID under coverage overrides is different from the one on request.\n");
-          //engineData.addNegativeCheckStatus("BG_DIFFERENT", "Buying Group ID under coverage overrides is different from the one on request.");
+          // engineData.addNegativeCheckStatus("BG_DIFFERENT", "Buying Group ID
+          // under coverage overrides is different from the one on request.");
           output.getData().remove(bgKey);
         }
         FieldResultKey gbgKey = new FieldResultKey("DATA", "GBG_ID");
@@ -512,7 +517,8 @@ public class CalculateCoverageElement extends OverridingElement {
           // calculated global buying group is different from coverage global
           // buying group.
           details.append("Global Buying Group ID under coverage overrides is different from the one on request.\n");
-          //engineData.addNegativeCheckStatus("GBG_DIFFERENT", "Buying Group ID under coverage overrides is different from the one on request.");
+          // engineData.addNegativeCheckStatus("GBG_DIFFERENT", "Buying Group ID
+          // under coverage overrides is different from the one on request.");
           output.getData().remove(gbgKey);
         }
       }
