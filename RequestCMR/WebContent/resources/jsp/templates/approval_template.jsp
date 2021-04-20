@@ -65,8 +65,8 @@ request.setAttribute("cmrv", SystemConfiguration.getSystemProperty("BUILD"));
 <script src="${resourcesPath}/js/cmr-windows.js?${cmrv}" type="text/javascript"></script>
 <script src="${resourcesPath}/js/facestypeahead-0.4.4.js"></script>
 <script src="${resourcesPath}/js/moment.js" type="text/javascript"></script>
-<link rel="stylesheet" type="text/css" href="//1.w3.s81c.com/common/v17e/css/w3.css" />
-<link href="//1.www.s81c.com/common/v17e/css/form.css" rel="stylesheet" title="www" type="text/css" />
+<link rel="stylesheet" href="${resourcesPath}/css/ext/w3.css?${cmrv}"/>
+<link rel="stylesheet" href="${resourcesPath}/css/ext/form.css"/>
 <link rel="stylesheet" href="${resourcesPath}/css/facestypeahead-0.4.4.css"/>
 
 <!-- nihilo grid --> 
@@ -78,9 +78,10 @@ request.setAttribute("cmrv", SystemConfiguration.getSystemProperty("BUILD"));
 <link rel="stylesheet" type="text/css" href="//1.w3.s81c.com/common/js/dojo/1.6/dojox/grid/enhanced/resources/EnhancedGrid_rtl.css" />
 
 <link rel="stylesheet" type="text/css" href="${resourcesPath}/css/cmr.css?${cmrv}" />
-<link rel="stylesheet" type="text/css" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
-<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
-<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+<link rel="stylesheet" href="${resourcesPath}/css/ext/jquery-ui.css"/>
+<script src="${resourcesPath}/js/ext/jquery-1.10.2.js"></script>
+<script src="${resourcesPath}/js/ext/jquery-ui.js"></script>
+<link rel="stylesheet" type="text/css" href="${resourcesPath}/css/cmr-v2.css?${cmrv}" />
 
 <!-- typeahead, dates -->
 <script>
@@ -149,7 +150,6 @@ request.setAttribute("cmrv", SystemConfiguration.getSystemProperty("BUILD"));
   </div>
   <!-- CONTENT_END -->
   <div>
-    <tiles:insertAttribute name="footer" />
   </div>
 </body>
 </html>
