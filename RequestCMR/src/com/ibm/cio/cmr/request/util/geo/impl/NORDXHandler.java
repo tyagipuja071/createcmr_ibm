@@ -2331,6 +2331,7 @@ public class NORDXHandler extends BaseSOFHandler {
     QueryRequest query = new QueryRequest();
     query.setSql(sql);
     query.addField("SPRAS");
+    query.addField("ZZKV_CUSNO");
 
     LOG.debug("Getting existing SPRAS value from RDc DB..");
 
