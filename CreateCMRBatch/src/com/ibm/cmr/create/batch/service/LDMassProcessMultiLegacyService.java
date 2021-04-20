@@ -36,6 +36,7 @@ import com.ibm.cio.cmr.request.entity.MassUpdtDataPK;
 import com.ibm.cio.cmr.request.entity.ReqCmtLog;
 import com.ibm.cio.cmr.request.entity.SuppCntry;
 import com.ibm.cio.cmr.request.entity.WfHist;
+import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.RequestUtils;
@@ -110,6 +111,7 @@ public class LDMassProcessMultiLegacyService extends MultiThreadedBatchService<L
 
   @Override
   public Boolean executeBatchForRequests(EntityManager entityManager, List<Long> requests) throws Exception {
+    ChangeLogListener.setManager(entityManager);
     for (Long reqId : requests) {
       AdminPK pk = new AdminPK();
       pk.setReqId(reqId);
@@ -130,6 +132,7 @@ public class LDMassProcessMultiLegacyService extends MultiThreadedBatchService<L
       }
       partialCommit(entityManager);
     }
+    ChangeLogListener.clean();
     return true;
   }
 

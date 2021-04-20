@@ -30,6 +30,7 @@ import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.entity.MassUpdt;
 import com.ibm.cio.cmr.request.entity.ReqCmtLog;
 import com.ibm.cio.cmr.request.entity.WfHist;
+import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.RequestUtils;
@@ -55,6 +56,7 @@ public class LDMassProcessMultiRdcService extends MultiThreadedBatchService<Long
 
   @Override
   protected Queue<Long> getRequestsToProcess(EntityManager entityManager) {
+    ChangeLogListener.setManager(entityManager);
     LOG.info("Initializing Country Map..");
     LandedCountryMap.init(entityManager);
 
@@ -68,6 +70,7 @@ public class LDMassProcessMultiRdcService extends MultiThreadedBatchService<Long
       }
     }
     LOG.debug(toProcess.size() + " records to process.");
+    ChangeLogListener.clean();
     return toProcess;
   }
 
