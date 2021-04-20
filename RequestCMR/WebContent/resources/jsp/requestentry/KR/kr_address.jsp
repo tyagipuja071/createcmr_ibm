@@ -103,24 +103,6 @@
     <cmr:field fieldId="DIVN" id="divn" path="divn" size="400" />
   </cmr:column>
 </cmr:row>
-<cmr:row>
-  <cmr:column span="2" >
-    <cmr:label fieldId="contact">
-      <cmr:fieldLabel fieldId="Contact" />:
-       <cmr:delta text="-" id="delta-contact" />
-    </cmr:label>
-    <cmr:field fieldId="Contact" id="contact" path="contact"  size="400" />
-  </cmr:column>
-</cmr:row>
-<cmr:row>
-    <cmr:column span="2">
-     <cmr:label fieldId="countyName">
-       <cmr:fieldLabel fieldId="LocalLangCountryName" />: 
-            <cmr:delta text="-" id="delta-countyName" />
-     </cmr:label>
-     <cmr:field fieldId="LocalLangCountryName" id="countyName" path="countyName"  size="400"/>
-    </cmr:column>
-</cmr:row>
 <cmr:row topPad="20">
   <cmr:column span="2">
     <p>
@@ -181,6 +163,22 @@
       <cmr:field fieldId="TransportZone" id="transportZone" path="transportZone" />
     </p>
   </cmr:column>
+</cmr:row>
+<cmr:row>
+  <cmr:column span="2" >
+    <cmr:label fieldId="contact">
+      <cmr:fieldLabel fieldId="Contact" />:
+       <cmr:delta text="-" id="delta-contact" />
+    </cmr:label>
+    <cmr:field fieldId="Contact" id="contact" path="contact"  />
+  </cmr:column>
+    <cmr:column span="2">
+     <cmr:label fieldId="countyName">
+       <cmr:fieldLabel fieldId="LocalLangCountryName" />: 
+            <cmr:delta text="-" id="delta-countyName" />
+     </cmr:label>
+     <cmr:field fieldId="LocalLangCountryName" id="countyName" path="countyName" />
+    </cmr:column>
 </cmr:row>
 <cmr:row topPad="10">
   <cmr:column span="2">

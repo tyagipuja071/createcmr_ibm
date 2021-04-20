@@ -223,26 +223,6 @@
         <div id="divn_view">-</div>
       </cmr:column>
       </cmr:row>  
-      <cmr:row>
-      <cmr:column span="1" width="300">
-	    <cmr:label fieldId="countyName_view">
-			<span class="lbl-LocalLangCountryName">Name of person in charge of Invoice_1</span>:
-		</cmr:label>
-      </cmr:column>
-		<cmr:column span="2">
-			<div id="countyName_view">-</div>
-		</cmr:column>
-		</cmr:row>
-      <cmr:row>
-       <cmr:column span="1" width="300">
-        <cmr:label fieldId="contact_view">
-          <span class="lbl-Contact">Name of person in charge of Invoice_2</span>:
-          </cmr:label>
-       </cmr:column>
-      <cmr:column span="2">
-        <div id="contact_view">-</div>
-     </cmr:column>
-     </cmr:row> 
       <br>  
       <cmr:row>
         <cmr:column span="1">
@@ -297,6 +277,24 @@
       <div id="transportZone_view">-</div>
       </cmr:column>
       </cmr:row>
+      <cmr:row>
+       <cmr:column span="1">
+        <cmr:label fieldId="contact_view">
+          <span class="lbl-Contact">Name of person in charge of Invoice_1</span>:
+          </cmr:label>
+       </cmr:column>
+      <cmr:column span="2">
+        <div id="contact_view">-</div>
+     </cmr:column>
+      <cmr:column span="1">
+	    <cmr:label fieldId="countyName_view">
+			<span class="lbl-LocalLangCountryName">Name of person in charge of Invoice_2</span>:
+		</cmr:label>
+      </cmr:column>
+		<cmr:column span="2">
+			<div id="countyName_view">-</div>
+		</cmr:column>
+     </cmr:row> 
       <cmr:row>
       <cmr:column span="1">
 	    <cmr:label fieldId="dept_view">
