@@ -65,6 +65,13 @@ function afterConfigForNORDX() {
       // FormManager.readOnly('engineeringBo');
       // } // CMR-1903 commented
     }
+
+    if (custSubGrp.substring(2, 5) == 'INT' || custSubGrp.substring(2, 5) == 'BUS' || custSubGrp == 'BUSPR' || custSubGrp == 'INTER') {
+      FormManager.readOnly('engineeringBo');
+      FormManager.readOnly('repTeamMemberNo');
+
+    }
+
   }
   // if (reqType == 'C') {
   // if (!(_collCdArraySubTypes.indexOf(custSubGrp) > -1) &&
