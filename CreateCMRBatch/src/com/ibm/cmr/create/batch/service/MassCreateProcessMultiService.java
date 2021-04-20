@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import javax.persistence.EntityManager;
 
@@ -322,12 +321,10 @@ public class MassCreateProcessMultiService extends MultiThreadedBatchService<Str
     LOG.debug("Starting processing mass create at " + new Date());
     List<MassCreateWorker> workers = new ArrayList<MassCreateWorker>();
     ScheduledExecutorService executor = Executors.newScheduledThreadPool(threads, new WorkerThreadFactory(getThreadName()));
-    int currCount = 0;
     for (CompoundEntity entity : results) {
       mass_create = entity.getEntity(MassCreate.class);
       MassCreateWorker worker = new MassCreateWorker(em, mass_create, cmrServiceInput, itrId, cmrNoSapNoMap);
-      executor.schedule(worker, 2 * currCount, TimeUnit.SECONDS);
-      currCount++;
+      executor.execute(worker);
       workers.add(worker);
     }
 

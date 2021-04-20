@@ -95,11 +95,11 @@ import com.ibm.cmr.services.client.process.mass.ResponseRecord;
 public class TransConnService extends BaseBatchService {
 
   protected static final String BATCH_SERVICES_URL = SystemConfiguration.getValue("BATCH_SERVICES_URL");
-  protected static final String ACTION_RDC_UPDATE = "System Action:RDc Update";
-  protected static final String ACTION_RDC_CREATE = "System Action:RDc Create";
-  protected static final String ACTION_RDC_DELETE = "System Action:RDc Mass Delete";
-  protected static final String ACTION_RDC_REACTIVATE = "System Action:RDc Mass Reactivate";
-  protected static final String ACTION_RDC_SINGLE_REACTIVATE = "System Action:RDc Single Reactivate";
+  public static final String ACTION_RDC_UPDATE = "System Action:RDc Update";
+  public static final String ACTION_RDC_CREATE = "System Action:RDc Create";
+  public static final String ACTION_RDC_DELETE = "System Action:RDc Mass Delete";
+  public static final String ACTION_RDC_REACTIVATE = "System Action:RDc Mass Reactivate";
+  public static final String ACTION_RDC_SINGLE_REACTIVATE = "System Action:RDc Single Reactivate";
   protected static final String ACTION_RDC_MASS_UPDATE = "System Action:RDc Mass Update";
   private static final String FORCED_CHANGE_ACTION = "System Action: Forced Changes.";
   private static final String ACTION_RDC_UPDT_BY_ENT = "System Action:RDc Enterprise update";

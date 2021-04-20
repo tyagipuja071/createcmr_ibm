@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import javax.persistence.EntityManager;
 
@@ -283,12 +282,10 @@ public class MassCreateValidatorMultiService extends MultiThreadedBatchService<L
         LOG.debug("Starting validating contents at " + new Date());
         List<MassCreateWorker> workers = new ArrayList<MassCreateWorker>();
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(threads, new WorkerThreadFactory(getThreadName()));
-        int currCount = 0;
         for (MassCreateFileRow row : rows) {
           engine = initEngine(cmrIssuingCountry);
           MassCreateWorker worker = new MassCreateWorker(entityManager, engine, row);
-          executor.schedule(worker, 2 * currCount, TimeUnit.SECONDS);
-          currCount++;
+          executor.execute(worker);
           workers.add(worker);
         }
 

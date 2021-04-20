@@ -195,7 +195,7 @@ public class LDMassProcessMultiLegacyService extends MultiThreadedBatchService<L
       int currCount = 0;
       for (MassUpdt massUpdt : results) {
         LDMassProcessWorker worker = new LDMassProcessWorker(entityManager, admin, massUpdt, this);
-        executor.schedule(worker, 2 * currCount, TimeUnit.SECONDS);
+        executor.schedule(worker, currCount, TimeUnit.SECONDS);
         currCount++;
         workers.add(worker);
       }
