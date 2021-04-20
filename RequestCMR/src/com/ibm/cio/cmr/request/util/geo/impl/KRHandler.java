@@ -89,9 +89,9 @@ public class KRHandler extends GEOHandler {
     // this.currentRecord = retrieveWTAASValues(mainRecord);
     data.setAbbrevNm(mainRecord.getCmrName1Plain());
 
-    if (mainRecord.getCmrCountryLandedDesc() != null && (mainRecord.getCmrCountryLandedDesc().length() != 0)) {
+/*    if (mainRecord.getCmrCountryLandedDesc() != null && (mainRecord.getCmrCountryLandedDesc().length() != 0)) {
       data.setAbbrevLocn(mainRecord.getCmrCountryLandedDesc());
-    }
+    }*/
     // else
     // {
     // data.setAbbrevLocn(this.currentRecord.get(WtaasQueryKeys.Data.AbbrLoc));
@@ -107,7 +107,7 @@ public class KRHandler extends GEOHandler {
     data.setContactName1(data.getContactName1());
     // }
 
-    data.setContactName2(mainRecord.getCmrName2());
+//    data.setContactName2(mainRecord.getCmrName2());
 
     // GB segment default setting
     if (StringUtils.isEmpty(mainRecord.getCmrTier()) || CmrConstants.FIND_CMR_BLANK_CLIENT_TIER.equals(mainRecord.getCmrTier())) {
