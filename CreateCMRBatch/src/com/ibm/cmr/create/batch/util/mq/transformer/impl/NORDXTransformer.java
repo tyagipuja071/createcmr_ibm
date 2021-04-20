@@ -1093,13 +1093,13 @@ public class NORDXTransformer extends EMEATransformer {
         if ("E".equals(data.getCustPrefLang())) {
           legacyCust.setLangCd("3");
         } else {
-          legacyCust.setLangCd("S");
+          legacyCust.setLangCd("1");
         }
       } else if (SystemLocation.SWEDEN.equals(data.getCmrIssuingCntry())) {
         if ("E".equals(data.getCustPrefLang())) {
           legacyCust.setLangCd("3");
         } else {
-          legacyCust.setLangCd("1");
+          legacyCust.setLangCd("S");
         }
 
       } else if (SystemLocation.DENMARK.equals(data.getCmrIssuingCntry())) {
@@ -1311,13 +1311,13 @@ public class NORDXTransformer extends EMEATransformer {
         if ("E".equals(muData.getSvcArOffice())) {
           cust.setLangCd("3");
         } else {
-          cust.setLangCd("S");
+          cust.setLangCd("1");
         }
       } else if (SystemLocation.SWEDEN.equals(cust.getId().getSofCntryCode())) {
         if ("E".equals(muData.getSvcArOffice())) {
           cust.setLangCd("3");
         } else {
-          cust.setLangCd("1");
+          cust.setLangCd("S");
         }
 
       } else if (SystemLocation.DENMARK.equals(cust.getId().getSofCntryCode())) {
