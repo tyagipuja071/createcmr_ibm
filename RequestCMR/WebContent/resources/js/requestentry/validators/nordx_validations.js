@@ -138,6 +138,7 @@ function afterConfigForNORDX() {
 
   // CREATCMR-2144
   setCustPrefLangByCountry();
+  setInacCd();
 }
 
 function disableLandCntry() {
@@ -3175,6 +3176,18 @@ function setCustPrefLangByCountry() {
 
 }
 // CREATCMR-2144
+
+function setInacCd() {
+  if (reqType == 'C') {
+    var custSubType = FormManager.getActualValue('custSubGrp');
+    if (custSubType.includes('BUS') || custSubType.includes('INT') || custSubType.includes('PRI') || custSubType.includes('IBM')) {
+      FormManager.setValue('inacCd', '');
+      FormManager.readOnly('inacCd');
+    } else {
+      FormManager.enable('inacCd');
+    }
+  }
+}
 
 dojo.addOnLoad(function() {
   GEOHandler.NORDX = [ '846', '806', '702', '678' ];
