@@ -3178,6 +3178,9 @@ function setCustPrefLangByCountry() {
 // CREATCMR-2144
 
 function setInacCd() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
   if (reqType == 'C') {
     var custSubType = FormManager.getActualValue('custSubGrp');
     if (custSubType.includes('BUS') || custSubType.includes('INT') || custSubType.includes('PRI') || custSubType.includes('IBM')) {
