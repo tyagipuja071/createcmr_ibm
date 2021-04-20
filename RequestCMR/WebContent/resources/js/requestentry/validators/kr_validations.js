@@ -37,16 +37,27 @@ function afterConfigKR() {
   }
 
   // story: attachment Company Proof required
+  var custSubType = FormManager.getActualValue('custSubGrp');
   if( (reqType == 'C' || reqType == 'U') && (custSubType != 'INTER')){
     //FormManager.addValidator('DocContent',Validators.REQUIRED,['Company Proof required']);
     FormManager.addValidator('docContent', Validators.REQUIRED, [ '${ui.content}' ],'MAIN_ATTACH_TAB');
   }
 
-
   RemoveCrossAddressMandatory();
+  setChecklistStatus();
+  addKRChecklistValidator();
 }
 
 function setChecklistStatus() {
+
+  reqType = FormManager.getActualValue('reqType');
+  var custSubScnrio = FormManager.getActualValue('custSubGrp');
+  if (reqType == 'U') {
+    return;
+  }
+  if (custSubScnrio != 'CROSS') {
+    return;
+  }
   console.log('validating checklist..');
   var checklist = dojo.query('table.checklist');
   document.getElementById("checklistStatus").innerHTML = "Not Done";
@@ -77,19 +88,22 @@ function setChecklistStatus() {
 }
 
 function addKRChecklistValidator() {
+
+  reqType = FormManager.getActualValue('reqType');
+  var custSubScnrio = FormManager.getActualValue('custSubGrp');
+  if (reqType == 'U') {
+    return;
+  }
+  if (custSubScnrio != 'CROSS') {
+    return;
+  }
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
         console.log('validating checklist..');
         var checklist = dojo.query('table.checklist');
 
-        // local customer name if found
-        var localNm = checklist.query('input[name="localCustNm"]');
-        if (localNm.length > 0 && localNm[0].value.trim() == '') {
-          return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
-        }
-
-        // local customer name if found
+        // local address name if found
         var localAddr = checklist.query('input[name="localAddr"]');
         if (localAddr.length > 0 && localAddr[0].value.trim() == '') {
           return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
@@ -130,7 +144,8 @@ function addKRChecklistValidator() {
           REQID : reqId
         });
         if (!record || !record.sectionA1) {
-          return new ValidationResult(null, false, 'Checklist has not been registered yet. Please execute a \'Save\' action before sending for processing to avoid any data loss.');
+          return new ValidationResult(null, false,
+              'Checklist has not been registered yet. Please execute a \'Save\' action before sending for processing to avoid any data loss.');
         }
         return new ValidationResult(null, true);
       }
