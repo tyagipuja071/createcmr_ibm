@@ -1225,15 +1225,15 @@ public class NORDXTransformer extends EMEATransformer {
 
     } else if (SystemLocation.DENMARK.equals(data.getCmrIssuingCntry())) {
       if ("678".equals(data.getCountryUse())) {
-        int postCd = Integer.valueOf(StringUtils.isNumeric(mailPostCode.trim()) ? mailPostCode.trim() : "0");
-        if (postCd >= 0 && postCd < 5000) {
+        int postCd = Integer.valueOf(StringUtils.isNumeric(mailPostCode.trim()) ? mailPostCode.trim() : "10001");
+        if (!DEFAULT_LANDED_COUNTRY.equals(landedCntry)) {
+          legacyCust.setCeBo("000281X");
+        } else if (postCd >= 0 && postCd < 5000) {
           legacyCust.setCeBo("000281X");
         } else if (postCd > 4999 && postCd < 7400) {
           legacyCust.setCeBo("000246X");
         } else if (postCd > 7399 && postCd < 10000) {
           legacyCust.setCeBo("000245X");
-        } else if (!DEFAULT_LANDED_COUNTRY.equals(landedCntry)) {
-          legacyCust.setCeBo("000281X");
         }
       } else if ("678FO".equals(data.getCountryUse())) {
         legacyCust.setCeBo("000200F");
@@ -1465,7 +1465,7 @@ public class NORDXTransformer extends EMEATransformer {
     }
 
     if (!StringUtils.isBlank(muData.getCollectionCd())) {
-      if ("@".equals(muData.getCollectionCd())) {
+      if ("@@@@@@".equals(muData.getCollectionCd())) {
         cust.setCollectionCd("");
       } else {
         cust.setCollectionCd(muData.getCollectionCd());
