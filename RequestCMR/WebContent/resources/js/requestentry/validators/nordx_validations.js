@@ -3278,9 +3278,10 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(lockEmbargo, GEOHandler.NORDX);
   GEOHandler.registerValidator(addNORDXAddressTypeValidator, GEOHandler.NORDX, null, true);
   GEOHandler.registerValidator(addNORDXInstallingShipping, GEOHandler.NORDX, null, true);
-  GEOHandler.registerValidator(addGenericVATValidator('', 'MAIN_CUST_TAB', 'frmCMR', 'ZS01'), [ SysLoc.DENMARK, SysLoc.FINLAND, SysLoc.SWEDEN ],
-      null, true);
-  GEOHandler.registerValidator(norwayCustomVATValidator('', 'MAIN_CUST_TAB', 'frmCMR', 'ZS01'), [ SysLoc.NORWAY ], null, true);
+  GEOHandler.registerValidator(addGenericVATValidator('', 'MAIN_CUST_TAB', 'frmCMR', 'ZS01'), [ SysLoc.DENMARK, SysLoc.FINLAND, SysLoc.SWEDEN,
+      SysLoc.NORWAY ], null, true);
+  // GEOHandler.registerValidator(norwayCustomVATValidator('', 'MAIN_CUST_TAB',
+  // 'frmCMR', 'ZS01'), [ SysLoc.NORWAY ], null, true);
   GEOHandler.registerValidator(addACAdminValidator, GEOHandler.NORDX, null, true);// CMR-1746
   GEOHandler.registerValidator(addISICValidator, GEOHandler.NORDX, null, true);// CMR-1993
   GEOHandler.addAddrFunction(disableLandCntry, GEOHandler.NORDX);
