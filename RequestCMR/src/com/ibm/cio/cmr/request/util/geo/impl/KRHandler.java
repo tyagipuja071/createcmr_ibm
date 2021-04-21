@@ -156,6 +156,20 @@ public class KRHandler extends GEOHandler {
 
   @Override
   public void appendExtraModelEntries(EntityManager entityManager, ModelAndView mv, RequestEntryModel model) throws Exception {
+	    String requesterId = model.getRequesterId();
+	    if (!StringUtils.isEmpty(requesterId)) {
+	      Person p = BluePagesHelper.getPerson(requesterId);
+	      if (p != null) {
+	        mv.addObject("requesterId_UID", p.getEmployeeId().substring(0, p.getEmployeeId().length() - 3));
+	      }
+	    }
+	    String originatorId = model.getOriginatorId();
+	    if (!StringUtils.isEmpty(originatorId)) {
+	      Person p = BluePagesHelper.getPerson(originatorId);
+	      if (p != null) {
+	        mv.addObject("originatorId_UID", p.getEmployeeId().substring(0, p.getEmployeeId().length() - 3));
+	      }
+	    }
   }
 
   @Override

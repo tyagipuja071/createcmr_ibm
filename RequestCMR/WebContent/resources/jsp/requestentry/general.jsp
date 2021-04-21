@@ -496,7 +496,7 @@ if (readOnly){
               <cmr:field id="reqReason" path="reqReason" fieldId="RequestReason" tabId="MAIN_GENERAL_TAB" size="250"/>
             </p>
             </cmr:column>
-        <cmr:view forGEO="JP,TW">
+        <cmr:view forGEO="JP,TW,KR">
             <cmr:column span="2">
               <p>
                 <label for="requesterId">Requester ID:</label>
@@ -515,7 +515,7 @@ if (readOnly){
         <cmr:view forGEO="KR">
             <cmr:column span="2">
               <p>
-                <label for="requesterId"><cmr:fieldLabel fieldId="OriginatorName" />:<cmr:info text="${ui.info.orgName}" /></label>
+                <label for="reqFor"><cmr:fieldLabel fieldId="OriginatorName" />:<cmr:info text="${ui.info.orgName}" /></label>
                 <cmr:bluepages model="reqentry" namePath="originatorNm"  idPath="originatorId" useBothIds="false" ></cmr:bluepages>
               </p>
             </cmr:column></cmr:view>
