@@ -3199,6 +3199,33 @@ function setInacCd() {
   }
 }
 
+function setSensitiveFlag() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  var role = null;
+  if (typeof (_pagemodel) != 'undefined') {
+    role = _pagemodel.userRole;
+  }
+  if (reqType == 'C') {
+    if (role == 'Requester') {
+      FormManager.setValue('sensitiveFlag', 'REG');
+      FormManager.readOnly('sensitiveFlag');
+      FormManager.resetValidations('sensitiveFlag');
+    } else if (role == 'Processor') {
+      FormManager.enable('sensitiveFlag');
+      FormManager.addValidator('sensitiveFlag', Validators.REQUIRED, [ 'Sensitive Flag' ], 'MAIN_CUST_TAB');
+    }
+  } else if (reqType == 'U') {
+    FormManager.resetValidations('sensitiveFlag');
+    if (role == 'Requester') {
+      FormManager.readOnly('sensitiveFlag');
+    } else if (role == 'Processor') {
+      FormManager.enable('sensitiveFlag');
+    }
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.NORDX = [ '846', '806', '702', '678' ];
 
@@ -3260,4 +3287,5 @@ dojo.addOnLoad(function() {
 
   // CREATCMR-1689
   GEOHandler.addAddrFunction(setAbbrevNmAddressSave, GEOHandler.NORDX);
+  GEOHandler.addAfterConfig(setSensitiveFlag, GEOHandler.NORDX);
 });
