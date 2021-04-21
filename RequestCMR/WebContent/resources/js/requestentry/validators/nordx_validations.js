@@ -1125,6 +1125,7 @@ function addNORDXInstallingShipping() {
       validate : function() {
         var shippingBool = true;
         var installBool = true;
+        var eplBool = true;
         var reqId = FormManager.getActualValue('reqId');
         var addr = 'ZD01';
         var qParams = {
@@ -1157,14 +1158,36 @@ function addNORDXInstallingShipping() {
           }
         }
 
-        if (shippingBool && installBool) {
+        addr = 'ZS02';
+        qParams = {
+          _qall : 'Y',
+          REQID : reqId,
+          ADDR_TYPE : addr
+        };
+
+        results = cmr.query('GET_STREET_ADDRSEQ', qParams);
+        if (results != null) {
+          for (var i = 0; i < results.length; i++) {
+            if (results[i].ret1.length < 1) {
+              eplBool = false;
+            }
+          }
+        }
+        var errMsg = '';
+        if (!installBool) {
+          errMsg += 'Installing';
+        }
+        if (!shippingBool) {
+          errMsg += ' and Shipping';
+        }
+        if (!eplBool) {
+          errMsg += ' and EPL';
+        }
+        errMsg = errMsg.replace(/^ and /, "");
+        if (shippingBool && installBool && eplBool) {
           return new ValidationResult(null, true);
-        } else if (!shippingBool && !installBool) {
-          return new ValidationResult(null, false, 'Street should not be empty in Installing and Shipping Address.');
-        } else if (!shippingBool) {
-          return new ValidationResult(null, false, 'Street should not be empty in Shipping Address.');
-        } else if (!installBool) {
-          return new ValidationResult(null, false, 'Street should not be empty in Installing Address.');
+        } else {
+          return new ValidationResult(null, false, 'Street should not be empty in ' + errMsg + ' Address.');
         }
         return new ValidationResult(null, true);
       }
