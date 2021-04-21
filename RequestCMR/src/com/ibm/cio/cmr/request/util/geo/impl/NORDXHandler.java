@@ -157,6 +157,8 @@ public class NORDXHandler extends BaseSOFHandler {
 
           int maxintSeqLegacy = getMaxSequenceOnLegacyAddr(entityManager, reqEntry.getCmrIssuingCntry(), mainRecord.getCmrNum());
 
+          String zi01Flag = null;
+          String zs02Flag = null;
           // map RDc - SOF - CreateCMR by sequence no
           for (FindCMRRecordModel record : source.getItems()) {
             seqNo = record.getCmrAddrSeq();
@@ -189,6 +191,9 @@ public class NORDXHandler extends BaseSOFHandler {
                   LOG.debug("---------parvmCount---------------" + parvmCount);
                   if ("0".equals(stkzn) || parvmCount > 2) {
                     addr.setCmrAddrTypeCode("ZS02");
+                    zs02Flag = "Y";
+                  } else {
+                    zi01Flag = "Y";
                   }
                 }
 
@@ -317,7 +322,9 @@ public class NORDXHandler extends BaseSOFHandler {
                 String isShareZP01 = isShareZP01(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), installingseqLegacy);
                 String isShareZS02 = isShareZS02(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), installingseqLegacy);
                 String isShareZD01 = isShareZD01(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), installingseqLegacy);
+                String isShareZI01 = isShareZI01(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), installingseqLegacy);
 
+                if (isShareZI01 != null && isShareZS02 != null) {
                 // add share ZP01
                 if (isShareZP01 != null && (!installingseq.equals(mainRecord.getCmrAddrSeq()))) {
                   FindCMRRecordModel sharezp01 = new FindCMRRecordModel();
@@ -332,7 +339,7 @@ public class NORDXHandler extends BaseSOFHandler {
                   InstalingShareSeq = record.getCmrAddrSeq();
                 }
                 // add share ZS02
-                if (isShareZS02 != null && (!installingseq.equals(mainRecord.getCmrAddrSeq()))) {
+                  if (isShareZS02 != null && (!installingseq.equals(mainRecord.getCmrAddrSeq())) && "Y".equals(zi01Flag)) {
                   FindCMRRecordModel sharezs02 = new FindCMRRecordModel();
                   PropertyUtils.copyProperties(sharezs02, record);
                   sharezs02.setCmrAddrTypeCode("ZS02");
@@ -357,7 +364,21 @@ public class NORDXHandler extends BaseSOFHandler {
                   converted.add(sharezd01);
                   InstalingShareSeq = record.getCmrAddrSeq();
                 }
+                // add share ZI01
+                  if (isShareZI01 != null && (!installingseq.equals(mainRecord.getCmrAddrSeq())) && "Y".equals(zs02Flag)) {
+                  FindCMRRecordModel sharezi01 = new FindCMRRecordModel();
+                    PropertyUtils.copyProperties(sharezi01, record);
+                  sharezi01.setCmrAddrTypeCode("ZI01");
+                  sharezi01.setCmrAddrSeq(StringUtils.leftPad(String.valueOf(maxintSeqLegacy), 5, '0'));
+                  maxintSeqLegacy++;
+                  sharezi01.setParentCMRNo("");
+                    sharezi01.setCmrSapNumber(record.getCmrSapNumber());
+                    sharezi01.setCmrDept(record.getCmrCity2());
+                  converted.add(sharezi01);
+                    InstalingShareSeq = record.getCmrAddrSeq();
+                }
                 System.out.println("---------ZI01 Share Seq Max Seq is ---------------" + maxintSeqLegacy);
+              }
               }
             }
 
@@ -1434,6 +1455,7 @@ public class NORDXHandler extends BaseSOFHandler {
       String isShareZP01 = isShareZP01(entityManager, data.getCmrIssuingCntry(), data.getCmrNo(), installingseqLegacy);
       String isShareZS02 = isShareZS02(entityManager, data.getCmrIssuingCntry(), data.getCmrNo(), installingseqLegacy);
       String isShareZD01 = isShareZD01(entityManager, data.getCmrIssuingCntry(), data.getCmrNo(), installingseqLegacy);
+      String isShareZI01 = isShareZI01(entityManager, data.getCmrIssuingCntry(), data.getCmrNo(), installingseqLegacy);
 
       if (isShareZP01 != null) {
         updateImportIndToNForSharezp01Addr(entityManager, data.getId().getReqId(), SystemConfiguration.getValue("MANDT"), data.getCmrIssuingCntry(),
@@ -1447,7 +1469,11 @@ public class NORDXHandler extends BaseSOFHandler {
         updateImportIndToNForSharezd01Addr(entityManager, data.getId().getReqId(), SystemConfiguration.getValue("MANDT"), data.getCmrIssuingCntry(),
             data.getCmrNo());
       }
-      if (isShareZP01 != null || isShareZS02 != null || isShareZD01 != null) {
+      if (isShareZI01 != null) {
+        updateImportIndToNForSharezi01Addr(entityManager, data.getId().getReqId(), SystemConfiguration.getValue("MANDT"), data.getCmrIssuingCntry(),
+            data.getCmrNo());
+      }
+      if (isShareZP01 != null || isShareZS02 != null || isShareZD01 != null || isShareZI01 != null) {
         updateChangeindToYForSharezi01Addr(entityManager, data.getId().getReqId(), InstalingShareSeq);
       }
     }
