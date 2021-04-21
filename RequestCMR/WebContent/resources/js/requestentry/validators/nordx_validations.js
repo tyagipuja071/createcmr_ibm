@@ -2793,20 +2793,9 @@ function setAbbrevNmAddressSave(cntry, addressMode, saving, finalSave, force) {
 
       if (custSubGrp == 'DK3PA' || custSubGrp == 'FO3PA' || custSubGrp == 'GL3PA' || custSubGrp == 'IS3PA' || custSubGrp == 'FI3PA'
           || custSubGrp == 'EE3PA' || custSubGrp == 'LT3PA' || custSubGrp == 'LV3PA' || custSubGrp == 'THDPT') {
-        var custNm1DBVal = getAbbreviatedNameByAddrType(_reqId, "ZS01");
-        var custNm2DBVal = getAbbreviatedNameByAddrType(_reqId, "ZI01");
-
-        if (addrType == 'ZS01') {
-          if (zs01CustNm != custNm1DBVal) {
-            FormManager.setValue('abbrevNm', zs01CustNm.substring(0, 8) + " c/o " + custNm2DBVal.substring(0, 9));
-
-          }
-        }
-
+        var custNmDBVal = getAbbreviatedNameByAddrType(_reqId, "ZI01");
         if (addrType == 'ZI01') {
-          if (zi01CustNm != custNm2DBVal) {
-            FormManager.setValue('abbrevNm', custNm1DBVal.substring(0, 8) + " c/o " + zi01CustNm.substring(0, 9));
-          }
+          FormManager.setValue('abbrevNm', custNmDBVal.substring(0, 22));
         }
       }
 
