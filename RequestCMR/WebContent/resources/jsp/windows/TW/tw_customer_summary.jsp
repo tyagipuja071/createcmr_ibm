@@ -39,7 +39,7 @@
   		 <cmr:column span="1" width="127">
     </cmr:column>
     <cmr:column span="1" width="130">
-      <label><cmr:fieldLabel fieldId="custAcctType" />: </label>
+      <label><cmr:fieldLabel fieldId="CustAcctType" />: </label>
     </cmr:column>
     <cmr:column span="1" width="240">
           ${summary.data.custAcctType}

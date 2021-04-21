@@ -17,31 +17,63 @@
   Addr addr = summary.getAddr();
   String cntry = data.getCmrIssuingCntry();
 %>
-<cmr:view forGEO="TW">
+<cmr:view forGEO="KR">
   <cmr:row>
     <cmr:column span="1" width="127">
     </cmr:column>
-     <%-- <cmr:column span="1" width="130">
-      <label><cmr:fieldLabel fieldId="SalesBusOff" />: </label>
+    <cmr:column span="1" width="130">
+      <label><cmr:fieldLabel fieldId="SalRepNameNo" />: </label>
     </cmr:column>
     <cmr:column span="1" width="240">
-        ${summary.data.salesBusOffCd}
-      </cmr:column> --%>
-    <cmr:column span="1" width="130">
-      <label><cmr:fieldLabel fieldId="EngineeringBo" />: </label>
+     ${summary.data.repTeamMemberNo}
     </cmr:column>
-    <cmr:column span="1" width="180">
-          ${summary.data.engineeringBo}
-        </cmr:column>
-  </cmr:row>
+      <cmr:column span="1" width="130">
+      <label><cmr:fieldLabel fieldId="MrcCd" />: </label>
+    </cmr:column>
+    <cmr:column span="1" width="240">
+      ${summary.data.mrcCd}
+    </cmr:column>
+    </cmr:row>
     <cmr:row>
     <cmr:column span="1" width="127">
     </cmr:column>
       <cmr:column span="1" width="130">
-      <label><cmr:fieldLabel fieldId="SitePartyID" />: </label>
+      <label><cmr:fieldLabel fieldId="OrgNo" />: </label>
     </cmr:column>
     <cmr:column span="1" width="240">
-      ${summary.data.sitePartyId}
+      ${summary.data.orgNo}
+    </cmr:column>
+      <cmr:column span="1" width="130">
+      <label><cmr:fieldLabel fieldId="CommercialFinanced" />: </label>
+    </cmr:column>
+    <cmr:column span="1" width="240">
+      ${summary.data.commercialFinanced}
+    </cmr:column>
+    </cmr:row>
+    <cmr:row>
+    <cmr:column span="1" width="127">
+    </cmr:column>
+      <cmr:column span="1" width="130">
+      <label><cmr:fieldLabel fieldId="ContactName2" />: </label>
+    </cmr:column>
+    <cmr:column span="1" width="240">
+      ${summary.data.contactName2}
+    </cmr:column>
+    <cmr:column span="1" width="130">
+      <label><cmr:fieldLabel fieldId="CreditCd" />: </label>
+    </cmr:column>
+    <cmr:column span="1" width="240">
+      ${summary.data.creditCd}
+    </cmr:column>
+    </cmr:row>
+    <cmr:row>
+    <cmr:column span="1" width="127">
+    </cmr:column>
+      <cmr:column span="1" width="130">
+      <label><cmr:fieldLabel fieldId="ContactName3" />: </label>
+    </cmr:column>
+    <cmr:column span="1" width="240">
+      ${summary.data.contactName3}
     </cmr:column>
     </cmr:row>
 </cmr:view>

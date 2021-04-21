@@ -36,10 +36,28 @@ function afterConfigKR() {
     FormManager.readOnly('cmrNoPrefix');
   }
 
+  // story: attachment Company Proof required
+  var custSubType = FormManager.getActualValue('custSubGrp');
+  if( (reqType == 'C' || reqType == 'U') && (custSubType != 'INTER')){
+    //FormManager.addValidator('DocContent',Validators.REQUIRED,['Company Proof required']);
+    FormManager.addValidator('docContent', Validators.REQUIRED, [ '${ui.content}' ],'MAIN_ATTACH_TAB');
+  }
+
   RemoveCrossAddressMandatory();
+  setChecklistStatus();
+  addKRChecklistValidator();
 }
 
 function setChecklistStatus() {
+
+  reqType = FormManager.getActualValue('reqType');
+  var custSubScnrio = FormManager.getActualValue('custSubGrp');
+  if (reqType == 'U') {
+    return;
+  }
+  if (custSubScnrio != 'CROSS') {
+    return;
+  }
   console.log('validating checklist..');
   var checklist = dojo.query('table.checklist');
   document.getElementById("checklistStatus").innerHTML = "Not Done";
@@ -70,19 +88,22 @@ function setChecklistStatus() {
 }
 
 function addKRChecklistValidator() {
+
+  reqType = FormManager.getActualValue('reqType');
+  var custSubScnrio = FormManager.getActualValue('custSubGrp');
+  if (reqType == 'U') {
+    return;
+  }
+  if (custSubScnrio != 'CROSS') {
+    return;
+  }
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
         console.log('validating checklist..');
         var checklist = dojo.query('table.checklist');
 
-        // local customer name if found
-        var localNm = checklist.query('input[name="localCustNm"]');
-        if (localNm.length > 0 && localNm[0].value.trim() == '') {
-          return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
-        }
-
-        // local customer name if found
+        // local address name if found
         var localAddr = checklist.query('input[name="localAddr"]');
         if (localAddr.length > 0 && localAddr[0].value.trim() == '') {
           return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
@@ -123,7 +144,8 @@ function addKRChecklistValidator() {
           REQID : reqId
         });
         if (!record || !record.sectionA1) {
-          return new ValidationResult(null, false, 'Checklist has not been registered yet. Please execute a \'Save\' action before sending for processing to avoid any data loss.');
+          return new ValidationResult(null, false,
+              'Checklist has not been registered yet. Please execute a \'Save\' action before sending for processing to avoid any data loss.');
         }
         return new ValidationResult(null, true);
       }
@@ -139,6 +161,36 @@ function RemoveCrossAddressMandatory() {
     FormManager.removeValidator('custNm4', Validators.REQUIRED);
   }
 }
+	//story:2139 Except Internal scenario, for all the other scenarios requester needs to attach a file of COMP(Company Proof)
+	function addAttachmentValidator() {
+	  FormManager.addFormValidator((function() {
+	    return {
+	      validate : function() {
+	        var reqType = FormManager.getActualValue('reqType');
+	        var custSubType = FormManager.getActualValue('custSubGrp');
+	        var cntryUse = FormManager.getActualValue('cntryUse');
+	        // var docContent = FormManager.getActualValue('docContent');
+	        if (typeof (_pagemodel) != 'undefined') {
+	          if ((reqType == 'C' || reqType == 'U')
+	              && (custSubType != 'INTER')) {
+	        	  var id = FormManager.getActualValue('reqId');
+	            var ret = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
+	              ID : id
+	            });
+
+	            if (ret == null || ret.ret1 == null) {
+	              return new ValidationResult(null, false, 'Company Proof  in Attachment tab is required.');
+	            } else {
+	              return new ValidationResult(null, true);
+	            }
+	          } else {
+	            return new ValidationResult(null, true);
+	          }
+	        }
+	      }
+	    };
+	  })(), 'MAIN_ATTACH_TAB', 'frmCMR');
+	}
 
 dojo.addOnLoad(function() {
   GEOHandler.KR = [ '766' ];
@@ -148,10 +200,10 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(afterConfigKR, GEOHandler.KR);
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.KR);
   GEOHandler.addAfterTemplateLoad(afterConfigKR, GEOHandler.KR);
-  // FormManager.skipByteChecks([ 'billingPstlAddr', 'divn', 'custNm3',
-  // 'custNm4' ]);
+  FormManager.skipByteChecks([ 'billingPstlAddr', 'divn', 'custNm3', 'custNm4', 'contact', 'dept', 'poBoxCity', 'countyName' ]);
   GEOHandler.addAfterConfig(setChecklistStatus, GEOHandler.KR);
   GEOHandler.registerValidator(addKRChecklistValidator, GEOHandler.KR);
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.KR, GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(addDPLCheckValidator, GEOHandler.KR, GEOHandler.ROLE_REQUESTER, true);
+  GEOHandler.registerValidator(addAttachmentValidator, GEOHandler.KR);
 });

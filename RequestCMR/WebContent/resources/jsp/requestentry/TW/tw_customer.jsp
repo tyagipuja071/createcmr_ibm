@@ -66,7 +66,7 @@
      </cmr:column>
   </cmr:row>
   <!-- No1 -->
-   <cmr:row>
+   <cmr:row addBackground="true">
     <cmr:column span="2" containerForField="FootnoteTxt2">
       <p>
         <label for="footnoteTxt2"> <cmr:fieldLabel fieldId="FootnoteTxt2" />: 
@@ -92,7 +92,7 @@
     </cmr:column>
   </cmr:row>
   <!-- No2 -->
-   <cmr:row>
+   <cmr:row addBackground="true">
       <cmr:column span="2" containerForField="ExportCodesTDOdate">
       <p>
         <label for="nuclChecklstDate"> <cmr:fieldLabel fieldId="ExportCodesTDOdate" />: 
@@ -165,7 +165,7 @@
       </cmr:column>
   </cmr:row>
     <!-- No5 -->
-   <cmr:row>
+   <cmr:row addBackground="true">
      <cmr:column span="2" containerForField="FootnoteTxt1">
       <p>
         <label for="footnoteTxt1"> <cmr:fieldLabel fieldId="FootnoteTxt1" />: 
@@ -187,7 +187,7 @@
       </cmr:column>
   </cmr:row>
     <!-- No6 -->
-   <cmr:row>
+   <cmr:row addBackground="true">
     <cmr:column span="2" containerForField="OriginatorNo">
         <p>
           <cmr:label fieldId="orgNo">

@@ -17,86 +17,52 @@
   Addr addr = summary.getAddr();
   String cntry = data.getCmrIssuingCntry();
 %>
-<cmr:view forGEO="TW">
+<cmr:view forGEO="KR">
   <cmr:row addBackground="true">
     <cmr:column span="1" width="127">
     </cmr:column>
     <cmr:column span="1" width="130">
-      <label><cmr:fieldLabel fieldId="AbbrevName" />: </label>
+      <label><cmr:fieldLabel fieldId="AbbrevLocation" />: </label>
     </cmr:column>
     <cmr:column span="1" width="240">
-          ${summary.data.abbrevNm}
+          ${summary.data.abbrevLocn}
     </cmr:column>
     
     <cmr:column span="1" width="130">
-      <label><cmr:fieldLabel fieldId="AbbrevLocation" />: </label>
-    </cmr:column>
-    <cmr:column span="1" width="200">
-      ${summary.data.abbrevLocn}
-    </cmr:column>
+      <label><cmr:fieldLabel fieldId="RestrictTo" />: </label>
+      </cmr:column>
+      <cmr:column span="1" width="240">
+        ${summary.data.restrictTo}
+      </cmr:column>
   </cmr:row>	
   	<cmr:row addBackground="true">
   		 <cmr:column span="1" width="127">
     </cmr:column>
     <cmr:column span="1" width="130">
-      <label><cmr:fieldLabel fieldId="InternalDept" />: </label>
+      <label><cmr:fieldLabel fieldId="ContactName1" />: </label>
     </cmr:column>
     <cmr:column span="1" width="240">
-          ${summary.data.ibmDeptCostCenter}
+          ${summary.data.contactName1}
     </cmr:column>
   	</cmr:row>
   <cmr:row addBackground="true">
   	
   </cmr:row>
-
-  <cmr:view>
-    <cmr:row addBackground="true">
-      <cmr:column span="1" width="127">
-      </cmr:column>
-      <cmr:column span="1" width="130">
-        <label><cmr:fieldLabel fieldId="CollectionCd" />: </label>
-      </cmr:column>
-      <cmr:column span="1" width="240">
-        ${summary.data.company}
-      </cmr:column>
-      <cmr:column span="1" width="130">
-        <label><cmr:fieldLabel fieldId="LocalTax1" />: </label>
-      </cmr:column>
-      <cmr:column span="1" width="200">
-        ${summary.data.taxCd1}
-      </cmr:column>
-    </cmr:row>
-  </cmr:view>
-
-  <cmr:view>
     <cmr:row addBackground="true">
       <cmr:column span="1" width="127">
       </cmr:column>
             <cmr:column span="1" width="130">
-      <label><cmr:fieldLabel fieldId="EconomicCd2" />: </label>
+      <label><cmr:fieldLabel fieldId="Phone1" />: </label>
     </cmr:column>
     <cmr:column span="1" width="240">
-      ${summary.data.economicCd}
+      ${summary.data.phone1}
     </cmr:column>
           <cmr:column span="1" width="130">
-        <label><cmr:fieldLabel fieldId="EmbargoCode" />: </label>
+        <label><cmr:fieldLabel fieldId="ModeOfPayment" />: </label>
       </cmr:column>
       <cmr:column span="1" width="180">
-        ${summary.data.embargoCd}
+        ${summary.data.modeOfPayment}
       </cmr:column> 
     </cmr:row>
-  </cmr:view>
-  <cmr:view>
-    <cmr:row addBackground="true">
-      <cmr:column span="1" width="127">
-      </cmr:column>
-      <cmr:column span="1" width="130">
-        <label><cmr:fieldLabel fieldId="LocalTax2" />: </label>
-      </cmr:column>
-      <cmr:column span="1" width="200">
-        ${summary.data.taxCd2}
-      </cmr:column>
-    </cmr:row>
-  </cmr:view>
 
 </cmr:view>

@@ -98,16 +98,6 @@ Missile: Bahrain, People's Republic of China, Egypt, Iran, Iraq, Israel, Jordan,
       Iraq, Kazakhstan, Korea (North), Kyrgyzstan, Laos, Libya,  
       Macao, Moldova, Mongolia, Myanmar (Burma), Russia, Sudan, Tajikistan, Turkmenistan, Ukraine, Uzbekistan, Venezuela, Vietnam.
     </cmr:chk-entry>
-  </cmr:chk-section>
-    <cmr:chk-section name="CERTIFICATION" >
-    <cmr:chk-entry>
-      Address Verification
-    </cmr:chk-entry> 
-    <cmr:chk-entry number="1" section="D">
-     By selecting 'I confirm' you are certifying that any address you are entering into this customer record is a valid customer 
-     address (not a location owned, leased or otherwise controlled by IBM), and if not a customer address is specifically 
-     identified as an IBM or third party address in the entry.
-     </cmr:chk-entry>   
   </cmr:chk-section>    
 </cmr:checklist>
 
