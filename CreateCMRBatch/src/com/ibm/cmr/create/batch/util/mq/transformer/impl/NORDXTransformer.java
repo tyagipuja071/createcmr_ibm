@@ -569,7 +569,7 @@ public class NORDXTransformer extends EMEATransformer {
       if (StringUtils.isNotBlank(comboStreetCondPobox)) {
         comboStreetCondPobox += ", PO BOX " + pobox;
       } else {
-        comboStreetCondPobox += pobox;
+        comboStreetCondPobox += "PO BOX " + pobox;
       }
     }
     String city = StringUtils.isNotBlank(addrData.getCity1()) ? addrData.getCity1() : "";
@@ -712,7 +712,7 @@ public class NORDXTransformer extends EMEATransformer {
       if (StringUtils.isNotBlank(comboStreetCondPobox)) {
         comboStreetCondPobox += ", PO BOX " + pobox;
       } else {
-        comboStreetCondPobox += pobox;
+        comboStreetCondPobox += "PO BOX " + pobox;
       }
     }
 
@@ -1208,7 +1208,7 @@ public class NORDXTransformer extends EMEATransformer {
     }
 
     if (SystemLocation.SWEDEN.equals(data.getCmrIssuingCntry())) {
-      int beginPost = Integer.valueOf(mailPostCode.substring(0, 1));
+      int beginPost = Integer.valueOf(StringUtils.isNumeric(mailPostCode.trim().substring(0, 1)) ? mailPostCode.trim().substring(0, 1) : "0");
       if (beginPost > 9 && beginPost < 20) {
         legacyCust.setCeBo("130");
       } else if (beginPost > 19 && beginPost < 40) {
@@ -1225,7 +1225,7 @@ public class NORDXTransformer extends EMEATransformer {
 
     } else if (SystemLocation.DENMARK.equals(data.getCmrIssuingCntry())) {
       if ("678".equals(data.getCountryUse())) {
-        int postCd = Integer.valueOf(mailPostCode.trim());
+        int postCd = Integer.valueOf(StringUtils.isNumeric(mailPostCode.trim()) ? mailPostCode.trim() : "0");
         if (postCd >= 0 && postCd < 5000) {
           legacyCust.setCeBo("000281X");
         } else if (postCd > 4999 && postCd < 7400) {
@@ -1260,7 +1260,7 @@ public class NORDXTransformer extends EMEATransformer {
     } else if (SystemLocation.SWEDEN.equals(data.getCmrIssuingCntry())) {
       newSbo = "3420ISU";
     } else if (SystemLocation.NORWAY.equals(data.getCmrIssuingCntry())) {
-      int postCd = Integer.valueOf(mailPostCode.trim());
+      int postCd = Integer.valueOf(StringUtils.isNumeric(mailPostCode.trim()) ? mailPostCode.trim() : "10001");
 
       if (!"NO".equals(landedCntry.trim())) {
         newSbo = "1000ISU";// CMR-1650 SBO value for cross
@@ -1272,8 +1272,6 @@ public class NORDXTransformer extends EMEATransformer {
         newSbo = "5000ISU";
       } else if (postCd > 6999 && postCd < 10000) {
         newSbo = "7000ISU";
-      } else {
-        newSbo = "1000ISU";// CMR-1650 SBO value for cross
       }
     }
     legacyCust.setSbo(newSbo);
