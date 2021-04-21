@@ -37,11 +37,10 @@
    <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="Purpose of End Use: ">
       <%=RequestUtils.generateChecklistFreeTxtField3(request)%>
    </cmr:chk-lbl-field>
-   <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="Provide the completed the checklist: ">
-      <%=RequestUtils.generateChecklistLocalName(request)%>
-   </cmr:chk-lbl-field>
    <br>
    <cmr:chk-block>
+   Provide the completed the checklist.
+   <br>
    Transactions (with customers found DPL matched) may only proceed as reviewed and authorized by IBM ERO (Export Regulation Office) and/or AP STC (Sensitive Transaction Council).
    <br>
    To be completed by Marketing / Client Representative for new customers.
