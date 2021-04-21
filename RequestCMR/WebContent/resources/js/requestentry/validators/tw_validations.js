@@ -25,6 +25,8 @@ function afterConfigTW() {
   } else {
     if (role == 'Requester' && reqType == 'C') {
       FormManager.readOnly('isuCd');
+      FormManager.setValue('custPrefLang', 'M');
+      FormManager.setValue('collectionCd', '00FO');
     } else {
       FormManager.enable('isuCd');
     }
@@ -280,6 +282,7 @@ function addTWChecklistValidator() {
 dojo.addOnLoad(function() {
   GEOHandler.TW = [ '858' ];
   GEOHandler.TW_CHECKLIST = [ '858' ];
+  GEOHandler.enableCopyAddress(GEOHandler.TW);
 
   console.log('adding Taiwan functions...');
   GEOHandler.enableCustomerNamesOnAddress(GEOHandler.TW);
