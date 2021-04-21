@@ -289,19 +289,20 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addHandlersForTW, GEOHandler.TW);
   // GEOHandler.addAfterConfig(setISUCodeValues, GEOHandler.TW);
   GEOHandler.addAfterConfig(setDupCmrIndcWarning, GEOHandler.TW);
+  GEOHandler.addAfterConfig(setChecklistStatus, GEOHandler.TW_CHECKLIST);
 
   GEOHandler.addAfterTemplateLoad(afterConfigTW, GEOHandler.TW);
   GEOHandler.addAfterTemplateLoad(addHandlersForTW, GEOHandler.TW);
   // GEOHandler.addAfterTemplateLoad(setISUCodeValues, GEOHandler.TW);
   GEOHandler.addAfterTemplateLoad(setDupCmrIndcWarning, GEOHandler.TW);
-  // Checklist
-  GEOHandler.addAfterConfig(setChecklistStatus, GEOHandler.TW_CHECKLIST);
-  GEOHandler.registerValidator(addTWChecklistValidator, GEOHandler.TW_CHECKLIST);
 
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.TW);
 
-  GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.TW, GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.registerValidator(addTWChecklistValidator, GEOHandler.TW_CHECKLIST);
+  // GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.TW,
+  // GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(addDPLCheckValidator, GEOHandler.TW, GEOHandler.ROLE_REQUESTER, true);
+  GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.TW);
 
   // skip byte checks
   FormManager.skipByteChecks([ 'cmt', 'bldg', 'dept', 'custNm3', 'custNm4', 'busnType', 'footnoteTxt2', 'contactName1', 'bpName', 'footnoteTxt1',
