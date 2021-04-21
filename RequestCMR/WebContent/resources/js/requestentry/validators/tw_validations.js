@@ -22,11 +22,11 @@ function afterConfigTW() {
   } else {
     if (role == 'Requester' && reqType == 'C') {
       FormManager.readOnly('isuCd');
-      FormManager.setValue('custPrefLang', 'M');
-      FormManager.setValue('collectionCd', '00FO');
     } else {
       FormManager.enable('isuCd');
     }
+    FormManager.setValue('custPrefLang', 'M');
+    FormManager.setValue('collectionCd', '00FO');
 
     if (reqType == 'C') {
       FormManager.addValidator('custAcctType', Validators.REQUIRED, [ 'Custome Type' ], 'MAIN_CUST_TAB');
