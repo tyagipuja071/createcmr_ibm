@@ -2692,10 +2692,12 @@ function setAbbreviatedNameValue() {
 
     if (custSubGrp == 'DK3PA' || custSubGrp == 'FO3PA' || custSubGrp == 'GL3PA' || custSubGrp == 'IS3PA' || custSubGrp == 'FI3PA'
         || custSubGrp == 'EE3PA' || custSubGrp == 'LT3PA' || custSubGrp == 'LV3PA' || custSubGrp == 'THDPT') {
-      var custNm1 = getAbbreviatedNameByAddrType(_reqId, "ZS01");
-      var custNm2 = getAbbreviatedNameByAddrType(_reqId, "ZI01");
+      // var custNm1 = getAbbreviatedNameByAddrType(_reqId, "ZS01");
+      var custNm = getAbbreviatedNameByAddrType(_reqId, "ZI01");
       if (custNm != "") {
-        FormManager.setValue('abbrevNm', custNm1.substring(0, 8) + " c/o " + custNm2.substring(0, 9));
+        FormManager.setValue('abbrevNm', custNm.substring(0, 22));
+        // FormManager.setValue('abbrevNm', custNm1.substring(0, 8) + " c/o " +
+        // custNm2.substring(0, 9));
       }
     }
 
@@ -2900,13 +2902,15 @@ function modeOfPaymentValidation() {
         });
 
         if (modeOfPayment == '') {
-          if (result.ref1 != '') {
+          // if (result.ref1 != '') {
+          if (result && result.ret1) {
             return new ValidationResult({
               id : 'modeOfPayment',
               type : 'text',
               name : 'modeOfPayment'
             }, false, 'Payment Terms shouldn\'t be blanked.');
           }
+          return;
         }
 
         var alphanumeric = /^[0-9a-zA-Z]*$/;
