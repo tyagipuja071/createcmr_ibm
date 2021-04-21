@@ -38,6 +38,8 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
+import com.ibm.cio.cmr.request.util.BluePagesHelper;
+import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
@@ -110,6 +112,20 @@ public class TWHandler extends GEOHandler {
 
   @Override
   public void appendExtraModelEntries(EntityManager entityManager, ModelAndView mv, RequestEntryModel model) throws Exception {
+    String requesterId = model.getRequesterId();
+    if (!StringUtils.isEmpty(requesterId)) {
+      Person p = BluePagesHelper.getPerson(requesterId);
+      if (p != null) {
+        mv.addObject("requesterId_UID", p.getEmployeeId().substring(0, p.getEmployeeId().length() - 3));
+      }
+    }
+    String originatorId = model.getOriginatorId();
+    if (!StringUtils.isEmpty(originatorId)) {
+      Person p = BluePagesHelper.getPerson(originatorId);
+      if (p != null) {
+        mv.addObject("originatorId_UID", p.getEmployeeId().substring(0, p.getEmployeeId().length() - 3));
+      }
+    }
   }
 
   @Override

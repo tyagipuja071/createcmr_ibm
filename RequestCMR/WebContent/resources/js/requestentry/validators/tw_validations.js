@@ -12,9 +12,6 @@ function afterConfigTW() {
   FormManager.readOnly('cmrOwner');
   FormManager.resetValidations('enterprise');
 
-  FormManager.addValidator('requesterId', Validators.REQUIRED, [ 'Requester' ], 'MAIN_GENERAL_TAB');
-  FormManager.addValidator('originatorNm', Validators.REQUIRED, [ 'Requester' ], 'MAIN_GENERAL_TAB');
-
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
     taxLocation = _pagemodel.mktgDept;
