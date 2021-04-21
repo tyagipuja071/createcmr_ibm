@@ -147,6 +147,9 @@ public class KRHandler extends GEOHandler {
   @Override
   public void setDataDefaultsOnCreate(Data data, EntityManager entityManager) {
     data.setCmrOwner("IBM");
+    data.setCustPrefLang("3");
+    data.setInstallRep("1");
+    data.setPhone1("1");
   }
 
   @Override
