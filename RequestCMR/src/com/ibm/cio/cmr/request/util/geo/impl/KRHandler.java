@@ -118,8 +118,18 @@ public class KRHandler extends GEOHandler {
     data.setRepTeamMemberNo(mainRecord.getRepTeamMemberNo());
     this.setMRC(admin, data);
     data.setContactName2(data.getContactName2());
-
-    // autoSetAbbrevLocnNMOnImport(admin, data, results, mainRecord);
+    // jira-2243: setup default values for update/import scenario  Added by IBM-CIC(LIU XUE)
+    if(data.getCustPrefLang()== "" || data.getCustPrefLang() == null){
+    	data.setCustPrefLang("3");    	
+    }
+    
+    if(data.getInstallRep()== "" || data.getInstallRep() == null){
+    	data.setInstallRep("1");    	
+    }
+    
+    if(data.getPhone1()== "" || data.getPhone1() == null){
+    	data.setPhone1("1");    	
+    }
   }
 
   @Override
