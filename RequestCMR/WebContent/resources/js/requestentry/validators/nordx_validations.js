@@ -12,6 +12,7 @@ var EU_COUNTRIES = [ "AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR",
 
 var reqType = null;
 function afterConfigForNORDX() {
+
   reqType = FormManager.getActualValue('reqType');
   var role = null;
   var custSubGrp = FormManager.getActualValue('custSubGrp');
@@ -146,6 +147,9 @@ function afterConfigForNORDX() {
   // CREATCMR-2144
   setCustPrefLangByCountry();
   setInacCd();
+
+  // CREATCMR-1709
+  setCustPrefLang();
 }
 
 function disableLandCntry() {
@@ -3176,6 +3180,73 @@ function setCustPrefLangByCountry() {
 
 }
 // CREATCMR-2144
+
+// CREATCMR-1709
+var pageModelFlag2 = 'N';
+
+function setCustPrefLang() {
+
+  var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var countryUse = FormManager.getActualValue('countryUse');
+
+  if (pageModelFlag2 == 'Y') {
+    // Denmark, Faroe Islands, Greenland, Iceland
+    if (cmrIssuingCntry == '678') {
+      if (countryUse == '678' || countryUse == '678FO' || countryUse == '678GL' || countryUse == '678IS') {
+        FormManager.setValue('custPrefLang', 'K');
+      }
+    }
+    if (cmrIssuingCntry == '702') {
+      if (countryUse == '702') {
+        // Finland
+        FormManager.setValue('custPrefLang', 'U');
+      } else if (countryUse == '702EE' || countryUse == '702LT' || countryUse == '702LV') {
+        // Estonia, Lithuania, Latvia
+        FormManager.setValue('custPrefLang', 'E');
+      }
+    }
+
+    // Norway
+    if (cmrIssuingCntry == '806') {
+      FormManager.setValue('custPrefLang', 'O');
+    }
+
+    // Sweden
+    if (cmrIssuingCntry == '846') {
+      FormManager.setValue('custPrefLang', 'V');
+    }
+  } else {
+    // Denmark, Faroe Islands, Greenland, Iceland
+    if (cmrIssuingCntry == '678') {
+      if (countryUse == '678' || countryUse == '678FO' || countryUse == '678GL' || countryUse == '678IS') {
+        FormManager.setValue('custPrefLang', _pagemodel.custPrefLang == null ? 'K' : _pagemodel.custPrefLang);
+      }
+    }
+
+    if (cmrIssuingCntry == '702') {
+      if (countryUse == '702') {
+        // Finland
+        FormManager.setValue('custPrefLang', _pagemodel.custPrefLang == null ? 'U' : _pagemodel.custPrefLang);
+      } else if (countryUse == '702EE' || countryUse == '702LT' || countryUse == '702LV') {
+        // Estonia, Lithuania, Latvia
+        FormManager.setValue('custPrefLang', _pagemodel.custPrefLang == null ? 'E' : _pagemodel.custPrefLang);
+      }
+    }
+
+    // Norway
+    if (cmrIssuingCntry == '806') {
+      FormManager.setValue('custPrefLang', _pagemodel.custPrefLang == null ? 'O' : _pagemodel.custPrefLang);
+    }
+
+    // Sweden
+    if (cmrIssuingCntry == '846') {
+      FormManager.setValue('custPrefLang', _pagemodel.custPrefLang == null ? 'V' : _pagemodel.custPrefLang);
+    }
+
+    pageModelFlag2 = 'Y';
+  }
+}
+// CREATCMR-1709
 
 function setInacCd() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
