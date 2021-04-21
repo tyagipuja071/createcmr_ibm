@@ -670,6 +670,9 @@ function setCmrNoCmrNo2Required() {
     if (dojo.byId('disableAutoProc') && dojo.byId('disableAutoProc').checked) {
       if (FormManager.getActualValue('reqType') == 'C') {
         FormManager.enable('cmrNo');
+        if (custSubGrp == "EUCMR" || "WHCMR") {
+          FormManager.addValidator('cmrNo', Validators.REQUIRED, [ 'CMR Number' ], 'MAIN_IBM_TAB');
+        }
       }
     }
   }
