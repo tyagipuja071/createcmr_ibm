@@ -25,6 +25,7 @@ function afterConfigTW() {
     } else {
       FormManager.enable('isuCd');
     }
+
     FormManager.setValue('custPrefLang', 'M');
     FormManager.setValue('collectionCd', '00FO');
 
