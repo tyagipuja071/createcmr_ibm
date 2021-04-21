@@ -39,7 +39,7 @@
 					<lovId>LocalTax1</lovId>
 					<width>10</width>
 				</column>
-				<column>
+				<column exactLength="true">
 					<label>INAC/NAC</label>
 					<dbColumn>INAC_CD</dbColumn>
 					<length>4</length>
@@ -77,13 +77,13 @@
 					<lovId>ClientTier</lovId>
 					<length>1</length>
 				</column>
-				<column exactLength="6">
+				<column exactLength="true">
 					<label>Leading Account Number</label>
 					<dbColumn>NEW_ENTP_NAME1</dbColumn>
 					<width>20</width>
 					<length>6</length>
 				</column>
-				<column exactLength="6">
+				<column exactLength="true">
 					<label>A/C Admin DSC</label>
 					<dbColumn>SEARCH_TERM</dbColumn>
 					<width>10</width>
@@ -102,7 +102,7 @@
 					<lovId>SalRepNameNo</lovId>
 					<length>6</length>
 				</column>
-				<column number="true">
+				<column>
 					<label>Phone</label>
 					<dbColumn>EMAIL1</dbColumn>
 					<width>20</width>
