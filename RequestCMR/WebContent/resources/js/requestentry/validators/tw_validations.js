@@ -25,7 +25,9 @@ function afterConfigTW() {
     } else {
       FormManager.enable('isuCd');
     }
-
+    if (role == 'Processor' && reqType == 'C') {
+      FormManager.addValidator('cmrNo', Validators.REQUIRED, [ 'CMR Number' ], 'MAIN_IBM_TAB');
+    }
     FormManager.setValue('custPrefLang', 'M');
     FormManager.setValue('collectionCd', '00FO');
 
