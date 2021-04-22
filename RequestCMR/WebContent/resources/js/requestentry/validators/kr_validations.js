@@ -4,8 +4,8 @@ function afterConfigKR() {
   var role = null;
   var reqType = null;
 
-   reqType = FormManager.getActualValue('reqType');
-   if (typeof (_pagemodel) != 'undefined') {
+  reqType = FormManager.getActualValue('reqType');
+  if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
   }
   FormManager.readOnly('capInd');
@@ -15,21 +15,18 @@ function afterConfigKR() {
   FormManager.enable('memLvl');
   FormManager.enable('sitePartyId');
 
-  FormManager.addValidator('reqFor',Validators.REQUIRED, ['Requested For Name (Originator)'], 'MAIN_GENERAL_TAB');
-  FormManager.addValidator('originatorNm', Validators.REQUIRED, [ 'Requested For Name (Originator)' ], 'MAIN_GENERAL_TAB');
   FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
-  FormManager.addValidator('phone1', Validators.REQUIRED, ['Business License Type'], 'MAIN_CUST_TAB');
-  FormManager.addValidator('Phone1', Validators.REQUIRED, ['Business License Type'], 'MAIN_CUST_TAB');
-  FormManager.addValidator('installRep', Validators.REQUIRED, ['Tax Invoice Type'], 'MAIN_CUST_TAB');
-  
-  FormManager.addValidator('contactName3', Validators.REQUIRED,['Product Type'],'MAIN_IBM_TAB');
-  FormManager.addValidator('MrcCd', Validators.REQUIRED,['Market Responsibility Code (MRC)'],'MAIN_IBM_TAB');
-  FormManager.addValidator('commercialFinanced', Validators.REQUIRED,['ROL Code'],'MAIN_IBM_TAB');
-  
-  FormManager.removeValidator('subIndustryCd', Validators.REQUIRED);  
+  FormManager.addValidator('phone1', Validators.REQUIRED, [ 'Business License Type' ], 'MAIN_CUST_TAB');
+  FormManager.addValidator('installRep', Validators.REQUIRED, [ 'Tax Invoice Type' ], 'MAIN_CUST_TAB');
+
+  FormManager.addValidator('contactName3', Validators.REQUIRED, [ 'Product Type' ], 'MAIN_IBM_TAB');
+  FormManager.addValidator('MrcCd', Validators.REQUIRED, [ 'Market Responsibility Code (MRC)' ], 'MAIN_IBM_TAB');
+  FormManager.addValidator('commercialFinanced', Validators.REQUIRED, [ 'ROL Code' ], 'MAIN_IBM_TAB');
+
+  FormManager.removeValidator('subIndustryCd', Validators.REQUIRED);
   FormManager.removeValidator('sensitiveFlag', Validators.REQUIRED);
   FormManager.removeValidator('LocalTax2', Validators.REQUIRED);
-  
+
   // Non editable for requester role
   if (reqType == 'C' && role == 'Requester') {
     FormManager.readOnly('isuCd');
@@ -38,9 +35,10 @@ function afterConfigKR() {
 
   // story: attachment Company Proof required
   var custSubType = FormManager.getActualValue('custSubGrp');
-  if( (reqType == 'C' || reqType == 'U') && (custSubType != 'INTER')){
-    //FormManager.addValidator('DocContent',Validators.REQUIRED,['Company Proof required']);
-    FormManager.addValidator('docContent', Validators.REQUIRED, [ '${ui.content}' ],'MAIN_ATTACH_TAB');
+  if ((reqType == 'C' || reqType == 'U') && (custSubType != 'INTER')) {
+    // FormManager.addValidator('DocContent',Validators.REQUIRED,['Company Proof
+    // required']);
+    FormManager.addValidator('docContent', Validators.REQUIRED, [ '${ui.content}' ], 'MAIN_ATTACH_TAB');
   }
 
   RemoveCrossAddressMandatory();
@@ -161,36 +159,36 @@ function RemoveCrossAddressMandatory() {
     FormManager.removeValidator('custNm4', Validators.REQUIRED);
   }
 }
-	//story:2139 Except Internal scenario, for all the other scenarios requester needs to attach a file of COMP(Company Proof)
-	function addAttachmentValidator() {
-	  FormManager.addFormValidator((function() {
-	    return {
-	      validate : function() {
-	        var reqType = FormManager.getActualValue('reqType');
-	        var custSubType = FormManager.getActualValue('custSubGrp');
-	        var cntryUse = FormManager.getActualValue('cntryUse');
-	        // var docContent = FormManager.getActualValue('docContent');
-	        if (typeof (_pagemodel) != 'undefined') {
-	          if ((reqType == 'C' || reqType == 'U')
-	              && (custSubType != 'INTER')) {
-	        	  var id = FormManager.getActualValue('reqId');
-	            var ret = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
-	              ID : id
-	            });
+// story:2139 Except Internal scenario, for all the other scenarios requester
+// needs to attach a file of COMP(Company Proof)
+function addAttachmentValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqType = FormManager.getActualValue('reqType');
+        var custSubType = FormManager.getActualValue('custSubGrp');
+        var cntryUse = FormManager.getActualValue('cntryUse');
+        // var docContent = FormManager.getActualValue('docContent');
+        if (typeof (_pagemodel) != 'undefined') {
+          if ((reqType == 'C' || reqType == 'U') && (custSubType != 'INTER')) {
+            var id = FormManager.getActualValue('reqId');
+            var ret = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
+              ID : id
+            });
 
-	            if (ret == null || ret.ret1 == null) {
-	              return new ValidationResult(null, false, 'Company Proof  in Attachment tab is required.');
-	            } else {
-	              return new ValidationResult(null, true);
-	            }
-	          } else {
-	            return new ValidationResult(null, true);
-	          }
-	        }
-	      }
-	    };
-	  })(), 'MAIN_ATTACH_TAB', 'frmCMR');
-	}
+            if (ret == null || ret.ret1 == null) {
+              return new ValidationResult(null, false, 'Company Proof  in Attachment tab is required.');
+            } else {
+              return new ValidationResult(null, true);
+            }
+          } else {
+            return new ValidationResult(null, true);
+          }
+        }
+      }
+    };
+  })(), 'MAIN_ATTACH_TAB', 'frmCMR');
+}
 
 dojo.addOnLoad(function() {
   GEOHandler.KR = [ '766' ];
