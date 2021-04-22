@@ -574,7 +574,16 @@ public class NORDXTransformer extends EMEATransformer {
     }
     String city = StringUtils.isNotBlank(addrData.getCity1()) ? addrData.getCity1() : "";
     String postCode = StringUtils.isNotBlank(addrData.getPostCd()) ? addrData.getPostCd() : "";
+
     String landedCntry = StringUtils.isNotBlank(addrData.getLandCntry()) ? addrData.getLandCntry() : "";
+    String fullCntryName = "";
+    if (StringUtils.isNotBlank(landedCntry)) {
+      EntityManager entityManager = handler.getEntityManager();
+      String sql = ExternalizedQuery.getSql("ADDRESS.GETCNTRY");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("COUNTRY", landedCntry);
+      fullCntryName = query.getSingleResult(String.class);
+    }
 
     List<String> addrAttrList = Arrays.asList(custNameCond, additionalInfo, attPerson, street, comboStreetCondPobox);
 
@@ -604,7 +613,7 @@ public class NORDXTransformer extends EMEATransformer {
 
     if (crossBorder) {
       line5 = postCode + " " + city;
-      line6 = landedCntry;
+      line6 = StringUtils.isNotBlank(fullCntryName) ? (fullCntryName.length() >= 30 ? fullCntryName.substring(0, 30) : fullCntryName) : "";
     } else {
       for (int i = 3; i < addrAttrList.size(); i++) {
         if (StringUtils.isNotBlank(addrAttrList.get(i))) {
@@ -718,7 +727,15 @@ public class NORDXTransformer extends EMEATransformer {
 
     String city = StringUtils.isNotBlank(addr.getCity1()) ? addr.getCity1() : "";
     String postCode = StringUtils.isNotBlank(addr.getPostCd()) ? addr.getPostCd() : "";
+
     String landedCntry = StringUtils.isNotBlank(addr.getLandCntry()) ? addr.getLandCntry() : "";
+    String fullCntryName = "";
+    if (StringUtils.isNotBlank(landedCntry)) {
+      String sql = ExternalizedQuery.getSql("ADDRESS.GETCNTRY");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("COUNTRY", landedCntry);
+      fullCntryName = query.getSingleResult(String.class);
+    }
 
     List<String> addrAttrList = Arrays.asList(custNameCond, additionalInfo, attPerson, street, comboStreetCondPobox);
 
@@ -748,7 +765,7 @@ public class NORDXTransformer extends EMEATransformer {
 
     if (crossBorder) {
       line5 = postCode + " " + city;
-      line6 = landedCntry;
+      line6 = StringUtils.isNotBlank(fullCntryName) ? (fullCntryName.length() >= 30 ? fullCntryName.substring(0, 30) : fullCntryName) : "";
     } else {
       for (int i = 3; i < addrAttrList.size(); i++) {
         if (StringUtils.isNotBlank(addrAttrList.get(i))) {
