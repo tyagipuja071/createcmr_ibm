@@ -57,6 +57,12 @@ public class SystemUtil {
   private static Timestamp dbtime = null;
   // private static Date servertime = null;
 
+  private static ThreadLocal<EntityManager> current = new ThreadLocal<>();
+
+  public static synchronized void setManager(EntityManager entityManager) {
+    current.set(entityManager);
+  }
+
   @SuppressWarnings("unchecked")
   /**
    * Gets the database timestamp
@@ -69,7 +75,15 @@ public class SystemUtil {
       try {
         // only query once the db's timestamp. use the offset to calculate
         // current time
-        EntityManager em = JpaManager.getEntityManager();
+        boolean own = false;
+        EntityManager em = null;
+        if (current.get() != null) {
+          em = current.get();
+        }
+        if (em == null || !em.isOpen()) {
+          own = true;
+          em = JpaManager.getEntityManager();
+        }
         try {
           String sql = "select current timestamp, '1' from sysibm.sysdummy1";
           Query q = em.createNativeQuery(sql);
@@ -80,8 +94,10 @@ public class SystemUtil {
             // servertime = new Date();
           }
         } finally {
-          em.clear();
-          em.close();
+          if (own) {
+            em.clear();
+            em.close();
+          }
         }
       } catch (Exception e) {
         LOG.error("Error in getting time.", e);

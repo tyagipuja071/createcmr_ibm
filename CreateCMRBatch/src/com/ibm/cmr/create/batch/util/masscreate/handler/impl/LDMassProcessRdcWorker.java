@@ -22,6 +22,7 @@ import com.ibm.cio.cmr.request.entity.ReqCmtLog;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cmr.create.batch.util.BatchUtil;
 import com.ibm.cmr.create.batch.util.DebugUtil;
 import com.ibm.cmr.services.client.CmrServicesFactory;
@@ -57,6 +58,7 @@ public class LDMassProcessRdcWorker implements Runnable {
   private boolean isIndexNotUpdated;
 
   public LDMassProcessRdcWorker(EntityManager entityManager, Admin admin, Data data, MassUpdt massUpdt, String userId) {
+    SystemUtil.setManager(entityManager);
     this.entityManager = entityManager;
     this.admin = admin;
     this.data = data;

@@ -40,6 +40,7 @@ public class LDMassProcessWorker implements Runnable {
   private Exception errorMsg;
 
   public LDMassProcessWorker(EntityManager entityManager, Admin admin, MassUpdt massUpdt, LDMassProcessMultiLegacyService service) {
+    SystemUtil.setManager(entityManager);
     this.entityManager = entityManager;
     this.admin = admin;
     this.massUpdt = massUpdt;
@@ -95,6 +96,9 @@ public class LDMassProcessWorker implements Runnable {
       }
       LOG.info("Mass Updating Legacy Records for Request ID " + admin.getId().getReqId());
       LOG.info(" - SOF Country: " + legacyCust.getId().getSofCntryCode() + " CMR No.: " + legacyCust.getId().getCustomerNo());
+      if (legacyCust.getUpdateTs() == null) {
+        legacyCust.setUpdateTs(SystemUtil.getCurrentTimestamp());
+      }
       entityManager.merge(legacyCust);
       // partialCommit(entityManager);
 
