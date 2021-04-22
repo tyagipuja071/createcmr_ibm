@@ -2814,33 +2814,33 @@ function setAbbrevNmAddressSave(cntry, addressMode, saving, finalSave, force) {
           || custSubGrp == 'LTBUS' || custSubGrp == 'LTINT' || custSubGrp == 'LTPRI' || custSubGrp == 'LTIBM' || custSubGrp == 'LTGOV'
           || custSubGrp == 'LVCOM' || custSubGrp == 'LVBUS' || custSubGrp == 'LVINT' || custSubGrp == 'LVPRI' || custSubGrp == 'LVIBM'
           || custSubGrp == 'LVGOV' || custSubGrp == 'COMME' || custSubGrp == 'BUSPR' || custSubGrp == 'INTER' || custSubGrp == 'PRIPE'
-          || custSubGrp == 'IBMEM' || custSubGrp == 'GOVRN' || custSubGrp == '') {
-        var custNmDBVal = getAbbreviatedNameByAddrType(_reqId, "ZS01");
-        if (custNmDBVal != "") {
-          if (zs01CustNm != custNmDBVal) {
-            FormManager.setValue('abbrevNm', zs01CustNm.substring(0, 22));
-          }
-        }
+          || custSubGrp == 'IBMEM' || custSubGrp == 'GOVRN') {
+        // var custNmDBVal = getAbbreviatedNameByAddrType(_reqId, "ZS01");
+        // if (custNmDBVal != "") {
+        // if (zs01CustNm != custNmDBVal) {
+        FormManager.setValue('abbrevNm', zs01CustNm.substring(0, 22));
+        // }
+        // }
       }
 
       if (custSubGrp == 'DK3PA' || custSubGrp == 'FO3PA' || custSubGrp == 'GL3PA' || custSubGrp == 'IS3PA' || custSubGrp == 'FI3PA'
           || custSubGrp == 'EE3PA' || custSubGrp == 'LT3PA' || custSubGrp == 'LV3PA' || custSubGrp == 'THDPT') {
-        var custNmDBVal = getAbbreviatedNameByAddrType(_reqId, "ZI01");
-        if (addrType == 'ZI01') {
-          FormManager.setValue('abbrevNm', custNmDBVal.substring(0, 22));
-        }
+        // var custNmDBVal = getAbbreviatedNameByAddrType(_reqId, "ZI01");
+        // if (addrType == 'ZI01') {
+        FormManager.setValue('abbrevNm', zi01CustNm.substring(0, 22));
+        // }
       }
 
       if (custSubGrp == 'CBISO' || custSubGrp == 'DKISO' || custSubGrp == 'FOISO' || custSubGrp == 'GLISO' || custSubGrp == 'ISISO'
           || custSubGrp == 'FIISO' || custSubGrp == 'EEISO' || custSubGrp == 'LTISO' || custSubGrp == 'LVISO' || custSubGrp == 'INTSO') {
-        var custNm = getAbbreviatedNameByAddrType(_reqId, "ZI01");
-        if (custNm != "") {
-          if (zi01CustNm != custNm) {
-            FormManager.setValue('abbrevNm', "IBM c/o " + zi01CustNm.substring(0, 14));
-          }
-        } else {
-          FormManager.setValue('abbrevNm', "IBM c/o ");
-        }
+        // var custNm = getAbbreviatedNameByAddrType(_reqId, "ZI01");
+        // if (custNm != "") {
+        // if (zi01CustNm != custNm) {
+        FormManager.setValue('abbrevNm', "IBM c/o " + zi01CustNm.substring(0, 14));
+        // }
+        // } else {
+        // FormManager.setValue('abbrevNm', "IBM c/o ");
+        // }
       }
     }
   }
