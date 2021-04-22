@@ -99,7 +99,6 @@
 					<label>Sales Rep</label>
 					<dbColumn>REP_TEAM_MEMBER_NO</dbColumn>
 					<width>30</width>
-					<lovId>SalRepNameNo</lovId>
 					<length>6</length>
 				</column>
 				<column>
@@ -148,13 +147,13 @@
 					<label>Additional Info</label>
 					<dbColumn>CUST_NM3</dbColumn>
 					<width>40</width>
-					<length>35</length>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Att. person</label>
 					<dbColumn>CUST_NM4</dbColumn>
 					<width>40</width>
-					<length>35</length>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Street</label>
@@ -224,13 +223,13 @@
 					<label>Additional Info</label>
 					<dbColumn>CUST_NM3</dbColumn>
 					<width>40</width>
-					<length>35</length>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Att. person</label>
 					<dbColumn>CUST_NM4</dbColumn>
 					<width>40</width>
-					<length>35</length>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Street</label>
@@ -300,13 +299,13 @@
 					<label>Additional Info</label>
 					<dbColumn>CUST_NM3</dbColumn>
 					<width>40</width>
-					<length>35</length>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Att. person</label>
 					<dbColumn>CUST_NM4</dbColumn>
 					<width>40</width>
-					<length>35</length>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Street</label>
@@ -370,13 +369,13 @@
 					<label>Additional Info</label>
 					<dbColumn>CUST_NM3</dbColumn>
 					<width>40</width>
-					<length>35</length>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Att. person</label>
 					<dbColumn>CUST_NM4</dbColumn>
 					<width>40</width>
-					<length>35</length>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Street</label>
@@ -441,13 +440,13 @@
 					<label>Additional Info</label>
 					<dbColumn>CUST_NM3</dbColumn>
 					<width>40</width>
-					<length>35</length>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Att. person</label>
 					<dbColumn>CUST_NM4</dbColumn>
 					<width>40</width>
-					<length>35</length>
+					<length>30</length>
 				</column>
 				<column>
 					<label>Street</label>
