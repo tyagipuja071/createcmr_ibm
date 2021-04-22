@@ -61,6 +61,7 @@ public class LDMassProcessRdcWorker implements Runnable {
     this.admin = admin;
     this.data = data;
     this.massUpdt = massUpdt;
+    this.userId = userId;
   }
 
   @Override
@@ -75,6 +76,8 @@ public class LDMassProcessRdcWorker implements Runnable {
           ProcessClient.class);
 
       String processingStatus = admin.getRdcProcessingStatus() != null ? admin.getRdcProcessingStatus() : "";
+
+      comment = new StringBuilder();
 
       if (!CmrConstants.REQUEST_STATUS.PCO.toString().equals(admin.getReqStatus())) {
         admin.setReqStatus(CmrConstants.REQUEST_STATUS.PCO.toString());
