@@ -86,18 +86,18 @@ public class KRHandler extends GEOHandler {
 
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
-    // this.currentRecord = retrieveWTAASValues(mainRecord);
-    data.setAbbrevNm(mainRecord.getCmrName1Plain());
-
-    /*
-     * if (mainRecord.getCmrCountryLandedDesc() != null &&
-     * (mainRecord.getCmrCountryLandedDesc().length() != 0)) {
-     * data.setAbbrevLocn(mainRecord.getCmrCountryLandedDesc()); }
-     */
-    // else
-    // {
-    // data.setAbbrevLocn(this.currentRecord.get(WtaasQueryKeys.Data.AbbrLoc));
-    // }
+	  //jira 2235
+	  data.setAbbrevNm(mainRecord.getCmrName1Plain());
+	  data.setAbbrevLocn(mainRecord.getCmrCity());
+    
+/*    if (mainRecord.getCmrCountryLandedDesc() != null &&
+      	 (mainRecord.getCmrCountryLandedDesc().length() != 0)) {
+      	data.setAbbrevLocn(mainRecord.getCmrCountryLandedDesc()); }     
+     else
+     {
+    	 data.setAbbrevLocn(this.currentRecord.get(WtaasQueryKeys.Data.AbbrLoc));
+     }*/
+	  
     data.setClientTier(mainRecord.getCmrTier());
     // data.setClientTier(this.currentRecord.get(WtaasQueryKeys.Data.GB_SegCode));
     // ?Representative(CEO) name in business license?
@@ -162,6 +162,9 @@ public class KRHandler extends GEOHandler {
     data.setCustPrefLang("3");
     data.setInstallRep("1");
     data.setPhone1("1");
+    
+
+    
   }
 
   @Override
