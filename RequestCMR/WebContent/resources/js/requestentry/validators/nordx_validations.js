@@ -1069,58 +1069,63 @@ function handleMahcineModel() {
  * at) *Mailing - not flowing into RDC!!
  */
 function addNORDXAddressTypeValidator() {
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount == 0) {
-          return new ValidationResult(null, false,
-              'Mailing, Billing address are mandatory. Only one address for each address type should be defined when sending for processing.');
-        }
-        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
-          var record = null;
-          var type = null;
-          var installingCnt = 0;
-          var billingCnt = 0;
-          var mailingCnt = 0;
-          var shippingCnt = 0;
-          var eplCnt = 0;
+  FormManager.addFormValidator(
+      (function() {
+        return {
+          validate : function() {
+            if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount == 0) {
+              return new ValidationResult(null, false,
+                  'Mailing, Billing address are mandatory. Only one address for each address type should be defined when sending for processing.');
+            }
+            if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+              var record = null;
+              var type = null;
+              var installingCnt = 0;
+              var billingCnt = 0;
+              var mailingCnt = 0;
+              var shippingCnt = 0;
+              var eplCnt = 0;
 
-          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
-            record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
-            if (record == null && _allAddressData != null && _allAddressData[i] != null) {
-              record = _allAddressData[i];
-            }
-            type = record.addrType;
-            if (typeof (type) == 'object') {
-              type = type[0];
-            }
-            if (type == 'ZS01') {
-              mailingCnt++;
-            } else if (type == 'ZP01') {
-              billingCnt++;
-            } else if (type == 'ZI01') {
-              installingCnt++;
-            } else if (type == 'ZD01') {
-              shippingCnt++;
-            } else if (type == 'ZS02') {
-              eplCnt++;
+              for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+                record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+                if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+                  record = _allAddressData[i];
+                }
+                type = record.addrType;
+                if (typeof (type) == 'object') {
+                  type = type[0];
+                }
+                if (type == 'ZS01') {
+                  mailingCnt++;
+                } else if (type == 'ZP01') {
+                  billingCnt++;
+                } else if (type == 'ZI01') {
+                  installingCnt++;
+                } else if (type == 'ZD01') {
+                  shippingCnt++;
+                } else if (type == 'ZS02') {
+                  eplCnt++;
+                }
+              }
+              var custSubType = FormManager.getActualValue('custSubGrp');
+              if (billingCnt == 0 || mailingCnt == 0) {
+                return new ValidationResult(null, false, 'Billing, Mailing address are mandatory.');
+              } else if ((custSubType.includes('SO') || custSubType.includes('3PA') || custSubType == 'THDPT') && installingCnt == 0) {
+                return new ValidationResult(null, false,
+                    'For Internal SO and Third Party sub-scenarios installing address is mandatory. Please add it.');
+              } else if (billingCnt > 1) {
+                return new ValidationResult(null, false, 'Only one Billing address can be defined. Please remove the additional Billing address.');
+              } else if (mailingCnt > 1) {
+                return new ValidationResult(null, false, 'Only one Mailing address can be defined. Please remove the additional Mailing address.');
+              } else if (eplCnt > 1) {
+                return new ValidationResult(null, false, 'Only one EPL address can be defined. Please remove the additional EPL mailing address.');
+              } else {
+                return new ValidationResult(null, true);
+              }
             }
           }
-          if (billingCnt == 0 || mailingCnt == 0) {
-            return new ValidationResult(null, false, 'Billing, Mailing address are mandatory.');
-          } else if (billingCnt > 1) {
-            return new ValidationResult(null, false, 'Only one Billing address can be defined. Please remove the additional Billing address.');
-          } else if (mailingCnt > 1) {
-            return new ValidationResult(null, false, 'Only one Mailing address can be defined. Please remove the additional Mailing address.');
-          } else if (eplCnt > 1) {
-            return new ValidationResult(null, false, 'Only one EPL address can be defined. Please remove the additional EPL mailing address.');
-          } else {
-            return new ValidationResult(null, true);
-          }
-        }
-      }
-    };
-  })(), 'MAIN_NAME_TAB', 'frmCMR');
+        };
+      })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
 function addNORDXInstallingShipping() {
