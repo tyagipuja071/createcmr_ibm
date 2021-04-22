@@ -5,6 +5,8 @@ function afterConfigTW() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var custGrp = FormManager.getActualValue('custGrp');
   var invoiceSplitCd = FormManager.getActualValue('invoiceSplitCd');
+  var custPrefLang = FormManager.getField('custPrefLang');
+  var collectionCd = FormManager.getField('collectionCd');
   var role = null;
   var taxLocation = null;
   FormManager.readOnly('capInd');
@@ -28,8 +30,12 @@ function afterConfigTW() {
     if (role == 'Processor' && reqType == 'C') {
       FormManager.addValidator('cmrNo', Validators.REQUIRED, [ 'CMR Number' ], 'MAIN_IBM_TAB');
     }
-    FormManager.setValue('custPrefLang', 'M');
-    FormManager.setValue('collectionCd', '00FO');
+    if (!FormManager.getField('custPrefLang') || custPrefLang == '') {
+      FormManager.setValue('custPrefLang', 'M');
+    }
+    if (!FormManager.getField('collectionCd') || collectionCd == '') {
+      FormManager.setValue('collectionCd', '00FO');
+    }
 
     if (reqType == 'C') {
       FormManager.addValidator('custAcctType', Validators.REQUIRED, [ 'Custome Type' ], 'MAIN_CUST_TAB');
