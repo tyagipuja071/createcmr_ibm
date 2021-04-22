@@ -3211,13 +3211,15 @@ function setCustPrefLangByCountry() {
 
 // CREATCMR-1709
 var pageModelFlag2 = 'N';
+var cnt = 0;
 
 function setCustPrefLang() {
+  cnt++;
 
   var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
   var countryUse = FormManager.getActualValue('countryUse');
 
-  if (pageModelFlag2 == 'Y') {
+  if (pageModelFlag2 == 'Y' && cnt > 2) {
     // Denmark, Faroe Islands, Greenland, Iceland
     if (cmrIssuingCntry == '678') {
       if (countryUse == '678' || countryUse == '678FO' || countryUse == '678GL' || countryUse == '678IS') {
