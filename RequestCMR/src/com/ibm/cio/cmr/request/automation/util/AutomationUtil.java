@@ -905,7 +905,8 @@ public abstract class AutomationUtil {
     while (it.hasNext()) {
       Addr addr = it.next();
       if (!"ZS01".equals(addr.getId().getAddrType())) {
-        if (compareCustomerNames(zs01, addr) && (StringUtils.isNotBlank(addr.getAddrTxt()) && addr.getAddrTxt().trim().toUpperCase().equals(mainStreetAddress1))
+        if (compareCustomerNames(zs01, addr)
+            && (StringUtils.isNotBlank(addr.getAddrTxt()) && addr.getAddrTxt().trim().toUpperCase().equals(mainStreetAddress1))
             && addr.getCity1().trim().toUpperCase().equals(mainCity) && addr.getPostCd().trim().equals(mainPostalCd)) {
           details.append("Removing duplicate address record: " + addr.getId().getAddrType() + " from the request.").append("\n");
           Addr merged = entityManager.merge(addr);
@@ -1165,6 +1166,24 @@ public abstract class AutomationUtil {
     String custNm3 = StringUtils.isNotBlank(addr.getCustNm3()) ? " " + addr.getCustNm3() : "";
     String custNm4 = StringUtils.isNotBlank(addr.getCustNm4()) ? " " + addr.getCustNm4() : "";
     return custNm1 + custNm2 + custNm3 + custNm4;
+  }
+
+  /**
+   * Returns true if the partner is accredited for the Pay-Go process
+   * 
+   * @param entityManager
+   * @param sourceSystId
+   * @return
+   */
+  public static boolean isPayGoAccredited(EntityManager entityManager, String sourceSystId) {
+    if (StringUtils.isBlank(sourceSystId)) {
+      return false;
+    }
+    String sql = ExternalizedQuery.getSql("AUTO.PAYGO.CHECK");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("SYST_ID", sourceSystId);
+    query.setForReadOnly(true);
+    return query.exists();
   }
 
   /**
