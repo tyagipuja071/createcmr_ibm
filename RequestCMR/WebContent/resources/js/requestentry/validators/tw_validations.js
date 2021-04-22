@@ -285,6 +285,41 @@ function addTWChecklistValidator() {
     };
   })(), 'MAIN_CHECKLIST_TAB', 'frmCMR');
 }
+
+function addSingleByteValidatorTW(cntry, details) {
+
+  /* Address */
+  FormManager.addValidator('custNm1', Validators.LATIN, [ 'Customer English Name' ]);
+  FormManager.addValidator('custNm2', Validators.LATIN, [ 'Customer English Name Con' + '\'' + 't' ]);
+  FormManager.addValidator('custNm3', Validators.NO_SINGLE_BYTE, [ 'Customer Chinese Name' ]);
+  FormManager.addValidator('custNm4', Validators.NO_SINGLE_BYTE, [ 'Customer Chinese Name Con' + '\'' + 't' ]);
+  FormManager.addValidator('addrTxt', Validators.LATIN, [ 'Customer English Address' ]);
+  FormManager.addValidator('addrTxt2', Validators.LATIN, [ 'Customer English Address Con' + '\'' + 't' ]);
+  FormManager.addValidator('dept', Validators.NO_SINGLE_BYTE, [ 'Customer Chinese Address' ]);
+  FormManager.addValidator('bldg', Validators.NO_SINGLE_BYTE, [ 'Customer Chinese Address Con' + '\'' + 't' ]);
+
+  /* Customer */
+  FormManager.addValidator('footnoteTxt2', Validators.NO_SINGLE_BYTE, [ 'Chief Executive Officer Name' ]);
+  FormManager.addValidator('busnType', Validators.NO_SINGLE_BYTE, [ 'Chief Executive Officer Job Title' ]);
+  FormManager.addValidator('bioChemMissleMfg', Validators.LATIN, [ 'Chief Executive Officer Telephone' ]);
+  FormManager.addValidator('email1', Validators.LATIN, [ 'Chief Executive Officer Email' ]);
+  FormManager.addValidator('contactName2', Validators.LATIN, [ 'Chief Executive Officer Fax' ]);
+
+  FormManager.addValidator('contactName1', Validators.NO_SINGLE_BYTE, [ 'Chief Information Officer Name' ]);
+  FormManager.addValidator('bpName', Validators.NO_SINGLE_BYTE, [ 'Chief Information Officer Job Title' ]);
+  FormManager.addValidator('affiliate', Validators.LATIN, [ 'Chief Information Officer Telephone' ]);
+  FormManager.addValidator('email2', Validators.LATIN, [ 'Chief Information Officer Email' ]);
+  FormManager.addValidator('commercialFinanced', Validators.LATIN, [ 'Chief Information Officer Fax' ]);
+
+  FormManager.addValidator('footnoteTxt1', Validators.NO_SINGLE_BYTE, [ 'Goods Receiver Chinese Name' ]);
+  FormManager.addValidator('contactName3', Validators.NO_SINGLE_BYTE, [ 'Goods Receiver Job Title' ]);
+  FormManager.addValidator('email3', Validators.LATIN, [ 'Goods Receiver Telephone Number' ]);
+
+  FormManager.addValidator('orgNo', Validators.LATIN, [ 'Customer Telephone Number' ]);
+  FormManager.addValidator('restrictTo', Validators.LATIN, [ 'Customer Fax Number' ]);
+
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.TW = [ '858' ];
   GEOHandler.TW_CHECKLIST = [ '858' ];
@@ -304,6 +339,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(addHandlersForTW, GEOHandler.TW);
   // GEOHandler.addAfterTemplateLoad(setISUCodeValues, GEOHandler.TW);
   GEOHandler.addAfterTemplateLoad(setDupCmrIndcWarning, GEOHandler.TW);
+  GEOHandler.addAfterTemplateLoad(addSingleByteValidatorTW, GEOHandler.TW);
 
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.TW);
 
