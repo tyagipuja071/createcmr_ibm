@@ -148,6 +148,12 @@
           <cmr:field fieldId="Affiliate" id="affiliate" path="affiliate" tabId="MAIN_CUST_TAB" />
         </p>
       </cmr:column>
+    <cmr:column span="2" containerForField="Email2">
+        <p>
+          <label for="email2"> <cmr:fieldLabel fieldId="Email2" />: </label>
+          <cmr:field fieldId="Email2" id="email2" path="email2" tabId="MAIN_CUST_TAB" />
+        </p>
+      </cmr:column>
         <cmr:column span="2" containerForField="CommercialFinanced" >
         <p>
           <cmr:label fieldId="commercialFinanced">
@@ -155,12 +161,6 @@
               <cmr:delta text="${rdcdata.commercialFinanced}" oldValue="${reqentry.commercialFinanced}" />
           </cmr:label>
           <cmr:field path="commercialFinanced" id="commercialFinanced" fieldId="CommercialFinanced" tabId="MAIN_CUST_TAB" />
-        </p>
-      </cmr:column>
-    <cmr:column span="2" containerForField="Email2">
-        <p>
-          <label for="email2"> <cmr:fieldLabel fieldId="Email2" />: </label>
-          <cmr:field fieldId="Email2" id="email2" path="email2" tabId="MAIN_CUST_TAB" />
         </p>
       </cmr:column>
   </cmr:row>
