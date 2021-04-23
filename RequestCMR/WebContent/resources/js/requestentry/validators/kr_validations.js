@@ -41,6 +41,21 @@ function afterConfigKR() {
     FormManager.addValidator('docContent', Validators.REQUIRED, [ '${ui.content}' ], 'MAIN_ATTACH_TAB');
   }
 
+  if (reqType == 'U') {
+    FormManager.removeValidator('custNm3', Validators.REQUIRED);
+    FormManager.removeValidator('custNm4', Validators.REQUIRED);
+    FormManager.removeValidator('divn', Validators.REQUIRED);
+    FormManager.removeValidator('abbrevLocn', Validators.REQUIRED);
+    FormManager.removeValidator('contactName1', Validators.REQUIRED);
+    FormManager.removeValidator('searchTerm', Validators.REQUIRED);
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
+    FormManager.removeValidator('commercialFinanced', Validators.REQUIRED);
+    FormManager.removeValidator('contactName2', Validators.REQUIRED);
+    FormManager.removeValidator('contactName3', Validators.REQUIRED);
+    FormManager.removeValidator('creditCd', Validators.REQUIRED);
+  }
+  
   RemoveCrossAddressMandatory();
   setChecklistStatus();
   addKRChecklistValidator();
