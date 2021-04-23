@@ -86,18 +86,18 @@ public class KRHandler extends GEOHandler {
 
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
-	  //jira 2235
-	  data.setAbbrevNm(mainRecord.getCmrName1Plain());
-	  data.setAbbrevLocn(mainRecord.getCmrCity());
-    
-/*    if (mainRecord.getCmrCountryLandedDesc() != null &&
-      	 (mainRecord.getCmrCountryLandedDesc().length() != 0)) {
-      	data.setAbbrevLocn(mainRecord.getCmrCountryLandedDesc()); }     
-     else
-     {
-    	 data.setAbbrevLocn(this.currentRecord.get(WtaasQueryKeys.Data.AbbrLoc));
-     }*/
-	  
+    // jira 2235
+    data.setAbbrevNm(mainRecord.getCmrName1Plain());
+    data.setAbbrevLocn(mainRecord.getCmrCity());
+
+    /*
+     * if (mainRecord.getCmrCountryLandedDesc() != null &&
+     * (mainRecord.getCmrCountryLandedDesc().length() != 0)) {
+     * data.setAbbrevLocn(mainRecord.getCmrCountryLandedDesc()); } else {
+     * data.setAbbrevLocn(this.currentRecord.get(WtaasQueryKeys.Data.AbbrLoc));
+     * }
+     */
+
     data.setClientTier(mainRecord.getCmrTier());
     // data.setClientTier(this.currentRecord.get(WtaasQueryKeys.Data.GB_SegCode));
     // ?Representative(CEO) name in business license?
@@ -118,17 +118,18 @@ public class KRHandler extends GEOHandler {
     data.setRepTeamMemberNo(mainRecord.getRepTeamMemberNo());
     this.setMRC(admin, data);
     data.setContactName2(data.getContactName2());
-    // jira-2243: setup default values for update/import scenario  Added by IBM-CIC(LIU XUE)
-    if(data.getCustPrefLang()== "" || data.getCustPrefLang() == null){
-    	data.setCustPrefLang("3");    	
+    // jira-2243: setup default values for update/import scenario Added by
+    // IBM-CIC(LIU XUE)
+    if (data.getCustPrefLang() == "" || data.getCustPrefLang() == null) {
+      data.setCustPrefLang("3");
     }
-    
-    if(data.getInstallRep()== "" || data.getInstallRep() == null){
-    	data.setInstallRep("1");    	
+
+    if (data.getInstallRep() == "" || data.getInstallRep() == null) {
+      data.setInstallRep("1");
     }
-    
-    if(data.getPhone1()== "" || data.getPhone1() == null){
-    	data.setPhone1("1");    	
+
+    if (data.getPhone1() == "" || data.getPhone1() == null) {
+      data.setPhone1("1");
     }
   }
 
@@ -143,8 +144,9 @@ public class KRHandler extends GEOHandler {
     address.setCity2(currentRecord.getCmrCity2());
     address.setCustNm1(currentRecord.getCmrName1Plain());
     address.setCustNm2(currentRecord.getCmrName2Plain());
-    address.setCustNm3(currentRecord.getCmrName3());
-    address.setCustNm4(currentRecord.getCmrName4());
+    address.setCustNm3(currentRecord.getCmrIntlName1());
+    address.setCustNm4(currentRecord.getCmrIntlCity1());
+    address.setDivn(currentRecord.getCmrIntlCity2());
     address.setStateProv("");
     address.setAddrTxt2(currentRecord.getCmrStreetAddressCont());
     address.setTaxOffice(currentRecord.getCmrTaxOffice());
@@ -162,27 +164,25 @@ public class KRHandler extends GEOHandler {
     data.setCustPrefLang("3");
     data.setInstallRep("1");
     data.setPhone1("1");
-    
 
-    
   }
 
   @Override
   public void appendExtraModelEntries(EntityManager entityManager, ModelAndView mv, RequestEntryModel model) throws Exception {
-	    String requesterId = model.getRequesterId();
-	    if (!StringUtils.isEmpty(requesterId)) {
-	      Person p = BluePagesHelper.getPerson(requesterId);
-	      if (p != null) {
-	        mv.addObject("requesterId_UID", p.getEmployeeId().substring(0, p.getEmployeeId().length() - 3));
-	      }
-	    }
-	    String originatorId = model.getOriginatorId();
-	    if (!StringUtils.isEmpty(originatorId)) {
-	      Person p = BluePagesHelper.getPerson(originatorId);
-	      if (p != null) {
-	        mv.addObject("originatorId_UID", p.getEmployeeId().substring(0, p.getEmployeeId().length() - 3));
-	      }
-	    }
+    String requesterId = model.getRequesterId();
+    if (!StringUtils.isEmpty(requesterId)) {
+      Person p = BluePagesHelper.getPerson(requesterId);
+      if (p != null) {
+        mv.addObject("requesterId_UID", p.getEmployeeId().substring(0, p.getEmployeeId().length() - 3));
+      }
+    }
+    String originatorId = model.getOriginatorId();
+    if (!StringUtils.isEmpty(originatorId)) {
+      Person p = BluePagesHelper.getPerson(originatorId);
+      if (p != null) {
+        mv.addObject("originatorId_UID", p.getEmployeeId().substring(0, p.getEmployeeId().length() - 3));
+      }
+    }
   }
 
   @Override
