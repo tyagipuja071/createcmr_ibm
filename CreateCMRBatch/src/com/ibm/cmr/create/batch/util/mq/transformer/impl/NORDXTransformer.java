@@ -452,6 +452,9 @@ public class NORDXTransformer extends EMEATransformer {
     if ("678".equals(data.getCmrIssuingCntry())) {
       DEFAULT_LANDED_COUNTRY = "DK";// Denmark
     }
+    if (StringUtils.isNotBlank(data.getCountryUse()) && data.getCountryUse().length() == 5) {
+      DEFAULT_LANDED_COUNTRY = data.getCountryUse().substring(3, 5);
+    }
 
   }
 
