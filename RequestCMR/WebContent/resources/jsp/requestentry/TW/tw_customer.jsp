@@ -95,7 +95,7 @@
    <cmr:row addBackground="true">
       <cmr:column span="2" containerForField="ExportCodesTDOdate">
       <p>
-        <label for="nuclChecklstDate"> <cmr:fieldLabel fieldId="ExportCodesTDOdate" />: 
+        <label for="bioChemMissleMfg"> <cmr:fieldLabel fieldId="ExportCodesTDOdate" />: 
         </label>
         <cmr:field fieldId="ExportCodesTDOdate" id="bioChemMissleMfg" path="bioChemMissleMfg" tabId="MAIN_CUST_TAB" />
       </p>
