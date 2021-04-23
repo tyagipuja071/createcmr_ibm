@@ -87,7 +87,11 @@ public class KRHandler extends GEOHandler {
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
     // jira 2235
-    data.setAbbrevNm(mainRecord.getCmrName1Plain());
+    String abbName = mainRecord.getCmrName1Plain();
+    if (!StringUtils.isEmpty(abbName) && abbName.length() > 21) {
+      abbName = abbName.substring(0, 21);
+    }
+    data.setAbbrevNm(abbName);
     data.setAbbrevLocn(mainRecord.getCmrCity());
 
     /*
