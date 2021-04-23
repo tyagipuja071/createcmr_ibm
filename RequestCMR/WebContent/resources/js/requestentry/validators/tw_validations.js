@@ -331,6 +331,7 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(afterConfigTW, GEOHandler.TW);
   GEOHandler.addAfterConfig(addHandlersForTW, GEOHandler.TW);
+  GEOHandler.addAfterConfig(addSingleByteValidatorTW, GEOHandler.TW);
   // GEOHandler.addAfterConfig(setISUCodeValues, GEOHandler.TW);
   GEOHandler.addAfterConfig(setDupCmrIndcWarning, GEOHandler.TW);
   GEOHandler.addAfterConfig(setChecklistStatus, GEOHandler.TW_CHECKLIST);
@@ -342,7 +343,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(addSingleByteValidatorTW, GEOHandler.TW);
 
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.TW);
-
+  GEOHandler.addAddrFunction(addSingleByteValidatorTW, GEOHandler.TW);
   GEOHandler.registerValidator(addTWChecklistValidator, GEOHandler.TW_CHECKLIST);
   // GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.TW,
   // GEOHandler.ROLE_PROCESSOR, true);
