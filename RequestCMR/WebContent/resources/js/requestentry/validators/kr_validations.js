@@ -190,6 +190,108 @@ function addAttachmentValidator() {
   })(), 'MAIN_ATTACH_TAB', 'frmCMR');
 }
 
+function setAbbrevNmLocnOnAddressSave(cntry, addressMode, saving, finalSave, force) {
+  console.log(">>>> setAbbrevNmLocnOnAddressSave >>>>");
+  var reqType = null;
+  var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
+  if (typeof (_pagemodel) != 'undefined') {
+    reqType = FormManager.getActualValue('reqType');
+  }
+    var addrType = FormManager.getActualValue('addrType');
+    var copyTypes = document.getElementsByName('copyTypes');
+    //var copyingToA = false;          
+        if (addrType == 'ZS01') {
+          //copyingToA = true;        
+          autoSetAbbrevNmLocnLogic();
+      }      
+}
+
+function autoSetAbbrevNmLocnLogic() {
+	console.log("autoSetAbbrevNmLocnLogic");
+	var _abbrevNm = null;
+	var _abbrevLocn = null;
+	var custSubGrp = FormManager.getActualValue('custSubGrp');
+	
+	var zs01ReqId = FormManager.getActualValue('reqId');
+	 var qParams = {
+			    REQ_ID : zs01ReqId,
+			  };
+	 var result = cmr.query('ADDR.GET.CUSTNM1.BY_REQID', qParams);
+	 var custNm1 = FormManager.getActualValue('custNm1');
+   var _abbrevLocn = FormManager.getActualValue('city1')
+   
+	  if (custNm1 == '')	{
+		    	custNm1 = result.ret1;
+		    }
+		  _abbrevNm = custNm1;
+		  FormManager.setValue('abbrevNm', _abbrevNm);
+      
+      switch (_abbrevLocn) {
+        case '1':
+          FormManager.setValue('abbrevLocn', 'Seoul');
+          break;
+
+        case '2':
+          FormManager.setValue('abbrevLocn', 'Busan');
+          break;
+
+          case '3':
+            FormManager.setValue('abbrevLocn', 'Daegu');
+          break;
+
+          case '4':
+            FormManager.setValue('abbrevLocn', 'Incheon');
+          break;
+
+          case '5':
+            FormManager.setValue('abbrevLocn', 'Gwangju');
+          break;
+
+          case '6':
+            FormManager.setValue('abbrevLocn', 'Daejeon');
+          break;
+          case '7':
+            FormManager.setValue('abbrevLocn', 'Ulsan');
+          break;
+          case '8':
+            FormManager.setValue('abbrevLocn', 'Sejong');
+          break;
+          case '9':
+            FormManager.setValue('abbrevLocn', 'Gyeonggi-do');
+          break;
+          case '10':
+            FormManager.setValue('abbrevLocn', 'Gangwon-do');
+          break;
+          case '11':
+            FormManager.setValue('abbrevLocn', 'Chungcheongbuk-do');
+          break;
+
+          case '12':
+            FormManager.setValue('abbrevLocn', 'Chungcheongnam-do');
+          break;
+
+          case '13':
+            FormManager.setValue('abbrevLocn', 'Jeollabuk-do');
+          break;
+
+          case '14':
+            FormManager.setValue('abbrevLocn', 'Jeollanam-do');
+          break;
+
+          case '15':
+            FormManager.setValue('abbrevLocn', 'Gyeongsangbuk-do');
+          break;
+
+          case '16':
+            FormManager.setValue('abbrevLocn', 'Gyeongsangnam-do');
+          break;
+
+          case '17':
+            FormManager.setValue('abbrevLocn', 'Jeju');
+          break;
+      }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.KR = [ '766' ];
   console.log('adding KOREA functions...');
@@ -202,7 +304,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(afterConfigKR, GEOHandler.KR);
 
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.KR);
-
+  GEOHandler.addAddrFunction(setAbbrevNmLocnOnAddressSave, GEOHandler.KR);
   FormManager.skipByteChecks([ 'billingPstlAddr', 'divn', 'custNm3', 'custNm4', 'contact', 'dept', 'poBoxCity', 'countyName' ]);
 
   GEOHandler.registerValidator(addKRChecklistValidator, GEOHandler.KR);
