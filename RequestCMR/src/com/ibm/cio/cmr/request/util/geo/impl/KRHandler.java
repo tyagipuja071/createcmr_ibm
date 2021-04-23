@@ -87,12 +87,12 @@ public class KRHandler extends GEOHandler {
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
     // jira 2235
-    String abbName = mainRecord.getCmrName1Plain();
+    String abbName = mainRecord.getCmrName1Plain() == null ? mainRecord.getCmrName1Plain() : mainRecord.getCmrName1Plain().trim();
     if (!StringUtils.isEmpty(abbName) && abbName.length() > 21) {
       abbName = abbName.substring(0, 21);
     }
     data.setAbbrevNm(abbName);
-    data.setAbbrevLocn(mainRecord.getCmrCity());
+    data.setAbbrevLocn(mainRecord.getCmrCity() == null ? mainRecord.getCmrCity() : mainRecord.getCmrCity().trim());
 
     /*
      * if (mainRecord.getCmrCountryLandedDesc() != null &&
@@ -102,7 +102,7 @@ public class KRHandler extends GEOHandler {
      * }
      */
 
-    data.setClientTier(mainRecord.getCmrTier());
+    data.setClientTier(mainRecord.getCmrTier() == null ? mainRecord.getCmrTier() : mainRecord.getCmrTier().trim());
     // data.setClientTier(this.currentRecord.get(WtaasQueryKeys.Data.GB_SegCode));
     // ?Representative(CEO) name in business license?
     // data.setContactName1(mainRecord.getUsCmrRestrictTo());
@@ -144,18 +144,20 @@ public class KRHandler extends GEOHandler {
   @Override
   public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo) throws Exception {
 
-    address.setCity1(currentRecord.getCmrCity());
-    address.setCity2(currentRecord.getCmrCity2());
-    address.setCustNm1(currentRecord.getCmrName1Plain());
-    address.setCustNm2(currentRecord.getCmrName2Plain());
-    address.setCustNm3(currentRecord.getCmrIntlName1());
-    address.setCustNm4(currentRecord.getCmrIntlCity1());
-    address.setDivn(currentRecord.getCmrIntlCity2());
+    address.setCity1(currentRecord.getCmrCity() == null ? currentRecord.getCmrCity() : currentRecord.getCmrCity().trim());
+    address.setCity2(currentRecord.getCmrCity2() == null ? currentRecord.getCmrCity2() : currentRecord.getCmrCity2().trim());
+    address.setCustNm1(currentRecord.getCmrName1Plain() == null ? currentRecord.getCmrName1Plain() : currentRecord.getCmrName1Plain().trim());
+    address.setCustNm2(currentRecord.getCmrName2Plain() == null ? currentRecord.getCmrName2Plain() : currentRecord.getCmrName2Plain().trim());
+    address.setCustNm3(currentRecord.getCmrIntlName1() == null ? currentRecord.getCmrIntlName1() : currentRecord.getCmrIntlName1().trim());
+    address.setCustNm4(currentRecord.getCmrIntlCity1() == null ? currentRecord.getCmrIntlCity1() : currentRecord.getCmrIntlCity1().trim());
+    address.setDivn(currentRecord.getCmrIntlCity2() == null ? currentRecord.getCmrIntlCity2() : currentRecord.getCmrIntlCity2().trim());
     address.setStateProv("");
-    address.setAddrTxt2(currentRecord.getCmrStreetAddressCont());
-    address.setTaxOffice(currentRecord.getCmrTaxOffice());
-    address.setDept(currentRecord.getCmrDept());
-    address.setPoBoxPostCd(currentRecord.getCmrPOBoxPostCode());
+    address.setAddrTxt2(
+        currentRecord.getCmrStreetAddressCont() == null ? currentRecord.getCmrStreetAddressCont() : currentRecord.getCmrStreetAddressCont().trim());
+    address.setTaxOffice(currentRecord.getCmrTaxOffice() == null ? currentRecord.getCmrTaxOffice() : currentRecord.getCmrTaxOffice().trim());
+    address.setDept(currentRecord.getCmrDept() == null ? currentRecord.getCmrDept() : currentRecord.getCmrDept().trim());
+    address.setPoBoxPostCd(
+        currentRecord.getCmrPOBoxPostCode() == null ? currentRecord.getCmrPOBoxPostCode() : currentRecord.getCmrPOBoxPostCode().trim());
   }
 
   @Override

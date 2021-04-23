@@ -76,10 +76,10 @@ public class TWHandler extends GEOHandler {
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
 
-    data.setIsuCd(mainRecord.getIsuCode());
-    data.setDunsNo(mainRecord.getCmrDuns());
-    data.setClientTier(mainRecord.getCmrTier());
-    data.setInvoiceSplitCd(mainRecord.getInvoiceSplitCode());
+    data.setIsuCd(mainRecord.getIsuCode() == null ? mainRecord.getIsuCode() : mainRecord.getIsuCode().trim());
+    data.setDunsNo(mainRecord.getCmrDuns() == null ? mainRecord.getCmrDuns() : mainRecord.getCmrDuns().trim());
+    data.setClientTier(mainRecord.getCmrTier() == null ? mainRecord.getCmrTier() : mainRecord.getCmrTier().trim());
+    data.setInvoiceSplitCd(mainRecord.getInvoiceSplitCode() == null ? mainRecord.getInvoiceSplitCode() : mainRecord.getInvoiceSplitCode().trim());
 
   }
 
@@ -91,17 +91,22 @@ public class TWHandler extends GEOHandler {
   public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo) throws Exception {
 
     address.setCustNm1(currentRecord.getCmrName1Plain() == null ? currentRecord.getCmrName1Plain() : currentRecord.getCmrName1Plain().trim());
-    address.setCustNm2(currentRecord.getCmrName2Plain());
-    address.setCustNm3(currentRecord.getCmrIntlName1());
-    address.setCustNm4(currentRecord.getCmrIntlName2());
+    address.setCustNm2(currentRecord.getCmrName2Plain() == null ? currentRecord.getCmrName2Plain() : currentRecord.getCmrName2Plain().trim());
+    address.setCustNm3(currentRecord.getCmrIntlName1() == null ? currentRecord.getCmrIntlName1() : currentRecord.getCmrIntlName1().trim());
+    address.setCustNm4(currentRecord.getCmrIntlName2() == null ? currentRecord.getCmrIntlName2() : currentRecord.getCmrIntlName2().trim());
 
-    String strAdd1 = currentRecord.getCmrName4() + " " + currentRecord.getCmrStreetAddress() + " " + currentRecord.getCmrCity2() + " ";
-    String strAdd2 = currentRecord.getCmrCity() + " " + currentRecord.getCmrCountryLanded();
+    String strAdd1 = (currentRecord.getCmrName4() == null ? ""
+        : currentRecord.getCmrName4().trim() + " " + currentRecord.getCmrStreetAddress() == null ? ""
+            : currentRecord.getCmrStreetAddress().trim() + " " + currentRecord.getCmrCity2() == null ? "" : currentRecord.getCmrCity2().trim())
+                .trim();
+    String strAdd2 = (currentRecord.getCmrCity() == null ? ""
+        : currentRecord.getCmrCity().trim() + " " + currentRecord.getCmrCountryLanded() == null ? "" : currentRecord.getCmrCountryLanded().trim())
+            .trim();
 
     splitAddress(address, strAdd1, strAdd2, 60, 60);
 
-    address.setDept(currentRecord.getCmrIntlCity1());
-    address.setBldg(currentRecord.getCmrIntlCity2());
+    address.setDept(currentRecord.getCmrIntlCity1() == null ? currentRecord.getCmrIntlCity1() : currentRecord.getCmrIntlCity1().trim());
+    address.setBldg(currentRecord.getCmrIntlCity2() == null ? currentRecord.getCmrIntlCity2() : currentRecord.getCmrIntlCity2().trim());
   }
 
   @Override
