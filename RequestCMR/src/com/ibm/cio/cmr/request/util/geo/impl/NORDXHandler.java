@@ -1019,7 +1019,7 @@ public class NORDXHandler extends BaseSOFHandler {
 
               currCell = (XSSFCell) row.getCell(6);
               inac = validateColValFromCell(currCell);
-              if (!StringUtils.isBlank(inac) && !(inac.matches("^[a-zA-z]{2}[0-9]{2}") || inac.matches("^[a-zA-z]{4}") || "@@@@".equals(inac))) {
+              if (!StringUtils.isBlank(inac) && !(inac.matches("^[a-zA-z]{2}[0-9]{2}") || StringUtils.isNumeric(inac) || "@@@@".equals(inac))) {
                 TemplateValidation error = new TemplateValidation(name);
                 LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that INAC format is incorrect. Please fix and upload the template again.");
                 error.addError((row.getRowNum() + 1), "INAC",
