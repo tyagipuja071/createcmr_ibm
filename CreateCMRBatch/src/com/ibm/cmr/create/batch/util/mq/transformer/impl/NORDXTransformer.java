@@ -448,14 +448,13 @@ public class NORDXTransformer extends EMEATransformer {
     }
     if ("702".equals(data.getCmrIssuingCntry())) {
       DEFAULT_LANDED_COUNTRY = "FI";// Finland
+      if (StringUtils.isNotBlank(data.getCountryUse()) && data.getCountryUse().length() == 5) {
+        DEFAULT_LANDED_COUNTRY = data.getCountryUse().substring(3, 5);
+      }
     }
     if ("678".equals(data.getCmrIssuingCntry())) {
       DEFAULT_LANDED_COUNTRY = "DK";// Denmark
     }
-    if (StringUtils.isNotBlank(data.getCountryUse()) && data.getCountryUse().length() == 5) {
-      DEFAULT_LANDED_COUNTRY = data.getCountryUse().substring(3, 5);
-    }
-
   }
 
   /**
