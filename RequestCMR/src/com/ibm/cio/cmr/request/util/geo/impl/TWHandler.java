@@ -94,8 +94,11 @@ public class TWHandler extends GEOHandler {
     address.setCustNm2(currentRecord.getCmrName2Plain());
     address.setCustNm3(currentRecord.getCmrIntlName1());
     address.setCustNm4(currentRecord.getCmrIntlName2());
-    address.setAddrTxt(currentRecord.getCmrStreetAddress());
-    address.setAddrTxt2(currentRecord.getCmrStreetAddressCont());
+
+    String strAdd1 = currentRecord.getCmrName4() + " " + currentRecord.getCmrStreetAddress() + " " + currentRecord.getCmrCity2() + " ";
+    String strAdd2 = currentRecord.getCmrCity() + " " + currentRecord.getCmrCountryLanded();
+
+    splitAddress(address, strAdd1, strAdd2, 60, 60);
 
     address.setDept(currentRecord.getCmrIntlCity1());
     address.setBldg(currentRecord.getCmrIntlCity2());
