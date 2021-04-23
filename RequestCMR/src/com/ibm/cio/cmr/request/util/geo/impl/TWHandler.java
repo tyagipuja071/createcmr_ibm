@@ -763,7 +763,14 @@ public class TWHandler extends GEOHandler {
         for (Object tempRecObj : recordsToCheck) {
           if (tempRecObj instanceof FindCMRRecordModel) {
             FindCMRRecordModel tempRec = (FindCMRRecordModel) tempRecObj;
-
+            if (tempRec.getCmrAddrTypeCode().equalsIgnoreCase("ZD01") && tempRec.getCmrAddrSeq().equalsIgnoreCase("040")) {
+              tempRec.setCmrAddrTypeCode("ZI01");
+              tempRec.setCmrAddrSeq("040");
+            }
+            if (tempRec.getCmrAddrTypeCode().equalsIgnoreCase("ZP01") && tempRec.getCmrAddrSeq().equalsIgnoreCase("D")) {
+              tempRec.setCmrAddrTypeCode("ZP02");
+              tempRec.setCmrAddrSeq("D");
+            }
             if (!StringUtils.isEmpty(tempRec.getCmrAddrSeq())) {
               recordsToReturn.add(tempRec);
             }
