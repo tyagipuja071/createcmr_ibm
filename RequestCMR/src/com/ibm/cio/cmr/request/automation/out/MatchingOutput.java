@@ -57,7 +57,7 @@ public class MatchingOutput implements AutomationOutput {
     record.setMatchGradeType(matchGradeType);
     record.setMatchGradeValue(matchGradeValue);
     record.setMatchKeyName(matchKeyName);
-    if (matchKeyValue.length() > 30) {
+    if (matchKeyValue != null && matchKeyValue.length() > 30) {
       record.setMatchKeyValue(matchKeyValue.substring(0, 30));
     } else {
       record.setMatchKeyValue(matchKeyValue);
