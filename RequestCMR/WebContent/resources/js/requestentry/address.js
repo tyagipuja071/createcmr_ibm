@@ -2232,6 +2232,17 @@ function refreshAfterAddressRemove(result) {
   if (FormManager.getActualValue('cmrIssuingCntry') == '706') {
     window.setTimeout('resetAbbNmOnRemoveSelectedAddrsFR()', 3000);
   }
+
+  // CREATCMR-2262
+  if (FormManager.getActualValue('cmrIssuingCntry') == '678' || FormManager.getActualValue('cmrIssuingCntry') == '702'
+      || FormManager.getActualValue('cmrIssuingCntry') == '806' || FormManager.getActualValue('cmrIssuingCntry') == '846') {
+    // if (cmr.removeDetails.remAddrType == 'ZI01') {
+    // resetAbbNmRemoveAddrNORDX();
+    resetAbbNmOnRemoveSelectedAddrNORDX();
+    // }
+  }
+  // CREATCMR-2262
+
 }
 
 /* Generalized Address Grid New Formatters */
@@ -2942,5 +2953,45 @@ function resetAbbNmRemoveAddrNORDX() {
   if (custSubGrp == 'CBISO' || custSubGrp == 'DKISO' || custSubGrp == 'FOISO' || custSubGrp == 'GLISO' || custSubGrp == 'ISISO'
       || custSubGrp == 'FIISO' || custSubGrp == 'EEISO' || custSubGrp == 'LTISO' || custSubGrp == 'LVISO' || custSubGrp == 'INTSO') {
     FormManager.setValue('abbrevNm', "IBM c/o ");
+  }
+}
+
+function resetAbbNmOnRemoveSelectedAddrNORDX() {
+  var havingZI01 = false;
+
+  if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+    var record = null;
+    var type = null;
+    for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+      record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+      if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+        record = _allAddressData[i];
+      }
+      type = record.addrType;
+      if (typeof (type) == 'object') {
+        type = type[0];
+      }
+
+      if (type == 'ZI01') {
+        havingZI01 = true;
+      }
+
+    }
+  }
+
+  if (havingZI01) {
+
+    var custSubGrp = FormManager.getActualValue('custSubGrp');
+    if (custSubGrp == 'DK3PA' || custSubGrp == 'FO3PA' || custSubGrp == 'GL3PA' || custSubGrp == 'IS3PA' || custSubGrp == 'FI3PA'
+        || custSubGrp == 'EE3PA' || custSubGrp == 'LT3PA' || custSubGrp == 'LV3PA' || custSubGrp == 'THDPT') {
+      FormManager.setValue('abbrevNm', "");
+    }
+
+    if (custSubGrp == 'CBISO' || custSubGrp == 'DKISO' || custSubGrp == 'FOISO' || custSubGrp == 'GLISO' || custSubGrp == 'ISISO'
+        || custSubGrp == 'FIISO' || custSubGrp == 'EEISO' || custSubGrp == 'LTISO' || custSubGrp == 'LVISO' || custSubGrp == 'INTSO') {
+      FormManager.setValue('abbrevNm', "IBM c/o ");
+    }
+
+    return;
   }
 }
