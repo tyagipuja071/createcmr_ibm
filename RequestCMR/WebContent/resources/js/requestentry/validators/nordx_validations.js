@@ -57,14 +57,7 @@ function afterConfigForNORDX() {
       FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
       FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Abbreviated Name' ], 'MAIN_CUST_TAB');
       FormManager.addValidator('abbrevLocn', Validators.REQUIRED, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
-      // if ((custSubGrp != 'LTBUS' && custSubGrp != 'EEBUS' && custSubGrp !=
-      // 'LVBUS' && custSubGrp != 'CBBUS')) {
-      // FormManager.addValidator('engineeringBo', Validators.REQUIRED, [ 'A/C
-      // Admin DSC' ], 'MAIN_IBM_TAB');
-      // } else {
-      // FormManager.resetValidations('engineeringBo');
-      // FormManager.readOnly('engineeringBo');
-      // } // CMR-1903 commented
+
     }
 
     if (custSubGrp.substring(2, 5) == 'INT' || custSubGrp.substring(2, 5) == 'BUS' || custSubGrp == 'BUSPR' || custSubGrp == 'INTER') {
@@ -852,6 +845,10 @@ function cleanupACdminDSAndSRValues() {
   }
 
   if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
+
+  if (FormManager.getActualValue('custSubGrp') == '') {
     return;
   }
 
