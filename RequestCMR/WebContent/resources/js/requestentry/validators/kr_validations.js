@@ -233,13 +233,17 @@ function autoSetAbbrevNmLocnLogic() {
 			  };
 	 var result = cmr.query('ADDR.GET.CUSTNM1.BY_REQID', qParams);
 	 var custNm1 = FormManager.getActualValue('custNm1');
-   var _abbrevLocn = FormManager.getActualValue('city1')
+	 var _abbrevLocn = FormManager.getActualValue('city1')
    
 	  if (custNm1 == '')	{
 		    	custNm1 = result.ret1;
 		    }
 		  _abbrevNm = custNm1;
-		  FormManager.setValue('abbrevNm', _abbrevNm);
+		  
+      if ( _abbrevNm && _abbrevNm.length > 21) {
+	    	_abbrevNm = _abbrevNm.substring(0, 21);
+	      }
+	  FormManager.setValue('abbrevNm', _abbrevNm);
       
       switch (_abbrevLocn) {
         case '1':
@@ -317,13 +321,12 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setChecklistStatus, GEOHandler.KR);
 
   GEOHandler.addAfterTemplateLoad(afterConfigKR, GEOHandler.KR);
-
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.KR);
   GEOHandler.addAddrFunction(setAbbrevNmLocnOnAddressSave, GEOHandler.KR);
   FormManager.skipByteChecks([ 'billingPstlAddr', 'divn', 'custNm3', 'custNm4', 'contact', 'dept', 'poBoxCity', 'countyName' ]);
 
   GEOHandler.registerValidator(addKRChecklistValidator, GEOHandler.KR);
-  // GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.KR,
+  
   // GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(addDPLCheckValidator, GEOHandler.KR, GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(addAttachmentValidator, GEOHandler.KR);
