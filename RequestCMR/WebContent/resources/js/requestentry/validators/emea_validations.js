@@ -7209,10 +7209,10 @@ function autoPopulateISUClientTierUK() {
     }
     if (addrType != '' && addrType == 'ZS01') {
       if (postCd != '' && (isNorthernIrelandPostCd(postCd) || isScotlandPostCd(postCd))) {
-        FormManager.setValue('isuCd', "32");
-        FormManager.setValue('clientTier', "C");
+        FormManager.setValue('isuCd', "34");
+        FormManager.setValue('clientTier', "Q");
       } else {
-        FormManager.setValue('clientTier', "S");
+        FormManager.setValue('clientTier', "Q");
       }
     }
   } else {
@@ -7249,10 +7249,10 @@ function autoSetISUClientTierUK() {
       }
 
       if (postCd != '' && (isNorthernIrelandPostCd(postCd) || isScotlandPostCd(postCd))) {
-        FormManager.setValue('isuCd', "32");
-        FormManager.setValue('clientTier', "C");
+        FormManager.setValue('isuCd', "34");
+        FormManager.setValue('clientTier', "Q");
       } else {
-        FormManager.setValue('clientTier', "S");
+        FormManager.setValue('clientTier', "Q");
       }
     } else {
       FormManager.setValue('isuCd', '21');
