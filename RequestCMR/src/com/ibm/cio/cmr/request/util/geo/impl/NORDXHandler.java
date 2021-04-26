@@ -192,8 +192,10 @@ public class NORDXHandler extends BaseSOFHandler {
                   if ("0".equals(stkzn) || parvmCount > 2) {
                     addr.setCmrAddrTypeCode("ZS02");
                     zs02Flag = "Y";
+                    System.out.println("---------zs02Flag---------------" + zs02Flag);
                   } else {
                     zi01Flag = "Y";
+                    System.out.println("---------zi01Flag---------------" + zi01Flag);
                   }
                 }
 
@@ -324,7 +326,8 @@ public class NORDXHandler extends BaseSOFHandler {
                 String isShareZD01 = isShareZD01(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), installingseqLegacy);
                 String isShareZI01 = isShareZI01(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), installingseqLegacy);
 
-                if (isShareZI01 != null && isShareZS02 != null) {
+                if ((isShareZI01 != null && isShareZS02 != null) || (isShareZS02 != null && isShareZD01 != null)
+                    || (isShareZI01 != null && isShareZD01 != null)) {
                 // add share ZP01
                 if (isShareZP01 != null && (!installingseq.equals(mainRecord.getCmrAddrSeq()))) {
                   FindCMRRecordModel sharezp01 = new FindCMRRecordModel();
@@ -379,6 +382,8 @@ public class NORDXHandler extends BaseSOFHandler {
                 }
                 System.out.println("---------ZI01 Share Seq Max Seq is ---------------" + maxintSeqLegacy);
               }
+                zs02Flag = null;
+                zi01Flag = null;
               }
             }
 
@@ -1408,17 +1413,20 @@ public class NORDXHandler extends BaseSOFHandler {
     // }
     // }
 
-    for (Addr addr : addresses) {
-      if ("ZS01".equals(addr.getId().getAddrType())) {
-        String adrnr = getaddAddressAdrnr(entityManager, data.getCmrIssuingCntry(), SystemConfiguration.getValue("MANDT"), addr.getSapNo(),
-            addr.getId().getAddrType(), addr.getId().getAddrSeq());
-        String legacyGaddrSeq = getGaddressSeqFromLegacy(entityManager, data.getCmrIssuingCntry(), data.getCmrNo());
-        if (StringUtils.isBlank(adrnr) && !StringUtils.isBlank(legacyGaddrSeq)) {
-          changeZS01AddrUpdate(entityManager, data.getId().getReqId());
-          changeZP01AddrUpdate(entityManager, data.getId().getReqId());
-        }
-      }
-    }
+    // for (Addr addr : addresses) {
+    // if ("ZS01".equals(addr.getId().getAddrType())) {
+    // String adrnr = getaddAddressAdrnr(entityManager,
+    // data.getCmrIssuingCntry(), SystemConfiguration.getValue("MANDT"),
+    // addr.getSapNo(),
+    // addr.getId().getAddrType(), addr.getId().getAddrSeq());
+    // String legacyGaddrSeq = getGaddressSeqFromLegacy(entityManager,
+    // data.getCmrIssuingCntry(), data.getCmrNo());
+    // if (StringUtils.isBlank(adrnr) && !StringUtils.isBlank(legacyGaddrSeq)) {
+    // changeZS01AddrUpdate(entityManager, data.getId().getReqId());
+    // changeZP01AddrUpdate(entityManager, data.getId().getReqId());
+    // }
+    // }
+    // }
 
     if (ND_COUNTRIES_LIST.contains(data.getCmrIssuingCntry())) {
       String soldtoseq = getSoldtoaddrSeqFromLegacy(entityManager, data.getCmrIssuingCntry(), data.getCmrNo());
