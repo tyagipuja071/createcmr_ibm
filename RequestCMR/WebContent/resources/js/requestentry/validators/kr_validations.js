@@ -246,71 +246,76 @@ function autoSetAbbrevNmLocnLogic() {
 	    	_abbrevNm = _abbrevNm.substring(0, 21);
 	      }
 	  FormManager.setValue('abbrevNm', _abbrevNm);
-      
-      switch (_abbrevLocn) {
-        case '1':
-          FormManager.setValue('abbrevLocn', 'Seoul');
-          break;
 
-        case '2':
-          FormManager.setValue('abbrevLocn', 'Busan');
-          break;
-
-          case '3':
-            FormManager.setValue('abbrevLocn', 'Daegu');
-          break;
-
-          case '4':
-            FormManager.setValue('abbrevLocn', 'Incheon');
-          break;
-
-          case '5':
-            FormManager.setValue('abbrevLocn', 'Gwangju');
-          break;
-
-          case '6':
-            FormManager.setValue('abbrevLocn', 'Daejeon');
-          break;
-          case '7':
-            FormManager.setValue('abbrevLocn', 'Ulsan');
-          break;
-          case '8':
-            FormManager.setValue('abbrevLocn', 'Sejong');
-          break;
-          case '9':
-            FormManager.setValue('abbrevLocn', 'Gyeonggi-do');
-          break;
-          case '10':
-            FormManager.setValue('abbrevLocn', 'Gangwon-do');
-          break;
-          case '11':
-            FormManager.setValue('abbrevLocn', 'Chungcheongbuk-do');
-          break;
-
-          case '12':
-            FormManager.setValue('abbrevLocn', 'Chungcheongnam-do');
-          break;
-
-          case '13':
-            FormManager.setValue('abbrevLocn', 'Jeollabuk-do');
-          break;
-
-          case '14':
-            FormManager.setValue('abbrevLocn', 'Jeollanam-do');
-          break;
-
-          case '15':
-            FormManager.setValue('abbrevLocn', 'Gyeongsangbuk-do');
-          break;
-
-          case '16':
-            FormManager.setValue('abbrevLocn', 'Gyeongsangnam-do');
-          break;
-
-          case '17':
-            FormManager.setValue('abbrevLocn', 'Jeju');
-          break;
+    if ( _abbrevLocn && _abbrevLocn.length > 21) {
+      _abbrevLocn = _abbrevLocn.substring(0, 21);
       }
+    FormManager.setValue('abbrevLocn', _abbrevLocn);
+
+      // switch (_abbrevLocn) {
+      //   case '1':
+      //     FormManager.setValue('abbrevLocn', 'Seoul');
+      //     break;
+
+      //   case '2':
+      //     FormManager.setValue('abbrevLocn', 'Busan');
+      //     break;
+
+      //     case '3':
+      //       FormManager.setValue('abbrevLocn', 'Daegu');
+      //     break;
+
+      //     case '4':
+      //       FormManager.setValue('abbrevLocn', 'Incheon');
+      //     break;
+
+      //     case '5':
+      //       FormManager.setValue('abbrevLocn', 'Gwangju');
+      //     break;
+
+      //     case '6':
+      //       FormManager.setValue('abbrevLocn', 'Daejeon');
+      //     break;
+      //     case '7':
+      //       FormManager.setValue('abbrevLocn', 'Ulsan');
+      //     break;
+      //     case '8':
+      //       FormManager.setValue('abbrevLocn', 'Sejong');
+      //     break;
+      //     case '9':
+      //       FormManager.setValue('abbrevLocn', 'Gyeonggi-do');
+      //     break;
+      //     case '10':
+      //       FormManager.setValue('abbrevLocn', 'Gangwon-do');
+      //     break;
+      //     case '11':
+      //       FormManager.setValue('abbrevLocn', 'Chungcheongbuk-do');
+      //     break;
+
+      //     case '12':
+      //       FormManager.setValue('abbrevLocn', 'Chungcheongnam-do');
+      //     break;
+
+      //     case '13':
+      //       FormManager.setValue('abbrevLocn', 'Jeollabuk-do');
+      //     break;
+
+      //     case '14':
+      //       FormManager.setValue('abbrevLocn', 'Jeollanam-do');
+      //     break;
+
+      //     case '15':
+      //       FormManager.setValue('abbrevLocn', 'Gyeongsangbuk-do');
+      //     break;
+
+      //     case '16':
+      //       FormManager.setValue('abbrevLocn', 'Gyeongsangnam-do');
+      //     break;
+
+      //     case '17':
+      //       FormManager.setValue('abbrevLocn', 'Jeju');
+      //     break;
+      // }
 }
 
 dojo.addOnLoad(function() {
