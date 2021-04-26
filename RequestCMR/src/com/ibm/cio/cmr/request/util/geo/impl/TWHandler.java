@@ -92,8 +92,10 @@ public class TWHandler extends GEOHandler {
 
     address.setCustNm1(currentRecord.getCmrName1Plain() == null ? currentRecord.getCmrName1Plain() : currentRecord.getCmrName1Plain().trim());
     address.setCustNm2(currentRecord.getCmrName2Plain() == null ? currentRecord.getCmrName2Plain() : currentRecord.getCmrName2Plain().trim());
-    address.setCustNm3(currentRecord.getCmrIntlName1() == null ? currentRecord.getCmrIntlName1() : currentRecord.getCmrIntlName1().trim());
-    address.setCustNm4(currentRecord.getCmrIntlName2() == null ? currentRecord.getCmrIntlName2() : currentRecord.getCmrIntlName2().trim());
+    address.setCustNm3(currentRecord.getCmrIntlName1() == null ? currentRecord.getCmrIntlName1()
+        : currentRecord.getCmrIntlName1().replace((char) 12288, ' ').trim().replace(' ', (char) 12288));
+    address.setCustNm4(currentRecord.getCmrIntlName2() == null ? currentRecord.getCmrIntlName2()
+        : currentRecord.getCmrIntlName2().replace((char) 12288, ' ').trim().replace(' ', (char) 12288));
 
     String strAdd1 = ((currentRecord.getCmrName4() == null ? "" : currentRecord.getCmrName4().trim()) + " "
         + (currentRecord.getCmrStreetAddress() == null ? "" : currentRecord.getCmrStreetAddress().trim()) + " "
@@ -104,8 +106,10 @@ public class TWHandler extends GEOHandler {
 
     splitAddress(address, strAdd1, strAdd2, 60, 60);
 
-    address.setDept(currentRecord.getCmrIntlCity1() == null ? currentRecord.getCmrIntlCity1() : currentRecord.getCmrIntlCity1().trim());
-    address.setBldg(currentRecord.getCmrIntlCity2() == null ? currentRecord.getCmrIntlCity2() : currentRecord.getCmrIntlCity2().trim());
+    address.setDept(currentRecord.getCmrIntlCity1() == null ? currentRecord.getCmrIntlCity1()
+        : currentRecord.getCmrIntlCity1().replace((char) 12288, ' ').trim().replace(' ', (char) 12288));
+    address.setBldg(currentRecord.getCmrIntlCity2() == null ? currentRecord.getCmrIntlCity2()
+        : currentRecord.getCmrIntlCity2().replace((char) 12288, ' ').trim().replace(' ', (char) 12288));
   }
 
   @Override
