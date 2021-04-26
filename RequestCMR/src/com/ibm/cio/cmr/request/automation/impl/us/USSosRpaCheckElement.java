@@ -26,6 +26,12 @@ import com.ibm.cmr.services.client.automation.AutomationResponse;
 import com.ibm.cmr.services.client.automation.us.SosRequest;
 import com.ibm.cmr.services.client.automation.us.SosResponse;
 
+/**
+ *
+ * @author Shivangi
+ *
+ */
+
 public class USSosRpaCheckElement extends ValidatingElement implements CompanyVerifier {
 
   // Business Partner
