@@ -3214,7 +3214,7 @@ function setCustPrefLangByCountry() {
 
 // CREATCMR-1709
 function resetCustPrefLang() {
-  _pagemodel.custPrefLang = null;
+  // _pagemodel.custPrefLang = null;
 }
 // CREATCMR-1709
 
