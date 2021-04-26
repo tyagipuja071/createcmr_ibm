@@ -652,6 +652,7 @@ public class NORDXTransformer extends EMEATransformer {
     legacyAddr.setCity(addrData.getCity1());
     legacyAddr.setZipCode(addrData.getPostCd());
     legacyAddr.setStreet(addrData.getAddrTxt());
+    legacyAddr.setPoBox(StringUtils.isNotBlank(pobox) ? pobox : "");
     legacyAddr.setAddrPhone(phone);
     legacyAddr.setAddrLineT(addrLineT);
     legacyAddr.setDistrict(addrData.getDept());
@@ -804,6 +805,7 @@ public class NORDXTransformer extends EMEATransformer {
     legacyAddr.setCity(city);
     legacyAddr.setZipCode(postCode);
     legacyAddr.setStreet(street);
+    legacyAddr.setPoBox(StringUtils.isNotBlank(pobox) ? pobox : legacyAddr.getPoBox());
     legacyAddr.setAddrPhone(phone);
     legacyAddr.setAddrLineU("");
 
