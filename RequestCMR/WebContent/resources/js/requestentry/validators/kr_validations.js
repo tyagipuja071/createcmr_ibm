@@ -54,6 +54,7 @@ function afterConfigKR() {
     FormManager.removeValidator('contactName2', Validators.REQUIRED);
     FormManager.removeValidator('contactName3', Validators.REQUIRED);
     FormManager.removeValidator('creditCd', Validators.REQUIRED);
+    FormManager.removeValidator('MrcCd', Validators.REQUIRED);
   }
   
   RemoveCrossAddressMandatory();
