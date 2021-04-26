@@ -69,6 +69,7 @@ public class NORDXTransformer extends EMEATransformer {
   private static final Logger LOG = Logger.getLogger(EMEATransformer.class);
 
   public static String DEFAULT_LANDED_COUNTRY = "AE";
+  public String SUB_REGION_COUNTRY = "";
   public static final String CMR_REQUEST_REASON_TEMP_REACT_EMBARGO = "TREC";
   public static final String CMR_REQUEST_STATUS_CPR = "CPR";
   public static final String CMR_REQUEST_STATUS_PCR = "PCR";
@@ -440,20 +441,24 @@ public class NORDXTransformer extends EMEATransformer {
   }
 
   public void setDefaultLandedCountry(Data data) {
-    if ("846".equals(data.getCmrIssuingCntry())) {
+    if (SystemLocation.SWEDEN.equals(data.getCmrIssuingCntry())) {
       DEFAULT_LANDED_COUNTRY = "SE";// Sweden
     }
-    if ("806".equals(data.getCmrIssuingCntry())) {
+    if (SystemLocation.NORWAY.equals(data.getCmrIssuingCntry())) {
       DEFAULT_LANDED_COUNTRY = "NO";// Norway
     }
-    if ("702".equals(data.getCmrIssuingCntry())) {
+    if (SystemLocation.FINLAND.equals(data.getCmrIssuingCntry())) {
       DEFAULT_LANDED_COUNTRY = "FI";// Finland
       if (StringUtils.isNotBlank(data.getCountryUse()) && data.getCountryUse().length() == 5) {
         DEFAULT_LANDED_COUNTRY = data.getCountryUse().substring(3, 5);
+        SUB_REGION_COUNTRY = data.getCountryUse().substring(3, 5);
       }
     }
-    if ("678".equals(data.getCmrIssuingCntry())) {
+    if (SystemLocation.DENMARK.equals(data.getCmrIssuingCntry())) {
       DEFAULT_LANDED_COUNTRY = "DK";// Denmark
+      if (StringUtils.isNotBlank(data.getCountryUse()) && data.getCountryUse().length() == 5) {
+        SUB_REGION_COUNTRY = data.getCountryUse().substring(3, 5);
+      }
     }
   }
 
@@ -464,6 +469,13 @@ public class NORDXTransformer extends EMEATransformer {
    * @return
    */
   protected boolean isCrossBorder(Addr addr) {
+    if (DEFAULT_LANDED_COUNTRY.equals("DK")) {
+      if (StringUtils.isBlank(SUB_REGION_COUNTRY)) {// blank means Denmark
+        return !"DK".equals(addr.getLandCntry());
+      } else {
+        return false;
+      }
+    }
     return !DEFAULT_LANDED_COUNTRY.equals(addr.getLandCntry());
   }
 
@@ -541,8 +553,9 @@ public class NORDXTransformer extends EMEATransformer {
 
     Addr addrData = handler.addrData;
     Data cmrData = handler.cmrData;
+    Admin adminData = handler.adminData;
     boolean update = "U".equals(handler.adminData.getReqType());
-    boolean crossBorder = isCrossBorder(addrData);
+    boolean crossBorder = zs01CrossBorder(handler);
 
     LOG.debug("Legacy Direct -Handling Address for " + (update ? "update" : "create") + " request.");
 
@@ -691,6 +704,8 @@ public class NORDXTransformer extends EMEATransformer {
   public void transformLegacyAddressDataMassUpdate(EntityManager entityManager, CmrtAddr legacyAddr, MassUpdtAddr addr, String cntry, CmrtCust cust,
       Data data, LegacyDirectObjectContainer legacyObjects) {
     legacyAddr.setForUpdate(true);
+    List<CmrtAddr> legacyAddrList = legacyObjects.getAddresses();
+    String legacyAddrLandedCntry = "";
     boolean dummyReq = false;
     if (StringUtils.isBlank(addr.getCustNm1())) {
       dummyReq = true;
@@ -698,7 +713,15 @@ public class NORDXTransformer extends EMEATransformer {
     if (dummyReq) {
       return;
     }
-    boolean crossBorder = !DEFAULT_LANDED_COUNTRY.equals(addr.getLandCntry());
+
+    boolean crossBorder = false;
+    if (DEFAULT_LANDED_COUNTRY.equals("DK")) {
+      if (StringUtils.isBlank(SUB_REGION_COUNTRY)) {// blank means Denmark
+        crossBorder = StringUtils.isNotBlank(addr.getLandCntry());
+      }
+    } else {
+      crossBorder = true;
+    }
 
     String line2 = "";
     String line3 = "";
@@ -1247,7 +1270,7 @@ public class NORDXTransformer extends EMEATransformer {
     } else if (SystemLocation.DENMARK.equals(data.getCmrIssuingCntry())) {
       if ("678".equals(data.getCountryUse())) {
         int postCd = Integer.valueOf(StringUtils.isNumeric(mailPostCode.trim()) ? mailPostCode.trim() : "10001");
-        if (!DEFAULT_LANDED_COUNTRY.equals(landedCntry)) {
+        if ("CROSS".equals(data.getCustGrp())) {
           legacyCust.setCeBo("000281X");
         } else if (postCd >= 0 && postCd < 5000) {
           legacyCust.setCeBo("000281X");
@@ -1698,13 +1721,26 @@ public class NORDXTransformer extends EMEATransformer {
     List<Addr> addrList = cmrObjects.getAddresses();
     Data data = cmrObjects.getData();
     List<CmrtAddr> legacyAddrList = legacyObjects.getAddresses();
+    MassUpdtData muData = cmrObjects.getMassUpdateData();
+    Admin admin = cmrObjects.getAdmin();
     CmrtCust legacyCust = legacyObjects.getCustomer();
 
     // leading Account number
-    if (StringUtils.isNotBlank(data.getCompany()) && data.getCompany().length() > 4) {
-      legacyCust.setLeadingAccNo(data.getCompany() + legacyCust.getMrcCd());
+    if ("M".equals(admin.getReqType())) {
+      // leading Account number
+      if (!StringUtils.isBlank(muData.getNewEntpName1())) {
+        if ("@".equals(muData.getNewEntpName1())) {
+          legacyCust.setLeadingAccNo("");
+        } else {
+          legacyCust.setLeadingAccNo(muData.getNewEntpName1() + legacyCust.getMrcCd());
+        }
+      }
     } else {
-      legacyCust.setLeadingAccNo(legacyCust.getId().getCustomerNo() + legacyCust.getMrcCd());
+      if (StringUtils.isNotBlank(data.getCompany()) && data.getCompany().length() > 4) {
+        legacyCust.setLeadingAccNo(data.getCompany() + legacyCust.getMrcCd());
+      } else {
+        legacyCust.setLeadingAccNo(legacyCust.getId().getCustomerNo() + legacyCust.getMrcCd());
+      }
     }
 
     int seqStartForRequiredAddr = 1;
