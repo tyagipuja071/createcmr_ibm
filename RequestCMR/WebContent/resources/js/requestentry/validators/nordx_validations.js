@@ -149,6 +149,8 @@ function disableLandCntry() {
     var reqType = FormManager.getActualValue('reqType');
     if (custType == 'LOCAL' || custType.substring(2, 5) == 'LOC' || reqType == 'U') {
       FormManager.readOnly('landCntry');
+    } else {
+      FormManager.enable('landCntry');
     }
     if (custType == 'LOCAL' || custType.substring(2, 5) == 'LOC') {
       FormManager.setValue('landCntry', FormManager.getActualValue('defaultLandedCountry'));
