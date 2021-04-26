@@ -561,14 +561,16 @@ function setSalesRepValues(clientTier) {
 
     } else if (cntry == '702') {
       // SalRep for Finland & its Subregion
-      FormManager.setValue('repTeamMemberNo', "NOREP9");
       if (isuCtc == '34Q') {
         if (geoCd == 'EE') {
           FormManager.setValue('engineeringBo', '4422');
+          FormManager.setValue('repTeamMemberNo', "NOREP9");
         } else if (geoCd == 'LV') {
           FormManager.setValue('engineeringBo', '4390');
+          FormManager.setValue('repTeamMemberNo', "NOREP9");
         } else if (geoCd == 'LT') {
           FormManager.setValue('engineeringBo', '4394');
+          FormManager.setValue('repTeamMemberNo', "NOREP9");
         } else {
           // Finland
           var MSF107_6949 = "A,E,G,J,L,M,P,U,V,X,Y,Z";
@@ -591,9 +593,12 @@ function setSalesRepValues(clientTier) {
         }
       } else if ((isuCtc == '217' || isuCtc == '8B7') && (geoCd == 'EE' || geoCd == 'LV' || geoCd == 'LT')) {
         FormManager.setValue('engineeringBo', '1640');
+        FormManager.setValue('repTeamMemberNo', "NOREP9");
       } else if (isuCtc == '219' || isuCtc == '217') {
+        FormManager.setValue('repTeamMemberNo', "NOREP9");
         FormManager.setValue('engineeringBo', '4710');
       } else if (isuCtc == '8B7') {
+        FormManager.setValue('repTeamMemberNo', "NOREP9");
         FormManager.setValue('engineeringBo', '0070');
       }
     } else if (cntry == '806') {
