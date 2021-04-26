@@ -1491,13 +1491,20 @@ function addAddressFieldValidators() {
         var cntryRegion = FormManager.getActualValue('countryUse');
         var cntryRegionSubString = cntryRegion.slice(-2);
         var landCntry = FormManager.getActualValue('landCntry');
-        if (cntryRegion != '' && cntryRegion.length > 3 && cntryRegionSubString == landCntry && count > 4) {
-          return new ValidationResult(null, false,
-              'Customer name con\'t, Additional info, Att. Person, Street and PO BOX only 4 fields can be filled at the same time.');
-        }
-        if (cntryRegion != '' && cntryRegion.length > 3 && cntryRegionSubString != landCntry && count > 3) {
-          return new ValidationResult(null, false,
-              'Customer name con\'t, Additional info, Att. Person, Street and PO BOX only 3 fields can be filled at the same time.');
+        if (cntryRegion == '678FO' || cntryRegion == '678GL' || cntryRegion == '678IS') {
+          if (count > 3) {
+            return new ValidationResult(null, false,
+                'Customer name con\'t, Additional info, Att. Person, Street and PO BOX only 3 fields can be filled at the same time.');
+          }
+        } else {
+          if (cntryRegion != '' && cntryRegion.length > 3 && cntryRegionSubString == landCntry && count > 4) {
+            return new ValidationResult(null, false,
+                'Customer name con\'t, Additional info, Att. Person, Street and PO BOX only 4 fields can be filled at the same time.');
+          }
+          if (cntryRegion != '' && cntryRegion.length > 3 && cntryRegionSubString != landCntry && count > 3) {
+            return new ValidationResult(null, false,
+                'Customer name con\'t, Additional info, Att. Person, Street and PO BOX only 3 fields can be filled at the same time.');
+          }
         }
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
         if (cntryRegion == '' || cntryRegion.length == 3) {
