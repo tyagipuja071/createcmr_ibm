@@ -20,7 +20,7 @@ function afterConfigKR() {
   FormManager.addValidator('installRep', Validators.REQUIRED, [ 'Tax Invoice Type' ], 'MAIN_CUST_TAB');
 
   FormManager.addValidator('contactName3', Validators.REQUIRED, [ 'Product Type' ], 'MAIN_IBM_TAB');
-  FormManager.addValidator('MrcCd', Validators.REQUIRED, [ 'Market Responsibility Code (MRC)' ], 'MAIN_IBM_TAB');
+  //FormManager.addValidator('MrcCd', Validators.REQUIRED, [ 'Market Responsibility Code (MRC)' ], 'MAIN_IBM_TAB');
   FormManager.addValidator('commercialFinanced', Validators.REQUIRED, [ 'ROL Code' ], 'MAIN_IBM_TAB');
 
   FormManager.removeValidator('subIndustryCd', Validators.REQUIRED);
@@ -32,6 +32,10 @@ function afterConfigKR() {
     FormManager.readOnly('isuCd');
     FormManager.readOnly('cmrNoPrefix');
   }
+  
+  if (reqType == 'C') {
+  FormManager.addValidator('MrcCd', Validators.REQUIRED, [ 'Market Responsibility Code (MRC)' ], 'MAIN_IBM_TAB');
+	  }
 
   // story: attachment Company Proof required
   var custSubType = FormManager.getActualValue('custSubGrp');
