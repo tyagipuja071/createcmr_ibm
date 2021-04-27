@@ -69,7 +69,7 @@ public class TWHandler extends GEOHandler {
       "LocalTax2", "CustAcctType", "AbbrevLocation", "OriginatorNo", "CommercialFinanced", "CSBOCd", "ContactName2", "Email1", "ContactName1",
       "ContactName3", "BPName", "Email2", "BusnType", "Affiliate", "Email3", "MrcCd", "SalRepNameNo", "CollectionCd", "EngineeringBo", "SitePartyID",
       "SearchTerm", "Company", "CAP", "CMROwner", "CustClassCode", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office",
-      "Floor", "Building", "County", "City2", "Department", "SpecialTaxCd", "SensitiveFlag", "StateProv", "City1", "ISU", "GeoLocationCode" };
+      "Floor", "Building", "County", "City2", "Department", "SpecialTaxCd", "SensitiveFlag", "StateProv", "City1", "ISU" };
 
   private static final List<String> COUNTRIES_LIST = Arrays.asList(SystemLocation.TAIWAN);
 
@@ -180,7 +180,19 @@ public class TWHandler extends GEOHandler {
 
   @Override
   public void doAfterImport(EntityManager entityManager, Admin admin, Data data) {
-
+    // update GeoLocCd in data_rdc table
+    String sql = ExternalizedQuery.getSql("SUMMARY.OLDDATA");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", data.getId().getReqId());
+    List<DataRdc> records = query.getResults(DataRdc.class);
+    if (records != null && records.size() > 0) {
+      DataRdc rdc = records.get(0);
+      if ("858".equals(data.getCmrIssuingCntry())) {
+        rdc.setGeoLocCd(data.getGeoLocationCd());
+      }
+      entityManager.merge(rdc);
+    }
+    entityManager.flush();
   }
 
   @Override
@@ -367,6 +379,13 @@ public class TWHandler extends GEOHandler {
       update.setDataField(PageManager.getLabel(cmrCountry, "SearchTerm", "-"));
       update.setNewData(service.getCodeAndDescription(newData.getSearchTerm(), "SearchTerm", cmrCountry));
       update.setOldData(service.getCodeAndDescription(oldData.getSearchTerm(), "SearchTerm", cmrCountry));
+      results.add(update);
+    }
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getSearchTerm(), newData.getSearchTerm())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "GeoLocationCode", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getGeoLocationCd(), "GeoLocationCode", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getGeoLocCd(), "GeoLocationCode", cmrCountry));
       results.add(update);
     }
 
