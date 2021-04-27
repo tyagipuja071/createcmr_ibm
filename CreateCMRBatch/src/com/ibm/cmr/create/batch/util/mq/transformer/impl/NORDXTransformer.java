@@ -473,7 +473,7 @@ public class NORDXTransformer extends EMEATransformer {
       if (StringUtils.isBlank(SUB_REGION_COUNTRY)) {// blank means Denmark
         return !"DK".equals(addr.getLandCntry());
       } else {
-        return false;
+        return true;
       }
     }
     return !DEFAULT_LANDED_COUNTRY.equals(addr.getLandCntry());
@@ -715,7 +715,9 @@ public class NORDXTransformer extends EMEATransformer {
     boolean crossBorder = false;
     if (DEFAULT_LANDED_COUNTRY.equals("DK")) {
       if (StringUtils.isBlank(SUB_REGION_COUNTRY)) {// blank means Denmark
-        crossBorder = StringUtils.isNotBlank(addr.getLandCntry());
+        crossBorder = !"DK".equals(addr.getLandCntry());
+      } else {
+        crossBorder = true;
       }
     } else {
       crossBorder = true;
