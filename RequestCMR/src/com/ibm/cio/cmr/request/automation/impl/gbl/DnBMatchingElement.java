@@ -74,13 +74,13 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
 
     // skip dnb matching if dnb matches on UI are overriden and attachment is
     // provided
-    if ("Y".equals(admin.getMatchOverrideIndc()) && DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())
-        && !SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry())) {
+    if ("Y".equals(admin.getMatchOverrideIndc()) && DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
       result.setResults("Overriden");
       result.setDetails(
           "D&B matches were chosen to be overridden by the requester.\nSupporting documentation is provided by the requester as attachment.");
       List<String> dnbOverrideCountryList = SystemParameters.getList("DNB_OVR_CNTRY_LIST");
-      if (dnbOverrideCountryList == null || !dnbOverrideCountryList.contains(data.getCmrIssuingCntry())) {
+      if ((dnbOverrideCountryList == null || !dnbOverrideCountryList.contains(data.getCmrIssuingCntry()))
+          && !SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry())) {
         engineData.addNegativeCheckStatus("_dnbOverride", "D&B matches were chosen to be overridden by the requester.");
       }
       return result;
