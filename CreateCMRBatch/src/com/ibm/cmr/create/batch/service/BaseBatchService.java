@@ -112,7 +112,9 @@ public abstract class BaseBatchService extends BaseSimpleService<Boolean> {
     long elapsed = (endTime - startTime) / 1000;
     LOG.info("Application finished execution at " + TIME_FORMATTER.format(new Date(endTime)));
     LOG.info("Took " + elapsed + " seconds.");
-    System.exit(exitCode);
+    LOG.info("System exiting...");
+    Runtime.getRuntime().halt(0);
+    // System.exit(0);
   }
 
   @Override

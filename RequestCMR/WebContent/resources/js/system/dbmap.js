@@ -286,8 +286,13 @@ var DB_DATA_FIELDS = [ {
 }, {
   id : 'CountryUse',
   name : 'CNTRY_USE'
+}, {
+  id : 'EconomicCd2',
+  name : 'ECONOMIC_CD'
+}, {
+  id : 'EngineeringBo',
+  name : 'ENGINEERING_BO'
 }
-
 ];
 DB_DATA_FIELDS.sort(function(a, b) {
   if (a.id > b.id) {

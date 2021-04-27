@@ -9,7 +9,6 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 
 /**
  * Class that manages getting resources from external directories or from
@@ -20,18 +19,40 @@ import org.apache.log4j.Logger;
  */
 public class ConfigUtil {
 
-  private static final Logger LOG = Logger.getLogger(ConfigUtil.class);
+  // private static final Logger LOG = Logger.getLogger(ConfigUtil.class);
 
   private static String configDir = null;
+
+  public static synchronized void initFromBatch() {
+    System.out.println("Initializing Config Util...");
+    File configDirFile = null;
+
+    String ciwebconfig = System.getenv("ciwebconfig");
+    System.out.println(" - ciwebconfig: " + ciwebconfig);
+    if (!StringUtils.isBlank(ciwebconfig)) {
+      System.out.println(" - checking file : " + ciwebconfig);
+      configDirFile = new File(ciwebconfig);
+      if (configDirFile.exists()) {
+        System.out.println("Found ciwebconfig dir at: " + ciwebconfig);
+        configDir = ciwebconfig;
+      }
+    }
+    if (configDir == null) {
+      System.err.println("Error in getting configuration directory. No app directory or ciwebconfig directories defined on the system");
+    }
+  }
 
   /**
    * Initiliazes the configuration directories
    */
   public static synchronized void init() {
+    System.out.println("Initializing Config Util...");
     File configDirFile = null;
 
     String config = System.getenv("config_createcmr");
+    System.out.println(" - config: " + config);
     if (!StringUtils.isBlank(config)) {
+      System.out.println(" - checking file: " + config);
       configDirFile = new File(config);
       if (configDirFile.exists()) {
         System.out.println("Found app config dir at: " + config);
@@ -40,7 +61,9 @@ public class ConfigUtil {
     }
     if (configDir == null) {
       String ciwebconfig = System.getenv("ciwebconfig");
+      System.out.println(" - ciwebconfig: " + ciwebconfig);
       if (!StringUtils.isBlank(ciwebconfig)) {
+        System.out.println(" - checking file : " + ciwebconfig);
         configDirFile = new File(ciwebconfig);
         if (configDirFile.exists()) {
           System.out.println("Found ciwebconfig dir at: " + ciwebconfig);
@@ -78,7 +101,7 @@ public class ConfigUtil {
       if (classPathResource != null) {
         return classPathResource;
       }
-      LOG.warn("Resource " + resourceName + " not found.");
+      System.err.println("Resource " + resourceName + " not found.");
       return null;
     }
     try {

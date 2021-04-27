@@ -41,7 +41,7 @@ import com.ibm.cmr.create.batch.util.AutomationCheckAndRecover;
  * 
  */
 
-public class AutomationService extends MultiThreadedBatchService {
+public class AutomationService extends MultiThreadedBatchService<Long> {
 
   private static final Logger LOG = Logger.getLogger(AutomationService.class);
   private static Map<String, AutomationEngine> engines = new HashMap<String, AutomationEngine>();
