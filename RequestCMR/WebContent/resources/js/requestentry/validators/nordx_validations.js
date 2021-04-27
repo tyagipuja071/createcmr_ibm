@@ -3172,7 +3172,7 @@ function setCustPrefLangByCountry() {
         }
       }
 
-      FormManager.setValue(field, 'U');
+      FormManager.setValue(field, _pagemodel.custPrefLang == null ? 'U' : _pagemodel.custPrefLang);
     } else if (countryUse == '702EE' || countryUse == '702LT' || countryUse == '702LV') {
       // Estonia, Lithuania, Latvia
       FormManager.limitDropdownValues(field, [ 'U', 'V', 'E' ]);
@@ -3220,9 +3220,9 @@ function setCustPrefLangByCountry() {
 // CREATCMR-2144
 
 // CREATCMR-1709
-function resetCustPrefLang() {
-  // _pagemodel.custPrefLang = null;
-}
+// function resetCustPrefLang() {
+// _pagemodel.custPrefLang = null;
+// }
 // CREATCMR-1709
 
 function setInacCd() {
@@ -3327,7 +3327,7 @@ dojo.addOnLoad(function() {
 
   // CREATCMR-1709
   // GEOHandler.addAfterConfig(resetCustPrefLang, GEOHandler.NORDX);
-  GEOHandler.addAfterTemplateLoad(resetCustPrefLang, GEOHandler.NORDX);
+  // GEOHandler.addAfterTemplateLoad(resetCustPrefLang, GEOHandler.NORDX);
 
   // CREATCMR-1690
   GEOHandler.registerValidator(addCmrNoValidatorForNordx, GEOHandler.NORDX);
