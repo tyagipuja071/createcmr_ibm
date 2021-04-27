@@ -555,7 +555,7 @@ public class NORDXTransformer extends EMEATransformer {
     Data cmrData = handler.cmrData;
     Admin adminData = handler.adminData;
     boolean update = "U".equals(handler.adminData.getReqType());
-    boolean crossBorder = zs01CrossBorder(handler);
+    boolean crossBorder = isCrossBorder(addrData);
 
     LOG.debug("Legacy Direct -Handling Address for " + (update ? "update" : "create") + " request.");
 
