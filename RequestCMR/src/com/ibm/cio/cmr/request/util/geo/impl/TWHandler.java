@@ -69,7 +69,7 @@ public class TWHandler extends GEOHandler {
       "LocalTax2", "CustAcctType", "AbbrevLocation", "OriginatorNo", "CommercialFinanced", "CSBOCd", "ContactName2", "Email1", "ContactName1",
       "ContactName3", "BPName", "Email2", "BusnType", "Affiliate", "Email3", "MrcCd", "SalRepNameNo", "CollectionCd", "EngineeringBo", "SitePartyID",
       "SearchTerm", "Company", "CAP", "CMROwner", "CustClassCode", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office",
-      "Floor", "Building", "County", "City2", "Department", "SpecialTaxCd" };
+      "Floor", "Building", "County", "City2", "Department", "SpecialTaxCd", "SensitiveFlag", "StateProv", "City1", "ISU", "GeoLocationCode" };
 
   private static final List<String> COUNTRIES_LIST = Arrays.asList(SystemLocation.TAIWAN);
 
