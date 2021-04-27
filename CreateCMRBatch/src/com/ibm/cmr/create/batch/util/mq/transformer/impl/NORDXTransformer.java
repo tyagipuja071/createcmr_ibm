@@ -704,8 +704,6 @@ public class NORDXTransformer extends EMEATransformer {
   public void transformLegacyAddressDataMassUpdate(EntityManager entityManager, CmrtAddr legacyAddr, MassUpdtAddr addr, String cntry, CmrtCust cust,
       Data data, LegacyDirectObjectContainer legacyObjects) {
     legacyAddr.setForUpdate(true);
-    List<CmrtAddr> legacyAddrList = legacyObjects.getAddresses();
-    String legacyAddrLandedCntry = "";
     boolean dummyReq = false;
     if (StringUtils.isBlank(addr.getCustNm1())) {
       dummyReq = true;
