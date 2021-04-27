@@ -3231,7 +3231,8 @@ function setInacCd() {
   }
   if (reqType == 'C') {
     var custSubType = FormManager.getActualValue('custSubGrp');
-    if (custSubType.includes('BUS') || custSubType.includes('INT') || custSubType.includes('PRI') || custSubType.includes('IBM')) {
+    if (custSubType.includes('BUS') || (custSubType.includes('INT') && custSubType != 'INTSO') || custSubType.includes('PRI')
+        || custSubType.includes('IBM')) {
       FormManager.setValue('inacCd', '');
       FormManager.readOnly('inacCd');
     } else {
