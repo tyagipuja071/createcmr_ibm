@@ -88,11 +88,16 @@ public class KRHandler extends GEOHandler {
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
     // jira 2235
     String abbName = mainRecord.getCmrName1Plain() == null ? mainRecord.getCmrName1Plain() : mainRecord.getCmrName1Plain().trim();
-    // if (!StringUtils.isEmpty(abbName) && abbName.length() > 21) {
-    // abbName = abbName.substring(0, 21);
-    // }
+    if (!StringUtils.isEmpty(abbName) && abbName.length() > 21) {
+      abbName = abbName.substring(0, 21);
+    }
     data.setAbbrevNm(abbName);
-    data.setAbbrevLocn(mainRecord.getCmrCity() == null ? mainRecord.getCmrCity() : mainRecord.getCmrCity().trim());
+
+    String abbLoc = mainRecord.getCmrCity() == null ? mainRecord.getCmrCity() : mainRecord.getCmrCity().trim();
+    if (!StringUtils.isEmpty(abbLoc) && abbName.length() > 12) {
+      abbLoc = abbLoc.substring(0, 12);
+    }
+    data.setAbbrevLocn(abbLoc);
 
     /*
      * if (mainRecord.getCmrCountryLandedDesc() != null &&
