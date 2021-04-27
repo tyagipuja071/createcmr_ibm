@@ -13,6 +13,7 @@ function afterConfigTW() {
   FormManager.setValue('capInd', true);
   FormManager.readOnly('cmrOwner');
   FormManager.resetValidations('enterprise');
+  FormManager.readOnly('isuCd');
 
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
@@ -22,11 +23,6 @@ function afterConfigTW() {
   if (!FormManager.getField('reqType') || reqType == '') {
     window.setTimeout('afterConfigTW()', 500);
   } else {
-    if (role == 'Requester' && reqType == 'C') {
-      FormManager.readOnly('isuCd');
-    } else {
-      FormManager.enable('isuCd');
-    }
     if (role == 'Processor' && reqType == 'C') {
       FormManager.addValidator('cmrNo', Validators.REQUIRED, [ 'CMR Number' ], 'MAIN_IBM_TAB');
     }
