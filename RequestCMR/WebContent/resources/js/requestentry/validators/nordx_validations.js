@@ -1628,8 +1628,10 @@ function addAddressFieldValidators() {
         var addrtxt2Length = FormManager.getActualValue('addrTxt2').length;
         var poBoxLength = FormManager.getActualValue('poBox').length;
         var totalLength = addrtxt2Length + poBoxLength;
-        if (totalLength > 30) {
-          return new ValidationResult(null, false, 'Total computed length of PO BOX and Street Con\'t should not exceed 30 characters.');
+        if ((poBoxLength > 0 && addrtxt2Length > 0 && totalLength > 21) || (poBoxLength > 0 && !addrtxt2Length > 0 && totalLength > 23)
+            || (!poBoxLength > 0 && totalLength > 30)) {
+          return new ValidationResult(null, false,
+              'Total computed length of PO BOX (including PO BOX prefix) and Street Con\'t should not exceed 30 characters.');
         }
 
         return new ValidationResult(null, true);
@@ -3313,7 +3315,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(disableLandCntry, GEOHandler.NORDX);
   GEOHandler.addAddrFunction(loadMachinesList, GEOHandler.NORDX);
   GEOHandler.addAddrFunction(handleMahcineModel, GEOHandler.NORDX);
-  GEOHandler.addAddrFunction(addPhoneValidatorNORDX, GEOHandler.NORDX);
+  // GEOHandler.addAddrFunction(addPhoneValidatorNORDX, GEOHandler.NORDX);
   // GEOHandler.registerValidator(machineValidator, GEOHandler.NORDX, null,
   // true);
   /* 1596058: All Nordics - DPL check failed */
