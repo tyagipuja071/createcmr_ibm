@@ -1103,7 +1103,7 @@ public class NORDXHandler extends BaseSOFHandler {
               poBox = validateColValFromCell(currCell);
 
               if ("Installing,Shipping,EPL".contains(name)) {
-                if (!(StringUtils.isBlank(custNm) || StringUtils.isBlank(street) || StringUtils.isBlank(city) || StringUtils.isBlank(landedCntry))) {
+                if (StringUtils.isBlank(custNm) || StringUtils.isBlank(street) || StringUtils.isBlank(city) || StringUtils.isBlank(landedCntry)) {
                   TemplateValidation error = new TemplateValidation(name);
                   LOG.trace("The row " + (row.getRowNum() + 1)
                       + ":Note that Customer name, Street, City, Landed Country must be filled. Please fix and upload the template again.");
