@@ -1472,88 +1472,90 @@ function addAddressFieldValidators() {
   // }
   // };
   // })(), null, 'frmCMR_addressModal');
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var showError = false;
-        var count = 0;
-        if (FormManager.getActualValue('custNm2') != '') {
-          count++
-        }
-        if (FormManager.getActualValue('custNm3') != '') {
-          count++
-        }
-        if (FormManager.getActualValue('custNm4') != '') {
-          count++
-        }
-        if (FormManager.getActualValue('poBox') != '') {
-          count++
-        }
-        if (FormManager.getActualValue('addrTxt') != '') {
-          count++
-        }
+  FormManager
+      .addFormValidator(
+          (function() {
+            return {
+              validate : function() {
+                var showError = false;
+                var count = 0;
+                if (FormManager.getActualValue('custNm2') != '') {
+                  count++
+                }
+                if (FormManager.getActualValue('custNm3') != '') {
+                  count++
+                }
+                if (FormManager.getActualValue('custNm4') != '') {
+                  count++
+                }
+                if (FormManager.getActualValue('poBox') != '' || FormManager.getActualValue('addrTxt2') != '') {
+                  count++
+                }
+                if (FormManager.getActualValue('addrTxt') != '') {
+                  count++
+                }
 
-        var cntryRegion = FormManager.getActualValue('countryUse');
-        var cntryRegionSubString = cntryRegion.slice(-2);
-        var landCntry = FormManager.getActualValue('landCntry');
-        if (cntryRegion == '678FO' || cntryRegion == '678GL' || cntryRegion == '678IS') {
-          if (count > 3) {
-            return new ValidationResult(null, false,
-                'Customer name con\'t, Additional info, Att. Person, Street and PO BOX only 3 fields can be filled at the same time.');
-          }
-        } else {
-          if (cntryRegion != '' && cntryRegion.length > 3 && cntryRegionSubString == landCntry && count > 4) {
-            return new ValidationResult(null, false,
-                'Customer name con\'t, Additional info, Att. Person, Street and PO BOX only 4 fields can be filled at the same time.');
-          }
-          if (cntryRegion != '' && cntryRegion.length > 3 && cntryRegionSubString != landCntry && count > 3) {
-            return new ValidationResult(null, false,
-                'Customer name con\'t, Additional info, Att. Person, Street and PO BOX only 3 fields can be filled at the same time.');
-          }
-        }
-        var cntry = FormManager.getActualValue('cmrIssuingCntry');
-        if (cntryRegion == '' || cntryRegion.length == 3) {
-          if (cntry == SysLoc.SWEDEN) {
-            if (landCntry != "SE" && count > 3) {
-              return new ValidationResult(null, false,
-                  'Customer name con\'t, Additional info, Att. Person, Street and PO BOX only 3 fields can be filled at the same time.');
-            } else if (landCntry == "SE" && count > 4) {
-              return new ValidationResult(null, false,
-                  'Customer name con\'t, Additional info, Att. Person, Street and PO BOX only 4 fields can be filled at the same time.');
-            }
-          }
-          if (cntry == SysLoc.NORWAY) {
-            if (landCntry != "NO" && count > 3) {
-              return new ValidationResult(null, false,
-                  'Customer name con\'t, Additional info, Att. Person, Street and PO BOX only 3 fields can be filled at the same time.');
-            } else if (landCntry == "NO" && count > 4) {
-              return new ValidationResult(null, false,
-                  'Customer name con\'t, Additional info, Att. Person, Street and PO BOX only 4 fields can be filled at the same time.');
-            }
-          }
-          if (cntry == SysLoc.DENMARK) {
-            if (landCntry != "DK" && count > 3) {
-              return new ValidationResult(null, false,
-                  'Customer name con\'t, Additional info, Att. Person, Street and PO BOX only 3 fields can be filled at the same time.');
-            } else if (landCntry == "DK" && count > 4) {
-              return new ValidationResult(null, false,
-                  'Customer name con\'t, Additional info, Att. Person, Street and PO BOX only 4 fields can be filled at the same time.');
-            }
-          }
-          if (cntry == SysLoc.FINLAND) {
-            if (landCntry != "FI" && count > 3) {
-              return new ValidationResult(null, false,
-                  'Customer name con\'t, Additional info, Att. Person, Street and PO BOX only 3 fields can be filled at the same time.');
-            } else if (landCntry == "FI" && count > 4) {
-              return new ValidationResult(null, false,
-                  'Customer name con\'t, Additional info, Att. Person, Street and PO BOX only 4 fields can be filled at the same time.');
-            }
-          }
-        }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), null, 'frmCMR_addressModal');
+                var cntryRegion = FormManager.getActualValue('countryUse');
+                var cntryRegionSubString = cntryRegion.slice(-2);
+                var landCntry = FormManager.getActualValue('landCntry');
+                if (cntryRegion == '678FO' || cntryRegion == '678GL' || cntryRegion == '678IS') {
+                  if (count > 3) {
+                    return new ValidationResult(null, false,
+                        'Customer name con\'t, Additional info, Att. Person, Street and Street Con\'t and/or PO BOX only 3 fields can be filled at the same time.');
+                  }
+                } else {
+                  if (cntryRegion != '' && cntryRegion.length > 3 && cntryRegionSubString == landCntry && count > 4) {
+                    return new ValidationResult(null, false,
+                        'Customer name con\'t, Additional info, Att. Person, Street and Street Con\'t and/or PO BOX only 4 fields can be filled at the same time.');
+                  }
+                  if (cntryRegion != '' && cntryRegion.length > 3 && cntryRegionSubString != landCntry && count > 3) {
+                    return new ValidationResult(null, false,
+                        'Customer name con\'t, Additional info, Att. Person, Street and Street Con\'t and/or PO BOX only 3 fields can be filled at the same time.');
+                  }
+                }
+                var cntry = FormManager.getActualValue('cmrIssuingCntry');
+                if (cntryRegion == '' || cntryRegion.length == 3) {
+                  if (cntry == SysLoc.SWEDEN) {
+                    if (landCntry != "SE" && count > 3) {
+                      return new ValidationResult(null, false,
+                          'Customer name con\'t, Additional info, Att. Person, Street and Street Con\'t and/or PO BOX only 3 fields can be filled at the same time.');
+                    } else if (landCntry == "SE" && count > 4) {
+                      return new ValidationResult(null, false,
+                          'Customer name con\'t, Additional info, Att. Person, Street and Street Con\'t and/or PO BOX 4 fields can be filled at the same time.');
+                    }
+                  }
+                  if (cntry == SysLoc.NORWAY) {
+                    if (landCntry != "NO" && count > 3) {
+                      return new ValidationResult(null, false,
+                          'Customer name con\'t, Additional info, Att. Person, Street and Street Con\'t and/or PO BOX only 3 fields can be filled at the same time.');
+                    } else if (landCntry == "NO" && count > 4) {
+                      return new ValidationResult(null, false,
+                          'Customer name con\'t, Additional info, Att. Person, Street and Street Con\'t and/or PO BOX only 4 fields can be filled at the same time.');
+                    }
+                  }
+                  if (cntry == SysLoc.DENMARK) {
+                    if (landCntry != "DK" && count > 3) {
+                      return new ValidationResult(null, false,
+                          'Customer name con\'t, Additional info, Att. Person, Street and Street Con\'t and/or PO BOX only 3 fields can be filled at the same time.');
+                    } else if (landCntry == "DK" && count > 4) {
+                      return new ValidationResult(null, false,
+                          'Customer name con\'t, Additional info, Att. Person, Street and Street Con\'t and/or PO BOX only 4 fields can be filled at the same time.');
+                    }
+                  }
+                  if (cntry == SysLoc.FINLAND) {
+                    if (landCntry != "FI" && count > 3) {
+                      return new ValidationResult(null, false,
+                          'Customer name con\'t, Additional info, Att. Person, Street and Street Con\'t and/or PO BOX only 3 fields can be filled at the same time.');
+                    } else if (landCntry == "FI" && count > 4) {
+                      return new ValidationResult(null, false,
+                          'Customer name con\'t, Additional info, Att. Person, Street and Street Con\'t and/or PO BOX only 4 fields can be filled at the same time.');
+                    }
+                  }
+                }
+                return new ValidationResult(null, true);
+              }
+            };
+          })(), null, 'frmCMR_addressModal');
   // Street and PO BOX DENMARK and FO
   FormManager.addFormValidator((function() {
     return {
@@ -1628,8 +1630,10 @@ function addAddressFieldValidators() {
         var addrtxt2Length = FormManager.getActualValue('addrTxt2').length;
         var poBoxLength = FormManager.getActualValue('poBox').length;
         var totalLength = addrtxt2Length + poBoxLength;
-        if (totalLength > 30) {
-          return new ValidationResult(null, false, 'Total computed length of PO BOX and Street Con\'t should not exceed 30 characters.');
+        if ((poBoxLength > 0 && addrtxt2Length > 0 && totalLength > 21) || (poBoxLength > 0 && !addrtxt2Length > 0 && totalLength > 23)
+            || (!poBoxLength > 0 && totalLength > 30)) {
+          return new ValidationResult(null, false,
+              'Total computed length of PO BOX (including PO BOX prefix) and Street Con\'t should not exceed 30 characters.');
         }
 
         return new ValidationResult(null, true);
@@ -3313,7 +3317,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(disableLandCntry, GEOHandler.NORDX);
   GEOHandler.addAddrFunction(loadMachinesList, GEOHandler.NORDX);
   GEOHandler.addAddrFunction(handleMahcineModel, GEOHandler.NORDX);
-  GEOHandler.addAddrFunction(addPhoneValidatorNORDX, GEOHandler.NORDX);
+  // GEOHandler.addAddrFunction(addPhoneValidatorNORDX, GEOHandler.NORDX);
   // GEOHandler.registerValidator(machineValidator, GEOHandler.NORDX, null,
   // true);
   /* 1596058: All Nordics - DPL check failed */
