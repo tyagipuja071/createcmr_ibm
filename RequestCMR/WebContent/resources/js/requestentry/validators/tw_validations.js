@@ -29,8 +29,10 @@ function afterConfigTW() {
     if (!FormManager.getField('custPrefLang') || custPrefLang == '') {
       FormManager.setValue('custPrefLang', 'M');
     }
-
     if (reqType == 'C') {
+      if (!FormManager.getField('collectionCd') || collectionCd == '') {
+        FormManager.setValue('collectionCd', '00FO');
+      }
       FormManager.addValidator('custAcctType', Validators.REQUIRED, [ 'Custome Type' ], 'MAIN_CUST_TAB');
       FormManager.addValidator('mktgDept', Validators.REQUIRED, [ 'Tax Location' ], 'MAIN_CUST_TAB');
     } else if (reqType == 'U') {
