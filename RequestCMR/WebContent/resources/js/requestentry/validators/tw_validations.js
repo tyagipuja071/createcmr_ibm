@@ -29,9 +29,6 @@ function afterConfigTW() {
     if (!FormManager.getField('custPrefLang') || custPrefLang == '') {
       FormManager.setValue('custPrefLang', 'M');
     }
-    if (!FormManager.getField('collectionCd') || collectionCd == '') {
-      FormManager.setValue('collectionCd', '00FO');
-    }
 
     if (reqType == 'C') {
       FormManager.addValidator('custAcctType', Validators.REQUIRED, [ 'Custome Type' ], 'MAIN_CUST_TAB');
