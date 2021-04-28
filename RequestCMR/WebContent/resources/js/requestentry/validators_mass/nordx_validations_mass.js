@@ -50,7 +50,7 @@ function addDPLValidator() {
 
 dojo.addOnLoad(function() {
   GEOHandler.NORDX = [ '846', '806', '702', '678' ];
-  console.log('adding Mass Change FR validators...');
+  console.log('adding Mass Change Nordx validators...');
 
   GEOHandler.registerValidator(addDPLValidator, GEOHandler.NORDX, null, true);
 });
