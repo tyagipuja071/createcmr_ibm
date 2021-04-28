@@ -79,11 +79,12 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
       result.setDetails(
           "D&B matches were chosen to be overridden by the requester.\nSupporting documentation is provided by the requester as attachment.");
       List<String> dnbOverrideCountryList = SystemParameters.getList("DNB_OVR_CNTRY_LIST");
-      if ((dnbOverrideCountryList == null || !dnbOverrideCountryList.contains(data.getCmrIssuingCntry()))
-          && !SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry())) {
-        engineData.addNegativeCheckStatus("_dnbOverride", "D&B matches were chosen to be overridden by the requester.");
+      if (!SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry())) {
+        if ((dnbOverrideCountryList == null || !dnbOverrideCountryList.contains(data.getCmrIssuingCntry()))) {
+          engineData.addNegativeCheckStatus("_dnbOverride", "D&B matches were chosen to be overridden by the requester.");
+        }
+        return result;
       }
-      return result;
     }
 
     if (soldTo != null) {
