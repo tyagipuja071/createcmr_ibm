@@ -99,6 +99,7 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
       } else {
         scorecard.setRpaMatchingResult("N");
         validation.setSuccess(true);
+        output.setOnError(false);
         validation.setMessage("No Matches found");
         output.setDetails(response.getMessage());
         log.debug(response.getMessage());
