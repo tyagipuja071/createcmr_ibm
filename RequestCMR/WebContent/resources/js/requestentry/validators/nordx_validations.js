@@ -2728,6 +2728,8 @@ function setAbbreviatedNameValue() {
       var custNm = getAbbreviatedNameByAddrType(_reqId, "ZS01");
       if (custNm != "") {
         FormManager.setValue('abbrevNm', custNm.substring(0, 22));
+      } else {
+        FormManager.setValue('abbrevNm', "");
       }
     }
 
@@ -2739,6 +2741,8 @@ function setAbbreviatedNameValue() {
         FormManager.setValue('abbrevNm', custNm.substring(0, 22));
         // FormManager.setValue('abbrevNm', custNm1.substring(0, 8) + " c/o " +
         // custNm2.substring(0, 9));
+      } else {
+        FormManager.setValue('abbrevNm', "");
       }
     }
 
@@ -2827,7 +2831,13 @@ function setAbbrevNmAddressSave(cntry, addressMode, saving, finalSave, force) {
         // var custNmDBVal = getAbbreviatedNameByAddrType(_reqId, "ZS01");
         // if (custNmDBVal != "") {
         // if (zs01CustNm != custNmDBVal) {
-        FormManager.setValue('abbrevNm', zs01CustNm.substring(0, 22));
+        if (addrType == 'ZS01') {
+          FormManager.setValue('abbrevNm', zs01CustNm.substring(0, 22));
+        }
+
+        // if (addrType == 'ZI01') {
+        // FormManager.setValue('abbrevNm', zi01CustNm.substring(0, 22));
+        // }
         // }
         // }
       }
@@ -2870,7 +2880,7 @@ function embargoCodeValidator() {
             id : 'embargoCd',
             type : 'text',
             name : 'embargoCd'
-          }, false, 'Embargo Code value should only \'D\', \'J\', \'K\' or blank.');
+          }, false, 'Embargo Code value should be only \'D\', \'J\', \'K\' or blank.');
         }
       }
     };
@@ -3001,6 +3011,7 @@ function settingForProcessor() {
   if (reqType == 'C') {
     if (role == 'Processor') {
       FormManager.enable('cmrNo');
+      $('#cmrNo').attr('maxlength', '6');
     }
   }
 }
@@ -3064,7 +3075,7 @@ function addCmrNoValidatorForNordx() {
                   id : 'cmrNo',
                   type : 'text',
                   name : 'cmrNo'
-                }, false, 'Non Internal CMR Number should not be in 99XXXX for scenarios.');
+                }, false, 'Only Internal Scenarios can be assigned CMRs from 99XXXX range.');
               }
             }
 
