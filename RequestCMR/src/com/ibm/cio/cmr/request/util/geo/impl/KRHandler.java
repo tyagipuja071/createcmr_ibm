@@ -94,7 +94,7 @@ public class KRHandler extends GEOHandler {
     data.setAbbrevNm(abbName);
 
     String abbLoc = mainRecord.getCmrCity() == null ? mainRecord.getCmrCity() : mainRecord.getCmrCity().trim();
-    if (!StringUtils.isEmpty(abbLoc) && abbName.length() > 12) {
+    if (!StringUtils.isEmpty(abbLoc) && abbLoc.length() > 12) {
       abbLoc = abbLoc.substring(0, 12);
     }
     data.setAbbrevLocn(abbLoc);
