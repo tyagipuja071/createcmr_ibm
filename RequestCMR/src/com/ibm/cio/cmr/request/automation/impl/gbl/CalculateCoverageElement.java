@@ -148,6 +148,11 @@ public class CalculateCoverageElement extends OverridingElement {
       boolean withCmrData = false;
       StringBuilder details = new StringBuilder();
 
+      if (SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry()) && data.getBgId() != null) {
+        engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
+        LOG.debug("Skip Coverage for Create By Model.");
+      }
+
       // added flow to skip gbg matching
       LOG.debug("Before -Skip Coverage for Create By Model...");
       if (engineData.hasPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE)) {
