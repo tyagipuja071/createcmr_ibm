@@ -60,6 +60,7 @@ function afterConfigKR() {
     FormManager.removeValidator('creditCd', Validators.REQUIRED);
     FormManager.removeValidator('installRep', Validators.REQUIRED);
     FormManager.removeValidator('MrcCd', Validators.REQUIRED);
+    FormManager.removeValidator('phone1', Validators.REQUIRED);
   }
 
   RemoveCrossAddressMandatory();
