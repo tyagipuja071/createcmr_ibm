@@ -105,9 +105,9 @@
       </p>
     </cmr:column>
     
-    <cmr:column span="2" containerForField="phone1" >
+    <cmr:column span="2" containerForField="Phone1" >
       <p>
-        <label for="Phone1"> 
+        <label for="phone1"> 
           <cmr:fieldLabel fieldId="Phone1" />: 
 			<cmr:delta text="-" id="delta-phone1" />
         </label>
