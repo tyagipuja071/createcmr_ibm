@@ -1633,7 +1633,7 @@ function addAddressFieldValidators() {
         if ((poBoxLength > 0 && addrtxt2Length > 0 && totalLength > 21) || (poBoxLength > 0 && !addrtxt2Length > 0 && totalLength > 23)
             || (!poBoxLength > 0 && totalLength > 30)) {
           return new ValidationResult(null, false,
-              'Total computed length of PO BOX (including PO BOX prefix) and Street Con\'t should not exceed 30 characters.');
+              'Total computed length of PO BOX (including PO BOX prefix) and Street Con\'t should not exceed limitation.');
         }
 
         return new ValidationResult(null, true);
