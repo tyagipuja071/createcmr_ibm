@@ -268,9 +268,6 @@ public class CalculateCoverageElement extends OverridingElement {
 
         List<String> coverageIds = new ArrayList<String>();
         boolean logNegativeCheck = !COV_ODM.equals(covFrom);
-        if (COV_BG.equals(covFrom) && SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry())) {
-          logNegativeCheck = false;
-        }
         for (CoverageContainer container : coverages) {
           if (coverages.size() > 3 && coverages.indexOf(container) > 3) {
             break;
@@ -482,7 +479,7 @@ public class CalculateCoverageElement extends OverridingElement {
           }
         }
       }
-      if (!notDeterminedFields.isEmpty()) {
+      if (!notDeterminedFields.isEmpty() && !(COV_BG.equals(covFrom) && SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry()))) {
         details.append("\nOverrides for following fields could not be determined:").append("\n");
         for (String key : notDeterminedFields.keySet()) {
           String val = notDeterminedFields.get(key);
