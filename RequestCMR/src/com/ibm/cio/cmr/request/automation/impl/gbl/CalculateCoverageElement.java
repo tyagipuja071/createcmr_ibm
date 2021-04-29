@@ -148,6 +148,11 @@ public class CalculateCoverageElement extends OverridingElement {
       boolean withCmrData = false;
       StringBuilder details = new StringBuilder();
 
+      if (SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry()) && data.getBgId() != null) {
+        engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
+        LOG.debug("Skip Coverage for Create By Model.");
+      }
+
       // added flow to skip gbg matching
       LOG.debug("Before -Skip Coverage for Create By Model...");
       if (engineData.hasPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE)) {
@@ -263,9 +268,6 @@ public class CalculateCoverageElement extends OverridingElement {
 
         List<String> coverageIds = new ArrayList<String>();
         boolean logNegativeCheck = !COV_ODM.equals(covFrom);
-        if (COV_BG.equals(covFrom) && SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry())) {
-          logNegativeCheck = false;
-        }
         for (CoverageContainer container : coverages) {
           if (coverages.size() > 3 && coverages.indexOf(container) > 3) {
             break;
@@ -477,7 +479,7 @@ public class CalculateCoverageElement extends OverridingElement {
           }
         }
       }
-      if (!notDeterminedFields.isEmpty()) {
+      if (!notDeterminedFields.isEmpty() && !(COV_BG.equals(covFrom) && SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry()))) {
         details.append("\nOverrides for following fields could not be determined:").append("\n");
         for (String key : notDeterminedFields.keySet()) {
           String val = notDeterminedFields.get(key);
