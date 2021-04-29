@@ -1197,15 +1197,25 @@ public class NORDXHandler extends BaseSOFHandler {
               }
               fieldCount = 0;
 
-              if (StringUtils.isNotBlank(street)) {
-                if (!(StringUtils.isBlank(streetCon) || StringUtils.isBlank(additionalInfo))) {
+              if (StringUtils.isBlank(street)) {
+                if (StringUtils.isNotBlank(streetCon)) {
                   TemplateValidation error = new TemplateValidation(name);
                   LOG.trace("The row " + (row.getRowNum() + 1)
-                      + ":Note that Street Cond and Additional Info both filled not allowed. Please fix and upload the template again.");
+                      + ":Note that Street Cond can't be filled without Street. Please fix and upload the template again.");
                   error.addError((row.getRowNum() + 1), "Street", "The row " + (row.getRowNum() + 1)
-                      + ":Note that Street Cond and Additional Info both filled not allowed. Please fix and upload the template again.<br>");
+                      + ":Note that Street Cond can't be filled without Street. Please fix and upload the template again.<br>");
                   validations.add(error);
                 }
+              }
+
+              if (StringUtils.isNotBlank(streetCon) && StringUtils.isNotBlank(additionalInfo)) {
+                TemplateValidation error = new TemplateValidation(name);
+                LOG.trace("The row " + (row.getRowNum() + 1)
+                    + ":Note that Street Cond and Additional Info both filled not allowed. Please fix and upload the template again.");
+                error.addError((row.getRowNum() + 1), "Street", "The row " + (row.getRowNum() + 1)
+                    + ":Note that Street Cond and Additional Info both filled not allowed. Please fix and upload the template again.<br>");
+                validations.add(error);
+
               }
 
               if (StringUtils.isNotBlank(poBox) && !StringUtils.isNumericSpace(poBox)) {
