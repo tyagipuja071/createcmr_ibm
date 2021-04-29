@@ -26,6 +26,12 @@ import com.ibm.cmr.services.client.automation.AutomationResponse;
 import com.ibm.cmr.services.client.automation.us.SosRequest;
 import com.ibm.cmr.services.client.automation.us.SosResponse;
 
+/**
+ *
+ * @author Shivangi
+ *
+ */
+
 public class USSosRpaCheckElement extends ValidatingElement implements CompanyVerifier {
 
   // Business Partner
@@ -51,14 +57,14 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
     ValidationOutput validation = new ValidationOutput();
     Scorecard scorecard = requestData.getScorecard();
     // skip sos matching if matching records are found in SOS-RPA
-    if (engineData.isDnbVerified() || "Y".equals(admin.getCompVerifiedIndc())) {
-      validation.setSuccess(true);
-      validation.setMessage("Skipped");
-      output.setResults("Skipped");
-      output.setDetails("Sos-RPA Matching is skipped as matching records are found in DnB");
-      engineData.addPositiveCheckStatus(AutomationEngineData.DNB_MATCH);
-      return output;
-    }
+    /*
+     * if (engineData.isDnbVerified() ||
+     * "Y".equals(admin.getCompVerifiedIndc())) { validation.setSuccess(true);
+     * validation.setMessage("Skipped"); output.setResults("Skipped"); output.
+     * setDetails("Sos-RPA Matching is skipped as matching records are found in DnB"
+     * ); engineData.addPositiveCheckStatus(AutomationEngineData.DNB_MATCH);
+     * return output; }
+     */
     if (SC_BP_END_USER.equals(scenario) && SC_BP_POOL.equals(scenario) && SC_BP_DEVELOP.equals(scenario) && SC_BP_E_HOST.equals(scenario)) {
       validation.setSuccess(true);
       validation.setMessage("Skipped");
@@ -89,9 +95,16 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
         output.setDetails(details.toString());
         engineData.addPositiveCheckStatus(AutomationEngineData.SOS_MATCH);
         engineData.clearNegativeCheckStatus("DnBMatch");
+        engineData.clearNegativeCheckStatus("DNB_VAT_MATCH_CHECK_FAIL");
       } else {
         scorecard.setRpaMatchingResult("N");
         validation.setSuccess(true);
+        boolean shouldThrowError = !"Y".equals(admin.getCompVerifiedIndc());
+        if (shouldThrowError) {
+          output.setOnError(true);
+        } else {
+          output.setOnError(false);
+        }
         validation.setMessage("No Matches found");
         output.setDetails(response.getMessage());
         log.debug(response.getMessage());
