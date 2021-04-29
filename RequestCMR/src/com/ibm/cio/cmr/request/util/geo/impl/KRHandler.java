@@ -961,20 +961,15 @@ public class KRHandler extends GEOHandler {
 
     if (theApprovalReq != null) {
       Person ibmer = null;
-      /*
-       * testing String originatorIdInAdmin =
-       * getOriginatorIdInAdmin(entityManager, reqId);
-       * 
-       * if (originatorIdInAdmin != null && !originatorIdInAdmin.isEmpty()) {
-       * Person ibmerManager = null; ibmerManager =
-       * BluePagesHelper.getPerson(originatorIdInAdmin); ibmer =
-       * BluePagesHelper.getPerson(BluePagesHelper.getManagerEmail(ibmerManager
-       * == null ? "" : ibmerManager.getEmployeeId())); } else { ibmer =
-       * BluePagesHelper.getPerson(BluePagesHelper.getManagerEmail(user.
-       * getUserCnum())); }
-       */
-      ibmer = BluePagesHelper.getPerson("mahechi@cn.ibm.com");
-      // }
+      String originatorIdInAdmin = getOriginatorIdInAdmin(entityManager, reqId);
+
+      if (originatorIdInAdmin != null && !originatorIdInAdmin.isEmpty()) {
+        Person ibmerManager = null;
+        ibmerManager = BluePagesHelper.getPerson(originatorIdInAdmin);
+        ibmer = BluePagesHelper.getPerson(BluePagesHelper.getManagerEmail(ibmerManager == null ? "" : ibmerManager.getEmployeeId()));
+      } else {
+        ibmer = BluePagesHelper.getPerson(BluePagesHelper.getManagerEmail(user.getUserCnum()));
+      }
 
       if (ibmer != null && theApprovalReq != null) {
 
