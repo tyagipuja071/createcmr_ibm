@@ -98,7 +98,11 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
         if (!hasValidMatches) {
           // if no valid matches - do not process records
           scorecard.setDnbMatchingResult("N");
-          result.setOnError(shouldThrowError);
+          if (!SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry())) {
+            result.setOnError(shouldThrowError);
+          } else {
+            result.setOnError(false);
+          }
           result.setResults("No Matches");
           result.setDetails("No high quality matches with D&B records. Please import from D&B search.");
           engineData.addNegativeCheckStatus("DnBMatch", "No high quality matches with D&B records. Please import from D&B search.");
@@ -168,6 +172,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
           if (perfectMatch != null) {
             LOG.debug("Perfect match was found with DUNS " + perfectMatch.getDunsNo());
             result.setResults("Matched");
+            admin.setCompVerifiedIndc("Y");
             details.append("High Quality match D&B record matched the request name/address information.\n");
             if (!"Y".equals(perfectMatch.getOrgIdMatch()) && !scenarioExceptions.isCheckVATForDnB()) {
               details.append((isTaxCdMatch ? "Org ID " : "VAT ")
@@ -223,7 +228,11 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
             }
             engineData.addRejectionComment("OTH", "Matches against D&B were found but no record matched the request data.", "", "");
             result.setResults("Name/Address not matched");
-            result.setOnError(true);
+            if (!SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry())) {
+              result.setOnError(true);
+            } else {
+              result.setOnError(false);
+            }
             engineData.put("dnbMatching", dnbMatches.get(0));
           }
 
