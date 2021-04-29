@@ -243,9 +243,9 @@ public class EMEAHandler extends BaseSOFHandler {
           for (FindCMRRecordModel record : source.getItems()) {
             seqNo = record.getCmrAddrSeq();
             if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo) && !("862".equals(cmrIssueCd) || "726".equals(cmrIssueCd))) {
-              if (StringUtils.isNotBlank(record.getCmrAddrSeq()) && !"PG".equals(record.getCmrOrderBlock())) {
 
                 sofUses = this.legacyObjects.getUsesBySequenceNo(seqNo);
+              if (StringUtils.isNotBlank(record.getCmrAddrSeq()) && !sofUses.isEmpty()) {
                 for (String sofUse : sofUses) {
                   addrType = getAddressTypeByUse(sofUse);
                   if (!StringUtils.isEmpty(addrType)) {
@@ -284,7 +284,7 @@ public class EMEAHandler extends BaseSOFHandler {
                     converted.add(addr);
                   }
                 }
-              } else {
+              } else if (sofUses.isEmpty() && "ZP01".equals(record.getCmrAddrTypeCode())) {
                 record.setCmrAddrTypeCode("PG01");
                 addrType = record.getCmrAddrTypeCode();
                 if (!StringUtils.isEmpty(addrType)) {
