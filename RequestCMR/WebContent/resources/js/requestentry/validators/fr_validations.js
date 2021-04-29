@@ -3335,8 +3335,19 @@ function orderBlockCodeValidator() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
+        var cmrno = FormManager.getActualValue('enterCMRNo');
+        var mandt = FormManager.getActualValue('mandt');
+        var isscntry = FormManager.getActualValue('cmrIssuingCntry');
+        // PayGo_check
+        var qParams = {
+          ZZKV_CUSNO : cmrno,
+          MANDT : mandt,
+          KATR6 : isscntry
+        };
+        var paygorecord = cmr.query('CMR_CHECK_PAYGO', qParams);
+        var countpaygo = paygorecord.ret1;
         var orderBlockCd = FormManager.getActualValue('ordBlk');
-        if (orderBlockCd == '94' || orderBlockCd == '88' || orderBlockCd == '') {
+        if (orderBlockCd == '94' || orderBlockCd == '88' || orderBlockCd == '' || (Number(countpaygo) == 1 && role == 'Processor')) {
           return new ValidationResult(null, true);
         } else {
           return new ValidationResult({
