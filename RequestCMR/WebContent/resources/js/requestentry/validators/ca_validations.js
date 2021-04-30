@@ -6,6 +6,7 @@ Validations file for Canada
 
 var regexNumeric = /^[0-9]+$/;
 var regexAlphanumeric = /^[0-9a-zA-Z]+$/;
+var _importedIndc = null;
 /**
  * Adds the validator for the Install At and optional Invoice To
  * 
@@ -371,6 +372,61 @@ function addPhoneNumberValidationCa() {
     };
   })(), null, 'frmCMR_addressModal');
 }
+
+function retainImportValues(fromAddress, scenario, scenarioChanged) {
+  var isCmrImported = getImportedIndc();
+  var reqId = FormManager.getActualValue('reqId');
+
+  if (FormManager.getActualValue('reqType') == 'C' && isCmrImported == 'Y' && scenarioChanged) {
+    if (scenario == 'COMME' || scenario == 'GOVT') {
+      // var origCustData; // not present in findcmr json
+      var origSbo;
+      var origRepTeam; // note: not sure if mapping is correct
+      var origIsic;
+      var origSubInd;
+      // var origArFaar; // not present in findcmr json
+      var origInac;
+      // var origCreditCode; // not present in findcmr json
+      var origEfc;
+
+      var result = cmr.query("GET.CMRINFO.IMPORTED_CA", {
+        REQ_ID : reqId
+      });
+
+      if (result != null && result != '') {
+        origSbo = result.ret1;
+        origRepTeam = result.ret2;
+        origIsic = result.ret3;
+        origSubInd = result.ret4;
+        origInac = result.ret5;
+        origEfc = result.ret6;
+
+        FormManager.setValue('salesBusOffCd', origSbo);
+        FormManager.setValue('repTeamMemberNo', origRepTeam);
+        FormManager.setValue('isicCd', origIsic);
+        FormManager.setValue('subIndustryCd', origSubInd);
+        FormManager.setValue('inacCd', origInac);
+        FormManager.setValue('taxCd1', origEfc);
+      }
+    }
+  }
+}
+
+function getImportedIndc() {
+  if (_importedIndc) {
+    return _importedIndc;
+  }
+  var results = cmr.query('VALIDATOR.IMPORTED', {
+    REQID : FormManager.getActualValue('reqId')
+  });
+  if (results != null && results.ret1) {
+    _importedIndc = results.ret1;
+  } else {
+    _importedIndc = 'N';
+  }
+  return _importedIndc;
+}
+
 /* Register CA Javascripts */
 dojo.addOnLoad(function() {
   console.log('adding CA scripts...');
@@ -391,4 +447,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(addCAAddressHandler, [ SysLoc.CANADA ]);
   GEOHandler.enableCopyAddress(SysLoc.CANADA);
   GEOHandler.addAfterTemplateLoad(removeValidatorForOptionalFields, SysLoc.CANADA);
+  GEOHandler.addAfterTemplateLoad(retainImportValues, SysLoc.CANADA);
 });

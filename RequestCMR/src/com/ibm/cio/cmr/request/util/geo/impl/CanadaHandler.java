@@ -10,6 +10,7 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.web.servlet.ModelAndView;
@@ -85,75 +86,20 @@ public class CanadaHandler extends GEOHandler {
 
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
-    if (mainRecord != null && StringUtils.isBlank(mainRecord.getCmrShortName())) {
-      String custName = mainRecord.getCmrName1Plain();
-      if (StringUtils.isNotBlank(custName)) {
-        data.setAbbrevNm(custName.length() > 20 ? custName.substring(0, 20).toUpperCase() : custName);
+    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      data.setSalesBusOffCd(mainRecord.getCmrSellBoGrp());
+
+      String efc = mainRecord.getCmrTaxCertStatus();
+      if (StringUtils.isNotBlank(efc) && ArrayUtils.contains(new String[] { "8", "R", "Z", "7", "P", "E", "T" }, efc)) {
+        efc = "6";
+        // TODO: send email to Tax Team for Verification
       }
+      data.setTaxCd1(efc);
     }
-
-    // -- Sales Branch Office
-    if (!(StringUtils.isBlank(mainRecord.getCmrSapNumber()))) {
-      /*
-       * if (mainRecord.getCmrSapNumber().length() > 3) {
-       * data.setSalesBusOffCd(mainRecord.getCmrSapNumber().substring(0, 3)); }
-       * else { data.setSalesBusOffCd(mainRecord.getCmrSapNumber()); }
-       */
-    }
-
-    // -- CS Branch
-    // -- will be set on setAddressRelatedData first 3 digits of postal code
-    if (!(StringUtils.isBlank(mainRecord.getSalesTeamCd()))) {
-    }
-
-    // -- Credit Code
-    // -- will use K as default based on mapping doc
-    if (!(StringUtils.isBlank(mainRecord.getCreditCd()))) {
-      // data.setCreditCd(mainRecord.getCreditCd());
-    }
-
-    // -- PPS CEID
-    if (!(StringUtils.isBlank(mainRecord.getCmrPpsceid()))) {
-      // data.setPpsceid(mainRecord.getCmrPpsceid());
-    }
-
-    // -- Install Branch Office
-    // -- will set 051 as default per mapping doc
-    data.setInstallBranchOff("051");
-
-    // -- Distribution Mktg Branch
-    data.setInvoiceDistCd("000");
-
-    // -- S/W Billing Frequency
-    // -- will set 03 as default per mapping doc
-    data.setCollectorNameNo("3");
-
-    // -- VAD-VAD Number
-    // -- Leave This Field Blank per mapping doc
-    data.setTaxCd2("");
-
-    // -- AR-FAAR
-    data.setAdminDeptCd("051Z"); // default per mapping doc
-
-    // -- Customer Data
-    data.setTaxCd3("NETNEW"); // default per mapping doc
-
-    // -- Number of Invoices
-    data.setCusInvoiceCopies("01"); // default per mapping doc
   }
 
   @Override
   public void setAdminValuesOnImport(Admin admin, FindCMRRecordModel currentRecord) throws Exception {
-    String[] parts = null;
-
-    String name1 = admin.getMainCustNm1();
-    String name2 = admin.getMainCustNm2();
-    parts = splitName(name1, name2, 28, 24);
-    admin.setMainCustNm1(parts[0]);
-    admin.setOldCustNm1(parts[0]);
-    admin.setMainCustNm2(parts[1]);
-    admin.setOldCustNm2(parts[1]);
-
   }
 
   @Override
@@ -162,66 +108,11 @@ public class CanadaHandler extends GEOHandler {
 
   @Override
   public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo) throws Exception {
-    if (currentRecord != null) {
-      // -- District
-      if (!StringUtils.isBlank(currentRecord.getCmrCity2())) {
-        // address.setCity2(currentRecord.getCmrCity2());
-      }
-
-      // -- Phone #
-      if (!StringUtils.isBlank(currentRecord.getCmrCustPhone())) {
-        // address.setCustPhone(currentRecord.getCmrCustPhone());
-      }
-
-      // -- PostBox
-      address.setPoBox("");
-
-      // -- SAP Number (KUNNR)
-      if (!StringUtils.isBlank(currentRecord.getCmrSapNumber())) {
-        address.setSapNo(currentRecord.getCmrSapNumber());
-      }
-
-      // -- Division
-      if (!StringUtils.isBlank(currentRecord.getCmrName3())) {
-        // address.setDivn(currentRecord.getCmrName3() + " Division");
-      }
-
-      // -- Street con't
-      if (!StringUtils.isBlank(currentRecord.getCmrStreetAddressCont())) {
-        // address.setAddrTxt2(currentRecord.getCmrStreetAddressCont());
-      }
-
-      // -- Department / Attn.
-      if (!StringUtils.isBlank(currentRecord.getCmrName3())) {
-        // address.setDept(currentRecord.getCmrName3() + " Department/Attn");
-      }
-
-      // -- Building
-      if (!StringUtils.isBlank(currentRecord.getCmrBldg())) {
-        // address.setBldg(currentRecord.getCmrBldg());
-      }
-
-      // -- Floor
-      if (!StringUtils.isBlank(currentRecord.getCmrName4())) {
-        // address.setFloor(currentRecord.getCmrName4() + " Floor");
-      }
-
-      // -- Office
-      if (!(StringUtils.isBlank(currentRecord.getCmrPostalCode()) && currentRecord.getCmrPOBoxPostCode().length() > 3)) {
-        // address.setOffice(currentRecord.getCmrPostalCode().substring(0, 3));
-      }
-
-      // -- PostBox City
-      if (!StringUtils.isBlank(currentRecord.getCmrPOBoxCity())) {
-        // address.setPoBoxCity(currentRecord.getCmrPOBoxCity());
-      }
-
-    }
     String addrSeq = address.getId().getAddrSeq();
     if (currentRecord.getCmrAddrSeq() != null && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       addrSeq = StringUtils.leftPad(addrSeq, 5, '0');
+      address.getId().setAddrSeq(addrSeq);
     }
-    address.getId().setAddrSeq(addrSeq);
   }
 
   @Override
