@@ -1033,7 +1033,7 @@ public class USUtil extends AutomationUtil {
             }
           }
           if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZS01.toString())) {
-            closelyMatchAddressWithDnbRecords(requestData, engineData, "ZS01", details, validation);
+            closelyMatchAddressWithDnbRecords(entityManager, requestData, engineData, "ZS01", details, validation);
           }
 
           if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZI01.toString())) {
@@ -1063,7 +1063,7 @@ public class USUtil extends AutomationUtil {
                 return true;
               }
             }
-            closelyMatchAddressWithDnbRecords(requestData, engineData, "ZP01", details, validation);
+            closelyMatchAddressWithDnbRecords(entityManager, requestData, engineData, "ZI01", details, validation);
           }
         }
 
@@ -1072,6 +1072,9 @@ public class USUtil extends AutomationUtil {
           output.setDetails("Updated ADDRESS elements were validated successfully.\n");
           validation.setMessage("Validated");
           validation.setSuccess(true);
+        } else {
+          output.setDetails(details.toString());
+          output.setOnError(true);
         }
 
       } else {
@@ -1095,8 +1098,8 @@ public class USUtil extends AutomationUtil {
    * @param validation
    * @throws Exception
    */
-  private void closelyMatchAddressWithDnbRecords(RequestData requestData, AutomationEngineData engineData, String addrType, StringBuilder details,
-      ValidationOutput validation) throws Exception {
+  private void closelyMatchAddressWithDnbRecords(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
+      String addrType, StringBuilder details, ValidationOutput validation) throws Exception {
     String addrDesc = "ZS01".equals(addrType) ? "Install-at" : "Invoice-at";
     Addr addr = requestData.getAddress(addrType);
     Data data = requestData.getData();
@@ -1117,23 +1120,53 @@ public class USUtil extends AutomationUtil {
             validation.setMessage("Validated.");
             validation.setSuccess(true);
           } else {
-            engineData.addNegativeCheckStatus("DNB_MATCH_FAIL_" + addrType,
-                "High confidence D&B matches did not match the " + addrDesc + " address data. ");
-            details.append("High confidence D&B matches did not match the " + addrDesc + " address data.").append("\n");
-            validation.setMessage("Review needed");
-            validation.setSuccess(false);
+            // company proof
+            if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+              validation.setMessage("Review Needed");
+              engineData.addNegativeCheckStatus("DNB_MATCH_FAIL_" + addrType,
+                  "High confidence D&B matches did not match the " + addrDesc + " address data.");
+              details.append("High confidence D&B matches did not match the " + addrDesc + " address data.").append("\n");
+              details.append("Supporting documentation is provided by the requester as attachment.").append("\n");
+              validation.setSuccess(false);
+            } else {
+              validation.setMessage("Rejected");
+              validation.setSuccess(false);
+              details.append("\nNo supporting documentation is provided by the requester for " + addrDesc + " address.");
+              engineData.addRejectionComment("OTH", "No supporting documentation is provided by the requester for " + addrDesc + " address.", "", "");
+              LOG.debug("D&B matches were chosen to be overridden by the requester and needs to be reviewed");
+            }
           }
         } else {
-          engineData.addNegativeCheckStatus("DNB_MATCH_FAIL_" + addrType, "No High Quality D&B Matches were found for " + addrDesc + " address.");
-          details.append("No High Quality D&B Matches were found for " + addrDesc + " address.").append("\n");
-          validation.setMessage("Review needed");
-          validation.setSuccess(false);
+          // company proof
+          if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+            validation.setMessage("Review Needed");
+            engineData.addNegativeCheckStatus("DNB_MATCH_FAIL_" + addrType, "No High Quality D&B Matches were found for " + addrDesc + " address.");
+            details.append("No High Quality D&B Matches were found for " + addrDesc + " address.").append("\n");
+            details.append("Supporting documentation is provided by the requester as attachment.").append("\n");
+            validation.setSuccess(false);
+          } else {
+            validation.setMessage("Rejected");
+            validation.setSuccess(false);
+            details.append("\nNo supporting documentation is provided by the requester for " + addrDesc + " address.");
+            engineData.addRejectionComment("OTH", "No supporting documentation is provided by the requester for " + addrDesc + " address.", "", "");
+            LOG.debug("D&B matches were chosen to be overridden by the requester and needs to be reviewed");
+          }
         }
       } else {
-        engineData.addNegativeCheckStatus("DNB_MATCH_FAIL_" + addrType, "No D&B Matches were found for " + addrDesc + " address.");
-        details.append("No D&B Matches were found for " + addrDesc + " address.").append("\n");
-        validation.setMessage("Review needed");
-        validation.setSuccess(false);
+        // company proof
+        if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+          validation.setMessage("Review Needed");
+          engineData.addNegativeCheckStatus("DNB_MATCH_FAIL_" + addrType, "No D&B Matches were found for " + addrDesc + " address.");
+          details.append("No D&B Matches were found for " + addrDesc + " address.").append("\n");
+          details.append("Supporting documentation is provided by the requester as attachment.").append("\n");
+          validation.setSuccess(false);
+        } else {
+          validation.setMessage("Rejected");
+          validation.setSuccess(false);
+          details.append("No D&B Matches were found for " + addrDesc + " address.").append("\n");
+          engineData.addRejectionComment("OTH", "No supporting documentation is provided by the requester for " + addrDesc + " address.", "", "");
+          LOG.debug("D&B matches were chosen to be overridden by the requester and needs to be reviewed");
+        }
       }
     } else {
       engineData.addNegativeCheckStatus("DNB_MATCH_FAIL_" + "ZS01", "D&B Matching couldn't be performed for " + addrDesc + " address.");
