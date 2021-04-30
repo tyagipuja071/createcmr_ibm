@@ -243,6 +243,11 @@ public class FindCMRRecordModel implements Serializable, Comparable<FindCMRRecor
 
   private String militaryFlag;
 
+  // new canada fields
+  private String cmrSellBoGrp;
+  private String cmrInstlBoGrp;
+  private String cmrTaxCertStatus;
+
   public String getCustClass() {
     return custClass;
   }
@@ -1880,6 +1885,30 @@ public class FindCMRRecordModel implements Serializable, Comparable<FindCMRRecor
 
   public void setMilitaryFlag(String militaryFlag) {
     this.militaryFlag = militaryFlag;
+  }
+
+  public String getCmrSellBoGrp() {
+    return cmrSellBoGrp;
+  }
+
+  public void setCmrSellBoGrp(String cmrSellBoGrp) {
+    this.cmrSellBoGrp = cmrSellBoGrp;
+  }
+
+  public String getCmrInstlBoGrp() {
+    return cmrInstlBoGrp;
+  }
+
+  public void setCmrInstlBoGrp(String cmrInstlBoGrp) {
+    this.cmrInstlBoGrp = cmrInstlBoGrp;
+  }
+
+  public String getCmrTaxCertStatus() {
+    return cmrTaxCertStatus;
+  }
+
+  public void setCmrTaxCertStatus(String cmrTaxCertStatus) {
+    this.cmrTaxCertStatus = cmrTaxCertStatus;
   }
 
 }
