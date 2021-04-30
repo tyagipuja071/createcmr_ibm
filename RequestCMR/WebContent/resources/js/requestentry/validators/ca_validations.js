@@ -351,6 +351,26 @@ function removeValidatorForOptionalFields() {
   }
 }
 
+
+function addPhoneNumberValidationCa() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var phoneNumber = FormManager.getActualValue('custPhone');
+        var custGrp = FormManager.getActualValue('custGrp');
+
+        if (custGrp != 'CROSS' && phoneNumber.length > 0 && !phoneNumber.match("([0-9]{3}-[0-9]{3}-[0-9]{4})$")) {
+          return new ValidationResult({
+            id : 'custPhone',
+            type : 'text',
+            name : 'custPhone'
+          }, false, 'Invalid format of Phone Number. Format should be NNN-NNN-NNNN.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+}
 /* Register CA Javascripts */
 dojo.addOnLoad(function() {
   console.log('adding CA scripts...');
@@ -362,7 +382,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addDPLCheckValidator, [ SysLoc.CANADA ], GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(addDPLAssessmentValidator, [ SysLoc.CANADA ], GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(addLocationNoValidator, [ SysLoc.CANADA ], null, true);
-
+  GEOHandler.registerValidator(addPhoneNumberValidationCa, [ SysLoc.CANADA ], null, true);
   // NOTE: do not add multiple addAfterConfig calls to avoid confusion, club the
   // functions on afterConfigForCA
   GEOHandler.addAfterConfig(afterConfigForCA, [ SysLoc.CANADA ]);
