@@ -1357,20 +1357,18 @@ function addAddressFieldValidators() {
     return {
       validate : function() {
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
-        if (cntry == SysLoc.NORWAY || cntry == SysLoc.SWEDEN) {
-          var addrTxt = FormManager.getActualValue('addrTxt');
-          var addrTxt2 = FormManager.getActualValue('addrTxt2');
+        var addrTxt = FormManager.getActualValue('addrTxt');
+        var addrTxt2 = FormManager.getActualValue('addrTxt2');
 
-          var val = addrTxt;
-          if (addrTxt2 != '') {
-            val += addrTxt2;
-            if (val.length > 30) {
-              return new ValidationResult(null, false, 'Total computed length of Street and Street Con\'t should not exceed 30 characters.');
-            }
-          } else {
-            if (val.length > 30) {
-              return new ValidationResult(null, false, 'Street should not exceed 30 characters.');
-            }
+        var val = addrTxt;
+        if (addrTxt2 != '') {
+          val += addrTxt2;
+          if (val.length > 30) {
+            return new ValidationResult(null, false, 'Total computed length of Street and Street Con\'t should not exceed 30 characters.');
+          }
+        } else {
+          if (val.length > 30) {
+            return new ValidationResult(null, false, 'Street should not exceed 30 characters.');
           }
         }
         return new ValidationResult(null, true);
