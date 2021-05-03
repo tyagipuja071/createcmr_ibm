@@ -197,7 +197,7 @@ public class USHandler extends GEOHandler {
         this.entityManager.close();
       }
       // setCodes(url, data);
-    } else if ("Y".equals(admin.getPoolCmrIndc())) {
+    } else if (!retrieved && isPoolProcessing()) {
       // do nothing and return
       return;
     } else {
