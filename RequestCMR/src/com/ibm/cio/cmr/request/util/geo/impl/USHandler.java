@@ -164,8 +164,6 @@ public class USHandler extends GEOHandler {
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel cmr) throws Exception {
 
     String cmrNo = cmr.getCmrNum();
-    boolean poolProcessing = false;
-
     if (!NumberUtils.isDigits(cmrNo)) {
       LOG.debug("Non-digits found. Maybe Prospect/Lite conversion.");
       return;
@@ -180,10 +178,6 @@ public class USHandler extends GEOHandler {
 
     LOG.debug("Getting existing values from US CMR DB..");
     boolean retrieved = queryAndAssign(url, sql, results, data, dbId);
-
-    if (!retrieved) {
-      poolProcessing = true;
-    }
 
     LOG.debug("US CMR Data retrieved? " + retrieved);
     if (retrieved) {
@@ -203,7 +197,7 @@ public class USHandler extends GEOHandler {
         this.entityManager.close();
       }
       // setCodes(url, data);
-    } else if (poolProcessing) {
+    } else if (!retrieved && poolProcesing) {
       // do nothing and return
       return;
     } else {

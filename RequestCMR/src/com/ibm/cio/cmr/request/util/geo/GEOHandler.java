@@ -73,6 +73,8 @@ public abstract class GEOHandler {
       "ADDR_STD_ACCEPT_IND", "ADDR_STD_REJ_REASON", "ADDR_STD_REJ_CMT", "ADDR_STD_TS", "IMPORT_IND", "DPL_CHK_RESULT", "DPL_CHK_INFO", "DPL_CHK_TS",
       "DPL_CHK_BY_ID", "DPL_CHK_BY_NM", "DPL_CHK_ERR_LIST", "RDC_CREATE_DT", "RDC_LAST_UPDT_DT", "COUNTY_NAME", "STD_CITY_NM", "PAIRED_ADDR_SEQ");
 
+  public static final boolean poolProcesing = true;
+
   /**
    * From the result model which is from CMR search, do the necessary
    * manipulations to make it conform with the country's business logic
@@ -864,7 +866,7 @@ public abstract class GEOHandler {
   public String getCMRNo(EntityManager rdcMgr, String kukla, String mandt, String katr6, String cmrNo) {
     return null;
   }
-  
+
   /**
    * Checks if this {@link Data} record has been updated. This method compares
    * with the {@link DataRdc} equivalent and compares per field and filters
