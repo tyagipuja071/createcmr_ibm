@@ -73,7 +73,7 @@ public abstract class GEOHandler {
       "ADDR_STD_ACCEPT_IND", "ADDR_STD_REJ_REASON", "ADDR_STD_REJ_CMT", "ADDR_STD_TS", "IMPORT_IND", "DPL_CHK_RESULT", "DPL_CHK_INFO", "DPL_CHK_TS",
       "DPL_CHK_BY_ID", "DPL_CHK_BY_NM", "DPL_CHK_ERR_LIST", "RDC_CREATE_DT", "RDC_LAST_UPDT_DT", "COUNTY_NAME", "STD_CITY_NM", "PAIRED_ADDR_SEQ");
 
-  public static final boolean poolProcesing = true;
+  public static final boolean poolProcessing = true;
 
   /**
    * From the result model which is from CMR search, do the necessary
