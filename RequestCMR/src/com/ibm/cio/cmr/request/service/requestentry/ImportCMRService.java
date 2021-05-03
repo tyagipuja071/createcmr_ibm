@@ -194,6 +194,10 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
         scorecard.setId(scorecardPK);
         setScorecardDefaults(scorecard);
       }
+	  
+	   if (searchModel.isPoolRecord()) {
+          geoHandler.setPoolProcessing(true);
+        }
 
       if (mainRecord != null) {
         cmrNo = mainRecord.getCmrNum();
