@@ -1033,7 +1033,7 @@ public class USUtil extends AutomationUtil {
             }
           }
           if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZS01.toString())) {
-            closelyMatchAddressWithDnbRecords(entityManager, requestData, engineData, "ZS01", details, validation);
+            closelyMatchAddressWithDnbRecords(entityManager, requestData, engineData, "ZS01", details, validation, output);
           }
 
           if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZI01.toString())) {
@@ -1063,7 +1063,7 @@ public class USUtil extends AutomationUtil {
                 return true;
               }
             }
-            closelyMatchAddressWithDnbRecords(entityManager, requestData, engineData, "ZI01", details, validation);
+            closelyMatchAddressWithDnbRecords(entityManager, requestData, engineData, "ZI01", details, validation, output);
           }
         }
 
@@ -1072,11 +1072,7 @@ public class USUtil extends AutomationUtil {
           output.setDetails("Updated ADDRESS elements were validated successfully.\n");
           validation.setMessage("Validated");
           validation.setSuccess(true);
-        } else {
-          output.setDetails(details.toString());
-          output.setOnError(true);
         }
-
       } else {
         validation.setSuccess(false);
         validation.setMessage("Unknown CustType");
@@ -1099,7 +1095,7 @@ public class USUtil extends AutomationUtil {
    * @throws Exception
    */
   private void closelyMatchAddressWithDnbRecords(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
-      String addrType, StringBuilder details, ValidationOutput validation) throws Exception {
+      String addrType, StringBuilder details, ValidationOutput validation, AutomationResult<ValidationOutput> output) throws Exception {
     String addrDesc = "ZS01".equals(addrType) ? "Install-at" : "Invoice-at";
     Addr addr = requestData.getAddress(addrType);
     Data data = requestData.getData();
@@ -1133,6 +1129,8 @@ public class USUtil extends AutomationUtil {
               validation.setSuccess(false);
               details.append("\nNo supporting documentation is provided by the requester for " + addrDesc + " address.");
               engineData.addRejectionComment("OTH", "No supporting documentation is provided by the requester for " + addrDesc + " address.", "", "");
+              output.setOnError(true);
+              output.setDetails(details.toString());
               LOG.debug("D&B matches were chosen to be overridden by the requester and needs to be reviewed");
             }
           }
@@ -1149,6 +1147,8 @@ public class USUtil extends AutomationUtil {
             validation.setSuccess(false);
             details.append("\nNo supporting documentation is provided by the requester for " + addrDesc + " address.");
             engineData.addRejectionComment("OTH", "No supporting documentation is provided by the requester for " + addrDesc + " address.", "", "");
+            output.setOnError(true);
+            output.setDetails(details.toString());
             LOG.debug("D&B matches were chosen to be overridden by the requester and needs to be reviewed");
           }
         }
@@ -1165,6 +1165,8 @@ public class USUtil extends AutomationUtil {
           validation.setSuccess(false);
           details.append("No D&B Matches were found for " + addrDesc + " address.").append("\n");
           engineData.addRejectionComment("OTH", "No supporting documentation is provided by the requester for " + addrDesc + " address.", "", "");
+          output.setOnError(true);
+          output.setDetails(details.toString());
           LOG.debug("D&B matches were chosen to be overridden by the requester and needs to be reviewed");
         }
       }
