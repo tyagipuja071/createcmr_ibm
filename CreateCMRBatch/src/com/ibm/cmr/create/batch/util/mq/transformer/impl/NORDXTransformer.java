@@ -599,72 +599,41 @@ public class NORDXTransformer extends EMEATransformer {
       query.setParameter("COUNTRY", landedCntry);
       fullCntryName = query.getSingleResult(String.class);
     }
+    fullCntryName =StringUtils.isNotBlank(fullCntryName) ? (fullCntryName.length() >= 30 ? fullCntryName.substring(0, 30) : fullCntryName) : "";
 
-    List<String> addrAttrList = Arrays.asList(custNameCond, additionalInfo, attPerson, street, comboStreetCondPobox);
-
-    for (int i = 0; i < 2; i++) {
+    List<String> addrAttrList = Arrays.asList(custNameCond, additionalInfo, attPerson, street, comboStreetCondPobox, postCode + " " + city);
+    String[] lines = new String[6];
+    int strCount = 0;
+    for (int i = 0; i < addrAttrList.size(); i++) {
       if (StringUtils.isNotBlank(addrAttrList.get(i))) {
-        line2 = addrAttrList.get(i);
-        addrAttrList.set(i, "");
-        break;
-      }
-    }
-
-    for (int i = 1; i < 4; i++) {
-      if (StringUtils.isNotBlank(addrAttrList.get(i))) {
-        line3 = addrAttrList.get(i);
-        addrAttrList.set(i, "");
-        break;
-      }
-    }
-
-    for (int i = 2; i < addrAttrList.size(); i++) {
-      if (StringUtils.isNotBlank(addrAttrList.get(i))) {
-        line4 = addrAttrList.get(i);
-        addrAttrList.set(i, "");
-        break;
+        lines[strCount] = addrAttrList.get(i);
+        strCount++;
       }
     }
 
     if (crossBorder) {
-      line5 = postCode + " " + city;
-      line6 = StringUtils.isNotBlank(fullCntryName) ? (fullCntryName.length() >= 30 ? fullCntryName.substring(0, 30) : fullCntryName) : "";
-    } else {
-      for (int i = 3; i < addrAttrList.size(); i++) {
-        if (StringUtils.isNotBlank(addrAttrList.get(i))) {
-          line5 = addrAttrList.get(i);
-          addrAttrList.set(i, "");
-          break;
-        }
-      }
-      line6 = postCode + " " + city;
-    }
-    String[] lines = new String[] { line2, line3, line4, line5, line6 };
-    ArrayList<String> addrLnList = new ArrayList<>();
-    for (int i = 0; i < lines.length; i++) {
-      if (StringUtils.isNotBlank(lines[i])) {
-        addrLnList.add(lines[i]);
-      }
-    }
-    if (!addrLnList.isEmpty()) {
-      for (int i = 0; i < lines.length; i++) {
-        if (i < addrLnList.size()) {
-          lines[i] = addrLnList.get(i);
-        } else {
-          lines[i] = "";
-        }
+      if (strCount < lines.length-1) {
+        lines[strCount] = fullCntryName;
+      } else {
+        lines[strCount - 1] = fullCntryName;
       }
     }
 
-    legacyAddr.setAddrLine1(line1);
-    legacyAddr.setAddrLine2(lines[0]);
-    legacyAddr.setAddrLine3(lines[1]);
-    legacyAddr.setAddrLine4(lines[2]);
-    legacyAddr.setAddrLine5(lines[3]);
-    legacyAddr.setAddrLine6(lines[4]);
+    legacyAddr.setAddrLine1(lines[0]);
+    legacyAddr.setAddrLine2(lines[1]);
+    legacyAddr.setAddrLine3(lines[2]);
+    legacyAddr.setAddrLine4(lines[3]);
+    legacyAddr.setAddrLine5(lines[4]);
+    legacyAddr.setAddrLine6(lines[5]);
     legacyAddr.setCity(addrData.getCity1());
-    legacyAddr.setZipCode(addrData.getPostCd());
-    legacyAddr.setStreet(addrData.getAddrTxt());
+
+    if (StringUtils.isNotBlank(addrData.getPostCd())) {
+      legacyAddr.setZipCode(addrData.getPostCd());
+    }
+
+    if (StringUtils.isNotBlank(addrData.getAddrTxt())) {
+      legacyAddr.setStreet(addrData.getAddrTxt());
+    }
     legacyAddr.setPoBox(StringUtils.isNotBlank(pobox) ? pobox : "");
     legacyAddr.setAddrPhone(phone);
     legacyAddr.setAddrLineT(addrLineT);
@@ -827,7 +796,9 @@ public class NORDXTransformer extends EMEATransformer {
     legacyAddr.setAddrLine6(lines[4]);
     legacyAddr.setCity(city);
     legacyAddr.setZipCode(postCode);
-    legacyAddr.setStreet(street);
+    if (StringUtils.isNotBlank(addr.getAddrTxt())) {
+      legacyAddr.setStreet(addr.getAddrTxt());
+    }
     legacyAddr.setPoBox(StringUtils.isNotBlank(pobox) ? pobox : legacyAddr.getPoBox());
     legacyAddr.setAddrPhone(phone);
     legacyAddr.setAddrLineU("");
