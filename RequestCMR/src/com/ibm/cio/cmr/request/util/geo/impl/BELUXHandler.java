@@ -193,7 +193,7 @@ public class BELUXHandler extends BaseSOFHandler {
             benchmarkAddrType = getBenchmarkAddr(seq, rdcRecords);
             shareSeqAddrList = getShareSeqAddrList(cmrtaddr);
 
-            if (isShareSeq(cmrtaddr) && !StringUtils.isEmpty(benchmarkAddrType) && !benchmarkAddrType.isEmpty() && !shareSeqAddrList.isEmpty()) {
+            if (isShareSeq(cmrtaddr) && StringUtils.isNotEmpty(benchmarkAddrType) && !shareSeqAddrList.isEmpty()) {
               for (String shareSeqAddrType : shareSeqAddrList) {
                 if (!benchmarkAddrType.equals(shareSeqAddrType)) {
                   splitSharedAddr(benchmarkAddrType, seq, null, shareSeqAddrType, maxSeq, converted);
