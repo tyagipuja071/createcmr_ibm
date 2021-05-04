@@ -74,6 +74,7 @@
 					<label>Address Seq. No.</label>
 					<dbColumn>ADDR_SEQUENCE_NO</dbColumn>
 					<width>10</width>
+					<length>5</length>
 				</column>
 				<column>
 					<label>Number + Street</label>
@@ -180,6 +181,7 @@
 					<label>Address Seq. No.</label>
 					<dbColumn>ADDR_SEQUENCE_NO</dbColumn>
 					<width>10</width>
+					<length>5</length>
 				</column>
 				<column>
 					<label>Number + Street</label>
