@@ -567,7 +567,7 @@ public class NORDXTransformer extends EMEATransformer {
     String phone = "";
     String addrLineT = "";
 
-    String line1 = StringUtils.isNotBlank(addrData.getCustNm1()) ? addrData.getCustNm1() : "";
+    String custName = StringUtils.isNotBlank(addrData.getCustNm1()) ? addrData.getCustNm1() : "";
     String custNameCond = StringUtils.isNotBlank(addrData.getCustNm2()) ? addrData.getCustNm2() : "";
     String additionalInfo = StringUtils.isNotBlank(addrData.getCustNm3()) ? addrData.getCustNm3() : "";
     String attPerson = StringUtils.isNotBlank(addrData.getCustNm4()) ? addrData.getCustNm4() : "";
@@ -600,7 +600,7 @@ public class NORDXTransformer extends EMEATransformer {
     }
     fullCntryName =StringUtils.isNotBlank(fullCntryName) ? (fullCntryName.length() >= 30 ? fullCntryName.substring(0, 30) : fullCntryName) : "";
 
-    List<String> addrAttrList = Arrays.asList(line1, custNameCond, additionalInfo, attPerson, street, comboStreetCondPobox, postCode + " " + city);
+    List<String> addrAttrList = Arrays.asList(custName, custNameCond, additionalInfo, attPerson, street, comboStreetCondPobox, postCode + " " + city);
     String[] lines = new String[7];
     int strCount = 0;
     for (int i = 0; i < addrAttrList.size(); i++) {
