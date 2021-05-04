@@ -80,9 +80,11 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
     if (zs01 != null) {
       AutomationResponse<SosResponse> response = getSosMatches(admin.getId().getReqId(), zs01, admin);
       scorecard.setRpaMatchingResult("");
+      log.debug("Scorecard Updated for SOS-RPA to Not Done");
       if (response != null && response.isSuccess() && response.getRecord() != null) {
         admin.setCompVerifiedIndc("Y");
         scorecard.setRpaMatchingResult("Y");
+        log.debug("Scorecard Updated for SOS-RPA to Yes");
         validation.setSuccess(true);
         validation.setMessage("Successful Execution");
         log.debug(response.getMessage());
@@ -98,6 +100,7 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
         engineData.clearNegativeCheckStatus("DNB_VAT_MATCH_CHECK_FAIL");
       } else {
         scorecard.setRpaMatchingResult("N");
+        log.debug("Scorecard Updated for SOS-RPA to No");
         validation.setSuccess(true);
         boolean shouldThrowError = !"Y".equals(admin.getCompVerifiedIndc());
         if (shouldThrowError) {
