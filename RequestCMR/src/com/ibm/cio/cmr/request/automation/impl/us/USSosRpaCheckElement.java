@@ -102,6 +102,7 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
         boolean shouldThrowError = !"Y".equals(admin.getCompVerifiedIndc());
         if (shouldThrowError) {
           output.setOnError(true);
+          engineData.addNegativeCheckStatus("DnBMatch", "No high quality matches with D&B and SOS-RPA records.");
         } else {
           output.setOnError(false);
         }
