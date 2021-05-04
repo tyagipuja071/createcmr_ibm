@@ -75,6 +75,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
     // skip dnb matching if dnb matches on UI are overriden and attachment is
     // provided
     if ("Y".equals(admin.getMatchOverrideIndc()) && DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+      LOG.debug("DNB Overidden");
       result.setResults("Overriden");
       result.setDetails(
           "D&B matches were chosen to be overridden by the requester.\nSupporting documentation is provided by the requester as attachment.");
@@ -106,9 +107,12 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
             result.setOnError(false);
           }
           if (!override) {
+            LOG.debug("No Matches in DNB");
             result.setResults("No Matches");
             result.setDetails("No high quality matches with D&B records. Please import from D&B search.");
             engineData.addNegativeCheckStatus("DnBMatch", "No high quality matches with D&B records. Please import from D&B search.");
+          } else {
+            result.setDetails("No high quality matches with D&B records. Please import from D&B search.");
           }
         } else {
           // actions to be performed only when matches with high confidence are
@@ -233,6 +237,8 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
             if (!override) {
               engineData.addRejectionComment("OTH", "Matches against D&B were found but no record matched the request data.", "", "");
               result.setResults("Name/Address not matched");
+            } else {
+              result.setDetails("Matches against D&B were found but no record matched the request data.");
             }
             if (!SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry())) {
               result.setOnError(true);
