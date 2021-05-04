@@ -132,15 +132,10 @@ public class BELUXHandler extends BaseSOFHandler {
           for (FindCMRRecordModel record : source.getItems()) {
             seqNo = record.getCmrAddrSeq();
             if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo)) {
-
-              //
               sofUses = this.legacyObjects.getUsesBySequenceNo(seqNo);
               if (StringUtils.isNotBlank(record.getCmrAddrSeq()) && !sofUses.isEmpty()) {
                 for (String sofUse : sofUses) {
                   addrType = getAddressTypeByUse(sofUse);
-                  //
-
-                  addrType = record.getCmrAddrTypeCode();
                   if (!StringUtils.isEmpty(addrType)) {
                     addr = cloneAddress(record, addrType);
                     addr.setCmrDept(record.getCmrCity2());
