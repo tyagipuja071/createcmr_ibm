@@ -102,12 +102,11 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
         scorecard.setRpaMatchingResult("N");
         log.debug("Scorecard Updated for SOS-RPA to No");
         validation.setSuccess(true);
-        boolean shouldThrowError = !"Y".equals(admin.getCompVerifiedIndc());
-        if (shouldThrowError) {
+        if ("O".equals(admin.getCompVerifiedIndc()) || "Y".equals(admin.getCompVerifiedIndc())) {
+          output.setOnError(false);
+        } else {
           output.setOnError(true);
           engineData.addNegativeCheckStatus("DnBMatch", "No high quality matches with D&B and SOS-RPA records.");
-        } else {
-          output.setOnError(false);
         }
         validation.setMessage("No Matches found");
         output.setDetails(response.getMessage());
