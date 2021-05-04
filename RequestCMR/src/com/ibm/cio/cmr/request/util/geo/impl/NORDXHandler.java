@@ -226,7 +226,8 @@ public class NORDXHandler extends BaseSOFHandler {
 
                 converted.add(addr);
               }
-              if (CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode())) {
+              if (CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode())
+                  && record.getCmrAddrSeq().equals(mainRecord.getCmrAddrSeq())) {
                 String kunnr = addr.getCmrSapNumber();
                 // String adrnr = getaddAddressAdrnr(entityManager, cmrIssueCd,
                 // SystemConfiguration.getValue("MANDT"), kunnr,
