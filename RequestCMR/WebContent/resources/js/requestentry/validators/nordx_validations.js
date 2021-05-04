@@ -97,7 +97,7 @@ function afterConfigForNORDX() {
   }
   FormManager.hide('StateProv', 'stateProv');
   // setVatValidatorNORDX();
-  setSalesRepValues();
+  // setSalesRepValues();
   // setAdminDSCValues();
   // setTaxCdValuesCROSS();
   setSBOForFinlandSubRegion();
@@ -241,13 +241,6 @@ function addHandlersForNORDX() {
   if (_SalesRepHandler == null) {
     _SalesRepHandler = dojo.connect(FormManager.getField('repTeamMemberNo'), 'onChange', function(value) {
       setAdminDSCValues(value);
-    });
-  }
-
-  if (_IMSHandler == null && FormManager.getActualValue('cmrIssuingCntry')) {
-    _IMSHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
-      setSalesRepValues();
-      FormManager.readOnly('subIndustryCd');// CMR-1993
     });
   }
 
@@ -453,6 +446,124 @@ function getLandedCountryByAddType(addType) {
 // }
 // }
 // }
+/**
+ * NORDIX - CMR-1709
+ */
+function onSubIndustryChange() {
+  console.log(">>>> onSubIndustryChange >>>>");
+  var reqType = null;
+  reqType = FormManager.getActualValue('reqType');
+  if (reqType == 'U') {
+    console.log(">>>> Exit onSubIndustChange for Update.");
+    return;
+  }
+  _subIndCdHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
+    if (!value) {
+      return;
+    }
+    if (value != null && value.length > 1) {
+      setSRValuesBaseOnSubInd(value);
+      FormManager.readOnly('subIndustryCd');// CMR-1993
+    }
+  });
+  if (_subIndCdHandler && _subIndCdHandler[0]) {
+    _subIndCdHandler[0].onChange();
+  }
+}
+
+/*
+ * NORDX - sets Sales rep based on subIndustry Changed by CMR-1709
+ */
+function setSRValuesBaseOnSubInd(subIndustry) {
+
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+
+  if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
+
+  if (FormManager.getActualValue('custSubGrp') == '' || subIndustry == '') {
+    return;
+  }
+  var subIndPage = null;
+  var subIndDB = null;
+  if (typeof (_pagemodel) != 'undefined') {
+    subIndPage = FormManager.getActualValue('subIndustryCd');
+    subIndDB = _pagemodel.subIndustryCd;
+  }
+
+  if (subIndPage == subIndDB && subIndPage != null && subIndDB != null) {
+    return;
+  }
+
+  var clientTier = FormManager.getActualValue('clientTier');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var isuCd = FormManager.getActualValue('isuCd');
+  var geoCd = FormManager.getActualValue('countryUse').substring(3, 5);
+  if (isuCd != '') {
+    var isuCtc = isuCd + clientTier;
+    var ind = subIndustry.substring(0, 1);
+    if (isuCtc == '34Q') {
+      if (cntry == '678') {
+        // DK/FO/GL
+        var MSD993_34Q = "B,C,D,J,L,P,T,V";
+        var MSD992_6644 = "G,Y,E,H,X,U";
+        var MSD992_1375 = "A,K,F,N,S,Z";
+        var MSD302_34Q = "M,R,W";
+        if (ind != '') {
+          if (MSD993_34Q.indexOf(ind) >= 0) {
+            FormManager.setValue('repTeamMemberNo', "MSD993");
+            FormManager.setValue('engineeringBo', '6880');
+          } else if (MSD992_6644.indexOf(ind) >= 0) {
+            FormManager.setValue('repTeamMemberNo', "MSD992");
+            FormManager.setValue('engineeringBo', '6644');
+          } else if (MSD992_1375.indexOf(ind) >= 0) {
+            FormManager.setValue('repTeamMemberNo', "MSD992");
+            FormManager.setValue('engineeringBo', '1375');
+          } else if (MSD302_34Q.indexOf(ind) >= 0) {
+            FormManager.setValue('repTeamMemberNo', "MSD302");
+            FormManager.setValue('engineeringBo', '6881');
+          }
+        } else {
+          FormManager.setValue('repTeamMemberNo', "MSD302");
+          FormManager.setValue('engineeringBo', '6881');
+        }
+      } else if (cntry == '702' && geoCd == '') {
+        // Finland
+        var MSF107_6949 = "A,E,G,J,L,M,P,U,V,X,Y,Z";
+        var MSF107_1379 = "B,D,R,T,W";
+        var MSF702 = "C,F,H,K,N,S";
+        if (MSF107_6949.indexOf(ind) >= 0) {
+          FormManager.setValue('repTeamMemberNo', "MSF107");
+          FormManager.setValue('engineeringBo', '6949');
+        } else if (MSF107_1379.indexOf(ind) >= 0) {
+          FormManager.setValue('repTeamMemberNo', "MSF107");
+          FormManager.setValue('engineeringBo', '1379');
+        } else if (MSF702.indexOf(ind) >= 0) {
+          FormManager.setValue('repTeamMemberNo', "MSF702");
+          FormManager.setValue('engineeringBo', '7864');
+        }
+      } else if (cntry == '846') {
+        var MSS315 = "A,E,G,H,K,U,V,X,Y";
+        var MSS596_1387 = "B,C,D,R,T,W,L,Z";
+        var MSS596_6966 = "F,J,M,N,P,S,V";
+        if (MSS315.indexOf(ind) >= 0) {
+          FormManager.setValue('repTeamMemberNo', "MSS315");
+          FormManager.setValue('engineeringBo', '6888');
+        } else if (MSS596_1387.indexOf(ind) >= 0) {
+          FormManager.setValue('repTeamMemberNo', "MSS596");
+          FormManager.setValue('engineeringBo', '1387');
+        } else if (MSS596_6966.indexOf(ind) >= 0) {
+          FormManager.setValue('repTeamMemberNo', "MSS596");
+          FormManager.setValue('engineeringBo', '6966');
+        }
+      }
+    }
+  }
+}
+
 /**
  * NORDIX - sets SBO based on Postal Code value
  */
@@ -3346,6 +3457,7 @@ dojo.addOnLoad(function() {
   // CREATCMR-1709
   // GEOHandler.addAfterConfig(resetCustPrefLang, GEOHandler.NORDX);
   // GEOHandler.addAfterTemplateLoad(resetCustPrefLang, GEOHandler.NORDX);
+  GEOHandler.addAfterTemplateLoad(onSubIndustryChange, GEOHandler.NORDX);// CMR-1709
 
   // CREATCMR-1690
   GEOHandler.registerValidator(addCmrNoValidatorForNordx, GEOHandler.NORDX);
