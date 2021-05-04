@@ -97,8 +97,6 @@ function afterConfigForNORDX() {
   }
   FormManager.hide('StateProv', 'stateProv');
   // setVatValidatorNORDX();
-  // setSalesRepValues();
-  // setAdminDSCValues();
   // setTaxCdValuesCROSS();
   setSBOForFinlandSubRegion();
   setPPSCEID();
@@ -214,7 +212,6 @@ var _ISUHandler = null;
 var _CTCHandler = null;
 var _SalesRepHandler = null;
 var _AdminDSCHandler = null;
-var _IMSHandler = null;
 var _vatExemptHandler = null;
 var _poSteertNorwayFin = null;
 var _PostalCodeHandler = null;
@@ -457,6 +454,11 @@ function onSubIndustryChange() {
     console.log(">>>> Exit onSubIndustChange for Update.");
     return;
   }
+
+  if (_isScenarioChanged) {
+    setSalesRepValues();
+  }
+
   _subIndCdHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
     if (!value) {
       return;
