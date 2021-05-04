@@ -132,12 +132,23 @@ public class BELUXHandler extends BaseSOFHandler {
           for (FindCMRRecordModel record : source.getItems()) {
             seqNo = record.getCmrAddrSeq();
             if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo)) {
-              addrType = record.getCmrAddrTypeCode();
-              if (!StringUtils.isEmpty(addrType)) {
-                addr = cloneAddress(record, addrType);
-                addr.setCmrDept(record.getCmrCity2());
-                addr.setCmrName4(record.getCmrName4());
-                converted.add(addr);
+              if (StringUtils.isNotBlank(record.getCmrAddrSeq()) && !"PG".equals(record.getCmrOrderBlock())) {
+                addrType = record.getCmrAddrTypeCode();
+                if (!StringUtils.isEmpty(addrType)) {
+                  addr = cloneAddress(record, addrType);
+                  addr.setCmrDept(record.getCmrCity2());
+                  addr.setCmrName4(record.getCmrName4());
+                  converted.add(addr);
+                }
+              } else {
+                record.setCmrAddrTypeCode("PG01");
+                addrType = record.getCmrAddrTypeCode();
+                if (!StringUtils.isEmpty(addrType)) {
+                  addr = cloneAddress(record, addrType);
+                  addr.setCmrDept(record.getCmrCity2());
+                  addr.setCmrName4(record.getCmrName4());
+                  converted.add(addr);
+                }
               }
             }
           }
@@ -1584,7 +1595,7 @@ public class BELUXHandler extends BaseSOFHandler {
     String addrSeq = addr.getId().getAddrSeq();
     String addrType = addr.getId().getAddrType();
     for (Kna1 kna1 : kna1Records) {
-      if (addrType.equals(kna1.getKtokd()) && addrSeq.equals(kna1.getZzkvSeqno())) {
+      if ((addrType.equals(kna1.getKtokd()) && addrSeq.equals(kna1.getZzkvSeqno())) || "PG01".equals(addr.getId().getAddrType())) {
         result = true;
       }
     }

@@ -51,7 +51,7 @@ public class NLTransformer extends EMEATransformer {
 
   private static final Logger LOG = Logger.getLogger(NLTransformer.class);
 
-  private static final String[] ADDRESS_ORDER = { "ZS01", "ZP01", "ZI01", "ZD01", "ZS02", "ZP02" };
+  private static final String[] ADDRESS_ORDER = { "ZS01", "ZP01", "ZI01", "ZD01", "ZS02", "ZP02", "PG01" };
   protected boolean duplicateRecordFound = false;
   protected Map<String, String> dupCMRValues = new HashMap<String, String>();
   protected List<String> dupShippingSequences = null;
@@ -1526,5 +1526,13 @@ public class NLTransformer extends EMEATransformer {
     } else {
       return false;
     }
+  }
+
+  @Override
+  public boolean skipLegacyAddressData(EntityManager entityManager, CMRRequestContainer cmrObjects, Addr currAddr, boolean flag) {
+    if ("PG01".equals(currAddr.getId().getAddrType())) {
+      return true;
+    }
+    return false;
   }
 }
