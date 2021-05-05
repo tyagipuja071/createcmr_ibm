@@ -84,7 +84,7 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
       if (response != null && response.isSuccess() && response.getRecord() != null) {
         admin.setCompVerifiedIndc("Y");
         scorecard.setRpaMatchingResult("Y");
-        log.debug("Scorecard Updated for SOS-RPA to Yes");
+        log.debug("Scorecard Updated for SOS-RPA to" + scorecard.getRpaMatchingResult());
         validation.setSuccess(true);
         validation.setMessage("Successful Execution");
         log.debug(response.getMessage());
@@ -100,13 +100,15 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
         engineData.clearNegativeCheckStatus("DNB_VAT_MATCH_CHECK_FAIL");
       } else {
         scorecard.setRpaMatchingResult("N");
-        log.debug("Scorecard Updated for SOS-RPA to No");
+        updateEntity(admin, entityManager);
+        log.debug("Scorecard Updated for SOS-RPA to" + scorecard.getRpaMatchingResult());
         validation.setSuccess(true);
         if ("O".equals(admin.getCompVerifiedIndc()) || "Y".equals(admin.getCompVerifiedIndc())) {
           output.setOnError(false);
+          admin.setCompVerifiedIndc("Y");
         } else {
           output.setOnError(true);
-          engineData.addNegativeCheckStatus("DnBMatch", "No high quality matches with D&B and SOS-RPA records.");
+          engineData.addNegativeCheckStatus("DnBSoSMatch", "No high quality matches with D&B and SOS-RPA records.");
         }
         validation.setMessage("No Matches found");
         output.setDetails(response.getMessage());
