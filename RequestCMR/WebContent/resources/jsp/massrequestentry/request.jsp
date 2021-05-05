@@ -80,10 +80,6 @@ dojo.addOnLoad(function() {
        <%if( (reqentry.getCmrIssuingCntry().equalsIgnoreCase("706")) && reqentry.getUserRole().equalsIgnoreCase("Processor")){%>
         addDPLValidator();
     <%}%>
-       <%if( (reqentry.getCmrIssuingCntry().equalsIgnoreCase("678") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("846")||reqentry.getCmrIssuingCntry().equalsIgnoreCase("702")
-       ||reqentry.getCmrIssuingCntry().equalsIgnoreCase("806")) && reqentry.getUserRole().equalsIgnoreCase("Processor")){%>
-        addDPLValidator();
-    <%}%>
     <%}%>
     
     <%if (reqentry.getReqType()!= null && (CmrConstants.REQ_TYPE_UPDT_BY_ENT.equals(reqentry.getReqType())) && reqentry.getReqId() > 0){%>
