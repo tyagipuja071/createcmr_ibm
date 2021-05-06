@@ -31,7 +31,6 @@ import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.entity.DataRdc;
-import com.ibm.cio.cmr.request.entity.Kna1;
 import com.ibm.cio.cmr.request.entity.MachinesToInstall;
 import com.ibm.cio.cmr.request.entity.MachinesToInstallPK;
 import com.ibm.cio.cmr.request.entity.Sadr;
@@ -1203,7 +1202,7 @@ public class NORDXHandler extends BaseSOFHandler {
                   TemplateValidation error = new TemplateValidation(name);
                   LOG.trace("The row " + (row.getRowNum() + 1)
                       + ":Note that Street Cond can't be filled without Street. Please fix and upload the template again.");
-                  error.addError((row.getRowNum() + 1), "Street", "The row " + (row.getRowNum() + 1)
+                  error.addError((row.getRowNum() + 1), "Street Cond & Additional Info", "The row " + (row.getRowNum() + 1)
                       + ":Note that Street Cond can't be filled without Street. Please fix and upload the template again.<br>");
                   validations.add(error);
                 }
@@ -1213,7 +1212,7 @@ public class NORDXHandler extends BaseSOFHandler {
                 TemplateValidation error = new TemplateValidation(name);
                 LOG.trace("The row " + (row.getRowNum() + 1)
                     + ":Note that Street Cond and Additional Info both filled not allowed. Please fix and upload the template again.");
-                error.addError((row.getRowNum() + 1), "Street", "The row " + (row.getRowNum() + 1)
+                error.addError((row.getRowNum() + 1), "Street Cond & Additional Info", "The row " + (row.getRowNum() + 1)
                     + ":Note that Street Cond and Additional Info both filled not allowed. Please fix and upload the template again.<br>");
                 validations.add(error);
 
@@ -2296,24 +2295,25 @@ public class NORDXHandler extends BaseSOFHandler {
   }
 
   private static boolean isDivCMR(String cmrNo, String cntry) {
-    boolean isDivestiture = true;
-    String mandt = SystemConfiguration.getValue("MANDT");
-    EntityManager entityManager = JpaManager.getEntityManager();
-    String sql = ExternalizedQuery.getSql("ND.GET.ZS01KATR10");
-
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setForReadOnly(true);
-    query.setParameter("KATR6", cntry);
-    query.setParameter("MANDT", mandt);
-    query.setParameter("CMR", cmrNo);
-
-    Kna1 zs01 = query.getSingleResult(Kna1.class);
-    if (zs01 != null) {
-      if (StringUtils.isBlank(zs01.getKatr10())) {
-        isDivestiture = false;
-      }
-    }
-    return isDivestiture;
+    return false;
+    // boolean isDivestiture = true;
+    // String mandt = SystemConfiguration.getValue("MANDT");
+    // EntityManager entityManager = JpaManager.getEntityManager();
+    // String sql = ExternalizedQuery.getSql("ND.GET.ZS01KATR10");
+    //
+    // PreparedQuery query = new PreparedQuery(entityManager, sql);
+    // query.setForReadOnly(true);
+    // query.setParameter("KATR6", cntry);
+    // query.setParameter("MANDT", mandt);
+    // query.setParameter("CMR", cmrNo);
+    //
+    // Kna1 zs01 = query.getSingleResult(Kna1.class);
+    // if (zs01 != null) {
+    // if (StringUtils.isBlank(zs01.getKatr10())) {
+    // isDivestiture = false;
+    // }
+    // }
+    // return isDivestiture;
   }
 
   // CREATCMR-1653
