@@ -161,6 +161,12 @@ public class NORDXHandler extends BaseSOFHandler {
           // map RDc - SOF - CreateCMR by sequence no
           for (FindCMRRecordModel record : source.getItems()) {
             seqNo = record.getCmrAddrSeq();
+            String legacyseqNoformat = StringUtils.leftPad(seqNo, 5, '0');
+            String legacyAddressSeq = getLegacyAddressSeq(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), legacyseqNoformat);
+
+            if (StringUtils.isBlank(legacyAddressSeq)) {
+              break;
+            }
 
             // if
             // ((CmrConstants.ADDR_TYPE.ZD01.toString().equals(record.getCmrAddrTypeCode()))
@@ -2622,6 +2628,21 @@ public class NORDXHandler extends BaseSOFHandler {
   public String isSecondaryEpl(EntityManager entityManager, String rcyaa, String cmr_no, String seq) {
     String secondaryInst = null;
     String sql = ExternalizedQuery.getSql("ND.ISSECONDARYEPL");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("RCYAA", rcyaa);
+    query.setParameter("RCUXA", cmr_no);
+    query.setParameter("SEQ", seq);
+    String result = query.getSingleResult(String.class);
+
+    if (result != null) {
+      secondaryInst = result;
+    }
+    return secondaryInst;
+  }
+
+  public String getLegacyAddressSeq(EntityManager entityManager, String rcyaa, String cmr_no, String seq) {
+    String secondaryInst = null;
+    String sql = ExternalizedQuery.getSql("ND.GETLEGACYADDRESSSEQ");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("RCYAA", rcyaa);
     query.setParameter("RCUXA", cmr_no);
