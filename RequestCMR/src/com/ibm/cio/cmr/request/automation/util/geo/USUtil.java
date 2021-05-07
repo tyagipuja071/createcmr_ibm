@@ -1008,6 +1008,9 @@ public class USUtil extends AutomationUtil {
     query.setForReadOnly(true);
     if (query.exists() && "Y".equals(SystemParameters.getString("US.SKIP_UPDATE_CHECK"))) {
       // skip checks if requester is from USCMDE team
+      LOG.debug("Requester is from CMDE team, skipping Update checks.");
+      output.setDetails("Requester is from CMDE team, skipping Update checks.\n");
+      validation.setMessage("Update checks Skipped");
       validation.setSuccess(true);
     } else {
       String dataDetails = output.getDetails() != null ? output.getDetails() : "";
@@ -1118,12 +1121,10 @@ public class USUtil extends AutomationUtil {
           } else {
             // company proof
             if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
-              validation.setMessage("Review Needed");
-              engineData.addNegativeCheckStatus("DNB_MATCH_FAIL_" + addrType,
-                  "High confidence D&B matches did not match the " + addrDesc + " address data.");
+              validation.setMessage("Validated");
               details.append("High confidence D&B matches did not match the " + addrDesc + " address data.").append("\n");
-              details.append("Supporting documentation is provided by the requester as attachment.").append("\n");
-              validation.setSuccess(false);
+              details.append("Supporting documentation is provided by the requester as attachment for " + addrDesc).append("\n");
+              validation.setSuccess(true);
             } else {
               validation.setMessage("Rejected");
               validation.setSuccess(false);
@@ -1137,11 +1138,10 @@ public class USUtil extends AutomationUtil {
         } else {
           // company proof
           if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
-            validation.setMessage("Review Needed");
-            engineData.addNegativeCheckStatus("DNB_MATCH_FAIL_" + addrType, "No High Quality D&B Matches were found for " + addrDesc + " address.");
+            validation.setMessage("Validated");
             details.append("No High Quality D&B Matches were found for " + addrDesc + " address.").append("\n");
-            details.append("Supporting documentation is provided by the requester as attachment.").append("\n");
-            validation.setSuccess(false);
+            details.append("Supporting documentation is provided by the requester as attachment for " + addrDesc).append("\n");
+            validation.setSuccess(true);
           } else {
             validation.setMessage("Rejected");
             validation.setSuccess(false);
@@ -1155,11 +1155,10 @@ public class USUtil extends AutomationUtil {
       } else {
         // company proof
         if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
-          validation.setMessage("Review Needed");
-          engineData.addNegativeCheckStatus("DNB_MATCH_FAIL_" + addrType, "No D&B Matches were found for " + addrDesc + " address.");
+          validation.setMessage("Validated");
           details.append("No D&B Matches were found for " + addrDesc + " address.").append("\n");
-          details.append("Supporting documentation is provided by the requester as attachment.").append("\n");
-          validation.setSuccess(false);
+          details.append("Supporting documentation is provided by the requester as attachment for " + addrDesc).append("\n");
+          validation.setSuccess(true);
         } else {
           validation.setMessage("Rejected");
           validation.setSuccess(false);
