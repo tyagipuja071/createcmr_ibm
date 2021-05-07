@@ -305,12 +305,9 @@ function setIsuOnIsic(){
   
     var clusterDesc = cmr.query('GET.DESC_BY_CLUSTER', qParams);
     if((cmrIssuingCntry == '616' || cmrIssuingCntry == '796' ) &&(clusterDesc[0] != '' && (clusterDesc[0].ret1.includes('S2') || clusterDesc[0].ret1.includes('Default')))){
-        FormManager.setValue('repTeamMemberNo', '000000');
-        FormManager.readOnly('repTeamMemberNo');
-     }  else {
-    	 FormManager.setValue('repTeamMemberNo', '');
-         FormManager.enable('repTeamMemberNo');
-       }
+      FormManager.setValue('repTeamMemberNo', '000000');
+      FormManager.readOnly('repTeamMemberNo');
+    } 
     if((cmrIssuingCntry == '738' || cmrIssuingCntry == '736' ) &&(clusterDesc[0] != '' && !(clusterDesc[0].ret1.includes('S1')))){
       return;
     }
