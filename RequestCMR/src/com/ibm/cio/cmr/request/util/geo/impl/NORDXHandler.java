@@ -31,6 +31,7 @@ import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.entity.DataRdc;
+import com.ibm.cio.cmr.request.entity.Kna1;
 import com.ibm.cio.cmr.request.entity.MachinesToInstall;
 import com.ibm.cio.cmr.request.entity.MachinesToInstallPK;
 import com.ibm.cio.cmr.request.entity.Sadr;
@@ -937,9 +938,11 @@ public class NORDXHandler extends BaseSOFHandler {
 
             if (StringUtils.isEmpty(cmrNo)) {
               TemplateValidation error = new TemplateValidation(name);
-              LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that CMR No. is mandatory. Please fix and upload the template again.");
+              LOG.trace("The row " + (row.getRowNum() + 1)
+                  + ":Note that if the ROW format is changed then CMR No. is mandatory field to be filled. Please fix and upload the template again.");
               error.addError((row.getRowNum() + 1), "CMR No.",
-                  "The row " + (row.getRowNum() + 1) + ":Note that CMR No. is mandatory. Please fix and upload the template again.<br>");
+                  "The row " + (row.getRowNum() + 1)
+                      + ":Note that if the ROW format is changed then CMR No. is mandatory field to be filled. Please fix and upload the template again.<br>");
               validations.add(error);
             }
             if (isDivCMR(cmrNo, country)) {
@@ -2301,25 +2304,24 @@ public class NORDXHandler extends BaseSOFHandler {
   }
 
   private static boolean isDivCMR(String cmrNo, String cntry) {
-    return false;
-    // boolean isDivestiture = true;
-    // String mandt = SystemConfiguration.getValue("MANDT");
-    // EntityManager entityManager = JpaManager.getEntityManager();
-    // String sql = ExternalizedQuery.getSql("ND.GET.ZS01KATR10");
-    //
-    // PreparedQuery query = new PreparedQuery(entityManager, sql);
-    // query.setForReadOnly(true);
-    // query.setParameter("KATR6", cntry);
-    // query.setParameter("MANDT", mandt);
-    // query.setParameter("CMR", cmrNo);
-    //
-    // Kna1 zs01 = query.getSingleResult(Kna1.class);
-    // if (zs01 != null) {
-    // if (StringUtils.isBlank(zs01.getKatr10())) {
-    // isDivestiture = false;
-    // }
-    // }
-    // return isDivestiture;
+    boolean isDivestiture = true;
+    String mandt = SystemConfiguration.getValue("MANDT");
+    EntityManager entityManager = JpaManager.getEntityManager();
+    String sql = ExternalizedQuery.getSql("ND.GET.ZS01KATR10");
+
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setForReadOnly(true);
+    query.setParameter("KATR6", cntry);
+    query.setParameter("MANDT", mandt);
+    query.setParameter("CMR", cmrNo);
+
+    Kna1 zs01 = query.getSingleResult(Kna1.class);
+    if (zs01 != null) {
+      if (StringUtils.isBlank(zs01.getKatr10())) {
+        isDivestiture = false;
+      }
+    }
+    return isDivestiture;
   }
 
   // CREATCMR-1653
