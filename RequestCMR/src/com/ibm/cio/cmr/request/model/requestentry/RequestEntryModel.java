@@ -420,16 +420,26 @@ public class RequestEntryModel extends BaseModel {
   // CMR-5910 - military flag
   private String military;
 
-  // canada fields
-  private String invoiceDistCd;
-  private String cusInvoiceCopies;
-  
   // dpl assessment internal fields
   private String intDplAssessmentResult;
   private String intDplAssessmentDate;
   private String intDplAssessmentBy;
-  private String intDplAssessmentCmt;  
+  private String intDplAssessmentCmt;
 
+  // canada fields
+  private String invoiceDistCd;
+  private String cusInvoiceCopies;
+
+  private String sourceSystId;
+
+  // taiwan fields
+  private String footnoteTxt1;
+  private String footnoteTxt2;
+  private String customerIdCd;
+
+  // korea fields
+  private String installRep;
+  
   public String getMatchIndc() {
     return matchIndc;
   }
@@ -3019,14 +3029,6 @@ public class RequestEntryModel extends BaseModel {
     this.addrStdTs = addrStdTs;
   }
 
-  public String getPaygoProcessIndc() {
-    return paygoProcessIndc;
-  }
-
-  public void setPaygoProcessIndc(String paygoProcessIndc) {
-    this.paygoProcessIndc = paygoProcessIndc;
-  }
-
   public String getMilitary() {
     return military;
   }
@@ -3035,22 +3037,14 @@ public class RequestEntryModel extends BaseModel {
     this.military = military;
   }
 
-  public String getInvoiceDistCd() {
-    return invoiceDistCd;
+  public String getPaygoProcessIndc() {
+    return paygoProcessIndc;
   }
 
-  public void setInvoiceDistCd(String invoiceDistCd) {
-    this.invoiceDistCd = invoiceDistCd;
+  public void setPaygoProcessIndc(String paygoProcessIndc) {
+    this.paygoProcessIndc = paygoProcessIndc;
   }
 
-  public String getCusInvoiceCopies() {
-    return cusInvoiceCopies;
-  }
-
-  public void setCusInvoiceCopies(String cusInvoiceCopies) {
-    this.cusInvoiceCopies = cusInvoiceCopies;
-  }
-  
   public String getIntDplAssessmentResult() {
     return intDplAssessmentResult;
   }
@@ -3082,5 +3076,61 @@ public class RequestEntryModel extends BaseModel {
   public void setIntDplAssessmentCmt(String intDplAssessmentCmt) {
     this.intDplAssessmentCmt = intDplAssessmentCmt;
   }
+
+  public String getInvoiceDistCd() {
+    return invoiceDistCd;
+  }
+
+  public void setInvoiceDistCd(String invoiceDistCd) {
+    this.invoiceDistCd = invoiceDistCd;
+  }
+
+  public String getCusInvoiceCopies() {
+    return cusInvoiceCopies;
+  }
+
+  public void setCusInvoiceCopies(String cusInvoiceCopies) {
+    this.cusInvoiceCopies = cusInvoiceCopies;
+  }
+
+  public String getSourceSystId() {
+    return sourceSystId;
+  }
+
+  public void setSourceSystId(String sourceSystId) {
+    this.sourceSystId = sourceSystId;
+  }
+
+  public String getFootnoteTxt1() {
+    return footnoteTxt1;
+  }
+
+  public void setFootnoteTxt1(String footnoteTxt1) {
+    this.footnoteTxt1 = footnoteTxt1;
+  }
+
+  public String getFootnoteTxt2() {
+    return footnoteTxt2;
+  }
+
+  public void setFootnoteTxt2(String footnoteTxt2) {
+    this.footnoteTxt2 = footnoteTxt2;
+  }
+
+  public String getCustomerIdCd() {
+    return customerIdCd;
+  }
+
+  public void setCustomerIdCd(String customerIdCd) {
+    this.customerIdCd = customerIdCd;
+  }
+
+public String getInstallRep() {
+	return installRep;
+}
+
+public void setInstallRep(String installRep) {
+	this.installRep = installRep;
+}
 
 }
