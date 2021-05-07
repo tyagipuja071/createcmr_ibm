@@ -264,7 +264,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     custClone.setId(custPkClone);
 
     // override config changes
-    List<CloningOverrideMapping> overrideValues = overrideUtil.getOverrideValueFromMapping(cntry);
+    List<CloningOverrideMapping> overrideValues = overrideUtil.getOverrideValueFromMapping(cntry, cloningQueue.getCreatedBy());
 
     overrideConfigChanges(entityManager, overrideValues, custClone, LEGACY_CUST_TABLE, custPkClone);
 
@@ -1866,7 +1866,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
     for (RdcCloningRefn rdcCloningRefn : pendingCloningRefn) {
       try {
-        overrideValues = overrideUtil.getOverrideValueFromMapping(rdcCloningRefn.getCmrIssuingCntry());
+        overrideValues = overrideUtil.getOverrideValueFromMapping(rdcCloningRefn.getCmrIssuingCntry(), cloningQueue.getCreatedBy());
         processCloningKNA1RDC(entityManager, rdcCloningRefn, overrideValues, cloningQueue);
       } catch (Exception e) {
         partialRollback(entityManager);
@@ -1890,7 +1890,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
       try {
         kna1 = getKna1ByKunnr(entityManager, rdcCloningRefn.getId().getMandt(), rdcCloningRefn.getId().getKunnr());
         kna1Clone = getKna1ByKunnr(entityManager, rdcCloningRefn.getTargetMandt(), rdcCloningRefn.getTargetKunnr());
-        overrideValuesChild = overrideUtil.getOverrideValueFromMapping(rdcCloningRefn.getCmrIssuingCntry());
+        overrideValuesChild = overrideUtil.getOverrideValueFromMapping(rdcCloningRefn.getCmrIssuingCntry(), cloningQueue.getCreatedBy());
         processKna1Children(entityManager, kna1, kna1Clone, overrideValuesChild);
         rdcCloningRefn.setStatus("C");
         updateEntity(rdcCloningRefn, entityManager);
