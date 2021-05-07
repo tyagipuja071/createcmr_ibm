@@ -262,6 +262,9 @@ function AddressDetailsModal_onLoad() {
     cmr.showNode('updateButtonFromView');
   }
 
+  if (details.ret2 == 'PG01' && role != 'PROCESSOR') {
+    cmr.hideNode('updateButtonFromView');
+  }
   // Defect 1518423: PP: Update Address functionality is visible for Imported
   // Billing Address for SM Create :Mukesh
   if ('758' == FormManager.getActualValue('cmrIssuingCntry') && 'C' == FormManager.getActualValue('reqType') && 'Y' == details.ret31) {
@@ -416,6 +419,12 @@ function AddressDetailsModal_onLoad() {
     _assignDetailsValue('#AddressDetailsModal #cnCustContJobTitle_view', details.ret66);
     _assignDetailsValue('#AddressDetailsModal #cnCustContPhone2_view', details.ret67);
     _assignDetailsValue('#AddressDetailsModal #cnCustName3_view', details.ret73);
+  }
+
+  if (FormManager.getActualValue('cmrIssuingCntry') == '766') {
+    _assignDetailsValue('#AddressDetailsModal #billingPstlAddr_view', details.ret58);
+    _assignDetailsValue('#AddressDetailsModal #contact_view', details.ret71);
+    _assignDetailsValue('#AddressDetailsModal #countyName_view', details.ret45);
   }
 
   if (FormManager.getActualValue('cmrIssuingCntry') == '760') {
@@ -1028,6 +1037,12 @@ function addEditAddressModal_onLoad() {
       // FormManager.hide('BillingPstlAddr', 'billingPstlAddr');
       // }
       // }
+      
+      if (FormManager.getActualValue('cmrIssuingCntry') == '766') {
+        FormManager.setValue('billingPstlAddr', details.ret58);
+        FormManager.setValue('contact', details.ret71);
+        FormManager.setValue('countyName', details.ret45);
+      }
 
       if ('Y' == details.ret26) {
         FormManager.setValue('addrStdAcceptInd', "Y");
@@ -1792,6 +1807,18 @@ function applyAddrChangesModal_onLoad() {
       }
 
       if (SysLoc.GREECE == cntry && type.ret1 == 'ZS01') {
+        if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZP01') {
+          continue;
+        }
+      }
+
+      if (SysLoc.TURKEY == cntry && type.ret1 == 'ZP01') {
+        if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZS01') {
+          continue;
+        }
+      }
+
+      if (SysLoc.TURKEY == cntry && type.ret1 == 'ZS01') {
         if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZP01') {
           continue;
         }
