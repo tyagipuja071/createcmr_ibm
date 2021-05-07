@@ -688,7 +688,7 @@ public class NORDXTransformer extends EMEATransformer {
         crossBorder = true;
       }
     } else {
-      crossBorder = true;
+      crossBorder = !DEFAULT_LANDED_COUNTRY.equals(addr.getLandCntry());
     }
     String custName = StringUtils.isNotBlank(addr.getCustNm1()) ? addr.getCustNm1() : "";
     String custNameCond = StringUtils.isNotBlank(addr.getCustNm2()) ? addr.getCustNm2() : "";
@@ -1268,6 +1268,8 @@ public class NORDXTransformer extends EMEATransformer {
   @Override
   public void transformLegacyCustomerDataMassUpdate(EntityManager entityManager, CmrtCust cust, CMRRequestContainer cmrObjects, MassUpdtData muData) { // default
     LOG.debug("Mapping default Data values..");
+    Data data = cmrObjects.getData();
+    setDefaultLandedCountry(data);
     String issuingCntry = cust.getId().getSofCntryCode();
 
     if (!(StringUtils.isNotBlank(muData.getAbbrevNm()) || StringUtils.isNotBlank(muData.getSvcArOffice())
