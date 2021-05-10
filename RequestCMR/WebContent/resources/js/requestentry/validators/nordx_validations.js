@@ -379,6 +379,8 @@ function vatAndVatExemptOnScenario(value) {
       FormManager.removeValidator('vat', Validators.REQUIRED);
     }
     resetVatRequired(zs01Cntry, false);
+  } else if (FormManager.getActualValue('reqType') == 'U') {
+    FormManager.hide('VATExempt', 'vatExempt');
   }
 }
 function getLandedCountryByAddType(addType) {
@@ -3422,7 +3424,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addAddressFieldValidators, GEOHandler.NORDX, null, true);
   GEOHandler.addAddrFunction(hidePOBoxandHandleStreet, GEOHandler.NORDX);
   GEOHandler.addAddrFunction(handleMachineType, GEOHandler.NORDX);
-  GEOHandler.enableCopyAddress(GEOHandler.NORDX, validateNORDXCopy, [ 'ZD01', 'ZP02' ]);
+  GEOHandler.enableCopyAddress(GEOHandler.NORDX, validateNORDXCopy, [ 'ZI01', 'ZD01', 'ZP02' ]);
   GEOHandler.addAddrFunction(updateAddrTypeList, GEOHandler.NORDX);
   GEOHandler.registerValidator(addCrossBorderValidatorNORS, GEOHandler.NORDX, null, true);
   // GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.NORDX);
