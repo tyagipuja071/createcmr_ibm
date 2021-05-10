@@ -62,7 +62,7 @@
 				</column>
 			</columns>
 		</tab>
-		<tab name="Install at" type="Address" typeCode="ZS01">
+		<tab name="Sold To" type="Address" typeCode="ZS01">
 			<columns>
 				<column exactLength="true">
 					<label>CMR. No</label>
@@ -74,6 +74,7 @@
 					<label>Address Seq. No.</label>
 					<dbColumn>ADDR_SEQUENCE_NO</dbColumn>
 					<width>10</width>
+					<length>5</length>
 				</column>
 				<column>
 					<label>Number + Street</label>
@@ -168,7 +169,7 @@
 			</columns>
 		</tab>
 
-		<tab name="Maintenance Billing" type="Address" typeCode="ZP01">
+		<tab name="Bill To" type="Address" typeCode="ZP01">
 			<columns>
 				<column exactLength="true">
 					<label>CMR. No</label>
@@ -180,6 +181,7 @@
 					<label>Address Seq. No.</label>
 					<dbColumn>ADDR_SEQUENCE_NO</dbColumn>
 					<width>10</width>
+					<length>5</length>
 				</column>
 				<column>
 					<label>Number + Street</label>
