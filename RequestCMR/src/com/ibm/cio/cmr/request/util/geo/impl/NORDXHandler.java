@@ -335,60 +335,60 @@ public class NORDXHandler extends BaseSOFHandler {
 
                 if ((isShareZI01 != null && isShareZS02 != null) || (isShareZS02 != null && isShareZD01 != null)
                     || (isShareZI01 != null && isShareZD01 != null)) {
-                // add share ZP01
-                if (isShareZP01 != null && (!installingseq.equals(mainRecord.getCmrAddrSeq()))) {
-                  FindCMRRecordModel sharezp01 = new FindCMRRecordModel();
-                  PropertyUtils.copyProperties(sharezp01, record);
-                  sharezp01.setCmrAddrTypeCode("ZP01");
-                  sharezp01.setCmrAddrSeq(StringUtils.leftPad(String.valueOf(maxintSeqLegacy), 5, '0'));
-                  maxintSeqLegacy++;
-                  sharezp01.setParentCMRNo("");
-                  sharezp01.setCmrSapNumber(record.getCmrSapNumber());
-                  sharezp01.setCmrDept(record.getCmrCity2());
-                  converted.add(sharezp01);
-                  InstalingShareSeq = record.getCmrAddrSeq();
-                }
-                // add share ZS02
+                  // add share ZP01
+                  if (isShareZP01 != null && (!installingseq.equals(mainRecord.getCmrAddrSeq()))) {
+                    FindCMRRecordModel sharezp01 = new FindCMRRecordModel();
+                    PropertyUtils.copyProperties(sharezp01, record);
+                    sharezp01.setCmrAddrTypeCode("ZP01");
+                    sharezp01.setCmrAddrSeq(StringUtils.leftPad(String.valueOf(maxintSeqLegacy), 5, '0'));
+                    maxintSeqLegacy++;
+                    sharezp01.setParentCMRNo("");
+                    sharezp01.setCmrSapNumber(record.getCmrSapNumber());
+                    sharezp01.setCmrDept(record.getCmrCity2());
+                    converted.add(sharezp01);
+                    InstalingShareSeq = record.getCmrAddrSeq();
+                  }
+                  // add share ZS02
                   if (isShareZS02 != null && (!installingseq.equals(mainRecord.getCmrAddrSeq())) && "Y".equals(zi01Flag)) {
-                  FindCMRRecordModel sharezs02 = new FindCMRRecordModel();
-                  PropertyUtils.copyProperties(sharezs02, record);
-                  sharezs02.setCmrAddrTypeCode("ZS02");
-                  sharezs02.setCmrAddrSeq(StringUtils.leftPad(String.valueOf(maxintSeqLegacy), 5, '0'));
-                  maxintSeqLegacy++;
-                  sharezs02.setParentCMRNo("");
-                  sharezs02.setCmrSapNumber(record.getCmrSapNumber());
-                  sharezs02.setCmrDept(record.getCmrCity2());
-                  converted.add(sharezs02);
-                  InstalingShareSeq = record.getCmrAddrSeq();
-                }
-                // add share ZD01
-                if (isShareZD01 != null && (!installingseq.equals(mainRecord.getCmrAddrSeq()))) {
-                  FindCMRRecordModel sharezd01 = new FindCMRRecordModel();
-                  PropertyUtils.copyProperties(sharezd01, record);
-                  sharezd01.setCmrAddrTypeCode("ZD01");
-                  sharezd01.setCmrAddrSeq(StringUtils.leftPad(String.valueOf(maxintSeqLegacy), 5, '0'));
-                  maxintSeqLegacy++;
-                  sharezd01.setParentCMRNo("");
-                  sharezd01.setCmrSapNumber(record.getCmrSapNumber());
-                  sharezd01.setCmrDept(record.getCmrCity2());
-                  converted.add(sharezd01);
-                  InstalingShareSeq = record.getCmrAddrSeq();
-                }
-                // add share ZI01
+                    FindCMRRecordModel sharezs02 = new FindCMRRecordModel();
+                    PropertyUtils.copyProperties(sharezs02, record);
+                    sharezs02.setCmrAddrTypeCode("ZS02");
+                    sharezs02.setCmrAddrSeq(StringUtils.leftPad(String.valueOf(maxintSeqLegacy), 5, '0'));
+                    maxintSeqLegacy++;
+                    sharezs02.setParentCMRNo("");
+                    sharezs02.setCmrSapNumber(record.getCmrSapNumber());
+                    sharezs02.setCmrDept(record.getCmrCity2());
+                    converted.add(sharezs02);
+                    InstalingShareSeq = record.getCmrAddrSeq();
+                  }
+                  // add share ZD01
+                  if (isShareZD01 != null && (!installingseq.equals(mainRecord.getCmrAddrSeq()))) {
+                    FindCMRRecordModel sharezd01 = new FindCMRRecordModel();
+                    PropertyUtils.copyProperties(sharezd01, record);
+                    sharezd01.setCmrAddrTypeCode("ZD01");
+                    sharezd01.setCmrAddrSeq(StringUtils.leftPad(String.valueOf(maxintSeqLegacy), 5, '0'));
+                    maxintSeqLegacy++;
+                    sharezd01.setParentCMRNo("");
+                    sharezd01.setCmrSapNumber(record.getCmrSapNumber());
+                    sharezd01.setCmrDept(record.getCmrCity2());
+                    converted.add(sharezd01);
+                    InstalingShareSeq = record.getCmrAddrSeq();
+                  }
+                  // add share ZI01
                   if (isShareZI01 != null && (!installingseq.equals(mainRecord.getCmrAddrSeq())) && "Y".equals(zs02Flag)) {
-                  FindCMRRecordModel sharezi01 = new FindCMRRecordModel();
+                    FindCMRRecordModel sharezi01 = new FindCMRRecordModel();
                     PropertyUtils.copyProperties(sharezi01, record);
-                  sharezi01.setCmrAddrTypeCode("ZI01");
-                  sharezi01.setCmrAddrSeq(StringUtils.leftPad(String.valueOf(maxintSeqLegacy), 5, '0'));
-                  maxintSeqLegacy++;
-                  sharezi01.setParentCMRNo("");
+                    sharezi01.setCmrAddrTypeCode("ZI01");
+                    sharezi01.setCmrAddrSeq(StringUtils.leftPad(String.valueOf(maxintSeqLegacy), 5, '0'));
+                    maxintSeqLegacy++;
+                    sharezi01.setParentCMRNo("");
                     sharezi01.setCmrSapNumber(record.getCmrSapNumber());
                     sharezi01.setCmrDept(record.getCmrCity2());
-                  converted.add(sharezi01);
+                    converted.add(sharezi01);
                     InstalingShareSeq = record.getCmrAddrSeq();
+                  }
+                  System.out.println("---------ZI01 Share Seq Max Seq is ---------------" + maxintSeqLegacy);
                 }
-                System.out.println("---------ZI01 Share Seq Max Seq is ---------------" + maxintSeqLegacy);
-              }
                 zs02Flag = null;
                 zi01Flag = null;
               }
@@ -809,6 +809,11 @@ public class NORDXHandler extends BaseSOFHandler {
     data.setCustPrefLang(sprasCd);
     // CREATCMR-2144
 
+    // CREATCMR-1657
+    String dunsNo = getDunsNoForNordx(data.getCmrNo(), zs01sapNo, data.getCmrIssuingCntry());
+    data.setDunsNo(dunsNo);
+    // CREATCMR-1657
+
     // data.setEngineeringBo(this.currentImportValues.get("ACAdmDSC"));
     // LOG.trace("ACAdmDSC: " + data.getEngineeringBo());
     // CMR-1746 Change Start
@@ -940,9 +945,8 @@ public class NORDXHandler extends BaseSOFHandler {
               TemplateValidation error = new TemplateValidation(name);
               LOG.trace("The row " + (row.getRowNum() + 1)
                   + ":Note that if the ROW format is changed then CMR No. is mandatory field to be filled. Please fix and upload the template again.");
-              error.addError((row.getRowNum() + 1), "CMR No.",
-                  "The row " + (row.getRowNum() + 1)
-                      + ":Note that if the ROW format is changed then CMR No. is mandatory field to be filled. Please fix and upload the template again.<br>");
+              error.addError((row.getRowNum() + 1), "CMR No.", "The row " + (row.getRowNum() + 1)
+                  + ":Note that if the ROW format is changed then CMR No. is mandatory field to be filled. Please fix and upload the template again.<br>");
               validations.add(error);
             }
             if (isDivCMR(cmrNo, country)) {
@@ -2491,6 +2495,32 @@ public class NORDXHandler extends BaseSOFHandler {
     return spras;
   }
   // CREATCMR-2144
+
+  // CREATCMR-1657
+  private String getDunsNoForNordx(String cmrNo, String kunnr, String countryCd) throws Exception {
+    String dunsNo = "";
+    List<String> results = new ArrayList<String>();
+
+    EntityManager entityManager = JpaManager.getEntityManager();
+    try {
+      String mandt = SystemConfiguration.getValue("MANDT");
+      String sql = ExternalizedQuery.getSql("GET.DUNS.KNA1.BYCMR");
+      sql = StringUtils.replace(sql, ":ZZKV_CUSNO", "'" + cmrNo + "'");
+      sql = StringUtils.replace(sql, ":KUNNR", "'" + kunnr + "'");
+      sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
+      sql = StringUtils.replace(sql, ":KATR6", "'" + countryCd + "'");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      results = query.getResults(String.class);
+      if (results != null && results.size() > 0) {
+        dunsNo = results.get(0);
+      }
+    } finally {
+      entityManager.clear();
+      entityManager.close();
+    }
+    return dunsNo;
+  }
+  // CREATCMR-1657
 
   // CMR-1746
   private String getACAdminFromLegacy(String rcyaa, String cmr_no) throws Exception {

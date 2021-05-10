@@ -3178,7 +3178,8 @@ function addCmrNoValidatorForNordx() {
                   id : 'cmrNo',
                   type : 'text',
                   name : 'cmrNo'
-                }, false, 'Non Internal CMR Number should not be in 997XXX for Internal scenarios.');
+                }, false,
+                    '997XXX range can be used only for Internal SO scenario. For Internal Scenario, please use CMR from any other 99XXXX range.');
               }
             } else if (custSubType == 'CBISO' || custSubType == 'DKISO' || custSubType == 'FOISO' || custSubType == 'GLISO' || custSubType == 'ISISO'
                 || custSubType == 'FIISO' || custSubType == 'EEISO' || custSubType == 'LTISO' || custSubType == 'LVISO' || custSubType == 'INTSO') {
