@@ -132,15 +132,18 @@ public class BELUXHandler extends BaseSOFHandler {
           for (FindCMRRecordModel record : source.getItems()) {
             seqNo = record.getCmrAddrSeq();
             if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo)) {
-              if (StringUtils.isNotBlank(record.getCmrAddrSeq()) && !"PG".equals(record.getCmrOrderBlock())) {
-                addrType = record.getCmrAddrTypeCode();
-                if (!StringUtils.isEmpty(addrType)) {
-                  addr = cloneAddress(record, addrType);
-                  addr.setCmrDept(record.getCmrCity2());
-                  addr.setCmrName4(record.getCmrName4());
-                  converted.add(addr);
+              sofUses = this.legacyObjects.getUsesBySequenceNo(seqNo);
+              if (StringUtils.isNotBlank(record.getCmrAddrSeq()) && !sofUses.isEmpty()) {
+                for (String sofUse : sofUses) {
+                  addrType = record.getCmrAddrTypeCode();
+                  if (!StringUtils.isEmpty(addrType)) {
+                    addr = cloneAddress(record, addrType);
+                    addr.setCmrDept(record.getCmrCity2());
+                    addr.setCmrName4(record.getCmrName4());
+                    converted.add(addr);
+                  }
                 }
-              } else {
+              } else if (sofUses.isEmpty() && "ZP01".equals(record.getCmrAddrTypeCode())) {
                 record.setCmrAddrTypeCode("PG01");
                 addrType = record.getCmrAddrTypeCode();
                 if (!StringUtils.isEmpty(addrType)) {

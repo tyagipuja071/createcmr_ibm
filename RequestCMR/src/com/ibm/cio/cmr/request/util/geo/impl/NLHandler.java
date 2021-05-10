@@ -140,43 +140,37 @@ public class NLHandler extends BaseSOFHandler {
           // map RDc - SOF - CreateCMR by sequence no
           for (FindCMRRecordModel record : source.getItems()) {
             seqNo = record.getCmrAddrSeq();
-
-            // if
-            // ((CmrConstants.ADDR_TYPE.ZD01.toString().equals(record.getCmrAddrTypeCode()))
-            // && (parvmCount > 1)) {
-            // record.setCmrAddrTypeCode("ZS02");
-            // }
-
             System.out.println("seqNo = " + seqNo);
             if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo)) {
-
-              // PG COndition
-              if (StringUtils.isNotBlank(record.getCmrAddrSeq()) && !"PG".equals(record.getCmrOrderBlock())) {
-                addrType = record.getCmrAddrTypeCode();
-                if (!StringUtils.isEmpty(addrType)) {
-                  addr = cloneAddress(record, addrType);
-                  addr.setCmrDept(record.getCmrCity2());
-                  addr.setCmrName4(record.getCmrName4());
-                  if (NL_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry())
-                      && (CmrConstants.ADDR_TYPE.ZD01.toString().equals(addr.getCmrAddrTypeCode())) && "598".equals(addr.getCmrAddrSeq())) {
-                    addr.setCmrAddrTypeCode("ZD02");
-                  }
-                  if (NL_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry())
-                      && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(addr.getCmrAddrTypeCode())) && "28801".equals(addr.getCmrAddrSeq())) {
-                    addr.setCmrAddrTypeCode("ZP02");
-                  }
-                  if ((CmrConstants.ADDR_TYPE.ZD01.toString().equals(addr.getCmrAddrTypeCode()))) {
-                    String stkzn = "";
-                    stkzn = getStkznFromDataRdc(entityManager, addr.getCmrSapNumber(), SystemConfiguration.getValue("MANDT"));
-                    int parvmCount = getCeeKnvpParvmCount(addr.getCmrSapNumber());
-                    if ("0".equals(stkzn) || parvmCount > 0) {
-                      addr.setCmrAddrTypeCode("ZS02");
+              sofUses = this.legacyObjects.getUsesBySequenceNo(seqNo);
+              if (StringUtils.isNotBlank(record.getCmrAddrSeq()) && !sofUses.isEmpty()) {
+                for (String sofUse : sofUses) {
+                  addrType = getAddressTypeByUse(sofUse);
+                  addrType = record.getCmrAddrTypeCode();
+                  if (!StringUtils.isEmpty(addrType)) {
+                    addr = cloneAddress(record, addrType);
+                    addr.setCmrDept(record.getCmrCity2());
+                    addr.setCmrName4(record.getCmrName4());
+                    if (NL_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry())
+                        && (CmrConstants.ADDR_TYPE.ZD01.toString().equals(addr.getCmrAddrTypeCode())) && "598".equals(addr.getCmrAddrSeq())) {
+                      addr.setCmrAddrTypeCode("ZD02");
                     }
+                    if (NL_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry())
+                        && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(addr.getCmrAddrTypeCode())) && "28801".equals(addr.getCmrAddrSeq())) {
+                      addr.setCmrAddrTypeCode("ZP02");
+                    }
+                    if ((CmrConstants.ADDR_TYPE.ZD01.toString().equals(addr.getCmrAddrTypeCode()))) {
+                      String stkzn = "";
+                      stkzn = getStkznFromDataRdc(entityManager, addr.getCmrSapNumber(), SystemConfiguration.getValue("MANDT"));
+                      int parvmCount = getCeeKnvpParvmCount(addr.getCmrSapNumber());
+                      if ("0".equals(stkzn) || parvmCount > 0) {
+                        addr.setCmrAddrTypeCode("ZS02");
+                      }
+                    }
+                    converted.add(addr);
                   }
-                  converted.add(addr);
                 }
-              }
-              else {
+              } else if (sofUses.isEmpty() && "ZP01".equals(record.getCmrAddrTypeCode())) {
                 record.setCmrAddrTypeCode("PG01");
                 addrType = record.getCmrAddrTypeCode();
                 if (!StringUtils.isEmpty(addrType)) {
@@ -2133,6 +2127,23 @@ public class NLHandler extends BaseSOFHandler {
       }
     }
     return newSeq;
+  }
+
+  @Override
+  protected String getAddressTypeByUse(String addressUse) {
+    switch (addressUse) {
+    case "1":
+      return "ZS01";
+    case "2":
+      return "ZP01";
+    case "3":
+      return "ZP02";
+    case "4":
+      return "ZI01";
+    case "5":
+      return "ZD01";
+    }
+    return null;
   }
 
   // NL(788) Shipping addr seq logic should work while copying of address
