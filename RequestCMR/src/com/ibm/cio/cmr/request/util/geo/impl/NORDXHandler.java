@@ -1243,7 +1243,6 @@ public class NORDXHandler extends BaseSOFHandler {
                       "The row " + (row.getRowNum() + 1) + ":Note that City should less than 30 chars. Please fix and upload the template again.");
                   error.addError((row.getRowNum() + 1), "City",
                       ":Note that City should less than 30 chars. Please fix and upload the template again.<br>");
-                  validations.add(error);
                 }
                 if (StringUtils.isNotBlank(postCd)) {
                   if ((city + postCd).length() > 30) {
