@@ -135,7 +135,7 @@ public class BELUXHandler extends BaseSOFHandler {
               sofUses = this.legacyObjects.getUsesBySequenceNo(seqNo);
               if (StringUtils.isNotBlank(record.getCmrAddrSeq()) && !sofUses.isEmpty()) {
                 for (String sofUse : sofUses) {
-                  addrType = getAddressTypeByUse(sofUse);
+                  addrType = record.getCmrAddrTypeCode();
                   if (!StringUtils.isEmpty(addrType)) {
                     addr = cloneAddress(record, addrType);
                     addr.setCmrDept(record.getCmrCity2());
@@ -456,23 +456,6 @@ public class BELUXHandler extends BaseSOFHandler {
     } else {
       return null;
     }
-  }
-
-  @Override
-  protected String getAddressTypeByUse(String addressUse) {
-    switch (addressUse) {
-    case "1":
-      return "ZS01";
-    case "2":
-      return "ZP01";
-    case "3":
-      return "ZS02";
-    case "4":
-      return "ZI01";
-    case "5":
-      return "ZD01";
-    }
-    return null;
   }
 
   private void splitSharedAddr(String sourceAddrType, String SourceAddrSeq, FindCMRRecordModel sourceAddr, String targetAddrType, int targetAddrSeq,
