@@ -1679,26 +1679,21 @@ function addAddressFieldValidators() {
     return {
       validate : function() {
 
-        var cntry = FormManager.getActualValue('cmrIssuingCntry');
-        if (cntry == SysLoc.DENMARK || cntry == SysLoc.FINLAND) {
-          var cntryRegion = FormManager.getActualValue('countryUse');
-          if (cntryRegion != '' && (cntryRegion != SysLoc.FINLAND)) {
-
-            var addrFldCnt = 0;
-            if (FormManager.getActualValue('poBox') != '') {
-              addrFldCnt++;
-            }
-            if (FormManager.getActualValue('addrTxt') != '') {
-              addrFldCnt++;
-            }
-            /*
-             * if (dojo.byId('poBox').getAttribute('aria-readonly') == 'true') {
-             * if (addrFldCnt < 1) { return new ValidationResult({ id :
-             * 'addrTxt', }, false, ''); } }
-             */
-            if (addrFldCnt < 1) {
-              return new ValidationResult(null, false, 'For Street and PO BOX, atleast one should be filled.');
-            }
+        if (FormManager.getActualValue('addrType') == 'ZS01' || FormManager.getActualValue('addrType') == 'ZP01') {
+          var addrFldCnt = 0;
+          if (FormManager.getActualValue('poBox') != '') {
+            addrFldCnt++;
+          }
+          if (FormManager.getActualValue('addrTxt') != '') {
+            addrFldCnt++;
+          }
+          /*
+           * if (dojo.byId('poBox').getAttribute('aria-readonly') == 'true') {
+           * if (addrFldCnt < 1) { return new ValidationResult({ id : 'addrTxt', },
+           * false, ''); } }
+           */
+          if (addrFldCnt < 1) {
+            return new ValidationResult(null, false, 'For Street and PO BOX, atleast one should be filled.');
           }
         }
         return new ValidationResult(null, true);
