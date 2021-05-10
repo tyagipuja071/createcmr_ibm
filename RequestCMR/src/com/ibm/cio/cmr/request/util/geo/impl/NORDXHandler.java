@@ -910,6 +910,7 @@ public class NORDXHandler extends BaseSOFHandler {
       XSSFSheet sheet = book.getSheet(name);
       LOG.debug("validating for sheet " + name);
       if (sheet != null) {
+        TemplateValidation error = new TemplateValidation(name);
         int rowCount = 0;
         for (Row row : sheet) {
           if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
@@ -942,19 +943,14 @@ public class NORDXHandler extends BaseSOFHandler {
             }
 
             if (StringUtils.isEmpty(cmrNo)) {
-              TemplateValidation error = new TemplateValidation(name);
               LOG.trace("The row " + (row.getRowNum() + 1)
                   + ":Note that if the ROW format is changed then CMR No. is mandatory field to be filled. Please fix and upload the template again.");
-              error.addError((row.getRowNum() + 1), "CMR No.", "The row " + (row.getRowNum() + 1)
-                  + ":Note that if the ROW format is changed then CMR No. is mandatory field to be filled. Please fix and upload the template again.<br>");
-              validations.add(error);
+              error.addError((row.getRowNum() + 1), "CMR No.",
+                  ":Note that if the ROW format is changed then CMR No. is mandatory field to be filled. Please fix and upload the template again.<br>");
             }
             if (isDivCMR(cmrNo, country)) {
-              TemplateValidation error = new TemplateValidation(name);
               LOG.trace("The row " + (row.getRowNum() + 1) + ":Note the CMR number is not existed or a divestiture CMR records.");
-              error.addError((row.getRowNum() + 1), "CMR No.",
-                  "The row " + (row.getRowNum() + 1) + ":Note the CMR number is not existed or a divestiture CMR records.<br>");
-              validations.add(error);
+              error.addError((row.getRowNum() + 1), "CMR No.", ":Note the CMR number is not existed or a divestiture CMR records.<br>");
             }
 
             boolean dummyUpd = true;
@@ -976,95 +972,77 @@ public class NORDXHandler extends BaseSOFHandler {
               currCell = (XSSFCell) row.getCell(1);
               abbName = validateColValFromCell(currCell);
               if ("@".equals(abbName)) {
-                TemplateValidation error = new TemplateValidation(name);
                 LOG.trace("The row " + (row.getRowNum() + 1)
                     + ":Note that Abbreviated Name is not allowed blank out. Please fix and upload the template again.");
-                error.addError((row.getRowNum() + 1), "Abbreviated Name", "The row " + (row.getRowNum() + 1)
-                    + ":Note that Abbreviated Name is not allowed blank out. Please fix and upload the template again.<br>");
-                validations.add(error);
+                error.addError((row.getRowNum() + 1), "Abbreviated Name",
+                    ":Note that Abbreviated Name is not allowed blank out. Please fix and upload the template again.<br>");
               }
 
               currCell = (XSSFCell) row.getCell(2);
               abbLocation = validateColValFromCell(currCell);
               if ("@".equals(abbLocation)) {
-                TemplateValidation error = new TemplateValidation(name);
                 LOG.trace("The row " + (row.getRowNum() + 1)
                     + ":Note that Abbreviated Location is not allowed blank out. Please fix and upload the template again.");
-                error.addError((row.getRowNum() + 1), "Abbreviated Location", "The row " + (row.getRowNum() + 1)
-                    + ":Note that Abbreviated Location is mandatory. Please fix and upload the template again.<br>");
-                validations.add(error);
+                error.addError((row.getRowNum() + 1), "Abbreviated Location",
+                    ":Note that Abbreviated Location is mandatory. Please fix and upload the template again.<br>");
               }
 
               currCell = (XSSFCell) row.getCell(8);
               payment = validateColValFromCell(currCell);
               if ("@".equals(payment)) {
-                TemplateValidation error = new TemplateValidation(name);
                 LOG.trace("The row " + (row.getRowNum() + 1)
                     + ":Note that Payment terms is not allowed blank out. Please fix and upload the template again.");
-                error.addError((row.getRowNum() + 1), "Payment terms", "The row " + (row.getRowNum() + 1)
-                    + ":Note that Payment terms is not allowed blank out. Please fix and upload the template again.<br>");
-                validations.add(error);
+                error.addError((row.getRowNum() + 1), "Payment terms",
+                    ":Note that Payment terms is not allowed blank out. Please fix and upload the template again.<br>");
               }
 
               currCell = (XSSFCell) row.getCell(9);
               embargo = validateColValFromCell(currCell);
               if (StringUtils.isNotBlank(embargo) && !"@JDK".contains(embargo)) {
-                TemplateValidation error = new TemplateValidation(name);
                 LOG.trace("The row " + (row.getRowNum() + 1)
                     + ":Note that Embargo code only accept @,J,D,K values. Please fix and upload the template again.");
-                error.addError((row.getRowNum() + 1), "Embargo code", "The row " + (row.getRowNum() + 1)
-                    + ":Note that Embargo code only accept @,J,D,K values. Please fix and upload the template again.<br>");
-                validations.add(error);
+                error.addError((row.getRowNum() + 1), "Embargo code",
+                    ":Note that Embargo code only accept @,J,D,K values. Please fix and upload the template again.<br>");
               }
               currCell = (XSSFCell) row.getCell(12);
               leadingAccount = validateColValFromCell(currCell);
               if ("@".equals(leadingAccount)) {
-                TemplateValidation error = new TemplateValidation(name);
                 LOG.trace("The row " + (row.getRowNum() + 1)
                     + ":Note that Leading Account Number is not allowed blank out. Please fix and upload the template again.");
-                error.addError((row.getRowNum() + 1), "Leading Account Number", "The row " + (row.getRowNum() + 1)
-                    + ":Note that Leading Account Number is not allowed blank out. Please fix and upload the template again.<br>");
-                validations.add(error);
+                error.addError((row.getRowNum() + 1), "Leading Account Number",
+                    ":Note that Leading Account Number is not allowed blank out. Please fix and upload the template again.<br>");
               }
               if (!StringUtils.isBlank(leadingAccount) && !leadingAccount.matches("^[0-9]*$")) {
-                TemplateValidation error = new TemplateValidation(name);
                 LOG.trace("The row " + (row.getRowNum() + 1)
                     + ":Note that Leading Account Number should be only numeric. Please fix and upload the template again.");
-                error.addError((row.getRowNum() + 1), "Leading Account Number", "The row " + (row.getRowNum() + 1)
-                    + ":Note that Leading Account Number should be only numeric. Please fix and upload the template again.<br>");
-                validations.add(error);
+                error.addError((row.getRowNum() + 1), "Leading Account Number",
+                    ":Note that Leading Account Number should be only numeric. Please fix and upload the template again.<br>");
               }
 
               currCell = (XSSFCell) row.getCell(6);
               inac = validateColValFromCell(currCell);
               if (!StringUtils.isBlank(inac) && !(inac.matches("^[a-zA-z]{2}[0-9]{2}") || StringUtils.isNumeric(inac) || "@@@@".equals(inac))) {
-                TemplateValidation error = new TemplateValidation(name);
                 LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that INAC format is incorrect. Please fix and upload the template again.");
                 error.addError((row.getRowNum() + 1), "INAC",
-                    "The row " + (row.getRowNum() + 1) + ":Note that INAC format is incorrect. Please fix and upload the template again.<br>");
-                validations.add(error);
+                    ":Note that INAC format is incorrect. Please fix and upload the template again.<br>");
               }
 
               currCell = (XSSFCell) row.getCell(13);
               acAdmin = validateColValFromCell(currCell);
               if ("@".equals(acAdmin)) {
-                TemplateValidation error = new TemplateValidation(name);
                 LOG.trace("The row " + (row.getRowNum() + 1)
                     + ":Note that A/C Admin DSC is not allowed blank out. Please fix and upload the template again.");
-                error.addError((row.getRowNum() + 1), "A/C Admin DSC", "The row " + (row.getRowNum() + 1)
-                    + ":Note that A/C Admin DSC is not allowed blank out. Please fix and upload the template again.<br>");
-                validations.add(error);
+                error.addError((row.getRowNum() + 1), "A/C Admin DSC",
+                    ":Note that A/C Admin DSC is not allowed blank out. Please fix and upload the template again.<br>");
               }
 
               currCell = (XSSFCell) row.getCell(15);
               salesRep = validateColValFromCell(currCell);
               if ("@".equals(salesRep)) {
-                TemplateValidation error = new TemplateValidation(name);
                 LOG.trace(
                     "The row " + (row.getRowNum() + 1) + ":Note that Sales Rep is not allowed blank out. Please fix and upload the template again.");
-                error.addError((row.getRowNum() + 1), "Sales Rep", "The row " + (row.getRowNum() + 1)
-                    + ":Note that Sales Rep is not allowed blank out. Please fix and upload the template again.<br>");
-                validations.add(error);
+                error.addError((row.getRowNum() + 1), "Sales Rep",
+                    ":Note that Sales Rep is not allowed blank out. Please fix and upload the template again.<br>");
               }
 
             } else {
@@ -1072,11 +1050,9 @@ public class NORDXHandler extends BaseSOFHandler {
               currCell = (XSSFCell) row.getCell(1);
               seq = validateColValFromCell(currCell);
               if (StringUtils.isEmpty(seq)) {
-                TemplateValidation error = new TemplateValidation(name);
                 LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that Sequence number is mandatory. Please fix and upload the template again.");
                 error.addError((row.getRowNum() + 1), "Seq Number",
-                    "The row " + (row.getRowNum() + 1) + ":Note that Sequence number is mandatory. Please fix and upload the template again.<br>");
-                validations.add(error);
+                    ":Note that Sequence number is mandatory. Please fix and upload the template again.<br>");
               }
 
               if (dummyUpd) {
@@ -1117,12 +1093,10 @@ public class NORDXHandler extends BaseSOFHandler {
 
               if ("Installing,Shipping,EPL".contains(name)) {
                 if (StringUtils.isBlank(custNm) || StringUtils.isBlank(street) || StringUtils.isBlank(city) || StringUtils.isBlank(landedCntry)) {
-                  TemplateValidation error = new TemplateValidation(name);
                   LOG.trace("The row " + (row.getRowNum() + 1)
                       + ":Note that Customer name, Street, City, Landed Country must be filled. Please fix and upload the template again.");
-                  error.addError((row.getRowNum() + 1), name, "The row " + (row.getRowNum() + 1)
-                      + ":Note that Customer name, Street, City, Landed Country must be filled. Please fix and upload the template again.<br>");
-                  validations.add(error);
+                  error.addError((row.getRowNum() + 1), name,
+                      ":Note that Customer name, Street, City, Landed Country must be filled. Please fix and upload the template again.<br>");
                 }
               } else {
                 if (SystemLocation.DENMARK.equals(country) || (SystemLocation.FINLAND.equals(country) && !"FI".equals(landedCntry))) {
@@ -1137,23 +1111,19 @@ public class NORDXHandler extends BaseSOFHandler {
                     }
                   }
                   if (StringUtils.isBlank(custNm) || StringUtils.isBlank(city) || !streetPoBoxValid || StringUtils.isBlank(landedCntry)) {
-                    TemplateValidation error = new TemplateValidation(name);
                     LOG.trace("The row " + (row.getRowNum() + 1)
                         + ":Note that Customer name, Street OR POBox, City, Landed Country all must be filled. Please fix and upload the template again.");
-                    error.addError((row.getRowNum() + 1), name, "The row " + (row.getRowNum() + 1)
-                        + ":Note that Customer name, Street OR POBox, City, Landed Country must be filled. Please fix and upload the template again.<br>");
-                    validations.add(error);
+                    error.addError((row.getRowNum() + 1), name,
+                        ":Note that Customer name, Street OR POBox, City, Landed Country must be filled. Please fix and upload the template again.<br>");
 
                   }
                 } else if (SystemLocation.NORWAY.equals(country) || SystemLocation.SWEDEN.equals(country)
                     || (SystemLocation.FINLAND.equals(country) && "FI".equals(landedCntry))) {
                   if (StringUtils.isBlank(custNm) || StringUtils.isBlank(city) || StringUtils.isBlank(landedCntry)) {
-                    TemplateValidation error = new TemplateValidation(name);
                     LOG.trace("The row " + (row.getRowNum() + 1)
                         + ":Note that Customer name, City, Landed Country must be filled. Please fix and upload the template again.");
-                    error.addError((row.getRowNum() + 1), name, "The row " + (row.getRowNum() + 1)
-                        + ":Note that Customer name, City, Landed Country must be filled. Please fix and upload the template again.<br>");
-                    validations.add(error);
+                    error.addError((row.getRowNum() + 1), name,
+                        ":Note that Customer name, City, Landed Country must be filled. Please fix and upload the template again.<br>");
                   }
                 }
               }
@@ -1191,93 +1161,74 @@ public class NORDXHandler extends BaseSOFHandler {
               }
               if (isCrossBoarder) {
                 if (fieldCount > 3) {
-                  TemplateValidation error = new TemplateValidation(name);
                   LOG.trace("The row " + (row.getRowNum() + 1)
                       + ":Note that only 3 fields of Customer name Cond,Addtional Info, Att Person, Street, Po Box can be filled at once. Please fix and upload the template again.");
-                  error.addError((row.getRowNum() + 1), name, "The row " + (row.getRowNum() + 1)
-                      + ":Note that only 3 fields of Customer name Cond,Addtional Info, Att Person, Street, Po Box can be filled at once. Please fix and upload the template again.<br>");
-                  validations.add(error);
+                  error.addError((row.getRowNum() + 1), name,
+                      ":Note that only 3 fields of Customer name Cond,Addtional Info, Att Person, Street, Po Box can be filled at once. Please fix and upload the template again.<br>");
                 }
               } else {
                 if (fieldCount == 5) {
-                  TemplateValidation error = new TemplateValidation(name);
                   LOG.trace("The row " + (row.getRowNum() + 1)
                       + ":Note that only 4 fields of Customer name Cond,Addtional Info, Att Person, Street, Po Box can be filled at once. Please fix and upload the template again.");
-                  error.addError((row.getRowNum() + 1), name, "The row " + (row.getRowNum() + 1)
-                      + ":Note that only 4 fields of Customer name Cond,Addtional Info, Att Person, Street, Po Box can be filled at once. Please fix and upload the template again.<br>");
-                  validations.add(error);
+                  error.addError((row.getRowNum() + 1), name,
+                      ":Note that only 4 fields of Customer name Cond,Addtional Info, Att Person, Street, Po Box can be filled at once. Please fix and upload the template again.<br>");
                 }
               }
               fieldCount = 0;
 
               if (StringUtils.isBlank(street)) {
                 if (StringUtils.isNotBlank(streetCon)) {
-                  TemplateValidation error = new TemplateValidation(name);
                   LOG.trace("The row " + (row.getRowNum() + 1)
                       + ":Note that Street Cond can't be filled without Street. Please fix and upload the template again.");
-                  error.addError((row.getRowNum() + 1), "Street Cond & Additional Info", "The row " + (row.getRowNum() + 1)
-                      + ":Note that Street Cond can't be filled without Street. Please fix and upload the template again.<br>");
-                  validations.add(error);
+                  error.addError((row.getRowNum() + 1), "Street Cond & Additional Info",
+                      ":Note that Street Cond can't be filled without Street. Please fix and upload the template again.<br>");
                 }
               }
 
               if (StringUtils.isNotBlank(streetCon) && StringUtils.isNotBlank(additionalInfo)) {
-                TemplateValidation error = new TemplateValidation(name);
                 LOG.trace("The row " + (row.getRowNum() + 1)
                     + ":Note that Street Cond and Additional Info both filled not allowed. Please fix and upload the template again.");
-                error.addError((row.getRowNum() + 1), "Street Cond & Additional Info", "The row " + (row.getRowNum() + 1)
-                    + ":Note that Street Cond and Additional Info both filled not allowed. Please fix and upload the template again.<br>");
-                validations.add(error);
+                error.addError((row.getRowNum() + 1), "Street Cond & Additional Info",
+                    ":Note that Street Cond and Additional Info both filled not allowed. Please fix and upload the template again.<br>");
 
               }
 
               if (StringUtils.isNotBlank(poBox) && !StringUtils.isNumericSpace(poBox)) {
-                TemplateValidation error = new TemplateValidation(name);
                 LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that PO Box only accept digits. Please fix and upload the template again.");
                 error.addError((row.getRowNum() + 1), "PO BOX",
-                    "The row " + (row.getRowNum() + 1) + ":Note that PO Box only accept digits. Please fix and upload the template again.<br>");
-                validations.add(error);
+                    ":Note that PO Box only accept digits. Please fix and upload the template again.<br>");
 
               }
 
               if (StringUtils.isBlank(poBox)) {
                 if (streetCon.length() > 30) {
-                  TemplateValidation error = new TemplateValidation(name);
                   LOG.trace("The row " + (row.getRowNum() + 1)
                       + ":Note that Street Cond should less than 30 chars. Please fix and upload the template again.");
-                  error.addError((row.getRowNum() + 1), "Street Cond", "The row " + (row.getRowNum() + 1)
-                      + ":Note that Street Cond should less than 30 chars. Please fix and upload the template again.<br>");
-                  validations.add(error);
+                  error.addError((row.getRowNum() + 1), "Street Cond",
+                      ":Note that Street Cond should less than 30 chars. Please fix and upload the template again.<br>");
 
                 }
               } else {
                 String combingStr = streetCon + ", PO BOX " + poBox;
                 if (combingStr.length() > 30) {
-                  TemplateValidation error = new TemplateValidation(name);
                   LOG.trace("The row " + (row.getRowNum() + 1)
                       + ":Note that Combo Street Cond and PO Box(with prefix) should less than 30 chars. Please fix and upload the template again.");
-                  error.addError((row.getRowNum() + 1), "PO Box", "The row " + (row.getRowNum() + 1)
-                      + ":Note that Combo Street Cond and PO Box(with prefix) should less than 30 chars. Please fix and upload the template again.<br>");
-                  validations.add(error);
+                  error.addError((row.getRowNum() + 1), "PO Box",
+                      ":Note that Combo Street Cond and PO Box(with prefix) should less than 30 chars. Please fix and upload the template again.<br>");
                 }
               }
 
               if (!StringUtils.isEmpty(postCd)) {
                 if (StringUtils.isEmpty(landedCntry)) {
-                  TemplateValidation error = new TemplateValidation(name);
                   LOG.trace("Please input landed Country when postal code is filled. Please fix and upload the template again.");
-                  error.addError((row.getRowNum() + 1), "Landed Country", "The row " + (row.getRowNum() + 1)
-                      + ":Please input landed Country when postal code is filled. Please fix and upload the template again.<br>");
-                  validations.add(error);
+                  error.addError((row.getRowNum() + 1), "Landed Country",
+                      ":Please input landed Country when postal code is filled. Please fix and upload the template again.<br>");
                 } else {
                   try {
                     ValidationResult validation = checkPostalCode(landedCntry.substring(0, 2), postCd, country);
                     if (!validation.isSuccess()) {
-                      TemplateValidation error = new TemplateValidation(name);
                       LOG.trace(validation.getErrorMessage());
-                      error.addError((row.getRowNum() + 1), "Postal code.",
-                          "The row " + (row.getRowNum() + 1) + ":" + validation.getErrorMessage() + "<br>");
-                      validations.add(error);
+                      error.addError((row.getRowNum() + 1), "Postal code.", validation.getErrorMessage() + "<br>");
                     }
                   } catch (Exception e) {
                     LOG.error("Error occured on connecting postal code validation service.");
@@ -1288,21 +1239,18 @@ public class NORDXHandler extends BaseSOFHandler {
 
               if (StringUtils.isNotBlank(city)) {
                 if (city.length() > 30) {
-                  TemplateValidation error = new TemplateValidation(name);
                   LOG.trace(
                       "The row " + (row.getRowNum() + 1) + ":Note that City should less than 30 chars. Please fix and upload the template again.");
-                  error.addError((row.getRowNum() + 1), "City", "The row " + (row.getRowNum() + 1)
-                      + ":Note that City should less than 30 chars. Please fix and upload the template again.<br>");
+                  error.addError((row.getRowNum() + 1), "City",
+                      ":Note that City should less than 30 chars. Please fix and upload the template again.<br>");
                   validations.add(error);
                 }
                 if (StringUtils.isNotBlank(postCd)) {
                   if ((city + postCd).length() > 30) {
-                    TemplateValidation error = new TemplateValidation(name);
                     LOG.trace("The row " + (row.getRowNum() + 1)
                         + ":Note that Combo City and postal code should less than 30 chars. Please fix and upload the template again.");
-                    error.addError((row.getRowNum() + 1), "Post Code", "The row " + (row.getRowNum() + 1)
-                        + ":Note that Combo City and postal code should less than 30 chars. Please fix and upload the template again.<br>");
-                    validations.add(error);
+                    error.addError((row.getRowNum() + 1), "Post Code",
+                        ":Note that Combo City and postal code should less than 30 chars. Please fix and upload the template again.<br>");
 
                   }
                 }
@@ -1311,12 +1259,13 @@ public class NORDXHandler extends BaseSOFHandler {
           }
         }
         if (rowCount < 2 && "Data".equals(name)) {
-          TemplateValidation error = new TemplateValidation(name);
           LOG.trace("Note that Blank template uploaded is not allowed. Please input and upload the template again.");
           error.addError((rowCount), "Data Sheet",
               "Note that Blank template uploaded is not allowed. Please input and upload the template again.<br>");
-          validations.add(error);
           rowCount = 0;
+        }
+        if (error.hasErrors()) {
+          validations.add(error);
         }
       }
     }
