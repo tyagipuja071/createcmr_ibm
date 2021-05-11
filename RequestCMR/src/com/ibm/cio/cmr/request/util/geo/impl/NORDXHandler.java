@@ -157,6 +157,8 @@ public class NORDXHandler extends BaseSOFHandler {
 
           int maxintSeqLegacy = getMaxSequenceOnLegacyAddr(entityManager, reqEntry.getCmrIssuingCntry(), mainRecord.getCmrNum());
 
+          String sourceID = getSourceidFromAdmin(entityManager, reqEntry.getReqId());
+
           String zi01Flag = null;
           String zs02Flag = null;
           // map RDc - SOF - CreateCMR by sequence no
@@ -166,7 +168,11 @@ public class NORDXHandler extends BaseSOFHandler {
             String legacyAddressSeq = getLegacyAddressSeq(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), legacyseqNoformat);
 
             if (StringUtils.isBlank(legacyAddressSeq)) {
-              break;
+              if (!StringUtils.isBlank(sourceID) && "PayGo-Test".equals(sourceID) && "ZP01".equals(record.getCmrAddrTypeCode())) {
+                record.setCmrAddrTypeCode("PG01");
+              }else{
+                continue;
+              }
             }
 
             // if
@@ -2627,6 +2633,19 @@ public class NORDXHandler extends BaseSOFHandler {
     query.setParameter("RCYAA", rcyaa);
     query.setParameter("RCUXA", cmr_no);
     query.setParameter("SEQ", seq);
+    String result = query.getSingleResult(String.class);
+
+    if (result != null) {
+      secondaryInst = result;
+    }
+    return secondaryInst;
+  }
+
+  public String getSourceidFromAdmin(EntityManager entityManager, long reqId) {
+    String secondaryInst = null;
+    String sql = ExternalizedQuery.getSql("ND.GETSOURCEIDFROMADMIN");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
     String result = query.getSingleResult(String.class);
 
     if (result != null) {
