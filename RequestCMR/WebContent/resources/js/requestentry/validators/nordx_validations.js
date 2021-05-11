@@ -3397,6 +3397,24 @@ function setSensitiveFlag() {
   }
 }
 
+// CREATCMR-1657
+function lockDunsNo() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+
+  reqType = FormManager.getActualValue('reqType');
+
+  if (reqType == 'U') {
+    if (role == 'REQUESTER' || role == 'PROCESSOR') {
+      FormManager.readOnly('dunsNo');
+    }
+  }
+
+}
+// CREATCMR-1657
+
 dojo.addOnLoad(function() {
   GEOHandler.NORDX = [ '846', '806', '702', '678' ];
 
@@ -3461,6 +3479,9 @@ dojo.addOnLoad(function() {
 
   // CREATCMR-1690
   GEOHandler.registerValidator(addCmrNoValidatorForNordx, GEOHandler.NORDX);
+
+  // CREATCMR-1657
+  GEOHandler.addAfterConfig(lockDunsNo, GEOHandler.NORDX);
 
   // CREATCMR-1689
   GEOHandler.addAddrFunction(setAbbrevNmAddressSave, GEOHandler.NORDX);
