@@ -185,32 +185,36 @@ public class MassCreateWorker implements Runnable {
       }
 
       // update MASS_CREATE table with the error txt and row status cd
-      PreparedQuery cretMassAddrQry = new PreparedQuery(this.entityManager, ExternalizedQuery.getSql("BATCH.GET_MASS_CREATE_ENTITY"));
-      cretMassAddrQry.setParameter("REQ_ID", this.record.getId().getParReqId());
-      cretMassAddrQry.setParameter("ITERATION_ID", this.iterationId);
-      cretMassAddrQry.setParameter("CMR_NO", response.getCmrNo());
-      List<MassCreate> createList = cretMassAddrQry.getResults(MassCreate.class);
+      // PreparedQuery cretMassAddrQry = new PreparedQuery(this.entityManager,
+      // ExternalizedQuery.getSql("BATCH.GET_MASS_CREATE_ENTITY"));
+      // cretMassAddrQry.setParameter("REQ_ID",
+      // this.record.getId().getParReqId());
+      // cretMassAddrQry.setParameter("ITERATION_ID", this.iterationId);
+      // cretMassAddrQry.setParameter("CMR_NO", response.getCmrNo());
+      // List<MassCreate> createList =
+      // cretMassAddrQry.getResults(MassCreate.class);
 
-      for (MassCreate massCretEntity : createList) {
-        if (null != response.getStatus() && CmrConstants.RDC_STATUS_NOT_COMPLETED.equalsIgnoreCase((response.getStatus()))) {
-          if (massCretEntity.getRowStatusCd().equalsIgnoreCase(CmrConstants.MASS_CREATE_ROW_STATUS_UPDATE_FAILE)) {
-            massCretEntity.setErrorTxt(response.getMessage() + " The automatic update also failed.");
-          } else {
-            massCretEntity.setErrorTxt(response.getMessage());
-            massCretEntity.setRowStatusCd("RDCER");
-          }
-        } else if (null != response.getStatus() && (CmrConstants.RDC_STATUS_COMPLETED.equalsIgnoreCase(response.getStatus())
-            || CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equalsIgnoreCase(response.getStatus()))) {
-          if (massCretEntity.getRowStatusCd().equalsIgnoreCase(CmrConstants.MASS_CREATE_ROW_STATUS_UPDATE_FAILE)) {
-            massCretEntity.setErrorTxt("The automatic update failed.");
-          } else {
-            massCretEntity.setRowStatusCd("DONE");
-          }
+      MassCreate massCretEntity = this.record;
+      // for (MassCreate massCretEntity : createList) {
+      if (null != response.getStatus() && CmrConstants.RDC_STATUS_NOT_COMPLETED.equalsIgnoreCase((response.getStatus()))) {
+        if (massCretEntity.getRowStatusCd().equalsIgnoreCase(CmrConstants.MASS_CREATE_ROW_STATUS_UPDATE_FAILE)) {
+          massCretEntity.setErrorTxt(response.getMessage() + " The automatic update also failed.");
+        } else {
+          massCretEntity.setErrorTxt(response.getMessage());
+          massCretEntity.setRowStatusCd("RDCER");
         }
-        LOG.info("Mass Create Record Updated [Request ID: " + massCretEntity.getId().getParReqId() + " CMR_NO: " + this.record.getCmrNo()
-            + " SEQ No: " + massCretEntity.getId().getSeqNo() + "]");
-        this.entityManager.merge(massCretEntity);
+      } else if (null != response.getStatus() && (CmrConstants.RDC_STATUS_COMPLETED.equalsIgnoreCase(response.getStatus())
+          || CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equalsIgnoreCase(response.getStatus()))) {
+        if (massCretEntity.getRowStatusCd().equalsIgnoreCase(CmrConstants.MASS_CREATE_ROW_STATUS_UPDATE_FAILE)) {
+          massCretEntity.setErrorTxt("The automatic update failed.");
+        } else {
+          massCretEntity.setRowStatusCd("DONE");
+        }
       }
+      LOG.info("Mass Create Record Updated [Request ID: " + massCretEntity.getId().getParReqId() + " CMR_NO: " + this.record.getCmrNo() + " SEQ No: "
+          + massCretEntity.getId().getSeqNo() + "]");
+      this.entityManager.merge(massCretEntity);
+      // }
 
       this.entityManager.flush();
 
