@@ -157,7 +157,8 @@ public class NORDXHandler extends BaseSOFHandler {
 
           int maxintSeqLegacy = getMaxSequenceOnLegacyAddr(entityManager, reqEntry.getCmrIssuingCntry(), mainRecord.getCmrNum());
 
-          String sourceID = getSourceidFromAdmin(entityManager, reqEntry.getReqId());
+          // String sourceID = getSourceidFromAdmin(entityManager,
+          // reqEntry.getReqId());
 
           String zi01Flag = null;
           String zs02Flag = null;
@@ -168,7 +169,7 @@ public class NORDXHandler extends BaseSOFHandler {
             String legacyAddressSeq = getLegacyAddressSeq(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), legacyseqNoformat);
 
             if (StringUtils.isBlank(legacyAddressSeq)) {
-              if (!StringUtils.isBlank(sourceID) && "PayGo-Test".equals(sourceID) && "ZP01".equals(record.getCmrAddrTypeCode())) {
+              if ("ZP01".equals(record.getCmrAddrTypeCode())) {
                 record.setCmrAddrTypeCode("PG01");
               }else{
                 continue;
