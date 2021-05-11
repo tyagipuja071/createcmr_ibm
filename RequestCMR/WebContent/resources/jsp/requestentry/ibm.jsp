@@ -174,7 +174,7 @@ dojo.addOnLoad(function(){
           <cmr:field size="80" fieldId="INACCode" id="inacCd" path="inacCd" tabId="MAIN_IBM_TAB" />
           <cmr:view forCountry="760">
           <%if (!readOnly){%>
-          <span class="cmr-bluepages-ro" title="INACCode Search" style="font-family:Geneva, Arial, Helvetica, sans-serif;font-size:12px;" id="geoLocDescCont"><a href="https://w3-connections.ibm.com/communities/service/html/communityview?communityUuid=aba599bd-cf1d-4beb-9e20-7a2b9adbed22#fullpageWidgetId=W0564147ab889_45f2_aeba_df5811201a32&file=bba58209-19fe-4d81-9d1d-cc074d89d6e5" target="_blank">INAC/NAC Code Search</a></span>
+          <span class="cmr-bluepages-ro" title="INACCode Search" style="font-family:Geneva, Arial, Helvetica, sans-serif;font-size:12px;" id="geoLocDescCont"><a href="https://ibm.box.com/s/o0pi2baolsu2px94m5zgc25zkbxxsfbi" target="_blank">INAC/NAC Code Search</a></span>
           <%}%>
           </cmr:view>
         </p> 
