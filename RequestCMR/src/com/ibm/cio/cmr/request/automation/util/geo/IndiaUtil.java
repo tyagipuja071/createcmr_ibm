@@ -77,7 +77,7 @@ public class IndiaUtil extends AutomationUtil{
 	              String custNmTrimmed = getCustomerFullName(addr);
 	              if (custNmTrimmed.toUpperCase().contains("PRIVATE LIMITED") || custNmTrimmed.toUpperCase().contains("COMPANY") || custNmTrimmed.toUpperCase().contains("CORPORATION") || custNmTrimmed.toUpperCase().contains("INCORPORATE") || custNmTrimmed.toUpperCase().contains("ORGANIZATION") || custNmTrimmed.toUpperCase().contains("PVT LTD")) {
 	                details.append("Customer name should not contain 'Private Limited', 'Company', 'Corporation', 'Incorporate', 'Organization', 'Pvt Ltd' .").append("\n");
-	                engineData.addRejectionComment("OTH", "Customer name should not contain 'Private Limite', 'Company', 'Corporation', 'Incorporate', 'Organization', 'Pvt Ltd' .", "", "");
+	                engineData.addRejectionComment("OTH", "Customer name should not contain 'Private Limited', 'Company', 'Corporation', 'Incorporate', 'Organization', 'Pvt Ltd' .", "", "");
 	                return false;
 	              }
 	            }
