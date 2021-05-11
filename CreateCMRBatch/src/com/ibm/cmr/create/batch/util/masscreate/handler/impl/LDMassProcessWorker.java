@@ -91,6 +91,7 @@ public class LDMassProcessWorker implements Runnable {
         errTxt.append("Legacy customer record cannot be updated because it does not exist on LEGACY. CMR NO:" + massUpdt.getCmrNo());
         massUpdt.setErrorTxt(errTxt.toString());
         entityManager.merge(massUpdt);
+        entityManager.flush();
         return;
         // throw new Exception("Customer record cannot be updated.");
       }
@@ -100,10 +101,12 @@ public class LDMassProcessWorker implements Runnable {
         legacyCust.setUpdateTs(SystemUtil.getCurrentTimestamp());
       }
       entityManager.merge(legacyCust);
+      entityManager.flush();
       // partialCommit(entityManager);
 
       if (legacyObjects.getCustomerExt() != null) {
         entityManager.merge(legacyObjects.getCustomerExt());
+        entityManager.flush();
         // partialCommit(entityManager);
       }
 
@@ -111,23 +114,27 @@ public class LDMassProcessWorker implements Runnable {
         if (legacyAddr.isForUpdate()) {
           legacyAddr.setUpdateTs(SystemUtil.getCurrentTimestamp());
           entityManager.merge(legacyAddr);
+          entityManager.flush();
           // partialCommit(entityManager);
         } else if (legacyAddr.isForCreate()) {
           entityManager.persist(legacyAddr);
+          entityManager.flush();
         }
       }
 
       // CMR-2279: update muData
       if (SystemLocation.TURKEY.equals(data.getCmrIssuingCntry())) {
         entityManager.merge(cmrObjects.getMassUpdateData());
+        entityManager.flush();
       }
 
       if (StringUtils.isEmpty(legacyObjects.getErrTxt())) {
         massUpdt.setRowStatusCd(MASS_UPDATE_LEGACYDONE);
         massUpdt.setErrorTxt("Legacy data processing completed.\n\n");
         entityManager.merge(massUpdt);
+        entityManager.flush();
       }
-      entityManager.flush();
+      // entityManager.flush();
 
       LOG.debug("END PROCESSING CMR# >> " + massUpdt.getCmrNo());
     } catch (Exception e) {
