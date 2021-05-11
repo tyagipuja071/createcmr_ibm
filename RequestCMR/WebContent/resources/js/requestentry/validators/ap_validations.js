@@ -2498,6 +2498,11 @@ function setFieldsForDoubleCreates() {
     FormManager.enable('cmrNo');
     FormManager.enable('cmrNoPrefix');
   }
+  if (cntry == '744' && role == 'REQUESTER' && custSubGrp == 'PRIV') {
+	    FormManager.readOnly('apCustClusterId');
+	    FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
+	    FormManager.removeValidator('repTeamMemberName', Validators.REQUIRED);
+	  }
   if (cntry == '852' && role == 'PROCESSOR' && (custSubGrp != 'BLUMX' || custSubGrp != 'MKTPC')) {
     FormManager.enable('cmrNo');
     FormManager.enable('cmrNoPrefix');
