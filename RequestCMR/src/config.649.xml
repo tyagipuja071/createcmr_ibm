@@ -32,6 +32,7 @@
 					<label>SIC Code</label>
 					<dbColumn>ISIC_CD</dbColumn>
 					<width>20</width>
+					<bdsId>ISIC</bdsId>
 				</column>
 				<column>
 					<label>MKTG Rep</label>
@@ -84,13 +85,7 @@
 				</column>
 				<column>
 					<label>Street con't</label>
-					<dbColumn>ADDR_TXT_2</dbColumn>
-					<width>40</width>
-					<length>30</length>
-				</column>
-				<column>
-					<label>Division</label>
-					<dbColumn>DIVN</dbColumn>
+					<dbColumn>ADDR_TXT2</dbColumn>
 					<width>40</width>
 					<length>30</length>
 				</column>
@@ -101,7 +96,7 @@
 					<length>30</length>
 				</column>
 				<column>
-					<label>Department / Attn.</label>
+					<label>Division/Department</label>
 					<dbColumn>DEPT</dbColumn>
 					<width>40</width>
 					<length>30</length>
@@ -113,34 +108,16 @@
 					<length>70</length>
 				</column>
 				<column>
-					<label>Building</label>
-					<dbColumn>BLDG</dbColumn>
-					<width>40</width>
-					<length>100</length>
-				</column>
-				<column>
 					<label>State/Province</label>
 					<dbColumn>STATE_PROV</dbColumn>
 					<width>40</width>
-					<length>30</length>
-				</column>
-				<column>
-					<label>Floor</label>
-					<dbColumn>FLOOR</dbColumn>
-					<width>40</width>
-					<length>100</length>
+					<length>3</length>
 				</column>
 				<column>
 					<label>Postal Code</label>
 					<dbColumn>POST_CD</dbColumn>
 					<width>18</width>
 					<length>10</length>
-				</column>
-				<column>
-					<label>Office</label>
-					<dbColumn>OFFICE</dbColumn>
-					<width>40</width>
-					<length>100</length>
 				</column>
 				<column>
 					<label>Phone#</label>
@@ -170,7 +147,7 @@
 		</tab>
 
 		<tab name="Bill To" type="Address" typeCode="ZP01">
-			<columns>
+				<columns>
 				<column exactLength="true">
 					<label>CMR. No</label>
 					<dbColumn>CMR_NO</dbColumn>
@@ -191,13 +168,7 @@
 				</column>
 				<column>
 					<label>Street con't</label>
-					<dbColumn>ADDR_TXT_2</dbColumn>
-					<width>40</width>
-					<length>30</length>
-				</column>
-				<column>
-					<label>Division</label>
-					<dbColumn>DIVN</dbColumn>
+					<dbColumn>ADDR_TXT2</dbColumn>
 					<width>40</width>
 					<length>30</length>
 				</column>
@@ -208,7 +179,7 @@
 					<length>30</length>
 				</column>
 				<column>
-					<label>Department / Attn.</label>
+					<label>Division/Department</label>
 					<dbColumn>DEPT</dbColumn>
 					<width>40</width>
 					<length>30</length>
@@ -220,34 +191,16 @@
 					<length>70</length>
 				</column>
 				<column>
-					<label>Building</label>
-					<dbColumn>BLDG</dbColumn>
-					<width>40</width>
-					<length>100</length>
-				</column>
-				<column>
 					<label>State/Province</label>
 					<dbColumn>STATE_PROV</dbColumn>
 					<width>40</width>
-					<length>30</length>
-				</column>
-				<column>
-					<label>Floor</label>
-					<dbColumn>FLOOR</dbColumn>
-					<width>40</width>
-					<length>100</length>
+					<length>3</length>
 				</column>
 				<column>
 					<label>Postal Code</label>
 					<dbColumn>POST_CD</dbColumn>
 					<width>18</width>
 					<length>10</length>
-				</column>
-				<column>
-					<label>Office</label>
-					<dbColumn>OFFICE</dbColumn>
-					<width>40</width>
-					<length>100</length>
 				</column>
 				<column>
 					<label>Phone#</label>
