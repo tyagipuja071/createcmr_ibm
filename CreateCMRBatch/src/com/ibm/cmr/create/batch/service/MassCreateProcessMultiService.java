@@ -326,6 +326,7 @@ public class MassCreateProcessMultiService extends MultiThreadedBatchService<Str
 
     LOG.debug("Worker threads to use: " + threads);
     LOG.debug("Starting processing mass create at " + new Date());
+    LOG.debug("Number of records found: " + results.size());
     List<MassCreateWorker> workers = new ArrayList<MassCreateWorker>();
     ExecutorService executor = Executors.newFixedThreadPool(threads, new WorkerThreadFactory("MCWorker-" + reqId));
     for (CompoundEntity entity : results) {
@@ -548,4 +549,10 @@ public class MassCreateProcessMultiService extends MultiThreadedBatchService<Str
   protected boolean useServicesConnections() {
     return true;
   }
+
+  @Override
+  protected boolean terminateOnLongExecution() {
+    return false;
+  }
+
 }

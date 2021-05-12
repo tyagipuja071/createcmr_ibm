@@ -287,6 +287,7 @@ public class MassCreateValidatorMultiService extends MultiThreadedBatchService<L
 
         LOG.debug("Worker threads to use: " + threads);
         LOG.debug("Starting validating contents at " + new Date());
+        LOG.debug("Number of lines found: " + rows.size());
         List<MassCreateWorker> workers = new ArrayList<MassCreateWorker>();
         // change to executor and not scheduled
         ExecutorService executor = Executors.newFixedThreadPool(threads, new WorkerThreadFactory("MCWorker-" + data.getReqId()));
@@ -427,6 +428,11 @@ public class MassCreateValidatorMultiService extends MultiThreadedBatchService<L
   @Override
   protected boolean useServicesConnections() {
     return true;
+  }
+
+  @Override
+  protected boolean terminateOnLongExecution() {
+    return false;
   }
 
 }
