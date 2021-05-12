@@ -12,8 +12,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
 import javax.persistence.EntityManager;
 
@@ -41,6 +41,7 @@ import com.ibm.cio.cmr.request.model.requestentry.MassCreateBatchEmailModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cmr.create.batch.model.CmrServiceInput;
 import com.ibm.cmr.create.batch.model.NotifyReqModel;
@@ -313,14 +314,20 @@ public class MassCreateProcessMultiService extends MultiThreadedBatchService<Str
     Map<String, List<String>> cmrNoSapNoMap = new HashMap<String, List<String>>();
 
     int threads = 5;
-    String threadCount = BatchUtil.getProperty("multithreaded.threadCount");
-    if (threadCount != null && StringUtils.isNumeric(threadCount)) {
-      threads = Integer.parseInt(threadCount);
+    String mcThreads = SystemParameters.getString("PROCESS.THREAD.COUNT");
+    if (!StringUtils.isBlank(mcThreads) && StringUtils.isNumeric(mcThreads)) {
+      threads = Integer.parseInt(mcThreads);
+    } else {
+      String threadCount = BatchUtil.getProperty("multithreaded.threadCount");
+      if (threadCount != null && StringUtils.isNumeric(threadCount)) {
+        threads = Integer.parseInt(threadCount);
+      }
     }
 
+    LOG.debug("Worker threads to use: " + threads);
     LOG.debug("Starting processing mass create at " + new Date());
     List<MassCreateWorker> workers = new ArrayList<MassCreateWorker>();
-    ScheduledExecutorService executor = Executors.newScheduledThreadPool(threads, new WorkerThreadFactory(getThreadName()));
+    ExecutorService executor = Executors.newFixedThreadPool(threads, new WorkerThreadFactory("MCWorker-" + reqId));
     for (CompoundEntity entity : results) {
       mass_create = entity.getEntity(MassCreate.class);
       MassCreateWorker worker = new MassCreateWorker(em, mass_create, cmrServiceInput, itrId, cmrNoSapNoMap);

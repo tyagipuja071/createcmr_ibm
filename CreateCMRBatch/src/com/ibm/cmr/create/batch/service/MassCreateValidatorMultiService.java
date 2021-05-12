@@ -13,8 +13,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
 import javax.persistence.EntityManager;
 
@@ -33,6 +33,7 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.approval.ApprovalService;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.masscreate.MassCreateFile;
 import com.ibm.cio.cmr.request.util.masscreate.MassCreateFile.ValidationResult;
@@ -274,14 +275,20 @@ public class MassCreateValidatorMultiService extends MultiThreadedBatchService<L
       HandlerEngine engine = null;
       try {
         int threads = 5;
-        String threadCount = BatchUtil.getProperty("multithreaded.threadCount");
-        if (threadCount != null && StringUtils.isNumeric(threadCount)) {
-          threads = Integer.parseInt(threadCount);
+        String mcThreads = SystemParameters.getString("PROCESS.THREAD.COUNT");
+        if (!StringUtils.isBlank(mcThreads) && StringUtils.isNumeric(mcThreads)) {
+          threads = Integer.parseInt(mcThreads);
+        } else {
+          String threadCount = BatchUtil.getProperty("multithreaded.threadCount");
+          if (threadCount != null && StringUtils.isNumeric(threadCount)) {
+            threads = Integer.parseInt(threadCount);
+          }
         }
 
+        LOG.debug("Worker threads to use: " + threads);
         LOG.debug("Starting validating contents at " + new Date());
         List<MassCreateWorker> workers = new ArrayList<MassCreateWorker>();
-        ScheduledExecutorService executor = Executors.newScheduledThreadPool(threads, new WorkerThreadFactory(getThreadName()));
+        ExecutorService executor = Executors.newFixedThreadPool(threads, new WorkerThreadFactory("MCWorker-" + data.getReqId()));
         for (MassCreateFileRow row : rows) {
           engine = initEngine(cmrIssuingCountry);
           MassCreateWorker worker = new MassCreateWorker(entityManager, engine, row);

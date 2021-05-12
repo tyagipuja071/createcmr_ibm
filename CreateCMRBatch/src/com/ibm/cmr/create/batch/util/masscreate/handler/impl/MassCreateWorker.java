@@ -82,7 +82,7 @@ public class MassCreateWorker implements Runnable {
 
   private void validateRow() {
     try {
-      LOG.debug("Validating row " + this.row.getCmrNo() + "/" + this.row.getSeqNo());
+      LOG.debug("Validating row Request " + this.record.getId().getParReqId() + " Row Number " + this.row.getSeqNo());
       StringBuilder errorMsg = new StringBuilder();
 
       this.errors = this.engine.validateRow(this.entityManager, this.row);
