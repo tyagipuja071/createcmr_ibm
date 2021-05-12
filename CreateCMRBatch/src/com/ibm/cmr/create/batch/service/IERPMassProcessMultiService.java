@@ -44,6 +44,8 @@ import com.ibm.cmr.services.client.process.ProcessRequest;
 import com.ibm.cmr.services.client.process.ProcessResponse;
 
 /**
+ * Mass processing for IERP
+ * 
  * @author 136786PH1
  *
  */
