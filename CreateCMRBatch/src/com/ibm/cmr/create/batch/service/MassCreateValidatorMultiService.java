@@ -293,7 +293,7 @@ public class MassCreateValidatorMultiService extends MultiThreadedBatchService<L
         ExecutorService executor = Executors.newFixedThreadPool(threads, new WorkerThreadFactory("MCWorker-" + data.getReqId()));
         for (MassCreateFileRow row : rows) {
           engine = initEngine(cmrIssuingCountry);
-          MassCreateWorker worker = new MassCreateWorker(entityManager, engine, row);
+          MassCreateWorker worker = new MassCreateWorker(entityManager, engine, row, reqId);
           executor.execute(worker);
           workers.add(worker);
         }
