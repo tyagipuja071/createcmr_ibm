@@ -288,6 +288,7 @@ public class MassCreateValidatorMultiService extends MultiThreadedBatchService<L
         LOG.debug("Worker threads to use: " + threads);
         LOG.debug("Starting validating contents at " + new Date());
         List<MassCreateWorker> workers = new ArrayList<MassCreateWorker>();
+        // change to executor and not scheduled
         ExecutorService executor = Executors.newFixedThreadPool(threads, new WorkerThreadFactory("MCWorker-" + data.getReqId()));
         for (MassCreateFileRow row : rows) {
           engine = initEngine(cmrIssuingCountry);
