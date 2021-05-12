@@ -90,8 +90,8 @@ public class IERPMassWorker implements Runnable {
       response.setMessage("No application ID defined for Country: " + data.getCmrIssuingCntry() + ". Cannot process RDc records.");
     } else {
       try {
-        ServiceClient serviceClient = CmrServicesFactory.getInstance()
-            .createClient(SystemConfiguration.getValue(SystemConfiguration.getValue("BATCH_SERVICES_URL")), ProcessClient.class);
+        ServiceClient serviceClient = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
+            ProcessClient.class);
         serviceClient.setReadTimeout(60 * 30 * 1000); // 30 mins
         response = serviceClient.executeAndWrap(applicationId, request, ProcessResponse.class);
 
