@@ -22,6 +22,8 @@ import com.ibm.cmr.services.client.ValidatorClient;
 import com.ibm.cmr.services.client.automation.AutomationResponse;
 import com.ibm.cmr.services.client.automation.eu.VatLayerRequest;
 import com.ibm.cmr.services.client.automation.eu.VatLayerResponse;
+import com.ibm.cmr.services.client.automation.in.GstLayerRequest;
+import com.ibm.cmr.services.client.automation.in.GstLayerResponse;
 import com.ibm.cmr.services.client.validator.PostalCodeValidateRequest;
 import com.ibm.cmr.services.client.validator.ValidationResult;
 import com.ibm.cmr.services.client.validator.VatValidateRequest;
@@ -109,6 +111,76 @@ public class VatUtilController {
       } else {
         validation = ValidationResult
             .error("VAT Validation with VIES Failed." + (StringUtils.isNotBlank(vatResponse.getMessage()) ? vatResponse.getMessage() : ""));
+      }
+    }
+    map.addAttribute("result", validation);
+    return map;
+  }
+
+  @RequestMapping(
+      value = "/in/gst")
+  public ModelMap validateGST(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    ModelMap map = new ModelMap();
+
+    ValidationResult validation = null;
+    String country = request.getParameter("country");
+    if (StringUtils.isEmpty(country)) {
+      validation = ValidationResult.error("'country' param is required.");
+    }
+    String vat = request.getParameter("vat");
+    if (StringUtils.isEmpty(vat)) {
+      validation = ValidationResult.error("'Gst#' param is required.");
+    }
+    String name = request.getParameter("name");
+    if (StringUtils.isEmpty(name)) {
+      validation = ValidationResult.error("'name' param is required.");
+    }
+    String address = request.getParameter("address");
+    if (StringUtils.isEmpty(address)) {
+      validation = ValidationResult.error("'address' param is required.");
+    }
+    String postal = request.getParameter("postal");
+    if (StringUtils.isEmpty(postal)) {
+      validation = ValidationResult.error("'postal' param is required.");
+    }
+    String city = request.getParameter("city");
+    if (StringUtils.isEmpty(city)) {
+      validation = ValidationResult.error("'city' param is required.");
+    }
+    if (validation == null || validation.isSuccess()) {
+
+      LOG.debug("Validating GST# " + vat + " for country " + country);
+
+      String baseUrl = SystemConfiguration.getValue("CMR_SERVICES_URL");
+      AutomationServiceClient autoClient = CmrServicesFactory.getInstance().createClient(baseUrl, AutomationServiceClient.class);
+      autoClient.setReadTimeout(1000 * 60 * 5);
+      autoClient.setRequestMethod(Method.Get);
+
+      GstLayerRequest gstLayerRequest = new GstLayerRequest();
+      gstLayerRequest.setGst(vat);
+      gstLayerRequest.setCountry(country);
+      gstLayerRequest.setName(name);
+      gstLayerRequest.setAddress(address);
+      gstLayerRequest.setCity(city);
+      gstLayerRequest.setPostal(postal);
+
+      LOG.debug("Connecting to the GST Layer Service at " + baseUrl);
+      AutomationResponse<?> rawResponse = autoClient.executeAndWrap(AutomationServiceClient.IN_GST_SERVICE_ID, gstLayerRequest,
+          AutomationResponse.class);
+      ObjectMapper mapper = new ObjectMapper();
+      String json = mapper.writeValueAsString(rawResponse);
+      TypeReference<AutomationResponse<GstLayerResponse>> ref = new TypeReference<AutomationResponse<GstLayerResponse>>() {
+      };
+      AutomationResponse<GstLayerResponse> gstResponse = mapper.readValue(json, ref);
+      if (gstResponse != null && gstResponse.isSuccess()) {
+        if (gstResponse.getMessage().equals("Valid GST")) {
+          validation = ValidationResult.success();
+        } else {
+          validation = ValidationResult.error("GST# provided on the request is not valid as per GST Validation. Please verify the GST# provided.");
+        }
+      } else {
+        validation = ValidationResult
+            .error("GST Validation Failed." + (StringUtils.isNotBlank(gstResponse.getMessage()) ? gstResponse.getMessage() : ""));
       }
     }
     map.addAttribute("result", validation);
