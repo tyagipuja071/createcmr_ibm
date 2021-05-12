@@ -37,6 +37,7 @@ import com.ibm.cio.cmr.request.entity.ReqCmtLog;
 import com.ibm.cio.cmr.request.entity.ReqCmtLogPK;
 import com.ibm.cio.cmr.request.entity.WfHist;
 import com.ibm.cio.cmr.request.entity.WfHistPK;
+import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 import com.ibm.cio.cmr.request.model.requestentry.MassCreateBatchEmailModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
@@ -98,6 +99,8 @@ public class MassCreateProcessMultiService extends MultiThreadedBatchService<Str
         abortedReqList.add(Long.parseLong(id.substring(1)));
       }
     }
+
+    ChangeLogListener.setUser(BATCH_USER_ID);
 
     monitorTransconn(entityManager, notifyReqList);
 

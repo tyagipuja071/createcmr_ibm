@@ -27,6 +27,7 @@ import com.ibm.cio.cmr.request.entity.AdminPK;
 import com.ibm.cio.cmr.request.entity.CompoundEntity;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataPK;
+import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
@@ -73,6 +74,7 @@ public class MassCreateValidatorMultiService extends MultiThreadedBatchService<L
   @Override
   public Boolean executeBatchForRequests(EntityManager entityManager, List<Long> requests) throws Exception {
     LOG.debug("Executing validations for " + requests.size() + " requests..");
+    ChangeLogListener.setUser(BATCH_USER_ID);
     for (Long reqId : requests) {
       processRecord(entityManager, reqId);
     }
