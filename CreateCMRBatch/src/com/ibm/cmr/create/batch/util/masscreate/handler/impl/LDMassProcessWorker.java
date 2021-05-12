@@ -134,12 +134,14 @@ public class LDMassProcessWorker implements Runnable {
         entityManager.merge(cmrObjects.getMassUpdateData());
         entityManager.flush();
       }
-
+      LOG.info("legacyObjects.getErrTxt()==" + legacyObjects.getErrTxt() + "==CMR==" + massUpdt.getCmrNo());
       if (StringUtils.isEmpty(legacyObjects.getErrTxt())) {
+        LOG.info("massUpdt.getCmrNo()==" + massUpdt.getCmrNo());
         massUpdt.setRowStatusCd(MASS_UPDATE_LEGACYDONE);
         massUpdt.setErrorTxt("Legacy data processing completed.\n\n");
         entityManager.merge(massUpdt);
         entityManager.flush();
+        LOG.info("legacyObjects.getErrTxt()==" + massUpdt.getRowStatusCd() + "==CMR==" + massUpdt.getCmrNo());
       }
       // entityManager.flush();
 
