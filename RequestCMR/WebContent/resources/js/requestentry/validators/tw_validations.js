@@ -14,6 +14,7 @@ function afterConfigTW() {
   FormManager.readOnly('cmrOwner');
   FormManager.resetValidations('enterprise');
   FormManager.readOnly('isuCd');
+  FormManager.removeValidator('affiliate', Validators.DIGIT);
 
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
@@ -294,24 +295,24 @@ function addSingleByteValidatorTW(cntry, details) {
   FormManager.addValidator('bldg', Validators.NO_SINGLE_BYTE, [ 'Customer Chinese Address Con' + '\'' + 't' ]);
 
   /* Customer */
-  FormManager.addValidator('footnoteTxt2', Validators.NO_SINGLE_BYTE, [ 'Chief Executive Officer Name' ]);
-  FormManager.addValidator('busnType', Validators.NO_SINGLE_BYTE, [ 'Chief Executive Officer Job Title' ]);
-  FormManager.addValidator('bioChemMissleMfg', Validators.LATIN, [ 'Chief Executive Officer Telephone' ]);
-  FormManager.addValidator('email1', Validators.LATIN, [ 'Chief Executive Officer Email' ]);
-  FormManager.addValidator('contactName2', Validators.LATIN, [ 'Chief Executive Officer Fax' ]);
+  FormManager.addValidator('footnoteTxt2', Validators.NO_SINGLE_BYTE, [ 'Chief Executive Officer Name' ], 'MAIN_CUST_TAB');
+  FormManager.addValidator('busnType', Validators.NO_SINGLE_BYTE, [ 'Chief Executive Officer Job Title' ], 'MAIN_CUST_TAB');
+  FormManager.addValidator('bioChemMissleMfg', Validators.LATIN, [ 'Chief Executive Officer Telephone' ], 'MAIN_CUST_TAB');
+  FormManager.addValidator('email1', Validators.LATIN, [ 'Chief Executive Officer Email' ], 'MAIN_CUST_TAB');
+  FormManager.addValidator('contactName2', Validators.LATIN, [ 'Chief Executive Officer Fax' ], 'MAIN_CUST_TAB');
 
-  FormManager.addValidator('contactName1', Validators.NO_SINGLE_BYTE, [ 'Chief Information Officer Name' ]);
-  FormManager.addValidator('bpName', Validators.NO_SINGLE_BYTE, [ 'Chief Information Officer Job Title' ]);
-  FormManager.addValidator('affiliate', Validators.LATIN, [ 'Chief Information Officer Telephone' ]);
-  FormManager.addValidator('email2', Validators.LATIN, [ 'Chief Information Officer Email' ]);
-  FormManager.addValidator('commercialFinanced', Validators.LATIN, [ 'Chief Information Officer Fax' ]);
+  FormManager.addValidator('contactName1', Validators.NO_SINGLE_BYTE, [ 'Chief Information Officer Name' ], 'MAIN_CUST_TAB');
+  FormManager.addValidator('bpName', Validators.NO_SINGLE_BYTE, [ 'Chief Information Officer Job Title' ], 'MAIN_CUST_TAB');
+  FormManager.addValidator('affiliate', Validators.LATIN, [ 'Chief Information Officer Telephone' ], 'MAIN_CUST_TAB');
+  FormManager.addValidator('email2', Validators.LATIN, [ 'Chief Information Officer Email' ], 'MAIN_CUST_TAB');
+  FormManager.addValidator('commercialFinanced', Validators.LATIN, [ 'Chief Information Officer Fax' ], 'MAIN_CUST_TAB');
 
-  FormManager.addValidator('footnoteTxt1', Validators.NO_SINGLE_BYTE, [ 'Goods Receiver Chinese Name' ]);
-  FormManager.addValidator('contactName3', Validators.NO_SINGLE_BYTE, [ 'Goods Receiver Job Title' ]);
-  FormManager.addValidator('email3', Validators.LATIN, [ 'Goods Receiver Telephone Number' ]);
+  FormManager.addValidator('footnoteTxt1', Validators.NO_SINGLE_BYTE, [ 'Goods Receiver Chinese Name' ], 'MAIN_CUST_TAB');
+  FormManager.addValidator('contactName3', Validators.NO_SINGLE_BYTE, [ 'Goods Receiver Job Title' ], 'MAIN_CUST_TAB');
+  FormManager.addValidator('email3', Validators.LATIN, [ 'Goods Receiver Telephone Number' ], 'MAIN_CUST_TAB');
 
-  FormManager.addValidator('orgNo', Validators.LATIN, [ 'Customer Telephone Number' ]);
-  FormManager.addValidator('restrictTo', Validators.LATIN, [ 'Customer Fax Number' ]);
+  FormManager.addValidator('orgNo', Validators.LATIN, [ 'Customer Telephone Number' ], 'MAIN_CUST_TAB');
+  FormManager.addValidator('restrictTo', Validators.LATIN, [ 'Customer Fax Number' ], 'MAIN_CUST_TAB');
 
 }
 
