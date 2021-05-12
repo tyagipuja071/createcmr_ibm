@@ -16,130 +16,131 @@ import javax.persistence.TemporalType;
 /**
  * The persistent class for the KNVL_EXT database table.
  * 
- * @author 113101PH1
+ * @author clint
  */
 @Entity
-@Table(name = "KNVL_EXT", schema = "SAPR3")
+@Table(
+    name = "KNVL_EXT",
+    schema = "SAPR3")
 public class KnvlExt extends BaseEntity<KnvlExtPK> implements Serializable {
   private static final long serialVersionUID = 1L;
 
   @EmbeddedId
   private KnvlExtPK id;
 
+  @Override
   public KnvlExtPK getId() {
     return id;
   }
 
+  @Override
   public void setId(KnvlExtPK id) {
     this.id = id;
   }
-  
-  /** 
+
+  /**
    * Tax Exempt Reason
-   */ 
-  @Column(name = "TAX_EXEMPT_REASON")
+   */
+  @Column(
+      name = "TAX_EXEMPT_REASON")
   private String taxExemptReason;
 
-  /** 
+  /**
    * Logical Delete Flag
-   */ 
+   */
   private String loevm;
 
-  /** 
+  /**
    * Created By
-   */ 
-  @Column(name = "CREATED_BY")
+   */
+  @Column(
+      name = "CREATED_BY")
   private String createdBy;
 
-  /** 
+  /**
    * Create Date
-   */ 
-  @Column(name = "CREATE_DT")
+   */
+  @Column(
+      name = "CREATE_DT")
   @Temporal(TemporalType.TIMESTAMP)
   private Date createDt;
 
-  /** 
+  /**
    * Updated By
-   */ 
-  @Column(name = "UPDATED_BY")
+   */
+  @Column(
+      name = "UPDATED_BY")
   private String updatedBy;
 
-  /** 
+  /**
    * Update Date
-   */ 
-  @Column(name = "UPDATE_DT")
+   */
+  @Column(
+      name = "UPDATE_DT")
   @Temporal(TemporalType.TIMESTAMP)
   private Date updateDt;
 
-  /** 
+  /**
    * Update Type
-   */ 
-  @Column(name = "UPDATE_TYPE")
+   */
+  @Column(
+      name = "UPDATE_TYPE")
   private String updateType;
 
-  public String getTaxExemptReason(){
+  public String getTaxExemptReason() {
     return this.taxExemptReason;
   }
 
-  public void setTaxExemptReason(String taxExemptReason){
+  public void setTaxExemptReason(String taxExemptReason) {
     this.taxExemptReason = taxExemptReason;
   }
 
-
-  public String getLoevm(){
+  public String getLoevm() {
     return this.loevm;
   }
 
-  public void setLoevm(String loevm){
+  public void setLoevm(String loevm) {
     this.loevm = loevm;
   }
 
-
-  public String getCreatedBy(){
+  public String getCreatedBy() {
     return this.createdBy;
   }
 
-  public void setCreatedBy(String createdBy){
+  public void setCreatedBy(String createdBy) {
     this.createdBy = createdBy;
   }
 
-
-  public Date getCreateDt(){
+  public Date getCreateDt() {
     return this.createDt;
   }
 
-  public void setCreateDt(Date createDt){
+  public void setCreateDt(Date createDt) {
     this.createDt = createDt;
   }
 
-
-  public String getUpdatedBy(){
+  public String getUpdatedBy() {
     return this.updatedBy;
   }
 
-  public void setUpdatedBy(String updatedBy){
+  public void setUpdatedBy(String updatedBy) {
     this.updatedBy = updatedBy;
   }
 
-
-  public Date getUpdateDt(){
+  public Date getUpdateDt() {
     return this.updateDt;
   }
 
-  public void setUpdateDt(Date updateDt){
+  public void setUpdateDt(Date updateDt) {
     this.updateDt = updateDt;
   }
 
-
-  public String getUpdateType(){
+  public String getUpdateType() {
     return this.updateType;
   }
 
-  public void setUpdateType(String updateType){
+  public void setUpdateType(String updateType) {
     this.updateType = updateType;
   }
-
-
-
 
 }

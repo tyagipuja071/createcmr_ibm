@@ -16,466 +16,467 @@ import javax.persistence.TemporalType;
 /**
  * The persistent class for the KNVV_EXT database table.
  * 
- * @author 113101PH1
+ * @author clint
  */
 @Entity
-@Table(name = "KNVV_EXT", schema = "SAPR3")
+@Table(
+    name = "KNVV_EXT",
+    schema = "SAPR3")
 public class KnvvExt extends BaseEntity<KnvvExtPK> implements Serializable {
   private static final long serialVersionUID = 1L;
 
   @EmbeddedId
   private KnvvExtPK id;
 
+  @Override
   public KnvvExtPK getId() {
     return id;
   }
 
+  @Override
   public void setId(KnvvExtPK id) {
     this.id = id;
   }
-  
-  /** 
+
+  /**
    * CSO Site
-   */ 
-  @Column(name = "CSO_SITE")
+   */
+  @Column(
+      name = "CSO_SITE")
   private String csoSite;
 
-  /** 
+  /**
    * Customer Type 2
-   */ 
-  @Column(name = "CUST_TYPE_2")
+   */
+  @Column(
+      name = "CUST_TYPE_2")
   private String custType2;
 
-  /** 
+  /**
    * Customer Type 3
-   */ 
-  @Column(name = "CUST_TYPE_3")
+   */
+  @Column(
+      name = "CUST_TYPE_3")
   private String custType3;
 
-  /** 
+  /**
    * Miscellaneous Billing Code
-   */ 
-  @Column(name = "MISC_BILLING")
+   */
+  @Column(
+      name = "MISC_BILLING")
   private String miscBilling;
 
-  /** 
+  /**
    * Marketing Area
-   */ 
-  @Column(name = "MKTG_AREA")
+   */
+  @Column(
+      name = "MKTG_AREA")
   private String mktgArea;
 
-  @Column(name = "MKTG_AR_DEPT")
+  @Column(
+      name = "MKTG_AR_DEPT")
   private String mktgArDept;
 
-  /** 
+  /**
    * Marketing Department
-   */ 
-  @Column(name = "MKTG_DEPT")
+   */
+  @Column(
+      name = "MKTG_DEPT")
   private String mktgDept;
 
-  @Column(name = "ORG_MKTG_BR_OFC")
+  @Column(
+      name = "ORG_MKTG_BR_OFC")
   private String orgMktgBrOfc;
 
-  @Column(name = "PCC_AR_BO")
+  @Column(
+      name = "PCC_AR_BO")
   private String pccArBo;
 
-  /** 
+  /**
    * PCC Marketing Branch Office
-   */ 
-  @Column(name = "PCC_MKTG_BO")
+   */
+  @Column(
+      name = "PCC_MKTG_BO")
   private String pccMktgBo;
 
-  /** 
+  /**
    * USA Restrict to Code
-   */ 
-  @Column(name = "US_RESTRICT_TO")
+   */
+  @Column(
+      name = "US_RESTRICT_TO")
   private String usRestrictTo;
 
-  @Column(name = "SVC_AR_OFC")
+  @Column(
+      name = "SVC_AR_OFC")
   private String svcArOfc;
 
-  /** 
+  /**
    * Services Large Systems Office
-   */ 
-  @Column(name = "SVC_LGSYS_OFC")
+   */
+  @Column(
+      name = "SVC_LGSYS_OFC")
   private String svcLgsysOfc;
 
-  /** 
+  /**
    * Services Small Systems Office
-   */ 
-  @Column(name = "SVC_SMSYS_OFC")
+   */
+  @Column(
+      name = "SVC_SMSYS_OFC")
   private String svcSmsysOfc;
 
-  /** 
+  /**
    * Services Other Office
-   */ 
-  @Column(name = "SVC_OTH_OFC")
+   */
+  @Column(
+      name = "SVC_OTH_OFC")
   private String svcOthOfc;
 
-  @Column(name = "ACCT_RECV_BO")
+  @Column(
+      name = "ACCT_RECV_BO")
   private String acctRecvBo;
 
-  /** 
+  /**
    * Marketing Branch Office
-   */ 
-  @Column(name = "MKTG_BO")
+   */
+  @Column(
+      name = "MKTG_BO")
   private String mktgBo;
 
-  /** 
+  /**
    * Marketing Responsibility Code
-   */ 
-  @Column(name = "MKTG_RESP_CD")
+   */
+  @Column(
+      name = "MKTG_RESP_CD")
   private String mktgRespCd;
 
-  @Column(name = "INSTALL_BO_GRP")
+  @Column(
+      name = "INSTALL_BO_GRP")
   private String installBoGrp;
 
-  @Column(name = "INSTALL_BO_NUM")
+  @Column(
+      name = "INSTALL_BO_NUM")
   private String installBoNum;
 
-  /** 
+  /**
    * Selling Branch Office Group
-   */ 
-  @Column(name = "SELLING_BO_GRP")
+   */
+  @Column(
+      name = "SELLING_BO_GRP")
   private String sellingBoGrp;
 
-  /** 
+  /**
    * Selling Branch Office Number
-   */ 
-  @Column(name = "SELLING_BO_NUM")
+   */
+  @Column(
+      name = "SELLING_BO_NUM")
   private String sellingBoNum;
 
-  @Column(name = "CE_GRP")
+  @Column(
+      name = "CE_GRP")
   private String ceGrp;
 
-  /** 
+  /**
    * CRS Customer Identity Code
-   */ 
-  @Column(name = "CRS_ID_CODE")
+   */
+  @Column(
+      name = "CRS_ID_CODE")
   private String crsIdCode;
 
-  /** 
+  /**
    * Customer Set
-   */ 
-  @Column(name = "CUST_SET")
+   */
+  @Column(
+      name = "CUST_SET")
   private String custSet;
 
-  /** 
+  /**
    * Logical Delete Flag
-   */ 
+   */
   private String loevm;
 
-  /** 
+  /**
    * Created By
-   */ 
-  @Column(name = "CREATED_BY")
+   */
+  @Column(
+      name = "CREATED_BY")
   private String createdBy;
 
-  /** 
+  /**
    * Create Date
-   */ 
-  @Column(name = "CREATE_DT")
+   */
+  @Column(
+      name = "CREATE_DT")
   @Temporal(TemporalType.TIMESTAMP)
   private Date createDt;
 
-  /** 
+  /**
    * Updated By
-   */ 
-  @Column(name = "UPDATED_BY")
+   */
+  @Column(
+      name = "UPDATED_BY")
   private String updatedBy;
 
-  /** 
+  /**
    * Update Date
-   */ 
-  @Column(name = "UPDATE_DT")
+   */
+  @Column(
+      name = "UPDATE_DT")
   @Temporal(TemporalType.TIMESTAMP)
   private Date updateDt;
 
-  /** 
+  /**
    * Update Type
-   */ 
-  @Column(name = "UPDATE_TYPE")
+   */
+  @Column(
+      name = "UPDATE_TYPE")
   private String updateType;
 
-  public String getCsoSite(){
+  public String getCsoSite() {
     return this.csoSite;
   }
 
-  public void setCsoSite(String csoSite){
+  public void setCsoSite(String csoSite) {
     this.csoSite = csoSite;
   }
 
-
-  public String getCustType2(){
+  public String getCustType2() {
     return this.custType2;
   }
 
-  public void setCustType2(String custType2){
+  public void setCustType2(String custType2) {
     this.custType2 = custType2;
   }
 
-
-  public String getCustType3(){
+  public String getCustType3() {
     return this.custType3;
   }
 
-  public void setCustType3(String custType3){
+  public void setCustType3(String custType3) {
     this.custType3 = custType3;
   }
 
-
-  public String getMiscBilling(){
+  public String getMiscBilling() {
     return this.miscBilling;
   }
 
-  public void setMiscBilling(String miscBilling){
+  public void setMiscBilling(String miscBilling) {
     this.miscBilling = miscBilling;
   }
 
-
-  public String getMktgArea(){
+  public String getMktgArea() {
     return this.mktgArea;
   }
 
-  public void setMktgArea(String mktgArea){
+  public void setMktgArea(String mktgArea) {
     this.mktgArea = mktgArea;
   }
 
-
-  public String getMktgArDept(){
+  public String getMktgArDept() {
     return this.mktgArDept;
   }
 
-  public void setMktgArDept(String mktgArDept){
+  public void setMktgArDept(String mktgArDept) {
     this.mktgArDept = mktgArDept;
   }
 
-
-  public String getMktgDept(){
+  public String getMktgDept() {
     return this.mktgDept;
   }
 
-  public void setMktgDept(String mktgDept){
+  public void setMktgDept(String mktgDept) {
     this.mktgDept = mktgDept;
   }
 
-
-  public String getOrgMktgBrOfc(){
+  public String getOrgMktgBrOfc() {
     return this.orgMktgBrOfc;
   }
 
-  public void setOrgMktgBrOfc(String orgMktgBrOfc){
+  public void setOrgMktgBrOfc(String orgMktgBrOfc) {
     this.orgMktgBrOfc = orgMktgBrOfc;
   }
 
-
-  public String getPccArBo(){
+  public String getPccArBo() {
     return this.pccArBo;
   }
 
-  public void setPccArBo(String pccArBo){
+  public void setPccArBo(String pccArBo) {
     this.pccArBo = pccArBo;
   }
 
-
-  public String getPccMktgBo(){
+  public String getPccMktgBo() {
     return this.pccMktgBo;
   }
 
-  public void setPccMktgBo(String pccMktgBo){
+  public void setPccMktgBo(String pccMktgBo) {
     this.pccMktgBo = pccMktgBo;
   }
 
-
-  public String getUsRestrictTo(){
+  public String getUsRestrictTo() {
     return this.usRestrictTo;
   }
 
-  public void setUsRestrictTo(String usRestrictTo){
+  public void setUsRestrictTo(String usRestrictTo) {
     this.usRestrictTo = usRestrictTo;
   }
 
-
-  public String getSvcArOfc(){
+  public String getSvcArOfc() {
     return this.svcArOfc;
   }
 
-  public void setSvcArOfc(String svcArOfc){
+  public void setSvcArOfc(String svcArOfc) {
     this.svcArOfc = svcArOfc;
   }
 
-
-  public String getSvcLgsysOfc(){
+  public String getSvcLgsysOfc() {
     return this.svcLgsysOfc;
   }
 
-  public void setSvcLgsysOfc(String svcLgsysOfc){
+  public void setSvcLgsysOfc(String svcLgsysOfc) {
     this.svcLgsysOfc = svcLgsysOfc;
   }
 
-
-  public String getSvcSmsysOfc(){
+  public String getSvcSmsysOfc() {
     return this.svcSmsysOfc;
   }
 
-  public void setSvcSmsysOfc(String svcSmsysOfc){
+  public void setSvcSmsysOfc(String svcSmsysOfc) {
     this.svcSmsysOfc = svcSmsysOfc;
   }
 
-
-  public String getSvcOthOfc(){
+  public String getSvcOthOfc() {
     return this.svcOthOfc;
   }
 
-  public void setSvcOthOfc(String svcOthOfc){
+  public void setSvcOthOfc(String svcOthOfc) {
     this.svcOthOfc = svcOthOfc;
   }
 
-
-  public String getAcctRecvBo(){
+  public String getAcctRecvBo() {
     return this.acctRecvBo;
   }
 
-  public void setAcctRecvBo(String acctRecvBo){
+  public void setAcctRecvBo(String acctRecvBo) {
     this.acctRecvBo = acctRecvBo;
   }
 
-
-  public String getMktgBo(){
+  public String getMktgBo() {
     return this.mktgBo;
   }
 
-  public void setMktgBo(String mktgBo){
+  public void setMktgBo(String mktgBo) {
     this.mktgBo = mktgBo;
   }
 
-
-  public String getMktgRespCd(){
+  public String getMktgRespCd() {
     return this.mktgRespCd;
   }
 
-  public void setMktgRespCd(String mktgRespCd){
+  public void setMktgRespCd(String mktgRespCd) {
     this.mktgRespCd = mktgRespCd;
   }
 
-
-  public String getInstallBoGrp(){
+  public String getInstallBoGrp() {
     return this.installBoGrp;
   }
 
-  public void setInstallBoGrp(String installBoGrp){
+  public void setInstallBoGrp(String installBoGrp) {
     this.installBoGrp = installBoGrp;
   }
 
-
-  public String getInstallBoNum(){
+  public String getInstallBoNum() {
     return this.installBoNum;
   }
 
-  public void setInstallBoNum(String installBoNum){
+  public void setInstallBoNum(String installBoNum) {
     this.installBoNum = installBoNum;
   }
 
-
-  public String getSellingBoGrp(){
+  public String getSellingBoGrp() {
     return this.sellingBoGrp;
   }
 
-  public void setSellingBoGrp(String sellingBoGrp){
+  public void setSellingBoGrp(String sellingBoGrp) {
     this.sellingBoGrp = sellingBoGrp;
   }
 
-
-  public String getSellingBoNum(){
+  public String getSellingBoNum() {
     return this.sellingBoNum;
   }
 
-  public void setSellingBoNum(String sellingBoNum){
+  public void setSellingBoNum(String sellingBoNum) {
     this.sellingBoNum = sellingBoNum;
   }
 
-
-  public String getCeGrp(){
+  public String getCeGrp() {
     return this.ceGrp;
   }
 
-  public void setCeGrp(String ceGrp){
+  public void setCeGrp(String ceGrp) {
     this.ceGrp = ceGrp;
   }
 
-
-  public String getCrsIdCode(){
+  public String getCrsIdCode() {
     return this.crsIdCode;
   }
 
-  public void setCrsIdCode(String crsIdCode){
+  public void setCrsIdCode(String crsIdCode) {
     this.crsIdCode = crsIdCode;
   }
 
-
-  public String getCustSet(){
+  public String getCustSet() {
     return this.custSet;
   }
 
-  public void setCustSet(String custSet){
+  public void setCustSet(String custSet) {
     this.custSet = custSet;
   }
 
-
-  public String getLoevm(){
+  public String getLoevm() {
     return this.loevm;
   }
 
-  public void setLoevm(String loevm){
+  public void setLoevm(String loevm) {
     this.loevm = loevm;
   }
 
-
-  public String getCreatedBy(){
+  public String getCreatedBy() {
     return this.createdBy;
   }
 
-  public void setCreatedBy(String createdBy){
+  public void setCreatedBy(String createdBy) {
     this.createdBy = createdBy;
   }
 
-
-  public Date getCreateDt(){
+  public Date getCreateDt() {
     return this.createDt;
   }
 
-  public void setCreateDt(Date createDt){
+  public void setCreateDt(Date createDt) {
     this.createDt = createDt;
   }
 
-
-  public String getUpdatedBy(){
+  public String getUpdatedBy() {
     return this.updatedBy;
   }
 
-  public void setUpdatedBy(String updatedBy){
+  public void setUpdatedBy(String updatedBy) {
     this.updatedBy = updatedBy;
   }
 
-
-  public Date getUpdateDt(){
+  public Date getUpdateDt() {
     return this.updateDt;
   }
 
-  public void setUpdateDt(Date updateDt){
+  public void setUpdateDt(Date updateDt) {
     this.updateDt = updateDt;
   }
 
-
-  public String getUpdateType(){
+  public String getUpdateType() {
     return this.updateType;
   }
 
-  public void setUpdateType(String updateType){
+  public void setUpdateType(String updateType) {
     this.updateType = updateType;
   }
-
-
-
 
 }
