@@ -30,7 +30,7 @@ public class IndiaUtil extends AutomationUtil{
 	public static final String SCENARIO_PRIVATE_CUSTOMER = "PRIV";
 	public static final String SCENARIO_FOREIGN = "CROSS";
 	private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
-		      CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO);
+		      CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SECONDARY_SHIPPING);
 	
 	@Override
 	public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager,
