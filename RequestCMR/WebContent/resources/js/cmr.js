@@ -731,6 +731,33 @@ var cmr = {
     });
     return result;
   },
+  validateGST : function(country, vat, name, address, postal, city) {
+    var result = {};
+    dojo.xhrGet({
+      url : cmr.CONTEXT_ROOT + '/in/gst.json',
+      handleAs : 'json',
+      method : 'GET',
+      content : {
+        country : country,
+        vat : vat,
+        name : name,
+        address : address,
+        postal : postal,
+        city : city
+      },
+      timeout : 50000,
+      sync : true,
+      load : function(data, ioargs) {
+        if (data && data.result) {
+          result = data.result;
+        }
+      },
+      error : function(error, ioargs) {
+        result = {};
+      }
+    });
+    return result;
+  },
   validateZIP : function(country, zip, loc) {
     var result = {};
     dojo.xhrGet({
