@@ -97,16 +97,20 @@ public class LDMassProcessWorker implements Runnable {
       }
       LOG.info("Mass Updating Legacy Records for Request ID " + admin.getId().getReqId());
       LOG.info(" - SOF Country: " + legacyCust.getId().getSofCntryCode() + " CMR No.: " + legacyCust.getId().getCustomerNo());
-      if (legacyCust.getUpdateTs() == null)
-        legacyCust.setUpdateTs(SystemUtil.getCurrentTimestamp());
+      LOG.info("legacyCust.getUpdateTs() before==" + legacyCust.getUpdateTs());
+      LOG.info("SystemUtil.getCurrentTimestamp() Cust==" + SystemUtil.getCurrentTimestamp());
+      legacyCust.setUpdateTs(SystemUtil.getCurrentTimestamp());
+      LOG.info("legacyCust.getUpdateTs() after==" + legacyCust.getUpdateTs());
 
       entityManager.merge(legacyCust);
       entityManager.flush();
       // partialCommit(entityManager);
 
       if (legacyObjects.getCustomerExt() != null) {
-        if (legacyObjects.getCustomerExt().getUpdateTs() == null)
-          legacyObjects.getCustomerExt().setUpdateTs(SystemUtil.getCurrentTimestamp());
+        LOG.info("legacyCustExt.getUpdateTs() before==" + legacyObjects.getCustomerExt().getUpdateTs());
+        LOG.info("SystemUtil.getCurrentTimestamp() CustExt==" + SystemUtil.getCurrentTimestamp());
+        legacyObjects.getCustomerExt().setUpdateTs(SystemUtil.getCurrentTimestamp());
+        LOG.info("legacyCustExt.getUpdateTs() after==" + legacyObjects.getCustomerExt().getUpdateTs());
 
         entityManager.merge(legacyObjects.getCustomerExt());
         entityManager.flush();
