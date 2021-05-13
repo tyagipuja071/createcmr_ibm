@@ -1252,53 +1252,43 @@ function addNORDXInstallingShipping() {
         var shippingBool = true;
         var installBool = true;
         var eplBool = true;
-        var reqId = FormManager.getActualValue('reqId');
-        var addr = 'ZD01';
-        var qParams = {
-          _qall : 'Y',
-          REQID : reqId,
-          ADDR_TYPE : addr
-        };
 
-        var results = cmr.query('GET_STREET_ADDRSEQ', qParams);
-        if (results != null) {
-          for (var i = 0; i < results.length; i++) {
-            if (results[i].ret1.length < 1) {
-              shippingBool = false;
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+          var record = null;
+          var type = null;
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+            record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+            if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+              record = _allAddressData[i];
+            }
+            type = record.addrType;
+            updateInd = record.updateInd;
+            importInd = record.importInd;
+            street = record.addrTxt;
+            if (typeof (type) == 'object') {
+              type = type[0];
+            }
+            if (typeof (updateInd) == 'object') {
+              updateInd = updateInd[0];
+            }
+            if (typeof (importInd) == 'object') {
+              importInd = importInd[0];
+            }
+            if (typeof (street) == 'object') {
+              street = street[0];
+            }
+            if ((street == '' || street == null || street == undefined) && !(updateInd != 'U' && importInd == 'Y')) {
+              if (type == 'ZD01') {
+                shippingBool = false;
+              } else if (type == 'ZI01') {
+                installBool = false;
+              } else if (type == 'ZS02') {
+                eplBool = false;
+              }
             }
           }
         }
-        addr = 'ZI01';
-        qParams = {
-          _qall : 'Y',
-          REQID : reqId,
-          ADDR_TYPE : addr
-        };
 
-        results = cmr.query('GET_STREET_ADDRSEQ', qParams);
-        if (results != null) {
-          for (var i = 0; i < results.length; i++) {
-            if (results[i].ret1.length < 1) {
-              installBool = false;
-            }
-          }
-        }
-
-        addr = 'ZS02';
-        qParams = {
-          _qall : 'Y',
-          REQID : reqId,
-          ADDR_TYPE : addr
-        };
-
-        results = cmr.query('GET_STREET_ADDRSEQ', qParams);
-        if (results != null) {
-          for (var i = 0; i < results.length; i++) {
-            if (results[i].ret1.length < 1) {
-              eplBool = false;
-            }
-          }
-        }
         var errMsg = '';
         if (!installBool) {
           errMsg += 'Installing';
