@@ -1034,7 +1034,6 @@ public class NORDXTransformer extends EMEATransformer {
         }
 
       } else if (SystemLocation.DENMARK.equals(cntry) && StringUtils.isBlank(SUB_REGION_COUNTRY) && "DK".equals(landedCntry) && zs01changed) {
-        if ("678".equals(data.getCountryUse())) {
           int postCd = 10001;
           if (StringUtils.isNotBlank(mailPostCode)) {
             if (StringUtils.isNumeric(mailPostCode)) {
@@ -1049,7 +1048,6 @@ public class NORDXTransformer extends EMEATransformer {
             legacyCust.setCeBo("000245X");
           }
         }
-      }
 
       if (SystemLocation.DENMARK.equals(cntry)) {
         if ("DKK".equals(data.getCurrencyCd())) {
