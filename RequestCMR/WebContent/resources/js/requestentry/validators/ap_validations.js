@@ -2932,7 +2932,7 @@ function validateGSTForIndia() {
       }
       }
     };
-  })(), 'MAIN_IBM_TAB', 'frmCMR');
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
 dojo.addOnLoad(function() {
