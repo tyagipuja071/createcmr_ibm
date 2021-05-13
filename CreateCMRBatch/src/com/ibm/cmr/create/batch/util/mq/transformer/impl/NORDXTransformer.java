@@ -869,8 +869,12 @@ public class NORDXTransformer extends EMEATransformer {
 
     String landedCntry = "";
     String mailPostCode = "";
+    boolean zs01changed = false;
     for (Addr addr : cmrObjects.getAddresses()) {
       if (MQMsgConstants.ADDR_ZS01.equals(addr.getId().getAddrType())) {
+        if ("Y".equals(addr.getChangedIndc())) {
+          zs01changed = true;
+        }
         legacyCust.setTelNoOrVat(addr.getCustPhone());
         landedCntry = addr.getLandCntry();
         mailPostCode = addr.getPostCd();
@@ -1004,6 +1008,46 @@ public class NORDXTransformer extends EMEATransformer {
       if (!StringUtils.isBlank(data.getTerritoryCd())) {
         legacyCust.setOverseasTerritory(data.getTerritoryCd());
       }
+
+      if (SystemLocation.SWEDEN.equals(cntry) && "SE".equals(landedCntry) && zs01changed) {
+        int postCd = 0;
+        String head = "0";
+        if (StringUtils.isNotBlank(mailPostCode) && mailPostCode.length() >= 2) {
+          head = mailPostCode.trim().substring(0, 2);
+          if (StringUtils.isNumeric(head)) {
+            postCd = Integer.valueOf(head);
+          }
+        }
+        int beginPost = Integer.valueOf(postCd);
+        if (!DEFAULT_LANDED_COUNTRY.equals(landedCntry)) {
+          legacyCust.setCeBo("130");
+        } else if (beginPost > 9 && beginPost < 20) {
+          legacyCust.setCeBo("130");
+        } else if (beginPost > 19 && beginPost < 40) {
+          legacyCust.setCeBo("140");
+        } else if (beginPost > 39 && beginPost < 58) {
+          legacyCust.setCeBo("110");
+        } else if (beginPost > 57 && beginPost < 77) {
+          legacyCust.setCeBo("130");
+        } else if (beginPost > 76 && beginPost < 99) {
+          legacyCust.setCeBo("130");
+        }
+
+      } else if (SystemLocation.DENMARK.equals(cntry) && StringUtils.isBlank(SUB_REGION_COUNTRY) && "DK".equals(landedCntry) && zs01changed) {
+          int postCd = 10001;
+          if (StringUtils.isNotBlank(mailPostCode)) {
+            if (StringUtils.isNumeric(mailPostCode)) {
+              postCd = Integer.valueOf(mailPostCode.trim());
+            }
+          }
+          if (postCd >= 0 && postCd < 5000) {
+            legacyCust.setCeBo("000281X");
+          } else if (postCd > 4999 && postCd < 7400) {
+            legacyCust.setCeBo("000246X");
+          } else if (postCd > 7399 && postCd < 10000) {
+            legacyCust.setCeBo("000245X");
+          }
+        }
 
       if (SystemLocation.DENMARK.equals(cntry)) {
         if ("DKK".equals(data.getCurrencyCd())) {
