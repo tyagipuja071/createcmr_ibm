@@ -171,7 +171,7 @@ public class NORDXHandler extends BaseSOFHandler {
             if (StringUtils.isBlank(legacyAddressSeq)) {
               if ("ZP01".equals(record.getCmrAddrTypeCode())) {
                 record.setCmrAddrTypeCode("PG01");
-              }else{
+              } else {
                 continue;
               }
             }
@@ -817,8 +817,7 @@ public class NORDXHandler extends BaseSOFHandler {
     // CREATCMR-2144
 
     // CREATCMR-1657
-    String dunsNo = getDunsNoForNordx(data.getCmrNo(), zs01sapNo, data.getCmrIssuingCntry());
-    data.setDunsNo(dunsNo);
+    data.setDunsNo(mainRecord.getCmrDuns());
     // CREATCMR-1657
 
     // data.setEngineeringBo(this.currentImportValues.get("ACAdmDSC"));
@@ -1030,8 +1029,7 @@ public class NORDXHandler extends BaseSOFHandler {
               inac = validateColValFromCell(currCell);
               if (!StringUtils.isBlank(inac) && !(inac.matches("^[a-zA-z]{2}[0-9]{2}") || StringUtils.isNumeric(inac) || "@@@@".equals(inac))) {
                 LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that INAC format is incorrect. Please fix and upload the template again.");
-                error.addError((row.getRowNum() + 1), "INAC",
-                    ":Note that INAC format is incorrect. Please fix and upload the template again.<br>");
+                error.addError((row.getRowNum() + 1), "INAC", ":Note that INAC format is incorrect. Please fix and upload the template again.<br>");
               }
 
               currCell = (XSSFCell) row.getCell(13);
@@ -2450,32 +2448,6 @@ public class NORDXHandler extends BaseSOFHandler {
     return spras;
   }
   // CREATCMR-2144
-
-  // CREATCMR-1657
-  private String getDunsNoForNordx(String cmrNo, String kunnr, String countryCd) throws Exception {
-    String dunsNo = "";
-    List<String> results = new ArrayList<String>();
-
-    EntityManager entityManager = JpaManager.getEntityManager();
-    try {
-      String mandt = SystemConfiguration.getValue("MANDT");
-      String sql = ExternalizedQuery.getSql("GET.DUNS.KNA1.BYCMR");
-      sql = StringUtils.replace(sql, ":ZZKV_CUSNO", "'" + cmrNo + "'");
-      sql = StringUtils.replace(sql, ":KUNNR", "'" + kunnr + "'");
-      sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
-      sql = StringUtils.replace(sql, ":KATR6", "'" + countryCd + "'");
-      PreparedQuery query = new PreparedQuery(entityManager, sql);
-      results = query.getResults(String.class);
-      if (results != null && results.size() > 0) {
-        dunsNo = results.get(0);
-      }
-    } finally {
-      entityManager.clear();
-      entityManager.close();
-    }
-    return dunsNo;
-  }
-  // CREATCMR-1657
 
   // CMR-1746
   private String getACAdminFromLegacy(String rcyaa, String cmr_no) throws Exception {
