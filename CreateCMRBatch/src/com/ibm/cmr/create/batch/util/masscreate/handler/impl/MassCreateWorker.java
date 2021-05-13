@@ -16,8 +16,10 @@ import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.MassCreate;
 import com.ibm.cio.cmr.request.entity.MassCreateAddr;
+import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.masscreate.MassCreateFileRow;
 import com.ibm.cmr.create.batch.model.CmrServiceInput;
 import com.ibm.cmr.create.batch.util.DebugUtil;
@@ -75,6 +77,9 @@ public class MassCreateWorker implements Runnable {
 
   @Override
   public void run() {
+    ChangeLogListener.setUser(SystemConfiguration.getValue("BATCH_USERID"));
+    ChangeLogListener.setManager(this.entityManager);
+    SystemUtil.setManager(this.entityManager);
     if (StringUtils.isBlank(this.mode) || "V".equals(this.mode)) {
       validateRow();
     } else if ("C".equals(this.mode)) {

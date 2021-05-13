@@ -136,6 +136,8 @@ public class TransConnService extends BaseBatchService {
     try {
       initClient();
 
+      LOG.info("Multi Mode: " + this.multiMode);
+
       ChangeLogListener.setUser(BATCH_USER_ID);
 
       LOG.info("Processing Aborted records (retry)...");
