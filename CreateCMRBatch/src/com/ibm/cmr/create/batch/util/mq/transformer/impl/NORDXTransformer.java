@@ -895,6 +895,54 @@ public class NORDXTransformer extends EMEATransformer {
         legacyCust.setCeBo("");
       } else if (SystemLocation.FINLAND.equals(data.getCmrIssuingCntry())) {
         legacyCust.setCeBo("X900000");
+      } else if (SystemLocation.SWEDEN.equals(data.getCmrIssuingCntry())) {
+        int postCd = 0;
+        String head = "0";
+        if (StringUtils.isNotBlank(mailPostCode) && mailPostCode.length() >= 2) {
+          head = mailPostCode.trim().substring(0, 2);
+          if (StringUtils.isNumeric(head)) {
+            postCd = Integer.valueOf(head);
+          }
+        }
+        int beginPost = Integer.valueOf(postCd);
+        if (!DEFAULT_LANDED_COUNTRY.equals(landedCntry)) {
+          legacyCust.setCeBo("130");
+        } else if (beginPost > 9 && beginPost < 20) {
+          legacyCust.setCeBo("130");
+        } else if (beginPost > 19 && beginPost < 40) {
+          legacyCust.setCeBo("140");
+        } else if (beginPost > 39 && beginPost < 58) {
+          legacyCust.setCeBo("110");
+        } else if (beginPost > 57 && beginPost < 77) {
+          legacyCust.setCeBo("130");
+        } else if (beginPost > 76 && beginPost < 99) {
+          legacyCust.setCeBo("130");
+        }
+
+      } else if (SystemLocation.DENMARK.equals(data.getCmrIssuingCntry())) {
+        if ("678".equals(data.getCountryUse())) {
+          int postCd = 10001;
+          if (StringUtils.isNotBlank(mailPostCode)) {
+            if (StringUtils.isNumeric(mailPostCode)) {
+              postCd = Integer.valueOf(mailPostCode.trim());
+            }
+          }
+          if ("CROSS".equals(data.getCustGrp())) {
+            legacyCust.setCeBo("000281X");
+          } else if (postCd >= 0 && postCd < 5000) {
+            legacyCust.setCeBo("000281X");
+          } else if (postCd > 4999 && postCd < 7400) {
+            legacyCust.setCeBo("000246X");
+          } else if (postCd > 7399 && postCd < 10000) {
+            legacyCust.setCeBo("000245X");
+          }
+        } else if ("678FO".equals(data.getCountryUse())) {
+          legacyCust.setCeBo("000200F");
+        } else if ("678GL".equals(data.getCountryUse())) {
+          legacyCust.setCeBo("000200G");
+        } else if ("678IS".equals(data.getCountryUse())) {
+          legacyCust.setCeBo("000200I");
+        }
       }
 
       if (SystemLocation.DENMARK.equals(cntry)) {
@@ -1179,56 +1227,6 @@ public class NORDXTransformer extends EMEATransformer {
       legacyCust.setIsuCd(data.getIsuCd() + data.getClientTier());
     } else {
       legacyCust.setIsuCd("");
-    }
-
-    if (SystemLocation.SWEDEN.equals(data.getCmrIssuingCntry())) {
-      int postCd = 0;
-      String head = "0";
-      if (StringUtils.isNotBlank(mailPostCode) && mailPostCode.length() >= 2) {
-        head = mailPostCode.trim().substring(0, 2);
-        if (StringUtils.isNumeric(head)) {
-          postCd = Integer.valueOf(head);
-        }
-      }
-      int beginPost = Integer.valueOf(postCd);
-      if (!DEFAULT_LANDED_COUNTRY.equals(landedCntry)) {
-        legacyCust.setCeBo("130");
-      } else if (beginPost > 9 && beginPost < 20) {
-        legacyCust.setCeBo("130");
-      } else if (beginPost > 19 && beginPost < 40) {
-        legacyCust.setCeBo("140");
-      } else if (beginPost > 39 && beginPost < 58) {
-        legacyCust.setCeBo("110");
-      } else if (beginPost > 57 && beginPost < 77) {
-        legacyCust.setCeBo("130");
-      } else if (beginPost > 76 && beginPost < 99) {
-        legacyCust.setCeBo("130");
-      }
-
-    } else if (SystemLocation.DENMARK.equals(data.getCmrIssuingCntry())) {
-      if ("678".equals(data.getCountryUse())) {
-        int postCd = 10001;
-        if (StringUtils.isNotBlank(mailPostCode)) {
-          if (StringUtils.isNumeric(mailPostCode)) {
-            postCd = Integer.valueOf(mailPostCode.trim());
-          }
-        }
-        if ("CROSS".equals(data.getCustGrp())) {
-          legacyCust.setCeBo("000281X");
-        } else if (postCd >= 0 && postCd < 5000) {
-          legacyCust.setCeBo("000281X");
-        } else if (postCd > 4999 && postCd < 7400) {
-          legacyCust.setCeBo("000246X");
-        } else if (postCd > 7399 && postCd < 10000) {
-          legacyCust.setCeBo("000245X");
-        }
-      } else if ("678FO".equals(data.getCountryUse())) {
-        legacyCust.setCeBo("000200F");
-      } else if ("678GL".equals(data.getCountryUse())) {
-        legacyCust.setCeBo("000200G");
-      } else if ("678IS".equals(data.getCountryUse())) {
-        legacyCust.setCeBo("000200I");
-      }
     }
 
     String newSbo = "";
