@@ -2571,4 +2571,9 @@ public class TransConnService extends BaseBatchService {
   public void setMultiMode(boolean multiMode) {
     this.multiMode = multiMode;
   }
+
+  @Override
+  protected boolean terminateOnLongExecution() {
+    return !this.multiMode;
+  }
 }
