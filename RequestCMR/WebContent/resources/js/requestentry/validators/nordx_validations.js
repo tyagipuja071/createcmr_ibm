@@ -2438,7 +2438,7 @@ function collectionCdValidation() {
               id : 'collectionCd',
               type : 'text',
               name : 'collectionCd'
-            }, false, 'The value of Collection Code is invalid, please input digitals or letter.');
+            }, false, 'The value of Collection Code is invalid, please use only alphanumeric characters.');
           }
           return new ValidationResult(null, true);
         }
@@ -3074,7 +3074,7 @@ function modeOfPaymentValidation() {
             id : 'modeOfPayment',
             type : 'text',
             name : 'modeOfPayment'
-          }, false, 'The value of Payment Terms is invalid, please input digitals or letter.');
+          }, false, 'The value of Payment Terms is invalid, please use only alphanumeric characters.');
         }
 
         var modeOfpaymentArray = [ 'A001', 'A002', 'A003', 'A004', 'A005', 'A006', 'A007', 'A008', 'A009', 'A010', 'A014', 'A015', 'A016', 'A017',
