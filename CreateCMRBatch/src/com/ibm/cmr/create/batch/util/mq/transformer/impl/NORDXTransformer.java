@@ -655,7 +655,7 @@ public class NORDXTransformer extends EMEATransformer {
       generateCMRNoObj.setMax(996999);
       LOG.debug("that is Nordics INTER CMR");
     } else {
-      generateCMRNoObj.setMin(369320);
+      generateCMRNoObj.setMin(1);
       generateCMRNoObj.setMax(979999);
       LOG.debug("that is Nordics No INTER CMR");
     }
