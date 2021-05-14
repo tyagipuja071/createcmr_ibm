@@ -79,7 +79,7 @@ public class USMassUpdateWorker implements Runnable {
       List<String> statusCodes = new ArrayList<String>();
       while (queue.peek() != null) {
         sub.add(queue.pop());
-        if (sub.size() % 50 == 0) {
+        if (sub.size() % 50 == 0 && sub.size() > 0) {
           try {
             request.setRecords(sub);
             ServiceClient massServiceClient = MassServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
