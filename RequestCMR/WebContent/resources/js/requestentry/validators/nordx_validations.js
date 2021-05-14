@@ -2438,7 +2438,7 @@ function collectionCdValidation() {
               id : 'collectionCd',
               type : 'text',
               name : 'collectionCd'
-            }, false, 'The value of Collection Code is invalid, please input digitals or letter.');
+            }, false, 'The value of Collection Code is invalid, please use only alphanumeric characters.');
           }
           return new ValidationResult(null, true);
         }
@@ -2941,38 +2941,19 @@ function setAbbrevNmAddressSave(cntry, addressMode, saving, finalSave, force) {
           || custSubGrp == 'LVCOM' || custSubGrp == 'LVBUS' || custSubGrp == 'LVINT' || custSubGrp == 'LVPRI' || custSubGrp == 'LVIBM'
           || custSubGrp == 'LVGOV' || custSubGrp == 'COMME' || custSubGrp == 'BUSPR' || custSubGrp == 'INTER' || custSubGrp == 'PRIPE'
           || custSubGrp == 'IBMEM' || custSubGrp == 'GOVRN') {
-        // var custNmDBVal = getAbbreviatedNameByAddrType(_reqId, "ZS01");
-        // if (custNmDBVal != "") {
-        // if (zs01CustNm != custNmDBVal) {
         if (addrType == 'ZS01') {
           FormManager.setValue('abbrevNm', zs01CustNm.substring(0, 22));
         }
-
-        // if (addrType == 'ZI01') {
-        // FormManager.setValue('abbrevNm', zi01CustNm.substring(0, 22));
-        // }
-        // }
-        // }
       }
 
       if (custSubGrp == 'DK3PA' || custSubGrp == 'FO3PA' || custSubGrp == 'GL3PA' || custSubGrp == 'IS3PA' || custSubGrp == 'FI3PA'
           || custSubGrp == 'EE3PA' || custSubGrp == 'LT3PA' || custSubGrp == 'LV3PA' || custSubGrp == 'THDPT') {
-        // var custNmDBVal = getAbbreviatedNameByAddrType(_reqId, "ZI01");
-        // if (addrType == 'ZI01') {
         FormManager.setValue('abbrevNm', zi01CustNm.substring(0, 22));
-        // }
       }
 
       if (custSubGrp == 'CBISO' || custSubGrp == 'DKISO' || custSubGrp == 'FOISO' || custSubGrp == 'GLISO' || custSubGrp == 'ISISO'
           || custSubGrp == 'FIISO' || custSubGrp == 'EEISO' || custSubGrp == 'LTISO' || custSubGrp == 'LVISO' || custSubGrp == 'INTSO') {
-        // var custNm = getAbbreviatedNameByAddrType(_reqId, "ZI01");
-        // if (custNm != "") {
-        // if (zi01CustNm != custNm) {
         FormManager.setValue('abbrevNm', "IBM c/o " + zi01CustNm.substring(0, 14));
-        // }
-        // } else {
-        // FormManager.setValue('abbrevNm', "IBM c/o ");
-        // }
       }
 
     }
@@ -3074,7 +3055,7 @@ function modeOfPaymentValidation() {
             id : 'modeOfPayment',
             type : 'text',
             name : 'modeOfPayment'
-          }, false, 'The value of Payment Terms is invalid, please input digitals or letter.');
+          }, false, 'The value of Payment Terms is invalid, please use only alphanumeric characters.');
         }
 
         var modeOfpaymentArray = [ 'A001', 'A002', 'A003', 'A004', 'A005', 'A006', 'A007', 'A008', 'A009', 'A010', 'A014', 'A015', 'A016', 'A017',
@@ -3478,6 +3459,7 @@ dojo.addOnLoad(function() {
 
   // CREATCMR-1657
   GEOHandler.addAfterConfig(lockDunsNo, GEOHandler.NORDX);
+  GEOHandler.addAfterConfig(kuklaAltShowAndHide, GEOHandler.NORDX);
 
   // CREATCMR-1689
   GEOHandler.addAddrFunction(setAbbrevNmAddressSave, GEOHandler.NORDX);
