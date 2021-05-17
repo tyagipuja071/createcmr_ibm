@@ -427,6 +427,36 @@ function getImportedIndc() {
   return _importedIndc;
 }
 
+function setDefaultInvoiceCopies(fromAddress, scenario, scenarioChanged) {
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+  var reqType = FormManager.getActualValue('reqType');
+  var invoiceCopies = FormManager.getActualValue('cusInvoiceCopies');
+  if (viewOnlyPage == 'true' || reqType != 'C') {
+    return;
+  }
+  if (invoiceCopies.length == 0) {
+    FormManager.setValue('cusInvoiceCopies', '01');
+  }
+}
+
+function addNumberOfInvoiceValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var invoiceCopies = FormManager.getActualValue('cusInvoiceCopies');
+        if (invoiceCopies.length > 0 && !invoiceCopies.match("([0-9]{2})$")) {
+          return new ValidationResult({
+            id : 'cusInvoiceCopies',
+            type : 'text',
+            name : 'cusInvoiceCopies'
+          }, false, invoiceCopies + ' is not a valid value for Number of Invoices.  Format should be NN.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
 /* Register CA Javascripts */
 dojo.addOnLoad(function() {
   console.log('adding CA scripts...');
@@ -439,6 +469,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addDPLAssessmentValidator, [ SysLoc.CANADA ], GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(addLocationNoValidator, [ SysLoc.CANADA ], null, true);
   GEOHandler.registerValidator(addPhoneNumberValidationCa, [ SysLoc.CANADA ], null, true);
+  GEOHandler.registerValidator(addNumberOfInvoiceValidator, [ SysLoc.CANADA ], null, true);
   // NOTE: do not add multiple addAfterConfig calls to avoid confusion, club the
   // functions on afterConfigForCA
   GEOHandler.addAfterConfig(afterConfigForCA, [ SysLoc.CANADA ]);
@@ -448,4 +479,5 @@ dojo.addOnLoad(function() {
   GEOHandler.enableCopyAddress(SysLoc.CANADA);
   GEOHandler.addAfterTemplateLoad(removeValidatorForOptionalFields, SysLoc.CANADA);
   GEOHandler.addAfterTemplateLoad(retainImportValues, SysLoc.CANADA);
+  GEOHandler.addAfterTemplateLoad(setDefaultInvoiceCopies, SysLoc.CANADA);
 });
