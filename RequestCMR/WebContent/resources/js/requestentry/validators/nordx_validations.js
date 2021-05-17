@@ -3461,6 +3461,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(lockDunsNo, GEOHandler.NORDX);
   GEOHandler.addAfterConfig(kuklaAltShowAndHide, GEOHandler.NORDX);
 
+  // CREATCMR-2430
+  GEOHandler.addAfterConfig(setCustPrefLangByCountry, GEOHandler.NORDX);
   // CREATCMR-1689
   GEOHandler.addAddrFunction(setAbbrevNmAddressSave, GEOHandler.NORDX);
   GEOHandler.addAfterConfig(setSensitiveFlag, GEOHandler.NORDX);
