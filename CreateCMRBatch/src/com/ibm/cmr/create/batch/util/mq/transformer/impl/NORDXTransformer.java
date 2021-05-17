@@ -1047,6 +1047,18 @@ public class NORDXTransformer extends EMEATransformer {
           } else if (postCd > 7399 && postCd < 10000) {
             legacyCust.setCeBo("000245X");
           }
+      } else {
+        String sql = ExternalizedQuery.getSql("LEGACYD.GETCUST");
+        PreparedQuery query = new PreparedQuery(entityManager, sql);
+        query.setParameter("COUNTRY", cntry);
+        query.setParameter("CMR_NO", legacyCust.getId().getCustomerNo());
+        query.setForReadOnly(true);
+        CmrtCust cust = query.getSingleResult(CmrtCust.class);
+        if (cust == null) {
+          LOG.error("Legacy Direct -can't find LegacyCust for request:" + admin.getId().getReqId());
+        } else {
+          legacyCust.setCeBo(cust.getCeBo());
+        }
         }
 
       if (SystemLocation.DENMARK.equals(cntry)) {
