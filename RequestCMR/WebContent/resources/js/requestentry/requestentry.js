@@ -1603,7 +1603,7 @@ function matchDnBForIndia() {
             if (data.match) {
               cmr.showConfirm('addressVerificationModal');
             }else {
-              cmr.showAlert("Please attach company proof as Dnb failed");
+              cmr.showAlert("Please attach company proof as validation failed by Dnb.");
               checkDnBMatchingAttachmentValidator();
             }
           } else {
