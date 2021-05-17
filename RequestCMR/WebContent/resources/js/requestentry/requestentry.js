@@ -133,7 +133,9 @@ function processRequestAction() {
     } else if (FormManager.validate('frmCMR')) {
 			if(checkForConfirmationAttachments()){
 				showDocTypeConfirmDialog();
-			} else if (checkIfFinalDnBCheckRequired()) {
+			} else if(checkIfDnBCheckReqForIndia()) {            
+                matchDnBForIndia();
+            } else if (checkIfFinalDnBCheckRequired()) {
         matchDnBForAutomationCountries();
       } else if (checkIfUpfrontUpdateChecksRequired()) {
         addUpdateChecksExecution(frmCMR);
@@ -1507,6 +1509,21 @@ function checkIfFinalDnBCheckRequired() {
   }
   return false;
 }
+function checkIfDnBCheckReqForIndia() {
+  var reqId = FormManager.getActualValue('reqId');
+  var reqType = FormManager.getActualValue('reqType');
+  var custSubGrp=FormManager.getActualValue('custSubGrp');
+  var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var result = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
+            ID : reqId
+          });
+  if(cmrCntry == '744' && reqType == 'C' && (custSubGrp == 'BLUMX'|| custSubGrp == 'MKTPC' || custSubGrp == 'IGF' || custSubGrp == 'AQSTN' || custSubGrp == 'NRML' || custSubGrp == 'ESOSW' || custSubGrp =='CROSS')){
+   if(result && result.ret1)
+   return false;
+}
+   return true;
+}
+
 
 function matchDnBForAutomationCountries() {
   var reqId = FormManager.getActualValue('reqId');
@@ -1545,6 +1562,50 @@ function matchDnBForAutomationCountries() {
                       });
             } else {
               showDnBMatchModal();
+            }
+          } else {
+            // continue
+            console.log("An error occurred while matching dnb.");
+            cmr.showConfirm("cmr.showModal('addressVerificationModal')", 'An error occurred while matching dnb. Do you want to proceed with this request?', 'Warning', null, {
+              OK : 'Yes',
+              CANCEL : 'No'
+            });
+          }
+        },
+        error : function(error, ioargs) {
+        }
+      });
+
+}
+function matchDnBForIndia() {
+  var reqId = FormManager.getActualValue('reqId');
+  console.log("Checking if the request matches D&B...");      
+  var nm1 = _pagemodel.mainCustNm1 == null ? '' : _pagemodel.mainCustNm1;
+  var nm2 = _pagemodel.mainCustNm2 == null ? '' : _pagemodel.mainCustNm2;
+  if (nm1 != FormManager.getActualValue('mainCustNm1') || nm2 != FormManager.getActualValue('mainCustNm2')) {
+    cmr.showAlert("The Customer Name/s have changed. The record has to be saved first. Please select Save from the actions.");
+    return;
+  }
+  cmr.showProgress('Checking request data with D&B...');
+  dojo
+      .xhrGet({
+        url : cmr.CONTEXT_ROOT + '/request/dnb/checkMatch.json',
+        handleAs : 'json',
+        method : 'GET',
+        content : {
+          'reqId' : reqId
+        },
+        timeout : 50000,
+        sync : false,
+        load : function(data, ioargs) {
+          cmr.hideProgress();
+          console.log(data);
+          if (data && data.success) {
+            if (data.match) {
+              cmr.showConfirm('addressVerificationModal');
+            }else {
+              cmr.showAlert("Please attach company proof as Dnb failed");
+              checkDnBMatchingAttachmentValidator();
             }
           } else {
             // continue
@@ -1645,6 +1706,27 @@ function checkForConfirmationAttachments(){
 	} else {
 		return false;
 	}
+}
+
+function checkDnBMatchingAttachmentValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+          // FOR India Temporary
+          var id = FormManager.getActualValue('reqId');
+          var ret = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
+            ID : id
+          });
+          if (ret == null || ret.ret1 == null) {
+            return new ValidationResult(null, false, "You\'re obliged to provide either one of the following documentation as backup - "
+                + "client\'s official website, Secretary of State business registration proof, client\'s confirmation email and signed PO, attach it under the file content "
+                + "of <strong>Company Proof</strong>. Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.");
+          } else {
+            return new ValidationResult(null, true);
+          }
+      }
+    };
+  })(), 'MAIN_ATTACH_TAB', 'frmCMR');
 }
 
 function showDocTypeConfirmDialog() {

@@ -131,6 +131,23 @@ function addAfterConfigAP() {
       else
         FormManager.enable('clientTier');
     }
+    
+       if (cntry == SysLoc.INDIA) {
+      if (custSubGrp == 'BLUMX' ){
+       FormManager.resetDropdownValues(FormManager.getField('isicCd'));
+        FormManager.setValue('isicCd',"");
+       }
+       if(custSubGrp == 'IGF'){
+         FormManager.resetDropdownValues(FormManager.getField('busnType'));
+        FormManager.setValue('busnType','000');
+          FormManager.readOnly('busnType');
+       }
+       if(custSubGrp == 'AQSTN'){
+        FormManager.setValue('abbrevNm','Acquisition Use Only');
+       }
+     
+    }
+    
   }
   if (reqType == 'C') {
     setIsuOnIsic();
