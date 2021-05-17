@@ -2104,7 +2104,7 @@ public class NORDXHandler extends BaseSOFHandler {
     String sql = ExternalizedQuery.getSql("ND.GET.KNVP.PARVW");
     sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
     sql = StringUtils.replace(sql, ":KUNNR", "'" + kunnr + "'");
-    String dbId = QueryClient.RDC_APP_ID;
+    String dbId = QueryClient.CMMA_APP_ID;
 
     QueryRequest query = new QueryRequest();
     query.setSql(sql);
@@ -2352,7 +2352,7 @@ public class NORDXHandler extends BaseSOFHandler {
     String sql = ExternalizedQuery.getSql("GET.KNVP.PARVW");
     sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
     sql = StringUtils.replace(sql, ":KUNNR", "'" + kunnr + "'");
-    String dbId = QueryClient.RDC_APP_ID;
+    String dbId = QueryClient.CMMA_APP_ID;
 
     QueryRequest query = new QueryRequest();
     query.setSql(sql);
@@ -2482,7 +2482,7 @@ public class NORDXHandler extends BaseSOFHandler {
     sql = StringUtils.replace(sql, ":ZZKV_CUSNO", "'" + cmrNo + "'");
     sql = StringUtils.replace(sql, ":AUFSD", "'" + ordBlk + "'");
 
-    String dbId = QueryClient.RDC_APP_ID;
+    String dbId = QueryClient.CMMA_APP_ID;
 
     QueryRequest query = new QueryRequest();
     query.setSql(sql);
@@ -2511,7 +2511,7 @@ public class NORDXHandler extends BaseSOFHandler {
     String sql = ExternalizedQuery.getSql("GET.KNVV.WAERS");
     sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
     sql = StringUtils.replace(sql, ":KUNNR", "'" + kunnr + "'");
-    String dbId = QueryClient.RDC_APP_ID;
+    String dbId = QueryClient.CMMA_APP_ID;
 
     QueryRequest query = new QueryRequest();
     query.setSql(sql);
@@ -2546,7 +2546,7 @@ public class NORDXHandler extends BaseSOFHandler {
     sql = StringUtils.replace(sql, ":ZZKV_CUSNO", "'" + cmrNo + "'");
     sql = StringUtils.replace(sql, ":KTOKD", "'ZS01'");
 
-    String dbId = QueryClient.RDC_APP_ID;
+    String dbId = QueryClient.CMMA_APP_ID;
 
     QueryRequest query = new QueryRequest();
     query.setSql(sql);
@@ -2579,7 +2579,7 @@ public class NORDXHandler extends BaseSOFHandler {
     String sql = ExternalizedQuery.getSql("GET.KNVV.ZTERM");
     sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
     sql = StringUtils.replace(sql, ":KUNNR", "'" + kunnr + "'");
-    String dbId = QueryClient.RDC_APP_ID;
+    String dbId = QueryClient.CMMA_APP_ID;
 
     QueryRequest query = new QueryRequest();
     query.setSql(sql);
@@ -2615,7 +2615,7 @@ public class NORDXHandler extends BaseSOFHandler {
     sql = StringUtils.replace(sql, ":ZZKV_CUSNO", "'" + cmrNo + "'");
     sql = StringUtils.replace(sql, ":AUFSD", "'" + ordBlk + "'");
 
-    String dbId = QueryClient.RDC_APP_ID;
+    String dbId = QueryClient.CMMA_APP_ID;
 
     QueryRequest query = new QueryRequest();
     query.setSql(sql);
@@ -2692,7 +2692,7 @@ public class NORDXHandler extends BaseSOFHandler {
     String sql = ExternalizedQuery.getSql("GET.IERP.BRAN5");
     sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
     sql = StringUtils.replace(sql, ":KUNNR", "'" + kunnr + "'");
-    String dbId = QueryClient.RDC_APP_ID;
+    String dbId = QueryClient.CMMA_APP_ID;
 
     QueryRequest query = new QueryRequest();
     query.setSql(sql);
