@@ -999,6 +999,10 @@ public class TransConnService extends BaseBatchService {
 
     List<List<MassUpdateRecord>> allocated = allocateRequests(origList, threads);
 
+    LOG.debug("Allocations: ");
+    for (List<MassUpdateRecord> list : allocated) {
+      LOG.debug(" - " + list.size() + " records");
+    }
     ExecutorService executor = Executors.newFixedThreadPool(threads, new WorkerThreadFactory("UpdateMulti"));
     for (List<MassUpdateRecord> list : allocated) {
       USMassUpdateWorker worker = new USMassUpdateWorker(list, reqId, request, data.getCmrIssuingCntry());

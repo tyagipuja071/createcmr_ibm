@@ -81,6 +81,7 @@ public class USMassUpdateWorker implements Runnable {
         sub.add(queue.pop());
         if (sub.size() % 50 == 0 && sub.size() > 0) {
           try {
+            LOG.debug("Sending " + sub.size() + " records to process services..");
             request.setRecords(sub);
             ServiceClient massServiceClient = MassServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
                 MassProcessClient.class);
