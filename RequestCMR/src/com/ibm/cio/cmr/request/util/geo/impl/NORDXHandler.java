@@ -1885,7 +1885,8 @@ public class NORDXHandler extends BaseSOFHandler {
         // Get create cmr seq list
         for (int i = 0; i < resultsCMR.size(); i++) {
           String item = String.valueOf(resultsCMR.get(i));
-          if (!StringUtils.isEmpty(item)) {
+          if (!StringUtils.isEmpty(item) && !"10001".equals(item) && !"20001".equals(item) && !"40001".equals(item) && !"60001".equals(item)
+              && !"70001".equals(item) && !"70002".equals(item) && !"90001".equals(item) && !"99997".equals(item)) {
             seqListCMR.add(Integer.parseInt(item));
           }
         }
