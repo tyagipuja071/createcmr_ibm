@@ -91,7 +91,7 @@ dojo.addOnLoad(function(){
     <!-- Defect : 1444422 -->
     <!-- Site Party ID -->
     <cmr:row topPad="10" addBackground="true">
-			<cmr:column span="2" containerForField="SitePartyID" forGEO="IERP,MCO2,EMEA,JP,NORDX" forCountry="846,806,702,678">
+			<cmr:column span="2" containerForField="SitePartyID" forGEO="IERP,MCO2,EMEA,JP,NORDX,TW" forCountry="846,806,702,678,858">
 				<p>
 					<cmr:label fieldId="sitePartyId">
             <cmr:fieldLabel fieldId="SitePartyID" />: 
@@ -100,6 +100,26 @@ dojo.addOnLoad(function(){
 					<cmr:field id="sitePartyId" path="sitePartyId" fieldId="SitePartyID" tabId="MAIN_IBM_TAB" />
 				</p>
 			</cmr:column>
+			<cmr:column span="2" containerForField="CMRDoubleCreation" forGEO="TW" forCountry="858" >
+				<p>
+					<cmr:label fieldId="DuplicateCMR">
+		            <cmr:fieldLabel fieldId="DuplicateCMR" />: 
+		           <%--  <cmr:delta text="${rdcdata.dupCmrIndc}" oldValue="${reqentry.dupCmrIndc}" />DuplicateCMR --%>
+          			</cmr:label>
+					<cmr:field id="dupCmrIndc" path="dupCmrIndc" fieldId="DuplicateCMR" tabId="MAIN_IBM_TAB" />
+				</p>				
+				<p id="duplicateCMR"></p>
+			</cmr:column>
+  			<cmr:column span="1" containerForField="CustomerIdCd" forGEO="TW" forCountry="858">
+  				<p>
+            		<cmr:label fieldId="customerIdCd2">&nbsp;</cmr:label>
+              		<cmr:field fieldId="CustomerIdCd" path="customerIdCd" tabId="MAIN_IBM_TAB"/>
+              		<cmr:label fieldId="customerIdCd" forRadioOrCheckbox="true">
+                 	<cmr:fieldLabel fieldId="CustomerIdCd" />
+                 	<cmr:delta text="${rdcdata.customerIdCd}" oldValue="${reqentry.customerIdCd == 'Y' ? 'Yes' : 'No'}"/>
+              		</cmr:label>
+  				</p>
+  			</cmr:column>
 		</cmr:row>
     <cmr:view forGEO="CN">
     <cmr:row topPad="10">
@@ -154,7 +174,7 @@ dojo.addOnLoad(function(){
           <cmr:field size="80" fieldId="INACCode" id="inacCd" path="inacCd" tabId="MAIN_IBM_TAB" />
           <cmr:view forCountry="760">
           <%if (!readOnly){%>
-          <span class="cmr-bluepages-ro" title="INACCode Search" style="font-family:Geneva, Arial, Helvetica, sans-serif;font-size:12px;" id="geoLocDescCont"><a href="https://w3-connections.ibm.com/communities/service/html/communityview?communityUuid=aba599bd-cf1d-4beb-9e20-7a2b9adbed22#fullpageWidgetId=W0564147ab889_45f2_aeba_df5811201a32&file=bba58209-19fe-4d81-9d1d-cc074d89d6e5" target="_blank">INAC/NAC Code Search</a></span>
+          <span class="cmr-bluepages-ro" title="INACCode Search" style="font-family:Geneva, Arial, Helvetica, sans-serif;font-size:12px;" id="geoLocDescCont"><a href="https://ibm.box.com/s/o0pi2baolsu2px94m5zgc25zkbxxsfbi" target="_blank">INAC/NAC Code Search</a></span>
           <%}%>
           </cmr:view>
         </p> 
@@ -199,7 +219,7 @@ dojo.addOnLoad(function(){
     </cmr:row>
    </cmr:view>
 
-    <cmr:view exceptForCountry="643,749,778,818,834,852,856,646,714,720,848,649" exceptForGEO="FR,JP,MCO2">
+    <cmr:view exceptForCountry="643,749,778,818,834,852,856,646,714,720,848,649,858" exceptForGEO="FR,JP,MCO2,TW,KR">
     <cmr:row topPad="10" addBackground="true">
       <cmr:column span="2" containerForField="Enterprise" exceptForGEO="MCO1,NORDX" exceptForCountry="755">
         <p>
@@ -224,7 +244,7 @@ dojo.addOnLoad(function(){
           </cmr:view>  --%>       
         </p>
       </cmr:column>
-      <cmr:column span="2" containerForField="Company" exceptForCountry="666,726,862,822,838,724" exceptForGEO="MCO1,MCO2,CEMEA,BELUX,NL">
+      <cmr:column span="2" containerForField="Company" exceptForCountry="666,726,862,822,838,724,858" exceptForGEO="MCO1,MCO2,CEMEA,BELUX,NL,TW">
         <p>
           <cmr:label fieldId="company">
             <cmr:fieldLabel fieldId="Company" />: 
@@ -233,7 +253,7 @@ dojo.addOnLoad(function(){
           <cmr:field fieldId="Company" id="company" path="company" tabId="MAIN_IBM_TAB" />
         </p>
       </cmr:column>
-      <cmr:column span="2" containerForField="Affiliate" exceptForCountry="666,726,862,822,838,641" exceptForGEO="MCO1,MCO2,CEMEA,NORDX,BELUX,NL">
+      <cmr:column span="2" containerForField="Affiliate" exceptForCountry="666,726,862,822,838,641,858" exceptForGEO="MCO1,MCO2,CEMEA,NORDX,BELUX,NL,TW">
         <p>
           <cmr:label fieldId="affiliate">
             <cmr:fieldLabel fieldId="Affiliate" />: 
@@ -355,7 +375,7 @@ dojo.addOnLoad(function(){
   <%}%>
 
    <!--  PPSCEID, Membership Level, BP Relation Type -->    
-   <cmr:view exceptForCountry="643,749,778,818,834,852,856,646,714,720,760,649">
+   <cmr:view exceptForCountry="643,749,778,818,834,852,856,646,714,720,760,649,858,766">
 		<cmr:row topPad="10" addBackground="true">
   			<cmr:column span="2" containerForField="PPSCEID">
   				<p>
@@ -366,7 +386,7 @@ dojo.addOnLoad(function(){
             <cmr:field fieldId="PPSCEID" id="ppsceid" path="ppsceid" tabId="MAIN_IBM_TAB" />
   				</p>
   			</cmr:column>
-        <cmr:column exceptForGEO="MCO2" span="2" containerForField="MembLevel" exceptForCountry="754,758,866,822,666,644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889,838,620,642,675,677,680,752,762,767,768,772,805,808,823,832,849,850,865,729,780,706,624,788">
+        <cmr:column exceptForGEO="MCO2" span="2" containerForField="MembLevel" exceptForCountry="754,758,866,822,666,644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889,838,620,642,675,677,680,752,762,767,768,772,805,808,823,832,849,850,865,729,780,706,624,788,858,766">
           <p>
             <cmr:label fieldId="memLvl">
               <cmr:fieldLabel fieldId="MembLevel" />:
@@ -375,7 +395,7 @@ dojo.addOnLoad(function(){
             <cmr:field fieldId="MembLevel" id="memLvl" path="memLvl" tabId="MAIN_IBM_TAB" />
           </p>
         </cmr:column>
-        <cmr:column exceptForGEO="MCO2" span="2" containerForField="BPRelationType" exceptForCountry="754,758,866,822,666,644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889,838,620,642,675,677,680,752,762,767,768,772,805,808,823,832,849,850,865,729,780,706,624,788">
+        <cmr:column exceptForGEO="MCO2" span="2" containerForField="BPRelationType" exceptForCountry="754,758,866,822,666,644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889,838,620,642,675,677,680,752,762,767,768,772,805,808,823,832,849,850,865,729,780,706,624,788,858">
           <p>
             <cmr:label fieldId="bpRelType">
               <cmr:fieldLabel fieldId="BPRelationType" />:
@@ -450,5 +470,10 @@ dojo.addOnLoad(function(){
        <!--  Canada fields -->
     <jsp:include page="CA/ca_ibm.jsp" />
     
+       <!--  Taiwan fields -->
+    <jsp:include page="TW/tw_ibm.jsp" />
+
+       <!--  Korea, Republic of, fields -->
+    <jsp:include page="KR/kr_ibm.jsp" />
      
 	</cmr:section>

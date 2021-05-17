@@ -57,13 +57,13 @@ public class MatchingOutput implements AutomationOutput {
     record.setMatchGradeType(matchGradeType);
     record.setMatchGradeValue(matchGradeValue);
     record.setMatchKeyName(matchKeyName);
-    if (matchKeyValue.length() > 30) {
+    if (matchKeyValue != null && matchKeyValue.length() > 30) {
       record.setMatchKeyValue(matchKeyValue.substring(0, 30));
     } else {
       record.setMatchKeyValue(matchKeyValue);
     }
-    LOG.debug("Key Value is " + record.getMatchKeyValue().getBytes(Charset.forName("UTF-8")).length);
     if (record.getMatchKeyValue() != null && record.getMatchKeyValue().getBytes(Charset.forName("UTF-8")).length > 30) {
+      LOG.debug("Key Value is " + record.getMatchKeyValue().getBytes(Charset.forName("UTF-8")).length);
       int delta = record.getMatchKeyValue().getBytes(Charset.forName("UTF-8")).length - 30;
       record.setMatchKeyValue(record.getMatchKeyValue().substring(0, 30 - delta));
     }
