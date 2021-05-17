@@ -3463,7 +3463,6 @@ dojo.addOnLoad(function() {
 
   // CREATCMR-2430
   GEOHandler.addAfterConfig(setCustPrefLangByCountry, GEOHandler.NORDX);
-
   // CREATCMR-1689
   GEOHandler.addAddrFunction(setAbbrevNmAddressSave, GEOHandler.NORDX);
   GEOHandler.addAfterConfig(setSensitiveFlag, GEOHandler.NORDX);
