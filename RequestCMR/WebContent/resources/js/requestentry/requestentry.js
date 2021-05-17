@@ -133,7 +133,7 @@ function processRequestAction() {
     } else if (FormManager.validate('frmCMR')) {
 			if(checkForConfirmationAttachments()){
 				showDocTypeConfirmDialog();
-			} else if(checkIfDnBCheckReqForIndia()) {            
+			} else if(cntry =='744' && checkIfDnBCheckReqForIndia()) {            
                 matchDnBForIndia();
             } else if (checkIfFinalDnBCheckRequired()) {
         matchDnBForAutomationCountries();
@@ -1513,11 +1513,10 @@ function checkIfDnBCheckReqForIndia() {
   var reqId = FormManager.getActualValue('reqId');
   var reqType = FormManager.getActualValue('reqType');
   var custSubGrp=FormManager.getActualValue('custSubGrp');
-  var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
   var result = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
             ID : reqId
           });
-  if(cmrCntry == '744' && reqType == 'C' && (custSubGrp == 'BLUMX'|| custSubGrp == 'MKTPC' || custSubGrp == 'IGF' || custSubGrp == 'AQSTN' || custSubGrp == 'NRML' || custSubGrp == 'ESOSW' || custSubGrp =='CROSS')){
+  if(reqType == 'C' && (custSubGrp == 'BLUMX'|| custSubGrp == 'MKTPC' || custSubGrp == 'IGF' || custSubGrp == 'AQSTN' || custSubGrp == 'NRML' || custSubGrp == 'ESOSW' || custSubGrp =='CROSS')){
    if(result && result.ret1)
    return false;
 }
@@ -1604,7 +1603,7 @@ function matchDnBForIndia() {
             if (data.match) {
               cmr.showConfirm('addressVerificationModal');
             }else {
-              cmr.showAlert("Please attach company proof as Dnb failed");
+              cmr.showAlert("Please attach company proof as validation failed by Dnb.");
               checkDnBMatchingAttachmentValidator();
             }
           } else {
