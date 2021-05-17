@@ -182,6 +182,9 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
         LOG.debug("Retrieveing CMR dunsNo [CmrDusNumber=" + mainRecord.getCmrDuns() + "]");
         if ("678".equals(reqModel.getCmrIssuingCntry()) || "702".equals(reqModel.getCmrIssuingCntry()) || "806".equals(reqModel.getCmrIssuingCntry())
             || "846".equals(reqModel.getCmrIssuingCntry())) {
+          if (CmrConstants.REQ_TYPE_CREATE.equalsIgnoreCase(reqModel.getReqType())) {
+            data.setDunsNo(mainRecord.getCmrDuns());
+          }
         } else {
           data.setDunsNo(mainRecord.getCmrDuns());
         }
