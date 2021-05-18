@@ -1131,6 +1131,7 @@ public class NORDXTransformer extends EMEATransformer {
           && "Wx".equals(admin.getProcessedFlag())) {
         legacyCust.setEmbargoCd("D");
         resetOrdBlockToData(entityManager, data);
+        changeImportIndForShareAddrTRCE(entityManager, admin.getId().getReqId());
       }
     }
 
@@ -1947,6 +1948,12 @@ public class NORDXTransformer extends EMEATransformer {
     } else {
       return false;
     }
+  }
+
+  public void changeImportIndForShareAddrTRCE(EntityManager entityManager, long reqId) {
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ND.ADDR.Y.IMPORTIND"));
+    query.setParameter("REQ_ID", reqId);
+    query.executeSql();
   }
 
 }
