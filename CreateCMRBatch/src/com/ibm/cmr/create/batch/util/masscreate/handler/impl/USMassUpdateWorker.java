@@ -77,11 +77,12 @@ public class USMassUpdateWorker implements Runnable {
       List<ResponseRecord> responseRecords = new ArrayList<ResponseRecord>();
       List<MassUpdateRecord> sub = new ArrayList<MassUpdateRecord>();
       List<String> statusCodes = new ArrayList<String>();
+      int finished = 0;
       while (queue.peek() != null) {
         sub.add(queue.pop());
         if (sub.size() % 50 == 0 && sub.size() > 0) {
           try {
-            LOG.debug("Sending " + sub.size() + " records to process services..");
+            LOG.debug("Sending " + sub.size() + " records to process services. (Finished: " + finished + ")");
             request.setRecords(sub);
             ServiceClient massServiceClient = MassServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
                 MassProcessClient.class);
@@ -90,6 +91,7 @@ public class USMassUpdateWorker implements Runnable {
             if (response.getRecords() != null) {
               responseRecords.addAll(response.getRecords());
             }
+            LOG.debug(" - Response received. Status: " + response.getStatus() + (response.getMsg() != null ? " (" + response.getMsg() + ")" : ""));
             statusCodes.add(response.getStatus());
             sub.clear();
           } catch (Exception e) {
@@ -97,11 +99,13 @@ public class USMassUpdateWorker implements Runnable {
             statusCodes.add(CmrConstants.RDC_STATUS_ABORTED);
           }
         }
+        finished++;
       }
 
       // another round, clearout
       if (sub.size() > 0) {
         try {
+          LOG.debug("Sending final " + sub.size() + " records to process services. (Finished: " + finished + ")");
           request.setRecords(sub);
           ServiceClient massServiceClient = MassServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
               MassProcessClient.class);
@@ -110,6 +114,7 @@ public class USMassUpdateWorker implements Runnable {
           if (response.getRecords() != null) {
             responseRecords.addAll(response.getRecords());
           }
+          LOG.debug(" - Response received. Status: " + response.getStatus() + (response.getMsg() != null ? " (" + response.getMsg() + ")" : ""));
           statusCodes.add(response.getStatus());
           sub.clear();
         } catch (Exception e) {
