@@ -424,6 +424,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
    * @return
    * @throws Exception
    */
+  @Override
   public <T> T initEmpty(Class<T> entityClass) throws Exception {
     try {
       T object = entityClass.newInstance();
@@ -1144,6 +1145,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
           cloneInsert.setId(knvkPKClone);
 
+          cloneInsert.setKunnr(kna1Clone.getId().getKunnr());
           cloneInsert.setSapTs(ts);
           cloneInsert.setShadUpdateInd("I");
           cloneInsert.setShadUpdateTs(ts);
