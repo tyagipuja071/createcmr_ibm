@@ -1131,7 +1131,8 @@ public class NORDXTransformer extends EMEATransformer {
           && "Wx".equals(admin.getProcessedFlag())) {
         legacyCust.setEmbargoCd("D");
         resetOrdBlockToData(entityManager, data);
-        changeImportIndForShareAddrTRCE(entityManager, admin.getId().getReqId());
+        // changeImportIndForShareAddrTRCE(entityManager,
+        // admin.getId().getReqId());
       }
     }
 
