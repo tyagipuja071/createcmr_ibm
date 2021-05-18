@@ -133,7 +133,7 @@ function processRequestAction() {
     } else if (FormManager.validate('frmCMR')) {
 			if(checkForConfirmationAttachments()){
 				showDocTypeConfirmDialog();
-			} else if(cntry =='744' && checkIfDnBCheckReqForIndia()) {            
+			} else if(cmrCntry =='744' && checkIfDnBCheckReqForIndia()) {            
                 matchDnBForIndia();
             } else if (checkIfFinalDnBCheckRequired()) {
         matchDnBForAutomationCountries();
