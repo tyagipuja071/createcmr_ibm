@@ -4,6 +4,8 @@
 package com.ibm.cmr.create.batch.entry;
 
 import com.ibm.cio.cmr.request.CmrException;
+import com.ibm.cmr.create.batch.service.BaseBatchService;
+import com.ibm.cmr.create.batch.service.LDMassProcessMultiRdcService;
 import com.ibm.cmr.create.batch.service.LegacyDirectRdcMassProcessService;
 
 /**
@@ -20,8 +22,12 @@ public class LegacyDirectRdcMassProcessEntryPoint extends BatchEntryPoint {
   public static void main(String[] args) throws CmrException {
     BatchEntryPoint.initContext("LegacyDirectRdcMassProcess");
 
-    LegacyDirectRdcMassProcessService service = new LegacyDirectRdcMassProcessService();
-    service.setDevMode(args != null && args.length > 0 && "DEV".equals(args[0]));
+    BaseBatchService service = null;
+    if (args != null && args.length > 0 && "MULTI".equalsIgnoreCase(args[0])) {
+      service = new LDMassProcessMultiRdcService();
+    } else {
+      service = new LegacyDirectRdcMassProcessService();
+    }
     service.execute();
   }
 

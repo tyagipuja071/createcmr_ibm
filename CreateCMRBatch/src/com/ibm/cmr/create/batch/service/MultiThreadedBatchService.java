@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
@@ -86,15 +85,12 @@ public abstract class MultiThreadedBatchService<T> extends BaseBatchService {
     BatchThreadWorker worker = null;
     List<BatchThreadWorker> workers = new ArrayList<BatchThreadWorker>();
 
-    int delay = 15;
-    int currCount = 1;
     for (List<T> requestBatch : allocatedRequests) {
       worker = new BatchThreadWorker(this, requestBatch);
       if (worker != null) {
-        executor.schedule(worker, delay * currCount, TimeUnit.SECONDS);
+        executor.execute(worker);
       }
       workers.add(worker);
-      currCount++;
     }
 
     // try {

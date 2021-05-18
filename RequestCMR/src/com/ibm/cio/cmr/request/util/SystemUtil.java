@@ -54,8 +54,13 @@ public class SystemUtil {
 
   private static final Logger LOG = Logger.getLogger(SystemUtil.class);
 
-  private static Timestamp dbtime = null;
   // private static Date servertime = null;
+
+  private static ThreadLocal<EntityManager> current = new ThreadLocal<>();
+
+  public static synchronized void setManager(EntityManager entityManager) {
+    current.set(entityManager);
+  }
 
   @SuppressWarnings("unchecked")
   /**
@@ -64,32 +69,38 @@ public class SystemUtil {
    * @return
    */
   public static Timestamp getCurrentTimestamp() {
-    dbtime = null; // always get fresh
-    if (dbtime == null) {
+    try {
+      // only query once the db's timestamp. use the offset to calculate
+      // current time
+      boolean own = false;
+      EntityManager em = null;
+      if (current.get() != null) {
+        em = current.get();
+      }
+      if (em == null || !em.isOpen()) {
+        own = true;
+        em = JpaManager.getEntityManager();
+      }
       try {
-        // only query once the db's timestamp. use the offset to calculate
-        // current time
-        EntityManager em = JpaManager.getEntityManager();
-        try {
-          String sql = "select current timestamp, '1' from sysibm.sysdummy1";
-          Query q = em.createNativeQuery(sql);
-          List<Object[]> results = q.getResultList();
-          if (results != null && results.size() > 0) {
-            Timestamp ts = (Timestamp) results.get(0)[0];
-            dbtime = ts;
-            // servertime = new Date();
-          }
-        } finally {
+        String sql = "select current timestamp, '1' from sysibm.sysdummy1";
+        Query q = em.createNativeQuery(sql);
+        List<Object[]> results = q.getResultList();
+        if (results != null && results.size() > 0) {
+          Timestamp ts = (Timestamp) results.get(0)[0];
+          return ts;
+          // servertime = new Date();
+        }
+      } finally {
+        if (own) {
           em.clear();
           em.close();
         }
-      } catch (Exception e) {
-        LOG.error("Error in getting time.", e);
       }
+    } catch (Exception e) {
+      LOG.error("Error in getting time.", e);
     }
-    // long diff = new Date().getTime() - servertime.getTime();
-    // return new Timestamp(dbtime.getTime() + diff);
-    return dbtime;
+    return new Timestamp(new Date().getTime());
+
   }
 
   /**
