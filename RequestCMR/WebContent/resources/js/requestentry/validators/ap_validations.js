@@ -3,6 +3,7 @@ var _isicHandlerAP = null;
 var _clusterHandlerAP = null;
 var _isicHandlerGCG = null;
 var _clusterHandlerGCG = null;
+var _vatExemptHandler = null;
 
 function addHandlersForAP() {
   if (_isicHandlerAP == null) {
@@ -30,6 +31,17 @@ function addHandlersForGCG() {
     _clusterHandlerGCG = dojo.connect(FormManager.getField('apCustClusterId'), 'onChange', function(value) {
       setIsuOnIsic();
       setInacByClusterHKMO();
+    });
+  }
+}
+
+function afterConfigForIndia() {
+  if (_vatExemptHandler == null) {
+    _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
+      FormManager.resetValidations('vat');
+      if (!dijit.byId('vatExempt').get('checked')) {
+        FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+      }
     });
   }
 }
@@ -2892,6 +2904,10 @@ function validateGSTForIndia() {
         var reqTyp = FormManager.getActualValue('reqType');
         var vat = FormManager.getActualValue('vat');
         var reqId = FormManager.getActualValue('reqId');
+        /*
+         * if (!dijit.byId('vatExempt').get('checked')) { return new
+         * ValidationResult(null, true); }
+         */
         if (cntry != '744' || custSubGrp == 'CROSS' || reqTyp != 'C') {
           return new ValidationResult(null, true);
         }
@@ -3050,5 +3066,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addHandlersForGCG, GEOHandler.GCG);
   GEOHandler.addAfterTemplateLoad(setInacByClusterHKMO, GEOHandler.GCG);
   GEOHandler.registerValidator(validateGSTForIndia, [ SysLoc.INDIA ], null, true);
+  GEOHandler.addAfterConfig(afterConfigForIndia, [ SysLoc.INDIA ]);
   
 });
