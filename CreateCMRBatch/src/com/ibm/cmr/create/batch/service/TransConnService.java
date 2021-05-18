@@ -1028,14 +1028,13 @@ public class TransConnService extends BaseBatchService {
 
     for (USMassUpdateWorker worker : workers) {
       if (worker != null) {
+        if (worker.getResponse().getRecords() != null) {
+          response.getRecords().addAll(worker.getResponse().getRecords());
+        }
         String status = worker.getResponse().getStatus();
         if (CmrConstants.RDC_STATUS_ABORTED.equals(status) || CmrConstants.RDC_STATUS_NOT_COMPLETED.equals(status)) {
           response.setStatus(CmrConstants.RDC_STATUS_ABORTED);
           response.setMsg(worker.getResponse().getMsg());
-        } else {
-          if (worker.getResponse().getRecords() != null) {
-            response.getRecords().addAll(worker.getResponse().getRecords());
-          }
         }
       }
     }
@@ -1043,6 +1042,7 @@ public class TransConnService extends BaseBatchService {
       response.setStatus(CmrConstants.RDC_STATUS_COMPLETED);
     }
 
+    LOG.debug("Total records from response: " + response.getRecords().size());
     // try this
     // get the results from the service and process jason response
     try {
