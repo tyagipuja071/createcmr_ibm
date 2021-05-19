@@ -37,6 +37,44 @@
   	</cmr:column>
   </cmr:row>
   
+  <cmr:row>
+  	<cmr:column span="2" containerForField="HST">
+  		<p>
+  			<cmr:label fieldId="HST">
+        		<cmr:fieldLabel fieldId="HST" />:
+          	</cmr:label>
+        	<cmr:field path="vat" id="vat" fieldId="HST" tabId="MAIN_CUST_TAB" />
+  		</p>		
+  	</cmr:column>
+  	<cmr:column span="2" containerForField="PSTExempt">
+  		<p>
+  			<cmr:label fieldId="PSTExempt">
+        		<cmr:fieldLabel fieldId="PSTExempt" />:
+          	</cmr:label>
+        	<cmr:field path="vatExempt" id="vatExempt" fieldId="PSTExempt" tabId="MAIN_CUST_TAB" />
+  		</p>		
+  	</cmr:column>
+  	<cmr:column span="2" containerForField="PSTExemptLicNum">
+  		<p> 
+  			<cmr:label fieldId="PSTExemptLicNum">
+        		<cmr:fieldLabel fieldId="PSTExemptLicNum" />:
+          	</cmr:label>
+        	<cmr:field path="taxPayerCustCd" id="taxPayerCustCd" fieldId="PSTExemptLicNum" tabId="MAIN_CUST_TAB" />
+  		</p>		
+  	</cmr:column>
+  </cmr:row>
+  
+  <cmr:row>
+  	<cmr:column span="2" containerForField="QST">
+  		<p>
+  			<cmr:label fieldId="QST">
+        		<cmr:fieldLabel fieldId="QST" />:
+          	</cmr:label>
+        	<cmr:field path="taxCd3" id="taxCd3" fieldId="QST" tabId="MAIN_CUST_TAB" />
+  		</p>		
+  	</cmr:column>
+  </cmr:row>
+  
   <cmr:row addBackground="true" >
     <cmr:column span="2" containerForField="LocalTax1">
       <p>
@@ -146,17 +184,19 @@
         <cmr:field path="collectorNameNo" id="collectorNameNo" fieldId="BillingProcCd" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
+    <%-- 
     <cmr:column span="2" containerForField="CustomerData">
       <p>
         <label for="taxCd3"> 
-          <cmr:fieldLabel fieldId="CustomerData" />: 
+          <cmr:fieldLabel fieldId="CustomerData" />:--%> 
           <%-- uncomment after DM changes or remap field
           <cmr:delta text="${rdcdata.taxCd3}" oldValue="${reqentry.taxCd3}" />
-          --%>
+          --%><%-- 
         </label>
         <cmr:field path="taxCd3" id="taxCd3" fieldId="CustomerData" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
+    --%>
   </cmr:row>
 
   <cmr:row addBackground="true">
