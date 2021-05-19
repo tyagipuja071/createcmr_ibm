@@ -1128,6 +1128,7 @@ public class USUtil extends AutomationUtil {
             } else {
               validation.setMessage("Rejected");
               validation.setSuccess(false);
+              details.append("High confidence D&B matches did not match the " + addrDesc + " address data.").append("\n");
               details.append("\nNo supporting documentation is provided by the requester for " + addrDesc + " address.");
               engineData.addRejectionComment("OTH", "No supporting documentation is provided by the requester for " + addrDesc + " address.", "", "");
               output.setOnError(true);
@@ -1145,6 +1146,7 @@ public class USUtil extends AutomationUtil {
           } else {
             validation.setMessage("Rejected");
             validation.setSuccess(false);
+            details.append("No High Quality D&B Matches were found for " + addrDesc + " address.").append("\n");
             details.append("\nNo supporting documentation is provided by the requester for " + addrDesc + " address.");
             engineData.addRejectionComment("OTH", "No supporting documentation is provided by the requester for " + addrDesc + " address.", "", "");
             output.setOnError(true);
