@@ -374,8 +374,14 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     if ("11".equals(cloningQueue.getLastUpdtBy()) && cmrNo.startsWith("99")) {
       LOG.debug("Skip setting of CMR No for Internal for CMR : " + cmrNo);
     } else if (Arrays.asList("81", "85").contains(cloningQueue.getLastUpdtBy()) && !cmrNo.startsWith("99")) {
-      request.setMin(990000);
-      request.setMax(999999);
+      if ("81".equals(cloningQueue.getLastUpdtBy())) {
+        request.setMin(990000);
+        request.setMax(999999);
+      } else {
+        request.setMin(997000);
+        request.setMax(998999);
+      }
+
     } else {
       int CmrNoVal = Integer.parseInt(cmrNo);
       CloningMapping cMapping = null;
@@ -1704,7 +1710,13 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     LOG.debug("Inside generateCMRNoNonLegacy method ");
     String mandt = SystemConfiguration.getValue("MANDT");
     // CloningUtil cUtil = new CloningUtil();
-    String kukla = CloningUtil.getKuklaFromCMR(entityManager, cmrIssuingCntry, cmrNo, mandt);
+    String kukla = "";
+    if (StringUtils.isBlank(cloningQueue.getLastUpdtBy())) {
+      kukla = CloningUtil.getKuklaFromCMR(entityManager, cmrIssuingCntry, cmrNo, mandt);
+    } else {
+      kukla = cloningQueue.getLastUpdtBy();
+    }
+
     GEOHandler geoHandler = RequestUtils.getGEOHandler(cmrIssuingCntry);
     String generatedCmrNo = "";
     if (geoHandler != null) {
