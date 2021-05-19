@@ -1604,9 +1604,11 @@ function matchDnBForIndia() {
         load : function(data, ioargs) {
           cmr.hideProgress();
           console.log(data);
+          console.log(data.success);
+          console.log(data.match);       
           if (data && data.success) {
             if (data.match) {
-              cmr.showConfirm('addressVerificationModal');
+              cmr.showModal('addressVerificationModal');
             }else {
               cmr.showAlert("Please attach company proof as validation failed by Dnb.");
               checkDnBMatchingAttachmentValidator();
