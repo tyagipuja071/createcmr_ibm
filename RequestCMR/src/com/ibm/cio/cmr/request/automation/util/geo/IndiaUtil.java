@@ -3,13 +3,13 @@
  */
 package com.ibm.cio.cmr.request.automation.util.geo;
 
-import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
-
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.CmrConstants;
@@ -22,6 +22,8 @@ import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cmr.services.client.matching.MatchingResponse;
+import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 
 public class IndiaUtil extends AutomationUtil {
 
@@ -113,4 +115,24 @@ public class IndiaUtil extends AutomationUtil {
     return true;
   }
 
+  @Override
+  public void filterDuplicateCMRMatches(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
+      MatchingResponse<DuplicateCMRCheckResponse> response) {
+    String[] scenariosToBeChecked = { "ESOSW" };
+    String scenario = requestData.getData().getCustSubGrp();
+    if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
+      List<DuplicateCMRCheckResponse> matches = response.getMatches();
+      List<DuplicateCMRCheckResponse> filteredMatches = new ArrayList<DuplicateCMRCheckResponse>();
+      for (DuplicateCMRCheckResponse match : matches) {
+        if (StringUtils.isNotBlank(match.getCmrNo())) {
+          String cmrFound = match.getCmrNo().substring(0, 3);
+          if ("800".equals(cmrFound)) {
+            filteredMatches.add(match);
+          }
+        }
+      }
+      // set filtered matches in response
+      response.setMatches(filteredMatches);
+    }
+  }
 }
