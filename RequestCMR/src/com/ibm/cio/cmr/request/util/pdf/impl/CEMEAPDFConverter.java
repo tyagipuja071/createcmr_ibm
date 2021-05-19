@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 import javax.persistence.EntityManager;
 
@@ -115,19 +116,21 @@ public class CEMEAPDFConverter extends DefaultPDFConverter {
 
       Table checklistMain = createDetailsTable(new float[] { 25, 75 });
 
-      checklistMain.addCell(createLabelCell("Customer Name:"));
-      checklistMain.addCell(createValueCell(admin.getMainCustNm1()));
-      if (!StringUtils.isEmpty(checklist.getLocalCustNm())) {
-        checklistMain.addCell(createLabelCell("Local Customer Name:"));
-        checklistMain.addCell(createValueCell(checklist.getLocalCustNm()));
-      }
+      String[] countriesToSkip = { "787", "620", "677", "680", "752", "762", "767", "768", "772", "805", "808", "823", "832", "849", "850", "865" };
+      if (!(Stream.of(countriesToSkip).anyMatch(loc -> loc.equals(sysLoc)))) {
+        checklistMain.addCell(createLabelCell("Customer Name:"));
+        checklistMain.addCell(createValueCell(admin.getMainCustNm1()));
+        if (!StringUtils.isEmpty(checklist.getLocalCustNm())) {
+          checklistMain.addCell(createLabelCell("Local Customer Name:"));
+          checklistMain.addCell(createValueCell(checklist.getLocalCustNm()));
+        }
 
-      if (soldTo != null) {
-        checklistMain.addCell(createLabelCell("Address:"));
-        String address = soldTo.getAddrTxt() != null ? soldTo.getAddrTxt() : "";
-        checklistMain.addCell(createValueCell(address + (!StringUtils.isEmpty(soldTo.getAddrTxt2()) ? " " + soldTo.getAddrTxt2() : "")));
+        if (soldTo != null) {
+          checklistMain.addCell(createLabelCell("Address:"));
+          String address = soldTo.getAddrTxt() != null ? soldTo.getAddrTxt() : "";
+          checklistMain.addCell(createValueCell(address + (!StringUtils.isEmpty(soldTo.getAddrTxt2()) ? " " + soldTo.getAddrTxt2() : "")));
+        }
       }
-
       document.add(checklistMain);
       document.add(blankLine());
 
