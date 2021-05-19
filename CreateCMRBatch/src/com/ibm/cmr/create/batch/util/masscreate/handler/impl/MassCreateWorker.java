@@ -223,7 +223,7 @@ public class MassCreateWorker implements Runnable {
       this.entityManager.merge(massCretEntity);
       // }
 
-      this.entityManager.flush();
+      // this.entityManager.flush();
 
     } catch (Exception e) {
       LOG.error("Error in processing Mass Create and Mass Create Addr Updates for Create Mass Request " + " [" + e.getMessage() + "]", e);
