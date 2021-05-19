@@ -46,10 +46,6 @@ function afterConfigForIndia() {
   }
 }
 
-if (_vatExemptHandler && _vatExemptHandler[0]) {
-  _vatExemptHandler[0].onClick();
-}
-
 function addAfterConfigAP() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var reqType = FormManager.getActualValue('reqType');
@@ -2908,10 +2904,9 @@ function validateGSTForIndia() {
         var reqTyp = FormManager.getActualValue('reqType');
         var vat = FormManager.getActualValue('vat');
         var reqId = FormManager.getActualValue('reqId');
-        /*
-         * if (!dijit.byId('vatExempt').get('checked')) { return new
-         * ValidationResult(null, true); }
-         */
+        if (dijit.byId('vatExempt').get('checked')) { 
+          return new ValidationResult(null, true); 
+        }
         if (cntry != '744' || custSubGrp == 'CROSS' || reqTyp != 'C') {
           return new ValidationResult(null, true);
         }
