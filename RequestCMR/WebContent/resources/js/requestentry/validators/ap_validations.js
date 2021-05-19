@@ -46,6 +46,10 @@ function afterConfigForIndia() {
   }
 }
 
+if (_vatExemptHandler && _vatExemptHandler[0]) {
+  _vatExemptHandler[0].onClick();
+}
+
 function addAfterConfigAP() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var reqType = FormManager.getActualValue('reqType');
