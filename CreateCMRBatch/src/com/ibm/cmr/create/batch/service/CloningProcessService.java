@@ -373,7 +373,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
     if ("11".equals(cloningQueue.getLastUpdtBy()) && cmrNo.startsWith("99")) {
       LOG.debug("Skip setting of CMR No for Internal for CMR : " + cmrNo);
-    } else if (Arrays.asList("81", "85").contains(cloningQueue.getLastUpdtBy()) && !cmrNo.startsWith("99")) {
+    } else if (Arrays.asList("81", "85").contains(cloningQueue.getLastUpdtBy())) {
       if ("81".equals(cloningQueue.getLastUpdtBy())) {
         request.setMin(990000);
         request.setMax(999999);
