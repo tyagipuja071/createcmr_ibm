@@ -127,13 +127,14 @@ function processRequestAction() {
   } else if (action == YourActions.Reject) {
     doYourAction();
 
-  } else if (action == YourActions.Send_for_Processing) {
+  } else if (action == YourActions.Send_for_Processing) {    
+    var findDnbResult =  FormManager.getActualValue('findDnbResult');
     if (_pagemodel.approvalResult == 'Rejected') {
       cmr.showAlert('The request\'s approvals have been rejected. Please re-submit or override the rejected approvals. ');
     } else if (FormManager.validate('frmCMR')) {
 			if(checkForConfirmationAttachments()){
 				showDocTypeConfirmDialog();
-			} else if(cmrCntry =='744' && checkIfDnBCheckReqForIndia()) {            
+			} else if(cmrCntry =='744' && checkIfDnBCheckReqForIndia() && findDnbResult == 'Accepted') {            
                 matchDnBForIndia();
             } else if (checkIfFinalDnBCheckRequired()) {
         matchDnBForAutomationCountries();
@@ -1517,10 +1518,14 @@ function checkIfDnBCheckReqForIndia() {
             ID : reqId
           });
   if(reqType == 'C' && (custSubGrp == 'BLUMX'|| custSubGrp == 'MKTPC' || custSubGrp == 'IGF' || custSubGrp == 'AQSTN' || custSubGrp == 'NRML' || custSubGrp == 'ESOSW' || custSubGrp =='CROSS')){
-   if(result && result.ret1)
+   if(result && result.ret1){
    return false;
-}
+   }
+   else {
    return true;
+   }
+}
+   return false;
 }
 
 
