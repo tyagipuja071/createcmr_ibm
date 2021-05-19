@@ -1704,7 +1704,13 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     LOG.debug("Inside generateCMRNoNonLegacy method ");
     String mandt = SystemConfiguration.getValue("MANDT");
     // CloningUtil cUtil = new CloningUtil();
-    String kukla = CloningUtil.getKuklaFromCMR(entityManager, cmrIssuingCntry, cmrNo, mandt);
+    String kukla = "";
+    if (StringUtils.isBlank(cloningQueue.getLastUpdtBy())) {
+      kukla = CloningUtil.getKuklaFromCMR(entityManager, cmrIssuingCntry, cmrNo, mandt);
+    } else {
+      kukla = cloningQueue.getLastUpdtBy();
+    }
+
     GEOHandler geoHandler = RequestUtils.getGEOHandler(cmrIssuingCntry);
     String generatedCmrNo = "";
     if (geoHandler != null) {
