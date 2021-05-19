@@ -2904,10 +2904,9 @@ function validateGSTForIndia() {
         var reqTyp = FormManager.getActualValue('reqType');
         var vat = FormManager.getActualValue('vat');
         var reqId = FormManager.getActualValue('reqId');
-        /*
-         * if (!dijit.byId('vatExempt').get('checked')) { return new
-         * ValidationResult(null, true); }
-         */
+        if (dijit.byId('vatExempt').get('checked')) { 
+          return new ValidationResult(null, true); 
+        }
         if (cntry != '744' || custSubGrp == 'CROSS' || reqTyp != 'C') {
           return new ValidationResult(null, true);
         }
