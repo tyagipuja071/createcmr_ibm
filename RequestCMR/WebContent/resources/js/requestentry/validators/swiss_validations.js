@@ -1560,4 +1560,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(lockIBMTabForSWISS, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(lockIBMTabForSWISS, GEOHandler.SWISS);
   GEOHandler.registerValidator(validateDeptAttnBldg, GEOHandler.SWISS);
+  GEOHandler.addAfterConfig(setAddressDetailsForView, GEOHandler.SWISS);
 });

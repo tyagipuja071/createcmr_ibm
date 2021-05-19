@@ -646,13 +646,13 @@ public class UKIUtil extends AutomationUtil {
         results.setResults("Calculated");
         results.setDetails(details.toString());
       } else if (StringUtils.isNotBlank(data.getRepTeamMemberNo()) && StringUtils.isNotBlank(data.getSalesBusOffCd())) {
-        details.append("Coverage could not be calculated using 32S logic. Using values from request").append("\n");
+        details.append("Coverage could not be calculated using 34Q logic. Using values from request").append("\n");
         details.append("Sales Rep : " + data.getRepTeamMemberNo()).append("\n");
         details.append("SBO : " + data.getSalesBusOffCd()).append("\n");
         results.setResults("Calculated");
         results.setDetails(details.toString());
       } else {
-        String msg = "Coverage cannot be calculated. No valid 32S mapping found from request data.";
+        String msg = "Coverage cannot be calculated. No valid 34Q mapping found from request data.";
         details.append(msg);
         results.setResults("Cannot Calculate");
         results.setDetails(details.toString());
@@ -664,7 +664,7 @@ public class UKIUtil extends AutomationUtil {
   }
 
   private UkiFieldsContainer calculate32SValuesForUK(EntityManager entityManager, String isuCd, String clientTier, String isicCd) {
-    if ("32".equals(isuCd) && StringUtils.isNotBlank(clientTier) && StringUtils.isNotBlank(isicCd)) {
+    if ("34".equals(isuCd) && StringUtils.isNotBlank(clientTier) && StringUtils.isNotBlank(isicCd)) {
       UkiFieldsContainer container = new UkiFieldsContainer();
       String sql = ExternalizedQuery.getSql("QUERY.UK.GET.SBOSR_FOR_ISIC");
       PreparedQuery query = new PreparedQuery(entityManager, sql);
@@ -686,7 +686,7 @@ public class UKIUtil extends AutomationUtil {
   }
 
   private UkiFieldsContainer calculate32SValuesForIE(EntityManager entityManager, String isuCd, String clientTier, String isicCd) {
-    if ("32".equals(isuCd) && StringUtils.isNotBlank(clientTier) && StringUtils.isNotBlank(isicCd)) {
+    if ("34".equals(isuCd) && StringUtils.isNotBlank(clientTier) && StringUtils.isNotBlank(isicCd)) {
       UkiFieldsContainer container = new UkiFieldsContainer();
       String sql = ExternalizedQuery.getSql("QUERY.GET.SALESREPSBO.IRELAND");
       PreparedQuery query = new PreparedQuery(entityManager, sql);

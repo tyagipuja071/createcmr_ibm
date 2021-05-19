@@ -143,9 +143,11 @@ public class GridTag extends TagSupport {
       return "null";
     }
     StringBuilder sb = new StringBuilder();
+    String val = null;
     for (String key : this.params.keySet()) {
       sb.append(sb.length() > 0 ? "&" : "");
-      sb.append(key + "=" + this.params.get(key));
+      val = this.params.get(key);
+      sb.append(key + "=" + val.replace("'", "\\'"));
     }
     return "'" + sb.toString() + "'";
   }

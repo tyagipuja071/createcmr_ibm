@@ -304,6 +304,10 @@ function setIsuOnIsic(){
     };
   
     var clusterDesc = cmr.query('GET.DESC_BY_CLUSTER', qParams);
+    if((cmrIssuingCntry == '616' || cmrIssuingCntry == '796' ) &&(clusterDesc[0] != '' && (clusterDesc[0].ret1.includes('S2') || clusterDesc[0].ret1.includes('Default')))){
+      FormManager.setValue('repTeamMemberNo', '000000');
+      FormManager.readOnly('repTeamMemberNo');
+    } 
     if((cmrIssuingCntry == '738' || cmrIssuingCntry == '736' ) &&(clusterDesc[0] != '' && !(clusterDesc[0].ret1.includes('S1')))){
       return;
     }
@@ -2883,6 +2887,7 @@ function validateStreetAddrCont2() {
   })(), null, 'frmCMR_addressModal');
 }
 
+
 dojo.addOnLoad(function() {
   GEOHandler.AP = [ SysLoc.AUSTRALIA, SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE, SysLoc.VIETNAM,
       SysLoc.THAILAND, SysLoc.HONG_KONG, SysLoc.NEW_ZEALAND, SysLoc.LAOS, SysLoc.MACAO, SysLoc.MALASIA, SysLoc.NEPAL, SysLoc.CAMBODIA ];
@@ -2916,7 +2921,6 @@ dojo.addOnLoad(function() {
   GEOHandler.enableCustomerNamesOnAddress(GEOHandler.AP);
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.AP);
   GEOHandler.addAddrFunction(setAbbrevNmLocnOnAddressSave, GEOHandler.AP);
-
   // GEOHandler.addAddrFunction(addMandateCmrNoForSG, [ SysLoc.SINGAPORE ]);
 
   GEOHandler.addAfterConfig(onCustSubGrpChange, GEOHandler.AP);

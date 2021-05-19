@@ -54,11 +54,10 @@ var _landCntryHandlerUK = null;
 var _postalCdUKHandler = null;
 var _cityUKHandler = null;
 var _custGrpIT = null;
-
 var _importedIndc = null;
-
 var _landedIT = null;
 var _sboHandlerIT = null;
+var _importedIndcBilling = null;
 
 function getImportedIndcForItaly() {
   if (_importedIndc) {
@@ -77,6 +76,24 @@ function getImportedIndcForItaly() {
   return _importedIndc;
 
 }
+
+function getImportedIndcForItalyBillingAddr() {
+  if (_importedIndcBilling) {
+    console.log('Returning imported indc for Billing Address = ' + _importedIndcBilling);
+    return _importedIndcBilling;
+  }
+  var results = cmr.query('IMPORTED_ADDR_ZP01', {
+    REQID : FormManager.getActualValue('reqId')
+  });
+  if (results != null && results.ret1) {
+    _importedIndcBilling = results.ret1;
+  } else {
+    _importedIndcBilling = 'N';
+  }
+  console.log('saving imported ind as for Billing Address' + _importedIndc);
+  return _importedIndcBilling;
+}
+
 function addEMEALandedCountryHandler(cntry, addressMode, saving, finalSave) {
   if (!saving) {
     if (addressMode == 'newAddress') {
@@ -7192,10 +7209,10 @@ function autoPopulateISUClientTierUK() {
     }
     if (addrType != '' && addrType == 'ZS01') {
       if (postCd != '' && (isNorthernIrelandPostCd(postCd) || isScotlandPostCd(postCd))) {
-        FormManager.setValue('isuCd', "32");
-        FormManager.setValue('clientTier', "C");
+        FormManager.setValue('isuCd', "34");
+        FormManager.setValue('clientTier', "Q");
       } else {
-        FormManager.setValue('clientTier', "S");
+        FormManager.setValue('clientTier', "Q");
       }
     }
   } else {
@@ -7232,10 +7249,10 @@ function autoSetISUClientTierUK() {
       }
 
       if (postCd != '' && (isNorthernIrelandPostCd(postCd) || isScotlandPostCd(postCd))) {
-        FormManager.setValue('isuCd', "32");
-        FormManager.setValue('clientTier', "C");
+        FormManager.setValue('isuCd', "34");
+        FormManager.setValue('clientTier', "Q");
       } else {
-        FormManager.setValue('clientTier', "S");
+        FormManager.setValue('clientTier', "Q");
       }
     } else {
       FormManager.setValue('isuCd', '21');
