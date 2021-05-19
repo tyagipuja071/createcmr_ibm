@@ -172,7 +172,7 @@ public class MassCreateProcessMultiService extends MultiThreadedBatchService<Str
         String batchAction = "MonitorTransconn";
         if (isMassCreateRecord) {
           LOG.debug("Processing Mass Create Service for Request ID " + notifyReq.getReqId());
-          String result = processMassCreateService(em, notifyReq.getReqId(), cmrServiceInput, notifyReq.getIterationId(), batchAction,
+          String result = processMassCreateService(em, admin, cmrServiceInput, notifyReq.getIterationId(), batchAction,
               admin.getRdcProcessingStatus(), wfHist);
           LOG.debug("Result from Create Service: '" + result + "'");
         }
@@ -241,7 +241,7 @@ public class MassCreateProcessMultiService extends MultiThreadedBatchService<Str
           CmrServiceInput cmrServiceInput = getReqParam(em, manualRec.getId().getReqId(), manualRec.getReqType(), cmrno);
           cmrServiceInput.setCmrIssuingCntry(cmrIssuingCountry);
 
-          String result = processMassCreateService(em, manualRec.getId().getReqId(), cmrServiceInput, manualRec.getIterationId(), batchAction,
+          String result = processMassCreateService(em, manualRec, cmrServiceInput, manualRec.getIterationId(), batchAction,
               manualRec.getRdcProcessingStatus(), null);
           LOG.debug("Result from Create Service: '" + result + "'");
 
@@ -297,9 +297,10 @@ public class MassCreateProcessMultiService extends MultiThreadedBatchService<Str
     createEntity(reqCmtLog, em);
   }
 
-  public String processMassCreateService(EntityManager em, long reqId, CmrServiceInput cmrServiceInput, int itrId, String batchAction,
+  public String processMassCreateService(EntityManager em, Admin admin, CmrServiceInput cmrServiceInput, int itrId, String batchAction,
       String currentRDCProcStat, WfHist wfHist) throws JsonGenerationException, JsonMappingException, IOException, Exception {
 
+    long reqId = admin.getId().getReqId();
     String resultCode = "";
     // get the params for input to the create cmr service
     List<MassCreateBatchEmailModel> ufailList = new ArrayList<MassCreateBatchEmailModel>();
@@ -349,6 +350,8 @@ public class MassCreateProcessMultiService extends MultiThreadedBatchService<Str
     }
     LOG.debug("Mass create processing finished at " + new Date());
 
+    em.flush();
+
     for (MassCreateWorker worker : workers) {
       if (worker != null) {
         if (worker.isError()) {
@@ -361,9 +364,7 @@ public class MassCreateProcessMultiService extends MultiThreadedBatchService<Str
     }
 
     // update the Admin table for all the update responses
-    PreparedQuery adminQuery = new PreparedQuery(em, ExternalizedQuery.getSql("BATCH.GET_ADMIN_ENTITY"));
-    adminQuery.setParameter("REQ_ID", reqId);
-    Admin adminEntity = adminQuery.getSingleResult(Admin.class);
+    Admin adminEntity = admin;
     String currProcStatus = adminEntity.getRdcProcessingStatus();
     Admin adminEntityWf = new Admin();
     LOG.debug("Updating Admin table. Current Status: " + currProcStatus);
