@@ -1001,6 +1001,32 @@ public class NORDXTransformer extends EMEATransformer {
       } else {
         legacyCust.setLeadingAccNo(legacyCust.getId().getCustomerNo() + legacyCust.getMrcCd());
       }
+
+      if (SystemLocation.NORWAY.equals(data.getCmrIssuingCntry())) {
+        legacyCust.setRealCtyCd("806");
+      } else if (SystemLocation.SWEDEN.equals(data.getCmrIssuingCntry())) {
+        legacyCust.setRealCtyCd("846");
+      } else if (SystemLocation.DENMARK.equals(data.getCmrIssuingCntry())) {
+        if ("678".equals(data.getCountryUse())) {
+          legacyCust.setRealCtyCd("678");
+        } else if ("678FO".equals(data.getCountryUse())) {
+          legacyCust.setRealCtyCd("678");
+        } else if ("678GL".equals(data.getCountryUse())) {
+          legacyCust.setRealCtyCd("678");
+        } else if ("678IS".equals(data.getCountryUse())) {
+          legacyCust.setRealCtyCd("742");
+        }
+      } else if (SystemLocation.FINLAND.equals(data.getCmrIssuingCntry())) {
+        if ("702".equals(data.getCountryUse())) {
+          legacyCust.setRealCtyCd("702");
+        } else if ("702EE".equals(data.getCountryUse())) {
+          legacyCust.setRealCtyCd("602");
+        } else if ("702LT".equals(data.getCountryUse())) {
+          legacyCust.setRealCtyCd("638");
+        } else if ("702LV".equals(data.getCountryUse())) {
+          legacyCust.setRealCtyCd("608");
+        }
+      }
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
 
       String cntry = legacyCust.getId().getSofCntryCode().trim();
@@ -1131,34 +1157,6 @@ public class NORDXTransformer extends EMEATransformer {
           && "Wx".equals(admin.getProcessedFlag())) {
         legacyCust.setEmbargoCd("D");
         resetOrdBlockToData(entityManager, data);
-        // changeImportIndForShareAddrTRCE(entityManager,
-        // admin.getId().getReqId());
-      }
-    }
-
-    if (SystemLocation.NORWAY.equals(data.getCmrIssuingCntry())) {
-      legacyCust.setRealCtyCd("806");
-    } else if (SystemLocation.SWEDEN.equals(data.getCmrIssuingCntry())) {
-      legacyCust.setRealCtyCd("846");
-    } else if (SystemLocation.DENMARK.equals(data.getCmrIssuingCntry())) {
-      if ("678".equals(data.getCountryUse())) {
-        legacyCust.setRealCtyCd("678");
-      } else if ("678FO".equals(data.getCountryUse())) {
-        legacyCust.setRealCtyCd("678");
-      } else if ("678GL".equals(data.getCountryUse())) {
-        legacyCust.setRealCtyCd("678");
-      } else if ("678IS".equals(data.getCountryUse())) {
-        legacyCust.setRealCtyCd("742");
-      }
-    } else if (SystemLocation.FINLAND.equals(data.getCmrIssuingCntry())) {
-      if ("702".equals(data.getCountryUse())) {
-        legacyCust.setRealCtyCd("702");
-      } else if ("702EE".equals(data.getCountryUse())) {
-        legacyCust.setRealCtyCd("602");
-      } else if ("702LT".equals(data.getCountryUse())) {
-        legacyCust.setRealCtyCd("638");
-      } else if ("702LV".equals(data.getCountryUse())) {
-        legacyCust.setRealCtyCd("608");
       }
     }
 
@@ -1949,12 +1947,6 @@ public class NORDXTransformer extends EMEATransformer {
     } else {
       return false;
     }
-  }
-
-  public void changeImportIndForShareAddrTRCE(EntityManager entityManager, long reqId) {
-    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ND.ADDR.Y.IMPORTIND"));
-    query.setParameter("REQ_ID", reqId);
-    query.executeSql();
   }
 
 }
