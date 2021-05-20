@@ -35,19 +35,39 @@ function addHandlersForGCG() {
   }
 }
 
-function afterConfigForIndia() {
-  if (_vatExemptHandler == null) {
-    _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
+/*
+ * function afterConfigForIndia() { if (_vatExemptHandler == null) {
+ * _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'),
+ * 'onClick', function(value) { FormManager.resetValidations('vat'); if
+ * (!dijit.byId('vatExempt').get('checked')) { FormManager.addValidator('vat',
+ * Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB'); } }); } if
+ * (_vatExemptHandler && _vatExemptHandler[0]) { _vatExemptHandler[0].onClick(); } }
+ */
+
+function afterConfigForIndia() { 
+if (_vatExemptHandler == null) {
+  _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
+    console.log(">>> RUNNING!!!!");
+    if (dijit.byId('vatExempt').get('checked')) {
+      console.log(">>> Process vatExempt remove * >> ");
       FormManager.resetValidations('vat');
-      if (!dijit.byId('vatExempt').get('checked')) {
-        FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
-      }
-    });
-  }
+    } else {
+      console.log(">>> Process vatExempt add * >> ");
+      FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+    }
+  });
+}
 }
 
-if (_vatExemptHandler && _vatExemptHandler[0]) {
-  _vatExemptHandler[0].onClick();
+function resetVatExempt() {
+  /*
+   * var viewOnly = FormManager.getActualValue('viewOnlyPage'); if (viewOnly != '' &&
+   * viewOnly == 'true') { return; }
+   */
+  if (dijit.byId('vatExempt') != undefined && dijit.byId('vatExempt').get('checked')) {
+    console.log(">>> Process vatExempt remove * >> ");
+    FormManager.resetValidations('vat');
+  }
 }
 
 function addAfterConfigAP() {
@@ -3070,5 +3090,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setInacByClusterHKMO, GEOHandler.GCG);
   GEOHandler.registerValidator(validateGSTForIndia, [ SysLoc.INDIA ], null, true);
   GEOHandler.addAfterConfig(afterConfigForIndia, [ SysLoc.INDIA ]);
+  GEOHandler.addAfterTemplateLoad(afterConfigForIndia, SysLoc.INDIA);
+  GEOHandler.addAfterConfig(resetVatExempt, [ SysLoc.INDIA ]);
+  GEOHandler.addAfterTemplateLoad(resetVatExempt, SysLoc.INDIA);
   
 });
