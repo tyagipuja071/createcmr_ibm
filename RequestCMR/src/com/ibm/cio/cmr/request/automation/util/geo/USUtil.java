@@ -173,6 +173,7 @@ public class USUtil extends AutomationUtil {
       SC_FED_HOSPITAL, SC_FED_INDIAN_TRIBE, SC_FED_NATIVE_CORP, SC_FED_POA, SC_FED_REGULAR, SC_FED_TRIBAL_BUS);
   private static final List<String> CSP_IRRELEVANT_UPDATE_FIELDS = Arrays.asList("ISU Code", "GEO Location Code", "Coverage Type/ID", "BG LDE Rule",
       "Buying Group ID", "Client Tier", "DUNS No.");
+  private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("County");
 
   private static final List<String> HEALTH_CARE_EDUCATION_ISIC = Arrays.asList("8030", "8010", "8511");
 
@@ -1066,7 +1067,10 @@ public class USUtil extends AutomationUtil {
                 return true;
               }
             }
-            closelyMatchAddressWithDnbRecords(entityManager, requestData, engineData, "ZI01", details, validation, output);
+
+            if (isRelevantAddressFieldUpdated(changes, requestData.getAddress("ZI01"))) {
+              closelyMatchAddressWithDnbRecords(entityManager, requestData, engineData, "ZI01", details, validation, output);
+            }
           }
         }
 
@@ -1545,6 +1549,19 @@ public class USUtil extends AutomationUtil {
   @Override
   public List<String> getSkipChecksRequestTypesforCMDE() {
     return Arrays.asList("E", "M");
+  }
+
+  private boolean isRelevantAddressFieldUpdated(RequestChangeContainer changes, Addr addr) {
+    List<UpdatedNameAddrModel> addrChanges = changes.getAddressChanges(addr.getId().getAddrType(), addr.getId().getAddrSeq());
+    if (addrChanges == null) {
+      return false;
+    }
+    for (UpdatedNameAddrModel change : addrChanges) {
+      if (!NON_RELEVANT_ADDRESS_FIELDS.contains(change.getDataField())) {
+        return true;
+      }
+    }
+    return false;
   }
 
 }
