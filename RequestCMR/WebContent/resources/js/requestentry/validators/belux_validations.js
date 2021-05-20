@@ -1322,9 +1322,9 @@ function setAbbrvNmLoc() {
   if (FormManager.getActualValue('reqType') != 'C') {
     return;
   }
-  // if (role != 'REQUESTER') {
-  // return;
-  // }
+  if (role != 'REQUESTER') {
+    return;
+  }
   var reqId = FormManager.getActualValue('reqId');
   if (reqId != null) {
     reqParam = {
@@ -1332,6 +1332,56 @@ function setAbbrvNmLoc() {
     };
   }
   var custNm = cmr.query('ADDR.GET.CUSTNM1.BY_REQID', reqParam);
+  var city;
+  var abbrevLocn = null;
+  var abbrvNm = custNm.ret1;
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var custGrp = FormManager.getActualValue('custGrp');
+
+  if (custSubGrp == 'CBCOM' || custGrp == 'LOCAL' || custGrp.substring(2, 5) == 'LOC') {
+    city = cmr.query('ADDR.GET.CITY1.BY_REQID', reqParam);
+    abbrevLocn = city.ret1;
+  } else {
+    city = cmr.query('ADDR.GET.LANDCNTRY.BY_REQID', reqParam);
+    abbrevLocn = getLandCntryDesc(city.ret1);
+  }
+
+  if (abbrvNm && abbrvNm.length > 22) {
+    abbrvNm = abbrvNm.substring(0, 22);
+  }
+  if (abbrevLocn && abbrevLocn.length > 12) {
+    abbrevLocn = abbrevLocn.substring(0, 12);
+  }
+
+  if (abbrevLocn != null && custSubGrp.substring(2, 5) != 'SOF') {
+    FormManager.setValue('abbrevLocn', abbrevLocn);
+  }
+  if (abbrvNm != null) {
+    FormManager.setValue('abbrevNm', abbrvNm);
+  }
+}
+
+// CMR - 1282
+
+function setAbbrvNmLocFrProc() {
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var reqParam = null;
+
+  if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
+
+  if (role != 'PROCESSOR') {
+    return;
+  }
+
+  var reqId = FormManager.getActualValue('reqId');
+  if (reqId != null) {
+    reqParam = {
+      REQ_ID : reqId
+    };
+  }
+  var custNm = cmr.query('DATA.GET.ABBREV_NM.BY_REQID', reqParam);
   var city;
   var abbrevLocn = null;
   var abbrvNm = custNm.ret1;
@@ -1687,6 +1737,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setCollectionCodeValues, GEOHandler.BELUX);
   GEOHandler.addAfterTemplateLoad(afterConfigForBELUX, GEOHandler.BELUX);
   GEOHandler.addAfterTemplateLoad(setAbbrvNmLoc, GEOHandler.BELUX);
+  GEOHandler.addAfterTemplateLoad(setAbbrvNmLocFrProc, GEOHandler.BELUX);
   // GEOHandler.addAfterTemplateLoad(setINACfrLux, GEOHandler.BELUX);
   // GEOHandler.addAfterTemplateLoad(setPreferredLanguage, GEOHandler.BELUX);
   // GEOHandler.addAfterTemplateLoad(setINACValues, GEOHandler.BELUX);
