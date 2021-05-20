@@ -1225,16 +1225,17 @@ function addNORDXAddressTypeValidator() {
                 }
               }
               var custSubType = FormManager.getActualValue('custSubGrp');
-              if (billingCnt == 0 || mailingCnt == 0) {
+              var reason = FormManager.getActualValue('reqReason');
+              if (reason != 'TREC' && (billingCnt == 0 || mailingCnt == 0)) {
                 return new ValidationResult(null, false, 'Billing, Mailing address are mandatory.');
               } else if ((custSubType.includes('SO') || custSubType.includes('3PA') || custSubType == 'THDPT') && installingCnt == 0) {
                 return new ValidationResult(null, false,
                     'For Internal SO and Third Party sub-scenarios installing address is mandatory. Please add it.');
-              } else if (billingCnt > 1) {
+              } else if (reason != 'TREC' && billingCnt > 1) {
                 return new ValidationResult(null, false, 'Only one Billing address can be defined. Please remove the additional Billing address.');
-              } else if (mailingCnt > 1) {
+              } else if (reason != 'TREC' && mailingCnt > 1) {
                 return new ValidationResult(null, false, 'Only one Mailing address can be defined. Please remove the additional Mailing address.');
-              } else if (eplCnt > 1) {
+              } else if (reason != 'TREC' && eplCnt > 1) {
                 return new ValidationResult(null, false, 'Only one EPL address can be defined. Please remove the additional EPL mailing address.');
               } else {
                 return new ValidationResult(null, true);
