@@ -39,12 +39,15 @@ function afterConfigForIndia() {
 if (_vatExemptHandler == null) {
   _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
     console.log(">>> RUNNING!!!!");
+    FormManager.resetValidations('vat');
     if (dijit.byId('vatExempt').get('checked')) {
       console.log(">>> Process gstExempt remove * >> ");
-      FormManager.resetValidations('vat');
+      FormManager.readOnly('vat');
+      FormManager.setValue('vat', '');
     } else {
       console.log(">>> Process gstExempt add * >> ");
       FormManager.addValidator('vat', Validators.REQUIRED, [ 'GST#' ], 'MAIN_CUST_TAB');
+      FormManager.enable('vat');
     }
   });
 }
@@ -54,6 +57,7 @@ function resetGstExempt() {
   if (dijit.byId('vatExempt') != undefined && dijit.byId('vatExempt').get('checked')) {
     console.log(">>> Process gstExempt remove * >> ");
     FormManager.resetValidations('vat');
+    FormManager.readOnly('vat');
   }
 }
 
