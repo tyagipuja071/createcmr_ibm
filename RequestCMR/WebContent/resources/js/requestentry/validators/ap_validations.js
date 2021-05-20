@@ -133,10 +133,6 @@ function addAfterConfigAP() {
     }
     
        if (cntry == SysLoc.INDIA) {
-      if (custSubGrp == 'BLUMX' ){
-       FormManager.resetDropdownValues(FormManager.getField('isicCd'));
-        FormManager.setValue('isicCd',"");
-       }
        if(custSubGrp == 'IGF'){
          FormManager.resetDropdownValues(FormManager.getField('busnType'));
         FormManager.setValue('busnType','000');
