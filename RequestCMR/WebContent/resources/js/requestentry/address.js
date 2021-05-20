@@ -1577,6 +1577,10 @@ function actualRemoveAddr() {
   if (FormManager.getActualValue('cmrIssuingCntry') == '758' && cmr.removeDetails.remAddrType == 'ZS01') {
     setBlankAbbrevNmLocationIT();
   }
+  
+  if (FormManager.getActualValue('cmrIssuingCntry') == '649' && cmr.removeDetails.remAddrType == 'ZS01') {
+	  clearCATaxFields();
+  }
 }
 
 function setBlankAbbrevNmLocationIT() {
