@@ -53,7 +53,7 @@ if (_vatExemptHandler == null) {
       FormManager.resetValidations('vat');
     } else {
       console.log(">>> Process vatExempt add * >> ");
-      FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+      FormManager.addValidator('vat', Validators.REQUIRED, [ 'GST#' ], 'MAIN_CUST_TAB');
     }
   });
 }
