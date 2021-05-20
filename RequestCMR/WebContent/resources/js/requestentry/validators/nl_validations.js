@@ -1513,6 +1513,8 @@ dojo.addOnLoad(function() {
   // GEOHandler.addAfterConfig(disbleCreateByModel, GEOHandler.NL);
 
   GEOHandler.addAfterTemplateLoad(setAbbrvNmLoc, GEOHandler.NL);
+  GEOHandler.addAfterTemplateLoad(setAbbrvNmLocFrProc, GEOHandler.NL);
+
   GEOHandler.addAfterTemplateLoad(afterConfigForNL, GEOHandler.NL);
   GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.NL);
   GEOHandler.addAfterTemplateLoad(setBOTeamValues, GEOHandler.NL);
