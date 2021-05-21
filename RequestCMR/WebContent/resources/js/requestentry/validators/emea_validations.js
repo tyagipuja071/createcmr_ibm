@@ -1226,6 +1226,17 @@ function autoSetSboSrOnAddrSaveUK() {
       }
     }
 
+    if (isuCd == '34') {
+      if (postCd != '' && isScotlandPostCd(postCd)) {
+        FormManager.setValue('salesBusOffCd', "758");
+        FormManager.setValue('repTeamMemberNo', "SPA758");
+      }
+      if (postCd != '' && isNorthernIrelandPostCd(postCd)) {
+        FormManager.setValue('salesBusOffCd', "958");
+        FormManager.setValue('repTeamMemberNo', "MMIRE1");
+      }
+    }
+
   }
 }
 
