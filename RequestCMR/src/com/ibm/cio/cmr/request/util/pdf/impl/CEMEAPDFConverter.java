@@ -165,8 +165,10 @@ public class CEMEAPDFConverter extends DefaultPDFConverter {
           checklistSection.addCell(answerCell);
 
           // Re-export countries
-          if (items.indexOf(item) == 7 && "Y".equals(item.getAnswer())) {
-            checklistSection.addCell(createValueCell("Re-export countries: " + checklist.getFreeTxtField1(), 1, 2));
+          if (!(Stream.of(countriesToSkip).anyMatch(loc -> loc.equals(sysLoc)))) {
+            if (items.indexOf(item) == 7 && "Y".equals(item.getAnswer())) {
+              checklistSection.addCell(createValueCell("Re-export countries: " + checklist.getFreeTxtField1(), 1, 2));
+            }
           }
         }
       } catch (Exception e) {
