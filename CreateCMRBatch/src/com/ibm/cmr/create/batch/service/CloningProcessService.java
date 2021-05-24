@@ -169,9 +169,9 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     }
 
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType))
-      cloningCmrNo = generateCMRNoLegacy(entityManager, cntry, cmrNo);
+      cloningCmrNo = generateCMRNoLegacy(entityManager, cntry, cmrNo, cloningQueue);
     else if (PROCESSING_TYPES.contains(processingType))
-      cloningCmrNo = generateCMRNoNonLegacy(entityManager, cntry, cmrNo);
+      cloningCmrNo = generateCMRNoNonLegacy(entityManager, cntry, cmrNo, cloningQueue);
     else {
       cloningQueue.setErrorMsg("CMR no generation not supported for this country");
       cloningQueue.setStatus("STOP");
@@ -352,7 +352,8 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
   }
 
-  private String generateCMRNoLegacy(EntityManager entityManager, String cmrIssuingCntry, String cmrNo) throws Exception {
+  private String generateCMRNoLegacy(EntityManager entityManager, String cmrIssuingCntry, String cmrNo, CmrCloningQueue cloningQueue)
+      throws Exception {
     GenerateCMRNoRequest request = new GenerateCMRNoRequest();
     request.setLoc1(cmrIssuingCntry);
     request.setLoc2(cmrIssuingCntry);
@@ -369,17 +370,31 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     if (transformer != null) {
       transformer.getTargetCountryId(entityManager, request, cmrIssuingCntry, cmrNo);
     }
-    int CmrNoVal = Integer.parseInt(cmrNo);
-    CloningMapping cMapping = null;
-    try {
-      cMapping = getCMRNoRangeFromMapping(cmrIssuingCntry, CmrNoVal, request);
-    } catch (Exception e) {
-      LOG.error("Error occured while digesting xml.", e);
-    }
 
-    if (cMapping == null && (CmrNoVal >= 990000 && CmrNoVal <= 999999)) {
-      request.setMin(990000);
-      request.setMax(999999);
+    if ("11".equals(cloningQueue.getLastUpdtBy()) && cmrNo.startsWith("99")) {
+      LOG.debug("Skip setting of CMR No for Internal for CMR : " + cmrNo);
+    } else if (Arrays.asList("81", "85").contains(cloningQueue.getLastUpdtBy())) {
+      if ("81".equals(cloningQueue.getLastUpdtBy())) {
+        request.setMin(990000);
+        request.setMax(999999);
+      } else {
+        request.setMin(997000);
+        request.setMax(998999);
+      }
+
+    } else {
+      int CmrNoVal = Integer.parseInt(cmrNo);
+      CloningMapping cMapping = null;
+      try {
+        cMapping = getCMRNoRangeFromMapping(cmrIssuingCntry, CmrNoVal, request);
+      } catch (Exception e) {
+        LOG.error("Error occured while digesting xml in CMR No generation.", e);
+      }
+
+      if (cMapping == null && (CmrNoVal >= 990000 && CmrNoVal <= 999999)) {
+        request.setMin(990000);
+        request.setMax(999999);
+      }
     }
 
     GenerateCMRNoClient client = CmrServicesFactory.getInstance().createClient(BATCH_SERVICE_URL, GenerateCMRNoClient.class);
@@ -424,6 +439,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
    * @return
    * @throws Exception
    */
+  @Override
   public <T> T initEmpty(Class<T> entityClass) throws Exception {
     try {
       T object = entityClass.newInstance();
@@ -1144,6 +1160,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
           cloneInsert.setId(knvkPKClone);
 
+          cloneInsert.setKunnr(kna1Clone.getId().getKunnr());
           cloneInsert.setSapTs(ts);
           cloneInsert.setShadUpdateInd("I");
           cloneInsert.setShadUpdateTs(ts);
@@ -1688,15 +1705,22 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     }
   }
 
-  private String generateCMRNoNonLegacy(EntityManager entityManager, String cmrIssuingCntry, String cmrNo) throws Exception {
+  private String generateCMRNoNonLegacy(EntityManager entityManager, String cmrIssuingCntry, String cmrNo, CmrCloningQueue cloningQueue)
+      throws Exception {
     LOG.debug("Inside generateCMRNoNonLegacy method ");
     String mandt = SystemConfiguration.getValue("MANDT");
     // CloningUtil cUtil = new CloningUtil();
-    String kukla = CloningUtil.getKuklaFromCMR(entityManager, cmrIssuingCntry, cmrNo, mandt);
+    String kukla = "";
+    if (StringUtils.isBlank(cloningQueue.getLastUpdtBy())) {
+      kukla = CloningUtil.getKuklaFromCMR(entityManager, cmrIssuingCntry, cmrNo, mandt);
+    } else {
+      kukla = cloningQueue.getLastUpdtBy();
+    }
+
     GEOHandler geoHandler = RequestUtils.getGEOHandler(cmrIssuingCntry);
     String generatedCmrNo = "";
     if (geoHandler != null) {
-      generatedCmrNo = geoHandler.getCMRNo(entityManager, kukla, mandt, cmrIssuingCntry, cmrNo);
+      generatedCmrNo = geoHandler.getCMRNo(entityManager, kukla, mandt, cmrIssuingCntry, cmrNo, cloningQueue);
       if (StringUtils.isNotBlank(generatedCmrNo))
         return generatedCmrNo;
       else {

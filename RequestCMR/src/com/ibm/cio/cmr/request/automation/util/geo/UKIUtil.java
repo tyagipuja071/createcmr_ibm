@@ -60,6 +60,9 @@ public class UKIUtil extends AutomationUtil {
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
       CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO, CmrConstants.RDC_SECONDARY_SOLD_TO);
   private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Attn", "Phone #", "Hardware Master");
+  private static final List<String> SCOTLAND_POST_CD = Arrays.asList("AB", "KA", "DD", "KW", "DG", "KY", "EH", "ML", "FK", "PA", "G1", "G2", "G3",
+      "G4", "G5", "G6", "G7", "G8", "G9", "PH", "TD", "IV");
+  public static final String NORTHERN_IRELAND_POST_CD = "BT";
 
   @Override
   public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
@@ -85,8 +88,12 @@ public class UKIUtil extends AutomationUtil {
     LOG.debug("Scenario to check: " + scenario);
     if ((SCENARIO_COMMERCIAL.equals(scenario) || SCENARIO_GOVERNMENT.equals(scenario) || SCENARIO_PRIVATE_PERSON.equals(scenario))
         && (!customerName.toUpperCase().equals(customerNameZI01.toUpperCase()) || customerNameZI01.toUpperCase().matches("^VR[0-9]{3}.+$"))) {
-      details.append("Third Party Scenario should be selected.").append("\n");
-      engineData.addRejectionComment("OTH", "Third Party Scenario should be selected.", "", "");
+      details.append("This request cannot be processed as 'Commercial' scenario sub-type because 'Customer name' field is not the same in all address sequences. Even the smallest difference or typo mistake can cause that the sequences will be considered as of different entities." + " \n" + 
+      "If two different entities are needed in 'Billing' and 'Installing' sequences, please change the scenario sub-type to 'Third-party'."  + " \n" + 
+    		  "If 'Billing' and 'Installing' should be the same entity in your CMR, please select 'Commercial' sub-type, and double-check all the 'Customer name' fields.").append("\n");
+      engineData.addRejectionComment("OTH", "This request cannot be processed as 'Commercial' scenario sub-type because 'Customer name' field is not the same in all address sequences. Even the smallest difference or typo mistake can cause that the sequences will be considered as of different entities." + " \n" + 
+      "If two different entities are needed in 'Billing' and 'Installing' sequences, please change the scenario sub-type to 'Third-party'."  + " \n" + 
+    		  "If 'Billing' and 'Installing' should be the same entity in your CMR, please select 'Commercial' sub-type, and double-check all the 'Customer name' fields.", "", "");
       return false;
     } else if ((SCENARIO_COMMERCIAL.equals(scenario) || SCENARIO_GOVERNMENT.equals(scenario) || SCENARIO_CROSSBORDER.equals(scenario)
         || SCENARIO_CROSS_GOVERNMENT.equals(scenario)) && !addressEquals(zs01, zi01)) {
@@ -633,12 +640,12 @@ public class UKIUtil extends AutomationUtil {
       overrides.clearOverrides();
       UkiFieldsContainer fields = null;
       if (SystemLocation.UNITED_KINGDOM.equals(data.getCmrIssuingCntry())) {
-        fields = calculate32SValuesForUK(entityManager, data.getIsuCd(), data.getClientTier(), data.getIsicCd());
+        fields = calculate32SValuesForUK(entityManager, data.getIsuCd(), data.getClientTier(), data.getIsicCd(), requestData);
       } else if (SystemLocation.IRELAND.equals(data.getCmrIssuingCntry())) {
         fields = calculate32SValuesForIE(entityManager, data.getIsuCd(), data.getClientTier(), data.getIsicCd());
       }
       if (fields != null) {
-        details.append("Coverage calculated successfully using 32S logic.").append("\n");
+        details.append("Coverage calculated successfully using 34Q logic.").append("\n");
         details.append("Sales Rep : " + fields.getSalesRep()).append("\n");
         details.append("SBO : " + fields.getSbo()).append("\n");
         overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), fields.getSbo());
@@ -663,22 +670,43 @@ public class UKIUtil extends AutomationUtil {
 
   }
 
-  private UkiFieldsContainer calculate32SValuesForUK(EntityManager entityManager, String isuCd, String clientTier, String isicCd) {
+  private UkiFieldsContainer calculate32SValuesForUK(EntityManager entityManager, String isuCd, String clientTier, String isicCd,
+      RequestData requestData) {
+
+    Addr zi01 = requestData.getAddress("ZI01");
+
+    String PostCd = zi01.getPostCd();
+
+    if (PostCd != null && PostCd.length() > 2) {
+      PostCd = PostCd.substring(0, 2);
+    }
+
     if ("34".equals(isuCd) && StringUtils.isNotBlank(clientTier) && StringUtils.isNotBlank(isicCd)) {
+
       UkiFieldsContainer container = new UkiFieldsContainer();
-      String sql = ExternalizedQuery.getSql("QUERY.UK.GET.SBOSR_FOR_ISIC");
-      PreparedQuery query = new PreparedQuery(entityManager, sql);
-      query.setParameter("ISU_CD", "%" + isuCd + "%");
-      query.setParameter("ISIC_CD", isicCd);
-      query.setParameter("CLIENT_TIER", "%" + clientTier + "%");
-      query.setForReadOnly(true);
-      List<Object[]> results = query.getResults();
-      if (results != null && results.size() == 1) {
-        String sbo = (String) results.get(0)[0];
-        String salesRep = (String) results.get(0)[1];
-        container.setSbo(sbo);
-        container.setSalesRep(salesRep);
+      if ("Q".equals(clientTier) && SCOTLAND_POST_CD.contains(PostCd)) {
+        container.setSbo("758");
+        container.setSalesRep("SPA758");
         return container;
+      } else if ("Q".equals(clientTier) && NORTHERN_IRELAND_POST_CD.equals(PostCd)) {
+        container.setSbo("958");
+        container.setSalesRep("MMIRE1");
+        return container;
+      } else {
+        String sql = ExternalizedQuery.getSql("QUERY.UK.GET.SBOSR_FOR_ISIC");
+        PreparedQuery query = new PreparedQuery(entityManager, sql);
+        query.setParameter("ISU_CD", "%" + isuCd + "%");
+        query.setParameter("ISIC_CD", isicCd);
+        query.setParameter("CLIENT_TIER", "%" + clientTier + "%");
+        query.setForReadOnly(true);
+        List<Object[]> results = query.getResults();
+        if (results != null && results.size() == 1) {
+          String sbo = (String) results.get(0)[0];
+          String salesRep = (String) results.get(0)[1];
+          container.setSbo(sbo);
+          container.setSalesRep(salesRep);
+          return container;
+        }
       }
     }
     return null;

@@ -28,6 +28,7 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.AddrRdc;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AdminPK;
+import com.ibm.cio.cmr.request.entity.CmrCloningQueue;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.entity.Kna1;
@@ -1753,12 +1754,16 @@ public class FranceHandler extends GEOHandler {
   }
 
   @Override
-  public String getCMRNo(EntityManager rdcMgr, String kukla, String mandt, String katr6, String cmrNo) {
+  public String getCMRNo(EntityManager rdcMgr, String kukla, String mandt, String katr6, String cmrNo, CmrCloningQueue cloningQueue) {
     LOG.debug("generateCNDCmr :: START");
     String cndCMR = "";
     boolean internal = false;
 
-    if (cmrNo.startsWith("99"))
+    if ("11".equals(cloningQueue.getLastUpdtBy()) && cmrNo.startsWith("99")) {
+      LOG.debug("Skip setting of CMR No for Internal for CMR : " + cmrNo);
+    } else if (Arrays.asList("81", "85").contains(cloningQueue.getLastUpdtBy()) && !cmrNo.startsWith("99")) {
+      internal = true;
+    } else if (cmrNo.startsWith("99"))
       internal = true;
 
     int i = 0;
