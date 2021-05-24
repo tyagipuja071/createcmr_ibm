@@ -3428,7 +3428,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(afterConfigForNORDX, GEOHandler.NORDX);
   GEOHandler.addAfterConfig(lockEmbargo, GEOHandler.NORDX);
   GEOHandler.registerValidator(addNORDXAddressTypeValidator, GEOHandler.NORDX, null, true);
-  GEOHandler.registerValidator(addNORDXInstallingShipping, GEOHandler.NORDX, null, true);
+  // GEOHandler.registerValidator(addNORDXInstallingShipping, GEOHandler.NORDX,
+  // null, true);
   GEOHandler.registerValidator(addGenericVATValidator('', 'MAIN_CUST_TAB', 'frmCMR', 'ZS01'), [ SysLoc.DENMARK, SysLoc.FINLAND, SysLoc.SWEDEN,
       SysLoc.NORWAY ], null, true);
   // GEOHandler.registerValidator(norwayCustomVATValidator('', 'MAIN_CUST_TAB',
