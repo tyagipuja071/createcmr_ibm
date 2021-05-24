@@ -1248,22 +1248,24 @@ public class CNHandler extends GEOHandler {
     LOG.debug(">>>>>>>>> getMaxWordLengthInUtf8() :: Start");
     int previousCount = 0;
     int count = 0;
-    for (int i = 0, len = sequence.length(); i < len; i++) {
-      char ch = sequence.charAt(i);
-      if (ch <= 0x7F) {
-        previousCount = 1;
-      } else if (ch <= 0x7FF) {
-        previousCount = 2;
-      } else if (Character.isHighSurrogate(ch)) {
-        previousCount = 4;
-        ++i;
-      } else {
-        previousCount = 3;
-      }
+    if (sequence != null) {
+      for (int i = 0, len = sequence.length(); i < len; i++) {
+        char ch = sequence.charAt(i);
+        if (ch <= 0x7F) {
+          previousCount = 1;
+        } else if (ch <= 0x7FF) {
+          previousCount = 2;
+        } else if (Character.isHighSurrogate(ch)) {
+          previousCount = 4;
+          ++i;
+        } else {
+          previousCount = 3;
+        }
 
-      // get the Max count in CharSequence;
-      if (previousCount != 0 && previousCount > count) {
-        count = previousCount;
+        // get the Max count in CharSequence;
+        if (previousCount != 0 && previousCount > count) {
+          count = previousCount;
+        }
       }
     }
 
