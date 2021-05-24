@@ -3,6 +3,7 @@ var _isicHandlerAP = null;
 var _clusterHandlerAP = null;
 var _isicHandlerGCG = null;
 var _clusterHandlerGCG = null;
+var _vatExemptHandler = null;
 
 function addHandlersForAP() {
   if (_isicHandlerAP == null) {
@@ -31,6 +32,32 @@ function addHandlersForGCG() {
       setIsuOnIsic();
       setInacByClusterHKMO();
     });
+  }
+}
+
+function afterConfigForIndia() { 
+if (_vatExemptHandler == null) {
+  _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
+    console.log(">>> RUNNING!!!!");
+    FormManager.resetValidations('vat');
+    if (dijit.byId('vatExempt').get('checked')) {
+      console.log(">>> Process gstExempt remove * >> ");
+      FormManager.readOnly('vat');
+      FormManager.setValue('vat', '');
+    } else {
+      console.log(">>> Process gstExempt add * >> ");
+      FormManager.addValidator('vat', Validators.REQUIRED, [ 'GST#' ], 'MAIN_CUST_TAB');
+      FormManager.enable('vat');
+    }
+  });
+}
+}
+
+function resetGstExempt() {
+  if (dijit.byId('vatExempt') != undefined && dijit.byId('vatExempt').get('checked')) {
+    console.log(">>> Process gstExempt remove * >> ");
+    FormManager.resetValidations('vat');
+    FormManager.readOnly('vat');
   }
 }
 
@@ -131,19 +158,16 @@ function addAfterConfigAP() {
       else
         FormManager.enable('clientTier');
     }
-    
-       if (cntry == SysLoc.INDIA) {
-       if(custSubGrp == 'IGF'){
+    if (cntry == SysLoc.INDIA) {
+      if(custSubGrp == 'IGF'){
          FormManager.resetDropdownValues(FormManager.getField('busnType'));
-        FormManager.setValue('busnType','000');
-          FormManager.readOnly('busnType');
-       }
-       if(custSubGrp == 'AQSTN'){
-        FormManager.setValue('abbrevNm','Acquisition Use Only');
-       }
-     
-    }
-    
+         FormManager.setValue('busnType','000');
+         FormManager.readOnly('busnType');
+      }
+      if(custSubGrp == 'AQSTN'){
+         FormManager.setValue('abbrevNm','Acquisition Use Only');
+      }
+    } 
   }
   if (reqType == 'C') {
     setIsuOnIsic();
@@ -1738,11 +1762,11 @@ function updateMRCAseanAnzIsa() {
       }
     }
     if (_exsitFlag == 0) {
-    	if(cmrIssuingCntry == '744' && custSubGrp == 'PRIV'){
-    		FormManager.setValue('mrcCd', '3');
-    	} else{
-    		FormManager.setValue('mrcCd', '2');
-    	}
+      if(cmrIssuingCntry == '744' && custSubGrp == 'PRIV'){
+            FormManager.setValue('mrcCd', '3');
+      } else{
+            FormManager.setValue('mrcCd', '2');
+      } 
     }
   }
 }
@@ -2907,6 +2931,61 @@ function validateStreetAddrCont2() {
   })(), null, 'frmCMR_addressModal');
 }
 
+function validateGSTForIndia() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        var reqTyp = FormManager.getActualValue('reqType');
+        var vat = FormManager.getActualValue('vat');
+        var reqId = FormManager.getActualValue('reqId');
+        if (dijit.byId('vatExempt').get('checked')) { 
+          return new ValidationResult(null, true); 
+        }
+        if (cntry != '744' || custSubGrp == 'CROSS' || reqTyp != 'C') {
+          return new ValidationResult(null, true);
+        }
+        var country = "";
+        if (SysLoc.INDIA == FormManager.getActualValue('cmrIssuingCntry')) {
+        country = "IN";
+        if (country != '') {
+          if (vat == '') {
+            return new ValidationResult(null, true);
+          } else {
+            if (reqId != null) {
+              reqParam = {
+                REQ_ID : reqId
+              };
+            }
+            var results = cmr.query('GET_ZS01', reqParam);
+            if (results != null) {
+              
+              var name = results.ret1;
+              var address = results.ret2;
+              var postal = results.ret3;
+              var city = results.ret4;
+            }
+            var gstRet = cmr.validateGST(country, vat, name, address, postal, city);
+            if (!gstRet.success) {
+              return new ValidationResult({
+                id : 'vat',
+                type : 'text',
+                name : 'vat'
+              }, false, gstRet.errorMessage);
+            } else {
+              return new ValidationResult(null, true);
+            }
+          }
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.AP = [ SysLoc.AUSTRALIA, SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE, SysLoc.VIETNAM,
       SysLoc.THAILAND, SysLoc.HONG_KONG, SysLoc.NEW_ZEALAND, SysLoc.LAOS, SysLoc.MACAO, SysLoc.MALASIA, SysLoc.NEPAL, SysLoc.CAMBODIA ];
@@ -3021,5 +3100,10 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addHandlersForAP, GEOHandler.AP);
   GEOHandler.addAfterConfig(addHandlersForGCG, GEOHandler.GCG);
   GEOHandler.addAfterTemplateLoad(setInacByClusterHKMO, GEOHandler.GCG);
+  GEOHandler.registerValidator(validateGSTForIndia, [ SysLoc.INDIA ], null, true);
+  GEOHandler.addAfterConfig(afterConfigForIndia, [ SysLoc.INDIA ]);
+  GEOHandler.addAfterTemplateLoad(afterConfigForIndia, SysLoc.INDIA);
+  GEOHandler.addAfterConfig(resetGstExempt, [ SysLoc.INDIA ]);
+  GEOHandler.addAfterTemplateLoad(resetGstExempt, SysLoc.INDIA);
   
 });
