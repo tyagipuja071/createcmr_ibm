@@ -156,7 +156,16 @@ public class NORDXHandler extends BaseSOFHandler {
           List<String> sofUses = null;
           FindCMRRecordModel addr = null;
 
-          int maxintSeqLegacy = getMaxSequenceOnLegacyAddr(entityManager, reqEntry.getCmrIssuingCntry(), mainRecord.getCmrNum());
+          int maxintSeqLegacy = 0;
+          int maxintSeqFromLegacy = getMaxSequenceOnLegacyAddr(entityManager, reqEntry.getCmrIssuingCntry(), mainRecord.getCmrNum());
+          int maxintSeqFromRdc = getMaxSequenceFromRdc(entityManager, SystemConfiguration.getValue("MANDT"), reqEntry.getCmrIssuingCntry(),
+              mainRecord.getCmrNum());
+
+          if (maxintSeqFromRdc > maxintSeqFromLegacy) {
+            maxintSeqLegacy = maxintSeqFromRdc;
+          } else {
+            maxintSeqLegacy = maxintSeqFromLegacy;
+          }
 
           // String sourceID = getSourceidFromAdmin(entityManager,
           // reqEntry.getReqId());
@@ -2814,6 +2823,30 @@ public class NORDXHandler extends BaseSOFHandler {
       secondaryInst = result;
     }
     return secondaryInst;
+  }
+
+  private int getMaxSequenceFromRdc(EntityManager entityManager, String mandt, String katr6, String cmrNo) {
+    String maxAddrSeq = null;
+    int addrSeq = 0;
+    String sql = ExternalizedQuery.getSql("CEE.GETADDRSEQ.MAX");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("MANDT", mandt);
+    query.setParameter("KATR6", katr6);
+    query.setParameter("ZZKV_CUSNO", cmrNo);
+
+    List<Object[]> results = query.getResults();
+    if (results != null && results.size() > 0) {
+      Object[] result = results.get(0);
+      maxAddrSeq = (String) (result != null && result.length > 0 ? result[0] : "0");
+      if (StringUtils.isEmpty(maxAddrSeq)) {
+        maxAddrSeq = "0";
+      }
+      addrSeq = Integer.parseInt(maxAddrSeq);
+      addrSeq = ++addrSeq;
+      System.out.println("maxseq = " + addrSeq);
+    }
+
+    return addrSeq;
   }
 
 }
