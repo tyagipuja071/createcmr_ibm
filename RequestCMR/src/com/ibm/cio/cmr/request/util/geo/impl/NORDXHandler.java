@@ -1091,8 +1091,8 @@ public class NORDXHandler extends BaseSOFHandler {
                   ":Note that if the ROW format is changed then CMR No. is mandatory field to be filled. Please fix and upload the template again.<br>");
             }
             if (isDivCMR(cmrNo, country)) {
-              LOG.trace("The row " + (row.getRowNum() + 1) + ":Note the CMR number is not existed or a divestiture CMR records.");
-              error.addError((row.getRowNum() + 1), "CMR No.", ":Note the CMR number is not existed or a divestiture CMR records.<br>");
+              LOG.trace("The row " + (row.getRowNum() + 1) + ":Note the entered CMR number is either cancelled, divestiture or doesn't exist.");
+              error.addError((row.getRowNum() + 1), "CMR No.", ":Note the entered CMR number is either cancelled, divestiture or doesn't exist.<br>");
             }
 
             boolean dummyUpd = true;
