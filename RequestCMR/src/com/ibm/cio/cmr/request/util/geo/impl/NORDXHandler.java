@@ -264,17 +264,19 @@ public class NORDXHandler extends BaseSOFHandler {
                 String isSecondaryShip = isSecondaryShip(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), seqSecondaryZS01Legacy);
                 String isSecondaryEpl = isSecondaryEpl(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), seqSecondaryZS01Legacy);
 
-                if ("Y".equals(isSecondaryInst)) {
+                  if ("Y".equals(isSecondaryBill)) {
+                    addr.setCmrAddrTypeCode("ZP01");
+                  } else if ("N".equals(isSecondaryBill) && "Y".equals(isSecondaryInst)) {
                   addr.setCmrAddrTypeCode("ZI01");
-                } else if ("N".equals(isSecondaryInst) && "Y".equals(isSecondaryBill)) {
-                  addr.setCmrAddrTypeCode("ZP01");
-                } else if ("N".equals(isSecondaryInst) && "N".equals(isSecondaryBill) && "Y".equals(isSecondaryShip)) {
+                  } else if ("N".equals(isSecondaryBill) && "N".equals(isSecondaryInst) && "Y".equals(isSecondaryShip)) {
                   addr.setCmrAddrTypeCode("ZD01");
-                } else if ("N".equals(isSecondaryInst) && "N".equals(isSecondaryBill) && "N".equals(isSecondaryShip) && "Y".equals(isSecondaryEpl)) {
+                  } else if ("N".equals(isSecondaryBill) && "N".equals(isSecondaryInst) && "N".equals(isSecondaryShip)
+                      && "Y".equals(isSecondaryEpl)) {
                   addr.setCmrAddrTypeCode("ZS02");
-                } else {
+                  } else {
                   addr.setCmrAddrTypeCode("ZI01");
-                }
+                  }
+
                 }
 
                 converted.add(addr);
