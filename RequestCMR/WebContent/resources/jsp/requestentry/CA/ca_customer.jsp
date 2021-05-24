@@ -46,7 +46,7 @@
         	<cmr:field path="vat" id="vat" fieldId="HST" tabId="MAIN_CUST_TAB" />
   		</p>		
   	</cmr:column>
-  	<cmr:column span="2" containerForField="PSTExempt">
+  	<cmr:column span="1" containerForField="PSTExempt">
   		<p>
   			<cmr:label fieldId="PSTExempt">
         		<cmr:fieldLabel fieldId="PSTExempt" />:

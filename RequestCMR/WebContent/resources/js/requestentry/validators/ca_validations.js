@@ -180,95 +180,89 @@ function addCAAddressHandler(cntry, addressMode, saving) {
 }
 
 /**
- * Enable/Disable the PST Exempt, PST Exempt Lic No and QST
- * based on the selected Install-At Province/State
+ * Enable/Disable the PST Exempt, PST Exempt Lic No and QST based on the
+ * selected Install-At Province/State
+ * 
  * @returns
  */
 function toggleCATaxFields() {
-    var addrRowCount = CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount;
-    if (addrRowCount > 0) {
-    	var record = null;
-        var type = null;
-    	for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
-    		record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
-            type = record.addrType;
-            
-            if (typeof (type) == 'object') {
-              type = type[0];
-            }
+  var addrRowCount = CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount;
+  if (addrRowCount > 0) {
+    var record = null;
+    var type = null;
+    for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+      record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+      type = record.addrType;
 
-            if (type == 'ZS01') {
-        		var stateProv = record.stateProv;
-        		if (stateProv == 'QC') {
-        			//Show QST
-        	    	FormManager.readOnly('vatExempt');
-        	    	FormManager.readOnly('taxPayerCustCd');
-        	    	FormManager.enable('taxCd3');
-        		}
-        		else if (stateProv == 'BC' || stateProv == 'MB' || stateProv == 'SK') {
-        			//PST Exempt Flag, PST Exemp Lic No
-        			FormManager.enable('vatExempt');
-        	    	FormManager.enable('taxPayerCustCd');
-        	    	FormManager.readOnly('taxCd3');
-        		}
-        		else {
-        			FormManager.readOnly('vatExempt');
-        	    	FormManager.readOnly('taxPayerCustCd');
-        	    	FormManager.readOnly('taxCd3');
-        		}
-            	return;
-            }
-    	}
+      if (typeof (type) == 'object') {
+        type = type[0];
+      }
+
+      if (type == 'ZS01') {
+        var stateProv = record.stateProv;
+        if (stateProv == 'QC') {
+          // Show QST
+          FormManager.readOnly('vatExempt');
+          FormManager.readOnly('taxPayerCustCd');
+          FormManager.enable('taxCd3');
+        } else if (stateProv == 'BC' || stateProv == 'MB' || stateProv == 'SK') {
+          // PST Exempt Flag, PST Exemp Lic No
+          FormManager.enable('vatExempt');
+          FormManager.enable('taxPayerCustCd');
+          FormManager.readOnly('taxCd3');
+        } else {
+          FormManager.readOnly('vatExempt');
+          FormManager.readOnly('taxPayerCustCd');
+          FormManager.readOnly('taxCd3');
+        }
+        return;
+      }
     }
-    else {
-    	clearCATaxFields();
-    }
+  } else {
+    clearCATaxFields();
+  }
 }
 
 /**
- * Clear all the CA Tax Fields
- * PST Exempt, PST Exempt Lic No, QST
+ * Clear all the CA Tax Fields PST Exempt, PST Exempt Lic No, QST
+ * 
  * @returns
  */
 function clearCATaxFields() {
-	FormManager.clearValue('vatExempt');
-	FormManager.clearValue('taxPayerCustCd');
-	FormManager.clearValue('taxCd3');
-	
-	FormManager.readOnly('vatExempt');
-	FormManager.readOnly('taxPayerCustCd');
-	FormManager.readOnly('taxCd3');
+
+  FormManager.readOnly('vatExempt');
+  FormManager.readOnly('taxPayerCustCd');
+  FormManager.readOnly('taxCd3');
+
+  FormManager.clearValue('vatExempt');
+  FormManager.getField('vatExempt').set('checked', false);
+  FormManager.clearValue('taxPayerCustCd');
+  FormManager.clearValue('taxCd3');
 }
 
 function addPSTExemptValidator() {
-	FormManager.addFormValidator((function() {
-	    return {
-	      validate : function() {
-	    	  var installAtAddr = getAddressByType('ZS01');
-	    	  if (installAtAddr != null && (installAtAddr.stateProv == 'BC' || installAtAddr.stateProv == 'MB' || installAtAddr.stateProv == 'KS') ) { 
-				var pstExempt = FormManager.getActualValue('vatExempt');
-				//check if pstExempt value is X
-				if (pstExempt != null && pstExempt != '') {
-					if (pstExempt != 'X') {
-						return new ValidationResult(null, false, 'PST Exempt value should be X only');
-					}
-					else { //check PST Exemption Lic Num
-						var pstExemptLicNum = FormManager.getActualValue('taxPayerCustCd');
-						if (pstExemptLicNum == '') {
-							return new ValidationResult(null, false, 'PST Exemption License Number is required');
-						}
-						else {
-							return new ValidationResult(null, true);
-						}
-					}
-				}
-				else {
-					return new ValidationResult(null, true);
-				}
-	    	  }
-	      }
-	    };
-	  })(), 'MAIN_NAME_TAB', 'frmCMR');
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var installAtAddr = getAddressByType('ZS01');
+        if (installAtAddr != null && (installAtAddr.stateProv == 'BC' || installAtAddr.stateProv == 'MB' || installAtAddr.stateProv == 'KS')) {
+          var pstExempt = FormManager.getActualValue('vatExempt');
+          // check if pstExempt value is X
+          if (pstExempt != null && pstExempt == 'Y') {
+            var pstExemptLicNum = FormManager.getActualValue('taxPayerCustCd');
+            if (pstExemptLicNum == '') {
+              return new ValidationResult(null, false, 'PST Exemption License Number is required');
+            } else {
+              return new ValidationResult(null, true);
+            }
+
+          } else {
+            return new ValidationResult(null, true);
+          }
+        }
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
 /**
@@ -296,7 +290,7 @@ function isAddressInGrid(addrType) {
 }
 
 function getAddressByType(addrType) {
-  
+
   var record = null;
   var type = null;
   for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
@@ -308,7 +302,7 @@ function getAddressByType(addrType) {
     }
 
     if (type == addrType) {
-    	return record;
+      return record;
     }
   }
   return null;
@@ -365,7 +359,7 @@ function afterConfigForCA() {
 
 var _inacCodeHandler = null;
 var _custSubGrpHandler = null;
-var _pstExemptHandler = null;
+// var _pstExemptHandler = null;
 function addFieldHandlers() {
 
   if (_inacCodeHandler == null) {
@@ -398,14 +392,15 @@ function addFieldHandlers() {
       }
     });
   }
-  
-  if (_pstExemptHandler == null) {
-	  _pstExemptHandler = dojo.connect(FormManager.getField('PSTExempt'), 'onkeyup', function(value) {
 
-		  var pstExemptVal = FormManager.getActualValue('vatExempt');
-		  FormManager.setValue('vatExempt', pstExemptVal.toUpperCase());
-	  });
-  }
+  /*
+   * if (_pstExemptHandler == null) { _pstExemptHandler =
+   * dojo.connect(FormManager.getField('PSTExempt'), 'onkeyup', function(value) {
+   * 
+   * var pstExemptVal = FormManager.getActualValue('vatExempt');
+   * FormManager.setValue('vatExempt', pstExemptVal.toUpperCase()); }); }
+   */
+
 }
 
 function addLocationNoValidator() {
@@ -471,7 +466,6 @@ function removeValidatorForOptionalFields() {
     FormManager.removeValidator('isicCd', Validators.REQUIRED);
   }
 }
-
 
 function addPhoneNumberValidationCa() {
   FormManager.addFormValidator((function() {
