@@ -390,19 +390,13 @@ public class NORDXTransformer extends EMEATransformer {
     case "ZP01":
       return "Bill-To";
     case "ZS01":
-      return "Sold-To";
+      return "Mail-To";
     case "ZD01":
       return "Ship-To";
     case "ZI01":
       return "Install-at";
     case "ZS02":
-      return "Mail-To";
-    case "ZP02":
-      return "G address (Address in local language)";
-    case "ZD02":
-      return "IGF Ship-To";
-    case "ZP03":
-      return "IGF Bill-To";
+      return "EPL";
     default:
       return "";
     }
@@ -414,15 +408,13 @@ public class NORDXTransformer extends EMEATransformer {
     case "ZP01":
       return "Bill-To";
     case "ZS01":
-      return "Sold-To";
+      return "Mail-To";
     case "ZD01":
       return "Ship-To";
     case "ZI01":
       return "Install-at";
     case "ZS02":
-      return "Mail-To";
-    case "ZP02":
-      return "G address (Address in local language)";
+      return "EPL";
     default:
       return "";
     }
