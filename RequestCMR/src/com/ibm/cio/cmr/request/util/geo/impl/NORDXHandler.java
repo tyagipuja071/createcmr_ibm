@@ -488,7 +488,7 @@ public class NORDXHandler extends BaseSOFHandler {
                 }
 
                 // cheeck if SecondaryZS01 share ZI01
-                if (isShareZI01 != null) {
+                if (isShareZI01 != null && isShareZP01 == null) {
                   // add share ZS02
                   if (isShareZS02 != null) {
                     FindCMRRecordModel sharezs02 = new FindCMRRecordModel();
@@ -517,7 +517,7 @@ public class NORDXHandler extends BaseSOFHandler {
                   }
                 }
 
-                if (isShareZD01 != null) {
+                if (isShareZD01 != null && isShareZP01 == null && isShareZI01 == null) {
                   // add share ZS02
                   if (isShareZS02 != null) {
                     FindCMRRecordModel sharezs02 = new FindCMRRecordModel();
