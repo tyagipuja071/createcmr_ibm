@@ -1213,6 +1213,17 @@ public class NORDXHandler extends BaseSOFHandler {
                     ":Note that A/C admin DSC should be only numeric. Please fix and upload the template again.<br>");
               }
 
+              currCell = (XSSFCell) row.getCell(14);
+              vat = validateColValFromCell(currCell);
+              String vatTxt = df.formatCellValue(currCell);
+              // if (!StringUtils.isBlank(phone) &&
+              // !phoneTxt.matches("^[0-9]*$")) {
+              if (!StringUtils.isBlank(vat) && !vat.equals(vatTxt)) {
+                LOG.trace("The row " + (row.getRowNum() + 1) + " Note that VAT format is incorrect. Please fix and upload the template again.");
+                error.addError((row.getRowNum() + 1), "VAT",
+                    "The row " + (row.getRowNum() + 1) + ":Note that VAT format is incorrect. Please fix and upload the template again.<br>");
+              }
+
               currCell = (XSSFCell) row.getCell(15);
               salesRep = validateColValFromCell(currCell);
               if ("@".equals(salesRep)) {
@@ -1230,12 +1241,13 @@ public class NORDXHandler extends BaseSOFHandler {
 
               currCell = (XSSFCell) row.getCell(16);
               phone = validateColValFromCell(currCell);
-              String phoneTxt = "";
-              phoneTxt = df.formatCellValue(currCell);
-              if (!StringUtils.isBlank(phone) && !phoneTxt.matches("^[0-9]*$")) {
-                LOG.trace("The row " + (row.getRowNum() + 1) + " Note that Phone should be numeric. Please fix and upload the template again.");
+              String phoneTxt = df.formatCellValue(currCell);
+              // if (!StringUtils.isBlank(phone) &&
+              // !phoneTxt.matches("^[0-9]*$")) {
+              if (!StringUtils.isBlank(phone) && !phone.equals(phoneTxt)) {
+                LOG.trace("The row " + (row.getRowNum() + 1) + " Note that Phone format is incorrect. Please fix and upload the template again.");
                 error.addError((row.getRowNum() + 1), "Phone",
-                    "The row " + (row.getRowNum() + 1) + ":Note that Phone should be numeric. Please fix and upload the template again.<br>");
+                    "The row " + (row.getRowNum() + 1) + ":Note that Phone format is incorrect. Please fix and upload the template again.<br>");
               }
             } else {
               String seq = "";// 1
@@ -1348,17 +1360,21 @@ public class NORDXHandler extends BaseSOFHandler {
               if (StringUtils.isNotBlank(street)) {
                 fieldCount++;
               }
-              if (StringUtils.isNotBlank(poBox)) {
-                fieldCount++;
-              }
+
               if (isCrossBoarder) {
+                if (StringUtils.isNotBlank(poBox) || StringUtils.isNotBlank(streetCon)) {
+                  fieldCount++;
+                }
                 if (fieldCount > 3) {
                   LOG.trace("The row " + (row.getRowNum() + 1)
-                      + ":Note that only 3 fields of Customer name con't, Addtional Info, Att Person, Street, Po Box can be filled at once. Please fix and upload the template again.");
+                      + ":Note that only 3 fields of Customer name con't, Addtional Info, Att Person, Street, Street con't and/or Po Box can be filled at once. Please fix and upload the template again.");
                   error.addError((row.getRowNum() + 1), name,
-                      ":Note that only 3 fields of Customer name con't, Addtional Info, Att Person, Street, Po Box can be filled at once. Please fix and upload the template again.<br>");
+                      ":Note that only 3 fields of Customer name con't, Addtional Info, Att Person, Street, Street con't and/or Po Box can be filled at once. Please fix and upload the template again.<br>");
                 }
               } else {
+                if (StringUtils.isNotBlank(poBox)) {
+                  fieldCount++;
+                }
                 if (fieldCount == 5) {
                   LOG.trace("The row " + (row.getRowNum() + 1)
                       + ":Note that only 4 fields of Customer name con't,Addtional Info, Att Person, Street, Po Box can be filled at once. Please fix and upload the template again.");
