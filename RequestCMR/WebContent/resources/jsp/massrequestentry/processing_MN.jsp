@@ -205,9 +205,8 @@
       } else {
     %>
     <%
-      if("678".equals(reqentry.getCmrIssuingCntry()) || "702".equals(reqentry.getCmrIssuingCntry()) || "806".equals(reqentry.getCmrIssuingCntry()) || "846".equals(reqentry.getCmrIssuingCntry())){
-        if("Viewer".equalsIgnoreCase(reqentry.getUserRole())){
-          if("COM".equals(reqentry.getReqStatus()) || "PCP".equals(reqentry.getReqStatus())) {
+      if("Viewer".equalsIgnoreCase(reqentry.getUserRole())){
+        if("COM".equals(reqentry.getReqStatus()) || "PCP".equals(reqentry.getReqStatus())) {
     %>
     <cmr:column span="4">
       <p style="height:45px"></p>
@@ -219,16 +218,9 @@
       </div>
     </cmr:column>
     <%
-          }
         }
-      } else {
-    %>
-    <cmr:column span="4">
-    </cmr:column>
-    <%
       }
     %>
-    
     <%
       }
     %>
