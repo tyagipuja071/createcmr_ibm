@@ -1367,9 +1367,9 @@ public class NORDXHandler extends BaseSOFHandler {
                 }
                 if (fieldCount > 3) {
                   LOG.trace("The row " + (row.getRowNum() + 1)
-                      + ":Note that only 3 fields of Customer name con't, Addtional Info, Att Person, Street, Po Box can be filled at once. Please fix and upload the template again.");
+                      + ":Note that only 3 fields of Customer name con't, Addtional Info, Att Person, Street, Street con't and/or Po Box can be filled at once. Please fix and upload the template again.");
                   error.addError((row.getRowNum() + 1), name,
-                      ":Note that only 3 fields of Customer name con't, Addtional Info, Att Person, Street, Po Box can be filled at once. Please fix and upload the template again.<br>");
+                      ":Note that only 3 fields of Customer name con't, Addtional Info, Att Person, Street, Street con't and/or Po Box can be filled at once. Please fix and upload the template again.<br>");
                 }
               } else {
                 if (StringUtils.isNotBlank(poBox)) {
