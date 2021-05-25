@@ -30,17 +30,22 @@
       but also quasi-military organizations like Federal Security Service and may include seemingly non-military
       end users /end uses which may be involved in military contracts or in military-related activities.
       <br>
-      <span style="font-weight: bold">Definitions for Reference:</span>
+      <span style="font-weight: bold">Definitions:</span>
       <br>
       <span style="font-weight: bold; text-decoration: underline">Military End Users:</span>
       Include army, navy, air force, marines, coast guard, national guard, security or police, government defense, intelligence 
-      and reconnaissance organizations, and their contractors or any person or entity whose actions or functions are intended
+      and reconnaissance organizations (excludes organizations of the armed forces or national guard, that are covered under the military-intelligence end user definition below), and their contractors or any person or entity whose actions or functions are intended
       to support military end uses.
       <br>
       <br>
       <span style="font-weight: bold; text-decoration: underline">Military End Uses:</span>
-       That will be directly part, component or subsystems of weapons or defense articles, or that indirectly supports
-       or contributes to the operation, installation, maintenance, repair, overhaul, refurbishing, development or production of military items.
+       incorporation into a military item described on the U.S. Munitions List (USML) (22 CFR part 121, International Traffic in Arms Regulations); incorporation into items classified under ECCNs ending in "A018" or under "600 series" ECCNs; or any item that supports or contributes to the operation, installation, maintenance, repair, overhaul, refurbishing, development, or production, of military items described on the USML, or items classified under ECCNs ending in "A018" or under "600 series" ECCNs.
+      <br>
+      <span style="font-weight: bold; text-decoration: underline">Military-Intelligence End User:</span>
+      means any intelligence or reconnaissance organization of the armed services (army, navy, marine, air force, or coast guard); or national guard.
+      <br>
+      <span style="font-weight: bold; text-decoration: underline">Military-Intelligence End Uses:</span>
+      means the design, development, production, use, operation, installation (including on-site installation), maintenance (checking), repair, overhaul, or refurbishing of, or incorporation into, items described on the U.S. Munitions List (USML) (22 CFR part 121, International Traffic in Arms Regulations), or classified under ECCNs ending in "A018" or under "600 series" ECCNs, which are intended to support the actions or functions of a 'military-intelligence end user,' as defined above. 
     </cmr:chk-entry>
     <cmr:chk-entry number="1" section="A">
       Is the customer part of the military or involved in any military activity?
@@ -62,7 +67,7 @@
       <br>
       2. Nuclear activities include research on, or development, design, manufacture, construction,
       operation, or maintenance of any "nuclear reactor" (including for non-weapon-related nuclear power generation), critical facility, 
-      facility for the fabrication of nuclear fuel, facility for the conversion of nuclear material from one chemical form to another, or separate storage.
+      facility for the fabrication of nuclear fuel, facility for the conversion of nuclear material from one chemical form to another, or separate storage, and nuclear activities in connection with a foreign maritime nuclear propulsion project.
       <br>
       3. Sensitive nuclear activities are: nuclear fuel cycle activities, including research on or development design, manufacture, construction, 
       operation or maintenance of any of the following facilities or components for such facilities:
@@ -81,14 +86,19 @@
       Is the customer related to or owned or controlled by any organization involved with any nuclear activity?
     </cmr:chk-entry>
     <cmr:chk-entry number="5" section="A">
-      Is the customer involved in the design, development, production or use of missiles?
+      Is the customer involved in or supporting the design, development, production, operation, installation (including on-site installation), maintenance (checking), repair, overhaul, refurbishing, or use of, missiles (i.e. rocket systems and/or unmanned air vehicles)?
     </cmr:chk-entry>
     <cmr:chk-entry number="6" section="A">
-      Is the customer involved in the design, development, production, stockpiling or use of chemical or biological weapons?
+      Is the customer involved in or supporting the design, development, production, operation, stockpiling, installation (including on-site installation), maintenance (checking), repair, overhaul, refurbishing, or use of chemical or biological weapons?
+    </cmr:chk-entry>
+    <cmr:chk-entry number="7" section="A">
+    To the best of your knowledge or belief is your customer involved in any activity related to or in support of the design, development, production, operation, installation (including on-site installation), maintenance (checking), repair, overhaul, refurbishing of a chemical plant?
+	</cmr:chk-entry>
+	<cmr:chk-entry number="8" section="A">
+	If yes to the above, is your customer involved in any activity related to, or in support of: the design, development, production, operation, installation (including on-site installation), maintenance (checking), repair, overhaul, refurbishing of a whole plant of chemical weapons precursors specified in export control classification number (ECCN) 1C350?
       <br>
       <br>
     </cmr:chk-entry>
-
     <cmr:chk-entry>
       <span style="font-weight: bold; text-decoration: underline">Diversion and Re-export risk assessment</span>
     </cmr:chk-entry>
@@ -109,12 +119,12 @@
       <br>
       (The list is illustrative, not comprehensive)
     </cmr:chk-entry>
-    <cmr:chk-entry number="7" section="A">
+    <cmr:chk-entry number="9" section="A">
       Based on your knowledge of this customer, have you identified any indicators of a potential diversion?
       <br>
     </cmr:chk-entry>
 
-    <cmr:chk-entry number="8" section="A">
+    <cmr:chk-entry number="10" section="A">
     <span style="font-weight: bold; text-decoration: underline">Re-export:</span>
     <br>
       To the best of your knowledge and belief, is there any indication that the customer intends to re-export the products? 
@@ -127,11 +137,13 @@
        <%=RequestUtils.generateChecklistFreeTxtField1(request)%>
        <br>
     </cmr:chk-lbl-field>
-
+  
+    </cmr:chk-section> 
+    <cmr:chk-section name="Section B"> 
     <cmr:chk-entry>
       <span style="font-weight: bold; text-decoration: underline">Embassies or consulates:</span>
     </cmr:chk-entry>
-    <cmr:chk-entry number="9" section="A">
+    <cmr:chk-entry number="1" section="B">
       Is the customer a representation of an embargoed/terrorist country?
       <br>
     </cmr:chk-entry>
@@ -139,15 +151,13 @@
     <cmr:chk-entry>
       <span style="font-weight: bold; text-decoration: underline">Controlled in fact customers</span>
     </cmr:chk-entry>
-    <cmr:chk-entry number="10" section="A">
+    <cmr:chk-entry number="2" section="B">
       To the best of your knowledge and belief, is the customer partially/fully owned or controlled by a
       government, - company/organisation or person of an embargoed/terrorist country (see USERP,
       chapter 1.5)
       <br>
     </cmr:chk-entry>
-    </cmr:chk-section> 
-    <cmr:chk-section name="Section B"> 
-     <cmr:chk-entry number="1" section="B">
+     <cmr:chk-entry number="3" section="B">
       Does the entity have any persons in its shareholder's structure that are subject to sanctions imposed by any government body,
       including the United Nations, the United States, and the European Union (collectively, "Sanctions" ) 
       see https://w3-03.ibm.com/legal/denied-parties-list/denied.nsf.

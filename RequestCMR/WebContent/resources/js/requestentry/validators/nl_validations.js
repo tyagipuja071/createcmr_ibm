@@ -28,9 +28,12 @@ function afterConfigForNL() {
     FormManager.setValue('abbrevLocn', 'Softlayer');
   }
   if (reqType == 'C' && role != 'Processor') {
+    FormManager.readOnly('inacCd');
     FormManager.readOnly('abbrevNm');
     FormManager.readOnly('subIndustryCd');
     FormManager.resetValidations('engineeringBo');
+  } else {
+    FormManager.enable('inacCd');
   }
   if (custSubType == 'PRICU') {
     FormManager.clearValue('enterprise');

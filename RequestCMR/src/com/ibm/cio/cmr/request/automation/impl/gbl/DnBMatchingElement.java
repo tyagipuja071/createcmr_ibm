@@ -71,18 +71,23 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
     MatchingOutput output = new MatchingOutput();
     Scorecard scorecard = requestData.getScorecard();
     scorecard.setDnbMatchingResult("");
-
+    Boolean override = false;
     // skip dnb matching if dnb matches on UI are overriden and attachment is
     // provided
     if ("Y".equals(admin.getMatchOverrideIndc()) && DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+      LOG.debug("DNB Overriden");
       result.setResults("Overriden");
       result.setDetails(
           "D&B matches were chosen to be overridden by the requester.\nSupporting documentation is provided by the requester as attachment.");
-      List<String> dnbOverrideCountryList = SystemParameters.getList("DNB_OVR_CNTRY_LIST");
-      if (dnbOverrideCountryList == null || !dnbOverrideCountryList.contains(data.getCmrIssuingCntry())) {
-        engineData.addNegativeCheckStatus("_dnbOverride", "D&B matches were chosen to be overridden by the requester.");
+      admin.setCompVerifiedIndc("O");
+      override = true;
+      if (!SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry())) {
+        List<String> dnbOverrideCountryList = SystemParameters.getList("DNB_OVR_CNTRY_LIST");
+        if ((dnbOverrideCountryList == null || !dnbOverrideCountryList.contains(data.getCmrIssuingCntry()))) {
+          engineData.addNegativeCheckStatus("_dnbOverride", "D&B matches were chosen to be overridden by the requester.");
+        }
+        return result;
       }
-      return result;
     }
 
     if (soldTo != null) {
@@ -97,10 +102,19 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
         if (!hasValidMatches) {
           // if no valid matches - do not process records
           scorecard.setDnbMatchingResult("N");
-          result.setOnError(shouldThrowError);
-          result.setResults("No Matches");
-          result.setDetails("No high quality matches with D&B records. Please import from D&B search.");
-          engineData.addNegativeCheckStatus("DnBMatch", "No high quality matches with D&B records. Please import from D&B search.");
+          if (!SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry())) {
+            result.setOnError(shouldThrowError);
+          } else {
+            result.setOnError(false);
+          }
+          if (!override) {
+            LOG.debug("No Matches in DNB");
+            result.setResults("No Matches");
+            result.setDetails("No high quality matches with D&B records. Please import from D&B search.");
+            engineData.addNegativeCheckStatus("DnBMatch", "No high quality matches with D&B records. Please import from D&B search.");
+          } else {
+            result.setDetails("No high quality matches with D&B records. Please import from D&B search.");
+          }
         } else {
           // actions to be performed only when matches with high confidence are
           // found
@@ -167,6 +181,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
           if (perfectMatch != null) {
             LOG.debug("Perfect match was found with DUNS " + perfectMatch.getDunsNo());
             result.setResults("Matched");
+            admin.setCompVerifiedIndc("Y");
             details.append("High Quality match D&B record matched the request name/address information.\n");
             if (!"Y".equals(perfectMatch.getOrgIdMatch()) && !scenarioExceptions.isCheckVATForDnB()) {
               details.append((isTaxCdMatch ? "Org ID " : "VAT ")
@@ -220,9 +235,17 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
               processDnBFields(entityManager, data, dnbRecord, output, details, itemNo);
               itemNo++;
             }
-            engineData.addRejectionComment("OTH", "Matches against D&B were found but no record matched the request data.", "", "");
-            result.setResults("Name/Address not matched");
-            result.setOnError(true);
+            if (!override) {
+              engineData.addRejectionComment("OTH", "Matches against D&B were found but no record matched the request data.", "", "");
+              result.setResults("Name/Address not matched");
+            } else {
+              result.setDetails("Matches against D&B were found but no record matched the request data.");
+            }
+            if (!SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry())) {
+              result.setOnError(true);
+            } else {
+              result.setOnError(false);
+            }
             engineData.put("dnbMatching", dnbMatches.get(0));
           }
 
@@ -249,9 +272,13 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
       } else {
         scorecard.setDnbMatchingResult("N");
         result.setDetails("No D&B record was found using advanced matching.");
-        engineData.addRejectionComment("OTH", "No matches with D&B records. Please import from D&B search.", "", "");
         result.setResults("No Matches");
-        result.setOnError(true);
+        if (!override) {
+          engineData.addRejectionComment("OTH", "No matches with D&B records. Please import from D&B search.", "", "");
+          result.setOnError(true);
+        } else {
+          result.setOnError(false);
+        }
       }
 
     } else {
