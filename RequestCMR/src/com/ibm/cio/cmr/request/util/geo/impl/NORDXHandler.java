@@ -1142,6 +1142,15 @@ public class NORDXHandler extends BaseSOFHandler {
                     ":Note that Abbreviated Location is mandatory. Please fix and upload the template again.<br>");
               }
 
+              currCell = (XSSFCell) row.getCell(7);
+              collection = validateColValFromCell(currCell);
+              if (!StringUtils.isBlank(collection) && !collection.matches("^[A-Za-z0-9]+$")) {
+                LOG.trace("The row " + (row.getRowNum() + 1)
+                    + ":Note that Collection code only accept AlphaNumeric. Please fix and upload the template again.");
+                error.addError((row.getRowNum() + 1), "Collection Code",
+                    ":Note that Collection Code only accept AlphaNumeric. Please fix and upload the template again.<br>");
+              }
+
               currCell = (XSSFCell) row.getCell(8);
               payment = validateColValFromCell(currCell);
               if ("@".equals(payment)) {
@@ -1149,6 +1158,14 @@ public class NORDXHandler extends BaseSOFHandler {
                     + ":Note that Payment terms is not allowed blank out. Please fix and upload the template again.");
                 error.addError((row.getRowNum() + 1), "Payment terms",
                     ":Note that Payment terms is not allowed blank out. Please fix and upload the template again.<br>");
+              }
+
+              if (!StringUtils.isBlank(payment) && !payment.matches("^[A-Za-z0-9]+$")) {
+                LOG.trace(
+                    "The row " + (row.getRowNum() + 1)
+                        + ":Note that Payment terms only accept AlphaNumeric. Please fix and upload the template again.");
+                error.addError((row.getRowNum() + 1), "Payment terms",
+                    ":Note that Payment terms only accept AlphaNumeric. Please fix and upload the template again.<br>");
               }
 
               currCell = (XSSFCell) row.getCell(9);
@@ -1189,6 +1206,12 @@ public class NORDXHandler extends BaseSOFHandler {
                 error.addError((row.getRowNum() + 1), "A/C Admin DSC",
                     ":Note that A/C Admin DSC is not allowed blank out. Please fix and upload the template again.<br>");
               }
+              if (!StringUtils.isBlank(acAdmin) && !acAdmin.matches("^[0-9]*$")) {
+                LOG.trace("The row " + (row.getRowNum() + 1)
+                    + ":Note that A/C admin DSC should be only numeric. Please fix and upload the template again.");
+                error.addError((row.getRowNum() + 1), "A/C admin DSC",
+                    ":Note that A/C admin DSC should be only numeric. Please fix and upload the template again.<br>");
+              }
 
               currCell = (XSSFCell) row.getCell(15);
               salesRep = validateColValFromCell(currCell);
@@ -1198,7 +1221,22 @@ public class NORDXHandler extends BaseSOFHandler {
                 error.addError((row.getRowNum() + 1), "Sales Rep",
                     ":Note that Sales Rep is not allowed blank out. Please fix and upload the template again.<br>");
               }
+              if (!StringUtils.isBlank(salesRep) && !salesRep.matches("^[A-Za-z0-9]+$")) {
+                LOG.trace(
+                    "The row " + (row.getRowNum() + 1) + ":Note that Sales Rep only accept AlphaNumeric. Please fix and upload the template again.");
+                error.addError((row.getRowNum() + 1), "Sales Rep",
+                    ":Note that Sales Rep only accept AlphaNumeric. Please fix and upload the template again.<br>");
+              }
 
+              currCell = (XSSFCell) row.getCell(16);
+              phone = validateColValFromCell(currCell);
+              String phoneTxt = "";
+              phoneTxt = df.formatCellValue(currCell);
+              if (!StringUtils.isBlank(phone) && !phoneTxt.matches("^[0-9]*$")) {
+                LOG.trace("The row " + (row.getRowNum() + 1) + " Note that Phone should be numeric. Please fix and upload the template again.");
+                error.addError((row.getRowNum() + 1), "Phone",
+                    "The row " + (row.getRowNum() + 1) + ":Note that Phone should be numeric. Please fix and upload the template again.<br>");
+              }
             } else {
               String seq = "";// 1
               currCell = (XSSFCell) row.getCell(1);
@@ -1316,16 +1354,16 @@ public class NORDXHandler extends BaseSOFHandler {
               if (isCrossBoarder) {
                 if (fieldCount > 3) {
                   LOG.trace("The row " + (row.getRowNum() + 1)
-                      + ":Note that only 3 fields of Customer name Cond,Addtional Info, Att Person, Street, Po Box can be filled at once. Please fix and upload the template again.");
+                      + ":Note that only 3 fields of Customer name con't, Addtional Info, Att Person, Street, Po Box can be filled at once. Please fix and upload the template again.");
                   error.addError((row.getRowNum() + 1), name,
-                      ":Note that only 3 fields of Customer name Cond,Addtional Info, Att Person, Street, Po Box can be filled at once. Please fix and upload the template again.<br>");
+                      ":Note that only 3 fields of Customer name con't, Addtional Info, Att Person, Street, Po Box can be filled at once. Please fix and upload the template again.<br>");
                 }
               } else {
                 if (fieldCount == 5) {
                   LOG.trace("The row " + (row.getRowNum() + 1)
-                      + ":Note that only 4 fields of Customer name Cond,Addtional Info, Att Person, Street, Po Box can be filled at once. Please fix and upload the template again.");
+                      + ":Note that only 4 fields of Customer name con't,Addtional Info, Att Person, Street, Po Box can be filled at once. Please fix and upload the template again.");
                   error.addError((row.getRowNum() + 1), name,
-                      ":Note that only 4 fields of Customer name Cond,Addtional Info, Att Person, Street, Po Box can be filled at once. Please fix and upload the template again.<br>");
+                      ":Note that only 4 fields of Customer name con't,Addtional Info, Att Person, Street, Po Box can be filled at once. Please fix and upload the template again.<br>");
                 }
               }
               fieldCount = 0;
@@ -1333,17 +1371,17 @@ public class NORDXHandler extends BaseSOFHandler {
               if (StringUtils.isBlank(street)) {
                 if (StringUtils.isNotBlank(streetCon)) {
                   LOG.trace("The row " + (row.getRowNum() + 1)
-                      + ":Note that Street Cond can't be filled without Street. Please fix and upload the template again.");
-                  error.addError((row.getRowNum() + 1), "Street Cond & Additional Info",
-                      ":Note that Street Cond can't be filled without Street. Please fix and upload the template again.<br>");
+                      + ":Note that Street con't can't be filled without Street. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "Street con't & Additional Info",
+                      ":Note that Street con't can't be filled without Street. Please fix and upload the template again.<br>");
                 }
               }
 
               if (StringUtils.isNotBlank(streetCon) && StringUtils.isNotBlank(additionalInfo)) {
                 LOG.trace("The row " + (row.getRowNum() + 1)
-                    + ":Note that Street Cond and Additional Info both filled not allowed. Please fix and upload the template again.");
-                error.addError((row.getRowNum() + 1), "Street Cond & Additional Info",
-                    ":Note that Street Cond and Additional Info both filled not allowed. Please fix and upload the template again.<br>");
+                    + ":Note that Street con't and Additional Info both filled not allowed. Please fix and upload the template again.");
+                error.addError((row.getRowNum() + 1), "Street con't & Additional Info",
+                    ":Note that Street con't and Additional Info both filled not allowed. Please fix and upload the template again.<br>");
 
               }
 
@@ -1357,18 +1395,18 @@ public class NORDXHandler extends BaseSOFHandler {
               if (StringUtils.isBlank(poBox)) {
                 if (streetCon.length() > 30) {
                   LOG.trace("The row " + (row.getRowNum() + 1)
-                      + ":Note that Street Cond should less than 30 chars. Please fix and upload the template again.");
-                  error.addError((row.getRowNum() + 1), "Street Cond",
-                      ":Note that Street Cond should less than 30 chars. Please fix and upload the template again.<br>");
+                      + ":Note that Street con't should less than 30 chars. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "Street con't",
+                      ":Note that Street con't should less than 30 chars. Please fix and upload the template again.<br>");
 
                 }
               } else {
                 String combingStr = streetCon + ", PO BOX " + poBox;
                 if (combingStr.length() > 30) {
                   LOG.trace("The row " + (row.getRowNum() + 1)
-                      + ":Note that Combo Street Cond and PO Box(with prefix) should less than 30 chars. Please fix and upload the template again.");
+                      + ":Note that Combo Street con't and PO Box(with prefix) should less than 30 chars. Please fix and upload the template again.");
                   error.addError((row.getRowNum() + 1), "PO Box",
-                      ":Note that Combo Street Cond and PO Box(with prefix) should less than 30 chars. Please fix and upload the template again.<br>");
+                      ":Note that Combo Street con't and PO Box(with prefix) should less than 30 chars. Please fix and upload the template again.<br>");
                 }
               }
 
