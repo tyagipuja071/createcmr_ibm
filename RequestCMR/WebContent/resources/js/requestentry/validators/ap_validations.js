@@ -164,9 +164,6 @@ function addAfterConfigAP() {
          FormManager.setValue('busnType','000');
          FormManager.readOnly('busnType');
       }
-      if(custSubGrp == 'AQSTN'){
-         FormManager.setValue('abbrevNm','Acquisition Use Only');
-      }
     } 
   }
   if (reqType == 'C') {
@@ -902,6 +899,8 @@ function autoSetAbbrevNmLocnLogic() {
         _abbrevNm = "SOFTLAYER USE ONLY";
       } else if (custSubGrp == "ESOSW" || custSubGrp == "XESO") {
         _abbrevNm = "ESA/OEM/SWG_" + custNm1;
+      } else if (custSubGrp == "AQSTN") {
+        _abbrevNm ="Acquisition Use Only";
       } else {
         if (custNm1)
           _abbrevNm = custNm1;

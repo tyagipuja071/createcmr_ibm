@@ -1397,7 +1397,15 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
           if (response.getMatched() && (("Accepted".equals(scorecard.getFindDnbResult()) && !StringUtils.isBlank(requestData.getData().getDunsNo()))
               || "Rejected".equals(scorecard.getFindDnbResult()))) {
             for (DnBMatchingResponse record : response.getMatches()) {
-              if (record.getConfidenceCode() >= 8 && DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), zs01, admin, record, null, false, true)) {
+              boolean isicMatch = getDnBDetailsUI(record.getDunsNo()).getIbmIsic().equals(requestData.getData().getIsicCd());
+              if (record.getConfidenceCode() >= 8 && DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), zs01, admin, record, null, false, true)
+                  && SystemLocation.INDIA.equals(data.getCmrIssuingCntry())) {
+                if (isicMatch) {
+                  match = true;
+                  break;
+                }
+              } else if (record.getConfidenceCode() >= 8
+                  && DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), zs01, admin, record, null, false, true)) {
                 match = true;
                 break;
               } else if (checkTradestyleNames && record.getConfidenceCode() >= 8 && record.getTradeStyleNames() != null && tradeStyleName == null
@@ -1533,7 +1541,8 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
           cmrRecord.setCmrTier("");
           cmrRecord.setCmrInacType("");
           cmrRecord.setCmrIsic(!StringUtils.isEmpty(kna1.getZzkvSic())
-              ? (kna1.getZzkvSic().trim().length() > 4 ? kna1.getZzkvSic().trim().substring(0, 4) : kna1.getZzkvSic().trim()) : "");
+              ? (kna1.getZzkvSic().trim().length() > 4 ? kna1.getZzkvSic().trim().substring(0, 4) : kna1.getZzkvSic().trim())
+              : "");
           cmrRecord.setCmrSortl("");
           cmrRecord.setCmrIssuedByDesc("");
           cmrRecord.setCmrRdcCreateDate("");
