@@ -230,14 +230,14 @@ function toggleCATaxFields() {
  */
 function clearCATaxFields() {
 
-  FormManager.readOnly('vatExempt');
-  FormManager.readOnly('taxPayerCustCd');
-  FormManager.readOnly('taxCd3');
-
   FormManager.clearValue('vatExempt');
   FormManager.getField('vatExempt').set('checked', false);
   FormManager.clearValue('taxPayerCustCd');
   FormManager.clearValue('taxCd3');
+
+  FormManager.readOnly('vatExempt');
+  FormManager.readOnly('taxPayerCustCd');
+  FormManager.readOnly('taxCd3');
 }
 
 function addPSTExemptValidator() {
