@@ -254,6 +254,8 @@ public class DataModel extends BaseModel {
 
   private String custAcctType;
 
+  private String customerIdCd;
+
   public String getCreditCd() {
     return creditCd;
   }
@@ -1224,4 +1226,11 @@ public class DataModel extends BaseModel {
     this.custAcctType = custAcctType;
   }
 
+  public String getCustomerIdCd() {
+    return customerIdCd;
+  }
+
+  public void setCustomerIdCd(String customerIdCd) {
+    this.customerIdCd = customerIdCd;
+  }
 }

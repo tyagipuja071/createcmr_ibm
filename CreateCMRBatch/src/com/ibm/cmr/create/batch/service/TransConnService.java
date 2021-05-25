@@ -8,10 +8,15 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.persistence.EntityManager;
 
@@ -66,6 +71,8 @@ import com.ibm.cmr.create.batch.model.MassUpdateServiceInput;
 import com.ibm.cmr.create.batch.model.NotifyReqModel;
 import com.ibm.cmr.create.batch.util.BatchUtil;
 import com.ibm.cmr.create.batch.util.DebugUtil;
+import com.ibm.cmr.create.batch.util.masscreate.WorkerThreadFactory;
+import com.ibm.cmr.create.batch.util.masscreate.handler.impl.USMassUpdateWorker;
 import com.ibm.cmr.create.batch.util.mq.MQMsgConstants;
 import com.ibm.cmr.create.batch.util.mq.exception.MQErrorLine;
 import com.ibm.cmr.create.batch.util.mq.exception.MQProcessingException;
@@ -95,11 +102,11 @@ import com.ibm.cmr.services.client.process.mass.ResponseRecord;
 public class TransConnService extends BaseBatchService {
 
   protected static final String BATCH_SERVICES_URL = SystemConfiguration.getValue("BATCH_SERVICES_URL");
-  protected static final String ACTION_RDC_UPDATE = "System Action:RDc Update";
-  protected static final String ACTION_RDC_CREATE = "System Action:RDc Create";
-  protected static final String ACTION_RDC_DELETE = "System Action:RDc Mass Delete";
-  protected static final String ACTION_RDC_REACTIVATE = "System Action:RDc Mass Reactivate";
-  protected static final String ACTION_RDC_SINGLE_REACTIVATE = "System Action:RDc Single Reactivate";
+  public static final String ACTION_RDC_UPDATE = "System Action:RDc Update";
+  public static final String ACTION_RDC_CREATE = "System Action:RDc Create";
+  public static final String ACTION_RDC_DELETE = "System Action:RDc Mass Delete";
+  public static final String ACTION_RDC_REACTIVATE = "System Action:RDc Mass Reactivate";
+  public static final String ACTION_RDC_SINGLE_REACTIVATE = "System Action:RDc Single Reactivate";
   protected static final String ACTION_RDC_MASS_UPDATE = "System Action:RDc Mass Update";
   private static final String FORCED_CHANGE_ACTION = "System Action: Forced Changes.";
   private static final String ACTION_RDC_UPDT_BY_ENT = "System Action:RDc Enterprise update";
@@ -118,6 +125,8 @@ public class TransConnService extends BaseBatchService {
 
   private boolean deleteRDcTargets;
 
+  private boolean multiMode;
+
   public TransConnService() {
     super();
   }
@@ -126,6 +135,8 @@ public class TransConnService extends BaseBatchService {
   protected Boolean executeBatch(EntityManager entityManager) throws Exception {
     try {
       initClient();
+
+      LOG.info("Multi Mode: " + this.multiMode);
 
       ChangeLogListener.setUser(BATCH_USER_ID);
 
@@ -784,6 +795,12 @@ public class TransConnService extends BaseBatchService {
       throws JsonGenerationException, JsonMappingException, IOException, Exception {
     // Create the request
 
+    if (this.multiMode) {
+      LOG.debug("Processing in Multi Mode..");
+      processMassChangesMulti(entityManager, admin, data);
+      return;
+    }
+
     long reqId = admin.getId().getReqId();
     long iterationId = admin.getIterationId();
     String processingStatus = admin.getRdcProcessingStatus();
@@ -839,6 +856,193 @@ public class TransConnService extends BaseBatchService {
       response.setReqId(request.getReqId());
     }
 
+    // try this
+    // get the results from the service and process jason response
+    try {
+      // update MASS_UPDT table with the error txt and row status cd
+      for (ResponseRecord record : response.getRecords()) {
+        PreparedQuery updtQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.GET_MASS_UPDT_ENTITY"));
+        updtQuery.setParameter("REQ_ID", reqId);
+        updtQuery.setParameter("ITERATION_ID", iterationId);
+        updtQuery.setParameter("CMR_NO", record.getCmrNo());
+        List<MassUpdt> updateList = updtQuery.getResults(MassUpdt.class);
+
+        for (MassUpdt massUpdt : updateList) {
+          massUpdt.setErrorTxt(record.getMessage());
+          if (CmrConstants.RDC_STATUS_NOT_COMPLETED.equals(record.getStatus())) {
+            massUpdt.setRowStatusCd("RDCER");
+          } else if (CmrConstants.RDC_STATUS_COMPLETED.equals(record.getStatus())) {
+            massUpdt.setRowStatusCd("DONE");
+          }
+          LOG.info("Mass Update Record Updated [Request ID: " + massUpdt.getId().getParReqId() + " CMR_NO: " + massUpdt.getCmrNo() + " SEQ No: "
+              + massUpdt.getId().getSeqNo() + "]");
+          updateEntity(massUpdt, entityManager);
+        }
+      }
+      String resultCode = response.getStatus();
+
+      String requestType = "";
+      String action = "";
+      switch (admin.getReqType()) {
+      case "D":
+        action = ACTION_RDC_DELETE;
+        requestType = "Mass Delete";
+        break;
+      case "R":
+        action = ACTION_RDC_REACTIVATE;
+        requestType = "Mass Reactivate";
+        break;
+      case "X":
+        action = ACTION_RDC_SINGLE_REACTIVATE;
+        requestType = "Single Reactivate";
+        break;
+      case "M":
+        action = ACTION_RDC_MASS_UPDATE;
+        requestType = "Mass Update";
+        break;
+      }
+
+      // create comment log and workflow history entries for update type of
+      // request
+      StringBuilder comment = new StringBuilder();
+      if (isCompletedSuccessfully(resultCode)) {
+        comment = comment.append(requestType + " in RDc successfully completed.");
+      } else {
+        if (CmrConstants.RDC_STATUS_ABORTED.equals(resultCode) && CmrConstants.RDC_STATUS_ABORTED.equals(processingStatus)) {
+          comment = comment.append(requestType + " in RDc failed: " + response.getMsg());
+        } else if (CmrConstants.RDC_STATUS_ABORTED.equalsIgnoreCase(resultCode)) {
+          comment = comment.append(requestType + " in RDc aborted: " + response.getMsg() + "\nSystem will retry once.");
+        } else if (CmrConstants.RDC_STATUS_NOT_COMPLETED.equalsIgnoreCase(resultCode)) {
+          comment = comment.append(requestType + " in RDc failed: " + response.getMsg());
+        } else if (CmrConstants.RDC_STATUS_IGNORED.equalsIgnoreCase(resultCode)) {
+          comment = comment.append(requestType + " in RDc skipped: " + response.getMsg());
+        }
+      }
+
+      if (!CmrConstants.RDC_STATUS_IGNORED.equals(resultCode)) {
+        RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin, comment.toString().trim(), action, null, null,
+            "COM".equals(admin.getReqStatus()));
+      }
+      RequestUtils.createCommentLogFromBatch(entityManager, BATCH_USER_ID, admin.getId().getReqId(), comment.toString().trim());
+
+      // only update Admin record once depending on the overall status of the
+      // request
+      LOG.debug("Updating Admin record for Request ID " + admin.getId().getReqId());
+      if (CmrConstants.RDC_STATUS_ABORTED.equals(resultCode) && CmrConstants.RDC_STATUS_ABORTED.equals(admin.getRdcProcessingStatus())) {
+        admin.setRdcProcessingStatus(CmrConstants.RDC_STATUS_NOT_COMPLETED);
+      } else {
+        admin.setRdcProcessingStatus(resultCode);
+      }
+      admin.setRdcProcessingTs(SystemUtil.getCurrentTimestamp());
+      admin.setRdcProcessingMsg(response.getMsg());
+      updateEntity(admin, entityManager);
+      LOG.debug("Request ID " + admin.getId().getReqId() + " Status: " + admin.getRdcProcessingStatus() + " Message: " + admin.getRdcProcessingMsg());
+
+      partialCommit(entityManager);
+
+    } catch (Exception e) {
+      LOG.error("Error in processing Mass Change Request  " + admin.getId().getReqId(), e);
+      addError("Mass Change Request " + admin.getId().getReqId() + " Error: " + e.getMessage());
+    }
+
+  }
+
+  /**
+   * Processes Request Type 'M', 'D', 'R'
+   * 
+   * @param entityManager
+   * @param reqId
+   * @param cmrServiceInput
+   * @param batchAction
+   * @param currentRDCProcStat
+   * @throws JsonGenerationException
+   * @throws JsonMappingException
+   * @throws IOException
+   * @throws Exception
+   */
+  public void processMassChangesMulti(EntityManager entityManager, Admin admin, Data data)
+      throws JsonGenerationException, JsonMappingException, IOException, Exception {
+    // Create the request
+
+    long reqId = admin.getId().getReqId();
+    long iterationId = admin.getIterationId();
+    String processingStatus = admin.getRdcProcessingStatus();
+
+    MassUpdateServiceInput input = prepareMassChangeInput(entityManager, admin);
+
+    MassProcessRequest request = new MassProcessRequest();
+    // set the update mass record in request
+    if (input.getInputReqType() != null && (input.getInputReqType().equalsIgnoreCase("D") || input.getInputReqType().equalsIgnoreCase("R"))) {
+      request = prepareReactivateDelRequest(entityManager, admin, data, input);
+    } else {
+      request = prepareMassUpdateRequest(entityManager, admin, data, input);
+    }
+
+    int threads = 5;
+    String mcThreads = SystemParameters.getString("PROCESS.THREAD.COUNT");
+    if (!StringUtils.isBlank(mcThreads) && StringUtils.isNumeric(mcThreads)) {
+      threads = Integer.parseInt(mcThreads);
+    } else {
+      String threadCount = BatchUtil.getProperty("multithreaded.threadCount");
+      if (threadCount != null && StringUtils.isNumeric(threadCount)) {
+        threads = Integer.parseInt(threadCount);
+      }
+    }
+
+    LOG.debug("Worker threads to use: " + threads);
+    LOG.debug("Starting processing mass update at " + new Date());
+    LOG.debug("Number of records found: " + request.getRecords().size());
+    List<USMassUpdateWorker> workers = new ArrayList<USMassUpdateWorker>();
+
+    LinkedList<MassUpdateRecord> origList = new LinkedList<>();
+    origList.addAll(request.getRecords());
+
+    List<List<MassUpdateRecord>> allocated = allocateRequests(origList, threads);
+
+    LOG.debug("Allocations: ");
+    for (List<MassUpdateRecord> list : allocated) {
+      LOG.debug(" - " + list.size() + " records");
+    }
+    ExecutorService executor = Executors.newFixedThreadPool(threads, new WorkerThreadFactory("UpdateMulti"));
+    for (List<MassUpdateRecord> list : allocated) {
+      USMassUpdateWorker worker = new USMassUpdateWorker(list, reqId, request, data.getCmrIssuingCntry());
+      executor.execute(worker);
+      workers.add(worker);
+    }
+
+    executor.shutdown();
+    while (!executor.isTerminated()) {
+      try {
+        Thread.sleep(5000);
+      } catch (InterruptedException e) {
+        // noop
+      }
+    }
+    LOG.debug("Mass update processing finished at " + new Date());
+
+    MassProcessResponse response = new MassProcessResponse();
+    response.setMandt(request.getMandt());
+    response.setReqId(reqId);
+    response.setReqType(request.getReqType());
+    response.setRecords(new ArrayList<ResponseRecord>());
+
+    for (USMassUpdateWorker worker : workers) {
+      if (worker != null) {
+        if (worker.getResponse().getRecords() != null) {
+          response.getRecords().addAll(worker.getResponse().getRecords());
+        }
+        String status = worker.getResponse().getStatus();
+        if (CmrConstants.RDC_STATUS_ABORTED.equals(status) || CmrConstants.RDC_STATUS_NOT_COMPLETED.equals(status)) {
+          response.setStatus(CmrConstants.RDC_STATUS_ABORTED);
+          response.setMsg(worker.getResponse().getMsg());
+        }
+      }
+    }
+    if (StringUtils.isBlank(response.getStatus())) {
+      response.setStatus(CmrConstants.RDC_STATUS_COMPLETED);
+    }
+
+    LOG.debug("Total records from response: " + response.getRecords().size());
     // try this
     // get the results from the service and process jason response
     try {
@@ -2329,5 +2533,52 @@ public class TransConnService extends BaseBatchService {
 
   public void setDeleteRDcTargets(boolean deleteRDcTargets) {
     this.deleteRDcTargets = deleteRDcTargets;
+  }
+
+  /**
+   * Distributes the requests evenly on lists that equate to the thread count
+   * 
+   * @param requests
+   * @param threadCount
+   * @return
+   */
+  private <T> List<List<T>> allocateRequests(Queue<T> requests, int threadCount) {
+    List<List<T>> lists = new ArrayList<List<T>>();
+    if (requests.size() < threadCount) {
+      for (int i = 0; i < threadCount; i++) {
+        T reqId = requests.poll();
+        if (reqId != null) {
+          lists.add(Collections.singletonList(reqId));
+        }
+      }
+    } else {
+      while (requests.peek() != null) {
+        for (int i = 0; i < threadCount; i++) {
+          if (lists.size() < threadCount) {
+            lists.add(new ArrayList<T>());
+          }
+          T reqId = requests.poll();
+          if (reqId != null) {
+            List<T> queueForThread = lists.get(i);
+            queueForThread.add(reqId);
+          }
+        }
+      }
+    }
+
+    return lists;
+  }
+
+  public boolean isMultiMode() {
+    return multiMode;
+  }
+
+  public void setMultiMode(boolean multiMode) {
+    this.multiMode = multiMode;
+  }
+
+  @Override
+  protected boolean terminateOnLongExecution() {
+    return !this.multiMode;
   }
 }

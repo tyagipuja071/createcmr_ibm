@@ -33,17 +33,18 @@ String processingType = PageManager.getProcessingType(reqentry.getCmrIssuingCntr
   <script src="${resourcesPath}/js/requestentry/contactinfo.js?${cmrv}" type="text/javascript"></script>
 </cmr:view>
 
+<!-- EMEA -->
 <cmr:view forGEO="EMEA">
-  <cmr:view forCountry="666">
-  <script src="${resourcesPath}/js/requestentry/validators/cy_validations.js?${cmrv}" type="text/javascript"></script>
-  </cmr:view>
   <cmr:view forCountry="862">
   <script src="${resourcesPath}/js/requestentry/validators/emea_validations_tr.js?${cmrv}" type="text/javascript"></script>
   </cmr:view>
   <cmr:view forCountry="726">
   <script src="${resourcesPath}/js/requestentry/validators/gr_validations.js?${cmrv}" type="text/javascript"></script>
   </cmr:view>
-  <cmr:view exceptForCountry="726,862,666">
+  <cmr:view forCountry="666">
+  <script src="${resourcesPath}/js/requestentry/validators/cy_validations.js?${cmrv}" type="text/javascript"></script>
+  </cmr:view>
+  <cmr:view exceptForCountry="726,666,862">
   <script src="${resourcesPath}/js/requestentry/validators/emea_validations.js?${cmrv}" type="text/javascript"></script>
   </cmr:view>
 </cmr:view>
@@ -125,3 +126,10 @@ String processingType = PageManager.getProcessingType(reqentry.getCmrIssuingCntr
   <script src="${resourcesPath}/js/requestentry/validators/ca_validations.js?${cmrv}" type="text/javascript"></script>
 </cmr:view>
 
+<cmr:view forCountry="858">
+  <script src="${resourcesPath}/js/requestentry/validators/tw_validations.js?${cmrv}" type="text/javascript"></script>
+</cmr:view>
+
+<cmr:view forCountry="766">
+  <script src="${resourcesPath}/js/requestentry/validators/kr_validations.js?${cmrv}" type="text/javascript"></script>
+</cmr:view>

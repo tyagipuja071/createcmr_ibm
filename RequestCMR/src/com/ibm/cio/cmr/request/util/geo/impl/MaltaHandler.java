@@ -25,6 +25,7 @@ import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.entity.CmrCloningQueue;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.listener.CmrContextListener;
@@ -1236,7 +1237,7 @@ public class MaltaHandler extends BaseSOFHandler {
   }
 
   @Override
-  public String getCMRNo(EntityManager rdcMgr, String kukla, String mandt, String katr6, String cmrNo) {
+  public String getCMRNo(EntityManager rdcMgr, String kukla, String mandt, String katr6, String cmrNo, CmrCloningQueue cloningQueue) {
     int minValue = 1;
     int maxValue = 899999;
 
@@ -1244,7 +1245,11 @@ public class MaltaHandler extends BaseSOFHandler {
     String loc2 = katr6;
 
     boolean internal = false;
-    if (cmrNo.startsWith("99"))
+    if ("11".equals(cloningQueue.getLastUpdtBy()) && cmrNo.startsWith("99")) {
+      LOG.debug("Skip setting of CMR No for Internal for CMR : " + cmrNo);
+    } else if (Arrays.asList("81", "85").contains(cloningQueue.getLastUpdtBy()) && !cmrNo.startsWith("99")) {
+      internal = true;
+    } else if (cmrNo.startsWith("99"))
       internal = true;
 
     if (internal) {

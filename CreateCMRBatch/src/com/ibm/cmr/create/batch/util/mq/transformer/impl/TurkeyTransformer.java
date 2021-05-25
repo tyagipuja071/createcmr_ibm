@@ -1104,7 +1104,6 @@ public class TurkeyTransformer extends EMEATransformer {
       legacyCust.setIbo(sbo);
       legacyCust.setCeBo(sbo);
     } else {
-      legacyCust.setSbo("");
       legacyCust.setIbo("");
       legacyCust.setCeBo("");
     }
