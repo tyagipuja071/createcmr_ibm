@@ -83,7 +83,7 @@
 					<width>20</width>
 					<length>6</length>
 				</column>
-				<column exactLength="true" number="true">
+				<column exactLength="true">
 					<label>A/C Admin DSC</label>
 					<dbColumn>SEARCH_TERM</dbColumn>
 					<width>10</width>
