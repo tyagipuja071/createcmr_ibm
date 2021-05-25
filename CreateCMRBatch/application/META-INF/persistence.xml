@@ -168,6 +168,10 @@
     <class>com.ibm.cio.cmr.request.entity.SizeinfoPK</class>
     <class>com.ibm.cio.cmr.request.entity.TransService</class>
     <class>com.ibm.cio.cmr.request.entity.TransServicePK</class>
+    <class>com.ibm.cio.cmr.request.entity.Changelog</class>
+    <class>com.ibm.cio.cmr.request.entity.ChangelogPK</class>
+    <class>com.ibm.cio.cmr.request.entity.Stxl</class>
+    <class>com.ibm.cio.cmr.request.entity.StxlPK</class>
 
     <properties>
 
