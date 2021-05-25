@@ -1736,19 +1736,21 @@ public class NORDXTransformer extends EMEATransformer {
       }
     }
 
-    int seqStartForRequiredAddr = 1;
-    for (int i = 0; i < addrList.size(); i++) {
-      Addr addr = addrList.get(i);
-      String addrSeq = addr.getId().getAddrSeq();
-      String addrType = addr.getId().getAddrType();
-
-      if (addrSeq.equals("1")) {
-
-        updateRequiredAddresses(entityManager, reqId, addrList.get(i).getId().getAddrType(), legacyAddrList.get(i).getId().getAddrNo(),
-            changeSeqNo(seqStartForRequiredAddr++), legacyObjects, i);
-      }
-
-    }
+    // int seqStartForRequiredAddr = 1;
+    // for (int i = 0; i < addrList.size(); i++) {
+    // Addr addr = addrList.get(i);
+    // String addrSeq = addr.getId().getAddrSeq();
+    // String addrType = addr.getId().getAddrType();
+    //
+    // if (addrSeq.equals("1")) {
+    //
+    // updateRequiredAddresses(entityManager, reqId,
+    // addrList.get(i).getId().getAddrType(),
+    // legacyAddrList.get(i).getId().getAddrNo(),
+    // changeSeqNo(seqStartForRequiredAddr++), legacyObjects, i);
+    // }
+    //
+    // }
 
     String reqType = cmrObjects.getAdmin().getReqType();
     long requestId = cmrObjects.getAdmin().getId().getReqId();
