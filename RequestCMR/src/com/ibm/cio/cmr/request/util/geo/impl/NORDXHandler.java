@@ -1144,7 +1144,7 @@ public class NORDXHandler extends BaseSOFHandler {
 
               currCell = (XSSFCell) row.getCell(7);
               collection = validateColValFromCell(currCell);
-              if (!StringUtils.isBlank(collection) && !collection.matches("^[A-Za-z0-9]+$")) {
+              if (!StringUtils.isBlank(collection) && !(collection.matches("^[A-Za-z0-9]+$") || "@@@@@@".equals(collection))) {
                 LOG.trace("The row " + (row.getRowNum() + 1)
                     + ":Note that Collection code only accept AlphaNumeric. Please fix and upload the template again.");
                 error.addError((row.getRowNum() + 1), "Collection Code",
