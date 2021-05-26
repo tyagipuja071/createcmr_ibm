@@ -2199,9 +2199,9 @@ public class MEHandler extends BaseSOFHandler {
         }
         currCell = row.getCell(ordBlkIndex);
         String ordBlk = validateColValFromCell(currCell);
-        if (StringUtils.isNotBlank(ordBlk) && !("@".equals(ordBlk) || "E".equals(ordBlk) || "S".equals(ordBlk))) {
+        if (StringUtils.isNotBlank(ordBlk) && !("@".equals(ordBlk) || "J".equals(ordBlk) || "E".equals(ordBlk) || "S".equals(ordBlk))) {
           LOG.trace("Order Block Code should only @, E, R. >> ");
-          error.addError(rowIndex, "Order Block Code", "Order Block Code should be only @, E, S. ");
+          error.addError(rowIndex, "Order Block Code", "Order Block Code should be only @, E, S, J. ");
           validations.add(error);
         }
       }
