@@ -252,6 +252,8 @@ public class CNHandler extends GEOHandler {
       if ("DRA".equalsIgnoreCase(admin.getReqStatus())) {
         if (data.getCustSubGrp() != null && "AQSTN".equals(data.getCustSubGrp())) {
           data.setRdcComment("Acquisition");
+        } else if (data.getCustSubGrp() != null && "PRIV".equals(data.getCustSubGrp())) {
+          data.setRdcComment("Private Person");
         } else {
           data.setRdcComment("");
         }
