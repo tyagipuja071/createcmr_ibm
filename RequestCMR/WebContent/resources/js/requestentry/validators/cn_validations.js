@@ -634,7 +634,7 @@ function setValuesForScenarios() {
         FormManager.readOnly('searchTerm');
         FormManager.resetValidations('isicCd');
       }
-      if (_custSubGrp == 'NRML' || _custSubGrp == 'INTER' || _custSubGrp == 'AQSTN' || _custSubGrp == 'EMBSA' || _custSubGrp == 'CROSS') {
+      if (_custSubGrp == 'NRML' || _custSubGrp == 'INTER' || _custSubGrp == 'AQSTN'|| _custSubGrp == 'PRIV' || _custSubGrp == 'EMBSA' || _custSubGrp == 'CROSS') {
         FormManager.hide('PPSCEID', 'ppsceid');
         FormManager.hide('MembLevel', 'memLvl');
         FormManager.hide('BPRelationType', 'bpRelType');
@@ -644,7 +644,7 @@ function setValuesForScenarios() {
         FormManager.show('BPRelationType', 'bpRelType');
       }
 
-      if (_custSubGrp == 'AQSTN' || _custSubGrp == 'CROSS') {
+      if (_custSubGrp == 'AQSTN'|| _custSubGrp == 'PRIV' || _custSubGrp == 'CROSS') {
         FormManager.resetValidations('cnCustName1');
         FormManager.resetValidations('cnAddrTxt');
         FormManager.resetValidations('cnCity');
@@ -652,7 +652,7 @@ function setValuesForScenarios() {
     }
 
     if (_pagemodel.userRole.toUpperCase() == "PROCESSOR") {
-      if (_custSubGrp == 'NRML' || _custSubGrp == 'AQSTN' || _custSubGrp == 'EMBSA' || _custSubGrp == 'CROSS' || _custSubGrp == 'MRKT' || _custSubGrp == 'BLUMX') {
+      if (_custSubGrp == 'NRML' || _custSubGrp == 'AQSTN'|| _custSubGrp == 'PRIV' || _custSubGrp == 'EMBSA' || _custSubGrp == 'CROSS' || _custSubGrp == 'MRKT' || _custSubGrp == 'BLUMX') {
         FormManager.setValue('custClass', '11');
         FormManager.readOnly('custClass');
       }
@@ -672,13 +672,17 @@ function setValuesForScenarios() {
       } else {
         FormManager.resetValidations('cnInterAddrKey');
       }
-      if (_custSubGrp == 'AQSTN' || _custSubGrp == 'EMBSA') {
+      if (_custSubGrp == 'AQSTN'|| _custSubGrp == 'PRIV' || _custSubGrp == 'EMBSA') {
         FormManager.addValidator('rdcComment', Validators.REQUIRED, [ 'RdcComment' ], '');
         if (_custSubGrp == 'EMBSA') {
           FormManager.setValue('rdcComment', 'For ESA Use Only');
         } else if (_custSubGrp == 'AQSTN') {
           if (FormManager.getActualValue('custSubGrp') != _pagemodel.custSubGrp) {
             FormManager.setValue('rdcComment', 'Acquisition');
+          }
+        } else if (_custSubGrp == 'PRIV') {
+          if (FormManager.getActualValue('custSubGrp') != _pagemodel.custSubGrp) {
+            FormManager.setValue('rdcComment', 'Private Person');
           }
         }
       } else if (_custSubGrp == 'MRKT') {
