@@ -556,7 +556,12 @@ public class MassCreateProcessMultiService extends MultiThreadedBatchService<Str
 
   @Override
   protected boolean terminateOnLongExecution() {
-    return false;
+    return true;
+  }
+
+  @Override
+  protected int getTerminatorWaitTime() {
+    return 180;
   }
 
 }
