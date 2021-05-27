@@ -311,7 +311,7 @@ public class MassCreateProcessMultiService extends MultiThreadedBatchService<Str
     PreparedQuery massCreatequery = new PreparedQuery(em, ExternalizedQuery.getSql(massCreteSql));
     massCreatequery.setParameter("REQ_ID", reqId);
     massCreatequery.setParameter("ITERATION_ID", itrId);
-    List<CompoundEntity> results = massCreatequery.getCompundResults(Admin.class, map);
+    List<CompoundEntity> resultsMain = massCreatequery.getCompundResults(Admin.class, map);
     MassCreate mass_create = null;
 
     List<String> resultCodes = new ArrayList<String>();
@@ -327,30 +327,44 @@ public class MassCreateProcessMultiService extends MultiThreadedBatchService<Str
         threads = Integer.parseInt(threadCount);
       }
     }
-
     LOG.debug("Worker threads to use: " + threads);
     LOG.debug("Starting processing mass create at " + new Date());
-    LOG.debug("Number of records found: " + results.size());
+    LOG.debug("Number of records found: " + resultsMain.size());
+
     List<MassCreateWorker> workers = new ArrayList<MassCreateWorker>();
-    ExecutorService executor = Executors.newFixedThreadPool(threads, new WorkerThreadFactory("MCWorker-" + reqId));
-    for (CompoundEntity entity : results) {
-      mass_create = entity.getEntity(MassCreate.class);
-      MassCreateWorker worker = new MassCreateWorker(em, mass_create, cmrServiceInput, itrId, cmrNoSapNoMap);
-      executor.execute(worker);
-      workers.add(worker);
-    }
-
-    executor.shutdown();
-    while (!executor.isTerminated()) {
-      try {
-        Thread.sleep(5000);
-      } catch (InterruptedException e) {
-        // noop
+    while (resultsMain.size() > 0) {
+      List<CompoundEntity> results = new LinkedList<CompoundEntity>();
+      for (int i = 0; i < 50; i++) {
+        if (resultsMain.size() > 0) {
+          results.add(resultsMain.remove(0));
+        } else {
+          break;
+        }
       }
-    }
-    LOG.debug("Mass create processing finished at " + new Date());
 
-    em.flush();
+      LOG.debug(" - Processing " + results.size() + " subrecords...");
+      ExecutorService executor = Executors.newFixedThreadPool(threads, new WorkerThreadFactory("MCWorker-" + reqId));
+      for (CompoundEntity entity : results) {
+        mass_create = entity.getEntity(MassCreate.class);
+        MassCreateWorker worker = new MassCreateWorker(em, mass_create, cmrServiceInput, itrId, cmrNoSapNoMap);
+        executor.execute(worker);
+        workers.add(worker);
+      }
+
+      executor.shutdown();
+      while (!executor.isTerminated()) {
+        try {
+          Thread.sleep(5000);
+        } catch (InterruptedException e) {
+          // noop
+        }
+      }
+
+      // execute flush every 50
+      em.flush();
+    }
+
+    LOG.debug("Mass create processing finished at " + new Date());
 
     for (MassCreateWorker worker : workers) {
       if (worker != null) {
