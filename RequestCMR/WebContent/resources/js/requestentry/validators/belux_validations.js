@@ -536,6 +536,40 @@ function setAbbrevNameLocn(cntry, addressMode, saving, finalSave, force) {
   }
 }
 
+function setAbbrevNameLocnProc(cntry, addressMode, saving, finalSave, force) {
+  if (typeof (_pagemodel) != 'undefined') {
+    reqType = FormManager.getActualValue('reqType');
+    role = _pagemodel.userRole;
+  }
+  if (reqType == 'U') {
+    return;
+  }
+  if (role != 'PROCESSOR') {
+    console.log("REQUESTER, return");
+    return;
+  }
+  if (finalSave || force || addressMode == 'ZS01') {
+    var copyTypes = document.getElementsByName('copyTypes');
+    var copyingToA = false;
+    if (copyTypes != null && copyTypes.length > 0) {
+      copyTypes.forEach(function(input, i) {
+        if (input.value == 'ZS01' && input.checked) {
+          copyingToA = true;
+        }
+      });
+    }
+    var addrType = FormManager.getActualValue('addrType');
+    var cmpnyName = FormManager.getActualValue('abbrevNm');
+    var city1 = FormManager.getActualValue('city1');
+    if (addrType == 'ZS01' || copyingToA) {
+      FormManager.setValue('abbrevNm', cmpnyName);
+      FormManager.setValue('abbrevLocn', city1);
+    }
+    FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
+    FormManager.removeValidator('abbrevLocn', Validators.REQUIRED);
+  }
+}
+
 /**
  * Lock Embargo Code field
  */
@@ -1717,6 +1751,7 @@ dojo.addOnLoad(function() {
   GEOHandler.enableCustomerNamesOnAddress(GEOHandler.BELUX);
   GEOHandler.enableCopyAddress(GEOHandler.BELUX, validateBELUXCopy, [ 'ZD01' ]);
 
+  GEOHandler.addAddrFunction(setAbbrevNameLocnProc, GEOHandler.BELUX);
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.BELUX);
   GEOHandler.addAfterConfig(addHandlersForBELUX, GEOHandler.BELUX);
   GEOHandler.addAfterConfig(setCollectionCodeValues, GEOHandler.BELUX);
