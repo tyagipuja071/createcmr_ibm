@@ -1476,7 +1476,7 @@ public class NORDXHandler extends BaseSOFHandler {
     if ("U".equals(admin.getReqType()) && "TREC".equals(admin.getReqReason())) {
       changeShareAddrFroTrce(entityManager, data.getId().getReqId(), SystemConfiguration.getValue("MANDT"), data.getCmrIssuingCntry(),
           data.getCmrNo());
-      updateChangeindToNForTrce(entityManager, data.getId().getReqId());
+      // updateChangeindToNForTrce(entityManager, data.getId().getReqId());
     }
   }
 
