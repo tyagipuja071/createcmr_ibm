@@ -60,9 +60,13 @@ public abstract class MultiThreadedBatchService<T> extends BaseBatchService {
     if (!StringUtils.isEmpty(terminatorMins) && StringUtils.isNumeric(terminatorMins)) {
       terminatorTime = Integer.parseInt(terminatorMins);
     }
+    if (getTerminatorWaitTime() > 0) {
+      terminatorTime = getTerminatorWaitTime();
+      LOG.debug("Terimator wait time indicated by batch: " + terminatorTime);
+    }
 
     if (terminateOnLongExecution()) {
-      LOG.info("Starting terminator thread..");
+      LOG.info("Starting terminator thread. Wait time: " + terminatorTime + " mins");
       this.terminator = new TerminatorThread(1000 * 60 * terminatorTime, entityManager);
       this.terminator.start();
     } else {

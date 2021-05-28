@@ -41,6 +41,8 @@ public class Stxl extends BaseEntity<StxlPK> implements Serializable {
    */
   private String clustd;
 
+  private String clustr;
+
   /**
    * Last updated date
    */
@@ -91,6 +93,14 @@ public class Stxl extends BaseEntity<StxlPK> implements Serializable {
 
   public void setSapTs(Date sapTs) {
     this.sapTs = sapTs;
+  }
+
+  public String getClustr() {
+    return clustr;
+  }
+
+  public void setClustr(String clustr) {
+    this.clustr = clustr;
   }
 
 }
