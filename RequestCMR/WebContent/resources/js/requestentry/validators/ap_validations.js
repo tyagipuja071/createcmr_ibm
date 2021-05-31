@@ -2985,6 +2985,40 @@ function validateGSTForIndia() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
+function lockFieldsForIndia(){
+  var reqType = FormManager.getActualValue('reqType');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  if(reqType != 'U' && role != 'REQUESTER'){
+    return;
+  }  
+  FormManager.readOnly('abbrevNm');
+  FormManager.readOnly('abbrevLocn');
+  FormManager.readOnly('custPrefLang');
+  FormManager.readOnly('subIndustryCd');
+  FormManager.readOnly('sensitiveFlag');
+  FormManager.readOnly('isicCd');
+  FormManager.readOnly('taxCd1');
+  FormManager.readOnly('cmrNo');
+  FormManager.readOnly('cmrOwner');
+  FormManager.readOnly('apCustClusterId');
+  FormManager.readOnly('clientTier');
+  FormManager.readOnly('isuCd');
+  FormManager.readOnly('mrcCd');
+  FormManager.readOnly('bpRelType');
+  FormManager.readOnly('busnType');
+  FormManager.readOnly('cmrNoPrefix');
+  FormManager.readOnly('collectionCd');
+  FormManager.readOnly('repTeamMemberNo');
+  FormManager.readOnly('miscBillCd');
+  FormManager.readOnly('inacType');
+  FormManager.readOnly('inacCd');
+  FormManager.readOnly('restrictInd');
+  FormManager.readOnly('govType');
+  FormManager.readOnly('repTeamMemberName');
+  FormManager.readOnly('covId');
+  FormManager.readOnly('dunsNo');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.AP = [ SysLoc.AUSTRALIA, SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE, SysLoc.VIETNAM,
       SysLoc.THAILAND, SysLoc.HONG_KONG, SysLoc.NEW_ZEALAND, SysLoc.LAOS, SysLoc.MACAO, SysLoc.MALASIA, SysLoc.NEPAL, SysLoc.CAMBODIA ];
@@ -3104,5 +3138,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(afterConfigForIndia, SysLoc.INDIA);
   GEOHandler.addAfterConfig(resetGstExempt, [ SysLoc.INDIA ]);
   GEOHandler.addAfterTemplateLoad(resetGstExempt, SysLoc.INDIA);
+  GEOHandler.addAfterConfig(lockFieldsForIndia, [ SysLoc.INDIA ]);
+
   
 });
