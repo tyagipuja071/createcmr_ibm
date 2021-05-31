@@ -550,7 +550,7 @@ var mubotyvalues = [];
 var postCdOld = '';
 function setMubotyOnPostalCodeIMS(postCd, subIndustryCd, clientTier) {
 
-  if (FormManager.getActualValue('reqType') != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true') {
+  if (FormManager.getActualValue('reqType') != 'C' || (cmr.currentRequestType != undefined && cmr.currentRequestType != 'C') || FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
   var role = FormManager.getActualValue('userRole').toUpperCase();
