@@ -610,10 +610,10 @@ function addGenericZIPValidator() {
         if (!cntry || cntry == '' || cntry.trim() == '' || (loc == '631' || loc == '815' || loc == '681' || loc == '781')) {
           return new ValidationResult(null, true);
         }
-        
-        if(cntry == 'LV'){
-          var postCd = FormManager.getActualValue('postCd');
-          
+        var postCd = FormManager.getActualValue('postCd');
+
+        console.log('Country: ' + cntry + ' Postal Code: ' + postCd);
+        if(cntry == 'LV') {
           if(postCd == ''){
             return new ValidationResult({
               id : 'postCd',
