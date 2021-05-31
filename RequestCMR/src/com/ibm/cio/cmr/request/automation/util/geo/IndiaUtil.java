@@ -231,7 +231,7 @@ public class IndiaUtil extends AutomationUtil {
     for (UpdatedDataModel change : changes.getDataUpdates()) {
       switch (change.getDataField()) {
 
-      case "GST #":
+      case "GST#":
         // For GST update, Match with DnB and API
         if (!StringUtils.isBlank(change.getNewData()) && !(change.getNewData().equals(change.getOldData()))) {
           // UPDATE
