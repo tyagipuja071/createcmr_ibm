@@ -1751,7 +1751,7 @@ dojo.addOnLoad(function() {
   GEOHandler.enableCustomerNamesOnAddress(GEOHandler.BELUX);
   GEOHandler.enableCopyAddress(GEOHandler.BELUX, validateBELUXCopy, [ 'ZD01' ]);
 
-  GEOHandler.addAddrFunction(setAbbrevNameLocnProc, GEOHandler.BELUX);
+  // GEOHandler.addAddrFunction(setAbbrevNameLocnProc, GEOHandler.BELUX);
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.BELUX);
   GEOHandler.addAfterConfig(addHandlersForBELUX, GEOHandler.BELUX);
   GEOHandler.addAfterConfig(setCollectionCodeValues, GEOHandler.BELUX);
