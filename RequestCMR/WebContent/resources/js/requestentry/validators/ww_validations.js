@@ -610,35 +610,58 @@ function addGenericZIPValidator() {
         if (!cntry || cntry == '' || cntry.trim() == '' || (loc == '631' || loc == '815' || loc == '681' || loc == '781')) {
           return new ValidationResult(null, true);
         }
-        var postCd = FormManager.getActualValue('postCd');
-
-        console.log('Country: ' + cntry + ' Postal Code: ' + postCd);
-
-        var result = cmr.validateZIP(cntry, postCd, loc);
-        if (result && !result.success) {
-          if (result.errorPattern == null) {
+        
+        if(cntry == 'LV'){
+          var postCd = FormManager.getActualValue('postCd');
+          
+          if(postCd == ''){
             return new ValidationResult({
               id : 'postCd',
               type : 'text',
               name : 'postCd'
-            }, false, (result.errorMessage ? result.errorMessage : 'Cannot get error message for Postal Code.') + '.');
-          } else {
-            var msg;
-
-            if (loc == '754' || loc == '866') {
-              msg = result.errorMessage + '. Please refer to info bubble for the correct format.';
-            } else {
-              msg = result.errorMessage + '. Format should be ' + result.errorPattern.formatReadable;
-            }
-
+            }, false, ('Postal Code for LV is required.'));
+          }
+          
+          if(!postCd.startsWith("LV-")){
             return new ValidationResult({
               id : 'postCd',
               type : 'text',
               name : 'postCd'
-            }, false, msg);
+            }, false, ('Postal Code format should be LV-nnnn.'));
+          } else if(postCd.length != '7') {
+            return new ValidationResult({
+              id : 'postCd',
+              type : 'text',
+              name : 'postCd'
+            }, false, ('Postal Code format should be LV-nnnn.'));
           }
         } else {
-          return new ValidationResult(null, true);
+          var result = cmr.validateZIP(cntry, postCd, loc);
+          if (result && !result.success) {
+            if (result.errorPattern == null) {
+              return new ValidationResult({
+                id : 'postCd',
+                type : 'text',
+                name : 'postCd'
+              }, false, (result.errorMessage ? result.errorMessage : 'Cannot get error message for Postal Code.') + '.');
+            } else {
+              var msg;
+  
+              if (loc == '754' || loc == '866') {
+                msg = result.errorMessage + '. Please refer to info bubble for the correct format.';
+              } else {
+                msg = result.errorMessage + '. Format should be ' + result.errorPattern.formatReadable;
+              }
+  
+              return new ValidationResult({
+                id : 'postCd',
+                type : 'text',
+                name : 'postCd'
+              }, false, msg);
+            }
+          } else {
+            return new ValidationResult(null, true);
+          }
         }
       }
     };
