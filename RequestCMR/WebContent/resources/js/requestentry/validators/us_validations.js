@@ -59,6 +59,33 @@ function addInvoiceAddressLinesValidator() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
+function addCountyValidator() {
+      FormManager.addFormValidator((function() {
+        return {
+          validate : function() {
+            var reqType = FormManager.getActualValue('reqType');
+            var id = FormManager.getActualValue('reqId');
+            var county = FormManager.getActualValue('county');
+            if (typeof (_pagemodel) != 'undefined') {
+              if (reqType == 'U') {
+                var result = cmr.query('ADDRESS.GETCOUNTYFORJS', {
+                  REQ_ID : id,
+                  ADDR_TYPE : 'ZI01'
+                });
+                if (result.ret1 == "") {
+                  return new ValidationResult(null, false, 'County in Invoice-to address is required.');
+                } else {
+                  return new ValidationResult(null, true);
+                }
+              } else {
+                return new ValidationResult(null, true);
+              }
+            }
+          }
+        };
+      })(), null,'frmCMR');
+    }
+
 function addCreateByModelValidator() {
   FormManager.addFormValidator((function() {
     return {
@@ -338,6 +365,7 @@ function canRemoveAddress(value, rowIndex, grid) {
 dojo.addOnLoad(function() {
   console.log('adding US scripts...');
   GEOHandler.registerValidator(addInvoiceAddressLinesValidator, [ SysLoc.USA ], null, true);
+  GEOHandler.registerValidator(addCountyValidator, [ SysLoc.USA ], null, true);
   GEOHandler.registerValidator(addCreateByModelValidator, [ SysLoc.USA ], null, true);
   GEOHandler.registerValidator(addAddressRecordTypeValidator, [ SysLoc.USA ], null, true);
   GEOHandler.addAfterConfig(afterConfigForUS, [ SysLoc.USA ]);
