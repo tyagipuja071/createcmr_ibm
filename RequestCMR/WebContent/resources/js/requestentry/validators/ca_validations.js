@@ -149,6 +149,16 @@ function toggleAddrTypesForCA(cntry, addressMode, details) {
   }
 }
 
+function hideObsoleteAddressOption(cntry, addressMode, details) {
+  if (addressMode == 'newAddress' || addressMode == 'copyAddress') {
+    cmr.hideNode('radiocont_ZM01');
+    cmr.hideNode('radiocont_ZD02');
+    cmr.hideNode('radiocont_ZP08');
+    cmr.hideNode('radiocont_ZP09');
+
+  }
+}
+
 /**
  * Sets the default country to CA
  * 
@@ -164,17 +174,6 @@ function addCAAddressHandler(cntry, addressMode, saving) {
       FormManager.setValue('landCntry', 'CA');
     } else {
       FilteringDropdown['val_landCntry'] = null;
-    }
-  }
-
-  if (cmr.currentRequestType == 'U') {
-    cmr.hideNode('radiocont_ZS01');
-
-    // Some cmr's only has ZS01 so we will show invoice if not present
-    if (isAddressInGrid('ZI01')) {
-      cmr.hideNode('radiocont_ZI01');
-    } else {
-      cmr.showNode('radiocont_ZI01');
     }
   }
 }
@@ -633,7 +632,8 @@ dojo.addOnLoad(function() {
   console.log('adding CA scripts...');
 
   // validators - register one each
-  GEOHandler.registerValidator(addAddressRecordTypeValidator, [ SysLoc.CANADA ], null, true);
+  // GEOHandler.registerValidator(addAddressRecordTypeValidator, [ SysLoc.CANADA
+  // ], null, true);
   GEOHandler.registerValidator(addInacCdValidator, [ SysLoc.CANADA ], null, true);
   GEOHandler.registerValidator(addChangeNameAttachmentValidator, [ SysLoc.CANADA ], null, true);
   GEOHandler.registerValidator(addDPLCheckValidator, [ SysLoc.CANADA ], GEOHandler.ROLE_REQUESTER, true);
@@ -647,11 +647,14 @@ dojo.addOnLoad(function() {
   // functions on afterConfigForCA
   GEOHandler.addAfterConfig(afterConfigForCA, [ SysLoc.CANADA ]);
 
-  GEOHandler.addToggleAddrTypeFunction(toggleAddrTypesForCA, [ SysLoc.CANADA ]);
+  // GEOHandler.addToggleAddrTypeFunction(toggleAddrTypesForCA, [ SysLoc.CANADA
+  // ]);
   GEOHandler.addAddrFunction(addCAAddressHandler, [ SysLoc.CANADA ]);
   GEOHandler.enableCopyAddress(SysLoc.CANADA);
   GEOHandler.addAfterTemplateLoad(removeValidatorForOptionalFields, SysLoc.CANADA);
   GEOHandler.addAfterTemplateLoad(retainImportValues, SysLoc.CANADA);
   GEOHandler.addAfterTemplateLoad(toggleCATaxFields, SysLoc.CANADA);
   GEOHandler.addAfterTemplateLoad(setDefaultInvoiceCopies, SysLoc.CANADA);
+  GEOHandler.addToggleAddrTypeFunction(hideObsoleteAddressOption, [ SysLoc.CANADA ]);
+
 });

@@ -11,18 +11,22 @@
   RequestEntryModel reqentry = (RequestEntryModel) request.getAttribute("reqentry");
 %>
 <cmr:row topPad="10">
-  <cmr:column span="2">
+  <cmr:column span="4">
+
     <cmr:label fieldId="addrType">
       <cmr:fieldLabel fieldId="AddressType" />: 
           <cmr:delta text="-" id="delta-addrType" code="L" />
       <cmr:info text="${ui.info.addressType}" />
     </cmr:label>
     <div id="addrTypeCheckboxes" style="display: block">
-      <cmr:field fieldId="AddressTypeInput" id="addrType" path="addrType" />
+      <cmr:field fieldId="AddressTypeInput" id="addrType" path="addrType" breakAfter="6" />
     </div>
     <div id="addrTypeStaticText" style="display: none">ZS01</div>
   </cmr:column>
- </cmr:row>
+  <br>
+  <br>
+  <br>
+</cmr:row>
 
 <cmr:row>
   <cmr:column span="2">
