@@ -83,7 +83,10 @@ public class AutomationElementRegistry extends HashMap<String, Class<? extends A
   public static final String US_SOS_RPA_CHECK = "US_SOS_RPA_CHECK";
   //EMEA
   public static final String EMEA_ABBREV_CHECK = "EMEA_ABBREV_CHECK";
-  
+
+  // India
+  public static final String IN_GST_VALIDATION = "IN_GST_VALIDATION";
+
   private static AutomationElementRegistry registry = new AutomationElementRegistry();
 
   public static AutomationElementRegistry getInstance() {
