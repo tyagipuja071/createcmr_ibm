@@ -3175,12 +3175,24 @@ function addCmrNoValidatorForNordx() {
               }
             }
 
-            var results = cmr.query('GET.CMR_BY_CNTRY_CUSNO_SAPR3', {
+            var results1 = cmr.query('GET.CMR_BY_CNTRY_CUSNO_SAPR3', {
               CMRNO : cmrNo,
               CNTRY : cntry,
               MANDT : cmr.MANDT
             });
-            if (results.ret1 != null) {
+
+            var results2 = cmr.query('GET.CHECK_EXISTS_CMR_NO', {
+              CMR_NO : cmrNo,
+              CNTRY : cntry
+            });
+
+            if (results1.ret1 != null) {
+              return new ValidationResult({
+                id : 'cmrNo',
+                type : 'text',
+                name : 'cmrNo'
+              }, false, 'The CMR Number already exists.');
+            } else if (results2.ret1 != null) {
               return new ValidationResult({
                 id : 'cmrNo',
                 type : 'text',
