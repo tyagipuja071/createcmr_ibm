@@ -1577,9 +1577,9 @@ function actualRemoveAddr() {
   if (FormManager.getActualValue('cmrIssuingCntry') == '758' && cmr.removeDetails.remAddrType == 'ZS01') {
     setBlankAbbrevNmLocationIT();
   }
-  
+
   if (FormManager.getActualValue('cmrIssuingCntry') == '649' && cmr.removeDetails.remAddrType == 'ZS01') {
-	  clearCATaxFields();
+    clearCATaxFields();
   }
 }
 
@@ -1799,6 +1799,10 @@ function applyAddrChangesModal_onLoad() {
         if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZP01') {
           continue;
         }
+      }
+
+      if (SysLoc.CANADA == cntry && [ 'ZM01', 'ZD02', 'ZP08', 'ZP09' ].includes(type.ret1)) {
+        continue;
       }
 
       if (type.ret3 == cntry) {
