@@ -150,6 +150,7 @@ public class IndiaUtil extends AutomationUtil {
       RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
+    boolean cmdeReview = false;
     if (handlePrivatePersonRecord(entityManager, admin, output, validation, engineData)) {
       return true;
     }
@@ -188,6 +189,12 @@ public class IndiaUtil extends AutomationUtil {
                         + dnb.getDnbCountry() + "\n\n");
                   }
                 }
+
+                if (changes.getAddressChanges(addr.getId().getAddrType(), addr.getId().getAddrSeq()).contains("Customer Name")) {
+                  // send to CMDE
+                  cmdeReview = true;
+                  checkDetails.append("Customer Name has been updated.\n");
+                }
               } else {
                 checkDetails.append("Updates to non-address fields for " + addrType + "(" + addr.getId().getAddrSeq() + ") skipped in the checks.")
                     .append("\n");
@@ -205,6 +212,11 @@ public class IndiaUtil extends AutomationUtil {
       validation.setSuccess(false);
       validation.setMessage("Not Validated");
       engineData.addNegativeCheckStatus("_atCheckFailed", "Updates to addresses cannot be checked automatically.");
+    } else if (cmdeReview) {
+      engineData.addNegativeCheckStatus("_esDataCheckFailed", "Updates to one or more fields cannot be validated.");
+      checkDetails.append("Updates to one or more fields cannot be validated.\n");
+      validation.setSuccess(false);
+      validation.setMessage("Not Validated");
     } else {
       validation.setSuccess(true);
       validation.setMessage("Successful");
