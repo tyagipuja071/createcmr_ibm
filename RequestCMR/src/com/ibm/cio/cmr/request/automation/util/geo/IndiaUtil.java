@@ -14,6 +14,8 @@ import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
 
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
@@ -23,11 +25,18 @@ import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
+import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
+import com.ibm.cmr.services.client.AutomationServiceClient;
+import com.ibm.cmr.services.client.CmrServicesFactory;
+import com.ibm.cmr.services.client.ServiceClient.Method;
+import com.ibm.cmr.services.client.automation.AutomationResponse;
+import com.ibm.cmr.services.client.automation.in.GstLayerRequest;
+import com.ibm.cmr.services.client.automation.in.GstLayerResponse;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
@@ -305,4 +314,42 @@ public class IndiaUtil extends AutomationUtil {
     }
     return false;
   }
+
+  private boolean getGstMatches(long reqId, Addr addr, String vat) throws Exception {
+
+    LOG.debug("Validating GST# " + vat + " for country India");
+
+    String baseUrl = SystemConfiguration.getValue("CMR_SERVICES_URL");
+    AutomationServiceClient autoClient = CmrServicesFactory.getInstance().createClient(baseUrl, AutomationServiceClient.class);
+    autoClient.setReadTimeout(1000 * 60 * 5);
+    autoClient.setRequestMethod(Method.Get);
+
+    GstLayerRequest gstLayerRequest = new GstLayerRequest();
+    gstLayerRequest.setGst(vat);
+    gstLayerRequest.setCountry("IN");
+    gstLayerRequest.setName((StringUtils.isNotBlank(addr.getCustNm1()) ? addr.getCustNm1() : ""));
+    gstLayerRequest.setAddress((StringUtils.isNotBlank(addr.getAddrTxt()) ? addr.getAddrTxt() : "")
+        + (StringUtils.isNotBlank(addr.getAddrTxt2()) ? " " + addr.getAddrTxt2() : ""));
+    gstLayerRequest.setCity(addr.getCity1());
+    gstLayerRequest.setPostal(addr.getPostCd());
+
+    LOG.debug("Connecting to the GST Layer Service at " + baseUrl);
+    AutomationResponse<?> rawResponse = autoClient.executeAndWrap(AutomationServiceClient.IN_GST_SERVICE_ID, gstLayerRequest,
+        AutomationResponse.class);
+    ObjectMapper mapper = new ObjectMapper();
+    String json = mapper.writeValueAsString(rawResponse);
+    TypeReference<AutomationResponse<GstLayerResponse>> ref = new TypeReference<AutomationResponse<GstLayerResponse>>() {
+    };
+    AutomationResponse<GstLayerResponse> gstResponse = mapper.readValue(json, ref);
+    if (gstResponse != null && gstResponse.isSuccess()) {
+      if (gstResponse.getMessage().equals("Valid GST and Company Name entered on the Request")) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  }
+
 }
