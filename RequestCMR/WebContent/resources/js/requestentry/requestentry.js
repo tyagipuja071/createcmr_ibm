@@ -8,6 +8,7 @@
  * 
  */
 var CNTRY_LIST_FOR_INVALID_CUSTOMERS = [ '838', '866', '754' ];
+var comp_proof_IN= false;
 dojo.require("dojo.io.iframe");
 
 /**
@@ -127,11 +128,11 @@ function processRequestAction() {
   } else if (action == YourActions.Reject) {
     doYourAction();
 
-  } else if (action == YourActions.Send_for_Processing) {    
+  } else if (action == YourActions.Send_for_Processing) {
     var findDnbResult =  FormManager.getActualValue('findDnbResult');
     if (_pagemodel.approvalResult == 'Rejected') {
       cmr.showAlert('The request\'s approvals have been rejected. Please re-submit or override the rejected approvals. ');
-    } else if (FormManager.validate('frmCMR')) {
+    } else if (FormManager.validate('frmCMR') && !comp_proof_IN ) {
 			if(checkForConfirmationAttachments()){
 				showDocTypeConfirmDialog();
 			} else if(cmrCntry =='744' && checkIfDnBCheckReqForIndia() && findDnbResult == 'Accepted') {            
@@ -148,7 +149,12 @@ function processRequestAction() {
           cmr.showModal('addressVerificationModal');
         }
       }
-    } else {
+    } else if(comp_proof_IN && cmrCntry =='744' ){
+      if(checkIfDnBCheckReqForIndia() && findDnbResult == 'Accepted') {            
+                matchDnBForIndia();
+                    }
+                    }
+    else {
       cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
     }
 
@@ -1583,6 +1589,7 @@ function matchDnBForAutomationCountries() {
 }
 function matchDnBForIndia() {
   var reqId = FormManager.getActualValue('reqId');
+  var isicCd= FormManager.getActualValue('isicCd');
   console.log("Checking if the request matches D&B...");      
   var nm1 = _pagemodel.mainCustNm1 == null ? '' : _pagemodel.mainCustNm1;
   var nm2 = _pagemodel.mainCustNm2 == null ? '' : _pagemodel.mainCustNm2;
@@ -1597,7 +1604,8 @@ function matchDnBForIndia() {
         handleAs : 'json',
         method : 'GET',
         content : {
-          'reqId' : reqId
+          'reqId' : reqId,
+          'isicCd': isicCd
         },
         timeout : 50000,
         sync : false,
@@ -1605,13 +1613,26 @@ function matchDnBForIndia() {
           cmr.hideProgress();
           console.log(data);
           console.log(data.success);
-          console.log(data.match);       
+          console.log(data.match);                  
+          console.log(data.isicMatch);  
+          console.log(data.validate);     
           if (data && data.success) {
-            if (data.match) {
-              cmr.showModal('addressVerificationModal');
+            if (data.match && data.isicMatch) {
+             comp_proof_IN =true;   
+             checkDnBMatchingAttachmentValidator();
+            cmr.showModal('addressVerificationModal');
             }else {
-              cmr.showAlert("Please attach company proof as validation failed by Dnb.");
-              checkDnBMatchingAttachmentValidator();
+             
+             if (data.match && !data.isicMatch){
+                console.log("ISIC validation failed by Dnb.");
+                cmr.showAlert("Please attach company proof as ISIC validation failed by Dnb.");     
+           } else{   
+              console.log("Name/Address validation failed by dnb");
+              cmr.showAlert("Please attach company proof as Name/Address validation failed by Dnb.");
+              }
+                   if(!data.validate){
+                   checkDnBMatchingAttachmentValidator();
+                   }
             }
           } else {
             // continue
@@ -1718,17 +1739,13 @@ function checkDnBMatchingAttachmentValidator() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
-          // FOR India Temporary
-          var id = FormManager.getActualValue('reqId');
-          var ret = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
-            ID : id
-          });
-          if (ret == null || ret.ret1 == null) {
+          // FOR  Temporary India
+          if(!comp_proof_IN){
             return new ValidationResult(null, false, "You\'re obliged to provide either one of the following documentation as backup - "
                 + "client\'s official website, Secretary of State business registration proof, client\'s confirmation email and signed PO, attach it under the file content "
                 + "of <strong>Company Proof</strong>. Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.");
-          } else {
-            return new ValidationResult(null, true);
+          } else {         
+            return new ValidationResult(null, true);           
           }
       }
     };
