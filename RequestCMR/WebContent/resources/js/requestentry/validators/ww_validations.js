@@ -634,6 +634,15 @@ function addGenericZIPValidator() {
               type : 'text',
               name : 'postCd'
             }, false, ('Postal Code format should be LV-nnnn.'));
+          } else if(postCd.length == '7'){
+            var numPattern = /^[0-9]+$/;
+            if (!postCd.substr(3,7).match(numPattern)){
+              return new ValidationResult({
+                id : 'postCd',
+                type : 'text',
+                name : 'postCd'
+              }, false, ('Postal Code format should be LV-nnnn.'));
+            }
           }
         } else {
           var result = cmr.validateZIP(cntry, postCd, loc);
