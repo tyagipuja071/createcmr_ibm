@@ -2991,9 +2991,7 @@ function validateGSTForIndia() {
 function lockFieldsForIndia(){
   var reqType = FormManager.getActualValue('reqType');
   var role = FormManager.getActualValue('userRole').toUpperCase();
-  if(reqType != 'U' && role != 'REQUESTER'){
-    return;
-  }  
+  if(reqType == 'U' && role == 'REQUESTER'){
   FormManager.readOnly('abbrevNm');
   FormManager.readOnly('abbrevLocn');
   FormManager.readOnly('custPrefLang');
@@ -3003,15 +3001,27 @@ function lockFieldsForIndia(){
   FormManager.readOnly('taxCd1');
   FormManager.readOnly('cmrNo');
   FormManager.readOnly('cmrOwner');
+  FormManager.resetValidations('cmrOwner');
+
   FormManager.readOnly('apCustClusterId');
+  FormManager.resetValidations('apCustClusterId');
+
   FormManager.readOnly('clientTier');
+  FormManager.resetValidations('clientTier');
+
   FormManager.readOnly('isuCd');
   FormManager.readOnly('mrcCd');
   FormManager.readOnly('bpRelType');
   FormManager.readOnly('busnType');
+  FormManager.resetValidations('busnType');
+
   FormManager.readOnly('cmrNoPrefix');
   FormManager.readOnly('collectionCd');
+  FormManager.resetValidations('collectionCd');
+
   FormManager.readOnly('repTeamMemberNo');
+  FormManager.resetValidations('repTeamMemberNo');
+
   FormManager.readOnly('miscBillCd');
   FormManager.readOnly('inacType');
   FormManager.readOnly('inacCd');
@@ -3019,7 +3029,10 @@ function lockFieldsForIndia(){
   FormManager.readOnly('govType');
   FormManager.readOnly('repTeamMemberName');
   FormManager.readOnly('covId');
+  FormManager.resetValidations('covId');
+
   FormManager.readOnly('dunsNo');
+  }
 }
 
 dojo.addOnLoad(function() {
@@ -3142,6 +3155,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(resetGstExempt, [ SysLoc.INDIA ]);
   GEOHandler.addAfterTemplateLoad(resetGstExempt, SysLoc.INDIA);
   GEOHandler.addAfterConfig(lockFieldsForIndia, [ SysLoc.INDIA ]);
+  GEOHandler.addAfterTemplateLoad(lockFieldsForIndia, SysLoc.INDIA);
 
   
 });
