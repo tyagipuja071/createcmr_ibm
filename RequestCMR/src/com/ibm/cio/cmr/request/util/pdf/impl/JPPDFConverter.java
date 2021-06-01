@@ -83,6 +83,8 @@ public class JPPDFConverter extends DefaultPDFConverter {
     for (char charac : text.toCharArray()) {
       if (Character.UnicodeBlock.of(charac) == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS) {
         return "JAPANESE";
+      } else if (Character.UnicodeBlock.of(charac) == Character.UnicodeBlock.HALFWIDTH_AND_FULLWIDTH_FORMS) {
+        return "JAPANESE";
       }
     }
     return null;

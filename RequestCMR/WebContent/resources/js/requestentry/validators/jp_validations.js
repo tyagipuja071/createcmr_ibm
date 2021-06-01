@@ -2929,7 +2929,7 @@ function setAccountAbbNmOnAddrSaveUpdate() {
 function addLogicOnOfficeCdChange() {
   dojo.connect(FormManager.getField('salesBusOffCd'), 'onChange', function(value) {
     setINACCodeMandatory();
-    addJSICLogic();
+    // addJSICLogic();
     setClusterOnOfcdChange();
   });
 }
@@ -5408,7 +5408,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addDPLCheckValidatorJP, GEOHandler.JP, GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(addFailedDPLValidatorJP, GEOHandler.JP, null, true);
   GEOHandler.registerValidator(addINACValidator, GEOHandler.JP, null, true);
-  GEOHandler.registerValidator(ofcdJsicMismatchValidatorJP, GEOHandler.JP, GEOHandler.ROLE_REQUESTER, true);
+  // GEOHandler.registerValidator(ofcdJsicMismatchValidatorJP, GEOHandler.JP,
+  // GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(addressDuplicateValidator, GEOHandler.JP, null, true);
   GEOHandler.registerValidator(ROLValidatorForZC01, GEOHandler.JP, null, true);
 
