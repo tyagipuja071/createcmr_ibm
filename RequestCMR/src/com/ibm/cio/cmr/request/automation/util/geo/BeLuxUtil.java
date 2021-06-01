@@ -539,7 +539,7 @@ public class BeLuxUtil extends AutomationUtil {
             if ((addrType.equalsIgnoreCase(CmrConstants.RDC_INSTALL_AT) && soldToCustNm1.equalsIgnoreCase(installAtCustNm))
                 || (addrType.equalsIgnoreCase(CmrConstants.RDC_SHIP_TO) && "N".equals(addr.getImportInd()))) {
               LOG.debug("Checking duplicates for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
-              boolean duplicate = addressExists(entityManager, addr);
+              boolean duplicate = addressExists(entityManager, addr, requestData);
               if (duplicate) {
                 LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
                 duplicateDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");
