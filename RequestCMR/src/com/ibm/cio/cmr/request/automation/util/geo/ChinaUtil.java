@@ -48,6 +48,8 @@ public class ChinaUtil extends AutomationUtil {
   public static final String SCENARIO_LOCAL_NRML = "NRML";
   public static final String SCENARIO_LOCAL_PRIV = "PRIV";
 
+  private static final String IBM_China = "IBM China";
+
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
       CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO, CmrConstants.RDC_SECONDARY_SOLD_TO);
   private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Attention Person", "Phone #");
@@ -107,7 +109,12 @@ public class ChinaUtil extends AutomationUtil {
       }
       break;
     case SCENARIO_LOCAL_INTER:
-      String customerNameFull = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
+      String customerNameFull = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2()
+          : "" + (StringUtils.isNotBlank(zs01.getCustNm3()) ? " " + zs01.getCustNm3() : ""));
+      if (StringUtils.isNotBlank(customerNameFull) && !customerNameFull.contains(IBM_China)) {
+        details.append("English name should include 'IBM China'");
+      }
+
       return doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerNameFull, details, false, requestData);
 
     case SCENARIO_LOCAL_MRKT:
