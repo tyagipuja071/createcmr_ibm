@@ -304,7 +304,7 @@ public class GermanyUtil extends AutomationUtil {
     String mainStreetAddress1 = (StringUtils.isNotBlank(zs01.getAddrTxt()) ? zs01.getAddrTxt() : "").trim().toUpperCase();
     String mainCity = (StringUtils.isNotBlank(zs01.getCity1()) ? zs01.getCity1() : "").trim().toUpperCase();
     String mainPostalCd = (StringUtils.isNotBlank(zs01.getPostCd()) ? zs01.getPostCd() : "").trim();
-    String mainDept = (StringUtils.isNotBlank(zs01.getDept()) ? zs01.getDept() : "").trim();
+    String mainCustNm4 = (StringUtils.isNotBlank(zs01.getCustNm4()) ? zs01.getCustNm4() : "").trim();
     Iterator<Addr> it = requestData.getAddresses().iterator();
     boolean removed = false;
     details.append("Checking for duplicate address records - ").append("\n");
@@ -330,7 +330,7 @@ public class GermanyUtil extends AutomationUtil {
               .toUpperCase();
           if (custNm.equals(mainCustNm) && addr.getAddrTxt().trim().toUpperCase().equals(mainStreetAddress1)
               && addr.getCity1().trim().toUpperCase().equals(mainCity) && addr.getPostCd().trim().equals(mainPostalCd)
-              && addr.getDept().trim().toUpperCase().equals(mainDept)) {
+              && addr.getCustNm4().trim().toUpperCase().equals(mainCustNm4)) {
             details.append("Removing duplicate address record: " + addr.getId().getAddrType() + " from the request.").append("\n");
             Addr merged = entityManager.merge(addr);
             if (merged != null) {
