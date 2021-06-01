@@ -1388,6 +1388,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
         Scorecard scorecard = requestData.getScorecard();
         Addr zs01 = requestData.getAddress("ZS01");
         DnBMatchingResponse tradeStyleName = null;
+        boolean isicMatch = false;
         boolean checkTradestyleNames = ("R".equals(RequestUtils.getTradestyleUsage(entityManager, data.getCmrIssuingCntry()))
             || "O".equals(RequestUtils.getTradestyleUsage(entityManager, data.getCmrIssuingCntry())));
         MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, null, "ZS01");
@@ -1397,15 +1398,10 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
           if (response.getMatched() && (("Accepted".equals(scorecard.getFindDnbResult()) && !StringUtils.isBlank(requestData.getData().getDunsNo()))
               || "Rejected".equals(scorecard.getFindDnbResult()))) {
             for (DnBMatchingResponse record : response.getMatches()) {
-              boolean isicMatch = getDnBDetailsUI(record.getDunsNo()).getIbmIsic().equals(requestData.getData().getIsicCd());
-              if (record.getConfidenceCode() >= 8 && DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), zs01, admin, record, null, false, true)
-                  && SystemLocation.INDIA.equals(data.getCmrIssuingCntry())) {
-                if (isicMatch) {
-                  match = true;
-                  break;
-                }
-              } else if (record.getConfidenceCode() >= 8
-                  && DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), zs01, admin, record, null, false, true)) {
+              // ISIC on request is compared to IBM ISIC
+              isicMatch = getDnBDetailsUI(record.getDunsNo()).getIbmIsic().equals(model.getIsicCd());
+              log.debug("ISIC Match : " + isicMatch);
+              if (record.getConfidenceCode() >= 8 && DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), zs01, admin, record, null, false, true)) {
                 match = true;
                 break;
               } else if (checkTradestyleNames && record.getConfidenceCode() >= 8 && record.getTradeStyleNames() != null && tradeStyleName == null
@@ -1414,7 +1410,13 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
               }
             }
           }
+          if ( isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+            map.put("validate", true);
+          } else {
+            map.put("validate", false);
+          }
           map.put("match", match);
+          map.put("isicMatch", isicMatch);
           if (!match && tradeStyleName != null) {
             map.put("tradeStyleMatch", true);
             map.put("legalName", tradeStyleName.getDnbName());
@@ -1467,6 +1469,14 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       return data.getResults().get(0);
     }
     return null;
+  }
+
+  public static boolean isDnbOverrideAttachmentProvided(EntityManager entityManager, long reqId) {
+    String sql = ExternalizedQuery.getSql("QUERY.CHECK_DNB_MATCH_ATTACHMENT");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("ID", reqId);
+
+    return query.exists();
   }
 
   public FindCMRResultModel findSingleReactCMRs(String cmrNo, String cmrCntry, int i, String searchCntry) {

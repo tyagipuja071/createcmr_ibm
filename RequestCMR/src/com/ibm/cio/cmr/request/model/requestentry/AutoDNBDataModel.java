@@ -17,6 +17,7 @@ public class AutoDNBDataModel extends BaseModel {
   private String autoDnbImportedIndc;
   private String fullAddress;
   private String ibmIsic;
+  private String isicCd;
 
   public String getAutoDnbImportedIndc() {
     return autoDnbImportedIndc;
@@ -90,5 +91,13 @@ public class AutoDNBDataModel extends BaseModel {
 
   @Override
   public void addKeyParameters(ModelMap map) {
+  }
+
+  public String getIsicCd() {
+    return isicCd;
+  }
+
+  public void setIsicCd(String isicCd) {
+    this.isicCd = isicCd;
   }
 }
