@@ -288,7 +288,7 @@ public class UKIUtil extends AutomationUtil {
           if ("N".equals(addr.getImportInd())) {
             // new address
             if (CmrConstants.RDC_SHIP_TO.equals(addrType) || CmrConstants.RDC_SECONDARY_SOLD_TO.equals(addrType)) {
-              if (addressExists(entityManager, addr)) {
+              if (addressExists(entityManager, addr, requestData)) {
                 LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
                 checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");
                 resultCodes.add("R");
@@ -305,7 +305,7 @@ public class UKIUtil extends AutomationUtil {
                 billToName = getCustomerFullName(zs01);
               }
               if (installAtName.equals(billToName)) {
-                if (addressExists(entityManager, addr)) {
+                if (addressExists(entityManager, addr, requestData)) {
                   LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
                   checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");
                   resultCodes.add("R");
@@ -388,7 +388,7 @@ public class UKIUtil extends AutomationUtil {
   }
 
   @Override
-  public boolean addressExists(EntityManager entityManager, Addr addrToCheck) {
+  public boolean addressExists(EntityManager entityManager, Addr addrToCheck, RequestData requestData) {
 
     String sql = ExternalizedQuery.getSql("AUTO.UKI.CHECK_IF_ADDRESS_EXIST");
     PreparedQuery query = new PreparedQuery(entityManager, sql);

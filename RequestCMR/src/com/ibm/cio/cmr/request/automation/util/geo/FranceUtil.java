@@ -354,8 +354,7 @@ public class FranceUtil extends AutomationUtil {
       if (!FRANCE_SUBREGIONS.contains(addr.getLandCntry())) {
         details.append("Calculating Coverage using SIREN.").append("\n\n");
         String siren = StringUtils.isNotBlank(data.getTaxCd1())
-            ? (data.getTaxCd1().length() > 9 ? data.getTaxCd1().substring(0, 9) : data.getTaxCd1())
-            : "";
+            ? (data.getTaxCd1().length() > 9 ? data.getTaxCd1().substring(0, 9) : data.getTaxCd1()) : "";
         if (StringUtils.isNotBlank(siren)) {
           details.append("SIREN: " + siren).append("\n");
           List<CoverageContainer> coverages = covElement.computeCoverageFromRDCQuery(entityManager, "AUTO.COV.GET_COV_FROM_TAX_CD1", siren + "%",
@@ -810,7 +809,7 @@ public class FranceUtil extends AutomationUtil {
               engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_DNB_ORGID_VAL);
             }
             if (CmrConstants.RDC_SHIP_TO.equals(addrType)) {
-              if (addressExists(entityManager, addr)) {
+              if (addressExists(entityManager, addr, requestData)) {
                 LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
                 checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");
                 resultCodes.add("R");
@@ -828,7 +827,7 @@ public class FranceUtil extends AutomationUtil {
               }
 
               if (addrName.equals(soldToName)) {
-                if (addressExists(entityManager, addr)) {
+                if (addressExists(entityManager, addr, requestData)) {
                   LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
                   checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");
                   resultCodes.add("R");

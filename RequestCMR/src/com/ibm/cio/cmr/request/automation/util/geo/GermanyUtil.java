@@ -298,6 +298,8 @@ public class GermanyUtil extends AutomationUtil {
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {
     Data data = requestData.getData();
     Addr zs01 = requestData.getAddress("ZS01");
+    Admin admin = requestData.getAdmin();
+    boolean payGoAddredited = AutomationUtil.isPayGoAccredited(entityManager, admin.getSourceSystId());
     String custNm1 = StringUtils.isNotBlank(zs01.getCustNm1()) ? zs01.getCustNm1().trim() : "";
     String custNm2 = StringUtils.isNotBlank(zs01.getCustNm2()) ? zs01.getCustNm2().trim() : "";
     String mainCustNm = (custNm1 + (StringUtils.isNotBlank(custNm2) ? " " + custNm2 : "")).toUpperCase();
@@ -310,8 +312,8 @@ public class GermanyUtil extends AutomationUtil {
     details.append("Checking for duplicate address records - ").append("\n");
     while (it.hasNext()) {
       Addr addr = it.next();
-      if (!"ZS01".equals(addr.getId().getAddrType())) {
-        if (!"ZP01".equals(addr.getId().getAddrType())) {
+      if (!payGoAddredited) {
+        if (!"ZS01".equals(addr.getId().getAddrType())) {
           removed = true;
           String custNm = (addr.getCustNm1().trim() + (StringUtils.isNotBlank(addr.getCustNm2()) ? " " + addr.getCustNm2().trim() : ""))
               .toUpperCase();
@@ -324,19 +326,36 @@ public class GermanyUtil extends AutomationUtil {
             }
             it.remove();
           }
-        } else if ("ZP01".equals(addr.getId().getAddrType())) {
-          removed = true;
-          String custNm = (addr.getCustNm1().trim() + (StringUtils.isNotBlank(addr.getCustNm2()) ? " " + addr.getCustNm2().trim() : ""))
-              .toUpperCase();
-          if (custNm.equals(mainCustNm) && addr.getAddrTxt().trim().toUpperCase().equals(mainStreetAddress1)
-              && addr.getCity1().trim().toUpperCase().equals(mainCity) && addr.getPostCd().trim().equals(mainPostalCd)
-              && addr.getCustNm4().trim().toUpperCase().equals(mainCustNm4)) {
-            details.append("Removing duplicate address record: " + addr.getId().getAddrType() + " from the request.").append("\n");
-            Addr merged = entityManager.merge(addr);
-            if (merged != null) {
-              entityManager.remove(merged);
+        }
+      } else {
+        if (!"ZS01".equals(addr.getId().getAddrType())) {
+          if (!"ZP01".equals(addr.getId().getAddrType())) {
+            removed = true;
+            String custNm = (addr.getCustNm1().trim() + (StringUtils.isNotBlank(addr.getCustNm2()) ? " " + addr.getCustNm2().trim() : ""))
+                .toUpperCase();
+            if (custNm.equals(mainCustNm) && addr.getAddrTxt().trim().toUpperCase().equals(mainStreetAddress1)
+                && addr.getCity1().trim().toUpperCase().equals(mainCity) && addr.getPostCd().trim().equals(mainPostalCd)) {
+              details.append("Removing duplicate address record: " + addr.getId().getAddrType() + " from the request.").append("\n");
+              Addr merged = entityManager.merge(addr);
+              if (merged != null) {
+                entityManager.remove(merged);
+              }
+              it.remove();
             }
-            it.remove();
+          } else if ("ZP01".equals(addr.getId().getAddrType())) {
+            removed = true;
+            String custNm = (addr.getCustNm1().trim() + (StringUtils.isNotBlank(addr.getCustNm2()) ? " " + addr.getCustNm2().trim() : ""))
+                .toUpperCase();
+            if (custNm.equals(mainCustNm) && addr.getAddrTxt().trim().toUpperCase().equals(mainStreetAddress1)
+                && addr.getCity1().trim().toUpperCase().equals(mainCity) && addr.getPostCd().trim().equals(mainPostalCd)
+                && addr.getCustNm4().trim().toUpperCase().equals(mainCustNm4)) {
+              details.append("Removing duplicate address record: " + addr.getId().getAddrType() + " from the request.").append("\n");
+              Addr merged = entityManager.merge(addr);
+              if (merged != null) {
+                entityManager.remove(merged);
+              }
+              it.remove();
+            }
           }
         }
       }
@@ -630,7 +649,7 @@ public class GermanyUtil extends AutomationUtil {
 
       if (shipTo != null && (changes.isAddressChanged("ZD01") || isAddressAdded(shipTo))) {
         // Check If Address already exists on request
-        isShipToExistOnReq = addressExists(entityManager, shipTo);
+        isShipToExistOnReq = addressExists(entityManager, shipTo, requestData);
         if (isShipToExistOnReq) {
           detail.append("Ship To details provided matches an existing address.");
           validation.setMessage("ShipTo already exists");
@@ -647,7 +666,7 @@ public class GermanyUtil extends AutomationUtil {
 
       if (installAt != null && (changes.isAddressChanged("ZI01") || isAddressAdded(installAt))) {
         // Check If Address already exists on request
-        isInstallAtExistOnReq = addressExists(entityManager, installAt);
+        isInstallAtExistOnReq = addressExists(entityManager, installAt, requestData);
         if (isInstallAtExistOnReq) {
           detail.append("Install At details provided matches an existing address.");
           engineData.addRejectionComment("OTH", "Install At details provided matches an existing address.", "", "");
@@ -675,7 +694,7 @@ public class GermanyUtil extends AutomationUtil {
 
       if (billTo != null && (changes.isAddressChanged("ZP01") || isAddressAdded(billTo))) {
         // Check If Address already exists on request
-        isBillToExistOnReq = addressExists(entityManager, billTo);
+        isBillToExistOnReq = addressExists(entityManager, billTo, requestData);
         if (isBillToExistOnReq) {
           detail.append("Bill To details provided matches an existing address.");
           engineData.addRejectionComment("OTH", "Bill To details provided matches an existing address.", "", "");

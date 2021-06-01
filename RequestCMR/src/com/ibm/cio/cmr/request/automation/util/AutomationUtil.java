@@ -829,8 +829,9 @@ public abstract class AutomationUtil {
    * @param reqId
    * @return
    */
-  protected boolean addressExists(EntityManager entityManager, Addr addrToCheck) {
-
+  protected boolean addressExists(EntityManager entityManager, Addr addrToCheck, RequestData requestData) {
+    Admin admin = requestData.getAdmin();
+    boolean payGoAddredited = AutomationUtil.isPayGoAccredited(entityManager, admin.getSourceSystId());
     String sql = ExternalizedQuery.getSql("AUTO.CHECK_IF_ADDRESS_EXIST");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", addrToCheck.getId().getReqId());
@@ -883,6 +884,12 @@ public abstract class AutomationUtil {
       query.append(" and COUNTY= :COUNTY");
       query.setParameter("COUNTY", addrToCheck.getCounty());
     }
+    if (payGoAddredited) {
+      if (addrToCheck.getCustNm4() != null) {
+        query.append(" and CUST_NM4 = :CUST_NM4");
+        query.setParameter("CUST_NM4", addrToCheck.getCustNm4());
+      }
+    }
 
     return query.exists();
   }
@@ -896,6 +903,8 @@ public abstract class AutomationUtil {
    */
   protected boolean removeDuplicateAddresses(EntityManager entityManager, RequestData requestData, StringBuilder details) {
     Addr zs01 = requestData.getAddress("ZS01");
+    Admin admin = requestData.getAdmin();
+    boolean payGoAddredited = AutomationUtil.isPayGoAccredited(entityManager, admin.getSourceSystId());
     String mainStreetAddress1 = (StringUtils.isNotBlank(zs01.getAddrTxt()) ? zs01.getAddrTxt() : "").trim().toUpperCase();
     String mainCity = (StringUtils.isNotBlank(zs01.getCity1()) ? zs01.getCity1() : "").trim().toUpperCase();
     String mainPostalCd = (StringUtils.isNotBlank(zs01.getPostCd()) ? zs01.getPostCd() : "").trim();
@@ -905,8 +914,8 @@ public abstract class AutomationUtil {
     details.append("Checking for duplicate address records - ").append("\n");
     while (it.hasNext()) {
       Addr addr = it.next();
-      if (!"ZS01".equals(addr.getId().getAddrType())) {
-        if (!"ZP01".equals(addr.getId().getAddrType())) {
+      if (!payGoAddredited) {
+        if (!"ZS01".equals(addr.getId().getAddrType())) {
           if (compareCustomerNames(zs01, addr)
               && (StringUtils.isNotBlank(addr.getAddrTxt()) && addr.getAddrTxt().trim().toUpperCase().equals(mainStreetAddress1))
               && addr.getCity1().trim().toUpperCase().equals(mainCity) && addr.getPostCd().trim().equals(mainPostalCd)) {
@@ -918,18 +927,34 @@ public abstract class AutomationUtil {
             it.remove();
             removed = true;
           }
-        } else if ("ZP01".equals(addr.getId().getAddrType())) {
-          if (compareCustomerNames(zs01, addr)
-              && (StringUtils.isNotBlank(addr.getAddrTxt()) && addr.getAddrTxt().trim().toUpperCase().equals(mainStreetAddress1))
-              && addr.getCity1().trim().toUpperCase().equals(mainCity) && addr.getPostCd().trim().equals(mainPostalCd)
-              && addr.getCustNm4().trim().toUpperCase().equals(mainCustNm4)) {
-            details.append("Removing duplicate address record: " + addr.getId().getAddrType() + " from the request.").append("\n");
-            Addr merged = entityManager.merge(addr);
-            if (merged != null) {
-              entityManager.remove(merged);
+        }
+      } else {
+        if (!"ZS01".equals(addr.getId().getAddrType())) {
+          if (!"ZP01".equals(addr.getId().getAddrType())) {
+            if (compareCustomerNames(zs01, addr)
+                && (StringUtils.isNotBlank(addr.getAddrTxt()) && addr.getAddrTxt().trim().toUpperCase().equals(mainStreetAddress1))
+                && addr.getCity1().trim().toUpperCase().equals(mainCity) && addr.getPostCd().trim().equals(mainPostalCd)) {
+              details.append("Removing duplicate address record: " + addr.getId().getAddrType() + " from the request.").append("\n");
+              Addr merged = entityManager.merge(addr);
+              if (merged != null) {
+                entityManager.remove(merged);
+              }
+              it.remove();
+              removed = true;
             }
-            it.remove();
-            removed = true;
+          } else if ("ZP01".equals(addr.getId().getAddrType())) {
+            if (compareCustomerNames(zs01, addr)
+                && (StringUtils.isNotBlank(addr.getAddrTxt()) && addr.getAddrTxt().trim().toUpperCase().equals(mainStreetAddress1))
+                && addr.getCity1().trim().toUpperCase().equals(mainCity) && addr.getPostCd().trim().equals(mainPostalCd)
+                && addr.getCustNm4().trim().toUpperCase().equals(mainCustNm4)) {
+              details.append("Removing duplicate address record: " + addr.getId().getAddrType() + " from the request.").append("\n");
+              Addr merged = entityManager.merge(addr);
+              if (merged != null) {
+                entityManager.remove(merged);
+              }
+              it.remove();
+              removed = true;
+            }
           }
         }
       }
