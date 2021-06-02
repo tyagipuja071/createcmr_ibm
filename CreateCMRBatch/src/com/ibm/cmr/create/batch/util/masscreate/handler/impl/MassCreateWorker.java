@@ -187,6 +187,9 @@ public class MassCreateWorker implements Runnable {
             cretAddrEntity.setSapNo(record.getSapNo());
             this.entityManager.merge(cretAddrEntity);
           }
+          if (!cmrNoSapNoMap.containsKey(this.record.getCmrNo())) {
+            cmrNoSapNoMap.put(this.record.getCmrNo(), new ArrayList<String>());
+          }
           cmrNoSapNoMap.get(this.record.getCmrNo()).add(record.getSapNo());
         }
       }
@@ -226,7 +229,8 @@ public class MassCreateWorker implements Runnable {
       // this.entityManager.flush();
 
     } catch (Exception e) {
-      LOG.error("Error in processing Mass Create and Mass Create Addr Updates for Create Mass Request " + " [" + e.getMessage() + "]", e);
+      LOG.error("Error in processing Mass Create and Mass Create Addr Updates for Create Mass Request " + this.record.getId().getParReqId() + " Seq "
+          + this.record.getId().getSeqNo() + " [" + e.getMessage() + "]", e);
       this.error = true;
       this.errorMsg = e.getMessage();
     }
