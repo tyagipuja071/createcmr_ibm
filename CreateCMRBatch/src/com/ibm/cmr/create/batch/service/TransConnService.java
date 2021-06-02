@@ -1923,8 +1923,7 @@ public class TransConnService extends BaseBatchService {
           throw new Exception("Cannot process Propsect to Legal CMR conversion for Request ID " + reqId + ". Propsect CMR No. is missing.");
         }
         request.setProspectCMRNo(prospectCMR);
-        request.setSeqNo(!StringUtils.isEmpty((String) result[2]) ? (String) result[2] : "A");
-        // request.setSeqNo((String) result[2]);
+        request.setSeqNo((String) result[2]);
         // request.set
       }
     }
