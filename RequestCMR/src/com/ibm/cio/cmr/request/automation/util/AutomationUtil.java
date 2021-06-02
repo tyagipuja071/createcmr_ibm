@@ -884,7 +884,7 @@ public abstract class AutomationUtil {
       query.append(" and COUNTY= :COUNTY");
       query.setParameter("COUNTY", addrToCheck.getCounty());
     }
-    if (payGoAddredited) {
+    if (payGoAddredited && "ZP01".equals(addrToCheck.getId().getAddrType())) {
       if (addrToCheck.getCustNm4() != null) {
         query.append(" and CUST_NM4 = :CUST_NM4");
         query.setParameter("CUST_NM4", addrToCheck.getCustNm4());
