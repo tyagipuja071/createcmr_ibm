@@ -638,6 +638,7 @@ public class LegacyDirectService extends TransConnService {
               cExt.setItBillingName(StringUtils.isEmpty(abbrevName) ? "" : abbrevName);
               cExt.setItBillingStreet(StringUtils.isEmpty(streetAbbrev) ? "" : streetAbbrev);
               cExt.setItBillingCity(StringUtils.isEmpty(abbrevLoc) ? "" : abbrevLoc);
+              cExt.setUpdateTs(SystemUtil.getCurrentTimestamp());
               updateEntity(cExt, entityManager);
             }
 
@@ -674,6 +675,7 @@ public class LegacyDirectService extends TransConnService {
               cExt.setItBillingName(StringUtils.isEmpty(abbrevName) ? "" : abbrevName);
               cExt.setItBillingStreet(StringUtils.isEmpty(streetAbbrev) ? "" : streetAbbrev);
               cExt.setItBillingCity(StringUtils.isEmpty(abbrevLoc) ? "" : abbrevLoc);
+              cExt.setUpdateTs(SystemUtil.getCurrentTimestamp());
               updateEntity(cExt, entityManager);
             }
 
@@ -2095,6 +2097,7 @@ public class LegacyDirectService extends TransConnService {
    * @return
    * @throws Exception
    */
+  @Override
   public <T> T initEmpty(Class<T> entityClass) throws Exception {
     try {
       T object = entityClass.newInstance();
@@ -2121,6 +2124,7 @@ public class LegacyDirectService extends TransConnService {
    * @return
    * @throws Exception
    */
+  @Override
   public void capsAndFillNulls(Object entity, boolean capitalize) throws Exception {
     try {
       Class<?> entityClass = entity.getClass();
