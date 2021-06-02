@@ -51,7 +51,7 @@ import com.ibm.cmr.services.client.wtaas.WtaasQueryResponse;
 public abstract class APHandler extends GEOHandler {
 
   private static final Logger LOG = Logger.getLogger(APHandler.class);
-  private static final String[] AP_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "SearchTerm" };
+  private static final String[] AP_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "SearchTerm", "Transport Zone" };
   protected WtaasRecord currentRecord;
 
   @Override
