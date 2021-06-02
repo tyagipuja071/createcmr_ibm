@@ -36,10 +36,10 @@ function afterConfigForDE() {
     _deClientTierHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
       if (FormManager.getActualValue('reqType') == 'C') {
         setISUValues(value);
-      } 
-//      else if (FormManager.getActualValue('reqType') == 'U') {
-//        setISUValuesOnUpdate(value);
-//      }
+      }
+      // else if (FormManager.getActualValue('reqType') == 'U') {
+      // setISUValuesOnUpdate(value);
+      // }
     });
   }
 
@@ -182,7 +182,7 @@ function setISUValues(value) {
   } else if (_custSubGrp == 'CROSS' && _pagemodel.userRole.toUpperCase() != "PROCESSOR") {
     FormManager.readOnly('isuCd');
   }
-  //CREATCMR-710 Comments fix
+  // CREATCMR-710 Comments fix
   var role = FormManager.getActualValue('userRole').toUpperCase();
   if (reqType == 'C' && role == 'REQUESTER' && (_custSubGrp == 'GOVMT' || _custSubGrp == 'PRIPE')) {
     FormManager.readOnly('isuCd');
@@ -271,7 +271,8 @@ function ADDRESS_GRID_showCheck(value, rowIndex, grid) {
 
 function disableAutoProcForProcessor() {
   var _custSubGrp = FormManager.getActualValue('custSubGrp');
-  if (_pagemodel.userRole.toUpperCase() == "PROCESSOR" && FormManager.getActualValue('reqType') == 'C' && _custSubGrp != 'undefined' && _custSubGrp != '' && _custSubGrp == 'BUSPR') {
+  if (_pagemodel.userRole.toUpperCase() == "PROCESSOR" && FormManager.getActualValue('reqType') == 'C' && _custSubGrp != 'undefined'
+      && _custSubGrp != '' && _custSubGrp == 'BUSPR') {
     FormManager.show('DisableAutoProcessing', 'disableAutoProc');
     FormManager.enable('disableAutoProc');
     FormManager.getField('disableAutoProc').checked = false;
@@ -280,47 +281,48 @@ function disableAutoProcForProcessor() {
   }
 }
 
-//function setISUValuesOnUpdate(value) {
-//  var reqType = null;
-//  reqType = FormManager.getActualValue('reqType');
-//  if (reqType != 'U') {
-//    return;
-//  }
-//  if (!value) {
-//    value = FormManager.getField('clientTier');
-//  }
-//  if (!PageManager.isReadOnly()) {
-//    FormManager.enable('isuCd');
-//  }
-//  isuValues = null;
-//  if (value == '7') {
-//    isuValues = [ '5E', '31', '4A', '4F', '19', '04', '3T', '28', '5B', '8B', '21', '4D', '60' ];
-//  } else if (value == 'A' || value == '6') {
-//    isuValues = [ '34' ];
-//  } else if (value == 'B') {
-//    isuValues = [ '32' ];
-//  } else if (value == 'Z') {
-//    isuValues = [ '21' ];
-//  } else if (value == 'V') {
-//    isuValues = [ '34', '60' ];
-//  } else {
-//    if (PageManager.isReadOnly()) {
-//      FormManager.readOnly('isuCd');
-//    } else {
-//      FormManager.enable('isuCd');
-//    }
-//  }
+// function setISUValuesOnUpdate(value) {
+// var reqType = null;
+// reqType = FormManager.getActualValue('reqType');
+// if (reqType != 'U') {
+// return;
+// }
+// if (!value) {
+// value = FormManager.getField('clientTier');
+// }
+// if (!PageManager.isReadOnly()) {
+// FormManager.enable('isuCd');
+// }
+// isuValues = null;
+// if (value == '7') {
+// isuValues = [ '5E', '31', '4A', '4F', '19', '04', '3T', '28', '5B', '8B',
+// '21', '4D', '60' ];
+// } else if (value == 'A' || value == '6') {
+// isuValues = [ '34' ];
+// } else if (value == 'B') {
+// isuValues = [ '32' ];
+// } else if (value == 'Z') {
+// isuValues = [ '21' ];
+// } else if (value == 'V') {
+// isuValues = [ '34', '60' ];
+// } else {
+// if (PageManager.isReadOnly()) {
+// FormManager.readOnly('isuCd');
+// } else {
+// FormManager.enable('isuCd');
+// }
+// }
 //
-//  if (isuValues != null) {
-//    FormManager.limitDropdownValues(FormManager.getField('isuCd'), isuValues);
-//    if (isuValues.length == 1) {
-//      FormManager.setValue('isuCd', isuValues[0]);
-//      FormManager.readOnly('isuCd');
-//    }
-//  } else {
-//    FormManager.resetDropdownValues(FormManager.getField('isuCd'));
-//  }
-//}
+// if (isuValues != null) {
+// FormManager.limitDropdownValues(FormManager.getField('isuCd'), isuValues);
+// if (isuValues.length == 1) {
+// FormManager.setValue('isuCd', isuValues[0]);
+// FormManager.readOnly('isuCd');
+// }
+// } else {
+// FormManager.resetDropdownValues(FormManager.getField('isuCd'));
+// }
+// }
 
 function restrictNonSoldToAddress(cntry, addressMode, saving, finalSave, force) {
   var scenarioType = FormManager.getActualValue('custSubGrp');
@@ -406,7 +408,8 @@ function validateAddressTypeForScenario() {
             scenarioDesc = 'IBM Employee';
           }
           if (Number(count) >= 1) {
-            return new ValidationResult(null, false, 'Only Sold To Address is allowed for ' + scenarioDesc + ' scenario. Please remove other addresses.');
+            return new ValidationResult(null, false, 'Only Sold To Address is allowed for ' + scenarioDesc
+                + ' scenario. Please remove other addresses.');
           } else {
             return new ValidationResult(null, true);
           }
@@ -463,7 +466,8 @@ function setAbbrevNameDEUpdate(cntry, addressMode, saving, finalSave, force) {
     var currCustNm = FormManager.getActualValue('custNm1');
 
     var addrType = FormManager.getActualValue('addrType');
-    if ((zs01Reccount == '' || (zs01Reccount != '' && Number(zs01Reccount) == 0)) && (oldCustNm != undefined && oldCustNm != '' && currCustNm != '' && currCustNm != oldCustNm)) {
+    if ((zs01Reccount == '' || (zs01Reccount != '' && Number(zs01Reccount) == 0))
+        && (oldCustNm != undefined && oldCustNm != '' && currCustNm != '' && currCustNm != oldCustNm)) {
       FormManager.setValue('abbrevNm', FormManager.getActualValue('custNm1').substring(0, 30));
     }
   }
@@ -622,58 +626,55 @@ function isZD01OrZP01ExistOnCMR(addressType) {
 }
 
 function restrictDuplicateAddr(cntry, addressMode, saving, finalSave, force) {
-  FormManager.addFormValidator(
-      (function() {
-        return {
-          validate : function() {
-            var reqReason = FormManager.getActualValue('reqReason');
-            var addressType = FormManager.getActualValue('addrType');
-            if (addressType == 'ZP02' || addressType == 'ZD02') {
-              if (reqReason != 'IGF') {
-                return new ValidationResult(null, false, 'Request Reason should be IGF.');
-              }
-            }
-            var requestId = FormManager.getActualValue('reqId');
-            var addressSeq = FormManager.getActualValue('addrSeq');
-            var dummyseq = "xx";
-            var showDuplicateIGFBillToError = false;
-            var showDuplicateIGFInstallAtToError = false;
-            var qParams;
-            if (addressMode == 'updateAddress') {
-              qParams = {
-                REQ_ID : requestId,
-                ADDR_SEQ : addressSeq,
-                ADDR_TYPE : addressType
-              };
-            } else {
-              qParams = {
-                REQ_ID : requestId,
-                ADDR_SEQ : dummyseq,
-                ADDR_TYPE : addressType
-              };
-            }
-            var result = cmr.query('GETADDRECORDSBYTYPE', qParams);
-            var addCount = result.ret1;
-            if (addressType != undefined && addressType != '' && addressType == 'ZP02' && cmr.addressMode != 'updateAddress') {
-              showDuplicateIGFBillToError = Number(addCount) >= 1 && addressType == 'ZP02';
-              if (showDuplicateIGFBillToError) {
-                return new ValidationResult(null, false,
-                    'Only one IGF Bill-To address is allowed.');
-              }
-            }
-
-            if (addressType != undefined && addressType != '' && addressType == 'ZD02' && cmr.addressMode != 'updateAddress') {
-              showDuplicateIGFInstallAtToError = Number(addCount) >= 1 && addressType == 'ZD02';
-              if (showDuplicateIGFInstallAtToError) {
-                return new ValidationResult(null, false,
-                    'Only one IGF Ship-To address is allowed.');
-              }
-            }
-
-            return new ValidationResult(null, true);
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqReason = FormManager.getActualValue('reqReason');
+        var addressType = FormManager.getActualValue('addrType');
+        if (addressType == 'ZP02' || addressType == 'ZD02') {
+          if (reqReason != 'IGF') {
+            return new ValidationResult(null, false, 'Request Reason should be IGF.');
           }
-        };
-      })(), null, 'frmCMR_addressModal');
+        }
+        var requestId = FormManager.getActualValue('reqId');
+        var addressSeq = FormManager.getActualValue('addrSeq');
+        var dummyseq = "xx";
+        var showDuplicateIGFBillToError = false;
+        var showDuplicateIGFInstallAtToError = false;
+        var qParams;
+        if (addressMode == 'updateAddress') {
+          qParams = {
+            REQ_ID : requestId,
+            ADDR_SEQ : addressSeq,
+            ADDR_TYPE : addressType
+          };
+        } else {
+          qParams = {
+            REQ_ID : requestId,
+            ADDR_SEQ : dummyseq,
+            ADDR_TYPE : addressType
+          };
+        }
+        var result = cmr.query('GETADDRECORDSBYTYPE', qParams);
+        var addCount = result.ret1;
+        if (addressType != undefined && addressType != '' && addressType == 'ZP02' && cmr.addressMode != 'updateAddress') {
+          showDuplicateIGFBillToError = Number(addCount) >= 1 && addressType == 'ZP02';
+          if (showDuplicateIGFBillToError) {
+            return new ValidationResult(null, false, 'Only one IGF Bill-To address is allowed.');
+          }
+        }
+
+        if (addressType != undefined && addressType != '' && addressType == 'ZD02' && cmr.addressMode != 'updateAddress') {
+          showDuplicateIGFInstallAtToError = Number(addCount) >= 1 && addressType == 'ZD02';
+          if (showDuplicateIGFInstallAtToError) {
+            return new ValidationResult(null, false, 'Only one IGF Ship-To address is allowed.');
+          }
+        }
+
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
 }
 
 function unlockCustGrpSubGrp() {
@@ -766,12 +767,13 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(autoSetIBMDeptCostCenter, GEOHandler.DE);
   GEOHandler.addAfterTemplateLoad(disableVatExemptForScenarios, GEOHandler.DE);
   GEOHandler.addAfterTemplateLoad(setPrivacyIndcReqdForProc, GEOHandler.DE);
-//  GEOHandler.addAfterTemplateLoad(limitClientTierValuesOnCreate, GEOHandler.DE);
+  // GEOHandler.addAfterTemplateLoad(limitClientTierValuesOnCreate,
+  // GEOHandler.DE);
   GEOHandler.setRevertIsicBehavior(false);
   GEOHandler.addAfterTemplateLoad(setISUValues, GEOHandler.DE);
   GEOHandler.addAfterTemplateLoad(disableAutoProcForProcessor, GEOHandler.DE);
-//  GEOHandler.addAfterConfig(limitClientTierValuesOnUpdate, GEOHandler.DE);
-//  GEOHandler.addAfterConfig(setISUValuesOnUpdate, GEOHandler.DE);
+  // GEOHandler.addAfterConfig(limitClientTierValuesOnUpdate, GEOHandler.DE);
+  // GEOHandler.addAfterConfig(setISUValuesOnUpdate, GEOHandler.DE);
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.GERMANY, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.GERMANY ], null, true);
   GEOHandler.addAfterConfig(defaultCapIndicator, SysLoc.GERMANY);
   GEOHandler.addAfterConfig(disableAutoProcForProcessor, GEOHandler.DE);
@@ -787,5 +789,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(restrictDuplicateAddr, GEOHandler.DE, null, true);
   GEOHandler.addAfterConfig(lockIBMTabForDE, GEOHandler.DE);
   GEOHandler.addAfterTemplateLoad(lockIBMTabForDE, GEOHandler.DE);
+  GEOHandler.registerValidator(validateDeptAttnBldg, GEOHandler.DE, null, true);
   GEOHandler.addAfterConfig(setAddressDetailsForView, SysLoc.GERMANY);
 });
