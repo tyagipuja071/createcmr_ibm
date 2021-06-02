@@ -40,36 +40,54 @@
       <cmr:column span="1" width="127">
       </cmr:column>
       <cmr:column span="1" width="130">
-        <label><cmr:fieldLabel fieldId="CollectionCd" />: </label>
+        <label><cmr:fieldLabel fieldId="EmbargoCode" />: </label>
       </cmr:column>
       <cmr:column span="1" width="240">
-          ${summary.data.collectionCd}
+        ${summary.data.embargoCd}
       </cmr:column>
+      <!-- 
       <cmr:column span="1" width="130">
-        <label><cmr:fieldLabel fieldId="LocalTax1" />: </label>
+        <label><cmr:fieldLabel fieldId="ModeOfPayment" />: </label>
       </cmr:column>
       <cmr:column span="1" width="200">
-        ${summary.data.taxCd1}
+        ${summary.data.modeOfPayment}
       </cmr:column>
+       -->
     </cmr:row>
   </cmr:view>
-
+  
   <cmr:view>
     <cmr:row addBackground="true">
       <cmr:column span="1" width="127">
       </cmr:column>
+      <!-- 
       <cmr:column span="1" width="130">
-        <label><cmr:fieldLabel fieldId="ModeOfPayment" />:</label>
+        <label><cmr:fieldLabel fieldId="CollectionCd" />: </label>
       </cmr:column>
       <cmr:column span="1" width="240">
-      ${summary.data.phone1}
-    </cmr:column>
+          ${summary.data.collectionCd}
+      </cmr:column> -->
       <cmr:column span="1" width="130">
-        <label><cmr:fieldLabel fieldId="EmbargoCode" />: </label>
+        <label><cmr:fieldLabel fieldId="LocalTax1" />: </label>
       </cmr:column>
-      <cmr:column span="1" width="200">
-        ${summary.data.embargoCd}
+      <cmr:column span="1" width="240">
+        ${summary.data.taxCd1}
       </cmr:column>
+      <%
+        String[] custClassArray = {"CBCOM", "DKCOM", "FOCOM", "GLCOM", "ISCOM", "FICOM", "EECOM", "LTCOM", "LVCOM", "COMME", "CBBUS", "DKBUS", "FOBUS", "GLBUS", "ISBUS", "FIBUS", "EEBUS", "LTBUS", "LVBUS", "BUSPR"};
+        for (String str : custClassArray) {
+          if(str.equals(data.getCustSubGrp())){
+      %>
+	      <cmr:column span="1" width="130">
+	        <label><cmr:fieldLabel fieldId="CustClass" />: </label>
+	      </cmr:column>
+	      <cmr:column span="1" width="200">
+	        ${summary.data.custClass}
+	      </cmr:column>
+      <%
+          }
+        }
+      %>
     </cmr:row>
   </cmr:view>
 

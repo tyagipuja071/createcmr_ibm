@@ -119,20 +119,19 @@
         </p>
       </cmr:column>
     </cmr:view>
-
-    <cmr:column span="2" containerForField="Subindustry">
-      <p>
-        <cmr:label fieldId="subIndustryCd">
-          <cmr:fieldLabel fieldId="Subindustry" />:
-            <cmr:delta text="${rdcdata.subIndustryCd}" oldValue="${reqentry.subIndustryCd}" code="L" />
-        </cmr:label>
-        <cmr:field path="subIndustryCd" id="subIndustryCd" fieldId="Subindustry" tabId="MAIN_CUST_TAB" size="500" placeHolder="Select Subindustry" />
-      </p>
-    </cmr:column>
-  </cmr:row>
-
-  <cmr:row>
-    <cmr:view exceptForCountry="643,749,778,818,834,852,856,646,714,720,760,706,858,766">
+    
+    <cmr:view forGEO="NORDX">
+      <cmr:column span="2" containerForField="CurrencyCd">
+        <p>
+          <cmr:label fieldId="currencyCd">
+            <cmr:fieldLabel fieldId="CurrencyCd" />:
+          </cmr:label>
+          <cmr:field path="currencyCd" id="currencyCd" fieldId="CurrencyCd" tabId="MAIN_CUST_TAB" />
+        </p>
+      </cmr:column>
+    </cmr:view>
+    
+    <cmr:view forGEO="NORDX">
       <cmr:column span="2" containerForField="SensitiveFlag">
         <p>
           <cmr:label fieldId="sensitiveFlag">
@@ -140,6 +139,43 @@
              <cmr:delta text="${rdcdata.sensitiveFlag}" oldValue="${reqentry.sensitiveFlag}" />
           </cmr:label>
           <cmr:field path="sensitiveFlag" id="sensitiveFlag" fieldId="SensitiveFlag" tabId="MAIN_CUST_TAB" />
+        </p>
+      </cmr:column>
+    </cmr:view>
+    <cmr:view exceptForGEO="NORDX">
+      <cmr:column span="2" containerForField="Subindustry">
+        <p>
+          <cmr:label fieldId="subIndustryCd">
+            <cmr:fieldLabel fieldId="Subindustry" />:
+              <cmr:delta text="${rdcdata.subIndustryCd}" oldValue="${reqentry.subIndustryCd}" code="L" />
+          </cmr:label>
+          <cmr:field path="subIndustryCd" id="subIndustryCd" fieldId="Subindustry" tabId="MAIN_CUST_TAB" size="500" placeHolder="Select Subindustry" />
+        </p>
+      </cmr:column>
+    </cmr:view>
+    
+  </cmr:row>
+
+  <cmr:row>
+    <cmr:view exceptForCountry="643,749,778,818,834,852,856,646,714,720,760,706,678,702,806,846,858,766">
+      <cmr:column span="2" containerForField="SensitiveFlag">
+        <p>
+          <cmr:label fieldId="sensitiveFlag">
+            <cmr:fieldLabel fieldId="SensitiveFlag" />:
+             <cmr:delta text="${rdcdata.sensitiveFlag}" oldValue="${reqentry.sensitiveFlag}" />
+          </cmr:label>
+          <cmr:field path="sensitiveFlag" id="sensitiveFlag" fieldId="SensitiveFlag" tabId="MAIN_CUST_TAB" />
+        </p>
+      </cmr:column>
+    </cmr:view>
+    <cmr:view forGEO="NORDX">
+      <cmr:column span="4" containerForField="Subindustry">
+        <p>
+          <cmr:label fieldId="subIndustryCd">
+            <cmr:fieldLabel fieldId="Subindustry" />:
+              <cmr:delta text="${rdcdata.subIndustryCd}" oldValue="${reqentry.subIndustryCd}" code="L" />
+          </cmr:label>
+          <cmr:field path="subIndustryCd" id="subIndustryCd" fieldId="Subindustry" tabId="MAIN_CUST_TAB" size="500" placeHolder="Select Subindustry" />
         </p>
       </cmr:column>
     </cmr:view>
@@ -167,8 +203,8 @@
         </label>
         <cmr:field path="isicCd" id="isicCd" fieldId="ISIC" tabId="MAIN_CUST_TAB" size="500" />
       </p>
-
     </cmr:column>
+    
   </cmr:row>
 
   <cmr:row addBackground="true">
@@ -266,21 +302,71 @@
               <cmr:info text="${ui.info.vATFR}" />
             </cmr:view> <cmr:view forCountry="618">
               <cmr:info text="${ui.info.vatAT}" />
-            </cmr:view> <cmr:view forCountry="846">
+            </cmr:view> <!--<cmr:view forCountry="846">
               <cmr:info text="${ui.info.vatSE}" />
-            </cmr:view> <cmr:view forCountry="702">
+            </cmr:view>--> <!--<cmr:view forCountry="702">
               <cmr:info text="${ui.info.vatFIN}" />
-            </cmr:view> <cmr:view forCountry="678">
+            </cmr:view>--> <!--<cmr:view forCountry="678">
               <cmr:info text="${ui.info.vatDEN}" />
-            </cmr:view> <cmr:view forCountry="806">
+            </cmr:view>--> <!-- <cmr:view forCountry="806">
               <cmr:info text="${ui.info.vatNO}" />
-             </cmr:view><cmr:view forCountry="788">
+             </cmr:view>--> <cmr:view forCountry="788">
               <cmr:info text="${ui.info.vatNL}" />
              </cmr:view> <cmr:view forCountry="624">
              <a id = 'vatInfoBubble'>
                 <cmr:info text="${ui.info.vatBELUX}" />
                 </a>
               </cmr:view>
+              <c:if test="${reqentry.countryUse == '678'}">
+                <span id="vatInfoBubble">
+                  <cmr:info text="${ui.info.NordicsForDKVat}" />
+                </span>
+              </c:if>
+              <c:if test="${reqentry.countryUse == '678GL'}">
+                <span id="vatInfoBubble">
+                  <cmr:info text="${ui.info.NordicsForGLVat}" />
+                </span>
+              </c:if>
+              <c:if test="${reqentry.countryUse == '678FO'}">
+                <span id="vatInfoBubble">
+                  <cmr:info text="${ui.info.NordicsForFOVat}" />
+                </span>
+              </c:if>
+              <c:if test="${reqentry.countryUse == '678IS'}">
+                <span id="vatInfoBubble">
+                  <cmr:info text="${ui.info.NordicsForISVat}" />
+                </span>
+              </c:if>
+              <c:if test="${reqentry.countryUse == '702'}">
+                <span id="vatInfoBubble">
+                  <cmr:info text="${ui.info.NordicsForFIVat}" />
+                </span>
+              </c:if>
+              <c:if test="${reqentry.countryUse == '702LV'}">
+                <span id="vatInfoBubble">
+                  <cmr:info text="${ui.info.NordicsForLVVat}" />
+                </span>
+              </c:if>
+              <c:if test="${reqentry.countryUse == '702LT'}">
+                <span id="vatInfoBubble">
+                  <cmr:info text="${ui.info.NordicsForLTVat}" />
+                </span>
+              </c:if>
+              <c:if test="${reqentry.countryUse == '702EE'}">
+                <span id="vatInfoBubble">
+                  <cmr:info text="${ui.info.NordicsForEEVat}" />
+                </span>
+              </c:if>
+              <c:if test="${reqentry.cmrIssuingCntry == '806'}">
+                <span id="vatInfoBubble">
+                  <cmr:info text="${ui.info.NordicsForNOVat}" />
+                </span>
+              </c:if>
+              <c:if test="${reqentry.cmrIssuingCntry == '846'}">
+                <span id="vatInfoBubble">
+                  <cmr:info text="${ui.info.NordicsForSEVat}" />
+                </span>
+              </c:if>
           </label>
           <cmr:field path="vat" id="vat" fieldId="VAT" tabId="MAIN_CUST_TAB" />
         </p>

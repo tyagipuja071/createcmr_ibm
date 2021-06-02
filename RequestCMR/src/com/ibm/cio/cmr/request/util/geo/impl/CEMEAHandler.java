@@ -1212,7 +1212,6 @@ public class CEMEAHandler extends BaseSOFHandler {
     }
     return ke;
   }
-
   @Override
   public int getName2Length() {
     return 35;
@@ -1283,7 +1282,7 @@ public class CEMEAHandler extends BaseSOFHandler {
         }
       }
     }
-  }
+    }
 
   @Override
   public void setAdminDefaultsOnCreate(Admin admin) {
