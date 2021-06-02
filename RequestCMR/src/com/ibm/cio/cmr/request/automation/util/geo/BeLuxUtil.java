@@ -520,7 +520,7 @@ public class BeLuxUtil extends AutomationUtil {
               }
               if (!matchesDnb) {
                 LOG.debug("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
-                resultCodes.add("R");
+                resultCodes.add("X");
                 checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
               } else {
                 checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
@@ -554,12 +554,16 @@ public class BeLuxUtil extends AutomationUtil {
         }
       }
     }
-    if (resultCodes.contains("R")) {
+    if (resultCodes.contains("X")) {     
+        validation.setSuccess(false);
+        validation.setMessage("Review Required.");
+        engineData.addNegativeCheckStatus("_esCheckFailed", "Updated elements cannot be checked automatically.");
+      } else if (resultCodes.contains("R")) {   
       output.setOnError(true);
+      engineData.addRejectionComment("_atRejectAddr", "Addition or updation on the address is rejected", "", "");
       validation.setSuccess(false);
       validation.setMessage("Rejected.");
-      engineData.addNegativeCheckStatus("_esCheckFailed", "Updated elements cannot be checked automatically.");
-    } else {
+     }  else {
       validation.setSuccess(true);
       validation.setMessage("Successful");
     }

@@ -1035,6 +1035,18 @@ function autoSetSBO(value, valueInDB) {
         set32SBOLogicOnISIC();
       }
     }
+
+    if (isuCd == '34') {
+      if (postCd != '' && isScotlandPostCd(postCd)) {
+        FormManager.setValue('salesBusOffCd', "758");
+        FormManager.setValue('repTeamMemberNo', "SPA758");
+      }
+      if (postCd != '' && isNorthernIrelandPostCd(postCd)) {
+        FormManager.setValue('salesBusOffCd', "958");
+        FormManager.setValue('repTeamMemberNo', "MMIRE1");
+      }
+    }
+
   }
 }
 
@@ -1052,7 +1064,7 @@ function set32SBOLogicOnISIC() {
     role = _pagemodel.userRole;
   }
 
-  if (isuCdValue == '32' && (tierValue == 'S' || tierValue == 'N')) {
+  if (isuCdValue == '34') {
     var qParams = {
       ISU_CD : '%' + isuCdValue + '%',
       CLIENT_TIER : '%' + tierValue + '%',
@@ -1211,6 +1223,17 @@ function autoSetSboSrOnAddrSaveUK() {
       if (postCd != '' && isNorthernIrelandPostCd(postCd)) {
         // FormManager.setValue('clientTier', "C");
         set32SBOLogicOnISIC();
+      }
+    }
+
+    if (isuCd == '34') {
+      if (postCd != '' && isScotlandPostCd(postCd)) {
+        FormManager.setValue('salesBusOffCd', "758");
+        FormManager.setValue('repTeamMemberNo', "SPA758");
+      }
+      if (postCd != '' && isNorthernIrelandPostCd(postCd)) {
+        FormManager.setValue('salesBusOffCd', "958");
+        FormManager.setValue('repTeamMemberNo', "MMIRE1");
       }
     }
 

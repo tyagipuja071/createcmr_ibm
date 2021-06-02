@@ -89,10 +89,10 @@ public class LegacyDirectLegacyMassProcessService extends TransConnService {
   private static final String ADDRESS_USE_COUNTRY_H = "H";
   private static final String ADDRESS_USE_EXISTS = "Y";
   private static final String ADDRESS_USE_NOT_EXISTS = "N";
-  private static final String MASS_UPDATE_FAIL = "FAIL";
+  public static final String MASS_UPDATE_FAIL = "FAIL";
   private static final String MASS_UPDATE_DONE = "DONE";
   private static final String MASS_UPDATE_LEGACYDONE = "LDONE";
-  private static final String MASS_UDPATE_LEGACY_FAIL_MSG = "Errors happened in legacy mass updates. Pleaes see request summary for details.";
+  public static final String MASS_UDPATE_LEGACY_FAIL_MSG = "Errors happened in legacy mass updates. Pleaes see request summary for details.";
   private static final int MASS_UPDATE_TXT_LEN = 10000;
 
   private static final List<String> SKIP_RDc_COUNTRY_LIST = Arrays.asList("675");
@@ -235,7 +235,7 @@ public class LegacyDirectLegacyMassProcessService extends TransConnService {
    * @throws CmrException
    * @throws SQLException
    */
-  private void processError(EntityManager entityManager, Admin admin, String errorMsg) throws CmrException, SQLException {
+  public void processError(EntityManager entityManager, Admin admin, String errorMsg) throws CmrException, SQLException {
     if (CmrConstants.REQ_TYPE_DELETE.equals(admin.getReqType()) || CmrConstants.REQ_TYPE_REACTIVATE.equals(admin.getReqType())) {
       admin.setDisableAutoProc("Y");// disable auto processing if error on
                                     // processing
@@ -251,8 +251,8 @@ public class LegacyDirectLegacyMassProcessService extends TransConnService {
     admin.setLastUpdtBy(BATCH_USER_ID);
     updateEntity(admin, entityManager);
 
-    WfHist hist = createHistory(entityManager, "An error occurred during processing: " + errorMsg, "PPN", "Processing Error", admin.getId()
-        .getReqId());
+    WfHist hist = createHistory(entityManager, "An error occurred during processing: " + errorMsg, "PPN", "Processing Error",
+        admin.getId().getReqId());
     createComment(entityManager, "An error occurred during processing:\n" + errorMsg, admin.getId().getReqId());
 
     RequestUtils.sendEmailNotifications(entityManager, admin, hist);
@@ -517,8 +517,8 @@ public class LegacyDirectLegacyMassProcessService extends TransConnService {
       updateEntity(admin, entityManager);
     }
     if (!CmrConstants.RDC_STATUS_IGNORED.equals(resultCode)) {
-      RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin, comment, "C".equals(admin.getReqType()) ? ACTION_RDC_CREATE
-          : ACTION_RDC_UPDATE, null, null, true, false);
+      RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin, comment,
+          "C".equals(admin.getReqType()) ? ACTION_RDC_CREATE : ACTION_RDC_UPDATE, null, null, true, false);
     }
   }
 
@@ -970,8 +970,8 @@ public class LegacyDirectLegacyMassProcessService extends TransConnService {
       if (!"@".equals(muData.getNewEntpName1().trim())
           && LegacyDirectUtil.isFisCodeUsed(entityManager, SystemLocation.ITALY, muData.getNewEntpName1(), massUpdt.getCmrNo())) {
         errorCmrs.add("Entered Fiscal Code for CMR:" + massUpdt.getCmrNo() + " and Fiscal Code:" + muData.getNewEntpName1() + " is already in use.");
-        legacyObjects.setErrTxt("Entered Fiscal Code for CMR:" + massUpdt.getCmrNo() + " and Fiscal Code:" + muData.getNewEntpName1()
-            + " is already in use.");
+        legacyObjects
+            .setErrTxt("Entered Fiscal Code for CMR:" + massUpdt.getCmrNo() + " and Fiscal Code:" + muData.getNewEntpName1() + " is already in use.");
         massUpdt.setErrorTxt(legacyObjects.getErrTxt());
         massUpdt.setRowStatusCd(MASS_UPDATE_FAIL);
         partialCommit(entityManager);
@@ -995,7 +995,8 @@ public class LegacyDirectLegacyMassProcessService extends TransConnService {
       errorCmrs
           .add("Mass update has encountered an error: The list of legacy customer data with the same fiscal code is empty. Please correct the data.");
       // throw new CmrException(new Exception(
-      // "Mass update has encountered an error: The list of legacy customer data with the same fiscal code is empty. Please correct the data."));
+      // "Mass update has encountered an error: The list of legacy customer data
+      // with the same fiscal code is empty. Please correct the data."));
       massUpdt.setErrorTxt(legacyObjects.getErrTxt());
       massUpdt.setRowStatusCd(MASS_UPDATE_FAIL);
       partialCommit(entityManager);

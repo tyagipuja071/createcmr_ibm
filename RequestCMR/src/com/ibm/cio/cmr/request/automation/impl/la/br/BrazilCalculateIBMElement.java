@@ -598,8 +598,10 @@ public class BrazilCalculateIBMElement extends OverridingElement {
           ReftBrSboCollector sboMSP = query.getSingleResult(ReftBrSboCollector.class);
 
           if (sboMSP != null) {
-            details.append("Search Term/Sales Branch Office = " + sboMSP.getSbo() + "\n");
-            overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sboMSP.getSbo());
+            // details.append("Search Term/Sales Branch Office = " +
+            // sboMSP.getSbo() + "\n");
+            // overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD",
+            // data.getSalesBusOffCd(), sboMSP.getSbo());
 
             details.append("Market Responsibility Code (MRC) = " + sboMSP.getMrcCd() + "\n");
             overrides.addOverride(getProcessCode(), "DATA", "MRC_CD", data.getMrcCd(), sboMSP.getMrcCd());

@@ -4199,8 +4199,8 @@ function addEmbargoCdValidatorForME() {
       return {
         validate : function() {
           var embargoCd = FormManager.getActualValue('embargoCd');
-          if (embargoCd && !(embargoCd == 'E' || embargoCd == 'S' || embargoCd == '')) {
-            return new ValidationResult(null, false, 'Order Block Code should be only E, S, Blank allowed');
+          if (embargoCd && !(embargoCd == 'E' || embargoCd == 'S' || embargoCd == 'J' || embargoCd == '')) {
+            return new ValidationResult(null, false, 'Order Block Code should be only E, S, J, Blank allowed');
           }
           return new ValidationResult(null, true);
         }

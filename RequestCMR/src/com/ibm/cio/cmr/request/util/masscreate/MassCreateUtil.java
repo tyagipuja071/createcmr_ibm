@@ -41,7 +41,7 @@ public class MassCreateUtil {
    * @param file
    * @param entityManager
    */
-  public static synchronized void createMassCreateRecords(MassCreateFile file, EntityManager entityManager) {
+  public static void createMassCreateRecords(MassCreateFile file, EntityManager entityManager) {
     LOG.info("Creating Mass Create records for parsed file..");
     for (MassCreateFileRow row : file.getRows()) {
       LOG.debug("Mass Create: ID " + file.getReqId() + " Iteration: " + file.getIterationId() + " Sequence: " + row.getSeqNo());
