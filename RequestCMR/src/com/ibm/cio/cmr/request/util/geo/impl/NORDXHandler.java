@@ -179,12 +179,17 @@ public class NORDXHandler extends BaseSOFHandler {
             String legacyAddressSeq = getLegacyAddressSeq(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), legacyseqNoformat);
 
             if (StringUtils.isBlank(legacyAddressSeq)) {
-              if ("ZP01".equals(record.getCmrAddrTypeCode()) && "PG".equals(record.getCmrOrderBlock())) {
-                record.setCmrAddrTypeCode("PG01");
-              } else {
                 continue;
-              }
             }
+
+            // if (StringUtils.isBlank(legacyAddressSeq)) {
+            // if ("ZP01".equals(record.getCmrAddrTypeCode()) &&
+            // "PG".equals(record.getCmrOrderBlock())) {
+            // record.setCmrAddrTypeCode("PG01");
+            // } else {
+            // continue;
+            // }
+            // }
 
             // if
             // ((CmrConstants.ADDR_TYPE.ZD01.toString().equals(record.getCmrAddrTypeCode()))
