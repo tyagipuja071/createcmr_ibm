@@ -63,7 +63,6 @@ public class IndiaUtil extends AutomationUtil {
     // TODO Auto-generated method stub
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
-    String scenario = data.getCustSubGrp();
     if (!"C".equals(admin.getReqType())) {
       details.append("Field Computation skipped for Updates.");
       results.setResults("Skipped");
@@ -187,8 +186,12 @@ public class IndiaUtil extends AutomationUtil {
                 }
                 if (!matchesDnb) {
                   LOG.debug("Update address for " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
-                  resultCodes.add("D");
-                  checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
+                  if (StringUtils.isEmpty(data.getVat()) && getGstMatches(admin.getId().getReqId(), addr, data.getVat())) {
+                    checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches data in GST layer service.\n");
+                  } else {
+                    resultCodes.add("D");
+                    checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records and GST Service.\n");
+                  }
                 } else {
                   checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
                   for (DnBMatchingResponse dnb : matches) {
