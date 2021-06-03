@@ -52,8 +52,7 @@ public class INGSTValidationElement extends ValidatingElement implements Company
     AutomationResult<ValidationOutput> output = buildResult(admin.getId().getReqId());
     ValidationOutput validation = new ValidationOutput();
 
-    if (((SCENARIO_BLUEMIX.equals(scenario) || SCENARIO_MARKETPLACE.equals(scenario) || SCENARIO_ACQUISITION.equals(scenario)
-        || SCENARIO_PRIVATE_CUSTOMER.equals(scenario)) && StringUtils.isBlank(data.getVat())) || SCENARIO_FOREIGN.equals(scenario)) {
+    if (StringUtils.isBlank(data.getVat()) || SCENARIO_FOREIGN.equals(scenario)) {
       validation.setSuccess(true);
       validation.setMessage("Skipped");
       output.setResults("Skipped");
@@ -66,7 +65,7 @@ public class INGSTValidationElement extends ValidatingElement implements Company
     StringBuilder details = new StringBuilder();
 
     if (zs01 != null) {
-      AutomationResponse<GstLayerResponse> response = getSosMatches(admin.getId().getReqId(), zs01, data.getVat());
+      AutomationResponse<GstLayerResponse> response = getGstMatches(admin.getId().getReqId(), zs01, data.getVat());
       if (response != null && response.isSuccess() && response.getMessage().equals("Valid GST and Company Name entered on the Request")) {
         admin.setCompVerifiedIndc("Y");
         validation.setSuccess(true);
@@ -92,7 +91,7 @@ public class INGSTValidationElement extends ValidatingElement implements Company
     return output;
   }
 
-  private AutomationResponse<GstLayerResponse> getSosMatches(long reqId, Addr zs01, String vat) throws Exception {
+  private AutomationResponse<GstLayerResponse> getGstMatches(long reqId, Addr zs01, String vat) throws Exception {
 
     log.debug("Validating GST# " + vat + " for India");
 
