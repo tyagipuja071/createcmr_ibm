@@ -90,7 +90,7 @@ if (readOnly){
           </cmr:row>
        </cmr:column>
        <cmr:column span="2" >
-	<cmr:view forCountry="724" >
+	<cmr:view forCountry="724,858,766" >
  	<% autoProcCapable = true ;%>
         </cmr:view>
             <cmr:row topPad="15" noPad="true">
@@ -258,7 +258,7 @@ if (readOnly){
                 <td>-</td>
               </tr>
               <%}%>
-              <cmr:view forCountry="358,359,363,607,620,626,651,675,677,680,694,695,713,741,752,762,767,768,772,787,805,808,821,823,832,849,850,865,889,641">
+              <cmr:view forCountry="358,359,363,607,620,626,651,675,677,680,694,695,713,741,752,762,767,768,772,787,805,808,821,823,832,849,850,865,889,641,766,858">
               <tr>
                 <td>Proliferation Checklist
                     <%if (!readOnly){%>
@@ -293,7 +293,7 @@ if (readOnly){
     
     <cmr:row addBackground="false">
       <c:if test="${reqentry.reqType != 'U'}">
-      <cmr:view forCountry="631,724,815,661,629,613,655,663,681,683,731,735,781,799,811,813,829,869,871,641,846,806,702,678,788,624,848">
+      <cmr:view forCountry="631,724,815,661,629,613,655,663,681,683,731,735,781,799,811,813,829,869,871,641,846,806,702,678,788,624,848,858,766">
         <cmr:column span="2" containerForField="CustomerScenarioType">
           <p>
             <cmr:label fieldId="custGrp">
@@ -496,21 +496,23 @@ if (readOnly){
               <cmr:field id="reqReason" path="reqReason" fieldId="RequestReason" tabId="MAIN_GENERAL_TAB" size="250"/>
             </p>
             </cmr:column>
-        <cmr:view forGEO="JP">
+        <cmr:view forGEO="JP,TW,KR">
             <cmr:column span="2">
               <p>
                 <label for="requesterId">Requester ID:</label>
                 ${reqentry.requesterId} (${requesterId_UID})
               </p>
             </cmr:column>
+        </cmr:view>
+        <cmr:view forGEO="JP,TW,KR">
             <cmr:column span="2">
               <p>
                 <label for="reqFor"><cmr:fieldLabel fieldId="OriginatorName" />:<cmr:info text="${ui.info.orgName}" /></label>
-                <cmr:bluepages model="reqentry" namePath="originatorNm"  idPath="originatorId" useBothIds="true" showId="true"></cmr:bluepages>
+                <cmr:bluepages model="reqentry" namePath="originatorNm"  idPath="originatorId" useBothIds="false" showId="true"></cmr:bluepages>
               </p>
             </cmr:column>
         </cmr:view>
-        <cmr:view exceptForGEO="JP" exceptForCountry="649">
+        <cmr:view exceptForGEO="JP,KR,TW">
               <cmr:column span="2">
                 <p>
                   <label for="requesterId">Requester:</label>
@@ -559,6 +561,14 @@ if (readOnly){
               <cmr:date id="requestDueDateTemp" path="requestDueDateTemp" format="yyyy-MM-dd" />
             </p>
           </cmr:column>
+          <cmr:column span="2">
+              <p>
+              <cmr:label fieldId="email3">
+                <cmr:fieldLabel fieldId="Email3" />:
+              </cmr:label>
+              <cmr:field id="email3" path="email3" fieldId="Email3" tabId="MAIN_GENERAL_TAB" size="255"/>
+              </p>
+            </cmr:column>
         </cmr:row>
       </cmr:view>
       

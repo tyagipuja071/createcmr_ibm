@@ -418,6 +418,12 @@ function AddressDetailsModal_onLoad() {
     _assignDetailsValue('#AddressDetailsModal #cnCustName3_view', details.ret73);
   }
 
+  if (FormManager.getActualValue('cmrIssuingCntry') == '766') {
+    _assignDetailsValue('#AddressDetailsModal #billingPstlAddr_view', details.ret58);
+    _assignDetailsValue('#AddressDetailsModal #contact_view', details.ret71);
+    _assignDetailsValue('#AddressDetailsModal #countyName_view', details.ret45);
+  }
+
   if (FormManager.getActualValue('cmrIssuingCntry') == '760') {
     _assignDetailsValue('#AddressDetailsModal #locationCode_view', details.ret56);
     _assignDetailsValue('#AddressDetailsModal #estabFuncCd_view', details.ret69);
@@ -1028,6 +1034,12 @@ function addEditAddressModal_onLoad() {
       // FormManager.hide('BillingPstlAddr', 'billingPstlAddr');
       // }
       // }
+      
+      if (FormManager.getActualValue('cmrIssuingCntry') == '766') {
+        FormManager.setValue('billingPstlAddr', details.ret58);
+        FormManager.setValue('contact', details.ret71);
+        FormManager.setValue('countyName', details.ret45);
+      }
 
       if ('Y' == details.ret26) {
         FormManager.setValue('addrStdAcceptInd', "Y");

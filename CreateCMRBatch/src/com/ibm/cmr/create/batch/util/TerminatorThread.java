@@ -4,6 +4,8 @@
 package com.ibm.cmr.create.batch.util;
 
 import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -54,7 +56,15 @@ public class TerminatorThread extends Thread {
         } catch (Exception e) {
           // noop
         }
-        Runtime.getRuntime().halt(0);
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+
+          @Override
+          public void run() {
+            LOG.info("System exiting...");
+            Runtime.getRuntime().halt(0);
+          }
+        }, 5000);
       }
 
       try {

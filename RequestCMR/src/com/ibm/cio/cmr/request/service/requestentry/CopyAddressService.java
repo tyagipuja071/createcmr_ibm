@@ -401,7 +401,7 @@ public class CopyAddressService extends BaseService<CopyAddressModel, Addr> {
     int addrSeq = 0;
     String maxAddrSeq = null;
     String newAddrSeq = null;
-    String sql = ExternalizedQuery.getSql("ADDRESS.GETMADDRSEQ");
+    String sql = ExternalizedQuery.getSql("ADDRESS.GETMADDRSEQ_TR");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", reqId);
 
@@ -410,9 +410,10 @@ public class CopyAddressService extends BaseService<CopyAddressModel, Addr> {
       Object[] result = results.get(0);
       maxAddrSeq = (String) (result != null && result.length > 0 && result[0] != null ? result[0] : "00000");
 
-      if (!(Integer.valueOf(maxAddrSeq) >= 00000 && Integer.valueOf(maxAddrSeq) <= 20849)) {
-        maxAddrSeq = "";
-      }
+      // if (!(Integer.valueOf(maxAddrSeq) >= 00000 &&
+      // Integer.valueOf(maxAddrSeq) <= 20849)) {
+      // maxAddrSeq = "";
+      // }
       if (StringUtils.isEmpty(maxAddrSeq)) {
         maxAddrSeq = "00000";
       }
