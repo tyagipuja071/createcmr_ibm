@@ -159,6 +159,7 @@ public class IndiaUtil extends AutomationUtil {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
     boolean cmdeReview = false;
+    boolean cmdeReviewCustNme = false;
     if (handlePrivatePersonRecord(entityManager, admin, output, validation, engineData)) {
       return true;
     }
@@ -177,6 +178,21 @@ public class IndiaUtil extends AutomationUtil {
             // update address
             if (RELEVANT_ADDRESSES.contains(addrType)) {
               if (isRelevantAddressFieldUpdated(changes, addr)) {
+                // if customer name has been updated on any address , simply
+                // send to CMDE
+
+                List<UpdatedNameAddrModel> addrChanges = changes.getAddressChanges(addr.getId().getAddrType(), addr.getId().getAddrSeq());
+                for (UpdatedNameAddrModel change : addrChanges) {
+                  if ("Customer Name".equals(change.getDataField())) {
+                    cmdeReviewCustNme = true;
+                    checkDetails.append("Update of Customer Name for" + addrType + "(" + addr.getId().getAddrSeq() + ") needs review.\n");
+                    break;
+                  }
+                }
+                if (cmdeReviewCustNme) {
+                  continue; // avoid further checks
+                }
+
                 Addr addressToChk = requestData.getAddress(addrType);
                 List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addressToChk, true);
                 boolean matchesDnb = false;
@@ -190,7 +206,8 @@ public class IndiaUtil extends AutomationUtil {
                     checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches data in GST layer service.\n");
                   } else {
                     resultCodes.add("D");
-                    checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records and GST Service.\n");
+                    checkDetails
+                        .append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records and GST Service.\n");
                   }
                 } else {
                   checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
@@ -202,11 +219,6 @@ public class IndiaUtil extends AutomationUtil {
                   }
                 }
 
-                if (changes.getAddressChanges(addr.getId().getAddrType(), addr.getId().getAddrSeq()).contains("Customer Name")) {
-                  // send to CMDE
-                  cmdeReview = true;
-                  checkDetails.append("Customer Name has been updated.\n");
-                }
               } else {
                 checkDetails.append("Updates to non-address fields for " + addrType + "(" + addr.getId().getAddrSeq() + ") skipped in the checks.")
                     .append("\n");
@@ -227,6 +239,10 @@ public class IndiaUtil extends AutomationUtil {
     } else if (cmdeReview) {
       engineData.addNegativeCheckStatus("_esDataCheckFailed", "Updates to one or more fields cannot be validated.");
       checkDetails.append("Updates to one or more fields cannot be validated.\n");
+      validation.setSuccess(false);
+      validation.setMessage("Not Validated");
+    } else if (cmdeReviewCustNme) {
+      engineData.addNegativeCheckStatus("_esDataCheckFailed", "Updates to one or more fields cannot be validated.");
       validation.setSuccess(false);
       validation.setMessage("Not Validated");
     } else {
