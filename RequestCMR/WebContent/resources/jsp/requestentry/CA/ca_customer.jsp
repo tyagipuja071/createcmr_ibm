@@ -62,6 +62,26 @@
         	<cmr:field path="taxCd3" id="taxCd3" fieldId="QST" tabId="MAIN_CUST_TAB" />
   		</p>		
   	</cmr:column>
+  	<cmr:column span="2" containerForField="PurchaseOrdNo">
+		<p>
+			<label for="contactName1"> <cmr:fieldLabel
+					fieldId="PurchaseOrdNo" />: <cmr:delta
+					text="${rdcdata.contactName1}" oldValue="${reqentry.contactName1}" />
+			</label>
+			<cmr:field path="contactName1" id="contactName1"
+				fieldId="PurchaseOrdNo" tabId="MAIN_CUST_TAB" />
+		</p>
+	</cmr:column>
+	<cmr:column span="2" containerForField="LeasingCompIndc">
+		<p>
+			<label for="leasingCompanyIndc"> &nbsp; </label>
+			<cmr:field fieldId="LeasingCompIndc" path="leasingCompanyIndc"
+				tabId="MAIN_CUST_TAB" />
+			<cmr:label fieldId="LeasingCompIndc" forRadioOrCheckbox="true">
+				<cmr:fieldLabel fieldId="LeasingCompIndc" />
+			</cmr:label>
+		</p>
+	</cmr:column>
   </cmr:row>
   
   <cmr:row addBackground="true" >
