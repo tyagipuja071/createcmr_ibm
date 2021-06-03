@@ -461,8 +461,8 @@ function removeValidatorForOptionalFields() {
     FormManager.removeValidator('taxCd3', Validators.REQUIRED);
     FormManager.removeValidator('creditCd', Validators.REQUIRED);
     FormManager.removeValidator('cusInvoiceCopies', Validators.REQUIRED);
-    FormManager.removeValidator('subIndustryCd', Validators.REQUIRED);
-    FormManager.removeValidator('isicCd', Validators.REQUIRED);
+    // FormManager.removeValidator('subIndustryCd', Validators.REQUIRED);
+    // FormManager.removeValidator('isicCd', Validators.REQUIRED);
   }
 }
 
