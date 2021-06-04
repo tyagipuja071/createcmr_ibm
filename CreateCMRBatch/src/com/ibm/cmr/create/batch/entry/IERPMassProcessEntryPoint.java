@@ -4,6 +4,8 @@
 package com.ibm.cmr.create.batch.entry;
 
 import com.ibm.cio.cmr.request.CmrException;
+import com.ibm.cmr.create.batch.service.BaseBatchService;
+import com.ibm.cmr.create.batch.service.IERPMassProcessMultiService;
 import com.ibm.cmr.create.batch.service.IERPMassProcessService;
 
 /**
@@ -20,8 +22,12 @@ public class IERPMassProcessEntryPoint extends BatchEntryPoint {
   public static void main(String[] args) throws CmrException {
     BatchEntryPoint.initContext("IERPMassProcess");
 
-    IERPMassProcessService service = new IERPMassProcessService();
-    service.setDevMode(args != null && args.length > 0 && "DEV".equals(args[0]));
+    BaseBatchService service = null;
+    if (args != null && args.length > 0 && "MULTI".equalsIgnoreCase(args[0])) {
+      service = new IERPMassProcessMultiService();
+    } else {
+      service = new IERPMassProcessService();
+    }
     service.execute();
   }
 

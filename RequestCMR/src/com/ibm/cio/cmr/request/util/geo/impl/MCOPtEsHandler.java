@@ -1391,4 +1391,13 @@ public class MCOPtEsHandler extends MCOHandler {
     }
   }
 
+  @Override
+  public void convertDnBImportValues(EntityManager entityManager, Admin admin, Data data) {
+
+    super.convertDnBImportValues(entityManager, admin, data);
+    if (SystemLocation.SPAIN.equals(data.getCmrIssuingCntry())) {
+      data.setCustPrefLang("S");
+    }
+  }
+
 }

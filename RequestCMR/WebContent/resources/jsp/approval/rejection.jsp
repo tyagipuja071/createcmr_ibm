@@ -103,7 +103,7 @@
       </cmr:column>
     </cmr:row>
     <cmr:row topPad="20">
-      <cmr:column span="3">
+      <cmr:column span="4">
         <p>
           <cmr:label fieldId="comments">Comments:</cmr:label>
         </p>
@@ -115,8 +115,8 @@
       </cmr:column>
     </cmr:row>
     <cmr:row topPad="10">
-      <cmr:column span="3">
-        <form:textarea path="comments" id="comments" rows="5" cols="40"></form:textarea>
+      <cmr:column span="4">
+        <form:textarea path="comments" id="comments" rows="5" cols="60"></form:textarea>
       </cmr:column>
       <cmr:column span="2" >
         <p>

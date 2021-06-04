@@ -4,6 +4,8 @@
 package com.ibm.cmr.create.batch.entry;
 
 import com.ibm.cio.cmr.request.CmrException;
+import com.ibm.cmr.create.batch.service.BaseBatchService;
+import com.ibm.cmr.create.batch.service.LDMassProcessMultiLegacyService;
 import com.ibm.cmr.create.batch.service.LegacyDirectLegacyMassProcessService;
 
 /**
@@ -20,8 +22,12 @@ public class LegacyDirectLegacyMassProcessEntryPoint extends BatchEntryPoint {
   public static void main(String[] args) throws CmrException {
     BatchEntryPoint.initContext("LegacyDirectLegacyMassProcess");
 
-    LegacyDirectLegacyMassProcessService service = new LegacyDirectLegacyMassProcessService();
-    service.setDevMode(args != null && args.length > 0 && "DEV".equals(args[0]));
+    BaseBatchService service = null;
+    if (args != null && args.length > 0 && "MULTI".equalsIgnoreCase(args[0])) {
+      service = new LDMassProcessMultiLegacyService();
+    } else {
+      service = new LegacyDirectLegacyMassProcessService();
+    }
     service.execute();
   }
 

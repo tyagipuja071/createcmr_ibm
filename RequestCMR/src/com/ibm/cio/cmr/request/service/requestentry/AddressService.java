@@ -2251,9 +2251,10 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       Object[] result = results.get(0);
       maxAddrSeq = (String) (result != null && result.length > 0 && result[0] != null ? result[0] : "00000");
 
-      if (!(Integer.valueOf(maxAddrSeq) >= 00000 && Integer.valueOf(maxAddrSeq) <= 20849)) {
-        maxAddrSeq = "";
-      }
+      // if (!(Integer.valueOf(maxAddrSeq) >= 00000 &&
+      // Integer.valueOf(maxAddrSeq) <= 20849)) {
+      // maxAddrSeq = "";
+      // }
       if (StringUtils.isEmpty(maxAddrSeq)) {
         maxAddrSeq = "00000";
       }
@@ -2265,9 +2266,14 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       addrSeq++;
     }
 
-    newAddrSeq = "0000" + Integer.toString(addrSeq);
+    // newAddrSeq = "0000" + Integer.toString(addrSeq);
 
-    newAddrSeq = newAddrSeq.substring(newAddrSeq.length() - 5, newAddrSeq.length());
+    // newAddrSeq = newAddrSeq.substring(newAddrSeq.length() - 5,
+    // newAddrSeq.length());
+
+    String straddrSeq = Integer.toString(addrSeq);
+
+    newAddrSeq = StringUtils.leftPad(straddrSeq, 5, '0');
 
     return newAddrSeq;
   }

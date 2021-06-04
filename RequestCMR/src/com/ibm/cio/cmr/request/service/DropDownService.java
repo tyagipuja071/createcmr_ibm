@@ -538,6 +538,8 @@ public class DropDownService extends BaseSimpleService<DropdownModel> {
         query.append(" and (ISSUING_CNTRY = :ISSUING_CNTRY or ISSUING_CNTRY = '*') and SALES_BO_CD = :SALES_BO_CD");
         query.setParameter("ISSUING_CNTRY", params.getParam("cmrIssuingCntry"));
         query.setParameter("SALES_BO_CD", params.getParam("salesBusOffCd"));
+      } else if ("858".equals(issuingCntry) || "766".equals(issuingCntry)) {
+        // do nothing
       } else {
         query.append(" and (ISSUING_CNTRY = :ISSUING_CNTRY or ISSUING_CNTRY = '*')");
         query.setParameter("ISSUING_CNTRY", params.getParam("cmrIssuingCntry"));
