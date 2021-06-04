@@ -494,9 +494,41 @@ public class CanadaHandler extends GEOHandler {
     String newAddrSeq = "";
 
     if (!StringUtils.isEmpty(addrType)) {
-      newAddrSeq = getAvailableAddrSeq(entityManager, reqId);
+      if (isMultiAddrType(addrType)) {
+        newAddrSeq = getSeqForMultiAddress(entityManager, addrType, reqId);
+      } else {
+        newAddrSeq = getAvailableAddrSeq(entityManager, reqId);
+      }
     }
     return newAddrSeq;
+  }
+
+  private String getSeqForMultiAddress(EntityManager entityManager, String addrType, long reqId) {
+    List<Addr> addrs = getAddressByType(entityManager, addrType, reqId);
+    int addrCount = addrs.size();
+    if (addrCount == 0) {
+      return getAvailableAddrSeq(entityManager, reqId);
+    }
+
+    String mainAddrSeq = addrs.get(0).getId().getAddrSeq();
+
+    if (mainAddrSeq.length() > 5) {
+      mainAddrSeq = mainAddrSeq.substring(0, 5);
+    }
+
+    String addressUse = addrType.equals("ZP01") ? "M" : "2";
+    String multiAddrSeq = mainAddrSeq + "-" + String.format("%02d", addrCount) + "-" + addressUse;
+
+    return multiAddrSeq;
+  }
+
+  private List<Addr> getAddressByType(EntityManager entityManager, String addrType, long reqId) {
+    String sql = ExternalizedQuery.getSql("ADDRESS.GET.BYTYPE");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    query.setParameter("ADDR_TYPE", addrType);
+    List<Addr> addrList = query.getResults(Addr.class);
+    return addrList;
   }
 
   private String getAvailableAddrSeq(EntityManager entityManager, long reqId) {
@@ -510,6 +542,13 @@ public class CanadaHandler extends GEOHandler {
       return String.format("%05d", availSeq);
     }
     return "00001";
+  }
+
+  private boolean isMultiAddrType(String addrType) {
+    if ("ZP01".equals(addrType) || "ZP02".equals(addrType)) {
+      return true;
+    }
+    return false;
   }
 
   @Override
