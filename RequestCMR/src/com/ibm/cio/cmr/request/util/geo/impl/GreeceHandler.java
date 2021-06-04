@@ -2894,6 +2894,40 @@ public class GreeceHandler extends BaseSOFHandler {
 
   @Override
   public void createOtherAddressesOnDNBImport(EntityManager entityManager, Admin admin, Data data) throws Exception {
+    if (SystemLocation.GREECE.equals(data.getCmrIssuingCntry()) && "C".equals(admin.getReqType())) {
+      String abbrevNmValue = null;
+      String abbrevLocnValue = null;
+      String sql = ExternalizedQuery.getSql("QUERY.ADDR.GET.CUSTNM1.BY_REQID_ADDRTYP");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("REQ_ID", data.getId().getReqId());
+      query.setParameter("ADDR_TYPE", "ZS01");
+      List<String> record = query.getResults(String.class);
+      if (record != null && !record.isEmpty()) {
+        abbrevNmValue = record.get(0);
+      }
+
+      if (abbrevNmValue != null && abbrevNmValue.length() > 22) {
+        abbrevNmValue = abbrevNmValue.substring(0, 22);
+      }
+
+      data.setAbbrevNm(abbrevNmValue);
+
+      String sql2 = ExternalizedQuery.getSql("QUERY.ADDR.GET.CITY1.BY_REQID_ADDRTYP");
+      PreparedQuery query2 = new PreparedQuery(entityManager, sql2);
+      query2.setParameter("REQ_ID", data.getId().getReqId());
+      query2.setParameter("ADDR_TYPE", "ZS01");
+      List<String> results = query2.getResults(String.class);
+      if (results != null && !results.isEmpty()) {
+        abbrevLocnValue = results.get(0);
+      }
+
+      if (abbrevLocnValue != null && abbrevLocnValue.length() > 12) {
+        abbrevLocnValue = abbrevLocnValue.substring(0, 12);
+      }
+      data.setAbbrevLocn(abbrevLocnValue);
+      entityManager.merge(data);
+      entityManager.flush();
+    }
   }
 
   public static boolean isITIssuingCountry(String cmrIssuingCntry) {
