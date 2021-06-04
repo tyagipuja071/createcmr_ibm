@@ -18,10 +18,19 @@
 <cmr:section id="CUST_REQ_TAB" hidden="true">
   <jsp:include page="detailstrip.jsp" />
   <cmr:row addBackground="true">
-    <cmr:view exceptForGEO="CN,FR">
+    <cmr:view exceptForGEO="CN,FR,KR">
       <cmr:column span="2" containerForField="AbbrevName">
         <p>
 
+          <label for="abbrevNm"> <cmr:fieldLabel fieldId="AbbrevName" />: <cmr:delta text="${rdcdata.abbrevNm}"
+              oldValue="${reqentry.abbrevNm}" /> </label>
+          <cmr:field fieldId="AbbrevName" id="abbrevNm" path="abbrevNm" tabId="MAIN_CUST_TAB" />
+        </p>
+      </cmr:column>
+    </cmr:view>
+        <cmr:view forGEO="KR">
+      <cmr:column span="2" containerForField="AbbrevName">
+        <p>
           <label for="abbrevNm"> <cmr:fieldLabel fieldId="AbbrevName" />: <cmr:delta text="${rdcdata.abbrevNm}"
               oldValue="${reqentry.abbrevNm}" /> </label>
           <cmr:field fieldId="AbbrevName" id="abbrevNm" path="abbrevNm" tabId="MAIN_CUST_TAB" />
@@ -123,7 +132,7 @@
   </cmr:row>
 
   <cmr:row>
-    <cmr:view exceptForCountry="643,749,778,818,834,852,856,646,714,720,760,706">
+    <cmr:view exceptForCountry="643,749,778,818,834,852,856,646,714,720,760,706,858,766">
       <cmr:column span="2" containerForField="SensitiveFlag">
         <p>
           <cmr:label fieldId="sensitiveFlag">
@@ -165,7 +174,7 @@
   <cmr:row addBackground="true">
     <!-- // 1164561 -->
 
-    <cmr:view exceptForCountry="631,643,749,778,818,834,852,856,646,714,720,666,726,754,755,862,866,641,702,624,848,649" exceptForGEO="MCO,MCO1,MCO2,CEMEA,JP">
+    <cmr:view exceptForCountry="631,643,749,778,818,834,852,856,646,714,720,666,726,754,755,862,866,641,702,624,848,649,766" exceptForGEO="MCO,MCO1,MCO2,CEMEA,JP,TW,KR">
       <cmr:column span="2" containerForField="LocalTax1">
         <p>
           <label for="taxCd1"> <cmr:fieldLabel fieldId="LocalTax1" />: <cmr:delta text="${rdcdata.taxCd1}" oldValue="${reqentry.taxCd1}" />
@@ -212,7 +221,7 @@
   <cmr:row addBackground="true">
     <!-- // 1164558 -->
     <cmr:view exceptForCountry="631,848,649" exceptForGEO="LA,JP">
-      <cmr:view exceptForGEO="EMEA,AP,MCO1,MCO,MCO2,CEMEA,NORDX,BELUX,NL,CN,FR">
+      <cmr:view exceptForGEO="EMEA,AP,MCO1,MCO,MCO2,CEMEA,NORDX,BELUX,NL,CN,FR,TW,KR">
         <cmr:column span="2" containerForField="LocalTax2">
           <p>
             <label for="taxCd2">
@@ -379,5 +388,11 @@
 
    <!--  Canada fields -->
   <jsp:include page="CA/ca_customer.jsp" />
+  
+   <!--  Taiwan fields -->
+  <jsp:include page="TW/tw_customer.jsp" />
+
+   <!--  Korea, Republic of, fields -->
+  <jsp:include page="KR/kr_customer.jsp" />
 
 </cmr:section>

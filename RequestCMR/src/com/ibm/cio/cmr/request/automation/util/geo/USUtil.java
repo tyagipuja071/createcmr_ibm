@@ -173,6 +173,7 @@ public class USUtil extends AutomationUtil {
       SC_FED_HOSPITAL, SC_FED_INDIAN_TRIBE, SC_FED_NATIVE_CORP, SC_FED_POA, SC_FED_REGULAR, SC_FED_TRIBAL_BUS);
   private static final List<String> CSP_IRRELEVANT_UPDATE_FIELDS = Arrays.asList("ISU Code", "GEO Location Code", "Coverage Type/ID", "BG LDE Rule",
       "Buying Group ID", "Client Tier", "DUNS No.");
+  private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("County", "PO Box");
 
   private static final List<String> HEALTH_CARE_EDUCATION_ISIC = Arrays.asList("8030", "8010", "8511");
 
@@ -480,8 +481,14 @@ public class USUtil extends AutomationUtil {
       if (SC_BYMODEL.equals(scenarioSubType)) {
         try {
           scenarioSubType = determineCustSubScenario(entityManager, admin.getModelCmrNo(), engineData, requestData);
+          LOG.debug("ScenarioSubType:" + scenarioSubType);
         } catch (Exception e) {
           LOG.error("CMR Scenario for Create by model request could not be determined.", e);
+        }
+
+        if (data.getBgId() != null) {
+          engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
+          LOG.debug("Skip Coverage for Create By Model.");
         }
 
         // skip Dnb check and matching
@@ -502,7 +509,12 @@ public class USUtil extends AutomationUtil {
 
     if (StringUtils.isBlank(scenarioSubType) || Arrays.asList(scenarioList).contains(scenarioSubType)) {
       String scenarioDesc = getScenarioDesc(entityManager, scenarioSubType);
+      LOG.debug("Skip Coverage for Create By Model CMR if BgId is not null " + data.getBgId());
       if (SC_BYMODEL.equals(data.getCustSubGrp())) {
+        if (data.getBgId() != null) {
+          engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
+          LOG.debug("Skip Coverage for Create By Model.");
+        }
         engineData.addNegativeCheckStatus("US_SCENARIO_CHK", "Processor review required as imported CMR belongs to " + scenarioDesc + " scenario.");
         details.append("Processor review required as imported CMR belongs to " + scenarioDesc + " scenario.").append("\n");
       } else {
@@ -997,6 +1009,9 @@ public class USUtil extends AutomationUtil {
     query.setForReadOnly(true);
     if (query.exists() && "Y".equals(SystemParameters.getString("US.SKIP_UPDATE_CHECK"))) {
       // skip checks if requester is from USCMDE team
+      LOG.debug("Requester is from CMDE team, skipping Update checks.");
+      output.setDetails("Requester is from CMDE team, skipping Update checks.\n");
+      validation.setMessage("Update checks Skipped");
       validation.setSuccess(true);
     } else {
       String dataDetails = output.getDetails() != null ? output.getDetails() : "";
@@ -1022,7 +1037,7 @@ public class USUtil extends AutomationUtil {
             }
           }
           if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZS01.toString())) {
-            closelyMatchAddressWithDnbRecords(requestData, engineData, "ZS01", details, validation);
+            closelyMatchAddressWithDnbRecords(entityManager, requestData, engineData, "ZS01", details, validation, output);
           }
 
           if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZI01.toString())) {
@@ -1052,7 +1067,10 @@ public class USUtil extends AutomationUtil {
                 return true;
               }
             }
-            closelyMatchAddressWithDnbRecords(requestData, engineData, "ZP01", details, validation);
+
+            if (isRelevantAddressFieldUpdated(changes, requestData.getAddress("ZI01"))) {
+              closelyMatchAddressWithDnbRecords(entityManager, requestData, engineData, "ZI01", details, validation, output);
+            }
           }
         }
 
@@ -1062,7 +1080,6 @@ public class USUtil extends AutomationUtil {
           validation.setMessage("Validated");
           validation.setSuccess(true);
         }
-
       } else {
         validation.setSuccess(false);
         validation.setMessage("Unknown CustType");
@@ -1084,8 +1101,8 @@ public class USUtil extends AutomationUtil {
    * @param validation
    * @throws Exception
    */
-  private void closelyMatchAddressWithDnbRecords(RequestData requestData, AutomationEngineData engineData, String addrType, StringBuilder details,
-      ValidationOutput validation) throws Exception {
+  private void closelyMatchAddressWithDnbRecords(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
+      String addrType, StringBuilder details, ValidationOutput validation, AutomationResult<ValidationOutput> output) throws Exception {
     String addrDesc = "ZS01".equals(addrType) ? "Install-at" : "Invoice-at";
     Addr addr = requestData.getAddress(addrType);
     Data data = requestData.getData();
@@ -1106,23 +1123,57 @@ public class USUtil extends AutomationUtil {
             validation.setMessage("Validated.");
             validation.setSuccess(true);
           } else {
-            engineData.addNegativeCheckStatus("DNB_MATCH_FAIL_" + addrType,
-                "High confidence D&B matches did not match the " + addrDesc + " address data. ");
-            details.append("High confidence D&B matches did not match the " + addrDesc + " address data.").append("\n");
-            validation.setMessage("Review needed");
-            validation.setSuccess(false);
+            // company proof
+            if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+              validation.setMessage("Validated");
+              details.append("High confidence D&B matches did not match the " + addrDesc + " address data.").append("\n");
+              details.append("Supporting documentation is provided by the requester as attachment for " + addrDesc).append("\n");
+              validation.setSuccess(true);
+            } else {
+              validation.setMessage("Rejected");
+              validation.setSuccess(false);
+              details.append("High confidence D&B matches did not match the " + addrDesc + " address data.").append("\n");
+              details.append("\nNo supporting documentation is provided by the requester for " + addrDesc + " address.");
+              engineData.addRejectionComment("OTH", "No supporting documentation is provided by the requester for " + addrDesc + " address.", "", "");
+              output.setOnError(true);
+              output.setDetails(details.toString());
+              LOG.debug("D&B matches were chosen to be overridden by the requester and needs to be reviewed");
+            }
           }
         } else {
-          engineData.addNegativeCheckStatus("DNB_MATCH_FAIL_" + addrType, "No High Quality D&B Matches were found for " + addrDesc + " address.");
-          details.append("No High Quality D&B Matches were found for " + addrDesc + " address.").append("\n");
-          validation.setMessage("Review needed");
-          validation.setSuccess(false);
+          // company proof
+          if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+            validation.setMessage("Validated");
+            details.append("No High Quality D&B Matches were found for " + addrDesc + " address.").append("\n");
+            details.append("Supporting documentation is provided by the requester as attachment for " + addrDesc).append("\n");
+            validation.setSuccess(true);
+          } else {
+            validation.setMessage("Rejected");
+            validation.setSuccess(false);
+            details.append("No High Quality D&B Matches were found for " + addrDesc + " address.").append("\n");
+            details.append("\nNo supporting documentation is provided by the requester for " + addrDesc + " address.");
+            engineData.addRejectionComment("OTH", "No supporting documentation is provided by the requester for " + addrDesc + " address.", "", "");
+            output.setOnError(true);
+            output.setDetails(details.toString());
+            LOG.debug("D&B matches were chosen to be overridden by the requester and needs to be reviewed");
+          }
         }
       } else {
-        engineData.addNegativeCheckStatus("DNB_MATCH_FAIL_" + addrType, "No D&B Matches were found for " + addrDesc + " address.");
-        details.append("No D&B Matches were found for " + addrDesc + " address.").append("\n");
-        validation.setMessage("Review needed");
-        validation.setSuccess(false);
+        // company proof
+        if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+          validation.setMessage("Validated");
+          details.append("No D&B Matches were found for " + addrDesc + " address.").append("\n");
+          details.append("Supporting documentation is provided by the requester as attachment for " + addrDesc).append("\n");
+          validation.setSuccess(true);
+        } else {
+          validation.setMessage("Rejected");
+          validation.setSuccess(false);
+          details.append("No D&B Matches were found for " + addrDesc + " address.").append("\n");
+          engineData.addRejectionComment("OTH", "No supporting documentation is provided by the requester for " + addrDesc + " address.", "", "");
+          output.setOnError(true);
+          output.setDetails(details.toString());
+          LOG.debug("D&B matches were chosen to be overridden by the requester and needs to be reviewed");
+        }
       }
     } else {
       engineData.addNegativeCheckStatus("DNB_MATCH_FAIL_" + "ZS01", "D&B Matching couldn't be performed for " + addrDesc + " address.");
@@ -1498,6 +1549,19 @@ public class USUtil extends AutomationUtil {
   @Override
   public List<String> getSkipChecksRequestTypesforCMDE() {
     return Arrays.asList("E", "M");
+  }
+
+  private boolean isRelevantAddressFieldUpdated(RequestChangeContainer changes, Addr addr) {
+    List<UpdatedNameAddrModel> addrChanges = changes.getAddressChanges(addr.getId().getAddrType(), addr.getId().getAddrSeq());
+    if (addrChanges == null) {
+      return false;
+    }
+    for (UpdatedNameAddrModel change : addrChanges) {
+      if (!NON_RELEVANT_ADDRESS_FIELDS.contains(change.getDataField())) {
+        return true;
+      }
+    }
+    return false;
   }
 
 }

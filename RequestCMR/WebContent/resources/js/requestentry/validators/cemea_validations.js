@@ -4334,8 +4334,8 @@ function addEmbargoCdValidatorForCEE() {
       return {
         validate : function() {
           var embargoCd = FormManager.getActualValue('embargoCd');
-          if (embargoCd && !(embargoCd == 'E' || embargoCd == 'R' || embargoCd == '')) {
-            return new ValidationResult(null, false, 'Embargo Code should only E, R, Blank allowed');
+          if (embargoCd && !(embargoCd == 'E' || embargoCd == 'R' || embargoCd == 'J' || embargoCd == '')) {
+            return new ValidationResult(null, false, 'Embargo Code should only E, R, J, Blank allowed');
           }
           return new ValidationResult(null, true);
         }

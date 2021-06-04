@@ -39,6 +39,7 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
@@ -147,9 +148,16 @@ public class CalculateCoverageElement extends OverridingElement {
       boolean withCmrData = false;
       StringBuilder details = new StringBuilder();
 
+      if (SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry()) && data.getBgId() != null && "BYMODEL".equals(data.getCustSubGrp())) {
+        engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
+        LOG.debug("Skip Coverage for Create By Model.");
+      }
+
       // added flow to skip gbg matching
+      LOG.debug("Before -Skip Coverage for Create By Model...");
       if (engineData.hasPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE)) {
         // ensure a GBG is set
+        LOG.debug("Skip Coverage for Create By Model contains Positive Check");
         String covId = (String) engineData.get(AutomationEngineData.COVERAGE_CALCULATED);
         if (covId != null) {
           details.append("Coverage already computed by external process: ");
@@ -158,9 +166,10 @@ public class CalculateCoverageElement extends OverridingElement {
           result.setResults("Skipped");
           result.setProcessOutput(output);
         } else {
-          result.setDetails("GBG Matching skipped due to previous element execution results.");
+          result.setDetails("Coverage calculation skipped due to previous element execution results.");
           result.setResults("Skipped");
           result.setProcessOutput(output);
+          LOG.debug("After Skip Coverage for Create By Model...");
         }
         return result;
       }
@@ -470,7 +479,7 @@ public class CalculateCoverageElement extends OverridingElement {
           }
         }
       }
-      if (!notDeterminedFields.isEmpty()) {
+      if (!notDeterminedFields.isEmpty() && !(COV_BG.equals(covFrom) && SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry()))) {
         details.append("\nOverrides for following fields could not be determined:").append("\n");
         for (String key : notDeterminedFields.keySet()) {
           String val = notDeterminedFields.get(key);
@@ -499,7 +508,8 @@ public class CalculateCoverageElement extends OverridingElement {
             && !data.getBgId().equals(bgResult.getNewValue())) {
           // calculated buying group is different from coverage buying group.
           details.append("Buying Group ID under coverage overrides is different from the one on request.\n");
-          engineData.addNegativeCheckStatus("BG_DIFFERENT", "Buying Group ID under coverage overrides is different from the one on request.");
+          // engineData.addNegativeCheckStatus("BG_DIFFERENT", "Buying Group ID
+          // under coverage overrides is different from the one on request.");
           output.getData().remove(bgKey);
         }
         FieldResultKey gbgKey = new FieldResultKey("DATA", "GBG_ID");
@@ -509,7 +519,8 @@ public class CalculateCoverageElement extends OverridingElement {
           // calculated global buying group is different from coverage global
           // buying group.
           details.append("Global Buying Group ID under coverage overrides is different from the one on request.\n");
-          engineData.addNegativeCheckStatus("GBG_DIFFERENT", "Buying Group ID under coverage overrides is different from the one on request.");
+          // engineData.addNegativeCheckStatus("GBG_DIFFERENT", "Buying Group ID
+          // under coverage overrides is different from the one on request.");
           output.getData().remove(gbgKey);
         }
       }
