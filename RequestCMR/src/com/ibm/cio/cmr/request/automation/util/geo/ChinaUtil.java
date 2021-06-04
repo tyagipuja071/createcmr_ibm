@@ -1,619 +1,465 @@
 package com.ibm.cio.cmr.request.automation.util.geo;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
-import com.ibm.cio.cmr.request.CmrConstants;
-import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
-import com.ibm.cio.cmr.request.automation.impl.gbl.CalculateCoverageElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
-import com.ibm.cio.cmr.request.automation.util.CoverageContainer;
-import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
-import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
-import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
-import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
-import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
-import com.ibm.cio.cmr.request.query.ExternalizedQuery;
-import com.ibm.cio.cmr.request.query.PreparedQuery;
-import com.ibm.cio.cmr.request.util.SystemLocation;
-import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
-import com.ibm.cmr.services.client.matching.gbg.GBGResponse;
+import com.ibm.cmr.services.client.matching.MatchingResponse;
+import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 
 public class ChinaUtil extends AutomationUtil {
 
   private static final Logger LOG = Logger.getLogger(ChinaUtil.class);
-  public static final String SCENARIO_LOCAL_AQSTN = "AQSTN";
-  public static final String SCENARIO_CROSS_CROSS = "CROSS";
-  public static final String SCENARIO_LOCAL_BLUMX = "BLUMX";
-  public static final String SCENARIO_LOCAL_BUSPR = "BUSPR";
-  public static final String SCENARIO_LOCAL_EMBSA = "EMBSA";
-  public static final String SCENARIO_LOCAL_INTER = "INTER";
-  public static final String SCENARIO_LOCAL_MRKT = "MRKT";
   public static final String SCENARIO_LOCAL_NRML = "NRML";
+  public static final String SCENARIO_LOCAL_EMBSA = "EMBSA";
+  public static final String SCENARIO_CROSS_CROSS = "CROSS";
+  public static final String SCENARIO_LOCAL_AQSTN = "AQSTN";
+  public static final String SCENARIO_LOCAL_BLUMX = "BLUMX";
+  public static final String SCENARIO_LOCAL_MRKT = "MRKT";
+  public static final String SCENARIO_LOCAL_BUSPR = "BUSPR";
+  public static final String SCENARIO_LOCAL_INTER = "INTER";
   public static final String SCENARIO_LOCAL_PRIV = "PRIV";
-
-  private static final String IBM_China = "IBM China";
-
-  private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
-      CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO, CmrConstants.RDC_SECONDARY_SOLD_TO);
-  private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Attention Person", "Phone #");
 
   @Override
   public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
       AutomationResult<ValidationOutput> result, StringBuilder details, ValidationOutput output) {
 
-    ScenarioExceptionsUtil scenarioExceptions = (ScenarioExceptionsUtil) engineData.get("SCENARIO_EXCEPTIONS");
+    // ScenarioExceptionsUtil scenarioExceptions = (ScenarioExceptionsUtil)
+    // engineData.get("SCENARIO_EXCEPTIONS");
     Data data = requestData.getData();
     String scenario = data.getCustSubGrp();
-    Addr zs01 = requestData.getAddress("ZS01");
-    Addr zi01 = requestData.getAddress("ZI01");
-    String customerName = zs01.getCustNm1();
-    Addr zp01 = requestData.getAddress("ZP01");
-    String customerNameZP01 = "";
-    String landedCountryZP01 = "";
-    if (zp01 != null) {
-      customerNameZP01 = StringUtils.isBlank(zp01.getCustNm1()) ? "" : zp01.getCustNm1();
-      landedCountryZP01 = StringUtils.isBlank(zp01.getLandCntry()) ? "" : zp01.getLandCntry();
-
-      if (!StringUtils.equals(zs01.getLandCntry(), zp01.getLandCntry())) {
-        scenarioExceptions.setCheckVATForDnB(false);
-      }
-    }
-    if ((SCENARIO_LOCAL_BUSPR.equals(scenario) || SCENARIO_LOCAL_EMBSA.equals(scenario)) && zp01 != null
-        && (!StringUtils.equals(getCleanString(customerName), getCleanString(customerNameZP01))
-            || !StringUtils.equals(zs01.getLandCntry(), landedCountryZP01))) {
-      details.append("Customer Name and Landed Country on Sold-to and Bill-to address should be same for BP Scenario.").append("\n");
-      engineData.addNegativeCheckStatus("SOLDTO_BILLTO_DIFF",
-          "Customer Name and Landed Country on Sold-to and Bill-to address should be same for BP Scenario.");
-    }
+    Addr soldTo = requestData.getAddress("ZS01");
+    String custNm1 = soldTo.getCustNm1();
+    String custNm2 = StringUtils.isNotBlank(soldTo.getCustNm2()) ? " " + soldTo.getCustNm2() : "";
+    String customerName = custNm1 + custNm2;
 
     switch (scenario) {
 
-    case SCENARIO_LOCAL_AQSTN:
-    case SCENARIO_CROSS_CROSS:
-    case SCENARIO_LOCAL_BLUMX:
-      if (zp01 != null && (!StringUtils.equals(getCleanString(customerName), getCleanString(customerNameZP01))
-          || !StringUtils.equals(zs01.getLandCntry(), landedCountryZP01))) {
-        details.append("Customer Name and Landed Country on Sold-to and Bill-to address should be same for Commercial and Public Customer Scenario.")
-            .append("\n");
-        engineData.addNegativeCheckStatus("SOLDTO_BILLTO_DIFF",
-            "Customer Name and Landed Country on Sold-to and Bill-to address should be same for Commercial and Public Customer Scenario.");
+    case SCENARIO_LOCAL_NRML:
+      if (!("00000".equals(data.getApCustClusterId()) || "04182".equals(data.getApCustClusterId()))) {
+        LOG.debug("Cluster allowed: Cluster=" + data.getApCustClusterId() + " Scenario=" + data.getCustSubGrp());
+        result.setOnError(false);
+        details.append("Cluster allowed:Cluster=" + data.getApCustClusterId() + " Scenario=" + data.getCustSubGrp() + " for the request.\n");
+      } else {
+        details
+            .append("Cluster=" + data.getApCustClusterId() + " should not be allowed for Scenario=" + data.getCustSubGrp() + " for the request.\n");
+        engineData.addRejectionComment("OTH", "Cluster=" + data.getApCustClusterId() + " should not be allowed for this scenario", "", "");
+        result.setOnError(true);
       }
-      break;
-
-    case SCENARIO_LOCAL_BUSPR:
     case SCENARIO_LOCAL_EMBSA:
-      return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
-
-    case SCENARIO_LOCAL_PRIV:
-      if (zi01 == null) {
-        details.append("Install-at address should be present for Interna SO Scenario.").append("\n");
-        engineData.addRejectionComment("OTH", "Install-at address should be present for Internal SO Scenario.", "", "");
-        return false;
+      if (!("00000".equals(data.getApCustClusterId()) || "04182".equals(data.getApCustClusterId()))) {
+        LOG.debug("Cluster allowed: Cluster=" + data.getApCustClusterId() + " Scenario=" + data.getCustSubGrp());
+        result.setOnError(false);
+        details.append("Cluster allowed:Cluster=" + data.getApCustClusterId() + " Scenario=" + data.getCustSubGrp() + " for the request.\n");
+      } else {
+        details
+            .append("Cluster=" + data.getApCustClusterId() + " should not be allowed for Scenario=" + data.getCustSubGrp() + " for the request.\n");
+        engineData.addRejectionComment("OTH", "Cluster=" + data.getApCustClusterId() + " should not be allowed for this scenario", "", "");
+        result.setOnError(true);
       }
-      break;
-    case SCENARIO_LOCAL_INTER:
-      String customerNameFull = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2()
-          : "" + (StringUtils.isNotBlank(zs01.getCustNm3()) ? " " + zs01.getCustNm3() : ""));
-      if (StringUtils.isNotBlank(customerNameFull) && !customerNameFull.contains(IBM_China)) {
-        details.append("English name should include 'IBM China'");
+    case SCENARIO_CROSS_CROSS:
+      if (!("00000".equals(data.getApCustClusterId()) || "04182".equals(data.getApCustClusterId()))) {
+        LOG.debug("Cluster allowed: Cluster=" + data.getApCustClusterId() + " Scenario=" + data.getCustSubGrp());
+        result.setOnError(false);
+        details.append("Cluster allowed:Cluster=" + data.getApCustClusterId() + " Scenario=" + data.getCustSubGrp() + " for the request.\n");
+      } else {
+        details
+            .append("Cluster=" + data.getApCustClusterId() + " should not be allowed for Scenario=" + data.getCustSubGrp() + " for the request.\n");
+        engineData.addRejectionComment("OTH", "Cluster=" + data.getApCustClusterId() + " should not be allowed for this scenario", "", "");
+        result.setOnError(true);
       }
-
-      return doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerNameFull, details, false, requestData);
+    case SCENARIO_LOCAL_AQSTN:
+      if (!("00000".equals(data.getApCustClusterId()) || "04182".equals(data.getApCustClusterId()))) {
+        LOG.debug("Cluster allowed: Cluster=" + data.getApCustClusterId() + " Scenario=" + data.getCustSubGrp());
+        result.setOnError(false);
+        details.append("Cluster allowed:Cluster=" + data.getApCustClusterId() + " Scenario=" + data.getCustSubGrp() + " for the request.\n");
+      } else {
+        details
+            .append("Cluster=" + data.getApCustClusterId() + " should not be allowed for Scenario=" + data.getCustSubGrp() + " for the request.\n");
+        engineData.addRejectionComment("OTH", "Cluster=" + data.getApCustClusterId() + " should not be allowed for this scenario", "", "");
+        result.setOnError(true);
+      }
+    case SCENARIO_LOCAL_BLUMX:
+      engineData.hasPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
 
     case SCENARIO_LOCAL_MRKT:
-      details.append("Processor Review will be required for Third Party Scenario/Data Center.\n");
-      engineData.addNegativeCheckStatus("Scenario_Validation", "3rd Party/Data Center request will require CMDE review before proceeding.\n");
-      break;
-    }
+      engineData.hasPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
 
-    return true;
-  }
-
-  @Override
-  public boolean performCountrySpecificCoverageCalculations(CalculateCoverageElement covElement, EntityManager entityManager,
-      AutomationResult<OverrideOutput> results, StringBuilder details, OverrideOutput overrides, RequestData requestData,
-      AutomationEngineData engineData, String covFrom, CoverageContainer container, boolean isCoverageCalculated) throws Exception {
-
-    if (!"C".equals(requestData.getAdmin().getReqType())) {
-      details.append(" Coverage Calculation skipped for Updates.");
-      results.setResults("Skipped");
-      results.setDetails(details.toString());
-      return true;
-    }
-
-    Data data = requestData.getData();
-    String gbgCntry = chkFrAffiliateCntry(engineData, requestData, entityManager);
-    String cmrCntry = data.getCountryUse().length() == 3 ? "Belgium" : "Luxembourg";
-
-    if (StringUtils.isNotBlank(gbgCntry) && cmrCntry.equalsIgnoreCase(gbgCntry)) {
-      details.append("Coverage calculated for: " + gbgCntry).append("\n");
-    } else if (StringUtils.isNotBlank(gbgCntry) && !cmrCntry.equalsIgnoreCase(gbgCntry)) {
-      results.setOnError(true);
-      details.append("Coverage calculated for: " + gbgCntry + " hence skipping overrides.").append("\n");
-      overrides.clearOverrides(); // clear existing overrides
-      return true;
-    }
-
-    if (StringUtils.isNotBlank(cmrCntry)) {
-      String sortl = getSORTLfromCoverage(entityManager, container.getFinalCoverage(), cmrCntry);
-      if (StringUtils.isNotBlank(sortl)) {
-        details.append("SORTL calculated on basis of Existing CMR Data: " + sortl).append("\n");
-        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getSearchTerm(), sortl);
-        String sbo = "";
-        if (data.getCountryUse().length() == 3) {
-          sbo = "0" + sortl.substring(0, 2) + "0000";
-        } else if (data.getCountryUse().length() > 3) {
-          sbo = "0" + sortl.substring(0, 2) + "0001";
-        }
-        details.append("SBO calculated from Account Team: " + sbo);
-        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sbo);
-
-      }
-    }
-
-    if (!isCoverageCalculated) {
-      // if not calculated using bg/gbg try calculation using 32/S logic
-      details.setLength(0);// clear string builder
-      overrides.clearOverrides(); // clear existing overrides
-
-      BeLuxFieldsContainer fields = calculate32SValuesFromIMSBeLux(entityManager, data.getCmrIssuingCntry(), data.getCountryUse(),
-          data.getSubIndustryCd(), data.getIsuCd(), data.getClientTier());
-      if (fields != null) {
-        if (StringUtils.isNotBlank(fields.getSearchterm())) {
-          details.append("Coverage calculated successfully using 32S logic.").append("\n");
-          details.append("Account Team Number : " + fields.getSearchterm()).append("\n");
-          overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getSearchTerm(), fields.getSearchterm());
-          String sbo = "";
-          if (data.getCountryUse().equalsIgnoreCase("624")) {
-            sbo = "0" + fields.getSearchterm().substring(0, 2) + "0000";
-          } else if (data.getCountryUse().equalsIgnoreCase("624LU")) {
-            sbo = "0" + fields.getSearchterm().substring(0, 2) + "0001";
-          }
-          details.append("SBO : " + sbo).append("\n");
-          overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sbo);
-
-          details.append(" INAC/NAC Code : " + fields.getInacCd()).append("\n");
-          overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "INAC_CD", data.getInacCd(), fields.getInacCd());
-        }
-        results.setResults("Calculated");
-        results.setDetails(details.toString());
-      } else if (StringUtils.isNotBlank(data.getSearchTerm()) && StringUtils.isNotBlank(data.getSalesBusOffCd())) {
-        details.append("Coverage could not be calculated using 32S logic. Using values from request").append("\n");
-        details.append("Sales Rep : " + data.getRepTeamMemberNo()).append("\n");
-        details.append("SBO : " + data.getSalesBusOffCd()).append("\n");
-        results.setResults("Calculated");
-        results.setDetails(details.toString());
+    case SCENARIO_LOCAL_BUSPR:
+      if ("04182".equals(data.getApCustClusterId())) {
+        LOG.debug("Cluster allowed: Cluster=" + data.getApCustClusterId() + " Scenario=" + data.getCustSubGrp());
+        result.setOnError(false);
+        details.append("Cluster allowed:Cluster=" + data.getApCustClusterId() + " Scenario=" + data.getCustSubGrp() + " for the request.\n");
       } else {
-        String msg = "Coverage cannot be calculated. No valid 32S mapping found from request data.";
-        details.append(msg);
-        results.setResults("Cannot Calculate");
-        results.setDetails(details.toString());
-        engineData.addNegativeCheckStatus("_beluxCoverage", msg);
+        details.append(
+            "Cluster=" + data.getApCustClusterId() + " should be default (04182)  for Scenario=" + data.getCustSubGrp() + " for the request.\n");
+        engineData.addRejectionComment("OTH", "Cluster=" + data.getApCustClusterId() + " should default (04182)  for this scenario", "", "");
+        result.setOnError(true);
       }
+      if (StringUtils.isNotBlank(data.getPpsceid())) {
+        LOG.debug("CEID=" + data.getPpsceid() + " for Scenario=" + data.getCustSubGrp());
+        result.setOnError(false);
+        details.append("CEID=" + data.getPpsceid() + " for Scenario=" + data.getCustSubGrp() + " for the request.\n");
+      } else {
+        details.append("CEID cannot be blank for Scenario=" + data.getCustSubGrp() + " for the request.\n");
+        engineData.addRejectionComment("OTH", "CEID cannot be blank for this scenario", "", "");
+        result.setOnError(true);
+      }
+      if ("7230".equals(data.getIsicCd())) {
+        LOG.debug("ISIC allowed: ISIC=" + data.getIsicCd() + " Scenario=" + data.getCustSubGrp());
+        result.setOnError(false);
+        details.append("ISIC ISIC=" + data.getIsicCd() + " Scenario=" + data.getCustSubGrp() + " for the request.\n");
+      } else {
+        details.append("ISIC=" + data.getIsicCd() + " should be default (7230)  for Scenario=" + data.getCustSubGrp() + " for the request.\n");
+        engineData.addRejectionComment("OTH", "ISIC=" + data.getIsicCd() + " should default (7230)  for this scenario", "", "");
+        result.setOnError(true);
+      }
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
+      engineData.hasPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
+
+    case SCENARIO_LOCAL_INTER:
+      if (StringUtils.isNotBlank(customerName) && customerName.indexOf("IBM China") >= 0) {
+        LOG.debug("English name=" + customerName + " for Scenario=" + data.getCustSubGrp());
+        result.setOnError(false);
+        details.append("English name=" + customerName + " for Scenario=" + data.getCustSubGrp() + " for the request.\n");
+      } else {
+        details.append("English name should include 'IBM China' for Scenario=" + data.getCustSubGrp() + " for the request.\n");
+        engineData.addRejectionComment("OTH", "English name should include 'IBM China' for this scenario", "", "");
+        result.setOnError(true);
+      }
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
+      engineData.hasPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
+
+    case SCENARIO_LOCAL_PRIV:
+      if ("00000".equals(data.getApCustClusterId())) {
+        LOG.debug("Cluster allowed: Cluster=" + data.getApCustClusterId() + " Scenario=" + data.getCustSubGrp());
+        result.setOnError(false);
+        details.append("Cluster allowed:Cluster=" + data.getApCustClusterId() + " Scenario=" + data.getCustSubGrp() + " for the request.\n");
+      } else {
+        details.append(
+            "Cluster=" + data.getApCustClusterId() + " should be default (00000)  for Scenario=" + data.getCustSubGrp() + " for the request.\n");
+        engineData.addRejectionComment("OTH", "Cluster=" + data.getApCustClusterId() + " should default (00000)  for this scenario", "", "");
+        result.setOnError(true);
+      }
+      if ("9500".equals(data.getIsicCd())) {
+        LOG.debug("ISIC allowed: ISIC=" + data.getIsicCd() + " Scenario=" + data.getCustSubGrp());
+        result.setOnError(false);
+        details.append("ISIC ISIC=" + data.getIsicCd() + " Scenario=" + data.getCustSubGrp() + " for the request.\n");
+      } else {
+        details.append("ISIC=" + data.getIsicCd() + " should be default (9500)  for Scenario=" + data.getCustSubGrp() + " for the request.\n");
+        engineData.addRejectionComment("OTH", "ISIC=" + data.getIsicCd() + " should default (9500)  for this scenario", "", "");
+        result.setOnError(true);
+      }
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
+      engineData.hasPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
+
     }
+
     return true;
   }
 
-  private String chkFrAffiliateCntry(AutomationEngineData engineData, RequestData reqData, EntityManager entityManager) {
-    GBGResponse gbg = (GBGResponse) engineData.get(AutomationEngineData.GBG_MATCH);
-    String gbgCntry = "";
-    if (gbg != null && gbg.isDomesticGBG()) {
-      // check konsz
-
-      Data data = reqData.getData();
-      int count = 0;
-      String affiliate = data.getCountryUse().length() > 3 ? "0502" : "0016";
-      String sql = ExternalizedQuery.getSql("AUTO.GBG.COV.KNA1.KONSZ");
-      String bgId = gbg.getBgId();
-      PreparedQuery query = new PreparedQuery(entityManager, sql);
-      query.setParameter("CNTRY", data.getCmrIssuingCntry());
-      query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
-      query.setParameter("BG_ID", bgId);
-      query.setParameter("AFFILIATE", affiliate);
-
-      count = query.getSingleResult(Integer.class);
-      if (count > 0 && data.getCountryUse().length() == 3) {
-        gbgCntry = "Belgium";
-      } else if (count > 0 && data.getCountryUse().length() > 3) {
-        gbgCntry = "Luxembourg";
-      }
-    }
-    return gbgCntry;
-  }
-
-  private BeLuxFieldsContainer calculate32SValuesFromIMSBeLux(EntityManager entityManager, String cmrIssuingctry, String countryUse,
-      String subIndustryCd, String isuCd, String clientTier) {
-    BeLuxFieldsContainer container = new BeLuxFieldsContainer();
-    List<Object[]> searchTerms = new ArrayList<>();
-    String isuCtc = (StringUtils.isNotBlank(isuCd) ? isuCd : "") + (StringUtils.isNotBlank(clientTier) ? clientTier : "");
-    String geoCd = "";
-    if (countryUse.length() > 3) {
-      geoCd = countryUse.substring(3, 5);
-    }
-
-    String cmrCntry = cmrIssuingctry + geoCd;
-    if (StringUtils.isNotBlank(subIndustryCd) && ("32S".equals(isuCtc))) {
-      String ims = subIndustryCd.substring(0, 1);
-      String sql = ExternalizedQuery.getSql("QUERY.GET.SRLIST.BYISUCTC");
-      PreparedQuery query = new PreparedQuery(entityManager, sql);
-      query.setParameter("ISU", "%" + isuCtc + "%");
-      query.setParameter("ISSUING_CNTRY", cmrCntry);
-      query.setParameter("CLIENT_TIER", "%" + ims + "%");
-      query.setForReadOnly(true);
-      searchTerms = query.getResults();
-    } else {
-      String sql = ExternalizedQuery.getSql("QUERY.GET.SRLIST.BYISU");
-      PreparedQuery query = new PreparedQuery(entityManager, sql);
-      query.setParameter("ISU", "%" + isuCtc + "%");
-      query.setParameter("ISSUING_CNTRY", cmrCntry);
-      searchTerms = query.getResults();
-    }
-    if (searchTerms != null && searchTerms.size() == 1) {
-      String searchTerm = (String) searchTerms.get(0)[0];
-      container.setSearchterm(searchTerm);
-    }
-
-    // inac
-    List<Object[]> inacs = new ArrayList<>();
-
-    if (StringUtils.isNotBlank(container.getSearchterm())) {
-      String sql = ExternalizedQuery.getSql("QUERY.GET.INACLIST.BYST");
-      PreparedQuery query = new PreparedQuery(entityManager, sql);
-      query.setParameter("SEARCHTERM", "%" + container.getSearchterm() + "%");
-      query.setParameter("ISSUING_CNTRY", SystemLocation.BELGIUM);
-      query.setForReadOnly(true);
-      inacs = query.getResults();
-    }
-
-    if (inacs != null && inacs.size() == 1) {
-      String inacCd = (String) inacs.get(0)[0];
-      container.setInacCd(inacCd);
-    }
-
-    return container;
-
-  }
-
-  private class BeLuxFieldsContainer {
-    private String searchTerm;
-    private String inacCd;
-
-    public String getSearchterm() {
-      return searchTerm;
-    }
-
-    public void setSearchterm(String searchTerm) {
-      this.searchTerm = searchTerm;
-    }
-
-    public String getInacCd() {
-      return inacCd;
-    }
-
-    public void setInacCd(String inacCd) {
-      this.inacCd = inacCd;
-    }
-
-  }
+  // @Override
+  // public boolean
+  // performCountrySpecificCoverageCalculations(CalculateCoverageElement
+  // covElement, EntityManager entityManager,
+  // AutomationResult<OverrideOutput> results, StringBuilder details,
+  // OverrideOutput overrides, RequestData requestData,
+  // AutomationEngineData engineData, String covFrom, CoverageContainer
+  // container, boolean isCoverageCalculated) throws Exception {
+  //
+  // if (!"C".equals(requestData.getAdmin().getReqType())) {
+  // details.append(" Coverage Calculation skipped for Updates.");
+  // results.setResults("Skipped");
+  // results.setDetails(details.toString());
+  // return true;
+  // }
+  //
+  // Data data = requestData.getData();
+  // String scenario = data.getCustSubGrp();
+  // if (StringUtils.isNotEmpty(scenario) &&
+  // !((SCENARIO_LOCAL_BLUMX.equals(scenario) ||
+  // SCENARIO_LOCAL_MRKT.equals(scenario)
+  // || SCENARIO_LOCAL_BUSPR.equals(scenario) ||
+  // SCENARIO_LOCAL_INTER.equals(scenario) ||
+  // SCENARIO_LOCAL_PRIV.equals(scenario)))) {
+  //
+  // }
+  // return true;
+  // }
 
   @Override
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public boolean runUpdateChecksForData(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
-      RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
-    Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
-    StringBuilder details = new StringBuilder();
-    boolean cmdeReview = false;
-    Set<String> resultCodes = new HashSet<String>();
-    List<String> ignoredUpdates = new ArrayList<String>();
-    for (UpdatedDataModel change : changes.getDataUpdates()) {
-      switch (change.getDataField()) {
-      case "VAT #":
-        if (StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())) {
-          // ADD
-          Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
-          List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
-          boolean matchesDnb = false;
-          if (matches != null) {
-            // check against D&B
-            matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
-          }
-          if (!matchesDnb) {
-            cmdeReview = true;
-            engineData.addNegativeCheckStatus("_beluxVATCheckFailed", "VAT # on the request did not match D&B");
-            details.append("VAT # on the request did not match D&B\n");
-          } else {
-            details.append("VAT # on the request matches D&B\n");
-          }
-        }
-
-        if (!StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())
-            && !(change.getOldData().equals(change.getNewData()))) {
-          // UPDATE
-          Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
-          List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
-          boolean matchesDnb = false;
-          if (matches != null) {
-            // check against D&B
-            matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
-          }
-          if (!matchesDnb) {
-            cmdeReview = true;
-            engineData.addNegativeCheckStatus("_beluxVATCheckFailed", "VAT # on the request did not match D&B");
-            details.append("VAT # on the request did not match D&B\n");
-          } else {
-            details.append("VAT # on the request matches D&B\n");
-          }
-        }
-
-        break;
-      case "ISIC":
-      case "INAC/NAC Code":
-        cmdeReview = true;
-        break;
-      case "Economic Code":
-        String newEcoCd = change.getNewData();
-        String oldEcoCd = change.getOldData();
-        List<String> ls = Arrays.asList("A", "F", "C", "R");
-        if (StringUtils.isNotBlank(newEcoCd) && StringUtils.isNotBlank(oldEcoCd) && newEcoCd.length() == 3 && oldEcoCd.length() == 3) {
-          if (!newEcoCd.substring(0, 1).equals(oldEcoCd.substring(0, 1))
-              && newEcoCd.substring(1, newEcoCd.length()).equals(oldEcoCd.substring(1, oldEcoCd.length()))) {
-            if (ls.contains(newEcoCd.substring(0, 1)) && oldEcoCd.substring(0, 1).equals("K")
-                || ls.contains(oldEcoCd.substring(0, 1)) && newEcoCd.substring(0, 1).equals("K")) {
-              admin.setScenarioVerifiedIndc("Y");
-              details.append("Economic Code has been updated by registered user to " + newEcoCd + "\n");
-            } else {
-              cmdeReview = true;
-            }
-          } else if (newEcoCd.substring(0, 1).equals(oldEcoCd.substring(0, 1))
-              && (newEcoCd.substring(1, 3).equals("11") || newEcoCd.substring(1, 3).equals("13") || newEcoCd.substring(1, 3).equals("49"))) {
-            cmdeReview = true;
-            engineData.addNegativeCheckStatus("_beluxEconomicCdUpdt", "Economic code is updated from " + oldEcoCd + " to " + newEcoCd);
-            details.append("Economic code is updated to " + newEcoCd + "\n");
-          } else {
-            cmdeReview = true;
-            engineData.addNegativeCheckStatus("_beluxEconomicCdUpdt", "Economic code was updated incorrectly or by non registered user.");
-            details.append("Economic code was updated incorrectly or by non registered user.\n");
-          }
-        }
-        break;
-      case "PPS CEID":
-        String newppsceid = change.getNewData();
-        String oldppsceid = change.getOldData();
-        String Kukla = data.getCustClass();
-        // ADD
-        if (StringUtils.isBlank(oldppsceid) && !StringUtils.isBlank(newppsceid)) {
-          if ("49".equalsIgnoreCase(Kukla) && checkPPSCEID(data.getPpsceid())) {
-            details.append("PPS CE ID validated successfully with PartnerWorld Profile Systems.").append("\n");
-          } else {
-            resultCodes.add("D");
-            if (!"49".equalsIgnoreCase(Kukla)) {
-              details.append("PS Ceid added for CMR with Kukla other than 49").append("\n");
-            } else {
-              details.append("PPS ceid on the request is invalid").append("\n");
-            }
-          }
-        }
-        // DELETE
-        if (!StringUtils.isBlank(oldppsceid) && StringUtils.isBlank(newppsceid)) {
-          cmdeReview = true;
-          engineData.addNegativeCheckStatus("_beluxPpsCeidUpdt", " Deletion of ppsceid needs cmde review.\n");
-          details.append(" Deletion of ppsceid needs cmde review.\n");
-        }
-        // UPDATE
-        if (!StringUtils.isBlank(oldppsceid) && !StringUtils.isBlank(newppsceid) && !oldppsceid.equalsIgnoreCase(newppsceid)) {
-          cmdeReview = true;
-          engineData.addNegativeCheckStatus("_beluxPpsCeidUpdt", " Update of ppsceid needs cmde review.\n");
-          details.append(" Update of ppsceid needs cmde review.\n");
-        }
-        break;
-      case "Order Block Code":
-        String newOrdBlk = change.getNewData();
-        String oldOrdBlk = change.getOldData();
-        // ADD
-        if (StringUtils.isBlank(oldOrdBlk) && !StringUtils.isBlank(newOrdBlk) && "P".equalsIgnoreCase(newOrdBlk)) {
-          cmdeReview = true;
-          engineData.addNegativeCheckStatus("_beluxOrdBlkUpdt", "Embargo Code P was added.");
-          details.append("Embargo Code P was added.\n");
-        }
-
-        // DELETE
-        if (!StringUtils.isBlank(oldOrdBlk) && StringUtils.isBlank(newOrdBlk) && "P".equalsIgnoreCase(oldOrdBlk)) {
-          cmdeReview = true;
-          engineData.addNegativeCheckStatus("_beluxOrdBlkUpdt", "Embargo Code P was deleted.");
-          details.append("Embargo Code P was deleted.\n");
-        }
-        break;
-      case "Preferred Language":
-        details.append("Preferred Language data field was updated.\n");
-        break;
-      default:
-        ignoredUpdates.add(change.getDataField());
-        break;
-      }
-    }
-    if (resultCodes.contains("D")) {
-      output.setOnError(true);
-      validation.setSuccess(false);
-      validation.setMessage("Rejected");
-    } else if (cmdeReview) {
-      engineData.addNegativeCheckStatus("_esDataCheckFailed", "Updates to one or more fields requires CMDE review.");
-      details.append("Updates to one or more fields requires CMDE review.\n");
-      validation.setSuccess(false);
-      validation.setMessage("Not Validated");
-    } else {
-      validation.setSuccess(true);
-      validation.setMessage("Successful");
-    }
-    if (!ignoredUpdates.isEmpty()) {
-      details.append("Updates to the following fields skipped validation:\n");
-      for (String field : ignoredUpdates) {
-        details.append(" - " + field + "\n");
-      }
-    }
-    output.setDetails(details.toString());
-    output.setProcessOutput(validation);
-    return true;
-  }
-
-  @Override
-  public boolean runUpdateChecksForAddress(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
-      RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
     Admin admin = requestData.getAdmin();
-    Data data = requestData.getData();
-    StringBuilder duplicateDetails = new StringBuilder();
-    StringBuilder nonRelAddrFdsDetails = new StringBuilder();
-    List<Addr> addresses = null;
-    int ignoredAddr = 0;
-    StringBuilder checkDetails = new StringBuilder();
-    Set<String> resultCodes = new HashSet<String>();// R - review
-    for (String addrType : RELEVANT_ADDRESSES) {
-      addresses = requestData.getAddresses(addrType);
-      if (changes.isAddressChanged(addrType)) {
-        for (Addr addr : addresses) {
-          if (isRelevantAddressFieldUpdated(changes, addr, nonRelAddrFdsDetails)) {
-
-            if ((addrType.equalsIgnoreCase(CmrConstants.RDC_SOLD_TO) && "Y".equals(addr.getImportInd()))
-                || addrType.equalsIgnoreCase(CmrConstants.RDC_BILL_TO) || addrType.equalsIgnoreCase(CmrConstants.RDC_SECONDARY_SOLD_TO)) {
-
-              List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addr, false);
-              boolean matchesDnb = false;
-              if (matches != null) {
-                // check against D&B
-                matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
-              }
-              if (!matchesDnb) {
-                LOG.debug("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
-                resultCodes.add("X");
-                checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
-              } else {
-                checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
-                for (DnBMatchingResponse dnb : matches) {
-                  checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
-                  checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
-                  checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
-                      + dnb.getDnbCountry() + "\n\n");
-                }
-              }
-
-            }
-
-            String soldToCustNm1 = requestData.getAddress("ZS01").getCustNm1();
-            String installAtCustNm = requestData.getAddress("ZI01") != null ? requestData.getAddress("ZI01").getCustNm1() : "";
-            if ((addrType.equalsIgnoreCase(CmrConstants.RDC_INSTALL_AT) && soldToCustNm1.equalsIgnoreCase(installAtCustNm))
-                || (addrType.equalsIgnoreCase(CmrConstants.RDC_SHIP_TO) && "N".equals(addr.getImportInd()))) {
-              LOG.debug("Checking duplicates for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
-              boolean duplicate = addressExists(entityManager, addr);
-              if (duplicate) {
-                LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
-                duplicateDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");
-                resultCodes.add("R");
-              }
-            }
-
-            if (addrType.equalsIgnoreCase(CmrConstants.RDC_SHIP_TO) && "Y".equals(addr.getImportInd())) {
-              ignoredAddr++;
-            }
-          }
-        }
-      }
-    }
-    if (resultCodes.contains("X")) {
-      validation.setSuccess(false);
-      validation.setMessage("Review Required.");
-      engineData.addNegativeCheckStatus("_esCheckFailed", "Updated elements cannot be checked automatically.");
-    } else if (resultCodes.contains("R")) {
-      output.setOnError(true);
-      engineData.addRejectionComment("_atRejectAddr", "Addition or updation on the address is rejected", "", "");
-      validation.setSuccess(false);
-      validation.setMessage("Rejected.");
-    } else {
-      validation.setSuccess(true);
-      validation.setMessage("Successful");
-    }
-
-    if (ignoredAddr > 0) {
-      checkDetails.append("Updates to imported Address Ship-To(ZD01) ignored. ");
-    }
-    String details = (output.getDetails() != null && output.getDetails().length() > 0) ? output.getDetails() : "";
-    details += duplicateDetails.length() > 0 ? duplicateDetails.toString() : "";
-    details += checkDetails.length() > 0 ? "\n" + checkDetails.toString() : "";
-    details += nonRelAddrFdsDetails.length() > 0 ? "Following updates ignored - \n" + nonRelAddrFdsDetails.toString() : "";
-    output.setDetails(details);
-    output.setProcessOutput(validation);
-    return true;
-  }
-
-  private boolean isRelevantAddressFieldUpdated(RequestChangeContainer changes, Addr addr, StringBuilder details) {
-    List<UpdatedNameAddrModel> addrChanges = changes.getAddressChanges(addr.getId().getAddrType(), addr.getId().getAddrSeq());
-    if (addrChanges == null) {
-      return false;
-    }
-    for (UpdatedNameAddrModel change : addrChanges) {
-      if (!NON_RELEVANT_ADDRESS_FIELDS.contains(change.getDataField())) {
-        return true;
+    if ("C".equals(admin.getReqType())) {
+      String scenario = data.getCustSubGrp();
+      LOG.info("Starting Field Computations for Request ID " + data.getId().getReqId());
+      if (StringUtils.isNotBlank(scenario) && (SCENARIO_LOCAL_BLUMX.equals(scenario) || SCENARIO_LOCAL_MRKT.equals(scenario)
+          || SCENARIO_LOCAL_BUSPR.equals(scenario) || SCENARIO_LOCAL_INTER.equals(scenario) || SCENARIO_LOCAL_PRIV.equals(scenario))) {
+        details.append("No specific fields to compute.\n");
+        results.setResults("Skipped");
       } else {
-        details.append(change.getDataField() + " of address " + addr.getId().getAddrType() + " \n");
+        details.append("This is a normal process.\n");
+        results.setResults("Computed");
       }
-    }
-    return false;
-  }
 
-  /**
-   * Computes the SBO by getting the SORTL most used by the COverage ID
+    } else {
+      details.append("No specific fields to compute.\n");
+      results.setResults("Skipped");
+    }
+    results.setDetails(details.toString());
+
+    return results;
+  }
+  /*
+   * @Override public boolean runUpdateChecksForData(EntityManager
+   * entityManager, AutomationEngineData engineData, RequestData requestData,
+   * RequestChangeContainer changes, AutomationResult<ValidationOutput> output,
+   * ValidationOutput validation) throws Exception { Admin admin =
+   * requestData.getAdmin(); Data data = requestData.getData(); StringBuilder
+   * details = new StringBuilder(); boolean cmdeReview = false; Set<String>
+   * resultCodes = new HashSet<String>(); List<String> ignoredUpdates = new
+   * ArrayList<String>(); for (UpdatedDataModel change :
+   * changes.getDataUpdates()) { switch (change.getDataField()) { case "VAT #":
+   * if (StringUtils.isBlank(change.getOldData()) &&
+   * !StringUtils.isBlank(change.getNewData())) { // ADD Addr soldTo =
+   * requestData.getAddress(CmrConstants.RDC_SOLD_TO); List<DnBMatchingResponse>
+   * matches = getMatches(requestData, engineData, soldTo, true); boolean
+   * matchesDnb = false; if (matches != null) { // check against D&B matchesDnb
+   * = ifaddressCloselyMatchesDnb(matches, soldTo, admin,
+   * data.getCmrIssuingCntry()); } if (!matchesDnb) { cmdeReview = true;
+   * engineData.addNegativeCheckStatus("_beluxVATCheckFailed",
+   * "VAT # on the request did not match D&B");
+   * details.append("VAT # on the request did not match D&B\n"); } else {
+   * details.append("VAT # on the request matches D&B\n"); } }
    * 
-   * @param entityManager
-   * @param coverage
-   * @return
+   * if (!StringUtils.isBlank(change.getOldData()) &&
+   * !StringUtils.isBlank(change.getNewData()) &&
+   * !(change.getOldData().equals(change.getNewData()))) { // UPDATE Addr soldTo
+   * = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
+   * List<DnBMatchingResponse> matches = getMatches(requestData, engineData,
+   * soldTo, true); boolean matchesDnb = false; if (matches != null) { // check
+   * against D&B matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin,
+   * data.getCmrIssuingCntry()); } if (!matchesDnb) { cmdeReview = true;
+   * engineData.addNegativeCheckStatus("_beluxVATCheckFailed",
+   * "VAT # on the request did not match D&B");
+   * details.append("VAT # on the request did not match D&B\n"); } else {
+   * details.append("VAT # on the request matches D&B\n"); } }
+   * 
+   * break; case "ISIC": case "INAC/NAC Code": cmdeReview = true; break; case
+   * "Economic Code": String newEcoCd = change.getNewData(); String oldEcoCd =
+   * change.getOldData(); List<String> ls = Arrays.asList("A", "F", "C", "R");
+   * if (StringUtils.isNotBlank(newEcoCd) && StringUtils.isNotBlank(oldEcoCd) &&
+   * newEcoCd.length() == 3 && oldEcoCd.length() == 3) { if
+   * (!newEcoCd.substring(0, 1).equals(oldEcoCd.substring(0, 1)) &&
+   * newEcoCd.substring(1, newEcoCd.length()).equals(oldEcoCd.substring(1,
+   * oldEcoCd.length()))) { if (ls.contains(newEcoCd.substring(0, 1)) &&
+   * oldEcoCd.substring(0, 1).equals("K") || ls.contains(oldEcoCd.substring(0,
+   * 1)) && newEcoCd.substring(0, 1).equals("K")) {
+   * admin.setScenarioVerifiedIndc("Y");
+   * details.append("Economic Code has been updated by registered user to " +
+   * newEcoCd + "\n"); } else { cmdeReview = true; } } else if
+   * (newEcoCd.substring(0, 1).equals(oldEcoCd.substring(0, 1)) &&
+   * (newEcoCd.substring(1, 3).equals("11") || newEcoCd.substring(1,
+   * 3).equals("13") || newEcoCd.substring(1, 3).equals("49"))) { cmdeReview =
+   * true; engineData.addNegativeCheckStatus("_beluxEconomicCdUpdt",
+   * "Economic code is updated from " + oldEcoCd + " to " + newEcoCd);
+   * details.append("Economic code is updated to " + newEcoCd + "\n"); } else {
+   * cmdeReview = true;
+   * engineData.addNegativeCheckStatus("_beluxEconomicCdUpdt",
+   * "Economic code was updated incorrectly or by non registered user.");
+   * details.
+   * append("Economic code was updated incorrectly or by non registered user.\n"
+   * ); } } break; case "PPS CEID": String newppsceid = change.getNewData();
+   * String oldppsceid = change.getOldData(); String Kukla =
+   * data.getCustClass(); // ADD if (StringUtils.isBlank(oldppsceid) &&
+   * !StringUtils.isBlank(newppsceid)) { if ("49".equalsIgnoreCase(Kukla) &&
+   * checkPPSCEID(data.getPpsceid())) { details.
+   * append("PPS CE ID validated successfully with PartnerWorld Profile Systems."
+   * ).append("\n"); } else { resultCodes.add("D"); if
+   * (!"49".equalsIgnoreCase(Kukla)) {
+   * details.append("PS Ceid added for CMR with Kukla other than 49").append(
+   * "\n"); } else {
+   * details.append("PPS ceid on the request is invalid").append("\n"); } } } //
+   * DELETE if (!StringUtils.isBlank(oldppsceid) &&
+   * StringUtils.isBlank(newppsceid)) { cmdeReview = true;
+   * engineData.addNegativeCheckStatus("_beluxPpsCeidUpdt",
+   * " Deletion of ppsceid needs cmde review.\n");
+   * details.append(" Deletion of ppsceid needs cmde review.\n"); } // UPDATE if
+   * (!StringUtils.isBlank(oldppsceid) && !StringUtils.isBlank(newppsceid) &&
+   * !oldppsceid.equalsIgnoreCase(newppsceid)) { cmdeReview = true;
+   * engineData.addNegativeCheckStatus("_beluxPpsCeidUpdt",
+   * " Update of ppsceid needs cmde review.\n");
+   * details.append(" Update of ppsceid needs cmde review.\n"); } break; case
+   * "Order Block Code": String newOrdBlk = change.getNewData(); String
+   * oldOrdBlk = change.getOldData(); // ADD if (StringUtils.isBlank(oldOrdBlk)
+   * && !StringUtils.isBlank(newOrdBlk) && "P".equalsIgnoreCase(newOrdBlk)) {
+   * cmdeReview = true; engineData.addNegativeCheckStatus("_beluxOrdBlkUpdt",
+   * "Embargo Code P was added.");
+   * details.append("Embargo Code P was added.\n"); }
+   * 
+   * // DELETE if (!StringUtils.isBlank(oldOrdBlk) &&
+   * StringUtils.isBlank(newOrdBlk) && "P".equalsIgnoreCase(oldOrdBlk)) {
+   * cmdeReview = true; engineData.addNegativeCheckStatus("_beluxOrdBlkUpdt",
+   * "Embargo Code P was deleted.");
+   * details.append("Embargo Code P was deleted.\n"); } break; case
+   * "Preferred Language":
+   * details.append("Preferred Language data field was updated.\n"); break;
+   * default: ignoredUpdates.add(change.getDataField()); break; } } if
+   * (resultCodes.contains("D")) { output.setOnError(true);
+   * validation.setSuccess(false); validation.setMessage("Rejected"); } else if
+   * (cmdeReview) { engineData.addNegativeCheckStatus("_esDataCheckFailed",
+   * "Updates to one or more fields requires CMDE review.");
+   * details.append("Updates to one or more fields requires CMDE review.\n");
+   * validation.setSuccess(false); validation.setMessage("Not Validated"); }
+   * else { validation.setSuccess(true); validation.setMessage("Successful"); }
+   * if (!ignoredUpdates.isEmpty()) {
+   * details.append("Updates to the following fields skipped validation:\n");
+   * for (String field : ignoredUpdates) { details.append(" - " + field + "\n");
+   * } } output.setDetails(details.toString());
+   * output.setProcessOutput(validation); return true; }
+   * 
+   * @Override public boolean runUpdateChecksForAddress(EntityManager
+   * entityManager, AutomationEngineData engineData, RequestData requestData,
+   * RequestChangeContainer changes, AutomationResult<ValidationOutput> output,
+   * ValidationOutput validation) throws Exception { Admin admin =
+   * requestData.getAdmin(); Data data = requestData.getData(); StringBuilder
+   * duplicateDetails = new StringBuilder(); StringBuilder nonRelAddrFdsDetails
+   * = new StringBuilder(); List<Addr> addresses = null; int ignoredAddr = 0;
+   * StringBuilder checkDetails = new StringBuilder(); Set<String> resultCodes =
+   * new HashSet<String>();// R - review for (String addrType :
+   * RELEVANT_ADDRESSES) { addresses = requestData.getAddresses(addrType); if
+   * (changes.isAddressChanged(addrType)) { for (Addr addr : addresses) { if
+   * (isRelevantAddressFieldUpdated(changes, addr, nonRelAddrFdsDetails)) {
+   * 
+   * if ((addrType.equalsIgnoreCase(CmrConstants.RDC_SOLD_TO) &&
+   * "Y".equals(addr.getImportInd())) ||
+   * addrType.equalsIgnoreCase(CmrConstants.RDC_BILL_TO) ||
+   * addrType.equalsIgnoreCase(CmrConstants.RDC_SECONDARY_SOLD_TO)) {
+   * 
+   * List<DnBMatchingResponse> matches = getMatches(requestData, engineData,
+   * addr, false); boolean matchesDnb = false; if (matches != null) { // check
+   * against D&B matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin,
+   * data.getCmrIssuingCntry()); } if (!matchesDnb) { LOG.debug("Address " +
+   * addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
+   * resultCodes.add("X"); checkDetails.append("Address " + addrType + "(" +
+   * addr.getId().getAddrSeq() + ") did not match D&B records.\n"); } else {
+   * checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq()
+   * + ") matches D&B records. Matches:\n"); for (DnBMatchingResponse dnb :
+   * matches) { checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
+   * checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
+   * checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " +
+   * dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " " + dnb.getDnbCountry()
+   * + "\n\n"); } }
+   * 
+   * }
+   * 
+   * String soldToCustNm1 = requestData.getAddress("ZS01").getCustNm1(); String
+   * installAtCustNm = requestData.getAddress("ZI01") != null ?
+   * requestData.getAddress("ZI01").getCustNm1() : ""; if
+   * ((addrType.equalsIgnoreCase(CmrConstants.RDC_INSTALL_AT) &&
+   * soldToCustNm1.equalsIgnoreCase(installAtCustNm)) ||
+   * (addrType.equalsIgnoreCase(CmrConstants.RDC_SHIP_TO) &&
+   * "N".equals(addr.getImportInd()))) { LOG.debug("Checking duplicates for " +
+   * addrType + "(" + addr.getId().getAddrSeq() + ")"); boolean duplicate =
+   * addressExists(entityManager, addr); if (duplicate) {
+   * LOG.debug(" - Duplicates found for " + addrType + "(" +
+   * addr.getId().getAddrSeq() + ")"); duplicateDetails.append("Address " +
+   * addrType + "(" + addr.getId().getAddrSeq() +
+   * ") provided matches an existing address.\n"); resultCodes.add("R"); } }
+   * 
+   * if (addrType.equalsIgnoreCase(CmrConstants.RDC_SHIP_TO) &&
+   * "Y".equals(addr.getImportInd())) { ignoredAddr++; } } } } } if
+   * (resultCodes.contains("X")) { validation.setSuccess(false);
+   * validation.setMessage("Review Required.");
+   * engineData.addNegativeCheckStatus("_esCheckFailed",
+   * "Updated elements cannot be checked automatically."); } else if
+   * (resultCodes.contains("R")) { output.setOnError(true);
+   * engineData.addRejectionComment("_atRejectAddr",
+   * "Addition or updation on the address is rejected", "", "");
+   * validation.setSuccess(false); validation.setMessage("Rejected."); } else {
+   * validation.setSuccess(true); validation.setMessage("Successful"); }
+   * 
+   * if (ignoredAddr > 0) {
+   * checkDetails.append("Updates to imported Address Ship-To(ZD01) ignored. ");
+   * } String details = (output.getDetails() != null &&
+   * output.getDetails().length() > 0) ? output.getDetails() : ""; details +=
+   * duplicateDetails.length() > 0 ? duplicateDetails.toString() : ""; details
+   * += checkDetails.length() > 0 ? "\n" + checkDetails.toString() : ""; details
+   * += nonRelAddrFdsDetails.length() > 0 ? "Following updates ignored - \n" +
+   * nonRelAddrFdsDetails.toString() : ""; output.setDetails(details);
+   * output.setProcessOutput(validation); return true; }
+   * 
+   * private boolean isRelevantAddressFieldUpdated(RequestChangeContainer
+   * changes, Addr addr, StringBuilder details) { List<UpdatedNameAddrModel>
+   * addrChanges = changes.getAddressChanges(addr.getId().getAddrType(),
+   * addr.getId().getAddrSeq()); if (addrChanges == null) { return false; } for
+   * (UpdatedNameAddrModel change : addrChanges) { if
+   * (!NON_RELEVANT_ADDRESS_FIELDS.contains(change.getDataField())) { return
+   * true; } else { details.append(change.getDataField() + " of address " +
+   * addr.getId().getAddrType() + " \n"); } } return false; }
    */
-  private String getSORTLfromCoverage(EntityManager entityManager, String coverage, String gbgCntry) {
-    String sortl = "";
-    try {
-      LOG.debug("Computing SORTL for Coverage " + coverage);
-      String gbgCntryCd = gbgCntry.equalsIgnoreCase("Belgium") ? "BE" : "LU";
-      String konzs = "BE".equalsIgnoreCase(gbgCntryCd) ? "0016" : "0502";
-      String sql = ExternalizedQuery.getSql("AUTO.BELUX.COV.SORTL");
-      PreparedQuery query = new PreparedQuery(entityManager, sql);
-      query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
-      query.setParameter("COVID", coverage);
-      query.setParameter("LAND1", gbgCntryCd);
-      query.setParameter("KONZS", konzs);
-      query.setForReadOnly(true);
-      sortl = query.getSingleResult(String.class);
-    } catch (Exception e) {
-      LOG.debug("Error while computing SORTL for Coverage " + coverage + " from RDc query.");
-    }
-    if (sortl != null && !StringUtils.isBlank(sortl)) {
-      return sortl;
-    }
-    return null;
+
+  @Override
+  public void filterDuplicateCMRMatches(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
+      MatchingResponse<DuplicateCMRCheckResponse> response) {
+    // String[] scenariosToBeChecked = { "COMME", "CBMME", "GOVRN", "CBVRN",
+    // "BPIEU", "CBIEU", "CBIEM", "XBLUM" };
+    // String scenario = requestData.getData().getCustSubGrp();
+    // String[] kuklaComme = { "11" };
+    // String[] kuklaGovrn = { "13", "14", "17" };
+    // String[] kuklaBuspr = { "42", "43", "45", "46", "47", "48" };
+    // String[] kuklaCBIEM = { "71" };
+    // String[] kuklaXBLUM = { "60" };
+    //
+    // if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
+    // List<DuplicateCMRCheckResponse> matches = response.getMatches();
+    // List<DuplicateCMRCheckResponse> filteredMatches = new
+    // ArrayList<DuplicateCMRCheckResponse>();
+    // for (DuplicateCMRCheckResponse match : matches) {
+    // if (StringUtils.isNotBlank(match.getCustClass())) {
+    // String kukla = match.getCustClass() != null ? match.getCustClass() : "";
+    // if (Arrays.asList(kuklaComme).contains(kukla) &&
+    // ("COMME".equals(scenario) || "CBMME".equals(scenario))) {
+    // filteredMatches.add(match);
+    // } else if (Arrays.asList(kuklaGovrn).contains(kukla) &&
+    // ("GOVRN".equals(scenario) || "CBVRN".equals(scenario))) {
+    // filteredMatches.add(match);
+    // } else if (Arrays.asList(kuklaBuspr).contains(kukla) &&
+    // ("BPIEU".equals(scenario) || "CBIEU".equals(scenario))) {
+    // filteredMatches.add(match);
+    // } else if (Arrays.asList(kuklaCBIEM).contains(kukla) &&
+    // ("CBIEM".equals(scenario))) {
+    // filteredMatches.add(match);
+    // } else if (Arrays.asList(kuklaXBLUM).contains(kukla) &&
+    // ("XBLUM".equals(scenario))) {
+    // filteredMatches.add(match);
+    // }
+    // }
+    //
+    // }
+    // // set filtered matches in response
+    // response.setMatches(filteredMatches);
+    // }
+
   }
 
   @Override
   public List<String> getSkipChecksRequestTypesforCMDE() {
-    return Arrays.asList("C", "U", "M", "D", "R");
+    return Arrays.asList("C", "U" , "M", "D", "R");
   }
 }
