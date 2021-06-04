@@ -32,15 +32,26 @@
   			<cmr:label fieldId="HST">
         		<cmr:fieldLabel fieldId="HST" />:
           	</cmr:label>
-        	<cmr:field path="vat" id="vat" fieldId="HST" tabId="MAIN_CUST_TAB" />
+        	<cmr:field path="vat" id="HST" fieldId="HST" tabId="MAIN_CUST_TAB" />
   		</p>		
   	</cmr:column>
-  	<cmr:column span="1" containerForField="PSTExempt">
+  	<cmr:column span="2" containerForField="QST">
+  		<p>
+  			<cmr:label fieldId="QST">
+        		<cmr:fieldLabel fieldId="QST" />:
+          	</cmr:label>
+        	<cmr:field path="taxCd3" id="QST" fieldId="QST" tabId="MAIN_CUST_TAB" />
+  		</p>		
+  	</cmr:column>
+  </cmr:row>
+  
+  <cmr:row>
+  	<cmr:column span="2" containerForField="PSTExempt">
   		<p>
   			<cmr:label fieldId="PSTExempt">
         		<cmr:fieldLabel fieldId="PSTExempt" />:
           	</cmr:label>
-        	<cmr:field path="vatExempt" id="vatExempt" fieldId="PSTExempt" tabId="MAIN_CUST_TAB" />
+        	<cmr:field path="vatExempt" id="PSTExempt" fieldId="PSTExempt" tabId="MAIN_CUST_TAB" />
   		</p>		
   	</cmr:column>
   	<cmr:column span="2" containerForField="PSTExemptLicNum">
@@ -48,21 +59,21 @@
   			<cmr:label fieldId="PSTExemptLicNum">
         		<cmr:fieldLabel fieldId="PSTExemptLicNum" />:
           	</cmr:label>
-        	<cmr:field path="taxPayerCustCd" id="taxPayerCustCd" fieldId="PSTExemptLicNum" tabId="MAIN_CUST_TAB" />
+        	<cmr:field path="taxPayerCustCd" id="PSTExemptLicNum" fieldId="PSTExemptLicNum" tabId="MAIN_CUST_TAB" />
   		</p>		
+  	</cmr:column>
+  	<cmr:column span="2" containerForField="AuthExemptType">
+  		<p> 
+  			<cmr:label fieldId="AuthExemptType">
+        		<cmr:fieldLabel fieldId="AuthExemptType" />:
+          	</cmr:label><%--TODO path is temporary --%>
+        	<cmr:field path="sectorCd" id="AuthExemptType" fieldId="AuthExemptType" tabId="MAIN_CUST_TAB" />
+  		</p>
   	</cmr:column>
   </cmr:row>
   
   <cmr:row>
-  	<cmr:column span="2" containerForField="QST">
-  		<p>
-  			<cmr:label fieldId="QST">
-        		<cmr:fieldLabel fieldId="QST" />:
-          	</cmr:label>
-        	<cmr:field path="taxCd3" id="taxCd3" fieldId="QST" tabId="MAIN_CUST_TAB" />
-  		</p>		
-  	</cmr:column>
-  	<cmr:column span="2" containerForField="PurchaseOrdNo">
+	<cmr:column span="2" containerForField="PurchaseOrdNo">
 		<p>
 			<label for="contactName1"> <cmr:fieldLabel
 					fieldId="PurchaseOrdNo" />: <cmr:delta
@@ -81,7 +92,7 @@
 				<cmr:fieldLabel fieldId="LeasingCompIndc" />
 			</cmr:label>
 		</p>
-	</cmr:column>
+	</cmr:column>  
   </cmr:row>
   
   <cmr:row addBackground="true" >

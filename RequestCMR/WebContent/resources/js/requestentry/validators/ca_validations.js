@@ -198,25 +198,36 @@ function toggleCATaxFields() {
       }
 
       if (type == 'ZS01') {
-        var stateProv = record.stateProv;
-        if (stateProv == 'QC') {
-          // Show QST
-          FormManager.readOnly('vatExempt');
-          FormManager.readOnly('taxPayerCustCd');
-          FormManager.enable('taxCd3');
-        } else if (stateProv == 'BC' || stateProv == 'MB' || stateProv == 'SK') {
-          // PST Exempt Flag, PST Exemp Lic No
-          FormManager.enable('vatExempt');
-          FormManager.enable('taxPayerCustCd');
-          FormManager.readOnly('taxCd3');
-        } else {
-          FormManager.readOnly('vatExempt');
-          FormManager.readOnly('taxPayerCustCd');
-          FormManager.readOnly('taxCd3');
-        }
+        toggleCATaxFieldsByProvCd(record.stateProv);
         return;
       }
     }
+  } else {
+    clearCATaxFields();
+  }
+}
+
+function toggleCATaxFieldsByProvCd(provCd) {
+  if (provCd == 'QC') {
+    // Show QST
+    FormManager.clearValue('PSTExempt');
+    FormManager.getField('PSTExempt').set('checked', false);
+    FormManager.clearValue('PSTExemptLicNum');
+    FormManager.clearValue('AuthExemptType');
+    FormManager.removeValidator('PSTExemptLicNum', Validators.REQUIRED);
+
+    FormManager.readOnly('PSTExempt');
+    FormManager.readOnly('PSTExemptLicNum');
+    FormManager.readOnly('AuthExemptType');
+    FormManager.enable('QST');
+  } else if (provCd == 'BC' || provCd == 'MB' || provCd == 'SK') {
+    FormManager.clearValue('QST');
+    // PST Exempt Flag, PST Exemp Lic No
+    FormManager.enable('PSTExempt');
+    FormManager.enable('PSTExemptLicNum');
+    FormManager.enable('AuthExemptType');
+    FormManager.readOnly('QST');
+
   } else {
     clearCATaxFields();
   }
@@ -229,14 +240,17 @@ function toggleCATaxFields() {
  */
 function clearCATaxFields() {
 
-  FormManager.clearValue('vatExempt');
-  FormManager.getField('vatExempt').set('checked', false);
-  FormManager.clearValue('taxPayerCustCd');
-  FormManager.clearValue('taxCd3');
+  FormManager.clearValue('PSTExempt');
+  FormManager.getField('PSTExempt').set('checked', false);
+  FormManager.clearValue('PSTExemptLicNum');
+  FormManager.clearValue('AuthExemptType');
+  FormManager.clearValue('QST');
 
-  FormManager.readOnly('vatExempt');
-  FormManager.readOnly('taxPayerCustCd');
-  FormManager.readOnly('taxCd3');
+  FormManager.readOnly('PSTExempt');
+  FormManager.readOnly('PSTExemptLicNum');
+  FormManager.readOnly('AuthExemptType');
+  FormManager.readOnly('QST');
+  FormManager.removeValidator('PSTExemptLicNum', Validators.REQUIRED);
 }
 
 function addPSTExemptValidator() {
@@ -245,10 +259,10 @@ function addPSTExemptValidator() {
       validate : function() {
         var installAtAddr = getAddressByType('ZS01');
         if (installAtAddr != null && (installAtAddr.stateProv == 'BC' || installAtAddr.stateProv == 'MB' || installAtAddr.stateProv == 'KS')) {
-          var pstExempt = FormManager.getActualValue('vatExempt');
+          var pstExempt = FormManager.getActualValue('PSTExempt');
           // check if pstExempt value is X
           if (pstExempt != null && pstExempt == 'Y') {
-            var pstExemptLicNum = FormManager.getActualValue('taxPayerCustCd');
+            var pstExemptLicNum = FormManager.getActualValue('PSTExemptLicNum');
             if (pstExemptLicNum == '') {
               return new ValidationResult(null, false, 'PST Exemption License Number is required');
             } else {
@@ -261,7 +275,7 @@ function addPSTExemptValidator() {
         }
       }
     };
-  })(), 'MAIN_NAME_TAB', 'frmCMR');
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
 /**
@@ -358,7 +372,6 @@ function afterConfigForCA() {
 
 var _inacCodeHandler = null;
 var _custSubGrpHandler = null;
-// var _pstExemptHandler = null;
 function addFieldHandlers() {
 
   if (_inacCodeHandler == null) {
@@ -392,14 +405,20 @@ function addFieldHandlers() {
     });
   }
 
-  /*
-   * if (_pstExemptHandler == null) { _pstExemptHandler =
-   * dojo.connect(FormManager.getField('PSTExempt'), 'onkeyup', function(value) {
-   * 
-   * var pstExemptVal = FormManager.getActualValue('vatExempt');
-   * FormManager.setValue('vatExempt', pstExemptVal.toUpperCase()); }); }
-   */
+}
 
+var _pstExemptHandler = null;
+function addPSTExemptHandler() {
+
+  if (_pstExemptHandler == null) {
+    _pstExemptHandler = dojo.connect(FormManager.getField('PSTExempt'), 'onClick', function(value) {
+      if (dojo.byId('PSTExempt').checked) {
+        FormManager.addValidator('PSTExemptLicNum', Validators.REQUIRED, [ 'PST Exemption License Number' ], 'MAIN_CUST_TAB');
+      } else {
+        FormManager.removeValidator('PSTExemptLicNum', Validators.REQUIRED);
+      }
+    });
+  }
 }
 
 function addLocationNoValidator() {
@@ -458,7 +477,7 @@ function removeValidatorForOptionalFields() {
     FormManager.removeValidator('salesTeamCd', Validators.REQUIRED);
     FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
     FormManager.removeValidator('invoiceDistCd', Validators.REQUIRED);
-    FormManager.removeValidator('taxCd3', Validators.REQUIRED);
+    FormManager.removeValidator('QST', Validators.REQUIRED);
     FormManager.removeValidator('creditCd', Validators.REQUIRED);
     FormManager.removeValidator('cusInvoiceCopies', Validators.REQUIRED);
     // FormManager.removeValidator('subIndustryCd', Validators.REQUIRED);
@@ -640,7 +659,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addDPLAssessmentValidator, [ SysLoc.CANADA ], GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(addLocationNoValidator, [ SysLoc.CANADA ], null, true);
   GEOHandler.registerValidator(addPhoneNumberValidationCa, [ SysLoc.CANADA ], null, true);
-  GEOHandler.registerValidator(addPSTExemptValidator, [ SysLoc.CANADA ], null, true);
+  // GEOHandler.registerValidator(addPSTExemptValidator, [ SysLoc.CANADA ],
+  // null, true);
   GEOHandler.registerValidator(addNumberOfInvoiceValidator, [ SysLoc.CANADA ], null, true);
   GEOHandler.registerValidator(addProvincePostalCdValidator, [ SysLoc.CANADA ], null, true);
   // NOTE: do not add multiple addAfterConfig calls to avoid confusion, club the
@@ -655,6 +675,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(retainImportValues, SysLoc.CANADA);
   GEOHandler.addAfterTemplateLoad(toggleCATaxFields, SysLoc.CANADA);
   GEOHandler.addAfterTemplateLoad(setDefaultInvoiceCopies, SysLoc.CANADA);
+  GEOHandler.addAfterTemplateLoad(addPSTExemptHandler, SysLoc.CANADA);
   GEOHandler.addToggleAddrTypeFunction(hideObsoleteAddressOption, [ SysLoc.CANADA ]);
-
 });

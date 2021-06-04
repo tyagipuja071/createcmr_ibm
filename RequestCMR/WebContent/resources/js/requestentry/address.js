@@ -712,6 +712,10 @@ function actualAddToAddressList() {
     FormManager.doHiddenAction('frmCMR_addressModal', 'ADD_ADDRESS', cmr.CONTEXT_ROOT + '/request/address/process.json?reqId=' + cmr.addrReqId, true, refreshAddressAfterResult, true);
   } else if (cmr.addressMode == 'updateAddress') {
     FormManager.doHiddenAction('frmCMR_addressModal', 'UPDATE_ADDRESS', cmr.CONTEXT_ROOT + '/request/address/process.json?reqId=' + cmr.addrReqId, true, refreshAddressAfterResult, true);
+
+    if (FormManager.getActualValue('cmrIssuingCntry') == '649' && cmr.currentAddressType == 'ZS01' && cmr.currentAddressSeq == '00001') {
+      toggleCATaxFieldsByProvCd(FormManager.getActualValue('stateProv'));
+    }
   }
   if (FormManager.getActualValue('cmrIssuingCntry') == '631') {
     // 1164561
