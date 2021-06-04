@@ -149,6 +149,16 @@ function toggleAddrTypesForCA(cntry, addressMode, details) {
   }
 }
 
+function hideObsoleteAddressOption(cntry, addressMode, details) {
+  if (addressMode == 'newAddress' || addressMode == 'copyAddress') {
+    cmr.hideNode('radiocont_ZM01');
+    cmr.hideNode('radiocont_ZD02');
+    cmr.hideNode('radiocont_ZP08');
+    cmr.hideNode('radiocont_ZP09');
+
+  }
+}
+
 /**
  * Sets the default country to CA
  * 
@@ -164,17 +174,6 @@ function addCAAddressHandler(cntry, addressMode, saving) {
       FormManager.setValue('landCntry', 'CA');
     } else {
       FilteringDropdown['val_landCntry'] = null;
-    }
-  }
-
-  if (cmr.currentRequestType == 'U') {
-    cmr.hideNode('radiocont_ZS01');
-
-    // Some cmr's only has ZS01 so we will show invoice if not present
-    if (isAddressInGrid('ZI01')) {
-      cmr.hideNode('radiocont_ZI01');
-    } else {
-      cmr.showNode('radiocont_ZI01');
     }
   }
 }
@@ -481,8 +480,8 @@ function removeValidatorForOptionalFields() {
     FormManager.removeValidator('QST', Validators.REQUIRED);
     FormManager.removeValidator('creditCd', Validators.REQUIRED);
     FormManager.removeValidator('cusInvoiceCopies', Validators.REQUIRED);
-    FormManager.removeValidator('subIndustryCd', Validators.REQUIRED);
-    FormManager.removeValidator('isicCd', Validators.REQUIRED);
+    // FormManager.removeValidator('subIndustryCd', Validators.REQUIRED);
+    // FormManager.removeValidator('isicCd', Validators.REQUIRED);
   }
 }
 
@@ -590,12 +589,70 @@ function addNumberOfInvoiceValidator() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
+function mappingAddressField(key) {
+  var value = '';
+  if (key == 'NL') {
+    value = 'A';
+  } else if (key == 'NS') {
+    value = 'B';
+  } else if (key == 'PE') {
+    value = 'C';
+  } else if (key == '99') {
+    value = 'D';
+  } else if (key == 'NB') {
+    value = 'E';
+  } else if (key == 'QC') {
+    value = [ 'G', 'H', 'J' ];
+  } else if (key == 'ON') {
+    value = [ 'K', 'L', 'M', 'N', 'P', 'W' ];
+  } else if (key == 'MB') {
+    value = 'R';
+  } else if (key == 'SK') {
+    value = 'S';
+  } else if (key == 'AB') {
+    value = 'T';
+  } else if (key == 'BC') {
+    value = 'V';
+  } else if (key == 'YT') {
+    value = 'Y';
+  } else if (key == 'NU') {
+    value = [ 'X0A', 'X0B', 'X0C' ];
+  } else if (key == 'NT') {
+    value = [ 'X0E', 'X0B', 'X1A' ];
+  }
+  return value;
+}
+
+function addProvincePostalCdValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var NU_NT_PROV = [ 'NU', 'NT' ];
+        var landCntry = FormManager.getActualValue('landCntry');
+        var postCd = FormManager.getActualValue('postCd');
+        var stateProv = FormManager.getActualValue('stateProv');
+
+        if (stateProv != '' && landCntry == 'CA' && postCd != '') {
+          if ((mappingAddressField(stateProv).indexOf(postCd.substring(0, 1)) == -1) && NU_NT_PROV.indexOf(stateProv) == -1) {
+            return new ValidationResult(null, false, 'Invalid postal code prefix, should starts with  ' + mappingAddressField(stateProv));
+          } else if ((mappingAddressField(stateProv).indexOf(postCd.substring(0, 3)) == -1) && NU_NT_PROV.indexOf(stateProv) != -1) {
+            return new ValidationResult(null, false, 'Invalid postal code prefix, should starts with  ' + mappingAddressField(stateProv));
+          }
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+}
+
 /* Register CA Javascripts */
 dojo.addOnLoad(function() {
   console.log('adding CA scripts...');
 
   // validators - register one each
-  GEOHandler.registerValidator(addAddressRecordTypeValidator, [ SysLoc.CANADA ], null, true);
+  // GEOHandler.registerValidator(addAddressRecordTypeValidator, [ SysLoc.CANADA
+  // ], null, true);
   GEOHandler.registerValidator(addInacCdValidator, [ SysLoc.CANADA ], null, true);
   GEOHandler.registerValidator(addChangeNameAttachmentValidator, [ SysLoc.CANADA ], null, true);
   GEOHandler.registerValidator(addDPLCheckValidator, [ SysLoc.CANADA ], GEOHandler.ROLE_REQUESTER, true);
@@ -605,11 +662,13 @@ dojo.addOnLoad(function() {
   // GEOHandler.registerValidator(addPSTExemptValidator, [ SysLoc.CANADA ],
   // null, true);
   GEOHandler.registerValidator(addNumberOfInvoiceValidator, [ SysLoc.CANADA ], null, true);
+  GEOHandler.registerValidator(addProvincePostalCdValidator, [ SysLoc.CANADA ], null, true);
   // NOTE: do not add multiple addAfterConfig calls to avoid confusion, club the
   // functions on afterConfigForCA
   GEOHandler.addAfterConfig(afterConfigForCA, [ SysLoc.CANADA ]);
 
-  GEOHandler.addToggleAddrTypeFunction(toggleAddrTypesForCA, [ SysLoc.CANADA ]);
+  // GEOHandler.addToggleAddrTypeFunction(toggleAddrTypesForCA, [ SysLoc.CANADA
+  // ]);
   GEOHandler.addAddrFunction(addCAAddressHandler, [ SysLoc.CANADA ]);
   GEOHandler.enableCopyAddress(SysLoc.CANADA);
   GEOHandler.addAfterTemplateLoad(removeValidatorForOptionalFields, SysLoc.CANADA);
@@ -617,4 +676,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(toggleCATaxFields, SysLoc.CANADA);
   GEOHandler.addAfterTemplateLoad(setDefaultInvoiceCopies, SysLoc.CANADA);
   GEOHandler.addAfterTemplateLoad(addPSTExemptHandler, SysLoc.CANADA);
+  GEOHandler.addToggleAddrTypeFunction(hideObsoleteAddressOption, [ SysLoc.CANADA ]);
 });

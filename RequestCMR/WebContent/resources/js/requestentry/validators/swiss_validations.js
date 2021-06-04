@@ -550,7 +550,7 @@ var mubotyvalues = [];
 var postCdOld = '';
 function setMubotyOnPostalCodeIMS(postCd, subIndustryCd, clientTier) {
 
-  if (FormManager.getActualValue('reqType') != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true') {
+  if (FormManager.getActualValue('reqType') != 'C' || (cmr.currentRequestType != undefined && cmr.currentRequestType != 'C') || FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
   var role = FormManager.getActualValue('userRole').toUpperCase();
@@ -1560,4 +1560,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(lockIBMTabForSWISS, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(lockIBMTabForSWISS, GEOHandler.SWISS);
   GEOHandler.registerValidator(validateDeptAttnBldg, GEOHandler.SWISS);
+  GEOHandler.addAfterConfig(setAddressDetailsForView, GEOHandler.SWISS);
 });

@@ -57,7 +57,7 @@ public class MQInterfaceService extends BaseBatchService {
   private static final int ONE_MINUTE = 1000 * 60;
   private static final int ONE_HOUR = ONE_MINUTE * 60;
 
-  private static final SimpleDateFormat XML_DATE_FORMAT = new SimpleDateFormat("yyyyMMddHHmmss");
+  private static final SimpleDateFormat XML_DATE_FORMAT = new SimpleDateFormat("yyyyMMddHHmmssSSS");
   private String mode;
 
   @Override

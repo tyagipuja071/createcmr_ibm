@@ -489,57 +489,27 @@ public class CanadaHandler extends GEOHandler {
     return val1.trim().equals(val2.trim());
   }
 
-  public String incrementAddrSequence(EntityManager entityManager, String addrType, long reqId) {
-    String nextSeq = "";
-    String sql = ExternalizedQuery.getSql("ADDRESS.GETADDRSEQ");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("REQ_ID", reqId);
-    query.setParameter("ADDR_TYPE", addrType);
-
-    List<Object[]> results = query.getResults();
-    if (results != null && results.size() > 0) {
-      Object[] result = results.get(0);
-      if (result != null && result.length > 0 && result[0] != null) {
-        String currentSeq = (String) result[0];
-        try {
-          int addrSeq = Integer.valueOf(currentSeq) + 1;
-          nextSeq = String.format("%05d", Integer.parseInt(Integer.toString(addrSeq)));
-        } catch (Exception e) {
-          // if returned value is invalid
-        }
-      }
-    }
-    return nextSeq;
-  }
-
   @Override
   public String generateAddrSeq(EntityManager entityManager, String addrType, long reqId, String cmrIssuingCntry) {
     String newAddrSeq = "";
-    String reqType = "";
 
     if (!StringUtils.isEmpty(addrType)) {
-      reqType = getReqType(entityManager, reqId);
-
-      if (!StringUtils.isBlank(reqType) && reqType.equals(CmrConstants.REQ_TYPE_CREATE)) {
-        if (addrType.equals("ZS01")) {
-          newAddrSeq = incrementAddrSequence(entityManager, addrType, reqId);
-          if (StringUtils.isEmpty(newAddrSeq)) {
-            newAddrSeq = "00001";
-          }
-        } else if (addrType.equals("ZI01")) {
-          newAddrSeq = incrementAddrSequence(entityManager, addrType, reqId);
-          if (StringUtils.isEmpty(newAddrSeq)) {
-            newAddrSeq = "00002";
-          }
-        } else if (addrType.equals("ZP01")) {
-          newAddrSeq = incrementAddrSequence(entityManager, addrType, reqId);
-          if (StringUtils.isEmpty(newAddrSeq)) {
-            newAddrSeq = "00003";
-          }
-        }
-      }
+      newAddrSeq = getAvailableAddrSeq(entityManager, reqId);
     }
     return newAddrSeq;
+  }
+
+  private String getAvailableAddrSeq(EntityManager entityManager, long reqId) {
+    String sql = null;
+    sql = ExternalizedQuery.getSql("ADDRESS.GETAVAILSEQ");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    Integer availSeq = query.getSingleResult(Integer.class);
+
+    if (availSeq != null) {
+      return String.format("%05d", availSeq);
+    }
+    return "00001";
   }
 
   @Override

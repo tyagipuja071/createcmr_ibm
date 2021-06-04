@@ -27,17 +27,6 @@
   <%} %>
 
   <cmr:row>
-  	<cmr:column span="2">
-  		<p>
-  			<cmr:label fieldId="ProfileNo">
-        		<cmr:fieldLabel fieldId="ProfileNo" />:
-          	</cmr:label>
-        	<cmr:field path="modelCmrNo" id="modelCmrNo" fieldId="ProfileNo" tabId="MAIN_CUST_TAB" />	
-  		</p>
-  	</cmr:column>
-  </cmr:row>
-  
-  <cmr:row>
   	<cmr:column span="2" containerForField="HST">
   		<p>
   			<cmr:label fieldId="HST">
@@ -81,6 +70,29 @@
         	<cmr:field path="sectorCd" id="AuthExemptType" fieldId="AuthExemptType" tabId="MAIN_CUST_TAB" />
   		</p>
   	</cmr:column>
+  </cmr:row>
+  
+  <cmr:row>
+	<cmr:column span="2" containerForField="PurchaseOrdNo">
+		<p>
+			<label for="contactName1"> <cmr:fieldLabel
+					fieldId="PurchaseOrdNo" />: <cmr:delta
+					text="${rdcdata.contactName1}" oldValue="${reqentry.contactName1}" />
+			</label>
+			<cmr:field path="contactName1" id="contactName1"
+				fieldId="PurchaseOrdNo" tabId="MAIN_CUST_TAB" />
+		</p>
+	</cmr:column>
+	<cmr:column span="2" containerForField="LeasingCompIndc">
+		<p>
+			<label for="leasingCompanyIndc"> &nbsp; </label>
+			<cmr:field fieldId="LeasingCompIndc" path="leasingCompanyIndc"
+				tabId="MAIN_CUST_TAB" />
+			<cmr:label fieldId="LeasingCompIndc" forRadioOrCheckbox="true">
+				<cmr:fieldLabel fieldId="LeasingCompIndc" />
+			</cmr:label>
+		</p>
+	</cmr:column>  
   </cmr:row>
   
   <cmr:row addBackground="true" >
@@ -219,15 +231,7 @@
         <cmr:field path="locationNumber" id="locationNumber" fieldId="LocationCode" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
-    <cmr:column span="2" containerForField="SizeCode">
-      <p>
-        <label for="orgNo"> 
-          <cmr:fieldLabel fieldId="SizeCode" />:
-          <cmr:delta text="${rdcdata.orgNo}" oldValue="${reqentry.orgNo}" />
-        </label>
-        <cmr:field path="orgNo" id="orgNo" fieldId="SizeCode" tabId="MAIN_CUST_TAB" />
-      </p>
-    </cmr:column>
+
     <cmr:column span="2" containerForField="InvoiceSplitCd">
       <p>
         <label for="cusInvoiceCopies"> 
