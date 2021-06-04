@@ -73,26 +73,22 @@
   </cmr:row>
   
   <cmr:row>
-	<cmr:column span="2" containerForField="PurchaseOrdNo">
-		<p>
-			<label for="contactName1"> <cmr:fieldLabel
-					fieldId="PurchaseOrdNo" />: <cmr:delta
-					text="${rdcdata.contactName1}" oldValue="${reqentry.contactName1}" />
-			</label>
-			<cmr:field path="contactName1" id="contactName1"
-				fieldId="PurchaseOrdNo" tabId="MAIN_CUST_TAB" />
-		</p>
-	</cmr:column>
 	<cmr:column span="2" containerForField="LeasingCompIndc">
 		<p>
-			<label for="leasingCompanyIndc"> &nbsp; </label>
-			<cmr:field fieldId="LeasingCompIndc" path="leasingCompanyIndc"
-				tabId="MAIN_CUST_TAB" />
-			<cmr:label fieldId="LeasingCompIndc" forRadioOrCheckbox="true">
+			<cmr:label fieldId="LeasingCompIndc">
 				<cmr:fieldLabel fieldId="LeasingCompIndc" />
 			</cmr:label>
+			<cmr:field path="leasingCompanyIndc" id="leasingCompanyIndc" fieldId="LeasingCompIndc" tabId="MAIN_CUST_TAB" />
 		</p>
-	</cmr:column>  
+	</cmr:column>
+  	<cmr:column span="2" containerForField="PurchaseOrdNo">
+		<p>
+			<cmr:label fieldId="PurchaseOrdNo">
+				<cmr:fieldLabel fieldId="PurchaseOrdNo" />:
+			</cmr:label>
+			<cmr:field path="contactName1" id="contactName1" fieldId="PurchaseOrdNo" tabId="MAIN_CUST_TAB" />
+		</p>
+	</cmr:column>
   </cmr:row>
   
   <cmr:row addBackground="true" >
