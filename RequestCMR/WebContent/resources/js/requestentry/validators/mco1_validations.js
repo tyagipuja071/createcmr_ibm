@@ -617,6 +617,12 @@ function addAttachmentValidator() {
           case 'XSL':
             return new ValidationResult(null, true);
             break;
+          case 'PC':
+            return new ValidationResult(null, true);
+            break;
+          case 'XPC':
+            return new ValidationResult(null, true);
+            break;
           default:
             var reqId = FormManager.getActualValue('reqId');
             if (reqId != null) {
