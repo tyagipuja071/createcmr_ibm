@@ -1623,7 +1623,6 @@ function matchDnBForIndia() {
             if (data.match && data.isicMatch) {
              comp_proof_IN =true;   
              /*checkDnBMatchingAttachmentValidator();*/
-            console.log('action == YourActions.Send_for_Processing-------data.match && data.isicMatch --truee');
             cmr.showModal('addressVerificationModal');
             }else {
              
