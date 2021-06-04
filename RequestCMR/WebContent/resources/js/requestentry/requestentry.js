@@ -1432,6 +1432,9 @@ function isSkipDnbMatching() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var countryUse = FormManager.getActualValue("countryUse");
   var subRegionCd = countryUse != null && countryUse.length > 0 ? countryUse : cntry;
+  if(SysLoc.INDIA == FormManager.getActualValue('cmrIssuingCntry')){
+        return false;
+    }
   if(dnbPrimary == 'Y') {
     if (custGrp != null && custGrp != '' && custSubGrp != null && custSubGrp != '') {
       var qParams = {
