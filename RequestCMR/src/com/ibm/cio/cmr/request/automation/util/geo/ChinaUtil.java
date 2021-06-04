@@ -59,6 +59,7 @@ public class ChinaUtil extends AutomationUtil {
         engineData.addRejectionComment("OTH", "Cluster=" + data.getApCustClusterId() + " should not be allowed for this scenario", "", "");
         result.setOnError(true);
       }
+      break;
     case SCENARIO_LOCAL_EMBSA:
       if (!("00000".equals(data.getApCustClusterId()) || "04182".equals(data.getApCustClusterId()))) {
         LOG.debug("Cluster allowed: Cluster=" + data.getApCustClusterId() + " Scenario=" + data.getCustSubGrp());
@@ -70,6 +71,7 @@ public class ChinaUtil extends AutomationUtil {
         engineData.addRejectionComment("OTH", "Cluster=" + data.getApCustClusterId() + " should not be allowed for this scenario", "", "");
         result.setOnError(true);
       }
+      break;
     case SCENARIO_CROSS_CROSS:
       if (!("00000".equals(data.getApCustClusterId()) || "04182".equals(data.getApCustClusterId()))) {
         LOG.debug("Cluster allowed: Cluster=" + data.getApCustClusterId() + " Scenario=" + data.getCustSubGrp());
@@ -81,6 +83,7 @@ public class ChinaUtil extends AutomationUtil {
         engineData.addRejectionComment("OTH", "Cluster=" + data.getApCustClusterId() + " should not be allowed for this scenario", "", "");
         result.setOnError(true);
       }
+      break;
     case SCENARIO_LOCAL_AQSTN:
       if (!("00000".equals(data.getApCustClusterId()) || "04182".equals(data.getApCustClusterId()))) {
         LOG.debug("Cluster allowed: Cluster=" + data.getApCustClusterId() + " Scenario=" + data.getCustSubGrp());
@@ -92,12 +95,13 @@ public class ChinaUtil extends AutomationUtil {
         engineData.addRejectionComment("OTH", "Cluster=" + data.getApCustClusterId() + " should not be allowed for this scenario", "", "");
         result.setOnError(true);
       }
+      break;
     case SCENARIO_LOCAL_BLUMX:
       engineData.hasPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
-
+      break;
     case SCENARIO_LOCAL_MRKT:
       engineData.hasPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
-
+      break;
     case SCENARIO_LOCAL_BUSPR:
       if ("04182".equals(data.getApCustClusterId())) {
         LOG.debug("Cluster allowed: Cluster=" + data.getApCustClusterId() + " Scenario=" + data.getCustSubGrp());
@@ -129,7 +133,7 @@ public class ChinaUtil extends AutomationUtil {
       }
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
       engineData.hasPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
-
+      break;
     case SCENARIO_LOCAL_INTER:
       if (StringUtils.isNotBlank(customerName) && customerName.indexOf("IBM China") >= 0) {
         LOG.debug("English name=" + customerName + " for Scenario=" + data.getCustSubGrp());
@@ -142,7 +146,7 @@ public class ChinaUtil extends AutomationUtil {
       }
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
       engineData.hasPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
-
+      break;
     case SCENARIO_LOCAL_PRIV:
       if ("00000".equals(data.getApCustClusterId())) {
         LOG.debug("Cluster allowed: Cluster=" + data.getApCustClusterId() + " Scenario=" + data.getCustSubGrp());
@@ -165,7 +169,7 @@ public class ChinaUtil extends AutomationUtil {
       }
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
       engineData.hasPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
-
+      break;
     }
 
     return true;
@@ -460,6 +464,6 @@ public class ChinaUtil extends AutomationUtil {
 
   @Override
   public List<String> getSkipChecksRequestTypesforCMDE() {
-    return Arrays.asList("C", "U" , "M", "D", "R");
+    return Arrays.asList("C", "U", "M", "D", "R");
   }
 }
