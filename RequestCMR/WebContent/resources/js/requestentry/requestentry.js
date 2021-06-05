@@ -1622,14 +1622,16 @@ function matchDnBForIndia() {
           if (data && data.success) {
             if (data.match && data.isicMatch) {
              comp_proof_IN =true;   
-             checkDnBMatchingAttachmentValidator();
+             /*checkDnBMatchingAttachmentValidator();*/
             cmr.showModal('addressVerificationModal');
             }else {
              
              if (data.match && !data.isicMatch){
+                comp_proof_IN =false;
                 console.log("ISIC validation failed by Dnb.");
                 cmr.showAlert("Please attach company proof as ISIC validation failed by Dnb.");     
            } else{   
+              comp_proof_IN =false;
               console.log("Name/Address validation failed by dnb");
               cmr.showAlert("Please attach company proof as Name/Address validation failed by Dnb.");
               }
@@ -1748,7 +1750,8 @@ function checkDnBMatchingAttachmentValidator() {
        ID : id,
        });
        // FOR  Temporary India
-          if(ret== null || ret.ret1== null ){
+          if((ret== null || ret.ret1== null) && !comp_proof_IN){
+            comp_proof_IN= true;
             return new ValidationResult(null, false, "You\'re obliged to provide either one of the following documentation as backup - "
                 + "client\'s official website, Secretary of State business registration proof, client\'s confirmation email and signed PO, attach it under the file content "
                 + "of <strong>Company Proof</strong>. Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.");
@@ -1757,7 +1760,7 @@ function checkDnBMatchingAttachmentValidator() {
           }
       }
     };
-  })(), 'MAIN_ATTACH_TAB', 'frmCMR');
+  })(), null, 'frmCMR');
 }
 
 function showDocTypeConfirmDialog() {
