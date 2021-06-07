@@ -1622,8 +1622,10 @@ function matchDnBForIndia() {
           if (data && data.success) {
             if (data.match && data.isicMatch) {
              comp_proof_IN =true;   
-             /*checkDnBMatchingAttachmentValidator();*/
-            cmr.showModal('addressVerificationModal');
+              if(!data.validate){
+                   checkDnBMatchingAttachmentValidator();
+                   }
+             cmr.showModal('addressVerificationModal');
             }else {
              
              if (data.match && !data.isicMatch){
