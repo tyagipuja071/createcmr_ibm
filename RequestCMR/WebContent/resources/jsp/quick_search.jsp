@@ -85,6 +85,7 @@ form.ibm-column-form .dijitTextBox INPUT {
         cmr.hideNode('cRn-cont');
         cmr.hideNode('cRn/siret-cont');
         cmr.hideNode('uen-cont');
+        cmr.hideNode('busnType');
         FormManager.setValue('taxCd1','');
         FormManager.readOnly('taxCd1');
         FormManager.setValue('restrictTo','');
@@ -104,6 +105,10 @@ form.ibm-column-form .dijitTextBox INPUT {
           cmr.showNode('cRn-cont');
           cmr.showNode('cRn/siret-cont');
           FormManager.enable('taxCd1');
+        } else if(cntry == '641'){
+          cmr.showNode('busnType');
+          cmr.showNode('cRn/siret-cont');
+          FormManager.enable('taxCd1');
         }
       }
     });
@@ -121,7 +126,7 @@ form.ibm-column-form .dijitTextBox INPUT {
     FormManager.addFormValidator((function() {
       return {
         validate : function() {
-          var noCities = ['736', '738', '834']; // MACAO, SINGAPORE, HONG KONG
+          var noCities = ['736', '738', '834', '641']; // MACAO, SINGAPORE, HONG KONG, China
           var crit = buildSearchCriteria();
           if (!crit.cmrNo){
             if (noCities.indexOf(crit.issuingCntry) >=0){
@@ -134,6 +139,16 @@ form.ibm-column-form .dijitTextBox INPUT {
                     type : 'text',
                     name : 'streetAddress1'
                   }, false, 'VAT/Business Reg. or UEN, OR Company Name + Country + Street should be specified if CMR No. is blank.');
+                }
+              } else if (crit.issuingCntry == '641') {
+                var orgIdSearch = crit.taxCd1;
+                var nameSearch = crit.name && crit.streetAddress1 && crit.countryCd;
+                if (!orgIdSearch && !nameSearch){
+                    return new ValidationResult({
+                    id : 'streetAddress1',
+                    type : 'text',
+                    name : 'streetAddress1'
+                  }, false, 'Social Credit Code, OR Company Name + Country + Street should be specified if CMR No. is blank.');
                 }
               } else {
                 if (!crit.name || !crit.countryCd || !crit.streetAddress1){ 
@@ -381,6 +396,14 @@ form.ibm-column-form .dijitTextBox INPUT {
             <form:input path="vat" placeHolder="VAT# / Business Reg #" dojoType="dijit.form.TextBox" maxlength="16"/>
           </p>
         </cmr:column>
+        <div id="busnType" style="display:none">
+          <cmr:column span="1" width="150">
+          <p>
+            <cmr:label fieldId="vat">Social Credit Code: 
+            </cmr:label>
+          </p>
+        </cmr:column>     
+        </div>      
         <div id="siret-cont" style="display:none">
           <cmr:column span="1" width="150">
             <p>
@@ -411,7 +434,7 @@ form.ibm-column-form .dijitTextBox INPUT {
            <div id = "cRn/siret-cont" style="display:none">
           <cmr:column span="2" width="250">
             <p> 
-              <form:input path="taxCd1" placeHolder="Enter Value Here" dojoType="dijit.form.TextBox" maxlength="14"/>
+              <form:input path="taxCd1" placeHolder="Enter Value Here" dojoType="dijit.form.TextBox" maxlength="18"/>
             </p>
           </cmr:column>
         </div>
