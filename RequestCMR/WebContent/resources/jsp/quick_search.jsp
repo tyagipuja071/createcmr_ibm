@@ -126,7 +126,7 @@ form.ibm-column-form .dijitTextBox INPUT {
     FormManager.addFormValidator((function() {
       return {
         validate : function() {
-          var noCities = ['736', '738', '834', '641']; // MACAO, SINGAPORE, HONG KONG, China
+          var noCities = ['736', '738', '834']; // MACAO, SINGAPORE, HONG KONG
           var crit = buildSearchCriteria();
           if (!crit.cmrNo){
             if (noCities.indexOf(crit.issuingCntry) >=0){
@@ -140,16 +140,6 @@ form.ibm-column-form .dijitTextBox INPUT {
                     name : 'streetAddress1'
                   }, false, 'VAT/Business Reg. or UEN, OR Company Name + Country + Street should be specified if CMR No. is blank.');
                 }
-              } else if (crit.issuingCntry == '641') {
-                var orgIdSearch = crit.taxCd1;
-                var nameSearch = crit.name && crit.streetAddress1 && crit.countryCd;
-                if (!orgIdSearch && !nameSearch){
-                    return new ValidationResult({
-                    id : 'streetAddress1',
-                    type : 'text',
-                    name : 'streetAddress1'
-                  }, false, 'Social Credit Code, OR Company Name + Country + Street should be specified if CMR No. is blank.');
-                }
               } else {
                 if (!crit.name || !crit.countryCd || !crit.streetAddress1){ 
                   return new ValidationResult({
@@ -159,6 +149,16 @@ form.ibm-column-form .dijitTextBox INPUT {
                   }, false, 'Company Name, Country, and Street should be specified if CMR No. is blank.');
                 }
               }
+            } else if (crit.issuingCntry == '641') {
+                var orgIdSearch = crit.taxCd1;
+                var nameSearch = crit.name && crit.streetAddress1 && crit.countryCd;
+                if (!orgIdSearch && !nameSearch){
+                    return new ValidationResult({
+                    id : 'streetAddress1',
+                    type : 'text',
+                    name : 'streetAddress1'
+                  }, false, 'Social Credit Code, OR Company Name + Country + Street should be specified if CMR No. is blank.');
+                }
             } else {
               var orgIdSearch = crit.vat || crit.taxCd1;
               var nameSearch = crit.name && crit.streetAddress1 && crit.city;
