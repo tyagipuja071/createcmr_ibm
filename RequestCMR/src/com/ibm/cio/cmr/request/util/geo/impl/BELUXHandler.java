@@ -159,6 +159,7 @@ public class BELUXHandler extends BaseSOFHandler {
                 newRecord.setCmrName2(null);
                 newRecord.setCmrName3(null);
                 newRecord.setCmrName4(null);
+                newRecord.setCmrSapNumber(null);
                 mapCmrtAddr2FindCMRRec(newRecord, cmrAddr);
                 newRecord.setCmrAddrTypeCode(getSingleAddrType(cmrAddr));
                 converted.add(newRecord);

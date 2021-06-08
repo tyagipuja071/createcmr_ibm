@@ -6,6 +6,7 @@ package com.ibm.cmr.create.batch.service;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -315,7 +316,8 @@ public class MassCreateProcessMultiService extends MultiThreadedBatchService<Str
     MassCreate mass_create = null;
 
     List<String> resultCodes = new ArrayList<String>();
-    Map<String, List<String>> cmrNoSapNoMap = new HashMap<String, List<String>>();
+    Map<String, List<String>> backing = new HashMap<String, List<String>>();
+    Map<String, List<String>> cmrNoSapNoMap = Collections.synchronizedMap(backing);
 
     int threads = 5;
     String mcThreads = SystemParameters.getString("PROCESS.THREAD.COUNT");
