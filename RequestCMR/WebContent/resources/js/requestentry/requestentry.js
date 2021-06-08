@@ -152,8 +152,11 @@ function processRequestAction() {
     } else if(comp_proof_IN && cmrCntry =='744' ){
       if(checkIfDnBCheckReqForIndia() && findDnbResult == 'Accepted') {            
                 matchDnBForIndia();
-                    }
-                    }
+                    }else {
+          // if there are no errors, show the Address Verification modal window
+          cmr.showModal('addressVerificationModal');
+        }
+       }
     else {
       cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
     }
@@ -1624,8 +1627,13 @@ function matchDnBForIndia() {
              comp_proof_IN =true;   
               if(!data.validate){
                    checkDnBMatchingAttachmentValidator();
-                   }
-             cmr.showModal('addressVerificationModal');
+                   } 
+                 if (FormManager.validate('frmCMR')) {
+                 MessageMgr.clearMessages();
+                 cmr.showModal('addressVerificationModal');
+                }else {
+                cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
+              }
             }else {
              
              if (data.match && !data.isicMatch){
@@ -1757,7 +1765,7 @@ function checkDnBMatchingAttachmentValidator() {
             return new ValidationResult(null, false, "You\'re obliged to provide either one of the following documentation as backup - "
                 + "client\'s official website, Secretary of State business registration proof, client\'s confirmation email and signed PO, attach it under the file content "
                 + "of <strong>Company Proof</strong>. Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.");
-          } else {         
+          } else {        
             return new ValidationResult(null, true);           
           }
       }
