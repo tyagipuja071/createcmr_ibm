@@ -1630,6 +1630,7 @@ function matchDnBForIndia() {
                    } 
                  if (FormManager.validate('frmCMR')) {
                  MessageMgr.clearMessages();
+                 doValidateRequest();
                  cmr.showModal('addressVerificationModal');
                 }else {
                 cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
