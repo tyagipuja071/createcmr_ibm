@@ -839,18 +839,25 @@ function setSBOAndEBO() {
       var eBo = '';
       var ent = '';
       if (Object.keys(result).length != 0) {
-        salesBoCd = result.ret1;
         eBo = result.ret2;
         ent = result.ret3;
       } else {
-        result = cmr.query('GET.SBO.BYSR_ES', {
+        var result = cmr.query('GET.SBO.BYSR_ES', {
           ISSUING_CNTRY : FormManager.getActualValue('cmrIssuingCntry'),
           REP_TEAM_CD : locationNumber
         });
-        salesBoCd = result.ret1;
         eBo = result.ret2;
         ent = result.ret3;
       }
+
+      var result = cmr.query('GET.SBO.BYSR_ES', {
+        ISSUING_CNTRY : FormManager.getActualValue('cmrIssuingCntry'),
+        REP_TEAM_CD : locationNumber
+      });
+      if (Object.keys(result).length != 0) {
+        salesBoCd = result.ret1;
+      }
+
       if (FormManager.getActualValue('reqType') == 'C') {
         FormManager.setValue('engineeringBo', eBo);
         if (custSubGroup != undefined && custSubGroup != '' && !noSBOLogicES.has(custSubGroup) && 'BUSPR' != custSubGroup) {
@@ -1552,13 +1559,14 @@ function forceLockScenariosSpain() {
       fieldsToDisable.push('ppsceid');
     }
     FormManager.enable('repTeamMemberNo');
-    FormManager.enable('salesBusOffCd');
+    // FormManager.enable('salesBusOffCd');
   }
   fieldsToDisable.push('cmrOwner');
   fieldsToDisable.push('collectionCd');
   fieldsToDisable.push('subIndustryCd');
   fieldsToDisable.push('modeOfPayment');
   // fieldsToDisable.push('locationNumber');
+  fieldsToDisable.push('salesBusOffCd');
 
   for (var i = 0; i < fieldsToDisable.length; i++) {
     FormManager.readOnly(fieldsToDisable[i]);
