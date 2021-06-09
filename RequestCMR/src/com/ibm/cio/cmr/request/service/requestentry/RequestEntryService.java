@@ -1389,6 +1389,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
         Addr zs01 = requestData.getAddress("ZS01");
         DnBMatchingResponse tradeStyleName = null;
         boolean isicMatch = false;
+        boolean confidenceCd = false;
         boolean checkTradestyleNames = ("R".equals(RequestUtils.getTradestyleUsage(entityManager, data.getCmrIssuingCntry()))
             || "O".equals(RequestUtils.getTradestyleUsage(entityManager, data.getCmrIssuingCntry())));
         MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, null, "ZS01");
@@ -1399,6 +1400,9 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
               || "Rejected".equals(scorecard.getFindDnbResult()))) {
             for (DnBMatchingResponse record : response.getMatches()) {
               // ISIC on request is compared to IBM ISIC
+              if (record.getConfidenceCode() >= 8) {
+                confidenceCd = true;
+              }
               isicMatch = getDnBDetailsUI(record.getDunsNo()).getIbmIsic().equals(model.getIsicCd());
               log.debug("ISIC Match : " + isicMatch);
               if (record.getConfidenceCode() >= 8 && DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), zs01, admin, record, null, false, true)) {
@@ -1410,13 +1414,14 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
               }
             }
           }
-          if ( isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+          if (isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
             map.put("validate", true);
           } else {
             map.put("validate", false);
           }
           map.put("match", match);
           map.put("isicMatch", isicMatch);
+          map.put("confidenceCd", confidenceCd);
           if (!match && tradeStyleName != null) {
             map.put("tradeStyleMatch", true);
             map.put("legalName", tradeStyleName.getDnbName());
