@@ -89,14 +89,7 @@ function afterConfigForCN() {
 
   if (_vatExemptHandler == null) {
     _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
-      console.log(">>> RUNNING!!!!");
-      if (dijit.byId('vatExempt').get('checked')) {
-        console.log(">>> Process vatExempt remove * >> ");
-        FormManager.resetValidations('vat');
-      } else {
-        console.log(">>> Process vatExempt add * >> ");
-        FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
-      }
+      setSocialCreditCdValidator();
     });
   }
 
@@ -1146,6 +1139,17 @@ function addEngNameFormatValidation() {
   }
 
 }
+
+function setSocialCreditCdValidator(){
+  console.log(">>> process Social Credit Code remove * >> ");
+  if (dojo.byId('vatExempt').checked) {
+    FormManager.removeValidator('busnType', Validators.REQUIRED);
+  } else {
+    console.log(">>> If scenario is not Internal and Private person, then process Social Credit Code add * >> ");
+    FormManager.addValidator('busnType', Validators.REQUIRED, [ 'BusnType' ], 'MAIN_CUST_TAB');
+  }
+}
+
 
 dojo.addOnLoad(function() {
   GEOHandler.CN = [ SysLoc.CHINA ];
