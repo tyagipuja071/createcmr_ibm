@@ -1573,8 +1573,10 @@ function matchDnBForAutomationCountries() {
                         OK : 'Yes',
                         CANCEL : 'No'
                       });
-            } else {
+            } else if(data.confidenceCd){
               showDnBMatchModal();
+            } else {
+                cmr.showModal('addressVerificationModal');
             }
           } else {
             // continue
