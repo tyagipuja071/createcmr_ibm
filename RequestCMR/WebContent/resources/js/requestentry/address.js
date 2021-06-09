@@ -1038,7 +1038,7 @@ function addEditAddressModal_onLoad() {
       // FormManager.hide('BillingPstlAddr', 'billingPstlAddr');
       // }
       // }
-      
+
       if (FormManager.getActualValue('cmrIssuingCntry') == '766') {
         FormManager.setValue('billingPstlAddr', details.ret58);
         FormManager.setValue('contact', details.ret71);
@@ -1817,7 +1817,7 @@ function applyAddrChangesModal_onLoad() {
         }
       }
 
-      if (SysLoc.CANADA == cntry && [ 'ZM01', 'ZD02', 'ZP08', 'ZP09' ].includes(type.ret1)) {
+      if (SysLoc.CANADA == cntry && [ 'ZD02', 'ZP08', 'ZP04', 'ZP05', 'ZE01', 'ZP06', 'ZP09' ].includes(type.ret1)) {
         continue;
       }
 
