@@ -8,7 +8,7 @@ var regexNumeric = /^[0-9]+$/;
 var regexAlphanumeric = /^[0-9a-zA-Z]+$/;
 var _importedIndc = null;
 /**
- * Adds the validator for the Install At and optional Invoice To
+ * Adds the validator for the mandatory sold to and single address types
  * 
  * @returns
  */
@@ -22,14 +22,18 @@ function addAddressRecordTypeValidator() {
         var reqType = FormManager.getActualValue('reqType');
 
         if (reqType == 'C') {
-          if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount < 2) {
-            return new ValidationResult(null, false, 'Please add Install At and Invoice To address to this request.');
+          if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount < 1) {
+            return new ValidationResult(null, false, 'Sold-To address is mandatory. Please add one Sold-To address.');
           }
 
           var record = null;
           var type = null;
-          var invoiceToCnt = 0;
-          var installAtCnt = 0;
+          var zs01Count = 0; // Sold-to
+          var zd01Count = 0; // Ship-to
+          var zi01Count = 0; // Install-at
+          var zp03Count = 0; // A/R Bill-to
+          var zp07Count = 0; // TLA/Rentals Bill-to
+
           for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
             record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
             type = record.addrType;
@@ -37,13 +41,28 @@ function addAddressRecordTypeValidator() {
               type = type[0];
             }
             if (type == 'ZS01') {
-              installAtCnt++;
+              zs01Count++;
+            } else if (type == 'ZD01') {
+              zd01Count++;
             } else if (type == 'ZI01') {
-              invoiceToCnt++;
+              zi01Count++;
+            } else if (type == 'ZP03') {
+              zp03Count++;
+            } else if (type == 'ZP07') {
+              zp07Count++;
             }
           }
-          if (installAtCnt != 1 || invoiceToCnt != 1) {
-            return new ValidationResult(null, false, 'The request should contain both Install At address and Invoice To address.');
+
+          if (zs01Count > 1) {
+            return new ValidationResult(null, false, 'Only one Sold-To address is allowed. Please remove the additional Sold-to address.');
+          } else if (zd01Count > 1) {
+            return new ValidationResult(null, false, 'Only one Ship-To address is allowed. Please remove the additional Ship-To address.');
+          } else if (zi01Count > 1) {
+            return new ValidationResult(null, false, 'Only one Install-At address is allowed. Please remove the additional Install-At address.');
+          } else if (zp03Count > 1) {
+            return new ValidationResult(null, false, 'Only one (A/R) Bill-To address is allowed. Please remove the additional (A/R) Bill-To address.');
+          } else if (zp07Count > 1) {
+            return new ValidationResult(null, false, 'Only one TLA/Rentals Bill-To address is allowed. Please remove the additional TLA/Rentals Bill-To address.');
           } else {
             return new ValidationResult(null, true);
           }
@@ -151,9 +170,12 @@ function toggleAddrTypesForCA(cntry, addressMode, details) {
 
 function hideObsoleteAddressOption(cntry, addressMode, details) {
   if (addressMode == 'newAddress' || addressMode == 'copyAddress') {
-    cmr.hideNode('radiocont_ZM01');
     cmr.hideNode('radiocont_ZD02');
     cmr.hideNode('radiocont_ZP08');
+    cmr.hideNode('radiocont_ZP04');
+    cmr.hideNode('radiocont_ZP05');
+    cmr.hideNode('radiocont_ZE01');
+    cmr.hideNode('radiocont_ZP06');
     cmr.hideNode('radiocont_ZP09');
 
   }
@@ -616,9 +638,9 @@ function mappingAddressField(key) {
   } else if (key == 'YT') {
     value = 'Y';
   } else if (key == 'NU') {
-    value = [ 'X0A', 'X0B', 'X0C' ];
+    value = [ 'X0A', ' X0B', ' X0C' ];
   } else if (key == 'NT') {
-    value = [ 'X0E', 'X0B', 'X1A' ];
+    value = [ 'X0E', ' X0B', ' X1A' ];
   }
   return value;
 }
@@ -634,9 +656,9 @@ function addProvincePostalCdValidator() {
 
         if (stateProv != '' && landCntry == 'CA' && postCd != '') {
           if ((mappingAddressField(stateProv).indexOf(postCd.substring(0, 1)) == -1) && NU_NT_PROV.indexOf(stateProv) == -1) {
-            return new ValidationResult(null, false, 'Invalid postal code prefix, should starts with  ' + mappingAddressField(stateProv));
+            return new ValidationResult(null, false, 'Invalid Postal Code, the first character should be ' + mappingAddressField(stateProv));
           } else if ((mappingAddressField(stateProv).indexOf(postCd.substring(0, 3)) == -1) && NU_NT_PROV.indexOf(stateProv) != -1) {
-            return new ValidationResult(null, false, 'Invalid postal code prefix, should starts with  ' + mappingAddressField(stateProv));
+            return new ValidationResult(null, false, 'Invalid Postal Code, the first 3 characters should be ' + mappingAddressField(stateProv));
           }
         } else {
           return new ValidationResult(null, true);
@@ -651,8 +673,7 @@ dojo.addOnLoad(function() {
   console.log('adding CA scripts...');
 
   // validators - register one each
-  // GEOHandler.registerValidator(addAddressRecordTypeValidator, [ SysLoc.CANADA
-  // ], null, true);
+  GEOHandler.registerValidator(addAddressRecordTypeValidator, [ SysLoc.CANADA ], null, true);
   GEOHandler.registerValidator(addInacCdValidator, [ SysLoc.CANADA ], null, true);
   GEOHandler.registerValidator(addChangeNameAttachmentValidator, [ SysLoc.CANADA ], null, true);
   GEOHandler.registerValidator(addDPLCheckValidator, [ SysLoc.CANADA ], GEOHandler.ROLE_REQUESTER, true);
