@@ -114,7 +114,7 @@ public class Scorecard extends BaseEntity<ScorecardPK> implements Serializable {
       name = "DNB_MATCHING_RESULT")
   private String dnbMatchingResult;
   @Column(
-      name = "RPA_MATCHING_RESULT ")
+      name = "RPA_MATCHING_RESULT")
   private String rpaMatchingResult;
 
   public String getDplChkResult() {
