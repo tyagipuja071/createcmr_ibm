@@ -2870,6 +2870,19 @@ function setAbbreviatedNameValue() {
       }
     }
 
+    var reqStatus = null;
+    if (typeof (_pagemodel) != 'undefined') {
+      reqStatus = _pagemodel.reqStatus;
+    }
+
+    if (reqStatus == 'PPN' || reqStatus == 'PVA' || reqStatus == 'PCP' || reqStatus == 'PCO' || reqStatus == 'COM') {
+      var result = cmr.query('DATA.GET.ABBREV_NM.BY_REQID', qParams);
+      var abbrevNmDBValue = result.ret1;
+      if (abbrevNmDBValue != '') {
+        FormManager.setValue('abbrevNm', abbrevNmDBValue);
+      }
+    }
+
   });
 
   var qParams = {
