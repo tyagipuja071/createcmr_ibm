@@ -53,7 +53,9 @@ function addAddressRecordTypeValidator() {
             }
           }
 
-          if (zs01Count > 1) {
+          if (zs01Count == 0) {
+            return new ValidationResult(null, false, 'Sold-To address is mandatory. Please add one Sold-To address.');
+          } else if (zs01Count > 1) {
             return new ValidationResult(null, false, 'Only one Sold-To address is allowed. Please remove the additional Sold-to address.');
           } else if (zd01Count > 1) {
             return new ValidationResult(null, false, 'Only one Ship-To address is allowed. Please remove the additional Ship-To address.');
