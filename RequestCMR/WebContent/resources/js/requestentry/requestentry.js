@@ -135,8 +135,13 @@ function processRequestAction() {
     } else if (FormManager.validate('frmCMR') && !comp_proof_IN ) {
 			if(checkForConfirmationAttachments()){
 				showDocTypeConfirmDialog();
-			} else if(cmrCntry =='744' && checkIfDnBCheckReqForIndia() && findDnbResult == 'Accepted') {            
+			} else if(cmrCntry =='744' && findDnbResult == 'Accepted') {   
+                // Cmr-2340- For India Dnb import   
+                if(checkIfDnBCheckReqForIndia()){      
                 matchDnBForIndia();
+                } else {
+                   cmr.showModal('addressVerificationModal'); 
+                }              
             } else if (checkIfFinalDnBCheckRequired()) {
         matchDnBForAutomationCountries();
       } else if (checkIfUpfrontUpdateChecksRequired()) {
