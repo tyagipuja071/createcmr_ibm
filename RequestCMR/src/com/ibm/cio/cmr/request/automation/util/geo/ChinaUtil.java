@@ -41,6 +41,10 @@ public class ChinaUtil extends AutomationUtil {
     // engineData.get("SCENARIO_EXCEPTIONS");
     Data data = requestData.getData();
     String scenario = data.getCustSubGrp();
+    Admin admin = requestData.getAdmin();
+    if ("U".equals(admin.getReqType())) {
+
+    }
     Addr soldTo = requestData.getAddress("ZS01");
     String custNm1 = soldTo.getCustNm1();
     String custNm2 = StringUtils.isNotBlank(soldTo.getCustNm2()) ? " " + soldTo.getCustNm2() : "";
@@ -109,15 +113,19 @@ public class ChinaUtil extends AutomationUtil {
         engineData.addRejectionComment("OTH", "Cluster=" + data.getSearchTerm() + " should default (04182)  for this scenario", "", "");
         result.setOnError(true);
       }
-      if (StringUtils.isNotBlank(data.getPpsceid())) {
-        LOG.debug("CEID=" + data.getPpsceid() + " for Scenario=" + data.getCustSubGrp());
-        result.setOnError(false);
-        details.append("CEID=" + data.getPpsceid() + " for Scenario=" + data.getCustSubGrp() + " for the request.\n");
-      } else {
-        details.append("CEID cannot be blank for Scenario=" + data.getCustSubGrp() + " for the request.\n");
-        engineData.addRejectionComment("OTH", "CEID cannot be blank for this scenario", "", "");
-        result.setOnError(true);
-      }
+      // if (StringUtils.isNotBlank(data.getPpsceid())) {
+      // LOG.debug("CEID=" + data.getPpsceid() + " for Scenario=" +
+      // data.getCustSubGrp());
+      // result.setOnError(false);
+      // details.append("CEID=" + data.getPpsceid() + " for Scenario=" +
+      // data.getCustSubGrp() + " for the request.\n");
+      // } else {
+      // details.append("CEID cannot be blank for Scenario=" +
+      // data.getCustSubGrp() + " for the request.\n");
+      // engineData.addRejectionComment("OTH", "CEID cannot be blank for this
+      // scenario", "", "");
+      // result.setOnError(true);
+      // }
       if ("7230".equals(data.getIsicCd())) {
         LOG.debug("ISIC allowed: ISIC=" + data.getIsicCd() + " Scenario=" + data.getCustSubGrp());
         result.setOnError(false);
@@ -129,8 +137,10 @@ public class ChinaUtil extends AutomationUtil {
       }
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
+      doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
       break;
     case SCENARIO_LOCAL_INTER:
+
       if (StringUtils.isNotBlank(customerName) && customerName.indexOf("IBM China") >= 0) {
         LOG.debug("English name=" + customerName + " for Scenario=" + data.getCustSubGrp());
         result.setOnError(false);
@@ -170,35 +180,6 @@ public class ChinaUtil extends AutomationUtil {
 
     return true;
   }
-
-  // @Override
-  // public boolean
-  // performCountrySpecificCoverageCalculations(CalculateCoverageElement
-  // covElement, EntityManager entityManager,
-  // AutomationResult<OverrideOutput> results, StringBuilder details,
-  // OverrideOutput overrides, RequestData requestData,
-  // AutomationEngineData engineData, String covFrom, CoverageContainer
-  // container, boolean isCoverageCalculated) throws Exception {
-  //
-  // if (!"C".equals(requestData.getAdmin().getReqType())) {
-  // details.append(" Coverage Calculation skipped for Updates.");
-  // results.setResults("Skipped");
-  // results.setDetails(details.toString());
-  // return true;
-  // }
-  //
-  // Data data = requestData.getData();
-  // String scenario = data.getCustSubGrp();
-  // if (StringUtils.isNotEmpty(scenario) &&
-  // !((SCENARIO_LOCAL_BLUMX.equals(scenario) ||
-  // SCENARIO_LOCAL_MRKT.equals(scenario)
-  // || SCENARIO_LOCAL_BUSPR.equals(scenario) ||
-  // SCENARIO_LOCAL_INTER.equals(scenario) ||
-  // SCENARIO_LOCAL_PRIV.equals(scenario)))) {
-  //
-  // }
-  // return true;
-  // }
 
   @Override
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
