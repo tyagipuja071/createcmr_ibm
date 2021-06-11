@@ -25,8 +25,13 @@ import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.service.CmrClientService;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
+import com.ibm.cmr.services.client.AutomationServiceClient;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.MatchingServiceClient;
+import com.ibm.cmr.services.client.ServiceClient.Method;
+import com.ibm.cmr.services.client.automation.AutomationResponse;
+import com.ibm.cmr.services.client.automation.cn.CNRequest;
+import com.ibm.cmr.services.client.automation.cn.CNResponse;
 import com.ibm.cmr.services.client.dnb.DnbData;
 import com.ibm.cmr.services.client.dnb.DnbOrganizationId;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
@@ -574,6 +579,32 @@ public class CompanyFinder {
     // characters
     boolean isLatinResult = asciiEncoder.canEncode(text);
     return isLatinResult;
+  }
+  
+  /**
+   * Get chinese name and address from China's TianYanCha Api
+   * @param searchModel
+   * @return
+   * @throws Exception
+   */
+  public static AutomationResponse<CNResponse> getCNApiInfo(CompanyRecordModel searchModel) throws Exception {
+    AutomationServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
+        AutomationServiceClient.class);
+    client.setReadTimeout(1000 * 60 * 5);
+    client.setRequestMethod(Method.Get);
+
+    CNRequest request = new CNRequest();
+    request.setKeyword(searchModel.getTaxCd1());
+    System.out.println(request + request.getKeyword());
+
+    LOG.debug("Connecting to the CNValidation service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
+    AutomationResponse<?> rawResponse = client.executeAndWrap(AutomationServiceClient.CN_TYC_SERVICE_ID, request,
+        AutomationResponse.class);
+    ObjectMapper mapper = new ObjectMapper();
+    String json = mapper.writeValueAsString(rawResponse);
+    TypeReference<AutomationResponse<CNResponse>> ref = new TypeReference<AutomationResponse<CNResponse>>() {
+    };
+    return mapper.readValue(json, ref);
   }
 
 }
