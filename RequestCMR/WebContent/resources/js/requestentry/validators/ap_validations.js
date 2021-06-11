@@ -2917,6 +2917,7 @@ function validateStreetAddrCont2() {
   })(), null, 'frmCMR_addressModal');
 }
 
+// API call for validating GST for India on Save Request and Send for Processing
 function validateGSTForIndia() {
   FormManager.addFormValidator((function() {
     return {
