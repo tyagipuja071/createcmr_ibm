@@ -299,14 +299,16 @@ function lockRequireFieldsZA() {
   var role = FormManager.getActualValue('userRole');
 
   // fields locked for Requester
-  if (reqType == 'U' && role == GEOHandler.ROLE_REQUESTER) {
-    FormManager.readOnly('specialTaxCd');
-  }
   FormManager.readOnly('cmrOwner');
   FormManager.readOnly('custPrefLang');
   FormManager.addValidator('custPrefLang', Validators.REQUIRED, [ 'Preferred Language' ], 'MAIN_IBM_TAB');
   FormManager.addValidator('cmrOwner', Validators.REQUIRED, [ 'CMR Owner' ], 'MAIN_IBM_TAB');
-
+  if (reqType == 'U') {
+    FormManager.removeValidator('custPrefLang', Validators.REQUIRED);
+    if (role == GEOHandler.ROLE_REQUESTER) {
+      FormManager.readOnly('specialTaxCd');
+    }
+  }
 }
 
 function disableAddrFieldsZA() {
