@@ -208,7 +208,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
             result.setResults((isTaxCdMatch ? "Org ID " : "VAT ") + " not matched");
             details.append("High Quality match D&B record matched the request name/address information but the " + (isTaxCdMatch ? "Org ID " : "VAT ")
                 + " on record did not match request data.\n");
-            scorecard.setDnbMatchingResult("N");
+            scorecard.setDnbMatchingResult("Y");
             processDnBFields(entityManager, data, highestCloseMatch, output, details, 1);
             if (scenarioExceptions.isImportDnbInfo()) {
               // Create Address Records only if Levenshtein Distance
