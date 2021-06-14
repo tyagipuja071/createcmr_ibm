@@ -329,33 +329,18 @@ public class GermanyUtil extends AutomationUtil {
         }
       } else {
         if (!"ZS01".equals(addr.getId().getAddrType())) {
-          if (!"ZP01".equals(addr.getId().getAddrType())) {
-            removed = true;
-            String custNm = (addr.getCustNm1().trim() + (StringUtils.isNotBlank(addr.getCustNm2()) ? " " + addr.getCustNm2().trim() : ""))
-                .toUpperCase();
-            if (custNm.equals(mainCustNm) && addr.getAddrTxt().trim().toUpperCase().equals(mainStreetAddress1)
-                && addr.getCity1().trim().toUpperCase().equals(mainCity) && addr.getPostCd().trim().equals(mainPostalCd)) {
-              details.append("Removing duplicate address record: " + addr.getId().getAddrType() + " from the request.").append("\n");
-              Addr merged = entityManager.merge(addr);
-              if (merged != null) {
-                entityManager.remove(merged);
-              }
-              it.remove();
+          removed = true;
+          String custNm = (addr.getCustNm1().trim() + (StringUtils.isNotBlank(addr.getCustNm2()) ? " " + addr.getCustNm2().trim() : ""))
+              .toUpperCase();
+          if (custNm.equals(mainCustNm) && addr.getAddrTxt().trim().toUpperCase().equals(mainStreetAddress1)
+              && addr.getCity1().trim().toUpperCase().equals(mainCity) && addr.getPostCd().trim().equals(mainPostalCd)
+              && addr.getCustNm4().trim().toUpperCase().equals(mainCustNm4)) {
+            details.append("Removing duplicate address record: " + addr.getId().getAddrType() + " from the request.").append("\n");
+            Addr merged = entityManager.merge(addr);
+            if (merged != null) {
+              entityManager.remove(merged);
             }
-          } else if ("ZP01".equals(addr.getId().getAddrType())) {
-            removed = true;
-            String custNm = (addr.getCustNm1().trim() + (StringUtils.isNotBlank(addr.getCustNm2()) ? " " + addr.getCustNm2().trim() : ""))
-                .toUpperCase();
-            if (custNm.equals(mainCustNm) && addr.getAddrTxt().trim().toUpperCase().equals(mainStreetAddress1)
-                && addr.getCity1().trim().toUpperCase().equals(mainCity) && addr.getPostCd().trim().equals(mainPostalCd)
-                && addr.getCustNm4().trim().toUpperCase().equals(mainCustNm4)) {
-              details.append("Removing duplicate address record: " + addr.getId().getAddrType() + " from the request.").append("\n");
-              Addr merged = entityManager.merge(addr);
-              if (merged != null) {
-                entityManager.remove(merged);
-              }
-              it.remove();
-            }
+            it.remove();
           }
         }
       }
@@ -815,4 +800,8 @@ public class GermanyUtil extends AutomationUtil {
     return Arrays.asList("C", "U", "M");
   }
 
+  @Override
+  public boolean ifAnyAdditionChecksRequired(RequestData requestData) {
+    return true;
+  }
 }
