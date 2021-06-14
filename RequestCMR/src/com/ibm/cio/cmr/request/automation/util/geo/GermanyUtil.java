@@ -800,8 +800,4 @@ public class GermanyUtil extends AutomationUtil {
     return Arrays.asList("C", "U", "M");
   }
 
-  @Override
-  public boolean ifAnyAdditionChecksRequired(RequestData requestData) {
-    return true;
-  }
 }
