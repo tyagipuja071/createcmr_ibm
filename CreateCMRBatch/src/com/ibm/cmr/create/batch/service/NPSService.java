@@ -10,7 +10,6 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.ResourceBundle;
 
 import javax.persistence.EntityManager;
 
@@ -21,9 +20,9 @@ import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataPK;
-import com.ibm.cio.cmr.request.entity.NotifList;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.mail.Email;
 import com.ibm.cio.cmr.request.util.mail.MessageType;
@@ -37,7 +36,6 @@ import com.ibm.cio.cmr.request.util.mail.MessageType;
 public class NPSService extends BaseBatchService {
 
   private static final Logger LOG = Logger.getLogger(NPSService.class);
-  private static final ResourceBundle FEEDBACK_BUNDLE = ResourceBundle.getBundle("feedback");
 
   private Map<String, String> requestTypeDescriptions = new HashMap<String, String>();
 
@@ -58,18 +56,19 @@ public class NPSService extends BaseBatchService {
       DataPK dataPK = null;
       String feedbackUrl = null;
 
-      String market = null;
-      String tribe = null;
-      String squad = null;
-      String area = null;
-
-      String urlElem = null;
-      String[] urlParts = null;
+      boolean automated = false;
+      String procCenter = null;
+      String processor = null;
 
       for (Admin admin : pending) {
 
         // check first if NPS needs to be sent
         if (shouldSendNPS(entityManager, admin)) {
+
+          LOG.debug("Request " + admin.getId().getReqId() + ":");
+          processor = getProcessor(entityManager, admin.getId().getReqId());
+          automated = StringUtils.isBlank(processor);
+          LOG.debug(" - Requester: " + admin.getRequesterId() + ", Processor: " + processor + ", Automated: " + automated);
 
           // get DATA for country specific survey
           dataPK = new DataPK();
@@ -77,44 +76,35 @@ public class NPSService extends BaseBatchService {
           data = entityManager.find(Data.class, dataPK);
           if (data != null) {
 
-            // get the feedback URL
-            feedbackUrl = FEEDBACK_BUNDLE.getString(data.getCmrIssuingCntry());
+            procCenter = RequestUtils.getProcessingCenter(entityManager, data.getCmrIssuingCntry());
+            LOG.debug(" - Processing Center: " + procCenter);
+
+            feedbackUrl = SystemParameters.getString("NPS.URL");
+            if (StringUtils.isBlank(feedbackUrl)) {
+              feedbackUrl = "https://nps-survey-prod.dal1a.ciocloud.nonprod.intranet.ibm.com/";
+            }
+            feedbackUrl += "?type=" + (automated ? "automation" : "createcmr");
+            feedbackUrl += "&requestID=" + admin.getId().getReqId();
+            feedbackUrl += "&tribe=" + (procCenter != null ? procCenter.toLowerCase().replaceAll(" ", "") : "bratislava");
+
+            LOG.debug(" - Feedback URL: " + feedbackUrl);
 
             if (StringUtils.isBlank(feedbackUrl)) {
               LOG.warn("Request " + admin.getId().getReqId() + " does not have a feedback URL. Skipping.");
               admin.setWaitRevInd("Y");
             } else {
 
-              feedbackUrl = StringUtils.replace(feedbackUrl, "%20", " ");
-              feedbackUrl = StringUtils.replace(feedbackUrl, "%26", "&");
-
-              // if (feedbackUrl.contains("/survey/")) {
-
-              // build the mail
-              urlElem = feedbackUrl.substring(feedbackUrl.indexOf("/survey/") + 8);
-
-              urlParts = urlElem.split("[/]");
-              if (urlParts != null && urlParts.length == 4) {
-                market = urlParts[0];
-                tribe = urlParts[1];
-                squad = urlParts[2];
-                area = urlParts[3];
-              }
               LOG.debug("Sending client statisfaction survey to Request " + admin.getId().getReqId());
 
               String npsMail = new String(template);
               npsMail = StringUtils.replace(npsMail, "{{REQUEST}}",
                   admin.getId().getReqId() + " (" + this.requestTypeDescriptions.get(admin.getReqType()) + ")");
-              npsMail = StringUtils.replace(npsMail, "{{TRIBE}}", tribe);
               npsMail = StringUtils.replace(npsMail, "{{CMR}}", data.getCmrNo() + " (" + admin.getMainCustNm1()
                   + (!StringUtils.isBlank(admin.getMainCustNm2()) ? " " + admin.getMainCustNm2() : "") + ")");
-              npsMail = StringUtils.replace(npsMail, "{{SQUAD}}", squad);
-              npsMail = StringUtils.replace(npsMail, "{{MARKET}}", market);
-              npsMail = StringUtils.replace(npsMail, "{{AREA}}", area);
-              npsMail = StringUtils.replace(npsMail, "{{NPS_URL}}", SystemConfiguration.getValue("APPLICATION_URL") + "/nps");
+
               npsMail = StringUtils.replace(npsMail, "{{REQUEST_URL}}",
                   SystemConfiguration.getValue("APPLICATION_URL") + "/request/" + admin.getId().getReqId());
-              npsMail = StringUtils.replace(npsMail, "{{FEEDBACK_URL}}", FEEDBACK_BUNDLE.getString(data.getCmrIssuingCntry()));
+              npsMail = StringUtils.replace(npsMail, "{{FEEDBACK_URL}}", feedbackUrl);
 
               Email mail = new Email();
               mail.setFrom(SystemConfiguration.getValue("MAIL_FROM"));
@@ -126,7 +116,9 @@ public class NPSService extends BaseBatchService {
               String sourceSysSkip = admin.getSourceSystId() + ".SKIP";
               String onlySkipPartner = SystemParameters.getString(sourceSysSkip);
               boolean skip = false;
-
+              if (admin.getRequesterId().toLowerCase().equals(processor != null ? processor.toLowerCase() : "")) {
+                skip = true;
+              }
               if (StringUtils.isNotBlank(admin.getSourceSystId()) && "Y".equals(onlySkipPartner)) {
                 skip = true;
               }
@@ -134,14 +126,11 @@ public class NPSService extends BaseBatchService {
               if (skip == false) {
                 LOG.info("Sending NPS survey to " + admin.getRequesterId() + " for Request " + admin.getId().getReqId());
                 mail.send(SystemConfiguration.getValue("MAIL_HOST"));
+              } else {
+                LOG.warn("NPS Survey skipped for Request " + admin.getId().getReqId());
               }
 
               admin.setWaitRevInd("Y");
-              // } else {
-              // LOG.warn("Request " + admin.getId().getReqId() + " has
-              // unparseable feedback URL. Skipping.");
-              // admin.setWaitRevInd("Y");
-              // }
 
             }
           } else {
@@ -163,6 +152,21 @@ public class NPSService extends BaseBatchService {
   }
 
   /**
+   * Checks if the request is automated or not
+   * 
+   * @param entityManager
+   * @param reqId
+   * @return
+   */
+  private String getProcessor(EntityManager entityManager, long reqId) {
+    String sql = "select CREATE_BY_ID from CREQCMR.WF_HIST where REQ_ID = :REQ_ID and REQ_STATUS in ('PVA')";
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    query.setForReadOnly(true);
+    return query.getSingleResult(String.class);
+  }
+
+  /**
    * Checks if the survey needs to be sent to the requester. <br>
    * Criteria:<br>
    * <ul>
@@ -175,22 +179,24 @@ public class NPSService extends BaseBatchService {
    * @return
    */
   private boolean shouldSendNPS(EntityManager entityManager, Admin admin) {
-    String requesterId = admin.getRequesterId().toLowerCase();
-
-    if (!requesterId.endsWith("ibm.com")) {
-      return false;
-    }
-    String sql = ExternalizedQuery.getSql("BATCH.NPS.NOTIF");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("REQ_ID", admin.getId().getReqId());
-    List<NotifList> notifList = query.getResults(NotifList.class);
-    if (notifList != null) {
-      if (notifList.size() < 2) {
-        return false;
-      }
-    }
-
+    // always return now, catering for automation
     return true;
+    // String requesterId = admin.getRequesterId().toLowerCase();
+    //
+    // if (!requesterId.endsWith("ibm.com")) {
+    // return false;
+    // }
+    // String sql = ExternalizedQuery.getSql("BATCH.NPS.NOTIF");
+    // PreparedQuery query = new PreparedQuery(entityManager, sql);
+    // query.setParameter("REQ_ID", admin.getId().getReqId());
+    // List<NotifList> notifList = query.getResults(NotifList.class);
+    // if (notifList != null) {
+    // if (notifList.size() < 2) {
+    // return false;
+    // }
+    // }
+    //
+    // return true;
 
   }
 
