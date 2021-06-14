@@ -226,7 +226,6 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
             LOG.trace(new ObjectMapper().writeValueAsString(highestCloseMatch));
           } else if (SystemLocation.INDIA.equals(data.getCmrIssuingCntry())
               && (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId()))) {
-            scorecard.setDnbMatchingResult("N");
             LOG.debug("No D&B record matched the request data.");
             details.append("Matches against D&B were found but no record matched the request data.\n");
             details.append("Showing D&B matches:\n");
