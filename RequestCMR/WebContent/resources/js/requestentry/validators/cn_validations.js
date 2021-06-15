@@ -138,9 +138,7 @@ function afterConfigForCN() {
   if (_searchTermHandler && _searchTermHandler[0]) {
     _searchTermHandler[0].onChange();
   }
-  if (_govTypeHandler && _govTypeHandler[0]) {
-    _govTypeHandler[0].onChange();
-  }
+
 }
 
 function setInacBySearchTerm() {
