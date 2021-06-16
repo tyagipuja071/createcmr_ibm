@@ -12,15 +12,16 @@ import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.impl.ValidatingElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
+import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
-import com.ibm.cio.cmr.request.entity.Scorecard;
+import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.IntlAddr;
+import com.ibm.cio.cmr.request.model.CompanyRecordModel;
 import com.ibm.cio.cmr.request.util.CompanyFinder;
 import com.ibm.cio.cmr.request.util.RequestUtils;
-import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
-import com.ibm.cmr.services.client.dnb.DnbData;
-import com.ibm.cmr.services.client.matching.MatchingResponse;
-import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
+import com.ibm.cmr.services.client.automation.AutomationResponse;
+import com.ibm.cmr.services.client.automation.cn.CNResponse;
 
 public class CNAPICheckElement extends ValidatingElement implements CompanyVerifier {
 
@@ -39,117 +40,107 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
   @Override
   public AutomationResult<ValidationOutput> executeElement(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData)
       throws Exception {
-
-    long reqId = requestData.getAdmin().getId().getReqId();
-
-    AutomationResult<ValidationOutput> result = buildResult(reqId);
-    ValidationOutput validation = new ValidationOutput();
-    GEOHandler handler = RequestUtils.getGEOHandler(requestData.getData().getCmrIssuingCntry());
+    Addr soldTo = requestData.getAddress("ZS01");
     Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
+    // ScenarioExceptionsUtil scenarioExceptions =
+    // getScenarioExceptions(entityManager, requestData, engineData);
+    // AutomationUtil countryUtil =
+    // AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
 
-    boolean ifDnBAccepted = false;
-    boolean ifDnBRejected = false;
-    boolean ifDnBNotRequired = false;
-    boolean isSourceSysIDBlank = StringUtils.isBlank(admin.getSourceSystId()) ? true : false;
+    AutomationResult<ValidationOutput> result = buildResult(admin.getId().getReqId());
+    // boolean matchDepartment = false;
+    // if (engineData.get(AutomationEngineData.MATCH_DEPARTMENT) != null) {
+    // matchDepartment = (boolean)
+    // engineData.get(AutomationEngineData.MATCH_DEPARTMENT);
+    // }
 
-    LOG.debug("Entering China API Check Element");
-    if (requestData.getAdmin().getReqType().equalsIgnoreCase("U")) {
-      validation.setSuccess(true);
-      validation.setMessage("Skipping China API check");
-      result.setDetails("Skipping China API check for updates");
-      LOG.debug("Skipping China - API check for updates");
-    }
+    ValidationOutput output = new ValidationOutput();
 
-    else {
-      Scorecard scorecard = requestData.getScorecard();
-      if (scorecard.getFindDnbResult() != null) {
-        ifDnBAccepted = scorecard.getFindDnbResult().equalsIgnoreCase(RESULT_ACCEPTED) && !StringUtils.isBlank(requestData.getData().getDunsNo());
-        ifDnBRejected = scorecard.getFindDnbResult().equalsIgnoreCase(RESULT_REJECTED);
-        ifDnBNotRequired = scorecard.getFindDnbResult().equalsIgnoreCase("Not Required");
-      }
-      if (!ifDnBAccepted && !ifDnBRejected && !ifDnBNotRequired) {
-        if (admin.getMatchOverrideIndc() == null
-            || (!StringUtils.isEmpty(admin.getMatchOverrideIndc()) && !admin.getMatchOverrideIndc().equalsIgnoreCase(MATCH_INDC_YES))) {
-          MatchingResponse<DnBMatchingResponse> dnbMatchingResult = new MatchingResponse<DnBMatchingResponse>();
-          try {
-            dnbMatchingResult = DnBUtil.getMatches(requestData, engineData, "ZS01");
-          } catch (Exception e) {
-            LOG.debug("Error on China - API Matching" + e.getMessage());
+    // if (!scenarioExceptions.isSkipDuplicateChecks()) {
+    if (StringUtils.isNotBlank(admin.getDupCmrReason())) {
+      StringBuilder details = new StringBuilder();
+      details.append("User requested to proceed with Duplicate CMR Creation.").append("\n\n");
+      details.append("Reason provided - ").append("\n");
+      details.append(admin.getDupCmrReason()).append("\n");
+      result.setDetails(details.toString());
+      result.setResults("Overridden");
+      result.setOnError(false);
+    } else if (soldTo != null) {
+
+      String SCENARIO_LOCAL_NRML = "NRML";
+      String SCENARIO_LOCAL_EMBSA = "EMBSA";
+      String SCENARIO_CROSS_CROSS = "CROSS";
+      String SCENARIO_LOCAL_AQSTN = "AQSTN";
+      String SCENARIO_LOCAL_BLUMX = "BLUMX";
+      String SCENARIO_LOCAL_MRKT = "MRKT";
+      String SCENARIO_LOCAL_BUSPR = "BUSPR";
+      String SCENARIO_LOCAL_INTER = "INTER";
+      String SCENARIO_LOCAL_PRIV = "PRIV";
+      boolean ifAQSTNHasCN = true;
+      if (data.getCustSubGrp() != null && (SCENARIO_LOCAL_NRML.equals(data.getCustSubGrp()) || SCENARIO_LOCAL_EMBSA.equals(data.getCustSubGrp())
+          || SCENARIO_LOCAL_AQSTN.equals(data.getCustSubGrp()) || SCENARIO_LOCAL_BLUMX.equals(data.getCustSubGrp())
+          || SCENARIO_LOCAL_MRKT.equals(data.getCustSubGrp()) || SCENARIO_LOCAL_BUSPR.equals(data.getCustSubGrp())
+          || SCENARIO_LOCAL_INTER.equals(data.getCustSubGrp()))) {
+        CompanyRecordModel searchModel = new CompanyRecordModel();
+        searchModel.setIssuingCntry(data.getCmrIssuingCntry());
+        searchModel.setCountryCd(soldTo.getLandCntry());
+        if (StringUtils.isNotEmpty(data.getTaxCd1())) {
+          searchModel.setTaxCd1(data.getTaxCd1());
+        } else {
+          GEOHandler handler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
+          IntlAddr iAddr = new IntlAddr();
+          // CompanyRecordModel cmrData = null;
+          iAddr = handler.getIntlAddrById(soldTo, entityManager);
+          // searchModel.setCmrNo(cmrNo);
+          if (iAddr != null) {
+
+            searchModel.setTaxCd1(iAddr.getIntlCustNm1() + " " + (iAddr.getIntlCustNm2() != null ? iAddr.getIntlCustNm2() : ""));
           }
-          boolean hasValidMatches = DnBUtil.hasValidMatches(dnbMatchingResult);
-          if (dnbMatchingResult != null && hasValidMatches && isSourceSysIDBlank) {
-            requestData.getAdmin().setMatchIndc("D");
-            validation.setSuccess(false);
-            validation.setMessage("Matches found");
-            result.setDetails("High confidence China - API matches were found. No override from users was recorded.");
-            result.setOnError(true);
-            engineData.addRejectionComment("OTH", "High confidence China - API matches were found. No override from users was recorded.", "", "");
-            LOG.debug("High confidence China - API matches were found. No override from user was recorded.\n");
-          } else if (!hasValidMatches && isSourceSysIDBlank) {
-            validation.setSuccess(true);
-            validation.setMessage("Review Needed");
-            result.setDetails("Processor review is required as no high confidence China - API matches were found.");
-
-            engineData.addNegativeCheckStatus("ChinaAPICheck", "No high confidence China - API matches were found.");
-            LOG.debug("Processor review is required as no high confidence China - API matches were found.");
-          } else if (!isSourceSysIDBlank) {
-            validation.setSuccess(true);
-            validation.setMessage("Skipped");
-            result.setDetails("The request was created from an external system and China - API searches is not available.");
-            LOG.debug("The request was created from an external system and China - API searches is not available.");
-          }
-        } else if (!StringUtils.isEmpty(admin.getMatchOverrideIndc()) && admin.getMatchOverrideIndc().equalsIgnoreCase(MATCH_INDC_YES)) {
-          validation.setSuccess(true);
-          String message = "China - API matches were chosen to be overridden by the requester.";
-          if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, reqId)) {
-            validation.setMessage("Overridden");
-            result.setDetails(message + "\nSupporting documentation is provided by the requester as attachment.");
+        }
+        try {
+          AutomationResponse<CNResponse> cmrsData = CompanyFinder.getCNApiInfo(searchModel);
+          if (cmrsData != null && cmrsData.isSuccess()) {
+            // cmrData = cmrsData.get(0);
+            result.setResults("Matches Found");
+            StringBuilder details = new StringBuilder();
+            result.setResults("Found China API Data.");
+            // engineData.addRejectionComment("DUPC", "Customer already exists /
+            // duplicate CMR", "", "");
+            // to allow overides later
+            // requestData.getAdmin().setMatchIndc("C");
+            result.setOnError(false);
+            details.append("\n");
+            // logDuplicateCMR(details, cmrData);
+            result.setProcessOutput(output);
+            result.setDetails(details.toString().trim());
           } else {
-            validation.setMessage("Review required.");
-            result.setDetails(message + "\nNo supporting documentation is provided by the requester.");
-            engineData.addNegativeCheckStatus("ChinaAPICheck", "China - API Check matches were chosen to be overridden by the requester");
-            LOG.debug("China - API matches were chosen to be overridden by the requester and needs to be reviewed");
-          }
-
-        }
-      } else if (ifDnBAccepted) {
-
-        DnbData dnb = CompanyFinder.getDnBDetails(requestData.getData().getDunsNo());
-        boolean writeSuccess = true;
-        if (dnb != null && dnb.getResults() != null && !dnb.getResults().isEmpty()) {
-          if ("O".equals(dnb.getResults().get(0).getOperStatusCode())) {
+            result.setDetails("No China API Data were found.");
+            result.setResults("No Matches");
+            engineData.addRejectionComment("NOCN", "No China API Data were found.", "", "");
             result.setOnError(true);
-            validation.setSuccess(false);
-            validation.setMessage("Failed");
-            result.setDetails("Company is Out of Business based on China - API records.");
-            engineData.addRejectionComment("OTH", "Company is Out of Business based on China - API records.", "", "");
-            // admin.setCompVerifiedIndc(COMPANY_VERIFIED_INDC_YES);
-            // admin.setCompInfoSrc("D&B");
-            engineData.setCompanySource("ChinaAPI");
-            LOG.debug("China - API Check record is marked as Out of Business.");
-            writeSuccess = false;
           }
+        } catch (Exception e) {
+          e.printStackTrace();
+          result.setDetails("Error on get China API Data Check.");
+          engineData.addRejectionComment("OTH", "Error on  get China API Data Check.", "", "");
+          result.setOnError(true);
+          result.setResults("Error on  get China API Data Check.");
         }
 
-        if (writeSuccess) {
-          validation.setSuccess(true);
-          validation.setMessage("DUNS Imported");
-          result.setDetails("China - API Check record has been imported into the request.");
-          // admin.setCompVerifiedIndc(COMPANY_VERIFIED_INDC_YES);
-          // admin.setCompInfoSrc("D&B");
-          engineData.setCompanySource("ChinaAPI");
-          LOG.debug("China - API Check record has been imported into the request.");
-        }
-      } else if (ifDnBRejected || ifDnBNotRequired) {
-        validation.setSuccess(true);
-        validation.setMessage("Skipped");
-        result.setDetails("Skipping China - API Check. Search rejected or not required.");
-        LOG.debug("Skipping China - API Check as China - API search found to be rejected");
       }
+    } else {
+      result.setDetails("Missing main address on the request.");
+      engineData.addRejectionComment("OTH", "Missing main address on the request.", "", "");
+      result.setResults("No Matches");
+      result.setOnError(true);
     }
-
-    result.setResults(validation.getMessage());
-    result.setProcessOutput(validation);
+    // } else {
+    // result.setDetails("Skipping Duplicate CMR checks for scenario");
+    // log.debug("Skipping Duplicate CMR checks for scenario");
+    // result.setResults("Skipped");
+    // result.setOnError(false);
+    // }
     return result;
   }
 
