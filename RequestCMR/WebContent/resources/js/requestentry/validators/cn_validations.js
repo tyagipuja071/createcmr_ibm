@@ -321,25 +321,24 @@ function defaultCapIndicator() {
 function disableVatExemptForScenarios() {
   var _custSubGrp = FormManager.getActualValue('custSubGrp');
   // setValuesForScenarios();
-  if (FormManager.getActualValue('reqType') == 'C' && _custSubGrp != 'undefined' && _custSubGrp != '') {
-    if (_custSubGrp != 'COMME' && _custSubGrp != 'GOVMT' && _custSubGrp != 'BROKR' && _custSubGrp != 'CROSS') {
+  if (_custSubGrp != 'undefined' && _custSubGrp != '') {
+    if (_custSubGrp == 'INTER'  ||  _custSubGrp == 'PRIV') {
       FormManager.disable('vatExempt');
+      FormManager.removeValidator('busnType', Validators.REQUIRED);
     } else {
       FormManager.enable('vatExempt');
-      autoSetTax();
+      setSocialCreditCdValidator();
     }
   }
 }
-function autoSetTax() {
-  var reqType = null;
-  reqType = FormManager.getActualValue('reqType');
-  if (reqType != 'C') {
-    return;
-  }
-  if (dijit.byId('vatExempt').get('checked')) {
-    FormManager.resetValidations('vat');
+
+function setSocialCreditCdValidator(){
+  if (dojo.byId('vatExempt').checked ) {
+    console.log(">>> process Social Credit Code remove * >> ");
+    FormManager.resetValidations('busnType');
   } else {
-    FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+    console.log(">>> process Social Credit Code add * >> ");
+    FormManager.addValidator('busnType', Validators.REQUIRED, [ 'Social Credit Code' ], 'MAIN_CUST_TAB');
   }
 }
 
@@ -1138,29 +1137,17 @@ function addEngNameFormatValidation() {
 
 }
 
-function setSocialCreditCdValidator(){
-  console.log(">>> process Social Credit Code remove * >> ");
-  if (dojo.byId('vatExempt').checked) {
-    FormManager.removeValidator('busnType', Validators.REQUIRED);
-  } else {
-    console.log(">>> If scenario is not Internal and Private person, then process Social Credit Code add * >> ");
-    FormManager.addValidator('busnType', Validators.REQUIRED, [ 'BusnType' ], 'MAIN_CUST_TAB');
-  }
-}
-
-
 dojo.addOnLoad(function() {
   GEOHandler.CN = [ SysLoc.CHINA ];
   console.log('adding CN validators...');
   GEOHandler.addAfterConfig(afterConfigForCN, GEOHandler.CN);
-  // GEOHandler.addAfterConfig(autoSetTax, GEOHandler.CN);
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.CN);
   GEOHandler.registerValidator(addDPLCheckValidator, GEOHandler.CN, GEOHandler.ROLE_REQUESTER, false, false);
   GEOHandler.enableCustomerNamesOnAddress(GEOHandler.CN);
   GEOHandler.addAfterTemplateLoad(autoSetIBMDeptCostCenter, GEOHandler.CN);
   GEOHandler.addAfterTemplateLoad(addValidationForParentCompanyNo, GEOHandler.CN);
-  // GEOHandler.addAfterTemplateLoad(disableVatExemptForScenarios,
-  // GEOHandler.CN);
+  GEOHandler.addAfterConfig(setSocialCreditCdValidator, GEOHandler.CN);
+  GEOHandler.addAfterTemplateLoad(disableVatExemptForScenarios, GEOHandler.CN);
   GEOHandler.addAfterTemplateLoad(setPrivacyIndcReqdForProc, GEOHandler.CN);
   // GEOHandler.addAfterTemplateLoad(limitClientTierValuesOnCreate,
   // GEOHandler.CN);

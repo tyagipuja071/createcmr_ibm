@@ -38,6 +38,7 @@
   </cmr:column>
    <cmr:column span="2" >
      <p>
+       <cmr:label fieldId="vatExempt2">&nbsp;</cmr:label>
        <cmr:field fieldId="VATExempt" id="vatExempt" path="vatExempt" tabId="MAIN_CUST_TAB" />
        <cmr:label fieldId="vatExempt" forRadioOrCheckbox="true">
          <cmr:fieldLabel fieldId="VATExempt" />
