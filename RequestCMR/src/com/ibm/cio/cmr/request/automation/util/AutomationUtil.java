@@ -909,6 +909,7 @@ public abstract class AutomationUtil {
     String mainCity = (StringUtils.isNotBlank(zs01.getCity1()) ? zs01.getCity1() : "").trim().toUpperCase();
     String mainPostalCd = (StringUtils.isNotBlank(zs01.getPostCd()) ? zs01.getPostCd() : "").trim();
     String mainCustNm4 = (StringUtils.isNotBlank(zs01.getCustNm4()) ? zs01.getCustNm4() : "").trim();
+    String mainCity2 = (StringUtils.isNotBlank(zs01.getCity2()) ? zs01.getCity2() : "").trim();
     Iterator<Addr> it = requestData.getAddresses().iterator();
     boolean removed = false;
     details.append("Checking for duplicate address records - ").append("\n");
@@ -933,7 +934,7 @@ public abstract class AutomationUtil {
           if (compareCustomerNames(zs01, addr)
               && (StringUtils.isNotBlank(addr.getAddrTxt()) && addr.getAddrTxt().trim().toUpperCase().equals(mainStreetAddress1))
               && addr.getCity1().trim().toUpperCase().equals(mainCity) && addr.getPostCd().trim().equals(mainPostalCd)
-              && addr.getCustNm4().trim().toUpperCase().equals(mainCustNm4)) {
+              && (addr.getCustNm4().trim().toUpperCase().equals(mainCustNm4) || addr.getCity2().trim().toUpperCase().equals(mainCity2))) {
             details.append("Removing duplicate address record: " + addr.getId().getAddrType() + " from the request.").append("\n");
             Addr merged = entityManager.merge(addr);
             if (merged != null) {
