@@ -1698,6 +1698,10 @@ function setISBUScenarioLogic() {
     if (cmrIssuingCntry == '744' || cmrIssuingCntry == '834') {
       FormManager.setValue('isbuCd', 'GMBW');
     }
+  } else if (custSubGrp == 'PRIV') {
+	 if (cmrIssuingCntry == '744') {
+	        FormManager.setValue('isbuCd', 'GMBW');
+	      }
   } else if (custSubGrp == 'BUSPR' || custSubGrp == 'XBUSP') {
     if (cmrIssuingCntry == '643' || cmrIssuingCntry == '646' || cmrIssuingCntry == '714' || cmrIssuingCntry == '720' || cmrIssuingCntry == '749' || cmrIssuingCntry == '778'
         || cmrIssuingCntry == '818' || cmrIssuingCntry == '834' || cmrIssuingCntry == '852' || cmrIssuingCntry == '856') {
