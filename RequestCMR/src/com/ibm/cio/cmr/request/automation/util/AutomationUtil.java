@@ -904,6 +904,7 @@ public abstract class AutomationUtil {
   protected boolean removeDuplicateAddresses(EntityManager entityManager, RequestData requestData, StringBuilder details) {
     Addr zs01 = requestData.getAddress("ZS01");
     Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
     boolean payGoAddredited = AutomationUtil.isPayGoAccredited(entityManager, admin.getSourceSystId());
     String mainStreetAddress1 = (StringUtils.isNotBlank(zs01.getAddrTxt()) ? zs01.getAddrTxt() : "").trim().toUpperCase();
     String mainCity = (StringUtils.isNotBlank(zs01.getCity1()) ? zs01.getCity1() : "").trim().toUpperCase();
@@ -931,17 +932,32 @@ public abstract class AutomationUtil {
         }
       } else {
         if (!"ZS01".equals(addr.getId().getAddrType())) {
-          if (compareCustomerNames(zs01, addr)
-              && (StringUtils.isNotBlank(addr.getAddrTxt()) && addr.getAddrTxt().trim().toUpperCase().equals(mainStreetAddress1))
-              && addr.getCity1().trim().toUpperCase().equals(mainCity) && addr.getPostCd().trim().equals(mainPostalCd)
-              && (addr.getCustNm4().trim().toUpperCase().equals(mainCustNm4) || addr.getCity2().trim().toUpperCase().equals(mainCity2))) {
-            details.append("Removing duplicate address record: " + addr.getId().getAddrType() + " from the request.").append("\n");
-            Addr merged = entityManager.merge(addr);
-            if (merged != null) {
-              entityManager.remove(merged);
+          if (Arrays.asList("618", "706").contains(data.getCmrIssuingCntry())) {
+            if (compareCustomerNames(zs01, addr)
+                && (StringUtils.isNotBlank(addr.getAddrTxt()) && addr.getAddrTxt().trim().toUpperCase().equals(mainStreetAddress1))
+                && addr.getCity1().trim().toUpperCase().equals(mainCity) && addr.getPostCd().trim().equals(mainPostalCd)
+                && addr.getCustNm4().trim().toUpperCase().equals(mainCustNm4)) {
+              details.append("Removing duplicate address record: " + addr.getId().getAddrType() + " from the request.").append("\n");
+              Addr merged = entityManager.merge(addr);
+              if (merged != null) {
+                entityManager.remove(merged);
+              }
+              it.remove();
+              removed = true;
             }
-            it.remove();
-            removed = true;
+          } else if ("848".equals(data.getCmrIssuingCntry())) {
+            if (compareCustomerNames(zs01, addr)
+                && (StringUtils.isNotBlank(addr.getAddrTxt()) && addr.getAddrTxt().trim().toUpperCase().equals(mainStreetAddress1))
+                && addr.getCity1().trim().toUpperCase().equals(mainCity) && addr.getPostCd().trim().equals(mainPostalCd)
+                && addr.getCity2().trim().toUpperCase().equals(mainCity2)) {
+              details.append("Removing duplicate address record: " + addr.getId().getAddrType() + " from the request.").append("\n");
+              Addr merged = entityManager.merge(addr);
+              if (merged != null) {
+                entityManager.remove(merged);
+              }
+              it.remove();
+              removed = true;
+            }
           }
         }
       }
