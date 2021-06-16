@@ -493,7 +493,7 @@ public class NetherlandsUtil extends AutomationUtil {
               String installAtName = getCustomerFullName(addr);
               String soldToName = getCustomerFullName(zs01);
               if (installAtName.equals(soldToName)) {
-                if (addressExists(entityManager, addr)) {
+                if (addressExists(entityManager, addr ,requestData)) {
                   LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
                   checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");
                   resultCodes.add("R");
@@ -510,7 +510,7 @@ public class NetherlandsUtil extends AutomationUtil {
 
             if (addrType.equalsIgnoreCase(CmrConstants.RDC_SHIP_TO) && "N".equals(addr.getImportInd())) {
               LOG.debug("Checking duplicates for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
-              boolean duplicate = addressExists(entityManager, addr);
+              boolean duplicate = addressExists(entityManager, addr , requestData);
               if (duplicate) {
                 LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
                 checkDetails.append("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");
