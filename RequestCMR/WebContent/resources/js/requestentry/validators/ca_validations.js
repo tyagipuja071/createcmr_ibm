@@ -670,6 +670,35 @@ function addProvincePostalCdValidator() {
   })(), null, 'frmCMR_addressModal');
 }
 
+function addINACValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var inacType = FormManager.getActualValue('inacType');
+        var inac = FormManager.getActualValue('inacCd');
+        if (inac != '') {
+          var message = '';
+          var qParams = {
+            FIELD_ID : "##INACCode",
+            CMR_ISSUING_CNTRY : SysLoc.CANADA,
+            CD : FormManager.getActualValue('inacCd'),
+          };
+          var result = cmr.query('CHECKLOV', qParams);
+          if (inacType == 'I') {
+            message = 'INAC value is invalid.';
+          } else {
+            message = 'NAT value is invalid.';
+          }
+          if (result.ret1 != 1) {
+            return new ValidationResult(null, false, message);
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 /* Register CA Javascripts */
 dojo.addOnLoad(function() {
   console.log('adding CA scripts...');
