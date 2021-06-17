@@ -344,55 +344,6 @@ function lockOrdBlk() {
   }
 }
 
-/**
- * After config handlers Oman
- */
-var _vatExemptHandlerOM = null;
-function addHandlersForOman() {
-  if (_vatExemptHandlerOM == null) {
-    _vatExemptHandlerOM = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
-      setVatValidatorOMAN();
-    });
-  }
-}
-
-function omanVat() {
-  if (FormManager.getActualValue('cmrIssuingCntry') != '805') {
-    return;
-  }
-
-  var role = FormManager.getActualValue('userRole').toUpperCase();
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
-
-  if (role == 'REQUESTER') {
-    if (custSubGrp == 'BUSPR' || custSubGrp == 'COMME' || custSubGrp == 'THDPT' || custSubGrp == 'ELBP' || custSubGrp == 'ELCOM') {
-      FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
-    } else {
-      FormManager.removeValidator('vat', Validators.REQUIRED);
-    }
-  }
- 
-  setVatValidatorOMAN();
-}
-
-function setVatValidatorOMAN() {
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
-  if (FormManager.getActualValue('cmrIssuingCntry') != '805') {
-    return;
-  }
-  if (custSubGrp == 'INTER' || custSubGrp == 'PRICU') {
-    return;
-  }
-  
-  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
-  if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
-    FormManager.resetValidations('vat');
-    if (!dijit.byId('vatExempt').get('checked')) {
-      checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
-    }
-  }
-}
-
 function orderBlockValidation() {
   FormManager.addFormValidator((function() {
     return {
@@ -4613,9 +4564,5 @@ dojo
       // GEOHandler.addAfterConfig(addPrefixVat, GEOHandler.CEE);
       // GEOHandler.addAfterTemplateLoad(addPrefixVat, GEOHandler.CEE);
       // GEOHandler.addAddrFunction(addPrefixVat, GEOHandler.CEE);
-      
-      GEOHandler.addAfterConfig(omanVat, GEOHandler.ME);
-      GEOHandler.addAfterTemplateLoad(omanVat, GEOHandler.ME);
-      GEOHandler.addAfterConfig(addHandlersForOman, GEOHandler.ME);
 
     });
