@@ -810,7 +810,7 @@ public class FranceUtil extends AutomationUtil {
               engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_DNB_ORGID_VAL);
             }
             if (CmrConstants.RDC_SHIP_TO.equals(addrType)) {
-              if (addressExists(entityManager, addr)) {
+              if (addressExists(entityManager, addr ,requestData)) {
                 LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
                 checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");
                 resultCodes.add("R");
@@ -828,7 +828,7 @@ public class FranceUtil extends AutomationUtil {
               }
 
               if (addrName.equals(soldToName)) {
-                if (addressExists(entityManager, addr)) {
+                if (addressExists(entityManager, addr, requestData)) {
                   LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
                   checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");
                   resultCodes.add("R");
