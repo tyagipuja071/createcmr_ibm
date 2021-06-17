@@ -612,7 +612,7 @@ public class GermanyUtil extends AutomationUtil {
 
       if (shipTo != null && (changes.isAddressChanged("ZD01") || isAddressAdded(shipTo))) {
         // Check If Address already exists on request
-        isShipToExistOnReq = addressExists(entityManager, shipTo);
+        isShipToExistOnReq = addressExists(entityManager, shipTo ,requestData);
         if (isShipToExistOnReq) {
           detail.append("Ship To details provided matches an existing address.");
           validation.setMessage("ShipTo already exists");
@@ -629,7 +629,7 @@ public class GermanyUtil extends AutomationUtil {
 
       if (installAt != null && (changes.isAddressChanged("ZI01") || isAddressAdded(installAt))) {
         // Check If Address already exists on request
-        isInstallAtExistOnReq = addressExists(entityManager, installAt);
+        isInstallAtExistOnReq = addressExists(entityManager, installAt , requestData);
         if (isInstallAtExistOnReq) {
           detail.append("Install At details provided matches an existing address.");
           engineData.addRejectionComment("OTH", "Install At details provided matches an existing address.", "", "");
@@ -657,7 +657,7 @@ public class GermanyUtil extends AutomationUtil {
 
       if (billTo != null && (changes.isAddressChanged("ZP01") || isAddressAdded(billTo))) {
         // Check If Address already exists on request
-        isBillToExistOnReq = addressExists(entityManager, billTo);
+        isBillToExistOnReq = addressExists(entityManager, billTo , requestData);
         if (isBillToExistOnReq) {
           detail.append("Bill To details provided matches an existing address.");
           engineData.addRejectionComment("OTH", "Bill To details provided matches an existing address.", "", "");
