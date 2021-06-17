@@ -76,7 +76,7 @@
     <editable>true</editable>
     <required>true</required>
     <editType>text</editType>
-    <value>030</value>
+    <value>230</value>
   </item>
   <item>
     <id>MAIL_HOST</id>
