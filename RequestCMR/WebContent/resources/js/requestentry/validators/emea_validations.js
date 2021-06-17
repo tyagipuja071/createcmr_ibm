@@ -3580,8 +3580,22 @@ var _gtcISUHandler = null;
 var _CTCHandler = null;
 var _gtcISRHandler = null;
 var _gtcAddrTypes = [ 'ZS01', 'ZP01', 'ZD01', 'ZI01' ];
+var _gtcAddrTypesIL = [ 'ZS01', 'ZP01', 'ZD01', 'ZI01', 'CTYA', 'CTYB', 'CTYC' ];
 var _gtcAddrTypeHandler = [];
+var _gtcAddrTypeHandlerIL = [];
 var _gtcVatExemptHandler = null;
+
+function addHandlersForIL() {
+  for (var i = 0; i < _gtcAddrTypesIL.length; i++) {
+    _gtcAddrTypeHandlerIL[i] = null;
+    if (_gtcAddrTypeHandlerIL[i] == null) {
+      _gtcAddrTypeHandlerIL[i] = dojo.connect(FormManager.getField('addrType_' + _gtcAddrTypesIL[i]), 'onClick', function(value) {
+        countryUseAISRAEL();
+      });
+    }
+  }
+}
+
 function addHandlersForGRCYTR() {
   var custType = FormManager.getActualValue('custGrp');
   if (_gtcISUHandler == null) {
@@ -9173,6 +9187,20 @@ function lockCollectionCode() {
   }
 }
 
+function countryUseAISRAEL() {
+  // Lock land country when 'LOCAL' scenario
+  var cntryCd = FormManager.getActualValue('cmrIssuingCntry');
+  if (cntryCd == SysLoc.ISRAEL) {
+    var landCntry = FormManager.getActualValue('landCntry');
+    if ((FormManager.getActualValue('custGrp') == 'LOCAL') && (FormManager.getActualValue('addrType') == 'CTYA' || FormManager.getActualValue('addrType') == 'ZS01')) {
+      FormManager.setValue('landCntry', 'IL');
+      FormManager.readOnly('landCntry');
+    } else {
+      FormManager.enable('landCntry');
+    }
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding EMEA functions...');
@@ -9442,5 +9470,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(autoSetVAT, [ SysLoc.UK, SysLoc.IRELAND ]);
 
   GEOHandler.registerValidator(validateVATForINFSLScenarioUKI, [ SysLoc.IRELAND ], null, true);
+  GEOHandler.addAfterConfig(addHandlersForIL, [ SysLoc.ISRAEL ]);
+  GEOHandler.addAddrFunction(countryUseAISRAEL, [ SysLoc.ISRAEL ]);
 
 });
