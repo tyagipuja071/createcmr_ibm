@@ -2234,6 +2234,10 @@ function addPostalCodeLengthValidator() {
           if (postal_cd.length != 8) {
             return new ValidationResult(null, false, 'Postal Code should be 8 characters long.');
           }
+        } else if (land_cntry == 'IL') {
+          if (postal_cd.length < 5 || postal_cd.length == 6) {
+            return new ValidationResult(null, false, 'Postal Code should be either 5 or 7 characters long.');
+          }
         } else {
           return new ValidationResult(null, true);
         }
@@ -9269,7 +9273,9 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(resetSubIndustryCd, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(removeValidationInacNac, [ SysLoc.ISRAEL ]);
   GEOHandler.addAddrFunction(disableCustPhone, [ SysLoc.ISRAEL ]);
-  GEOHandler.addAfterConfig(postalCodeNumericOnlyForDomestic, [ SysLoc.ISRAEL ]);
+  GEOHandler.registerValidator(addPostalCodeLengthValidator, [ SysLoc.ISRAEL ], null, true);
+  // GEOHandler.addAfterConfig(postalCodeNumericOnlyForDomestic, [ SysLoc.ISRAEL
+  // ]);
   GEOHandler.addAfterConfig(setAbbrvLocCrossBorderScenario, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(setAbbrvLocCrossBorderScenarioOnChange, [ SysLoc.ISRAEL ]);
 
