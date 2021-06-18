@@ -439,7 +439,8 @@ public class KRPDFConverter extends DefaultPDFConverter {
   public String textContainingLanguage(String text) {
     for (char charac : text.toCharArray()) {
       if (Character.UnicodeBlock.of(charac) == Character.UnicodeBlock.HANGUL_SYLLABLES) {
-
+        return "KOREA";
+      } else if (Character.UnicodeBlock.of(charac) == Character.UnicodeBlock.HALFWIDTH_AND_FULLWIDTH_FORMS) {
         return "KOREA";
       }
     }

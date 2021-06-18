@@ -81,6 +81,12 @@ public class TWHandler extends GEOHandler {
     data.setClientTier(mainRecord.getCmrTier() == null ? mainRecord.getCmrTier() : mainRecord.getCmrTier().trim());
     data.setInvoiceSplitCd(mainRecord.getInvoiceSplitCode() == null ? mainRecord.getInvoiceSplitCode() : mainRecord.getInvoiceSplitCode().trim());
 
+    // jira 2567
+    String abbName = mainRecord.getCmrName1Plain() == null ? mainRecord.getCmrName1Plain() : mainRecord.getCmrName1Plain().trim();
+    if (!StringUtils.isEmpty(abbName) && abbName.length() > 21) {
+      abbName = abbName.substring(0, 21);
+    }
+    data.setAbbrevNm(abbName);
   }
 
   @Override

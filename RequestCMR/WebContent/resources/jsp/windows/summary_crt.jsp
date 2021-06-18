@@ -640,6 +640,17 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
             ${summary.addr.custNm4}
           </cmr:column>
           </cmr:view>
+        <cmr:view forGEO="NORDX">
+          <cmr:column span="1" width="130">
+            <label>
+              <cmr:fieldLabel fieldId="CustomerName3" />:
+              <cmr:info text="${ui.info.NordicsForAdditionalInfo}" />
+            </label>
+          </cmr:column>
+          <cmr:column span="1" width="170">
+            ${summary.addr.custNm3}
+          </cmr:column>
+        </cmr:view>
       </cmr:row>
 
       <cmr:row addBackground="false">
