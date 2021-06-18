@@ -1137,6 +1137,26 @@ function addEngNameFormatValidation() {
 
 }
 
+function addSocialCreditCdLengthValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var _socialCreditCdLen = FormManager.getActualValue('busnType');
+        if (_socialCreditCdLen && _socialCreditCdLen.length > 0 && _socialCreditCdLen.length != 18){
+            return new ValidationResult({
+              id : 'busnType',
+              type : 'text',
+              name : 'busnType'
+            }, false, 'The length for Social Credit Code should be 18 characters.');
+        }else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
+
 dojo.addOnLoad(function() {
   GEOHandler.CN = [ SysLoc.CHINA ];
   console.log('adding CN validators...');
@@ -1173,5 +1193,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addSoltToAddressValidator, GEOHandler.CN, null, false, false);
   GEOHandler.registerValidator(addContactInfoValidator, GEOHandler.CN, GEOHandler.REQUESTER, false, false);
   GEOHandler.registerValidator(addCityRequiredOnUpdateValidatorAddrList, GEOHandler.CN, null, true);
+  GEOHandler.registerValidator(addSocialCreditCdLengthValidator, GEOHandler.CN, GEOHandler.REQUESTER, true);
   GEOHandler.addAfterConfig(onInacTypeChange, GEOHandler.CN);
 });
