@@ -833,7 +833,7 @@ public abstract class AutomationUtil {
 	Data data = requestData.getData();
 	String sql = "";
 	if(SystemLocation.BELGIUM.equals(data.getCmrIssuingCntry()) || SystemLocation.NETHERLANDS.equals(data.getCmrIssuingCntry())){
-	    sql = ExternalizedQuery.getSql("AUTO.CHECK_IF_ADDRESS_EXIST_BENELUX");
+	    sql = ExternalizedQuery.getSql("AUTO.UKI.CHECK_IF_ADDRESS_EXIST");
 	} else {
 	    sql = ExternalizedQuery.getSql("AUTO.CHECK_IF_ADDRESS_EXIST");
 	}
