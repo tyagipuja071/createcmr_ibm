@@ -630,6 +630,12 @@ function defaultCMRNumberPrefix() {
   if (cmrIssuingCntry == '736' && role == 'REQUESTER' && (custSubGrp == 'INT' || custSubGrp == 'XINT')) {
     FormManager.resetValidations('cmrNoPrefix');
   }
+  
+  if (cmrIssuingCntry == '744' && role == 'REQUESTER' && (custSubGrp == 'INTER' || custSubGrp == 'XINT')) {
+	  FormManager.show('CmrNoPrefix', 'cmrNoPrefix');
+	  FormManager.setValue('cmrNoPrefix', '996---');
+	  }
+
 }
 
 function setISBUforBPscenario() {
@@ -3109,8 +3115,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addDPLCheckValidator, GEOHandler.ASEAN, GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(addDPLCheckValidator, GEOHandler.ISA, GEOHandler.ROLE_REQUESTER, true);
 
-  GEOHandler.addAfterConfig(defaultCMRNumberPrefix, GEOHandler.GCG);
-  GEOHandler.addAfterTemplateLoad(defaultCMRNumberPrefix, GEOHandler.GCG);
+  GEOHandler.addAfterConfig(defaultCMRNumberPrefix, [ SysLoc.HONG_KONG, SysLoc.MACAO, SysLoc.INDIA  ]);
+  GEOHandler.addAfterTemplateLoad(defaultCMRNumberPrefix, [ SysLoc.HONG_KONG, SysLoc.MACAO, SysLoc.INDIA  ]);
   GEOHandler.addAfterConfig(setISBUforBPscenario, GEOHandler.ASEAN);
   GEOHandler.addAfterTemplateLoad(setISBUforBPscenario, GEOHandler.ASEAN);
 
