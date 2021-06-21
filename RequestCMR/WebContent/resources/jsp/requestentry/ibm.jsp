@@ -91,7 +91,7 @@ dojo.addOnLoad(function(){
     <!-- Defect : 1444422 -->
     <!-- Site Party ID -->
     <cmr:row topPad="10" addBackground="true">
-			<cmr:column span="2" containerForField="SitePartyID" forGEO="IERP,MCO2,EMEA,JP,NORDX,TW" forCountry="846,806,702,678,858">
+			<cmr:column span="2" containerForField="SitePartyID" forGEO="IERP,MCO2,EMEA,JP,TW" forCountry="846,806,702,678,858">
 				<p>
 					<cmr:label fieldId="sitePartyId">
             <cmr:fieldLabel fieldId="SitePartyID" />: 
@@ -386,7 +386,7 @@ dojo.addOnLoad(function(){
             <cmr:field fieldId="PPSCEID" id="ppsceid" path="ppsceid" tabId="MAIN_IBM_TAB" />
   				</p>
   			</cmr:column>
-        <cmr:column exceptForGEO="MCO2" span="2" containerForField="MembLevel" exceptForCountry="754,758,866,822,666,644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889,838,620,642,675,677,680,752,762,767,768,772,805,808,823,832,849,850,865,729,780,706,624,788,858,766">
+        <cmr:column exceptForGEO="MCO2,NORDX" span="2" containerForField="MembLevel" exceptForCountry="754,758,866,822,666,644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889,838,620,642,675,677,680,752,762,767,768,772,805,808,823,832,849,850,865,729,780,706,624,788,858,766">
           <p>
             <cmr:label fieldId="memLvl">
               <cmr:fieldLabel fieldId="MembLevel" />:
@@ -395,7 +395,7 @@ dojo.addOnLoad(function(){
             <cmr:field fieldId="MembLevel" id="memLvl" path="memLvl" tabId="MAIN_IBM_TAB" />
           </p>
         </cmr:column>
-        <cmr:column exceptForGEO="MCO2" span="2" containerForField="BPRelationType" exceptForCountry="754,758,866,822,666,644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889,838,620,642,675,677,680,752,762,767,768,772,805,808,823,832,849,850,865,729,780,706,624,788,858">
+        <cmr:column exceptForGEO="MCO2,NORDX" span="2" containerForField="BPRelationType" exceptForCountry="754,758,866,822,666,644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889,838,620,642,675,677,680,752,762,767,768,772,805,808,823,832,849,850,865,729,780,706,624,788,858">
           <p>
             <cmr:label fieldId="bpRelType">
               <cmr:fieldLabel fieldId="BPRelationType" />:

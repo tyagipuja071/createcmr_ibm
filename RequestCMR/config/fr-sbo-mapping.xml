@@ -48,10 +48,28 @@
       S
     </ctc>
      <postalCdStarts>
-      04,05,06,11,13,20,30,34,48,66,83,84
+      13,20,83,84
     </postalCdStarts>
     <sbo>
-      02M
+      5EB
+    </sbo>
+  </mapping>
+  
+     <mapping>
+    <countryUse>
+    706
+   </countryUse>
+     <isu>
+      32
+    </isu>
+    <ctc>
+      S
+    </ctc>
+     <postalCdStarts>
+      04,05,06,11,30,34,48,66
+    </postalCdStarts>
+    <sbo>
+      40D
     </sbo>
   </mapping>
   
