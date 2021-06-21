@@ -55,14 +55,16 @@ public class CanadaUtil extends AutomationUtil {
   private static final String MATCHING = "matching";
   private static final String POSTAL_CD_RANGE = "postalCdRange";
   private static final String SORTL = "SORTL";
-  private static final String SCENARIO_COMMERCIAL = "COM";
-  private static final String SCENARIO_GOVERNMENT = "GOV";
-  private static final String SCENARIO_INTERNAL = "INT";
-  private static final String SCENARIO_THIRD_PARTY = "3PA";
-  private static final String SCENARIO_PRIVATE_CUSTOMER = "PRI";
-  private static final String SCENARIO_IBM_EMPLOYEE = "IBM";
-  private static final String SCENARIO_BUSINESS_PARTNER = "BUS";
-  private static final String SCENARIO_CROSS_BORDER = "XCHCM";
+
+  private static final String SCENARIO_COMMERCIAL = "COMME";
+  private static final String SCENARIO_BUSINESS_PARTNER = "BUSP";
+  private static final String SCENARIO_PRIVATE_HOUSEHOLD = "PRIV";
+  private static final String SCENARIO_INTERNAL = "INTER";
+  private static final String SCENARIO_OEM = "OEM";
+  private static final String SCENARIO_STRATEGIC_OUTSOURCING = "SOCUS";
+  private static final String SCENARIO_GOVERNMENT = "GOVT";
+  private static final String SCENARIO_CROSS_BORDER_USA = "USA";
+  private static final String SCENARIO_CROSS_BORDER_CARIB = "CND";
 
   private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Building", "Floor", "Office", "Department", "Customer Name 2",
       "Phone #", "PostBox", "State/Province");
@@ -75,9 +77,41 @@ public class CanadaUtil extends AutomationUtil {
     boolean valid = true;
     String scenario = data.getCustSubGrp();
 
-    engineData.setMatchDepartment(true);
+    if (StringUtils.isBlank(scenario)) {
+      details.append("Scenario not correctly specified on the request");
+      engineData.addNegativeCheckStatus("_atNoScenario", "Scenario not correctly specified on the request");
+      return true;
+    }
+    LOG.info("Starting scenario validations for Request ID " + data.getId().getReqId());
+    LOG.debug("Scenario to check: " + scenario);
+
+    if ("C".equals(requestData.getAdmin().getReqType())) {
+      // remove duplicates
+      removeDuplicateAddresses(entityManager, requestData, details);
+    }
+    // engineData.setMatchDepartment(true);
 
     if (StringUtils.isNotBlank(scenario)) {
+      switch (scenario) {
+      case SCENARIO_COMMERCIAL:
+        break;
+      case SCENARIO_BUSINESS_PARTNER:
+        return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
+      case SCENARIO_PRIVATE_HOUSEHOLD:
+        engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
+      case SCENARIO_INTERNAL:
+        break;
+      case SCENARIO_OEM:
+        break;
+      case SCENARIO_STRATEGIC_OUTSOURCING:
+        break;
+      case SCENARIO_GOVERNMENT:
+        break;
+      case SCENARIO_CROSS_BORDER_USA:
+        break;
+      case SCENARIO_CROSS_BORDER_CARIB:
+        break;
+      }
       switch (scenario) {
       case "PRIPE":
       case "IBMEM":
