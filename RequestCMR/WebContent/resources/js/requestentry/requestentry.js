@@ -9,6 +9,7 @@
  */
 var CNTRY_LIST_FOR_INVALID_CUSTOMERS = [ '838', '866', '754' ];
 var comp_proof_IN= false;
+var flag = false;
 dojo.require("dojo.io.iframe");
 
 /**
@@ -1548,6 +1549,8 @@ function checkIfDnBCheckReqForIndia() {
 
 function matchDnBForAutomationCountries() {
   var reqId = FormManager.getActualValue('reqId');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var custSubGrp=FormManager.getActualValue('custSubGrp');
   console.log("Checking if the request matches D&B...");
   var nm1 = _pagemodel.mainCustNm1 == null ? '' : _pagemodel.mainCustNm1;
   var nm2 = _pagemodel.mainCustNm2 == null ? '' : _pagemodel.mainCustNm2;
@@ -1584,7 +1587,13 @@ function matchDnBForAutomationCountries() {
             } else if(data.confidenceCd){
               showDnBMatchModal();
             } else {
+                //Cmr-2755_India_no_match_found  
+                if(cntry == '744' && (custSubGrp == 'BLUMX'|| custSubGrp == 'MKTPC'|| custSubGrp == 'IGF' || custSubGrp == 'AQSTN' || custSubGrp == 'NRML' || custSubGrp == 'ESOSW' || custSubGrp =='CROSS') && !flag){
+                cmr.showAlert('Dnb matches not found.');
+                checkNoMatchingAttachmentValidator();
+                }else{
                 cmr.showModal('addressVerificationModal');
+             }
             }
           } else {
             // continue
@@ -1603,6 +1612,7 @@ function matchDnBForAutomationCountries() {
 function matchDnBForIndia() {
   var reqId = FormManager.getActualValue('reqId');
   var isicCd= FormManager.getActualValue('isicCd');
+  var custSubGrp=FormManager.getActualValue('custSubGrp');
   console.log("Checking if the request matches D&B...");      
   var nm1 = _pagemodel.mainCustNm1 == null ? '' : _pagemodel.mainCustNm1;
   var nm2 = _pagemodel.mainCustNm2 == null ? '' : _pagemodel.mainCustNm2;
@@ -1644,11 +1654,13 @@ function matchDnBForIndia() {
               }
             }else {
              
-             if (data.match && !data.isicMatch){
+             if (data.match && !data.isicMatch && custSubGrp != 'IGF'){
                 comp_proof_IN =false;
                 console.log("ISIC validation failed by Dnb.");
                 cmr.showAlert("Please attach company proof as ISIC validation failed by Dnb.");     
-           } else{   
+              }else if(data.match && !data.isicMatch && custSubGrp == 'IGF'){
+                    cmr.showModal('addressVerificationModal');
+              }else{   
               comp_proof_IN =false;
               console.log("Name/Address validation failed by dnb");
               cmr.showAlert("Please attach company proof as Name/Address validation failed by Dnb.");
@@ -1777,6 +1789,28 @@ function checkDnBMatchingAttachmentValidator() {
             return new ValidationResult(null, true);           
           }
       }
+    };
+  })(), null, 'frmCMR');
+}
+
+//CREATCMR-2755
+function checkNoMatchingAttachmentValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+          var id = FormManager.getActualValue('reqId');
+          var ret = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
+           ID : id
+           });
+            if (ret == null || ret.ret1 == null) {
+            return new ValidationResult(null, false, "You\'re obliged to provide either one of the following documentation as backup - "
+                + "client\'s official website, Secretary of State business registration proof, client\'s confirmation email and signed PO, attach it under the file content "
+                + "of <strong>Company Proof</strong>. Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.");
+            } else {        
+            flag=true;
+            return new ValidationResult(null, true);           
+          }
+        }
     };
   })(), null, 'frmCMR');
 }
