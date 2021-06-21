@@ -1,6 +1,5 @@
 package com.ibm.cio.cmr.request.automation.util.geo;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -9,7 +8,6 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
-import org.apache.commons.digester.Digester;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -35,7 +33,6 @@ import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
-import com.ibm.cio.cmr.request.util.ConfigUtil;
 import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cmr.services.client.CmrServicesFactory;
@@ -58,33 +55,17 @@ public class CanadaUtil extends AutomationUtil {
   private static final String MATCHING = "matching";
   private static final String POSTAL_CD_RANGE = "postalCdRange";
   private static final String SORTL = "SORTL";
+  private static final String SCENARIO_COMMERCIAL = "COM";
+  private static final String SCENARIO_GOVERNMENT = "GOV";
+  private static final String SCENARIO_INTERNAL = "INT";
+  private static final String SCENARIO_THIRD_PARTY = "3PA";
+  private static final String SCENARIO_PRIVATE_CUSTOMER = "PRI";
+  private static final String SCENARIO_IBM_EMPLOYEE = "IBM";
+  private static final String SCENARIO_BUSINESS_PARTNER = "BUS";
+  private static final String SCENARIO_CROSS_BORDER = "XCHCM";
 
   private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Building", "Floor", "Office", "Department", "Customer Name 2",
       "Phone #", "PostBox", "State/Province");
-
-  @SuppressWarnings("unchecked")
-  public CanadaUtil() {
-    if (CanadaUtil.sortlMappings.isEmpty()) {
-      Digester digester = new Digester();
-      digester.setValidating(false);
-      digester.addObjectCreate("mappings", ArrayList.class);
-
-      digester.addObjectCreate("mappings/mapping", DeSortlMapping.class);
-
-      digester.addBeanPropertySetter("mappings/mapping/subIndustryCds", "subIndustryCds");
-      digester.addBeanPropertySetter("mappings/mapping/postalCdRanges", "postalCdRanges");
-      digester.addBeanPropertySetter("mappings/mapping/isu", "isu");
-      digester.addBeanPropertySetter("mappings/mapping/ctc", "ctc");
-      digester.addBeanPropertySetter("mappings/mapping/sortl", "sortl");
-      digester.addSetNext("mappings/mapping", "add");
-      try {
-        InputStream is = ConfigUtil.getResourceStream("de-sortl-mapping.xml");
-        CanadaUtil.sortlMappings = (ArrayList<DeSortlMapping>) digester.parse(is);
-      } catch (Exception e) {
-        LOG.error("Error occured while digesting xml.", e);
-      }
-    }
-  }
 
   @Override
   public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
@@ -154,7 +135,7 @@ public class CanadaUtil extends AutomationUtil {
                 if (StringUtils.isNotBlank(zs01.getCustNm1())) {
                   try {
                     String mainCustName = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
-                    person = BluePagesHelper.getPersonByName(insertGermanCharacters(mainCustName));
+                    person = BluePagesHelper.getPersonByName(mainCustName);
                     if (person == null) {
                       engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
                       details.append("Employee details not found in IBM BluePages.").append("\n");
@@ -287,7 +268,6 @@ public class CanadaUtil extends AutomationUtil {
   @Override
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {
-    Data data = requestData.getData();
     Addr zs01 = requestData.getAddress("ZS01");
     String custNm1 = StringUtils.isNotBlank(zs01.getCustNm1()) ? zs01.getCustNm1().trim() : "";
     String custNm2 = StringUtils.isNotBlank(zs01.getCustNm2()) ? zs01.getCustNm2().trim() : "";
@@ -317,23 +297,6 @@ public class CanadaUtil extends AutomationUtil {
 
     if (!removed) {
       details.append("No duplicate address records found on the request.").append("\n");
-    }
-
-    // replace special characters from addresses.
-    details.append("Replacing German language characters from address fields if any.").append("\n");
-    for (Addr addr : requestData.getAddresses()) {
-      if (addr != null) {
-        addr.setCustNm1(replaceGermanCharacters(addr.getCustNm1()));
-        addr.setCustNm2(replaceGermanCharacters(addr.getCustNm2()));
-        addr.setAddrTxt(replaceGermanCharacters(addr.getAddrTxt()));
-        addr.setAddrTxt2(replaceGermanCharacters(addr.getAddrTxt2()));
-        addr.setCity1(replaceGermanCharacters(addr.getCity1()));
-        addr.setDept(replaceGermanCharacters(addr.getDept()));
-        addr.setOffice(replaceGermanCharacters(addr.getOffice()));
-        addr.setBldg(replaceGermanCharacters(addr.getBldg()));
-        addr.setFloor(replaceGermanCharacters(addr.getFloor()));
-        data.setAbbrevNm(replaceGermanCharacters(data.getAbbrevNm()));
-      }
     }
 
     return results;
@@ -408,24 +371,6 @@ public class CanadaUtil extends AutomationUtil {
       response.put(MATCHING, "No Match Found");
       return response;
     }
-  }
-
-  private String replaceGermanCharacters(String input) {
-    if (StringUtils.isNotBlank(input)) {
-      String str = input.replaceAll("Ä", "AE").replaceAll("ä", "ae").replaceAll("Ö", "OE").replaceAll("ö", "oe").replaceAll("Ü", "UE")
-          .replace("ü", "ue").replaceAll("ß", "SS");
-      return str;
-    }
-    return null;
-  }
-
-  private String insertGermanCharacters(String input) {
-    if (StringUtils.isNotBlank(input)) {
-      String str = input.replaceAll("Ae", "Ä").replaceAll("ae", "ä").replace("AE", "Ä").replaceAll("Oe", "Ö").replaceAll("oe", "ö").replace("OE", "Ö")
-          .replaceAll("Ue", "Ü").replace("ue", "ü").replace("UE", "Ü").replaceAll("ss", "ß").replaceAll("SS", "ß").replace("Ss", "ß");
-      return str;
-    }
-    return null;
   }
 
   @Override
