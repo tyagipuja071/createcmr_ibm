@@ -316,6 +316,46 @@ function addSingleByteValidatorTW(cntry, details) {
 
 }
 
+function setAbbrevNmLocnOnAddressSave(cntry, addressMode, saving, finalSave, force) {
+  console.log(">>>> setAbbrevNmLocnOnAddressSave >>>>");
+  var reqType = null;
+  var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
+  if (typeof (_pagemodel) != 'undefined') {
+    reqType = FormManager.getActualValue('reqType');
+  }
+  var addrType = FormManager.getActualValue('addrType');
+  var copyTypes = document.getElementsByName('copyTypes');
+  // var copyingToA = false;
+  if (addrType == 'ZS01') {
+    // copyingToA = true;
+    autoSetAbbrevNmLocnLogic();
+  }
+}
+
+function autoSetAbbrevNmLocnLogic() {
+  console.log("autoSetAbbrevNmLocnLogic");
+  var _abbrevNm = null;
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+
+  var zs01ReqId = FormManager.getActualValue('reqId');
+  var qParams = {
+    REQ_ID : zs01ReqId,
+  };
+  var result = cmr.query('ADDR.GET.CUSTNM1.BY_REQID', qParams);
+  var custNm1 = FormManager.getActualValue('custNm1');
+
+  if (custNm1 == '') {
+    custNm1 = result.ret1;
+  }
+  _abbrevNm = custNm1;
+
+  if (_abbrevNm && _abbrevNm.length > 21) {
+    _abbrevNm = _abbrevNm.substring(0, 21);
+  }
+  FormManager.setValue('abbrevNm', _abbrevNm);
+
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.TW = [ '858' ];
   GEOHandler.TW_CHECKLIST = [ '858' ];
@@ -340,6 +380,8 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.TW);
   GEOHandler.addAddrFunction(addSingleByteValidatorTW, GEOHandler.TW);
+  GEOHandler.addAddrFunction(setAbbrevNmLocnOnAddressSave, GEOHandler.TW);
+
   GEOHandler.registerValidator(addTWChecklistValidator, GEOHandler.TW_CHECKLIST);
   // GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.TW,
   // GEOHandler.ROLE_PROCESSOR, true);

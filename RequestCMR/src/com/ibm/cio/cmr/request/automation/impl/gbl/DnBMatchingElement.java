@@ -176,7 +176,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
             }
 
           }
-
+          Boolean processDnbFlag = false;
           // assess the matches here
           if (perfectMatch != null) {
             LOG.debug("Perfect match was found with DUNS " + perfectMatch.getDunsNo());
@@ -189,7 +189,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
                   + (isTaxCdMatch ? "Org ID " : "VAT ") + ".\n");
             }
             scorecard.setDnbMatchingResult("Y");
-            processDnBFields(entityManager, data, perfectMatch, output, details, 1);
+            processDnbFlag = processDnBFields(entityManager, data, perfectMatch, output, details, 1);
             if (scenarioExceptions.isImportDnbInfo()) {
               // Create Address Records only if Levenshtein Distance
               List<String> eligibleAddresses = getAddrSatisfyingLevenshteinDistance(data.getCmrIssuingCntry(), admin, requestData.getAddresses(),
@@ -208,8 +208,8 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
             result.setResults((isTaxCdMatch ? "Org ID " : "VAT ") + " not matched");
             details.append("High Quality match D&B record matched the request name/address information but the " + (isTaxCdMatch ? "Org ID " : "VAT ")
                 + " on record did not match request data.\n");
-            scorecard.setDnbMatchingResult("N");
-            processDnBFields(entityManager, data, highestCloseMatch, output, details, 1);
+            scorecard.setDnbMatchingResult("Y");
+            processDnbFlag = processDnBFields(entityManager, data, highestCloseMatch, output, details, 1);
             if (scenarioExceptions.isImportDnbInfo()) {
               // Create Address Records only if Levenshtein Distance
               List<String> eligibleAddresses = getAddrSatisfyingLevenshteinDistance(data.getCmrIssuingCntry(), admin, requestData.getAddresses(),
@@ -246,7 +246,10 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
             details.append("Showing D&B matches:\n");
             int itemNo = 1;
             for (DnBMatchingResponse dnbRecord : dnbMatches) {
-              processDnBFields(entityManager, data, dnbRecord, output, details, itemNo);
+              processDnbFlag = processDnBFields(entityManager, data, dnbRecord, output, details, itemNo);
+              if (processDnbFlag == true) {
+                scorecard.setDnbMatchingResult("Y");
+              }
               itemNo++;
             }
             if (!override) {
@@ -337,10 +340,13 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
    * @param itemNo
    * @throws Exception
    */
-  private void processDnBFields(EntityManager entityManager, Data data, DnBMatchingResponse dnbRecord, MatchingOutput output, StringBuilder details,
+  private boolean processDnBFields(EntityManager entityManager, Data data, DnBMatchingResponse dnbRecord, MatchingOutput output, StringBuilder details,
       int itemNo) throws Exception {
     details.append("\n");
-
+    Boolean highConfidenceDnb = false;
+    if (dnbRecord.getConfidenceCode() > 7) {
+      highConfidenceDnb = true;
+    }
     LOG.debug("Matches found via D&B matching..");
 
     output.addMatch(getProcessCode(), "DUNS_NO", dnbRecord.getDunsNo(), "Confidence Code", dnbRecord.getConfidenceCode() + "", "D&B", itemNo);
@@ -400,6 +406,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
         details.append("Subindustry Code  =  " + subInd).append("\n");
       }
     }
+    return highConfidenceDnb;
   }
 
   /**

@@ -3919,7 +3919,7 @@ public class EMEAHandler extends BaseSOFHandler {
           }
           salesRep = validateColValFromCell(currCell);
 
-				}
+        }
         if ((!("@").equals(collectionCd)) && (!StringUtils.isEmpty(collectionCd))) {
           if (((collectionCd.length() == 2 && !collectionCd.chars().allMatch(Character::isDigit))
               || (collectionCd.length() == 6 && !collectionCd.chars().allMatch(Character::isLetterOrDigit)))) {

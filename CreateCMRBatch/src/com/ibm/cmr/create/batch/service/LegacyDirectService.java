@@ -1193,7 +1193,8 @@ public class LegacyDirectService extends TransConnService {
     MessageTransformer transformer = TransformerManager.getTransformer(cntry);
     String targetCountry = null;
 
-    if (!StringUtils.isEmpty(cmrNo) && !"Y".equals(admin.getProspLegalInd())) {
+    // CREATCMR-1690
+    if (!StringUtils.isEmpty(cmrNo)) {
       boolean isCMRExist = LegacyDirectUtil.checkCMRNoInLegacyDB(entityManager, data);
       LOG.info("Checking existing CMR in create Process...");
       if (isCMRExist) {
@@ -2096,6 +2097,7 @@ public class LegacyDirectService extends TransConnService {
    * @return
    * @throws Exception
    */
+  @Override
   public <T> T initEmpty(Class<T> entityClass) throws Exception {
     try {
       T object = entityClass.newInstance();
@@ -2122,6 +2124,7 @@ public class LegacyDirectService extends TransConnService {
    * @return
    * @throws Exception
    */
+  @Override
   public void capsAndFillNulls(Object entity, boolean capitalize) throws Exception {
     try {
       Class<?> entityClass = entity.getClass();
