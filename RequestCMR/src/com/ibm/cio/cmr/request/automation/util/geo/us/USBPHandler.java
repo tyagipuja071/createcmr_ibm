@@ -269,7 +269,9 @@ public abstract class USBPHandler {
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ADMN", "COMP_VERIFIED_INDC", requestData.getAdmin().getCompVerifiedIndc(), "Y");
       return response;
     } else {
-      scorecard.setRpaMatchingResult("N");
+      if ("N".equals(scorecard.getRpaMatchingResult()) || "".equals(scorecard.getRpaMatchingResult())) {
+        scorecard.setRpaMatchingResult("N");
+      }
       String msg = "No records found in SOS-RPA Service.";
       details.append(msg + "\n");
       if (hasExistingCmr) {
