@@ -3115,10 +3115,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addDPLCheckValidator, GEOHandler.ASEAN, GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(addDPLCheckValidator, GEOHandler.ISA, GEOHandler.ROLE_REQUESTER, true);
 
-  GEOHandler.addAfterConfig(defaultCMRNumberPrefix, GEOHandler.GCG);
-  GEOHandler.addAfterTemplateLoad(defaultCMRNumberPrefix, GEOHandler.GCG);
-  GEOHandler.addAfterConfig(defaultCMRNumberPrefix, [ SysLoc.INDIA ]);
-  GEOHandler.addAfterTemplateLoad(defaultCMRNumberPrefix, [ SysLoc.INDIA ]);
+  GEOHandler.addAfterConfig(defaultCMRNumberPrefix, [ SysLoc.HONG_KONG, SysLoc.MACAO, SysLoc.INDIA  ]);
+  GEOHandler.addAfterTemplateLoad(defaultCMRNumberPrefix, [ SysLoc.HONG_KONG, SysLoc.MACAO, SysLoc.INDIA  ]);
   GEOHandler.addAfterConfig(setISBUforBPscenario, GEOHandler.ASEAN);
   GEOHandler.addAfterTemplateLoad(setISBUforBPscenario, GEOHandler.ASEAN);
 
