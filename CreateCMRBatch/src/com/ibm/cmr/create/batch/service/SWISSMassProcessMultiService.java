@@ -241,6 +241,8 @@ public class SWISSMassProcessMultiService extends MultiThreadedBatchService<Long
           threads = Integer.parseInt(threadCount);
         }
 
+        createComment(entityManager, "Processing started.", admin.getId().getReqId());
+
         LOG.debug("Worker threads to use: " + threads);
         LOG.debug("Starting processing SWISS mass update at " + new Date());
         LOG.debug("Number of records found: " + results.size());
@@ -281,9 +283,10 @@ public class SWISSMassProcessMultiService extends MultiThreadedBatchService<Long
           }
         }
 
-        admin.setReqStatus(CmrConstants.REQUEST_STATUS.COM.toString());
-        admin.setProcessedFlag("Y");
-        updateEntity(admin, entityManager);
+        /*
+         * admin.setReqStatus(CmrConstants.REQUEST_STATUS.COM.toString());
+         * admin.setProcessedFlag("Y"); updateEntity(admin, entityManager);
+         */
 
         // *** START OF FIX
         LOG.debug("**** Placing comment on success --> " + comment);
