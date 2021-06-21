@@ -337,6 +337,8 @@ public class CompanyFinder {
         cmr.setAltStreet(record.getCmrIntlAddress() + (record.getCmrIntlName3() != null ? record.getCmrIntlName3() : ""));
         cmr.setAltCity(record.getCmrIntlCity1());
 
+        cmr.setCied(record.getCmrPpsceid());
+
         if (!StringUtils.isBlank(searchModel.getVat()) || !StringUtils.isBlank(searchModel.getTaxCd1())) {
           cmr.setOrgIdMatch(searchModel.getVat().equals(cmr.getVat()) || searchModel.getTaxCd1().equals(cmr.getTaxCd1()));
         }
