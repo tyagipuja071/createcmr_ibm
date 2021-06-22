@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -13,7 +15,7 @@ import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.MassUpdt;
-import com.ibm.cio.cmr.request.util.SystemUtil;
+import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 import com.ibm.cmr.create.batch.util.BatchUtil;
 import com.ibm.cmr.create.batch.util.DebugUtil;
 import com.ibm.cmr.services.client.CmrServicesFactory;
@@ -45,8 +47,9 @@ public class FRMassProcessWorker implements Runnable {
 
   private boolean isIndexNotUpdated;
 
-  public FRMassProcessWorker(EntityManager entityManager, Admin admin, Data data, MassUpdt massUpdt, String userId) {
-    SystemUtil.setManager(entityManager);
+  public FRMassProcessWorker(EntityManagerFactory emf, Admin admin, Data data, MassUpdt massUpdt, String userId) {
+    EntityManager entityManager = emf.createEntityManager();
+    // SystemUtil.setManager(entityManager);
     this.entityManager = entityManager;
     this.admin = admin;
     this.data = data;
@@ -56,11 +59,33 @@ public class FRMassProcessWorker implements Runnable {
 
   @Override
   public void run() {
-    processMassUpdate();
+    EntityTransaction transaction = null;
+    try {
+      ChangeLogListener.setManager(entityManager);
+      transaction = entityManager.getTransaction();
+      transaction.begin();
+      processMassUpdate(entityManager);
+      if (transaction != null && transaction.isActive() && !transaction.getRollbackOnly()) {
+        transaction.commit();
+      }
+    } catch (Throwable e) {
+      LOG.error("An error was encountered during processing. Transaction will be rolled back.", e);
+      if (transaction != null && transaction.isActive()) {
+        transaction.rollback();
+      }
+      throw e;
+    } finally {
+      if (transaction != null && transaction.isActive()) {
+        transaction.rollback();
+      }
+      // empty the manager
+      entityManager.clear();
+      entityManager.close();
+    }
 
   }
 
-  private void processMassUpdate() {
+  private void processMassUpdate(EntityManager entityManager) {
     try {
 
       ServiceClient serviceClient = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
@@ -195,12 +220,12 @@ public class FRMassProcessWorker implements Runnable {
         }
       }
       // updateEntity(massUpdt, entityManager);
-      admin.setReqStatus(CmrConstants.REQUEST_STATUS.COM.toString());
-      admin.setProcessedFlag("Y");
+      // admin.setReqStatus(CmrConstants.REQUEST_STATUS.COM.toString());
+      // admin.setProcessedFlag("Y");
       // updateEntity(admin, entityManager);
       // partialCommit(entityManager);
       entityManager.merge(massUpdt);
-      entityManager.merge(admin);
+      // entityManager.merge(admin);
       entityManager.flush();
     } catch (Exception e) {
       LOG.debug("Error in processing Mass Update: Request " + massUpdt.getId().getParReqId() + " Iter " + massUpdt.getId().getIterationId() + " Seq "

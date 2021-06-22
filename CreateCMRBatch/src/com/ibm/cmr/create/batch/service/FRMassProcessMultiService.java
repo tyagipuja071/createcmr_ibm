@@ -13,6 +13,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -35,6 +37,7 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemUtil;
+import com.ibm.cmr.create.batch.entry.BatchEntryPoint;
 import com.ibm.cmr.create.batch.util.BatchUtil;
 import com.ibm.cmr.create.batch.util.CMRRequestContainer;
 import com.ibm.cmr.create.batch.util.masscreate.WorkerThreadFactory;
@@ -111,7 +114,7 @@ public class FRMassProcessMultiService extends MultiThreadedBatchService<Long> {
     String processingStatus = admin.getRdcProcessingStatus() != null ? admin.getRdcProcessingStatus() : "";
     long reqId = admin.getId().getReqId();
     boolean isIndexNotUpdated = false;
-
+    EntityManagerFactory emf = null;
     try {
       // 1. Get request to process
       PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.FR.GET.MASS_UPDT"));
@@ -136,11 +139,16 @@ public class FRMassProcessMultiService extends MultiThreadedBatchService<Long> {
           threads = Integer.parseInt(threadCount);
         }
 
+        LOG.debug("Worker threads to use: " + threads);
+        LOG.debug("Number of records found: " + results.size());
         LOG.debug("Starting processing mass update lines at " + new Date());
+
+        emf = Persistence.createEntityManagerFactory(BatchEntryPoint.DEFAULT_BATCH_PERSISTENCE_UNIT);
+
         List<FRMassProcessWorker> workers = new ArrayList<FRMassProcessWorker>();
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(threads, new WorkerThreadFactory(getThreadName()));
         for (MassUpdt sMassUpdt : results) {
-          FRMassProcessWorker worker = new FRMassProcessWorker(entityManager, admin, data, sMassUpdt, BATCH_USER_ID);
+          FRMassProcessWorker worker = new FRMassProcessWorker(emf, admin, data, sMassUpdt, BATCH_USER_ID);
           executor.schedule(worker, 5, TimeUnit.SECONDS);
           workers.add(worker);
         }
@@ -178,6 +186,8 @@ public class FRMassProcessMultiService extends MultiThreadedBatchService<Long> {
 
         // *** START OF FIX
         LOG.debug("**** Placing comment on success --> " + comment);
+        LOG.debug("Status Codes: " + statusCodes);
+        LOG.debug("RDC PRocessings msgs " + rdcProcessStatusMsgs);
         comment = new StringBuilder();
         if (rdcProcessStatusMsgs.size() > 0) {
           if (rdcProcessStatusMsgs.contains(CmrConstants.RDC_STATUS_ABORTED)) {
@@ -206,6 +216,8 @@ public class FRMassProcessMultiService extends MultiThreadedBatchService<Long> {
 
           if (strOverallStatus != null && CmrConstants.RDC_STATUS_COMPLETED.equals(strOverallStatus)) {
             comment.append("Successfully completed RDc processing for mass update request.");
+          } else if (strOverallStatus != null && !CmrConstants.RDC_STATUS_COMPLETED.equals(strOverallStatus)) {
+            comment.append("Some errors occurred during processing. Please check request's summary for details.");
           } else {
             comment.append("Issues happened generating a processing comment. Please contact your Administrator.");
           }
@@ -214,14 +226,14 @@ public class FRMassProcessMultiService extends MultiThreadedBatchService<Long> {
 
         LOG.debug("Updating Admin record for Request ID " + admin.getId().getReqId());
 
-        if (statusCodes.contains(CmrConstants.RDC_STATUS_NOT_COMPLETED)) {
+        if (rdcProcessStatusMsgs.contains(CmrConstants.RDC_STATUS_NOT_COMPLETED)) {
           admin.setRdcProcessingStatus(CmrConstants.RDC_STATUS_NOT_COMPLETED);
           admin.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
-        } else if (statusCodes.contains(CmrConstants.RDC_STATUS_ABORTED)) {
+        } else if (rdcProcessStatusMsgs.contains(CmrConstants.RDC_STATUS_ABORTED)) {
           admin.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
           admin.setRdcProcessingStatus(
               processingStatus.equals(CmrConstants.RDC_STATUS_ABORTED) ? CmrConstants.RDC_STATUS_NOT_COMPLETED : CmrConstants.RDC_STATUS_ABORTED);
-        } else if (statusCodes.contains(CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS)) {
+        } else if (rdcProcessStatusMsgs.contains(CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS)) {
           admin.setRdcProcessingStatus(CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS);
         } else {
           admin.setRdcProcessingStatus(CmrConstants.RDC_STATUS_COMPLETED);
@@ -263,6 +275,8 @@ public class FRMassProcessMultiService extends MultiThreadedBatchService<Long> {
     } catch (Exception e) {
       LOG.error("Error in processing Update Request " + admin.getId().getReqId(), e);
       addError("Update Request " + admin.getId().getReqId() + " Error: " + e.getMessage());
+    } finally {
+      emf.close();
     }
   }
 
@@ -330,12 +344,15 @@ public class FRMassProcessMultiService extends MultiThreadedBatchService<Long> {
           admin.setReqStatus("PPN");
           admin.setProcessedFlag("E"); // set request status to error.
           createHistory(entityManager, "Sending back to processor due to error on RDC processing", "PPN", "RDC Processing", admin.getId().getReqId());
+          LOG.debug("Sending back to processor due to error on RDC processing , request status=" + admin.getReqStatus());
         } else if ((CmrConstants.RDC_STATUS_COMPLETED.equalsIgnoreCase(admin.getRdcProcessingStatus())
             || CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equalsIgnoreCase(admin.getRdcProcessingStatus()))
             && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
           admin.setReqStatus("COM");
           admin.setProcessedFlag("Y"); // set request status to processed
           createHistory(entityManager, "Request processing Completed Successfully", "COM", "RDC Processing", admin.getId().getReqId());
+          LOG.debug("Request processing Completed Successfully , request status=" + admin.getReqStatus());
+
         }
         partialCommit(entityManager);
       } catch (Exception e) {
