@@ -249,6 +249,7 @@ function afterConfigForCA() {
   }
 
   addFieldHandlers();
+  scenarioHandlerForAutomation();
 }
 
 var _inacCodeHandler = null;
@@ -285,6 +286,54 @@ function addFieldHandlers() {
       }
     });
   }
+}
+
+function scenarioHandlerForAutomation() {
+
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+
+  FormManager.setValue("inacCd", ""); // true for all scenarios
+  FormManager.readOnly("inacCd");
+
+  if (reqType == 'C' && custSubGrp == 'BUSP') {
+    FormManager.setValue("taxCd1", "I");
+    FormManager.readOnly("taxCd1");
+    FormManager.resetValidations('ppsceid');
+    FormManager.enable('ppsceid');
+    FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
+  } else if (reqType == 'C' && !(custSubGrp == 'BUSP')) {
+    FormManager.resetValidations('ppsceid');
+    FormManager.clearValue('ppsceid');
+    FormManager.readOnly('ppsceid');
+  }
+
+  if (reqType == 'C' && (custSubGrp == 'COMME' || custSubGrp == 'USA' || custSubGrp == 'CND')) {
+    FormManager.setValue("taxCd1", "6");
+    FormManager.readOnly("taxCd1");
+  }
+
+  if (reqType == 'C' && custSubGrp == 'PRIV') {
+    FormManager.setValue("taxCd1", "T");
+    FormManager.readOnly("taxCd1");
+    FormManager.setValue("isicCd", "9500");
+    FormManager.readOnly("isicCd");
+  }
+
+  if (reqType == 'C' && custSubGrp == 'INTER') {
+    FormManager.setValue("taxCd1", "K");
+    FormManager.readOnly("taxCd1");
+  }
+
+  if (reqType == 'C' && custSubGrp == 'OEM') {
+    FormManager.setValue("taxCd1", "H");
+    FormManager.readOnly("taxCd1");
+  }
+
+  if (reqType == 'C' && custSubGrp == 'SOCUS') {
+    FormManager.setValue("taxCd1", "Q");
+    FormManager.readOnly("taxCd1");
+  }
+
 }
 
 function addLocationNoValidator() {
