@@ -640,9 +640,9 @@ function mappingAddressField(key) {
   } else if (key == 'YT') {
     value = 'Y';
   } else if (key == 'NU') {
-    value = [ 'X0A', ' X0B', ' X0C' ];
+    value = [ 'X0A', 'X0B', 'X0C' ];
   } else if (key == 'NT') {
-    value = [ 'X0E', ' X0B', ' X1A' ];
+    value = [ 'X0E', 'X0G', 'X1A' ];
   }
   return value;
 }
