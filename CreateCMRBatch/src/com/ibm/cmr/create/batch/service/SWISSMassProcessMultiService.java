@@ -283,6 +283,10 @@ public class SWISSMassProcessMultiService extends MultiThreadedBatchService<Long
           }
         }
 
+        if (processError != null) {
+          throw processError;
+        }
+
         /*
          * admin.setReqStatus(CmrConstants.REQUEST_STATUS.COM.toString());
          * admin.setProcessedFlag("Y"); updateEntity(admin, entityManager);
