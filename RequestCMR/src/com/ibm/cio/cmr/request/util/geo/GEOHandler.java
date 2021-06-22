@@ -967,21 +967,9 @@ public abstract class GEOHandler {
     return null;
   }
 
-  public void convertChinaStateNameToStateCode(Addr addr, FindCMRRecordModel cmr, EntityManager entityManager) {
-    // TODO Auto-generated method stub   
-  }
-  
   public IntlAddr getIntlAddrById(Addr addr, EntityManager entityManager) {
     // TODO Auto-generated method stub
     return null;
-  }
-
-  public void setCNAddressENCityOnImport(Addr addr, FindCMRRecordModel cmr, EntityManager entityManager) {
-    // TODO Auto-generated method stub
-  }
-  
-  public void setCNAddressCityOnImport(AddressModel model, FindCMRRecordModel cmr, Addr addr, EntityManager entityManager) {
-    // TODO Auto-generated method stub
   }
 
 }

@@ -1483,8 +1483,7 @@ public class CNHandler extends GEOHandler {
     LOG.debug("getChinaCMR :: END");
     return cmr;
   }
- 
-  @Override
+
   public void convertChinaStateNameToStateCode(Addr addr, FindCMRRecordModel cmr, EntityManager entityManager) {
     LOG.debug("Convert China StateName to StateCode Begin >>>");
     String stateCode = null;
@@ -1497,17 +1496,16 @@ public class CNHandler extends GEOHandler {
     if (results != null && !results.isEmpty()) {
       Object[] sResult = results.get(0);
       stateCode = sResult[0].toString();
-    }    
+    }
     if (StringUtils.isNotBlank(stateCode)) {
       addr.setStateProv(stateCode);
       cmr.setCmrState(stateCode);
       LOG.debug("Convert China StateName to StateCode End >>>");
     }
   }
-  
-  @Override
+
   public void setCNAddressENCityOnImport(Addr addr, FindCMRRecordModel cmr, EntityManager entityManager) {
-    // TODO Auto-generated method stub 
+    // TODO Auto-generated method stub
     LOG.debug("Convert China ENCITY Begin >>>");
     String city1Upper = addr.getCity1() != null ? addr.getCity1().toUpperCase() : "";
     city1Upper = city1Upper.replaceAll("[^a-zA-Z]+", "");
@@ -1535,10 +1533,9 @@ public class CNHandler extends GEOHandler {
       }
     }
   }
-  
-  @Override
+
   public void setCNAddressCityOnImport(AddressModel model, FindCMRRecordModel cmr, Addr addr, EntityManager entityManager) {
-    // TODO Auto-generated method stub 
+    // TODO Auto-generated method stub
     LOG.debug("Convert China CNCITY Begin >>>");
     String stateProv = addr.getStateProv();
     String cityTxt = addr.getCity1();
@@ -1554,21 +1551,21 @@ public class CNHandler extends GEOHandler {
     if (results != null && !results.isEmpty()) {
       Object[] sResult = results.get(0);
       cityCode = sResult[0].toString();
-    } 
+    }
     LOG.debug("Convert China CNCITY Begin get cityCode is " + cityCode);
     String cnCity = null;
-    if(StringUtils.isNotBlank(cityCode)){
+    if (StringUtils.isNotBlank(cityCode)) {
       String qryChinaCityTxt = ExternalizedQuery.getSql("GET.CN_CITY_TXT");
       PreparedQuery queryCity = new PreparedQuery(entityManager, qryChinaCityTxt);
-      queryCity.setParameter("CD" , cityCode );
-      List<Object[]> results2 = queryCity.getResults();     
+      queryCity.setParameter("CD", cityCode);
+      List<Object[]> results2 = queryCity.getResults();
       if (results2 != null && !results2.isEmpty()) {
         Object[] sResult = results2.get(0);
         cnCity = sResult[1].toString();
       }
     }
     LOG.debug("Convert China CNCITY End >>> cnCity is " + cnCity);
-    if(StringUtils.isNotEmpty(cnCity)){
+    if (StringUtils.isNotEmpty(cnCity)) {
       model.setCnCity(cnCity);
       cmr.setCmrIntlCity1(cnCity);
     }

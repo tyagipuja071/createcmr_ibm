@@ -53,6 +53,7 @@ import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
+import com.ibm.cio.cmr.request.util.geo.impl.CNHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.LAHandler;
 import com.ibm.cio.cmr.request.util.pdf.impl.DnBPDFConverter;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
@@ -509,8 +510,10 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
 
     addr.setCity1(cmr.getCmrCity());
     addr.setStateProv(cmr.getCmrState());
-    if (SystemLocation.CHINA.equals(reqModel.getCmrIssuingCntry()) && StringUtils.isNotBlank(cmr.getCmrState())) {
-      converter.convertChinaStateNameToStateCode(addr, cmr, entityManager);
+    if (converter != null && (converter instanceof CNHandler) && SystemLocation.CHINA.equals(reqModel.getCmrIssuingCntry())
+        && StringUtils.isNotBlank(cmr.getCmrState())) {
+      CNHandler cnHandler = (CNHandler) converter;
+      cnHandler.convertChinaStateNameToStateCode(addr, cmr, entityManager);
     }
     if (!StringUtils.isBlank(addr.getStateProv()) && addr.getStateProv().length() > 3) {
       addr.setStateProv(null);
@@ -640,8 +643,10 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
       addr.setDplChkInfo(null);
     }
 
-    if (converter != null && SystemLocation.CHINA.equals(reqModel.getCmrIssuingCntry()) && StringUtils.isNotBlank(addr.getCity1())) {
-      converter.setCNAddressENCityOnImport(addr, cmr, entityManager);
+    if (converter != null && (converter instanceof CNHandler) && SystemLocation.CHINA.equals(reqModel.getCmrIssuingCntry())
+        && StringUtils.isNotBlank(addr.getCity1())) {
+      CNHandler cnHandler = (CNHandler) converter;
+      cnHandler.setCNAddressENCityOnImport(addr, cmr, entityManager);
     }
 
     reqEntryService.createEntity(addr, entityManager);
@@ -656,8 +661,9 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
     if (SystemLocation.CHINA.equals(reqModel.getCmrIssuingCntry())
         && (StringUtils.isNotBlank(cmr.getCmrIntlAddress()) || StringUtils.isNotBlank(cmr.getCmrIntlName()))) {
       AddressModel model = new AddressModel();
-      if (converter != null && StringUtils.isNotBlank(cmr.getCmrIntlCity1())) {
-        converter.setCNAddressCityOnImport(model, cmr, addr, entityManager);
+      if (converter != null && (converter instanceof CNHandler) && StringUtils.isNotBlank(cmr.getCmrIntlCity1())) {
+        CNHandler cnHandler = (CNHandler) converter;
+        cnHandler.setCNAddressCityOnImport(model, cmr, addr, entityManager);
       }
       setCNIntlAddrModel(model, cmr);
       addressService.createCNIntlAddr(model, addr, entityManager);
