@@ -873,6 +873,7 @@ public class CNHandler extends GEOHandler {
     return name1Name2Val;
   }
 
+  @Override
   public IntlAddr getIntlAddrById(Addr addr, EntityManager entityManager) {
     IntlAddr iAddr = new IntlAddr();
     String addrType = "";
@@ -1481,5 +1482,95 @@ public class CNHandler extends GEOHandler {
     LOG.debug("getChinaCMR :: GENERATED CMR >> " + cmr + " :: END");
     LOG.debug("getChinaCMR :: END");
     return cmr;
+  }
+ 
+  @Override
+  public void convertChinaStateNameToStateCode(Addr addr, FindCMRRecordModel cmr, EntityManager entityManager) {
+    LOG.debug("Convert China StateName to StateCode Begin >>>");
+    String stateCode = null;
+    String stateName = cmr.getCmrState().trim();
+    List<Object[]> results = new ArrayList<Object[]>();
+    String cnStateProvCD = ExternalizedQuery.getSql("GET.CN_STATE_PROV_CD");
+    PreparedQuery query = new PreparedQuery(entityManager, cnStateProvCD);
+    query.setParameter("STATE_PROV_DESC", stateName);
+    results = query.getResults();
+    if (results != null && !results.isEmpty()) {
+      Object[] sResult = results.get(0);
+      stateCode = sResult[0].toString();
+    }    
+    if (StringUtils.isNotBlank(stateCode)) {
+      addr.setStateProv(stateCode);
+      cmr.setCmrState(stateCode);
+      LOG.debug("Convert China StateName to StateCode End >>>");
+    }
+  }
+  
+  @Override
+  public void setCNAddressENCityOnImport(Addr addr, FindCMRRecordModel cmr, EntityManager entityManager) {
+    // TODO Auto-generated method stub 
+    LOG.debug("Convert China ENCITY Begin >>>");
+    String city1Upper = addr.getCity1() != null ? addr.getCity1().toUpperCase() : "";
+    city1Upper = city1Upper.replaceAll("[^a-zA-Z]+", "");
+    if (!containsWhiteSpace(addr.getCity1()) && !StringUtils.isEmpty(city1Upper) && !CmrConstants.CN_NON_SPACED_CITIES.contains(city1Upper)) {
+      // 1. query code from LOV
+      String cdOfUpperDesc = getCNCityCdByUpperDesc(entityManager, city1Upper);
+      // 2. query desc from lov with the use of code from 1
+      String enDesc = getCnCityEngDescById(entityManager, cdOfUpperDesc);
+      // 3. save desc as addr.city1
+      addr.setCity1(enDesc);
+      cmr.setCmrIntlCity1(enDesc);
+      LOG.debug("Convert China ENCITY End >>> enCity is " + enDesc);
+    } else {
+      // ASSUMPTION: CITY CONTAINS WHITESPACE
+      // 1. query desc from lov with the use of desc from toUpperCase
+      String enDesc = getCNCityCdByUpperDesc(entityManager, city1Upper);
+      // 2. save desc as addr.city1
+      if (StringUtils.isEmpty(enDesc) || StringUtils.isBlank(enDesc)) {
+        addr.setCity1(enDesc);
+      } else {
+        String newCity = getCnCityEngDescById(entityManager, enDesc);
+        addr.setCity1(newCity);
+        cmr.setCmrIntlCity1(enDesc);
+        LOG.debug("Convert China ENCITY End >>> enCity is " + newCity);
+      }
+    }
+  }
+  
+  @Override
+  public void setCNAddressCityOnImport(AddressModel model, FindCMRRecordModel cmr, Addr addr, EntityManager entityManager) {
+    // TODO Auto-generated method stub 
+    LOG.debug("Convert China CNCITY Begin >>>");
+    String stateProv = addr.getStateProv();
+    String cityTxt = addr.getCity1();
+    String cityCode = null;
+    String qryChinaCityID = ExternalizedQuery.getSql("GET.GEO_CITIES_BYID");
+    stateProv += "%";
+    List<Object[]> results = new ArrayList<Object[]>();
+    PreparedQuery query = new PreparedQuery(entityManager, qryChinaCityID);
+    query.setParameter("CITY_DESC", cityTxt);
+    query.setParameter("ISSUING_CNTRY", SystemLocation.CHINA);
+    query.setParameter("STATE_CD", stateProv);
+    results = query.getResults();
+    if (results != null && !results.isEmpty()) {
+      Object[] sResult = results.get(0);
+      cityCode = sResult[0].toString();
+    } 
+    LOG.debug("Convert China CNCITY Begin get cityCode is " + cityCode);
+    String cnCity = null;
+    if(StringUtils.isNotBlank(cityCode)){
+      String qryChinaCityTxt = ExternalizedQuery.getSql("GET.CN_CITY_TXT");
+      PreparedQuery queryCity = new PreparedQuery(entityManager, qryChinaCityTxt);
+      queryCity.setParameter("CD" , cityCode );
+      List<Object[]> results2 = queryCity.getResults();     
+      if (results2 != null && !results2.isEmpty()) {
+        Object[] sResult = results2.get(0);
+        cnCity = sResult[1].toString();
+      }
+    }
+    LOG.debug("Convert China CNCITY End >>> cnCity is " + cnCity);
+    if(StringUtils.isNotEmpty(cnCity)){
+      model.setCnCity(cnCity);
+      cmr.setCmrIntlCity1(cnCity);
+    }
   }
 }

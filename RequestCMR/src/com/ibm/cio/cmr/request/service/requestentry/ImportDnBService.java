@@ -37,6 +37,7 @@ import com.ibm.cio.cmr.request.entity.ReqCmtLogPK;
 import com.ibm.cio.cmr.request.entity.Scorecard;
 import com.ibm.cio.cmr.request.entity.ScorecardPK;
 import com.ibm.cio.cmr.request.model.ParamContainer;
+import com.ibm.cio.cmr.request.model.requestentry.AddressModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.model.requestentry.ImportCMRModel;
@@ -508,6 +509,9 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
 
     addr.setCity1(cmr.getCmrCity());
     addr.setStateProv(cmr.getCmrState());
+    if (SystemLocation.CHINA.equals(reqModel.getCmrIssuingCntry()) && StringUtils.isNotBlank(cmr.getCmrState())) {
+      converter.convertChinaStateNameToStateCode(addr, cmr, entityManager);   
+    }
     if (!StringUtils.isBlank(addr.getStateProv()) && addr.getStateProv().length() > 3) {
       addr.setStateProv(null);
     }
@@ -635,6 +639,10 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
       addr.setDplChkResult(CmrConstants.ADDRESS_Not_Required);
       addr.setDplChkInfo(null);
     }
+    
+    if(converter != null && SystemLocation.CHINA.equals(reqModel.getCmrIssuingCntry()) && StringUtils.isNotBlank(addr.getCity1())){
+      converter.setCNAddressENCityOnImport(addr, cmr, entityManager);
+    }
 
     reqEntryService.createEntity(addr, entityManager);
 
@@ -644,12 +652,31 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
     PropertyUtils.copyProperties(rdcpk, addr.getId());
     rdc.setId(rdcpk);
     reqEntryService.createEntity(rdc, entityManager);
+    
+    if(SystemLocation.CHINA.equals(reqModel.getCmrIssuingCntry()) && (StringUtils.isNotBlank(cmr.getCmrIntlAddress()) || StringUtils.isNotBlank(cmr.getCmrIntlName()))){
+      AddressModel model = new AddressModel();      
+      if (StringUtils.isNotBlank(cmr.getCmrIntlCity1())){
+        converter.setCNAddressCityOnImport(model, cmr, addr, entityManager);
+      }
+      setCNIntlAddrModel(model, cmr);
+      addressService.createCNIntlAddr(model, addr, entityManager);
+    }
 
     // Ed|1043386| Only require DPL check for Create requests
     if (CmrConstants.REQ_TYPE_CREATE.equalsIgnoreCase(reqModel.getReqType())) {
       AddressService.clearDplResults(entityManager, reqId);
     }
 
+  }
+
+  private void setCNIntlAddrModel(AddressModel model, FindCMRRecordModel cmr) {
+    // TODO Auto-generated method stub
+    model.setCnAddrTxt(cmr.getCmrIntlAddress());
+    model.setCnAddrTxt2("");
+    model.setCnCustName1(cmr.getCmrIntlName());
+    model.setCnCustName2("");
+    model.setCnCustName3("");  
+    model.setCnDistrict(cmr.getCmrIntlCity2());
   }
 
   /**
