@@ -631,7 +631,7 @@ function defaultCMRNumberPrefix() {
     FormManager.resetValidations('cmrNoPrefix');
   }
   
-  if (cmrIssuingCntry == '744' && (role == 'REQUESTER' || role == 'PROCESSOR') && (custSubGrp == 'INTER' || custSubGrp == 'XINT')) {
+  if (cmrIssuingCntry == '744' && (custSubGrp == 'INTER' || custSubGrp == 'XINT')) {
 	  FormManager.show('CmrNoPrefix', 'cmrNoPrefix');
 	  FormManager.setValue('cmrNoPrefix', '996---');
 	  }
