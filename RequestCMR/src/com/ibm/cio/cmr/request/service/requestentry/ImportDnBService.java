@@ -510,7 +510,7 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
     addr.setCity1(cmr.getCmrCity());
     addr.setStateProv(cmr.getCmrState());
     if (SystemLocation.CHINA.equals(reqModel.getCmrIssuingCntry()) && StringUtils.isNotBlank(cmr.getCmrState())) {
-      converter.convertChinaStateNameToStateCode(addr, cmr, entityManager);   
+      converter.convertChinaStateNameToStateCode(addr, cmr, entityManager);
     }
     if (!StringUtils.isBlank(addr.getStateProv()) && addr.getStateProv().length() > 3) {
       addr.setStateProv(null);
@@ -639,8 +639,8 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
       addr.setDplChkResult(CmrConstants.ADDRESS_Not_Required);
       addr.setDplChkInfo(null);
     }
-    
-    if(converter != null && SystemLocation.CHINA.equals(reqModel.getCmrIssuingCntry()) && StringUtils.isNotBlank(addr.getCity1())){
+
+    if (converter != null && SystemLocation.CHINA.equals(reqModel.getCmrIssuingCntry()) && StringUtils.isNotBlank(addr.getCity1())) {
       converter.setCNAddressENCityOnImport(addr, cmr, entityManager);
     }
 
@@ -652,10 +652,11 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
     PropertyUtils.copyProperties(rdcpk, addr.getId());
     rdc.setId(rdcpk);
     reqEntryService.createEntity(rdc, entityManager);
-    
-    if(SystemLocation.CHINA.equals(reqModel.getCmrIssuingCntry()) && (StringUtils.isNotBlank(cmr.getCmrIntlAddress()) || StringUtils.isNotBlank(cmr.getCmrIntlName()))){
-      AddressModel model = new AddressModel();      
-      if (StringUtils.isNotBlank(cmr.getCmrIntlCity1())){
+
+    if (SystemLocation.CHINA.equals(reqModel.getCmrIssuingCntry())
+        && (StringUtils.isNotBlank(cmr.getCmrIntlAddress()) || StringUtils.isNotBlank(cmr.getCmrIntlName()))) {
+      AddressModel model = new AddressModel();
+      if (converter != null && StringUtils.isNotBlank(cmr.getCmrIntlCity1())) {
         converter.setCNAddressCityOnImport(model, cmr, addr, entityManager);
       }
       setCNIntlAddrModel(model, cmr);
@@ -675,7 +676,7 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
     model.setCnAddrTxt2("");
     model.setCnCustName1(cmr.getCmrIntlName());
     model.setCnCustName2("");
-    model.setCnCustName3("");  
+    model.setCnCustName3("");
     model.setCnDistrict(cmr.getCmrIntlCity2());
   }
 
