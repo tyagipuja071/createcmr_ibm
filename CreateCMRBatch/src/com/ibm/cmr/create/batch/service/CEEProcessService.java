@@ -158,7 +158,7 @@ public class CEEProcessService extends LegacyDirectService {
     String cntry = data.getDupIssuingCntryCd();
     String companyBK = data.getEnterprise();
     data.setEnterprise(data.getDupEnterpriseNo());
-    data.setDupSalesBoCd(data.getSalesBusOffCd());
+//    data.setDupSalesBoCd(data.getDupSalesBoCd());
     data.setDupSalesRepNo(data.getSalesBusOffCd());
 
     LOG.debug("Issued country. " + cntry + " duplicate issued country used to generated and assigned.");

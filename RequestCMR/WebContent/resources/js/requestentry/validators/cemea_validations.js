@@ -2,6 +2,13 @@
 
 // Exclusive countries for GBM/SBM 
 var CEMEA_EXCL = new Set([ '620', '767', '805', '823', '677', '680', '832' ]);
+var WEST_INCL = new Set([ '144', '153', '156', '163', '170', '173', '180', '214', '236', '249', '302', '305', '308', '344', '350', '364', '369',
+    '385', '386', '390', '392', '398', '410', '414', '420', '440', '443', '454', '610', '150', '152', '183', '184', '185', '186', '300', '301',
+    '358', '359', '360', '361', '362', '363', '430', '431', '394', '396', '397', '400', '403', '404', '600', '601', '602', '603', '606', '607',
+    '367', '368' ]);
+var EAST_INCL = new Set([ '166', '167', '168', '169', '426', '432', '460', '614', '619', '620', '625', '628', '629', '630', '634', '640', '644',
+    '647', '648', '649', '650', '655', '656', '660', '667', '669', '672', '675', '679', '680', '683', '685', '687', '688', '689', '690', '693',
+    '424', '425', '428', '429', '664', '665', '670', '671', '677', '678', '450', '452', '453' ]);
 var CEE_INCL = new Set([ '603', '607', '626', '644', '651', '668', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '787',
     '820', '821', '826', '889', '358', '359', '363' ]);
 var isicCds = new Set([ '6010', '6411', '6421', '7320', '7511', '7512', '7513', '7514', '7521', '7522', '7523', '7530', '7704', '7706', '7707',
@@ -1639,6 +1646,7 @@ function setCountryDuplicateFields(value) {
       FormManager.show('ClientTier2', 'dupClientTierCd');
       FormManager.show('Enterprise2', 'dupEnterpriseNo');
       FormManager.show('LocalTax3', 'taxCd3');
+      FormManager.show('DupSalesBusOffCd', 'dupSalesBoCd');
       // Mark as hide for CMR-4606
       FormManager.hide('SalRepNameNo2', 'dupSalesRepNo');
       // if (role == GEOHandler.ROLE_PROCESSOR) {
@@ -1658,6 +1666,11 @@ function setCountryDuplicateFields(value) {
           checkAndAddValidator('dupClientTierCd', Validators.REQUIRED, [ 'Client Tier 2' ], 'MAIN_IBM_TAB');
           // checkAndAddValidator('dupSalesRepNo', Validators.REQUIRED, [ 'Sales
           // Rep 2' ]);
+          if (role == 'Requester') {
+            FormManager.readOnly('dupSalesBoCd');
+          } else {
+            FormManager.enable('dupSalesBoCd');
+          }
         }
       } else {
         FormManager.readOnly('dupIsuCd');
@@ -1665,6 +1678,7 @@ function setCountryDuplicateFields(value) {
         FormManager.readOnly('dupEnterpriseNo');
         // FormManager.readOnly('dupSalesRepNo');
         FormManager.readOnly('taxCd3');
+        FormManager.readOnly('dupSalesBoCd');
       }
 
     } else {
@@ -2077,6 +2091,155 @@ function cancelCIS() {
   FormManager.setValue('cisServiceCustIndc', false);
   setCountryDuplicateFields();
   cmr.showModal('addressVerificationModal');
+}
+
+function afterConfigForRussia() {
+  dojo.connect(FormManager.getField('cisServiceCustIndc'), 'onChange', function(value) {
+    setSBOValues();
+  });
+}
+
+function setSBOafterAddrConfig() {
+  if (FormManager.getActualValue('addrType') == 'ZS01') {
+
+    var custType = FormManager.getActualValue('custGrp');
+    var isu = FormManager.getActualValue('isuCd');
+    var ctc = FormManager.getActualValue('clientTier');
+    var custSubType = FormManager.getActualValue('custSubGrp');
+    if (custType == 'CROSS') {
+      if (custSubType == 'XCOM' || custSubType == 'XTP') {
+        FormManager.setValue('salesBusOffCd', 'R02');
+      } else if (custSubType == 'XBP') {
+        FormManager.setValue('salesBusOffCd', '000');
+      } else if (custSubType == 'XINT') {
+        FormManager.setValue('salesBusOffCd', '999');
+      }
+    } else if (dijit.byId('cisServiceCustIndc').get('checked')) {
+      FormManager.setValue('salesBusOffCd', 'R04');
+    } else {
+      if (isu != null && ctc != null && isu != '' && ctc != '') {
+        if (isu == '34' && ctc == 'Y') {
+          FormManager.setValue('salesBusOffCd', 'R01');
+        } else if (custSubType == 'COMME' || custSubType == 'THDPT' || custSubType == 'PRICU') {
+          if (isu == '34' && ctc == 'Q') {
+            var postalCode = FormManager.getActualValue('postCd');
+            var head3 = "";
+            if (postalCode != null && postalCode != "") {
+              head3 = postalCode.substring(0, 3);
+            }
+            var sbo = "";
+            if (WEST_INCL.has(head3)
+                || ((parseInt(head3) > 100 && parseInt(head3) < 130) || (parseInt(head3) > 139 && parseInt(head3) < 143)
+                    || (parseInt(head3) > 159 && parseInt(head3) < 163) || (parseInt(head3) > 186 && parseInt(head3) < 189)
+                    || (parseInt(head3) > 189 && parseInt(head3) < 200) || (parseInt(head3) > 240 && parseInt(head3) < 244)
+                    || (parseInt(head3) > 294 && parseInt(head3) < 300) || (parseInt(head3) > 354 && parseInt(head3) < 358))) {
+              sbo = "R02";
+            } else if (EAST_INCL.has(head3)) {
+              sbo = "R03";
+            }
+            FormManager.setValue('salesBusOffCd', sbo);
+          }
+        } else if (custSubType == 'BUSPR') {
+          FormManager.setValue('salesBusOffCd', '000');
+        } else if (custSubType == 'BUSPR') {
+          FormManager.setValue('salesBusOffCd', '999');
+        }
+      }
+    }
+  } else {
+    setSBOValues();
+  }
+}
+
+function setSBOValues() {
+  var custType = FormManager.getActualValue('custGrp');
+  var isu = FormManager.getActualValue('isuCd');
+  var ctc = FormManager.getActualValue('clientTier');
+  var custSubType = FormManager.getActualValue('custSubGrp');
+  if (custType == 'CROSS') {
+    if (custSubType == 'XCOM' || custSubType == 'XTP') {
+      FormManager.setValue('salesBusOffCd', 'R02');
+    } else if (custSubType == 'XBP') {
+      FormManager.setValue('salesBusOffCd', '000');
+    } else if (custSubType == 'XINT') {
+      FormManager.setValue('salesBusOffCd', '999');
+    }
+  } else if (dijit.byId('cisServiceCustIndc').get('checked')) {
+    FormManager.setValue('salesBusOffCd', 'R04');
+  } else {
+    if (isu != null && ctc != null && isu != '' && ctc != '') {
+      if (isu == '34' && ctc == 'Y') {
+        FormManager.setValue('salesBusOffCd', 'R01');
+      } else if (custSubType == 'COMME' || custSubType == 'THDPT' || custSubType == 'PRICU') {
+        if (isu == '34' && ctc == 'Q') {
+          if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount == 0) {
+            // do nothing
+          } else {
+            if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+              var record = null;
+              var type = null;
+              for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+                record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+                if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+                  record = _allAddressData[i];
+                }
+                type = record.addrType;
+                if (typeof (type) == 'object') {
+                  type = type[0];
+                }
+                if (type == 'ZS01') {
+                  var postalCode = "";
+                  var head3 = "";
+                  postalCode = record.postCd;
+                  if (postalCode != null && postalCode != "") {
+                    head3 = postalCode[0].substring(0, 3);
+                  }
+                  var sbo = "";
+                  if (WEST_INCL.has(head3)
+                      || ((parseInt(head3) > 100 && parseInt(head3) < 130) || (parseInt(head3) > 139 && parseInt(head3) < 143)
+                          || (parseInt(head3) > 159 && parseInt(head3) < 163) || (parseInt(head3) > 186 && parseInt(head3) < 189)
+                          || (parseInt(head3) > 189 && parseInt(head3) < 200) || (parseInt(head3) > 240 && parseInt(head3) < 244)
+                          || (parseInt(head3) > 294 && parseInt(head3) < 300) || (parseInt(head3) > 354 && parseInt(head3) < 358))) {
+                    sbo = "R02";
+                  } else if (EAST_INCL.has(head3)) {
+                    sbo = "R03";
+                  }
+                  FormManager.setValue('salesBusOffCd', sbo);
+                }
+              }
+            }
+          }
+        }
+      } else if (custSubType == 'BUSPR') {
+        FormManager.setValue('salesBusOffCd', '000');
+      } else if (custSubType == 'BUSPR') {
+        FormManager.setValue('salesBusOffCd', '999');
+      }
+    }
+  }
+}
+
+function changeDupSBO() {
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var dupIssuingCntry = FormManager.getActualValue('dupIssuingCntryCd');
+
+  var dupSbo = "";
+  if (dupIssuingCntry != null && dupIssuingCntry != '') {
+    if ('358' == dupIssuingCntry) {
+      dupSbo = 'A02';
+    } else if ('889' == dupIssuingCntry) {
+      dupSbo = 'U02';
+    } else if ('787' == dupIssuingCntry) {
+      dupSbo = 'D02';
+    } else if ('626' == dupIssuingCntry || '607' == dupIssuingCntry || '651' == dupIssuingCntry) {
+      dupSbo = 'G02';
+    } else if ('695' == dupIssuingCntry || '694' == dupIssuingCntry) {
+      dupSbo = 'K02';
+    } else if ('741' == dupIssuingCntry || '363' == dupIssuingCntry || '359' == dupIssuingCntry) {
+      dupSbo = 'J02';
+    }
+    FormManager.setValue('dupSalesBoCd', dupSbo);
+  }
 }
 
 function changeAbbrevNmLocn(cntry, addressMode, saving, finalSave, force) {
@@ -4727,6 +4890,14 @@ dojo
       GEOHandler.addAfterTemplateLoad(setDupISUCTCValues, [ SysLoc.RUSSIA ]); // CreateCMR-811
       GEOHandler.addAfterConfig(setEnterprise2Values, [ SysLoc.RUSSIA ]);// CreateCMR-811
       GEOHandler.addAfterTemplateLoad(setEnterprise2Values, [ SysLoc.RUSSIA ]);// CreateCMR-811
+
+      GEOHandler.addAddrFunction(setSBOafterAddrConfig, [ SysLoc.RUSSIA ]);
+      GEOHandler.addAfterConfig(changeDupSBO, SysLoc.RUSSIA);
+      GEOHandler.addAfterTemplateLoad(changeDupSBO, [ SysLoc.RUSSIA ]);
+      GEOHandler.addAfterConfig(afterConfigForRussia, [ SysLoc.RUSSIA ]);
+      GEOHandler.addAfterConfig(setSBOValues, [ SysLoc.RUSSIA ]);
+      GEOHandler.addAfterTemplateLoad(setSBOValues, [ SysLoc.RUSSIA ]);
+
       // Slovakia
       GEOHandler.addAfterConfig(afterConfigForSlovakia, [ SysLoc.SLOVAKIA ]);
       GEOHandler.addAfterTemplateLoad(afterConfigForSlovakia, [ SysLoc.SLOVAKIA ]);
