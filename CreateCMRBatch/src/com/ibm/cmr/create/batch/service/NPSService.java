@@ -113,13 +113,14 @@ public class NPSService extends BaseBatchService {
               mail.setMessage(npsMail.toString());
               mail.setType(MessageType.HTML);
 
-              String sourceSysSkip = admin.getSourceSystId() + ".SKIP";
-              String onlySkipPartner = SystemParameters.getString(sourceSysSkip);
               boolean skip = false;
               if (admin.getRequesterId().toLowerCase().equals(processor != null ? processor.toLowerCase() : "")) {
                 skip = true;
               }
-              if (StringUtils.isNotBlank(admin.getSourceSystId()) && "Y".equals(onlySkipPartner)) {
+              if (StringUtils.isNotBlank(admin.getSourceSystId())) {
+                skip = true;
+              }
+              if (!admin.getRequesterId().toLowerCase().contains("ibm.com")) {
                 skip = true;
               }
 
