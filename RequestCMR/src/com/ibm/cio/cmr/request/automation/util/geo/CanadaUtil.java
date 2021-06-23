@@ -10,36 +10,22 @@ import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
 
 import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.impl.gbl.CalculateCoverageElement;
-import com.ibm.cio.cmr.request.automation.impl.gbl.DupCMRCheckElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.CoverageContainer;
 import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
-import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
-import com.ibm.cio.cmr.request.query.ExternalizedQuery;
-import com.ibm.cio.cmr.request.query.PreparedQuery;
-import com.ibm.cio.cmr.request.util.BluePagesHelper;
-import com.ibm.cio.cmr.request.util.Person;
-import com.ibm.cio.cmr.request.util.SystemLocation;
-import com.ibm.cmr.services.client.CmrServicesFactory;
-import com.ibm.cmr.services.client.MatchingServiceClient;
-import com.ibm.cmr.services.client.matching.MatchingResponse;
-import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckRequest;
-import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 
 /**
@@ -94,203 +80,17 @@ public class CanadaUtil extends AutomationUtil {
     if (StringUtils.isNotBlank(scenario)) {
       switch (scenario) {
       case SCENARIO_COMMERCIAL:
+      case SCENARIO_PRIVATE_HOUSEHOLD:
+      case SCENARIO_INTERNAL:
+      case SCENARIO_OEM:
+      case SCENARIO_STRATEGIC_OUTSOURCING:
+      case SCENARIO_GOVERNMENT:
+      case SCENARIO_CROSS_BORDER_USA:
+      case SCENARIO_CROSS_BORDER_CARIB:
         break;
       case SCENARIO_BUSINESS_PARTNER:
         return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
-      case SCENARIO_PRIVATE_HOUSEHOLD:
-        engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
-      case SCENARIO_INTERNAL:
-        break;
-      case SCENARIO_OEM:
-        break;
-      case SCENARIO_STRATEGIC_OUTSOURCING:
-        break;
-      case SCENARIO_GOVERNMENT:
-        break;
-      case SCENARIO_CROSS_BORDER_USA:
-        break;
-      case SCENARIO_CROSS_BORDER_CARIB:
-        break;
       }
-      switch (scenario) {
-      case "PRIPE":
-      case "IBMEM":
-        for (Addr addr : requestData.getAddresses()) {
-          String custNm = addr.getCustNm1() + (StringUtils.isNotBlank(addr.getCustNm2()) ? " " + addr.getCustNm2() : "");
-          if (StringUtils.isNotBlank(custNm) && (custNm.contains("GmbH") || custNm.contains("AG") || custNm.contains("e.V.") || custNm.contains("OHG")
-              || custNm.contains("Co.KG") || custNm.contains("Co.OHG") || custNm.contains("KGaA") || custNm.contains("mbH") || custNm.contains("UG")
-              || custNm.contains("e.G") || custNm.contains("mit beschränkter Haftung") || custNm.contains("Aktiengesellschaft"))) {
-            engineData.addRejectionComment("OTH", "Scenario chosen is incorrect, should be Commercial.", "", "");
-            details.append("Scenario chosen is incorrect, should be Commercial.").append("\n");
-            valid = false;
-            break;
-          }
-        }
-        if (valid) {
-          String name = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
-          String duplicateCMRNo = null;
-          // getting fuzzy matches on basis of name
-          try {
-            MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
-                MatchingServiceClient.class);
-            DuplicateCMRCheckRequest request = new DuplicateCMRCheckRequest();
-            request.setCustomerName(name);
-            request.setIssuingCountry(data.getCmrIssuingCntry());
-            request.setLandedCountry(zs01.getLandCntry());
-            request.setIsicCd("9500");
-            request.setNameMatch("Y");
-            client.setReadTimeout(1000 * 60 * 5);
-            LOG.debug("Connecting to the Duplicate CMR Check Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
-            MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.CMR_SERVICE_ID, request, MatchingResponse.class);
-            ObjectMapper mapper = new ObjectMapper();
-            String json = mapper.writeValueAsString(rawResponse);
-
-            TypeReference<MatchingResponse<DuplicateCMRCheckResponse>> ref = new TypeReference<MatchingResponse<DuplicateCMRCheckResponse>>() {
-            };
-
-            MatchingResponse<DuplicateCMRCheckResponse> response = mapper.readValue(json, ref);
-
-            if (response.getSuccess()) {
-              if (response.getMatched() && response.getMatches().size() > 0) {
-                duplicateCMRNo = response.getMatches().get(0).getCmrNo();
-                String zs01Kunnr = getZS01Kunnr(duplicateCMRNo, SystemLocation.GERMANY);
-                details.append(
-                    "The " + (scenario.equals("PRIPE") ? "Private Person" : "IBM Employee") + " already has a record with CMR No. " + duplicateCMRNo)
-                    .append("\n");
-                engineData.addRejectionComment("DUPC",
-                    "The " + (scenario.equals("PRIPE") ? "Private Person" : "IBM Employee") + " already has a record with CMR No. " + duplicateCMRNo,
-                    duplicateCMRNo, zs01Kunnr);
-                valid = false;
-              } else {
-                details.append("No Duplicate CMRs were found.").append("\n");
-              }
-              if (StringUtils.isBlank(duplicateCMRNo) && scenario.equals("IBMEM")) {
-                Person person = null;
-                if (StringUtils.isNotBlank(zs01.getCustNm1())) {
-                  try {
-                    String mainCustName = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
-                    person = BluePagesHelper.getPersonByName(mainCustName);
-                    if (person == null) {
-                      engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
-                      details.append("Employee details not found in IBM BluePages.").append("\n");
-                    } else {
-                      details.append("Employee details validated with IBM BluePages for " + person.getName() + "(" + person.getEmail() + ").")
-                          .append("\n");
-                    }
-                  } catch (Exception e) {
-                    LOG.error("Not able to check name against bluepages", e);
-                    engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED",
-                        "Not able to check name against bluepages for scenario IBM Employee.");
-                  }
-                } else {
-                  LOG.warn("Not able to check name against bluepages, Customer Name 1 not found on the main address");
-                  engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED", "Customer Name 1 not found on the main address");
-                }
-              }
-            }
-          } catch (Exception e) {
-            details.append("Duplicate CMR check using customer name match failed to execute.").append("\n");
-            engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name match failed to execute.");
-          }
-        }
-        break;
-      case "BROKR":
-        // check duplicate CMR's manually
-        MatchingResponse<DuplicateCMRCheckResponse> response = null;
-        try {
-          DupCMRCheckElement cmrCheckElement = new DupCMRCheckElement(null, null, false, false);
-          response = cmrCheckElement.getMatches(entityManager, requestData, engineData);
-          // get a count of matches with match grade E1,E2, F1 or F2
-          int count = 0;
-          if (response != null && response.getSuccess()) {
-            if (response.getMatched()) {
-              LOG.debug("Duplicate CMR's found for request: " + data.getId().getReqId());
-              for (DuplicateCMRCheckResponse cmrResponse : response.getMatches()) {
-                if (cmrResponse.getMatchGrade().equals("E1") || cmrResponse.getMatchGrade().equals("E2") || cmrResponse.getMatchGrade().equals("F1")
-                    || cmrResponse.getMatchGrade().equals("F2")) {
-                  count++;
-                }
-              }
-            }
-
-          } else {
-            LOG.error("Unable to perform Duplicate CMR Check for BROKR scenario.");
-            details.append("Unable to perform Duplicate CMR Check for Broker scenario.").append("\n");
-            engineData.addNegativeCheckStatus("CMR_CHECK_FAILED", "Unable to perform Duplicate CMR Check for Broker scenario.");
-          }
-          if (count > 1) {
-            engineData.addRejectionComment("OTH", "Multiple registered CMRs already found for this customer.", "", "");
-            details.append("Multiple registered CMRs already found for this customer.").append("\n");
-            valid = false;
-          } else if (count == 1) {
-            details.append("Single registered CMR found for this customer.").append("\n");
-          } else {
-            details.append("No registered CMRs found for this customer.").append("\n");
-          }
-        } catch (Exception e) {
-          LOG.error("Unable to perform Duplicate CMR Check for BROKR scenario.", e);
-          details.append("Unable to perform Duplicate CMR Check for Broker scenario.");
-          engineData.addNegativeCheckStatus("CMR_CHECK_FAILED", "Unable to perform Duplicate CMR Check for Broker scenario.");
-        }
-        break;
-      case "BUSPR":
-        if (StringUtils.isNotBlank(data.getPpsceid())) {
-          try {
-            if (!checkPPSCEID(data.getPpsceid())) {
-              engineData.addRejectionComment("OTH", "PPS CE ID on the request is invalid.", "", "");
-              details.append("PPS CE ID on the request is invalid.").append("\n");
-              valid = false;
-            } else {
-              details.append("PPS CE ID validated successfully with PartnerWorld Profile Systems.").append("\n");
-            }
-          } catch (Exception e) {
-            LOG.error("Not able to validate PPS CE ID using PPS Service.", e);
-            details.append("Not able to validate PPS CE ID using PPS Service.").append("\n");
-            engineData.addNegativeCheckStatus("PPSCEID", "Not able to validate PPS CE ID using PPS Service.");
-          }
-        } else {
-          details.append("PPS CE ID not available on the request.").append("\n");
-          engineData.addNegativeCheckStatus("PPSCEID", "PPS CE ID not available on the request.");
-        }
-        break;
-      case "INTIN":
-      case "INTSO":
-      case "INTAM":
-        // check value of Department under '##GermanyInternalDepartment' LOV
-        String sql = ExternalizedQuery.getSql("DE.CHECK_DEPARTMENT");
-        PreparedQuery query = new PreparedQuery(entityManager, sql);
-        String dept = data.getIbmDeptCostCenter();
-        if (StringUtils.isNotBlank(dept)) {
-          query.setParameter("CD", dept);
-          String result = query.getSingleResult(String.class);
-          if (result == null) {
-            engineData.addRejectionComment("OTH", "IBM Department/Cost Center on the request is invalid.", "", "");
-            details.append("IBM Department/Cost Center on the request is invalid.").append("\n");
-            valid = false;
-          } else {
-            details.append("IBM Department/Cost Center " + dept + " validated successfully.").append("\n");
-          }
-        } else {
-          details.append("IBM Department/Cost Center not provided on the request. Default Department Number(00X306) will be set.");
-          data.setIbmDeptCostCenter("00X306");
-        }
-        break;
-      }
-
-      if (!scenario.equals("3PADC")) {
-        for (Addr addr : requestData.getAddresses()) {
-          String custNm = addr.getCustNm1() + (StringUtils.isNotBlank(addr.getCustNm2()) ? addr.getCustNm2() : "");
-          if (StringUtils.isNotBlank(custNm)
-              && (custNm.toUpperCase().contains("C/O") || custNm.toUpperCase().contains("C / O") || custNm.toUpperCase().contains("CARE OF"))) {
-            engineData.addNegativeCheckStatus("SCENARIO_CHECK", "The scenario should be for 3rd Party / Data Center.");
-            break;
-          }
-        }
-      }
-      // String[] skipCompanyCheckList = { "PRIPE", "IBMEM" };
-      // skipCompanyCheckForScenario(requestData, engineData,
-      // Arrays.asList(skipCompanyCheckList), false);
-
     } else {
       valid = false;
       engineData.addRejectionComment("TYPR", "Wrong type of request.", "No Scenario found on the request", "");
