@@ -122,7 +122,14 @@
         <cmr:field fieldId="LocalTax3" id="taxCd3" path="taxCd3" tabId="MAIN_IBM_TAB" />
       </p>
     </cmr:column>
-    
+    <cmr:column span="2" containerForField="DupSalesBusOffCd">
+      <p>
+        <cmr:label fieldId="dupSalesBoCd">
+          <cmr:fieldLabel fieldId="DupSalesBusOffCd" />: 
+        </cmr:label>
+        <cmr:field fieldId="DupSalesBusOffCd" id="dupSalesBoCd" path="dupSalesBoCd" tabId="MAIN_IBM_TAB" />
+      </p>
+    </cmr:column>    
     <cmr:column span="2" containerForField="SalRepNameNo2">
       <p>
         <cmr:label fieldId="dupSalesRepNo">
