@@ -4517,16 +4517,20 @@ function setCEESBOValuesForIsuCtc() {
   }
 }
 
-function hideCompanyForCEE() {
+function lockCompanyForCEE() {
 
-  var role = FormManager.getActualValue('userRole');
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+
+  var role = FormManager.getActualValue('userRole').toUpperCase();
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
 
   if (!CEE_INCL.has(cntry)) {
     return;
   }
-  if (CEE_INCL.has(cntry)) {
-    FormManager.hide('Company number', 'enterprise');
+  if (CEE_INCL.has(cntry) && role == 'REQUESTER') {
+    FormManager.readOnly('enterprise');
   }
 }
 
@@ -4745,8 +4749,8 @@ dojo
       GEOHandler.addAfterConfig(setAddressDetailsForViewAT, SysLoc.AUSTRIA);
       GEOHandler.addAfterConfig(setCEESBOValuesForIsuCtc, GEOHandler.CEE);
       GEOHandler.addAfterTemplateLoad(setCEESBOValuesForIsuCtc, GEOHandler.CEE);
-      GEOHandler.addAfterConfig(hideCompanyForCEE, GEOHandler.CEE);
-      GEOHandler.addAfterTemplateLoad(hideCompanyForCEE, GEOHandler.CEE);
+      GEOHandler.addAfterConfig(lockCompanyForCEE, GEOHandler.CEE);
+      GEOHandler.addAfterTemplateLoad(lockCompanyForCEE, GEOHandler.CEE);
       // GEOHandler.addAfterConfig(addPrefixVat, GEOHandler.CEE);
       // GEOHandler.addAfterTemplateLoad(addPrefixVat, GEOHandler.CEE);
       // GEOHandler.addAddrFunction(addPrefixVat, GEOHandler.CEE);
