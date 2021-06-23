@@ -11,7 +11,6 @@ var _landCntryHandler = null;
 var _isuHandler = null;
 var _searchTermHandler = null;
 var _govTypeHandler = null;
-var _goeTypeHandler = null;
 var _isicHandlerCN = null;
 var _inacCdHandler = null;
 var CNHandler = {
@@ -99,12 +98,6 @@ function afterConfigForCN() {
     });
   }
 
-  if (_goeTypeHandler == null) {
-    _goeTypeHandler = dojo.connect(FormManager.getField('goeType'), 'onClick', function(value) {
-      addValidationForParentCompanyNo();
-    });
-  }
-
   if (FormManager.getActualValue('reqType') == 'U') {
     FormManager.hide('IbmDeptCostCenter', 'ibmDeptCostCenter');
     if (_pagemodel.userRole.toUpperCase() == "REQUESTER") {
@@ -139,6 +132,9 @@ function afterConfigForCN() {
     _searchTermHandler[0].onChange();
   }
 
+  if (_govTypeHandler && _govTypeHandler[0]) {    
+    _govTypeHandler[0].onChange();   
+  }
 }
 
 function setInacBySearchTerm() {
@@ -634,7 +630,7 @@ function setValuesForScenarios() {
         FormManager.show('BPRelationType', 'bpRelType');
       }
 
-      if (_custSubGrp == 'AQSTN'|| _custSubGrp == 'PRIV' || _custSubGrp == 'CROSS') {
+      if (_custSubGrp == 'AQSTN'|| _custSubGrp == 'PRIV' || _custSubGrp == 'CROSS' || _custSubGrp == 'INTER') {
         FormManager.resetValidations('cnCustName1');
         FormManager.resetValidations('cnAddrTxt');
         FormManager.resetValidations('cnCity');
@@ -802,9 +798,11 @@ function showHideCityCN() {
       FormManager.resetValidations('cnCustContJobTitle');
       FormManager.resetValidations('cnCustContNm');
     } else {
-      FormManager.addValidator('cnCity', Validators.REQUIRED, [ 'City Chinese' ], null);
-      FormManager.addValidator('cnAddrTxt', Validators.REQUIRED, [ 'Street Address Chinese' ], null);
-      FormManager.addValidator('cnCustName1', Validators.REQUIRED, [ 'Customer Name Chinese' ], null);
+      if (_custSubGrp != 'undefined' && _custSubGrp != '' && (_custSubGrp != 'PRIV' && _custSubGrp != 'INTER' && _custSubGrp != 'AQSTN')) {
+        FormManager.addValidator('cnCity', Validators.REQUIRED, [ 'City Chinese' ], null);
+        FormManager.addValidator('cnAddrTxt', Validators.REQUIRED, [ 'Street Address Chinese' ], null);
+        FormManager.addValidator('cnCustName1', Validators.REQUIRED, [ 'Customer Name Chinese' ], null);
+      }
       FormManager.addValidator('stateProv', Validators.REQUIRED, [ 'State/Province' ], null);
       //
       FormManager.addValidator('custPhone', Validators.REQUIRED, [ "Customer Contact's Phone Number 2" ], null);
