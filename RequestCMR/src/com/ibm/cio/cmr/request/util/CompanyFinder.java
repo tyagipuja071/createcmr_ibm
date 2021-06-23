@@ -589,14 +589,22 @@ public class CompanyFinder {
    * @return
    * @throws Exception
    */
-  public static AutomationResponse<CNResponse> getCNApiInfo(CompanyRecordModel searchModel) throws Exception {
+  public static AutomationResponse<CNResponse> getCNApiInfo(CompanyRecordModel searchModel, String key) throws Exception {
     AutomationServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
         AutomationServiceClient.class);
     client.setReadTimeout(1000 * 60 * 5);
     client.setRequestMethod(Method.Get);
 
     CNRequest request = new CNRequest();
-    request.setKeyword(searchModel.getTaxCd1());
+    switch (key) {
+    case "TAXCD":
+      request.setKeyword(searchModel.getTaxCd1());
+      break;
+    case "ALTNAME":
+      request.setKeyword(searchModel.getAltName());
+      break;
+    }
+
     System.out.println(request + request.getKeyword());
 
     LOG.debug("Connecting to the CNValidation service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
