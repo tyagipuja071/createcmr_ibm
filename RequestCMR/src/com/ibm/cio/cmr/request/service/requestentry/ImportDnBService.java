@@ -32,6 +32,7 @@ import com.ibm.cio.cmr.request.entity.CompoundEntity;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.entity.DataRdc;
+import com.ibm.cio.cmr.request.entity.IntlAddr;
 import com.ibm.cio.cmr.request.entity.ReqCmtLog;
 import com.ibm.cio.cmr.request.entity.ReqCmtLogPK;
 import com.ibm.cio.cmr.request.entity.Scorecard;
@@ -346,6 +347,13 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
           reqEntryService.deleteEntity(currRdc, entityManager);
         }
 
+        if ("641".equals(reqModel.getCmrIssuingCntry())) {
+          IntlAddr iAddr = getCurrSoldToIntlAddr(entityManager, reqIdToUse);
+          if (iAddr != null) {
+            LOG.debug("Deleting current sold to (IntlAddr) address..");
+            reqEntryService.deleteEntity(iAddr, entityManager);
+          }
+        }
         extractAddresses(entityManager, mainRecord, converter, reqIdToUse, reqModel);
       }
       if (geoHandler != null) {
@@ -439,6 +447,14 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", reqId);
     return query.getSingleResult(AddrRdc.class);
+  }
+
+  private IntlAddr getCurrSoldToIntlAddr(EntityManager entityManager, long reqId) {
+    // TODO Auto-generated method stub
+    String sql = ExternalizedQuery.getSql("DNB.GET_CURR_SOLD_TO_INTLADDR");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    return query.getSingleResult(IntlAddr.class);
   }
 
   /**
