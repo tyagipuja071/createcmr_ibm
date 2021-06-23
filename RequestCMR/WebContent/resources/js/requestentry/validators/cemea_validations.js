@@ -656,6 +656,7 @@ function addHandlersForCEMEA() {
         setSalesRepValues(value);
       }
       setSBOValuesForIsuCtc();// CMR-2101
+      setCEESBOValuesForIsuCtc();
       if (CEE_INCL.has(FormManager.getActualValue('cmrIssuingCntry'))) {
         togglePPSCeidCEE();
       }
@@ -1261,7 +1262,8 @@ function addAddressFieldValidators() {
         if (custPhone != '') {
           val += custPhone;
           if (val != null && val.length > 30) {
-            return new ValidationResult(null, false, 'Total computed length of Attention to/Building/Floor/Office and Phone should not exceed 30 characters.');
+            return new ValidationResult(null, false,
+                'Total computed length of Attention to/Building/Floor/Office and Phone should not exceed 30 characters.');
           }
         }
         return new ValidationResult(null, true);
@@ -1844,7 +1846,8 @@ function setSBO(repTeamMemberNo) {
     if (FormManager.getField('templatevalue-repTeamMemberNo') != undefined) {
       FormManager.getField('templatevalue-repTeamMemberNo').style.display = 'none';
     }
-    FormManager.setValue('salesBusOffCd', '0000000');
+    // CMR-2520 -- CEE will not set SBO to 0000000
+    // FormManager.setValue('salesBusOffCd', '0000000');
     FormManager.setValue('repTeamMemberNo', '099998');
     return;
   }
@@ -2202,38 +2205,31 @@ function setAddressDetailsForView() {
   }
 }
 
-/*function custNmAttnPersonPhoneValidation() {
-  var attn = FormManager.getActualValue('custNm4');
-  var phone = FormManager.getActualValue('custPhone');
-  var cust3 = FormManager.getActualValue('custNm3');
-
-  if (cust3 != null && cust3.trim().length > 0) {
-    FormManager.clearValue('custNm4');
-    FormManager.disable('custNm4');
-    FormManager.clearValue('custPhone');
-    FormManager.disable('custPhone');
-  } else if (cust3 == null || cust3.trim().length == 0) {
-    FormManager.enable('custNm4');
-    FormManager.enable('custPhone');
-  }
-
-  if ((attn != null && attn.trim().length > 0) || (phone != null && phone.trim().length > 0)) {
-    FormManager.clearValue('custNm3');
-    FormManager.disable('custNm3');
-  } else if ((attn == null || attn.trim().length == 0) && (phone == null || phone.trim().length == 0)) {
-    FormManager.enable('custNm3');
-  }
-}
-
-function custNmAttnPersonPhoneValidationOnChange() {
-  var fields = [ 'custNm3', 'custNm4', 'custPhone' ];
-
-  for (var i = 0; i < fields.length; i++) {
-    dojo.connect(FormManager.getField(fields[i]), 'onChange', function(value) {
-      custNmAttnPersonPhoneValidation();
-    });
-  }
-}*/
+/*
+ * function custNmAttnPersonPhoneValidation() { var attn =
+ * FormManager.getActualValue('custNm4'); var phone =
+ * FormManager.getActualValue('custPhone'); var cust3 =
+ * FormManager.getActualValue('custNm3');
+ * 
+ * if (cust3 != null && cust3.trim().length > 0) {
+ * FormManager.clearValue('custNm4'); FormManager.disable('custNm4');
+ * FormManager.clearValue('custPhone'); FormManager.disable('custPhone'); } else
+ * if (cust3 == null || cust3.trim().length == 0) {
+ * FormManager.enable('custNm4'); FormManager.enable('custPhone'); }
+ * 
+ * if ((attn != null && attn.trim().length > 0) || (phone != null &&
+ * phone.trim().length > 0)) { FormManager.clearValue('custNm3');
+ * FormManager.disable('custNm3'); } else if ((attn == null ||
+ * attn.trim().length == 0) && (phone == null || phone.trim().length == 0)) {
+ * FormManager.enable('custNm3'); } }
+ * 
+ * function custNmAttnPersonPhoneValidationOnChange() { var fields = [
+ * 'custNm3', 'custNm4', 'custPhone' ];
+ * 
+ * for (var i = 0; i < fields.length; i++) {
+ * dojo.connect(FormManager.getField(fields[i]), 'onChange', function(value) {
+ * custNmAttnPersonPhoneValidation(); }); } }
+ */
 
 function reqReasonOnChangeAT() {
   var reqReason = FormManager.getActualValue('reqReason');
@@ -2279,22 +2275,18 @@ function isZD01OrZP01ExistOnCMR() {
   return false;
 }
 
-/*function phoneNoValidation() {
-  var phone = FormManager.getActualValue('custPhone');
-  var attn = FormManager.getActualValue('custNm4');
-  if (phone != null && phone.trim().length > 0) {
-    FormManager.clearValue('custNm3');
-    FormManager.disable('custNm3');
-  } else if (attn == null || attn.trim().length == 0) {
-    FormManager.enable('custNm3');
-  }
-}
-
-function phoneNoValidationOnChange() {
-  dojo.connect(FormManager.getField('custPhone'), 'onChange', function(value) {
-    phoneNoValidation();
-  });
-}*/
+/*
+ * function phoneNoValidation() { var phone =
+ * FormManager.getActualValue('custPhone'); var attn =
+ * FormManager.getActualValue('custNm4'); if (phone != null &&
+ * phone.trim().length > 0) { FormManager.clearValue('custNm3');
+ * FormManager.disable('custNm3'); } else if (attn == null || attn.trim().length ==
+ * 0) { FormManager.enable('custNm3'); } }
+ * 
+ * function phoneNoValidationOnChange() {
+ * dojo.connect(FormManager.getField('custPhone'), 'onChange', function(value) {
+ * phoneNoValidation(); }); }
+ */
 
 function setEnterpriseValues(clientTier) {
   var role = FormManager.getActualValue('userRole').toUpperCase();
@@ -2512,7 +2504,6 @@ function setCompanyNoForCEE(clientTier) {
     }
   }
 }
-
 
 // CreateCMR-811 Change End
 
@@ -4388,205 +4379,376 @@ function setAddressDetailsForViewAT() {
   }
 }
 
-dojo.addOnLoad(function() {
-  GEOHandler.CEMEA_COPY = [ '358', '359', '363', '603', '607', '620', '626', '644', '642', '651', '668', '677', '680', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '752',
-      '762', '767', '768', '772', '787', '805', '808', '820', '821', '823', '826', '832', '849', '850', '865', '889' ];
-  GEOHandler.CEMEA = [ '358', '359', '363', '603', '607', '620', '626', '644', '642', '651', '668', '677', '680', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '752', '762',
-      '767', '768', '772', '787', '805', '808', '820', '821', '823', '826', '832', '849', '850', '865', '889', '618' ];
-  GEOHandler.CEMEA_CHECKLIST = [ '358', '359', '363', '607', '620', '626', '651', '675', '677', '680', '694', '695', '713', '741', '752', '762', '767', '768', '772', '787', '805', '808', '821',
-      '823', '832', '849', '850', '865', '889' ];
-  GEOHandler.NON_CEE_CHECK = [ '620', '675', '677', '680', '713', '752', '762', '767', '768', '772', '805', '808', '823', '832', '849', '850', '865' ];
-  GEOHandler.CEE = [ '603', '607', '626', '644', '651', '668', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '787', '820', '821', '826', '889', '358', '359', '363' ];
-  GEOHandler.CEMEA_EXCLUDE_CEE = GEOHandler.CEMEA.filter(function(v) {
-    return GEOHandler.CEE.indexOf(v) == -1
-  });
-  console.log('adding CEMEA functions...');
-  GEOHandler.addAddrFunction(addCEMEALandedCountryHandler, GEOHandler.CEMEA);
-  // GEOHandler.enableCopyAddress(GEOHandler.CEMEA, validateCEMEACopy);
-  GEOHandler.enableCustomerNamesOnAddress(GEOHandler.CEMEA);
-  GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.CEMEA);
-  GEOHandler.setRevertIsicBehavior(false);
+function setCEESBOValuesForIsuCtc() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
 
-  GEOHandler.addAfterConfig(afterConfigForCEMEA, GEOHandler.CEMEA);
-  GEOHandler.addAfterConfig(addHandlersForCEMEA, GEOHandler.CEMEA);
-  GEOHandler.addAfterConfig(addVatExemptHandler, GEOHandler.CEMEA);
-  GEOHandler.addAfterConfig(addCISHandler, [ SysLoc.RUSSIA ]);
-  GEOHandler.addAfterConfig(setAbbrvNmLoc, GEOHandler.CEMEA);
-  GEOHandler.addAfterConfig(lockAbbrv, GEOHandler.CEMEA);
-  // CMR-801:comment out to unlock embargo code
-  GEOHandler.addAfterConfig(lockEmbargo, GEOHandler.CEMEA);
+  if ('U' == FormManager.getActualValue('reqType')) {
+    return;
+  }
 
-  // CMR-2096-Austria - "Central order block code"
-  GEOHandler.addAfterConfig(lockOrdBlk, SysLoc.AUSTRIA);
+  var role = FormManager.getActualValue('userRole');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var clientTier = FormManager.getActualValue('clientTier');
+  var isuCd = FormManager.getActualValue('isuCd');
+  var ims = FormManager.getActualValue('subIndustryCd');
+  var isuCtc = isuCd + clientTier;
 
-      //GEOHandler.addAfterConfig(custNmAttnPersonPhoneValidation, [ SysLoc.AUSTRIA ]);
-  // GEOHandler.addAfterConfig(setScenarioTo3PA, [ SysLoc.AUSTRIA ]);
-  GEOHandler.addAfterTemplateLoad(lockAbbrvLocnForScenrio, [ SysLoc.AUSTRIA ]);
-  GEOHandler.addAddrFunction(lockAbbrvLocnForScenrio, [ SysLoc.AUSTRIA ]);
-  // GEOHandler.addAddrFunction(setScenarioTo3PAOnAddrSave, [ SysLoc.AUSTRIA ]);
+  if (!CEE_INCL.has(cntry)) {
+    return;
+  }
 
-      //GEOHandler.addAfterConfig(custNmAttnPersonPhoneValidationOnChange, [ SysLoc.AUSTRIA ]);
-  GEOHandler.addAfterConfig(reqReasonOnChangeAT, [ SysLoc.AUSTRIA ]);
-      //GEOHandler.addAfterConfig(phoneNoValidation, [ SysLoc.AUSTRIA ]);
-      //GEOHandler.addAfterConfig(phoneNoValidationOnChange, [ SysLoc.AUSTRIA ]);
-  GEOHandler.addAfterConfig(setEnterpriseValues, GEOHandler.CEMEA);
-  GEOHandler.addAfterConfig(setVatRequired, GEOHandler.CEMEA);
-  GEOHandler.addAfterConfig(setPreferredLang, GEOHandler.CEMEA);
-  GEOHandler.addAfterTemplateLoad(setVatRequired, GEOHandler.CEMEA);
-  // CMR-2101 Austria the func for Austria, setSBO also used by CEE countries
-  GEOHandler.addAfterConfig(setSBO, GEOHandler.CEMEA);
-  GEOHandler.addAfterTemplateLoad(setSBO, GEOHandler.CEMEA);
-  // GEOHandler.addAfterConfig(setSBO2, [ SysLoc.RUSSIA ]);
-  // GEOHandler.addAfterTemplateLoad(setSBO2, [ SysLoc.RUSSIA ]);
-  GEOHandler.addAfterConfig(setCommercialFinanced, GEOHandler.CEMEA);
-  GEOHandler.addAfterTemplateLoad(setCommercialFinanced, GEOHandler.CEMEA);
-  GEOHandler.addAfterConfig(setTelecoverageRep, GEOHandler.CEMEA);
-  GEOHandler.addAfterTemplateLoad(setTelecoverageRep, GEOHandler.CEMEA);
-  GEOHandler.addAfterConfig(lockLandCntry, GEOHandler.CEMEA);
-  GEOHandler.addAfterTemplateLoad(lockLandCntry, GEOHandler.CEMEA);
-  GEOHandler.addAfterConfig(populateBundeslandercode, [ SysLoc.AUSTRIA ]);
-  GEOHandler.addAfterConfig(populateBundeslandercodeOnChange, [ SysLoc.AUSTRIA ]);
-  GEOHandler.addAfterTemplateLoad(populateBundeslandercode, [ SysLoc.AUSTRIA ]);
-  GEOHandler.addAfterConfig(setAbbrvNmLocMandatoryProcessor, GEOHandler.CEMEA);
-  GEOHandler.addAfterConfig(setVatValidator, GEOHandler.CEMEA);
-  GEOHandler.addAfterTemplateLoad(setVatValidator, GEOHandler.CEMEA);
+  if (isuCd != '') {
 
-  GEOHandler.addAfterTemplateLoad(cmrNoEnabled, GEOHandler.CEMEA_EXCLUDE_CEE);
-  GEOHandler.addAfterConfig(cmrNoEnabled, GEOHandler.CEMEA_EXCLUDE_CEE);
+    var readOnly = false;
+    var custSubGrp = FormManager.getActualValue('custSubGrp');
 
-  GEOHandler.addAfterConfig(cmrNoEnableForCEE, GEOHandler.CEE);
-  GEOHandler.addAfterTemplateLoad(cmrNoEnableForCEE, GEOHandler.CEE);
-  GEOHandler.registerValidator(addCmrNoValidatorForCEE, GEOHandler.CEE);
-  GEOHandler.registerValidator(addEmbargoCdValidatorForCEE, GEOHandler.CEE);
+    if ((custSubGrp == 'BUSPR' || custSubGrp == 'XBP') && isuCtc == '8B7') {
+      FormManager.setValue('salesBusOffCd', "000");
+    }
+    if ((custSubGrp == 'INTER' || custSubGrp == 'INTSO' || custSubGrp == 'XINT' || custSubGrp == 'XISO') && isuCtc == '217') {
+      FormManager.setValue('salesBusOffCd', "999");
+    }
 
-  GEOHandler.addAfterTemplateLoad(afterConfigForCEMEA, GEOHandler.CEMEA);
-  GEOHandler.addAfterConfig(setCountryDuplicateFields, SysLoc.RUSSIA);
-  GEOHandler.addAfterTemplateLoad(setCountryDuplicateFields, SysLoc.RUSSIA);
-  GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.CEMEA);
-  GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.CEMEA);
-  GEOHandler.addAfterConfig(setSBOValuesForIsuCtc, [ SysLoc.AUSTRIA ]); // CMR-2101
-  GEOHandler.addAfterConfig(resetVatExempt, GEOHandler.CEMEA);
-  GEOHandler.addAfterTemplateLoad(resetVatExempt, GEOHandler.CEMEA);
-  GEOHandler.addAfterConfig(resetVatExemptOnchange, GEOHandler.CEMEA);
-  GEOHandler.addAfterConfig(lockLocationNo, [ SysLoc.AUSTRIA ]);
+    if (cntry == '668') {
+      if (isuCtc == '34Q') {
+        FormManager.setValue('salesBusOffCd', "C02");
+      } else if (isuCtc == '34Y') {
+        FormManager.setValue('salesBusOffCd', "C01");
+      }
+    }
+    if (cntry == '693') {
+      if (isuCtc == '34Q') {
+        FormManager.setValue('salesBusOffCd', "S02");
+      } else if (isuCtc == '34Y') {
+        FormManager.setValue('salesBusOffCd', "S01");
+      }
+    }
+    if (cntry == '820') {
+      if (isuCtc == '34Q') {
+        FormManager.setValue('salesBusOffCd', "P02");
+      } else if (isuCtc == '34Y') {
+        FormManager.setValue('salesBusOffCd', "P01");
+      }
+    }
+    if (cntry == '358') {
+      if (isuCtc == '34Q') {
+        FormManager.setValue('salesBusOffCd', "A02");
+      } else if (isuCtc == '34Y') {
+        FormManager.setValue('salesBusOffCd', "A01");
+      }
+    }
+    if (cntry == '626' || cntry == '607' || cntry == '651') {
+      if (isuCtc == '34Q') {
+        FormManager.setValue('salesBusOffCd', "G02");
+      } else if (isuCtc == '34Y') {
+        FormManager.setValue('salesBusOffCd', "G01");
+      }
+    }
+    if (cntry == '695' || cntry == '694') {
+      if (isuCtc == '34Q') {
+        FormManager.setValue('salesBusOffCd', "K02");
+      } else if (isuCtc == '34Y') {
+        FormManager.setValue('salesBusOffCd', "K01");
+      }
+    }
+    if (cntry == '889') {
+      if (isuCtc == '34Q') {
+        FormManager.setValue('salesBusOffCd', "U02");
+      } else if (isuCtc == '34Y') {
+        FormManager.setValue('salesBusOffCd', "U01");
+      }
+    }
+    if (cntry == '741' || cntry == '363' || cntry == '359') {
+      if (isuCtc == '34Q') {
+        FormManager.setValue('salesBusOffCd', "J02");
+      } else if (isuCtc == '34Y') {
+        FormManager.setValue('salesBusOffCd', "J01");
+      }
+    }
+    if (cntry == '644') {
+      if (isuCtc == '34Q') {
+        FormManager.setValue('salesBusOffCd', "B02");
+      } else if (isuCtc == '34Y') {
+        FormManager.setValue('salesBusOffCd', "B01");
+      }
+    }
+    if (cntry == '704') {
+      if (isuCtc == '34Q') {
+        FormManager.setValue('salesBusOffCd', "T02");
+      } else if (isuCtc == '34Y') {
+        FormManager.setValue('salesBusOffCd', "T01");
+      }
+    }
+    if (cntry == '740') {
+      if (isuCtc == '34Q') {
+        FormManager.setValue('salesBusOffCd', "H02");
+      } else if (isuCtc == '34Y') {
+        FormManager.setValue('salesBusOffCd', "H01");
+      }
+    }
+    if (cntry == '787' || cntry == '826') {
+      if (isuCtc == '34Q') {
+        FormManager.setValue('salesBusOffCd', "D02");
+      } else if (isuCtc == '34Y') {
+        FormManager.setValue('salesBusOffCd', "D01");
+      }
+    }
+    if (cntry == '707' || cntry == '705' || cntry == '603') {
+      if (isuCtc == '34Q') {
+        FormManager.setValue('salesBusOffCd', "M02");
+      } else if (isuCtc == '34Y') {
+        FormManager.setValue('salesBusOffCd', "M01");
+      }
+    }
+    if (cntry == '708' || cntry == '699') {
+      if (isuCtc == '34Q') {
+        FormManager.setValue('salesBusOffCd', "V02");
+      } else if (isuCtc == '34Y') {
+        FormManager.setValue('salesBusOffCd', "V01");
+      }
+    }
 
-  // GEOHandler.addAfterConfig(setAbbrvNmSuffix, [ SysLoc.AUSTRIA ]);
-  GEOHandler.addAfterConfig(handleRequestLOBChange, [ SysLoc.AUSTRIA ]);
-  GEOHandler.addAfterConfig(filterCmrnoForAT, [ SysLoc.AUSTRIA ]);
-  GEOHandler.addAfterTemplateLoad(filterCmrnoForAT, [ SysLoc.AUSTRIA ]);
-  // CMR-811
-  GEOHandler.addAfterConfig(changeBetachar, [ SysLoc.AUSTRIA ]);
+    if (readOnly) {
+      // experimental might need to remove later
+      FormManager.readOnly('salesBusOffCd');
+    }
+  }
+}
 
-  GEOHandler.addAddrFunction(changeAbbrevNmLocn, GEOHandler.CEMEA);
-  GEOHandler.addAfterConfig(validateAbbrevNmLocn, GEOHandler.CEMEA);
-  GEOHandler.addAddrFunction(addLatinCharValidator, GEOHandler.CEMEA);
+function hideCompanyForCEE() {
 
-  GEOHandler.addAfterTemplateLoad(setPreferredLang, GEOHandler.CEMEA);
+  var role = FormManager.getActualValue('userRole');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
 
-  GEOHandler.registerValidator(orderBlockValidation, [ SysLoc.AUSTRIA ], null, true);
+  if (!CEE_INCL.has(cntry)) {
+    return;
+  }
+  if (CEE_INCL.has(cntry)) {
+    FormManager.hide('Company number', 'enterprise');
+  }
+}
 
-  GEOHandler.registerValidator(addAddressTypeValidator, GEOHandler.CEMEA_EXCLUDE_CEE, null, true);
-  GEOHandler.registerValidator(addAddressFieldValidators, GEOHandler.CEMEA, null, true);
-  GEOHandler.registerValidator(addCrossBorderValidatorForCEMEA, [ '707', '762', '808', '620', '767', '805', '823', '677', '680', '832' ], null, true);
-  GEOHandler.registerValidator(addGaddrValidatorForCEE, GEOHandler.CEE, null, true);
-  // GEOHandler.registerValidator(postCdLenChecks, GEOHandler.CEMEA, null,
-  // true);
-  GEOHandler.registerValidator(requireVATForCrossBorderAT, [ SysLoc.AUSTRIA ], null, true);
-  GEOHandler.registerValidator(addCmrNoValidator, GEOHandler.CEMEA, null, true, [ '603', '607', '626', '644', '651', '668', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741',
-      '787', '820', '821', '826', '889', '358', '359', '363' ]);
-  GEOHandler.registerValidator(cemeaCustomVATValidator('', 'MAIN_CUST_TAB', 'frmCMR', 'ZP01'), GEOHandler.CEMEA, null, true);
-  // GEOHandler.registerValidator(customCrossPostCdValidator, GEOHandler.CEMEA,
-  // null, true);
+dojo
+    .addOnLoad(function() {
+      GEOHandler.CEMEA_COPY = [ '358', '359', '363', '603', '607', '620', '626', '644', '642', '651', '668', '677', '680', '693', '694', '695',
+          '699', '704', '705', '707', '708', '740', '741', '752', '762', '767', '768', '772', '787', '805', '808', '820', '821', '823', '826', '832',
+          '849', '850', '865', '889' ];
+      GEOHandler.CEMEA = [ '358', '359', '363', '603', '607', '620', '626', '644', '642', '651', '668', '677', '680', '693', '694', '695', '699',
+          '704', '705', '707', '708', '740', '741', '752', '762', '767', '768', '772', '787', '805', '808', '820', '821', '823', '826', '832', '849',
+          '850', '865', '889', '618' ];
+      GEOHandler.CEMEA_CHECKLIST = [ '358', '359', '363', '607', '620', '626', '651', '675', '677', '680', '694', '695', '713', '741', '752', '762',
+          '767', '768', '772', '787', '805', '808', '821', '823', '832', '849', '850', '865', '889' ];
+      GEOHandler.NON_CEE_CHECK = [ '620', '675', '677', '680', '713', '752', '762', '767', '768', '772', '805', '808', '823', '832', '849', '850',
+          '865' ];
+      GEOHandler.CEE = [ '603', '607', '626', '644', '651', '668', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '787',
+          '820', '821', '826', '889', '358', '359', '363' ];
+      GEOHandler.CEMEA_EXCLUDE_CEE = GEOHandler.CEMEA.filter(function(v) {
+        return GEOHandler.CEE.indexOf(v) == -1
+      });
+      console.log('adding CEMEA functions...');
+      GEOHandler.addAddrFunction(addCEMEALandedCountryHandler, GEOHandler.CEMEA);
+      // GEOHandler.enableCopyAddress(GEOHandler.CEMEA, validateCEMEACopy);
+      GEOHandler.enableCustomerNamesOnAddress(GEOHandler.CEMEA);
+      GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.CEMEA);
+      GEOHandler.setRevertIsicBehavior(false);
 
-  GEOHandler.addAddrFunction(displayIceForMA, [ SysLoc.MOROCCO ]);
-  GEOHandler.registerValidator(addIceFormatValidationMorocco, [ SysLoc.MOROCCO ], null, true);
-  GEOHandler.registerValidator(addIceBillingValidator, [ SysLoc.MOROCCO ], null, true);
+      GEOHandler.addAfterConfig(afterConfigForCEMEA, GEOHandler.CEMEA);
+      GEOHandler.addAfterConfig(addHandlersForCEMEA, GEOHandler.CEMEA);
+      GEOHandler.addAfterConfig(addVatExemptHandler, GEOHandler.CEMEA);
+      GEOHandler.addAfterConfig(addCISHandler, [ SysLoc.RUSSIA ]);
+      GEOHandler.addAfterConfig(setAbbrvNmLoc, GEOHandler.CEMEA);
+      GEOHandler.addAfterConfig(lockAbbrv, GEOHandler.CEMEA);
+      // CMR-801:comment out to unlock embargo code
+      GEOHandler.addAfterConfig(lockEmbargo, GEOHandler.CEMEA);
 
-  GEOHandler.registerValidator(validateAbbrevNmForCIS, [ SysLoc.RUSSIA ], null, true);
+      // CMR-2096-Austria - "Central order block code"
+      GEOHandler.addAfterConfig(lockOrdBlk, SysLoc.AUSTRIA);
 
-  // GEOHandler.registerValidator(addPoBoxValidator, [ SysLoc.AUSTRIA], null,
-  // true);
+      // GEOHandler.addAfterConfig(custNmAttnPersonPhoneValidation, [
+      // SysLoc.AUSTRIA ]);
+      // GEOHandler.addAfterConfig(setScenarioTo3PA, [ SysLoc.AUSTRIA ]);
+      GEOHandler.addAfterTemplateLoad(lockAbbrvLocnForScenrio, [ SysLoc.AUSTRIA ]);
+      GEOHandler.addAddrFunction(lockAbbrvLocnForScenrio, [ SysLoc.AUSTRIA ]);
+      // GEOHandler.addAddrFunction(setScenarioTo3PAOnAddrSave, [ SysLoc.AUSTRIA
+      // ]);
 
-  GEOHandler.registerValidator(addStreetAndPoBoxFormValidator, [ SysLoc.AUSTRIA ], null, true);
-  GEOHandler.registerValidator(restrictDuplicateAddrAT, [ SysLoc.AUSTRIA ]);
+      // GEOHandler.addAfterConfig(custNmAttnPersonPhoneValidationOnChange, [
+      // SysLoc.AUSTRIA ]);
+      GEOHandler.addAfterConfig(reqReasonOnChangeAT, [ SysLoc.AUSTRIA ]);
+      // GEOHandler.addAfterConfig(phoneNoValidation, [ SysLoc.AUSTRIA ]);
+      // GEOHandler.addAfterConfig(phoneNoValidationOnChange, [ SysLoc.AUSTRIA
+      // ]);
+      GEOHandler.addAfterConfig(setEnterpriseValues, GEOHandler.CEMEA);
+      GEOHandler.addAfterConfig(setVatRequired, GEOHandler.CEMEA);
+      GEOHandler.addAfterConfig(setPreferredLang, GEOHandler.CEMEA);
+      GEOHandler.addAfterTemplateLoad(setVatRequired, GEOHandler.CEMEA);
+      // CMR-2101 Austria the func for Austria, setSBO also used by CEE
+      // countries
+      GEOHandler.addAfterConfig(setSBO, GEOHandler.CEMEA);
+      GEOHandler.addAfterTemplateLoad(setSBO, GEOHandler.CEMEA);
+      // GEOHandler.addAfterConfig(setSBO2, [ SysLoc.RUSSIA ]);
+      // GEOHandler.addAfterTemplateLoad(setSBO2, [ SysLoc.RUSSIA ]);
+      GEOHandler.addAfterConfig(setCommercialFinanced, GEOHandler.CEMEA);
+      GEOHandler.addAfterTemplateLoad(setCommercialFinanced, GEOHandler.CEMEA);
+      GEOHandler.addAfterConfig(setTelecoverageRep, GEOHandler.CEMEA);
+      GEOHandler.addAfterTemplateLoad(setTelecoverageRep, GEOHandler.CEMEA);
+      GEOHandler.addAfterConfig(lockLandCntry, GEOHandler.CEMEA);
+      GEOHandler.addAfterTemplateLoad(lockLandCntry, GEOHandler.CEMEA);
+      GEOHandler.addAfterConfig(populateBundeslandercode, [ SysLoc.AUSTRIA ]);
+      GEOHandler.addAfterConfig(populateBundeslandercodeOnChange, [ SysLoc.AUSTRIA ]);
+      GEOHandler.addAfterTemplateLoad(populateBundeslandercode, [ SysLoc.AUSTRIA ]);
+      GEOHandler.addAfterConfig(setAbbrvNmLocMandatoryProcessor, GEOHandler.CEMEA);
+      GEOHandler.addAfterConfig(setVatValidator, GEOHandler.CEMEA);
+      GEOHandler.addAfterTemplateLoad(setVatValidator, GEOHandler.CEMEA);
 
-  // Checklist
-  GEOHandler.addAfterConfig(setChecklistStatus, GEOHandler.CEMEA_CHECKLIST);
-  GEOHandler.registerValidator(addCEMEAChecklistValidator, GEOHandler.CEMEA_CHECKLIST);
+      GEOHandler.addAfterTemplateLoad(cmrNoEnabled, GEOHandler.CEMEA_EXCLUDE_CEE);
+      GEOHandler.addAfterConfig(cmrNoEnabled, GEOHandler.CEMEA_EXCLUDE_CEE);
 
-  /* 1438717 - add DPL match validation for failed dpl checks */
-  GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.NON_CEE_CHECK, GEOHandler.ROLE_PROCESSOR, true);
-  GEOHandler.addAfterConfig(hideEngineeringBOForReq, GEOHandler.CEMEA_EXCLUDE_CEE);
-  GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.CEE, GEOHandler.ROLE_PROCESSOR, true);
-  GEOHandler.addAfterConfig(validatorsDIGIT, GEOHandler.CEE);
-  // CMR-1912 Vat should be required for AT local-BP and Commercial
-  GEOHandler.addAfterConfig(customVATMandatoryForAT, [ SysLoc.AUSTRIA ]);
-  GEOHandler.addAfterTemplateLoad(customVATMandatoryForAT, [ SysLoc.AUSTRIA ]);
-  /*
-   * GEOHandler.addAfterConfig(cemeaCustomVATMandatory, GEOHandler.CEMEA);
-   * GEOHandler.addAfterTemplateLoad(cemeaCustomVATMandatory, GEOHandler.CEMEA);
-   */
-  // GEOHandler.registerValidator(cemeaCustomVATMandatory('', 'MAIN_CUST_TAB',
-  // 'frmCMR', 'ZP01'), GEOHandler.CEMEA, null, true);
-  /*
-   * 1496135: Importing G address from SOF for Update Requests jz: add local
-   * country name text box
-   */
-  // GEOHandler.registerValidator(similarAddrCheckValidator, [ SysLoc.AUSTRIA ],
-  // null, true);
-  GEOHandler.addToggleAddrTypeFunction(toggleLocalCountryName, GEOHandler.CEMEA);
-  GEOHandler.addAddrFunction(toggleLocalCountryNameOnOpen, GEOHandler.CEMEA);
-  // CMR-2101 SBO is required for processor
-  GEOHandler.registerValidator(validateSBO, [ SysLoc.AUSTRIA ], GEOHandler.ROLE_PROCESSOR, true);
-  GEOHandler.addAfterConfig(validateSBO, [ SysLoc.AUSTRIA ]);
-  GEOHandler.addAfterTemplateLoad(validateSBO, [ SysLoc.AUSTRIA ]);
-  GEOHandler.addAfterTemplateLoad(setISUCTCOnIMSChange, [ SysLoc.AUSTRIA ]);
-  GEOHandler.addAfterConfig(setISUCTCOnIMSChange, [ SysLoc.AUSTRIA ]);
-  GEOHandler.addAfterConfig(lockIBMtab, [ SysLoc.AUSTRIA ]);
-  GEOHandler.addAfterTemplateLoad(lockIBMtab, [ SysLoc.AUSTRIA ]);
-  GEOHandler.addAfterConfig(resetVatExemptOnScenario, [ SysLoc.AUSTRIA ]);
-  GEOHandler.addAfterTemplateLoad(resetVatExemptOnScenario, SysLoc.AUSTRIA);
-  // CEE
-  GEOHandler.addAfterConfig(afterConfigTemplateLoadForCEE, GEOHandler.CEE);
-  GEOHandler.addAfterTemplateLoad(afterConfigTemplateLoadForCEE, GEOHandler.CEE);
-  GEOHandler.addAfterConfig(afterConfigForCEE, GEOHandler.CEE);
-  GEOHandler.registerValidator(restrictDuplicateAddr, GEOHandler.CEE, null, true);
-  GEOHandler.registerValidator(validateIsicCEEValidator, GEOHandler.CEE, null, true);
-  GEOHandler.registerValidator(addAddressTypeValidatorCEE, GEOHandler.CEE, null, true);
-  GEOHandler.addAfterConfig(setISUCTCValuesForCEE, GEOHandler.CEE);// CreateCMR-811
-  GEOHandler.addAfterTemplateLoad(setISUCTCValuesForCEE, GEOHandler.CEE); // CreateCMR-811
-  GEOHandler.addAfterConfig(setCompanyNoForCEE, GEOHandler.CEE); // CreateCMR-811
-  GEOHandler.addAfterTemplateLoad(setCompanyNoForCEE, GEOHandler.CEE); // CreateCMR-811
-  // CMR-4606 DupCMR exist
-  GEOHandler.registerValidator(dupCMRExistCheckForRuCIS, [ SysLoc.RUSSIA ], null, true);
-  GEOHandler.registerValidator(checkGAddressExist, [ SysLoc.RUSSIA ], null, true);
-  GEOHandler.addAfterConfig(validatorsDIGITForDupField, [ SysLoc.RUSSIA ]);
-  GEOHandler.addAfterConfig(setDupISUCTCValues, [ SysLoc.RUSSIA ]); // CreateCMR-811
-  GEOHandler.addAfterTemplateLoad(setDupISUCTCValues, [ SysLoc.RUSSIA ]); // CreateCMR-811
-  GEOHandler.addAfterConfig(setEnterprise2Values, [ SysLoc.RUSSIA ]);// CreateCMR-811
-  GEOHandler.addAfterTemplateLoad(setEnterprise2Values, [ SysLoc.RUSSIA ]);// CreateCMR-811
-  // Slovakia
-  GEOHandler.addAfterConfig(afterConfigForSlovakia, [ SysLoc.SLOVAKIA ]);
-  GEOHandler.addAfterTemplateLoad(afterConfigForSlovakia, [ SysLoc.SLOVAKIA ]);
-  // Hungary
-  GEOHandler.addAddrFunction(initAddressPageHungary, [ SysLoc.HUNGARY ]);
-  GEOHandler.addAfterConfig(afterConfigTemplateForHungary, [ SysLoc.HUNGARY ]);
-  GEOHandler.addAfterTemplateLoad(afterConfigTemplateForHungary, [ SysLoc.HUNGARY ]);
-  // Czech
-  GEOHandler.addAfterConfig(afterConfigTemplateForCzech, [ SysLoc.CZECH_REPUBLIC ]);
-  GEOHandler.addAfterTemplateLoad(afterConfigTemplateForCzech, [ SysLoc.CZECH_REPUBLIC ]);
-  // Romania
-  GEOHandler.addAddrFunction(initAddressPageRomania, [ SysLoc.ROMANIA ]);
-  // Croatia
-  GEOHandler.addAfterConfig(afterConfigTemplateForCroatia, [ SysLoc.CROATIA ]);
-  GEOHandler.addAfterTemplateLoad(afterConfigTemplateForCroatia, [ SysLoc.CROATIA ]);
+      GEOHandler.addAfterConfig(cmrNoEnableForCEE, GEOHandler.CEE);
+      GEOHandler.addAfterTemplateLoad(cmrNoEnableForCEE, GEOHandler.CEE);
+      GEOHandler.registerValidator(addCmrNoValidatorForCEE, GEOHandler.CEE);
+      GEOHandler.registerValidator(addEmbargoCdValidatorForCEE, GEOHandler.CEE);
 
-  GEOHandler.addAfterConfig(lockIsicCdCEE, GEOHandler.CEE);
-  GEOHandler.addAfterTemplateLoad(lockIsicCdCEE, GEOHandler.CEE);
-  GEOHandler.registerValidator(validateDeptBldg, SysLoc.AUSTRIA);
-  GEOHandler.addAfterConfig(setAddressDetailsForViewAT, SysLoc.AUSTRIA);
-  // GEOHandler.addAfterConfig(addPrefixVat, GEOHandler.CEE);
-  // GEOHandler.addAfterTemplateLoad(addPrefixVat, GEOHandler.CEE);
-  // GEOHandler.addAddrFunction(addPrefixVat, GEOHandler.CEE);
+      GEOHandler.addAfterTemplateLoad(afterConfigForCEMEA, GEOHandler.CEMEA);
+      GEOHandler.addAfterConfig(setCountryDuplicateFields, SysLoc.RUSSIA);
+      GEOHandler.addAfterTemplateLoad(setCountryDuplicateFields, SysLoc.RUSSIA);
+      GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.CEMEA);
+      GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.CEMEA);
+      GEOHandler.addAfterConfig(setSBOValuesForIsuCtc, [ SysLoc.AUSTRIA ]); // CMR-2101
+      GEOHandler.addAfterConfig(resetVatExempt, GEOHandler.CEMEA);
+      GEOHandler.addAfterTemplateLoad(resetVatExempt, GEOHandler.CEMEA);
+      GEOHandler.addAfterConfig(resetVatExemptOnchange, GEOHandler.CEMEA);
+      GEOHandler.addAfterConfig(lockLocationNo, [ SysLoc.AUSTRIA ]);
 
-});
+      // GEOHandler.addAfterConfig(setAbbrvNmSuffix, [ SysLoc.AUSTRIA ]);
+      GEOHandler.addAfterConfig(handleRequestLOBChange, [ SysLoc.AUSTRIA ]);
+      GEOHandler.addAfterConfig(filterCmrnoForAT, [ SysLoc.AUSTRIA ]);
+      GEOHandler.addAfterTemplateLoad(filterCmrnoForAT, [ SysLoc.AUSTRIA ]);
+      // CMR-811
+      GEOHandler.addAfterConfig(changeBetachar, [ SysLoc.AUSTRIA ]);
+
+      GEOHandler.addAddrFunction(changeAbbrevNmLocn, GEOHandler.CEMEA);
+      GEOHandler.addAfterConfig(validateAbbrevNmLocn, GEOHandler.CEMEA);
+      GEOHandler.addAddrFunction(addLatinCharValidator, GEOHandler.CEMEA);
+
+      GEOHandler.addAfterTemplateLoad(setPreferredLang, GEOHandler.CEMEA);
+
+      GEOHandler.registerValidator(orderBlockValidation, [ SysLoc.AUSTRIA ], null, true);
+
+      GEOHandler.registerValidator(addAddressTypeValidator, GEOHandler.CEMEA_EXCLUDE_CEE, null, true);
+      GEOHandler.registerValidator(addAddressFieldValidators, GEOHandler.CEMEA, null, true);
+      GEOHandler.registerValidator(addCrossBorderValidatorForCEMEA, [ '707', '762', '808', '620', '767', '805', '823', '677', '680', '832' ], null,
+          true);
+      GEOHandler.registerValidator(addGaddrValidatorForCEE, GEOHandler.CEE, null, true);
+      // GEOHandler.registerValidator(postCdLenChecks, GEOHandler.CEMEA, null,
+      // true);
+      GEOHandler.registerValidator(requireVATForCrossBorderAT, [ SysLoc.AUSTRIA ], null, true);
+      GEOHandler.registerValidator(addCmrNoValidator, GEOHandler.CEMEA, null, true, [ '603', '607', '626', '644', '651', '668', '693', '694', '695',
+          '699', '704', '705', '707', '708', '740', '741', '787', '820', '821', '826', '889', '358', '359', '363' ]);
+      GEOHandler.registerValidator(cemeaCustomVATValidator('', 'MAIN_CUST_TAB', 'frmCMR', 'ZP01'), GEOHandler.CEMEA, null, true);
+      // GEOHandler.registerValidator(customCrossPostCdValidator,
+      // GEOHandler.CEMEA,
+      // null, true);
+
+      GEOHandler.addAddrFunction(displayIceForMA, [ SysLoc.MOROCCO ]);
+      GEOHandler.registerValidator(addIceFormatValidationMorocco, [ SysLoc.MOROCCO ], null, true);
+      GEOHandler.registerValidator(addIceBillingValidator, [ SysLoc.MOROCCO ], null, true);
+
+      GEOHandler.registerValidator(validateAbbrevNmForCIS, [ SysLoc.RUSSIA ], null, true);
+
+      // GEOHandler.registerValidator(addPoBoxValidator, [ SysLoc.AUSTRIA],
+      // null,
+      // true);
+
+      GEOHandler.registerValidator(addStreetAndPoBoxFormValidator, [ SysLoc.AUSTRIA ], null, true);
+      GEOHandler.registerValidator(restrictDuplicateAddrAT, [ SysLoc.AUSTRIA ]);
+
+      // Checklist
+      GEOHandler.addAfterConfig(setChecklistStatus, GEOHandler.CEMEA_CHECKLIST);
+      GEOHandler.registerValidator(addCEMEAChecklistValidator, GEOHandler.CEMEA_CHECKLIST);
+
+      /* 1438717 - add DPL match validation for failed dpl checks */
+      GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.NON_CEE_CHECK, GEOHandler.ROLE_PROCESSOR, true);
+      GEOHandler.addAfterConfig(hideEngineeringBOForReq, GEOHandler.CEMEA_EXCLUDE_CEE);
+      GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.CEE, GEOHandler.ROLE_PROCESSOR, true);
+      GEOHandler.addAfterConfig(validatorsDIGIT, GEOHandler.CEE);
+      // CMR-1912 Vat should be required for AT local-BP and Commercial
+      GEOHandler.addAfterConfig(customVATMandatoryForAT, [ SysLoc.AUSTRIA ]);
+      GEOHandler.addAfterTemplateLoad(customVATMandatoryForAT, [ SysLoc.AUSTRIA ]);
+      /*
+       * GEOHandler.addAfterConfig(cemeaCustomVATMandatory, GEOHandler.CEMEA);
+       * GEOHandler.addAfterTemplateLoad(cemeaCustomVATMandatory,
+       * GEOHandler.CEMEA);
+       */
+      // GEOHandler.registerValidator(cemeaCustomVATMandatory('',
+      // 'MAIN_CUST_TAB',
+      // 'frmCMR', 'ZP01'), GEOHandler.CEMEA, null, true);
+      /*
+       * 1496135: Importing G address from SOF for Update Requests jz: add local
+       * country name text box
+       */
+      // GEOHandler.registerValidator(similarAddrCheckValidator, [
+      // SysLoc.AUSTRIA ],
+      // null, true);
+      GEOHandler.addToggleAddrTypeFunction(toggleLocalCountryName, GEOHandler.CEMEA);
+      GEOHandler.addAddrFunction(toggleLocalCountryNameOnOpen, GEOHandler.CEMEA);
+      // CMR-2101 SBO is required for processor
+      GEOHandler.registerValidator(validateSBO, [ SysLoc.AUSTRIA ], GEOHandler.ROLE_PROCESSOR, true);
+      GEOHandler.addAfterConfig(validateSBO, [ SysLoc.AUSTRIA ]);
+      GEOHandler.addAfterTemplateLoad(validateSBO, [ SysLoc.AUSTRIA ]);
+      GEOHandler.addAfterTemplateLoad(setISUCTCOnIMSChange, [ SysLoc.AUSTRIA ]);
+      GEOHandler.addAfterConfig(setISUCTCOnIMSChange, [ SysLoc.AUSTRIA ]);
+      GEOHandler.addAfterConfig(lockIBMtab, [ SysLoc.AUSTRIA ]);
+      GEOHandler.addAfterTemplateLoad(lockIBMtab, [ SysLoc.AUSTRIA ]);
+      GEOHandler.addAfterConfig(resetVatExemptOnScenario, [ SysLoc.AUSTRIA ]);
+      GEOHandler.addAfterTemplateLoad(resetVatExemptOnScenario, SysLoc.AUSTRIA);
+      // CEE
+      GEOHandler.addAfterConfig(afterConfigTemplateLoadForCEE, GEOHandler.CEE);
+      GEOHandler.addAfterTemplateLoad(afterConfigTemplateLoadForCEE, GEOHandler.CEE);
+      GEOHandler.addAfterConfig(afterConfigForCEE, GEOHandler.CEE);
+      GEOHandler.registerValidator(restrictDuplicateAddr, GEOHandler.CEE, null, true);
+      GEOHandler.registerValidator(validateIsicCEEValidator, GEOHandler.CEE, null, true);
+      GEOHandler.registerValidator(addAddressTypeValidatorCEE, GEOHandler.CEE, null, true);
+      GEOHandler.addAfterConfig(setISUCTCValuesForCEE, GEOHandler.CEE);// CreateCMR-811
+      GEOHandler.addAfterTemplateLoad(setISUCTCValuesForCEE, GEOHandler.CEE); // CreateCMR-811
+      GEOHandler.addAfterConfig(setCompanyNoForCEE, GEOHandler.CEE); // CreateCMR-811
+      GEOHandler.addAfterTemplateLoad(setCompanyNoForCEE, GEOHandler.CEE); // CreateCMR-811
+      // CMR-4606 DupCMR exist
+      GEOHandler.registerValidator(dupCMRExistCheckForRuCIS, [ SysLoc.RUSSIA ], null, true);
+      GEOHandler.registerValidator(checkGAddressExist, [ SysLoc.RUSSIA ], null, true);
+      GEOHandler.addAfterConfig(validatorsDIGITForDupField, [ SysLoc.RUSSIA ]);
+      GEOHandler.addAfterConfig(setDupISUCTCValues, [ SysLoc.RUSSIA ]); // CreateCMR-811
+      GEOHandler.addAfterTemplateLoad(setDupISUCTCValues, [ SysLoc.RUSSIA ]); // CreateCMR-811
+      GEOHandler.addAfterConfig(setEnterprise2Values, [ SysLoc.RUSSIA ]);// CreateCMR-811
+      GEOHandler.addAfterTemplateLoad(setEnterprise2Values, [ SysLoc.RUSSIA ]);// CreateCMR-811
+      // Slovakia
+      GEOHandler.addAfterConfig(afterConfigForSlovakia, [ SysLoc.SLOVAKIA ]);
+      GEOHandler.addAfterTemplateLoad(afterConfigForSlovakia, [ SysLoc.SLOVAKIA ]);
+      // Hungary
+      GEOHandler.addAddrFunction(initAddressPageHungary, [ SysLoc.HUNGARY ]);
+      GEOHandler.addAfterConfig(afterConfigTemplateForHungary, [ SysLoc.HUNGARY ]);
+      GEOHandler.addAfterTemplateLoad(afterConfigTemplateForHungary, [ SysLoc.HUNGARY ]);
+      // Czech
+      GEOHandler.addAfterConfig(afterConfigTemplateForCzech, [ SysLoc.CZECH_REPUBLIC ]);
+      GEOHandler.addAfterTemplateLoad(afterConfigTemplateForCzech, [ SysLoc.CZECH_REPUBLIC ]);
+      // Romania
+      GEOHandler.addAddrFunction(initAddressPageRomania, [ SysLoc.ROMANIA ]);
+      // Croatia
+      GEOHandler.addAfterConfig(afterConfigTemplateForCroatia, [ SysLoc.CROATIA ]);
+      GEOHandler.addAfterTemplateLoad(afterConfigTemplateForCroatia, [ SysLoc.CROATIA ]);
+
+      GEOHandler.addAfterConfig(lockIsicCdCEE, GEOHandler.CEE);
+      GEOHandler.addAfterTemplateLoad(lockIsicCdCEE, GEOHandler.CEE);
+      GEOHandler.registerValidator(validateDeptBldg, SysLoc.AUSTRIA);
+      GEOHandler.addAfterConfig(setAddressDetailsForViewAT, SysLoc.AUSTRIA);
+      GEOHandler.addAfterConfig(setCEESBOValuesForIsuCtc, GEOHandler.CEE);
+      GEOHandler.addAfterTemplateLoad(setCEESBOValuesForIsuCtc, GEOHandler.CEE);
+      GEOHandler.addAfterConfig(hideCompanyForCEE, GEOHandler.CEE);
+      GEOHandler.addAfterTemplateLoad(hideCompanyForCEE, GEOHandler.CEE);
+      // GEOHandler.addAfterConfig(addPrefixVat, GEOHandler.CEE);
+      // GEOHandler.addAfterTemplateLoad(addPrefixVat, GEOHandler.CEE);
+      // GEOHandler.addAddrFunction(addPrefixVat, GEOHandler.CEE);
+
+    });
