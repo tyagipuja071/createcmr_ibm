@@ -121,7 +121,7 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
             }
           }
           try {
-            AutomationResponse<CNResponse> cmrsData = CompanyFinder.getCNApiInfo(searchModel);
+            AutomationResponse<CNResponse> cmrsData = CompanyFinder.getCNApiInfo(searchModel, "TAXCD");
             if (cmrsData != null && cmrsData.isSuccess()) {
               // cmrData = cmrsData.get(0);
               
@@ -281,7 +281,7 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
     if (!oldCnName.equals(newCnName)) {
       try {
         cmrsData = new AutomationResponse<CNResponse>();
-        cmrsData = CompanyFinder.getCNApiInfo(searchModel);
+        cmrsData = CompanyFinder.getCNApiInfo(searchModel, "TAXCD");
       } catch (Exception e) {
         e.printStackTrace();
         details.append("Error on get China API Data Check.").append("\n");
@@ -348,7 +348,7 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
     if (!oldCnAddr.equals(newCnAddr)) {
       try {
         if (cmrsData == null) {
-          cmrsData = CompanyFinder.getCNApiInfo(searchModel);
+          cmrsData = CompanyFinder.getCNApiInfo(searchModel, "TAXCD");
         }       
       } catch (Exception e) {
         e.printStackTrace();
