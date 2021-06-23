@@ -3001,6 +3001,7 @@ function validateGSTForIndia() {
 function lockFieldsForIndia(){
   var reqType = FormManager.getActualValue('reqType');
   var role = FormManager.getActualValue('userRole').toUpperCase();
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
   if(reqType == 'U' && role == 'REQUESTER'){
   FormManager.readOnly('abbrevNm');
   FormManager.readOnly('abbrevLocn');
@@ -3042,6 +3043,9 @@ function lockFieldsForIndia(){
   FormManager.resetValidations('covId');
 
   FormManager.readOnly('dunsNo');
+  }
+  if (reqType == 'C'  && !(custSubGrp == 'INTER' || custSubGrp == 'ESOSW')){
+	  FormManager.readOnly('cmrNoPrefix');
   }
 }
 
