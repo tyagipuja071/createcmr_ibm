@@ -535,15 +535,15 @@ function retainImportValues(fromAddress, scenario, scenarioChanged) {
 
   if (FormManager.getActualValue('reqType') == 'C' && isCmrImported == 'Y' && scenarioChanged) {
     if (scenario == 'COMME' || scenario == 'GOVT') {
-      // var origCustData; // not present in findcmr json
       var origSbo;
       var origRepTeam; // note: not sure if mapping is correct
       var origIsic;
       var origSubInd;
-      // var origArFaar; // not present in findcmr json
       var origInac;
-      // var origCreditCode; // not present in findcmr json
       var origEfc;
+      var origIbo;
+      var origArFaar;
+      var origCreditCode;
 
       var result = cmr.query("GET.CMRINFO.IMPORTED_CA", {
         REQ_ID : reqId
@@ -556,6 +556,9 @@ function retainImportValues(fromAddress, scenario, scenarioChanged) {
         origSubInd = result.ret4;
         origInac = result.ret5;
         origEfc = result.ret6;
+        origIbo = result.ret7;
+        origArFaar = result.ret8;
+        origCreditCode = result.ret9;
 
         FormManager.setValue('salesBusOffCd', origSbo);
         FormManager.setValue('repTeamMemberNo', origRepTeam);
@@ -563,6 +566,9 @@ function retainImportValues(fromAddress, scenario, scenarioChanged) {
         FormManager.setValue('subIndustryCd', origSubInd);
         FormManager.setValue('inacCd', origInac);
         FormManager.setValue('taxCd1', origEfc);
+        FormManager.setValue('installBranchOff', origIbo);
+        FormManager.setValue('adminDeptCd', origArFaar);
+        FormManager.setValue('creditCd', origCreditCode);
       }
     }
   }
