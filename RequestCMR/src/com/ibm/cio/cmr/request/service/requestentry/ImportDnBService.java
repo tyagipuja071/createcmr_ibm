@@ -531,8 +531,9 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
     } else {
       addr.setPostCd(cmr.getCmrPostalCode());
       int addrLength = SystemLocation.UNITED_STATES.equals(reqModel.getCmrIssuingCntry()) ? 24 : 30;
-      if (SystemLocation.FRANCE.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.GERMANY.equals(reqModel.getCmrIssuingCntry()) || 
-    		  SystemLocation.AUSTRIA.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.SWITZERLAND.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.LIECHTENSTEIN.equals(reqModel.getCmrIssuingCntry())) {
+      if (SystemLocation.FRANCE.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.GERMANY.equals(reqModel.getCmrIssuingCntry())
+          || SystemLocation.AUSTRIA.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.SWITZERLAND.equals(reqModel.getCmrIssuingCntry())
+          || SystemLocation.LIECHTENSTEIN.equals(reqModel.getCmrIssuingCntry())) {
         addrLength = 35;
       }
       String street = cmr.getCmrStreet();
@@ -547,12 +548,14 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
           }
         } else {
           // no street address con't, overflow
-        	String[] streetParts;
-        	if (SystemLocation.AUSTRIA.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.GERMANY.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.LIECHTENSTEIN.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.SWITZERLAND.equals(reqModel.getCmrIssuingCntry())){
-        		streetParts = converter.doSplitName(street, "", 35, 35);
-        	}else {
-        		streetParts = converter.doSplitName(street, "", 30, 30);
-        	}
+          String[] streetParts;
+          if (SystemLocation.AUSTRIA.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.GERMANY.equals(reqModel.getCmrIssuingCntry())
+              || SystemLocation.LIECHTENSTEIN.equals(reqModel.getCmrIssuingCntry())
+              || SystemLocation.SWITZERLAND.equals(reqModel.getCmrIssuingCntry())) {
+            streetParts = converter.doSplitName(street, "", 35, 35);
+          } else {
+            streetParts = converter.doSplitName(street, "", 30, 30);
+          }
           String street1 = streetParts[0];
           String street2 = streetParts[1];
           addr.setAddrTxt(street1);
@@ -575,6 +578,31 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
         }
         addr.setAddrTxt(street);
         addr.setAddrTxt2(null); // addr con't removed from UI of FR
+      }
+
+      if (converter.has3AddressLines(reqModel.getCmrIssuingCntry())) {
+        // special handling for countries supporting 3 address lines (AP)
+        String fullStreet = cmr.getCmrStreet();
+        fullStreet += !StringUtils.isBlank(cmr.getCmrStreetAddressCont()) ? " " + cmr.getCmrStreetAddressCont() : "";
+
+        // use name splitting
+        String[] linesA = converter.doSplitName(fullStreet, "", addrLength, addrLength);
+        String line1 = linesA[0];
+        String remaining = "";
+        if (fullStreet.length() > line1.length()) {
+          remaining = fullStreet.substring(line1.length()).trim();
+        }
+        String[] linesB = converter.doSplitName(remaining, "", addrLength, addrLength);
+        String line2 = linesB[0];
+        String line3 = linesB[1];
+        LOG.debug("3 Line Split: " + fullStreet);
+        LOG.debug(" - 1: " + line1);
+        LOG.debug(" - 2: " + line2);
+        LOG.debug(" - 3: " + line3);
+
+        addr.setAddrTxt(line1);
+        addr.setAddrTxt2(line2);
+        converter.setAddressLine3(reqModel.getCmrIssuingCntry(), addr, cmr, line3);
       }
       cmr.setCmrStreet(addr.getAddrTxt());
       cmr.setCmrStreetAddress(addr.getAddrTxt());
