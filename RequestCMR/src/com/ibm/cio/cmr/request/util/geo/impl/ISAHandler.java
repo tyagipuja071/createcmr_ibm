@@ -15,6 +15,7 @@ import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
@@ -402,4 +403,31 @@ public class ISAHandler extends APHandler {
   public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
     return false;
   }
+
+  @Override
+  public boolean has3AddressLines(String country) {
+    if (SystemLocation.INDIA.equals(country)) {
+      return true;
+    }
+    return false;
+  }
+
+  @Override
+  public void setAddressLine3(String country, Addr addr, FindCMRRecordModel cmrModel, String line3) {
+    if (SystemLocation.INDIA.equals(country)) {
+      addr.setDept(line3);
+      cmrModel.setCmrDept(line3);
+    }
+  }
+
+  @Override
+  public String buildAddressForDnbMatching(String country, Addr addr) {
+    if (SystemLocation.INDIA.equals(country)) {
+      String address = addr.getAddrTxt() != null ? addr.getAddrTxt() : "";
+      address += StringUtils.isNotBlank(addr.getAddrTxt2()) ? " " + addr.getAddrTxt2() : "";
+      address += StringUtils.isNotBlank(addr.getDept()) ? " " + addr.getDept() : "";
+      address = address.trim();
+    }
+    return null;
+  };
 }
