@@ -110,7 +110,7 @@ public class SWISSMassWorker implements Runnable {
     request.setSeqNo("");
 
     // call the create cmr service
-    LOG.info("Sending request to Process Service [Request ID: " + request.getReqId() + " Type: " + request.getReqType() + "CMRNo: "
+    LOG.info("Sending request to Process Service [Request ID: " + request.getReqId() + " Type: " + request.getReqType() + " CMRNo: "
         + request.getCmrNo() + "]");
 
     if (LOG.isTraceEnabled()) {
@@ -198,24 +198,25 @@ public class SWISSMassWorker implements Runnable {
     } else {
       if (CmrConstants.RDC_STATUS_ABORTED.equals(resultCode) && CmrConstants.RDC_STATUS_ABORTED.equals(processingStatus)) {
         comment = comment
-            .append("\nRDc mass update processing for REQ ID " + request.getReqId() + "for CMRNo" + request.getCmrNo() + " was ABORTED.");
+            .append("\nRDc mass update processing for REQ ID " + request.getReqId() + " for CMRNo" + request.getCmrNo() + " was ABORTED.");
         sMassUpdt.setRowStatusCd(CmrConstants.MASS_CREATE_ROW_STATUS_FAIL);
         sMassUpdt.setErrorTxt(comment.toString());
         rdcProcessStatusMsgs.add(resultCode);
       } else if (CmrConstants.RDC_STATUS_ABORTED.equalsIgnoreCase(resultCode)) {
         comment = comment
-            .append("\nRDc mass update processing for REQ ID " + request.getReqId() + "for CMRNo" + request.getCmrNo() + " was ABORTED.");
+            .append("\nRDc mass update processing for REQ ID " + request.getReqId() + " for CMRNo" + request.getCmrNo() + " was ABORTED.");
         sMassUpdt.setRowStatusCd(CmrConstants.MASS_CREATE_ROW_STATUS_FAIL);
         sMassUpdt.setErrorTxt(comment.toString());
         rdcProcessStatusMsgs.add(resultCode);
       } else if (CmrConstants.RDC_STATUS_NOT_COMPLETED.equalsIgnoreCase(resultCode)) {
         comment = comment
-            .append("\nRDc mass update processing for REQ ID " + request.getReqId() + "for CMRNo" + request.getCmrNo() + " is NOT COMPLETED.");
+            .append("\nRDc mass update processing for REQ ID " + request.getReqId() + " for CMRNo" + request.getCmrNo() + " is NOT COMPLETED.");
         sMassUpdt.setRowStatusCd(CmrConstants.MASS_CREATE_ROW_STATUS_FAIL);
         rdcProcessStatusMsgs.add(resultCode);
         sMassUpdt.setErrorTxt(comment.toString());
       } else if (CmrConstants.RDC_STATUS_IGNORED.equalsIgnoreCase(resultCode)) {
-        comment = comment.append("\nRDc mass update processing for REQ ID " + request.getReqId() + "for CMRNo" + request.getCmrNo() + " is IGNORED.");
+        comment = comment
+            .append("\nRDc mass update processing for REQ ID " + request.getReqId() + " for CMRNo" + request.getCmrNo() + " is IGNORED.");
         sMassUpdt.setRowStatusCd(CmrConstants.MASS_CREATE_ROW_STATUS_UPDATE_FAILE);
         sMassUpdt.setErrorTxt(comment.toString());
         rdcProcessStatusMsgs.add(resultCode);
