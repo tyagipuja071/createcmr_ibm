@@ -10,6 +10,7 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -43,7 +44,6 @@ import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
 public class CanadaHandler extends GEOHandler {
 
   private static final Logger LOG = Logger.getLogger(CanadaHandler.class);
-  private static final String[] USABLE_ADDRESSES = new String[] { "ZS01", "ZI01", "ZP01" };
 
   @Override
   public void convertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry, ImportCMRModel searchModel)
@@ -53,29 +53,23 @@ public class CanadaHandler extends GEOHandler {
 
     if (CmrConstants.REQ_TYPE_CREATE.equals(reqEntry.getReqType())) {
       for (FindCMRRecordModel record : records) {
-        if ("ZS01".equals(record.getCmrAddrTypeCode())
-            && (StringUtils.isBlank(record.getCmrOrderBlock()) || "75".equals(record.getCmrOrderBlock()))) {
+        if ("ZS01".equals(record.getCmrAddrTypeCode()) && (StringUtils.isBlank(record.getCmrOrderBlock()))) {
           record.setCmrAddrTypeCode("ZS01");
           converted.add(record);
         }
       }
     } else {
       for (FindCMRRecordModel record : records) {
-        // if address is usable, process and add to converted
-        if (Arrays.asList(USABLE_ADDRESSES).contains(record.getCmrAddrTypeCode())) {
-          if ("ZS01".equals(record.getCmrAddrTypeCode()) && StringUtils.isBlank(record.getCmrOrderBlock())) {
-            // set the address type to Install At for CreateCMR
-            record.setCmrAddrTypeCode("ZS01");
-          } else if ("ZS01".equals(record.getCmrAddrTypeCode()) && StringUtils.isNotBlank(record.getCmrOrderBlock())
-              && record.getCmrOrderBlock().equals("90")) {
-            // set the address type to HW/SW Billing At for CreateCMR
-            record.setCmrAddrTypeCode("ZP01");
-          } else if ("ZP01".equals(record.getCmrAddrTypeCode())) {
-            // set the address type to Invoice To for CreateCMR
-            record.setCmrAddrTypeCode("ZI01");
-          }
+        String addrUse = record.getCmrAddrUse();
+        if (StringUtils.isNotBlank(addrUse)) {
+          char[] addrUses = addrUse.trim().toCharArray();
+          for (char addrUseCh : addrUses) {
+            FindCMRRecordModel tempRecord = new FindCMRRecordModel();
+            PropertyUtils.copyProperties(tempRecord, record);
 
-          converted.add(record);
+            tempRecord.setCmrAddrTypeCode(getUIAddrTypeFromAddrUse(Character.toString(addrUseCh)));
+            converted.add(tempRecord);
+          }
         }
       }
     }
@@ -84,17 +78,92 @@ public class CanadaHandler extends GEOHandler {
     source.setItems(converted);
   }
 
+  private String getUIAddrTypeFromAddrUse(String addrUse) {
+    String addrType = "";
+    switch (addrUse) {
+    case "2":
+      addrType = "ZP02";
+      break;
+    case "3":
+      addrType = "ZS01";
+      break;
+    case "4":
+      addrType = "ZD01";
+      break;
+    case "5":
+      addrType = "ZI01";
+      break;
+    case "6":
+      addrType = "ZD02";
+      break;
+    case "7":
+      addrType = "ZP08";
+      break;
+    case "A":
+      addrType = "ZP03";
+      break;
+    case "B":
+      addrType = "ZP04";
+      break;
+    case "D":
+      addrType = "ZP05";
+      break;
+    case "E":
+      addrType = "ZE01";
+      break;
+    case "L":
+      addrType = "ZP06";
+      break;
+    case "M":
+      addrType = "ZP01";
+      break;
+    case "P":
+      addrType = "ZP09";
+      break;
+    case "R":
+      addrType = "ZP07";
+      break;
+    }
+    return addrType;
+  }
+
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
-      data.setSalesBusOffCd(mainRecord.getCmrSellBoGrp());
-
-      String efc = mainRecord.getCmrTaxCertStatus();
+      String efc = mainRecord.getCmrEstabFnInd();
       if (StringUtils.isNotBlank(efc) && ArrayUtils.contains(new String[] { "8", "R", "Z", "7", "P", "E", "T" }, efc)) {
         efc = "6";
         // TODO: send email to Tax Team for Verification
       }
       data.setTaxCd1(efc);
+    } else {
+      data.setTaxCd1(mainRecord.getCmrEstabFnInd());
+    }
+
+    data.setSalesBusOffCd(mainRecord.getCmrSellBoNum());
+    data.setInstallBranchOff(mainRecord.getCmrInstlBoNum());
+    data.setAdminDeptCd(mainRecord.getCmrAccRecvBo());
+    data.setContactName1(mainRecord.getCmrPurOrdNo());
+    data.setSectorCd(mainRecord.getCmrTaxExemptReas());
+    data.setTaxPayerCustCd(mainRecord.getCmrLicNo());
+    data.setVatExempt(mainRecord.getCmrTaxExInd());
+    data.setTaxCd3(mainRecord.getCmrQstNo());
+    data.setVat(mainRecord.getCmrBusinessReg());
+    data.setAbbrevNm(mainRecord.getCmrShortName());
+    data.setAbbrevLocn(mainRecord.getCmrDataLine());
+
+    data.setLeasingCompanyIndc("1".equals(mainRecord.getCmrLeasingInd()) ? "Y" : "N");
+
+    // credit code - needs conversion
+    // data.setCreditCd(mainRecord.getCmrPymtTerms());
+
+    String mainRecBillFreq = mainRecord.getCmrBillPlnTyp();
+    if (mainRecBillFreq.equals("YM")) {
+      data.setCollectorNameNo("1");
+    } else if (mainRecBillFreq.equals("YQ")) {
+      data.setCollectorNameNo("3");
+    } else {
+      data.setCollectorNameNo("");
     }
   }
 
@@ -589,5 +658,4 @@ public class CanadaHandler extends GEOHandler {
     query.setParameter("REQ_ID", reqId);
     query.executeSql();
   }
-
 }
