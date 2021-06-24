@@ -87,7 +87,7 @@
 && (!reqentry.getCmrIssuingCntry().equalsIgnoreCase("618") && !"Processor".equalsIgnoreCase(reqentry.getUserRole()))){%>
       <form:hidden path="salesBusOffCd" id="salesBusOffCd"/>
     <%} else { %>
-      <cmr:column span="2" containerForField="SalesBusOff">
+      <cmr:column span="2" containerForField="SalesBusOff" exceptForCountry='821'>
         <p>
           <cmr:label fieldId="salesBusOffCd">
             <cmr:fieldLabel fieldId="SalesBusOff" />:
@@ -108,6 +108,15 @@
 	        <cmr:field fieldId="LocalTax2" id="taxCd2" path="taxCd2" tabId="MAIN_IBM_TAB" />
 	      </p>
 	    </cmr:column>
+	    <cmr:column span="2" containerForField="Company" forCountry="821">
+        <p>
+          <cmr:label fieldId="company">
+            <cmr:fieldLabel fieldId="Company" />: 
+              <cmr:delta text="${rdcdata.company}" oldValue="${reqentry.company}" />
+          </cmr:label>
+          <cmr:field fieldId="Company" id="company" path="company" tabId="MAIN_IBM_TAB" />
+        </p>
+      </cmr:column>
   	</cmr:row>
   </cmr:view>
   <!-- CIS Duplicate CMR -->
@@ -122,14 +131,14 @@
         <cmr:field fieldId="LocalTax3" id="taxCd3" path="taxCd3" tabId="MAIN_IBM_TAB" />
       </p>
     </cmr:column>
-    <cmr:column span="2" containerForField="DupSalesBusOffCd">
-      <p>
-        <cmr:label fieldId="dupSalesBoCd">
-          <cmr:fieldLabel fieldId="DupSalesBusOffCd" />: 
-        </cmr:label>
-        <cmr:field fieldId="DupSalesBusOffCd" id="dupSalesBoCd" path="dupSalesBoCd" tabId="MAIN_IBM_TAB" />
-      </p>
-    </cmr:column>    
+          <cmr:column span="2" containerForField="Enterprise2">
+        <p>
+          <cmr:label fieldId="dupEnterpriseNo">
+            <cmr:fieldLabel fieldId="Enterprise2" />: 
+          </cmr:label>
+          <cmr:field fieldId="Enterprise2" id="dupEnterpriseNo" path="dupEnterpriseNo" tabId="MAIN_IBM_TAB" />
+        </p>
+      </cmr:column>
     <cmr:column span="2" containerForField="SalRepNameNo2">
       <p>
         <cmr:label fieldId="dupSalesRepNo">

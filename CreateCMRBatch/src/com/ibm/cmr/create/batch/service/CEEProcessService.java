@@ -515,6 +515,8 @@ public class CEEProcessService extends LegacyDirectService {
     String clientTBK = data.getClientTier();
     String companyBK = data.getEnterprise();
     String enterpriseBK = data.getTaxCd2();
+    String dupSBO = data.getDupSalesBoCd();
+
     data.setDupSalesBoCd(data.getSalesBusOffCd());
     data.setDupSalesRepNo(data.getSalesBusOffCd());
     data.setCmrIssuingCntry(cntry);
@@ -522,6 +524,7 @@ public class CEEProcessService extends LegacyDirectService {
     data.setClientTier(data.getDupClientTierCd());
     data.setEnterprise(data.getDupEnterpriseNo());
     data.setTaxCd2(data.getTaxCd3());
+    data.setSalesBusOffCd(dupSBO);
 
     MessageTransformer transformer = TransformerManager.getTransformer(cntry);
 

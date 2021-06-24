@@ -1693,7 +1693,7 @@ function setCountryDuplicateFields(value) {
       FormManager.hide('Enterprise2', 'dupEnterpriseNo');
       FormManager.hide('LocalTax3', 'taxCd3');
       FormManager.hide('SalRepNameNo2', 'dupSalesRepNo');
-      // FormManager.hide('SalesBusOff2', 'dupSalesBoCd');
+      FormManager.hide('DupSalesBusOffCd', 'dupSalesBoCd');
     }
   }
 }
@@ -2631,7 +2631,7 @@ function setCompanyNoForCEE(clientTier) {
       } else if (SysLoc.RUSSIA == cntry) {
         enterprises = [ '985012', '985013', '985014', '985016', '985017', '985018', '985021', '985026', '985031', '985040', '985041', '985042',
             '985051', '985052', '985053', '985054', '985055', '985067', '985069', '985070', '985081', '985082', '985083', '985084' ];
-        FormManager.setValue('enterprise', '985051');
+        // FormManager.setValue('enterprise', '985051');
       }
     } else {
       var qParams = {
@@ -2791,6 +2791,10 @@ function cmrNoEnableForCEE() {
 }
 
 function setEnterprise2Values(dupClientTierCd) {
+  // Russia not use dropdown value any more
+  if (SysLoc.RUSSIA == FormManager.getActualValue('cmrIssuingCntry')) {
+    return;
+  }
   // CMR-4606
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
