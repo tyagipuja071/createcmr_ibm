@@ -15,6 +15,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -36,6 +38,7 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
+import com.ibm.cmr.create.batch.entry.BatchEntryPoint;
 import com.ibm.cmr.create.batch.util.BatchUtil;
 import com.ibm.cmr.create.batch.util.CMRRequestContainer;
 import com.ibm.cmr.create.batch.util.masscreate.WorkerThreadFactory;
@@ -193,6 +196,7 @@ public class LDMassProcessMultiRdcService extends MultiThreadedBatchService<Long
     String processingStatus = admin.getRdcProcessingStatus() != null ? admin.getRdcProcessingStatus() : "";
     long reqId = admin.getId().getReqId();
     boolean isIndexNotUpdated = false;
+    EntityManagerFactory emf = null;
 
     try {
       // 1. Get request to process
@@ -223,11 +227,13 @@ public class LDMassProcessMultiRdcService extends MultiThreadedBatchService<Long
           threads = Integer.parseInt(threadCount);
         }
 
+        emf = Persistence.createEntityManagerFactory(BatchEntryPoint.DEFAULT_BATCH_PERSISTENCE_UNIT);
+
         LOG.debug("Starting processing mass update lines at " + new Date());
         List<LDMassProcessRdcWorker> workers = new ArrayList<LDMassProcessRdcWorker>();
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(threads, new WorkerThreadFactory(getThreadName()));
         for (MassUpdt sMassUpdt : results) {
-          LDMassProcessRdcWorker worker = new LDMassProcessRdcWorker(entityManager, admin, data, sMassUpdt, BATCH_USER_ID);
+          LDMassProcessRdcWorker worker = new LDMassProcessRdcWorker(emf, admin, data, sMassUpdt, BATCH_USER_ID);
           executor.schedule(worker, 5, TimeUnit.SECONDS);
           workers.add(worker);
         }
@@ -356,8 +362,10 @@ public class LDMassProcessMultiRdcService extends MultiThreadedBatchService<Long
         RequestUtils.createCommentLogFromBatch(entityManager, BATCH_USER_ID, reqId, histMessage);
       }
     } catch (Exception e) {
-      LOG.error("Error in processing Update Request " + admin.getId().getReqId(), e);
-      addError("Update Request " + admin.getId().getReqId() + " Error: " + e.getMessage());
+      LOG.error("Error in processing Mass Update Request " + admin.getId().getReqId(), e);
+      addError("Mass Update Request " + admin.getId().getReqId() + " Error: " + e.getMessage());
+    } finally {
+      emf.close();
     }
 
   }

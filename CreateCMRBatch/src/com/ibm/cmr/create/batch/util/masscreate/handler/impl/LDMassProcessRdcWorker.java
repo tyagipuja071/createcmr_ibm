@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -19,10 +21,10 @@ import com.ibm.cio.cmr.request.entity.MassUpdt;
 import com.ibm.cio.cmr.request.entity.MassUpdtData;
 import com.ibm.cio.cmr.request.entity.MassUpdtDataPK;
 import com.ibm.cio.cmr.request.entity.ReqCmtLog;
+import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.SystemLocation;
-import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cmr.create.batch.util.BatchUtil;
 import com.ibm.cmr.create.batch.util.DebugUtil;
 import com.ibm.cmr.services.client.CmrServicesFactory;
@@ -57,8 +59,9 @@ public class LDMassProcessRdcWorker implements Runnable {
   private Exception errorMsg;
   private boolean isIndexNotUpdated;
 
-  public LDMassProcessRdcWorker(EntityManager entityManager, Admin admin, Data data, MassUpdt massUpdt, String userId) {
-    SystemUtil.setManager(entityManager);
+  public LDMassProcessRdcWorker(EntityManagerFactory emf, Admin admin, Data data, MassUpdt massUpdt, String userId) {
+    // SystemUtil.setManager(entityManager);
+    EntityManager entityManager = emf.createEntityManager();
     this.entityManager = entityManager;
     this.admin = admin;
     this.data = data;
@@ -68,7 +71,29 @@ public class LDMassProcessRdcWorker implements Runnable {
 
   @Override
   public void run() {
-    processLDRdc();
+    EntityTransaction transaction = null;
+    try {
+      ChangeLogListener.setManager(entityManager);
+      transaction = entityManager.getTransaction();
+      transaction.begin();
+      processLDRdc();
+      if (transaction != null && transaction.isActive() && !transaction.getRollbackOnly()) {
+        transaction.commit();
+      }
+    } catch (Throwable e) {
+      LOG.error("An error was encountered during processing. Transaction will be rolled back.", e);
+      if (transaction != null && transaction.isActive()) {
+        transaction.rollback();
+      }
+      throw e;
+    } finally {
+      if (transaction != null && transaction.isActive()) {
+        transaction.rollback();
+      }
+      // empty the manager
+      entityManager.clear();
+      entityManager.close();
+    }
   }
 
   private void processLDRdc() {

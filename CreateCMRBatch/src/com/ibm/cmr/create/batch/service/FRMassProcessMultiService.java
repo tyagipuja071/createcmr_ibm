@@ -273,8 +273,8 @@ public class FRMassProcessMultiService extends MultiThreadedBatchService<Long> {
         LOG.error("*****There are no mass update requests for RDC processing.*****");
       }
     } catch (Exception e) {
-      LOG.error("Error in processing Update Request " + admin.getId().getReqId(), e);
-      addError("Update Request " + admin.getId().getReqId() + " Error: " + e.getMessage());
+      LOG.error("Error in processing Mass Update Request " + admin.getId().getReqId(), e);
+      addError("Mass Update Request " + admin.getId().getReqId() + " Error: " + e.getMessage());
     } finally {
       emf.close();
     }
