@@ -108,7 +108,7 @@ public class ATMassProcessWorker implements Runnable {
 
       if (!CmrConstants.REQUEST_STATUS.PCO.toString().equals(admin.getReqStatus())) {
         admin.setReqStatus(CmrConstants.REQUEST_STATUS.PCO.toString());
-        entityManager.merge(admin);
+        // entityManager.merge(admin);
       }
 
       ProcessRequest request = new ProcessRequest();
