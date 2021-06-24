@@ -157,6 +157,7 @@ public class CanadaHandler extends GEOHandler {
     data.setVat(mainRecord.getCmrBusinessReg());
     data.setAbbrevNm(mainRecord.getCmrShortName());
     data.setAbbrevLocn(mainRecord.getCmrDataLine());
+    data.setCusInvoiceCopies(mainRecord.getCmrNoInvc());
 
     data.setLeasingCompanyIndc("1".equals(mainRecord.getCmrLeasingInd()) ? "Y" : "N");
 
