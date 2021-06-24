@@ -231,7 +231,7 @@ public class SWISSHandler extends GEOHandler {
       }
       String name3 = getName3FrmKna1(currentRecord.getCmrSapNumber());
       String name4 = getName4FrmKna1(currentRecord.getCmrSapNumber());
-      address.setCustNm4(name4);
+      // address.setCustNm4(name4);
       address.setDivn(name3);
       address.setCity2(name4);
       if ("U".equalsIgnoreCase(admin.getReqType())) {

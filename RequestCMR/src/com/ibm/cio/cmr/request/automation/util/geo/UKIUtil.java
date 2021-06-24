@@ -407,7 +407,7 @@ public class UKIUtil extends AutomationUtil {
       query.setParameter("NAME2", addrToCheck.getCustNm2());
     }
     if (addrToCheck.getDept() != null) {
-      query.append(" and DEPT = :DEPT");
+      query.append(" and lower(DEPT) like lower(:DEPT)");
       query.setParameter("DEPT", addrToCheck.getDept());
     }
     if (addrToCheck.getFloor() != null) {
