@@ -1,6 +1,6 @@
 ####################################################################
 
-resultFRMASS=$(ps -ef|grep -v grep|grep ATMassProcessEntryPoint|awk '{print $2}')
+resultATMASS=$(ps -ef|grep -v grep|grep ATMassProcessEntryPoint|awk '{print $2}')
 if [ "$result" = "" ]
 then
 
