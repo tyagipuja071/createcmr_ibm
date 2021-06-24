@@ -2100,6 +2100,9 @@ function afterConfigForRussia() {
 }
 
 function setSBOafterAddrConfig() {
+  if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
   if (FormManager.getActualValue('addrType') == 'ZS01') {
 
     var custType = FormManager.getActualValue('custGrp');
@@ -2152,6 +2155,9 @@ function setSBOafterAddrConfig() {
 }
 
 function setSBOValues() {
+  if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
   var custType = FormManager.getActualValue('custGrp');
   var isu = FormManager.getActualValue('isuCd');
   var ctc = FormManager.getActualValue('clientTier');
