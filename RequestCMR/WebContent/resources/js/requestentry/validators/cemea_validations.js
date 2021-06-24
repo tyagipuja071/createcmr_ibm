@@ -1693,7 +1693,7 @@ function setCountryDuplicateFields(value) {
       FormManager.hide('Enterprise2', 'dupEnterpriseNo');
       FormManager.hide('LocalTax3', 'taxCd3');
       FormManager.hide('SalRepNameNo2', 'dupSalesRepNo');
-      // FormManager.hide('SalesBusOff2', 'dupSalesBoCd');
+      FormManager.hide('DupSalesBusOffCd', 'dupSalesBoCd');
     }
   }
 }
