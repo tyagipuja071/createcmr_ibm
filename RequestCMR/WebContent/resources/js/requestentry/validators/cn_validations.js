@@ -131,10 +131,7 @@ function afterConfigForCN() {
   if (_searchTermHandler && _searchTermHandler[0]) {
     _searchTermHandler[0].onChange();
   }
-
-  if (_govTypeHandler && _govTypeHandler[0]) {    
-    _govTypeHandler[0].onChange();   
-  }
+  
 }
 
 function setInacBySearchTerm() {
@@ -309,7 +306,7 @@ function autoSetIBMDeptCostCenter() {
 
 function defaultCapIndicator() {
   if (FormManager.getActualValue('reqType') == 'C') {
-    FormManager.getField('capInd').set('checked', true);
+    FormManager.getField('capInd').checked = true;
     FormManager.readOnly('capInd');
   }
 }
