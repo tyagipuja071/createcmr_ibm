@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 
@@ -17,6 +18,7 @@ import org.apache.log4j.Logger;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.ibm.cio.cmr.request.CmrConstants;
+import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AdminPK;
@@ -33,6 +35,10 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
+import com.ibm.cmr.services.client.CmrServicesFactory;
+import com.ibm.cmr.services.client.QueryClient;
+import com.ibm.cmr.services.client.query.QueryRequest;
+import com.ibm.cmr.services.client.query.QueryResponse;
 import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
 
 /**
@@ -169,6 +175,45 @@ public class CanadaHandler extends GEOHandler {
 
   @Override
   public void setAdminValuesOnImport(Admin admin, FindCMRRecordModel currentRecord) throws Exception {
+    String[] name1Name2Val = getRDcName1Name2Values(currentRecord.getCmrSapNumber());
+    String name1 = StringUtils.isEmpty(name1Name2Val[0]) ? "" : name1Name2Val[0].toString();
+    String name2 = StringUtils.isEmpty(name1Name2Val[1]) ? "" : name1Name2Val[1].toString();
+    name1Name2Val = splitName(name1, name2, 35, 35);
+
+    admin.setMainCustNm1(name1Name2Val[0]);
+    admin.setOldCustNm1(name1Name2Val[0]);
+    admin.setMainCustNm2(name1Name2Val[1]);
+    admin.setOldCustNm2(name1Name2Val[1]);
+  }
+
+  public String[] getRDcName1Name2Values(String kunnr) throws Exception {
+    String[] name1Name2Val = new String[2];
+
+    String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
+    String mandt = SystemConfiguration.getValue("MANDT");
+    String sql = ExternalizedQuery.getSql("GET.CA.NAME1.NAME2");
+    sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
+    sql = StringUtils.replace(sql, ":KUNNR", "'" + kunnr + "'");
+    String dbId = QueryClient.RDC_APP_ID;
+
+    QueryRequest query = new QueryRequest();
+    query.setSql(sql);
+    query.addField("NAME1");
+    query.addField("NAME2");
+    query.addField("KUNNR");
+
+    LOG.debug("Getting existing NAME1, NAME2 value from RDc DB..");
+    QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
+    QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
+
+    if (response.isSuccess() && response.getRecords() != null && response.getRecords().size() != 0) {
+      List<Map<String, Object>> records = response.getRecords();
+      Map<String, Object> record = records.get(0);
+      name1Name2Val[0] = record.get("NAME1") != null ? record.get("NAME1").toString() : "";
+      name1Name2Val[1] = record.get("NAME2") != null ? record.get("NAME2").toString() : "";
+    }
+
+    return name1Name2Val;
   }
 
   @Override
