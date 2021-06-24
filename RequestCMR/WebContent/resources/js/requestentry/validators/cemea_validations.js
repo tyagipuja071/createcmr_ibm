@@ -2791,6 +2791,10 @@ function cmrNoEnableForCEE() {
 }
 
 function setEnterprise2Values(dupClientTierCd) {
+  // Russia not use dropdown value any more
+  if (SysLoc.RUSSIA == FormManager.getActualValue('cmrIssuingCntry')) {
+    return;
+  }
   // CMR-4606
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
