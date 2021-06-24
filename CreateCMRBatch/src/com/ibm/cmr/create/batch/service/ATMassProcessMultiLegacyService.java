@@ -52,7 +52,7 @@ import com.ibm.cmr.services.client.process.ProcessResponse;
  */
 public class ATMassProcessMultiLegacyService extends MultiThreadedBatchService<Long> {
 
-  private static final Logger LOG = Logger.getLogger(LDMassProcessMultiLegacyService.class);
+  private static final Logger LOG = Logger.getLogger(ATMassProcessMultiLegacyService.class);
   private static final String[] ADDRESS_ORDER = { "ZS01", "ZP01", "ZI01", "ZD01", "ZS02", "ZP02", "ZD02" };
 
   @Override
