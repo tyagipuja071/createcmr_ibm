@@ -886,7 +886,7 @@ public abstract class AutomationUtil {
     }
     if (payGoAddredited) {
       if (addrToCheck.getCustNm4() != null) {
-        query.append(" and CUST_NM4 = :CUST_NM4");
+        query.append(" and lower(CUST_NM4) like lower(:CUST_NM4)");
         query.setParameter("CUST_NM4", addrToCheck.getCustNm4());
       }
     }
