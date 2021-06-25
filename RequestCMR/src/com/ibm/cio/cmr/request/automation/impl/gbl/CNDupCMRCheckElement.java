@@ -78,6 +78,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
       result.setOnError(false);
     } else if (soldTo != null) {
 
+      String cnCreditCd = null;
       String cnName = null;
       String cnHistoryName = null;
       String cnAddr = null;
@@ -113,24 +114,35 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
           iAddr = handler.getIntlAddrById(soldTo, entityManager);
           if (iAddr != null) {
 
-            // 1, Check CN API
-            cnName = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
-            searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
-            searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
-            searchModelCNAPI.setAltName(cnName);
             try {
-              resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "ALTNAME");
+
+              // 1, Check CN API
+              if (data.getCreditCd() != null && data.getCreditCd().length() > 0) {
+                cnCreditCd = data.getCreditCd();
+                searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
+                searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
+                searchModelCNAPI.setAltName(cnCreditCd);
+                resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "TAXCD");
+              } else {
+                cnName = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
+                searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
+                searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
+                searchModelCNAPI.setAltName(cnName);
+                resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "ALTNAME");
+              }
+
               if (resultCNApi != null && resultCNApi.isSuccess()) {
                 cnName = resultCNApi.getRecord().getName();
                 cnHistoryName = resultCNApi.getRecord().getHistoryNames();
                 cnAddr = resultCNApi.getRecord().getRegLocation();
 
-                // 2, Check FindCMR NON Latin with Chinese name
-                searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
-                searchModelFindCmrCN.setCountryCd(soldTo.getLandCntry());
-                searchModelFindCmrCN.setName(cnName);
                 try {
+                  // 2, Check FindCMR NON Latin with Chinese name
+                  searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
+                  searchModelFindCmrCN.setCountryCd(soldTo.getLandCntry());
+                  searchModelFindCmrCN.setName(cnName);
                   resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
+
                   if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
                     for (int i = 0; i < resultFindCmrCN.size(); i++) {
                       nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
@@ -156,42 +168,47 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   result.setDetails("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnName);
                   engineData.addRejectionComment("OTH", "Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnName, "", "");
                   result.setOnError(true);
-                  result.setResults("Error on checking Duplicate CMR Check of Chinese.");
+                  result.setResults("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnName);
                 }
 
                 // 3, Check FindCMR Non Latin with historical Chinese name
                 if (cnHistoryName != null && !"".equals(cnHistoryName)) {
-                  searchModelFindCmrCN.setName(cnHistoryName);
+                  List<String> cnHistoryNameList = Arrays.asList(cnHistoryName.split(";"));
                   try {
-                    resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
-                    if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
-                      for (int i = 0; i < resultFindCmrCN.size(); i++) {
-                        nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
-                        if (nameFindCmrCnResult != null && nameFindCmrCnResult.equals(cnHistoryName)) {
+                    for (String historyName : cnHistoryNameList) {
+                      searchModelFindCmrCN.setName(historyName);
+                      resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
+                      if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
+                        for (int i = 0; i < resultFindCmrCN.size(); i++) {
+                          nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
+                          if (nameFindCmrCnResult != null && nameFindCmrCnResult.equals(historyName)) {
 
-                          historyNmMatched = true;
-                          matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
+                            historyNmMatched = true;
+                            matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
 
-                          if (resultFindCmrCN.get(i).getCied() != null && resultFindCmrCN.get(i).getCied().length() > 0) {
-                            historyNmIsBP = true;
-                          }
+                            if (resultFindCmrCN.get(i).getCied() != null && resultFindCmrCN.get(i).getCied().length() > 0) {
+                              historyNmIsBP = true;
+                            }
 
-                          if (historyNmMatched && !historyNmIsBP) {
-                            cmrData = resultFindCmrCN.get(i);
-                            details.append("\n");
-                            logDuplicateCMR(details, cmrData);
+                            if (historyNmMatched && !historyNmIsBP) {
+                              cmrData = resultFindCmrCN.get(i);
+                              details.append("\n");
+                              logDuplicateCMR(details, cmrData);
+                            }
                           }
                         }
                       }
                     }
+
                   } catch (Exception e) {
                     e.printStackTrace();
                     result.setDetails("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryName);
                     engineData.addRejectionComment("OTH",
                         "Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryName, "", "");
                     result.setOnError(true);
-                    result.setResults("Error on checking Duplicate CMR Check of Chinese.");
+                    result.setResults("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryName);
                   }
+
                 }
               }
 
@@ -242,23 +259,33 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
           iAddr = handler.getIntlAddrById(soldTo, entityManager);
           if (iAddr != null) {
 
-            // 1, Check CN API
-            cnName = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
-            searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
-            searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
-            searchModelCNAPI.setAltName(cnName);
             try {
-              resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "ALTNAME");
+
+              // 1, Check CN API
+              if (data.getCreditCd() != null && data.getCreditCd().length() > 0) {
+                cnCreditCd = data.getCreditCd();
+                searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
+                searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
+                searchModelCNAPI.setAltName(cnCreditCd);
+                resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "TAXCD");
+              } else {
+                cnName = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
+                searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
+                searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
+                searchModelCNAPI.setAltName(cnName);
+                resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "ALTNAME");
+              }
+
               if (resultCNApi != null && resultCNApi.isSuccess()) {
                 cnName = resultCNApi.getRecord().getName();
                 cnHistoryName = resultCNApi.getRecord().getHistoryNames();
                 cnAddr = resultCNApi.getRecord().getRegLocation();
 
-                // 2, Check FindCMR NON Latin with Chinese name
-                searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
-                searchModelFindCmrCN.setCountryCd(soldTo.getLandCntry());
-                searchModelFindCmrCN.setName(cnName);
                 try {
+                  // 2, Check FindCMR NON Latin with Chinese name
+                  searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
+                  searchModelFindCmrCN.setCountryCd(soldTo.getLandCntry());
+                  searchModelFindCmrCN.setName(cnName);
                   resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
                   if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
                     for (int i = 0; i < resultFindCmrCN.size(); i++) {
@@ -285,42 +312,47 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   result.setDetails("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnName);
                   engineData.addRejectionComment("OTH", "Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnName, "", "");
                   result.setOnError(true);
-                  result.setResults("Error on checking Duplicate CMR Check of Chinese.");
+                  result.setResults("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnName);
                 }
 
                 // 3, Check FindCMR Non Latin with historical Chinese name
                 if (cnHistoryName != null && !"".equals(cnHistoryName)) {
-                  searchModelFindCmrCN.setName(cnHistoryName);
+                  List<String> cnHistoryNameList = Arrays.asList(cnHistoryName.split(";"));
                   try {
-                    resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
-                    if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
-                      for (int i = 0; i < resultFindCmrCN.size(); i++) {
-                        nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
-                        if (nameFindCmrCnResult != null && nameFindCmrCnResult.equals(cnHistoryName)) {
+                    for (String historyName : cnHistoryNameList) {
+                      searchModelFindCmrCN.setName(historyName);
+                      resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
+                      if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
+                        for (int i = 0; i < resultFindCmrCN.size(); i++) {
+                          nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
+                          if (nameFindCmrCnResult != null && nameFindCmrCnResult.equals(historyName)) {
 
-                          historyNmMatched = true;
-                          matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
+                            historyNmMatched = true;
+                            matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
 
-                          if (resultFindCmrCN.get(i).getCied() != null && resultFindCmrCN.get(i).getCied().length() > 0) {
-                            historyNmIsBP = true;
-                          }
+                            if (resultFindCmrCN.get(i).getCied() != null && resultFindCmrCN.get(i).getCied().length() > 0) {
+                              historyNmIsBP = true;
+                            }
 
-                          if (historyNmMatched && historyNmIsBP) {
-                            cmrData = resultFindCmrCN.get(i);
-                            details.append("\n");
-                            logDuplicateCMR(details, cmrData);
+                            if (historyNmMatched && historyNmIsBP) {
+                              cmrData = resultFindCmrCN.get(i);
+                              details.append("\n");
+                              logDuplicateCMR(details, cmrData);
+                            }
                           }
                         }
                       }
                     }
+
                   } catch (Exception e) {
                     e.printStackTrace();
                     result.setDetails("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryName);
                     engineData.addRejectionComment("OTH",
                         "Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryName, "", "");
                     result.setOnError(true);
-                    result.setResults("Error on checking Duplicate CMR Check of Chinese.");
+                    result.setResults("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryName);
                   }
+
                 }
               }
 
@@ -370,23 +402,33 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
           // searchModelFindCMR.setCmrNo(cmrNo);
           if (iAddr != null) {
 
-            // 1, Check CN API
-            cnName = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
-            searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
-            searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
-            searchModelCNAPI.setAltName(cnName);
             try {
-              resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "ALTNAME");
+
+              // 1, Check CN API
+              if (data.getCreditCd() != null && data.getCreditCd().length() > 0) {
+                cnCreditCd = data.getCreditCd();
+                searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
+                searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
+                searchModelCNAPI.setAltName(cnCreditCd);
+                resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "TAXCD");
+              } else {
+                cnName = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
+                searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
+                searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
+                searchModelCNAPI.setAltName(cnName);
+                resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "ALTNAME");
+              }
+
               if (resultCNApi != null && resultCNApi.isSuccess()) {
                 cnName = resultCNApi.getRecord().getName();
                 cnHistoryName = resultCNApi.getRecord().getHistoryNames();
                 cnAddr = resultCNApi.getRecord().getRegLocation();
 
-                // 2, Check FindCMR NON Latin with Chinese name
-                searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
-                searchModelFindCmrCN.setCountryCd(soldTo.getLandCntry());
-                searchModelFindCmrCN.setName(cnName);
                 try {
+                  // 2, Check FindCMR NON Latin with Chinese name
+                  searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
+                  searchModelFindCmrCN.setCountryCd(soldTo.getLandCntry());
+                  searchModelFindCmrCN.setName(cnName);
                   resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
                   if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
                     for (int i = 0; i < resultFindCmrCN.size(); i++) {
@@ -409,37 +451,41 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   result.setDetails("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnName);
                   engineData.addRejectionComment("OTH", "Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnName, "", "");
                   result.setOnError(true);
-                  result.setResults("Error on checking Duplicate CMR Check of Chinese.");
+                  result.setResults("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnName);
                 }
 
                 // 3, Check FindCMR Non Latin with historical Chinese name
                 if (cnHistoryName != null && !"".equals(cnHistoryName)) {
-                  searchModelFindCmrCN.setName(cnHistoryName);
+                  List<String> cnHistoryNameList = Arrays.asList(cnHistoryName.split(";"));
                   try {
-                    resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
-                    if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
-                      for (int i = 0; i < resultFindCmrCN.size(); i++) {
-                        nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
-                        if (nameFindCmrCnResult != null && nameFindCmrCnResult.equals(cnHistoryName)) {
+                    for (String historyName : cnHistoryNameList) {
+                      searchModelFindCmrCN.setName(historyName);
+                      resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
+                      if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
+                        for (int i = 0; i < resultFindCmrCN.size(); i++) {
+                          nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
+                          if (nameFindCmrCnResult != null && nameFindCmrCnResult.equals(historyName)) {
 
-                          historyNmMatched = true;
-                          matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
+                            historyNmMatched = true;
+                            matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
 
-                          if (historyNmMatched) {
-                            cmrData = resultFindCmrCN.get(i);
-                            details.append("\n");
-                            logDuplicateCMR(details, cmrData);
+                            if (historyNmMatched) {
+                              cmrData = resultFindCmrCN.get(i);
+                              details.append("\n");
+                              logDuplicateCMR(details, cmrData);
+                            }
                           }
                         }
                       }
                     }
+
                   } catch (Exception e) {
                     e.printStackTrace();
                     result.setDetails("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryName);
                     engineData.addRejectionComment("OTH",
                         "Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryName, "", "");
                     result.setOnError(true);
-                    result.setResults("Error on checking Duplicate CMR Check of Chinese.");
+                    result.setResults("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryName);
                   }
                 }
               }
@@ -486,23 +532,33 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
           iAddr = handler.getIntlAddrById(soldTo, entityManager);
           if (iAddr != null) {
 
-            // 1, Check CN API
-            cnName = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
-            searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
-            searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
-            searchModelCNAPI.setAltName(cnName);
             try {
-              resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "ALTNAME");
+
+              // 1, Check CN API
+              if (data.getCreditCd() != null && data.getCreditCd().length() > 0) {
+                cnCreditCd = data.getCreditCd();
+                searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
+                searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
+                searchModelCNAPI.setAltName(cnCreditCd);
+                resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "TAXCD");
+              } else {
+                cnName = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
+                searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
+                searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
+                searchModelCNAPI.setAltName(cnName);
+                resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "ALTNAME");
+              }
+
               if (resultCNApi != null && resultCNApi.isSuccess()) {
                 cnName = resultCNApi.getRecord().getName();
                 cnHistoryName = resultCNApi.getRecord().getHistoryNames();
                 cnAddr = resultCNApi.getRecord().getRegLocation();
 
-                // 2, Check FindCMR NON Latin with Chinese name
-                searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
-                searchModelFindCmrCN.setCountryCd(soldTo.getLandCntry());
-                searchModelFindCmrCN.setName(cnName);
                 try {
+                  // 2, Check FindCMR NON Latin with Chinese name
+                  searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
+                  searchModelFindCmrCN.setCountryCd(soldTo.getLandCntry());
+                  searchModelFindCmrCN.setName(cnName);
                   resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
                   if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
                     for (int i = 0; i < resultFindCmrCN.size(); i++) {
@@ -525,37 +581,41 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   result.setDetails("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnName);
                   engineData.addRejectionComment("OTH", "Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnName, "", "");
                   result.setOnError(true);
-                  result.setResults("Error on checking Duplicate CMR Check of Chinese.");
+                  result.setResults("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnName);
                 }
 
                 // 3, Check FindCMR Non Latin with historical Chinese name
                 if (cnHistoryName != null && !"".equals(cnHistoryName)) {
-                  searchModelFindCmrCN.setName(cnHistoryName);
+                  List<String> cnHistoryNameList = Arrays.asList(cnHistoryName.split(";"));
                   try {
-                    resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
-                    if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
-                      for (int i = 0; i < resultFindCmrCN.size(); i++) {
-                        nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
-                        if (nameFindCmrCnResult != null && nameFindCmrCnResult.equals(cnHistoryName)) {
+                    for (String historyName : cnHistoryNameList) {
+                      searchModelFindCmrCN.setName(historyName);
+                      resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
+                      if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
+                        for (int i = 0; i < resultFindCmrCN.size(); i++) {
+                          nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
+                          if (nameFindCmrCnResult != null && nameFindCmrCnResult.equals(historyName)) {
 
-                          historyNmMatched = true;
-                          matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
+                            historyNmMatched = true;
+                            matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
 
-                          if (historyNmMatched) {
-                            cmrData = resultFindCmrCN.get(i);
-                            details.append("\n");
-                            logDuplicateCMR(details, cmrData);
+                            if (historyNmMatched) {
+                              cmrData = resultFindCmrCN.get(i);
+                              details.append("\n");
+                              logDuplicateCMR(details, cmrData);
+                            }
                           }
                         }
                       }
                     }
+
                   } catch (Exception e) {
                     e.printStackTrace();
                     result.setDetails("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryName);
                     engineData.addRejectionComment("OTH",
                         "Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryName, "", "");
                     result.setOnError(true);
-                    result.setResults("Error on checking Duplicate CMR Check of Chinese.");
+                    result.setResults("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryName);
                   }
                 }
               }
@@ -669,23 +729,33 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
           iAddr = handler.getIntlAddrById(soldTo, entityManager);
           if (iAddr != null) {
 
-            // 1, Check CN API
-            cnName = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
-            searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
-            searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
-            searchModelCNAPI.setAltName(cnName);
             try {
-              resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "ALTNAME");
+
+              // 1, Check CN API
+              if (data.getCreditCd() != null && data.getCreditCd().length() > 0) {
+                cnCreditCd = data.getCreditCd();
+                searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
+                searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
+                searchModelCNAPI.setAltName(cnCreditCd);
+                resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "TAXCD");
+              } else {
+                cnName = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
+                searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
+                searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
+                searchModelCNAPI.setAltName(cnName);
+                resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "ALTNAME");
+              }
+
               if (resultCNApi != null && resultCNApi.isSuccess()) {
                 cnName = resultCNApi.getRecord().getName();
                 cnHistoryName = resultCNApi.getRecord().getHistoryNames();
                 cnAddr = resultCNApi.getRecord().getRegLocation();
 
-                // 2, Check FindCMR NON Latin with Chinese name
-                searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
-                searchModelFindCmrCN.setCountryCd(soldTo.getLandCntry());
-                searchModelFindCmrCN.setName(cnName);
                 try {
+                  // 2, Check FindCMR NON Latin with Chinese name
+                  searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
+                  searchModelFindCmrCN.setCountryCd(soldTo.getLandCntry());
+                  searchModelFindCmrCN.setName(cnName);
                   resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
                   if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
                     for (int i = 0; i < resultFindCmrCN.size(); i++) {
@@ -708,37 +778,41 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   result.setDetails("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnName);
                   engineData.addRejectionComment("OTH", "Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnName, "", "");
                   result.setOnError(true);
-                  result.setResults("Error on checking Duplicate CMR Check of Chinese.");
+                  result.setResults("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnName);
                 }
 
                 // 3, Check FindCMR Non Latin with historical Chinese name
                 if (cnHistoryName != null && !"".equals(cnHistoryName)) {
-                  searchModelFindCmrCN.setName(cnHistoryName);
+                  List<String> cnHistoryNameList = Arrays.asList(cnHistoryName.split(";"));
                   try {
-                    resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
-                    if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
-                      for (int i = 0; i < resultFindCmrCN.size(); i++) {
-                        nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
-                        if (nameFindCmrCnResult != null && nameFindCmrCnResult.equals(cnHistoryName)) {
+                    for (String historyName : cnHistoryNameList) {
+                      searchModelFindCmrCN.setName(historyName);
+                      resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
+                      if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
+                        for (int i = 0; i < resultFindCmrCN.size(); i++) {
+                          nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
+                          if (nameFindCmrCnResult != null && nameFindCmrCnResult.equals(historyName)) {
 
-                          historyNmMatched = true;
-                          matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
+                            historyNmMatched = true;
+                            matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
 
-                          if (historyNmMatched) {
-                            cmrData = resultFindCmrCN.get(i);
-                            details.append("\n");
-                            logDuplicateCMR(details, cmrData);
+                            if (historyNmMatched) {
+                              cmrData = resultFindCmrCN.get(i);
+                              details.append("\n");
+                              logDuplicateCMR(details, cmrData);
+                            }
                           }
                         }
                       }
                     }
+
                   } catch (Exception e) {
                     e.printStackTrace();
                     result.setDetails("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryName);
                     engineData.addRejectionComment("OTH",
                         "Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryName, "", "");
                     result.setOnError(true);
-                    result.setResults("Error on checking Duplicate CMR Check of Chinese.");
+                    result.setResults("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryName);
                   }
                 }
               }
@@ -783,23 +857,33 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
           iAddr = handler.getIntlAddrById(soldTo, entityManager);
           if (iAddr != null) {
 
-            // 1, Check CN API
-            cnName = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
-            searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
-            searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
-            searchModelCNAPI.setAltName(cnName);
             try {
-              resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "ALTNAME");
+
+              // 1, Check CN API
+              if (data.getCreditCd() != null && data.getCreditCd().length() > 0) {
+                cnCreditCd = data.getCreditCd();
+                searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
+                searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
+                searchModelCNAPI.setAltName(cnCreditCd);
+                resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "TAXCD");
+              } else {
+                cnName = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
+                searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
+                searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
+                searchModelCNAPI.setAltName(cnName);
+                resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "ALTNAME");
+              }
+
               if (resultCNApi != null && resultCNApi.isSuccess()) {
                 cnName = resultCNApi.getRecord().getName();
                 cnHistoryName = resultCNApi.getRecord().getHistoryNames();
                 cnAddr = resultCNApi.getRecord().getRegLocation();
 
-                // 2, Check FindCMR NON Latin with Chinese name
-                searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
-                searchModelFindCmrCN.setCountryCd(soldTo.getLandCntry());
-                searchModelFindCmrCN.setName(cnName);
                 try {
+                  // 2, Check FindCMR NON Latin with Chinese name
+                  searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
+                  searchModelFindCmrCN.setCountryCd(soldTo.getLandCntry());
+                  searchModelFindCmrCN.setName(cnName);
                   resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
                   if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
                     for (int i = 0; i < resultFindCmrCN.size(); i++) {
@@ -830,46 +914,50 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   result.setDetails("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnName);
                   engineData.addRejectionComment("OTH", "Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnName, "", "");
                   result.setOnError(true);
-                  result.setResults("Error on checking Duplicate CMR Check of Chinese.");
+                  result.setResults("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnName);
                 }
 
                 // 3, Check FindCMR Non Latin with historical Chinese name
                 if (cnHistoryName != null && !"".equals(cnHistoryName)) {
-                  searchModelFindCmrCN.setName(cnHistoryName);
+                  List<String> cnHistoryNameList = Arrays.asList(cnHistoryName.split(";"));
                   try {
-                    resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
-                    if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
-                      for (int i = 0; i < resultFindCmrCN.size(); i++) {
-                        nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
-                        if (nameFindCmrCnResult != null && cnHistoryName.equals(nameFindCmrCnResult)) {
+                    for (String historyName : cnHistoryNameList) {
+                      searchModelFindCmrCN.setName(historyName);
+                      resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
+                      if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
+                        for (int i = 0; i < resultFindCmrCN.size(); i++) {
+                          nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
+                          if (nameFindCmrCnResult != null && nameFindCmrCnResult.equals(historyName)) {
 
-                          historyNmMatched = true;
-
-                          // check Chinese address
-                          addrFindCmrCnResult = resultFindCmrCN.get(i).getAltStreet() != null ? resultFindCmrCN.get(i).getAltStreet() : "";
-                          if (addrFindCmrCnResult.equals(cnAddr)) {
                             historyNmMatched = true;
-                          } else {
-                            historyNmMatched = false;
-                          }
 
-                          if (historyNmMatched) {
-                            matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
-                            cmrData = resultFindCmrCN.get(i);
-                            details.append("\n");
-                            logDuplicateCMR(details, cmrData);
+                            // check Chinese address
+                            addrFindCmrCnResult = resultFindCmrCN.get(i).getAltStreet() != null ? resultFindCmrCN.get(i).getAltStreet() : "";
+                            if (addrFindCmrCnResult.equals(cnAddr)) {
+                              historyNmMatched = true;
+                            } else {
+                              historyNmMatched = false;
+                            }
+
+                            if (historyNmMatched) {
+                              cmrData = resultFindCmrCN.get(i);
+                              details.append("\n");
+                              logDuplicateCMR(details, cmrData);
+                            }
                           }
                         }
                       }
                     }
+
                   } catch (Exception e) {
                     e.printStackTrace();
                     result.setDetails("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryName);
                     engineData.addRejectionComment("OTH",
                         "Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryName, "", "");
                     result.setOnError(true);
-                    result.setResults("Error on checking Duplicate CMR Check of Chinese.");
+                    result.setResults("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryName);
                   }
+
                 }
               }
 
@@ -981,7 +1069,8 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
         case "CROSS": // SCENARIO_CROSS_CROSS
 
           // logic:
-          // check with English name and get matched result, then it is dup req
+          // a) check with English name and get matched result, then it is dup
+          // req
 
           response = getMatches(entityManager, requestData, engineData);
           if (response != null) {
