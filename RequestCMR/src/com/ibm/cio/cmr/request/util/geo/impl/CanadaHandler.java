@@ -633,10 +633,12 @@ public class CanadaHandler extends GEOHandler {
   @Override
   public List<String> getDataFieldsForUpdate(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
-    fields.addAll(Arrays.asList("ABBREV_NM", "CLIENT_TIER", "CUST_CLASS", "CUST_PREF_LANG", "INAC_CD", "ISU_CD", "ENTERPRISE", "SEARCH_TERM",
-        "ISIC_CD", "SUB_INDUSTRY_CD", "VAT", "COV_DESC", "COV_ID", "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC",
-        "GEO_LOCATION_CD", "DUNS_NO", "CUST_ACCT_TYP", "PPSCEID", "SENSITIVE_FLAG", "CMR_NO", "CMR_OWNER", "INAC_TYPE", "SALES_BO_CD", "VAT_EXEMPT",
-        "CUST_CLASS", "ABBREV_LOCN"));
+    fields
+        .addAll(Arrays.asList("ABBREV_NM", "CLIENT_TIER", "CUST_CLASS", "CUST_PREF_LANG", "INAC_CD", "ISU_CD", "ENTERPRISE", "SEARCH_TERM", "ISIC_CD",
+            "SUB_INDUSTRY_CD", "VAT", "COV_DESC", "COV_ID", "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC", "GEO_LOCATION_CD",
+            "DUNS_NO", "CUST_ACCT_TYP", "PPSCEID", "SENSITIVE_FLAG", "CMR_NO", "CMR_OWNER", "INAC_TYPE", "SALES_BO_CD", "VAT_EXEMPT", "CUST_CLASS",
+            "ABBREV_LOCN", "INSTALL_BRANCH_OFF", "ADMIN_DEPT_CD", "TAX_CD2", "INVOICE_DISTRIBUTION_CD", "SALES_TEAM_CD", "REP_TEAM_MEMBER_NO",
+            "COLLECTOR_NO", "LOCN_NO", "CUST_INVOICE_COPIES", "TAX_CD1", "TAX_CD3", "TAX_PAYER_CUST_CD", "LEASING_COMP_INDC", "CONTACT_NAME1"));
     return fields;
   }
 
