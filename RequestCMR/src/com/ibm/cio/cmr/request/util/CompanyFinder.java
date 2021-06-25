@@ -603,6 +603,9 @@ public class CompanyFinder {
     case "ALTNAME":
       request.setKeyword(searchModel.getAltName());
       break;
+    case "DEFAULT":
+      request.setKeyword(searchModel.getTaxCd1());
+      break;
     }
 
     System.out.println(request + request.getKeyword());
