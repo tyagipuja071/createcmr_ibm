@@ -210,26 +210,35 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   }
 
                 }
-              }
 
-              // output
-              if ((nameMatched && !nameIsBP) || (historyNmMatched && !historyNmIsBP)) {
-                result.setResults("Matches Found");
-                result.setResults("Found Duplicate CMRs.");
-                engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR", StringUtils.join(matchedCMRs, ", "), "");
-                // to allow overides later
-                requestData.getAdmin().setMatchIndc("C");
+                // output
+                if ((nameMatched && !nameIsBP) || (historyNmMatched && !historyNmIsBP)) {
+                  result.setResults("Matches Found");
+                  result.setResults("Found Duplicate CMRs.");
+                  engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR", StringUtils.join(matchedCMRs, ", "), "");
+                  // to allow overides later
+                  requestData.getAdmin().setMatchIndc("C");
+                  result.setOnError(true);
+                  result.setProcessOutput(output);
+                  result.setDetails(details.toString().trim());
+                } else if ((nameMatched && nameIsBP) || (historyNmMatched && historyNmIsBP)) {
+                  result.setDetails("Duplicate CMR Check returned BP record for Normal Scenario." + StringUtils.join(matchedCMRs, ", "));
+                  result.setResults("No Matches");
+                  result.setOnError(false);
+                } else if (!nameMatched && !historyNmMatched) {
+                  result.setDetails("No Duplicate CMRs were found.");
+                  result.setResults("No Matches");
+                  result.setOnError(false);
+                }
+              } else if (resultCNApi != null && !resultCNApi.isSuccess()) {
+                result.setDetails(
+                    "Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage() + ". Please contact CMDE.");
+                engineData.addRejectionComment("OTH",
+                    "Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage() + ". Please contact CMDE.",
+                    "", "");
                 result.setOnError(true);
-                result.setProcessOutput(output);
-                result.setDetails(details.toString().trim());
-              } else if ((nameMatched && nameIsBP) || (historyNmMatched && historyNmIsBP)) {
-                result.setDetails("Duplicate CMR Check returned BP record for Normal Scenario." + StringUtils.join(matchedCMRs, ", "));
-                result.setResults("No Matches");
-                result.setOnError(false);
-              } else if (!nameMatched && !historyNmMatched) {
-                result.setDetails("No Duplicate CMRs were found.");
-                result.setResults("No Matches");
-                result.setOnError(false);
+                result.setResults(
+                    "Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage() + ". Please contact CMDE.");
               }
 
             } catch (Exception e) {
@@ -354,26 +363,34 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   }
 
                 }
-              }
-
-              // output
-              if ((nameMatched && nameIsBP) || (historyNmMatched && historyNmIsBP)) {
-                result.setResults("Matches Found");
-                result.setResults("Found Duplicate CMRs.");
-                engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR", StringUtils.join(matchedCMRs, ", "), "");
-                // to allow overides later
-                requestData.getAdmin().setMatchIndc("C");
+                // output
+                if ((nameMatched && nameIsBP) || (historyNmMatched && historyNmIsBP)) {
+                  result.setResults("Matches Found");
+                  result.setResults("Found Duplicate CMRs.");
+                  engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR", StringUtils.join(matchedCMRs, ", "), "");
+                  // to allow overides later
+                  requestData.getAdmin().setMatchIndc("C");
+                  result.setOnError(true);
+                  result.setProcessOutput(output);
+                  result.setDetails(details.toString().trim());
+                } else if ((nameMatched && !nameIsBP) || (historyNmMatched && !historyNmIsBP)) {
+                  result.setDetails("Duplicate CMR Check returned record without ceid for BP Scenario." + StringUtils.join(matchedCMRs, ", "));
+                  result.setResults("No Matches");
+                  result.setOnError(false);
+                } else if (!nameMatched && !historyNmMatched) {
+                  result.setDetails("No Duplicate CMRs were found.");
+                  result.setResults("No Matches");
+                  result.setOnError(false);
+                }
+              } else if (resultCNApi != null && !resultCNApi.isSuccess()) {
+                result.setDetails(
+                    "Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage() + ". Please contact CMDE.");
+                engineData.addRejectionComment("OTH",
+                    "Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage() + ". Please contact CMDE.",
+                    "", "");
                 result.setOnError(true);
-                result.setProcessOutput(output);
-                result.setDetails(details.toString().trim());
-              } else if ((nameMatched && !nameIsBP) || (historyNmMatched && !historyNmIsBP)) {
-                result.setDetails("Duplicate CMR Check returned record without ceid for BP Scenario." + StringUtils.join(matchedCMRs, ", "));
-                result.setResults("No Matches");
-                result.setOnError(false);
-              } else if (!nameMatched && !historyNmMatched) {
-                result.setDetails("No Duplicate CMRs were found.");
-                result.setResults("No Matches");
-                result.setOnError(false);
+                result.setResults(
+                    "Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage() + ". Please contact CMDE.");
               }
 
             } catch (Exception e) {
@@ -488,22 +505,30 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                     result.setResults("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryName);
                   }
                 }
-              }
-
-              // output
-              if (nameMatched || historyNmMatched) {
-                result.setResults("Matches Found");
-                result.setResults("Found Duplicate CMRs.");
-                engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR", StringUtils.join(matchedCMRs, ", "), "");
-                // to allow overides later
-                requestData.getAdmin().setMatchIndc("C");
+                // output
+                if (nameMatched || historyNmMatched) {
+                  result.setResults("Matches Found");
+                  result.setResults("Found Duplicate CMRs.");
+                  engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR", StringUtils.join(matchedCMRs, ", "), "");
+                  // to allow overides later
+                  requestData.getAdmin().setMatchIndc("C");
+                  result.setOnError(true);
+                  result.setProcessOutput(output);
+                  result.setDetails(details.toString().trim());
+                } else if (!nameMatched && !historyNmMatched) {
+                  result.setDetails("No Duplicate CMRs were found.");
+                  result.setResults("No Matches");
+                  result.setOnError(false);
+                }
+              } else if (resultCNApi != null && !resultCNApi.isSuccess()) {
+                result.setDetails(
+                    "Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage() + ". Please contact CMDE.");
+                engineData.addRejectionComment("OTH",
+                    "Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage() + ". Please contact CMDE.",
+                    "", "");
                 result.setOnError(true);
-                result.setProcessOutput(output);
-                result.setDetails(details.toString().trim());
-              } else if (!nameMatched && !historyNmMatched) {
-                result.setDetails("No Duplicate CMRs were found.");
-                result.setResults("No Matches");
-                result.setOnError(false);
+                result.setResults(
+                    "Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage() + ". Please contact CMDE.");
               }
 
             } catch (Exception e) {
@@ -618,22 +643,30 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                     result.setResults("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryName);
                   }
                 }
-              }
-
-              // output
-              if (nameMatched || historyNmMatched) {
-                result.setResults("Matches Found");
-                result.setResults("Found Duplicate CMRs.");
-                engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR", StringUtils.join(matchedCMRs, ", "), "");
-                // to allow overides later
-                requestData.getAdmin().setMatchIndc("C");
+                // output
+                if (nameMatched || historyNmMatched) {
+                  result.setResults("Matches Found");
+                  result.setResults("Found Duplicate CMRs.");
+                  engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR", StringUtils.join(matchedCMRs, ", "), "");
+                  // to allow overides later
+                  requestData.getAdmin().setMatchIndc("C");
+                  result.setOnError(true);
+                  result.setProcessOutput(output);
+                  result.setDetails(details.toString().trim());
+                } else if (!nameMatched && !historyNmMatched) {
+                  result.setDetails("No Duplicate CMRs were found.");
+                  result.setResults("No Matches");
+                  result.setOnError(false);
+                }
+              } else if (resultCNApi != null && !resultCNApi.isSuccess()) {
+                result.setDetails(
+                    "Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage() + ". Please contact CMDE.");
+                engineData.addRejectionComment("OTH",
+                    "Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage() + ". Please contact CMDE.",
+                    "", "");
                 result.setOnError(true);
-                result.setProcessOutput(output);
-                result.setDetails(details.toString().trim());
-              } else if (!nameMatched && !historyNmMatched) {
-                result.setDetails("No Duplicate CMRs were found.");
-                result.setResults("No Matches");
-                result.setOnError(false);
+                result.setResults(
+                    "Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage() + ". Please contact CMDE.");
               }
 
             } catch (Exception e) {
@@ -815,22 +848,30 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                     result.setResults("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryName);
                   }
                 }
-              }
-
-              // output
-              if (nameMatched || historyNmMatched) {
-                result.setResults("Matches Found");
-                result.setResults("Found Duplicate CMRs.");
-                engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR", StringUtils.join(matchedCMRs, ", "), "");
-                // to allow overides later
-                requestData.getAdmin().setMatchIndc("C");
+                // output
+                if (nameMatched || historyNmMatched) {
+                  result.setResults("Matches Found");
+                  result.setResults("Found Duplicate CMRs.");
+                  engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR", StringUtils.join(matchedCMRs, ", "), "");
+                  // to allow overides later
+                  requestData.getAdmin().setMatchIndc("C");
+                  result.setOnError(true);
+                  result.setProcessOutput(output);
+                  result.setDetails(details.toString().trim());
+                } else if (!nameMatched && !historyNmMatched) {
+                  result.setDetails("No Duplicate CMRs were found.");
+                  result.setResults("No Matches");
+                  result.setOnError(false);
+                }
+              } else if (resultCNApi != null && !resultCNApi.isSuccess()) {
+                result.setDetails(
+                    "Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage() + ". Please contact CMDE.");
+                engineData.addRejectionComment("OTH",
+                    "Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage() + ". Please contact CMDE.",
+                    "", "");
                 result.setOnError(true);
-                result.setProcessOutput(output);
-                result.setDetails(details.toString().trim());
-              } else if (!nameMatched && !historyNmMatched) {
-                result.setDetails("No Duplicate CMRs were found.");
-                result.setResults("No Matches");
-                result.setOnError(false);
+                result.setResults(
+                    "Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage() + ". Please contact CMDE.");
               }
 
             } catch (Exception e) {
@@ -959,22 +1000,30 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   }
 
                 }
-              }
-
-              // output
-              if (nameMatched || historyNmMatched) {
-                result.setResults("Matches Found");
-                result.setResults("Found Duplicate CMRs.");
-                engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR", StringUtils.join(matchedCMRs, ", "), "");
-                // to allow overides later
-                requestData.getAdmin().setMatchIndc("C");
+                // output
+                if (nameMatched || historyNmMatched) {
+                  result.setResults("Matches Found");
+                  result.setResults("Found Duplicate CMRs.");
+                  engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR", StringUtils.join(matchedCMRs, ", "), "");
+                  // to allow overides later
+                  requestData.getAdmin().setMatchIndc("C");
+                  result.setOnError(true);
+                  result.setProcessOutput(output);
+                  result.setDetails(details.toString().trim());
+                } else if (!nameMatched && !historyNmMatched) {
+                  result.setDetails("No Duplicate CMRs were found.");
+                  result.setResults("No Matches");
+                  result.setOnError(false);
+                }
+              } else if (resultCNApi != null && !resultCNApi.isSuccess()) {
+                result.setDetails(
+                    "Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage() + ". Please contact CMDE.");
+                engineData.addRejectionComment("OTH",
+                    "Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage() + ". Please contact CMDE.",
+                    "", "");
                 result.setOnError(true);
-                result.setProcessOutput(output);
-                result.setDetails(details.toString().trim());
-              } else if (!nameMatched && !historyNmMatched) {
-                result.setDetails("No Duplicate CMRs were found.");
-                result.setResults("No Matches");
-                result.setOnError(false);
+                result.setResults(
+                    "Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage() + ". Please contact CMDE.");
               }
 
             } catch (Exception e) {
