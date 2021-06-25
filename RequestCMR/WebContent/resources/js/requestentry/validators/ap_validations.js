@@ -2552,6 +2552,13 @@ function setFieldsForDoubleCreates() {
 	    FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
 	    FormManager.removeValidator('repTeamMemberName', Validators.REQUIRED);
 	  }
+  
+  if (cntry == '744' && role == 'REQUESTER' && custSubGrp == 'CROSS') {
+	    FormManager.setValue('collectionCd', 'I001');
+	    FormManager.setValue('busnType', '709');
+	    FormManager.setValue('territoryCd', '709');
+	  }
+  
   if (cntry == '852' && role == 'PROCESSOR' && (custSubGrp != 'BLUMX' || custSubGrp != 'MKTPC')) {
     FormManager.enable('cmrNo');
     FormManager.enable('cmrNoPrefix');
