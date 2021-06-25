@@ -2095,14 +2095,18 @@ function cancelCIS() {
 
 function afterConfigForRussia() {
   dojo.connect(FormManager.getField('cisServiceCustIndc'), 'onChange', function(value) {
+
+    if (dijit.byId('cisServiceCustIndc').get('checked')) {
+      dojo.connect(FormManager.getField('dupIssuingCntryCd'), 'onChange', function(value) {
+        changeDupSBO();
+      });
+    }
+
     setSBOValues();
   });
 }
 
 function setSBOafterAddrConfig() {
-  if (FormManager.getActualValue('reqType') != 'C') {
-    return;
-  }
   if (FormManager.getActualValue('addrType') == 'ZS01') {
 
     var custType = FormManager.getActualValue('custGrp');
@@ -2155,9 +2159,6 @@ function setSBOafterAddrConfig() {
 }
 
 function setSBOValues() {
-  if (FormManager.getActualValue('reqType') != 'C') {
-    return;
-  }
   var custType = FormManager.getActualValue('custGrp');
   var isu = FormManager.getActualValue('isuCd');
   var ctc = FormManager.getActualValue('clientTier');
@@ -2179,7 +2180,7 @@ function setSBOValues() {
       } else if (custSubType == 'COMME' || custSubType == 'THDPT' || custSubType == 'PRICU') {
         if (isu == '34' && ctc == 'Q') {
           if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount == 0) {
-            // do nothing
+            FormManager.setValue('salesBusOffCd', '');
           } else {
             if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
               var record = null;
@@ -2244,8 +2245,8 @@ function changeDupSBO() {
     } else if ('741' == dupIssuingCntry || '363' == dupIssuingCntry || '359' == dupIssuingCntry) {
       dupSbo = 'J02';
     }
-    FormManager.setValue('dupSalesBoCd', dupSbo);
   }
+  FormManager.setValue('dupSalesBoCd', dupSbo);
 }
 
 function changeAbbrevNmLocn(cntry, addressMode, saving, finalSave, force) {
