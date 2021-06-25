@@ -108,6 +108,15 @@
 	        <cmr:field fieldId="LocalTax2" id="taxCd2" path="taxCd2" tabId="MAIN_IBM_TAB" />
 	      </p>
 	    </cmr:column>
+	  <cmr:column span="2" containerForField="Enterprise" forCountry="358,359,363,603,607,626,644,651,668,693,694,695,699,704,705,707,708,740,741,787,820,826,889">
+        <p>
+          <cmr:label fieldId="enterprise">
+            <cmr:fieldLabel fieldId="Enterprise" />:
+              <cmr:delta text="${rdcdata.enterprise}" oldValue="${reqentry.enterprise}" />
+          </cmr:label>
+          <cmr:field id="enterprise" path="enterprise" fieldId="Enterprise" tabId="MAIN_IBM_TAB" />     
+        </p>
+      </cmr:column>
 	    <cmr:column span="2" containerForField="Company" forCountry="821">
         <p>
           <cmr:label fieldId="company">
