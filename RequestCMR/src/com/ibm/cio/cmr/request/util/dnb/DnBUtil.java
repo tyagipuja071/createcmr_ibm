@@ -348,7 +348,7 @@ public class DnBUtil {
         cmrRecord.setCmrIntlCity1(cnCity1);
         cmrRecord.setCmrIntlCity2(cnCity2);
         cmrRecord.setCreditCd(cnCreditCode);
-        System.out.println("Get Chiese API Info Social credit code is " + cnCreditCode);
+        LOG.debug("Get Chiese API Info Social credit code is " + cnCreditCode);
       } else {
         LOG.debug("No China API Data were found.");
       }
