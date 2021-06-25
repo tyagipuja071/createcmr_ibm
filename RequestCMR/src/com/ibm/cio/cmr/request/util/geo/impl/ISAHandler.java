@@ -427,6 +427,7 @@ public class ISAHandler extends APHandler {
       address += StringUtils.isNotBlank(addr.getAddrTxt2()) ? " " + addr.getAddrTxt2() : "";
       address += StringUtils.isNotBlank(addr.getDept()) ? " " + addr.getDept() : "";
       address = address.trim();
+      return address;
     }
     return null;
   };
