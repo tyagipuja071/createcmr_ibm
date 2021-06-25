@@ -2168,6 +2168,9 @@ function setSBOafterAddrConfig() {
 }
 
 function setSBOValues() {
+  if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
   var custType = FormManager.getActualValue('custGrp');
   var isu = FormManager.getActualValue('isuCd');
   var ctc = FormManager.getActualValue('clientTier');
@@ -2236,6 +2239,10 @@ function setSBOValues() {
 }
 
 function changeDupSBO() {
+  if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
+
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var dupIssuingCntry = FormManager.getActualValue('dupIssuingCntryCd');
 
