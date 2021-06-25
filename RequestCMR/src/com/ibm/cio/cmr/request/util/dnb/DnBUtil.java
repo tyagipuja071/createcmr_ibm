@@ -235,7 +235,7 @@ public class DnBUtil {
     // covert from D&B data to FindCMR model
     FindCMRRecordModel cmrRecord = new FindCMRRecordModel();
     if (SystemLocation.CHINA.equals(issuingCntry) && StringUtils.isNotBlank(company.getOrganizationId())) {
-       getCNApiAddressData(cmrRecord, company.getOrganizationId());
+      getCNApiAddressData(cmrRecord, company.getOrganizationId());
     }
     cmrRecord.setCmrIssuedBy(issuingCntry);
     cmrRecord.setCmrIsic(company.getIbmIsic());
@@ -342,10 +342,13 @@ public class DnBUtil {
         String cnStreet = cmrsData.getRecord().getRegLocation().trim();
         String cnCity1 = cmrsData.getRecord().getCity().trim();
         String cnCity2 = cmrsData.getRecord().getDistrict().trim();
+        String cnCreditCode = cmrsData.getRecord().getCreditCode().trim();
         cmrRecord.setCmrIntlName(cnName);
         cmrRecord.setCmrIntlAddress(cnStreet);
         cmrRecord.setCmrIntlCity1(cnCity1);
         cmrRecord.setCmrIntlCity2(cnCity2);
+        cmrRecord.setCreditCd(cnCreditCode);
+        System.out.println("Get Chiese API Info Social credit code is " + cnCreditCode);
       } else {
         LOG.debug("No China API Data were found.");
       }
@@ -354,6 +357,7 @@ public class DnBUtil {
       LOG.error("Error in getting Chiese API details ", e);
     }
   }
+
   /**
    * Gets the DnB code for the equivalent of the VAT field
    *
