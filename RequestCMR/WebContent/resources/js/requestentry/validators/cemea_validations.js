@@ -637,11 +637,16 @@ function addHandlersForCEMEA() {
   if (_ISUHandler == null) {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       var cntry = FormManager.getActualValue('cmrIssuingCntry');
-      if (CEE_INCL.has(cntry)) {// CreateCMR-811
-        setCompanyNoForCEE(value);
-      } else {
-        setClientTierValues(value);
+      // CreateCMR-811
+      // if (CEE_INCL.has(cntry)) {
+      // setCompanyNoForCEE(value);
+      // } else {
+      // setClientTierValues(value);
+      // }
+      if (!CEE_INCL.has(cntry)) {
+        setEnterpriseValues(value);
       }
+
       if (CEE_INCL.has(FormManager.getActualValue('cmrIssuingCntry'))) {
         togglePPSCeidCEE();
       }
@@ -652,9 +657,13 @@ function addHandlersForCEMEA() {
     _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
       // CreateCMR -811 change start
       var cntry = FormManager.getActualValue('cmrIssuingCntry');
-      if (CEE_INCL.has(cntry)) {
-        setCompanyNoForCEE(value);
-      } else {
+      // if (CEE_INCL.has(cntry)) {
+      // setCompanyNoForCEE(value);
+      // } else {
+      // setEnterpriseValues(value);
+      // }
+
+      if (!CEE_INCL.has(cntry)) {
         setEnterpriseValues(value);
       }
 
@@ -4884,8 +4893,10 @@ dojo
       GEOHandler.registerValidator(addAddressTypeValidatorCEE, GEOHandler.CEE, null, true);
       GEOHandler.addAfterConfig(setISUCTCValuesForCEE, GEOHandler.CEE);// CreateCMR-811
       GEOHandler.addAfterTemplateLoad(setISUCTCValuesForCEE, GEOHandler.CEE); // CreateCMR-811
-      GEOHandler.addAfterConfig(setCompanyNoForCEE, GEOHandler.CEE); // CreateCMR-811
-      GEOHandler.addAfterTemplateLoad(setCompanyNoForCEE, GEOHandler.CEE); // CreateCMR-811
+      // GEOHandler.addAfterConfig(setCompanyNoForCEE, GEOHandler.CEE); //
+      // CreateCMR-811
+      // GEOHandler.addAfterTemplateLoad(setCompanyNoForCEE, GEOHandler.CEE); //
+      // CreateCMR-811
       // CMR-4606 DupCMR exist
       GEOHandler.registerValidator(dupCMRExistCheckForRuCIS, [ SysLoc.RUSSIA ], null, true);
       GEOHandler.registerValidator(checkGAddressExist, [ SysLoc.RUSSIA ], null, true);
