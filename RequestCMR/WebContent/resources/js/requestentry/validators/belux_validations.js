@@ -616,6 +616,7 @@ function addHandlersForBELUX() {
       // setINACValues(value);
       setEconomicCodeValues(value);
       setSBO();
+      setSORTL();
 
     });
   }
@@ -806,8 +807,10 @@ function setAccountTeamNumberValues(clientTier) {
     var qParams = null;
     var results = null;
 
+    // 32S changed to 34Q on 2021 2H Coverage
     // Account Team Number will be based on IMS for 32S
-    if (ims != '' && ims.length > 1 && (isuCtc == '32S')) {
+    // if (ims != '' && ims.length > 1 && (isuCtc == '32S')) {
+    if (ims != '' && ims.length > 1 && (isuCtc == '34Q')) {
       qParams = {
         _qall : 'Y',
         ISSUING_CNTRY : cntry + geoCd,
@@ -1535,6 +1538,57 @@ function setSBO(searchTerm) {
     }
   } else if (FormManager.getActualValue('countryUse') == '624LU') {
     FormManager.setValue('salesBusOffCd', '0'.concat(accTeam.substring(0, 2) + '0001'));
+  }
+}
+
+function setSORTL() {
+
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+
+  var acctTeamNum = FormManager.getActualValue('searchTerm');
+  var custSubType = FormManager.getActualValue('custSubGrp');
+  var reqType = FormManager.getActualValue('reqType');
+
+  if (reqType != 'C') {
+    return;
+  }
+  switch (custSubType) {
+  case 'BEINT':
+  case 'BEISO':
+  case 'BEPRI':
+  case 'BEBUS':
+    if (acctTeamNum != _pagemodel.searchTerm) {
+      FormManager.setValue('commercialFinanced', acctTeamNum);
+    }
+    break;
+  case 'BECOM':
+  case 'BEPUB':
+  case 'BE3PA':
+  case 'BEDAT':
+    // do nothing
+    break;
+  case 'LUINT':
+  case 'LUISO':
+  case 'LUPRI':
+  case 'LUBUS':
+    if (acctTeamNum != _pagemodel.searchTerm) {
+      FormManager.setValue('commercialFinanced', acctTeamNum);
+    }
+    break;
+  case 'LUCOM':
+  case 'LUPUB':
+  case 'LU3PA':
+  case 'LUDAT':
+    // do nothing
+    break;
+  case 'CBCOM':
+  case 'CBBUS':
+    // do nothing
+    break;
+  default:
+    break;
   }
 }
 
