@@ -829,6 +829,7 @@ public class NLHandler extends BaseSOFHandler {
     data.setInstallBranchOff("");
     data.setInacType("");
     data.setIbmDeptCostCenter(getInternalDepartment(mainRecord.getCmrNum()));
+    data.setCommercialFinanced(results.getItems().get(0).getCmrSortl());
 
     boolean prospectCmrChosen = mainRecord != null && CmrConstants.PROSPECT_ORDER_BLOCK.equals(mainRecord.getCmrOrderBlock());
     if (prospectCmrChosen) {
