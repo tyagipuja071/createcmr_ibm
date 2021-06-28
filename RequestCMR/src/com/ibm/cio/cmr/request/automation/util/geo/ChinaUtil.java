@@ -1,22 +1,28 @@
 package com.ibm.cio.cmr.request.automation.util.geo;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
+import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
+import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 
 public class ChinaUtil extends AutomationUtil {
 
@@ -30,6 +36,9 @@ public class ChinaUtil extends AutomationUtil {
   public static final String SCENARIO_LOCAL_BUSPR = "BUSPR";
   public static final String SCENARIO_LOCAL_INTER = "INTER";
   public static final String SCENARIO_LOCAL_PRIV = "PRIV";
+  private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
+      CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO);
+  private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Attention Person", "Phone #", "Collection Code");
 
   @Override
   public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
@@ -196,6 +205,168 @@ public class ChinaUtil extends AutomationUtil {
     results.setDetails(details.toString());
 
     return results;
+  }
+
+  @Override
+  public boolean runUpdateChecksForAddress(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
+      RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
+
+    Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
+    StringBuilder nonRelAddrFdsDetails = new StringBuilder();
+    List<Addr> addresses = null;
+    // int ignoredAddr = 0;
+    StringBuilder checkDetails = new StringBuilder();
+    Set<String> resultCodes = new HashSet<String>();// R - review
+    Addr zs01 = requestData.getAddress("ZS01");
+
+    for (String addrType : RELEVANT_ADDRESSES) {
+      addresses = requestData.getAddresses(addrType);
+      if (changes.isAddressChanged(addrType)) {
+        for (Addr addr : addresses) {
+          if (isRelevantAddressFieldUpdated(changes, addr, nonRelAddrFdsDetails)) {
+
+            if ((addrType.equalsIgnoreCase(CmrConstants.RDC_SOLD_TO) && "Y".equals(addr.getImportInd()))) {
+              List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addr, false);
+              boolean matchesDnb = false;
+              if (matches != null) {
+                // check against D&B
+                matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
+              }
+              if (!matchesDnb) {
+                LOG.debug("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
+                resultCodes.add("R");
+                checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
+              } else {
+                checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
+                for (DnBMatchingResponse dnb : matches) {
+                  checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
+                  checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
+                  checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
+                      + dnb.getDnbCountry() + "\n\n");
+                }
+              }
+            }
+
+            if (!addrType.equalsIgnoreCase(CmrConstants.RDC_SOLD_TO)) {
+              if (!compareCustomerNames(zs01, addr)) {
+                LOG.debug("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified");
+                checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") has different customer name than sold-to.\n");
+                resultCodes.add("D");
+              } else {
+                List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addr, false);
+                boolean matchesDnb = false;
+                if (matches != null) {
+                  // check against D&B
+                  matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
+                }
+                if (!matchesDnb) {
+                  LOG.debug("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
+                  resultCodes.add("R");
+                  checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
+                } else {
+                  checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
+                  for (DnBMatchingResponse dnb : matches) {
+                    checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
+                    checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
+                    checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
+                        + dnb.getDnbCountry() + "\n\n");
+                  }
+                }
+
+              }
+            }
+
+            // if (CmrConstants.RDC_INSTALL_AT.equals(addrType)) {
+            // String installAtName = getCustomerFullName(addr);
+            // String soldToName = getCustomerFullName(zs01);
+            // if (installAtName.equals(soldToName)) {
+            // if (addressExists(entityManager, addr)) {
+            // LOG.debug(" - Duplicates found for " + addrType + "(" +
+            // addr.getId().getAddrSeq() + ")");
+            // checkDetails.append("Address " + addrType + "(" +
+            // addr.getId().getAddrSeq() + ") provided matches an existing
+            // address.\n");
+            // resultCodes.add("R");
+            // } else {
+            // LOG.debug("Addition/Updation of " + addrType + "(" +
+            // addr.getId().getAddrSeq() + ")");
+            // checkDetails.append("Address (" + addr.getId().getAddrSeq() + ")
+            // is validated.\n");
+            // }
+            // } else {
+            // LOG.debug("Address " + addrType + "(" + addr.getId().getAddrSeq()
+            // + ") needs to be verified");
+            // checkDetails.append("Address " + addrType + "(" +
+            // addr.getId().getAddrSeq() + ") has different customer name than
+            // sold-to.\n");
+            // resultCodes.add("D");
+            // }
+            // }
+            //
+            // if (addrType.equalsIgnoreCase(CmrConstants.RDC_SHIP_TO) &&
+            // "N".equals(addr.getImportInd())) {
+            // LOG.debug("Checking duplicates for " + addrType + "(" +
+            // addr.getId().getAddrSeq() + ")");
+            // boolean duplicate = addressExists(entityManager, addr);
+            // if (duplicate) {
+            // LOG.debug(" - Duplicates found for " + addrType + "(" +
+            // addr.getId().getAddrSeq() + ")");
+            // checkDetails.append("Addition of " + addrType + "(" +
+            // addr.getId().getAddrSeq() + ") provided matches an existing
+            // address.\n");
+            // resultCodes.add("R");
+            // }
+            // }
+            //
+            // if (addrType.equalsIgnoreCase(CmrConstants.RDC_SHIP_TO) &&
+            // "Y".equals(addr.getImportInd())) {
+            // ignoredAddr++;
+            // }
+          }
+        }
+      }
+    }
+    if (resultCodes.contains("R")) {
+      output.setOnError(true);
+      engineData.addRejectionComment("_atRejectAddr", "Addition or updation on the address is rejected", "", "");
+      validation.setSuccess(false);
+      validation.setMessage("Rejected");
+    } else if (resultCodes.contains("D")) {
+      validation.setSuccess(false);
+      validation.setMessage("Not Validated");
+      engineData.addNegativeCheckStatus("_atCheckFailed", "Updates to addresses cannot be checked automatically.");
+    } else {
+      validation.setSuccess(true);
+      validation.setMessage("Successful");
+    }
+
+    // if (ignoredAddr > 0) {
+    // checkDetails.append("Updates to imported Address Ship-To(ZD01) is
+    // skipped. ");
+    // }
+    String details = (output.getDetails() != null && output.getDetails().length() > 0) ? output.getDetails() : "";
+    details += checkDetails.length() > 0 ? "\n" + checkDetails.toString() : "";
+    details += nonRelAddrFdsDetails.length() > 0 ? "Following updates ignored - \n" + nonRelAddrFdsDetails.toString() : "";
+    output.setDetails(details);
+    output.setProcessOutput(validation);
+    return true;
+
+  }
+
+  private boolean isRelevantAddressFieldUpdated(RequestChangeContainer changes, Addr addr, StringBuilder details) {
+    List<UpdatedNameAddrModel> addrChanges = changes.getAddressChanges(addr.getId().getAddrType(), addr.getId().getAddrSeq());
+    if (addrChanges == null) {
+      return false;
+    }
+    for (UpdatedNameAddrModel change : addrChanges) {
+      if (!NON_RELEVANT_ADDRESS_FIELDS.contains(change.getDataField())) {
+        return true;
+      } else {
+        details.append(change.getDataField() + " of address " + addr.getId().getAddrType() + " \n");
+      }
+    }
+    return false;
   }
 
   @Override
