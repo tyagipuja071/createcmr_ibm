@@ -46,7 +46,7 @@ public class NetherlandsUtil extends AutomationUtil {
   public static final String SCENARIO_INTERNAL = "INTER";
 
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
-      CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO);
+      CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO, CmrConstants.RDC_ADDITIONAL_BILL_TO);
   private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Attention Person", "Phone #", "Collection Code");
 
   @Override
@@ -508,7 +508,8 @@ public class NetherlandsUtil extends AutomationUtil {
               }
             }
 
-            if (addrType.equalsIgnoreCase(CmrConstants.RDC_SHIP_TO) && "N".equals(addr.getImportInd())) {
+            if ((addrType.equalsIgnoreCase(CmrConstants.RDC_SHIP_TO) || addrType.equalsIgnoreCase(CmrConstants.RDC_ADDITIONAL_BILL_TO))
+                && "N".equals(addr.getImportInd())) {
               LOG.debug("Checking duplicates for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
               boolean duplicate = addressExists(entityManager, addr, requestData);
               if (duplicate) {
