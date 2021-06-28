@@ -2110,7 +2110,7 @@ function afterConfigForRussia() {
         changeDupSBO();
       });
     }
-
+    lockCompanyForCEE();
     setSBOValues();
   });
 }
@@ -4720,7 +4720,12 @@ function lockCompanyForCEE() {
     return;
   }
   if (CEE_INCL.has(cntry) && role == 'REQUESTER') {
-    FormManager.readOnly('enterprise');
+    if (SysLoc.RUSSIA == cntry) {
+      FormManager.readOnly('company');
+      FormManager.readOnly('dupEnterpriseNo');
+    }else{
+    	FormManager.readOnly('enterprise');
+    }
   }
 }
 
