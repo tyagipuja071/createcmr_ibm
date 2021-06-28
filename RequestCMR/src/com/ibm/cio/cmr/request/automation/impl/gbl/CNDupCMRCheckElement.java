@@ -82,6 +82,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
       String cnName = null;
       String cnHistoryName = null;
       String cnAddr = null;
+      String cnCeid = null;
 
       IntlAddr iAddr = new IntlAddr();
       CompanyRecordModel searchModelCNAPI = new CompanyRecordModel();
@@ -96,8 +97,10 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
       boolean nameIsBP = false;
       boolean historyNmMatched = false;
       boolean historyNmIsBP = false;
+      boolean ceidMatched = false;
       String nameFindCmrCnResult = null;
       String addrFindCmrCnResult = null;
+      String ceidFindCmrCnResult = null;
       List<String> matchedCMRs = new ArrayList<>();
       StringBuilder details = new StringBuilder();
 
@@ -108,8 +111,11 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
           // logic:
           // a) if the return result has the same Chinese name, then it is a
           // duplicate request
-          // b) if the return result has ceid, then it is not a duplicate
+          // b) if the findCMR result has ceid, then it is not a duplicate
           // request
+
+          nameIsBP = true;
+          historyNmIsBP = true;
 
           iAddr = handler.getIntlAddrById(soldTo, entityManager);
           if (iAddr != null) {
@@ -149,13 +155,13 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                       if (nameFindCmrCnResult != null && cnName.equals(nameFindCmrCnResult)) {
 
                         nameMatched = true;
-                        matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
 
-                        if (resultFindCmrCN.get(i).getCied() != null && resultFindCmrCN.get(i).getCied().length() > 0) {
-                          nameIsBP = true;
+                        if (resultFindCmrCN.get(i).getCied() == null || StringUtils.isBlank(resultFindCmrCN.get(i).getCied())) {
+                          nameIsBP = false;
                         }
 
                         if (nameMatched && !nameIsBP) {
+                          matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
                           cmrData = resultFindCmrCN.get(i);
                           details.append("\n");
                           logDuplicateCMR(details, cmrData);
@@ -184,13 +190,13 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                           if (nameFindCmrCnResult != null && nameFindCmrCnResult.equals(historyName)) {
 
                             historyNmMatched = true;
-                            matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
 
-                            if (resultFindCmrCN.get(i).getCied() != null && resultFindCmrCN.get(i).getCied().length() > 0) {
-                              historyNmIsBP = true;
+                            if (resultFindCmrCN.get(i).getCied() == null || StringUtils.isBlank(resultFindCmrCN.get(i).getCied())) {
+                              historyNmIsBP = false;
                             }
 
                             if (historyNmMatched && !historyNmIsBP) {
+                              matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
                               cmrData = resultFindCmrCN.get(i);
                               details.append("\n");
                               logDuplicateCMR(details, cmrData);
@@ -260,10 +266,13 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
         case "BUSPR": // SCENARIO_LOCAL_BUSPR
 
           // logic:
-          // a) if the return result has the same Chinese name, then it is a
-          // duplicate request
-          // b) if the return result has not ceid, then it is not a duplicate
+          // a) if the return result has the same Chinese name, or CEID, then it
+          // is a duplicate request
+          // b) if the findCMR result has not ceid, then it is not a duplicate
           // request
+
+          nameIsBP = false;
+          historyNmIsBP = false;
 
           iAddr = handler.getIntlAddrById(soldTo, entityManager);
           if (iAddr != null) {
@@ -289,6 +298,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 cnName = resultCNApi.getRecord().getName();
                 cnHistoryName = resultCNApi.getRecord().getHistoryNames();
                 cnAddr = resultCNApi.getRecord().getRegLocation();
+                cnCeid = resultCNApi.getRecord().getCreditCode();
 
                 try {
                   // 2, Check FindCMR NON Latin with Chinese name
@@ -302,13 +312,13 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                       if (nameFindCmrCnResult != null && cnName.equals(nameFindCmrCnResult)) {
 
                         nameMatched = true;
-                        matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
 
                         if (resultFindCmrCN.get(i).getCied() != null && resultFindCmrCN.get(i).getCied().length() > 0) {
                           nameIsBP = true;
                         }
 
                         if (nameMatched && nameIsBP) {
+                          matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
                           cmrData = resultFindCmrCN.get(i);
                           details.append("\n");
                           logDuplicateCMR(details, cmrData);
@@ -337,13 +347,13 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                           if (nameFindCmrCnResult != null && nameFindCmrCnResult.equals(historyName)) {
 
                             historyNmMatched = true;
-                            matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
 
                             if (resultFindCmrCN.get(i).getCied() != null && resultFindCmrCN.get(i).getCied().length() > 0) {
                               historyNmIsBP = true;
                             }
 
                             if (historyNmMatched && historyNmIsBP) {
+                              matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
                               cmrData = resultFindCmrCN.get(i);
                               details.append("\n");
                               logDuplicateCMR(details, cmrData);
@@ -363,8 +373,41 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   }
 
                 }
+
+                if (cnCeid != null && !"".equals(cnCeid)) {
+                  try {
+                    // 4, Check FindCMR with CEID
+                    searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
+                    searchModelFindCmrCN.setCountryCd(soldTo.getLandCntry());
+                    searchModelFindCmrCN.setCied(cnCeid);
+                    resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
+                    if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
+                      for (int i = 0; i < resultFindCmrCN.size(); i++) {
+                        ceidFindCmrCnResult = resultFindCmrCN.get(i).getCied() != null ? resultFindCmrCN.get(i).getCied() : "";
+                        if (ceidFindCmrCnResult != null && cnCeid.equals(ceidFindCmrCnResult)) {
+
+                          ceidMatched = true;
+
+                          if (ceidMatched) {
+                            matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
+                            cmrData = resultFindCmrCN.get(i);
+                            details.append("\n");
+                            logDuplicateCMR(details, cmrData);
+                          }
+                        }
+                      }
+                    }
+                  } catch (Exception e) {
+                    e.printStackTrace();
+                    result.setDetails("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnName);
+                    engineData.addRejectionComment("OTH", "Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnName, "", "");
+                    result.setOnError(true);
+                    result.setResults("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnName);
+                  }
+                }
+
                 // output
-                if ((nameMatched && nameIsBP) || (historyNmMatched && historyNmIsBP)) {
+                if ((nameMatched && nameIsBP) || (historyNmMatched && historyNmIsBP) || ceidMatched) {
                   result.setResults("Matches Found");
                   result.setResults("Found Duplicate CMRs.");
                   engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR", StringUtils.join(matchedCMRs, ", "), "");
@@ -373,11 +416,11 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   result.setOnError(true);
                   result.setProcessOutput(output);
                   result.setDetails(details.toString().trim());
-                } else if ((nameMatched && !nameIsBP) || (historyNmMatched && !historyNmIsBP)) {
+                } else if ((nameMatched && !nameIsBP) || (historyNmMatched && !historyNmIsBP) && !ceidMatched) {
                   result.setDetails("Duplicate CMR Check returned record without ceid for BP Scenario." + StringUtils.join(matchedCMRs, ", "));
                   result.setResults("No Matches");
                   result.setOnError(false);
-                } else if (!nameMatched && !historyNmMatched) {
+                } else if (!nameMatched && !historyNmMatched && !ceidMatched) {
                   result.setDetails("No Duplicate CMRs were found.");
                   result.setResults("No Matches");
                   result.setOnError(false);
@@ -894,6 +937,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
           // logic:
           // a) if the return result has same Chinese name and address, then it
           // is a duplicate request
+          // b) if there is no Chinese name, then check English name
 
           iAddr = handler.getIntlAddrById(soldTo, entityManager);
           if (iAddr != null) {
@@ -1033,13 +1077,81 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
               result.setOnError(true);
               result.setResults("Error on getting China API Data when Duplicate CMR Check of Chinese.");
             }
-          } else {
-            result.setDetails("Error on getting Chinese name when Duplicate CMR Check.");
-            engineData.addRejectionComment("OTH", "Error on getting Chinese name when Duplicate CMR Check.", "", "");
-            result.setOnError(true);
-            result.setResults("Error on getting Chinese name when Duplicate CMR Check.");
-          }
 
+          } else {
+
+            // check with English name and get matched result, then it is dup
+            // req
+            ifAQSTNHasCN = false;
+
+            response = getMatches(entityManager, requestData, engineData);
+            if (response != null) {
+              if (response.getSuccess()) {
+                if (response.getMatched()) {
+                  List<DuplicateCMRCheckResponse> cmrCheckMatches = response.getMatches();
+                  if (cmrCheckMatches.size() != 0) {
+                    result.setResults("Matches Found");
+                    details.append(cmrCheckMatches.size() + " record(s) found.");
+                    List<String> dupCMRNos = new ArrayList<>();
+                    if (cmrCheckMatches.size() > 5) {
+                      cmrCheckMatches = cmrCheckMatches.subList(0, 5);
+                      details.append("Showing top 5 matches only.");
+                    }
+
+                    int itemNo = 1;
+                    for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
+                      details.append("\n");
+
+                      log.debug("Duplicate CMRs Found..");
+                      output.addMatch(getProcessCode(), "CMR_NO", cmrCheckRecord.getCmrNo(), "Matching Logic", cmrCheckRecord.getMatchGrade() + "",
+                          "CMR", itemNo++);
+                      dupCMRNos.add(cmrCheckRecord.getCmrNo());
+                      logDuplicateCMR(details, cmrCheckRecord);
+                    }
+                    engineData.put("cmrCheckMatches", cmrCheckMatches);
+                    result.setResults("Found Duplicate CMRs.");
+                    if (engineData.hasPositiveCheckStatus("allowDuplicates")) {
+                      engineData.addNegativeCheckStatus("dupAllowed",
+                          cmrCheckMatches.size()
+                              + " possible duplicate CMR(s) found with the same data but allowed for the scenario.\n Duplicate CMR(s) found: "
+                              + StringUtils.join(dupCMRNos, ", "));
+                    } else {
+                      List<String> zs01KunnrsList = new ArrayList<String>();
+                      for (String dupCMR : dupCMRNos) {
+                        zs01KunnrsList.add(getZS01Kunnr(dupCMR, requestData.getData().getCmrIssuingCntry()));
+                      }
+                      engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR", StringUtils.join(dupCMRNos, ", "),
+                          StringUtils.join(zs01KunnrsList, ", "));
+                      // to allow overides later
+                      requestData.getAdmin().setMatchIndc("C");
+                      result.setOnError(true);
+                    }
+                    result.setProcessOutput(output);
+                    result.setDetails(details.toString().trim());
+                  } else {
+                    result.setDetails("No Duplicate CMRs were found.");
+                    result.setResults("No Matches");
+                    result.setOnError(false);
+                  }
+                } else {
+                  result.setDetails("No Duplicate CMRs were found.");
+                  result.setResults("No Matches");
+                  result.setOnError(false);
+                }
+              } else {
+                result.setDetails(response.getMessage());
+                engineData.addRejectionComment("OTH", response.getMessage(), "", "");
+                result.setOnError(true);
+                result.setResults("Error on Duplicate CMR Check.");
+              }
+            } else {
+              result.setDetails("Duplicate CMR Check Encountered an error.");
+              engineData.addRejectionComment("OTH", "Duplicate CMR Check Encountered an error.", "", "");
+              result.setOnError(true);
+              result.setResults("Error on Duplicate CMR Check");
+            }
+
+          }
           break;
 
         case "PRIV": // SCENARIO_LOCAL_PRIV
