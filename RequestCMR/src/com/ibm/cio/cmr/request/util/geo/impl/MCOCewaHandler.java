@@ -67,7 +67,7 @@ public class MCOCewaHandler extends MCOHandler {
 
   private static final String[] MCO2_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "Affiliate", "CAP", "CMROwner", "Company", "CustClassCode", "LocalTax2",
       "Enterprise", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office", "Floor",
-      "Building", "County", "City2", "INACType", "BPRelationType", "MembLevel", "ModeOfPayment", "CodFlag" };
+      "Building", "County", "City2", "INACType", "BPRelationType", "MembLevel", "ModeOfPayment", "CodFlag", "SalRepNameNo" };
 
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
@@ -229,9 +229,9 @@ public class MCOCewaHandler extends MCOHandler {
   @Override
   public List<String> getDataFieldsForUpdateCheckLegacy(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
-    fields.addAll(Arrays.asList("SALES_BO_CD", "REP_TEAM_MEMBER_NO", "VAT", "ISIC_CD", "EMBARGO_CD", "ABBREV_NM", "CLIENT_TIER", "CUST_PREF_LANG",
-        "INAC_CD", "ISU_CD", "COLLECTION_CD", "SPECIAL_TAX_CD", "SUB_INDUSTRY_CD", "ABBREV_LOCN", "PPSCEID", "IBM_DEPT_COST_CENTER",
-        "COMMERCIAL_FINANCED", "CREDIT_CD", "TAX_CD1", "ADMIN_DEPT_LN"));
+    fields.addAll(Arrays.asList("SALES_BO_CD", "VAT", "ISIC_CD", "EMBARGO_CD", "ABBREV_NM", "CLIENT_TIER", "CUST_PREF_LANG", "INAC_CD", "ISU_CD",
+        "COLLECTION_CD", "SPECIAL_TAX_CD", "SUB_INDUSTRY_CD", "ABBREV_LOCN", "PPSCEID", "IBM_DEPT_COST_CENTER", "COMMERCIAL_FINANCED", "CREDIT_CD",
+        "TAX_CD1", "ADMIN_DEPT_LN"));
     return fields;
   }
 
@@ -487,14 +487,6 @@ public class MCOCewaHandler extends MCOHandler {
       update.setDataField(PageManager.getLabel(cmrCountry, "Collection Code", "Collection Code"));
       update.setNewData(service.getCodeAndDescription(newData.getCollectionCd(), "Collection Code", cmrCountry));
       update.setOldData(service.getCodeAndDescription(oldData.getCollectionCd(), "Collection Code", cmrCountry));
-      results.add(update);
-    }
-
-    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getRepTeamMemberNo(), newData.getRepTeamMemberNo())) {
-      update = new UpdatedDataModel();
-      update.setDataField(PageManager.getLabel(cmrCountry, "Sales Rep", "Sales Rep"));
-      update.setNewData(service.getCodeAndDescription(newData.getRepTeamMemberNo(), "Sales Rep", cmrCountry));
-      update.setOldData(service.getCodeAndDescription(oldData.getRepTeamMemberNo(), "Sales Rep", cmrCountry));
       results.add(update);
     }
 
