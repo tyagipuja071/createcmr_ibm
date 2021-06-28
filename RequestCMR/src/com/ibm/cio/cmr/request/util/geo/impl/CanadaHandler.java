@@ -332,6 +332,14 @@ public class CanadaHandler extends GEOHandler {
       results.add(update);
     }
 
+    // Purchase Order Number
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getContactName1(), newData.getContactName1())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "PurchaseOrdNo", "-"));
+      update.setNewData(newData.getContactName1());
+      update.setOldData(oldData.getContactName1());
+      results.add(update);
+    }
   }
 
   @Override
