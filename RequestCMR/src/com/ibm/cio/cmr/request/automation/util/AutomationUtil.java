@@ -831,8 +831,14 @@ public abstract class AutomationUtil {
    */
   protected boolean addressExists(EntityManager entityManager, Addr addrToCheck, RequestData requestData) {
     Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
     boolean payGoAddredited = AutomationUtil.isPayGoAccredited(entityManager, admin.getSourceSystId());
-    String sql = ExternalizedQuery.getSql("AUTO.CHECK_IF_ADDRESS_EXIST");
+    String sql = "";
+    if (SystemLocation.BELGIUM.equals(data.getCmrIssuingCntry()) || SystemLocation.NETHERLANDS.equals(data.getCmrIssuingCntry())) {
+      sql = ExternalizedQuery.getSql("AUTO.UKI.CHECK_IF_ADDRESS_EXIST");
+    } else {
+      sql = ExternalizedQuery.getSql("AUTO.CHECK_IF_ADDRESS_EXIST");
+    }
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", addrToCheck.getId().getReqId());
     query.setParameter("ADDR_TYPE", addrToCheck.getId().getAddrType());

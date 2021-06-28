@@ -132,6 +132,7 @@ public class CmrConstants {
   public static final String RDC_SHIP_TO = "ZD01";
   public static final String RDC_SECONDARY_SOLD_TO = "ZS02";
   public static final String RDC_SHIPPING = "ZH02";
+  public static final String RDC_ADDITIONAL_BILL_TO = "PG01";
 
   // REQUEST ACTIONS
   public static final String All_Processing_Complete() {
