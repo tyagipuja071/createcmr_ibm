@@ -2,7 +2,6 @@ package com.ibm.cio.cmr.request.automation.impl.gbl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -43,7 +42,7 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
 
   public CNAPICheckElement(String requestTypes, String actionOnError, boolean overrideData, boolean stopOnError) {
     super(requestTypes, actionOnError, overrideData, stopOnError);
-
+    
   }
 
   @Override
@@ -67,7 +66,7 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
     CNHandler handler = (CNHandler) RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
     AutomationResult<ValidationOutput> result = buildResult(admin.getId().getReqId());
     result.setOnError(false);
-
+     
     ValidationOutput validation = new ValidationOutput();
     IntlAddr iAddr = new IntlAddr();
     String cnName = null;
@@ -105,66 +104,66 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
       } else if (soldTo != null) {
 
         if (data.getCustSubGrp() != null && (SCENARIO_LOCAL_NRML.equals(data.getCustSubGrp()) || SCENARIO_LOCAL_EMBSA.equals(data.getCustSubGrp())
-            || SCENARIO_LOCAL_AQSTN.equals(data.getCustSubGrp()) || SCENARIO_LOCAL_BLUMX.equals(data.getCustSubGrp())
+            || (SCENARIO_LOCAL_AQSTN.equals(data.getCustSubGrp()) && ifAQSTNHasCN) || SCENARIO_LOCAL_BLUMX.equals(data.getCustSubGrp())
             || SCENARIO_LOCAL_MRKT.equals(data.getCustSubGrp()) || SCENARIO_LOCAL_BUSPR.equals(data.getCustSubGrp()))) {
           CompanyRecordModel searchModel = new CompanyRecordModel();
           searchModel.setIssuingCntry(data.getCmrIssuingCntry());
           searchModel.setCountryCd(soldTo.getLandCntry());
 
-          if (ifAQSTNHasCN) {
-            if (StringUtils.isNotEmpty(data.getBusnType())) {
-              searchModel.setTaxCd1(data.getBusnType());
-            } else {
+          if (StringUtils.isNotEmpty(data.getBusnType())) {
+            searchModel.setTaxCd1(data.getBusnType());
+          } else {
 
-              if (iAddr != null) {
-                searchModel.setTaxCd1(cnName);
-              }
+            if (iAddr != null) {
+              searchModel.setTaxCd1(cnName);
             }
-            try {
-              AutomationResponse<CNResponse> cmrsData = CompanyFinder.getCNApiInfo(searchModel, "DEFAULT");
-              if (cmrsData != null && cmrsData.isSuccess()) {
+          }
+          try {
+            AutomationResponse<CNResponse> cmrsData = CompanyFinder.getCNApiInfo(searchModel, "DEFAULT");
+            if (cmrsData != null && cmrsData.isSuccess()) {
 
-                StringBuilder details = new StringBuilder();
+              StringBuilder details = new StringBuilder();
 
-                if (cnName.equals(cmrsData.getRecord().getName()) && cnAddr.equals(cmrsData.getRecord().getRegLocation())) {
+              if (cnName.equals(cmrsData.getRecord().getName()) && cnAddr.equals(cmrsData.getRecord().getRegLocation())) {
 
-                  result.setResults("Matches found");
-                  details.append("High confidence Chinese name and address were found. No override from users was recorded.");
+                result.setResults("Matches found");
+                details.append("High confidence Chinese name and address were found. No override from users was recorded.");
 
-                  requestData.getAdmin().setMatchIndc("C");
-                  // result.setOnError(false);
-                  details.append("\n");
-                  // logDuplicateCMR(details, cmrData);
-                  result.setProcessOutput(validation);
-                  result.setDetails(details.toString().trim());
-                  engineData.addNegativeCheckStatus("CNAPICheck", "High confidence Chinese name and address were found.");
-                  LOG.debug("High confidence Chinese name and address were found.\n");
+                requestData.getAdmin().setMatchIndc("C");
+                // result.setOnError(false);
+                details.append("\n");
+                // logDuplicateCMR(details, cmrData);
+                result.setProcessOutput(validation);
+                result.setDetails(details.toString().trim());
+                engineData.addNegativeCheckStatus("CNAPICheck", "High confidence Chinese name and address were found.");
+                LOG.debug("High confidence Chinese name and address were found.\n");
 
-                } else {
-                  result.setOnError(true);
-                  result.setResults("Review Needed");
-                  details.append("Processor review is required as no high confidence Chinese name and address were found.").append("\n");
-                  details.append("Request name: " + cnName + "\n" + " API name: " + cmrsData.getRecord().getName() + "\n");
-                  details.append("Request address: " + cnAddr + "\n" + " API address: " + cmrsData.getRecord().getRegLocation() + "\n");
-                  result.setDetails(details.toString().trim());
-
-                  engineData.addNegativeCheckStatus("CNAPICheck", "No high confidence China API matches were found.");
-                  LOG.debug("Processor review is required as no high confidence Chinese name and address were found.");
-                }
               } else {
-                result.setDetails("No China API Data were found.");
-                result.setResults("No Matches");
-                engineData.addRejectionComment("NOCN", "No China API Data were found.", "", "");
+                overrideNameAndAddress(cmrsData.getRecord().getName(), cmrsData.getRecord().getRegLocation(), iAddr, entityManager);
+                
                 result.setOnError(true);
+                result.setResults("Overridden");
+                details.append("Processor review is required as no high confidence Chinese name and address were found.").append("\n");
+                details.append("Request name: " + cnName + "\n" + " API name: " + cmrsData.getRecord().getName() + "\n");
+                details.append("Request address: " + cnAddr + "\n" + " API address: " + cmrsData.getRecord().getRegLocation() + "\n");
+                result.setDetails(details.toString().trim());
+
+                engineData.addNegativeCheckStatus("CNAPICheck", "No high confidence China API matches were found.");
+                LOG.debug("Processor review is required as no high confidence Chinese name and address were found.");
               }
-            } catch (Exception e) {
-              e.printStackTrace();
-              result.setDetails("Error on get China API Data Check.");
-              engineData.addRejectionComment("OTH", "Error on  get China API Data Check.", "", "");
+            } else {
+              result.setDetails("No China API Data were found.");
+              result.setResults("No Matches");
+              engineData.addRejectionComment("NOCN", "No China API Data were found.", "", "");
               result.setOnError(true);
-              result.setResults("Error on  get China API Data Check.");
-              // LOG.debug("Error on China API Validating" + e.getMessage());
             }
+          } catch (Exception e) {
+            e.printStackTrace();
+            result.setDetails("Error on get China API Data Check.");
+            engineData.addRejectionComment("OTH", "Error on  get China API Data Check.", "", "");
+            result.setOnError(true);
+            result.setResults("Error on  get China API Data Check.");
+            // LOG.debug("Error on China API Validating" + e.getMessage());
           }
 
         }
@@ -213,8 +212,6 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
         // List<IntlAddr> zi01AddrList =
         // Map<String, IntlAddr> noSoldToAddrListMap = new HashMap<String,
         // IntlAddr>();
-        HashMap<String, IntlAddr> noSoldToAddrMap = new HashMap<String, IntlAddr>();
-        HashMap<String, IntlAddrRdc> noSoldToAddrRdcMap = new HashMap<String, IntlAddrRdc>();
 
         List<IntlAddr> zi01AddrList = new ArrayList<IntlAddr>();
         List<IntlAddrRdc> zi01AddrRdcList = new ArrayList<IntlAddrRdc>();
@@ -256,13 +253,18 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
 
         // if non-sodeTo address type's Chinese name and address has changed
         if (zi01AddrList != null && zi01AddrList.size() > 0) {
-          compareAddr(zi01AddrList, zi01AddrRdcList, result, details);
+          compareAddr(soldToIntlAddr, soldToIntlAddrRdc, zi01AddrList, zi01AddrRdcList, result, details, engineData);
         }
         if (zi01AddrList != null && zi01AddrList.size() > 0) {
-          compareAddr(zp01AddrList, zp01AddrRdcList, result, details);
+          compareAddr(soldToIntlAddr, soldToIntlAddrRdc, zp01AddrList, zp01AddrRdcList, result, details, engineData);
         }
         if (zi01AddrList != null && zi01AddrList.size() > 0) {
-          compareAddr(zd01AddrList, zd01AddrRdcList, result, details);
+          compareAddr(soldToIntlAddr, soldToIntlAddrRdc, zd01AddrList, zd01AddrRdcList, result, details, engineData);
+        }
+        if (result.isOnError()) {
+          details.append("The Chinese name or address of the non-SOLDTO address type has been changed." + "Please attach supporting document.").append("\n");
+          result.setDetails(details.toString().trim());
+          return result;
         }
 
         // Boolean nameCheckSuccess = true;
@@ -278,6 +280,7 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
 
         result.setProcessOutput(validation);
         result.setDetails(details.toString().trim());
+        
       } else {
         details.append("Missing main address on the request.").append("\n");
         engineData.addRejectionComment("OTH", "Missing main address on the request.", "", "");
@@ -296,12 +299,20 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
     return result;
   }
 
-  private void compareAddr(List<IntlAddr> addrList, List<IntlAddrRdc> addrRdcList, AutomationResult<ValidationOutput> result, StringBuilder details) {
+  private void compareAddr(IntlAddr soldToIntlAddr, IntlAddrRdc soldToIntlAddrRdc, List<IntlAddr> addrList, List<IntlAddrRdc> addrRdcList, AutomationResult<ValidationOutput> result, StringBuilder details, AutomationEngineData engineData) {
 
     String cnAddressAddr = null;
     String cnAddressAddrRdc = null;
     String cnNameAddr = null;
     String cnNameAddrRdc = null;
+    String newCnName = soldToIntlAddr.getIntlCustNm1() + (soldToIntlAddr.getIntlCustNm2() != null ? soldToIntlAddr.getIntlCustNm2() : "");
+    String oldCnName = soldToIntlAddrRdc.getIntlCustNm1() + (soldToIntlAddrRdc.getIntlCustNm2() != null ? soldToIntlAddrRdc.getIntlCustNm2() : "");
+    String newCnAddr = soldToIntlAddr.getAddrTxt() + (soldToIntlAddr.getIntlCustNm4() != null ? soldToIntlAddr.getIntlCustNm4() : "");
+    String oldCnAddr = soldToIntlAddrRdc.getAddrTxt() + (soldToIntlAddrRdc.getIntlCustNm4() != null ? soldToIntlAddrRdc.getIntlCustNm4() : "");
+    if (oldCnName.equals(newCnName) || oldCnAddr.equals(newCnAddr)) {
+      return;
+    }
+    
     for (IntlAddr intlAddr : addrList) {
       for (IntlAddrRdc intlAddrRdc : addrRdcList) {
 
@@ -320,19 +331,22 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
             cnAddressAddr = intlAddrRdc.getCity1() + (intlAddrRdc.getCity2() != null ? intlAddrRdc.getCity2() : "");
           }
 
-          if (!(cnNameAddr.equals(cnNameAddrRdc))) {
-            result.setResults("Review Needed");
-            details.append("The Chinese name of the non-SOLDTO address type is changed from " + cnNameAddrRdc + " to " + cnNameAddr).append("\n");
+          if (!cnNameAddr.equals(cnNameAddrRdc)) {
+             result.setResults("Review Needed");
+             engineData.addRejectionComment("OTH", "The Chinese name of the " + intlAddr.getId().getAddrType() + " address type has been changed.", "", "");
+            // details.append("The Chinese name of the non-SOLDTO address type is changed from " + cnNameAddrRdc + " to " + cnNameAddr).append("\n");
             result.setOnError(true);
           }
-          if (!(cnAddressAddr.equals(cnAddressAddrRdc))) {
-            result.setResults("Review Needed");
-            details.append("The Chinese address of the non-SOLDTO address type is changed from " + cnAddressAddrRdc + " to " + cnAddressAddr)
-                .append("\n");
+          if (!cnAddressAddr.equals(cnAddressAddrRdc)) {
+             result.setResults("Review Needed");
+             engineData.addRejectionComment("OTH", "The Chinese address of the " + intlAddr.getId().getAddrType() + " address type has been changed.", "", "");
+            // details.append("The Chinese address of the non-SOLDTO address type is changed from " + cnAddressAddrRdc + " to " + cnAddressAddr)
+            //     .append("\n");
             result.setOnError(true);
           }
           if (result.isOnError()) {
-            details.append("Please attach supporting document.");
+            engineData.addRejectionComment("OTH", intlAddr.getId().getAddrType() + " address type has been changed.", "", "");
+//            details.append(intlAddr.getId().getAddrType() + " address type has been changed. " + "Please attach supporting document.").append("\n");
             result.setDetails(details.toString().trim());
           }
 
@@ -380,7 +394,7 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
 
                 // TODO do pop up to let user choose
                 result.setResults("Overridden");
-                // result.setOnError(false);
+                 result.setOnError(true);
                 details.append("Chinese name has been override by trust source,if you don't agree please attach supporting document.").append("\n");
 
               }
@@ -445,7 +459,7 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
         } else {
           overrideNameAndAddress(cmrsData.getRecord().getName(), cmrsData.getRecord().getRegLocation(), soldToIntlAddr, entityManager);
           result.setResults("Overridden");
-          result.setOnError(true);
+           result.setOnError(true);
           details.append("Chinese address has been override by trust source,if you don't agree please attach supporting document.").append("\n");
         }
 
