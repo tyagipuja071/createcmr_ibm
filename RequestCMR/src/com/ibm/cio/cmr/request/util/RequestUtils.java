@@ -468,7 +468,7 @@ public class RequestUtils {
     boolean includeUser = false;
     String embeddedLink = "";
     if ("COM".equals(history.getReqStatus()) || "COM".equals(admin.getReqStatus())) {
-      embeddedLink = Feedback.generateEmeddedFeedbackLink(data);
+      embeddedLink = Feedback.getNPSUrl(entityManager, admin, data.getCmrIssuingCntry());
     } else if ("PPN".equals(history.getReqStatus())) {
       embeddedLink = Feedback.generateEmeddedContactLink(data);
       includeUser = !StringUtils.isEmpty(embeddedLink);

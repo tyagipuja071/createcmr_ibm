@@ -22,8 +22,7 @@ import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
-import com.ibm.cio.cmr.request.util.RequestUtils;
-import com.ibm.cio.cmr.request.util.SystemParameters;
+import com.ibm.cio.cmr.request.util.Feedback;
 import com.ibm.cio.cmr.request.util.mail.Email;
 import com.ibm.cio.cmr.request.util.mail.MessageType;
 
@@ -51,24 +50,15 @@ public class NPSService extends BaseBatchService {
       buildRequestTypeDescriptions(entityManager);
 
       String template = getEmailTemplate();
-
+      String processor = null;
       Data data = null;
       DataPK dataPK = null;
       String feedbackUrl = null;
-
-      boolean automated = false;
-      String procCenter = null;
-      String processor = null;
 
       for (Admin admin : pending) {
 
         // check first if NPS needs to be sent
         if (shouldSendNPS(entityManager, admin)) {
-
-          LOG.debug("Request " + admin.getId().getReqId() + ":");
-          processor = getProcessor(entityManager, admin.getId().getReqId());
-          automated = StringUtils.isBlank(processor);
-          LOG.debug(" - Requester: " + admin.getRequesterId() + ", Processor: " + processor + ", Automated: " + automated);
 
           // get DATA for country specific survey
           dataPK = new DataPK();
@@ -76,16 +66,8 @@ public class NPSService extends BaseBatchService {
           data = entityManager.find(Data.class, dataPK);
           if (data != null) {
 
-            procCenter = RequestUtils.getProcessingCenter(entityManager, data.getCmrIssuingCntry());
-            LOG.debug(" - Processing Center: " + procCenter);
-
-            feedbackUrl = SystemParameters.getString("NPS.URL");
-            if (StringUtils.isBlank(feedbackUrl)) {
-              feedbackUrl = "https://nps-survey-prod.dal1a.ciocloud.nonprod.intranet.ibm.com/";
-            }
-            feedbackUrl += "?type=" + (automated ? "automation" : "createcmr");
-            feedbackUrl += "&requestID=" + admin.getId().getReqId();
-            feedbackUrl += "&tribe=" + (procCenter != null ? procCenter.toLowerCase().replaceAll(" ", "") : "bratislava");
+            feedbackUrl = Feedback.getNPSUrl(entityManager, admin, data.getCmrIssuingCntry());
+            processor = Feedback.getProcessor(entityManager, admin.getId().getReqId());
 
             LOG.debug(" - Feedback URL: " + feedbackUrl);
 
@@ -150,21 +132,6 @@ public class NPSService extends BaseBatchService {
       }
     }
     return Boolean.TRUE;
-  }
-
-  /**
-   * Checks if the request is automated or not
-   * 
-   * @param entityManager
-   * @param reqId
-   * @return
-   */
-  private String getProcessor(EntityManager entityManager, long reqId) {
-    String sql = "select CREATE_BY_ID from CREQCMR.WF_HIST where REQ_ID = :REQ_ID and REQ_STATUS in ('PVA')";
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("REQ_ID", reqId);
-    query.setForReadOnly(true);
-    return query.getSingleResult(String.class);
   }
 
   /**
