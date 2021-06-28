@@ -2113,6 +2113,10 @@ function afterConfigForRussia() {
     lockCompanyForCEE();
     setSBOValues();
   });
+
+  dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
+    setSBOValues();
+  });
 }
 
 function setSBOafterAddrConfig() {
@@ -2183,13 +2187,13 @@ function setSBOValues() {
     } else if (custSubType == 'XINT') {
       FormManager.setValue('salesBusOffCd', '999');
     }
+  } else if (isu == '34' && ctc == 'Y') {
+    FormManager.setValue('salesBusOffCd', 'R01');
   } else if (dijit.byId('cisServiceCustIndc').get('checked')) {
     FormManager.setValue('salesBusOffCd', 'R04');
   } else {
     if (isu != null && ctc != null && isu != '' && ctc != '') {
-      if (isu == '34' && ctc == 'Y') {
-        FormManager.setValue('salesBusOffCd', 'R01');
-      } else if (custSubType == 'COMME' || custSubType == 'THDPT' || custSubType == 'PRICU') {
+      if (custSubType == 'COMME' || custSubType == 'THDPT' || custSubType == 'PRICU') {
         if (isu == '34' && ctc == 'Q') {
           if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount == 0) {
             FormManager.setValue('salesBusOffCd', '');
@@ -4723,8 +4727,8 @@ function lockCompanyForCEE() {
     if (SysLoc.RUSSIA == cntry) {
       FormManager.readOnly('company');
       FormManager.readOnly('dupEnterpriseNo');
-    }else{
-    	FormManager.readOnly('enterprise');
+    } else {
+      FormManager.readOnly('enterprise');
     }
   }
 }
