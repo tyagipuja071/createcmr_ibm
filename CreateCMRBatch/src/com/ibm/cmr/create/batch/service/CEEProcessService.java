@@ -157,8 +157,9 @@ public class CEEProcessService extends LegacyDirectService {
     String cmrNo = data.getCmrNo();
     String cntry = data.getDupIssuingCntryCd();
     String companyBK = data.getEnterprise();
+    String sboBK = data.getSalesBusOffCd();
     data.setEnterprise(data.getDupEnterpriseNo());
-//    data.setDupSalesBoCd(data.getDupSalesBoCd());
+    data.setSalesBusOffCd(data.getDupSalesBoCd());
     data.setDupSalesRepNo(data.getSalesBusOffCd());
 
     LOG.debug("Issued country. " + cntry + " duplicate issued country used to generated and assigned.");
@@ -351,6 +352,7 @@ public class CEEProcessService extends LegacyDirectService {
       // }
       transformer.transformOtherData(entityManager, legacyObjects, cmrObjects);
       data.setEnterprise(companyBK);
+      data.setSalesBusOffCd(sboBK);
     }
 
     return legacyObjects;
