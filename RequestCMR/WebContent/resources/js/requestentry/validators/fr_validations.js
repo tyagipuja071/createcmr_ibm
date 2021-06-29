@@ -3594,18 +3594,38 @@ function setPPSCEIDRequired() {
   }
 }
 
-function setFieldsOnScenarioChange(fromAddress, scenario, scenarioChanged) {
+var _oldLandedCntry = '';
+function setFieldsOnLandedCountryChange() {
+  var addrType = FormManager.getActualValue('addrType');
+
+  if (addrType == 'ZS01') {
+    if (_oldLandedCntry == '') {
+      // first load - Address modal load
+      _oldLandedCntry = getSoldToLanded();
+    } else {
+      // second load - user clicks Save
+      var currentLanded = FormManager.getActualValue('landCntry');
+      var valueChanged = _oldLandedCntry != currentLanded;
+      if (valueChanged) {
+        var scenario = FormManager.getActualValue('custSubGrp');
+        setFieldsOnScenarioChange(true, scenario, true, currentLanded);
+      }
+    }
+  }
+}
+
+function setFieldsOnScenarioChange(fromAddress, scenario, scenarioChanged, currentLanded) {
   if (FormManager.getActualValue('reqType') == 'C' && scenarioChanged) {
     // Existing ISU/CTC/SBO logic on scenario change
     setISUClientTierOnScenario();
     setSBOOnScenario();
 
     // 2H21 Coverage Changes
-    set2H21CoverageChanges(fromAddress, scenario, scenarioChanged)
+    set2H21CoverageChanges(fromAddress, scenario, scenarioChanged, currentLanded)
   }
 }
 
-function set2H21CoverageChanges(fromAddress, scenario, scenarioChanged) {
+function set2H21CoverageChanges(fromAddress, scenario, scenarioChanged, currentLanded) {
   if (FormManager.getActualValue('reqType') == 'C' && scenarioChanged) {
     if (isExcludedScenario(scenario)) {
       return;
@@ -3614,16 +3634,21 @@ function set2H21CoverageChanges(fromAddress, scenario, scenarioChanged) {
     var custGrp = FormManager.getActualValue('custGrp');
     // Set ISU/CTC based on scenario and landed
     if (custGrp == 'CROSS') {
-      setCoverageIsuCtcBasedOnLandCntry()
+      setCoverageIsuCtcBasedOnLandCntry(fromAddress, currentLanded);
     }
 
     // Set SBO Based on ISU/CTC
-    setCoverageSBOBasedOnIsuCtc()
+    setCoverageSBOBasedOnIsuCtc(currentLanded);
   }
 }
 
-function setCoverageIsuCtcBasedOnLandCntry() {
+function setCoverageIsuCtcBasedOnLandCntry(fromAddress, currentLanded) {
   var landedCountry = getSoldToLanded();
+  if (fromAddress && currentLanded != undefined) {
+    landedCountry = currentLanded;
+  } else {
+    landedCountry = getSoldToLanded();
+  }
   if (isCoverage34QCountry(landedCountry)) {
     FormManager.setValue('isuCd', '34');
     FormManager.setValue('clientTier', 'Q');
@@ -3644,7 +3669,7 @@ function isExcludedScenario(scenario) {
   return false;
 }
 
-function setCoverageSBOBasedOnIsuCtc() {
+function setCoverageSBOBasedOnIsuCtc(currentLanded) {
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
   if (isuCd != '34' || FormManager.getActualValue('reqType') == 'U') {
@@ -3663,7 +3688,13 @@ function setCoverageSBOBasedOnIsuCtc() {
         return;
       }
 
-      var landedCountry = getSoldToLanded();
+      var landedCountry = '';
+      if (currentLanded != undefined) {
+        landedCountry = currentLanded;
+      } else {
+        landedCountry = getSoldToLanded();
+      }
+
       if (custGrp == 'CROSS') {
         if (landedCountry == 'TF' || landedCountry == 'RE') {
           FormManager.setValue('salesBusOffCd', 'ID1ID1');
@@ -3766,4 +3797,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(showIGFOnOpen, '706');
 
   GEOHandler.addAfterTemplateLoad(setFieldsOnScenarioChange, '706');
+  GEOHandler.addAddrFunction(setFieldsOnLandedCountryChange, '706');
 });
