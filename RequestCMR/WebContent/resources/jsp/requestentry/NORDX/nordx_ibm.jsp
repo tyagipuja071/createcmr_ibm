@@ -35,7 +35,18 @@
         <cmr:field fieldId="SalRepNameNo" id="repTeamMemberNo" path="repTeamMemberNo" tabId="MAIN_IBM_TAB" />
       </p>
     </cmr:column>
-            <cmr:column span="2" containerForField="EngineeringBo">
+    
+    <cmr:column span="2" containerForField="SearchTerm">
+      <p>
+        <cmr:label fieldId="searchTerm">
+          <cmr:fieldLabel fieldId="SearchTerm" />:
+           <cmr:delta text="${rdcdata.searchTerm}" oldValue="${reqentry.searchTerm}" id="delta-searchTerm" />
+        </cmr:label>
+        <cmr:field fieldId="SearchTerm" id="searchTerm" path="searchTerm" tabId="MAIN_IBM_TAB"/>
+      </p>
+    </cmr:column>
+    
+    <cmr:column span="2" containerForField="EngineeringBo">
       <p>
         <cmr:label fieldId="engineeringBo">
           <cmr:fieldLabel fieldId="EngineeringBo" />:
@@ -44,5 +55,6 @@
         <cmr:field fieldId="EngineeringBo" id="engineeringBo" path="engineeringBo" tabId="MAIN_IBM_TAB"/>
       </p>
     </cmr:column> 
+    
   </cmr:row>
 </cmr:view>
