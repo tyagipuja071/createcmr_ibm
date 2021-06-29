@@ -269,6 +269,8 @@ public class LDMassProcessMultiRdcService extends MultiThreadedBatchService<Long
           throw processError;
         }
 
+        LOG.debug("Status Codes" + statusCodes);
+
         // *** START OF FIX
         LOG.debug("**** Placing comment on success --> " + comment);
         comment = new StringBuilder();
