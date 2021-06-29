@@ -826,7 +826,7 @@ function addEmbargoCdValidator() {
     return {
       validate : function() {
         var reqType = null;
-		var cmrno = FormManager.getActualValue('enterCMRNo');
+	  var cmrno = FormManager.getActualValue('enterCMRNo');
         var mandt = FormManager.getActualValue('mandt');
         var isscntry = FormManager.getActualValue('cmrIssuingCntry');
         // PayGo_check
