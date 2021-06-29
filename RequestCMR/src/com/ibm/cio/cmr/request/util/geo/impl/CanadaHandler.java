@@ -324,11 +324,11 @@ public class CanadaHandler extends GEOHandler {
       results.add(update);
     }
     // Number of Invoices
-    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getInvoiceSplitCd(), newData.getInvoiceSplitCd())) {
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCusInvoiceCopies(), newData.getCusInvoiceCopies())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "InvoiceSplitCd", "-"));
-      update.setNewData(newData.getInvoiceSplitCd());
-      update.setOldData(oldData.getInvoiceSplitCd());
+      update.setNewData(newData.getCusInvoiceCopies());
+      update.setOldData(oldData.getCusInvoiceCopies());
       results.add(update);
     }
 

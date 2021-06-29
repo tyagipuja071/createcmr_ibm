@@ -436,6 +436,17 @@ public class DataRdc extends BaseEntity<DataPK> implements Serializable {
   @Column(name = "CUST_ACCT_TYP")
   private String custAcctType;
 
+	@Column(name = "CUST_INVOICE_COPIES")
+  private String cusInvoiceCopies;
+  
+  public String getCusInvoiceCopies() {
+  	return cusInvoiceCopies;
+  }
+
+  public void setCusInvoiceCopies(String cusInvoiceCopies) {
+    this.cusInvoiceCopies = cusInvoiceCopies;
+  }
+  
   public String getAbbrevNm() {
     return this.abbrevNm;
   }
