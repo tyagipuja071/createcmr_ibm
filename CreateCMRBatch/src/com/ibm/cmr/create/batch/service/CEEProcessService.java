@@ -159,8 +159,8 @@ public class CEEProcessService extends LegacyDirectService {
     String companyBK = data.getEnterprise();
     String sboBK = data.getSalesBusOffCd();
     data.setEnterprise(data.getDupEnterpriseNo());
-    data.setSalesBusOffCd(data.getDupSalesBoCd());
     data.setDupSalesRepNo(data.getSalesBusOffCd());
+    data.setSalesBusOffCd(data.getDupSalesBoCd());
 
     LOG.debug("Issued country. " + cntry + " duplicate issued country used to generated and assigned.");
 
@@ -518,9 +518,9 @@ public class CEEProcessService extends LegacyDirectService {
     String companyBK = data.getEnterprise();
     String enterpriseBK = data.getTaxCd2();
     String dupSBO = data.getDupSalesBoCd();
+    String sboBK = data.getSalesBusOffCd();
 
-    data.setDupSalesBoCd(data.getSalesBusOffCd());
-    data.setDupSalesRepNo(data.getSalesBusOffCd());
+    data.setDupSalesRepNo(dupSBO);
     data.setCmrIssuingCntry(cntry);
     data.setIsuCd(data.getDupIsuCd());
     data.setClientTier(data.getDupClientTierCd());
@@ -926,8 +926,9 @@ public class CEEProcessService extends LegacyDirectService {
       // }
       // rebuild the address use table
 
-      data.setDupSalesBoCd(data.getSalesBusOffCd());
-      data.setDupSalesRepNo(data.getSalesBusOffCd());
+//      data.setDupSalesBoCd(data.getSalesBusOffCd());
+      data.setDupSalesRepNo(data.getDupSalesBoCd());
+      data.setSalesBusOffCd(sboBK);
       data.setCmrIssuingCntry(cntryBK);
       data.setIsuCd(isuCd);
       data.setClientTier(clientTBK);
