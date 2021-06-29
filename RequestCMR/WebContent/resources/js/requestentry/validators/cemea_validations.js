@@ -4723,8 +4723,8 @@ function lockCompanyForCEE() {
   if (!CEE_INCL.has(cntry)) {
     return;
   }
-  if (CEE_INCL.has(cntry) && role == 'REQUESTER') {
-    if (SysLoc.RUSSIA == cntry && FormManager.getActualValue('reqType') == 'C') {
+  if (CEE_INCL.has(cntry) && 'REQUESTER' == role && 'C' == FormManager.getActualValue('reqType')) {
+    if (SysLoc.RUSSIA == cntry) {
       FormManager.readOnly('enterprise');
       FormManager.readOnly('dupEnterpriseNo');
     } else {
