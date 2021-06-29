@@ -2120,6 +2120,9 @@ function afterConfigForRussia() {
 }
 
 function setSBOafterAddrConfig() {
+  if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
   if (FormManager.getActualValue('addrType') == 'ZS01') {
 
     var custType = FormManager.getActualValue('custGrp');
@@ -2134,13 +2137,13 @@ function setSBOafterAddrConfig() {
       } else if (custSubType == 'XINT') {
         FormManager.setValue('salesBusOffCd', '999');
       }
+    } else if (isu == '34' && ctc == 'Y') {
+      FormManager.setValue('salesBusOffCd', 'R01');
     } else if (dijit.byId('cisServiceCustIndc').get('checked')) {
       FormManager.setValue('salesBusOffCd', 'R04');
     } else {
       if (isu != null && ctc != null && isu != '' && ctc != '') {
-        if (isu == '34' && ctc == 'Y') {
-          FormManager.setValue('salesBusOffCd', 'R01');
-        } else if (custSubType == 'COMME' || custSubType == 'THDPT' || custSubType == 'PRICU') {
+        if (custSubType == 'COMME' || custSubType == 'THDPT' || custSubType == 'PRICU') {
           if (isu == '34' && ctc == 'Q') {
             var postalCode = FormManager.getActualValue('postCd');
             var head3 = "";
