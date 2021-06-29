@@ -826,11 +826,22 @@ function addEmbargoCdValidator() {
     return {
       validate : function() {
         var reqType = null;
+		var cmrno = FormManager.getActualValue('enterCMRNo');
+        var mandt = FormManager.getActualValue('mandt');
+        var isscntry = FormManager.getActualValue('cmrIssuingCntry');
+        // PayGo_check
+        var qParams = {
+          ZZKV_CUSNO : cmrno,
+          MANDT : mandt,
+          KATR6 : isscntry
+        };
+        var paygorecord = cmr.query('CMR_CHECK_PAYGO', qParams);
+        var countpaygo = paygorecord.ret1;
         var emabrgoCd = FormManager.getActualValue('ordBlk');
         if (typeof (_pagemodel) != 'undefined') {
           reqType = FormManager.getActualValue('reqType');
         }
-        if (emabrgoCd == null || emabrgoCd == '88' || emabrgoCd == '94' || emabrgoCd == '') {
+        if (emabrgoCd == null || emabrgoCd == '88' || emabrgoCd == '94' || emabrgoCd == '' || (Number(countpaygo) == 1 && role == 'Processor')) {
           return new ValidationResult(null, true);
         } else {
           return new ValidationResult(null, false, 'Value of Emabrgo code can only be 88, 94 or blank.');
