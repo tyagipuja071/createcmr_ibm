@@ -705,6 +705,26 @@ function addINACValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+/*
+ * AbbrevName, AbbrevLocation fields locked for REQUESTER
+ */
+function lockAbbrevNmLocn() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  var reqType = FormManager.getActualValue('reqType');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  if (role == 'REQUESTER') {
+    if (reqType != 'U') {
+      FormManager.readOnly('abbrevNm');
+      FormManager.readOnly('abbrevLocn');
+    }
+  } else {
+    FormManager.enable('abbrevNm');
+    FormManager.enable('abbrevLocn');
+  }
+}
+
 /* Register CA Javascripts */
 dojo.addOnLoad(function() {
   console.log('adding CA scripts...');
@@ -724,7 +744,7 @@ dojo.addOnLoad(function() {
   // NOTE: do not add multiple addAfterConfig calls to avoid confusion, club the
   // functions on afterConfigForCA
   GEOHandler.addAfterConfig(afterConfigForCA, [ SysLoc.CANADA ]);
-
+  GEOHandler.addAfterConfig(lockAbbrevNmLocn, [ SysLoc.CANADA ]);
   // GEOHandler.addToggleAddrTypeFunction(toggleAddrTypesForCA, [ SysLoc.CANADA
   // ]);
   GEOHandler.addAddrFunction(addCAAddressHandler, [ SysLoc.CANADA ]);
