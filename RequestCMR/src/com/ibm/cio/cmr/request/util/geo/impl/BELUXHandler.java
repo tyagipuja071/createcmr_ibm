@@ -1706,6 +1706,14 @@ public class BELUXHandler extends BaseSOFHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getSoProjectCd(), "IbmDeptCostCenter", cmrCountry));
       results.add(update);
     }
+    // SORTL
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getCommercialFinanced(), newData.getCommercialFinanced())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "CommercialFinanced", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getCommercialFinanced(), "CommercialFinanced", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getCommercialFinanced(), "CommercialFinanced", cmrCountry));
+      results.add(update);
+    }
   }
 
   @Override
