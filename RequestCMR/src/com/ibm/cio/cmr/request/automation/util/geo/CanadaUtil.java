@@ -1,5 +1,6 @@
 package com.ibm.cio.cmr.request.automation.util.geo;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -10,7 +11,9 @@ import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.springframework.ui.ModelMap;
 
+import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
@@ -21,11 +24,17 @@ import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.CoverageContainer;
 import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
+import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.service.CmrClientService;
+import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 
 /**
@@ -269,85 +278,94 @@ public class CanadaUtil extends AutomationUtil {
   public boolean runUpdateChecksForData(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
       RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
     Admin admin = requestData.getAdmin();
-    Addr soldTo = requestData.getAddress("ZS01");
-    String details = StringUtils.isNotBlank(output.getDetails()) ? output.getDetails() : "";
-    StringBuilder detail = new StringBuilder(details);
-    String duns = null;
-    boolean isNegativeCheckNeedeed = false;
-    if (changes != null && changes.hasDataChanges()) {
-      if (changes.isDataChanged("VAT #")) {
-        UpdatedDataModel vatChange = changes.getDataChange("VAT #");
-        if (vatChange != null) {
-          if ((StringUtils.isBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData()))
-              || (StringUtils.isNotBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData()))) {
-            // check if the name + VAT exists in D&B
-            List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
-            if (matches.isEmpty()) {
-              // get DnB matches based on all address details
-              matches = getMatches(requestData, engineData, soldTo, false);
-            }
-            String custName = soldTo.getCustNm1() + (StringUtils.isBlank(soldTo.getCustNm2()) ? "" : " " + soldTo.getCustNm2());
-            if (!matches.isEmpty()) {
-              for (DnBMatchingResponse dnbRecord : matches) {
-                if ("Y".equals(dnbRecord.getOrgIdMatch()) && (StringUtils.isNotEmpty(custName) && StringUtils.isNotEmpty((dnbRecord.getDnbName()))
-                    && StringUtils.getLevenshteinDistance(custName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) <= 5)) {
-                  duns = dnbRecord.getDunsNo();
-                  isNegativeCheckNeedeed = false;
-                  break;
-                }
-                isNegativeCheckNeedeed = true;
-              }
-            }
-            if (isNegativeCheckNeedeed) {
-              detail.append("Updates to VAT need verification as VAT and legal name doesn't matches DnB.\n");
-              LOG.debug("Updates to VAT need verification as VAT and legal name doesn't matches DnB.");
-            } else {
-              detail.append("Updates to VAT matches DnB.\n DUNS No :" + duns + "\n");
-              LOG.debug("Updates to VAT matches DnB.\n DUNS No :" + duns + "\n");
-            }
+    Data data = requestData.getData();
 
-          } else if (StringUtils.isNotBlank(vatChange.getOldData()) && StringUtils.isBlank(vatChange.getNewData())) {
-            admin.setScenarioVerifiedIndc("N");
-            entityManager.merge(admin);
-            detail.append("Setting scenario verified indc= N as VAT is blank.\n");
-            LOG.debug("Setting scenario verified indc= N as VAT is blank.");
-          } else if (StringUtils.isNotBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData())) {
-            isNegativeCheckNeedeed = true;
-            detail.append("Updates to VAT need verification.\n");
-            LOG.debug("Updates to VAT need verification.");
+    // if (handlePrivatePersonRecord(entityManager, admin, output, validation,
+    // engineData)) {
+    // return true;
+    // }
+
+    StringBuilder details = new StringBuilder();
+    boolean cmdeReview = false;
+    EntityManager cedpManager = JpaManager.getEntityManager("CEDP");
+    List<String> ignoredUpdates = new ArrayList<String>();
+    for (UpdatedDataModel change : changes.getDataUpdates()) {
+      switch (change.getDataField()) {
+      case "VAT #":
+        if (!StringUtils.isBlank(change.getNewData())) {
+          Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
+          List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
+          boolean matchesDnb = false;
+          if (matches != null) {
+            // check against D&B
+            matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
+          }
+          if (!matchesDnb) {
+            cmdeReview = true;
+            engineData.addNegativeCheckStatus("_chVATCheckFailed", "VAT # on the request did not match D&B");
+            details.append("VAT # on the request did not match D&B\n");
+          } else {
+            details.append("VAT # on the request matches D&B\n");
           }
 
         }
-      } else {
-        boolean otherFieldsChanged = false;
-        for (UpdatedDataModel dataChange : changes.getDataUpdates()) {
-          if (dataChange != null && !"CAP Record".equals(dataChange.getDataField())) {
-            otherFieldsChanged = true;
-            break;
+        break;
+      case "Order Block Code":
+        if ("94".equals(change.getOldData()) || "94".equals(change.getNewData())) {
+          cmdeReview = true;
+        }
+        break;
+      case "ISIC":
+      case "Subindustry":
+      case "INAC/NAC Code":
+        String error = performInacCheck(cedpManager, entityManager, requestData);
+        if (StringUtils.isNotBlank(error)) {
+          if ("BG_ERROR".equals(error)) {
+            cmdeReview = true;
+            engineData.addNegativeCheckStatus("_chINACCheckFailed",
+                "The projected global buying group during INAC checks did not match the one on the request.");
+            details.append("The projected global buying group during INAC checks did not match the one on the request.\n");
+          } else {
+            return true;
           }
         }
-        if (otherFieldsChanged) {
-          isNegativeCheckNeedeed = true;
-          detail.append("Updates to data were found, review is required.\n");
-          LOG.debug("Updates to data were found, review is required.");
-        }
+        break;
+      case "Tax Code":
+        // noop, for switch handling only
+        break;
+      case "Client Tier Code":
+        // noop, for switch handling only
+        break;
+      case "ISU Code":
+        // noop, for switch handling only
+        break;
+      case "SORTL":
+        // noop, for switch handling only
+        break;
+      default:
+        ignoredUpdates.add(change.getDataField());
+        break;
       }
-
     }
-    if (isNegativeCheckNeedeed) {
-      validation.setSuccess(false);
-      validation.setMessage("Not validated");
-      engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updated elements cannot be checked automatically.");
 
+    if (cmdeReview) {
+      engineData.addNegativeCheckStatus("_chDataCheckFailed", "Updates to one or more fields cannot be validated.");
+      details.append("Updates to one or more fields cannot be validated.\n");
+      validation.setSuccess(false);
+      validation.setMessage("Not Validated");
     } else {
       validation.setSuccess(true);
-      validation.setMessage("Validated");
-      if (detail.toString().isEmpty()) {
-        detail.append("No data updates made on the request");
+      validation.setMessage("Successful");
+    }
+    if (!ignoredUpdates.isEmpty()) {
+      details.append("Updates to the following fields skipped validation:\n");
+      for (String field : ignoredUpdates) {
+        details.append(" - " + field + "\n");
       }
     }
-    output.setDetails(detail.toString());
+    output.setDetails(details.toString());
     output.setProcessOutput(validation);
+
     return true;
   }
 
@@ -546,6 +564,65 @@ public class CanadaUtil extends AutomationUtil {
   @Override
   public List<String> getSkipChecksRequestTypesforCMDE() {
     return Arrays.asList("C", "U", "M");
+  }
+
+  /**
+   * Checks to perform if INAC field updated.
+   * 
+   * @param cedpManager
+   * @param entityManager
+   * @param requestData
+   * @return An error message if validation failed, null if validated.
+   * @throws Exception
+   */
+  private String performInacCheck(EntityManager cedpManager, EntityManager entityManager, RequestData requestData) throws Exception {
+    Data data = requestData.getData();
+    String error = "The CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle.\nLink:- https://jira.data.zc2.ibm.com/servicedesk/customer/portal/14";
+    String sql = ExternalizedQuery.getSql("AUTO.CA.GET_CMR_REVENUE");
+    PreparedQuery query = new PreparedQuery(cedpManager, sql);
+    query.setParameter("CMR_NO", data.getCmrNo());
+    query.setForReadOnly(true);
+    List<Object[]> results = query.getResults(1);
+    if (results != null && results.size() > 0) {
+      BigDecimal revenue = new BigDecimal(0);
+      if (results.get(0)[1] != null) {
+        revenue = (BigDecimal) results.get(0)[1];
+      }
+      if (revenue.floatValue() > 0) {
+        return error + "\n- CMR with revenue";
+      } else if (revenue.floatValue() == 0) {
+        sql = ExternalizedQuery.getSql("AUTO.CA.INAC_DUNS_CHECK");
+        query = new PreparedQuery(entityManager, sql);
+        query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+        query.setParameter("CMR_NO", data.getCmrNo());
+        query.setParameter("INAC", data.getInacCd());
+        query.setForReadOnly(true);
+        results = query.getResults(1);
+        if (results != null && !results.isEmpty()) {
+          // String guDunsNo = (String) results.get(0)[0];
+          String gbgIdDb = (String) results.get(0)[1];
+
+          CmrClientService odmService = new CmrClientService();
+          RequestEntryModel model = requestData.createModelFromRequest();
+          Addr soldTo = requestData.getAddress("ZS01");
+          ModelMap response = new ModelMap();
+
+          odmService.getBuyingGroup(entityManager, soldTo, model, response);
+          String gbgId = (String) response.get("globalBuyingGroupID");
+          if (StringUtils.isBlank(gbgId)) {
+            gbgId = gbgIdDb;
+          }
+
+          if (StringUtils.isBlank(gbgId) || (StringUtils.isNotBlank(gbgId) && !gbgId.equals(data.getGbgId()))) {
+            return "BG_ERROR";
+          }
+
+        } else {
+          return error + "\n- Target INAC is not under the same GU DUNs/parent";
+        }
+      }
+    }
+    return null;
   }
 
 }
