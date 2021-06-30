@@ -4007,14 +4007,12 @@ function searchTermValidation() {
               }, false, 'STORL should be exactly 4 digits long.');
             }
           } else {
-            if (searchTerm.length == 4 || searchTerm.length == 8) {
-              return new ValidationResult(null, true);
-            } else {
+            if (searchTerm.length != 8) {
               return new ValidationResult({
                 id : 'searchTerm',
                 type : 'text',
                 name : 'searchTerm'
-              }, false, 'STORL should be exactly 4 or 8 digits long.');
+              }, false, 'STORL should be exactly 8 digits long.');
             }
           }
 
