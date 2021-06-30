@@ -434,15 +434,38 @@ function addFieldHandlers() {
 var _pstExemptHandler = null;
 function addPSTExemptHandler() {
 
+  var label = dojo.query('label[for="PSTExemptLicNum"]');
+  var mand = '<span style="color:red" class="cmr-ast" id="ast-PSTExemptLicNum">* </span>';
+  if (label && label[0]) {
+    var change = dojo.query(label[0]).query('img.cmr-delta-icon');
+    if (change && change[0]) {
+      dojo.place(mand, change[0], 'before');
+    } else {
+      var info = dojo.query(label[0]).query('img.cmr-info-bubble');
+      if (info && info[0]) {
+        dojo.place(mand, info[0], 'before');
+      } else {
+        dojo.place(mand, label[0], 'last');
+      }
+    }
+  }
+
   if (_pstExemptHandler == null) {
     _pstExemptHandler = dojo.connect(FormManager.getField('PSTExempt'), 'onClick', function(value) {
       if (dojo.byId('PSTExempt').checked) {
         FormManager.addValidator('PSTExemptLicNum', Validators.REQUIRED, [ 'PST Exemption License Number' ], 'MAIN_CUST_TAB');
+        dojo.byId('ast-PSTExemptLicNum').style.display = 'inline-block';
       } else {
         FormManager.removeValidator('PSTExemptLicNum', Validators.REQUIRED);
+        dojo.byId('ast-PSTExemptLicNum').style.display = 'none';
       }
     });
   }
+  // Toggle PST License Number Required Marker
+  if (dojo.byId('PSTExempt').checked) {
+    dojo.byId('ast-PSTExemptLicNum').style.display = 'inline-block';
+  }
+
 }
 
 function addLocationNoValidator() {
