@@ -233,7 +233,7 @@ public class LDMassProcessRdcWorker implements Runnable {
         }
 
         massUpdt.setRowStatusCd(MASS_UPDATE_DONE);
-        admin.setReqStatus(CmrConstants.REQUEST_STATUS.COM.toString());
+        // admin.setReqStatus(CmrConstants.REQUEST_STATUS.COM.toString());
         rdcProcessStatusMsgs.add(CmrConstants.RDC_STATUS_COMPLETED);
       } else {
         if (CmrConstants.RDC_STATUS_ABORTED.equals(resultCode) && CmrConstants.RDC_STATUS_ABORTED.equals(processingStatus)) {
@@ -267,7 +267,7 @@ public class LDMassProcessRdcWorker implements Runnable {
         LOG.debug(comment.toString());
       }
       entityManager.merge(massUpdt);
-      entityManager.merge(admin);
+      // entityManager.merge(admin);
       entityManager.flush();
     } catch (Exception e) {
       LOG.debug("Error in processing Mass Update: Request " + massUpdt.getId().getParReqId() + " Iter " + massUpdt.getId().getIterationId() + " Seq "
