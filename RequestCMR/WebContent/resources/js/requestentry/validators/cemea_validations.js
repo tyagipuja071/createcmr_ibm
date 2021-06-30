@@ -4715,7 +4715,6 @@ function setCEESBOValuesForIsuCtc() {
 }
 
 function lockCompanyForCEE() {
-
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
@@ -4733,6 +4732,9 @@ function lockCompanyForCEE() {
     } else {
       FormManager.readOnly('enterprise');
     }
+  }
+  if (CEE_INCL.has(cntry) && 'REQUESTER' == role) {
+    FormManager.readOnly('salesBusOffCd');
   }
 }
 
