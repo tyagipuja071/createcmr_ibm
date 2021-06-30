@@ -725,6 +725,27 @@ function lockAbbrevNmLocn() {
   }
 }
 
+function updateMainCustomerNames(cntry, addressMode, saving, finalSave, force) {
+  if (finalSave || force) {
+    var trgType = 'ZS01';
+    if (typeof (GEOHandler) != 'undefined') {
+      trgType = GEOHandler.getAddressTypeForName();
+    }
+    console.log('Target Address Type: ' + trgType);
+
+    var addrType = FormManager.getActualValue('addrType');
+    if (addrType == trgType || force) {
+      var nm1 = FormManager.getActualValue('mainCustNm1');
+      var nm2 = FormManager.getActualValue('mainCustNm2');
+
+      console.log('Setting Customer Names: ' + nm1 + ' - ' + nm2);
+      FormManager.setValue('mainCustNm1', nm1);
+      FormManager.setValue('mainCustNm2', nm2);
+      FormManager.setValue('mainAddrType', addrType);
+    }
+  }
+}
+
 /* Register CA Javascripts */
 dojo.addOnLoad(function() {
   console.log('adding CA scripts...');
