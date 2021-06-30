@@ -27,6 +27,7 @@ function afterConfigForNORDX() {
   }
   if (reqType == 'U') {
     if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+      cmr.hideNode("container-EngineeringBo"); // CREATCMR-2674
       cmr.hideNode("container-SalesBusOff"); // CMR-1650
       return;
     }
@@ -3995,6 +3996,28 @@ function searchTermValidation() {
               name : 'searchTerm'
             }, false, 'The value of SORTL is invalid, please use only alphanumeric characters.');
           }
+
+          var countryUse = FormManager.getActualValue('countryUse');
+          if (countryUse == '702EE' || countryUse == '702LT' || countryUse == '702LV') {
+            if (searchTerm.length != 4) {
+              return new ValidationResult({
+                id : 'searchTerm',
+                type : 'text',
+                name : 'searchTerm'
+              }, false, 'STORL should be exactly 4 digits long.');
+            }
+          } else {
+            if (searchTerm.length == 4 || searchTerm.length == 8) {
+              return new ValidationResult(null, true);
+            } else {
+              return new ValidationResult({
+                id : 'searchTerm',
+                type : 'text',
+                name : 'searchTerm'
+              }, false, 'STORL should be exactly 4 or 8 digits long.');
+            }
+          }
+
           return new ValidationResult(null, true);
         }
       }
