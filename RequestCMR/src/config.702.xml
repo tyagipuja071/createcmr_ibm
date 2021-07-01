@@ -83,7 +83,7 @@
 					<width>20</width>
 					<length>6</length>
 				</column>
-				<column exactLength="true">
+				<column>
 					<label>SORTL</label>
 					<dbColumn>SEARCH_TERM</dbColumn>
 					<width>10</width>
