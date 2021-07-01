@@ -4743,7 +4743,7 @@ function lockCompanyForCEE() {
       FormManager.readOnly('enterprise');
     }
   }
-  if (CEE_INCL.has(cntry) && 'REQUESTER' == role) {
+  if (CEE_INCL.has(cntry) && 'REQUESTER' == role && 'C' == FormManager.getActualValue('reqType')) {
     FormManager.readOnly('salesBusOffCd');
   }
 }
