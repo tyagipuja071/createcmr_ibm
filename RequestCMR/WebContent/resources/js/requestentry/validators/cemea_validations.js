@@ -4605,10 +4605,13 @@ function setCEESBOValuesForIsuCtc() {
     var readOnly = false;
     var custSubGrp = FormManager.getActualValue('custSubGrp');
 
-    if ((custSubGrp == 'BUSPR' || custSubGrp == 'XBP') && isuCtc == '8B7') {
+    if ((custSubGrp == 'BUSPR' || custSubGrp == 'XBP' || custSubGrp == 'RSBP' || custSubGrp == 'RSXBP' || custSubGrp == 'CSBP' || custSubGrp == 'MEBP')
+        && isuCtc == '8B7') {
       FormManager.setValue('salesBusOffCd', "000");
     }
-    if ((custSubGrp == 'INTER' || custSubGrp == 'INTSO' || custSubGrp == 'XINT' || custSubGrp == 'XISO') && isuCtc == '217') {
+    if ((custSubGrp == 'INTER' || custSubGrp == 'INTSO' || custSubGrp == 'XINT' || custSubGrp == 'XISO' || custSubGrp == 'RSINT'
+        || custSubGrp == 'RSXIN' || custSubGrp == 'CSINT' || custSubGrp == 'MEINT')
+        && isuCtc == '217') {
       FormManager.setValue('salesBusOffCd', "999");
     }
 
