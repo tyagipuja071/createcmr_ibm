@@ -1527,6 +1527,9 @@ function setISUCTCValuesForCEE(isuCd) {
     FormManager.setValue('isuCd', '34');
     FormManager.setValue('clientTier', 'Q');
   }
+  if (FormManager.getActualValue('custSubGrp') == 'MEINT') {
+    FormManager.setValue('isuCd', '21');
+  }
 }// End of CreateCMR-811
 
 // CMR-6057 setup ISU value for 821 Dup countries
