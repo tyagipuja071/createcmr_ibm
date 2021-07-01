@@ -117,6 +117,7 @@ function afterConfigForCN() {
       FormManager.readOnly('custClass');
     }
   }
+  FormManager.show('DisableAutoProcessing', 'disableAutoProc');
 
   if (_landCntryHandler == null) {
     _landCntryHandler = dojo.connect(FormManager.getField('landCntry'), 'onChange', function(value) {
