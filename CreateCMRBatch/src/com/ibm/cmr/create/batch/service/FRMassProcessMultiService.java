@@ -8,9 +8,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -121,7 +120,7 @@ public class FRMassProcessMultiService extends MultiThreadedBatchService<Long> {
       query.setParameter("REQ_ID", admin.getId().getReqId());
       query.setParameter("ITER_ID", admin.getIterationId());
 
-      List<MassUpdt> results = query.getResults(MassUpdt.class);
+      List<MassUpdt> resultsMain = query.getResults(MassUpdt.class);
       List<String> statusCodes = new ArrayList<String>();
       StringBuilder comment = new StringBuilder();
 
@@ -129,8 +128,7 @@ public class FRMassProcessMultiService extends MultiThreadedBatchService<Long> {
       String applicationId = BatchUtil.getAppId(data.getCmrIssuingCntry());
       List<String> rdcProcessStatusMsgs = new ArrayList<String>();
       HashMap<String, String> overallStatus = new HashMap<String, String>();
-
-      if (results != null && results.size() > 0) {
+      if (resultsMain != null && resultsMain.size() > 0) {
         // 2. If results are not empty, lock the admin record
         lockRecord(entityManager, admin);
         int threads = 5;
@@ -140,26 +138,41 @@ public class FRMassProcessMultiService extends MultiThreadedBatchService<Long> {
         }
 
         LOG.debug("Worker threads to use: " + threads);
-        LOG.debug("Number of records found: " + results.size());
+        LOG.debug("Number of records found: " + resultsMain.size());
         LOG.debug("Starting processing mass update lines at " + new Date());
 
         emf = Persistence.createEntityManagerFactory(BatchEntryPoint.DEFAULT_BATCH_PERSISTENCE_UNIT);
 
         List<FRMassProcessWorker> workers = new ArrayList<FRMassProcessWorker>();
-        ScheduledExecutorService executor = Executors.newScheduledThreadPool(threads, new WorkerThreadFactory(getThreadName()));
-        for (MassUpdt sMassUpdt : results) {
-          FRMassProcessWorker worker = new FRMassProcessWorker(emf, admin, data, sMassUpdt, BATCH_USER_ID);
-          executor.schedule(worker, 5, TimeUnit.SECONDS);
-          workers.add(worker);
-        }
-
-        executor.shutdown();
-        while (!executor.isTerminated()) {
-          try {
-            Thread.sleep(5000);
-          } catch (InterruptedException e) {
-            // noop
+        while (resultsMain.size() > 0) {
+          List<MassUpdt> results = new LinkedList<MassUpdt>();
+          for (int i = 0; i < 50; i++) {
+            if (resultsMain.size() > 0) {
+              results.add(resultsMain.remove(0));
+            } else {
+              break;
+            }
           }
+
+          LOG.debug(" - Processing " + results.size() + " subrecords...");
+          ExecutorService executor = Executors.newFixedThreadPool(threads, new WorkerThreadFactory(getThreadName() + reqId));
+          for (MassUpdt sMassUpdt : results) {
+            FRMassProcessWorker worker = new FRMassProcessWorker(emf, admin, data, sMassUpdt, BATCH_USER_ID);
+            executor.execute(worker);
+            workers.add(worker);
+          }
+
+          executor.shutdown();
+          while (!executor.isTerminated()) {
+            try {
+              Thread.sleep(5000);
+            } catch (InterruptedException e) {
+              // noop
+            }
+          }
+
+          // execute close every 50
+          entityManager.close();
         }
 
         LOG.debug("Finished processing mass update lines at " + new Date());
