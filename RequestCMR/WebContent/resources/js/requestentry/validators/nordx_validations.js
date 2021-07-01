@@ -222,6 +222,7 @@ function lockEmbargo() {
  */
 var _ISUHandler = null;
 var _CTCHandler = null;
+var _subIndCdHandler1 = null;
 // var _SalesRepHandler = null;
 var _AdminDSCHandler = null;
 var _vatExemptHandler = null;
@@ -229,6 +230,8 @@ var _poSteertNorwayFin = null;
 var _PostalCodeHandler = null;
 var _ExpediteHandler = null;
 var _ISICHandler = null; // CMR-1993
+
+var cnt = 0;
 
 function addHandlersForNORDX() {
 
@@ -248,6 +251,16 @@ function addHandlersForNORDX() {
       // cleanupACdminDSAndSRValues();// CMR-1746
     });
   }
+
+  _subIndCdHandler1 = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
+    if (cnt >= 1) {
+      if (value != null && value.length > 1) {
+        setSRValuesBaseOnSubInd();
+        FormManager.readOnly('subIndustryCd');// CMR-1993
+      }
+    }
+
+  });
 
   // if (_SalesRepHandler == null) {
   // _SalesRepHandler = dojo.connect(FormManager.getField('repTeamMemberNo'),
@@ -271,6 +284,7 @@ function addHandlersForNORDX() {
 
   if (_ISICHandler == null) {
     _ISICHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
+      cnt++;
       FormManager.readOnly('subIndustryCd'); // CMR-1993
     });
   }
@@ -4130,9 +4144,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setSensitiveFlag, GEOHandler.NORDX);
 
   // CREATCMR-2674
-  // GEOHandler.registerValidator(searchTermValidation, GEOHandler.NORDX, null,
-  // true);
-  GEOHandler.addAfterConfig(searchTermValidation, GEOHandler.NORDX);
-  GEOHandler.addAfterTemplateLoad(searchTermValidation, GEOHandler.NORDX);
+  GEOHandler.registerValidator(searchTermValidation, GEOHandler.NORDX, null, true);
+  // GEOHandler.addAfterConfig(searchTermValidation, GEOHandler.NORDX);
+  // GEOHandler.addAfterTemplateLoad(searchTermValidation, GEOHandler.NORDX);
 
 });
