@@ -225,7 +225,7 @@ public class SWISSMassProcessMultiService extends MultiThreadedBatchService<Long
       query.setParameter("REQ_ID", admin.getId().getReqId());
       query.setParameter("ITER_ID", admin.getIterationId());
 
-      List<MassUpdt> results = query.getResults(MassUpdt.class);
+      List<MassUpdt> resultsMain = query.getResults(MassUpdt.class);
       List<String> statusCodes = new ArrayList<String>();
 
       ProcessResponse response = null;
@@ -233,7 +233,7 @@ public class SWISSMassProcessMultiService extends MultiThreadedBatchService<Long
       List<String> rdcProcessStatusMsgs = new ArrayList<String>();
       HashMap<String, String> overallStatus = new HashMap<String, String>();
       StringBuilder comment = new StringBuilder();
-      if (results != null && results.size() > 0) {
+      if (resultsMain != null && resultsMain.size() > 0) {
 
         int threads = 5;
         String threadCount = BatchUtil.getProperty("multithreaded.threadCount");
@@ -245,25 +245,38 @@ public class SWISSMassProcessMultiService extends MultiThreadedBatchService<Long
 
         LOG.debug("Worker threads to use: " + threads);
         LOG.debug("Starting processing SWISS mass update at " + new Date());
-        LOG.debug("Number of records found: " + results.size());
+        LOG.debug("Number of records found: " + resultsMain.size());
 
         emf = Persistence.createEntityManagerFactory(BatchEntryPoint.DEFAULT_BATCH_PERSISTENCE_UNIT);
 
         List<SWISSMassWorker> workers = new ArrayList<SWISSMassWorker>();
-        ExecutorService executor = Executors.newFixedThreadPool(threads, new WorkerThreadFactory("SWISSMassWorker-" + reqId));
-        for (MassUpdt sMassUpdt : results) {
-          SWISSMassWorker worker = new SWISSMassWorker(emf, sMassUpdt, admin, data, BATCH_USER_ID);
-          executor.execute(worker);
-          workers.add(worker);
-        }
-
-        executor.shutdown();
-        while (!executor.isTerminated()) {
-          try {
-            Thread.sleep(5000);
-          } catch (InterruptedException e) {
-            // noop
+        while (resultsMain.size() > 0) {
+          List<MassUpdt> results = new LinkedList<MassUpdt>();
+          for (int i = 0; i < 50; i++) {
+            if (resultsMain.size() > 0) {
+              results.add(resultsMain.remove(0));
+            } else {
+              break;
+            }
           }
+          ExecutorService executor = Executors.newFixedThreadPool(threads, new WorkerThreadFactory("SWISSMassWorker-" + reqId));
+          for (MassUpdt sMassUpdt : results) {
+            SWISSMassWorker worker = new SWISSMassWorker(emf, sMassUpdt, admin, data, BATCH_USER_ID);
+            executor.execute(worker);
+            workers.add(worker);
+          }
+
+          executor.shutdown();
+          while (!executor.isTerminated()) {
+            try {
+              Thread.sleep(5000);
+            } catch (InterruptedException e) {
+              // noop
+            }
+          }
+
+          // execute flush every 50
+          entityManager.flush();
         }
         LOG.debug("Mass create processing finished at " + new Date());
         Exception processError = null;
