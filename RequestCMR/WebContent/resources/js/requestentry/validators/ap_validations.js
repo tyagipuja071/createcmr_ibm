@@ -309,8 +309,11 @@ function setInacByClusterHKMO() {
     FormManager.resetDropdownValues(FormManager.getField('inacCd'));
     FormManager.resetDropdownValues(FormManager.getField('inacType'));
     var custSubGrp = FormManager.getActualValue('custSubGrp');
-    if (custSubGrp =='BUSPR' || custSubGrp =='XBUSP') {
+    if (custSubGrp =='BUSPR' || custSubGrp =='XBUSP' || custSubGrp =='INTER' || custSubGrp =='DUMMY' || custSubGrp =='XDUMM' || custSubGrp =='XINT') {
       FormManager.setValue('mrcCd', '2');
+      if (custSubGrp =='DUMMY' || custSubGrp =='XDUMM') {
+      FormManager.removeValidator('cmrNoPrefix', Validators.REQUIRED);
+      }
     } else {
       FormManager.setValue('mrcCd', '3');
     }
