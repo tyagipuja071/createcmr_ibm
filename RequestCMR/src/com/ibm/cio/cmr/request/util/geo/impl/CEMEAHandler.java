@@ -1152,7 +1152,7 @@ public class CEMEAHandler extends BaseSOFHandler {
         if (!StringUtils.isEmpty(abbrevNm) && abbrevNm.endsWith(" CIS")) {
           // 4606 Russia CIS Duplicate CMR
           Map<String, Object> dupRecordV = getDupCMRFieldValue(dupCntry, dupCmrNo);
-          data.setDupEnterpriseNo(dupRecordV.get("ZZKV_NODE1").toString());
+          // data.setDupEnterpriseNo(dupRecordV.get("ZZKV_NODE1").toString());
           LOG.debug("CompanyNo2: " + data.getDupEnterpriseNo());
           data.setDupSalesRepNo(this.currentImportValues.get("SR"));
           LOG.debug("SalRepNameNo2: " + data.getDupSalesRepNo());

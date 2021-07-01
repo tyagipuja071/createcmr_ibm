@@ -2130,7 +2130,9 @@ function setSBOafterAddrConfig() {
     var ctc = FormManager.getActualValue('clientTier');
     var custSubType = FormManager.getActualValue('custSubGrp');
     if (custType == 'CROSS') {
-      if (custSubType == 'XCOM' || custSubType == 'XTP') {
+      if (dijit.byId('cisServiceCustIndc').get('checked')) {
+        FormManager.setValue('salesBusOffCd', 'R04');
+      } else if (custSubType == 'XCOM' || custSubType == 'XTP') {
         FormManager.setValue('salesBusOffCd', 'R02');
       } else if (custSubType == 'XBP') {
         FormManager.setValue('salesBusOffCd', '000');
@@ -2183,7 +2185,9 @@ function setSBOValues() {
   var ctc = FormManager.getActualValue('clientTier');
   var custSubType = FormManager.getActualValue('custSubGrp');
   if (custType == 'CROSS') {
-    if (custSubType == 'XCOM' || custSubType == 'XTP') {
+    if (dijit.byId('cisServiceCustIndc').get('checked')) {
+      FormManager.setValue('salesBusOffCd', 'R04');
+    } else if (custSubType == 'XCOM' || custSubType == 'XTP') {
       FormManager.setValue('salesBusOffCd', 'R02');
     } else if (custSubType == 'XBP') {
       FormManager.setValue('salesBusOffCd', '000');
