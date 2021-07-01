@@ -951,6 +951,7 @@ public class NORDXHandler extends BaseSOFHandler {
       data.setGeoLocDesc("");
       data.setGbgId("");
       data.setGbgDesc("");
+      data.setSearchTerm("");
       data.setMilitary(null);
       return;
     }
