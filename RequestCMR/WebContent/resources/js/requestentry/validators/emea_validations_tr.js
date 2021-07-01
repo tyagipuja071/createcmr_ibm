@@ -67,6 +67,42 @@ function getImportedIndcForItaly() {
   return _importedIndc;
 
 }
+
+// CREATCMR-2657 for TURKEY
+function setSORTL() {
+  if (FormManager.getActualValue('cmrIssuingCntry') != '862') {
+    return;
+  }
+  _clientTierHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
+    var clientTier = FormManager.getActualValue('clientTier');
+    var reqType = FormManager.getActualValue('reqType');
+    var isu = FormManager.getActualValue('isuCd');
+    if (isu == '34' && clientTier == 'Y' && reqType == 'C') {
+      FormManager.setValue('salesBusOffCd','A20');
+      FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), [ '', 'A20' ]);    
+    }
+    lockSORTL();
+  }); 
+ }
+
+// CREATCMR-2657 lock SORTL field for turkey
+function lockSORTL() {
+  if (FormManager.getActualValue('cmrIssuingCntry') != '862') {
+    return;
+  }
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var reqType = FormManager.getActualValue('reqType');
+  var clientTier = FormManager.getActualValue('clientTier');
+  if (reqType == 'U' || reqType == 'C') {
+    if (role == 'REQUESTER') {
+      FormManager.readOnly('salesBusOffCd');
+    } 
+    else if (role == 'PROCESSOR') {
+      FormManager.enable('salesBusOffCd');
+    }
+  }
+ }
+
 function addEMEALandedCountryHandler(cntry, addressMode, saving, finalSave) {
   if (!saving) {
     if (addressMode == 'newAddress') {
@@ -149,7 +185,10 @@ function lockEmbargo() {
   }
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var issu_cntry = FormManager.getActualValue('cmrIssuingCntry');
-  if (role == 'REQUESTER') {
+  if (issu_cntry == '862') {
+    lockSORTL();
+  }
+   if (role == 'REQUESTER') {
     if ((issu_cntry == '866' || issu_cntry == '754' || issu_cntry == '758') && (FormManager.getActualValue('reqType') == 'U' || FormManager.getActualValue('reqType') == 'X')) {
       FormManager.enable('embargoCd');
     } else {
@@ -9930,6 +9969,11 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setDefaultValueForPreferredLanguage, [ SysLoc.TURKEY ]);
   // CMR-1804 Turkey - Fields values validations - ISU Default on UI
   GEOHandler.addAfterConfig(setDefaultValueForISU, [ SysLoc.TURKEY ]);
+  // CMR-2657
+  GEOHandler.addAfterConfig(setSORTL, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterConfig(lockSORTL, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterTemplateLoad(lockSORTL, [ SysLoc.TURKEY ]);
+  
   GEOHandler.addAfterConfig(setISUDefaultValueOnSubTypeChange, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(setISUDefaultValueOnSubTypeChange, [ SysLoc.TURKEY ]);
   GEOHandler.addAddrFunction(disableTaxOfficeTR, [ SysLoc.TURKEY ]);

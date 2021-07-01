@@ -48,6 +48,21 @@ function lockEmbargo() {
   }
 }
 
+// CREATCMR-2645 lock SORTL field for update action for REQUESTER
+function lockSORTL() {
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var reqType = FormManager.getActualValue('reqType');
+  var clientTier = FormManager.getActualValue('clientTier');
+  if (reqType == 'U' && clientTier == 'Y') {
+    if (role == 'REQUESTER') {
+      FormManager.readOnly('salesBusOffCd');
+    }
+    else if (role == 'PROCESSOR') {
+      FormManager.enable('salesBusOffCd');
+    }
+  }
+}
+
 var _addrTypesForZA = [ 'ZS01', 'ZP01', 'ZI01', 'ZD01', 'ZS02' ];
 var _addrTypeHandler = [];
 var _isuHandler = null;
@@ -89,6 +104,20 @@ function addHandlersForZA() {
         calledByIsuHandler = false;
         calledByCtcHandler = true;
         setCtcSalesRepSBO(FormManager.getField('isuCd'));
+        setSalesRepSORTL();
+      });
+    }
+    else if (FormManager.getActualValue('reqType') == 'U') {
+      _ctcHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
+        calledByIsuHandler = false;
+        calledByCtcHandler = true;
+        var clientTier = FormManager.getActualValue('clientTier');
+        if (clientTier == 'Y') {
+        lockSORTL();
+        } else {
+          FormManager.enable('salesBusOffCd');
+        }
+        
       });
     }
   }
@@ -143,6 +172,48 @@ function setCtcSalesRepSBO(value) {
         calledByCtcHandler = false;
       }
       scenarioChangeSalesRepSBO = false;
+    }
+  }
+  if (isuCtc == '34Y' && (countryUse == '864' || countryUse == '864LS' || countryUse == '864SZ' || countryUse == '864NA')) {
+    if (calledByIsuHandler) {
+      if (!scenarioChangeSalesRepSBO) {
+        FormManager.setValue('salesBusOffCd', '');
+        FormManager.setValue('repTeamMemberNo', '');
+        calledByIsuHandler = false;
+      }
+    } else if (calledByCtcHandler) {
+      if (!scenarioChangeSalesRepSBO) {
+        FormManager.setValue('salesBusOffCd', '');
+        FormManager.setValue('repTeamMemberNo', '');
+        calledByCtcHandler = false;
+      }
+      scenarioChangeSalesRepSBO = false;
+    }
+  }
+}
+
+// CREATCMR-2645
+function setSalesRepSORTL() {
+  var clientTier = FormManager.getActualValue('clientTier');
+  var reqType = FormManager.getActualValue('reqType');
+  var isu = FormManager.getActualValue('isuCd');
+  var cntryRegion = FormManager.getActualValue('countryUse');
+  if (isu == '34' && clientTier == 'Y' && reqType == 'C') {
+    if (cntryRegion == '864') {
+      FormManager.setValue('repTeamMemberNo', 'SALES9');
+      FormManager.setValue('salesBusOffCd', '4961');
+    }
+    else if (cntryRegion == '864NA') {
+      FormManager.setValue('repTeamMemberNo', 'SALES4');
+      FormManager.setValue('salesBusOffCd', '4411');
+    }
+    else if (cntryRegion == '864LS') {
+      FormManager.setValue('repTeamMemberNo', 'SALES5');
+      FormManager.setValue('salesBusOffCd', '4511');
+    }
+    else if (cntryRegion == '864SZ') {
+      FormManager.setValue('repTeamMemberNo', 'SALES6');
+      FormManager.setValue('salesBusOffCd', '4611');
     }
   }
 }
@@ -1857,7 +1928,8 @@ dojo.addOnLoad(function() {
   /* 1438717 - add DPL match validation for failed dpl checks */
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.MCO1, GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.addAfterConfig(lockEmbargo, GEOHandler.MCO1);
-
+  GEOHandler.addAfterConfig(lockSORTL, GEOHandler.MCO1);
+  GEOHandler.addAfterTemplateLoad(lockSORTL, GEOHandler.MCO1);
   GEOHandler.registerValidator(addStreetContPoBoxLengthValidator, GEOHandler.MCO1, null, true);
   GEOHandler.registerValidator(addCityPostalCodeLengthValidator, GEOHandler.MCO1, null, true);
   GEOHandler.registerValidator(addCrossLandedCntryFormValidator, GEOHandler.MCO1, null, true);
@@ -1866,6 +1938,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(onLobchange, GEOHandler.MCO1);
   GEOHandler.addAfterTemplateLoad(onLobchange, GEOHandler.MCO1);
   GEOHandler.addAfterConfig(setCofField, GEOHandler.MCO1);
+  GEOHandler.addAfterConfig(setSalesRepSORTL, GEOHandler.MCO1);
   GEOHandler.addAfterTemplateLoad(setCofField, GEOHandler.MCO1);
   GEOHandler.registerValidator(validateCMRForExistingGMLLCScenario, [ SysLoc.SOUTH_AFRICA ], null, true);
   GEOHandler.addAfterConfig(enableCMRNOSAGLLC, SysLoc.SOUTH_AFRICA);
