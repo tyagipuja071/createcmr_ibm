@@ -312,7 +312,9 @@ public class GermanyUtil extends AutomationUtil {
       if (!"ZS01".equals(addr.getId().getAddrType())) {
         removed = true;
         String custNm = (addr.getCustNm1().trim() + (StringUtils.isNotBlank(addr.getCustNm2()) ? " " + addr.getCustNm2().trim() : "")).toUpperCase();
-        if (custNm.equals(mainCustNm) && addr.getAddrTxt().trim().toUpperCase().equals(mainStreetAddress1)
+        String streetaddress = ((StringUtils.isNotBlank(addr.getAddrTxt()) ? addr.getAddrTxt().trim() : ""))
+                .toUpperCase();
+        if (custNm.equals(mainCustNm) && streetaddress.equals(mainStreetAddress1) 
             && addr.getCity1().trim().toUpperCase().equals(mainCity) && addr.getPostCd().trim().equals(mainPostalCd)) {
           details.append("Removing duplicate address record: " + addr.getId().getAddrType() + " from the request.").append("\n");
           Addr merged = entityManager.merge(addr);
