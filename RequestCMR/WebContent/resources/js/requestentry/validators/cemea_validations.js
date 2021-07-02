@@ -2108,10 +2108,10 @@ function cancelCIS() {
 function afterConfigForRussia() {
   var reqType = FormManager.getActualValue('reqType');
   var role = FormManager.getActualValue('userRole').toUpperCase();
-  if ("U" == reqType && "REQUESTER" == role) {
-    FormManager.enable('salesBusOffCd');
-  } else {
+  if ("C" == reqType && "REQUESTER" == role) {
     FormManager.readOnly('salesBusOffCd');
+  } else {
+    FormManager.enable('salesBusOffCd');
   }
   dojo.connect(FormManager.getField('cisServiceCustIndc'), 'onChange', function(value) {
 
