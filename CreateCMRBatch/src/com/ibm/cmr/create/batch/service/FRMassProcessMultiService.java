@@ -171,8 +171,6 @@ public class FRMassProcessMultiService extends MultiThreadedBatchService<Long> {
             }
           }
 
-          // execute close every 50
-          entityManager.close();
         }
 
         LOG.debug("Finished processing mass update lines at " + new Date());
