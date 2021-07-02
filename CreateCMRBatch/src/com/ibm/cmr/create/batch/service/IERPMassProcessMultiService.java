@@ -279,6 +279,8 @@ public class IERPMassProcessMultiService extends MultiThreadedBatchService<Long>
               // noop
             }
           }
+          // execute flush every 50
+          entityManager.flush();
         }
         LOG.debug("Mass create processing finished at " + new Date());
 

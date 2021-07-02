@@ -193,6 +193,8 @@ public class ATMassProcessMultiLegacyService extends MultiThreadedBatchService<L
             }
           }
 
+          // execute flush every 50
+          entityManager.flush();
         }
 
         LOG.debug("Finished processing mass update lines at " + new Date());
@@ -447,7 +449,7 @@ public class ATMassProcessMultiLegacyService extends MultiThreadedBatchService<L
     createHistory(entityManager, "Legacy database processing started.", "PCR", "Claim", admin.getId().getReqId());
     createComment(entityManager, "Legacy database processing started.", admin.getId().getReqId());
 
-    // partialCommit(entityManager);
+    partialCommit(entityManager);
   }
 
   @Override
