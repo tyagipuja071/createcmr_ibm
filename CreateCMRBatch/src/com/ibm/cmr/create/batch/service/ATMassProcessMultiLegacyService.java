@@ -141,14 +141,14 @@ public class ATMassProcessMultiLegacyService extends MultiThreadedBatchService<L
       query.setParameter("REQ_ID", admin.getId().getReqId());
       query.setParameter("ITER_ID", admin.getIterationId());
 
-      List<MassUpdt> results = query.getResults(MassUpdt.class);
+      List<MassUpdt> resultsMain = query.getResults(MassUpdt.class);
       List<String> statusCodes = new ArrayList<String>();
       StringBuilder comment = new StringBuilder();
       boolean isIndexNotUpdated = false;
 
       List<String> rdcProcessStatusMsgs = new ArrayList<String>();
       HashMap<String, String> overallStatus = new HashMap<String, String>();
-      if (results != null && results.size() > 0) {
+      if (resultsMain != null && resultsMain.size() > 0) {
         // 2. If results are not empty, lock the admin record
         lockRecord(entityManager, admin);
         List<String> errorCmrs = new ArrayList<String>();
@@ -161,24 +161,40 @@ public class ATMassProcessMultiLegacyService extends MultiThreadedBatchService<L
 
         LOG.debug("Worker threads to use: " + threads);
         LOG.debug("Starting processing AUSTRIA mass update lines at " + new Date());
-        LOG.debug("Number of records found: " + results.size());
+        LOG.debug("Number of records found: " + resultsMain.size());
 
         emf = Persistence.createEntityManagerFactory(BatchEntryPoint.DEFAULT_BATCH_PERSISTENCE_UNIT);
         List<ATMassProcessWorker> workers = new ArrayList<ATMassProcessWorker>();
-        ScheduledExecutorService executor = Executors.newScheduledThreadPool(threads, new WorkerThreadFactory(getThreadName()));
-        for (MassUpdt sMassUpdt : results) {
-          ATMassProcessWorker worker = new ATMassProcessWorker(emf, admin, data, sMassUpdt, BATCH_USER_ID);
-          executor.schedule(worker, 5, TimeUnit.SECONDS);
-          workers.add(worker);
-        }
 
-        executor.shutdown();
-        while (!executor.isTerminated()) {
-          try {
-            Thread.sleep(5000);
-          } catch (InterruptedException e) {
-            // noop
+        while (resultsMain.size() > 0) {
+
+          List<MassUpdt> results = new LinkedList<MassUpdt>();
+          for (int i = 0; i < 50; i++) {
+            if (resultsMain.size() > 0) {
+              results.add(resultsMain.remove(0));
+            } else {
+              break;
+            }
           }
+
+          ScheduledExecutorService executor = Executors.newScheduledThreadPool(threads, new WorkerThreadFactory(getThreadName() + reqId));
+          for (MassUpdt sMassUpdt : results) {
+            ATMassProcessWorker worker = new ATMassProcessWorker(emf, admin, data, sMassUpdt, BATCH_USER_ID);
+            executor.schedule(worker, 5, TimeUnit.SECONDS);
+            workers.add(worker);
+          }
+
+          executor.shutdown();
+          while (!executor.isTerminated()) {
+            try {
+              Thread.sleep(5000);
+            } catch (InterruptedException e) {
+              // noop
+            }
+          }
+
+          // execute flush every 50
+          entityManager.flush();
         }
 
         LOG.debug("Finished processing mass update lines at " + new Date());
@@ -433,7 +449,7 @@ public class ATMassProcessMultiLegacyService extends MultiThreadedBatchService<L
     createHistory(entityManager, "Legacy database processing started.", "PCR", "Claim", admin.getId().getReqId());
     createComment(entityManager, "Legacy database processing started.", admin.getId().getReqId());
 
-    // partialCommit(entityManager);
+    partialCommit(entityManager);
   }
 
   @Override

@@ -40,7 +40,10 @@ public class IERPMassWorker implements Runnable {
   private Data data;
   private List<String> statusCodes = new ArrayList<String>();
   private List<String> rdcProcessStatusMsgs = new ArrayList<String>();
+  private StringBuilder comment;
   private boolean isIndexNotUpdated;
+  private boolean error;
+  private Exception errorMsg;
 
   public IERPMassWorker(EntityManager entityManager, MassUpdt massUpdt, Admin admin, Data data, String userId) {
     this.entityManager = entityManager;
@@ -59,7 +62,7 @@ public class IERPMassWorker implements Runnable {
 
     String processingStatus = admin.getRdcProcessingStatus() != null ? admin.getRdcProcessingStatus() : "";
 
-    StringBuilder comment = new StringBuilder();
+    comment = new StringBuilder();
     ProcessRequest request = new ProcessRequest();
     request.setCmrNo(sMassUpdt.getCmrNo());
     request.setMandt(SystemConfiguration.getValue("MANDT"));
@@ -220,8 +223,19 @@ public class IERPMassWorker implements Runnable {
     this.rdcProcessStatusMsgs = rdcProcessStatusMsgs;
   }
 
-  public boolean isIndexNotUpdated() {
+  public boolean getIndexNotUpdated() {
     return isIndexNotUpdated;
   }
 
+  public boolean isError() {
+    return error;
+  }
+
+  public Exception getErrorMsg() {
+    return errorMsg;
+  }
+
+  public String getComments() {
+    return this.comment.toString();
+  }
 }

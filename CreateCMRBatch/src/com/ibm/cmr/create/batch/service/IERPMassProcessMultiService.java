@@ -228,14 +228,14 @@ public class IERPMassProcessMultiService extends MultiThreadedBatchService<Long>
       sql.setParameter("REQ_ID", admin.getId().getReqId());
       sql.setParameter("ITER_ID", admin.getIterationId());
 
-      List<MassUpdt> results = sql.getResults(MassUpdt.class);
+      List<MassUpdt> resultsMain = sql.getResults(MassUpdt.class);
       List<String> statusCodes = new ArrayList<String>();
-      StringBuilder comment = null;
+      StringBuilder comment = new StringBuilder();
 
       List<String> rdcProcessStatusMsgs = new ArrayList<String>();
       HashMap<String, String> overallStatus = new HashMap<String, String>();
 
-      if (results != null && results.size() > 0) {
+      if (resultsMain != null && resultsMain.size() > 0) {
 
         int threads = 5;
         String massThreads = SystemParameters.getString("PROCESS.THREAD.COUNT");
@@ -250,28 +250,62 @@ public class IERPMassProcessMultiService extends MultiThreadedBatchService<Long>
 
         LOG.debug("Worker threads to use: " + threads);
         LOG.debug("Starting processing IERP mass update at " + new Date());
-        LOG.debug("Number of records found: " + results.size());
+        LOG.debug("Number of records found: " + resultsMain.size());
         List<IERPMassWorker> workers = new ArrayList<IERPMassWorker>();
-        ExecutorService executor = Executors.newFixedThreadPool(threads, new WorkerThreadFactory("IERPMassWorker-" + reqId));
-        for (MassUpdt sMassUpdt : results) {
-          IERPMassWorker worker = new IERPMassWorker(entityManager, sMassUpdt, admin, data, BATCH_USER_ID);
-          executor.execute(worker);
-          workers.add(worker);
-        }
 
-        executor.shutdown();
-        while (!executor.isTerminated()) {
-          try {
-            Thread.sleep(5000);
-          } catch (InterruptedException e) {
-            // noop
+        while (resultsMain.size() > 0) {
+
+          List<MassUpdt> results = new LinkedList<MassUpdt>();
+          for (int i = 0; i < 50; i++) {
+            if (resultsMain.size() > 0) {
+              results.add(resultsMain.remove(0));
+            } else {
+              break;
+            }
           }
+
+          ExecutorService executor = Executors.newFixedThreadPool(threads, new WorkerThreadFactory("IERPMassWorker-" + reqId));
+          for (MassUpdt sMassUpdt : results) {
+            IERPMassWorker worker = new IERPMassWorker(entityManager, sMassUpdt, admin, data, BATCH_USER_ID);
+            executor.execute(worker);
+            workers.add(worker);
+          }
+
+          executor.shutdown();
+          while (!executor.isTerminated()) {
+            try {
+              Thread.sleep(5000);
+            } catch (InterruptedException e) {
+              // noop
+            }
+          }
+          // execute flush every 50
+          entityManager.flush();
         }
         LOG.debug("Mass create processing finished at " + new Date());
 
+        Exception processError = null;
         for (IERPMassWorker worker : workers) {
-          statusCodes.addAll(worker.getStatusCodes());
-          rdcProcessStatusMsgs.addAll(worker.getRdcProcessStatusMsgs());
+          if (worker != null) {
+            if (worker.isError()) {
+              LOG.error("Error in processing mass update rdc for Request ID " + admin.getId().getReqId() + ": " + worker.getErrorMsg());
+              if (processError == null && worker.getErrorMsg() != null) {
+                processError = worker.getErrorMsg();
+              }
+            } else {
+              statusCodes.addAll(worker.getStatusCodes());
+              rdcProcessStatusMsgs.addAll(worker.getRdcProcessStatusMsgs());
+              isIndexNotUpdated = isIndexNotUpdated || worker.getIndexNotUpdated();
+              comment.append(worker.getComments());
+            }
+          }
+        }
+
+        LOG.debug("**** Status CODES --> " + statusCodes);
+        LOG.debug("Worker Process Message" + comment);
+
+        if (processError != null) {
+          throw processError;
         }
 
         admin.setReqStatus(CmrConstants.REQUEST_STATUS.COM.toString());
