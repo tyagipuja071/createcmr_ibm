@@ -255,17 +255,6 @@ function addHandlersForNORDX() {
     });
   }
 
-  _subIndCdHandler1 = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
-    if (cnt >= 1) {
-      changeFlag = true;
-      if (value != null && value.length > 1) {
-        setSRValuesBaseOnSubInd();
-        FormManager.readOnly('subIndustryCd');// CMR-1993
-      }
-    }
-
-  });
-
   // if (_SalesRepHandler == null) {
   // _SalesRepHandler = dojo.connect(FormManager.getField('repTeamMemberNo'),
   // 'onChange', function(value) {
@@ -292,6 +281,17 @@ function addHandlersForNORDX() {
       FormManager.readOnly('subIndustryCd'); // CMR-1993
     });
   }
+
+  _subIndCdHandler1 = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
+    if (cnt > 0) {
+      changeFlag = true;
+      if (value != null && value.length > 1) {
+        setSRValuesBaseOnSubInd();
+        FormManager.readOnly('subIndustryCd');// CMR-1993
+      }
+    }
+  });
+
   // if (_poSteertNorwayFin == null) {
   // if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.NORWAY
   // || (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.FINLAND &&
