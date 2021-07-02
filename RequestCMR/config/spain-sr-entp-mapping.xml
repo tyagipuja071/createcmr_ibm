@@ -13,9 +13,9 @@
 		<salesRep>
 			1FICTI
 		</salesRep>
-		<scenarios>
-			COMME,IGSGS,PRICU,THDPT,THDIG,GOVRN,GOVIG
-		</scenarios>
+		<scenario>
+			COMME, IGSGS, PRICU, THDPT, THDIG, GOVRN, GOVIG
+		</scenario>
 		<isicBelongs>
 			Yes
 		</isicBelongs>
@@ -34,9 +34,9 @@
 		<salesRep>
 			1FICTI
 		</salesRep>
-		<scenarios>
-			COMME,IGSGS,PRICU,THDPT,THDIG,GOVRN,GOVIG
-		</scenarios>
+		<scenario>
+			COMME, IGSGS, PRICU, THDPT, THDIG, GOVRN, GOVIG
+		</scenario>
 		<isicBelongs>
 			Yes
 		</isicBelongs>
@@ -55,9 +55,9 @@
 		<salesRep>
 			1FICTI
 		</salesRep>
-		<scenarios>
-			COMME,IGSGS,PRICU,THDPT,THDIG,GOVRN,GOVIG
-		</scenarios>
+		<scenario>
+			COMME, IGSGS, PRICU, THDPT, THDIG, GOVRN, GOVIG
+		</scenario>
 		<isicBelongs>
 			Yes
 		</isicBelongs>
@@ -76,9 +76,9 @@
 		<salesRep>
 			1FICTI
 		</salesRep>
-		<scenarios>
-			COMME,IGSGS,PRICU,THDPT,THDIG,GOVRN,GOVIG
-		</scenarios>
+		<scenario>
+			COMME, IGSGS, PRICU, THDPT, THDIG, GOVRN, GOVIG
+		</scenario>
 		<isicBelongs>
 			Yes
 		</isicBelongs>
@@ -97,9 +97,9 @@
 		<salesRep>
 			1FICTI
 		</salesRep>
-		<scenarios>
-			COMME,IGSGS,PRICU,THDPT,THDIG,GOVRN,GOVIG
-		</scenarios>
+		<scenario>
+			COMME, IGSGS, PRICU, THDPT, THDIG, GOVRN, GOVIG
+		</scenario>
 		<isicBelongs>
 			Yes
 		</isicBelongs>
@@ -118,9 +118,9 @@
 		<salesRep>
 			1FICTI
 		</salesRep>
-		<scenarios>
-			COMME,IGSGS,PRICU,THDPT,THDIG,GOVRN,GOVIG
-		</scenarios>
+		<scenario>
+			COMME, IGSGS, PRICU, THDPT, THDIG, GOVRN, GOVIG
+		</scenario>
 		<isicBelongs>
 			Yes
 		</isicBelongs>
@@ -139,9 +139,9 @@
 		<salesRep>
 			1FICTI
 		</salesRep>
-		<scenarios>
-			COMME,IGSGS,PRICU,THDPT,THDIG,GOVRN,GOVIG
-		</scenarios>
+		<scenario>
+			COMME, IGSGS, PRICU, THDPT, THDIG, GOVRN, GOVIG
+		</scenario>
 
 		<isicBelongs>
 			No
@@ -161,9 +161,9 @@
 		<salesRep>
 			1FICTI
 		</salesRep>
-		<scenarios>
-			COMME,IGSGS,PRICU,THDPT,THDIG,GOVRN,GOVIG
-		</scenarios>
+		<scenario>
+			COMME, IGSGS, PRICU, THDPT, THDIG, GOVRN, GOVIG
+		</scenario>
 
 		<isicBelongs>
 			No
@@ -183,9 +183,9 @@
 		<salesRep>
 			1FICTI
 		</salesRep>
-		<scenarios>
-			COMME,IGSGS,PRICU,THDPT,THDIG,GOVRN,GOVIG
-		</scenarios>
+		<scenario>
+			COMME, IGSGS, PRICU, THDPT, THDIG, GOVRN, GOVIG
+		</scenario>
 
 		<isicBelongs>
 			No
@@ -205,9 +205,9 @@
 		<salesRep>
 			1FICTI
 		</salesRep>
-		<scenarios>
-			COMME,IGSGS,PRICU,THDPT,THDIG,GOVRN,GOVIG
-		</scenarios>
+		<scenario>
+			COMME, IGSGS, PRICU, THDPT, THDIG, GOVRN, GOVIG
+		</scenario>
 
 		<isicBelongs>
 			No
@@ -227,9 +227,9 @@
 		<salesRep>
 			1FICTI
 		</salesRep>
-		<scenarios>
-			COMME,IGSGS,PRICU,THDPT,THDIG,GOVRN,GOVIG
-		</scenarios>
+		<scenario>
+			COMME, IGSGS, PRICU, THDPT, THDIG, GOVRN, GOVIG
+		</scenario>
 
 		<isicBelongs>
 			No
@@ -246,9 +246,9 @@
 		<salesRep>
 			1FICTI
 		</salesRep>
-		<scenarios>
-			INTER,INTSO,BUSPR
-		</scenarios>
+		<scenario>
+			INTER, INTSO, BUSPR
+		</scenario>
 		<isicBelongs>
 			None
 		</isicBelongs>
@@ -264,9 +264,9 @@
 		<salesRep>
 			1FICTI
 		</salesRep>
-		<scenarios>
-			INTER,INTSO,BUSPR
-		</scenarios>
+		<scenario>
+			INTER, INTSO, BUSPR
+		</scenario>
 		<isicBelongs>
 			None
 		</isicBelongs>
@@ -282,9 +282,9 @@
 		<salesRep>
 			1FICTI
 		</salesRep>
-		<scenarios>
-			XCRO,XBP,XIGS
-		</scenarios>
+		<scenario>
+			XCRO, XBP, XIGS
+		</scenario>
 		<isicBelongs>
 			None
 		</isicBelongs>
