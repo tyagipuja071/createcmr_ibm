@@ -179,7 +179,7 @@ public class NORDXHandler extends BaseSOFHandler {
             String legacyAddressSeq = getLegacyAddressSeq(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), legacyseqNoformat);
 
             if (StringUtils.isBlank(legacyAddressSeq)) {
-                continue;
+              continue;
             }
 
             // if (StringUtils.isBlank(legacyAddressSeq)) {
@@ -228,9 +228,48 @@ public class NORDXHandler extends BaseSOFHandler {
                 }
 
                 /*
-                String seqSecondaryZS01 = getSecondaryZS01Seq(entityManager, cmrIssueCd, SystemConfiguration.getValue("MANDT"), record.getCmrNum());
-                System.out.println("---------seqSecondaryZS01---------------" + seqSecondaryZS01);
-                if (!StringUtils.isBlank(seqSecondaryZS01) && seqSecondaryZS01.equals(addr.getCmrAddrSeq())) {
+                 * String seqSecondaryZS01 = getSecondaryZS01Seq(entityManager,
+                 * cmrIssueCd, SystemConfiguration.getValue("MANDT"),
+                 * record.getCmrNum());
+                 * System.out.println("---------seqSecondaryZS01---------------"
+                 * + seqSecondaryZS01); if
+                 * (!StringUtils.isBlank(seqSecondaryZS01) &&
+                 * seqSecondaryZS01.equals(addr.getCmrAddrSeq())) { String
+                 * seqSecondaryZS01Legacy =
+                 * StringUtils.leftPad(seqSecondaryZS01, 5, '0');
+                 * LOG.debug("---------seqSecondaryZS01Legacy---------------" +
+                 * seqSecondaryZS01Legacy); System.out.println(
+                 * "---------seqSecondaryZS01Legacy---------------" +
+                 * seqSecondaryZS01Legacy); String isSecondaryInst =
+                 * isSecondaryInst(entityManager, reqEntry.getCmrIssuingCntry(),
+                 * record.getCmrNum(), seqSecondaryZS01Legacy); String
+                 * isSecondaryBill = isSecondaryBill(entityManager,
+                 * reqEntry.getCmrIssuingCntry(), record.getCmrNum(),
+                 * seqSecondaryZS01Legacy); String isSecondaryShip =
+                 * isSecondaryShip(entityManager, reqEntry.getCmrIssuingCntry(),
+                 * record.getCmrNum(), seqSecondaryZS01Legacy); String
+                 * isSecondaryEpl = isSecondaryEpl(entityManager,
+                 * reqEntry.getCmrIssuingCntry(), record.getCmrNum(),
+                 * seqSecondaryZS01Legacy);
+                 * 
+                 * if ("Y".equals(isSecondaryInst)) {
+                 * addr.setCmrAddrTypeCode("ZI01"); } else if
+                 * ("N".equals(isSecondaryInst) && "Y".equals(isSecondaryBill))
+                 * { addr.setCmrAddrTypeCode("ZP01"); } else if
+                 * ("N".equals(isSecondaryInst) && "N".equals(isSecondaryBill)
+                 * && "Y".equals(isSecondaryShip)) {
+                 * addr.setCmrAddrTypeCode("ZD01"); } else if
+                 * ("N".equals(isSecondaryInst) && "N".equals(isSecondaryBill)
+                 * && "N".equals(isSecondaryShip) && "Y".equals(isSecondaryEpl))
+                 * { addr.setCmrAddrTypeCode("ZS02"); } else {
+                 * addr.setCmrAddrTypeCode("ZI01"); } }
+                 * 
+                 * converted.add(addr); }
+                 */
+
+                if (CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode())
+                    && !record.getCmrAddrSeq().equals(mainRecord.getCmrAddrSeq())) {
+                  String seqSecondaryZS01 = record.getCmrAddrSeq();
                   String seqSecondaryZS01Legacy = StringUtils.leftPad(seqSecondaryZS01, 5, '0');
                   LOG.debug("---------seqSecondaryZS01Legacy---------------" + seqSecondaryZS01Legacy);
                   System.out.println("---------seqSecondaryZS01Legacy---------------" + seqSecondaryZS01Legacy);
@@ -239,47 +278,17 @@ public class NORDXHandler extends BaseSOFHandler {
                   String isSecondaryShip = isSecondaryShip(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), seqSecondaryZS01Legacy);
                   String isSecondaryEpl = isSecondaryEpl(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), seqSecondaryZS01Legacy);
 
-                  if ("Y".equals(isSecondaryInst)) {
-                    addr.setCmrAddrTypeCode("ZI01");
-                  } else if ("N".equals(isSecondaryInst) && "Y".equals(isSecondaryBill)) {
+                  if ("Y".equals(isSecondaryBill)) {
                     addr.setCmrAddrTypeCode("ZP01");
-                  } else if ("N".equals(isSecondaryInst) && "N".equals(isSecondaryBill) && "Y".equals(isSecondaryShip)) {
+                  } else if ("N".equals(isSecondaryBill) && "Y".equals(isSecondaryInst)) {
+                    addr.setCmrAddrTypeCode("ZI01");
+                  } else if ("N".equals(isSecondaryBill) && "N".equals(isSecondaryInst) && "Y".equals(isSecondaryShip)) {
                     addr.setCmrAddrTypeCode("ZD01");
-                  } else if ("N".equals(isSecondaryInst) && "N".equals(isSecondaryBill) && "N".equals(isSecondaryShip)
+                  } else if ("N".equals(isSecondaryBill) && "N".equals(isSecondaryInst) && "N".equals(isSecondaryShip)
                       && "Y".equals(isSecondaryEpl)) {
                     addr.setCmrAddrTypeCode("ZS02");
                   } else {
                     addr.setCmrAddrTypeCode("ZI01");
-                  }
-                }
-
-                converted.add(addr);
-              }
-              */
-
-
-              if (CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode())
-                  && !record.getCmrAddrSeq().equals(mainRecord.getCmrAddrSeq())) {
-                String seqSecondaryZS01 = record.getCmrAddrSeq();
-                String seqSecondaryZS01Legacy = StringUtils.leftPad(seqSecondaryZS01, 5, '0');
-                LOG.debug("---------seqSecondaryZS01Legacy---------------" + seqSecondaryZS01Legacy);
-                System.out.println("---------seqSecondaryZS01Legacy---------------" + seqSecondaryZS01Legacy);
-                String isSecondaryInst = isSecondaryInst(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), seqSecondaryZS01Legacy);
-                String isSecondaryBill = isSecondaryBill(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), seqSecondaryZS01Legacy);
-                String isSecondaryShip = isSecondaryShip(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), seqSecondaryZS01Legacy);
-                String isSecondaryEpl = isSecondaryEpl(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), seqSecondaryZS01Legacy);
-
-                  if ("Y".equals(isSecondaryBill)) {
-                    addr.setCmrAddrTypeCode("ZP01");
-                  } else if ("N".equals(isSecondaryBill) && "Y".equals(isSecondaryInst)) {
-                  addr.setCmrAddrTypeCode("ZI01");
-                  } else if ("N".equals(isSecondaryBill) && "N".equals(isSecondaryInst) && "Y".equals(isSecondaryShip)) {
-                  addr.setCmrAddrTypeCode("ZD01");
-                  } else if ("N".equals(isSecondaryBill) && "N".equals(isSecondaryInst) && "N".equals(isSecondaryShip)
-                      && "Y".equals(isSecondaryEpl)) {
-                  addr.setCmrAddrTypeCode("ZS02");
-                  } else {
-                  addr.setCmrAddrTypeCode("ZI01");
                   }
 
                 }
@@ -447,19 +456,19 @@ public class NORDXHandler extends BaseSOFHandler {
                 zs02Flag = null;
                 zi01Flag = null;
               }
-              
-              if(CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode())
-                  && !record.getCmrAddrSeq().equals(mainRecord.getCmrAddrSeq())){
-                
+
+              if (CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode())
+                  && !record.getCmrAddrSeq().equals(mainRecord.getCmrAddrSeq())) {
+
                 String SecondaryZS01ShareSeq = record.getCmrAddrSeq();
                 String SecondaryZS01ShareSeqLegacy = StringUtils.leftPad(SecondaryZS01ShareSeq, 5, '0');
-                
+
                 // check if share seq address
                 String isShareZP01 = isShareZP01(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), SecondaryZS01ShareSeqLegacy);
                 String isShareZS02 = isShareZS02(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), SecondaryZS01ShareSeqLegacy);
                 String isShareZD01 = isShareZD01(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), SecondaryZS01ShareSeqLegacy);
                 String isShareZI01 = isShareZI01(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), SecondaryZS01ShareSeqLegacy);
-                
+
                 // cheeck if SecondaryZS01 share ZP01
                 if (isShareZP01 != null) {
                   // add share ZS02
@@ -942,6 +951,7 @@ public class NORDXHandler extends BaseSOFHandler {
       data.setGeoLocDesc("");
       data.setGbgId("");
       data.setGbgDesc("");
+      data.setSearchTerm("");
       data.setMilitary(null);
       return;
     }
@@ -978,9 +988,10 @@ public class NORDXHandler extends BaseSOFHandler {
     String cmrNo = data.getCmrNo();
     String cntry = data.getCmrIssuingCntry();
 
-    String engineeringBo = getACAdminFromLegacy(cntry, cmrNo);
-    data.setEngineeringBo(engineeringBo);
-    LOG.trace("ACAdmDSC: " + data.getEngineeringBo());
+    // CREATCMR-2674
+    // String engineeringBo = getACAdminFromLegacy(cntry, cmrNo);
+    // data.setEngineeringBo(engineeringBo);
+    // LOG.trace("ACAdmDSC: " + data.getEngineeringBo());
 
     String salesRep = getSRFromLegacy(cntry, cmrNo);
     data.setRepTeamMemberNo(salesRep);
@@ -1087,7 +1098,7 @@ public class NORDXHandler extends BaseSOFHandler {
             String isu = ""; // 10
             String ctc = ""; // 11
             String leadingAccount = ""; // 12
-            String acAdmin = ""; // 13
+            String sortl = ""; // 13
             String vat = ""; // 14
             String salesRep = ""; // 15
             String phone = ""; // 16
@@ -1166,9 +1177,8 @@ public class NORDXHandler extends BaseSOFHandler {
               }
 
               if (!StringUtils.isBlank(payment) && !payment.matches("^[A-Za-z0-9]+$")) {
-                LOG.trace(
-                    "The row " + (row.getRowNum() + 1)
-                        + ":Note that Payment terms only accept AlphaNumeric. Please fix and upload the template again.");
+                LOG.trace("The row " + (row.getRowNum() + 1)
+                    + ":Note that Payment terms only accept AlphaNumeric. Please fix and upload the template again.");
                 error.addError((row.getRowNum() + 1), "Payment terms",
                     ":Note that Payment terms only accept AlphaNumeric. Please fix and upload the template again.<br>");
               }
@@ -1204,18 +1214,12 @@ public class NORDXHandler extends BaseSOFHandler {
               }
 
               currCell = (XSSFCell) row.getCell(13);
-              acAdmin = validateColValFromCell(currCell);
-              if ("@".equals(acAdmin)) {
-                LOG.trace("The row " + (row.getRowNum() + 1)
-                    + ":Note that A/C Admin DSC is not allowed blank out. Please fix and upload the template again.");
-                error.addError((row.getRowNum() + 1), "A/C Admin DSC",
-                    ":Note that A/C Admin DSC is not allowed blank out. Please fix and upload the template again.<br>");
-              }
-              if (!StringUtils.isBlank(acAdmin) && !acAdmin.matches("^[0-9]*$")) {
-                LOG.trace("The row " + (row.getRowNum() + 1)
-                    + ":Note that A/C admin DSC should be only numeric. Please fix and upload the template again.");
-                error.addError((row.getRowNum() + 1), "A/C admin DSC",
-                    ":Note that A/C admin DSC should be only numeric. Please fix and upload the template again.<br>");
+              sortl = validateColValFromCell(currCell);
+              if (!StringUtils.isBlank(sortl) && !sortl.matches("^[A-Za-z0-9]+$")) {
+                LOG.trace(
+                    "The row " + (row.getRowNum() + 1) + ":Note that SORTL should be only alphanumeric. Please fix and upload the template again.");
+                error.addError((row.getRowNum() + 1), "SORTL",
+                    ":Note that SORTL should be only alphanumeric. Please fix and upload the template again.<br>");
               }
 
               currCell = (XSSFCell) row.getCell(14);
@@ -1531,7 +1535,7 @@ public class NORDXHandler extends BaseSOFHandler {
         data.setCapInd("N");
       }
     }
-    
+
     if ("U".equals(admin.getReqType()) && "TREC".equals(admin.getReqReason())) {
       changeShareAddrFroTrce(entityManager, data.getId().getReqId(), SystemConfiguration.getValue("MANDT"), data.getCmrIssuingCntry(),
           data.getCmrNo());
@@ -1778,6 +1782,14 @@ public class NORDXHandler extends BaseSOFHandler {
       update.setDataField(PageManager.getLabel(cmrCountry, "Preferred Language", "Preferred Language"));
       update.setNewData(newData.getCustPrefLang());
       update.setOldData(oldData.getCustPrefLang());
+      results.add(update);
+    }
+
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getSearchTerm(), newData.getSearchTerm())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "SORTL", "SORTL"));
+      update.setNewData(newData.getSearchTerm());
+      update.setOldData(oldData.getSearchTerm());
       results.add(update);
     }
 

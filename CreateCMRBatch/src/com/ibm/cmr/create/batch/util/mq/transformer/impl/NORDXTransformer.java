@@ -590,7 +590,7 @@ public class NORDXTransformer extends EMEATransformer {
       query.setParameter("COUNTRY", landedCntry);
       fullCntryName = query.getSingleResult(String.class);
     }
-    fullCntryName =StringUtils.isNotBlank(fullCntryName) ? (fullCntryName.length() >= 30 ? fullCntryName.substring(0, 30) : fullCntryName) : "";
+    fullCntryName = StringUtils.isNotBlank(fullCntryName) ? (fullCntryName.length() >= 30 ? fullCntryName.substring(0, 30) : fullCntryName) : "";
 
     List<String> addrAttrList = Arrays.asList(custName, custNameCond, additionalInfo, attPerson, street, comboStreetCondPobox, postCode + " " + city);
     String[] lines = new String[7];
@@ -603,7 +603,7 @@ public class NORDXTransformer extends EMEATransformer {
     }
 
     if (crossBorder) {
-      if (strCount < lines.length-1) {
+      if (strCount < lines.length - 1) {
         lines[strCount] = fullCntryName;
       } else {
         lines[strCount - 1] = fullCntryName;
@@ -713,7 +713,6 @@ public class NORDXTransformer extends EMEATransformer {
       query.setParameter("COUNTRY", landedCntry);
       fullCntryName = query.getSingleResult(String.class);
     }
-
 
     List<String> addrAttrList = Arrays.asList(custName, custNameCond, additionalInfo, attPerson, street, comboStreetCondPobox, postCode + " " + city);
     String[] lines = new String[7];
@@ -1052,19 +1051,19 @@ public class NORDXTransformer extends EMEATransformer {
         }
 
       } else if (SystemLocation.DENMARK.equals(cntry) && StringUtils.isBlank(SUB_REGION_COUNTRY) && "DK".equals(landedCntry) && zs01changed) {
-          int postCd = 10001;
-          if (StringUtils.isNotBlank(mailPostCode)) {
-            if (StringUtils.isNumeric(mailPostCode)) {
-              postCd = Integer.valueOf(mailPostCode.trim());
-            }
+        int postCd = 10001;
+        if (StringUtils.isNotBlank(mailPostCode)) {
+          if (StringUtils.isNumeric(mailPostCode)) {
+            postCd = Integer.valueOf(mailPostCode.trim());
           }
-          if (postCd >= 0 && postCd < 5000) {
-            legacyCust.setCeBo("000281X");
-          } else if (postCd > 4999 && postCd < 7400) {
-            legacyCust.setCeBo("000246X");
-          } else if (postCd > 7399 && postCd < 10000) {
-            legacyCust.setCeBo("000245X");
-          }
+        }
+        if (postCd >= 0 && postCd < 5000) {
+          legacyCust.setCeBo("000281X");
+        } else if (postCd > 4999 && postCd < 7400) {
+          legacyCust.setCeBo("000246X");
+        } else if (postCd > 7399 && postCd < 10000) {
+          legacyCust.setCeBo("000245X");
+        }
       } else {
         String sql = ExternalizedQuery.getSql("LEGACYD.GETCUST");
         PreparedQuery query = new PreparedQuery(entityManager, sql);
@@ -1077,7 +1076,7 @@ public class NORDXTransformer extends EMEATransformer {
         } else {
           legacyCust.setCeBo(cust.getCeBo());
         }
-        }
+      }
 
       if (SystemLocation.DENMARK.equals(cntry)) {
         if ("DKK".equals(data.getCurrencyCd())) {
@@ -1812,13 +1811,13 @@ public class NORDXTransformer extends EMEATransformer {
   @Override
   public void transformLegacyCustomerExtDataMassUpdate(EntityManager entityManager, CmrtCustExt custExt, CMRRequestContainer cmrObjects,
       MassUpdtData muData, String cmr) throws Exception {
-    if (!StringUtils.isBlank(muData.getSearchTerm())) {
-      if ("@".equals(muData.getSearchTerm())) {
-        custExt.setAcAdminBo("");
-      } else {
-        custExt.setAcAdminBo(muData.getSearchTerm());
-      }
-    }
+    // if (!StringUtils.isBlank(muData.getSearchTerm())) {
+    // if ("@".equals(muData.getSearchTerm())) {
+    // custExt.setAcAdminBo("");
+    // } else {
+    // custExt.setAcAdminBo(muData.getSearchTerm());
+    // }
+    // }
 
     // List<MassUpdtAddr> muAddrList = cmrObjects.getMassUpdateAddresses();
     // MassUpdtAddr zp01Addr = new MassUpdtAddr();

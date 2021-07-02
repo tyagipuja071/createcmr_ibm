@@ -4303,7 +4303,7 @@ function setIsuCtcOnScenarioChange() {
     if (scenario == 'BUSPR' || scenario.includes('BP') || scenario.includes('IN')) {
       FormManager.setValue('enterprise', '');
     } else {
-      FormManager.setValue('enterprise', '985518');
+      // FormManager.setValue('enterprise', '985518');
     }
   }
 }
@@ -4343,7 +4343,7 @@ function setIsuCtcOnScenarioChange() {
     if (scenario == 'BUSPR' || scenario.includes('BP') || scenario.includes('IN')) {
       FormManager.setValue('enterprise', '');
     } else {
-      FormManager.setValue('enterprise', '985518');
+      // FormManager.setValue('enterprise', '985518');
     }
   }
 }

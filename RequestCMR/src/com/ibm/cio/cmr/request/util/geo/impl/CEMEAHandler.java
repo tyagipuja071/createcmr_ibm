@@ -1152,12 +1152,14 @@ public class CEMEAHandler extends BaseSOFHandler {
         if (!StringUtils.isEmpty(abbrevNm) && abbrevNm.endsWith(" CIS")) {
           // 4606 Russia CIS Duplicate CMR
           Map<String, Object> dupRecordV = getDupCMRFieldValue(dupCntry, dupCmrNo);
-          data.setDupEnterpriseNo(dupRecordV.get("ZZKV_NODE1").toString());
-          LOG.debug("CompanyNo2: " + data.getDupEnterpriseNo());
+          if (!dupCmrNo.equals(dupRecordV.get("ZZKV_NODE1").toString())) {
+            data.setDupEnterpriseNo(dupRecordV.get("ZZKV_NODE1").toString());
+            LOG.debug("CompanyNo2: " + data.getDupEnterpriseNo());
+          }
           data.setDupSalesRepNo(this.currentImportValues.get("SR"));
           LOG.debug("SalRepNameNo2: " + data.getDupSalesRepNo());
-          data.setDupSalesBoCd(this.currentImportValues.get("SBO"));
-          LOG.debug("SalesBusOff2: " + data.getDupSalesBoCd());
+          data.setDupSalesBoCd(dupRecordV.get("SORTL").toString());
+          LOG.debug("SalesBusOff2: " + dupRecordV.get("SORTL").toString());
           data.setTaxCd3(dupRecordV.get("ZZKV_NODE2").toString());
           LOG.debug("SalesEnterpriseNo2: " + data.getTaxCd3());
           data.setDupIsuCd(dupRecordV.get("BRSCH").toString());
@@ -2414,6 +2416,7 @@ public class CEMEAHandler extends BaseSOFHandler {
     query.addField("BRSCH");
     query.addField("ZZKV_NODE1");
     query.addField("ZZKV_NODE2");
+    query.addField("SORTL");
     LOG.debug("Check Dup CMR .. Getting existing SPRAS value from RDc DB.." + "KATR6 =" + katr6);
     QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
     QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
