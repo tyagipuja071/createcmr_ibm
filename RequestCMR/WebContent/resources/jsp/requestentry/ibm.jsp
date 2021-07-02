@@ -216,6 +216,31 @@ dojo.addOnLoad(function(){
           <cmr:field fieldId="SearchTerm" id="searchTerm" path="searchTerm" tabId="MAIN_IBM_TAB" />
         </p>
       </cmr:column>
+
+      <cmr:column span="2" containerForField="CommercialFinanced" forCountry="624" >
+        <p>
+          <cmr:label fieldId="commercialFinanced">
+            <cmr:fieldLabel fieldId="CommercialFinanced" />:
+              <cmr:delta text="${rdcdata.commercialFinanced}" oldValue="${reqentry.commercialFinanced}" />
+          </cmr:label>
+          <cmr:field path="commercialFinanced" id="commercialFinanced" fieldId="CommercialFinanced" tabId="MAIN_IBM_TAB" />
+        </p>
+      </cmr:column>
+      
+    </cmr:row>
+   </cmr:view>
+   
+   <cmr:view forCountry='788'>
+   	<cmr:row topPad="10">
+   	  <cmr:column span="2" containerForField="CommercialFinanced" >
+        <p>
+          <cmr:label fieldId="commercialFinanced">
+            <cmr:fieldLabel fieldId="CommercialFinanced" />:
+              <cmr:delta text="${rdcdata.commercialFinanced}" oldValue="${reqentry.commercialFinanced}" />
+          </cmr:label>
+          <cmr:field path="commercialFinanced" id="commercialFinanced" fieldId="CommercialFinanced" tabId="MAIN_IBM_TAB" />
+        </p>
+      </cmr:column>
     </cmr:row>
    </cmr:view>
 

@@ -271,6 +271,51 @@ function setAccTemNumValueOnScenarios() {
   }
 }
 
+function setSortlOnScenarios() {
+  var cntryUse = FormManager.getActualValue('countryUse');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var reqType = FormManager.getActualValue('reqType');
+  if (typeof (_pagemodel) != 'undefined') {
+    reqType = FormManager.getActualValue('reqType');
+    role = _pagemodel.userRole;
+  }
+
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+
+  if (reqType != 'C') {
+    return;
+  }
+
+  if (custSubGrp == '') {
+    return;
+  }
+
+  switch (custSubGrp) {
+  case 'CBCOM':
+    if (role == 'Requester') {
+      if (cntryUse == '624') {
+        FormManager.setValue('commercialFinanced', 'T0003601');
+      } else if (cntryUse == '624LU') {
+        FormManager.setValue('commercialFinanced', 'T0003500');
+      }
+    }
+    break;
+  case 'CBBUS':
+    if (role == 'Requester') {
+      if (cntryUse == '624') {
+        FormManager.setValue('commercialFinanced', 'BP0000');
+      } else if (cntryUse == '624LU') {
+        FormManager.setValue('commercialFinanced', 'LP0000');
+      }
+    }
+    break;
+  default:
+    break;
+  }
+}
+
 function addAccTemNumValidate() {
   var cntryUse = FormManager.getActualValue('countryUse');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
@@ -616,6 +661,7 @@ function addHandlersForBELUX() {
       // setINACValues(value);
       setEconomicCodeValues(value);
       setSBO();
+      setSORTL();
 
     });
   }
@@ -806,8 +852,10 @@ function setAccountTeamNumberValues(clientTier) {
     var qParams = null;
     var results = null;
 
+    // 32S changed to 34Q on 2021 2H Coverage
     // Account Team Number will be based on IMS for 32S
-    if (ims != '' && ims.length > 1 && (isuCtc == '32S')) {
+    // if (ims != '' && ims.length > 1 && (isuCtc == '32S')) {
+    if (ims != '' && ims.length > 1 && (isuCtc == '34Q')) {
       qParams = {
         _qall : 'Y',
         ISSUING_CNTRY : cntry + geoCd,
@@ -1538,6 +1586,57 @@ function setSBO(searchTerm) {
   }
 }
 
+function setSORTL() {
+
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+
+  var acctTeamNum = FormManager.getActualValue('searchTerm');
+  var custSubType = FormManager.getActualValue('custSubGrp');
+  var reqType = FormManager.getActualValue('reqType');
+
+  if (reqType != 'C') {
+    return;
+  }
+  switch (custSubType) {
+  case 'BEINT':
+  case 'BEISO':
+  case 'BEPRI':
+  case 'BEBUS':
+    if (acctTeamNum != _pagemodel.searchTerm) {
+      FormManager.setValue('commercialFinanced', acctTeamNum);
+    }
+    break;
+  case 'BECOM':
+  case 'BEPUB':
+  case 'BE3PA':
+  case 'BEDAT':
+    // do nothing
+    break;
+  case 'LUINT':
+  case 'LUISO':
+  case 'LUPRI':
+  case 'LUBUS':
+    if (acctTeamNum != _pagemodel.searchTerm) {
+      FormManager.setValue('commercialFinanced', acctTeamNum);
+    }
+    break;
+  case 'LUCOM':
+  case 'LUPUB':
+  case 'LU3PA':
+  case 'LUDAT':
+    // do nothing
+    break;
+  case 'CBCOM':
+  case 'CBBUS':
+    // do nothing
+    break;
+  default:
+    break;
+  }
+}
+
 function getLandCntryDesc(cntryCd) {
   if (cntryCd != null) {
     reqParam = {
@@ -1780,6 +1879,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.BELUX);
   GEOHandler.addAfterTemplateLoad(setISUDropDown, GEOHandler.BELUX);
   GEOHandler.addAfterTemplateLoad(setClientTierDropDown, GEOHandler.BELUX);
+  GEOHandler.addAfterTemplateLoad(setSortlOnScenarios, GEOHandler.BELUX);
 
   GEOHandler.addAddrFunction(disableLandCntry, GEOHandler.BELUX);
   GEOHandler.addAddrFunction(addLandedCountryHandler, GEOHandler.BELUX);
