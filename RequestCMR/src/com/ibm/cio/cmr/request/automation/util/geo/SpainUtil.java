@@ -3,15 +3,18 @@
  */
 package com.ibm.cio.cmr.request.automation.util.geo;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import javax.persistence.EntityManager;
 
+import org.apache.commons.digester.Digester;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
@@ -32,6 +35,7 @@ import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
+import com.ibm.cio.cmr.request.util.ConfigUtil;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemParameters;
@@ -64,11 +68,55 @@ public class SpainUtil extends AutomationUtil {
   public static final String SCENARIO_GOVERNMENT = "GOVRN";
   public static final String SCENARIO_GOVERNMENT_IGS = "GOVIG";
 
+  private static SpainISICPostalMapping esIsicPostalMapping = new SpainISICPostalMapping();
+  private static List<ESPostalMapping> postalMappings = new ArrayList<ESPostalMapping>();
+  private static final String SALES_REP = "salesRep";
+  private static final String ENTP = "enterprise";
+  private static final String MATCHING = "matching";
+
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
       CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO, CmrConstants.RDC_SECONDARY_SOLD_TO);
   private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Att. Person", "Phone #");
   private static final List<String> SCENARIOS_TO_SKIP_COVERAGE = Arrays.asList(SCENARIO_INTERNAL, SCENARIO_INTERNAL_SO, SCENARIO_BUSINESS_PARTNER,
       SCENARIO_CROSSBORDER_BP);
+  @SuppressWarnings("unchecked")
+  public SpainUtil() {
+    if (SpainUtil.esIsicPostalMapping == null || SpainUtil.postalMappings.isEmpty()) {
+      Digester digester = new Digester();
+      Digester digester_ = new Digester();
+
+      digester.setValidating(false);
+      digester_.setValidating(false);
+
+      digester.addObjectCreate("mappings", ArrayList.class);
+      digester.addObjectCreate("mappings/postalMapping", ESPostalMapping.class);
+
+      digester_.addObjectCreate("mappping-isic", SpainISICPostalMapping.class);
+
+      digester.addBeanPropertySetter("mappings/postalMapping/isuCTC", "isuCTC");
+      digester.addBeanPropertySetter("mappings/postalMapping/postalCdStarts", "postalCdStarts");
+      digester.addBeanPropertySetter("mappings/postalMapping/enterprise", "enterprise");
+      digester.addBeanPropertySetter("mappings/postalMapping/salesRep", "salesRep");
+      digester.addBeanPropertySetter("mappings/postalMapping/scenarios",
+       "scenarios");
+      digester.addBeanPropertySetter("mappings/postalMapping/isicBelongs", "isicBelongs");
+
+      digester.addSetNext("mappings/postalMapping", "add");
+
+      digester_.addBeanPropertySetter("mappping-isic/isicCds", "isicCds");
+
+      try {
+        InputStream is_ = ConfigUtil.getResourceStream("spain-sr-entp-mapping.xml");
+        SpainUtil.postalMappings = (ArrayList<ESPostalMapping>) digester.parse(is_);
+
+        InputStream is = ConfigUtil.getResourceStream("spain-isic-mapping.xml");
+        SpainUtil.esIsicPostalMapping = (SpainISICPostalMapping) digester_.parse(is);
+
+      } catch (Exception e) {
+        LOG.error("Error occured while digesting xml.", e);
+      }
+    }
+  }
 
   @Override
   public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
@@ -500,14 +548,19 @@ public class SpainUtil extends AutomationUtil {
     }
 
     Data data = requestData.getData();
-    String scenario = data.getCustSubGrp();
+    Addr addr = requestData.getAddress("ZI01");
 
-    if ((!isCoverageCalculated || SCENARIO_PRIVATE_CUSTOMER.equals(scenario)
-        || ((SCENARIO_THIRD_PARTY.equals(scenario) || SCENARIO_THIRD_PARTY_IG.equals(scenario)) && engineData.get("ZI01_DNB_MATCH") != null))
-        && !SCENARIOS_TO_SKIP_COVERAGE.contains(scenario)) {
+    if ((!isCoverageCalculated)) {
       details.setLength(0);
       overrides.clearOverrides();
-      SpainFieldsCompContainer fields = new SpainFieldsCompContainer(entityManager, data, data.getIsuCd(), data.getClientTier());
+
+      HashMap<String, String> response = getEntpSalRepFromPostalCodeMapping(data.getIsicCd(), addr.getPostCd(), data.getIsuCd(), data.getClientTier(),
+          data.getCustSubGrp());
+      SpainFieldsCompContainer fields = null;
+      if (response.get(MATCHING).isEmpty() || response.get(MATCHING).equals("No Match Found")) {
+        fields = new SpainFieldsCompContainer(entityManager, data, data.getIsuCd(), data.getClientTier());
+      }
+
       if (fields != null && fields.allFieldsCalculated()) {
         details.append("Coverage calculated successfully using 34Q logic.").append("\n");
         details.append("Sales Rep : " + fields.getSalesRep()).append("\n");
@@ -516,6 +569,16 @@ public class SpainUtil extends AutomationUtil {
         overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), fields.getSbo());
         overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ENTERPRISE", data.getEnterprise(), fields.getEnterprise());
         overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "REP_TEAM_MEMBER_NO", data.getRepTeamMemberNo(), fields.getSalesRep());
+        results.setResults("Calculated");
+        results.setDetails(details.toString());
+      } else if (response.get(MATCHING).equalsIgnoreCase("Match Found.")) {
+        LOG.debug("Calculated Enterprise: " + response.get(ENTP));
+        LOG.debug("Calculated Sales Rep: " + response.get(SALES_REP));
+        details.append("Coverage calculated successfully using 34Q logic.").append("\n");
+        details.append("Sales Rep : " + response.get(SALES_REP)).append("\n");
+        details.append("Enterprise : " + response.get(ENTP)).append("\n");
+        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ENTERPRISE", data.getEnterprise(), response.get(SALES_REP));
+        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "REP_TEAM_MEMBER_NO", data.getRepTeamMemberNo(), response.get(ENTP));
         results.setResults("Calculated");
         results.setDetails(details.toString());
       } else if (StringUtils.isNotBlank(data.getRepTeamMemberNo()) && StringUtils.isNotBlank(data.getSalesBusOffCd())
@@ -549,6 +612,43 @@ public class SpainUtil extends AutomationUtil {
       }
     }
 
+  }
+
+  private HashMap<String, String> getEntpSalRepFromPostalCodeMapping(String isicCd, String postCd, String isuCd, String clientTier, String scenario) {
+    HashMap<String, String> response = new HashMap<String, String>();
+    response.put(ENTP, "");
+    response.put(SALES_REP, "");
+    response.put(MATCHING, "");
+
+    List<String> isicCds = new ArrayList<String>();
+    List<String> postalCodes = new ArrayList<String>();
+    List<String> scenariosList = new ArrayList<String>();
+
+    if (esIsicPostalMapping != null) {
+      for (ESPostalMapping postalMapping : postalMappings) {
+        if (esIsicPostalMapping.getIsicCds() != null && !esIsicPostalMapping.getIsicCds().isEmpty()) {
+          isicCds = Arrays.asList(esIsicPostalMapping.getIsicCds().replaceAll("\n", "").replaceAll(" ", "").split(","));
+        }
+        String[] postalCodeRanges = postalMapping.getPostalCdStarts().replaceAll("\n", "").replaceAll(" ", "").split(",");
+        postalCodes = Arrays.asList(postalCodeRanges);
+        String[] scenarios = postalMapping.getScenarios().replaceAll("\n", "").replaceAll(" ", "").split(",");
+        scenariosList = Arrays.asList(scenarios);
+
+        if (isuCd.concat(clientTier).equalsIgnoreCase(postalMapping.getIsuCTC()) && scenariosList.contains(scenario)
+            && "None".equalsIgnoreCase(postalMapping.getIsicBelongs())
+            || (postalCodes.contains(postCd)) && (("Yes".equalsIgnoreCase(postalMapping.getIsicBelongs()) && isicCds.contains(isicCd))
+                || ("No".equalsIgnoreCase(postalMapping.getIsicBelongs()) && !isicCds.contains(isicCd)))) {
+          response.put(ENTP, postalMapping.getEnterprise());
+          response.put(SALES_REP, postalMapping.getSaleRep());
+          response.put(MATCHING, "Match Found.");
+        }
+      }
+      response.put(MATCHING, "No Match Found");
+      return response;
+    } else {
+      response.put(MATCHING, "No Match Found");
+      return response;
+    }
   }
 
   @Override
