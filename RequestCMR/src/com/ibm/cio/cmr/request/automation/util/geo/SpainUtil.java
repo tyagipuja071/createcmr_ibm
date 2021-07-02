@@ -79,6 +79,7 @@ public class SpainUtil extends AutomationUtil {
   private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Att. Person", "Phone #");
   private static final List<String> SCENARIOS_TO_SKIP_COVERAGE = Arrays.asList(SCENARIO_INTERNAL, SCENARIO_INTERNAL_SO, SCENARIO_BUSINESS_PARTNER,
       SCENARIO_CROSSBORDER_BP);
+
   @SuppressWarnings("unchecked")
   public SpainUtil() {
     if (SpainUtil.esIsicPostalMapping == null || SpainUtil.postalMappings.isEmpty()) {
@@ -97,8 +98,7 @@ public class SpainUtil extends AutomationUtil {
       digester.addBeanPropertySetter("mappings/postalMapping/postalCdStarts", "postalCdStarts");
       digester.addBeanPropertySetter("mappings/postalMapping/enterprise", "enterprise");
       digester.addBeanPropertySetter("mappings/postalMapping/salesRep", "salesRep");
-      digester.addBeanPropertySetter("mappings/postalMapping/scenarios",
-       "scenarios");
+      digester.addBeanPropertySetter("mappings/postalMapping/scenario", "scenario");
       digester.addBeanPropertySetter("mappings/postalMapping/isicBelongs", "isicBelongs");
 
       digester.addSetNext("mappings/postalMapping", "add");
@@ -106,11 +106,11 @@ public class SpainUtil extends AutomationUtil {
       digester_.addBeanPropertySetter("mappping-isic/isicCds", "isicCds");
 
       try {
-        InputStream is_ = ConfigUtil.getResourceStream("spain-sr-entp-mapping.xml");
-        SpainUtil.postalMappings = (ArrayList<ESPostalMapping>) digester.parse(is_);
+        InputStream is = ConfigUtil.getResourceStream("spain-sr-entp-mapping.xml");
+        SpainUtil.postalMappings = (ArrayList<ESPostalMapping>) digester.parse(is);
 
-        InputStream is = ConfigUtil.getResourceStream("spain-isic-mapping.xml");
-        SpainUtil.esIsicPostalMapping = (SpainISICPostalMapping) digester_.parse(is);
+        InputStream is_ = ConfigUtil.getResourceStream("spain-isic-mapping.xml");
+        SpainUtil.esIsicPostalMapping = (SpainISICPostalMapping) digester_.parse(is_);
 
       } catch (Exception e) {
         LOG.error("Error occured while digesting xml.", e);
@@ -625,19 +625,24 @@ public class SpainUtil extends AutomationUtil {
     List<String> scenariosList = new ArrayList<String>();
 
     if (esIsicPostalMapping != null) {
+      String[] postalCodeRanges = null;
       for (ESPostalMapping postalMapping : postalMappings) {
         if (esIsicPostalMapping.getIsicCds() != null && !esIsicPostalMapping.getIsicCds().isEmpty()) {
           isicCds = Arrays.asList(esIsicPostalMapping.getIsicCds().replaceAll("\n", "").replaceAll(" ", "").split(","));
         }
-        String[] postalCodeRanges = postalMapping.getPostalCdStarts().replaceAll("\n", "").replaceAll(" ", "").split(",");
-        postalCodes = Arrays.asList(postalCodeRanges);
+        if (StringUtils.isEmpty(postalMapping.getPostalCdStarts())) {
+          postalCodeRanges = postalMapping.getPostalCdStarts().replaceAll("\n", "").replaceAll(" ", "").split(",");
+          postalCodes = Arrays.asList(postalCodeRanges);
+        }
+
         String[] scenarios = postalMapping.getScenarios().replaceAll("\n", "").replaceAll(" ", "").split(",");
         scenariosList = Arrays.asList(scenarios);
 
         if (isuCd.concat(clientTier).equalsIgnoreCase(postalMapping.getIsuCTC()) && scenariosList.contains(scenario)
             && "None".equalsIgnoreCase(postalMapping.getIsicBelongs())
-            || (postalCodes.contains(postCd)) && (("Yes".equalsIgnoreCase(postalMapping.getIsicBelongs()) && isicCds.contains(isicCd))
-                || ("No".equalsIgnoreCase(postalMapping.getIsicBelongs()) && !isicCds.contains(isicCd)))) {
+            || (!postalCodes.isEmpty() && postalCodes.contains(postCd))
+                && (("Yes".equalsIgnoreCase(postalMapping.getIsicBelongs()) && isicCds.contains(isicCd))
+                    || ("No".equalsIgnoreCase(postalMapping.getIsicBelongs()) && !isicCds.contains(isicCd)))) {
           response.put(ENTP, postalMapping.getEnterprise());
           response.put(SALES_REP, postalMapping.getSaleRep());
           response.put(MATCHING, "Match Found.");
