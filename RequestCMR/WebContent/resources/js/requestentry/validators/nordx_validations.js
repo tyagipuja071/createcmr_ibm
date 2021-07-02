@@ -232,11 +232,13 @@ var _ExpediteHandler = null;
 var _ISICHandler = null; // CMR-1993
 
 var cnt = 0;
+var changeFlag = false;
 
 function addHandlersForNORDX() {
 
   if (_ISUHandler == null) {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+      changeFlag = true;
       // setClientTierValues(value);
       // CREATCMR-2674
       setSalesRepValues();
@@ -246,6 +248,7 @@ function addHandlersForNORDX() {
 
   if (_CTCHandler == null) {
     _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
+      changeFlag = true;
       // CREATCMR-2674
       setSalesRepValues();
       // cleanupACdminDSAndSRValues();// CMR-1746
@@ -254,6 +257,7 @@ function addHandlersForNORDX() {
 
   _subIndCdHandler1 = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
     if (cnt >= 1) {
+      changeFlag = true;
       if (value != null && value.length > 1) {
         setSRValuesBaseOnSubInd();
         FormManager.readOnly('subIndustryCd');// CMR-1993
@@ -3467,6 +3471,10 @@ function lockDunsNo() {
 // CREATCMR-2674
 function setSalesRepValues() {
 
+  if (!changeFlag) {
+    return;
+  }
+
   reqType = FormManager.getActualValue('reqType');
 
   var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
@@ -3710,6 +3718,10 @@ function setSalesRepValues() {
 function setSRValuesBaseOnSubInd() {
 
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+
+  if (!changeFlag) {
     return;
   }
 
