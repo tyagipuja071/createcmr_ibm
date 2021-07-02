@@ -2,6 +2,201 @@
 <mappings>
 
   <mapping>
+    <countryLanded>TF</countryLanded>
+    <isu>
+      34
+    </isu>
+    <ctc>
+      Q
+    </ctc>
+    <sbo>
+      ID1
+    </sbo>
+  </mapping>
+  
+  <mapping>
+    <countryLanded>RE</countryLanded>
+    <isu>
+      34
+    </isu>
+    <ctc>
+      Q
+    </ctc>
+    <sbo>
+      ID1
+    </sbo>
+  </mapping>
+  
+  <mapping>
+    <countryLanded>MQ</countryLanded>
+    <isu>
+      34
+    </isu>
+    <ctc>
+      Q
+    </ctc>
+    <sbo>
+      YF1
+    </sbo>
+  </mapping>
+  
+  <mapping>
+    <countryLanded>GP</countryLanded>
+    <isu>
+      34
+    </isu>
+    <ctc>
+      Q
+    </ctc>
+    <sbo>
+      YD1
+    </sbo>
+  </mapping>
+  
+  <mapping>
+    <countryLanded>GF</countryLanded>
+    <isu>
+      34
+    </isu>
+    <ctc>
+      Q
+    </ctc>
+    <sbo>
+      XF1
+    </sbo>
+  </mapping>
+  
+  <mapping>
+    <countryLanded>PM</countryLanded>
+    <isu>
+      34
+    </isu>
+    <ctc>
+      Q
+    </ctc>
+    <sbo>
+      XF1
+    </sbo>
+  </mapping>
+  
+  <mapping>
+    <countryLanded>YT</countryLanded>
+    <isu>
+      34
+    </isu>
+    <ctc>
+      Q
+    </ctc>
+    <sbo>
+      XD1
+    </sbo>
+  </mapping>
+  
+  <mapping>
+    <countryLanded>NC</countryLanded>
+    <isu>
+      34
+    </isu>
+    <ctc>
+      Q
+    </ctc>
+    <sbo>
+      GD1
+    </sbo>
+  </mapping>
+  
+  <mapping>
+    <countryLanded>VU</countryLanded>
+    <isu>
+      34
+    </isu>
+    <ctc>
+      Q
+    </ctc>
+    <sbo>
+      GD1
+    </sbo>
+  </mapping>
+  
+  <mapping>
+    <countryLanded>WF</countryLanded>
+    <isu>
+      34
+    </isu>
+    <ctc>
+      Q
+    </ctc>
+    <sbo>
+      GD1
+    </sbo>
+  </mapping>
+  
+  <mapping>
+    <countryLanded>PF</countryLanded>
+    <isu>
+      34
+    </isu>
+    <ctc>
+      Q
+    </ctc>
+    <sbo>
+      DD1
+    </sbo>
+  </mapping>
+  
+  <mapping>
+    <countryLanded>AD</countryLanded>
+    <isu>
+      34
+    </isu>
+    <ctc>
+      Q
+    </ctc>
+    <sbo>
+      NNN
+    </sbo>
+  </mapping>
+  
+  <mapping>
+    <countryLanded>MC</countryLanded>
+    <isu>
+      34
+    </isu>
+    <ctc>
+      Q
+    </ctc>
+    <sbo>
+      NNN
+    </sbo>
+  </mapping>
+  
+  <mapping>
+    <countryLanded>FR</countryLanded>
+    <isu>
+      34
+    </isu>
+    <ctc>
+      Q
+    </ctc>
+    <sbo>
+      NNN
+    </sbo>
+  </mapping>
+  
+  <mapping>
+    <countryLanded>DZ</countryLanded>
+    <isu>
+      34
+    </isu>
+    <ctc>
+      Q
+    </ctc>
+    <sbo>
+      711
+    </sbo>
+  </mapping> 
+
+  <mapping>
   <countryUse>
   706
   </countryUse>
@@ -384,5 +579,6 @@
       03T
     </sbo>
   </mapping>
+  
   
 </mappings>

@@ -13,6 +13,7 @@ public class FrSboMapping {
   private String sbo;
   private String postalCdStarts;
   private String countryUse;
+  private String countryLanded;
 
   public String getIsicCds() {
     return isicCds;
@@ -60,6 +61,14 @@ public class FrSboMapping {
 
   public void setCountryUse(String countryUse) {
     this.countryUse = countryUse;
+  }
+
+  public String getCountryLanded() {
+    return countryLanded;
+  }
+
+  public void setCountryLanded(String countryLanded) {
+    this.countryLanded = countryLanded;
   }
 
 }
