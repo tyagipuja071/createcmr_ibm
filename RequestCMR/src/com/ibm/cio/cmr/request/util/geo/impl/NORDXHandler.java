@@ -1098,7 +1098,7 @@ public class NORDXHandler extends BaseSOFHandler {
             String isu = ""; // 10
             String ctc = ""; // 11
             String leadingAccount = ""; // 12
-            String acAdmin = ""; // 13
+            String sortl = ""; // 13
             String vat = ""; // 14
             String salesRep = ""; // 15
             String phone = ""; // 16
@@ -1214,18 +1214,12 @@ public class NORDXHandler extends BaseSOFHandler {
               }
 
               currCell = (XSSFCell) row.getCell(13);
-              acAdmin = validateColValFromCell(currCell);
-              if ("@".equals(acAdmin)) {
-                LOG.trace("The row " + (row.getRowNum() + 1)
-                    + ":Note that A/C Admin DSC is not allowed blank out. Please fix and upload the template again.");
-                error.addError((row.getRowNum() + 1), "A/C Admin DSC",
-                    ":Note that A/C Admin DSC is not allowed blank out. Please fix and upload the template again.<br>");
-              }
-              if (!StringUtils.isBlank(acAdmin) && !acAdmin.matches("^[0-9]*$")) {
-                LOG.trace("The row " + (row.getRowNum() + 1)
-                    + ":Note that A/C admin DSC should be only numeric. Please fix and upload the template again.");
-                error.addError((row.getRowNum() + 1), "A/C admin DSC",
-                    ":Note that A/C admin DSC should be only numeric. Please fix and upload the template again.<br>");
+              sortl = validateColValFromCell(currCell);
+              if (!StringUtils.isBlank(sortl) && !sortl.matches("^[A-Za-z0-9]+$")) {
+                LOG.trace(
+                    "The row " + (row.getRowNum() + 1) + ":Note that SORTL should be only alphanumeric. Please fix and upload the template again.");
+                error.addError((row.getRowNum() + 1), "SORTL",
+                    ":Note that SORTL should be only alphanumeric. Please fix and upload the template again.<br>");
               }
 
               currCell = (XSSFCell) row.getCell(14);
