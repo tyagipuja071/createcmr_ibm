@@ -3534,10 +3534,10 @@ function setSalesRepValues() {
               if (T0007879.includes(ind)) {
                 FormManager.setValue('searchTerm', 'T0007879');
               } else {
-                FormManager.setValue('searchTerm', '');
+                FormManager.setValue('searchTerm', 'T0001376');
               }
             } else {
-              FormManager.setValue('searchTerm', 'T0001376');
+              FormManager.setValue('searchTerm', '');
             }
           } else if (isuAndCtc == '34Y') {
             FormManager.setValue('searchTerm', 'T0007977');
@@ -3793,10 +3793,10 @@ function setSRValuesBaseOnSubInd() {
             if (T0007879.includes(ind)) {
               FormManager.setValue('searchTerm', 'T0007879');
             } else {
-              FormManager.setValue('searchTerm', '');
+              FormManager.setValue('searchTerm', 'T0001376');
             }
           } else {
-            FormManager.setValue('searchTerm', 'T0001376');
+            FormManager.setValue('searchTerm', '');
           }
         } else if (isuAndCtc == '34Y') {
           FormManager.setValue('searchTerm', 'T0007977');
