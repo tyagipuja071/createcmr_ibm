@@ -377,14 +377,6 @@ function afterConfigForCEMEA() {
     return;
   }
 
-  var reqType = FormManager.getActualValue('reqType');
-  var role = FormManager.getActualValue('userRole').toUpperCase();
-  if ("U" == reqType && "REQUESTER" == role) {
-    FormManager.enable('salesBusOffCd');
-  } else {
-    FormManager.readOnly('salesBusOffCd');
-  }
-
   FormManager.readOnly('cmrOwner');
 
   // Set abbrevLocn for Softlayer Scenario
@@ -2114,6 +2106,13 @@ function cancelCIS() {
 }
 
 function afterConfigForRussia() {
+  var reqType = FormManager.getActualValue('reqType');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  if ("U" == reqType && "REQUESTER" == role) {
+    FormManager.enable('salesBusOffCd');
+  } else {
+    FormManager.readOnly('salesBusOffCd');
+  }
   dojo.connect(FormManager.getField('cisServiceCustIndc'), 'onChange', function(value) {
 
     if (dijit.byId('cisServiceCustIndc').get('checked')) {
