@@ -416,7 +416,7 @@ public class SwitzerlandUtil extends AutomationUtil {
       sortl = getSortlForISUCTC(entityManager, data.getSubIndustryCd(), soldTo.getPostCd(), data.getIsuCd(), data.getClientTier());
       break;
     default:
-      if ("32".equals(data.getIsuCd()) && ("S".equals(data.getClientTier()) || "N".equals(data.getClientTier())) && !isCoverageCalculated) {
+      if ("34".equals(data.getIsuCd()) && ("Q".equals(data.getClientTier())) && !isCoverageCalculated) {
         if (SCENARIO_CROSS_BORDER.equals(scenario)) {
           // verified all logic is based on 3000-9999 condition for crossborders
           sortl = getSortlForISUCTC(entityManager, data.getSubIndustryCd(), "3000", data.getIsuCd(), data.getClientTier());
@@ -507,7 +507,7 @@ public class SwitzerlandUtil extends AutomationUtil {
         subIndustryCd = "";
       }
 
-      if (StringUtils.isNotBlank(postCd) && "32".equals(isuCd) && StringUtils.isNumeric(postCd)) {
+      if (StringUtils.isNotBlank(postCd) && "34".equals(isuCd) && StringUtils.isNumeric(postCd)) {
         int postalCode = Integer.parseInt(postCd);
         if (postalCode >= 3000) {
           // postCd=2 represents the 2nd range which is 3000 to 9999
@@ -515,6 +515,7 @@ public class SwitzerlandUtil extends AutomationUtil {
         } else {
           // postCd=1 represents the 1st range which is 1000 to 2999
           postCd = "1";
+          subIndustryCd = "";
         }
       } else {
         postCd = "";
