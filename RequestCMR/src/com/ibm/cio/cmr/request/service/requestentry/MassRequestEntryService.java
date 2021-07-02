@@ -5911,6 +5911,10 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       case "SVC_AR_OFFICE":
         muModel.setSvcArOffice(tempVal);
         break;
+      case "TAX_CD3":
+        muModel.setTaxCd3(tempVal);
+        ;
+        break;
       default:
         LOG.debug("Default condition was executed [nothing was saved] for DB column >> " + col.getLabel());
         break;
