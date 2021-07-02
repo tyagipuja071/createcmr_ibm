@@ -248,6 +248,10 @@ function lockRequireFieldsMCO2() {
       FormManager.readOnly('specialTaxCd');
     }
 
+    if (reqType == 'U') {
+      FormManager.readOnly('salesBusOffCd');
+    }
+
     // FormManager.readOnly('salesBusOffCd');
     // FormManager.readOnly('repTeamMemberNo');
     // FormManager.readOnly('isuCd');
@@ -809,19 +813,19 @@ function setSalesRepValues(isuCd, clientTier) {
   var salesReps = [];
   if (isuCd != '') {
     if (cntry == '764' || cntry == '831' || cntry == '851' || cntry == '857') {
-      if ((isuCd == '32' && clientTier == 'T') || (isuCd == '34' && clientTier == 'Q')) {
+      if ((isuCd == '32' && clientTier == 'T') || (isuCd == '34' && clientTier == 'Q') || (isuCd == '34' && clientTier == 'Y')) {
         FormManager.setValue('salesBusOffCd', '0080');
       } else {
         FormManager.setValue('salesBusOffCd', '0010');
       }
     } else if (cntry == '698' || cntry == '745') {
-      if ((isuCd == '32' && clientTier == 'T') || (isuCd == '34' && clientTier == 'Q')) {
+      if ((isuCd == '32' && clientTier == 'T') || (isuCd == '34' && clientTier == 'Q') || (isuCd == '34' && clientTier == 'Y')) {
         FormManager.setValue('salesBusOffCd', '0060');
       } else {
         FormManager.setValue('salesBusOffCd', '0010');
       }
     } else if (cntry == '645' || cntry == '835' || cntry == '842') {
-      if (isuCd == '34' && clientTier == 'Q') {
+      if ((isuCd == '34' && clientTier == 'Q') || (isuCd == '34' && clientTier == 'Y')) {
         FormManager.setValue('salesBusOffCd', '0040');
       } else {
         FormManager.setValue('salesBusOffCd', '0010');
@@ -1649,7 +1653,7 @@ function limitClientTierValues(value) {
     if (value == '32') {
       tierValues = [ 'C', 'S', 'T', 'N' ];
     } else if (value == '34') {
-      tierValues = [ 'V', 'A', 'Q' ];
+      tierValues = [ 'V', 'A', 'Q', 'Y' ];
     } else if (value == '21' || value == '8B') {
       tierValues = [ '7' ];
     } else {
