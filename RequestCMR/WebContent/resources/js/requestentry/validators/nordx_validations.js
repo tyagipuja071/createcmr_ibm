@@ -283,6 +283,11 @@ function addHandlersForNORDX() {
   }
 
   _subIndCdHandler1 = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
+
+    if (!value) {
+      return;
+    }
+
     if (cnt > 0) {
       changeFlag = true;
       if (value != null && value.length > 1) {
@@ -4140,7 +4145,8 @@ dojo.addOnLoad(function() {
   // CREATCMR-1709
   // GEOHandler.addAfterConfig(resetCustPrefLang, GEOHandler.NORDX);
   // GEOHandler.addAfterTemplateLoad(resetCustPrefLang, GEOHandler.NORDX);
-  GEOHandler.addAfterTemplateLoad(onSubIndustryChange, GEOHandler.NORDX);// CMR-1709
+  // GEOHandler.addAfterTemplateLoad(onSubIndustryChange, GEOHandler.NORDX);//
+  // CMR-1709
 
   // CREATCMR-1690
   GEOHandler.registerValidator(addCmrNoValidatorForNordx, GEOHandler.NORDX);
