@@ -106,6 +106,26 @@ public class BrazilCalculateIBMElement extends OverridingElement {
       overrides.addOverride(getProcessCode(), "DATA", "LOCN_NO", data.getLocationNumber(), "");
     }
 
+    // Set Data.SALES_BO_CD for stateProv Coverage change !!
+    final List<String> STATEPROV_763 = Arrays.asList("AM", "PA", "AC", "RO", "RR", "AP", "TO", "MA", "PI", "CE", "RN", "PB", "PE", "AL", "SE", "BA");
+    final List<String> STATEPROV_504 = Arrays.asList("DF", "GO", "MT", "MS");
+    final List<String> STATEPROV_758 = Arrays.asList("PR", "SC", "RS");
+    if (SystemLocation.BRAZIL.equals(data.getCmrIssuingCntry()) && soldTo != null) {
+      if ("RJ".equals(soldTo.getStateProv())) {
+        overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), "761");
+      } else if ("SP".equals(soldTo.getStateProv())) {
+        overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), "764");
+      } else if ("ES".equals(soldTo.getStateProv()) || "MG".equals(soldTo.getStateProv())) {
+        overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), "556");
+      } else if (STATEPROV_758.equals(soldTo.getStateProv())) {
+        overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), "758");
+      } else if (STATEPROV_504.equals(soldTo.getStateProv())) {
+        overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), "504");
+      } else if (STATEPROV_763.equals(soldTo.getStateProv())) {
+        overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), "763");
+      }
+    }
+
     // if the request is an update, do not calculate IBM fields
     if ("U".equals(admin.getReqType()) && !"REAC".equalsIgnoreCase(admin.getReqReason())) {
 

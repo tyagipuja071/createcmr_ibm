@@ -2526,6 +2526,50 @@ function setLocNoLockedForRequesterBR() {
   }
 }
 
+function setSortlForStateProvince() {
+  var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var reqType = FormManager.getActualValue('reqType');
+  if (cmrIssuingCntry != '631' || reqType != 'C') {
+    return;
+  }
+  var _reqId = FormManager.getActualValue('reqId');
+  var stateProvParams = {
+    REQ_ID : _reqId,
+    ADDR_TYPE : "ZS01",
+  };
+  var stateProvResult = cmr.query('ADDR.GET.STATEPROV.BY_REQID_ADDRTYP', stateProvParams);
+  var stateProv = stateProvResult.ret1;
+  if (stateProv != null && stateProv.length > 2) {
+    stateProv = stateProv.substring(0, 2);
+  }
+  if (stateProv == 'AM' || stateProv == 'PA' || stateProv == 'AC' || stateProv == 'RO' || stateProv == 'RR' || stateProv == 'AP' || stateProv == 'TO' || stateProv == 'MA' || stateProv == 'PI'
+      || stateProv == 'CE' || stateProv == 'RN' || stateProv == 'PB' || stateProv == 'PE' || stateProv == 'AL' || stateProv == 'SE' || stateProv == 'BA') {
+    FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
+    FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), [ '763','515' ]);
+    FormManager.enable('salesBusOffCd');
+  } else if (stateProv == 'DF' || stateProv == 'GO' || stateProv == 'MT' || stateProv == 'MS') {
+    FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
+    FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), [ '504','515' ]);
+    FormManager.enable('salesBusOffCd');
+  } else if (stateProv == 'PR' || stateProv == 'ES' || stateProv == 'MG') {
+    FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
+    FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), [ '556','515' ]);
+    FormManager.enable('salesBusOffCd');
+  } else if (stateProv == 'PR' || stateProv == 'SC' || stateProv == 'RS') {
+    FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
+    FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), [ '758','515' ]);
+    FormManager.enable('salesBusOffCd');
+  } else if (stateProv == 'RJ') {
+    FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
+    FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), [ '761','515' ]);
+    FormManager.enable('salesBusOffCd');
+  } else if (stateProv == 'SP') {
+    FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
+    FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), [ '764','515' ]);
+    FormManager.enable('salesBusOffCd');
+  } 
+}
+
 /* Register LA Validators */
 dojo.addOnLoad(function() {
   GEOHandler.LA = [ SysLoc.ARGENTINA, SysLoc.BOLIVIA, SysLoc.BRAZIL, SysLoc.CHILE, SysLoc.COLOMBIA, SysLoc.COSTA_RICA, SysLoc.DOMINICAN_REPUBLIC, SysLoc.ECUADOR, SysLoc.GUATEMALA, SysLoc.HONDURAS,
@@ -2600,5 +2644,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setMrcCdOptionalForRequester, [ SysLoc.BRAZIL ]);
   GEOHandler.addAddrFunction(setLocationNumberForBR, GEOHandler.LA);
   GEOHandler.addAfterConfig(setLocNoLockedForRequesterBR, [ SysLoc.BRAZIL ]);
-
+  GEOHandler.addAfterConfig(setSortlForStateProvince, [ SysLoc.BRAZIL ]);
+  GEOHandler.addAfterTemplateLoad(setSortlForStateProvince, [ SysLoc.BRAZIL ]);
+  
 });
