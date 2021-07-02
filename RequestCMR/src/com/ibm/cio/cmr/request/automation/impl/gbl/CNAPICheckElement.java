@@ -127,7 +127,7 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
               if (cnName.equals(cmrsData.getRecord().getName()) && cnAddr.equals(cmrsData.getRecord().getRegLocation())) {
 
                 result.setResults("Matches found");
-                details.append("High confidence Chinese name and address were found. No override from users was recorded.");
+                details.append("High confidence Chinese name and address were found.");
 
                 requestData.getAdmin().setMatchIndc("C");
                 // result.setOnError(false);
@@ -135,12 +135,13 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
                 // logDuplicateCMR(details, cmrData);
                 result.setProcessOutput(validation);
                 result.setDetails(details.toString().trim());
-                engineData.addNegativeCheckStatus("CNAPICheck", "High confidence Chinese name and address were found.");
+                // engineData.addNegativeCheckStatus("CNAPICheck", "High
+                // confidence Chinese name and address were found.");
                 LOG.debug("High confidence Chinese name and address were found.\n");
 
               } else {
                 overrideNameAndAddress(cmrsData.getRecord().getName(), cmrsData.getRecord().getRegLocation(), iAddr, entityManager);
-                
+
                 result.setOnError(true);
                 result.setResults("Overridden");
                 details.append("Processor review is required as no high confidence Chinese name and address were found.").append("\n");
