@@ -1,24 +1,29 @@
 package com.ibm.cio.cmr.request.automation.util.geo;
 
-import java.io.InputStream;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 
-import org.apache.commons.digester.Digester;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
+import org.springframework.ui.ModelMap;
 
+<<<<<<< HEAD
+=======
+import com.ibm.cio.cmr.request.CmrConstants;
+import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
+>>>>>>> yellow_canada2.0
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.impl.gbl.CalculateCoverageElement;
-import com.ibm.cio.cmr.request.automation.impl.gbl.DupCMRCheckElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
@@ -29,19 +34,13 @@ import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
-import com.ibm.cio.cmr.request.util.BluePagesHelper;
-import com.ibm.cio.cmr.request.util.ConfigUtil;
-import com.ibm.cio.cmr.request.util.Person;
-import com.ibm.cio.cmr.request.util.SystemLocation;
-import com.ibm.cmr.services.client.CmrServicesFactory;
-import com.ibm.cmr.services.client.MatchingServiceClient;
-import com.ibm.cmr.services.client.matching.MatchingResponse;
-import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckRequest;
-import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
+import com.ibm.cio.cmr.request.service.CmrClientService;
+import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 
 /**
@@ -59,32 +58,21 @@ public class CanadaUtil extends AutomationUtil {
   private static final String SORTL = "SORTL";
   private static final String SCENARIO_LOC_INTERNAL = "INTER";
 
+  private static final String SCENARIO_COMMERCIAL = "COMME";
+  private static final String SCENARIO_BUSINESS_PARTNER = "BUSP";
+  private static final String SCENARIO_PRIVATE_HOUSEHOLD = "PRIV";
+  private static final String SCENARIO_INTERNAL = "INTER";
+  private static final String SCENARIO_OEM = "OEM";
+  private static final String SCENARIO_STRATEGIC_OUTSOURCING = "SOCUS";
+  private static final String SCENARIO_GOVERNMENT = "GOVT";
+  private static final String SCENARIO_CROSS_BORDER_USA = "USA";
+  private static final String SCENARIO_CROSS_BORDER_CARIB = "CND";
+
+  private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
+      CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO, "ZP02", "ZP03", "ZP04", "ZP05", "ZP06", "ZP07", "ZP08", "ZP09");
+
   private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Building", "Floor", "Office", "Department", "Customer Name 2",
       "Phone #", "PostBox", "State/Province");
-
-  @SuppressWarnings("unchecked")
-  public CanadaUtil() {
-    if (CanadaUtil.sortlMappings.isEmpty()) {
-      Digester digester = new Digester();
-      digester.setValidating(false);
-      digester.addObjectCreate("mappings", ArrayList.class);
-
-      digester.addObjectCreate("mappings/mapping", DeSortlMapping.class);
-
-      digester.addBeanPropertySetter("mappings/mapping/subIndustryCds", "subIndustryCds");
-      digester.addBeanPropertySetter("mappings/mapping/postalCdRanges", "postalCdRanges");
-      digester.addBeanPropertySetter("mappings/mapping/isu", "isu");
-      digester.addBeanPropertySetter("mappings/mapping/ctc", "ctc");
-      digester.addBeanPropertySetter("mappings/mapping/sortl", "sortl");
-      digester.addSetNext("mappings/mapping", "add");
-      try {
-        InputStream is = ConfigUtil.getResourceStream("de-sortl-mapping.xml");
-        CanadaUtil.sortlMappings = (ArrayList<DeSortlMapping>) digester.parse(is);
-      } catch (Exception e) {
-        LOG.error("Error occured while digesting xml.", e);
-      }
-    }
-  }
 
   @Override
   public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
@@ -94,188 +82,34 @@ public class CanadaUtil extends AutomationUtil {
     boolean valid = true;
     String scenario = data.getCustSubGrp();
 
-    engineData.setMatchDepartment(true);
+    if (StringUtils.isBlank(scenario)) {
+      details.append("Scenario not correctly specified on the request");
+      engineData.addNegativeCheckStatus("_atNoScenario", "Scenario not correctly specified on the request");
+      return true;
+    }
+    LOG.info("Starting scenario validations for Request ID " + data.getId().getReqId());
+    LOG.debug("Scenario to check: " + scenario);
+
+    if ("C".equals(requestData.getAdmin().getReqType())) {
+      // remove duplicates
+      removeDuplicateAddresses(entityManager, requestData, details);
+    }
+    // engineData.setMatchDepartment(true);
 
     if (StringUtils.isNotBlank(scenario)) {
       switch (scenario) {
-      case "PRIPE":
-      case "IBMEM":
-        for (Addr addr : requestData.getAddresses()) {
-          String custNm = addr.getCustNm1() + (StringUtils.isNotBlank(addr.getCustNm2()) ? " " + addr.getCustNm2() : "");
-          if (StringUtils.isNotBlank(custNm) && (custNm.contains("GmbH") || custNm.contains("AG") || custNm.contains("e.V.") || custNm.contains("OHG")
-              || custNm.contains("Co.KG") || custNm.contains("Co.OHG") || custNm.contains("KGaA") || custNm.contains("mbH") || custNm.contains("UG")
-              || custNm.contains("e.G") || custNm.contains("mit beschränkter Haftung") || custNm.contains("Aktiengesellschaft"))) {
-            engineData.addRejectionComment("OTH", "Scenario chosen is incorrect, should be Commercial.", "", "");
-            details.append("Scenario chosen is incorrect, should be Commercial.").append("\n");
-            valid = false;
-            break;
-          }
-        }
-        if (valid) {
-          String name = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
-          String duplicateCMRNo = null;
-          // getting fuzzy matches on basis of name
-          try {
-            MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
-                MatchingServiceClient.class);
-            DuplicateCMRCheckRequest request = new DuplicateCMRCheckRequest();
-            request.setCustomerName(name);
-            request.setIssuingCountry(data.getCmrIssuingCntry());
-            request.setLandedCountry(zs01.getLandCntry());
-            request.setIsicCd("9500");
-            request.setNameMatch("Y");
-            client.setReadTimeout(1000 * 60 * 5);
-            LOG.debug("Connecting to the Duplicate CMR Check Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
-            MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.CMR_SERVICE_ID, request, MatchingResponse.class);
-            ObjectMapper mapper = new ObjectMapper();
-            String json = mapper.writeValueAsString(rawResponse);
-
-            TypeReference<MatchingResponse<DuplicateCMRCheckResponse>> ref = new TypeReference<MatchingResponse<DuplicateCMRCheckResponse>>() {
-            };
-
-            MatchingResponse<DuplicateCMRCheckResponse> response = mapper.readValue(json, ref);
-
-            if (response.getSuccess()) {
-              if (response.getMatched() && response.getMatches().size() > 0) {
-                duplicateCMRNo = response.getMatches().get(0).getCmrNo();
-                String zs01Kunnr = getZS01Kunnr(duplicateCMRNo, SystemLocation.GERMANY);
-                details.append(
-                    "The " + (scenario.equals("PRIPE") ? "Private Person" : "IBM Employee") + " already has a record with CMR No. " + duplicateCMRNo)
-                    .append("\n");
-                engineData.addRejectionComment("DUPC",
-                    "The " + (scenario.equals("PRIPE") ? "Private Person" : "IBM Employee") + " already has a record with CMR No. " + duplicateCMRNo,
-                    duplicateCMRNo, zs01Kunnr);
-                valid = false;
-              } else {
-                details.append("No Duplicate CMRs were found.").append("\n");
-              }
-              if (StringUtils.isBlank(duplicateCMRNo) && scenario.equals("IBMEM")) {
-                Person person = null;
-                if (StringUtils.isNotBlank(zs01.getCustNm1())) {
-                  try {
-                    String mainCustName = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
-                    person = BluePagesHelper.getPersonByName(insertGermanCharacters(mainCustName));
-                    if (person == null) {
-                      engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
-                      details.append("Employee details not found in IBM BluePages.").append("\n");
-                    } else {
-                      details.append("Employee details validated with IBM BluePages for " + person.getName() + "(" + person.getEmail() + ").")
-                          .append("\n");
-                    }
-                  } catch (Exception e) {
-                    LOG.error("Not able to check name against bluepages", e);
-                    engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED",
-                        "Not able to check name against bluepages for scenario IBM Employee.");
-                  }
-                } else {
-                  LOG.warn("Not able to check name against bluepages, Customer Name 1 not found on the main address");
-                  engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED", "Customer Name 1 not found on the main address");
-                }
-              }
-            }
-          } catch (Exception e) {
-            details.append("Duplicate CMR check using customer name match failed to execute.").append("\n");
-            engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name match failed to execute.");
-          }
-        }
+      case SCENARIO_COMMERCIAL:
+      case SCENARIO_PRIVATE_HOUSEHOLD:
+      case SCENARIO_INTERNAL:
+      case SCENARIO_OEM:
+      case SCENARIO_STRATEGIC_OUTSOURCING:
+      case SCENARIO_GOVERNMENT:
+      case SCENARIO_CROSS_BORDER_USA:
+      case SCENARIO_CROSS_BORDER_CARIB:
         break;
-      case "BROKR":
-        // check duplicate CMR's manually
-        MatchingResponse<DuplicateCMRCheckResponse> response = null;
-        try {
-          DupCMRCheckElement cmrCheckElement = new DupCMRCheckElement(null, null, false, false);
-          response = cmrCheckElement.getMatches(entityManager, requestData, engineData);
-          // get a count of matches with match grade E1,E2, F1 or F2
-          int count = 0;
-          if (response != null && response.getSuccess()) {
-            if (response.getMatched()) {
-              LOG.debug("Duplicate CMR's found for request: " + data.getId().getReqId());
-              for (DuplicateCMRCheckResponse cmrResponse : response.getMatches()) {
-                if (cmrResponse.getMatchGrade().equals("E1") || cmrResponse.getMatchGrade().equals("E2") || cmrResponse.getMatchGrade().equals("F1")
-                    || cmrResponse.getMatchGrade().equals("F2")) {
-                  count++;
-                }
-              }
-            }
-
-          } else {
-            LOG.error("Unable to perform Duplicate CMR Check for BROKR scenario.");
-            details.append("Unable to perform Duplicate CMR Check for Broker scenario.").append("\n");
-            engineData.addNegativeCheckStatus("CMR_CHECK_FAILED", "Unable to perform Duplicate CMR Check for Broker scenario.");
-          }
-          if (count > 1) {
-            engineData.addRejectionComment("OTH", "Multiple registered CMRs already found for this customer.", "", "");
-            details.append("Multiple registered CMRs already found for this customer.").append("\n");
-            valid = false;
-          } else if (count == 1) {
-            details.append("Single registered CMR found for this customer.").append("\n");
-          } else {
-            details.append("No registered CMRs found for this customer.").append("\n");
-          }
-        } catch (Exception e) {
-          LOG.error("Unable to perform Duplicate CMR Check for BROKR scenario.", e);
-          details.append("Unable to perform Duplicate CMR Check for Broker scenario.");
-          engineData.addNegativeCheckStatus("CMR_CHECK_FAILED", "Unable to perform Duplicate CMR Check for Broker scenario.");
-        }
-        break;
-      case "BUSPR":
-        if (StringUtils.isNotBlank(data.getPpsceid())) {
-          try {
-            if (!checkPPSCEID(data.getPpsceid())) {
-              engineData.addRejectionComment("OTH", "PPS CE ID on the request is invalid.", "", "");
-              details.append("PPS CE ID on the request is invalid.").append("\n");
-              valid = false;
-            } else {
-              details.append("PPS CE ID validated successfully with PartnerWorld Profile Systems.").append("\n");
-            }
-          } catch (Exception e) {
-            LOG.error("Not able to validate PPS CE ID using PPS Service.", e);
-            details.append("Not able to validate PPS CE ID using PPS Service.").append("\n");
-            engineData.addNegativeCheckStatus("PPSCEID", "Not able to validate PPS CE ID using PPS Service.");
-          }
-        } else {
-          details.append("PPS CE ID not available on the request.").append("\n");
-          engineData.addNegativeCheckStatus("PPSCEID", "PPS CE ID not available on the request.");
-        }
-        break;
-      case "INTIN":
-      case "INTSO":
-      case "INTAM":
-        // check value of Department under '##GermanyInternalDepartment' LOV
-        String sql = ExternalizedQuery.getSql("DE.CHECK_DEPARTMENT");
-        PreparedQuery query = new PreparedQuery(entityManager, sql);
-        String dept = data.getIbmDeptCostCenter();
-        if (StringUtils.isNotBlank(dept)) {
-          query.setParameter("CD", dept);
-          String result = query.getSingleResult(String.class);
-          if (result == null) {
-            engineData.addRejectionComment("OTH", "IBM Department/Cost Center on the request is invalid.", "", "");
-            details.append("IBM Department/Cost Center on the request is invalid.").append("\n");
-            valid = false;
-          } else {
-            details.append("IBM Department/Cost Center " + dept + " validated successfully.").append("\n");
-          }
-        } else {
-          details.append("IBM Department/Cost Center not provided on the request. Default Department Number(00X306) will be set.");
-          data.setIbmDeptCostCenter("00X306");
-        }
-        break;
+      case SCENARIO_BUSINESS_PARTNER:
+        return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
       }
-
-      if (!scenario.equals("3PADC")) {
-        for (Addr addr : requestData.getAddresses()) {
-          String custNm = addr.getCustNm1() + (StringUtils.isNotBlank(addr.getCustNm2()) ? addr.getCustNm2() : "");
-          if (StringUtils.isNotBlank(custNm)
-              && (custNm.toUpperCase().contains("C/O") || custNm.toUpperCase().contains("C / O") || custNm.toUpperCase().contains("CARE OF"))) {
-            engineData.addNegativeCheckStatus("SCENARIO_CHECK", "The scenario should be for 3rd Party / Data Center.");
-            break;
-          }
-        }
-      }
-      // String[] skipCompanyCheckList = { "PRIPE", "IBMEM" };
-      // skipCompanyCheckForScenario(requestData, engineData,
-      // Arrays.asList(skipCompanyCheckList), false);
-
     } else {
       valid = false;
       engineData.addRejectionComment("TYPR", "Wrong type of request.", "No Scenario found on the request", "");
@@ -287,7 +121,6 @@ public class CanadaUtil extends AutomationUtil {
   @Override
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {
-    Data data = requestData.getData();
     Addr zs01 = requestData.getAddress("ZS01");
     String custNm1 = StringUtils.isNotBlank(zs01.getCustNm1()) ? zs01.getCustNm1().trim() : "";
     String custNm2 = StringUtils.isNotBlank(zs01.getCustNm2()) ? zs01.getCustNm2().trim() : "";
@@ -317,23 +150,6 @@ public class CanadaUtil extends AutomationUtil {
 
     if (!removed) {
       details.append("No duplicate address records found on the request.").append("\n");
-    }
-
-    // replace special characters from addresses.
-    details.append("Replacing German language characters from address fields if any.").append("\n");
-    for (Addr addr : requestData.getAddresses()) {
-      if (addr != null) {
-        addr.setCustNm1(replaceGermanCharacters(addr.getCustNm1()));
-        addr.setCustNm2(replaceGermanCharacters(addr.getCustNm2()));
-        addr.setAddrTxt(replaceGermanCharacters(addr.getAddrTxt()));
-        addr.setAddrTxt2(replaceGermanCharacters(addr.getAddrTxt2()));
-        addr.setCity1(replaceGermanCharacters(addr.getCity1()));
-        addr.setDept(replaceGermanCharacters(addr.getDept()));
-        addr.setOffice(replaceGermanCharacters(addr.getOffice()));
-        addr.setBldg(replaceGermanCharacters(addr.getBldg()));
-        addr.setFloor(replaceGermanCharacters(addr.getFloor()));
-        data.setAbbrevNm(replaceGermanCharacters(data.getAbbrevNm()));
-      }
     }
 
     return results;
@@ -410,24 +226,6 @@ public class CanadaUtil extends AutomationUtil {
     }
   }
 
-  private String replaceGermanCharacters(String input) {
-    if (StringUtils.isNotBlank(input)) {
-      String str = input.replaceAll("Ä", "AE").replaceAll("ä", "ae").replaceAll("Ö", "OE").replaceAll("ö", "oe").replaceAll("Ü", "UE")
-          .replace("ü", "ue").replaceAll("ß", "SS");
-      return str;
-    }
-    return null;
-  }
-
-  private String insertGermanCharacters(String input) {
-    if (StringUtils.isNotBlank(input)) {
-      String str = input.replaceAll("Ae", "Ä").replaceAll("ae", "ä").replace("AE", "Ä").replaceAll("Oe", "Ö").replaceAll("oe", "ö").replace("OE", "Ö")
-          .replaceAll("Ue", "Ü").replace("ue", "ü").replace("UE", "Ü").replaceAll("ss", "ß").replaceAll("SS", "ß").replace("Ss", "ß");
-      return str;
-    }
-    return null;
-  }
-
   @Override
   public boolean performCountrySpecificCoverageCalculations(CalculateCoverageElement covElement, EntityManager entityManager,
       AutomationResult<OverrideOutput> results, StringBuilder details, OverrideOutput overrides, RequestData requestData,
@@ -457,237 +255,217 @@ public class CanadaUtil extends AutomationUtil {
   public boolean runUpdateChecksForData(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
       RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
     Admin admin = requestData.getAdmin();
-    Addr soldTo = requestData.getAddress("ZS01");
-    String details = StringUtils.isNotBlank(output.getDetails()) ? output.getDetails() : "";
-    StringBuilder detail = new StringBuilder(details);
-    String duns = null;
-    boolean isNegativeCheckNeedeed = false;
-    if (changes != null && changes.hasDataChanges()) {
-      if (changes.isDataChanged("VAT #")) {
-        UpdatedDataModel vatChange = changes.getDataChange("VAT #");
-        if (vatChange != null) {
-          if ((StringUtils.isBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData()))
-              || (StringUtils.isNotBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData()))) {
-            // check if the name + VAT exists in D&B
-            List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
-            if (matches.isEmpty()) {
-              // get DnB matches based on all address details
-              matches = getMatches(requestData, engineData, soldTo, false);
-            }
-            String custName = soldTo.getCustNm1() + (StringUtils.isBlank(soldTo.getCustNm2()) ? "" : " " + soldTo.getCustNm2());
-            if (!matches.isEmpty()) {
-              for (DnBMatchingResponse dnbRecord : matches) {
-                if ("Y".equals(dnbRecord.getOrgIdMatch()) && (StringUtils.isNotEmpty(custName) && StringUtils.isNotEmpty((dnbRecord.getDnbName()))
-                    && StringUtils.getLevenshteinDistance(custName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) <= 5)) {
-                  duns = dnbRecord.getDunsNo();
-                  isNegativeCheckNeedeed = false;
-                  break;
-                }
-                isNegativeCheckNeedeed = true;
-              }
-            }
-            if (isNegativeCheckNeedeed) {
-              detail.append("Updates to VAT need verification as VAT and legal name doesn't matches DnB.\n");
-              LOG.debug("Updates to VAT need verification as VAT and legal name doesn't matches DnB.");
-            } else {
-              detail.append("Updates to VAT matches DnB.\n DUNS No :" + duns + "\n");
-              LOG.debug("Updates to VAT matches DnB.\n DUNS No :" + duns + "\n");
-            }
+    Data data = requestData.getData();
 
-          } else if (StringUtils.isNotBlank(vatChange.getOldData()) && StringUtils.isBlank(vatChange.getNewData())) {
-            admin.setScenarioVerifiedIndc("N");
-            entityManager.merge(admin);
-            detail.append("Setting scenario verified indc= N as VAT is blank.\n");
-            LOG.debug("Setting scenario verified indc= N as VAT is blank.");
-          } else if (StringUtils.isNotBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData())) {
-            isNegativeCheckNeedeed = true;
-            detail.append("Updates to VAT need verification.\n");
-            LOG.debug("Updates to VAT need verification.");
-          }
-
-        }
-      } else {
-        boolean otherFieldsChanged = false;
-        for (UpdatedDataModel dataChange : changes.getDataUpdates()) {
-          if (dataChange != null && !"CAP Record".equals(dataChange.getDataField())) {
-            otherFieldsChanged = true;
-            break;
-          }
-        }
-        if (otherFieldsChanged) {
-          isNegativeCheckNeedeed = true;
-          detail.append("Updates to data were found, review is required.\n");
-          LOG.debug("Updates to data were found, review is required.");
-        }
-      }
-
-    }
-    if (isNegativeCheckNeedeed) {
-      validation.setSuccess(false);
-      validation.setMessage("Not validated");
-      engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updated elements cannot be checked automatically.");
-
-    } else {
+    // if (handlePrivatePersonRecord(entityManager, admin, output, validation,
+    // engineData)) {
+    // return true;
+    // }
+    String sqlKey = ExternalizedQuery.getSql("AUTO.US.CHECK_CMDE");
+    PreparedQuery query = new PreparedQuery(entityManager, sqlKey);
+    query.setParameter("EMAIL", admin.getRequesterId());
+    query.setForReadOnly(true);
+    if (query.exists()) {
+      // skip checks if requester is from Canada CMDE team
+      admin.setScenarioVerifiedIndc("Y");
+      LOG.debug("Requester is from CA CMDE team, skipping update checks.");
+      output.setDetails("Requester is from CA CMDE team, skipping update checks.\n");
+      validation.setMessage("Skipped");
       validation.setSuccess(true);
-      validation.setMessage("Validated");
-      if (detail.toString().isEmpty()) {
-        detail.append("No data updates made on the request");
+    } else {
+      StringBuilder details = new StringBuilder();
+      boolean cmdeReview = false;
+      EntityManager cedpManager = JpaManager.getEntityManager("CEDP");
+      List<String> ignoredUpdates = new ArrayList<String>();
+      for (UpdatedDataModel change : changes.getDataUpdates()) {
+        switch (change.getDataField()) {
+        case "VAT #":
+          if (!StringUtils.isBlank(change.getNewData())) {
+            Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
+            List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
+            boolean matchesDnb = false;
+            if (matches != null) {
+              // check against D&B
+              matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
+            }
+            if (!matchesDnb) {
+              cmdeReview = true;
+              engineData.addNegativeCheckStatus("_chVATCheckFailed", "VAT # on the request did not match D&B");
+              details.append("VAT # on the request did not match D&B\n");
+            } else {
+              details.append("VAT # on the request matches D&B\n");
+            }
+
+          }
+          break;
+        case "Order Block Code":
+          if ("94".equals(change.getOldData()) || "94".equals(change.getNewData())) {
+            cmdeReview = true;
+          }
+          break;
+        case "ISIC":
+        case "Subindustry":
+        case "INAC/NAC Code":
+          String error = performInacCheck(cedpManager, entityManager, requestData);
+          if (StringUtils.isNotBlank(error)) {
+            if ("BG_ERROR".equals(error)) {
+              cmdeReview = true;
+              engineData.addNegativeCheckStatus("_chINACCheckFailed",
+                  "The projected global buying group during INAC checks did not match the one on the request.");
+              details.append("The projected global buying group during INAC checks did not match the one on the request.\n");
+            } else {
+              return true;
+            }
+          }
+          String ageError = performCMRNewCheck(cedpManager, entityManager, requestData);
+          if (StringUtils.isNotBlank(ageError)) {
+            engineData.addNegativeCheckStatus("_chINACCheckFailed", ageError);
+            details.append(ageError);
+          }
+          break;
+        case "Tax Code":
+          // noop, for switch handling only
+          break;
+        case "Client Tier Code":
+          // noop, for switch handling only
+          break;
+        case "ISU Code":
+          // noop, for switch handling only
+          break;
+        case "SORTL":
+          // noop, for switch handling only
+          break;
+        default:
+          ignoredUpdates.add(change.getDataField());
+          break;
+        }
       }
+
+      if (cmdeReview) {
+        engineData.addNegativeCheckStatus("_chDataCheckFailed", "Updates to one or more fields cannot be validated.");
+        details.append("Updates to one or more fields cannot be validated.\n");
+        validation.setSuccess(false);
+        validation.setMessage("Not Validated");
+      } else {
+        validation.setSuccess(true);
+        validation.setMessage("Successful");
+      }
+      if (!ignoredUpdates.isEmpty()) {
+        details.append("Updates to the following fields skipped validation:\n");
+        for (String field : ignoredUpdates) {
+          details.append(" - " + field + "\n");
+        }
+      }
+      output.setDetails(details.toString());
+      output.setProcessOutput(validation);
     }
-    output.setDetails(detail.toString());
-    output.setProcessOutput(validation);
     return true;
   }
 
   @Override
   public boolean runUpdateChecksForAddress(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
       RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
-    Data data = requestData.getData();
     Admin admin = requestData.getAdmin();
-    List<Addr> addressList = requestData.getAddresses();
-    boolean isInstallAtMatchesDnb = true;
-    boolean isBillToMatchesDnb = true;
-    boolean isNegativeCheckNeedeed = false;
-    boolean isInstallAtExistOnReq = false;
-    boolean isBillToExistOnReq = false;
-    boolean isShipToExistOnReq = false;
-    Addr installAt = requestData.getAddress("ZI01");
-    Addr billTo = requestData.getAddress("ZP01");
-    Addr shipTo = requestData.getAddress("ZD01");
-    String details = StringUtils.isNotBlank(output.getDetails()) ? output.getDetails() : "";
-    StringBuilder detail = new StringBuilder(details);
-    long reqId = requestData.getAdmin().getId().getReqId();
-    if (changes != null && changes.hasAddressChanges()) {
-      if (StringUtils.isNotEmpty(data.getCustClass()) && ("81".equals(data.getCustClass()) || "85".equals(data.getCustClass()))
-          && !changes.hasDataChanges()) {
-        LOG.debug("Skipping checks as customer class is " + data.getCustClass() + " and only address changes.");
-        output.setDetails("Skipping checks as customer class is " + data.getCustClass() + " and only address changes.");
-        validation.setSuccess(true);
-        validation.setMessage("No Validations");
-        output.setProcessOutput(validation);
-        return true;
-      }
+    Data data = requestData.getData();
+    // if (handlePrivatePersonRecord(entityManager, admin, output, validation,
+    // engineData)) {
+    // return true;
+    // }
 
-      if (shipTo != null && (changes.isAddressChanged("ZD01") || isAddressAdded(shipTo))) {
-        // Check If Address already exists on request
-        isShipToExistOnReq = addressExists(entityManager, shipTo);
-        if (isShipToExistOnReq) {
-          detail.append("Ship To details provided matches an existing address.");
-          validation.setMessage("ShipTo already exists");
-          engineData.addRejectionComment("OTH", "Ship To details provided matches an existing address.", "", "");
-          output.setOnError(true);
-          validation.setSuccess(false);
-          validation.setMessage("Not validated");
-          output.setDetails(detail.toString());
-          output.setProcessOutput(validation);
-          LOG.debug("Ship To details provided matches already existing address.");
-          return true;
-        }
-      }
+    List<Addr> addresses = null;
 
-      if (installAt != null && (changes.isAddressChanged("ZI01") || isAddressAdded(installAt))) {
-        // Check If Address already exists on request
-        isInstallAtExistOnReq = addressExists(entityManager, installAt);
-        if (isInstallAtExistOnReq) {
-          detail.append("Install At details provided matches an existing address.");
-          engineData.addRejectionComment("OTH", "Install At details provided matches an existing address.", "", "");
-          LOG.debug("Install At details provided matches an existing address.");
-          output.setOnError(true);
-          validation.setSuccess(false);
-          validation.setMessage("Not validated");
-          output.setDetails(detail.toString());
-          output.setProcessOutput(validation);
-          return true;
-        }
-        if ((changes.isAddressChanged("ZI01") && isOnlyDnBRelevantFieldUpdated(changes, "ZI01")) || isAddressAdded(installAt)) {
-          // Check if address closely matches DnB
-          List<DnBMatchingResponse> matches = getMatches(requestData, engineData, installAt, false);
-          if (matches != null) {
-            isInstallAtMatchesDnb = ifaddressCloselyMatchesDnb(matches, installAt, admin, data.getCmrIssuingCntry());
-          }
-          if (!isInstallAtMatchesDnb) {
-            isNegativeCheckNeedeed = true;
-            detail.append("Updates to Install At address need verification as it does not matches D&B");
-            LOG.debug("Updates to Install At address need verification as it does not matches D&B");
-          }
-        }
-      }
+    StringBuilder duplicateDetails = new StringBuilder();
+    StringBuilder checkDetails = new StringBuilder();
 
-      if (billTo != null && (changes.isAddressChanged("ZP01") || isAddressAdded(billTo))) {
-        // Check If Address already exists on request
-        isBillToExistOnReq = addressExists(entityManager, billTo);
-        if (isBillToExistOnReq) {
-          detail.append("Bill To details provided matches an existing address.");
-          engineData.addRejectionComment("OTH", "Bill To details provided matches an existing address.", "", "");
-          LOG.debug("Bill To details provided matches an existing address.");
-          output.setOnError(true);
-          validation.setSuccess(false);
-          validation.setMessage("Not validated");
-          output.setDetails(detail.toString());
-          output.setProcessOutput(validation);
-          return true;
-        }
+    // D - duplicates, R - review
+    Set<String> resultCodes = new HashSet<String>();
 
-        if ((changes.isAddressChanged("ZP01") && isOnlyDnBRelevantFieldUpdated(changes, "ZP01")) || isAddressAdded(billTo)) {
-          // Check if address closely matches DnB
-          List<DnBMatchingResponse> matches = getMatches(requestData, engineData, billTo, false);
-          if (matches != null) {
-            isBillToMatchesDnb = ifaddressCloselyMatchesDnb(matches, billTo, admin, data.getCmrIssuingCntry());
-            if (!isBillToMatchesDnb) {
-              isNegativeCheckNeedeed = true;
-              detail.append("Updates to Bill To address need verification as it does not matches D&B");
-              LOG.debug("Updates to Bill To address need verification as it does not matches D&B");
-            }
-          }
-        }
-      }
-
-      if (isNegativeCheckNeedeed || isShipToExistOnReq || isInstallAtExistOnReq || isBillToExistOnReq) {
-        validation.setSuccess(false);
-        validation.setMessage("Not validated");
-        engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updated elements cannot be checked automatically.");
-      } else {
-        for (Addr addr : addressList) {
-          if ("Y".equals(addr.getImportInd())) {
-            if (!isRelevantAddressFieldUpdated(changes, addr)) {
-              validation.setSuccess(true);
-              LOG.debug("Updates to relevant addresses fields is found.Updates verified.");
-              detail.append("Updates to relevant addresses found but have been marked as Verified.");
-              validation.setMessage("Validated");
-              isNegativeCheckNeedeed = false;
-              break;
-            } else if (isRelevantAddressFieldUpdated(changes, addr)) {
-              isNegativeCheckNeedeed = true;
-            }
-          }
-        }
-
-        if (isNegativeCheckNeedeed) {
-          detail.append("Updates to addresses found which cannot be checked automatically.");
-          LOG.debug("Updates to addresses found which cannot be checked automatically.");
-          validation.setSuccess(false);
-          validation.setMessage("Not validated");
-          engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updated elements cannot be checked automatically.");
+    for (String addrType : RELEVANT_ADDRESSES) {
+      if (changes.isAddressChanged(addrType)) {
+        if (CmrConstants.RDC_SOLD_TO.equals(addrType)) {
+          addresses = Collections.singletonList(requestData.getAddress(CmrConstants.RDC_SOLD_TO));
         } else {
-          LOG.debug("Address changes don't need review");
-          if (changes.hasAddressChanges()) {
-            validation.setMessage("Address changes were found. No further review required.");
-            detail.append("Address changes were found. No further review required.");
-          } else {
-            validation.setMessage("No Address changes found on the request.");
-            detail.append("No Address changes found on the request.");
-          }
-          if (StringUtils.isBlank(output.getResults())) {
-            output.setResults("Validated");
-          }
-          validation.setSuccess(true);
+          addresses = requestData.getAddresses(addrType);
         }
-
+        for (Addr addr : addresses) {
+          if ("N".equals(addr.getImportInd())) {
+            // new address
+            LOG.debug("Checking duplicates for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+            boolean duplicate = addressExists(entityManager, addr);
+            if (duplicate) {
+              LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+              duplicateDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");
+              resultCodes.add("D");
+            } else {
+              LOG.debug(" - NO duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+              if (addrType.startsWith("ZP")) {
+                LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+                checkDetails.append("Addition of new " + addrType + "(" + addr.getId().getAddrSeq() + ") address skipped in the checks.\n");
+              } else {
+                List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addr, false);
+                boolean matchesDnb = false;
+                if (matches != null) {
+                  // check against D&B
+                  matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
+                }
+                if (!matchesDnb) {
+                  LOG.debug("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
+                  resultCodes.add("R");
+                  checkDetails.append("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
+                } else {
+                  checkDetails.append("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
+                  for (DnBMatchingResponse dnb : matches) {
+                    checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
+                    checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
+                    checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
+                        + dnb.getDnbCountry() + "\n\n");
+                  }
+                }
+              }
+            }
+          } else if ("Y".equals(addr.getChangedIndc())) {
+            // updated addresses
+            if (CmrConstants.RDC_SHIP_TO.equals(addrType) || addrType.startsWith("ZP")) {
+              // just proceed for billing and shipping updates
+              LOG.debug("Update to " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+              checkDetails.append("Updates to (" + addr.getId().getAddrSeq() + ") skipped in the checks.\n");
+            } else {
+              // update to other relevant addresses
+              if (isRelevantAddressFieldUpdated(changes, addr)) {
+                checkDetails.append("Updates to address fields for " + addrType + "(" + addr.getId().getAddrSeq() + ") need to be verified.")
+                    .append("\n");
+                resultCodes.add("R");
+              } else {
+                checkDetails.append("Updates to non-address fields for " + addrType + "(" + addr.getId().getAddrSeq() + ") skipped in the checks.")
+                    .append("\n");
+              }
+            }
+          }
+        }
       }
-
     }
-    output.setDetails(detail.toString());
+
+    if (resultCodes.contains("D")) {
+      // prioritize duplicates, set error
+      output.setOnError(true);
+      engineData.addRejectionComment("DUPADDR", "One or more new addresses matches existing addresses on record.", "", "");
+      validation.setSuccess(false);
+      validation.setMessage("Duplicate Address");
+    } else if (resultCodes.contains("R")) {
+      validation.setSuccess(false);
+      validation.setMessage("Not Validated");
+      engineData.addNegativeCheckStatus("_chCheckFailed", "Updated elements cannot be checked automatically.");
+    } else {
+      validation.setSuccess(true);
+      validation.setMessage("Successful");
+    }
+
+    String details = (output.getDetails() != null && output.getDetails().length() > 0) ? output.getDetails() : "";
+    details += duplicateDetails.length() > 0 ? duplicateDetails.toString() : "";
+    details += checkDetails.length() > 0 ? "\n" + checkDetails.toString() : "";
+    output.setDetails(details);
     output.setProcessOutput(validation);
+
     return true;
   }
 
@@ -734,6 +512,94 @@ public class CanadaUtil extends AutomationUtil {
   @Override
   public List<String> getSkipChecksRequestTypesforCMDE() {
     return Arrays.asList("C", "U", "M");
+  }
+
+  /**
+   * Checks to perform if INAC field updated.
+   * 
+   * @param cedpManager
+   * @param entityManager
+   * @param requestData
+   * @return An error message if validation failed, null if validated.
+   * @throws Exception
+   */
+  private String performInacCheck(EntityManager cedpManager, EntityManager entityManager, RequestData requestData) throws Exception {
+    Data data = requestData.getData();
+    String error = "The CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle.\nLink:- https://jira.data.zc2.ibm.com/servicedesk/customer/portal/14";
+    String sql = ExternalizedQuery.getSql("AUTO.CA.GET_CMR_REVENUE");
+    PreparedQuery query = new PreparedQuery(cedpManager, sql);
+    query.setParameter("CMR_NO", data.getCmrNo());
+    query.setForReadOnly(true);
+    List<Object[]> results = query.getResults(1);
+    if (results != null && results.size() > 0) {
+      BigDecimal revenue = new BigDecimal(0);
+      if (results.get(0)[1] != null) {
+        revenue = (BigDecimal) results.get(0)[1];
+      }
+      if (revenue.floatValue() > 0) {
+        return error + "\n- CMR with revenue";
+      } else if (revenue.floatValue() == 0) {
+        sql = ExternalizedQuery.getSql("AUTO.CA.INAC_DUNS_CHECK");
+        query = new PreparedQuery(entityManager, sql);
+        query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+        query.setParameter("CMR_NO", data.getCmrNo());
+        query.setParameter("INAC", data.getInacCd());
+        query.setForReadOnly(true);
+        results = query.getResults(1);
+        if (results != null && !results.isEmpty()) {
+          // String guDunsNo = (String) results.get(0)[0];
+          String gbgIdDb = (String) results.get(0)[1];
+
+          CmrClientService odmService = new CmrClientService();
+          RequestEntryModel model = requestData.createModelFromRequest();
+          Addr soldTo = requestData.getAddress("ZS01");
+          ModelMap response = new ModelMap();
+
+          odmService.getBuyingGroup(entityManager, soldTo, model, response);
+          String gbgId = (String) response.get("globalBuyingGroupID");
+          if (StringUtils.isBlank(gbgId)) {
+            gbgId = gbgIdDb;
+          }
+
+          if (StringUtils.isBlank(gbgId) || (StringUtils.isNotBlank(gbgId) && !gbgId.equals(data.getGbgId()))) {
+            return "BG_ERROR";
+          }
+
+        } else {
+          return error + "\n- Target INAC is not under the same GU DUNs/parent";
+        }
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Checks to perform if CMR is new (age within 30 days)
+   * 
+   * @param cedpManager
+   * @param entityManager
+   * @param requestData
+   * @return An error message if validation failed, null if validated.
+   * @throws Exception
+   */
+  private String performCMRNewCheck(EntityManager cedpManager, EntityManager entityManager, RequestData requestData) throws Exception {
+    Data data = requestData.getData();
+    String error = "The CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle.\nLink:- https://jira.data.zc2.ibm.com/servicedesk/customer/portal/14";
+    String sql = ExternalizedQuery.getSql("AUTO.CA.CHECK_CMR_NEW");
+    PreparedQuery query = new PreparedQuery(cedpManager, sql);
+    query.setParameter("CMR_NO", data.getCmrNo());
+    query.setForReadOnly(true);
+    List<Object[]> results = query.getResults(1);
+    if (results != null && results.size() > 0) {
+      String creationCapChanged = (String) results.get(0)[2];
+      if (!"Ok".equals(creationCapChanged)) {
+        if (!"Ok".equals(creationCapChanged)) {
+          error += "\n- Not new CMR (for CMR pass the 30 days period)";
+        }
+        return error;
+      }
+    }
+    return null;
   }
 
 }
