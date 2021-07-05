@@ -16,11 +16,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.ui.ModelMap;
 
-<<<<<<< HEAD
-=======
 import com.ibm.cio.cmr.request.CmrConstants;
-import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
->>>>>>> yellow_canada2.0
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.impl.gbl.CalculateCoverageElement;
