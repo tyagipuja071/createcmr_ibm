@@ -1849,6 +1849,9 @@ function ADDRESS_GRID_showCheck(value, rowIndex, grid) {
 
 function setCTCIsuByCluster() {
   var reqType = FormManager.getActualValue('reqType');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var scenario = FormManager.getActualValue('custGrp');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (reqType != 'C') {
     return;
   }
@@ -1880,6 +1883,19 @@ function setCTCIsuByCluster() {
           FormManager.setValue('clientTier', apClientTierValue[0]);
           FormManager.setValue('isuCd', isuCdValue[0]);
         }
+        else if (apClientTierValue.length > 1 && (_cmrIssuingCntry == '744' || _cmrIssuingCntry == '615' || _cmrIssuingCntry == '652')){
+            if(scenario == 'LOCAL' && (custSubGrp == 'BLUMX' || custSubGrp == 'MKTPC' || custSubGrp == 'IGF' || custSubGrp == 'DUMMY')){
+              FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['Q', 'Y']);
+              FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['34']);
+              FormManager.enable('clientTier');
+              }
+            else if(scenario == 'LOCAL' && custSubGrp == 'INTER'){
+              FormManager.limitDropdownValues(FormManager.getField('clientTier'), ['0']);
+              FormManager.limitDropdownValues(FormManager.getField('isuCd'), ['60']);
+              }
+            FormManager.setValue('clientTier', apClientTierValue[0]);
+            FormManager.setValue('isuCd', isuCdValue[0]);
+          }
       }
     }
   });
@@ -3010,8 +3026,9 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(onCustSubGrpChange, GEOHandler.AP);
   GEOHandler.addAfterConfig(setCTCIsuByCluster, GEOHandler.AP);
+  GEOHandler.addAfterTemplateLoad(setCTCIsuByCluster, GEOHandler.AP);
   GEOHandler.addAfterTemplateLoad(setISUDropDownValues, GEOHandler.AP);
-  // GEOHandler.addAfterConfig(setIsuByClusterCTC, GEOHandler.AP);
+//  GEOHandler.addAfterConfig(setIsuByClusterCTC, GEOHandler.AP);
   GEOHandler.registerValidator(addAbnValidatorForAU, [ SysLoc.AUSTRALIA ]);
 
   // GEOHandler.registerValidator(addMandateCmrNoForSG, [SysLoc.SINGAPORE]);
