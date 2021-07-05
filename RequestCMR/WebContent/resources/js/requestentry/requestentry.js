@@ -1493,6 +1493,7 @@ function handleRequiredDnBSearch() {
 
 
 function checkIfFinalDnBCheckRequired() {
+  var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
   var reqId = FormManager.getActualValue('reqId');
   var reqType = FormManager.getActualValue('reqType');
   var reqStatus = FormManager.getActualValue('reqStatus');
@@ -1504,6 +1505,13 @@ function checkIfFinalDnBCheckRequired() {
       && matchOverrideIndc != 'Y') {
     // currently Enabled Only For US
     return true;
+  }
+  if (cmrCntry == '641') {
+    if (reqId > 0 && reqType == 'U' && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B')
+        && matchOverrideIndc != 'Y') {
+      // currently Enabled Only For CN
+      return true;
+    }
   }
   return false;
 }
