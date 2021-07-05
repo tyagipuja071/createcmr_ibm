@@ -171,6 +171,9 @@ public class FRMassProcessMultiService extends MultiThreadedBatchService<Long> {
             }
           }
 
+          // execute flush every 50
+          entityManager.flush();
+
         }
 
         LOG.debug("Finished processing mass update lines at " + new Date());
@@ -465,6 +468,6 @@ public class FRMassProcessMultiService extends MultiThreadedBatchService<Long> {
     createHistory(entityManager, "RDC processing started.", "PCR", "Claim", admin.getId().getReqId());
     createComment(entityManager, "RDC processing started.", admin.getId().getReqId());
 
-    // partialCommit(entityManager);
+    partialCommit(entityManager);
   }
 }
