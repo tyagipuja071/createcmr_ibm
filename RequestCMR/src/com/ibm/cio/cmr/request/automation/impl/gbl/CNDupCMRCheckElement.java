@@ -78,11 +78,10 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
       result.setOnError(false);
     } else if (soldTo != null) {
 
-      String cnCreditCd = null;
       String cnName = null;
       String cnHistoryName = null;
       String cnAddr = null;
-      String cnCeid = null;
+      String cnCeid = data.getBusnType();
 
       IntlAddr iAddr = new IntlAddr();
       CompanyRecordModel searchModelCNAPI = new CompanyRecordModel();
@@ -123,11 +122,10 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
             try {
 
               // 1, Check CN API
-              if (data.getCreditCd() != null && data.getCreditCd().length() > 0) {
-                cnCreditCd = data.getCreditCd();
+              if (cnCeid != null && cnCeid.length() > 0) {
                 searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
                 searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
-                searchModelCNAPI.setAltName(cnCreditCd);
+                searchModelCNAPI.setTaxCd1(cnCeid);
                 resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "TAXCD");
               } else {
                 cnName = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
@@ -237,14 +235,11 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   result.setOnError(false);
                 }
               } else if (resultCNApi != null && !resultCNApi.isSuccess()) {
-                result.setDetails(
-                    "Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage() + ". Please contact CMDE.");
+                result.setDetails("Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage());
                 engineData.addRejectionComment("OTH",
-                    "Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage() + ". Please contact CMDE.",
-                    "", "");
+                    "Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage(), "", "");
                 result.setOnError(true);
-                result.setResults(
-                    "Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage() + ". Please contact CMDE.");
+                result.setResults("Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage());
               }
 
             } catch (Exception e) {
@@ -280,11 +275,10 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
             try {
 
               // 1, Check CN API
-              if (data.getCreditCd() != null && data.getCreditCd().length() > 0) {
-                cnCreditCd = data.getCreditCd();
+              if (cnCeid != null && cnCeid.length() > 0) {
                 searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
                 searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
-                searchModelCNAPI.setAltName(cnCreditCd);
+                searchModelCNAPI.setTaxCd1(cnCeid);
                 resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "TAXCD");
               } else {
                 cnName = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
@@ -298,7 +292,6 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 cnName = resultCNApi.getRecord().getName();
                 cnHistoryName = resultCNApi.getRecord().getHistoryNames();
                 cnAddr = resultCNApi.getRecord().getRegLocation();
-                cnCeid = resultCNApi.getRecord().getCreditCode();
 
                 try {
                   // 2, Check FindCMR NON Latin with Chinese name
@@ -379,7 +372,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                     // 4, Check FindCMR with CEID
                     searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
                     searchModelFindCmrCN.setCountryCd(soldTo.getLandCntry());
-                    searchModelFindCmrCN.setCied(cnCeid);
+                    searchModelFindCmrCN.setTaxCd1(cnCeid);
                     resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
                     if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
                       for (int i = 0; i < resultFindCmrCN.size(); i++) {
@@ -426,14 +419,11 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   result.setOnError(false);
                 }
               } else if (resultCNApi != null && !resultCNApi.isSuccess()) {
-                result.setDetails(
-                    "Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage() + ". Please contact CMDE.");
+                result.setDetails("Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage());
                 engineData.addRejectionComment("OTH",
-                    "Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage() + ". Please contact CMDE.",
-                    "", "");
+                    "Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage(), "", "");
                 result.setOnError(true);
-                result.setResults(
-                    "Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage() + ". Please contact CMDE.");
+                result.setResults("Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage());
               }
 
             } catch (Exception e) {
@@ -465,11 +455,10 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
             try {
 
               // 1, Check CN API
-              if (data.getCreditCd() != null && data.getCreditCd().length() > 0) {
-                cnCreditCd = data.getCreditCd();
+              if (cnCeid != null && cnCeid.length() > 0) {
                 searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
                 searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
-                searchModelCNAPI.setAltName(cnCreditCd);
+                searchModelCNAPI.setTaxCd1(cnCeid);
                 resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "TAXCD");
               } else {
                 cnName = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
@@ -564,14 +553,11 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   result.setOnError(false);
                 }
               } else if (resultCNApi != null && !resultCNApi.isSuccess()) {
-                result.setDetails(
-                    "Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage() + ". Please contact CMDE.");
+                result.setDetails("Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage());
                 engineData.addRejectionComment("OTH",
-                    "Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage() + ". Please contact CMDE.",
-                    "", "");
+                    "Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage(), "", "");
                 result.setOnError(true);
-                result.setResults(
-                    "Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage() + ". Please contact CMDE.");
+                result.setResults("Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage());
               }
 
             } catch (Exception e) {
@@ -603,11 +589,10 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
             try {
 
               // 1, Check CN API
-              if (data.getCreditCd() != null && data.getCreditCd().length() > 0) {
-                cnCreditCd = data.getCreditCd();
+              if (cnCeid != null && cnCeid.length() > 0) {
                 searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
                 searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
-                searchModelCNAPI.setAltName(cnCreditCd);
+                searchModelCNAPI.setTaxCd1(cnCeid);
                 resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "TAXCD");
               } else {
                 cnName = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
@@ -702,14 +687,11 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   result.setOnError(false);
                 }
               } else if (resultCNApi != null && !resultCNApi.isSuccess()) {
-                result.setDetails(
-                    "Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage() + ". Please contact CMDE.");
+                result.setDetails("Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage());
                 engineData.addRejectionComment("OTH",
-                    "Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage() + ". Please contact CMDE.",
-                    "", "");
+                    "Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage(), "", "");
                 result.setOnError(true);
-                result.setResults(
-                    "Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage() + ". Please contact CMDE.");
+                result.setResults("Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage());
               }
 
             } catch (Exception e) {
@@ -808,11 +790,10 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
             try {
 
               // 1, Check CN API
-              if (data.getCreditCd() != null && data.getCreditCd().length() > 0) {
-                cnCreditCd = data.getCreditCd();
+              if (cnCeid != null && cnCeid.length() > 0) {
                 searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
                 searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
-                searchModelCNAPI.setAltName(cnCreditCd);
+                searchModelCNAPI.setTaxCd1(cnCeid);
                 resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "TAXCD");
               } else {
                 cnName = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
@@ -907,14 +888,11 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   result.setOnError(false);
                 }
               } else if (resultCNApi != null && !resultCNApi.isSuccess()) {
-                result.setDetails(
-                    "Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage() + ". Please contact CMDE.");
+                result.setDetails("Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage());
                 engineData.addRejectionComment("OTH",
-                    "Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage() + ". Please contact CMDE.",
-                    "", "");
+                    "Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage(), "", "");
                 result.setOnError(true);
-                result.setResults(
-                    "Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage() + ". Please contact CMDE.");
+                result.setResults("Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage());
               }
 
             } catch (Exception e) {
@@ -941,23 +919,18 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
           iAddr = handler.getIntlAddrById(soldTo, entityManager);
           if (iAddr != null) {
+            cnName = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
+          }
+          if (cnName != null) {
 
             try {
 
               // 1, Check CN API
-              if (data.getCreditCd() != null && data.getCreditCd().length() > 0) {
-                cnCreditCd = data.getCreditCd();
-                searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
-                searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
-                searchModelCNAPI.setAltName(cnCreditCd);
-                resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "TAXCD");
-              } else {
-                cnName = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
-                searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
-                searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
-                searchModelCNAPI.setAltName(cnName);
-                resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "ALTNAME");
-              }
+              cnName = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
+              searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
+              searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
+              searchModelCNAPI.setAltName(cnName);
+              resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "ALTNAME");
 
               if (resultCNApi != null && resultCNApi.isSuccess()) {
                 cnName = resultCNApi.getRecord().getName();
@@ -1060,14 +1033,11 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   result.setOnError(false);
                 }
               } else if (resultCNApi != null && !resultCNApi.isSuccess()) {
-                result.setDetails(
-                    "Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage() + ". Please contact CMDE.");
+                result.setDetails("Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage());
                 engineData.addRejectionComment("OTH",
-                    "Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage() + ". Please contact CMDE.",
-                    "", "");
+                    "Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage(), "", "");
                 result.setOnError(true);
-                result.setResults(
-                    "Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage() + ". Please contact CMDE.");
+                result.setResults("Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage());
               }
 
             } catch (Exception e) {
