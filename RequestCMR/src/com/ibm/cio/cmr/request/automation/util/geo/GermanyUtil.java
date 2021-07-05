@@ -443,7 +443,12 @@ public class GermanyUtil extends AutomationUtil {
       AutomationEngineData engineData, String covFrom, CoverageContainer container, boolean isCoverageCalculated) throws Exception {
     Data data = requestData.getData();
     Addr zs01 = requestData.getAddress("ZS01");
+    String scenario = data.getCustSubGrp();
     String coverageId = container.getFinalCoverage();
+    String coverage = data.getSearchTerm();
+    List<String> covList = Arrays.asList("A0004520", "A0004515", "A0004541", "A0004580");
+    System.out.println("coverageId-------------" + coverageId);
+    System.out.println("sortl-------------" + coverage);
     details.append("\n");
     if (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && covFrom != null && CalculateCoverageElement.COV_BG.equals(covFrom)) {
       overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getSearchTerm(), coverageId);
@@ -474,23 +479,28 @@ public class GermanyUtil extends AutomationUtil {
           engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
           break;
         case "No Match Found":
-          engineData.addRejectionComment("OTH", "Coverage cannot be computed using 32S-PostalCode logic.", "", "");
-          details.append("Coverage cannot be computed using 32S-PostalCode logic.").append("\n");
+          engineData.addRejectionComment("OTH", "Coverage cannot be computed using 34Q-PostalCode logic.", "", "");
+          details.append("Coverage cannot be computed using 34Q-PostalCode logic.").append("\n");
           results.setResults("Coverage not calculated.");
           results.setOnError(true);
           break;
         }
       } else {
-        engineData.addRejectionComment("OTH", "Coverage cannot be computed using 32S-PostalCode logic.", "", "");
-        details.append("Coverage cannot be computed using 32S-PostalCode logic.").append("\n");
+        engineData.addRejectionComment("OTH", "Coverage cannot be computed using 34Q-PostalCode logic.", "", "");
+        details.append("Coverage cannot be computed using 34Q-PostalCode logic.").append("\n");
         results.setResults("Coverage not calculated.");
         results.setOnError(true);
       }
     } else {
       details.setLength(0);
       overrides.clearOverrides();
-      details.append("Coverage could not be calculated through Buying group or 32S-PostalCode logic.\n Skipping coverage calculation.").append("\n");
+      details.append("Coverage could not be calculated through Buying group or 34Q-PostalCode logic.\n Skipping coverage calculation.").append("\n");
       results.setResults("Skipped");
+    }
+    if (("COMME".equals(scenario) || "GOVMT".equals(scenario)) && StringUtils.isNotBlank(coverage) && covList.contains("A0004520")) { // covList.contains("A0004520"))
+      details.append("Setting isu ctc to 28-7 based on coverage");
+      overrides.addOverride(covElement.getProcessCode(), "DATA", "ISU_CD", data.getIsuCd(), "28");
+      overrides.addOverride(covElement.getProcessCode(), "DATA", "CLIENT_TIER", data.getClientTier(), "7");
     }
     return true;
   }
