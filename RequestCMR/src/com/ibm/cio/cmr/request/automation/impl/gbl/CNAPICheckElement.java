@@ -42,7 +42,7 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
 
   public CNAPICheckElement(String requestTypes, String actionOnError, boolean overrideData, boolean stopOnError) {
     super(requestTypes, actionOnError, overrideData, stopOnError);
-    
+
   }
 
   @Override
@@ -66,7 +66,7 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
     CNHandler handler = (CNHandler) RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
     AutomationResult<ValidationOutput> result = buildResult(admin.getId().getReqId());
     result.setOnError(false);
-     
+
     ValidationOutput validation = new ValidationOutput();
     IntlAddr iAddr = new IntlAddr();
     String cnName = null;
@@ -144,11 +144,14 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
 
                 result.setOnError(true);
                 result.setResults("Overridden");
-                details.append("Processor review is required as no high confidence Chinese name and address were found.").append("\n");
+
+                details.append("Processor review is required as no high confidence Chinese name and address were found. ").append("\n");
                 details.append("Request name: " + cnName + "\n" + " API name: " + cmrsData.getRecord().getName() + "\n");
                 details.append("Request address: " + cnAddr + "\n" + " API address: " + cmrsData.getRecord().getRegLocation() + "\n");
+                details.append(
+                    "Chinese name and address have been override by trust source. if you agree, please Send for Processing. if you don't agree, please attach supporting document and click Disable automatic processing checkbox.")
+                    .append("\n");
                 result.setDetails(details.toString().trim());
-
                 engineData.addNegativeCheckStatus("CNAPICheck", "No high confidence China API matches were found.");
                 LOG.debug("Processor review is required as no high confidence Chinese name and address were found.");
               }
@@ -263,7 +266,8 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
           compareAddr(soldToIntlAddr, soldToIntlAddrRdc, zd01AddrList, zd01AddrRdcList, result, details, engineData);
         }
         if (result.isOnError()) {
-          details.append("The Chinese name or address of the non-SOLDTO address type has been changed." + "Please attach supporting document.").append("\n");
+          details.append("The Chinese name or address of the non-SOLDTO address type has been changed." + "Please attach supporting document.")
+              .append("\n");
           result.setDetails(details.toString().trim());
           return result;
         }
@@ -281,7 +285,7 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
 
         result.setProcessOutput(validation);
         result.setDetails(details.toString().trim());
-        
+
       } else {
         details.append("Missing main address on the request.").append("\n");
         engineData.addRejectionComment("OTH", "Missing main address on the request.", "", "");
@@ -300,7 +304,8 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
     return result;
   }
 
-  private void compareAddr(IntlAddr soldToIntlAddr, IntlAddrRdc soldToIntlAddrRdc, List<IntlAddr> addrList, List<IntlAddrRdc> addrRdcList, AutomationResult<ValidationOutput> result, StringBuilder details, AutomationEngineData engineData) {
+  private void compareAddr(IntlAddr soldToIntlAddr, IntlAddrRdc soldToIntlAddrRdc, List<IntlAddr> addrList, List<IntlAddrRdc> addrRdcList,
+      AutomationResult<ValidationOutput> result, StringBuilder details, AutomationEngineData engineData) {
 
     String cnAddressAddr = null;
     String cnAddressAddrRdc = null;
@@ -313,7 +318,7 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
     if (oldCnName.equals(newCnName) || oldCnAddr.equals(newCnAddr)) {
       return;
     }
-    
+
     for (IntlAddr intlAddr : addrList) {
       for (IntlAddrRdc intlAddrRdc : addrRdcList) {
 
@@ -333,21 +338,29 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
           }
 
           if (!cnNameAddr.equals(cnNameAddrRdc)) {
-             result.setResults("Review Needed");
-             engineData.addRejectionComment("OTH", "The Chinese name of the " + intlAddr.getId().getAddrType() + " address type has been changed.", "", "");
-            // details.append("The Chinese name of the non-SOLDTO address type is changed from " + cnNameAddrRdc + " to " + cnNameAddr).append("\n");
+            result.setResults("Review Needed");
+            engineData.addRejectionComment("OTH", "The Chinese name of the " + intlAddr.getId().getAddrType() + " address type has been changed.", "",
+                "");
+            // details.append("The Chinese name of the non-SOLDTO address type
+            // is changed from " + cnNameAddrRdc + " to " +
+            // cnNameAddr).append("\n");
             result.setOnError(true);
           }
           if (!cnAddressAddr.equals(cnAddressAddrRdc)) {
-             result.setResults("Review Needed");
-             engineData.addRejectionComment("OTH", "The Chinese address of the " + intlAddr.getId().getAddrType() + " address type has been changed.", "", "");
-            // details.append("The Chinese address of the non-SOLDTO address type is changed from " + cnAddressAddrRdc + " to " + cnAddressAddr)
-            //     .append("\n");
+            result.setResults("Review Needed");
+            engineData.addRejectionComment("OTH", "The Chinese address of the " + intlAddr.getId().getAddrType() + " address type has been changed.",
+                "", "");
+            // details.append("The Chinese address of the non-SOLDTO address
+            // type is changed from " + cnAddressAddrRdc + " to " +
+            // cnAddressAddr)
+            // .append("\n");
             result.setOnError(true);
           }
           if (result.isOnError()) {
             engineData.addRejectionComment("OTH", intlAddr.getId().getAddrType() + " address type has been changed.", "", "");
-//            details.append(intlAddr.getId().getAddrType() + " address type has been changed. " + "Please attach supporting document.").append("\n");
+            // details.append(intlAddr.getId().getAddrType() + " address type
+            // has been changed. " + "Please attach supporting
+            // document.").append("\n");
             result.setDetails(details.toString().trim());
           }
 
@@ -395,8 +408,10 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
 
                 // TODO do pop up to let user choose
                 result.setResults("Overridden");
-                 result.setOnError(true);
-                details.append("Chinese name has been override by trust source,if you don't agree please attach supporting document.").append("\n");
+                result.setOnError(true);
+                details.append(
+                    "Chinese name has been override by trust source. if you agree, please Send for Processing. if you don't agree, please attach supporting document and click Disable automatic processing checkbox.")
+                    .append("\n");
 
               }
             } else {
@@ -460,8 +475,10 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
         } else {
           overrideNameAndAddress(cmrsData.getRecord().getName(), cmrsData.getRecord().getRegLocation(), soldToIntlAddr, entityManager);
           result.setResults("Overridden");
-           result.setOnError(true);
-          details.append("Chinese address has been override by trust source,if you don't agree please attach supporting document.").append("\n");
+          result.setOnError(true);
+          details.append(
+              "Chinese address has been override by trust source. if you agree, please Send for Processing. if you don't agree, please attach supporting document and click Disable automatic processing checkbox.")
+              .append("\n");
         }
 
       } else {
