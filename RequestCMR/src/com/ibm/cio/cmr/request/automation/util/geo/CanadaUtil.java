@@ -58,7 +58,6 @@ public class CanadaUtil extends AutomationUtil {
   private static final String POSTAL_CD_RANGE = "postalCdRange";
   private static final String SORTL = "SORTL";
   private static final String SCENARIO_LOC_INTERNAL = "INTER";
-  private static final String SCENARIO_LOC_SOCUS = "SOCUS";
 
   private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Building", "Floor", "Office", "Department", "Customer Name 2",
       "Phone #", "PostBox", "State/Province");
@@ -444,12 +443,7 @@ public class CanadaUtil extends AutomationUtil {
     Data data = requestData.getData();
     String scenario = data.getCustSubGrp();
 
-    if (scenario.equals(SCENARIO_LOC_SOCUS)) {
-      details.append("Coverage Calculation skipped for Internal-Strategic Outsourcing Scenario.");
-      results.setResults("Skipped");
-      results.setDetails(details.toString());
-      return true;
-    } else if (scenario.equals(SCENARIO_LOC_INTERNAL)) {
+    if (scenario.equals(SCENARIO_LOC_INTERNAL)) {
       details.append("Setting SBO to 922 for Local-Internal Scenario");
       overrides.addOverride(covElement.getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), "922");
       engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
