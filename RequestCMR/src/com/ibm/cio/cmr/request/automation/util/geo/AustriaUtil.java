@@ -53,6 +53,7 @@ public class AustriaUtil extends AutomationUtil {
   private static final String SCENARIO_CROSS_COMMERICAL = "XCOM";
   private static final String SCENARIO_INTERNAL = "INTER";
   private static final String SCENARIO_INTERNAL_SO = "INTSO";
+  private static final String SCENARIO_GOVERNMENT = "GOVRN";
 
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
       CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO, CmrConstants.RDC_SECONDARY_SOLD_TO);
@@ -367,6 +368,11 @@ public class AustriaUtil extends AutomationUtil {
     Data data = requestData.getData();
     String scenario = data.getCustSubGrp();
     String sbo = "";
+    String coverageId = container.getFinalCoverage();
+    String coverage = data.getSearchTerm();
+    System.out.println("sortl----------" + coverage);
+    System.out.println("coverageId----------" + coverageId);
+    List<String> covList = Arrays.asList("A0004520", "A0004515", "A0004541", "A0004580");
     LOG.info("Starting coverage calculations for Request ID " + requestData.getData().getId().getReqId());
     switch (scenario) {
     case SCENARIO_COMMERCIAL:
@@ -381,6 +387,12 @@ public class AustriaUtil extends AutomationUtil {
       break;
     }
 
+    if ((SCENARIO_COMMERCIAL.equals(scenario) || SCENARIO_GOVERNMENT.equals(scenario)) && StringUtils.isNotBlank(coverage)
+        && covList.contains("A0004520")) {
+      details.append("Setting Isu ctc to 28-7 based on coverage.");
+      overrides.addOverride(covElement.getProcessCode(), "DATA", "ISU_CD", data.getIsuCd(), "28");
+      overrides.addOverride(covElement.getProcessCode(), "DATA", "CLIENT_TIER", data.getClientTier(), "7");
+    }
     if (StringUtils.isNotBlank(sbo)) {
       details.append("Setting SBO to " + sbo + " based on IMS mapping rules.");
       overrides.addOverride(covElement.getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sbo);

@@ -402,6 +402,12 @@ public class SwitzerlandUtil extends AutomationUtil {
     String scenario = data.getCustSubGrp();
     LOG.info("Starting coverage calculations for Request ID " + requestData.getData().getId().getReqId());
     String actualScenario = scenario.substring(2);
+    String coverageId = container.getFinalCoverage();
+    String coverage = data.getSearchTerm();
+    System.out.println("coverageId--------------------" + container.getFinalCoverage());
+    System.out.println("sortl--------------------" + coverage);
+
+    List<String> covList = Arrays.asList("A0004520", "A0004515", "A0004541", "A0004580");
 
     // ChMubotyMapping muboty = null;
     String sortl = null;
@@ -448,7 +454,13 @@ public class SwitzerlandUtil extends AutomationUtil {
         engineData.addNegativeCheckStatus("_chMuboty", msg);
       }
     }
-
+    System.out.println("sortl--------------------" + data.getSearchTerm());
+    if ((data.getSearchTerm() != null) && (SCENARIO_COMMERCIAL.equals(actualScenario) || SCENARIO_GOVERNMENT.equals(actualScenario))
+        && StringUtils.isNotBlank(coverage) && covList.contains(coverage)) { // covList.contains("A0004520"))
+      details.append("Setting isu ctc to 28-7 based on coverage.");
+      overrides.addOverride(covElement.getProcessCode(), "DATA", "ISU_CD", data.getIsuCd(), "28");
+      overrides.addOverride(covElement.getProcessCode(), "DATA", "CLIENT_TIER", data.getClientTier(), "7");
+    }
     return true;
   }
 
