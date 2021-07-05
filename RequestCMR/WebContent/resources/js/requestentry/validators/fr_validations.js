@@ -3680,6 +3680,8 @@ function setCoverageSBOBasedOnIsuCtc(currentLanded) {
         } else if (landedCountry == 'DZ') {
           FormManager.setValue('salesBusOffCd', '711711');
         }
+      } else if (custGrp == 'LOCAL') {
+        FormManager.setValue('salesBusOffCd', 'NNNNNN');
       }
     }
   }
