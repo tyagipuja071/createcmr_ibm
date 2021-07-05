@@ -234,7 +234,7 @@ public class SWISSMassProcessMultiService extends MultiThreadedBatchService<Long
       HashMap<String, String> overallStatus = new HashMap<String, String>();
       StringBuilder comment = new StringBuilder();
       if (resultsMain != null && resultsMain.size() > 0) {
-
+        lockRecord(entityManager, admin);
         int threads = 5;
         String threadCount = BatchUtil.getProperty("multithreaded.threadCount");
         if (threadCount != null && StringUtils.isNumeric(threadCount)) {
@@ -430,6 +430,30 @@ public class SWISSMassProcessMultiService extends MultiThreadedBatchService<Long
     createComment(entityManager, "An error occurred during processing:\n" + errorMsg, admin.getId().getReqId());
 
     RequestUtils.sendEmailNotifications(entityManager, admin, hist);
+  }
+
+  /**
+   * Locks the admin record
+   * 
+   * @param entityManager
+   * @param admin
+   * @throws Exception
+   */
+  private void lockRecord(EntityManager entityManager, Admin admin) throws Exception {
+    LOG.info("Locking Request " + admin.getId().getReqId());
+    admin.setLockBy(BATCH_USER_ID);
+    admin.setLockByNm(BATCH_USER_ID);
+    admin.setLockInd("Y");
+    // error
+    admin.setProcessedFlag("Wx");
+    admin.setReqStatus("PCR");
+    admin.setLastUpdtBy(BATCH_USER_ID);
+    updateEntity(admin, entityManager);
+
+    createHistory(entityManager, "Processing started.", "PCR", "Claim", admin.getId().getReqId());
+    createComment(entityManager, "Processing started.", admin.getId().getReqId());
+
+    partialCommit(entityManager);
   }
 
 }
