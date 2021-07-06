@@ -170,10 +170,18 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
         importAddress = false;
       }
 
+      if (SystemLocation.CHINA.equals(data.getCmrIssuingCntry())) {
+        // do import for CHINA update
+        if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && CmrConstants.REQUEST_STATUS.DRA.toString().equals(admin.getReqStatus())) {
+          importAddress = true;
+        }
+      }
+
       LOG.debug("D&B Address to be imported? " + importAddress);
 
       if (!StringUtils.isBlank(mainRecord.getCmrIsic())) {
-        if (!CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+        if (!CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())
+            || (SystemLocation.CHINA.equals(data.getCmrIssuingCntry()) && CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()))) {
           LOG.debug("Retrieving ISIC and Subindustry [ISIC=" + mainRecord.getCmrIsic() + "]");
           data.setIsicCd(mainRecord.getCmrIsic());
           data.setSubIndustryCd(getSubindCode(mainRecord.getCmrIsic(), entityManager));
