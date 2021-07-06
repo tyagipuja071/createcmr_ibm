@@ -627,7 +627,7 @@ function setClientTierValues(value) {
     }
   } else if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.SPAIN) {
     if (value == '34') {
-      tierValues = [ '6', 'A', 'V', 'Z', 'Q' ];
+      tierValues = [ '6', 'A', 'V', 'Z', 'Q', 'Y' ];
     } else if (value == '32') {
       tierValues = [ 'B', 'S', 'T', 'N', 'Z', 'M' ];
     } else if (value == '21' || value == '5B' || value == '04' || value == '3T' || value == '60') {
