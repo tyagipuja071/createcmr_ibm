@@ -429,6 +429,7 @@ public class FranceUtil extends AutomationUtil {
               case "Exact Match":
                 overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(),
                     response.get(SBO) + response.get(SBO));
+                overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getSearchTerm(), response.get(SBO));
                 details.append("Coverage calculation Successful.").append("\n");
                 details.append("Computed SORTL = " + response.get(SBO) + response.get(SBO)).append("\n\n");
                 details.append("Matched Rule:").append("\n");
