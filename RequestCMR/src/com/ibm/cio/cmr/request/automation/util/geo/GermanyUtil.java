@@ -447,8 +447,9 @@ public class GermanyUtil extends AutomationUtil {
     String coverageId = container.getFinalCoverage();
     String coverage = data.getSearchTerm();
     List<String> covList = Arrays.asList("A0004520", "A0004515", "A0004541", "A0004580");
-    System.out.println("coverageId-------------" + coverageId);
-    System.out.println("sortl-------------" + coverage);
+    LOG.debug("coverageId-------------" + coverageId);
+    LOG.debug("sortl-------------" + coverage);
+
     details.append("\n");
     if (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && covFrom != null && CalculateCoverageElement.COV_BG.equals(covFrom)) {
       overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getSearchTerm(), coverageId);
@@ -497,8 +498,11 @@ public class GermanyUtil extends AutomationUtil {
       details.append("Coverage could not be calculated through Buying group or 34Q-PostalCode logic.\n Skipping coverage calculation.").append("\n");
       results.setResults("Skipped");
     }
-    if (("COMME".equals(scenario) || "GOVMT".equals(scenario)) && StringUtils.isNotBlank(coverage) && covList.contains("A0004520")) { // covList.contains("A0004520"))
-      details.append("Setting isu ctc to 28-7 based on coverage");
+    LOG.debug("---coverage---" + coverage);
+    LOG.debug("Setting isu ctc to 28-7 for matched coverage from list");
+    if (("COMME".equals(scenario) || "GOVMT".equals(scenario)) && StringUtils.isNotBlank(coverage) && covList.contains("A0004520")) {
+      LOG.debug("Setting isu ctc to 28-7 based on coverage mapping.");
+      details.append("Setting isu ctc to 287 based on coverage mapping.");
       overrides.addOverride(covElement.getProcessCode(), "DATA", "ISU_CD", data.getIsuCd(), "28");
       overrides.addOverride(covElement.getProcessCode(), "DATA", "CLIENT_TIER", data.getClientTier(), "7");
     }

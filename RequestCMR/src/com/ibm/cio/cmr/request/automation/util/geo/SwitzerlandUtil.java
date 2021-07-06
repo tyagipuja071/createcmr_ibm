@@ -404,8 +404,8 @@ public class SwitzerlandUtil extends AutomationUtil {
     String actualScenario = scenario.substring(2);
     String coverageId = container.getFinalCoverage();
     String coverage = data.getSearchTerm();
-    System.out.println("coverageId--------------------" + container.getFinalCoverage());
-    System.out.println("sortl--------------------" + coverage);
+    LOG.debug("coverageId--------------------" + container.getFinalCoverage());
+    LOG.debug("sortl--------------------" + coverage);
 
     List<String> covList = Arrays.asList("A0004520", "A0004515", "A0004541", "A0004580");
 
@@ -434,6 +434,7 @@ public class SwitzerlandUtil extends AutomationUtil {
       }
     }
 
+    LOG.debug("----CovId()+Coverage--" + data.getCovId());
     if (sortl != null) {
       details.append("Setting SORTL to " + sortl + " based on Postal Code rules.");
       overrides.addOverride(covElement.getProcessCode(), "DATA", "SEARCH_TERM", data.getSearchTerm(), sortl);
@@ -454,10 +455,13 @@ public class SwitzerlandUtil extends AutomationUtil {
         engineData.addNegativeCheckStatus("_chMuboty", msg);
       }
     }
-    System.out.println("sortl--------------------" + data.getSearchTerm());
-    if ((data.getSearchTerm() != null) && (SCENARIO_COMMERCIAL.equals(actualScenario) || SCENARIO_GOVERNMENT.equals(actualScenario))
-        && StringUtils.isNotBlank(coverage) && covList.contains(coverage)) { // covList.contains("A0004520"))
-      details.append("Setting isu ctc to 28-7 based on coverage.");
+
+    LOG.debug("Setting isu ctc to 28-7 for matched coverage from list");
+    System.out.println("sortl--------------------" + data.getSearchTerm() + "coverage---" + coverage);
+    if ((SCENARIO_COMMERCIAL.equals(actualScenario) || SCENARIO_GOVERNMENT.equals(actualScenario)) && StringUtils.isNotBlank(coverage)
+        && covList.contains("A0004520")) {
+      LOG.debug("Setting isu ctc to 28-7 based on coverage mapping.");
+      details.append("Setting isu ctc to 287 based on coverage mapping.");
       overrides.addOverride(covElement.getProcessCode(), "DATA", "ISU_CD", data.getIsuCd(), "28");
       overrides.addOverride(covElement.getProcessCode(), "DATA", "CLIENT_TIER", data.getClientTier(), "7");
     }
