@@ -339,7 +339,7 @@ function addAddressTypeValidator() {
 }
 
 function addAddressFieldValidators() {
-  // Street Address and PostBox cannot be both empty
+  // Street Address and PostBox fields cannot be both empty
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
