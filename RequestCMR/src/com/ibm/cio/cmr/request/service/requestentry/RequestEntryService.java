@@ -721,8 +721,13 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
           // check here for any automation
           String processingIndc = SystemUtil.getAutomationIndicator(entityManager, model.getCmrIssuingCntry());
           if ("P".equals(processingIndc) || "B".equals(processingIndc)) {
-            this.log.debug("Processor automation enabled for " + model.getCmrIssuingCntry() + ". Setting " + model.getReqId() + " to AUT");
-            transrec.setNewReqStatus("AUT"); // set to automated processing
+            if (SystemLocation.CHINA.equals(model.getCmrIssuingCntry()) && StringUtils.isNotBlank(model.getDisableAutoProc())
+                && model.getDisableAutoProc().equalsIgnoreCase("Y")) {
+              transrec.setNewReqStatus("PPN");// set to PPN for CHINA
+            } else {
+              this.log.debug("Processor automation enabled for " + model.getCmrIssuingCntry() + ". Setting " + model.getReqId() + " to AUT");
+              transrec.setNewReqStatus("AUT"); // set to automated processing
+            }
           }
         }
         if ("*".equals(transrec.getId().getReqType())) {
@@ -1533,7 +1538,8 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
           cmrRecord.setCmrTier("");
           cmrRecord.setCmrInacType("");
           cmrRecord.setCmrIsic(!StringUtils.isEmpty(kna1.getZzkvSic())
-              ? (kna1.getZzkvSic().trim().length() > 4 ? kna1.getZzkvSic().trim().substring(0, 4) : kna1.getZzkvSic().trim()) : "");
+              ? (kna1.getZzkvSic().trim().length() > 4 ? kna1.getZzkvSic().trim().substring(0, 4) : kna1.getZzkvSic().trim())
+              : "");
           cmrRecord.setCmrSortl("");
           cmrRecord.setCmrIssuedByDesc("");
           cmrRecord.setCmrRdcCreateDate("");
