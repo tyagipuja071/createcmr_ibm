@@ -434,19 +434,32 @@ function addFieldHandlers() {
 var _pstExemptHandler = null;
 function addPSTExemptHandler() {
 
-  var label = dojo.query('label[for="PSTExemptLicNum"]');
-  var mand = '<span style="color:red" class="cmr-ast" id="ast-PSTExemptLicNum">* </span>';
-  if (label && label[0]) {
-    var change = dojo.query(label[0]).query('img.cmr-delta-icon');
-    if (change && change[0]) {
-      dojo.place(mand, change[0], 'before');
-    } else {
-      var info = dojo.query(label[0]).query('img.cmr-info-bubble');
-      if (info && info[0]) {
-        dojo.place(mand, info[0], 'before');
+  if (dojo.byId('PSTExempt').checked) {
+    try {
+      dojo.destroy('ast-PSTExemptLicNum');
+    } catch (err) {
+      console.log('Catch error destroying ast-PSTExemptLicNum element');
+    }
+
+    var label = dojo.query('label[for="PSTExemptLicNum"]');
+    var mand = '<span style="color:red" class="cmr-ast" id="ast-PSTExemptLicNum">* </span>';
+    if (label && label[0]) {
+      var change = dojo.query(label[0]).query('img.cmr-delta-icon');
+      if (change && change[0]) {
+        dojo.place(mand, change[0], 'before');
       } else {
-        dojo.place(mand, label[0], 'last');
+        var info = dojo.query(label[0]).query('img.cmr-info-bubble');
+        if (info && info[0]) {
+          dojo.place(mand, info[0], 'before');
+        } else {
+          dojo.place(mand, label[0], 'last');
+        }
       }
+    }
+  } else {// PST Exempt NOT checked
+    var reqMarker = dojo.query('ast-PSTExemptLicNum');
+    if (reqMarker && reqMarker[0]) {
+      dojo.byId('ast-PSTExemptLicNum').style.display = 'none';
     }
   }
 
@@ -461,11 +474,6 @@ function addPSTExemptHandler() {
       }
     });
   }
-  // Toggle PST License Number Required Marker
-  if (dojo.byId('PSTExempt').checked) {
-    dojo.byId('ast-PSTExemptLicNum').style.display = 'inline-block';
-  }
-
 }
 
 function addLocationNoValidator() {
