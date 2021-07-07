@@ -81,7 +81,8 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
       String cnName = null;
       String cnHistoryName = null;
       String cnAddr = null;
-      String cnCeid = data.getBusnType();
+      String cnCreditCd = data.getBusnType();
+      String cnCeid = data.getPpsceid();
 
       IntlAddr iAddr = new IntlAddr();
       CompanyRecordModel searchModelCNAPI = new CompanyRecordModel();
@@ -122,10 +123,10 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
             try {
 
               // 1, Check CN API
-              if (cnCeid != null && cnCeid.length() > 0) {
+              if (cnCreditCd != null && cnCreditCd.length() > 0) {
                 searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
                 searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
-                searchModelCNAPI.setTaxCd1(cnCeid);
+                searchModelCNAPI.setTaxCd1(cnCreditCd);
                 resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "TAXCD");
               } else {
                 cnName = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
@@ -275,10 +276,10 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
             try {
 
               // 1, Check CN API
-              if (cnCeid != null && cnCeid.length() > 0) {
+              if (cnCreditCd != null && cnCreditCd.length() > 0) {
                 searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
                 searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
-                searchModelCNAPI.setTaxCd1(cnCeid);
+                searchModelCNAPI.setTaxCd1(cnCreditCd);
                 resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "TAXCD");
               } else {
                 cnName = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
@@ -332,6 +333,8 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   List<String> cnHistoryNameList = Arrays.asList(cnHistoryName.split(";"));
                   try {
                     for (String historyName : cnHistoryNameList) {
+                      searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
+                      searchModelFindCmrCN.setCountryCd(soldTo.getLandCntry());
                       searchModelFindCmrCN.setName(historyName);
                       resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
                       if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
@@ -372,7 +375,8 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                     // 4, Check FindCMR with CEID
                     searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
                     searchModelFindCmrCN.setCountryCd(soldTo.getLandCntry());
-                    searchModelFindCmrCN.setTaxCd1(cnCeid);
+                    searchModelFindCmrCN.setName(null);
+                    searchModelFindCmrCN.setCied(cnCeid);
                     resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
                     if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
                       for (int i = 0; i < resultFindCmrCN.size(); i++) {
@@ -455,10 +459,10 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
             try {
 
               // 1, Check CN API
-              if (cnCeid != null && cnCeid.length() > 0) {
+              if (cnCreditCd != null && cnCreditCd.length() > 0) {
                 searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
                 searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
-                searchModelCNAPI.setTaxCd1(cnCeid);
+                searchModelCNAPI.setTaxCd1(cnCreditCd);
                 resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "TAXCD");
               } else {
                 cnName = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
@@ -589,10 +593,10 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
             try {
 
               // 1, Check CN API
-              if (cnCeid != null && cnCeid.length() > 0) {
+              if (cnCreditCd != null && cnCreditCd.length() > 0) {
                 searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
                 searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
-                searchModelCNAPI.setTaxCd1(cnCeid);
+                searchModelCNAPI.setTaxCd1(cnCreditCd);
                 resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "TAXCD");
               } else {
                 cnName = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
@@ -790,10 +794,10 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
             try {
 
               // 1, Check CN API
-              if (cnCeid != null && cnCeid.length() > 0) {
+              if (cnCreditCd != null && cnCreditCd.length() > 0) {
                 searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
                 searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
-                searchModelCNAPI.setTaxCd1(cnCeid);
+                searchModelCNAPI.setTaxCd1(cnCreditCd);
                 resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "TAXCD");
               } else {
                 cnName = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
@@ -919,9 +923,15 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
           iAddr = handler.getIntlAddrById(soldTo, entityManager);
           if (iAddr != null) {
-            cnName = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
+            // cnName = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null
+            // ? iAddr.getIntlCustNm2() : "");
+            if (iAddr.getIntlCustNm2() != null) {
+              cnName = iAddr.getIntlCustNm1() + iAddr.getIntlCustNm2();
+            } else {
+              cnName = iAddr.getIntlCustNm1();
+            }
           }
-          if (cnName != null) {
+          if (!StringUtils.isBlank(cnName)) {
 
             try {
 

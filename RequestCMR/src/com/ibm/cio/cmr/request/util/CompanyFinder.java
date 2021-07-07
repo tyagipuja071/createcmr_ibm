@@ -167,6 +167,10 @@ public class CompanyFinder {
         request.setIncludeDeleted("Y");
       }
 
+      if (StringUtils.isNotBlank(searchModel.getCied())) {
+        request.setPpsCeId(searchModel.getCied());
+      }
+
       LOG.debug("Connecting to CMR matching service for " + request.getIssuingCountry() + " - " + request.getCustomerName());
       // connect to the duplicate CMR check service
       MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
