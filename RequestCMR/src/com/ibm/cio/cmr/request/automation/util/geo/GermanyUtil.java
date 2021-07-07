@@ -545,7 +545,7 @@ public class GermanyUtil extends AutomationUtil {
       String sql = ExternalizedQuery.getSql("QUERY.SWISS.GET.SORTL_BY_ISUCTCIMS");
       PreparedQuery query = new PreparedQuery(entityManager, sql);
       query.setParameter("ISU", "%" + isuCtc + "%");
-      query.setParameter("ISSUING_CNTRY", SystemLocation.AUSTRIA);
+      query.setParameter("ISSUING_CNTRY", SystemLocation.GERMANY);
       query.setParameter("CLIENT_TIER", "%" + ims + "%");
       query.setForReadOnly(true);
       sboValues = query.getResults(String.class);
