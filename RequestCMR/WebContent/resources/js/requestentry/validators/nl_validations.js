@@ -78,8 +78,15 @@ function afterConfigForNL() {
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
   }
+  var sourceSystId = FormManager.getActualValue('sourceSystId');
+  // PayGo_check
+  var qParams = {
+    SYST_ID : sourceSystId
+  };
+  var paygoUser = cmr.query('PAYGO.CHECK.CRN', qParams);
+  var countpaygo = paygoUser.ret1;
   if ((custSubScnrio == 'PUBCU' && role == 'Processor') || custSubScnrio == 'PRICU' || custSubScnrio == 'CBCOM' || custSubScnrio == 'CBBUS'
-      || (custSubScnrio == 'INTER' && vatExempt && vatExemptChecked) || viewOnlyPage == 'true') {
+      || (custSubScnrio == 'INTER' && vatExempt && vatExemptChecked) || viewOnlyPage == 'true'|| (Number(countpaygo) == 1 && role == 'Processor')) {
     FormManager.removeValidator('taxCd2', Validators.REQUIRED);
   } else if (reqType != 'U') {
     FormManager.addValidator('taxCd2', Validators.REQUIRED, [ 'KVK' ], 'MAIN_CUST_TAB');
