@@ -59,6 +59,9 @@ public class FieldComputationElement extends OverridingElement {
       log.debug("Error On Field Calculation");
       // engineData.addRejectionComment(result.getResults());
       results = result;
+      if (result.getResults() != null && "Requester check fail".equals(result.getResults())) {
+        super.setStopOnError(true);
+      }
       results.setResults(result.getResults());
       results.setProcessOutput(result.getProcessOutput());
     }

@@ -198,10 +198,12 @@ public class ChinaUtil extends AutomationUtil {
         boolean managerCheck = BluePagesHelper.isBluePagesHeirarchyManager(admin.getRequesterId(), managerID);
         if (!managerCheck) {
           details.append("request must be from BPSO team.");
-          engineData.addRejectionComment("OTH", "please sure request must be from BPSO team.", "", "");
+          engineData.addRejectionComment("OTH", "please sure requester must be from BPSO team.", "", "");
           results.setOnError(true);
+          results.setResults("Requester check fail");
         } else {
-          details.append("Skipping validation for request must be from BPSO team for requester - " + admin.getRequesterId() + ".\n");
+          details.append("Skipping validation for requester must be from BPSO team for requester - " + admin.getRequesterId() + ".\n");
+          results.setOnError(false);
           results.setResults("Computed");
         }
       } else {
@@ -216,6 +218,7 @@ public class ChinaUtil extends AutomationUtil {
         } else {
           details.append("ISIC is valid" + "\n");
           details.append("Successful Execution.\n");
+          results.setOnError(false);
           results.setResults("Computed");
         }
 
@@ -224,6 +227,7 @@ public class ChinaUtil extends AutomationUtil {
     } else {
       details.append("No specific fields to compute.\n");
       results.setResults("Skipped");
+      results.setOnError(false);
     }
     results.setDetails(details.toString());
 
@@ -282,8 +286,8 @@ public class ChinaUtil extends AutomationUtil {
       List<String> managerID = SystemParameters.getList("AUTO_CN_MGR_BP_LIST");
       boolean managerCheck = BluePagesHelper.isBluePagesHeirarchyManager(admin.getRequesterId(), managerID);
       if (!managerCheck) {
-        details.append("request must be from BPSO team.");
-        engineData.addRejectionComment("OTH", "please sure request must be from BPSO team.", "", "");
+        details.append("requester must be from BPSO team.");
+        engineData.addRejectionComment("OTH", "please sure requester must be from BPSO team.", "", "");
         output.setOnError(true);
         validation.setSuccess(false);
         validation.setMessage("Rejected");
