@@ -4606,6 +4606,20 @@ function addAddrValidationForProcItaly() {
   }
 }
 
+function landedCntryLockedIT() {
+  var addrType = FormManager.getActualValue('addrType');
+  var issuingCntryVal = FormManager.getActualValue('cmrIssuingCntry');
+  var landCntry = FormManager.getActualValue('landCntry');
+
+  if (issuingCntryVal == '758' && cmr.currentRequestType == 'U') {
+    if (addrType == 'ZS01') {
+      FormManager.readOnly('landCntry');
+    } else if (addrType == 'ZI01' || addrType == 'ZP01') {
+      FormManager.enable('landCntry');
+    }
+  }
+}
+
 function afterConfigForIT() {
 
   if (_landCntryHandler == null) {
@@ -8458,7 +8472,7 @@ function addAddrFunctionItaly(cntry, addressMode, saving, finalSave) {
   allowCopyOfNonExistingAddressOnly(cntry, addressMode, saving, finalSave);
   setSpecialTaxCodeOnAddressIT(cntry, addressMode, saving, finalSave);
   setPostCdItalyVA(cntry, addressMode, saving, finalSave);
-
+  landedCntryLockedIT(cntry, addressMode, saving, finalSave);
 }
 
 function ibmFieldsBehaviourInCreateByScratchIT() {
