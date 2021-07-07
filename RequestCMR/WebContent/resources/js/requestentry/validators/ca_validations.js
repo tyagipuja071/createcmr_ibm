@@ -455,12 +455,14 @@ function addPSTExemptHandler() {
           dojo.place(mand, label[0], 'last');
         }
       }
+      FormManager.addValidator('PSTExemptLicNum', Validators.REQUIRED, [ 'PST Exemption License Number' ], 'MAIN_CUST_TAB');
     }
   } else {// PST Exempt NOT checked
     var reqMarker = dojo.query('ast-PSTExemptLicNum');
     if (reqMarker && reqMarker[0]) {
       dojo.byId('ast-PSTExemptLicNum').style.display = 'none';
     }
+    FormManager.removeValidator('PSTExemptLicNum', Validators.REQUIRED);
   }
 
   if (_pstExemptHandler == null) {
