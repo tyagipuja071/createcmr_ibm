@@ -556,22 +556,8 @@ public class SpainUtil extends AutomationUtil {
 
       HashMap<String, String> response = getEntpSalRepFromPostalCodeMapping(data.getIsicCd(), addr, data.getIsuCd(), data.getClientTier(),
           data.getCustSubGrp());
-      SpainFieldsCompContainer fields = null;
-      if (response.get(MATCHING).isEmpty() || response.get(MATCHING).equals("No Match Found")) {
-        fields = new SpainFieldsCompContainer(entityManager, data, data.getIsuCd(), data.getClientTier());
-      }
 
-      if (fields != null && fields.allFieldsCalculated()) {
-        details.append("Coverage calculated successfully using 34Q logic.").append("\n");
-        details.append("Sales Rep : " + fields.getSalesRep()).append("\n");
-        details.append("Enterprise : " + fields.getEnterprise()).append("\n");
-        details.append("SBO : " + fields.getSbo()).append("\n");
-        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), fields.getSbo());
-        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ENTERPRISE", data.getEnterprise(), fields.getEnterprise());
-        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "REP_TEAM_MEMBER_NO", data.getRepTeamMemberNo(), fields.getSalesRep());
-        results.setResults("Calculated");
-        results.setDetails(details.toString());
-      } else if (response.get(MATCHING).equalsIgnoreCase("Match Found.")) {
+      if (response.get(MATCHING).equalsIgnoreCase("Match Found.")) {
         LOG.debug("Calculated Enterprise: " + response.get(ENTP));
         LOG.debug("Calculated Sales Rep: " + response.get(SALES_REP));
         details.append("Coverage calculated successfully using 34Q logic mapping.").append("\n");
@@ -585,9 +571,9 @@ public class SpainUtil extends AutomationUtil {
       } else if (StringUtils.isNotBlank(data.getRepTeamMemberNo()) && StringUtils.isNotBlank(data.getSalesBusOffCd())
           && StringUtils.isNotBlank(data.getEnterprise())) {
         details.append("Coverage could not be calculated using 34Q logic. Using values from request").append("\n");
-        details.append("Sales Rep : " + fields.getSalesRep()).append("\n");
-        details.append("Enterprise : " + fields.getEnterprise()).append("\n");
-        details.append("SBO : " + fields.getSbo()).append("\n");
+        details.append("Sales Rep : " + data.getRepTeamMemberNo()).append("\n");
+        details.append("Enterprise : " + data.getEnterprise()).append("\n");
+        details.append("SBO : " + data.getSalesBusOffCd()).append("\n");
         results.setResults("Calculated");
         results.setDetails(details.toString());
       } else {
