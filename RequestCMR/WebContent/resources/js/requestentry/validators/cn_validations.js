@@ -350,7 +350,6 @@ function filterISUOnChange() {
     KATR6 : '641'
   };
   var isuCdResult = cmr.query('GET.MAPPED_ISU_BY_SORTL', searchTermParams);
-  console.log(isuCdResult);
 
   if (isuCdResult != null) {
     FormManager.resetDropdownValues(FormManager.getField('isuCd'));
@@ -1152,6 +1151,212 @@ function addSocialCreditCdLengthValidator() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
+function addAddrUpdateValidator() {
+  console.log("running addAddrUpdateValidator . . .");
+  FormManager
+      .addFormValidator(
+          (function() {
+            return {
+              validate : function() {
+                
+                if (FormManager.getActualValue('reqType') != 'U') {
+                  return new ValidationResult(null, true);
+                }
+                
+                var failInd = false;
+                var zs01Updated = false;
+                var additionalAddrupdated = false;
+                if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 1) {
+                  var record = null;
+                  var type = null;
+                  var updateIndZS01 = null;
+                  var custNm1ZS01 = null;
+                  var custNm2ZS01 = null;
+                  var addrTxtZS01 = null;
+                  var addrTxt2ZS01 = null;
+                  var cnCustName1ZS01 = null;
+                  var cnCustName2ZS01 = null;
+                  var cnAddrTxtZS01 = null;
+                  var cnAddrTxt2ZS01 = null;
+                  var updateIndOther = null;
+                  var custNm1Other = null;
+                  var custNm2Other = null;
+                  var addrTxtOther = null;
+                  var addrTxt2Other = null;
+                  var cnCustName1Other = null;
+                  var cnCustName2Other = null;
+                  var cnAddrTxtOther = null;
+                  var cnAddrTxt2Other = null;
+
+                  // check ZS01 updated
+                  for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+                    record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+                    type = record.addrType;
+                    if (typeof (type) == 'object') {
+                      type = type[0];
+                    }
+                    if (type == 'ZS01') {
+                      updateIndZS01 = record.updateInd;
+                      custNm1ZS01 = record.custNm1;
+                      custNm2ZS01 = record.custNm2;
+                      addrTxtZS01 = record.addrTxt;
+                      addrTxt2ZS01 = record.addrTxt2;
+                      cnCustName1ZS01 = record.cnCustName1;
+                      cnCustName2ZS01 = record.cnCustName2;
+                      cnAddrTxtZS01 = record.cnAddrTxt;
+                      cnAddrTxt2ZS01 = record.cnAddrTxt2;
+                      
+                      if (typeof (updateIndZS01) == 'object') {
+                        updateIndZS01 = updateIndZS01[0];
+                      }
+                      if (typeof (custNm1ZS01) == 'object') {
+                        custNm1ZS01 = custNm1ZS01[0];
+                      }
+                      if (typeof (custNm2ZS01) == 'object') {
+                        custNm2ZS01 = custNm2ZS01[0];
+                      }
+                      if (typeof (addrTxtZS01) == 'object') {
+                        addrTxtZS01 = addrTxtZS01[0];
+                      }
+                      if (typeof (addrTxt2ZS01) == 'object') {
+                        addrTxt2ZS01 = addrTxt2ZS01[0];
+                      }
+                      if (typeof (cnCustName1ZS01) == 'object') {
+                        cnCustName1ZS01 = cnCustName1ZS01[0];
+                      }
+                      if (typeof (cnCustName2ZS01) == 'object') {
+                        cnCustName2ZS01 = cnCustName2ZS01[0];
+                      }
+                      if (typeof (cnAddrTxtZS01) == 'object') {
+                        cnAddrTxtZS01 = cnAddrTxtZS01[0];
+                      }
+                      if (typeof (cnAddrTxt2ZS01) == 'object') {
+                        cnAddrTxt2ZS01 = cnAddrTxt2ZS01[0];
+                      }
+                      
+                      if (updateIndZS01=='U' ) {
+                        zs01Updated = true;
+                      }
+                    }
+                    
+                  }
+                  
+                  // check additional addr updated
+                  for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+                    record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+                    type = record.addrType;
+                    if (typeof (type) == 'object') {
+                      type = type[0];
+                    }
+                    if (type != 'ZS01') {
+                      updateIndOther = record.updateInd;
+                      custNm1Other = record.custNm1;
+                      custNm2Other = record.custNm2;
+                      addrTxtOther = record.addrTxt;
+                      addrTxt2Other = record.addrTxt2;
+                      cnCustName1Other = record.cnCustName1;
+                      cnCustName2Other = record.cnCustName2;
+                      cnAddrTxtOther = record.cnAddrTxt;
+                      cnAddrTxt2Other = record.cnAddrTxt2;
+                      
+                      if (typeof (updateIndOther) == 'object') {
+                        updateIndOther = updateIndOther[0];
+                      }
+                      if (typeof (custNm1Other) == 'object') {
+                        custNm1Other = custNm1Other[0];
+                      }
+                      if (typeof (custNm2Other) == 'object') {
+                        custNm2Other = custNm2Other[0];
+                      }
+                      if (typeof (addrTxtOther) == 'object') {
+                        addrTxtOther = addrTxtOther[0];
+                      }
+                      if (typeof (addrTxt2Other) == 'object') {
+                        addrTxt2Other = addrTxt2Other[0];
+                      }
+                      if (typeof (cnCustName1Other) == 'object') {
+                        cnCustName1Other = cnCustName1Other[0];
+                      }
+                      if (typeof (cnCustName2Other) == 'object') {
+                        cnCustName2Other = cnCustName2Other[0];
+                      }
+                      if (typeof (cnAddrTxtOther) == 'object') {
+                        cnAddrTxtOther = cnAddrTxtOther[0];
+                      }
+                      if (typeof (cnAddrTxt2Other) == 'object') {
+                        cnAddrTxt2Other = cnAddrTxt2Other[0];
+                      }
+                      
+                      if (updateIndOther=='U' || updateIndOther=='N') {
+                        additionalAddrupdated = true;
+                      }
+                      
+                      if (zs01Updated) {
+                        if (additionalAddrupdated) {
+                          if ((custNm1ZS01 && custNm1ZS01 != '') || (custNm1Other && custNm1Other != '')) {
+                            if (custNm1ZS01 != custNm1Other) {
+                              failInd = true;
+                            }
+                          } else if ((custNm2ZS01 && custNm2ZS01 != '') || (custNm2Other && custNm2Other != '')) {
+                            if (custNm2ZS01 != custNm2Other) {
+                              failInd = true;
+                            }
+                          } else if ((addrTxtZS01 && addrTxtZS01 != '') || (addrTxtOther && addrTxtOther != '')) {
+                            if (addrTxtZS01 != addrTxtOther) {
+                              failInd = true;
+                            }
+                          } else if ((addrTxt2ZS01 && addrTxt2ZS01 != '') || (addrTxt2Other && addrTxt2Other != '')) {
+                            if (addrTxt2ZS01 != addrTxt2Other) {
+                              failInd = true;
+                            }
+                          } else if ((cnCustName1ZS01 && cnCustName1ZS01 != '') || (cnCustName1Other && cnCustName1Other != '')) {
+                            if (cnCustName1ZS01 != cnCustName1Other) {
+                              failInd = true;
+                            }
+                          } else if ((cnCustName2ZS01 && cnCustName2ZS01 != '') || (cnCustName2Other && cnCustName2Other != '')) {
+                            if (cnCustName2ZS01 != cnCustName2Other) {
+                              failInd = true;
+                            }
+                          } else if ((cnAddrTxtZS01 && cnAddrTxtZS01 != '') || (cnAddrTxtOther && cnAddrTxtOther != '')) {
+                            if (cnAddrTxtZS01 != cnAddrTxtOther) {
+                              failInd = true;
+                            }
+                          } else if ((cnAddrTxt2ZS01 && cnAddrTxt2ZS01 != '') || (cnAddrTxt2Other && cnAddrTxt2Other != '')) {
+                            if (cnAddrTxt2ZS01 != cnAddrTxt2Other) {
+                              failInd = true;
+                            }
+                          }
+                        } else  {
+                          failInd = true;
+                        }
+                      } else {
+                        if (additionalAddrupdated) {
+                          failInd = true;
+                        }
+                      }
+                      
+                    }
+                  }
+                  
+                }
+                
+                if (failInd) {
+                  var id = FormManager.getActualValue('reqId');
+                  var ret = cmr.query('CHECK_CONFIRMATION_ATTACHMENTS', {
+                    ID : id
+                  });
+
+                  if (ret == null || ret.ret1 == null) {
+                    return new ValidationResult(null, false, 'Additional addresse types need to be updated same with Legal Address (Sold To). please attach support documents and send to CMDE.');
+                  } else {
+                    return new ValidationResult(null, true);
+                  }
+                }
+                return new ValidationResult(null, true);
+              }
+            };
+          })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
 
 dojo.addOnLoad(function() {
   GEOHandler.CN = [ SysLoc.CHINA ];
@@ -1191,4 +1396,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addCityRequiredOnUpdateValidatorAddrList, GEOHandler.CN, null, true);
   GEOHandler.registerValidator(addSocialCreditCdLengthValidator, GEOHandler.CN, GEOHandler.REQUESTER, true);
   GEOHandler.addAfterConfig(onInacTypeChange, GEOHandler.CN);
+  GEOHandler.registerValidator(addAddrUpdateValidator, GEOHandler.CN, null, true);
 });
