@@ -44,7 +44,7 @@ public abstract class ISATransformer extends APTransformer {
 
     String isu = handler.cmrData.getIsuCd();
 
-    if ("32".equalsIgnoreCase(isu) || "34".equalsIgnoreCase(isu) || "21".equalsIgnoreCase(isu) || "60".equalsIgnoreCase(isu)) {
+    if ("32".equalsIgnoreCase(isu) || "34".equalsIgnoreCase(isu) || "21".equalsIgnoreCase(isu)) {
       handler.messageHash.put("MrktRespCode", "3");
     } else {
       handler.messageHash.put("MrktRespCode", "2");

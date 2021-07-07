@@ -1745,6 +1745,9 @@ function onIsuCdChangeAseanAnzIsa() {
 
 function updateMRCAseanAnzIsa() {
   console.log(">>>> updateMRC >>>>");
+  var scenario = FormManager.getActualValue('custGrp');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var _cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
   var arryISUCdForMRC3 = [ '32', '34', '21' ];
   FormManager.setValue('mrcCd', '');
   var _isuCd = FormManager.getActualValue('isuCd');
@@ -1758,6 +1761,9 @@ function updateMRCAseanAnzIsa() {
     }
     if (_exsitFlag == 0) {
       FormManager.setValue('mrcCd', '2');
+    }
+    if(scenario == 'LOCAL' &&(_cmrIssuingCntry == '744' || _cmrIssuingCntry == '615' || _cmrIssuingCntry == '652') && custSubGrp == 'INTER'){
+      FormManager.setValue('mrcCd', '3');
     }
   }
 }
