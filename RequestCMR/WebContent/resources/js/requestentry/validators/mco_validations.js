@@ -13,6 +13,10 @@ var _postalCodeHandler = null;
 var _ISICHandler = null;
 var _isicCdHandler = null;
 
+var subIndValSpain = [ 'F9', 'FA', 'FD', 'FF', 'FW', 'H9', 'HA', 'HB', 'HC', 'HD', 'HE', 'HW', 'GA', 'GB', 'GC', 'GD', 'GE', 'GF', 'GG', 'GH', 'GJ',
+    'GK', 'GL', 'GM', 'GN', 'GP', 'GR', 'GW', 'GZ', 'Y9', 'YA', 'YB', 'YC', 'YD', 'YE', 'YF', 'YG', 'YW', 'N9', 'NA', 'NB', 'NI', 'NW', 'NZ', 'E9',
+    'EA', 'ER', 'EW', 'S9', 'SB', 'SE', 'SG', 'SW', 'XF', 'XW' ];
+
 function afterConfigPT() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
@@ -694,9 +698,59 @@ function setEnterpriseBasedOnSubIndustry() {
       if (cmr.currentTab == "CUST_REQ_TAB") {
         _subindustryChanged = true;
         setEnterpriseValues(false);
+        setEnterpriseValues34Q();
       }
     });
   }
+}
+
+function setEnterpriseValues34Q() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
+
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var isuCd = FormManager.getActualValue('isuCd');
+  var clientTier = FormManager.getActualValue('clientTier');
+  var belongs = '';
+  var entp = '';
+  var salRep = '';
+  if (cntry != SysLoc.SPAIN || isuCd.concat(clientTier) != '34Q') {
+    return;
+  }
+  var postcd = '';
+  var subIndCd = FormManager.getActualValue('subIndustryCd');
+  var qParams = {
+    REQ_ID : FormManager.getActualValue('reqId')
+  };
+  var result = cmr.query('GET.ZS01POSTCD.BY_REQID', qParams);
+  if (result != null && result != '' && result.ret1 != undefined) {
+    postcd = result.ret1.substring(0, 2);
+  }
+
+  if (subIndValSpain.includes(subIndCd)) {
+    belongs = 'Y';
+  } else {
+    belongs = 'N';
+  }
+
+  var qParams1 = {
+    _qall : 'Y',
+    POST_CD : '%' + postcd + '%',
+    CTC : isuCd.concat(clientTier),
+    BELONGS : belongs
+  };
+  var result1 = cmr.query('GET.ENTP.SPAIN', qParams1);
+  if (result1 != null && result1 != '' && result1[0].ret1 != undefined) {
+    entp = result1[0].ret1;
+    salRep = result1[0].ret2;
+  }
+  FormManager.setValue('enterprise', entp);
+  FormManager.setValue('repTeamMemberNo', salRep);
+
 }
 
 var _oldIsuCtc = '';
@@ -2615,6 +2669,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setClientTierValues, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(setSalesRepValues, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(setEnterpriseValues, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
+  GEOHandler.addAfterConfig(setEnterpriseValues34Q, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(setFieldMandatoryForProcessorPT, [ SysLoc.PORTUGAL ]);
   // GEOHandler.addAfterConfig(setLocationNumber, [ SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(setCollectionCode, [ SysLoc.SPAIN, SysLoc.PORTUGAL ]);
@@ -2652,6 +2707,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setClientTierValues, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
   GEOHandler.addAfterTemplateLoad(setSalesRepValues, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
   GEOHandler.addAfterTemplateLoad(setEnterpriseValues, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
+  GEOHandler.addAfterTemplateLoad(setEnterpriseValues34Q, [ SysLoc.SPAIN ]);
 
   GEOHandler.addAfterTemplateLoad(setDPCEBObasedOnCntry, [ SysLoc.SPAIN ]);
   GEOHandler.addAfterTemplateLoad(setVatValidatorPTES, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
