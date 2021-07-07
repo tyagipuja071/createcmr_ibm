@@ -1258,7 +1258,16 @@ function setDummySIRETOnCustSubGrpChange(value) {
   if (reqType == 'U' || FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
-  if (value == "COMME" || value == "HOSTC" || value == "THDPT" || value == "BUSPR" || value == "GOVRN" || value == "INTER" || value == "INTSO"
+  var sourceSystId = FormManager.getActualValue('sourceSystId');
+  // PayGo_check
+  var qParams = {
+    SYST_ID : sourceSystId
+  };
+  var paygoUser = cmr.query('PAYGO.CHECK.CRN', qParams);
+  var countpaygo = paygoUser.ret1;
+  if ((Number(countpaygo) == 1 && role == 'Processor')) {
+    FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+  } else if (value == "COMME" || value == "HOSTC" || value == "THDPT" || value == "BUSPR" || value == "GOVRN" || value == "INTER" || value == "INTSO"
       || value == "LCFIN") {
     FormManager.enable('taxCd1');
     FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'SIRET' ], 'MAIN_CUST_TAB');
