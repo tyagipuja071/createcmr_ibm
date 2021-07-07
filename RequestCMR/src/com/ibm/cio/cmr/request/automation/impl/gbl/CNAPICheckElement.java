@@ -35,7 +35,6 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
 
   private static final Logger LOG = Logger.getLogger(CNAPICheckElement.class);
 
-  // private static final String COMPANY_VERIFIED_INDC_YES = "Y";
   public static final String RESULT_ACCEPTED = "Accepted";
   public static final String MATCH_INDC_YES = "Y";
   public static final String RESULT_REJECTED = "Rejected";
@@ -75,7 +74,8 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
 
     if (iAddr != null) {
 
-      if (data.getCustSubGrp() != null && !SCENARIO_LOCAL_AQSTN.equals(data.getCustSubGrp())) {
+      if (data.getCustSubGrp() != null && !SCENARIO_LOCAL_AQSTN.equals(data.getCustSubGrp())
+          || requestData.getAdmin().getReqType().equalsIgnoreCase("U")) {
         cnName = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? iAddr.getIntlCustNm2() : "");
         cnAddr = iAddr.getAddrTxt() + (iAddr.getIntlCustNm4() != null ? iAddr.getIntlCustNm4() : "");
       } else if (data.getCustSubGrp() != null && SCENARIO_LOCAL_AQSTN.equals(data.getCustSubGrp())) {
@@ -92,7 +92,6 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
 
     LOG.debug("Entering DnB Check Element");
     if (requestData.getAdmin().getReqType().equalsIgnoreCase("C")) {
-      // if (!scenarioExceptions.isSkipDuplicateChecks()) {
       if (StringUtils.isNotBlank(admin.getDupCmrReason())) {
         StringBuilder details = new StringBuilder();
         details.append("User requested to proceed with Duplicate CMR Creation.").append("\n");
@@ -130,13 +129,9 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
                 details.append("High confidence Chinese name and address were found.");
 
                 requestData.getAdmin().setMatchIndc("C");
-                // result.setOnError(false);
                 details.append("\n");
-                // logDuplicateCMR(details, cmrData);
                 result.setProcessOutput(validation);
                 result.setDetails(details.toString().trim());
-                // engineData.addNegativeCheckStatus("CNAPICheck", "High
-                // confidence Chinese name and address were found.");
                 LOG.debug("High confidence Chinese name and address were found.\n");
 
               } else {
@@ -167,7 +162,6 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
             engineData.addRejectionComment("OTH", "Error on  get China API Data Check.", "", "");
             result.setOnError(true);
             result.setResults("Error on  get China API Data Check.");
-            // LOG.debug("Error on China API Validating" + e.getMessage());
           }
 
         }
@@ -186,20 +180,11 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
         details.append(admin.getDupCmrReason()).append("\n");
         result.setDetails(details.toString());
         result.setResults("Overridden");
-        // result.setOnError(false);
       } else if (soldTo != null) {
         AutomationResponse<CNResponse> cmrsData = new AutomationResponse<CNResponse>();
         CompanyRecordModel searchModel = new CompanyRecordModel();
         IntlAddr soldToIntlAddr = new IntlAddr();
         IntlAddrRdc soldToIntlAddrRdc = new IntlAddrRdc();
-
-        // if(StringUtils.isNotEmpty(data.getPpsceid())) {
-        // details.append("Skipping Chinese name and address check for BP
-        // scenario").append("\n");
-        // LOG.debug("Skipping Chinese name and address check for BP scenario");
-        // result.setResults("Skipped");
-        // result.setOnError(false);
-        // }else {
 
         searchModel.setIssuingCntry(data.getCmrIssuingCntry());
         searchModel.setCountryCd(soldTo.getLandCntry());
@@ -213,9 +198,6 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
 
         List<IntlAddr> intlAddrList = new ArrayList<IntlAddr>();
         List<IntlAddrRdc> intlAddrRdcList = new ArrayList<IntlAddrRdc>();
-        // List<IntlAddr> zi01AddrList =
-        // Map<String, IntlAddr> noSoldToAddrListMap = new HashMap<String,
-        // IntlAddr>();
 
         List<IntlAddr> zi01AddrList = new ArrayList<IntlAddr>();
         List<IntlAddrRdc> zi01AddrRdcList = new ArrayList<IntlAddrRdc>();
@@ -272,18 +254,19 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
           return result;
         }
 
-        // Boolean nameCheckSuccess = true;
+        StringBuilder resultString = new StringBuilder();
         checkChineseName(soldToIntlAddr, soldToIntlAddrRdc, searchModel, cmrsData, result, details, engineData, entityManager);
         details.append("\n");
-        // if (result.isOnError()) {
-        // nameCheckSuccess = false;
-        // }
+        if (result.isOnError()) {
+          return result;
+        } else if (StringUtils.isNotBlank(result.getResults())) {
+          resultString.append("Name: " + result.getResults()).append("\n");
+        }
         checkChineseAddress(soldToIntlAddr, soldToIntlAddrRdc, searchModel, cmrsData, result, details, engineData, entityManager);
-        // if (!nameCheckSuccess) {
-        // result.setOnError(true);
-        // }
+        resultString.append("Address: ").append(result.getResults());
 
         result.setProcessOutput(validation);
+        result.setResults(resultString.toString().trim());
         result.setDetails(details.toString().trim());
 
       } else {
@@ -294,13 +277,6 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
         result.setDetails(details.toString().trim());
       }
     }
-    // } else {
-    // result.setDetails("Skipping Duplicate CMR checks for scenario");
-    // log.debug("Skipping Duplicate CMR checks for scenario");
-    // result.setResults("Skipped");
-    // result.setOnError(false);
-    // }
-
     return result;
   }
 
@@ -341,26 +317,16 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
             result.setResults("Review Needed");
             engineData.addRejectionComment("OTH", "The Chinese name of the " + intlAddr.getId().getAddrType() + " address type has been changed.", "",
                 "");
-            // details.append("The Chinese name of the non-SOLDTO address type
-            // is changed from " + cnNameAddrRdc + " to " +
-            // cnNameAddr).append("\n");
             result.setOnError(true);
           }
           if (!cnAddressAddr.equals(cnAddressAddrRdc)) {
             result.setResults("Review Needed");
             engineData.addRejectionComment("OTH", "The Chinese address of the " + intlAddr.getId().getAddrType() + " address type has been changed.",
                 "", "");
-            // details.append("The Chinese address of the non-SOLDTO address
-            // type is changed from " + cnAddressAddrRdc + " to " +
-            // cnAddressAddr)
-            // .append("\n");
             result.setOnError(true);
           }
           if (result.isOnError()) {
             engineData.addRejectionComment("OTH", intlAddr.getId().getAddrType() + " address type has been changed.", "", "");
-            // details.append(intlAddr.getId().getAddrType() + " address type
-            // has been changed. " + "Please attach supporting
-            // document.").append("\n");
             result.setDetails(details.toString().trim());
           }
 
@@ -397,10 +363,7 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
             if (oldCnName.equals(historyName)) {
 
               result.setResults("Matches found");
-              // result.setOnError(false);
               details.append("Original Chinese name matchs with historical name in API.").append("\n");
-              // result.setProcessOutput(validation);
-              // result.setDetails(details.toString().trim());
               if (newCnName.equals(cmrsData.getRecord().getName())) {
                 details.append("Current Chinese name matchs with Chinese name in API.").append("\n");
               } else {
@@ -412,7 +375,6 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
                 details.append(
                     "Chinese name has been override by trust source. if you agree, please Send for Processing. if you don't agree, please attach supporting document and click Disable automatic processing checkbox.")
                     .append("\n");
-
               }
             } else {
               details.append("Original Chinese name does not match with historical name in API.").append("\n");
@@ -439,7 +401,6 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
       details.append("Skipping Chinese name check as Chinese name has not been updated.").append("\n");
       LOG.debug("Skipping Chinese name check as Chinese name has not been updated");
       result.setResults("Skipped");
-      // result.setOnError(false);
     }
 
   }
@@ -468,9 +429,6 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
 
         if (newCnAddr.equals(cmrsData.getRecord().getRegLocation())) {
           result.setResults("Matches found");
-          // result.setOnError(false);
-          // result.setProcessOutput(validation);
-          // result.setDetails(details.toString().trim());
           details.append("Current Chinese address matchs with Chinese address in API.").append("\n");
         } else {
           overrideNameAndAddress(cmrsData.getRecord().getName(), cmrsData.getRecord().getRegLocation(), soldToIntlAddr, entityManager);
@@ -491,7 +449,6 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
       details.append("Skipping Chinese address check as Chinese address has not been updated.").append("\n");
       LOG.debug("Skipping Chinese address check as Chinese address has not been updated");
       result.setResults("Skipped");
-      // result.setOnError(false);
     }
 
   }
@@ -531,7 +488,6 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
       String excess = cnAddress.substring(tempNewLen);
       intlAddr.setAddrTxt(newTxt);
       intlAddr.setIntlCustNm4(excess);
-      // model.setCnAddrTxt2(excess + model.getCnAddrTxt2());
     } else {
       intlAddr.setAddrTxt(cnAddress);
     }
@@ -542,7 +498,6 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
       String excess = cnName.substring(tempNewLen);
       intlAddr.setIntlCustNm1(newTxt);
       intlAddr.setIntlCustNm2(excess);
-      // model.setCnCustName2(excess + model.getCnCustName2());
     } else {
       intlAddr.setIntlCustNm1(cnName);
     }
