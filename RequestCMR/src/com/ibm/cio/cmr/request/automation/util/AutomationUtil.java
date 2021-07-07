@@ -1275,4 +1275,11 @@ public abstract class AutomationUtil {
     return dupReqIds;
   }
 
+  public void performCoverageBasedOnGBG(CalculateCoverageElement covElement, EntityManager entityManager, AutomationResult<OverrideOutput> results,
+      StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData, String covFrom,
+      CoverageContainer container, boolean isCoverageCalculated) throws Exception {
+    // TODO Auto-generated method stub
+
+  }
+
 }
