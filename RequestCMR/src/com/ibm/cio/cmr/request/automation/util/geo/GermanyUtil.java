@@ -464,7 +464,7 @@ public class GermanyUtil extends AutomationUtil {
       sbo = getSBOFromIMS(entityManager, data.getSubIndustryCd(), data.getIsuCd(), data.getClientTier());
       if (StringUtils.isNotBlank(sbo)) {
         details.append("Setting SBO to " + sbo + " based on IMS mapping rules.");
-        overrides.addOverride(covElement.getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sbo);
+        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getSearchTerm(), sbo);
         engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
         results.setResults("Calculated");
       } else if (!isCoverageCalculated) {
@@ -524,6 +524,8 @@ public class GermanyUtil extends AutomationUtil {
       details.append("Coverage could not be calculated through Buying group or 34Q logic.\n Skipping coverage calculation.").append("\n");
       results.setResults("Skipped");
     }
+    LOG.debug("---data.getSearchTerm---" + data.getSearchTerm());
+    LOG.debug("---coverageId---" + data.getCovId());
     LOG.debug("---coverage---" + coverage);
     LOG.debug("Setting isu ctc to 28-7 for matched coverage from list");
     if (("COMME".equals(scenario) || "GOVMT".equals(scenario)) && StringUtils.isNotBlank(coverage) && covList.contains("A0004520")) {
@@ -540,7 +542,7 @@ public class GermanyUtil extends AutomationUtil {
     String isuCtc = (StringUtils.isNotBlank(isuCd) ? isuCd : "") + (StringUtils.isNotBlank(clientTier) ? clientTier : "");
     if (StringUtils.isNotBlank(subIndustryCd) && ("34Y".equals(isuCtc) || "34Q".equals(isuCtc))) {
       String ims = subIndustryCd.substring(0, 1);
-      String sql = ExternalizedQuery.getSql("AUTO.DE.GET_SBOLIST_FROM_ISUCTC");
+      String sql = ExternalizedQuery.getSql("QUERY.SWISS.GET.SORTL_BY_ISUCTCIMS");
       PreparedQuery query = new PreparedQuery(entityManager, sql);
       query.setParameter("ISU", "%" + isuCtc + "%");
       query.setParameter("ISSUING_CNTRY", SystemLocation.AUSTRIA);
