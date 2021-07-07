@@ -652,8 +652,9 @@ function doAddToAddressList() {
       if (FormManager.getActualValue('cmrIssuingCntry') == '641') {
         // do
         if (isCNAddressDetailsExisting()) {
-          cmr.showAlert('The details of this address is the same as the existing Sold-To. This address can not be added.');
-          return;
+          // cmr.showAlert('The details of this address is the same as the
+          // existing Sold-To. This address can not be added.');
+          // return;
         }
       }
       if (asean_isa_cntries.indexOf(cntry) >= 0) {
