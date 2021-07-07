@@ -464,7 +464,7 @@ public class GermanyUtil extends AutomationUtil {
       sbo = getSBOFromIMS(entityManager, data.getSubIndustryCd(), data.getIsuCd(), data.getClientTier());
       if (StringUtils.isNotBlank(sbo)) {
         details.append("Setting SBO to " + sbo + " based on IMS mapping rules.");
-        overrides.addOverride(covElement.getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sbo);
+        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getSearchTerm(), sbo);
         engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
         results.setResults("Calculated");
       } else if (!isCoverageCalculated) {
