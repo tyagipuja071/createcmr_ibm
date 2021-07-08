@@ -548,7 +548,7 @@ public class SpainUtil extends AutomationUtil {
     }
 
     Data data = requestData.getData();
-    Addr addr = requestData.getAddress("ZI01");
+    Addr addr = requestData.getAddress("ZS01");
 
     if ((!isCoverageCalculated)) {
       details.setLength(0);
