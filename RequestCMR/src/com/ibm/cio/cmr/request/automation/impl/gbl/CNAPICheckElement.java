@@ -257,9 +257,14 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
         StringBuilder resultString = new StringBuilder();
         checkChineseName(soldToIntlAddr, soldToIntlAddrRdc, searchModel, cmrsData, result, details, engineData, entityManager);
         details.append("\n");
-        if (result.isOnError()) {
-          return result;
-        } else if (StringUtils.isNotBlank(result.getResults())) {
+        // if (result.isOnError()) {
+        // resultString.append("Name: " + result.getResults()).append("\n");
+        // result.setProcessOutput(validation);
+        // result.setResults(resultString.toString().trim());
+        // result.setDetails(details.toString().trim());
+        // return result;
+        // } else
+        if (StringUtils.isNotBlank(result.getResults())) {
           resultString.append("Name: " + result.getResults()).append("\n");
         }
         checkChineseAddress(soldToIntlAddr, soldToIntlAddrRdc, searchModel, cmrsData, result, details, engineData, entityManager);
