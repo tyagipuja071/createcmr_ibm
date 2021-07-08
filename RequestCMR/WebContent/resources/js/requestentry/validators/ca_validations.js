@@ -425,6 +425,8 @@ function addFieldHandlers() {
       var custSubGrp = FormManager.getActualValue('custSubGrp');
       if (custSubGrp == 'OEM') {
         FormManager.enable('abbrevNm');
+      } else {
+        FormManager.readOnly('abbrevNm');
       }
     });
   }
