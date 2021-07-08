@@ -1506,10 +1506,10 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
       }
       request.setStreetLine1(addr.getAddrTxt());
       request.setStreetLine2(StringUtils.isEmpty(addr.getAddrTxt2()) ? "" : addr.getAddrTxt2());
-      request.setCity(addr.getCity1());
+      // request.setCity(addr.getCity1()); //
 
-      request.setStateProv(addr.getStateProv());
-      request.setPostalCode(addr.getPostCd());
+      // request.setStateProv(addr.getStateProv()); //
+      // request.setPostalCode(addr.getPostCd()); //
 
       if (vatMatchRequired) {
         if (StringUtils.isNotBlank(data.getVat())) {
