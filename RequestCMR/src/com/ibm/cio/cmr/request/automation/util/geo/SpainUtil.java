@@ -92,7 +92,7 @@ public class SpainUtil extends AutomationUtil {
       digester.addObjectCreate("mappings", ArrayList.class);
       digester.addObjectCreate("mappings/postalMapping", ESPostalMapping.class);
 
-      digester_.addObjectCreate("mappping-isic", SpainISICPostalMapping.class);
+      digester_.addObjectCreate("mappping-subInd", SpainISICPostalMapping.class);
 
       digester.addBeanPropertySetter("mappings/postalMapping/isuCTC", "isuCTC");
       digester.addBeanPropertySetter("mappings/postalMapping/postalCdStarts", "postalCdStarts");
@@ -103,13 +103,13 @@ public class SpainUtil extends AutomationUtil {
 
       digester.addSetNext("mappings/postalMapping", "add");
 
-      digester_.addBeanPropertySetter("mappping-isic/isicCds", "isicCds");
+      digester_.addBeanPropertySetter("mappping-subInd/subIndCds", "subIndCds");
 
       try {
         InputStream is = ConfigUtil.getResourceStream("spain-sr-entp-mapping.xml");
         SpainUtil.postalMappings = (ArrayList<ESPostalMapping>) digester.parse(is);
 
-        InputStream is_ = ConfigUtil.getResourceStream("spain-isic-mapping.xml");
+        InputStream is_ = ConfigUtil.getResourceStream("spain-subInd-mapping.xml");
         SpainUtil.esIsicPostalMapping = (SpainISICPostalMapping) digester_.parse(is_);
 
       } catch (Exception e) {
@@ -615,8 +615,8 @@ public class SpainUtil extends AutomationUtil {
       if (esIsicPostalMapping != null) {
         String[] postalCodeRanges = null;
         for (ESPostalMapping postalMapping : postalMappings) {
-          if (esIsicPostalMapping.getIsicCds() != null && !esIsicPostalMapping.getIsicCds().isEmpty()) {
-            isicCds = Arrays.asList(esIsicPostalMapping.getIsicCds().replaceAll("\n", "").replaceAll(" ", "").split(","));
+          if (esIsicPostalMapping.getSubIndCds() != null && !esIsicPostalMapping.getSubIndCds().isEmpty()) {
+            isicCds = Arrays.asList(esIsicPostalMapping.getSubIndCds().replaceAll("\n", "").replaceAll(" ", "").split(","));
           }
           if (!StringUtils.isEmpty(postalMapping.getPostalCdStarts())) {
             postalCodeRanges = postalMapping.getPostalCdStarts().replaceAll("\n", "").replaceAll(" ", "").split(",");
