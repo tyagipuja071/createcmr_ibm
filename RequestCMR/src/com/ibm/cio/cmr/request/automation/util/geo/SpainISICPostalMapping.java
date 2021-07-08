@@ -1,13 +1,13 @@
 package com.ibm.cio.cmr.request.automation.util.geo;
 
 public class SpainISICPostalMapping {
-  private String isicCds;
+  private String subIndCds;
 
-  public String getIsicCds() {
-    return isicCds;
+  public String getSubIndCds() {
+    return subIndCds;
   }
 
-  public void setIsicCds(String isicCds) {
-    this.isicCds = isicCds;
+  public void setSubIndCds(String subIndCds) {
+    this.subIndCds = subIndCds;
   }
 }
