@@ -540,13 +540,13 @@ public class GermanyUtil extends AutomationUtil {
   private String getSBOFromIMS(EntityManager entityManager, String subIndustryCd, String isuCd, String clientTier) {
     List<String> sboValues = new ArrayList<>();
     String isuCtc = (StringUtils.isNotBlank(isuCd) ? isuCd : "") + (StringUtils.isNotBlank(clientTier) ? clientTier : "");
-    if (StringUtils.isNotBlank(subIndustryCd) && ("34Y".equals(isuCtc) || "34Q".equals(isuCtc))) {
+    if (StringUtils.isNotBlank(subIndustryCd) && ("34Q".equals(isuCtc))) {
       String ims = subIndustryCd.substring(0, 1);
-      String sql = ExternalizedQuery.getSql("QUERY.SWISS.GET.SORTL_BY_ISUCTCIMS");
+      String sql = ExternalizedQuery.getSql("AUTO.DE.GET_SBOLIST_FROM_ISUCTC");
       PreparedQuery query = new PreparedQuery(entityManager, sql);
       query.setParameter("ISU", "%" + isuCtc + "%");
       query.setParameter("ISSUING_CNTRY", SystemLocation.GERMANY);
-      query.setParameter("CLIENT_TIER", "%" + ims + "%");
+      query.setParameter("IMS", "%" + ims + "%");
       query.setForReadOnly(true);
       sboValues = query.getResults(String.class);
     }
