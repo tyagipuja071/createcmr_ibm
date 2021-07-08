@@ -788,6 +788,7 @@ function setEnterpriseValues(scenarioChanged) {
   if (cntry == SysLoc.SPAIN && (isuCtc == '34Q')) {
     return; // avoid below and follow setEnterpriseValues34Q
   }
+
   var isuCtcValueChanged = false;
   var isuCtc217Scen = new Set([ 'BUSPR', 'INTER', 'XBP', 'CRINT', 'INTSO' ]);
   var is217ScenarioSelect = (isuCtc217Scen.has(custSubGrp) && scenarioChanged && isuCtc == '217');
@@ -836,6 +837,10 @@ function setEnterpriseValues(scenarioChanged) {
         if (isuCtc == '34Z' || is217ScenarioSelectEs) {
           enterprises = [ '985999' ];
         }
+      }
+
+      if (cntry == SysLoc.SPAIN && isuCtc217Scen.has(custSubGrp) && isuCtc == '34Y') {
+        enterprises = [ '985129' ];
       }
 
       if (enterprises != null) {
