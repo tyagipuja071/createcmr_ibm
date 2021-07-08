@@ -1750,6 +1750,9 @@ function onIsuCdChangeAseanAnzIsa() {
 function updateMRCAseanAnzIsa() {
   console.log(">>>> updateMRC >>>>");
   var arryISUCdForMRC3 = [ '32', '34', '21' ];
+  var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var scenario = FormManager.getActualValue('custGrp');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
   FormManager.setValue('mrcCd', '');
   var _isuCd = FormManager.getActualValue('isuCd');
   if (_isuCd != null && _isuCd.length > 1) {
