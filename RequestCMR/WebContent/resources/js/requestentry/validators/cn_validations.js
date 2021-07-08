@@ -10,7 +10,7 @@ var _addrTypesForCN = [ 'ZS01', 'ZP01', 'ZI01', 'ZD01' ];
 var _landCntryHandler = null;
 var _isuHandler = null;
 var _searchTermHandler = null;
-var _govTypeHandler = null;
+// var _govTypeHandler = null;
 var _isicHandlerCN = null;
 var _inacCdHandler = null;
 var CNHandler = {
@@ -82,7 +82,7 @@ function afterConfigForCN() {
       filterISUOnChange();
       setIsuOnIsic();
       setInacBySearchTerm();
-      addValidationForParentCompanyNo();
+      // addValidationForParentCompanyNo();
     });
   }
 
@@ -92,11 +92,12 @@ function afterConfigForCN() {
     });
   }
 
-  if (_govTypeHandler == null) {
-    _govTypeHandler = dojo.connect(FormManager.getField('govType'), 'onClick', function(value) {
-      addValidationForParentCompanyNo();
-    });
-  }
+// if (_govTypeHandler == null) {
+// _govTypeHandler = dojo.connect(FormManager.getField('govType'), 'onClick',
+// function(value) {
+// addValidationForParentCompanyNo();
+// });
+// }
 
   if (FormManager.getActualValue('reqType') == 'U') {
     FormManager.hide('IbmDeptCostCenter', 'ibmDeptCostCenter');
@@ -310,6 +311,11 @@ function defaultCapIndicator() {
     FormManager.getField('capInd').checked = true;
     FormManager.readOnly('capInd');
   }
+}
+
+function defaultGovernmentIndicator(){
+  FormManager.getField('govType').checked = true;
+  FormManager.readOnly('govType');
 }
 
 function disableVatExemptForScenarios() {
@@ -1366,7 +1372,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addDPLCheckValidator, GEOHandler.CN, GEOHandler.ROLE_REQUESTER, false, false);
   GEOHandler.enableCustomerNamesOnAddress(GEOHandler.CN);
   GEOHandler.addAfterTemplateLoad(autoSetIBMDeptCostCenter, GEOHandler.CN);
-  GEOHandler.addAfterTemplateLoad(addValidationForParentCompanyNo, GEOHandler.CN);
+  // GEOHandler.addAfterTemplateLoad(addValidationForParentCompanyNo,
+  // GEOHandler.CN);
   GEOHandler.addAfterConfig(setSocialCreditCdValidator, GEOHandler.CN);
   GEOHandler.addAfterTemplateLoad(disableVatExemptForScenarios, GEOHandler.CN);
   GEOHandler.addAfterTemplateLoad(setPrivacyIndcReqdForProc, GEOHandler.CN);
@@ -1377,11 +1384,12 @@ dojo.addOnLoad(function() {
   // GEOHandler.addAfterConfig(limitClientTierValuesOnUpdate, GEOHandler.CN);
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.CHINA, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.CHINA ], null, true);
   GEOHandler.addAfterConfig(defaultCapIndicator, SysLoc.CHINA);
+  GEOHandler.addAfterConfig(defaultGovernmentIndicator, GEOHandler.CN);
   GEOHandler.addAddrFunction(autoSetAddrFieldsForCN, GEOHandler.CN);
   GEOHandler.addAddrFunction(showHideCityCN, GEOHandler.CN);
   // Checklist
   GEOHandler.addAfterConfig(setChinaChecklistStatus, GEOHandler.CN);
-  GEOHandler.addAfterConfig(addValidationForParentCompanyNo, GEOHandler.CN);
+  // GEOHandler.addAfterConfig(addValidationForParentCompanyNo, GEOHandler.CN);
   GEOHandler.registerValidator(addChecklistValidator, GEOHandler.CN);
   // DENNIS: COMMENTED BECAUSE OF SCRIPT RUN TIME ISSUES
   GEOHandler.addAfterConfig(addDateValidator, GEOHandler.CN);
