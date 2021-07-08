@@ -427,7 +427,7 @@ public class AustriaUtil extends AutomationUtil {
       PreparedQuery query = new PreparedQuery(entityManager, sql);
       query.setParameter("ISU", "%" + isuCtc + "%");
       query.setParameter("ISSUING_CNTRY", SystemLocation.AUSTRIA);
-      query.setParameter("CLIENT_TIER", "%" + ims + "%");
+      query.setParameter("UPDATE_BY_ID", "%" + ims + "%");
       query.setForReadOnly(true);
       sboValues = query.getResults(String.class);
     } else {
