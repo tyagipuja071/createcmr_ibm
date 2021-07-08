@@ -1557,10 +1557,19 @@ function matchDnBForAutomationCountries() {
           } else {
             // continue
             console.log("An error occurred while matching dnb.");
-            cmr.showConfirm("cmr.showModal('addressVerificationModal')", 'An error occurred while matching dnb. Do you want to proceed with this request?', 'Warning', null, {
-              OK : 'Yes',
-              CANCEL : 'No'
-            });
+            if (cmrCntry == '641') {
+              cmr.showConfirm('showAddressVerificationModal()', 'An error occurred while matching dnb. Do you want to proceed with this request?',
+                  'Warning', null, {
+                    OK : 'Yes',
+                    CANCEL : 'No'
+                  });
+            } else {
+              cmr.showConfirm("cmr.showModal('addressVerificationModal')",
+                  'An error occurred while matching dnb. Do you want to proceed with this request?', 'Warning', null, {
+                    OK : 'Yes',
+                    CANCEL : 'No'
+                  });
+            }
           }
         },
         error : function(error, ioargs) {
