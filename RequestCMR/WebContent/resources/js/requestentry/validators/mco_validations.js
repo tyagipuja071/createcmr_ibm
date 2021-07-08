@@ -434,9 +434,11 @@ function addAddressFieldValidators() {
             }
           }
         } else if (cntry == SysLoc.PORTUGAL) {
-          if (FormManager.getActualValue('custNm2') != '' && FormManager.getActualValue('custNm4') != '' && FormManager.getActualValue('addrTxt') != '' && FormManager.getActualValue('addrTxt2') != ''
+          if (FormManager.getActualValue('custNm2') != '' && FormManager.getActualValue('custNm4') != ''
+              && FormManager.getActualValue('addrTxt') != '' && FormManager.getActualValue('addrTxt2') != ''
               && FormManager.getActualValue('poBox') != '') {
-            return new ValidationResult(null, false, 'For Customer Name Con\'t, Street, Address Con\'t, Attention Person, and PO Box only 3 can be filled.');
+            return new ValidationResult(null, false,
+                'For Customer Name Con\'t, Street, Address Con\'t, Attention Person, and PO Box only 3 can be filled.');
           }
         }
 
@@ -772,7 +774,9 @@ function setEnterpriseValues(scenarioChanged) {
   // LocNo
   var isuCtc = isuCd + clientTier;
   if (custGroup != 'CROSS') {
-    if (cntry == SysLoc.SPAIN && (isuCtc == '32B' || isuCtc == '32T' || isuCtc == '217' || isuCtc == '34Q')) {
+    // if (cntry == SysLoc.SPAIN && (isuCtc == '32B' || isuCtc == '32T' ||
+    // isuCtc == '217' || isuCtc == '34Q')) {
+    if (cntry == SysLoc.SPAIN && (isuCtc == '32B' || isuCtc == '32T' || isuCtc == '217')) {
       // FormManager.readOnly('enterprise');
       setSBOAndEBO();
       if (!isuCtc == '217') {
@@ -781,6 +785,9 @@ function setEnterpriseValues(scenarioChanged) {
     }
   }
 
+  if (cntry == SysLoc.SPAIN && (isuCtc == '34Q')) {
+    return; // avoid below and follow setEnterpriseValues34Q
+  }
   var isuCtcValueChanged = false;
   var isuCtc217Scen = new Set([ 'BUSPR', 'INTER', 'XBP', 'CRINT', 'INTSO' ]);
   var is217ScenarioSelect = (isuCtc217Scen.has(custSubGrp) && scenarioChanged && isuCtc == '217');
@@ -919,7 +926,10 @@ function setSBOAndEBO() {
         }
       }
       // For Spain, domestic with 32 & 21 ISU, set enterprise based on LocNo
-      if (isuCtc == '32B' || isuCtc == '34Q' || isuCtc == '32T' || isuCtc == '217') {
+      // if (isuCtc == '32B' || isuCtc == '34Q' || isuCtc == '32T' || isuCtc ==
+      // '217') {
+      // removing 34Q according to 2H2021
+      if (isuCtc == '32B' || isuCtc == '32T' || isuCtc == '217') {
         if (ent == undefined) {
           FormManager.setValue('enterprise', '');
         } else {
@@ -1215,7 +1225,8 @@ function setTaxCdByPostCd() {
   if (postalCdList.has(postcd)) {
     if (reqType == 'C' && (custSubGroup == 'GOVRN' || custSubGroup == 'GOVIG')) {
       FormManager.setValue('specialTaxCd', '18');
-    } else if (reqType == 'C' && (custSubGroup != 'GOVRN' && custSubGroup != 'GOVIG' && custSubGroup != 'INTSO' && custSubGroup != 'INTER' && custSubGroup != 'XINSO' && custSubGroup != 'XINTR')) {
+    } else if (reqType == 'C'
+        && (custSubGroup != 'GOVRN' && custSubGroup != 'GOVIG' && custSubGroup != 'INTSO' && custSubGroup != 'INTER' && custSubGroup != 'XINSO' && custSubGroup != 'XINTR')) {
       FormManager.setValue('specialTaxCd', '23');
     }
   } else {
@@ -1936,7 +1947,8 @@ function setDPCEBObasedOnCntry() {
 
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   for (var i = 0; i < cntryCode.length; i++) {
-    if (locNum != null && locNum == cntryCode[i] && custSubGrp != '' && custSubGrp != null && (custSubGrp != 'XINSO' && custSubGrp != 'XINTR') && custSubGrp != 'BUSPR' && custSubGrp != 'XIGS') {
+    if (locNum != null && locNum == cntryCode[i] && custSubGrp != '' && custSubGrp != null && (custSubGrp != 'XINSO' && custSubGrp != 'XINTR')
+        && custSubGrp != 'BUSPR' && custSubGrp != 'XIGS') {
       FormManager.setValue('engineeringBo', '8628628');
       FormManager.setValue('salesBusOffCd', '4515140');
     } else if (custSubGrp == 'XCRO' || custSubGrp == 'XBP' || custSubGrp == 'XIGS' || custSubGrp == 'XINSO' || custSubGrp == 'XINTR') {
@@ -2404,7 +2416,8 @@ function setFieldsCharForScenarios() {
     FormManager.setValue('repTeamMemberNo', '1Ficti');
   }
 
-  if (custSubGroup == 'COMME' || custSubGroup == 'IGSGS' || custSubGroup == 'THDPT' || custSubGroup == 'THDIG' || custSubGroup == 'XCRO' || custSubGroup == 'XIGS') {
+  if (custSubGroup == 'COMME' || custSubGroup == 'IGSGS' || custSubGroup == 'THDPT' || custSubGroup == 'THDIG' || custSubGroup == 'XCRO'
+      || custSubGroup == 'XIGS') {
     FormManager.setValue('custClass', '11');
   }
   if (custSubGroup == 'GOVRN' || custSubGroup == 'GOVIG') {
@@ -2422,7 +2435,8 @@ function setISUCTCOnISIC() {
   var isic = FormManager.getActualValue('isicCd');
   var isicList = new Set([ '7230', '7240', '7290', '7210', '7221', '7229' ]);
   if (reqType == 'C' && role == 'REQUESTER') {
-    if (!(custSubGrp == 'INTER' || custSubGrp == 'INTSO' || custSubGrp == 'PRICU' || custSubGrp == 'XIGS' || custSubGrp == 'BUSPR' || custSubGrp == 'XBP' || custSubGrp == 'XCRO')) {
+    if (!(custSubGrp == 'INTER' || custSubGrp == 'INTSO' || custSubGrp == 'PRICU' || custSubGrp == 'XIGS' || custSubGrp == 'BUSPR'
+        || custSubGrp == 'XBP' || custSubGrp == 'XCRO')) {
       if ('34' == isuCd && 'Q' == clientTier && isicList.has(isic)) {
         FormManager.setValue('clientTier', 'Q');
       } else if ('34' == isuCd && 'Q' == clientTier && !isicList.has(isic)) {
@@ -2452,7 +2466,8 @@ function changeAbbNmSpainOnScenario() {
       if (abbName.length > 22)
         abbName = abbName.substring(0, 22);
     } else if ([ 'IGSGS', 'GOVIG', 'XIGS', 'THDIG' ].includes(custSubGrp) && installingAddrName.ret1 != undefined && !abbName.includes('IGS')) {
-      abbName = installingAddrName.ret1.length >= 18 ? installingAddrName.ret1.substring(0, 18).concat(' IGS') : installingAddrName.ret1.concat(' IGS');
+      abbName = installingAddrName.ret1.length >= 18 ? installingAddrName.ret1.substring(0, 18).concat(' IGS') : installingAddrName.ret1
+          .concat(' IGS');
     }
     FormManager.setValue('abbrevNm', abbName);
   }
@@ -2622,7 +2637,9 @@ function retainImportValuesPT(fromAddress, scenario, scenarioChanged) {
       FormManager.setValue('inacCd', origInac);
       FormManager.setValue('enterprise', origEnterprise);
     }
-  } else if (FormManager.getActualValue('reqType') == 'C' && isCmrImported == 'Y' && scenarioChanged
+  } else if (FormManager.getActualValue('reqType') == 'C'
+      && isCmrImported == 'Y'
+      && scenarioChanged
       && (scenario == 'BUSPR' || scenario == 'XBP' || scenario == 'PRICU' || scenario == 'CRPRI' || scenario == 'SAAPA' || scenario == 'INTER' || scenario == 'CRINT')) {
     FormManager.setValue('inacCd', '');
   } else if (FormManager.getActualValue('reqType') == 'C' && isCmrImported == 'Y' && scenarioChanged && (scenario == 'BUSPR' || scenario == 'XBP')) {
