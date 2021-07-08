@@ -849,14 +849,18 @@ public class GermanyUtil extends AutomationUtil {
     query.setParameter("COUNTRY", country);
     query.setForReadOnly(true);
     String result = query.getSingleResult(String.class);
-    LOG.debug("------------------performCoverageBasedOnGBG-------------");
-    if (result != null) {
+    LOG.debug("perform coverage based on GBG-------------");
+    LOG.debug("result--------" + result);
+    if (result != null && bgId.equals("DB500JRX")) {
       LOG.debug("Setting isu-ctc to 34Y and sortl based on gbg matching.");
       details.append("Setting isu-ctc to 34Y and sortl based on gbg matching.");
       overrides.addOverride(covElement.getProcessCode(), "DATA", "ISU_CD", data.getIsuCd(), "34");
       overrides.addOverride(covElement.getProcessCode(), "DATA", "CLIENT_TIER", data.getClientTier(), "Y");
-      overrides.addOverride(covElement.getProcessCode(), "DATA", "SORTL", data.getSearchTerm(), "T0007970");
+      overrides.addOverride(covElement.getProcessCode(), "DATA", "SEARCH_TERM", data.getSearchTerm(), "T0007970");
     }
+    LOG.debug("isu" + data.getIsuCd());
+    LOG.debug("client tier" + data.getClientTier());
+    LOG.debug("sortl" + data.getSearchTerm());
   }
 
   @Override

@@ -456,7 +456,7 @@ public class SwitzerlandUtil extends AutomationUtil {
       }
     }
 
-    LOG.debug("Setting isu ctc to 28-7 for matched coverage from list");
+    LOG.debug("Before Setting isu ctc to 28-7 for matched coverage from list");
     System.out.println("sortl--------------------" + data.getSearchTerm() + "coverage---" + coverage);
     if ((SCENARIO_COMMERCIAL.equals(actualScenario) || SCENARIO_GOVERNMENT.equals(actualScenario)) && StringUtils.isNotBlank(coverage)
         && covList.contains(coverage)) {
@@ -567,14 +567,19 @@ public class SwitzerlandUtil extends AutomationUtil {
     query.setParameter("COUNTRY", country);
     query.setForReadOnly(true);
     String result = query.getSingleResult(String.class);
-    LOG.debug("------------------performCoverageBasedOnGBG-------------");
-    if (result != null) {
+    LOG.debug("perform coverage based on GBG");
+    LOG.debug("result--------" + result);
+    if (result != null && bgId.equals("DB500JRX")) {
       LOG.debug("Setting isu-ctc to 34Y and sortl based on gbg matching.");
       details.append("Setting isu-ctc to 34Y and sortl based on gbg matching.");
       overrides.addOverride(covElement.getProcessCode(), "DATA", "ISU_CD", data.getIsuCd(), "34");
       overrides.addOverride(covElement.getProcessCode(), "DATA", "CLIENT_TIER", data.getClientTier(), "Y");
-      overrides.addOverride(covElement.getProcessCode(), "DATA", "SORTL", data.getSearchTerm(), "T0007971");
+      overrides.addOverride(covElement.getProcessCode(), "DATA", "SEARCH_TERM", data.getSearchTerm(), "T0007971");
     }
+
+    LOG.debug("isu" + data.getIsuCd());
+    LOG.debug("client tier" + data.getClientTier());
+    LOG.debug("sortl" + data.getSearchTerm());
   }
 
   @Override
