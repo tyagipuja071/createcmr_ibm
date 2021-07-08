@@ -6,6 +6,8 @@ var _vatExemptHandler = null;
 var _scenarioSubTypeHandler = null;
 var _deClientTierHandler = null;
 var _reqReasonHandler = null;
+var _ISUHandler = null;
+var _IMSHandler = null;
 
 function afterConfigForDE() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
