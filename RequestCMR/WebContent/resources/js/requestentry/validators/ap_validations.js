@@ -1517,7 +1517,7 @@ function onInacTypeChange() {
             var inacCdValue = [];
             if(cluster.includes('BLAN') || 
                 ((cluster == '04501' || cluster == '04683' || cluster == '04690') && 
-                    (cntry == SysLoc.HONG_KONG || cntry == SysLoc.MACAO))){
+                    (cntry == SysLoc.HONG_KONG || cntry == SysLoc.MACAO)) || ((cluster.includes('00129') || cluster.includes('04477') || cluster.includes('04496') || cluster.includes('04490') || cluster.includes('04494') || cluster.includes('04691') || cluster.includes('04467')) && (cntry == SysLoc.INDIA || cntry == SysLoc.BANGLADESH || cntry == SysLoc.SRI_LANKA))){
                 var qParams = {
                   _qall : 'Y',
                   ISSUING_CNTRY : cntry ,
@@ -1538,6 +1538,9 @@ function onInacTypeChange() {
                   inacCdValue.push(results[i].ret1);
                 }
                 if (value == 'N' && !(cluster.includes('BLAN')) && cntry == '616') {
+                  inacCdValue.push('new');
+                }
+                if (value == 'N' && (!((cluster.includes('00129') || cluster.includes('04477') || cluster.includes('04496') || cluster.includes('04490') || cluster.includes('04494') || cluster.includes('04691') || cluster.includes('04467')) && (cntry == SysLoc.INDIA || cntry == SysLoc.BANGLADESH || cntry == SysLoc.SRI_LANKA)))) {
                   inacCdValue.push('new');
                 }
                 FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacCdValue);
@@ -1672,7 +1675,9 @@ function setISBUScenarioLogic() {
   var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var isbuList = null;
-
+  if (cmrIssuingCntry == '744' && custSubGrp == 'PRIV') {
+    FormManager.readOnly('apCustClusterId');
+  }
   if (custSubGrp == 'BLUMX' || custSubGrp == 'XBLUM') {
     if (cmrIssuingCntry == '615' || cmrIssuingCntry == '652' || cmrIssuingCntry == '744' || cmrIssuingCntry == '834') {
       FormManager.setValue('isbuCd', 'GMBW');
