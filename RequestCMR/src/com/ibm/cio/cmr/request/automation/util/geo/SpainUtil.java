@@ -554,7 +554,7 @@ public class SpainUtil extends AutomationUtil {
       details.setLength(0);
       overrides.clearOverrides();
 
-      HashMap<String, String> response = getEntpSalRepFromPostalCodeMapping(data.getIsicCd(), addr, data.getIsuCd(), data.getClientTier(),
+      HashMap<String, String> response = getEntpSalRepFromPostalCodeMapping(data.getSubIndustryCd(), addr, data.getIsuCd(), data.getClientTier(),
           data.getCustSubGrp());
 
       if (response.get(MATCHING).equalsIgnoreCase("Match Found.")) {
@@ -601,7 +601,7 @@ public class SpainUtil extends AutomationUtil {
 
   }
 
-  private HashMap<String, String> getEntpSalRepFromPostalCodeMapping(String isicCd, Addr addr, String isuCd, String clientTier, String scenario) {
+  private HashMap<String, String> getEntpSalRepFromPostalCodeMapping(String subIndCd, Addr addr, String isuCd, String clientTier, String scenario) {
     HashMap<String, String> response = new HashMap<String, String>();
     response.put(ENTP, "");
     response.put(SALES_REP, "");
@@ -629,8 +629,8 @@ public class SpainUtil extends AutomationUtil {
           if (isuCd.concat(clientTier).equalsIgnoreCase(postalMapping.getIsuCTC()) && scenariosList.contains(scenario)
               && "None".equalsIgnoreCase(postalMapping.getIsicBelongs())
               || (!postalCodes.isEmpty() && postalCodes.contains(postCdtStrt))
-                  && (("Yes".equalsIgnoreCase(postalMapping.getIsicBelongs()) && isicCds.contains(isicCd))
-                      || ("No".equalsIgnoreCase(postalMapping.getIsicBelongs()) && !isicCds.contains(isicCd)))) {
+                  && (("Yes".equalsIgnoreCase(postalMapping.getIsicBelongs()) && isicCds.contains(subIndCd))
+                      || ("No".equalsIgnoreCase(postalMapping.getIsicBelongs()) && !isicCds.contains(subIndCd)))) {
             response.put(ENTP, postalMapping.getEnterprise());
             response.put(SALES_REP, postalMapping.getSaleRep());
             response.put(MATCHING, "Match Found.");
