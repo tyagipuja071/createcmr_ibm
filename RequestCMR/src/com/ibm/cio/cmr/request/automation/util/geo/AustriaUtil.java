@@ -388,7 +388,7 @@ public class AustriaUtil extends AutomationUtil {
     }
 
     if ((SCENARIO_COMMERCIAL.equals(scenario) || SCENARIO_GOVERNMENT.equals(scenario)) && StringUtils.isNotBlank(coverage)
-        && covList.contains("A0004520")) {
+        && covList.contains(coverage)) {
       details.append("Setting Isu ctc to 28-7 based on coverage.");
       overrides.addOverride(covElement.getProcessCode(), "DATA", "ISU_CD", data.getIsuCd(), "28");
       overrides.addOverride(covElement.getProcessCode(), "DATA", "CLIENT_TIER", data.getClientTier(), "7");
@@ -450,16 +450,17 @@ public class AustriaUtil extends AutomationUtil {
       CoverageContainer container, boolean isCoverageCalculated) throws Exception {
     Data data = requestData.getData();
     String bgId = data.getBgId();
-    String gbgId = "GB000K4L";
+    String gbgId = data.getGbgId();
     String country = data.getCmrIssuingCntry();
     String sql = ExternalizedQuery.getSql("QUERY.GET_GBG_FROM_LOV");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("CD", gbgId);
     query.setParameter("COUNTRY", country);
     query.setForReadOnly(true);
-    List<Object[]> result = query.getResults();
-    System.out.println("------------------performCoverageBasedOnGBG-------------");
+    String result = query.getSingleResult(String.class);
+    LOG.debug("------------------performCoverageBasedOnGBG-------------");
     if (result != null) {
+      LOG.debug("Setting isu ctc to 34Y based on gbg matching.");
       details.append("Setting isu ctc to 34Y based on gbg matching.");
       overrides.addOverride(covElement.getProcessCode(), "DATA", "ISU_CD", data.getIsuCd(), "34");
       overrides.addOverride(covElement.getProcessCode(), "DATA", "CLIENT_TIER", data.getClientTier(), "Y");

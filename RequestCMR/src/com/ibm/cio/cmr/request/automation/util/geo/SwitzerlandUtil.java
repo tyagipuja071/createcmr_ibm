@@ -459,7 +459,7 @@ public class SwitzerlandUtil extends AutomationUtil {
     LOG.debug("Setting isu ctc to 28-7 for matched coverage from list");
     System.out.println("sortl--------------------" + data.getSearchTerm() + "coverage---" + coverage);
     if ((SCENARIO_COMMERCIAL.equals(actualScenario) || SCENARIO_GOVERNMENT.equals(actualScenario)) && StringUtils.isNotBlank(coverage)
-        && covList.contains("A0004520")) {
+        && covList.contains(coverage)) {
       LOG.debug("Setting isu ctc to 28-7 based on coverage mapping.");
       details.append("Setting isu ctc to 287 based on coverage mapping.");
       overrides.addOverride(covElement.getProcessCode(), "DATA", "ISU_CD", data.getIsuCd(), "28");
@@ -558,18 +558,19 @@ public class SwitzerlandUtil extends AutomationUtil {
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData, String covFrom,
       CoverageContainer container, boolean isCoverageCalculated) throws Exception {
     Data data = requestData.getData();
-    String bgId = data.getGbgId();
-    String gbgId = "GB000K4L";
+    String bgId = data.getBgId();
+    String gbgId = data.getGbgId();
     String country = data.getCmrIssuingCntry();
     String sql = ExternalizedQuery.getSql("QUERY.GET_GBG_FROM_LOV");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("CD", gbgId);
     query.setParameter("COUNTRY", country);
     query.setForReadOnly(true);
-    List<Object[]> result = query.getResults();
-    System.out.println("------------------performCoverageBasedOnGBG-------------");
+    String result = query.getSingleResult(String.class);
+    LOG.debug("------------------performCoverageBasedOnGBG-------------");
     if (result != null) {
-      details.append("Setting isu ctc to 34Y based on gbg matching.");
+      LOG.debug("Setting isu-ctc to 34Y and sortl based on gbg matching.");
+      details.append("Setting isu-ctc to 34Y and sortl based on gbg matching.");
       overrides.addOverride(covElement.getProcessCode(), "DATA", "ISU_CD", data.getIsuCd(), "34");
       overrides.addOverride(covElement.getProcessCode(), "DATA", "CLIENT_TIER", data.getClientTier(), "Y");
       overrides.addOverride(covElement.getProcessCode(), "DATA", "SORTL", data.getSearchTerm(), "T0007971");
