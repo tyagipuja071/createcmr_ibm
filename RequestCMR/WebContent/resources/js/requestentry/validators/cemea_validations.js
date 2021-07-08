@@ -1752,7 +1752,7 @@ function setSBOValuesForIsuCtc() {
       qParams = {
         _qall : 'Y',
         ISSUING_CNTRY : cntry,
-        ISU : '%' + isuCd + clientTier + '%',
+        ISU : '%' + isuCtc + '%',
         UPDATE_BY_ID : '%' + ims.substring(0, 1) + '%'
       };
       results = cmr.query('GET.SBOLIST.BYISUCTC', qParams);

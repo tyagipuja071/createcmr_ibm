@@ -87,7 +87,8 @@ function setSboOnIMS(postCd, subIndustryCd, clientTier) {
   var clientTier = FormManager.getActualValue('clientTier');
 
   var result = cmr.query('DE.GET.SORTL_BY_ISUCTCIMS', {
-    ISU_CD : '34Q',
+    ISU_CD : '34',
+    CLIENT_TIER : 'Q',
     IMS : '%' + ims + '%'
   });
 
