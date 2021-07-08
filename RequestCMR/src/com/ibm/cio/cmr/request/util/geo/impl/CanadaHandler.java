@@ -147,7 +147,7 @@ public class CanadaHandler extends GEOHandler {
     data.setSectorCd(mainRecord.getCmrTaxExemptReas());
     data.setTaxPayerCustCd(mainRecord.getCmrLicNo());
     data.setVatExempt(mainRecord.getCmrTaxExInd());
-    data.setTaxCd3(mainRecord.getCmrQstNo());
+    data.setTaxCd3("NO_VALUE_RETRIEVED".equals(mainRecord.getCmrQstNo()) ? "" : mainRecord.getCmrQstNo());
     data.setVat(mainRecord.getCmrBusinessReg());
     data.setAbbrevNm(mainRecord.getCmrShortName());
     data.setAbbrevLocn(mainRecord.getCmrDataLine());
@@ -166,6 +166,7 @@ public class CanadaHandler extends GEOHandler {
     } else {
       data.setCollectorNameNo("");
     }
+    setLocationNumber(data, mainRecord.getCmrCountryLanded(), mainRecord.getCmrState());
   }
 
   @Override
@@ -426,8 +427,7 @@ public class CanadaHandler extends GEOHandler {
    */
   private void setAddressRelatedData(EntityManager entityManager, Admin admin, Data data, Addr zs01) {
     Addr mainAddr = zs01;
-    List<String> caribNorthDistCntries = Arrays.asList("AG", "AI", "AW", "BS", "BB", "BM", "BQ", "BV", "CW", "DM", "DO", "GD", "GP", "GY", "HT", "KN",
-        "KY", "JM", "LC", "MQ", "MS", "PR", "SR", "SX", "TC", "TT", "VC", "VG");
+
     if (mainAddr == null) {
       // reuse italy's ZS01
       String sql = ExternalizedQuery.getSql("ITALY.GETINSTALLING");
@@ -445,95 +445,7 @@ public class CanadaHandler extends GEOHandler {
     }
 
     // set location number based on state/prov
-    if ("CA".equals(mainAddr.getLandCntry()) && !("USA".equals(data.getCustSubGrp()) || "CND".equals(data.getCustSubGrp()))) {
-      if ("AB".equals(mainAddr.getStateProv())) {
-        data.setLocationNumber("01999");
-      } else if ("BC".equals(mainAddr.getStateProv())) {
-        data.setLocationNumber("02999");
-      } else if ("MB".equals(mainAddr.getStateProv())) {
-        data.setLocationNumber("03999");
-      } else if ("NB".equals(mainAddr.getStateProv())) {
-        data.setLocationNumber("04999");
-      } else if ("NL".equals(mainAddr.getStateProv()) || "NF".equals(mainAddr.getStateProv())) {
-        data.setLocationNumber("05999");
-      } else if ("NT".equals(mainAddr.getStateProv())) {
-        data.setLocationNumber("06999");
-      } else if ("NS".equals(mainAddr.getStateProv())) {
-        data.setLocationNumber("07999");
-      } else if ("ON".equals(mainAddr.getStateProv())) {
-        data.setLocationNumber("08999");
-      } else if ("PE".equals(mainAddr.getStateProv())) {
-        data.setLocationNumber("09999");
-      } else if ("QC".equals(mainAddr.getStateProv())) {
-        data.setLocationNumber("10999");
-      } else if ("SK".equals(mainAddr.getStateProv())) {
-        data.setLocationNumber("11999");
-      } else if ("YT".equals(mainAddr.getStateProv())) {
-        data.setLocationNumber("12999");
-      } else if ("NU".equals(mainAddr.getStateProv())) {
-        data.setLocationNumber("13999");
-      }
-    } else if (caribNorthDistCntries.contains(mainAddr.getLandCntry())) {
-      if (("AG").equals(mainAddr.getLandCntry())) {
-        data.setLocationNumber("AG000");
-      } else if (("AI").equals(mainAddr.getLandCntry())) {
-        data.setLocationNumber("AI000");
-      } else if (("AW").equals(mainAddr.getLandCntry())) {
-        data.setLocationNumber("AW000");
-      } else if (("BS").equals(mainAddr.getLandCntry())) {
-        data.setLocationNumber("BS000");
-      } else if (("BB").equals(mainAddr.getLandCntry())) {
-        data.setLocationNumber("BB000");
-      } else if (("BM").equals(mainAddr.getLandCntry())) {
-        data.setLocationNumber("BM000");
-      } else if (("BQ").equals(mainAddr.getLandCntry())) {
-        data.setLocationNumber("BQ000");
-      } else if (("BV").equals(mainAddr.getLandCntry())) {
-        data.setLocationNumber("BV000");
-      } else if (("CW").equals(mainAddr.getLandCntry())) {
-        data.setLocationNumber("CW000");
-      } else if (("DM").equals(mainAddr.getLandCntry())) {
-        data.setLocationNumber("DM000");
-      } else if (("DO").equals(mainAddr.getLandCntry())) {
-        data.setLocationNumber("DO000");
-      } else if (("GD").equals(mainAddr.getLandCntry())) {
-        data.setLocationNumber("GD000");
-      } else if (("GP").equals(mainAddr.getLandCntry())) {
-        data.setLocationNumber("GP000");
-      } else if (("GY").equals(mainAddr.getLandCntry())) {
-        data.setLocationNumber("GY000");
-      } else if (("HT").equals(mainAddr.getLandCntry())) {
-        data.setLocationNumber("HT000");
-      } else if (("KN").equals(mainAddr.getLandCntry())) {
-        data.setLocationNumber("KN000");
-      } else if (("KY").equals(mainAddr.getLandCntry())) {
-        data.setLocationNumber("KY000");
-      } else if (("JM").equals(mainAddr.getLandCntry())) {
-        data.setLocationNumber("JM000");
-      } else if (("LC").equals(mainAddr.getLandCntry())) {
-        data.setLocationNumber("LC000");
-      } else if (("MQ").equals(mainAddr.getLandCntry())) {
-        data.setLocationNumber("MQ000");
-      } else if (("MS").equals(mainAddr.getLandCntry())) {
-        data.setLocationNumber("MS000");
-      } else if (("PR").equals(mainAddr.getLandCntry())) {
-        data.setLocationNumber("PR000");
-      } else if (("SR").equals(mainAddr.getLandCntry())) {
-        data.setLocationNumber("SR000");
-      } else if (("SX").equals(mainAddr.getLandCntry())) {
-        data.setLocationNumber("SX000");
-      } else if (("TC").equals(mainAddr.getLandCntry())) {
-        data.setLocationNumber("TC000");
-      } else if (("TT").equals(mainAddr.getLandCntry())) {
-        data.setLocationNumber("TT000");
-      } else if (("VC").equals(mainAddr.getLandCntry())) {
-        data.setLocationNumber("VC000");
-      } else if (("VG").equals(mainAddr.getLandCntry())) {
-        data.setLocationNumber("VG000");
-      }
-    } else if ("USA".equals(data.getCustSubGrp())) {
-      data.setLocationNumber("99999");
-    }
+    setLocationNumber(data, mainAddr.getLandCntry(), mainAddr.getStateProv());
 
     // set CS Branch to first 3 digits of postal code
     if (mainAddr.getPostCd() != null && mainAddr.getPostCd().length() >= 3) {
@@ -554,6 +466,101 @@ public class CanadaHandler extends GEOHandler {
     }
 
     entityManager.merge(data);
+  }
+
+  private void setLocationNumber(Data data, String landedCntry, String stateProv) {
+    List<String> caribNorthDistCntries = Arrays.asList("AG", "AI", "AW", "BS", "BB", "BM", "BQ", "BV", "CW", "DM", "DO", "GD", "GP", "GY", "HT", "KN",
+        "KY", "JM", "LC", "MQ", "MS", "PR", "SR", "SX", "TC", "TT", "VC", "VG");
+
+    if ("CA".equals(landedCntry) && !("USA".equals(data.getCustSubGrp()) || "CND".equals(data.getCustSubGrp()))) {
+      if ("AB".equals(stateProv)) {
+        data.setLocationNumber("01999");
+      } else if ("BC".equals(stateProv)) {
+        data.setLocationNumber("02999");
+      } else if ("MB".equals(stateProv)) {
+        data.setLocationNumber("03999");
+      } else if ("NB".equals(stateProv)) {
+        data.setLocationNumber("04999");
+      } else if ("NL".equals(stateProv) || "NF".equals(stateProv)) {
+        data.setLocationNumber("05999");
+      } else if ("NT".equals(stateProv)) {
+        data.setLocationNumber("06999");
+      } else if ("NS".equals(stateProv)) {
+        data.setLocationNumber("07999");
+      } else if ("ON".equals(stateProv)) {
+        data.setLocationNumber("08999");
+      } else if ("PE".equals(stateProv)) {
+        data.setLocationNumber("09999");
+      } else if ("QC".equals(stateProv)) {
+        data.setLocationNumber("10999");
+      } else if ("SK".equals(stateProv)) {
+        data.setLocationNumber("11999");
+      } else if ("YT".equals(stateProv)) {
+        data.setLocationNumber("12999");
+      } else if ("NU".equals(stateProv)) {
+        data.setLocationNumber("13999");
+      }
+    } else if (caribNorthDistCntries.contains(landedCntry)) {
+      if (("AG").equals(landedCntry)) {
+        data.setLocationNumber("AG000");
+      } else if (("AI").equals(landedCntry)) {
+        data.setLocationNumber("AI000");
+      } else if (("AW").equals(landedCntry)) {
+        data.setLocationNumber("AW000");
+      } else if (("BS").equals(landedCntry)) {
+        data.setLocationNumber("BS000");
+      } else if (("BB").equals(landedCntry)) {
+        data.setLocationNumber("BB000");
+      } else if (("BM").equals(landedCntry)) {
+        data.setLocationNumber("BM000");
+      } else if (("BQ").equals(landedCntry)) {
+        data.setLocationNumber("BQ000");
+      } else if (("BV").equals(landedCntry)) {
+        data.setLocationNumber("BV000");
+      } else if (("CW").equals(landedCntry)) {
+        data.setLocationNumber("CW000");
+      } else if (("DM").equals(landedCntry)) {
+        data.setLocationNumber("DM000");
+      } else if (("DO").equals(landedCntry)) {
+        data.setLocationNumber("DO000");
+      } else if (("GD").equals(landedCntry)) {
+        data.setLocationNumber("GD000");
+      } else if (("GP").equals(landedCntry)) {
+        data.setLocationNumber("GP000");
+      } else if (("GY").equals(landedCntry)) {
+        data.setLocationNumber("GY000");
+      } else if (("HT").equals(landedCntry)) {
+        data.setLocationNumber("HT000");
+      } else if (("KN").equals(landedCntry)) {
+        data.setLocationNumber("KN000");
+      } else if (("KY").equals(landedCntry)) {
+        data.setLocationNumber("KY000");
+      } else if (("JM").equals(landedCntry)) {
+        data.setLocationNumber("JM000");
+      } else if (("LC").equals(landedCntry)) {
+        data.setLocationNumber("LC000");
+      } else if (("MQ").equals(landedCntry)) {
+        data.setLocationNumber("MQ000");
+      } else if (("MS").equals(landedCntry)) {
+        data.setLocationNumber("MS000");
+      } else if (("PR").equals(landedCntry)) {
+        data.setLocationNumber("PR000");
+      } else if (("SR").equals(landedCntry)) {
+        data.setLocationNumber("SR000");
+      } else if (("SX").equals(landedCntry)) {
+        data.setLocationNumber("SX000");
+      } else if (("TC").equals(landedCntry)) {
+        data.setLocationNumber("TC000");
+      } else if (("TT").equals(landedCntry)) {
+        data.setLocationNumber("TT000");
+      } else if (("VC").equals(landedCntry)) {
+        data.setLocationNumber("VC000");
+      } else if (("VG").equals(landedCntry)) {
+        data.setLocationNumber("VG000");
+      }
+    } else if ("USA".equals(data.getCustSubGrp())) {
+      data.setLocationNumber("99999");
+    }
   }
 
   /**
