@@ -4,6 +4,7 @@ import javax.persistence.EntityManager;
 
 import org.apache.log4j.Logger;
 
+import com.ibm.cio.cmr.request.automation.ActionOnError;
 import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
@@ -61,6 +62,7 @@ public class FieldComputationElement extends OverridingElement {
       results = result;
       if (result.getResults() != null && "Requester check fail".equals(result.getResults())) {
         super.setStopOnError(true);
+        super.setActionOnError(ActionOnError.fromCode("R"));
       }
       results.setResults(result.getResults());
       results.setProcessOutput(result.getProcessOutput());
