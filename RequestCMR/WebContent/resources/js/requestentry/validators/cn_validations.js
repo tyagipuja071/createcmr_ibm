@@ -158,7 +158,7 @@ function setInacBySearchTerm() {
   var searchTerm = FormManager.getActualValue('searchTerm');
   if ((searchTerm == '04687' || searchTerm == '04488' || searchTerm == '04630' || searchTerm == '04472' || searchTerm == '04474' || searchTerm == '04480' || searchTerm == '04484'
       || searchTerm == '04486' || searchTerm == '04491' || searchTerm == '04493' || searchTerm == '04495' || searchTerm == '04497' || searchTerm == '04499' || searchTerm == '04502'
-      || searchTerm == '04629' || searchTerm == '04689' || searchTerm == '04489')) {
+      || searchTerm == '04629' || searchTerm == '04689' || searchTerm == '04489'|| searchTerm == '04747' || searchTerm == '04748' || searchTerm == '04749')) {
     FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('inacType', Validators.REQUIRED, [ 'INAC Type' ], 'MAIN_IBM_TAB');
     var qParams = {
@@ -227,7 +227,7 @@ function setIsuOnIsic() {
   var searchTerm = FormManager.getActualValue('searchTerm');
   if (!(searchTerm == '04687' || searchTerm == '04488' || searchTerm == '04630' || searchTerm == '04472' || searchTerm == '04474' || searchTerm == '04480' || searchTerm == '04484'
       || searchTerm == '04486' || searchTerm == '04491' || searchTerm == '04493' || searchTerm == '04495' || searchTerm == '04497' || searchTerm == '04499' || searchTerm == '04502'
-      || searchTerm == '04629' || searchTerm == '04689' || searchTerm == '04489')) {
+      || searchTerm == '04629' || searchTerm == '04689' || searchTerm == '04489' || searchTerm == '04747' || searchTerm == '04748' || searchTerm == '04749')) {
     return;
   }
 
@@ -271,7 +271,7 @@ function onInacTypeChange() {
             var inacCdValue = [];
             if(searchTerm == '04687' || searchTerm == '04488' || searchTerm == '04630' || searchTerm == '04472' || searchTerm == '04474' || searchTerm == '04480' || searchTerm == '04484'
               || searchTerm == '04486' || searchTerm == '04491' || searchTerm == '04493' || searchTerm == '04495' || searchTerm == '04497' || searchTerm == '04499' || searchTerm == '04502'
-                || searchTerm == '04629' || searchTerm == '04689' || searchTerm == '04489') {
+                || searchTerm == '04629' || searchTerm == '04689' || searchTerm == '04489'  || searchTerm == '04747' || searchTerm == '04748' || searchTerm == '04749') {
               var qParams = {
               _qall : 'Y',
               ISSUING_CNTRY : cntry ,
