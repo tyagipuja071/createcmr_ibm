@@ -1518,6 +1518,7 @@ function checkIfFinalDnBCheckRequired() {
 
 function matchDnBForAutomationCountries() {
   var reqId = FormManager.getActualValue('reqId');
+  var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
   console.log("Checking if the request matches D&B...");
   var nm1 = _pagemodel.mainCustNm1 == null ? '' : _pagemodel.mainCustNm1;
   var nm2 = _pagemodel.mainCustNm2 == null ? '' : _pagemodel.mainCustNm2;
