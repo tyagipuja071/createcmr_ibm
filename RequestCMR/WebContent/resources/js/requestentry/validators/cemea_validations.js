@@ -1744,6 +1744,8 @@ function setSBOValuesForIsuCtc() {
   var ims = FormManager.getActualValue('subIndustryCd');
   var isuCtc = isuCd + clientTier;
   var qParams = null;
+  var enterprises = [];
+
   // SBO will be based on IMS
   if (isuCd != '') {
     var results = null;
