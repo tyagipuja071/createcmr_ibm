@@ -402,6 +402,12 @@ public class SwitzerlandUtil extends AutomationUtil {
     String scenario = data.getCustSubGrp();
     LOG.info("Starting coverage calculations for Request ID " + requestData.getData().getId().getReqId());
     String actualScenario = scenario.substring(2);
+    String coverageId = container.getFinalCoverage();
+    String coverage = data.getSearchTerm();
+    LOG.debug("coverageId--------------------" + container.getFinalCoverage());
+    LOG.debug("sortl--------------------" + coverage);
+
+    List<String> covList = Arrays.asList("A0004520", "A0004515", "A0004541", "A0004580");
 
     // ChMubotyMapping muboty = null;
     String sortl = null;
@@ -416,7 +422,7 @@ public class SwitzerlandUtil extends AutomationUtil {
       sortl = getSortlForISUCTC(entityManager, data.getSubIndustryCd(), soldTo.getPostCd(), data.getIsuCd(), data.getClientTier());
       break;
     default:
-      if ("32".equals(data.getIsuCd()) && ("S".equals(data.getClientTier()) || "N".equals(data.getClientTier())) && !isCoverageCalculated) {
+      if ("34".equals(data.getIsuCd()) && ("Q".equals(data.getClientTier())) && !isCoverageCalculated) {
         if (SCENARIO_CROSS_BORDER.equals(scenario)) {
           // verified all logic is based on 3000-9999 condition for crossborders
           sortl = getSortlForISUCTC(entityManager, data.getSubIndustryCd(), "3000", data.getIsuCd(), data.getClientTier());
@@ -428,6 +434,7 @@ public class SwitzerlandUtil extends AutomationUtil {
       }
     }
 
+    LOG.debug("----CovId()+Coverage--" + data.getCovId());
     if (sortl != null) {
       details.append("Setting SORTL to " + sortl + " based on Postal Code rules.");
       overrides.addOverride(covElement.getProcessCode(), "DATA", "SEARCH_TERM", data.getSearchTerm(), sortl);
@@ -449,6 +456,15 @@ public class SwitzerlandUtil extends AutomationUtil {
       }
     }
 
+    LOG.debug("Before Setting isu ctc to 28-7 for matched coverage from list");
+    System.out.println("sortl--------------------" + data.getSearchTerm() + "coverage---" + coverage);
+    if ((SCENARIO_COMMERCIAL.equals(actualScenario) || SCENARIO_GOVERNMENT.equals(actualScenario)) && StringUtils.isNotBlank(coverage)
+        && covList.contains(coverage)) {
+      LOG.debug("Setting isu ctc to 28-7 based on coverage mapping.");
+      details.append("Setting isu ctc to 287 based on coverage mapping.");
+      overrides.addOverride(covElement.getProcessCode(), "DATA", "ISU_CD", data.getIsuCd(), "28");
+      overrides.addOverride(covElement.getProcessCode(), "DATA", "CLIENT_TIER", data.getClientTier(), "7");
+    }
     return true;
   }
 
@@ -507,7 +523,7 @@ public class SwitzerlandUtil extends AutomationUtil {
         subIndustryCd = "";
       }
 
-      if (StringUtils.isNotBlank(postCd) && "32".equals(isuCd) && StringUtils.isNumeric(postCd)) {
+      if (StringUtils.isNotBlank(postCd) && "34".equals(isuCd) && StringUtils.isNumeric(postCd)) {
         int postalCode = Integer.parseInt(postCd);
         if (postalCode >= 3000) {
           // postCd=2 represents the 2nd range which is 3000 to 9999
@@ -515,6 +531,7 @@ public class SwitzerlandUtil extends AutomationUtil {
         } else {
           // postCd=1 represents the 1st range which is 1000 to 2999
           postCd = "1";
+          subIndustryCd = "";
         }
       } else {
         postCd = "";
@@ -534,6 +551,35 @@ public class SwitzerlandUtil extends AutomationUtil {
       }
     }
     return null;
+  }
+
+  @Override
+  public void performCoverageBasedOnGBG(CalculateCoverageElement covElement, EntityManager entityManager, AutomationResult<OverrideOutput> results,
+      StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData, String covFrom,
+      CoverageContainer container, boolean isCoverageCalculated) throws Exception {
+    Data data = requestData.getData();
+    String bgId = data.getBgId();
+    String gbgId = data.getGbgId();
+    String country = data.getCmrIssuingCntry();
+    String sql = ExternalizedQuery.getSql("QUERY.GET_GBG_FROM_LOV");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CD", gbgId);
+    query.setParameter("COUNTRY", country);
+    query.setForReadOnly(true);
+    String result = query.getSingleResult(String.class);
+    LOG.debug("perform coverage based on GBG");
+    LOG.debug("result--------" + result);
+    if (result != null || bgId.equals("DB500JRX")) {
+      LOG.debug("Setting isu-ctc to 34Y and sortl based on gbg matching.");
+      details.append("Setting isu-ctc to 34Y and sortl based on gbg matching.");
+      overrides.addOverride(covElement.getProcessCode(), "DATA", "ISU_CD", data.getIsuCd(), "34");
+      overrides.addOverride(covElement.getProcessCode(), "DATA", "CLIENT_TIER", data.getClientTier(), "Y");
+      overrides.addOverride(covElement.getProcessCode(), "DATA", "SEARCH_TERM", data.getSearchTerm(), "T0007971");
+    }
+
+    LOG.debug("isu" + data.getIsuCd());
+    LOG.debug("client tier" + data.getClientTier());
+    LOG.debug("sortl" + data.getSearchTerm());
   }
 
   @Override

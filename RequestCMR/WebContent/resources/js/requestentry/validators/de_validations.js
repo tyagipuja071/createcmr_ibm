@@ -6,6 +6,8 @@ var _vatExemptHandler = null;
 var _scenarioSubTypeHandler = null;
 var _deClientTierHandler = null;
 var _reqReasonHandler = null;
+var _ISUHandler = null;
+var _IMSHandler = null;
 
 function afterConfigForDE() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
@@ -36,10 +38,23 @@ function afterConfigForDE() {
     _deClientTierHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
       if (FormManager.getActualValue('reqType') == 'C') {
         setISUValues(value);
+        setSboOnIMS();
       }
       // else if (FormManager.getActualValue('reqType') == 'U') {
       // setISUValuesOnUpdate(value);
       // }
+    });
+  }
+
+  if (_ISUHandler == null) {
+    _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+      setSboOnIMS(value);
+    });
+  }
+
+  if (_IMSHandler == null) {
+    _IMSHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
+      setSboOnIMS();
     });
   }
 
@@ -60,6 +75,33 @@ function afterConfigForDE() {
 
   // Disable address copying for GERMANY
   GEOHandler.disableCopyAddress();
+}
+
+function setSboOnIMS(postCd, subIndustryCd, clientTier) {
+  if (FormManager.getActualValue('reqType') != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var ims = FormManager.getActualValue('subIndustryCd').substring(0, 1);
+  var clientTier = FormManager.getActualValue('clientTier');
+
+  var result = cmr.query('DE.GET.SORTL_BY_ISUCTCIMS', {
+    ISU_CD : '34',
+    CLIENT_TIER : 'Q',
+    IMS : '%' + ims + '%'
+  });
+
+  if (result != null && Object.keys(result).length > 0 && result.ret1) {
+    FormManager.setValue('searchTerm', result.ret1);
+    if (role == 'REQUESTER') {
+      FormManager.readOnly('searchTerm');
+    }
+  } else {
+    FormManager.clearValue('searchTerm');
+    FormManager.enable('searchTerm');
+  }
+
 }
 
 function autoSetIBMDeptCostCenter() {
@@ -160,6 +202,8 @@ function setISUValues(value) {
       isuValues = [ '21' ];
     } else if (value == 'V') {
       isuValues = [ '34', '60' ];
+    } else if (value == 'Q') {
+      isuValues = [ '34' ];
     } else {
       if (PageManager.isReadOnly()) {
         FormManager.readOnly('isuCd');
@@ -271,8 +315,7 @@ function ADDRESS_GRID_showCheck(value, rowIndex, grid) {
 
 function disableAutoProcForProcessor() {
   var _custSubGrp = FormManager.getActualValue('custSubGrp');
-  if (_pagemodel.userRole.toUpperCase() == "PROCESSOR" && FormManager.getActualValue('reqType') == 'C' && _custSubGrp != 'undefined'
-      && _custSubGrp != '' && _custSubGrp == 'BUSPR') {
+  if (_pagemodel.userRole.toUpperCase() == "PROCESSOR" && FormManager.getActualValue('reqType') == 'C' && _custSubGrp != 'undefined' && _custSubGrp != '' && _custSubGrp == 'BUSPR') {
     FormManager.show('DisableAutoProcessing', 'disableAutoProc');
     FormManager.enable('disableAutoProc');
     FormManager.getField('disableAutoProc').checked = false;
@@ -408,8 +451,7 @@ function validateAddressTypeForScenario() {
             scenarioDesc = 'IBM Employee';
           }
           if (Number(count) >= 1) {
-            return new ValidationResult(null, false, 'Only Sold To Address is allowed for ' + scenarioDesc
-                + ' scenario. Please remove other addresses.');
+            return new ValidationResult(null, false, 'Only Sold To Address is allowed for ' + scenarioDesc + ' scenario. Please remove other addresses.');
           } else {
             return new ValidationResult(null, true);
           }
@@ -466,8 +508,7 @@ function setAbbrevNameDEUpdate(cntry, addressMode, saving, finalSave, force) {
     var currCustNm = FormManager.getActualValue('custNm1');
 
     var addrType = FormManager.getActualValue('addrType');
-    if ((zs01Reccount == '' || (zs01Reccount != '' && Number(zs01Reccount) == 0))
-        && (oldCustNm != undefined && oldCustNm != '' && currCustNm != '' && currCustNm != oldCustNm)) {
+    if ((zs01Reccount == '' || (zs01Reccount != '' && Number(zs01Reccount) == 0)) && (oldCustNm != undefined && oldCustNm != '' && currCustNm != '' && currCustNm != oldCustNm)) {
       FormManager.setValue('abbrevNm', FormManager.getActualValue('custNm1').substring(0, 30));
     }
   }
@@ -791,4 +832,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(lockIBMTabForDE, GEOHandler.DE);
   GEOHandler.registerValidator(validateDeptAttnBldg, GEOHandler.DE, null, true);
   GEOHandler.addAfterConfig(setAddressDetailsForView, SysLoc.GERMANY);
+  GEOHandler.addAfterTemplateLoad(setSboOnIMS, GEOHandler.DE);
 });
