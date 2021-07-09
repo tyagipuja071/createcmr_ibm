@@ -558,7 +558,7 @@ function lockAbbrv() {
     }
   }
 }
-
+ var _CTCHandlerMT = null;
 function enterpriseMalta() {
   var reqType = FormManager.getActualValue('reqType').toUpperCase();
   var role = FormManager.getActualValue('userRole').toUpperCase();
@@ -578,6 +578,20 @@ function enterpriseMalta() {
     FormManager.readOnly('enterprise');
   } else {
     FormManager.enable('enterprise');
+  }
+  
+  if (_CTCHandlerMT == null) {
+    _CTCHandlerMT = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
+      if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.MALTA) {
+        if (FormManager.getActualValue('isuCd') == '34' && FormManager.getActualValue('clientTier') == 'Y') {
+          FormManager.setValue('enterprise', '985205');
+          FormManager.setValue('salesBusOffCd', '0010');
+        } else if (FormManager.getActualValue('isuCd') == '34' && FormManager.getActualValue('clientTier') == 'Q') {
+          FormManager.setValue('enterprise', '985204');
+          FormManager.setValue('salesBusOffCd', '0010');
+        }
+      }
+    });
   }
 
 }
