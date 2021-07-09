@@ -1027,11 +1027,7 @@ public class CEMEAHandler extends BaseSOFHandler {
       // Austria - For SBO values exceeding 3 char length
       // CMR-2053 add SR value get from DNB search
       if (!(StringUtils.isEmpty(mainRecord.getCmrSortl()))) {
-        if (mainRecord.getCmrSortl().length() > 3) {
-          data.setSalesBusOffCd(mainRecord.getCmrSortl().substring(0, 3));
-        } else {
-          data.setSalesBusOffCd(mainRecord.getCmrSortl());
-        }
+        data.setSalesBusOffCd(mainRecord.getCmrSortl());
       }
       if (!(StringUtils.isEmpty(mainRecord.getSR()))) {
         data.setRepTeamMemberNo(mainRecord.getSR());
