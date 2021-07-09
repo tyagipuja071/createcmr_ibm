@@ -52,6 +52,11 @@ function afterConfigPT() {
     FormManager.readOnly('cmrNo');
   }
 
+  if ((role == 'REQUESTER') && reqType != 'U') {
+    if (custSubGrp == 'CRINT') {
+      FormManager.readOnly('repTeamMemberNo');
+    }
+  }
 }
 
 function afterTemplateLoadPT() {
@@ -60,7 +65,15 @@ function afterTemplateLoadPT() {
   var addrType = FormManager.getActualValue('addrType');
   var city1 = FormManager.getActualValue('city1');
   var custGrp = FormManager.getActualValue('custGrp');
-
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var reqType = FormManager.getActualValue('reqType');
+  
+  if ((role == 'REQUESTER') && reqType != 'U') {
+    if (subCustGrp == 'CRINT') {
+      FormManager.readOnly('repTeamMemberNo');
+    }
+  }
+  
   if (custGrp != 'LOCAL') {
     return;
   }
@@ -116,6 +129,7 @@ function afterTemplateLoadPT() {
 }
 
 function addHandlersForPT() {
+  
   dojo.connect(FormManager.getField('postCd'), 'onChange', function(value) {
     var req = FormManager.getActualValue('reqType').toUpperCase();
     var role = FormManager.getActualValue('reqType').toUpperCase();
@@ -322,13 +336,13 @@ function addAddressTypeValidator() {
           } else if (zp01Cnt > 1) {
             return new ValidationResult(null, false, 'Only one Mailing address is allowed.');
           } /*
-             * else if (zi01Cnt > 1 && cntry != SysLoc.SPAIN) { return new
-             * ValidationResult(null, false, 'Only one Installing address is
-             * allowed.'); } else if (zd01Cnt > 1 && cntry != SysLoc.SPAIN &&
-             * FormManager.getActualValue('reqType') == 'C') { return new
-             * ValidationResult(null, false, 'Only one Shipping address is
-             * allowed for create requests.'); }
-             */else if (zs02Cnt > 1) {
+           * else if (zi01Cnt > 1 && cntry != SysLoc.SPAIN) { return new
+           * ValidationResult(null, false, 'Only one Installing address is
+           * allowed.'); } else if (zd01Cnt > 1 && cntry != SysLoc.SPAIN &&
+           * FormManager.getActualValue('reqType') == 'C') { return new
+           * ValidationResult(null, false, 'Only one Shipping address is
+           * allowed for create requests.'); }
+           */else if (zs02Cnt > 1) {
             return new ValidationResult(null, false, 'Only one EPL address is allowed.');
           }
           return new ValidationResult(null, true);
@@ -545,7 +559,7 @@ var _SalesRepHandler = null;
 var _LocNumHandler = null;
 var _vatExemptHandler = null;
 var _isicHandler = null;
-var _noISRLogicPT = new Set([ 'INTER', 'INTSO', 'ININV', 'IBMEM' ]);
+var _noISRLogicPT = new Set([ 'BUSPR', 'INTER', 'INTSO', 'ININV', 'IBMEM', 'XBP' ]);
 var _noISRLogicES = new Set([ 'INTER', 'INTSO', 'XINTR', 'XINSO' ]);
 function addHandlersForPTES() {
   if (_ISUHandler == null) {
@@ -623,7 +637,7 @@ function setClientTierValues(value) {
     } else if (value == '21' || value == '60') {
       tierValues = [ '7' ];
     } else if (value == '34') {
-      tierValues = [ 'V', '6', 'A', 'Q', 'Z' ];
+      tierValues = [ 'V', '6', 'A', 'Q', 'Y', 'Z' ];
     }
   } else if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.SPAIN) {
     if (value == '34') {
