@@ -569,7 +569,7 @@ public class SwitzerlandUtil extends AutomationUtil {
     String result = query.getSingleResult(String.class);
     LOG.debug("perform coverage based on GBG");
     LOG.debug("result--------" + result);
-    if (result != null && bgId.equals("DB500JRX")) {
+    if (result != null || bgId.equals("DB500JRX")) {
       LOG.debug("Setting isu-ctc to 34Y and sortl based on gbg matching.");
       details.append("Setting isu-ctc to 34Y and sortl based on gbg matching.");
       overrides.addOverride(covElement.getProcessCode(), "DATA", "ISU_CD", data.getIsuCd(), "34");
