@@ -460,7 +460,7 @@ public class AustriaUtil extends AutomationUtil {
     String result = query.getSingleResult(String.class);
     LOG.debug("perform coverage based on GBG-------------");
     LOG.debug("result--------" + result);
-    if (result != null && bgId.equals("DB500JRX")) {
+    if (result != null || bgId.equals("DB500JRX")) {
       LOG.debug("Setting isu ctc to 34Y based on gbg matching.");
       details.append("Setting isu ctc to 34Y based on gbg matching.");
       overrides.addOverride(covElement.getProcessCode(), "DATA", "ISU_CD", data.getIsuCd(), "34");
