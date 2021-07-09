@@ -1497,15 +1497,19 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
     DuplicateCMRCheckRequest request = new DuplicateCMRCheckRequest();
     if (addr != null) {
       request.setIssuingCountry(data.getCmrIssuingCntry());
-      request.setLandedCountry(addr.getLandCntry());
       GEOHandler handler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
       if (handler != null && !handler.customerNamesOnAddress()) {
         request.setCustomerName(admin.getMainCustNm1() + (StringUtils.isBlank(admin.getMainCustNm2()) ? "" : " " + admin.getMainCustNm2()));
       } else {
         request.setCustomerName(addr.getCustNm1() + (StringUtils.isBlank(addr.getCustNm2()) ? "" : " " + addr.getCustNm2()));
       }
-      request.setStreetLine1(addr.getAddrTxt());
-      request.setStreetLine2(StringUtils.isEmpty(addr.getAddrTxt2()) ? "" : addr.getAddrTxt2());
+
+      if (data.getCustSubGrp() != null && ("PRIV".equals(data.getCustSubGrp()) || "INTER".equals(data.getCustSubGrp()))) {
+        request.setLandedCountry(addr.getLandCntry());
+        request.setStreetLine1(addr.getAddrTxt());
+        request.setStreetLine2(StringUtils.isEmpty(addr.getAddrTxt2()) ? "" : addr.getAddrTxt2());
+      }
+
       // request.setCity(addr.getCity1()); //
 
       // request.setStateProv(addr.getStateProv()); //
