@@ -5332,27 +5332,6 @@ function replaceAndSymbol(value) {
   }
   return modifiedVal;
 };
-function bgRuleIdValidator() {
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var officeCdList = [ 'CS', 'RT', 'GR', 'BB', 'BR', 'GC', 'CV', 'RR', 'BA', 'BI', 'GH', 'BM', 'C6', 'GA', 'CZ', 'CH', 'BF', 'CW', 'CI', 'BT', 'BX', 'GV', 'RW', 'GK', 'GS', 'BC', 'GN', 'BV',
-            'CP', 'CE', 'UD', 'YS', 'CY', 'JS', 'DK', 'JR', 'LG', 'LC', 'DT', 'LJ', 'DL', 'DE', 'DJ', 'JN', 'KV', 'KR', 'DQ', 'HP', 'GF', 'JH', 'GJ', 'KP', 'KA', 'KD', 'AA', 'RB', 'KL', 'KQ', 'AC',
-            'AL', 'AI', 'AE', 'AG', 'RG', 'JM', 'TL', 'LF', 'DS', 'JK', 'JF', 'JW', 'HM', 'JV', 'DA', 'DC', 'PZ', 'KF', 'JX', 'HH', 'LH', 'PS', 'CN', 'CG', 'CB', 'CC', 'CA', 'MC', 'SC', 'PJ', 'MF',
-            'PL', 'PR', 'AD', 'PV', 'PW', 'QR', 'QM', 'BD', 'BW', 'GG', 'BY', 'GD', 'BH', 'BG', 'CD', 'GX', 'FT', 'GL', 'GI', 'QE', 'GO', 'QI', 'SD', 'BL', 'HD' ];
-
-        var bgLDERule = FormManager.getActualValue('bgRuleId').trim();
-        var officeCd = FormManager.getActualValue('salesBusOffCd').toUpperCase();
-
-        if (officeCdList.includes(officeCd) && bgLDERule.length == 0) {
-          return new ValidationResult(null, false, 'BG LDE Rule should not be empty.');
-        } else {
-          return new ValidationResult(null, true);
-        }
-      }
-    };
-  })(), 'MAIN_IBM_TAB', 'frmCMR');
-}
 dojo.addOnLoad(function() {
   GEOHandler.JP = [ SysLoc.JAPAN ];
   console.log('adding JP functions...');
@@ -5432,7 +5411,6 @@ dojo.addOnLoad(function() {
   // GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(addressDuplicateValidator, GEOHandler.JP, null, true);
   GEOHandler.registerValidator(ROLValidatorForZC01, GEOHandler.JP, null, true);
-  GEOHandler.registerValidator(bgRuleIdValidator, GEOHandler.JP, null, true);
   // GEOHandler.registerValidator(addAddressRecordsValidatorJP, GEOHandler.JP,
   // GEOHandler.ROLE_PROCESSOR, true);
 
