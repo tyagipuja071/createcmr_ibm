@@ -564,6 +564,8 @@ function addHandlersForPTES() {
     _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
       setSalesRepValues(value);
       setEnterpriseValues(false);
+      setEnterpriseValues34Q();
+
     });
   }
 
