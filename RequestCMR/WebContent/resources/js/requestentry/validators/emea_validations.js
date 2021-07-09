@@ -62,6 +62,48 @@ function addHandlersForIL() {
   }
 }
 
+/*
+ * Set SR SBO Values based on Enterprise
+ */
+function setSrSboValuesOnEnterprise(enterprise) {
+  var reqType = FormManager.getActualValue('reqType');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var enterprise = FormManager.getActualValue('enterprise');
+
+  if (reqType != 'C') {
+    return;
+  }
+
+  var srlist = [];
+  var sbolist = [];
+  if (enterprise != '') {
+    var qParams = {
+      _qall : 'Y',
+      ISSUING_CNTRY : cntry,
+      SALES_BO_DESC : '%' + enterprise + '%'
+    };
+    var results = cmr.query('GET.SRSBOTLIST.BYENTR', qParams);
+    if (results != null) {
+      for (var i = 0; i < results.length; i++) {
+        srlist.push(results[i].ret1);
+        sbolist.push(results[i].ret2);
+      }
+      if (srlist != null) {
+        FormManager.limitDropdownValues(FormManager.getField('repTeamMemberNo'), srlist);
+        if (srlist.length >= 1) {
+          FormManager.setValue('repTeamMemberNo', srlist[0]);
+        }
+      }
+
+      if (sbolist != null) {
+        if (sbolist.length >= 1) {
+          FormManager.setValue('salesBusOffCd', sbolist[0]);
+        }
+      }
+    }
+  }
+}
+
 function countryScenarioProcessorRules() {
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.ISRAEL) {
     return true;
