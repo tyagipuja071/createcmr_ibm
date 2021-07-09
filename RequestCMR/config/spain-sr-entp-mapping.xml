@@ -265,7 +265,7 @@
 			1FICTI
 		</salesRep>
 		<scenario>
-			INTER, INTSO, BUSPR
+			COMME, IGSGS, PRICU, THDPT, THDIG, GOVRN, GOVIG, INTER, INTSO, BUSPR
 		</scenario>
 		<isicBelongs>
 			None
