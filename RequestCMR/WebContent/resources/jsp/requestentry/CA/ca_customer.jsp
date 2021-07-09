@@ -195,7 +195,7 @@
       <p>
         <label for="collectorNameNo"> 
           <cmr:fieldLabel fieldId="BillingProcCd" />: 
-          <cmr:delta text="${rdcdata.collectorNo}" oldValue="${reqentry.collectorNameNo}" />
+          <cmr:delta text="${rdcdata.sizeCd}" oldValue="${reqentry.sizeCd}" />
         </label>
         <cmr:field path="collectorNameNo" id="collectorNameNo" fieldId="BillingProcCd" tabId="MAIN_CUST_TAB" />
       </p>
@@ -220,9 +220,7 @@
       <p>
         <label for="locationNumber"> 
           <cmr:fieldLabel fieldId="LocationCode" />:
-          <%-- uncomment after DM changes or remap field 
           <cmr:delta text="${rdcdata.locationNumber}" oldValue="${reqentry.locationNumber}" />
-          --%>
         </label>
         <cmr:field path="locationNumber" id="locationNumber" fieldId="LocationCode" tabId="MAIN_CUST_TAB" />
       </p>
@@ -232,9 +230,7 @@
       <p>
         <label for="cusInvoiceCopies"> 
           <cmr:fieldLabel fieldId="InvoiceSplitCd" />:
-          <%-- uncomment after DM changes or remap field 
           <cmr:delta text="${rdcdata.cusInvoiceCopies}" oldValue="${reqentry.cusInvoiceCopies}" />
-          --%>
         </label>
         <cmr:field path="cusInvoiceCopies" id="cusInvoiceCopies" fieldId="InvoiceSplitCd" tabId="MAIN_CUST_TAB" />
       </p>

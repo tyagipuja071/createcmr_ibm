@@ -161,10 +161,13 @@ public class CanadaHandler extends GEOHandler {
     String mainRecBillFreq = mainRecord.getCmrBillPlnTyp();
     if (mainRecBillFreq.equals("YM")) {
       data.setCollectorNameNo("1");
+      data.setSizeCd(data.getCollectorNameNo());
     } else if (mainRecBillFreq.equals("YQ")) {
       data.setCollectorNameNo("3");
+      data.setSizeCd(data.getCollectorNameNo());
     } else {
       data.setCollectorNameNo("");
+      data.setSizeCd(data.getCollectorNameNo());
     }
     setLocationNumber(data, mainRecord.getCmrCountryLanded(), mainRecord.getCmrState());
   }
@@ -300,28 +303,21 @@ public class CanadaHandler extends GEOHandler {
       results.add(update);
     }
     // S/W Billing Frequency
-    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCollectorNo(), newData.getCollectorNameNo())) {
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getSizeCd(), newData.getSizeCd())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "BillingProcCd", "-"));
-      update.setNewData(newData.getCollectorNameNo());
-      update.setOldData(oldData.getCollectorNo());
+      update.setNewData(service.getCodeAndDescription(newData.getSizeCd(), "BillingProcCd", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getSizeCd(), "BillingProcCdr", cmrCountry));
       results.add(update);
     }
+
     // insert Customer Data here
     // Location/Province Code
-    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getLoc(), newData.getLocationNumber())) {
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getLocationNumber(), newData.getLocationNumber())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "LocationCode", "-"));
       update.setNewData(newData.getLocationNumber());
-      update.setOldData(oldData.getLoc());
-      results.add(update);
-    }
-    // Employee Size
-    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getOrgNo(), newData.getOrgNo())) {
-      update = new UpdatedDataModel();
-      update.setDataField(PageManager.getLabel(cmrCountry, "SizeCode", "-"));
-      update.setNewData(newData.getOrgNo());
-      update.setOldData(oldData.getOrgNo());
+      update.setOldData(oldData.getLocationNumber());
       results.add(update);
     }
     // Number of Invoices
@@ -360,6 +356,11 @@ public class CanadaHandler extends GEOHandler {
   public void doBeforeDataSave(EntityManager entityManager, Admin admin, Data data, String cmrIssuingCntry) throws Exception {
     setAddressRelatedData(entityManager, admin, data, null);
     updateAddrCustNm1(entityManager, StringUtils.EMPTY, data.getId().getReqId());
+    if (StringUtils.isNotBlank(data.getCollectorNameNo())) {
+      data.setSizeCd(data.getCollectorNameNo());
+    } else {
+      data.setSizeCd("");
+    }
   }
 
   @Override
@@ -448,8 +449,10 @@ public class CanadaHandler extends GEOHandler {
     setLocationNumber(data, mainAddr.getLandCntry(), mainAddr.getStateProv());
 
     // set CS Branch to first 3 digits of postal code
-    if (mainAddr.getPostCd() != null && mainAddr.getPostCd().length() >= 3) {
-      data.setSalesTeamCd(mainAddr.getPostCd().substring(0, 3));
+    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      if (mainAddr.getPostCd() != null && mainAddr.getPostCd().length() >= 3) {
+        data.setSalesTeamCd(mainAddr.getPostCd().substring(0, 3));
+      }
     }
     if (mainAddr.getCity1() != null) {
       data.setAbbrevLocn(mainAddr.getCity1().length() > 12 ? mainAddr.getCity1().substring(0, 12) : mainAddr.getCity1());
@@ -458,10 +461,12 @@ public class CanadaHandler extends GEOHandler {
     // set abbreviated name
     String name = admin.getMainCustNm1();
     if (name != null) {
-      if ("OEM".equalsIgnoreCase(data.getCustSubGrp())) {
-        data.setAbbrevNm(name.length() > 16 ? name.substring(0, 16).toUpperCase() + "/SWG" : name + "/SWG");
-      } else {
-        data.setAbbrevNm(name.length() > 20 ? name.substring(0, 20).toUpperCase() : name);
+      if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+        if ("OEM".equalsIgnoreCase(data.getCustSubGrp())) {
+          data.setAbbrevNm(name.length() > 16 ? name.substring(0, 16).toUpperCase() + "/SWG" : name + "/SWG");
+        } else {
+          data.setAbbrevNm(name.length() > 20 ? name.substring(0, 20).toUpperCase() : name);
+        }
       }
     }
 
