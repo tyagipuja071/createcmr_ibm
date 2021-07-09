@@ -601,6 +601,7 @@ function setMubotyOnPostalCodeIMS(postCd, subIndustryCd, clientTier) {
       postCd = 2;
     } else {
       postCd = 1;
+      ims = '';
     }
   } else {
     postCd = '';

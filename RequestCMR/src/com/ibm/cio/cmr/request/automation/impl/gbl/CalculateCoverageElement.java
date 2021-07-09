@@ -185,6 +185,7 @@ public class CalculateCoverageElement extends OverridingElement {
 
       String bgId = data.getBgId();
       String gbgId = data.getGbgId();
+      String country = data.getCmrIssuingCntry();
       String covFrom = "XXX";
       if (bgId != null && !"BGNONE".equals(bgId.trim())) {
         coverages = computeCoverageFromRDCQuery(entityManager, QUERY_BG, bgId, data.getCmrIssuingCntry(), false);
@@ -201,6 +202,11 @@ public class CalculateCoverageElement extends OverridingElement {
         }
 
         if (coverages == null || coverages.isEmpty()) {
+          if (countryUtil != null) {
+            LOG.debug("Performing Gbg based on coverage");
+            countryUtil.performCoverageBasedOnGBG(this, entityManager, result, details, output, requestData, engineData, covFrom,
+                calculatedCoverageContainer, isCoverageCalculated);
+          }
           CoverageInput inputBG = extractCoverageInput(entityManager, requestData, data, addr, gbgId, bgId);
           List<Coverage> currCoverage = coverageRules.findCoverage(inputBG);
           if (currCoverage != null && !currCoverage.isEmpty()) {
