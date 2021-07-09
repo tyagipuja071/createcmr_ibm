@@ -1659,6 +1659,7 @@ function matchDnBForIndia() {
                 console.log("ISIC validation failed by Dnb.");
                 cmr.showAlert("Please attach company proof as ISIC validation failed by Dnb.");     
               }else if(data.match && !data.isicMatch && custSubGrp == 'IGF'){
+                    comp_proof_IN =true;
                     cmr.showModal('addressVerificationModal');
               }else{   
               comp_proof_IN =false;
