@@ -167,10 +167,6 @@ function addAfterConfigAP() {
          FormManager.setValue('busnType','000');
          FormManager.readOnly('busnType');
       }
-      if(custSubGrp == 'BLUMX'){
-         FormManager.setValue('apCustClusterId','012D999');
-         FormManager.readOnly('apCustClusterId');
-      }
     } 
   }
   if (reqType == 'C') {
