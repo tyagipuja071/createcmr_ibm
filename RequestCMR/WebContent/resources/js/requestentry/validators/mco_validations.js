@@ -755,6 +755,8 @@ function setEnterpriseValues34Q() {
   FormManager.setValue('enterprise', entp);
   FormManager.setValue('repTeamMemberNo', salRep);
 
+  _oldIsuCtc = isuCtc;
+  _subindustryChanged = false;
 }
 
 var _oldIsuCtc = '';
@@ -787,10 +789,6 @@ function setEnterpriseValues(scenarioChanged) {
     }
   }
 
-  if (cntry == SysLoc.SPAIN && (isuCtc == '34Q')) {
-    return; // avoid below and follow setEnterpriseValues34Q
-  }
-
   var isuCtcValueChanged = false;
   var isuCtc217Scen = new Set([ 'BUSPR', 'INTER', 'XBP', 'CRINT', 'INTSO' ]);
   var is217ScenarioSelect = (isuCtc217Scen.has(custSubGrp) && scenarioChanged && isuCtc == '217');
@@ -798,6 +796,10 @@ function setEnterpriseValues(scenarioChanged) {
 
   if (cmr.currentTab == 'IBM_REQ_TAB') {
     isuCtcValueChanged = (_oldIsuCtc != isuCtc);
+  }
+
+  if (cntry == SysLoc.SPAIN && (isuCtc == '34Q')) {
+    return; // avoid below and follow setEnterpriseValues34Q
   }
 
   if (isuCtc217Scen.has(custSubGrp)) {
@@ -841,7 +843,7 @@ function setEnterpriseValues(scenarioChanged) {
         }
       }
 
-      if (cntry == SysLoc.SPAIN && isuCtc217Scen.has(custSubGrp) && isuCtc == '34Y') {
+      if (cntry == SysLoc.SPAIN && isuCtc == '34Y') {
         enterprises = [ '985129' ];
       }
 
