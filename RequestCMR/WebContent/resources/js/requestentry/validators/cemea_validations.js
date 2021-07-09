@@ -1744,6 +1744,8 @@ function setSBOValuesForIsuCtc() {
   var ims = FormManager.getActualValue('subIndustryCd');
   var isuCtc = isuCd + clientTier;
   var qParams = null;
+  var sbo = [];
+
   // SBO will be based on IMS
   if (isuCd != '') {
     var results = null;
@@ -1770,26 +1772,11 @@ function setSBOValuesForIsuCtc() {
     var custSubGrp = FormManager.getActualValue('custSubGrp');
     if (results != null && results.length > 0) {
       for (var i = 0; i < results.length; i++) {
-        enterprises.push(results[i].ret1);
+        sbo.push(results[i].ret1);
       }
       FormManager.setValue('salesBusOffCd', sbo[0]);
       readOnly = true;
     }
-
-    var results = cmr.query('GET.ENTLIST.BYISU', qParams);
-    if (results != null) {
-      for (var i = 0; i < results.length; i++) {
-        enterprises.push(results[i].ret1);
-      }
-    }
-  }
-
-  if (enterprises != null) {
-    FormManager.limitDropdownValues(FormManager.getField('dupEnterpriseNo'), enterprises);
-    if (enterprises.length == 1) {
-      FormManager.setValue('dupEnterpriseNo', enterprises[0]);
-    }
-
     if (readOnly) {
       // experimental might need to remove later
       FormManager.readOnly('salesBusOffCd');
