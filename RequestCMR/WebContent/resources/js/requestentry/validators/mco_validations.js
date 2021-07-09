@@ -12,6 +12,7 @@ var _importedIndc = null;
 var _postalCodeHandler = null;
 var _ISICHandler = null;
 var _isicCdHandler = null;
+var _subIndCdHanlder = null;
 
 var subIndValSpain = [ 'F9', 'FA', 'FD', 'FF', 'FW', 'H9', 'HA', 'HB', 'HC', 'HD', 'HE', 'HW', 'GA', 'GB', 'GC', 'GD', 'GE', 'GF', 'GG', 'GH', 'GJ',
     'GK', 'GL', 'GM', 'GN', 'GP', 'GR', 'GW', 'GZ', 'Y9', 'YA', 'YB', 'YC', 'YD', 'YE', 'YF', 'YG', 'YW', 'N9', 'NA', 'NB', 'NI', 'NW', 'NZ', 'E9',
@@ -695,8 +696,8 @@ function checkScenarioChanged(fromAddress, scenario, scenarioChanged) {
 
 var _subindustryChanged = false;
 function setEnterpriseBasedOnSubIndustry() {
-  if (_isicCdHandler == null && FormManager.getField('isicCd')) {
-    _isicCdHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
+  if (_subIndCdHanlder == null && FormManager.getField('subIndustryCd')) {
+    _subIndCdHanlder = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
       if (cmr.currentTab == "CUST_REQ_TAB") {
         _subindustryChanged = true;
         setEnterpriseValues(false);
@@ -717,10 +718,32 @@ function setEnterpriseValues34Q() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
+  var custGrp = FormManager.getActualValue('custGrp');
   var belongs = '';
   var entp = '';
   var salRep = '';
   if (cntry != SysLoc.SPAIN || isuCd.concat(clientTier) != '34Q') {
+    return;
+  }
+
+  var landCntry = FormManager.getActualValue('landCntry');
+  if (custGrp == 'CROSS' && landCntry != 'ES') {
+    // get landed cntry of zs01
+    var zs01ReqId = FormManager.getActualValue('reqId');
+    var qParams = {
+      REQ_ID : zs01ReqId,
+    };
+    if (landCntry == '' || !landCntry) {
+      var result = cmr.query('ADDR.GET.LANDCNTRY.BY_REQID', qParams);
+      landCntry = result.ret1;
+    }
+    if (landCntry == 'MT') {
+      entp = '985204';
+    } else {
+      entp = '985107'
+    }
+
+    FormManager.setValue('enterprise', entp);
     return;
   }
   var postcd = '';
@@ -839,7 +862,7 @@ function setEnterpriseValues(scenarioChanged) {
         }
       }
 
-      if (cntry == SysLoc.SPAIN && isuCtc217Scen.has(custSubGrp) && isuCtc == '34Y') {
+      if (cntry == SysLoc.SPAIN && isuCtc == '34Y') {
         enterprises = [ '985129' ];
       }
 
