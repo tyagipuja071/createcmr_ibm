@@ -1518,7 +1518,6 @@ function checkIfFinalDnBCheckRequired() {
 
 function matchDnBForAutomationCountries() {
   var reqId = FormManager.getActualValue('reqId');
-  var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
   console.log("Checking if the request matches D&B...");
   var nm1 = _pagemodel.mainCustNm1 == null ? '' : _pagemodel.mainCustNm1;
   var nm2 = _pagemodel.mainCustNm2 == null ? '' : _pagemodel.mainCustNm2;
@@ -1558,7 +1557,7 @@ function matchDnBForAutomationCountries() {
           } else {
             // continue
             console.log("An error occurred while matching dnb.");
-            if (cmrCntry == '641') {
+            if (cntry == '641') {
               cmr.showConfirm('showAddressVerificationModal()', 'An error occurred while matching dnb. Do you want to proceed with this request?',
                   'Warning', null, {
                     OK : 'Yes',
