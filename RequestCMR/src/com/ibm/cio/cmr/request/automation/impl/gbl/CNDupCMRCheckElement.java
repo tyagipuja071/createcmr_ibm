@@ -1504,8 +1504,12 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
       } else {
         request.setCustomerName(addr.getCustNm1() + (StringUtils.isBlank(addr.getCustNm2()) ? "" : " " + addr.getCustNm2()));
       }
-      request.setStreetLine1(addr.getAddrTxt());
-      request.setStreetLine2(StringUtils.isEmpty(addr.getAddrTxt2()) ? "" : addr.getAddrTxt2());
+
+      if (data.getCustSubGrp() != null && ("PRIV".equals(data.getCustSubGrp()) || "INTER".equals(data.getCustSubGrp()))) {
+        request.setStreetLine1(addr.getAddrTxt());
+        request.setStreetLine2(StringUtils.isEmpty(addr.getAddrTxt2()) ? "" : addr.getAddrTxt2());
+      }
+
       // request.setCity(addr.getCity1()); //
 
       // request.setStateProv(addr.getStateProv()); //
