@@ -632,21 +632,43 @@ function doAddToAddressList() {
       };
     }
     var showSoldToError = false;
+    var showMailingError = false;
+    var showEPLError = false;
     var noSoldToCheck = new Set([ SysLoc.USA, SysLoc.ISRAEL, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
     if (!noSoldToCheck.has(cntry)) {
       var result = cmr.query('GETZS01RECORDS', qParams);
       var zs01count = result.ret1;
       showSoldToError = Number(zs01count) >= 1 && cmr.addressType == 'ZS01';
+
+      var resultZP01 = cmr.query('GETZP01RECORDS', qParams);
+      var zp01count = resultZP01.ret1;
+      showMailingError = Number(zp01count) >= 1 && cmr.addressType == 'ZP01';
+
+      var resultZS02 = cmr.query('GETZS02RECORDS', qParams);
+      var zs02count = resultZS02.ret1;
+      showEPLError = Number(zs02count) >= 1 && cmr.addressType == 'ZS02';
     }
-    if (showSoldToError) {
-      cmr
-          .showConfirm(
-              'doAddZS01ToAddressList()',
-              'This request already has a Sold To record. Only one is permitted. You will have to remove one before completing the request processing. Do you still want to add this row?',
-              null, null, {
-                OK : 'Add Address Row',
-                CANCEL : 'Cancel'
-              });
+
+    if (FormManager.getActualValue('cmrIssuingCntry') == '838') {
+      if (showSoldToError) {
+        cmr.showAlert('This request already has a Billing record. Only one is permitted. The existing record has to be deleted to create a new record.');
+        return;
+      }
+      if (showMailingError) {
+        cmr.showAlert('This request already has a Mailing record. Only one is permitted. The existing record has to be deleted to create a new record.');
+        return;
+      }
+      if (showEPLError) {
+        cmr.showAlert('This request already has an EPL record. Only one is permitted. The existing record has to be deleted to create a new record.');
+        return;
+      }
+    }
+    if ((showSoldToError) && (FormManager.getActualValue('cmrIssuingCntry') != '838')) {
+      cmr.showConfirm('doAddZS01ToAddressList()',
+          'This request already has a Sold To record. Only one is permitted. You will have to remove one before completing the request processing. Do you still want to add this row?', null, null, {
+            OK : 'Add Address Row',
+            CANCEL : 'Cancel'
+          });
     } else {
 
       if (FormManager.getActualValue('cmrIssuingCntry') == '641') {
