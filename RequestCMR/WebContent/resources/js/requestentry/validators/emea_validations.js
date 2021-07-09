@@ -999,6 +999,7 @@ function isNorthernIrelandPostCd(postCd) {
   }
 }
 
+function set32SBOLogicOnISIC() {
   var reqType = FormManager.getActualValue('reqType');
   var isuCdValue = FormManager.getActualValue('isuCd');
   var isicCdValue = FormManager.getActualValue('isicCd');
@@ -1043,34 +1044,6 @@ function isScotlandPostCd(postCd) {
     return true;
   } else {
     return false;
-  }
-}
-
-    if (!(isNorthernIrelandPostCd(postCd))) {
-      if (isuCdValue == '34' && tierValue == 'Q') {
-        var qParams = {
-          ISU_CD : '%' + isuCdValue + '%',
-          CLIENT_TIER : '%' + tierValue + '%',
-          ISIC_CD : isicCdValue
-        };
-        var result = cmr.query('UK.GET.SBOSR_FOR_ISIC', qParams);
-        if (Object.keys(result).length > 0 && result.ret1 && result.ret2) {
-          var sbo = result.ret1;
-          var salesRep = result.ret2;
-          FormManager.setValue('salesBusOffCd', sbo);
-          FormManager.setValue('repTeamMemberNo', salesRep);
-          if (role == 'Requester' && reqType == 'C') {
-            FormManager.readOnly('repTeamMemberNo');
-            FormManager.readOnly('salesBusOffCd');
-          }
-        }
-      } else if (isicCdValue != null) {
-        if (isuCdValue == '34' && tierValue == 'Y') {
-          FormManager.setValue('salesBusOffCd', '015');
-          FormManager.setValue('repTeamMemberNo', 'SPA015');
-        }
-      }
-    }
   }
 }
 
