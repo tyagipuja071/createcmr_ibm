@@ -1169,6 +1169,254 @@ function addAddrUpdateValidator() {
                   return new ValidationResult(null, true);
                 }
                 
+                var addrList = [];
+                var addrRdcList = [];
+                var cnAddrList = [];
+                var cnAddrRdcList = [];
+                
+                var failInd = false;
+                var zs01AddressUpdated = false;
+                var otherAddressUpdated = false;
+                
+                var zs01Count = 0;
+                
+                var addrTxtZS01 = null;
+                var addrTxt2ZS01 = null;
+                var cnAddrTxtZS01 = null;
+                var cnAddrTxt2ZS01 = null;
+                
+                var addrTypeOther = null;
+                var addrSeqOther = null;
+                
+                var addrTxtOther = null;
+                var addrTxt2Other = null;
+                var cnAddrTxtOther = null;
+                var cnAddrTxt2Other = null;
+                
+                // get addr, addr_rdc, intl_addr, intl_addr_rdc
+                var reqId = FormManager.getActualValue('reqId');
+                var qParams = {
+                    _qall : 'Y',
+                    REQ_ID : reqId ,
+                   };
+                var addrResults = cmr.query('GET.ADDR_BY_REQID', qParams);
+                if (addrResults != null) {
+                  for (var i = 0; i < addrResults.length; i++) {
+                    var addr  = {
+                        reqId : addrResults[i].ret1,
+                        addrType : addrResults[i].ret2,
+                        addrSeq : addrResults[i].ret3,
+                        custNm1 : addrResults[i].ret4,
+                        custNm2 : addrResults[i].ret5,
+                        addrTxt : addrResults[i].ret6,
+                        addrTxt2 : addrResults[i].ret7,
+                        city1 : addrResults[i].ret8,
+                    };
+                    addrList.push(addr);
+                  }
+                }
+                
+                var addrRdcResults = cmr.query('GET.ADDRRDC_BY_REQID', qParams);
+                if (addrRdcResults != null) {
+                  for (var i = 0; i < addrRdcResults.length; i++) {
+                    var addrRdc  = {
+                        reqId : addrRdcResults[i].ret1,
+                        addrType : addrRdcResults[i].ret2,
+                        addrSeq : addrRdcResults[i].ret3,
+                        custNm1 : addrRdcResults[i].ret4,
+                        custNm2 : addrRdcResults[i].ret5,
+                        addrTxt : addrRdcResults[i].ret6,
+                        addrTxt2 : addrRdcResults[i].ret7,
+                        city1 : addrRdcResults[i].ret8,
+                    };
+                    addrRdcList.push(addrRdc);
+                  }
+                }
+                
+                var intlAddrResults = cmr.query('GET.INTLADDR_BY_REQID', qParams);
+                if (intlAddrResults != null) {
+                  for (var i = 0; i < intlAddrResults.length; i++) {
+                    var cnAddr  = {
+                        reqId : intlAddrResults[i].ret1,
+                        addrType : intlAddrResults[i].ret2,
+                        addrSeq : intlAddrResults[i].ret3,
+                        cnCustName1 : intlAddrResults[i].ret4,
+                        cnCustName2 : intlAddrResults[i].ret5,
+                        cnAddrTxt : intlAddrResults[i].ret6,
+                        cnAddrTxt2 : intlAddrResults[i].ret7,
+                        cnCity1 : intlAddrResults[i].ret8,
+                    };
+                    cnAddrList.push(cnAddr);
+                  }
+                }
+                
+                var intlAddrRdcResults = cmr.query('GET.INTLADDRRDC_BY_REQID', qParams);
+                if (intlAddrRdcResults != null) {
+                  for (var i = 0; i < intlAddrRdcResults.length; i++) {
+                    var cnAddrRdc  = {
+                        reqId : intlAddrRdcResults[i].ret1,
+                        addrType : intlAddrRdcResults[i].ret2,
+                        addrSeq : intlAddrRdcResults[i].ret3,
+                        cnCustName1 : intlAddrRdcResults[i].ret4,
+                        cnCustName2 : intlAddrRdcResults[i].ret5,
+                        cnAddrTxt : intlAddrRdcResults[i].ret6,
+                        cnAddrTxt2 : intlAddrRdcResults[i].ret7,
+                        cnCity1 : intlAddrRdcResults[i].ret8,
+                    };
+                    cnAddrRdcList.push(cnAddrRdc);
+                  }
+                }
+                
+                if (addrList != null) {
+                  for (var i=0; i< addrList.length; i++) {
+                    if (addrList[i].addrType == 'ZS01') {
+                      addrTxtZS01 = addrList[i].addrTxt;
+                      addrTxt2ZS01 = addrList[i].addrTxt2;
+                      
+                      zs01Count +=1;
+                      
+                      if (isChangedAddress('ZS01', addrList[i].addrSeq, addrList, addrRdcList, cnAddrList, cnAddrRdcList)) {
+                        zs01AddressUpdated = true;
+                      }
+                    }
+                  }
+                }
+                
+                if (cnAddrList != null) {
+                  for (var i=0; i< cnAddrList.length; i++) {
+                    if (cnAddrList[i].addrType == 'ZS01') {
+                      cnAddrTxtZS01 = cnAddrList[i].cnAddrTxt;
+                      cnAddrTxt2ZS01 = cnAddrList[i].cnAddrTxt2;
+                    }
+                  }
+                }
+                
+                if (zs01Count > 1) {
+                  return new ValidationResult(null, false, 'Only one Sold-To Address can be defined.');
+                }
+                
+                if (addrList.length > 1) {
+                  for (var i=0; i< addrList.length; i++) {
+                    if (addrList[i].addrType != 'ZS01') {
+                      if (isChangedAddress(addrList[i].addrType, addrList[i].addrSeq, addrList, addrRdcList, cnAddrList, cnAddrRdcList)) {
+                        otherAddressUpdated = true;
+                        addrTxtOther = addrList[i].addrTxt;
+                        addrTxt2Other = addrList[i].addrTxt2;
+                        cnAddrTxtOther = getAddrValue('cnAddrTxt', addrList[i].addrType, addrList[i].addrSeq, cnAddrList);
+                        cnAddrTxt2Other = getAddrValue('cnAddrTxt2', addrList[i].addrType, addrList[i].addrSeq, cnAddrList);
+                      }
+                      
+                      if (otherAddressUpdated) {
+                        if ((addrTxtZS01 != addrTxtOther) || (addrTxt2ZS01 != addrTxt2Other) || (cnAddrTxtZS01 != cnAddrTxtOther) || (cnAddrTxt2ZS01 != cnAddrTxt2Other)) {
+                          failInd = true;
+                        }
+                      }
+                    }
+                  }
+                }
+                
+                if (failInd) {
+                  var id = FormManager.getActualValue('reqId');
+                  var ret = cmr.query('CHECK_CONFIRMATION_ATTACHMENTS', {
+                    ID : id
+                  });
+
+                  if (ret == null || ret.ret1 == null) {
+                    return new ValidationResult(null, false, 'Additional addresses types need to be updated same with Legal Address (Sold To). If you do not agree, please attach supporting document and click Disable automatic processing checkbox.');
+                  } else {
+                    return new ValidationResult(null, true);
+                  }
+                }
+                return new ValidationResult(null, true);
+              }
+            };
+          })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
+function isChangedAddress(addrType, addrSeq, addrList, addrRdcList, cnAddrList, cnAddrRdcList) {
+  var result = false;
+  if (isChangedField('addrTxt', addrType, addrSeq, addrList, addrRdcList) || isChangedField('addrTxt2', addrType, addrSeq, addrList, addrRdcList) || isChangedField('cnAddrTxt', addrType, addrSeq, cnAddrList, cnAddrRdcList) || isChangedField('cnAddrTxt2', addrType, addrSeq, cnAddrList, cnAddrRdcList)) {
+    result = true;
+  }
+  return result;
+}
+
+function isChangedField(fieldName, addrType, addrSeq, list1, list2) {
+  var result = false;
+  var fieldValue1 = null;
+  var fieldValue2 = null;
+  
+  if (list1 != null && list1.length > 0) {
+    for (var i = 0; i < list1.length; i ++) {
+      if (list1[i].addrType == addrType && list1[i].addrSeq == addrSeq) {
+        if (fieldName == 'addrTxt') {
+          fieldValue1 = list1[i].addrTxt;
+        } else if (fieldName == 'addrTxt2') {
+          fieldValue1 = list1[i].addrTxt2;
+        } else if (fieldName == 'cnAddrTxt') {
+          fieldValue1 = list1[i].cnAddrTxt;
+        } else if (fieldName == 'cnAddrTxt2') {
+          fieldValue1 = list1[i].cnAddrTxt2;
+        }
+      }
+    }
+  }
+  
+  if (list2 != null && list2.length > 0) {
+    for (var j = 0; j < list2.length; j ++) {
+      if (list2[j].addrType == addrType && list2[j].addrSeq == addrSeq) {
+        if (fieldName == 'addrTxt') {
+          fieldValue2 = list2[j].addrTxt;
+        } else if (fieldName == 'addrTxt2') {
+          fieldValue2 = list2[j].addrTxt2;
+        } else if (fieldName == 'cnAddrTxt') {
+          fieldValue2 = list2[j].cnAddrTxt;
+        } else if (fieldName == 'cnAddrTxt2') {
+          fieldValue2 = list2[j].cnAddrTxt2;
+        }
+      }
+    }
+  }
+  
+  if (fieldValue1 != fieldValue2) {
+    result = true;
+  }
+  return result;
+}
+
+function getAddrValue(fieldName, addrType, addrSeq, list) {
+  var value = null;
+  if (list!=null && list.length > 0) {
+    for (var i = 0; i < list.length; i ++) {
+      if (list[i].addrType == addrType && list[i].addrSeq == addrSeq) {
+        if (fieldName == 'addrTxt') {
+          value = list[i].addrTxt;
+        } else if (fieldName == 'addrTxt2') {
+          value = list[i].addrTxt2;
+        } else if (fieldName == 'cnAddrTxt') {
+          value = list[i].cnAddrTxt;
+        } else if (fieldName == 'cnAddrTxt2') {
+          value = list[i].cnAddrTxt2;
+        }
+      }
+    }
+  }
+  return value;
+}
+
+// no use
+function addAddrUpdateValidator0() {
+  console.log("running addAddrUpdateValidator . . .");
+  FormManager
+      .addFormValidator(
+          (function() {
+            return {
+              validate : function() {
+                
+                if (FormManager.getActualValue('reqType') != 'U') {
+                  return new ValidationResult(null, true);
+                }
+                
                 var failInd = false;
                 var zs01Updated = false;
                 var additionalAddrupdated = false;
@@ -1353,7 +1601,7 @@ function addAddrUpdateValidator() {
                   });
 
                   if (ret == null || ret.ret1 == null) {
-                    return new ValidationResult(null, false, 'Additional addresse types need to be updated same with Legal Address (Sold To). please attach support documents and send to CMDE.');
+                    return new ValidationResult(null, false, 'Additional addresses types need to be updated same with Legal Address (Sold To). If you do not agree, please attach supporting document and click Disable automatic processing checkbox.');
                   } else {
                     return new ValidationResult(null, true);
                   }
