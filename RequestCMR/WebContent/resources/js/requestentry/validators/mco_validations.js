@@ -777,9 +777,6 @@ function setEnterpriseValues34Q() {
   }
   FormManager.setValue('enterprise', entp);
   FormManager.setValue('repTeamMemberNo', salRep);
-
-  _oldIsuCtc = isuCtc;
-  _subindustryChanged = false;
 }
 
 var _oldIsuCtc = '';
