@@ -1612,6 +1612,15 @@ function addAddrUpdateValidator0() {
           })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
+function addDoubleByteValidatorCN(cntry, details) {
+
+  /* Address */
+  FormManager.addValidator('cnCustName1', Validators.NO_SINGLE_BYTE, [ 'Customer Name Chinese' ]);
+  FormManager.addValidator('cnCustName2', Validators.NO_SINGLE_BYTE, [ 'Customer Name Con' + '\'' + 't Chinese' ]);
+  FormManager.addValidator('cnAddrTxt', Validators.NO_SINGLE_BYTE, [ 'Street Address Chinese' ]);
+  FormManager.addValidator('cnAddrTxt2', Validators.NO_SINGLE_BYTE, [ 'Street Address Con' + '\'' + 't Chinese' ]);
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.CN = [ SysLoc.CHINA ];
   console.log('adding CN validators...');
@@ -1635,6 +1644,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(defaultGovernmentIndicator, GEOHandler.CN);
   GEOHandler.addAddrFunction(autoSetAddrFieldsForCN, GEOHandler.CN);
   GEOHandler.addAddrFunction(showHideCityCN, GEOHandler.CN);
+  GEOHandler.addAddrFunction(addDoubleByteValidatorCN, GEOHandler.CN);
   // Checklist
   GEOHandler.addAfterConfig(setChinaChecklistStatus, GEOHandler.CN);
   // GEOHandler.addAfterConfig(addValidationForParentCompanyNo, GEOHandler.CN);
