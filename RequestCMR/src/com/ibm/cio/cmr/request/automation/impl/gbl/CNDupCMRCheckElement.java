@@ -28,9 +28,12 @@ import com.ibm.cio.cmr.request.entity.AutomationMatching;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.IntlAddr;
 import com.ibm.cio.cmr.request.model.CompanyRecordModel;
+import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
+import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.util.CompanyFinder;
 import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.MatchingServiceClient;
@@ -89,8 +92,9 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
       AutomationResponse<CNResponse> resultCNApi = null;
       List<CompanyRecordModel> resultFindCmrCN = null;
+      FindCMRResultModel findCMRResult = null;
       GEOHandler handler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
-      CompanyRecordModel cmrData = null; // nonLatin result
+      CompanyRecordModel cmrData = new CompanyRecordModel(); // nonLatin result
       MatchingResponse<DuplicateCMRCheckResponse> response = null; // Latin
                                                                    // result
       boolean nameMatched = false;
@@ -380,29 +384,35 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                     CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
                     searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
                     searchModelFindCmrCN.setCied(cnCeid);
-                    resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
-                    if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
-                      for (int i = 0; i < resultFindCmrCN.size(); i++) {
-                        ceidFindCmrCnResult = resultFindCmrCN.get(i).getCied() != null ? resultFindCmrCN.get(i).getCied() : "";
-                        if (ceidFindCmrCnResult != null && cnCeid.equals(ceidFindCmrCnResult)) {
+                    // resultFindCmrCN =
+                    // CompanyFinder.findCompanies(searchModelFindCmrCN);
+                    findCMRResult = checkCeidViaFindCMR(searchModelFindCmrCN);
+                    if (findCMRResult != null && findCMRResult.getItems() != null && !findCMRResult.getItems().isEmpty()) {
+                      ceidMatched = true;
+                      List<FindCMRRecordModel> cmrs = findCMRResult.getItems();
+                      for (FindCMRRecordModel cmrsMods : cmrs) {
+                        cmrData.setCmrNo(cmrsMods.getCmrNum());
+                        cmrData.setName(cmrsMods.getCmrName1Plain() + (cmrsMods.getCmrName2Plain() != null ? cmrsMods.getCmrName2Plain() : ""));
+                        cmrData.setIssuingCntry(cmrsMods.getCmrIssuedBy());
+                        cmrData.setCied(cmrsMods.getCmrPpsceid());
+                        cmrData.setCountryCd(cmrsMods.getCmrCountryLanded());
+                        cmrData.setStreetAddress1(cmrsMods.getCmrStreetAddress());
+                        cmrData.setStreetAddress2(cmrsMods.getCmrStreetAddressCont());
+                        cmrData.setPostCd(cmrsMods.getCmrPostalCode());
+                        cmrData.setCity(cmrsMods.getCmrCity());
 
-                          ceidMatched = true;
-
-                          if (ceidMatched) {
-                            matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
-                            cmrData = resultFindCmrCN.get(i);
-                            details.append("\n");
-                            logDuplicateCMR(details, cmrData);
-                          }
-                        }
+                        matchedCMRs.add(cmrsMods.getCmrNum());
+                        details.append("\n");
+                        logDuplicateCMR(details, cmrData);
                       }
+
                     }
                   } catch (Exception e) {
                     e.printStackTrace();
-                    result.setDetails("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnName);
-                    engineData.addRejectionComment("OTH", "Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnName, "", "");
+                    result.setDetails("Error on checking findCMR on Duplicate CMR Check of Chinese, ceid: " + cnCeid);
+                    engineData.addRejectionComment("OTH", "Error on checking findCMR on Duplicate CMR Check of Chinese, ceid: " + cnCeid, "", "");
                     result.setOnError(true);
-                    result.setResults("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnName);
+                    result.setResults("Error on checking findCMR on Duplicate CMR Check of Chinese, ceid: " + cnCeid);
                   }
                 }
 
@@ -1599,4 +1609,13 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
     }
     return kunnr;
   }
+
+  protected static FindCMRResultModel checkCeidViaFindCMR(CompanyRecordModel searchModel) throws Exception {
+    String cmrNo = searchModel.getCmrNo();
+    String issuingCntry = searchModel.getIssuingCntry();
+    String params = "&ppsCeId=" + searchModel.getCied();
+    FindCMRResultModel results = SystemUtil.findCMRs(cmrNo, issuingCntry, 10, null, params);
+    return results;
+  }
+
 }
