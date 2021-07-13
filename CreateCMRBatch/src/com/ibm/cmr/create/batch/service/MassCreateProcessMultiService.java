@@ -543,6 +543,11 @@ public class MassCreateProcessMultiService extends MultiThreadedBatchService<Str
   }
 
   @Override
+  public boolean flushOnCommitOnly() {
+    return true;
+  }
+
+  @Override
   protected String getThreadName() {
     return "MassCreateMulti";
   }

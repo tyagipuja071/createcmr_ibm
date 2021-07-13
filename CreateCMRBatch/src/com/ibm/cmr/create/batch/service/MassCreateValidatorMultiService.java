@@ -424,6 +424,11 @@ public class MassCreateValidatorMultiService extends MultiThreadedBatchService<L
   }
 
   @Override
+  public boolean flushOnCommitOnly() {
+    return true;
+  }
+
+  @Override
   public boolean isTransactional() {
     return true;
   }
