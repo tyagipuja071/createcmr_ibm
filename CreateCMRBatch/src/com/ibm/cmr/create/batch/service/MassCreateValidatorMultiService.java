@@ -54,10 +54,10 @@ import com.ibm.cmr.create.batch.util.masscreate.handler.impl.DataHandler;
 import com.ibm.cmr.create.batch.util.masscreate.handler.impl.EnterpriseAffiliateHandler;
 import com.ibm.cmr.create.batch.util.masscreate.handler.impl.INACHandler;
 import com.ibm.cmr.create.batch.util.masscreate.handler.impl.InternalTypeAbbrevNameHandler;
-import com.ibm.cmr.create.batch.util.masscreate.handler.impl.MassCreateWorker;
 import com.ibm.cmr.create.batch.util.masscreate.handler.impl.SubindustryISICHandler;
 import com.ibm.cmr.create.batch.util.masscreate.handler.impl.TgmeAddrStdHandler;
 import com.ibm.cmr.create.batch.util.masscreate.handler.impl.USPostCodeAndStateHandler;
+import com.ibm.cmr.create.batch.util.worker.impl.USMassCreateValidateMultiWorker;
 
 /**
  * @author JeffZAMORA
@@ -129,7 +129,8 @@ public class MassCreateValidatorMultiService extends MultiThreadedBatchService<L
     lockAdminRecordsForProcessing(Collections.singletonList(request), entityManager);
 
     LOG.info("Processing Mass Create Request ID: " + request.getId().getReqId());
-    massCreate = validateFile(entityManager, data.getCmrIssuingCntry(), request.getFileName(), request.getId().getReqId(), request.getIterationId());
+    massCreate = validateFile(entityManager, request, data.getCmrIssuingCntry(), request.getFileName(), request.getId().getReqId(),
+        request.getIterationId());
 
     originalStatus = request.getReqStatus();
 
@@ -253,8 +254,8 @@ public class MassCreateValidatorMultiService extends MultiThreadedBatchService<L
    * @return
    * @throws Exception
    */
-  private MassCreateFile validateFile(EntityManager entityManager, String cmrIssuingCountry, String fileName, long reqId, int iterationId)
-      throws Exception {
+  private MassCreateFile validateFile(EntityManager entityManager, Admin admin, String cmrIssuingCountry, String fileName, long reqId,
+      int iterationId) throws Exception {
     if (StringUtils.isBlank(fileName)) {
       LOG.warn("Filename is empty for Request " + reqId + ". Skipping this request.");
       return null;
@@ -290,12 +291,12 @@ public class MassCreateValidatorMultiService extends MultiThreadedBatchService<L
         LOG.debug("Worker threads to use: " + threads);
         LOG.debug("Starting validating contents at " + new Date());
         LOG.debug("Number of lines found: " + rows.size());
-        List<MassCreateWorker> workers = new ArrayList<MassCreateWorker>();
+        List<USMassCreateValidateMultiWorker> workers = new ArrayList<USMassCreateValidateMultiWorker>();
         // change to executor and not scheduled
         ExecutorService executor = Executors.newFixedThreadPool(threads, new WorkerThreadFactory("MCWorker-" + data.getReqId()));
         for (MassCreateFileRow row : rows) {
           engine = initEngine(cmrIssuingCountry);
-          MassCreateWorker worker = new MassCreateWorker(entityManager, engine, row, reqId);
+          USMassCreateValidateMultiWorker worker = new USMassCreateValidateMultiWorker(admin, row, engine);
           executor.execute(worker);
           workers.add(worker);
         }
@@ -311,7 +312,7 @@ public class MassCreateValidatorMultiService extends MultiThreadedBatchService<L
 
         LOG.debug("Finished validating contents at " + new Date());
 
-        for (MassCreateWorker worker : workers) {
+        for (USMassCreateValidateMultiWorker worker : workers) {
           if (worker != null) {
             if (worker.isError()) {
               LOG.error("Error in validating file for Request ID " + reqId + ": " + worker.getErrorMsg());
