@@ -649,6 +649,7 @@ function setClientTierValues(value) {
       FormManager.setValue('clientTier', tierValues[0]);
       setSalesRepValues();
       setEnterpriseValues(false);
+      setEnterpriseValues34Q();
     }
   } else {
     FormManager.resetDropdownValues(FormManager.getField('clientTier'));
@@ -683,6 +684,11 @@ function setSalesRepValues(clientTier) {
       for (var i = 0; i < results.length; i++) {
         salesReps.push(results[i].ret1);
       }
+
+      // 34Y sales rep new logic CMR-2672
+      if (isuCd.concat(clientTier) == '34Y' && cntry == SysLoc.SPAIN && salesReps.length == 0) {
+        salesReps[0] = '1FICTI';
+      }
       FormManager.limitDropdownValues(FormManager.getField('repTeamMemberNo'), salesReps);
       if (salesReps.length == 1) {
         FormManager.setValue('repTeamMemberNo', salesReps[0]);
@@ -709,6 +715,7 @@ function setEnterpriseBasedOnSubIndustry() {
   }
 }
 
+var _oldIsuCtc = '';
 function setEnterpriseValues34Q() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
@@ -724,6 +731,8 @@ function setEnterpriseValues34Q() {
   var belongs = '';
   var entp = '';
   var salRep = '';
+  var isuCtc = isuCd + clientTier;
+
   if (cntry != SysLoc.SPAIN || isuCd.concat(clientTier) != '34Q') {
     return;
   }
@@ -777,9 +786,10 @@ function setEnterpriseValues34Q() {
   }
   FormManager.setValue('enterprise', entp);
   FormManager.setValue('repTeamMemberNo', salRep);
+  _oldIsuCtc = isuCtc;
+
 }
 
-var _oldIsuCtc = '';
 function setEnterpriseValues(scenarioChanged) {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
@@ -797,6 +807,7 @@ function setEnterpriseValues(scenarioChanged) {
   // For Spain, domestic with 32B, 32S, 32T & 217 ISUs, set enterprise based on
   // LocNo
   var isuCtc = isuCd + clientTier;
+
   if (custGroup != 'CROSS') {
     // if (cntry == SysLoc.SPAIN && (isuCtc == '32B' || isuCtc == '32T' ||
     // isuCtc == '217' || isuCtc == '34Q')) {
@@ -822,7 +833,7 @@ function setEnterpriseValues(scenarioChanged) {
     return; // avoid below and follow setEnterpriseValues34Q
   }
 
-  if (isuCtc217Scen.has(custSubGrp)) {
+  if (isuCtc == '217' && isuCtc217Scen.has(custSubGrp)) {
     isuCtcValueChanged = false;
     _subindustryChanged = false;
   }
