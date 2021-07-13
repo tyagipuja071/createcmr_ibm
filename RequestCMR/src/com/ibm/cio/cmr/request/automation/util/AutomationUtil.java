@@ -847,31 +847,31 @@ public abstract class AutomationUtil {
     query.setParameter("LAND_CNTRY", addrToCheck.getLandCntry());
     query.setParameter("CITY", addrToCheck.getCity1());
     if (addrToCheck.getAddrTxt() != null) {
-      query.append(" and ADDR_TXT = :ADDR_TXT");
+      query.append(" and lower(ADDR_TXT) like lower(:ADDR_TXT)");
       query.setParameter("ADDR_TXT", addrToCheck.getAddrTxt());
     }
     if (addrToCheck.getCustNm2() != null) {
-      query.append(" and CUST_NM2 = :NAME2");
+      query.append(" and lower(CUST_NM2) like lower(:NAME2)");
       query.setParameter("NAME2", addrToCheck.getCustNm2());
     }
     if (addrToCheck.getDept() != null) {
-      query.append(" and DEPT = :DEPT");
+      query.append(" and lower(DEPT) like lower(:DEPT)");
       query.setParameter("DEPT", addrToCheck.getDept());
     }
     if (addrToCheck.getFloor() != null) {
-      query.append(" and FLOOR= :FLOOR");
+      query.append(" and lower(FLOOR) like lower(:FLOOR)");
       query.setParameter("FLOOR", addrToCheck.getFloor());
     }
     if (addrToCheck.getBldg() != null) {
-      query.append(" and BLDG= :BLDG");
+      query.append(" and lower(BLDG) like lower(:BLDG)");
       query.setParameter("BLDG", addrToCheck.getBldg());
     }
     if (addrToCheck.getOffice() != null) {
-      query.append(" and OFFICE =:OFFICE");
+      query.append(" and lower(OFFICE) like lower(:OFFICE)");
       query.setParameter("OFFICE", addrToCheck.getOffice());
     }
     if (addrToCheck.getStateProv() != null) {
-      query.append(" and STATE_PROV = :STATE");
+      query.append(" and lower(STATE_PROV) like lower(:STATE)");
       query.setParameter("STATE", addrToCheck.getStateProv());
     }
     if (addrToCheck.getPoBox() != null) {
