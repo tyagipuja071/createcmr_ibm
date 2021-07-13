@@ -8,6 +8,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
+import javax.persistence.FlushModeType;
 import javax.persistence.Persistence;
 
 import org.apache.log4j.Logger;
@@ -50,6 +51,10 @@ public class BatchThreadWorker<T> implements Runnable {
       EntityManagerFactory emf = Persistence.createEntityManagerFactory(BatchEntryPoint.DEFAULT_BATCH_PERSISTENCE_UNIT);
       try {
         EntityManager entityManager = emf.createEntityManager();
+        if (this.batchService.flushOnCommitOnly()) {
+          LOG.debug("Setting flush mode to COMMIT..");
+          entityManager.setFlushMode(FlushModeType.COMMIT);
+        }
         EntityTransaction transaction = null;
         try {
 

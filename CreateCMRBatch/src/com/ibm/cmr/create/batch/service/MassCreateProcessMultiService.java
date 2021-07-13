@@ -49,7 +49,7 @@ import com.ibm.cmr.create.batch.model.CmrServiceInput;
 import com.ibm.cmr.create.batch.model.NotifyReqModel;
 import com.ibm.cmr.create.batch.util.BatchUtil;
 import com.ibm.cmr.create.batch.util.masscreate.WorkerThreadFactory;
-import com.ibm.cmr.create.batch.util.masscreate.handler.impl.MassCreateWorker;
+import com.ibm.cmr.create.batch.util.worker.impl.USMassCreateMultiWorker;
 
 /**
  * @author JeffZAMORA
@@ -267,7 +267,7 @@ public class MassCreateProcessMultiService extends MultiThreadedBatchService<Str
         LOG.debug("Locking Request ID " + admin.getId().getReqId() + " for processing.");
       }
     }
-    partialCommit(entityManager);
+    // partialCommit(entityManager);
 
   }
 
@@ -333,48 +333,35 @@ public class MassCreateProcessMultiService extends MultiThreadedBatchService<Str
     LOG.debug("Starting processing mass create at " + new Date());
     LOG.debug("Number of records found: " + resultsMain.size());
 
-    List<MassCreateWorker> workers = new ArrayList<MassCreateWorker>();
-    while (resultsMain.size() > 0) {
-      List<CompoundEntity> results = new LinkedList<CompoundEntity>();
-      for (int i = 0; i < 50; i++) {
-        if (resultsMain.size() > 0) {
-          results.add(resultsMain.remove(0));
-        } else {
-          break;
-        }
-      }
+    List<USMassCreateMultiWorker> workers = new ArrayList<USMassCreateMultiWorker>();
 
-      LOG.debug(" - Processing " + results.size() + " subrecords...");
-      ExecutorService executor = Executors.newFixedThreadPool(threads, new WorkerThreadFactory("MCWorker-" + reqId));
-      for (CompoundEntity entity : results) {
-        mass_create = entity.getEntity(MassCreate.class);
-        MassCreateWorker worker = new MassCreateWorker(em, mass_create, cmrServiceInput, itrId, cmrNoSapNoMap);
-        executor.execute(worker);
-        workers.add(worker);
-      }
+    LOG.debug(" - Processing " + resultsMain.size() + " subrecords...");
+    ExecutorService executor = Executors.newFixedThreadPool(threads, new WorkerThreadFactory("MCWorker-" + reqId));
+    for (CompoundEntity entity : resultsMain) {
+      mass_create = entity.getEntity(MassCreate.class);
+      USMassCreateMultiWorker worker = new USMassCreateMultiWorker(admin, mass_create, cmrServiceInput, cmrNoSapNoMap);
+      executor.execute(worker);
+      workers.add(worker);
+    }
 
-      executor.shutdown();
-      while (!executor.isTerminated()) {
-        try {
-          Thread.sleep(5000);
-        } catch (InterruptedException e) {
-          // noop
-        }
+    executor.shutdown();
+    while (!executor.isTerminated()) {
+      try {
+        Thread.sleep(5000);
+      } catch (InterruptedException e) {
+        // noop
       }
-
-      // execute flush every 50
-      em.flush();
     }
 
     LOG.debug("Mass create processing finished at " + new Date());
 
-    for (MassCreateWorker worker : workers) {
+    for (USMassCreateMultiWorker worker : workers) {
       if (worker != null) {
         if (worker.isError()) {
           LOG.error("Error in processing mass create ID " + reqId + ": " + worker.getErrorMsg());
           throw new Exception(worker.getErrorMsg());
         } else {
-          resultCodes.addAll(worker.getResultCodes());
+          resultCodes.addAll(worker.getStatusCodes());
         }
       }
     }
