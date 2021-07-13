@@ -311,7 +311,7 @@
   </cmr:column>
 </cmr:row>
 
-<c:if test="${reqentry.reqType != 'U'}">
+
 <cmr:row>
  <cmr:column span="2" containerForField="CustomerCntPhone2">
     <p>
@@ -332,9 +332,8 @@
     </p>
   </cmr:column>
 </cmr:row>
-</c:if>
 
-<c:if test="${reqentry.reqType != 'U'}">
+
 <cmr:row>
  <cmr:column span="4" containerForField="ChinaCustomerCntName">
     <p>
@@ -346,7 +345,6 @@
     </p>
   </cmr:column>
 </cmr:row>
-</c:if>
 
 <cmr:row>
 <cmr:column span="2" containerForField="InterAddrKey">
