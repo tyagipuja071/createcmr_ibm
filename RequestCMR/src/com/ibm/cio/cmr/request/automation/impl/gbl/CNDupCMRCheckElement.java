@@ -86,7 +86,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
       IntlAddr iAddr = new IntlAddr();
       CompanyRecordModel searchModelCNAPI = new CompanyRecordModel();
-      CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
+
       AutomationResponse<CNResponse> resultCNApi = null;
       List<CompanyRecordModel> resultFindCmrCN = null;
       GEOHandler handler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
@@ -143,6 +143,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
                 try {
                   // 2, Check FindCMR NON Latin with Chinese name
+                  CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
                   searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
                   searchModelFindCmrCN.setCountryCd(soldTo.getLandCntry());
                   searchModelFindCmrCN.setName(cnName);
@@ -179,6 +180,8 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 // 3, Check FindCMR Non Latin with historical Chinese name
                 if (cnHistoryName != null && !"".equals(cnHistoryName)) {
                   List<String> cnHistoryNameList = Arrays.asList(cnHistoryName.split(";"));
+                  CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
+                  searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
                   try {
                     for (String historyName : cnHistoryNameList) {
                       searchModelFindCmrCN.setName(historyName);
@@ -296,6 +299,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
                 try {
                   // 2, Check FindCMR NON Latin with Chinese name
+                  CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
                   searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
                   searchModelFindCmrCN.setCountryCd(soldTo.getLandCntry());
                   searchModelFindCmrCN.setName(cnName);
@@ -332,9 +336,9 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 if (cnHistoryName != null && !"".equals(cnHistoryName)) {
                   List<String> cnHistoryNameList = Arrays.asList(cnHistoryName.split(";"));
                   try {
+                    CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
+                    searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
                     for (String historyName : cnHistoryNameList) {
-                      searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
-                      searchModelFindCmrCN.setCountryCd(soldTo.getLandCntry());
                       searchModelFindCmrCN.setName(historyName);
                       resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
                       if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
@@ -373,9 +377,8 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 if (cnCeid != null && !"".equals(cnCeid)) {
                   try {
                     // 4, Check FindCMR with CEID
+                    CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
                     searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
-                    searchModelFindCmrCN.setCountryCd(soldTo.getLandCntry());
-                    searchModelFindCmrCN.setName(null);
                     searchModelFindCmrCN.setCied(cnCeid);
                     resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
                     if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
@@ -479,8 +482,8 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
                 try {
                   // 2, Check FindCMR NON Latin with Chinese name
+                  CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
                   searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
-                  searchModelFindCmrCN.setCountryCd(soldTo.getLandCntry());
                   searchModelFindCmrCN.setName(cnName);
                   resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
                   if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
@@ -511,6 +514,8 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 if (cnHistoryName != null && !"".equals(cnHistoryName)) {
                   List<String> cnHistoryNameList = Arrays.asList(cnHistoryName.split(";"));
                   try {
+                    CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
+                    searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
                     for (String historyName : cnHistoryNameList) {
                       searchModelFindCmrCN.setName(historyName);
                       resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
@@ -589,6 +594,15 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
           boolean ifAQSTNHasCN = true;
           iAddr = handler.getIntlAddrById(soldTo, entityManager);
           if (iAddr != null) {
+            // cnName = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null
+            // ? iAddr.getIntlCustNm2() : "");
+            if (iAddr.getIntlCustNm2() != null) {
+              cnName = iAddr.getIntlCustNm1() + iAddr.getIntlCustNm2();
+            } else {
+              cnName = iAddr.getIntlCustNm1();
+            }
+          }
+          if (!StringUtils.isBlank(cnName)) {
 
             try {
 
@@ -613,8 +627,8 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
                 try {
                   // 2, Check FindCMR NON Latin with Chinese name
+                  CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
                   searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
-                  searchModelFindCmrCN.setCountryCd(soldTo.getLandCntry());
                   searchModelFindCmrCN.setName(cnName);
                   resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
                   if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
@@ -645,6 +659,8 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 if (cnHistoryName != null && !"".equals(cnHistoryName)) {
                   List<String> cnHistoryNameList = Arrays.asList(cnHistoryName.split(";"));
                   try {
+                    CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
+                    searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
                     for (String historyName : cnHistoryNameList) {
                       searchModelFindCmrCN.setName(historyName);
                       resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
@@ -814,8 +830,8 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
                 try {
                   // 2, Check FindCMR NON Latin with Chinese name
+                  CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
                   searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
-                  searchModelFindCmrCN.setCountryCd(soldTo.getLandCntry());
                   searchModelFindCmrCN.setName(cnName);
                   resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
                   if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
@@ -846,6 +862,8 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 if (cnHistoryName != null && !"".equals(cnHistoryName)) {
                   List<String> cnHistoryNameList = Arrays.asList(cnHistoryName.split(";"));
                   try {
+                    CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
+                    searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
                     for (String historyName : cnHistoryNameList) {
                       searchModelFindCmrCN.setName(historyName);
                       resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
@@ -936,11 +954,18 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
             try {
 
               // 1, Check CN API
-              cnName = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
-              searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
-              searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
-              searchModelCNAPI.setAltName(cnName);
-              resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "ALTNAME");
+              if (cnCreditCd != null && cnCreditCd.length() > 0) {
+                searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
+                searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
+                searchModelCNAPI.setTaxCd1(cnCreditCd);
+                resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "TAXCD");
+              } else {
+                cnName = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
+                searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
+                searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
+                searchModelCNAPI.setAltName(cnName);
+                resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "ALTNAME");
+              }
 
               if (resultCNApi != null && resultCNApi.isSuccess()) {
                 cnName = resultCNApi.getRecord().getName();
@@ -949,8 +974,8 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
                 try {
                   // 2, Check FindCMR NON Latin with Chinese name
+                  CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
                   searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
-                  searchModelFindCmrCN.setCountryCd(soldTo.getLandCntry());
                   searchModelFindCmrCN.setName(cnName);
                   resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
                   if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
@@ -989,6 +1014,8 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 if (cnHistoryName != null && !"".equals(cnHistoryName)) {
                   List<String> cnHistoryNameList = Arrays.asList(cnHistoryName.split(";"));
                   try {
+                    CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
+                    searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
                     for (String historyName : cnHistoryNameList) {
                       searchModelFindCmrCN.setName(historyName);
                       resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
@@ -1497,6 +1524,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
     DuplicateCMRCheckRequest request = new DuplicateCMRCheckRequest();
     if (addr != null) {
       request.setIssuingCountry(data.getCmrIssuingCntry());
+      request.setLandedCountry(addr.getLandCntry());
       GEOHandler handler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
       if (handler != null && !handler.customerNamesOnAddress()) {
         request.setCustomerName(admin.getMainCustNm1() + (StringUtils.isBlank(admin.getMainCustNm2()) ? "" : " " + admin.getMainCustNm2()));
@@ -1504,16 +1532,15 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
         request.setCustomerName(addr.getCustNm1() + (StringUtils.isBlank(addr.getCustNm2()) ? "" : " " + addr.getCustNm2()));
       }
 
-      if (data.getCustSubGrp() != null && ("PRIV".equals(data.getCustSubGrp()) || "INTER".equals(data.getCustSubGrp()))) {
-        request.setLandedCountry(addr.getLandCntry());
-        request.setStreetLine1(addr.getAddrTxt());
-        request.setStreetLine2(StringUtils.isEmpty(addr.getAddrTxt2()) ? "" : addr.getAddrTxt2());
+      if (data.getCustSubGrp() != null) {
+        if ("PRIV".equals(data.getCustSubGrp()) || "INTER".equals(data.getCustSubGrp())) {
+          request.setStreetLine1(addr.getAddrTxt());
+          request.setStreetLine2(StringUtils.isEmpty(addr.getAddrTxt2()) ? "" : addr.getAddrTxt2());
+        } else if ("CROSS".equals(data.getCustSubGrp()) || "AQSTN".equals(data.getCustSubGrp())) {
+          request.setNameMatch("Y");
+        }
+
       }
-
-      // request.setCity(addr.getCity1()); //
-
-      // request.setStateProv(addr.getStateProv()); //
-      // request.setPostalCode(addr.getPostCd()); //
 
       if (vatMatchRequired) {
         if (StringUtils.isNotBlank(data.getVat())) {
