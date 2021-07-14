@@ -18,6 +18,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 
 import com.ibm.cio.cmr.request.CmrConstants;
+import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
@@ -369,6 +370,16 @@ public class IndiaUtil extends AutomationUtil {
     } else {
       return false;
     }
+  }
+
+  @Override
+  public void emptyINAC(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData) throws Exception {
+    Data data = requestData.getData();
+    OverrideOutput overrides = new OverrideOutput(false);
+    LOG.debug("INAC code value " + data.getInacCd());
+    overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "INAC_CD", data.getInacCd(), " ");
+    LOG.debug("INAC type value " + data.getInacType());
+    overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "INAC_TYPE", data.getInacType(), " ");
   }
 
 }

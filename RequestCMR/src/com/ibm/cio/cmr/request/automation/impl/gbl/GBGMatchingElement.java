@@ -231,6 +231,10 @@ public class GBGMatchingElement extends MatchingElement {
         result.setProcessOutput(output);
         result.setDetails(details.toString());
       } else {
+        countryUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
+        if (countryUtil != null) {
+          countryUtil.emptyINAC(entityManager, requestData, engineData);
+        }
         result.setDetails("No GBG was found using DUNS hierarchy matching.");
         result.setResults("No Matches");
         result.setOnError(false);
