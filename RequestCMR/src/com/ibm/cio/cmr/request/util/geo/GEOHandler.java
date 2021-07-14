@@ -43,6 +43,7 @@ import com.ibm.cio.cmr.request.entity.IntlAddr;
 import com.ibm.cio.cmr.request.entity.UpdatedAddr;
 import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation;
 import com.ibm.cio.cmr.request.model.ParamContainer;
+import com.ibm.cio.cmr.request.model.approval.ApprovalResponseModel;
 import com.ibm.cio.cmr.request.model.auto.BaseV2RequestModel;
 import com.ibm.cio.cmr.request.model.requestentry.AddressModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
@@ -970,6 +971,12 @@ public abstract class GEOHandler {
   public IntlAddr getIntlAddrById(Addr addr, EntityManager entityManager) {
     // TODO Auto-generated method stub
     return null;
+  }
+
+  public void handleMEUCondApproval(EntityManager entityManager, ApprovalResponseModel approval, Data data) {
+
+    // TODO Auto-generated method stub
+
   }
 
 }

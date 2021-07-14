@@ -39,6 +39,7 @@ import com.ibm.cio.cmr.request.entity.ReqCmtLog;
 import com.ibm.cio.cmr.request.entity.ReqCmtLogPK;
 import com.ibm.cio.cmr.request.entity.Sadr;
 import com.ibm.cio.cmr.request.entity.UpdatedAddr;
+import com.ibm.cio.cmr.request.model.approval.ApprovalResponseModel;
 import com.ibm.cio.cmr.request.model.requestentry.AddressModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
@@ -1570,4 +1571,19 @@ public class CNHandler extends GEOHandler {
       cmr.setCmrIntlCity1(cnCity);
     }
   }
+
+  @Override
+  public void handleMEUCondApproval(EntityManager entityManager, ApprovalResponseModel approval, Data data) {
+    data.setCustAcctType("US");
+    data.setBioChemMissleMfg(
+        SystemUtil.getCurrentTimestamp() != null ? SystemUtil.getCurrentTimestamp().toString().substring(0, 10).replaceAll("-", "") : "");
+    data.setIcmsInd("Y");
+    // TODO Auto-generated method stub
+    if (approval != null && approval.getComments() != null && approval.getComments().contains("MEU")) {
+      data.setMilitary("Y");
+    }
+    entityManager.merge(data);
+    entityManager.flush();
+  }
+
 }
