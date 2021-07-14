@@ -47,7 +47,6 @@ public abstract class MultiThreadedWorker<T> implements Runnable {
 
   @Override
   public void run() {
-    String batchUserId = SystemConfiguration.getValue("BATCH_USERID");
 
     EntityManager entityManager = JpaManager.getEntityManager();
     if (flushOnCommitOnly()) {
@@ -58,7 +57,7 @@ public abstract class MultiThreadedWorker<T> implements Runnable {
     try {
 
       ChangeLogListener.setManager(entityManager);
-      ChangeLogListener.setUser(batchUserId);
+      ChangeLogListener.setUser(BATCH_USER_ID);
       transaction = entityManager.getTransaction();
       transaction.begin();
 
@@ -134,6 +133,10 @@ public abstract class MultiThreadedWorker<T> implements Runnable {
    */
   public void addComment(String comment) {
     this.comment.append(comment);
+  }
+
+  public String getComments() {
+    return this.comment.toString();
   }
 
   public boolean isError() {

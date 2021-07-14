@@ -39,7 +39,7 @@ import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cmr.create.batch.util.BatchUtil;
 import com.ibm.cmr.create.batch.util.CMRRequestContainer;
 import com.ibm.cmr.create.batch.util.masscreate.WorkerThreadFactory;
-import com.ibm.cmr.create.batch.util.masscreate.handler.impl.IERPMassWorker;
+import com.ibm.cmr.create.batch.util.worker.impl.IERPMassUpdtMultiWorker;
 import com.ibm.cmr.services.client.process.ProcessRequest;
 import com.ibm.cmr.services.client.process.ProcessResponse;
 
@@ -251,41 +251,30 @@ public class IERPMassProcessMultiService extends MultiThreadedBatchService<Long>
         LOG.debug("Worker threads to use: " + threads);
         LOG.debug("Starting processing IERP mass update at " + new Date());
         LOG.debug("Number of records found: " + resultsMain.size());
-        List<IERPMassWorker> workers = new ArrayList<IERPMassWorker>();
+        List<IERPMassUpdtMultiWorker> workers = new ArrayList<IERPMassUpdtMultiWorker>();
 
-        while (resultsMain.size() > 0) {
+        ExecutorService executor = Executors.newFixedThreadPool(threads, new WorkerThreadFactory("IERPMassWorker-" + reqId));
+        for (MassUpdt sMassUpdt : resultsMain) {
+          // ensure the mass update entity is not updated on this persistence
+          // context
+          entityManager.detach(sMassUpdt);
+          IERPMassUpdtMultiWorker worker = new IERPMassUpdtMultiWorker(admin, sMassUpdt);
+          executor.execute(worker);
+          workers.add(worker);
+        }
 
-          List<MassUpdt> results = new LinkedList<MassUpdt>();
-          for (int i = 0; i < 50; i++) {
-            if (resultsMain.size() > 0) {
-              results.add(resultsMain.remove(0));
-            } else {
-              break;
-            }
+        executor.shutdown();
+        while (!executor.isTerminated()) {
+          try {
+            Thread.sleep(5000);
+          } catch (InterruptedException e) {
+            // noop
           }
-
-          ExecutorService executor = Executors.newFixedThreadPool(threads, new WorkerThreadFactory("IERPMassWorker-" + reqId));
-          for (MassUpdt sMassUpdt : results) {
-            IERPMassWorker worker = new IERPMassWorker(entityManager, sMassUpdt, admin, data, BATCH_USER_ID);
-            executor.execute(worker);
-            workers.add(worker);
-          }
-
-          executor.shutdown();
-          while (!executor.isTerminated()) {
-            try {
-              Thread.sleep(5000);
-            } catch (InterruptedException e) {
-              // noop
-            }
-          }
-          // execute flush every 50
-          entityManager.flush();
         }
         LOG.debug("Mass create processing finished at " + new Date());
 
-        Exception processError = null;
-        for (IERPMassWorker worker : workers) {
+        Throwable processError = null;
+        for (IERPMassUpdtMultiWorker worker : workers) {
           if (worker != null) {
             if (worker.isError()) {
               LOG.error("Error in processing mass update rdc for Request ID " + admin.getId().getReqId() + ": " + worker.getErrorMsg());
@@ -295,7 +284,7 @@ public class IERPMassProcessMultiService extends MultiThreadedBatchService<Long>
             } else {
               statusCodes.addAll(worker.getStatusCodes());
               rdcProcessStatusMsgs.addAll(worker.getRdcProcessStatusMsgs());
-              isIndexNotUpdated = isIndexNotUpdated || worker.getIndexNotUpdated();
+              isIndexNotUpdated = isIndexNotUpdated || worker.isIndexNotUpdated();
               comment.append(worker.getComments());
             }
           }
@@ -305,7 +294,7 @@ public class IERPMassProcessMultiService extends MultiThreadedBatchService<Long>
         LOG.debug("Worker Process Message" + comment);
 
         if (processError != null) {
-          throw processError;
+          throw new Exception(processError);
         }
 
         admin.setReqStatus(CmrConstants.REQUEST_STATUS.COM.toString());
@@ -429,6 +418,11 @@ public class IERPMassProcessMultiService extends MultiThreadedBatchService<Long>
     createComment(entityManager, "An error occurred during processing:\n" + errorMsg, admin.getId().getReqId());
 
     RequestUtils.sendEmailNotifications(entityManager, admin, hist);
+  }
+
+  @Override
+  public boolean flushOnCommitOnly() {
+    return true;
   }
 
   /**
