@@ -3,10 +3,13 @@
  */
 package com.ibm.cio.cmr.request.util.geo.impl;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 
@@ -18,6 +21,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.AddrPK;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AdminPK;
 import com.ibm.cio.cmr.request.entity.Data;
@@ -44,6 +48,8 @@ import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
 public class CanadaHandler extends GEOHandler {
 
   private static final Logger LOG = Logger.getLogger(CanadaHandler.class);
+  private static final char SOLD_TO_ADDR_USE = '3';
+  private Map<String, String> kunnrToAddrUseMap = new HashMap<>();
 
   @Override
   public void convertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry, ImportCMRModel searchModel)
@@ -62,20 +68,43 @@ public class CanadaHandler extends GEOHandler {
       for (FindCMRRecordModel record : records) {
         String addrUse = record.getCmrAddrUse();
         if (StringUtils.isNotBlank(addrUse)) {
-          char[] addrUses = addrUse.trim().toCharArray();
-          for (char addrUseCh : addrUses) {
-            FindCMRRecordModel tempRecord = new FindCMRRecordModel();
-            PropertyUtils.copyProperties(tempRecord, record);
-
-            tempRecord.setCmrAddrTypeCode(getUIAddrTypeFromAddrUse(Character.toString(addrUseCh)));
-            converted.add(tempRecord);
+          if (addrUse.length() == 1) {
+            addConvertedRecord(converted, record, addrUse.charAt(0));
+          } else {
+            handleMultipleAddrUse(addrUse, converted, record);
           }
         }
       }
     }
-
     Collections.sort(converted);
     source.setItems(converted);
+  }
+
+  private void handleMultipleAddrUse(String addrUse, List<FindCMRRecordModel> converted, FindCMRRecordModel record)
+      throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+
+    int soldToIndex = addrUse.indexOf(SOLD_TO_ADDR_USE);
+    int retainOrigDataIndex = soldToIndex < 0 ? 0 : soldToIndex;
+
+    char[] addrUses = addrUse.trim().toCharArray();
+    String addrUseCopies = "";
+    for (int i = 0; i < addrUses.length; i++) {
+      if (i == retainOrigDataIndex) {
+        addConvertedRecord(converted, record, addrUses[i]);
+      } else {
+        addrUseCopies += addrUses[i];
+      }
+    }
+    kunnrToAddrUseMap.put(record.getCmrSapNumber(), addrUseCopies);
+  }
+
+  private void addConvertedRecord(List<FindCMRRecordModel> converted, FindCMRRecordModel record, char addrUseCh)
+      throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+    FindCMRRecordModel tempRecord = new FindCMRRecordModel();
+    PropertyUtils.copyProperties(tempRecord, record);
+
+    tempRecord.setCmrAddrTypeCode(getUIAddrTypeFromAddrUse(Character.toString(addrUseCh)));
+    converted.add(tempRecord);
   }
 
   private String getUIAddrTypeFromAddrUse(String addrUse) {
@@ -307,7 +336,7 @@ public class CanadaHandler extends GEOHandler {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "BillingProcCd", "-"));
       update.setNewData(service.getCodeAndDescription(newData.getSizeCd(), "BillingProcCd", cmrCountry));
-      update.setOldData(service.getCodeAndDescription(oldData.getSizeCd(), "BillingProcCdr", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getSizeCd(), "BillingProcCd", cmrCountry));
       results.add(update);
     }
 
@@ -398,11 +427,50 @@ public class CanadaHandler extends GEOHandler {
 
   @Override
   public void doAfterImport(EntityManager entityManager, Admin admin, Data data) throws Exception {
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+      Long reqId = data.getId().getReqId();
+      List<Addr> addresses = getAddresses(entityManager, reqId);
+      for (Addr addr : addresses) {
+        String addrUse = kunnrToAddrUseMap.get(addr.getSapNo());
+        if (StringUtils.isNotBlank(addrUse)) {
+          saveAddrCopies(entityManager, addr, addrUse, reqId, data.getCmrIssuingCntry());
+        }
+      }
+    }
+  }
+
+  private void saveAddrCopies(EntityManager entityManager, Addr addrToCopy, String addrUse, Long reqId, String cmrIssuingCntry)
+      throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+
+    char[] addrUses = addrUse.trim().toCharArray();
+    // Set import indicator to N to create new Address copy
+    for (char addrUseCh : addrUses) {
+      String addrType = getUIAddrTypeFromAddrUse(Character.toString(addrUseCh));
+      String addrSeq = generateAddrSeq(entityManager, addrType, reqId, cmrIssuingCntry);
+
+      AddrPK newAddrId = new AddrPK();
+      newAddrId.setAddrType(addrType);
+      newAddrId.setAddrSeq(addrSeq);
+      newAddrId.setReqId(reqId);
+
+      Addr newAddr = new Addr();
+      PropertyUtils.copyProperties(newAddr, addrToCopy);
+      newAddr.setId(newAddrId);
+      newAddr.setImportInd("N");
+      newAddr.setSapNo("");
+
+      entityManager.persist(newAddr);
+      entityManager.flush();
+    }
   }
 
   @Override
   public List<String> getAddressFieldsForUpdateCheck(String cmrIssuingCntry) {
-    return null;
+    List<String> fields = new ArrayList<>();
+    fields.addAll(Arrays.asList("LAND_CNTRY", "ADDR_TXT", "ADDR_TXT_2", "CITY1", "DEPT", "STATE_PROV", "CITY2", "POST_CD", "CUST_PHONE", "PO_BOX",
+        "PO_BOX_CITY"));
+
+    return fields;
   }
 
   @Override
@@ -690,4 +758,14 @@ public class CanadaHandler extends GEOHandler {
     query.setParameter("REQ_ID", reqId);
     query.executeSql();
   }
+
+  private List<Addr> getAddresses(EntityManager entityManager, Long reqId) {
+    List<Addr> addresses = null;
+    String sql = ExternalizedQuery.getSql("DR.GET.ADDR");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    addresses = query.getResults(Addr.class);
+    return addresses;
+  }
+
 }
