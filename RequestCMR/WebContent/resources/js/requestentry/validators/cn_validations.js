@@ -611,7 +611,6 @@ function setValuesForScenarios() {
       FormManager.show('ClassCode', 'custClass');
       var field = FormManager.getField('custClass');
       FormManager.limitDropdownValues(field, [ '81', '85' ]);
-      field.set('value', '81');
     }
     if (_pagemodel.userRole.toUpperCase() == "REQUESTER") {
       // if (_custSubGrp == 'BUSPR') {
