@@ -422,7 +422,7 @@ function AddressDetailsModal_onLoad() {
     _assignDetailsValue('#AddressDetailsModal #cnDistrict_view', details.ret64);
     _assignDetailsValue('#AddressDetailsModal #cnCustContNm_view', details.ret65);
     _assignDetailsValue('#AddressDetailsModal #cnCustContJobTitle_view', details.ret66);
-    _assignDetailsValue('#AddressDetailsModal #cnCustContPhone2_view', details.ret67);
+    _assignDetailsValue('#AddressDetailsModal #custPhone_view', details.ret67);
     _assignDetailsValue('#AddressDetailsModal #cnCustName3_view', details.ret73);
   }
 
@@ -1236,7 +1236,7 @@ function addEditAddressModal_onLoad() {
       cmr.oldcndistrict = details.ret64;
       FormManager.setValue('cnCustContNm', details.ret65);
       FormManager.setValue('cnCustContJobTitle', details.ret66);
-      FormManager.setValue('cnCustContPhone2', details.ret67);
+      FormManager.setValue('custPhone', details.ret67);
       FormManager.setValue('cnCustName3', details.ret73);
       cmr.oldcncustname3 = details.ret73;
 

@@ -317,6 +317,19 @@ public class CNHandler extends GEOHandler {
     intlAddrList = getINTLAddrCountByReqId(entityManager, admin.getId().getReqId());
     intlAddrRdcList = getINTLAddrRdcByReqId(entityManager, admin.getId().getReqId());
 
+    List<GeoContactInfo> geoContactInfoList = new ArrayList<GeoContactInfo>();
+    geoContactInfoList = getGeoContactInfoByReqId(entityManager, admin.getId().getReqId());
+
+    if (geoContactInfoList != null && geoContactInfoList.size() > 0) {
+      for (GeoContactInfo geoContactInfo : geoContactInfoList) {
+        GeoContactInfo merged = entityManager.merge(geoContactInfo);
+        if (merged != null) {
+          entityManager.remove(merged);
+        }
+      }
+      entityManager.flush();
+    }
+
     if (intlAddrList != null && intlAddrList.size() > 0) {
       for (IntlAddr intlAddr : intlAddrList) {
         IntlAddr merged = entityManager.merge(intlAddr);
@@ -1364,6 +1377,21 @@ public class CNHandler extends GEOHandler {
       throw ex;
     }
     return intlAddrRdcList;
+  }
+
+  private List<GeoContactInfo> getGeoContactInfoByReqId(EntityManager entityManager, long reqId) {
+    // TODO Auto-generated method stub
+    String sql = ExternalizedQuery.getSql("CONTACTINFO.FINDALL");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    List<GeoContactInfo> geoContactInfoList;
+    try {
+      geoContactInfoList = query.getResults(GeoContactInfo.class);
+    } catch (Exception ex) {
+      LOG.error("An error occured in getting the GEO_ADL_CONT_DTL records");
+      throw ex;
+    }
+    return geoContactInfoList;
   }
 
   public void createCommentLog(EntityManager em, Admin admin, String message) throws CmrException, SQLException {
