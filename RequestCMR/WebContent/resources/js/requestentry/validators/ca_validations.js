@@ -781,6 +781,10 @@ function updateMainCustomerNames(cntry, addressMode, saving, finalSave, force) {
   }
 }
 
+function validateCACopy(addrType, arrayOfTargetTypes) {
+  return null;
+}
+
 /* Register CA Javascripts */
 dojo.addOnLoad(function() {
   console.log('adding CA scripts...');
@@ -804,7 +808,7 @@ dojo.addOnLoad(function() {
   // GEOHandler.addToggleAddrTypeFunction(toggleAddrTypesForCA, [ SysLoc.CANADA
   // ]);
   GEOHandler.addAddrFunction(addCAAddressHandler, [ SysLoc.CANADA ]);
-  GEOHandler.enableCopyAddress(SysLoc.CANADA);
+  GEOHandler.enableCopyAddress([ SysLoc.CANADA ], validateCACopy, [ 'ZP01', 'ZP02' ]);
   GEOHandler.addAfterTemplateLoad(removeValidatorForOptionalFields, SysLoc.CANADA);
   GEOHandler.addAfterTemplateLoad(retainImportValues, SysLoc.CANADA);
   GEOHandler.addAfterTemplateLoad(toggleCATaxFields, SysLoc.CANADA);
