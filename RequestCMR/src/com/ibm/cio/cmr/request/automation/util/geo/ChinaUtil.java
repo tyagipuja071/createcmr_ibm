@@ -308,6 +308,93 @@ public class ChinaUtil extends AutomationUtil {
     return true;
   }
 
+  public boolean isUpdated(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData) throws Exception {
+
+    Data data = requestData.getData();
+    Admin admin = requestData.getAdmin();
+    RequestChangeContainer changes = new RequestChangeContainer(entityManager, data.getCmrIssuingCntry(), admin, requestData);
+
+    boolean ppsceid = changes.isDataChanged("PPS CEID");
+    boolean memLvl = changes.isDataChanged("Membership Level");
+    boolean bpRelType = changes.isDataChanged("BP Relation Type");
+    boolean custClass = changes.isDataChanged("Classification Code");
+
+    // check if ZS01 name and address have been updated
+    boolean zs01EnName1 = changes.isAddressFieldChanged("ZS01", "Customer Name English");
+    boolean zs01CnName1 = changes.isAddressFieldChanged("ZS01", "Customer Name Chinese");
+    boolean zs01EnName2 = changes.isAddressFieldChanged("ZS01", "Customer Name Con't English");
+    boolean zs01CnName2 = changes.isAddressFieldChanged("ZS01", "Customer Name Con't Chinese");
+    boolean zs01EnName3 = changes.isAddressFieldChanged("ZS01", "Customer Name Con't 2 English");
+    boolean zs01CnName3 = changes.isAddressFieldChanged("ZS01", "Customer Name Con't Chinese 2");
+    boolean zs01EnAddr1 = changes.isAddressFieldChanged("ZS01", "Street Address English");
+    boolean zs01CnAddr1 = changes.isAddressFieldChanged("ZS01", "Street Address Chinese");
+    boolean zs01EnAddr2 = changes.isAddressFieldChanged("ZS01", "Address Con't English");
+    boolean zs01CnAddr2 = changes.isAddressFieldChanged("ZS01", "Street Address Con't Chinese");
+    boolean zs01Phone = changes.isAddressFieldChanged("ZS01", "Phone #");
+    boolean zs01JobTitle = changes.isAddressFieldChanged("ZS01", "Customer Contact's Job Title");
+    boolean zs01ContactName = changes.isAddressFieldChanged("ZS01", "Customer Contact's Name (include salutation)");
+
+    // check if ZI01 name and address have been updated
+    boolean zi01EnName1 = changes.isAddressFieldChanged("ZI01", "Customer Name English");
+    boolean zi01CnName1 = changes.isAddressFieldChanged("ZI01", "Customer Name Chinese");
+    boolean zi01EnName2 = changes.isAddressFieldChanged("ZI01", "Customer Name Con't English");
+    boolean zi01CnName2 = changes.isAddressFieldChanged("ZI01", "Customer Name Con't Chinese");
+    boolean zi01EnName3 = changes.isAddressFieldChanged("ZI01", "Customer Name Con't 2 English");
+    boolean zi01CnName3 = changes.isAddressFieldChanged("ZI01", "Customer Name Con't Chinese 2");
+    boolean zi01EnAddr1 = changes.isAddressFieldChanged("ZI01", "Street Address English");
+    boolean zi01CnAddr1 = changes.isAddressFieldChanged("ZI01", "Street Address Chinese");
+    boolean zi01EnAddr2 = changes.isAddressFieldChanged("ZI01", "Address Con't English");
+    boolean zi01CnAddr2 = changes.isAddressFieldChanged("ZI01", "Street Address Con't Chinese");
+    boolean zi01Phone = changes.isAddressFieldChanged("ZI01", "Phone #");
+    boolean zi01JobTitle = changes.isAddressFieldChanged("ZI01", "Customer Contact's Job Title");
+    boolean zi01ContactName = changes.isAddressFieldChanged("ZI01", "Customer Contact's Name (include salutation)");
+
+    // check if ZP01 name and address have been updated
+    boolean zp01EnName1 = changes.isAddressFieldChanged("ZP01", "Customer Name English");
+    boolean zp01CnName1 = changes.isAddressFieldChanged("ZP01", "Customer Name Chinese");
+    boolean zp01EnName2 = changes.isAddressFieldChanged("ZP01", "Customer Name Con't English");
+    boolean zp01CnName2 = changes.isAddressFieldChanged("ZP01", "Customer Name Con't Chinese");
+    boolean zp01EnName3 = changes.isAddressFieldChanged("ZP01", "Customer Name Con't 2 English");
+    boolean zp01CnName3 = changes.isAddressFieldChanged("ZP01", "Customer Name Con't Chinese 2");
+    boolean zp01EnAddr1 = changes.isAddressFieldChanged("ZP01", "Street Address English");
+    boolean zp01CnAddr1 = changes.isAddressFieldChanged("ZP01", "Street Address Chinese");
+    boolean zp01EnAddr2 = changes.isAddressFieldChanged("ZP01", "Address Con't English");
+    boolean zp01CnAddr2 = changes.isAddressFieldChanged("ZP01", "Street Address Con't Chinese");
+    boolean zp01Phone = changes.isAddressFieldChanged("ZP01", "Phone #");
+    boolean zp01JobTitle = changes.isAddressFieldChanged("ZP01", "Customer Contact's Job Title");
+    boolean zp01ContactName = changes.isAddressFieldChanged("ZP01", "Customer Contact's Name (include salutation)");
+
+    // check if ZD01 name and address have been updated
+    boolean zd01EnName1 = changes.isAddressFieldChanged("ZD01", "Customer Name English");
+    boolean zd01CnName1 = changes.isAddressFieldChanged("ZD01", "Customer Name Chinese");
+    boolean zd01EnName2 = changes.isAddressFieldChanged("ZD01", "Customer Name Con't English");
+    boolean zd01CnName2 = changes.isAddressFieldChanged("ZD01", "Customer Name Con't Chinese");
+    boolean zd01EnName3 = changes.isAddressFieldChanged("ZD01", "Customer Name Con't 2 English");
+    boolean zd01CnName3 = changes.isAddressFieldChanged("ZD01", "Customer Name Con't Chinese 2");
+    boolean zd01EnAddr1 = changes.isAddressFieldChanged("ZD01", "Street Address English");
+    boolean zd01CnAddr1 = changes.isAddressFieldChanged("ZD01", "Street Address Chinese");
+    boolean zd01EnAddr2 = changes.isAddressFieldChanged("ZD01", "Address Con't English");
+    boolean zd01CnAddr2 = changes.isAddressFieldChanged("ZD01", "Street Address Con't Chinese");
+    boolean zd01Phone = changes.isAddressFieldChanged("ZD01", "Phone #");
+    boolean zd01JobTitle = changes.isAddressFieldChanged("ZD01", "Customer Contact's Job Title");
+    boolean zd01ContactName = changes.isAddressFieldChanged("ZD01", "Customer Contact's Name (include salutation)");
+
+    // validation
+    if (!(zs01EnName1 || zs01CnName1 || zs01EnName2 || zs01CnName2 || zs01EnName3 || zs01CnName3 || zs01EnAddr1 || zs01CnAddr1 || zs01EnAddr2
+        || zs01CnAddr2 || zi01EnName1 || zi01CnName1 || zi01EnName2 || zi01CnName2 || zi01EnName3 || zi01CnName3 || zi01EnAddr1 || zi01CnAddr1
+        || zi01EnAddr2 || zi01CnAddr2 || zp01EnName1 || zp01CnName1 || zp01EnName2 || zp01CnName2 || zp01EnName3 || zp01CnName3 || zp01EnAddr1
+        || zp01CnAddr1 || zp01EnAddr2 || zp01CnAddr2 || zd01EnName1 || zd01CnName1 || zd01EnName2 || zd01CnName2 || zd01EnName3 || zd01CnName3
+        || zd01EnAddr1 || zd01CnAddr1 || zd01EnAddr2 || zd01CnAddr2)) {
+
+      if (ppsceid || memLvl || bpRelType || custClass || zs01Phone || zs01JobTitle || zs01ContactName || zi01Phone || zi01JobTitle || zi01ContactName
+          || zp01Phone || zp01JobTitle || zp01ContactName || zd01Phone || zd01JobTitle || zd01ContactName) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   @Override
   public boolean runUpdateChecksForAddress(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
       RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {

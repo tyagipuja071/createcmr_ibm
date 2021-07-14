@@ -14,11 +14,15 @@ import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.impl.ApprovalsElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.EmptyOutput;
+import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
+import com.ibm.cio.cmr.request.automation.util.geo.ChinaUtil;
 import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.service.approval.ApprovalService;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 
 /**
  * {@link ApprovalsElement} implementing the default approvals workflow
@@ -40,6 +44,7 @@ public class DefaultApprovalsElement extends ApprovalsElement {
       throws Exception {
     long reqId = requestData.getAdmin().getId().getReqId();
     Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
     RequestEntryModel model = requestData.createModelFromRequest();
 
     AppUser requester = new AppUser();
@@ -51,25 +56,43 @@ public class DefaultApprovalsElement extends ApprovalsElement {
     AutomationResult<EmptyOutput> result = buildResult(reqId);
     result.setProcessOutput(new EmptyOutput());
 
-    LOG.info("Checking and generating required approvals for Request " + reqId);
+    AutomationUtil automationUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
+    String approvalsResult = "";
+    boolean sendApprovalFlag = false;
+    if (automationUtil != null && automationUtil instanceof ChinaUtil && SystemLocation.CHINA.equals(data.getCmrIssuingCntry())) {
+      ChinaUtil chinaUtil = (ChinaUtil) automationUtil;
+      // call chinaUtil logic
+      sendApprovalFlag = chinaUtil.isUpdated(entityManager, requestData, engineData);
+      if (!sendApprovalFlag) {
 
-    LOG.debug("Merging admin entity before checking for default approvals.");
-    entityManager.merge(admin);
-
-    ApprovalService service = new ApprovalService();
-    String approvalsResult = service.processDefaultApproval(entityManager, reqId, admin.getReqType(), requester, model);
-    LOG.trace("Approvals result: " + approvalsResult);
-    if (engineData.hasPositiveCheckStatus("SKIP_APPROVALS")) {
-      result.setOnError(false);
-      result.setDetails("Skip processing of element as requester is from CMDE team.");
-      result.setResults("Skipped");
-    } else if (StringUtils.isBlank(approvalsResult) || "NONE".equalsIgnoreCase(approvalsResult)) {
-      result.setResults("None");
-      result.setDetails("No approvals are required.");
+        LOG.info("Checking and generating required approvals for China Request " + reqId);
+        LOG.debug("Merging admin entity before checking for default China approvals.");
+        entityManager.merge(admin);
+        ApprovalService service = new ApprovalService();
+        approvalsResult = service.processDefaultApproval(entityManager, reqId, admin.getReqType(), requester, model);
+        LOG.trace("China Approvals result: " + approvalsResult);
+      }
     } else {
-      result.setOnError(true);
-      result.setResults("Generated");
-      result.setDetails("Required approvals have been generated.");
+      LOG.info("Checking and generating required approvals for Request " + reqId);
+
+      LOG.debug("Merging admin entity before checking for default approvals.");
+      entityManager.merge(admin);
+
+      ApprovalService service = new ApprovalService();
+      approvalsResult = service.processDefaultApproval(entityManager, reqId, admin.getReqType(), requester, model);
+      LOG.trace("Approvals result: " + approvalsResult);
+      if (engineData.hasPositiveCheckStatus("SKIP_APPROVALS")) {
+        result.setOnError(false);
+        result.setDetails("Skip processing of element as requester is from CMDE team.");
+        result.setResults("Skipped");
+      } else if (StringUtils.isBlank(approvalsResult) || "NONE".equalsIgnoreCase(approvalsResult)) {
+        result.setResults("None");
+        result.setDetails("No approvals are required.");
+      } else {
+        result.setOnError(true);
+        result.setResults("Generated");
+        result.setDetails("Required approvals have been generated.");
+      }
     }
 
     return result;
