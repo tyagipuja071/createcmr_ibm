@@ -465,40 +465,38 @@ public class CNHandler extends GEOHandler {
 
         }
 
-        if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
-          String qryKnvkAddr = ExternalizedQuery.getSql("GET_CONTINFO_ON_IMPORT_FOR_CN");
-          PreparedQuery queryKnvK = new PreparedQuery(entityManager, qryKnvkAddr);
-          queryKnvK.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
-          queryKnvK.setParameter("CMR", cmr);
-          queryKnvK.setParameter("KATR6", SystemLocation.CHINA);
+        String qryKnvkAddr = ExternalizedQuery.getSql("GET_CONTINFO_ON_IMPORT_FOR_CN");
+        PreparedQuery queryKnvK = new PreparedQuery(entityManager, qryKnvkAddr);
+        queryKnvK.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+        queryKnvK.setParameter("CMR", cmr);
+        queryKnvK.setParameter("KATR6", SystemLocation.CHINA);
 
-          List<Object[]> results = queryKnvK.getResults();
+        List<Object[]> results = queryKnvK.getResults();
 
-          if (results != null && !results.isEmpty()) {
-            Object[] sResult = results.get(0);
+        if (results != null && !results.isEmpty()) {
+          Object[] sResult = results.get(0);
 
-            GeoContactInfo geoContactInfo = new GeoContactInfo();
-            GeoContactInfoPK ePk = new GeoContactInfoPK();
-            int contactId = 1;
-            geoContactInfo.setContactFunc(sResult[0].toString());
-            geoContactInfo.setContactName(sResult[1].toString());
-            geoContactInfo.setContactPhone(sResult[2].toString());
-            geoContactInfo.setContactType(addr.getId().getAddrType());
-            geoContactInfo.setContactSeqNum(addr.getId().getAddrSeq());
-            geoContactInfo.setCreateById(admin.getRequesterId());
-            geoContactInfo.setCreateTs(SystemUtil.getCurrentTimestamp());
+          GeoContactInfo geoContactInfo = new GeoContactInfo();
+          GeoContactInfoPK ePk = new GeoContactInfoPK();
+          int contactId = 1;
+          geoContactInfo.setContactPhone(sResult[0].toString());
+          geoContactInfo.setContactFunc(sResult[1].toString());
+          geoContactInfo.setContactName(sResult[2].toString());
+          geoContactInfo.setContactType(addr.getId().getAddrType());
+          geoContactInfo.setContactSeqNum(addr.getId().getAddrSeq());
+          geoContactInfo.setCreateById(admin.getRequesterId());
+          geoContactInfo.setCreateTs(SystemUtil.getCurrentTimestamp());
 
-            try {
-              contactId = new GeoContactInfoService().generateNewContactId(null, entityManager, null, String.valueOf(admin.getId().getReqId()));
-              ePk.setContactInfoId(contactId);
-            } catch (CmrException ex) {
-              LOG.debug("Exception while getting contactId : " + ex.getMessage(), ex);
-            }
-            ePk.setReqId(data.getId().getReqId());
-            geoContactInfo.setId(ePk);
-            entityManager.persist(geoContactInfo);
-            entityManager.flush();
+          try {
+            contactId = new GeoContactInfoService().generateNewContactId(null, entityManager, null, String.valueOf(admin.getId().getReqId()));
+            ePk.setContactInfoId(contactId);
+          } catch (CmrException ex) {
+            LOG.debug("Exception while getting contactId : " + ex.getMessage(), ex);
           }
+          ePk.setReqId(data.getId().getReqId());
+          geoContactInfo.setId(ePk);
+          entityManager.persist(geoContactInfo);
+          entityManager.flush();
         }
 
       } catch (Exception e) {
