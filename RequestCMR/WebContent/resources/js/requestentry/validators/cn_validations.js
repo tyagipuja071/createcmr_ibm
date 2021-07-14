@@ -1619,6 +1619,7 @@ function addDoubleByteValidatorCN(cntry, details) {
   /* Address */
   FormManager.addValidator('cnCustName1', Validators.NO_SINGLE_BYTE, [ 'Customer Name Chinese' ]);
   FormManager.addValidator('cnCustName2', Validators.NO_SINGLE_BYTE, [ 'Customer Name Con' + '\'' + 't Chinese' ]);
+  FormManager.addValidator('cnCustName3', Validators.NO_SINGLE_BYTE, [ 'Customer Name Con' + '\'' + 't Chinese 2' ]);
   FormManager.addValidator('cnAddrTxt', Validators.NO_SINGLE_BYTE, [ 'Street Address Chinese' ]);
   FormManager.addValidator('cnAddrTxt2', Validators.NO_SINGLE_BYTE, [ 'Street Address Con' + '\'' + 't Chinese' ]);
 }
