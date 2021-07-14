@@ -386,7 +386,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                     searchModelFindCmrCN.setCied(cnCeid);
                     // resultFindCmrCN =
                     // CompanyFinder.findCompanies(searchModelFindCmrCN);
-                    findCMRResult = checkCeidViaFindCMR(searchModelFindCmrCN);
+                    findCMRResult = searchFindCMR(searchModelFindCmrCN);
                     if (findCMRResult != null && findCMRResult.getItems() != null && !findCMRResult.getItems().isEmpty()) {
                       ceidMatched = true;
                       List<FindCMRRecordModel> cmrs = findCMRResult.getItems();
@@ -738,71 +738,41 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
             // req
             ifAQSTNHasCN = false;
 
-            response = getMatches(entityManager, requestData, engineData);
-            if (response != null) {
-              if (response.getSuccess()) {
-                if (response.getMatched()) {
-                  List<DuplicateCMRCheckResponse> cmrCheckMatches = response.getMatches();
-                  if (cmrCheckMatches.size() != 0) {
-                    result.setResults("Matches Found");
-                    details.append(cmrCheckMatches.size() + " record(s) found.");
-                    List<String> dupCMRNos = new ArrayList<>();
-                    if (cmrCheckMatches.size() > 5) {
-                      cmrCheckMatches = cmrCheckMatches.subList(0, 5);
-                      details.append("Showing top 5 matches only.");
-                    }
+            CompanyRecordModel searchModelFindCmr = new CompanyRecordModel();
+            searchModelFindCmr.setIssuingCntry(data.getCmrIssuingCntry());
+            searchModelFindCmr.setName(soldTo.getCustNm1() + (soldTo.getCustNm2() != null ? soldTo.getCustNm2() : ""));
+            findCMRResult = searchFindCMR(searchModelFindCmr);
+            if (findCMRResult != null && findCMRResult.getItems() != null && !findCMRResult.getItems().isEmpty()) {
+              ceidMatched = true;
+              List<FindCMRRecordModel> cmrs = findCMRResult.getItems();
+              for (FindCMRRecordModel cmrsMods : cmrs) {
+                cmrData.setCmrNo(cmrsMods.getCmrNum());
+                cmrData.setName(cmrsMods.getCmrName1Plain() + (cmrsMods.getCmrName2Plain() != null ? cmrsMods.getCmrName2Plain() : ""));
+                cmrData.setIssuingCntry(cmrsMods.getCmrIssuedBy());
+                cmrData.setCied(cmrsMods.getCmrPpsceid());
+                cmrData.setCountryCd(cmrsMods.getCmrCountryLanded());
+                cmrData.setStreetAddress1(cmrsMods.getCmrStreetAddress());
+                cmrData.setStreetAddress2(cmrsMods.getCmrStreetAddressCont());
+                cmrData.setPostCd(cmrsMods.getCmrPostalCode());
+                cmrData.setCity(cmrsMods.getCmrCity());
 
-                    int itemNo = 1;
-                    for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
-                      details.append("\n");
-
-                      log.debug("Duplicate CMRs Found..");
-                      output.addMatch(getProcessCode(), "CMR_NO", cmrCheckRecord.getCmrNo(), "Matching Logic", cmrCheckRecord.getMatchGrade() + "",
-                          "CMR", itemNo++);
-                      dupCMRNos.add(cmrCheckRecord.getCmrNo());
-                      logDuplicateCMR(details, cmrCheckRecord);
-                    }
-                    engineData.put("cmrCheckMatches", cmrCheckMatches);
-                    result.setResults("Found Duplicate CMRs.");
-                    if (engineData.hasPositiveCheckStatus("allowDuplicates")) {
-                      engineData.addNegativeCheckStatus("dupAllowed",
-                          cmrCheckMatches.size()
-                              + " possible duplicate CMR(s) found with the same data but allowed for the scenario.\n Duplicate CMR(s) found: "
-                              + StringUtils.join(dupCMRNos, ", "));
-                    } else {
-                      List<String> zs01KunnrsList = new ArrayList<String>();
-                      for (String dupCMR : dupCMRNos) {
-                        zs01KunnrsList.add(getZS01Kunnr(dupCMR, requestData.getData().getCmrIssuingCntry()));
-                      }
-                      engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR", StringUtils.join(dupCMRNos, ", "),
-                          StringUtils.join(zs01KunnrsList, ", "));
-                      // to allow overides later
-                      requestData.getAdmin().setMatchIndc("C");
-                      result.setOnError(true);
-                    }
-                    result.setProcessOutput(output);
-                    result.setDetails(details.toString().trim());
-                  } else {
-                    result.setDetails("No Duplicate CMRs were found.");
-                    result.setResults("No Matches");
-                    result.setOnError(false);
-                  }
-                } else {
-                  result.setDetails("No Duplicate CMRs were found.");
-                  result.setResults("No Matches");
-                  result.setOnError(false);
-                }
-              } else {
-                result.setDetails(response.getMessage());
-                engineData.addRejectionComment("OTH", response.getMessage(), "", "");
-                result.setOnError(true);
-                result.setResults("Error on Duplicate CMR Check.");
+                matchedCMRs.add(cmrsMods.getCmrNum());
+                details.append("\n");
+                logDuplicateCMR(details, cmrData);
               }
-            } else {
-              result.setDetails("Duplicate CMR Check Encountered an error.");
-              engineData.addRejectionComment("OTH", "Duplicate CMR Check Encountered an error.", "", "");
+
+              result.setResults("Matches Found");
+              result.setResults("Found Duplicate CMRs.");
+              engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR", StringUtils.join(matchedCMRs, ", "), "");
+              // to allow overides later
+              requestData.getAdmin().setMatchIndc("C");
               result.setOnError(true);
-              result.setResults("Error on Duplicate CMR Check");
+              result.setProcessOutput(output);
+              result.setDetails(details.toString().trim());
+            } else {
+              result.setDetails("No Duplicate CMRs were found.");
+              result.setResults("No Matches");
+              result.setOnError(false);
             }
 
           }
@@ -1099,73 +1069,41 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
             // check with English name and get matched result, then it is dup
             // req
-            ifAQSTNHasCN = false;
+            CompanyRecordModel searchModelFindCmr = new CompanyRecordModel();
+            searchModelFindCmr.setIssuingCntry(data.getCmrIssuingCntry());
+            searchModelFindCmr.setName(soldTo.getCustNm1() + (soldTo.getCustNm2() != null ? soldTo.getCustNm2() : ""));
+            findCMRResult = searchFindCMR(searchModelFindCmr);
+            if (findCMRResult != null && findCMRResult.getItems() != null && !findCMRResult.getItems().isEmpty()) {
+              ceidMatched = true;
+              List<FindCMRRecordModel> cmrs = findCMRResult.getItems();
+              for (FindCMRRecordModel cmrsMods : cmrs) {
+                cmrData.setCmrNo(cmrsMods.getCmrNum());
+                cmrData.setName(cmrsMods.getCmrName1Plain() + (cmrsMods.getCmrName2Plain() != null ? cmrsMods.getCmrName2Plain() : ""));
+                cmrData.setIssuingCntry(cmrsMods.getCmrIssuedBy());
+                cmrData.setCied(cmrsMods.getCmrPpsceid());
+                cmrData.setCountryCd(cmrsMods.getCmrCountryLanded());
+                cmrData.setStreetAddress1(cmrsMods.getCmrStreetAddress());
+                cmrData.setStreetAddress2(cmrsMods.getCmrStreetAddressCont());
+                cmrData.setPostCd(cmrsMods.getCmrPostalCode());
+                cmrData.setCity(cmrsMods.getCmrCity());
 
-            response = getMatches(entityManager, requestData, engineData);
-            if (response != null) {
-              if (response.getSuccess()) {
-                if (response.getMatched()) {
-                  List<DuplicateCMRCheckResponse> cmrCheckMatches = response.getMatches();
-                  if (cmrCheckMatches.size() != 0) {
-                    result.setResults("Matches Found");
-                    details.append(cmrCheckMatches.size() + " record(s) found.");
-                    List<String> dupCMRNos = new ArrayList<>();
-                    if (cmrCheckMatches.size() > 5) {
-                      cmrCheckMatches = cmrCheckMatches.subList(0, 5);
-                      details.append("Showing top 5 matches only.");
-                    }
-
-                    int itemNo = 1;
-                    for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
-                      details.append("\n");
-
-                      log.debug("Duplicate CMRs Found..");
-                      output.addMatch(getProcessCode(), "CMR_NO", cmrCheckRecord.getCmrNo(), "Matching Logic", cmrCheckRecord.getMatchGrade() + "",
-                          "CMR", itemNo++);
-                      dupCMRNos.add(cmrCheckRecord.getCmrNo());
-                      logDuplicateCMR(details, cmrCheckRecord);
-                    }
-                    engineData.put("cmrCheckMatches", cmrCheckMatches);
-                    result.setResults("Found Duplicate CMRs.");
-                    if (engineData.hasPositiveCheckStatus("allowDuplicates")) {
-                      engineData.addNegativeCheckStatus("dupAllowed",
-                          cmrCheckMatches.size()
-                              + " possible duplicate CMR(s) found with the same data but allowed for the scenario.\n Duplicate CMR(s) found: "
-                              + StringUtils.join(dupCMRNos, ", "));
-                    } else {
-                      List<String> zs01KunnrsList = new ArrayList<String>();
-                      for (String dupCMR : dupCMRNos) {
-                        zs01KunnrsList.add(getZS01Kunnr(dupCMR, requestData.getData().getCmrIssuingCntry()));
-                      }
-                      engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR", StringUtils.join(dupCMRNos, ", "),
-                          StringUtils.join(zs01KunnrsList, ", "));
-                      // to allow overides later
-                      requestData.getAdmin().setMatchIndc("C");
-                      result.setOnError(true);
-                    }
-                    result.setProcessOutput(output);
-                    result.setDetails(details.toString().trim());
-                  } else {
-                    result.setDetails("No Duplicate CMRs were found.");
-                    result.setResults("No Matches");
-                    result.setOnError(false);
-                  }
-                } else {
-                  result.setDetails("No Duplicate CMRs were found.");
-                  result.setResults("No Matches");
-                  result.setOnError(false);
-                }
-              } else {
-                result.setDetails(response.getMessage());
-                engineData.addRejectionComment("OTH", response.getMessage(), "", "");
-                result.setOnError(true);
-                result.setResults("Error on Duplicate CMR Check.");
+                matchedCMRs.add(cmrsMods.getCmrNum());
+                details.append("\n");
+                logDuplicateCMR(details, cmrData);
               }
-            } else {
-              result.setDetails("Duplicate CMR Check Encountered an error.");
-              engineData.addRejectionComment("OTH", "Duplicate CMR Check Encountered an error.", "", "");
+
+              result.setResults("Matches Found");
+              result.setResults("Found Duplicate CMRs.");
+              engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR", StringUtils.join(matchedCMRs, ", "), "");
+              // to allow overides later
+              requestData.getAdmin().setMatchIndc("C");
               result.setOnError(true);
-              result.setResults("Error on Duplicate CMR Check");
+              result.setProcessOutput(output);
+              result.setDetails(details.toString().trim());
+            } else {
+              result.setDetails("No Duplicate CMRs were found.");
+              result.setResults("No Matches");
+              result.setOnError(false);
             }
 
           }
@@ -1177,72 +1115,45 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
           // a) check with English name and address, if get matched result, then
           // it is dup req
 
-          response = getMatches(entityManager, requestData, engineData);
-          if (response != null) {
-            if (response.getSuccess()) {
-              if (response.getMatched()) {
-                List<DuplicateCMRCheckResponse> cmrCheckMatches = response.getMatches();
-                if (cmrCheckMatches.size() != 0) {
-                  result.setResults("Matches Found");
-                  details.append(cmrCheckMatches.size() + " record(s) found.");
-                  List<String> dupCMRNos = new ArrayList<>();
-                  if (cmrCheckMatches.size() > 5) {
-                    cmrCheckMatches = cmrCheckMatches.subList(0, 5);
-                    details.append("Showing top 5 matches only.");
-                  }
+          CompanyRecordModel searchModelFindCmr = new CompanyRecordModel();
+          searchModelFindCmr.setIssuingCntry(data.getCmrIssuingCntry());
+          searchModelFindCmr.setName(soldTo.getCustNm1() + (soldTo.getCustNm2() != null ? soldTo.getCustNm2() : ""));
+          searchModelFindCmr.setStreetAddress1(soldTo.getAddrTxt());
+          searchModelFindCmr.setStreetAddress2(soldTo.getAddrTxt2());
+          findCMRResult = searchFindCMR(searchModelFindCmr);
+          if (findCMRResult != null && findCMRResult.getItems() != null && !findCMRResult.getItems().isEmpty()) {
+            ceidMatched = true;
+            List<FindCMRRecordModel> cmrs = findCMRResult.getItems();
+            for (FindCMRRecordModel cmrsMods : cmrs) {
+              cmrData.setCmrNo(cmrsMods.getCmrNum());
+              cmrData.setName(cmrsMods.getCmrName1Plain() + (cmrsMods.getCmrName2Plain() != null ? cmrsMods.getCmrName2Plain() : ""));
+              cmrData.setIssuingCntry(cmrsMods.getCmrIssuedBy());
+              cmrData.setCied(cmrsMods.getCmrPpsceid());
+              cmrData.setCountryCd(cmrsMods.getCmrCountryLanded());
+              cmrData.setStreetAddress1(cmrsMods.getCmrStreetAddress());
+              cmrData.setStreetAddress2(cmrsMods.getCmrStreetAddressCont());
+              cmrData.setPostCd(cmrsMods.getCmrPostalCode());
+              cmrData.setCity(cmrsMods.getCmrCity());
 
-                  int itemNo = 1;
-                  for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
-                    details.append("\n");
-
-                    log.debug("Duplicate CMRs Found..");
-                    output.addMatch(getProcessCode(), "CMR_NO", cmrCheckRecord.getCmrNo(), "Matching Logic", cmrCheckRecord.getMatchGrade() + "",
-                        "CMR", itemNo++);
-                    dupCMRNos.add(cmrCheckRecord.getCmrNo());
-                    logDuplicateCMR(details, cmrCheckRecord);
-                  }
-                  engineData.put("cmrCheckMatches", cmrCheckMatches);
-                  result.setResults("Found Duplicate CMRs.");
-                  if (engineData.hasPositiveCheckStatus("allowDuplicates")) {
-                    engineData.addNegativeCheckStatus("dupAllowed",
-                        cmrCheckMatches.size()
-                            + " possible duplicate CMR(s) found with the same data but allowed for the scenario.\n Duplicate CMR(s) found: "
-                            + StringUtils.join(dupCMRNos, ", "));
-                  } else {
-                    List<String> zs01KunnrsList = new ArrayList<String>();
-                    for (String dupCMR : dupCMRNos) {
-                      zs01KunnrsList.add(getZS01Kunnr(dupCMR, requestData.getData().getCmrIssuingCntry()));
-                    }
-                    engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR", StringUtils.join(dupCMRNos, ", "),
-                        StringUtils.join(zs01KunnrsList, ", "));
-                    // to allow overides later
-                    requestData.getAdmin().setMatchIndc("C");
-                    result.setOnError(true);
-                  }
-                  result.setProcessOutput(output);
-                  result.setDetails(details.toString().trim());
-                } else {
-                  result.setDetails("No Duplicate CMRs were found.");
-                  result.setResults("No Matches");
-                  result.setOnError(false);
-                }
-              } else {
-                result.setDetails("No Duplicate CMRs were found.");
-                result.setResults("No Matches");
-                result.setOnError(false);
-              }
-            } else {
-              result.setDetails(response.getMessage());
-              engineData.addRejectionComment("OTH", response.getMessage(), "", "");
-              result.setOnError(true);
-              result.setResults("Error on Duplicate CMR Check.");
+              matchedCMRs.add(cmrsMods.getCmrNum());
+              details.append("\n");
+              logDuplicateCMR(details, cmrData);
             }
-          } else {
-            result.setDetails("Duplicate CMR Check Encountered an error.");
-            engineData.addRejectionComment("OTH", "Duplicate CMR Check Encountered an error.", "", "");
+
+            result.setResults("Matches Found");
+            result.setResults("Found Duplicate CMRs.");
+            engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR", StringUtils.join(matchedCMRs, ", "), "");
+            // to allow overides later
+            requestData.getAdmin().setMatchIndc("C");
             result.setOnError(true);
-            result.setResults("Error on Duplicate CMR Check");
+            result.setProcessOutput(output);
+            result.setDetails(details.toString().trim());
+          } else {
+            result.setDetails("No Duplicate CMRs were found.");
+            result.setResults("No Matches");
+            result.setOnError(false);
           }
+
           break;
         case "CROSS": // SCENARIO_CROSS_CROSS
 
@@ -1250,71 +1161,41 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
           // a) check with English name and get matched result, then it is dup
           // req
 
-          response = getMatches(entityManager, requestData, engineData);
-          if (response != null) {
-            if (response.getSuccess()) {
-              if (response.getMatched()) {
-                List<DuplicateCMRCheckResponse> cmrCheckMatches = response.getMatches();
-                if (cmrCheckMatches.size() != 0) {
-                  result.setResults("Matches Found");
-                  details.append(cmrCheckMatches.size() + " record(s) found.");
-                  List<String> dupCMRNos = new ArrayList<>();
-                  if (cmrCheckMatches.size() > 5) {
-                    cmrCheckMatches = cmrCheckMatches.subList(0, 5);
-                    details.append("Showing top 5 matches only.");
-                  }
+          CompanyRecordModel searchModel = new CompanyRecordModel();
+          searchModel.setIssuingCntry(data.getCmrIssuingCntry());
+          searchModel.setName(soldTo.getCustNm1() + (soldTo.getCustNm2() != null ? soldTo.getCustNm2() : ""));
+          findCMRResult = searchFindCMR(searchModel);
+          if (findCMRResult != null && findCMRResult.getItems() != null && !findCMRResult.getItems().isEmpty()) {
+            ceidMatched = true;
+            List<FindCMRRecordModel> cmrs = findCMRResult.getItems();
+            for (FindCMRRecordModel cmrsMods : cmrs) {
+              cmrData.setCmrNo(cmrsMods.getCmrNum());
+              cmrData.setName(cmrsMods.getCmrName1Plain() + (cmrsMods.getCmrName2Plain() != null ? cmrsMods.getCmrName2Plain() : ""));
+              cmrData.setIssuingCntry(cmrsMods.getCmrIssuedBy());
+              cmrData.setCied(cmrsMods.getCmrPpsceid());
+              cmrData.setCountryCd(cmrsMods.getCmrCountryLanded());
+              cmrData.setStreetAddress1(cmrsMods.getCmrStreetAddress());
+              cmrData.setStreetAddress2(cmrsMods.getCmrStreetAddressCont());
+              cmrData.setPostCd(cmrsMods.getCmrPostalCode());
+              cmrData.setCity(cmrsMods.getCmrCity());
 
-                  int itemNo = 1;
-                  for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
-                    details.append("\n");
-
-                    log.debug("Duplicate CMRs Found..");
-                    output.addMatch(getProcessCode(), "CMR_NO", cmrCheckRecord.getCmrNo(), "Matching Logic", cmrCheckRecord.getMatchGrade() + "",
-                        "CMR", itemNo++);
-                    dupCMRNos.add(cmrCheckRecord.getCmrNo());
-                    logDuplicateCMR(details, cmrCheckRecord);
-                  }
-                  engineData.put("cmrCheckMatches", cmrCheckMatches);
-                  result.setResults("Found Duplicate CMRs.");
-                  if (engineData.hasPositiveCheckStatus("allowDuplicates")) {
-                    engineData.addNegativeCheckStatus("dupAllowed",
-                        cmrCheckMatches.size()
-                            + " possible duplicate CMR(s) found with the same data but allowed for the scenario.\n Duplicate CMR(s) found: "
-                            + StringUtils.join(dupCMRNos, ", "));
-                  } else {
-                    List<String> zs01KunnrsList = new ArrayList<String>();
-                    for (String dupCMR : dupCMRNos) {
-                      zs01KunnrsList.add(getZS01Kunnr(dupCMR, requestData.getData().getCmrIssuingCntry()));
-                    }
-                    engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR", StringUtils.join(dupCMRNos, ", "),
-                        StringUtils.join(zs01KunnrsList, ", "));
-                    // to allow overides later
-                    requestData.getAdmin().setMatchIndc("C");
-                    result.setOnError(true);
-                  }
-                  result.setProcessOutput(output);
-                  result.setDetails(details.toString().trim());
-                } else {
-                  result.setDetails("No Duplicate CMRs were found.");
-                  result.setResults("No Matches");
-                  result.setOnError(false);
-                }
-              } else {
-                result.setDetails("No Duplicate CMRs were found.");
-                result.setResults("No Matches");
-                result.setOnError(false);
-              }
-            } else {
-              result.setDetails(response.getMessage());
-              engineData.addRejectionComment("OTH", response.getMessage(), "", "");
-              result.setOnError(true);
-              result.setResults("Error on Duplicate CMR Check.");
+              matchedCMRs.add(cmrsMods.getCmrNum());
+              details.append("\n");
+              logDuplicateCMR(details, cmrData);
             }
-          } else {
-            result.setDetails("Duplicate CMR Check Encountered an error.");
-            engineData.addRejectionComment("OTH", "Duplicate CMR Check Encountered an error.", "", "");
+
+            result.setResults("Matches Found");
+            result.setResults("Found Duplicate CMRs.");
+            engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR", StringUtils.join(matchedCMRs, ", "), "");
+            // to allow overides later
+            requestData.getAdmin().setMatchIndc("C");
             result.setOnError(true);
-            result.setResults("Error on Duplicate CMR Check");
+            result.setProcessOutput(output);
+            result.setDetails(details.toString().trim());
+          } else {
+            result.setDetails("No Duplicate CMRs were found.");
+            result.setResults("No Matches");
+            result.setOnError(false);
           }
           break;
         default:
@@ -1610,10 +1491,28 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
     return kunnr;
   }
 
-  protected static FindCMRResultModel checkCeidViaFindCMR(CompanyRecordModel searchModel) throws Exception {
+  protected static FindCMRResultModel searchFindCMR(CompanyRecordModel searchModel) throws Exception {
     String cmrNo = searchModel.getCmrNo();
     String issuingCntry = searchModel.getIssuingCntry();
-    String params = "&ppsCeId=" + searchModel.getCied();
+    String params = null;
+    if (!StringUtils.isBlank(searchModel.getCied())) {
+      params = "&ppsCeId=" + searchModel.getCied();
+    }
+    if (!StringUtils.isBlank(searchModel.getName())) {
+      String name = searchModel.getName();
+      name = StringUtils.replace(name, " ", "%20");
+      params = "&customerName=" + name;
+    }
+    if (!StringUtils.isBlank(searchModel.getStreetAddress1())) {
+      String street = searchModel.getStreetAddress1();
+      street = StringUtils.replace(street, " ", "%20");
+      if (!StringUtils.isBlank(searchModel.getStreetAddress2())) {
+        String street2 = searchModel.getStreetAddress2();
+        street2 = StringUtils.replace(street2, " ", "%20");
+        street += street2;
+      }
+      params += "&streetAddress=" + street;
+    }
     FindCMRResultModel results = SystemUtil.findCMRs(cmrNo, issuingCntry, 10, null, params);
     return results;
   }
