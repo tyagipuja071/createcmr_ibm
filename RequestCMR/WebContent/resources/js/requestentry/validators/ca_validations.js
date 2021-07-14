@@ -249,7 +249,7 @@ function afterConfigForCA() {
   }
 
   addFieldHandlers();
-  scenarioHandlerForAutomation();
+  // scenarioHandlerForAutomation();
 }
 
 var _inacCodeHandler = null;
