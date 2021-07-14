@@ -317,6 +317,19 @@ public class CNHandler extends GEOHandler {
     intlAddrList = getINTLAddrCountByReqId(entityManager, admin.getId().getReqId());
     intlAddrRdcList = getINTLAddrRdcByReqId(entityManager, admin.getId().getReqId());
 
+    List<GeoContactInfo> geoContactInfoList = new ArrayList<GeoContactInfo>();
+    geoContactInfoList = getGeoContactInfoByReqId(entityManager, admin.getId().getReqId());
+
+    if (geoContactInfoList != null && geoContactInfoList.size() > 0) {
+      for (GeoContactInfo geoContactInfo : geoContactInfoList) {
+        GeoContactInfo merged = entityManager.merge(geoContactInfo);
+        if (merged != null) {
+          entityManager.remove(merged);
+        }
+      }
+      entityManager.flush();
+    }
+
     if (intlAddrList != null && intlAddrList.size() > 0) {
       for (IntlAddr intlAddr : intlAddrList) {
         IntlAddr merged = entityManager.merge(intlAddr);
@@ -1081,6 +1094,10 @@ public class CNHandler extends GEOHandler {
   @Override
   public void addSummaryUpdatedFieldsForAddress(RequestSummaryService service, String cmrCountry, String addrTypeDesc, String sapNumber,
       UpdatedAddr addr, List<UpdatedNameAddrModel> results, EntityManager entityManager) {
+
+    String addrType = addr.getId().getAddrType();
+    String seqNo = addr.getId().getAddrSeq();
+
     // get INTL_ADDR
     IntlAddr iAddr = getIntlAddrByIdReqSummary(addr, entityManager);
     IntlAddrRdc iAddrRdc = getIntlAddrRdcByIdReqSummary(addr, entityManager);
@@ -1121,6 +1138,8 @@ public class CNHandler extends GEOHandler {
     if (iAddr != null && iAddrRdc != null) {
       if (!equals(iAddr.getIntlCustNm1(), iAddrRdc.getIntlCustNm1())) {
         UpdatedNameAddrModel update = new UpdatedNameAddrModel();
+        update.setAddrTypeCode(addrType);
+        update.setAddrSeq(seqNo);
         update.setAddrType(addrTypeDesc);
         update.setSapNumber(sapNumber);
         update.setDataField(PageManager.getLabel(cmrCountry, "ChinaCustomerName1", "-"));
@@ -1130,6 +1149,8 @@ public class CNHandler extends GEOHandler {
       }
       if (!equals(iAddr.getIntlCustNm2(), iAddrRdc.getIntlCustNm2())) {
         UpdatedNameAddrModel update = new UpdatedNameAddrModel();
+        update.setAddrTypeCode(addrType);
+        update.setAddrSeq(seqNo);
         update.setAddrType(addrTypeDesc);
         update.setSapNumber(sapNumber);
         update.setDataField(PageManager.getLabel(cmrCountry, "ChinaCustomerName2", "-"));
@@ -1137,8 +1158,21 @@ public class CNHandler extends GEOHandler {
         update.setOldData(iAddrRdc.getIntlCustNm2());
         results.add(update);
       }
+      if (!equals(iAddr.getIntlCustNm3(), iAddrRdc.getIntlCustNm3())) {
+        UpdatedNameAddrModel update = new UpdatedNameAddrModel();
+        update.setAddrTypeCode(addrType);
+        update.setAddrSeq(seqNo);
+        update.setAddrType(addrTypeDesc);
+        update.setSapNumber(sapNumber);
+        update.setDataField(PageManager.getLabel(cmrCountry, "ChinaCustomerName3", "-"));
+        update.setNewData(iAddr.getIntlCustNm3());
+        update.setOldData(iAddrRdc.getIntlCustNm3());
+        results.add(update);
+      }
       if (!equals(iAddr.getAddrTxt(), iAddrRdc.getAddrTxt())) {
         UpdatedNameAddrModel update = new UpdatedNameAddrModel();
+        update.setAddrTypeCode(addrType);
+        update.setAddrSeq(seqNo);
         update.setAddrType(addrTypeDesc);
         update.setSapNumber(sapNumber);
         update.setDataField(PageManager.getLabel(cmrCountry, "ChinaStreetAddress1", "-"));
@@ -1148,6 +1182,8 @@ public class CNHandler extends GEOHandler {
       }
       if (!equals(iAddr.getIntlCustNm4(), iAddrRdc.getIntlCustNm4())) {
         UpdatedNameAddrModel update = new UpdatedNameAddrModel();
+        update.setAddrTypeCode(addrType);
+        update.setAddrSeq(seqNo);
         update.setAddrType(addrTypeDesc);
         update.setSapNumber(sapNumber);
         update.setDataField(PageManager.getLabel(cmrCountry, "ChinaStreetAddress2", "-"));
@@ -1158,6 +1194,8 @@ public class CNHandler extends GEOHandler {
       // city
       if (!equals(iAddr.getCity1(), iAddrRdc.getCity1())) {
         UpdatedNameAddrModel update = new UpdatedNameAddrModel();
+        update.setAddrTypeCode(addrType);
+        update.setAddrSeq(seqNo);
         update.setAddrType(addrTypeDesc);
         update.setSapNumber(sapNumber);
         update.setDataField(PageManager.getLabel(cmrCountry, "DropDownCityChina", "-"));
@@ -1168,6 +1206,8 @@ public class CNHandler extends GEOHandler {
       // district
       if (!equals(iAddr.getCity2(), iAddrRdc.getCity2())) {
         UpdatedNameAddrModel update = new UpdatedNameAddrModel();
+        update.setAddrTypeCode(addrType);
+        update.setAddrSeq(seqNo);
         update.setAddrType(addrTypeDesc);
         update.setSapNumber(sapNumber);
         update.setDataField(PageManager.getLabel(cmrCountry, "ChinaCity2", "-"));
@@ -1337,6 +1377,21 @@ public class CNHandler extends GEOHandler {
       throw ex;
     }
     return intlAddrRdcList;
+  }
+
+  private List<GeoContactInfo> getGeoContactInfoByReqId(EntityManager entityManager, long reqId) {
+    // TODO Auto-generated method stub
+    String sql = ExternalizedQuery.getSql("CONTACTINFO.FINDALL");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    List<GeoContactInfo> geoContactInfoList;
+    try {
+      geoContactInfoList = query.getResults(GeoContactInfo.class);
+    } catch (Exception ex) {
+      LOG.error("An error occured in getting the GEO_ADL_CONT_DTL records");
+      throw ex;
+    }
+    return geoContactInfoList;
   }
 
   public void createCommentLog(EntityManager em, Admin admin, String message) throws CmrException, SQLException {
