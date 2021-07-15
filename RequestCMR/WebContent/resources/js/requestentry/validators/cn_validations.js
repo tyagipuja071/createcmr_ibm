@@ -1613,6 +1613,21 @@ function addAddrUpdateValidator0() {
           })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
+function setCompanyOnInacCd() {
+  if (FormManager.getActualValue('reqType') != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  if (_pagemodel.userRole.toUpperCase() != "REQUESTER") {
+    return;
+  }
+  dojo.connect(FormManager.getField('inacCd'), 'onChange', function(value) {
+    var inacCd = FormManager.getActualValue('inacCd');
+    if (inacCd == '9120_A') {
+      FormManager.setValue('company', '856105');
+    }
+  });
+}
+
 function addDoubleByteValidatorCN(cntry, details) {
 
   /* Address */
@@ -1665,4 +1680,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addSocialCreditCdLengthValidator, GEOHandler.CN, GEOHandler.REQUESTER, true);
   GEOHandler.addAfterConfig(onInacTypeChange, GEOHandler.CN);
   GEOHandler.registerValidator(addAddrUpdateValidator, GEOHandler.CN, null, true);
+  GEOHandler.addAfterConfig(setCompanyOnInacCd, GEOHandler.CN);
 });
