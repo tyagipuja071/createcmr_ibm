@@ -15,8 +15,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -46,14 +44,13 @@ import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectObjectContainer;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
-import com.ibm.cmr.create.batch.entry.BatchEntryPoint;
 import com.ibm.cmr.create.batch.util.BatchUtil;
 import com.ibm.cmr.create.batch.util.CMRRequestContainer;
 import com.ibm.cmr.create.batch.util.masscreate.WorkerThreadFactory;
-import com.ibm.cmr.create.batch.util.masscreate.handler.impl.LDMassProcessWorker;
 import com.ibm.cmr.create.batch.util.mq.LandedCountryMap;
 import com.ibm.cmr.create.batch.util.mq.transformer.MessageTransformer;
 import com.ibm.cmr.create.batch.util.mq.transformer.TransformerManager;
+import com.ibm.cmr.create.batch.util.worker.impl.LDMassUpdtDb2MultiWorker;
 
 /**
  * @author JeffZAMORA
@@ -146,7 +143,6 @@ public class LDMassProcessMultiLegacyService extends MultiThreadedBatchService<L
    * @param admin
    */
   public void processMassUpdate(EntityManager entityManager, Admin admin) throws Exception {
-    EntityManagerFactory emf = null;
     try {
       if (admin == null) {
         throw new Exception("Cannot process mass update request. Admin information is null or empty.");
@@ -197,14 +193,12 @@ public class LDMassProcessMultiLegacyService extends MultiThreadedBatchService<L
           threads = Integer.parseInt(threadCount);
         }
 
-        emf = Persistence.createEntityManagerFactory(BatchEntryPoint.DEFAULT_BATCH_PERSISTENCE_UNIT);
-
         LOG.debug("Starting processing mass update lines at " + new Date());
-        List<LDMassProcessWorker> workers = new ArrayList<LDMassProcessWorker>();
+        List<LDMassUpdtDb2MultiWorker> workers = new ArrayList<LDMassUpdtDb2MultiWorker>();
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(threads, new WorkerThreadFactory(getThreadName()));
         int currCount = 0;
         for (MassUpdt massUpdt : results) {
-          LDMassProcessWorker worker = new LDMassProcessWorker(emf, admin, massUpdt, this);
+          LDMassUpdtDb2MultiWorker worker = new LDMassUpdtDb2MultiWorker(admin, massUpdt, this);
           executor.schedule(worker, currCount, TimeUnit.SECONDS);
           currCount++;
           workers.add(worker);
@@ -221,8 +215,8 @@ public class LDMassProcessMultiLegacyService extends MultiThreadedBatchService<L
 
         LOG.debug("Finished processing mass update lines at " + new Date());
 
-        Exception processError = null;
-        for (LDMassProcessWorker worker : workers) {
+        Throwable processError = null;
+        for (LDMassUpdtDb2MultiWorker worker : workers) {
           if (worker != null) {
             if (worker.isError()) {
               LOG.error("Error in processing mass update for Request ID " + admin.getId().getReqId() + ": " + worker.getErrorMsg());
@@ -233,7 +227,7 @@ public class LDMassProcessMultiLegacyService extends MultiThreadedBatchService<L
           }
         }
         if (processError != null) {
-          throw processError;
+          throw new Exception(processError);
         }
 
         admin.setLastUpdtTs(SystemUtil.getCurrentTimestamp());
@@ -245,8 +239,6 @@ public class LDMassProcessMultiLegacyService extends MultiThreadedBatchService<L
     } catch (Exception e) {
       LOG.error("Error in processing mass Update Request " + admin.getId().getReqId(), e);
       addError("Mass Update Request " + admin.getId().getReqId() + " Error: " + e.getMessage());
-    } finally {
-      emf.close();
     }
   }
 
@@ -938,6 +930,11 @@ public class LDMassProcessMultiLegacyService extends MultiThreadedBatchService<L
     createComment(entityManager, "An error occurred during processing:\n" + errorMsg, admin.getId().getReqId());
 
     RequestUtils.sendEmailNotifications(entityManager, admin, hist);
+  }
+
+  @Override
+  public boolean flushOnCommitOnly() {
+    return true;
   }
 
   @Override
