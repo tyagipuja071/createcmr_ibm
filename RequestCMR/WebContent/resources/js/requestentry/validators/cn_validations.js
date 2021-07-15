@@ -1641,44 +1641,49 @@ function addDoubleByteValidatorCN(cntry, details) {
 dojo.addOnLoad(function() {
   GEOHandler.CN = [ SysLoc.CHINA ];
   console.log('adding CN validators...');
-  GEOHandler.addAfterConfig(afterConfigForCN, GEOHandler.CN);
-  GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.CN);
-  GEOHandler.registerValidator(addDPLCheckValidator, GEOHandler.CN, GEOHandler.ROLE_REQUESTER, false, false);
   GEOHandler.enableCustomerNamesOnAddress(GEOHandler.CN);
+  GEOHandler.setRevertIsicBehavior(false);
+  
+  GEOHandler.addAfterConfig(afterConfigForCN, GEOHandler.CN);
+  GEOHandler.addAfterConfig(setSocialCreditCdValidator, GEOHandler.CN);
+  // GEOHandler.addAfterConfig(limitClientTierValuesOnUpdate, GEOHandler.CN);
+  GEOHandler.addAfterConfig(defaultCapIndicator, SysLoc.CHINA);
+  GEOHandler.addAfterConfig(defaultGovernmentIndicator, GEOHandler.CN);
+  // Checklist
+  GEOHandler.addAfterConfig(setChinaChecklistStatus, GEOHandler.CN);
+  // GEOHandler.addAfterConfig(addValidationForParentCompanyNo, GEOHandler.CN);
+  // DENNIS: COMMENTED BECAUSE OF SCRIPT RUN TIME ISSUES
+  GEOHandler.addAfterConfig(addDateValidator, GEOHandler.CN);
+  GEOHandler.addAfterConfig(hideTDOFields, GEOHandler.CN);
+  GEOHandler.addAfterConfig(onInacTypeChange, GEOHandler.CN);
+  GEOHandler.addAfterConfig(setCompanyOnInacCd, GEOHandler.CN);
+  
   GEOHandler.addAfterTemplateLoad(autoSetIBMDeptCostCenter, GEOHandler.CN);
   // GEOHandler.addAfterTemplateLoad(addValidationForParentCompanyNo,
   // GEOHandler.CN);
-  GEOHandler.addAfterConfig(setSocialCreditCdValidator, GEOHandler.CN);
   GEOHandler.addAfterTemplateLoad(disableVatExemptForScenarios, GEOHandler.CN);
   GEOHandler.addAfterTemplateLoad(setPrivacyIndcReqdForProc, GEOHandler.CN);
   // GEOHandler.addAfterTemplateLoad(limitClientTierValuesOnCreate,
   // GEOHandler.CN);
-  GEOHandler.setRevertIsicBehavior(false);
   GEOHandler.addAfterTemplateLoad(setValuesForScenarios, GEOHandler.CN);
-  // GEOHandler.addAfterConfig(limitClientTierValuesOnUpdate, GEOHandler.CN);
-  GEOHandler.registerValidator(addGenericVATValidator(SysLoc.CHINA, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.CHINA ], null, true);
-  GEOHandler.addAfterConfig(defaultCapIndicator, SysLoc.CHINA);
-  GEOHandler.addAfterConfig(defaultGovernmentIndicator, GEOHandler.CN);
+  GEOHandler.addAfterTemplateLoad(setReadOnlyFields, GEOHandler.CN);
+  
+  GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.CN);
   GEOHandler.addAddrFunction(autoSetAddrFieldsForCN, GEOHandler.CN);
   GEOHandler.addAddrFunction(showHideCityCN, GEOHandler.CN);
   GEOHandler.addAddrFunction(addDoubleByteValidatorCN, GEOHandler.CN);
-  // Checklist
-  GEOHandler.addAfterConfig(setChinaChecklistStatus, GEOHandler.CN);
-  // GEOHandler.addAfterConfig(addValidationForParentCompanyNo, GEOHandler.CN);
+  
+  GEOHandler.registerValidator(addDPLCheckValidator, GEOHandler.CN, GEOHandler.ROLE_REQUESTER, false, false);
+  GEOHandler.registerValidator(addGenericVATValidator(SysLoc.CHINA, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.CHINA ], null, true);
   GEOHandler.registerValidator(addChecklistValidator, GEOHandler.CN);
-  // DENNIS: COMMENTED BECAUSE OF SCRIPT RUN TIME ISSUES
-  GEOHandler.addAfterConfig(addDateValidator, GEOHandler.CN);
-  // GEOHandler.registerValidator(isValidDate,GEOHandler.CN);
+// GEOHandler.registerValidator(isValidDate,GEOHandler.CN);
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.CN, GEOHandler.REQUESTER, false, false);
   GEOHandler.registerValidator(addFastPassAttachmentValidator, GEOHandler.CN, GEOHandler.REQUESTER, false, false);
-  GEOHandler.addAfterConfig(hideTDOFields, GEOHandler.CN);
-  GEOHandler.addAfterTemplateLoad(setReadOnlyFields, GEOHandler.CN);
   GEOHandler.registerValidator(setTDOFlagToYesValidator, GEOHandler.CN, GEOHandler.PROCESSOR, false, false);
   GEOHandler.registerValidator(addSoltToAddressValidator, GEOHandler.CN, null, false, false);
   GEOHandler.registerValidator(addContactInfoValidator, GEOHandler.CN, GEOHandler.REQUESTER, false, false);
   GEOHandler.registerValidator(addCityRequiredOnUpdateValidatorAddrList, GEOHandler.CN, null, true);
   GEOHandler.registerValidator(addSocialCreditCdLengthValidator, GEOHandler.CN, GEOHandler.REQUESTER, true);
-  GEOHandler.addAfterConfig(onInacTypeChange, GEOHandler.CN);
   GEOHandler.registerValidator(addAddrUpdateValidator, GEOHandler.CN, null, true);
-  GEOHandler.addAfterConfig(setCompanyOnInacCd, GEOHandler.CN);
+  
 });
