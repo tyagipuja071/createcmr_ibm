@@ -715,8 +715,11 @@ function addINACValidator() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
+        var scenarioSubtype = FormManager.getActualValue('custSubGrp');
+        var inacCdListForSOScenario = [ 'AX98', 'AX99', 'YR41', 'YS30', 'YS36', 'YS37', 'YS39', 'YS38', 'YT56', 'YT57', 'YR61', 'YR71' ];
         var inacType = FormManager.getActualValue('inacType');
         var inac = FormManager.getActualValue('inacCd');
+        var isValid = false;
         if (inac != '') {
           var message = '';
           var qParams = {
@@ -725,12 +728,29 @@ function addINACValidator() {
             CD : FormManager.getActualValue('inacCd'),
           };
           var result = cmr.query('CHECKLOV', qParams);
-          if (inacType == 'I') {
-            message = 'INAC value is invalid.';
+
+          if (result.ret1 == 1) {
+            if (scenarioSubtype == 'SOCUS' && !inacCdListForSOScenario.includes(inac)) {
+              isValid = false;
+              if (inacType == 'I') {
+                message = 'INAC ' + inac + ' is invalid for Strategic Outsourcing (S/O) Customer scenario.';
+              } else {
+                message = 'NAT ' + inac + ' is invalid for Strategic Outsourcing (S/O) Customer scenario.';
+              }
+            } else {
+              isValid = true;
+            }
           } else {
-            message = 'NAT value is invalid.';
+            isValid = false;
+            if (inacType == 'I') {
+              message = 'INAC ' + inac + ' is invalid.';
+            } else {
+              message = 'NAT ' + inac + ' is invalid.';
+            }
           }
-          if (result.ret1 != 1) {
+          if (isValid) {
+            return new ValidationResult(null, true);
+          } else {
             return new ValidationResult(null, false, message);
           }
         }
