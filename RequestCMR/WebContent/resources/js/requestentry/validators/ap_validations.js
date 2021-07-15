@@ -1792,7 +1792,7 @@ function updateMRCAseanAnzIsa() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var aseanCntries = ['852', '818', '856', '643', '778', '749', '834'];
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  if((cntry == '852' || cntry == '818' || cntry == '856' || cntry == '643' || cntry == '778' || cntry == '749' || cntry == '834') && (custSubGrp == 'INTER' || custSubGrp == 'XINT'|| custSubGrp == 'DUMMY' || custSubGrp == 'XDUMM')){
+  if((aseanCntries.includes(cntry)) && (custSubGrp == '' || custSubGrp == 'INTER' || custSubGrp == 'XINT'|| custSubGrp == 'DUMMY' || custSubGrp == 'XDUMM')){
     return;
   }
   FormManager.setValue('mrcCd', '');
