@@ -31,8 +31,6 @@ import com.ibm.cmr.services.client.process.RDcRecord;
 public class IERPMassUpdtMultiWorker extends MassUpdateMultiWorker {
 
   private static final Logger LOG = Logger.getLogger(IERPMassUpdtMultiWorker.class);
-  private static final String MASS_UPDATE_DONE = "DONE";
-  private static final String MASS_UPDATE_FAIL = "FAIL";
   private boolean indexNotUpdated;
 
   public IERPMassUpdtMultiWorker(Admin parentAdmin, MassUpdt parentEntity) {

@@ -15,8 +15,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -37,12 +35,11 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemUtil;
-import com.ibm.cmr.create.batch.entry.BatchEntryPoint;
 import com.ibm.cmr.create.batch.util.BatchUtil;
 import com.ibm.cmr.create.batch.util.CMRRequestContainer;
 import com.ibm.cmr.create.batch.util.masscreate.WorkerThreadFactory;
-import com.ibm.cmr.create.batch.util.masscreate.handler.impl.ATMassProcessWorker;
 import com.ibm.cmr.create.batch.util.mq.LandedCountryMap;
+import com.ibm.cmr.create.batch.util.worker.impl.AustriaMassUpdtMultiWorker;
 import com.ibm.cmr.services.client.process.ProcessRequest;
 import com.ibm.cmr.services.client.process.ProcessResponse;
 
@@ -134,7 +131,6 @@ public class ATMassProcessMultiLegacyService extends MultiThreadedBatchService<L
 
     long reqId = admin.getId().getReqId();
     String processingStatus = admin.getRdcProcessingStatus() != null ? admin.getRdcProcessingStatus() : "";
-    EntityManagerFactory emf = null;
     try {
       // 1. Get request to process
       PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.MA.GET.MASS_UPDT"));
@@ -151,7 +147,6 @@ public class ATMassProcessMultiLegacyService extends MultiThreadedBatchService<L
       if (resultsMain != null && resultsMain.size() > 0) {
         // 2. If results are not empty, lock the admin record
         lockRecord(entityManager, admin);
-        List<String> errorCmrs = new ArrayList<String>();
 
         int threads = 5;
         String threadCount = BatchUtil.getProperty("multithreaded.threadCount");
@@ -163,8 +158,12 @@ public class ATMassProcessMultiLegacyService extends MultiThreadedBatchService<L
         LOG.debug("Starting processing AUSTRIA mass update lines at " + new Date());
         LOG.debug("Number of records found: " + resultsMain.size());
 
-        emf = Persistence.createEntityManagerFactory(BatchEntryPoint.DEFAULT_BATCH_PERSISTENCE_UNIT);
-        List<ATMassProcessWorker> workers = new ArrayList<ATMassProcessWorker>();
+        List<AustriaMassUpdtMultiWorker> workers = new ArrayList<AustriaMassUpdtMultiWorker>();
+
+        if (!CmrConstants.REQUEST_STATUS.PCO.toString().equals(admin.getReqStatus())) {
+          admin.setReqStatus(CmrConstants.REQUEST_STATUS.PCO.toString());
+          entityManager.merge(admin);
+        }
 
         while (resultsMain.size() > 0) {
 
@@ -179,7 +178,7 @@ public class ATMassProcessMultiLegacyService extends MultiThreadedBatchService<L
 
           ScheduledExecutorService executor = Executors.newScheduledThreadPool(threads, new WorkerThreadFactory(getThreadName() + reqId));
           for (MassUpdt sMassUpdt : results) {
-            ATMassProcessWorker worker = new ATMassProcessWorker(emf, admin, data, sMassUpdt, BATCH_USER_ID);
+            AustriaMassUpdtMultiWorker worker = new AustriaMassUpdtMultiWorker(admin, sMassUpdt);
             executor.schedule(worker, 5, TimeUnit.SECONDS);
             workers.add(worker);
           }
@@ -199,8 +198,8 @@ public class ATMassProcessMultiLegacyService extends MultiThreadedBatchService<L
 
         LOG.debug("Finished processing mass update lines at " + new Date());
 
-        Exception processError = null;
-        for (ATMassProcessWorker worker : workers) {
+        Throwable processError = null;
+        for (AustriaMassUpdtMultiWorker worker : workers) {
           if (worker != null) {
             if (worker.isError()) {
               LOG.error("Error in processing mass update rdc for Request ID " + admin.getId().getReqId() + ": " + worker.getErrorMsg());
@@ -210,7 +209,7 @@ public class ATMassProcessMultiLegacyService extends MultiThreadedBatchService<L
             } else {
               statusCodes.addAll(worker.getStatusCodes());
               rdcProcessStatusMsgs.addAll(worker.getRdcProcessStatusMsgs());
-              isIndexNotUpdated = isIndexNotUpdated || worker.getIndexNotUpdated();
+              isIndexNotUpdated = isIndexNotUpdated || worker.isIndexNotUpdated();
               comment.append(worker.getComments());
             }
           }
@@ -219,7 +218,7 @@ public class ATMassProcessMultiLegacyService extends MultiThreadedBatchService<L
         LOG.debug("Worker Process Message" + comment);
 
         if (processError != null) {
-          throw processError;
+          throw new Exception(processError);
         }
 
         // *** START OF FIX
@@ -318,8 +317,6 @@ public class ATMassProcessMultiLegacyService extends MultiThreadedBatchService<L
     } catch (Exception e) {
       LOG.error("Error in processing Update Request " + admin.getId().getReqId(), e);
       addError("Update Request " + admin.getId().getReqId() + " Error: " + e.getMessage());
-    } finally {
-      emf.close();
     }
   }
 
@@ -450,6 +447,11 @@ public class ATMassProcessMultiLegacyService extends MultiThreadedBatchService<L
     createComment(entityManager, "Legacy database processing started.", admin.getId().getReqId());
 
     partialCommit(entityManager);
+  }
+
+  @Override
+  public boolean flushOnCommitOnly() {
+    return true;
   }
 
   @Override

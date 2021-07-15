@@ -3,6 +3,9 @@
  */
 package com.ibm.cmr.create.batch.util.worker.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
@@ -16,6 +19,7 @@ import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.entity.MassUpdt;
 import com.ibm.cmr.create.batch.util.BatchUtil;
 import com.ibm.cmr.create.batch.util.DebugUtil;
+import com.ibm.cmr.create.batch.util.masscreate.handler.impl.FRMassProcessWorker;
 import com.ibm.cmr.create.batch.util.worker.MassUpdateMultiWorker;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.ProcessClient;
@@ -28,12 +32,9 @@ import com.ibm.cmr.services.client.process.RDcRecord;
  * @author 136786PH1
  *
  */
-public class SwissMassUpdtMultiWorker extends MassUpdateMultiWorker {
+public class FranceMassUpdtMultiWorker extends MassUpdateMultiWorker {
 
-  private static final Logger LOG = Logger.getLogger(SwissMassUpdtMultiWorker.class);
-
-  public static final String CMR_REQUEST_STATUS_CPR = "CPR";
-  public static final String CMR_REQUEST_STATUS_PCP = "PCP";
+  private static final Logger LOG = Logger.getLogger(FRMassProcessWorker.class);
 
   private boolean indexNotUpdated;
 
@@ -41,21 +42,25 @@ public class SwissMassUpdtMultiWorker extends MassUpdateMultiWorker {
    * @param parentAdmin
    * @param parentEntity
    */
-  public SwissMassUpdtMultiWorker(Admin parentAdmin, MassUpdt parentEntity) {
+  public FranceMassUpdtMultiWorker(Admin parentAdmin, MassUpdt parentEntity) {
     super(parentAdmin, parentEntity);
 
   }
 
   @Override
   public void executeProcess(EntityManager entityManager) throws Exception {
-    String processingStatus = this.parentAdmin.getRdcProcessingStatus() != null ? this.parentAdmin.getRdcProcessingStatus() : "";
+    ServiceClient serviceClient = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
+        ProcessClient.class);
+    String resultCode = null;
 
     DataPK dataPk = new DataPK();
     dataPk.setReqId(this.parentAdmin.getId().getReqId());
     Data data = entityManager.find(Data.class, dataPk);
 
-    ProcessRequest request = new ProcessRequest();
+    String processingStatus = this.parentAdmin.getRdcProcessingStatus() != null ? this.parentAdmin.getRdcProcessingStatus() : "";
+    List<String> statusCodes = new ArrayList<String>();
 
+    ProcessRequest request = new ProcessRequest();
     request.setCmrNo(this.parentRow.getCmrNo());
     request.setMandt(SystemConfiguration.getValue("MANDT"));
     request.setReqId(this.parentAdmin.getId().getReqId());
@@ -66,8 +71,7 @@ public class SwissMassUpdtMultiWorker extends MassUpdateMultiWorker {
     request.setSeqNo("");
 
     // call the create cmr service
-    LOG.info("Sending request to Process Service [Request ID: " + request.getReqId() + " Type: " + request.getReqType() + " CMRNo: "
-        + request.getCmrNo() + "]");
+    LOG.info("Sending request to Process Service [Request ID: " + request.getReqId() + " Type: " + request.getReqType() + "]");
 
     if (LOG.isTraceEnabled()) {
       LOG.trace("Request JSON:");
@@ -76,6 +80,7 @@ public class SwissMassUpdtMultiWorker extends MassUpdateMultiWorker {
 
     ProcessResponse response = null;
     String applicationId = BatchUtil.getAppId(data.getCmrIssuingCntry());
+
     if (applicationId == null) {
       LOG.debug("No Application ID mapped to " + data.getCmrIssuingCntry());
       response = new ProcessResponse();
@@ -86,8 +91,6 @@ public class SwissMassUpdtMultiWorker extends MassUpdateMultiWorker {
       response.setMessage("No application ID defined for Country: " + data.getCmrIssuingCntry() + ". Cannot process RDc records.");
     } else {
       try {
-        ServiceClient serviceClient = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
-            ProcessClient.class);
         serviceClient.setReadTimeout(60 * 30 * 1000); // 30 mins
         response = serviceClient.executeAndWrap(applicationId, request, ProcessResponse.class);
 
@@ -113,11 +116,11 @@ public class SwissMassUpdtMultiWorker extends MassUpdateMultiWorker {
       response.setReqId(request.getReqId());
     }
 
-    String resultCode = response.getStatus();
+    resultCode = response.getStatus();
     if (StringUtils.isBlank(resultCode)) {
-      addStatusCode(CmrConstants.RDC_STATUS_NOT_COMPLETED);
+      statusCodes.add(CmrConstants.RDC_STATUS_NOT_COMPLETED);
     } else {
-      addStatusCode(resultCode);
+      statusCodes.add(resultCode);
     }
 
     if (LOG.isTraceEnabled()) {
@@ -150,16 +153,17 @@ public class SwissMassUpdtMultiWorker extends MassUpdateMultiWorker {
       addRdcStatus(CmrConstants.RDC_STATUS_COMPLETED);
     } else {
       if (CmrConstants.RDC_STATUS_ABORTED.equals(resultCode) && CmrConstants.RDC_STATUS_ABORTED.equals(processingStatus)) {
-        addComment("\nRDc mass update processing for REQ ID " + request.getReqId() + " for CMRNo" + request.getCmrNo() + " was ABORTED.");
+        addComment("\nRDc mass update processing for REQ ID " + request.getReqId() + ", CMR NO = " + this.parentRow.getCmrNo() + " was ABORTED.");
         this.parentRow.setRowStatusCd(CmrConstants.MASS_CREATE_ROW_STATUS_FAIL);
       } else if (CmrConstants.RDC_STATUS_ABORTED.equalsIgnoreCase(resultCode)) {
-        addComment("\nRDc mass update processing for REQ ID " + request.getReqId() + " for CMRNo" + request.getCmrNo() + " was ABORTED.");
+        addComment("\nRDc mass update processing for REQ ID " + request.getReqId() + ", CMR NO = " + this.parentRow.getCmrNo() + " was ABORTED.");
         this.parentRow.setRowStatusCd(CmrConstants.MASS_CREATE_ROW_STATUS_FAIL);
       } else if (CmrConstants.RDC_STATUS_NOT_COMPLETED.equalsIgnoreCase(resultCode)) {
-        addComment("\nRDc mass update processing for REQ ID " + request.getReqId() + " for CMRNo" + request.getCmrNo() + " is NOT COMPLETED.");
+        addComment(
+            "\nRDc mass update processing for REQ ID " + request.getReqId() + ", CMR NO = " + this.parentRow.getCmrNo() + " is NOT COMPLETED.");
         this.parentRow.setRowStatusCd(CmrConstants.MASS_CREATE_ROW_STATUS_FAIL);
       } else if (CmrConstants.RDC_STATUS_IGNORED.equalsIgnoreCase(resultCode)) {
-        addComment("\nRDc mass update processing for REQ ID " + request.getReqId() + " for CMRNo" + request.getCmrNo() + " is IGNORED.");
+        addComment("\nRDc mass update processing for REQ ID " + request.getReqId() + ", CMR NO = " + this.parentRow.getCmrNo() + " is IGNORED.");
         this.parentRow.setRowStatusCd(CmrConstants.MASS_CREATE_ROW_STATUS_UPDATE_FAILE);
       } else {
         this.parentRow.setRowStatusCd(CmrConstants.MASS_CREATE_ROW_STATUS_DONE);
@@ -171,9 +175,11 @@ public class SwissMassUpdtMultiWorker extends MassUpdateMultiWorker {
       }
 
     }
+
     if (this.parentRow.getErrorTxt() != null && this.parentRow.getErrorTxt().length() > 10000) {
       this.parentRow.setErrorTxt(this.parentRow.getErrorTxt().substring(0, 9999));
     }
+
     entityManager.merge(this.parentRow);
   }
 
