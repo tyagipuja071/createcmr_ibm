@@ -1512,8 +1512,8 @@ public class CNHandler extends GEOHandler {
     sql = StringUtils.replaceOnce(sql, ":MANDT", "'" + mandt + "'");
     sql = StringUtils.replaceOnce(sql, ":KATR6", "'" + katr6 + "'");
 
-    if (CmrConstants.CN_KUKLA81.equals(kukla)) {
-      LOG.debug("getChinaCMR :: RETRIEVING KUKLA 81 CMR");
+    if (CmrConstants.CN_KUKLA81.equals(kukla) || CmrConstants.CN_KUKLA85.equals(kukla)) {
+      LOG.debug("getChinaCMR :: RETRIEVING KUKLA 81 or 85 CMR");
       sql = StringUtils.replaceOnce(sql, ":KEYID", "'" + CmrConstants.CN_KUKLA81_KEYID + "'");
     } else if (CmrConstants.CN_KUKLA45.equals(kukla)) {
       LOG.debug("getChinaCMR :: RETRIEVING KUKLA 45 CMR");

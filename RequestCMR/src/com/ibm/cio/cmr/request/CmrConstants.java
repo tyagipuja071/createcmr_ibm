@@ -912,6 +912,7 @@ public class CmrConstants {
   public static final int LD_MASS_UPDATE_UPPER_LIMIT = 40;
 
   public static final String CN_KUKLA81 = "81";
+  public static final String CN_KUKLA85 = "85";
   public static final String CN_KUKLA45 = "45";
   public static final String CN_KUKLA81_KEYID = "CMRNO_ZS01_81";
   public static final String CN_KUKLA45_KEYID = "CMRNO_ZS01_45";
