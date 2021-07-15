@@ -79,13 +79,20 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
     if (MQMsgConstants.CUSTSUBGRP_INFSL.equals(cmrData.getCustSubGrp())) {
       messageHash.put("FSLICAM", "ZG35");
     }
-    messageHash.put("SBO", "090");
-    messageHash.put("IBO", "090");
+
+    if (MQMsgConstants.CUSTSUBGRP_INTER.equals(cmrData.getCustSubGrp()) || (MQMsgConstants.CUSTSUBGRP_BUSPR.equals(cmrData.getCustSubGrp()))) {
+      messageHash.put("SBO", "000");
+      messageHash.put("SR", "SPA000");
+    } else if (MQMsgConstants.CUSTSUBGRP_COMME.equals(cmrData.getCustSubGrp())) {
+      messageHash.put("SBO", "090");
+      messageHash.put("SR", "MMIR11");
+    }
+
     messageHash.put("DPCEBO", "W90");
     messageHash.put("CurrencyCode", "EU");
 
-    // for cross border, the AbbreviatedLocation is country id, need to
-    // convert to country desc
+    // for cross border, the AbbreviatedLocation is country id, need to convert
+    // to country desc
     if (crossBorder) {
       if (StringUtils.isBlank(cmrData.getAbbrevLocn()))
         messageHash.put("AbbreviatedLocation", LandedCountryMap.getCountryName(addrData.getLandCntry()));
@@ -1285,6 +1292,10 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
       } else {
         cust.setEnterpriseNo(muData.getEnterprise());
       }
+    }
+
+    if (!StringUtils.isBlank(muData.getCustNm1())) {
+      cust.setSbo(muData.getCustNm1());
     }
 
     if (!StringUtils.isBlank(muData.getCustNm2())) {
