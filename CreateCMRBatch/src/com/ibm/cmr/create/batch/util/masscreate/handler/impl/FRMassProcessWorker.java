@@ -6,6 +6,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
+import javax.persistence.FlushModeType;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -49,6 +50,7 @@ public class FRMassProcessWorker implements Runnable {
 
   public FRMassProcessWorker(EntityManagerFactory emf, Admin admin, Data data, MassUpdt massUpdt, String userId) {
     EntityManager entityManager = emf.createEntityManager();
+    entityManager.setFlushMode(FlushModeType.COMMIT);
     // SystemUtil.setManager(entityManager);
     this.entityManager = entityManager;
     this.admin = admin;

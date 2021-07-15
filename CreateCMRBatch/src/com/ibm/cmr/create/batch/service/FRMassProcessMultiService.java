@@ -470,4 +470,9 @@ public class FRMassProcessMultiService extends MultiThreadedBatchService<Long> {
 
     partialCommit(entityManager);
   }
+
+  @Override
+  public boolean flushOnCommitOnly() {
+    return true;
+  }
 }
