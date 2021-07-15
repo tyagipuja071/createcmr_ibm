@@ -1567,7 +1567,7 @@ function onInacTypeChange() {
                 if (value == 'N' && (!(cluster.includes('BLAN') || cluster.includes('00035') || cluster.includes('00127') || cluster.includes('00105') || cluster.includes('04470') || cluster.includes('04469') || cluster.includes('04471') || cluster.includes('04485') || cluster.includes('04500') || cluster.includes('04746') || cluster.includes('04744') || cluster.includes('04745')) && (cntry == SysLoc.AUSTRALIA))) { 
                   inacCdValue.push('new');
                 }
-                if ((value == 'N' && (!((cluster.includes('00129') || cluster.includes('04477') || cluster.includes('04496') || cluster.includes('04490') || cluster.includes('04494') || cluster.includes('04691') || cluster.includes('04467')) && (cntry == SysLoc.INDIA || cntry == SysLoc.BANGLADESH || cntry == SysLoc.SRI_LANKA)))) && cntry != SysLoc.AUSTRALIA) {
+                if ((value == 'N' && (!((cluster.includes('00129') || cluster.includes('04477') || cluster.includes('04496') || cluster.includes('04490') || cluster.includes('04494') || cluster.includes('04691') || cluster.includes('04467')) && (cntry == SysLoc.INDIA || cntry == SysLoc.BANGLADESH || cntry == SysLoc.SRI_LANKA)))) && cntry != SysLoc.AUSTRALIA && (cntry != SysLoc.THAILAND && cntry != SysLoc.SINGAPORE)) {
                   inacCdValue.push('new');
                 }
                 if (value == 'N' && (!(cluster.includes('04492') || cluster.includes('04503') || cluster.includes('04692') || cluster.includes('04481') || cluster.includes('04462') || cluster.includes('04483') || cluster.includes('00149')) && (cntry == SysLoc.THAILAND || cntry == SysLoc.SINGAPORE))) {
