@@ -28,14 +28,22 @@ import com.ibm.cmr.services.client.process.RDcRecord;
  * @author 136786PH1
  *
  */
-public class IERPMassUpdtMultiWorker extends MassUpdateMultiWorker {
+public class SwissMassUpdtMultiWorker extends MassUpdateMultiWorker {
 
-  private static final Logger LOG = Logger.getLogger(IERPMassUpdtMultiWorker.class);
-  private static final String MASS_UPDATE_DONE = "DONE";
+  private static final Logger LOG = Logger.getLogger(SwissMassUpdtMultiWorker.class);
+
   private static final String MASS_UPDATE_FAIL = "FAIL";
+  private static final String MASS_UPDATE_DONE = "DONE";
+  public static final String CMR_REQUEST_STATUS_CPR = "CPR";
+  public static final String CMR_REQUEST_STATUS_PCP = "PCP";
+
   private boolean indexNotUpdated;
 
-  public IERPMassUpdtMultiWorker(Admin parentAdmin, MassUpdt parentEntity) {
+  /**
+   * @param parentAdmin
+   * @param parentEntity
+   */
+  public SwissMassUpdtMultiWorker(Admin parentAdmin, MassUpdt parentEntity) {
     super(parentAdmin, parentEntity);
 
   }
@@ -49,6 +57,7 @@ public class IERPMassUpdtMultiWorker extends MassUpdateMultiWorker {
     Data data = entityManager.find(Data.class, dataPk);
 
     ProcessRequest request = new ProcessRequest();
+
     request.setCmrNo(this.parentRow.getCmrNo());
     request.setMandt(SystemConfiguration.getValue("MANDT"));
     request.setReqId(this.parentAdmin.getId().getReqId());
@@ -59,12 +68,14 @@ public class IERPMassUpdtMultiWorker extends MassUpdateMultiWorker {
     request.setSeqNo("");
 
     // call the create cmr service
-    LOG.info("Sending request to Process Service [Request ID: " + request.getReqId() + " Type: " + request.getReqType() + "]");
+    LOG.info("Sending request to Process Service [Request ID: " + request.getReqId() + " Type: " + request.getReqType() + " CMRNo: "
+        + request.getCmrNo() + "]");
 
     if (LOG.isTraceEnabled()) {
       LOG.trace("Request JSON:");
       DebugUtil.printObjectAsJson(LOG, request);
     }
+
     ProcessResponse response = null;
     String applicationId = BatchUtil.getAppId(data.getCmrIssuingCntry());
     if (applicationId == null) {
@@ -105,7 +116,6 @@ public class IERPMassUpdtMultiWorker extends MassUpdateMultiWorker {
     }
 
     String resultCode = response.getStatus();
-
     if (StringUtils.isBlank(resultCode)) {
       addStatusCode(CmrConstants.RDC_STATUS_NOT_COMPLETED);
     } else {
@@ -120,20 +130,13 @@ public class IERPMassUpdtMultiWorker extends MassUpdateMultiWorker {
     if (isCompletedSuccessfully(resultCode)) {
       if (response.getRecords() != null) {
         if (response != null && response.getRecords() != null && response.getRecords().size() > 0) {
-
-          if (CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equals(resultCode)) {
-            addComment("RDc records were not processed.");
-            addComment("Warning Message: " + response.getMessage());
-          } else {
-            addComment("Record with the following Kunnr, Address sequence and address types on request ID " + this.parentAdmin.getId().getReqId()
-                + " was SUCCESSFULLY processed:\n");
-            for (RDcRecord pRecord : response.getRecords()) {
-              addComment("Kunnr: " + pRecord.getSapNo() + ", sequence number: " + pRecord.getSeqNo() + ", ");
-              addComment(" address type: " + pRecord.getAddressType() + "\n");
-            }
+          addComment("Record with the following Kunnr, Address sequence and address types on request ID " + this.parentAdmin.getId().getReqId()
+              + " was SUCCESSFULLY processed:\n");
+          for (RDcRecord pRecord : response.getRecords()) {
+            addComment("Kunnr: " + pRecord.getSapNo() + ", sequence number: " + pRecord.getSeqNo() + ", ");
+            addComment(" address type: " + pRecord.getAddressType() + "\n");
           }
         }
-
       } else {
         addComment("RDc records were not processed.");
         if (CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equals(resultCode)) {
@@ -149,16 +152,16 @@ public class IERPMassUpdtMultiWorker extends MassUpdateMultiWorker {
       addRdcStatus(CmrConstants.RDC_STATUS_COMPLETED);
     } else {
       if (CmrConstants.RDC_STATUS_ABORTED.equals(resultCode) && CmrConstants.RDC_STATUS_ABORTED.equals(processingStatus)) {
-        addComment("\nRDc mass update processing for REQ ID " + request.getReqId() + " was ABORTED.");
+        addComment("\nRDc mass update processing for REQ ID " + request.getReqId() + " for CMRNo" + request.getCmrNo() + " was ABORTED.");
         this.parentRow.setRowStatusCd(CmrConstants.MASS_CREATE_ROW_STATUS_FAIL);
       } else if (CmrConstants.RDC_STATUS_ABORTED.equalsIgnoreCase(resultCode)) {
-        addComment("\nRDc mass update processing for REQ ID " + request.getReqId() + " was ABORTED.");
+        addComment("\nRDc mass update processing for REQ ID " + request.getReqId() + " for CMRNo" + request.getCmrNo() + " was ABORTED.");
         this.parentRow.setRowStatusCd(CmrConstants.MASS_CREATE_ROW_STATUS_FAIL);
       } else if (CmrConstants.RDC_STATUS_NOT_COMPLETED.equalsIgnoreCase(resultCode)) {
-        addComment("\nRDc mass update processing for REQ ID " + request.getReqId() + " is NOT COMPLETED.");
+        addComment("\nRDc mass update processing for REQ ID " + request.getReqId() + " for CMRNo" + request.getCmrNo() + " is NOT COMPLETED.");
         this.parentRow.setRowStatusCd(CmrConstants.MASS_CREATE_ROW_STATUS_FAIL);
       } else if (CmrConstants.RDC_STATUS_IGNORED.equalsIgnoreCase(resultCode)) {
-        addComment("\nRDc mass update processing for REQ ID " + request.getReqId() + " is IGNORED.");
+        addComment("\nRDc mass update processing for REQ ID " + request.getReqId() + " for CMRNo" + request.getCmrNo() + " is IGNORED.");
         this.parentRow.setRowStatusCd(CmrConstants.MASS_CREATE_ROW_STATUS_UPDATE_FAILE);
       } else {
         this.parentRow.setRowStatusCd(CmrConstants.MASS_CREATE_ROW_STATUS_DONE);
@@ -168,6 +171,7 @@ public class IERPMassUpdtMultiWorker extends MassUpdateMultiWorker {
         this.parentRow.setErrorTxt(getComments());
         addRdcStatus(resultCode);
       }
+
     }
     if (this.parentRow.getErrorTxt() != null && this.parentRow.getErrorTxt().length() > 10000) {
       this.parentRow.setErrorTxt(this.parentRow.getErrorTxt().substring(0, 9999));
@@ -178,4 +182,5 @@ public class IERPMassUpdtMultiWorker extends MassUpdateMultiWorker {
   public boolean isIndexNotUpdated() {
     return indexNotUpdated;
   }
+
 }

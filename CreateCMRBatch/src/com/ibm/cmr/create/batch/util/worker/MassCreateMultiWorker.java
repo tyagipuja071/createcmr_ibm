@@ -20,4 +20,9 @@ public abstract class MassCreateMultiWorker extends MultiThreadedWorker<MassCrea
 
   }
 
+  @Override
+  public boolean flushOnCommitOnly() {
+    return true;
+  }
+
 }

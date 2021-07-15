@@ -167,9 +167,4 @@ public class USMassCreateMultiWorker extends MassCreateMultiWorker {
 
   }
 
-  @Override
-  public boolean flushOnCommitOnly() {
-    return true;
-  }
-
 }

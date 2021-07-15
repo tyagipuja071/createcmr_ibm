@@ -263,6 +263,7 @@ public class IERPMassProcessMultiService extends MultiThreadedBatchService<Long>
           workers.add(worker);
         }
 
+        LOG.debug(workers.size() + " workers added...");
         executor.shutdown();
         while (!executor.isTerminated()) {
           try {
