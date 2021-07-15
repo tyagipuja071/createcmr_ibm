@@ -477,8 +477,11 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     lockedBy = admin.getLockBy();
     lockedByNm = admin.getLockByNm();
     processingStatus = admin.getProcessedFlag();
-
-    if (transitionToNext) {
+    boolean cnSendToPPNFlag = false;
+    if (SystemLocation.CHINA.equals(model.getCmrIssuingCntry()) && "DRA".equals(admin.getReqStatus()) && "PPN".equals(trans.getNewReqStatus())) {
+      cnSendToPPNFlag = true;
+    }
+    if (transitionToNext && !cnSendToPPNFlag) {
       admin.setReqStatus(trans.getNewReqStatus());
     }
 
@@ -624,6 +627,8 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     String autoConfig = RequestUtils.getAutomationConfig(entityManager, model.getCmrIssuingCntry());
     if (!AutomationConst.AUTOMATE_PROCESSOR.equals(autoConfig) && !AutomationConst.AUTOMATE_BOTH.equals(autoConfig)) {
       result = approvalService.processDefaultApproval(entityManager, model.getReqId(), model.getReqType(), user, model);
+    } else if (trans != null && !trans.getNewReqStatus().equals("AUT") && SystemLocation.CHINA.equals(model.getCmrIssuingCntry())) {
+      approvalService.processDefaultApproval(entityManager, model.getReqId(), model.getReqType(), user, model);
     } else {
       this.log.info("Processor automation enabled, skipping default approvals.");
     }
