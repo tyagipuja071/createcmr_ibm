@@ -541,14 +541,17 @@ public class GermanyUtil extends AutomationUtil {
 
   private String getSBOFromIMS(EntityManager entityManager, String subIndustryCd, String isuCd, String clientTier) {
     List<String> sboValues = new ArrayList<>();
+    String isu = StringUtils.isNotBlank(isuCd) ? isuCd : "";
+    String ctc = StringUtils.isNotBlank(clientTier) ? clientTier : "";
     String isuCtc = (StringUtils.isNotBlank(isuCd) ? isuCd : "") + (StringUtils.isNotBlank(clientTier) ? clientTier : "");
     if (StringUtils.isNotBlank(subIndustryCd) && ("34Q".equals(isuCtc))) {
       String ims = subIndustryCd.substring(0, 1);
       String sql = ExternalizedQuery.getSql("AUTO.DE.GET_SBOLIST_FROM_ISUCTC");
       PreparedQuery query = new PreparedQuery(entityManager, sql);
-      query.setParameter("ISU", "%" + isuCtc + "%");
+      query.setParameter("ISU", "%" + isu + "%");
+      query.setParameter("CLIENT_TIER", "%" + ctc + "%");
       query.setParameter("ISSUING_CNTRY", SystemLocation.GERMANY);
-      query.setParameter("IMS", "%" + ims + "%");
+      query.setParameter("UPDATE_BY_ID", "%" + ims + "%");
       query.setForReadOnly(true);
       sboValues = query.getResults(String.class);
     }
