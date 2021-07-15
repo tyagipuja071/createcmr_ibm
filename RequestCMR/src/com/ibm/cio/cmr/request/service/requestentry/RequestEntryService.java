@@ -622,8 +622,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     copyValuesToEntity(model, entity);
     String result = null;
     String autoConfig = RequestUtils.getAutomationConfig(entityManager, model.getCmrIssuingCntry());
-    if (!AutomationConst.AUTOMATE_PROCESSOR.equals(autoConfig) && !AutomationConst.AUTOMATE_BOTH.equals(autoConfig)
-        || SystemLocation.CHINA.equals(model.getCmrIssuingCntry())) {
+    if (!AutomationConst.AUTOMATE_PROCESSOR.equals(autoConfig) && !AutomationConst.AUTOMATE_BOTH.equals(autoConfig)) {
       result = approvalService.processDefaultApproval(entityManager, model.getReqId(), model.getReqType(), user, model);
     } else {
       this.log.info("Processor automation enabled, skipping default approvals.");
