@@ -3056,6 +3056,87 @@ function lockFieldsForIndia(){
   }
 }
 
+
+// CMR-2830
+function addCompanyProofAttachValidation() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+          var reqType = FormManager.getActualValue('reqType');  
+          var msg = '';
+          if(reqType != 'U'){
+            return new ValidationResult(null, true);
+          }
+          var id = FormManager.getActualValue('reqId');
+          var custNmChangedStatus = false;
+          var mailingAddrChangedStatus = false;
+          var newAddrStatus = false;
+      // 1. check for cust nm update
+          var results = cmr.query('GET.CUST_NM_OLD_ATTCH', {
+            _qall  : 'Y',
+            REQ_ID : id
+          });
+          for (var i = 0; i < results.length; i++) {
+            if (results != undefined && results[i].ret1 != '' && results[i].ret1 != results[i].ret2) {
+              custNmChangedStatus = true;
+              break;
+            }
+          }
+          
+          if (custNmChangedStatus && checkForCompanyProofAttachment()) {
+            msg =  'Customer Name update';
+          }
+          
+          // 2. check for mailing updated address
+             var resultUpdt = cmr.query('GET.CHANGED_INDC_INDIA',{
+               _qall  : 'Y',
+               REQ_ID : id
+             });
+             
+             if(resultUpdt != undefined && resultUpdt.length > 0){
+               mailingAddrChangedStatus = true;
+             }
+             
+             if (mailingAddrChangedStatus && checkForCompanyProofAttachment()) {
+               msg += (msg != '' )? ' / Mailing address update' : 'Customer Name update';
+             }
+             
+             // 3. check for any new address
+             var resultNew = cmr.query('GET.IMPORT_INDC_INDIA',{
+               _qall  : 'Y',
+               REQ_ID : id
+             });
+             
+             if(resultNew != undefined && resultNew.length > 0 ){
+               newAddrStatus = true;
+             }
+             
+             if (newAddrStatus && checkForCompanyProofAttachment()) {
+               msg += (msg != '' )? ' / New address addition' : 'New Address addition';
+             }
+             
+             if(msg != null && msg != ''){
+               return new ValidationResult(null, false, 'Company proof attachment is mandatory for '+msg+'.');
+             }
+          
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_ATTACH_TAB', 'frmCMR');
+}
+
+function checkForCompanyProofAttachment(){
+  var id = FormManager.getActualValue('reqId');
+  var ret = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
+    ID : id
+  });
+  if (ret == null || ret.ret1 == null) {
+    return true;
+  }else{
+    return false;
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.AP = [ SysLoc.AUSTRALIA, SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE, SysLoc.VIETNAM,
       SysLoc.THAILAND, SysLoc.HONG_KONG, SysLoc.NEW_ZEALAND, SysLoc.LAOS, SysLoc.MACAO, SysLoc.MALASIA, SysLoc.NEPAL, SysLoc.CAMBODIA ];
@@ -3100,6 +3181,7 @@ dojo.addOnLoad(function() {
 
   // GEOHandler.registerValidator(addMandateCmrNoForSG, [SysLoc.SINGAPORE]);
   GEOHandler.registerValidator(addCmrNoValidator, [ SysLoc.SINGAPORE ]);
+  GEOHandler.registerValidator(addCompanyProofAttachValidation, [ SysLoc.INDIA ]);
 
   GEOHandler.addAfterConfig(removeStateValidatorForHkMoNZ, [ SysLoc.AUSTRALIA, SysLoc.NEW_ZEALAND ]);
   GEOHandler.addAfterTemplateLoad(removeStateValidatorForHkMoNZ, [ SysLoc.AUSTRALIA, SysLoc.NEW_ZEALAND ]);
