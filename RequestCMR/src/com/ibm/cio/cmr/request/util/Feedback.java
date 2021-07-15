@@ -115,6 +115,23 @@ public class Feedback {
     return feedbackUrl;
   }
 
+  public static String genEmbeddedNPSLink(EntityManager entityManager, Admin admin, String country) {
+    String link = getNPSUrl(entityManager, admin, country);
+    if (link == null) {
+      return "";
+    }
+    StringBuilder sb = new StringBuilder();
+    sb.append("<br>\n");
+    sb.append("<br>\n");
+    sb.append("<div style=\"color:#0000CD; font-weight:bold\">\n");
+    sb.append("We'd love to hear from you! Send us your feedback about the process by clicking ");
+    sb.append("<a style=\"text-decoration:underline\" href=\"" + link + "\">here</a>.\n");
+    sb.append("</div>\n");
+
+    return sb.toString();
+
+  }
+
   /**
    * Checks if the request is automated or not
    * 
