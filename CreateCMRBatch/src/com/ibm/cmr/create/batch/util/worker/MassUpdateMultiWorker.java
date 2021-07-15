@@ -16,6 +16,9 @@ import com.ibm.cmr.create.batch.util.MultiThreadedWorker;
  */
 public abstract class MassUpdateMultiWorker extends MultiThreadedWorker<MassUpdt> {
 
+  protected static final String MASS_UPDATE_FAIL = "FAIL";
+  protected static final String MASS_UPDATE_DONE = "DONE";
+
   public MassUpdateMultiWorker(Admin parentAdmin, MassUpdt parentEntity) {
     super(parentAdmin, parentEntity);
   }

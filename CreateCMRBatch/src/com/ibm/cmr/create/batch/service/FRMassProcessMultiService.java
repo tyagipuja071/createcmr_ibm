@@ -12,8 +12,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -36,12 +34,11 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemUtil;
-import com.ibm.cmr.create.batch.entry.BatchEntryPoint;
 import com.ibm.cmr.create.batch.util.BatchUtil;
 import com.ibm.cmr.create.batch.util.CMRRequestContainer;
 import com.ibm.cmr.create.batch.util.masscreate.WorkerThreadFactory;
-import com.ibm.cmr.create.batch.util.masscreate.handler.impl.FRMassProcessWorker;
 import com.ibm.cmr.create.batch.util.mq.LandedCountryMap;
+import com.ibm.cmr.create.batch.util.worker.impl.FranceMassUpdtMultiWorker;
 import com.ibm.cmr.services.client.process.ProcessRequest;
 import com.ibm.cmr.services.client.process.ProcessResponse;
 
@@ -109,11 +106,9 @@ public class FRMassProcessMultiService extends MultiThreadedBatchService<Long> {
    */
   protected void processMassUpdateRequest(EntityManager entityManager, ProcessRequest request, Admin admin, Data data) throws Exception {
 
-    String resultCode = null;
     String processingStatus = admin.getRdcProcessingStatus() != null ? admin.getRdcProcessingStatus() : "";
     long reqId = admin.getId().getReqId();
     boolean isIndexNotUpdated = false;
-    EntityManagerFactory emf = null;
     try {
       // 1. Get request to process
       PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.FR.GET.MASS_UPDT"));
@@ -124,8 +119,6 @@ public class FRMassProcessMultiService extends MultiThreadedBatchService<Long> {
       List<String> statusCodes = new ArrayList<String>();
       StringBuilder comment = new StringBuilder();
 
-      ProcessResponse response = null;
-      String applicationId = BatchUtil.getAppId(data.getCmrIssuingCntry());
       List<String> rdcProcessStatusMsgs = new ArrayList<String>();
       HashMap<String, String> overallStatus = new HashMap<String, String>();
       if (resultsMain != null && resultsMain.size() > 0) {
@@ -141,45 +134,29 @@ public class FRMassProcessMultiService extends MultiThreadedBatchService<Long> {
         LOG.debug("Number of records found: " + resultsMain.size());
         LOG.debug("Starting processing mass update lines at " + new Date());
 
-        emf = Persistence.createEntityManagerFactory(BatchEntryPoint.DEFAULT_BATCH_PERSISTENCE_UNIT);
+        List<FranceMassUpdtMultiWorker> workers = new ArrayList<FranceMassUpdtMultiWorker>();
 
-        List<FRMassProcessWorker> workers = new ArrayList<FRMassProcessWorker>();
-        while (resultsMain.size() > 0) {
-          List<MassUpdt> results = new LinkedList<MassUpdt>();
-          for (int i = 0; i < 50; i++) {
-            if (resultsMain.size() > 0) {
-              results.add(resultsMain.remove(0));
-            } else {
-              break;
-            }
+        LOG.debug(" - Processing " + resultsMain.size() + " subrecords...");
+        ExecutorService executor = Executors.newFixedThreadPool(threads, new WorkerThreadFactory(getThreadName() + reqId));
+        for (MassUpdt sMassUpdt : resultsMain) {
+          FranceMassUpdtMultiWorker worker = new FranceMassUpdtMultiWorker(admin, sMassUpdt);
+          executor.execute(worker);
+          workers.add(worker);
+        }
+
+        executor.shutdown();
+        while (!executor.isTerminated()) {
+          try {
+            Thread.sleep(5000);
+          } catch (InterruptedException e) {
+            // noop
           }
-
-          LOG.debug(" - Processing " + results.size() + " subrecords...");
-          ExecutorService executor = Executors.newFixedThreadPool(threads, new WorkerThreadFactory(getThreadName() + reqId));
-          for (MassUpdt sMassUpdt : results) {
-            FRMassProcessWorker worker = new FRMassProcessWorker(emf, admin, data, sMassUpdt, BATCH_USER_ID);
-            executor.execute(worker);
-            workers.add(worker);
-          }
-
-          executor.shutdown();
-          while (!executor.isTerminated()) {
-            try {
-              Thread.sleep(5000);
-            } catch (InterruptedException e) {
-              // noop
-            }
-          }
-
-          // execute flush every 50
-          entityManager.flush();
-
         }
 
         LOG.debug("Finished processing mass update lines at " + new Date());
 
-        Exception processError = null;
-        for (FRMassProcessWorker worker : workers) {
+        Throwable processError = null;
+        for (FranceMassUpdtMultiWorker worker : workers) {
           if (worker != null) {
             if (worker.isError()) {
               LOG.error("Error in processing mass update rdc for Request ID " + admin.getId().getReqId() + ": " + worker.getErrorMsg());
@@ -189,13 +166,13 @@ public class FRMassProcessMultiService extends MultiThreadedBatchService<Long> {
             } else {
               statusCodes.addAll(worker.getStatusCodes());
               rdcProcessStatusMsgs.addAll(worker.getRdcProcessStatusMsgs());
-              isIndexNotUpdated = isIndexNotUpdated || worker.getIndexNotUpdated();
+              isIndexNotUpdated = isIndexNotUpdated || worker.isIndexNotUpdated();
               comment.append(worker.getComments());
             }
           }
         }
         if (processError != null) {
-          throw processError;
+          throw new Exception(processError);
         }
 
         // *** START OF FIX
@@ -289,8 +266,6 @@ public class FRMassProcessMultiService extends MultiThreadedBatchService<Long> {
     } catch (Exception e) {
       LOG.error("Error in processing Mass Update Request " + admin.getId().getReqId(), e);
       addError("Mass Update Request " + admin.getId().getReqId() + " Error: " + e.getMessage());
-    } finally {
-      emf.close();
     }
   }
 
@@ -469,5 +444,10 @@ public class FRMassProcessMultiService extends MultiThreadedBatchService<Long> {
     createComment(entityManager, "RDC processing started.", admin.getId().getReqId());
 
     partialCommit(entityManager);
+  }
+
+  @Override
+  public boolean flushOnCommitOnly() {
+    return true;
   }
 }
