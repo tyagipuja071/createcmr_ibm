@@ -1636,6 +1636,20 @@ function addDoubleByteValidatorCN(cntry, details) {
   FormManager.addValidator('cnCustName3', Validators.NO_SINGLE_BYTE, [ 'Customer Name Con' + '\'' + 't Chinese 2' ]);
   FormManager.addValidator('cnAddrTxt', Validators.NO_SINGLE_BYTE, [ 'Street Address Chinese' ]);
   FormManager.addValidator('cnAddrTxt2', Validators.NO_SINGLE_BYTE, [ 'Street Address Con' + '\'' + 't Chinese' ]);
+  FormManager.addValidator('cnCity', Validators.NO_SINGLE_BYTE, [ 'City Chinese' ]);
+  FormManager.addValidator('cnDistrict', Validators.NO_SINGLE_BYTE, [ 'District Chinese' ]);
+
+  FormManager.addValidator('custNm1', Validators.LATIN, [ 'Customer Name English' ]);
+  FormManager.addValidator('custNm2', Validators.LATIN, [ 'Customer Name Con' + '\'' + 't English' ]);
+  FormManager.addValidator('custNm3', Validators.LATIN, [ 'Customer Name Con' + '\'' + 't 2 English' ]);
+  FormManager.addValidator('addrTxt', Validators.LATIN, [ 'Customer Address English' ]);
+  FormManager.addValidator('addrTxt2', Validators.LATIN, [ 'Customer Address Con' + '\'' + 't English' ]);
+  FormManager.addValidator('city2', Validators.LATIN, [ 'District English' ]);
+  FormManager.addValidator('dropdowncity1', Validators.LATIN, [ 'City English' ]);
+  FormManager.addValidator('dept', Validators.LATIN, [ 'Department English' ]);
+  FormManager.addValidator('bldg', Validators.LATIN, [ 'Building English' ]);
+  FormManager.addValidator('office', Validators.LATIN, [ 'Office English' ]);
+  FormManager.addValidator('poBox', Validators.LATIN, [ 'PostBox English' ]);
 }
 
 dojo.addOnLoad(function() {
