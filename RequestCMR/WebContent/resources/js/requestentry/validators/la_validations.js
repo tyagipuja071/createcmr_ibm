@@ -949,6 +949,7 @@ function addLatinAmericaAddressHandler(cntry, addressMode, saving) {
   var latinAmericaCntryJSON2 = JSON.stringify(latinAmericaCntryJSON);
   var land1Json = JSON.parse(latinAmericaCntryJSON2);
   var issuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var reqType = FormManager.getActualValue('reqType');
   if (!saving) {
     if (addressMode == 'newAddress') {
       /*
@@ -962,6 +963,11 @@ function addLatinAmericaAddressHandler(cntry, addressMode, saving) {
       FilteringDropdown['val_landCntry'] = null;
     }
   }
+  if (reqType == 'U' && FormManager.getActualValue('addrType') == 'ZS01') {
+    FormManager.readOnly('landCntry');
+  } else {
+    FormManager.enable('landCntry');
+}
 }
 
 function addTaxCode1ValidatorForOtherLACntries() {
