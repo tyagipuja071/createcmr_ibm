@@ -18,7 +18,6 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 
 import com.ibm.cio.cmr.request.CmrConstants;
-import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
@@ -64,7 +63,6 @@ public class IndiaUtil extends AutomationUtil {
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {
     // TODO Auto-generated method stub
     Admin admin = requestData.getAdmin();
-    Data data = requestData.getData();
     if (!"C".equals(admin.getReqType())) {
       details.append("Field Computation skipped for Updates.");
       results.setResults("Skipped");
@@ -419,11 +417,10 @@ public class IndiaUtil extends AutomationUtil {
   @Override
   public void emptyINAC(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData) throws Exception {
     Data data = requestData.getData();
-    OverrideOutput overrides = new OverrideOutput(false);
     LOG.debug("INAC code value " + data.getInacCd());
-    overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "INAC_CD", data.getInacCd(), " ");
+    data.setInacCd("");
     LOG.debug("INAC type value " + data.getInacType());
-    overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "INAC_TYPE", data.getInacType(), " ");
+    data.setInacType("");
   }
 
 }
