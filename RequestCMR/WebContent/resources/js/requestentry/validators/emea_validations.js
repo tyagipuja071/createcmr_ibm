@@ -1829,6 +1829,11 @@ function fieldsReadOnlyItaly(fromAddress, scenario, scenarioChanged) {
   var reqType = FormManager.getActualValue('reqType');
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var reqId = FormManager.getActualValue('reqId');
+  if (custSubType == 'INTER' || custSubType == 'CROIN' || custSubType == 'INTSM' || custSubType == 'INTVA') {
+    cmr.showNode('sboInfo');
+  } else {
+    cmr.hideNode('sboInfo');
+  }
   if (reqType != 'C') {
     return;
   }
