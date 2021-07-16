@@ -2167,6 +2167,14 @@ public class TransConnService extends BaseBatchService {
         requestDataValueRecords.add(telx1);
       }
 
+      // CREATCMR-2990 - add affiliate
+      if (!StringUtils.isBlank(massUpdtData.getAffiliate())) {
+        RequestValueRecord affiliate = new RequestValueRecord();
+        affiliate.setField("KONZS");
+        affiliate.setValue(massUpdtData.getAffiliate());
+        requestDataValueRecords.add(affiliate);
+      }
+
       // set requestDataValueRecords list updatDataRec
       updtDataRec.setValues(requestDataValueRecords);
       int recordSize = updtDataRec.getValues().size();

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -13,6 +15,7 @@ import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.MassUpdt;
+import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectObjectContainer;
@@ -39,8 +42,9 @@ public class LDMassProcessWorker implements Runnable {
   private boolean error;
   private Exception errorMsg;
 
-  public LDMassProcessWorker(EntityManager entityManager, Admin admin, MassUpdt massUpdt, LDMassProcessMultiLegacyService service) {
-    SystemUtil.setManager(entityManager);
+  public LDMassProcessWorker(EntityManagerFactory emf, Admin admin, MassUpdt massUpdt, LDMassProcessMultiLegacyService service) {
+    // SystemUtil.setManager(entityManager);
+    EntityManager entityManager = emf.createEntityManager();
     this.entityManager = entityManager;
     this.admin = admin;
     this.massUpdt = massUpdt;
@@ -49,10 +53,32 @@ public class LDMassProcessWorker implements Runnable {
 
   @Override
   public void run() {
-    processLDLegacy();
+    EntityTransaction transaction = null;
+    try {
+      ChangeLogListener.setManager(entityManager);
+      transaction = entityManager.getTransaction();
+      transaction.begin();
+      processLDLegacy(entityManager);
+      if (transaction != null && transaction.isActive() && !transaction.getRollbackOnly()) {
+        transaction.commit();
+      }
+    } catch (Throwable e) {
+      LOG.error("An error was encountered during processing. Transaction will be rolled back.", e);
+      if (transaction != null && transaction.isActive()) {
+        transaction.rollback();
+      }
+      throw e;
+    } finally {
+      if (transaction != null && transaction.isActive()) {
+        transaction.rollback();
+      }
+      // empty the manager
+      entityManager.clear();
+      entityManager.close();
+    }
   }
 
-  private void processLDLegacy() {
+  private void processLDLegacy(EntityManager entityManager) {
     try {
       LOG.debug("BEGIN PROCESSING CMR# >> " + massUpdt.getCmrNo());
       CMRRequestContainer cmrObjects = service.prepareRequest(entityManager, massUpdt, admin);

@@ -47,10 +47,10 @@ import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
 import com.ibm.cmr.create.batch.util.BatchUtil;
 import com.ibm.cmr.create.batch.util.CMRRequestContainer;
 import com.ibm.cmr.create.batch.util.masscreate.WorkerThreadFactory;
-import com.ibm.cmr.create.batch.util.masscreate.handler.impl.LDMassProcessWorker;
 import com.ibm.cmr.create.batch.util.mq.LandedCountryMap;
 import com.ibm.cmr.create.batch.util.mq.transformer.MessageTransformer;
 import com.ibm.cmr.create.batch.util.mq.transformer.TransformerManager;
+import com.ibm.cmr.create.batch.util.worker.impl.LDMassUpdtDb2MultiWorker;
 
 /**
  * @author JeffZAMORA
@@ -143,98 +143,103 @@ public class LDMassProcessMultiLegacyService extends MultiThreadedBatchService<L
    * @param admin
    */
   public void processMassUpdate(EntityManager entityManager, Admin admin) throws Exception {
-    if (admin == null) {
-      throw new Exception("Cannot process mass update request. Admin information is null or empty.");
-    }
-    // PreparedQuery query = new PreparedQuery(entityManager,
-    // ExternalizedQuery.getSql("SYSTEM.SUPP_CNTRY_BY_CNTRY_CD"));=
-    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("QUERY.DATA.GET.CMR.BY_REQID"));
-    query.setParameter("REQ_ID", admin.getId().getReqId());
-    List<Object[]> cntryList = query.getResults();
-    String cntry = "";
-
-    if (cntryList != null && cntryList.size() > 0) {
-      Object[] result = cntryList.get(0);
-      cntry = (String) result[0];
-    } else {
-      throw new Exception("Cannot process mass update request. Data information is null or empty.");
-    }
-
-    query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("SYSTEM.SUPP_CNTRY_BY_CNTRY_CD"));
-    query.setParameter("CNTRY_CD", cntry);
-    SuppCntry suppCntry = query.getSingleResult(SuppCntry.class);
-
-    if (suppCntry == null) {
-      throw new Exception("Cannot process mass update request. Data information is null or empty.");
-    } else {
-      String mode = suppCntry.getSuppReqType();
-
-      if (mode.contains("M0")) {
-        throw new Exception("Cannot process mass update request. Mass update processing is currently set to manual.");
+    try {
+      if (admin == null) {
+        throw new Exception("Cannot process mass update request. Admin information is null or empty.");
       }
-    }
+      // PreparedQuery query = new PreparedQuery(entityManager,
+      // ExternalizedQuery.getSql("SYSTEM.SUPP_CNTRY_BY_CNTRY_CD"));=
+      PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("QUERY.DATA.GET.CMR.BY_REQID"));
+      query.setParameter("REQ_ID", admin.getId().getReqId());
+      List<Object[]> cntryList = query.getResults();
+      String cntry = "";
 
-    // 1. Get request to process
-    query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.LD.GET.MASS_UPDT"));
-    query.setParameter("REQ_ID", admin.getId().getReqId());
-    query.setParameter("ITER_ID", admin.getIterationId());
-
-    List<MassUpdt> results = query.getResults(MassUpdt.class);
-
-    if (results != null && results.size() > 0) {
-      // 2. If results are not empty, lock the admin record
-      lockRecord(entityManager, admin);
-      List<String> errorCmrs = new ArrayList<String>();
-
-      int threads = 5;
-      String threadCount = BatchUtil.getProperty("multithreaded.threadCount");
-      if (threadCount != null && StringUtils.isNumeric(threadCount)) {
-        threads = Integer.parseInt(threadCount);
+      if (cntryList != null && cntryList.size() > 0) {
+        Object[] result = cntryList.get(0);
+        cntry = (String) result[0];
+      } else {
+        throw new Exception("Cannot process mass update request. Data information is null or empty.");
       }
 
-      LOG.debug("Starting processing mass update lines at " + new Date());
-      List<LDMassProcessWorker> workers = new ArrayList<LDMassProcessWorker>();
-      ScheduledExecutorService executor = Executors.newScheduledThreadPool(threads, new WorkerThreadFactory(getThreadName()));
-      int currCount = 0;
-      for (MassUpdt massUpdt : results) {
-        LDMassProcessWorker worker = new LDMassProcessWorker(entityManager, admin, massUpdt, this);
-        executor.schedule(worker, currCount, TimeUnit.SECONDS);
-        currCount++;
-        workers.add(worker);
-      }
+      query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("SYSTEM.SUPP_CNTRY_BY_CNTRY_CD"));
+      query.setParameter("CNTRY_CD", cntry);
+      SuppCntry suppCntry = query.getSingleResult(SuppCntry.class);
 
-      executor.shutdown();
-      while (!executor.isTerminated()) {
-        try {
-          Thread.sleep(5000);
-        } catch (InterruptedException e) {
-          // noop
+      if (suppCntry == null) {
+        throw new Exception("Cannot process mass update request. Data information is null or empty.");
+      } else {
+        String mode = suppCntry.getSuppReqType();
+
+        if (mode.contains("M0")) {
+          throw new Exception("Cannot process mass update request. Mass update processing is currently set to manual.");
         }
       }
 
-      LOG.debug("Finished processing mass update lines at " + new Date());
+      // 1. Get request to process
+      query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.LD.GET.MASS_UPDT"));
+      query.setParameter("REQ_ID", admin.getId().getReqId());
+      query.setParameter("ITER_ID", admin.getIterationId());
 
-      Exception processError = null;
-      for (LDMassProcessWorker worker : workers) {
-        if (worker != null) {
-          if (worker.isError()) {
-            LOG.error("Error in processing mass update for Request ID " + admin.getId().getReqId() + ": " + worker.getErrorMsg());
-            if (processError == null && worker.getErrorMsg() != null) {
-              processError = worker.getErrorMsg();
+      List<MassUpdt> results = query.getResults(MassUpdt.class);
+
+      if (results != null && results.size() > 0) {
+        // 2. If results are not empty, lock the admin record
+        lockRecord(entityManager, admin);
+        List<String> errorCmrs = new ArrayList<String>();
+
+        int threads = 5;
+        String threadCount = BatchUtil.getProperty("multithreaded.threadCount");
+        if (threadCount != null && StringUtils.isNumeric(threadCount)) {
+          threads = Integer.parseInt(threadCount);
+        }
+
+        LOG.debug("Starting processing mass update lines at " + new Date());
+        List<LDMassUpdtDb2MultiWorker> workers = new ArrayList<LDMassUpdtDb2MultiWorker>();
+        ScheduledExecutorService executor = Executors.newScheduledThreadPool(threads, new WorkerThreadFactory(getThreadName()));
+        int currCount = 0;
+        for (MassUpdt massUpdt : results) {
+          LDMassUpdtDb2MultiWorker worker = new LDMassUpdtDb2MultiWorker(admin, massUpdt, this);
+          executor.schedule(worker, currCount, TimeUnit.SECONDS);
+          currCount++;
+          workers.add(worker);
+        }
+
+        executor.shutdown();
+        while (!executor.isTerminated()) {
+          try {
+            Thread.sleep(5000);
+          } catch (InterruptedException e) {
+            // noop
+          }
+        }
+
+        LOG.debug("Finished processing mass update lines at " + new Date());
+
+        Throwable processError = null;
+        for (LDMassUpdtDb2MultiWorker worker : workers) {
+          if (worker != null) {
+            if (worker.isError()) {
+              LOG.error("Error in processing mass update for Request ID " + admin.getId().getReqId() + ": " + worker.getErrorMsg());
+              if (processError == null && worker.getErrorMsg() != null) {
+                processError = worker.getErrorMsg();
+              }
             }
           }
         }
-      }
-      if (processError != null) {
-        throw processError;
-      }
+        if (processError != null) {
+          throw new Exception(processError);
+        }
 
-      admin.setLastUpdtTs(SystemUtil.getCurrentTimestamp());
+        admin.setLastUpdtTs(SystemUtil.getCurrentTimestamp());
 
-      // DTN: This means errors happened in Legacy processing.
-      completeMassUpdateRecord(entityManager, admin, errorCmrs);
+        // DTN: This means errors happened in Legacy processing.
+        completeMassUpdateRecord(entityManager, admin, errorCmrs);
+      }
+      partialCommit(entityManager);
+    } catch (Exception e) {
+      LOG.error("Error in processing mass Update Request " + admin.getId().getReqId(), e);
+      addError("Mass Update Request " + admin.getId().getReqId() + " Error: " + e.getMessage());
     }
-    partialCommit(entityManager);
   }
 
   /*
@@ -925,6 +930,11 @@ public class LDMassProcessMultiLegacyService extends MultiThreadedBatchService<L
     createComment(entityManager, "An error occurred during processing:\n" + errorMsg, admin.getId().getReqId());
 
     RequestUtils.sendEmailNotifications(entityManager, admin, hist);
+  }
+
+  @Override
+  public boolean flushOnCommitOnly() {
+    return true;
   }
 
   @Override
