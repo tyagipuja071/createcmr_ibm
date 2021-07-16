@@ -31,6 +31,7 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
+import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cmr.services.client.AutomationServiceClient;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.ServiceClient.Method;
@@ -173,6 +174,7 @@ public class IndiaUtil extends AutomationUtil {
           addresses = requestData.getAddresses(addrType);
         }
         for (Addr addr : addresses) {
+          Addr addressToChk = requestData.getAddress(addrType);
           if ("Y".equals(addr.getChangedIndc())) {
             // update address
             if (RELEVANT_ADDRESSES.contains(addrType)) {
@@ -192,7 +194,6 @@ public class IndiaUtil extends AutomationUtil {
                   continue; // avoid further checks
                 }
 
-                Addr addressToChk = requestData.getAddress(addrType);
                 List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addressToChk, true);
                 boolean matchesDnb = false;
                 if (matches != null) {
@@ -208,6 +209,21 @@ public class IndiaUtil extends AutomationUtil {
                     checkDetails
                         .append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records and GST Service.\n");
                   }
+
+                  // check for company proof attachment
+
+                  // company proof
+                  if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+                    validation.setMessage("Validated");
+                    checkDetails.append("Supporting documentation is provided by the requester as attachment for " + addrType).append("\n");
+                    validation.setSuccess(true);
+                  } else {
+                    validation.setMessage("Review Required");
+                    cmdeReview = true;
+                    checkDetails.append("\nNo supporting documentation is provided by the requester for " + addrType + " address.");
+                    output.setDetails(checkDetails.toString());
+                  }
+
                 } else {
                   checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
                   for (DnBMatchingResponse dnb : matches) {
@@ -226,6 +242,34 @@ public class IndiaUtil extends AutomationUtil {
               // proceed
               LOG.debug("Update to Address " + addrType + "(" + addr.getId().getAddrSeq() + ") skipped in the checks.\\n");
               checkDetails.append("Updates to Address (" + addr.getId().getAddrSeq() + ") skipped in the checks.\n");
+            }
+          } else if ("N".equals(addr.getImportInd())) {
+            // new address addition
+
+            List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addressToChk, true);
+            boolean matchesDnb = false;
+            if (matches != null) {
+              // check against D&B
+              matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
+            }
+
+            if (!matchesDnb) {
+              LOG.debug("Update address for " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
+              if (!StringUtils.isEmpty(data.getVat()) && getGstMatches(admin.getId().getReqId(), addr, data.getVat())) {
+                checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches data in GST layer service.\n");
+              } else {
+                resultCodes.add("D");
+                checkDetails
+                    .append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records and GST Service.\n");
+              }
+            } else {
+              checkDetails.append("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
+              for (DnBMatchingResponse dnb : matches) {
+                checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
+                checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
+                checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
+                    + dnb.getDnbCountry() + "\n\n");
+              }
             }
           }
         }
