@@ -10,8 +10,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javax.persistence.EntityManager;
 
@@ -28,37 +29,85 @@ import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.entity.MassUpdt;
 import com.ibm.cio.cmr.request.entity.ReqCmtLog;
-import com.ibm.cio.cmr.request.entity.SuppCntry;
 import com.ibm.cio.cmr.request.entity.WfHist;
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.RequestUtils;
-import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cmr.create.batch.util.BatchUtil;
 import com.ibm.cmr.create.batch.util.CMRRequestContainer;
 import com.ibm.cmr.create.batch.util.masscreate.WorkerThreadFactory;
-import com.ibm.cmr.create.batch.util.worker.impl.IERPMassUpdtMultiWorker;
+import com.ibm.cmr.create.batch.util.mq.LandedCountryMap;
+import com.ibm.cmr.create.batch.util.worker.impl.AustriaMassUpdtMultiWorker;
 import com.ibm.cmr.services.client.process.ProcessRequest;
 import com.ibm.cmr.services.client.process.ProcessResponse;
 
 /**
- * Mass processing for IERP
- * 
- * @author 136786PH1
+ * @author 000S8A744
  *
  */
-public class IERPMassProcessMultiService extends MultiThreadedBatchService<Long> {
+public class ATMassProcessMultiLegacyService extends MultiThreadedBatchService<Long> {
 
-  private static final Logger LOG = Logger.getLogger(IERPMassProcessMultiService.class);
-  private static final String[] ADDRESS_ORDER = { "ZS01", "ZP01", "ZI01", "ZD01", "ZD02", "ZP02" };
+  private static final Logger LOG = Logger.getLogger(ATMassProcessMultiLegacyService.class);
+  private static final String[] ADDRESS_ORDER = { "ZS01", "ZP01", "ZI01", "ZD01", "ZS02", "ZP02", "ZD02" };
+
+  @Override
+  public Boolean executeBatchForRequests(EntityManager entityManager, List<Long> requests) throws Exception {
+    ChangeLogListener.setManager(entityManager);
+    for (Long reqId : requests) {
+      AdminPK pk = new AdminPK();
+      pk.setReqId(reqId);
+      Admin admin = entityManager.find(Admin.class, pk);
+      try {
+        CMRRequestContainer cmrObjects = prepareRequest(entityManager, admin);
+        Data data = cmrObjects.getData();
+        ProcessRequest request = new ProcessRequest();
+        request.setCmrNo(data.getCmrNo());
+        request.setMandt(SystemConfiguration.getValue("MANDT"));
+        request.setReqId(admin.getId().getReqId());
+        request.setReqType(admin.getReqType());
+        request.setUserId(BATCH_USER_ID);
+
+        String histMessage = "";
+        processMassUpdate(entityManager, request, admin, data, histMessage);
+
+        if (CmrConstants.RDC_STATUS_ABORTED.equalsIgnoreCase(admin.getRdcProcessingStatus())
+            || CmrConstants.RDC_STATUS_NOT_COMPLETED.equalsIgnoreCase(admin.getRdcProcessingStatus())) {
+          admin.setReqStatus("PPN");
+          admin.setProcessedFlag("E"); // set request status to error.
+
+          if (StringUtils.isEmpty(histMessage)) {
+            histMessage = "Sending back to processor due to error on RDC processing";
+            histMessage += "<br>" + admin.getRdcProcessingMsg();
+          }
+          createHistory(entityManager, histMessage, "PPN", "RDC Processing", admin.getId().getReqId());
+        } else if ((CmrConstants.RDC_STATUS_COMPLETED.equalsIgnoreCase(admin.getRdcProcessingStatus())
+            || CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equalsIgnoreCase(admin.getRdcProcessingStatus()))
+            && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+          admin.setReqStatus("COM");
+          admin.setProcessedFlag("Y"); // set request status to processed
+          createHistory(entityManager, "Request processing Completed Successfully", "COM", "RDC Processing", admin.getId().getReqId());
+        }
+        partialCommit(entityManager);
+
+      } catch (Exception e) {
+        partialRollback(entityManager);
+        LOG.error("Unexpected error occurred during processing of Request " + admin.getId().getReqId(), e);
+        processError(entityManager, admin, e.getMessage());
+      }
+    }
+    return null;
+  }
 
   @Override
   protected Queue<Long> getRequestsToProcess(EntityManager entityManager) {
-    String sql = ExternalizedQuery.getSql("DR.GET_MASS_PROCESS_PENDING.RDC");
+    LOG.info("Initializing Country Map..");
+    LandedCountryMap.init(entityManager);
+    String sql = ExternalizedQuery.getSql("AT.GET_MASS_PROCESS_PENDING.RDC");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     List<Admin> pending = query.getResults(Admin.class);
+
     LinkedList<Long> toProcess = new LinkedList<>();
     LOG.debug((pending != null ? pending.size() : 0) + " records to process.");
     if (pending != null) {
@@ -69,213 +118,88 @@ public class IERPMassProcessMultiService extends MultiThreadedBatchService<Long>
     return toProcess;
   }
 
-  @Override
-  public Boolean executeBatchForRequests(EntityManager entityManager, List<Long> requests) throws Exception {
-
-    Data data = null;
-    ProcessRequest request = null;
-
-    ChangeLogListener.setManager(entityManager);
-    for (Long reqId : requests) {
-      AdminPK pk = new AdminPK();
-      pk.setReqId(reqId);
-      Admin admin = entityManager.find(Admin.class, pk);
-      try {
-
-        CMRRequestContainer cmrObjects = prepareRequest(entityManager, admin);
-        data = cmrObjects.getData();
-
-        request = new ProcessRequest();
-        request.setCmrNo(data.getCmrNo());
-        request.setMandt(SystemConfiguration.getValue("MANDT"));
-        request.setReqId(admin.getId().getReqId());
-        request.setReqType(admin.getReqType());
-        request.setUserId(BATCH_USER_ID);
-
-        processMassUpdateRequest(entityManager, request, admin, data);
-
-        if (CmrConstants.RDC_STATUS_ABORTED.equalsIgnoreCase(admin.getRdcProcessingStatus())
-            || CmrConstants.RDC_STATUS_NOT_COMPLETED.equalsIgnoreCase(admin.getRdcProcessingStatus())) {
-          admin.setReqStatus("PPN");
-          admin.setProcessedFlag("E"); // set request status to error.
-          createHistory(entityManager, "Sending back to processor due to error on RDC processing", "PPN", "RDC Processing", admin.getId().getReqId());
-        } else if ((CmrConstants.RDC_STATUS_COMPLETED.equalsIgnoreCase(admin.getRdcProcessingStatus())
-            || CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equalsIgnoreCase(admin.getRdcProcessingStatus()))
-            && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
-          admin.setReqStatus("COM");
-          admin.setProcessedFlag("Y"); // set request status to processed
-          createHistory(entityManager, "Request processing Completed Successfully", "COM", "RDC Processing", admin.getId().getReqId());
-        }
-        partialCommit(entityManager);
-      } catch (Exception e) {
-        partialRollback(entityManager);
-        LOG.error("Unexpected error occurred during processing of Request " + admin.getId().getReqId(), e);
-        processError(entityManager, admin, e.getMessage());
-      }
-    }
-    return true;
-  }
-
   /**
-   * Retrieves the {@link Admin}, {@link Data}, and {@link Addr} records based
-   * on the request
-   * 
-   * @param cmmaMgr
-   * @param reqId
-   * @return
-   * @throws Exception
-   */
-  private CMRRequestContainer prepareRequest(EntityManager entityManager, Admin admin) throws Exception {
-    LOG.debug("Preparing Request Objects... ");
-    CMRRequestContainer container = new CMRRequestContainer();
-
-    DataPK dataPk = new DataPK();
-    dataPk.setReqId(admin.getId().getReqId());
-    Data data = entityManager.find(Data.class, dataPk);
-    if (data == null) {
-      throw new Exception("Cannot locate DATA record");
-    }
-
-    String sql = ExternalizedQuery.getSql("DR.GET.ADDR");
-    // get the address order
-    if (getIerpAddressOrder() != null) {
-      String[] order = getIerpAddressOrder();
-      StringBuilder types = new StringBuilder();
-      if (order != null && order.length > 0) {
-
-        for (String type : order) {
-          LOG.trace("Looking for Address Types " + type);
-          types.append(types.length() > 0 ? ", " : "");
-          types.append("'" + type + "'");
-        }
-      }
-
-      if (types.length() > 0) {
-        sql += " and ADDR_TYPE in ( " + types.toString() + ") ";
-      }
-      StringBuilder orderBy = new StringBuilder();
-      int orderIndex = 0;
-      for (String type : order) {
-        orderBy.append(" when ADDR_TYPE = '").append(type).append("' then ").append(orderIndex);
-        orderIndex++;
-      }
-      orderBy.append(" else 25 end, ADDR_TYPE, case when IMPORT_IND = 'Y' then 0 else 1 end, ADDR_SEQ ");
-      sql += " order by case " + orderBy.toString();
-    }
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    // query.setForReadOnly(true);
-    query.setParameter("REQ_ID", admin.getId().getReqId());
-    List<Addr> addresses = query.getResults(Addr.class);
-
-    container.setAdmin(admin);
-    container.setData(data);
-    if (addresses != null) {
-      for (Addr addr : addresses) {
-        container.addAddress(addr);
-      }
-    }
-    return container;
-  }
-
-  /**
-   * Processes Request Type 'M'
+   * This is the batch process for mass update requests
    * 
    * @param entityManager
-   * @param request
    * @param admin
-   * @param data
-   * @throws Exception
    */
-  protected void processMassUpdateRequest(EntityManager entityManager, ProcessRequest request, Admin admin, Data data) throws Exception {
-
+  public void processMassUpdate(EntityManager entityManager, ProcessRequest request, Admin admin, Data data, String histMessage) throws Exception {
     if (admin == null) {
       throw new Exception("Cannot process mass update request. Admin information is null or empty.");
     }
 
-    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("QUERY.DATA.GET.CMR.BY_REQID"));
-    query.setParameter("REQ_ID", admin.getId().getReqId());
-    List<Object[]> cntryList = query.getResults();
-    String cntry = "";
-
-    if (cntryList != null && cntryList.size() > 0) {
-      Object[] result = cntryList.get(0);
-      cntry = (String) result[0];
-    } else {
-      throw new Exception("Cannot process mass update request. Data information is null or empty.");
-    }
-
-    query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("SYSTEM.SUPP_CNTRY_BY_CNTRY_CD"));
-    query.setParameter("CNTRY_CD", cntry);
-    SuppCntry suppCntry = query.getSingleResult(SuppCntry.class);
-
-    if (suppCntry == null) {
-      throw new Exception("Cannot process mass update request. Data information is null or empty.");
-    } else {
-      String mode = suppCntry.getSuppReqType();
-
-      if (mode.contains("M0")) {
-        throw new Exception("Cannot process mass update request. Mass update processing is currently set to manual.");
-      }
-    }
-
-    String processingStatus = admin.getRdcProcessingStatus() != null ? admin.getRdcProcessingStatus() : "";
     long reqId = admin.getId().getReqId();
-    boolean isIndexNotUpdated = false;
-
+    String processingStatus = admin.getRdcProcessingStatus() != null ? admin.getRdcProcessingStatus() : "";
     try {
       // 1. Get request to process
-      PreparedQuery sql = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.MD.GET.MASS_UPDT"));
-      sql.setParameter("REQ_ID", admin.getId().getReqId());
-      sql.setParameter("ITER_ID", admin.getIterationId());
+      PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.MA.GET.MASS_UPDT"));
+      query.setParameter("REQ_ID", admin.getId().getReqId());
+      query.setParameter("ITER_ID", admin.getIterationId());
 
-      List<MassUpdt> resultsMain = sql.getResults(MassUpdt.class);
+      List<MassUpdt> resultsMain = query.getResults(MassUpdt.class);
       List<String> statusCodes = new ArrayList<String>();
       StringBuilder comment = new StringBuilder();
+      boolean isIndexNotUpdated = false;
 
       List<String> rdcProcessStatusMsgs = new ArrayList<String>();
       HashMap<String, String> overallStatus = new HashMap<String, String>();
-
       if (resultsMain != null && resultsMain.size() > 0) {
+        // 2. If results are not empty, lock the admin record
+        lockRecord(entityManager, admin);
 
         int threads = 5;
-        String massThreads = SystemParameters.getString("PROCESS.THREAD.COUNT");
-        if (!StringUtils.isBlank(massThreads) && StringUtils.isNumeric(massThreads)) {
-          threads = Integer.parseInt(massThreads);
-        } else {
-          String threadCount = BatchUtil.getProperty("multithreaded.threadCount");
-          if (threadCount != null && StringUtils.isNumeric(threadCount)) {
-            threads = Integer.parseInt(threadCount);
-          }
+        String threadCount = BatchUtil.getProperty("multithreaded.threadCount");
+        if (threadCount != null && StringUtils.isNumeric(threadCount)) {
+          threads = Integer.parseInt(threadCount);
         }
 
         LOG.debug("Worker threads to use: " + threads);
-        LOG.debug("Starting processing IERP mass update at " + new Date());
+        LOG.debug("Starting processing AUSTRIA mass update lines at " + new Date());
         LOG.debug("Number of records found: " + resultsMain.size());
-        List<IERPMassUpdtMultiWorker> workers = new ArrayList<IERPMassUpdtMultiWorker>();
 
-        ExecutorService executor = Executors.newFixedThreadPool(threads, new WorkerThreadFactory("IERPMassWorker-" + reqId));
-        for (MassUpdt sMassUpdt : resultsMain) {
-          // ensure the mass update entity is not updated on this persistence
-          // context
-          entityManager.detach(sMassUpdt);
-          IERPMassUpdtMultiWorker worker = new IERPMassUpdtMultiWorker(admin, sMassUpdt);
-          executor.execute(worker);
-          workers.add(worker);
+        List<AustriaMassUpdtMultiWorker> workers = new ArrayList<AustriaMassUpdtMultiWorker>();
+
+        if (!CmrConstants.REQUEST_STATUS.PCO.toString().equals(admin.getReqStatus())) {
+          admin.setReqStatus(CmrConstants.REQUEST_STATUS.PCO.toString());
+          entityManager.merge(admin);
         }
 
-        LOG.debug(workers.size() + " workers added...");
-        executor.shutdown();
-        while (!executor.isTerminated()) {
-          try {
-            Thread.sleep(5000);
-          } catch (InterruptedException e) {
-            // noop
+        while (resultsMain.size() > 0) {
+
+          List<MassUpdt> results = new LinkedList<MassUpdt>();
+          for (int i = 0; i < 50; i++) {
+            if (resultsMain.size() > 0) {
+              results.add(resultsMain.remove(0));
+            } else {
+              break;
+            }
           }
+
+          ScheduledExecutorService executor = Executors.newScheduledThreadPool(threads, new WorkerThreadFactory(getThreadName() + reqId));
+          for (MassUpdt sMassUpdt : results) {
+            AustriaMassUpdtMultiWorker worker = new AustriaMassUpdtMultiWorker(admin, sMassUpdt);
+            executor.schedule(worker, 5, TimeUnit.SECONDS);
+            workers.add(worker);
+          }
+
+          executor.shutdown();
+          while (!executor.isTerminated()) {
+            try {
+              Thread.sleep(5000);
+            } catch (InterruptedException e) {
+              // noop
+            }
+          }
+
+          // execute flush every 50
+          entityManager.flush();
         }
-        LOG.debug("Mass create processing finished at " + new Date());
+
+        LOG.debug("Finished processing mass update lines at " + new Date());
 
         Throwable processError = null;
-        for (IERPMassUpdtMultiWorker worker : workers) {
+        for (AustriaMassUpdtMultiWorker worker : workers) {
           if (worker != null) {
             if (worker.isError()) {
               LOG.error("Error in processing mass update rdc for Request ID " + admin.getId().getReqId() + ": " + worker.getErrorMsg());
@@ -290,17 +214,12 @@ public class IERPMassProcessMultiService extends MultiThreadedBatchService<Long>
             }
           }
         }
-
         LOG.debug("**** Status CODES --> " + statusCodes);
         LOG.debug("Worker Process Message" + comment);
 
         if (processError != null) {
           throw new Exception(processError);
         }
-
-        admin.setReqStatus(CmrConstants.REQUEST_STATUS.COM.toString());
-        admin.setProcessedFlag("Y");
-        updateEntity(admin, entityManager);
 
         // *** START OF FIX
         LOG.debug("**** Placing comment on success --> " + comment);
@@ -363,6 +282,8 @@ public class IERPMassProcessMultiService extends MultiThreadedBatchService<Long>
         admin.setRdcProcessingTs(SystemUtil.getCurrentTimestamp());
         admin.setRdcProcessingMsg(rdcProcessingMsg.toString().trim());
 
+        LOG.debug("Request Processing status" + admin.getRdcProcessingStatus());
+
         if (!"A".equals(admin.getRdcProcessingStatus()) && !"N".equals(admin.getRdcProcessingStatus())) {
           admin.setReqStatus("COM");
         }
@@ -382,13 +303,92 @@ public class IERPMassProcessMultiService extends MultiThreadedBatchService<Long>
         LOG.debug(
             "Request ID " + admin.getId().getReqId() + " Status: " + admin.getRdcProcessingStatus() + " Message: " + admin.getRdcProcessingMsg());
         // *** END OF FIX
+
       } else {
         LOG.error("*****There are no mass update requests for RDC processing.*****");
+        admin.setRdcProcessingStatus(CmrConstants.RDC_STATUS_ABORTED);
+        admin.setRdcProcessingMsg(
+            "There are no Mass Update records completed on Legacy that can be processed on RDc. " + "This request is being sent back in error.");
+        histMessage = "There are no Mass Update records completed on Legacy that can be processed on RDc. "
+            + "This request is being sent back in error.";
+        RequestUtils.createCommentLogFromBatch(entityManager, BATCH_USER_ID, reqId, histMessage);
       }
+      partialCommit(entityManager);
     } catch (Exception e) {
       LOG.error("Error in processing Update Request " + admin.getId().getReqId(), e);
       addError("Update Request " + admin.getId().getReqId() + " Error: " + e.getMessage());
     }
+  }
+
+  /**
+   * Retrieves the {@link Admin}, {@link Data}, and {@link Addr} records based
+   * on the request
+   * 
+   * @param cmmaMgr
+   * @param reqId
+   * @return
+   * @throws Exception
+   */
+  private CMRRequestContainer prepareRequest(EntityManager entityManager, Admin admin) throws Exception {
+    LOG.debug("Preparing Request Objects... ");
+    CMRRequestContainer container = new CMRRequestContainer();
+
+    DataPK dataPk = new DataPK();
+    dataPk.setReqId(admin.getId().getReqId());
+    Data data = entityManager.find(Data.class, dataPk);
+    if (data == null) {
+      throw new Exception("Cannot locate DATA record");
+    }
+    LOG.debug("Preparing Data Objects... " + data.getCmrNo());
+
+    String sql = ExternalizedQuery.getSql("AT.GET.ADDR");
+    // get the address order for swizz
+    if (getIerpAddressOrder() != null) {
+      String[] order = getIerpAddressOrder();
+      StringBuilder types = new StringBuilder();
+      if (order != null && order.length > 0) {
+
+        for (String type : order) {
+          LOG.trace("Looking for Address Types " + type);
+          types.append(types.length() > 0 ? ", " : "");
+          types.append("'" + type + "'");
+        }
+      }
+
+      if (types.length() > 0) {
+        sql += " and ADDR_TYPE in ( " + types.toString() + ") ";
+      }
+      StringBuilder orderBy = new StringBuilder();
+      int orderIndex = 0;
+      for (String type : order) {
+        orderBy.append(" when ADDR_TYPE = '").append(type).append("' then ").append(orderIndex);
+        orderIndex++;
+      }
+      orderBy.append(" else 25 end, ADDR_TYPE, case when IMPORT_IND = 'Y' then 0 else 1 end, ADDR_SEQ ");
+      sql += " order by case " + orderBy.toString();
+    }
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    // query.setForReadOnly(true);
+    query.setParameter("REQ_ID", admin.getId().getReqId());
+    List<Addr> addresses = query.getResults(Addr.class);
+
+    container.setAdmin(admin);
+    container.setData(data);
+    if (addresses != null) {
+      for (Addr addr : addresses) {
+        container.addAddress(addr);
+      }
+    }
+    return container;
+  }
+
+  private String[] getIerpAddressOrder() {
+    return ADDRESS_ORDER;
+  }
+
+  @Override
+  protected String getThreadName() {
+    return "ATRdcMulti";
   }
 
   /**
@@ -403,6 +403,10 @@ public class IERPMassProcessMultiService extends MultiThreadedBatchService<Long>
    * @throws SQLException
    */
   private void processError(EntityManager entityManager, Admin admin, String errorMsg) throws CmrException, SQLException {
+    if (CmrConstants.REQ_TYPE_DELETE.equals(admin.getReqType()) || CmrConstants.REQ_TYPE_REACTIVATE.equals(admin.getReqType())) {
+      admin.setDisableAutoProc("Y");// disable auto processing if error on
+                                    // processing
+    }
     // processing pending
     LOG.info("Processing error for Request ID " + admin.getId().getReqId() + ": " + errorMsg);
     admin.setReqStatus("PPN");
@@ -421,38 +425,38 @@ public class IERPMassProcessMultiService extends MultiThreadedBatchService<Long>
     RequestUtils.sendEmailNotifications(entityManager, admin, hist);
   }
 
+  /**
+   * Locks the admin record
+   * 
+   * @param entityManager
+   * @param admin
+   * @throws Exception
+   */
+  private void lockRecord(EntityManager entityManager, Admin admin) throws Exception {
+    LOG.info("Locking Request " + admin.getId().getReqId());
+    admin.setLockBy(BATCH_USER_ID);
+    admin.setLockByNm(BATCH_USER_ID);
+    admin.setLockInd("Y");
+    // error
+    admin.setProcessedFlag("Wx");
+    admin.setReqStatus("PCR");
+    admin.setLastUpdtBy(BATCH_USER_ID);
+    updateEntity(admin, entityManager);
+
+    createHistory(entityManager, "Legacy database processing started.", "PCR", "Claim", admin.getId().getReqId());
+    createComment(entityManager, "Legacy database processing started.", admin.getId().getReqId());
+
+    partialCommit(entityManager);
+  }
+
   @Override
   public boolean flushOnCommitOnly() {
     return true;
   }
 
-  /**
-   * Checks if the status is a completed status
-   * 
-   * @param status
-   * @return
-   */
-  protected boolean isCompletedSuccessfully(String status) {
-    return CmrConstants.RDC_STATUS_COMPLETED.equals(status) || CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equals(status);
-  }
-
-  public String[] getIerpAddressOrder() {
-    return ADDRESS_ORDER;
-  }
-
-  @Override
-  protected String getThreadName() {
-    return "IERPMulti";
-  }
-
   @Override
   public boolean isTransactional() {
     return true;
-  }
-
-  @Override
-  protected boolean terminateOnLongExecution() {
-    return false;
   }
 
   @Override

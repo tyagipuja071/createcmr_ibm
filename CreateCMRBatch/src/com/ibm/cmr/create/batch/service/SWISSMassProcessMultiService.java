@@ -28,62 +28,44 @@ import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.entity.MassUpdt;
 import com.ibm.cio.cmr.request.entity.ReqCmtLog;
-import com.ibm.cio.cmr.request.entity.SuppCntry;
 import com.ibm.cio.cmr.request.entity.WfHist;
-import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.RequestUtils;
-import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cmr.create.batch.util.BatchUtil;
 import com.ibm.cmr.create.batch.util.CMRRequestContainer;
 import com.ibm.cmr.create.batch.util.masscreate.WorkerThreadFactory;
-import com.ibm.cmr.create.batch.util.worker.impl.IERPMassUpdtMultiWorker;
+import com.ibm.cmr.create.batch.util.worker.impl.SwissMassUpdtMultiWorker;
 import com.ibm.cmr.services.client.process.ProcessRequest;
 import com.ibm.cmr.services.client.process.ProcessResponse;
 
 /**
- * Mass processing for IERP
- * 
- * @author 136786PH1
+ * @author 05634V744
  *
  */
-public class IERPMassProcessMultiService extends MultiThreadedBatchService<Long> {
+public class SWISSMassProcessMultiService extends MultiThreadedBatchService<Long> {
 
-  private static final Logger LOG = Logger.getLogger(IERPMassProcessMultiService.class);
+  private static final Logger LOG = Logger.getLogger(SWISSMassProcessMultiService.class);
   private static final String[] ADDRESS_ORDER = { "ZS01", "ZP01", "ZI01", "ZD01", "ZD02", "ZP02" };
 
   @Override
-  protected Queue<Long> getRequestsToProcess(EntityManager entityManager) {
-    String sql = ExternalizedQuery.getSql("DR.GET_MASS_PROCESS_PENDING.RDC");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    List<Admin> pending = query.getResults(Admin.class);
-    LinkedList<Long> toProcess = new LinkedList<>();
-    LOG.debug((pending != null ? pending.size() : 0) + " records to process.");
-    if (pending != null) {
-      for (Admin admin : pending) {
-        toProcess.add(admin.getId().getReqId());
-      }
-    }
-    return toProcess;
-  }
-
-  @Override
   public Boolean executeBatchForRequests(EntityManager entityManager, List<Long> requests) throws Exception {
-
+    // TODO Auto-generated method stub
     Data data = null;
     ProcessRequest request = null;
-
-    ChangeLogListener.setManager(entityManager);
     for (Long reqId : requests) {
       AdminPK pk = new AdminPK();
       pk.setReqId(reqId);
       Admin admin = entityManager.find(Admin.class, pk);
-      try {
 
-        CMRRequestContainer cmrObjects = prepareRequest(entityManager, admin);
-        data = cmrObjects.getData();
+      try {
+        // hard-coding to debug specific request
+        // if (admin.getId().getReqId() != reQId) {
+        // continue;
+        // }
+        CMRRequestContainer cmrObject = prepareRequest(entityManager, admin);
+        data = cmrObject.getData();
 
         request = new ProcessRequest();
         request.setCmrNo(data.getCmrNo());
@@ -116,6 +98,41 @@ public class IERPMassProcessMultiService extends MultiThreadedBatchService<Long>
     return true;
   }
 
+  @Override
+  protected Queue<Long> getRequestsToProcess(EntityManager entityManager) {
+    String sql = ExternalizedQuery.getSql("SWISS.GET_MASS_PROCESS_PENDING.RDC");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    List<Admin> pending = query.getResults(Admin.class);
+    LinkedList<Long> toProcess = new LinkedList<>();
+    LOG.debug((pending != null ? pending.size() : 0) + " records to process.");
+    if (pending != null) {
+      for (Admin admin : pending) {
+        toProcess.add(admin.getId().getReqId());
+      }
+    }
+    return toProcess;
+  }
+
+  @Override
+  protected String getThreadName() {
+    return "SWISSMulti";
+  }
+
+  @Override
+  public boolean isTransactional() {
+    return true;
+  }
+
+  @Override
+  protected boolean terminateOnLongExecution() {
+    return false;
+  }
+
+  @Override
+  protected boolean useServicesConnections() {
+    return true;
+  }
+
   /**
    * Retrieves the {@link Admin}, {@link Data}, and {@link Addr} records based
    * on the request
@@ -136,8 +153,8 @@ public class IERPMassProcessMultiService extends MultiThreadedBatchService<Long>
       throw new Exception("Cannot locate DATA record");
     }
 
-    String sql = ExternalizedQuery.getSql("DR.GET.ADDR");
-    // get the address order
+    String sql = ExternalizedQuery.getSql("SWISS.GET.ADDR");
+    // get the address order for swizz
     if (getIerpAddressOrder() != null) {
       String[] order = getIerpAddressOrder();
       StringBuilder types = new StringBuilder();
@@ -177,6 +194,10 @@ public class IERPMassProcessMultiService extends MultiThreadedBatchService<Long>
     return container;
   }
 
+  public String[] getIerpAddressOrder() {
+    return ADDRESS_ORDER;
+  }
+
   /**
    * Processes Request Type 'M'
    * 
@@ -188,82 +209,45 @@ public class IERPMassProcessMultiService extends MultiThreadedBatchService<Long>
    */
   protected void processMassUpdateRequest(EntityManager entityManager, ProcessRequest request, Admin admin, Data data) throws Exception {
 
-    if (admin == null) {
-      throw new Exception("Cannot process mass update request. Admin information is null or empty.");
-    }
-
-    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("QUERY.DATA.GET.CMR.BY_REQID"));
-    query.setParameter("REQ_ID", admin.getId().getReqId());
-    List<Object[]> cntryList = query.getResults();
-    String cntry = "";
-
-    if (cntryList != null && cntryList.size() > 0) {
-      Object[] result = cntryList.get(0);
-      cntry = (String) result[0];
-    } else {
-      throw new Exception("Cannot process mass update request. Data information is null or empty.");
-    }
-
-    query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("SYSTEM.SUPP_CNTRY_BY_CNTRY_CD"));
-    query.setParameter("CNTRY_CD", cntry);
-    SuppCntry suppCntry = query.getSingleResult(SuppCntry.class);
-
-    if (suppCntry == null) {
-      throw new Exception("Cannot process mass update request. Data information is null or empty.");
-    } else {
-      String mode = suppCntry.getSuppReqType();
-
-      if (mode.contains("M0")) {
-        throw new Exception("Cannot process mass update request. Mass update processing is currently set to manual.");
-      }
-    }
-
     String processingStatus = admin.getRdcProcessingStatus() != null ? admin.getRdcProcessingStatus() : "";
     long reqId = admin.getId().getReqId();
     boolean isIndexNotUpdated = false;
 
     try {
-      // 1. Get request to process
-      PreparedQuery sql = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.MD.GET.MASS_UPDT"));
-      sql.setParameter("REQ_ID", admin.getId().getReqId());
-      sql.setParameter("ITER_ID", admin.getIterationId());
 
-      List<MassUpdt> resultsMain = sql.getResults(MassUpdt.class);
+      // 1. Get request to process
+      PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.MD.GET.MASS_UPDT"));
+      query.setParameter("REQ_ID", admin.getId().getReqId());
+      query.setParameter("ITER_ID", admin.getIterationId());
+
+      List<MassUpdt> resultsMain = query.getResults(MassUpdt.class);
       List<String> statusCodes = new ArrayList<String>();
-      StringBuilder comment = new StringBuilder();
 
       List<String> rdcProcessStatusMsgs = new ArrayList<String>();
       HashMap<String, String> overallStatus = new HashMap<String, String>();
-
+      StringBuilder comment = new StringBuilder();
       if (resultsMain != null && resultsMain.size() > 0) {
-
+        lockRecord(entityManager, admin);
         int threads = 5;
-        String massThreads = SystemParameters.getString("PROCESS.THREAD.COUNT");
-        if (!StringUtils.isBlank(massThreads) && StringUtils.isNumeric(massThreads)) {
-          threads = Integer.parseInt(massThreads);
-        } else {
-          String threadCount = BatchUtil.getProperty("multithreaded.threadCount");
-          if (threadCount != null && StringUtils.isNumeric(threadCount)) {
-            threads = Integer.parseInt(threadCount);
-          }
+        String threadCount = BatchUtil.getProperty("multithreaded.threadCount");
+        if (threadCount != null && StringUtils.isNumeric(threadCount)) {
+          threads = Integer.parseInt(threadCount);
         }
 
-        LOG.debug("Worker threads to use: " + threads);
-        LOG.debug("Starting processing IERP mass update at " + new Date());
-        LOG.debug("Number of records found: " + resultsMain.size());
-        List<IERPMassUpdtMultiWorker> workers = new ArrayList<IERPMassUpdtMultiWorker>();
+        createComment(entityManager, "Processing started.", admin.getId().getReqId());
 
-        ExecutorService executor = Executors.newFixedThreadPool(threads, new WorkerThreadFactory("IERPMassWorker-" + reqId));
+        LOG.debug("Worker threads to use: " + threads);
+        LOG.debug("Starting processing SWISS mass update at " + new Date());
+        LOG.debug("Number of records found: " + resultsMain.size());
+
+        List<SwissMassUpdtMultiWorker> workers = new ArrayList<SwissMassUpdtMultiWorker>();
+        ExecutorService executor = Executors.newFixedThreadPool(threads, new WorkerThreadFactory("SWISSMassWorker-" + reqId));
         for (MassUpdt sMassUpdt : resultsMain) {
-          // ensure the mass update entity is not updated on this persistence
-          // context
-          entityManager.detach(sMassUpdt);
-          IERPMassUpdtMultiWorker worker = new IERPMassUpdtMultiWorker(admin, sMassUpdt);
+          SwissMassUpdtMultiWorker worker = new SwissMassUpdtMultiWorker(admin, sMassUpdt);
           executor.execute(worker);
           workers.add(worker);
         }
 
-        LOG.debug(workers.size() + " workers added...");
         executor.shutdown();
         while (!executor.isTerminated()) {
           try {
@@ -272,10 +256,10 @@ public class IERPMassProcessMultiService extends MultiThreadedBatchService<Long>
             // noop
           }
         }
-        LOG.debug("Mass create processing finished at " + new Date());
 
+        LOG.debug("Mass create processing finished at " + new Date());
         Throwable processError = null;
-        for (IERPMassUpdtMultiWorker worker : workers) {
+        for (SwissMassUpdtMultiWorker worker : workers) {
           if (worker != null) {
             if (worker.isError()) {
               LOG.error("Error in processing mass update rdc for Request ID " + admin.getId().getReqId() + ": " + worker.getErrorMsg());
@@ -291,16 +275,14 @@ public class IERPMassProcessMultiService extends MultiThreadedBatchService<Long>
           }
         }
 
-        LOG.debug("**** Status CODES --> " + statusCodes);
-        LOG.debug("Worker Process Message" + comment);
-
         if (processError != null) {
           throw new Exception(processError);
         }
 
-        admin.setReqStatus(CmrConstants.REQUEST_STATUS.COM.toString());
-        admin.setProcessedFlag("Y");
-        updateEntity(admin, entityManager);
+        /*
+         * admin.setReqStatus(CmrConstants.REQUEST_STATUS.COM.toString());
+         * admin.setProcessedFlag("Y"); updateEntity(admin, entityManager);
+         */
 
         // *** START OF FIX
         LOG.debug("**** Placing comment on success --> " + comment);
@@ -331,6 +313,8 @@ public class IERPMassProcessMultiService extends MultiThreadedBatchService<Long>
 
           if (strOverallStatus != null && CmrConstants.RDC_STATUS_COMPLETED.equals(strOverallStatus)) {
             comment.append("Successfully completed RDc processing for mass update request.");
+          } else if (strOverallStatus != null && !CmrConstants.RDC_STATUS_COMPLETED.equals(strOverallStatus)) {
+            comment.append("Some errors occured while processing Mass Update request. Please check request summary for details");
           } else {
             comment.append("Issues happened generating a processing comment. Please contact your Administrator.");
           }
@@ -403,6 +387,10 @@ public class IERPMassProcessMultiService extends MultiThreadedBatchService<Long>
    * @throws SQLException
    */
   private void processError(EntityManager entityManager, Admin admin, String errorMsg) throws CmrException, SQLException {
+    if (CmrConstants.REQ_TYPE_DELETE.equals(admin.getReqType()) || CmrConstants.REQ_TYPE_REACTIVATE.equals(admin.getReqType())) {
+      admin.setDisableAutoProc("Y");// disable auto processing if error on
+                                    // processing
+    }
     // processing pending
     LOG.info("Processing error for Request ID " + admin.getId().getReqId() + ": " + errorMsg);
     admin.setReqStatus("PPN");
@@ -421,42 +409,32 @@ public class IERPMassProcessMultiService extends MultiThreadedBatchService<Long>
     RequestUtils.sendEmailNotifications(entityManager, admin, hist);
   }
 
+  /**
+   * Locks the admin record
+   * 
+   * @param entityManager
+   * @param admin
+   * @throws Exception
+   */
+  private void lockRecord(EntityManager entityManager, Admin admin) throws Exception {
+    LOG.info("Locking Request " + admin.getId().getReqId());
+    admin.setLockBy(BATCH_USER_ID);
+    admin.setLockByNm(BATCH_USER_ID);
+    admin.setLockInd("Y");
+    // error
+    admin.setProcessedFlag("Wx");
+    admin.setReqStatus("PCR");
+    admin.setLastUpdtBy(BATCH_USER_ID);
+    updateEntity(admin, entityManager);
+
+    createHistory(entityManager, "Processing started.", "PCR", "Claim", admin.getId().getReqId());
+    createComment(entityManager, "Processing started.", admin.getId().getReqId());
+
+    partialCommit(entityManager);
+  }
+
   @Override
   public boolean flushOnCommitOnly() {
-    return true;
-  }
-
-  /**
-   * Checks if the status is a completed status
-   * 
-   * @param status
-   * @return
-   */
-  protected boolean isCompletedSuccessfully(String status) {
-    return CmrConstants.RDC_STATUS_COMPLETED.equals(status) || CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equals(status);
-  }
-
-  public String[] getIerpAddressOrder() {
-    return ADDRESS_ORDER;
-  }
-
-  @Override
-  protected String getThreadName() {
-    return "IERPMulti";
-  }
-
-  @Override
-  public boolean isTransactional() {
-    return true;
-  }
-
-  @Override
-  protected boolean terminateOnLongExecution() {
-    return false;
-  }
-
-  @Override
-  protected boolean useServicesConnections() {
     return true;
   }
 
