@@ -59,7 +59,8 @@ public class DefaultApprovalsElement extends ApprovalsElement {
     AutomationUtil automationUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
     String approvalsResult = "";
     boolean sendApprovalFlag = false;
-    if (automationUtil != null && automationUtil instanceof ChinaUtil && SystemLocation.CHINA.equals(data.getCmrIssuingCntry())) {
+    if (automationUtil != null && automationUtil instanceof ChinaUtil && SystemLocation.CHINA.equals(data.getCmrIssuingCntry())
+        && admin.getReqType().equalsIgnoreCase("U")) {
       ChinaUtil chinaUtil = (ChinaUtil) automationUtil;
       // call chinaUtil logic
       sendApprovalFlag = chinaUtil.isUpdated(entityManager, requestData, engineData);
