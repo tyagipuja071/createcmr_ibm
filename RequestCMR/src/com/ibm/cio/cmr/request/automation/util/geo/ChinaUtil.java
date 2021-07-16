@@ -23,7 +23,7 @@ import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
-import com.ibm.cio.cmr.request.util.geo.GEOHandler;
+import com.ibm.cio.cmr.request.util.geo.impl.CNHandler;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
 
 public class ChinaUtil extends AutomationUtil {
@@ -382,30 +382,26 @@ public class ChinaUtil extends AutomationUtil {
       RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
 
     Data data = requestData.getData();
-    GEOHandler handler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
-    List<Addr> addrs = requestData.getAddresses();
+    CNHandler handler = (CNHandler) RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
+    List<Addr> addrs = handler.getAddrByReqId(entityManager, data.getId().getReqId());
     Addr zs01addr = requestData.getAddress("ZS01");
     IntlAddr intlZS01Addr = handler.getIntlAddrById(zs01addr, entityManager);
 
     for (int i = 0; i < addrs.size(); i++) {
       Addr addr = addrs.get(i);
-      String addrType = addr.getId().getAddrType();
-      if (StringUtils.isNotBlank(addrType) && !"ZS01".equalsIgnoreCase(addrType)) {
-        addr.setCustNm1(zs01addr.getCustNm1());
-        addr.setCustNm2(zs01addr.getCustNm2());
-        addr.setCustNm3(zs01addr.getCustNm3());
-        addr.setCustNm4(zs01addr.getCustNm4());
-        IntlAddr intlAddr = handler.getIntlAddrById(addr, entityManager);
-        intlAddr.setIntlCustNm1(intlZS01Addr.getIntlCustNm1());
-        intlAddr.setIntlCustNm2(intlZS01Addr.getIntlCustNm2());
-        intlAddr.setIntlCustNm3(intlZS01Addr.getIntlCustNm3());
-        intlAddr.setIntlCustNm4(intlZS01Addr.getIntlCustNm4());
-        entityManager.merge(addr);
-        entityManager.merge(intlAddr);
-        entityManager.flush();
-      }
+      addr.setCustNm1(zs01addr.getCustNm1());
+      addr.setCustNm2(zs01addr.getCustNm2());
+      addr.setCustNm3(zs01addr.getCustNm3());
+      addr.setCustNm4(zs01addr.getCustNm4());
+      IntlAddr intlAddr = handler.getIntlAddrById(addr, entityManager);
+      intlAddr.setIntlCustNm1(intlZS01Addr.getIntlCustNm1());
+      intlAddr.setIntlCustNm2(intlZS01Addr.getIntlCustNm2());
+      intlAddr.setIntlCustNm3(intlZS01Addr.getIntlCustNm3());
+      intlAddr.setIntlCustNm4(intlZS01Addr.getIntlCustNm4());
+      entityManager.merge(addr);
+      entityManager.merge(intlAddr);
+      entityManager.flush();
     }
-
     return true;
   }
 

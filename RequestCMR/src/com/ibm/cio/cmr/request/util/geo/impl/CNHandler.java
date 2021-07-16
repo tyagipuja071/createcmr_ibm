@@ -1379,6 +1379,20 @@ public class CNHandler extends GEOHandler {
     return intlAddrRdcList;
   }
 
+  public List<Addr> getAddrByReqId(EntityManager entityManager, long reqId) {
+    String sql = ExternalizedQuery.getSql("QUERY.ADDR_BY_REQ_ID");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    List<Addr> addrList;
+    try {
+      addrList = query.getResults(Addr.class);
+    } catch (Exception ex) {
+      LOG.error("An error occured in getting the ADDR records");
+      throw ex;
+    }
+    return addrList;
+  }
+
   private List<GeoContactInfo> getGeoContactInfoByReqId(EntityManager entityManager, long reqId) {
     // TODO Auto-generated method stub
     String sql = ExternalizedQuery.getSql("CONTACTINFO.FINDALL");
