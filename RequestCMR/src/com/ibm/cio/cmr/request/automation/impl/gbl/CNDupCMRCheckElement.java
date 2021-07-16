@@ -12,6 +12,7 @@ import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 
+import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
@@ -31,10 +32,14 @@ import com.ibm.cio.cmr.request.model.CompanyRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.CompanyFinder;
+import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
+import com.ibm.cio.cmr.request.util.mail.Email;
+import com.ibm.cio.cmr.request.util.mail.MessageType;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.MatchingServiceClient;
 import com.ibm.cmr.services.client.QueryClient;
@@ -233,6 +238,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   result.setOnError(true);
                   result.setProcessOutput(output);
                   result.setDetails(details.toString().trim());
+                  sendManagerEmail(entityManager, admin, data, soldTo, details);
                 } else if ((nameMatched && nameIsBP) || (historyNmMatched && historyNmIsBP)) {
                   result.setDetails("Duplicate CMR Check returned BP record for Normal Scenario." + StringUtils.join(matchedCMRs, ", "));
                   result.setResults("No Matches");
@@ -426,6 +432,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   result.setOnError(true);
                   result.setProcessOutput(output);
                   result.setDetails(details.toString().trim());
+                  sendManagerEmail(entityManager, admin, data, soldTo, details);
                 } else if ((nameMatched && !nameIsBP) || (historyNmMatched && !historyNmIsBP) && !ceidMatched) {
                   result.setDetails("Duplicate CMR Check returned record without ceid for BP Scenario." + StringUtils.join(matchedCMRs, ", "));
                   result.setResults("No Matches");
@@ -566,6 +573,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   result.setOnError(true);
                   result.setProcessOutput(output);
                   result.setDetails(details.toString().trim());
+                  sendManagerEmail(entityManager, admin, data, soldTo, details);
                 } else if (!nameMatched && !historyNmMatched) {
                   result.setDetails("No Duplicate CMRs were found.");
                   result.setResults("No Matches");
@@ -711,6 +719,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   result.setOnError(true);
                   result.setProcessOutput(output);
                   result.setDetails(details.toString().trim());
+                  sendManagerEmail(entityManager, admin, data, soldTo, details);
                 } else if (!nameMatched && !historyNmMatched) {
                   result.setDetails("No Duplicate CMRs were found.");
                   result.setResults("No Matches");
@@ -769,6 +778,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
               result.setOnError(true);
               result.setProcessOutput(output);
               result.setDetails(details.toString().trim());
+              sendManagerEmail(entityManager, admin, data, soldTo, details);
             } else {
               result.setDetails("No Duplicate CMRs were found.");
               result.setResults("No Matches");
@@ -884,6 +894,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   result.setOnError(true);
                   result.setProcessOutput(output);
                   result.setDetails(details.toString().trim());
+                  sendManagerEmail(entityManager, admin, data, soldTo, details);
                 } else if (!nameMatched && !historyNmMatched) {
                   result.setDetails("No Duplicate CMRs were found.");
                   result.setResults("No Matches");
@@ -1044,6 +1055,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   result.setOnError(true);
                   result.setProcessOutput(output);
                   result.setDetails(details.toString().trim());
+                  sendManagerEmail(entityManager, admin, data, soldTo, details);
                 } else if (!nameMatched && !historyNmMatched) {
                   result.setDetails("No Duplicate CMRs were found.");
                   result.setResults("No Matches");
@@ -1100,6 +1112,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
               result.setOnError(true);
               result.setProcessOutput(output);
               result.setDetails(details.toString().trim());
+              sendManagerEmail(entityManager, admin, data, soldTo, details);
             } else {
               result.setDetails("No Duplicate CMRs were found.");
               result.setResults("No Matches");
@@ -1148,6 +1161,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
             result.setOnError(true);
             result.setProcessOutput(output);
             result.setDetails(details.toString().trim());
+            sendManagerEmail(entityManager, admin, data, soldTo, details);
           } else {
             result.setDetails("No Duplicate CMRs were found.");
             result.setResults("No Matches");
@@ -1192,6 +1206,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
             result.setOnError(true);
             result.setProcessOutput(output);
             result.setDetails(details.toString().trim());
+            sendManagerEmail(entityManager, admin, data, soldTo, details);
           } else {
             result.setDetails("No Duplicate CMRs were found.");
             result.setResults("No Matches");
@@ -1258,6 +1273,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
     if (!StringUtils.isBlank(companyRecordModel.getDunsNo())) {
       details.append("Duns No =  " + companyRecordModel.getDunsNo()).append("\n");
     }
+    details.append("<br>");
     // if (!StringUtils.isBlank(cmrCheckRecord.getParentDunsNo())) {
     // details.append("Parent Duns No = " +
     // cmrCheckRecord.getParentDunsNo()).append("\n");
@@ -1515,6 +1531,40 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
     }
     FindCMRResultModel results = SystemUtil.findCMRs(cmrNo, issuingCntry, 10, null, params);
     return results;
+  }
+
+  private void sendManagerEmail(EntityManager entityManager, Admin admin, Data data, Addr soldTo, StringBuilder details) {
+    boolean skip = true;
+    if (skip) {
+      return;
+    }
+    Person target = null;
+    String manager = null;
+    try {
+      target = BluePagesHelper.getPerson(admin.getRequesterId());
+      manager = BluePagesHelper.getManagerEmail(target.getId());
+    } catch (CmrException e) {
+      log.debug("Failed in getting requester manager. ReqID = " + data.getId().getReqId() + ", requester = " + admin.getRequesterId());
+      e.printStackTrace();
+    }
+    if (manager != null) {
+      log.debug("Sending duplicate CMR manager email. ReqID = " + data.getId().getReqId() + ", requester = " + admin.getRequesterId() + ". Manager = "
+          + manager);
+      String host = SystemConfiguration.getValue("MAIL_HOST");
+      String subject = "Duplicate CMR Found for Request " + data.getId().getReqId() + " From " + admin.getRequesterId();
+      // String from = SystemConfiguration.getValue("MAIL_FROM");
+      String from = "CreateCMR_Automation_China";
+      String email = "ReqID " + data.getId().getReqId() + "status is changed to REJECT due to duplicate CMR found. <br><br> Found records: "
+          + details;
+
+      Email mail = new Email();
+      mail.setSubject(subject);
+      mail.setTo(manager);
+      mail.setFrom(from);
+      mail.setMessage(email);
+      mail.setType(MessageType.HTML);
+      mail.send(host);
+    }
   }
 
 }
