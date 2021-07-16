@@ -42,6 +42,7 @@ import com.ibm.cmr.services.client.query.QueryResponse;
 public class DupCMRCheckElement extends DuplicateCheckElement {
 
   private static final Logger log = Logger.getLogger(DupCMRCheckElement.class);
+  private static final List<String> AP_COUNTRIES = Arrays.asList("744");
 
   public DupCMRCheckElement(String requestTypes, String actionOnError, boolean overrideData, boolean stopOnError) {
     super(requestTypes, actionOnError, overrideData, stopOnError);
@@ -315,6 +316,12 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
       }
       request.setStreetLine1(addr.getAddrTxt());
       request.setStreetLine2(StringUtils.isEmpty(addr.getAddrTxt2()) ? "" : addr.getAddrTxt2());
+      log.debug("Issuing country:-" + data.getCmrIssuingCntry());
+      if (AP_COUNTRIES.contains(data.getCmrIssuingCntry())) {
+        request.setStreetLine3(StringUtils.isEmpty(addr.getDept()) ? "" : addr.getDept());
+      } else {
+        request.setStreetLine3("");
+      }
       request.setCity(addr.getCity1());
 
       request.setStateProv(addr.getStateProv());
