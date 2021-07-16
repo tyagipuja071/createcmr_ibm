@@ -63,7 +63,7 @@ public class DefaultApprovalsElement extends ApprovalsElement {
       ChinaUtil chinaUtil = (ChinaUtil) automationUtil;
       // call chinaUtil logic
       sendApprovalFlag = chinaUtil.isUpdated(entityManager, requestData, engineData);
-      if (!sendApprovalFlag) {
+      if (sendApprovalFlag) {
 
         LOG.info("Checking and generating required approvals for China Request " + reqId);
         LOG.debug("Merging admin entity before checking for default China approvals.");
