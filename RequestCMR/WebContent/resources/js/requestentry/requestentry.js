@@ -1521,8 +1521,8 @@ function checkIfFinalDnBCheckRequired() {
   var findDnbResult = FormManager.getActualValue('findDnbResult');
   var userRole = FormManager.getActualValue('userRole');
   var ifReprocessAllowed = FormManager.getActualValue('autoEngineIndc');
-  if (reqId > 0 && reqType == 'C' && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B') && !isSkipDnbMatching()
-      && matchOverrideIndc != 'Y') {
+  if (reqId > 0 && (reqType == 'C' || reqType == 'U') && reqStatus == 'DRA' && userRole == 'Requester'
+      && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B') && !isSkipDnbMatching() && matchOverrideIndc != 'Y') {
     // currently Enabled Only For US
     return true;
   }
@@ -1535,7 +1535,7 @@ function checkIfDnBCheckReqForIndia() {
   var result = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
             ID : reqId
           });
-  if(reqType == 'C' && (custSubGrp == 'BLUMX'|| custSubGrp == 'MKTPC' || custSubGrp == 'IGF' || custSubGrp == 'AQSTN' || custSubGrp == 'NRML' || custSubGrp == 'ESOSW' || custSubGrp =='CROSS')){
+  if(reqType == 'U' || (reqType == 'C' && (custSubGrp == 'BLUMX'|| custSubGrp == 'MKTPC' || custSubGrp == 'IGF' || custSubGrp == 'AQSTN' || custSubGrp == 'NRML' || custSubGrp == 'ESOSW' || custSubGrp =='CROSS'))){
    if(result && result.ret1){
    return false;
    }
@@ -1551,6 +1551,7 @@ function matchDnBForAutomationCountries() {
   var reqId = FormManager.getActualValue('reqId');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var custSubGrp=FormManager.getActualValue('custSubGrp');
+  var reqType = FormManager.getActualValue('reqType');
   console.log("Checking if the request matches D&B...");
   var nm1 = _pagemodel.mainCustNm1 == null ? '' : _pagemodel.mainCustNm1;
   var nm2 = _pagemodel.mainCustNm2 == null ? '' : _pagemodel.mainCustNm2;
@@ -1588,7 +1589,7 @@ function matchDnBForAutomationCountries() {
               showDnBMatchModal();
             } else {
                 //Cmr-2755_India_no_match_found  
-                if(cntry == '744' && (custSubGrp == 'BLUMX'|| custSubGrp == 'MKTPC'|| custSubGrp == 'IGF' || custSubGrp == 'AQSTN' || custSubGrp == 'NRML' || custSubGrp == 'ESOSW' || custSubGrp =='CROSS') && !flag){
+                if(cntry == SysLoc.INDIA && ((custSubGrp == 'BLUMX'|| custSubGrp == 'MKTPC'|| custSubGrp == 'IGF' || custSubGrp == 'AQSTN' || custSubGrp == 'NRML' || custSubGrp == 'ESOSW' || custSubGrp =='CROSS')) || reqType == 'U' && !flag){
                 cmr.showAlert('Please attach company proof as no matches found in dnb.');
                 checkNoMatchingAttachmentValidator();
                 }else{

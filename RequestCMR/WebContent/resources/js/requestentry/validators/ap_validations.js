@@ -3098,7 +3098,7 @@ function addCompanyProofAttachValidation() {
              }
              
              if (mailingAddrChangedStatus && checkForCompanyProofAttachment()) {
-               msg += (msg != '' )? ' / Mailing address update' : 'Customer Name update';
+               msg += (msg != '' )? ' / Mailing address update' : 'Mailing address update';
              }
              
              // 3. check for any new address
@@ -3181,7 +3181,8 @@ dojo.addOnLoad(function() {
 
   // GEOHandler.registerValidator(addMandateCmrNoForSG, [SysLoc.SINGAPORE]);
   GEOHandler.registerValidator(addCmrNoValidator, [ SysLoc.SINGAPORE ]);
-  GEOHandler.registerValidator(addCompanyProofAttachValidation, [ SysLoc.INDIA ]);
+// GEOHandler.registerValidator(addCompanyProofAttachValidation, [ SysLoc.INDIA
+// ]);
 
   GEOHandler.addAfterConfig(removeStateValidatorForHkMoNZ, [ SysLoc.AUSTRALIA, SysLoc.NEW_ZEALAND ]);
   GEOHandler.addAfterTemplateLoad(removeStateValidatorForHkMoNZ, [ SysLoc.AUSTRALIA, SysLoc.NEW_ZEALAND ]);
