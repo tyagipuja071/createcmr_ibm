@@ -57,6 +57,14 @@ function addAddressRecordTypeValidator() {
             return new ValidationResult(null, false, 'Sold-To address is mandatory. Please add one Sold-To address.');
           } else if (zs01Count > 1) {
             return new ValidationResult(null, false, 'Only one Sold-To address is allowed. Please remove the additional Sold-to address.');
+          } else if (FormManager.getActualValue('custGrp') == 'CROSS') {
+            if (isLandedCountryCheck()) {
+              return new ValidationResult(null, false, 'Landed Country value should not be \'CA - Canada\' for Cross-border customers.');
+            }
+          } else if (FormManager.getActualValue('custGrp') == 'LOCAL') {
+            if (isLandedCountryCheck()) {
+              return new ValidationResult(null, false, 'Landed Country value should be \'CA - Canada\' for Local customers.');
+            }
           } else if (zd01Count > 1) {
             return new ValidationResult(null, false, 'Only one Ship-To address is allowed. Please remove the additional Ship-To address.');
           } else if (zi01Count > 1) {
@@ -803,6 +811,34 @@ function updateMainCustomerNames(cntry, addressMode, saving, finalSave, force) {
 
 function validateCACopy(addrType, arrayOfTargetTypes) {
   return null;
+}
+
+function isLandedCountryCheck() {
+  if ((FormManager.getActualValue('custGrp') == 'CROSS')) {
+    for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+      recordList = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+      if (_allAddressData != null && _allAddressData[i] != null) {
+        if (_allAddressData[i].addrType[0] == 'ZS01') {
+          if (_allAddressData[i].landCntry[0] == 'CA') {
+            return true;
+          }
+        }
+      }
+    }
+  }
+  if ((FormManager.getActualValue('custGrp') == 'LOCAL')) {
+    for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+      recordList = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+      if (_allAddressData != null && _allAddressData[i] != null) {
+        if (_allAddressData[i].addrType[0] == 'ZS01') {
+          if (_allAddressData[i].landCntry[0] != 'CA') {
+            return true;
+          }
+        }
+      }
+    }
+  }
+  return false;
 }
 
 /* Register CA Javascripts */
