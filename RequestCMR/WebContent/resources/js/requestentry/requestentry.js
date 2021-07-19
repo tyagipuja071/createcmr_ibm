@@ -1589,7 +1589,7 @@ function matchDnBForAutomationCountries() {
               showDnBMatchModal();
             } else {
                 //Cmr-2755_India_no_match_found  
-                if(cntry == SysLoc.INDIA && ((custSubGrp == 'BLUMX'|| custSubGrp == 'MKTPC'|| custSubGrp == 'IGF' || custSubGrp == 'AQSTN' || custSubGrp == 'NRML' || custSubGrp == 'ESOSW' || custSubGrp =='CROSS')) && !flag){
+                if(cntry == SysLoc.INDIA && (custSubGrp == 'BLUMX'|| custSubGrp == 'MKTPC'|| custSubGrp == 'IGF' || custSubGrp == 'AQSTN' || custSubGrp == 'NRML' || custSubGrp == 'ESOSW' || custSubGrp =='CROSS') && !flag){
                 cmr.showAlert('Please attach company proof as no matches found in dnb.');
                 checkNoMatchingAttachmentValidator();
                 }else{
