@@ -809,7 +809,7 @@ function showHideCityCN() {
       }
       FormManager.addValidator('stateProv', Validators.REQUIRED, [ 'State/Province' ], null);
       //
-      FormManager.addValidator('custPhone', Validators.REQUIRED, [ "Customer Contact's Phone Number 2" ], null);
+      FormManager.addValidator('custPhone', Validators.REQUIRED, [ "Customer Contact's Phone Number" ], null);
       FormManager.addValidator('cnCustContJobTitle', Validators.REQUIRED, [ "Customer Contact's Job Title" ], null);
       FormManager.addValidator('cnCustContNm', Validators.REQUIRED, [ "Customer Contact's Name (include salutation)" ], null);
     }
