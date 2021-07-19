@@ -1535,7 +1535,7 @@ function checkIfDnBCheckReqForIndia() {
   var result = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
             ID : reqId
           });
-  if(reqType == 'U' || (reqType == 'C' && (custSubGrp == 'BLUMX'|| custSubGrp == 'MKTPC' || custSubGrp == 'IGF' || custSubGrp == 'AQSTN' || custSubGrp == 'NRML' || custSubGrp == 'ESOSW' || custSubGrp =='CROSS'))){
+  if(reqType == 'C' && (custSubGrp == 'BLUMX'|| custSubGrp == 'MKTPC' || custSubGrp == 'IGF' || custSubGrp == 'AQSTN' || custSubGrp == 'NRML' || custSubGrp == 'ESOSW' || custSubGrp =='CROSS')){
    if(result && result.ret1){
    return false;
    }
@@ -1589,7 +1589,7 @@ function matchDnBForAutomationCountries() {
               showDnBMatchModal();
             } else {
                 //Cmr-2755_India_no_match_found  
-                if(cntry == SysLoc.INDIA && ((custSubGrp == 'BLUMX'|| custSubGrp == 'MKTPC'|| custSubGrp == 'IGF' || custSubGrp == 'AQSTN' || custSubGrp == 'NRML' || custSubGrp == 'ESOSW' || custSubGrp =='CROSS')) || reqType == 'U' && !flag){
+                if(cntry == SysLoc.INDIA && ((custSubGrp == 'BLUMX'|| custSubGrp == 'MKTPC'|| custSubGrp == 'IGF' || custSubGrp == 'AQSTN' || custSubGrp == 'NRML' || custSubGrp == 'ESOSW' || custSubGrp =='CROSS')) && !flag){
                 cmr.showAlert('Please attach company proof as no matches found in dnb.');
                 checkNoMatchingAttachmentValidator();
                 }else{
