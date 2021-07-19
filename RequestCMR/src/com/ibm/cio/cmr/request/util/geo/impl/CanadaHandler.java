@@ -251,6 +251,9 @@ public class CanadaHandler extends GEOHandler {
 
   @Override
   public void handleImportByType(String requestType, Admin admin, Data data, boolean importing) {
+    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      admin.setDelInd(null);
+    }
   }
 
   @Override
