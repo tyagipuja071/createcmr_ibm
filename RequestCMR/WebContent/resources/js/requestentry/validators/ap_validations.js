@@ -3071,23 +3071,7 @@ function addCompanyProofAttachValidation() {
           var custNmChangedStatus = false;
           var mailingAddrChangedStatus = false;
           var newAddrStatus = false;
-      // 1. check for cust nm update
-          var results = cmr.query('GET.CUST_NM_OLD_ATTCH', {
-            _qall  : 'Y',
-            REQ_ID : id
-          });
-          for (var i = 0; i < results.length; i++) {
-            if (results != undefined && results[i].ret1 != '' && results[i].ret1 != results[i].ret2) {
-              custNmChangedStatus = true;
-              break;
-            }
-          }
-          
-          if (custNmChangedStatus && checkForCompanyProofAttachment()) {
-            msg =  'Customer Name update';
-          }
-          
-          // 2. check for mailing updated address
+          // 1. check for mailing updated address
              var resultUpdt = cmr.query('GET.CHANGED_INDC_INDIA',{
                _qall  : 'Y',
                REQ_ID : id
@@ -3098,10 +3082,10 @@ function addCompanyProofAttachValidation() {
              }
              
              if (mailingAddrChangedStatus && checkForCompanyProofAttachment()) {
-               msg += (msg != '' )? ' / Mailing address update' : 'Mailing address update';
+               msg = 'Mailing address update';
              }
              
-             // 3. check for any new address
+           // 2. check for any new address
              var resultNew = cmr.query('GET.IMPORT_INDC_INDIA',{
                _qall  : 'Y',
                REQ_ID : id
@@ -3181,8 +3165,7 @@ dojo.addOnLoad(function() {
 
   // GEOHandler.registerValidator(addMandateCmrNoForSG, [SysLoc.SINGAPORE]);
   GEOHandler.registerValidator(addCmrNoValidator, [ SysLoc.SINGAPORE ]);
-// GEOHandler.registerValidator(addCompanyProofAttachValidation, [ SysLoc.INDIA
-// ]);
+ GEOHandler.registerValidator(addCompanyProofAttachValidation, [ SysLoc.INDIA]);
 
   GEOHandler.addAfterConfig(removeStateValidatorForHkMoNZ, [ SysLoc.AUSTRALIA, SysLoc.NEW_ZEALAND ]);
   GEOHandler.addAfterTemplateLoad(removeStateValidatorForHkMoNZ, [ SysLoc.AUSTRALIA, SysLoc.NEW_ZEALAND ]);
