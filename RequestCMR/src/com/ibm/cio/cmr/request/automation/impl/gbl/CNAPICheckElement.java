@@ -78,11 +78,15 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
           || requestData.getAdmin().getReqType().equalsIgnoreCase("U")) {
         cnName = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? iAddr.getIntlCustNm2() : "");
         cnAddr = iAddr.getAddrTxt() + (iAddr.getIntlCustNm4() != null ? iAddr.getIntlCustNm4() : "");
+        cnName = convertSBCS(cnName);
+        cnAddr = convertSBCS(cnAddr);
       } else if (data.getCustSubGrp() != null && SCENARIO_LOCAL_AQSTN.equals(data.getCustSubGrp())) {
 
         if (StringUtils.isNotBlank(iAddr.getIntlCustNm1())) {
           cnName = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? iAddr.getIntlCustNm2() : "");
           cnAddr = iAddr.getAddrTxt() + (iAddr.getIntlCustNm4() != null ? iAddr.getIntlCustNm4() : "");
+          cnName = convertSBCS(cnName);
+          cnAddr = convertSBCS(cnAddr);
           ifAQSTNHasCN = true;
         } else {
           ifAQSTNHasCN = false;
@@ -123,6 +127,8 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
 
               StringBuilder details = new StringBuilder();
 
+              cnName = convertSBCS(cnName);
+              cnAddr = convertSBCS(cnAddr);
               if (cnName.equals(cmrsData.getRecord().getName()) && cnAddr.equals(cmrsData.getRecord().getRegLocation())) {
 
                 result.setResults("Matches found");
@@ -198,14 +204,14 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
 
         List<IntlAddr> intlAddrList = new ArrayList<IntlAddr>();
         List<IntlAddrRdc> intlAddrRdcList = new ArrayList<IntlAddrRdc>();
-
-        List<IntlAddr> zi01AddrList = new ArrayList<IntlAddr>();
-        List<IntlAddrRdc> zi01AddrRdcList = new ArrayList<IntlAddrRdc>();
-        List<IntlAddr> zp01AddrList = new ArrayList<IntlAddr>();
-        List<IntlAddrRdc> zp01AddrRdcList = new ArrayList<IntlAddrRdc>();
-        List<IntlAddr> zd01AddrList = new ArrayList<IntlAddr>();
-        List<IntlAddrRdc> zd01AddrRdcList = new ArrayList<IntlAddrRdc>();
-
+        //
+        // List<IntlAddr> zi01AddrList = new ArrayList<IntlAddr>();
+        // List<IntlAddrRdc> zi01AddrRdcList = new ArrayList<IntlAddrRdc>();
+        // List<IntlAddr> zp01AddrList = new ArrayList<IntlAddr>();
+        // List<IntlAddrRdc> zp01AddrRdcList = new ArrayList<IntlAddrRdc>();
+        // List<IntlAddr> zd01AddrList = new ArrayList<IntlAddr>();
+        // List<IntlAddrRdc> zd01AddrRdcList = new ArrayList<IntlAddrRdc>();
+        //
         intlAddrList = handler.getINTLAddrCountByReqId(entityManager, requestData.getAdmin().getId().getReqId());
         intlAddrRdcList = handler.getINTLAddrRdcByReqId(entityManager, requestData.getAdmin().getId().getReqId());
 
@@ -213,13 +219,20 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
           for (IntlAddr intlAddr : intlAddrList) {
             if (intlAddr.getId().getAddrType().contains(CmrConstants.ADDR_TYPE.ZS01.toString())) {
               soldToIntlAddr = intlAddr;
-            } else if (intlAddr.getId().getAddrType().contains(CmrConstants.ADDR_TYPE.ZI01.toString())) {
-              zi01AddrList.add(intlAddr);
-            } else if (intlAddr.getId().getAddrType().contains(CmrConstants.ADDR_TYPE.ZP01.toString())) {
-              zp01AddrList.add(intlAddr);
-            } else if (intlAddr.getId().getAddrType().contains(CmrConstants.ADDR_TYPE.ZD01.toString())) {
-              zd01AddrList.add(intlAddr);
             }
+            // else if
+            // (intlAddr.getId().getAddrType().contains(CmrConstants.ADDR_TYPE.ZI01.toString()))
+            // {
+            // zi01AddrList.add(intlAddr);
+            // } else if
+            // (intlAddr.getId().getAddrType().contains(CmrConstants.ADDR_TYPE.ZP01.toString()))
+            // {
+            // zp01AddrList.add(intlAddr);
+            // } else if
+            // (intlAddr.getId().getAddrType().contains(CmrConstants.ADDR_TYPE.ZD01.toString()))
+            // {
+            // zd01AddrList.add(intlAddr);
+            // }
           }
         }
 
@@ -227,32 +240,43 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
           for (IntlAddrRdc intlAddrRdc : intlAddrRdcList) {
             if (intlAddrRdc.getId().getAddrType().contains(CmrConstants.ADDR_TYPE.ZS01.toString())) {
               soldToIntlAddrRdc = intlAddrRdc;
-            } else if (intlAddrRdc.getId().getAddrType().contains(CmrConstants.ADDR_TYPE.ZI01.toString())) {
-              zi01AddrRdcList.add(intlAddrRdc);
-            } else if (intlAddrRdc.getId().getAddrType().contains(CmrConstants.ADDR_TYPE.ZP01.toString())) {
-              zp01AddrRdcList.add(intlAddrRdc);
-            } else if (intlAddrRdc.getId().getAddrType().contains(CmrConstants.ADDR_TYPE.ZD01.toString())) {
-              zd01AddrRdcList.add(intlAddrRdc);
             }
+            // else if
+            // (intlAddrRdc.getId().getAddrType().contains(CmrConstants.ADDR_TYPE.ZI01.toString()))
+            // {
+            // zi01AddrRdcList.add(intlAddrRdc);
+            // } else if
+            // (intlAddrRdc.getId().getAddrType().contains(CmrConstants.ADDR_TYPE.ZP01.toString()))
+            // {
+            // zp01AddrRdcList.add(intlAddrRdc);
+            // } else if
+            // (intlAddrRdc.getId().getAddrType().contains(CmrConstants.ADDR_TYPE.ZD01.toString()))
+            // {
+            // zd01AddrRdcList.add(intlAddrRdc);
+            // }
           }
         }
-
-        // if non-sodeTo address type's Chinese name and address has changed
-        if (zi01AddrList != null && zi01AddrList.size() > 0) {
-          compareAddr(soldToIntlAddr, soldToIntlAddrRdc, zi01AddrList, zi01AddrRdcList, result, details, engineData);
-        }
-        if (zi01AddrList != null && zi01AddrList.size() > 0) {
-          compareAddr(soldToIntlAddr, soldToIntlAddrRdc, zp01AddrList, zp01AddrRdcList, result, details, engineData);
-        }
-        if (zi01AddrList != null && zi01AddrList.size() > 0) {
-          compareAddr(soldToIntlAddr, soldToIntlAddrRdc, zd01AddrList, zd01AddrRdcList, result, details, engineData);
-        }
-        if (result.isOnError()) {
-          details.append("The Chinese name or address of the non-SOLDTO address type has been changed." + "Please attach supporting document.")
-              .append("\n");
-          result.setDetails(details.toString().trim());
-          return result;
-        }
+        //
+        // // if non-sodeTo address type's Chinese name and address has changed
+        // if (zi01AddrList != null && zi01AddrList.size() > 0) {
+        // compareAddr(soldToIntlAddr, soldToIntlAddrRdc, zi01AddrList,
+        // zi01AddrRdcList, result, details, engineData);
+        // }
+        // if (zi01AddrList != null && zi01AddrList.size() > 0) {
+        // compareAddr(soldToIntlAddr, soldToIntlAddrRdc, zp01AddrList,
+        // zp01AddrRdcList, result, details, engineData);
+        // }
+        // if (zi01AddrList != null && zi01AddrList.size() > 0) {
+        // compareAddr(soldToIntlAddr, soldToIntlAddrRdc, zd01AddrList,
+        // zd01AddrRdcList, result, details, engineData);
+        // }
+        // if (result.isOnError()) {
+        // details.append("The Chinese name or address of the non-SOLDTO address
+        // type has been changed." + "Please attach supporting document.")
+        // .append("\n");
+        // result.setDetails(details.toString().trim());
+        // return result;
+        // }
 
         StringBuilder resultString = new StringBuilder();
         checkChineseName(soldToIntlAddr, soldToIntlAddrRdc, searchModel, cmrsData, result, details, engineData, entityManager);
@@ -346,6 +370,8 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
 
     String newCnName = soldToIntlAddr.getIntlCustNm1() + (soldToIntlAddr.getIntlCustNm2() != null ? soldToIntlAddr.getIntlCustNm2() : "");
     String oldCnName = soldToIntlAddrRdc.getIntlCustNm1() + (soldToIntlAddrRdc.getIntlCustNm2() != null ? soldToIntlAddrRdc.getIntlCustNm2() : "");
+    oldCnName = convertSBCS(oldCnName);
+    newCnName = convertSBCS(newCnName);
 
     if (!oldCnName.equals(newCnName)) {
       try {
@@ -416,6 +442,8 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
 
     String newCnAddr = soldToIntlAddr.getAddrTxt() + (soldToIntlAddr.getIntlCustNm4() != null ? soldToIntlAddr.getIntlCustNm4() : "");
     String oldCnAddr = soldToIntlAddrRdc.getAddrTxt() + (soldToIntlAddrRdc.getIntlCustNm4() != null ? soldToIntlAddrRdc.getIntlCustNm4() : "");
+    newCnAddr = convertSBCS(newCnAddr);
+    oldCnAddr = convertSBCS(oldCnAddr);
 
     if (!oldCnAddr.equals(newCnAddr)) {
       try {
@@ -508,6 +536,87 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
     }
 
     return true;
+  }
+
+  private String convertSBCS(String input) {
+
+    String modified = "";
+    if (StringUtils.isNotBlank(input)) {
+      modified = input;
+
+      modified = modified.replace("１", "1");
+      modified = modified.replace("２", "2");
+      modified = modified.replace("３", "3");
+      modified = modified.replace("４", "4");
+      modified = modified.replace("５", "5");
+      modified = modified.replace("６", "6");
+      modified = modified.replace("７", "7");
+      modified = modified.replace("８", "8");
+      modified = modified.replace("９", "9");
+      modified = modified.replace("０", "0");
+      modified = modified.replace("ａ", "a");
+      modified = modified.replace("ｂ", "b");
+      modified = modified.replace("ｃ", "c");
+      modified = modified.replace("ｄ", "d");
+      modified = modified.replace("ｅ", "e");
+      modified = modified.replace("ｆ", "f");
+      modified = modified.replace("ｇ", "g");
+      modified = modified.replace("ｈ", "h");
+      modified = modified.replace("ｉ", "i");
+      modified = modified.replace("ｊ", "j");
+      modified = modified.replace("ｋ", "k");
+      modified = modified.replace("ｌ", "l");
+      modified = modified.replace("ｍ", "m");
+      modified = modified.replace("ｎ", "n");
+      modified = modified.replace("ｏ", "o");
+      modified = modified.replace("ｐ", "p");
+      modified = modified.replace("ｑ", "q");
+      modified = modified.replace("ｒ", "r");
+      modified = modified.replace("ｓ", "s");
+      modified = modified.replace("ｔ", "t");
+      modified = modified.replace("ｕ", "u");
+      modified = modified.replace("ｖ", "v");
+      modified = modified.replace("ｗ", "w");
+      modified = modified.replace("ｘ", "x");
+      modified = modified.replace("ｙ", "y");
+      modified = modified.replace("ｚ", "z");
+      modified = modified.replace("Ａ", "A");
+      modified = modified.replace("Ｂ", "B");
+      modified = modified.replace("Ｃ", "C");
+      modified = modified.replace("Ｄ", "D");
+      modified = modified.replace("Ｅ", "E");
+      modified = modified.replace("Ｆ", "F");
+      modified = modified.replace("Ｇ", "G");
+      modified = modified.replace("Ｈ", "H");
+      modified = modified.replace("Ｉ", "I");
+      modified = modified.replace("Ｊ", "J");
+      modified = modified.replace("Ｋ", "K");
+      modified = modified.replace("Ｌ", "L");
+      modified = modified.replace("Ｍ", "M");
+      modified = modified.replace("Ｎ", "N");
+      modified = modified.replace("Ｏ", "O");
+      modified = modified.replace("Ｐ", "P");
+      modified = modified.replace("Ｑ", "Q");
+      modified = modified.replace("Ｒ", "R");
+      modified = modified.replace("Ｓ", "S");
+      modified = modified.replace("Ｔ", "T");
+      modified = modified.replace("Ｕ", "U");
+      modified = modified.replace("Ｖ", "V");
+      modified = modified.replace("Ｗ", "W");
+      modified = modified.replace("Ｘ", "X");
+      modified = modified.replace("Ｙ", "Y");
+      modified = modified.replace("Ｚ", "Z");
+      modified = modified.replace("　", " ");
+      modified = modified.replace("＆", "&");
+      modified = modified.replace("－", "-");
+      modified = modified.replace("．", ".");
+      modified = modified.replace("，", ",");
+      modified = modified.replace("：", ":");
+      modified = modified.replace("＿", "_");
+      modified = modified.replace("（", "(");
+      modified = modified.replace("）", ")");
+    }
+    return modified;
   }
 
   @Override

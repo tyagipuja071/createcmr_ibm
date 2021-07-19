@@ -82,18 +82,18 @@ public class DefaultApprovalsElement extends ApprovalsElement {
       ApprovalService service = new ApprovalService();
       approvalsResult = service.processDefaultApproval(entityManager, reqId, admin.getReqType(), requester, model);
       LOG.trace("Approvals result: " + approvalsResult);
-      if (engineData.hasPositiveCheckStatus("SKIP_APPROVALS")) {
-        result.setOnError(false);
-        result.setDetails("Skip processing of element as requester is from CMDE team.");
-        result.setResults("Skipped");
-      } else if (StringUtils.isBlank(approvalsResult) || "NONE".equalsIgnoreCase(approvalsResult)) {
-        result.setResults("None");
-        result.setDetails("No approvals are required.");
-      } else {
-        result.setOnError(true);
-        result.setResults("Generated");
-        result.setDetails("Required approvals have been generated.");
-      }
+    }
+    if (engineData.hasPositiveCheckStatus("SKIP_APPROVALS")) {
+      result.setOnError(false);
+      result.setDetails("Skip processing of element as requester is from CMDE team.");
+      result.setResults("Skipped");
+    } else if (StringUtils.isBlank(approvalsResult) || "NONE".equalsIgnoreCase(approvalsResult)) {
+      result.setResults("None");
+      result.setDetails("No approvals are required.");
+    } else {
+      result.setOnError(true);
+      result.setResults("Generated");
+      result.setDetails("Required approvals have been generated.");
     }
 
     return result;
