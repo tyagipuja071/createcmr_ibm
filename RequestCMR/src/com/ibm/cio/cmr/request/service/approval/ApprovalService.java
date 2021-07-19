@@ -412,6 +412,19 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
     query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", admin.getId().getReqId());
     boolean conditionallyApproved = query.exists();
+    boolean cnConditionallyApproved = false;
+    if (conditionallyApproved && admin != null && admin.getId() != null && dataService != null) {
+      Data data = null;
+      try {
+        data = dataService.getCurrentRecordById(admin.getId().getReqId(), entityManager);
+      } catch (Exception e) {
+        this.log.debug("Error in Querying data table using admin's reqid in ApprovalService.java");
+      }
+      if (data != null && SystemLocation.CHINA.equals(data.getCmrIssuingCntry())) {
+        cnConditionallyApproved = true;
+      }
+      conditionallyApproved = conditionallyApproved && !cnConditionallyApproved;
+    }
 
     if (approvalsReceived && PENDING_STATUSES_TO_MOVE.contains(admin.getReqStatus())) {
       // move only if it is one of the middle statuses
