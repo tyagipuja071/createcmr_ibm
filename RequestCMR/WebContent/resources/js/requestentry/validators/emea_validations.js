@@ -575,7 +575,7 @@ function addHandlersForUK() {
   if (_isicCdHandler && _isicCdHandler[0]) {
     _isicCdHandler[0].onChange();
   }
-  
+
   if (_postCdHandlerUK == null && FormManager.getField('postCd')) {
     _postCdHandlerUK = dojo.connect(FormManager.getField('postCd'), 'onChange', function(value) {
       autoSetSBO(value, _pagemodel.postCd);
@@ -1870,7 +1870,6 @@ function fieldsReadOnlyItaly(fromAddress, scenario, scenarioChanged) {
 
     if (checkImportIndc == "Y") {
       // fields for Legacy consolidation
-      FormManager.readOnly('vat');
       FormManager.readOnly('taxCd1');
       FormManager.enable('collectionCd');
       FormManager.readOnly('enterprise');
@@ -1900,7 +1899,6 @@ function fieldsReadOnlyItaly(fromAddress, scenario, scenarioChanged) {
     if (checkImportIndc == "Y") {
       // fields for Legacy consolidation
       FormManager.readOnly('taxCd1');
-      FormManager.readOnly('vat');
       FormManager.readOnly('enterprise');
       FormManager.resetValidations('taxCd1');
       FormManager.resetValidations('vat');
@@ -4602,7 +4600,6 @@ function afterConfigForIT() {
 
     if (result != null && result.ret1 != '' && result.ret1 != undefined && result.ret1 != 'IT') {
       FormManager.setValue('vat', '');
-      FormManager.readOnly('vat');
     }
   }
 
@@ -7442,7 +7439,7 @@ function addSBOSRLogicIE(clientTier) {
     var isuCtc = _isuCd + _clientTier;
     var qParams = null;
     var results = null;
-    
+
     qParams = {
       _qall : 'Y',
       ISSUING_CNTRY : cntry,
