@@ -1663,7 +1663,7 @@ public class CNHandler extends GEOHandler {
     }
   }
 
-  private String convert2DBCS(String value) {
+  public String convert2DBCS(String value) {
     String modifiedVal = null;
     if (value != null && value.length() > 0) {
       modifiedVal = value;
