@@ -841,7 +841,7 @@ public class ItalyHandler extends BaseSOFHandler {
         collectionCd = cExt.getItCodeSSV();
       }
       if (cust != null) {
-        vat = cust.getVat();
+//         vat = cust.getVat();
         abbrevNm = cust.getAbbrevNm();
         abbrevLoc = cust.getAbbrevLocn();
         sbo = cust.getSbo();
@@ -917,6 +917,10 @@ public class ItalyHandler extends BaseSOFHandler {
           data.setCollectionCd(collectionCode);
         }
         break;
+      }
+      if (result.getCmrAddrTypeCode().equals(COMPANY_ADDR_TYPE)) {
+        // For ZORG addresses
+        countryLanded = result.getCmrCountryLanded();
       }
     }
     // no data from RDc? get DB2
