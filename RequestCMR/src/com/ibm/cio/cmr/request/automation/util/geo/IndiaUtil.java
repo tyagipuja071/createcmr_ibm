@@ -25,6 +25,7 @@ import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
+import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
@@ -82,6 +83,8 @@ public class IndiaUtil extends AutomationUtil {
       AutomationResult<ValidationOutput> result, StringBuilder details, ValidationOutput output) {
     Data data = requestData.getData();
     String scenario = data.getCustSubGrp();
+    ScenarioExceptionsUtil scenarioExceptions = (ScenarioExceptionsUtil) engineData.get("SCENARIO_EXCEPTIONS");
+    scenarioExceptions.setCheckVATForDnB(false);
     switch (scenario) {
     case SCENARIO_ACQUISITION:
     case SCENARIO_NORMAL:
