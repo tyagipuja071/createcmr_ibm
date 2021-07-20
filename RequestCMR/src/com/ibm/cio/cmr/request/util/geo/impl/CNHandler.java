@@ -227,7 +227,11 @@ public class CNHandler extends GEOHandler {
   public void doBeforeDataSave(EntityManager entityManager, Admin admin, Data data, String cmrIssuingCntry) throws Exception {
     if (data.getInacCd() != null) {
       if (data.getInacCd().matches("[a-zA-Z]{1}[a-zA-Z0-9]{3}")) {
-        data.setInacType("N");
+        if ("XXXX".equals(data.getInacCd())) {
+          data.setInacType("I");
+        } else {
+          data.setInacType("N");
+        }
       } else if (data.getInacCd().matches("[0-9]{1}[a-zA-Z0-9]{3}")) {
         data.setInacType("I");
       } else if (data.getInacCd().equals("")) {
@@ -269,9 +273,14 @@ public class CNHandler extends GEOHandler {
       LOG.debug(">>> START Char of INAC CODE is " + startCd);
 
       if (StringUtils.isAlpha(startCd)) {
-        // set type as N if alpha
-        LOG.debug(">>> START Char of INAC CODE is ALPHA setting type to N");
-        data.setInacType("N");
+        if ("XXXX".equals(inac)) {
+          LOG.debug(">>> INAC CODE is XXXX setting type to I");
+          data.setInacType("I");
+        } else {
+          // set type as N if alpha
+          LOG.debug(">>> START Char of INAC CODE is ALPHA setting type to N");
+          data.setInacType("N");
+        }
       } else if (StringUtils.isNumeric(startCd)) {
         LOG.debug(">>> START Char of INAC CODE is NUMERIC setting type to I");
         data.setInacType("I");
