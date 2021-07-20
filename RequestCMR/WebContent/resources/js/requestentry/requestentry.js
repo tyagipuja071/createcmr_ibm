@@ -136,9 +136,9 @@ function processRequestAction() {
     } else if (FormManager.validate('frmCMR') && !comp_proof_IN ) {
 			if(checkForConfirmationAttachments()){
 				showDocTypeConfirmDialog();
-			} else if(cmrCntry =='744' && findDnbResult == 'Accepted') {   
+			} else if(cmrCntry == SysLoc.INDIA) {   
                 // Cmr-2340- For India Dnb import   
-                if(checkIfDnBCheckReqForIndia()){      
+                if(findDnbResult == 'Accepted' && checkIfDnBCheckReqForIndia()){      
                 matchDnBForIndia();
                 } else {
                    cmr.showModal('addressVerificationModal'); 

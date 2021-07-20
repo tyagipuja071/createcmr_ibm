@@ -186,7 +186,7 @@ public class IndiaUtil extends AutomationUtil {
                 for (UpdatedNameAddrModel change : addrChanges) {
                   if ("Customer Name".equals(change.getDataField()) && addrChanges.size() == 1) {
                     cmdeReviewCustNme = true;
-                    checkDetails.append("Update of Customer Name for" + addrType + "(" + addr.getId().getAddrSeq() + ") needs review.\n");
+                    checkDetails.append("Update of Customer Name for " + addrType + "(" + addr.getId().getAddrSeq() + ") needs review.\n");
                     break;
                   }
                 }
@@ -202,24 +202,13 @@ public class IndiaUtil extends AutomationUtil {
                 }
                 if (!matchesDnb) {
                   LOG.debug("Update address for " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
-                  if (!StringUtils.isEmpty(data.getVat()) && getGstMatches(admin.getId().getReqId(), addr, data.getVat())) {
-                    checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches data in GST layer service.\n");
-                  } else {
-                    resultCodes.add("D");
-                    checkDetails
-                        .append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records and GST Service.\n");
-                  }
-
-                  // check for company proof attachment
-
+                  cmdeReview = true;
+                  checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
+                  validation.setMessage("Review Required.");
                   // company proof
                   if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
-                    validation.setMessage("Validated");
                     checkDetails.append("Supporting documentation is provided by the requester as attachment for " + addrType).append("\n");
-                    validation.setSuccess(true);
                   } else {
-                    validation.setMessage("Review Required");
-                    cmdeReview = true;
                     checkDetails.append("\nNo supporting documentation is provided by the requester for " + addrType + " address.");
                     output.setDetails(checkDetails.toString());
                   }
@@ -254,13 +243,15 @@ public class IndiaUtil extends AutomationUtil {
             }
 
             if (!matchesDnb) {
-              LOG.debug("Update address for " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
-              if (!StringUtils.isEmpty(data.getVat()) && getGstMatches(admin.getId().getReqId(), addr, data.getVat())) {
-                checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches data in GST layer service.\n");
+              LOG.debug("New address for " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
+              cmdeReview = true;
+              checkDetails.append("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B.\n");
+              // company proof
+              if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+                checkDetails.append("Supporting documentation is provided by the requester as attachment for " + addrType).append("\n");
               } else {
-                resultCodes.add("D");
-                checkDetails
-                    .append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records and GST Service.\n");
+                checkDetails.append("\nNo supporting documentation is provided by the requester for " + addrType + " address.");
+                output.setDetails(checkDetails.toString());
               }
             } else {
               checkDetails.append("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
@@ -278,14 +269,12 @@ public class IndiaUtil extends AutomationUtil {
     if (resultCodes.contains("D")) {
       validation.setSuccess(false);
       validation.setMessage("Not Validated");
-      engineData.addNegativeCheckStatus("_atCheckFailed", "Updates to addresses cannot be checked automatically.");
+      engineData.addNegativeCheckStatus("_indCheckFailed", "Updates to addresses cannot be checked automatically.");
     } else if (cmdeReview) {
-      engineData.addNegativeCheckStatus("_esDataCheckFailed", "Updates to one or more fields cannot be validated.");
-      checkDetails.append("Updates to one or more fields cannot be validated.\n");
+      engineData.addNegativeCheckStatus("_indCheckFailed", "Updates to addresses cannot be checked automatically.");
       validation.setSuccess(false);
-      validation.setMessage("Not Validated");
     } else if (cmdeReviewCustNme) {
-      engineData.addNegativeCheckStatus("_esDataCheckFailed", "Updates to one or more fields cannot be validated.");
+      engineData.addNegativeCheckStatus("_indCheckFailed", "Updates to addresses(Customer Name) cannot be checked automatically.");
       validation.setSuccess(false);
       validation.setMessage("Not Validated");
     } else {
@@ -315,20 +304,17 @@ public class IndiaUtil extends AutomationUtil {
       switch (change.getDataField()) {
 
       case "GST#":
-        // For GST update, Match with DnB and API
+        // For GST update, Match with gst api
+        boolean matchesgGST = false;
         if (!StringUtils.isBlank(change.getNewData()) && !(change.getNewData().equals(change.getOldData()))) {
-          // UPDATE
-          List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
-          boolean matchesDnb = false;
-          if (matches != null) {
-            // check against D&B
-            matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
-          }
-          if (!matchesDnb) {
-            resultCodes.add("R");
-            details.append("GST# update on the request did not match D&B\n");
+          // check against gST
+          matchesgGST = getGstMatches(data.getId().getReqId(), soldTo, data.getVat());
+
+          if (!matchesgGST) {
+            resultCodes.add("R"); // R- review to CMDE
+            details.append("GST# update on the request did not match GST Layer Service.\n");
           } else {
-            details.append("GST# update on the request matches D&B\n");
+            details.append("GST# update on the request matches GST Layer Service.\n");
           }
         }
         break;
@@ -339,9 +325,8 @@ public class IndiaUtil extends AutomationUtil {
     }
 
     if (resultCodes.contains("R")) {
-      output.setOnError(true);
       validation.setSuccess(false);
-      validation.setMessage("Rejected");
+      validation.setMessage("Review Required.");
     } else {
       validation.setSuccess(true);
       validation.setMessage("Successful");
