@@ -282,6 +282,21 @@ public class CNHandler extends GEOHandler {
 
     // data.setSearchTerm(data.getCovId());
 
+    // convert chinese name and address to DBCS
+    List<IntlAddr> intlAddrList = getINTLAddrCountByReqId(entityManager, data.getId().getReqId());
+
+    for (IntlAddr intlAddr : intlAddrList) {
+      intlAddr.setIntlCustNm1(convert2DBCS(intlAddr.getIntlCustNm1()));
+      intlAddr.setIntlCustNm2(convert2DBCS(intlAddr.getIntlCustNm2()));
+      intlAddr.setIntlCustNm3(convert2DBCS(intlAddr.getIntlCustNm3()));
+      intlAddr.setAddrTxt(convert2DBCS(intlAddr.getAddrTxt()));
+      intlAddr.setIntlCustNm4(convert2DBCS(intlAddr.getIntlCustNm4()));
+      intlAddr.setCity2(convert2DBCS(intlAddr.getCity2()));
+      updateCNIntlAddr(intlAddr, entityManager);
+      entityManager.merge(intlAddr);
+    }
+    entityManager.flush();
+
   }
 
   @Override
@@ -1637,6 +1652,133 @@ public class CNHandler extends GEOHandler {
       model.setCnCity(cnCity);
       cmr.setCmrIntlCity1(cnCity);
     }
+  }
+
+  private String convert2DBCS(String value) {
+    String modifiedVal = null;
+    if (value != null && value.length() > 0) {
+      modifiedVal = value;
+      modifiedVal = modifiedVal.replace("1", "１");
+      modifiedVal = modifiedVal.replace("2", "２");
+      modifiedVal = modifiedVal.replace("3", "３");
+      modifiedVal = modifiedVal.replace("4", "４");
+      modifiedVal = modifiedVal.replace("5", "５");
+      modifiedVal = modifiedVal.replace("6", "６");
+      modifiedVal = modifiedVal.replace("7", "７");
+      modifiedVal = modifiedVal.replace("8", "８");
+      modifiedVal = modifiedVal.replace("9", "９");
+      modifiedVal = modifiedVal.replace("0", "０");
+      modifiedVal = modifiedVal.replace("a", "ａ");
+      modifiedVal = modifiedVal.replace("b", "ｂ");
+      modifiedVal = modifiedVal.replace("c", "ｃ");
+      modifiedVal = modifiedVal.replace("d", "ｄ");
+      modifiedVal = modifiedVal.replace("e", "ｅ");
+      modifiedVal = modifiedVal.replace("f", "ｆ");
+      modifiedVal = modifiedVal.replace("g", "ｇ");
+      modifiedVal = modifiedVal.replace("h", "ｈ");
+      modifiedVal = modifiedVal.replace("i", "ｉ");
+      modifiedVal = modifiedVal.replace("j", "ｊ");
+      modifiedVal = modifiedVal.replace("k", "ｋ");
+      modifiedVal = modifiedVal.replace("l", "ｌ");
+      modifiedVal = modifiedVal.replace("m", "ｍ");
+      modifiedVal = modifiedVal.replace("n", "ｎ");
+      modifiedVal = modifiedVal.replace("o", "ｏ");
+      modifiedVal = modifiedVal.replace("p", "ｐ");
+      modifiedVal = modifiedVal.replace("q", "ｑ");
+      modifiedVal = modifiedVal.replace("r", "ｒ");
+      modifiedVal = modifiedVal.replace("s", "ｓ");
+      modifiedVal = modifiedVal.replace("t", "ｔ");
+      modifiedVal = modifiedVal.replace("u", "ｕ");
+      modifiedVal = modifiedVal.replace("v", "ｖ");
+      modifiedVal = modifiedVal.replace("w", "ｗ");
+      modifiedVal = modifiedVal.replace("x", "ｘ");
+      modifiedVal = modifiedVal.replace("y", "ｙ");
+      modifiedVal = modifiedVal.replace("z", "ｚ");
+      modifiedVal = modifiedVal.replace("A", "Ａ");
+      modifiedVal = modifiedVal.replace("B", "Ｂ");
+      modifiedVal = modifiedVal.replace("C", "Ｃ");
+      modifiedVal = modifiedVal.replace("D", "Ｄ");
+      modifiedVal = modifiedVal.replace("E", "Ｅ");
+      modifiedVal = modifiedVal.replace("F", "Ｆ");
+      modifiedVal = modifiedVal.replace("G", "Ｇ");
+      modifiedVal = modifiedVal.replace("H", "Ｈ");
+      modifiedVal = modifiedVal.replace("I", "Ｉ");
+      modifiedVal = modifiedVal.replace("J", "Ｊ");
+      modifiedVal = modifiedVal.replace("K", "Ｋ");
+      modifiedVal = modifiedVal.replace("L", "Ｌ");
+      modifiedVal = modifiedVal.replace("M", "Ｍ");
+      modifiedVal = modifiedVal.replace("N", "Ｎ");
+      modifiedVal = modifiedVal.replace("O", "Ｏ");
+      modifiedVal = modifiedVal.replace("P", "Ｐ");
+      modifiedVal = modifiedVal.replace("Q", "Ｑ");
+      modifiedVal = modifiedVal.replace("R", "Ｒ");
+      modifiedVal = modifiedVal.replace("S", "Ｓ");
+      modifiedVal = modifiedVal.replace("T", "Ｔ");
+      modifiedVal = modifiedVal.replace("U", "Ｕ");
+      modifiedVal = modifiedVal.replace("V", "Ｖ");
+      modifiedVal = modifiedVal.replace("W", "Ｗ");
+      modifiedVal = modifiedVal.replace("X", "Ｘ");
+      modifiedVal = modifiedVal.replace("Y", "Ｙ");
+      modifiedVal = modifiedVal.replace("Z", "Ｚ");
+      modifiedVal = modifiedVal.replace(" ", "　");
+      modifiedVal = modifiedVal.replace("&", "＆");
+      modifiedVal = modifiedVal.replace("-", "－");
+      modifiedVal = modifiedVal.replace(".", "．");
+      modifiedVal = modifiedVal.replace(",", "，");
+      modifiedVal = modifiedVal.replace(":", "：");
+      modifiedVal = modifiedVal.replace("_", "＿");
+      modifiedVal = modifiedVal.replace("(", "（");
+      modifiedVal = modifiedVal.replace(")", "）");
+    }
+    return modifiedVal;
+  }
+
+  private boolean updateCNIntlAddr(IntlAddr intlAddr, EntityManager entityManager) {
+
+    int tempNewLen = 0;
+    String newTxt = "";
+
+    if (StringUtils.isNotBlank(intlAddr.getAddrTxt()) && CNHandler.getLengthInUtf8(intlAddr.getAddrTxt()) > CNHandler.CN_STREET_ADD_TXT) {
+      tempNewLen = CNHandler.getMaxWordLengthInUtf8(intlAddr.getAddrTxt(), CNHandler.CN_STREET_ADD_TXT, CNHandler.CN_STREET_ADD_TXT);
+      newTxt = intlAddr.getAddrTxt() != null ? intlAddr.getAddrTxt().substring(0, tempNewLen) : "";
+      String excess = intlAddr.getAddrTxt().substring(tempNewLen);
+      intlAddr.setAddrTxt(newTxt);
+      intlAddr.setIntlCustNm4(excess + (intlAddr.getIntlCustNm4() != null ? intlAddr.getIntlCustNm4() : ""));
+    }
+
+    if (StringUtils.isNotBlank(intlAddr.getIntlCustNm4()) && CNHandler.getLengthInUtf8(intlAddr.getIntlCustNm4()) > CNHandler.CN_STREET_ADD_TXT2) {
+      tempNewLen = CNHandler.getMaxWordLengthInUtf8(intlAddr.getIntlCustNm4(), CNHandler.CN_STREET_ADD_TXT2, CNHandler.CN_STREET_ADD_TXT2);
+      newTxt = intlAddr.getIntlCustNm4() != null ? intlAddr.getIntlCustNm4().substring(0, tempNewLen) : "";
+      intlAddr.setIntlCustNm4(newTxt);
+    }
+
+    if (StringUtils.isNotBlank(intlAddr.getIntlCustNm1()) && CNHandler.getLengthInUtf8(intlAddr.getIntlCustNm1()) > CNHandler.CN_CUST_NAME_1) {
+      tempNewLen = CNHandler.getMaxWordLengthInUtf8(intlAddr.getIntlCustNm1(), CNHandler.CN_CUST_NAME_1, CNHandler.CN_CUST_NAME_1);
+      newTxt = intlAddr.getIntlCustNm1() != null ? intlAddr.getIntlCustNm1().substring(0, tempNewLen) : "";
+      String excess = intlAddr.getIntlCustNm1().substring(tempNewLen);
+      intlAddr.setIntlCustNm1(newTxt);
+      intlAddr.setIntlCustNm2(excess + (intlAddr.getIntlCustNm2() != null ? intlAddr.getIntlCustNm2() : ""));
+    }
+
+    if (StringUtils.isNotBlank(intlAddr.getIntlCustNm2()) && CNHandler.getLengthInUtf8(intlAddr.getIntlCustNm2()) > CNHandler.CN_CUST_NAME_2) {
+      tempNewLen = CNHandler.getMaxWordLengthInUtf8(intlAddr.getIntlCustNm2(), CNHandler.CN_CUST_NAME_2, CNHandler.CN_CUST_NAME_2);
+      newTxt = intlAddr.getIntlCustNm2() != null ? intlAddr.getIntlCustNm2().substring(0, tempNewLen) : "";
+      intlAddr.setIntlCustNm2(newTxt);
+    }
+
+    if (StringUtils.isNotBlank(intlAddr.getIntlCustNm3()) && CNHandler.getLengthInUtf8(intlAddr.getIntlCustNm3()) > CNHandler.CN_CUST_NAME_2) {
+      tempNewLen = CNHandler.getMaxWordLengthInUtf8(intlAddr.getIntlCustNm3(), CNHandler.CN_CUST_NAME_2, CNHandler.CN_CUST_NAME_2);
+      newTxt = intlAddr.getIntlCustNm3() != null ? intlAddr.getIntlCustNm3().substring(0, tempNewLen) : "";
+      intlAddr.setIntlCustNm3(newTxt);
+    }
+
+    if (StringUtils.isNotBlank(intlAddr.getCity2()) && CNHandler.getLengthInUtf8(intlAddr.getCity2()) > CNHandler.CN_CUST_NAME_2) {
+      tempNewLen = CNHandler.getMaxWordLengthInUtf8(intlAddr.getCity2(), CNHandler.CN_CUST_NAME_2, CNHandler.CN_CUST_NAME_2);
+      newTxt = intlAddr.getCity2() != null ? intlAddr.getCity2().substring(0, tempNewLen) : "";
+      intlAddr.setCity2(newTxt);
+    }
+
+    return true;
   }
 
   @Override
