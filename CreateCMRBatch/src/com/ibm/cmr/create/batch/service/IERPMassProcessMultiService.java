@@ -258,7 +258,7 @@ public class IERPMassProcessMultiService extends MultiThreadedBatchService<Long>
           // ensure the mass update entity is not updated on this persistence
           // context
           entityManager.detach(sMassUpdt);
-          IERPMassUpdtMultiWorker worker = new IERPMassUpdtMultiWorker(admin, sMassUpdt);
+          IERPMassUpdtMultiWorker worker = new IERPMassUpdtMultiWorker(this, admin, sMassUpdt);
           executor.execute(worker);
           workers.add(worker);
         }

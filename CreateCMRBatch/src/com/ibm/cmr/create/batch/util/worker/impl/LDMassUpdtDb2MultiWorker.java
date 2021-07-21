@@ -20,6 +20,7 @@ import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectObjectContainer;
 import com.ibm.cmr.create.batch.service.LDMassProcessMultiLegacyService;
+import com.ibm.cmr.create.batch.service.MultiThreadedBatchService;
 import com.ibm.cmr.create.batch.util.CMRRequestContainer;
 import com.ibm.cmr.create.batch.util.worker.MassUpdateMultiWorker;
 
@@ -39,8 +40,9 @@ public class LDMassUpdtDb2MultiWorker extends MassUpdateMultiWorker {
    * @param parentAdmin
    * @param parentEntity
    */
-  public LDMassUpdtDb2MultiWorker(Admin parentAdmin, MassUpdt parentEntity, LDMassProcessMultiLegacyService service) {
-    super(parentAdmin, parentEntity);
+  public LDMassUpdtDb2MultiWorker(MultiThreadedBatchService<?> parentService, Admin parentAdmin, MassUpdt parentEntity,
+      LDMassProcessMultiLegacyService service) {
+    super(parentService, parentAdmin, parentEntity);
     this.service = service;
 
   }

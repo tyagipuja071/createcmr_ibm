@@ -178,7 +178,7 @@ public class ATMassProcessMultiLegacyService extends MultiThreadedBatchService<L
 
           ScheduledExecutorService executor = Executors.newScheduledThreadPool(threads, new WorkerThreadFactory(getThreadName() + reqId));
           for (MassUpdt sMassUpdt : results) {
-            AustriaMassUpdtMultiWorker worker = new AustriaMassUpdtMultiWorker(admin, sMassUpdt);
+            AustriaMassUpdtMultiWorker worker = new AustriaMassUpdtMultiWorker(this, admin, sMassUpdt);
             executor.schedule(worker, 5, TimeUnit.SECONDS);
             workers.add(worker);
           }

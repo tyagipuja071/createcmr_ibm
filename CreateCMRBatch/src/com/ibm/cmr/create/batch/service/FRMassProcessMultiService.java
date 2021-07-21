@@ -139,7 +139,7 @@ public class FRMassProcessMultiService extends MultiThreadedBatchService<Long> {
         LOG.debug(" - Processing " + resultsMain.size() + " subrecords...");
         ExecutorService executor = Executors.newFixedThreadPool(threads, new WorkerThreadFactory(getThreadName() + reqId));
         for (MassUpdt sMassUpdt : resultsMain) {
-          FranceMassUpdtMultiWorker worker = new FranceMassUpdtMultiWorker(admin, sMassUpdt);
+          FranceMassUpdtMultiWorker worker = new FranceMassUpdtMultiWorker(this, admin, sMassUpdt);
           executor.execute(worker);
           workers.add(worker);
         }

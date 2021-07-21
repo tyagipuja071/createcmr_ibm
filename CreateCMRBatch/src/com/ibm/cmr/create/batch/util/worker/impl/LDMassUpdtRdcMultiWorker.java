@@ -22,6 +22,7 @@ import com.ibm.cio.cmr.request.entity.ReqCmtLog;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cmr.create.batch.service.MultiThreadedBatchService;
 import com.ibm.cmr.create.batch.util.BatchUtil;
 import com.ibm.cmr.create.batch.util.DebugUtil;
 import com.ibm.cmr.create.batch.util.worker.MassUpdateMultiWorker;
@@ -45,8 +46,8 @@ public class LDMassUpdtRdcMultiWorker extends MassUpdateMultiWorker {
    * @param parentAdmin
    * @param parentEntity
    */
-  public LDMassUpdtRdcMultiWorker(Admin parentAdmin, MassUpdt parentEntity) {
-    super(parentAdmin, parentEntity);
+  public LDMassUpdtRdcMultiWorker(MultiThreadedBatchService<?> parentService, Admin parentAdmin, MassUpdt parentEntity) {
+    super(parentService, parentAdmin, parentEntity);
 
   }
 

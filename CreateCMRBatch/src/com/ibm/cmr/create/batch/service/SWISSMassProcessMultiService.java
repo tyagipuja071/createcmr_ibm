@@ -243,7 +243,7 @@ public class SWISSMassProcessMultiService extends MultiThreadedBatchService<Long
         List<SwissMassUpdtMultiWorker> workers = new ArrayList<SwissMassUpdtMultiWorker>();
         ExecutorService executor = Executors.newFixedThreadPool(threads, new WorkerThreadFactory("SWISSMassWorker-" + reqId));
         for (MassUpdt sMassUpdt : resultsMain) {
-          SwissMassUpdtMultiWorker worker = new SwissMassUpdtMultiWorker(admin, sMassUpdt);
+          SwissMassUpdtMultiWorker worker = new SwissMassUpdtMultiWorker(this, admin, sMassUpdt);
           executor.execute(worker);
           workers.add(worker);
         }

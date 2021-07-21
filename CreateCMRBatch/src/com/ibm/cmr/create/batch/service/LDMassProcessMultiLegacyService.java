@@ -198,7 +198,7 @@ public class LDMassProcessMultiLegacyService extends MultiThreadedBatchService<L
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(threads, new WorkerThreadFactory(getThreadName()));
         int currCount = 0;
         for (MassUpdt massUpdt : results) {
-          LDMassUpdtDb2MultiWorker worker = new LDMassUpdtDb2MultiWorker(admin, massUpdt, this);
+          LDMassUpdtDb2MultiWorker worker = new LDMassUpdtDb2MultiWorker(this, admin, massUpdt, this);
           executor.schedule(worker, currCount, TimeUnit.SECONDS);
           currCount++;
           workers.add(worker);

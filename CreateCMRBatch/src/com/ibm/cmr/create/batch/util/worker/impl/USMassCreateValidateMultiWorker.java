@@ -12,6 +12,7 @@ import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.util.masscreate.MassCreateFileRow;
+import com.ibm.cmr.create.batch.service.MultiThreadedBatchService;
 import com.ibm.cmr.create.batch.util.MultiThreadedWorker;
 import com.ibm.cmr.create.batch.util.masscreate.handler.HandlerEngine;
 
@@ -32,8 +33,9 @@ public class USMassCreateValidateMultiWorker extends MultiThreadedWorker<MassCre
    * @param parentAdmin
    * @param parentEntity
    */
-  public USMassCreateValidateMultiWorker(Admin parentAdmin, MassCreateFileRow parentEntity, HandlerEngine engine) {
-    super(parentAdmin, parentEntity);
+  public USMassCreateValidateMultiWorker(MultiThreadedBatchService<?> parentService, Admin parentAdmin, MassCreateFileRow parentEntity,
+      HandlerEngine engine) {
+    super(parentService, parentAdmin, parentEntity);
     this.engine = engine;
     this.reqId = parentAdmin.getId().getReqId();
   }

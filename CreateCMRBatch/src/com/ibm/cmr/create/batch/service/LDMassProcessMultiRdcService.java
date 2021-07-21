@@ -227,7 +227,7 @@ public class LDMassProcessMultiRdcService extends MultiThreadedBatchService<Long
         List<LDMassUpdtRdcMultiWorker> workers = new ArrayList<LDMassUpdtRdcMultiWorker>();
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(threads, new WorkerThreadFactory(getThreadName()));
         for (MassUpdt sMassUpdt : results) {
-          LDMassUpdtRdcMultiWorker worker = new LDMassUpdtRdcMultiWorker(admin, sMassUpdt);
+          LDMassUpdtRdcMultiWorker worker = new LDMassUpdtRdcMultiWorker(this, admin, sMassUpdt);
           executor.schedule(worker, 5, TimeUnit.SECONDS);
           workers.add(worker);
         }
