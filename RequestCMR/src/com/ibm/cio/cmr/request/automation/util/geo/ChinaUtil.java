@@ -382,26 +382,40 @@ public class ChinaUtil extends AutomationUtil {
       RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
 
     Data data = requestData.getData();
+    StringBuilder details = new StringBuilder();
     CNHandler handler = (CNHandler) RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
     List<Addr> addrs = handler.getAddrByReqId(entityManager, data.getId().getReqId());
     Addr zs01addr = requestData.getAddress("ZS01");
     IntlAddr intlZS01Addr = handler.getIntlAddrById(zs01addr, entityManager);
 
-    for (int i = 0; i < addrs.size(); i++) {
-      Addr addr = addrs.get(i);
-      addr.setCustNm1(zs01addr.getCustNm1());
-      addr.setCustNm2(zs01addr.getCustNm2());
-      addr.setCustNm3(zs01addr.getCustNm3());
-      addr.setCustNm4(zs01addr.getCustNm4());
-      IntlAddr intlAddr = handler.getIntlAddrById(addr, entityManager);
-      intlAddr.setIntlCustNm1(intlZS01Addr.getIntlCustNm1());
-      intlAddr.setIntlCustNm2(intlZS01Addr.getIntlCustNm2());
-      intlAddr.setIntlCustNm3(intlZS01Addr.getIntlCustNm3());
-      intlAddr.setIntlCustNm4(intlZS01Addr.getIntlCustNm4());
-      entityManager.merge(addr);
-      entityManager.merge(intlAddr);
-      entityManager.flush();
+    if (addrs.size() > 0) {
+      for (int i = 0; i < addrs.size(); i++) {
+        Addr addr = addrs.get(i);
+        addr.setCustNm1(zs01addr.getCustNm1());
+        addr.setCustNm2(zs01addr.getCustNm2());
+        addr.setCustNm3(zs01addr.getCustNm3());
+        addr.setCustNm4(zs01addr.getCustNm4());
+        IntlAddr intlAddr = handler.getIntlAddrById(addr, entityManager);
+        intlAddr.setIntlCustNm1(intlZS01Addr.getIntlCustNm1());
+        intlAddr.setIntlCustNm2(intlZS01Addr.getIntlCustNm2());
+        intlAddr.setIntlCustNm3(intlZS01Addr.getIntlCustNm3());
+        intlAddr.setIntlCustNm4(intlZS01Addr.getIntlCustNm4());
+        entityManager.merge(addr);
+        entityManager.merge(intlAddr);
+        entityManager.flush();
+      }
+      details.append("Chinese&English name updated automatically by ZS01.");
+      validation.setSuccess(true);
+      validation.setMessage("Successful");
+    } else {
+      details.append("Chinese&English name no need to be updated by ZS01.");
+      validation.setSuccess(true);
+      validation.setMessage("Successful");
     }
+
+    output.setDetails(details.toString());
+    output.setProcessOutput(validation);
+
     return true;
   }
 
