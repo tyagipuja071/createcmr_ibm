@@ -404,11 +404,11 @@ public class ChinaUtil extends AutomationUtil {
         entityManager.merge(intlAddr);
         entityManager.flush();
       }
-      details.append("Chinese&English name updated automatically by ZS01.");
+      details.append("Chinese&English name updated automatically for all address types.");
       validation.setSuccess(true);
       validation.setMessage("Successful");
     } else {
-      details.append("Chinese&English name no need to be updated by ZS01.");
+      details.append("Chinese&English name no need to be updated automatically.");
       validation.setSuccess(true);
       validation.setMessage("Successful");
     }
