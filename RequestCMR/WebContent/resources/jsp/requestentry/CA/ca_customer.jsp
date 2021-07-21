@@ -90,7 +90,16 @@
 		</p>
 	</cmr:column>
   </cmr:row>
-  
+  <cmr:row>
+	<cmr:column span="2" containerForField="MiscBillCode">
+		<p>
+			<cmr:label fieldId="MiscBillCode">
+				<cmr:fieldLabel fieldId="MiscBillCode" />
+			</cmr:label>
+			<cmr:field path="miscBillCd" id="miscBillCd" fieldId="MiscBillCode" tabId="MAIN_CUST_TAB" />
+		</p>
+	</cmr:column>
+  </cmr:row>
   <cmr:row addBackground="true" >
     <cmr:column span="2" containerForField="LocalTax1">
       <p>
