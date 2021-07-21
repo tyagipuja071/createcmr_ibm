@@ -197,7 +197,7 @@ public class IndiaUtil extends AutomationUtil {
                   continue; // avoid further checks
                 }
 
-                List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addressToChk, true);
+                List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addressToChk, false);
                 boolean matchesDnb = false;
                 if (matches != null) {
                   // check against D&B

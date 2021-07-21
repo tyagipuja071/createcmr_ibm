@@ -453,7 +453,7 @@ public abstract class AutomationUtil {
       if (SystemLocation.SWITZERLAND.equalsIgnoreCase(data.getCmrIssuingCntry())) {
         request.setOrgId(data.getVat().split("\\s")[0]);
       } else if (SystemLocation.INDIA.equalsIgnoreCase(data.getCmrIssuingCntry())) {
-        request.setOrgId(""); // CMR - 2830
+        request.setOrgId("");
       } else {
         request.setOrgId(data.getVat());
       }
