@@ -328,6 +328,7 @@ public class IndiaUtil extends AutomationUtil {
     }
 
     if (resultCodes.contains("R")) {
+      engineData.addNegativeCheckStatus("_indCheckFailed", "Updates to fields cannot be checked automatically.");
       validation.setSuccess(false);
       validation.setMessage("Review Required.");
     } else {
