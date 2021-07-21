@@ -86,11 +86,15 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
       result.setOnError(false);
     } else if (soldTo != null) {
 
-      String cnName = null;
-      String cnHistoryName = null;
-      String cnAddr = null;
+      String cnNameSingleByte = null;
+      String cnHistoryNameSingleByte = null;
+      String cnAddrSingleByte = null;
       String cnCreditCd = data.getBusnType();
       String cnCeid = data.getPpsceid();
+
+      String cnNameDoubleByte = null;
+      String cnHistoryNameDoubleByte = null;
+      String cnAddrDoubleByte = null;
 
       IntlAddr iAddr = new IntlAddr();
       CompanyRecordModel searchModelCNAPI = new CompanyRecordModel();
@@ -122,6 +126,9 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
           // duplicate request
           // b) if the findCMR result has ceid, then it is not a duplicate
           // request
+          // c) check China API with single byte string value
+          // d) check findcmr twice with single byte and double byte value, if
+          // they are not equals
 
           nameIsBP = true;
           historyNmIsBP = true;
@@ -138,30 +145,35 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 searchModelCNAPI.setTaxCd1(cnCreditCd);
                 resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "TAXCD");
               } else {
-                cnName = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
+                cnNameSingleByte = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
+                cnNameSingleByte = convert2SingleByte(cnNameSingleByte);
                 searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
                 searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
-                searchModelCNAPI.setAltName(cnName);
+                searchModelCNAPI.setAltName(cnNameSingleByte);
                 resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "ALTNAME");
               }
 
               if (resultCNApi != null && resultCNApi.isSuccess()) {
-                cnName = resultCNApi.getRecord().getName();
-                cnHistoryName = resultCNApi.getRecord().getHistoryNames();
-                cnAddr = resultCNApi.getRecord().getRegLocation();
+                cnNameSingleByte = resultCNApi.getRecord().getName();
+                cnHistoryNameSingleByte = resultCNApi.getRecord().getHistoryNames();
+                cnAddrSingleByte = resultCNApi.getRecord().getRegLocation();
+
+                cnNameDoubleByte = convert2DoubleByte(cnNameSingleByte);
+                cnHistoryNameDoubleByte = convert2DoubleByte(cnHistoryNameSingleByte);
+                cnAddrDoubleByte = convert2DoubleByte(cnAddrSingleByte);
 
                 try {
-                  // 2, Check FindCMR NON Latin with Chinese name
+                  // 2, Check FindCMR NON Latin with Chinese name - single byte
                   CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
                   searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
                   searchModelFindCmrCN.setCountryCd(soldTo.getLandCntry());
-                  searchModelFindCmrCN.setName(cnName);
+                  searchModelFindCmrCN.setName(cnNameSingleByte);
                   resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
 
                   if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
                     for (int i = 0; i < resultFindCmrCN.size(); i++) {
                       nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
-                      if (nameFindCmrCnResult != null && cnName.equals(nameFindCmrCnResult)) {
+                      if (nameFindCmrCnResult != null && cnNameSingleByte.equals(nameFindCmrCnResult)) {
 
                         nameMatched = true;
 
@@ -180,15 +192,56 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   }
                 } catch (Exception e) {
                   e.printStackTrace();
-                  result.setDetails("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnName);
-                  engineData.addRejectionComment("OTH", "Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnName, "", "");
+                  result.setDetails("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameSingleByte);
+                  engineData.addRejectionComment("OTH", "Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameSingleByte, "",
+                      "");
                   result.setOnError(true);
-                  result.setResults("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnName);
+                  result.setResults("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameSingleByte);
                 }
 
-                // 3, Check FindCMR Non Latin with historical Chinese name
-                if (cnHistoryName != null && !"".equals(cnHistoryName)) {
-                  List<String> cnHistoryNameList = Arrays.asList(cnHistoryName.split(";"));
+                if (cnNameDoubleByte != null && !cnNameDoubleByte.equals(cnNameSingleByte)) {
+                  // 3, Check FindCMR NON Latin with Chinese name - double byte
+                  try {
+                    CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
+                    searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
+                    searchModelFindCmrCN.setCountryCd(soldTo.getLandCntry());
+                    searchModelFindCmrCN.setName(cnNameDoubleByte);
+                    resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
+
+                    if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
+                      for (int i = 0; i < resultFindCmrCN.size(); i++) {
+                        nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
+                        if (nameFindCmrCnResult != null && cnNameDoubleByte.equals(nameFindCmrCnResult)) {
+
+                          nameMatched = true;
+
+                          if (resultFindCmrCN.get(i).getCied() == null || StringUtils.isBlank(resultFindCmrCN.get(i).getCied())) {
+                            nameIsBP = false;
+                          }
+
+                          if (nameMatched && !nameIsBP) {
+                            matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
+                            cmrData = resultFindCmrCN.get(i);
+                            details.append("\n");
+                            logDuplicateCMR(details, cmrData);
+                          }
+                        }
+                      }
+                    }
+                  } catch (Exception e) {
+                    e.printStackTrace();
+                    result.setDetails("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameDoubleByte);
+                    engineData.addRejectionComment("OTH", "Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameDoubleByte,
+                        "", "");
+                    result.setOnError(true);
+                    result.setResults("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameDoubleByte);
+                  }
+                }
+
+                // 4, Check FindCMR Non Latin with historical Chinese name -
+                // single byte
+                if (cnHistoryNameSingleByte != null && !"".equals(cnHistoryNameSingleByte)) {
+                  List<String> cnHistoryNameList = Arrays.asList(cnHistoryNameSingleByte.split(";"));
                   CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
                   searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
                   try {
@@ -219,11 +272,59 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
                   } catch (Exception e) {
                     e.printStackTrace();
-                    result.setDetails("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryName);
+                    result
+                        .setDetails("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameSingleByte);
                     engineData.addRejectionComment("OTH",
-                        "Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryName, "", "");
+                        "Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameSingleByte, "", "");
                     result.setOnError(true);
-                    result.setResults("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryName);
+                    result
+                        .setResults("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameSingleByte);
+                  }
+
+                }
+
+                // 5, Check FindCMR Non Latin with historical Chinese name -
+                // double byte
+                if (cnHistoryNameDoubleByte != null && !"".equals(cnHistoryNameDoubleByte)
+                    && !cnHistoryNameDoubleByte.equals(cnHistoryNameSingleByte)) {
+                  List<String> cnHistoryNameList = Arrays.asList(cnHistoryNameDoubleByte.split(";"));
+                  CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
+                  searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
+                  try {
+                    for (String historyName : cnHistoryNameList) {
+                      searchModelFindCmrCN.setName(historyName);
+                      resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
+                      if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
+                        for (int i = 0; i < resultFindCmrCN.size(); i++) {
+                          nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
+                          if (nameFindCmrCnResult != null && nameFindCmrCnResult.equals(historyName)) {
+
+                            historyNmMatched = true;
+
+                            if (resultFindCmrCN.get(i).getCied() == null || StringUtils.isBlank(resultFindCmrCN.get(i).getCied())) {
+                              historyNmIsBP = false;
+                            }
+
+                            if (historyNmMatched && !historyNmIsBP) {
+                              matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
+                              cmrData = resultFindCmrCN.get(i);
+                              details.append("\n");
+                              logDuplicateCMR(details, cmrData);
+                            }
+                          }
+                        }
+                      }
+                    }
+
+                  } catch (Exception e) {
+                    e.printStackTrace();
+                    result
+                        .setDetails("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameDoubleByte);
+                    engineData.addRejectionComment("OTH",
+                        "Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameDoubleByte, "", "");
+                    result.setOnError(true);
+                    result
+                        .setResults("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameDoubleByte);
                   }
 
                 }
@@ -295,29 +396,34 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 searchModelCNAPI.setTaxCd1(cnCreditCd);
                 resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "TAXCD");
               } else {
-                cnName = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
+                cnNameSingleByte = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
+                cnNameSingleByte = convert2SingleByte(cnNameSingleByte);
                 searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
                 searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
-                searchModelCNAPI.setAltName(cnName);
+                searchModelCNAPI.setAltName(cnNameSingleByte);
                 resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "ALTNAME");
               }
 
               if (resultCNApi != null && resultCNApi.isSuccess()) {
-                cnName = resultCNApi.getRecord().getName();
-                cnHistoryName = resultCNApi.getRecord().getHistoryNames();
-                cnAddr = resultCNApi.getRecord().getRegLocation();
+                cnNameSingleByte = resultCNApi.getRecord().getName();
+                cnHistoryNameSingleByte = resultCNApi.getRecord().getHistoryNames();
+                cnAddrSingleByte = resultCNApi.getRecord().getRegLocation();
+
+                cnNameDoubleByte = convert2DoubleByte(cnNameSingleByte);
+                cnHistoryNameDoubleByte = convert2DoubleByte(cnHistoryNameSingleByte);
+                cnAddrDoubleByte = convert2DoubleByte(cnAddrSingleByte);
 
                 try {
-                  // 2, Check FindCMR NON Latin with Chinese name
+                  // 2, Check FindCMR NON Latin with Chinese name - single byte
                   CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
                   searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
                   searchModelFindCmrCN.setCountryCd(soldTo.getLandCntry());
-                  searchModelFindCmrCN.setName(cnName);
+                  searchModelFindCmrCN.setName(cnNameSingleByte);
                   resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
                   if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
                     for (int i = 0; i < resultFindCmrCN.size(); i++) {
                       nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
-                      if (nameFindCmrCnResult != null && cnName.equals(nameFindCmrCnResult)) {
+                      if (nameFindCmrCnResult != null && cnNameSingleByte.equals(nameFindCmrCnResult)) {
 
                         nameMatched = true;
 
@@ -336,15 +442,56 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   }
                 } catch (Exception e) {
                   e.printStackTrace();
-                  result.setDetails("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnName);
-                  engineData.addRejectionComment("OTH", "Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnName, "", "");
+                  result.setDetails("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameSingleByte);
+                  engineData.addRejectionComment("OTH", "Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameSingleByte, "",
+                      "");
                   result.setOnError(true);
-                  result.setResults("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnName);
+                  result.setResults("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameSingleByte);
                 }
 
-                // 3, Check FindCMR Non Latin with historical Chinese name
-                if (cnHistoryName != null && !"".equals(cnHistoryName)) {
-                  List<String> cnHistoryNameList = Arrays.asList(cnHistoryName.split(";"));
+                if (cnNameDoubleByte != null && !cnNameDoubleByte.equals(cnNameSingleByte)) {
+                  try {
+                    // 3, Check FindCMR NON Latin with Chinese name - double
+                    // byte
+                    CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
+                    searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
+                    searchModelFindCmrCN.setCountryCd(soldTo.getLandCntry());
+                    searchModelFindCmrCN.setName(cnNameDoubleByte);
+                    resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
+                    if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
+                      for (int i = 0; i < resultFindCmrCN.size(); i++) {
+                        nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
+                        if (nameFindCmrCnResult != null && cnNameDoubleByte.equals(nameFindCmrCnResult)) {
+
+                          nameMatched = true;
+
+                          if (resultFindCmrCN.get(i).getCied() != null && resultFindCmrCN.get(i).getCied().length() > 0) {
+                            nameIsBP = true;
+                          }
+
+                          if (nameMatched && nameIsBP) {
+                            matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
+                            cmrData = resultFindCmrCN.get(i);
+                            details.append("\n");
+                            logDuplicateCMR(details, cmrData);
+                          }
+                        }
+                      }
+                    }
+                  } catch (Exception e) {
+                    e.printStackTrace();
+                    result.setDetails("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameDoubleByte);
+                    engineData.addRejectionComment("OTH", "Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameDoubleByte,
+                        "", "");
+                    result.setOnError(true);
+                    result.setResults("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameDoubleByte);
+                  }
+                }
+
+                // 4, Check FindCMR Non Latin with historical Chinese name -
+                // single byte
+                if (cnHistoryNameSingleByte != null && !"".equals(cnHistoryNameSingleByte)) {
+                  List<String> cnHistoryNameList = Arrays.asList(cnHistoryNameSingleByte.split(";"));
                   try {
                     CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
                     searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
@@ -375,18 +522,66 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
                   } catch (Exception e) {
                     e.printStackTrace();
-                    result.setDetails("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryName);
+                    result
+                        .setDetails("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameSingleByte);
                     engineData.addRejectionComment("OTH",
-                        "Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryName, "", "");
+                        "Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameSingleByte, "", "");
                     result.setOnError(true);
-                    result.setResults("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryName);
+                    result
+                        .setResults("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameSingleByte);
+                  }
+
+                }
+
+                // 5, Check FindCMR Non Latin with historical Chinese name -
+                // double byte
+                if (cnHistoryNameDoubleByte != null && !"".equals(cnHistoryNameDoubleByte)
+                    && !cnHistoryNameDoubleByte.equals(cnHistoryNameSingleByte)) {
+                  List<String> cnHistoryNameList = Arrays.asList(cnHistoryNameDoubleByte.split(";"));
+                  try {
+                    CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
+                    searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
+                    for (String historyName : cnHistoryNameList) {
+                      searchModelFindCmrCN.setName(historyName);
+                      resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
+                      if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
+                        for (int i = 0; i < resultFindCmrCN.size(); i++) {
+                          nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
+                          if (nameFindCmrCnResult != null && nameFindCmrCnResult.equals(historyName)) {
+
+                            historyNmMatched = true;
+
+                            if (resultFindCmrCN.get(i).getCied() != null && resultFindCmrCN.get(i).getCied().length() > 0) {
+                              historyNmIsBP = true;
+                            }
+
+                            if (historyNmMatched && historyNmIsBP) {
+                              matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
+                              cmrData = resultFindCmrCN.get(i);
+                              details.append("\n");
+                              logDuplicateCMR(details, cmrData);
+                            }
+                          }
+                        }
+                      }
+                    }
+
+                  } catch (Exception e) {
+                    e.printStackTrace();
+                    result
+                        .setDetails("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameDoubleByte);
+                    engineData.addRejectionComment("OTH",
+                        "Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameDoubleByte, "", "");
+                    result.setOnError(true);
+                    result
+                        .setResults("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameDoubleByte);
                   }
 
                 }
 
                 if (cnCeid != null && !"".equals(cnCeid)) {
                   try {
-                    // 4, Check FindCMR with CEID
+                    // 6, Check FindCMR with CEID
                     CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
                     searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
                     searchModelFindCmrCN.setCied(cnCeid);
@@ -485,28 +680,33 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 searchModelCNAPI.setTaxCd1(cnCreditCd);
                 resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "TAXCD");
               } else {
-                cnName = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
+                cnNameSingleByte = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
+                cnNameSingleByte = convert2SingleByte(cnNameSingleByte);
                 searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
                 searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
-                searchModelCNAPI.setAltName(cnName);
+                searchModelCNAPI.setAltName(cnNameSingleByte);
                 resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "ALTNAME");
               }
 
               if (resultCNApi != null && resultCNApi.isSuccess()) {
-                cnName = resultCNApi.getRecord().getName();
-                cnHistoryName = resultCNApi.getRecord().getHistoryNames();
-                cnAddr = resultCNApi.getRecord().getRegLocation();
+                cnNameSingleByte = resultCNApi.getRecord().getName();
+                cnHistoryNameSingleByte = resultCNApi.getRecord().getHistoryNames();
+                cnAddrSingleByte = resultCNApi.getRecord().getRegLocation();
+
+                cnNameDoubleByte = convert2DoubleByte(cnNameSingleByte);
+                cnHistoryNameDoubleByte = convert2DoubleByte(cnHistoryNameSingleByte);
+                cnAddrDoubleByte = convert2DoubleByte(cnAddrSingleByte);
 
                 try {
-                  // 2, Check FindCMR NON Latin with Chinese name
+                  // 2, Check FindCMR NON Latin with Chinese name - single byte
                   CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
                   searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
-                  searchModelFindCmrCN.setName(cnName);
+                  searchModelFindCmrCN.setName(cnNameSingleByte);
                   resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
                   if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
                     for (int i = 0; i < resultFindCmrCN.size(); i++) {
                       nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
-                      if (nameFindCmrCnResult != null && cnName.equals(nameFindCmrCnResult)) {
+                      if (nameFindCmrCnResult != null && cnNameSingleByte.equals(nameFindCmrCnResult)) {
 
                         nameMatched = true;
                         matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
@@ -521,15 +721,51 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   }
                 } catch (Exception e) {
                   e.printStackTrace();
-                  result.setDetails("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnName);
-                  engineData.addRejectionComment("OTH", "Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnName, "", "");
+                  result.setDetails("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameSingleByte);
+                  engineData.addRejectionComment("OTH", "Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameSingleByte, "",
+                      "");
                   result.setOnError(true);
-                  result.setResults("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnName);
+                  result.setResults("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameSingleByte);
                 }
 
-                // 3, Check FindCMR Non Latin with historical Chinese name
-                if (cnHistoryName != null && !"".equals(cnHistoryName)) {
-                  List<String> cnHistoryNameList = Arrays.asList(cnHistoryName.split(";"));
+                if (cnNameDoubleByte != null && !cnNameDoubleByte.equals(cnNameSingleByte)) {
+                  try {
+                    // 3, Check FindCMR NON Latin with Chinese name - double
+                    // byte
+                    CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
+                    searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
+                    searchModelFindCmrCN.setName(cnNameDoubleByte);
+                    resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
+                    if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
+                      for (int i = 0; i < resultFindCmrCN.size(); i++) {
+                        nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
+                        if (nameFindCmrCnResult != null && cnNameDoubleByte.equals(nameFindCmrCnResult)) {
+
+                          nameMatched = true;
+                          matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
+
+                          if (nameMatched) {
+                            cmrData = resultFindCmrCN.get(i);
+                            details.append("\n");
+                            logDuplicateCMR(details, cmrData);
+                          }
+                        }
+                      }
+                    }
+                  } catch (Exception e) {
+                    e.printStackTrace();
+                    result.setDetails("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameDoubleByte);
+                    engineData.addRejectionComment("OTH", "Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameDoubleByte,
+                        "", "");
+                    result.setOnError(true);
+                    result.setResults("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameDoubleByte);
+                  }
+                }
+
+                // 4, Check FindCMR Non Latin with historical Chinese name -
+                // single byte
+                if (cnHistoryNameSingleByte != null && !"".equals(cnHistoryNameSingleByte)) {
+                  List<String> cnHistoryNameList = Arrays.asList(cnHistoryNameSingleByte.split(";"));
                   try {
                     CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
                     searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
@@ -556,13 +792,57 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
                   } catch (Exception e) {
                     e.printStackTrace();
-                    result.setDetails("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryName);
+                    result
+                        .setDetails("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameSingleByte);
                     engineData.addRejectionComment("OTH",
-                        "Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryName, "", "");
+                        "Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameSingleByte, "", "");
                     result.setOnError(true);
-                    result.setResults("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryName);
+                    result
+                        .setResults("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameSingleByte);
                   }
                 }
+
+                // 5, Check FindCMR Non Latin with historical Chinese name -
+                // double byte
+                if (cnHistoryNameDoubleByte != null && !"".equals(cnHistoryNameDoubleByte)
+                    && !cnHistoryNameDoubleByte.equals(cnHistoryNameSingleByte)) {
+                  List<String> cnHistoryNameList = Arrays.asList(cnHistoryNameDoubleByte.split(";"));
+                  try {
+                    CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
+                    searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
+                    for (String historyName : cnHistoryNameList) {
+                      searchModelFindCmrCN.setName(historyName);
+                      resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
+                      if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
+                        for (int i = 0; i < resultFindCmrCN.size(); i++) {
+                          nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
+                          if (nameFindCmrCnResult != null && nameFindCmrCnResult.equals(historyName)) {
+
+                            historyNmMatched = true;
+                            matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
+
+                            if (historyNmMatched) {
+                              cmrData = resultFindCmrCN.get(i);
+                              details.append("\n");
+                              logDuplicateCMR(details, cmrData);
+                            }
+                          }
+                        }
+                      }
+                    }
+
+                  } catch (Exception e) {
+                    e.printStackTrace();
+                    result
+                        .setDetails("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameDoubleByte);
+                    engineData.addRejectionComment("OTH",
+                        "Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameDoubleByte, "", "");
+                    result.setOnError(true);
+                    result
+                        .setResults("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameDoubleByte);
+                  }
+                }
+
                 // output
                 if (nameMatched || historyNmMatched) {
                   result.setResults("Matches Found");
@@ -612,15 +892,16 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
           boolean ifAQSTNHasCN = true;
           iAddr = handler.getIntlAddrById(soldTo, entityManager);
           if (iAddr != null) {
-            // cnName = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null
+            // cnNameSingleByte = iAddr.getIntlCustNm1() +
+            // (iAddr.getIntlCustNm2() != null
             // ? iAddr.getIntlCustNm2() : "");
             if (iAddr.getIntlCustNm2() != null) {
-              cnName = iAddr.getIntlCustNm1() + iAddr.getIntlCustNm2();
+              cnNameSingleByte = iAddr.getIntlCustNm1() + iAddr.getIntlCustNm2();
             } else {
-              cnName = iAddr.getIntlCustNm1();
+              cnNameSingleByte = iAddr.getIntlCustNm1();
             }
           }
-          if (!StringUtils.isBlank(cnName)) {
+          if (!StringUtils.isBlank(cnNameSingleByte)) {
 
             try {
 
@@ -631,28 +912,33 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 searchModelCNAPI.setTaxCd1(cnCreditCd);
                 resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "TAXCD");
               } else {
-                cnName = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
+                cnNameSingleByte = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
+                cnNameSingleByte = convert2SingleByte(cnNameSingleByte);
                 searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
                 searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
-                searchModelCNAPI.setAltName(cnName);
+                searchModelCNAPI.setAltName(cnNameSingleByte);
                 resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "ALTNAME");
               }
 
               if (resultCNApi != null && resultCNApi.isSuccess()) {
-                cnName = resultCNApi.getRecord().getName();
-                cnHistoryName = resultCNApi.getRecord().getHistoryNames();
-                cnAddr = resultCNApi.getRecord().getRegLocation();
+                cnNameSingleByte = resultCNApi.getRecord().getName();
+                cnHistoryNameSingleByte = resultCNApi.getRecord().getHistoryNames();
+                cnAddrSingleByte = resultCNApi.getRecord().getRegLocation();
+
+                cnNameDoubleByte = convert2DoubleByte(cnNameSingleByte);
+                cnHistoryNameDoubleByte = convert2DoubleByte(cnHistoryNameSingleByte);
+                cnAddrDoubleByte = convert2DoubleByte(cnAddrSingleByte);
 
                 try {
-                  // 2, Check FindCMR NON Latin with Chinese name
+                  // 2, Check FindCMR NON Latin with Chinese name - single byte
                   CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
                   searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
-                  searchModelFindCmrCN.setName(cnName);
+                  searchModelFindCmrCN.setName(cnNameSingleByte);
                   resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
                   if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
                     for (int i = 0; i < resultFindCmrCN.size(); i++) {
                       nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
-                      if (nameFindCmrCnResult != null && cnName.equals(nameFindCmrCnResult)) {
+                      if (nameFindCmrCnResult != null && cnNameSingleByte.equals(nameFindCmrCnResult)) {
 
                         nameMatched = true;
                         matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
@@ -667,15 +953,51 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   }
                 } catch (Exception e) {
                   e.printStackTrace();
-                  result.setDetails("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnName);
-                  engineData.addRejectionComment("OTH", "Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnName, "", "");
+                  result.setDetails("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameSingleByte);
+                  engineData.addRejectionComment("OTH", "Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameSingleByte, "",
+                      "");
                   result.setOnError(true);
-                  result.setResults("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnName);
+                  result.setResults("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameSingleByte);
                 }
 
-                // 3, Check FindCMR Non Latin with historical Chinese name
-                if (cnHistoryName != null && !"".equals(cnHistoryName)) {
-                  List<String> cnHistoryNameList = Arrays.asList(cnHistoryName.split(";"));
+                if (cnNameDoubleByte != null && !cnNameDoubleByte.equals(cnNameSingleByte)) {
+                  try {
+                    // 3, Check FindCMR NON Latin with Chinese name - double
+                    // byte
+                    CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
+                    searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
+                    searchModelFindCmrCN.setName(cnNameDoubleByte);
+                    resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
+                    if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
+                      for (int i = 0; i < resultFindCmrCN.size(); i++) {
+                        nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
+                        if (nameFindCmrCnResult != null && cnNameDoubleByte.equals(nameFindCmrCnResult)) {
+
+                          nameMatched = true;
+                          matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
+
+                          if (nameMatched) {
+                            cmrData = resultFindCmrCN.get(i);
+                            details.append("\n");
+                            logDuplicateCMR(details, cmrData);
+                          }
+                        }
+                      }
+                    }
+                  } catch (Exception e) {
+                    e.printStackTrace();
+                    result.setDetails("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameDoubleByte);
+                    engineData.addRejectionComment("OTH", "Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameDoubleByte,
+                        "", "");
+                    result.setOnError(true);
+                    result.setResults("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameDoubleByte);
+                  }
+                }
+
+                // 4, Check FindCMR Non Latin with historical Chinese name -
+                // single byte
+                if (cnHistoryNameSingleByte != null && !"".equals(cnHistoryNameSingleByte)) {
+                  List<String> cnHistoryNameList = Arrays.asList(cnHistoryNameSingleByte.split(";"));
                   try {
                     CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
                     searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
@@ -702,13 +1024,57 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
                   } catch (Exception e) {
                     e.printStackTrace();
-                    result.setDetails("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryName);
+                    result
+                        .setDetails("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameSingleByte);
                     engineData.addRejectionComment("OTH",
-                        "Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryName, "", "");
+                        "Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameSingleByte, "", "");
                     result.setOnError(true);
-                    result.setResults("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryName);
+                    result
+                        .setResults("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameSingleByte);
                   }
                 }
+
+                // 5, Check FindCMR Non Latin with historical Chinese name -
+                // double byte
+                if (cnHistoryNameDoubleByte != null && !"".equals(cnHistoryNameDoubleByte)
+                    && !cnHistoryNameDoubleByte.equals(cnHistoryNameSingleByte)) {
+                  List<String> cnHistoryNameList = Arrays.asList(cnHistoryNameDoubleByte.split(";"));
+                  try {
+                    CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
+                    searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
+                    for (String historyName : cnHistoryNameList) {
+                      searchModelFindCmrCN.setName(historyName);
+                      resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
+                      if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
+                        for (int i = 0; i < resultFindCmrCN.size(); i++) {
+                          nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
+                          if (nameFindCmrCnResult != null && nameFindCmrCnResult.equals(historyName)) {
+
+                            historyNmMatched = true;
+                            matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
+
+                            if (historyNmMatched) {
+                              cmrData = resultFindCmrCN.get(i);
+                              details.append("\n");
+                              logDuplicateCMR(details, cmrData);
+                            }
+                          }
+                        }
+                      }
+                    }
+
+                  } catch (Exception e) {
+                    e.printStackTrace();
+                    result
+                        .setDetails("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameDoubleByte);
+                    engineData.addRejectionComment("OTH",
+                        "Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameDoubleByte, "", "");
+                    result.setOnError(true);
+                    result
+                        .setResults("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameDoubleByte);
+                  }
+                }
+
                 // output
                 if (nameMatched || historyNmMatched) {
                   result.setResults("Matches Found");
@@ -806,28 +1172,33 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 searchModelCNAPI.setTaxCd1(cnCreditCd);
                 resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "TAXCD");
               } else {
-                cnName = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
+                cnNameSingleByte = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
+                cnNameSingleByte = convert2SingleByte(cnNameSingleByte);
                 searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
                 searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
-                searchModelCNAPI.setAltName(cnName);
+                searchModelCNAPI.setAltName(cnNameSingleByte);
                 resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "ALTNAME");
               }
 
               if (resultCNApi != null && resultCNApi.isSuccess()) {
-                cnName = resultCNApi.getRecord().getName();
-                cnHistoryName = resultCNApi.getRecord().getHistoryNames();
-                cnAddr = resultCNApi.getRecord().getRegLocation();
+                cnNameSingleByte = resultCNApi.getRecord().getName();
+                cnHistoryNameSingleByte = resultCNApi.getRecord().getHistoryNames();
+                cnAddrSingleByte = resultCNApi.getRecord().getRegLocation();
+
+                cnNameDoubleByte = convert2DoubleByte(cnNameSingleByte);
+                cnHistoryNameDoubleByte = convert2DoubleByte(cnHistoryNameSingleByte);
+                cnAddrDoubleByte = convert2DoubleByte(cnAddrSingleByte);
 
                 try {
-                  // 2, Check FindCMR NON Latin with Chinese name
+                  // 2, Check FindCMR NON Latin with Chinese name - single byte
                   CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
                   searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
-                  searchModelFindCmrCN.setName(cnName);
+                  searchModelFindCmrCN.setName(cnNameSingleByte);
                   resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
                   if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
                     for (int i = 0; i < resultFindCmrCN.size(); i++) {
                       nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
-                      if (nameFindCmrCnResult != null && cnName.equals(nameFindCmrCnResult)) {
+                      if (nameFindCmrCnResult != null && cnNameSingleByte.equals(nameFindCmrCnResult)) {
 
                         nameMatched = true;
                         matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
@@ -842,15 +1213,51 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   }
                 } catch (Exception e) {
                   e.printStackTrace();
-                  result.setDetails("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnName);
-                  engineData.addRejectionComment("OTH", "Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnName, "", "");
+                  result.setDetails("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameSingleByte);
+                  engineData.addRejectionComment("OTH", "Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameSingleByte, "",
+                      "");
                   result.setOnError(true);
-                  result.setResults("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnName);
+                  result.setResults("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameSingleByte);
                 }
 
-                // 3, Check FindCMR Non Latin with historical Chinese name
-                if (cnHistoryName != null && !"".equals(cnHistoryName)) {
-                  List<String> cnHistoryNameList = Arrays.asList(cnHistoryName.split(";"));
+                if (cnNameDoubleByte != null && !cnNameDoubleByte.equals(cnNameSingleByte)) {
+                  try {
+                    // 3, Check FindCMR NON Latin with Chinese name - double
+                    // byte
+                    CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
+                    searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
+                    searchModelFindCmrCN.setName(cnNameDoubleByte);
+                    resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
+                    if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
+                      for (int i = 0; i < resultFindCmrCN.size(); i++) {
+                        nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
+                        if (nameFindCmrCnResult != null && cnNameDoubleByte.equals(nameFindCmrCnResult)) {
+
+                          nameMatched = true;
+                          matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
+
+                          if (nameMatched) {
+                            cmrData = resultFindCmrCN.get(i);
+                            details.append("\n");
+                            logDuplicateCMR(details, cmrData);
+                          }
+                        }
+                      }
+                    }
+                  } catch (Exception e) {
+                    e.printStackTrace();
+                    result.setDetails("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameDoubleByte);
+                    engineData.addRejectionComment("OTH", "Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameDoubleByte,
+                        "", "");
+                    result.setOnError(true);
+                    result.setResults("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameDoubleByte);
+                  }
+                }
+
+                // 4, Check FindCMR Non Latin with historical Chinese name -
+                // single byte
+                if (cnHistoryNameSingleByte != null && !"".equals(cnHistoryNameSingleByte)) {
+                  List<String> cnHistoryNameList = Arrays.asList(cnHistoryNameSingleByte.split(";"));
                   try {
                     CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
                     searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
@@ -877,13 +1284,57 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
                   } catch (Exception e) {
                     e.printStackTrace();
-                    result.setDetails("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryName);
+                    result
+                        .setDetails("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameSingleByte);
                     engineData.addRejectionComment("OTH",
-                        "Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryName, "", "");
+                        "Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameSingleByte, "", "");
                     result.setOnError(true);
-                    result.setResults("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryName);
+                    result
+                        .setResults("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameSingleByte);
                   }
                 }
+
+                // 5, Check FindCMR Non Latin with historical Chinese name -
+                // double byte
+                if (cnHistoryNameDoubleByte != null && !"".equals(cnHistoryNameDoubleByte)
+                    && !cnHistoryNameDoubleByte.equals(cnHistoryNameSingleByte)) {
+                  List<String> cnHistoryNameList = Arrays.asList(cnHistoryNameDoubleByte.split(";"));
+                  try {
+                    CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
+                    searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
+                    for (String historyName : cnHistoryNameList) {
+                      searchModelFindCmrCN.setName(historyName);
+                      resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
+                      if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
+                        for (int i = 0; i < resultFindCmrCN.size(); i++) {
+                          nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
+                          if (nameFindCmrCnResult != null && nameFindCmrCnResult.equals(historyName)) {
+
+                            historyNmMatched = true;
+                            matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
+
+                            if (historyNmMatched) {
+                              cmrData = resultFindCmrCN.get(i);
+                              details.append("\n");
+                              logDuplicateCMR(details, cmrData);
+                            }
+                          }
+                        }
+                      }
+                    }
+
+                  } catch (Exception e) {
+                    e.printStackTrace();
+                    result
+                        .setDetails("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameDoubleByte);
+                    engineData.addRejectionComment("OTH",
+                        "Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameDoubleByte, "", "");
+                    result.setOnError(true);
+                    result
+                        .setResults("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameDoubleByte);
+                  }
+                }
+
                 // output
                 if (nameMatched || historyNmMatched) {
                   result.setResults("Matches Found");
@@ -932,15 +1383,16 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
           iAddr = handler.getIntlAddrById(soldTo, entityManager);
           if (iAddr != null) {
-            // cnName = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null
+            // cnNameSingleByte = iAddr.getIntlCustNm1() +
+            // (iAddr.getIntlCustNm2() != null
             // ? iAddr.getIntlCustNm2() : "");
             if (iAddr.getIntlCustNm2() != null) {
-              cnName = iAddr.getIntlCustNm1() + iAddr.getIntlCustNm2();
+              cnNameSingleByte = iAddr.getIntlCustNm1() + iAddr.getIntlCustNm2();
             } else {
-              cnName = iAddr.getIntlCustNm1();
+              cnNameSingleByte = iAddr.getIntlCustNm1();
             }
           }
-          if (!StringUtils.isBlank(cnName)) {
+          if (!StringUtils.isBlank(cnNameSingleByte)) {
 
             try {
 
@@ -951,34 +1403,39 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 searchModelCNAPI.setTaxCd1(cnCreditCd);
                 resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "TAXCD");
               } else {
-                cnName = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
+                cnNameSingleByte = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
+                cnNameSingleByte = convert2SingleByte(cnNameSingleByte);
                 searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
                 searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
-                searchModelCNAPI.setAltName(cnName);
+                searchModelCNAPI.setAltName(cnNameSingleByte);
                 resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "ALTNAME");
               }
 
               if (resultCNApi != null && resultCNApi.isSuccess()) {
-                cnName = resultCNApi.getRecord().getName();
-                cnHistoryName = resultCNApi.getRecord().getHistoryNames();
-                cnAddr = resultCNApi.getRecord().getRegLocation();
+                cnNameSingleByte = resultCNApi.getRecord().getName();
+                cnHistoryNameSingleByte = resultCNApi.getRecord().getHistoryNames();
+                cnAddrSingleByte = resultCNApi.getRecord().getRegLocation();
+
+                cnNameDoubleByte = convert2DoubleByte(cnNameSingleByte);
+                cnHistoryNameDoubleByte = convert2DoubleByte(cnHistoryNameSingleByte);
+                cnAddrDoubleByte = convert2DoubleByte(cnAddrSingleByte);
 
                 try {
-                  // 2, Check FindCMR NON Latin with Chinese name
+                  // 2, Check FindCMR NON Latin with Chinese name - single byte
                   CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
                   searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
-                  searchModelFindCmrCN.setName(cnName);
+                  searchModelFindCmrCN.setName(cnNameSingleByte);
                   resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
                   if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
                     for (int i = 0; i < resultFindCmrCN.size(); i++) {
                       nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
-                      if (nameFindCmrCnResult != null && cnName.equals(nameFindCmrCnResult)) {
+                      if (nameFindCmrCnResult != null && cnNameSingleByte.equals(nameFindCmrCnResult)) {
 
                         nameMatched = true;
 
                         // check Chinese address
                         addrFindCmrCnResult = resultFindCmrCN.get(i).getAltStreet() != null ? resultFindCmrCN.get(i).getAltStreet() : "";
-                        if (addrFindCmrCnResult.equals(cnAddr)) {
+                        if (addrFindCmrCnResult.equals(cnAddrSingleByte)) {
                           nameMatched = true;
                         } else {
                           nameMatched = false;
@@ -995,15 +1452,59 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   }
                 } catch (Exception e) {
                   e.printStackTrace();
-                  result.setDetails("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnName);
-                  engineData.addRejectionComment("OTH", "Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnName, "", "");
+                  result.setDetails("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameSingleByte);
+                  engineData.addRejectionComment("OTH", "Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameSingleByte, "",
+                      "");
                   result.setOnError(true);
-                  result.setResults("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnName);
+                  result.setResults("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameSingleByte);
                 }
 
-                // 3, Check FindCMR Non Latin with historical Chinese name
-                if (cnHistoryName != null && !"".equals(cnHistoryName)) {
-                  List<String> cnHistoryNameList = Arrays.asList(cnHistoryName.split(";"));
+                if (cnNameDoubleByte != null && !cnNameDoubleByte.equals(cnNameSingleByte)) {
+                  try {
+                    // 3, Check FindCMR NON Latin with Chinese name - double
+                    // byte
+                    CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
+                    searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
+                    searchModelFindCmrCN.setName(cnNameDoubleByte);
+                    resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
+                    if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
+                      for (int i = 0; i < resultFindCmrCN.size(); i++) {
+                        nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
+                        if (nameFindCmrCnResult != null && cnNameDoubleByte.equals(nameFindCmrCnResult)) {
+
+                          nameMatched = true;
+
+                          // check Chinese address
+                          addrFindCmrCnResult = resultFindCmrCN.get(i).getAltStreet() != null ? resultFindCmrCN.get(i).getAltStreet() : "";
+                          if (addrFindCmrCnResult.equals(cnAddrSingleByte)) {
+                            nameMatched = true;
+                          } else {
+                            nameMatched = false;
+                          }
+
+                          if (nameMatched) {
+                            matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
+                            cmrData = resultFindCmrCN.get(i);
+                            details.append("\n");
+                            logDuplicateCMR(details, cmrData);
+                          }
+                        }
+                      }
+                    }
+                  } catch (Exception e) {
+                    e.printStackTrace();
+                    result.setDetails("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameDoubleByte);
+                    engineData.addRejectionComment("OTH", "Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameDoubleByte,
+                        "", "");
+                    result.setOnError(true);
+                    result.setResults("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameDoubleByte);
+                  }
+                }
+
+                // 4, Check FindCMR Non Latin with historical Chinese name -
+                // single byte
+                if (cnHistoryNameSingleByte != null && !"".equals(cnHistoryNameSingleByte)) {
+                  List<String> cnHistoryNameList = Arrays.asList(cnHistoryNameSingleByte.split(";"));
                   try {
                     CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
                     searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
@@ -1019,7 +1520,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
                             // check Chinese address
                             addrFindCmrCnResult = resultFindCmrCN.get(i).getAltStreet() != null ? resultFindCmrCN.get(i).getAltStreet() : "";
-                            if (addrFindCmrCnResult.equals(cnAddr)) {
+                            if (addrFindCmrCnResult.equals(cnAddrSingleByte)) {
                               historyNmMatched = true;
                             } else {
                               historyNmMatched = false;
@@ -1037,14 +1538,66 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
                   } catch (Exception e) {
                     e.printStackTrace();
-                    result.setDetails("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryName);
+                    result
+                        .setDetails("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameSingleByte);
                     engineData.addRejectionComment("OTH",
-                        "Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryName, "", "");
+                        "Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameSingleByte, "", "");
                     result.setOnError(true);
-                    result.setResults("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryName);
+                    result
+                        .setResults("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameSingleByte);
                   }
 
                 }
+
+                // 5, Check FindCMR Non Latin with historical Chinese name -
+                // double byte
+                if (cnHistoryNameDoubleByte != null && !"".equals(cnHistoryNameDoubleByte)
+                    && !cnHistoryNameDoubleByte.equals(cnHistoryNameSingleByte)) {
+                  List<String> cnHistoryNameList = Arrays.asList(cnHistoryNameDoubleByte.split(";"));
+                  try {
+                    CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
+                    searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
+                    for (String historyName : cnHistoryNameList) {
+                      searchModelFindCmrCN.setName(historyName);
+                      resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
+                      if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
+                        for (int i = 0; i < resultFindCmrCN.size(); i++) {
+                          nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
+                          if (nameFindCmrCnResult != null && nameFindCmrCnResult.equals(historyName)) {
+
+                            historyNmMatched = true;
+
+                            // check Chinese address
+                            addrFindCmrCnResult = resultFindCmrCN.get(i).getAltStreet() != null ? resultFindCmrCN.get(i).getAltStreet() : "";
+                            if (addrFindCmrCnResult.equals(cnAddrSingleByte)) {
+                              historyNmMatched = true;
+                            } else {
+                              historyNmMatched = false;
+                            }
+
+                            if (historyNmMatched) {
+                              cmrData = resultFindCmrCN.get(i);
+                              details.append("\n");
+                              logDuplicateCMR(details, cmrData);
+                            }
+                          }
+                        }
+                      }
+                    }
+
+                  } catch (Exception e) {
+                    e.printStackTrace();
+                    result
+                        .setDetails("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameDoubleByte);
+                    engineData.addRejectionComment("OTH",
+                        "Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameDoubleByte, "", "");
+                    result.setOnError(true);
+                    result
+                        .setResults("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameDoubleByte);
+                  }
+
+                }
+
                 // output
                 if (nameMatched || historyNmMatched) {
                   result.setResults("Matches Found");
@@ -1178,6 +1731,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
           CompanyRecordModel searchModel = new CompanyRecordModel();
           searchModel.setIssuingCntry(data.getCmrIssuingCntry());
           searchModel.setName(soldTo.getCustNm1() + (soldTo.getCustNm2() != null ? soldTo.getCustNm2() : ""));
+          searchModel.setCountryCd(soldTo.getLandCntry());
           findCMRResult = searchFindCMR(searchModel);
           if (findCMRResult != null && findCMRResult.getItems() != null && !findCMRResult.getItems().isEmpty()) {
             ceidMatched = true;
@@ -1565,6 +2119,164 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
       mail.setType(MessageType.HTML);
       mail.send(host);
     }
+  }
+
+  private String convert2DoubleByte(String value) {
+    String modifiedVal = null;
+    if (value != null && value.length() > 0) {
+      modifiedVal = value;
+      modifiedVal = modifiedVal.replace("1", "１");
+      modifiedVal = modifiedVal.replace("2", "２");
+      modifiedVal = modifiedVal.replace("3", "３");
+      modifiedVal = modifiedVal.replace("4", "４");
+      modifiedVal = modifiedVal.replace("5", "５");
+      modifiedVal = modifiedVal.replace("6", "６");
+      modifiedVal = modifiedVal.replace("7", "７");
+      modifiedVal = modifiedVal.replace("8", "８");
+      modifiedVal = modifiedVal.replace("9", "９");
+      modifiedVal = modifiedVal.replace("0", "０");
+      modifiedVal = modifiedVal.replace("a", "ａ");
+      modifiedVal = modifiedVal.replace("b", "ｂ");
+      modifiedVal = modifiedVal.replace("c", "ｃ");
+      modifiedVal = modifiedVal.replace("d", "ｄ");
+      modifiedVal = modifiedVal.replace("e", "ｅ");
+      modifiedVal = modifiedVal.replace("f", "ｆ");
+      modifiedVal = modifiedVal.replace("g", "ｇ");
+      modifiedVal = modifiedVal.replace("h", "ｈ");
+      modifiedVal = modifiedVal.replace("i", "ｉ");
+      modifiedVal = modifiedVal.replace("j", "ｊ");
+      modifiedVal = modifiedVal.replace("k", "ｋ");
+      modifiedVal = modifiedVal.replace("l", "ｌ");
+      modifiedVal = modifiedVal.replace("m", "ｍ");
+      modifiedVal = modifiedVal.replace("n", "ｎ");
+      modifiedVal = modifiedVal.replace("o", "ｏ");
+      modifiedVal = modifiedVal.replace("p", "ｐ");
+      modifiedVal = modifiedVal.replace("q", "ｑ");
+      modifiedVal = modifiedVal.replace("r", "ｒ");
+      modifiedVal = modifiedVal.replace("s", "ｓ");
+      modifiedVal = modifiedVal.replace("t", "ｔ");
+      modifiedVal = modifiedVal.replace("u", "ｕ");
+      modifiedVal = modifiedVal.replace("v", "ｖ");
+      modifiedVal = modifiedVal.replace("w", "ｗ");
+      modifiedVal = modifiedVal.replace("x", "ｘ");
+      modifiedVal = modifiedVal.replace("y", "ｙ");
+      modifiedVal = modifiedVal.replace("z", "ｚ");
+      modifiedVal = modifiedVal.replace("A", "Ａ");
+      modifiedVal = modifiedVal.replace("B", "Ｂ");
+      modifiedVal = modifiedVal.replace("C", "Ｃ");
+      modifiedVal = modifiedVal.replace("D", "Ｄ");
+      modifiedVal = modifiedVal.replace("E", "Ｅ");
+      modifiedVal = modifiedVal.replace("F", "Ｆ");
+      modifiedVal = modifiedVal.replace("G", "Ｇ");
+      modifiedVal = modifiedVal.replace("H", "Ｈ");
+      modifiedVal = modifiedVal.replace("I", "Ｉ");
+      modifiedVal = modifiedVal.replace("J", "Ｊ");
+      modifiedVal = modifiedVal.replace("K", "Ｋ");
+      modifiedVal = modifiedVal.replace("L", "Ｌ");
+      modifiedVal = modifiedVal.replace("M", "Ｍ");
+      modifiedVal = modifiedVal.replace("N", "Ｎ");
+      modifiedVal = modifiedVal.replace("O", "Ｏ");
+      modifiedVal = modifiedVal.replace("P", "Ｐ");
+      modifiedVal = modifiedVal.replace("Q", "Ｑ");
+      modifiedVal = modifiedVal.replace("R", "Ｒ");
+      modifiedVal = modifiedVal.replace("S", "Ｓ");
+      modifiedVal = modifiedVal.replace("T", "Ｔ");
+      modifiedVal = modifiedVal.replace("U", "Ｕ");
+      modifiedVal = modifiedVal.replace("V", "Ｖ");
+      modifiedVal = modifiedVal.replace("W", "Ｗ");
+      modifiedVal = modifiedVal.replace("X", "Ｘ");
+      modifiedVal = modifiedVal.replace("Y", "Ｙ");
+      modifiedVal = modifiedVal.replace("Z", "Ｚ");
+      modifiedVal = modifiedVal.replace(" ", "　");
+      modifiedVal = modifiedVal.replace("&", "＆");
+      modifiedVal = modifiedVal.replace("-", "－");
+      modifiedVal = modifiedVal.replace(".", "．");
+      modifiedVal = modifiedVal.replace(",", "，");
+      modifiedVal = modifiedVal.replace(":", "：");
+      modifiedVal = modifiedVal.replace("_", "＿");
+      modifiedVal = modifiedVal.replace("(", "（");
+      modifiedVal = modifiedVal.replace(")", "）");
+    }
+    return modifiedVal;
+  }
+
+  private String convert2SingleByte(String value) {
+    String modifiedVal = null;
+    if (value != null && value.length() > 0) {
+      modifiedVal = value;
+      modifiedVal = modifiedVal.replace("１", "1");
+      modifiedVal = modifiedVal.replace("２", "2");
+      modifiedVal = modifiedVal.replace("３", "3");
+      modifiedVal = modifiedVal.replace("４", "4");
+      modifiedVal = modifiedVal.replace("５", "5");
+      modifiedVal = modifiedVal.replace("６", "6");
+      modifiedVal = modifiedVal.replace("７", "7");
+      modifiedVal = modifiedVal.replace("８", "8");
+      modifiedVal = modifiedVal.replace("９", "9");
+      modifiedVal = modifiedVal.replace("０", "0");
+      modifiedVal = modifiedVal.replace("ａ", "a");
+      modifiedVal = modifiedVal.replace("ｂ", "b");
+      modifiedVal = modifiedVal.replace("ｃ", "c");
+      modifiedVal = modifiedVal.replace("ｄ", "d");
+      modifiedVal = modifiedVal.replace("ｅ", "e");
+      modifiedVal = modifiedVal.replace("ｆ", "f");
+      modifiedVal = modifiedVal.replace("ｇ", "g");
+      modifiedVal = modifiedVal.replace("ｈ", "h");
+      modifiedVal = modifiedVal.replace("ｉ", "i");
+      modifiedVal = modifiedVal.replace("ｊ", "j");
+      modifiedVal = modifiedVal.replace("ｋ", "k");
+      modifiedVal = modifiedVal.replace("ｌ", "l");
+      modifiedVal = modifiedVal.replace("ｍ", "m");
+      modifiedVal = modifiedVal.replace("ｎ", "n");
+      modifiedVal = modifiedVal.replace("ｏ", "o");
+      modifiedVal = modifiedVal.replace("ｐ", "p");
+      modifiedVal = modifiedVal.replace("ｑ", "q");
+      modifiedVal = modifiedVal.replace("ｒ", "r");
+      modifiedVal = modifiedVal.replace("ｓ", "s");
+      modifiedVal = modifiedVal.replace("ｔ", "t");
+      modifiedVal = modifiedVal.replace("ｕ", "u");
+      modifiedVal = modifiedVal.replace("ｖ", "v");
+      modifiedVal = modifiedVal.replace("ｗ", "w");
+      modifiedVal = modifiedVal.replace("ｘ", "x");
+      modifiedVal = modifiedVal.replace("ｙ", "y");
+      modifiedVal = modifiedVal.replace("ｚ", "z");
+      modifiedVal = modifiedVal.replace("Ａ", "A");
+      modifiedVal = modifiedVal.replace("Ｂ", "B");
+      modifiedVal = modifiedVal.replace("Ｃ", "C");
+      modifiedVal = modifiedVal.replace("Ｄ", "D");
+      modifiedVal = modifiedVal.replace("Ｅ", "E");
+      modifiedVal = modifiedVal.replace("Ｆ", "F");
+      modifiedVal = modifiedVal.replace("Ｇ", "G");
+      modifiedVal = modifiedVal.replace("Ｈ", "H");
+      modifiedVal = modifiedVal.replace("Ｉ", "I");
+      modifiedVal = modifiedVal.replace("Ｊ", "J");
+      modifiedVal = modifiedVal.replace("Ｋ", "K");
+      modifiedVal = modifiedVal.replace("Ｌ", "L");
+      modifiedVal = modifiedVal.replace("Ｍ", "M");
+      modifiedVal = modifiedVal.replace("Ｎ", "N");
+      modifiedVal = modifiedVal.replace("Ｏ", "O");
+      modifiedVal = modifiedVal.replace("Ｐ", "P");
+      modifiedVal = modifiedVal.replace("Ｑ", "Q");
+      modifiedVal = modifiedVal.replace("Ｒ", "R");
+      modifiedVal = modifiedVal.replace("Ｓ", "S");
+      modifiedVal = modifiedVal.replace("Ｔ", "T");
+      modifiedVal = modifiedVal.replace("Ｕ", "U");
+      modifiedVal = modifiedVal.replace("Ｖ", "V");
+      modifiedVal = modifiedVal.replace("Ｗ", "W");
+      modifiedVal = modifiedVal.replace("Ｘ", "X");
+      modifiedVal = modifiedVal.replace("Ｙ", "Y");
+      modifiedVal = modifiedVal.replace("Ｚ", "Z");
+      modifiedVal = modifiedVal.replace("　", " ");
+      modifiedVal = modifiedVal.replace("＆", "&");
+      modifiedVal = modifiedVal.replace("－", "-");
+      modifiedVal = modifiedVal.replace("．", ".");
+      modifiedVal = modifiedVal.replace("，", ",");
+      modifiedVal = modifiedVal.replace("：", ":");
+      modifiedVal = modifiedVal.replace("＿", "_");
+      modifiedVal = modifiedVal.replace("（", "(");
+      modifiedVal = modifiedVal.replace("）", ")");
+    }
+    return modifiedVal;
   }
 
 }
