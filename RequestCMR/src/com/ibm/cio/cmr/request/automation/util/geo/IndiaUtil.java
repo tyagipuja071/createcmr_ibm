@@ -207,13 +207,11 @@ public class IndiaUtil extends AutomationUtil {
                   LOG.debug("Update address for " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
                   cmdeReview = true;
                   checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
-                  validation.setMessage("Review Required.");
                   // company proof
                   if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
                     checkDetails.append("Supporting documentation is provided by the requester as attachment for " + addrType).append("\n");
                   } else {
                     checkDetails.append("\nNo supporting documentation is provided by the requester for " + addrType + " address.");
-                    output.setDetails(checkDetails.toString());
                   }
 
                 } else {
@@ -276,6 +274,7 @@ public class IndiaUtil extends AutomationUtil {
     } else if (cmdeReview) {
       engineData.addNegativeCheckStatus("_indCheckFailed", "Updates to addresses cannot be checked automatically.");
       validation.setSuccess(false);
+      validation.setMessage("Review Required.");
     } else if (cmdeReviewCustNme) {
       engineData.addNegativeCheckStatus("_indCheckFailed", "Updates to addresses(Customer Name) cannot be checked automatically.");
       validation.setSuccess(false);
