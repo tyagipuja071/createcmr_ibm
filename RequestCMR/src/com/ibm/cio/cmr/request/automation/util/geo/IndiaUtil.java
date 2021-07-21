@@ -252,7 +252,6 @@ public class IndiaUtil extends AutomationUtil {
                 checkDetails.append("Supporting documentation is provided by the requester as attachment for " + addrType).append("\n");
               } else {
                 checkDetails.append("\nNo supporting documentation is provided by the requester for " + addrType + " address.");
-                output.setDetails(checkDetails.toString());
               }
             } else {
               checkDetails.append("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
