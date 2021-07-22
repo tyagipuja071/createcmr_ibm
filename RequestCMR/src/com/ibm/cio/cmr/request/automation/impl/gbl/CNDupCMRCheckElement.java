@@ -1115,7 +1115,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
             CompanyRecordModel searchModelFindCmr = new CompanyRecordModel();
             searchModelFindCmr.setIssuingCntry(data.getCmrIssuingCntry());
-            searchModelFindCmr.setName(soldTo.getCustNm1() + (soldTo.getCustNm2() != null ? soldTo.getCustNm2() : ""));
+            searchModelFindCmr.setName(soldTo.getCustNm1() + (soldTo.getCustNm2() != null ? " " + soldTo.getCustNm2() : ""));
             findCMRResult = searchFindCMR(searchModelFindCmr);
             if (findCMRResult != null && findCMRResult.getItems() != null && !findCMRResult.getItems().isEmpty()) {
               ceidMatched = true;
@@ -1636,7 +1636,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
             // req
             CompanyRecordModel searchModelFindCmr = new CompanyRecordModel();
             searchModelFindCmr.setIssuingCntry(data.getCmrIssuingCntry());
-            searchModelFindCmr.setName(soldTo.getCustNm1() + (soldTo.getCustNm2() != null ? soldTo.getCustNm2() : ""));
+            searchModelFindCmr.setName(soldTo.getCustNm1() + (soldTo.getCustNm2() != null ? " " + soldTo.getCustNm2() : ""));
             findCMRResult = searchFindCMR(searchModelFindCmr);
             if (findCMRResult != null && findCMRResult.getItems() != null && !findCMRResult.getItems().isEmpty()) {
               ceidMatched = true;
@@ -1683,7 +1683,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
           CompanyRecordModel searchModelFindCmr = new CompanyRecordModel();
           searchModelFindCmr.setIssuingCntry(data.getCmrIssuingCntry());
-          searchModelFindCmr.setName(soldTo.getCustNm1() + (soldTo.getCustNm2() != null ? soldTo.getCustNm2() : ""));
+          searchModelFindCmr.setName(soldTo.getCustNm1() + (soldTo.getCustNm2() != null ? " " + soldTo.getCustNm2() : ""));
           searchModelFindCmr.setStreetAddress1(soldTo.getAddrTxt());
           searchModelFindCmr.setStreetAddress2(soldTo.getAddrTxt2());
           findCMRResult = searchFindCMR(searchModelFindCmr);
@@ -1730,7 +1730,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
           CompanyRecordModel searchModel = new CompanyRecordModel();
           searchModel.setIssuingCntry(data.getCmrIssuingCntry());
-          searchModel.setName(soldTo.getCustNm1() + (soldTo.getCustNm2() != null ? soldTo.getCustNm2() : ""));
+          searchModel.setName(soldTo.getCustNm1() + (soldTo.getCustNm2() != null ? " " + soldTo.getCustNm2() : ""));
           searchModel.setCountryCd(soldTo.getLandCntry());
           findCMRResult = searchFindCMR(searchModel);
           if (findCMRResult != null && findCMRResult.getItems() != null && !findCMRResult.getItems().isEmpty()) {
