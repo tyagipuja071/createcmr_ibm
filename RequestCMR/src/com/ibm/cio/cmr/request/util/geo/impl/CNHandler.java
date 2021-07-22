@@ -516,9 +516,9 @@ public class CNHandler extends GEOHandler {
           GeoContactInfo geoContactInfo = new GeoContactInfo();
           GeoContactInfoPK ePk = new GeoContactInfoPK();
           int contactId = 1;
-          geoContactInfo.setContactPhone(sResult[0].toString());
-          geoContactInfo.setContactFunc(sResult[1].toString());
-          geoContactInfo.setContactName(sResult[2].toString());
+          geoContactInfo.setContactPhone(sResult[0] != null ? sResult[0].toString() : "");
+          geoContactInfo.setContactFunc(sResult[1] != null ? sResult[1].toString() : "");
+          geoContactInfo.setContactName(sResult[2] != null ? sResult[2].toString() : "");
           geoContactInfo.setContactType(addr.getId().getAddrType());
           geoContactInfo.setContactSeqNum(addr.getId().getAddrSeq());
           geoContactInfo.setCreateById(admin.getRequesterId());
