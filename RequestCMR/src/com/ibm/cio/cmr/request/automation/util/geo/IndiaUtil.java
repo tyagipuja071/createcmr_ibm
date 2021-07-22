@@ -303,6 +303,13 @@ public class IndiaUtil extends AutomationUtil {
       case "GST#":
         // For GST update, Match with gst api
         boolean matchesgGST = false;
+
+        if (StringUtils.isBlank(change.getOldData()) && !(change.getNewData().equals(change.getOldData()))) {
+          admin.setScenarioVerifiedIndc("Y");
+        } else {
+          admin.setScenarioVerifiedIndc("N");
+        }
+
         if (!StringUtils.isBlank(change.getNewData()) && !(change.getNewData().equals(change.getOldData()))) {
           // check against gST
           matchesgGST = getGstMatches(data.getId().getReqId(), soldTo, data.getVat());

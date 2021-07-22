@@ -5,6 +5,7 @@ var _isicHandlerGCG = null;
 var _clusterHandlerGCG = null;
 var _vatExemptHandler = null;
 
+// handlers for AP
 function addHandlersForAP() {
   if (_isicHandlerAP == null) {
     _isicHandlerAP = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
