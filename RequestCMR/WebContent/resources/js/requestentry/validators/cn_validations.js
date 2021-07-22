@@ -690,11 +690,11 @@ function hideContactInfoFields() {
   var addrType = FormManager.getActualValue('addrType');
 
   if (addrType != '' && addrType == 'ZS01') {
-    FormManager.hide('CustomerCntPhone2', 'cnCustContPhone2');
+    // FormManager.hide('CustomerCntPhone2', 'cnCustContPhone2');
     FormManager.show('CustomerCntJobTitle', 'cnCustContJobTitle');
     FormManager.show('ChinaCustomerCntName', 'cnCustContNm');
   } else {
-    FormManager.hide('CustomerCntPhone2', 'cnCustContPhone2');
+    // FormManager.hide('CustomerCntPhone2', 'cnCustContPhone2');
     FormManager.show('CustomerCntJobTitle', 'cnCustContJobTitle');
     FormManager.show('ChinaCustomerCntName', 'cnCustContNm');
 
@@ -718,11 +718,11 @@ function autoSetAddrFieldsForCN() {
 
   if (cmr.addressMode == 'updateAddress') {
     if (FormManager.getActualValue('addrType') == 'ZS01') {
-      FormManager.hide('CustomerCntPhone2', 'cnCustContPhone2');
+      // FormManager.hide('CustomerCntPhone2', 'cnCustContPhone2');
       FormManager.show('CustomerCntJobTitle', 'cnCustContJobTitle');
       FormManager.show('ChinaCustomerCntName', 'cnCustContNm');
     } else {
-      FormManager.hide('CustomerCntPhone2', 'cnCustContPhone2');
+      // FormManager.hide('CustomerCntPhone2', 'cnCustContPhone2');
       FormManager.show('CustomerCntJobTitle', 'cnCustContJobTitle');
       FormManager.show('ChinaCustomerCntName', 'cnCustContNm');
 

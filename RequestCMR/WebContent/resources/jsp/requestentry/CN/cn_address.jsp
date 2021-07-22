@@ -313,6 +313,7 @@
 
 
 <cmr:row>
+ <%-- 
  <cmr:column span="2" containerForField="CustomerCntPhone2">
     <p>
       <cmr:label fieldId="cnCustContPhone2">
@@ -322,6 +323,7 @@
       <cmr:field fieldId="CustomerCntPhone2" id="cnCustContPhone2" path="cnCustContPhone2" />
     </p>
   </cmr:column>
+  --%>
   <cmr:column span="2" containerForField="CustomerCntJobTitle">
     <p>
       <cmr:label fieldId="cnCustContJobTitle">
