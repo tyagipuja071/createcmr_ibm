@@ -389,6 +389,12 @@ function restrictNonSoldToAddress(cntry, addressMode, saving, finalSave, force) 
 function onSavingAddress(cntry, addressMode, saving, finalSave, force) {
   console.log(">>>> onSavingAddress ");
   var reqType = null;
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType == 'U' && FormManager.getActualValue('addrType') == 'ZS01') {
+    FormManager.readOnly('landCntry');
+  } else {
+    FormManager.enable('landCntry');
+  }
   if (typeof (_pagemodel) != 'undefined') {
     reqType = FormManager.getActualValue('reqType');
   }

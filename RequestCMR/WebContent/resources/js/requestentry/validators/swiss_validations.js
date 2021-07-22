@@ -1259,6 +1259,12 @@ function addLandedCountryHandler(cntry, addressMode, saving, finalSave) {
       FilteringDropdown['val_landCntry'] = null;
     }
   }
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType == 'U' && FormManager.getActualValue('addrType') == 'ZS01') {
+    FormManager.readOnly('landCntry');
+  } else {
+    FormManager.enable('landCntry');
+  }
 }
 
 function canRemoveAddress(value, rowIndex, grid) {
