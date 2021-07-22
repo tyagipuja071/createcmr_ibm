@@ -76,6 +76,8 @@ public class ATMassProcessMultiLegacyService extends MultiThreadedBatchService<L
             || CmrConstants.RDC_STATUS_NOT_COMPLETED.equalsIgnoreCase(admin.getRdcProcessingStatus())) {
           admin.setReqStatus("PPN");
           admin.setProcessedFlag("E"); // set request status to error.
+          RequestUtils.clearClaimDetails(admin);
+          admin.setLockInd("N");
 
           if (StringUtils.isEmpty(histMessage)) {
             histMessage = "Sending back to processor due to error on RDC processing";

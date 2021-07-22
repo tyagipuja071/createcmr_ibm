@@ -98,6 +98,8 @@ public class IERPMassProcessMultiService extends MultiThreadedBatchService<Long>
             || CmrConstants.RDC_STATUS_NOT_COMPLETED.equalsIgnoreCase(admin.getRdcProcessingStatus())) {
           admin.setReqStatus("PPN");
           admin.setProcessedFlag("E"); // set request status to error.
+          RequestUtils.clearClaimDetails(admin);
+          admin.setLockInd("N");
           createHistory(entityManager, "Sending back to processor due to error on RDC processing", "PPN", "RDC Processing", admin.getId().getReqId());
         } else if ((CmrConstants.RDC_STATUS_COMPLETED.equalsIgnoreCase(admin.getRdcProcessingStatus())
             || CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equalsIgnoreCase(admin.getRdcProcessingStatus()))

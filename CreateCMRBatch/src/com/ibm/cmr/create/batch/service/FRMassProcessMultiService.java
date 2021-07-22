@@ -220,10 +220,14 @@ public class FRMassProcessMultiService extends MultiThreadedBatchService<Long> {
         if (rdcProcessStatusMsgs.contains(CmrConstants.RDC_STATUS_NOT_COMPLETED)) {
           admin.setRdcProcessingStatus(CmrConstants.RDC_STATUS_NOT_COMPLETED);
           admin.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
+          RequestUtils.clearClaimDetails(admin);
+          admin.setLockInd("N");
         } else if (rdcProcessStatusMsgs.contains(CmrConstants.RDC_STATUS_ABORTED)) {
           admin.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
           admin.setRdcProcessingStatus(
               processingStatus.equals(CmrConstants.RDC_STATUS_ABORTED) ? CmrConstants.RDC_STATUS_NOT_COMPLETED : CmrConstants.RDC_STATUS_ABORTED);
+          RequestUtils.clearClaimDetails(admin);
+          admin.setLockInd("N");
         } else if (rdcProcessStatusMsgs.contains(CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS)) {
           admin.setRdcProcessingStatus(CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS);
         } else {
@@ -331,6 +335,8 @@ public class FRMassProcessMultiService extends MultiThreadedBatchService<Long> {
         if (CmrConstants.RDC_STATUS_ABORTED.equalsIgnoreCase(admin.getRdcProcessingStatus())
             || CmrConstants.RDC_STATUS_NOT_COMPLETED.equalsIgnoreCase(admin.getRdcProcessingStatus())) {
           admin.setReqStatus("PPN");
+          RequestUtils.clearClaimDetails(admin);
+          admin.setLockInd("N");
           admin.setProcessedFlag("E"); // set request status to error.
           createHistory(entityManager, "Sending back to processor due to error on RDC processing", "PPN", "RDC Processing", admin.getId().getReqId());
           LOG.debug("Sending back to processor due to error on RDC processing , request status=" + admin.getReqStatus());
