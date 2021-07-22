@@ -629,7 +629,7 @@ function setValuesForScenarios() {
         FormManager.readOnly('searchTerm');
         FormManager.resetValidations('isicCd');
       }
-      if (_custSubGrp == 'NRML' || _custSubGrp == 'INTER' || _custSubGrp == 'AQSTN'|| _custSubGrp == 'PRIV' || _custSubGrp == 'EMBSA' || _custSubGrp == 'CROSS') {
+      if (_custSubGrp == 'NRML' || _custSubGrp == 'ECOSY' || _custSubGrp == 'INTER' || _custSubGrp == 'AQSTN'|| _custSubGrp == 'PRIV' || _custSubGrp == 'EMBSA' || _custSubGrp == 'CROSS') {
         FormManager.hide('PPSCEID', 'ppsceid');
         FormManager.hide('MembLevel', 'memLvl');
         FormManager.hide('BPRelationType', 'bpRelType');
@@ -647,7 +647,7 @@ function setValuesForScenarios() {
     }
 
     if (_pagemodel.userRole.toUpperCase() == "PROCESSOR") {
-      if (_custSubGrp == 'NRML' || _custSubGrp == 'AQSTN'|| _custSubGrp == 'PRIV' || _custSubGrp == 'EMBSA' || _custSubGrp == 'CROSS' || _custSubGrp == 'MRKT' || _custSubGrp == 'BLUMX') {
+      if (_custSubGrp == 'NRML' || _custSubGrp == 'ECOSY' || _custSubGrp == 'AQSTN'|| _custSubGrp == 'PRIV' || _custSubGrp == 'EMBSA' || _custSubGrp == 'CROSS' || _custSubGrp == 'MRKT' || _custSubGrp == 'BLUMX') {
         FormManager.setValue('custClass', '11');
         FormManager.readOnly('custClass');
       }
@@ -655,7 +655,7 @@ function setValuesForScenarios() {
         FormManager.setValue('custClass', '45');
         FormManager.readOnly('custClass');
       }
-      if (_custSubGrp == 'NRML' || _custSubGrp == 'BUSPR' || _custSubGrp == 'INTER' || _custSubGrp == 'EMBSA' || _custSubGrp == 'BLUMX' || _custSubGrp == 'MRKT') {
+      if (_custSubGrp == 'NRML' || _custSubGrp == 'ECOSY' || _custSubGrp == 'BUSPR' || _custSubGrp == 'INTER' || _custSubGrp == 'EMBSA' || _custSubGrp == 'BLUMX' || _custSubGrp == 'MRKT') {
         FormManager.setValue('cnInterAddrKey', '6');
         FormManager.addValidator('cnInterAddrKey', Validators.REQUIRED, [ 'InterAddrKey' ], '');
         FormManager.readOnly('cnInterAddrKey');
@@ -1022,7 +1022,7 @@ function addContactInfoValidator() {
     return {
       validate : function() {
         var custSubType = FormManager.getActualValue('custSubGrp');
-        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0 && FormManager.getActualValue('reqType') == 'C' && (custSubType == 'EMBSA' || custSubType == 'NRML')) {
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0 && FormManager.getActualValue('reqType') == 'C' && (custSubType == 'EMBSA' || custSubType == 'NRML' || _custSubGrp == 'ECOSY')) {
           var record = null;
           var type = null;
 
@@ -1115,7 +1115,7 @@ function addValidationForParentCompanyNo() {
   // var parentCompanyNo = FormManager.getActualValue('dealerNo');
   var custSubType = FormManager.getActualValue('custSubGrp');
   var isuCd = FormManager.getActualValue('isuCd');
-  if (custSubType == 'NRML') {
+  if (custSubType == 'NRML'  || custSubGrp == 'ECOSY') {
     if (isuCd != "32" && (false == FormManager.getField('govType').checked)) {
       FormManager.addValidator('dealerNo', Validators.REQUIRED, [ 'You can input"000000" when there is not existing one. Parent Company No' ], 'MAIN_IBM_TAB');
     } else {
