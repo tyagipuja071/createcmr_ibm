@@ -582,6 +582,7 @@ function lockLandCntry() {
   var custType = FormManager.getActualValue('custGrp');
   var custSubType = FormManager.getActualValue('custSubGrp');
   var addrType = FormManager.getActualValue('addrType');
+  var reqType = FormManager.getActualValue('reqType');
   if (addrType == 'ZP02') {
     /* Defect : 1590750 */
     // FormManager.disable('landCntry');
@@ -598,6 +599,11 @@ function lockLandCntry() {
     if (CEE_INCL.has(cntry)) {
       FormManager.setValue('landCntry', FormManager.getActualValue('defaultLandedCountry'));
     }
+    FormManager.readOnly('landCntry');
+  } else {
+    FormManager.enable('landCntry');
+  }
+  if (reqType == 'U' && FormManager.getActualValue('addrType') == 'ZS01') {
     FormManager.readOnly('landCntry');
   } else {
     FormManager.enable('landCntry');
@@ -3753,7 +3759,13 @@ function toggleLocalCountryName(cntry, addressMode, details) {
  * country name text box
  */
 function toggleLocalCountryNameOnOpen(cntry, addressMode, saving, afterValidate) {
+  var reqType = FormManager.getActualValue('reqType');
   if (cntry == '618') {
+    if (reqType == 'U' && FormManager.getActualValue('addrType') == 'ZS01') {
+      FormManager.readOnly('landCntry');
+    } else {
+      FormManager.enable('landCntry');
+    }
     return;
   }
   if (!saving) {

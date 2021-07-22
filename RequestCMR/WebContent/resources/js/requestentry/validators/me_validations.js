@@ -634,6 +634,7 @@ function lockLandCntry() {
   var custType = FormManager.getActualValue('custGrp');
   var custSubType = FormManager.getActualValue('custSubGrp');
   var addrType = FormManager.getActualValue('addrType');
+  var reqType = FormManager.getActualValue('reqType')
   if (addrType == 'ZP02') {
     /* Defect : 1590750 */
     // FormManager.disable('landCntry');
@@ -650,6 +651,11 @@ function lockLandCntry() {
     if (ME_INCL.has(cntry)) {
       FormManager.setValue('landCntry', FormManager.getActualValue('defaultLandedCountry'));
     }
+    FormManager.readOnly('landCntry');
+  } else {
+    FormManager.enable('landCntry');
+  }
+  if (reqType == 'U' && FormManager.getActualValue('addrType') == 'ZS01') {
     FormManager.readOnly('landCntry');
   } else {
     FormManager.enable('landCntry');

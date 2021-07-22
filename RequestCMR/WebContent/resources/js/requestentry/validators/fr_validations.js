@@ -2450,6 +2450,7 @@ function addLengthValidatorForSIRET() {
 var _addrTypeHandler = [];
 
 function disableLandCntry() {
+  var reqType = FormManager.getActualValue('reqType');
 
   var custType = FormManager.getActualValue('custGrp');
 
@@ -2468,6 +2469,11 @@ function disableLandCntry() {
   }
 
   if (custType == 'LOCAL' && FormManager.getActualValue('addrType') == 'ZS01') {
+    FormManager.readOnly('landCntry');
+  } else {
+    FormManager.enable('landCntry');
+  }
+  if (reqType == 'U' && FormManager.getActualValue('addrType') == 'ZS01') {
     FormManager.readOnly('landCntry');
   } else {
     FormManager.enable('landCntry');
