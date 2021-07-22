@@ -187,14 +187,10 @@ public class IndiaUtil extends AutomationUtil {
 
                 List<UpdatedNameAddrModel> addrChanges = changes.getAddressChanges(addr.getId().getAddrType(), addr.getId().getAddrSeq());
                 for (UpdatedNameAddrModel change : addrChanges) {
-                  if ("Customer Name".equals(change.getDataField()) && addrChanges.size() == 1) {
+                  if ("Customer Name".equals(change.getDataField())) {
                     cmdeReviewCustNme = true;
                     checkDetails.append("Update of Customer Name for " + addrType + "(" + addr.getId().getAddrSeq() + ") needs review.\n");
-                    break;
                   }
-                }
-                if (cmdeReviewCustNme) {
-                  continue; // avoid further checks
                 }
 
                 List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addressToChk, false);
