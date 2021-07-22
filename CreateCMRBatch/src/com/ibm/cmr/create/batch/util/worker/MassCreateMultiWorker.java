@@ -5,6 +5,7 @@ package com.ibm.cmr.create.batch.util.worker;
 
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.MassCreate;
+import com.ibm.cmr.create.batch.service.MultiThreadedBatchService;
 import com.ibm.cmr.create.batch.util.MultiThreadedWorker;
 
 /**
@@ -15,8 +16,8 @@ import com.ibm.cmr.create.batch.util.MultiThreadedWorker;
  */
 public abstract class MassCreateMultiWorker extends MultiThreadedWorker<MassCreate> {
 
-  public MassCreateMultiWorker(Admin parentAdmin, MassCreate parentEntity) {
-    super(parentAdmin, parentEntity);
+  public MassCreateMultiWorker(MultiThreadedBatchService<?> parentService, Admin parentAdmin, MassCreate parentEntity) {
+    super(parentService, parentAdmin, parentEntity);
 
   }
 

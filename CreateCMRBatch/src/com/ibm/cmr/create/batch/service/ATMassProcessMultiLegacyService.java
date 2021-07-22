@@ -76,6 +76,8 @@ public class ATMassProcessMultiLegacyService extends MultiThreadedBatchService<L
             || CmrConstants.RDC_STATUS_NOT_COMPLETED.equalsIgnoreCase(admin.getRdcProcessingStatus())) {
           admin.setReqStatus("PPN");
           admin.setProcessedFlag("E"); // set request status to error.
+          RequestUtils.clearClaimDetails(admin);
+          admin.setLockInd("N");
 
           if (StringUtils.isEmpty(histMessage)) {
             histMessage = "Sending back to processor due to error on RDC processing";
@@ -178,7 +180,7 @@ public class ATMassProcessMultiLegacyService extends MultiThreadedBatchService<L
 
           ScheduledExecutorService executor = Executors.newScheduledThreadPool(threads, new WorkerThreadFactory(getThreadName() + reqId));
           for (MassUpdt sMassUpdt : results) {
-            AustriaMassUpdtMultiWorker worker = new AustriaMassUpdtMultiWorker(admin, sMassUpdt);
+            AustriaMassUpdtMultiWorker worker = new AustriaMassUpdtMultiWorker(this, admin, sMassUpdt);
             executor.schedule(worker, 5, TimeUnit.SECONDS);
             workers.add(worker);
           }

@@ -16,6 +16,7 @@ import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 import com.ibm.cio.cmr.request.util.JpaManager;
+import com.ibm.cmr.create.batch.service.MultiThreadedBatchService;
 
 /**
  * Class to handle second-level multi-threading<br>
@@ -40,7 +41,10 @@ public abstract class MultiThreadedWorker<T> implements Runnable {
   protected Admin parentAdmin;
   protected T parentRow;
 
-  public MultiThreadedWorker(Admin parentAdmin, T parentEntity) {
+  protected MultiThreadedBatchService<?> parentService;
+
+  public MultiThreadedWorker(MultiThreadedBatchService<?> parentService, Admin parentAdmin, T parentEntity) {
+    this.parentService = parentService;
     this.parentAdmin = parentAdmin;
     this.parentRow = parentEntity;
   }
@@ -69,6 +73,7 @@ public abstract class MultiThreadedWorker<T> implements Runnable {
       if (transaction != null && transaction.isActive() && !transaction.getRollbackOnly()) {
         LOG.debug("Committing working transaction...");
         transaction.commit();
+        this.parentService.keepAlive();
       }
 
     } catch (Throwable e) {

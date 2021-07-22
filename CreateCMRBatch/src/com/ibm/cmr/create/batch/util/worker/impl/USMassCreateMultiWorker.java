@@ -19,6 +19,7 @@ import com.ibm.cio.cmr.request.entity.MassCreateAddr;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cmr.create.batch.model.CmrServiceInput;
+import com.ibm.cmr.create.batch.service.MultiThreadedBatchService;
 import com.ibm.cmr.create.batch.util.DebugUtil;
 import com.ibm.cmr.create.batch.util.worker.MassCreateMultiWorker;
 import com.ibm.cmr.services.client.CmrServicesFactory;
@@ -45,8 +46,9 @@ public class USMassCreateMultiWorker extends MassCreateMultiWorker {
    * @param parentAdmin
    * @param parentEntity
    */
-  public USMassCreateMultiWorker(Admin parentAdmin, MassCreate parentEntity, CmrServiceInput input, Map<String, List<String>> cmrNoSapNoMap) {
-    super(parentAdmin, parentEntity);
+  public USMassCreateMultiWorker(MultiThreadedBatchService<?> parentService, Admin parentAdmin, MassCreate parentEntity, CmrServiceInput input,
+      Map<String, List<String>> cmrNoSapNoMap) {
+    super(parentService, parentAdmin, parentEntity);
     this.record = parentEntity;
     this.input = input;
     this.iterationId = parentEntity.getId().getIterationId();

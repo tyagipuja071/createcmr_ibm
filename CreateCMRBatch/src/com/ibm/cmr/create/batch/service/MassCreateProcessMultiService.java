@@ -339,7 +339,7 @@ public class MassCreateProcessMultiService extends MultiThreadedBatchService<Str
     ExecutorService executor = Executors.newFixedThreadPool(threads, new WorkerThreadFactory("MCWorker-" + reqId));
     for (CompoundEntity entity : resultsMain) {
       mass_create = entity.getEntity(MassCreate.class);
-      USMassCreateMultiWorker worker = new USMassCreateMultiWorker(admin, mass_create, cmrServiceInput, cmrNoSapNoMap);
+      USMassCreateMultiWorker worker = new USMassCreateMultiWorker(this, admin, mass_create, cmrServiceInput, cmrNoSapNoMap);
       executor.execute(worker);
       workers.add(worker);
     }

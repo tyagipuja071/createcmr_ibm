@@ -304,10 +304,17 @@ public abstract class BaseBatchService extends BaseSimpleService<Boolean> {
       transaction.begin();
     }
 
+    keepAlive();
+  }
+
+  /**
+   * Keeps the terminator thread running
+   */
+  public void keepAlive() {
     if (this.terminator != null) {
       this.terminator.keepAlive();
+      LOG.debug("Batch termination counter reset..");
     }
-
   }
 
   /**
