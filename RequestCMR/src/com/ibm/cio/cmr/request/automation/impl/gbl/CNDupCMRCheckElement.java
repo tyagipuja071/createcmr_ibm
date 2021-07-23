@@ -373,6 +373,235 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
           break;
 
+        case "ECOSY": // SCENARIO_LOCAL_ECOSY
+
+          // logic:
+          // a) if the return result has the same Chinese name, then it is a
+          // duplicate request
+          // b) check China API with single byte string value
+          // c) check findcmr twice with single byte and double byte value, if
+          // they are not equals
+
+          iAddr = handler.getIntlAddrById(soldTo, entityManager);
+          if (iAddr != null) {
+
+            try {
+
+              // 1, Check CN API
+              if (cnCreditCd != null && cnCreditCd.length() > 0) {
+                searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
+                searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
+                searchModelCNAPI.setTaxCd1(cnCreditCd);
+                resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "TAXCD");
+              } else {
+                cnNameSingleByte = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
+                cnNameSingleByte = convert2SingleByte(cnNameSingleByte);
+                searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
+                searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
+                searchModelCNAPI.setAltName(cnNameSingleByte);
+                resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "ALTNAME");
+              }
+
+              if (resultCNApi != null && resultCNApi.isSuccess()) {
+                cnNameSingleByte = resultCNApi.getRecord().getName();
+                cnHistoryNameSingleByte = resultCNApi.getRecord().getHistoryNames();
+                cnAddrSingleByte = resultCNApi.getRecord().getRegLocation();
+
+                cnNameDoubleByte = convert2DoubleByte(cnNameSingleByte);
+                cnHistoryNameDoubleByte = convert2DoubleByte(cnHistoryNameSingleByte);
+                cnAddrDoubleByte = convert2DoubleByte(cnAddrSingleByte);
+
+                try {
+                  // 2, Check FindCMR NON Latin with Chinese name - single byte
+                  CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
+                  searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
+                  searchModelFindCmrCN.setCountryCd(soldTo.getLandCntry());
+                  searchModelFindCmrCN.setName(cnNameSingleByte);
+                  resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
+
+                  if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
+                    for (int i = 0; i < resultFindCmrCN.size(); i++) {
+                      nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
+                      if (nameFindCmrCnResult != null && cnNameSingleByte.equals(nameFindCmrCnResult)) {
+
+                        nameMatched = true;
+
+                        if (nameMatched) {
+                          matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
+                          cmrData = resultFindCmrCN.get(i);
+                          details.append("\n");
+                          logDuplicateCMR(details, cmrData);
+                        }
+                      }
+                    }
+                  }
+                } catch (Exception e) {
+                  e.printStackTrace();
+                  result.setDetails("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameSingleByte);
+                  engineData.addRejectionComment("OTH", "Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameSingleByte, "",
+                      "");
+                  result.setOnError(true);
+                  result.setResults("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameSingleByte);
+                }
+
+                if (cnNameDoubleByte != null && !cnNameDoubleByte.equals(cnNameSingleByte)) {
+                  // 3, Check FindCMR NON Latin with Chinese name - double byte
+                  try {
+                    CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
+                    searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
+                    searchModelFindCmrCN.setCountryCd(soldTo.getLandCntry());
+                    searchModelFindCmrCN.setName(cnNameDoubleByte);
+                    resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
+
+                    if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
+                      for (int i = 0; i < resultFindCmrCN.size(); i++) {
+                        nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
+                        if (nameFindCmrCnResult != null && cnNameDoubleByte.equals(nameFindCmrCnResult)) {
+
+                          nameMatched = true;
+
+                          if (nameMatched) {
+                            matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
+                            cmrData = resultFindCmrCN.get(i);
+                            details.append("\n");
+                            logDuplicateCMR(details, cmrData);
+                          }
+                        }
+                      }
+                    }
+                  } catch (Exception e) {
+                    e.printStackTrace();
+                    result.setDetails("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameDoubleByte);
+                    engineData.addRejectionComment("OTH", "Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameDoubleByte,
+                        "", "");
+                    result.setOnError(true);
+                    result.setResults("Error on checking findCMR on Duplicate CMR Check of Chinese, name: " + cnNameDoubleByte);
+                  }
+                }
+
+                // 4, Check FindCMR Non Latin with historical Chinese name -
+                // single byte
+                if (cnHistoryNameSingleByte != null && !"".equals(cnHistoryNameSingleByte)) {
+                  List<String> cnHistoryNameList = Arrays.asList(cnHistoryNameSingleByte.split(";"));
+                  CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
+                  searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
+                  try {
+                    for (String historyName : cnHistoryNameList) {
+                      searchModelFindCmrCN.setName(historyName);
+                      resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
+                      if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
+                        for (int i = 0; i < resultFindCmrCN.size(); i++) {
+                          nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
+                          if (nameFindCmrCnResult != null && nameFindCmrCnResult.equals(historyName)) {
+
+                            historyNmMatched = true;
+
+                            if (historyNmMatched) {
+                              matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
+                              cmrData = resultFindCmrCN.get(i);
+                              details.append("\n");
+                              logDuplicateCMR(details, cmrData);
+                            }
+                          }
+                        }
+                      }
+                    }
+
+                  } catch (Exception e) {
+                    e.printStackTrace();
+                    result
+                        .setDetails("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameSingleByte);
+                    engineData.addRejectionComment("OTH",
+                        "Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameSingleByte, "", "");
+                    result.setOnError(true);
+                    result
+                        .setResults("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameSingleByte);
+                  }
+
+                }
+
+                // 5, Check FindCMR Non Latin with historical Chinese name -
+                // double byte
+                if (cnHistoryNameDoubleByte != null && !"".equals(cnHistoryNameDoubleByte)
+                    && !cnHistoryNameDoubleByte.equals(cnHistoryNameSingleByte)) {
+                  List<String> cnHistoryNameList = Arrays.asList(cnHistoryNameDoubleByte.split(";"));
+                  CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
+                  searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
+                  try {
+                    for (String historyName : cnHistoryNameList) {
+                      searchModelFindCmrCN.setName(historyName);
+                      resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
+                      if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
+                        for (int i = 0; i < resultFindCmrCN.size(); i++) {
+                          nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
+                          if (nameFindCmrCnResult != null && nameFindCmrCnResult.equals(historyName)) {
+
+                            historyNmMatched = true;
+
+                            if (historyNmMatched) {
+                              matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
+                              cmrData = resultFindCmrCN.get(i);
+                              details.append("\n");
+                              logDuplicateCMR(details, cmrData);
+                            }
+                          }
+                        }
+                      }
+                    }
+
+                  } catch (Exception e) {
+                    e.printStackTrace();
+                    result
+                        .setDetails("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameDoubleByte);
+                    engineData.addRejectionComment("OTH",
+                        "Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameDoubleByte, "", "");
+                    result.setOnError(true);
+                    result
+                        .setResults("Error on getting findCMR data when Duplicate CMR Check of historical Chinese, name: " + cnHistoryNameDoubleByte);
+                  }
+
+                }
+
+                // output
+                if (nameMatched || historyNmMatched) {
+                  result.setResults("Matches Found");
+                  result.setResults("Found Duplicate CMRs.");
+                  engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR", StringUtils.join(matchedCMRs, ", "), "");
+                  // to allow overides later
+                  requestData.getAdmin().setMatchIndc("C");
+                  result.setOnError(true);
+                  result.setProcessOutput(output);
+                  result.setDetails(details.toString().trim());
+                  sendManagerEmail(entityManager, admin, data, soldTo, details);
+                } else if (!nameMatched && !historyNmMatched) {
+                  result.setDetails("No Duplicate CMRs were found.");
+                  result.setResults("No Matches");
+                  result.setOnError(false);
+                }
+              } else if (resultCNApi != null && !resultCNApi.isSuccess()) {
+                result.setDetails("Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage());
+                engineData.addRejectionComment("OTH",
+                    "Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage(), "", "");
+                result.setOnError(true);
+                result.setResults("Error on getting China API Data when Duplicate CMR Check of Chinese - " + resultCNApi.getMessage());
+              }
+
+            } catch (Exception e) {
+              e.printStackTrace();
+              result.setDetails("Error on getting China API Data when Duplicate CMR Check of Chinese.");
+              engineData.addRejectionComment("OTH", "Error on getting China API Data when Duplicate CMR Check of Chinese.", "", "");
+              result.setOnError(true);
+              result.setResults("Error on getting China API Data when Duplicate CMR Check of Chinese.");
+            }
+          } else {
+            result.setDetails("Error on getting Chinese name when Duplicate CMR Check.");
+            engineData.addRejectionComment("OTH", "Error on getting Chinese name when Duplicate CMR Check.", "", "");
+            result.setOnError(true);
+            result.setResults("Error on getting Chinese name when Duplicate CMR Check.");
+          }
+
+          break;
+
         case "BUSPR": // SCENARIO_LOCAL_BUSPR
 
           // logic:
