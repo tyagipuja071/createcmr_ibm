@@ -38,6 +38,7 @@ public class ChinaUtil extends AutomationUtil {
   public static final String SCENARIO_LOCAL_BUSPR = "BUSPR";
   public static final String SCENARIO_LOCAL_INTER = "INTER";
   public static final String SCENARIO_LOCAL_PRIV = "PRIV";
+  public static final String SCENARIO_ECOSYTEM_PARNER = "ECOSY";
   // private static final List<String> RELEVANT_ADDRESSES =
   // Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
   // CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO);
@@ -112,6 +113,18 @@ public class ChinaUtil extends AutomationUtil {
       break;
     case SCENARIO_LOCAL_MRKT:
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
+      break;
+    case SCENARIO_ECOSYTEM_PARNER:
+      if ("08036".equals(data.getSearchTerm())) {
+        LOG.debug("Cluster allowed: Cluster=" + data.getSearchTerm() + " Scenario=" + data.getCustSubGrp());
+        result.setOnError(false);
+        details.append("Cluster allowed:Cluster=" + data.getSearchTerm() + " Scenario=" + data.getCustSubGrp() + " for the request.\n");
+      } else {
+        details
+            .append("Cluster=" + data.getSearchTerm() + " should be default (08036)  for Scenario=" + data.getCustSubGrp() + " for the request.\n");
+        engineData.addRejectionComment("OTH", "Cluster=" + data.getSearchTerm() + " should default (08036)  for this scenario", "", "");
+        result.setOnError(true);
+      }
       break;
     case SCENARIO_LOCAL_BUSPR:
       if ("04182".equals(data.getSearchTerm())) {
