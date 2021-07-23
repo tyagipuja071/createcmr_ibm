@@ -58,6 +58,7 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
     String SCENARIO_LOCAL_BUSPR = "BUSPR";
     String SCENARIO_LOCAL_INTER = "INTER";
     String SCENARIO_LOCAL_PRIV = "PRIV";
+    String SCENARIO_LOCAL_ECOSY = "ECOSY";
     boolean ifAQSTNHasCN = false;
 
     CNHandler handler = (CNHandler) RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
@@ -106,7 +107,8 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
 
         if (data.getCustSubGrp() != null && (SCENARIO_LOCAL_NRML.equals(data.getCustSubGrp()) || SCENARIO_LOCAL_EMBSA.equals(data.getCustSubGrp())
             || (SCENARIO_LOCAL_AQSTN.equals(data.getCustSubGrp()) && ifAQSTNHasCN) || SCENARIO_LOCAL_BLUMX.equals(data.getCustSubGrp())
-            || SCENARIO_LOCAL_MRKT.equals(data.getCustSubGrp()) || SCENARIO_LOCAL_BUSPR.equals(data.getCustSubGrp()))) {
+            || SCENARIO_LOCAL_MRKT.equals(data.getCustSubGrp()) || SCENARIO_LOCAL_BUSPR.equals(data.getCustSubGrp())
+            || SCENARIO_LOCAL_ECOSY.equals(data.getCustSubGrp()))) {
           CompanyRecordModel searchModel = new CompanyRecordModel();
           searchModel.setIssuingCntry(data.getCmrIssuingCntry());
           searchModel.setCountryCd(soldTo.getLandCntry());
@@ -202,14 +204,7 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
 
         List<IntlAddr> intlAddrList = new ArrayList<IntlAddr>();
         List<IntlAddrRdc> intlAddrRdcList = new ArrayList<IntlAddrRdc>();
-        //
-        // List<IntlAddr> zi01AddrList = new ArrayList<IntlAddr>();
-        // List<IntlAddrRdc> zi01AddrRdcList = new ArrayList<IntlAddrRdc>();
-        // List<IntlAddr> zp01AddrList = new ArrayList<IntlAddr>();
-        // List<IntlAddrRdc> zp01AddrRdcList = new ArrayList<IntlAddrRdc>();
-        // List<IntlAddr> zd01AddrList = new ArrayList<IntlAddr>();
-        // List<IntlAddrRdc> zd01AddrRdcList = new ArrayList<IntlAddrRdc>();
-        //
+
         intlAddrList = handler.getINTLAddrCountByReqId(entityManager, requestData.getAdmin().getId().getReqId());
         intlAddrRdcList = handler.getINTLAddrRdcByReqId(entityManager, requestData.getAdmin().getId().getReqId());
 
