@@ -3099,7 +3099,7 @@ function addCompanyProofAttachValidation() {
         }
       }
     };
-  })(), 'MAIN_NAME_TAB', 'frmCMR');
+  })(), 'MAIN_ATTACH_TAB', 'frmCMR');
 }
 
 function checkForCompanyProofAttachment(){
