@@ -156,6 +156,8 @@ function addAddressRecordTypeValidator() {
 function afterConfigForUS() {
 
   var reqType = FormManager.getActualValue('reqType');
+  var custGrp = FormManager.getActualValue('custGrp');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
   var role = null;
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
@@ -163,6 +165,9 @@ function afterConfigForUS() {
   if (reqType == 'U' && role == 'Requester') {
     FormManager.enable('isuCd');
     FormManager.enable('clientTier');
+  }
+  if (reqType == 'C' && role == 'Requester' && custGrp =='9' && custSubGrp == 'POA') {
+    FormManager.enable('miscBillCd');
   }
 
   // Enterprise field as mandatory for BP scenario
@@ -369,6 +374,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addCreateByModelValidator, [ SysLoc.USA ], null, true);
   GEOHandler.registerValidator(addAddressRecordTypeValidator, [ SysLoc.USA ], null, true);
   GEOHandler.addAfterConfig(afterConfigForUS, [ SysLoc.USA ]);
+  GEOHandler.addAfterTemplateLoad(afterConfigForUS, [ SysLoc.USA ]);
   GEOHandler.addAfterConfig(initUSTemplateHandler, [ SysLoc.USA ]);
   GEOHandler.addAddrFunction(addUSAddressHandler, [ SysLoc.USA ]);
   GEOHandler.addToggleAddrTypeFunction(toggleAddrTypesForUS, [ SysLoc.USA ]);
