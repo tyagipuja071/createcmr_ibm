@@ -507,6 +507,8 @@ public class CNHandler extends GEOHandler {
         queryKnvK.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
         queryKnvK.setParameter("CMR", cmr);
         queryKnvK.setParameter("KATR6", SystemLocation.CHINA);
+        queryKnvK.setParameter("KTOKD", addr.getId().getAddrType());
+        queryKnvK.setParameter("ZZKV_SEQNO", addr.getPairedAddrSeq());
 
         List<Object[]> results = queryKnvK.getResults();
 
