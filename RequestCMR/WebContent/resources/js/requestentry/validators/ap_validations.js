@@ -3063,51 +3063,43 @@ function addCompanyProofAttachValidation() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
-          var reqType = FormManager.getActualValue('reqType');  
-          var msg = '';
-          if(reqType != 'U'){
+        var reqType = FormManager.getActualValue('reqType');
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount == 0 || reqType == 'C') {
+         return new ValidationResult(null, true);  
+         }
+        
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0 ) {
+          var record = null;
+          var name = null;
+          var count = 0;
+          var updateInd = null;
+                    
+              for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+                record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+                if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+                  record = _allAddressData[i];
+                }
+                name = record.custNm1;
+                updateInd = record.updateInd;
+                              
+                if (typeof (type) == 'object') {
+                  updateInd = updateInd[0];
+                }
+                
+                if((updateInd == 'U' || updateInd == 'N')){
+                  count ++;
+                }
+                
+              }         
+          if (count > 0 &&  checkForCompanyProofAttachment() ) {
+            return new ValidationResult(null, false, 'Company proof is mandatory since address has been updated or added.');
+          } else {
             return new ValidationResult(null, true);
           }
-          var id = FormManager.getActualValue('reqId');
-          var custNmChangedStatus = false;
-          var mailingAddrChangedStatus = false;
-          var newAddrStatus = false;
-          // 1. check for mailing updated address
-             var resultUpdt = cmr.query('GET.CHANGED_INDC_INDIA',{
-               _qall  : 'Y',
-               REQ_ID : id
-             });
-             
-             if(resultUpdt != undefined && resultUpdt.length > 0){
-               mailingAddrChangedStatus = true;
-             }
-             
-             if (mailingAddrChangedStatus && checkForCompanyProofAttachment()) {
-               msg = 'Mailing address update';
-             }
-             
-           // 2. check for any new address
-             var resultNew = cmr.query('GET.IMPORT_INDC_INDIA',{
-               _qall  : 'Y',
-               REQ_ID : id
-             });
-             
-             if(resultNew != undefined && resultNew.length > 0 ){
-               newAddrStatus = true;
-             }
-             
-             if (newAddrStatus && checkForCompanyProofAttachment()) {
-               msg += (msg != '' )? ' / New address addition' : 'New Address addition';
-             }
-             
-             if(msg != null && msg != ''){
-               return new ValidationResult(null, false, 'Company proof attachment is mandatory for '+msg+'.');
-             }
-          
-        return new ValidationResult(null, true);
+        }
       }
     };
-  })(), 'MAIN_ATTACH_TAB', 'frmCMR');
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
 function checkForCompanyProofAttachment(){
@@ -3120,6 +3112,67 @@ function checkForCompanyProofAttachment(){
   }else{
     return false;
   }
+}
+
+// CMR-2830
+function addressNameSimilarValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount == 0) {
+          return new ValidationResult(null, true);
+        }
+        
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+          var record = null;
+          var type = null;
+          var name = null;
+          var name1 = '';
+          var name2 = '';
+          var count = 0;
+          var reqId = FormManager.getActualValue('reqId');
+          var updateInd = null;
+          var qParams = {
+            REQ_ID : reqId,
+            ADDR_TYPE : "ZS01",
+          };
+          var result =  cmr.query('ADDR.GET.CUSTNM1.BY_REQID_ADDRTYP',qParams);
+          var zs01Name = result != undefined ? result.ret1.concat(result.ret2): '';
+              for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+                record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+                if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+                  record = _allAddressData[i];
+                }
+                type = record.addrType;
+                name1 = record.custNm1;
+                name2 = record.custNm2;
+                updateInd = record.updateInd;
+                if (typeof (type) == 'object') {
+                  type = type[0];
+                }
+                if (typeof (type) == 'object') {
+                  name1 = name1[0];
+                }
+                if (typeof (type) == 'object') {
+                  name2 = name2[0];
+                }
+                if (typeof (type) == 'object') {
+                  updateInd = updateInd[0];
+                }
+                name = name1 + name2;
+                if((updateInd == 'U' || updateInd == 'N') && type != 'ZS01' && zs01Name != name){
+                  count ++;
+                }               
+              }         
+          if (count > 0) {
+            return new ValidationResult(null, false, 'All Updated / New address customer name should be similar to Mailing address.');
+          } else {
+            return new ValidationResult(null, true);
+          }
+        }
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
 dojo.addOnLoad(function() {
@@ -3167,6 +3220,7 @@ dojo.addOnLoad(function() {
   // GEOHandler.registerValidator(addMandateCmrNoForSG, [SysLoc.SINGAPORE]);
   GEOHandler.registerValidator(addCmrNoValidator, [ SysLoc.SINGAPORE ]);
  GEOHandler.registerValidator(addCompanyProofAttachValidation, [ SysLoc.INDIA]);
+ GEOHandler.registerValidator(addressNameSimilarValidator, [ SysLoc.INDIA]);
 
   GEOHandler.addAfterConfig(removeStateValidatorForHkMoNZ, [ SysLoc.AUSTRALIA, SysLoc.NEW_ZEALAND ]);
   GEOHandler.addAfterTemplateLoad(removeStateValidatorForHkMoNZ, [ SysLoc.AUSTRALIA, SysLoc.NEW_ZEALAND ]);
