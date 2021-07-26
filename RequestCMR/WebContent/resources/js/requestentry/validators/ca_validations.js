@@ -265,6 +265,27 @@ function toggleCATaxFieldsByProvCd(provCd) {
   }
 }
 
+function setPrefLangByProvCd(addrSeq, provCd) {
+  if (addrSeq != null && addrSeq == '00001' && provCd == 'QC') {
+    FormManager.setValue('custPrefLang', 'F');
+  } else {
+    FormManager.setValue('custPrefLang', 'E');
+  }
+}
+
+function setPrefLangAfterConfig() {
+  var soldToAddr = getAddressByType('ZS01');
+  if (soldToAddr != null && soldToAddr.stateProv != null) {
+    if (soldToAddr.stateProv == 'QC') {
+      FormManager.setValue('custPrefLang', 'F');
+    } else {
+      FormManager.setValue('custPrefLang', 'E');
+    }
+  } else if (soldToAddr == null) {
+    FormManager.setValue('custPrefLang', 'E');
+  }
+}
+
 /**
  * Clear all the CA Tax Fields PST Exempt, PST Exempt Lic No, QST
  * 
@@ -870,8 +891,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addDPLAssessmentValidator, [ SysLoc.CANADA ], GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(addLocationNoValidator, [ SysLoc.CANADA ], null, true);
   GEOHandler.registerValidator(addPhoneNumberValidationCa, [ SysLoc.CANADA ], null, true);
-  // GEOHandler.registerValidator(addPSTExemptValidator, [ SysLoc.CANADA ],
-  // null, true);
   GEOHandler.registerValidator(addNumberOfInvoiceValidator, [ SysLoc.CANADA ], null, true);
   GEOHandler.registerValidator(addProvincePostalCdValidator, [ SysLoc.CANADA ], null, true);
   // NOTE: do not add multiple addAfterConfig calls to avoid confusion, club the
@@ -888,8 +907,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(toggleCATaxFields, SysLoc.CANADA);
   GEOHandler.addAfterTemplateLoad(setDefaultInvoiceCopies, SysLoc.CANADA);
   GEOHandler.addAfterTemplateLoad(addPSTExemptHandler, SysLoc.CANADA);
+  GEOHandler.addAfterTemplateLoad(setPrefLangAfterConfig, SysLoc.CANADA);
   GEOHandler.addAfterTemplateLoad(preTickLatePaymentInd, SysLoc.CANADA);
   GEOHandler.addAfterTemplateLoad(limitDropdownOnScenarioChange, SysLoc.CANADA);
-
   GEOHandler.addToggleAddrTypeFunction(hideObsoleteAddressOption, [ SysLoc.CANADA ]);
 });

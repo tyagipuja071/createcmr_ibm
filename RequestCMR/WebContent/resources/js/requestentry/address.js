@@ -715,6 +715,7 @@ function actualAddToAddressList() {
 
     if (FormManager.getActualValue('cmrIssuingCntry') == '649' && cmr.currentAddressType == 'ZS01' && cmr.currentAddressSeq == '00001') {
       toggleCATaxFieldsByProvCd(FormManager.getActualValue('stateProv'));
+      setPrefLangByProvCd(cmr.currentAddressSeq, FormManager.getActualValue('stateProv'));
     }
   }
   if (FormManager.getActualValue('cmrIssuingCntry') == '631') {
