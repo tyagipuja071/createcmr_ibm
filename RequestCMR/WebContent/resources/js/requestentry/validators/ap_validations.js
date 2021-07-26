@@ -580,12 +580,25 @@ function addAttachmentValidator() {
       validate : function() {
         var reqType = FormManager.getActualValue('reqType');
         var custSubType = FormManager.getActualValue('custSubGrp');
-        var cntryUse = FormManager.getActualValue('cntryUse');
+        var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
         // var docContent = FormManager.getActualValue('docContent');
         if (typeof (_pagemodel) != 'undefined') {
           if (reqType == 'C'
               && (custSubType != 'INTER' && custSubType != 'XINT' && custSubType != 'DUMMY' && custSubType != 'XDUMM' && custSubType != 'BLUMX' && custSubType != 'XBLUM' && custSubType != 'MKTPC'
                   && custSubType != 'XMKTP' && custSubType != 'IGF' && custSubType != 'XIGF')) {
+          if(cmrIssuingCntry == '615' || cmrIssuingCntry == '652'){
+                //For BL and SL check company proof 
+            var id = FormManager.getActualValue('reqId');
+            var ret = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
+              ID : id
+            });   
+            if(ret == null || ret.ret1 == null){
+              return new ValidationResult(null, false, 'Company Proof in Attachment tab is required.');
+            }else {
+              return new ValidationResult(null, true);
+            }
+           }
+            else {                         
             var id = FormManager.getActualValue('reqId');
             var ret = cmr.query('CHECK_TERRITORY_ATTACHMENT', {
               ID : id
@@ -596,7 +609,8 @@ function addAttachmentValidator() {
             } else {
               return new ValidationResult(null, true);
             }
-          } else {
+          }
+         } else {
             return new ValidationResult(null, true);
           }
         }
@@ -604,6 +618,34 @@ function addAttachmentValidator() {
     };
   })(), 'MAIN_ATTACH_TAB', 'frmCMR');
 }
+
+function setAttachmentOnCluster() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqType = FormManager.getActualValue('reqType');
+        var role = FormManager.getActualValue('userRole').toUpperCase();
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        var cluster = FormManager.getActualValue('apCustClusterId');
+        if (reqType == 'C' && role == 'REQUESTER' && (custSubGrp =='NRML'|| custSubGrp =='AQSTN'||custSubGrp =='CROSS'||custSubGrp =='ESOSW') && (cluster == '08033'||cluster == '08034'||cluster == '08035')) {
+        var id = FormManager.getActualValue('reqId');
+        var ret = cmr.query('CHECK_ECSYS_ATTACHMENT', {
+              ID : id
+            });
+        if(ret == null || ret.ret1 == null){
+        return new ValidationResult(null, false, 'Ecosystem AND Technology leader Approval in Attachment tab is required.');
+         }
+        else
+        return new ValidationResult(null, true);
+        }
+        else
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_ATTACH_TAB', 'frmCMR');
+}
+
+
 
 function defaultCMRNumberPrefix() {
 
@@ -3262,6 +3304,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(similarAddrCheckValidator, GEOHandler.AP, null, true);
 
   GEOHandler.registerValidator(addAttachmentValidator, [SysLoc.SRI_LANKA, SysLoc.BANGLADESH, SysLoc.NEPAL], GEOHandler.REQUESTER, false, false);
+  GEOHandler.registerValidator(setAttachmentOnCluster, [ SysLoc.INDIA, SysLoc.SRI_LANKA, SysLoc.BANGLADESH], GEOHandler.REQUESTER, false, false);
+  
   // double creates
   GEOHandler.addAfterConfig(setFieldsForDoubleCreates, [ SysLoc.INDIA, SysLoc.BANGLADESH, SysLoc.SRI_LANKA, SysLoc.VIETNAM, SysLoc.CAMBODIA ]);
   GEOHandler.addAfterTemplateLoad(setFieldsForDoubleCreates, [ SysLoc.INDIA, SysLoc.BANGLADESH, SysLoc.SRI_LANKA, SysLoc.VIETNAM, SysLoc.CAMBODIA ]);
