@@ -265,6 +265,7 @@ public class FindCMRRecordModel implements Serializable, Comparable<FindCMRRecor
   private String cmrNoInvc;
   private String cmrEnggBoGrp;
   private String cmrLtPymntInd;
+  private String cmrCustCreditCode;
 
   public String getCustClass() {
     return custClass;
@@ -2063,6 +2064,14 @@ public class FindCMRRecordModel implements Serializable, Comparable<FindCMRRecor
 
   public void setCmrLtPymntInd(String cmrLtPymntInd) {
     this.cmrLtPymntInd = cmrLtPymntInd;
+  }
+
+  public String getCmrCustCreditCode() {
+    return cmrCustCreditCode;
+  }
+
+  public void setCmrCustCreditCode(String cmrCustCreditCode) {
+    this.cmrCustCreditCode = cmrCustCreditCode;
   }
 
 }
