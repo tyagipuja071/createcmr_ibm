@@ -232,7 +232,7 @@ public class IndiaUtil extends AutomationUtil {
           } else if ("N".equals(addr.getImportInd())) {
             // new address addition
 
-            List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addressToChk, true);
+            List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addressToChk, false);
             boolean matchesDnb = false;
             if (matches != null) {
               // check against D&B
