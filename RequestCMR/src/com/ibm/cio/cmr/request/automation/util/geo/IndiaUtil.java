@@ -187,7 +187,7 @@ public class IndiaUtil extends AutomationUtil {
 
                 List<UpdatedNameAddrModel> addrChanges = changes.getAddressChanges(addr.getId().getAddrType(), addr.getId().getAddrSeq());
                 for (UpdatedNameAddrModel change : addrChanges) {
-                  if ("Customer Name".equals(change.getDataField())) {
+                  if ("Customer Name".equals(change.getDataField()) && CmrConstants.RDC_SOLD_TO.equalsIgnoreCase(addr.getId().getAddrType())) {
                     cmdeReviewCustNme = true;
                     checkDetails.append("Update of Customer Name for " + addrType + "(" + addr.getId().getAddrSeq() + ") needs review.\n");
                   }
