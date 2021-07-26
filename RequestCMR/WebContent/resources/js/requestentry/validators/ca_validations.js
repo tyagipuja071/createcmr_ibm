@@ -847,6 +847,17 @@ function preTickLatePaymentInd(fromAddress, scenario, scenarioChanged) {
   }
 }
 
+function limitDropdownOnScenarioChange(fromAddress, scenario, scenarioChanged) {
+  var isCmrImported = getImportedIndc();
+
+  if (FormManager.getActualValue('reqType') == 'C' && isCmrImported == 'N' && scenarioChanged) {
+    if (scenario == 'GOVT') {
+      var efcValues = [ '7', '8', '9', 'E', 'G' ];
+      FormManager.limitDropdownValues(FormManager.getField('taxCd1'), efcValues);
+    }
+  }
+}
+
 /* Register CA Javascripts */
 dojo.addOnLoad(function() {
   console.log('adding CA scripts...');
@@ -871,11 +882,14 @@ dojo.addOnLoad(function() {
   // ]);
   GEOHandler.addAddrFunction(addCAAddressHandler, [ SysLoc.CANADA ]);
   GEOHandler.enableCopyAddress([ SysLoc.CANADA ], validateCACopy, [ 'ZP01', 'ZP02' ]);
+
   GEOHandler.addAfterTemplateLoad(removeValidatorForOptionalFields, SysLoc.CANADA);
   GEOHandler.addAfterTemplateLoad(retainImportValues, SysLoc.CANADA);
   GEOHandler.addAfterTemplateLoad(toggleCATaxFields, SysLoc.CANADA);
   GEOHandler.addAfterTemplateLoad(setDefaultInvoiceCopies, SysLoc.CANADA);
   GEOHandler.addAfterTemplateLoad(addPSTExemptHandler, SysLoc.CANADA);
   GEOHandler.addAfterTemplateLoad(preTickLatePaymentInd, SysLoc.CANADA);
+  GEOHandler.addAfterTemplateLoad(limitDropdownOnScenarioChange, SysLoc.CANADA);
+
   GEOHandler.addToggleAddrTypeFunction(hideObsoleteAddressOption, [ SysLoc.CANADA ]);
 });
