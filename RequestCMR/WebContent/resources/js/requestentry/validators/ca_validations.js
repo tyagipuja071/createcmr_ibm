@@ -841,6 +841,12 @@ function isLandedCountryCheck() {
   return false;
 }
 
+function preTickLatePaymentInd(fromAddress, scenario, scenarioChanged) {
+  if (FormManager.getActualValue('reqType') == 'C' && scenarioChanged) {
+    FormManager.setValue('miscBillCd', true);
+  }
+}
+
 /* Register CA Javascripts */
 dojo.addOnLoad(function() {
   console.log('adding CA scripts...');
@@ -870,5 +876,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(toggleCATaxFields, SysLoc.CANADA);
   GEOHandler.addAfterTemplateLoad(setDefaultInvoiceCopies, SysLoc.CANADA);
   GEOHandler.addAfterTemplateLoad(addPSTExemptHandler, SysLoc.CANADA);
+  GEOHandler.addAfterTemplateLoad(preTickLatePaymentInd, SysLoc.CANADA);
   GEOHandler.addToggleAddrTypeFunction(hideObsoleteAddressOption, [ SysLoc.CANADA ]);
 });
