@@ -422,7 +422,6 @@ function AddressDetailsModal_onLoad() {
     _assignDetailsValue('#AddressDetailsModal #cnDistrict_view', details.ret64);
     _assignDetailsValue('#AddressDetailsModal #cnCustContNm_view', details.ret65);
     _assignDetailsValue('#AddressDetailsModal #cnCustContJobTitle_view', details.ret66);
-    _assignDetailsValue('#AddressDetailsModal #custPhone_view', details.ret67);
     _assignDetailsValue('#AddressDetailsModal #cnCustName3_view', details.ret73);
   }
 
@@ -1053,7 +1052,7 @@ function addEditAddressModal_onLoad() {
       // FormManager.hide('BillingPstlAddr', 'billingPstlAddr');
       // }
       // }
-      
+
       if (FormManager.getActualValue('cmrIssuingCntry') == '766') {
         FormManager.setValue('billingPstlAddr', details.ret58);
         FormManager.setValue('contact', details.ret71);
