@@ -77,15 +77,15 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
           || requestData.getAdmin().getReqType().equalsIgnoreCase("U")) {
         cnName = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? iAddr.getIntlCustNm2() : "");
         cnAddr = iAddr.getAddrTxt() + (iAddr.getIntlCustNm4() != null ? iAddr.getIntlCustNm4() : "");
-        cnName = convertSBCS(cnName);
-        cnAddr = convertSBCS(cnAddr);
+        cnName = convertSBCS(cnName).trim();
+        cnAddr = convertSBCS(cnAddr).trim();
       } else if (data.getCustSubGrp() != null && SCENARIO_LOCAL_AQSTN.equals(data.getCustSubGrp())) {
 
         if (StringUtils.isNotBlank(iAddr.getIntlCustNm1())) {
           cnName = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? iAddr.getIntlCustNm2() : "");
           cnAddr = iAddr.getAddrTxt() + (iAddr.getIntlCustNm4() != null ? iAddr.getIntlCustNm4() : "");
-          cnName = convertSBCS(cnName);
-          cnAddr = convertSBCS(cnAddr);
+          cnName = convertSBCS(cnName).trim();
+          cnAddr = convertSBCS(cnAddr).trim();
           ifAQSTNHasCN = true;
         } else {
           ifAQSTNHasCN = false;
@@ -127,8 +127,8 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
 
               StringBuilder details = new StringBuilder();
 
-              cnName = convertSBCS(cnName);
-              cnAddr = convertSBCS(cnAddr);
+              cnName = convertSBCS(cnName).trim();
+              cnAddr = convertSBCS(cnAddr).trim();
               if (cnName.equals(cmrsData.getRecord().getName()) && cnAddr.equals(cmrsData.getRecord().getRegLocation())) {
 
                 result.setResults("Matches found");
@@ -312,8 +312,8 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
 
     String newCnName = soldToIntlAddr.getIntlCustNm1() + (soldToIntlAddr.getIntlCustNm2() != null ? soldToIntlAddr.getIntlCustNm2() : "");
     String oldCnName = soldToIntlAddrRdc.getIntlCustNm1() + (soldToIntlAddrRdc.getIntlCustNm2() != null ? soldToIntlAddrRdc.getIntlCustNm2() : "");
-    oldCnName = convertSBCS(oldCnName);
-    newCnName = convertSBCS(newCnName);
+    oldCnName = convertSBCS(oldCnName).trim();
+    newCnName = convertSBCS(newCnName).trim();
 
     if (!oldCnName.equals(newCnName)) {
       try {
@@ -384,8 +384,8 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
 
     String newCnAddr = soldToIntlAddr.getAddrTxt() + (soldToIntlAddr.getIntlCustNm4() != null ? soldToIntlAddr.getIntlCustNm4() : "");
     String oldCnAddr = soldToIntlAddrRdc.getAddrTxt() + (soldToIntlAddrRdc.getIntlCustNm4() != null ? soldToIntlAddrRdc.getIntlCustNm4() : "");
-    newCnAddr = convertSBCS(newCnAddr);
-    oldCnAddr = convertSBCS(oldCnAddr);
+    newCnAddr = convertSBCS(newCnAddr).trim();
+    oldCnAddr = convertSBCS(oldCnAddr).trim();
 
     if (!oldCnAddr.equals(newCnAddr)) {
       try {
@@ -431,8 +431,8 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
   private void overrideNameAndAddress(String name, String address, IntlAddr intlAddr, EntityManager entityManager) {
 
     CNHandler cnHandler = new CNHandler();
-    name = cnHandler.convert2DBCS(name);
-    address = cnHandler.convert2DBCS(address);
+    name = cnHandler.convert2DBCS(name).trim();
+    address = cnHandler.convert2DBCS(address).trim();
     updateCNIntlAddr(name, address, intlAddr, entityManager);
     entityManager.merge(intlAddr);
     entityManager.flush();
