@@ -1235,7 +1235,7 @@ function addEditAddressModal_onLoad() {
       cmr.oldcndistrict = details.ret64;
       FormManager.setValue('cnCustContNm', details.ret65);
       FormManager.setValue('cnCustContJobTitle', details.ret66);
-      FormManager.setValue('custPhone', details.ret67);
+      FormManager.setValue('custPhone', details.ret23);
       FormManager.setValue('cnCustName3', details.ret73);
       cmr.oldcncustname3 = details.ret73;
 
