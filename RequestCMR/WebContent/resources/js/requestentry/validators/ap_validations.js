@@ -3173,6 +3173,7 @@ function addressNameSimilarValidator() {
           var name2 = '';
           var count = 0;
           var reqId = FormManager.getActualValue('reqId');
+          var reqType = FormManager.getActualValue('reqType');
           var updateInd = null;
           var qParams = {
             REQ_ID : reqId,
@@ -3202,7 +3203,7 @@ function addressNameSimilarValidator() {
                   updateInd = updateInd[0];
                 }
                 name = name1 + name2;
-                if((updateInd == 'U' || updateInd == 'N') && type != 'ZS01' && zs01Name != name){
+                if(((reqType == 'U' && (updateInd == 'U' || updateInd == 'N')) || reqType == 'C') && type != 'ZS01' && zs01Name != name){
                   count ++;
                 }               
               }         
