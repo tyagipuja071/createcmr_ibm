@@ -2001,7 +2001,7 @@ function setCTCIsuByClusterANZ() {
 
     var apClientTierValue = [];
     var isuCdValue = [];
-    if ((scenario == 'LOCAL' && (custSubGrp == 'NRML' || custSubGrp == 'AQSTN' || custSubGrp == 'ESOSW' || custSubGrp == 'IGF' || custSubGrp == 'SOFT')) || (scenario == 'CROSS' && (custSubGrp == 'XNRML' || custSubGrp == 'XAQST' || custSubGrp == 'XESO' || custSubGrp == 'XIGF' || custSubGrp == 'XSOFT' || custSubGrp == 'CROSS'))) { 
+    if ((scenario == 'LOCAL' && (custSubGrp == 'NRML' || custSubGrp == 'AQSTN' || custSubGrp == 'ESOSW' || custSubGrp == 'IGF' || custSubGrp == 'SOFT' || custSubGrp == 'PRIV')) || (scenario == 'CROSS' && (custSubGrp == 'XNRML' || custSubGrp == 'XAQST' || custSubGrp == 'XESO' || custSubGrp == 'XIGF' || custSubGrp == 'XSOFT' || custSubGrp == 'CROSS' || custSubGrp == 'XPRIV'))) { 
     if (_cluster != '' && _cluster != '') {
       var qParams = {
         _qall : 'Y',
