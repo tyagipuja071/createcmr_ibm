@@ -17,15 +17,6 @@
 %>
 
 <cmr:view forCountry="649">
-  <%if ("U".equals(reqentry.getReqType())){ %>
-  <cmr:row addBackground="true" topPad="20">
-     <cmr:column span="6">
-       <img src="${resourcesPath}/images/warn-icon.png" class="cmr-error-icon">
-       <cmr:note text="For updates to any of the fields below, leave the fields below blank if you will not be changing the current values." />
-     </cmr:column>
-  </cmr:row>
-  <%} %>
-
   <cmr:row>
   	<cmr:column span="2" containerForField="HST">
   		<p>
