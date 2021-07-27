@@ -32,6 +32,7 @@ import com.ibm.cio.cmr.request.model.CompanyRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.CompanyFinder;
 import com.ibm.cio.cmr.request.util.Person;
@@ -145,7 +146,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 searchModelCNAPI.setTaxCd1(cnCreditCd);
                 resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "TAXCD");
               } else {
-                cnNameSingleByte = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
+                cnNameSingleByte = iAddr.getIntlCustNm1() + (!StringUtils.isBlank(iAddr.getIntlCustNm2()) ? (" " + iAddr.getIntlCustNm2()) : "");
                 cnNameSingleByte = convert2SingleByte(cnNameSingleByte);
                 searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
                 searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
@@ -381,6 +382,12 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
           // b) check China API with single byte string value
           // c) check findcmr twice with single byte and double byte value, if
           // they are not equals
+          // d) check if findcmr result's Search Term is in a special list. yes
+          // - dup.
+          // e) if findcmr result's Search Term is "00000" and CEID has value -
+          // not dup.
+          // f) when findcmr result's Search Term is "00000" and CEID is empty,
+          // if Kukla (classification code) in ('81','85') - not dup
 
           iAddr = handler.getIntlAddrById(soldTo, entityManager);
           if (iAddr != null) {
@@ -394,7 +401,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 searchModelCNAPI.setTaxCd1(cnCreditCd);
                 resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "TAXCD");
               } else {
-                cnNameSingleByte = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
+                cnNameSingleByte = iAddr.getIntlCustNm1() + (!StringUtils.isBlank(iAddr.getIntlCustNm2()) ? (" " + iAddr.getIntlCustNm2()) : "");
                 cnNameSingleByte = convert2SingleByte(cnNameSingleByte);
                 searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
                 searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
@@ -411,26 +418,62 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 cnHistoryNameDoubleByte = convert2DoubleByte(cnHistoryNameSingleByte);
                 cnAddrDoubleByte = convert2DoubleByte(cnAddrSingleByte);
 
+                boolean isSpecailSearchTerm = false;
+                boolean shouldBeRejected = false;
+
+                List<String> specialSearchTermList = getSpecialSearchTermList(entityManager, data.getCmrIssuingCntry());
+
                 try {
                   // 2, Check FindCMR NON Latin with Chinese name - single byte
                   CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
                   searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
                   searchModelFindCmrCN.setCountryCd(soldTo.getLandCntry());
                   searchModelFindCmrCN.setName(cnNameSingleByte);
-                  resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
+                  findCMRResult = searchFindCMR(searchModelFindCmrCN);
 
-                  if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
-                    for (int i = 0; i < resultFindCmrCN.size(); i++) {
-                      nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
+                  if (findCMRResult != null && findCMRResult.getItems() != null && !findCMRResult.getItems().isEmpty()) {
+                    List<FindCMRRecordModel> cmrs = findCMRResult.getItems();
+                    for (FindCMRRecordModel cmrsMods : cmrs) {
+                      nameFindCmrCnResult = cmrsMods.getCmrIntlName1()
+                          + (!StringUtils.isBlank(cmrsMods.getCmrIntlName2()) ? (" " + cmrsMods.getCmrIntlName2()) : "");
                       if (nameFindCmrCnResult != null && cnNameSingleByte.equals(nameFindCmrCnResult)) {
 
                         nameMatched = true;
 
                         if (nameMatched) {
-                          matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
-                          cmrData = resultFindCmrCN.get(i);
-                          details.append("\n");
-                          logDuplicateCMR(details, cmrData);
+
+                          if (specialSearchTermList != null && specialSearchTermList.contains(cmrsMods.getCmrSortl())) {
+                            isSpecailSearchTerm = true;
+                            // should be rejected
+
+                            shouldBeRejected = true;
+                            matchedCMRs.add(cmrsMods.getCmrNum());
+                            convertMatchData(cmrsMods, cmrData);
+                            details.append("\n");
+                            logDuplicateCMR(details, cmrData);
+                          } else if ("04182".equals(cmrsMods.getCmrSortl())) {
+                            // should not be rejected
+                          } else if ("00000".equals(cmrsMods.getCmrSortl())) {
+                            if (cmrsMods.getCmrPpsceid() != null && cmrsMods.getCmrPpsceid().length() > 0) {
+                              // should not be rejected
+                            } else {
+                              // Kukla (classification code) in ('81','85') -
+                              // not dup
+                              String kukla = getKukla(entityManager, cmrsMods.getCmrNum(), data.getCmrIssuingCntry());
+                              if ("81".equals(kukla) || "85".equals(kukla)) {
+                                // should not be rejected
+                              } else {
+                                // should be rejected
+
+                                shouldBeRejected = true;
+                                matchedCMRs.add(cmrsMods.getCmrNum());
+                                convertMatchData(cmrsMods, cmrData);
+                                details.append("\n");
+                                logDuplicateCMR(details, cmrData);
+                              }
+                            }
+                          }
+
                         }
                       }
                     }
@@ -451,20 +494,51 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                     searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
                     searchModelFindCmrCN.setCountryCd(soldTo.getLandCntry());
                     searchModelFindCmrCN.setName(cnNameDoubleByte);
-                    resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
+                    findCMRResult = searchFindCMR(searchModelFindCmrCN);
 
-                    if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
-                      for (int i = 0; i < resultFindCmrCN.size(); i++) {
-                        nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
+                    if (findCMRResult != null && findCMRResult.getItems() != null && !findCMRResult.getItems().isEmpty()) {
+                      List<FindCMRRecordModel> cmrs = findCMRResult.getItems();
+                      for (FindCMRRecordModel cmrsMods : cmrs) {
+                        nameFindCmrCnResult = cmrsMods.getCmrIntlName1()
+                            + (!StringUtils.isBlank(cmrsMods.getCmrIntlName2()) ? (" " + cmrsMods.getCmrIntlName2()) : "");
                         if (nameFindCmrCnResult != null && cnNameDoubleByte.equals(nameFindCmrCnResult)) {
 
                           nameMatched = true;
 
                           if (nameMatched) {
-                            matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
-                            cmrData = resultFindCmrCN.get(i);
-                            details.append("\n");
-                            logDuplicateCMR(details, cmrData);
+
+                            if (specialSearchTermList != null && specialSearchTermList.contains(cmrsMods.getCmrSortl())) {
+                              isSpecailSearchTerm = true;
+                              // should be rejected
+
+                              shouldBeRejected = true;
+                              matchedCMRs.add(cmrsMods.getCmrNum());
+                              convertMatchData(cmrsMods, cmrData);
+                              details.append("\n");
+                              logDuplicateCMR(details, cmrData);
+                            } else if ("04182".equals(cmrsMods.getCmrSortl())) {
+                              // should not be rejected
+                            } else if ("00000".equals(cmrsMods.getCmrSortl())) {
+                              if (cmrsMods.getCmrPpsceid() != null && cmrsMods.getCmrPpsceid().length() > 0) {
+                                // should not be rejected
+                              } else {
+                                // Kukla (classification code) in ('81','85') -
+                                // not dup
+                                String kukla = getKukla(entityManager, cmrsMods.getCmrNum(), data.getCmrIssuingCntry());
+                                if ("81".equals(kukla) || "85".equals(kukla)) {
+                                  // should not be rejected
+                                } else {
+                                  // should be rejected
+
+                                  shouldBeRejected = true;
+                                  matchedCMRs.add(cmrsMods.getCmrNum());
+                                  convertMatchData(cmrsMods, cmrData);
+                                  details.append("\n");
+                                  logDuplicateCMR(details, cmrData);
+                                }
+                              }
+                            }
+
                           }
                         }
                       }
@@ -488,25 +562,56 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   try {
                     for (String historyName : cnHistoryNameList) {
                       searchModelFindCmrCN.setName(historyName);
-                      resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
-                      if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
-                        for (int i = 0; i < resultFindCmrCN.size(); i++) {
-                          nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
+                      findCMRResult = searchFindCMR(searchModelFindCmrCN);
+
+                      if (findCMRResult != null && findCMRResult.getItems() != null && !findCMRResult.getItems().isEmpty()) {
+                        List<FindCMRRecordModel> cmrs = findCMRResult.getItems();
+                        for (FindCMRRecordModel cmrsMods : cmrs) {
+                          nameFindCmrCnResult = cmrsMods.getCmrIntlName1()
+                              + (!StringUtils.isBlank(cmrsMods.getCmrIntlName2()) ? (" " + cmrsMods.getCmrIntlName2()) : "");
                           if (nameFindCmrCnResult != null && nameFindCmrCnResult.equals(historyName)) {
 
                             historyNmMatched = true;
 
                             if (historyNmMatched) {
-                              matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
-                              cmrData = resultFindCmrCN.get(i);
-                              details.append("\n");
-                              logDuplicateCMR(details, cmrData);
+
+                              if (specialSearchTermList != null && specialSearchTermList.contains(cmrsMods.getCmrSortl())) {
+                                isSpecailSearchTerm = true;
+                                // should be rejected
+
+                                shouldBeRejected = true;
+                                matchedCMRs.add(cmrsMods.getCmrNum());
+                                convertMatchData(cmrsMods, cmrData);
+                                details.append("\n");
+                                logDuplicateCMR(details, cmrData);
+                              } else if ("04182".equals(cmrsMods.getCmrSortl())) {
+                                // should not be rejected
+                              } else if ("00000".equals(cmrsMods.getCmrSortl())) {
+                                if (cmrsMods.getCmrPpsceid() != null && cmrsMods.getCmrPpsceid().length() > 0) {
+                                  // should not be rejected
+                                } else {
+                                  // Kukla (classification code) in ('81','85')
+                                  // - not dup
+                                  String kukla = getKukla(entityManager, cmrsMods.getCmrNum(), data.getCmrIssuingCntry());
+                                  if ("81".equals(kukla) || "85".equals(kukla)) {
+                                    // should not be rejected
+                                  } else {
+                                    // should be rejected
+
+                                    shouldBeRejected = true;
+                                    matchedCMRs.add(cmrsMods.getCmrNum());
+                                    convertMatchData(cmrsMods, cmrData);
+                                    details.append("\n");
+                                    logDuplicateCMR(details, cmrData);
+                                  }
+                                }
+                              }
+
                             }
                           }
                         }
                       }
                     }
-
                   } catch (Exception e) {
                     e.printStackTrace();
                     result
@@ -530,25 +635,56 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   try {
                     for (String historyName : cnHistoryNameList) {
                       searchModelFindCmrCN.setName(historyName);
-                      resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
-                      if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
-                        for (int i = 0; i < resultFindCmrCN.size(); i++) {
-                          nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
+                      findCMRResult = searchFindCMR(searchModelFindCmrCN);
+
+                      if (findCMRResult != null && findCMRResult.getItems() != null && !findCMRResult.getItems().isEmpty()) {
+                        List<FindCMRRecordModel> cmrs = findCMRResult.getItems();
+                        for (FindCMRRecordModel cmrsMods : cmrs) {
+                          nameFindCmrCnResult = cmrsMods.getCmrIntlName1()
+                              + (!StringUtils.isBlank(cmrsMods.getCmrIntlName2()) ? (" " + cmrsMods.getCmrIntlName2()) : "");
                           if (nameFindCmrCnResult != null && nameFindCmrCnResult.equals(historyName)) {
 
                             historyNmMatched = true;
 
                             if (historyNmMatched) {
-                              matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
-                              cmrData = resultFindCmrCN.get(i);
-                              details.append("\n");
-                              logDuplicateCMR(details, cmrData);
+
+                              if (specialSearchTermList != null && specialSearchTermList.contains(cmrsMods.getCmrSortl())) {
+                                isSpecailSearchTerm = true;
+                                // should be rejected
+
+                                shouldBeRejected = true;
+                                matchedCMRs.add(cmrsMods.getCmrNum());
+                                convertMatchData(cmrsMods, cmrData);
+                                details.append("\n");
+                                logDuplicateCMR(details, cmrData);
+                              } else if ("04182".equals(cmrsMods.getCmrSortl())) {
+                                // should not be rejected
+                              } else if ("00000".equals(cmrsMods.getCmrSortl())) {
+                                if (cmrsMods.getCmrPpsceid() != null && cmrsMods.getCmrPpsceid().length() > 0) {
+                                  // should not be rejected
+                                } else {
+                                  // Kukla (classification code) in ('81','85')
+                                  // - not dup
+                                  String kukla = getKukla(entityManager, cmrsMods.getCmrNum(), data.getCmrIssuingCntry());
+                                  if ("81".equals(kukla) || "85".equals(kukla)) {
+                                    // should not be rejected
+                                  } else {
+                                    // should be rejected
+
+                                    shouldBeRejected = true;
+                                    matchedCMRs.add(cmrsMods.getCmrNum());
+                                    convertMatchData(cmrsMods, cmrData);
+                                    details.append("\n");
+                                    logDuplicateCMR(details, cmrData);
+                                  }
+                                }
+                              }
+
                             }
                           }
                         }
                       }
                     }
-
                   } catch (Exception e) {
                     e.printStackTrace();
                     result
@@ -563,7 +699,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 }
 
                 // output
-                if (nameMatched || historyNmMatched) {
+                if ((nameMatched || historyNmMatched) && shouldBeRejected) {
                   result.setResults("Matches Found");
                   result.setResults("Found Duplicate CMRs.");
                   engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR", StringUtils.join(matchedCMRs, ", "), "");
@@ -573,7 +709,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   result.setProcessOutput(output);
                   result.setDetails(details.toString().trim());
                   sendManagerEmail(entityManager, admin, data, soldTo, details);
-                } else if (!nameMatched && !historyNmMatched) {
+                } else {
                   result.setDetails("No Duplicate CMRs were found.");
                   result.setResults("No Matches");
                   result.setOnError(false);
@@ -625,7 +761,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 searchModelCNAPI.setTaxCd1(cnCreditCd);
                 resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "TAXCD");
               } else {
-                cnNameSingleByte = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
+                cnNameSingleByte = iAddr.getIntlCustNm1() + (!StringUtils.isBlank(iAddr.getIntlCustNm2()) ? (" " + iAddr.getIntlCustNm2()) : "");
                 cnNameSingleByte = convert2SingleByte(cnNameSingleByte);
                 searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
                 searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
@@ -822,7 +958,8 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                       List<FindCMRRecordModel> cmrs = findCMRResult.getItems();
                       for (FindCMRRecordModel cmrsMods : cmrs) {
                         cmrData.setCmrNo(cmrsMods.getCmrNum());
-                        cmrData.setName(cmrsMods.getCmrName1Plain() + (cmrsMods.getCmrName2Plain() != null ? cmrsMods.getCmrName2Plain() : ""));
+                        cmrData.setName(cmrsMods.getCmrName1Plain()
+                            + (!StringUtils.isBlank(cmrsMods.getCmrName2Plain()) ? (" " + cmrsMods.getCmrName2Plain()) : ""));
                         cmrData.setIssuingCntry(cmrsMods.getCmrIssuedBy());
                         cmrData.setCied(cmrsMods.getCmrPpsceid());
                         cmrData.setCountryCd(cmrsMods.getCmrCountryLanded());
@@ -909,7 +1046,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 searchModelCNAPI.setTaxCd1(cnCreditCd);
                 resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "TAXCD");
               } else {
-                cnNameSingleByte = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
+                cnNameSingleByte = iAddr.getIntlCustNm1() + (!StringUtils.isBlank(iAddr.getIntlCustNm2()) ? (" " + iAddr.getIntlCustNm2()) : "");
                 cnNameSingleByte = convert2SingleByte(cnNameSingleByte);
                 searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
                 searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
@@ -1121,14 +1258,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
           boolean ifAQSTNHasCN = true;
           iAddr = handler.getIntlAddrById(soldTo, entityManager);
           if (iAddr != null) {
-            // cnNameSingleByte = iAddr.getIntlCustNm1() +
-            // (iAddr.getIntlCustNm2() != null
-            // ? iAddr.getIntlCustNm2() : "");
-            if (iAddr.getIntlCustNm2() != null) {
-              cnNameSingleByte = iAddr.getIntlCustNm1() + iAddr.getIntlCustNm2();
-            } else {
-              cnNameSingleByte = iAddr.getIntlCustNm1();
-            }
+            cnNameSingleByte = iAddr.getIntlCustNm1() + (!StringUtils.isBlank(iAddr.getIntlCustNm2()) ? (" " + iAddr.getIntlCustNm2()) : "");
           }
           if (!StringUtils.isBlank(cnNameSingleByte)) {
 
@@ -1141,7 +1271,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 searchModelCNAPI.setTaxCd1(cnCreditCd);
                 resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "TAXCD");
               } else {
-                cnNameSingleByte = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
+                cnNameSingleByte = iAddr.getIntlCustNm1() + (!StringUtils.isBlank(iAddr.getIntlCustNm2()) ? (" " + iAddr.getIntlCustNm2()) : "");
                 cnNameSingleByte = convert2SingleByte(cnNameSingleByte);
                 searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
                 searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
@@ -1344,14 +1474,15 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
             CompanyRecordModel searchModelFindCmr = new CompanyRecordModel();
             searchModelFindCmr.setIssuingCntry(data.getCmrIssuingCntry());
-            searchModelFindCmr.setName(soldTo.getCustNm1() + (soldTo.getCustNm2() != null ? " " + soldTo.getCustNm2() : ""));
+            searchModelFindCmr.setName(soldTo.getCustNm1() + (!StringUtils.isBlank(soldTo.getCustNm2()) ? (" " + soldTo.getCustNm2()) : ""));
             findCMRResult = searchFindCMR(searchModelFindCmr);
             if (findCMRResult != null && findCMRResult.getItems() != null && !findCMRResult.getItems().isEmpty()) {
               ceidMatched = true;
               List<FindCMRRecordModel> cmrs = findCMRResult.getItems();
               for (FindCMRRecordModel cmrsMods : cmrs) {
                 cmrData.setCmrNo(cmrsMods.getCmrNum());
-                cmrData.setName(cmrsMods.getCmrName1Plain() + (cmrsMods.getCmrName2Plain() != null ? cmrsMods.getCmrName2Plain() : ""));
+                cmrData.setName(
+                    cmrsMods.getCmrName1Plain() + (!StringUtils.isBlank(cmrsMods.getCmrName2Plain()) ? (" " + cmrsMods.getCmrName2Plain()) : ""));
                 cmrData.setIssuingCntry(cmrsMods.getCmrIssuedBy());
                 cmrData.setCied(cmrsMods.getCmrPpsceid());
                 cmrData.setCountryCd(cmrsMods.getCmrCountryLanded());
@@ -1401,7 +1532,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 searchModelCNAPI.setTaxCd1(cnCreditCd);
                 resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "TAXCD");
               } else {
-                cnNameSingleByte = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
+                cnNameSingleByte = iAddr.getIntlCustNm1() + (!StringUtils.isBlank(iAddr.getIntlCustNm2()) ? (" " + iAddr.getIntlCustNm2()) : "");
                 cnNameSingleByte = convert2SingleByte(cnNameSingleByte);
                 searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
                 searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
@@ -1612,14 +1743,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
           iAddr = handler.getIntlAddrById(soldTo, entityManager);
           if (iAddr != null) {
-            // cnNameSingleByte = iAddr.getIntlCustNm1() +
-            // (iAddr.getIntlCustNm2() != null
-            // ? iAddr.getIntlCustNm2() : "");
-            if (iAddr.getIntlCustNm2() != null) {
-              cnNameSingleByte = iAddr.getIntlCustNm1() + iAddr.getIntlCustNm2();
-            } else {
-              cnNameSingleByte = iAddr.getIntlCustNm1();
-            }
+            cnNameSingleByte = iAddr.getIntlCustNm1() + (!StringUtils.isBlank(iAddr.getIntlCustNm2()) ? (" " + iAddr.getIntlCustNm2()) : "");
           }
           if (!StringUtils.isBlank(cnNameSingleByte)) {
 
@@ -1632,7 +1756,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 searchModelCNAPI.setTaxCd1(cnCreditCd);
                 resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "TAXCD");
               } else {
-                cnNameSingleByte = iAddr.getIntlCustNm1() + (iAddr.getIntlCustNm2() != null ? " " + iAddr.getIntlCustNm2() : "");
+                cnNameSingleByte = iAddr.getIntlCustNm1() + (!StringUtils.isBlank(iAddr.getIntlCustNm2()) ? (" " + iAddr.getIntlCustNm2()) : "");
                 cnNameSingleByte = convert2SingleByte(cnNameSingleByte);
                 searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
                 searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
@@ -1865,14 +1989,15 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
             // req
             CompanyRecordModel searchModelFindCmr = new CompanyRecordModel();
             searchModelFindCmr.setIssuingCntry(data.getCmrIssuingCntry());
-            searchModelFindCmr.setName(soldTo.getCustNm1() + (soldTo.getCustNm2() != null ? " " + soldTo.getCustNm2() : ""));
+            searchModelFindCmr.setName(soldTo.getCustNm1() + (!StringUtils.isBlank(soldTo.getCustNm2()) ? (" " + soldTo.getCustNm2()) : ""));
             findCMRResult = searchFindCMR(searchModelFindCmr);
             if (findCMRResult != null && findCMRResult.getItems() != null && !findCMRResult.getItems().isEmpty()) {
               ceidMatched = true;
               List<FindCMRRecordModel> cmrs = findCMRResult.getItems();
               for (FindCMRRecordModel cmrsMods : cmrs) {
                 cmrData.setCmrNo(cmrsMods.getCmrNum());
-                cmrData.setName(cmrsMods.getCmrName1Plain() + (cmrsMods.getCmrName2Plain() != null ? cmrsMods.getCmrName2Plain() : ""));
+                cmrData.setName(
+                    cmrsMods.getCmrName1Plain() + (!StringUtils.isBlank(cmrsMods.getCmrName2Plain()) ? (" " + cmrsMods.getCmrName2Plain()) : ""));
                 cmrData.setIssuingCntry(cmrsMods.getCmrIssuedBy());
                 cmrData.setCied(cmrsMods.getCmrPpsceid());
                 cmrData.setCountryCd(cmrsMods.getCmrCountryLanded());
@@ -1912,7 +2037,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
           CompanyRecordModel searchModelFindCmr = new CompanyRecordModel();
           searchModelFindCmr.setIssuingCntry(data.getCmrIssuingCntry());
-          searchModelFindCmr.setName(soldTo.getCustNm1() + (soldTo.getCustNm2() != null ? " " + soldTo.getCustNm2() : ""));
+          searchModelFindCmr.setName(soldTo.getCustNm1() + (!StringUtils.isBlank(soldTo.getCustNm2()) ? (" " + soldTo.getCustNm2()) : ""));
           searchModelFindCmr.setStreetAddress1(soldTo.getAddrTxt());
           searchModelFindCmr.setStreetAddress2(soldTo.getAddrTxt2());
           findCMRResult = searchFindCMR(searchModelFindCmr);
@@ -1921,7 +2046,8 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
             List<FindCMRRecordModel> cmrs = findCMRResult.getItems();
             for (FindCMRRecordModel cmrsMods : cmrs) {
               cmrData.setCmrNo(cmrsMods.getCmrNum());
-              cmrData.setName(cmrsMods.getCmrName1Plain() + (cmrsMods.getCmrName2Plain() != null ? cmrsMods.getCmrName2Plain() : ""));
+              cmrData.setName(
+                  cmrsMods.getCmrName1Plain() + (!StringUtils.isBlank(cmrsMods.getCmrName2Plain()) ? (" " + cmrsMods.getCmrName2Plain()) : ""));
               cmrData.setIssuingCntry(cmrsMods.getCmrIssuedBy());
               cmrData.setCied(cmrsMods.getCmrPpsceid());
               cmrData.setCountryCd(cmrsMods.getCmrCountryLanded());
@@ -1959,7 +2085,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
           CompanyRecordModel searchModel = new CompanyRecordModel();
           searchModel.setIssuingCntry(data.getCmrIssuingCntry());
-          searchModel.setName(soldTo.getCustNm1() + (soldTo.getCustNm2() != null ? " " + soldTo.getCustNm2() : ""));
+          searchModel.setName(soldTo.getCustNm1() + (!StringUtils.isBlank(soldTo.getCustNm2()) ? (" " + soldTo.getCustNm2()) : ""));
           searchModel.setCountryCd(soldTo.getLandCntry());
           findCMRResult = searchFindCMR(searchModel);
           if (findCMRResult != null && findCMRResult.getItems() != null && !findCMRResult.getItems().isEmpty()) {
@@ -1967,7 +2093,8 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
             List<FindCMRRecordModel> cmrs = findCMRResult.getItems();
             for (FindCMRRecordModel cmrsMods : cmrs) {
               cmrData.setCmrNo(cmrsMods.getCmrNum());
-              cmrData.setName(cmrsMods.getCmrName1Plain() + (cmrsMods.getCmrName2Plain() != null ? cmrsMods.getCmrName2Plain() : ""));
+              cmrData.setName(
+                  cmrsMods.getCmrName1Plain() + (!StringUtils.isBlank(cmrsMods.getCmrName2Plain()) ? (" " + cmrsMods.getCmrName2Plain()) : ""));
               cmrData.setIssuingCntry(cmrsMods.getCmrIssuedBy());
               cmrData.setCied(cmrsMods.getCmrPpsceid());
               cmrData.setCountryCd(cmrsMods.getCmrCountryLanded());
@@ -2506,6 +2633,78 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
       modifiedVal = modifiedVal.replace("）", ")");
     }
     return modifiedVal;
+  }
+
+  private List<String> getSpecialSearchTermList(EntityManager entityManager, String cmrIssuingCntry) {
+    List<String> list = null;
+    String sql = ExternalizedQuery.getSql("QUERY.GET.SPECIAL_SEARCH_TERM");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("FIELD_ID", "##SpecialSearchTerm");
+    query.setParameter("CMR_ISSUING_CNTRY", cmrIssuingCntry);
+    List<String> results = query.getResults(String.class);
+    if (results != null && !results.isEmpty()) {
+      list = results;
+    }
+    return list;
+  }
+
+  private String getKukla(EntityManager entityManager, String cmrNo, String issuingCountry) {
+    String result = null;
+    String sql = ExternalizedQuery.getSql("QUERY.GET.KNA1_BY_CMRNO");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("ZZKV_CUSNO", cmrNo);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("KATR6", issuingCountry);
+    List<Object[]> sqlResults = query.getResults();
+    if (sqlResults != null && !sqlResults.isEmpty()) {
+      if (sqlResults.size() == 1) {
+        result = (String) sqlResults.get(0)[0];
+      } else {
+        log.debug("function getKukla returned " + sqlResults.size() + "result(s). It could be a data issue. Please check.");
+      }
+    }
+    return result;
+  }
+
+  private void convertMatchData(FindCMRRecordModel cmrsMods, CompanyRecordModel cmrData) {
+    if (!StringUtils.isBlank(cmrsMods.getCmrNum())) {
+      cmrData.setCmrNo(cmrsMods.getCmrNum());
+    }
+    if (!StringUtils.isBlank(Float.toString(cmrsMods.getSearchScore()))) {
+      cmrData.setMatchGrade(Float.toString(cmrsMods.getSearchScore()));
+    }
+    if (!StringUtils.isBlank(cmrsMods.getCmrIssuedBy())) {
+      cmrData.setIssuingCntry(cmrsMods.getCmrIssuedBy());
+    }
+    String intlName = cmrsMods.getCmrIntlName1() + (!StringUtils.isBlank(cmrsMods.getCmrIntlName2()) ? (" " + cmrsMods.getCmrIntlName2()) : "");
+    if (!StringUtils.isBlank(intlName)) {
+      cmrData.setAltName(intlName);
+    }
+    if (!StringUtils.isBlank(cmrsMods.getCmrIntlCity1())) {
+      cmrData.setAltCity(cmrsMods.getCmrIntlCity1());
+    }
+    if (!StringUtils.isBlank(cmrsMods.getCmrIntlAddress())) {
+      cmrData.setAltStreet(cmrsMods.getCmrIntlAddress());
+    }
+    String name = cmrsMods.getCmrName1Plain() + (!StringUtils.isBlank(cmrsMods.getCmrName2Plain()) ? (" " + cmrsMods.getCmrName2Plain()) : "");
+    if (!StringUtils.isBlank(name)) {
+      cmrData.setName(name);
+    }
+    if (!StringUtils.isBlank(cmrsMods.getCmrCity())) {
+      cmrData.setCity(cmrsMods.getCmrCity());
+    }
+    if (!StringUtils.isBlank(cmrsMods.getCmrStateDesc())) {
+      cmrData.setStateProv(cmrsMods.getCmrStateDesc());
+    }
+    if (!StringUtils.isBlank(cmrsMods.getCmrPostalCode())) {
+      cmrData.setPostCd(cmrsMods.getCmrPostalCode());
+    }
+    if (!StringUtils.isBlank(cmrsMods.getCmrVat())) {
+      cmrData.setVat(cmrsMods.getCmrVat());
+    }
+    if (!StringUtils.isBlank(cmrsMods.getCmrDuns())) {
+      cmrData.setDunsNo(cmrsMods.getCmrDuns());
+    }
   }
 
 }
