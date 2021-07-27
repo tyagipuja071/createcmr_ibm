@@ -3208,7 +3208,7 @@ function addressNameSimilarValidator() {
                 }               
               }         
           if (count > 0) {
-            return new ValidationResult(null, false, 'All Updated / New address customer name should be similar to Mailing address.');
+            return new ValidationResult(null, false, 'All Updated / New address customer name should be same to Mailing address.');
           } else {
             return new ValidationResult(null, true);
           }
