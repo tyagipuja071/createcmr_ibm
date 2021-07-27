@@ -93,7 +93,7 @@ public class IndiaUtil extends AutomationUtil {
       if (data.getApCustClusterId().contains("08033")) {
         details.append("Cluster is set to 08033 Ecosystem Partners.Cmde review Needed").append("\n");
         engineData.addNegativeCheckStatus("OTH", "Cluster is set to 08033. Cmde review Needed");
-        return false;
+        return true;
       }
       if (data.getApCustClusterId().contains("012D999")) {
         details.append("Cluster cannot be default as 012D999.").append("\n");
