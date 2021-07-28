@@ -709,6 +709,26 @@ function populateTranslationAddrWithSoldToDataTR() {
   }
 }
 
+var _addrSelectionHistTR = '';
+function preFillTranslationAddrWithSoldToForTR(cntry, addressMode, saving) {
+  if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.TURKEY) {
+    var custType = FormManager.getActualValue('custGrp');
+    // for local don't proceed
+    if (custType == 'LOCAL') {
+      return;
+    }
+    if (!saving) {
+      if (FormManager.getActualValue('addrType') == 'ZP01') {
+        populateTranslationAddrWithSoldToDataTR();
+      } else if (FormManager.getActualValue('addrType') != 'ZP01' && addressMode != 'updateAddress' && _addrSelectionHistTR == 'ZP01') {
+        // clear address fields when switching
+        clearAddrFieldsForTR();
+      }
+    }
+    _addrSelectionHistTR = FormManager.getActualValue('addrType');
+  }
+}
+
 function clearAddrFieldsForGR() {
   FormManager.clearValue('custNm1');
   FormManager.clearValue('custNm2');
@@ -807,6 +827,7 @@ function addHandlersForGR() {
     _gtcAddrTypeHandler[i] = null;
     if (_gtcAddrTypeHandler[i] == null) {
       _gtcAddrTypeHandler[i] = dojo.connect(FormManager.getField('addrType_' + _gtcAddrTypes[i]), 'onClick', function(value) {
+        preFillTranslationAddrWithSoldToForTR();
         if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE) {
           convertToUpperCaseGR();
           disableAddrFieldsGR();
@@ -2135,5 +2156,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addInacCodeValidator, [ SysLoc.GREECE ], null, true);
   GEOHandler.registerValidator(addPaymentModeValidator, [ SysLoc.GREECE ], null, true);
   GEOHandler.registerValidator(addEnterpriseValidator, [ SysLoc.GREECE ], null, true);
+	GEOHandler.addAddrFunction(preFillTranslationAddrWithSoldToForTR, [ SysLoc.GREECE ]);
 
 });
