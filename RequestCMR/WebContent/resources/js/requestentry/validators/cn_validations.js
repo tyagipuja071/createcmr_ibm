@@ -809,7 +809,7 @@ function showHideCityCN() {
       }
       FormManager.addValidator('stateProv', Validators.REQUIRED, [ 'State/Province' ], null);
       //
-      FormManager.addValidator('custPhone', Validators.REQUIRED, [ "Customer Contact's Phone Number" ], null);
+      FormManager.addValidator('custPhone', Validators.REQUIRED, [ "Phone#" ], null);
       FormManager.addValidator('cnCustContJobTitle', Validators.REQUIRED, [ "Customer Contact's Job Title" ], null);
       FormManager.addValidator('cnCustContNm', Validators.REQUIRED, [ "Customer Contact's Name (include salutation)" ], null);
     }
@@ -1892,7 +1892,7 @@ function convertCnDistrictInDetails() {
   FormManager.setValue('cnDistrict', convert2DBCSIgnoreCase(cnDistrict));
   cnDistrict = FormManager.getActualValue('cnDistrict');
 }
-//TODO 
+// TODO
 function convertCustNm1(cntry, addressMode, details) {
   dojo.connect(FormManager.getField('custNm1'), 'onChange', function(value) {
     var custNm1 = FormManager.getActualValue('custNm1');
