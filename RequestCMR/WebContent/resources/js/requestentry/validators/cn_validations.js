@@ -1347,6 +1347,7 @@ function isChangedField(fieldName, addrType, addrSeq, list1, list2) {
   var fieldValue1 = null;
   var fieldValue2 = null;
   
+  // addr
   if (list1 != null && list1.length > 0) {
     for (var i = 0; i < list1.length; i ++) {
       if (list1[i].addrType == addrType && list1[i].addrSeq == addrSeq) {
@@ -1363,6 +1364,7 @@ function isChangedField(fieldName, addrType, addrSeq, list1, list2) {
     }
   }
   
+  // addr_rdc
   if (list2 != null && list2.length > 0) {
     for (var j = 0; j < list2.length; j ++) {
       if (list2[j].addrType == addrType && list2[j].addrSeq == addrSeq) {
@@ -1379,7 +1381,7 @@ function isChangedField(fieldName, addrType, addrSeq, list1, list2) {
     }
   }
   
-  if (fieldValue1 != fieldValue2) {
+  if (convert2DBCSIgnoreCase(fieldValue1) != convert2DBCSIgnoreCase(fieldValue2)) {
     result = true;
   }
   return result;
