@@ -628,6 +628,12 @@ public class DnBUtil {
     address += StringUtils.isNotBlank(addr.getAddrTxt2()) ? " " + addr.getAddrTxt2() : "";
     address = address.trim();
 
+    String handlerAddress = handler.buildAddressForDnbMatching(country, addr);
+    if (handler != null && !StringUtils.isBlank(handlerAddress)) {
+      address = handlerAddress;
+    }
+    LOG.debug("Address used for matching: " + address);
+
     String dnbAddress = dnbRecord.getDnbStreetLine1() != null ? dnbRecord.getDnbStreetLine1() : "";
     if (StringUtils.isNotBlank(addr.getAddrTxt2())) {
       dnbAddress += StringUtils.isNotBlank(dnbRecord.getDnbStreetLine2()) ? " " + dnbRecord.getDnbStreetLine2() : "";
