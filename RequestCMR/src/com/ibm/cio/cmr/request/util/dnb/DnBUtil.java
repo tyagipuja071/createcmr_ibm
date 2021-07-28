@@ -338,11 +338,11 @@ public class DnBUtil {
       AutomationResponse<CNResponse> cmrsData = CompanyFinder.getCNApiInfo(companyRecordModel, "TAXCD");
       if (cmrsData != null && cmrsData.isSuccess()) {
         LOG.debug("Get Chiese API Info successful>>>");
-        String cnName = cmrsData.getRecord().getName().trim();
-        String cnStreet = cmrsData.getRecord().getRegLocation().trim();
-        String cnCity1 = cmrsData.getRecord().getCity().trim();
-        String cnCity2 = cmrsData.getRecord().getDistrict().trim();
-        String cnCreditCode = cmrsData.getRecord().getCreditCode().trim();
+        String cnName = StringUtils.isNotBlank(cmrsData.getRecord().getName()) ? cmrsData.getRecord().getName().trim() : "";
+        String cnStreet = StringUtils.isNotBlank(cmrsData.getRecord().getRegLocation()) ? cmrsData.getRecord().getRegLocation().trim() : "";
+        String cnCity1 = StringUtils.isNotBlank(cmrsData.getRecord().getCity()) ? cmrsData.getRecord().getCity().trim() : "";
+        String cnCity2 = StringUtils.isNotBlank(cmrsData.getRecord().getDistrict()) ? cmrsData.getRecord().getDistrict().trim() : "";
+        String cnCreditCode = StringUtils.isNotBlank(cmrsData.getRecord().getCreditCode()) ? cmrsData.getRecord().getCreditCode().trim() : "";
         cmrRecord.setCmrIntlName(cnName);
         cmrRecord.setCmrIntlAddress(cnStreet);
         cmrRecord.setCmrIntlCity1(cnCity1);
