@@ -57,6 +57,7 @@ import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.SystemUtil;
+import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
 
 /**
@@ -963,6 +964,38 @@ public abstract class GEOHandler {
   }
 
   public String[] getAddressOrder() {
+    return null;
+  }
+
+  /**
+   * Return true if the country supports 3 lines of addresses
+   * 
+   * @return
+   */
+  public boolean has3AddressLines(String country) {
+    return false;
+  }
+
+  /**
+   * Called for import, sets the value of the 3rd address line, if supported
+   * 
+   * @param addr
+   * @param line3
+   */
+  public void setAddressLine3(String country, Addr addr, FindCMRRecordModel cmrModel, String line3) {
+
+  }
+
+  /**
+   * Called from
+   * {@link DnBUtil#closelyMatchesDnb(String, Addr, Admin, com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse, String, boolean, boolean)},
+   * builds the address used for close matching in D&B. Should return null if
+   * the default address construction is used
+   * 
+   * @param addr
+   * @return
+   */
+  public String buildAddressForDnbMatching(String country, Addr addr) {
     return null;
   }
 

@@ -22,6 +22,7 @@ import com.ibm.cio.cmr.request.automation.impl.gbl.FieldComputationElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.GBGMatchingElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.GBLScenarioCheckElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.GOEDeterminationElement;
+import com.ibm.cio.cmr.request.automation.impl.gbl.INGSTValidationElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.ImportCMRElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.RetrieveIBMValuesElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.USAddrStdElement;
@@ -83,7 +84,10 @@ public class AutomationElementRegistry extends HashMap<String, Class<? extends A
   public static final String US_SOS_RPA_CHECK = "US_SOS_RPA_CHECK";
   //EMEA
   public static final String EMEA_ABBREV_CHECK = "EMEA_ABBREV_CHECK";
-  
+
+  // India
+  public static final String IN_GST_VALIDATION = "IN_GST_VALIDATION";
+
   private static AutomationElementRegistry registry = new AutomationElementRegistry();
 
   public static AutomationElementRegistry getInstance() {
@@ -130,6 +134,7 @@ public class AutomationElementRegistry extends HashMap<String, Class<? extends A
     put(US_DUP_CHK, USDuplicateCheckElement.class);
     put(US_BP_PROCESS, USBusinessPartnerElement.class);
     put(US_SOS_RPA_CHECK, USSosRpaCheckElement.class);
+    put(IN_GST_VALIDATION, INGSTValidationElement.class);
   }
 
   @Override

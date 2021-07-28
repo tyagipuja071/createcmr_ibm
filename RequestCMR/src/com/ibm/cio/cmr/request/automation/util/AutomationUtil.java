@@ -29,6 +29,7 @@ import com.ibm.cio.cmr.request.automation.util.geo.BeLuxUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.BrazilUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.FranceUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.GermanyUtil;
+import com.ibm.cio.cmr.request.automation.util.geo.IndiaUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.NetherlandsUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.SingaporeUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.SpainUtil;
@@ -83,6 +84,7 @@ public abstract class AutomationUtil {
       put(SystemLocation.AUSTRALIA, AustraliaUtil.class);
       put(SystemLocation.GERMANY, GermanyUtil.class);
       put(SystemLocation.UNITED_STATES, USUtil.class);
+      put(SystemLocation.INDIA, IndiaUtil.class);
 
       // FRANCE Sub Regions
       put(SystemLocation.FRANCE, FranceUtil.class);
@@ -206,6 +208,16 @@ public abstract class AutomationUtil {
 
   public String getAddressTypeForGbgCovCalcs(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData) throws Exception {
     return "ZS01";
+  }
+
+  /**
+   * This method will empty the INAC values
+   * 
+   * @throws Exception
+   */
+
+  public void emptyINAC(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData) throws Exception {
+    // NOOP
   }
 
   /**
@@ -440,6 +452,8 @@ public abstract class AutomationUtil {
     if (StringUtils.isNotBlank(data.getVat())) {
       if (SystemLocation.SWITZERLAND.equalsIgnoreCase(data.getCmrIssuingCntry())) {
         request.setOrgId(data.getVat().split("\\s")[0]);
+      } else if (SystemLocation.INDIA.equalsIgnoreCase(data.getCmrIssuingCntry())) {
+        request.setOrgId("");
       } else {
         request.setOrgId(data.getVat());
       }
