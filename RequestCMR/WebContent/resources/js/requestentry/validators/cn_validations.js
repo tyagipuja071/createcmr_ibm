@@ -1652,6 +1652,309 @@ function addDoubleByteValidatorCN(cntry, details) {
   FormManager.addValidator('poBox', Validators.LATIN, [ 'PostBox English' ]);
 }
 
+function convert2DBCSIgnoreCase(input) {
+  var modifiedVal = '';
+  if (input != null && input.length > 0) {
+    modifiedVal = input;
+    // modifiedVal = modifiedVal.replace(/[^\d]/g, '');
+    modifiedVal = modifiedVal.replace(/1/g, '１');
+    modifiedVal = modifiedVal.replace(/2/g, '２');
+    modifiedVal = modifiedVal.replace(/3/g, '３');
+    modifiedVal = modifiedVal.replace(/4/g, '４');
+    modifiedVal = modifiedVal.replace(/5/g, '５');
+    modifiedVal = modifiedVal.replace(/6/g, '６');
+    modifiedVal = modifiedVal.replace(/7/g, '７');
+    modifiedVal = modifiedVal.replace(/8/g, '８');
+    modifiedVal = modifiedVal.replace(/9/g, '９');
+    modifiedVal = modifiedVal.replace(/0/g, '０');
+    modifiedVal = modifiedVal.replace(/a/g, 'ａ');
+    modifiedVal = modifiedVal.replace(/b/g, 'ｂ');
+    modifiedVal = modifiedVal.replace(/c/g, 'ｃ');
+    modifiedVal = modifiedVal.replace(/d/g, 'ｄ');
+    modifiedVal = modifiedVal.replace(/e/g, 'ｅ');
+    modifiedVal = modifiedVal.replace(/f/g, 'ｆ');
+    modifiedVal = modifiedVal.replace(/g/g, 'ｇ');
+    modifiedVal = modifiedVal.replace(/h/g, 'ｈ');
+    modifiedVal = modifiedVal.replace(/i/g, 'ｉ');
+    modifiedVal = modifiedVal.replace(/j/g, 'ｊ');
+    modifiedVal = modifiedVal.replace(/k/g, 'ｋ');
+    modifiedVal = modifiedVal.replace(/l/g, 'ｌ');
+    modifiedVal = modifiedVal.replace(/m/g, 'ｍ');
+    modifiedVal = modifiedVal.replace(/n/g, 'ｎ');
+    modifiedVal = modifiedVal.replace(/o/g, 'ｏ');
+    modifiedVal = modifiedVal.replace(/p/g, 'ｐ');
+    modifiedVal = modifiedVal.replace(/q/g, 'ｑ');
+    modifiedVal = modifiedVal.replace(/r/g, 'ｒ');
+    modifiedVal = modifiedVal.replace(/s/g, 'ｓ');
+    modifiedVal = modifiedVal.replace(/t/g, 'ｔ');
+    modifiedVal = modifiedVal.replace(/u/g, 'ｕ');
+    modifiedVal = modifiedVal.replace(/v/g, 'ｖ');
+    modifiedVal = modifiedVal.replace(/w/g, 'ｗ');
+    modifiedVal = modifiedVal.replace(/x/g, 'ｘ');
+    modifiedVal = modifiedVal.replace(/y/g, 'ｙ');
+    modifiedVal = modifiedVal.replace(/z/g, 'ｚ');
+    modifiedVal = modifiedVal.replace(/A/g, 'Ａ');
+    modifiedVal = modifiedVal.replace(/B/g, 'Ｂ');
+    modifiedVal = modifiedVal.replace(/C/g, 'Ｃ');
+    modifiedVal = modifiedVal.replace(/D/g, 'Ｄ');
+    modifiedVal = modifiedVal.replace(/E/g, 'Ｅ');
+    modifiedVal = modifiedVal.replace(/F/g, 'Ｆ');
+    modifiedVal = modifiedVal.replace(/G/g, 'Ｇ');
+    modifiedVal = modifiedVal.replace(/H/g, 'Ｈ');
+    modifiedVal = modifiedVal.replace(/I/g, 'Ｉ');
+    modifiedVal = modifiedVal.replace(/J/g, 'Ｊ');
+    modifiedVal = modifiedVal.replace(/K/g, 'Ｋ');
+    modifiedVal = modifiedVal.replace(/L/g, 'Ｌ');
+    modifiedVal = modifiedVal.replace(/M/g, 'Ｍ');
+    modifiedVal = modifiedVal.replace(/N/g, 'Ｎ');
+    modifiedVal = modifiedVal.replace(/O/g, 'Ｏ');
+    modifiedVal = modifiedVal.replace(/P/g, 'Ｐ');
+    modifiedVal = modifiedVal.replace(/Q/g, 'Ｑ');
+    modifiedVal = modifiedVal.replace(/R/g, 'Ｒ');
+    modifiedVal = modifiedVal.replace(/S/g, 'Ｓ');
+    modifiedVal = modifiedVal.replace(/T/g, 'Ｔ');
+    modifiedVal = modifiedVal.replace(/U/g, 'Ｕ');
+    modifiedVal = modifiedVal.replace(/V/g, 'Ｖ');
+    modifiedVal = modifiedVal.replace(/W/g, 'Ｗ');
+    modifiedVal = modifiedVal.replace(/X/g, 'Ｘ');
+    modifiedVal = modifiedVal.replace(/Y/g, 'Ｙ');
+    modifiedVal = modifiedVal.replace(/Z/g, 'Ｚ');
+    modifiedVal = modifiedVal.replace(/ /g, '　');
+    modifiedVal = replaceAndSymbol(modifiedVal);
+    modifiedVal = replaceCrossbarSymbol(modifiedVal);
+  }
+  return modifiedVal;
+}
+function replaceAndSymbol(value) {
+  var modifiedVal = '';
+  if (value != null && value.length > 0) {
+    modifiedVal = value;
+    modifiedVal = modifiedVal.replace(/&/g, '＆');
+  }
+  return modifiedVal;
+};
+function replaceCrossbarSymbol(value) {
+  var modifiedVal = '';
+  if (value != null && value.length > 0) {
+    modifiedVal = value;
+    modifiedVal = modifiedVal.replace(/-/g, '－');
+    modifiedVal = modifiedVal.replace(/･/g, '・');
+    // Story CMR-1660
+    modifiedVal = modifiedVal.replace(/,/g, '，');
+    modifiedVal = modifiedVal.replace(/:/g, '：');
+    modifiedVal = modifiedVal.replace(/_/g, '＿');
+    modifiedVal = modifiedVal.replace(/\(/g, '（');
+    modifiedVal = modifiedVal.replace(/\)/g, '）');
+  }
+  return modifiedVal;
+};
+
+function convert2SBCS(input) {
+  var modifiedVal = '';
+  if (input != null && input.length > 0) {
+    modifiedVal = input;
+    // modifiedVal = modifiedVal.replace(/[^\d]/g, '');
+    modifiedVal = modifiedVal.replace(/１/g, '1');
+    modifiedVal = modifiedVal.replace(/２/g, '2');
+    modifiedVal = modifiedVal.replace(/３/g, '3');
+    modifiedVal = modifiedVal.replace(/４/g, '4');
+    modifiedVal = modifiedVal.replace(/５/g, '5');
+    modifiedVal = modifiedVal.replace(/６/g, '6');
+    modifiedVal = modifiedVal.replace(/７/g, '7');
+    modifiedVal = modifiedVal.replace(/８/g, '8');
+    modifiedVal = modifiedVal.replace(/９/g, '9');
+    modifiedVal = modifiedVal.replace(/０/g, '0');
+    modifiedVal = modifiedVal.replace(/ａ/g, 'a');
+    modifiedVal = modifiedVal.replace(/ｂ/g, 'b');
+    modifiedVal = modifiedVal.replace(/ｃ/g, 'c');
+    modifiedVal = modifiedVal.replace(/ｄ/g, 'd');
+    modifiedVal = modifiedVal.replace(/ｅ/g, 'e');
+    modifiedVal = modifiedVal.replace(/ｆ/g, 'f');
+    modifiedVal = modifiedVal.replace(/ｇ/g, 'g');
+    modifiedVal = modifiedVal.replace(/ｈ/g, 'f');
+    modifiedVal = modifiedVal.replace(/ｉ/g, 'i');
+    modifiedVal = modifiedVal.replace(/ｊ/g, 'j');
+    modifiedVal = modifiedVal.replace(/ｋ/g, 'k');
+    modifiedVal = modifiedVal.replace(/ｌ/g, 'l');
+    modifiedVal = modifiedVal.replace(/ｍ/g, 'm');
+    modifiedVal = modifiedVal.replace(/ｎ/g, 'n');
+    modifiedVal = modifiedVal.replace(/ｏ/g, 'o');
+    modifiedVal = modifiedVal.replace(/ｐ/g, 'p');
+    modifiedVal = modifiedVal.replace(/ｑ/g, 'q');
+    modifiedVal = modifiedVal.replace(/ｒ/g, 'r');
+    modifiedVal = modifiedVal.replace(/ｓ/g, 's');
+    modifiedVal = modifiedVal.replace(/ｔ/g, 't');
+    modifiedVal = modifiedVal.replace(/ｕ/g, 'u');
+    modifiedVal = modifiedVal.replace(/ｖ/g, 'v');
+    modifiedVal = modifiedVal.replace(/ｗ/g, 'w');
+    modifiedVal = modifiedVal.replace(/ｘ/g, 'x');
+    modifiedVal = modifiedVal.replace(/ｙ/g, 'y');
+    modifiedVal = modifiedVal.replace(/ｚ/g, 'z');
+    modifiedVal = modifiedVal.replace(/Ａ/g, 'A');
+    modifiedVal = modifiedVal.replace(/Ｂ/g, 'B');
+    modifiedVal = modifiedVal.replace(/Ｃ/g, 'C');
+    modifiedVal = modifiedVal.replace(/Ｄ/g, 'D');
+    modifiedVal = modifiedVal.replace(/Ｅ/g, 'E');
+    modifiedVal = modifiedVal.replace(/Ｆ/g, 'F');
+    modifiedVal = modifiedVal.replace(/Ｇ/g, 'G');
+    modifiedVal = modifiedVal.replace(/Ｈ/g, 'H');
+    modifiedVal = modifiedVal.replace(/Ｉ/g, 'I');
+    modifiedVal = modifiedVal.replace(/Ｊ/g, 'J');
+    modifiedVal = modifiedVal.replace(/Ｋ/g, 'K');
+    modifiedVal = modifiedVal.replace(/Ｌ/g, 'L');
+    modifiedVal = modifiedVal.replace(/Ｍ/g, 'M');
+    modifiedVal = modifiedVal.replace(/Ｎ/g, 'N');
+    modifiedVal = modifiedVal.replace(/Ｏ/g, 'O');
+    modifiedVal = modifiedVal.replace(/Ｐ/g, 'P');
+    modifiedVal = modifiedVal.replace(/Ｑ/g, 'Q');
+    modifiedVal = modifiedVal.replace(/Ｒ/g, 'R');
+    modifiedVal = modifiedVal.replace(/Ｓ/g, 'S');
+    modifiedVal = modifiedVal.replace(/Ｔ/g, 'T');
+    modifiedVal = modifiedVal.replace(/Ｕ/g, 'U');
+    modifiedVal = modifiedVal.replace(/Ｖ/g, 'V');
+    modifiedVal = modifiedVal.replace(/Ｗ/g, 'W');
+    modifiedVal = modifiedVal.replace(/Ｘ/g, 'X');
+    modifiedVal = modifiedVal.replace(/Ｙ/g, 'Y');
+    modifiedVal = modifiedVal.replace(/Ｚ/g, 'Z');
+    modifiedVal = modifiedVal.replace(/　/g, ' ');
+  }
+  return modifiedVal;
+}
+
+function convertCnCustName1(cntry, addressMode, details) {
+  convertCnCustName1InDetails();
+  dojo.connect(FormManager.getField('cnCustName1'), 'onChange', function(value) {
+    convertCnCustName1InDetails();
+  });
+}
+function convertCnCustName1InDetails() {
+  var cnCustName1 = FormManager.getActualValue('cnCustName1');
+  FormManager.setValue('cnCustName1', convert2DBCSIgnoreCase(cnCustName1));
+  cnCustName1 = FormManager.getActualValue('cnCustName1');
+}
+
+function convertCnCustName2(cntry, addressMode, details) {
+  convertCnCustName2InDetails();
+  dojo.connect(FormManager.getField('cnCustName2'), 'onChange', function(value) {
+    convertCnCustName2InDetails();
+  });
+}
+function convertCnCustName2InDetails() {
+  var cnCustName2 = FormManager.getActualValue('cnCustName2');
+  FormManager.setValue('cnCustName2', convert2DBCSIgnoreCase(cnCustName2));
+  cnCustName2 = FormManager.getActualValue('cnCustName2');
+}
+
+function convertCnCustName3(cntry, addressMode, details) {
+  convertCnCustName3InDetails();
+  dojo.connect(FormManager.getField('cnCustName3'), 'onChange', function(value) {
+    convertCnCustName3InDetails();
+  });
+}
+function convertCnCustName3InDetails() {
+  var cnCustName3 = FormManager.getActualValue('cnCustName3');
+  FormManager.setValue('cnCustName3', convert2DBCSIgnoreCase(cnCustName3));
+  cnCustName3 = FormManager.getActualValue('cnCustName3');
+}
+
+function convertCnAddrTxt(cntry, addressMode, details) {
+  convertCnAddrTxtInDetails();
+  dojo.connect(FormManager.getField('cnAddrTxt'), 'onChange', function(value) {
+    convertCnAddrTxtInDetails();
+  });
+}
+function convertCnAddrTxtInDetails() {
+  var cnAddrTxt = FormManager.getActualValue('cnAddrTxt');
+  FormManager.setValue('cnAddrTxt', convert2DBCSIgnoreCase(cnAddrTxt));
+  cnAddrTxt = FormManager.getActualValue('cnAddrTxt');
+}
+
+function convertCnAddrTxt2(cntry, addressMode, details) {
+  convertCnAddrTxt2InDetails();
+  dojo.connect(FormManager.getField('cnAddrTxt2'), 'onChange', function(value) {
+    convertCnAddrTxt2InDetails();
+  });
+}
+function convertCnAddrTxt2InDetails() {
+  var cnAddrTxt2 = FormManager.getActualValue('cnAddrTxt2');
+  FormManager.setValue('cnAddrTxt2', convert2DBCSIgnoreCase(cnAddrTxt2));
+  cnAddrTxt2 = FormManager.getActualValue('cnAddrTxt2');
+}
+
+function convertCnDistrict(cntry, addressMode, details) {
+  convertCnDistrictInDetails();
+  dojo.connect(FormManager.getField('cnDistrict'), 'onChange', function(value) {
+    convertCnDistrictInDetails();
+  });
+}
+function convertCnDistrictInDetails() {
+  var cnDistrict = FormManager.getActualValue('cnDistrict');
+  FormManager.setValue('cnDistrict', convert2DBCSIgnoreCase(cnDistrict));
+  cnDistrict = FormManager.getActualValue('cnDistrict');
+}
+//TODO 
+function convertCustNm1(cntry, addressMode, details) {
+  dojo.connect(FormManager.getField('custNm1'), 'onChange', function(value) {
+    var custNm1 = FormManager.getActualValue('custNm1');
+    FormManager.setValue('custNm1', convert2SBCS(custNm1));
+  });
+}
+
+function convertCustNm2(cntry, addressMode, details) {
+  dojo.connect(FormManager.getField('custNm2'), 'onChange', function(value) {
+    var custNm2 = FormManager.getActualValue('custNm2');
+    FormManager.setValue('custNm2', convert2SBCS(custNm2));
+  });
+}
+function convertCustNm3(cntry, addressMode, details) {
+  dojo.connect(FormManager.getField('custNm3'), 'onChange', function(value) {
+    var custNm3 = FormManager.getActualValue('custNm3');
+    FormManager.setValue('custNm3', convert2SBCS(custNm3));
+  });
+}
+function convertAddrTxt(cntry, addressMode, details) {
+  dojo.connect(FormManager.getField('addrTxt'), 'onChange', function(value) {
+    var addrTxt = FormManager.getActualValue('addrTxt');
+    FormManager.setValue('addrTxt', convert2SBCS(addrTxt));
+  });
+}
+function convertAddrTxt2(cntry, addressMode, details) {
+  dojo.connect(FormManager.getField('addrTxt2'), 'onChange', function(value) {
+    var addrTxt2 = FormManager.getActualValue('addrTxt2');
+    FormManager.setValue('addrTxt2', convert2SBCS(addrTxt2));
+  });
+}
+function convertCity2(cntry, addressMode, details) {
+  dojo.connect(FormManager.getField('city2'), 'onChange', function(value) {
+    var city2 = FormManager.getActualValue('city2');
+    FormManager.setValue('city2', convert2SBCS(city2));
+  });
+}
+function convertDept(cntry, addressMode, details) {
+  dojo.connect(FormManager.getField('dept'), 'onChange', function(value) {
+    var dept = FormManager.getActualValue('dept');
+    FormManager.setValue('dept', convert2SBCS(dept));
+  });
+}
+function convertBldg(cntry, addressMode, details) {
+  dojo.connect(FormManager.getField('bldg'), 'onChange', function(value) {
+    var bldg = FormManager.getActualValue('bldg');
+    FormManager.setValue('bldg', convert2SBCS(bldg));
+  });
+}
+function convertOffice(cntry, addressMode, details) {
+  dojo.connect(FormManager.getField('office'), 'onChange', function(value) {
+    var office = FormManager.getActualValue('office');
+    FormManager.setValue('office', convert2SBCS(office));
+  });
+}
+function convertPoBox(cntry, addressMode, details) {
+  dojo.connect(FormManager.getField('poBox'), 'onChange', function(value) {
+    var poBox = FormManager.getActualValue('poBox');
+    FormManager.setValue('poBox', convert2SBCS(poBox));
+  });
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.CN = [ SysLoc.CHINA ];
   console.log('adding CN validators...');
@@ -1686,6 +1989,23 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(autoSetAddrFieldsForCN, GEOHandler.CN);
   GEOHandler.addAddrFunction(showHideCityCN, GEOHandler.CN);
   GEOHandler.addAddrFunction(addDoubleByteValidatorCN, GEOHandler.CN);
+  
+  GEOHandler.addToggleAddrTypeFunction(convertCnCustName1, GEOHandler.CN);
+  GEOHandler.addToggleAddrTypeFunction(convertCnCustName2, GEOHandler.CN);
+  GEOHandler.addToggleAddrTypeFunction(convertCnCustName3, GEOHandler.CN);
+  GEOHandler.addToggleAddrTypeFunction(convertCnAddrTxt, GEOHandler.CN);
+  GEOHandler.addToggleAddrTypeFunction(convertCnAddrTxt2, GEOHandler.CN);
+  GEOHandler.addToggleAddrTypeFunction(convertCnDistrict, GEOHandler.CN);
+  GEOHandler.addToggleAddrTypeFunction(convertCustNm1, GEOHandler.CN);
+  GEOHandler.addToggleAddrTypeFunction(convertCustNm2, GEOHandler.CN);
+  GEOHandler.addToggleAddrTypeFunction(convertCustNm3, GEOHandler.CN); 
+  GEOHandler.addToggleAddrTypeFunction(convertAddrTxt, GEOHandler.CN);
+  GEOHandler.addToggleAddrTypeFunction(convertAddrTxt2, GEOHandler.CN);
+  GEOHandler.addToggleAddrTypeFunction(convertCity2, GEOHandler.CN);
+  GEOHandler.addToggleAddrTypeFunction(convertDept, GEOHandler.CN);
+  GEOHandler.addToggleAddrTypeFunction(convertBldg, GEOHandler.CN);
+  GEOHandler.addToggleAddrTypeFunction(convertOffice, GEOHandler.CN);
+  GEOHandler.addToggleAddrTypeFunction(convertPoBox, GEOHandler.CN);
   
   GEOHandler.registerValidator(addDPLCheckValidator, GEOHandler.CN, GEOHandler.ROLE_REQUESTER, false, false);
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.CHINA, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.CHINA ], null, true);
