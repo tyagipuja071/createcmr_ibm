@@ -3517,7 +3517,9 @@ dojo.addOnLoad(function() {
 
   // GEOHandler.registerValidator(addMandateCmrNoForSG, [SysLoc.SINGAPORE]);
   GEOHandler.registerValidator(addCmrNoValidator, [ SysLoc.SINGAPORE ]);
-
+  GEOHandler.registerValidator(addCompanyProofAttachValidation, [ SysLoc.INDIA]);
+  GEOHandler.registerValidator(addressNameSimilarValidator, [ SysLoc.INDIA]);
+  
   GEOHandler.addAfterConfig(removeStateValidatorForHkMoNZ, [ SysLoc.AUSTRALIA, SysLoc.NEW_ZEALAND ]);
   GEOHandler.addAfterTemplateLoad(removeStateValidatorForHkMoNZ, [ SysLoc.AUSTRALIA, SysLoc.NEW_ZEALAND ]);
 
