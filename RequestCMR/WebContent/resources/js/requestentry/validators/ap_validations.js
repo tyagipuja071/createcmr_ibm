@@ -1843,7 +1843,6 @@ function onIsuCdChangeAseanAnzIsa() {
 function updateMRCAseanAnzIsa() {
   console.log(">>>> updateMRC >>>>");
   var arryISUCdForMRC3 = [ '32', '34', '21', '60' ];
-  var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
   var scenario = FormManager.getActualValue('custGrp');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
@@ -1852,7 +1851,9 @@ function updateMRCAseanAnzIsa() {
   if((aseanCntries.includes(cntry)) && (custSubGrp == '' || custSubGrp == 'INTER' || custSubGrp == 'XINT'|| custSubGrp == 'DUMMY' || custSubGrp == 'XDUMM')){
     return;
   }
-  FormManager.setValue('mrcCd', '');
+  if(!(cntry == 744 && (custSubGrp == 'CROSS' || custSubGrp == 'AQSTN' || custSubGrp == 'NRML' || custSubGrp == 'ESOSW'))){
+    FormManager.setValue('mrcCd', '');
+    } 
   var _isuCd = FormManager.getActualValue('isuCd');
   if (_isuCd != null && _isuCd.length > 1) {
     FormManager.setValue('mrcCd', '3');
@@ -1863,14 +1864,14 @@ function updateMRCAseanAnzIsa() {
       }
     }
     if (_exsitFlag == 0) {
-      if(cmrIssuingCntry == '744' && custSubGrp == 'PRIV'){
+      if(cntry == '744' && custSubGrp == 'PRIV'){
         FormManager.setValue('mrcCd', '3');
       } else{
         FormManager.setValue('mrcCd', '2');
       }
       FormManager.setValue('mrcCd', '2');
     }
-    if(scenario == 'LOCAL' &&(cmrIssuingCntry == '744' || cmrIssuingCntry == '615' || cmrIssuingCntry == '652') && custSubGrp == 'INTER'){
+    if(scenario == 'LOCAL' &&(cntry == '744' || cntry == '615' || cntry == '652') && custSubGrp == 'INTER'){
       FormManager.setValue('mrcCd', '3');
     }
   }
