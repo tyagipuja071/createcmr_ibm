@@ -178,6 +178,21 @@ public class ChinaUtil extends AutomationUtil {
         engineData.addRejectionComment("OTH", "Cluster=" + data.getSearchTerm() + " should default (00000)  for this scenario", "", "");
         result.setOnError(true);
       }
+      if (StringUtils.isNotBlank(customerName) && (customerName.indexOf("Private Limited") < 0 && customerName.indexOf("Company") < 0
+          && customerName.indexOf("Corporation") < 0 && customerName.indexOf("incorporate") < 0 && customerName.indexOf("organization") < 0
+          && customerName.indexOf("Pvt Ltd") < 0 && customerName.indexOf("imited") < 0)) {
+        LOG.debug("English name=" + customerName + " for Scenario=" + data.getCustSubGrp());
+        result.setOnError(false);
+        details.append("English name=" + customerName + " for Scenario=" + data.getCustSubGrp() + " for the request.\n");
+      } else {
+        details.append(
+            "English name can't contain 'Private Limited', 'Company', 'Corporation', 'incorporate', 'organization', 'Pvt Ltd','imited' for Scenario="
+                + data.getCustSubGrp() + " for the request.\n");
+        engineData.addRejectionComment("OTH",
+            "English name can't contain 'Private Limited', 'Company', 'Corporation', 'incorporate', 'organization', 'Pvt Ltd','imited' for this scenario",
+            "", "");
+        result.setOnError(true);
+      }
       if ("9500".equals(data.getIsicCd())) {
         LOG.debug("ISIC allowed: ISIC=" + data.getIsicCd() + " Scenario=" + data.getCustSubGrp());
         result.setOnError(false);
