@@ -548,8 +548,8 @@ public class GermanyUtil extends AutomationUtil {
       String ims = subIndustryCd.substring(0, 1);
       String sql = ExternalizedQuery.getSql("AUTO.DE.GET_SBOLIST_FROM_ISUCTC");
       PreparedQuery query = new PreparedQuery(entityManager, sql);
-      query.setParameter("ISU", "%" + isu + "%");
-      query.setParameter("CLIENT_TIER", "%" + ctc + "%");
+      query.setParameter("ISU", isu);
+      query.setParameter("CLIENT_TIER", ctc);
       query.setParameter("ISSUING_CNTRY", SystemLocation.GERMANY);
       query.setParameter("UPDATE_BY_ID", "%" + ims + "%");
       query.setForReadOnly(true);
