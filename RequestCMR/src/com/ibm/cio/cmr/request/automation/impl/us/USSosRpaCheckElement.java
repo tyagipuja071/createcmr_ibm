@@ -61,6 +61,7 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
     AutomationResult<ValidationOutput> output = buildResult(admin.getId().getReqId());
     ValidationOutput validation = new ValidationOutput();
     Scorecard scorecard = requestData.getScorecard();
+    StringBuilder details = new StringBuilder();
     // skip sos matching if matching records are found in SOS-RPA
     /*
      * if (engineData.isDnbVerified() ||
@@ -80,7 +81,6 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
     }
     for (String addrType : RELEVANT_ADDRESSES) {
       Addr address = requestData.getAddress(addrType);
-      StringBuilder details = new StringBuilder();
       if (address != null) {
         AutomationResponse<SosResponse> response = getSosMatches(admin.getId().getReqId(), address, admin);
         scorecard.setRpaMatchingResult("");
@@ -134,16 +134,16 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
     autoClient.setReadTimeout(1000 * 60 * 5);
     autoClient.setRequestMethod(Method.Post);
     // calling SOS-RPA Service
-    log.debug("Calling SOS-RPA Service for Install - At (ZS01) address for Req_id : " + reqId);
-    SosRequest requestInstallAt = new SosRequest();
-    requestInstallAt.setName((StringUtils.isNotBlank(admin.getMainCustNm1()) ? admin.getMainCustNm1() : "")
+    log.debug("Calling SOS-RPA Service for Req_id : " + reqId);
+    SosRequest requestAddr = new SosRequest();
+    requestAddr.setName((StringUtils.isNotBlank(admin.getMainCustNm1()) ? admin.getMainCustNm1() : "")
         + (StringUtils.isNotBlank(admin.getMainCustNm2()) ? " " + admin.getMainCustNm2() : ""));
-    requestInstallAt.setCity1(zs01.getCity1());
-    requestInstallAt.setAddrTxt((StringUtils.isNotBlank(zs01.getAddrTxt()) ? zs01.getAddrTxt() : "")
+    requestAddr.setCity1(zs01.getCity1());
+    requestAddr.setAddrTxt((StringUtils.isNotBlank(zs01.getAddrTxt()) ? zs01.getAddrTxt() : "")
         + (StringUtils.isNotBlank(zs01.getAddrTxt2()) ? " " + zs01.getAddrTxt2() : ""));
-    requestInstallAt.setState(zs01.getStateProv());
+    requestAddr.setState(zs01.getStateProv());
     log.debug("Connecting to the SOS - RPA Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
-    AutomationResponse<?> rawResponseInstallAt = autoClient.executeAndWrap(AutomationServiceClient.US_SOS_RPA_SERVICE_ID, requestInstallAt,
+    AutomationResponse<?> rawResponseInstallAt = autoClient.executeAndWrap(AutomationServiceClient.US_SOS_RPA_SERVICE_ID, requestAddr,
         AutomationResponse.class);
     ObjectMapper mapper = new ObjectMapper();
     String json = mapper.writeValueAsString(rawResponseInstallAt);
