@@ -562,7 +562,6 @@ function removeValidatorForOptionalFields() {
     FormManager.removeValidator('taxCd2', Validators.REQUIRED);
     FormManager.removeValidator('salesBusOffCd', Validators.REQUIRED);
     FormManager.removeValidator('installBranchOff', Validators.REQUIRED);
-    FormManager.removeValidator('salesTeamCd', Validators.REQUIRED);
     FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
     FormManager.removeValidator('invoiceDistCd', Validators.REQUIRED);
     FormManager.removeValidator('QST', Validators.REQUIRED);
@@ -879,6 +878,41 @@ function limitDropdownOnScenarioChange(fromAddress, scenario, scenarioChanged) {
   }
 }
 
+function setCSBranchValue(fromAddress, scenario, scenarioChanged) {
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  if (FormManager.getActualValue('reqType') == 'C' && scenarioChanged) {
+    if (scenario == 'USA' || scenario == 'CND') {
+      FormManager.setValue('salesTeamCd', '000');
+      FormManager.readOnly('salesTeamCd');
+    } else {
+      var postCd = getSoldToPostalCode();
+      if (postCd != null && postCd.length >= 3) {
+        FormManager.setValue('salesTeamCd', postCd.substring(0, 3));
+      }
+      FormManager.enable('salesTeamCd');
+    }
+
+    if (role == 'REQUESTER') {
+      if (FormManager.getActualValue('custGrp') == 'LOCAL') {
+        FormManager.removeValidator('salesTeamCd', Validators.REQUIRED);
+      } else {
+        FormManager.addValidator('salesTeamCd', Validators.REQUIRED, [ 'CS Branch' ], 'MAIN_CUST_TAB');
+      }
+    }
+  }
+}
+
+function getSoldToPostalCode() {
+  var _zs01ReqId = FormManager.getActualValue('reqId');
+  var postCdParams = {
+    REQ_ID : _zs01ReqId,
+    ADDR_TYPE : "ZS01",
+  };
+  var postCdResult = cmr.query('ADDR.GET.POSTCD.BY_REQID_ADDRTYP', postCdParams);
+  var postCd = postCdResult.ret1;
+  return postCd;
+}
+
 /* Register CA Javascripts */
 dojo.addOnLoad(function() {
   console.log('adding CA scripts...');
@@ -910,5 +944,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setPrefLangAfterConfig, SysLoc.CANADA);
   GEOHandler.addAfterTemplateLoad(preTickLatePaymentInd, SysLoc.CANADA);
   GEOHandler.addAfterTemplateLoad(limitDropdownOnScenarioChange, SysLoc.CANADA);
+  GEOHandler.addAfterTemplateLoad(setCSBranchValue, SysLoc.CANADA);
   GEOHandler.addToggleAddrTypeFunction(hideObsoleteAddressOption, [ SysLoc.CANADA ]);
 });
