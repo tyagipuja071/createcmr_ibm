@@ -322,7 +322,7 @@ function disableVatExemptForScenarios() {
   var _custSubGrp = FormManager.getActualValue('custSubGrp');
   // setValuesForScenarios();
   if (_custSubGrp != 'undefined' && _custSubGrp != '') {
-    if (_custSubGrp == 'INTER'  ||  _custSubGrp == 'PRIV') {
+    if (_custSubGrp == 'INTER'  ||  _custSubGrp == 'PRIV' || _custSubGrp == 'CROSS') {
       FormManager.disable('vatExempt');
       FormManager.removeValidator('busnType', Validators.REQUIRED);
     } else {
