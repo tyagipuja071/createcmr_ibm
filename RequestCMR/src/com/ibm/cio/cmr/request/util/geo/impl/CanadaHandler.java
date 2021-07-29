@@ -529,8 +529,12 @@ public class CanadaHandler extends GEOHandler {
 
     // set CS Branch to first 3 digits of postal code
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
-      if (mainAddr.getPostCd() != null && mainAddr.getPostCd().length() >= 3) {
-        data.setSalesTeamCd(mainAddr.getPostCd().substring(0, 3));
+      if (CmrConstants.CUSTGRP_CROSS.equals(data.getCustGrp())) {
+        data.setSalesTeamCd("000");
+      } else {
+        if (mainAddr.getPostCd() != null && mainAddr.getPostCd().length() >= 3) {
+          data.setSalesTeamCd(mainAddr.getPostCd().substring(0, 3));
+        }
       }
     }
     if (mainAddr.getCity1() != null) {
