@@ -180,16 +180,16 @@ public class ChinaUtil extends AutomationUtil {
       }
       if (StringUtils.isNotBlank(customerName) && (customerName.indexOf("Private Limited") < 0 && customerName.indexOf("Company") < 0
           && customerName.indexOf("Corporation") < 0 && customerName.indexOf("incorporate") < 0 && customerName.indexOf("organization") < 0
-          && customerName.indexOf("Pvt Ltd") < 0 && customerName.indexOf("imited") < 0)) {
+          && customerName.indexOf("Pvt Ltd") < 0 && customerName.indexOf("imited") < 0 && customerName.indexOf("Co., Ltd.") < 0)) {
         LOG.debug("English name=" + customerName + " for Scenario=" + data.getCustSubGrp());
         result.setOnError(false);
         details.append("English name=" + customerName + " for Scenario=" + data.getCustSubGrp() + " for the request.\n");
       } else {
         details.append(
-            "English name can't contain 'Private Limited', 'Company', 'Corporation', 'incorporate', 'organization', 'Pvt Ltd','imited' for Scenario="
+            "English name can't contain 'Private Limited', 'Company', 'Corporation', 'incorporate', 'organization', 'Pvt Ltd','imited','Co., Ltd.' for Scenario="
                 + data.getCustSubGrp() + " for the request.\n");
         engineData.addRejectionComment("OTH",
-            "English name can't contain 'Private Limited', 'Company', 'Corporation', 'incorporate', 'organization', 'Pvt Ltd','imited' for this scenario",
+            "English name can't contain 'Private Limited', 'Company', 'Corporation', 'incorporate', 'organization', 'Pvt Ltd','imited','Co., Ltd.' for this scenario",
             "", "");
         result.setOnError(true);
       }
