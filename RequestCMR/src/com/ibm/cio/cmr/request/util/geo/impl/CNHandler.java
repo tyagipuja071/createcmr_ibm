@@ -1162,7 +1162,7 @@ public class CNHandler extends GEOHandler {
     }
 
     if (iAddr != null && iAddrRdc != null) {
-      if (!equals(iAddr.getIntlCustNm1(), iAddrRdc.getIntlCustNm1())) {
+      if (!equals(convert2DBCS(iAddr.getIntlCustNm1()), convert2DBCS(iAddrRdc.getIntlCustNm1()))) {
         UpdatedNameAddrModel update = new UpdatedNameAddrModel();
         update.setAddrTypeCode(addrType);
         update.setAddrSeq(seqNo);
@@ -1173,7 +1173,7 @@ public class CNHandler extends GEOHandler {
         update.setOldData(iAddrRdc.getIntlCustNm1());
         results.add(update);
       }
-      if (!equals(iAddr.getIntlCustNm2(), iAddrRdc.getIntlCustNm2())) {
+      if (!equals(convert2DBCS(iAddr.getIntlCustNm2()), convert2DBCS(iAddrRdc.getIntlCustNm2()))) {
         UpdatedNameAddrModel update = new UpdatedNameAddrModel();
         update.setAddrTypeCode(addrType);
         update.setAddrSeq(seqNo);
@@ -1184,7 +1184,7 @@ public class CNHandler extends GEOHandler {
         update.setOldData(iAddrRdc.getIntlCustNm2());
         results.add(update);
       }
-      if (!equals(iAddr.getIntlCustNm3(), iAddrRdc.getIntlCustNm3())) {
+      if (!equals(convert2DBCS(iAddr.getIntlCustNm3()), convert2DBCS(iAddrRdc.getIntlCustNm3()))) {
         UpdatedNameAddrModel update = new UpdatedNameAddrModel();
         update.setAddrTypeCode(addrType);
         update.setAddrSeq(seqNo);
@@ -1195,7 +1195,7 @@ public class CNHandler extends GEOHandler {
         update.setOldData(iAddrRdc.getIntlCustNm3());
         results.add(update);
       }
-      if (!equals(iAddr.getAddrTxt(), iAddrRdc.getAddrTxt())) {
+      if (!equals(convert2DBCS(iAddr.getAddrTxt()), convert2DBCS(iAddrRdc.getAddrTxt()))) {
         UpdatedNameAddrModel update = new UpdatedNameAddrModel();
         update.setAddrTypeCode(addrType);
         update.setAddrSeq(seqNo);
@@ -1206,7 +1206,7 @@ public class CNHandler extends GEOHandler {
         update.setOldData(iAddrRdc.getAddrTxt());
         results.add(update);
       }
-      if (!equals(iAddr.getIntlCustNm4(), iAddrRdc.getIntlCustNm4())) {
+      if (!equals(convert2DBCS(iAddr.getIntlCustNm4()), convert2DBCS(iAddrRdc.getIntlCustNm4()))) {
         UpdatedNameAddrModel update = new UpdatedNameAddrModel();
         update.setAddrTypeCode(addrType);
         update.setAddrSeq(seqNo);
@@ -1218,7 +1218,7 @@ public class CNHandler extends GEOHandler {
         results.add(update);
       }
       // city
-      if (!equals(iAddr.getCity1(), iAddrRdc.getCity1())) {
+      if (!equals(convert2DBCS(iAddr.getCity1()), convert2DBCS(iAddrRdc.getCity1()))) {
         UpdatedNameAddrModel update = new UpdatedNameAddrModel();
         update.setAddrTypeCode(addrType);
         update.setAddrSeq(seqNo);
@@ -1230,7 +1230,7 @@ public class CNHandler extends GEOHandler {
         results.add(update);
       }
       // district
-      if (!equals(iAddr.getCity2(), iAddrRdc.getCity2())) {
+      if (!equals(convert2DBCS(iAddr.getCity2()), convert2DBCS(iAddrRdc.getCity2()))) {
         UpdatedNameAddrModel update = new UpdatedNameAddrModel();
         update.setAddrTypeCode(addrType);
         update.setAddrSeq(seqNo);
