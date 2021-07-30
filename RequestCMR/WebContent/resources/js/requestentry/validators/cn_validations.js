@@ -182,7 +182,7 @@ function setInacBySearchTerm() {
               CMT : cmt ,
              };
             var results = cmr.query('GET.INAC_CD', qParams);
-            if (results != null) {
+            if (results != null && results.length > 0) {
               for (var i = 0; i < results.length; i++) {
                 inacCdValue.push(results[i].ret1);
               }
@@ -196,6 +196,7 @@ function setInacBySearchTerm() {
         FormManager.resetDropdownValues(FormManager.getField('inacType'));
       }
     }
+    addSearchTerm04687Logic();
   } else {
     FormManager.resetDropdownValues(FormManager.getField('inacCd'));
     FormManager.resetDropdownValues(FormManager.getField('inacType'));
@@ -274,10 +275,20 @@ function onInacTypeChange() {
                 if (inacCdValue.length == 1) {
                   FormManager.setValue('inacCd', inacCdValue[0]);
                 }
+                addSearchTerm04687Logic();
               }
             }
           }
       });
+    }
+  }
+}
+
+function addSearchTerm04687Logic() {
+  if (FormManager.getActualValue('searchTerm') == '04687'){
+    if (FormManager.getActualValue('searchTerm') != _pagemodel.searchTerm) {
+      FormManager.setValue('inacCd', 'XXXX');
+      FormManager.setValue('inacType', 'I');
     }
   }
 }
