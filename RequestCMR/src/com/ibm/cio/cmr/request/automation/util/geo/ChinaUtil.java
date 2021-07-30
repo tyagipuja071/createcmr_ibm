@@ -228,8 +228,10 @@ public class ChinaUtil extends AutomationUtil {
         List<String> managerID = SystemParameters.getList("AUTO_CN_MGR_BP_LIST");
         boolean managerCheck = BluePagesHelper.isBluePagesHeirarchyManager(admin.getRequesterId(), managerID);
         if (!managerCheck) {
-          details.append("request must be from BPSO team.");
-          engineData.addRejectionComment("OTH", "please sure requester must be from BPSO team.", "", "");
+          details.append("BP CMR related,please contact Dalian BPCM team to raise request.Squad Leader:"
+              + (managerID != null && managerID.size() > 0 ? managerID.get(0) : ""));
+          engineData.addRejectionComment("OTH", "BP CMR related,please contact Dalian BPCM team to raise request.Squad Leader:"
+              + (managerID != null && managerID.size() > 0 ? managerID.get(0) : ""), "", "");
           results.setOnError(true);
           results.setResults("Requester check fail");
         } else {
