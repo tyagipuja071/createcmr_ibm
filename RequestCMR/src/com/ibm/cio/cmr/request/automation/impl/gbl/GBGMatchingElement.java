@@ -15,6 +15,7 @@ import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 
+import com.ibm.cio.cmr.request.automation.ActionOnError;
 import com.ibm.cio.cmr.request.automation.AutomationElement;
 import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
@@ -220,6 +221,8 @@ public class GBGMatchingElement extends MatchingElement {
                   engineData.addRejectionComment("OTH", "GBG computing result is S1 GBG ID on the request.", "", "");
                   result.setResults("S1 GBG ID");
                   result.setOnError(true);
+                  super.setStopOnError(true);
+                  super.setActionOnError(ActionOnError.fromCode("R"));
                 }
               }
               engineData.put(AutomationEngineData.GBG_MATCH, gbg);
