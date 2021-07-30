@@ -820,10 +820,26 @@ function showHideCityCN() {
       }
       FormManager.addValidator('stateProv', Validators.REQUIRED, [ 'State/Province' ], null);
       //
-      FormManager.addValidator('custPhone', Validators.REQUIRED, [ "Phone#" ], null);
-      FormManager.addValidator('cnCustContJobTitle', Validators.REQUIRED, [ "Customer Contact's Job Title" ], null);
-      FormManager.addValidator('cnCustContNm', Validators.REQUIRED, [ "Customer Contact's Name (include salutation)" ], null);
+      var addrType = FormManager.getActualValue('addrType');
+      if (addrType != '' && addrType == 'ZS01') {
+        FormManager.addValidator('custPhone', Validators.REQUIRED, [ "Phone#" ], null);
+        FormManager.addValidator('cnCustContJobTitle', Validators.REQUIRED, [ "Customer Contact's Job Title" ], null);
+        FormManager.addValidator('cnCustContNm', Validators.REQUIRED, [ "Customer Contact's Name (include salutation)" ], null);
+      }
     }
+  }
+}
+
+function addMandatoryOnlyForZS01CN(){
+  var addrType = FormManager.getActualValue('addrType');
+  if (addrType != '' && addrType == 'ZS01') {
+    FormManager.addValidator('custPhone', Validators.REQUIRED, [ "Phone#" ], null);
+    FormManager.addValidator('cnCustContJobTitle', Validators.REQUIRED, [ "Customer Contact's Job Title" ], null);
+    FormManager.addValidator('cnCustContNm', Validators.REQUIRED, [ "Customer Contact's Name (include salutation)" ], null);
+  }else{
+    FormManager.removeValidator('custPhone', Validators.REQUIRED);
+    FormManager.removeValidator('cnCustContJobTitle', Validators.REQUIRED);
+    FormManager.removeValidator('cnCustContNm', Validators.REQUIRED);
   }
 }
 // DENNIS: COMMENTED BECAUSE OF SCRIPT RUN TIME ISSUES
@@ -2001,6 +2017,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.CN);
   GEOHandler.addAddrFunction(autoSetAddrFieldsForCN, GEOHandler.CN);
   GEOHandler.addAddrFunction(showHideCityCN, GEOHandler.CN);
+  GEOHandler.addAddrFunction(addMandatoryOnlyForZS01CN, GEOHandler.CN);
   GEOHandler.addAddrFunction(addDoubleByteValidatorCN, GEOHandler.CN);
   
   GEOHandler.addToggleAddrTypeFunction(convertCnCustName1, GEOHandler.CN);
