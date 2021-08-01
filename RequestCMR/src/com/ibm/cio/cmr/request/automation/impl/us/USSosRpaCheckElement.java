@@ -118,7 +118,7 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
             output.setOnError(true);
             engineData.addNegativeCheckStatus("DnBSoSMatch", "No high quality matches with D&B and SOS-RPA records.");
           }
-          validation.setMessage("No Matches found for" + addrType + "\n\n");
+          validation.setMessage("No Matches found");
           output.setDetails(response.getMessage());
           log.debug(response.getMessage());
         }
