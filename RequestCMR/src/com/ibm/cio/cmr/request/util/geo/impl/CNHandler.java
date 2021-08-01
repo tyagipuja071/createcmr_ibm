@@ -158,7 +158,10 @@ public class CNHandler extends GEOHandler {
     address.setCustNm1(parts[0]);
     address.setCustNm2(parts[1]);
     address.setCustNm3(currentRecord.getCmrName3());
-    address.setAddrTxt2(currentRecord.getCmrName4());
+    // DnB addrTxt2 fix
+    if (!StringUtils.isEmpty(currentRecord.getCmrName4())) {
+      address.setAddrTxt2(currentRecord.getCmrName4());
+    }
 
     if (!StringUtils.isEmpty(parts[2])) {
       address.setDept(parts[2]);
