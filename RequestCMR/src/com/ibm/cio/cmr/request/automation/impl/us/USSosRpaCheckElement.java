@@ -85,6 +85,7 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
         AutomationResponse<SosResponse> response = getSosMatches(admin.getId().getReqId(), address, admin);
         scorecard.setRpaMatchingResult("");
         log.debug("Scorecard Updated for SOS-RPA to Not Done");
+        details.append("SOS-RPA Matching Results for" + addrType);
         if (response != null && response.isSuccess() && response.getRecord() != null) {
           admin.setCompVerifiedIndc("Y");
           scorecard.setRpaMatchingResult("Y");
@@ -98,7 +99,7 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
               .append("\nCustomer Name = " + (StringUtils.isBlank(response.getRecord().getLegalName()) ? "" : response.getRecord().getLegalName()));
           details.append("\nAddress = " + (StringUtils.isBlank(response.getRecord().getAddress1()) ? "" : response.getRecord().getAddress1()));
           details.append("\nState = " + (StringUtils.isBlank(response.getRecord().getState()) ? "" : response.getRecord().getState()));
-          details.append("\nZip = " + (StringUtils.isBlank(response.getRecord().getZip()) ? "" : response.getRecord().getZip()));
+          details.append("\nZip = " + (StringUtils.isBlank(response.getRecord().getZip()) ? "" : response.getRecord().getZip()) + "\n\n");
           output.setDetails(details.toString());
           engineData.addPositiveCheckStatus(AutomationEngineData.SOS_MATCH);
           engineData.clearNegativeCheckStatus("DnBMatch");
@@ -117,7 +118,7 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
             output.setOnError(true);
             engineData.addNegativeCheckStatus("DnBSoSMatch", "No high quality matches with D&B and SOS-RPA records.");
           }
-          validation.setMessage("No Matches found");
+          validation.setMessage("No Matches found for" + addrType + "\n\n");
           output.setDetails(response.getMessage());
           log.debug(response.getMessage());
         }
