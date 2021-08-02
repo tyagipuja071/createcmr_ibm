@@ -1656,8 +1656,8 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
           if (iAddr != null) {
             cnNameSingleByte = iAddr.getIntlCustNm1() + (!StringUtils.isBlank(iAddr.getIntlCustNm2()) ? (" " + iAddr.getIntlCustNm2()) : "");
           }
-          if (!StringUtils.isBlank(cnNameSingleByte)) {
-
+          // George, fix dup cmr not found CREATCMR-3133 on 20210802
+          if (!StringUtils.isBlank(cnNameSingleByte) && !"null".equalsIgnoreCase(cnNameSingleByte)) {
             try {
 
               // 1, Check CN API
@@ -2141,8 +2141,8 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
           if (iAddr != null) {
             cnNameSingleByte = iAddr.getIntlCustNm1() + (!StringUtils.isBlank(iAddr.getIntlCustNm2()) ? (" " + iAddr.getIntlCustNm2()) : "");
           }
-          if (!StringUtils.isBlank(cnNameSingleByte)) {
-
+          // George, fix dup cmr not found CREATCMR-3133 on 20210802
+          if (!StringUtils.isBlank(cnNameSingleByte) && !"null".equalsIgnoreCase(cnNameSingleByte)) {
             try {
 
               // 1, Check CN API
