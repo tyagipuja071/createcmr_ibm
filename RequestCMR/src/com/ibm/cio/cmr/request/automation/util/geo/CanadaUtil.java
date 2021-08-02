@@ -6,8 +6,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.EntityManager;
@@ -17,6 +17,7 @@ import org.apache.log4j.Logger;
 import org.springframework.ui.ModelMap;
 
 import com.ibm.cio.cmr.request.CmrConstants;
+import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.impl.gbl.CalculateCoverageElement;
@@ -29,6 +30,7 @@ import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.entity.CustScenarios;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
@@ -117,36 +119,155 @@ public class CanadaUtil extends AutomationUtil {
   @Override
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {
-    Addr zs01 = requestData.getAddress("ZS01");
-    String custNm1 = StringUtils.isNotBlank(zs01.getCustNm1()) ? zs01.getCustNm1().trim() : "";
-    String custNm2 = StringUtils.isNotBlank(zs01.getCustNm2()) ? zs01.getCustNm2().trim() : "";
-    String mainCustNm = (custNm1 + (StringUtils.isNotBlank(custNm2) ? " " + custNm2 : "")).toUpperCase();
-    String mainStreetAddress1 = (StringUtils.isNotBlank(zs01.getAddrTxt()) ? zs01.getAddrTxt() : "").trim().toUpperCase();
-    String mainCity = (StringUtils.isNotBlank(zs01.getCity1()) ? zs01.getCity1() : "").trim().toUpperCase();
-    String mainPostalCd = (StringUtils.isNotBlank(zs01.getPostCd()) ? zs01.getPostCd() : "").trim();
-    Iterator<Addr> it = requestData.getAddresses().iterator();
-    boolean removed = false;
-    details.append("Checking for duplicate address records - ").append("\n");
-    while (it.hasNext()) {
-      Addr addr = it.next();
-      if (!"ZS01".equals(addr.getId().getAddrType())) {
-        removed = true;
-        String custNm = (addr.getCustNm1().trim() + (StringUtils.isNotBlank(addr.getCustNm2()) ? " " + addr.getCustNm2().trim() : "")).toUpperCase();
-        if (custNm.equals(mainCustNm) && addr.getAddrTxt().trim().toUpperCase().equals(mainStreetAddress1)
-            && addr.getCity1().trim().toUpperCase().equals(mainCity) && addr.getPostCd().trim().equals(mainPostalCd)) {
-          details.append("Removing duplicate address record: " + addr.getId().getAddrType() + " from the request.").append("\n");
-          Addr merged = entityManager.merge(addr);
-          if (merged != null) {
-            entityManager.remove(merged);
+
+    Data data = requestData.getData();
+    Addr soldTo = requestData.getAddress("ZS01");
+    String custSubGrp = data.getCustSubGrp();
+    String sql = ExternalizedQuery.getSql("CA.QUERY.GET.CUSTSCENARIOS_BY_CUSTTYP");
+
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CUST_TYP", custSubGrp);
+    List<CustScenarios> custScenarioList = query.getResults(CustScenarios.class);
+    boolean isFieldCompSuccessful = true;
+
+    if (custScenarioList != null && custScenarioList.size() > 0) {
+      for (CustScenarios custScenario : custScenarioList) {
+        String scenariofieldValue = custScenario.getValue();
+        if (StringUtils.isNotBlank(scenariofieldValue)) {
+          // Sales Branch Office
+          if (custScenario.getFieldName().equals("salesBusOffCd")) {
+            String dataSalesBusOffCd = data.getSalesBusOffCd();
+            if (StringUtils.isBlank(dataSalesBusOffCd) || (StringUtils.isNotBlank(dataSalesBusOffCd) && StringUtils.isNotBlank(scenariofieldValue)
+                && !dataSalesBusOffCd.equals(scenariofieldValue))) {
+              details.append("Setting Sales Branch Office to ").append(scenariofieldValue).append("\n");
+              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SALES_BO_CD", dataSalesBusOffCd, scenariofieldValue);
+            }
           }
-          it.remove();
+          // Marketing Rep
+          else if (custScenario.getFieldName().equals("repTeamMemberNo")) {
+            String dataRepTeamMemberNo = data.getRepTeamMemberNo();
+            if (StringUtils.isBlank(dataRepTeamMemberNo) || (StringUtils.isNotBlank(dataRepTeamMemberNo) && StringUtils.isNotBlank(scenariofieldValue)
+                && !dataRepTeamMemberNo.equals(scenariofieldValue))) {
+              details.append("Setting Mktg Rep to ").append(scenariofieldValue).append("\n");
+              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "REP_TEAM_MEMBER_NO", dataRepTeamMemberNo,
+                  scenariofieldValue);
+            }
+          }
+          // CS Branch
+          else if (custScenario.getFieldName().equals("salesTeamCd")) {
+            String dataSalesTeamCd = data.getSalesTeamCd();
+            if (StringUtils.isNotBlank(dataSalesTeamCd) && StringUtils.isNotBlank(scenariofieldValue)
+                && !dataSalesTeamCd.equals(scenariofieldValue)) {
+              details.append("Setting CS Branch to ").append(scenariofieldValue).append("\n");
+              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SALES_TEAM_CD", dataSalesTeamCd, scenariofieldValue);
+            } else if (StringUtils.isBlank(dataSalesTeamCd)) {
+              if (soldTo != null && StringUtils.isNotBlank(soldTo.getPostCd()) && soldTo.getPostCd().length() >= 3) {
+                String computedCsBranch = soldTo.getPostCd().substring(0, 3);
+                details.append("Setting computed CS Branch to").append(computedCsBranch).append("\n");
+                overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SALES_TEAM_CD", dataSalesTeamCd, computedCsBranch);
+              } else if (soldTo == null) {
+                isFieldCompSuccessful = false;
+                details.append("No Sold-To Address. Cannot compute CS Branch").append("\n");
+              }
+            }
+          }
+          // AR-FAAR
+          else if (custScenario.getFieldName().equals("adminDeptCd")) {
+            String dataAdminDeptCd = data.getAdminDeptCd();
+            if (StringUtils.isBlank(dataAdminDeptCd) || (StringUtils.isNotBlank(dataAdminDeptCd) && StringUtils.isNotBlank(scenariofieldValue)
+                && !dataAdminDeptCd.equals(scenariofieldValue))) {
+              details.append("Setting AR-FAAR to ").append(scenariofieldValue).append("\n");
+              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ADMIN_DEPT_CD", dataAdminDeptCd, scenariofieldValue);
+            }
+          }
+          // Credit Code creditCd
+          else if (custScenario.getFieldName().equals("creditCd")) {
+            String dataCreditCd = data.getCreditCd();
+            if (StringUtils.isBlank(dataCreditCd)
+                || (StringUtils.isNotBlank(dataCreditCd) && StringUtils.isNotBlank(scenariofieldValue) && !dataCreditCd.equals(scenariofieldValue))) {
+              details.append("Setting Credit Code to ").append(scenariofieldValue).append("\n");
+              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CREDIT_CD", dataCreditCd, scenariofieldValue);
+            }
+          }
+          // Pref Lang
+          else if (custScenario.getFieldName().equals("custPrefLang")) {
+            String dataCustPrefLang = data.getCustPrefLang();
+            if (StringUtils.isBlank(dataCustPrefLang) && soldTo != null && "QC".equals(soldTo.getStateProv())) {
+              details.append("Setting Preferred Language to French").append("\n");
+              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CUST_PREF_LANG", dataCustPrefLang, "F");
+            } else if (StringUtils.isBlank(dataCustPrefLang) || (StringUtils.isNotBlank(dataCustPrefLang)
+                && StringUtils.isNotBlank(scenariofieldValue) && !dataCustPrefLang.equals(scenariofieldValue))) {
+              details.append("Setting Preferred Language to ").append(scenariofieldValue).append("\n");
+              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CUST_PREF_LANG", dataCustPrefLang, scenariofieldValue);
+            }
+          }
+          // Tax Code/Estab Function Code (EFC)
+          else if (custScenario.getFieldName().equals("taxCd1")) {
+            String dataTaxCd1 = data.getTaxCd1();
+            if (StringUtils.isBlank(dataTaxCd1)
+                || (StringUtils.isNotBlank(dataTaxCd1) && StringUtils.isNotBlank(scenariofieldValue) && !dataTaxCd1.equals(scenariofieldValue))) {
+              details.append("Setting Tax Code/EFC to ").append(scenariofieldValue).append("\n");
+              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "TAX_CD1", dataTaxCd1, scenariofieldValue);
+            }
+          }
         }
       }
     }
+    // Location Code
+    if (soldTo != null) {
+      Map<String, String> caLocationNumber = new HashMap<String, String>();
+      caLocationNumber.put("AB", "01999");
+      caLocationNumber.put("BC", "02999");
+      caLocationNumber.put("MB", "03999");
+      caLocationNumber.put("NB", "04999");
+      caLocationNumber.put("NF", "05999");
+      caLocationNumber.put("NL", "05999");
+      caLocationNumber.put("NT", "06999");
+      caLocationNumber.put("NS", "07999");
+      caLocationNumber.put("NU", "13999");
+      caLocationNumber.put("ON", "08999");
+      caLocationNumber.put("PE", "09999");
+      caLocationNumber.put("QC", "10999");
+      caLocationNumber.put("SK", "11999");
+      caLocationNumber.put("YT", "12999");
 
-    if (!removed) {
-      details.append("No duplicate address records found on the request.").append("\n");
+      List<String> caribNorthDistCntries = Arrays.asList("AG", "AI", "AW", "BS", "BB", "BM", "BQ", "BV", "CW", "DM", "DO", "GD", "GP", "GY", "HT",
+          "KN", "KY", "JM", "LC", "MQ", "MS", "PR", "SR", "SX", "TC", "TT", "VC", "VG");
+
+      String dataLocationNumber = data.getLocationNumber();
+      String computedLocNumber = null;
+      if ("CA".equals(soldTo.getLandCntry()) && !("USA".equals(data.getCustSubGrp()) || "CND".equals(data.getCustSubGrp()))) {
+        computedLocNumber = caLocationNumber.get(soldTo.getStateProv());
+      } else if (caribNorthDistCntries.contains(soldTo.getLandCntry())) {
+        computedLocNumber = soldTo.getLandCntry() + "000";
+      } else if ("USA".equals(data.getCustSubGrp())) {
+        computedLocNumber = "99999";
+      }
+
+      if (StringUtils.isNotEmpty(computedLocNumber) && (StringUtils.isBlank(dataLocationNumber)
+          || (StringUtils.isNotBlank(dataLocationNumber) && !dataLocationNumber.equals(computedLocNumber)))) {
+        details.append("Setting Location Code to ").append(computedLocNumber).append("\n");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "LOCN_NO", dataLocationNumber, computedLocNumber);
+      } else if (StringUtils.isEmpty(computedLocNumber)) {
+        details.append("Cannot compute Location Code\n");
+        isFieldCompSuccessful = false;
+      }
+    } else {
+      // error computation of Location Number
+      isFieldCompSuccessful = false;
+      String msg = "No Sold-To Address. Cannot compute Location Code.\n";
+      details.append(msg);
+      engineData.addNegativeCheckStatus("chLocNo", msg);
     }
+
+    if (isFieldCompSuccessful) {
+      results.setResults("Computed");
+    } else {
+      results.setResults("Cannot compute all fields");
+      results.setOnError(true);
+    }
+    results.setDetails(details.toString());
+    results.setProcessOutput(overrides);
 
     return results;
   }
