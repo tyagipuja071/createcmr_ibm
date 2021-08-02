@@ -704,6 +704,9 @@ function hideContactInfoFields() {
     // FormManager.hide('CustomerCntPhone2', 'cnCustContPhone2');
     FormManager.show('CustomerCntJobTitle', 'cnCustContJobTitle');
     FormManager.show('ChinaCustomerCntName', 'cnCustContNm');
+    FormManager.addValidator('custPhone', Validators.REQUIRED, [ "Phone#" ], null);
+    FormManager.addValidator('cnCustContJobTitle', Validators.REQUIRED, [ "Customer Contact's Job Title" ], null);
+    FormManager.addValidator('cnCustContNm', Validators.REQUIRED, [ "Customer Contact's Name (include salutation)" ], null);
   } else {
     // FormManager.hide('CustomerCntPhone2', 'cnCustContPhone2');
     FormManager.show('CustomerCntJobTitle', 'cnCustContJobTitle');
@@ -711,11 +714,12 @@ function hideContactInfoFields() {
 
     FormManager.resetValidations('cnCustContJobTitle');
     FormManager.resetValidations('cnCustContNm');
+    FormManager.resetValidations('custPhone');
   }
 }
 
 function autoSetAddrFieldsForCN() {
-  if (cmr.addressMode == 'newAddress' || cmr.addressMode == 'copyAddress') {
+  if (cmr.addressMode == 'newAddress' || cmr.addressMode == 'copyAddress' || cmr.addressMode =='updateAddress' ) {
     for (var i = 0; i < _addrTypesForCN.length; i++) {
       _addrTypeCNHandler[i] = null;
       if (_addrTypeCNHandler[i] == null) {
@@ -732,6 +736,9 @@ function autoSetAddrFieldsForCN() {
       // FormManager.hide('CustomerCntPhone2', 'cnCustContPhone2');
       FormManager.show('CustomerCntJobTitle', 'cnCustContJobTitle');
       FormManager.show('ChinaCustomerCntName', 'cnCustContNm');
+      FormManager.addValidator('custPhone', Validators.REQUIRED, [ "Phone#" ], null);
+      FormManager.addValidator('cnCustContJobTitle', Validators.REQUIRED, [ "Customer Contact's Job Title" ], null);
+      FormManager.addValidator('cnCustContNm', Validators.REQUIRED, [ "Customer Contact's Name (include salutation)" ], null);
     } else {
       // FormManager.hide('CustomerCntPhone2', 'cnCustContPhone2');
       FormManager.show('CustomerCntJobTitle', 'cnCustContJobTitle');
@@ -739,6 +746,7 @@ function autoSetAddrFieldsForCN() {
 
       FormManager.resetValidations('cnCustContJobTitle');
       FormManager.resetValidations('cnCustContNm');
+      FormManager.resetValidations('custPhone');
     }
   }
 }
@@ -836,7 +844,7 @@ function addMandatoryOnlyForZS01CN(){
     FormManager.addValidator('custPhone', Validators.REQUIRED, [ "Phone#" ], null);
     FormManager.addValidator('cnCustContJobTitle', Validators.REQUIRED, [ "Customer Contact's Job Title" ], null);
     FormManager.addValidator('cnCustContNm', Validators.REQUIRED, [ "Customer Contact's Name (include salutation)" ], null);
-  }else{
+  } else {
     FormManager.removeValidator('custPhone', Validators.REQUIRED);
     FormManager.removeValidator('cnCustContJobTitle', Validators.REQUIRED);
     FormManager.removeValidator('cnCustContNm', Validators.REQUIRED);
