@@ -812,14 +812,6 @@ function showHideCityCN() {
       FormManager.resetValidations('cnAddrTxt');
       FormManager.resetValidations('cnCity');
       FormManager.resetValidations('stateProv');
-      //
-      FormManager.resetValidations('custPhone');
-      FormManager.resetValidations('cnCustContJobTitle');
-      FormManager.resetValidations('cnCustContNm');
-    } else if (_custSubGrp == 'MRKT' || _custSubGrp == 'BLUMX') {
-      FormManager.resetValidations('custPhone');
-      FormManager.resetValidations('cnCustContJobTitle');
-      FormManager.resetValidations('cnCustContNm');
     } else {
       if (_custSubGrp != 'undefined' && _custSubGrp != '' && (_custSubGrp != 'PRIV' && _custSubGrp != 'INTER' && _custSubGrp != 'AQSTN')) {
         FormManager.addValidator('cnCity', Validators.REQUIRED, [ 'City Chinese' ], null);
