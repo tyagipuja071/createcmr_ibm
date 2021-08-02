@@ -186,10 +186,10 @@ public class ChinaUtil extends AutomationUtil {
         details.append("English name=" + customerName + " for Scenario=" + data.getCustSubGrp() + " for the request.\n");
       } else {
         details.append(
-            "English name can't contain 'Private Limited', 'Company', 'Corporation', 'incorporate', 'organization', 'Pvt Ltd','imited','Co., Ltd.' for Scenario="
+            "English name can't contain 'Private Limited', 'Company', 'Corporation', 'incorporate', 'organization', 'Pvt Ltd','limited','Co., Ltd.' for Scenario="
                 + data.getCustSubGrp() + " for the request.\n");
         engineData.addRejectionComment("OTH",
-            "English name can't contain 'Private Limited', 'Company', 'Corporation', 'incorporate', 'organization', 'Pvt Ltd','imited','Co., Ltd.' for this scenario",
+            "English name can't contain 'Private Limited', 'Company', 'Corporation', 'incorporate', 'organization', 'Pvt Ltd','limited','Co., Ltd.' for this scenario",
             "", "");
         result.setOnError(true);
       }
@@ -319,8 +319,10 @@ public class ChinaUtil extends AutomationUtil {
       List<String> managerID = SystemParameters.getList("AUTO_CN_MGR_BP_LIST");
       boolean managerCheck = BluePagesHelper.isBluePagesHeirarchyManager(admin.getRequesterId(), managerID);
       if (!managerCheck) {
-        details.append("requester must be from BPSO team.");
-        engineData.addRejectionComment("OTH", "please sure requester must be from BPSO team.", "", "");
+        details.append("BP CMR related,please contact Dalian BPCM team to raise request.Squad Leader:"
+            + (managerID != null && managerID.size() > 0 ? managerID.get(0) : ""));
+        engineData.addRejectionComment("OTH", "BP CMR related,please contact Dalian BPCM team to raise request.Squad Leader:"
+            + (managerID != null && managerID.size() > 0 ? managerID.get(0) : ""), "", "");
         output.setOnError(true);
         validation.setSuccess(false);
         validation.setMessage("Rejected");
