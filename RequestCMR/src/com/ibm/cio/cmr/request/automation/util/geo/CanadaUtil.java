@@ -275,25 +275,6 @@ public class CanadaUtil extends AutomationUtil {
       List<String> ignoredUpdates = new ArrayList<String>();
       for (UpdatedDataModel change : changes.getDataUpdates()) {
         switch (change.getDataField()) {
-        case "VAT #":
-          if (!StringUtils.isBlank(change.getNewData())) {
-            Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
-            List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
-            boolean matchesDnb = false;
-            if (matches != null) {
-              // check against D&B
-              matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
-            }
-            if (!matchesDnb) {
-              cmdeReview = true;
-              engineData.addNegativeCheckStatus("_chVATCheckFailed", "VAT # on the request did not match D&B");
-              details.append("VAT # on the request did not match D&B\n");
-            } else {
-              details.append("VAT # on the request matches D&B\n");
-            }
-
-          }
-          break;
         case "Order Block Code":
           if ("94".equals(change.getOldData()) || "94".equals(change.getNewData())) {
             cmdeReview = true;
@@ -301,7 +282,7 @@ public class CanadaUtil extends AutomationUtil {
           break;
         case "ISIC":
         case "Subindustry":
-        case "INAC/NAC Code":
+        case "NAT/INAC":
           String error = performInacCheck(cedpManager, entityManager, requestData);
           if (StringUtils.isNotBlank(error)) {
             if ("BG_ERROR".equals(error)) {
@@ -310,13 +291,33 @@ public class CanadaUtil extends AutomationUtil {
                   "The projected global buying group during INAC checks did not match the one on the request.");
               details.append("The projected global buying group during INAC checks did not match the one on the request.\n");
             } else {
+              LOG.debug(error);
+              output.setDetails(error);
+              validation.setMessage("Validation Failed");
+              validation.setSuccess(false);
+              if (StringUtils.isBlank(admin.getSourceSystId())) {
+                engineData.addRejectionComment("OTH", error, "", "");
+                output.setOnError(true);
+              } else {
+                engineData.addNegativeCheckStatus("BP_" + change.getDataField(), error);
+              }
               return true;
             }
-          }
-          String ageError = performCMRNewCheck(cedpManager, entityManager, requestData);
-          if (StringUtils.isNotBlank(ageError)) {
-            engineData.addNegativeCheckStatus("_chINACCheckFailed", ageError);
-            details.append(ageError);
+          } else {
+            String ageError = performCMRNewCheck(cedpManager, entityManager, requestData);
+            if (StringUtils.isNotBlank(ageError)) {
+              engineData.addNegativeCheckStatus("_chINACCheckFailed", ageError);
+              details.append(ageError);
+              validation.setSuccess(false);
+              validation.setMessage("Validation Failed");
+              if (StringUtils.isBlank(admin.getSourceSystId())) {
+                engineData.addRejectionComment("OTH", error, "", "");
+                output.setOnError(true);
+              } else {
+                engineData.addNegativeCheckStatus("BP_" + change.getDataField(), error);
+              }
+              return true;
+            }
           }
           break;
         case "Tax Code":
