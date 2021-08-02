@@ -175,7 +175,7 @@ public class CanadaHandler extends GEOHandler {
     data.setContactName1(mainRecord.getCmrPurOrdNo());
     data.setSectorCd(mainRecord.getCmrTaxExemptReas());
     data.setTaxPayerCustCd(mainRecord.getCmrLicNo());
-    data.setVatExempt(mainRecord.getCmrTaxExInd());
+    data.setVatExempt("X".equalsIgnoreCase(mainRecord.getCmrTaxExInd()) ? "Y" : "N");
     data.setTaxCd3("NO_VALUE_RETRIEVED".equals(mainRecord.getCmrQstNo()) ? "" : mainRecord.getCmrQstNo());
     data.setVat(mainRecord.getCmrBusinessReg());
     data.setAbbrevNm(mainRecord.getCmrShortName());
