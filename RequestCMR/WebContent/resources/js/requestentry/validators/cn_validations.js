@@ -1984,6 +1984,111 @@ function convertPoBox(cntry, addressMode, details) {
   });
 }
 
+function validateCnNameAndAddr() {
+  console.log("running validateCnNameAndAddr . . .");
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var custSubType = FormManager.getActualValue('custSubGrp');
+        var disableAutoProc = dijit.byId('disableAutoProc').get('checked');
+        if (!disableAutoProc) {
+          if (custSubType != 'INTER' && custSubType != 'CROSS' && custSubType != 'PRIV') {
+
+            var cnCustName1ZS01 = '';
+            var cnCustName2ZS01 = '';
+            var cnAddrTxtZS01 = '';
+            var intlCustNm4ZS01 = '';
+
+            for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+              record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+              type = record.addrType;
+
+              if (typeof (type) == 'object') {
+                type = type[0];
+              }
+
+              if (type == 'ZS01') {
+                cnCustName1ZS01 = record.cnCustName1;
+                cnCustName2ZS01 = record.cnCustName2;
+                cnAddrTxtZS01 = record.cnAddrTxt;
+              }
+
+              if (typeof (cnCustName1ZS01) == 'object') {
+                if (cnCustName1ZS01[0] != '' && cnCustName1ZS01[0] != null) {
+                  cnCustName1ZS01 = cnCustName1ZS01[0];
+                }
+              }
+
+              if (typeof (cnCustName2ZS01) == 'object') {
+                if (cnCustName2ZS01[0] != '' && cnCustName2ZS01[0] != null) {
+                  cnCustName2ZS01 = cnCustName2ZS01[0];
+                }
+              }
+
+              if (typeof (cnAddrTxtZS01) == 'object') {
+                if (cnAddrTxtZS01[0] != '' && cnAddrTxtZS01[0] != null) {
+                  cnAddrTxtZS01 = cnAddrTxtZS01[0];
+                }
+              }
+
+            }
+            var ret = cmr.query('QUERY.ADDR.GET.INTLCUSTNM4.BY_REQID', {
+              REQ_ID : FormManager.getActualValue('reqId')
+            });
+            if (ret && ret.ret1 && ret.ret1 != '') {
+              intlCustNm4ZS01 = ret.ret1;
+            }
+
+            var busnType = FormManager.getActualValue('busnType');
+            var cnName = convert2SBCS(cnCustName1ZS01 + cnCustName2ZS01);
+            var result = {};
+            dojo.xhrGet({
+              url : cmr.CONTEXT_ROOT + '/cn/tyc.json',
+              handleAs : 'json',
+              method : 'GET',
+              content : {
+                busnType : busnType,
+                cnName : cnName
+              },
+              timeout : 50000,
+              sync : true,
+              load : function(data, ioargs) {
+                if (data && data.result) {
+                  result = data.result;
+                }
+              },
+              error : function(error, ioargs) {
+                result = {};
+              }
+            });
+
+            var cnAddress = convert2SBCS(cnAddrTxtZS01 + intlCustNm4ZS01);
+            if (result.regLocation != cnAddress || result.name != cnName) {
+              var id = FormManager.getActualValue('reqId');
+              var ret = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
+                ID : id
+              });
+
+              if ((ret == null || ret.ret1 == null)) {
+                return new ValidationResult(null, false, 'The Chinese Company name and address must 100% match with “Tian Yan Cha”, otherwise the request are not allowed to send for processing. '
+                    + 'If requestor insist using the Chinese company name and address which don\'t match with "Tian Yan Cha", the Attachment Content "Company Proof" is required.');
+              } else {
+                return new ValidationResult(null, true);
+              }
+            } else {
+              return new ValidationResult(null, true);
+            }
+          } else {
+            return new ValidationResult(null, true);
+          }
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    }
+  })(), 'MAIN_ATTACH_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.CN = [ SysLoc.CHINA ];
   console.log('adding CN validators...');
@@ -2049,5 +2154,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addCityRequiredOnUpdateValidatorAddrList, GEOHandler.CN, null, true);
   GEOHandler.registerValidator(addSocialCreditCdLengthValidator, GEOHandler.CN, GEOHandler.REQUESTER, true);
   GEOHandler.registerValidator(addAddrUpdateValidator, GEOHandler.CN, null, true);
-  
+  GEOHandler.registerValidator(validateCnNameAndAddr, GEOHandler.CN, null, false);
 });

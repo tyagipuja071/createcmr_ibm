@@ -106,9 +106,8 @@ public class CNAPICheckElement extends ValidatingElement implements CompanyVerif
       } else if (soldTo != null) {
 
         if (data.getCustSubGrp() != null && (SCENARIO_LOCAL_NRML.equals(data.getCustSubGrp()) || SCENARIO_LOCAL_EMBSA.equals(data.getCustSubGrp())
-            || (SCENARIO_LOCAL_AQSTN.equals(data.getCustSubGrp()) && ifAQSTNHasCN) || SCENARIO_LOCAL_BLUMX.equals(data.getCustSubGrp())
-            || SCENARIO_LOCAL_MRKT.equals(data.getCustSubGrp()) || SCENARIO_LOCAL_BUSPR.equals(data.getCustSubGrp())
-            || SCENARIO_LOCAL_ECOSY.equals(data.getCustSubGrp()))) {
+            || SCENARIO_LOCAL_BLUMX.equals(data.getCustSubGrp()) || SCENARIO_LOCAL_MRKT.equals(data.getCustSubGrp())
+            || SCENARIO_LOCAL_BUSPR.equals(data.getCustSubGrp()) || SCENARIO_LOCAL_ECOSY.equals(data.getCustSubGrp()))) {
           CompanyRecordModel searchModel = new CompanyRecordModel();
           searchModel.setIssuingCntry(data.getCmrIssuingCntry());
           searchModel.setCountryCd(soldTo.getLandCntry());
