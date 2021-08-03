@@ -292,7 +292,14 @@ function setPrefLangAfterConfig() {
  * @returns
  */
 function clearCATaxFields() {
-
+  if ('U' == FormManager.getActualValue('reqType')) {
+    FormManager.readOnly('PSTExempt');
+    FormManager.readOnly('PSTExemptLicNum');
+    FormManager.readOnly('AuthExemptType');
+    FormManager.readOnly('QST');
+    FormManager.removeValidator('PSTExemptLicNum', Validators.REQUIRED);
+    return;
+  }
   FormManager.clearValue('PSTExempt');
   FormManager.getField('PSTExempt').set('checked', false);
   FormManager.clearValue('PSTExemptLicNum');
@@ -421,6 +428,12 @@ function afterConfigForCA() {
   }
 
   addFieldHandlers();
+
+  if ('U' == FormManager.getActualValue('reqType')) {
+    var stateProv = getSoldToStateProv();
+    toggleCATaxFieldsByProvCd(stateProv);
+  }
+
 }
 
 var _inacCodeHandler = null;
@@ -913,6 +926,22 @@ function getSoldToPostalCode() {
   return postCd;
 }
 
+function getSoldToStateProv() {
+  var _zs01ReqId = FormManager.getActualValue('reqId');
+  var stateProvParams = {
+    REQ_ID : _zs01ReqId,
+    ADDR_TYPE : "ZS01",
+  };
+  var stateProvResult = cmr.query('ADDR.GET.STATEPROV.BY_REQID_ADDRTYP', stateProvParams);
+  var stateProv = stateProvResult.ret1;
+  return stateProv;
+}
+
+function addStateProvHandler(cntry, addressMode, saving) {
+  var stateProv = getSoldToStateProv();
+  toggleCATaxFieldsByProvCd(stateProv);
+}
+
 /* Register CA Javascripts */
 dojo.addOnLoad(function() {
   console.log('adding CA scripts...');
@@ -946,4 +975,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(limitDropdownOnScenarioChange, SysLoc.CANADA);
   GEOHandler.addAfterTemplateLoad(setCSBranchValue, SysLoc.CANADA);
   GEOHandler.addToggleAddrTypeFunction(hideObsoleteAddressOption, [ SysLoc.CANADA ]);
+  GEOHandler.addAddrFunction(addStateProvHandler, [ SysLoc.CANADA ]);
 });
