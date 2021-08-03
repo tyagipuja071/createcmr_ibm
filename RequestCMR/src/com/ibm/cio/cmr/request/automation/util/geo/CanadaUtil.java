@@ -39,6 +39,9 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.CmrClientService;
 import com.ibm.cio.cmr.request.util.JpaManager;
+import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
+import com.ibm.cmr.services.client.dnb.DnBCompany;
+import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 
 /**
@@ -394,6 +397,7 @@ public class CanadaUtil extends AutomationUtil {
       boolean cmdeReview = false;
       EntityManager cedpManager = JpaManager.getEntityManager("CEDP");
       List<String> ignoredUpdates = new ArrayList<String>();
+      boolean isicCheckDone = false;
       for (UpdatedDataModel change : changes.getDataUpdates()) {
         switch (change.getDataField()) {
         case "Order Block Code":
@@ -403,6 +407,24 @@ public class CanadaUtil extends AutomationUtil {
           break;
         case "ISIC":
         case "Subindustry":
+          if (!isicCheckDone) {
+            String error = performISICCheck(cedpManager, entityManager, requestData, change);
+            if (StringUtils.isNotBlank(error)) {
+              LOG.debug(error);
+              output.setDetails(error);
+              validation.setMessage("Validation Failed");
+              validation.setSuccess(false);
+              if (StringUtils.isBlank(admin.getSourceSystId())) {
+                engineData.addRejectionComment("OTH", error, "", "");
+                output.setOnError(true);
+              } else {
+                engineData.addNegativeCheckStatus("BP_" + change.getDataField(), error);
+              }
+              return true;
+            }
+            isicCheckDone = true;
+          }
+          break;
         case "NAT/INAC":
           String error = performInacCheck(cedpManager, entityManager, requestData);
           if (StringUtils.isNotBlank(error)) {
@@ -715,6 +737,74 @@ public class CanadaUtil extends AutomationUtil {
           error += "\n- Not new CMR (for CMR pass the 30 days period)";
         }
         return error;
+      }
+    }
+    return null;
+  }
+
+  private String performISICCheck(EntityManager cedpManager, EntityManager entityManager, RequestData requestData, UpdatedDataModel updatedDataModel)
+      throws Exception {
+    Data data = requestData.getData();
+    String updatedValue = updatedDataModel.getNewData();
+    String error = "This CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle. Thank you. \nJira link https://jira.data.zc2.ibm.com/servicedesk/customer/portal/14";
+    String sql = ExternalizedQuery.getSql("AUTO.CA.GET_CMR_REVENUE");
+    PreparedQuery query = new PreparedQuery(cedpManager, sql);
+    query.setParameter("CMR_NO", data.getCmrNo());
+    query.setForReadOnly(true);
+    List<Object[]> results = query.getResults(1);
+    if (results != null && results.size() > 0) {
+      BigDecimal revenue = new BigDecimal(0);
+      if (results.get(0)[1] != null) {
+        revenue = (BigDecimal) results.get(0)[1];
+      }
+      if (revenue.floatValue() > 100000) {
+        return error + "\n- CMR with revenue > 100K";
+      } else if (revenue.floatValue() == 0) {
+        String dunsNo = "";
+        if (StringUtils.isNotBlank(data.getDunsNo())) {
+          dunsNo = data.getDunsNo();
+        } else {
+          MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, null, "ZS01");
+          if (response != null && DnBUtil.hasValidMatches(response)) {
+            DnBMatchingResponse dnbRecord = response.getMatches().get(0);
+            if (dnbRecord.getConfidenceCode() >= 8) {
+              dunsNo = dnbRecord.getDunsNo();
+            }
+          }
+        }
+
+        if (StringUtils.isNotBlank(dunsNo)) {
+          DnBCompany dnbData = DnBUtil.getDnBDetails(dunsNo);
+          if (dnbData != null && StringUtils.isNotBlank(dnbData.getIbmIsic())) {
+            if (!dnbData.getIbmIsic().equals(updatedValue)) {
+              return error + "\n- Requested ISIC did not match value in D&B";
+            } else {
+              sql = ExternalizedQuery.getSql("AUTO.CA.GET_ISU_BY_ISIC");
+              query = new PreparedQuery(entityManager, sql);
+              query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+              query.setParameter("ISIC", updatedValue);
+              query.setForReadOnly(true);
+              String brsch = query.getSingleResult(String.class);
+              if (!data.getIsuCd().equals(brsch)) {
+                return error + "\n- ISU/Industry impact";
+              } else {
+                // check if isic and sicmen are equal if not set them equal
+                if (data.getIsicCd() != null && !data.getIsicCd().equals(data.getUsSicmen())) {
+                  if ("ISIC".equals(updatedDataModel.getDataField())) {
+                    data.setUsSicmen(updatedValue);
+                  } else {
+                    data.setIsicCd(updatedValue);
+                  }
+                }
+
+              }
+            }
+          } else {
+            return error + "\n- Isic is blank";
+          }
+        } else {
+          return error + "\n- Duns No. is blank";
+        }
       }
     }
     return null;
