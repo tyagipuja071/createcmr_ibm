@@ -2070,8 +2070,9 @@ function validateCnNameAndAddr() {
               });
 
               if ((ret == null || ret.ret1 == null)) {
-                return new ValidationResult(null, false, 'The Chinese Company name and address must 100% match with “Tian Yan Cha”, otherwise the request are not allowed to send for processing. '
-                    + 'If requestor insist using the Chinese company name and address which don\'t match with "Tian Yan Cha", the Attachment Content "Company Proof" is required.');
+                return new ValidationResult(null, false, 'The Chinese Company name and address must 100% match with “Tian Yan Cha”. ' 
+                    + 'If you insist to input the missmatch Chinese company name and address, please attach the relevant supporting documents, '
+                    + 'file content must be“Company Proof”, and click Disable automatic processing checkbox, then this request will go to CMDE for manual validate.');
               } else {
                 return new ValidationResult(null, true);
               }
