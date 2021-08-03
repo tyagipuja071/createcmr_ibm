@@ -100,6 +100,7 @@ function afterConfigForCN() {
 // }
 
   if (FormManager.getActualValue('reqType') == 'U') {
+    FormManager.readOnly('isicCd');
     FormManager.hide('IbmDeptCostCenter', 'ibmDeptCostCenter');
     if (_pagemodel.userRole.toUpperCase() == "REQUESTER") {
       /*
@@ -240,6 +241,7 @@ function setIsuOnIsic() {
         }
       }
     }
+    FormManager.readOnly('isicCd');
   }
 }
 

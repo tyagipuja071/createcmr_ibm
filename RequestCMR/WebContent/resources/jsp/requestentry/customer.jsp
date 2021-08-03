@@ -198,6 +198,8 @@
 
     </cmr:column>
     <cmr:column span="4" containerForField="ISIC" exceptForCountry="897">
+    <%if (reqentry.getCmrIssuingCntry().equalsIgnoreCase("641")){%>
+    <cmr:info text="${ui.info.cnisicinfo}"></cmr:info><%} %>
       <p>
         <label for="isicCd"> <cmr:fieldLabel fieldId="ISIC" />: <cmr:delta text="${rdcdata.isicCd}" oldValue="${reqentry.isicCd}" code="L" />
         </label>
