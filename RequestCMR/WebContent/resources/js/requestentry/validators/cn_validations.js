@@ -1055,22 +1055,21 @@ function addPRIVCustNameValidator() {
          if (_custSubGrp != 'undefined' && _custSubGrp != '' && _custSubGrp == 'PRIV') {
            if (englishName1 != 'undefined' && englishName1 != ''){
              englishName1 = englishName1.toUpperCase();
-            if (englishName1.indexOf("PRIVATE LIMITED") < 0 && englishName1.indexOf("COMPANY") < 0 && englishName1.indexOf("CORPORATION") < 0  && englishName1.indexOf("INCORPORATE") < 0 && englishName1.indexOf("ORGANIZATION") < 0 && englishName1.indexOf("LIMITED") < 0 && englishName1.indexOf("PVT LTD") < 0 && englishName1.indexOf("CO., LTD.") < 0 && englishName1.indexOf("LTD") < 0 && englishName1.indexOf("COM LTD") < 0){
-              console.log("Customer Name English for Private Person validate is successful...");
-              return new ValidationResult(null, true);
-            } else {
-              return new ValidationResult(null, false, "Customer Name English can't contain 'Private Limited', 'Company', 'Corporation', 'incorporate', 'organization', 'Pvt Ltd','imited','Co., Ltd.', 'ltd', 'com ltd' for Scenario Privte Person");
-            }
-          }
-        if (englishName2 != 'undefined' && englishName2 != ''){
-          englishName2 = englishName2.toUpperCase();
-          if (englishName2.indexOf("PRIVATE LIMITED") < 0 && englishName2.indexOf("COMPANY") < 0 && englishName2.indexOf("CORPORATION") < 0  && englishName2.indexOf("INCORPORATE") < 0 && englishName2.indexOf("ORGANIZATION") < 0 && englishName2.indexOf("LIMITED") < 0 && englishName2.indexOf("PVT LTD") < 0 && englishName2.indexOf("CO., LTD.") < 0 && englishName2.indexOf("LTD") < 0 && englishName2.indexOf("COM LTD") < 0 ){
-            console.log("Customer Name Con't English for Private Person validate is successful...");
-            return new ValidationResult(null, true);
-          } else {
-            return new ValidationResult(null, false, "Customer Name Con't English can't contain 'Private Limited', 'Company', 'Corporation', 'incorporate', 'organization', 'Pvt Ltd','imited','Co., Ltd.', 'ltd', 'com ltd' for Scenario Privte Person");
-          }
-        }
+             if (englishName1.indexOf("PRIVATE LIMITED") < 0 && englishName1.indexOf("COMPANY") < 0 && englishName1.indexOf("CORPORATION") < 0  && englishName1.indexOf("INCORPORATE") < 0 && englishName1.indexOf("ORGANIZATION") < 0 && englishName1.indexOf("LIMITED") < 0 && englishName1.indexOf("PVT LTD") < 0 && englishName1.indexOf("CO., LTD.") < 0 && englishName1.indexOf("LTD") < 0 && englishName1.indexOf("COM LTD") < 0){
+               console.log("Customer Name English for Private Person validate is successful...");
+             } else {
+               return new ValidationResult(null, false, "Customer Name English can't contain 'Private Limited', 'Company', 'Corporation', 'incorporate', 'organization', 'Pvt Ltd','imited','Co., Ltd.', 'ltd', 'com ltd' for Scenario Privte Person");
+             }
+           }
+           if (englishName2 != 'undefined' && englishName2 != ''){
+             englishName2 = englishName2.toUpperCase();
+             if (englishName2.indexOf("PRIVATE LIMITED") < 0 && englishName2.indexOf("COMPANY") < 0 && englishName2.indexOf("CORPORATION") < 0  && englishName2.indexOf("INCORPORATE") < 0 && englishName2.indexOf("ORGANIZATION") < 0 && englishName2.indexOf("LIMITED") < 0 && englishName2.indexOf("PVT LTD") < 0 && englishName2.indexOf("CO.,LTD.") < 0 && englishName2.indexOf("LTD") < 0 && englishName2.indexOf("COM LTD") < 0 ){
+               console.log("Customer Name Con't English for Private Person validate is successful...");
+               return new ValidationResult(null, true);
+             } else {
+               return new ValidationResult(null, false, "Customer Name Con't English can't contain 'Private Limited', 'Company', 'Corporation', 'incorporate', 'organization', 'Pvt Ltd','imited','Co., Ltd.', 'ltd', 'com ltd' for Scenario Privte Person");
+           }
+         }
        }
       }
     };
