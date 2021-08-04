@@ -703,7 +703,9 @@ function setSalesRepValues(clientTier) {
       if (isuCd.concat(clientTier) == '34Y' && cntry == SysLoc.SPAIN && salesReps.length == 0) {
         salesReps[0] = '1FICTI';
       }
-      FormManager.limitDropdownValues(FormManager.getField('repTeamMemberNo'), salesReps);
+      if (cntry == SysLoc.PORTUGAL) {
+      	FormManager.limitDropdownValues(FormManager.getField('repTeamMemberNo'), salesReps);
+      }
       if (salesReps.length == 1) {
         FormManager.setValue('repTeamMemberNo', salesReps[0]);
         setSBOAndEBO();
