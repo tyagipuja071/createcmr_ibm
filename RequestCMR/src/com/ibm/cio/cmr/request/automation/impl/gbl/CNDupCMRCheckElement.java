@@ -257,7 +257,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                       for (FindCMRRecordModel cmrsMods : cmrs) {
                         nameFindCmrCnResult = cmrsMods.getCmrIntlName1()
                             + (!StringUtils.isBlank(cmrsMods.getCmrIntlName2()) ? (" " + cmrsMods.getCmrIntlName2()) : "");
-                        if (nameFindCmrCnResult != null && cnNameDoubleByte.equals(nameFindCmrCnResult)) {
+                        if (nameFindCmrCnResult != null && trimChineseSpace(cnNameDoubleByte).equals(trimChineseSpace(nameFindCmrCnResult))) {
 
                           nameMatched = true;
                           kukla = getKukla(entityManager, cmrsMods.getCmrNum(), data.getCmrIssuingCntry());
@@ -332,7 +332,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                         for (FindCMRRecordModel cmrsMods : cmrs) {
                           nameFindCmrCnResult = cmrsMods.getCmrIntlName1()
                               + (!StringUtils.isBlank(cmrsMods.getCmrIntlName2()) ? (" " + cmrsMods.getCmrIntlName2()) : "");
-                          if (nameFindCmrCnResult != null && nameFindCmrCnResult.equals(historyName)) {
+                          if (nameFindCmrCnResult != null && trimChineseSpace(nameFindCmrCnResult).equals(trimChineseSpace(historyName))) {
 
                             historyNmMatched = true;
                             kukla = getKukla(entityManager, cmrsMods.getCmrNum(), data.getCmrIssuingCntry());
@@ -413,7 +413,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                         for (FindCMRRecordModel cmrsMods : cmrs) {
                           nameFindCmrCnResult = cmrsMods.getCmrIntlName1()
                               + (!StringUtils.isBlank(cmrsMods.getCmrIntlName2()) ? (" " + cmrsMods.getCmrIntlName2()) : "");
-                          if (nameFindCmrCnResult != null && nameFindCmrCnResult.equals(historyName)) {
+                          if (nameFindCmrCnResult != null && trimChineseSpace(nameFindCmrCnResult).equals(trimChineseSpace(historyName))) {
 
                             historyNmMatched = true;
                             kukla = getKukla(entityManager, cmrsMods.getCmrNum(), data.getCmrIssuingCntry());
@@ -580,7 +580,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                     for (FindCMRRecordModel cmrsMods : cmrs) {
                       nameFindCmrCnResult = cmrsMods.getCmrIntlName1()
                           + (!StringUtils.isBlank(cmrsMods.getCmrIntlName2()) ? (" " + cmrsMods.getCmrIntlName2()) : "");
-                      if (nameFindCmrCnResult != null && cnNameSingleByte.equals(nameFindCmrCnResult)) {
+                      if (nameFindCmrCnResult != null && trimChineseSpace(cnNameSingleByte).equals(trimChineseSpace(nameFindCmrCnResult))) {
 
                         nameMatched = true;
                         kukla = getKukla(entityManager, cmrsMods.getCmrNum(), data.getCmrIssuingCntry());
@@ -652,7 +652,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                       for (FindCMRRecordModel cmrsMods : cmrs) {
                         nameFindCmrCnResult = cmrsMods.getCmrIntlName1()
                             + (!StringUtils.isBlank(cmrsMods.getCmrIntlName2()) ? (" " + cmrsMods.getCmrIntlName2()) : "");
-                        if (nameFindCmrCnResult != null && cnNameDoubleByte.equals(nameFindCmrCnResult)) {
+                        if (nameFindCmrCnResult != null && trimChineseSpace(cnNameDoubleByte).equals(trimChineseSpace(nameFindCmrCnResult))) {
 
                           nameMatched = true;
                           kukla = getKukla(entityManager, cmrsMods.getCmrNum(), data.getCmrIssuingCntry());
@@ -727,7 +727,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                         for (FindCMRRecordModel cmrsMods : cmrs) {
                           nameFindCmrCnResult = cmrsMods.getCmrIntlName1()
                               + (!StringUtils.isBlank(cmrsMods.getCmrIntlName2()) ? (" " + cmrsMods.getCmrIntlName2()) : "");
-                          if (nameFindCmrCnResult != null && nameFindCmrCnResult.equals(historyName)) {
+                          if (nameFindCmrCnResult != null && trimChineseSpace(nameFindCmrCnResult).equals(trimChineseSpace(historyName))) {
 
                             historyNmMatched = true;
                             kukla = getKukla(entityManager, cmrsMods.getCmrNum(), data.getCmrIssuingCntry());
@@ -807,7 +807,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                         for (FindCMRRecordModel cmrsMods : cmrs) {
                           nameFindCmrCnResult = cmrsMods.getCmrIntlName1()
                               + (!StringUtils.isBlank(cmrsMods.getCmrIntlName2()) ? (" " + cmrsMods.getCmrIntlName2()) : "");
-                          if (nameFindCmrCnResult != null && nameFindCmrCnResult.equals(historyName)) {
+                          if (nameFindCmrCnResult != null && trimChineseSpace(nameFindCmrCnResult).equals(trimChineseSpace(historyName))) {
 
                             historyNmMatched = true;
                             kukla = getKukla(entityManager, cmrsMods.getCmrNum(), data.getCmrIssuingCntry());
@@ -964,7 +964,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                     for (FindCMRRecordModel cmrsMods : cmrs) {
                       nameFindCmrCnResult = cmrsMods.getCmrIntlName1()
                           + (!StringUtils.isBlank(cmrsMods.getCmrIntlName2()) ? (" " + cmrsMods.getCmrIntlName2()) : "");
-                      if (nameFindCmrCnResult != null && cnNameSingleByte.equals(nameFindCmrCnResult)) {
+                      if (nameFindCmrCnResult != null && trimChineseSpace(cnNameSingleByte).equals(trimChineseSpace(nameFindCmrCnResult))) {
 
                         nameMatched = true;
 
@@ -1016,7 +1016,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                       for (FindCMRRecordModel cmrsMods : cmrs) {
                         nameFindCmrCnResult = cmrsMods.getCmrIntlName1()
                             + (!StringUtils.isBlank(cmrsMods.getCmrIntlName2()) ? (" " + cmrsMods.getCmrIntlName2()) : "");
-                        if (nameFindCmrCnResult != null && cnNameDoubleByte.equals(nameFindCmrCnResult)) {
+                        if (nameFindCmrCnResult != null && trimChineseSpace(cnNameDoubleByte).equals(trimChineseSpace(nameFindCmrCnResult))) {
 
                           nameMatched = true;
 
@@ -1070,7 +1070,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                         for (FindCMRRecordModel cmrsMods : cmrs) {
                           nameFindCmrCnResult = cmrsMods.getCmrIntlName1()
                               + (!StringUtils.isBlank(cmrsMods.getCmrIntlName2()) ? (" " + cmrsMods.getCmrIntlName2()) : "");
-                          if (nameFindCmrCnResult != null && nameFindCmrCnResult.equals(historyName)) {
+                          if (nameFindCmrCnResult != null && trimChineseSpace(nameFindCmrCnResult).equals(trimChineseSpace(historyName))) {
 
                             historyNmMatched = true;
 
@@ -1130,7 +1130,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                         for (FindCMRRecordModel cmrsMods : cmrs) {
                           nameFindCmrCnResult = cmrsMods.getCmrIntlName1()
                               + (!StringUtils.isBlank(cmrsMods.getCmrIntlName2()) ? (" " + cmrsMods.getCmrIntlName2()) : "");
-                          if (nameFindCmrCnResult != null && nameFindCmrCnResult.equals(historyName)) {
+                          if (nameFindCmrCnResult != null && trimChineseSpace(nameFindCmrCnResult).equals(trimChineseSpace(historyName))) {
 
                             historyNmMatched = true;
 
@@ -1314,7 +1314,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                     for (FindCMRRecordModel cmrsMods : cmrs) {
                       nameFindCmrCnResult = cmrsMods.getCmrIntlName1()
                           + (!StringUtils.isBlank(cmrsMods.getCmrIntlName2()) ? (" " + cmrsMods.getCmrIntlName2()) : "");
-                      if (nameFindCmrCnResult != null && cnNameSingleByte.equals(nameFindCmrCnResult)) {
+                      if (nameFindCmrCnResult != null && trimChineseSpace(cnNameSingleByte).equals(trimChineseSpace(nameFindCmrCnResult))) {
 
                         nameMatched = true;
                         kukla = getKukla(entityManager, cmrsMods.getCmrNum(), data.getCmrIssuingCntry());
@@ -1386,7 +1386,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                       for (FindCMRRecordModel cmrsMods : cmrs) {
                         nameFindCmrCnResult = cmrsMods.getCmrIntlName1()
                             + (!StringUtils.isBlank(cmrsMods.getCmrIntlName2()) ? (" " + cmrsMods.getCmrIntlName2()) : "");
-                        if (nameFindCmrCnResult != null && cnNameDoubleByte.equals(nameFindCmrCnResult)) {
+                        if (nameFindCmrCnResult != null && trimChineseSpace(cnNameDoubleByte).equals(trimChineseSpace(nameFindCmrCnResult))) {
 
                           nameMatched = true;
                           kukla = getKukla(entityManager, cmrsMods.getCmrNum(), data.getCmrIssuingCntry());
@@ -1461,7 +1461,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                         for (FindCMRRecordModel cmrsMods : cmrs) {
                           nameFindCmrCnResult = cmrsMods.getCmrIntlName1()
                               + (!StringUtils.isBlank(cmrsMods.getCmrIntlName2()) ? (" " + cmrsMods.getCmrIntlName2()) : "");
-                          if (nameFindCmrCnResult != null && nameFindCmrCnResult.equals(historyName)) {
+                          if (nameFindCmrCnResult != null && trimChineseSpace(nameFindCmrCnResult).equals(trimChineseSpace(historyName))) {
 
                             historyNmMatched = true;
                             kukla = getKukla(entityManager, cmrsMods.getCmrNum(), data.getCmrIssuingCntry());
@@ -1542,7 +1542,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                         for (FindCMRRecordModel cmrsMods : cmrs) {
                           nameFindCmrCnResult = cmrsMods.getCmrIntlName1()
                               + (!StringUtils.isBlank(cmrsMods.getCmrIntlName2()) ? (" " + cmrsMods.getCmrIntlName2()) : "");
-                          if (nameFindCmrCnResult != null && nameFindCmrCnResult.equals(historyName)) {
+                          if (nameFindCmrCnResult != null && trimChineseSpace(nameFindCmrCnResult).equals(trimChineseSpace(historyName))) {
 
                             historyNmMatched = true;
                             kukla = getKukla(entityManager, cmrsMods.getCmrNum(), data.getCmrIssuingCntry());
@@ -1694,7 +1694,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
                     for (int i = 0; i < resultFindCmrCN.size(); i++) {
                       nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
-                      if (nameFindCmrCnResult != null && cnNameSingleByte.equals(nameFindCmrCnResult)) {
+                      if (nameFindCmrCnResult != null && trimChineseSpace(cnNameSingleByte).equals(trimChineseSpace(nameFindCmrCnResult))) {
 
                         nameMatched = true;
                         matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
@@ -1727,7 +1727,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                     if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
                       for (int i = 0; i < resultFindCmrCN.size(); i++) {
                         nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
-                        if (nameFindCmrCnResult != null && cnNameDoubleByte.equals(nameFindCmrCnResult)) {
+                        if (nameFindCmrCnResult != null && trimChineseSpace(cnNameDoubleByte).equals(trimChineseSpace(nameFindCmrCnResult))) {
 
                           nameMatched = true;
                           matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
@@ -1763,7 +1763,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                       if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
                         for (int i = 0; i < resultFindCmrCN.size(); i++) {
                           nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
-                          if (nameFindCmrCnResult != null && nameFindCmrCnResult.equals(historyName)) {
+                          if (nameFindCmrCnResult != null && trimChineseSpace(nameFindCmrCnResult).equals(trimChineseSpace(historyName))) {
 
                             historyNmMatched = true;
                             matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
@@ -1804,7 +1804,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                       if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
                         for (int i = 0; i < resultFindCmrCN.size(); i++) {
                           nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
-                          if (nameFindCmrCnResult != null && nameFindCmrCnResult.equals(historyName)) {
+                          if (nameFindCmrCnResult != null && trimChineseSpace(nameFindCmrCnResult).equals(trimChineseSpace(historyName))) {
 
                             historyNmMatched = true;
                             matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
@@ -1955,7 +1955,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
                     for (int i = 0; i < resultFindCmrCN.size(); i++) {
                       nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
-                      if (nameFindCmrCnResult != null && cnNameSingleByte.equals(nameFindCmrCnResult)) {
+                      if (nameFindCmrCnResult != null && trimChineseSpace(cnNameSingleByte).equals(trimChineseSpace(nameFindCmrCnResult))) {
 
                         nameMatched = true;
                         matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
@@ -1988,7 +1988,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                     if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
                       for (int i = 0; i < resultFindCmrCN.size(); i++) {
                         nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
-                        if (nameFindCmrCnResult != null && cnNameDoubleByte.equals(nameFindCmrCnResult)) {
+                        if (nameFindCmrCnResult != null && trimChineseSpace(cnNameDoubleByte).equals(trimChineseSpace(nameFindCmrCnResult))) {
 
                           nameMatched = true;
                           matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
@@ -2024,7 +2024,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                       if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
                         for (int i = 0; i < resultFindCmrCN.size(); i++) {
                           nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
-                          if (nameFindCmrCnResult != null && nameFindCmrCnResult.equals(historyName)) {
+                          if (nameFindCmrCnResult != null && trimChineseSpace(nameFindCmrCnResult).equals(trimChineseSpace(historyName))) {
 
                             historyNmMatched = true;
                             matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
@@ -2065,7 +2065,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                       if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
                         for (int i = 0; i < resultFindCmrCN.size(); i++) {
                           nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
-                          if (nameFindCmrCnResult != null && nameFindCmrCnResult.equals(historyName)) {
+                          if (nameFindCmrCnResult != null && trimChineseSpace(nameFindCmrCnResult).equals(trimChineseSpace(historyName))) {
 
                             historyNmMatched = true;
                             matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
@@ -2178,7 +2178,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
                     for (int i = 0; i < resultFindCmrCN.size(); i++) {
                       nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
-                      if (nameFindCmrCnResult != null && cnNameSingleByte.equals(nameFindCmrCnResult)) {
+                      if (nameFindCmrCnResult != null && trimChineseSpace(cnNameSingleByte).equals(trimChineseSpace(nameFindCmrCnResult))) {
 
                         nameMatched = true;
 
@@ -2219,7 +2219,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                     if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
                       for (int i = 0; i < resultFindCmrCN.size(); i++) {
                         nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
-                        if (nameFindCmrCnResult != null && cnNameDoubleByte.equals(nameFindCmrCnResult)) {
+                        if (nameFindCmrCnResult != null && trimChineseSpace(cnNameDoubleByte).equals(trimChineseSpace(nameFindCmrCnResult))) {
 
                           nameMatched = true;
 
@@ -2263,7 +2263,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                       if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
                         for (int i = 0; i < resultFindCmrCN.size(); i++) {
                           nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
-                          if (nameFindCmrCnResult != null && nameFindCmrCnResult.equals(historyName)) {
+                          if (nameFindCmrCnResult != null && trimChineseSpace(nameFindCmrCnResult).equals(trimChineseSpace(historyName))) {
 
                             historyNmMatched = true;
 
@@ -2312,7 +2312,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                       if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
                         for (int i = 0; i < resultFindCmrCN.size(); i++) {
                           nameFindCmrCnResult = resultFindCmrCN.get(i).getAltName() != null ? resultFindCmrCN.get(i).getAltName() : "";
-                          if (nameFindCmrCnResult != null && nameFindCmrCnResult.equals(historyName)) {
+                          if (nameFindCmrCnResult != null && trimChineseSpace(nameFindCmrCnResult).equals(trimChineseSpace(historyName))) {
 
                             historyNmMatched = true;
 
