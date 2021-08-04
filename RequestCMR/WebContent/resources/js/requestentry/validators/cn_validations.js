@@ -1781,8 +1781,10 @@ function convert2DBCSIgnoreCase(input) {
     modifiedVal = modifiedVal.replace(/Y/g, 'Ｙ');
     modifiedVal = modifiedVal.replace(/Z/g, 'Ｚ');
     modifiedVal = modifiedVal.replace(/ /g, '　');
-    modifiedVal = replaceAndSymbol(modifiedVal);
-    modifiedVal = replaceCrossbarSymbol(modifiedVal);
+    modifiedVal = modifiedVal.replace(/\(/g, '（');
+    modifiedVal = modifiedVal.replace(/\)/g, '）');
+// modifiedVal = replaceAndSymbol(modifiedVal);
+// modifiedVal = replaceCrossbarSymbol(modifiedVal);
   }
   return modifiedVal;
 }
@@ -2061,7 +2063,7 @@ function validateCnNameAndAddr() {
           }
 
         }
-        var ret = cmr.query('QUERY.ADDR.GET.INTLCUSTNM4.BY_REQID', {
+        var ret = cmr.query('ADDR.GET.INTLCUSTNM4.BY_REQID', {
           REQ_ID : FormManager.getActualValue('reqId')
         });
         if (ret && ret.ret1 && ret.ret1 != '') {
