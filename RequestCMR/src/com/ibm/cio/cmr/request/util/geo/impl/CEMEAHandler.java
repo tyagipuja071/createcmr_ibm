@@ -219,7 +219,9 @@ public class CEMEAHandler extends BaseSOFHandler {
             // && (parvmCount > 1)) {
             // record.setCmrAddrTypeCode("ZS02");
             // }
-
+            String soldtoseqinrdc = getSoldtoSeqFromRDC(entityManager, SystemConfiguration.getValue("MANDT"), reqEntry.getCmrIssuingCntry(),
+                record.getCmrNum());
+            System.out.println("soldtoseqinrdc = " + soldtoseqinrdc);
             System.out.println("seqNo = " + seqNo);
             if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo)) {
               addrType = record.getCmrAddrTypeCode();
@@ -245,7 +247,7 @@ public class CEMEAHandler extends BaseSOFHandler {
                 }
                 converted.add(addr);
               }
-              if (CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode())) {
+              if (CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode()) && record.getCmrAddrSeq().equals(soldtoseqinrdc)) {
                 String kunnr = addr.getCmrSapNumber();
                 String adrnr = getaddAddressAdrnr(entityManager, cmrIssueCd, SystemConfiguration.getValue("MANDT"), kunnr, addr.getCmrAddrTypeCode(),
                     addr.getCmrAddrSeq());
@@ -331,43 +333,7 @@ public class CEMEAHandler extends BaseSOFHandler {
                     }
                   }
                 }
-                if (StringUtils.isBlank(adrnr)) {
-                  CmrtAddr gAddr = getLegacyGAddress(entityManager, reqEntry.getCmrIssuingCntry(), searchModel.getCmrNum());
-                  if (gAddr != null) {
-                    LOG.debug("Adding installing to the records");
-                    FindCMRRecordModel installing = new FindCMRRecordModel();
-                    PropertyUtils.copyProperties(installing, mainRecord);
-                    // copyAddrData(installing, installingAddr, gAddrSeq);
-                    installing.setCmrAddrTypeCode("ZP02");
-                    installing.setCmrAddrSeq(gAddrSeq);
-                    // add value
-                    installing.setCmrName1Plain(gAddr.getAddrLine1());
-                    if (!StringUtils.isBlank(gAddr.getAddrLine2())) {
-                      installing.setCmrName2Plain(gAddr.getAddrLine2());
-                    } else {
-                      installing.setCmrName2Plain("");
-                    }
-                    // installing.setCmrStreetAddress(gAddr.getAddrLine3());
-                    if (!StringUtils.isBlank(gAddr.getAddrLine3())) {
-                      installing.setCmrStreetAddress(gAddr.getAddrLine3());
-                    } else {
-                      installing.setCmrStreetAddress(gAddr.getAddrLine4());
-                    }
-                    installing.setCmrCity(record.getCmrCity());
-                    installing.setCmrCity2(record.getCmrCity2());
-                    installing.setCmrCountry(gAddr.getAddrLine6());
-                    installing.setCmrCountryLanded("");
-                    installing.setCmrPostalCode(record.getCmrPostalCode());
-                    installing.setCmrState(record.getCmrState());
-                    installing.setCmrBldg(legacyGaddrLN6);
-                    if (StringUtils.isBlank(gAddr.getAddrLine3())) {
-                      installing.setCmrStreetAddressCont("");
-                    } else {
-                      installing.setCmrStreetAddressCont(gAddr.getAddrLine4());
-                    }
-                    converted.add(installing);
-                  }
-                }
+
                 // add new here
                 String soldtoseq = getSoldtoaddrSeqFromLegacy(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum());
                 // int maxintSeqadd = getMaxSequenceOnLegacyAddr(entityManager,
@@ -2600,6 +2566,22 @@ public class CEMEAHandler extends BaseSOFHandler {
       return cndCMR;
     }
     return null;
+  }
+
+  private String getSoldtoSeqFromRDC(EntityManager entityManager, String mandt, String katr6, String cmrNo) {
+    String addrSeq = null;
+    String sql = ExternalizedQuery.getSql("CEE.GETSOLDTOSEQFROMRDC");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("MANDT", mandt);
+    query.setParameter("KATR6", katr6);
+    query.setParameter("ZZKV_CUSNO", cmrNo);
+    String result = query.getSingleResult(String.class);
+
+    if (result != null) {
+      addrSeq = result;
+    }
+
+    return addrSeq;
   }
 
 }
