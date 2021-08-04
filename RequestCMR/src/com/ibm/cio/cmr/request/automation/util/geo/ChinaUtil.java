@@ -24,9 +24,7 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemParameters;
-import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cio.cmr.request.util.geo.impl.CNHandler;
-import com.ibm.cmr.services.client.dnb.DnBCompany;
 import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
 
 public class ChinaUtil extends AutomationUtil {
@@ -250,23 +248,26 @@ public class ChinaUtil extends AutomationUtil {
           results.setOnError(false);
           results.setResults("Computed");
         }
-      } else {
-        String error = performISICCheck(entityManager, requestData);
-
-        if (StringUtils.isNotBlank(error)) {
-          details.append(error);
-          engineData.addRejectionComment("OTH",
-              "If you insist to use different ISIC from D&B,please raise D&B ticket to do investigation and raise jira ticket to CMDE team within 30 days after D&B refresh.",
-              "", "");
-          results.setOnError(true);
-        } else {
-          details.append("ISIC is valid" + "\n");
-          details.append("Successful Execution.\n");
-          results.setOnError(false);
-          results.setResults("Computed");
-        }
-
       }
+      // else {
+      // String error = performISICCheck(entityManager, requestData);
+      //
+      // if (StringUtils.isNotBlank(error)) {
+      // details.append(error);
+      // engineData.addRejectionComment("OTH",
+      // "If you insist to use different ISIC from D&B,please raise D&B ticket
+      // to do investigation and raise jira ticket to CMDE team within 30 days
+      // after D&B refresh.",
+      // "", "");
+      // results.setOnError(true);
+      // } else {
+      // details.append("ISIC is valid" + "\n");
+      // details.append("Successful Execution.\n");
+      // results.setOnError(false);
+      // results.setResults("Computed");
+      // }
+      //
+      // }
 
     } else {
       details.append("No specific fields to compute.\n");
@@ -289,34 +290,36 @@ public class ChinaUtil extends AutomationUtil {
    *         checks, null if validated.
    * @throws Exception
    */
-  private String performISICCheck(EntityManager entityManager, RequestData requestData) throws Exception {
-    Data data = requestData.getData();
-    String isic = data.getIsicCd() == null ? "" : data.getIsicCd();
-    String dunsNo = "";
-    if (StringUtils.isNotBlank(data.getDunsNo())) {
-      dunsNo = data.getDunsNo();
-
-      if (StringUtils.isNotBlank(dunsNo)) {
-        DnBCompany dnbData = DnBUtil.getDnBDetails(dunsNo);
-        if (dnbData != null && StringUtils.isNotBlank(dnbData.getIbmIsic())) {
-          if (!dnbData.getIbmIsic().equals(isic)) {
-            isic = dnbData.getIbmIsic();
-            return "ISIC validation failed by D&B,import and override the ISIC from D&B directly";
-          } else {
-
-            return null;
-
-          }
-        }
-      } else {
-        return "\n- Duns No. is blank";
-      }
-    } else {
-      return "\n- Duns No. is blank";
-    }
-
-    return null;
-  }
+  // private String performISICCheck(EntityManager entityManager, RequestData
+  // requestData) throws Exception {
+  // Data data = requestData.getData();
+  // String isic = data.getIsicCd() == null ? "" : data.getIsicCd();
+  // String dunsNo = "";
+  // if (StringUtils.isNotBlank(data.getDunsNo())) {
+  // dunsNo = data.getDunsNo();
+  //
+  // if (StringUtils.isNotBlank(dunsNo)) {
+  // DnBCompany dnbData = DnBUtil.getDnBDetails(dunsNo);
+  // if (dnbData != null && StringUtils.isNotBlank(dnbData.getIbmIsic())) {
+  // if (!dnbData.getIbmIsic().equals(isic)) {
+  // isic = dnbData.getIbmIsic();
+  // return "ISIC validation failed by D&B,import and override the ISIC from D&B
+  // directly";
+  // } else {
+  //
+  // return null;
+  //
+  // }
+  // }
+  // } else {
+  // return "\n- Duns No. is blank";
+  // }
+  // } else {
+  // return "\n- Duns No. is blank";
+  // }
+  //
+  // return null;
+  // }
 
   @Override
   public boolean runUpdateChecksForData(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
