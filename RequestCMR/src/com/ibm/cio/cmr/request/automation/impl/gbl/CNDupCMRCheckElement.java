@@ -1657,7 +1657,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
             cnNameSingleByte = iAddr.getIntlCustNm1() + (!StringUtils.isBlank(iAddr.getIntlCustNm2()) ? (" " + iAddr.getIntlCustNm2()) : "");
           }
           // George, fix dup cmr not found CREATCMR-3133 on 20210802
-          if (!StringUtils.isBlank(cnNameSingleByte) && !"null".equalsIgnoreCase(cnNameSingleByte)) {
+          if (validCNName(cnNameSingleByte)) {
             try {
 
               // 1, Check CN API
@@ -1667,7 +1667,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 searchModelCNAPI.setTaxCd1(cnCreditCd);
                 resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "TAXCD");
               } else {
-                cnNameSingleByte = iAddr.getIntlCustNm1() + (!StringUtils.isBlank(iAddr.getIntlCustNm2()) ? (" " + iAddr.getIntlCustNm2()) : "");
+
                 cnNameSingleByte = convert2SingleByte(cnNameSingleByte);
                 searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
                 searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
@@ -2142,7 +2142,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
             cnNameSingleByte = iAddr.getIntlCustNm1() + (!StringUtils.isBlank(iAddr.getIntlCustNm2()) ? (" " + iAddr.getIntlCustNm2()) : "");
           }
           // George, fix dup cmr not found CREATCMR-3133 on 20210802
-          if (!StringUtils.isBlank(cnNameSingleByte) && !"null".equalsIgnoreCase(cnNameSingleByte)) {
+          if (validCNName(cnNameSingleByte)) {
             try {
 
               // 1, Check CN API
@@ -2152,7 +2152,6 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 searchModelCNAPI.setTaxCd1(cnCreditCd);
                 resultCNApi = CompanyFinder.getCNApiInfo(searchModelCNAPI, "TAXCD");
               } else {
-                cnNameSingleByte = iAddr.getIntlCustNm1() + (!StringUtils.isBlank(iAddr.getIntlCustNm2()) ? (" " + iAddr.getIntlCustNm2()) : "");
                 cnNameSingleByte = convert2SingleByte(cnNameSingleByte);
                 searchModelCNAPI.setIssuingCntry(data.getCmrIssuingCntry());
                 searchModelCNAPI.setCountryCd(soldTo.getLandCntry());
@@ -3116,6 +3115,15 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
       }
     }
     return result;
+  }
+
+  private boolean validCNName(String input) {
+    if (input != null && !StringUtils.isBlank(input) && !"null".equals(input) && !"*".equals(input)) {
+      return true;
+    } else {
+      return false;
+    }
+
   }
 
 }
