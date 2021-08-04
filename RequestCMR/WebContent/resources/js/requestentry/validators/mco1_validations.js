@@ -898,6 +898,17 @@ function enterpriseValidation() {
 
 function showDeptNoForInternalsOnly() {
   var scenario = FormManager.getActualValue('custSubGrp');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var requestCMR = FormManager.getActualValue('cmrNo');
+  var reqType = FormManager.getActualValue('reqType');
+  var flag = (requestCMR.match("[0-8][0-8].{4}") || requestCMR.match("[9][0-8].{4}") || requestCMR.match("[0-8][9].{4}"));
+  
+  if (reqType == 'U' && role == 'REQUESTER' && flag) {
+    FormManager.readOnly('ibmDeptCostCenter');
+  } else {
+    FormManager.enable('ibmDeptCostCenter');
+  }  
+  
   if (scenario != null && scenario.includes('IN')) {
     FormManager.show('InternalDept', 'ibmDeptCostCenter');
     FormManager.addValidator('ibmDeptCostCenter', Validators.NUMBER, [ 'Internal Department Number' ]);
