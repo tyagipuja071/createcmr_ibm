@@ -19,6 +19,8 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.IntlAddr;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemParameters;
@@ -207,6 +209,14 @@ public class ChinaUtil extends AutomationUtil {
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_RETRIEVE_VALUES);
       break;
+    }
+
+    String ret = geDocContent(entityManager, admin.getId().getReqId());
+    if ("Y".equals(ret)) {
+      details.append("An attachment of type 'Chinese Name And Address change' has been added. This Requester will be routed to CMDE.\n");
+      engineData.addRejectionComment("OTH",
+          "An attachment of type 'Chinese Name And Address change' has been added. This Requester will be routed to CMDE", "", "");
+      result.setOnError(true);
     }
 
     return true;
@@ -450,6 +460,19 @@ public class ChinaUtil extends AutomationUtil {
     output.setProcessOutput(validation);
 
     return true;
+  }
+
+  private String geDocContent(EntityManager entityManager, long req_id) {
+    String sql = ExternalizedQuery.getSql("QUERY.CHECK_CN_API_ATTACHMENT");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("ID", req_id);
+    String result = "N";
+    List<String> records = query.getResults(String.class);
+    if (records != null && records.size() > 0) {
+      result = "Y";
+    }
+    LOG.debug("result" + result);
+    return result;
   }
 
   @Override

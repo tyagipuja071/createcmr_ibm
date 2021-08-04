@@ -2022,92 +2022,99 @@ function validateCnNameAndAddr() {
     return {
       validate : function() {
         var custSubType = FormManager.getActualValue('custSubGrp');
-        var disableAutoProc = dijit.byId('disableAutoProc').get('checked');
-        if (!disableAutoProc) {
-          if (custSubType != 'INTER' && custSubType != 'CROSS' && custSubType != 'PRIV') {
+        
+        var cnCustName1ZS01 = '';
+        var cnCustName2ZS01 = '';
+        var cnAddrTxtZS01 = '';
+        var intlCustNm4ZS01 = '';
 
-            var cnCustName1ZS01 = '';
-            var cnCustName2ZS01 = '';
-            var cnAddrTxtZS01 = '';
-            var intlCustNm4ZS01 = '';
+        for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+          record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+          type = record.addrType;
 
-            for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
-              record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
-              type = record.addrType;
+          if (typeof (type) == 'object') {
+            type = type[0];
+          }
 
-              if (typeof (type) == 'object') {
-                type = type[0];
-              }
+          if (type == 'ZS01') {
+            cnCustName1ZS01 = record.cnCustName1;
+            cnCustName2ZS01 = record.cnCustName2;
+            cnAddrTxtZS01 = record.cnAddrTxt;
+          }
 
-              if (type == 'ZS01') {
-                cnCustName1ZS01 = record.cnCustName1;
-                cnCustName2ZS01 = record.cnCustName2;
-                cnAddrTxtZS01 = record.cnAddrTxt;
-              }
-
-              if (typeof (cnCustName1ZS01) == 'object') {
-                if (cnCustName1ZS01[0] != '' && cnCustName1ZS01[0] != null) {
-                  cnCustName1ZS01 = cnCustName1ZS01[0];
-                }
-              }
-
-              if (typeof (cnCustName2ZS01) == 'object') {
-                if (cnCustName2ZS01[0] != '' && cnCustName2ZS01[0] != null) {
-                  cnCustName2ZS01 = cnCustName2ZS01[0];
-                }
-              }
-
-              if (typeof (cnAddrTxtZS01) == 'object') {
-                if (cnAddrTxtZS01[0] != '' && cnAddrTxtZS01[0] != null) {
-                  cnAddrTxtZS01 = cnAddrTxtZS01[0];
-                }
-              }
-
+          if (typeof (cnCustName1ZS01) == 'object') {
+            if (cnCustName1ZS01[0] != '' && cnCustName1ZS01[0] != null) {
+              cnCustName1ZS01 = cnCustName1ZS01[0];
             }
-            var ret = cmr.query('QUERY.ADDR.GET.INTLCUSTNM4.BY_REQID', {
-              REQ_ID : FormManager.getActualValue('reqId')
-            });
-            if (ret && ret.ret1 && ret.ret1 != '') {
-              intlCustNm4ZS01 = ret.ret1;
+          }
+
+          if (typeof (cnCustName2ZS01) == 'object') {
+            if (cnCustName2ZS01[0] != '' && cnCustName2ZS01[0] != null) {
+              cnCustName2ZS01 = cnCustName2ZS01[0];
             }
+          }
 
-            var busnType = FormManager.getActualValue('busnType');
-            var cnName = convert2SBCS(cnCustName1ZS01 + cnCustName2ZS01);
-            var result = {};
-            dojo.xhrGet({
-              url : cmr.CONTEXT_ROOT + '/cn/tyc.json',
-              handleAs : 'json',
-              method : 'GET',
-              content : {
-                busnType : busnType,
-                cnName : cnName
-              },
-              timeout : 50000,
-              sync : true,
-              load : function(data, ioargs) {
-                if (data && data.result) {
-                  result = data.result;
-                }
-              },
-              error : function(error, ioargs) {
-                result = {};
+          if (typeof (cnAddrTxtZS01) == 'object') {
+            if (cnAddrTxtZS01[0] != '' && cnAddrTxtZS01[0] != null) {
+              cnAddrTxtZS01 = cnAddrTxtZS01[0];
+            }
+          }
+
+        }
+        var ret = cmr.query('QUERY.ADDR.GET.INTLCUSTNM4.BY_REQID', {
+          REQ_ID : FormManager.getActualValue('reqId')
+        });
+        if (ret && ret.ret1 && ret.ret1 != '') {
+          intlCustNm4ZS01 = ret.ret1;
+        }
+        
+        var busnType = FormManager.getActualValue('busnType');
+        var cnName = convert2SBCS(cnCustName1ZS01 + cnCustName2ZS01);
+        var scenarioValidation = true;
+        if (custSubType == 'INTER' || custSubType == 'CROSS' || custSubType == 'PRIV') {
+          scenarioValidation = false;
+        }else if(custSubType == 'AQSTN'){
+          if(cnName == null || cnName == '' || cnName == '*'){
+            scenarioValidation = false;
+          }
+        }
+        if (scenarioValidation){
+  
+          var busnType = FormManager.getActualValue('busnType');
+          var cnName = convert2SBCS(cnCustName1ZS01 + cnCustName2ZS01);
+          var result = {};
+          dojo.xhrGet({
+            url : cmr.CONTEXT_ROOT + '/cn/tyc.json',
+            handleAs : 'json',
+            method : 'GET',
+            content : {
+              busnType : busnType,
+              cnName : cnName
+            },
+            timeout : 50000,
+            sync : true,
+            load : function(data, ioargs) {
+              if (data && data.result) {
+                result = data.result;
               }
+            },
+            error : function(error, ioargs) {
+              result = {};
+            }
+          });
+  
+          var cnAddress = convert2SBCS(cnAddrTxtZS01 + intlCustNm4ZS01);
+          if (result.regLocation != cnAddress || result.name != cnName) {
+            var id = FormManager.getActualValue('reqId');
+            var ret = cmr.query('CHECK_CN_API_ATTACHMENT', {
+              ID : id
             });
-
-            var cnAddress = convert2SBCS(cnAddrTxtZS01 + intlCustNm4ZS01);
-            if (result.regLocation != cnAddress || result.name != cnName) {
-              var id = FormManager.getActualValue('reqId');
-              var ret = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
-                ID : id
-              });
-
-              if ((ret == null || ret.ret1 == null)) {
-                return new ValidationResult(null, false, 'The Chinese Company name and address must 100% match with “Tian Yan Cha”. ' 
-                    + 'If you insist to input the missmatch Chinese company name and address, please attach the relevant supporting documents, '
-                    + 'file content must be“Company Proof”, and click Disable automatic processing checkbox, then this request will go to CMDE for manual validate.');
-              } else {
-                return new ValidationResult(null, true);
-              }
+  
+            if ((ret == null || ret.ret1 == null)) {
+              return new ValidationResult(null, false, 'The Chinese Company name and addressdoes not match with “Tian Yan Cha”. '
+                  + 'If you insist to input the missmatch Chinese company name and address, please attach the relevant supporting documents, '
+                  + 'file content must be “Chinese Name And Address change”, then this request will go to CMDE for manual validate. '
+                  + '<br/>' + 'Name=' + result.name + ' Address=' + result.regLocation);
             } else {
               return new ValidationResult(null, true);
             }
@@ -2115,7 +2122,7 @@ function validateCnNameAndAddr() {
             return new ValidationResult(null, true);
           }
         } else {
-          return new ValidationResult(null, true);
+        return new ValidationResult(null, true);
         }
       }
     }
