@@ -69,6 +69,7 @@ import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
+import com.ibm.cio.cmr.request.util.geo.impl.CNHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.LAHandler;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
 import com.ibm.cmr.services.client.dnb.DnbData;
@@ -543,6 +544,11 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       geoHandler.doBeforeDataSave(entityManager, admin, data, model.getCmrIssuingCntry());
     }
     updateEntity(data, entityManager);
+
+    // CREATCMR-3144 - CN 2.0 special
+    if (CmrConstants.Send_for_Processing().equals(model.getAction()) && SystemLocation.CHINA.equals(model.getCmrIssuingCntry())) {
+      CNHandler.doBeforeSendForProcessing(entityManager, admin, data, model);
+    }
 
     // check if there's a status change
     if (transitionToNext && !trans.getId().getCurrReqStatus().equals(trans.getNewReqStatus())) {

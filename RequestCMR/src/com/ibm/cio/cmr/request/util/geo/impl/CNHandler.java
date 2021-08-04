@@ -1408,7 +1408,7 @@ public class CNHandler extends GEOHandler {
     return intlAddrRdcList;
   }
 
-  public List<Addr> getAddrByReqId(EntityManager entityManager, long reqId) {
+  public static List<Addr> getAddrByReqId(EntityManager entityManager, long reqId) {
     String sql = ExternalizedQuery.getSql("QUERY.ADDR_BY_REQ_ID");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", reqId);
@@ -1807,6 +1807,43 @@ public class CNHandler extends GEOHandler {
     }
     entityManager.merge(data);
     entityManager.flush();
+  }
+
+  public static void doBeforeSendForProcessing(EntityManager entityManager, Admin admin, Data data, RequestEntryModel model) {
+    if (shouldSetAsterisk()) {
+      setAddrNmAsterisk(entityManager, admin, data);
+    }
+  }
+
+  private static boolean shouldSetAsterisk() {
+    return true;
+  }
+
+  private static void setAddrNmAsterisk(EntityManager entityManager, Admin admin, Data data) {
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+      return;
+    }
+    GEOHandler handler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
+    List<Addr> addresses = getAddrByReqId(entityManager, data.getId().getReqId());
+    if (addresses != null && addresses.size() > 0) {
+      for (Addr addr : addresses) {
+        if ("PRIV".equals(data.getCustSubGrp()) || "INTER".equals(data.getCustSubGrp()) || "AQSTN".equals(data.getCustSubGrp())) {
+          IntlAddr intlAddr = handler.getIntlAddrById(addr, entityManager);
+          if (intlAddr != null) {
+            if (StringUtils.isBlank(intlAddr.getIntlCustNm1())) {
+              intlAddr.setIntlCustNm1("*");
+
+              entityManager.merge(intlAddr);
+              entityManager.flush();
+            }
+          } else {
+            // TODO
+            // creteIntlAddr();
+          }
+        }
+      }
+    }
+
   }
 
 }
