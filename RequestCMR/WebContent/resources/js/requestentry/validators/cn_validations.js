@@ -678,19 +678,21 @@ function setValuesForScenarios() {
       if (_custSubGrp == 'AQSTN'|| _custSubGrp == 'PRIV' || _custSubGrp == 'EMBSA') {
         FormManager.addValidator('rdcComment', Validators.REQUIRED, [ 'RdcComment' ], '');
         if (_custSubGrp == 'EMBSA') {
-          FormManager.setValue('rdcComment', 'For ESA Use Only');
+          FormManager.setValue('rdcComment', 'ESA Use Only');
+          FormManager.readOnly('rdcComment');
         } else if (_custSubGrp == 'AQSTN') {
-          if (FormManager.getActualValue('custSubGrp') != _pagemodel.custSubGrp) {
-            FormManager.setValue('rdcComment', 'Acquisition');
-          }
+          FormManager.setValue('rdcComment', 'Acquistion Use Only');
+          FormManager.readOnly('rdcComment');
         } else if (_custSubGrp == 'PRIV') {
-            FormManager.setValue('rdcComment', 'Private Person');
-            FormManager.readOnly('rdcComment');
+          FormManager.setValue('rdcComment', 'Private person Use Only');
+          FormManager.readOnly('rdcComment');
         }
       } else if (_custSubGrp == 'MRKT') {
-        FormManager.setValue('rdcComment', 'For Market place use only');
+        FormManager.setValue('rdcComment', 'Marketplace Use Only');
+        FormManager.readOnly('rdcComment');
       } else if (_custSubGrp == 'BLUMX') {
-        FormManager.setValue('rdcComment', 'For Bluemix use only');
+        FormManager.setValue('rdcComment', 'Bluemix Use Only');
+        FormManager.readOnly('rdcComment');
       } else {
         FormManager.resetValidations('rdcComment');
       }
@@ -1055,7 +1057,7 @@ function addPRIVCustNameValidator() {
          if (_custSubGrp != 'undefined' && _custSubGrp != '' && _custSubGrp == 'PRIV') {
            if (englishName1 != 'undefined' && englishName1 != ''){
              englishName1 = englishName1.toUpperCase();
-             if (englishName1.indexOf("PRIVATE LIMITED") < 0 && englishName1.indexOf("COMPANY") < 0 && englishName1.indexOf("CORPORATION") < 0  && englishName1.indexOf("INCORPORATE") < 0 && englishName1.indexOf("ORGANIZATION") < 0 && englishName1.indexOf("LIMITED") < 0 && englishName1.indexOf("PVT LTD") < 0 && englishName1.indexOf("CO., LTD.") < 0 && englishName1.indexOf("LTD") < 0 && englishName1.indexOf("COM LTD") < 0){
+             if (englishName1.indexOf("PRIVATE LIMITED") < 0 && englishName1.indexOf("COMPANY") < 0 && englishName1.indexOf("CORPORATION") < 0  && englishName1.indexOf("INCORPORATE") < 0 && englishName1.indexOf("ORGANIZATION") < 0 && englishName1.indexOf("LIMITED") < 0 && englishName1.indexOf("PVT LTD") < 0 && englishName1.indexOf("CO., LTD.") < 0 && englishName1.indexOf("LTD") < 0 && englishName1.indexOf("LTD.") < 0 && englishName1.indexOf("COM LTD") < 0){
                console.log("Customer Name English for Private Person validate is successful...");
              } else {
                return new ValidationResult(null, false, "Customer Name English can't contain 'Private Limited', 'Company', 'Corporation', 'incorporate', 'organization', 'Pvt Ltd','imited','Co., Ltd.', 'ltd', 'com ltd' for Scenario Privte Person");
@@ -1063,7 +1065,7 @@ function addPRIVCustNameValidator() {
            }
            if (englishName2 != 'undefined' && englishName2 != ''){
              englishName2 = englishName2.toUpperCase();
-             if (englishName2.indexOf("PRIVATE LIMITED") < 0 && englishName2.indexOf("COMPANY") < 0 && englishName2.indexOf("CORPORATION") < 0  && englishName2.indexOf("INCORPORATE") < 0 && englishName2.indexOf("ORGANIZATION") < 0 && englishName2.indexOf("LIMITED") < 0 && englishName2.indexOf("PVT LTD") < 0 && englishName2.indexOf("CO.,LTD.") < 0 && englishName2.indexOf("LTD") < 0 && englishName2.indexOf("COM LTD") < 0 ){
+             if (englishName2.indexOf("PRIVATE LIMITED") < 0 && englishName2.indexOf("COMPANY") < 0 && englishName2.indexOf("CORPORATION") < 0  && englishName2.indexOf("INCORPORATE") < 0 && englishName2.indexOf("ORGANIZATION") < 0 && englishName2.indexOf("LIMITED") < 0 && englishName2.indexOf("PVT LTD") < 0 && englishName2.indexOf("CO.,LTD.") < 0 && englishName2.indexOf("LTD") < 0 && englishName2.indexOf("LTD.") < 0 && englishName2.indexOf("COM LTD") < 0 ){
                console.log("Customer Name Con't English for Private Person validate is successful...");
                return new ValidationResult(null, true);
              } else {

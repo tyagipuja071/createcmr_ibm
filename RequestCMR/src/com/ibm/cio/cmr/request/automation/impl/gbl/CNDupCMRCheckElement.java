@@ -184,6 +184,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                     for (FindCMRRecordModel cmrsMods : cmrs) {
                       nameFindCmrCnResult = cmrsMods.getCmrIntlName1()
                           + (!StringUtils.isBlank(cmrsMods.getCmrIntlName2()) ? (" " + cmrsMods.getCmrIntlName2()) : "");
+                      nameFindCmrCnResult = trimChineseSpace(nameFindCmrCnResult);
                       if (nameFindCmrCnResult != null && cnNameSingleByte.equals(nameFindCmrCnResult)) {
 
                         nameMatched = true;
@@ -3123,7 +3124,18 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
     } else {
       return false;
     }
+  }
 
+  // The trim doesn't work if input param is Chinese Space.
+  // so first replace the Chiense Space with English Space.
+  private String trimChineseSpace(String nameFindCmrCnResult) {
+    String ret = "";
+    if (nameFindCmrCnResult != null) {
+      nameFindCmrCnResult = nameFindCmrCnResult.replace((char) 12288, ' ');
+      nameFindCmrCnResult = nameFindCmrCnResult.trim();
+      ret = nameFindCmrCnResult;
+    }
+    return ret;
   }
 
 }
