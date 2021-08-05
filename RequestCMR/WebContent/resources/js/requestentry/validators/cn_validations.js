@@ -100,7 +100,7 @@ function afterConfigForCN() {
 // }
 
   if (FormManager.getActualValue('reqType') == 'U') {
-    FormManager.readOnly('isicCd');
+
     FormManager.hide('IbmDeptCostCenter', 'ibmDeptCostCenter');
     if (_pagemodel.userRole.toUpperCase() == "REQUESTER") {
       /*
@@ -117,6 +117,16 @@ function afterConfigForCN() {
       FormManager.resetValidations('rdcComment');
     } else {
       FormManager.readOnly('custClass');
+    }
+    FormManager.readOnly('isicCd');
+    if(FormManager.getField('capInd').checked == true){
+      FormManager.readOnly('subIndustryCd');
+      FormManager.readOnly('searchTerm');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('clientTier');
+      FormManager.readOnly('inacType');
+      FormManager.readOnly('inacCd');
+      FormManager.readOnly('company');
     }
   }
   FormManager.show('DisableAutoProcessing', 'disableAutoProc');
@@ -619,7 +629,9 @@ function setValuesForScenarios() {
   }
 
   if (FormManager.getActualValue('reqType') == 'C' && _custSubGrp != 'undefined' && _custSubGrp != '') {
-    
+    if (FormManager.getActualValue('isicCd') != 'undefined' && FormManager.getActualValue('isicCd') != '') {
+      FormManager.readOnly('isicCd');
+    }
     if (_custSubGrp == 'INTER') {
       FormManager.show('ClassCode', 'custClass');
       var field = FormManager.getField('custClass');
