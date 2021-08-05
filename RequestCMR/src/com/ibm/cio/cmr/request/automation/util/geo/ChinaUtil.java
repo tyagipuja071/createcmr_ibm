@@ -353,6 +353,16 @@ public class ChinaUtil extends AutomationUtil {
       validation.setMessage("Successful");
     }
 
+    String ret = geDocContent(entityManager, admin.getId().getReqId());
+    if ("Y".equals(ret)) {
+      details.append("An attachment of type 'Chinese Name And Address change' has been added. This Requester will be routed to CMDE.\n");
+      engineData.addRejectionComment("OTH",
+          "An attachment of type 'Chinese Name And Address change' has been added. This Requester will be routed to CMDE", "", "");
+      output.setOnError(true);
+      validation.setSuccess(false);
+      validation.setMessage("Rejected");
+    }
+
     output.setDetails(details.toString());
     output.setProcessOutput(validation);
     return true;
