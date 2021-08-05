@@ -55,9 +55,11 @@ import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
+import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.QueryClient;
+import com.ibm.cmr.services.client.dnb.DnBCompany;
 import com.ibm.cmr.services.client.query.QueryRequest;
 import com.ibm.cmr.services.client.query.QueryResponse;
 import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
@@ -1813,6 +1815,20 @@ public class CNHandler extends GEOHandler {
     if (shouldSetAsterisk()) {
       setAddrNmAsterisk(entityManager, admin, data);
     }
+    if (StringUtils.isNotBlank(data.getDunsNo())) {
+      DnBCompany dnbData = null;
+      try {
+        dnbData = DnBUtil.getDnBDetails(data.getDunsNo());
+      } catch (Exception e) {
+        LOG.error("Error occured on get ISIC from DNB.");
+        e.printStackTrace();
+      }
+      if (dnbData != null && StringUtils.isNotBlank(dnbData.getIbmIsic())) {
+        if (!dnbData.getIbmIsic().equals(data.getIsicCd())) {
+          data.setIsicCd(dnbData.getIbmIsic());
+        }
+      }
+    } 
   }
 
   private static boolean shouldSetAsterisk() {
