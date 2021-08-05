@@ -967,6 +967,18 @@ function setPstExcemptValidator() {
   }
 }
 
+function lockOrderBlockCode() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType != 'U') {
+    FormManager.readOnly('custAcctType');
+  } else {
+    FormManager.enable('custAcctType');
+  }
+}
+
 /* Register CA Javascripts */
 dojo.addOnLoad(function() {
   console.log('adding CA scripts...');
@@ -985,6 +997,7 @@ dojo.addOnLoad(function() {
   // functions on afterConfigForCA
   GEOHandler.addAfterConfig(afterConfigForCA, [ SysLoc.CANADA ]);
   GEOHandler.addAfterConfig(lockAbbrevNmLocn, [ SysLoc.CANADA ]);
+  GEOHandler.addAfterConfig(lockOrderBlockCode, [ SysLoc.CANADA ]);
   // GEOHandler.addToggleAddrTypeFunction(toggleAddrTypesForCA, [ SysLoc.CANADA
   // ]);
   GEOHandler.addAddrFunction(addCAAddressHandler, [ SysLoc.CANADA ]);

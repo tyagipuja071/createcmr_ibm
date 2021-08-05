@@ -185,7 +185,11 @@ public class CanadaHandler extends GEOHandler {
     data.setLeasingCompanyIndc("1".equals(mainRecord.getCmrLeasingInd()) ? "Y" : "N");
     data.setMiscBillCd("CA".equals(mainRecord.getCmrLtPymntInd()) ? "Y" : "N");
     data.setCreditCd(mainRecord.getCmrCustCreditCode());
-
+    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      data.setCustAcctType("");
+    } else {
+      data.setCustAcctType(mainRecord.getCmrOrderBlock());
+    }
     String mainRecBillFreq = mainRecord.getCmrBillPlnTyp();
     if (mainRecBillFreq.equals("YM")) {
       data.setCollectorNameNo("1");
@@ -375,6 +379,15 @@ public class CanadaHandler extends GEOHandler {
       update.setDataField(PageManager.getLabel(cmrCountry, "MiscBillCode", "-"));
       update.setNewData(newData.getMiscBillCd());
       update.setOldData(oldData.getMiscBillCd());
+      results.add(update);
+    }
+
+    // Order Block Code
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCustAcctType(), newData.getCustAcctType())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "OrderBlock", "-"));
+      update.setNewData(newData.getCustAcctType());
+      update.setOldData(oldData.getCustAcctType());
       results.add(update);
     }
   }
