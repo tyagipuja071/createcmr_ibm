@@ -113,6 +113,8 @@ public abstract class USBPHandler {
   public static final List<String> DEPARTMENT_IDENTIFIERS = Arrays.asList("E-HOST", "EHOST", "DEMO DEVELOPMENT", "DEMO DEV", "DEVELOPMENT",
       "ICC LEASE DEV", "IDL LEASE DEV", "POOL");
 
+  private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_INSTALL_AT);
+
   private boolean waiting;
   private FindCMRRecordModel ibmCmr;
 
@@ -250,36 +252,42 @@ public abstract class USBPHandler {
    * @param details
    * @throws Exception
    */
-  public SosResponse matchAgainstSosRpa(GEOHandler handler, RequestData requestData, Addr addr, AutomationEngineData engineData,
-      StringBuilder details, OverrideOutput overrides, boolean hasExistingCmr) throws Exception {
+  public void matchAgainstSosRpa(GEOHandler handler, RequestData requestData, Addr addr, AutomationEngineData engineData, StringBuilder details,
+      OverrideOutput overrides, boolean hasExistingCmr) throws Exception {
     Scorecard scorecard = requestData.getScorecard();
     scorecard.setRpaMatchingResult("");
-    List<SosResponse> sosRpaMatches = USUtil.getSosRpaMatchesForBPEndUser(handler, requestData, engineData);
-    if (!sosRpaMatches.isEmpty()) {
-      scorecard.setRpaMatchingResult("Y");
-      String msg = "Record found in SOS-RPA Service.";
-      details.append(msg + "\n");
-      SosResponse response = sosRpaMatches.get(0);
-      details.append("Record found in SOS.");
-      details.append("\nCompany Id = " + (StringUtils.isBlank(response.getCompanyId()) ? "" : response.getCompanyId()));
-      details.append("\nCustomer Name = " + (StringUtils.isBlank(response.getLegalName()) ? "" : response.getLegalName()));
-      details.append("\nAddress = " + (StringUtils.isBlank(response.getAddress1()) ? "" : response.getAddress1()));
-      details.append("\nState = " + (StringUtils.isBlank(response.getState()) ? "" : response.getState()));
-      details.append("\nZip = " + (StringUtils.isBlank(response.getZip()) ? "" : response.getZip()));
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ADMN", "COMP_VERIFIED_INDC", requestData.getAdmin().getCompVerifiedIndc(), "Y");
-      return response;
-    } else {
-      if ("N".equals(scorecard.getRpaMatchingResult()) || "".equals(scorecard.getRpaMatchingResult())) {
-        scorecard.setRpaMatchingResult("N");
-      }
-      String msg = "No records found in SOS-RPA Service.";
-      details.append(msg + "\n");
-      if (hasExistingCmr) {
+    int itr = 0;
+    for (String addrType : RELEVANT_ADDRESSES) {
+      details.append("SOS-RPA Matching Results for" + addrType + "\n");
+      List<SosResponse> sosRpaMatches = USUtil.getSosRpaMatchesForBPEndUser(handler, requestData, engineData, addrType);
+      if (!sosRpaMatches.isEmpty()) {
+        scorecard.setRpaMatchingResult("Y");
+        LOG.debug("Scorecard Updated for SOS-RPA to" + scorecard.getRpaMatchingResult());
+        String msg = "Record found in SOS-RPA Service.";
+        details.append(msg + "\n");
+        SosResponse response = sosRpaMatches.get(0);
+        details.append("Record found in SOS.");
+        details.append("\nCompany Id = " + (StringUtils.isBlank(response.getCompanyId()) ? "" : response.getCompanyId()));
+        details.append("\nCustomer Name = " + (StringUtils.isBlank(response.getLegalName()) ? "" : response.getLegalName()));
+        details.append("\nAddress = " + (StringUtils.isBlank(response.getAddress1()) ? "" : response.getAddress1()));
+        details.append("\nState = " + (StringUtils.isBlank(response.getState()) ? "" : response.getState()));
+        details.append("\nZip = " + (StringUtils.isBlank(response.getZip()) ? "" : response.getZip()) + "\n\n");
         overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ADMN", "COMP_VERIFIED_INDC", requestData.getAdmin().getCompVerifiedIndc(),
             "Y");
-        details.append("- A current active CMR exists for the company.");
+      } else {
+        if (itr == 1 && ("N".equals(scorecard.getRpaMatchingResult()) || "".equals(scorecard.getRpaMatchingResult()))) {
+          scorecard.setRpaMatchingResult("N");
+        }
+        LOG.debug("Scorecard Updated for SOS-RPA to" + scorecard.getRpaMatchingResult());
+        String msg = "No records found in SOS-RPA Service.";
+        details.append(msg + "\n");
+        if (hasExistingCmr) {
+          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ADMN", "COMP_VERIFIED_INDC", requestData.getAdmin().getCompVerifiedIndc(),
+              "Y");
+          details.append("- A current active CMR exists for the company.");
+        }
       }
-      return null;
+      itr = 1;
     }
   }
 
