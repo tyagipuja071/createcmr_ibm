@@ -329,7 +329,8 @@ public class ChinaUtil extends AutomationUtil {
 
     StringBuilder details = new StringBuilder();
     String scenario = data.getCustSubGrp();
-    if (StringUtils.isNotBlank(scenario) && SCENARIO_LOCAL_BUSPR.equals(scenario) || StringUtils.isNotBlank(data.getPpsceid())) {
+    if (StringUtils.isNotBlank(scenario) && SCENARIO_LOCAL_BUSPR.equals(scenario)
+        || StringUtils.isNotBlank(data.getPpsceid()) && !"08036".equals(data.getSearchTerm())) {
       List<String> managerID = SystemParameters.getList("AUTO_CN_MGR_BP_LIST");
       boolean managerCheck = BluePagesHelper.isBluePagesHeirarchyManager(admin.getRequesterId(), managerID);
       if (!managerCheck) {
