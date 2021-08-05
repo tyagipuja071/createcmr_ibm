@@ -1060,7 +1060,7 @@ function addPRIVCustNameValidator() {
              if (englishName1.indexOf("PRIVATE LIMITED") < 0 && englishName1.indexOf("COMPANY") < 0 && englishName1.indexOf("CORPORATION") < 0  && englishName1.indexOf("INCORPORATE") < 0 && englishName1.indexOf("ORGANIZATION") < 0 && englishName1.indexOf("LIMITED") < 0 && englishName1.indexOf("PVT LTD") < 0 && englishName1.indexOf("CO., LTD.") < 0 && englishName1.indexOf("LTD") < 0 && englishName1.indexOf("LTD.") < 0 && englishName1.indexOf("COM LTD") < 0){
                console.log("Customer Name English for Private Person validate is successful...");
              } else {
-               return new ValidationResult(null, false, "Customer Name English can't contain 'Private Limited', 'Company', 'Corporation', 'incorporate', 'organization', 'Pvt Ltd','imited','Co., Ltd.', 'ltd', 'com ltd' for Scenario Privte Person");
+               return new ValidationResult(null, false, "Customer Name English can't contain 'Private Limited', 'Company', 'Corporation', 'incorporate', 'organization', 'Pvt Ltd','Limited','Co., Ltd.', 'ltd', 'com ltd' for Scenario Privte Person");
              }
            }
            if (englishName2 != 'undefined' && englishName2 != ''){
@@ -1069,7 +1069,7 @@ function addPRIVCustNameValidator() {
                console.log("Customer Name Con't English for Private Person validate is successful...");
                return new ValidationResult(null, true);
              } else {
-               return new ValidationResult(null, false, "Customer Name Con't English can't contain 'Private Limited', 'Company', 'Corporation', 'incorporate', 'organization', 'Pvt Ltd','imited','Co., Ltd.', 'ltd', 'com ltd' for Scenario Privte Person");
+               return new ValidationResult(null, false, "Customer Name Con't English can't contain 'Private Limited', 'Company', 'Corporation', 'incorporate', 'organization', 'Pvt Ltd','Limited','Co., Ltd.', 'ltd', 'com ltd' for Scenario Privte Person");
            }
          }
        }

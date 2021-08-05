@@ -261,11 +261,15 @@ public class CNHandler extends GEOHandler {
       }
       if ("DRA".equalsIgnoreCase(admin.getReqStatus())) {
         if (data.getCustSubGrp() != null && "AQSTN".equals(data.getCustSubGrp())) {
-          data.setRdcComment("Acquisition");
+          data.setRdcComment("Acquistion Use Only");
         } else if (data.getCustSubGrp() != null && "PRIV".equals(data.getCustSubGrp())) {
-          data.setRdcComment("Private Person");
-        } else {
-          data.setRdcComment("");
+          data.setRdcComment("Private person Use Only");
+        } else if (data.getCustSubGrp() != null && "MRKT".equals(data.getCustSubGrp())) {
+          data.setRdcComment("Marketplace Use Only");
+        } else if (data.getCustSubGrp() != null && "EMBSA".equals(data.getCustSubGrp())) {
+          data.setRdcComment("ESA Use Only");
+        } else if (data.getCustSubGrp() != null && "BLUMX".equals(data.getCustSubGrp())) {
+          data.setRdcComment("Bluemix Use Only");
         }
       }
     }
@@ -1828,7 +1832,7 @@ public class CNHandler extends GEOHandler {
           data.setIsicCd(dnbData.getIbmIsic());
         }
       }
-    } 
+    }
   }
 
   private static boolean shouldSetAsterisk() {
