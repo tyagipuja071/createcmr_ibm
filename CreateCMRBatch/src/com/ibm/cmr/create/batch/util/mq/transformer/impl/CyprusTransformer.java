@@ -196,6 +196,11 @@ public class CyprusTransformer extends EMEATransformer {
       legacyAddr.setAddrPhone(currAddr.getCustPhone());
     }
 
+    if (!StringUtils.isBlank(currAddr.getPoBox())) {
+      legacyAddr.setPoBox(currAddr.getPoBox());
+    } else {
+      legacyAddr.setPoBox("");
+    }
   }
 
   @Override
