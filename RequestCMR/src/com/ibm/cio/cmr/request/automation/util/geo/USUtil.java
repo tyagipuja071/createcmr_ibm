@@ -177,8 +177,6 @@ public class USUtil extends AutomationUtil {
 
   private static final List<String> HEALTH_CARE_EDUCATION_ISIC = Arrays.asList("8030", "8010", "8511");
 
-  private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_INSTALL_AT);
-
   public static List<USBranchOffcMapping> svcARBOMappings = new ArrayList<USBranchOffcMapping>();
   public static List<USBranchOffcMapping> boMappings = new ArrayList<USBranchOffcMapping>();
   private static Map<String, USDetailsContainer> usDetailsMap = new HashMap<String, USDetailsContainer>();
@@ -1446,42 +1444,40 @@ public class USUtil extends AutomationUtil {
    * @return
    * @throws Exception
    */
-  public static List<SosResponse> getSosRpaMatchesForBPEndUser(GEOHandler handler, RequestData requestData, AutomationEngineData engineData)
-      throws Exception {
+  public static List<SosResponse> getSosRpaMatchesForBPEndUser(GEOHandler handler, RequestData requestData, AutomationEngineData engineData,
+      String addrType) throws Exception {
     List<SosResponse> closeMatch = new ArrayList<SosResponse>();
     AutomationResponse<SosResponse> response = new AutomationResponse<SosResponse>();
     Admin admin = requestData.getAdmin();
     long reqId = admin.getId().getReqId();
-    for (String addrType : RELEVANT_ADDRESSES) {
-      Addr address = requestData.getAddress(addrType);
-      if (address != null) {
-        AutomationServiceClient autoClient = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
-            AutomationServiceClient.class);
-        autoClient.setReadTimeout(1000 * 60 * 5);
-        autoClient.setRequestMethod(Method.Post);
+    Addr address = requestData.getAddress(addrType);
+    if (address != null) {
+      AutomationServiceClient autoClient = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
+          AutomationServiceClient.class);
+      autoClient.setReadTimeout(1000 * 60 * 5);
+      autoClient.setRequestMethod(Method.Post);
 
-        // calling SOS-RPA Service
-        LOG.debug("Calling SOS-RPA Service for" + addrType + " address for Req_id : " + reqId);
-        SosRequest requestInstallAt = new SosRequest();
-        requestInstallAt.setName((StringUtils.isNotBlank(address.getDivn()) ? address.getDivn() : ""));
-        requestInstallAt.setCity1(address.getCity1());
-        requestInstallAt.setAddrTxt((StringUtils.isNotBlank(address.getAddrTxt()) ? address.getAddrTxt() : "")
-            + (StringUtils.isNotBlank(address.getAddrTxt2()) ? " " + address.getAddrTxt2() : ""));
-        requestInstallAt.setState(address.getStateProv());
+      // calling SOS-RPA Service
+      LOG.debug("Calling SOS-RPA Service for" + addrType + " address for Req_id : " + reqId);
+      SosRequest requestInstallAt = new SosRequest();
+      requestInstallAt.setName((StringUtils.isNotBlank(address.getDivn()) ? address.getDivn() : ""));
+      requestInstallAt.setCity1(address.getCity1());
+      requestInstallAt.setAddrTxt((StringUtils.isNotBlank(address.getAddrTxt()) ? address.getAddrTxt() : "")
+          + (StringUtils.isNotBlank(address.getAddrTxt2()) ? " " + address.getAddrTxt2() : ""));
+      requestInstallAt.setState(address.getStateProv());
 
-        LOG.debug("Connecting to the SOS - RPA Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
-        AutomationResponse<?> rawResponseInstallAt = autoClient.executeAndWrap(AutomationServiceClient.US_SOS_RPA_SERVICE_ID, requestInstallAt,
-            AutomationResponse.class);
+      LOG.debug("Connecting to the SOS - RPA Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
+      AutomationResponse<?> rawResponseInstallAt = autoClient.executeAndWrap(AutomationServiceClient.US_SOS_RPA_SERVICE_ID, requestInstallAt,
+          AutomationResponse.class);
 
-        ObjectMapper mapper = new ObjectMapper();
-        String json = mapper.writeValueAsString(rawResponseInstallAt);
-        LOG.trace("SOS-RPA Service Response : " + json);
-        TypeReference<AutomationResponse<SosResponse>> ref = new TypeReference<AutomationResponse<SosResponse>>() {
-        };
-        response = mapper.readValue(json, ref);
-        if (response != null && response.isSuccess() && response.getRecord() != null) {
-          closeMatch.add(response.getRecord());
-        }
+      ObjectMapper mapper = new ObjectMapper();
+      String json = mapper.writeValueAsString(rawResponseInstallAt);
+      LOG.trace("SOS-RPA Service Response : " + json);
+      TypeReference<AutomationResponse<SosResponse>> ref = new TypeReference<AutomationResponse<SosResponse>>() {
+      };
+      response = mapper.readValue(json, ref);
+      if (response != null && response.isSuccess() && response.getRecord() != null) {
+        closeMatch.add(response.getRecord());
       }
     }
     return closeMatch;
