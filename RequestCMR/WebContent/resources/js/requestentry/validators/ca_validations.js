@@ -432,12 +432,14 @@ function afterConfigForCA() {
   if ('U' == FormManager.getActualValue('reqType')) {
     var stateProv = getSoldToStateProv();
     toggleCATaxFieldsByProvCd(stateProv);
+    setPstExcemptValidator();
   }
 
 }
 
 var _inacCodeHandler = null;
 var _custSubGrpHandler = null;
+var _pstExemptHandlers = null;
 function addFieldHandlers() {
 
   if (_inacCodeHandler == null) {
@@ -469,6 +471,19 @@ function addFieldHandlers() {
         FormManager.enable('abbrevNm');
       } else {
         FormManager.readOnly('abbrevNm');
+      }
+    });
+  }
+
+  if (_pstExemptHandlers == null) {
+    _pstExemptHandlers = dojo.connect(FormManager.getField('PSTExempt'), 'onClick', function(value) {
+      if (FormManager.getActualValue('reqType') == 'C') {
+        return;
+      }
+      if (dijit.byId('PSTExempt').get('checked')) {
+        FormManager.addValidator('PSTExemptLicNum', Validators.REQUIRED, [ 'PST Exemption License Number' ], 'MAIN_CUST_TAB');
+      } else {
+        FormManager.resetValidations('PSTExemptLicNum');
       }
     });
   }
@@ -896,7 +911,7 @@ function setCSBranchValue(fromAddress, scenario, scenarioChanged) {
   if (FormManager.getActualValue('reqType') == 'C' && scenarioChanged) {
     if (scenario == 'USA' || scenario == 'CND') {
       FormManager.setValue('salesTeamCd', '000');
-      FormManager.readOnly('salesTeamCd');
+      // FormManager.readOnly('salesTeamCd');
     } else {
       var postCd = getSoldToPostalCode();
       if (postCd != null && postCd.length >= 3) {
@@ -940,6 +955,16 @@ function getSoldToStateProv() {
 function addStateProvHandler(cntry, addressMode, saving) {
   var stateProv = getSoldToStateProv();
   toggleCATaxFieldsByProvCd(stateProv);
+}
+
+function setPstExcemptValidator() {
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnlyPage != 'true') {
+    FormManager.resetValidations('PSTExempt');
+    if (undefined != dijit.byId('PSTExempt') && dijit.byId('PSTExempt').get('checked')) {
+      checkAndAddValidator('PSTExemptLicNum', Validators.REQUIRED, [ 'VAT' ]);
+    }
+  }
 }
 
 /* Register CA Javascripts */
