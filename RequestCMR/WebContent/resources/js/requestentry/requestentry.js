@@ -659,7 +659,7 @@ function afterConfigChange() {
   if (_inacHandler == null) {
     _inacHandler = dojo.connect(FormManager.getField('inacType'), 'onChange', function(value) {
       var value = FormManager.getActualValue('inacType');
-      if (cmrCntry != '616' && (value && dojo.string.trim(value) == 'I')) {
+      if ((cmrCntry != '616' && cmrCntry != '641') && (value && dojo.string.trim(value) == 'I')) {
         FormManager.addValidator('inacCd', Validators.NUMBER, [ 'INAC Code' ], 'MAIN_IBM_TAB');
       } else {
         FormManager.removeValidator('inacCd', Validators.NUMBER);
