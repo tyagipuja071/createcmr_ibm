@@ -1379,7 +1379,7 @@ function addAddrUpdateValidator() {
                 
                 if (failInd) {
                   var id = FormManager.getActualValue('reqId');
-                  var ret = cmr.query('CHECK_CONFIRMATION_ATTACHMENTS', {
+                  var ret = cmr.query('CHECK_CN_API_ATTACHMENT', {
                     ID : id
                   });
 
@@ -1660,7 +1660,7 @@ function addAddrUpdateValidator0() {
                 
                 if (failInd) {
                   var id = FormManager.getActualValue('reqId');
-                  var ret = cmr.query('CHECK_CONFIRMATION_ATTACHMENTS', {
+                  var ret = cmr.query('CHECK_CN_API_ATTACHMENT', {
                     ID : id
                   });
 
