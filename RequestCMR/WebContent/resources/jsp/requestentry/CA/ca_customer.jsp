@@ -80,6 +80,15 @@
 			<cmr:field path="contactName1" id="contactName1" fieldId="PurchaseOrdNo" tabId="MAIN_CUST_TAB" />
 		</p>
 	</cmr:column>
+	<cmr:column span="2" containerForField="OrderBlock">
+		<p>
+			<cmr:label fieldId="custAcctType">
+				<cmr:fieldLabel fieldId="OrderBlock" />:
+				<cmr:delta text="${rdcdata.custAcctType}" oldValue="${reqentry.custAcctType}" />
+			</cmr:label>
+			<cmr:field path="custAcctType" id="custAcctType" fieldId="OrderBlock" tabId="MAIN_CUST_TAB" />
+		</p>
+	</cmr:column>
   </cmr:row>
   <cmr:row>
 	<cmr:column span="2" containerForField="MiscBillCode">
