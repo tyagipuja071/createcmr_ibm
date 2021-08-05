@@ -79,19 +79,26 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
       log.debug("Skipping SOS-RPA Check Element for US BP Scenario");
       return output;
     }
+    String matchRPA = "";
+    int itr = 0;
     for (String addrType : RELEVANT_ADDRESSES) {
       Addr address = requestData.getAddress(addrType);
       if (address != null) {
         AutomationResponse<SosResponse> response = getSosMatches(admin.getId().getReqId(), address, admin);
         scorecard.setRpaMatchingResult("");
         log.debug("Scorecard Updated for SOS-RPA to Not Done");
-        details.append("SOS-RPA Matching Results for" + addrType);
+        details.append("SOS-RPA Matching Results for" + addrType + "\n");
         if (response != null && response.isSuccess() && response.getRecord() != null) {
           admin.setCompVerifiedIndc("Y");
           scorecard.setRpaMatchingResult("Y");
           log.debug("Scorecard Updated for SOS-RPA to" + scorecard.getRpaMatchingResult());
           validation.setSuccess(true);
-          validation.setMessage("Successful Execution");
+          if (matchRPA == "Y" && itr == 1) {
+            validation.setMessage("Successful Execution");
+          } else if (matchRPA != "Y" && itr == 1) {
+            validation.setMessage("Partial Matches found");
+          }
+          matchRPA = "Y";
           log.debug(response.getMessage());
           details.append("Record found in SOS.");
           details.append("\nCompany Id = " + (StringUtils.isBlank(response.getRecord().getCompanyId()) ? "" : response.getRecord().getCompanyId()));
@@ -106,7 +113,7 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
           engineData.clearNegativeCheckStatus("DNB_VAT_MATCH_CHECK_FAIL");
           engineData.clearNegativeCheckStatus("DnBSoSMatch");
         } else {
-          if ("N".equals(scorecard.getRpaMatchingResult()) || "".equals(scorecard.getRpaMatchingResult())) {
+          if (itr == 1 && ("N".equals(scorecard.getRpaMatchingResult()) || "".equals(scorecard.getRpaMatchingResult()))) {
             scorecard.setRpaMatchingResult("N");
           }
           log.debug("Scorecard Updated for SOS-RPA to" + scorecard.getRpaMatchingResult());
@@ -115,13 +122,21 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
             output.setOnError(false);
             admin.setCompVerifiedIndc("Y");
           } else {
-            output.setOnError(true);
-            engineData.addNegativeCheckStatus("DnBSoSMatch", "No high quality matches with D&B and SOS-RPA records.");
+            if (itr == 1) {
+              output.setOnError(true);
+              engineData.addNegativeCheckStatus("DnBSoSMatch", "No high quality matches with D&B and SOS-RPA records.");
+            }
           }
-          validation.setMessage("No Matches found");
-          output.setDetails(response.getMessage());
+          if (matchRPA == "Y" && itr == 1) {
+            validation.setMessage("Partial Matches found");
+          } else if (matchRPA != "Y" && itr == 1) {
+            validation.setMessage("No Matches found");
+          }
+          details.append("No Matches Found\n\n");
+          output.setDetails(details.toString());
           log.debug(response.getMessage());
         }
+        itr = 1;
       }
     }
     output.setResults(validation.getMessage());
@@ -129,7 +144,7 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
     return output;
   }
 
-  private AutomationResponse<SosResponse> getSosMatches(long reqId, Addr zs01, Admin admin) throws Exception {
+  private AutomationResponse<SosResponse> getSosMatches(long reqId, Addr addr, Admin admin) throws Exception {
     AutomationServiceClient autoClient = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
         AutomationServiceClient.class);
     autoClient.setReadTimeout(1000 * 60 * 5);
@@ -139,10 +154,10 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
     SosRequest requestAddr = new SosRequest();
     requestAddr.setName((StringUtils.isNotBlank(admin.getMainCustNm1()) ? admin.getMainCustNm1() : "")
         + (StringUtils.isNotBlank(admin.getMainCustNm2()) ? " " + admin.getMainCustNm2() : ""));
-    requestAddr.setCity1(zs01.getCity1());
-    requestAddr.setAddrTxt((StringUtils.isNotBlank(zs01.getAddrTxt()) ? zs01.getAddrTxt() : "")
-        + (StringUtils.isNotBlank(zs01.getAddrTxt2()) ? " " + zs01.getAddrTxt2() : ""));
-    requestAddr.setState(zs01.getStateProv());
+    requestAddr.setCity1(addr.getCity1());
+    requestAddr.setAddrTxt((StringUtils.isNotBlank(addr.getAddrTxt()) ? addr.getAddrTxt() : "")
+        + (StringUtils.isNotBlank(addr.getAddrTxt2()) ? " " + addr.getAddrTxt2() : ""));
+    requestAddr.setState(addr.getStateProv());
     log.debug("Connecting to the SOS - RPA Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
     AutomationResponse<?> rawResponseInstallAt = autoClient.executeAndWrap(AutomationServiceClient.US_SOS_RPA_SERVICE_ID, requestAddr,
         AutomationResponse.class);
