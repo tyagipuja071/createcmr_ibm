@@ -577,9 +577,15 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
                   if (findCMRResult != null && findCMRResult.getItems() != null && !findCMRResult.getItems().isEmpty()) {
                     List<FindCMRRecordModel> cmrs = findCMRResult.getItems();
+                    log.debug("There are " + cmrs.size() + " cmrs retrieved from FINDCMR.");
                     for (FindCMRRecordModel cmrsMods : cmrs) {
                       nameFindCmrCnResult = cmrsMods.getCmrIntlName1()
                           + (!StringUtils.isBlank(cmrsMods.getCmrIntlName2()) ? (" " + cmrsMods.getCmrIntlName2()) : "");
+                      log.debug("CNAPI retrieved name is <" + cnNameSingleByte + "> after trim Chinese Space is <"
+                          + trimChineseSpace(cnNameSingleByte) + ">");
+                      log.debug("FINDCMR retrieved name is <" + nameFindCmrCnResult + "> after trim Chinese Space is <"
+                          + trimChineseSpace(nameFindCmrCnResult) + ">");
+
                       if (nameFindCmrCnResult != null && trimChineseSpace(cnNameSingleByte).equals(trimChineseSpace(nameFindCmrCnResult))) {
 
                         nameMatched = true;
@@ -628,6 +634,8 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                         }
                       }
                     }
+                  } else {
+                    log.debug("There are 0 cmrs retrieved from FINDCMR.");
                   }
                 } catch (Exception e) {
                   e.printStackTrace();
