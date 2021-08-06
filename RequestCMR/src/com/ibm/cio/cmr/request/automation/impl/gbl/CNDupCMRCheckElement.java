@@ -579,8 +579,15 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                     List<FindCMRRecordModel> cmrs = findCMRResult.getItems();
                     log.debug("There are " + cmrs.size() + " cmrs retrieved from FINDCMR.");
                     for (FindCMRRecordModel cmrsMods : cmrs) {
-                      nameFindCmrCnResult = cmrsMods.getCmrIntlName1()
-                          + (!StringUtils.isBlank(cmrsMods.getCmrIntlName2()) ? (" " + cmrsMods.getCmrIntlName2()) : "");
+
+                      nameFindCmrCnResult = cmrsMods.getCmrIntlName1();
+                      if (!StringUtils.isBlank(cmrsMods.getCmrIntlName2())) {
+                        nameFindCmrCnResult = cmrsMods.getCmrIntlName1() + " " + cmrsMods.getCmrIntlName2();
+                      }
+
+                      // nameFindCmrCnResult = cmrsMods.getCmrIntlName1() +
+                      // (!StringUtils.isBlank(cmrsMods.getCmrIntlName2()) ? ("
+                      // " + cmrsMods.getCmrIntlName2()) : "");
                       log.debug("CNAPI retrieved name is <" + cnNameSingleByte + "> after trim Chinese Space is <"
                           + trimChineseSpace(cnNameSingleByte) + ">");
                       log.debug("FINDCMR retrieved name is <" + nameFindCmrCnResult + "> after trim Chinese Space is <"
