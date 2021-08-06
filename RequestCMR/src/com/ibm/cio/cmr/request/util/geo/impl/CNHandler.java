@@ -1844,8 +1844,7 @@ public class CNHandler extends GEOHandler {
       try {
         response = DnBUtil.getMatches(requestData, null, "ZS01");
       } catch (Exception e) {
-        LOG.error("Error occured on get dunsNo from DNB.");
-        e.printStackTrace();
+        LOG.error("Error occured on get dunsNo from DNB.", e);
       }
       if (response != null && DnBUtil.hasValidMatches(response)) {
         DnBMatchingResponse dnbRecord = response.getMatches().get(0);
@@ -1861,8 +1860,7 @@ public class CNHandler extends GEOHandler {
       try {
         dnbData = DnBUtil.getDnBDetails(dunsNo);
       } catch (Exception e) {
-        LOG.error("Error occured on get ISIC from DNB.");
-        e.printStackTrace();
+        LOG.error("Error occured on get ISIC from DNB.", e);
       }
       if (dnbData != null && StringUtils.isNotBlank(dnbData.getIbmIsic())) {
         if (!dnbData.getIbmIsic().equals(data.getIsicCd())) {
