@@ -129,9 +129,7 @@ public class USBPEhostHandler extends USBPHandler {
     DnBMatchingResponse dnbMatch = matchAgainstDnB(handler, requestData, zs01, engineData, details, overrides, ibmCmr != null);
 
     // match against SOS-RPA
-    if (dnbMatch == null) {
-      matchAgainstSosRpa(handler, requestData, zs01, engineData, details, overrides, ibmCmr != null);
-    }
+    matchAgainstSosRpa(handler, requestData, zs01, engineData, details, overrides, ibmCmr != null);
 
     if (ibmCmr == null) {
 
