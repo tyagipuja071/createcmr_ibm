@@ -569,6 +569,48 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
         addr.setAddrTxt(street);
       }
 
+    } else if (SystemLocation.CHINA.equals(reqModel.getCmrIssuingCntry())) {
+      addr.setPostCd(cmr.getCmrPostalCode());
+      int addrLength = 35;
+      String street = cmr.getCmrStreet();
+      if (street != null && street.length() > addrLength) {
+        if (!StringUtils.isBlank(cmr.getCmrStreetAddressCont())) {
+          // there is a con't, trim this only
+          addr.setAddrTxt(street.substring(0, addrLength));
+          if (cmr.getCmrStreetAddressCont().length() > addrLength) {
+            addr.setAddrTxt2(cmr.getCmrStreetAddressCont().substring(0, addrLength));
+          } else {
+            addr.setAddrTxt2(cmr.getCmrStreetAddressCont());
+          }
+        } else {
+          // no street address con't, overflow
+          String[] streetParts;
+          streetParts = converter.splitName123(street, "", "", 35, 24, 100);
+          String street1 = streetParts[0];
+          String street2 = streetParts[1];
+          String dept = streetParts[2];
+          addr.setAddrTxt(street1);
+          addr.setAddrTxt2(street2);
+          addr.setDept(dept);
+          if (StringUtils.isBlank(cmr.getCmrDept())) {
+            cmr.setCmrDept(dept);
+          }
+        }
+      } else {
+        addr.setAddrTxt(street);
+        if (!StringUtils.isBlank(cmr.getCmrStreetAddressCont())) {
+          if (cmr.getCmrStreetAddressCont().length() > addrLength) {
+            addr.setAddrTxt2(cmr.getCmrStreetAddressCont().substring(0, addrLength));
+          } else {
+            addr.setAddrTxt2(cmr.getCmrStreetAddressCont());
+          }
+        }
+      }
+
+      cmr.setCmrStreet(addr.getAddrTxt());
+      cmr.setCmrStreetAddress(addr.getAddrTxt());
+      cmr.setCmrStreetAddressCont(addr.getAddrTxt2());
+
     } else {
       addr.setPostCd(cmr.getCmrPostalCode());
       int addrLength = SystemLocation.UNITED_STATES.equals(reqModel.getCmrIssuingCntry()) ? 24 : 30;
@@ -592,7 +634,7 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
           String[] streetParts;
           if (SystemLocation.AUSTRIA.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.GERMANY.equals(reqModel.getCmrIssuingCntry())
               || SystemLocation.LIECHTENSTEIN.equals(reqModel.getCmrIssuingCntry())
-              || SystemLocation.SWITZERLAND.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.CHINA.equals(reqModel.getCmrIssuingCntry())) {
+              || SystemLocation.SWITZERLAND.equals(reqModel.getCmrIssuingCntry())) {
             streetParts = converter.doSplitName(street, "", 35, 35);
           } else {
             streetParts = converter.doSplitName(street, "", 30, 30);
