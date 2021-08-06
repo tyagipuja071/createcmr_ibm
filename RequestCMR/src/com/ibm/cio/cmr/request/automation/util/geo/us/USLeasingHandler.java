@@ -340,9 +340,7 @@ public class USLeasingHandler extends USBPHandler {
     DnBMatchingResponse dnbMatch = matchAgainstDnB(handler, requestData, addr, engineData, details, overrides, ibmCmr != null);
 
     // match against SOS-RPA
-    if (dnbMatch == null) {
-      matchAgainstSosRpa(handler, requestData, addr, engineData, details, overrides, ibmCmr != null);
-    }
+    matchAgainstSosRpa(handler, requestData, addr, engineData, details, overrides, ibmCmr != null);
 
     if (ibmCmr == null) {
 
