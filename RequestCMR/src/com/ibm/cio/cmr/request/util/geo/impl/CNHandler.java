@@ -302,7 +302,7 @@ public class CNHandler extends GEOHandler {
       if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())
           && (data.getCustSubGrp() == null
               || !(data.getCustSubGrp().equals("INTER") || data.getCustSubGrp().equals("BUSPR") || data.getCustSubGrp().equals("PRIV")))
-          && StringUtils.isBlank(data.getIsicCd())) {
+          && StringUtils.isBlank(data.getIsicCd()) && StringUtils.isNotBlank(data.getBusnType())) {
         getIsicByDNB(entityManager, data);
       }
     }
@@ -1829,8 +1829,8 @@ public class CNHandler extends GEOHandler {
     }
     if (model.getReqType().equals("U") && !data.getCapInd().equals("Y")) {
       getIsicByDNB(entityManager, data);
-    } else if (model.getReqType().equals("C")
-        && model.getCustSubGrp()!=null && !(model.getCustSubGrp().equals("INTER") || model.getCustSubGrp().equals("BUSPR") || model.getCustSubGrp().equals("PRIV"))) {
+    } else if (model.getReqType().equals("C") && model.getCustSubGrp() != null
+        && !(model.getCustSubGrp().equals("INTER") || model.getCustSubGrp().equals("BUSPR") || model.getCustSubGrp().equals("PRIV"))) {
       getIsicByDNB(entityManager, data);
     }
   }
