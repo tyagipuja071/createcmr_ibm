@@ -358,9 +358,6 @@ public class ChinaUtil extends AutomationUtil {
       details.append("An attachment of type 'Chinese Name And Address change' has been added. This Requester will be routed to CMDE.\n");
       engineData.addRejectionComment("OTH",
           "An attachment of type 'Chinese Name And Address change' has been added. This Requester will be routed to CMDE", "", "");
-      output.setOnError(true);
-      validation.setSuccess(false);
-      validation.setMessage("Rejected");
     }
 
     output.setDetails(details.toString());
@@ -476,7 +473,7 @@ public class ChinaUtil extends AutomationUtil {
     return true;
   }
 
-  private String geDocContent(EntityManager entityManager, long req_id) {
+  public String geDocContent(EntityManager entityManager, long req_id) {
     String sql = ExternalizedQuery.getSql("QUERY.CHECK_CN_API_ATTACHMENT");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("ID", req_id);

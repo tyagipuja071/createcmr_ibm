@@ -10,6 +10,7 @@ import javax.persistence.EntityManager;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.ibm.cio.cmr.request.automation.ActionOnError;
 import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
@@ -19,6 +20,7 @@ import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
 import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
+import com.ibm.cio.cmr.request.automation.util.geo.ChinaUtil;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
@@ -92,6 +94,21 @@ public class UpdateSwitchElement extends ValidatingElement {
           engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updates to CMR code fields need verification");
           engineData.addRejectionComment("OTH", "IBM/Legacy codes values changed.", "", "");
           log.debug("Updates to CMR code fields need verification");
+        }
+
+        // attachment check for china
+        if (automationUtil != null && automationUtil instanceof ChinaUtil) {
+          ChinaUtil chinaUtil = (ChinaUtil) automationUtil;
+          String ret = chinaUtil.geDocContent(entityManager, admin.getId().getReqId());
+          if (validation.isSuccess()) {
+            if ("Y".equals(ret)) {
+              output.setOnError(true);
+              validation.setSuccess(false);
+              validation.setMessage("Rejected");
+              super.setStopOnError(false);
+              super.setActionOnError(ActionOnError.fromCode(""));
+            }
+          }
         }
 
       } else {
