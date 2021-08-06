@@ -199,9 +199,9 @@
     </cmr:column>
     <cmr:column span="4" containerForField="ISIC" exceptForCountry="897">   
       <p>
-        <label for="isicCd"> <cmr:fieldLabel fieldId="ISIC" />: <cmr:delta text="${rdcdata.isicCd}" oldValue="${reqentry.isicCd}" code="L" />
-        </label><%if (reqentry.getCmrIssuingCntry().equalsIgnoreCase("641")){%>
+        <label for="isicCd"> <cmr:fieldLabel fieldId="ISIC" />: <cmr:delta text="${rdcdata.isicCd}" oldValue="${reqentry.isicCd}" code="L" /><%if (reqentry.getCmrIssuingCntry().equalsIgnoreCase("641")){%>
     <cmr:info text="${ui.info.cnisicinfo}"></cmr:info><%} %>
+        </label>
         <cmr:field path="isicCd" id="isicCd" fieldId="ISIC" tabId="MAIN_CUST_TAB" size="500" />
       </p>
     </cmr:column>

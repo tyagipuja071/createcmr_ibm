@@ -21,6 +21,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.CmrException;
+import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.AddrRdc;
@@ -60,6 +61,8 @@ import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.QueryClient;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
+import com.ibm.cmr.services.client.matching.MatchingResponse;
+import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.query.QueryRequest;
 import com.ibm.cmr.services.client.query.QueryResponse;
 import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
@@ -296,8 +299,13 @@ public class CNHandler extends GEOHandler {
       } else {
         data.setInacType("");
       }
+      if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())
+          && (data.getCustSubGrp() == null
+              || !(data.getCustSubGrp().equals("INTER") || data.getCustSubGrp().equals("BUSPR") || data.getCustSubGrp().equals("PRIV")))
+          && StringUtils.isBlank(data.getIsicCd())) {
+        getIsicByDNB(entityManager, data);
+      }
     }
-
     // data.setSearchTerm(data.getCovId());
 
     // convert chinese name and address to DBCS
@@ -1819,10 +1827,39 @@ public class CNHandler extends GEOHandler {
     if (shouldSetAsterisk()) {
       setAddrNmAsterisk(entityManager, admin, data);
     }
-    if (StringUtils.isNotBlank(data.getDunsNo())) {
+    if (model.getReqType().equals("U") && !data.getCapInd().equals("Y")) {
+      getIsicByDNB(entityManager, data);
+    } else if (model.getReqType().equals("C")
+        && model.getCustSubGrp()!=null && !(model.getCustSubGrp().equals("INTER") || model.getCustSubGrp().equals("BUSPR") || model.getCustSubGrp().equals("PRIV"))) {
+      getIsicByDNB(entityManager, data);
+    }
+  }
+
+  public static void getIsicByDNB(EntityManager entityManager, Data data) {
+
+    String dunsNo = null;
+    if (StringUtils.isBlank(data.getDunsNo())) {
+      RequestData requestData = new RequestData(entityManager, data.getId().getReqId());
+      MatchingResponse<DnBMatchingResponse> response = null;
+      try {
+        response = DnBUtil.getMatches(requestData, null, "ZS01");
+      } catch (Exception e) {
+        LOG.error("Error occured on get dunsNo from DNB.");
+        e.printStackTrace();
+      }
+      if (response != null && DnBUtil.hasValidMatches(response)) {
+        DnBMatchingResponse dnbRecord = response.getMatches().get(0);
+        if (dnbRecord.getConfidenceCode() >= 8) {
+          dunsNo = dnbRecord.getDunsNo();
+        }
+      }
+    } else {
+      dunsNo = data.getDunsNo();
+    }
+    if (StringUtils.isNotBlank(dunsNo)) {
       DnBCompany dnbData = null;
       try {
-        dnbData = DnBUtil.getDnBDetails(data.getDunsNo());
+        dnbData = DnBUtil.getDnBDetails(dunsNo);
       } catch (Exception e) {
         LOG.error("Error occured on get ISIC from DNB.");
         e.printStackTrace();
@@ -1830,6 +1867,8 @@ public class CNHandler extends GEOHandler {
       if (dnbData != null && StringUtils.isNotBlank(dnbData.getIbmIsic())) {
         if (!dnbData.getIbmIsic().equals(data.getIsicCd())) {
           data.setIsicCd(dnbData.getIbmIsic());
+          entityManager.merge(data);
+          entityManager.flush();
         }
       }
     }

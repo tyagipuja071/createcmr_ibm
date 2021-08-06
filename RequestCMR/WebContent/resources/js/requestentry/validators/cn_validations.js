@@ -67,6 +67,9 @@ var CNHandler = {
 };
 
 function afterConfigForCN() {
+  if (FormManager.getActualValue('isicCd') != 'undefined' && FormManager.getActualValue('isicCd') != '') {
+    FormManager.readOnly('isicCd');
+  }
   if (_isicHandlerCN == null) {
     _isicHandlerCN = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
       setIsuOnIsic();
