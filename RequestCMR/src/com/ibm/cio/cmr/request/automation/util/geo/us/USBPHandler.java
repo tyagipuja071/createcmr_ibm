@@ -258,7 +258,7 @@ public abstract class USBPHandler {
     scorecard.setRpaMatchingResult("");
     int itr = 0;
     for (String addrType : RELEVANT_ADDRESSES) {
-      details.append("SOS-RPA Matching Results for" + addrType + "\n");
+      details.append("SOS-RPA Matching Results for " + addrType + "\n");
       List<SosResponse> sosRpaMatches = USUtil.getSosRpaMatchesForBPEndUser(handler, requestData, engineData, addrType);
       if (!sosRpaMatches.isEmpty()) {
         scorecard.setRpaMatchingResult("Y");

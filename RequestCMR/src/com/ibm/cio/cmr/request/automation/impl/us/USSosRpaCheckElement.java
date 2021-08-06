@@ -87,7 +87,7 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
         AutomationResponse<SosResponse> response = getSosMatches(admin.getId().getReqId(), address, admin);
         scorecard.setRpaMatchingResult("");
         log.debug("Scorecard Updated for SOS-RPA to Not Done");
-        details.append("SOS-RPA Matching Results for" + addrType + "\n");
+        details.append("SOS-RPA Matching Results for " + addrType + "\n");
         if (response != null && response.isSuccess() && response.getRecord() != null) {
           admin.setCompVerifiedIndc("Y");
           scorecard.setRpaMatchingResult("Y");
