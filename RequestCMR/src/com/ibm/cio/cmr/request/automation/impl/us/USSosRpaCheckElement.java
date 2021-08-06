@@ -83,6 +83,11 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
     int itr = 0;
     for (String addrType : RELEVANT_ADDRESSES) {
       Addr address = requestData.getAddress(addrType);
+      Boolean containsInvoice = true;
+      Addr invoice = requestData.getAddress("Z101");
+      if (invoice == null) {
+        containsInvoice = false;
+      }
       if (address != null) {
         AutomationResponse<SosResponse> response = getSosMatches(admin.getId().getReqId(), address, admin);
         scorecard.setRpaMatchingResult("");
@@ -93,7 +98,7 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
           scorecard.setRpaMatchingResult("Y");
           log.debug("Scorecard Updated for SOS-RPA to" + scorecard.getRpaMatchingResult());
           validation.setSuccess(true);
-          if (matchRPA == "Y" && itr == 1) {
+          if ((matchRPA == "Y" && itr == 1) || !containsInvoice) {
             validation.setMessage("Successful Execution");
           } else if (matchRPA != "Y" && itr == 1) {
             validation.setMessage("Partial Matches found");
@@ -113,7 +118,7 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
           engineData.clearNegativeCheckStatus("DNB_VAT_MATCH_CHECK_FAIL");
           engineData.clearNegativeCheckStatus("DnBSoSMatch");
         } else {
-          if (itr == 1 && ("N".equals(scorecard.getRpaMatchingResult()) || "".equals(scorecard.getRpaMatchingResult()))) {
+          if ((itr == 1 || !containsInvoice) && ("N".equals(scorecard.getRpaMatchingResult()) || "".equals(scorecard.getRpaMatchingResult()))) {
             scorecard.setRpaMatchingResult("N");
           }
           log.debug("Scorecard Updated for SOS-RPA to" + scorecard.getRpaMatchingResult());
@@ -122,14 +127,14 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
             output.setOnError(false);
             admin.setCompVerifiedIndc("Y");
           } else {
-            if (itr == 1) {
+            if (itr == 1 || !containsInvoice) {
               output.setOnError(true);
               engineData.addNegativeCheckStatus("DnBSoSMatch", "No high quality matches with D&B and SOS-RPA records.");
             }
           }
           if (matchRPA == "Y" && itr == 1) {
             validation.setMessage("Partial Matches found");
-          } else if (matchRPA != "Y" && itr == 1) {
+          } else if ((matchRPA != "Y" && itr == 1) || !containsInvoice) {
             validation.setMessage("No Matches found");
           }
           details.append("No Matches Found\n\n");
