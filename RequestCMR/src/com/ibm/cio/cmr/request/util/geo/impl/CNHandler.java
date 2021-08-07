@@ -262,19 +262,6 @@ public class CNHandler extends GEOHandler {
           data.setAbbrevNm(admin.getMainCustNm1());
         }
       }
-      if ("DRA".equalsIgnoreCase(admin.getReqStatus())) {
-        if (data.getCustSubGrp() != null && "AQSTN".equals(data.getCustSubGrp())) {
-          data.setRdcComment("Acquistion Use Only");
-        } else if (data.getCustSubGrp() != null && "PRIV".equals(data.getCustSubGrp())) {
-          data.setRdcComment("Private person Use Only");
-        } else if (data.getCustSubGrp() != null && "MRKT".equals(data.getCustSubGrp())) {
-          data.setRdcComment("Marketplace Use Only");
-        } else if (data.getCustSubGrp() != null && "EMBSA".equals(data.getCustSubGrp())) {
-          data.setRdcComment("ESA Use Only");
-        } else if (data.getCustSubGrp() != null && "BLUMX".equals(data.getCustSubGrp())) {
-          data.setRdcComment("Bluemix Use Only");
-        }
-      }
     }
 
     // set inac type

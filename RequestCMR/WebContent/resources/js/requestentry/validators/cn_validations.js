@@ -116,8 +116,6 @@ function afterConfigForCN() {
       FormManager.resetValidations('custClass');
       FormManager.hide('InterAddrKey', 'cnInterAddrKey');
       FormManager.resetValidations('cnInterAddrKey');
-      FormManager.hide('RdcComment', 'rdcComment');
-      FormManager.resetValidations('rdcComment');
     } else {
       FormManager.readOnly('custClass');
     }
@@ -627,8 +625,6 @@ function setValuesForScenarios() {
     FormManager.resetValidations('custClass');
     FormManager.hide('InterAddrKey', 'cnInterAddrKey');
     FormManager.resetValidations('cnInterAddrKey');
-    FormManager.hide('RdcComment', 'rdcComment');
-    FormManager.resetValidations('rdcComment');
   }
 
   if (FormManager.getActualValue('reqType') == 'C' && _custSubGrp != 'undefined' && _custSubGrp != '') {
@@ -689,27 +685,6 @@ function setValuesForScenarios() {
         FormManager.readOnly('cnInterAddrKey');
       } else {
         FormManager.resetValidations('cnInterAddrKey');
-      }
-      if (_custSubGrp == 'AQSTN'|| _custSubGrp == 'PRIV' || _custSubGrp == 'EMBSA') {
-        FormManager.addValidator('rdcComment', Validators.REQUIRED, [ 'RdcComment' ], '');
-        if (_custSubGrp == 'EMBSA') {
-          FormManager.setValue('rdcComment', 'ESA Use Only');
-          FormManager.readOnly('rdcComment');
-        } else if (_custSubGrp == 'AQSTN') {
-          FormManager.setValue('rdcComment', 'Acquistion Use Only');
-          FormManager.readOnly('rdcComment');
-        } else if (_custSubGrp == 'PRIV') {
-          FormManager.setValue('rdcComment', 'Private person Use Only');
-          FormManager.readOnly('rdcComment');
-        }
-      } else if (_custSubGrp == 'MRKT') {
-        FormManager.setValue('rdcComment', 'Marketplace Use Only');
-        FormManager.readOnly('rdcComment');
-      } else if (_custSubGrp == 'BLUMX') {
-        FormManager.setValue('rdcComment', 'Bluemix Use Only');
-        FormManager.readOnly('rdcComment');
-      } else {
-        FormManager.resetValidations('rdcComment');
       }
     }
   }
