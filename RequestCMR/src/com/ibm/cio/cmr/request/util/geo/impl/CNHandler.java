@@ -539,6 +539,13 @@ public class CNHandler extends GEOHandler {
           ePk.setReqId(data.getId().getReqId());
           geoContactInfo.setId(ePk);
           entityManager.persist(geoContactInfo);
+
+          AddrRdc addrRdc = getAddrRdc(entityManager, addr.getId().getReqId(), addr.getId().getAddrType(), addr.getId().getAddrSeq());
+          String contactName = geoContactInfo.getContactName();
+          String contactTitle = geoContactInfo.getContactFunc();
+          addrRdc.setDivn(contactName);
+          addrRdc.setTaxOffice(contactTitle);
+          entityManager.merge(addrRdc);
           entityManager.flush();
         }
 
@@ -1246,6 +1253,40 @@ public class CNHandler extends GEOHandler {
         results.add(update);
       }
     }
+
+    List<GeoContactInfo> geoAddrList = getGeoContactInfoByReqId(entityManager, addr.getId().getReqId());
+    GeoContactInfo geoAddr = null;
+    for (GeoContactInfo gAddr : geoAddrList) {
+      if (gAddr.getContactType().equals(addr.getId().getAddrType()) && gAddr.getContactSeqNum().equals(addr.getId().getAddrSeq())) {
+        geoAddr = gAddr;
+      }
+    }
+    if (geoAddr != null) {
+      // contact name
+      if (!equals(convert2DBCS(geoAddr.getContactName()), convert2DBCS(addr.getDivnOld()))) {
+        UpdatedNameAddrModel update = new UpdatedNameAddrModel();
+        update.setAddrTypeCode(addrType);
+        update.setAddrSeq(seqNo);
+        update.setAddrType(addrTypeDesc);
+        update.setSapNumber(sapNumber);
+        update.setDataField(PageManager.getLabel(cmrCountry, "ChinaCustomerCntName", "-"));
+        update.setNewData(geoAddr.getContactName());
+        update.setOldData(addr.getDivnOld());
+        results.add(update);
+      }
+      // contact title
+      if (!equals(convert2DBCS(geoAddr.getContactFunc()), convert2DBCS(addr.getTaxOffice()))) {
+        UpdatedNameAddrModel update = new UpdatedNameAddrModel();
+        update.setAddrTypeCode(addrType);
+        update.setAddrSeq(seqNo);
+        update.setAddrType(addrTypeDesc);
+        update.setSapNumber(sapNumber);
+        update.setDataField(PageManager.getLabel(cmrCountry, "CustomerCntJobTitle", "-"));
+        update.setNewData(geoAddr.getContactFunc());
+        update.setOldData(addr.getTaxOffice());
+        results.add(update);
+      }
+    }
   }
 
   /**
@@ -1887,7 +1928,16 @@ public class CNHandler extends GEOHandler {
         }
       }
     }
+  }
 
+  private AddrRdc getAddrRdc(EntityManager entityManager, long reqId, String addrType, String addrSeq) {
+    String sql = ExternalizedQuery.getSql("REQUESTENTRY.ADDRRDC.SEARCH_BY_REQID_TYPE_SEQ");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    query.setParameter("ADDR_TYPE", addrType);
+    query.setParameter("ADDR_SEQ", addrSeq);
+    query.setForReadOnly(true);
+    return query.getSingleResult(AddrRdc.class);
   }
 
 }
