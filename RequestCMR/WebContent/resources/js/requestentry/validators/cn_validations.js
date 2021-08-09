@@ -1791,13 +1791,36 @@ function replaceCrossbarSymbol(value) {
   if (value != null && value.length > 0) {
     modifiedVal = value;
     modifiedVal = modifiedVal.replace(/-/g, '－');
-    modifiedVal = modifiedVal.replace(/･/g, '・');
-    // Story CMR-1660
+    modifiedVal = modifiedVal.replace(/\./g, '．');
     modifiedVal = modifiedVal.replace(/,/g, '，');
     modifiedVal = modifiedVal.replace(/:/g, '：');
     modifiedVal = modifiedVal.replace(/_/g, '＿');
     modifiedVal = modifiedVal.replace(/\(/g, '（');
     modifiedVal = modifiedVal.replace(/\)/g, '）');
+    
+    modifiedVal = modifiedVal.replace(/\//g, '\／');
+    modifiedVal = modifiedVal.replace(/\</g, '\＜');
+    modifiedVal = modifiedVal.replace(/\>/g, '\＞');
+    modifiedVal = modifiedVal.replace(/\?/g, '\？');
+    modifiedVal = modifiedVal.replace(/\`/g, '\｀');
+    modifiedVal = modifiedVal.replace(/\~/g, '\～');
+    modifiedVal = modifiedVal.replace(/\!/g, '\！');
+    modifiedVal = modifiedVal.replace(/\@/g, '\＠');
+    modifiedVal = modifiedVal.replace(/\#/g, '\＃');
+    modifiedVal = modifiedVal.replace(/\$/g, '\＄');
+    modifiedVal = modifiedVal.replace(/\%/g, '\％');
+    modifiedVal = modifiedVal.replace(/\^/g, '\＾');
+    modifiedVal = modifiedVal.replace(/\*/g, '\＊');
+    modifiedVal = modifiedVal.replace(/\+/g, '\＋');
+    modifiedVal = modifiedVal.replace(/\=/g, '\＝');
+    modifiedVal = modifiedVal.replace(/\[/g, '\［');
+    modifiedVal = modifiedVal.replace(/\]/g, '\］');
+    modifiedVal = modifiedVal.replace(/\{/g, '\｛');
+    modifiedVal = modifiedVal.replace(/\}/g, '\｝');
+    modifiedVal = modifiedVal.replace(/\|/g, '\｜');
+    modifiedVal = modifiedVal.replace(/\;/g, '\；');
+    modifiedVal = modifiedVal.replace(/\'/g, '\＇');
+    modifiedVal = modifiedVal.replace(/\"/g, '\＂');
   }
   return modifiedVal;
 };
@@ -1872,10 +1895,36 @@ function convert2SBCS(input) {
     modifiedVal = modifiedVal.replace(/　/g, ' ');
     modifiedVal = modifiedVal.replace(/＆/g, '&');
     modifiedVal = modifiedVal.replace(/－/g, '-');
-    modifiedVal = modifiedVal.replace(/・/g, '.');
+    modifiedVal = modifiedVal.replace(/\．/g, '\.');
     modifiedVal = modifiedVal.replace(/，/g, ',');
     modifiedVal = modifiedVal.replace(/：/g, ':');
     modifiedVal = modifiedVal.replace(/＿/g, '_');
+    
+    modifiedVal = modifiedVal.replace(/（/g, '(');
+    modifiedVal = modifiedVal.replace(/）/g, ')');
+    modifiedVal = modifiedVal.replace(/／/g, '/');
+    modifiedVal = modifiedVal.replace(/＜/g, '<');
+    modifiedVal = modifiedVal.replace(/＞/g, '>');
+    modifiedVal = modifiedVal.replace(/？/g, '?');
+    modifiedVal = modifiedVal.replace(/｀/g, '`');
+    modifiedVal = modifiedVal.replace(/～/g, '~');
+    modifiedVal = modifiedVal.replace(/！/g, '!');
+    modifiedVal = modifiedVal.replace(/＠/g, '@');
+    modifiedVal = modifiedVal.replace(/＃/g, '#');
+    modifiedVal = modifiedVal.replace(/＄/g, '$');
+    modifiedVal = modifiedVal.replace(/％/g, '%');
+    modifiedVal = modifiedVal.replace(/＾/g, '^');
+    modifiedVal = modifiedVal.replace(/＊/g, '*');
+    modifiedVal = modifiedVal.replace(/＋/g, '+');
+    modifiedVal = modifiedVal.replace(/＝/g, '=');
+    modifiedVal = modifiedVal.replace(/［/g, '[');
+    modifiedVal = modifiedVal.replace(/］/g, ']');
+    modifiedVal = modifiedVal.replace(/｛/g, '{');
+    modifiedVal = modifiedVal.replace(/｝/g, '}');
+    modifiedVal = modifiedVal.replace(/｜/g, '|');
+    modifiedVal = modifiedVal.replace(/；/g, ';');
+    modifiedVal = modifiedVal.replace(/＇/g, '\'');
+    modifiedVal = modifiedVal.replace(/＂/g, '\"');
   }
   return modifiedVal;
 }
@@ -2104,17 +2153,19 @@ function validateCnNameAndAddr() {
             });
     
             var cnAddress = convert2SBCS(cnAddrTxtZS01 + intlCustNm4ZS01);
-            if (result.regLocation != cnAddress || result.name != cnName) {
+            var name2SBCS = convert2SBCS(result.name);
+            var address2SBCS = convert2SBCS(result.regLocation);
+            if (address2SBCS != cnAddress || name2SBCS != cnName) {
               var correctName = '';
               var correctAddress = '';
-              if (result.name != cnName) {
+              if (name2SBCS != cnName) {
                 if(!$.isEmptyObject(result)){
                   correctName = '<br/>Company Name: ' + result.name;
                 } else {
                   correctName = '<br/>Company Name: No Data';
                 }
               }
-              if (result.regLocation != cnAddress) {
+              if (address2SBCS != cnAddress) {
                 if(!$.isEmptyObject(result)){
                   correctAddress = '<br/>Company Address: ' + result.regLocation;
                 } else {
@@ -2127,11 +2178,12 @@ function validateCnNameAndAddr() {
               });
     
               if ((ret == null || ret.ret1 == null)) {
-                return new ValidationResult(null, false, 'Your request are not allowed to send for processing '
-                    + 'if the Chinese company name and address doesn\'t match with Tian Yan Cha 100%, '
-                    + 'or if you insist on using missmatched address, you need attach the screenshot of customer '
-                    + 'official website,business license , government website,contract with signature or purchase order '
-                    + 'in attachment, the correct company name and address should be:'
+                return new ValidationResult(null, false, 'Your request are not allowed to send for processing if the Chinese company name '
+                    + 'and address doesn\'t match with Tian Yan Cha 100%, or if you insist on using missmatched '
+                    + 'company name or address, you need attach the screenshot of customer official website, '
+                    + 'business license , government website,contract/purchase order with signature in attachment, '
+                    + 'file content must be "Chinese Name And Address change", the correct company name and address '
+                    + 'should be:'
                     + correctName + correctAddress);
               } else {
                 return new ValidationResult(null, true);
