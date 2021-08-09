@@ -1855,7 +1855,7 @@ public class CNHandler extends GEOHandler {
     if (shouldSetAsterisk()) {
       setAddrNmAsterisk(entityManager, admin, data);
     }
-    if (model.getReqType().equals("U") && !data.getCapInd().equals("Y")) {
+    if (model.getReqType() != null && model.getReqType().equals("U") && (data.getCapInd() == null || !data.getCapInd().equals("Y"))) {
       getIsicByDNB(entityManager, data);
     } else if (model.getReqType().equals("C") && model.getCustSubGrp() != null
         && !(model.getCustSubGrp().equals("INTER") || model.getCustSubGrp().equals("BUSPR") || model.getCustSubGrp().equals("PRIV"))) {
