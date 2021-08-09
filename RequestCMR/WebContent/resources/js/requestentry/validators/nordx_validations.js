@@ -3820,7 +3820,12 @@ function setSRValuesBaseOnSubInd() {
                 subIndFlag = 'Y';
               }
             } else {
-              FormManager.setValue('searchTerm', '');
+              if (subIndFlag == 'Y') {
+                FormManager.setValue('searchTerm', '');
+              } else {
+                FormManager.setValue('searchTerm', _pagemodel.searchTerm == null ? '' : _pagemodel.searchTerm);
+                subIndFlag = 'Y';
+              }
             }
           } else {
             FormManager.setValue('searchTerm', '');
@@ -3854,7 +3859,12 @@ function setSRValuesBaseOnSubInd() {
             subIndFlag = 'Y';
           }
         } else {
-          FormManager.setValue('searchTerm', '');
+          if (subIndFlag == 'Y') {
+            FormManager.setValue('searchTerm', '');
+          } else {
+            FormManager.setValue('searchTerm', _pagemodel.searchTerm == null ? '' : _pagemodel.searchTerm);
+            subIndFlag = 'Y';
+          }
         }
 
       } else if (countryUse == '678IS') {
@@ -3910,7 +3920,12 @@ function setSRValuesBaseOnSubInd() {
             subIndFlag = 'Y';
           }
         } else {
-          FormManager.setValue('searchTerm', '');
+          if (subIndFlag == 'Y') {
+            FormManager.setValue('searchTerm', '');
+          } else {
+            FormManager.setValue('searchTerm', _pagemodel.searchTerm == null ? '' : _pagemodel.searchTerm);
+            subIndFlag = 'Y';
+          }
         }
       }
     }
@@ -3972,7 +3987,12 @@ function setSRValuesBaseOnSubInd() {
                 subIndFlag = 'Y';
               }
             } else {
-              FormManager.setValue('searchTerm', '');
+              if (subIndFlag == 'Y') {
+                FormManager.setValue('searchTerm', '');
+              } else {
+                FormManager.setValue('searchTerm', _pagemodel.searchTerm == null ? '' : _pagemodel.searchTerm);
+                subIndFlag = 'Y';
+              }
             }
           } else {
             FormManager.setValue('searchTerm', '');
@@ -4006,7 +4026,12 @@ function setSRValuesBaseOnSubInd() {
             subIndFlag = 'Y';
           }
         } else {
-          FormManager.setValue('searchTerm', '');
+          if (subIndFlag == 'Y') {
+            FormManager.setValue('searchTerm', '');
+          } else {
+            FormManager.setValue('searchTerm', _pagemodel.searchTerm == null ? '' : _pagemodel.searchTerm);
+            subIndFlag = 'Y';
+          }
         }
       } else if (countryUse == '702EE') {
         if (isuAndCtc == '34Q') {
@@ -4031,7 +4056,12 @@ function setSRValuesBaseOnSubInd() {
             subIndFlag = 'Y';
           }
         } else {
-          FormManager.setValue('searchTerm', '');
+          if (subIndFlag == 'Y') {
+            FormManager.setValue('searchTerm', '');
+          } else {
+            FormManager.setValue('searchTerm', _pagemodel.searchTerm == null ? '' : _pagemodel.searchTerm);
+            subIndFlag = 'Y';
+          }
         }
       } else if (countryUse == '702LT') {
         if (isuAndCtc == '34Q') {
@@ -4056,7 +4086,12 @@ function setSRValuesBaseOnSubInd() {
             subIndFlag = 'Y';
           }
         } else {
-          FormManager.setValue('searchTerm', '');
+          if (subIndFlag == 'Y') {
+            FormManager.setValue('searchTerm', '');
+          } else {
+            FormManager.setValue('searchTerm', _pagemodel.searchTerm == null ? '' : _pagemodel.searchTerm);
+            subIndFlag = 'Y';
+          }
         }
       } else if (countryUse == '702LV') {
         if (isuAndCtc == '34Q') {
@@ -4081,7 +4116,12 @@ function setSRValuesBaseOnSubInd() {
             subIndFlag = 'Y';
           }
         } else {
-          FormManager.setValue('searchTerm', '');
+          if (subIndFlag == 'Y') {
+            FormManager.setValue('searchTerm', '');
+          } else {
+            FormManager.setValue('searchTerm', _pagemodel.searchTerm == null ? '' : _pagemodel.searchTerm);
+            subIndFlag = 'Y';
+          }
         }
       }
 
@@ -4102,6 +4142,7 @@ function setSRValuesBaseOnSubInd() {
               FormManager.setValue('searchTerm', _pagemodel.searchTerm == null ? 'T0006611' : _pagemodel.searchTerm);
               subIndFlag = 'Y';
             }
+
           } else {
             if (subIndFlag == 'Y') {
               FormManager.setValue('searchTerm', 'T0001383');
@@ -4132,6 +4173,7 @@ function setSRValuesBaseOnSubInd() {
           FormManager.setValue('searchTerm', _pagemodel.searchTerm == null ? 'A0004752' : _pagemodel.searchTerm);
           subIndFlag = 'Y';
         }
+
       } else if (isuAndCtc == '217') {
         if (subIndFlag == 'Y') {
           FormManager.setValue('searchTerm', 'T0000490');
@@ -4147,7 +4189,12 @@ function setSRValuesBaseOnSubInd() {
           subIndFlag = 'Y';
         }
       } else {
-        FormManager.setValue('searchTerm', '');
+        if (subIndFlag == 'Y') {
+          FormManager.setValue('searchTerm', '');
+        } else {
+          FormManager.setValue('searchTerm', _pagemodel.searchTerm == null ? '' : _pagemodel.searchTerm);
+          subIndFlag = 'Y';
+        }
       }
 
     }
@@ -4200,7 +4247,12 @@ function setSRValuesBaseOnSubInd() {
               subIndFlag = 'Y';
             }
           } else {
-            FormManager.setValue('searchTerm', '');
+            if (subIndFlag == 'Y') {
+              FormManager.setValue('searchTerm', '');
+            } else {
+              FormManager.setValue('searchTerm', _pagemodel.searchTerm == null ? '' : _pagemodel.searchTerm);
+              subIndFlag = 'Y';
+            }
           }
         } else {
           FormManager.setValue('searchTerm', '');
@@ -4233,6 +4285,7 @@ function setSRValuesBaseOnSubInd() {
           FormManager.setValue('searchTerm', _pagemodel.searchTerm == null ? 'T0000499' : _pagemodel.searchTerm);
           subIndFlag = 'Y';
         }
+
       } else if (isuAndCtc == '8B7') {
         if (subIndFlag == 'Y') {
           FormManager.setValue('searchTerm', 'P0000007');
@@ -4241,11 +4294,16 @@ function setSRValuesBaseOnSubInd() {
           subIndFlag = 'Y';
         }
       } else {
-        FormManager.setValue('searchTerm', '');
+        if (subIndFlag == 'Y') {
+          FormManager.setValue('searchTerm', '');
+        } else {
+          FormManager.setValue('searchTerm', _pagemodel.searchTerm == null ? '' : _pagemodel.searchTerm);
+          subIndFlag = 'Y';
+        }
       }
 
     }
-
+    console.log('subIndFlag====>' + subIndFlag);
   }
 }
 
