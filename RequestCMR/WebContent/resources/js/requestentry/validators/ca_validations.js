@@ -298,6 +298,13 @@ function clearCATaxFields() {
     FormManager.readOnly('AuthExemptType');
     FormManager.readOnly('QST');
     FormManager.removeValidator('PSTExemptLicNum', Validators.REQUIRED);
+    FormManager.clearValue('PSTExemptLicNum');
+    FormManager.clearValue('AuthExemptType');
+    FormManager.clearValue('QST');
+    if (dijit.byId('PSTExempt')) {
+      FormManager.getField('PSTExempt').set('checked', false);
+    }
+    FormManager.disable('PSTExempt');
     return;
   }
   FormManager.clearValue('PSTExempt');
@@ -433,6 +440,13 @@ function afterConfigForCA() {
     var stateProv = getSoldToStateProv();
     toggleCATaxFieldsByProvCd(stateProv);
     setPstExcemptValidator();
+    if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+      FormManager.readOnly('PSTExempt');
+      FormManager.readOnly('PSTExemptLicNum');
+      FormManager.readOnly('AuthExemptType');
+      FormManager.readOnly('QST');
+      return;
+    }
   }
 
 }
