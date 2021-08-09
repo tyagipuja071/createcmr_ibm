@@ -2063,6 +2063,45 @@ function convertPoBox(cntry, addressMode, details) {
   });
 }
 
+function validateEnNameForInter() {
+  console.log("running validateCnNameAndAddr . . .");
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var custSubType = FormManager.getActualValue('custSubGrp');
+        var action = FormManager.getActualValue('yourAction');
+        if(action == 'SFP'){
+          if (custSubType == 'INTER') {
+            var custNm1ZS01 = '';
+            var custNm2ZS01 = '';
+            for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+              record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+              type = record.addrType;
+
+              if (typeof (type) == 'object') {
+                type = type[0];
+              }
+              if (type == 'ZS01') {
+                custNm1ZS01 = record.custNm1;
+                custNm2ZS01 = record.custNm2 == null ? '' : record.custNm2;
+              }
+            }
+            var enName = custNm1ZS01 + ' ' + custNm2ZS01;
+            var custSubType = FormManager.getActualValue('custSubGrp');
+            if (enName.toUpperCase().indexOf("IBM CHINA") == -1){
+              return new ValidationResult(null, false, "English name should include 'IBM China' when Scenario is Internal. ");
+            } else {
+              return new ValidationResult(null, true);
+            }
+          } else {
+            return new ValidationResult(null, true);
+          }
+        }
+      }
+    }
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
 function validateCnNameAndAddr() {
   console.log("running validateCnNameAndAddr . . .");
   FormManager.addFormValidator((function() {
@@ -2267,4 +2306,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addAddrUpdateValidator, GEOHandler.CN, null, true);
   GEOHandler.registerValidator(validateCnNameAndAddr, GEOHandler.CN, null, false);
   GEOHandler.registerValidator(addPRIVCustNameValidator, GEOHandler.CN, null, false, false);
+  GEOHandler.registerValidator(validateEnNameForInter, GEOHandler.CN, null, false);
 });
