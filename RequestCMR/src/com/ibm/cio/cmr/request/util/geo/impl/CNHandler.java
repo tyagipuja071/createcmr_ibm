@@ -79,9 +79,9 @@ public class CNHandler extends GEOHandler {
 
   public static List<String> getDataFieldsForUpdateCheck(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
-    fields.addAll(
-        Arrays.asList("ABBREV_NM", "CLIENT_TIER", "CUST_CLASS", "CUST_PREF_LANG", "INAC_CD", "ISU_CD", "SEARCH_TERM", "ISIC_CD", "SUB_INDUSTRY_CD",
-            "VAT", "COV_DESC", "COV_ID", "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC", "GEO_LOCATION_CD", "DUNS_NO"));
+    fields.addAll(Arrays.asList("ABBREV_NM", "CLIENT_TIER", "CUST_CLASS", "CUST_PREF_LANG", "INAC_CD", "ISU_CD", "SEARCH_TERM", "ISIC_CD",
+        "SUB_INDUSTRY_CD", "VAT", "COV_DESC", "COV_ID", "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC", "GEO_LOCATION_CD",
+        "DUNS_NO", "PPSCEID", "MEM_LVL", "BP_REL_TYPE"));
     return fields;
   }
 
@@ -582,14 +582,14 @@ public class CNHandler extends GEOHandler {
   public List<String> getAddressFieldsForUpdateCheck(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
     fields.addAll(Arrays.asList("CUST_NM1", "CUST_NM2", "CUST_NM3", "CUST_NM4", "DEPT", "ADDR_TXT", "ADDR_TXT_2", "BLDG", "OFFICE", "CITY1", "CITY2",
-        "POST_CD", "LAND_CNTRY", "PO_BOX"));
+        "POST_CD", "LAND_CNTRY", "PO_BOX", "CUST_PHONE", "DIVN", "TAX_OFFICE"));
     return fields;
   }
 
   public static List<String> getAddressFieldsForBatchUpdateCheck(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
     fields.addAll(Arrays.asList("CUST_NM1", "CUST_NM2", "CUST_NM3", "CUST_NM4", "DEPT", "ADDR_TXT", "ADDR_TXT_2", "BLDG", "OFFICE", "CITY1", "CITY2",
-        "POST_CD", "LAND_CNTRY", "PO_BOX"));
+        "POST_CD", "LAND_CNTRY", "PO_BOX", "CUST_PHONE", "DIVN", "TAX_OFFICE"));
     return fields;
   }
 
