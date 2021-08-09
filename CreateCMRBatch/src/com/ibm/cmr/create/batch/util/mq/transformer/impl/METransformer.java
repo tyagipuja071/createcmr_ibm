@@ -66,8 +66,8 @@ public class METransformer extends EMEATransformer {
       SystemLocation.YEMEN, SystemLocation.SYRIAN_ARAB_REPUBLIC, SystemLocation.EGYPT, SystemLocation.TUNISIA_SOF, SystemLocation.GULF);
 
   private static final List<String> ME_DUPCOUNTRY_LIST = Arrays.asList(SystemLocation.UNITED_ARAB_EMIRATES, SystemLocation.ABU_DHABI,
-      SystemLocation.BAHRAIN, SystemLocation.SAUDI_ARABIA, SystemLocation.OMAN, SystemLocation.KUWAIT, SystemLocation.QATAR, SystemLocation.JORDAN,
-      SystemLocation.LEBANON, SystemLocation.LIBYA, SystemLocation.YEMEN);
+      SystemLocation.BAHRAIN, SystemLocation.OMAN, SystemLocation.KUWAIT, SystemLocation.QATAR, SystemLocation.JORDAN, SystemLocation.LEBANON,
+      SystemLocation.IRAQ);
 
   private static final Logger LOG = Logger.getLogger(EMEATransformer.class);
 
@@ -2016,11 +2016,12 @@ public class METransformer extends EMEATransformer {
 
   @Override
   public void getTargetCountryId(EntityManager entityManager, GenerateCMRNoRequest generateCMRNoObj, String cntry, String cmrNo) {
-    if ("677, 680, 805, 849, 620, 767, 823, 772, 762, 768, 832".indexOf(cntry) > -1) {
+    if ("677, 680, 805, 849, 620, 767, 823, 772, 762, 768, 832, 752".indexOf(cntry) > -1) {
       generateCMRNoObj.setLoc2("675");
     }
   }
-  
+
+  @Override
   public boolean isUpdateNeededOnAllAddressType(EntityManager entityManager, CMRRequestContainer cmrObjects) {
     Admin admin = cmrObjects.getAdmin();
     if (CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason())) {
