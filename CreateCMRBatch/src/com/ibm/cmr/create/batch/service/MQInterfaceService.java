@@ -478,10 +478,11 @@ public class MQInterfaceService extends BaseBatchService {
         String fullUrl = gtsMqUrl + "?name=" + xmlFileName;
         URL url = new URL(fullUrl);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("POST");
         conn.setDoInput(true);
         conn.setDoOutput(true);
 
-        try (ByteArrayInputStream bis = new ByteArrayInputStream(xmlString.getBytes("UTF-8"))) {
+        try (ByteArrayInputStream bis = new ByteArrayInputStream(xmlString.getBytes())) {
           IOUtils.copy(bis, conn.getOutputStream());
         }
 
@@ -493,6 +494,8 @@ public class MQInterfaceService extends BaseBatchService {
           if (success) {
             String path = (String) resp.get("path");
             LOG.debug("Sent xml to GTS under " + path);
+          } else {
+            LOG.debug("Error response received: " + resp.get("msg"));
           }
           return success;
         }
