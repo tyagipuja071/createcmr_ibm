@@ -1,5 +1,6 @@
 package com.ibm.cio.cmr.request.automation.impl.gbl;
 
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -2838,7 +2839,8 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
     if (!StringUtils.isBlank(searchModel.getName())) {
       String name = searchModel.getName();
       name = StringUtils.replace(name, " ", "%20");
-      params = "&customerName=" + name;
+      // params = "&customerName=" + name;
+      params = "&customerName=" + URLEncoder.encode(name, "UTF-8");
     }
     if (!StringUtils.isBlank(searchModel.getStreetAddress1())) {
       String street = searchModel.getStreetAddress1();
