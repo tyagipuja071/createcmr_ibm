@@ -2125,7 +2125,7 @@ function validateEnNameForInter() {
             var enName = custNm1ZS01 + ' ' + custNm2ZS01;
             var custSubType = FormManager.getActualValue('custSubGrp');
             if (enName.toUpperCase().indexOf("IBM CHINA") == -1){
-              return new ValidationResult(null, false, "Customer Name English should include 'IBM China' when Scenario is Internal. ");
+              return new ValidationResult(null, false, "Customer Name English should include 'IBM China' for Internal Sub_scenario.");
             } else {
               return new ValidationResult(null, true);
             }
@@ -2149,7 +2149,7 @@ function validateEnNameInAddrTab() {
             var enName = custNm1 + ' ' + custNm2;
             var custSubType = FormManager.getActualValue('custSubGrp');
             if (enName.toUpperCase().indexOf("IBM CHINA") == -1){
-              return new ValidationResult(null, false, "Customer Name English should include 'IBM China' when Scenario is Internal. ");
+              return new ValidationResult(null, false, "Customer Name English should include 'IBM China' for Internal Sub_scenario.");
             } else {
               return new ValidationResult(null, true);
             }
@@ -2325,6 +2325,48 @@ function validateCnNameAndAddr() {
   })(), 'MAIN_ATTACH_TAB', 'frmCMR');
 }
 
+function validateSearchTermForCROSS() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var custSubType = FormManager.getActualValue('custSubGrp');
+        if (FormManager.getActualValue('reqType') == 'C' && custSubType == 'CROSS') {
+
+          var searchTerm = FormManager.getActualValue('searchTerm');
+          if (searchTerm == '00000' || searchTerm == '04182' || searchTerm == '08036') {
+            return new ValidationResult(null, false, 'It is not allowed to apply for default search term for Foreign Sub_scenario.');
+          } else {
+            return new ValidationResult(null, true);
+          }
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
+function validateISICForCROSS() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+
+        var custSubType = FormManager.getActualValue('custSubGrp');
+        if (FormManager.getActualValue('reqType') == 'C' && custSubType == 'CROSS') {
+          var isicCd = FormManager.getActualValue('isicCd');
+          if (isicCd == '0000' || isicCd == '8888' || isicCd == '9500') {
+            return new ValidationResult(null, false, 'It is not allowed to apply for default ISIC for Foreign Sub_scenario.');
+          } else {
+            return new ValidationResult(null, true);
+          }
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.CN = [ SysLoc.CHINA ];
   console.log('adding CN validators...');
@@ -2395,4 +2437,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addPRIVCustNameSFPValidator, GEOHandler.CN, null, false, false);
   GEOHandler.registerValidator(validateEnNameForInter, GEOHandler.CN, null, false);
   GEOHandler.registerValidator(validateEnNameInAddrTab, GEOHandler.CN, null, false, false);
+  GEOHandler.registerValidator(validateSearchTermForCROSS, GEOHandler.CN, null, false);
+  GEOHandler.registerValidator(validateISICForCROSS, GEOHandler.CN, null, false);
 });
