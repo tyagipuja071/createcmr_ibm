@@ -1068,6 +1068,44 @@ function addPRIVCustNameValidator() {
   })(), null, 'frmCMR_addressModal');
 }
 
+function addPRIVCustNameSFPValidator(){
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var action = FormManager.getActualValue('yourAction');
+        if (action == 'SFP' && CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount) {
+          var record = null;
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+             record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+             var _custSubGrp = FormManager.getActualValue('custSubGrp');
+             var englishName1 = record.custNm1[0];
+             var englishName2 = record.custNm2[0];
+             if (_custSubGrp != 'undefined' && _custSubGrp != '' && _custSubGrp == 'PRIV') {
+               if (englishName1 != 'undefined' && englishName1 != ''){
+                 englishName1 = englishName1.toUpperCase();
+                 if (englishName1.indexOf("PRIVATE LIMITED") < 0 && englishName1.indexOf("COMPANY") < 0 && englishName1.indexOf("CORPORATION") < 0  && englishName1.indexOf("INCORPORATE") < 0 && englishName1.indexOf("ORGANIZATION") < 0 && englishName1.indexOf("LIMITED") < 0 && englishName1.indexOf("PVT LTD") < 0 && englishName1.indexOf("CO., LTD.") < 0 && englishName1.indexOf("LTD") < 0 && englishName1.indexOf("LTD.") < 0 && englishName1.indexOf("COM LTD") < 0){
+                   console.log("Customer Name English for Private Person validate is successful...");
+                 } else {
+                   return new ValidationResult(null, false, "Customer Name English can't contain 'Private Limited', 'Company', 'Corporation', 'incorporate', 'organization', 'Pvt Ltd','Limited','Co., Ltd.', 'ltd', 'com ltd' for Scenario Privte Person");
+                 }
+               }
+               if (englishName2 != 'undefined' && englishName2 != ''){
+                 englishName2 = englishName2.toUpperCase();
+                 if (englishName2.indexOf("PRIVATE LIMITED") < 0 && englishName2.indexOf("COMPANY") < 0 && englishName2.indexOf("CORPORATION") < 0  && englishName2.indexOf("INCORPORATE") < 0 && englishName2.indexOf("ORGANIZATION") < 0 && englishName2.indexOf("LIMITED") < 0 && englishName2.indexOf("PVT LTD") < 0 && englishName2.indexOf("CO.,LTD.") < 0 && englishName2.indexOf("LTD") < 0 && englishName2.indexOf("LTD.") < 0 && englishName2.indexOf("COM LTD") < 0 ){
+                   console.log("Customer Name Con't English for Private Person validate is successful...");
+                   return new ValidationResult(null, true);
+                 } else {
+                   return new ValidationResult(null, false, "Customer Name Con't English can't contain 'Private Limited', 'Company', 'Corporation', 'incorporate', 'organization', 'Pvt Ltd','Limited','Co., Ltd.', 'ltd', 'com ltd' for Scenario Privte Person");
+               }
+             }
+           }
+          }
+        }
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
 function addContactInfoValidator() {
   FormManager.addFormValidator((function() {
     return {
@@ -2333,5 +2371,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addAddrUpdateValidator, GEOHandler.CN, null, true);
   GEOHandler.registerValidator(validateCnNameAndAddr, GEOHandler.CN, null, false);
   GEOHandler.registerValidator(addPRIVCustNameValidator, GEOHandler.CN, null, false, false);
+  GEOHandler.registerValidator(addPRIVCustNameSFPValidator, GEOHandler.CN, null, false, false);
   GEOHandler.registerValidator(validateEnNameForInter, GEOHandler.CN, null, false);
 });

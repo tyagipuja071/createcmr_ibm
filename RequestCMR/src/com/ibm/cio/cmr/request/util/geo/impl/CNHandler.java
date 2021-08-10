@@ -540,6 +540,10 @@ public class CNHandler extends GEOHandler {
           geoContactInfo.setId(ePk);
           entityManager.persist(geoContactInfo);
 
+          // Phone #
+          addr.setCustPhone(geoContactInfo.getContactPhone());
+          entityManager.merge(addr);
+
           AddrRdc addrRdc = getAddrRdc(entityManager, addr.getId().getReqId(), addr.getId().getAddrType(), addr.getId().getAddrSeq());
           String contactName = geoContactInfo.getContactName();
           String contactTitle = geoContactInfo.getContactFunc();
