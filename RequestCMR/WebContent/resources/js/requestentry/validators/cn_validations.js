@@ -2107,8 +2107,6 @@ function validateEnNameForInter() {
     return {
       validate : function() {
         var custSubType = FormManager.getActualValue('custSubGrp');
-// var action = FormManager.getActualValue('yourAction');
-// if(action == 'SFP'){
           if (custSubType == 'INTER') {
             var custNm1ZS01 = '';
             var custNm2ZS01 = '';
@@ -2127,17 +2125,40 @@ function validateEnNameForInter() {
             var enName = custNm1ZS01 + ' ' + custNm2ZS01;
             var custSubType = FormManager.getActualValue('custSubGrp');
             if (enName.toUpperCase().indexOf("IBM CHINA") == -1){
-              return new ValidationResult(null, false, "English name should include 'IBM China' when Scenario is Internal. ");
+              return new ValidationResult(null, false, "Customer Name English should include 'IBM China' when Scenario is Internal. ");
             } else {
               return new ValidationResult(null, true);
             }
           } else {
             return new ValidationResult(null, true);
           }
-// }
       }
     }
   })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
+function validateEnNameInAddrTab() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+
+        var custSubType = FormManager.getActualValue('custSubGrp');
+          if (custSubType == 'INTER') {
+            var custNm1 = FormManager.getActualValue('custNm1');
+            var custNm2 = FormManager.getActualValue('custNm2');
+            var enName = custNm1 + ' ' + custNm2;
+            var custSubType = FormManager.getActualValue('custSubGrp');
+            if (enName.toUpperCase().indexOf("IBM CHINA") == -1){
+              return new ValidationResult(null, false, "Customer Name English should include 'IBM China' when Scenario is Internal. ");
+            } else {
+              return new ValidationResult(null, true);
+            }
+          } else {
+            return new ValidationResult(null, true);
+          }
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
 }
 
 function validateCnNameAndAddr() {
@@ -2373,4 +2394,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addPRIVCustNameValidator, GEOHandler.CN, null, false, false);
   GEOHandler.registerValidator(addPRIVCustNameSFPValidator, GEOHandler.CN, null, false, false);
   GEOHandler.registerValidator(validateEnNameForInter, GEOHandler.CN, null, false);
+  GEOHandler.registerValidator(validateEnNameInAddrTab, GEOHandler.CN, null, false, false);
 });
