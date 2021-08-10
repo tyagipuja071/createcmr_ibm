@@ -454,6 +454,8 @@ function afterConfigForCA() {
 var _inacCodeHandler = null;
 var _custSubGrpHandler = null;
 var _pstExemptHandlers = null;
+var _postalCodeHandler = null;
+
 function addFieldHandlers() {
 
   if (_inacCodeHandler == null) {
@@ -993,6 +995,19 @@ function lockOrderBlockCode() {
   }
 }
 
+function addPostlCdLogic(cntry, addressMode, details) {
+  if (_postalCodeHandler == null) {
+    if (addressMode == 'newAddress' || addressMode == 'updateAddress' || addressMode == 'copyAddress') {
+      _postalCodeHandler = dojo.connect(FormManager.getField('postCd'), 'onChange', function(value) {
+        var postCd = FormManager.getActualValue('postCd');
+        if (postCd != null && postCd.length > 0) {
+          FormManager.setValue('postCd', postCd.toUpperCase());
+        }
+      });
+    }
+  }
+}
+
 /* Register CA Javascripts */
 dojo.addOnLoad(function() {
   console.log('adding CA scripts...');
@@ -1014,6 +1029,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(lockOrderBlockCode, [ SysLoc.CANADA ]);
   // GEOHandler.addToggleAddrTypeFunction(toggleAddrTypesForCA, [ SysLoc.CANADA
   // ]);
+  GEOHandler.addToggleAddrTypeFunction(addPostlCdLogic, [ SysLoc.CANADA ]);
   GEOHandler.addAddrFunction(addCAAddressHandler, [ SysLoc.CANADA ]);
   GEOHandler.enableCopyAddress([ SysLoc.CANADA ], validateCACopy, [ 'ZP01', 'ZP02' ]);
 
