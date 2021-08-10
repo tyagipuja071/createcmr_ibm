@@ -486,7 +486,10 @@ function addFieldHandlers() {
       if (custSubGrp == 'OEM') {
         FormManager.enable('abbrevNm');
       } else {
-        FormManager.readOnly('abbrevNm');
+        var role = FormManager.getActualValue('userRole').toUpperCase();
+        if (role == 'REQUESTER') {
+          FormManager.readOnly('abbrevNm');
+        }
       }
     });
   }
