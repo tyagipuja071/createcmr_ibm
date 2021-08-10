@@ -1707,7 +1707,7 @@ function addDoubleByteValidatorCN(cntry, details) {
 
 function convert2DBCSIgnoreCase(input) {
   var modifiedVal = '';
-  if (input != null && input.length > 0) {
+  if (input != null && input.length > 0 && input != '') {
     modifiedVal = input;
     // modifiedVal = modifiedVal.replace(/[^\d]/g, '');
     modifiedVal = modifiedVal.replace(/1/g, '１');
@@ -1780,7 +1780,7 @@ function convert2DBCSIgnoreCase(input) {
 }
 function replaceAndSymbol(value) {
   var modifiedVal = '';
-  if (value != null && value.length > 0) {
+  if (value != null && value.length > 0 && value != '') {
     modifiedVal = value;
     modifiedVal = modifiedVal.replace(/&/g, '＆');
   }
@@ -1788,7 +1788,7 @@ function replaceAndSymbol(value) {
 };
 function replaceCrossbarSymbol(value) {
   var modifiedVal = '';
-  if (value != null && value.length > 0) {
+  if (value != null && value.length > 0 && value != '') {
     modifiedVal = value;
     modifiedVal = modifiedVal.replace(/-/g, '－');
     modifiedVal = modifiedVal.replace(/\./g, '．');
@@ -1827,7 +1827,7 @@ function replaceCrossbarSymbol(value) {
 
 function convert2SBCS(input) {
   var modifiedVal = '';
-  if (input != null && input.length > 0) {
+  if (input != null && input.length > 0 && input != '') {
     modifiedVal = input;
     // modifiedVal = modifiedVal.replace(/[^\d]/g, '');
     modifiedVal = modifiedVal.replace(/１/g, '1');
@@ -2069,8 +2069,8 @@ function validateEnNameForInter() {
     return {
       validate : function() {
         var custSubType = FormManager.getActualValue('custSubGrp');
-        var action = FormManager.getActualValue('yourAction');
-        if(action == 'SFP'){
+// var action = FormManager.getActualValue('yourAction');
+// if(action == 'SFP'){
           if (custSubType == 'INTER') {
             var custNm1ZS01 = '';
             var custNm2ZS01 = '';
@@ -2096,7 +2096,7 @@ function validateEnNameForInter() {
           } else {
             return new ValidationResult(null, true);
           }
-        }
+// }
       }
     }
   })(), 'MAIN_NAME_TAB', 'frmCMR');
@@ -2167,63 +2167,90 @@ function validateCnNameAndAddr() {
             }
           }
           if (scenarioValidation){
-    
-            var busnType = FormManager.getActualValue('busnType');
-            var cnName = convert2SBCS(cnCustName1ZS01 + cnCustName2ZS01);
-            var result = {};
-            dojo.xhrGet({
-              url : cmr.CONTEXT_ROOT + '/cn/tyc.json',
-              handleAs : 'json',
-              method : 'GET',
-              content : {
-                busnType : busnType,
-                cnName : cnName
-              },
-              timeout : 50000,
-              sync : true,
-              load : function(data, ioargs) {
-                if (data && data.result) {
-                  result = data.result;
-                }
-              },
-              error : function(error, ioargs) {
-                result = {};
-              }
-            });
-    
-            var cnAddress = convert2SBCS(cnAddrTxtZS01 + intlCustNm4ZS01);
-            var name2SBCS = convert2SBCS(result.name);
-            var address2SBCS = convert2SBCS(result.regLocation);
-            if (address2SBCS != cnAddress || name2SBCS != cnName) {
-              var correctName = '';
-              var correctAddress = '';
-              if (name2SBCS != cnName) {
-                if(!$.isEmptyObject(result)){
-                  correctName = '<br/>Company Name: ' + result.name;
-                } else {
-                  correctName = '<br/>Company Name: No Data';
-                }
-              }
-              if (address2SBCS != cnAddress) {
-                if(!$.isEmptyObject(result)){
-                  correctAddress = '<br/>Company Address: ' + result.regLocation;
-                } else {
-                  correctAddress = '<br/>Company Address: No Data';
-                }
-              }
-              var id = FormManager.getActualValue('reqId');
-              var ret = cmr.query('CHECK_CN_API_ATTACHMENT', {
-                ID : id
+            var isValidate = false;
+            if (FormManager.getActualValue('reqType') == 'U') {
+              var intlAddrRdcResult = cmr.query('ADDR.GET.INTLINFO.BY_REQID',  {
+                REQ_ID : FormManager.getActualValue('reqId')
               });
-    
-              if ((ret == null || ret.ret1 == null)) {
-                return new ValidationResult(null, false, 'Your request are not allowed to send for processing if the Chinese company name '
-                    + 'and address doesn\'t match with Tian Yan Cha 100%, or if you insist on using missmatched '
-                    + 'company name or address, you need attach the screenshot of customer official website, '
-                    + 'business license , government website,contract/purchase order with signature in attachment, '
-                    + 'file content must be "Chinese Name And Address change", the correct company name and address '
-                    + 'should be:'
-                    + correctName + correctAddress);
+              
+              var intlCustNm1 = '';
+              var intlCustNm2 = '';
+              var addrTxt = '';
+              var intlCustNm4 = '';
+              
+              if(!$.isEmptyObject(intlAddrRdcResult)){
+                intlCustNm1 = convert2SBCS(intlAddrRdcResult.ret1);
+                intlCustNm2 = convert2SBCS(intlAddrRdcResult.ret2);
+                addrTxt = convert2SBCS(intlAddrRdcResult.ret3);
+                intlCustNm4 = convert2SBCS(intlAddrRdcResult.ret4);
+              }
+              
+              if(intlCustNm1 != convert2SBCS(cnCustName1ZS01) || intlCustNm2 != convert2SBCS(cnCustName2ZS01) || addrTxt != convert2SBCS(cnAddrTxtZS01) || intlCustNm4 != convert2SBCS(intlCustNm4ZS01)){
+                isValidate = true;
+              }
+            } else if (FormManager.getActualValue('reqType') == 'C') {
+              isValidate = true;
+            }
+            if (isValidate) {
+              var busnType = FormManager.getActualValue('busnType');
+              var cnName = convert2SBCS(cnCustName1ZS01 + cnCustName2ZS01);
+              var result = {};
+              dojo.xhrGet({
+                url : cmr.CONTEXT_ROOT + '/cn/tyc.json',
+                handleAs : 'json',
+                method : 'GET',
+                content : {
+                  busnType : busnType,
+                  cnName : cnName
+                },
+                timeout : 50000,
+                sync : true,
+                load : function(data, ioargs) {
+                  if (data && data.result) {
+                    result = data.result;
+                  }
+                },
+                error : function(error, ioargs) {
+                  result = {};
+                }
+              });
+      
+              var cnAddress = convert2SBCS(cnAddrTxtZS01 + intlCustNm4ZS01);
+              var name2SBCS = convert2SBCS(result.name);
+              var address2SBCS = convert2SBCS(result.regLocation);
+              if (address2SBCS != cnAddress || name2SBCS != cnName) {
+                var correctName = '';
+                var correctAddress = '';
+                if (name2SBCS != cnName) {
+                  if(!$.isEmptyObject(result)){
+                    correctName = '<br/>Company Name: ' + result.name;
+                  } else {
+                    correctName = '<br/>Company Name: No Data';
+                  }
+                }
+                if (address2SBCS != cnAddress) {
+                  if(!$.isEmptyObject(result)){
+                    correctAddress = '<br/>Company Address: ' + result.regLocation;
+                  } else {
+                    correctAddress = '<br/>Company Address: No Data';
+                  }
+                }
+                var id = FormManager.getActualValue('reqId');
+                var ret = cmr.query('CHECK_CN_API_ATTACHMENT', {
+                  ID : id
+                });
+      
+                if ((ret == null || ret.ret1 == null)) {
+                  return new ValidationResult(null, false, 'Your request are not allowed to send for processing if the Chinese company name '
+                      + 'and address doesn\'t match with Tian Yan Cha 100%, or if you insist on using missmatched '
+                      + 'company name or address, you need attach the screenshot of customer official website, '
+                      + 'business license , government website,contract/purchase order with signature in attachment, '
+                      + 'file content must be "Chinese Name And Address change", the correct company name and address '
+                      + 'should be:'
+                      + correctName + correctAddress);
+                } else {
+                  return new ValidationResult(null, true);
+                }
               } else {
                 return new ValidationResult(null, true);
               }
