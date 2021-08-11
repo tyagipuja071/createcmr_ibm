@@ -481,6 +481,7 @@ public class MQInterfaceService extends BaseBatchService {
         conn.setRequestMethod("POST");
         conn.setDoInput(true);
         conn.setDoOutput(true);
+        conn.setRequestProperty("Content-Type", "text/xml; charset=UTF-8");
 
         try (ByteArrayInputStream bis = new ByteArrayInputStream(xmlString.getBytes())) {
           IOUtils.copy(bis, conn.getOutputStream());
