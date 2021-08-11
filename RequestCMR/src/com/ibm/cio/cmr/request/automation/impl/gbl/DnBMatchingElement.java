@@ -249,6 +249,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
               processDnbFlag = processDnBFields(entityManager, data, dnbRecord, output, details, itemNo);
               if (processDnbFlag == true) {
                 scorecard.setDnbMatchingResult("Y");
+                admin.setCompVerifiedIndc("Y");
               }
               itemNo++;
             }
@@ -340,8 +341,8 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
    * @param itemNo
    * @throws Exception
    */
-  private boolean processDnBFields(EntityManager entityManager, Data data, DnBMatchingResponse dnbRecord, MatchingOutput output, StringBuilder details,
-      int itemNo) throws Exception {
+  private boolean processDnBFields(EntityManager entityManager, Data data, DnBMatchingResponse dnbRecord, MatchingOutput output,
+      StringBuilder details, int itemNo) throws Exception {
     details.append("\n");
     Boolean highConfidenceDnb = false;
     if (dnbRecord.getConfidenceCode() > 7) {

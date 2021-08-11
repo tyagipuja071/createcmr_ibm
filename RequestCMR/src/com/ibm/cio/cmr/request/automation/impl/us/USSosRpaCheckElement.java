@@ -87,7 +87,7 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
     for (String addrType : RELEVANT_ADDRESSES) {
       Addr address = requestData.getAddress(addrType);
       Boolean containsInvoice = true;
-      Addr invoice = requestData.getAddress("Z101");
+      Addr invoice = requestData.getAddress("ZI01");
       if (invoice == null) {
         containsInvoice = false;
       }
