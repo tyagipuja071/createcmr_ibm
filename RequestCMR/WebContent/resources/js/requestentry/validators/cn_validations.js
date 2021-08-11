@@ -2330,11 +2330,20 @@ function validateSearchTermForCROSS() {
     return {
       validate : function() {
         var custSubType = FormManager.getActualValue('custSubGrp');
-        if (FormManager.getActualValue('reqType') == 'C' && custSubType == 'CROSS') {
-
+        var subType = '';
+        if (FormManager.getActualValue('reqType') == 'C' && (custSubType == 'CROSS' || custSubType == 'NRML' ||custSubType == 'EMBSA' ||custSubType == 'AQSTN')) {
+          if (custSubType == 'CROSS'){
+            subType = 'Foreign';
+          } else if(custSubType == 'NRML') {
+            subType = 'Normal';
+          } else if(custSubType == 'EMBSA') {
+            subType = 'Embedded Solution Agreement (ESA)';
+          } else if(custSubType == 'AQSTN') {
+            subType = 'Acquisition';
+          }
           var searchTerm = FormManager.getActualValue('searchTerm');
           if (searchTerm == '00000' || searchTerm == '04182' || searchTerm == '08036') {
-            return new ValidationResult(null, false, 'It is not allowed to apply for default search term for Foreign Sub_scenario.');
+            return new ValidationResult(null, false, 'It is not allowed to apply for default search term for ' + subType + ' Sub_scenario.');
           } else {
             return new ValidationResult(null, true);
           }
@@ -2350,12 +2359,21 @@ function validateISICForCROSS() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
-
+        var subType = '';
         var custSubType = FormManager.getActualValue('custSubGrp');
-        if (FormManager.getActualValue('reqType') == 'C' && custSubType == 'CROSS') {
+        if (FormManager.getActualValue('reqType') == 'C' && (custSubType == 'CROSS' || custSubType == 'NRML' ||custSubType == 'EMBSA' ||custSubType == 'AQSTN')) {
+          if (custSubType == 'CROSS'){
+            subType = 'Foreign';
+          } else if(custSubType == 'NRML') {
+            subType = 'Normal';
+          } else if(custSubType == 'EMBSA') {
+            subType = 'Embedded Solution Agreement (ESA)';
+          } else if(custSubType == 'AQSTN') {
+            subType = 'Acquisition';
+          }
           var isicCd = FormManager.getActualValue('isicCd');
           if (isicCd == '0000' || isicCd == '8888' || isicCd == '9500') {
-            return new ValidationResult(null, false, 'It is not allowed to apply for default ISIC for Foreign Sub_scenario.');
+            return new ValidationResult(null, false, 'It is not allowed to apply for default ISIC for ' + subType + ' Sub_scenario.');
           } else {
             return new ValidationResult(null, true);
           }

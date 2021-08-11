@@ -65,28 +65,38 @@ public class ChinaUtil extends AutomationUtil {
 
     switch (scenario) {
 
-    case SCENARIO_LOCAL_NRML:
-      if (!("00000".equals(data.getSearchTerm()) || "04182".equals(data.getSearchTerm()))) {
-        LOG.debug("Cluster allowed: Cluster=" + data.getSearchTerm() + " Scenario=" + data.getCustSubGrp());
-        result.setOnError(false);
-        details.append("Cluster allowed:Cluster=" + data.getSearchTerm() + " Scenario=" + data.getCustSubGrp() + " for the request.\n");
-      } else {
-        details.append("Cluster=" + data.getSearchTerm() + " should not be allowed for Scenario=" + data.getCustSubGrp() + " for the request.\n");
-        engineData.addRejectionComment("OTH", "Cluster=" + data.getSearchTerm() + " should not be allowed for this scenario", "", "");
-        result.setOnError(true);
-      }
-      break;
-    case SCENARIO_LOCAL_EMBSA:
-      if (!("00000".equals(data.getSearchTerm()) || "04182".equals(data.getSearchTerm()))) {
-        LOG.debug("Cluster allowed: Cluster=" + data.getSearchTerm() + " Scenario=" + data.getCustSubGrp());
-        result.setOnError(false);
-        details.append("Cluster allowed:Cluster=" + data.getSearchTerm() + " Scenario=" + data.getCustSubGrp() + " for the request.\n");
-      } else {
-        details.append("Cluster=" + data.getSearchTerm() + " should not be allowed for Scenario=" + data.getCustSubGrp() + " for the request.\n");
-        engineData.addRejectionComment("OTH", "Cluster=" + data.getSearchTerm() + " should not be allowed for this scenario", "", "");
-        result.setOnError(true);
-      }
-      break;
+    // case SCENARIO_LOCAL_NRML:
+    // if (!("00000".equals(data.getSearchTerm()) ||
+    // "04182".equals(data.getSearchTerm()))) {
+    // LOG.debug("Cluster allowed: Cluster=" + data.getSearchTerm() + "
+    // Scenario=" + data.getCustSubGrp());
+    // result.setOnError(false);
+    // details.append("Cluster allowed:Cluster=" + data.getSearchTerm() + "
+    // Scenario=" + data.getCustSubGrp() + " for the request.\n");
+    // } else {
+    // details.append("Cluster=" + data.getSearchTerm() + " should not be
+    // allowed for Scenario=" + data.getCustSubGrp() + " for the request.\n");
+    // engineData.addRejectionComment("OTH", "Cluster=" + data.getSearchTerm() +
+    // " should not be allowed for this scenario", "", "");
+    // result.setOnError(true);
+    // }
+    // break;
+    // case SCENARIO_LOCAL_EMBSA:
+    // if (!("00000".equals(data.getSearchTerm()) ||
+    // "04182".equals(data.getSearchTerm()))) {
+    // LOG.debug("Cluster allowed: Cluster=" + data.getSearchTerm() + "
+    // Scenario=" + data.getCustSubGrp());
+    // result.setOnError(false);
+    // details.append("Cluster allowed:Cluster=" + data.getSearchTerm() + "
+    // Scenario=" + data.getCustSubGrp() + " for the request.\n");
+    // } else {
+    // details.append("Cluster=" + data.getSearchTerm() + " should not be
+    // allowed for Scenario=" + data.getCustSubGrp() + " for the request.\n");
+    // engineData.addRejectionComment("OTH", "Cluster=" + data.getSearchTerm() +
+    // " should not be allowed for this scenario", "", "");
+    // result.setOnError(true);
+    // }
+    // break;
     // case SCENARIO_CROSS_CROSS:
     // if (!("00000".equals(data.getSearchTerm()) ||
     // "04182".equals(data.getSearchTerm()))) {
@@ -103,17 +113,22 @@ public class ChinaUtil extends AutomationUtil {
     // result.setOnError(true);
     // }
     // break;
-    case SCENARIO_LOCAL_AQSTN:
-      if (!("00000".equals(data.getSearchTerm()) || "04182".equals(data.getSearchTerm()))) {
-        LOG.debug("Cluster allowed: Cluster=" + data.getSearchTerm() + " Scenario=" + data.getCustSubGrp());
-        result.setOnError(false);
-        details.append("Cluster allowed:Cluster=" + data.getSearchTerm() + " Scenario=" + data.getCustSubGrp() + " for the request.\n");
-      } else {
-        details.append("Cluster=" + data.getSearchTerm() + " should not be allowed for Scenario=" + data.getCustSubGrp() + " for the request.\n");
-        engineData.addRejectionComment("OTH", "Cluster=" + data.getSearchTerm() + " should not be allowed for this scenario", "", "");
-        result.setOnError(true);
-      }
-      break;
+    // case SCENARIO_LOCAL_AQSTN:
+    // if (!("00000".equals(data.getSearchTerm()) ||
+    // "04182".equals(data.getSearchTerm()))) {
+    // LOG.debug("Cluster allowed: Cluster=" + data.getSearchTerm() + "
+    // Scenario=" + data.getCustSubGrp());
+    // result.setOnError(false);
+    // details.append("Cluster allowed:Cluster=" + data.getSearchTerm() + "
+    // Scenario=" + data.getCustSubGrp() + " for the request.\n");
+    // } else {
+    // details.append("Cluster=" + data.getSearchTerm() + " should not be
+    // allowed for Scenario=" + data.getCustSubGrp() + " for the request.\n");
+    // engineData.addRejectionComment("OTH", "Cluster=" + data.getSearchTerm() +
+    // " should not be allowed for this scenario", "", "");
+    // result.setOnError(true);
+    // }
+    // break;
     case SCENARIO_LOCAL_BLUMX:
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
       break;
