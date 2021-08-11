@@ -2369,9 +2369,12 @@ function validateSearchTermForCROSS() {
             subType = 'Acquisition';
           }
           var searchTerm = FormManager.getActualValue('searchTerm');
+          var searchTermTxt = $('#searchTerm').val();
           if (searchTerm == '00000' || searchTerm == '04182' || searchTerm == '08036') {
             return new ValidationResult(null, false, 'It is not allowed to apply for default search term for ' + subType + ' Sub_scenario.');
-          } else {
+          } else if(searchTermTxt.indexOf('Expired') >= 0) { 
+            return new ValidationResult(null, false, 'It is not allowed to apply for default or expired search term for ' + subType + ' Sub_scenario.');
+          }else {
             return new ValidationResult(null, true);
           }
         } else {
