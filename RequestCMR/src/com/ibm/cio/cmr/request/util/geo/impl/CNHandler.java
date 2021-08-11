@@ -5,6 +5,8 @@ import java.lang.reflect.Modifier;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +19,8 @@ import javax.persistence.EntityManager;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.ibm.cio.cmr.request.CmrConstants;
@@ -59,17 +63,21 @@ import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.CmrServicesFactory;
+import com.ibm.cmr.services.client.MatchingServiceClient;
 import com.ibm.cmr.services.client.QueryClient;
+import com.ibm.cmr.services.client.ServiceClient.Method;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
+import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
+import com.ibm.cmr.services.client.matching.gbg.GBGResponse;
 import com.ibm.cmr.services.client.query.QueryRequest;
 import com.ibm.cmr.services.client.query.QueryResponse;
 import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
 
 public class CNHandler extends GEOHandler {
 
-  private static final Logger LOG = Logger.getLogger(DEHandler.class);
+  private static final Logger LOG = Logger.getLogger(CNHandler.class);
   private static final String[] DE_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "LocalTax1", "LocalTax2", "SitePartyID", "Division", "POBoxCity", "CustFAX",
       "City2", "Affiliate", "Company", "INACType" };
   public static final int CN_STREET_ADD_TXT = 70;
@@ -286,13 +294,31 @@ public class CNHandler extends GEOHandler {
       } else {
         data.setInacType("");
       }
-      if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())
-          && (data.getCustSubGrp() == null
-              || !(data.getCustSubGrp().equals("INTER") || data.getCustSubGrp().equals("BUSPR") || data.getCustSubGrp().equals("PRIV")))
-          && StringUtils.isBlank(data.getIsicCd()) && StringUtils.isNotBlank(data.getBusnType())) {
-        getIsicByDNB(entityManager, data);
-      }
     }
+
+    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())
+        && (data.getCustSubGrp() == null
+            || !(data.getCustSubGrp().equals("INTER") || data.getCustSubGrp().equals("BUSPR") || data.getCustSubGrp().equals("PRIV")))
+        && StringUtils.isBlank(data.getIsicCd()) && StringUtils.isNotBlank(data.getBusnType())) {
+      getIsicByDNB(entityManager, data);
+    }
+    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())
+        && (data.getCustSubGrp() == null
+            || !(data.getCustSubGrp().equals("INTER") || data.getCustSubGrp().equals("BUSPR") || data.getCustSubGrp().equals("PRIV")))
+        && StringUtils.isBlank(data.getGbgId()) && StringUtils.isNotBlank(data.getDunsNo())) {
+      Addr soldToAddr = null;
+      if (StringUtils.isNotEmpty(admin.getMainCustNm1())) {
+        String sql = ExternalizedQuery.getSql("BATCH.GET_ADDR_FOR_SAP_NO_ZS01");
+        PreparedQuery query = new PreparedQuery(entityManager, sql);
+        query.setParameter("REQ_ID", admin.getId().getReqId());
+        soldToAddr = query.getSingleResult(Addr.class);
+      }
+      if (soldToAddr != null) {
+        getGBGIdByGBGservice(entityManager, admin, data, soldToAddr);
+      }
+
+    }
+
     // data.setSearchTerm(data.getCovId());
 
     // convert chinese name and address to DBCS
@@ -309,6 +335,139 @@ public class CNHandler extends GEOHandler {
       entityManager.merge(intlAddr);
     }
     entityManager.flush();
+
+  }
+
+  private void getGBGIdByGBGservice(EntityManager entityManager, Admin admin, Data data, Addr currentAddress) throws Exception {
+    // TODO Auto-generated method stub
+    GBGFinderRequest request = new GBGFinderRequest();
+    request.setMandt(SystemConfiguration.getValue("MANDT"));
+
+    request.setCity(currentAddress.getCity1());
+    request
+        .setCustomerName(currentAddress.getCustNm1() + (StringUtils.isBlank(currentAddress.getCustNm2()) ? "" : " " + currentAddress.getCustNm2()));
+
+    String nameUsed = request.getCustomerName();
+    LOG.debug("Checking GBG for " + nameUsed);
+    // usedNames.add(nameUsed.toUpperCase());
+    request.setIssuingCountry(data.getCmrIssuingCntry());
+    request.setStreetLine1(currentAddress.getAddrTxt());
+    request.setStreetLine2(currentAddress.getAddrTxt2());
+    request.setLandedCountry(currentAddress.getLandCntry());
+    request.setPostalCode(currentAddress.getPostCd());
+    request.setStateProv(currentAddress.getStateProv());
+    if (!StringUtils.isBlank(data.getVat())) {
+      request.setOrgId(data.getVat());
+    }
+    request.setMinConfidence("6");
+
+    request.setDunsNo(data.getDunsNo());
+
+    MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
+        MatchingServiceClient.class);
+    client.setRequestMethod(Method.Get);
+    client.setReadTimeout(1000 * 60 * 5);
+
+    LOG.debug("Connecting to the GBG Finder Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
+    MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.GBG_SERVICE_ID, request, MatchingResponse.class);
+    ObjectMapper mapper = new ObjectMapper();
+    String json = mapper.writeValueAsString(rawResponse);
+
+    TypeReference<MatchingResponse<GBGResponse>> ref = new TypeReference<MatchingResponse<GBGResponse>>() {
+    };
+    MatchingResponse<GBGResponse> response = mapper.readValue(json, ref);
+
+    if (response != null && response.getMatched()) {
+      List<GBGResponse> gbgMatches = response.getMatches();
+      Collections.sort(gbgMatches, new GBGComparator(data.getCmrIssuingCntry()));
+
+      // get default landed country
+      String defaultLandCntry = PageManager.getDefaultLandedCountry(data.getCmrIssuingCntry());
+
+      if (gbgMatches.size() > 5) {
+        gbgMatches = gbgMatches.subList(0, 4);
+      }
+      boolean domesticGBGFound = false;
+      for (GBGResponse gbg : gbgMatches) {
+        if (gbg.isDomesticGBG()) {
+          domesticGBGFound = true;
+          break;
+        }
+      }
+
+      int itemNo = 0;
+      for (GBGResponse gbg : gbgMatches) {
+        if (gbg.isDomesticGBG() || !domesticGBGFound) {
+          itemNo++;
+          data.setGbgId(gbg.getGbgId());
+          data.setGbgDesc(gbg.getGbgName());
+          data.setBgId(gbg.getBgId());
+          data.setBgDesc(gbg.getBgName());
+          entityManager.merge(data);
+          entityManager.flush();
+          /*
+           * if (itemNo == 1 && gbg.isDomesticGBG()) { if
+           * ("641".equals(data.getCmrIssuingCntry()) &&
+           * "C".equals(admin.getReqType()) &&
+           * "ECOSY".equals(data.getCustSubGrp())) { List<String> s1GBGIDList =
+           * SystemParameters.getList("CN_S1_GBG_ID_LIST"); if
+           * (s1GBGIDList.contains(gbg.getGbgId())) { result.
+           * setDetails("GBG computing result is S1 GBG ID on the request.");
+           * engineData.addRejectionComment("OTH",
+           * "GBG computing result is S1 GBG ID on the request.", "", "");
+           * result.setResults("S1 GBG ID"); } } }
+           */
+          break;
+        }
+      }
+    }
+
+  }
+
+  /**
+   * Comparator for {@link GBGResponse}
+   * 
+   * @author JeffZAMORA
+   * 
+   */
+  private class GBGComparator implements Comparator<GBGResponse> {
+
+    private String landedCountry;
+
+    public GBGComparator(String landedCountry) {
+      this.landedCountry = landedCountry;
+    }
+
+    @Override
+    public int compare(GBGResponse o1, GBGResponse o2) {
+      // matched cmrs on the country
+      if (this.landedCountry.equals(o1.getCountry()) && !this.landedCountry.equals(o2.getCountry())) {
+        return -1;
+      }
+      if (!this.landedCountry.equals(o1.getCountry()) && this.landedCountry.equals(o2.getCountry())) {
+        return 1;
+      }
+      // cmr count
+      if (o1.getCmrCount() > o2.getCmrCount()) {
+        return -1;
+      }
+      if (o1.getCmrCount() < o2.getCmrCount()) {
+        return 1;
+      }
+
+      // Null pointer exception encountered. when comparing using this.
+      if (StringUtils.isNotBlank(o1.getLdeRule()) && StringUtils.isNotBlank(o2.getLdeRule())) {
+        // rule is country specific
+        if (o1.getLdeRule().contains(this.landedCountry) && !o2.getLdeRule().contains(this.landedCountry)) {
+          return -1;
+        }
+        if (!o1.getLdeRule().contains(this.landedCountry) && o2.getLdeRule().contains(this.landedCountry)) {
+          return 1;
+        }
+      }
+
+      return o1.getBgId().compareTo(o2.getBgId());
+    }
 
   }
 
