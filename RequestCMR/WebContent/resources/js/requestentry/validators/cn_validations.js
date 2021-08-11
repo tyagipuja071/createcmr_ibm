@@ -2174,6 +2174,8 @@ function validateCnNameAndAddr() {
           var cnCustName2ZS01 = '';
           var cnAddrTxtZS01 = '';
           var intlCustNm4ZS01 = '';
+          var cnCityZS01 = '';
+          var cnDistrictZS01 = '';
 
           for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
             record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
@@ -2187,6 +2189,8 @@ function validateCnNameAndAddr() {
               cnCustName1ZS01 = record.cnCustName1;
               cnCustName2ZS01 = record.cnCustName2;
               cnAddrTxtZS01 = record.cnAddrTxt;
+              cnCityZS01 = record.cnCity;
+              cnDistrictZS01 = record.cnDistrict;
             }
 
             if (typeof (cnCustName1ZS01) == 'object') {
@@ -2204,6 +2208,18 @@ function validateCnNameAndAddr() {
             if (typeof (cnAddrTxtZS01) == 'object') {
               if (cnAddrTxtZS01[0] != '' && cnAddrTxtZS01[0] != null) {
                 cnAddrTxtZS01 = cnAddrTxtZS01[0];
+              }
+            }
+            
+            if (typeof (cnAddrTxtZS01) == 'object') {
+              if (cnAddrTxtZS01[0] != '' && cnAddrTxtZS01[0] != null) {
+                cnCityZS01 = cnCityZS01[0];
+              }
+            }
+            
+            if (typeof (cnAddrTxtZS01) == 'object') {
+              if (cnAddrTxtZS01[0] != '' && cnAddrTxtZS01[0] != null) {
+                cnDistrictZS01 = cnDistrictZS01[0];
               }
             }
 
@@ -2277,23 +2293,34 @@ function validateCnNameAndAddr() {
               var cnAddress = convert2SBCS(cnAddrTxtZS01 + intlCustNm4ZS01);
               var name2SBCS = convert2SBCS(result.name);
               var address2SBCS = convert2SBCS(result.regLocation);
-              if (address2SBCS != cnAddress || name2SBCS != cnName) {
-                var correctName = '';
-                var correctAddress = '';
-                if (name2SBCS != cnName) {
-                  if(!$.isEmptyObject(result)){
-                    correctName = '<br/>Company Name: ' + result.name;
-                  } else {
-                    correctName = '<br/>Company Name: No Data';
-                  }
+              var apiCity = result.city;
+              var apiDistrict = result.district;
+              var equalFlag = true;
+
+              var correctName = '';
+              var correctAddress = '';
+              if (name2SBCS != cnName) {
+                equalFlag = false;
+                if(!$.isEmptyObject(result)){
+                  correctName = '<br/>Company Name: ' + result.name;
+                } else {
+                  correctName = '<br/>Company Name: No Data';
                 }
-                if (address2SBCS != cnAddress) {
+              }
+              if (address2SBCS != cnAddress) {
+                if (address2SBCS.indexOf(cnAddress) >= 0 && apiCity.indexOf(cnCityZS01) >= 0 && apiDistrict.indexOf(cnDistrictZS01) >= 0){
+                  equalFlag = true;
+                } else {
+                  equalFlag = false;
                   if(!$.isEmptyObject(result)){
                     correctAddress = '<br/>Company Address: ' + result.regLocation;
                   } else {
                     correctAddress = '<br/>Company Address: No Data';
                   }
                 }
+              }
+
+              if(!equalFlag){
                 var id = FormManager.getActualValue('reqId');
                 var ret = cmr.query('CHECK_CN_API_ATTACHMENT', {
                   ID : id
