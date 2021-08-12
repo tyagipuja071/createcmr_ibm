@@ -2423,6 +2423,33 @@ function validateISICForCROSS() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
+function s1GBGIdValidator() {
+  console.log("s1GBGIdValidator for REQUESTER...");
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var custSubType = FormManager.getActualValue('custSubGrp');
+        if (typeof (_pagemodel) != 'undefined') {
+          var id = FormManager.getActualValue('gbgId');
+          if (custSubType == 'ECOSY' && id != 'undefined' && id != '') {
+            var ret = cmr.query('CHECK_CN_S1_GBG_ID_LIST', {
+              ID : id
+            });
+
+            if (ret == null || ret.ret1 == null) {
+              return new ValidationResult(null, true);
+            } else {
+              return new ValidationResult(null, false, 'S1 client and subsidiary is not allowed to apply for ecosystem CMR type, pls change other "Scenario Sub-type" in General Tab.');
+            }
+          } else {
+            return new ValidationResult(null, true);
+          }
+        }
+      }
+    };
+  })(), 'MAIN_ATTACH_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.CN = [ SysLoc.CHINA ];
   console.log('adding CN validators...');
@@ -2495,4 +2522,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateEnNameInAddrTab, GEOHandler.CN, null, false, false);
   GEOHandler.registerValidator(validateSearchTermForCROSS, GEOHandler.CN, null, false);
   GEOHandler.registerValidator(validateISICForCROSS, GEOHandler.CN, null, false);
+  GEOHandler.registerValidator(s1GBGIdValidator, GEOHandler.CN,　null, false, false);
 });
