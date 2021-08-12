@@ -9,6 +9,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.persistence.EntityManager;
 
@@ -841,7 +843,7 @@ public class ItalyHandler extends BaseSOFHandler {
         collectionCd = cExt.getItCodeSSV();
       }
       if (cust != null) {
-//         vat = cust.getVat();
+        // vat = cust.getVat();
         abbrevNm = cust.getAbbrevNm();
         abbrevLoc = cust.getAbbrevLocn();
         sbo = cust.getSbo();
@@ -1548,9 +1550,9 @@ public class ItalyHandler extends BaseSOFHandler {
   @Override
   public List<String> getDataFieldsForUpdateCheckLegacy(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
-    fields.addAll(Arrays.asList("SALES_BO_CD", "REP_TEAM_MEMBER_NO","CUST_CLASS", "SPECIAL_TAX_CD", "VAT", "ISIC_CD", "EMBARGO_CD", "COLLECTION_CD", "ABBREV_NM",
-        "SENSITIVE_FLAG", "CLIENT_TIER", "COMPANY", "INAC_TYPE", "INAC_CD", "ISU_CD", "SUB_INDUSTRY_CD", "ABBREV_LOCN", "PPSCEID", "MEM_LVL",
-        "BP_REL_TYPE","CROS_SUB_TYP", "TAX_CD1", "NATIONAL_CUS_IND", "MODE_OF_PAYMENT", "ENTERPRISE"));
+    fields.addAll(Arrays.asList("SALES_BO_CD", "REP_TEAM_MEMBER_NO", "CUST_CLASS", "SPECIAL_TAX_CD", "VAT", "ISIC_CD", "EMBARGO_CD", "COLLECTION_CD",
+        "ABBREV_NM", "SENSITIVE_FLAG", "CLIENT_TIER", "COMPANY", "INAC_TYPE", "INAC_CD", "ISU_CD", "SUB_INDUSTRY_CD", "ABBREV_LOCN", "PPSCEID",
+        "MEM_LVL", "BP_REL_TYPE", "CROS_SUB_TYP", "TAX_CD1", "NATIONAL_CUS_IND", "MODE_OF_PAYMENT", "ENTERPRISE"));
     return fields;
   }
 
@@ -1824,6 +1826,16 @@ public class ItalyHandler extends BaseSOFHandler {
           LOG.trace("ISU and Client Tier must both be filled if either one was suppplied on the template");
           error.addError(rowIndex, "Data Tab", "ISU and Client Tier must both be filled if either one was suppplied on the template");
           validations.add(error);
+        }
+
+        if (!StringUtils.isBlank(collectionCode)) {
+          Pattern upperCaseNumeric = Pattern.compile("^[A-Z0-9]*$");
+          Matcher matcher = upperCaseNumeric.matcher(collectionCode);
+          if (!matcher.matches()) {
+            LOG.trace("Collection Code should contain only upper-case latin and numeric characters.");
+            error.addError(row.getRowNum(), "Collection Code.", "Collection Code should contain only upper-case latin and numeric characters. ");
+            validations.add(error);
+          }
         }
       }
     }
