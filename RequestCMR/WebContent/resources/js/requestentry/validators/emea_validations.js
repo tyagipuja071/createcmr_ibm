@@ -8268,7 +8268,7 @@ function validateCollectionCdIT() {
     return {
       validate : function() {
         var collCd = FormManager.getActualValue('collectionCd');
-        var alphanumeric = /^[0-9a-zA-Z]*$/;
+        var alphanumeric = /^[0-9A-Z]*$/;
 
         if (collCd == '') {
           return new ValidationResult(null, true);
@@ -8281,7 +8281,7 @@ function validateCollectionCdIT() {
               id : 'collectionCd',
               type : 'text',
               name : 'collectionCd'
-            }, false, 'Collection Code should be alphanumeric only.');
+            }, false, 'Collection Code should contain only upper-case latin and numeric characters.');
           }
           return new ValidationResult(null, true);
         }
