@@ -2211,14 +2211,14 @@ function validateCnNameAndAddr() {
               }
             }
             
-            if (typeof (cnAddrTxtZS01) == 'object') {
-              if (cnAddrTxtZS01[0] != '' && cnAddrTxtZS01[0] != null) {
+            if (typeof (cnCityZS01) == 'object') {
+              if (cnCityZS01[0] != '' && cnCityZS01[0] != null) {
                 cnCityZS01 = cnCityZS01[0];
               }
             }
             
-            if (typeof (cnAddrTxtZS01) == 'object') {
-              if (cnAddrTxtZS01[0] != '' && cnAddrTxtZS01[0] != null) {
+            if (typeof (cnDistrictZS01) == 'object') {
+              if (cnDistrictZS01[0] != '' && cnDistrictZS01[0] != null) {
                 cnDistrictZS01 = cnDistrictZS01[0];
               }
             }
@@ -2252,15 +2252,21 @@ function validateCnNameAndAddr() {
               var intlCustNm2 = '';
               var addrTxt = '';
               var intlCustNm4 = '';
+              var city1 = '';
+              var city2 = '';
               
               if(!$.isEmptyObject(intlAddrRdcResult)){
                 intlCustNm1 = convert2SBCS(intlAddrRdcResult.ret1);
                 intlCustNm2 = convert2SBCS(intlAddrRdcResult.ret2);
                 addrTxt = convert2SBCS(intlAddrRdcResult.ret3);
                 intlCustNm4 = convert2SBCS(intlAddrRdcResult.ret4);
+                city1 = convert2SBCS(intlAddrRdcResult.ret5);
+                city2 = convert2SBCS(intlAddrRdcResult.ret6);
               }
               
-              if(intlCustNm1 != convert2SBCS(cnCustName1ZS01) || intlCustNm2 != convert2SBCS(cnCustName2ZS01) || addrTxt != convert2SBCS(cnAddrTxtZS01) || intlCustNm4 != convert2SBCS(intlCustNm4ZS01)){
+              if(intlCustNm1 != convert2SBCS(cnCustName1ZS01) || intlCustNm2 != convert2SBCS(cnCustName2ZS01) 
+                  || addrTxt != convert2SBCS(cnAddrTxtZS01) || intlCustNm4 != convert2SBCS(intlCustNm4ZS01)
+                  || city1 != convert2SBCS(cnCityZS01) || city2 != convert2SBCS(cnDistrictZS01)){
                 isValidate = true;
               }
             } else if (FormManager.getActualValue('reqType') == 'C') {
