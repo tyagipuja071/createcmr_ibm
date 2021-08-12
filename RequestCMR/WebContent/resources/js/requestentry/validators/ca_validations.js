@@ -7,6 +7,7 @@ Validations file for Canada
 var regexNumeric = /^[0-9]+$/;
 var regexAlphanumeric = /^[0-9a-zA-Z]+$/;
 var _importedIndc = null;
+var _scenarioArFaar = '';
 /**
  * Adds the validator for the mandatory sold to and single address types
  * 
@@ -455,7 +456,7 @@ var _inacCodeHandler = null;
 var _custSubGrpHandler = null;
 var _pstExemptHandlers = null;
 var _postalCodeHandler = null;
-
+var _salesBusOffCdHandler = null;
 function addFieldHandlers() {
 
   if (_inacCodeHandler == null) {
@@ -504,6 +505,12 @@ function addFieldHandlers() {
       } else {
         FormManager.resetValidations('PSTExemptLicNum');
       }
+    });
+  }
+
+  if (_salesBusOffCdHandler == null) {
+    _salesBusOffCdHandler = dojo.connect(FormManager.getField('salesBusOffCd'), 'onChange', function(value) {
+      setDefaultARFAARBySBO(value);
     });
   }
 
@@ -679,6 +686,8 @@ function retainImportValues(fromAddress, scenario, scenarioChanged) {
         FormManager.setValue('installBranchOff', origIbo);
         FormManager.setValue('adminDeptCd', origArFaar);
         FormManager.setValue('creditCd', origCreditCode);
+
+        _scenarioArFaar = origArFaar;
       }
     }
   }
@@ -1011,6 +1020,49 @@ function addPostlCdLogic(cntry, addressMode, details) {
   }
 }
 
+function setDefaultARFAARBySBO(sboValue) {
+  if (sboValue != '') {
+    if (_scenarioArFaar != '') {
+      FormManager.setValue('adminDeptCd', _scenarioArFaar);
+      _scenarioArFaar = '';
+      return;
+    }
+
+    var params = {
+      ISSUING_CNTRY : '649',
+      SALES_BO_CD : sboValue
+    };
+    var results = cmr.query('GET.SBODESC', params);
+    if (results != null && results.ret1 != '' && results.ret1 != undefined) {
+      FormManager.setValue('adminDeptCd', results.ret1);
+    } else {
+      FormManager.setValue('adminDeptCd', '120V');
+    }
+  }
+}
+
+function setDefaultARFAARByScenario(fromAddress, scenario, scenarioChanged) {
+  var isCmrImported = getImportedIndc();
+  if (FormManager.getActualValue('reqType') == 'C' && isCmrImported == 'Y' && scenarioChanged && (scenario == 'COMME' || scenario == 'GOVT')) {
+    return;
+  }
+
+  if (FormManager.getActualValue('reqType') == 'C' && scenarioChanged) {
+    var arFaar = '';
+    if (scenario == 'CND') {
+      arFaar = '5990';
+    } else if (scenario == 'INTER' || scenario == 'SOCUS') {
+      arFaar = '0540';
+    } else if (scenario == 'PRIV') {
+      arFaar = '051Z';
+    } else if (scenario == 'USA') {
+      arFaar = '120V';
+    }
+    FormManager.setValue('adminDeptCd', arFaar);
+    _scenarioArFaar = arFaar;
+  }
+}
+
 /* Register CA Javascripts */
 dojo.addOnLoad(function() {
   console.log('adding CA scripts...');
@@ -1045,6 +1097,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(preTickLatePaymentInd, SysLoc.CANADA);
   GEOHandler.addAfterTemplateLoad(limitDropdownOnScenarioChange, SysLoc.CANADA);
   GEOHandler.addAfterTemplateLoad(setCSBranchValue, SysLoc.CANADA);
+  GEOHandler.addAfterTemplateLoad(setDefaultARFAARByScenario, SysLoc.CANADA);
+
   GEOHandler.addToggleAddrTypeFunction(hideObsoleteAddressOption, [ SysLoc.CANADA ]);
   GEOHandler.addAddrFunction(addStateProvHandler, [ SysLoc.CANADA ]);
 });
