@@ -2301,12 +2301,13 @@ function validateCnNameAndAddr() {
               var address2SBCS = convert2SBCS(result.regLocation);
               var apiCity = result.city;
               var apiDistrict = result.district;
-              var equalFlag = true;
+              var nameEqualFlag = true;
+              var addressEqualFlag = true;
 
               var correctName = '';
               var correctAddress = '';
               if (name2SBCS != cnName) {
-                equalFlag = false;
+                nameEqualFlag = false;
                 if(!$.isEmptyObject(result)){
                   correctName = '<br/>Company Name: ' + result.name;
                 } else {
@@ -2315,9 +2316,9 @@ function validateCnNameAndAddr() {
               }
               if (address2SBCS != cnAddress) {
                 if (address2SBCS.indexOf(cnAddress) >= 0 && apiCity.indexOf(cnCityZS01) >= 0 && apiDistrict.indexOf(cnDistrictZS01) >= 0){
-                  equalFlag = true;
+                  addressEqualFlag = true;
                 } else {
-                  equalFlag = false;
+                  addressEqualFlag = false;
                   if(!$.isEmptyObject(result)){
                     correctAddress = '<br/>Company Address: ' + result.regLocation;
                   } else {
@@ -2326,7 +2327,7 @@ function validateCnNameAndAddr() {
                 }
               }
 
-              if(!equalFlag){
+              if(!nameEqualFlag || !addressEqualFlag){
                 var id = FormManager.getActualValue('reqId');
                 var ret = cmr.query('CHECK_CN_API_ATTACHMENT', {
                   ID : id
@@ -2409,6 +2410,7 @@ function validateISICForCROSS() {
           }
           var isicCd = FormManager.getActualValue('isicCd');
           if (isicCd == '0000' || isicCd == '8888' || isicCd == '9500') {
+            FormManager.enable('isicCd');
             return new ValidationResult(null, false, 'It is not allowed to apply for default ISIC for ' + subType + ' Sub_scenario.');
           } else {
             return new ValidationResult(null, true);
