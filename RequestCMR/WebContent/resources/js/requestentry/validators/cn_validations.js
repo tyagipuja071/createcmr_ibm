@@ -2410,7 +2410,7 @@ function validateISICForCROSS() {
           }
           var isicCd = FormManager.getActualValue('isicCd');
           if (isicCd == '0000' || isicCd == '8888' || isicCd == '9500') {
-            FormManager.enable('isicCd');
+// FormManager.enable('isicCd');
             return new ValidationResult(null, false, 'It is not allowed to apply for default ISIC for ' + subType + ' Sub_scenario.');
           } else {
             return new ValidationResult(null, true);
