@@ -1555,13 +1555,15 @@ public class USUtil extends AutomationUtil {
   }
 
   private boolean isRelevantAddressFieldUpdated(RequestChangeContainer changes, Addr addr) {
-    List<UpdatedNameAddrModel> addrChanges = changes.getAddressChanges(addr.getId().getAddrType(), addr.getId().getAddrSeq());
-    if (addrChanges == null) {
-      return false;
-    }
-    for (UpdatedNameAddrModel change : addrChanges) {
-      if (!NON_RELEVANT_ADDRESS_FIELDS.contains(change.getDataField())) {
-        return true;
+    if (addr != null) {
+      List<UpdatedNameAddrModel> addrChanges = changes.getAddressChanges(addr.getId().getAddrType(), addr.getId().getAddrSeq());
+      if (addrChanges == null) {
+        return false;
+      }
+      for (UpdatedNameAddrModel change : addrChanges) {
+        if (!NON_RELEVANT_ADDRESS_FIELDS.contains(change.getDataField())) {
+          return true;
+        }
       }
     }
     return false;
