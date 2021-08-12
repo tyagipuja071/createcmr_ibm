@@ -830,7 +830,7 @@ public class CEWATransformer extends MCOTransformer {
 
   @Override
   public String getDupCreationCountryId(EntityManager entityManager, String cntry, String cmrNo) {
-    if ("764".equals(cntry))
+    if ("764".equals(cntry) || "780".equals(cntry))
       return "NA";
     else
       return "764";
