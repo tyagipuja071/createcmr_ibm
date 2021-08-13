@@ -2310,10 +2310,16 @@ function validateCnNameAndAddr() {
               var cnAddress = convert2SBCS(cnAddrTxtZS01 + intlCustNm4ZS01);
               var name2SBCS = convert2SBCS(result.name);
               var address2SBCS = convert2SBCS(result.regLocation);
-              var apiCity = result.city;
-              var apiDistrict = result.district;
+              var apiCity = '';
+              var apiDistrict = '';
               var nameEqualFlag = true;
               var addressEqualFlag = true;
+              if(result.city != null){
+                apiCity = result.city;
+              }
+              if(result.district != null){
+                apiDistrict = result.district;
+              }
 
               var correctName = '';
               var correctAddress = '';
@@ -2326,9 +2332,9 @@ function validateCnNameAndAddr() {
                 }
               }
               if (address2SBCS != cnAddress) {
-                address2SBCS = address2SBCS.replace(apiCity,'');
-                address2SBCS = address2SBCS.replace(apiDistrict,'');
-                if (cnAddress.indexOf(address2SBCS) >= 0 && apiCity.indexOf(cnCityZS01) >= 0 && apiDistrict.indexOf(cnDistrictZS01) >= 0){
+             // address2SBCS = address2SBCS.replace(apiCity,'');
+             // address2SBCS = address2SBCS.replace(apiDistrict,'');
+                if (address2SBCS.indexOf(cnAddress) >= 0 && apiCity.indexOf(cnCityZS01) >= 0 && apiDistrict.indexOf(cnDistrictZS01) >= 0){
                   addressEqualFlag = true;
                 } else {
                   addressEqualFlag = false;
@@ -2461,7 +2467,8 @@ function resetISICCode() {
       '9249', '9301', '9302', '9303', '9309', '9801', '9802', '9804', '9806', '9807', '9808', '9811', '9812', '9813', '9814', '9816', '9817', '9818',
       '9819', '9820', '9821', '9822', '9900', '9910', '9911', '9912', '9913', '9914', '9915', '9916', '9917', '9918', '9950', '9993', '9994', '999C',
       '999D', '999E', '999F', '999G', '999I', '999J', '999M', '999O', '999P', '999Q', '999R', '999S', '999X', '999Y' ];
-  if (FormManager.getActualValue('reqType') == 'C' && (custSubType == 'CROSS' || custSubType == 'NRML' ||custSubType == 'EMBSA' ||custSubType == 'AQSTN')) {
+  if (FormManager.getActualValue('reqType') == 'C' && (custSubType == 'CROSS' || custSubType == 'NRML' ||custSubType == 'EMBSA' 
+    || custSubType == 'AQSTN' || custSubType == 'ECOSY' || custSubType == 'MRKT' || custSubType == 'BLUMX')) {
     FormManager.limitDropdownValues(field, isicCodeArray);
 // FormManager.enable(field);
   }
