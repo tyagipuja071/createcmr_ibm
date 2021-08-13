@@ -1447,27 +1447,27 @@ public class USUtil extends AutomationUtil {
    * @return
    * @throws Exception
    */
-  public static List<SosResponse> getSosRpaMatchesForBPEndUser(GEOHandler handler, RequestData requestData, AutomationEngineData engineData)
-      throws Exception {
+  public static List<SosResponse> getSosRpaMatchesForBPEndUser(GEOHandler handler, RequestData requestData, AutomationEngineData engineData,
+      String addrType) throws Exception {
     List<SosResponse> closeMatch = new ArrayList<SosResponse>();
     AutomationResponse<SosResponse> response = new AutomationResponse<SosResponse>();
     Admin admin = requestData.getAdmin();
-    Addr zs01 = requestData.getAddress("ZS01");
     long reqId = admin.getId().getReqId();
-    if (zs01 != null) {
+    Addr address = requestData.getAddress(addrType);
+    if (address != null) {
       AutomationServiceClient autoClient = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
           AutomationServiceClient.class);
       autoClient.setReadTimeout(1000 * 60 * 5);
       autoClient.setRequestMethod(Method.Post);
 
       // calling SOS-RPA Service
-      LOG.debug("Calling SOS-RPA Service for Install - At (ZS01) address for Req_id : " + reqId);
+      LOG.debug("Calling SOS-RPA Service for" + addrType + " address for Req_id : " + reqId);
       SosRequest requestInstallAt = new SosRequest();
-      requestInstallAt.setName((StringUtils.isNotBlank(zs01.getDivn()) ? zs01.getDivn() : ""));
-      requestInstallAt.setCity1(zs01.getCity1());
-      requestInstallAt.setAddrTxt((StringUtils.isNotBlank(zs01.getAddrTxt()) ? zs01.getAddrTxt() : "")
-          + (StringUtils.isNotBlank(zs01.getAddrTxt2()) ? " " + zs01.getAddrTxt2() : ""));
-      requestInstallAt.setState(zs01.getStateProv());
+      requestInstallAt.setName((StringUtils.isNotBlank(address.getDivn()) ? address.getDivn() : ""));
+      requestInstallAt.setCity1(address.getCity1());
+      requestInstallAt.setAddrTxt((StringUtils.isNotBlank(address.getAddrTxt()) ? address.getAddrTxt() : "")
+          + (StringUtils.isNotBlank(address.getAddrTxt2()) ? " " + address.getAddrTxt2() : ""));
+      requestInstallAt.setState(address.getStateProv());
 
       LOG.debug("Connecting to the SOS - RPA Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
       AutomationResponse<?> rawResponseInstallAt = autoClient.executeAndWrap(AutomationServiceClient.US_SOS_RPA_SERVICE_ID, requestInstallAt,
@@ -1555,13 +1555,15 @@ public class USUtil extends AutomationUtil {
   }
 
   private boolean isRelevantAddressFieldUpdated(RequestChangeContainer changes, Addr addr) {
-    List<UpdatedNameAddrModel> addrChanges = changes.getAddressChanges(addr.getId().getAddrType(), addr.getId().getAddrSeq());
-    if (addrChanges == null) {
-      return false;
-    }
-    for (UpdatedNameAddrModel change : addrChanges) {
-      if (!NON_RELEVANT_ADDRESS_FIELDS.contains(change.getDataField())) {
-        return true;
+    if (addr != null) {
+      List<UpdatedNameAddrModel> addrChanges = changes.getAddressChanges(addr.getId().getAddrType(), addr.getId().getAddrSeq());
+      if (addrChanges == null) {
+        return false;
+      }
+      for (UpdatedNameAddrModel change : addrChanges) {
+        if (!NON_RELEVANT_ADDRESS_FIELDS.contains(change.getDataField())) {
+          return true;
+        }
       }
     }
     return false;

@@ -715,6 +715,8 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
 
     // get duplicates
     response = dupCMRCheckElement.getMatches(entityManager, requestData, engineData);
+    LOG.debug("Response match - " + response.getMatched());
+    LOG.debug("Response success - " + response.getSuccess());
 
     if (response != null && response.getSuccess() && response.getMatched() && zi01 == null) {
       List<DuplicateCMRCheckResponse> dirtyMatches = new ArrayList<DuplicateCMRCheckResponse>();
@@ -750,15 +752,19 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
             // if matches found for ZP01 we add them to pure matches
             pureMatches.addAll(dirtyMatches);
           }
+        } else {
+          LOG.debug("No matches found for record found in dirty matches ");
         }
         if (!pureMatches.isEmpty()) {
           response.setSuccess(true);
           response.setMatched(true);
           response.setMatches(pureMatches);
+          LOG.debug("Pure matches found for the given search criteria");
         } else {
           response.setSuccess(true);
           response.setMatched(false);
           response.setMessage("No matches found for the given search criteria.");
+          LOG.debug("No matches found for the given search criteria.");
         }
       }
 

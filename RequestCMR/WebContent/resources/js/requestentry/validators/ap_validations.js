@@ -36,6 +36,7 @@ function addHandlersForGCG() {
 }
 
 function afterConfigForIndia() { 
+  console.log("----After config. for India----");
   if (_vatExemptHandler == null) {
     _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
       console.log(">>> RUNNING!!!!");
