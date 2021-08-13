@@ -1589,7 +1589,7 @@ function matchDnBForAutomationCountries() {
               showDnBMatchModal();
             } else {
               if(cntry != SysLoc.INDIA){
-                 cmr.showAlert('Please attach company proof as no matches found in dnb.');      
+                 cmr.showAlert('No matches found in dnb : Data Overidden.\nPlease attach company proof');      
                  FormManager.setValue('matchOverrideIndc','Y');
                }  
                 //Cmr-2755_India_no_match_found   
