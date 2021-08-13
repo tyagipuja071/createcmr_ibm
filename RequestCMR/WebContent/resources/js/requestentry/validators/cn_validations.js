@@ -692,8 +692,8 @@ function setValuesForScenarios() {
 
 function hideContactInfoFields() {
   var addrType = FormManager.getActualValue('addrType');
-
-  if (addrType != '' && addrType == 'ZS01') {
+  var _custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (addrType != '' && addrType == 'ZS01' && _custSubGrp != undefined && _custSubGrp != null && _custSubGrp != '' && (_custSubGrp == 'NRML' || _custSubGrp == 'ECOSY' || _custSubGrp == 'AQSTN' || _custSubGrp == 'EMBSA' )){
     // FormManager.hide('CustomerCntPhone2', 'cnCustContPhone2');
     FormManager.show('CustomerCntJobTitle', 'cnCustContJobTitle');
     FormManager.show('ChinaCustomerCntName', 'cnCustContNm');
@@ -725,7 +725,9 @@ function autoSetAddrFieldsForCN() {
   }
 
   if (cmr.addressMode == 'updateAddress') {
-    if (FormManager.getActualValue('addrType') == 'ZS01') {
+      var addrType = FormManager.getActualValue('addrType');
+      var _custSubGrp = FormManager.getActualValue('custSubGrp');
+      if (addrType != '' && addrType == 'ZS01' && _custSubGrp != undefined && _custSubGrp != null && _custSubGrp != '' && (_custSubGrp == 'NRML' || _custSubGrp == 'ECOSY' || _custSubGrp == 'AQSTN' || _custSubGrp == 'EMBSA' )){
       // FormManager.hide('CustomerCntPhone2', 'cnCustContPhone2');
       FormManager.show('CustomerCntJobTitle', 'cnCustContJobTitle');
       FormManager.show('ChinaCustomerCntName', 'cnCustContNm');
@@ -814,10 +816,15 @@ function showHideCityCN() {
       FormManager.addValidator('stateProv', Validators.REQUIRED, [ 'State/Province' ], null);
       //
       var addrType = FormManager.getActualValue('addrType');
-      if (addrType != '' && addrType == 'ZS01') {
+      var _custSubGrp = FormManager.getActualValue('custSubGrp');
+      if (addrType != '' && addrType == 'ZS01' && _custSubGrp != undefined && _custSubGrp != null && _custSubGrp != '' && (_custSubGrp == 'NRML' || _custSubGrp == 'ECOSY' || _custSubGrp == 'AQSTN' || _custSubGrp == 'EMBSA' )){
         FormManager.addValidator('custPhone', Validators.REQUIRED, [ "Phone#" ], null);
         FormManager.addValidator('cnCustContJobTitle', Validators.REQUIRED, [ "Customer Contact's Job Title" ], null);
         FormManager.addValidator('cnCustContNm', Validators.REQUIRED, [ "Customer Contact's Name (include salutation)" ], null);
+      } else {
+        FormManager.resetValidations('custPhone');
+        FormManager.resetValidations('cnCustContJobTitle');
+        FormManager.resetValidations('cnCustContNm');
       }
     }
   }
@@ -825,7 +832,8 @@ function showHideCityCN() {
 
 function addMandatoryOnlyForZS01CN(){
   var addrType = FormManager.getActualValue('addrType');
-  if (addrType != '' && addrType == 'ZS01') {
+  var _custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (addrType != '' && addrType == 'ZS01' && _custSubGrp != undefined && _custSubGrp != null && _custSubGrp != '' && (_custSubGrp == 'NRML' || _custSubGrp == 'ECOSY' || _custSubGrp == 'AQSTN' || _custSubGrp == 'EMBSA' )){
     FormManager.addValidator('custPhone', Validators.REQUIRED, [ "Phone#" ], null);
     FormManager.addValidator('cnCustContJobTitle', Validators.REQUIRED, [ "Customer Contact's Job Title" ], null);
     FormManager.addValidator('cnCustContNm', Validators.REQUIRED, [ "Customer Contact's Name (include salutation)" ], null);
