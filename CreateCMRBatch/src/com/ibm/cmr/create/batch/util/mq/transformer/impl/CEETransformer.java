@@ -985,7 +985,7 @@ public class CEETransformer extends EMEATransformer {
         }
 
       } else {
-        if (!StringUtils.isBlank(data.getTaxCd1())) {
+        if (!StringUtils.isBlank(data.getTaxCd1()) && !SystemLocation.ROMANIA.equals(data.getCmrIssuingCntry())) {
           legacyCust.setBankAcctNo(data.getTaxCd1());
         } else {
           legacyCust.setBankAcctNo("");
@@ -1066,7 +1066,7 @@ public class CEETransformer extends EMEATransformer {
           legacyCust.setBankAcctNo("");
         }
       } else {
-        if (!StringUtils.isBlank(data.getTaxCd1())) {
+        if (!StringUtils.isBlank(data.getTaxCd1()) && !SystemLocation.ROMANIA.equals(data.getCmrIssuingCntry())) {
           legacyCust.setBankAcctNo(data.getTaxCd1());
         } else {
           legacyCust.setBankAcctNo("");
@@ -1736,7 +1736,7 @@ public class CEETransformer extends EMEATransformer {
   public boolean hasCmrtCustExt() {
     // return true;
     if ("SK".equals(DEFAULT_LANDED_COUNTRY) || "BG".equals(DEFAULT_LANDED_COUNTRY) || "RU".equals(DEFAULT_LANDED_COUNTRY)
-        || "CZ".equals(DEFAULT_LANDED_COUNTRY)) {
+        || "CZ".equals(DEFAULT_LANDED_COUNTRY) || "RO".equals(DEFAULT_LANDED_COUNTRY)) {
       return true;
     } else {
       return false;
@@ -1787,6 +1787,15 @@ public class CEETransformer extends EMEATransformer {
         legacyCustExt.setiTaxCode("");
       }
     }
+
+    // CREATCMR 2440 fiscal code for ROMANIA
+    if (SystemLocation.ROMANIA.equals(data.getCmrIssuingCntry())) {
+      if (!StringUtils.isBlank(data.getTaxCd1())) {
+        legacyCustExt.setiTaxCode(data.getTaxCd1());
+      } else {
+        legacyCustExt.setiTaxCode("");
+      }
+    }
   }
 
 
@@ -1822,6 +1831,15 @@ public class CEETransformer extends EMEATransformer {
         } else {
           custExt.setiTaxCode(muData.getNewEntpName1());
         }
+      }
+    }
+
+    // CREATCMR 2440 fiscal code for Romania MassUpdate
+    if (SystemLocation.ROMANIA.equals(cmrObjects.getData().getCmrIssuingCntry())) {
+      if (!StringUtils.isBlank(muData.getTaxCd1())) {
+        custExt.setiTaxCode(muData.getTaxCd1());
+      } else {
+        custExt.setiTaxCode("");
       }
     }
 
@@ -1984,6 +2002,7 @@ public class CEETransformer extends EMEATransformer {
 
   }
 
+  @Override
   public boolean isUpdateNeededOnAllAddressType(EntityManager entityManager, CMRRequestContainer cmrObjects) {
     Admin admin = cmrObjects.getAdmin();
     if (CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason())) {
