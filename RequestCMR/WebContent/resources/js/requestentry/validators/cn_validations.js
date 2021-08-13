@@ -2315,7 +2315,9 @@ function validateCnNameAndAddr() {
                 }
               }
               if (address2SBCS != cnAddress) {
-                if (address2SBCS.indexOf(cnAddress) >= 0 && apiCity.indexOf(cnCityZS01) >= 0 && apiDistrict.indexOf(cnDistrictZS01) >= 0){
+                address2SBCS = address2SBCS.replace(apiCity,'');
+                address2SBCS = address2SBCS.replace(apiDistrict,'');
+                if (cnAddress.indexOf(address2SBCS) >= 0 && apiCity.indexOf(cnCityZS01) >= 0 && apiDistrict.indexOf(cnDistrictZS01) >= 0){
                   addressEqualFlag = true;
                 } else {
                   addressEqualFlag = false;
