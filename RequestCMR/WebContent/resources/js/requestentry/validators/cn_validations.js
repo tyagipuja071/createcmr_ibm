@@ -668,6 +668,17 @@ function setValuesForScenarios() {
         FormManager.resetValidations('cnAddrTxt');
         FormManager.resetValidations('cnCity');
       }
+      if (_custSubGrp == 'ECOSY'){
+        var _GBGId = FormManager.getActualValue('gbgId');
+        if(_GBGId != 'undefined' && _GBGId != ''){
+          var ret = cmr.query('CHECK_CN_S1_GBG_ID_LIST', {
+            ID : _GBGId
+          });
+          if (ret && ret.ret1 && ret.ret1 != 0) {
+            cmr.showAlert("S1 client and subsidiary is not allowed to apply for ecosystem CMR type, pls change other 'Scenario Sub-type' in General Tab.", "Warning");
+          }
+        }
+      }
     }
 
     if (_pagemodel.userRole.toUpperCase() == "PROCESSOR") {
@@ -2436,10 +2447,10 @@ function s1GBGIdValidator() {
               ID : id
             });
 
-            if (ret == null || ret.ret1 == null) {
-              return new ValidationResult(null, true);
-            } else {
+            if (ret && ret.ret1 && ret.ret1 != 0) {
               return new ValidationResult(null, false, 'S1 client and subsidiary is not allowed to apply for ecosystem CMR type, pls change other "Scenario Sub-type" in General Tab.');
+            } else {
+              return new ValidationResult(null, true);
             }
           } else {
             return new ValidationResult(null, true);
