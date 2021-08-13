@@ -1588,9 +1588,13 @@ function matchDnBForAutomationCountries() {
             } else if(data.confidenceCd){
               showDnBMatchModal();
             } else {
-                //Cmr-2755_India_no_match_found  
-                if(cntry == SysLoc.INDIA && (custSubGrp == 'BLUMX'|| custSubGrp == 'MKTPC'|| custSubGrp == 'IGF' || custSubGrp == 'AQSTN' || custSubGrp == 'NRML' || custSubGrp == 'ESOSW' || custSubGrp =='CROSS') && !flag){
-                cmr.showAlert('Please attach company proof as no matches found in dnb.');
+              if(cntry != SysLoc.INDIA){
+                 cmr.showAlert('Please attach company proof as no matches found in dnb.');      
+                 FormManager.setValue('matchOverrideIndc','Y');
+               }  
+                //Cmr-2755_India_no_match_found   
+              else if(cntry == SysLoc.INDIA && (custSubGrp == 'BLUMX'|| custSubGrp == 'MKTPC'|| custSubGrp == 'IGF' || custSubGrp == 'AQSTN' || custSubGrp == 'NRML' || custSubGrp == 'ESOSW' || custSubGrp =='CROSS') && !flag){      
+                cmr.showAlert('Please attach company proof as no matches found in dnb.');     
                 checkNoMatchingAttachmentValidator();
                 }else{
                 cmr.showModal('addressVerificationModal');

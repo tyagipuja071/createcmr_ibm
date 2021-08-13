@@ -410,10 +410,11 @@ public class USBPEndUserHandler extends USBPHandler {
     String custType = null;
 
     int isicNumeric = 0;
-    if (StringUtils.isNumeric(isic.substring(0, 2))) {
-      isicNumeric = Integer.parseInt(isic.substring(0, 2));
+    if (!StringUtils.isEmpty(isic)) {
+      if (StringUtils.isNumeric(isic.substring(0, 2))) {
+        isicNumeric = Integer.parseInt(isic.substring(0, 2));
+      }
     }
-
     if (isicNumeric >= 94 && isicNumeric <= 97) {
       typeDesc = "State and Local";
       type = TYPE_STATE_AND_LOCAL;
