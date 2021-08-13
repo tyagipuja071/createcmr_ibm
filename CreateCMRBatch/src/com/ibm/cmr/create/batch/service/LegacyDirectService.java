@@ -1859,6 +1859,24 @@ public class LegacyDirectService extends TransConnService {
           custExt.setAeciSubDt(SystemUtil.getDummyDefaultDate());
           createEntity(custExt, entityManager);
           legacyObjects.setCustomerExt(custExt);
+        } else if (SystemLocation.ROMANIA.equals(data.getCmrIssuingCntry())) {
+          CmrtCustExtPK custExtPk = null;
+          LOG.debug("Mapping default Data values with Legacy CmrtCustExt table.....");
+          // Initialize the object
+          custExt = initEmpty(CmrtCustExt.class);
+          // default mapping for ADDR and CMRTCEXT
+          custExtPk = new CmrtCustExtPK();
+          custExtPk.setCustomerNo(cmrNo);
+          custExtPk.setSofCntryCode(cntry);
+          custExt.setId(custExtPk);
+
+          if (transformer != null) {
+            transformer.transformLegacyCustomerExtData(entityManager, dummyHandler, custExt, cmrObjects);
+          }
+          custExt.setUpdateTs(SystemUtil.getCurrentTimestamp());
+          custExt.setAeciSubDt(SystemUtil.getDummyDefaultDate());
+          createEntity(custExt, entityManager);
+          legacyObjects.setCustomerExt(custExt);
         }
       }
       // rebuild the address use table

@@ -1686,7 +1686,7 @@ public class CEMEAHandler extends BaseSOFHandler {
     List<String> fields = new ArrayList<>();
     fields.addAll(Arrays.asList("ABBREV_NM", "CLIENT_TIER", "CUST_CLASS", "CUST_PREF_LANG", "INAC_CD", "ISU_CD", "SEARCH_TERM", "ISIC_CD",
         "SUB_INDUSTRY_CD", "VAT", "COV_DESC", "COV_ID", "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC", "GEO_LOCATION_CD",
-        "DUNS_NO", "ABBREV_LOCN"));// CMR-1947:add
+        "DUNS_NO", "ABBREV_LOCN", "TAX_CD1"));// CMR-1947:add
     // Abbrev_locn
     // field
     // change
@@ -2004,7 +2004,7 @@ public class CEMEAHandler extends BaseSOFHandler {
     List<String> fields = new ArrayList<>();
     fields.addAll(Arrays.asList("SALES_BO_CD", "REP_TEAM_MEMBER_NO", "SPECIAL_TAX_CD", "VAT", "ISIC_CD", "EMBARGO_CD", "COLLECTION_CD", "ABBREV_NM",
         "SENSITIVE_FLAG", "CLIENT_TIER", "COMPANY", "INAC_TYPE", "INAC_CD", "ISU_CD", "SUB_INDUSTRY_CD", "ABBREV_LOCN", "PPSCEID", "MEM_LVL",
-        "BP_REL_TYPE", "COMMERCIAL_FINANCED", "ENTERPRISE", "PHONE1"));
+        "BP_REL_TYPE", "COMMERCIAL_FINANCED", "ENTERPRISE", "PHONE1", "TAX_CD1"));
     return fields;
   }
 
@@ -2138,11 +2138,16 @@ public class CEMEAHandler extends BaseSOFHandler {
       XSSFSheet sheet = book.getSheet("Data");// validate Data sheet
       row = sheet.getRow(0);// data field name row
       int ordBlkIndex = 12;// default index
+      int fiscalCdIndex = 15; // default index
       for (int cellIndex = 0; cellIndex < row.getLastCellNum(); cellIndex++) {
         currCell = row.getCell(cellIndex);
         String cellVal = validateColValFromCell(currCell);
         if ("Order block code".equals(cellVal)) {
           ordBlkIndex = cellIndex;
+          // break;
+        }
+        if ("Fiscal Code".equals(cellVal)) {
+          fiscalCdIndex = cellIndex;
           break;
         }
       }
@@ -2158,6 +2163,13 @@ public class CEMEAHandler extends BaseSOFHandler {
         if (StringUtils.isNotBlank(ordBlk) && !("@".equals(ordBlk) || "E".equals(ordBlk) || "J".equals(ordBlk) || "R".equals(ordBlk))) {
           LOG.trace("Order Block Code should only @, E, R, J. >> ");
           error.addError(rowIndex, "Order Block Code", "Order Block Code should be only @, E, R, J. ");
+          validations.add(error);
+        }
+        currCell = row.getCell(fiscalCdIndex);
+        String fiscalCd = validateColValFromCell(currCell);
+        if (StringUtils.isNotBlank(fiscalCd) && !(fiscalCd.matches("^[0-9]*$")) && "826".equals(country)) {
+          LOG.trace("fiscal code should consist only of digits");
+          error.addError(rowIndex, "Fiscal Code", " fiscal code should consist only of digits.");
           validations.add(error);
         }
       }
