@@ -159,6 +159,13 @@ form.ibm-column-form .dijitTextBox INPUT {
                     name : 'streetAddress1'
                   }, false, 'Social Credit Code, OR Company Name + Country + Street should be specified if CMR No. is blank.');
                 }
+                if (orgIdSearch && orgIdSearch.length > 0 && orgIdSearch.length != 18){                 
+                    return new ValidationResult({
+                    id : 'streetAddress1',
+                    type : 'text',
+                    name : 'streetAddress1'
+                  }, false, 'The length for Social Credit Code should be 18 characters.');
+                }
             } else {
               var orgIdSearch = crit.vat || crit.taxCd1;
               var nameSearch = crit.name && crit.streetAddress1 && crit.city;
@@ -434,7 +441,7 @@ form.ibm-column-form .dijitTextBox INPUT {
            <div id = "cRn/siret-cont" style="display:none">
           <cmr:column span="2" width="250">
             <p> 
-              <form:input path="taxCd1" placeHolder="Enter Value Here" dojoType="dijit.form.TextBox" maxlength="18"/>
+              <form:input path="taxCd1" placeHolder="Enter Value Here" dojoType="dijit.form.TextBox" maxlength="24"/>
             </p>
           </cmr:column>
         </div>

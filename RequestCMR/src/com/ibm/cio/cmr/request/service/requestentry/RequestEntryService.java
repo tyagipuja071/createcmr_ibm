@@ -1413,7 +1413,8 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
           if (response.getMatched() && (("Accepted".equals(scorecard.getFindDnbResult()) && !StringUtils.isBlank(requestData.getData().getDunsNo()))
               || "Rejected".equals(scorecard.getFindDnbResult()))) {
             for (DnBMatchingResponse record : response.getMatches()) {
-              if (record.getConfidenceCode() >= 8 && data.getCmrIssuingCntry().equals("641")) {
+              if (record.getConfidenceCode() >= 8 && SystemLocation.CHINA.equals(data.getCmrIssuingCntry())
+                  && (StringUtils.isBlank(data.getCustSubGrp()) || !data.getCustSubGrp().equals("CROSS"))) {
                 match = true;
                 break;
               }
