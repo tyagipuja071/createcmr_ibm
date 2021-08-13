@@ -684,7 +684,22 @@ public abstract class USBPHandler {
       };
       MatchingResponse<DuplicateCMRCheckResponse> res = mapper.readValue(rawJson, typeRef);
       if (res != null && res.getSuccess() && res.getMatched()) {
+        LOG.debug("Matches found for request " + requestData.getAdmin().getId().getReqId() + " with customer Name " + customerName);
+        LOG.debug("Checking best Cmr matches");
+        List<DuplicateCMRCheckResponse> cmrCheckMatches = res.getMatches();
+        if (cmrCheckMatches.size() != 0) {
+          LOG.debug(res.getMessage());
+          for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
+            if (!StringUtils.isBlank(cmrCheckRecord.getCmrNo())) {
+              LOG.debug("CMR Number = " + cmrCheckRecord.getCmrNo());
+            }
+          }
+        }
         return getIBMCMRBestMatch(engineData, requestData, res.getMatches());
+      } else {
+        LOG.debug("Response matches" + res.getMatched());
+        LOG.debug("Response success" + res.getSuccess());
+        LOG.debug("No matches found for request " + requestData.getAdmin().getId().getReqId() + " with customer Name " + customerName);
       }
     }
 

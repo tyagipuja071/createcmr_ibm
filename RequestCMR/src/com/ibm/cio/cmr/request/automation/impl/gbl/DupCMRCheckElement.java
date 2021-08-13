@@ -287,6 +287,7 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
     }
 
     if (response.getSuccess() && response.getMatches().size() > 0) {
+      log.debug("Matches found for the given search criteria.");
       AutomationUtil countryUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
       if (countryUtil != null) {
         countryUtil.filterDuplicateCMRMatches(entityManager, requestData, engineData, response);
@@ -295,6 +296,7 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
 
     // reverify
     if (response.getSuccess() && response.getMatches().size() == 0) {
+      log.debug("No matches found for the given search criteria.");
       response.setMatched(false);
       response.setMessage("No matches found for the given search criteria.");
     }
