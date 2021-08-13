@@ -702,6 +702,7 @@ function setValuesForScenarios() {
 }
 
 function hideContactInfoFields() {
+  
   var addrType = FormManager.getActualValue('addrType');
   var _custSubGrp = FormManager.getActualValue('custSubGrp');
   if (addrType != '' && addrType == 'ZS01' && _custSubGrp != undefined && _custSubGrp != null && _custSubGrp != '' && (_custSubGrp == 'NRML' || _custSubGrp == 'ECOSY' || _custSubGrp == 'AQSTN' || _custSubGrp == 'EMBSA' )){
