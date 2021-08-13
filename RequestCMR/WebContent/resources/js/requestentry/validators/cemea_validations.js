@@ -617,6 +617,8 @@ var _addrTypesForCEMEA = [ 'ZS01', 'ZP01', 'ZI01', 'ZD01', 'ZS02', 'ZP02' ];
 var _addrTypeHandler = [];
 var _ISUHandler = null;
 var _CTCHandler = null;
+var _fiscalExemptHandler = null;
+var _vatExemptHandler = null;
 var _SalesRepHandler = null;
 var _CTC2Handler = null;
 var _SalesRep2Handler = null;
@@ -722,7 +724,84 @@ function setISUCTCOnIMSChange() {
   }
 }
 
-var _vatExemptHandler = null;
+// CREATCMR- 2440 FiscalCd and FiscalCd Exempt for ROMANIA
+
+function addFiscalExemptHandler() {
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  if (cntry != '826') {
+    return;
+  }
+  if (_fiscalExemptHandler == null) {
+    _fiscalExemptHandler = dojo.connect(FormManager.getField('endUserFiscalCode'), 'onClick', function(value) {
+      RomaniaFiscalCdMandatory();
+    });
+  }
+  if (_vatExemptHandler == null) {
+    _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
+      RomaniaFiscalCdMandatory();
+    });
+  }
+}
+
+function RomaniaFiscalCdMandatory() {
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var vatExempt = dijit.byId('vatExempt').get('checked');
+  var custSubType = FormManager.getActualValue('custSubGrp');
+  var fiscalExempt = dijit.byId('endUserFiscalCode').get('checked');
+  FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+  if (cntry == SysLoc.ROMANIA && vatExempt == true) {
+    if ((custSubType == 'BUSPR' || custSubType == 'COMME' || custSubType == 'THDPT') && fiscalExempt == false) {
+      FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'Fiscal Code for ' + custSubType + ' scenario' ], 'MAIN_NAME_TAB');
+    } else if ((custSubType == 'BUSPR' || custSubType == 'COMME' || custSubType == 'THDPT') && fiscalExempt == true) {
+      FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+    } else {
+      // if vat exempt selected make either fiscalCd mandt or fiscalexempt madt
+      FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+    }
+  } else if (cntry == SysLoc.ROMANIA && vatExempt == false) {
+    FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+  }
+}
+
+function validateFiscalCdForRomania() {
+  // validate fiscal length for Romania
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var fiscalCd = FormManager.getActualValue('taxCd1');
+        var lbl1 = FormManager.getLabel('taxCd1');
+        if (fiscalCd.length > 9 && fiscalCd != undefined && fiscalCd != '') {
+          return new ValidationResult({
+            id : 'taxCd1',
+            type : 'text',
+            name : 'taxCd1'
+          }, false, 'Fiscal should be upto nine digits long');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+
+  // validate FiscalCD Characters and numbers only
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var fiscalCd = FormManager.getActualValue('taxCd1');
+        var lbl1 = FormManager.getLabel('taxCd1');
+        if (fiscalCd != undefined && fiscalCd != '' && !fiscalCd.match("^[0-9]*$")) {
+          return new ValidationResult({
+            id : 'taxCd1',
+            type : 'text',
+            name : 'taxCd1'
+          }, false, 'Fiscal code should consist of digits only');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
+
 function addVatExemptHandler() {
   if (!FormManager.getField('vatExempt')) {
     window.setTimeout('addVatExemptHandler()', 500);
@@ -737,6 +816,8 @@ function addVatExemptHandler() {
           setTaxCd1MandatoryCzech();
         } else if (cntry == '693') {
           setICOAndDICMandatory();
+        } else if (cntry == '826') {
+          RomaniaFiscalCdMandatory();
         }
       });
     }
@@ -4890,6 +4971,11 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(afterConfigTemplateForCzech, [ SysLoc.CZECH_REPUBLIC ]);
   // Romania
   GEOHandler.addAddrFunction(initAddressPageRomania, [ SysLoc.ROMANIA ]);
+  GEOHandler.addAfterTemplateLoad(RomaniaFiscalCdMandatory, [ SysLoc.ROMANIA ]);
+  GEOHandler.addAfterConfig(addFiscalExemptHandler, [ SysLoc.ROMANIA ]);
+  GEOHandler.addAfterConfig(RomaniaFiscalCdMandatory, [ SysLoc.ROMANIA ]);
+  GEOHandler.registerValidator(validateFiscalCdForRomania, [ SysLoc.ROMANIA ]);
+  GEOHandler.addAfterTemplateLoad(addFiscalExemptHandler, [ SysLoc.ROMANIA ]);
   // Croatia
   GEOHandler.addAfterConfig(afterConfigTemplateForCroatia, [ SysLoc.CROATIA ]);
   GEOHandler.addAfterTemplateLoad(afterConfigTemplateForCroatia, [ SysLoc.CROATIA ]);
