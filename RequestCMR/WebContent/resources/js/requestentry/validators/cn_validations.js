@@ -1763,9 +1763,17 @@ function setCompanyOnInacCd() {
   }
   dojo.connect(FormManager.getField('inacCd'), 'onChange', function(value) {
     var inacCd = FormManager.getActualValue('inacCd');
+    
+    if (inacCd != _pagemodel.inacCd) {
+      if (FormManager.getActualValue('company') !='') {
+        FormManager.setValue('company', '');
+      }
+    }
+    
     if (inacCd == 'XXXX') {
       FormManager.setValue('company', '856105');
     }
+    
   });
 }
 
