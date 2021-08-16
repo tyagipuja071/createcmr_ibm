@@ -2464,7 +2464,8 @@ function validateISICForCROSS() {
       validate : function() {
         var subType = '';
         var custSubType = FormManager.getActualValue('custSubGrp');
-        if (FormManager.getActualValue('reqType') == 'C' && (custSubType == 'CROSS' || custSubType == 'NRML' ||custSubType == 'EMBSA' ||custSubType == 'AQSTN')) {
+        if (_pagemodel.userRole.toUpperCase() == "REQUESTER" && FormManager.getActualValue('reqType') == 'C' && (custSubType == 'CROSS' || custSubType == 'NRML' ||custSubType == 'EMBSA' 
+          || custSubType == 'AQSTN' || custSubType == 'ECOSY' || custSubType == 'MRKT' || custSubType == 'BLUMX')) {
           if (custSubType == 'CROSS'){
             subType = 'Foreign';
           } else if(custSubType == 'NRML') {
@@ -2473,10 +2474,16 @@ function validateISICForCROSS() {
             subType = 'Embedded Solution Agreement (ESA)';
           } else if(custSubType == 'AQSTN') {
             subType = 'Acquisition';
+          } else if(custSubType == 'ECOSY') {
+            subType = 'Ecosystem Partners';
+          } else if(custSubType == 'MRKT') {
+            subType = 'Marketplace';
+          } else if(custSubType == 'BLUMX') {
+            subType = 'Bluemix';
           }
           var isicCd = FormManager.getActualValue('isicCd');
           if (isicCd == '0000' || isicCd == '8888' || isicCd == '9500') {
-// FormManager.enable('isicCd');
+            FormManager.enable('isicCd');
             return new ValidationResult(null, false, 'It is not allowed to apply for default ISIC for ' + subType + ' Sub_scenario.');
           } else {
             return new ValidationResult(null, true);
