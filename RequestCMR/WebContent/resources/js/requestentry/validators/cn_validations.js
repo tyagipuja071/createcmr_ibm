@@ -69,6 +69,16 @@ var CNHandler = {
 function afterConfigForCN() {
   if (FormManager.getActualValue('isicCd') != 'undefined' && FormManager.getActualValue('isicCd') != '') {
     FormManager.readOnly('isicCd');
+    var custSubType = FormManager.getActualValue('custSubGrp');
+    var isicCd = FormManager.getField('isicCd');
+    if (_pagemodel.userRole.toUpperCase() == "REQUESTER" && FormManager.getActualValue('reqType') == 'C') {
+      if(custSubType == 'CROSS' || custSubType == 'NRML' ||custSubType == 'EMBSA' 
+        || custSubType == 'AQSTN' || custSubType == 'ECOSY' || custSubType == 'MRKT' || custSubType == 'BLUMX') {
+        if (isicCd == '0000' || isicCd == '8888' || isicCd == '9500') {
+          FormManager.enable('isicCd');
+        }
+      }
+    }
   }
   if (_isicHandlerCN == null) {
     _isicHandlerCN = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
@@ -145,7 +155,7 @@ function afterConfigForCN() {
   if (_searchTermHandler && _searchTermHandler[0]) {
     _searchTermHandler[0].onChange();
   }
-  resetISICCode();
+// resetISICCode();
 }
 
 function setInacBySearchTerm() {
@@ -253,6 +263,16 @@ function setIsuOnIsic() {
       }
     }
     FormManager.readOnly('isicCd');
+    var custSubType = FormManager.getActualValue('custSubGrp');
+    var isicCd = FormManager.getField('isicCd');
+    if (_pagemodel.userRole.toUpperCase() == "REQUESTER" && FormManager.getActualValue('reqType') == 'C') {
+      if(custSubType == 'CROSS' || custSubType == 'NRML' ||custSubType == 'EMBSA' 
+        || custSubType == 'AQSTN' || custSubType == 'ECOSY' || custSubType == 'MRKT' || custSubType == 'BLUMX') {
+        if (isicCd == '0000' || isicCd == '8888' || isicCd == '9500') {
+          FormManager.enable('isicCd');
+        }
+      }
+    }
   }
 }
 
@@ -630,6 +650,16 @@ function setValuesForScenarios() {
   if (FormManager.getActualValue('reqType') == 'C' && _custSubGrp != 'undefined' && _custSubGrp != '') {
     if (FormManager.getActualValue('isicCd') != 'undefined' && FormManager.getActualValue('isicCd') != '') {
       FormManager.readOnly('isicCd');
+      var custSubType = FormManager.getActualValue('custSubGrp');
+      var isicCd = FormManager.getField('isicCd');
+      if (_pagemodel.userRole.toUpperCase() == "REQUESTER" && FormManager.getActualValue('reqType') == 'C') {
+        if(custSubType == 'CROSS' || custSubType == 'NRML' ||custSubType == 'EMBSA' 
+          || custSubType == 'AQSTN' || custSubType == 'ECOSY' || custSubType == 'MRKT' || custSubType == 'BLUMX') {
+          if (isicCd == '0000' || isicCd == '8888' || isicCd == '9500') {
+            FormManager.enable('isicCd');
+          }
+        }
+      }
     }
     if (_custSubGrp == 'INTER') {
       FormManager.show('ClassCode', 'custClass');
@@ -2429,7 +2459,7 @@ function validateISICForCROSS() {
           }
           var isicCd = FormManager.getActualValue('isicCd');
           if (isicCd == '0000' || isicCd == '8888' || isicCd == '9500') {
-            FormManager.enable('isicCd');
+// FormManager.enable('isicCd');
             return new ValidationResult(null, false, 'It is not allowed to apply for default ISIC for ' + subType + ' Sub_scenario.');
           } else {
             return new ValidationResult(null, true);
