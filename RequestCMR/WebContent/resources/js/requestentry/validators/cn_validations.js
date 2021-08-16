@@ -66,6 +66,80 @@ var CNHandler = {
 
 };
 
+function setSearchTermByGBGId() {
+  var _GBGId = FormManager.getActualValue('gbgId');
+  if (FormManager.getActualValue('gbgId') != 'undefined' && FormManager.getActualValue('gbgId') != '') {
+  var ret = cmr.query('CHECK_CN_S1_GBG_ID_LIST', {
+    ID : _GBGId
+  });
+  if (ret && ret.ret1 && ret.ret1 != 0) {
+    if(_GBGId == 'GB000HK1'){
+      FormManager.setValue('searchTerm', '04472');
+    }else if(_GBGId == 'GB000YEN'){
+      FormManager.setValue('searchTerm', '04474');
+    }else if(_GBGId == 'GB001CPW'){
+      FormManager.setValue('searchTerm', '04491');
+    }else if(_GBGId == 'GB001CPY'){
+      FormManager.setValue('searchTerm', '04493');
+    }else if(_GBGId == 'GB000V9W'){
+      FormManager.setValue('searchTerm', '04687');
+    }else if(_GBGId == 'GB001DR4'){
+      FormManager.setValue('searchTerm', '04497');
+    }else if(_GBGId == 'GB001A7X'){
+      FormManager.setValue('searchTerm', '04629');
+    }else if(_GBGId == 'GB001CQ2'){
+      FormManager.setValue('searchTerm', '04495');
+    }else if(_GBGId == 'GB001CQ3'){
+      FormManager.setValue('searchTerm', '04630');
+    }else if(_GBGId == 'GB001AUJ'){
+      FormManager.setValue('searchTerm', '04484');
+    }else if(_GBGId == 'GB0019BN'){
+      FormManager.setValue('searchTerm', '04480');
+    }else if(_GBGId == 'GB001BRC'){
+      FormManager.setValue('searchTerm', '04488');
+    }else if(_GBGId == 'GB001J73'){
+      FormManager.setValue('searchTerm', '04499');
+    }else if(_GBGId == 'GB001B83'){
+      FormManager.setValue('searchTerm', '04486');
+    }else if(_GBGId == 'GB300S7F'){
+      var zs01ReqId = FormManager.getActualValue('reqId');
+      if (zs01ReqId != 'undefined' && zs01ReqId != '') {
+        qParams = {
+            REQ_ID : zs01ReqId,
+          };
+          var record = cmr.query('GETZS01STATEBYREQID', qParams);
+          var zs01State = record.ret1;
+          if (zs01State != '') {
+            if(zs01State == '52'||zs01State == '53'||zs01State == '44'||zs01State == '51'||zs01State == '50'||zs01State == '45'||zs01State == '46'){
+              FormManager.setValue('searchTerm', '04747');
+              FormManager.setValue('bgId', 'DB002KDH');
+            }else if(zs01State == '15'||zs01State == '61'||zs01State == '13'||zs01State == '21'||zs01State == '64'||zs01State == '11'||zs01State == '62'||
+                zs01State == '63'||zs01State == '41'||zs01State == '12'||zs01State == '23'||zs01State == '65'||zs01State == '22'||zs01State == '54'||zs01State == '14'){
+              FormManager.setValue('searchTerm', '04748');
+              FormManager.setValue('bgId', 'DB002CBD');
+            }else if(zs01State == '32'||zs01State == '36'||zs01State == '34'){
+              FormManager.setValue('searchTerm', '04749');
+              FormManager.setValue('bgId', 'DB002C9T');
+            }else if(zs01State == '33'||zs01State == '42'||zs01State == '43'||zs01State == '31'||zs01State == '35'||zs01State == '37'){
+              FormManager.setValue('searchTerm', '04502');
+              FormManager.setValue('bgId', 'DB002CF1');
+            }
+          }
+          FormManager.readOnly('searchTerm');
+      }
+    }
+    if(FormManager.getActualValue('searchTerm') != 'undefined' && FormManager.getActualValue('searchTerm') != ''){
+      FormManager.readOnly('searchTerm');
+    }    
+  }
+  }else{
+    FormManager.setValue('inacCd', '');
+    FormManager.readOnly('inacCd');
+    FormManager.setValue('inacType', '');
+    FormManager.readOnly('inacType');
+  }
+}
+
 function afterConfigForCN() {
   if (FormManager.getActualValue('isicCd') != 'undefined' && FormManager.getActualValue('isicCd') != '') {
     FormManager.readOnly('isicCd');
@@ -80,6 +154,9 @@ function afterConfigForCN() {
       }
     }
   }
+  
+  setSearchTermByGBGId();
+  
   if (_isicHandlerCN == null) {
     _isicHandlerCN = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
       setIsuOnIsic();
