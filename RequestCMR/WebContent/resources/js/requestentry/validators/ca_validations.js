@@ -85,6 +85,106 @@ function addAddressRecordTypeValidator() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
+function addAddressRecordTypeUpdateValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        if (FormManager.getActualValue('cmrIssuingCntry') != SysLoc.CANADA) {
+          return new ValidationResult(null, true);
+        }
+        var reqType = FormManager.getActualValue('reqType');
+
+        if (reqType == 'U') {
+
+          var record = null;
+          var type = null;
+          var zs01Count = 0; // Sold-to
+
+          var zd01CountOrig = 0; // Ship-to count upon import
+          var zd01CountNew = 0; // New Ship-to
+
+          var zi01CountOrig = 0; // Install-at count upon import
+          var zi01CountNew = 0; // New Install-at
+
+          var zp03CountOrig = 0; // A/R Bill-to count upon import
+          var zp03CountNew = 0; // New A/R Bill-to
+
+          var zp07CountOrig = 0; // TLA/Rentals Bill-to count upon import
+          var zp07CountNew = 0; // New TLA/Rentals Bill-to
+
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+            record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+            type = record.addrType;
+            var importInd = record.importInd;
+            if (typeof (type) == 'object') {
+              type = type[0];
+            }
+            if (type == 'ZS01') {
+              zs01Count++;
+            } else if (type == 'ZD01') {
+              if (importInd == 'N') {
+                zd01CountNew++;
+              } else {
+                zd01CountOrig++;
+              }
+            } else if (type == 'ZI01') {
+              if (importInd == 'N') {
+                zi01CountNew++;
+              } else {
+                zi01CountOrig++;
+              }
+            } else if (type == 'ZP03') {
+              if (importInd == 'N') {
+                zp03CountNew++;
+              } else {
+                zp03CountOrig++;
+              }
+            } else if (type == 'ZP07') {
+              if (importInd == 'N') {
+                zp07CountNew++;
+              } else {
+                zp07CountOrig++;
+              }
+            }
+          }
+
+          if (zs01Count > 1) {
+            return new ValidationResult(null, false, getAddrErrorMsg('Sold-To', false));
+          } else if (zd01CountOrig > 0 && zd01CountNew > 0) {
+            return new ValidationResult(null, false, getAddrErrorMsg('Ship-To', true));
+          } else if (zd01CountOrig == 0 && zd01CountNew > 1) {
+            return new ValidationResult(null, false, getAddrErrorMsg('Ship-To', false));
+          } else if (zi01CountOrig > 0 && zi01CountNew > 0) {
+            return new ValidationResult(null, false, getAddrErrorMsg('Install-At', true));
+          } else if (zi01CountOrig == 0 && zi01CountNew > 1) {
+            return new ValidationResult(null, false, getAddrErrorMsg('Install-At', false));
+          } else if (zp03CountOrig > 0 && zp03CountNew > 0) {
+            return new ValidationResult(null, false, getAddrErrorMsg('(A/R) Bill-To', true));
+          } else if (zp03CountOrig == 0 && zp03CountNew > 1) {
+            return new ValidationResult(null, false, getAddrErrorMsg('(A/R) Bill-To', false));
+          } else if (zp07CountOrig > 0 && zp07CountNew > 0) {
+            return new ValidationResult(null, false, getAddrErrorMsg('TLA/Rentals Bill-To', true));
+          } else if (zp07CountOrig == 0 && zp07CountNew > 1) {
+            return new ValidationResult(null, false, getAddrErrorMsg('TLA/Rentals Bill-To', false));
+          } else {
+            return new ValidationResult(null, true);
+          }
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
+function getAddrErrorMsg(addrName, isNewNotAllowed) {
+  if (isNewNotAllowed) {
+    return 'Adding new ' + addrName + ' address is not allowed. Please remove the additional' + addrName + ' address.'
+  } else {
+    return 'Only one ' + addrName + ' address is allowed. Please remove the additional ' + addrName + ' address.'
+  }
+}
+
 function addInacCdValidator() {
   FormManager.addFormValidator((function() {
     return {
@@ -1069,6 +1169,7 @@ dojo.addOnLoad(function() {
 
   // validators - register one each
   GEOHandler.registerValidator(addAddressRecordTypeValidator, [ SysLoc.CANADA ], null, true);
+  GEOHandler.registerValidator(addAddressRecordTypeUpdateValidator, [ SysLoc.CANADA ], null, true);
   GEOHandler.registerValidator(addInacCdValidator, [ SysLoc.CANADA ], null, true);
   GEOHandler.registerValidator(addChangeNameAttachmentValidator, [ SysLoc.CANADA ], null, true);
   GEOHandler.registerValidator(addDPLCheckValidator, [ SysLoc.CANADA ], GEOHandler.ROLE_REQUESTER, true);

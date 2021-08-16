@@ -480,7 +480,7 @@ public class CanadaHandler extends GEOHandler {
       Addr newAddr = new Addr();
       PropertyUtils.copyProperties(newAddr, addrToCopy);
       newAddr.setId(newAddrId);
-      newAddr.setImportInd("N");
+      newAddr.setImportInd("Y");
       newAddr.setSapNo("");
 
       entityManager.persist(newAddr);
