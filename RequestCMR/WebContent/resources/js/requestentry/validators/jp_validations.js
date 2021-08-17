@@ -5332,7 +5332,6 @@ function replaceAndSymbol(value) {
   }
   return modifiedVal;
 };
-
 dojo.addOnLoad(function() {
   GEOHandler.JP = [ SysLoc.JAPAN ];
   console.log('adding JP functions...');
@@ -5412,7 +5411,6 @@ dojo.addOnLoad(function() {
   // GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(addressDuplicateValidator, GEOHandler.JP, null, true);
   GEOHandler.registerValidator(ROLValidatorForZC01, GEOHandler.JP, null, true);
-
   // GEOHandler.registerValidator(addAddressRecordsValidatorJP, GEOHandler.JP,
   // GEOHandler.ROLE_PROCESSOR, true);
 

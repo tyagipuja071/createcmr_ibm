@@ -601,6 +601,7 @@ function setMubotyOnPostalCodeIMS(postCd, subIndustryCd, clientTier) {
       postCd = 2;
     } else {
       postCd = 1;
+      ims = '';
     }
   } else {
     postCd = '';
@@ -1257,6 +1258,12 @@ function addLandedCountryHandler(cntry, addressMode, saving, finalSave) {
     } else {
       FilteringDropdown['val_landCntry'] = null;
     }
+  }
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType == 'U' && FormManager.getActualValue('addrType') == 'ZS01') {
+    FormManager.readOnly('landCntry');
+  } else {
+    FormManager.enable('landCntry');
   }
 }
 

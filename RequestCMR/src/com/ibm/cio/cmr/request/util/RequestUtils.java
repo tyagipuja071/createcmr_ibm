@@ -468,7 +468,7 @@ public class RequestUtils {
     boolean includeUser = false;
     String embeddedLink = "";
     if ("COM".equals(history.getReqStatus()) || "COM".equals(admin.getReqStatus())) {
-      embeddedLink = Feedback.generateEmeddedFeedbackLink(data);
+      embeddedLink = Feedback.genEmbeddedNPSLink(entityManager, admin, data.getCmrIssuingCntry());
     } else if ("PPN".equals(history.getReqStatus())) {
       embeddedLink = Feedback.generateEmeddedContactLink(data);
       includeUser = !StringUtils.isEmpty(embeddedLink);
@@ -503,7 +503,7 @@ public class RequestUtils {
 
     String histContent = history.getCmt();
     histContent = histContent != null ? StringUtils.replace(histContent, "\n", "<br>") : "-";
-    if (status != null && status.equals("Rejected")) {
+    if (status != null && status.toUpperCase().contains("REJECTED")) {
       StringBuffer temp = new StringBuffer(email);
       int tempstart = temp.indexOf("{5}");
       int insertstart = tempstart + 17;

@@ -1062,6 +1062,13 @@ public class MEHandler extends BaseSOFHandler {
     // Phone
     if (ME_COUNTRIES_LIST.contains(data.getCmrIssuingCntry())) {
       data.setPhone1(mainRecord.getCmrCustPhone());
+      if (data.getPhone1() != null) {
+        // Phone - remove non numeric characters
+        data.setPhone1(data.getPhone1().replaceAll("[^0-9]", ""));
+        if (data.getPhone1().length() > 15) {
+          data.setPhone1(data.getPhone1().substring(0, 15));
+        }
+      }
       data.setTaxCd2(mainRecord.getCmrEnterpriseNumber());
       if (SystemLocation.MOROCCO.equals(data.getCmrIssuingCntry())) {
         data.setPhone3(mainRecord.getCmrBusinessReg());

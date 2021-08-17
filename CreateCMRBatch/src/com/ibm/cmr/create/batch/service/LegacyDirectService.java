@@ -1194,7 +1194,7 @@ public class LegacyDirectService extends TransConnService {
     String targetCountry = null;
 
     // CREATCMR-1690
-    if (!StringUtils.isEmpty(cmrNo)) {
+    if (!StringUtils.isEmpty(cmrNo) && !"Y".equals(admin.getProspLegalInd())) {
       boolean isCMRExist = LegacyDirectUtil.checkCMRNoInLegacyDB(entityManager, data);
       LOG.info("Checking existing CMR in create Process...");
       if (isCMRExist) {

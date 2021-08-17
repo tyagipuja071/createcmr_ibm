@@ -79,13 +79,20 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
     if (MQMsgConstants.CUSTSUBGRP_INFSL.equals(cmrData.getCustSubGrp())) {
       messageHash.put("FSLICAM", "ZG35");
     }
-    messageHash.put("SBO", "090");
-    messageHash.put("IBO", "090");
+
+    if (MQMsgConstants.CUSTSUBGRP_INTER.equals(cmrData.getCustSubGrp()) || (MQMsgConstants.CUSTSUBGRP_BUSPR.equals(cmrData.getCustSubGrp()))) {
+      messageHash.put("SBO", "000");
+      messageHash.put("SR", "SPA000");
+    } else if (MQMsgConstants.CUSTSUBGRP_COMME.equals(cmrData.getCustSubGrp())) {
+      messageHash.put("SBO", "090");
+      messageHash.put("SR", "MMIR11");
+    }
+
     messageHash.put("DPCEBO", "W90");
     messageHash.put("CurrencyCode", "EU");
 
-    // for cross border, the AbbreviatedLocation is country id, need to
-    // convert to country desc
+    // for cross border, the AbbreviatedLocation is country id, need to convert
+    // to country desc
     if (crossBorder) {
       if (StringUtils.isBlank(cmrData.getAbbrevLocn()))
         messageHash.put("AbbreviatedLocation", LandedCountryMap.getCountryName(addrData.getLandCntry()));
@@ -460,6 +467,49 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
           }
         }
       }
+      // CREATCMR-1559 UkI Db flow change if street and street con't both are
+      // filled
+      if (!StringUtils.isBlank(addrData.getAddrTxt()) && !StringUtils.isBlank(addrData.getAddrTxt2())) {
+        // line1
+        line1 = addrData.getCustNm1();
+        // Billing & Shipping -name con't OR Att. Person + phones
+        if (MQMsgConstants.ADDR_ZS01.equals(addrType) || MQMsgConstants.ADDR_ZD01.equals(addrType)) {
+
+          if (!StringUtils.isBlank(addrData.getCustNm2())) {
+            line2 = addrData.getCustNm2();
+          } else if (!StringUtils.isBlank(addrData.getDept())) {
+            line2 = addrData.getDept().trim();
+            if (!StringUtils.isEmpty(line2) && !line2.toUpperCase().startsWith("ATT ") && !line2.toUpperCase().startsWith("ATT:")) {
+              line2 = "ATT " + line2;
+            }
+            if (!StringUtils.isBlank(addrData.getCustPhone())) {
+              line2 += (line2.length() > 0 ? ", " : "") + addrData.getCustPhone();
+            }
+          } else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
+            line2 = addrData.getCustPhone();
+          }
+        }
+        // mailing,installing and EPL(Software Update)-name con't OR Att. Person
+        if (MQMsgConstants.ADDR_ZP01.equals(addrType) || MQMsgConstants.ADDR_ZI01.equals(addrType) || MQMsgConstants.ADDR_ZS02.equals(addrType)) {
+
+          if (!StringUtils.isBlank(addrData.getCustNm2())) {
+            line2 = addrData.getCustNm2();
+          } else if (!StringUtils.isBlank(addrData.getDept())) {
+            line2 = addrData.getDept().trim();
+            if (!StringUtils.isEmpty(line2) && !line2.toUpperCase().startsWith("ATT ") && !line2.toUpperCase().startsWith("ATT:")) {
+              line2 = "ATT " + line2;
+            }
+          }
+        }
+        // street
+        line3 = addrData.getAddrTxt();
+        // street con't
+        line4 = addrData.getAddrTxt2();
+        // Postal Code + city -postCd +city1
+        line5 = addrData.getPostCd() + ", " + addrData.getCity1();
+        // landCntry
+        line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
+      }
     } else {
       // domestic
 
@@ -657,6 +707,74 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
           if (!StringUtils.isBlank(addrData.getPostCd())) {
             line6 = addrData.getPostCd();
           }
+        }
+      }
+      // CREATCMR-1559 UkI Db flow change if street and street con't both are
+      // filled
+      if (!StringUtils.isBlank(addrData.getAddrTxt()) && !StringUtils.isBlank(addrData.getAddrTxt2())) {
+        line1 = addrData.getCustNm1();
+        line2 = addrData.getCustNm2();
+        // mailling- Street Con't OR Att Person OR PO BOX
+        if (MQMsgConstants.ADDR_ZP01.equals(addrType)) {
+          if (!StringUtils.isBlank(addrData.getDept())) {
+            line2 = addrData.getDept().trim();
+            if (!StringUtils.isEmpty(line2) && !line2.toUpperCase().startsWith("ATT ") && !line2.toUpperCase().startsWith("ATT:")) {
+              line2 = "ATT " + line2;
+            }
+          } else if (!StringUtils.isEmpty(addrData.getPoBox())) {
+            line2 = "PO BOX " + addrData.getPoBox();
+          }
+        }
+        // Billing -Street Con't OR Att Person + Phone OR PO BOX
+        if (MQMsgConstants.ADDR_ZS01.equals(addrType)) {
+          if (!StringUtils.isBlank(addrData.getDept())) {
+            line2 = addrData.getDept().trim();
+            if (!StringUtils.isEmpty(line2) && !line2.toUpperCase().startsWith("ATT ") && !line2.toUpperCase().startsWith("ATT:")) {
+              line2 = "ATT " + line2;
+            }
+            if (!StringUtils.isBlank(addrData.getCustPhone())) {
+              line2 += (line2.length() > 0 ? ", " : "") + addrData.getCustPhone();
+            }
+          } else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
+            line2 = addrData.getCustPhone();
+          } else if (!StringUtils.isEmpty(addrData.getPoBox())) {
+            line2 = "PO BOX " + addrData.getPoBox().trim();
+          }
+        }
+        // Installing, EPL/SU-Street Con't OR Att Person
+        if (MQMsgConstants.ADDR_ZI01.equals(addrType) || MQMsgConstants.ADDR_ZS02.equals(addrType)) {
+          if (!StringUtils.isBlank(addrData.getDept())) {
+            line2 = addrData.getDept().trim();
+            if (!StringUtils.isEmpty(line2) && !line2.toUpperCase().startsWith("ATT ") && !line2.toUpperCase().startsWith("ATT:")) {
+              line2 = "ATT " + line2;
+            }
+          }
+        }
+        // Shipping ZD01-Street Con't OR Att Person + Phone
+        if (MQMsgConstants.ADDR_ZD01.equals(addrType)) {
+          if (!StringUtils.isBlank(addrData.getDept())) {
+            line2 = addrData.getDept().trim();
+            if (!StringUtils.isEmpty(line2) && !line2.toUpperCase().startsWith("ATT ") && !line2.toUpperCase().startsWith("ATT:")) {
+              line2 = "ATT " + line2;
+            }
+            if (!StringUtils.isBlank(addrData.getCustPhone())) {
+              line2 += (line2.length() > 0 ? ", " : "") + addrData.getCustPhone();
+            }
+          } else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
+            line2 = addrData.getCustPhone();
+          }
+        }
+        // street
+        line3 = addrData.getAddrTxt();
+        // street con't
+        line4 = addrData.getAddrTxt2();
+        // city
+        if (!StringUtils.isBlank(addrData.getCity1())) {
+          line5 = addrData.getCity1();
+        }
+        // Postal Code -postCd
+        if (!StringUtils.isBlank(addrData.getPostCd())) {
+          line6 = addrData.getPostCd();
         }
       }
     }
@@ -974,6 +1092,14 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
           line6 = massUpdtAddr.getLandCntry();
         }
       }
+      // CREATCMR-1559 UkI Db flow change if street and street con't both are
+      // filled
+      if (!StringUtils.isBlank(massUpdtAddr.getAddrTxt()) && !StringUtils.isBlank(massUpdtAddr.getAddrTxt2())) {
+        // street
+        line3 = massUpdtAddr.getAddrTxt();
+        // street con't
+        line4 = massUpdtAddr.getAddrTxt2();
+      }
 
     } else {
       // domestic
@@ -1101,7 +1227,14 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
         line6 = massUpdtAddr.getPostCd();
         legacyAddr.setZipCode(massUpdtAddr.getPostCd());
       }
-
+      // CREATCMR-1559 UkI Db flow change if street and street con't both are
+      // filled
+      if (!StringUtils.isBlank(massUpdtAddr.getAddrTxt()) && !StringUtils.isBlank(massUpdtAddr.getAddrTxt2())) {
+        // street
+        line3 = massUpdtAddr.getAddrTxt();
+        // street con't
+        line4 = massUpdtAddr.getAddrTxt2();
+      }
     }
 
     legacyAddr.setAddrLine1(line1);
@@ -1159,6 +1292,10 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
       } else {
         cust.setEnterpriseNo(muData.getEnterprise());
       }
+    }
+
+    if (!StringUtils.isBlank(muData.getCustNm1())) {
+      cust.setSbo(muData.getCustNm1());
     }
 
     if (!StringUtils.isBlank(muData.getCustNm2())) {

@@ -224,6 +224,20 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
               engineData.setVatVerified(false, "VAT value did not match with the highest confidence D&B match.");
             }
             LOG.trace(new ObjectMapper().writeValueAsString(highestCloseMatch));
+          } else if (SystemLocation.INDIA.equals(data.getCmrIssuingCntry())
+              && (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId()))) {
+            LOG.debug("No D&B record matched the request data.");
+            details.append("Matches against D&B were found but no record matched the request data.\n");
+            details.append("Showing D&B matches:\n");
+            int itemNo = 1;
+            for (DnBMatchingResponse dnbRecord : dnbMatches) {
+              processDnBFields(entityManager, data, dnbRecord, output, details, itemNo);
+              itemNo++;
+            }
+            engineData.addNegativeCheckStatus("OTH", "Matches against D&B were found but no record matched the request data.");
+            result.setResults("Name/Address not matched");
+            result.setOnError(false);
+            engineData.put("dnbMatching", dnbMatches.get(0));
           } else {
             scorecard.setDnbMatchingResult("N");
             LOG.debug("No D&B record matched the request data.");

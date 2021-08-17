@@ -3576,6 +3576,9 @@ public class CyprusHandler extends BaseSOFHandler {
             }
 
             if (StringUtils.isEmpty(dataCmrNo)) {
+              if (row.getRowNum() == 1) {
+                return;
+              }
               LOG.trace("Note that CMR No. is mandatory. Please fix and upload the template again.");
               error.addError(row.getRowNum(), "CMR No.", "Note that CMR No. is mandatory. Please fix and upload the template again.");
               validations.add(error);

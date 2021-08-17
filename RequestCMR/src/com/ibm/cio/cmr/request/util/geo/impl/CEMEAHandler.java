@@ -219,7 +219,9 @@ public class CEMEAHandler extends BaseSOFHandler {
             // && (parvmCount > 1)) {
             // record.setCmrAddrTypeCode("ZS02");
             // }
-
+            String soldtoseqinrdc = getSoldtoSeqFromRDC(entityManager, SystemConfiguration.getValue("MANDT"), reqEntry.getCmrIssuingCntry(),
+                record.getCmrNum());
+            System.out.println("soldtoseqinrdc = " + soldtoseqinrdc);
             System.out.println("seqNo = " + seqNo);
             if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo)) {
               addrType = record.getCmrAddrTypeCode();
@@ -245,7 +247,7 @@ public class CEMEAHandler extends BaseSOFHandler {
                 }
                 converted.add(addr);
               }
-              if (CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode())) {
+              if (CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode()) && record.getCmrAddrSeq().equals(soldtoseqinrdc)) {
                 String kunnr = addr.getCmrSapNumber();
                 String adrnr = getaddAddressAdrnr(entityManager, cmrIssueCd, SystemConfiguration.getValue("MANDT"), kunnr, addr.getCmrAddrTypeCode(),
                     addr.getCmrAddrSeq());
@@ -331,43 +333,7 @@ public class CEMEAHandler extends BaseSOFHandler {
                     }
                   }
                 }
-                if (StringUtils.isBlank(adrnr)) {
-                  CmrtAddr gAddr = getLegacyGAddress(entityManager, reqEntry.getCmrIssuingCntry(), searchModel.getCmrNum());
-                  if (gAddr != null) {
-                    LOG.debug("Adding installing to the records");
-                    FindCMRRecordModel installing = new FindCMRRecordModel();
-                    PropertyUtils.copyProperties(installing, mainRecord);
-                    // copyAddrData(installing, installingAddr, gAddrSeq);
-                    installing.setCmrAddrTypeCode("ZP02");
-                    installing.setCmrAddrSeq(gAddrSeq);
-                    // add value
-                    installing.setCmrName1Plain(gAddr.getAddrLine1());
-                    if (!StringUtils.isBlank(gAddr.getAddrLine2())) {
-                      installing.setCmrName2Plain(gAddr.getAddrLine2());
-                    } else {
-                      installing.setCmrName2Plain("");
-                    }
-                    // installing.setCmrStreetAddress(gAddr.getAddrLine3());
-                    if (!StringUtils.isBlank(gAddr.getAddrLine3())) {
-                      installing.setCmrStreetAddress(gAddr.getAddrLine3());
-                    } else {
-                      installing.setCmrStreetAddress(gAddr.getAddrLine4());
-                    }
-                    installing.setCmrCity(record.getCmrCity());
-                    installing.setCmrCity2(record.getCmrCity2());
-                    installing.setCmrCountry(gAddr.getAddrLine6());
-                    installing.setCmrCountryLanded("");
-                    installing.setCmrPostalCode(record.getCmrPostalCode());
-                    installing.setCmrState(record.getCmrState());
-                    installing.setCmrBldg(legacyGaddrLN6);
-                    if (StringUtils.isBlank(gAddr.getAddrLine3())) {
-                      installing.setCmrStreetAddressCont("");
-                    } else {
-                      installing.setCmrStreetAddressCont(gAddr.getAddrLine4());
-                    }
-                    converted.add(installing);
-                  }
-                }
+
                 // add new here
                 String soldtoseq = getSoldtoaddrSeqFromLegacy(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum());
                 // int maxintSeqadd = getMaxSequenceOnLegacyAddr(entityManager,
@@ -1027,11 +993,7 @@ public class CEMEAHandler extends BaseSOFHandler {
       // Austria - For SBO values exceeding 3 char length
       // CMR-2053 add SR value get from DNB search
       if (!(StringUtils.isEmpty(mainRecord.getCmrSortl()))) {
-        if (mainRecord.getCmrSortl().length() > 3) {
-          data.setSalesBusOffCd(mainRecord.getCmrSortl().substring(0, 3));
-        } else {
-          data.setSalesBusOffCd(mainRecord.getCmrSortl());
-        }
+        data.setSalesBusOffCd(mainRecord.getCmrSortl());
       }
       if (!(StringUtils.isEmpty(mainRecord.getSR()))) {
         data.setRepTeamMemberNo(mainRecord.getSR());
@@ -1041,6 +1003,13 @@ public class CEMEAHandler extends BaseSOFHandler {
     // Phone
     if (CEE_COUNTRIES_LIST.contains(data.getCmrIssuingCntry())) {
       data.setPhone1(mainRecord.getCmrCustPhone());
+      if (data.getPhone1() != null) {
+        // Phone - remove non numeric characters
+        data.setPhone1(data.getPhone1().replaceAll("[^0-9]", ""));
+        if (data.getPhone1().length() > 15) {
+          data.setPhone1(data.getPhone1().substring(0, 15));
+        }
+      }
       data.setTaxCd2(mainRecord.getCmrEnterpriseNumber());
     }
     // ICO field
@@ -1145,12 +1114,14 @@ public class CEMEAHandler extends BaseSOFHandler {
         if (!StringUtils.isEmpty(abbrevNm) && abbrevNm.endsWith(" CIS")) {
           // 4606 Russia CIS Duplicate CMR
           Map<String, Object> dupRecordV = getDupCMRFieldValue(dupCntry, dupCmrNo);
-          data.setDupEnterpriseNo(dupRecordV.get("ZZKV_NODE1").toString());
-          LOG.debug("CompanyNo2: " + data.getDupEnterpriseNo());
+          if (!dupCmrNo.equals(dupRecordV.get("ZZKV_NODE1").toString())) {
+            data.setDupEnterpriseNo(dupRecordV.get("ZZKV_NODE1").toString());
+            LOG.debug("CompanyNo2: " + data.getDupEnterpriseNo());
+          }
           data.setDupSalesRepNo(this.currentImportValues.get("SR"));
           LOG.debug("SalRepNameNo2: " + data.getDupSalesRepNo());
-          data.setDupSalesBoCd(this.currentImportValues.get("SBO"));
-          LOG.debug("SalesBusOff2: " + data.getDupSalesBoCd());
+          data.setDupSalesBoCd(dupRecordV.get("SORTL").toString());
+          LOG.debug("SalesBusOff2: " + dupRecordV.get("SORTL").toString());
           data.setTaxCd3(dupRecordV.get("ZZKV_NODE2").toString());
           LOG.debug("SalesEnterpriseNo2: " + data.getTaxCd3());
           data.setDupIsuCd(dupRecordV.get("BRSCH").toString());
@@ -2407,6 +2378,7 @@ public class CEMEAHandler extends BaseSOFHandler {
     query.addField("BRSCH");
     query.addField("ZZKV_NODE1");
     query.addField("ZZKV_NODE2");
+    query.addField("SORTL");
     LOG.debug("Check Dup CMR .. Getting existing SPRAS value from RDc DB.." + "KATR6 =" + katr6);
     QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
     QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
@@ -2594,6 +2566,22 @@ public class CEMEAHandler extends BaseSOFHandler {
       return cndCMR;
     }
     return null;
+  }
+
+  private String getSoldtoSeqFromRDC(EntityManager entityManager, String mandt, String katr6, String cmrNo) {
+    String addrSeq = null;
+    String sql = ExternalizedQuery.getSql("CEE.GETSOLDTOSEQFROMRDC");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("MANDT", mandt);
+    query.setParameter("KATR6", katr6);
+    query.setParameter("ZZKV_CUSNO", cmrNo);
+    String result = query.getSingleResult(String.class);
+
+    if (result != null) {
+      addrSeq = result;
+    }
+
+    return addrSeq;
   }
 
 }

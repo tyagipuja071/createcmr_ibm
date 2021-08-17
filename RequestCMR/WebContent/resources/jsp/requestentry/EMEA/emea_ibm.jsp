@@ -106,6 +106,9 @@
       <p>
         <cmr:label fieldId="salesBusOffCd">
           <cmr:fieldLabel fieldId="SalesBusOff" />:
+              <cmr:view forCountry="758">
+          <span id = "sboInfo"><cmr:info text="${ui.info.sbo}" /></span>    
+             </cmr:view>    
              <!--cmr:delta text="{rdcdata.salesBusOffCd}" oldValue="${reqentry.salesBusOffCd}" id="delta-salesBusOffCd" />-->
         </cmr:label>
         <cmr:field fieldId="SalesBusOff" id="salesBusOffCd" path="salesBusOffCd" tabId="MAIN_IBM_TAB" />

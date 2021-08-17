@@ -34,7 +34,7 @@
     <div class="cmtlog">
       <div class="section-header">Comments:</div>
       <div class="add-cmt">
-      <%if (user.isProcessor() && "Processor".equals(reqentry.getUserRole())){ %>
+      <%if (user.isProcessor() && !readOnly){ %>
         <input type="button" id="superUserModeBtn" class="cmr-grid-btn-o" style="margin-left: 20px" onclick="cmr.superUserMode()" value="Super User Mode">
       <%} %> 
       <%if (("P".equals(autoEngineIndc) || "B".equals(autoEngineIndc)) && user.isProcessor()){ %>

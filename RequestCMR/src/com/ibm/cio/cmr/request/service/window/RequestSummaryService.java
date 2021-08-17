@@ -880,7 +880,10 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
           update.setOldData(addr.getPoBoxOld());
           results.add(update);
         }
-        if (!equals(addr.getPoBoxCity(), addr.getPoBoxCityOld())
+        // No POBox City and POBox Postal Code Summary for PT, CY, GR, SP & UKI
+        if (!(SystemLocation.CYPRUS.equals(cmrCountry) || SystemLocation.SPAIN.equals(cmrCountry) || SystemLocation.PORTUGAL.equals(cmrCountry)
+            || SystemLocation.GREECE.equals(cmrCountry) || SystemLocation.UNITED_KINGDOM.equals(cmrCountry)
+            || SystemLocation.IRELAND.equals(cmrCountry)) && !equals(addr.getPoBoxCity(), addr.getPoBoxCityOld())
             && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "POBoxCity"))) {
           update = new UpdatedNameAddrModel();
           update.setAddrTypeCode(addrType);
@@ -892,7 +895,9 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
           update.setOldData(addr.getPoBoxCityOld());
           results.add(update);
         }
-        if (!equals(addr.getPoBoxPostCd(), addr.getPoBoxPostCdOld())
+        if (!(SystemLocation.CYPRUS.equals(cmrCountry) || SystemLocation.SPAIN.equals(cmrCountry) || SystemLocation.PORTUGAL.equals(cmrCountry)
+            || SystemLocation.GREECE.equals(cmrCountry) || SystemLocation.UNITED_KINGDOM.equals(cmrCountry)
+            || SystemLocation.IRELAND.equals(cmrCountry)) && !equals(addr.getPoBoxPostCd(), addr.getPoBoxPostCdOld())
             && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "POBoxPostalCode"))) {
           update = new UpdatedNameAddrModel();
           update.setAddrTypeCode(addrType);

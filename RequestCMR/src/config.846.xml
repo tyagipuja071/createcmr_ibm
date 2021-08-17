@@ -84,10 +84,10 @@
 					<length>6</length>
 				</column>
 				<column exactLength="true">
-					<label>A/C Admin DSC</label>
+					<label>SORTL</label>
 					<dbColumn>SEARCH_TERM</dbColumn>
 					<width>10</width>
-					<length>4</length>
+					<length>8</length>
 				</column>
 				<column>
 					<label>VAT</label>

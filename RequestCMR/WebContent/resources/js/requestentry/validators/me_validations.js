@@ -344,6 +344,55 @@ function lockOrdBlk() {
   }
 }
 
+/**
+ * After config handlers Oman
+ */
+var _vatExemptHandlerOM = null;
+function addHandlersForOman() {
+  if (_vatExemptHandlerOM == null) {
+    _vatExemptHandlerOM = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
+      setVatValidatorOMAN();
+    });
+  }
+}
+
+function omanVat() {
+  if (FormManager.getActualValue('cmrIssuingCntry') != '805') {
+    return;
+  }
+
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+
+  if (role == 'REQUESTER') {
+    if (custSubGrp == 'BUSPR' || custSubGrp == 'COMME' || custSubGrp == 'THDPT' || custSubGrp == 'ELBP' || custSubGrp == 'ELCOM') {
+      FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+    } else {
+      FormManager.removeValidator('vat', Validators.REQUIRED);
+    }
+  }
+ 
+  setVatValidatorOMAN();
+}
+
+function setVatValidatorOMAN() {
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (FormManager.getActualValue('cmrIssuingCntry') != '805') {
+    return;
+  }
+  if (custSubGrp == 'INTER' || custSubGrp == 'PRICU') {
+    return;
+  }
+  
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
+    FormManager.resetValidations('vat');
+    if (!dijit.byId('vatExempt').get('checked')) {
+      checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
+    }
+  }
+}
+
 function orderBlockValidation() {
   FormManager.addFormValidator((function() {
     return {
@@ -585,6 +634,7 @@ function lockLandCntry() {
   var custType = FormManager.getActualValue('custGrp');
   var custSubType = FormManager.getActualValue('custSubGrp');
   var addrType = FormManager.getActualValue('addrType');
+  var reqType = FormManager.getActualValue('reqType')
   if (addrType == 'ZP02') {
     /* Defect : 1590750 */
     // FormManager.disable('landCntry');
@@ -601,6 +651,11 @@ function lockLandCntry() {
     if (ME_INCL.has(cntry)) {
       FormManager.setValue('landCntry', FormManager.getActualValue('defaultLandedCountry'));
     }
+    FormManager.readOnly('landCntry');
+  } else {
+    FormManager.enable('landCntry');
+  }
+  if (reqType == 'U' && FormManager.getActualValue('addrType') == 'ZS01') {
     FormManager.readOnly('landCntry');
   } else {
     FormManager.enable('landCntry');
@@ -4303,7 +4358,7 @@ function setIsuCtcOnScenarioChange() {
     if (scenario == 'BUSPR' || scenario.includes('BP') || scenario.includes('IN')) {
       FormManager.setValue('enterprise', '');
     } else {
-      FormManager.setValue('enterprise', '985518');
+      // FormManager.setValue('enterprise', '985518');
     }
   }
 }
@@ -4343,7 +4398,7 @@ function setIsuCtcOnScenarioChange() {
     if (scenario == 'BUSPR' || scenario.includes('BP') || scenario.includes('IN')) {
       FormManager.setValue('enterprise', '');
     } else {
-      FormManager.setValue('enterprise', '985518');
+      // FormManager.setValue('enterprise', '985518');
     }
   }
 }
@@ -4564,5 +4619,9 @@ dojo
       // GEOHandler.addAfterConfig(addPrefixVat, GEOHandler.CEE);
       // GEOHandler.addAfterTemplateLoad(addPrefixVat, GEOHandler.CEE);
       // GEOHandler.addAddrFunction(addPrefixVat, GEOHandler.CEE);
+      
+      GEOHandler.addAfterConfig(omanVat, GEOHandler.ME);
+      GEOHandler.addAfterTemplateLoad(omanVat, GEOHandler.ME);
+      GEOHandler.addAfterConfig(addHandlersForOman, GEOHandler.ME);
 
     });

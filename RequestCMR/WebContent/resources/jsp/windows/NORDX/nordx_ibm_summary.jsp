@@ -44,10 +44,10 @@
       ${summary.data.sitePartyId}
     </cmr:column>
         <cmr:column span="1" width="130">
-      <label><cmr:fieldLabel fieldId="EngineeringBo" />: </label>
+      <label><cmr:fieldLabel fieldId="SearchTerm" />: </label>
     </cmr:column>
     <cmr:column span="1" width="200">
-       ${summary.data.engineeringBo}
+       ${summary.data.searchTerm}
       </cmr:column>
   </cmr:row>
 </cmr:view>

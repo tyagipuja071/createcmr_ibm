@@ -1,3 +1,6 @@
+/**
+ *@author Shivangi
+ */
 package com.ibm.cio.cmr.request.automation.impl.us;
 
 import javax.persistence.EntityManager;
@@ -100,7 +103,7 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
         engineData.clearNegativeCheckStatus("DNB_VAT_MATCH_CHECK_FAIL");
       } else {
         scorecard.setRpaMatchingResult("N");
-        updateEntity(admin, entityManager);
+        updateEntity(scorecard, entityManager);
         log.debug("Scorecard Updated for SOS-RPA to" + scorecard.getRpaMatchingResult());
         validation.setSuccess(true);
         if ("O".equals(admin.getCompVerifiedIndc()) || "Y".equals(admin.getCompVerifiedIndc())) {

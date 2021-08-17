@@ -3,6 +3,7 @@
  */
 package com.ibm.cio.cmr.request.automation.impl.la.br;
 
+import java.util.Arrays;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -53,6 +54,9 @@ public class BrazilCalculateIBMElement extends OverridingElement {
 
   private static final Logger LOG = Logger.getLogger(BrazilCalculateIBMElement.class);
 
+  private static final List<String> sboToBeChecked = Arrays.asList("504", "505", "556", "657 ", "758", "759", "761", "763", "764 ", "765");
+  public boolean sboToBeUnchanged = false;
+
   public BrazilCalculateIBMElement(String requestTypes, String actionOnError, boolean overrideData, boolean stopOnError) {
     super(requestTypes, actionOnError, overrideData, stopOnError);
 
@@ -72,6 +76,7 @@ public class BrazilCalculateIBMElement extends OverridingElement {
     Addr installAt = requestData.getAddress("ZI01");
     boolean ifErrorSoldTo = false;
     boolean ifErrorInstallAt = false;
+    sboToBeUnchanged = sboToBeChecked.contains(data.getSalesBusOffCd());
 
     // save the request data, this populates the internally computed and default
     // field values
@@ -99,6 +104,26 @@ public class BrazilCalculateIBMElement extends OverridingElement {
         && data.getLocationNumber().equals("90000")) {
       LOG.debug("Clearing DATA.LOCN_NO for value '90000'");
       overrides.addOverride(getProcessCode(), "DATA", "LOCN_NO", data.getLocationNumber(), "");
+    }
+
+    // Set Data.SALES_BO_CD for stateProv Coverage change !!
+    final List<String> STATEPROV_763 = Arrays.asList("AM", "PA", "AC", "RO", "RR", "AP", "TO", "MA", "PI", "CE", "RN", "PB", "PE", "AL", "SE", "BA");
+    final List<String> STATEPROV_504 = Arrays.asList("DF", "GO", "MT", "MS");
+    final List<String> STATEPROV_758 = Arrays.asList("PR", "SC", "RS");
+    if (SystemLocation.BRAZIL.equals(data.getCmrIssuingCntry()) && soldTo != null) {
+      if ("RJ".equals(soldTo.getStateProv())) {
+        overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), "761");
+      } else if ("SP".equals(soldTo.getStateProv())) {
+        overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), "764");
+      } else if ("ES".equals(soldTo.getStateProv()) || "MG".equals(soldTo.getStateProv())) {
+        overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), "556");
+      } else if (STATEPROV_758.equals(soldTo.getStateProv())) {
+        overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), "758");
+      } else if (STATEPROV_504.equals(soldTo.getStateProv())) {
+        overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), "504");
+      } else if (STATEPROV_763.equals(soldTo.getStateProv())) {
+        overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), "763");
+      }
     }
 
     // if the request is an update, do not calculate IBM fields
@@ -214,16 +239,20 @@ public class BrazilCalculateIBMElement extends OverridingElement {
         details.append("Collector Number = " + sbo.getCollectorNo() + "\n");
         overrides.addOverride(getProcessCode(), "DATA", "COLLECTOR_NO", data.getCollectorNameNo(), sbo.getCollectorNo());
 
-        details.append("Search Term/Sales Branch Office = " + sbo.getSbo() + "\n");
-        overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sbo.getSbo());
+        if (!sboToBeUnchanged) {
+          overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sbo.getSbo());
+        }
+        details.append("Search Term/Sales Branch Office = " + data.getSalesBusOffCd() + "\n");
 
         details.append("Market Responsibility Code (MRC) = " + sbo.getMrcCd() + "\n");
         overrides.addOverride(getProcessCode(), "DATA", "MRC_CD", data.getMrcCd(), sbo.getMrcCd());
 
         // SET ISU based on MRC
         String isu = getISUCode(entityManager, sbo.getMrcCd(), "");
-        details.append("ISU = " + isu + "\n");
-        overrides.addOverride(getProcessCode(), "DATA", "ISU_CD", data.getIsuCd(), isu);
+        if (!sboToBeUnchanged) {
+          overrides.addOverride(getProcessCode(), "DATA", "ISU_CD", data.getIsuCd(), isu);
+        }
+        details.append("ISU = " + data.getIsuCd() + "\n");
 
         // SET Client Tier based on MRC and ISU
         String clientTier = getClientTier(entityManager, sbo.getMrcCd(), isu);
@@ -377,6 +406,7 @@ public class BrazilCalculateIBMElement extends OverridingElement {
       String scenarioSubType) {
     EntityManager cedpManager = JpaManager.getEntityManager("CEDP");
     String kukla = "";
+    sboToBeUnchanged = sboToBeChecked.contains(data.getSalesBusOffCd());
     // compute kukla
     if (!StringUtils.isBlank(scenarioSubType) && "BUSPR".equalsIgnoreCase(scenarioSubType)) {
       kukla = "45";
@@ -424,8 +454,10 @@ public class BrazilCalculateIBMElement extends OverridingElement {
         details.append("Collector Number = " + (String) rootMatch[11] + "\n");
         overrides.addOverride(getProcessCode(), "DATA", "COLLECTOR_NO", data.getCollectorNameNo(), (String) rootMatch[11]);
 
-        details.append("Search Term/Sales Branch Office = " + (String) rootMatch[8] + "\n");
-        overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), (String) rootMatch[8]);
+        if (!sboToBeUnchanged) {
+          overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), (String) rootMatch[8]);
+        }
+        details.append("Search Term/Sales Branch Office = " + data.getSalesBusOffCd() + "\n");
 
         String mrc = (String) rootMatch[9];
         details.append("Market Responsibility Code (MRC) = " + mrc + "\n");
@@ -457,8 +489,10 @@ public class BrazilCalculateIBMElement extends OverridingElement {
          */
 
         String isu = getISUCode(entityManager, mrc, (String) rootMatch[14]);
-        details.append("ISU = " + isu + "\n");
-        overrides.addOverride(getProcessCode(), "DATA", "ISU_CD", data.getIsuCd(), isu);
+        if (!sboToBeUnchanged) {
+          overrides.addOverride(getProcessCode(), "DATA", "ISU_CD", data.getIsuCd(), isu);
+        }
+        details.append("ISU = " + data.getIsuCd() + "\n");
 
         String clientTier = getClientTier(entityManager, mrc, isu);
         if (StringUtils.isBlank(clientTier)) {
@@ -529,6 +563,7 @@ public class BrazilCalculateIBMElement extends OverridingElement {
    */
   private void computeValuesPerMappings(EntityManager entityManager, StringBuilder details, OverrideOutput overrides, long reqId, Data data,
       AutomationResponse<MidasResponse> midasResponse, Addr soldTo) {
+    sboToBeUnchanged = sboToBeChecked.contains(data.getSalesBusOffCd());
     LOG.debug("Setting computed values for data fields for Req_id : " + reqId);
 
     details.append("No VAT root matches.\n");
@@ -553,8 +588,10 @@ public class BrazilCalculateIBMElement extends OverridingElement {
         details.append("Collector Number = " + sbo.getCollectorNo() + "\n");
         overrides.addOverride(getProcessCode(), "DATA", "COLLECTOR_NO", data.getCollectorNameNo(), sbo.getCollectorNo());
 
-        details.append("Search Term/Sales Branch Office = " + sbo.getSbo() + "\n");
-        overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sbo.getSbo());
+        if (!sboToBeUnchanged) {
+          overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sbo.getSbo());
+        }
+        details.append("Search Term/Sales Branch Office = " + data.getSalesBusOffCd() + "\n");
 
         details.append("Market Responsibility Code (MRC) = " + sbo.getMrcCd() + "\n");
         overrides.addOverride(getProcessCode(), "DATA", "MRC_CD", data.getMrcCd(), sbo.getMrcCd());
@@ -580,8 +617,10 @@ public class BrazilCalculateIBMElement extends OverridingElement {
         overrides.addOverride(getProcessCode(), "DATA", "LEGACY_IND_CD", data.getLegacyIndustryCode(), legacyIndustry);
 
         // SET ISU
-        details.append("ISU Code = " + cnaeRecord.getIsuCd() + "\n");
-        overrides.addOverride(getProcessCode(), "DATA", "ISU_CD", data.getIsuCd(), cnaeRecord.getIsuCd());
+        if (!sboToBeUnchanged) {
+          overrides.addOverride(getProcessCode(), "DATA", "ISU_CD", data.getIsuCd(), cnaeRecord.getIsuCd());
+        }
+        details.append("ISU Code = " + data.getIsuCd() + "\n");
 
         String clientTier = null;
         if (sbo != null) {
@@ -645,6 +684,8 @@ public class BrazilCalculateIBMElement extends OverridingElement {
   private void calculateScenarioFields(EntityManager entityManager, String scenarioSubType, StringBuilder details, OverrideOutput overrides,
       AutomationEngineData engineData, Admin admin, Data data, Addr soldTo, Addr installAt, AutomationResponse<MidasResponse> midasResponse)
       throws Exception {
+    sboToBeUnchanged = sboToBeChecked.contains(data.getSalesBusOffCd());
+
     details.append("\nValues computed per scenario (overrides previous values): \n");
 
     // scenario fields start
@@ -699,8 +740,10 @@ public class BrazilCalculateIBMElement extends OverridingElement {
         overrides.addOverride(getProcessCode(), "DATA", "IBM_BANK_NO", data.getIbmBankNumber(), "34A");
 
         // SET SBO
-        details.append("Search Term/Sales Branch Office = " + "606" + "\n");
-        overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), "606");
+        if (!sboToBeUnchanged) {
+          overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), "606");
+        }
+        details.append("Search Term/Sales Branch Office = " + data.getSalesBusOffCd() + "\n");
 
         // SET MRC
         details.append("Market Responsibility Code (MRC) = " + "9" + "\n");
@@ -712,8 +755,10 @@ public class BrazilCalculateIBMElement extends OverridingElement {
 
         // SET ISU based on MRC
         String isu = getISUCode(entityManager, "9", "");
-        details.append("ISU = " + isu + "\n");
-        overrides.addOverride(getProcessCode(), "DATA", "ISU_CD", data.getIsuCd(), isu);
+        if (!sboToBeUnchanged) {
+          overrides.addOverride(getProcessCode(), "DATA", "ISU_CD", data.getIsuCd(), isu);
+        }
+        details.append("ISU = " + data.getIsuCd() + "\n");
 
         // SET Client Tier based on MRC and ISU
         String clientTier = getClientTier(entityManager, "9", isu);
@@ -745,8 +790,10 @@ public class BrazilCalculateIBMElement extends OverridingElement {
         overrides.addOverride(getProcessCode(), "DATA", "IBM_BANK_NO", data.getIbmBankNumber(), "34A");
 
         // SET SBO
-        details.append("Search Term/Sales Branch Office = " + "010" + "\n");
-        overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), "010");
+        if (!sboToBeUnchanged) {
+          overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), "010");
+        }
+        details.append("Search Term/Sales Branch Office = " + data.getSalesBusOffCd() + "\n");
 
         // SET MRC
         details.append("Market Responsibility Code (MRC) = " + "9" + "\n");
@@ -757,9 +804,12 @@ public class BrazilCalculateIBMElement extends OverridingElement {
         overrides.addOverride(getProcessCode(), "DATA", "CNTRY_USE", data.getMrcCd(), "9");
 
         // SET ISU based on MRC
+
         String isu = getISUCode(entityManager, "9", "");
-        details.append("ISU = " + isu + "\n");
-        overrides.addOverride(getProcessCode(), "DATA", "ISU_CD", data.getIsuCd(), isu);
+        if (!sboToBeUnchanged) {
+          overrides.addOverride(getProcessCode(), "DATA", "ISU_CD", data.getIsuCd(), isu);
+        }
+        details.append("ISU = " + data.getIsuCd() + "\n");
 
         // SET Client Tier based on MRC and ISU
         String clientTier = getClientTier(entityManager, "9", isu);
@@ -804,7 +854,8 @@ public class BrazilCalculateIBMElement extends OverridingElement {
       } else if ("CC3CC".equalsIgnoreCase(scenarioSubType)) {
         if (midasResponse != null && midasResponse.isSuccess()) {
           String abbrevName = (midasResponse.getRecord().getCompanyName().length() > 26)
-              ? "CC3/" + (midasResponse.getRecord().getCompanyName()).substring(0, 26) : "CC3/" + (midasResponse.getRecord().getCompanyName());
+              ? "CC3/" + (midasResponse.getRecord().getCompanyName()).substring(0, 26)
+              : "CC3/" + (midasResponse.getRecord().getCompanyName());
           LOG.debug("Sold To Company Name : " + midasResponse.getRecord().getCompanyName());
           // SET Abbreviated Name
           details.append("Abbreviated Name (TELX1) = " + abbrevName + "\n");
@@ -816,9 +867,10 @@ public class BrazilCalculateIBMElement extends OverridingElement {
         overrides.addOverride(getProcessCode(), "DATA", "ABBREV_NM", data.getAbbrevNm(), "SOFTLAYER USE ONLY");
 
         // SET SBO
-        details.append("Search Term/Sales Branch Office = " + "509" + "\n");
-        overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), "509");
-
+        if (!sboToBeUnchanged) {
+          overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), "509");
+        }
+        details.append("Search Term/Sales Branch Office = " + data.getSalesBusOffCd() + "\n");
         // SET MRC
         details.append("Market Responsibility Code (MRC) = " + "Y" + "\n");
         overrides.addOverride(getProcessCode(), "DATA", "MRC_CD", data.getMrcCd(), "Y");
@@ -829,8 +881,10 @@ public class BrazilCalculateIBMElement extends OverridingElement {
 
         // SET ISU based on MRC
         String isu = getISUCode(entityManager, "Y", "");
-        details.append("ISU = " + isu + "\n");
-        overrides.addOverride(getProcessCode(), "DATA", "ISU_CD", data.getIsuCd(), isu);
+        if (!sboToBeUnchanged) {
+          overrides.addOverride(getProcessCode(), "DATA", "ISU_CD", data.getIsuCd(), isu);
+        }
+        details.append("ISU = " + data.getIsuCd() + "\n");
 
         // SET Client Tier based on MRC and ISU
         String clientTier = getClientTier(entityManager, "Y", isu);

@@ -216,12 +216,37 @@ dojo.addOnLoad(function(){
           <cmr:field fieldId="SearchTerm" id="searchTerm" path="searchTerm" tabId="MAIN_IBM_TAB" />
         </p>
       </cmr:column>
+
+      <cmr:column span="2" containerForField="CommercialFinanced" forCountry="624" >
+        <p>
+          <cmr:label fieldId="commercialFinanced">
+            <cmr:fieldLabel fieldId="CommercialFinanced" />:
+              <cmr:delta text="${rdcdata.commercialFinanced}" oldValue="${reqentry.commercialFinanced}" />
+          </cmr:label>
+          <cmr:field path="commercialFinanced" id="commercialFinanced" fieldId="CommercialFinanced" tabId="MAIN_IBM_TAB" />
+        </p>
+      </cmr:column>
+      
+    </cmr:row>
+   </cmr:view>
+   
+   <cmr:view forCountry='788'>
+   	<cmr:row topPad="10">
+   	  <cmr:column span="2" containerForField="CommercialFinanced" >
+        <p>
+          <cmr:label fieldId="commercialFinanced">
+            <cmr:fieldLabel fieldId="CommercialFinanced" />:
+              <cmr:delta text="${rdcdata.commercialFinanced}" oldValue="${reqentry.commercialFinanced}" />
+          </cmr:label>
+          <cmr:field path="commercialFinanced" id="commercialFinanced" fieldId="CommercialFinanced" tabId="MAIN_IBM_TAB" />
+        </p>
+      </cmr:column>
     </cmr:row>
    </cmr:view>
 
     <cmr:view exceptForCountry="643,749,778,818,834,852,856,646,714,720,848,649,858" exceptForGEO="FR,JP,MCO2,TW,KR">
     <cmr:row topPad="10" addBackground="true">
-      <cmr:column span="2" containerForField="Enterprise" exceptForGEO="MCO1,NORDX" exceptForCountry="755">
+      <cmr:column span="2" containerForField="Enterprise" exceptForGEO="MCO1,NORDX" exceptForCountry="755,821,358,359,363,603,607,626,644,651,668,693,694,695,699,704,705,707,708,740,741,787,820,826,889">
         <p>
           <cmr:label fieldId="enterprise">
             <cmr:fieldLabel fieldId="Enterprise" />:
@@ -244,7 +269,7 @@ dojo.addOnLoad(function(){
           </cmr:view>  --%>       
         </p>
       </cmr:column>
-      <cmr:column span="2" containerForField="Company" exceptForCountry="666,726,862,822,838,724,858" exceptForGEO="MCO1,MCO2,CEMEA,BELUX,NL,TW">
+      <cmr:column span="2" containerForField="Company" exceptForCountry="666,726,862,822,838,724,858,821" exceptForGEO="MCO1,MCO2,CEMEA,BELUX,NL,TW">
         <p>
           <cmr:label fieldId="company">
             <cmr:fieldLabel fieldId="Company" />: 
@@ -253,6 +278,14 @@ dojo.addOnLoad(function(){
           <cmr:field fieldId="Company" id="company" path="company" tabId="MAIN_IBM_TAB" />
         </p>
       </cmr:column>
+      <cmr:column span="2" containerForField="SalesBusOff" forCountry="821">
+        <p>
+          <cmr:label fieldId="salesBusOffCd">
+            <cmr:fieldLabel fieldId="SalesBusOff" />:
+          </cmr:label>
+          <cmr:field fieldId="SalesBusOff" id="salesBusOffCd" path="salesBusOffCd" tabId="MAIN_IBM_TAB" />
+        </p>
+      </cmr:column>  
       <cmr:column span="2" containerForField="Affiliate" exceptForCountry="666,726,862,822,838,641,858" exceptForGEO="MCO1,MCO2,CEMEA,NORDX,BELUX,NL,TW">
         <p>
           <cmr:label fieldId="affiliate">
@@ -268,14 +301,14 @@ dojo.addOnLoad(function(){
     <!-- CIS Duplicate CMR -->
     <cmr:view forCountry="821">
     <cmr:row topPad="10" addBackground="true">
-      <cmr:column span="2" containerForField="Enterprise2">
-        <p>
-          <cmr:label fieldId="dupEnterpriseNo">
-            <cmr:fieldLabel fieldId="Enterprise2" />: 
-          </cmr:label>
-          <cmr:field fieldId="Enterprise2" id="dupEnterpriseNo" path="dupEnterpriseNo" tabId="MAIN_IBM_TAB" />
-        </p>
-      </cmr:column>
+    <cmr:column span="2" containerForField="DupSalesBusOffCd">
+      <p>
+        <cmr:label fieldId="dupSalesBoCd">
+          <cmr:fieldLabel fieldId="DupSalesBusOffCd" />: 
+        </cmr:label>
+        <cmr:field fieldId="DupSalesBusOffCd" id="dupSalesBoCd" path="dupSalesBoCd" tabId="MAIN_IBM_TAB" />
+      </p>
+    </cmr:column>  
     </cmr:row>      
     </cmr:view>
     

@@ -294,6 +294,7 @@ function addHandlersForNL() {
     _BOTeamHandler = dojo.connect(FormManager.getField('engineeringBo'), 'onChange', function(value) {
       // setINACValues(value);
       setEconomicCodeValues(value);
+      setSORTL();
     });
   }
   if (_vatExemptHandler == null) {
@@ -389,8 +390,10 @@ function setBOTeamValues(clientTier) {
     var results = null;
     var selectedResults = null;
 
+    // 32S changed to 34Q on 2021 2H coverage
     // BO Team will be based on IMS for 32S
-    if (ims != '' && ims.length > 1 && (isuCtc == '32S')) {
+    // if (ims != '' && ims.length > 1 && (isuCtc == '32S')) {
+    if (ims != '' && ims.length > 1 && (isuCtc == '34Q')) {
       qParams = {
         _qall : 'Y',
         ISSUING_CNTRY : cntry,
@@ -407,7 +410,8 @@ function setBOTeamValues(clientTier) {
       results = cmr.query('GET.BOTEAMLIST.BYISU', qParams);
     }
 
-    if (ims != '' && ims.length > 1 && (isuCtc == '32S')) {
+    // if (ims != '' && ims.length > 1 && (isuCtc == '32S')) {
+    if (ims != '' && ims.length > 1 && (isuCtc == '34Q')) {
       qParams = {
         _qall : 'Y',
         ISSUING_CNTRY : cntry,
@@ -575,6 +579,42 @@ function setEconomicCodeValues(engineeringBo) {
         }
       }
     }
+  }
+}
+
+function setSORTL() {
+
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+
+  var boTeam = FormManager.getActualValue('engineeringBo');
+  var custSubType = FormManager.getActualValue('custSubGrp');
+  var reqType = FormManager.getActualValue('reqType');
+
+  if (reqType != 'C') {
+    return;
+  }
+  switch (custSubType) {
+  case 'INTER':
+  case 'PRICU':
+  case 'BUSPR':
+    if (boTeam != _pagemodel.engineeringBo) {
+      FormManager.setValue('commercialFinanced', boTeam);
+    }
+    break;
+  case 'COMME':
+  case 'PUBCU':
+  case 'THDPT':
+  case 'NLDAT':
+    // do nothing
+    break;
+  case 'CBBUS':
+  case 'CBCOM':
+    // do nothing
+    break;
+  default:
+    break;
   }
 }
 

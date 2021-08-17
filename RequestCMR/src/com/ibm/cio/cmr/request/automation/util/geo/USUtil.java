@@ -131,6 +131,7 @@ public class USUtil extends AutomationUtil {
   public static final String SC_IGSF = "IGSF";
   public static final String SC_IGS = "IGS";
   // State/Local Government
+  public static final String SC_STATE = "LOCAL GOV";
   public static final String SC_STATE_DIST = "SPEC DIST";
   public static final String SC_STATE_COUNTY = "COUNTY";
   public static final String SC_STATE_CITY = "CITY";
@@ -468,7 +469,7 @@ public class USUtil extends AutomationUtil {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
     boolean valid = true;
-    String[] scenarioList = { SC_SCHOOL_PUBLIC, SC_SCHOOL_CHARTER, SC_SCHOOL_PRIV, SC_SCHOOL_PAROCHL, SC_SCHOOL_COLLEGE, SC_STATE_STATE,
+    String[] scenarioList = { SC_STATE, SC_SCHOOL_PUBLIC, SC_SCHOOL_CHARTER, SC_SCHOOL_PRIV, SC_SCHOOL_PAROCHL, SC_SCHOOL_COLLEGE, SC_STATE_STATE,
         SC_STATE_DIST, SC_STATE_COUNTY, SC_STATE_CITY, SC_LEASE_LPMA, SC_FED_REGULAR, SC_FED_CLINIC, SC_FED_FEDSTATE, SC_FED_HEALTHCARE,
         SC_FED_HOSPITAL, SC_FED_INDIAN_TRIBE, SC_FED_NATIVE_CORP, SC_FED_POA, SC_FED_TRIBAL_BUS };
     String[] skipCompanyChecksScenarioList = { SC_BP_DEVELOP, SC_BP_E_HOST, SC_BP_END_USER, SC_LEASE_3CC, SC_LEASE_SVR_CONT, SC_INTERNAL, SC_DUMMY,
@@ -1310,6 +1311,8 @@ public class USUtil extends AutomationUtil {
       if (("13".equals(custClass) || "14".equals(custClass) || "16".equals(custClass) || "17".equals(custClass))
           && StringUtils.isBlank(usRestricTo)) {
         custSubGroup = SC_STATE_DIST;
+      } else {
+        custSubGroup = SC_STATE;
       }
       engineData.addPositiveCheckStatus("SKIP_COMP_CHECK");
     } else if (LEASING.equals(custTypCd)) {

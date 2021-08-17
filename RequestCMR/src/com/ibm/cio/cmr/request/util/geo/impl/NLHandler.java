@@ -829,6 +829,7 @@ public class NLHandler extends BaseSOFHandler {
     data.setInstallBranchOff("");
     data.setInacType("");
     data.setIbmDeptCostCenter(getInternalDepartment(mainRecord.getCmrNum()));
+    data.setCommercialFinanced(results.getItems().get(0).getCmrSortl());
 
     boolean prospectCmrChosen = mainRecord != null && CmrConstants.PROSPECT_ORDER_BLOCK.equals(mainRecord.getCmrOrderBlock());
     if (prospectCmrChosen) {
@@ -1254,6 +1255,14 @@ public class NLHandler extends BaseSOFHandler {
       update.setDataField(PageManager.getLabel(cmrCountry, "EngineeringBo", "-"));
       update.setNewData(service.getCodeAndDescription(newData.getEngineeringBo(), "EngineeringBo", cmrCountry));
       update.setOldData(service.getCodeAndDescription(oldData.getEngineeringBo(), "EngineeringBo", cmrCountry));
+      results.add(update);
+    }
+    // SORTL
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getCommercialFinanced(), newData.getCommercialFinanced())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "CommercialFinanced", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getCommercialFinanced(), "CommercialFinanced", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getCommercialFinanced(), "CommercialFinanced", cmrCountry));
       results.add(update);
     }
   }
@@ -2204,7 +2213,7 @@ public class NLHandler extends BaseSOFHandler {
 
       XSSFSheet sheet = book.getSheet("Data");// validate Data sheet
       row = sheet.getRow(0);// data field name row
-      int ordBlkIndex = 14;// default index
+      int ordBlkIndex = 15;// default index
       int cmrNoIndex = 0;// 0
       String cmrNo = null;
       for (int cellIndex = 0; cellIndex < row.getLastCellNum(); cellIndex++) {

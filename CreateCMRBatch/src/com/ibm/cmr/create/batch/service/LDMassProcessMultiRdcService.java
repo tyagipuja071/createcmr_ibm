@@ -39,10 +39,10 @@ import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cmr.create.batch.util.BatchUtil;
 import com.ibm.cmr.create.batch.util.CMRRequestContainer;
 import com.ibm.cmr.create.batch.util.masscreate.WorkerThreadFactory;
-import com.ibm.cmr.create.batch.util.masscreate.handler.impl.LDMassProcessRdcWorker;
 import com.ibm.cmr.create.batch.util.mq.LandedCountryMap;
 import com.ibm.cmr.create.batch.util.mq.transformer.MessageTransformer;
 import com.ibm.cmr.create.batch.util.mq.transformer.TransformerManager;
+import com.ibm.cmr.create.batch.util.worker.impl.LDMassUpdtRdcMultiWorker;
 import com.ibm.cmr.services.client.process.ProcessRequest;
 import com.ibm.cmr.services.client.process.ProcessResponse;
 
@@ -224,10 +224,10 @@ public class LDMassProcessMultiRdcService extends MultiThreadedBatchService<Long
         }
 
         LOG.debug("Starting processing mass update lines at " + new Date());
-        List<LDMassProcessRdcWorker> workers = new ArrayList<LDMassProcessRdcWorker>();
+        List<LDMassUpdtRdcMultiWorker> workers = new ArrayList<LDMassUpdtRdcMultiWorker>();
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(threads, new WorkerThreadFactory(getThreadName()));
         for (MassUpdt sMassUpdt : results) {
-          LDMassProcessRdcWorker worker = new LDMassProcessRdcWorker(entityManager, admin, data, sMassUpdt, BATCH_USER_ID);
+          LDMassUpdtRdcMultiWorker worker = new LDMassUpdtRdcMultiWorker(this, admin, sMassUpdt);
           executor.schedule(worker, 5, TimeUnit.SECONDS);
           workers.add(worker);
         }
@@ -243,8 +243,8 @@ public class LDMassProcessMultiRdcService extends MultiThreadedBatchService<Long
 
         LOG.debug("Finished processing mass update lines at " + new Date());
 
-        Exception processError = null;
-        for (LDMassProcessRdcWorker worker : workers) {
+        Throwable processError = null;
+        for (LDMassUpdtRdcMultiWorker worker : workers) {
           if (worker != null) {
             if (worker.isError()) {
               LOG.error("Error in processing mass update rdc for Request ID " + admin.getId().getReqId() + ": " + worker.getErrorMsg());
@@ -254,14 +254,16 @@ public class LDMassProcessMultiRdcService extends MultiThreadedBatchService<Long
             } else {
               statusCodes.addAll(worker.getStatusCodes());
               rdcProcessStatusMsgs.addAll(worker.getRdcProcessStatusMsgs());
-              isIndexNotUpdated = isIndexNotUpdated || worker.getIndexNotUpdated();
+              isIndexNotUpdated = isIndexNotUpdated || worker.isIndexNotUpdated();
               comment.append(worker.getComments());
             }
           }
         }
         if (processError != null) {
-          throw processError;
+          throw new Exception(processError);
         }
+
+        LOG.debug("Status Codes" + statusCodes);
 
         // *** START OF FIX
         LOG.debug("**** Placing comment on success --> " + comment);
@@ -356,8 +358,8 @@ public class LDMassProcessMultiRdcService extends MultiThreadedBatchService<Long
         RequestUtils.createCommentLogFromBatch(entityManager, BATCH_USER_ID, reqId, histMessage);
       }
     } catch (Exception e) {
-      LOG.error("Error in processing Update Request " + admin.getId().getReqId(), e);
-      addError("Update Request " + admin.getId().getReqId() + " Error: " + e.getMessage());
+      LOG.error("Error in processing Mass Update Request " + admin.getId().getReqId(), e);
+      addError("Mass Update Request " + admin.getId().getReqId() + " Error: " + e.getMessage());
     }
 
   }
@@ -394,6 +396,11 @@ public class LDMassProcessMultiRdcService extends MultiThreadedBatchService<Long
     createComment(entityManager, "An error occurred during processing:\n" + errorMsg, admin.getId().getReqId());
 
     RequestUtils.sendEmailNotifications(entityManager, admin, hist);
+  }
+
+  @Override
+  public boolean flushOnCommitOnly() {
+    return true;
   }
 
   @Override

@@ -8,6 +8,8 @@
  * 
  */
 var CNTRY_LIST_FOR_INVALID_CUSTOMERS = [ '838', '866', '754' ];
+var comp_proof_IN= false;
+var flag = false;
 dojo.require("dojo.io.iframe");
 
 /**
@@ -128,12 +130,20 @@ function processRequestAction() {
     doYourAction();
 
   } else if (action == YourActions.Send_for_Processing) {
+    var findDnbResult =  FormManager.getActualValue('findDnbResult');
     if (_pagemodel.approvalResult == 'Rejected') {
       cmr.showAlert('The request\'s approvals have been rejected. Please re-submit or override the rejected approvals. ');
-    } else if (FormManager.validate('frmCMR')) {
+    } else if (FormManager.validate('frmCMR') && !comp_proof_IN ) {
 			if(checkForConfirmationAttachments()){
 				showDocTypeConfirmDialog();
-			} else if (checkIfFinalDnBCheckRequired()) {
+			} else if(cmrCntry == SysLoc.INDIA) {   
+                // Cmr-2340- For India Dnb import   
+                if(findDnbResult == 'Accepted' && checkIfDnBCheckReqForIndia()){      
+                matchDnBForIndia();
+                } else {
+                   cmr.showModal('addressVerificationModal'); 
+                }              
+            } else if (checkIfFinalDnBCheckRequired()) {
         matchDnBForAutomationCountries();
       } else if (checkIfUpfrontUpdateChecksRequired()) {
         addUpdateChecksExecution(frmCMR);
@@ -145,7 +155,15 @@ function processRequestAction() {
           cmr.showModal('addressVerificationModal');
         }
       }
-    } else {
+    } else if(comp_proof_IN && cmrCntry =='744' ){
+      if(checkIfDnBCheckReqForIndia() && findDnbResult == 'Accepted') {            
+                matchDnBForIndia();
+                    }else {
+          // if there are no errors, show the Address Verification modal window
+          cmr.showModal('addressVerificationModal');
+        }
+       }
+    else {
       cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
     }
 
@@ -1423,6 +1441,9 @@ function isSkipDnbMatching() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var countryUse = FormManager.getActualValue("countryUse");
   var subRegionCd = countryUse != null && countryUse.length > 0 ? countryUse : cntry;
+  if(SysLoc.INDIA == FormManager.getActualValue('cmrIssuingCntry')){
+        return false;
+    }
   if(dnbPrimary == 'Y') {
     if (custGrp != null && custGrp != '' && custSubGrp != null && custSubGrp != '') {
       var qParams = {
@@ -1500,16 +1521,37 @@ function checkIfFinalDnBCheckRequired() {
   var findDnbResult = FormManager.getActualValue('findDnbResult');
   var userRole = FormManager.getActualValue('userRole');
   var ifReprocessAllowed = FormManager.getActualValue('autoEngineIndc');
-  if (reqId > 0 && reqType == 'C' && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B') && !isSkipDnbMatching()
-      && matchOverrideIndc != 'Y') {
+  if (reqId > 0 && (reqType == 'C' || reqType == 'U') && reqStatus == 'DRA' && userRole == 'Requester'
+      && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B') && !isSkipDnbMatching() && matchOverrideIndc != 'Y') {
     // currently Enabled Only For US
     return true;
   }
   return false;
 }
+function checkIfDnBCheckReqForIndia() {
+  var reqId = FormManager.getActualValue('reqId');
+  var reqType = FormManager.getActualValue('reqType');
+  var custSubGrp=FormManager.getActualValue('custSubGrp');
+  var result = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
+            ID : reqId
+          });
+  if(reqType == 'C' && (custSubGrp == 'BLUMX'|| custSubGrp == 'MKTPC' || custSubGrp == 'IGF' || custSubGrp == 'AQSTN' || custSubGrp == 'NRML' || custSubGrp == 'ESOSW' || custSubGrp =='CROSS')){
+   if(result && result.ret1){
+   return false;
+   }
+   else {
+   return true;
+   }
+}
+   return false;
+}
+
 
 function matchDnBForAutomationCountries() {
   var reqId = FormManager.getActualValue('reqId');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var custSubGrp=FormManager.getActualValue('custSubGrp');
+  var reqType = FormManager.getActualValue('reqType');
   console.log("Checking if the request matches D&B...");
   var nm1 = _pagemodel.mainCustNm1 == null ? '' : _pagemodel.mainCustNm1;
   var nm2 = _pagemodel.mainCustNm2 == null ? '' : _pagemodel.mainCustNm2;
@@ -1543,8 +1585,91 @@ function matchDnBForAutomationCountries() {
                         OK : 'Yes',
                         CANCEL : 'No'
                       });
-            } else {
+            } else if(data.confidenceCd){
               showDnBMatchModal();
+            } else {
+                //Cmr-2755_India_no_match_found  
+                if(cntry == SysLoc.INDIA && (custSubGrp == 'BLUMX'|| custSubGrp == 'MKTPC'|| custSubGrp == 'IGF' || custSubGrp == 'AQSTN' || custSubGrp == 'NRML' || custSubGrp == 'ESOSW' || custSubGrp =='CROSS') && !flag){
+                cmr.showAlert('Please attach company proof as no matches found in dnb.');
+                checkNoMatchingAttachmentValidator();
+                }else{
+                cmr.showModal('addressVerificationModal');
+             }
+            }
+          } else {
+            // continue
+            console.log("An error occurred while matching dnb.");
+            cmr.showConfirm("cmr.showModal('addressVerificationModal')", 'An error occurred while matching dnb. Do you want to proceed with this request?', 'Warning', null, {
+              OK : 'Yes',
+              CANCEL : 'No'
+            });
+          }
+        },
+        error : function(error, ioargs) {
+        }
+      });
+
+}
+function matchDnBForIndia() {
+  var reqId = FormManager.getActualValue('reqId');
+  var isicCd= FormManager.getActualValue('isicCd');
+  var custSubGrp=FormManager.getActualValue('custSubGrp');
+  console.log("Checking if the request matches D&B...");      
+  var nm1 = _pagemodel.mainCustNm1 == null ? '' : _pagemodel.mainCustNm1;
+  var nm2 = _pagemodel.mainCustNm2 == null ? '' : _pagemodel.mainCustNm2;
+  if (nm1 != FormManager.getActualValue('mainCustNm1') || nm2 != FormManager.getActualValue('mainCustNm2')) {
+    cmr.showAlert("The Customer Name/s have changed. The record has to be saved first. Please select Save from the actions.");
+    return;
+  }
+  cmr.showProgress('Checking request data with D&B...');
+  dojo
+      .xhrGet({
+        url : cmr.CONTEXT_ROOT + '/request/dnb/checkMatch.json',
+        handleAs : 'json',
+        method : 'GET',
+        content : {
+          'reqId' : reqId,
+          'isicCd': isicCd
+        },
+        timeout : 50000,
+        sync : false,
+        load : function(data, ioargs) {
+          cmr.hideProgress();
+          console.log(data);
+          console.log(data.success);
+          console.log(data.match);                  
+          console.log(data.isicMatch);  
+          console.log(data.validate);     
+          if (data && data.success) {
+            if (data.match && data.isicMatch) {
+             comp_proof_IN =true;   
+              if(!data.validate){
+                   checkDnBMatchingAttachmentValidator();
+                   } 
+                 if (FormManager.validate('frmCMR')) {
+                 MessageMgr.clearMessages();
+                 doValidateRequest();
+                 cmr.showModal('addressVerificationModal');
+                }else {
+                cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
+              }
+            }else {
+             
+             if (data.match && !data.isicMatch && custSubGrp != 'IGF'){
+                comp_proof_IN =false;
+                console.log("ISIC validation failed by Dnb.");
+                cmr.showAlert("Please attach company proof as ISIC validation failed by Dnb.");     
+              }else if(data.match && !data.isicMatch && custSubGrp == 'IGF'){
+                    comp_proof_IN =true;
+                    cmr.showModal('addressVerificationModal');
+              }else{   
+              comp_proof_IN =false;
+              console.log("Name/Address validation failed by dnb");
+              cmr.showAlert("Please attach company proof as Name/Address validation failed by Dnb.");
+              }
+                   if(!data.validate){
+                   checkDnBMatchingAttachmentValidator();
+                   }
             }
           } else {
             // continue
@@ -1645,6 +1770,51 @@ function checkForConfirmationAttachments(){
 	} else {
 		return false;
 	}
+}
+
+function checkDnBMatchingAttachmentValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+          // FOR  Temporary India
+      var id = FormManager.getActualValue('reqId');
+      var ret = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
+       ID : id,
+       });
+       // FOR  Temporary India
+          if((ret== null || ret.ret1== null) && !comp_proof_IN){
+            comp_proof_IN= true;
+            return new ValidationResult(null, false, "You\'re obliged to provide either one of the following documentation as backup - "
+                + "client\'s official website, Secretary of State business registration proof, client\'s confirmation email and signed PO, attach it under the file content "
+                + "of <strong>Company Proof</strong>. Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.");
+          } else {        
+            return new ValidationResult(null, true);           
+          }
+      }
+    };
+  })(), null, 'frmCMR');
+}
+
+//CREATCMR-2755
+function checkNoMatchingAttachmentValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+          var id = FormManager.getActualValue('reqId');
+          var ret = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
+           ID : id
+           });
+            if (ret == null || ret.ret1 == null) {
+            return new ValidationResult(null, false, "You\'re obliged to provide either one of the following documentation as backup - "
+                + "client\'s official website, Secretary of State business registration proof, client\'s confirmation email and signed PO, attach it under the file content "
+                + "of <strong>Company Proof</strong>. Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.");
+            } else {        
+            flag=true;
+            return new ValidationResult(null, true);           
+          }
+        }
+    };
+  })(), null, 'frmCMR');
 }
 
 function showDocTypeConfirmDialog() {
