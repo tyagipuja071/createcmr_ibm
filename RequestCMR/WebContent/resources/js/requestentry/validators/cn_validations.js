@@ -154,8 +154,10 @@ function afterConfigForCN() {
       }
     }
   }
-  
-  setSearchTermByGBGId();
+  var custSubT = FormManager.getActualValue('custSubGrp');
+  if (FormManager.getActualValue('reqType') == 'C' && (custSubT == 'CROSS' || custSubT == 'NRML' ||custSubT == 'EMBSA' ||custSubT == 'AQSTN')) {
+    setSearchTermByGBGId();
+  }
   
   if (_isicHandlerCN == null) {
     _isicHandlerCN = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
@@ -2509,6 +2511,21 @@ function validateSearchTermForCROSS() {
         var custSubType = FormManager.getActualValue('custSubGrp');
         var subType = '';
         if (FormManager.getActualValue('reqType') == 'C' && (custSubType == 'CROSS' || custSubType == 'NRML' ||custSubType == 'EMBSA' ||custSubType == 'AQSTN')) {
+          var _GBGId = FormManager.getActualValue('gbgId');
+          var searchTerm = FormManager.getActualValue('searchTerm');
+          if (FormManager.getActualValue('gbgId') != 'undefined' && FormManager.getActualValue('gbgId') != '') {
+          var ret = cmr.query('CHECK_CN_S1_GBG_ID_LIST', {
+            ID : _GBGId
+          });
+          if (ret == null || ret.ret1 == null || ret.ret1 == 0) {
+            if(searchTerm == '04472' || searchTerm == '04474' || searchTerm == '04491' || searchTerm == '04493' || searchTerm == '04687' || searchTerm == '04497'
+              || searchTerm == '04629' || searchTerm == '04495' || searchTerm == '04630' || searchTerm == '04484' || searchTerm == '04480' || searchTerm == '04488'
+                || searchTerm == '04499' || searchTerm == '04486' || searchTerm == '04747' || searchTerm == '04748' || searchTerm == '04749' || searchTerm == '04502'){
+              return new ValidationResult(null, false, 'It is not allowed to apply S1 search term for none S1 GBGId  under ' + subType + ' Sub_scenario.');
+            }
+            }
+          }
+
           if (custSubType == 'CROSS'){
             subType = 'Foreign';
           } else if(custSubType == 'NRML') {
