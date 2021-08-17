@@ -25,7 +25,6 @@ import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.geo.impl.CNHandler;
-import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
 
 public class ChinaUtil extends AutomationUtil {
 
@@ -511,12 +510,4 @@ public class ChinaUtil extends AutomationUtil {
     return Arrays.asList("C", "U", "M", "D", "R");
   }
 
-  @Override
-  public void tweakDnBMatchingRequest(GBGFinderRequest request, RequestData requestData, AutomationEngineData engineData) {
-    Data data = requestData.getData();
-    if (StringUtils.isNotBlank(data.getBusnType())) {
-      request.setOrgId(data.getBusnType());
-      request.setMinConfidence("9");
-    }
-  }
 }
