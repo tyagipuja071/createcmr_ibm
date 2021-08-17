@@ -75,6 +75,8 @@ public class CanadaUtil extends AutomationUtil {
   private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Building", "Floor", "Office", "Department", "Customer Name 2",
       "Phone #", "PostBox", "State/Province");
 
+  private static final List<String> CARIB_CNTRIES = Arrays.asList("BS", "BB", "BM", "GY", "KY", "JM", "AW", "LC", "SR", "TT");
+
   @Override
   public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
       AutomationResult<ValidationOutput> results, StringBuilder details, ValidationOutput output) {
@@ -105,10 +107,32 @@ public class CanadaUtil extends AutomationUtil {
       case SCENARIO_OEM:
       case SCENARIO_STRATEGIC_OUTSOURCING:
       case SCENARIO_GOVERNMENT:
+        if (!"CA".equalsIgnoreCase(zs01.getLandCntry())) {
+          valid = false;
+          engineData.addRejectionComment("LAND", "Invalid Landed Country.", "Landed country is not Canada", "");
+          details.append("Landed Country is not Canada").append("\n");
+        }
+        break;
       case SCENARIO_CROSS_BORDER_USA:
+        if ("CA".equalsIgnoreCase(zs01.getLandCntry()) || CARIB_CNTRIES.contains(zs01.getLandCntry())) {
+          valid = false;
+          engineData.addRejectionComment("LAND", "Invalid Landed Country.", "Landed country contains Canada or a US Territory", "");
+          details.append("Landed country contains Canada or a US Territory").append("\n");
+        }
+        break;
       case SCENARIO_CROSS_BORDER_CARIB:
+        if (!CARIB_CNTRIES.contains(zs01.getLandCntry())) {
+          valid = false;
+          engineData.addRejectionComment("LAND", "Invalid Landed Country.", "Landed country is not a Carribean Country", "");
+          details.append("Landed country is not a Carribean Country").append("\n");
+        }
         break;
       case SCENARIO_BUSINESS_PARTNER:
+        if (!"CA".equalsIgnoreCase(zs01.getLandCntry())) {
+          valid = false;
+          engineData.addRejectionComment("LAND", "Invalid Landed Country.", "Landed country is not Canada", "");
+          details.append("Landed Country is not Canada").append("\n");
+        }
         return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
       }
     } else {
