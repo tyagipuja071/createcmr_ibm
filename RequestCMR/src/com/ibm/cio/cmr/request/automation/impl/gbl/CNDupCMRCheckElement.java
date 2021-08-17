@@ -14,6 +14,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 
 import com.ibm.cio.cmr.request.CmrException;
+import com.ibm.cio.cmr.request.automation.ActionOnError;
 import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
@@ -121,6 +122,8 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
       String searchTerm08036 = "08036";
       String[] cnSpecialKukla = { "81", "85", "43", "44", "45", "46" };
       String kukla = null;
+
+      boolean shouldGoToCMDE = false;
 
       if (data.getCustSubGrp() != null) {
         switch (data.getCustSubGrp()) {
@@ -1411,6 +1414,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
           // g) check findcmr twice with single byte and double byte value, if
           // they are not equals
           // h) fastpass - TBD
+          // i) scenario ESA would not reject dupliate cmr, just send to CMDE.
 
           iAddr = handler.getIntlAddrById(soldTo, entityManager);
           // searchModelFindCMR.setCmrNo(cmrNo);
@@ -1793,8 +1797,10 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
                 }
 
+                shouldGoToCMDE = true;
+
                 // output
-                if (shouldBeRejected) {
+                if (shouldBeRejected && !shouldGoToCMDE) {
                   result.setResults("Matches Found");
                   result.setResults("Found Duplicate CMRs.");
                   engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR", StringUtils.join(matchedCMRs, ", "), "");
@@ -1804,6 +1810,17 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                   result.setProcessOutput(output);
                   result.setDetails(details.toString().trim());
                   sendManagerEmail(entityManager, admin, data, soldTo, details);
+
+                } else if (shouldBeRejected && shouldGoToCMDE) {
+
+                  log.debug("send request " + admin.getId().getReqId() + " to CMDE...");
+                  super.setStopOnError(false);
+                  super.setActionOnError(ActionOnError.Proceed);
+                  result.setOnError(true);
+                  result.setResults("Matches Found. Go to CMDE");
+                  result.setDetails(details.toString().trim());
+                  requestData.getAdmin().setMatchIndc("C");
+
                 } else {
                   result.setDetails("No Duplicate CMRs were found.");
                   result.setResults("No Matches");
