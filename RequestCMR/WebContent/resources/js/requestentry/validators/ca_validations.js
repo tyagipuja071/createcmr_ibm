@@ -179,7 +179,7 @@ function addAddressRecordTypeUpdateValidator() {
 
 function getAddrErrorMsg(addrName, isNewNotAllowed) {
   if (isNewNotAllowed) {
-    return 'Adding new ' + addrName + ' address is not allowed. Please remove the additional' + addrName + ' address.'
+    return 'Adding new ' + addrName + ' address is not allowed. Please remove the additional ' + addrName + ' address.'
   } else {
     return 'Only one ' + addrName + ' address is allowed. Please remove the additional ' + addrName + ' address.'
   }
