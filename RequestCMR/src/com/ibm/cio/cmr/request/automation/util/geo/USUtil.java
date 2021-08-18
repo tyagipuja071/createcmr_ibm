@@ -1231,7 +1231,7 @@ public class USUtil extends AutomationUtil {
 
     // US restrict to LOV mapping
     String usRestrictToLOV = "";
-    if (StringUtils.isNotBlank(usRestricTo)) {
+    if (StringUtils.isNotBlank(usRestricTo) && "NO_VALUE_RETRIEVED".equalsIgnoreCase(usRestricTo)) {
       sql = ExternalizedQuery.getSql("AUTO.US.GET_US_RESTR_TO_LOV");
       query = new PreparedQuery(entityManager, sql);
       query.setParameter("RESTRICT_TO", usRestricTo);
@@ -1450,6 +1450,10 @@ public class USUtil extends AutomationUtil {
       query.setParameter("CMR_NO", cmrNo);
       query.setForReadOnly(true);
       code = query.getSingleResult(String.class);
+
+      if ("NO_VALUE_RETRIEVED".equalsIgnoreCase(code)) {
+        code = "";
+      }
     } catch (Exception e) {
       LOG.error("Error in querying the database table ADDLCTRYDATA ! ");
     }
