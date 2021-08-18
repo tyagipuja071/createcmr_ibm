@@ -387,7 +387,7 @@ function onInacTypeChange() {
                 if (inacCdValue.length == 1) {
                   FormManager.setValue('inacCd', inacCdValue[0]);
                 }
-                addSearchTerm04687Logic();
+                // addSearchTerm04687Logic();
               }
             }
           }
