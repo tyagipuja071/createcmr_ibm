@@ -33,6 +33,7 @@ import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
@@ -360,7 +361,7 @@ public class SwitzerlandUtil extends AutomationUtil {
   public boolean addressExists(EntityManager entityManager, Addr addrToCheck, RequestData requestData) {
 
     Admin admin = requestData.getAdmin();
-    boolean payGoAddredited = AutomationUtil.isPayGoAccredited(entityManager, admin.getSourceSystId());
+    boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
     String sql = ExternalizedQuery.getSql("AUTO.CHECK_IF_ADDRESS_EXIST");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", addrToCheck.getId().getReqId());

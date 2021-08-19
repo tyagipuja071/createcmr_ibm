@@ -46,6 +46,7 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.Person;
+import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cmr.services.client.CmrServicesFactory;
@@ -832,7 +833,7 @@ public abstract class AutomationUtil {
   protected boolean addressExists(EntityManager entityManager, Addr addrToCheck, RequestData requestData) {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
-    boolean payGoAddredited = AutomationUtil.isPayGoAccredited(entityManager, admin.getSourceSystId());
+    boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
     String sql = "";
     if (SystemLocation.BELGIUM.equals(data.getCmrIssuingCntry()) || SystemLocation.NETHERLANDS.equals(data.getCmrIssuingCntry())) {
       sql = ExternalizedQuery.getSql("AUTO.UKI.CHECK_IF_ADDRESS_EXIST");
@@ -911,7 +912,7 @@ public abstract class AutomationUtil {
     Addr zs01 = requestData.getAddress("ZS01");
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
-    boolean payGoAddredited = AutomationUtil.isPayGoAccredited(entityManager, admin.getSourceSystId());
+    boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
     String mainStreetAddress1 = (StringUtils.isNotBlank(zs01.getAddrTxt()) ? zs01.getAddrTxt() : "").trim().toUpperCase();
     String mainCity = (StringUtils.isNotBlank(zs01.getCity1()) ? zs01.getCity1() : "").trim().toUpperCase();
     String mainPostalCd = (StringUtils.isNotBlank(zs01.getPostCd()) ? zs01.getPostCd() : "").trim();
@@ -1216,24 +1217,6 @@ public abstract class AutomationUtil {
     String custNm3 = StringUtils.isNotBlank(addr.getCustNm3()) ? " " + addr.getCustNm3() : "";
     String custNm4 = StringUtils.isNotBlank(addr.getCustNm4()) ? " " + addr.getCustNm4() : "";
     return custNm1 + custNm2 + custNm3 + custNm4;
-  }
-
-  /**
-   * Returns true if the partner is accredited for the Pay-Go process
-   * 
-   * @param entityManager
-   * @param sourceSystId
-   * @return
-   */
-  public static boolean isPayGoAccredited(EntityManager entityManager, String sourceSystId) {
-    if (StringUtils.isBlank(sourceSystId)) {
-      return false;
-    }
-    String sql = ExternalizedQuery.getSql("AUTO.PAYGO.CHECK");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("SYST_ID", sourceSystId);
-    query.setForReadOnly(true);
-    return query.exists();
   }
 
   /**
