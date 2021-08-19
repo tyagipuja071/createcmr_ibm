@@ -681,7 +681,8 @@ function defaultCMRNumberPrefix() {
   if ((role == 'PROCESSOR') && (custSubGrp == 'INTER' || custSubGrp == 'XINT')) {
     FormManager.addValidator('cmrNoPrefix', Validators.REQUIRED, [ 'CmrNoPrefix' ], 'MAIN_IBM_TAB');
   }
-  if ((role != 'PROCESSOR') && (custSubGrp == 'INTER' || custSubGrp == 'XINT')) {
+  // 2333
+  if ((role != 'PROCESSOR' && cmrIssuingCntry != '834') && (custSubGrp == 'INTER' || custSubGrp == 'XINT')) {
     FormManager.hide('CmrNoPrefix', 'cmrNoPrefix');
   } else {
     FormManager.show('CmrNoPrefix', 'cmrNoPrefix');
@@ -699,6 +700,13 @@ function defaultCMRNumberPrefix() {
     FormManager.show('CmrNoPrefix', 'cmrNoPrefix');
     FormManager.setValue('cmrNoPrefix', '996---');
     }
+}
+
+// 2333
+function defaultCMRNumberPrefixforSingapore() {
+  if(custSubGrp == 'INTER' && cmrIssuingCntry == '834') {
+    FormManager.show('CmrNoPrefix', 'cmrNoPrefix');
+  }
 }
 
 function setMrc4IntDumForASEAN(){
@@ -3549,6 +3557,8 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(defaultCMRNumberPrefix, [ SysLoc.HONG_KONG, SysLoc.MACAO, SysLoc.INDIA  ]);
   GEOHandler.addAfterTemplateLoad(defaultCMRNumberPrefix, [ SysLoc.HONG_KONG, SysLoc.MACAO, SysLoc.INDIA  ]);
+  GEOHandler.addAfterTemplateLoad(defaultCMRNumberPrefixforSingapore, [ SysLoc.SINGAPORE ]);
+  // 2333
   GEOHandler.addAfterConfig(setISBUforBPscenario, GEOHandler.ASEAN);
   GEOHandler.addAfterTemplateLoad(setISBUforBPscenario, GEOHandler.ASEAN);
 
