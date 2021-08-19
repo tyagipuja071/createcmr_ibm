@@ -200,7 +200,8 @@
     <cmr:column span="4" containerForField="ISIC" exceptForCountry="897">   
       <p>
         <label for="isicCd"> <cmr:fieldLabel fieldId="ISIC" />: <cmr:delta text="${rdcdata.isicCd}" oldValue="${reqentry.isicCd}" code="L" />
-        <%if (reqentry.getReqType().equalsIgnoreCase("C")&&reqentry.getCmrIssuingCntry().equalsIgnoreCase("641")&&reqentry.getIsicCd()!=null||
+        <%if (reqentry.getReqType().equalsIgnoreCase("C")&&reqentry.getCmrIssuingCntry().equalsIgnoreCase("641")&&reqentry.getIsicCd()!=null&&
+        (reqentry.getCustSubGrp()==null||!(reqentry.getCustSubGrp().equals("INTER")||reqentry.getCustSubGrp().equals("PRIV ")||reqentry.getCustSubGrp().equals("BUSPR")))||
         reqentry.getReqType().equalsIgnoreCase("U")&&reqentry.getCmrIssuingCntry().equalsIgnoreCase("641")&&(reqentry.getCapInd()==null||reqentry.getCapInd().equalsIgnoreCase("N"))){%>
     <cmr:info text="${ui.info.cnisicinfo}"></cmr:info><%} %>
         </label>
