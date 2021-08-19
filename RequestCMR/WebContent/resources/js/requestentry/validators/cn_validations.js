@@ -305,6 +305,15 @@ function setInacBySearchTerm() {
     FormManager.removeValidator('inacType', Validators.REQUIRED);
     return;
   }
+  var _GBGId = FormManager.getActualValue('gbgId');
+  var custSubT = FormManager.getActualValue('custSubGrp');
+  if(FormManager.getActualValue('reqType') == 'C' && (custSubT == 'CROSS' || custSubT == 'NRML' ||custSubT == 'EMBSA' ||custSubT == 'AQSTN') 
+      &&( _GBGId == 'undefined' || _GBGId == '')){
+    FormManager.setValue('inacCd', '');
+    FormManager.readOnly('inacCd');
+    FormManager.setValue('inacType', '');
+    FormManager.readOnly('inacType');
+  }
 }
 
 function setIsuOnIsic() {
