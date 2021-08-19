@@ -1602,7 +1602,8 @@ public class RequestUtils {
     }
     String sql = ExternalizedQuery.getSql("PAYGO.CHECK");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("SYST_ID", sourceSystId);
+    query.setParameter("SYST_ID", sourceSystId.length() > 12 ? sourceSystId.substring(0, 12) : sourceSystId);
+    query.setParameter("SERVICE_ID", sourceSystId.length() > 20 ? sourceSystId.substring(0, 20) : sourceSystId);
     query.setForReadOnly(true);
     return query.exists();
   }
