@@ -1541,7 +1541,9 @@ function addAddrUpdateValidator() {
                   });
 
                   if (ret == null || ret.ret1 == null) {
-                    return new ValidationResult(null, false, 'Additional addresses types need to be updated same with Legal Address (Sold To). If you do not agree, please attach supporting document and click Disable automatic processing checkbox.');
+                    return new ValidationResult(null, false, 'The additional address should be same with Sold to address (ZS01).'
+                        + ' If you insist on using different address with Sold to (ZS01),you need to attach the screenshot of customer official website,'
+                        + ' business license,government website,contract/purchase order with signature in attachment, file content must be "Name and Address Change(China Specific)". ');
                   } else {
                     return new ValidationResult(null, true);
                   }
@@ -2483,7 +2485,7 @@ function validateCnNameAndAddr() {
                       + 'and address doesn\'t match with Tian Yan Cha 100%, or if you insist on using missmatched '
                       + 'company name or address, you need attach the screenshot of customer official website, '
                       + 'business license , government website,contract/purchase order with signature in attachment, '
-                      + 'file content must be "Chinese Name And Address change", the correct company name and address '
+                      + 'file content must be "Name and Address Change(China Specific)", the correct company name and address '
                       + 'should be:'
                       + correctName + correctAddress);
                 } else {

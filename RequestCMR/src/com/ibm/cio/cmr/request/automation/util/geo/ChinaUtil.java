@@ -230,9 +230,9 @@ public class ChinaUtil extends AutomationUtil {
 
     String ret = geDocContent(entityManager, admin.getId().getReqId());
     if ("Y".equals(ret)) {
-      details.append("An attachment of type 'Chinese Name And Address change' has been added. This Requester will be routed to CMDE.\n");
+      details.append("An attachment of type 'Name and Address Change(China Specific)' has been added. This Requester will be routed to CMDE.\n");
       engineData.addRejectionComment("OTH",
-          "An attachment of type 'Chinese Name And Address change' has been added. This Requester will be routed to CMDE", "", "");
+          "An attachment of type 'Name and Address Change(China Specific)' has been added. This Requester will be routed to CMDE", "", "");
       result.setOnError(true);
     }
 
@@ -374,9 +374,9 @@ public class ChinaUtil extends AutomationUtil {
 
     String ret = geDocContent(entityManager, admin.getId().getReqId());
     if ("Y".equals(ret)) {
-      details.append("An attachment of type 'Chinese Name And Address change' has been added. This Requester will be routed to CMDE.\n");
+      details.append("An attachment of type 'Name and Address Change(China Specific)' has been added. This Requester will be routed to CMDE.\n");
       engineData.addRejectionComment("OTH",
-          "An attachment of type 'Chinese Name And Address change' has been added. This Requester will be routed to CMDE", "", "");
+          "An attachment of type 'Name and Address Change(China Specific)' has been added. This Requester will be routed to CMDE", "", "");
     }
 
     output.setDetails(details.toString());
