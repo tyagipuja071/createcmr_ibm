@@ -1083,7 +1083,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
                         nameMatched = true;
 
-                        if (cmrsMods.getCmrPpsceid() != null && !StringUtils.isNotBlank(cmrsMods.getCmrPpsceid())) {
+                        if (cmrsMods.getCmrPpsceid() != null && StringUtils.isNotBlank(cmrsMods.getCmrPpsceid())) {
                           if (searchTerm08036.equals(cmrsMods.getCmrSortl())) {
                             // should not be rejected
                             log.debug("Not a duplicate CMR.");
@@ -1144,7 +1144,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
                           nameMatched = true;
 
-                          if (cmrsMods.getCmrPpsceid() != null && !StringUtils.isNotBlank(cmrsMods.getCmrPpsceid())) {
+                          if (cmrsMods.getCmrPpsceid() != null && StringUtils.isNotBlank(cmrsMods.getCmrPpsceid())) {
                             if (searchTerm08036.equals(cmrsMods.getCmrSortl())) {
                               // should not be rejected
                               log.debug("Not a duplicate CMR.");
@@ -1207,7 +1207,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
                             historyNmMatched = true;
 
-                            if (cmrsMods.getCmrPpsceid() != null && !StringUtils.isNotBlank(cmrsMods.getCmrPpsceid())) {
+                            if (cmrsMods.getCmrPpsceid() != null && StringUtils.isNotBlank(cmrsMods.getCmrPpsceid())) {
                               if (searchTerm08036.equals(cmrsMods.getCmrSortl())) {
                                 // should not be rejected
                                 log.debug("Not a duplicate CMR.");
@@ -1276,7 +1276,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
                             historyNmMatched = true;
 
-                            if (cmrsMods.getCmrPpsceid() != null && !StringUtils.isNotBlank(cmrsMods.getCmrPpsceid())) {
+                            if (cmrsMods.getCmrPpsceid() != null && StringUtils.isNotBlank(cmrsMods.getCmrPpsceid())) {
                               if (searchTerm08036.equals(cmrsMods.getCmrSortl())) {
                                 // should not be rejected
                                 log.debug("Not a duplicate CMR.");
