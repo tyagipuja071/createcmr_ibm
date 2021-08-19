@@ -21,7 +21,11 @@ import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.NotifList;
+import com.ibm.cio.cmr.request.entity.NotifListPK;
+import com.ibm.cio.cmr.request.service.BaseService;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cmr.services.client.AutomationServiceClient;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.ServiceClient.Method;
@@ -38,6 +42,7 @@ public class AustraliaUtil extends AutomationUtil {
   public static final String SCENARIO_BLUEMIX = "BLUMX";
   public static final String SCENARIO_MARKETPLACE = "MKTPC";
   private static final String SCENARIO_PRIVATE_CUSTOMER = "PRIV";
+  private static final String SCENARIO_ECOSYS = "ECSYS";
 
   @Override
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
@@ -173,6 +178,8 @@ public class AustraliaUtil extends AutomationUtil {
       break;
     case SCENARIO_PRIVATE_CUSTOMER:
       return doPrivatePersonChecks(engineData, SystemLocation.AUSTRALIA, soldTo.getLandCntry(), customerName, details, false, requestData);
+    case SCENARIO_ECOSYS:
+      addToNotifyListANZ(entityManager, data.getId().getReqId());
     }
     return true;
   }
@@ -195,6 +202,26 @@ public class AustraliaUtil extends AutomationUtil {
     TypeReference<AutomationResponse<BNValidationResponse>> ref = new TypeReference<AutomationResponse<BNValidationResponse>>() {
     };
     return mapper.readValue(json, ref);
+  }
+
+  public static void addToNotifyListANZ(EntityManager entityManager, long reqId) {
+    StringBuilder anzEcoNotifyList = getANZEcoNotifyList();
+    List<String> users = Arrays.asList(anzEcoNotifyList.toString().split("\\s*,\\s*"));
+    for (String user : users) {
+      NotifList notif = new NotifList();
+      NotifListPK pk = new NotifListPK();
+      pk.setReqId(reqId);
+      pk.setNotifId(user);
+      notif.setId(pk);
+      notif.setNotifNm(user);
+      entityManager.persist(notif);
+    }
+  }
+
+  private static StringBuilder getANZEcoNotifyList() {
+    StringBuilder anzEcoNotifyList = new StringBuilder();
+    anzEcoNotifyList.append(SystemParameters.getString("ANZ_ECSYS_NOTIFY"));
+    return anzEcoNotifyList;
   }
 
   @Override
