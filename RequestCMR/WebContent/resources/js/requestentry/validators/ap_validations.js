@@ -688,7 +688,7 @@ function defaultCMRNumberPrefix() {
     FormManager.show('CmrNoPrefix', 'cmrNoPrefix');
   }
 
-    // default cmrNoPrefix '994---' for Precessor role
+    // default cmrNoPrefix '994---' for PROCESSOR role
   if (role == 'PROCESSOR' && (custSubGrp == 'INTER' || custSubGrp == 'XINT')) {
     FormManager.setValue('cmrNoPrefix', '994---');
   }
