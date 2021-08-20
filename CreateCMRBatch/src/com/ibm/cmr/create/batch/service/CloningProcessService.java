@@ -212,8 +212,14 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     updateEntity(cloningQueue, entityManager);
 
     if ("641".equals(cntry)) {
-      // CloningUtil cUtil = new CloningUtil();
-      String kukla = CloningUtil.getKuklaFromCMR(entityManager, cntry, cmrNo, SystemConfiguration.getValue("MANDT"));
+      String kukla = "";
+      if (StringUtils.isBlank(cloningQueue.getLastUpdtBy())) {
+        kukla = CloningUtil.getKuklaFromCMR(entityManager, cntry, cmrNo, SystemConfiguration.getValue("MANDT"));
+      } else {
+        kukla = cloningQueue.getLastUpdtBy();
+      }
+      // String kukla = CloningUtil.getKuklaFromCMR(entityManager, cntry, cmrNo,
+      // SystemConfiguration.getValue("MANDT"));
       setCNLastUsedCMR(entityManager, cloningCmrNo, SystemConfiguration.getValue("MANDT"), kukla, cntry);
     }
 
