@@ -244,8 +244,10 @@ public class BrazilCalculateIBMElement extends OverridingElement {
         }
         details.append("Search Term/Sales Branch Office = " + data.getSalesBusOffCd() + "\n");
 
-        details.append("Market Responsibility Code (MRC) = " + sbo.getMrcCd() + "\n");
-        overrides.addOverride(getProcessCode(), "DATA", "MRC_CD", data.getMrcCd(), sbo.getMrcCd());
+        if (!sboToBeUnchanged) {
+          overrides.addOverride(getProcessCode(), "DATA", "MRC_CD", data.getMrcCd(), sbo.getMrcCd());
+        }
+        details.append("Market Responsibility Code (MRC) = " + data.getMrcCd() + "\n");
 
         // SET ISU based on MRC
         String isu = getISUCode(entityManager, sbo.getMrcCd(), "");
@@ -259,8 +261,10 @@ public class BrazilCalculateIBMElement extends OverridingElement {
         details.append("Client Tier = " + clientTier + "\n");
         overrides.addOverride(getProcessCode(), "DATA", "CLIENT_TIER", data.getClientTier(), clientTier);
 
-        details.append("Country Use = " + sbo.getMrcCd() + "\n");
-        overrides.addOverride(getProcessCode(), "DATA", "CNTRY_USE", data.getMrcCd(), sbo.getMrcCd());
+        if (!sboToBeUnchanged) {
+          overrides.addOverride(getProcessCode(), "DATA", "CNTRY_USE", data.getMrcCd(), sbo.getMrcCd());
+        }
+        details.append("Country Use = " + data.getMrcCd() + "\n");
 
         details.append("Sales Rep No = " + sbo.getSbo() + "001" + "\n");
         overrides.addOverride(getProcessCode(), "DATA", "REP_TEAM_MEMBER_NO", data.getRepTeamMemberNo(), sbo.getSbo() + "001");
@@ -460,11 +464,15 @@ public class BrazilCalculateIBMElement extends OverridingElement {
         details.append("Search Term/Sales Branch Office = " + data.getSalesBusOffCd() + "\n");
 
         String mrc = (String) rootMatch[9];
-        details.append("Market Responsibility Code (MRC) = " + mrc + "\n");
-        overrides.addOverride(getProcessCode(), "DATA", "MRC_CD", data.getMrcCd(), mrc);
+        if (!sboToBeUnchanged) {
+          overrides.addOverride(getProcessCode(), "DATA", "MRC_CD", data.getMrcCd(), mrc);
+        }
+        details.append("Market Responsibility Code (MRC) = " + data.getMrcCd() + "\n");
 
-        details.append("Country Use = " + (String) rootMatch[9] + "\n");
-        overrides.addOverride(getProcessCode(), "DATA", "CNTRY_USE", data.getMrcCd(), (String) rootMatch[9]);
+        if (!sboToBeUnchanged) {
+          overrides.addOverride(getProcessCode(), "DATA", "CNTRY_USE", data.getMrcCd(), (String) rootMatch[9]);
+        }
+        details.append("Country Use = " + data.getMrcCd() + "\n");
 
         details.append("Sales Rep No = " + (String) rootMatch[8] + "001" + "\n");
         overrides.addOverride(getProcessCode(), "DATA", "REP_TEAM_MEMBER_NO", data.getRepTeamMemberNo(), (String) rootMatch[8] + "001");
@@ -593,11 +601,15 @@ public class BrazilCalculateIBMElement extends OverridingElement {
         }
         details.append("Search Term/Sales Branch Office = " + data.getSalesBusOffCd() + "\n");
 
-        details.append("Market Responsibility Code (MRC) = " + sbo.getMrcCd() + "\n");
-        overrides.addOverride(getProcessCode(), "DATA", "MRC_CD", data.getMrcCd(), sbo.getMrcCd());
+        if (!sboToBeUnchanged) {
+          overrides.addOverride(getProcessCode(), "DATA", "MRC_CD", data.getMrcCd(), sbo.getMrcCd());
+        }
+        details.append("Market Responsibility Code (MRC) = " + data.getMrcCd() + "\n");
 
-        details.append("Country Use = " + sbo.getMrcCd() + "\n");
-        overrides.addOverride(getProcessCode(), "DATA", "CNTRY_USE", data.getMrcCd(), sbo.getMrcCd());
+        if (!sboToBeUnchanged) {
+          overrides.addOverride(getProcessCode(), "DATA", "CNTRY_USE", data.getMrcCd(), sbo.getMrcCd());
+        }
+        details.append("Country Use = " + data.getMrcCd() + "\n");
 
         details.append("Sales Rep No = " + sbo.getSbo() + "001" + "\n");
         overrides.addOverride(getProcessCode(), "DATA", "REP_TEAM_MEMBER_NO", data.getRepTeamMemberNo(), sbo.getSbo() + "001");
@@ -642,11 +654,18 @@ public class BrazilCalculateIBMElement extends OverridingElement {
             // overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD",
             // data.getSalesBusOffCd(), sboMSP.getSbo());
 
-            details.append("Market Responsibility Code (MRC) = " + sboMSP.getMrcCd() + "\n");
-            overrides.addOverride(getProcessCode(), "DATA", "MRC_CD", data.getMrcCd(), sboMSP.getMrcCd());
-
-            details.append("Country Use = " + sboMSP.getMrcCd() + "\n");
-            overrides.addOverride(getProcessCode(), "DATA", "CNTRY_USE", data.getMrcCd(), sboMSP.getMrcCd());
+            // if (!sboToBeUnchanged) {
+            // overrides.addOverride(getProcessCode(), "DATA", "MRC_CD",
+            // data.getMrcCd(), sboMSP.getMrcCd());
+            // }
+            // details.append("Market Responsibility Code (MRC) = " +
+            // data.getMrcCd() + "\n");
+            //
+            // if (!sboToBeUnchanged) {
+            // overrides.addOverride(getProcessCode(), "DATA", "CNTRY_USE",
+            // data.getMrcCd(), sboMSP.getMrcCd());
+            // }
+            // details.append("Country Use = " + data.getMrcCd() + "\n");
           }
 
           sql = ExternalizedQuery.getSql("BR.AUTO.GET_COLLECTOR_FROM_STATE");
@@ -746,12 +765,16 @@ public class BrazilCalculateIBMElement extends OverridingElement {
         details.append("Search Term/Sales Branch Office = " + data.getSalesBusOffCd() + "\n");
 
         // SET MRC
-        details.append("Market Responsibility Code (MRC) = " + "9" + "\n");
-        overrides.addOverride(getProcessCode(), "DATA", "MRC_CD", data.getMrcCd(), "9");
+        if (!sboToBeUnchanged) {
+          overrides.addOverride(getProcessCode(), "DATA", "MRC_CD", data.getMrcCd(), "9");
+        }
+        details.append("Market Responsibility Code (MRC) = " + data.getMrcCd() + "\n");
 
         // SET Country Use based on MRC
-        details.append("Country Use = " + "9" + "\n");
-        overrides.addOverride(getProcessCode(), "DATA", "CNTRY_USE", data.getMrcCd(), "9");
+        if (!sboToBeUnchanged) {
+          overrides.addOverride(getProcessCode(), "DATA", "CNTRY_USE", data.getMrcCd(), "9");
+        }
+        details.append("Country Use = " + data.getMrcCd() + "\n");
 
         // SET ISU based on MRC
         String isu = getISUCode(entityManager, "9", "");
@@ -796,12 +819,16 @@ public class BrazilCalculateIBMElement extends OverridingElement {
         details.append("Search Term/Sales Branch Office = " + data.getSalesBusOffCd() + "\n");
 
         // SET MRC
-        details.append("Market Responsibility Code (MRC) = " + "9" + "\n");
-        overrides.addOverride(getProcessCode(), "DATA", "MRC_CD", data.getMrcCd(), "9");
+        if (!sboToBeUnchanged) {
+          overrides.addOverride(getProcessCode(), "DATA", "MRC_CD", data.getMrcCd(), "9");
+        }
+        details.append("Market Responsibility Code (MRC) = " + data.getMrcCd() + "\n");
 
         // SET Country Use based on MRC
-        details.append("Country Use = " + "9" + "\n");
-        overrides.addOverride(getProcessCode(), "DATA", "CNTRY_USE", data.getMrcCd(), "9");
+        if (!sboToBeUnchanged) {
+          overrides.addOverride(getProcessCode(), "DATA", "CNTRY_USE", data.getMrcCd(), "9");
+        }
+        details.append("Country Use = " + data.getMrcCd() + "\n");
 
         // SET ISU based on MRC
 
@@ -872,12 +899,16 @@ public class BrazilCalculateIBMElement extends OverridingElement {
         }
         details.append("Search Term/Sales Branch Office = " + data.getSalesBusOffCd() + "\n");
         // SET MRC
-        details.append("Market Responsibility Code (MRC) = " + "Y" + "\n");
-        overrides.addOverride(getProcessCode(), "DATA", "MRC_CD", data.getMrcCd(), "Y");
+        if (!sboToBeUnchanged) {
+          overrides.addOverride(getProcessCode(), "DATA", "MRC_CD", data.getMrcCd(), "Y");
+        }
+        details.append("Market Responsibility Code (MRC) = " + data.getMrcCd() + "\n");
 
         // SET Country Use based on MRC
-        details.append("Country Use = " + "Y" + "\n");
-        overrides.addOverride(getProcessCode(), "DATA", "CNTRY_USE", data.getMrcCd(), "Y");
+        if (!sboToBeUnchanged) {
+          overrides.addOverride(getProcessCode(), "DATA", "CNTRY_USE", data.getMrcCd(), "Y");
+        }
+        details.append("Country Use = " + data.getMrcCd() + "\n");
 
         // SET ISU based on MRC
         String isu = getISUCode(entityManager, "Y", "");
