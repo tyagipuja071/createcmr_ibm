@@ -729,8 +729,6 @@ function setValuesForScenarios() {
   var _custSubGrp = FormManager.getActualValue('custSubGrp');
 
   if (_pagemodel.userRole.toUpperCase() == "REQUESTER") {
-    FormManager.hide('ClassCode', 'custClass');
-    FormManager.resetValidations('custClass');
     FormManager.hide('InterAddrKey', 'cnInterAddrKey');
     FormManager.resetValidations('cnInterAddrKey');
   }
@@ -800,14 +798,6 @@ function setValuesForScenarios() {
     }
 
     if (_pagemodel.userRole.toUpperCase() == "PROCESSOR") {
-      if (_custSubGrp == 'NRML' || _custSubGrp == 'ECOSY' || _custSubGrp == 'AQSTN'|| _custSubGrp == 'PRIV' || _custSubGrp == 'EMBSA' || _custSubGrp == 'CROSS' || _custSubGrp == 'MRKT' || _custSubGrp == 'BLUMX') {
-        FormManager.setValue('custClass', '11');
-        FormManager.readOnly('custClass');
-      }
-      if (_custSubGrp == 'BUSPR') {
-        FormManager.setValue('custClass', '45');
-        FormManager.readOnly('custClass');
-      }
       if (_custSubGrp == 'NRML' || _custSubGrp == 'ECOSY' || _custSubGrp == 'BUSPR' || _custSubGrp == 'INTER' || _custSubGrp == 'EMBSA' || _custSubGrp == 'BLUMX' || _custSubGrp == 'MRKT') {
         FormManager.setValue('cnInterAddrKey', '6');
         FormManager.addValidator('cnInterAddrKey', Validators.REQUIRED, [ 'InterAddrKey' ], '');
