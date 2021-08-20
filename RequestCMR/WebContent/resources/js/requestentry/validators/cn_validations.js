@@ -218,6 +218,24 @@ function afterConfigForCN() {
       FormManager.readOnly('inacCd');
       FormManager.readOnly('company');
     }
+    
+    var ppsceidBP = FormManager.getActualValue('ppsceid');
+    var searchTerm = FormManager.getActualValue('searchTerm');
+    var isuCd = FormManager.getActualValue('isuCd');
+    if (_pagemodel.userRole.toUpperCase() == 'REQUESTER' &&  ppsceidBP != undefined && ppsceidBP != null && ppsceidBP != '' && isuCd != undefined && isuCd != null && isuCd != '' && isuCd == '8B' && searchTerm != undefined && searchTerm != null && searchTerm != '' && searchTerm != '08036'){
+      if (searchTerm == '04182') {
+        FormManager.readOnly('searchTerm');
+        FormManager.readOnly('isuCd');
+        FormManager.readOnly('clientTier');
+        FormManager.readOnly('inacType');
+        FormManager.readOnly('inacCd');
+      } else {
+        FormManager.setValue('searchTerm', '04182');
+        FormManager.setValue('clientTier', 'Z');
+        FormManager.readOnly('searchTerm');
+        FormManager.readOnly('clientTier');
+      }
+    }
   }
   FormManager.show('DisableAutoProcessing', 'disableAutoProc');
 
