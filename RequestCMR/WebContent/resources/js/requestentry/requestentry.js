@@ -130,43 +130,49 @@ function processRequestAction() {
     doYourAction();
 
   } else if (action == YourActions.Send_for_Processing) {
-    var findDnbResult =  FormManager.getActualValue('findDnbResult');
-    if (_pagemodel.approvalResult == 'Rejected') {
-      cmr.showAlert('The request\'s approvals have been rejected. Please re-submit or override the rejected approvals. ');
-    } else if (FormManager.validate('frmCMR') && !comp_proof_IN ) {
-			if(checkForConfirmationAttachments()){
-				showDocTypeConfirmDialog();
-			} else if(cmrCntry == SysLoc.INDIA) {   
-                // Cmr-2340- For India Dnb import   
-                if(findDnbResult == 'Accepted' && checkIfDnBCheckReqForIndia()){      
-                matchDnBForIndia();
-                } else {
-                   cmr.showModal('addressVerificationModal'); 
-                }              
-            } else if (checkIfFinalDnBCheckRequired()) {
-        matchDnBForAutomationCountries();
-      } else if (checkIfUpfrontUpdateChecksRequired()) {
-        addUpdateChecksExecution(frmCMR);
-      } else {
-        if (cmrCntry == '821') {
-          executeBeforeSubmit();
-        } else {
-          // if there are no errors, show the Address Verification modal window
-          cmr.showModal('addressVerificationModal');
-        }
-      }
-    } else if(comp_proof_IN && cmrCntry =='744' ){
-      if(checkIfDnBCheckReqForIndia() && findDnbResult == 'Accepted') {            
-                matchDnBForIndia();
-                    }else {
-          // if there are no errors, show the Address Verification modal window
-          cmr.showModal('addressVerificationModal');
-        }
-       }
-    else {
-      cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
-    }
-
+        var findDnbResult = FormManager.getActualValue('findDnbResult');
+	    var reqType = FormManager.getActualValue('reqType');
+	    if (_pagemodel.approvalResult == 'Rejected') {
+	      cmr.showAlert('The request\'s approvals have been rejected. Please re-submit or override the rejected approvals. ');
+	    } else if (FormManager.validate('frmCMR') && !comp_proof_IN) {
+	      if (checkForConfirmationAttachments()) {
+	        showDocTypeConfirmDialog();
+	      } else if (cmrCntry == SysLoc.INDIA) {
+	        // Cmr-2340- For India Dnb import
+	        if (findDnbResult == 'Accepted') {
+	          if (checkIfDnBCheckReqForIndia()) {
+	            matchDnBForIndia();
+	          } else {
+	            cmr.showModal('addressVerificationModal');
+	          }
+	        } else if (checkIfFinalDnBCheckRequired() && reqType == 'C') {
+	          matchDnBForAutomationCountries();
+	        } else {
+	          cmr.showModal('addressVerificationModal');
+	        }
+	      } else if (checkIfFinalDnBCheckRequired()) {
+	        matchDnBForAutomationCountries();
+	      } else if (checkIfUpfrontUpdateChecksRequired()) {
+	        addUpdateChecksExecution(frmCMR);
+	      } else {
+	        if (cmrCntry == '821') {
+	          executeBeforeSubmit();
+	        } else {
+	          // if there are no errors, show the Address Verification modal window
+	          cmr.showModal('addressVerificationModal');
+	        }
+	      }
+	    } else if (comp_proof_IN && cmrCntry == '744') {
+	      if (checkIfDnBCheckReqForIndia() && findDnbResult == 'Accepted') {
+	        matchDnBForIndia();
+	      } else {
+	        // if there are no errors, show the Address Verification modal window
+	        cmr.showModal('addressVerificationModal');
+	      }
+	    } else {
+	      cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
+	    }
+  
   } else if (action == YourActions.Processing_Create_Up_Complete) {
     var cmrNo = FormManager.getActualValue('cmrNo');
     var disAutoProc = FormManager.getActualValue('disableAutoProc');
