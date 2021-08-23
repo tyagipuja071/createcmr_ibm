@@ -174,7 +174,7 @@ function addAfterConfigAP() {
       }
     }
     
-    if((cntry == SysLoc.NEW_ZEALAND || cntry == SysLoc.AUSTRALIA) && custSubGrp == 'ECSYS' ){
+    if((cntry == SysLoc.NEW_ZEALAND || cntry == SysLoc.AUSTRALIA) && (custSubGrp == 'ECSYS' ||custSubGrp == 'XECO' )){
         FormManager.setValue('mrcCd', '3');
         FormManager.setValue('clientTier', 'Y');
         FormManager.readOnly('clientTier');
@@ -3485,7 +3485,7 @@ function addValidatorBasedOnCluster() {
       validate : function() {
         var custSubType = FormManager.getActualValue('custSubGrp');
         var cluster = FormManager.getActualValue('apCustClusterId');
-        if (custSubType != 'ECSYS' && (cluster == '08039' || cluster == '08037')) {
+        if ((custSubType != 'ECSYS' && custSubType != 'XECO' ) && (cluster == '08039' || cluster == '08037')) {
           return new ValidationResult(null, false, 'Ecosytem Partners Cluster is not allowed for selected scenario.');
         }
      else{
