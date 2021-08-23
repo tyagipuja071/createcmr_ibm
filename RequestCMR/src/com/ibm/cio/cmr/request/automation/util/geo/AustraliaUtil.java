@@ -23,7 +23,6 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.NotifList;
 import com.ibm.cio.cmr.request.entity.NotifListPK;
-import com.ibm.cio.cmr.request.service.BaseService;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cmr.services.client.AutomationServiceClient;
@@ -43,6 +42,7 @@ public class AustraliaUtil extends AutomationUtil {
   public static final String SCENARIO_MARKETPLACE = "MKTPC";
   private static final String SCENARIO_PRIVATE_CUSTOMER = "PRIV";
   private static final String SCENARIO_ECOSYS = "ECSYS";
+  private static final String SCENARIO_CROSS_ECOSYS = "XECO";
 
   @Override
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
@@ -179,6 +179,7 @@ public class AustraliaUtil extends AutomationUtil {
     case SCENARIO_PRIVATE_CUSTOMER:
       return doPrivatePersonChecks(engineData, SystemLocation.AUSTRALIA, soldTo.getLandCntry(), customerName, details, false, requestData);
     case SCENARIO_ECOSYS:
+    case SCENARIO_CROSS_ECOSYS:
       addToNotifyListANZ(entityManager, data.getId().getReqId());
     }
     return true;
