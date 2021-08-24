@@ -1652,7 +1652,7 @@ public class CNHandler extends GEOHandler {
     reqCmtLog.setCmt(message != null ? message : "No message provided.");
     // save cmtlockedIn as Y default for current realese
     reqCmtLog.setCmtLockedIn(CmrConstants.CMT_LOCK_IND_YES);
-    reqCmtLog.setCreateById(admin.getLastUpdtBy());
+    reqCmtLog.setCreateById("CreateCMR");
     reqCmtLog.setCreateByNm("CreateCMR");
     // set createTs as current timestamp and updateTs same as CreateTs
     reqCmtLog.setCreateTs(SystemUtil.getCurrentTimestamp());
