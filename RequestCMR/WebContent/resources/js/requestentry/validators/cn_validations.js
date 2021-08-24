@@ -205,36 +205,8 @@ function afterConfigForCN() {
       FormManager.resetValidations('custClass');
       FormManager.hide('InterAddrKey', 'cnInterAddrKey');
       FormManager.resetValidations('cnInterAddrKey');
-      if (FormManager.getActualValue('isicCd') != 'undefined' && FormManager.getActualValue('isicCd') != '') {
-        FormManager.readOnly('isicCd');
-      }
-      if(FormManager.getField('capInd').checked == true){
-        FormManager.readOnly('subIndustryCd');
-        FormManager.readOnly('searchTerm');
-        FormManager.readOnly('isuCd');
-        FormManager.readOnly('clientTier');
-        FormManager.readOnly('inacType');
-        FormManager.readOnly('inacCd');
-        FormManager.readOnly('company');
-      }else{
-        FormManager.readOnly('searchTerm');
-        FormManager.readOnly('isuCd');
-        FormManager.readOnly('clientTier');
-        FormManager.readOnly('inacType');
-        FormManager.readOnly('inacCd');
-      }
     } else {
       FormManager.readOnly('custClass');
-    }
-    FormManager.readOnly('isicCd');
-    if(FormManager.getField('capInd').checked == true){
-      FormManager.readOnly('subIndustryCd');
-      FormManager.readOnly('searchTerm');
-      FormManager.readOnly('isuCd');
-      FormManager.readOnly('clientTier');
-      FormManager.readOnly('inacType');
-      FormManager.readOnly('inacCd');
-      FormManager.readOnly('company');
     }
   }
   FormManager.show('DisableAutoProcessing', 'disableAutoProc');
@@ -254,6 +226,36 @@ function afterConfigForCN() {
   }
 // resetISICCode();
   updateBPSearchTerm();
+}
+
+function setReadOnly4Update(){
+  if (FormManager.getActualValue('reqType') != 'U' || FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  if (FormManager.getActualValue('reqType') == 'U') {
+    window.setTimeout('setReadOnly4Update()', 1);
+    if (_pagemodel.userRole.toUpperCase() == "REQUESTER") {
+      FormManager.readOnly('isicCd');
+
+      if(FormManager.getField('capInd').checked == true){
+        FormManager.readOnly('subIndustryCd');
+        FormManager.readOnly('searchTerm');
+        FormManager.readOnly('isuCd');
+        FormManager.readOnly('clientTier');
+        FormManager.readOnly('inacType');
+        FormManager.readOnly('inacCd');
+        FormManager.readOnly('company');
+      }else{
+        FormManager.readOnly('searchTerm');
+        FormManager.readOnly('isuCd');
+        FormManager.readOnly('clientTier');
+        FormManager.readOnly('inacType');
+        FormManager.readOnly('inacCd');
+      }
+      FormManager.removeValidator('inacType', Validators.REQUIRED);
+    }
+    
+  }
 }
 
 function updateBPSearchTerm() {
@@ -2758,6 +2760,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(onInacTypeChange, GEOHandler.CN);
   GEOHandler.addAfterConfig(setCompanyOnInacCd, GEOHandler.CN);
   GEOHandler.addAfterConfig(updateBPSearchTerm, GEOHandler.CN);
+  GEOHandler.addAfterConfig(setReadOnly4Update, GEOHandler.CN);
   
   GEOHandler.addAfterTemplateLoad(autoSetIBMDeptCostCenter, GEOHandler.CN);
   GEOHandler.addAfterTemplateLoad(afterConfigForCN, GEOHandler.CN);
