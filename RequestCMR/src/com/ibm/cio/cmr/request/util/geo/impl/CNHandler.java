@@ -732,6 +732,14 @@ public class CNHandler extends GEOHandler {
       data.setClientTier("BL");
     }
 
+    if (!StringUtils.isBlank(admin.getReqType()) && admin.getReqType() == "U" && !StringUtils.isBlank(data.getPpsceid())
+        && !StringUtils.isBlank(admin.getReqStatus()) && admin.getReqStatus() == "DRA" && data.getSearchTerm() != null
+        && data.getSearchTerm() != "08036") {
+      if (data.getSearchTerm().trim() == "" || data.getSearchTerm().trim() == "00000" || data.getSearchTerm().matches("[a-zA-Z]")) {
+        data.setClientTier("Z");
+        data.setSearchTerm("04182");
+      }
+    }
   }
 
   private IntlAddr getIntlAddr(EntityManager entityManager, Addr address) {
