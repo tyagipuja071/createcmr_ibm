@@ -253,6 +253,7 @@ function afterConfigForCN() {
     _searchTermHandler[0].onChange();
   }
 // resetISICCode();
+  updateBPSearchTerm();
 }
 
 function updateBPSearchTerm() {
