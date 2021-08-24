@@ -1044,7 +1044,7 @@ public class USUtil extends AutomationUtil {
           if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZS01.toString())) {
             closelyMatchAddressWithDnbRecords(entityManager, requestData, engineData, "ZS01", details, validation, output);
             if (relevantAddressFieldForUpdates(changes, requestData.getAddress("ZS01"))) {
-              matchAddressWithDnbRecords(entityManager, requestData, engineData, "ZS01", details, validation, output);
+              matchAddressWithSosRecords(entityManager, requestData, engineData, "ZS01", details, validation, output);
             }
           }
 
@@ -1080,7 +1080,7 @@ public class USUtil extends AutomationUtil {
               closelyMatchAddressWithDnbRecords(entityManager, requestData, engineData, "ZI01", details, validation, output);
             }
             if (relevantAddressFieldForUpdates(changes, requestData.getAddress("ZI01"))) {
-              matchAddressWithDnbRecords(entityManager, requestData, engineData, "ZS01", details, validation, output);
+              matchAddressWithSosRecords(entityManager, requestData, engineData, "ZS01", details, validation, output);
             }
           }
         }
@@ -1103,7 +1103,7 @@ public class USUtil extends AutomationUtil {
   }
 
   /**
-   * Validates if address closely matches with DnB records matched.
+   * Validates if address closely matches with SOS records matched.
    * 
    * @param requestData
    * @param engineData
@@ -1112,7 +1112,7 @@ public class USUtil extends AutomationUtil {
    * @param validation
    * @throws Exception
    */
-  private void matchAddressWithDnbRecords(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData, String addrType,
+  private void matchAddressWithSosRecords(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData, String addrType,
       StringBuilder details, ValidationOutput validation, AutomationResult<ValidationOutput> output) throws Exception {
     String addrDesc = "ZS01".equals(addrType) ? "Install-at" : "Invoice-at";
     Addr addr = requestData.getAddress(addrType);
