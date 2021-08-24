@@ -217,10 +217,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                             // should be rejected
                             log.debug("Duplicate CMR. Request should be rejected.");
                             shouldBeRejected = true;
-                            matchedCMRs.add(cmrsMods.getCmrNum());
-                            convertMatchData(cmrsMods, cmrData);
-                            details.append("\n");
-                            logDuplicateCMR(details, cmrData);
+                            handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                           } else {
                             if (incloud(kukla, cnSpecialKukla)) {
                               // should not be rejected
@@ -229,10 +226,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                               // should be rejected
                               log.debug("Duplicate CMR. Request should be rejected.");
                               shouldBeRejected = true;
-                              matchedCMRs.add(cmrsMods.getCmrNum());
-                              convertMatchData(cmrsMods, cmrData);
-                              details.append("\n");
-                              logDuplicateCMR(details, cmrData);
+                              handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                             }
                           }
                         } else {
@@ -243,10 +237,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                             // should be rejected
                             log.debug("Duplicate CMR. Request should be rejected.");
                             shouldBeRejected = true;
-                            matchedCMRs.add(cmrsMods.getCmrNum());
-                            convertMatchData(cmrsMods, cmrData);
-                            details.append("\n");
-                            logDuplicateCMR(details, cmrData);
+                            handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                           }
                         }
 
@@ -299,10 +290,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                               // should be rejected
                               log.debug("Duplicate CMR. Request should be rejected.");
                               shouldBeRejected = true;
-                              matchedCMRs.add(cmrsMods.getCmrNum());
-                              convertMatchData(cmrsMods, cmrData);
-                              details.append("\n");
-                              logDuplicateCMR(details, cmrData);
+                              handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                             } else {
                               if (incloud(kukla, cnSpecialKukla)) {
                                 // should not be rejected
@@ -311,10 +299,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                                 // should be rejected
                                 log.debug("Duplicate CMR. Request should be rejected.");
                                 shouldBeRejected = true;
-                                matchedCMRs.add(cmrsMods.getCmrNum());
-                                convertMatchData(cmrsMods, cmrData);
-                                details.append("\n");
-                                logDuplicateCMR(details, cmrData);
+                                handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                               }
                             }
                           } else {
@@ -325,10 +310,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                               // should be rejected
                               log.debug("Duplicate CMR. Request should be rejected.");
                               shouldBeRejected = true;
-                              matchedCMRs.add(cmrsMods.getCmrNum());
-                              convertMatchData(cmrsMods, cmrData);
-                              details.append("\n");
-                              logDuplicateCMR(details, cmrData);
+                              handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                             }
                           }
 
@@ -384,10 +366,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                                 // should be rejected
                                 log.debug("Duplicate CMR. Request should be rejected.");
                                 shouldBeRejected = true;
-                                matchedCMRs.add(cmrsMods.getCmrNum());
-                                convertMatchData(cmrsMods, cmrData);
-                                details.append("\n");
-                                logDuplicateCMR(details, cmrData);
+                                handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                               } else {
                                 if (incloud(kukla, cnSpecialKukla)) {
                                   // should not be rejected
@@ -396,10 +375,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                                   // should be rejected
                                   log.debug("Duplicate CMR. Request should be rejected.");
                                   shouldBeRejected = true;
-                                  matchedCMRs.add(cmrsMods.getCmrNum());
-                                  convertMatchData(cmrsMods, cmrData);
-                                  details.append("\n");
-                                  logDuplicateCMR(details, cmrData);
+                                  handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                                 }
                               }
                             } else {
@@ -410,10 +386,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                                 // should be rejected
                                 log.debug("Duplicate CMR. Request should be rejected.");
                                 shouldBeRejected = true;
-                                matchedCMRs.add(cmrsMods.getCmrNum());
-                                convertMatchData(cmrsMods, cmrData);
-                                details.append("\n");
-                                logDuplicateCMR(details, cmrData);
+                                handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                               }
                             }
 
@@ -475,10 +448,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                                 // should be rejected
                                 log.debug("Duplicate CMR. Request should be rejected.");
                                 shouldBeRejected = true;
-                                matchedCMRs.add(cmrsMods.getCmrNum());
-                                convertMatchData(cmrsMods, cmrData);
-                                details.append("\n");
-                                logDuplicateCMR(details, cmrData);
+                                handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                               } else {
                                 if (incloud(kukla, cnSpecialKukla)) {
                                   // should not be rejected
@@ -487,10 +457,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                                   // should be rejected
                                   log.debug("Duplicate CMR. Request should be rejected.");
                                   shouldBeRejected = true;
-                                  matchedCMRs.add(cmrsMods.getCmrNum());
-                                  convertMatchData(cmrsMods, cmrData);
-                                  details.append("\n");
-                                  logDuplicateCMR(details, cmrData);
+                                  handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                                 }
                               }
                             } else {
@@ -501,10 +468,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                                 // should be rejected
                                 log.debug("Duplicate CMR. Request should be rejected.");
                                 shouldBeRejected = true;
-                                matchedCMRs.add(cmrsMods.getCmrNum());
-                                convertMatchData(cmrsMods, cmrData);
-                                details.append("\n");
-                                logDuplicateCMR(details, cmrData);
+                                handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                               }
                             }
 
@@ -661,10 +625,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                             // should be rejected
                             log.debug("Duplicate CMR. Request should be rejected.");
                             shouldBeRejected = true;
-                            matchedCMRs.add(cmrsMods.getCmrNum());
-                            convertMatchData(cmrsMods, cmrData);
-                            details.append("\n");
-                            logDuplicateCMR(details, cmrData);
+                            handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                           } else if ("04182".equals(cmrsMods.getCmrSortl())) {
                             // should not be rejected
                             log.debug("Not a duplicate CMR.");
@@ -682,10 +643,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                                 // should be rejected
                                 log.debug("Duplicate CMR. Request should be rejected.");
                                 shouldBeRejected = true;
-                                matchedCMRs.add(cmrsMods.getCmrNum());
-                                convertMatchData(cmrsMods, cmrData);
-                                details.append("\n");
-                                logDuplicateCMR(details, cmrData);
+                                handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                               }
                             }
                           }
@@ -745,10 +703,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                               // should be rejected
                               log.debug("Duplicate CMR. Request should be rejected.");
                               shouldBeRejected = true;
-                              matchedCMRs.add(cmrsMods.getCmrNum());
-                              convertMatchData(cmrsMods, cmrData);
-                              details.append("\n");
-                              logDuplicateCMR(details, cmrData);
+                              handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                             } else if ("04182".equals(cmrsMods.getCmrSortl())) {
                               // should not be rejected
                               log.debug("Not a duplicate CMR.");
@@ -766,10 +721,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                                   // should be rejected
                                   log.debug("Duplicate CMR. Request should be rejected.");
                                   shouldBeRejected = true;
-                                  matchedCMRs.add(cmrsMods.getCmrNum());
-                                  convertMatchData(cmrsMods, cmrData);
-                                  details.append("\n");
-                                  logDuplicateCMR(details, cmrData);
+                                  handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                                 }
                               }
                             }
@@ -830,10 +782,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                                 // should be rejected
                                 log.debug("Duplicate CMR. Request should be rejected.");
                                 shouldBeRejected = true;
-                                matchedCMRs.add(cmrsMods.getCmrNum());
-                                convertMatchData(cmrsMods, cmrData);
-                                details.append("\n");
-                                logDuplicateCMR(details, cmrData);
+                                handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                               } else if ("04182".equals(cmrsMods.getCmrSortl())) {
                                 // should not be rejected
                                 log.debug("Not a duplicate CMR.");
@@ -851,10 +800,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                                     // should be rejected
                                     log.debug("Duplicate CMR. Request should be rejected.");
                                     shouldBeRejected = true;
-                                    matchedCMRs.add(cmrsMods.getCmrNum());
-                                    convertMatchData(cmrsMods, cmrData);
-                                    details.append("\n");
-                                    logDuplicateCMR(details, cmrData);
+                                    handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                                   }
                                 }
                               }
@@ -920,10 +866,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                                 // should be rejected
                                 log.debug("Duplicate CMR. Request should be rejected.");
                                 shouldBeRejected = true;
-                                matchedCMRs.add(cmrsMods.getCmrNum());
-                                convertMatchData(cmrsMods, cmrData);
-                                details.append("\n");
-                                logDuplicateCMR(details, cmrData);
+                                handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                               } else if ("04182".equals(cmrsMods.getCmrSortl())) {
                                 // should not be rejected
                                 log.debug("Not a duplicate CMR.");
@@ -940,10 +883,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                                     // should be rejected
                                     log.debug("Duplicate CMR. Request should be rejected.");
                                     shouldBeRejected = true;
-                                    matchedCMRs.add(cmrsMods.getCmrNum());
-                                    convertMatchData(cmrsMods, cmrData);
-                                    details.append("\n");
-                                    logDuplicateCMR(details, cmrData);
+                                    handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                                   }
                                 }
                               }
@@ -1091,10 +1031,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                             // should be rejected
                             log.debug("Duplicate CMR. Request should be rejected.");
                             shouldBeRejected = true;
-                            matchedCMRs.add(cmrsMods.getCmrNum());
-                            convertMatchData(cmrsMods, cmrData);
-                            details.append("\n");
-                            logDuplicateCMR(details, cmrData);
+                            handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                           }
                         } else {
                           // should not be rejected
@@ -1152,10 +1089,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                               // should be rejected
                               log.debug("Duplicate CMR. Request should be rejected.");
                               shouldBeRejected = true;
-                              matchedCMRs.add(cmrsMods.getCmrNum());
-                              convertMatchData(cmrsMods, cmrData);
-                              details.append("\n");
-                              logDuplicateCMR(details, cmrData);
+                              handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                             }
                           } else {
                             // should not be rejected
@@ -1215,10 +1149,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                                 // should be rejected
                                 log.debug("Duplicate CMR. Request should be rejected.");
                                 shouldBeRejected = true;
-                                matchedCMRs.add(cmrsMods.getCmrNum());
-                                convertMatchData(cmrsMods, cmrData);
-                                details.append("\n");
-                                logDuplicateCMR(details, cmrData);
+                                handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                               }
                             } else {
                               // should not be rejected
@@ -1284,10 +1215,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                                 // should be rejected
                                 log.debug("Duplicate CMR. Request should be rejected.");
                                 shouldBeRejected = true;
-                                matchedCMRs.add(cmrsMods.getCmrNum());
-                                convertMatchData(cmrsMods, cmrData);
-                                details.append("\n");
-                                logDuplicateCMR(details, cmrData);
+                                handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                               }
                             } else {
                               // should not be rejected
@@ -1339,10 +1267,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                           // should be rejected
                           log.debug("Duplicate CMR. Request should be rejected.");
                           shouldBeRejected = true;
-                          matchedCMRs.add(cmrsMods.getCmrNum());
-                          convertMatchData(cmrsMods, cmrData);
-                          details.append("\n");
-                          logDuplicateCMR(details, cmrData);
+                          handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                         }
                       }
 
@@ -1488,10 +1413,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                             // should be rejected
                             log.debug("Duplicate CMR. Request should be rejected.");
                             shouldBeRejected = true;
-                            matchedCMRs.add(cmrsMods.getCmrNum());
-                            convertMatchData(cmrsMods, cmrData);
-                            details.append("\n");
-                            logDuplicateCMR(details, cmrData);
+                            handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                           } else {
                             if (incloud(kukla, cnSpecialKukla)) {
                               // should not be rejected
@@ -1500,10 +1422,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                               // should be rejected
                               log.debug("Duplicate CMR. Request should be rejected.");
                               shouldBeRejected = true;
-                              matchedCMRs.add(cmrsMods.getCmrNum());
-                              convertMatchData(cmrsMods, cmrData);
-                              details.append("\n");
-                              logDuplicateCMR(details, cmrData);
+                              handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                             }
                           }
                         } else {
@@ -1514,10 +1433,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                             // should be rejected
                             log.debug("Duplicate CMR. Request should be rejected.");
                             shouldBeRejected = true;
-                            matchedCMRs.add(cmrsMods.getCmrNum());
-                            convertMatchData(cmrsMods, cmrData);
-                            details.append("\n");
-                            logDuplicateCMR(details, cmrData);
+                            handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                           }
                         }
 
@@ -1570,10 +1486,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                               // should be rejected
                               log.debug("Duplicate CMR. Request should be rejected.");
                               shouldBeRejected = true;
-                              matchedCMRs.add(cmrsMods.getCmrNum());
-                              convertMatchData(cmrsMods, cmrData);
-                              details.append("\n");
-                              logDuplicateCMR(details, cmrData);
+                              handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                             } else {
                               if (incloud(kukla, cnSpecialKukla)) {
                                 // should not be rejected
@@ -1582,10 +1495,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                                 // should be rejected
                                 log.debug("Duplicate CMR. Request should be rejected.");
                                 shouldBeRejected = true;
-                                matchedCMRs.add(cmrsMods.getCmrNum());
-                                convertMatchData(cmrsMods, cmrData);
-                                details.append("\n");
-                                logDuplicateCMR(details, cmrData);
+                                handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                               }
                             }
                           } else {
@@ -1596,10 +1506,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                               // should be rejected
                               log.debug("Duplicate CMR. Request should be rejected.");
                               shouldBeRejected = true;
-                              matchedCMRs.add(cmrsMods.getCmrNum());
-                              convertMatchData(cmrsMods, cmrData);
-                              details.append("\n");
-                              logDuplicateCMR(details, cmrData);
+                              handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                             }
                           }
 
@@ -1655,10 +1562,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                                 // should be rejected
                                 log.debug("Duplicate CMR. Request should be rejected.");
                                 shouldBeRejected = true;
-                                matchedCMRs.add(cmrsMods.getCmrNum());
-                                convertMatchData(cmrsMods, cmrData);
-                                details.append("\n");
-                                logDuplicateCMR(details, cmrData);
+                                handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                               } else {
                                 if (incloud(kukla, cnSpecialKukla)) {
                                   // should not be rejected
@@ -1667,10 +1571,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                                   // should be rejected
                                   log.debug("Duplicate CMR. Request should be rejected.");
                                   shouldBeRejected = true;
-                                  matchedCMRs.add(cmrsMods.getCmrNum());
-                                  convertMatchData(cmrsMods, cmrData);
-                                  details.append("\n");
-                                  logDuplicateCMR(details, cmrData);
+                                  handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                                 }
                               }
                             } else {
@@ -1681,10 +1582,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                                 // should be rejected
                                 log.debug("Duplicate CMR. Request should be rejected.");
                                 shouldBeRejected = true;
-                                matchedCMRs.add(cmrsMods.getCmrNum());
-                                convertMatchData(cmrsMods, cmrData);
-                                details.append("\n");
-                                logDuplicateCMR(details, cmrData);
+                                handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                               }
                             }
 
@@ -1746,10 +1644,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                                 // should be rejected
                                 log.debug("Duplicate CMR. Request should be rejected.");
                                 shouldBeRejected = true;
-                                matchedCMRs.add(cmrsMods.getCmrNum());
-                                convertMatchData(cmrsMods, cmrData);
-                                details.append("\n");
-                                logDuplicateCMR(details, cmrData);
+                                handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                               } else {
                                 if (incloud(kukla, cnSpecialKukla)) {
                                   // should not be rejected
@@ -1758,10 +1653,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                                   // should be rejected
                                   log.debug("Duplicate CMR. Request should be rejected.");
                                   shouldBeRejected = true;
-                                  matchedCMRs.add(cmrsMods.getCmrNum());
-                                  convertMatchData(cmrsMods, cmrData);
-                                  details.append("\n");
-                                  logDuplicateCMR(details, cmrData);
+                                  handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                                 }
                               }
                             } else {
@@ -1772,10 +1664,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                                 // should be rejected
                                 log.debug("Duplicate CMR. Request should be rejected.");
                                 shouldBeRejected = true;
-                                matchedCMRs.add(cmrsMods.getCmrNum());
-                                convertMatchData(cmrsMods, cmrData);
-                                details.append("\n");
-                                logDuplicateCMR(details, cmrData);
+                                handleLogDetails(cmrsMods, cmrData, matchedCMRs, details);
                               }
                             }
 
@@ -1906,12 +1795,10 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                         }
 
                         nameMatched = true;
-                        matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
 
                         if (nameMatched) {
                           cmrData = resultFindCmrCN.get(i);
-                          details.append("\n");
-                          logDuplicateCMR(details, cmrData);
+                          handleLogDetails(cmrData, matchedCMRs, details);
                         }
                       }
                     }
@@ -1944,12 +1831,10 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                           }
 
                           nameMatched = true;
-                          matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
 
                           if (nameMatched) {
                             cmrData = resultFindCmrCN.get(i);
-                            details.append("\n");
-                            logDuplicateCMR(details, cmrData);
+                            handleLogDetails(cmrData, matchedCMRs, details);
                           }
                         }
                       }
@@ -1985,12 +1870,10 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                             }
 
                             historyNmMatched = true;
-                            matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
 
                             if (historyNmMatched) {
                               cmrData = resultFindCmrCN.get(i);
-                              details.append("\n");
-                              logDuplicateCMR(details, cmrData);
+                              handleLogDetails(cmrData, matchedCMRs, details);
                             }
                           }
                         }
@@ -2031,12 +1914,10 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                             }
 
                             historyNmMatched = true;
-                            matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
 
                             if (historyNmMatched) {
                               cmrData = resultFindCmrCN.get(i);
-                              details.append("\n");
-                              logDuplicateCMR(details, cmrData);
+                              handleLogDetails(cmrData, matchedCMRs, details);
                             }
                           }
                         }
@@ -2118,9 +1999,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 cmrData.setPostCd(cmrsMods.getCmrPostalCode());
                 cmrData.setCity(cmrsMods.getCmrCity());
 
-                matchedCMRs.add(cmrsMods.getCmrNum());
-                details.append("\n");
-                logDuplicateCMR(details, cmrData);
+                handleLogDetails(cmrData, matchedCMRs, details);
               }
 
               result.setResults("Matches Found");
@@ -2193,12 +2072,10 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                         }
 
                         nameMatched = true;
-                        matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
 
                         if (nameMatched) {
                           cmrData = resultFindCmrCN.get(i);
-                          details.append("\n");
-                          logDuplicateCMR(details, cmrData);
+                          handleLogDetails(cmrData, matchedCMRs, details);
                         }
                       }
                     }
@@ -2231,12 +2108,10 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                           }
 
                           nameMatched = true;
-                          matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
 
                           if (nameMatched) {
                             cmrData = resultFindCmrCN.get(i);
-                            details.append("\n");
-                            logDuplicateCMR(details, cmrData);
+                            handleLogDetails(cmrData, matchedCMRs, details);
                           }
                         }
                       }
@@ -2272,12 +2147,10 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                             }
 
                             historyNmMatched = true;
-                            matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
 
                             if (historyNmMatched) {
                               cmrData = resultFindCmrCN.get(i);
-                              details.append("\n");
-                              logDuplicateCMR(details, cmrData);
+                              handleLogDetails(cmrData, matchedCMRs, details);
                             }
                           }
                         }
@@ -2318,12 +2191,10 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                             }
 
                             historyNmMatched = true;
-                            matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
 
                             if (historyNmMatched) {
                               cmrData = resultFindCmrCN.get(i);
-                              details.append("\n");
-                              logDuplicateCMR(details, cmrData);
+                              handleLogDetails(cmrData, matchedCMRs, details);
                             }
                           }
                         }
@@ -2446,10 +2317,8 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                         }
 
                         if (nameMatched) {
-                          matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
                           cmrData = resultFindCmrCN.get(i);
-                          details.append("\n");
-                          logDuplicateCMR(details, cmrData);
+                          handleLogDetails(cmrData, matchedCMRs, details);
                         }
                       }
                     }
@@ -2492,10 +2361,8 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                           }
 
                           if (nameMatched) {
-                            matchedCMRs.add(resultFindCmrCN.get(i).getCmrNo());
                             cmrData = resultFindCmrCN.get(i);
-                            details.append("\n");
-                            logDuplicateCMR(details, cmrData);
+                            handleLogDetails(cmrData, matchedCMRs, details);
                           }
                         }
                       }
@@ -2542,8 +2409,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
                             if (historyNmMatched) {
                               cmrData = resultFindCmrCN.get(i);
-                              details.append("\n");
-                              logDuplicateCMR(details, cmrData);
+                              handleLogDetails(cmrData, matchedCMRs, details);
                             }
                           }
                         }
@@ -2596,8 +2462,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
 
                             if (historyNmMatched) {
                               cmrData = resultFindCmrCN.get(i);
-                              details.append("\n");
-                              logDuplicateCMR(details, cmrData);
+                              handleLogDetails(cmrData, matchedCMRs, details);
                             }
                           }
                         }
@@ -2678,9 +2543,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                 cmrData.setPostCd(cmrsMods.getCmrPostalCode());
                 cmrData.setCity(cmrsMods.getCmrCity());
 
-                matchedCMRs.add(cmrsMods.getCmrNum());
-                details.append("\n");
-                logDuplicateCMR(details, cmrData);
+                handleLogDetails(cmrData, matchedCMRs, details);
               }
 
               result.setResults("Matches Found");
@@ -2734,9 +2597,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
               cmrData.setPostCd(cmrsMods.getCmrPostalCode());
               cmrData.setCity(cmrsMods.getCmrCity());
 
-              matchedCMRs.add(cmrsMods.getCmrNum());
-              details.append("\n");
-              logDuplicateCMR(details, cmrData);
+              handleLogDetails(cmrData, matchedCMRs, details);
             }
 
             result.setResults("Matches Found");
@@ -2787,9 +2648,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
               cmrData.setPostCd(cmrsMods.getCmrPostalCode());
               cmrData.setCity(cmrsMods.getCmrCity());
 
-              matchedCMRs.add(cmrsMods.getCmrNum());
-              details.append("\n");
-              logDuplicateCMR(details, cmrData);
+              handleLogDetails(cmrData, matchedCMRs, details);
             }
 
             result.setResults("Matches Found");
@@ -2834,9 +2693,6 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
     if (!StringUtils.isBlank(companyRecordModel.getCmrNo())) {
       details.append("CMR Number = " + companyRecordModel.getCmrNo()).append("\n");
     }
-    if (!StringUtils.isBlank(companyRecordModel.getMatchGrade())) {
-      details.append("Match Grade = " + companyRecordModel.getMatchGrade()).append("\n");
-    }
     if (!StringUtils.isBlank(companyRecordModel.getIssuingCntry())) {
       details.append("Issuing Country =  " + companyRecordModel.getIssuingCntry()).append("\n");
     }
@@ -2858,9 +2714,6 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
   public static void logDuplicateCMR(StringBuilder details, DuplicateCMRCheckResponse cmrCheckRecord) {
     if (!StringUtils.isBlank(cmrCheckRecord.getCmrNo())) {
       details.append("CMR Number = " + cmrCheckRecord.getCmrNo()).append("\n");
-    }
-    if (!StringUtils.isBlank(cmrCheckRecord.getMatchGrade())) {
-      details.append("Match Grade = " + cmrCheckRecord.getMatchGrade()).append("\n");
     }
     if (!StringUtils.isBlank(cmrCheckRecord.getIssuingCntry())) {
       details.append("Issuing Country =  " + cmrCheckRecord.getIssuingCntry()).append("\n");
@@ -3363,6 +3216,39 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
       ret = nameFindCmrCnResult;
     }
     return ret;
+  }
+
+  private void handleLogDetails(CompanyRecordModel cmrData, List<String> matchedCMRs, StringBuilder details) {
+    if (included(matchedCMRs, cmrData.getCmrNo())) {
+      log.debug("CmrNo " + cmrData.getCmrNo() + " is included. skip logging...");
+      return;
+    }
+    matchedCMRs.add(cmrData.getCmrNo());
+    details.append("\n");
+    logDuplicateCMR(details, cmrData);
+  }
+
+  private void handleLogDetails(FindCMRRecordModel cmrsMods, CompanyRecordModel cmrData, List<String> matchedCMRs, StringBuilder details) {
+    if (included(matchedCMRs, cmrsMods.getCmrNum())) {
+      log.debug("CmrNo " + cmrsMods.getCmrNum() + " is included. skip logging...");
+      return;
+    }
+    matchedCMRs.add(cmrsMods.getCmrNum());
+    convertMatchData(cmrsMods, cmrData);
+    details.append("\n");
+    logDuplicateCMR(details, cmrData);
+  }
+
+  private boolean included(List<String> strList, String str) {
+    boolean result = false;
+    if (StringUtils.isNotBlank(str)) {
+      for (String temp : strList) {
+        if (str.equals(temp)) {
+          result = true;
+        }
+      }
+    }
+    return result;
   }
 
 }
