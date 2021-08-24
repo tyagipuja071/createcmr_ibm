@@ -163,15 +163,20 @@ public class ChinaUtil extends AutomationUtil {
       break;
     case SCENARIO_LOCAL_INTER:
 
-      if (StringUtils.isNotBlank(customerName) && customerName.indexOf("IBM China") >= 0) {
-        LOG.debug("English name=" + customerName + " for Scenario=" + data.getCustSubGrp());
-        result.setOnError(false);
-        details.append("English name=" + customerName + " for Scenario=" + data.getCustSubGrp() + " for the request.\n");
-      } else {
-        details.append("English name should include 'IBM China' for Scenario=" + data.getCustSubGrp() + " for the request.\n");
-        engineData.addRejectionComment("OTH", "English name should include 'IBM China' for this scenario", "", "");
-        result.setOnError(true);
-      }
+      // if (StringUtils.isNotBlank(customerName) && customerName.indexOf("IBM
+      // China") >= 0) {
+      // LOG.debug("English name=" + customerName + " for Scenario=" +
+      // data.getCustSubGrp());
+      // result.setOnError(false);
+      // details.append("English name=" + customerName + " for Scenario=" +
+      // data.getCustSubGrp() + " for the request.\n");
+      // } else {
+      // details.append("English name should include 'IBM China' for Scenario="
+      // + data.getCustSubGrp() + " for the request.\n");
+      // engineData.addRejectionComment("OTH", "English name should include 'IBM
+      // China' for this scenario", "", "");
+      // result.setOnError(true);
+      // }
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_RETRIEVE_VALUES);
