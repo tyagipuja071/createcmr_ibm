@@ -101,7 +101,7 @@ article, aside, canvas, details, figcaption, figure, footer, header, hgroup, men
   box-shadow: rgba(0, 0, 0, 0.3) 1px 1px 3px 0;
 }
 .faces-typeahead-results .small-result img {
-    width: 32px;
+    width: 50px;
 }
 .faces-typeahead-results .large-result img {
     width: 50px;

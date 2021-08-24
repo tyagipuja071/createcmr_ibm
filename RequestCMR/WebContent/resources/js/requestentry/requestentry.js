@@ -644,6 +644,20 @@ function commentFormatter(value, rowIndex) {
   return '<span style="word-wrap: break-word">' + cmtdata + '</span>';
 }
 
+function commentImgFormatter(value, rowIndex) {
+  if (!value){
+    return '&nbsp';
+  }
+  if (value.indexOf('@') > 0){
+    if (value.indexOf('ibm.com') > 0){
+      return '<img title="'+value+'" src="https://unified-profile-api.us-south-k8s.intranet.ibm.com/v3/image/'+value+'" class="cmt-img" onerror="this.onerror=null; this.src=\''+cmr.CONTEXT_ROOT+'/resources/images/person.jpg\'">';
+    } else {
+      return '<img title="'+value+'" src="'+cmr.CONTEXT_ROOT+'/resources/images/person.jpg" class="cmt-img">';
+    }
+  } else {
+    return '<img title="'+value+'" src="'+cmr.CONTEXT_ROOT+'/resources/images/CreateCMRLogo.png" class="cmt-img">';
+  }
+}
 /**
  * Disables the CMR Search and D&B Search buttons if page is read-only
  * 

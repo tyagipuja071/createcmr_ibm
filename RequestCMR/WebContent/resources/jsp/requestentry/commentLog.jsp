@@ -51,7 +51,10 @@
       <cmr:column span="6">
         <cmr:grid url="/request/commentlog/list.json" id="COMMENT_LIST_GRID" span="6" usePaging="false" height="200">
           <cmr:gridParam fieldId="reqId" value="${reqentry.reqId}" />
-          <cmr:gridCol width="160px" field="createTsString" header="<%=cmtDtHeader%>" />
+          <cmr:gridCol width="150px" field="createTsString" header="<%=cmtDtHeader%>" />
+          <cmr:gridCol width="26px" field="createById" header="&nbsp;" >
+            <cmr:formatter functionName="commentImgFormatter" />
+          </cmr:gridCol>
           <cmr:gridCol width="160px" field="createByNm" header="${ui.grid.cmtEnteredBy}" />
           <cmr:gridCol width="auto" field="cmt" header="${ui.grid.cmt}">
             <cmr:formatter functionName="commentFormatter" />

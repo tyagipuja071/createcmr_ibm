@@ -1272,7 +1272,7 @@ public class IERPProcessService extends BaseBatchService {
     }
     // save cmtlockedIn as Y default for current realese
     reqCmtLog.setCmtLockedIn(CmrConstants.CMT_LOCK_IND_YES);
-    reqCmtLog.setCreateById(admin.getLastUpdtBy());
+    reqCmtLog.setCreateById(COMMENT_LOGGER);
     reqCmtLog.setCreateByNm(COMMENT_LOGGER);
     // set createTs as current timestamp and updateTs same as CreateTs
     reqCmtLog.setCreateTs(SystemUtil.getCurrentTimestamp());

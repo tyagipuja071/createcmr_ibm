@@ -40,8 +40,8 @@ public class CommentLogService extends BaseService<CmtModel, ReqCmtLog> {
   }
 
   @Override
-  protected void performTransaction(CmtModel model, EntityManager entityManager, HttpServletRequest request) throws CmrException,
-      IllegalAccessException, InvocationTargetException, NoSuchMethodException, SQLException {
+  protected void performTransaction(CmtModel model, EntityManager entityManager, HttpServletRequest request)
+      throws CmrException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, SQLException {
 
     AppUser user = AppUser.getUser(request);
     try {
@@ -78,6 +78,7 @@ public class CommentLogService extends BaseService<CmtModel, ReqCmtLog> {
         cmtModel.setCmt(cmt);
         cmtModel.setCreateTs(createTs);
         cmtModel.setCreateByNm(createByNm);
+        cmtModel.setCreateById(reqCmtLog.getCreateById());
 
         results.add(cmtModel);
 
