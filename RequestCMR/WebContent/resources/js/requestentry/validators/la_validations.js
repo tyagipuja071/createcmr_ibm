@@ -484,6 +484,8 @@ function resetIbmBankNumber() {
 function afterConfigForLA() {
   var _reqType = FormManager.getActualValue('reqType');
   // var _country = FormManager.getActualValue('cmrIssuingCntry');
+  // CREATCMR-531
+  setIERPSitePartyIDForLA()
 
   if (dojo.byId('isuCd')) {
     // FormManager.disable('isuCd');
@@ -967,9 +969,8 @@ function addLatinAmericaAddressHandler(cntry, addressMode, saving) {
     FormManager.readOnly('landCntry');
   } else {
     FormManager.enable('landCntry');
+  }
 }
-}
-
 function addTaxCode1ValidatorForOtherLACntries() {
   FormManager.addFormValidator((function() {
     return {
@@ -2281,6 +2282,23 @@ function validateCustNameChangeForDPLCheck() {
     };
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
+// CREATCMR-531
+function setIERPSitePartyIDForLA() {
+  var role = null;
+  var sapNo = FormManager.getActualValue('sapNo');
+  var reqType = FormManager.getActualValue('reqType');
+  let
+  str = sapNo.substring(1);
+  if (typeof (_pagemodel) != 'undefined') {
+    role = _pagemodel.userRole;
+  }
+  // FormManager.setValue('ierpSitePrtyId', 'S' + str);
+  if (reqType == 'U') {
+    if (sapNo != null) {
+      FormManager.setValue('ierpSitePrtyId', 'S' + str);
+    }
+  }
+}
 
 function makeFieldManadatoryLAReactivate() {
   FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'AbbrevName' ], 'MAIN_CUST_TAB');
@@ -2590,6 +2608,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addDPLCheckValidatorLAReactivate, GEOHandler.LA, GEOHandler.ROLE_PROCESSOR, false, false);
 
   GEOHandler.addAddrFunction(addLatinAmericaAddressHandler, GEOHandler.LA);
+  GEOHandler.addAddrFunction(setIERPSitePartyIDForLA, GEOHandler.LA);
+  // CREATCMR-531
   GEOHandler.registerValidator(addTaxCode1ValidatorForOtherLACntries, SSAMX_COUNTRIES, null, false, false);
   // GEOHandler.registerValidator(addTaxCodesValidator, GEOHandler.LA);
   // GEOHandler.registerValidator(addTaxCodesValidator, [ SysLoc.BRAZIL ],

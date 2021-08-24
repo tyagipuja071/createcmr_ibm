@@ -30,6 +30,15 @@
       <cmr:delta text="-" id="delta-sapNo" />
       <cmr:field fieldId="SAPNumber" id="sapNo" path="sapNo" />
     </p>
+  </cmr:column> 
+<!--   CREATCMR-531 -->
+  <cmr:column span="2">
+    <p>
+      <cmr:label fieldId="ierpSitePrtyId">
+        <cmr:fieldLabel fieldId="IERPSitePrtyId" />:</cmr:label>
+      <cmr:delta text="-" id="delta-ierpSitePrtyId" />
+      <cmr:field fieldId="IERPSitePrtyId" id="ierpSitePrtyId" path="ierpSitePrtyId" />
+    </p>
   </cmr:column>
 
 </cmr:row>
