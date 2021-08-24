@@ -985,4 +985,11 @@ div.cmr-overall-status-btn {
   text-align: right;
 }
 
+
+img.cmt-img {
+	width: 25px;
+	border-radius: 6px;
+	vertical-align: text-top;
+	cursor: pointer;
+}
 /* reno end */
