@@ -155,7 +155,7 @@ function afterConfigForCN() {
     }
   }
   var custSubT = FormManager.getActualValue('custSubGrp');
-  if (FormManager.getActualValue('reqType') == 'C' && (custSubT == 'CROSS' || custSubT == 'NRML' ||custSubT == 'EMBSA' ||custSubT == 'AQSTN')) {
+  if (_pagemodel.userRole.toUpperCase() == "REQUESTER" && FormManager.getActualValue('reqType') == 'C' && (custSubT == 'CROSS' || custSubT == 'NRML' ||custSubT == 'EMBSA' ||custSubT == 'AQSTN')) {
     setSearchTermByGBGId();
   }
   
@@ -205,6 +205,24 @@ function afterConfigForCN() {
       FormManager.resetValidations('custClass');
       FormManager.hide('InterAddrKey', 'cnInterAddrKey');
       FormManager.resetValidations('cnInterAddrKey');
+      if (FormManager.getActualValue('isicCd') != 'undefined' && FormManager.getActualValue('isicCd') != '') {
+        FormManager.readOnly('isicCd');
+      }
+      if(FormManager.getField('capInd').checked == true){
+        FormManager.readOnly('subIndustryCd');
+        FormManager.readOnly('searchTerm');
+        FormManager.readOnly('isuCd');
+        FormManager.readOnly('clientTier');
+        FormManager.readOnly('inacType');
+        FormManager.readOnly('inacCd');
+        FormManager.readOnly('company');
+      }else{
+        FormManager.readOnly('searchTerm');
+        FormManager.readOnly('isuCd');
+        FormManager.readOnly('clientTier');
+        FormManager.readOnly('inacType');
+        FormManager.readOnly('inacCd');
+      }
     } else {
       FormManager.readOnly('custClass');
     }
@@ -2558,6 +2576,12 @@ function validateSearchTermForCROSS() {
                 || searchTerm == '04499' || searchTerm == '04486' || searchTerm == '04747' || searchTerm == '04748' || searchTerm == '04749' || searchTerm == '04502'){
               return new ValidationResult(null, false, 'It is not allowed to apply S1 search term for none S1 GBGId  under ' + subType + ' Sub_scenario.');
             }
+            }
+          }else{
+            if(searchTerm == '04472' || searchTerm == '04474' || searchTerm == '04491' || searchTerm == '04493' || searchTerm == '04687' || searchTerm == '04497'
+              || searchTerm == '04629' || searchTerm == '04495' || searchTerm == '04630' || searchTerm == '04484' || searchTerm == '04480' || searchTerm == '04488'
+                || searchTerm == '04499' || searchTerm == '04486' || searchTerm == '04747' || searchTerm == '04748' || searchTerm == '04749' || searchTerm == '04502'){
+              return new ValidationResult(null, false, 'It is not allowed to apply S1 search term for none S1 GBGId  under ' + subType + ' Sub_scenario.');
             }
           }
 
