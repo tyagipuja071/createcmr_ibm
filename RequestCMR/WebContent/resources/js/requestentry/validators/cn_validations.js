@@ -236,27 +236,6 @@ function afterConfigForCN() {
       FormManager.readOnly('inacCd');
       FormManager.readOnly('company');
     }
-    
-    var ppsceidBP = FormManager.getActualValue('ppsceid');
-    var searchTerm = FormManager.getActualValue('searchTerm');
-    var regString = /[a-zA-Z]+/;
-    if (_pagemodel.userRole.toUpperCase() == 'REQUESTER' &&  ppsceidBP != undefined && ppsceidBP != null && ppsceidBP != '' && searchTerm != undefined && searchTerm != null && searchTerm != '08036'){
-      if (searchTerm == '04182') {
-        FormManager.readOnly('searchTerm');
-        FormManager.readOnly('isuCd');
-        FormManager.readOnly('clientTier');
-        FormManager.readOnly('inacType');
-        FormManager.readOnly('inacCd');
-      } else if (searchTerm == '' || searchTerm == '00000' || regString.test(searchTerm)) {
-        FormManager.setValue('searchTerm', '04182');
-        FormManager.setValue('clientTier', 'Z');
-        FormManager.readOnly('searchTerm');
-        FormManager.readOnly('clientTier');
-        FormManager.readOnly('isuCd');
-        FormManager.readOnly('inacType');
-        FormManager.readOnly('inacCd');
-      }
-    }
   }
   FormManager.show('DisableAutoProcessing', 'disableAutoProc');
 
@@ -274,6 +253,29 @@ function afterConfigForCN() {
     _searchTermHandler[0].onChange();
   }
 // resetISICCode();
+}
+
+function updateBPSearchTerm() {
+  var ppsceidBP = FormManager.getActualValue('ppsceid');
+  var searchTerm = FormManager.getActualValue('searchTerm');
+  var regString = /[a-zA-Z]+/;
+  if (FormManager.getActualValue('reqType') == 'U' && _pagemodel.userRole.toUpperCase() == 'REQUESTER' &&  ppsceidBP != undefined && ppsceidBP != null && ppsceidBP != '' && searchTerm != undefined && searchTerm != null && searchTerm != '08036'){
+    if (searchTerm == '04182') {
+      FormManager.readOnly('searchTerm');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('clientTier');
+      FormManager.readOnly('inacType');
+      FormManager.readOnly('inacCd');
+    } else if (searchTerm == '' || searchTerm == '00000' || regString.test(searchTerm)) {
+      FormManager.setValue('searchTerm', '04182');
+      FormManager.setValue('clientTier', 'Z');
+      FormManager.readOnly('searchTerm');
+      FormManager.readOnly('clientTier');
+      FormManager.readOnly('isuCd');
+      FormManager.readOnly('inacType');
+      FormManager.readOnly('inacCd');
+    }
+  }
 }
 
 function setInacBySearchTerm() {
@@ -2754,6 +2756,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(hideTDOFields, GEOHandler.CN);
   GEOHandler.addAfterConfig(onInacTypeChange, GEOHandler.CN);
   GEOHandler.addAfterConfig(setCompanyOnInacCd, GEOHandler.CN);
+  GEOHandler.addAfterConfig(updateBPSearchTerm, GEOHandler.CN);
   
   GEOHandler.addAfterTemplateLoad(autoSetIBMDeptCostCenter, GEOHandler.CN);
   GEOHandler.addAfterTemplateLoad(afterConfigForCN, GEOHandler.CN);
@@ -2765,6 +2768,7 @@ dojo.addOnLoad(function() {
   // GEOHandler.CN);
   GEOHandler.addAfterTemplateLoad(setValuesForScenarios, GEOHandler.CN);
   GEOHandler.addAfterTemplateLoad(setReadOnlyFields, GEOHandler.CN);
+  GEOHandler.addAfterTemplateLoad(updateBPSearchTerm, GEOHandler.CN);
   
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.CN);
   GEOHandler.addAddrFunction(autoSetAddrFieldsForCN, GEOHandler.CN);
