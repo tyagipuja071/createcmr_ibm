@@ -234,6 +234,9 @@ function afterConfigForCN() {
         FormManager.setValue('clientTier', 'Z');
         FormManager.readOnly('searchTerm');
         FormManager.readOnly('clientTier');
+        FormManager.readOnly('isuCd');
+        FormManager.readOnly('inacType');
+        FormManager.readOnly('inacCd');
       }
     }
   }
@@ -581,6 +584,8 @@ function filterISUOnChange() {
     if (clientTier.length == 1) {
       FormManager.setValue('clientTier', clientTier[0]);
       if (isuCd == "8B" && FormManager.getActualValue('custSubGrp') == 'BUSPR') {
+        FormManager.readOnly('clientTier');
+      } else if (FormManager.getActualValue('custSubGrp') == 'ECOSY'){
         FormManager.readOnly('clientTier');
       }
       // FormManager.readOnly('clientTier');
