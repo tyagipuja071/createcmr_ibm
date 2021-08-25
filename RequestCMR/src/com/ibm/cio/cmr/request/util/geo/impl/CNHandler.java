@@ -734,7 +734,7 @@ public class CNHandler extends GEOHandler {
 
     if (!StringUtils.isBlank(admin.getReqType()) && admin.getReqType().equalsIgnoreCase("U") && !StringUtils.isBlank(data.getPpsceid())
         && !StringUtils.isBlank(admin.getReqStatus()) && admin.getReqStatus().equalsIgnoreCase("DRA")) {
-      if (data.getSearchTerm() == null || data.getSearchTerm().trim().equalsIgnoreCase("") || data.getSearchTerm().trim().equalsIgnoreCase("00000")
+      if (StringUtils.isBlank(data.getSearchTerm()) || data.getSearchTerm().trim().equalsIgnoreCase("00000")
           || data.getSearchTerm().matches("[a-zA-Z]")) {
         data.setClientTier("Z");
         data.setSearchTerm("04182");
