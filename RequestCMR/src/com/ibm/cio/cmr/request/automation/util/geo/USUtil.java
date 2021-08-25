@@ -1607,13 +1607,15 @@ public class USUtil extends AutomationUtil {
   }
 
   private boolean relevantAddressFieldForUpdates(RequestChangeContainer changes, Addr addr) {
-    List<UpdatedNameAddrModel> addrChanges = changes.getAddressChanges(addr.getId().getAddrType(), addr.getId().getAddrSeq());
-    if (addrChanges == null) {
-      return false;
-    }
-    for (UpdatedNameAddrModel change : addrChanges) {
-      if (RELEVANT_ADDRESS_FIELDS_RPA_UPDATES.contains(change.getDataField())) {
-        return true;
+    if (addr != null) {
+      List<UpdatedNameAddrModel> addrChanges = changes.getAddressChanges(addr.getId().getAddrType(), addr.getId().getAddrSeq());
+      if (addrChanges == null) {
+        return false;
+      }
+      for (UpdatedNameAddrModel change : addrChanges) {
+        if (RELEVANT_ADDRESS_FIELDS_RPA_UPDATES.contains(change.getDataField())) {
+          return true;
+        }
       }
     }
     return false;
