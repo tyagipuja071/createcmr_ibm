@@ -20,6 +20,8 @@ import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.ServiceClient.Method;
 import com.ibm.cmr.services.client.ValidatorClient;
 import com.ibm.cmr.services.client.automation.AutomationResponse;
+import com.ibm.cmr.services.client.automation.cn.CNRequest;
+import com.ibm.cmr.services.client.automation.cn.CNResponse;
 import com.ibm.cmr.services.client.automation.eu.VatLayerRequest;
 import com.ibm.cmr.services.client.automation.eu.VatLayerResponse;
 import com.ibm.cmr.services.client.automation.in.GstLayerRequest;
@@ -224,4 +226,37 @@ public class VatUtilController {
     return map;
   }
 
+  @RequestMapping(value = "/cn/tyc")
+  public ModelMap checkCnAddr(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    ModelMap map = new ModelMap();
+    // ValidationResult validation = null;
+    String busnType = request.getParameter("busnType");
+    String cnName = request.getParameter("cnName");
+    String keyword = "";
+    CNRequest cnRequest = new CNRequest();
+    if (StringUtils.isEmpty(busnType)) {
+      keyword = cnName;
+    } else {
+      keyword = busnType;
+    }
+    cnRequest.setKeyword(keyword);
+
+    AutomationServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
+        AutomationServiceClient.class);
+    client.setReadTimeout(1000 * 60 * 5);
+    client.setRequestMethod(Method.Get);
+
+    LOG.debug("Connecting to the CNValidation service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
+    AutomationResponse<?> rawResponse = client.executeAndWrap(AutomationServiceClient.CN_TYC_SERVICE_ID, cnRequest, AutomationResponse.class);
+    ObjectMapper mapper = new ObjectMapper();
+    String json = mapper.writeValueAsString(rawResponse);
+    TypeReference<AutomationResponse<CNResponse>> ref = new TypeReference<AutomationResponse<CNResponse>>() {
+    };
+    AutomationResponse<CNResponse> tycResponse = mapper.readValue(json, ref);
+
+    if (tycResponse != null && tycResponse.isSuccess()) {
+      map.addAttribute("result", tycResponse.getRecord());
+    }
+    return map;
+  }
 }

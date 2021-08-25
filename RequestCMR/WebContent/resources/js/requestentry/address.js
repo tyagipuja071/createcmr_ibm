@@ -422,7 +422,6 @@ function AddressDetailsModal_onLoad() {
     _assignDetailsValue('#AddressDetailsModal #cnDistrict_view', details.ret64);
     _assignDetailsValue('#AddressDetailsModal #cnCustContNm_view', details.ret65);
     _assignDetailsValue('#AddressDetailsModal #cnCustContJobTitle_view', details.ret66);
-    _assignDetailsValue('#AddressDetailsModal #cnCustContPhone2_view', details.ret67);
     _assignDetailsValue('#AddressDetailsModal #cnCustName3_view', details.ret73);
   }
 
@@ -674,8 +673,9 @@ function doAddToAddressList() {
       if (FormManager.getActualValue('cmrIssuingCntry') == '641') {
         // do
         if (isCNAddressDetailsExisting()) {
-          cmr.showAlert('The details of this address is the same as the existing Sold-To. This address can not be added.');
-          return;
+          // cmr.showAlert('The details of this address is the same as the
+          // existing Sold-To. This address can not be added.');
+          // return;
         }
       }
       if (asean_isa_cntries.indexOf(cntry) >= 0) {
@@ -1074,7 +1074,7 @@ function addEditAddressModal_onLoad() {
       // FormManager.hide('BillingPstlAddr', 'billingPstlAddr');
       // }
       // }
-      
+
       if (FormManager.getActualValue('cmrIssuingCntry') == '766') {
         FormManager.setValue('billingPstlAddr', details.ret58);
         FormManager.setValue('contact', details.ret71);
@@ -1257,7 +1257,7 @@ function addEditAddressModal_onLoad() {
       cmr.oldcndistrict = details.ret64;
       FormManager.setValue('cnCustContNm', details.ret65);
       FormManager.setValue('cnCustContJobTitle', details.ret66);
-      FormManager.setValue('cnCustContPhone2', details.ret67);
+      FormManager.setValue('custPhone', details.ret23);
       FormManager.setValue('cnCustName3', details.ret73);
       cmr.oldcncustname3 = details.ret73;
 

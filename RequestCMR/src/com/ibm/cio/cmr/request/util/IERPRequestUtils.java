@@ -239,6 +239,12 @@ public class IERPRequestUtils extends RequestUtils {
     // String type = "C".equals(admin.getReqType()) ? "Create" :
     // ("U".equals(admin.getReqType()) ? "Update" : "-");
 
+    if (data != null && "641".equals(data.getCmrIssuingCntry())) {
+      if ("COM".equals(admin.getReqStatus())) {
+        addNotifyCN(data, recipients, entityManager);
+      }
+    }
+
     String customerName = "-";
     if (!StringUtils.isBlank(admin.getMainCustNm1())) {
       customerName = admin.getMainCustNm1();
@@ -530,6 +536,20 @@ public class IERPRequestUtils extends RequestUtils {
     }
 
     return workingDays;
+  }
+
+  private static void addNotifyCN(Data data, StringBuilder recipients, EntityManager em) {
+    StringBuilder cnEcoNotifyList = getCnEcoNotifyList();
+    if (data != null && cnEcoNotifyList.length() > 0 && "ECOSY".equals(data.getCustSubGrp())) {
+      recipients.append(",");
+      recipients.append(cnEcoNotifyList);
+    }
+  }
+
+  private static StringBuilder getCnEcoNotifyList() {
+    StringBuilder cnEcoNotifyList = new StringBuilder();
+    cnEcoNotifyList.append(SystemParameters.getString("CN_ECOSY_COM_NOTIFY"));
+    return cnEcoNotifyList;
   }
 
 }

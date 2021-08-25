@@ -54,6 +54,8 @@ public class CompanyRecordModel implements Comparable<CompanyRecordModel> {
   private boolean isPoolRecord;
   private String addDnBMatches;
 
+  private String cied;
+
   @Override
   public int compareTo(CompanyRecordModel o) {
     if (o == null) {
@@ -351,5 +353,13 @@ public class CompanyRecordModel implements Comparable<CompanyRecordModel> {
 
   public void setAddDnBMatches(String addDnBMatches) {
     this.addDnBMatches = addDnBMatches;
+  }
+
+  public String getCied() {
+    return cied;
+  }
+
+  public void setCied(String cied) {
+    this.cied = cied;
   }
 }

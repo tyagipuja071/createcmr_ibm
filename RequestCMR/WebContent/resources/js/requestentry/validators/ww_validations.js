@@ -135,6 +135,23 @@ function addDnBMatchingAttachmentValidator() {
         var ifReprocessAllowed = FormManager.getActualValue('autoEngineIndc');
         if (reqId > 0 && reqType == 'C' && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B')
             && !isSkipDnbMatching() && FormManager.getActualValue('matchOverrideIndc') == 'Y') {
+          // FOR CN
+          var cntry = FormManager.getActualValue('landCntry');
+          var loc = FormManager.getActualValue('cmrIssuingCntry');
+          if(cntry == 'CN' || loc == '641') {
+            var id = FormManager.getActualValue('reqId');
+            var ret = cmr.query('CHECK_CN_API_ATTACHMENT', {
+              ID : id
+            });
+            if (ret == null || ret.ret1 == null) {
+              return new ValidationResult(null, false, "By overriding the D&B matching, you\'re obliged to provide either one of the following documentation as backup - "
+                  + "client\'s official website, Secretary of State business registration proof, client\'s confirmation email and signed PO, attach it under the file content "
+                  + "of <strong>Name and Address Change(China Specific)</strong>. Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.");
+            } else {
+              return new ValidationResult(null, true);
+            }
+          }
+          
           // FOR US Temporary
           var id = FormManager.getActualValue('reqId');
           var ret = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {

@@ -4,6 +4,7 @@ import javax.persistence.EntityManager;
 
 import org.apache.log4j.Logger;
 
+import com.ibm.cio.cmr.request.automation.ActionOnError;
 import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
@@ -39,19 +40,30 @@ public class FieldComputationElement extends OverridingElement {
     if (result == null) {
       details
           .append(" Field computations logics not defined for the country " + issuingCntry + ". Sending back to processor for final calculations.");
-      engineData.addRejectionComment("OTH",
-          "Field computations logics not defined for the country and needs to manually be completed.", "", "");
+      engineData.addRejectionComment("OTH", "Field computations logics not defined for the country and needs to manually be completed.", "", "");
       results.setResults("Error On Field Calculation");
       results.setOnError(true);
     } else if (result != null && !result.isOnError()) {
-      results = result;
-      results.setResults("Successful Execution");
-      results.setOnError(false);
-      results.setProcessOutput(result.getProcessOutput());
+      if ("Skipped".equals(result.getResults())) {
+        results = result;
+        results.setResults("Skip processing of element");
+        results.setOnError(false);
+        results.setProcessOutput(result.getProcessOutput());
+      } else {
+        results = result;
+        results.setResults("Successful Execution");
+        results.setOnError(false);
+        results.setProcessOutput(result.getProcessOutput());
+      }
+
     } else {
       log.debug("Error On Field Calculation");
       // engineData.addRejectionComment(result.getResults());
       results = result;
+      if (result.getResults() != null && "Requester check fail".equals(result.getResults())) {
+        super.setStopOnError(true);
+        super.setActionOnError(ActionOnError.fromCode("R"));
+      }
       results.setResults(result.getResults());
       results.setProcessOutput(result.getProcessOutput());
     }

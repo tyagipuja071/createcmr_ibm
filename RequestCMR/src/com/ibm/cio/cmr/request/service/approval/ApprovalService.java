@@ -35,6 +35,7 @@ import com.ibm.cio.cmr.request.entity.ApprovalReq;
 import com.ibm.cio.cmr.request.entity.ApprovalReqPK;
 import com.ibm.cio.cmr.request.entity.ApprovalTyp;
 import com.ibm.cio.cmr.request.entity.CompoundEntity;
+import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DefaultApprovalRecipients;
 import com.ibm.cio.cmr.request.entity.DefaultApprovals;
 import com.ibm.cio.cmr.request.model.approval.ApprovalCommentModel;
@@ -43,6 +44,7 @@ import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.BaseService;
+import com.ibm.cio.cmr.request.service.requestentry.DataService;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.ConfigUtil;
@@ -71,6 +73,7 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
   private static final List<String> PENDING_STATUSES_TO_MOVE = Arrays.asList("DRA", "REP");
   private static final List<String> PENDING_STATUSES_TO_RETURN = Arrays.asList("REP");
   private static final String BP_MANAGER_ID = "BPMANAGER";
+  private final DataService dataService = new DataService();
 
   public static void main(String[] args) {
 
@@ -148,6 +151,13 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
         break;
       case "C":
         updateApprovalStatus(entityManager, req, CmrConstants.APPROVAL_CONDITIONALLY_APPROVED, approval, admin);
+        if (admin != null && admin.getId() != null && dataService != null) {
+          Data data = dataService.getCurrentRecordById(admin.getId().getReqId(), entityManager);
+          if (data != null && SystemLocation.CHINA.equals(data.getCmrIssuingCntry())) {
+            GEOHandler geoHandler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
+            geoHandler.handleMEUCondApproval(entityManager, approval, data);
+          }
+        }
         if (!"REP".equals(admin.getReqStatus())) {
           moveToNextStep(entityManager, admin);
         }
@@ -402,6 +412,19 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
     query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", admin.getId().getReqId());
     boolean conditionallyApproved = query.exists();
+    boolean cnConditionallyApproved = false;
+    if (conditionallyApproved && admin != null && admin.getId() != null && dataService != null) {
+      Data data = null;
+      try {
+        data = dataService.getCurrentRecordById(admin.getId().getReqId(), entityManager);
+      } catch (Exception e) {
+        this.log.debug("Error in Querying data table using admin's reqid in ApprovalService.java");
+      }
+      if (data != null && SystemLocation.CHINA.equals(data.getCmrIssuingCntry())) {
+        cnConditionallyApproved = true;
+      }
+      conditionallyApproved = conditionallyApproved && !cnConditionallyApproved;
+    }
 
     if (approvalsReceived && PENDING_STATUSES_TO_MOVE.contains(admin.getReqStatus())) {
       // move only if it is one of the middle statuses
