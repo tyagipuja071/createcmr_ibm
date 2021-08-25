@@ -262,14 +262,14 @@ function updateBPSearchTerm() {
   var ppsceidBP = FormManager.getActualValue('ppsceid');
   var searchTerm = FormManager.getActualValue('searchTerm');
   var regString = /[a-zA-Z]+/;
-  if (FormManager.getActualValue('reqType') == 'U' && _pagemodel.userRole.toUpperCase() == 'REQUESTER' &&  ppsceidBP != undefined && ppsceidBP != null && ppsceidBP != '' && searchTerm != undefined && searchTerm != null && searchTerm != '08036'){
+  if (FormManager.getActualValue('reqType') == 'U' && _pagemodel.userRole.toUpperCase() == 'REQUESTER' &&  ppsceidBP != undefined && ppsceidBP != null && ppsceidBP != ''){
     if (searchTerm == '04182') {
       FormManager.readOnly('searchTerm');
       FormManager.readOnly('isuCd');
       FormManager.readOnly('clientTier');
       FormManager.readOnly('inacType');
       FormManager.readOnly('inacCd');
-    } else if (searchTerm == '' || searchTerm == '00000' || regString.test(searchTerm)) {
+    } else if (searchTerm == null || searchTerm == '' || searchTerm == '00000' || regString.test(searchTerm)) {
       FormManager.setValue('searchTerm', '04182');
       FormManager.setValue('clientTier', 'Z');
       FormManager.readOnly('searchTerm');
