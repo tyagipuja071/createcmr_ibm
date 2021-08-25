@@ -586,9 +586,10 @@ public class CompanyFinder {
     boolean isLatinResult = asciiEncoder.canEncode(text);
     return isLatinResult;
   }
-  
+
   /**
    * Get chinese name and address from China's TianYanCha Api
+   * 
    * @param searchModel
    * @return
    * @throws Exception
@@ -612,11 +613,10 @@ public class CompanyFinder {
       break;
     }
 
-    System.out.println(request + request.getKeyword());
+    LOG.debug(request + request.getKeyword());
 
     LOG.debug("Connecting to the CNValidation service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
-    AutomationResponse<?> rawResponse = client.executeAndWrap(AutomationServiceClient.CN_TYC_SERVICE_ID, request,
-        AutomationResponse.class);
+    AutomationResponse<?> rawResponse = client.executeAndWrap(AutomationServiceClient.CN_TYC_SERVICE_ID, request, AutomationResponse.class);
     ObjectMapper mapper = new ObjectMapper();
     String json = mapper.writeValueAsString(rawResponse);
     TypeReference<AutomationResponse<CNResponse>> ref = new TypeReference<AutomationResponse<CNResponse>>() {
