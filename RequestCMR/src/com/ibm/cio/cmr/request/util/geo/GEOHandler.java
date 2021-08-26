@@ -999,6 +999,8 @@ public abstract class GEOHandler {
    */
   public String buildAddressForDnbMatching(String country, Addr addr) {
     return null;
+  }
+
   public IntlAddr getIntlAddrById(Addr addr, EntityManager entityManager) {
     // TODO Auto-generated method stub
     return null;
