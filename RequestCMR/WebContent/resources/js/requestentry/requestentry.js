@@ -697,7 +697,7 @@ function afterConfigChange() {
   if (_inacHandler == null) {
     _inacHandler = dojo.connect(FormManager.getField('inacType'), 'onChange', function(value) {
       var value = FormManager.getActualValue('inacType');
-      if (cmrCntry != '616' && (value && dojo.string.trim(value) == 'I')) {
+      if ((cmrCntry != '616' && cmrCntry != '641') && (value && dojo.string.trim(value) == 'I')) {
         FormManager.addValidator('inacCd', Validators.NUMBER, [ 'INAC Code' ], 'MAIN_IBM_TAB');
       } else {
         FormManager.removeValidator('inacCd', Validators.NUMBER);
@@ -1328,11 +1328,22 @@ function DnbAutoCheckModal_onClose() {
  * Override Dnb Matches
  */
 function overrideDnBMatch() {
-  cmr
+  // FOR CN
+  var cntry = FormManager.getActualValue('landCntry');
+  var loc = FormManager.getActualValue('cmrIssuingCntry');
+  if (cntry == 'CN' || loc == '641') {
+    cmr
+        .showConfirm(
+            'doOverrideDnBMatch()',
+            'This action will override the D&B Matching Process.<br> By overriding the D&B matching, you\'re obliged to provide either one of the following documentation as backup - client\'s official website, Secretary of State business registration proof, client\'s confirmation email and signed PO, attach it under the file content of <strong>Name and Address Change(China Specific)</strong>. Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.<br>Proceed?',
+            'Warning', null, null);
+  } else {
+    cmr
       .showConfirm(
           'doOverrideDnBMatch()',
           'This action will override the D&B Matching Process.<br> By overriding the D&B matching, you\'re obliged to provide either one of the following documentation as backup - client\'s official website, Secretary of State business registration proof, client\'s confirmation email and signed PO, attach it under the file content of <strong>Company Proof</strong>. Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.<br>Proceed?',
           'Warning', null, null);
+  }
 }
 
 /**
@@ -1534,6 +1545,7 @@ function handleRequiredDnBSearch() {
 
 
 function checkIfFinalDnBCheckRequired() {
+  var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
   var reqId = FormManager.getActualValue('reqId');
   var reqType = FormManager.getActualValue('reqType');
   var reqStatus = FormManager.getActualValue('reqStatus');
@@ -1545,6 +1557,13 @@ function checkIfFinalDnBCheckRequired() {
       && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B') && !isSkipDnbMatching() && matchOverrideIndc != 'Y') {
     // currently Enabled Only For US
     return true;
+  }
+  if (cmrCntry == '641') {
+    if (reqId > 0 && reqType == 'U' && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B')
+        && matchOverrideIndc != 'Y') {
+      // currently Enabled Only For CN
+      return true;
+    }
   }
   return false;
 }
@@ -1698,10 +1717,19 @@ function matchDnBForIndia() {
           } else {
             // continue
             console.log("An error occurred while matching dnb.");
-            cmr.showConfirm("cmr.showModal('addressVerificationModal')", 'An error occurred while matching dnb. Do you want to proceed with this request?', 'Warning', null, {
-              OK : 'Yes',
-              CANCEL : 'No'
-            });
+            if (cntry == '641') {
+              cmr.showConfirm('showAddressVerificationModal()', 'An error occurred while matching dnb. Do you want to proceed with this request?',
+                  'Warning', null, {
+                    OK : 'Yes',
+                    CANCEL : 'No'
+                  });
+            } else {
+              cmr.showConfirm("cmr.showModal('addressVerificationModal')",
+                  'An error occurred while matching dnb. Do you want to proceed with this request?', 'Warning', null, {
+                    OK : 'Yes',
+                    CANCEL : 'No'
+                  });
+            }
           }
         },
         error : function(error, ioargs) {

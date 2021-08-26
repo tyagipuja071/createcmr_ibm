@@ -639,14 +639,16 @@
   </cmr:view>
 
   <cmr:view forGEO="CN">
-	<c:if test="${reqentry.reqType == 'C' && reqentry.mainAddrType == 'ZS01'}">
+	<%-- <c:if test="${reqentry.reqType == 'C' && reqentry.mainAddrType == 'ZS01'}"> --%>
      <cmr:row addBackground="true">
+      <%-- 
       <cmr:column span="1">
         <cmr:label fieldId="cnCustContPhone2_view">Customer Contact's Phone Number 2:</cmr:label>
       </cmr:column>
       <cmr:column span="2">
         <div id="cnCustContPhone2_view">${ui.custContPhone2}</div>
       </cmr:column>
+      --%>
       <cmr:column span="1">
         <cmr:label fieldId="cnCustContJobTitle_view">Customer Contact's Job Title:</cmr:label>
       </cmr:column>
@@ -669,7 +671,7 @@
         <div id="custPhone_view">-</div>
       </cmr:column>
     </cmr:row>
-</c:if>
+   <%-- </c:if> --%>
     <cmr:row addBackground="false">
       <cmr:column span="1">
         <cmr:label fieldId="custNm1_view">${ui.custName1}:</cmr:label>

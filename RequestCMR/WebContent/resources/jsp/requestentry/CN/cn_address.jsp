@@ -311,8 +311,9 @@
   </cmr:column>
 </cmr:row>
 
-<c:if test="${reqentry.reqType != 'U'}">
+
 <cmr:row>
+ <%-- 
  <cmr:column span="2" containerForField="CustomerCntPhone2">
     <p>
       <cmr:label fieldId="cnCustContPhone2">
@@ -322,6 +323,7 @@
       <cmr:field fieldId="CustomerCntPhone2" id="cnCustContPhone2" path="cnCustContPhone2" />
     </p>
   </cmr:column>
+  --%>
   <cmr:column span="2" containerForField="CustomerCntJobTitle">
     <p>
       <cmr:label fieldId="cnCustContJobTitle">
@@ -332,9 +334,8 @@
     </p>
   </cmr:column>
 </cmr:row>
-</c:if>
 
-<c:if test="${reqentry.reqType != 'U'}">
+
 <cmr:row>
  <cmr:column span="4" containerForField="ChinaCustomerCntName">
     <p>
@@ -346,7 +347,6 @@
     </p>
   </cmr:column>
 </cmr:row>
-</c:if>
 
 <cmr:row>
 <cmr:column span="2" containerForField="InterAddrKey">

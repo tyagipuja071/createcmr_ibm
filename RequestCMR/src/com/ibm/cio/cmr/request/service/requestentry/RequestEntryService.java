@@ -69,6 +69,7 @@ import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
+import com.ibm.cio.cmr.request.util.geo.impl.CNHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.LAHandler;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
 import com.ibm.cmr.services.client.dnb.DnbData;
@@ -477,8 +478,11 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     lockedBy = admin.getLockBy();
     lockedByNm = admin.getLockByNm();
     processingStatus = admin.getProcessedFlag();
-
-    if (transitionToNext) {
+    boolean cnSendToPPNFlag = false;
+    if (SystemLocation.CHINA.equals(model.getCmrIssuingCntry()) && "DRA".equals(admin.getReqStatus()) && "PPN".equals(trans.getNewReqStatus())) {
+      cnSendToPPNFlag = true;
+    }
+    if (transitionToNext && !cnSendToPPNFlag) {
       admin.setReqStatus(trans.getNewReqStatus());
     }
 
@@ -540,6 +544,11 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       geoHandler.doBeforeDataSave(entityManager, admin, data, model.getCmrIssuingCntry());
     }
     updateEntity(data, entityManager);
+
+    // CREATCMR-3144 - CN 2.0 special
+    if (CmrConstants.Send_for_Processing().equals(model.getAction()) && SystemLocation.CHINA.equals(model.getCmrIssuingCntry())) {
+      CNHandler.doBeforeSendForProcessing(entityManager, admin, data, model);
+    }
 
     // check if there's a status change
     if (transitionToNext && !trans.getId().getCurrReqStatus().equals(trans.getNewReqStatus())) {
@@ -624,6 +633,8 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     String autoConfig = RequestUtils.getAutomationConfig(entityManager, model.getCmrIssuingCntry());
     if (!AutomationConst.AUTOMATE_PROCESSOR.equals(autoConfig) && !AutomationConst.AUTOMATE_BOTH.equals(autoConfig)) {
       result = approvalService.processDefaultApproval(entityManager, model.getReqId(), model.getReqType(), user, model);
+    } else if (trans != null && !trans.getNewReqStatus().equals("AUT") && SystemLocation.CHINA.equals(model.getCmrIssuingCntry())) {
+      approvalService.processDefaultApproval(entityManager, model.getReqId(), model.getReqType(), user, model);
     } else {
       this.log.info("Processor automation enabled, skipping default approvals.");
     }
@@ -721,8 +732,13 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
           // check here for any automation
           String processingIndc = SystemUtil.getAutomationIndicator(entityManager, model.getCmrIssuingCntry());
           if ("P".equals(processingIndc) || "B".equals(processingIndc)) {
-            this.log.debug("Processor automation enabled for " + model.getCmrIssuingCntry() + ". Setting " + model.getReqId() + " to AUT");
-            transrec.setNewReqStatus("AUT"); // set to automated processing
+            if (SystemLocation.CHINA.equals(model.getCmrIssuingCntry()) && StringUtils.isNotBlank(model.getDisableAutoProc())
+                && model.getDisableAutoProc().equalsIgnoreCase("Y")) {
+              // transrec.setNewReqStatus("PPN");// set to PPN for CHINA
+            } else {
+              this.log.debug("Processor automation enabled for " + model.getCmrIssuingCntry() + ". Setting " + model.getReqId() + " to AUT");
+              transrec.setNewReqStatus("AUT"); // set to automated processing
+            }
           }
         }
         if ("*".equals(transrec.getId().getReqType())) {
@@ -1405,6 +1421,11 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
               }
               isicMatch = getDnBDetailsUI(record.getDunsNo()).getIbmIsic().equals(model.getIsicCd());
               log.debug("ISIC Match : " + isicMatch);
+              if (record.getConfidenceCode() >= 8 && SystemLocation.CHINA.equals(data.getCmrIssuingCntry())
+                  && (StringUtils.isBlank(data.getCustSubGrp()) || !data.getCustSubGrp().equals("CROSS"))) {
+                match = true;
+                break;
+              }
               if (record.getConfidenceCode() >= 8 && DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), zs01, admin, record, null, false, true)) {
                 match = true;
                 break;

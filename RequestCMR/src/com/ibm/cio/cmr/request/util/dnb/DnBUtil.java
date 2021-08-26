@@ -25,6 +25,7 @@ import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.model.CompanyRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
@@ -36,6 +37,8 @@ import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.MatchingServiceClient;
 import com.ibm.cmr.services.client.ValidatorClient;
+import com.ibm.cmr.services.client.automation.AutomationResponse;
+import com.ibm.cmr.services.client.automation.cn.CNResponse;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
 import com.ibm.cmr.services.client.dnb.DnbData;
 import com.ibm.cmr.services.client.dnb.DnbOrganizationId;
@@ -231,6 +234,9 @@ public class DnBUtil {
 
     // covert from D&B data to FindCMR model
     FindCMRRecordModel cmrRecord = new FindCMRRecordModel();
+    if (SystemLocation.CHINA.equals(issuingCntry) && StringUtils.isNotBlank(company.getOrganizationId())) {
+      getCNApiAddressData(cmrRecord, company.getOrganizationId());
+    }
     cmrRecord.setCmrIssuedBy(issuingCntry);
     cmrRecord.setCmrIsic(company.getIbmIsic());
     cmrRecord.setCmrDuns(company.getDunsNo());
@@ -273,6 +279,9 @@ public class DnBUtil {
     cmrRecord.setCmrState(company.getPrimaryStateCode() != null ? company.getPrimaryStateCode() : company.getMailingStateCode());
     if (cmrRecord.getCmrState() != null && cmrRecord.getCmrState().length() > 3) {
       cmrRecord.setCmrState(null);
+    }
+    if (SystemLocation.CHINA.equalsIgnoreCase(issuingCntry)) {
+      cmrRecord.setCmrState(StringUtils.isNotBlank(company.getPrimaryStateName()) ? company.getPrimaryStateName() : company.getMailingStateName());
     }
     cmrRecord.setCmrPostalCode(company.getPrimaryPostalCode() != null ? company.getPrimaryPostalCode() : company.getMailingPostalCode());
     if (cmrRecord.getCmrPostalCode() == null) {
@@ -319,6 +328,34 @@ public class DnBUtil {
       RequestUtils.deriveUSCounty(cmrRecord, company);
     }
     return cmrRecord;
+  }
+
+  private static void getCNApiAddressData(FindCMRRecordModel cmrRecord, String organizationId) {
+    // TODO Auto-generated method stub
+    CompanyRecordModel companyRecordModel = new CompanyRecordModel();
+    companyRecordModel.setTaxCd1(organizationId);
+    try {
+      AutomationResponse<CNResponse> cmrsData = CompanyFinder.getCNApiInfo(companyRecordModel, "TAXCD");
+      if (cmrsData != null && cmrsData.isSuccess()) {
+        LOG.debug("Get Chiese API Info successful>>>");
+        String cnName = StringUtils.isNotBlank(cmrsData.getRecord().getName()) ? cmrsData.getRecord().getName().trim() : "";
+        String cnStreet = StringUtils.isNotBlank(cmrsData.getRecord().getRegLocation()) ? cmrsData.getRecord().getRegLocation().trim() : "";
+        String cnCity1 = StringUtils.isNotBlank(cmrsData.getRecord().getCity()) ? cmrsData.getRecord().getCity().trim() : "";
+        String cnCity2 = StringUtils.isNotBlank(cmrsData.getRecord().getDistrict()) ? cmrsData.getRecord().getDistrict().trim() : "";
+        String cnCreditCode = StringUtils.isNotBlank(cmrsData.getRecord().getCreditCode()) ? cmrsData.getRecord().getCreditCode().trim() : "";
+        cmrRecord.setCmrIntlName(cnName);
+        cmrRecord.setCmrIntlAddress(cnStreet);
+        cmrRecord.setCmrIntlCity1(cnCity1);
+        cmrRecord.setCmrIntlCity2(cnCity2);
+        cmrRecord.setCreditCd(cnCreditCode);
+        LOG.debug("Get Chiese API Info Social credit code is " + cnCreditCode);
+      } else {
+        LOG.debug("No China API Data were found.");
+      }
+    } catch (Exception e) {
+      // TODO Auto-generated catch block
+      LOG.error("Error in getting Chiese API details ", e);
+    }
   }
 
   /**
