@@ -53,6 +53,8 @@ public class IndiaUtil extends AutomationUtil {
   public static final String SCENARIO_IGF = "IGF";
   public static final String SCENARIO_PRIVATE_CUSTOMER = "PRIV";
   public static final String SCENARIO_FOREIGN = "CROSS";
+  private static final List<String> India_LEGAL_ENDINGS = Arrays.asList("PRIVATE LIMITED", "ORGANIZATION", "ORGANISATION", "INC.", "ORG.",
+      "INCORPORATE", "COMPANY", "CORP.", "CORPORATION", "LIMITED", "LTD", "PVT", "PRIVATE", "PVT LTD");
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
       CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SECONDARY_SHIPPING);
   private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Attn", "Phone #");
@@ -119,14 +121,15 @@ public class IndiaUtil extends AutomationUtil {
       for (String addrType : RELEVANT_ADDRESSES) {
         List<Addr> addresses = requestData.getAddresses(addrType);
         for (Addr addr : addresses) {
-          String custNmTrimmed = getCustomerFullName(addr);
-          if (custNmTrimmed.toUpperCase().contains("PRIVATE LIMITED") || custNmTrimmed.toUpperCase().contains("COMPANY")
-              || custNmTrimmed.toUpperCase().contains("CORPORATION") || custNmTrimmed.toUpperCase().contains("INCORPORATE")
-              || custNmTrimmed.toUpperCase().contains("ORGANIZATION") || custNmTrimmed.toUpperCase().contains("PVT LTD")) {
-            details.append("Customer name should not contain 'Private Limited', 'Company', 'Corporation', 'Incorporate', 'Organization', 'Pvt Ltd' .")
+          String custNmTrimmed = getCustomerFullName(addr).toUpperCase();
+          if (hasINLegalEndings(custNmTrimmed)) {
+            details
+                .append(
+                    "Customer name should not contain 'Private Limited', 'Company', 'Corporation', 'Incorporate', 'Organization', 'Organisation', 'Pvt Ltd', 'Private', 'Limited', 'Pvt', 'Ltd', 'Inc.', 'Org.', 'Corp.' .")
                 .append("\n");
             engineData.addRejectionComment("OTH",
-                "Customer name should not contain 'Private Limited', 'Company', 'Corporation', 'Incorporate', 'Organization', 'Pvt Ltd' .", "", "");
+                "Customer name should not contain 'Private Limited', 'Company', 'Corporation', 'Incorporate', 'Organization', 'Organisation', 'Pvt Ltd', 'Private', 'Limited', 'Pvt', 'Ltd', 'Inc.', 'Org.', 'Corp.' .",
+                "", "");
             return false;
           }
         }
@@ -139,6 +142,20 @@ public class IndiaUtil extends AutomationUtil {
 
     }
     return true;
+  }
+
+  private boolean hasINLegalEndings(String custNmTrimmed) {
+    if (custNmTrimmed == null) {
+      return false;
+    }
+
+    for (String lglEnding : India_LEGAL_ENDINGS) {
+
+      if (custNmTrimmed.contains(lglEnding)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   @Override
