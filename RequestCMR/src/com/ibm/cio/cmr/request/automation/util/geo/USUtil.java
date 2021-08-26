@@ -1080,7 +1080,7 @@ public class USUtil extends AutomationUtil {
               closelyMatchAddressWithDnbRecords(entityManager, requestData, engineData, "ZI01", details, validation, output);
             }
             if (relevantAddressFieldForUpdates(changes, requestData.getAddress("ZI01"))) {
-              matchAddressWithSosRecords(entityManager, requestData, engineData, "ZS01", details, validation, output);
+              matchAddressWithSosRecords(entityManager, requestData, engineData, "ZI01", details, validation, output);
             }
           }
         }
