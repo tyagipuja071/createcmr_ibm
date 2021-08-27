@@ -1627,7 +1627,7 @@ function matchDnBForAutomationCountries() {
             } else if(data.confidenceCd){
               showDnBMatchModal();
             } else {
-              if(cntry != SysLoc.INDIA){
+              if(cntry != SysLoc.INDIA && cntry !='641' ){
                  cmr.showAlert('No matches found in dnb : Data Overidden.\nPlease attach company proof');      
                  FormManager.setValue('matchOverrideIndc','Y');
                }  
@@ -1642,10 +1642,18 @@ function matchDnBForAutomationCountries() {
           } else {
             // continue
             console.log("An error occurred while matching dnb.");
-            cmr.showConfirm("cmr.showModal('addressVerificationModal')", 'An error occurred while matching dnb. Do you want to proceed with this request?', 'Warning', null, {
-              OK : 'Yes',
-              CANCEL : 'No'
-            });
+            if (cntry == '641') {
+              cmr.showConfirm('showAddressVerificationModal()', 'An error occurred while matching dnb. Do you want to proceed with this request?',
+                  'Warning', null, {
+                    OK : 'Yes',
+                    CANCEL : 'No'
+                  });
+            } else {
+              cmr.showConfirm("cmr.showModal('addressVerificationModal')", 'An error occurred while matching dnb. Do you want to proceed with this request?', 'Warning', null, {
+                OK : 'Yes',
+                CANCEL : 'No'
+              });
+            }
           }
         },
         error : function(error, ioargs) {
@@ -1716,20 +1724,12 @@ function matchDnBForIndia() {
             }
           } else {
             // continue
-            console.log("An error occurred while matching dnb.");
-            if (cntry == '641') {
-              cmr.showConfirm('showAddressVerificationModal()', 'An error occurred while matching dnb. Do you want to proceed with this request?',
-                  'Warning', null, {
-                    OK : 'Yes',
-                    CANCEL : 'No'
-                  });
-            } else {
-              cmr.showConfirm("cmr.showModal('addressVerificationModal')",
-                  'An error occurred while matching dnb. Do you want to proceed with this request?', 'Warning', null, {
-                    OK : 'Yes',
-                    CANCEL : 'No'
-                  });
-            }
+            console.log("An error occurred while matching dnb.");           
+            cmr.showConfirm("cmr.showModal('addressVerificationModal')",
+                'An error occurred while matching dnb. Do you want to proceed with this request?', 'Warning', null, {
+                  OK : 'Yes',
+                  CANCEL : 'No'
+                });
           }
         },
         error : function(error, ioargs) {
