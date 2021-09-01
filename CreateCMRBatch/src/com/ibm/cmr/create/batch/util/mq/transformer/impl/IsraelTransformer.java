@@ -64,6 +64,7 @@ public class IsraelTransformer extends EMEATransformer {
     }
 
     legacyCust.setMrcCd("");
+    legacyCust.getId().setSofCntryCode(SystemLocation.SAP_ISRAEL_SOF_ONLY);
   }
 
   @Override
@@ -174,6 +175,7 @@ public class IsraelTransformer extends EMEATransformer {
       CMRRequestContainer cmrObjects, Addr currAddr) {
     LOG.debug("LD - transformLegacyAddressData ISRAEL transformer...");
     formatAddressLines(dummyHandler);
+    legacyAddr.getId().setSofCntryCode(SystemLocation.SAP_ISRAEL_SOF_ONLY);
   }
 
   @Override
