@@ -3359,6 +3359,17 @@ function lockFieldsForIndia(){
   if (reqType == 'C'  && !(custSubGrp == 'INTER' || custSubGrp == 'ESOSW')){
     FormManager.readOnly('cmrNoPrefix');
   }
+  if (reqType == 'C'  && custSubGrp == 'IGF'){
+    FormManager.setValue('isicCd', '8888');
+  }
+
+  if (reqType == 'C'  && custSubGrp == 'INTER'){
+    FormManager.setValue('isicCd', '0000');
+  }
+
+  if (reqType == 'C'  && custSubGrp == 'PRIV'){
+    FormManager.setValue('isicCd', '9500');
+  }
 }
 
 
