@@ -174,6 +174,14 @@ function addAfterConfigAP() {
          FormManager.readOnly('busnType');
       }
     }
+    
+    if((cntry == SysLoc.NEW_ZEALAND || cntry == SysLoc.AUSTRALIA) && (custSubGrp == 'ECSYS' ||custSubGrp == 'XECO' )){
+        FormManager.setValue('mrcCd', '3');
+        FormManager.setValue('clientTier', 'Y');
+        FormManager.readOnly('clientTier');
+        FormManager.setValue('isuCd', '34');
+        FormManager.readOnly('isuCd');
+    }
   }
   if (reqType == 'C') {
     setIsuOnIsic();
@@ -3491,6 +3499,23 @@ function addressNameSimilarValidator() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
+function addValidatorBasedOnCluster() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var custSubType = FormManager.getActualValue('custSubGrp');
+        var cluster = FormManager.getActualValue('apCustClusterId');
+        if ((custSubType != 'ECSYS' && custSubType != 'XECO' ) && (cluster == '08039' || cluster == '08037')) {
+          return new ValidationResult(null, false, 'Ecosytem Partners Cluster is not allowed for selected scenario.');
+        }
+     else{
+        return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.AP = [ SysLoc.AUSTRALIA, SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE, SysLoc.VIETNAM,
       SysLoc.THAILAND, SysLoc.HONG_KONG, SysLoc.NEW_ZEALAND, SysLoc.LAOS, SysLoc.MACAO, SysLoc.MALASIA, SysLoc.NEPAL, SysLoc.CAMBODIA ];
@@ -3623,5 +3648,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setMrc4IntDumForASEAN, GEOHandler.ASEAN);
   GEOHandler.addAfterConfig(lockFieldsForIndia, [ SysLoc.INDIA ]);
   GEOHandler.addAfterTemplateLoad(lockFieldsForIndia, SysLoc.INDIA);
+  GEOHandler.registerValidator(addValidatorBasedOnCluster, GEOHandler.ANZ, GEOHandler.ROLE_REQUESTER, true);
   
 });
