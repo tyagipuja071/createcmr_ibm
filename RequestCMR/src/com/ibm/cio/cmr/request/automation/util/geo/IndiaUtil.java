@@ -18,6 +18,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 
 import com.ibm.cio.cmr.request.CmrConstants;
+import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
@@ -66,11 +67,16 @@ public class IndiaUtil extends AutomationUtil {
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {
     // TODO Auto-generated method stub
     Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
+    String scenario = data.getCustSubGrp();
     if (!"C".equals(admin.getReqType())) {
       details.append("Field Computation skipped for Updates.");
       results.setResults("Skipped");
       results.setDetails(details.toString());
       return results;
+    }
+    if ("C".equals(admin.getReqType()) && SCENARIO_IGF.equals(scenario)) {
+      overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISIC_CD", data.getIsicCd(), "8888");
     }
     details.append("No specific fields to calculate.");
     results.setResults("Skipped.");
