@@ -1865,43 +1865,21 @@ public class IsraelHandler extends BaseSOFHandler {
 
   @Override
   public List<String> getMandtAddrTypeForLDSeqGen(String cmrIssuingCntry) {
-    if (SystemLocation.UNITED_KINGDOM.equals(cmrIssuingCntry) || SystemLocation.IRELAND.equals(cmrIssuingCntry)) {
-      return Arrays.asList("ZP01", "ZS01", "ZI01");
-    } else if (SystemLocation.GREECE.equals(cmrIssuingCntry)) {
-      return Arrays.asList("ZP01", "ZS01", "ZD01", "ZI01");
-    } else if (SystemLocation.TURKEY.equals(cmrIssuingCntry)) {
-      return Arrays.asList("ZP01", "ZS01");
-    }
-    return null;
+    return Arrays.asList("ZS01", "ZP01", "ZI01", "ZD01", "ZS02", "CTYA", "CTYB", "CTYC");
   }
 
   @Override
   public List<String> getOptionalAddrTypeForLDSeqGen(String cmrIssuingCntry) {
-    if (SystemLocation.UNITED_KINGDOM.equals(cmrIssuingCntry) || SystemLocation.IRELAND.equals(cmrIssuingCntry)) {
-      return Arrays.asList("ZD01", "ZS02");
-    }
     return null;
   }
 
   @Override
   public List<String> getAdditionalAddrTypeForLDSeqGen(String cmrIssuingCntry) {
-    if (SystemLocation.UNITED_KINGDOM.equals(cmrIssuingCntry) || SystemLocation.IRELAND.equals(cmrIssuingCntry)) {
-      return Arrays.asList("ZD01", "ZI01");
-    }
-    if (SystemLocation.TURKEY.equals(cmrIssuingCntry)) {
-      return Arrays.asList("ZP01");
-    }
-    if (SystemLocation.GREECE.equals(cmrIssuingCntry)) {
-      return Arrays.asList("ZD01", "ZI01");
-    }
     return null;
   }
 
   @Override
   public List<String> getReservedSeqForLDSeqGen(String cmrIssuingCntry) {
-    if (SystemLocation.GREECE.equals(cmrIssuingCntry)) {
-      return Arrays.asList("5");
-    }
     return null;
   }
 
@@ -2353,5 +2331,4 @@ public class IsraelHandler extends BaseSOFHandler {
     }
 
   }
-
 }
