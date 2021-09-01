@@ -336,8 +336,21 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
       legacyAddr.getId().setAddrNo(StringUtils.isEmpty(currAddr.getPrefSeqNo()) ? legacyAddr.getId().getAddrNo() : currAddr.getPrefSeqNo());
     }
     formatAddressLinesLD(dummyHandler, legacyAddr);
-    if ("ZD01".equals(currAddr.getId().getAddrType()) && !StringUtils.isEmpty(currAddr.getCustPhone())) {
+    if (("ZD01".equals(currAddr.getId().getAddrType()) || "ZS01".equals(currAddr.getId().getAddrType()))
+        && !StringUtils.isEmpty(currAddr.getCustPhone())) {
       legacyAddr.setAddrPhone(currAddr.getCustPhone().trim());
+    }
+    String poBox = currAddr.getPoBox();
+    if (!StringUtils.isEmpty(poBox) && ("ZS01".equals(currAddr.getId().getAddrType()) || "ZP01".equals(currAddr.getId().getAddrType()))) {
+      if (!poBox.startsWith("PO BOX ")) {
+        if (poBox.toUpperCase().startsWith("APTO"))
+          poBox = poBox.substring(5);
+        legacyAddr.setPoBox("PO BOX " + poBox);
+      } else {
+        legacyAddr.setPoBox(poBox);
+      }
+    } else if (StringUtils.isEmpty(poBox) && ("ZS01".equals(currAddr.getId().getAddrType()) || "ZP01".equals(currAddr.getId().getAddrType()))) {
+      legacyAddr.setPoBox("");
     }
   }
 

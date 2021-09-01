@@ -9610,7 +9610,12 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addStreetAddressFormValidatorGR, [ SysLoc.GREECE ], null, true);
   GEOHandler.registerValidator(addCrossLandedCntryFormValidatorGR, [ SysLoc.GREECE ], null, true);
   GEOHandler.addAfterConfig(clearPhoneNoFromGrid, [ SysLoc.GREECE ]);
+  GEOHandler.addAfterConfig(clearPhoneNoFromGrid, [ SysLoc.UK, SysLoc.IRELAND ]);
   GEOHandler.addAfterConfig(clearPOBoxFromGrid, [ SysLoc.GREECE ]);
+  GEOHandler.addAfterConfig(clearPOBoxFromGrid, [ SysLoc.UK ]);
+  GEOHandler.addAfterTemplateLoad(clearPOBoxFromGrid, [ SysLoc.UK ]);
+  GEOHandler.addAfterConfig(clearPOBoxFromGrid, [ SysLoc.IRELAND ]);
+  GEOHandler.addAfterTemplateLoad(clearPOBoxFromGrid, [ SysLoc.IRELAND ]);
   GEOHandler.addAfterTemplateLoad(retainLandCntryValuesOnCopy, [ SysLoc.GREECE ]);
 
   // GEOHandler.registerValidator(addPostalCodeLenForTurGreCypValidator,
