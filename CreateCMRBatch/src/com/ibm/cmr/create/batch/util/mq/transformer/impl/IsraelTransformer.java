@@ -7,17 +7,24 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.EntityManager;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.entity.CmrtAddr;
+import com.ibm.cio.cmr.request.entity.CmrtCust;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cmr.create.batch.util.CMRRequestContainer;
 import com.ibm.cmr.create.batch.util.mq.LandedCountryMap;
 import com.ibm.cmr.create.batch.util.mq.MQMsgConstants;
 import com.ibm.cmr.create.batch.util.mq.handler.MQMessageHandler;
 import com.ibm.cmr.create.batch.util.mq.transformer.MessageTransformer;
+import com.ibm.cmr.services.client.cmrno.GenerateCMRNoRequest;
 
 /**
  * {@link MessageTransformer} implementation for Israel.
@@ -40,6 +47,23 @@ public class IsraelTransformer extends EMEATransformer {
   public IsraelTransformer() {
     super(SystemLocation.ISRAEL);
 
+  }
+
+  @Override
+  public void transformLegacyCustomerData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCust legacyCust,
+      CMRRequestContainer cmrObjects) {
+    LOG.debug("LD - transformLegacyCustomerData ISRAEL transformer...");
+    Admin admin = cmrObjects.getAdmin();
+    Data data = cmrObjects.getData();
+    formatDataLines(dummyHandler);
+
+    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      // Creates only mapping
+    } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+      // Update only mapping
+    }
+
+    legacyCust.setMrcCd("");
   }
 
   @Override
@@ -143,7 +167,13 @@ public class IsraelTransformer extends EMEATransformer {
         messageHash.remove(field);
       }
     }
+  }
 
+  @Override
+  public void transformLegacyAddressData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCust legacyCust, CmrtAddr legacyAddr,
+      CMRRequestContainer cmrObjects, Addr currAddr) {
+    LOG.debug("LD - transformLegacyAddressData ISRAEL transformer...");
+    formatAddressLines(dummyHandler);
   }
 
   @Override
@@ -243,7 +273,8 @@ public class IsraelTransformer extends EMEATransformer {
           // count index from CTYC types only
           if (CmrConstants.ADDR_TYPE.CTYC.toString().equals(addr.getId().getAddrType())) {
             running++;
-            if (addr.getId().getAddrType().equals(addrData.getId().getAddrType()) && addr.getId().getAddrSeq().equals(addrData.getId().getAddrSeq())) {
+            if (addr.getId().getAddrType().equals(addrData.getId().getAddrType())
+                && addr.getId().getAddrSeq().equals(addrData.getId().getAddrSeq())) {
               ctyCIndex = running;
               break;
             }
@@ -280,7 +311,8 @@ public class IsraelTransformer extends EMEATransformer {
           // count index from CTYC types only
           if (CmrConstants.ADDR_TYPE.CTYC.toString().equals(addr.getId().getAddrType()) && !"Y".equals(addr.getImportInd())) {
             running++;
-            if (addr.getId().getAddrType().equals(addrData.getId().getAddrType()) && addr.getId().getAddrSeq().equals(addrData.getId().getAddrSeq())) {
+            if (addr.getId().getAddrType().equals(addrData.getId().getAddrType())
+                && addr.getId().getAddrSeq().equals(addrData.getId().getAddrSeq())) {
               ctyCIndex = running;
               break;
             }
@@ -403,6 +435,17 @@ public class IsraelTransformer extends EMEATransformer {
       return MQMsgConstants.SOF_ADDRESS_USE_COUNTRY_USE_C;
     default:
       return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
+    }
+  }
+
+  @Override
+  public void generateCMRNoByLegacy(EntityManager entityManager, GenerateCMRNoRequest generateCMRNoObj, CMRRequestContainer cmrObjects) {
+    Data data = cmrObjects.getData();
+    String custSubGrp = data.getCustSubGrp();
+    LOG.debug("Set max and min range For IL...");
+    if (custSubGrp != null && "INTER".equals(custSubGrp)) {
+      generateCMRNoObj.setMin(990000);
+      generateCMRNoObj.setMax(999999);
     }
   }
 
