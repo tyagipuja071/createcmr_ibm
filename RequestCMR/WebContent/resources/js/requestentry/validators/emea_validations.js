@@ -7567,11 +7567,19 @@ function autoSetISUClientTierUK() {
 }
 function disableAddrFieldsUKI() {
   var addrType = FormManager.getActualValue('addrType');
-  if (addrType != 'ZS01' && addrType != 'ZD01') {
+  var custGrp = FormManager.getActualValue('custGrp');
+  if (addrType == 'ZS01' || addrType == 'ZD01' || addrType == '') {
+    FormManager.enable('custPhone');
+  } else {
     FormManager.setValue('custPhone', '');
     FormManager.disable('custPhone');
+  }
+
+  if (addrType == 'ZP01' || addrType == 'ZS01' || addrType == '') {
+    FormManager.enable('poBox');
   } else {
-    FormManager.enable('custPhone');
+    FormManager.setValue('poBox', '');
+    FormManager.disable('poBox');
   }
 }
 
@@ -7995,6 +8003,17 @@ function displayHwMstInstallFlagNew() {
     }
   }
 }
+
+function addHandlersForUKI() {
+  if ((cmr.addressMode == 'newAddress' || cmr.addressMode == 'copyAddress') && (FormManager.getActualValue('cmrIssuingCntry') == '866' || FormManager.getActualValue('cmrIssuingCntry') == '754')) {
+    for (var i = 0; i < _addrTypesForEMEA.length; i++) {
+      addrTypeHandler[i] = dojo.connect(FormManager.getField('addrType_' + _addrTypesForEMEA[i]), 'onClick', function(value) {
+        disableAddrFieldsUKI();
+      });
+    }
+  }
+}
+
 function displayHwMstrInstallFlag() {
   console.log(">>> Executing displayHwMstInstallFlag");
   console.log('>> cmr.addressMode >>' + cmr.addressMode);
@@ -8690,6 +8709,227 @@ function addCustNm4ValidatorForTR() {
       }
     };
   })(), null, 'frmCMR_addressModal');
+}
+
+function addStPoValidatorUKI() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var strCont = FormManager.getActualValue('addrTxt2');
+        var poBox = FormManager.getActualValue('poBox');
+        var addrType = FormManager.getActualValue('addrType');
+        var landCntry = FormManager.getActualValue('landCntry');
+        var issuCntry = FormManager.getActualValue('cmrIssuingCntry');
+        var attn = FormManager.getActualValue('dept');
+        var custPh = FormManager.getActualValue('custPhone');
+
+        if ((landCntry != 'GB' && issuCntry == '866') || (landCntry != 'IE' && issuCntry == '754')) {
+          if (addrType == 'ZS01' || addrType == 'ZP01') {
+            if ((strCont.length != undefined && strCont.length > 0) && (poBox.length != undefined && poBox.length > 0)) {
+              return new ValidationResult(null, false, 'Only \'Street Cont\' or \'PO Box\' can be filled.');
+            }
+          }
+        }
+        if (addrType == 'ZD01') {
+          if ((attn.length != undefined && attn.length > 0) && (custPh.length != undefined && custPh.length > 0)) {
+            var attnCustPh = 'ATT ' + attn + (attn.length > 0 ? ', ' : '') + custPh;
+            if (attnCustPh.length > 30) {
+              return new ValidationResult(null, false, 'Computed length of \'Attn\'+\'Phone No.\' should be 24 characters or less');
+            }
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+}
+
+function addStAttPoValidatorForUKI() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqType = FormManager.getActualValue('reqType');
+        var strCont = FormManager.getActualValue('addrTxt2');
+        var poBox = FormManager.getActualValue('poBox');
+        var attn = FormManager.getActualValue('dept');
+        var addrType = FormManager.getActualValue('addrType');
+        var custPh = FormManager.getActualValue('custPhone');
+        var custGrp = FormManager.getActualValue('custGrp');
+        var custCont = FormManager.getActualValue('custNm2');
+        var landCntry = FormManager.getActualValue('landCntry');
+        var issuCntry = FormManager.getActualValue('cmrIssuingCntry');
+
+        if (reqType == 'C') {
+          if ((landCntry != 'GB' && issuCntry == '866') || (landCntry != 'IE' && issuCntry == '754')) {
+            if (addrType == 'ZS01' || addrType == 'ZP01') {
+              if ((custCont.length != undefined && custCont.length > 0) && (attn.length != undefined && attn.length > 0)) {
+                return new ValidationResult(null, false, 'Only \'Customer Name Cont\' or \'Attn\' can be filled.');
+              }
+            } else if (addrType == 'ZD01') {
+              if ((custCont.length != undefined && custCont.length > 0) && ((attn.length != undefined && attn.length > 0) || (custPh.length != undefined && custPh.length > 0))) {
+                return new ValidationResult(null, false, 'Only Customer Name Con\'t or Attn+Phone No/Attn/Phone No can be filled.');
+              }
+            } else if (addrType == 'ZI01' || addrType == 'ZS02') {
+              if ((custCont.length != undefined && custCont.length > 0) && (attn.length != undefined && attn.length > 0)) {
+                return new ValidationResult(null, false, 'Only \'Customer Name Cont\' or \'Attn\' can be filled.');
+              }
+            }
+
+          } else {
+            if (addrType == 'ZS01' || addrType == 'ZP01') {
+              if (((strCont.length != undefined && strCont.length > 0) && (poBox.length != undefined && poBox.length > 0))
+                  || ((attn.length != undefined && attn.length > 0) && (poBox.length != undefined && poBox.length > 0))
+                  || ((attn.length != undefined && attn.length > 0) && (strCont.length != undefined && strCont.length > 0))
+                  || ((attn.length != undefined && attn.length > 0) && (strCont.length != undefined && strCont.length > 0) && (poBox.length != undefined && poBox.length > 0))) {
+
+                return new ValidationResult(null, false, 'For Street Con\'t, PO BOX and Attn only one of the three can be filled.');
+              }
+            } else if (addrType == 'ZD01') {
+              if ((strCont.length != undefined && strCont.length > 0) && ((attn.length != undefined && attn.length > 0) || (custPh.length != undefined && custPh.length > 0))) {
+                return new ValidationResult(null, false, 'Only Street Con\'t or Attn+Phone No/Attn/Phone No can be filled.');
+              }
+            } else if (addrType == 'ZI01' || addrType == 'ZS02') {
+              if ((strCont.length != undefined && strCont.length > 0) && (attn.length != undefined && attn.length > 0)) {
+                return new ValidationResult(null, false, 'Only \'Street Cont\' or \'Attn\' can be filled.');
+              }
+            }
+
+          }
+        } else if (reqType == 'U') {
+          if (addrType == 'ZS01' || addrType == 'ZP01') {
+            if ((landCntry != 'GB' && issuCntry == '866') || (landCntry != 'IE' && issuCntry == '754')) {
+              if ((custCont.length != undefined && custCont.length > 0) && (attn.length != undefined && attn.length > 0)) {
+                return new ValidationResult(null, false, 'Only \'Customer Name Cont\' or \'Attn\' can be filled.');
+              }
+            } else {
+              if (((strCont.length != undefined && strCont.length > 0) && (poBox.length != undefined && poBox.length > 0))
+                  || ((attn.length != undefined && attn.length > 0) && (poBox.length != undefined && poBox.length > 0))
+                  || ((attn.length != undefined && attn.length > 0) && (strCont.length != undefined && strCont.length > 0))
+                  || ((attn.length != undefined && attn.length > 0) && (strCont.length != undefined && strCont.length > 0) && (poBox.length != undefined && poBox.length > 0))) {
+
+                return new ValidationResult(null, false, 'For Street Con\'t, PO BOX and Attn only one of the three can be filled.');
+              }
+            }
+          } else if (addrType == 'ZD01') {
+            if ((landCntry != 'GB' && issuCntry == '866') || (landCntry != 'IE' && issuCntry == '754')) {
+              if ((custCont.length != undefined && custCont.length > 0) && ((attn.length != undefined && attn.length > 0) || (custPh.length != undefined && custPh.length > 0))) {
+                return new ValidationResult(null, false, 'Only Customer Name Con\'t or Attn+Phone No/Attn/Phone No can be filled.');
+              }
+            } else {
+              if ((strCont.length != undefined && strCont.length > 0) && ((attn.length != undefined && attn.length > 0) || (custPh.length != undefined && custPh.length > 0))) {
+                return new ValidationResult(null, false, 'Only Street Con\'t or Attn+Phone No/Attn/Phone No can be filled.');
+              }
+            }
+          } else if (addrType == 'ZI01' || addrType == 'ZS02') {
+            if ((landCntry != 'GB' && issuCntry == '866') || (landCntry != 'IE' && issuCntry == '754')) {
+              if ((custCont.length != undefined && custCont.length > 0) && (attn.length != undefined && attn.length > 0)) {
+                return new ValidationResult(null, false, 'Only \'Customer Name Cont\' or \'Attn\' can be filled.');
+              }
+            } else {
+              if ((strCont.length != undefined && strCont.length > 0) && (attn.length != undefined && attn.length > 0)) {
+                return new ValidationResult(null, false, 'Only \'Street Cont\' or \'Attn\' can be filled.');
+              }
+            }
+          }
+        }
+
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+}
+
+function addUKIaddressContentValidator() {
+  console.log("addUKAddressAddressContentValidator..............");
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        if (FormManager.getActualValue('cmrIssuingCntry') != '866' || FormManager.getActualValue('cmrIssuingCntry') != '754') {
+          return new ValidationResult(null, true);
+        }
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+          var custGrp = FormManager.getActualValue('custGrp');
+          var landCntry = FormManager.getActualValue('landCntry');
+          var reqType = FormManager.getActualValue('reqType');
+          var record = null;
+          var type = null;
+          var strCont = null;
+          var poBox = null;
+          var attn = null;
+          var addrType = null;
+          var custPh = null;
+          var custCont = null;
+
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+            record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+            if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+              record = _allAddressData[i];
+            }
+            type = record.addrType;
+            if (typeof (type) == 'object') {
+              type = type[0];
+            }
+
+            strCont = record.addrTxt2[0];
+            poBox = record.poBox[0];
+            attn = record.dept[0];
+            addrType = record.addrType[0];
+            custPh = record.custPhone[0];
+            custCont = record.custNm2[0];
+
+            if (reqType == 'C') {
+              if (custGrp == 'CROSS') {
+                if (addrType == 'ZS01' || addrType == 'ZP01') {
+                  if (custCont != null && attn != null) {
+                    if (custCont.length > 0 && attn.length > 0)
+                      return new ValidationResult(null, false, 'Billing/Mailing Address: Only \'Customer Name Cont\' or \'Attn\' can be filled.');
+                  }
+                  if (strCont != null && poBox.length != null) {
+                    if (strCont.length > 0 && poBox.length > 0)
+                      return new ValidationResult(null, false, 'Billing/Mailing Address: Only \'Street Cont\' or \'PO Box\' can be filled.');
+                  }
+                } else if (addrType == 'ZD01') {
+                  if (custCont != null && (attn != null || custPh != null)) {
+                    if (custCont.length > 0 && (attn.length > 0 || custPh.length > 0))
+                      return new ValidationResult(null, false, 'Shipping Address: Only \'Customer Name Cont\' or (\'Attn\'+\'Phone No.\') can be filled.');
+                  }
+                } else if (addrType == 'ZI01' || addrType == 'ZS02') {
+                  if (attn != null && custCont != null) {
+                    if (custCont.length > 0 && attn.length > 0)
+                      return new ValidationResult(null, false, 'Installing/EPL Address: Only \'Street Cont\' or \'Attn\' can be filled.');
+                  }
+                }
+
+              } else if (custGrp == 'LOCAL') {
+                if (addrType == 'ZS01' || addrType == 'ZP01') {
+                  if (strCont == null)
+                    strCont = '';
+                  if (attn == null)
+                    attn = '';
+                  if (poBox == null)
+                    poBox = '';
+                  if ((strCont.length > 0 && poBox.length > 0) || (attn.length > 0 && poBox.length > 0) || (strCont.length > 0 && attn.length > 0)
+                      || (strCont.length > 0 && poBox.length > 0 && attn.length > 0)) {
+                    return new ValidationResult(null, false, 'Billing/Mailing Address: For Street Con\'t, PO BOX and Attn only one of the three can be filled.');
+                  }
+                } else if (addrType == 'ZD01') {
+                  if (strCont != null && (attn != null || custPh != null)) {
+                    if (strCont.length > 0 && (attn.length > 0 || custPh.length > 0))
+                      return new ValidationResult(null, false, 'Shipping Address: Only Street Con\'t or Attn+Phone No/Attn/Phone No can be filled.');
+                  }
+                } else if (addrType == 'ZI01' || addrType == 'ZS02') {
+                  if (strCont != null && attn != null) {
+                    if (strCont.length > 0 && attn.length > 0)
+                      return new ValidationResult(null, false, 'Installing/EPL Address: Only \'Street Cont\' or \'Attn\' can be filled.');
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
 function addAfterConfigItaly() {
@@ -9512,7 +9752,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addIRAddressTypeValidator, [ SysLoc.IRELAND ], null, true);
   GEOHandler.registerValidator(addPostCdCityValidator, [ SysLoc.IRELAND, SysLoc.UK ], null, true);
   GEOHandler.addAddrFunction(addLatinCharValidatorUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
-  GEOHandler.registerValidator(addNameContAttnDeptValidatorUKI, [ SysLoc.IRELAND, SysLoc.UK ], null, true);
+  //GEOHandler.registerValidator(addNameContAttnDeptValidatorUKI, [ SysLoc.IRELAND, SysLoc.UK ], null, true);
   GEOHandler.registerValidator(validateCompanyNoForUKI, [ SysLoc.IRELAND, SysLoc.UK ], null, true);
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.UK, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.UK ], null, true);
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.IRELAND, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.IRELAND ], null, true);
@@ -9521,12 +9761,22 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(checkHwMstrInstallFlag, [ SysLoc.IRELAND, SysLoc.UK, SysLoc.SPAIN ], null, true);
   GEOHandler.addAddrFunction(displayHwMstrInstallFlag, [ SysLoc.SPAIN, SysLoc.UK, SysLoc.IRELAND ], null, true);
   GEOHandler.addAfterTemplateLoad(displayHwMstInstallFlagNew, [ SysLoc.SPAIN, SysLoc.UK, SysLoc.IRELAND ]);
+  GEOHandler.addAddrFunction(addHandlersForUKI, [ SysLoc.SPAIN, SysLoc.UK, SysLoc.IRELAND ], null, true);
 
   GEOHandler.addAddrFunction(setUKIAbbrevNmLocnOnAddressSave, [ SysLoc.IRELAND, SysLoc.UK ]);
   GEOHandler.addAfterConfig(showDeptNoForInternalsOnlyUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
   GEOHandler.addAfterTemplateLoad(showDeptNoForInternalsOnlyUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
   GEOHandler.registerValidator(validateInternalDeptNumberLength, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
   GEOHandler.addAddrFunction(autoSetAbbrevLocnOnAddSaveUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
+
+  GEOHandler.addAfterConfig(clearPhoneNoFromGrid, [ SysLoc.UK, SysLoc.IRELAND ]);
+  GEOHandler.addAfterConfig(clearPOBoxFromGrid, [ SysLoc.UK ]);
+  GEOHandler.addAfterTemplateLoad(clearPOBoxFromGrid, [ SysLoc.UK ]);
+  GEOHandler.addAfterConfig(clearPOBoxFromGrid, [ SysLoc.IRELAND ]);
+  GEOHandler.addAfterTemplateLoad(clearPOBoxFromGrid, [ SysLoc.IRELAND ]);
+  GEOHandler.registerValidator(addStAttPoValidatorForUKI, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
+  GEOHandler.registerValidator(addStPoValidatorUKI, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
+  GEOHandler.registerValidator(addUKIaddressContentValidator, [ SysLoc.IRELAND, SysLoc.UK ], null, true);
 
   // Israel Specific
   GEOHandler.addAfterConfig(afterConfigForIsrael, [ SysLoc.ISRAEL ]);
