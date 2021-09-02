@@ -4,6 +4,7 @@ var _clusterHandlerAP = null;
 var _isicHandlerGCG = null;
 var _clusterHandlerGCG = null;
 var _vatExemptHandler = null;
+var _bpRelTypeHandlerGCG = null;
 
 function addHandlersForAP() {
   if (_isicHandlerAP == null) {
@@ -33,6 +34,13 @@ function addHandlersForGCG() {
       setInacByClusterHKMO();
     });
   }
+  
+  if (_bpRelTypeHandlerGCG == null && FormManager.getActualValue('reqType') != 'U') {
+    _bpRelTypeHandlerGCG = dojo.connect(FormManager.getField('bpRelType'), 'onChange', function(value) {
+      setAbbrvNameBPScen();
+    });
+  }
+
 }
 
 function afterConfigForIndia() { 
@@ -1464,6 +1472,8 @@ function autoSetAbbrevNmLocnLogic() {
         _abbrevNm = "Market Place Order";
       } else if (custSubGrp == "SOFT" || custSubGrp == "XSOFT") {
         _abbrevNm = "Softlayer use only";
+      } else if (custSubGrp == "BUSPR" || custSubGrp == "XBUSP") {
+        _abbrevNm = getAbbrvNameForBP(custNm1, false);
       } else {
         _abbrevNm = custNm1;
       }
@@ -3516,6 +3526,60 @@ function addValidatorBasedOnCluster() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+function getAbbrvNameForBP(custNm1, bpRelTypeValChange) {
+  var abbvNmRegex = /^(Dis|Sol|Res)(1|2|3)_/;
+  var abbvNmVal = FormManager.getActualValue('abbrevNm');
+  var bpRelPrefix = '';
+
+  if(!abbvNmRegex.test(abbvNmVal) || bpRelTypeValChange) {
+    var bpRelTypeVal = FormManager.getActualValue('bpRelType');
+    if(bpRelTypeVal == 'DS') {
+      bpRelPrefix = 'Dis2_';
+    } else if (bpRelTypeVal == 'SP') {
+      bpRelPrefix = 'Sol1_';
+    } else if(bpRelTypeVal == 'RS') {
+      bpRelPrefix = 'Res3_';
+    }
+  }
+  
+  if(bpRelPrefix != '') {
+    return bpRelPrefix + custNm1;  
+  } else {
+    return custNm1;
+  }
+}
+
+function setAbbrvNameBPScen() {
+  var scenario = FormManager.getActualValue('custSubGrp');
+  
+  if(scenario == 'BUSPR' || scenario == 'XBUSP') {
+    var zs01ReqId = FormManager.getActualValue('reqId');
+    var qParams = {
+      REQ_ID : zs01ReqId,
+    };
+    var result = cmr.query('ADDR.GET.CUSTNM1.BY_REQID', qParams);
+    var custNm1 = FormManager.getActualValue('custNm1');
+    if (custNm1 == '') {
+      custNm1 = result.ret1;
+    }
+    var abbvName = getAbbrvNameForBP(custNm1, true);
+    if (abbvName && abbvName.length > 21) {
+      abbvName = abbvName.substring(0, 21);
+    }
+    FormManager.setValue('abbrevNm', abbvName);
+  }
+}
+
+function lockAbbvNameOnScenarioChangeGCG() {
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var reqType = FormManager.getActualValue('reqType');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+
+  if (role == 'REQUESTER' && reqType == 'C' && (cntry == SysLoc.HONG_KONG || cntry == SysLoc.MACAO)) {
+    FormManager.readOnly('abbrevNm');
+  } 
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.AP = [ SysLoc.AUSTRALIA, SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE, SysLoc.VIETNAM,
       SysLoc.THAILAND, SysLoc.HONG_KONG, SysLoc.NEW_ZEALAND, SysLoc.LAOS, SysLoc.MACAO, SysLoc.MALASIA, SysLoc.NEPAL, SysLoc.CAMBODIA ];
@@ -3649,5 +3713,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(lockFieldsForIndia, [ SysLoc.INDIA ]);
   GEOHandler.addAfterTemplateLoad(lockFieldsForIndia, SysLoc.INDIA);
   GEOHandler.registerValidator(addValidatorBasedOnCluster, GEOHandler.ANZ, GEOHandler.ROLE_REQUESTER, true);
-  
+  GEOHandler.addAfterTemplateLoad(lockAbbvNameOnScenarioChangeGCG, GEOHandler.GCG);
+  GEOHandler.addAfterTemplateLoad(setAbbrvNameBPScen, GEOHandler.GCG);
+
 });
