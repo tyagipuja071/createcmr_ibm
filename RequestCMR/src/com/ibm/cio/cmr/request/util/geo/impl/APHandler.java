@@ -652,6 +652,8 @@ public abstract class APHandler extends GEOHandler {
           setAbbrevNM(data, "Market Place Order");
         } else if ("SOFT".equalsIgnoreCase(data.getCustSubGrp()) || "XSOFT".equalsIgnoreCase(data.getCustSubGrp())) {
           setAbbrevNM(data, "Softlayer use only");
+        } else if ("BUSPR".equalsIgnoreCase(data.getCustSubGrp()) || "XBUSP".equalsIgnoreCase(data.getCustSubGrp())) {
+          // do nothing - don't overwrite abbv name
         } else {
           setAbbrevNM(data, addr.getCustNm1());
         }
@@ -670,6 +672,8 @@ public abstract class APHandler extends GEOHandler {
           setAbbrevNM(data, "Market Place Order");
         } else if ("SOFT".equalsIgnoreCase(data.getCustSubGrp()) || "XSOFT".equalsIgnoreCase(data.getCustSubGrp())) {
           setAbbrevNM(data, "Softlayer use only");
+        } else if ("BUSPR".equalsIgnoreCase(data.getCustSubGrp()) || "XBUSP".equalsIgnoreCase(data.getCustSubGrp())) {
+          // do nothing - don't overwrite abbv name
         } else {
           setAbbrevNM(data, addr.getCustNm1());
         }
