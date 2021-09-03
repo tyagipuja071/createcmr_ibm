@@ -54,7 +54,7 @@ public class BrazilCalculateIBMElement extends OverridingElement {
 
   private static final Logger LOG = Logger.getLogger(BrazilCalculateIBMElement.class);
 
-  private static final List<String> sboToBeChecked = Arrays.asList("504", "505", "556", "657 ", "758", "759", "761", "763", "764 ", "765");
+  private static final List<String> sboToBeChecked = Arrays.asList("504", "505", "556", "657", "758", "759", "761", "763", "764", "765");
   public boolean sboToBeUnchanged = false;
 
   public BrazilCalculateIBMElement(String requestTypes, String actionOnError, boolean overrideData, boolean stopOnError) {
@@ -266,6 +266,15 @@ public class BrazilCalculateIBMElement extends OverridingElement {
         }
         details.append("Country Use = " + data.getMrcCd() + "\n");
 
+        // SET MRC & Country Use as per sboToBeChecked only
+        String autoSbo = sbo.getSbo();
+        if (sboToBeChecked.contains(autoSbo)) {
+          overrides.addOverride(getProcessCode(), "DATA", "MRC_CD", data.getMrcCd(), "Q");
+          LOG.debug("Override value of MRC_CD" + data.getMrcCd());
+          overrides.addOverride(getProcessCode(), "DATA", "CNTRY_USE", data.getMrcCd(), "Q");
+          LOG.debug("Override value of CNTRY_USE" + data.getMrcCd());
+        }
+
         details.append("Sales Rep No = " + sbo.getSbo() + "001" + "\n");
         overrides.addOverride(getProcessCode(), "DATA", "REP_TEAM_MEMBER_NO", data.getRepTeamMemberNo(), sbo.getSbo() + "001");
       }
@@ -474,6 +483,15 @@ public class BrazilCalculateIBMElement extends OverridingElement {
         }
         details.append("Country Use = " + data.getMrcCd() + "\n");
 
+        // SET MRC & Country Use as per sboToBeChecked only
+        String autoSbo = (String) rootMatch[8];
+        if (sboToBeChecked.contains(autoSbo)) {
+          overrides.addOverride(getProcessCode(), "DATA", "MRC_CD", data.getMrcCd(), "Q");
+          LOG.debug("Override value of MRC_CD" + data.getMrcCd());
+          overrides.addOverride(getProcessCode(), "DATA", "CNTRY_USE", data.getMrcCd(), "Q");
+          LOG.debug("Override value of CNTRY_USE" + data.getMrcCd());
+        }
+
         details.append("Sales Rep No = " + (String) rootMatch[8] + "001" + "\n");
         overrides.addOverride(getProcessCode(), "DATA", "REP_TEAM_MEMBER_NO", data.getRepTeamMemberNo(), (String) rootMatch[8] + "001");
 
@@ -611,6 +629,15 @@ public class BrazilCalculateIBMElement extends OverridingElement {
         }
         details.append("Country Use = " + data.getMrcCd() + "\n");
 
+        // SET MRC & Country Use as per sboToBeChecked only
+        String autoSbo = sbo.getSbo();
+        if (sboToBeChecked.contains(autoSbo)) {
+          overrides.addOverride(getProcessCode(), "DATA", "MRC_CD", data.getMrcCd(), "Q");
+          LOG.debug("Override value of MRC_CD" + data.getMrcCd());
+          overrides.addOverride(getProcessCode(), "DATA", "CNTRY_USE", data.getMrcCd(), "Q");
+          LOG.debug("Override value of CNTRY_USE" + data.getMrcCd());
+        }
+
         details.append("Sales Rep No = " + sbo.getSbo() + "001" + "\n");
         overrides.addOverride(getProcessCode(), "DATA", "REP_TEAM_MEMBER_NO", data.getRepTeamMemberNo(), sbo.getSbo() + "001");
       }
@@ -666,6 +693,17 @@ public class BrazilCalculateIBMElement extends OverridingElement {
             // data.getMrcCd(), sboMSP.getMrcCd());
             // }
             // details.append("Country Use = " + data.getMrcCd() + "\n");
+            // SET MRC & Country Use as per sboToBeChecked only
+            // String autoSbo = sboMSP.getSbo();
+            // if (sboToBeChecked.contains(autoSbo)) {
+            // overrides.addOverride(getProcessCode(), "DATA", "MRC_CD",
+            // data.getMrcCd(), "Q");
+            // LOG.debug("Override value of MRC_CD" + data.getMrcCd());
+            // overrides.addOverride(getProcessCode(), "DATA", "CNTRY_USE",
+            // data.getMrcCd(), "Q");
+            // LOG.debug("Override value of CNTRY_USE" + data.getMrcCd());
+            // data.getMrcCd(), "Q");
+            // }
           }
 
           sql = ExternalizedQuery.getSql("BR.AUTO.GET_COLLECTOR_FROM_STATE");
