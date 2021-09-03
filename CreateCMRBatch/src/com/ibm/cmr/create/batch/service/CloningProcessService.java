@@ -1967,7 +1967,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     sql = StringUtils.replaceOnce(sql, ":KATR6", "'" + katr6 + "'");
     sql = StringUtils.replaceOnce(sql, ":LST_USED", "'" + newLastUsed + "'");
 
-    if (CmrConstants.CN_KUKLA81.equals(kukla)) {
+    if (CmrConstants.CN_KUKLA81.equals(kukla) || CmrConstants.CN_KUKLA85.equals(kukla)) {
       sql = StringUtils.replaceOnce(sql, ":KEYID", "'" + CmrConstants.CN_KUKLA81_KEYID + "'");
     } else if (CmrConstants.CN_KUKLA45.equals(kukla)) {
       sql = StringUtils.replaceOnce(sql, ":KEYID", "'" + CmrConstants.CN_KUKLA45_KEYID + "'");
