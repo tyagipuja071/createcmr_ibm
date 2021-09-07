@@ -4,6 +4,7 @@
 package com.ibm.cmr.create.batch.util.mq.transformer.impl;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +20,7 @@ import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.legacy.LegacyDirectObjectContainer;
 import com.ibm.cmr.create.batch.util.CMRRequestContainer;
 import com.ibm.cmr.create.batch.util.mq.LandedCountryMap;
 import com.ibm.cmr.create.batch.util.mq.MQMsgConstants;
@@ -39,6 +41,14 @@ public class IsraelTransformer extends EMEATransformer {
   private static final String[] NO_UPDATE_FIELDS = { "OrganizationNo", "CurrencyCode", "ARemark" };
 
   private static final String[] ADDRESS_ORDER = { "ZS01", "ZP01", "ZI01", "ZD01", "ZS02", "CTYA", "CTYB", "CTYC" };
+
+  private static final String[] LOCAL_LANG_ADDR = { "ZS01", "ZP01", "ZD01" };
+
+  private Map<String, String> pairedSeqVal = new HashMap<>();
+
+  private static final String MAIL_KEY = "ADDRMAIL";
+  private static final String BILL_KEY = "ADDRBILL";
+  private static final String SHIP_KEY = "ADDRSHIP";
 
   // private static final String RIGHT_TO_LEFT_MARKER = "\u202e";
 
@@ -176,6 +186,17 @@ public class IsraelTransformer extends EMEATransformer {
     LOG.debug("LD - transformLegacyAddressData ISRAEL transformer...");
     formatAddressLines(dummyHandler);
     legacyAddr.getId().setSofCntryCode(SystemLocation.SAP_ISRAEL_SOF_ONLY);
+
+    String addrType = currAddr.getId().getAddrType();
+    if (Arrays.asList(LOCAL_LANG_ADDR).contains(addrType)) {
+      if ("ZS01".equals(addrType)) {
+        pairedSeqVal.put(MAIL_KEY, legacyAddr.getId().getAddrNo());
+      } else if ("ZP01".equals(addrType)) {
+        pairedSeqVal.put(BILL_KEY, legacyAddr.getId().getAddrNo());
+      } else if ("ZD01".equals(addrType)) {
+        pairedSeqVal.put(SHIP_KEY, legacyAddr.getId().getAddrNo());
+      }
+    }
   }
 
   @Override
@@ -449,6 +470,26 @@ public class IsraelTransformer extends EMEATransformer {
       generateCMRNoObj.setMin(990000);
       generateCMRNoObj.setMax(999999);
     }
+  }
+
+  @Override
+  public void transformOtherData(EntityManager entityManager, LegacyDirectObjectContainer legacyObjects, CMRRequestContainer cmrObjects) {
+    List<CmrtAddr> legacyAddrList = legacyObjects.getAddresses();
+
+    for (CmrtAddr addr : legacyAddrList) {
+      String pairedSeq = "";
+      if ("Y".equals(addr.getIsAddressUseA())) {
+        pairedSeq = pairedSeqVal.get(MAIL_KEY);
+      } else if ("Y".equals(addr.getIsAddressUseB())) {
+        pairedSeq = pairedSeqVal.get(BILL_KEY);
+      } else if ("Y".equals(addr.getIsAddressUseC())) {
+        pairedSeq = pairedSeqVal.get(SHIP_KEY);
+      }
+      // NOTE: Temp setting to contact
+      addr.setContact(pairedSeq);
+    }
+
+    // TODO: Handle Multiple Shipping later
   }
 
 }
