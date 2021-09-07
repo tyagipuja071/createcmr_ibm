@@ -353,10 +353,15 @@ function setInacBySearchTerm() {
     }
     addSearchTerm04687Logic();
   } else {
-    FormManager.resetDropdownValues(FormManager.getField('inacCd'));
-    FormManager.resetDropdownValues(FormManager.getField('inacType'));
-    FormManager.removeValidator('inacCd', Validators.REQUIRED);
-    FormManager.removeValidator('inacType', Validators.REQUIRED);
+    if(_GBGId != 'undefined' && _GBGId != ''){
+      FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
+      FormManager.addValidator('inacType', Validators.REQUIRED, [ 'INAC Type' ], 'MAIN_IBM_TAB');
+    }else{
+      FormManager.resetDropdownValues(FormManager.getField('inacCd'));
+      FormManager.resetDropdownValues(FormManager.getField('inacType'));
+      FormManager.removeValidator('inacCd', Validators.REQUIRED);
+      FormManager.removeValidator('inacType', Validators.REQUIRED);
+    }
     return;
   }
 }
@@ -2569,6 +2574,15 @@ function validateSearchTermForCROSS() {
         var custSubType = FormManager.getActualValue('custSubGrp');
         var subType = '';
         if (FormManager.getActualValue('reqType') == 'C' && (custSubType == 'CROSS' || custSubType == 'NRML' ||custSubType == 'EMBSA' ||custSubType == 'AQSTN')) {
+          if (custSubType == 'CROSS'){
+            subType = 'Foreign';
+          } else if(custSubType == 'NRML') {
+            subType = 'Normal';
+          } else if(custSubType == 'EMBSA') {
+            subType = 'Embedded Solution Agreement (ESA)';
+          } else if(custSubType == 'AQSTN') {
+            subType = 'Acquisition';
+          }
           var _GBGId = FormManager.getActualValue('gbgId');
           var searchTerm = FormManager.getActualValue('searchTerm');
           if (FormManager.getActualValue('gbgId') != 'undefined' && FormManager.getActualValue('gbgId') != '') {
@@ -2590,19 +2604,11 @@ function validateSearchTermForCROSS() {
             }
           }
 
-          if (custSubType == 'CROSS'){
-            subType = 'Foreign';
-          } else if(custSubType == 'NRML') {
-            subType = 'Normal';
-          } else if(custSubType == 'EMBSA') {
-            subType = 'Embedded Solution Agreement (ESA)';
-          } else if(custSubType == 'AQSTN') {
-            subType = 'Acquisition';
-          }
+
           var searchTerm = FormManager.getActualValue('searchTerm');
           var searchTermTxt = $('#searchTerm').val();
-          if (searchTerm == '00000' || searchTerm == '04182' || searchTerm == '08036') {
-            return new ValidationResult(null, false, 'It is not allowed to apply for default search term for ' + subType + ' Sub_scenario.');
+          if (searchTerm == '00000' || searchTerm == '04182' || searchTerm == '08036' || searchTerm == '71300') {
+            return new ValidationResult(null, false, 'It is not allowed to apply for default search term:' + searchTerm + ' by ' + subType + ' Sub_scenario.');
           } else if(searchTermTxt.indexOf('Expired') >= 0) { 
             return new ValidationResult(null, false, 'It is not allowed to apply for default or expired search term for ' + subType + ' Sub_scenario.');
           }else {
