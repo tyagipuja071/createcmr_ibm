@@ -31,6 +31,7 @@ import com.ibm.cio.cmr.request.automation.util.geo.FranceUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.GermanyUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.IndiaUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.NetherlandsUtil;
+import com.ibm.cio.cmr.request.automation.util.geo.NordicsUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.SingaporeUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.SpainUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.SwitzerlandUtil;
@@ -107,6 +108,11 @@ public abstract class AutomationUtil {
       put(SystemLocation.IRELAND, UKIUtil.class);
       put(SystemLocation.BELGIUM, BeLuxUtil.class);
       put(SystemLocation.NETHERLANDS, NetherlandsUtil.class);
+
+      put(SystemLocation.SWEDEN, NordicsUtil.class);
+      put(SystemLocation.NORWAY, NordicsUtil.class);
+      put(SystemLocation.FINLAND, NordicsUtil.class);
+      put(SystemLocation.DENMARK, NordicsUtil.class);
 
     }
   };
