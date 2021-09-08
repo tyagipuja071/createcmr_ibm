@@ -99,6 +99,16 @@ function afterConfigTW() {
   if (custSubGrp == 'LOINT') {
     FormManager.addValidator('isicCd', Validators.REQUIRED, [ 'ISIC' ], 'MAIN_CUST_TAB');
   }
+  if (reqType == 'C' && custSubGrp == 'ECOSY') {
+    FormManager.readOnly('searchTerm');
+    FormManager.readOnly('clientTier');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('mrcCd');
+    FormManager.setValue('apCustClusterId', '08043');
+    FormManager.setValue('clientTier', 'Y');
+    FormManager.setValue('isuCd', '34');
+    FormManager.setValue('mrcCd', '3');
+  }
 
   setVatValidator();
 }
