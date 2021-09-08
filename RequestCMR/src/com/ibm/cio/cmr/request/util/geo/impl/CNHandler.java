@@ -734,8 +734,8 @@ public class CNHandler extends GEOHandler {
 
     if (!StringUtils.isBlank(admin.getReqType()) && admin.getReqType().equalsIgnoreCase("U") && !StringUtils.isBlank(data.getPpsceid())
         && !StringUtils.isBlank(admin.getReqStatus()) && admin.getReqStatus().equalsIgnoreCase("DRA")) {
-      if (data.getSearchTerm() == null || StringUtils.isBlank(data.getSearchTerm()) || (data.getSearchTerm() != null && (data.getSearchTerm().trim().equalsIgnoreCase("00000")
-          || data.getSearchTerm().matches("[a-zA-Z]")))) {
+      if (data.getSearchTerm() == null || StringUtils.isBlank(data.getSearchTerm())
+          || (data.getSearchTerm() != null && (data.getSearchTerm().trim().equalsIgnoreCase("00000") || data.getSearchTerm().matches("[a-zA-Z]")))) {
         data.setClientTier("Z");
         data.setSearchTerm("04182");
       }
@@ -1261,41 +1261,81 @@ public class CNHandler extends GEOHandler {
       aCnStreetAddrTxt = iAddr.getAddrTxt();
       aCnStreetAddrTxt2 = iAddr.getIntlCustNm4();
     }
+    aCnDistrict = aCnDistrict != null ? aCnDistrict.trim().toLowerCase() : "";
+    aCnCustName = aCnCustName != null ? aCnCustName.trim().toLowerCase() : "";
+    aCnCustNameCont = aCnCustNameCont != null ? aCnCustNameCont.trim().toLowerCase() : "";
+    aCnStreetAddrTxt = aCnStreetAddrTxt != null ? aCnStreetAddrTxt.trim().toLowerCase() : "";
+    aCnStreetAddrTxt2 = aCnStreetAddrTxt2 != null ? aCnStreetAddrTxt2.trim().toLowerCase() : "";
 
     String aDept = addr.getDept() != null ? addr.getDept().trim().toLowerCase() : "";
     String aOfc = addr.getOffice() != null ? addr.getOffice().trim().toLowerCase() : "";
     String aPostBox = addr.getPoBox() != null ? addr.getPoBox().trim().toLowerCase() : "";
-    String aPhoneNum = addr.getCustPhone() != null ? addr.getCustPhone().trim().toLowerCase() : "";
+    // String aPhoneNum = addr.getCustPhone() != null ?
+    // addr.getCustPhone().trim().toLowerCase() : "";
     String aTransportZone = addr.getTransportZone() != null ? addr.getTransportZone().trim().toLowerCase() : "";
 
     String mAddrTxt = model.getAddrTxt() != null ? model.getAddrTxt().trim().toLowerCase() : "";
     String mAddrTxt2 = model.getAddrTxt2() != null ? model.getAddrTxt2().trim().toLowerCase() : "";
-    String mCity1 = model.getCity1() != null ? model.getCity1().trim().toLowerCase() : "";
+    String mCity1 = model.getCity1DrpDown() != null ? model.getCity1DrpDown().trim().toLowerCase() : "";
     String mCity2 = model.getCity2() != null ? model.getCity2().trim().toLowerCase() : "";
     String mBldg = model.getBldg() != null ? model.getBldg().trim().toLowerCase() : "";
     String mStateProv = model.getStateProv() != null ? model.getStateProv().trim().toLowerCase() : "";
     String mPostCd = model.getPostCd() != null ? model.getPostCd().trim().toLowerCase() : "";
-    String mCnDistrict = model.getCnDistrict() != null ? model.getPostCd().trim().toLowerCase() : "";
+    String mCnDistrict = model.getCnDistrict() != null ? model.getCnDistrict().trim().toLowerCase() : "";
     String mDept = model.getDept() != null ? model.getDept().trim().toLowerCase() : "";
     String mOfc = model.getOffice() != null ? model.getOffice().trim().toLowerCase() : "";
     String mPostBox = model.getPoBox() != null ? model.getPoBox().trim().toLowerCase() : "";
-    String mPhoneNum = model.getCustPhone() != null ? model.getCustPhone().trim().toLowerCase() : "";
+    // String mPhoneNum = model.getCustPhone() != null ?
+    // model.getCustPhone().trim().toLowerCase() : "";
     String mTransportZone = model.getTransportZone() != null ? model.getTransportZone().trim().toLowerCase() : "";
     String mCnCustName = model.getCnCustName1() != null ? model.getCnCustName1().trim().toLowerCase() : "";
     String mCnCustNameCont = model.getCnCustName2() != null ? model.getCnCustName2().trim().toLowerCase() : "";
     String mCnStreetAddrTxt = model.getCnAddrTxt() != null ? model.getCnAddrTxt().trim().toLowerCase() : "";
     String mCnStreetAddrTxt2 = model.getCnAddrTxt2() != null ? model.getCnAddrTxt2().trim().toLowerCase() : "";
 
+    LOG.debug(aAddrTxt);
+    LOG.debug(mAddrTxt);
+    LOG.debug(aAddrTxt2);
+    LOG.debug(mAddrTxt2);
+    LOG.debug(aCity1);
+    LOG.debug(mCity1);
+    LOG.debug(aCity2);
+    LOG.debug(mCity2);
+    LOG.debug(aBldg);
+    LOG.debug(mBldg);
+    LOG.debug(aStateProv);
+    LOG.debug(mStateProv);
+    LOG.debug(aPostCd);
+    LOG.debug(mPostCd);
+    LOG.debug(aCnDistrict);
+    LOG.debug(mCnDistrict);
+    LOG.debug(aCnCustName);
+    LOG.debug(mCnCustName);
+    LOG.debug(aCnCustNameCont);
+    LOG.debug(mCnCustNameCont);
+    LOG.debug(aCnStreetAddrTxt);
+    LOG.debug(mCnStreetAddrTxt);
+    LOG.debug(aCnStreetAddrTxt2);
+    LOG.debug(mCnStreetAddrTxt2);
+    LOG.debug(aDept);
+    LOG.debug(mDept);
+    LOG.debug(aOfc);
+    LOG.debug(mOfc);
+    LOG.debug(aPostBox);
+    LOG.debug(mPostBox);
+    LOG.debug(aTransportZone);
+    LOG.debug(mTransportZone);
+
     if (!StringUtils.equals(aAddrTxt, mAddrTxt) || !StringUtils.equals(aAddrTxt2, mAddrTxt2) || !StringUtils.equals(aCity1, mCity1)
         || !StringUtils.equals(aCity2, mCity2) || !StringUtils.equals(aBldg, mBldg) || !StringUtils.equals(aStateProv, mStateProv)
         || !StringUtils.equals(aPostCd, mPostCd) || !StringUtils.equals(aCnDistrict, mCnDistrict) || !StringUtils.equals(aDept, mDept)
-        || !StringUtils.equals(aOfc, mOfc) || !StringUtils.equals(aPostBox, mPostBox) || !StringUtils.equals(aPhoneNum, mPhoneNum)
-        || !StringUtils.equals(aTransportZone, mTransportZone) || !StringUtils.equals(aCnCustName, mCnCustName)
-        || !StringUtils.equals(aCnCustNameCont, mCnCustNameCont) || !StringUtils.equals(aCnStreetAddrTxt, mCnStreetAddrTxt)
-        || !StringUtils.equals(aCnStreetAddrTxt2, mCnStreetAddrTxt2)) {
+        || !StringUtils.equals(aOfc, mOfc) || !StringUtils.equals(aPostBox, mPostBox) || !StringUtils.equals(aTransportZone, mTransportZone)
+        || !StringUtils.equals(aCnCustName, mCnCustName) || !StringUtils.equals(aCnCustNameCont, mCnCustNameCont)
+        || !StringUtils.equals(aCnStreetAddrTxt, mCnStreetAddrTxt) || !StringUtils.equals(aCnStreetAddrTxt2, mCnStreetAddrTxt2)) {
+      LOG.debug("isClearDPL=true");
       return true;
     }
-
+    LOG.debug("isClearDPL=false");
     return false;
   }
 
