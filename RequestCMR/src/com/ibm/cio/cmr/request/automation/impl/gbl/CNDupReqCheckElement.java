@@ -275,7 +275,7 @@ public class CNDupReqCheckElement extends DuplicateCheckElement {
   @Override
   public String getProcessCode() {
     // TODO Auto-generated method stub
-    return AutomationElementRegistry.GBL_REQ_CHECK;
+    return AutomationElementRegistry.CN_DUP_REQ_CHECK;
   }
 
   @Override
