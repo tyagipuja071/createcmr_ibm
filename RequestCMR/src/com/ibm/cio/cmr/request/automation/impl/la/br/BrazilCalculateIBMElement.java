@@ -39,6 +39,7 @@ import com.ibm.cmr.services.client.AutomationServiceClient;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.ServiceClient.Method;
 import com.ibm.cmr.services.client.automation.AutomationResponse;
+import com.ibm.cmr.services.client.automation.la.br.ConsultaCCCResponse;
 import com.ibm.cmr.services.client.automation.la.br.MidasRequest;
 import com.ibm.cmr.services.client.automation.la.br.MidasResponse;
 import com.ibm.cmr.services.client.automation.la.br.SintegraResponse;
@@ -1113,6 +1114,7 @@ public class BrazilCalculateIBMElement extends OverridingElement {
       Addr addr, String addrTypeDesc, StringBuilder details, Data data) {
     LOG.debug("State Fiscal code not found on the request. Querying Sintgra API again.");
     AutomationResponse<SintegraResponse> response = null;
+    AutomationResponse<ConsultaCCCResponse> consultaResponse = null;
     boolean ifError = false;
     String status = null;
     String stateFiscalCode = null;
@@ -1142,6 +1144,23 @@ public class BrazilCalculateIBMElement extends OverridingElement {
                 icms = "1";
                 code = "ISENTO";
               }
+
+              if ("ISENTO".equals(code)) {
+                consultaResponse = BrazilUtil.querySintegraByConsulata(vat, state);
+                if (consultaResponse.isSuccess()) {
+                  ConsultaCCCResponse consulta = consultaResponse.getRecord();
+                  if (consulta != null) {
+                    status = consulta.getStateFiscalCodeStatus();
+                    if ("Habilitado".equalsIgnoreCase(status) || "Ativo".equalsIgnoreCase(status) || "habilitada".equalsIgnoreCase(status)
+                        || "Ativa".equalsIgnoreCase(status)) {
+                      code = consulta.getStateFiscalCode();
+                    } else {
+                      code = "ISENTO";
+                    }
+                  }
+                }
+              }
+
               details.append(addrTypeDesc + " State Fiscal Code Status = " + status + "\n");
               if ("ZS01".equals(addrType)) {
                 LOG.debug("Setting ICMS and TAX_PAYER_CUST_CD to " + icms);
@@ -1162,8 +1181,24 @@ public class BrazilCalculateIBMElement extends OverridingElement {
             LOG.debug("Warning: State Fiscal Code cannot be determined from Sintegra .\n");
           }
         } else {
+            consultaResponse = BrazilUtil.querySintegraByConsulata(vat, state);
+            if (consultaResponse.isSuccess()) {
+              ConsultaCCCResponse consulta = consultaResponse.getRecord();
+              if (consulta != null) {
+                status = consulta.getStateFiscalCodeStatus();
+                if ("Habilitado".equalsIgnoreCase(status) || "Ativo".equalsIgnoreCase(status) || "habilitada".equalsIgnoreCase(status)
+                    || "Ativa".equalsIgnoreCase(status)) {
+                  stateFiscalCode = consulta.getStateFiscalCode();
+                } else {
           status = "ISENTO";
           stateFiscalCode = "ISENTO";
+                }
+              }
+            } else {
+              status = "ISENTO";
+              stateFiscalCode = "ISENTO";
+            }
+
           details.append(addrTypeDesc + " State Fiscal Code cannot be determined from Sintegra.Setting to ISENTO\n");
           details.append(addrTypeDesc + " State Fiscal Code Status = " + status + "\n");
           details.append(addrTypeDesc + " State Fiscal Code= " + "ISENTO" + "\n");
