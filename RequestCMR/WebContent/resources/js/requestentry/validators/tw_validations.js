@@ -119,7 +119,7 @@ function addHandlersForTW() {
 
   if (_ISICHandler == null) {
     _ISICHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
-      setISUCodeValues(value);
+      // setISUCodeValues(value);
     });
   }
 
