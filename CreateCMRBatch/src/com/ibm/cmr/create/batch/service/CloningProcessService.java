@@ -102,8 +102,8 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
   private static final String BATCH_SERVICE_URL = SystemConfiguration.getValue("BATCH_SERVICES_URL");
   private static final String COMMENT_LOGGER = "Cloning Process Service";
   private boolean devMode;
-  private static final String KUNNR_KEY = "KUNNR";
-  private static final String ADRNR_KEY = "ADRNR";
+  protected static final String KUNNR_KEY = "KUNNR";
+  protected static final String ADRNR_KEY = "ADRNR";
   private static final String PARNR_KEY = "PARNR";
 
   private static final String LEGACY_CUST_TABLE = "CMRTCUST";
@@ -138,13 +138,13 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     this.devMode = devMode;
   }
 
-  private List<CmrCloningQueue> getCloningPendingRecords(EntityManager entityManager) {
+  protected List<CmrCloningQueue> getCloningPendingRecords(EntityManager entityManager) {
     String sql = ExternalizedQuery.getSql("CLONING_PENDING_RECORDS");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     return query.getResults(CmrCloningQueue.class);
   }
 
-  private synchronized void processCloningRecord(EntityManager entityManager, CmrCloningQueue cloningQueue) throws Exception {
+  protected synchronized void processCloningRecord(EntityManager entityManager, CmrCloningQueue cloningQueue) throws Exception {
     String cmrNo = cloningQueue.getId().getCmrNo();
     String cntry = cloningQueue.getId().getCmrIssuingCntry();
     LOG.debug("Inside processCloningRecord Started Cloning process for CMR No " + cmrNo);
@@ -773,7 +773,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     return query.getResults(RdcCloningRefn.class);
   }
 
-  private String generateId(String mandt, String key, EntityManager entityManager) {
+  protected String generateId(String mandt, String key, EntityManager entityManager) {
     LOG.debug("Calling stored procedure to produce next " + key);
     String generatedId = "";
 
