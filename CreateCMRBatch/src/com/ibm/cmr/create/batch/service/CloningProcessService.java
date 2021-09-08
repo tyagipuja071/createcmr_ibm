@@ -2022,7 +2022,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
           cloneInsert.setId(pk);
 
-          if ("ZS01".equalsIgnoreCase(kna1Clone.getKtokd()))
+          if ("ZS01".equalsIgnoreCase(kna1Clone.getKtokd()) && !"90".equals(kna1Clone.getAufsd()))
             cloneInsert.setParSitePrtyId(kna1Clone.getBran5());
           else {
             String parSitePartyid = getParSitePartyId(entityManager, kna1Clone);
