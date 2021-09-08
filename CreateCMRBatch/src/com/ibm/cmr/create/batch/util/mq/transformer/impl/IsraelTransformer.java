@@ -466,6 +466,10 @@ public class IsraelTransformer extends EMEATransformer {
     Data data = cmrObjects.getData();
     String custSubGrp = data.getCustSubGrp();
     LOG.debug("Set max and min range For IL...");
+    String loc1 = generateCMRNoObj.getLoc1();
+    if (loc1.equals("755")) {
+      generateCMRNoObj.setLoc1("756");
+    }
     if (custSubGrp != null && "INTER".equals(custSubGrp)) {
       generateCMRNoObj.setMin(990000);
       generateCMRNoObj.setMax(999999);
@@ -485,8 +489,7 @@ public class IsraelTransformer extends EMEATransformer {
       } else if ("Y".equals(addr.getIsAddressUseC())) {
         pairedSeq = pairedSeqVal.get(SHIP_KEY);
       }
-      // NOTE: Temp setting to contact
-      addr.setContact(pairedSeq);
+      addr.setAddrLineO(pairedSeq);
     }
 
     // TODO: Handle Multiple Shipping later
