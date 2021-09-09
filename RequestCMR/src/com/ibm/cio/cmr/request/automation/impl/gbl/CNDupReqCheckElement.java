@@ -286,7 +286,7 @@ public class CNDupReqCheckElement extends DuplicateCheckElement {
 
   @Override
   public String getProcessDesc() {
-    return "Duplicate Request Check";
+    return "China Duplicate Request Check";
   }
 
   @Override
