@@ -184,19 +184,28 @@ public class IsraelTransformer extends EMEATransformer {
   public void transformLegacyAddressData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCust legacyCust, CmrtAddr legacyAddr,
       CMRRequestContainer cmrObjects, Addr currAddr) {
     LOG.debug("LD - transformLegacyAddressData ISRAEL transformer...");
-    formatAddressLines(dummyHandler);
-    legacyAddr.getId().setSofCntryCode(SystemLocation.SAP_ISRAEL_SOF_ONLY);
-
+    /*
+     * formatAddressLines(dummyHandler);
+     * legacyAddr.getId().setSofCntryCode(SystemLocation.SAP_ISRAEL_SOF_ONLY);
+     * 
+     * String addrType = currAddr.getId().getAddrType(); if
+     * (Arrays.asList(LOCAL_LANG_ADDR).contains(addrType)) { if
+     * ("ZS01".equals(addrType)) { pairedSeqVal.put(MAIL_KEY,
+     * legacyAddr.getId().getAddrNo()); } else if ("ZP01".equals(addrType)) {
+     * pairedSeqVal.put(BILL_KEY, legacyAddr.getId().getAddrNo()); } else if
+     * ("ZD01".equals(addrType)) { pairedSeqVal.put(SHIP_KEY,
+     * legacyAddr.getId().getAddrNo()); } }
+     */
+    // Formatting PO Box
     String addrType = currAddr.getId().getAddrType();
-    if (Arrays.asList(LOCAL_LANG_ADDR).contains(addrType)) {
-      if ("ZS01".equals(addrType)) {
-        pairedSeqVal.put(MAIL_KEY, legacyAddr.getId().getAddrNo());
-      } else if ("ZP01".equals(addrType)) {
-        pairedSeqVal.put(BILL_KEY, legacyAddr.getId().getAddrNo());
-      } else if ("ZD01".equals(addrType)) {
-        pairedSeqVal.put(SHIP_KEY, legacyAddr.getId().getAddrNo());
+    if (StringUtils.isNotBlank(currAddr.getPoBox())) {
+      if (StringUtils.isNotBlank(addrType) && (addrType.equals("ZS01") || addrType.equals("ZP01") || addrType.equals("ZD01"))) {
+        legacyAddr.setPoBox(reverseNumbers(currAddr.getPoBox()) + "מ.ד ");
+      } else {
+        legacyAddr.setPoBox("PO BOX " + currAddr.getPoBox());
       }
     }
+
   }
 
   @Override
