@@ -57,6 +57,8 @@ public class CNDupReqCheckElement extends DuplicateCheckElement {
 
     AutomationResult<MatchingOutput> result = buildResult(admin.getId().getReqId());
 
+    LOG.debug("China duplicate request check start... request " + data.getId().getReqId());
+
     MatchingOutput output = new MatchingOutput();
     Addr soldTo = requestData.getAddress("ZS01");
     if (soldTo != null && !scenarioExceptions.isSkipDuplicateChecks()) {
@@ -74,6 +76,7 @@ public class CNDupReqCheckElement extends DuplicateCheckElement {
             List<String> dupReqIds = new ArrayList<>();
             StringBuilder details = new StringBuilder();
             List<ReqCheckResponse> reqCheckMatches = response.getMatches();
+            LOG.debug("CNDupReqCheckElement... " + reqCheckMatches.size() + " record(s) returned.");
             details.append(reqCheckMatches.size() + " record(s) returned.");
 
             List<ReqCheckResponse> reqCheckMatchesCopy = new ArrayList<ReqCheckResponse>();
@@ -84,6 +87,7 @@ public class CNDupReqCheckElement extends DuplicateCheckElement {
             }
 
             if (reqCheckMatchesCopy != null && reqCheckMatchesCopy.size() > 0) {
+              LOG.debug("CNDupReqCheckElement... " + reqCheckMatchesCopy.size() + " record(s) found.");
               details.append(reqCheckMatchesCopy.size() + " record(s) found.");
               if (reqCheckMatchesCopy.size() > 5) {
                 details.append("Showing top 5 matches only.");
@@ -144,6 +148,8 @@ public class CNDupReqCheckElement extends DuplicateCheckElement {
       result.setOnError(true);
       result.setResults("Duplicate Request Check Encountered an error.");
     }
+
+    LOG.debug("China duplicate request check end... request " + data.getId().getReqId());
 
     return result;
 
@@ -387,6 +393,8 @@ public class CNDupReqCheckElement extends DuplicateCheckElement {
     } else {
       output = true;
     }
+    String outputStr = String.valueOf(output);
+    LOG.debug("CNDupReqCheckElement... reqCheckRecord " + reqCheckRecord.getReqId() + " matches = " + outputStr);
     return output;
   }
 
