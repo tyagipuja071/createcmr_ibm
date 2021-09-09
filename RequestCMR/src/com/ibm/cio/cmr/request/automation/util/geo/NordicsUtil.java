@@ -1,6 +1,12 @@
 package com.ibm.cio.cmr.request.automation.util.geo;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import javax.persistence.EntityManager;
+
+import org.apache.commons.lang.StringUtils;
 
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
@@ -8,6 +14,8 @@ import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
+import com.ibm.cmr.services.client.matching.MatchingResponse;
+import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 
 /**
  * 
@@ -16,6 +24,38 @@ import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
  */
 
 public class NordicsUtil extends AutomationUtil {
+	
+	// Denmark
+	  public static final String DK_COMME_LOCAL = "DKCOM";
+	  public static final String DK_INTER_LOCAL = "DKINT";
+	  public static final String DK_GOV_LOCAL = "DKGOV";
+	  public static final String DK_BUSPR_LOCAL = "DKBUS";
+	  public static final String DK_INTSO_LOCAL = "DKISO";
+	  public static final String DK_PRIPE_LOCAL = "DKPRI";
+	  public static final String DK_IBMEM_LOCAL = "DKIBM";
+	  // Finland
+	  public static final String FI_COMME_LOCAL = "FICOM";
+	  public static final String FI_INTER_LOCAL = "FIINT";
+	  public static final String FI_GOV_LOCAL = "FIGOV";
+	  public static final String FI_BUSPR_LOCAL = "FIBUS";
+	  public static final String FI_INTSO_LOCAL = "FIISO";
+	  public static final String FI_PRIPE_LOCAL = "FIPRI";
+	  public static final String FI_IBMEM_LOCAL = "FIIBM";
+	  // Norway and Sweden
+	  public static final String COMME_LOCAL = "COMME";
+	  public static final String INTER_LOCAL = "INTER";
+	  public static final String GOVRN_LOCAL = "GOVRN";
+	  public static final String BUSPR_LOCAL = "BUSPR";
+	  public static final String INTSO_LOCAL = "INTSO";
+	  public static final String PRIPE_LOCAL = "PRIPE";
+	  public static final String IBMEM_LOCAL = "IBMEM";
+	  // Cross
+	  public static final String CROSS_COMME = "CBCOM";
+	  public static final String CROSS_INTER = "CBINT";
+	  public static final String CROSS_BUSPR = "CBBUS";
+	  public static final String CROSS_INTSO = "CBISO";
+	  public static final String CROSS_IBMEM = "CBIBM";
+	  public static final String CROSS_PRIPE = "CBPRI";
 
   @Override
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
@@ -30,5 +70,28 @@ public class NordicsUtil extends AutomationUtil {
     // TODO Auto-generated method stub
     return false;
   }
+  
+  @Override
+  public void filterDuplicateCMRMatches(EntityManager entityManager, RequestData requestData,
+		AutomationEngineData engineData, MatchingResponse<DuplicateCMRCheckResponse> response) {
+	    String[] scenariosToBeChecked = { "BUSPR", "FIBUS", "DKBUS" ,"CBBUS" };
+	    String scenario = requestData.getData().getCustSubGrp();
+	    String[] kuklaBuspr = { "43", "44", "45" };
 
+	    if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
+	      List<DuplicateCMRCheckResponse> matches = response.getMatches();
+	      List<DuplicateCMRCheckResponse> filteredMatches = new ArrayList<DuplicateCMRCheckResponse>();
+	      for (DuplicateCMRCheckResponse match : matches) {
+	        if (StringUtils.isNotBlank(match.getCustClass())) {
+	          String kukla = match.getCustClass() != null ? match.getCustClass() : "";
+	          if (Arrays.asList(kuklaBuspr).contains(kukla) && Arrays.asList(scenariosToBeChecked).contains(scenario)) {
+	            filteredMatches.add(match);
+	          }
+	        }
+	      }
+	      // set filtered matches in response
+	      response.setMatches(filteredMatches);
+	    }
+	  }
+  
 }
