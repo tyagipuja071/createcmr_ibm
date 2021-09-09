@@ -493,8 +493,6 @@ public class IsraelTransformer extends EMEATransformer {
       }
       addr.setAddrLineO(pairedSeq);
     }
-
-    // TODO: Handle Multiple Shipping later
   }
 
 }
