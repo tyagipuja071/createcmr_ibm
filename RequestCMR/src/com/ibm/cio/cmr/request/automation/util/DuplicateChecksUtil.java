@@ -13,6 +13,7 @@ import org.apache.commons.lang.StringUtils;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.util.geo.BeLuxUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.NetherlandsUtil;
+import com.ibm.cio.cmr.request.automation.util.geo.NordicsUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.SpainUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.UKIUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.USUtil;
@@ -177,6 +178,55 @@ public class DuplicateChecksUtil {
           request.setCustClass("49");
         }
       }
+    case SystemLocation.SWEDEN:
+    case SystemLocation.NORWAY:
+    	if (NordicsUtil.INTER_LOCAL.equals(data.getCustSubGrp()) || NordicsUtil.INTSO_LOCAL.equals(data.getCustSubGrp()) || NordicsUtil.CROSS_INTSO.equals(data.getCustSubGrp())) {
+            if ("ZS01".equals(addr.getId().getAddrType())) {
+              request.setCustClass("81");
+            }
+          }
+    	if (NordicsUtil.PRIPE_LOCAL.equals(data.getCustSubGrp())){
+    		if ("ZS01".equals(addr.getId().getAddrType())){
+    			request.setCustClass("60");
+    		}
+    	}
+    	if (NordicsUtil.IBMEM_LOCAL.equals(data.getCustSubGrp())){
+    		if ("ZS01".equals(addr.getId().getAddrType())){
+    			request.setCustClass("71");
+    		}
+    	}
+    case SystemLocation.FINLAND:
+    	if (NordicsUtil.FI_INTER_LOCAL.equals(data.getCustSubGrp()) || NordicsUtil.FI_INTSO_LOCAL.equals(data.getCustSubGrp()) || NordicsUtil.CROSS_INTSO.equals(data.getCustSubGrp())) {
+            if ("ZS01".equals(addr.getId().getAddrType())) {
+              request.setCustClass("81");
+            }
+          }
+    	if (NordicsUtil.FI_PRIPE_LOCAL.equals(data.getCustSubGrp())){
+    		if ("ZS01".equals(addr.getId().getAddrType())){
+    			request.setCustClass("60");
+    		}
+    	}
+    	if (NordicsUtil.FI_IBMEM_LOCAL.equals(data.getCustSubGrp())){
+    		if ("ZS01".equals(addr.getId().getAddrType())){
+    			request.setCustClass("71");
+    		}
+    	}
+    case SystemLocation.DENMARK:
+    	if (NordicsUtil.DK_INTER_LOCAL.equals(data.getCustSubGrp()) || NordicsUtil.DK_INTSO_LOCAL.equals(data.getCustSubGrp()) || NordicsUtil.CROSS_INTSO.equals(data.getCustSubGrp())) {
+            if ("ZS01".equals(addr.getId().getAddrType())) {
+              request.setCustClass("81");
+            }
+          }
+    	if (NordicsUtil.DK_PRIPE_LOCAL.equals(data.getCustSubGrp())){
+    		if ("ZS01".equals(addr.getId().getAddrType())){
+    			request.setCustClass("60");
+    		}
+    	}
+    	if (NordicsUtil.DK_IBMEM_LOCAL.equals(data.getCustSubGrp())){
+    		if ("ZS01".equals(addr.getId().getAddrType())){
+    			request.setCustClass("71");
+    		}
+    	}
     }
 
   }
