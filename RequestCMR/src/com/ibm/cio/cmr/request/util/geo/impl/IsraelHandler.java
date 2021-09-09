@@ -1894,7 +1894,7 @@ public class IsraelHandler extends BaseSOFHandler {
 
   @Override
   public List<String> getAdditionalAddrTypeForLDSeqGen(String cmrIssuingCntry) {
-    return null;
+    return Arrays.asList("ZD01", "CTYC");
   }
 
   @Override
