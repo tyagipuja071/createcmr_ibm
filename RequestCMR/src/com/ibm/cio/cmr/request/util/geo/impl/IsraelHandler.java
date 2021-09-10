@@ -448,6 +448,7 @@ public class IsraelHandler extends BaseSOFHandler {
     }
 
     addr.setCmrAddrSeq(legacyAddr.getId().getAddrNo());
+    addr.setTransAddrNo(legacyAddr.getAddrLineO());
 
     return addr;
   }
