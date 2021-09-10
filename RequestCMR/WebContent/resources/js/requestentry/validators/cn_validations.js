@@ -2525,6 +2525,8 @@ function validateCnNameAndAddr() {
              // address2SBCS = address2SBCS.replace(apiDistrict,'');
                 if (address2SBCS.indexOf(cnAddress) >= 0 && apiCity.indexOf(cnCityZS01) >= 0 && apiDistrict.indexOf(cnDistrictZS01) >= 0){
                   addressEqualFlag = true;
+                } else if(address2SBCS.indexOf(cnAddress) >= 0 && apiCity == '市辖区' && address2SBCS.indexOf(cnCityZS01) >= 0 && apiDistrict.indexOf(cnDistrictZS01) >= 0){
+                    addressEqualFlag = true;
                 } else {
                   addressEqualFlag = false;
                   if(!$.isEmptyObject(result)){
