@@ -50,6 +50,8 @@ public class IsraelTransformer extends EMEATransformer {
   private static final String BILL_KEY = "ADDRBILL";
   private static final String SHIP_KEY = "ADDRSHIP";
 
+  private int shipAddrCount = 1;
+
   // private static final String RIGHT_TO_LEFT_MARKER = "\u202e";
 
   /**
@@ -184,18 +186,6 @@ public class IsraelTransformer extends EMEATransformer {
   public void transformLegacyAddressData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCust legacyCust, CmrtAddr legacyAddr,
       CMRRequestContainer cmrObjects, Addr currAddr) {
     LOG.debug("LD - transformLegacyAddressData ISRAEL transformer...");
-    /*
-     * formatAddressLines(dummyHandler);
-     * legacyAddr.getId().setSofCntryCode(SystemLocation.SAP_ISRAEL_SOF_ONLY);
-     * 
-     * String addrType = currAddr.getId().getAddrType(); if
-     * (Arrays.asList(LOCAL_LANG_ADDR).contains(addrType)) { if
-     * ("ZS01".equals(addrType)) { pairedSeqVal.put(MAIL_KEY,
-     * legacyAddr.getId().getAddrNo()); } else if ("ZP01".equals(addrType)) {
-     * pairedSeqVal.put(BILL_KEY, legacyAddr.getId().getAddrNo()); } else if
-     * ("ZD01".equals(addrType)) { pairedSeqVal.put(SHIP_KEY,
-     * legacyAddr.getId().getAddrNo()); } }
-     */
     // Formatting PO Box
     String addrType = currAddr.getId().getAddrType();
     if (StringUtils.isNotBlank(currAddr.getPoBox())) {
@@ -488,7 +478,7 @@ public class IsraelTransformer extends EMEATransformer {
   @Override
   public void transformOtherData(EntityManager entityManager, LegacyDirectObjectContainer legacyObjects, CMRRequestContainer cmrObjects) {
     List<CmrtAddr> legacyAddrList = legacyObjects.getAddresses();
-
+    int localLangShipCount = 1;
     for (CmrtAddr addr : legacyAddrList) {
       String pairedSeq = "";
       if ("Y".equals(addr.getIsAddressUseA())) {
@@ -496,12 +486,10 @@ public class IsraelTransformer extends EMEATransformer {
       } else if ("Y".equals(addr.getIsAddressUseB())) {
         pairedSeq = pairedSeqVal.get(BILL_KEY);
       } else if ("Y".equals(addr.getIsAddressUseC())) {
-        pairedSeq = pairedSeqVal.get(SHIP_KEY);
+        pairedSeq = pairedSeqVal.get(SHIP_KEY + localLangShipCount++);
       }
       addr.setAddrLineO(pairedSeq);
     }
-
-    // TODO: Handle Multiple Shipping later
   }
 
 }

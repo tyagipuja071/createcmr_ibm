@@ -4,6 +4,7 @@
 package com.ibm.cio.cmr.request.util.geo.impl;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -12,6 +13,7 @@ import java.util.Map;
 
 import javax.persistence.EntityManager;
 
+import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -149,13 +151,11 @@ public class IsraelHandler extends BaseSOFHandler {
           String seqNo = null;
           List<String> sofUses = null;
           FindCMRRecordModel addr = null;
-          int zi01count = 0;
-          int zd01count = 0;
 
           // map RDc - SOF - CreateCMR by sequence no
           for (FindCMRRecordModel record : source.getItems()) {
             seqNo = record.getCmrAddrSeq();
-            if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo) && !("862".equals(cmrIssueCd) || "726".equals(cmrIssueCd))) {
+            if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo)) {
               sofUses = this.legacyObjects.getUsesBySequenceNo(seqNo);
               for (String sofUse : sofUses) {
                 addrType = getAddressTypeByUse(sofUse);
@@ -163,36 +163,32 @@ public class IsraelHandler extends BaseSOFHandler {
                   addr = cloneAddress(record, addrType);
                   LOG.trace("Adding address type " + addrType + " for sequence " + seqNo);
 
-                  if (SystemLocation.UNITED_KINGDOM.equals(record.getCmrIssuedBy()) || SystemLocation.IRELAND.equals(record.getCmrIssuedBy())) {
-                    addr.setCmrStreetAddressCont(record.getCmrName4());
-                    addr.setCmrName3(record.getCmrName3());
-
-                    addr.setCmrName2Plain(record.getCmrName2Plain());
-                  } else {
-                    // name3 in rdc = Address Con't on SOF
-                    addr.setCmrStreetAddressCont(record.getCmrName3());
-                    addr.setCmrName3(null);
-
-                    addr.setCmrName2Plain(!StringUtils.isEmpty(record.getCmrName2Plain()) ? record.getCmrName2Plain() : record.getCmrName4());
-                  }
-
-                  // addr.setCmrName2Plain(!StringUtils.isEmpty(record.getCmrName2Plain())
-                  // ? record.getCmrName2Plain() :
-                  // record.getCmrName4());
+                  // name3 in rdc = Address Con't on SOF
+                  addr.setCmrStreetAddressCont(record.getCmrName3());
+                  addr.setCmrName3(null);
+                  addr.setCmrName2Plain(!StringUtils.isEmpty(record.getCmrName2Plain()) ? record.getCmrName2Plain() : record.getCmrName4());
 
                   if (!StringUtils.isBlank(record.getCmrPOBox())) {
-                    if (SystemLocation.UNITED_KINGDOM.equals(record.getCmrIssuedBy()) || SystemLocation.IRELAND.equals(record.getCmrIssuedBy())) {
-                      addr.setCmrPOBox(record.getCmrPOBox());
-                    } else {
-                      addr.setCmrPOBox("PO BOX " + record.getCmrPOBox());
-                    }
+                    addr.setCmrPOBox(record.getCmrPOBox());
                   }
 
                   if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
                     addr.setCmrAddrSeq("00001");
                   }
 
-                  converted.add(addr);
+                  if ("ZS01".equals(addrType) || "ZP01".equals(addrType) || "ZD01".equals(addrType)) {
+                    addr.setCmrAddrTypeCode(record.getCmrAddrTypeCode());
+
+                    String pairedAddrSeq = addr.getCmrAddrSeq();
+                    List<CmrtAddr> legacyAddrList = legacyObjects.getAddresses();
+                    CmrtAddr legacyAddr = getLegacyAddrByAddrPair(legacyAddrList, pairedAddrSeq);
+
+                    converted.add(mapEnglishAddr(addr, legacyAddr));
+                    converted.add(mapLocalLanguageAddr(record, legacyAddr));
+                  } else {
+                    converted.add(addr);
+                  }
+
                 }
               }
             }
@@ -426,6 +422,40 @@ public class IsraelHandler extends BaseSOFHandler {
         }
       }
     }
+  }
+
+  // TODO: Local language mapping - waiting for final rdc sadr mapping
+  private FindCMRRecordModel mapLocalLanguageAddr(FindCMRRecordModel record, CmrtAddr legacyAddr)
+      throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+    FindCMRRecordModel localLangAddr = new FindCMRRecordModel();
+    PropertyUtils.copyProperties(localLangAddr, record);
+    localLangAddr.setCmrName1Plain(record.getCmrIntlName1());
+    localLangAddr.setCmrName2Plain(record.getCmrIntlName2());
+    localLangAddr.setCmrStreetAddress(record.getCmrIntlAddress());
+    localLangAddr.setCmrStreetAddressCont(record.getCmrIntlName3());
+    localLangAddr.setCmrCity(record.getCmrIntlCity1());
+
+    return localLangAddr;
+  }
+
+  private FindCMRRecordModel mapEnglishAddr(FindCMRRecordModel addr, CmrtAddr legacyAddr) {
+    if ("ZS01".equals(addr.getCmrAddrTypeCode())) {
+      addr.setCmrAddrTypeCode("CTYA");
+    } else if ("ZP01".equals(addr.getCmrAddrTypeCode())) {
+      addr.setCmrAddrTypeCode("CTYB");
+    } else if ("ZD01".equals(addr.getCmrAddrTypeCode())) {
+      addr.setCmrAddrTypeCode("CTYC");
+    }
+
+    addr.setCmrAddrSeq(legacyAddr.getId().getAddrNo());
+    addr.setTransAddrNo(legacyAddr.getAddrLineO());
+
+    return addr;
+  }
+
+  private CmrtAddr getLegacyAddrByAddrPair(List<CmrtAddr> legacyAddrList, String pairedAddrSeq) {
+    CmrtAddr legacyAddr = legacyAddrList.stream().filter(a -> pairedAddrSeq.equals(a.getAddrLineO())).findAny().orElse(null);
+    return legacyAddr;
   }
 
   private void importIsraelSequences(List<FindCMRRecordModel> records, String cmrIssuingCntry) {
@@ -1737,23 +1767,6 @@ public class IsraelHandler extends BaseSOFHandler {
 
   @Override
   public void doAfterImport(EntityManager entityManager, Admin admin, Data data) {
-    if (SystemLocation.ISRAEL.equals(data.getCmrIssuingCntry())) {
-      LOG.debug("Switching mailing address locations..");
-      String sql = null;
-      PreparedQuery query = null;
-      for (int i = 1; i <= 3; i++) {
-        sql = ExternalizedQuery.getSql("ISRAEL.REVERT_MAILING." + i);
-        query = new PreparedQuery(entityManager, sql);
-        query.setParameter("REQ_ID", data.getId().getReqId());
-        query.executeSql();
-
-        sql = ExternalizedQuery.getSql("ISRAEL.REVERT_MAILING_RDC." + i);
-        query = new PreparedQuery(entityManager, sql);
-        query.setParameter("REQ_ID", data.getId().getReqId());
-        query.executeSql();
-      }
-    }
-
     if (SystemLocation.ISRAEL.equals(data.getCmrIssuingCntry()) && data.getAbbrevNm() != null && data.getAbbrevNm().length() > 22) {
       data.setAbbrevNm(data.getAbbrevNm().substring(0, 22));
       entityManager.merge(data);
@@ -1837,15 +1850,22 @@ public class IsraelHandler extends BaseSOFHandler {
   protected String getAddressTypeByUse(String addressUse) {
     switch (addressUse) {
     case "1":
-      return "ZP01";
-    case "2":
       return "ZS01";
+    case "2":
+      return "ZP01";
     case "3":
       return "ZI01";
     case "4":
       return "ZD01";
     case "5":
       return "ZS02";
+    case "A":
+      return "CTYA";
+    case "B":
+      return "CTYB";
+    case "C":
+      return "CTYC";
+
     }
     return null;
   }
@@ -1875,7 +1895,7 @@ public class IsraelHandler extends BaseSOFHandler {
 
   @Override
   public List<String> getAdditionalAddrTypeForLDSeqGen(String cmrIssuingCntry) {
-    return null;
+    return Arrays.asList("ZD01", "CTYC");
   }
 
   @Override

@@ -961,6 +961,29 @@ function countryUseAISRAEL() {
   }
 }
 
+/**
+ * Toggles the REMOVE function on the address tab and prevents removing imported
+ * address in update requests
+ * 
+ * @param value
+ * @param rowIndex
+ * @param grid
+ * @returns
+ */
+function canRemoveAddress(value, rowIndex, grid) {
+  var rowData = grid.getItem(rowIndex);
+  var importInd = rowData.importInd[0];
+  var reqType = FormManager.getActualValue('reqType');
+  if ('U' == reqType && 'Y' == importInd) {
+    return false;
+  }
+  return true;
+}
+
+function ADDRESS_GRID_showCheck(value, rowIndex, grid) {
+  return canRemoveAddress(value, rowIndex, grid);
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding Israel functions...');
