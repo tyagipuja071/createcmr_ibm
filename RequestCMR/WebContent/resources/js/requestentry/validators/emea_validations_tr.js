@@ -9781,6 +9781,16 @@ function handleClassCode(){
   }
 }
 
+function hideCollectionCode() { 
+  var viewOnly = FormManager.getActualValue('viewOnlyPage'); 
+  if (viewOnly != '' && viewOnly == 'true') { 
+    return; 
+  }
+  if (FormManager.getActualValue('reqType') == 'C') {
+    FormManager.hide('CollectionCd2', 'collectionCd2'); 
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding EMEA functions...');
@@ -10046,5 +10056,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(mandatoryForBusinessPartnerCY, [ SysLoc.CYPRUS ]);
   GEOHandler.addAfterTemplateLoad(mandatoryForBusinessPartnerCY, [ SysLoc.CYPRUS ]);
   GEOHandler.addAfterTemplateLoad(handleClassCode, [ SysLoc.TURKEY ]);
-
+  GEOHandler.addAfterConfig(hideCollectionCode, [ SysLoc.TURKEY ]);
 });
