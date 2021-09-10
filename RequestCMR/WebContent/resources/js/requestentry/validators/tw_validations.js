@@ -109,6 +109,12 @@ function afterConfigTW() {
     FormManager.setValue('isuCd', '34');
     FormManager.setValue('mrcCd', '3');
   }
+  if (reqType == 'C' && custSubGrp == 'LOECO') {
+    FormManager.readOnly('searchTerm');
+    FormManager.readOnly('clientTier');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('mrcCd');
+  }
 
   setVatValidator();
 }
