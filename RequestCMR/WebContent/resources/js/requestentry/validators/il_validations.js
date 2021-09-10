@@ -718,7 +718,6 @@ function addLatinCharValidator() {
     checkAndAddValidator('addrTxt', Validators.LATIN, [ 'Street Address' ]);
     checkAndAddValidator('city1', Validators.LATIN, [ 'City' ]);
     checkAndAddValidator('postCd', Validators.LATIN, [ 'Postal Code' ]);
-    checkAndAddValidator('poBox', Validators.LATIN, [ 'PO Box' ]);
     // checkAndAddValidator('custPhone', Validators.LATIN, [ 'Phone #' ]);
   } else {
     FormManager.removeValidator('custNm1', Validators.LATIN);
@@ -728,7 +727,6 @@ function addLatinCharValidator() {
     FormManager.removeValidator('city1', Validators.LATIN);
     FormManager.removeValidator('postCd', Validators.LATIN);
     FormManager.removeValidator('dept', Validators.LATIN);
-    FormManager.removeValidator('poBox', Validators.LATIN);
     // FormManager.removeValidator('custPhone', Validators.LATIN);
   }
 }
@@ -760,7 +758,6 @@ function addNonLatinCharValidator() {
     checkAndAddValidator('addrTxt', Validators.NON_LATIN, [ 'Street Address' ]);
     checkAndAddValidator('city1', Validators.NON_LATIN, [ 'City' ]);
     checkAndAddValidator('postCd', Validators.NON_LATIN, [ 'Postal Code' ]);
-    checkAndAddValidator('poBox', Validators.NON_LATIN, [ 'PO Box' ]);
     // checkAndAddValidator('custPhone', Validators.NON_LATIN, [ 'Phone #'
     // ]);
 
@@ -775,10 +772,13 @@ function addNonLatinCharValidator() {
     FormManager.removeValidator('city1', Validators.NON_LATIN);
     FormManager.removeValidator('postCd', Validators.NON_LATIN);
     FormManager.removeValidator('dept', Validators.NON_LATIN);
-    FormManager.removeValidator('poBox', Validators.NON_LATIN);
     // FormManager.removeValidator('custPhone', Validators.NON_LATIN);
     FormManager.removeValidator('taxOffice', Validators.NON_LATIN);
   }
+}
+
+function validatePoBox() {
+  checkAndAddValidator('poBox', Validators.DIGIT, [ 'PO Box' ]);
 }
 
 function resetSubIndustryCd() {
@@ -1028,5 +1028,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(sboLengthValidator, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.addAfterConfig(addHandlersForIL, [ SysLoc.ISRAEL ]);
   GEOHandler.addAddrFunction(countryUseAISRAEL, [ SysLoc.ISRAEL ]);
+  GEOHandler.addAddrFunction(validatePoBox, [ SysLoc.ISRAEL ]);
 
 });

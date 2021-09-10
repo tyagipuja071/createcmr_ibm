@@ -186,6 +186,7 @@ public class IsraelTransformer extends EMEATransformer {
   public void transformLegacyAddressData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCust legacyCust, CmrtAddr legacyAddr,
       CMRRequestContainer cmrObjects, Addr currAddr) {
     LOG.debug("LD - transformLegacyAddressData ISRAEL transformer...");
+
     formatAddressLines(dummyHandler);
     legacyAddr.getId().setSofCntryCode(SystemLocation.SAP_ISRAEL_SOF_ONLY);
 
@@ -199,6 +200,16 @@ public class IsraelTransformer extends EMEATransformer {
         pairedSeqVal.put(SHIP_KEY + shipAddrCount++, legacyAddr.getId().getAddrNo());
       }
     }
+
+    // Formatting PO Box
+    if (StringUtils.isNotBlank(currAddr.getPoBox())) {
+      if (StringUtils.isNotBlank(addrType) && (addrType.equals("ZS01") || addrType.equals("ZP01") || addrType.equals("ZD01"))) {
+        legacyAddr.setPoBox(reverseNumbers(currAddr.getPoBox()) + "מ.ד ");
+      } else {
+        legacyAddr.setPoBox("PO BOX " + currAddr.getPoBox());
+      }
+    }
+
   }
 
   @Override
