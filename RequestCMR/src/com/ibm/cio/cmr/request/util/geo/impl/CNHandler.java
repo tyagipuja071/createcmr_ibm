@@ -44,7 +44,6 @@ import com.ibm.cio.cmr.request.entity.ReqCmtLog;
 import com.ibm.cio.cmr.request.entity.ReqCmtLogPK;
 import com.ibm.cio.cmr.request.entity.Sadr;
 import com.ibm.cio.cmr.request.entity.UpdatedAddr;
-import com.ibm.cio.cmr.request.model.CompanyRecordModel;
 import com.ibm.cio.cmr.request.model.approval.ApprovalResponseModel;
 import com.ibm.cio.cmr.request.model.requestentry.AddressModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
@@ -58,7 +57,6 @@ import com.ibm.cio.cmr.request.service.requestentry.AddressService;
 import com.ibm.cio.cmr.request.service.requestentry.GeoContactInfoService;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
-import com.ibm.cio.cmr.request.util.CompanyFinder;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
@@ -316,7 +314,7 @@ public class CNHandler extends GEOHandler {
         soldToAddr = query.getSingleResult(Addr.class);
       }
       if (soldToAddr != null) {
-        getGBGId(entityManager, admin, data, soldToAddr);
+        getGBGIdByGBGservice(entityManager, admin, data, soldToAddr);
       }
 
     }
@@ -340,7 +338,7 @@ public class CNHandler extends GEOHandler {
 
   }
 
-  private void getGBGIdByGBGservice(EntityManager entityManager, Admin admin, Data data, Addr currentAddress, String dunsNo) throws Exception {
+  private void getGBGIdByGBGservice(EntityManager entityManager, Admin admin, Data data, Addr currentAddress) throws Exception {
     // TODO Auto-generated method stub
     GBGFinderRequest request = new GBGFinderRequest();
     request.setMandt(SystemConfiguration.getValue("MANDT"));
@@ -362,11 +360,8 @@ public class CNHandler extends GEOHandler {
       request.setOrgId(data.getVat());
     }
     request.setMinConfidence("6");
-    if (StringUtils.isNotBlank(dunsNo)) {
-      request.setDunsNo(dunsNo);
-    } else {
-      request.setDunsNo(data.getDunsNo());
-    }
+
+    request.setDunsNo(data.getDunsNo());
 
     MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
         MatchingServiceClient.class);
@@ -386,6 +381,9 @@ public class CNHandler extends GEOHandler {
       List<GBGResponse> gbgMatches = response.getMatches();
       Collections.sort(gbgMatches, new GBGComparator(data.getCmrIssuingCntry()));
 
+      // get default landed country
+      String defaultLandCntry = PageManager.getDefaultLandedCountry(data.getCmrIssuingCntry());
+
       if (gbgMatches.size() > 5) {
         gbgMatches = gbgMatches.subList(0, 4);
       }
@@ -397,41 +395,33 @@ public class CNHandler extends GEOHandler {
         }
       }
 
+      int itemNo = 0;
       for (GBGResponse gbg : gbgMatches) {
         if (gbg.isDomesticGBG() || !domesticGBGFound) {
+          itemNo++;
           data.setGbgId(gbg.getGbgId());
           data.setGbgDesc(gbg.getGbgName());
           data.setBgId(gbg.getBgId());
           data.setBgDesc(gbg.getBgName());
           entityManager.merge(data);
           entityManager.flush();
+          /*
+           * if (itemNo == 1 && gbg.isDomesticGBG()) { if
+           * ("641".equals(data.getCmrIssuingCntry()) &&
+           * "C".equals(admin.getReqType()) &&
+           * "ECOSY".equals(data.getCustSubGrp())) { List<String> s1GBGIDList =
+           * SystemParameters.getList("CN_S1_GBG_ID_LIST"); if
+           * (s1GBGIDList.contains(gbg.getGbgId())) { result.
+           * setDetails("GBG computing result is S1 GBG ID on the request.");
+           * engineData.addRejectionComment("OTH",
+           * "GBG computing result is S1 GBG ID on the request.", "", "");
+           * result.setResults("S1 GBG ID"); } } }
+           */
           break;
         }
       }
     }
-  }
 
-  private void getGBGId(EntityManager entityManager, Admin admin, Data data, Addr currentAddress) throws Exception {
-    getGBGIdByGBGservice(entityManager, admin, data, currentAddress, null);
-    if (StringUtils.isBlank(data.getGbgId())) {
-      String companyName = null;
-      if (StringUtils.isNotBlank(data.getBusnType())) {
-        companyName = DnBUtil.getCNApiCompanyNameData4GBG(data.getBusnType());
-      }
-      if (StringUtils.isNotBlank(companyName)) {
-        // 2, Check FindCMR NON Latin with Chinese name - single byte
-        CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
-        searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
-        searchModelFindCmrCN.setName(companyName);
-        List<CompanyRecordModel> resultFindCmrCN = null;
-        resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
-        if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
-          if (StringUtils.isNotBlank(resultFindCmrCN.get(0).getDunsNo())) {
-            getGBGIdByGBGservice(entityManager, admin, data, currentAddress, resultFindCmrCN.get(0).getDunsNo());
-          }
-        }
-      }
-    }
   }
 
   /**
