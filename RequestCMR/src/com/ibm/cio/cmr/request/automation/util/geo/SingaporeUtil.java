@@ -27,12 +27,15 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.Kna1;
+import com.ibm.cio.cmr.request.entity.NotifList;
+import com.ibm.cio.cmr.request.entity.NotifListPK;
 import com.ibm.cio.cmr.request.model.CompanyRecordModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.CompanyFinder;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
 import com.ibm.cmr.services.client.matching.gbg.GBGResponse;
@@ -52,6 +55,8 @@ public class SingaporeUtil extends AutomationUtil {
   public static final String SCENARIO_CROSS_MARKETPLACE = "XMKTP";
   private static final String SCENARIO_PRIVATE_CUSTOMER = "PRIV";
   private static final String SCENARIO_CROSS_PRIVATE_CUSTOMER = "XPRIV";
+  private static final String SCENARIO_ECOSYS = "ECSYS";
+  private static final String SCENARIO_CROSS_ECOSYS = "XECO";
 
   @Override
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
@@ -257,6 +262,10 @@ public class SingaporeUtil extends AutomationUtil {
     case SCENARIO_CROSS_BLUEMIX:
     case SCENARIO_CROSS_MARKETPLACE:
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
+      break;
+    case SCENARIO_ECOSYS:
+    case SCENARIO_CROSS_ECOSYS:
+      addToNotifyListASEAN(entityManager, data.getId().getReqId());
       break;
     case SCENARIO_PRIVATE_CUSTOMER:
     case SCENARIO_CROSS_PRIVATE_CUSTOMER:
@@ -567,6 +576,26 @@ public class SingaporeUtil extends AutomationUtil {
     output.setDetails(details);
     output.setProcessOutput(validation);
     return true;
+  }
+
+  public static void addToNotifyListASEAN(EntityManager entityManager, long reqId) {
+    StringBuilder anzEcoNotifyList = getASEANEcoNotifyList();
+    List<String> users = Arrays.asList(anzEcoNotifyList.toString().split("\\s*,\\s*"));
+    for (String user : users) {
+      NotifList notif = new NotifList();
+      NotifListPK pk = new NotifListPK();
+      pk.setReqId(reqId);
+      pk.setNotifId(user);
+      notif.setId(pk);
+      notif.setNotifNm(user);
+      entityManager.persist(notif);
+    }
+  }
+
+  private static StringBuilder getASEANEcoNotifyList() {
+    StringBuilder aseanEcoNotifyList = new StringBuilder();
+    aseanEcoNotifyList.append(SystemParameters.getString("ASEAN_ECSYS_NOTIFY"));
+    return aseanEcoNotifyList;
   }
 
   @Override
