@@ -2,10 +2,12 @@ package com.ibm.cio.cmr.request.automation.util.geo;
 
 public class NordicsCovMapping {
 
+  private String country;
   private String isuCTC;
   private String sortl;
   private String salesRep;
   private String subIndustry;
+  private boolean exclude;
 
   public String getIsuCTC() {
     return isuCTC;
@@ -37,6 +39,22 @@ public class NordicsCovMapping {
 
   public void setSubIndustry(String subIndustry) {
     this.subIndustry = subIndustry;
+  }
+
+  public String getCountry() {
+    return country;
+  }
+
+  public void setCountry(String country) {
+    this.country = country;
+  }
+
+  public boolean isExclude() {
+    return exclude;
+  }
+
+  public void setExclude(boolean exclude) {
+    this.exclude = exclude;
   }
 
 }
