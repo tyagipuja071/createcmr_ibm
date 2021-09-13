@@ -82,10 +82,12 @@ public class NordicsUtil extends AutomationUtil {
       digester.addObjectCreate("mappings", ArrayList.class);
       digester.addObjectCreate("mappings/mapping", NordicsCovMapping.class);
 
+      digester.addBeanPropertySetter("mappings/mapping/country", "country");
       digester.addBeanPropertySetter("mappings/mapping/isuCTC", "isuCTC");
       digester.addBeanPropertySetter("mappings/mapping/subIndustry", "subIndustry");
       digester.addBeanPropertySetter("mappings/mapping/sortl", "sortl");
       digester.addBeanPropertySetter("mappings/mapping/salesRep", "salesRep");
+      digester.addBeanPropertySetter("mappings/mapping/exclude", "exclude");
 
       digester.addSetNext("mappings/mapping", "add");
 
@@ -182,7 +184,8 @@ public class NordicsUtil extends AutomationUtil {
       AutomationEngineData engineData, String covFrom, CoverageContainer container, boolean isCoverageCalculated) throws Exception {
     Data data = requestData.getData();
     String scenario = data.getCustSubGrp();
-
+    String reqSubInd = data.getSubIndustryCd().substring(0, 1);
+    String cntry = data.getCmrIssuingCntry();
     details.append("\n");
     if (!isCoverageCalculated && "34".equals(data.getIsuCd()) && "Q".equals(data.getClientTier()) && SCENARIOS_COVERAGE.contains(scenario)) {
       details.setLength(0); // clearing details
@@ -195,10 +198,11 @@ public class NordicsUtil extends AutomationUtil {
             subInd = mapping.getSubIndustry().replaceAll("\n", "").replaceAll(" ", "").split(",");
             subIndList = Arrays.asList(subInd);
           }
-          if (!subIndList.isEmpty() && subIndList.contains(data.getSubIndustryCd())) {
+          if (mapping.getCountry().equals(cntry) && !subIndList.isEmpty()
+              && ((mapping.isExclude() && !subIndList.contains(reqSubInd)) || (!mapping.isExclude() && subIndList.contains(reqSubInd)))) {
             details.append("Calculating coverage using 34Q logic.").append("\n");
 
-            details.append("SORTL : " + mapping.getSortl() + " calculated using 34-Q mapping.");
+            details.append("SORTL : " + mapping.getSortl() + " calculated using 34-Q mapping.").append("\n");
             overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getSearchTerm(), mapping.getSortl());
 
             details.append("Sales Rep : " + mapping.getSalesRep() + " calculated using 34-Q mapping.");
