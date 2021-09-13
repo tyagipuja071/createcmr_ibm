@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mappings>
+
+<mapping>
+       <isuCTC>
+			34Q
+		</isuCTC>
+		<subIndustry>
+			K,U,A,F,N,S
+		</subIndustry>
+		<sortl>
+			T0001375
+		</sortl>
+		<salesRep>
+		    NOREP0
+		</salesRep>
+</mapping>
+
+<mapping>
+       <isuCTC>
+			34Q
+		</isuCTC>
+		<subIndustry>
+			D,W,T,R
+		</subIndustry>
+		<sortl>
+			T0006880
+		</sortl>
+		<salesRep>
+		    NOREP0
+		</salesRep>
+</mapping>
+
+<mapping>
+       <isuCTC>
+			34Q
+		</isuCTC>
+		<subIndustry>
+			 G,Y,E,H,X
+		</subIndustry>
+		<sortl>
+			T0006644
+		</sortl>
+		<salesRep>
+		    NOREP0
+		</salesRep>
+</mapping>
+
+<mapping>
+       <isuCTC>
+			34Q
+		</isuCTC>
+		<subIndustry>
+			B,C
+		</subIndustry>
+		<sortl>
+			T0006607
+		</sortl>
+		<salesRep>
+		    NOREP0
+		</salesRep>
+</mapping>
+		
+</mappings>

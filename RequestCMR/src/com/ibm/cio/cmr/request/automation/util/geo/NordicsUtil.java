@@ -1,21 +1,28 @@
 package com.ibm.cio.cmr.request.automation.util.geo;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.apache.commons.digester.Digester;
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 
+import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
+import com.ibm.cio.cmr.request.automation.impl.gbl.CalculateCoverageElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
+import com.ibm.cio.cmr.request.automation.util.CoverageContainer;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.util.ConfigUtil;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 
@@ -26,6 +33,7 @@ import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
  */
 
 public class NordicsUtil extends AutomationUtil {
+  private static final Logger LOG = Logger.getLogger(NordicsUtil.class);
 
   // Denmark
   public static final String DK_COMME_LOCAL = "DKCOM";
@@ -58,6 +66,38 @@ public class NordicsUtil extends AutomationUtil {
   public static final String CROSS_INTSO = "CBISO";
   public static final String CROSS_IBMEM = "CBIBM";
   public static final String CROSS_PRIPE = "CBPRI";
+
+  private static final List<String> SCENARIOS_COVERAGE = Arrays.asList(DK_COMME_LOCAL, FI_COMME_LOCAL, COMME_LOCAL, CROSS_COMME, DK_INTSO_LOCAL,
+      FI_INTSO_LOCAL, INTSO_LOCAL, CROSS_INTSO, DK_GOV_LOCAL, FI_GOV_LOCAL);
+
+  private static List<NordicsCovMapping> coverageMapping = new ArrayList<NordicsCovMapping>();
+
+  @SuppressWarnings("unchecked")
+  public NordicsUtil() {
+    if (NordicsUtil.coverageMapping.isEmpty()) {
+      Digester digester = new Digester();
+
+      digester.setValidating(false);
+
+      digester.addObjectCreate("mappings", ArrayList.class);
+      digester.addObjectCreate("mappings/mapping", NordicsCovMapping.class);
+
+      digester.addBeanPropertySetter("mappings/mapping/isuCTC", "isuCTC");
+      digester.addBeanPropertySetter("mappings/mapping/subIndustry", "subIndustry");
+      digester.addBeanPropertySetter("mappings/mapping/sortl", "sortl");
+      digester.addBeanPropertySetter("mappings/mapping/salesRep", "salesRep");
+
+      digester.addSetNext("mappings/mapping", "add");
+
+      try {
+        InputStream is = ConfigUtil.getResourceStream("nordics-mapping.xml");
+        NordicsUtil.coverageMapping = (ArrayList<NordicsCovMapping>) digester.parse(is);
+
+      } catch (Exception e) {
+        LOG.error("Error occured while digesting xml.", e);
+      }
+    }
+  }
 
   @Override
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
@@ -134,6 +174,49 @@ public class NordicsUtil extends AutomationUtil {
       // set filtered matches in response
       response.setMatches(filteredMatches);
     }
+  }
+
+  @Override
+  public boolean performCountrySpecificCoverageCalculations(CalculateCoverageElement covElement, EntityManager entityManager,
+      AutomationResult<OverrideOutput> results, StringBuilder details, OverrideOutput overrides, RequestData requestData,
+      AutomationEngineData engineData, String covFrom, CoverageContainer container, boolean isCoverageCalculated) throws Exception {
+    Data data = requestData.getData();
+    String scenario = data.getCustSubGrp();
+
+    details.append("\n");
+    if (!isCoverageCalculated && "34".equals(data.getIsuCd()) && "Q".equals(data.getClientTier()) && SCENARIOS_COVERAGE.contains(scenario)) {
+      details.setLength(0); // clearing details
+      overrides.clearOverrides();
+      List<String> subIndList = new ArrayList<String>();
+      if (!coverageMapping.isEmpty()) {
+        String[] subInd = null;
+        for (NordicsCovMapping mapping : coverageMapping) {
+          if (!StringUtils.isEmpty(mapping.getSubIndustry())) {
+            subInd = mapping.getSubIndustry().replaceAll("\n", "").replaceAll(" ", "").split(",");
+            subIndList = Arrays.asList(subInd);
+          }
+          if (!subIndList.isEmpty() && subIndList.contains(data.getSubIndustryCd())) {
+            details.append("Calculating coverage using 34Q logic.").append("\n");
+
+            details.append("SORTL : " + mapping.getSortl() + " calculated using 34-Q mapping.");
+            overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getSearchTerm(), mapping.getSortl());
+
+            details.append("Sales Rep : " + mapping.getSalesRep() + " calculated using 34-Q mapping.");
+            overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "REP_TEAM_MEMBER_NO", data.getRepTeamMemberNo(),
+                mapping.getSalesRep());
+
+          }
+        }
+
+      } else {
+        details.setLength(0);
+        overrides.clearOverrides();
+        details.append("Coverage could not be calculated through Buying group or 34Q logic.\n Skipping coverage calculation.").append("\n");
+        results.setResults("Skipped");
+      }
+
+    }
+    return true;
   }
 
 }
