@@ -98,6 +98,13 @@ public class BeLuxUtil extends AutomationUtil {
     case SCENARIO_LOCAL_COMMERCIAL:
     case SCENARIO_CROSS_COMMERCIAL:
     case SCENARIO_LOCAL_COMMERCIAL_LU:
+      String customerNameCombined = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
+      if (customerNameCombined.contains("IBM")) {
+        details.append("Scenario sub-type should be Internal or Internal SO").append("\n");
+        engineData.addRejectionComment("OTH", "Change Scenario sub-type to Internal or Internal SO.", "", "");
+        return false;
+      }
+      break;
     case SCENARIO_LOCAL_PUBLIC:
     case SCENARIO_LOCAL_PUBLIC_LU:
       if (zp01 != null && (!StringUtils.equals(getCleanString(customerName), getCleanString(customerNameZP01))
@@ -545,9 +552,9 @@ public class BeLuxUtil extends AutomationUtil {
                 duplicateDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");
                 resultCodes.add("R");
               } else {
-                  LOG.debug("Addition/Updation of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
-                  checkDetails.append("Address (" + addr.getId().getAddrSeq() + ") is validated.\n");
-                }
+                LOG.debug("Addition/Updation of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+                checkDetails.append("Address (" + addr.getId().getAddrSeq() + ") is validated.\n");
+              }
             }
 
             if (addrType.equalsIgnoreCase(CmrConstants.RDC_SHIP_TO) && "Y".equals(addr.getImportInd())) {
@@ -557,16 +564,16 @@ public class BeLuxUtil extends AutomationUtil {
         }
       }
     }
-    if (resultCodes.contains("X")) {     
-        validation.setSuccess(false);
-        validation.setMessage("Review Required.");
-        engineData.addNegativeCheckStatus("_esCheckFailed", "Updated elements cannot be checked automatically.");
-      } else if (resultCodes.contains("R")) {   
+    if (resultCodes.contains("X")) {
+      validation.setSuccess(false);
+      validation.setMessage("Review Required.");
+      engineData.addNegativeCheckStatus("_esCheckFailed", "Updated elements cannot be checked automatically.");
+    } else if (resultCodes.contains("R")) {
       output.setOnError(true);
       engineData.addRejectionComment("_atRejectAddr", "Addition or updation on the address is rejected", "", "");
       validation.setSuccess(false);
       validation.setMessage("Rejected.");
-     }  else {
+    } else {
       validation.setSuccess(true);
       validation.setMessage("Successful");
     }
