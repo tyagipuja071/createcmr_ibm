@@ -29,6 +29,7 @@ import com.ibm.cio.cmr.request.entity.RdcCloningRefnPK;
 import com.ibm.cio.cmr.request.entity.Sadr;
 import com.ibm.cio.cmr.request.entity.SadrPK;
 import com.ibm.cio.cmr.request.entity.ScAccountCmrStg;
+import com.ibm.cio.cmr.request.entity.ScAccountCmrStgPK;
 import com.ibm.cio.cmr.request.entity.TransService;
 import com.ibm.cio.cmr.request.entity.TransServicePK;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
@@ -127,11 +128,8 @@ public class ProspectCloningService extends CloningProcessService {
         pkClone.setMandt(mandt);
         pkClone.setKunnr(cloneKunnr);
         kna1Clone.setId(pkClone);
-        String owner = record.getLastUpdtBy();
-        String owner2 = record.getCreatedBy();
-        if ("GTS".equals(owner) || "GTS".equals(owner2)) {
-          kna1Clone.setKatr10("GTS");
-        }
+        String scId = record.getCreatedBy();
+        kna1Clone.setKatr10("GTS");
         kna1Clone.setZzkvCusno(record.getClonedCmrNo());
         kna1Clone.setErnam(BATCH_USER_ID);
         kna1Clone.setShadUpdateInd("I");
@@ -161,7 +159,7 @@ public class ProspectCloningService extends CloningProcessService {
         kunnrExtClone.setUpdateTs(SystemUtil.getActualTimestamp());
         kunnrExtClone.setCreateTs(now);
         // kunnrExtClone.setCreateUser(BATCH_USER_ID);
-        kunnrExtClone.setScAccountId("-temp-");
+        kunnrExtClone.setScAccountId(scId);
         createEntity(kunnrExtClone, entityManager);
 
         if (!StringUtils.isBlank(kna1.getAdrnr())) {
@@ -195,7 +193,7 @@ public class ProspectCloningService extends CloningProcessService {
           LOG.debug("No SADR record to copy.");
         }
 
-        // processSCStaging(entityManager, kna1Clone, kunnrExtClone);
+        processSCStaging(entityManager, kna1Clone, kunnrExtClone);
 
         processTransService(entityManager, record, kna1Clone, kunnrExtClone);
 
@@ -268,6 +266,7 @@ public class ProspectCloningService extends CloningProcessService {
 
     if (!StringUtils.isBlank(scAccountId)) {
       ScAccountCmrStg scAccount = new ScAccountCmrStg();
+      scAccount.setId(new ScAccountCmrStgPK());
       scAccount.getId().setScAccountId(scAccountId);
       scAccount.setCmrSysLocCd(kna1.getKatr6());
       scAccount.setLegacyCmrNo(kna1.getZzkvCusno());
