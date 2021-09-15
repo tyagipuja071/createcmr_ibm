@@ -26,10 +26,12 @@ import org.springframework.web.servlet.ModelAndView;
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.automation.RequestData;
+import com.ibm.cio.cmr.request.automation.util.AutomationConst;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.AddrRdc;
 import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.entity.ApprovalReq;
 import com.ibm.cio.cmr.request.entity.CmrCloningQueue;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataRdc;
@@ -2161,6 +2163,18 @@ public class CNHandler extends GEOHandler {
     query.setParameter("ADDR_SEQ", addrSeq);
     query.setForReadOnly(true);
     return query.getSingleResult(AddrRdc.class);
+  }
+
+  @Override
+  public void setReqStatusAfterApprove(EntityManager entityManager, ApprovalResponseModel approval, ApprovalReq req, Admin admin) {
+    String reqTypeId = String.valueOf(req.getTypId());
+    String defaultApprovalId = String.valueOf(req.getDefaultApprovalId());
+    if ("26".equals(reqTypeId) && "83".equals(defaultApprovalId) && "Approved".equals(approval.getCurrentStatus())
+        && "Y".equals(approval.getProcessing())) {
+      // ERO approval
+      admin.setReqStatus(AutomationConst.STATUS_AUTOMATED_PROCESSING);
+    }
+
   }
 
 }
