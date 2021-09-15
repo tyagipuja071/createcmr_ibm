@@ -1232,7 +1232,7 @@ public class USUtil extends AutomationUtil {
 
     // US restrict to LOV mapping
     String usRestrictToLOV = "";
-    if (StringUtils.isNotBlank(usRestricTo)) {
+    if (StringUtils.isNotBlank(usRestricTo) && "NO_VALUE_RETRIEVED".equalsIgnoreCase(usRestricTo)) {
       sql = ExternalizedQuery.getSql("AUTO.US.GET_US_RESTR_TO_LOV");
       query = new PreparedQuery(entityManager, sql);
       query.setParameter("RESTRICT_TO", usRestricTo);
@@ -1385,7 +1385,7 @@ public class USUtil extends AutomationUtil {
     query.addField("I_BP_ACCOUNT_TYPE");
     query.addField("C_LEASING_CO");
     query.addField("C_GEM");
-    query.addField("C_COM_RESTRCT_CODE");
+    // query.addField("C_COM_RESTRCT_CODE");
     query.addField("I_CO");
     query.addField("I_CUST_OFF_5");
     query.addField("I_CUST_OFF_3");
@@ -1404,7 +1404,7 @@ public class USUtil extends AutomationUtil {
       leasingCo = (String) record.get("C_LEASING_CO");
       bpAccTyp = (String) record.get("I_BP_ACCOUNT_TYPE");
       cGem = (String) record.get("C_GEM");
-      usRestrictTo = (String) record.get("C_COM_RESTRCT_CODE");
+      // usRestrictTo = (String) record.get("C_COM_RESTRCT_CODE");
       companyNo = String.valueOf(record.get("I_CO"));
       pccArDept = (String) record.get("I_CUST_OFF_5");
       mtkgArDept = (String) record.get("I_CUST_OFF_3");
@@ -1424,18 +1424,44 @@ public class USUtil extends AutomationUtil {
         custTypCd = COMMERCIAL;
       }
     }
+
+    // GET US_RESTRICT_TO_CODE
+    String restrictCd = getUSRestrictToCode(entityManager, cmrNo);
+
     usDetails.setCustTypCd(custTypCd);
     usDetails.setEntType(entType);
     usDetails.setLeasingCo(leasingCo);
     usDetails.setBpAccTyp(bpAccTyp);
     usDetails.setcGem(cGem);
-    usDetails.setUsRestrictTo(usRestrictTo);
+    // usDetails.setUsRestrictTo(usRestrictTo);
+    usDetails.setUsRestrictTo(restrictCd);
     usDetails.setCompanyNo(companyNo);
     usDetails.setMktgArDept(mtkgArDept);
 
     usDetails.setPccArDept(pccArDept);
     usDetailsMap.put(cmrNo, usDetails);
     return usDetails;
+  }
+
+  public static String getUSRestrictToCode(EntityManager entityManager, String cmrNo) {
+    String code = "";
+    try {
+      LOG.debug("Getting US restrict To code from ADDLCTRYDATA...");
+      String sql = ExternalizedQuery.getSql("AUTO.GET_US_RESTRICT_TO");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+      query.setParameter("CMR_NO", cmrNo);
+      query.setForReadOnly(true);
+      code = query.getSingleResult(String.class);
+
+      if ("NO_VALUE_RETRIEVED".equalsIgnoreCase(code)) {
+        code = "";
+      }
+    } catch (Exception e) {
+      LOG.error("Error in querying the database table ADDLCTRYDATA ! ");
+    }
+
+    return code;
   }
 
   /**
