@@ -426,6 +426,9 @@ public abstract class USBPHandler {
         } else if (customerName.contains("CHANNEL SVCS")) {
           customerNameSuffix = customerName.substring(customerName.lastIndexOf("CHANNEL SVCS")).trim();
           customerName = customerName.substring(0, customerName.lastIndexOf("CHANNEL SVCS")).trim();
+        } else if (customerName.contains("CHANNEL SVCS USE ONLY")) {
+          customerNameSuffix = customerName.substring(customerName.lastIndexOf("CHANNEL SVCS USE ONLY")).trim();
+          customerName = customerName.substring(0, customerName.lastIndexOf("CHANNEL SVCS USE ONLY")).trim();
         } else if (customerName.contains("C/O")) {
           customerNameSuffix = customerName.substring(customerName.lastIndexOf("C/O")).trim();
           customerName = customerName.substring(0, customerName.lastIndexOf("C/O")).trim();
@@ -654,6 +657,8 @@ public abstract class USBPHandler {
         customerName = customerName.substring(0, customerName.lastIndexOf("CHN SVCS")).trim();
       } else if (customerName.contains("CHANNEL SVCS")) {
         customerName = customerName.substring(0, customerName.lastIndexOf("CHANNEL SVCS")).trim();
+      } else if (customerName.contains("CHANNEL SVCS USE ONLY")) {
+        customerName = customerName.substring(0, customerName.lastIndexOf("CHANNEL SVCS USE ONLY")).trim();
       } else if (customerName.contains("C/O")) {
         customerName = customerName.substring(0, customerName.lastIndexOf("C/O")).trim();
       } else if (customerName.contains("UCW")) {
@@ -1242,6 +1247,8 @@ public abstract class USBPHandler {
       customerName = customerName.substring(0, customerName.lastIndexOf("CHN SVCS")).trim();
     } else if (customerName.contains("CHANNEL SVCS")) {
       customerName = customerName.substring(0, customerName.lastIndexOf("CHANNEL SVCS")).trim();
+    } else if (customerName.contains("CHANNEL SVCS USE ONLY")) {
+      customerName = customerName.substring(0, customerName.lastIndexOf("CHANNEL SVCS USE ONLY")).trim();
     } else if (customerName.contains("C/O")) {
       customerName = customerName.substring(0, customerName.lastIndexOf("C/O")).trim();
     } else if (customerName.contains("UCW")) {
