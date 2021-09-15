@@ -16,6 +16,7 @@ function afterConfigForNORDX() {
   reqType = FormManager.getActualValue('reqType');
   var role = null;
   var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var vat = FormManager.getActualValue('vat'); 
   var geoCd = FormManager.getActualValue('countryUse').substring(3, 5);
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
@@ -32,6 +33,9 @@ function afterConfigForNORDX() {
       return;
     }
 
+    if((role == 'Requester' || role == 'Processore') && vat != ''){
+     FormManager.readOnly('vat');   
+    }
     // FormManager.enable('collectionCd');
     FormManager.resetValidations('inacCd');
     // FormManager.resetValidations('sitePartyId');
@@ -2411,7 +2415,7 @@ function setCollectionCd() {
 
     if (reqType == 'U') {
       var requestingLob = FormManager.getActualValue('requestingLob');
-      if (requestingLob == 'AR' || requestingLob == 'SCT') {
+      if (requestingLob == 'AR' || requestingLob == 'SCT' || requestingLob == 'PRE') {
         FormManager.enable('collectionCd');
       } else {
         FormManager.readOnly('collectionCd');
