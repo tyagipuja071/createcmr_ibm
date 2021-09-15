@@ -132,6 +132,27 @@ function setSearchTermByGBGId() {
       FormManager.readOnly('searchTerm');
     }    
   }
+  var mandt = FormManager.getActualValue('mandt');
+  var ret = cmr.query('CHECK_CN_INAC_BY_GBG_ID', {
+    MANDT : mandt,
+    ID : _GBGId
+  });
+  if (ret && ret.ret1 && ret.ret1 != '') {
+    var inacArr = ret.ret1;
+    var inacResult = inacArr.split('_');
+    if(inacResult && inacResult.length>2){
+      if(inacResult[inacResult.length - 2] == 'INAC'){
+        FormManager.setValue('inacType', 'I');
+        FormManager.setValue('inacCd', inacResult[inacResult.length - 1] );
+      }else if(inacResult[inacResult.length - 2] == 'NAC'){
+        FormManager.setValue('inacType', 'N');
+        FormManager.setValue('inacCd', inacResult[inacResult.length - 1] );
+      }
+      FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
+      FormManager.addValidator('inacType', Validators.REQUIRED, [ 'INAC Type' ], 'MAIN_IBM_TAB');
+    } 
+  }
+
   }else{
     FormManager.setValue('inacCd', '');
     FormManager.readOnly('inacCd');
@@ -354,13 +375,36 @@ function setInacBySearchTerm() {
     addSearchTerm04687Logic();
   } else {
     if(_GBGId != 'undefined' && _GBGId != ''){
-      FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
-      FormManager.addValidator('inacType', Validators.REQUIRED, [ 'INAC Type' ], 'MAIN_IBM_TAB');
+      var mandt = FormManager.getActualValue('mandt');
+      var ret = cmr.query('CHECK_CN_INAC_BY_GBG_ID', {
+        MANDT : mandt,
+        ID : _GBGId
+      });
+      if (ret && ret.ret1 && ret.ret1 != '') {
+        var inacArr = ret.ret1;
+        var inacResult = inacArr.split('_');
+        if(inacResult && inacResult.length>2){
+          if(inacResult[inacResult.length - 2] == 'INAC'){
+            FormManager.setValue('inacType', 'I');
+            FormManager.setValue('inacCd', inacResult[inacResult.length - 1] );
+          }else if(inacResult[inacResult.length - 2] == 'NAC'){
+            FormManager.setValue('inacType', 'N');
+            FormManager.setValue('inacCd', inacResult[inacResult.length - 1] );
+          }
+          FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
+          FormManager.addValidator('inacType', Validators.REQUIRED, [ 'INAC Type' ], 'MAIN_IBM_TAB');
+        } 
+      }else{
+        FormManager.resetDropdownValues(FormManager.getField('inacCd'));
+        FormManager.resetDropdownValues(FormManager.getField('inacType'));
+        FormManager.removeValidator('inacCd', Validators.REQUIRED);
+        FormManager.removeValidator('inacType', Validators.REQUIRED);   
+      }
     }else{
       FormManager.resetDropdownValues(FormManager.getField('inacCd'));
       FormManager.resetDropdownValues(FormManager.getField('inacType'));
       FormManager.removeValidator('inacCd', Validators.REQUIRED);
-      FormManager.removeValidator('inacType', Validators.REQUIRED);
+      FormManager.removeValidator('inacType', Validators.REQUIRED);   
     }
     return;
   }
