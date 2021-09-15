@@ -2169,6 +2169,11 @@ public class CNHandler extends GEOHandler {
   public void setReqStatusAfterApprove(EntityManager entityManager, ApprovalResponseModel approval, ApprovalReq req, Admin admin) {
     String reqTypeId = String.valueOf(req.getTypId());
     String defaultApprovalId = String.valueOf(req.getDefaultApprovalId());
+    LOG.debug(">>> CN setReqStatusAfterApprove...");
+    LOG.debug("reqTypeId = " + reqTypeId);
+    LOG.debug("defaultApprovalId = " + defaultApprovalId);
+    LOG.debug("currentStatus = " + approval.getCurrentStatus());
+    LOG.debug("processing = " + approval.getProcessing());
     if ("26".equals(reqTypeId) && "83".equals(defaultApprovalId) && "Approved".equals(approval.getCurrentStatus())
         && "Y".equals(approval.getProcessing())) {
       // ERO approval
