@@ -364,7 +364,7 @@ public class DnBUtil {
     companyRecordModel.setTaxCd1(organizationId);
     String cnName = null;
     try {
-      AutomationResponse<CNResponse> cmrsData = CompanyFinder.getCNApiInfo(companyRecordModel, "TAXCD");
+      AutomationResponse<CNResponse> cmrsData = CompanyFinder.getCNApiInfo4GBG(companyRecordModel, "TAXCD");
       if (cmrsData != null && cmrsData.isSuccess()) {
         LOG.debug("Get Chiese API Info successful>>>");
         cnName = StringUtils.isNotBlank(cmrsData.getRecord().getName()) ? cmrsData.getRecord().getName().trim() : "";
