@@ -33,7 +33,7 @@ function afterConfigForNORDX() {
       return;
     }
 
-    if((role == 'Requester' || role == 'Processore') && vat != ''){
+    if((role == 'Requester' || role == 'Processor') && vat != ''){
      FormManager.readOnly('vat');   
     }
     // FormManager.enable('collectionCd');
