@@ -181,6 +181,16 @@ function addAfterConfigAP() {
          FormManager.setValue('busnType','000');
          FormManager.readOnly('busnType');
       }
+      if(custSubGrp == 'NRML'){
+        FormManager.setValue('busnType','');
+        FormManager.setValue('apCustClusterId','');
+    }
+      if(custSubGrp == 'AQSTN' || custSubGrp == 'CROSS'){
+        FormManager.setValue('apCustClusterId','');
+    }
+      if(custSubGrp == 'PRIV'){
+        FormManager.setValue('busnType','');
+    }   
     }
     
     if((cntry == SysLoc.NEW_ZEALAND || cntry == SysLoc.AUSTRALIA ||cntry == SysLoc.INDONESIA || cntry == SysLoc.PHILIPPINES ||cntry == SysLoc.SINGAPORE ||cntry == SysLoc.VIETNAM || cntry == SysLoc.THAILAND || cntry == SysLoc.MALASIA) && (custSubGrp == 'ECSYS' ||custSubGrp == 'XECO' )){
