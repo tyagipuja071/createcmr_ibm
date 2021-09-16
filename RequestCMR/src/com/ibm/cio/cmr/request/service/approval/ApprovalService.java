@@ -1405,7 +1405,6 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
   }
 
   private String getCmrIssuingCntry(EntityManager entityManager, long reqId) {
-    String output = null;
     String sql = ExternalizedQuery.getSql("DATA.GET.RECORD.BYID");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", reqId);
