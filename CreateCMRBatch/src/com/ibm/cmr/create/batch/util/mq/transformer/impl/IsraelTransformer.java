@@ -75,6 +75,12 @@ public class IsraelTransformer extends EMEATransformer {
       // Update only mapping
     }
 
+    for (Addr addr : cmrObjects.getAddresses()) {
+      if (MQMsgConstants.ADDR_ZS01.equals(addr.getId().getAddrType())) {
+        legacyCust.setTelNoOrVat(addr.getCustPhone());
+      }
+    }
+
     legacyCust.setMrcCd("");
     legacyCust.getId().setSofCntryCode(SystemLocation.SAP_ISRAEL_SOF_ONLY);
   }
