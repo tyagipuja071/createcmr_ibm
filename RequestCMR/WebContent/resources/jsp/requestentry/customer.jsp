@@ -285,7 +285,7 @@
         <p>
           <label for="vat"> <cmr:fieldLabel fieldId="VAT" />: <cmr:delta text="${rdcdata.vat}" oldValue="${reqentry.vat}" /> <cmr:view
               forCountry="755">
-              <cmr:info text="${ui.info.vatNumberCodeFormat}" />
+              <span id="vatInfo"><cmr:info text="${ui.info.vatNumberCodeFormatIL}" /></span>
             </cmr:view> <cmr:view forCountry="726">
               <cmr:info text="${ui.info.vatNumberCodeFormatGR}" />
             </cmr:view> <cmr:view forCountry="666">
