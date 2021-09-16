@@ -343,79 +343,122 @@ public class CNHandler extends GEOHandler {
 
   }
 
-  private void getGBGIdByGBGservice(EntityManager entityManager, Admin admin, Data data, Addr currentAddress, String dunsNo) throws Exception {
-    // TODO Auto-generated method stub
-    GBGFinderRequest request = new GBGFinderRequest();
-    request.setMandt(SystemConfiguration.getValue("MANDT"));
+  private void getGBGIdByGBGservice(EntityManager entityManager, Admin admin, Data data, Addr currentAddress, String dunsNo, boolean flag)
+      throws Exception {
+    if (!flag) {
+      // TODO Auto-generated method stub
+      GBGFinderRequest request = new GBGFinderRequest();
+      request.setMandt(SystemConfiguration.getValue("MANDT"));
 
-    request.setCity(currentAddress.getCity1());
-    request
-        .setCustomerName(currentAddress.getCustNm1() + (StringUtils.isBlank(currentAddress.getCustNm2()) ? "" : " " + currentAddress.getCustNm2()));
+      request.setCity(currentAddress.getCity1());
+      request
+          .setCustomerName(currentAddress.getCustNm1() + (StringUtils.isBlank(currentAddress.getCustNm2()) ? "" : " " + currentAddress.getCustNm2()));
 
-    String nameUsed = request.getCustomerName();
-    LOG.debug("Checking GBG for " + nameUsed);
-    // usedNames.add(nameUsed.toUpperCase());
-    request.setIssuingCountry(data.getCmrIssuingCntry());
-    request.setStreetLine1(currentAddress.getAddrTxt());
-    request.setStreetLine2(currentAddress.getAddrTxt2());
-    request.setLandedCountry(currentAddress.getLandCntry());
-    request.setPostalCode(currentAddress.getPostCd());
-    request.setStateProv(currentAddress.getStateProv());
-    if (!StringUtils.isBlank(data.getVat())) {
-      request.setOrgId(data.getVat());
-    }
-    request.setMinConfidence("6");
-    if (StringUtils.isNotBlank(dunsNo)) {
-      request.setDunsNo(dunsNo);
-    } else {
-      request.setDunsNo(data.getDunsNo());
-    }
-
-    MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
-        MatchingServiceClient.class);
-    client.setRequestMethod(Method.Get);
-    client.setReadTimeout(1000 * 60 * 5);
-
-    LOG.debug("Connecting to the GBG Finder Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
-    MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.GBG_SERVICE_ID, request, MatchingResponse.class);
-    ObjectMapper mapper = new ObjectMapper();
-    String json = mapper.writeValueAsString(rawResponse);
-
-    TypeReference<MatchingResponse<GBGResponse>> ref = new TypeReference<MatchingResponse<GBGResponse>>() {
-    };
-    MatchingResponse<GBGResponse> response = mapper.readValue(json, ref);
-
-    if (response != null && response.getMatched()) {
-      List<GBGResponse> gbgMatches = response.getMatches();
-      Collections.sort(gbgMatches, new GBGComparator(data.getCmrIssuingCntry()));
-
-      if (gbgMatches.size() > 5) {
-        gbgMatches = gbgMatches.subList(0, 4);
+      String nameUsed = request.getCustomerName();
+      LOG.debug("Checking GBG for " + nameUsed);
+      // usedNames.add(nameUsed.toUpperCase());
+      request.setIssuingCountry(data.getCmrIssuingCntry());
+      request.setStreetLine1(currentAddress.getAddrTxt());
+      request.setStreetLine2(currentAddress.getAddrTxt2());
+      request.setLandedCountry(currentAddress.getLandCntry());
+      request.setPostalCode(currentAddress.getPostCd());
+      request.setStateProv(currentAddress.getStateProv());
+      if (!StringUtils.isBlank(data.getVat())) {
+        request.setOrgId(data.getVat());
       }
-      boolean domesticGBGFound = false;
-      for (GBGResponse gbg : gbgMatches) {
-        if (gbg.isDomesticGBG()) {
-          domesticGBGFound = true;
-          break;
+      request.setMinConfidence("6");
+      if (StringUtils.isNotBlank(dunsNo)) {
+        request.setDunsNo(dunsNo);
+      } else {
+        request.setDunsNo(data.getDunsNo());
+      }
+
+      MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
+          MatchingServiceClient.class);
+      client.setRequestMethod(Method.Get);
+      client.setReadTimeout(1000 * 60 * 5);
+
+      LOG.debug("Connecting to the GBG Finder Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
+      MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.GBG_SERVICE_ID, request, MatchingResponse.class);
+      ObjectMapper mapper = new ObjectMapper();
+      String json = mapper.writeValueAsString(rawResponse);
+
+      TypeReference<MatchingResponse<GBGResponse>> ref = new TypeReference<MatchingResponse<GBGResponse>>() {
+      };
+      MatchingResponse<GBGResponse> response = mapper.readValue(json, ref);
+
+      if (response != null && response.getMatched()) {
+        List<GBGResponse> gbgMatches = response.getMatches();
+        Collections.sort(gbgMatches, new GBGComparator(data.getCmrIssuingCntry()));
+
+        if (gbgMatches.size() > 5) {
+          gbgMatches = gbgMatches.subList(0, 4);
+        }
+        boolean domesticGBGFound = false;
+        for (GBGResponse gbg : gbgMatches) {
+          if (gbg.isDomesticGBG()) {
+            domesticGBGFound = true;
+            break;
+          }
+        }
+
+        for (GBGResponse gbg : gbgMatches) {
+          if (gbg.isDomesticGBG() || !domesticGBGFound) {
+            data.setGbgId(gbg.getGbgId());
+            data.setGbgDesc(gbg.getGbgName());
+            data.setBgId(gbg.getBgId());
+            data.setBgDesc(gbg.getBgName());
+            data.setBgRuleId(gbg.getLdeRule());
+            entityManager.merge(data);
+            entityManager.flush();
+            break;
+          }
         }
       }
+    } else {
+      List<GBGResponse> matches = new ArrayList<GBGResponse>();
 
-      for (GBGResponse gbg : gbgMatches) {
-        if (gbg.isDomesticGBG() || !domesticGBGFound) {
+      // do a matching against GU DUNS first
+      String sql = ExternalizedQuery.getSql("GBG.QUERY_BY_CMRNO");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+      query.setParameter("KATR6", data.getCmrIssuingCntry());
+      query.setParameter("CMR_NO", dunsNo);
+      query.setForReadOnly(true);
+
+      // 0 gbg id
+      // 1 gbg name
+      // 2 bg id
+      // 3 bg name
+      // 4 lde rule
+      // 5 int acct type
+      // 6 cmr count
+      List<Object[]> results = query.getResults();
+      if (results != null) {
+        GBGResponse gbg = null;
+        for (Object[] result : results) {
+          gbg = new GBGResponse();
+          gbg.setGbgId((String) result[0]);
+          gbg.setGbgName((String) result[1]);
+          gbg.setBgId((String) result[2]);
+          gbg.setBgName((String) result[3]);
+          gbg.setLdeRule((String) result[4]);
           data.setGbgId(gbg.getGbgId());
           data.setGbgDesc(gbg.getGbgName());
           data.setBgId(gbg.getBgId());
           data.setBgDesc(gbg.getBgName());
+          data.setBgRuleId(gbg.getLdeRule());
           entityManager.merge(data);
           entityManager.flush();
           break;
         }
       }
+
     }
   }
 
   private void getGBGId(EntityManager entityManager, Admin admin, Data data, Addr currentAddress) throws Exception {
-    getGBGIdByGBGservice(entityManager, admin, data, currentAddress, null);
+    getGBGIdByGBGservice(entityManager, admin, data, currentAddress, null, false);
     if (StringUtils.isBlank(data.getGbgId())) {
       String companyName = null;
       if (StringUtils.isNotBlank(data.getBusnType())) {
@@ -430,7 +473,9 @@ public class CNHandler extends GEOHandler {
         resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
         if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
           if (StringUtils.isNotBlank(resultFindCmrCN.get(0).getDunsNo())) {
-            getGBGIdByGBGservice(entityManager, admin, data, currentAddress, resultFindCmrCN.get(0).getDunsNo());
+            getGBGIdByGBGservice(entityManager, admin, data, currentAddress, resultFindCmrCN.get(0).getDunsNo(), false);
+          } else {
+            getGBGIdByGBGservice(entityManager, admin, data, currentAddress, resultFindCmrCN.get(0).getCmrNo(), true);
           }
         }
       }
