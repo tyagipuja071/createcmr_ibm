@@ -35,6 +35,7 @@ import com.ibm.cio.cmr.request.entity.ApprovalReq;
 import com.ibm.cio.cmr.request.entity.CmrCloningQueue;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataRdc;
+import com.ibm.cio.cmr.request.entity.DefaultApprovals;
 import com.ibm.cio.cmr.request.entity.GeoContactInfo;
 import com.ibm.cio.cmr.request.entity.GeoContactInfoPK;
 import com.ibm.cio.cmr.request.entity.IntlAddr;
@@ -2169,17 +2170,31 @@ public class CNHandler extends GEOHandler {
   public void setReqStatusAfterApprove(EntityManager entityManager, ApprovalResponseModel approval, ApprovalReq req, Admin admin) {
     String reqTypeId = String.valueOf(req.getTypId());
     String defaultApprovalId = String.valueOf(req.getDefaultApprovalId());
+    String approvalDesc = getApprovalDesc(entityManager, defaultApprovalId);
     LOG.debug(">>> CN setReqStatusAfterApprove...");
     LOG.debug("reqTypeId = " + reqTypeId);
     LOG.debug("defaultApprovalId = " + defaultApprovalId);
+    LOG.debug("approvalDesc = " + approvalDesc);
     LOG.debug("currentStatus = " + approval.getCurrentStatus());
     LOG.debug("processing = " + approval.getProcessing());
-    if ("26".equals(reqTypeId) && "83".equals(defaultApprovalId) && "Approved".equals(approval.getCurrentStatus())
-        && "Y".equals(approval.getProcessing())) {
-      // ERO approval
+    if (approvalDesc != null
+        && (CmrConstants.CN_ERO_APPROVAL_DESC.equals(approvalDesc) || CmrConstants.CN_ECO_LEADER_APPROVAL_DESC.equals(approvalDesc)
+            || CmrConstants.CN_TECH_LEADER_APPROVAL_DESC.equals(approvalDesc))
+        && "Approved".equals(approval.getCurrentStatus()) && "Y".equals(approval.getProcessing()) && "PPN".equals(admin.getReqStatus())) {
+      LOG.debug("Setting request " + req.getTypId() + " to automation process");
       admin.setReqStatus(AutomationConst.STATUS_AUTOMATED_PROCESSING);
     }
+  }
 
+  private String getApprovalDesc(EntityManager entityManager, String id) {
+    String sql = ExternalizedQuery.getSql("SYSTEM.GET_DEFAULT_APPR.DETAILS");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("ID", id);
+    DefaultApprovals approve = query.getSingleResult(DefaultApprovals.class);
+    if (approve != null) {
+      return approve.getDefaultApprovalDesc();
+    }
+    return null;
   }
 
 }
