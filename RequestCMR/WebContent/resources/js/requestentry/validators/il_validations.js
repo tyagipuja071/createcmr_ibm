@@ -1003,6 +1003,19 @@ function addEmbargoCodeValidator() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
+function showVatOnLocal(fromAddress, scenario, scenarioChanged) {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+  var custGrp = FormManager.getActualValue('custGrp');
+  if (scenarioChanged && custGrp == 'LOCAL') {
+    cmr.showNode('vatInfo');
+  } else {
+    cmr.hideNode('vatInfo');
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding Israel functions...');
@@ -1050,4 +1063,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(countryUseAISRAEL, [ SysLoc.ISRAEL ]);
   GEOHandler.addAddrFunction(validatePoBox, [ SysLoc.ISRAEL ]);
 
+  GEOHandler.addAfterTemplateLoad(showVatOnLocal, [ SysLoc.ISRAEL ]);
 });
