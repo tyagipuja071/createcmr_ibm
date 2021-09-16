@@ -430,7 +430,16 @@ public abstract class USBPHandler {
         String customerName = installAt.getDivn() + (!StringUtils.isBlank(installAt.getDept()) ? " " + installAt.getDept() : "");
         customerName = customerName.toUpperCase();
         String customerNameSuffix = "";
-        if (customerName.contains("C/O")) {
+        if (customerName.contains("CHN SVCS")) {
+          customerNameSuffix = customerName.substring(customerName.lastIndexOf("CHN SVCS")).trim();
+          customerName = customerName.substring(0, customerName.lastIndexOf("CHN SVCS")).trim();
+        } else if (customerName.contains("CHANNEL SVCS")) {
+          customerNameSuffix = customerName.substring(customerName.lastIndexOf("CHANNEL SVCS")).trim();
+          customerName = customerName.substring(0, customerName.lastIndexOf("CHANNEL SVCS")).trim();
+        } else if (customerName.contains("CHANNEL SVCS USE ONLY")) {
+          customerNameSuffix = customerName.substring(customerName.lastIndexOf("CHANNEL SVCS USE ONLY")).trim();
+          customerName = customerName.substring(0, customerName.lastIndexOf("CHANNEL SVCS USE ONLY")).trim();
+        } else if (customerName.contains("C/O")) {
           customerNameSuffix = customerName.substring(customerName.lastIndexOf("C/O")).trim();
           customerName = customerName.substring(0, customerName.lastIndexOf("C/O")).trim();
         } else if (customerName.contains("UCW")) {
@@ -654,7 +663,13 @@ public abstract class USBPHandler {
 
       String customerName = addr.getDivn() + ((!StringUtils.isBlank(addr.getDept()) && useDeptForMatching(requestData)) ? " " + addr.getDept() : "");
       customerName = customerName.toUpperCase();
-      if (customerName.contains("C/O")) {
+      if (customerName.contains("CHN SVCS")) {
+        customerName = customerName.substring(0, customerName.lastIndexOf("CHN SVCS")).trim();
+      } else if (customerName.contains("CHANNEL SVCS")) {
+        customerName = customerName.substring(0, customerName.lastIndexOf("CHANNEL SVCS")).trim();
+      } else if (customerName.contains("CHANNEL SVCS USE ONLY")) {
+        customerName = customerName.substring(0, customerName.lastIndexOf("CHANNEL SVCS USE ONLY")).trim();
+      } else if (customerName.contains("C/O")) {
         customerName = customerName.substring(0, customerName.lastIndexOf("C/O")).trim();
       } else if (customerName.contains("UCW")) {
         customerName = customerName.substring(0, customerName.lastIndexOf("UCW")).trim();
@@ -1253,7 +1268,13 @@ public abstract class USBPHandler {
     String customerName = bpAddr.getDivn()
         + ((!StringUtils.isBlank(bpAddr.getDept()) && useDeptForMatching(requestData)) ? " " + bpAddr.getDept() : "");
     customerName = customerName.toUpperCase();
-    if (customerName.contains("C/O")) {
+    if (customerName.contains("CHN SVCS")) {
+      customerName = customerName.substring(0, customerName.lastIndexOf("CHN SVCS")).trim();
+    } else if (customerName.contains("CHANNEL SVCS")) {
+      customerName = customerName.substring(0, customerName.lastIndexOf("CHANNEL SVCS")).trim();
+    } else if (customerName.contains("CHANNEL SVCS USE ONLY")) {
+      customerName = customerName.substring(0, customerName.lastIndexOf("CHANNEL SVCS USE ONLY")).trim();
+    } else if (customerName.contains("C/O")) {
       customerName = customerName.substring(0, customerName.lastIndexOf("C/O")).trim();
     } else if (customerName.contains("UCW")) {
       customerName = customerName.substring(0, customerName.lastIndexOf("UCW")).trim();
