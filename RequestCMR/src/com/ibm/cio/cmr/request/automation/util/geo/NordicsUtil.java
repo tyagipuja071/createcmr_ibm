@@ -344,60 +344,60 @@ public class NordicsUtil extends AutomationUtil {
     for (String addrType : RELEVANT_ADDRESSES) {
       if (changes.isAddressChanged(addrType)) {
         addresses = requestData.getAddresses(addrType);
-      }
-      for (Addr addr : addresses) {
-        if ("N".equals(addr.getImportInd())) {
-          // new address
-          if (CmrConstants.RDC_SHIP_TO.equals(addrType) || CmrConstants.RDC_INSTALL_AT.equals(addrType)) {
-            LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
-            LOG.debug("Checking duplicates for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
-            boolean duplicate = addressExists(entityManager, addr, requestData);
-            if (duplicate) {
-              LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
-              checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");
-              resultCodes.add("R");
-            } else {
-              LOG.debug("Addition/Updation of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
-              checkDetails.append("Address (" + addr.getId().getAddrSeq() + ") is validated.\n");
-            }
-          }
-
-        } else if ("Y".equals(addr.getChangedIndc())) {
-          // update address
-          if (CmrConstants.RDC_SOLD_TO.equals(addrType) || CmrConstants.RDC_BILL_TO.equals(addrType)) {
-            if (isRelevantAddressFieldUpdated(changes, addr)) {
-              List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addr, false);
-              boolean matchesDnb = false;
-              if (matches != null) {
-                // check against D&B
-                matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
-              }
-              if (!matchesDnb) {
-                LOG.debug("Update address for " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
-                resultCodes.add("X");
-                checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
-              } else {
-                checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
-                for (DnBMatchingResponse dnb : matches) {
-                  checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
-                  checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
-                  checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
-                      + dnb.getDnbCountry() + "\n\n");
-                }
-              }
-            } else {
-              checkDetails.append("Updates to non-address fields for " + addrType + "(" + addr.getId().getAddrSeq() + ") skipped in the checks.")
-                  .append("\n");
-            }
-          } else {
+        for (Addr addr : addresses) {
+          if ("N".equals(addr.getImportInd())) {
+            // new address
             if (CmrConstants.RDC_SHIP_TO.equals(addrType) || CmrConstants.RDC_INSTALL_AT.equals(addrType)) {
-              // proceed
-              LOG.debug("Update to " + addrType + "(" + addr.getId().getAddrSeq() + ")");
-              checkDetails.append("Updates to (" + addr.getId().getAddrSeq() + ") ignored in the checks.\n");
+              LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+              LOG.debug("Checking duplicates for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+              boolean duplicate = addressExists(entityManager, addr, requestData);
+              if (duplicate) {
+                LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+                checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");
+                resultCodes.add("R");
+              } else {
+                LOG.debug("Addition/Updation of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+                checkDetails.append("Address (" + addr.getId().getAddrSeq() + ") is validated.\n");
+              }
+            }
+
+          } else if ("Y".equals(addr.getChangedIndc())) {
+            // update address
+            if (CmrConstants.RDC_SOLD_TO.equals(addrType) || CmrConstants.RDC_BILL_TO.equals(addrType)) {
+              if (isRelevantAddressFieldUpdated(changes, addr)) {
+                List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addr, false);
+                boolean matchesDnb = false;
+                if (matches != null) {
+                  // check against D&B
+                  matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
+                }
+                if (!matchesDnb) {
+                  LOG.debug("Update address for " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
+                  resultCodes.add("X");
+                  checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
+                } else {
+                  checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
+                  for (DnBMatchingResponse dnb : matches) {
+                    checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
+                    checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
+                    checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
+                        + dnb.getDnbCountry() + "\n\n");
+                  }
+                }
+              } else {
+                checkDetails.append("Updates to non-address fields for " + addrType + "(" + addr.getId().getAddrSeq() + ") skipped in the checks.")
+                    .append("\n");
+              }
             } else {
-              checkDetails.append("Updates to Updated Addresses for " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified")
-                  .append("\n");
-              resultCodes.add("X");
+              if (CmrConstants.RDC_SHIP_TO.equals(addrType) || CmrConstants.RDC_INSTALL_AT.equals(addrType)) {
+                // proceed
+                LOG.debug("Update to " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+                checkDetails.append("Updates to (" + addr.getId().getAddrSeq() + ") ignored in the checks.\n");
+              } else {
+                checkDetails.append("Updates to Updated Addresses for " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified")
+                    .append("\n");
+                resultCodes.add("X");
+              }
             }
           }
         }
