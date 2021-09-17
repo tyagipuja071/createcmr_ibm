@@ -127,7 +127,6 @@ public class IsraelHandler extends BaseSOFHandler {
       FindCMRRecordModel addr = cloneAddress(record, "ZS01");
 
       converted.add(mapEnglishAddr(addr, legacyAddr));
-      converted.add(mapLocalLanguageAddr(record, legacyAddr));
 
     } else {
       String processingType = PageManager.getProcessingType(mainRecord.getCmrIssuedBy(), "U");
@@ -388,6 +387,10 @@ public class IsraelHandler extends BaseSOFHandler {
           String seq = StringUtils.leftPad(address.getId().getAddrSeq(), 5, '0');
           address.getId().setAddrSeq(seq);
         }
+
+        if (!"ZS01".equalsIgnoreCase(address.getId().getAddrType())) {
+          address.setCustPhone("");
+        }
       }
     }
   }
@@ -476,6 +479,10 @@ public class IsraelHandler extends BaseSOFHandler {
     AdminPK adminPK = new AdminPK();
     adminPK.setReqId(addr.getId().getReqId());
     Admin admin = entityManager.find(Admin.class, adminPK);
+
+    if (!"ZS01".equals(addr.getId().getAddrType())) {
+      addr.setCustPhone("");
+    }
 
     switch (cmrIssuingCntry) {
     case SystemLocation.ISRAEL:
