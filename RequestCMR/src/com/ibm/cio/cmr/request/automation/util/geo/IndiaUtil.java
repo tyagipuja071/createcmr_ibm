@@ -112,6 +112,7 @@ public class IndiaUtil extends AutomationUtil {
     case SCENARIO_ESOSW:
       engineData.addNegativeCheckStatus("_atESO", "ESOSW request need to be send to CMDE queue for review. ");
       details.append("ESOSW request need to be send to CMDE queue for review. ").append("\n");
+      return true;
     case SCENARIO_INTERNAL:
       for (String addrType : RELEVANT_ADDRESSES) {
         List<Addr> addresses = requestData.getAddresses(addrType);
@@ -131,9 +132,8 @@ public class IndiaUtil extends AutomationUtil {
         for (Addr addr : addresses) {
           String custNmTrimmed = getCustomerFullName(addr).toUpperCase();
           if (hasINLegalEndings(custNmTrimmed)) {
-            details
-                .append(
-                    "Customer name should not contain 'Private Limited', 'Company', 'Corporation', 'Incorporate', 'Organization', 'Organisation', 'Pvt Ltd', 'Private', 'Limited', 'Pvt', 'Ltd', 'Inc.', 'Org.', 'Corp.' .")
+            details.append(
+                "Customer name should not contain 'Private Limited', 'Company', 'Corporation', 'Incorporate', 'Organization', 'Organisation', 'Pvt Ltd', 'Private', 'Limited', 'Pvt', 'Ltd', 'Inc.', 'Org.', 'Corp.' .")
                 .append("\n");
             engineData.addRejectionComment("OTH",
                 "Customer name should not contain 'Private Limited', 'Company', 'Corporation', 'Incorporate', 'Organization', 'Organisation', 'Pvt Ltd', 'Private', 'Limited', 'Pvt', 'Ltd', 'Inc.', 'Org.', 'Corp.' .",
