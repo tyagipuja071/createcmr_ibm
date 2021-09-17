@@ -96,7 +96,6 @@ public class IndiaUtil extends AutomationUtil {
     switch (scenario) {
     case SCENARIO_ACQUISITION:
     case SCENARIO_NORMAL:
-    case SCENARIO_ESOSW:
     case SCENARIO_FOREIGN:
       if (data.getApCustClusterId().contains("08033")) {
         details.append("Cluster is set to 08033 Ecosystem Partners.").append("\n");
@@ -110,6 +109,9 @@ public class IndiaUtil extends AutomationUtil {
         return false;
       }
       break;
+    case SCENARIO_ESOSW:
+      engineData.addNegativeCheckStatus("_atESO", "ESOSW request need to be send to CMDE queue for review. ");
+      details.append("ESOSW request need to be send to CMDE queue for review. ").append("\n");
     case SCENARIO_INTERNAL:
       for (String addrType : RELEVANT_ADDRESSES) {
         List<Addr> addresses = requestData.getAddresses(addrType);
