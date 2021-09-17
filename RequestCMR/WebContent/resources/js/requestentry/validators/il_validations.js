@@ -90,10 +90,12 @@ function afterConfigForIsrael() {
  */
 function setCustPhone(value) {
   if (FormManager.getField('addrType_ZS01').checked) {
+    FormManager.show('CustPhone', 'custPhone');
     FormManager.enable('custPhone');
   } else {
     FormManager.setValue('custPhone', '');
     FormManager.disable('custPhone');
+    FormManager.hide('CustPhone', 'custPhone');
   }
 }
 
