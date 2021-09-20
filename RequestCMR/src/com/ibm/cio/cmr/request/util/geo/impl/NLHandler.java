@@ -134,6 +134,7 @@ public class NLHandler extends BaseSOFHandler {
         if (source.getItems() != null) {
           String addrType = null;
           String seqNo = null;
+          String intrSysId = null;
           List<String> sofUses = null;
           FindCMRRecordModel addr = null;
 
@@ -170,7 +171,7 @@ public class NLHandler extends BaseSOFHandler {
                     converted.add(addr);
                   }
                 }
-              } else if (sofUses.isEmpty() && "ZP01".equals(record.getCmrAddrTypeCode()) && "PG".equals(record.getCmrOrderBlock())) {
+              } else if (sofUses.isEmpty() && "ZP01".equals(record.getCmrAddrTypeCode()) && StringUtils.isNotEmpty(intrSysId)) {
                 record.setCmrAddrTypeCode("PG01");
                 addrType = record.getCmrAddrTypeCode();
                 if (!StringUtils.isEmpty(addrType)) {

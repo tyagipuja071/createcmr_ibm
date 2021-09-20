@@ -143,7 +143,7 @@ public class BELUXHandler extends BaseSOFHandler {
                     converted.add(addr);
                   }
                 }
-              } else if (sofUses.isEmpty() && "ZP01".equals(record.getCmrAddrTypeCode()) && "PG".equals(record.getCmrOrderBlock())) {
+              } else if (sofUses.isEmpty() && "ZP01".equals(record.getCmrAddrTypeCode()) && StringUtils.isNotEmpty(record.getCmrOffice())) {
                 record.setCmrAddrTypeCode("PG01");
                 addrType = record.getCmrAddrTypeCode();
                 if (!StringUtils.isEmpty(addrType)) {

@@ -234,6 +234,9 @@ public class CEMEAHandler extends BaseSOFHandler {
                     && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(addr.getCmrAddrTypeCode())) && "599".equals(addr.getCmrAddrSeq())) {
                   addr.setCmrAddrTypeCode("ZP03");
                 }
+                if(CEE_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry()) &&  (CmrConstants.ADDR_TYPE.ZP01.toString().equals(addr.getCmrAddrTypeCode())) && StringUtils.isNotEmpty(record.getCmrOffice())) {
+                  addr.setCmrAddrTypeCode("PG01");
+                }
                 if ((CmrConstants.ADDR_TYPE.ZD01.toString().equals(addr.getCmrAddrTypeCode()))) {
                   String stkzn = "";
                   stkzn = getStkznFromDataRdc(entityManager, addr.getCmrSapNumber(), SystemConfiguration.getValue("MANDT"));
