@@ -284,7 +284,7 @@ public class EMEAHandler extends BaseSOFHandler {
                     converted.add(addr);
                   }
                 }
-              } else if (sofUses.isEmpty() && "ZP01".equals(record.getCmrAddrTypeCode()) && "PG".equals(record.getCmrOrderBlock())) {
+              } else if (sofUses.isEmpty() && "ZP01".equals(record.getCmrAddrTypeCode()) &&StringUtils.isNotEmpty(record.getCmrOffice())) {
                 record.setCmrAddrTypeCode("PG01");
                 addrType = record.getCmrAddrTypeCode();
                 if (!StringUtils.isEmpty(addrType)) {
@@ -294,6 +294,7 @@ public class EMEAHandler extends BaseSOFHandler {
                     addr.setCmrStreetAddressCont(record.getCmrName4());
                     addr.setCmrName3(record.getCmrName3());
                     addr.setCmrName2Plain(record.getCmrName2Plain());
+                    addr.setCmrOffice(record.getCmrOffice());
                   } else {
                     // name3 in rdc = Address Con't on SOF
                     addr.setCmrStreetAddressCont(record.getCmrName3());
