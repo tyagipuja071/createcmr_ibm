@@ -136,6 +136,9 @@ public class FranceHandler extends GEOHandler {
             if (CmrConstants.ADDR_TYPE.ZP01.toString().equals(tempRec.getCmrAddrTypeCode()) && "599".equals(tempRec.getCmrAddrSeq())) {
               tempRec.setCmrAddrTypeCode("ZP02");
             }
+            if (CmrConstants.ADDR_TYPE.ZP01.toString().equals(tempRec.getCmrAddrTypeCode()) && StringUtils.isNotEmpty(tempRec.getCmrOffice())) {
+              tempRec.setCmrAddrTypeCode("PG01");
+            }
             recordsToReturn.add(tempRec);
           }
         }

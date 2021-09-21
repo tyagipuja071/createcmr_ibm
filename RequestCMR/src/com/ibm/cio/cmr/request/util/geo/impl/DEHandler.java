@@ -36,6 +36,7 @@ import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.legacy.CloningRDCDirectUtil;
+import com.ibm.cio.cmr.request.util.legacy.LegacyDirectObjectContainer;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.QueryClient;
 import com.ibm.cmr.services.client.query.QueryRequest;
@@ -55,13 +56,14 @@ public class DEHandler extends GEOHandler {
 
   private static final String[] DE_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "LocalTax1", "LocalTax2", "SitePartyID", "Division", "POBoxCity", "CustFAX",
       "City2", "Affiliate", "Company", "INACType", "TransportZone", "Office", "Floor" };
-
+  protected LegacyDirectObjectContainer legacyObjects;
   @Override
   public void convertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry, ImportCMRModel searchModel)
       throws Exception {
     List<FindCMRRecordModel> recordsFromSearch = source.getItems();
     List<FindCMRRecordModel> filteredRecords = new ArrayList<>();
-
+    FindCMRRecordModel mainRecord = null;
+   
     if (recordsFromSearch != null && !recordsFromSearch.isEmpty() && recordsFromSearch.size() > 0) {
       doFilterAddresses(reqEntry, recordsFromSearch, filteredRecords);
       if (!filteredRecords.isEmpty() && filteredRecords.size() > 0 && filteredRecords != null) {
@@ -87,6 +89,9 @@ public class DEHandler extends GEOHandler {
             if (CmrConstants.ADDR_TYPE.ZP01.toString().equals(tempRec.getCmrAddrTypeCode()) && "599".equals(tempRec.getCmrAddrSeq())) {
               tempRec.setCmrAddrTypeCode("ZP02");
             }
+            if (CmrConstants.ADDR_TYPE.ZP01.toString().equals(tempRec.getCmrAddrTypeCode()) && StringUtils.isNotEmpty(tempRec.getCmrOffice())){
+              tempRec.setCmrAddrTypeCode("PG01");
+            }
             recordsToReturn.add(tempRec);
           }
         }
@@ -105,7 +110,10 @@ public class DEHandler extends GEOHandler {
           }
         }
       }
+     
+
     }
+    
   }
 
   @Override
