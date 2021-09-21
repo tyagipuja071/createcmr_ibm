@@ -2450,7 +2450,7 @@ function requestingLobOnChange() {
     dojo.connect(FormManager.getField('requestingLob'), 'onChange', function(value) {
       var requestingLob = FormManager.getActualValue('requestingLob');
 
-      if (requestingLob == 'AR' || requestingLob == 'SCT') {
+      if (requestingLob == 'AR' || requestingLob == 'SCT' || requestingLob == 'PRE') {
         FormManager.setValue('collectionCd', _pagemodel.collectionCd);
         FormManager.enable('collectionCd');
         collectionCdValidation();
