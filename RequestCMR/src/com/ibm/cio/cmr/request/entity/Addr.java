@@ -259,6 +259,8 @@ public class Addr extends BaseEntity<AddrPK> implements Serializable {
   @Column(name = "HW_INSTL_MSTR_FLG")
   private String hwInstlMstrFlg;
 
+  private String extWalletId;
+
   public String getCustNm1() {
     return this.custNm1;
   }
@@ -737,6 +739,14 @@ public class Addr extends BaseEntity<AddrPK> implements Serializable {
 
   public void setHwInstlMstrFlg(String hwInstlMstrFlg) {
     this.hwInstlMstrFlg = hwInstlMstrFlg;
+  }
+
+  public String getExtWalletId() {
+    return extWalletId;
+  }
+
+  public void setExtWalletId(String extWalletId) {
+    this.extWalletId = extWalletId;
   }
 
 }
