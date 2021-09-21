@@ -97,7 +97,7 @@ public class USHandler extends GEOHandler {
           record.setCmrAddrTypeCode("ZI01");
         } else if (StringUtils.isNotBlank(record.getCmrAddrSeq()) && "ZP01".equals(record.getCmrAddrTypeCode())
             && Integer.parseInt(record.getCmrAddrSeq()) >= 200) {
-          continue;
+          record.setCmrAddrTypeCode("PG01");
         }
 
         converted.add(record);
