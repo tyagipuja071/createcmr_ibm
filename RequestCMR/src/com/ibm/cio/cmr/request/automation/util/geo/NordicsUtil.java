@@ -299,7 +299,7 @@ public class NordicsUtil extends AutomationUtil {
       case "INAC/NAC Code":
       case "KUKLA":
         resultCodes.add("D");// Reject
-        details.append("In case of INAC update/ ISIC update/ KUKLA please raise a JIRA ticket:").append("\n");
+        details.append("In case of INAC update/ ISIC update/ KUKLA update please raise a JIRA ticket:").append("\n");
         details.append("*https://jira.data.zc2.ibm.com/servicedesk/customer/portal/14*").append("\n");
         details.append("Thank you.");
         break;
