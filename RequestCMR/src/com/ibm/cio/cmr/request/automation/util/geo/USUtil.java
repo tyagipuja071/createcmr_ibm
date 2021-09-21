@@ -5,8 +5,10 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 
@@ -173,6 +175,7 @@ public class USUtil extends AutomationUtil {
       SC_FED_HOSPITAL, SC_FED_INDIAN_TRIBE, SC_FED_NATIVE_CORP, SC_FED_POA, SC_FED_REGULAR, SC_FED_TRIBAL_BUS);
   private static final List<String> CSP_IRRELEVANT_UPDATE_FIELDS = Arrays.asList("ISU Code", "GEO Location Code", "Coverage Type/ID", "BG LDE Rule",
       "Buying Group ID", "Client Tier", "DUNS No.");
+  private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("County", "PO Box");
 
   private static final List<String> HEALTH_CARE_EDUCATION_ISIC = Arrays.asList("8030", "8010", "8511");
 
@@ -480,8 +483,14 @@ public class USUtil extends AutomationUtil {
       if (SC_BYMODEL.equals(scenarioSubType)) {
         try {
           scenarioSubType = determineCustSubScenario(entityManager, admin.getModelCmrNo(), engineData, requestData);
+          LOG.debug("ScenarioSubType:" + scenarioSubType);
         } catch (Exception e) {
           LOG.error("CMR Scenario for Create by model request could not be determined.", e);
+        }
+
+        if (data.getBgId() != null) {
+          engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
+          LOG.debug("Skip Coverage for Create By Model.");
         }
 
         // skip Dnb check and matching
@@ -502,7 +511,12 @@ public class USUtil extends AutomationUtil {
 
     if (StringUtils.isBlank(scenarioSubType) || Arrays.asList(scenarioList).contains(scenarioSubType)) {
       String scenarioDesc = getScenarioDesc(entityManager, scenarioSubType);
+      LOG.debug("Skip Coverage for Create By Model CMR if BgId is not null " + data.getBgId());
       if (SC_BYMODEL.equals(data.getCustSubGrp())) {
+        if (data.getBgId() != null) {
+          engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
+          LOG.debug("Skip Coverage for Create By Model.");
+        }
         engineData.addNegativeCheckStatus("US_SCENARIO_CHK", "Processor review required as imported CMR belongs to " + scenarioDesc + " scenario.");
         details.append("Processor review required as imported CMR belongs to " + scenarioDesc + " scenario.").append("\n");
       } else {
@@ -980,23 +994,31 @@ public class USUtil extends AutomationUtil {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
 
+    List<Addr> addresses = null;
+    // D - duplicates, R - review
+    Set<String> resultCodes = new HashSet<String>();
+
     LOG.debug("Verifying PayGo Accreditation for " + admin.getSourceSystId());
     boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
     // do an initial check for PayGo cmrs
-    if (payGoAddredited && "PG".equals(data.getOrdBlk())) {
-      LOG.debug("Allowing name/address changes for PayGo accredited partner " + admin.getSourceSystId() + " Request: " + admin.getId().getReqId());
-      output.setDetails("Skipped checks on updates to PayGo CMR. Partner accredited for PayGo.\n");
-      validation.setMessage("Validated");
-      validation.setSuccess(true);
-      return true;
-    }
-
+    /*
+     * if (payGoAddredited && "PG".equals(data.getOrdBlk())) {
+     * LOG.debug("Allowing name/address changes for PayGo accredited partner " +
+     * admin.getSourceSystId() + " Request: " + admin.getId().getReqId());
+     * output.
+     * setDetails("Skipped checks on updates to PayGo CMR. Partner accredited for PayGo.\n"
+     * ); validation.setMessage("Validated"); validation.setSuccess(true);
+     * return true; }
+     */
     String sqlKey = ExternalizedQuery.getSql("AUTO.US.CHECK_CMDE");
     PreparedQuery query = new PreparedQuery(entityManager, sqlKey);
     query.setParameter("EMAIL", admin.getRequesterId());
     query.setForReadOnly(true);
     if (query.exists() && "Y".equals(SystemParameters.getString("US.SKIP_UPDATE_CHECK"))) {
       // skip checks if requester is from USCMDE team
+      LOG.debug("Requester is from CMDE team, skipping Update checks.");
+      output.setDetails("Requester is from CMDE team, skipping Update checks.\n");
+      validation.setMessage("Update checks Skipped");
       validation.setSuccess(true);
     } else {
       String dataDetails = output.getDetails() != null ? output.getDetails() : "";
@@ -1021,11 +1043,11 @@ public class USUtil extends AutomationUtil {
               addrTypesChanged.add(addrModel.getAddrTypeCode());
             }
           }
-          if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZS01.toString())) {
-            closelyMatchAddressWithDnbRecords(requestData, engineData, "ZS01", details, validation);
+          if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZS01.toString()) && !payGoAddredited) {
+            closelyMatchAddressWithDnbRecords(entityManager, requestData, engineData, "ZS01", details, validation, output);
           }
 
-          if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZI01.toString())) {
+          if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZI01.toString()) && !payGoAddredited) {
             UpdatedNameAddrModel addrTxt = changes.getAddressChange("ZI01", "Address");
             UpdatedNameAddrModel addrTxt2 = changes.getAddressChange("ZI01", "Address Cont");
             if (addrTxt != null) {
@@ -1052,8 +1074,39 @@ public class USUtil extends AutomationUtil {
                 return true;
               }
             }
-            closelyMatchAddressWithDnbRecords(requestData, engineData, "ZP01", details, validation);
+
+            if (isRelevantAddressFieldUpdated(changes, requestData.getAddress("ZI01"))) {
+              closelyMatchAddressWithDnbRecords(entityManager, requestData, engineData, "ZI01", details, validation, output);
+            }
           }
+
+          if (payGoAddredited && addrTypesChanged.contains(CmrConstants.RDC_PAYGO_BILLING.toString())) {
+            addresses = requestData.getAddresses(CmrConstants.RDC_PAYGO_BILLING.toString());
+            for (Addr addr : addresses) {
+              String addrType = addr.getId().getAddrType();
+              if ("N".equals(addr.getImportInd()) && !StringUtils.isEmpty(addr.getOffice())) {
+                LOG.debug("Checking duplicates for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+                boolean duplicate = addressExists(entityManager, addr);
+                if (duplicate) {
+                  LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+                  details.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing Bill-To address.\n");
+                  resultCodes.add("D");
+                } else {
+                  LOG.debug(" - NO duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+                  details.append(" - NO duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")" + "with same attentionTo");
+                }
+              }
+            }
+          }
+        }
+
+        if (resultCodes.contains("D")) {
+          // prioritize duplicates, set error
+          output.setOnError(true);
+          engineData.addRejectionComment("DUPADDR", "One or more new addresses matches existing addresses on record.", "", "");
+          validation.setSuccess(false);
+          validation.setMessage("Duplicate Address");
+
         }
 
         // check if validated
@@ -1062,7 +1115,6 @@ public class USUtil extends AutomationUtil {
           validation.setMessage("Validated");
           validation.setSuccess(true);
         }
-
       } else {
         validation.setSuccess(false);
         validation.setMessage("Unknown CustType");
@@ -1084,8 +1136,8 @@ public class USUtil extends AutomationUtil {
    * @param validation
    * @throws Exception
    */
-  private void closelyMatchAddressWithDnbRecords(RequestData requestData, AutomationEngineData engineData, String addrType, StringBuilder details,
-      ValidationOutput validation) throws Exception {
+  private void closelyMatchAddressWithDnbRecords(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
+      String addrType, StringBuilder details, ValidationOutput validation, AutomationResult<ValidationOutput> output) throws Exception {
     String addrDesc = "ZS01".equals(addrType) ? "Install-at" : "Invoice-at";
     Addr addr = requestData.getAddress(addrType);
     Data data = requestData.getData();
@@ -1106,23 +1158,57 @@ public class USUtil extends AutomationUtil {
             validation.setMessage("Validated.");
             validation.setSuccess(true);
           } else {
-            engineData.addNegativeCheckStatus("DNB_MATCH_FAIL_" + addrType,
-                "High confidence D&B matches did not match the " + addrDesc + " address data. ");
-            details.append("High confidence D&B matches did not match the " + addrDesc + " address data.").append("\n");
-            validation.setMessage("Review needed");
-            validation.setSuccess(false);
+            // company proof
+            if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+              validation.setMessage("Validated");
+              details.append("High confidence D&B matches did not match the " + addrDesc + " address data.").append("\n");
+              details.append("Supporting documentation is provided by the requester as attachment for " + addrDesc).append("\n");
+              validation.setSuccess(true);
+            } else {
+              validation.setMessage("Rejected");
+              validation.setSuccess(false);
+              details.append("High confidence D&B matches did not match the " + addrDesc + " address data.").append("\n");
+              details.append("\nNo supporting documentation is provided by the requester for " + addrDesc + " address.");
+              engineData.addRejectionComment("OTH", "No supporting documentation is provided by the requester for " + addrDesc + " address.", "", "");
+              output.setOnError(true);
+              output.setDetails(details.toString());
+              LOG.debug("D&B matches were chosen to be overridden by the requester and needs to be reviewed");
+            }
           }
         } else {
-          engineData.addNegativeCheckStatus("DNB_MATCH_FAIL_" + addrType, "No High Quality D&B Matches were found for " + addrDesc + " address.");
-          details.append("No High Quality D&B Matches were found for " + addrDesc + " address.").append("\n");
-          validation.setMessage("Review needed");
-          validation.setSuccess(false);
+          // company proof
+          if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+            validation.setMessage("Validated");
+            details.append("No High Quality D&B Matches were found for " + addrDesc + " address.").append("\n");
+            details.append("Supporting documentation is provided by the requester as attachment for " + addrDesc).append("\n");
+            validation.setSuccess(true);
+          } else {
+            validation.setMessage("Rejected");
+            validation.setSuccess(false);
+            details.append("No High Quality D&B Matches were found for " + addrDesc + " address.").append("\n");
+            details.append("\nNo supporting documentation is provided by the requester for " + addrDesc + " address.");
+            engineData.addRejectionComment("OTH", "No supporting documentation is provided by the requester for " + addrDesc + " address.", "", "");
+            output.setOnError(true);
+            output.setDetails(details.toString());
+            LOG.debug("D&B matches were chosen to be overridden by the requester and needs to be reviewed");
+          }
         }
       } else {
-        engineData.addNegativeCheckStatus("DNB_MATCH_FAIL_" + addrType, "No D&B Matches were found for " + addrDesc + " address.");
-        details.append("No D&B Matches were found for " + addrDesc + " address.").append("\n");
-        validation.setMessage("Review needed");
-        validation.setSuccess(false);
+        // company proof
+        if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+          validation.setMessage("Validated");
+          details.append("No D&B Matches were found for " + addrDesc + " address.").append("\n");
+          details.append("Supporting documentation is provided by the requester as attachment for " + addrDesc).append("\n");
+          validation.setSuccess(true);
+        } else {
+          validation.setMessage("Rejected");
+          validation.setSuccess(false);
+          details.append("No D&B Matches were found for " + addrDesc + " address.").append("\n");
+          engineData.addRejectionComment("OTH", "No supporting documentation is provided by the requester for " + addrDesc + " address.", "", "");
+          output.setOnError(true);
+          output.setDetails(details.toString());
+          LOG.debug("D&B matches were chosen to be overridden by the requester and needs to be reviewed");
+        }
       }
     } else {
       engineData.addNegativeCheckStatus("DNB_MATCH_FAIL_" + "ZS01", "D&B Matching couldn't be performed for " + addrDesc + " address.");
@@ -1498,6 +1584,71 @@ public class USUtil extends AutomationUtil {
   @Override
   public List<String> getSkipChecksRequestTypesforCMDE() {
     return Arrays.asList("E", "M");
+  }
+
+  private boolean isRelevantAddressFieldUpdated(RequestChangeContainer changes, Addr addr) {
+    List<UpdatedNameAddrModel> addrChanges = changes.getAddressChanges(addr.getId().getAddrType(), addr.getId().getAddrSeq());
+    if (addrChanges == null) {
+      return false;
+    }
+    for (UpdatedNameAddrModel change : addrChanges) {
+      if (!NON_RELEVANT_ADDRESS_FIELDS.contains(change.getDataField())) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public boolean addressExists(EntityManager entityManager, Addr addrToCheck) {
+
+    String sql = ExternalizedQuery.getSql("AUTO.US.CHECK_IF_ADDRESS_EXIST_ZP01PAYGO");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", addrToCheck.getId().getReqId());
+    query.setParameter("ADDR_SEQ", addrToCheck.getId().getAddrSeq());
+    query.setParameter("LAND_CNTRY", addrToCheck.getLandCntry());
+    query.setParameter("CITY", addrToCheck.getCity1());
+    if (addrToCheck.getAddrTxt() != null) {
+      query.append(" and lower(ADDR_TXT) like lower(:ADDR_TXT)");
+      query.setParameter("ADDR_TXT", addrToCheck.getAddrTxt());
+    }
+    if (addrToCheck.getAddrTxt2() != null) {
+      query.append(" and lower(DEPT) like lower(:DEPT)");
+      query.setParameter("DEPT", "%" + addrToCheck.getAddrTxt2() + "%");
+    }
+    if (addrToCheck.getDept() != null) {
+      query.append(" and lower(DEPT) like lower(:DEPT)");
+      query.setParameter("DEPT", "%" + addrToCheck.getDept() + "%");
+    }
+    if (addrToCheck.getFloor() != null) {
+      query.append(" and lower(FLOOR) like lower(:FLOOR)");
+      query.setParameter("FLOOR", addrToCheck.getFloor());
+    }
+    if (addrToCheck.getBldg() != null) {
+      query.append(" and BLDG= :BLDG");
+      query.setParameter("BLDG", addrToCheck.getBldg());
+    }
+    if (addrToCheck.getStateProv() != null) {
+      query.append(" and STATE_PROV = :STATE");
+      query.setParameter("STATE", addrToCheck.getStateProv());
+    }
+    if (addrToCheck.getPostCd() != null) {
+      query.append(" and POST_CD= :POST_CD");
+      query.setParameter("POST_CD", addrToCheck.getPostCd());
+    }
+    if (addrToCheck.getCustPhone() != null) {
+      query.append(" and CUST_PHONE = :PHONE");
+      query.setParameter("PHONE", addrToCheck.getCustPhone());
+    }
+    if (addrToCheck.getCounty() != null) {
+      query.append(" and COUNTY= :COUNTY");
+      query.setParameter("COUNTY", addrToCheck.getCounty());
+    }
+    if (addrToCheck.getCounty() != null) {
+      query.append(" and OFFICE= :OFFICE");
+      query.setParameter("OFFICE", addrToCheck.getOffice());
+    }
+
+    return query.exists();
   }
 
 }
