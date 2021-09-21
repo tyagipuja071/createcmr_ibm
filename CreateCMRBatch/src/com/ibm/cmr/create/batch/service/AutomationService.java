@@ -29,9 +29,11 @@ import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.approval.ApprovalService;
+import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
+import com.ibm.cio.cmr.request.util.legacy.LegacyDowntimes;
 import com.ibm.cmr.create.batch.util.AutomationCheckAndRecover;
 
 /**
@@ -97,6 +99,19 @@ public class AutomationService extends MultiThreadedBatchService<Long> {
               if (!shouldRetry(requestData.getAdmin().getLastUpdtTs(), current)) {
                 LOG.debug("Request ID " + id + " is for retry but is not yet within the retry threshold, skipping.");
                 proceedWithExecution = false;
+              }
+            } else if (AutomationConst.STATUS_AWAITING_LEGACY.equals(requestData.getAdmin().getReqStatus())) {
+              proceedWithExecution = false;
+              if (LegacyDowntimes.isUp(requestData.getData().getCmrIssuingCntry(), current)) {
+                long reqId = requestData.getAdmin().getId().getReqId();
+                requestData.getAdmin().setReqStatus("PCP");
+                AppUser appUser = AutomationEngine.createAutomationAppUser();
+                String cmt = "Legacy is up for Country " + requestData.getData().getCmrIssuingCntry() + ". Sending for processing.";
+                AutomationEngine.createComment(entityManager, cmt, reqId, appUser);
+                AutomationEngine.createHistory(entityManager, requestData.getAdmin(), cmt, "PCP", "Automated Processing", reqId, appUser, null, null,
+                    true, null);
+              } else {
+                LOG.debug("Legacy for Request " + requestData.getAdmin().getId().getReqId() + " is still down. Deferring..");
               }
             }
             if (proceedWithExecution) {
