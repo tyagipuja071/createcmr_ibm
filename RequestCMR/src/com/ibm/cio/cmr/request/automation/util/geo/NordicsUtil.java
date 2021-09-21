@@ -12,6 +12,8 @@ import javax.persistence.EntityManager;
 import org.apache.commons.digester.Digester;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
 
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
@@ -24,12 +26,20 @@ import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.CoverageContainer;
 import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
+import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.util.ConfigUtil;
+import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cmr.services.client.AutomationServiceClient;
+import com.ibm.cmr.services.client.CmrServicesFactory;
+import com.ibm.cmr.services.client.ServiceClient.Method;
+import com.ibm.cmr.services.client.automation.AutomationResponse;
+import com.ibm.cmr.services.client.automation.nordics.NorwayVatRequest;
+import com.ibm.cmr.services.client.automation.nordics.NorwayVatResponse;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
@@ -115,8 +125,28 @@ public class NordicsUtil extends AutomationUtil {
   @Override
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {
-    // TODO Auto-generated method stub
-    return null;
+
+    Data data = requestData.getData();
+    Admin admin = requestData.getAdmin();
+    if ("C".equals(admin.getReqType()) && StringUtils.isNotEmpty(data.getVat()) && SystemLocation.NORWAY.equals(data.getCmrIssuingCntry())) {
+      LOG.info("Starting Field Computations for Request ID " + data.getId().getReqId());
+      // register vat service of Norway
+      AutomationResponse<NorwayVatResponse> resp = getMVAVatInfo(admin, data);
+      if (resp.isSuccess() && resp.getRecord().isMva()) {
+        String newVAT = data.getVat() + "MVA";
+        details.append("Appending VAT with suffix MVA.").append("\n");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "VAT", data.getVat(), newVAT);
+      } else if (!resp.isSuccess()) {
+        details.append("MVA will not be appeneded to VAT and request to be sent for review.").append("\n");
+        engineData.addNegativeCheckStatus("MVA_NOT_APPENDED", "MVA will not be appeneded to VAT and request to be sent for review.");
+      }
+    } else {
+      details.append("No specific fields to compute.\n");
+      results.setResults("Skipped");
+    }
+    results.setDetails(details.toString());
+
+    return results;
   }
 
   @Override
@@ -434,6 +464,25 @@ public class NordicsUtil extends AutomationUtil {
       }
     }
     return false;
+  }
+
+  private AutomationResponse<NorwayVatResponse> getMVAVatInfo(Admin admin, Data data) throws Exception {
+    AutomationServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
+        AutomationServiceClient.class);
+    client.setReadTimeout(1000 * 60 * 5);
+    client.setRequestMethod(Method.Get);
+
+    NorwayVatRequest request = new NorwayVatRequest();
+    request.setVat(data.getVat());
+    System.out.println(request + request.getVat());
+
+    LOG.debug("Connecting to the Norway VAT service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
+    AutomationResponse<?> rawResponse = client.executeAndWrap(AutomationServiceClient.NORWAY_VAT_SERVICE_ID, request, AutomationResponse.class);
+    ObjectMapper mapper = new ObjectMapper();
+    String json = mapper.writeValueAsString(rawResponse);
+    TypeReference<AutomationResponse<NorwayVatResponse>> ref = new TypeReference<AutomationResponse<NorwayVatResponse>>() {
+    };
+    return mapper.readValue(json, ref);
   }
 
 }
