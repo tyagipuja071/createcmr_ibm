@@ -51,6 +51,7 @@ public class NordicsUtil extends AutomationUtil {
   public static final String DK_INTSO_LOCAL = "DKISO";
   public static final String DK_PRIPE_LOCAL = "DKPRI";
   public static final String DK_IBMEM_LOCAL = "DKIBM";
+  public static final String DK_THIRD_PARTY = "DK3PA";
   // Finland
   public static final String FI_COMME_LOCAL = "FICOM";
   public static final String FI_INTER_LOCAL = "FIINT";
@@ -59,6 +60,7 @@ public class NordicsUtil extends AutomationUtil {
   public static final String FI_INTSO_LOCAL = "FIISO";
   public static final String FI_PRIPE_LOCAL = "FIPRI";
   public static final String FI_IBMEM_LOCAL = "FIIBM";
+  public static final String FI_THIRD_PARTY = "FI3PA";
   // Norway and Sweden
   public static final String COMME_LOCAL = "COMME";
   public static final String INTER_LOCAL = "INTER";
@@ -67,6 +69,7 @@ public class NordicsUtil extends AutomationUtil {
   public static final String INTSO_LOCAL = "INTSO";
   public static final String PRIPE_LOCAL = "PRIPE";
   public static final String IBMEM_LOCAL = "IBMEM";
+  public static final String THIRD_PARTY = "THDPT";
   // Cross
   public static final String CROSS_COMME = "CBCOM";
   public static final String CROSS_INTER = "CBINT";
@@ -149,6 +152,13 @@ public class NordicsUtil extends AutomationUtil {
         engineData.addNegativeCheckStatus("SOLDTO_BILLTO_DIFF", "Sold-to and Bill-to name are not identical.");
       }
       break;
+
+    case DK_THIRD_PARTY:
+    case FI_THIRD_PARTY:
+    case THIRD_PARTY:
+      engineData.addNegativeCheckStatus("_atTHI", "Third Party request need to be send to CMDE queue for review. ");
+      details.append("Third Party request need to be send to CMDE queue for review. ").append("\n");
+      return true;
 
     case DK_BUSPR_LOCAL:
     case FI_BUSPR_LOCAL:
