@@ -894,7 +894,7 @@ public abstract class AutomationUtil {
     if (payGoAddredited) {
       if (addrToCheck.getCustNm4() != null) {
         query.append(" and lower(OFFICE) like lower(:OFFICE)");
-        query.setParameter("OFFICE", addrToCheck.getExtWalletId());
+        query.setParameter("OFFICE", addrToCheck.getOffice());
       }
     }
 
