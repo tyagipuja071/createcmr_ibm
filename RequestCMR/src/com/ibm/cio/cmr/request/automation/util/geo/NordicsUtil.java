@@ -447,7 +447,8 @@ public class NordicsUtil extends AutomationUtil {
     client.setRequestMethod(Method.Get);
 
     NorwayVatRequest request = new NorwayVatRequest();
-    request.setVat(data.getVat());
+    String vatReq = StringUtils.isNumeric(data.getVat()) ? data.getVat() : data.getVat().substring(2);
+    request.setVat(vatReq);
     System.out.println(request + request.getVat());
 
     LOG.debug("Connecting to the Norway VAT service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
