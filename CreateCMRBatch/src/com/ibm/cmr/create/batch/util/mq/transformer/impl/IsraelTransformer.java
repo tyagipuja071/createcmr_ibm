@@ -82,7 +82,7 @@ public class IsraelTransformer extends EMEATransformer {
       }
     }
     // Missing code END
-    
+
     legacyCust.setMrcCd("");
     legacyCust.getId().setSofCntryCode(SystemLocation.SAP_ISRAEL_SOF_ONLY);
   }
@@ -208,16 +208,6 @@ public class IsraelTransformer extends EMEATransformer {
         pairedSeqVal.put(SHIP_KEY + shipAddrCount++, legacyAddr.getId().getAddrNo());
       }
     }
-
-    // Formatting PO Box
-    if (StringUtils.isNotBlank(currAddr.getPoBox())) {
-      if (StringUtils.isNotBlank(addrType) && (addrType.equals("ZS01") || addrType.equals("ZP01") || addrType.equals("ZD01"))) {
-        legacyAddr.setPoBox(reverseNumbers(currAddr.getPoBox()) + "מ.ד ");
-      } else {
-        legacyAddr.setPoBox("PO BOX " + currAddr.getPoBox());
-      }
-    }
-
   }
 
   @Override
@@ -258,7 +248,12 @@ public class IsraelTransformer extends EMEATransformer {
     // PO BOX
     String line3 = "";
     if (!StringUtils.isBlank(addrData.getPoBox())) {
-      line3 = addrData.getPoBox();
+      String addrType = addrData.getId().getAddrType();
+      if (StringUtils.isNotBlank(addrType) && (addrType.equals("ZS01") || addrType.equals("ZP01") || addrType.equals("ZD01"))) {
+        line3 = reverseNumbers(addrData.getPoBox()) + " מ.ד";
+      } else {
+        line3 = "PO BOX " + addrData.getPoBox();
+      }
     }
 
     // Street
