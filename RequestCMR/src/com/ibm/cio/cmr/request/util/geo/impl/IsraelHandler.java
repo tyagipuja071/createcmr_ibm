@@ -973,4 +973,9 @@ public class IsraelHandler extends BaseSOFHandler {
   protected void handleSOFSequenceImport(List<FindCMRRecordModel> records, String cmrIssuingCntry) {
 
   }
+
+  @Override
+  public boolean hasChecklist(String cmrIssiungCntry) {
+    return true;
+  }
 }
