@@ -139,6 +139,8 @@ public class NordicsUtil extends AutomationUtil {
         String newVAT = data.getVat() + "MVA";
         details.append("Appending VAT with suffix MVA.").append("\n");
         overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "VAT", data.getVat(), newVAT);
+        results.setResults("Calculated.");
+        results.setProcessOutput(overrides);
       } else if (!resp.isSuccess()) {
         details.append("MVA will not be appeneded to VAT and request to be sent for review.").append("\n");
         engineData.addNegativeCheckStatus("MVA_NOT_APPENDED", "MVA will not be appeneded to VAT and request to be sent for review.");
