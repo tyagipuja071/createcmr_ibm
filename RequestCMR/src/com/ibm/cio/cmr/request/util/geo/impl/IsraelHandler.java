@@ -1080,4 +1080,14 @@ public class IsraelHandler extends EMEAHandler {
       super.handleSOFSequenceImport(records, cmrIssuingCntry);
     }
   }
+
+  @Override
+  public boolean hasChecklist(String cmrIssiungCntry) {
+    if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
+      return true;
+    } else {
+      return super.hasChecklist(cmrIssiungCntry);
+    }
+  }
+
 }
