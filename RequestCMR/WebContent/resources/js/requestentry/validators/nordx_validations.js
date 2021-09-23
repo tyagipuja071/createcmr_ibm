@@ -234,8 +234,16 @@ var _poSteertNorwayFin = null;
 var _PostalCodeHandler = null;
 var _ExpediteHandler = null;
 var _ISICHandler = null; // CMR-1993
-
+var _sortlHandler = null;
+var sortlFlag = false;
 function addHandlersForNORDX() {
+    
+    if (_sortlHandler == null) {
+    _ISUHandler = dojo.connect(FormManager.getField('searchTerm'), 'onChange', function(value) {
+      console.log('_SortlHandler');
+      sortlFlag = true;
+    });
+  }  
 
   if (_ISUHandler == null) {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
@@ -4380,7 +4388,7 @@ function searchTermValidation() {
 
           var countryUse = FormManager.getActualValue('countryUse');
           if (countryUse == '702EE' || countryUse == '702LT' || countryUse == '702LV') {
-            if (searchTerm.length != 4) {
+            if (searchTerm.length != 4 && sortlFlag) {
               return new ValidationResult({
                 id : 'searchTerm',
                 type : 'text',
