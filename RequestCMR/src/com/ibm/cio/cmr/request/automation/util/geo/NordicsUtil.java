@@ -242,8 +242,8 @@ public class NordicsUtil extends AutomationUtil {
     String coverageId = container.getFinalCoverage();
 
     details.append("\n");
-    if (isCoverageCalculated && "34".equals(data.getIsuCd()) && "Q".equals(data.getClientTier()) && SCENARIOS_COVERAGE.contains(scenario)
-        && StringUtils.isNotBlank(coverageId) && !CalculateCoverageElement.COV_BG.equals(covFrom)) {
+    if (!isCoverageCalculated || (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && !CalculateCoverageElement.COV_BG.equals(covFrom))
+        && "34".equals(data.getIsuCd()) && "Q".equals(data.getClientTier()) && SCENARIOS_COVERAGE.contains(scenario)) {
       details.setLength(0); // clearing details
       overrides.clearOverrides();
       List<String> subIndList = new ArrayList<String>();
