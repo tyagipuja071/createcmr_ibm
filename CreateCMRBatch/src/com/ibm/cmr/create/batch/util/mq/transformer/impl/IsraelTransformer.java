@@ -647,7 +647,7 @@ public class IsraelTransformer extends EMEATransformer {
     if (loc1.equals("755")) {
       generateCMRNoObj.setLoc1("756");
     }
-    if (custSubGrp != null && "INTER".equals(custSubGrp)) {
+    if (custSubGrp != null && ("INTER".equals(custSubGrp) || "INTSO".equals(custSubGrp))) {
       generateCMRNoObj.setMin(990000);
       generateCMRNoObj.setMax(999999);
     }
