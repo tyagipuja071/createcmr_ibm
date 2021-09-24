@@ -102,7 +102,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
         if (!hasValidMatches) {
           // if no valid matches - do not process records
           scorecard.setDnbMatchingResult("N");
-          if (!SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry())) {
+          if (!(SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry()) || SystemLocation.INDIA.equals(data.getCmrIssuingCntry()))) {
             result.setOnError(shouldThrowError);
           } else {
             result.setOnError(false);
@@ -234,7 +234,8 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
               processDnBFields(entityManager, data, dnbRecord, output, details, itemNo);
               itemNo++;
             }
-            engineData.addNegativeCheckStatus("OTH", "Matches against D&B were found but no record matched the request data.");
+            // engineData.addNegativeCheckStatus("OTH", "Matches against D&B
+            // were found but no record matched the request data.");
             result.setResults("Name/Address not matched");
             result.setOnError(false);
             engineData.put("dnbMatching", dnbMatches.get(0));
@@ -340,8 +341,8 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
    * @param itemNo
    * @throws Exception
    */
-  private boolean processDnBFields(EntityManager entityManager, Data data, DnBMatchingResponse dnbRecord, MatchingOutput output, StringBuilder details,
-      int itemNo) throws Exception {
+  private boolean processDnBFields(EntityManager entityManager, Data data, DnBMatchingResponse dnbRecord, MatchingOutput output,
+      StringBuilder details, int itemNo) throws Exception {
     details.append("\n");
     Boolean highConfidenceDnb = false;
     if (dnbRecord.getConfidenceCode() > 7) {

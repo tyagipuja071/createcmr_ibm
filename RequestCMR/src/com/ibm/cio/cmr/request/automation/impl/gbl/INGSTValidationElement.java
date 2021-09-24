@@ -21,6 +21,7 @@ import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cmr.services.client.AutomationServiceClient;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.ServiceClient.Method;
@@ -61,12 +62,23 @@ public class INGSTValidationElement extends ValidatingElement implements Company
       return output;
     }
 
+    // skip sos matching if matching records are found in SOS-RPA
+
+    if (engineData.isDnbVerified() || "Y".equals(admin.getCompVerifiedIndc())) {
+      validation.setSuccess(true);
+      validation.setMessage("Skipped");
+      output.setResults("Skipped");
+      output.setDetails("Name and Address Matching is skipped as matching records are found in DnB");
+      engineData.addPositiveCheckStatus(AutomationEngineData.DNB_MATCH);
+      return output;
+    }
+
     Addr zs01 = requestData.getAddress("ZS01");
     StringBuilder details = new StringBuilder();
 
     if (zs01 != null) {
       AutomationResponse<GstLayerResponse> response = getGstMatches(admin.getId().getReqId(), zs01, data.getVat());
-      if (response != null && response.isSuccess() && response.getMessage().equals("Valid GST and Company Name entered on the Request")) {
+      if (response != null && response.isSuccess() && response.getMessage().equals("Valid Address and Company Name entered on the Request")) {
         admin.setCompVerifiedIndc("Y");
         validation.setSuccess(true);
         validation.setMessage("Successful Execution");
@@ -78,14 +90,22 @@ public class INGSTValidationElement extends ValidatingElement implements Company
         details.append("\nCity = " + (StringUtils.isBlank(response.getRecord().getCity()) ? "" : response.getRecord().getCity()));
         details.append("\nState = " + (StringUtils.isBlank(response.getRecord().getState()) ? "" : response.getRecord().getState()));
         details.append("\nZip = " + (StringUtils.isBlank(response.getRecord().getPostal()) ? "" : response.getRecord().getPostal()));
-        output.setDetails(details.toString());
       } else {
-        validation.setSuccess(true);
-        validation.setMessage("GST on the Request is not validated with GST Service");
-        output.setDetails(response.getMessage());
-        log.debug(response.getMessage());
+        // company proof
+        if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+          details.append("No High Quality API Matches were found for name and address.").append("\n");
+          details.append("Supporting documentation(Company Proof) is provided by the requester as attachment").append("\n");
+        } else {
+          details.append("No High Quality API Matches were found for name and address.").append("\n");
+          details.append("\nNo supporting documentation is provided by the requester for address.").append("\n");
+        }
+        output.setOnError(false);
+        validation.setMessage("No Matches");
+        validation.setSuccess(false);
+        engineData.addNegativeCheckStatus("OTH", "Matches against API were found but no record matched the request data.");
       }
     }
+    output.setDetails(details.toString());
     output.setResults(validation.getMessage());
     output.setProcessOutput(validation);
     return output;
