@@ -236,14 +236,7 @@ var _ExpediteHandler = null;
 var _ISICHandler = null; // CMR-1993
 var _sortlHandler = null;
 var sortlFlag = false;
-function addHandlersForNORDX() {
-    
-    if (_sortlHandler == null) {
-    _ISUHandler = dojo.connect(FormManager.getField('searchTerm'), 'onChange', function(value) {
-      console.log('_SortlHandler');
-      sortlFlag = true;
-    });
-  }  
+function addHandlersForNORDX() {  
 
   if (_ISUHandler == null) {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
@@ -4375,6 +4368,14 @@ function searchTermValidation() {
       validate : function() {
         var searchTerm = FormManager.getActualValue('searchTerm');
         var alphanumeric = /^[0-9a-zA-Z]*$/;
+        
+        if (_sortlHandler == null) {
+         _sortlHandler = dojo.connect(FormManager.getField('searchTerm'), 'onChange', function(value) {
+         console.log('_SortlHandler');
+         sortlFlag = true;
+         });
+        }
+              
         if (searchTerm == '') {
           return new ValidationResult(null, true);
         } else {
