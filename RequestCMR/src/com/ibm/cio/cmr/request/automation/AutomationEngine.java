@@ -43,6 +43,7 @@ import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
+import com.ibm.cio.cmr.request.util.legacy.LegacyDowntimes;
 
 /**
  * The engine that runs a set of {@link AutomationElement} objects. This engine
@@ -465,12 +466,21 @@ public class AutomationEngine {
             pendingChecks.clear();
           }
           if (processOnCompletion && (pendingChecks == null || pendingChecks.isEmpty())) {
-            // move to PCP
-            LOG.debug("Moving Request " + reqId + " to PCP");
-            admin.setReqStatus("PCP");
-            String cmt = "Automated checks completed successfully. Request is ready for processing.";
-            createComment(entityManager, cmt, reqId, appUser);
-            createHistory(entityManager, admin, cmt, "PCP", "Automated Processing", reqId, appUser, processingCenter, null, true, null);
+            String country = data.getCmrIssuingCntry();
+            if (LegacyDowntimes.isUp(country, SystemUtil.getActualTimestamp())) {
+              // move to PCP
+              LOG.debug("Moving Request " + reqId + " to PCP");
+              admin.setReqStatus("PCP");
+              String cmt = "Automated checks completed successfully. Request is ready for processing.";
+              createComment(entityManager, cmt, reqId, appUser);
+              createHistory(entityManager, admin, cmt, "PCP", "Automated Processing", reqId, appUser, processingCenter, null, true, null);
+            } else {
+              LOG.debug("Country " + country + " is down in legacy. Moving to LEG ");
+              admin.setReqStatus("LEG");
+              String cmt = "Automated checks completed successfully. Request is ready for processing once Legacy system comes up.";
+              createComment(entityManager, cmt, reqId, appUser);
+              createHistory(entityManager, admin, cmt, "LEG", "Automated Processing", reqId, appUser, processingCenter, null, true, null);
+            }
           } else {
             // move to PPN
             LOG.debug("Moving Request " + reqId + " to PPN");
@@ -636,7 +646,7 @@ public class AutomationEngine {
    * @throws SQLException
    * @throws CmrException
    */
-  protected WfHist createHistory(EntityManager entityManager, Admin admin, String comment, String status, String action, long reqId, AppUser user,
+  public static WfHist createHistory(EntityManager entityManager, Admin admin, String comment, String status, String action, long reqId, AppUser user,
       String processingCenter, String rejectReason, boolean sendMail, RejectionContainer rejectCont) throws CmrException, SQLException {
     // create workflow history record
     completeLastHistoryRecord(entityManager, admin.getId().getReqId());
@@ -708,7 +718,7 @@ public class AutomationEngine {
    * @throws SQLException
    * @throws CmrException
    */
-  protected void createComment(EntityManager entityManager, String comment, long reqId, AppUser user) throws CmrException, SQLException {
+  public static void createComment(EntityManager entityManager, String comment, long reqId, AppUser user) throws CmrException, SQLException {
     // create request comment
     ReqCmtLog cmt = new ReqCmtLog();
     ReqCmtLogPK cmtPk = new ReqCmtLogPK();
@@ -730,7 +740,7 @@ public class AutomationEngine {
    * 
    * @return
    */
-  private AppUser createAutomationAppUser() {
+  public static AppUser createAutomationAppUser() {
     AppUser user = new AppUser();
     user.setBluePagesName("AutomationEngine");
     user.setIntranetId("AutomationEngine");
@@ -789,7 +799,7 @@ public class AutomationEngine {
    * @param code
    * @return
    */
-  public String getRejectionReason(String code) {
+  public static String getRejectionReason(String code) {
     return rejectionReasons.get(code);
   }
 }
