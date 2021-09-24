@@ -820,8 +820,10 @@ function disableCustPhone() {
   if (cntryCd == SysLoc.ISRAEL && FormManager.getActualValue('addrType') != 'ZS01') {
     FormManager.setValue('custPhone', '');
     FormManager.disable('custPhone');
+    FormManager.hide('CustPhone', 'custPhone');
   } else {
     FormManager.enable('custPhone');
+    FormManager.show('CustPhone', 'custPhone');
   }
 }
 
@@ -905,10 +907,6 @@ function setAbbrvLocCrossBorderScenarioOnChange() {
       }
     }
   });
-}
-
-function addPhoneValidatorEMEA() {
-  FormManager.addValidator('custPhone', Validators.DIGIT, [ 'Phone #' ]);
 }
 
 /*
@@ -1026,7 +1024,6 @@ dojo.addOnLoad(function() {
   GEOHandler.enableCustomerNamesOnAddress(GEOHandler.EMEA);
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.EMEA);
   GEOHandler.setRevertIsicBehavior(false);
-  GEOHandler.addAddrFunction(addPhoneValidatorEMEA, [ SysLoc.ISRAEL ]);
 
   // Israel Specific
   GEOHandler.addAfterConfig(afterConfigForIsrael, [ SysLoc.ISRAEL ]);
