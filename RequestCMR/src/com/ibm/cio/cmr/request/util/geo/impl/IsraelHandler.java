@@ -71,8 +71,6 @@ public class IsraelHandler extends EMEAHandler {
   protected static final String[] LD_MASS_UPDATE_SHEET_NAMES = { "Billing Address", "Mailing Address", "Installing Address",
       "Shipping Address (Update)", "EPL Address" };
 
-  private String processingType = PageManager.getProcessingType(SystemLocation.ISRAEL, "U");
-
   static {
     LANDED_CNTRY_MAP.put(SystemLocation.UNITED_KINGDOM, "GB");
     LANDED_CNTRY_MAP.put(SystemLocation.IRELAND, "IE");
@@ -102,7 +100,7 @@ public class IsraelHandler extends EMEAHandler {
   @Override
   public void handleSOFConvertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry, FindCMRRecordModel mainRecord,
       List<FindCMRRecordModel> converted, ImportCMRModel searchModel) throws Exception {
-
+    String processingType = PageManager.getProcessingType(SystemLocation.ISRAEL, "U");
     LOG.info("IsraelHandler processing type: " + processingType);
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
       // LD Implementation
@@ -172,6 +170,10 @@ public class IsraelHandler extends EMEAHandler {
                     List<CmrtAddr> legacyAddrList = legacyObjects.getAddresses();
                     CmrtAddr legacyAddr = getLegacyAddrByAddrPair(legacyAddrList, pairedAddrSeq);
 
+                    if ("ZS01".equals(addrType)) {
+                      record.setCmrCustPhone(mainRecord.getCmrCustPhone());
+                    }
+
                     converted.add(mapEnglishAddr(addr, legacyAddr));
                     converted.add(mapLocalLanguageAddr(record, legacyAddr));
 
@@ -225,6 +227,7 @@ public class IsraelHandler extends EMEAHandler {
 
   @Override
   protected void handleSOFAddressImport(EntityManager entityManager, String cmrIssuingCntry, FindCMRRecordModel address, String addressKey) {
+    String processingType = PageManager.getProcessingType(SystemLocation.ISRAEL, "U");
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
       // Handle LD setting
     } else {
@@ -234,6 +237,7 @@ public class IsraelHandler extends EMEAHandler {
 
   @Override
   public void setAdminValuesOnImport(Admin admin, FindCMRRecordModel currentRecord) throws Exception {
+    String processingType = PageManager.getProcessingType(SystemLocation.ISRAEL, "U");
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
       // Handle LD setting
     } else {
@@ -243,7 +247,7 @@ public class IsraelHandler extends EMEAHandler {
 
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
-
+    String processingType = PageManager.getProcessingType(SystemLocation.ISRAEL, "U");
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
       super.setDataValuesOnImport(admin, data, results, mainRecord);
 
@@ -372,7 +376,7 @@ public class IsraelHandler extends EMEAHandler {
 
   @Override
   public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo) throws Exception {
-
+    String processingType = PageManager.getProcessingType(SystemLocation.ISRAEL, "U");
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
       if (currentRecord != null) {
         String country = currentRecord.getCmrIssuedBy();
@@ -393,8 +397,6 @@ public class IsraelHandler extends EMEAHandler {
 
         address.setTaxOffice(currentRecord.getCmrTaxOffice());
         address.setVat(currentRecord.getCmrTaxNumber());
-
-        String processingType = PageManager.getProcessingType(country, "U");
         if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
           if (currentRecord.getCmrAddrSeq() != null && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())
               && "ZS01".equalsIgnoreCase(address.getId().getAddrType())) {
@@ -420,6 +422,7 @@ public class IsraelHandler extends EMEAHandler {
 
   @Override
   public void setAdminDefaultsOnCreate(Admin admin) {
+    String processingType = PageManager.getProcessingType(SystemLocation.ISRAEL, "U");
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
       // Handle LD here
     } else {
@@ -429,6 +432,7 @@ public class IsraelHandler extends EMEAHandler {
 
   @Override
   public void setDataDefaultsOnCreate(Data data, EntityManager entityManager) {
+    String processingType = PageManager.getProcessingType(SystemLocation.ISRAEL, "U");
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
       if (SystemLocation.ISRAEL.equals(data.getCmrIssuingCntry())) {
         data.setCustPrefLang("B");
@@ -446,6 +450,7 @@ public class IsraelHandler extends EMEAHandler {
 
   @Override
   public void appendExtraModelEntries(EntityManager entityManager, ModelAndView mv, RequestEntryModel model) throws Exception {
+    String processingType = PageManager.getProcessingType(SystemLocation.ISRAEL, "U");
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
       // Handle LD here
     } else {
@@ -455,6 +460,7 @@ public class IsraelHandler extends EMEAHandler {
 
   @Override
   public void handleImportByType(String requestType, Admin admin, Data data, boolean importing) {
+    String processingType = PageManager.getProcessingType(SystemLocation.ISRAEL, "U");
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
       if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
         admin.setDelInd(null);
@@ -466,6 +472,7 @@ public class IsraelHandler extends EMEAHandler {
 
   @Override
   public void convertCoverageInput(EntityManager entityManager, CoverageInput request, Addr mainAddr, RequestEntryModel data) {
+    String processingType = PageManager.getProcessingType(SystemLocation.ISRAEL, "U");
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
       if (!StringUtils.isEmpty(data.getRepTeamMemberNo())) {
         switch (data.getCmrIssuingCntry()) {
@@ -481,6 +488,7 @@ public class IsraelHandler extends EMEAHandler {
 
   @Override
   public void doBeforeAdminSave(EntityManager entityManager, Admin admin, String cmrIssuingCntry) throws Exception {
+    String processingType = PageManager.getProcessingType(SystemLocation.ISRAEL, "U");
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
       // Handle LD here
     } else {
@@ -490,6 +498,7 @@ public class IsraelHandler extends EMEAHandler {
 
   @Override
   public void doBeforeDataSave(EntityManager entityManager, Admin admin, Data data, String cmrIssuingCntry) throws Exception {
+    String processingType = PageManager.getProcessingType(SystemLocation.ISRAEL, "U");
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
       if (SystemLocation.ISRAEL.equals(data.getCmrIssuingCntry())) {
         // Auto-populate SBO, IBO field based on Sales rep number
@@ -525,6 +534,7 @@ public class IsraelHandler extends EMEAHandler {
 
   @Override
   public void doBeforeAddrSave(EntityManager entityManager, Addr addr, String cmrIssuingCntry) throws Exception {
+    String processingType = PageManager.getProcessingType(SystemLocation.ISRAEL, "U");
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
 
       DataPK pk = new DataPK();
@@ -586,6 +596,7 @@ public class IsraelHandler extends EMEAHandler {
 
   @Override
   public void doBeforeDPLCheck(EntityManager entityManager, Data data, List<Addr> addresses) throws Exception {
+    String processingType = PageManager.getProcessingType(SystemLocation.ISRAEL, "U");
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
       // No DPL check for non-latin addresses
       if (SystemLocation.ISRAEL.equals(data.getCmrIssuingCntry())) {
@@ -603,7 +614,7 @@ public class IsraelHandler extends EMEAHandler {
   @Override
   public void addSummaryUpdatedFields(RequestSummaryService service, String type, String cmrCountry, Data newData, DataRdc oldData,
       List<UpdatedDataModel> results) {
-
+    String processingType = PageManager.getProcessingType(SystemLocation.ISRAEL, "U");
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
       UpdatedDataModel update = null;
       super.addSummaryUpdatedFields(service, type, cmrCountry, newData, oldData, results);
@@ -622,6 +633,7 @@ public class IsraelHandler extends EMEAHandler {
 
   @Override
   public boolean skipOnSummaryUpdate(String cntry, String field) {
+    String processingType = PageManager.getProcessingType(SystemLocation.ISRAEL, "U");
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
       return Arrays.asList(ISRAEL_SKIP_ON_SUMMARY_UPDATE_FIELDS).contains(field);
     } else {
@@ -632,6 +644,7 @@ public class IsraelHandler extends EMEAHandler {
 
   @Override
   public void doAfterImport(EntityManager entityManager, Admin admin, Data data) {
+    String processingType = PageManager.getProcessingType(SystemLocation.ISRAEL, "U");
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
       if (SystemLocation.ISRAEL.equals(data.getCmrIssuingCntry()) && data.getAbbrevNm() != null && data.getAbbrevNm().length() > 22) {
         data.setAbbrevNm(data.getAbbrevNm().substring(0, 22));
@@ -645,9 +658,10 @@ public class IsraelHandler extends EMEAHandler {
 
   @Override
   public List<String> getAddressFieldsForUpdateCheck(String cmrIssuingCntry) {
+    String processingType = PageManager.getProcessingType(SystemLocation.ISRAEL, "U");
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
       List<String> fields = new ArrayList<>();
-      fields.addAll(Arrays.asList("CUST_NM1", "CUST_NM2", "ADDR_TXT", "DEPT", "CITY1", "POST_CD", "LAND_CNTRY", "PO_BOX"));
+      fields.addAll(Arrays.asList("CUST_NM1", "CUST_NM2", "ADDR_TXT", "DEPT", "CITY1", "POST_CD", "LAND_CNTRY", "PO_BOX", "CUST_PHONE"));
       return fields;
     } else {
       return super.getAddressFieldsForUpdateCheck(cmrIssuingCntry);
@@ -656,6 +670,7 @@ public class IsraelHandler extends EMEAHandler {
 
   @Override
   public void createOtherAddressesOnDNBImport(EntityManager entityManager, Admin admin, Data data) throws Exception {
+    String processingType = PageManager.getProcessingType(SystemLocation.ISRAEL, "U");
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
       if (SystemLocation.ISRAEL.equals(data.getCmrIssuingCntry()) && "C".equals(admin.getReqType())) {
         String abbrevNmValue = null;
@@ -699,6 +714,7 @@ public class IsraelHandler extends EMEAHandler {
 
   @Override
   protected String getAddressTypeByUse(String addressUse) {
+    String processingType = PageManager.getProcessingType(SystemLocation.ISRAEL, "U");
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
       switch (addressUse) {
       case "1":
@@ -726,6 +742,7 @@ public class IsraelHandler extends EMEAHandler {
 
   @Override
   public String generateAddrSeq(EntityManager entityManager, String addrType, long reqId, String cmrIssuingCntry) {
+    String processingType = PageManager.getProcessingType(SystemLocation.ISRAEL, "U");
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
       String newAddrSeq = null;
       return newAddrSeq;
@@ -736,6 +753,7 @@ public class IsraelHandler extends EMEAHandler {
 
   @Override
   public String generateModifyAddrSeqOnCopy(EntityManager entityManager, String addrType, long reqId, String oldAddrSeq, String cmrIssuingCntry) {
+    String processingType = PageManager.getProcessingType(SystemLocation.ISRAEL, "U");
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
       String newSeq = null;
       return newSeq;
@@ -746,6 +764,7 @@ public class IsraelHandler extends EMEAHandler {
 
   @Override
   public List<String> getMandtAddrTypeForLDSeqGen(String cmrIssuingCntry) {
+    String processingType = PageManager.getProcessingType(SystemLocation.ISRAEL, "U");
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
       return Arrays.asList("ZS01", "ZP01", "ZI01", "ZD01", "ZS02", "CTYA", "CTYB", "CTYC");
     } else {
@@ -755,6 +774,7 @@ public class IsraelHandler extends EMEAHandler {
 
   @Override
   public List<String> getOptionalAddrTypeForLDSeqGen(String cmrIssuingCntry) {
+    String processingType = PageManager.getProcessingType(SystemLocation.ISRAEL, "U");
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
       return null;
     } else {
@@ -764,6 +784,7 @@ public class IsraelHandler extends EMEAHandler {
 
   @Override
   public List<String> getAdditionalAddrTypeForLDSeqGen(String cmrIssuingCntry) {
+    String processingType = PageManager.getProcessingType(SystemLocation.ISRAEL, "U");
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
       return Arrays.asList("ZD01", "CTYC");
     } else {
@@ -773,6 +794,7 @@ public class IsraelHandler extends EMEAHandler {
 
   @Override
   public List<String> getReservedSeqForLDSeqGen(String cmrIssuingCntry) {
+    String processingType = PageManager.getProcessingType(SystemLocation.ISRAEL, "U");
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
       return null;
     } else {
@@ -782,6 +804,7 @@ public class IsraelHandler extends EMEAHandler {
 
   @Override
   public Map<String, String> getUIFieldIdMap() {
+    String processingType = PageManager.getProcessingType(SystemLocation.ISRAEL, "U");
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
 
       Map<String, String> map = new HashMap<String, String>();
@@ -860,19 +883,16 @@ public class IsraelHandler extends EMEAHandler {
 
   @Override
   public List<String> getDataFieldsForUpdateCheckLegacy(String cmrIssuingCntry) {
-    if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
-      List<String> fields = new ArrayList<>();
-      fields.addAll(Arrays.asList("SALES_BO_CD", "REP_TEAM_MEMBER_NO", "SPECIAL_TAX_CD", "VAT", "ISIC_CD", "EMBARGO_CD", "COLLECTION_CD", "ABBREV_NM",
-          "SENSITIVE_FLAG", "CLIENT_TIER", "COMPANY", "INAC_TYPE", "INAC_CD", "ISU_CD", "SUB_INDUSTRY_CD", "ABBREV_LOCN", "PPSCEID", "MEM_LVL",
-          "BP_REL_TYPE"));
-      return fields;
-    } else {
-      return super.getDataFieldsForUpdateCheckLegacy(cmrIssuingCntry);
-    }
+    List<String> fields = new ArrayList<>();
+    fields.addAll(Arrays.asList("SALES_BO_CD", "REP_TEAM_MEMBER_NO", "SPECIAL_TAX_CD", "VAT", "ISIC_CD", "EMBARGO_CD", "COLLECTION_CD", "ABBREV_NM",
+        "SENSITIVE_FLAG", "CLIENT_TIER", "COMPANY", "INAC_TYPE", "INAC_CD", "ISU_CD", "SUB_INDUSTRY_CD", "ABBREV_LOCN", "PPSCEID", "MEM_LVL",
+        "BP_REL_TYPE"));
+    return fields;
   }
 
   @Override
   public boolean isTemplateFieldForDualMarked(String columnName, boolean isCrossBorder) {
+    String processingType = PageManager.getProcessingType(SystemLocation.ISRAEL, "U");
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
       boolean isDualMarked = false;
       // row.get
@@ -903,6 +923,7 @@ public class IsraelHandler extends EMEAHandler {
 
   @Override
   public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
+    String processingType = PageManager.getProcessingType(SystemLocation.ISRAEL, "U");
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
       return true;
     } else {
@@ -912,6 +933,7 @@ public class IsraelHandler extends EMEAHandler {
 
   @Override
   public void validateMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country) {
+    String processingType = PageManager.getProcessingType(SystemLocation.ISRAEL, "U");
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
       XSSFRow row = null;
       XSSFCell currCell = null;
@@ -1065,6 +1087,7 @@ public class IsraelHandler extends EMEAHandler {
   @Override
   public void addSummaryUpdatedFieldsForAddress(RequestSummaryService service, String cmrCountry, String addrTypeDesc, String sapNumber,
       UpdatedAddr addr, List<UpdatedNameAddrModel> results, EntityManager entityManager) {
+    String processingType = PageManager.getProcessingType(SystemLocation.ISRAEL, "U");
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
       // Handle LD Here
     } else {
@@ -1074,6 +1097,7 @@ public class IsraelHandler extends EMEAHandler {
 
   @Override
   protected void handleSOFSequenceImport(List<FindCMRRecordModel> records, String cmrIssuingCntry) {
+    String processingType = PageManager.getProcessingType(SystemLocation.ISRAEL, "U");
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
       // Handle LD Here
     } else {
@@ -1083,6 +1107,7 @@ public class IsraelHandler extends EMEAHandler {
 
   @Override
   public boolean hasChecklist(String cmrIssiungCntry) {
+    String processingType = PageManager.getProcessingType(SystemLocation.ISRAEL, "U");
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
       return true;
     } else {
