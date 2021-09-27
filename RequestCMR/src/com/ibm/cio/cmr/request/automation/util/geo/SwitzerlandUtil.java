@@ -415,9 +415,9 @@ public class SwitzerlandUtil extends AutomationUtil {
       query.setParameter("COUNTY", addrToCheck.getCounty());
     }
     if (payGoAddredited) {
-      if (addrToCheck.getCity2() != null) {
-        query.append(" and lower(CITY2) like lower(:CITY2)");
-        query.setParameter("CITY2", addrToCheck.getCity2());
+      if (addrToCheck.getExtWalletId() != null) {
+        query.append(" and lower(EXT_WALLET_ID) like lower(:EXT_WALLET_ID)");
+        query.setParameter("EXT_WALLET_ID", addrToCheck.getExtWalletId());
       }
     }
 
