@@ -246,6 +246,25 @@ public class NordicsUtil extends AutomationUtil {
     for (UpdatedDataModel change : changes.getDataUpdates()) {
       switch (change.getDataField()) {
       case "VAT #":
+        if (StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())) {
+          // ADD
+          Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
+          List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
+          boolean matchesDnb = false;
+          if (matches != null) {
+            // check against D&B
+            matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
+          }
+          if (!matchesDnb) {
+            cmdeReview = true;
+            engineData.addNegativeCheckStatus("_esVATCheckFailed", "VAT # on the request did not match D&B");
+            details.append("VAT # on the request did not match D&B\n");
+          } else {
+            details.append("VAT # on the request matches D&B\n");
+            engineData.setVatVerified(true, "VAT Verified");
+          }
+        }
+        break;
       case "ISU":
       case "Client Tier":
       case "Tax Code":
