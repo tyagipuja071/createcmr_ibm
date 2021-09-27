@@ -123,7 +123,7 @@ public class VatUtilController {
     ModelMap map = new ModelMap();
 
     ValidationResult validation = null;
-    String state = request.getParameter("state");
+    String state = request.getParameter("country");
     if (StringUtils.isEmpty(state)) {
       validation = ValidationResult.error("'state' param is required.");
     }
@@ -149,7 +149,7 @@ public class VatUtilController {
     }
     if (validation == null || validation.isSuccess()) {
 
-      LOG.debug("Validating GST# " + vat + " for country " + state);
+      LOG.debug("Validating GST# " + vat + " for India");
 
       String baseUrl = SystemConfiguration.getValue("CMR_SERVICES_URL");
       AutomationServiceClient autoClient = CmrServicesFactory.getInstance().createClient(baseUrl, AutomationServiceClient.class);
