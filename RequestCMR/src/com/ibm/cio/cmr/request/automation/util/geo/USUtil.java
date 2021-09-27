@@ -1084,7 +1084,7 @@ public class USUtil extends AutomationUtil {
             addresses = requestData.getAddresses(CmrConstants.RDC_PAYGO_BILLING.toString());
             for (Addr addr : addresses) {
               String addrType = addr.getId().getAddrType();
-              if ("N".equals(addr.getImportInd()) && !StringUtils.isEmpty(addr.getOffice())) {
+              if ("N".equals(addr.getImportInd()) && !StringUtils.isEmpty(addr.getExtWalletId())) {
                 LOG.debug("Checking duplicates for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
                 boolean duplicate = addressExists(entityManager, addr);
                 if (duplicate) {
@@ -1643,9 +1643,9 @@ public class USUtil extends AutomationUtil {
       query.append(" and COUNTY= :COUNTY");
       query.setParameter("COUNTY", addrToCheck.getCounty());
     }
-    if (addrToCheck.getCounty() != null) {
-      query.append(" and OFFICE= :OFFICE");
-      query.setParameter("OFFICE", addrToCheck.getOffice());
+    if (addrToCheck.getExtWalletId() != null) {
+      query.append(" and EXT_WALLET_ID= :EXT_WALLET_ID");
+      query.setParameter("EXT_WALLET_ID", addrToCheck.getExtWalletId());
     }
 
     return query.exists();
