@@ -122,11 +122,6 @@ function addAfterConfigAP() {
       FormManager.setValue('apCustClusterId', '08045');
     }
   }
-  
-  if (cntry == '738' || cntry == '736') {
-    FormManager.setValue('repTeamMemberNo', '000000');
-    FormManager.enable('repTeamMemberNo');
-  }
 
   if (role != 'PROCESSOR' && (cntry == '643' || cntry == '749' || cntry == '778' || cntry == '818' || cntry == '834' || cntry == '852' || cntry == '856')) {
     FormManager.readOnly('miscBillCd');
