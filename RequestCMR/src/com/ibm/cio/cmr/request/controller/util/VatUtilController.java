@@ -123,9 +123,9 @@ public class VatUtilController {
     ModelMap map = new ModelMap();
 
     ValidationResult validation = null;
-    String state = request.getParameter("country");
-    if (StringUtils.isEmpty(state)) {
-      validation = ValidationResult.error("'state' param is required.");
+    String state = "";
+    if (!StringUtils.isEmpty(request.getParameter("country"))) {
+      state = request.getParameter("country");
     }
     String vat = request.getParameter("vat");
     if (StringUtils.isEmpty(vat)) {
