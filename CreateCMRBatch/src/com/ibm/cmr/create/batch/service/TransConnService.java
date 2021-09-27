@@ -656,7 +656,7 @@ public class TransConnService extends BaseBatchService {
 
           PreparedQuery zp01AddrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.GET_ADDR_ENTITY_CREATE_REQ"));
           zp01AddrQuery.setParameter("REQ_ID", admin.getId().getReqId());
-          zp01AddrQuery.setParameter("ADDR_TYPE", "ZP01");
+          zp01AddrQuery.setParameter("ADDR_TYPE", "PG01");
           List<Addr> zp01Addrs = zp01AddrQuery.getResults(Addr.class);
 
           PreparedQuery newAddrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.GET_ADDR_FOR_SAP_NO"));
@@ -695,7 +695,7 @@ public class TransConnService extends BaseBatchService {
                 AddrPK addrPK = new AddrPK();
                 addrPK.setAddrSeq(zp01.getId().getAddrSeq());
                 addrPK.setReqId(reqId);
-                addrPK.setAddrType("ZP01");
+                addrPK.setAddrType("PG01");
                 copyValuesToEntity(zp01, newAddr);
                 newAddr.setSapNo(null);
                 newAddr.setImportInd(CmrConstants.YES_NO.N.toString());
@@ -1264,7 +1264,7 @@ public class TransConnService extends BaseBatchService {
         // If additional bill to handle accordingly
         addrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.GET_ADDR_ENTITY_CREATE_REQ_SEQ"));
         addrQuery.setParameter("REQ_ID", admin.getId().getReqId());
-        addrQuery.setParameter("ADDR_TYPE", "ZP01");
+        addrQuery.setParameter("ADDR_TYPE", "PG01");
         addrQuery.setParameter("ADDR_SEQ", record.getSeqNo());
       } else {
         // if returned is ZS01/ZI01, update the ZS01 address. Else, Update
