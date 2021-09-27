@@ -1003,13 +1003,13 @@ function addEmbargoCodeValidator() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
-function showVatOnLocal(fromAddress, scenario, scenarioChanged) {
+function showVatOnLocal() {
   var viewOnly = FormManager.getActualValue('viewOnlyPage');
   if (viewOnly != '' && viewOnly == 'true') {
     return;
   }
   var custGrp = FormManager.getActualValue('custGrp');
-  if (scenarioChanged && custGrp == 'LOCAL') {
+  if (custGrp == 'LOCAL') {
     cmr.showNode('vatInfo');
   } else {
     cmr.hideNode('vatInfo');
@@ -1063,4 +1063,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(validatePoBox, [ SysLoc.ISRAEL ]);
 
   GEOHandler.addAfterTemplateLoad(showVatOnLocal, [ SysLoc.ISRAEL ]);
+  GEOHandler.addAfterConfig(showVatOnLocal, [ SysLoc.ISRAEL ]);
 });
