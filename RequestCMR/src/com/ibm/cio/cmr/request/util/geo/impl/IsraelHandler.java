@@ -658,14 +658,9 @@ public class IsraelHandler extends EMEAHandler {
 
   @Override
   public List<String> getAddressFieldsForUpdateCheck(String cmrIssuingCntry) {
-    String processingType = PageManager.getProcessingType(SystemLocation.ISRAEL, "U");
-    if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
-      List<String> fields = new ArrayList<>();
-      fields.addAll(Arrays.asList("CUST_NM1", "CUST_NM2", "ADDR_TXT", "DEPT", "CITY1", "POST_CD", "LAND_CNTRY", "PO_BOX", "CUST_PHONE"));
-      return fields;
-    } else {
-      return super.getAddressFieldsForUpdateCheck(cmrIssuingCntry);
-    }
+    List<String> fields = new ArrayList<>();
+    fields.addAll(Arrays.asList("CUST_NM1", "CUST_NM2", "ADDR_TXT", "DEPT", "CITY1", "POST_CD", "LAND_CNTRY", "PO_BOX", "CUST_PHONE"));
+    return fields;
   }
 
   @Override
