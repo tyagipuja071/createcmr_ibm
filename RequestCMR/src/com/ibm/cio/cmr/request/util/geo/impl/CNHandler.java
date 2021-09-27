@@ -308,9 +308,9 @@ public class CNHandler extends GEOHandler {
       getIsicByDNB(entityManager, data);
     }
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())
-        && (data.getCustSubGrp() == null
-            || !(data.getCustSubGrp().equals("INTER") || data.getCustSubGrp().equals("BUSPR") || data.getCustSubGrp().equals("PRIV")))
-        && StringUtils.isBlank(data.getGbgId()) && StringUtils.isNotBlank(data.getDunsNo())) {
+        && (data.getCustSubGrp() != null
+            && !(data.getCustSubGrp().equals("INTER") || data.getCustSubGrp().equals("BUSPR") || data.getCustSubGrp().equals("PRIV")))
+        && StringUtils.isBlank(data.getGbgId())) {
       Addr soldToAddr = null;
       if (StringUtils.isNotEmpty(admin.getMainCustNm1())) {
         String sql = ExternalizedQuery.getSql("BATCH.GET_ADDR_FOR_SAP_NO_ZS01");
