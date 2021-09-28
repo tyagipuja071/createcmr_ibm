@@ -2242,6 +2242,24 @@ function addPostalCdValidator() {
   })(), null, 'frmCMR_addressModal');
 }
 
+function addPostalCdValidatorPE() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqType = cmr.currentRequestType;
+        var postCd = FormManager.getActualValue('postCd');
+        if (postCd && postCd.length > 0 && !postCd.match(/^\d{5}$/)) {
+          return new ValidationResult(null, false, 'Postal Code should be 5 digits long.');
+        }
+        if (reqType != null && reqType == 'U' && (postCd.length == 0 || postCd == '')) {
+          return new ValidationResult(null, false, 'Postal Code is required.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+}
+
 function validateCustNameChangeForDPLCheck() {
   // CRU
   console.log("validateCustNameChangeForDPLCheck..............");
@@ -2659,9 +2677,10 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.LA, GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(validateVATChile, [ SysLoc.CHILE ], null, true);
   GEOHandler.registerValidator(addPostalCdValidator, [ SysLoc.ECUADOR ], GEOHandler.ROLE_REQUESTER, true);
+  GEOHandler.registerValidator(addPostalCdValidatorPE, [ SysLoc.PERU ], null, true);
   GEOHandler.registerValidator(validateCustNameChangeForDPLCheck, GEOHandler.LA, GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(validateAddlContactEmailFieldForReactivate, [ SysLoc.BRAZIL ], GEOHandler.ROLE_PROCESSOR, true);
-
+    
   // GEOHandler.addAfterConfig(disableFieldsForBrazil, [ SysLoc.BRAZIL ]);
   // 
   /* 1640462 - MRC should be optional for requester for SSA&MX */
