@@ -282,6 +282,7 @@ function setReadOnly4Update(){
 function updateBPSearchTerm() {
   var ppsceidBP = FormManager.getActualValue('ppsceid');
   var searchTerm = FormManager.getActualValue('searchTerm');
+  var cmrNo = FormManager.getActualValue('cmrNo');
   var regString = /[^0-9]+/;
   if (FormManager.getActualValue('reqType') == 'U' && _pagemodel.userRole.toUpperCase() == 'REQUESTER' &&  ppsceidBP != undefined && ppsceidBP != null && ppsceidBP != ''){
     if (searchTerm == '04182') {
@@ -291,13 +292,15 @@ function updateBPSearchTerm() {
       FormManager.readOnly('inacType');
       FormManager.readOnly('inacCd');
     } else if (searchTerm == null || searchTerm == '' || searchTerm == '00000' || regString.test(searchTerm)) {
-      FormManager.setValue('searchTerm', '04182');
-      FormManager.setValue('clientTier', 'Z');
-      FormManager.readOnly('searchTerm');
-      FormManager.readOnly('clientTier');
-      FormManager.readOnly('isuCd');
-      FormManager.readOnly('inacType');
-      FormManager.readOnly('inacCd');
+      if (cmrNo.startsWith('1') || cmrNo.startsWith('2')){
+        FormManager.setValue('searchTerm', '04182');
+        FormManager.setValue('clientTier', 'Z');
+        FormManager.readOnly('searchTerm');
+        FormManager.readOnly('clientTier');
+        FormManager.readOnly('isuCd');
+        FormManager.readOnly('inacType');
+        FormManager.readOnly('inacCd');
+      }
     }
   }
 }

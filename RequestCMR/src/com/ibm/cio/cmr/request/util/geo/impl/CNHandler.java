@@ -794,8 +794,10 @@ public class CNHandler extends GEOHandler {
         && !StringUtils.isBlank(admin.getReqStatus()) && admin.getReqStatus().equalsIgnoreCase("DRA")) {
       if (data.getSearchTerm() == null || StringUtils.isBlank(data.getSearchTerm())
           || (data.getSearchTerm() != null && (data.getSearchTerm().trim().equalsIgnoreCase("00000") || data.getSearchTerm().matches("[^0-9]+")))) {
-        data.setClientTier("Z");
-        data.setSearchTerm("04182");
+        if (data.getCmrNo().startsWith("1") || data.getCmrNo().startsWith("2")) {
+          data.setClientTier("Z");
+          data.setSearchTerm("04182");
+        }
       }
     }
   }
