@@ -238,7 +238,7 @@ public class NordicsUtil extends AutomationUtil {
     Data data = requestData.getData();
     String scenario = data.getCustSubGrp();
     String reqSubInd = data.getSubIndustryCd().substring(0, 1);
-    String cntry = data.getCmrIssuingCntry();
+    String cntry = data.getCountryUse();
     String coverageId = container.getFinalCoverage();
 
     details.append("\n");
@@ -256,16 +256,18 @@ public class NordicsUtil extends AutomationUtil {
             subInd = mapping.getSubIndustry().replaceAll("\n", "").replaceAll(" ", "").split(",");
             subIndList = Arrays.asList(subInd);
           }
-          if (mapping.getCountry().equals(cntry) && !subIndList.isEmpty()
-              && ((mapping.isExclude() && !subIndList.contains(reqSubInd)) || (!mapping.isExclude() && subIndList.contains(reqSubInd)))) {
+          if (mapping.getCountry().equals(cntry) && ((!subIndList.isEmpty()
+              && ((mapping.isExclude() && !subIndList.contains(reqSubInd)) || (!mapping.isExclude() && subIndList.contains(reqSubInd))))
+              || (mapping.getSubIndustry() == null && StringUtils.isNotBlank(mapping.getSortl())))) {
             details.append("Calculating coverage using 34Q logic.").append("\n");
 
-            details.append("SORTL : " + mapping.getSortl() + " calculated using 34-Q mapping.").append("\n");
+            details.append("SORTL : " + mapping.getSortl()).append("\n");
             overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getSearchTerm(), mapping.getSortl());
 
-            details.append("Sales Rep : " + mapping.getSalesRep() + " calculated using 34-Q mapping.");
+            details.append("Sales Rep : " + mapping.getSalesRep());
             overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "REP_TEAM_MEMBER_NO", data.getRepTeamMemberNo(),
                 mapping.getSalesRep());
+            break;
 
           }
         }
