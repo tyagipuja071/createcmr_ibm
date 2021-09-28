@@ -282,7 +282,7 @@ function setReadOnly4Update(){
 function updateBPSearchTerm() {
   var ppsceidBP = FormManager.getActualValue('ppsceid');
   var searchTerm = FormManager.getActualValue('searchTerm');
-  var regString = /[a-zA-Z]+/;
+  var regString = /[^0-9]+/;
   if (FormManager.getActualValue('reqType') == 'U' && _pagemodel.userRole.toUpperCase() == 'REQUESTER' &&  ppsceidBP != undefined && ppsceidBP != null && ppsceidBP != ''){
     if (searchTerm == '04182') {
       FormManager.readOnly('searchTerm');
