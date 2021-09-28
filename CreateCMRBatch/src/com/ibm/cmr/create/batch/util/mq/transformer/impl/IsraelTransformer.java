@@ -208,6 +208,12 @@ public class IsraelTransformer extends EMEATransformer {
         pairedSeqVal.put(SHIP_KEY + shipAddrCount++, legacyAddr.getId().getAddrNo());
       }
     }
+
+    if (addrType.equals("ZS01") || addrType.equals("ZP01") || addrType.equals("ZD01")) {
+      legacyAddr.setAddrLine3(reverseNumbers(currAddr.getPoBox()) + " מ.ד");
+    } else {
+      legacyAddr.setAddrLine3("PO BOX " + currAddr.getPoBox());
+    }
   }
 
   public void formatAddressLinesLD(MQMessageHandler handler) {
