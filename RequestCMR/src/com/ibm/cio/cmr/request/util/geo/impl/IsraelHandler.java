@@ -383,7 +383,6 @@ public class IsraelHandler extends EMEAHandler {
     String processingType = PageManager.getProcessingType(SystemLocation.ISRAEL, "U");
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
       if (currentRecord != null) {
-        String country = currentRecord.getCmrIssuedBy();
 
         address.setCustNm1(currentRecord.getCmrName1Plain());
         address.setCustNm2(currentRecord.getCmrName2Plain());
@@ -395,27 +394,22 @@ public class IsraelHandler extends EMEAHandler {
         }
 
         address.setPairedAddrSeq(currentRecord.getTransAddrNo());
-
         address.setVat(currentRecord.getCmrTaxNumber());
         // set tax office here
 
         address.setTaxOffice(currentRecord.getCmrTaxOffice());
         address.setVat(currentRecord.getCmrTaxNumber());
-        if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
-          if (currentRecord.getCmrAddrSeq() != null && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())
-              && "ZS01".equalsIgnoreCase(address.getId().getAddrType())) {
-            String seq = address.getId().getAddrSeq();
-            seq = StringUtils.leftPad(seq, 5, '0');
-            address.getId().setAddrSeq(seq);
-          }
-          if ("D".equals(address.getImportInd())) {
-            String seq = StringUtils.leftPad(address.getId().getAddrSeq(), 5, '0');
-            address.getId().setAddrSeq(seq);
-          }
+        if (currentRecord.getCmrAddrSeq() != null && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())
+            && "CTYA".equalsIgnoreCase(address.getId().getAddrType())) {
+          address.getId().setAddrSeq("00001");
+        }
+        if ("D".equals(address.getImportInd())) {
+          String seq = StringUtils.leftPad(address.getId().getAddrSeq(), 5, '0');
+          address.getId().setAddrSeq(seq);
+        }
 
-          if (!"ZS01".equalsIgnoreCase(address.getId().getAddrType())) {
-            address.setCustPhone("");
-          }
+        if (!"ZS01".equalsIgnoreCase(address.getId().getAddrType())) {
+          address.setCustPhone("");
         }
       }
     } else {
