@@ -1176,6 +1176,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addPostalCodeLengthValidator, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.addAfterConfig(setAbbrvLocCrossBorderScenario, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(setAbbrvLocCrossBorderScenarioOnChange, [ SysLoc.ISRAEL ]);
+  GEOHandler.addAfterConfig(setChecklistStatus, [ SysLoc.ISRAEL ]);
+  GEOHandler.registerValidator(addILChecklistValidator, [ SysLoc.ISRAEL ]);
 
   /* 1438717 - add DPL match validation for failed dpl checks */
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.EMEA, GEOHandler.ROLE_PROCESSOR, true);
