@@ -1123,6 +1123,25 @@ function showVatOnLocal() {
   }
 }
 
+function addPpsceidValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var ppsceid = FormManager.getActualValue('ppsceid');
+        if (ppsceid != null && ppsceid != undefined && ppsceid != '') {
+          if (ppsceid.length > 0 && !ppsceid.match("^[0-9a-z]*$")) {
+            return new ValidationResult(null, false, ppsceid + ' for PPS CEID is invalid, please enter only digits and lowercase latin characters.');
+          } else {
+            return new ValidationResult(null, true);
+          }
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding Israel functions...');
@@ -1171,4 +1190,5 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterTemplateLoad(showVatOnLocal, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(showVatOnLocal, [ SysLoc.ISRAEL ]);
+  GEOHandler.registerValidator(addPpsceidValidator, [ SysLoc.ISRAEL ], null, true);
 });

@@ -254,6 +254,10 @@ public class IsraelHandler extends EMEAHandler {
       data.setEmbargoCd(this.currentImportValues.get("EmbargoCode"));
       LOG.trace("EmbargoCode: " + data.getEmbargoCd());
 
+      if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+        data.setPpsceid("");
+      }
+
       if (!SystemLocation.ITALY.equalsIgnoreCase(data.getCmrIssuingCntry())) {
 
         // defect 1299146
