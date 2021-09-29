@@ -422,6 +422,7 @@ public class LegacyDirectLegacyMassProcessService extends TransConnService {
    * @return
    * @throws Exception
    */
+  @Override
   public <T> T initEmpty(Class<T> entityClass) throws Exception {
     try {
       T object = entityClass.newInstance();
@@ -448,6 +449,7 @@ public class LegacyDirectLegacyMassProcessService extends TransConnService {
    * @return
    * @throws Exception
    */
+  @Override
   public void capsAndFillNulls(Object entity, boolean capitalize) throws Exception {
     try {
       Class<?> entityClass = entity.getClass();
@@ -874,6 +876,9 @@ public class LegacyDirectLegacyMassProcessService extends TransConnService {
         CMRRequestContainer cmrObjects = prepareRequest(entityManager, massUpdt, admin);
         Data data = cmrObjects.getData();
 
+        if (!isOwnerCorrect(entityManager, massUpdt.getCmrNo(), data.getCmrIssuingCntry())) {
+          throw new Exception("Some CMRs on the request are not owned by IBM. Please check input CMRs");
+        }
         // for every mass update data
         // prepare the createCMR data to be saved
         LegacyDirectObjectContainer legacyObjects = mapRequestDataForMassUpdate(entityManager, cmrObjects, massUpdt, errorCmrs, admin);

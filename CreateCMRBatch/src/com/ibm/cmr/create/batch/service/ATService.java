@@ -1777,6 +1777,10 @@ public class ATService extends TransConnService {
           // partialCommit(entityManager);
           // }
 
+          if (!isOwnerCorrect(entityManager, sMassUpdt.getCmrNo(), data.getCmrIssuingCntry())) {
+            throw new Exception("Some CMRs on the request are not owned by IBM. Please check input CMRs");
+          }
+
           request.setCmrNo(sMassUpdt.getCmrNo());
           request.setMandt(SystemConfiguration.getValue("MANDT"));
           request.setReqId(admin.getId().getReqId());

@@ -55,6 +55,10 @@ public class AustriaMassUpdtMultiWorker extends MassUpdateMultiWorker {
     dataPk.setReqId(this.parentAdmin.getId().getReqId());
     Data data = entityManager.find(Data.class, dataPk);
 
+    if (!isOwnerCorrect(entityManager, this.parentRow.getCmrNo(), data.getCmrIssuingCntry())) {
+      throw new Exception("Some CMRs on the request are not owned by IBM. Please check input CMRs");
+    }
+
     String processingStatus = this.parentAdmin.getRdcProcessingStatus() != null ? this.parentAdmin.getRdcProcessingStatus() : "";
 
     ProcessRequest request = new ProcessRequest();

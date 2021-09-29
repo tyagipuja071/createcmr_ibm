@@ -55,6 +55,10 @@ public class SwissMassUpdtMultiWorker extends MassUpdateMultiWorker {
     dataPk.setReqId(this.parentAdmin.getId().getReqId());
     Data data = entityManager.find(Data.class, dataPk);
 
+    if (!isOwnerCorrect(entityManager, this.parentRow.getCmrNo(), data.getCmrIssuingCntry())) {
+      throw new Exception("Some CMRs on the request are not owned by IBM. Please check input CMRs");
+    }
+
     ProcessRequest request = new ProcessRequest();
 
     request.setCmrNo(this.parentRow.getCmrNo());
