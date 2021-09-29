@@ -63,6 +63,20 @@ public class NordicsUtil extends AutomationUtil {
   public static final String DK_PRIPE_LOCAL = "DKPRI";
   public static final String DK_IBMEM_LOCAL = "DKIBM";
   public static final String DK_THIRD_PARTY = "DK3PA";
+
+  // Sub Regions Iceland, Greenland , Faroe islands
+  public static final String FO_COMME_LOCAL = "FOCOM";
+  public static final String FO_GOV_LOCAL = "FOGOV";
+  public static final String FO_INTSO_LOCAL = "FOISO";
+
+  public static final String IS_COMME_LOCAL = "ISCOM";
+  public static final String IS_GOV_LOCAL = "ISGOV";
+  public static final String IS_INTSO_LOCAL = "ISISO";
+
+  public static final String GL_COMME_LOCAL = "GLCOM";
+  public static final String GL_GOV_LOCAL = "GLGOV";
+  public static final String GL_INTSO_LOCAL = "GLISO";
+
   // Finland
   public static final String FI_COMME_LOCAL = "FICOM";
   public static final String FI_INTER_LOCAL = "FIINT";
@@ -72,6 +86,20 @@ public class NordicsUtil extends AutomationUtil {
   public static final String FI_PRIPE_LOCAL = "FIPRI";
   public static final String FI_IBMEM_LOCAL = "FIIBM";
   public static final String FI_THIRD_PARTY = "FI3PA";
+
+  // Sub regions Estonia , Latvia , Lithuania
+  public static final String EE_COMME_LOCAL = "EECOM";
+  public static final String EE_GOV_LOCAL = "FIGOV";
+  public static final String EE_INTSO_LOCAL = "FIISO";
+
+  public static final String LT_COMME_LOCAL = "LTCOM";
+  public static final String LT_GOV_LOCAL = "LTGOV";
+  public static final String LT_INTSO_LOCAL = "LTISO";
+
+  public static final String LV_COMME_LOCAL = "LVCOM";
+  public static final String LV_GOV_LOCAL = "LVGOV";
+  public static final String LV_INTSO_LOCAL = "LVISO";
+
   // Norway and Sweden
   public static final String COMME_LOCAL = "COMME";
   public static final String INTER_LOCAL = "INTER";
@@ -89,8 +117,11 @@ public class NordicsUtil extends AutomationUtil {
   public static final String CROSS_IBMEM = "CBIBM";
   public static final String CROSS_PRIPE = "CBPRI";
 
-  private static final List<String> SCENARIOS_COVERAGE = Arrays.asList(DK_COMME_LOCAL, FI_COMME_LOCAL, COMME_LOCAL, CROSS_COMME, DK_INTSO_LOCAL,
-      FI_INTSO_LOCAL, INTSO_LOCAL, CROSS_INTSO, DK_GOV_LOCAL, FI_GOV_LOCAL);
+  private static final List<String> SCENARIOS_COVERAGE = Arrays.asList(DK_COMME_LOCAL, FO_COMME_LOCAL, GL_COMME_LOCAL, IS_COMME_LOCAL, FI_COMME_LOCAL,
+      LT_COMME_LOCAL, LV_COMME_LOCAL, EE_COMME_LOCAL, COMME_LOCAL, CROSS_COMME, DK_INTSO_LOCAL, FO_INTSO_LOCAL, GL_INTSO_LOCAL, IS_INTSO_LOCAL,
+      FI_INTSO_LOCAL, LT_INTSO_LOCAL, LV_INTSO_LOCAL, EE_INTSO_LOCAL, INTSO_LOCAL, CROSS_INTSO, DK_GOV_LOCAL, FO_GOV_LOCAL, GL_GOV_LOCAL,
+      IS_GOV_LOCAL, FI_GOV_LOCAL, LT_GOV_LOCAL, LV_GOV_LOCAL, EE_GOV_LOCAL);
+
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
       CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO, CmrConstants.RDC_SECONDARY_SOLD_TO);
   private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Att. Person", "Phone #");
