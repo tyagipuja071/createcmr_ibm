@@ -287,6 +287,10 @@ public class IERPMassProcessService extends TransConnService {
           request.setAddrType("");
           request.setSeqNo("");
 
+          if (!isOwnerCorrect(entityManager, sMassUpdt.getCmrNo(), data.getCmrIssuingCntry())) {
+            throw new Exception("Some CMRs on the request are not owned by IBM. Please check input CMRs");
+          }
+
           // call the create cmr service
           LOG.info("Sending request to Process Service [Request ID: " + request.getReqId() + " Type: " + request.getReqType() + "]");
 
