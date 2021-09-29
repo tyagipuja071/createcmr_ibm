@@ -83,6 +83,113 @@ function afterConfigForIsrael() {
   if (FormManager.getActualValue('reqType') == 'C') {
     setCodFlagVal();
   }
+
+  setChecklistStatus();
+  addILChecklistValidator();
+}
+
+function setChecklistStatus() {
+
+  reqType = FormManager.getActualValue('reqType');
+  var custSubScnrio = FormManager.getActualValue('custSubGrp');
+  if (reqType == 'U') {
+    return;
+  }
+  if (custSubScnrio != 'CROSS') {
+    return;
+  }
+  console.log('validating checklist..');
+  var checklist = dojo.query('table.checklist');
+  document.getElementById("checklistStatus").innerHTML = "Not Done";
+  var reqId = FormManager.getActualValue('reqId');
+  var questions = checklist.query('input[type="radio"]');
+
+  if (reqId != null && reqId.length > 0 && reqId != 0) {
+    if (questions.length > 0) {
+      var noOfQuestions = questions.length / 2;
+      var checkCount = 0;
+      for (var i = 0; i < questions.length; i++) {
+        if (questions[i].checked) {
+          checkCount++;
+        }
+      }
+      if (noOfQuestions != checkCount) {
+        document.getElementById("checklistStatus").innerHTML = "Incomplete";
+        FormManager.setValue('checklistStatus', "Incomplete");
+      } else {
+        document.getElementById("checklistStatus").innerHTML = "Complete";
+        FormManager.setValue('checklistStatus', "Complete");
+      }
+    } else {
+      document.getElementById("checklistStatus").innerHTML = "Complete";
+      FormManager.setValue('checklistStatus', "Complete");
+    }
+  }
+}
+
+function addILChecklistValidator() {
+
+  reqType = FormManager.getActualValue('reqType');
+  var custSubScnrio = FormManager.getActualValue('custSubGrp');
+  if (reqType == 'U') {
+    return;
+  }
+  if (custSubScnrio != 'CROSS') {
+    return;
+  }
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        console.log('validating checklist..');
+        var checklist = dojo.query('table.checklist');
+
+        // local address name if found
+        var localAddr = checklist.query('input[name="localAddr"]');
+        if (localAddr.length > 0 && localAddr[0].value.trim() == '') {
+          return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
+        }
+
+        var freeTxtField1 = checklist.query('input[name="freeTxtField1"]');
+        if (freeTxtField1.length > 0 && freeTxtField1[0].value.trim() == '') {
+          return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
+        }
+
+        var freeTxtField2 = checklist.query('input[name="freeTxtField2"]');
+        if (freeTxtField2.length > 0 && freeTxtField2[0].value.trim() == '') {
+          return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
+        }
+
+        var freeTxtField3 = checklist.query('input[name="freeTxtField3"]');
+        if (freeTxtField3.length > 0 && freeTxtField3[0].value.trim() == '') {
+          return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
+        }
+
+        var questions = checklist.query('input[type="radio"]');
+        if (questions.length > 0) {
+          var noOfQuestions = questions.length / 2;
+          var checkCount = 0;
+          for (var i = 0; i < questions.length; i++) {
+            if (questions[i].checked) {
+              checkCount++;
+            }
+          }
+          if (noOfQuestions != checkCount) {
+            return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
+          }
+        }
+
+        // add check for checklist on DB
+        var reqId = FormManager.getActualValue('reqId');
+        var record = cmr.getRecord('GBL_CHECKLIST', 'ProlifChecklist', {
+          REQID : reqId
+        });
+        if (!record || !record.sectionA1) {
+          return new ValidationResult(null, false, 'Checklist has not been registered yet. Please execute a \'Save\' action before sending for processing to avoid any data loss.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CHECKLIST_TAB', 'frmCMR');
 }
 
 /**
@@ -820,8 +927,10 @@ function disableCustPhone() {
   if (cntryCd == SysLoc.ISRAEL && FormManager.getActualValue('addrType') != 'ZS01') {
     FormManager.setValue('custPhone', '');
     FormManager.disable('custPhone');
+    FormManager.hide('CustPhone', 'custPhone');
   } else {
     FormManager.enable('custPhone');
+    FormManager.show('CustPhone', 'custPhone');
   }
 }
 
@@ -905,10 +1014,6 @@ function setAbbrvLocCrossBorderScenarioOnChange() {
       }
     }
   });
-}
-
-function addPhoneValidatorEMEA() {
-  FormManager.addValidator('custPhone', Validators.DIGIT, [ 'Phone #' ]);
 }
 
 /*
@@ -1005,17 +1110,36 @@ function addEmbargoCodeValidator() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
-function showVatOnLocal(fromAddress, scenario, scenarioChanged) {
+function showVatOnLocal() {
   var viewOnly = FormManager.getActualValue('viewOnlyPage');
   if (viewOnly != '' && viewOnly == 'true') {
     return;
   }
   var custGrp = FormManager.getActualValue('custGrp');
-  if (scenarioChanged && custGrp == 'LOCAL') {
+  if (custGrp == 'LOCAL') {
     cmr.showNode('vatInfo');
   } else {
     cmr.hideNode('vatInfo');
   }
+}
+
+function addPpsceidValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var ppsceid = FormManager.getActualValue('ppsceid');
+        if (ppsceid != null && ppsceid != undefined && ppsceid != '') {
+          if (ppsceid.length > 0 && !ppsceid.match("^[0-9a-z]*$")) {
+            return new ValidationResult(null, false, ppsceid + ' for PPS CEID is invalid, please enter only digits and lowercase latin characters.');
+          } else {
+            return new ValidationResult(null, true);
+          }
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
 dojo.addOnLoad(function() {
@@ -1026,7 +1150,6 @@ dojo.addOnLoad(function() {
   GEOHandler.enableCustomerNamesOnAddress(GEOHandler.EMEA);
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.EMEA);
   GEOHandler.setRevertIsicBehavior(false);
-  GEOHandler.addAddrFunction(addPhoneValidatorEMEA, [ SysLoc.ISRAEL ]);
 
   // Israel Specific
   GEOHandler.addAfterConfig(afterConfigForIsrael, [ SysLoc.ISRAEL ]);
@@ -1053,6 +1176,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addPostalCodeLengthValidator, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.addAfterConfig(setAbbrvLocCrossBorderScenario, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(setAbbrvLocCrossBorderScenarioOnChange, [ SysLoc.ISRAEL ]);
+  GEOHandler.addAfterConfig(setChecklistStatus, [ SysLoc.ISRAEL ]);
+  GEOHandler.registerValidator(addILChecklistValidator, [ SysLoc.ISRAEL ]);
 
   /* 1438717 - add DPL match validation for failed dpl checks */
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.EMEA, GEOHandler.ROLE_PROCESSOR, true);
@@ -1066,4 +1191,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(validatePoBox, [ SysLoc.ISRAEL ]);
 
   GEOHandler.addAfterTemplateLoad(showVatOnLocal, [ SysLoc.ISRAEL ]);
+  GEOHandler.addAfterConfig(showVatOnLocal, [ SysLoc.ISRAEL ]);
+  GEOHandler.registerValidator(addPpsceidValidator, [ SysLoc.ISRAEL ], null, true);
 });

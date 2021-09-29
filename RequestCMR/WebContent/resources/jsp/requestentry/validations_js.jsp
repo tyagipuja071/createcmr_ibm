@@ -45,7 +45,11 @@ String processingType = PageManager.getProcessingType(reqentry.getCmrIssuingCntr
   <script src="${resourcesPath}/js/requestentry/validators/cy_validations.js?${cmrv}" type="text/javascript"></script>
   </cmr:view>
   <cmr:view forCountry="755">
-  <script src="${resourcesPath}/js/requestentry/validators/il_validations.js?${cmrv}" type="text/javascript"></script>
+    <%  if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) { %>  
+  		<script src="${resourcesPath}/js/requestentry/validators/il_validations.js?${cmrv}" type="text/javascript"></script>
+    <%  }  else { %>  
+      	<script src="${resourcesPath}/js/requestentry/validators/emea_validations.js?${cmrv}" type="text/javascript"></script>
+    <%  } %>
   </cmr:view>
   <cmr:view exceptForCountry="726,666,862,755">
   <script src="${resourcesPath}/js/requestentry/validators/emea_validations.js?${cmrv}" type="text/javascript"></script>
