@@ -3292,7 +3292,6 @@ function validateGSTForIndia() {
                   country = stateResult.ret1;
                 }
               }
-            }
             var gstRet = cmr.validateGST(country, vat, name, address, postal, city);
             if (!gstRet.success) {
               return new ValidationResult({
@@ -3301,6 +3300,9 @@ function validateGSTForIndia() {
                 name : 'vat'
               }, false, gstRet.errorMessage);
             } else {
+              return new ValidationResult(null, true);
+            }
+            }else {
               return new ValidationResult(null, true);
             }
           }
