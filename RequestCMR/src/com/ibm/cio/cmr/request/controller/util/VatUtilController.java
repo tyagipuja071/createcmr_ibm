@@ -126,7 +126,6 @@ public class VatUtilController {
     String state = "";
     if (!StringUtils.isEmpty(request.getParameter("country"))) {
       state = request.getParameter("country");
-      state = state.substring(5);
     }
     String vat = request.getParameter("vat");
     if (StringUtils.isEmpty(vat)) {
