@@ -3,6 +3,7 @@ package com.ibm.cio.cmr.request.automation.util.geo;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -240,6 +241,8 @@ public class NordicsUtil extends AutomationUtil {
     String reqSubInd = data.getSubIndustryCd().substring(0, 1);
     String cntry = data.getCountryUse() != null ? data.getCountryUse() : data.getCmrIssuingCntry();
     String coverageId = container.getFinalCoverage();
+    HashMap<String, String> response = new HashMap<String, String>();
+    response.put("MATCHING", "No Match Found.");
 
     details.append("\n");
     if (!isCoverageCalculated || (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && !CalculateCoverageElement.COV_BG.equals(covFrom))
@@ -267,11 +270,13 @@ public class NordicsUtil extends AutomationUtil {
             details.append("Sales Rep : " + mapping.getSalesRep());
             overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "REP_TEAM_MEMBER_NO", data.getRepTeamMemberNo(),
                 mapping.getSalesRep());
+            response.put("MATCHING", "Match Found.");
             break;
-
-          } else {
-            details.append("No 34-Q mapping values found.").append("\n");
           }
+        }
+
+        if ("No Match Found".equalsIgnoreCase(response.get("MATCHING"))) {
+          details.append("Coverage couldn't be calculated through 34Q logic as no match found.\n").append("\n");
         }
 
       } else {
