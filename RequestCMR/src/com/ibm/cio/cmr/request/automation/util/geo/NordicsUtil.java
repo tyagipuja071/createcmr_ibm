@@ -238,7 +238,7 @@ public class NordicsUtil extends AutomationUtil {
     Data data = requestData.getData();
     String scenario = data.getCustSubGrp();
     String reqSubInd = data.getSubIndustryCd().substring(0, 1);
-    String cntry = data.getCountryUse();
+    String cntry = data.getCountryUse() != null ? data.getCountryUse() : data.getCmrIssuingCntry();
     String coverageId = container.getFinalCoverage();
 
     details.append("\n");
@@ -269,6 +269,8 @@ public class NordicsUtil extends AutomationUtil {
                 mapping.getSalesRep());
             break;
 
+          } else {
+            details.append("No 34-Q mapping values found.").append("\n");
           }
         }
 
