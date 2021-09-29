@@ -1064,6 +1064,7 @@ public class IsraelHandler extends EMEAHandler {
         return true;
       }
     }
+    return false;
   }
 
   private boolean isHebrewFieldNotBlank(XSSFCell cell) {
