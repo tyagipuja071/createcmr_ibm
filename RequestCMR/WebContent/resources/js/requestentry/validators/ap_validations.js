@@ -3287,10 +3287,10 @@ function validateGSTForIndia() {
                 reqParam = {
                     STATE_PROV_CD : state,
                   };
-              }
               var stateResult = cmr.query('GET_STATE_DESC', reqParam);
-              if (stateResult != null) {
-                country = stateResult.ret1;
+                if (stateResult != null) {
+                  country = stateResult.ret1;
+                }
               }
             }
             var gstRet = cmr.validateGST(country, vat, name, address, postal, city);
