@@ -234,6 +234,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
               processDnBFields(entityManager, data, dnbRecord, output, details, itemNo);
               itemNo++;
             }
+            admin.setCompVerifiedIndc("N");
             // engineData.addNegativeCheckStatus("OTH", "Matches against D&B
             // were found but no record matched the request data.");
             result.setResults("Name/Address not matched");
