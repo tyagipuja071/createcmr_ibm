@@ -1872,7 +1872,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                 } else if (PageManager.fromGeo("CA", cmrIssuingCntry)) {
                   if (!validateMassUpdateCA(item.getInputStream())) {
                     throw new CmrException(MessageUtil.ERROR_MASS_FILE);
-                  }                  
+                  }
                 } else {
                   if (!validateMassUpdateFile(item.getInputStream())) {
                     throw new CmrException(MessageUtil.ERROR_MASS_FILE);
@@ -4704,7 +4704,6 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
 
   }
 
-
   public boolean validateSWISSMassUpdateFile(String path, Data data, Admin admin) throws Exception {
     List<Boolean> isErr = new ArrayList<Boolean>();
     try (FileInputStream fis = new FileInputStream(path)) {
@@ -4782,12 +4781,24 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
           validations = template.validate(em, is, country, 2000);
           LOG.debug(new ObjectMapper().writeValueAsString(validations));
 
-          for (TemplateValidation validation : validations) {
-            if (validation.hasErrors()) {
-              if (StringUtils.isEmpty(errTxt.toString())) {
-                errTxt.append("Tab name :" + validation.getTabName() + ", " + validation.getAllError());
-              } else {
-                errTxt.append("\nTab name :" + validation.getTabName() + ", " + validation.getAllError());
+          if (SystemLocation.ISRAEL.equals(country)) {
+            for (TemplateValidation validation : validations) {
+              if (validation.hasErrors()) {
+                if (StringUtils.isEmpty(errTxt.toString())) {
+                  errTxt.append("[TAB: " + validation.getTabName() + "]" + validation.getAllError() + "");
+                } else {
+                  errTxt.append("<br>[TAB: " + validation.getTabName() + "]" + validation.getAllError() + "");
+                }
+              }
+            }
+          } else {
+            for (TemplateValidation validation : validations) {
+              if (validation.hasErrors()) {
+                if (StringUtils.isEmpty(errTxt.toString())) {
+                  errTxt.append("Tab name :" + validation.getTabName() + ", " + validation.getAllError());
+                } else {
+                  errTxt.append("\nTab name :" + validation.getTabName() + ", " + validation.getAllError());
+                }
               }
             }
           }
@@ -4971,8 +4982,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                       }
                     } catch (Exception e) {
                       throw new CmrException(e);
-                    } 
-                    }else {
+                    }
+                  } else {
                     if (!validateMassUpdateFile(item.getInputStream())) {
                       throw new CmrException(MessageUtil.ERROR_MASS_FILE);
                     }
@@ -5376,7 +5387,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     }
   }
 
-    private void setMassUpdateListForFR(EntityManager entityManager, Map<String, Object> massUpdtCol, String filepath, long reqId, int newIterId,
+  private void setMassUpdateListForFR(EntityManager entityManager, Map<String, Object> massUpdtCol, String filepath, long reqId, int newIterId,
       String filePath) throws Exception {
 
     // 1. get the config file and get all the valid tabs
