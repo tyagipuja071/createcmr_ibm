@@ -3311,7 +3311,7 @@ function validateGSTForIndia() {
               };
             }
             var results = cmr.query('GET_ZS01', reqParam);
-            if (results != null) {
+            if (results.ret1 != undefined) {
               
               var name = results.ret1;
               var address = results.ret2;
