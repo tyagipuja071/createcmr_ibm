@@ -1633,7 +1633,7 @@ public class FranceHandler extends GEOHandler {
     query.setForReadOnly(true);
     query.setParameter("KATR6", SystemLocation.FRANCE);
     query.setParameter("MANDT", mandt);
-    query.setParameter("CMR", cmrNo);
+    query.setParameter("CMR", cmrNo.length() > 6 ? cmrNo.substring(0, 6) : cmrNo);
 
     Kna1 zs01 = query.getSingleResult(Kna1.class);
     if (zs01 != null) {
