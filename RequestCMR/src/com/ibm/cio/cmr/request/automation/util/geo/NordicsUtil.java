@@ -89,8 +89,8 @@ public class NordicsUtil extends AutomationUtil {
 
   // Sub regions Estonia , Latvia , Lithuania
   public static final String EE_COMME_LOCAL = "EECOM";
-  public static final String EE_GOV_LOCAL = "FIGOV";
-  public static final String EE_INTSO_LOCAL = "FIISO";
+  public static final String EE_GOV_LOCAL = "EEGOV";
+  public static final String EE_INTSO_LOCAL = "EEISO";
 
   public static final String LT_COMME_LOCAL = "LTCOM";
   public static final String LT_GOV_LOCAL = "LTGOV";
