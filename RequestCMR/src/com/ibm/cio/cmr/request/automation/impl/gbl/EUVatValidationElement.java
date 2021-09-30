@@ -192,8 +192,9 @@ public class EUVatValidationElement extends ValidatingElement implements Company
 
   private String getLandedCountryForVies(String cmrIssuingCntry, String landCntry, String countryUse) {
     String defaultLandedCountry = PageManager.getDefaultLandedCountry(cmrIssuingCntry);
+    List<String> dkSubRegion = Arrays.asList("IS", "FO", "GL");
     String subRegion = !StringUtils.isBlank(countryUse) && countryUse.length() > 3 ? countryUse.substring(3) : "";
-    if (StringUtils.isNotBlank(subRegion) && EU_COUNTRIES.contains(subRegion)) {
+    if (StringUtils.isNotBlank(subRegion) && (EU_COUNTRIES.contains(subRegion) || dkSubRegion.contains(subRegion))) {
       // if subregion is part of EU countries eligible for VAT matching, use
       // subregion as default country
       defaultLandedCountry = subRegion;
