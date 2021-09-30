@@ -20,7 +20,10 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
+import com.ibm.cio.cmr.request.entity.MassUpdtData;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.legacy.LegacyCommonUtil;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectObjectContainer;
 import com.ibm.cmr.create.batch.util.CMRRequestContainer;
@@ -676,6 +679,72 @@ public class IsraelTransformer extends EMEATransformer {
       }
       addr.setAddrLineO(pairedSeq);
     }
+  }
+
+  @Override
+  public void transformLegacyCustomerDataMassUpdate(EntityManager entityManager, CmrtCust cust, CMRRequestContainer cmrObjects, MassUpdtData muData) {
+
+    if (StringUtils.isNotBlank(muData.getAbbrevNm())) {
+      cust.setAbbrevNm(muData.getAbbrevNm());
+    }
+
+    if (StringUtils.isNotBlank(muData.getAbbrevLocn())) {
+      cust.setAbbrevLocn(muData.getAbbrevLocn());
+    }
+
+    if (StringUtils.isNotBlank(muData.getIsicCd())) {
+      cust.setIsicCd(muData.getIsicCd());
+    }
+
+    if (StringUtils.isNotBlank(muData.getVat())) {
+      cust.setVat(muData.getVat());
+    }
+
+    if (StringUtils.isNotBlank(muData.getCollectionCd())) {
+      cust.setCollectionCd(muData.getCollectionCd());
+    }
+
+    if (StringUtils.isNotBlank(muData.getEnterprise())) {
+      cust.setEnterpriseNo(muData.getEnterprise());
+    }
+
+    if (StringUtils.isNotBlank(muData.getInacCd())) {
+      cust.setInacCd(muData.getInacCd());
+    }
+
+    if (StringUtils.isNotBlank(muData.getIsuCd())) {
+      cust.setIsuCd(muData.getIsuCd());
+    }
+
+    if (StringUtils.isNotBlank(muData.getRepTeamMemberNo())) {
+      cust.setSalesRepNo(muData.getRepTeamMemberNo());
+    }
+
+    cust.setUpdateTs(SystemUtil.getCurrentTimestamp());
+  }
+
+  @Override
+  public void transformLegacyAddressDataMassUpdate(EntityManager entityManager, CmrtAddr legacyAddr, MassUpdtAddr addr, String cntry, CmrtCust cust,
+      Data data, LegacyDirectObjectContainer legacyObjects) {
+
+    legacyAddr.setForUpdate(true);
+    if (StringUtils.isNotBlank(addr.getAddrTxt())) {
+      legacyAddr.setStreet(addr.getAddrTxt());
+    }
+
+    if (StringUtils.isNotBlank(addr.getCity1())) {
+      legacyAddr.setCity(addr.getCity1());
+    }
+
+    if (StringUtils.isNotBlank(addr.getPostCd())) {
+      legacyAddr.setZipCode(addr.getPostCd());
+    }
+
+    if (StringUtils.isNotBlank(addr.getPoBox())) {
+      legacyAddr.setPoBox(addr.getPoBox());
+    }
+
+    legacyObjects.addAddress(legacyAddr);
   }
 
   @Override

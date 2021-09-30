@@ -96,7 +96,7 @@ public class TemplateValidation {
         StringBuilder sbRowError = new StringBuilder();
 
         if (StringUtils.isNotEmpty(field)) {
-          sbRowError.append(field).append(", :");
+          sbRowError.append(field).append(" :");
         }
 
         sbRowError.append(" Row").append("" + this.rowNumber);

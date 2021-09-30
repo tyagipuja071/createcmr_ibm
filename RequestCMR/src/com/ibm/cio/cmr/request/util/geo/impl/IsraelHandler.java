@@ -22,6 +22,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.ibm.cio.cmr.request.CmrConstants;
+import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.controller.DropdownListController;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
@@ -30,6 +31,7 @@ import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.entity.DataRdc;
+import com.ibm.cio.cmr.request.entity.Kna1;
 import com.ibm.cio.cmr.request.entity.UpdatedAddr;
 import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
@@ -42,6 +44,7 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
+import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
 
@@ -926,155 +929,150 @@ public class IsraelHandler extends EMEAHandler {
 
   @Override
   public void validateMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country) {
-    String processingType = PageManager.getProcessingType(SystemLocation.ISRAEL, "U");
-    if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
-      XSSFRow row = null;
-      XSSFCell currCell = null;
+    String[] sheetNames = { "Data", "Mailing", "Billing", "Installing", "Shipping", "EPL", "Country Use A (Mailing)", "Country Use B (Billing)",
+        "Country Use C (Shipping)" };
+    XSSFRow row = null;
 
-      String[] countryAddrss = null;
-
-      countryAddrss = LD_MASS_UPDATE_SHEET_NAMES;
-
-      for (String name : countryAddrss) {
-        XSSFSheet sheet = book.getSheet(name);
+    for (String name : sheetNames) {
+      XSSFSheet sheet = book.getSheet(name);
+      LOG.debug("validating for sheet " + name);
+      if (sheet != null) {
+        TemplateValidation error = new TemplateValidation(name);
         for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
-
-          String cbCity = ""; // 8
-          String localCity = ""; // 7
-          String cbPostal = ""; // 10
-          String localPostal = ""; // 9
-
-          String streetCont = ""; // 5
-          String poBox = ""; // 11
-          String attPerson = ""; // 13
-
-          String district = "";// 12
-          String taxOffice = ""; // 13
-          String name4 = "";// 10
-
           row = sheet.getRow(rowIndex);
           if (row == null) {
-            return; // stop immediately when row is blank
+            rowIndex = maxRows;
           }
-          // iterate all the rows and check each column value
-          currCell = row.getCell(6);
-          localCity = validateColValFromCell(currCell);
-          currCell = row.getCell(7);
-          cbCity = validateColValFromCell(currCell);
-          currCell = row.getCell(8);
-          localPostal = validateColValFromCell(currCell);
-          currCell = row.getCell(9);
-          cbPostal = validateColValFromCell(currCell);
 
-          TemplateValidation error = new TemplateValidation(name);
-
-          // CMR-2731 Turkey: Mass Update: country modification
-          if (SystemLocation.TURKEY.equals(country)) {
-            currCell = row.getCell(12);
-            district = validateColValFromCell(currCell);
-            currCell = row.getCell(13);
-            taxOffice = validateColValFromCell(currCell);
-            currCell = row.getCell(5);
-            streetCont = validateColValFromCell(currCell);
-            currCell = row.getCell(10);
-            name4 = validateColValFromCell(currCell);
-
-            if (!StringUtils.isEmpty(cbCity) && !StringUtils.isEmpty(localCity)) {
-              LOG.trace("Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty. >> ");
-              error.addError(rowIndex, "Local City",
-                  "Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty.");
-              validations.add(error);
+          if (rowIndex != maxRows) {
+            // Validate CMR No
+            String cmrNo = ""; // 0
+            cmrNo = validateColValFromCell(row.getCell(0));
+            if (StringUtils.isBlank(cmrNo)) {
+              error.addError(rowIndex, "<br>CMR No.", "<br>&nbsp;&nbsp;CMR number is required.");
+            } else if (isDivCMR(cmrNo, country)) {
+              error.addError(rowIndex, "<br>CMR No.",
+                  "<br>&nbsp;&nbsp;Note the entered CMR number is either cancelled, divestiture or doesn't exist. Please check the template and correct.");
             }
 
-            if (!StringUtils.isEmpty(cbPostal) && !StringUtils.isEmpty(localPostal)) {
-              LOG.trace("Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
-                  + "If one is populated, the other must be empty. >>");
-              error.addError(rowIndex, "Local Postal Code", "Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
-                  + "If one is populated, the other must be empty.");
-              validations.add(error);
-            }
-
-            if (!StringUtils.isEmpty(name4) && !StringUtils.isEmpty(streetCont)) {
-              LOG.trace("Name4 and Street Cont must not be populated at the same time. " + "If one is populated, the other must be empty. >>");
-              error.addError(rowIndex, "Name4",
-                  "Name4 and Street Cont must not be populated at the same time. " + "If one is populated, the other must be empty.");
-              validations.add(error);
-            }
-
-            if ((!StringUtils.isEmpty(localCity) || !StringUtils.isEmpty(localPostal))) {
-              if ("@".equals(district)) {
-                LOG.trace("Local address must not be populate District with @. ");
-                error.addError(rowIndex, "District", "Local address must not be populate District with @. ");
-                validations.add(error);
+            if (!name.equals("Data")) {
+              String localCity = ""; // 5
+              String cbCity = ""; // 6
+              String localPostalCode = ""; // 7
+              String cbPostalCode = ""; // 8
+              // validate local and cross-border city
+              localCity = validateColValFromCell(row.getCell(5));
+              cbCity = validateColValFromCell(row.getCell(6));
+              if (StringUtils.isNotBlank(localCity) && StringUtils.isNotBlank(cbCity)) {
+                error.addError(rowIndex, "<br>Local City",
+                    "<br>&nbsp;&nbsp;Local City and Cross Border City must not be populated at the same time. If one is populated, the other must be empty.");
               }
 
-              if ("@".equals(taxOffice)) {
-                LOG.trace("Local address must not be populate Tax Office with @. ");
-                error.addError(rowIndex, "Tax Office", "Local address must not be populate Tax Office with @. ");
-                validations.add(error);
+              // validate Local and cross-border postal code
+              localPostalCode = validateColValFromCell(row.getCell(7));
+              cbPostalCode = validateColValFromCell(row.getCell(8));
+              if (StringUtils.isNotBlank(localPostalCode) && StringUtils.isNotBlank(cbPostalCode)) {
+                error.addError(rowIndex, "<br>Local Postal Code",
+                    "<br>&nbsp;&nbsp;Local Postal Code and Cross Border Postal Code must not be populated at the same time. "
+                        + "If one is populated, the other must be empty.");
               }
-            }
-          } else {
-            currCell = row.getCell(5);
-            streetCont = validateColValFromCell(currCell);
-            currCell = row.getCell(11);
-            poBox = validateColValFromCell(currCell);
-            currCell = row.getCell(12);
-            attPerson = validateColValFromCell(currCell);
-            // DTN: Defect 1898300: UKI - mass updates - addresses
-            /*
-             * Adding a check that if any of the address lines values that are
-             * set as either value and both are filled out, it will throw an
-             * error message that both can not be filled out.
-             */
-            if (!StringUtils.isEmpty(cbCity) && !StringUtils.isEmpty(localCity)) {
-              LOG.trace("Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty. >> ");
-              error.addError(rowIndex, "Local City",
-                  "Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty.");
-              validations.add(error);
-            }
 
-            if (!StringUtils.isEmpty(cbPostal) && !StringUtils.isEmpty(localPostal)) {
-              LOG.trace("Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
-                  + "If one is populated, the other must be empty. >>");
-              error.addError(rowIndex, "Local Postal Code", "Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
-                  + "If one is populated, the other must be empty.");
-              validations.add(error);
-            }
-            if ((!StringUtils.isEmpty(cbCity) || !StringUtils.isEmpty(cbPostal))
-                && (!StringUtils.isEmpty(localCity) || !StringUtils.isEmpty(localPostal))) {
-              // if local
-              if (!StringUtils.isEmpty(streetCont) && !StringUtils.isEmpty(poBox)) {
-                LOG.trace("Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
-                error.addError(rowIndex, "Street Con't/PO Box",
-                    "Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
-                validations.add(error);
-              } else if (!StringUtils.isEmpty(poBox) && !StringUtils.isEmpty(attPerson)) {
-                LOG.trace("Note that PO Box/ATT Person cannot be filled at same time. Please fix and upload the template again.");
-                error.addError(rowIndex, "PO Box/ATT Person",
-                    "Note that PO Box/ATT Person cannot be filled at same time. Please fix and upload the template again.");
-                validations.add(error);
-              } else if (!StringUtils.isEmpty(attPerson) && !StringUtils.isEmpty(streetCont)) {
-                LOG.trace("Note that ATT Person/Street Con't cannot be filled at same time. Please fix and upload the template again.");
-                error.addError(rowIndex, "ATT Person/Street Con't",
-                    "Note that ATT Person/Street Con't cannot be filled at same time. Please fix and upload the template again.");
-                validations.add(error);
-              }
-            } else {
-              // else cross border
-              if (!StringUtils.isEmpty(streetCont) && !StringUtils.isEmpty(poBox)) {
-                LOG.trace("Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
-                error.addError(rowIndex, "Street Con't/PO Box",
-                    "Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
-                validations.add(error);
+              // validate hebrew addresses
+              if (name.equals("Mailing") || name.equals("Billing") || name.equals("Shipping")) {
+                // customer name
+                String custName = ""; // 2
+                if (isHebrewFieldNotBlank(row.getCell(2))) {
+                  custName = row.getCell(2).getRichStringCellValue().getString();
+                  if (!containsHebrewChar(custName)) {
+                    error.addError(rowIndex, "<br>Customer Name", "<br>&nbsp;&nbsp;" + name + " address Customer Name must be in Hebrew.");
+                  }
+                }
+
+                // customer name con't
+                String custNameCont = ""; // 3
+                if (isHebrewFieldNotBlank(row.getCell(3))) {
+                  custNameCont = row.getCell(3).getRichStringCellValue().getString();
+                  if (!containsHebrewChar(custNameCont)) {
+                    error.addError(rowIndex, "<br>Customer Name Continuation",
+                        "<br>&nbsp;&nbsp;" + name + " address Customer Name Continuation must be in Hebrew.");
+                  }
+                }
+
+                // Street
+                String street = ""; // 4
+                if (isHebrewFieldNotBlank(row.getCell(4))) {
+                  street = row.getCell(4).getRichStringCellValue().getString();
+                  if (!containsHebrewChar(street)) {
+                    error.addError(rowIndex, "<br>Street", "<br>&nbsp;&nbsp;" + name + " address Street must be in Hebrew.");
+                  }
+                }
+
+                // Local City
+                if (isHebrewFieldNotBlank(row.getCell(5))) {
+                  localCity = row.getCell(5).getRichStringCellValue().getString();
+                  if (!containsHebrewChar(localCity)) {
+                    error.addError(rowIndex, "<br>Local City", "<br>&nbsp;&nbsp;" + name + " address Local City must be in Hebrew.");
+                  }
+                }
+
+                // Cross-border City
+                if (isHebrewFieldNotBlank(row.getCell(6))) {
+                  cbCity = row.getCell(6).getRichStringCellValue().getString();
+                  if (!containsHebrewChar(cbCity)) {
+                    error.addError(rowIndex, "<br>Cross Border City", "<br>&nbsp;&nbsp;" + name + " address Cross Border City must be in Hebrew.");
+                  }
+                }
               }
             }
           }
         }
+
+        if (error.hasErrors()) {
+          validations.add(error);
+        }
+
       }
-    } else {
-      super.validateMassUpdateTemplateDupFills(validations, book, maxRows, country);
     }
+
+  }
+
+  private static boolean isDivCMR(String cmrNo, String cntry) {
+    boolean isDivestiture = true;
+    String mandt = SystemConfiguration.getValue("MANDT");
+    EntityManager entityManager = JpaManager.getEntityManager();
+    String sql = ExternalizedQuery.getSql("IL.GET.ZS01KATR10");
+
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setForReadOnly(true);
+    query.setParameter("KATR6", cntry);
+    query.setParameter("MANDT", mandt);
+    query.setParameter("CMR", cmrNo);
+
+    Kna1 zs01 = query.getSingleResult(Kna1.class);
+    if (zs01 != null) {
+      if (StringUtils.isBlank(zs01.getKatr10())) {
+        isDivestiture = false;
+      }
+    }
+    return isDivestiture;
+  }
+
+  private boolean containsHebrewChar(String str) {
+    int strLen = str.length();
+    for (int i = 0; i < strLen; i++) {
+      if (Character.UnicodeBlock.HEBREW.equals(Character.UnicodeBlock.of(str.codePointAt(i)))) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private boolean isHebrewFieldNotBlank(XSSFCell cell) {
+    boolean isHebrewFieldNotBlank = false;
+    if (cell != null && cell.getRichStringCellValue() != null && StringUtils.isNotBlank(cell.getRichStringCellValue().getString())) {
+      isHebrewFieldNotBlank = true;
+    }
+    return isHebrewFieldNotBlank;
   }
 
   @Override
