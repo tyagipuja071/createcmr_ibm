@@ -3311,7 +3311,7 @@ function validateGSTForIndia() {
               };
             }
             var results = cmr.query('GET_ZS01', reqParam);
-            if (results != null) {
+            if (results.ret1 != undefined) {
               
               var name = results.ret1;
               var address = results.ret2;
@@ -3476,7 +3476,15 @@ function addressNameSimilarValidator() {
           var reqId = FormManager.getActualValue('reqId');
           var reqType = FormManager.getActualValue('reqType');
           var updateInd = null;
-          var qParams = {
+          qParams_z = {
+              REQ_ID : reqId,
+            };
+            var record = cmr.query('GETZS01VALRECORDS', qParams_z);
+            var zs01Reccount = record.ret1;   
+            if(zs01Reccount == 0){
+              return new ValidationResult(null, true);   
+            }
+            var qParams = {
             REQ_ID : reqId,
             ADDR_TYPE : "ZS01",
           };
@@ -3513,6 +3521,8 @@ function addressNameSimilarValidator() {
           } else {
             return new ValidationResult(null, true);
           }
+        }else{
+          return new ValidationResult(null, true); 
         }
       }
     };
