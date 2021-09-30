@@ -3317,6 +3317,7 @@ function validateGSTForIndia() {
               var address = results.ret2;
               var postal = results.ret3;
               var city = results.ret4;
+              var country = results.ret5;
             }
             var gstRet = cmr.validateGST(country, vat, name, address, postal, city);
             if (!gstRet.success) {
