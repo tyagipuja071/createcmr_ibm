@@ -111,7 +111,9 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
             LOG.debug("No Matches in DNB");
             result.setResults("No Matches");
             result.setDetails("No high quality matches with D&B records. Please import from D&B search.");
-            engineData.addNegativeCheckStatus("DnBMatch", "No high quality matches with D&B records. Please import from D&B search.");
+            if (!SystemLocation.INDIA.equals(data.getCmrIssuingCntry())) {
+              engineData.addNegativeCheckStatus("DnBMatch", "No high quality matches with D&B records. Please import from D&B search.");
+            }
           } else {
             result.setDetails("No high quality matches with D&B records. Please import from D&B search.");
           }
