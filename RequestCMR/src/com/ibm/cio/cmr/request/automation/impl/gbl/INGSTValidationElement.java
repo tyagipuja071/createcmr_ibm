@@ -148,8 +148,9 @@ public class INGSTValidationElement extends ValidatingElement implements Company
     gstLayerRequest.setGst(vat);
     gstLayerRequest.setCountry(state);
     gstLayerRequest.setName((StringUtils.isNotBlank(zs01.getCustNm1()) ? zs01.getCustNm1() : ""));
-    gstLayerRequest.setAddress((StringUtils.isNotBlank(zs01.getAddrTxt()) ? zs01.getAddrTxt() : "")
-        + (StringUtils.isNotBlank(zs01.getAddrTxt2()) ? " " + zs01.getAddrTxt2() : ""));
+    gstLayerRequest.setAddress((StringUtils.isNotBlank(zs01.getAddrTxt()) ? zs01.getAddrTxt() : "") + " "
+        + (StringUtils.isNotBlank(zs01.getAddrTxt2()) ? " " + zs01.getAddrTxt2() : "") + " "
+        + (StringUtils.isNotBlank(zs01.getDept()) ? " " + zs01.getDept() : ""));
     gstLayerRequest.setCity(zs01.getCity1());
     gstLayerRequest.setPostal(zs01.getPostCd());
 
