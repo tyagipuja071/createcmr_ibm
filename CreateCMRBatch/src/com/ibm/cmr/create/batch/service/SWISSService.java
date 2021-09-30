@@ -1992,6 +1992,7 @@ public class SWISSService extends TransConnService {
     } catch (Exception e) {
       LOG.error("Error in processing Update Request " + admin.getId().getReqId(), e);
       addError("Update Request " + admin.getId().getReqId() + " Error: " + e.getMessage());
+      throw e;
     }
   }
 
