@@ -306,7 +306,7 @@ public class NordicsUtil extends AutomationUtil {
           }
         }
 
-        if ("No Match Found".equalsIgnoreCase(response.get("MATCHING"))) {
+        if ("No Match Found.".equalsIgnoreCase(response.get("MATCHING"))) {
           details.append("Coverage couldn't be calculated through 34Q logic as no match found.\n").append("\n");
         }
 
