@@ -84,8 +84,6 @@ function afterConfigForIsrael() {
     setCodFlagVal();
   }
 
-  setChecklistStatus();
-  addILChecklistValidator();
 }
 
 function setChecklistStatus() {
@@ -95,7 +93,7 @@ function setChecklistStatus() {
   if (reqType == 'U') {
     return;
   }
-  if (custSubScnrio != 'CROSS') {
+  if (custSubScnrio == 'CROSS') {
     return;
   }
   console.log('validating checklist..');
@@ -134,7 +132,7 @@ function addILChecklistValidator() {
   if (reqType == 'U') {
     return;
   }
-  if (custSubScnrio != 'CROSS') {
+  if (custSubScnrio == 'CROSS') {
     return;
   }
   FormManager.addFormValidator((function() {
@@ -142,27 +140,6 @@ function addILChecklistValidator() {
       validate : function() {
         console.log('validating checklist..');
         var checklist = dojo.query('table.checklist');
-
-        // local address name if found
-        var localAddr = checklist.query('input[name="localAddr"]');
-        if (localAddr.length > 0 && localAddr[0].value.trim() == '') {
-          return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
-        }
-
-        var freeTxtField1 = checklist.query('input[name="freeTxtField1"]');
-        if (freeTxtField1.length > 0 && freeTxtField1[0].value.trim() == '') {
-          return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
-        }
-
-        var freeTxtField2 = checklist.query('input[name="freeTxtField2"]');
-        if (freeTxtField2.length > 0 && freeTxtField2[0].value.trim() == '') {
-          return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
-        }
-
-        var freeTxtField3 = checklist.query('input[name="freeTxtField3"]');
-        if (freeTxtField3.length > 0 && freeTxtField3[0].value.trim() == '') {
-          return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
-        }
 
         var questions = checklist.query('input[type="radio"]');
         if (questions.length > 0) {
@@ -1177,7 +1154,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setAbbrvLocCrossBorderScenario, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(setAbbrvLocCrossBorderScenarioOnChange, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(setChecklistStatus, [ SysLoc.ISRAEL ]);
-  GEOHandler.registerValidator(addILChecklistValidator, [ SysLoc.ISRAEL ]);
+  GEOHandler.registerValidator(addILChecklistValidator, [ SysLoc.ISRAEL ], null, true);
 
   /* 1438717 - add DPL match validation for failed dpl checks */
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.EMEA, GEOHandler.ROLE_PROCESSOR, true);

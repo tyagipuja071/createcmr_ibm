@@ -56,16 +56,16 @@
     <span style="font-weight: bold; text-decoration: underline">Chemical or Biological Weapons:</span>
       a) To the best of your knowledge or belief is your customer involved in any activity related to or in support of the design, development, production, operation, stockpiling, installation (including on-site installation), maintenance (checking), repair, overhaul, refurbishing, or use of Chemical or Biological Weapons? 
     </cmr:chk-entry>
-    <cmr:chk-entry number="2" section="B">
+    <cmr:chk-entry number="3" section="B">
 	  b) To the best of your knowledge or belief is your customer involved in any activity related to or in support of the design, development, production, operation, installation (including on-site installation), maintenance (checking), repair, overhaul, refurbishing of a chemical plant? 
 	  (<span style="font-weight: bold;">NOTE:</span> Questions B and C <span style="font-weight: bold;">do not apply</span> to IBM business by or in any of the following countries - Argentina, Australia, Austria, Belgium, Bulgaria, Canada, Croatia, Cyprus, Czech Republic, Denmark, Estonia, European Union, Finland, France, Germany, Greece, Hungary, Iceland, India, Ireland, Italy, Japan, Latvia, Lithuania, Luxembourg, Malta, Mexico, Netherlands, New Zealand, Norway, Poland, Portugal, South Korea, Turkey, Romania, Slovakia, Slovenia, Spain, Sweden, Switzerland, Ukraine, United Kingdom, United States)
     </cmr:chk-entry>
-    <cmr:chk-entry number="2" section="B">
+    <cmr:chk-entry number="4" section="B">
       c) If yes to b above, is your customer involved in any activity related to, or in support of: the design, development, production, operation, installation (including on-site installation), maintenance (checking), repair, overhaul, refurbishing of a whole plant of chemical weapons precursors specified in export control classification number<a href="https://www.bis.doc.gov/index.php/documents/regulations-docs/2332-category-1-materials-chemicals-microorganisms-and-toxins-4/file"> (ECCN) 1C350</a>? <br>
       (USERP Section 4, Part 2.3.3)     
       Afghanistan, Armenia, Azerbaijan, Bahrain, Belarus, People's Republic of China, Cuba, Egypt, Georgia, Iran, Iraq, Israel, Jordan, Kazakhstan, Korea (North), Kuwait, Kyrgyzstan, Lebanon, Libya, Macau, Moldova, Mongolia, Myanmar (Burma), Oman, Pakistan, Qatar, Russia, Saudi Arabia, Syria, Taiwan, Tajikistan, Turkmenistan, Ukraine, United Arab Emirates, Uzbekistan, Venezuela, Vietnam & Yemen.          
     </cmr:chk-entry>
-    <cmr:chk-entry number="3" section="B">
+    <cmr:chk-entry number="5" section="B">
       <span style="font-weight: bold; text-decoration: underline">Nuclear:</span>
       To the best of your knowledge or belief is your customer involved in nuclear activities in any of the countries listed below?
       (USERP Section 4, Part 2.3.2)    <br>
