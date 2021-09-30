@@ -1345,6 +1345,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     kunnrExt = getKunnrExtByKunnr(entityManager, kna1.getId().getMandt(), kna1.getId().getKunnr());
     kunnrExtClone = getKunnrExtByKunnr(entityManager, kna1Clone.getId().getMandt(), kna1Clone.getId().getKunnr());
     if (kunnrExt != null && kunnrExt.size() > 0 && kunnrExtClone.size() == 0) {
+      LOG.info("Inside KUNNR_EXT record Insert with KUNNR " + kna1.getId().getKunnr());
       try {
         for (KunnrExt current : kunnrExt) {
           cloneInsert = new KunnrExt();
@@ -1369,7 +1370,30 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
         LOG.debug("Error in copy kunnrext :", e);
       }
     } else {
-      LOG.info("KUNNR_EXT record not exist with KUNNR " + kna1.getId().getKunnr());
+      LOG.info("Inside KUNNR_EXT record updating with KUNNR " + kna1.getId().getKunnr());
+      try {
+        for (KunnrExt current : kunnrExt) {
+          KunnrExtPK pk = new KunnrExtPK();
+          pk.setKunnr(kna1Clone.getId().getKunnr());
+          pk.setMandt(kna1Clone.getId().getMandt());
+
+          KunnrExt cloneInsertKE = entityManager.find(KunnrExt.class, pk);
+
+          PropertyUtils.copyProperties(cloneInsertKE, current);
+
+          overrideConfigChanges(entityManager, overrideValues, cloneInsertKE, "KUNNR_EXT", pk);
+
+          cloneInsertKE.setId(pk);
+
+          cloneInsertKE.setUpdateInd("U");
+          cloneInsertKE.setUpdateTs(ts);
+
+          updateEntity(cloneInsertKE, entityManager);
+        }
+
+      } catch (Exception e) {
+        LOG.debug("Error in updating kunnrext :", e);
+      }
     }
 
   }
