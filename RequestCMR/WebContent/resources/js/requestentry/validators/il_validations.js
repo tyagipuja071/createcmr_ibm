@@ -89,13 +89,11 @@ function afterConfigForIsrael() {
 function setChecklistStatus() {
 
   reqType = FormManager.getActualValue('reqType');
-  var custSubScnrio = FormManager.getActualValue('custSubGrp');
+
   if (reqType == 'U') {
     return;
   }
-  if (custSubScnrio == 'CROSS') {
-    return;
-  }
+
   console.log('validating checklist..');
   var checklist = dojo.query('table.checklist');
   document.getElementById("checklistStatus").innerHTML = "Not Done";
@@ -128,16 +126,18 @@ function setChecklistStatus() {
 function addILChecklistValidator() {
 
   reqType = FormManager.getActualValue('reqType');
-  var custSubScnrio = FormManager.getActualValue('custSubGrp');
+
   if (reqType == 'U') {
     return;
   }
-  if (custSubScnrio == 'CROSS') {
-    return;
-  }
+
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
+        custSubScnrio = FormManager.getActualValue('custSubGrp');
+        if (custSubScnrio == 'CROSS') {
+          return;
+        }
         console.log('validating checklist..');
         var checklist = dojo.query('table.checklist');
 
