@@ -956,6 +956,13 @@ public class IsraelHandler extends EMEAHandler {
             }
 
             if (!name.equals("Data")) {
+              // Validate Addr Sequence No
+              String addrSeqNo = ""; // 1
+              addrSeqNo = validateColValFromCell(row.getCell(1));
+              if (StringUtils.isNotBlank(cmrNo) && StringUtils.isBlank(addrSeqNo)) {
+                error.addError(rowIndex, "<br>Address Seq. No.", "<br>&nbsp;&nbsp;Address Sequence No is required.");
+              }
+
               String localCity = ""; // 5
               String cbCity = ""; // 6
               String localPostalCode = ""; // 7
@@ -1033,6 +1040,13 @@ public class IsraelHandler extends EMEAHandler {
 
       }
     }
+    // compare sheet with translation
+    // Mailing vs Country Use A
+    compareAddressSheets(book.getSheet(sheetNames[1]), book.getSheet(sheetNames[6]), maxRows, validations);
+    // Billing vs Country Use B
+    compareAddressSheets(book.getSheet(sheetNames[2]), book.getSheet(sheetNames[7]), maxRows, validations);
+    // Shipping vs Country Use C
+    compareAddressSheets(book.getSheet(sheetNames[4]), book.getSheet(sheetNames[8]), maxRows, validations);
 
   }
 
@@ -1104,6 +1118,70 @@ public class IsraelHandler extends EMEAHandler {
     } else {
       return super.hasChecklist(cmrIssiungCntry);
     }
+  }
+
+  private void compareAddressSheets(XSSFSheet sheet1, XSSFSheet sheet2, int maxRows, List<TemplateValidation> validations) {
+    if (sheet1 != null && sheet2 != null) {
+      int firstRow1 = sheet1.getFirstRowNum();
+      TemplateValidation error = new TemplateValidation(sheet1.getSheetName() + " - " + sheet2.getSheetName());
+      for (int i = firstRow1 + 1; i <= maxRows; i++) {
+        XSSFRow rowA = sheet1.getRow(i);
+        XSSFRow rowB = sheet2.getRow(i);
+        if (rowA == null && rowB == null) {
+          i = maxRows;
+          break;
+        }
+
+        if (!compareTwoRows(rowA, rowB, error)) {
+          error.addError(i, "<br>Mismatch",
+              "<br>&nbsp;&nbsp;Same fields needs to be filled for both " + sheet1.getSheetName() + " and " + sheet2.getSheetName() + " address.");
+        }
+      }
+      if (error.hasErrors()) {
+        validations.add(error);
+      }
+    }
+  }
+
+  private boolean compareTwoRows(XSSFRow rowA, XSSFRow rowB, TemplateValidation error) {
+    boolean isRowEqual = true;
+    if (rowA == null && rowB == null) {
+      return isRowEqual;
+    } else if ((rowA != null && rowB == null) || (rowA == null && rowB != null)) {
+      return false;
+    } else if (rowA != null && rowB != null) {
+      // compare CMR No if same
+      String cmrNoA = validateColValFromCell(rowA.getCell(0));
+      String cmrNoB = validateColValFromCell(rowB.getCell(0));
+      if ((StringUtils.isNotBlank(cmrNoA) && StringUtils.isNotBlank(cmrNoB) && !cmrNoA.equals(cmrNoB))
+          || (StringUtils.isBlank(cmrNoA) && StringUtils.isNotBlank(cmrNoB)) || (StringUtils.isNotBlank(cmrNoA) && StringUtils.isBlank(cmrNoB))) {
+        error.addError(rowA.getRowNum(), "<br>CMR No.", "<br>&nbsp;&nbsp;CMR No. does not match.");
+        return false;
+      }
+
+      // compare Address Seq No if same
+      String addrSeqNoA = validateColValFromCell(rowA.getCell(1));
+      String addrSeqNoB = validateColValFromCell(rowB.getCell(1));
+      if ((StringUtils.isNotBlank(addrSeqNoA) && StringUtils.isNotBlank(addrSeqNoB) && !addrSeqNoA.equals(addrSeqNoB))
+          || (StringUtils.isBlank(addrSeqNoA) && StringUtils.isNotBlank(addrSeqNoB))
+          || (StringUtils.isNotBlank(addrSeqNoA) && StringUtils.isBlank(addrSeqNoB))) {
+        error.addError(rowA.getRowNum(), "<br>CMR No.", "<br>&nbsp;&nbsp;Address Sequence No. does not match.");
+        return false;
+      }
+
+      // Iterate other fields if filled-out the same
+      int lastCell = rowA.getLastCellNum();
+      for (int i = 2; i <= lastCell; i++) {
+        String currCellA = validateColValFromCell(rowA.getCell(i));
+        String currCellB = validateColValFromCell(rowB.getCell(i));
+        if ((StringUtils.isNotBlank(currCellA) && StringUtils.isBlank(currCellB))
+            || (StringUtils.isBlank(currCellA) && StringUtils.isNotBlank(currCellB))) {
+          return false;
+        }
+      }
+    }
+
+    return isRowEqual;
   }
 
 }
