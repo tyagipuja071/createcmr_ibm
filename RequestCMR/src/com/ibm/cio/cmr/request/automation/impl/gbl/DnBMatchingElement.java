@@ -65,6 +65,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
     Addr soldTo = requestData.getAddress("ZS01");
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
+    String scenario = data.getCustSubGrp();
     GEOHandler handler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
     ScenarioExceptionsUtil scenarioExceptions = getScenarioExceptions(entityManager, requestData, engineData);
     AutomationResult<MatchingOutput> result = buildResult(admin.getId().getReqId());
@@ -81,7 +82,8 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
           "D&B matches were chosen to be overridden by the requester.\nSupporting documentation is provided by the requester as attachment.");
       admin.setCompVerifiedIndc("O");
       override = true;
-      if (!SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry())) {
+      if (!SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry())
+          && !(SystemLocation.INDIA.equals(data.getCmrIssuingCntry()) && !(StringUtils.isBlank(data.getVat()) || "CROSS".equals(scenario)))) {
         List<String> dnbOverrideCountryList = SystemParameters.getList("DNB_OVR_CNTRY_LIST");
         if ((dnbOverrideCountryList == null || !dnbOverrideCountryList.contains(data.getCmrIssuingCntry()))) {
           engineData.addNegativeCheckStatus("_dnbOverride", "D&B matches were chosen to be overridden by the requester.");
@@ -99,7 +101,6 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
         StringBuilder details = new StringBuilder();
         List<DnBMatchingResponse> dnbMatches = response.getMatches();
         engineData.put(AutomationEngineData.DNB_ALL_MATCHES, dnbMatches);
-        String scenario = data.getCustSubGrp();
         if (!hasValidMatches) {
           // if no valid matches - do not process records
           scorecard.setDnbMatchingResult("N");
