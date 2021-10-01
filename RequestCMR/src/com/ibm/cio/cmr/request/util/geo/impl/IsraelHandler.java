@@ -949,13 +949,20 @@ public class IsraelHandler extends EMEAHandler {
             String cmrNo = ""; // 0
             cmrNo = validateColValFromCell(row.getCell(0));
             if (StringUtils.isBlank(cmrNo)) {
-              error.addError(rowIndex, "<br>CMR No.", "<br>&nbsp;&nbsp;CMR number is required.");
+              error.addError(rowIndex, "<br>CMR No.", "CMR number is required.");
             } else if (isDivCMR(cmrNo, country)) {
               error.addError(rowIndex, "<br>CMR No.",
-                  "<br>&nbsp;&nbsp;Note the entered CMR number is either cancelled, divestiture or doesn't exist. Please check the template and correct.");
+                  "Note the entered CMR number is either cancelled, divestiture or doesn't exist. Please check the template and correct.");
             }
 
             if (!name.equals("Data")) {
+              // Validate Addr Sequence No
+              String addrSeqNo = ""; // 1
+              addrSeqNo = validateColValFromCell(row.getCell(1));
+              if (StringUtils.isNotBlank(cmrNo) && StringUtils.isBlank(addrSeqNo)) {
+                error.addError(rowIndex, "<br>Address Seq. No.", "Address Sequence No is required.");
+              }
+
               String localCity = ""; // 5
               String cbCity = ""; // 6
               String localPostalCode = ""; // 7
@@ -965,7 +972,7 @@ public class IsraelHandler extends EMEAHandler {
               cbCity = validateColValFromCell(row.getCell(6));
               if (StringUtils.isNotBlank(localCity) && StringUtils.isNotBlank(cbCity)) {
                 error.addError(rowIndex, "<br>Local City",
-                    "<br>&nbsp;&nbsp;Local City and Cross Border City must not be populated at the same time. If one is populated, the other must be empty.");
+                    "Local City and Cross Border City must not be populated at the same time. If one is populated, the other must be empty.");
               }
 
               // validate Local and cross-border postal code
@@ -973,7 +980,7 @@ public class IsraelHandler extends EMEAHandler {
               cbPostalCode = validateColValFromCell(row.getCell(8));
               if (StringUtils.isNotBlank(localPostalCode) && StringUtils.isNotBlank(cbPostalCode)) {
                 error.addError(rowIndex, "<br>Local Postal Code",
-                    "<br>&nbsp;&nbsp;Local Postal Code and Cross Border Postal Code must not be populated at the same time. "
+                    "Local Postal Code and Cross Border Postal Code must not be populated at the same time. "
                         + "If one is populated, the other must be empty.");
               }
 
@@ -984,7 +991,7 @@ public class IsraelHandler extends EMEAHandler {
                 if (isHebrewFieldNotBlank(row.getCell(2))) {
                   custName = row.getCell(2).getRichStringCellValue().getString();
                   if (!containsHebrewChar(custName)) {
-                    error.addError(rowIndex, "<br>Customer Name", "<br>&nbsp;&nbsp;" + name + " address Customer Name must be in Hebrew.");
+                    error.addError(rowIndex, "<br>Customer Name", name + " address Customer Name must be in Hebrew.");
                   }
                 }
 
@@ -993,8 +1000,7 @@ public class IsraelHandler extends EMEAHandler {
                 if (isHebrewFieldNotBlank(row.getCell(3))) {
                   custNameCont = row.getCell(3).getRichStringCellValue().getString();
                   if (!containsHebrewChar(custNameCont)) {
-                    error.addError(rowIndex, "<br>Customer Name Continuation",
-                        "<br>&nbsp;&nbsp;" + name + " address Customer Name Continuation must be in Hebrew.");
+                    error.addError(rowIndex, "<br>Customer Name Continuation", name + " address Customer Name Continuation must be in Hebrew.");
                   }
                 }
 
@@ -1003,7 +1009,7 @@ public class IsraelHandler extends EMEAHandler {
                 if (isHebrewFieldNotBlank(row.getCell(4))) {
                   street = row.getCell(4).getRichStringCellValue().getString();
                   if (!containsHebrewChar(street)) {
-                    error.addError(rowIndex, "<br>Street", "<br>&nbsp;&nbsp;" + name + " address Street must be in Hebrew.");
+                    error.addError(rowIndex, "<br>Street", name + " address Street must be in Hebrew.");
                   }
                 }
 
@@ -1011,7 +1017,7 @@ public class IsraelHandler extends EMEAHandler {
                 if (isHebrewFieldNotBlank(row.getCell(5))) {
                   localCity = row.getCell(5).getRichStringCellValue().getString();
                   if (!containsHebrewChar(localCity)) {
-                    error.addError(rowIndex, "<br>Local City", "<br>&nbsp;&nbsp;" + name + " address Local City must be in Hebrew.");
+                    error.addError(rowIndex, "<br>Local City", name + " address Local City must be in Hebrew.");
                   }
                 }
 
@@ -1019,7 +1025,7 @@ public class IsraelHandler extends EMEAHandler {
                 if (isHebrewFieldNotBlank(row.getCell(6))) {
                   cbCity = row.getCell(6).getRichStringCellValue().getString();
                   if (!containsHebrewChar(cbCity)) {
-                    error.addError(rowIndex, "<br>Cross Border City", "<br>&nbsp;&nbsp;" + name + " address Cross Border City must be in Hebrew.");
+                    error.addError(rowIndex, "<br>Cross Border City", name + " address Cross Border City must be in Hebrew.");
                   }
                 }
               }
@@ -1033,6 +1039,13 @@ public class IsraelHandler extends EMEAHandler {
 
       }
     }
+    // compare sheet with translation
+    // Mailing vs Country Use A
+    compareAddressSheets(book.getSheet(sheetNames[1]), book.getSheet(sheetNames[6]), maxRows, validations);
+    // Billing vs Country Use B
+    compareAddressSheets(book.getSheet(sheetNames[2]), book.getSheet(sheetNames[7]), maxRows, validations);
+    // Shipping vs Country Use C
+    compareAddressSheets(book.getSheet(sheetNames[4]), book.getSheet(sheetNames[8]), maxRows, validations);
 
   }
 
@@ -1104,6 +1117,70 @@ public class IsraelHandler extends EMEAHandler {
     } else {
       return super.hasChecklist(cmrIssiungCntry);
     }
+  }
+
+  private void compareAddressSheets(XSSFSheet sheet1, XSSFSheet sheet2, int maxRows, List<TemplateValidation> validations) {
+    if (sheet1 != null && sheet2 != null) {
+      int firstRow1 = sheet1.getFirstRowNum();
+      TemplateValidation error = new TemplateValidation(sheet1.getSheetName() + " - " + sheet2.getSheetName());
+      for (int i = firstRow1 + 1; i <= maxRows; i++) {
+        XSSFRow rowA = sheet1.getRow(i);
+        XSSFRow rowB = sheet2.getRow(i);
+        if (rowA == null && rowB == null) {
+          i = maxRows;
+          break;
+        }
+
+        if (!compareTwoRows(rowA, rowB, error)) {
+          error.addError(i, "<br>Mismatch",
+              "Same fields needs to be filled for both " + sheet1.getSheetName() + " and " + sheet2.getSheetName() + " address.");
+        }
+      }
+      if (error.hasErrors()) {
+        validations.add(error);
+      }
+    }
+  }
+
+  private boolean compareTwoRows(XSSFRow rowA, XSSFRow rowB, TemplateValidation error) {
+    boolean isRowEqual = true;
+    if (rowA == null && rowB == null) {
+      return isRowEqual;
+    } else if ((rowA != null && rowB == null) || (rowA == null && rowB != null)) {
+      return false;
+    } else if (rowA != null && rowB != null) {
+      // compare CMR No if same
+      String cmrNoA = validateColValFromCell(rowA.getCell(0));
+      String cmrNoB = validateColValFromCell(rowB.getCell(0));
+      if ((StringUtils.isNotBlank(cmrNoA) && StringUtils.isNotBlank(cmrNoB) && !cmrNoA.equals(cmrNoB))
+          || (StringUtils.isBlank(cmrNoA) && StringUtils.isNotBlank(cmrNoB)) || (StringUtils.isNotBlank(cmrNoA) && StringUtils.isBlank(cmrNoB))) {
+        error.addError(rowA.getRowNum(), "<br>CMR No.", "CMR No. does not match.");
+        return false;
+      }
+
+      // compare Address Seq No if same
+      String addrSeqNoA = validateColValFromCell(rowA.getCell(1));
+      String addrSeqNoB = validateColValFromCell(rowB.getCell(1));
+      if ((StringUtils.isNotBlank(addrSeqNoA) && StringUtils.isNotBlank(addrSeqNoB) && !addrSeqNoA.equals(addrSeqNoB))
+          || (StringUtils.isBlank(addrSeqNoA) && StringUtils.isNotBlank(addrSeqNoB))
+          || (StringUtils.isNotBlank(addrSeqNoA) && StringUtils.isBlank(addrSeqNoB))) {
+        error.addError(rowA.getRowNum(), "<br>CMR No.", "Address Sequence No. does not match.");
+        return false;
+      }
+
+      // Iterate other fields if filled-out the same
+      int lastCell = rowA.getLastCellNum();
+      for (int i = 2; i <= lastCell; i++) {
+        String currCellA = validateColValFromCell(rowA.getCell(i));
+        String currCellB = validateColValFromCell(rowB.getCell(i));
+        if ((StringUtils.isNotBlank(currCellA) && StringUtils.isBlank(currCellB))
+            || (StringUtils.isBlank(currCellA) && StringUtils.isNotBlank(currCellB))) {
+          return false;
+        }
+      }
+    }
+
+    return isRowEqual;
   }
 
 }
