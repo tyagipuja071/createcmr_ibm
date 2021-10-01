@@ -39,7 +39,7 @@ public class EUVatValidationElement extends ValidatingElement implements Company
 
   private static final Logger LOG = Logger.getLogger(EUVatValidationElement.class);
   private static final List<String> EU_COUNTRIES = Arrays.asList("BE", "AT", "BG", "CY", "CZ", "DE", "DK", "EE", "EL", "ES", "FI", "FR", "GB", "HR",
-      "HU", "IE", "IT", "LT", "LU", "LV", "MT", "NL", "PL", "PT", "RO", "SE", "SI", "SK");
+      "HU", "IE", "IT", "LT", "LU", "LV", "MT", "NL", "PL", "PT", "RO", "SE", "SI", "SK", "IS", "FO", "GL");
 
   public EUVatValidationElement(String requestTypes, String actionOnError, boolean overrideData, boolean stopOnError) {
     super(requestTypes, actionOnError, overrideData, stopOnError);
@@ -121,7 +121,7 @@ public class EUVatValidationElement extends ValidatingElement implements Company
               output.setDetails(details.toString());
               engineData.setCompanySource("VIES");
               updateEntity(admin, entityManager);
-            } else if (data.getCustSubGrp().equals("PUBCU") && SystemLocation.NETHERLANDS.equals(data.getCmrIssuingCntry())) {
+            } else if (SystemLocation.NETHERLANDS.equals(data.getCmrIssuingCntry()) && "PUBCU".equalsIgnoreCase(data.getCustSubGrp())) {
               validation.setSuccess(true);
               validation.setMessage("Review needed.");
               output.setDetails("VAT is invalid. Need review.");
@@ -192,11 +192,10 @@ public class EUVatValidationElement extends ValidatingElement implements Company
 
   private String getLandedCountryForVies(String cmrIssuingCntry, String landCntry, String countryUse) {
     String defaultLandedCountry = PageManager.getDefaultLandedCountry(cmrIssuingCntry);
-    List<String> dkSubRegion = Arrays.asList("IS", "FO", "GL");
     String subRegion = !StringUtils.isBlank(countryUse) && countryUse.length() > 3 ? countryUse.substring(3) : "";
-    if (StringUtils.isNotBlank(subRegion) && (EU_COUNTRIES.contains(subRegion) || dkSubRegion.contains(subRegion))) {
-      // if subregion is part of EU countries eligible for VAT matching, use
-      // subregion as default country
+    // if subregion is part of EU countries eligible for VAT matching, use
+    // subregion as default country
+    if (StringUtils.isNotBlank(subRegion) && EU_COUNTRIES.contains(subRegion)) {
       defaultLandedCountry = subRegion;
     }
     if (!landCntry.equals(defaultLandedCountry) && !landCntry.equals(subRegion)) {
