@@ -3284,6 +3284,7 @@ function validateStreetAddrCont2() {
 
 // API call for validating GST for India on Save Request and Send for Processing
 function validateGSTForIndia() {
+
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
@@ -3317,7 +3318,18 @@ function validateGSTForIndia() {
               var address = results.ret2;
               var postal = results.ret3;
               var city = results.ret4;
-            
+              var state = results.ret5;
+              var country = '';
+              
+              if (state != null && state != '') {
+                reqParam = {
+                    STATE_PROV_CD : state,
+                  };
+              var stateResult = cmr.query('GET_STATE_DESC', reqParam);
+                if (stateResult != null) {
+                  country = stateResult.ret1;
+                }
+              }
             var gstRet = cmr.validateGST(country, vat, name, address, postal, city);
             if (!gstRet.success) {
               return new ValidationResult({
@@ -3328,10 +3340,10 @@ function validateGSTForIndia() {
             } else {
               return new ValidationResult(null, true);
             }
-          }else{
-            return new ValidationResult(null, true);
-          }
+            }else {
+              return new ValidationResult(null, true);
             }
+          }
         } else {
           return new ValidationResult(null, true);
         }

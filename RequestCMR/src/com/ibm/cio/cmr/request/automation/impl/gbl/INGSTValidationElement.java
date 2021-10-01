@@ -21,6 +21,9 @@ import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cmr.services.client.AutomationServiceClient;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.ServiceClient.Method;
@@ -61,37 +64,65 @@ public class INGSTValidationElement extends ValidatingElement implements Company
       return output;
     }
 
+    // skip sos matching if matching records are found in SOS-RPA
+
+    if (engineData.isDnbVerified() || "Y".equals(admin.getCompVerifiedIndc())) {
+      validation.setSuccess(true);
+      validation.setMessage("Skipped");
+      output.setResults("Skipped");
+      output.setDetails("Name and Address Matching is skipped as matching records are found in DnB");
+      engineData.addPositiveCheckStatus(AutomationEngineData.DNB_MATCH);
+      return output;
+    }
+
     Addr zs01 = requestData.getAddress("ZS01");
     StringBuilder details = new StringBuilder();
 
     if (zs01 != null) {
-      AutomationResponse<GstLayerResponse> response = getGstMatches(admin.getId().getReqId(), zs01, data.getVat());
-      if (response != null && response.isSuccess() && response.getMessage().equals("Valid GST and Company Name entered on the Request")) {
+      AutomationResponse<GstLayerResponse> response = getGstMatches(entityManager, admin.getId().getReqId(), zs01, data.getVat());
+      if (response != null && response.isSuccess() && response.getMessage().equals("Valid Address and Company Name entered on the Request")) {
         admin.setCompVerifiedIndc("Y");
         validation.setSuccess(true);
         validation.setMessage("Successful Execution");
         log.debug(response.getMessage());
-        details.append("Record found in GST service : GST and Company Name Validated");
-        details.append("\nCustomer Name = " + (StringUtils.isBlank(response.getRecord().getName()) ? "" : response.getRecord().getName()));
-        details.append("\nGST = " + (StringUtils.isBlank(response.getRecord().getGst()) ? "" : response.getRecord().getGst()));
-        details.append("\nAddress = " + (StringUtils.isBlank(response.getRecord().getAddress()) ? "" : response.getRecord().getAddress()));
-        details.append("\nCity = " + (StringUtils.isBlank(response.getRecord().getCity()) ? "" : response.getRecord().getCity()));
-        details.append("\nState = " + (StringUtils.isBlank(response.getRecord().getState()) ? "" : response.getRecord().getState()));
-        details.append("\nZip = " + (StringUtils.isBlank(response.getRecord().getPostal()) ? "" : response.getRecord().getPostal()));
-        output.setDetails(details.toString());
+        details.append("Record found in GST service : Address and Company Name Validated on API");
+        /*
+         * details.append("\nCustomer Name = " +
+         * (StringUtils.isBlank(response.getRecord().getName()) ? "" :
+         * response.getRecord().getName())); details.append("\nGST = " +
+         * (StringUtils.isBlank(response.getRecord().getGst()) ? "" :
+         * response.getRecord().getGst())); details.append("\nAddress = " +
+         * (StringUtils.isBlank(response.getRecord().getAddress()) ? "" :
+         * response.getRecord().getAddress())); details.append("\nCity = " +
+         * (StringUtils.isBlank(response.getRecord().getCity()) ? "" :
+         * response.getRecord().getCity())); details.append("\nState = " +
+         * (StringUtils.isBlank(response.getRecord().getState()) ? "" :
+         * response.getRecord().getState())); details.append("\nZip = " +
+         * (StringUtils.isBlank(response.getRecord().getPostal()) ? "" :
+         * response.getRecord().getPostal()));
+         */
       } else {
-        validation.setSuccess(true);
-        validation.setMessage("GST on the Request is not validated with GST Service");
-        output.setDetails(response.getMessage());
-        log.debug(response.getMessage());
+        // company proof
+        if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+          details.append("No High Quality API Matches were found for name and address.").append("\n");
+          details.append("Supporting documentation(Company Proof) is provided by the requester as attachment").append("\n");
+        } else {
+          details.append("No High Quality API Matches were found for name and address.").append("\n");
+          details.append("\nNo supporting documentation is provided by the requester for address.").append("\n");
+        }
+        output.setOnError(false);
+        validation.setMessage("No Matches");
+        validation.setSuccess(false);
+        engineData.addNegativeCheckStatus("OTH", "Matches against API were found but no record matched the request data.");
       }
     }
+    output.setDetails(details.toString());
     output.setResults(validation.getMessage());
     output.setProcessOutput(validation);
     return output;
   }
 
-  private AutomationResponse<GstLayerResponse> getGstMatches(long reqId, Addr zs01, String vat) throws Exception {
+  private AutomationResponse<GstLayerResponse> getGstMatches(EntityManager entityManager, long reqId, Addr zs01, String vat) throws Exception {
 
     log.debug("Validating GST# " + vat + " for India");
 
@@ -104,11 +135,22 @@ public class INGSTValidationElement extends ValidatingElement implements Company
     log.debug("Calling GST Layer Service for Req_id : " + reqId);
 
     GstLayerRequest gstLayerRequest = new GstLayerRequest();
+    String state = zs01.getStateProv();
+    if (StringUtils.isNotBlank(state)) {
+      String sql = ExternalizedQuery.getSql("AUTO.GET_STATE_DESCRIP");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("STATE_PROV_CD", state);
+      String stateDesc = query.getSingleResult(String.class);
+      if (StringUtils.isNotBlank(stateDesc)) {
+        state = stateDesc;
+      }
+    }
     gstLayerRequest.setGst(vat);
-    gstLayerRequest.setCountry("IN");
+    gstLayerRequest.setCountry(state);
     gstLayerRequest.setName((StringUtils.isNotBlank(zs01.getCustNm1()) ? zs01.getCustNm1() : ""));
-    gstLayerRequest.setAddress((StringUtils.isNotBlank(zs01.getAddrTxt()) ? zs01.getAddrTxt() : "")
-        + (StringUtils.isNotBlank(zs01.getAddrTxt2()) ? " " + zs01.getAddrTxt2() : ""));
+    gstLayerRequest.setAddress((StringUtils.isNotBlank(zs01.getAddrTxt()) ? zs01.getAddrTxt() : "") + " "
+        + (StringUtils.isNotBlank(zs01.getAddrTxt2()) ? " " + zs01.getAddrTxt2() : "") + " "
+        + (StringUtils.isNotBlank(zs01.getDept()) ? " " + zs01.getDept() : ""));
     gstLayerRequest.setCity(zs01.getCity1());
     gstLayerRequest.setPostal(zs01.getPostCd());
 
