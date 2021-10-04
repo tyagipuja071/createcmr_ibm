@@ -1135,7 +1135,7 @@ function autoSetAbbrevNmLocnLogic() {
   case SysLoc.SINGAPORE:
     if (custSubGrp != null && custSubGrp.length > 0 && custNm1) {
       if (custSubGrp == "DUMMY") {
-        _abbrevNm = "DUMMY_" + custNm1;
+        _abbrevNm = "IGF INTERNAL_" + custNm1;
       } else if (custSubGrp == "BLUMX" || custSubGrp == "XBLUM") {
         _abbrevNm = "BLUEMIX_" + custNm1;
       } else if (custSubGrp == "MKTPC" || custSubGrp == "XMKTP") {
@@ -1171,7 +1171,7 @@ function autoSetAbbrevNmLocnLogic() {
   case SysLoc.MALASIA:
     if (custSubGrp != null && custSubGrp.length > 0 && custNm1) {
       if (custSubGrp == "DUMMY" || custSubGrp == "XDUMM") {
-        _abbrevNm = "DUMMY_" + custNm1;
+        _abbrevNm = "IGF INTERNAL_" + custNm1;
       } else if (custSubGrp == "ASLOM" || custSubGrp == "XASLM") {
         _abbrevNm = "ESA_" + custNm1;
       } else if (custSubGrp == "SOFT" || custSubGrp == "XSOFT") {
@@ -1206,7 +1206,7 @@ function autoSetAbbrevNmLocnLogic() {
   case SysLoc.BRUNEI:
     if (custSubGrp != null && custSubGrp.length > 0 && custNm1) {
       if (custSubGrp == "DUMMY" || custSubGrp == "XDUMM") {
-        _abbrevNm = "DUMMY_" + custNm1;
+        _abbrevNm = "IGF INTERNAL_" + custNm1;
       } else if (custSubGrp == "ASLOM" || custSubGrp == "XASLM") {
         _abbrevNm = "ESA_" + custNm1;
       } else if (custSubGrp == "SOFT" || custSubGrp == "XSOFT") {
@@ -1239,7 +1239,7 @@ function autoSetAbbrevNmLocnLogic() {
   case SysLoc.VIETNAM:
     if (custSubGrp != null && custSubGrp.length > 0 && custNm1) {
       if (custSubGrp == "DUMMY" || custSubGrp == "XDUMM") {
-        _abbrevNm = "DUMMY_" + custNm1;
+        _abbrevNm = "IGF INTERNAL_" + custNm1;
       } else if (custSubGrp == "ASLOM" || custSubGrp == "XASLM") {
         _abbrevNm = "ESA_" + custNm1;
       } else if (custSubGrp == "SOFT" || custSubGrp == "XSOFT") {
@@ -1274,7 +1274,7 @@ function autoSetAbbrevNmLocnLogic() {
   case SysLoc.INDONESIA:
     if (custSubGrp != null && custSubGrp.length > 0 && custNm1) {
       if (custSubGrp == "DUMMY" || custSubGrp == "XDUMM") {
-        _abbrevNm = "DUMMY_" + custNm1;
+        _abbrevNm = "IGF INTERNAL_" + custNm1;
       } else if (custSubGrp == "ASLOM" || custSubGrp == "XASLM") {
         _abbrevNm = "ESA_" + custNm1;
       } else if (custSubGrp == "SOFT" || custSubGrp == "XSOFT") {
@@ -1308,7 +1308,7 @@ function autoSetAbbrevNmLocnLogic() {
   case SysLoc.PHILIPPINES:
     if (custSubGrp != null && custSubGrp.length > 0 && custNm1) {
       if (custSubGrp == "DUMMY" || custSubGrp == "XDUMM") {
-        _abbrevNm = "DUMMY_" + custNm1;
+        _abbrevNm = "IGF INTERNAL_" + custNm1;
       } else if (custSubGrp == "ASLOM" || custSubGrp == "XASLM") {
         _abbrevNm = "ESA_" + custNm1;
       } else if (custSubGrp == "SOFT" || custSubGrp == "XSOFT") {
@@ -1342,7 +1342,7 @@ function autoSetAbbrevNmLocnLogic() {
   case SysLoc.THAILAND:
     if (custSubGrp != null && custSubGrp.length > 0 && custNm1) {
       if (custSubGrp == "DUMMY" || custSubGrp == "XDUMM") {
-        _abbrevNm = "DUMMY_" + custNm1;
+        _abbrevNm = "IGF INTERNAL_" + custNm1;
       } else if (custSubGrp == "ASLOM" || custSubGrp == "XASLM") {
         _abbrevNm = "ESA_" + custNm1;
       } else if (custSubGrp == "SOFT" || custSubGrp == "XSOFT") {
