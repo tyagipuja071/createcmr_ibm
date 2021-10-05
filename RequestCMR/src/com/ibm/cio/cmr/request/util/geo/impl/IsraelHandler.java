@@ -118,7 +118,7 @@ public class IsraelHandler extends EMEAHandler {
         record.setCmrName3(null);
 
         if (!StringUtils.isBlank(record.getCmrPOBox())) {
-          record.setCmrPOBox("PO BOX " + record.getCmrPOBox());
+          record.setCmrPOBox(record.getCmrPOBox());
         }
 
         if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
