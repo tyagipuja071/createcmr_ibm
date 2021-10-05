@@ -4,6 +4,8 @@ var _ILentConnect = null;
 var _vatExemptHandler = null;
 var _gtcAddrTypeHandlerIL = [];
 var _gtcAddrTypesIL = [ 'ZS01', 'ZP01', 'ZD01', 'ZI01', 'CTYA', 'CTYB', 'CTYC' ];
+var _prolifCountries = [ 'AF', 'AM', 'AZ', 'BH', 'BY', 'KH', 'CN', 'CU', 'EG', 'GE', 'IR', 'IQ', 'IL', 'JO', 'KZ', 'KP', 'KW', 'KG', 'LA', 'LB', 'LY', 'MO', 'MD', 'MN', 'MM', 'OM', 'PK', 'QA', 'RU',
+    'SA', 'SD', 'SY', 'TW', 'TJ', 'TM', 'UA', 'AE', 'UZ', 'VE', 'VN', 'YE' ];
 
 function addHandlersForIL() {
   for (var i = 0; i < _gtcAddrTypesIL.length; i++) {
@@ -135,7 +137,17 @@ function addILChecklistValidator() {
     return {
       validate : function() {
         custSubScnrio = FormManager.getActualValue('custSubGrp');
-        if (custSubScnrio == 'CROSS') {
+        var zs01ReqId = FormManager.getActualValue('reqId');
+        var prolif = false;
+        var qParams = {
+          REQ_ID : zs01ReqId,
+        };
+        var result = cmr.query('ADDR.GET.LANDCNTRY.BY_REQID', qParams);
+        landCntry = result.ret1;
+        if (_prolifCountries.includes(landCntry)) {
+          prolif = true;
+        }
+        if (custSubScnrio == 'CROSS' && !prolif) {
           return;
         }
         console.log('validating checklist..');
