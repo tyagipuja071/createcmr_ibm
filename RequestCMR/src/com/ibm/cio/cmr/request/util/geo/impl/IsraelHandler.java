@@ -60,7 +60,7 @@ public class IsraelHandler extends EMEAHandler {
 
   private static Map<String, List<List<String>>> MASS_UPDT_DUP_ENTRY_MAP = new HashMap<String, List<List<String>>>();
 
-  private static final String[] ISRAEL_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "Affiliate", "Company", "CAP", "CMROwner", "CustClassCode", "LocalTax1",
+  private static final String[] ISRAEL_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "Affiliate", "Company", "CAP", "CMROwner", "CustClass", "LocalTax1",
       "LocalTax2", "SearchTerm", "SitePartyID", "StreetAddress2", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office",
       "Floor", "Building", "County", "City2", "CustomerName2" };
 
@@ -252,6 +252,7 @@ public class IsraelHandler extends EMEAHandler {
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
     String processingType = PageManager.getProcessingType(SystemLocation.ISRAEL, "U");
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
+      data.setCustClass(mainRecord.getCustClass() != null ? mainRecord.getCustClass() : "");
       super.setDataValuesOnImport(admin, data, results, mainRecord);
 
       data.setEmbargoCd(this.currentImportValues.get("EmbargoCode"));
@@ -527,6 +528,39 @@ public class IsraelHandler extends EMEAHandler {
         if (data.getSubIndustryCd() != null) {
           data.setEconomicCd("0" + data.getSubIndustryCd());
         }
+
+        if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+          String scenario = !StringUtils.isEmpty(data.getCustSubGrp()) ? data.getCustSubGrp() : "";
+          String kukla = !StringUtils.isEmpty(data.getCustClass()) ? data.getCustClass() : "";
+          String kuklaVal = "";
+
+          if (!StringUtils.isEmpty(scenario)) {
+            switch (scenario) {
+            case "GOVRN":
+              kuklaVal = "13";
+              break;
+            case "INTER":
+              kuklaVal = "81";
+              break;
+            case "INTSO":
+              kuklaVal = "85";
+              break;
+            case "PRIPE":
+              kuklaVal = "60";
+              break;
+            case "THDPT":
+              kuklaVal = "11";
+              break;
+            default:
+              kuklaVal = kukla;
+              break;
+            }
+          }
+          if (!StringUtils.isBlank(kuklaVal)) {
+            data.setCustClass(kuklaVal);
+          }
+        }
+
       }
     } else {
       super.doBeforeDataSave(entityManager, admin, data, cmrIssuingCntry);
@@ -628,6 +662,15 @@ public class IsraelHandler extends EMEAHandler {
         results.add(update);
       } else {
         super.addSummaryUpdatedFields(service, type, cmrCountry, newData, oldData, results);
+      }
+
+      // Type of Customer
+      if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCustClass(), newData.getCustClass())) {
+        update = new UpdatedDataModel();
+        update.setDataField(PageManager.getLabel(cmrCountry, "CustClass", "-"));
+        update.setNewData(newData.getCustClass());
+        update.setOldData(oldData.getCustClass());
+        results.add(update);
       }
     }
   }
@@ -882,7 +925,7 @@ public class IsraelHandler extends EMEAHandler {
     List<String> fields = new ArrayList<>();
     fields.addAll(Arrays.asList("SALES_BO_CD", "REP_TEAM_MEMBER_NO", "SPECIAL_TAX_CD", "VAT", "ISIC_CD", "EMBARGO_CD", "COLLECTION_CD", "ABBREV_NM",
         "SENSITIVE_FLAG", "CLIENT_TIER", "COMPANY", "INAC_TYPE", "INAC_CD", "ISU_CD", "SUB_INDUSTRY_CD", "ABBREV_LOCN", "PPSCEID", "MEM_LVL",
-        "BP_REL_TYPE"));
+        "BP_REL_TYPE", "CUST_CLASS"));
     return fields;
   }
 
