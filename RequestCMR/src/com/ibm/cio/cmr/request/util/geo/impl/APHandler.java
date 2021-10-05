@@ -1406,7 +1406,7 @@ public abstract class APHandler extends GEOHandler {
     Boolean mrcFlag3 = false;
     if (admin.getReqType().equals("C")) {
       data.setMrcCd("");
-      if (!data.getIsuCd().isEmpty() && data.getIsuCd().length() > 0) {
+      if (StringUtils.isNotBlank(data.getIsuCd()) && data.getIsuCd().length() > 0) {
         for (String s : arryISUCdForMRC3) {
           if (isuCd != null && s.equals(isuCd)) {
             mrcFlag3 = true;
