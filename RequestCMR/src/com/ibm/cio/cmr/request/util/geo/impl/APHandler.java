@@ -498,7 +498,7 @@ public abstract class APHandler extends GEOHandler {
           }
         }
         if ("DUMMY".equalsIgnoreCase(data.getCustSubGrp()) || "XDUMM".equalsIgnoreCase(data.getCustSubGrp())) {
-          setAbbrevNM(data, "DUMMY_" + addr.getCustNm1());
+          setAbbrevNM(data, "IGF INTERNAL_" + addr.getCustNm1());
         } else if ("BLUMX".equalsIgnoreCase(data.getCustSubGrp()) || "XBLUM".equalsIgnoreCase(data.getCustSubGrp())) {
           setAbbrevNM(data, "BLUEMIX_" + addr.getCustNm1());
         } else if ("MKTPC".equalsIgnoreCase(data.getCustSubGrp()) || "XMKTP".equalsIgnoreCase(data.getCustSubGrp())) {
@@ -526,7 +526,7 @@ public abstract class APHandler extends GEOHandler {
           }
         }
         if ("DUMMY".equalsIgnoreCase(data.getCustSubGrp()) || "XDUMM".equalsIgnoreCase(data.getCustSubGrp())) {
-          setAbbrevNM(data, "DUMMY_" + addr.getCustNm1());
+          setAbbrevNM(data, "IGF INTERNAL_" + addr.getCustNm1());
         } else if ("ASLOM".equalsIgnoreCase(data.getCustSubGrp()) || "XASLM".equalsIgnoreCase(data.getCustSubGrp())) {
           setAbbrevNM(data, "ESA_" + addr.getCustNm1());
         } else {
@@ -543,7 +543,7 @@ public abstract class APHandler extends GEOHandler {
           }
         }
         if ("DUMMY".equalsIgnoreCase(data.getCustSubGrp()) || "XDUMM".equalsIgnoreCase(data.getCustSubGrp())) {
-          setAbbrevNM(data, "DUMMY_" + addr.getCustNm1());
+          setAbbrevNM(data, "IGF INTERNAL_" + addr.getCustNm1());
         } else if ("ASLOM".equalsIgnoreCase(data.getCustSubGrp()) || "XASLM".equalsIgnoreCase(data.getCustSubGrp())) {
           setAbbrevNM(data, "ESA_" + addr.getCustNm1());
         } else {
@@ -565,7 +565,7 @@ public abstract class APHandler extends GEOHandler {
           }
         }
         if ("DUMMY".equalsIgnoreCase(data.getCustSubGrp()) || "XDUMM".equalsIgnoreCase(data.getCustSubGrp())) {
-          setAbbrevNM(data, "DUMMY_" + addr.getCustNm1());
+          setAbbrevNM(data, "IGF INTERNAL_" + addr.getCustNm1());
         } else if ("ASLOM".equalsIgnoreCase(data.getCustSubGrp()) || "XASLM".equalsIgnoreCase(data.getCustSubGrp())) {
           setAbbrevNM(data, "ESA_" + addr.getCustNm1());
         } else {
@@ -587,7 +587,7 @@ public abstract class APHandler extends GEOHandler {
           }
         }
         if ("DUMMY".equalsIgnoreCase(data.getCustSubGrp()) || "XDUMM".equalsIgnoreCase(data.getCustSubGrp())) {
-          setAbbrevNM(data, "DUMMY_" + addr.getCustNm1());
+          setAbbrevNM(data, "IGF INTERNAL_" + addr.getCustNm1());
         } else if ("ASLOM".equalsIgnoreCase(data.getCustSubGrp()) || "XASLM".equalsIgnoreCase(data.getCustSubGrp())) {
           setAbbrevNM(data, "ESA_" + addr.getCustNm1());
         } else {
@@ -609,7 +609,7 @@ public abstract class APHandler extends GEOHandler {
           }
         }
         if ("DUMMY".equalsIgnoreCase(data.getCustSubGrp()) || "XDUMM".equalsIgnoreCase(data.getCustSubGrp())) {
-          setAbbrevNM(data, "DUMMY_" + addr.getCustNm1());
+          setAbbrevNM(data, "IGF INTERNAL_" + addr.getCustNm1());
         } else if ("ASLOM".equalsIgnoreCase(data.getCustSubGrp()) || "XASLM".equalsIgnoreCase(data.getCustSubGrp())) {
           setAbbrevNM(data, "ESA_" + addr.getCustNm1());
         } else {
@@ -631,7 +631,7 @@ public abstract class APHandler extends GEOHandler {
           }
         }
         if ("DUMMY".equalsIgnoreCase(data.getCustSubGrp()) || "XDUMM".equalsIgnoreCase(data.getCustSubGrp())) {
-          setAbbrevNM(data, "DUMMY_" + addr.getCustNm1());
+          setAbbrevNM(data, "IGF INTERNAL_" + addr.getCustNm1());
         } else if ("ASLOM".equalsIgnoreCase(data.getCustSubGrp()) || "XASLM".equalsIgnoreCase(data.getCustSubGrp())) {
           setAbbrevNM(data, "ESA_" + addr.getCustNm1());
         } else {
@@ -1063,7 +1063,7 @@ public abstract class APHandler extends GEOHandler {
         }
       }
       if ("DUMMY".equalsIgnoreCase(data.getCustSubGrp()) || "XDUMM".equalsIgnoreCase(data.getCustSubGrp())) {
-        setAbbrevNM(data, "DUMMY_" + mainRecord.getCmrName1Plain());
+        setAbbrevNM(data, "IGF INTERNAL_" + mainRecord.getCmrName1Plain());
       } else if ("BLUMX".equalsIgnoreCase(data.getCustSubGrp()) || "XBLUM".equalsIgnoreCase(data.getCustSubGrp())) {
         setAbbrevNM(data, "BLUEMIX_" + mainRecord.getCmrName1Plain());
       } else if ("MKTPC".equalsIgnoreCase(data.getCustSubGrp()) || "XMKTP".equalsIgnoreCase(data.getCustSubGrp())) {
@@ -1091,7 +1091,7 @@ public abstract class APHandler extends GEOHandler {
         }
       }
       if ("DUMMY".equalsIgnoreCase(data.getCustSubGrp()) || "XDUMM".equalsIgnoreCase(data.getCustSubGrp())) {
-        setAbbrevNM(data, "DUMMY_" + mainRecord.getCmrName1Plain());
+        setAbbrevNM(data, "IGF INTERNAL_" + mainRecord.getCmrName1Plain());
       } else if ("ASLOM".equalsIgnoreCase(data.getCustSubGrp()) || "XASLM".equalsIgnoreCase(data.getCustSubGrp())) {
         setAbbrevNM(data, "ESA_" + mainRecord.getCmrName1Plain());
       } else {
@@ -1108,7 +1108,7 @@ public abstract class APHandler extends GEOHandler {
         }
       }
       if ("DUMMY".equalsIgnoreCase(data.getCustSubGrp()) || "XDUMM".equalsIgnoreCase(data.getCustSubGrp())) {
-        setAbbrevNM(data, "DUMMY_" + mainRecord.getCmrName1Plain());
+        setAbbrevNM(data, "IGF INTERNAL_" + mainRecord.getCmrName1Plain());
       } else if ("ASLOM".equalsIgnoreCase(data.getCustSubGrp()) || "XASLM".equalsIgnoreCase(data.getCustSubGrp())) {
         setAbbrevNM(data, "ESA_" + mainRecord.getCmrName1Plain());
       } else {
@@ -1130,7 +1130,7 @@ public abstract class APHandler extends GEOHandler {
         }
       }
       if ("DUMMY".equalsIgnoreCase(data.getCustSubGrp()) || "XDUMM".equalsIgnoreCase(data.getCustSubGrp())) {
-        setAbbrevNM(data, "DUMMY_" + mainRecord.getCmrName1Plain());
+        setAbbrevNM(data, "IGF INTERNAL_" + mainRecord.getCmrName1Plain());
       } else if ("ASLOM".equalsIgnoreCase(data.getCustSubGrp()) || "XASLM".equalsIgnoreCase(data.getCustSubGrp())) {
         setAbbrevNM(data, "ESA_" + mainRecord.getCmrName1Plain());
       } else {
@@ -1152,7 +1152,7 @@ public abstract class APHandler extends GEOHandler {
         }
       }
       if ("DUMMY".equalsIgnoreCase(data.getCustSubGrp()) || "XDUMM".equalsIgnoreCase(data.getCustSubGrp())) {
-        setAbbrevNM(data, "DUMMY_" + mainRecord.getCmrName1Plain());
+        setAbbrevNM(data, "IGF INTERNAL_" + mainRecord.getCmrName1Plain());
       } else if ("ASLOM".equalsIgnoreCase(data.getCustSubGrp()) || "XASLM".equalsIgnoreCase(data.getCustSubGrp())) {
         setAbbrevNM(data, "ESA_" + mainRecord.getCmrName1Plain());
       } else {
@@ -1174,7 +1174,7 @@ public abstract class APHandler extends GEOHandler {
         }
       }
       if ("DUMMY".equalsIgnoreCase(data.getCustSubGrp()) || "XDUMM".equalsIgnoreCase(data.getCustSubGrp())) {
-        setAbbrevNM(data, "DUMMY_" + mainRecord.getCmrName1Plain());
+        setAbbrevNM(data, "IGF INTERNAL_" + mainRecord.getCmrName1Plain());
       } else if ("ASLOM".equalsIgnoreCase(data.getCustSubGrp()) || "XASLM".equalsIgnoreCase(data.getCustSubGrp())) {
         setAbbrevNM(data, "ESA_" + mainRecord.getCmrName1Plain());
       } else {
@@ -1196,7 +1196,7 @@ public abstract class APHandler extends GEOHandler {
         }
       }
       if ("DUMMY".equalsIgnoreCase(data.getCustSubGrp()) || "XDUMM".equalsIgnoreCase(data.getCustSubGrp())) {
-        setAbbrevNM(data, "DUMMY_" + mainRecord.getCmrName1Plain());
+        setAbbrevNM(data, "IGF INTERNAL_" + mainRecord.getCmrName1Plain());
       } else if ("ASLOM".equalsIgnoreCase(data.getCustSubGrp()) || "XASLM".equalsIgnoreCase(data.getCustSubGrp())) {
         setAbbrevNM(data, "ESA_" + mainRecord.getCmrName1Plain());
       } else {

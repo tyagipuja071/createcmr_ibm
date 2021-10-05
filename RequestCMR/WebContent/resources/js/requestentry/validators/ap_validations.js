@@ -1135,7 +1135,7 @@ function autoSetAbbrevNmLocnLogic() {
   case SysLoc.SINGAPORE:
     if (custSubGrp != null && custSubGrp.length > 0 && custNm1) {
       if (custSubGrp == "DUMMY") {
-        _abbrevNm = "DUMMY_" + custNm1;
+        _abbrevNm = "IGF INTERNAL_" + custNm1;
       } else if (custSubGrp == "BLUMX" || custSubGrp == "XBLUM") {
         _abbrevNm = "BLUEMIX_" + custNm1;
       } else if (custSubGrp == "MKTPC" || custSubGrp == "XMKTP") {
@@ -1171,7 +1171,7 @@ function autoSetAbbrevNmLocnLogic() {
   case SysLoc.MALASIA:
     if (custSubGrp != null && custSubGrp.length > 0 && custNm1) {
       if (custSubGrp == "DUMMY" || custSubGrp == "XDUMM") {
-        _abbrevNm = "DUMMY_" + custNm1;
+        _abbrevNm = "IGF INTERNAL_" + custNm1;
       } else if (custSubGrp == "ASLOM" || custSubGrp == "XASLM") {
         _abbrevNm = "ESA_" + custNm1;
       } else if (custSubGrp == "SOFT" || custSubGrp == "XSOFT") {
@@ -1206,7 +1206,7 @@ function autoSetAbbrevNmLocnLogic() {
   case SysLoc.BRUNEI:
     if (custSubGrp != null && custSubGrp.length > 0 && custNm1) {
       if (custSubGrp == "DUMMY" || custSubGrp == "XDUMM") {
-        _abbrevNm = "DUMMY_" + custNm1;
+        _abbrevNm = "IGF INTERNAL_" + custNm1;
       } else if (custSubGrp == "ASLOM" || custSubGrp == "XASLM") {
         _abbrevNm = "ESA_" + custNm1;
       } else if (custSubGrp == "SOFT" || custSubGrp == "XSOFT") {
@@ -1239,7 +1239,7 @@ function autoSetAbbrevNmLocnLogic() {
   case SysLoc.VIETNAM:
     if (custSubGrp != null && custSubGrp.length > 0 && custNm1) {
       if (custSubGrp == "DUMMY" || custSubGrp == "XDUMM") {
-        _abbrevNm = "DUMMY_" + custNm1;
+        _abbrevNm = "IGF INTERNAL_" + custNm1;
       } else if (custSubGrp == "ASLOM" || custSubGrp == "XASLM") {
         _abbrevNm = "ESA_" + custNm1;
       } else if (custSubGrp == "SOFT" || custSubGrp == "XSOFT") {
@@ -1274,7 +1274,7 @@ function autoSetAbbrevNmLocnLogic() {
   case SysLoc.INDONESIA:
     if (custSubGrp != null && custSubGrp.length > 0 && custNm1) {
       if (custSubGrp == "DUMMY" || custSubGrp == "XDUMM") {
-        _abbrevNm = "DUMMY_" + custNm1;
+        _abbrevNm = "IGF INTERNAL_" + custNm1;
       } else if (custSubGrp == "ASLOM" || custSubGrp == "XASLM") {
         _abbrevNm = "ESA_" + custNm1;
       } else if (custSubGrp == "SOFT" || custSubGrp == "XSOFT") {
@@ -1308,7 +1308,7 @@ function autoSetAbbrevNmLocnLogic() {
   case SysLoc.PHILIPPINES:
     if (custSubGrp != null && custSubGrp.length > 0 && custNm1) {
       if (custSubGrp == "DUMMY" || custSubGrp == "XDUMM") {
-        _abbrevNm = "DUMMY_" + custNm1;
+        _abbrevNm = "IGF INTERNAL_" + custNm1;
       } else if (custSubGrp == "ASLOM" || custSubGrp == "XASLM") {
         _abbrevNm = "ESA_" + custNm1;
       } else if (custSubGrp == "SOFT" || custSubGrp == "XSOFT") {
@@ -1342,7 +1342,7 @@ function autoSetAbbrevNmLocnLogic() {
   case SysLoc.THAILAND:
     if (custSubGrp != null && custSubGrp.length > 0 && custNm1) {
       if (custSubGrp == "DUMMY" || custSubGrp == "XDUMM") {
-        _abbrevNm = "DUMMY_" + custNm1;
+        _abbrevNm = "IGF INTERNAL_" + custNm1;
       } else if (custSubGrp == "ASLOM" || custSubGrp == "XASLM") {
         _abbrevNm = "ESA_" + custNm1;
       } else if (custSubGrp == "SOFT" || custSubGrp == "XSOFT") {
@@ -3284,6 +3284,7 @@ function validateStreetAddrCont2() {
 
 // API call for validating GST for India on Save Request and Send for Processing
 function validateGSTForIndia() {
+
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
@@ -3317,7 +3318,18 @@ function validateGSTForIndia() {
               var address = results.ret2;
               var postal = results.ret3;
               var city = results.ret4;
-            
+              var state = results.ret5;
+              var country = '';
+              
+              if (state != null && state != '') {
+                reqParam = {
+                    STATE_PROV_CD : state,
+                  };
+              var stateResult = cmr.query('GET_STATE_DESC', reqParam);
+                if (stateResult != null) {
+                  country = stateResult.ret1;
+                }
+              }
             var gstRet = cmr.validateGST(country, vat, name, address, postal, city);
             if (!gstRet.success) {
               return new ValidationResult({
@@ -3328,10 +3340,10 @@ function validateGSTForIndia() {
             } else {
               return new ValidationResult(null, true);
             }
-          }else{
-            return new ValidationResult(null, true);
-          }
+            }else {
+              return new ValidationResult(null, true);
             }
+          }
         } else {
           return new ValidationResult(null, true);
         }
