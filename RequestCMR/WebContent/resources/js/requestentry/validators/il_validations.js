@@ -6,6 +6,7 @@ var _gtcAddrTypeHandlerIL = [];
 var _gtcAddrTypesIL = [ 'ZS01', 'ZP01', 'ZD01', 'ZI01', 'CTYA', 'CTYB', 'CTYC' ];
 var _prolifCountries = [ 'AF', 'AM', 'AZ', 'BH', 'BY', 'KH', 'CN', 'CU', 'EG', 'GE', 'IR', 'IQ', 'IL', 'JO', 'KZ', 'KP', 'KW', 'KG', 'LA', 'LB', 'LY', 'MO', 'MD', 'MN', 'MM', 'OM', 'PK', 'QA', 'RU',
     'SA', 'SD', 'SY', 'TW', 'TJ', 'TM', 'UA', 'AE', 'UZ', 'VE', 'VN', 'YE' ];
+var _requestingLOBHandler = null;
 
 function addHandlersForIL() {
   for (var i = 0; i < _gtcAddrTypesIL.length; i++) {
@@ -86,6 +87,15 @@ function afterConfigForIsrael() {
     setCodFlagVal();
   }
 
+  if (_requestingLOBHandler == null) {
+    var _custType = FormManager.getActualValue('custSubGrp');
+    _requestingLOBHandler = dojo.connect(FormManager.getField('requestingLob'), 'onChange', function(value) {
+      var lob = FormManager.getActualValue('requestingLob');
+      if (lob != '') {
+        lockCustomerClassByLob(_custType);
+      }
+    });
+  }
 }
 
 function setChecklistStatus() {
@@ -1131,6 +1141,75 @@ function addPpsceidValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+function showHideKuklaField() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  var reqType = FormManager.getActualValue('reqType');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+
+  /*
+   * In CREATES, KUKLA is visible only for COMMERCIAL (local & cross) & BP and
+   * hidden from UI for other scenarios. In UPDATES, KUKLA is visible for all
+   * scenarios
+   */
+  if (reqType == 'C') {
+    if (custSubGrp == 'COMME' || custSubGrp == 'CROSS' || custSubGrp == 'BUSPR') {
+      FormManager.show('CustClass', 'custClass');
+      limitCustomerClassValues(custSubGrp);
+    } else {
+      FormManager.hide('CustClass', 'custClass');
+    }
+  } else {
+    FormManager.show('CustClass', 'custClass');
+  }
+}
+
+function limitCustomerClassValues(value) {
+  if (!value) {
+    value = FormManager.getActualValue('custSubGrp');
+  }
+  var kuklaValues = null;
+
+  switch (value.toUpperCase()) {
+  case 'BUSPR':
+    var kuklaValues = [ '41', '42', '43', '44', '45', '46', '47', '48', '49' ];
+    break;
+  case 'COMME':
+    var kuklaValues = [ '11', '33', '35' ];
+    break;
+  case 'CROSS':
+    var kuklaValues = [ '11', '33', '35' ];
+    break;
+  default:
+    break;
+  }
+
+  if (kuklaValues != null) {
+    FormManager.limitDropdownValues(FormManager.getField('custClass'), kuklaValues);
+    lockCustomerClassByLob(value);
+  }
+}
+
+function lockCustomerClassByLob(_custType) {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  if (!_custType) {
+    _custType = FormManager.getActualValue('custSubGrp');
+  }
+  var lob = FormManager.getActualValue('requestingLob');
+  if (_custType == 'COMME' || _custType == 'CROSS') {
+    if (lob == 'SCT' || lob == 'IGF') {
+      FormManager.enable('custClass');
+    } else {
+      FormManager.readOnly('custClass');
+    }
+  } else if (_custType == 'BUSPR') {
+    FormManager.enable('custClass');
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding Israel functions...');
@@ -1182,4 +1261,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(showVatOnLocal, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(showVatOnLocal, [ SysLoc.ISRAEL ]);
   GEOHandler.registerValidator(addPpsceidValidator, [ SysLoc.ISRAEL ], null, true);
+
+  GEOHandler.addAfterConfig(showHideKuklaField, [ SysLoc.ISRAEL ]);
+  GEOHandler.addAfterTemplateLoad(showHideKuklaField, [ SysLoc.ISRAEL ]);
+  GEOHandler.addAfterTemplateLoad(lockCustomerClassByLob, [ SysLoc.ISRAEL ]);
 });

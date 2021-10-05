@@ -86,6 +86,25 @@ public class IsraelTransformer extends EMEATransformer {
       }
     }
 
+    String kukla = !StringUtils.isEmpty(data.getCustClass()) ? data.getCustClass() : "";
+    String kuklaVal = "";
+
+    if (!StringUtils.isEmpty(kukla)) {
+      switch (kukla) {
+      case "71":
+        kuklaVal = "98";
+        break;
+      case "33":
+        kuklaVal = "33";
+        break;
+      default:
+        kuklaVal = "WR";
+        break;
+      }
+    }
+    if (!StringUtils.isEmpty(kuklaVal)) {
+      legacyCust.setCustType(kuklaVal);
+    }
     legacyCust.setMrcCd("");
     legacyCust.getId().setSofCntryCode(SystemLocation.SAP_ISRAEL_SOF_ONLY);
   }
