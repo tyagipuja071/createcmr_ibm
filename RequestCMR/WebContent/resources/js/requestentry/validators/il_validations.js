@@ -85,16 +85,16 @@ function afterConfigForIsrael() {
   // Israel COD Flag change
   if (FormManager.getActualValue('reqType') == 'C') {
     setCodFlagVal();
-  }
 
-  if (_requestingLOBHandler == null) {
-    var _custType = FormManager.getActualValue('custSubGrp');
-    _requestingLOBHandler = dojo.connect(FormManager.getField('requestingLob'), 'onChange', function(value) {
-      var lob = FormManager.getActualValue('requestingLob');
-      if (lob != '') {
-        lockCustomerClassByLob(_custType);
-      }
-    });
+    if (_requestingLOBHandler == null) {
+      var _custType = FormManager.getActualValue('custSubGrp');
+      _requestingLOBHandler = dojo.connect(FormManager.getField('requestingLob'), 'onChange', function(value) {
+        var lob = FormManager.getActualValue('requestingLob');
+        if (lob != '') {
+          lockCustomerClassByLob(_custType);
+        }
+      });
+    }
   }
 }
 
