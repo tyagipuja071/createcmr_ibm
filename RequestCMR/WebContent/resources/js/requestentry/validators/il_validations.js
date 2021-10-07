@@ -39,10 +39,13 @@ function addHandlersForIL() {
 }
 
 function addEMEALandedCountryHandler(cntry, addressMode, saving, finalSave) {
+  var scenario = FormManager.getActualValue('custGrp');
   if (!saving) {
     if (addressMode == 'newAddress') {
       FilteringDropdown['val_landCntry'] = FormManager.getActualValue('defaultLandedCountry');
-      FormManager.setValue('landCntry', FormManager.getActualValue('defaultLandedCountry'));
+      if (scenario != 'CROSS') {
+        FormManager.setValue('landCntry', FormManager.getActualValue('defaultLandedCountry'));
+      }
     } else {
       FilteringDropdown['val_landCntry'] = null;
     }
@@ -1050,13 +1053,21 @@ function sboLengthValidator() {
 }
 
 function countryUseAISRAEL() {
-  // Lock land country when 'LOCAL' scenario
+  // Lock land country when 'LOCAL' scenario or Update request
   var cntryCd = FormManager.getActualValue('cmrIssuingCntry');
+  var reqType = FormManager.getActualValue('reqType');
   if (cntryCd == SysLoc.ISRAEL) {
     var landCntry = FormManager.getActualValue('landCntry');
-    if ((FormManager.getActualValue('custGrp') == 'LOCAL') && (FormManager.getActualValue('addrType') == 'CTYA' || FormManager.getActualValue('addrType') == 'ZS01')) {
-      FormManager.setValue('landCntry', 'IL');
-      FormManager.readOnly('landCntry');
+
+    if (FormManager.getActualValue('addrType') == 'CTYA' || FormManager.getActualValue('addrType') == 'ZS01') {
+      if (reqType == 'C' && FormManager.getActualValue('custGrp') == 'LOCAL') {
+        FormManager.setValue('landCntry', 'IL');
+        FormManager.readOnly('landCntry');
+      } else if (reqType == 'U' && !cmr.superUser) {
+        FormManager.readOnly('landCntry');
+      } else {
+        FormManager.enable('landCntry');
+      }
     } else {
       FormManager.enable('landCntry');
     }
@@ -1210,6 +1221,17 @@ function lockCustomerClassByLob(_custType) {
   }
 }
 
+
+function markAddrSaveSuperUser(cntry, addressMode, saving) {
+  if (saving) {
+    if (FormManager.getActualValue('reqType') == 'U' && cmr.superUser) {
+      FormManager.setValue('bldg', 'SUPERUSER');
+    } else {
+      FormManager.setValue('bldg', '');
+    }
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding Israel functions...');
@@ -1257,6 +1279,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addHandlersForIL, [ SysLoc.ISRAEL ]);
   GEOHandler.addAddrFunction(countryUseAISRAEL, [ SysLoc.ISRAEL ]);
   GEOHandler.addAddrFunction(validatePoBox, [ SysLoc.ISRAEL ]);
+  GEOHandler.addAddrFunction(markAddrSaveSuperUser, [ SysLoc.ISRAEL ]);
 
   GEOHandler.addAfterTemplateLoad(showVatOnLocal, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(showVatOnLocal, [ SysLoc.ISRAEL ]);
