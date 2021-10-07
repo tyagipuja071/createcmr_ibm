@@ -25,6 +25,7 @@ import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.controller.DropdownListController;
 import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.AddrRdc;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AdminPK;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
@@ -46,6 +47,7 @@ import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.legacy.LegacyCommonUtil;
 import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
 
 /**
@@ -73,6 +75,8 @@ public class IsraelHandler extends EMEAHandler {
 
   protected static final String[] LD_MASS_UPDATE_SHEET_NAMES = { "Billing Address", "Mailing Address", "Installing Address",
       "Shipping Address (Update)", "EPL Address" };
+
+  private static final String CUSTGRP_LOCAL = "LOCAL";
 
   static {
     LANDED_CNTRY_MAP.put(SystemLocation.UNITED_KINGDOM, "GB");
@@ -584,6 +588,7 @@ public class IsraelHandler extends EMEAHandler {
         addr.setCustPhone("");
       }
 
+      lockLandedCountry(entityManager, data, admin, addr);
       switch (cmrIssuingCntry) {
       case SystemLocation.ISRAEL:
         if ("CTYA".equals(addr.getId().getAddrType())) {
@@ -629,6 +634,29 @@ public class IsraelHandler extends EMEAHandler {
     }
   }
 
+  private void lockLandedCountry(EntityManager entityManager, Data data, Admin admin, Addr addr) {
+    boolean isLocalScenario = CUSTGRP_LOCAL.equals(data.getCustGrp());
+    boolean isCreateRequest = admin.getReqType().equals("C");
+    boolean isMailingOrTranslated = "CTYA".equals(addr.getId().getAddrType()) || "ZS01".equals(addr.getId().getAddrType());
+    // local scenario - mailing and translated mailing lock landed country
+    // to israel
+    if (isCreateRequest && isLocalScenario && isMailingOrTranslated) {
+      addr.setLandCntry("IL");
+    } else {
+      String marker = addr.getBldg();
+      // in Update requests, Mailing and Country Use A must be locked upon
+      // import and not editable for both requester and processor.
+      if (isMailingOrTranslated) {
+        if ("SUPERUSER".equals(marker)) {
+          addr.setBldg("");
+        } else {
+          AddrRdc addrRdc = LegacyCommonUtil.getAddrRdcRecord(entityManager, addr);
+          addr.setLandCntry(addrRdc.getLandCntry());
+        }
+      }
+    }
+  }
+
   @Override
   public void doBeforeDPLCheck(EntityManager entityManager, Data data, List<Addr> addresses) throws Exception {
     String processingType = PageManager.getProcessingType(SystemLocation.ISRAEL, "U");
@@ -660,17 +688,17 @@ public class IsraelHandler extends EMEAHandler {
         update.setNewData(service.getCodeAndDescription(newData.getEmbargoCd(), "EmbargoCode", cmrCountry));
         update.setOldData(service.getCodeAndDescription(oldData.getEmbargoCd(), "EmbargoCode", cmrCountry));
         results.add(update);
+        
+        // Type of Customer
+        if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCustClass(), newData.getCustClass())) {
+          update = new UpdatedDataModel();
+          update.setDataField(PageManager.getLabel(cmrCountry, "CustClass", "-"));
+          update.setNewData(newData.getCustClass());
+          update.setOldData(oldData.getCustClass());
+          results.add(update);
+        }
       } else {
         super.addSummaryUpdatedFields(service, type, cmrCountry, newData, oldData, results);
-      }
-
-      // Type of Customer
-      if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCustClass(), newData.getCustClass())) {
-        update = new UpdatedDataModel();
-        update.setDataField(PageManager.getLabel(cmrCountry, "CustClass", "-"));
-        update.setNewData(newData.getCustClass());
-        update.setOldData(oldData.getCustClass());
-        results.add(update);
       }
     }
   }
