@@ -23,6 +23,7 @@ import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.impl.gbl.DupCMRCheckElement;
 import com.ibm.cio.cmr.request.automation.impl.us.USDuplicateCheckElement;
+import com.ibm.cio.cmr.request.automation.impl.us.USSosRpaCheckElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
@@ -175,6 +176,9 @@ public class USUtil extends AutomationUtil {
   private static final List<String> CSP_IRRELEVANT_UPDATE_FIELDS = Arrays.asList("ISU Code", "GEO Location Code", "Coverage Type/ID", "BG LDE Rule",
       "Buying Group ID", "Client Tier", "DUNS No.");
   private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("County", "PO Box");
+
+  private static final List<String> RELEVANT_ADDRESS_FIELDS_RPA_UPDATES = Arrays.asList("Customer Name", "Customer Name 2", "Address", "Address Con",
+      "City", "State/Province");
 
   private static final List<String> HEALTH_CARE_EDUCATION_ISIC = Arrays.asList("8030", "8010", "8511");
 
@@ -1039,6 +1043,9 @@ public class USUtil extends AutomationUtil {
           }
           if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZS01.toString())) {
             closelyMatchAddressWithDnbRecords(entityManager, requestData, engineData, "ZS01", details, validation, output);
+            if (relevantAddressFieldForUpdates(changes, requestData.getAddress("ZS01"))) {
+              matchAddressWithSosRecords(entityManager, requestData, engineData, "ZS01", details, validation, output);
+            }
           }
 
           if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZI01.toString())) {
@@ -1072,6 +1079,9 @@ public class USUtil extends AutomationUtil {
             if (isRelevantAddressFieldUpdated(changes, requestData.getAddress("ZI01"))) {
               closelyMatchAddressWithDnbRecords(entityManager, requestData, engineData, "ZI01", details, validation, output);
             }
+            if (relevantAddressFieldForUpdates(changes, requestData.getAddress("ZI01"))) {
+              matchAddressWithSosRecords(entityManager, requestData, engineData, "ZI01", details, validation, output);
+            }
           }
         }
 
@@ -1090,6 +1100,35 @@ public class USUtil extends AutomationUtil {
       output.setDetails(details.toString());
     }
     return true;
+  }
+
+  /**
+   * Validates if address closely matches with SOS records matched.
+   * 
+   * @param requestData
+   * @param engineData
+   * @param addrType
+   * @param details
+   * @param validation
+   * @throws Exception
+   */
+  private void matchAddressWithSosRecords(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData, String addrType,
+      StringBuilder details, ValidationOutput validation, AutomationResult<ValidationOutput> output) throws Exception {
+    String addrDesc = "ZS01".equals(addrType) ? "Install-at" : "Invoice-at";
+    Addr addr = requestData.getAddress(addrType);
+    Admin admin = requestData.getAdmin();
+    AutomationResponse<SosResponse> response = USSosRpaCheckElement.getSosMatches(admin.getId().getReqId(), addr, admin);
+    if (response != null && response.isSuccess() && response.getRecord() != null) {
+      details.append(addrDesc + " address details matched successfully with SOS.").append("\n");
+    } else {
+      /*
+       * engineData.addNegativeCheckStatus("DNB_MATCH_FAIL_" + "ZS01",
+       * "SOS Matching couldn't be performed for " + addrDesc + " address.");
+       */
+      details.append(addrDesc + " address details did not match with SOS.").append("\n");
+    }
+    validation.setMessage("Validated.");
+    validation.setSuccess(true);
   }
 
   /**
@@ -1588,6 +1627,21 @@ public class USUtil extends AutomationUtil {
       }
       for (UpdatedNameAddrModel change : addrChanges) {
         if (!NON_RELEVANT_ADDRESS_FIELDS.contains(change.getDataField())) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  private boolean relevantAddressFieldForUpdates(RequestChangeContainer changes, Addr addr) {
+    if (addr != null) {
+      List<UpdatedNameAddrModel> addrChanges = changes.getAddressChanges(addr.getId().getAddrType(), addr.getId().getAddrSeq());
+      if (addrChanges == null) {
+        return false;
+      }
+      for (UpdatedNameAddrModel change : addrChanges) {
+        if (RELEVANT_ADDRESS_FIELDS_RPA_UPDATES.contains(change.getDataField())) {
           return true;
         }
       }

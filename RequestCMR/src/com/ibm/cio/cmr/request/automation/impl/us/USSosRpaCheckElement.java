@@ -152,7 +152,7 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
     return output;
   }
 
-  private AutomationResponse<SosResponse> getSosMatches(long reqId, Addr addr, Admin admin) throws Exception {
+  public static AutomationResponse<SosResponse> getSosMatches(long reqId, Addr addr, Admin admin) throws Exception {
     AutomationServiceClient autoClient = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
         AutomationServiceClient.class);
     autoClient.setReadTimeout(1000 * 60 * 5);
