@@ -20,12 +20,14 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
 import com.ibm.cio.cmr.request.entity.MassUpdtData;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.legacy.LegacyCommonUtil;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectObjectContainer;
+import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
 import com.ibm.cmr.create.batch.util.CMRRequestContainer;
 import com.ibm.cmr.create.batch.util.mq.LandedCountryMap;
 import com.ibm.cmr.create.batch.util.mq.MQMsgConstants;
@@ -74,10 +76,24 @@ public class IsraelTransformer extends EMEATransformer {
     Data data = cmrObjects.getData();
     formatDataLines(dummyHandler);
 
+    String kukla = !StringUtils.isEmpty(data.getCustClass()) ? data.getCustClass() : "";
+    String kuklaVal = "";
+
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       // Creates only mapping
+      kuklaVal = getDB2KuklaValue(kukla);
+      if (!StringUtils.isEmpty(kuklaVal)) {
+        legacyCust.setCustType(kuklaVal);
+      }
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       // Update only mapping
+      DataRdc dataRdc = LegacyDirectUtil.getOldData(entityManager, String.valueOf(data.getId().getReqId()));
+      if (dataRdc != null && !data.getCustClass().equals(dataRdc.getCustClass())) {
+        kuklaVal = getDB2KuklaValue(kukla);
+        if (!StringUtils.isEmpty(kuklaVal)) {
+          legacyCust.setCustType(kuklaVal);
+        }
+      }
     }
 
     for (Addr addr : cmrObjects.getAddresses()) {
@@ -86,7 +102,11 @@ public class IsraelTransformer extends EMEATransformer {
       }
     }
 
-    String kukla = !StringUtils.isEmpty(data.getCustClass()) ? data.getCustClass() : "";
+    legacyCust.setMrcCd("");
+    legacyCust.getId().setSofCntryCode(SystemLocation.SAP_ISRAEL_SOF_ONLY);
+  }
+
+  private String getDB2KuklaValue(String kukla) {
     String kuklaVal = "";
 
     if (!StringUtils.isEmpty(kukla)) {
@@ -102,11 +122,7 @@ public class IsraelTransformer extends EMEATransformer {
         break;
       }
     }
-    if (!StringUtils.isEmpty(kuklaVal)) {
-      legacyCust.setCustType(kuklaVal);
-    }
-    legacyCust.setMrcCd("");
-    legacyCust.getId().setSofCntryCode(SystemLocation.SAP_ISRAEL_SOF_ONLY);
+    return kuklaVal;
   }
 
   @Override
