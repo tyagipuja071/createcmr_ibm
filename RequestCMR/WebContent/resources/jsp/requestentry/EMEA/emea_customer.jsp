@@ -182,6 +182,7 @@
 		        <p>
 		          <cmr:label fieldId="custClass">
 		            <cmr:fieldLabel fieldId="CustClass" />:
+		            <cmr:delta text="${rdcdata.custClass}" oldValue="${reqentry.custClass}" /> 
 		          </cmr:label>
 		          <cmr:field path="custClass" id="custClass" fieldId="CustClass" tabId="MAIN_CUST_TAB" />
 		        </p>
