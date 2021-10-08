@@ -48,6 +48,7 @@ import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.legacy.LegacyCommonUtil;
+import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
 import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
 
 /**
@@ -256,7 +257,6 @@ public class IsraelHandler extends EMEAHandler {
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
     String processingType = PageManager.getProcessingType(SystemLocation.ISRAEL, "U");
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
-      data.setCustClass(mainRecord.getCustClass() != null ? mainRecord.getCustClass() : "");
       super.setDataValuesOnImport(admin, data, results, mainRecord);
 
       data.setEmbargoCd(this.currentImportValues.get("EmbargoCode"));
@@ -562,6 +562,16 @@ public class IsraelHandler extends EMEAHandler {
           }
           if (!StringUtils.isBlank(kuklaVal)) {
             data.setCustClass(kuklaVal);
+          }
+        } else {
+          // UPDATE
+          DataRdc rdcData = null;
+          rdcData = LegacyDirectUtil.getOldData(entityManager, String.valueOf(data.getId().getReqId()));
+
+          if (rdcData != null) {
+            if (StringUtils.isEmpty(data.getCustClass()) && !StringUtils.isEmpty(rdcData.getCustClass())) {
+              data.setCustClass(rdcData.getCustClass());
+            }
           }
         }
 
