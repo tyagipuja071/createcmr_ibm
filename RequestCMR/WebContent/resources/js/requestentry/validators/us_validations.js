@@ -368,16 +368,14 @@ function canRemoveAddress(value, rowIndex, grid) {
 
 function usRestrictCode() {
   if (FormManager.getActualValue('custSubGrp') == 'KYN') {
-    FormManager.setValue('restrictTo', 'KYN');
+    FormManager.setValue('inacType', 'I');
     FormManager.setValue('inacCd', '6272');
     FormManager.setValue('mtkgArDept', 'SD3');
     FormManager.setValue('svcArOffice', 'IJ9');
-    FormManager.setValue('taxCd1', 'J666');
-    FormManager.readOnly('restrictTo');
+    FormManager.readOnly('inacType');
     FormManager.readOnly('inacCd');
     FormManager.readOnly('mtkgArDept');
     FormManager.readOnly('svcArOffice');
-    FormManager.readOnly('taxCd1');
   }
 }
 
