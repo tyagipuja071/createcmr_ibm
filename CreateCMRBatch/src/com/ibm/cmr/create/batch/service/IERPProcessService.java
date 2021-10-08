@@ -363,7 +363,7 @@ public class IERPProcessService extends BaseBatchService {
         GEOHandler cntryHandler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
         boolean enableTempReact = cntryHandler.enableTempReactivateOnUpdate() && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason());
 
-        if (SystemLocation.GERMANY.equals(data.getCmrIssuingCntry())) {
+        if (SystemLocation.GERMANY.equals(data.getCmrIssuingCntry()) && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason())) {
           enableTempReact = true;
         }
 
