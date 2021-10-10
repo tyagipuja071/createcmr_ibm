@@ -554,7 +554,6 @@ function addAddressLandedPairingValidatorBilling() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
-
 function addShippingAddrTypeValidator() {
   console.log("addShippingAddrTypeValidator..............");
   FormManager.addFormValidator((function() {
@@ -1357,23 +1356,11 @@ function isAddrFieldsUpdatedExcludingLanded(type, addrRecord) {
     var curPostCd = (addrRecord.postCd[0] == null) ? '' : addrRecord.postCd[0];
     var curDept = (addrRecord.dept[0] == null) ? '' : addrRecord.dept[0];
 
-    console.log('origCustNm1: ' + origCustNm1 + ', addrRecord.custNm1[0] ' + curCustNm1);
-    console.log('origCustNm2: ' + origCustNm2 + ', addrRecord.custNm2[0] ' + curCustNm2);
-    console.log('origAddrTxt: ' + origAddrTxt + ', addrRecord.addrTxt[0] ' + curAddrTxt);
-    console.log('origPOBox: ' + origPOBox + ', addrRecord.poBox[0]  ' + curPOBox);
-    console.log('origCity1: ' + origCity1 + ', addrRecord.city1[0] ' + curCity1);
-    console.log('origPostCd: ' + origPostCd + ', addrRecord.postCd[0] ' + curPostCd);
-    console.log('origDept: ' + origDept + ', addrRecord.dept[0] ' + curDept);
-
-    if (origCustNm1 != curCustNm1 || origCustNm2 != curCustNm2 || origAddrTxt != curAddrTxt || origPOBox != curPOBox || origCity1 != curCity1 || origPostCd != curPostCd
-        || origDept != curDept) {
-      console.log('returning TRUE');
+    if (origCustNm1 != curCustNm1 || origCustNm2 != curCustNm2 || origAddrTxt != curAddrTxt || origPOBox != curPOBox || origCity1 != curCity1 || origPostCd != curPostCd || origDept != curDept) {
       return true;
     }
 
   }
-
-  console.log('returning FALSE');
   return false;
 }
 
