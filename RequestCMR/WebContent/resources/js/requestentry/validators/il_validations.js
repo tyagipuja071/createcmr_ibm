@@ -1364,6 +1364,31 @@ function isAddrFieldsUpdatedExcludingLanded(type, addrRecord) {
   return false;
 }
 
+function addISICKUKLAValidator() {
+
+  reqType = FormManager.getActualValue('reqType');
+
+  if (reqType == 'C') {
+    return;
+  }
+
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var isicCD = FormManager.getActualValue('isicCd');
+        var kukla = FormManager.getActualValue('custClass');
+
+        if (isicCD == '9500' && kukla != '60') {
+          return new ValidationResult(null, false, 'Invalid value for ISIC/KUKLA.  ISIC value 9500 and KUKLA 60 should be linked together.');
+        } else if (kukla == '60' && isicCD != '9500') {
+          return new ValidationResult(null, false, 'Invalid value for ISIC/KUKLA.  ISIC value 9500 and KUKLA 60 should be linked together.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding Israel functions...');
@@ -1422,4 +1447,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(showHideKuklaField, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterTemplateLoad(showHideKuklaField, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterTemplateLoad(lockCustomerClassByLob, [ SysLoc.ISRAEL ]);
+
+  GEOHandler.registerValidator(addISICKUKLAValidator, [ SysLoc.ISRAEL ], null, true);
 });
