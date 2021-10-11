@@ -646,13 +646,12 @@ public class IsraelHandler extends EMEAHandler {
 
   private void lockLandedCountry(EntityManager entityManager, Data data, Admin admin, Addr addr) {
     boolean isLocalScenario = CUSTGRP_LOCAL.equals(data.getCustGrp());
-    boolean isCreateRequest = admin.getReqType().equals("C");
     boolean isMailingOrTranslated = "CTYA".equals(addr.getId().getAddrType()) || "ZS01".equals(addr.getId().getAddrType());
     // local scenario - mailing and translated mailing lock landed country
     // to israel
-    if (isCreateRequest && isLocalScenario && isMailingOrTranslated) {
+    if ("C".equals(admin.getReqType()) && isLocalScenario && isMailingOrTranslated) {
       addr.setLandCntry("IL");
-    } else {
+    } else if ("U".equals(admin.getReqType())) {
       String marker = addr.getBldg();
       // in Update requests, Mailing and Country Use A must be locked upon
       // import and not editable for both requester and processor.
@@ -698,7 +697,7 @@ public class IsraelHandler extends EMEAHandler {
         update.setNewData(service.getCodeAndDescription(newData.getEmbargoCd(), "EmbargoCode", cmrCountry));
         update.setOldData(service.getCodeAndDescription(oldData.getEmbargoCd(), "EmbargoCode", cmrCountry));
         results.add(update);
-        
+
         // Type of Customer
         if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCustClass(), newData.getCustClass())) {
           update = new UpdatedDataModel();
