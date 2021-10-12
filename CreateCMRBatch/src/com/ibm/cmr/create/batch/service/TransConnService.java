@@ -1456,6 +1456,9 @@ public class TransConnService extends BaseBatchService {
                   if (StringUtils.isBlank(addr.getSapNo())) {
                     addr.setSapNo(response.getRecords().get(i).getSapNo());
                   }
+                  if (StringUtils.isBlank(addr.getIerpSitePrtyId())) {
+                    addr.setIerpSitePrtyId(response.getRecords().get(i).getIerpSitePartyId());
+                  }
                 }
               }
               if (CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equals(resultCode)) {
