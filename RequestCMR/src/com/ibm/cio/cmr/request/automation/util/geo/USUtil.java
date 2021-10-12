@@ -127,6 +127,7 @@ public class USUtil extends AutomationUtil {
   public static final String SC_REST_SSI = "SSI";
   public static final String SC_REST_ICC = "ICC";
   public static final String SC_REST_SVMP = "SVMP";
+  public static final String SC_REST_KYN = "KYN";
   // IGS
   public static final String SC_IGSF = "IGSF";
   public static final String SC_IGS = "IGS";
@@ -430,6 +431,22 @@ public class USUtil extends AutomationUtil {
           overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), "ZC");
           overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "US_SICMEN", data.getUsSicmen(), "357X");
         }
+      }
+
+      // if scenario is KYN
+      if (SC_REST_KYN.equals(scenarioSubType)) {
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISIC_CD", data.getIsicCd(), "7229");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "RESTRICT_TO", data.getRestrictTo(), "KYN");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), "BD");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "US_SICMEN", data.getUsSicmen(), "7229");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "AFFILIATE", data.getAffiliate(), "6500871");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "COMPANY", data.getCompany(), "12641341");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ENTERPRISE", data.getEnterprise(), "6500871");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "INAC_CD", data.getInacCd(), "6272");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "INAC_TYPE", data.getInacType(), "I");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "TAX_CD1", data.getTaxCd1(), "J666");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "MTKG_AR_DEPT", data.getMtkgArDept(), "SD3");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SVC_AR_OFFICE", data.getSvcArOffice(), "IJ9");
       }
 
       if (CG_BY_MODEL.equals(data.getCustGrp()) && StringUtils.isNotEmpty(data.getMiscBillCd())) {
@@ -1566,5 +1583,4 @@ public class USUtil extends AutomationUtil {
     }
     return false;
   }
-
 }
