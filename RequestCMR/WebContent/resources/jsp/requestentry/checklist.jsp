@@ -4,13 +4,19 @@
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring"%>
 <%@ taglib uri="/tags/cmr" prefix="cmr"%>
+<%@page import="com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel"%>
+<%@page import="com.ibm.cio.cmr.request.ui.PageManager"%>
+<%@page import="com.ibm.cio.cmr.request.CmrConstants"%>
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 <c:set var="resourcesPath" value="${contextPath}/resources" />
+
 <%
 Boolean readOnly = (Boolean) request.getAttribute("yourActionsViewOnly");
 if (readOnly == null){
   readOnly = false;
 }
+RequestEntryModel reqentry = (RequestEntryModel) request.getAttribute("reqentry");
+String processingType = PageManager.getProcessingType(reqentry.getCmrIssuingCntry(), reqentry.getReqType());
 %>
 
 <style>
@@ -101,7 +107,9 @@ table.checklist span.checklist-radio {
       <jsp:include page="KR/kr_checklist.jsp" />
     </cmr:view>
     <cmr:view forCountry="755">
+    <%  if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) { %>  
       <jsp:include page="IL/israel_checklist.jsp" />
+    <%  } %>  
     </cmr:view>    
     </cmr:column>
   </cmr:row>
