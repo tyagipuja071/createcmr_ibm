@@ -139,6 +139,15 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
         updateApprovalStatus(entityManager, req, CmrConstants.APPROVAL_APPROVED, approval, admin);
         if (!"REP".equals(admin.getReqStatus())) {
           moveToNextStep(entityManager, admin);
+
+          // CREATCMR-3377 - CN 2.0
+          String cmrIssuingCntry = getCmrIssuingCntry(entityManager, req.getReqId());
+          if (SystemLocation.CHINA.equals(cmrIssuingCntry)) {
+            GEOHandler geoHandler = RequestUtils.getGEOHandler(cmrIssuingCntry);
+            geoHandler.setReqStatusAfterApprove(entityManager, approval, req, admin);
+            log.debug("Updating Approval Request ID " + req.getId().getApprovalId() + " to " + admin.getReqStatus());
+            updateEntity(admin, entityManager);
+          }
         }
         approval.setProcessed(true);
         approval.setActionDone(CmrConstants.YES_NO.Y.toString());
@@ -1400,6 +1409,19 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
       }
     }
     return false;
+  }
+
+  private String getCmrIssuingCntry(EntityManager entityManager, long reqId) {
+    String sql = ExternalizedQuery.getSql("DATA.GET.RECORD.BYID");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+
+    List<Data> rs = query.getResults(1, Data.class);
+
+    if (rs != null && rs.size() > 0) {
+      return rs.get(0).getCmrIssuingCntry();
+    }
+    return null;
   }
 
 }

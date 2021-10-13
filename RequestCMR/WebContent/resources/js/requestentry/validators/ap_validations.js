@@ -114,7 +114,29 @@ function addAfterConfigAP() {
     FormManager.enable('IndustryClass');
     FormManager.enable('subIndustryCd');
   }
+  
+  if (reqType == 'C' && custSubGrp == 'ECOSY' && (cntry == '738' || cntry == '736')) {
+    FormManager.readOnly('apCustClusterId');
+    FormManager.readOnly('clientTier');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('mrcCd');
+    FormManager.setValue('clientTier', 'Y');
+    FormManager.setValue('isuCd', '34');
+    FormManager.setValue('mrcCd', '3');
+    if (cntry == '738'){
+      FormManager.setValue('apCustClusterId', '08041');
+      FormManager.removeValidator('isuCd', Validators.REQUIRED);
+    }
+    if (cntry == '736'){
+      FormManager.setValue('apCustClusterId', '08045');
+    }
+  }
 
+ if (reqType == 'C' && (custSubGrp && custSubGrp != '') && custSubGrp != 'INTER' && custSubGrp != 'XINT' && (cntry == '738' || cntry == '736')) {
+    FormManager.setValue('repTeamMemberNo', _pagemodel.repTeamMemberNo == null ? '000000' : _pagemodel.repTeamMemberNo);
+    FormManager.enable('repTeamMemberNo');
+  }
+  
   if (role != 'PROCESSOR' && (cntry == '643' || cntry == '749' || cntry == '778' || cntry == '818' || cntry == '834' || cntry == '852' || cntry == '856')) {
     FormManager.readOnly('miscBillCd');
   }

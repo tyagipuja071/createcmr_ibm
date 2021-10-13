@@ -1056,4 +1056,8 @@ public abstract class GEOHandler {
     return new String[] { namePart1, namePart2, namePart3 };
   }
 
+  public void setReqStatusAfterApprove(EntityManager entityManager, ApprovalResponseModel approval, ApprovalReq req, Admin admin) {
+    // TODO Auto-generated method stub
+  }
+
 }
