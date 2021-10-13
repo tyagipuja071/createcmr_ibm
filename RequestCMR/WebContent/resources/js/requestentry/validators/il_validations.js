@@ -1237,9 +1237,7 @@ function addPpsceidValidator() {
 }
 
 function showHideKuklaField() {
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
+
   var reqType = FormManager.getActualValue('reqType');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
 
@@ -1255,12 +1253,15 @@ function showHideKuklaField() {
     } else {
       FormManager.hide('CustClass', 'custClass');
     }
-  } else {
+  } else if (reqType == 'U') {
     FormManager.show('CustClass', 'custClass');
   }
 }
 
 function limitCustomerClassValues(value) {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
   if (!value) {
     value = FormManager.getActualValue('custSubGrp');
   }
