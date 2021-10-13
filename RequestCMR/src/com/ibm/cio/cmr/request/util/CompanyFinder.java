@@ -624,4 +624,41 @@ public class CompanyFinder {
     return mapper.readValue(json, ref);
   }
 
+  /**
+   * Get chinese name and address from China's TianYanCha Api
+   * 
+   * @param searchModel
+   * @return
+   * @throws Exception
+   */
+  public static AutomationResponse<CNResponse> getCNApiInfo4GBG(CompanyRecordModel searchModel, String key) throws Exception {
+    AutomationServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
+        AutomationServiceClient.class);
+    client.setReadTimeout(1000 * 60 * 5);
+    client.setRequestMethod(Method.Get);
+
+    CNRequest request = new CNRequest();
+    switch (key) {
+    case "TAXCD":
+      request.setKeyword(searchModel.getTaxCd1());
+      break;
+    case "ALTNAME":
+      request.setKeyword(searchModel.getAltName());
+      break;
+    case "DEFAULT":
+      request.setKeyword(searchModel.getTaxCd1());
+      break;
+    }
+    request.setQueryType("2");
+
+    System.out.println(request + request.getKeyword());
+
+    LOG.debug("Connecting to the CNValidation service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
+    AutomationResponse<?> rawResponse = client.executeAndWrap(AutomationServiceClient.CN_TYC_SERVICE_ID, request, AutomationResponse.class);
+    ObjectMapper mapper = new ObjectMapper();
+    String json = mapper.writeValueAsString(rawResponse);
+    TypeReference<AutomationResponse<CNResponse>> ref = new TypeReference<AutomationResponse<CNResponse>>() {
+    };
+    return mapper.readValue(json, ref);
+  }
 }

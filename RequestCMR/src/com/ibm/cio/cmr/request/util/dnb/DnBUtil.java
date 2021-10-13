@@ -358,6 +358,27 @@ public class DnBUtil {
     }
   }
 
+  public static String getCNApiCompanyNameData4GBG(String organizationId) {
+    // TODO Auto-generated method stub
+    CompanyRecordModel companyRecordModel = new CompanyRecordModel();
+    companyRecordModel.setTaxCd1(organizationId);
+    String cnName = null;
+    try {
+      AutomationResponse<CNResponse> cmrsData = CompanyFinder.getCNApiInfo4GBG(companyRecordModel, "TAXCD");
+      if (cmrsData != null && cmrsData.isSuccess()) {
+        LOG.debug("Get Chiese API Info successful>>>");
+        cnName = StringUtils.isNotBlank(cmrsData.getRecord().getName()) ? cmrsData.getRecord().getName().trim() : "";
+        LOG.debug("Get Chiese API Info Social credit code is " + cnName);
+      } else {
+        LOG.debug("No China API Data were found.");
+      }
+    } catch (Exception e) {
+      // TODO Auto-generated catch block
+      LOG.error("Error in getting Chiese API details ", e);
+    }
+    return cnName;
+  }
+
   /**
    * Gets the DnB code for the equivalent of the VAT field
    *
