@@ -691,24 +691,16 @@ public class IsraelHandler extends EMEAHandler {
       UpdatedDataModel update = null;
       super.addSummaryUpdatedFields(service, type, cmrCountry, newData, oldData, results);
 
-      if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getEmbargoCd(), newData.getEmbargoCd())) {
+      // Type of Customer
+      if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCustClass(), newData.getCustClass())) {
         update = new UpdatedDataModel();
-        update.setDataField(PageManager.getLabel(cmrCountry, "EmbargoCode", "-"));
-        update.setNewData(service.getCodeAndDescription(newData.getEmbargoCd(), "EmbargoCode", cmrCountry));
-        update.setOldData(service.getCodeAndDescription(oldData.getEmbargoCd(), "EmbargoCode", cmrCountry));
+        update.setDataField(PageManager.getLabel(cmrCountry, "CustClass", "-"));
+        update.setNewData(newData.getCustClass());
+        update.setOldData(oldData.getCustClass());
         results.add(update);
-
-        // Type of Customer
-        if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCustClass(), newData.getCustClass())) {
-          update = new UpdatedDataModel();
-          update.setDataField(PageManager.getLabel(cmrCountry, "CustClass", "-"));
-          update.setNewData(newData.getCustClass());
-          update.setOldData(oldData.getCustClass());
-          results.add(update);
-        }
-      } else {
-        super.addSummaryUpdatedFields(service, type, cmrCountry, newData, oldData, results);
       }
+    } else {
+      super.addSummaryUpdatedFields(service, type, cmrCountry, newData, oldData, results);
     }
   }
 
