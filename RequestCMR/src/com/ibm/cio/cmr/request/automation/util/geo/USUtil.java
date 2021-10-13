@@ -1594,8 +1594,13 @@ public class USUtil extends AutomationUtil {
     Data data = requestData.getData();
     scenarioSubType = data.getCustSubGrp();
     if (SC_REST_KYN.equals(scenarioSubType)) {
+      overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ISIC_CD", data.getIsicCd(), "7229");
+      overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "US_SICMEN", data.getUsSicmen(), "7229");
       overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "INAC_TYPE", data.getInacType(), "I");
       overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "INAC_CD", data.getInacCd(), "6272");
+      overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "AFFILIATE", data.getAffiliate(), "6500871");
+      overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "COMPANY", data.getCompany(), "12641341");
+      overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ENTERPRISE", data.getEnterprise(), "6500871");
     }
     return true;
   }
