@@ -701,18 +701,23 @@ public class IsraelTransformer extends EMEATransformer {
 
   @Override
   public void transformOtherData(EntityManager entityManager, LegacyDirectObjectContainer legacyObjects, CMRRequestContainer cmrObjects) {
-    List<CmrtAddr> legacyAddrList = legacyObjects.getAddresses();
-    int localLangShipCount = 1;
-    for (CmrtAddr addr : legacyAddrList) {
-      String pairedSeq = "";
-      if ("Y".equals(addr.getIsAddressUseA())) {
-        pairedSeq = pairedSeqVal.get(MAIL_KEY);
-      } else if ("Y".equals(addr.getIsAddressUseB())) {
-        pairedSeq = pairedSeqVal.get(BILL_KEY);
-      } else if ("Y".equals(addr.getIsAddressUseC())) {
-        pairedSeq = pairedSeqVal.get(SHIP_KEY + localLangShipCount++);
+
+    // Do not execute for mass update
+    if (cmrObjects != null && cmrObjects.getAdmin() != null && StringUtils.isNotEmpty(cmrObjects.getAdmin().getReqType())
+        && !"M".equals(cmrObjects.getAdmin().getReqType())) {
+      List<CmrtAddr> legacyAddrList = legacyObjects.getAddresses();
+      int localLangShipCount = 1;
+      for (CmrtAddr addr : legacyAddrList) {
+        String pairedSeq = "";
+        if ("Y".equals(addr.getIsAddressUseA())) {
+          pairedSeq = pairedSeqVal.get(MAIL_KEY);
+        } else if ("Y".equals(addr.getIsAddressUseB())) {
+          pairedSeq = pairedSeqVal.get(BILL_KEY);
+        } else if ("Y".equals(addr.getIsAddressUseC())) {
+          pairedSeq = pairedSeqVal.get(SHIP_KEY + localLangShipCount++);
+        }
+        addr.setAddrLineO(pairedSeq);
       }
-      addr.setAddrLineO(pairedSeq);
     }
   }
 
@@ -778,8 +783,6 @@ public class IsraelTransformer extends EMEATransformer {
     if (StringUtils.isNotBlank(addr.getPoBox())) {
       legacyAddr.setPoBox(addr.getPoBox());
     }
-
-    legacyObjects.addAddress(legacyAddr);
   }
 
   @Override

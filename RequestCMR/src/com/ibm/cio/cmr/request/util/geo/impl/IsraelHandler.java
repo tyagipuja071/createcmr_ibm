@@ -1238,19 +1238,9 @@ public class IsraelHandler extends EMEAHandler {
         return false;
       }
 
-      // compare Address Seq No if same
-      String addrSeqNoA = validateColValFromCell(rowA.getCell(1));
-      String addrSeqNoB = validateColValFromCell(rowB.getCell(1));
-      if ((StringUtils.isNotBlank(addrSeqNoA) && StringUtils.isNotBlank(addrSeqNoB) && !addrSeqNoA.equals(addrSeqNoB))
-          || (StringUtils.isBlank(addrSeqNoA) && StringUtils.isNotBlank(addrSeqNoB))
-          || (StringUtils.isNotBlank(addrSeqNoA) && StringUtils.isBlank(addrSeqNoB))) {
-        error.addError(rowA.getRowNum(), "<br>CMR No.", "Address Sequence No. does not match.");
-        return false;
-      }
-
       // Iterate other fields if filled-out the same
       int lastCell = rowA.getLastCellNum();
-      for (int i = 2; i <= lastCell; i++) {
+      for (int i = 1; i <= lastCell; i++) {
         String currCellA = validateColValFromCell(rowA.getCell(i));
         String currCellB = validateColValFromCell(rowB.getCell(i));
         if ((StringUtils.isNotBlank(currCellA) && StringUtils.isBlank(currCellB))
