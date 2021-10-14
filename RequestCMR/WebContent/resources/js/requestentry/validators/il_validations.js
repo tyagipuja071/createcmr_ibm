@@ -1401,6 +1401,29 @@ function addISICKUKLAValidator() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
+function setCapInd() {
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType == 'C') {
+    FormManager.readOnly('capInd');
+    FormManager.setValue('capInd', true);
+  } else if (reqType == 'U') {
+    var params = {
+      USERID : _pagemodel.requesterId
+    };
+
+    var result1 = cmr.query('GET.ND.USER_ROLE', params);
+    var result2 = cmr.query('GET.ND.USER_PROC_CENTER_NM', params);
+
+    reqType = FormManager.getActualValue('reqType');
+
+    if (reqType == 'U') {
+      if (result1.ret1 > 0 && result2.ret1 == 'Bratislava') {
+        FormManager.enable('capInd');
+      }
+    }
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding Israel functions...');
@@ -1439,6 +1462,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addILChecklistValidator, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(addAddressLandedPairingValidatorMailing, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(addAddressLandedPairingValidatorBilling, [ SysLoc.ISRAEL ], null, true);
+  GEOHandler.addAfterConfig(setCapInd, [ SysLoc.ISRAEL ]);
 
   /* 1438717 - add DPL match validation for failed dpl checks */
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.EMEA, GEOHandler.ROLE_PROCESSOR, true);
