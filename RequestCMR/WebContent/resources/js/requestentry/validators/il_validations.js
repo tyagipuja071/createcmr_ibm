@@ -861,6 +861,65 @@ function updateAbbrevNmLocnIsrael(cntry, addressMode, saving, finalSave, force) 
   }
 }
 
+function finalizeAbbrevName() {
+  if (typeof (_pagemodel) != 'undefined') {
+    role = _pagemodel.userRole;
+    reqType = FormManager.getActualValue('reqType');
+  }
+  if (reqType != 'C') {
+    return;
+  }
+
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (custSubGrp != null) {
+    var installingAddr = getAddressByType('ZI01');
+    var countryUseAAddr = getAddressByType('CTYA');
+    var finalAbbrevName = '';
+
+    if (custSubGrp == 'THDPT') {// Third Party Sub scenario
+      if ((installingAddr != null && installingAddr != '') && (countryUseAAddr != null && countryUseAAddr != '')) {
+        var installCustName = '' + installingAddr.custNm1;
+        var cntryUseACustName = '' + countryUseAAddr.custNm1;
+        if ((installCustName != null && installCustName != '') && (cntryUseACustName != null && cntryUseACustName != '')) {
+          finalAbbrevName = cntryUseACustName.substring(0, 8) + ' ' + installCustName.substring(0, 9);
+        }
+      }
+    } else if (custSubGrp == 'INTSO') {// Internal SO Sub scenario
+      if (installingAddr != null && installingAddr != '') {
+        var installCustName = '' + installingAddr.custNm1;
+        if (installCustName != null && installCustName != '') {
+          finalAbbrevName = 'IBM for ' + installCustName.substring(0, 14);
+        }
+      }
+    } else if (countryUseAAddr != null) {
+      var cntryUseACustName = '' + countryUseAAddr.custNm1;
+      if (cntryUseACustName != null && cntryUseACustName != '') {
+        finalAbbrevName = cntryUseACustName.substring(0, 22)
+      }
+    }
+    FormManager.setValue('abbrevNm', finalAbbrevName);
+  }
+}
+
+function getAddressByType(addrType) {
+
+  var record = null;
+  var type = null;
+  for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+    record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+    type = record.addrType;
+
+    if (typeof (type) == 'object') {
+      type = type[0];
+    }
+
+    if (type == addrType) {
+      return record;
+    }
+  }
+  return null;
+}
+
 /**
  * Customer Name Con't or Attention Person should be required (Israel)
  */
@@ -1487,6 +1546,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(showHideKuklaField, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterTemplateLoad(showHideKuklaField, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterTemplateLoad(lockCustomerClassByLob, [ SysLoc.ISRAEL ]);
+  GEOHandler.addAfterTemplateLoad(finalizeAbbrevName, [ SysLoc.ISRAEL ]);
 
   GEOHandler.registerValidator(addISICKUKLAValidator, [ SysLoc.ISRAEL ], null, true);
 });
