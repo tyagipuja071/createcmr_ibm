@@ -149,6 +149,10 @@ function addILChecklistValidator() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
+        rType = FormManager.getActualValue('reqType');
+        if (rType == 'U') {
+          return;
+        }
         custSubScnrio = FormManager.getActualValue('custSubGrp');
         var zs01ReqId = FormManager.getActualValue('reqId');
         var prolif = false;
