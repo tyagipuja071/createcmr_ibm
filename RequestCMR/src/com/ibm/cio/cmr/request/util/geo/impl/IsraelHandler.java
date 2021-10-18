@@ -6,9 +6,12 @@ package com.ibm.cio.cmr.request.util.geo.impl;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 
@@ -78,6 +81,8 @@ public class IsraelHandler extends EMEAHandler {
       "Shipping Address (Update)", "EPL Address" };
 
   private static final String CUSTGRP_LOCAL = "LOCAL";
+  private static final int MANDATORY_ADDR_COUNT = 8;
+  private static final int MAX_ADDR_SEQ = 99999;
 
   static {
     LANDED_CNTRY_MAP.put(SystemLocation.UNITED_KINGDOM, "GB");
@@ -812,19 +817,147 @@ public class IsraelHandler extends EMEAHandler {
   public String generateAddrSeq(EntityManager entityManager, String addrType, long reqId, String cmrIssuingCntry) {
     String processingType = PageManager.getProcessingType(SystemLocation.ISRAEL, "U");
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
-      String newAddrSeq = null;
-      return newAddrSeq;
+      String addrSeqNum = null;
+
+      AdminPK adminPK = new AdminPK();
+      adminPK.setReqId(reqId);
+      Admin admin = entityManager.find(Admin.class, adminPK);
+
+      if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+        addrSeqNum = getAddrSeqForCreate(entityManager, reqId, addrType);
+      } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+        addrSeqNum = getAddrSeqForUpdate(entityManager, reqId);
+      }
+      return addrSeqNum;
     } else {
       return super.generateAddrSeq(entityManager, addrType, reqId, cmrIssuingCntry);
     }
+  }
+
+  private String getAddrSeqForCreate(EntityManager entityManager, long reqId, String addrType) {
+    int candidateSeqNum = 0;
+    String addrSeqNum = null;
+    if (!StringUtils.isEmpty(addrType)) {
+      candidateSeqNum = getFixedSequenceForMandatoryAddresses(addrType);
+      addrSeqNum = getAvailableAddrSeqNum(entityManager, reqId, candidateSeqNum);
+    }
+
+    return addrSeqNum;
+  }
+
+  private String getAddrSeqForUpdate(EntityManager entityManager, long reqId) {
+    String addrSeqNum = null;
+    addrSeqNum = getAvailAddrSeqNumInclRdc(entityManager, reqId);
+
+    return addrSeqNum;
+  }
+
+  private String getAvailableAddrSeqNum(EntityManager entityManager, long reqId, int candidateSeqNum) {
+    int availSeqNum = 0;
+    Set<Integer> allAddrSeq = getAllSavedSeqFromAddr(entityManager, reqId);
+    if (allAddrSeq.contains(candidateSeqNum)) {
+      availSeqNum = MANDATORY_ADDR_COUNT + 1;
+      while (allAddrSeq.contains(availSeqNum)) {
+        availSeqNum++;
+      }
+    } else {
+      availSeqNum = candidateSeqNum;
+    }
+    return String.format("%05d", availSeqNum);
+  }
+
+  private String getAvailAddrSeqNumInclRdc(EntityManager entityManager, long reqId) {
+    DataPK pk = new DataPK();
+    pk.setReqId(reqId);
+    Data data = entityManager.find(Data.class, pk);
+
+    String cmrNo = data.getCmrNo();
+    Set<Integer> allAddrSeqFromAddr = getAllSavedSeqFromAddr(entityManager, reqId);
+    Set<Integer> allAddrSeqFromRdc = getAllSavedSeqFromRdc(entityManager, cmrNo);
+
+    Set<Integer> mergedAddrSet = new HashSet<>();
+    mergedAddrSet.addAll(allAddrSeqFromAddr);
+    mergedAddrSet.addAll(allAddrSeqFromRdc);
+
+    int candidateSeqNum = Collections.max(mergedAddrSet) + 1;
+
+    if (candidateSeqNum > MAX_ADDR_SEQ) {
+      candidateSeqNum = 1;
+    }
+
+    int availSeqNum = 0;
+    if (mergedAddrSet.contains(candidateSeqNum)) {
+      availSeqNum = candidateSeqNum;
+      while (mergedAddrSet.contains(availSeqNum)) {
+        availSeqNum++;
+        if (availSeqNum > MAX_ADDR_SEQ) {
+          availSeqNum = 1;
+        }
+      }
+    } else {
+      availSeqNum = candidateSeqNum;
+    }
+
+    return String.format("%05d", availSeqNum);
+  }
+
+  private int getFixedSequenceForMandatoryAddresses(String addrType) {
+    int addrSeq = 0;
+    // fixed sequence for mandatory addresses
+    if ("ZS01".equals(addrType)) {
+      addrSeq = 1;
+    } else if ("ZP01".equals(addrType)) {
+      addrSeq = 2;
+    } else if ("ZI01".equals(addrType)) {
+      addrSeq = 3;
+    } else if ("ZD01".equals(addrType)) {
+      addrSeq = 4;
+    } else if ("ZS02".equals(addrType)) {
+      addrSeq = 5;
+    } else if ("CTYA".equals(addrType)) {
+      addrSeq = 6;
+    } else if ("CTYB".equals(addrType)) {
+      addrSeq = 7;
+    } else if ("CTYC".equals(addrType)) {
+      addrSeq = 8;
+    }
+
+    return addrSeq;
+  }
+
+  private Set<Integer> getAllSavedSeqFromAddr(EntityManager entityManager, long reqId) {
+    String sql = ExternalizedQuery.getSql("GET.ADDRSEQ.BY_REQID");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    List<Integer> results = query.getResults(Integer.class);
+
+    Set<Integer> addrSeqSet = new HashSet<>();
+    addrSeqSet.addAll(results);
+
+    return addrSeqSet;
+  }
+
+  private Set<Integer> getAllSavedSeqFromRdc(EntityManager entityManager, String cmrNo) {
+    String sql = ExternalizedQuery.getSql("GET.KNA1_ZZKV_SEQNO_DISTINCT");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("KATR6", SystemLocation.ISRAEL);
+    query.setParameter("ZZKV_CUSNO", cmrNo);
+
+    List<Integer> resultsRDC = query.getResults(Integer.class);
+    Set<Integer> addrSeqSet = new HashSet<>();
+    addrSeqSet.addAll(resultsRDC);
+
+    return addrSeqSet;
   }
 
   @Override
   public String generateModifyAddrSeqOnCopy(EntityManager entityManager, String addrType, long reqId, String oldAddrSeq, String cmrIssuingCntry) {
     String processingType = PageManager.getProcessingType(SystemLocation.ISRAEL, "U");
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
-      String newSeq = null;
-      return newSeq;
+      String newAddrSeq = "";
+      newAddrSeq = generateAddrSeq(entityManager, addrType, reqId, cmrIssuingCntry);
+      return newAddrSeq;
     } else {
       return super.generateModifyAddrSeqOnCopy(entityManager, addrType, reqId, oldAddrSeq, cmrIssuingCntry);
     }
@@ -834,7 +967,7 @@ public class IsraelHandler extends EMEAHandler {
   public List<String> getMandtAddrTypeForLDSeqGen(String cmrIssuingCntry) {
     String processingType = PageManager.getProcessingType(SystemLocation.ISRAEL, "U");
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
-      return Arrays.asList("ZS01", "ZP01", "ZI01", "ZD01", "ZS02", "CTYA", "CTYB", "CTYC");
+      return null;
     } else {
       return super.getMandtAddrTypeForLDSeqGen(cmrIssuingCntry);
     }
@@ -854,7 +987,7 @@ public class IsraelHandler extends EMEAHandler {
   public List<String> getAdditionalAddrTypeForLDSeqGen(String cmrIssuingCntry) {
     String processingType = PageManager.getProcessingType(SystemLocation.ISRAEL, "U");
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
-      return Arrays.asList("ZD01", "CTYC");
+      return null;
     } else {
       return super.getAdditionalAddrTypeForLDSeqGen(cmrIssuingCntry);
     }
