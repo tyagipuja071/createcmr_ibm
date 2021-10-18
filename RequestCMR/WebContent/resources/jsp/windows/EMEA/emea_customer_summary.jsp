@@ -67,6 +67,17 @@
       		</cmr:column>
 		</cmr:view>
 	</cmr:row>
+	<cmr:row addBackground="true">
+		<cmr:view forCountry="755">
+			<cmr:column span="1" width="127"></cmr:column>
+			<cmr:column span="1" width="130">
+				<label><cmr:fieldLabel fieldId="CustClass" />: </label>
+			</cmr:column>
+			<cmr:column span="1" width="200">
+				${summary.data.custClass}
+      		</cmr:column>
+		</cmr:view>
+	</cmr:row>
   <cmr:row addBackground="true">
   <cmr:view forCountry="758">
    <cmr:column span="1" width="127"> </cmr:column>
