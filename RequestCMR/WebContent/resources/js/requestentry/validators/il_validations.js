@@ -1431,7 +1431,6 @@ function isAddrFieldsUpdatedExcludingLanded(type, addrRecord) {
 function addISICKUKLAValidator() {
 
   var reqType = FormManager.getActualValue('reqType');
-  var reqId = FormManager.getActualValue('reqId');
 
   if (reqType == 'C') {
     return;
@@ -1443,21 +1442,12 @@ function addISICKUKLAValidator() {
         var isicCD = FormManager.getActualValue('isicCd');
         var kukla = FormManager.getActualValue('custClass');
 
-        var qParams = {
-          REQ_ID : reqId,
-        };
-
-        var result = cmr.query('GET.IL.ISIC_KUKLA_FOR_DATA_RDC', qParams);
-        var rdcIsic = result.ret1;
-        var rdcKukla = result.ret2;
-
-        if (rdcIsic == '9500' && rdcKukla == '60') {
-          if (isicCD == '9500' && kukla != '60') {
-            return new ValidationResult(null, false, 'Invalid value for ISIC/KUKLA.  ISIC value 9500 and KUKLA 60 should be linked together.');
-          } else if (kukla == '60' && isicCD != '9500') {
-            return new ValidationResult(null, false, 'Invalid value for ISIC/KUKLA.  ISIC value 9500 and KUKLA 60 should be linked together.');
-          }
+        if (isicCD == '9500' && kukla != '60') {
+          return new ValidationResult(null, false, 'Invalid value for ISIC/KUKLA.  ISIC value 9500 and KUKLA 60 should be linked together.');
+        } else if (kukla == '60' && isicCD != '9500') {
+          return new ValidationResult(null, false, 'Invalid value for ISIC/KUKLA.  ISIC value 9500 and KUKLA 60 should be linked together.');
         }
+
         return new ValidationResult(null, true);
       }
     };
