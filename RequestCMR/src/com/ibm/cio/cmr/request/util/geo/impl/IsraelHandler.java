@@ -580,6 +580,9 @@ public class IsraelHandler extends EMEAHandler {
           }
         }
 
+        if (StringUtils.isEmpty(data.getCapInd())) {
+          data.setCapInd("N");
+        }
       }
     } else {
       super.doBeforeDataSave(entityManager, admin, data, cmrIssuingCntry);
