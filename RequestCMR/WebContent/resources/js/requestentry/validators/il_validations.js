@@ -97,6 +97,23 @@ function afterConfigForIsrael() {
         }
       });
     }
+
+    var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+    if (viewOnlyPage) {
+      FormManager.hide('CollectionCd', 'collectionCd');
+    }
+  }
+
+  if (FormManager.getActualValue('reqType') == 'U') {
+    lockCollectionCdForUpdate();
+    if (_requestingLOBHandler == null) {
+      _requestingLOBHandler = dojo.connect(FormManager.getField('requestingLob'), 'onChange', function(value) {
+        var lob = FormManager.getActualValue('requestingLob');
+        if (lob != '') {
+          lockCollectionCdForUpdate();
+        }
+      });
+    }
   }
 }
 
@@ -1549,6 +1566,42 @@ function enableCmrNoForProcessor() {
   }
 }
 
+function addCollectionValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var collectionCd = FormManager.getActualValue('collectionCd');
+        if (collectionCd != null && collectionCd != undefined && collectionCd != '') {
+          if (collectionCd.length > 0 && !collectionCd.match("^[0-9a-zA-Z]*$")) {
+            return new ValidationResult(null, false, 'The value of Collection Code is invalid, please use only alphanumeric characters.');
+          } else {
+            return new ValidationResult(null, true);
+          }
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
+function lockCollectionCdForUpdate() {
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  var lob = FormManager.getActualValue('requestingLob');
+  if (role == 'REQUESTER') {
+    if (lob == 'SCT' || lob == 'AR') {
+      FormManager.enable('collectionCd');
+    } else {
+      FormManager.readOnly('collectionCd');
+    }
+  } else {
+    FormManager.enable('collectionCd');
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding Israel functions...');
@@ -1613,4 +1666,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(finalizeAbbrevName, [ SysLoc.ISRAEL ]);
 
   GEOHandler.registerValidator(addISICKUKLAValidator, [ SysLoc.ISRAEL ], null, true);
+  GEOHandler.registerValidator(addCollectionValidator, [ SysLoc.ISRAEL ], null, true);
 });
