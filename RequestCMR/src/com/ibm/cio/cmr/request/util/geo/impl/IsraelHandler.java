@@ -666,7 +666,7 @@ public class IsraelHandler extends EMEAHandler {
       if (isMailingOrTranslated) {
         if ("SUPERUSER".equals(marker)) {
           addr.setBldg("");
-        } else {
+        } else if ("Y".equals(addr.getImportInd())) {
           AddrRdc addrRdc = LegacyCommonUtil.getAddrRdcRecord(entityManager, addr);
           addr.setLandCntry(addrRdc.getLandCntry());
         }
