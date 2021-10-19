@@ -35,7 +35,6 @@ function addHandlersForIL() {
       setSrSboValuesOnEnterprise(value);
     });
   }
-
 }
 
 function addEMEALandedCountryHandler(cntry, addressMode, saving, finalSave) {
@@ -1404,17 +1403,13 @@ function setCapInd() {
   var reqType = FormManager.getActualValue('reqType');
   if (reqType == 'C') {
     FormManager.readOnly('capInd');
-    FormManager.setValue('capInd', true);
   } else if (reqType == 'U') {
     var params = {
       USERID : _pagemodel.requesterId
     };
-
     var result1 = cmr.query('GET.ND.USER_ROLE', params);
     var result2 = cmr.query('GET.ND.USER_PROC_CENTER_NM', params);
-
     reqType = FormManager.getActualValue('reqType');
-
     if (reqType == 'U') {
       if (result1.ret1 > 0 && result2.ret1 == 'Bratislava') {
         FormManager.enable('capInd');
