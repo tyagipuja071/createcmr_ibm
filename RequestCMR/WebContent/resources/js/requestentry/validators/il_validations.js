@@ -1296,6 +1296,7 @@ function showHideKuklaField() {
 
   var reqType = FormManager.getActualValue('reqType');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
 
   /*
    * In CREATES, KUKLA is visible only for COMMERCIAL (local & cross) & BP and
@@ -1310,7 +1311,11 @@ function showHideKuklaField() {
       FormManager.hide('CustClass', 'custClass');
     }
   } else if (reqType == 'U') {
-    FormManager.show('CustClass', 'custClass');
+    if (viewOnlyPage) {
+      FormManager.readOnly('custClass');
+    } else {
+      FormManager.show('CustClass', 'custClass');
+    }
   }
 }
 
