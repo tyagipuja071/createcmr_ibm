@@ -35,7 +35,6 @@ function addHandlersForIL() {
       setSrSboValuesOnEnterprise(value);
     });
   }
-
 }
 
 function addEMEALandedCountryHandler(cntry, addressMode, saving, finalSave) {
@@ -1452,22 +1451,94 @@ function setCapInd() {
   var reqType = FormManager.getActualValue('reqType');
   if (reqType == 'C') {
     FormManager.readOnly('capInd');
-    FormManager.setValue('capInd', true);
   } else if (reqType == 'U') {
     var params = {
       USERID : _pagemodel.requesterId
     };
-
     var result1 = cmr.query('GET.ND.USER_ROLE', params);
     var result2 = cmr.query('GET.ND.USER_PROC_CENTER_NM', params);
-
     reqType = FormManager.getActualValue('reqType');
-
     if (reqType == 'U') {
       if (result1.ret1 > 0 && result2.ret1 == 'Bratislava') {
         FormManager.enable('capInd');
       }
     }
+  }
+}
+
+function validateCMRNumberForLegacy() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var cmrNo = FormManager.getActualValue('cmrNo');
+        var _custSubGrp = FormManager.getActualValue('custSubGrp');
+
+        var numPattern = /^[0-9]+$/;
+        if (FormManager.getActualValue('reqType') != 'C') {
+          return new ValidationResult(null, true);
+        }
+        if (cmrNo == '') {
+          return new ValidationResult(null, true);
+        } else {
+          // Skip validation for Prospect Request
+          var ifProspect = FormManager.getActualValue('prospLegalInd');
+          if (dijit.byId('prospLegalInd')) {
+            ifProspect = dijit.byId('prospLegalInd').get('checked') ? 'Y' : 'N';
+          }
+          console.log("validateCMRNumberForLegacy ifProspect:" + ifProspect);
+          if ('Y' == ifProspect) {
+            return new ValidationResult(null, true);
+          }
+          // Validation for Internal Scenario
+          if (_custSubGrp == 'INTER' || _custSubGrp == 'INTSO') {
+            if (!cmrNo.startsWith("99")) {
+              return new ValidationResult(null, false, 'Internal CMR should begin with 99.');
+            }
+          } else if (_custSubGrp != 'INTER' || _custSubGrp != 'INTSO') {
+            if (cmrNo.startsWith("99")) {
+              return new ValidationResult(null, false, 'CMR Starting with 99 is allowed for Internal Scenario only.');
+            }
+          }
+          if (cmrNo == '000000') {
+            return new ValidationResult(null, false, 'CMR Number should be number only Except -> 000000');
+          }
+          if (cmrNo.length >= 1 && cmrNo.length != 6) {
+            return new ValidationResult(null, false, 'CMR Number should be 6 digit long.');
+          }
+          if (cmrNo.length > 1 && !cmrNo.match(numPattern)) {
+            return new ValidationResult({
+              id : 'cmrNo',
+              type : 'text',
+              name : 'cmrNo'
+            }, false, 'CMR Number should be number only.');
+          }
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
+function enableCmrNoForProcessor() {
+  var cmrNO = FormManager.getActualValue('cmrNo');
+  var ifProspect = FormManager.getActualValue('prospLegalInd');
+  console.log('enableCmrNoForProcessor... ' + ifProspect);
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  if (reqType != 'C') {
+    return;
+  }
+
+  if (dijit.byId('prospLegalInd')) {
+    console.log('prospLegalInd... ');
+    ifProspect = dijit.byId('prospLegalInd').get('checked') ? 'Y' : 'N';
+  }
+  console.log("enableCmrNoForProcessor ifProspect:" + ifProspect);
+  if (role == 'REQUESTER' || 'Y' == ifProspect || (role != 'REQUESTER' && cmrNO.startsWith('P'))) {
+    FormManager.readOnly('cmrNo');
+  } else if ('Y' != ifProspect && (role == 'PROCESSOR') && reqType != 'U') {
+    FormManager.enable('cmrNo');
+  } else {
+    FormManager.readOnly('cmrNo');
   }
 }
 
@@ -1526,6 +1597,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(showVatOnLocal, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(showVatOnLocal, [ SysLoc.ISRAEL ]);
   GEOHandler.registerValidator(addPpsceidValidator, [ SysLoc.ISRAEL ], null, true);
+  GEOHandler.registerValidator(validateCMRNumberForLegacy, [ SysLoc.ISRAEL ], GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.addAfterConfig(enableCmrNoForProcessor, [ SysLoc.ISRAEL ]);
 
   GEOHandler.addAfterConfig(showHideKuklaField, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterTemplateLoad(showHideKuklaField, [ SysLoc.ISRAEL ]);
