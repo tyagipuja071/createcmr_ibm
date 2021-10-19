@@ -262,7 +262,10 @@ if (readOnly){
               <tr>
                 <td>Proliferation Checklist
                     <%if (!readOnly){%>
-                      <span class="ibm-required cmr-required-spacer">*</span>
+                      <% if("755".equals(reqentry.getCmrIssuingCntry()) && "U".equals(reqentry.getReqType())) %>
+                      <% else { %>
+                      	<span class="ibm-required cmr-required-spacer">*</span>
+                      <% } %>	
                     <%} %>
                 </td>
                 <td id="checklistStatus">

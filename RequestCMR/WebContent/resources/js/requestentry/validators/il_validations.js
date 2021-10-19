@@ -103,13 +103,7 @@ function afterConfigForIsrael() {
 
 function setChecklistStatus() {
 
-  reqType = FormManager.getActualValue('reqType');
-
-  if (reqType == 'U') {
-    return;
-  }
-
-  console.log('validating checklist..');
+  console.log('checklist status..');
   var checklist = dojo.query('table.checklist');
   document.getElementById("checklistStatus").innerHTML = "Not Done";
   var reqId = FormManager.getActualValue('reqId');
