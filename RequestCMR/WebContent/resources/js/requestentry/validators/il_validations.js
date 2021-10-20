@@ -1444,18 +1444,16 @@ function isAddrFieldsUpdatedExcludingLanded(type, addrRecord) {
 }
 
 function addISICKUKLAValidator() {
-
-  var reqType = FormManager.getActualValue('reqType');
-
-  if (reqType == 'C') {
-    return;
-  }
-
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
         var isicCD = FormManager.getActualValue('isicCd');
         var kukla = FormManager.getActualValue('custClass');
+        var reqType = FormManager.getActualValue('reqType').toUpperCase();
+
+        if (reqType != 'U') {
+          return;
+        }
 
         if (isicCD == '9500' && kukla != '60') {
           return new ValidationResult(null, false, 'Invalid value for ISIC/KUKLA.  ISIC value 9500 and KUKLA 60 should be linked together.');
