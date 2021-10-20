@@ -327,6 +327,14 @@ public class IsraelHandler extends EMEAHandler {
           }
         }
 
+        if (StringUtils.isNotBlank(data.getCmrNo())) {
+          String kunnrExtCapInd = getZS01CapInd(data.getCmrNo());
+          System.out.println("mon! kunnrExtCapInd=" + kunnrExtCapInd);
+          if (StringUtils.isNotEmpty(kunnrExtCapInd)) {
+            data.setCapInd(kunnrExtCapInd);
+          }
+        }
+
       } else { // Story 1389065: SBO and Sales rep auto-population : Mukesh
 
         String collCd = this.currentImportValues.get("CollectionCode");
@@ -952,6 +960,23 @@ public class IsraelHandler extends EMEAHandler {
     addrSeqSet.addAll(resultsRDC);
 
     return addrSeqSet;
+  }
+
+  private String getZS01CapInd(String cmrNo) {
+    EntityManager entityManager = JpaManager.getEntityManager();
+    String sql = ExternalizedQuery.getSql("IL.GET.KUNNREXT_CAPIND");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("KATR6", SystemLocation.ISRAEL);
+    query.setParameter("ZZKV_CUSNO", cmrNo);
+
+    List<String> record = query.getResults(String.class);
+    String zs01CapInd = null;
+    if (record != null && !record.isEmpty()) {
+      zs01CapInd = record.get(0);
+    }
+
+    return zs01CapInd;
   }
 
   @Override
