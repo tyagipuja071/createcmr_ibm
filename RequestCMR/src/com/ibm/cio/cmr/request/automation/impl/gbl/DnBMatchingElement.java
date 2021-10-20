@@ -255,10 +255,6 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
             int itemNo = 1;
             for (DnBMatchingResponse dnbRecord : dnbMatches) {
               processDnbFlag = processDnBFields(entityManager, data, dnbRecord, output, details, itemNo);
-              if (processDnbFlag == true) {
-                scorecard.setDnbMatchingResult("Y");
-                admin.setCompVerifiedIndc("Y");
-              }
               itemNo++;
             }
             if (!override) {
