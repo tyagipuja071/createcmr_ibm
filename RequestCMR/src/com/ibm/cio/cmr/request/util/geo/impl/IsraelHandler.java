@@ -329,7 +329,6 @@ public class IsraelHandler extends EMEAHandler {
 
         if (StringUtils.isNotBlank(data.getCmrNo())) {
           String kunnrExtCapInd = getZS01CapInd(data.getCmrNo());
-          System.out.println("mon! kunnrExtCapInd=" + kunnrExtCapInd);
           if (StringUtils.isNotEmpty(kunnrExtCapInd)) {
             data.setCapInd(kunnrExtCapInd);
           }
