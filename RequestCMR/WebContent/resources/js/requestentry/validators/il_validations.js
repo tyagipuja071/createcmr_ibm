@@ -1472,6 +1472,7 @@ function setCapInd() {
     var reqType = FormManager.getActualValue('reqType');
     if (reqType == 'C') {
       FormManager.readOnly('capInd');
+      FormManager.setValue('capInd', true);
     } else if (reqType == 'U') {
       var params = {
         USERID : _pagemodel.requesterId
