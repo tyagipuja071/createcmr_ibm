@@ -1482,6 +1482,7 @@ public class TransConnService extends BaseBatchService {
     List<Addr> addrList = addrQuery.getResults(Addr.class);
     for (Addr addr : addrList) {
       addr.setSapNo(record.getSapNo());
+      addr.setIerpSitePrtyId(record.getIerpSitePartyId());
       addr.setRdcCreateDt(record.getCreateDate());
       addr.setRdcLastUpdtDt(SystemUtil.getCurrentTimestamp());
       LOG.info("Address Record Updated [Request ID: " + addr.getId().getReqId() + " Type: " + addr.getId().getAddrType() + " SAP No: "
@@ -1658,6 +1659,9 @@ public class TransConnService extends BaseBatchService {
                   comment = comment.append(response.getRecords().get(i).getSapNo() + " ");
                   if (StringUtils.isBlank(addr.getSapNo())) {
                     addr.setSapNo(response.getRecords().get(i).getSapNo());
+                  }
+                  if (StringUtils.isBlank(addr.getIerpSitePrtyId())) {
+                    addr.setIerpSitePrtyId(response.getRecords().get(i).getIerpSitePartyId());
                   }
                 }
               }
