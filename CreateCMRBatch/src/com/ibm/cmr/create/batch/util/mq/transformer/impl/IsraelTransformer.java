@@ -85,7 +85,7 @@ public class IsraelTransformer extends EMEATransformer {
       if (!StringUtils.isEmpty(kuklaVal)) {
         legacyCust.setCustType(kuklaVal);
       }
-      legacyCust.setCollectionCd("TCO");
+      legacyCust.setCollectionCd("TC0");
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       // Update only mapping
       DataRdc dataRdc = LegacyDirectUtil.getOldData(entityManager, String.valueOf(data.getId().getReqId()));
