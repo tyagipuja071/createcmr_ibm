@@ -2588,7 +2588,7 @@ public class TransConnService extends BaseBatchService {
    * @return
    */
   protected boolean isOwnerCorrect(EntityManager entityManager, String cmrNo, String cmrIssuingCntry) {
-    String sql = "select KATR10 from SAPR3.KNA1 where MANDT = :MANDT and KATR6 = :COUNTRY and ZZKV_CUSNO = :CMR_NO";
+    String sql = "select KATR10 from SAPR3.KNA1 where MANDT = :MANDT and KATR6 = :COUNTRY and ZZKV_CUSNO = :CMR_NO and KTOKD = 'ZS01'";
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
     query.setParameter("COUNTRY", cmrIssuingCntry);
@@ -2598,7 +2598,7 @@ public class TransConnService extends BaseBatchService {
       // non existent, return true;
       return true;
     } else {
-      return "".equals(katr10);
+      return "".equals(katr10.trim());
     }
   }
 
