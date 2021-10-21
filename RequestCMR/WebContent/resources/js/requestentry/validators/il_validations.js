@@ -98,6 +98,13 @@ function afterConfigForIsrael() {
     var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
     if (viewOnlyPage) {
       FormManager.hide('CollectionCd', 'collectionCd');
+      var checklist = dojo.query('table.checklist');
+
+      var questions = checklist.query('input[type="radio"]');
+
+      for (var i = 0; i < questions.length; i++) {
+        questions[i].disabled = true;
+      }
     }
   }
 
