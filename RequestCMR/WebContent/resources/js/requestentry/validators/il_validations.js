@@ -62,15 +62,6 @@ function addEMEALandedCountryHandler(cntry, addressMode, saving, finalSave) {
 var _addrTypesIL = [ 'ZS01', 'ZP01', 'ZI01', 'ZD01', 'ZS02', 'CTYA', 'CTYB', 'CTYC' ];
 var _addrTypeHandler = [];
 function afterConfigForIsrael() {
-  if (_vatExemptHandler == null) {
-    _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
-      FormManager.resetValidations('vat');
-      if (!dijit.byId('vatExempt').get('checked')) {
-        FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
-      }
-    });
-  }
-
   // addrType Handler
   for (var i = 0; i < _addrTypesIL.length; i++) {
     _addrTypeHandler[i] = null;
@@ -95,6 +86,12 @@ function afterConfigForIsrael() {
         if (lob != '') {
           lockCustomerClassByLob(_custType);
         }
+      });
+    }
+
+    if (_vatExemptHandler == null) {
+      _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
+        resetVatRequired();
       });
     }
 
@@ -1277,19 +1274,6 @@ function addEmbargoCodeValidator() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
-function showVatOnLocal() {
-  var viewOnly = FormManager.getActualValue('viewOnlyPage');
-  if (viewOnly != '' && viewOnly == 'true') {
-    return;
-  }
-  var custGrp = FormManager.getActualValue('custGrp');
-  if (custGrp == 'LOCAL') {
-    cmr.showNode('vatInfo');
-  } else {
-    cmr.hideNode('vatInfo');
-  }
-}
-
 function addPpsceidValidator() {
   FormManager.addFormValidator((function() {
     return {
@@ -1601,6 +1585,92 @@ function lockCollectionCdForUpdate() {
   }
 }
 
+function showVatExempt() {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+  if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
+
+  var vatRequired = isVatRequired();
+
+  if (vatRequired) {
+    // show
+    FormManager.show('VATExempt', 'vatExempt');
+    checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+  } else {
+    // hide
+    FormManager.hide('VATExempt', 'vatExempt');
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+  }
+}
+
+function isVatRequired() {
+  var landedCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var reqId = FormManager.getActualValue('reqId');
+  // MAILING
+  var retZs01 = cmr.query('VAT.IL_ADDR_BY_TYPE', {
+    REQID : reqId,
+    TYPE : 'ZS01'
+  });
+  if (retZs01 && retZs01.ret1 && retZs01.ret1 != '') {
+    landedCntry = retZs01.ret1;
+  }
+  if (GEOHandler.VAT_RQD_CROSS_LNDCNTRY.indexOf(landedCntry) >= 0) {
+    return true;
+  }
+
+  // COUNTRY USE A (MAILING)
+  landedCntry = '';
+  var retCtyA = cmr.query('VAT.IL_ADDR_BY_TYPE', {
+    REQID : reqId,
+    TYPE : 'CTYA'
+  });
+  if (retCtyA && retCtyA.ret1 && retCtyA.ret1 != '') {
+    landedCntry = retCtyA.ret1;
+  }
+  if (GEOHandler.VAT_RQD_CROSS_LNDCNTRY.indexOf(landedCntry) >= 0) {
+    return true;
+  }
+
+  return false;
+}
+
+function preTickVatExempt(fromAddress, scenario, scenarioChanged) {
+
+  if (FormManager.getActualValue('reqType') == 'C' && scenarioChanged) {
+    if (scenario == 'PRIPE') {
+      FormManager.setValue('vatExempt', true);
+    } else {
+      FormManager.setValue('vatExempt', false);
+    }
+  }
+  resetVatRequired();
+}
+
+function resetVatRequired() {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+  if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
+  var vatRequired = isVatRequired();
+  if (vatRequired) {
+    if (dijit.byId('vatExempt').get('checked')) {
+      FormManager.clearValue('vat');
+      FormManager.readOnly('vat');
+      FormManager.removeValidator('vat', Validators.REQUIRED);
+    } else {
+      FormManager.enable('vat');
+      checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+    }
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding Israel functions...');
@@ -1653,8 +1723,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(validatePoBox, [ SysLoc.ISRAEL ]);
   GEOHandler.addAddrFunction(markAddrSaveSuperUser, [ SysLoc.ISRAEL ]);
 
-  GEOHandler.addAfterTemplateLoad(showVatOnLocal, [ SysLoc.ISRAEL ]);
-  GEOHandler.addAfterConfig(showVatOnLocal, [ SysLoc.ISRAEL ]);
   GEOHandler.registerValidator(addPpsceidValidator, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(validateCMRNumberForLegacy, [ SysLoc.ISRAEL ], GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.addAfterConfig(enableCmrNoForProcessor, [ SysLoc.ISRAEL ]);
@@ -1666,4 +1734,7 @@ dojo.addOnLoad(function() {
 
   GEOHandler.registerValidator(addISICKUKLAValidator, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(addCollectionValidator, [ SysLoc.ISRAEL ], null, true);
+
+  GEOHandler.addAfterTemplateLoad(preTickVatExempt, [ SysLoc.ISRAEL ]);
+  GEOHandler.addAfterConfig(showVatExempt, [ SysLoc.ISRAEL ]);
 });
