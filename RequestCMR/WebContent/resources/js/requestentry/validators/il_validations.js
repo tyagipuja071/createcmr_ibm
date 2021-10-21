@@ -888,7 +888,7 @@ function finalizeAbbrevName() {
         var installCustName = '' + installingAddr.custNm1;
         var cntryUseACustName = '' + countryUseAAddr.custNm1;
         if ((installCustName != null && installCustName != '') && (cntryUseACustName != null && cntryUseACustName != '')) {
-          finalAbbrevName = cntryUseACustName.substring(0, 8) + ' ' + installCustName.substring(0, 9);
+          finalAbbrevName = cntryUseACustName.substring(0, 8) + ' for ' + installCustName.substring(0, 9);
         }
       }
     } else if (custSubGrp == 'INTSO') {// Internal SO Sub scenario
