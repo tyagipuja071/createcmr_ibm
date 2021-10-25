@@ -55,9 +55,6 @@ public class IsraelTransformer extends EMEATransformer {
 
   private static final String MAIL_KEY = "ADDRMAIL";
   private static final String BILL_KEY = "ADDRBILL";
-  private static final String SHIP_KEY = "ADDRSHIP";
-
-  private int shipAddrCount = 1;
 
   // private static final String RIGHT_TO_LEFT_MARKER = "\u202e";
 
@@ -246,15 +243,14 @@ public class IsraelTransformer extends EMEATransformer {
         pairedSeqVal.put(MAIL_KEY, legacyAddr.getId().getAddrNo());
       } else if ("ZP01".equals(addrType)) {
         pairedSeqVal.put(BILL_KEY, legacyAddr.getId().getAddrNo());
-      } else if ("ZD01".equals(addrType)) {
-        boolean isUpdate = "U".equals(cmrObjects.getAdmin().getReqType());
-
-        // Assign addl shipping in Create request and only for new addresses in
-        // Update
-        // request
-        if (!isUpdate || (isUpdate && "N".equals(currAddr.getImportInd()))) {
-          pairedSeqVal.put(SHIP_KEY + shipAddrCount++, legacyAddr.getId().getAddrNo());
-        }
+      }
+    } else if ("CTYC".equals(addrType)) {
+      boolean isUpdate = "U".equals(cmrObjects.getAdmin().getReqType());
+      // Assign addl shipping in Create request and only for new addresses in
+      // Update
+      // request
+      if (!isUpdate || (isUpdate && "N".equals(currAddr.getImportInd()))) {
+        legacyAddr.setAddrLineO(currAddr.getPairedAddrSeq());
       }
     }
 
@@ -717,17 +713,17 @@ public class IsraelTransformer extends EMEATransformer {
     if (cmrObjects != null && cmrObjects.getAdmin() != null && StringUtils.isNotEmpty(cmrObjects.getAdmin().getReqType())
         && !"M".equals(cmrObjects.getAdmin().getReqType())) {
       List<CmrtAddr> legacyAddrList = legacyObjects.getAddresses();
-      int localLangShipCount = 1;
       for (CmrtAddr addr : legacyAddrList) {
         String pairedSeq = "";
         if ("Y".equals(addr.getIsAddressUseA())) {
           pairedSeq = pairedSeqVal.get(MAIL_KEY);
         } else if ("Y".equals(addr.getIsAddressUseB())) {
           pairedSeq = pairedSeqVal.get(BILL_KEY);
-        } else if ("Y".equals(addr.getIsAddressUseC()) && StringUtils.isBlank(addr.getAddrLineO())) {
-          pairedSeq = pairedSeqVal.get(SHIP_KEY + localLangShipCount++);
         }
-        addr.setAddrLineO(pairedSeq);
+
+        if (!"Y".equals(addr.getIsAddressUseC())) {
+          addr.setAddrLineO(pairedSeq);
+        }
       }
     }
   }

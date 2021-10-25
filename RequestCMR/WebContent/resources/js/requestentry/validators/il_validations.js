@@ -1666,6 +1666,50 @@ function resetVatRequired() {
   }
 }
 
+function toggleAddressTypesForIL(cntry, addressMode, details) {
+  if (addressMode == 'newAddress' || addressMode == 'copyAddress') {
+    var record = null;
+    var type = null;
+    var shippingCnt = 0;
+    var ctyCCnt = 0;
+    for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+      record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+      if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+        record = _allAddressData[i];
+      }
+      type = record.addrType;
+      if (typeof (type) == 'object') {
+        type = type[0];
+      }
+      if (type == 'ZD01') {
+        shippingCnt++;
+      } else if (type == 'CTYC') {
+        ctyCCnt++;
+      }
+    }
+
+    if (shippingCnt > 0 && shippingCnt != ctyCCnt) {
+      cmr.hideNode('radiocont_ZS01');
+      cmr.hideNode('radiocont_ZP01');
+      cmr.hideNode('radiocont_ZI01');
+      cmr.hideNode('radiocont_ZD01');
+      cmr.hideNode('radiocont_ZS02');
+      cmr.hideNode('radiocont_CTYA');
+      cmr.hideNode('radiocont_CTYB');
+      cmr.showNode('radiocont_CTYC');
+    } else {
+      cmr.showNode('radiocont_ZS01');
+      cmr.showNode('radiocont_ZP01');
+      cmr.showNode('radiocont_ZI01');
+      cmr.showNode('radiocont_ZD01');
+      cmr.showNode('radiocont_ZS02');
+      cmr.showNode('radiocont_CTYA');
+      cmr.showNode('radiocont_CTYB');
+      cmr.hideNode('radiocont_CTYC');
+    }
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding Israel functions...');
@@ -1717,6 +1761,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(countryUseAISRAEL, [ SysLoc.ISRAEL ]);
   GEOHandler.addAddrFunction(validatePoBox, [ SysLoc.ISRAEL ]);
   GEOHandler.addAddrFunction(markAddrSaveSuperUser, [ SysLoc.ISRAEL ]);
+  GEOHandler.addAddrFunction(toggleAddressTypesForIL, [ SysLoc.ISRAEL ]);
 
   GEOHandler.registerValidator(addPpsceidValidator, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(validateCMRNumberForLegacy, [ SysLoc.ISRAEL ], GEOHandler.ROLE_PROCESSOR, true);
