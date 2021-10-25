@@ -654,7 +654,7 @@ public class IsraelTransformer extends EMEATransformer {
 
   @Override
   public String getFixedAddrSeqForProspectCreation() {
-    return "1";
+    return "00001";
   }
 
   /**

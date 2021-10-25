@@ -137,14 +137,20 @@ public class IsraelHandler extends EMEAHandler {
           record.setCmrAddrSeq(StringUtils.leftPad(record.getCmrAddrSeq(), 5, '0'));
         }
 
-        String pairedAddrSeq = record.getCmrAddrSeq();
-        List<CmrtAddr> legacyAddrList = legacyObjects.getAddresses();
-        CmrtAddr legacyAddr = getLegacyAddrByAddrPair(legacyAddrList, pairedAddrSeq);
+        boolean isProspects = mainRecord != null && CmrConstants.PROSPECT_ORDER_BLOCK.equals(mainRecord.getCmrOrderBlock());
+        if (!isProspects) {
+          String pairedAddrSeq = record.getCmrAddrSeq();
+          List<CmrtAddr> legacyAddrList = legacyObjects.getAddresses();
+          CmrtAddr legacyAddr = getLegacyAddrByAddrPair(legacyAddrList, pairedAddrSeq);
 
-        FindCMRRecordModel addr = cloneAddress(record, "ZS01");
+          FindCMRRecordModel addr = cloneAddress(record, "ZS01");
 
-        converted.add(mapEnglishAddr(addr, legacyAddr));
-
+          converted.add(mapEnglishAddr(addr, legacyAddr));
+        } else {
+          record.setCmrAddrSeq("00006");
+          record.setCmrAddrTypeCode("CTYA");
+          converted.add(record);
+        }
       } else {
         if (source.getItems() != null) {
           String addrType = null;
@@ -269,6 +275,10 @@ public class IsraelHandler extends EMEAHandler {
 
       if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
         data.setPpsceid("");
+        boolean isProspects = mainRecord != null && CmrConstants.PROSPECT_ORDER_BLOCK.equals(mainRecord.getCmrOrderBlock());
+        if (isProspects) {
+          data.setCmrNo("");
+        }
       }
 
       if (!SystemLocation.ITALY.equalsIgnoreCase(data.getCmrIssuingCntry())) {
@@ -421,7 +431,12 @@ public class IsraelHandler extends EMEAHandler {
         address.setVat(currentRecord.getCmrTaxNumber());
         if (currentRecord.getCmrAddrSeq() != null && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())
             && "CTYA".equalsIgnoreCase(address.getId().getAddrType())) {
-          address.getId().setAddrSeq("00001");
+          boolean isProspects = currentRecord != null && CmrConstants.PROSPECT_ORDER_BLOCK.equals(currentRecord.getCmrOrderBlock());
+          if (isProspects) {
+            address.getId().setAddrSeq("00006");
+          } else {
+            address.getId().setAddrSeq("00001");
+          }
         }
         if ("D".equals(address.getImportInd())) {
           String seq = StringUtils.leftPad(address.getId().getAddrSeq(), 5, '0');
