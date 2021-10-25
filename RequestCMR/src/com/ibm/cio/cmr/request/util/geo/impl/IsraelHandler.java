@@ -614,6 +614,8 @@ public class IsraelHandler extends EMEAHandler {
       }
 
       lockLandedCountry(entityManager, data, admin, addr);
+      assignPairedSequence(entityManager, addr, admin.getReqType());
+
       switch (cmrIssuingCntry) {
       case SystemLocation.ISRAEL:
         if ("CTYA".equals(addr.getId().getAddrType())) {
@@ -657,6 +659,51 @@ public class IsraelHandler extends EMEAHandler {
     } else {
       super.doBeforeAddrSave(entityManager, addr, cmrIssuingCntry);
     }
+  }
+
+  private void assignPairedSequence(EntityManager entityManager, Addr addr, String reqType) {
+
+    if ("C".equals(reqType)) {
+      assignPairedSeqForNewAddr(entityManager, addr);
+    } else if ("U".equals(reqType)) {
+      if ("Y".equals(addr.getImportInd())) {
+
+        AddrRdc addrRdc = LegacyCommonUtil.getAddrRdcRecord(entityManager, addr);
+        addr.setPairedAddrSeq(addrRdc.getPairedAddrSeq());
+
+      } else if ("N".equals(addr.getImportInd())) {
+        assignPairedSeqForNewAddr(entityManager, addr);
+      }
+    }
+  }
+
+  private void assignPairedSeqForNewAddr(EntityManager entityManager, Addr addr) {
+    if (StringUtils.isEmpty(addr.getPairedAddrSeq()) && "CTYC".equals(addr.getId().getAddrType())) {
+
+      Addr existingRecord = getAddrByAddrSeq(entityManager, addr.getId().getReqId(), "CTYC", addr.getId().getAddrSeq());
+      // Prevent overwriting the assigned paired sequence when Copying in create
+      // request
+      if (existingRecord != null) {
+        addr.setPairedAddrSeq(existingRecord.getPairedAddrSeq());
+      } else {
+        String pairedShipping = getLatestShipping(entityManager, addr.getId().getReqId());
+        addr.setPairedAddrSeq(pairedShipping);
+      }
+    } else {
+      addr.setPairedAddrSeq("");
+    }
+  }
+
+  private String getLatestShipping(EntityManager entityManager, long reqId) {
+    String sql = ExternalizedQuery.getSql("GET.ADDRSEQ.LATEST.BY_REQID_TYPE");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    query.setParameter("ADDR_TYPE", "ZD01");
+    List<String> results = query.getResults(String.class);
+    if (!results.isEmpty() && !results.get(0).isEmpty()) {
+      return results.get(0);
+    }
+    return null;
   }
 
   private void lockLandedCountry(EntityManager entityManager, Data data, Admin admin, Addr addr) {
@@ -1403,6 +1450,20 @@ public class IsraelHandler extends EMEAHandler {
     }
 
     return isRowEqual;
+  }
+
+  private Addr getAddrByAddrSeq(EntityManager entityManager, long reqId, String addrType, String addrSeq) {
+    String sql = ExternalizedQuery.getSql("ADDRESS.GETRECORDS");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    query.setParameter("ADDR_TYPE", addrType);
+    query.setParameter("ADDR_SEQ", addrSeq);
+    List<Addr> addrList = query.getResults(Addr.class);
+
+    if (!addrList.isEmpty()) {
+      return addrList.get(0);
+    }
+    return null;
   }
 
 }

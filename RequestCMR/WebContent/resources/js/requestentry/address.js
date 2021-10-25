@@ -636,6 +636,13 @@ function doAddToAddressList() {
       showEPLError = Number(zs02count) >= 1 && cmr.addressType == 'ZS02';
     }
 
+    if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.ISRAEL) {
+      if (cmr.addressType == 'ZD01') {
+        cmr.showConfirm('actualAddToAddressList()', 'Country Use C (Shipping) is required to be created after the Shipping address.');
+        return;
+      }
+    }
+
     if (FormManager.getActualValue('cmrIssuingCntry') == '838') {
       if (showSoldToError) {
         cmr.showAlert('This request already has a Billing record. Only one is permitted. The existing record has to be deleted to create a new record.');
@@ -1832,6 +1839,20 @@ function applyAddrChangesModal_onLoad() {
 
       if (SysLoc.GREECE == cntry && type.ret1 == 'ZS01') {
         if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZP01') {
+          continue;
+        }
+      }
+
+      if (SysLoc.ISRAEL == cntry && type.ret1 == 'CTYC') {
+        var countShipping = 0;
+        for (var a = 0; a < _allAddressData.length; a++) {
+          if (_allAddressData[a].addrType[0] == 'ZD01') {
+            countShipping++;
+            break;
+          }
+        }
+
+        if (countShipping == 0) {
           continue;
         }
       }
