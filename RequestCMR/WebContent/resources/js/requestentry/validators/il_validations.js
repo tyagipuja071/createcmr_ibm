@@ -105,6 +105,7 @@ function afterConfigForIsrael() {
       for (var i = 0; i < questions.length; i++) {
         questions[i].disabled = true;
       }
+      FormManager.hide('CodFlag', 'codFlag');
     }
   }
 

@@ -113,6 +113,7 @@
         <%=cebo != null ? cebo : ""%>
       </cmr:column>
     </cmr:row>
+    <cmr:view exceptForCountry="755">
     <cmr:row>
       <cmr:column span="1" width="127">
       </cmr:column>
@@ -126,6 +127,7 @@
         <%=codflag != null ? codflag : ""%>
       </cmr:column>
     </cmr:row>
+    </cmr:view>
   </cmr:view>
   
   <cmr:view forCountry="758">
