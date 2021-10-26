@@ -86,6 +86,28 @@ public class IsraelTransformer extends EMEATransformer {
         legacyCust.setVat(data.getVat());
       }
       legacyCust.setCollectionCd("TC0");
+      legacyCust.setDcRepeatAgreement("0");
+      legacyCust.setCeDivision("2");
+      legacyCust.setDeptCd("3");
+      legacyCust.setInvoiceCpyReqd("04");
+
+      String custType = data.getCustSubGrp();
+      if (MQMsgConstants.CUSTSUBGRP_BUSPR.equals(custType)) {
+        legacyCust.setAuthRemarketerInd("1");
+        legacyCust.setMrcCd("5");
+      } else {
+        legacyCust.setAuthRemarketerInd("0");
+        legacyCust.setMrcCd("2");
+      }
+
+      if ("INTER".equals(custType) || "INTSO".equals(custType)) {
+        legacyCust.setCreditCd("91");
+      } else if ("MOD".equals(custType)) {
+        legacyCust.setCreditCd("01");
+      } else {
+        legacyCust.setCreditCd("90");
+      }
+
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       // Update only mapping
       DataRdc dataRdc = LegacyDirectUtil.getOldData(entityManager, String.valueOf(data.getId().getReqId()));
@@ -95,6 +117,9 @@ public class IsraelTransformer extends EMEATransformer {
           legacyCust.setCustType(kuklaVal);
         }
       }
+
+      String cod = !StringUtils.isEmpty(data.getCreditCd()) ? data.getCreditCd() : "";
+      legacyCust.setDeptCd(cod);
     }
 
     for (Addr addr : cmrObjects.getAddresses()) {
@@ -103,7 +128,14 @@ public class IsraelTransformer extends EMEATransformer {
       }
     }
 
-    legacyCust.setMrcCd("");
+    if (StringUtils.isNotBlank(data.getSubIndustryCd())) {
+      legacyCust.setDistrictCd("0" + data.getSubIndustryCd().substring(0, 1));
+    }
+
+    if (StringUtils.isNotBlank(data.getRepTeamMemberNo())) {
+      legacyCust.setSalesGroupRep(data.getRepTeamMemberNo());
+    }
+
     legacyCust.getId().setSofCntryCode(SystemLocation.SAP_ISRAEL_SOF_ONLY);
   }
 
