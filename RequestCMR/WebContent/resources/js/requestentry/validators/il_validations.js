@@ -1468,6 +1468,20 @@ function setCapInd() {
   }
 }
 
+function lockDunsNo() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  reqType = FormManager.getActualValue('reqType');
+
+  if (reqType == 'U') {
+    if (role == 'REQUESTER' || role == 'PROCESSOR') {
+      FormManager.readOnly('dunsNo');
+    }
+  }
+}
+
 function validateCMRNumberForLegacy() {
   FormManager.addFormValidator((function() {
     return {
@@ -1749,6 +1763,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addAddressLandedPairingValidatorMailing, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(addAddressLandedPairingValidatorBilling, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.addAfterConfig(setCapInd, [ SysLoc.ISRAEL ]);
+  GEOHandler.addAfterConfig(lockDunsNo, [ SysLoc.ISRAEL ]);
 
   /* 1438717 - add DPL match validation for failed dpl checks */
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.EMEA, GEOHandler.ROLE_PROCESSOR, true);
