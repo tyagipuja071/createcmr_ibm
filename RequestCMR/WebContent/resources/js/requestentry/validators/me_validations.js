@@ -3731,7 +3731,8 @@ function setTypeOfCustomerRequiredProcessor() {
 }
 
 function canCopyAddress(value, rowIndex, grid) {
-  return false;
+  // CREATCMR-1961 (CEE, ME: Copy icon disappeared)
+  return true;
 }
 
 function filterCmrnoForME() {

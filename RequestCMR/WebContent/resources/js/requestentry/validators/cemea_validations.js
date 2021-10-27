@@ -4049,7 +4049,8 @@ function setTypeOfCustomerRequiredProcessor() {
 }
 
 function canCopyAddress(value, rowIndex, grid) {
-  return false;
+  // CREATCMR-1961 (CEE, ME: Copy icon disappeared)
+  return true;
 }
 
 function filterCmrnoForCEE() {
@@ -5040,7 +5041,8 @@ dojo.addOnLoad(function() {
   // GEOHandler.addAfterConfig(addPrefixVat, GEOHandler.CEE);
   // GEOHandler.addAfterTemplateLoad(addPrefixVat, GEOHandler.CEE);
   // GEOHandler.addAddrFunction(addPrefixVat, GEOHandler.CEE);
-  // GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.CEE,
+  // GEOHandler.registerValidator(checkCmrUpdateBeforeImport,
+  // GEOHandler.CEE,
   // null, true);
 
 });
