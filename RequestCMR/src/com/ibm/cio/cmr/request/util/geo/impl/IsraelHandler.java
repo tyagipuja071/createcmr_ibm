@@ -344,6 +344,23 @@ public class IsraelHandler extends EMEAHandler {
           }
         }
 
+        if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+          if (StringUtils.isNotEmpty(mainRecord.getCmrDuns())) {
+            data.setDunsNo(mainRecord.getCmrDuns());
+          } else { // manually query KNA1.zzkv_duns
+            EntityManager entityManager = JpaManager.getEntityManager();
+            String sql = ExternalizedQuery.getSql("IL.GET.KNA1_ZS01DUNS");
+            PreparedQuery query = new PreparedQuery(entityManager, sql);
+            query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+            query.setParameter("ZZKV_CUSNO", data.getCmrNo());
+
+            List<String> record = query.getResults(String.class);
+            if (record != null && !record.isEmpty()) {
+              data.setDunsNo(record.get(0));
+            }
+          }
+        }
+
       } else { // Story 1389065: SBO and Sales rep auto-population : Mukesh
 
         String collCd = this.currentImportValues.get("CollectionCode");
