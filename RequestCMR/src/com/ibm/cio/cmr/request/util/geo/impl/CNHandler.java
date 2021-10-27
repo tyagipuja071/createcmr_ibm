@@ -372,20 +372,33 @@ public class CNHandler extends GEOHandler {
       } else {
         request.setDunsNo(data.getDunsNo());
       }
+      MatchingResponse<?> rawResponse = null;
+      try {
+        MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
+            MatchingServiceClient.class);
+        client.setRequestMethod(Method.Get);
+        client.setReadTimeout(1000 * 60 * 5);
 
-      MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
-          MatchingServiceClient.class);
-      client.setRequestMethod(Method.Get);
-      client.setReadTimeout(1000 * 60 * 5);
+        LOG.debug("Connecting to the GBG Finder Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
+        rawResponse = client.executeAndWrap(MatchingServiceClient.GBG_SERVICE_ID, request, MatchingResponse.class);
 
-      LOG.debug("Connecting to the GBG Finder Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
-      MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.GBG_SERVICE_ID, request, MatchingResponse.class);
+      } catch (Exception e) {
+        LOG.error("CMR Error:" + e.getMessage());
+      }
       ObjectMapper mapper = new ObjectMapper();
-      String json = mapper.writeValueAsString(rawResponse);
+      String json = null;
+      if (rawResponse == null) {
+        json = "";
+      } else {
+        json = mapper.writeValueAsString(rawResponse);
+      }
 
       TypeReference<MatchingResponse<GBGResponse>> ref = new TypeReference<MatchingResponse<GBGResponse>>() {
       };
-      MatchingResponse<GBGResponse> response = mapper.readValue(json, ref);
+      MatchingResponse<GBGResponse> response = null;
+      if (StringUtils.isNotBlank(json)) {
+        response = mapper.readValue(json, ref);
+      }
 
       if (response != null && response.getMatched()) {
         List<GBGResponse> gbgMatches = response.getMatches();
@@ -416,45 +429,49 @@ public class CNHandler extends GEOHandler {
         }
       }
     } else {
-      List<GBGResponse> matches = new ArrayList<GBGResponse>();
+      try {
+        // List<GBGResponse> matches = new ArrayList<GBGResponse>();
 
-      // do a matching against GU DUNS first
-      String sql = ExternalizedQuery.getSql("GBG.QUERY_BY_CMRNO");
-      PreparedQuery query = new PreparedQuery(entityManager, sql);
-      query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
-      query.setParameter("KATR6", data.getCmrIssuingCntry());
-      query.setParameter("CMR_NO", dunsNo);
-      query.setForReadOnly(true);
+        // do a matching against GU DUNS first
+        String sql = ExternalizedQuery.getSql("GBG.QUERY_BY_CMRNO");
+        PreparedQuery query = new PreparedQuery(entityManager, sql);
+        query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+        query.setParameter("KATR6", data.getCmrIssuingCntry());
+        query.setParameter("CMR_NO", dunsNo);
+        query.setForReadOnly(true);
 
-      // 0 gbg id
-      // 1 gbg name
-      // 2 bg id
-      // 3 bg name
-      // 4 lde rule
-      // 5 int acct type
-      // 6 cmr count
-      List<Object[]> results = query.getResults();
-      if (results != null) {
-        GBGResponse gbg = null;
-        for (Object[] result : results) {
-          gbg = new GBGResponse();
-          gbg.setGbgId((String) result[0]);
-          gbg.setGbgName((String) result[1]);
-          gbg.setBgId((String) result[2]);
-          gbg.setBgName((String) result[3]);
-          gbg.setLdeRule((String) result[4]);
-          data.setGbgId(gbg.getGbgId());
-          data.setGbgDesc(gbg.getGbgName());
-          data.setBgId(gbg.getBgId());
-          data.setBgDesc(gbg.getBgName());
-          data.setBgRuleId(gbg.getLdeRule());
-          entityManager.merge(data);
-          entityManager.flush();
-          break;
+        // 0 gbg id
+        // 1 gbg name
+        // 2 bg id
+        // 3 bg name
+        // 4 lde rule
+        // 5 int acct type
+        // 6 cmr count
+        List<Object[]> results = query.getResults();
+        if (results != null) {
+          GBGResponse gbg = null;
+          for (Object[] result : results) {
+            gbg = new GBGResponse();
+            gbg.setGbgId((String) result[0]);
+            gbg.setGbgName((String) result[1]);
+            gbg.setBgId((String) result[2]);
+            gbg.setBgName((String) result[3]);
+            gbg.setLdeRule((String) result[4]);
+            data.setGbgId(gbg.getGbgId());
+            data.setGbgDesc(gbg.getGbgName());
+            data.setBgId(gbg.getBgId());
+            data.setBgDesc(gbg.getBgName());
+            data.setBgRuleId(gbg.getLdeRule());
+            entityManager.merge(data);
+            entityManager.flush();
+            break;
+          }
         }
+      } catch (Exception e) {
+        LOG.error("CMR Error:" + e.getMessage());
       }
-
     }
+
   }
 
   private void getGBGId(EntityManager entityManager, Admin admin, Data data, Addr currentAddress) throws Exception {
