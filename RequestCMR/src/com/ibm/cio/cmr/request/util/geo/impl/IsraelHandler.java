@@ -281,145 +281,84 @@ public class IsraelHandler extends EMEAHandler {
         }
       }
 
-      if (!SystemLocation.ITALY.equalsIgnoreCase(data.getCmrIssuingCntry())) {
-
-        // defect 1299146
-        if (mainRecord.getCmrSortl() != null && mainRecord.getCmrSortl().length() >= 10) {
-          data.setSalesBusOffCd(mainRecord.getCmrSortl().substring(0, 3));
-          LOG.trace("SBO from Sortl : " + data.getSalesBusOffCd());
-          if (SystemLocation.ISRAEL.equals(data.getCmrIssuingCntry())) {
-            data.setRepTeamMemberNo(mainRecord.getCmrSortl().substring(4));
-            LOG.trace("Rep No from Sortl (IL) : " + data.getRepTeamMemberNo());
-          } else {
-            // defect fix 1329919 changed from 5 to 4
-            data.setRepTeamMemberNo(mainRecord.getCmrSortl().substring(4, 10));
-            LOG.trace("Rep No from Sortl : " + data.getRepTeamMemberNo());
-          }
-        }
-        // 1299146
-        // Translate and auto-populate for next release
-        if (SystemLocation.ISRAEL.equals(data.getCmrIssuingCntry()) && StringUtils.isEmpty(data.getCollectionCd())) {
-          data.setCollectionCd("TC0");
-        }
-
-        // Changed abbreviated location if cross border to country
+      // defect 1299146
+      if (mainRecord.getCmrSortl() != null && mainRecord.getCmrSortl().length() >= 10) {
+        data.setSalesBusOffCd(mainRecord.getCmrSortl().substring(0, 3));
+        LOG.trace("SBO from Sortl : " + data.getSalesBusOffCd());
         if (SystemLocation.ISRAEL.equals(data.getCmrIssuingCntry())) {
-          if (!this.currentImportValues.isEmpty() && !(mainRecord.getCmrCountryLanded().equalsIgnoreCase("IL"))) {
-            String country = DropdownListController.getDescription("LandedCountry", mainRecord.getCmrCountryLanded(), SystemLocation.ISRAEL);
-            if (!StringUtils.isEmpty(country) && admin.getReqType() == "C") {
-              data.setAbbrevLocn(country.length() > 12 ? country.substring(0, 12) : country);
-            }
-          }
-          if ("U".equals(admin.getReqType()) && !StringUtils.isEmpty(this.currentImportValues.get("COD"))) {
-            data.setCreditCd(this.currentImportValues.get("COD"));
-          }
-        }
-
-        // For IBO, SBO & EBO values exceeding 3 char length
-        String iBO = this.currentImportValues.get("IBO");
-        String sBO = this.currentImportValues.get("SBO");
-        String eBo = this.currentImportValues.get("DPCEBO");
-        String accAdBo = this.currentImportValues.get("AccAdBo");
-
-        if (!(StringUtils.isEmpty(iBO))) {
-          if (iBO.length() > 3) {
-            data.setInstallBranchOff(iBO.substring(0, 3));
-          }
-        }
-        if (!(StringUtils.isEmpty(sBO))) {
-          if (sBO.length() > 3) {
-            data.setSalesBusOffCd(sBO.substring(0, 3));
-          }
-        }
-        if (!(StringUtils.isEmpty(eBo))) {
-          if (eBo.length() > 3) {
-            data.setEngineeringBo(eBo.substring(0, 3));
-          }
-        }
-
-        if (StringUtils.isNotBlank(data.getCmrNo())) {
-          String kunnrExtCapInd = getZS01CapInd(data.getCmrNo());
-          if (StringUtils.isNotEmpty(kunnrExtCapInd)) {
-            data.setCapInd(kunnrExtCapInd);
-          }
-        }
-
-        if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
-          if (StringUtils.isNotEmpty(mainRecord.getCmrDuns())) {
-            data.setDunsNo(mainRecord.getCmrDuns());
-          } else { // manually query KNA1.zzkv_duns
-            EntityManager entityManager = JpaManager.getEntityManager();
-            String sql = ExternalizedQuery.getSql("IL.GET.KNA1_ZS01DUNS");
-            PreparedQuery query = new PreparedQuery(entityManager, sql);
-            query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
-            query.setParameter("ZZKV_CUSNO", data.getCmrNo());
-
-            List<String> record = query.getResults(String.class);
-            if (record != null && !record.isEmpty()) {
-              data.setDunsNo(record.get(0));
-            }
-          }
-        }
-
-      } else { // Story 1389065: SBO and Sales rep auto-population : Mukesh
-
-        String collCd = this.currentImportValues.get("CollectionCode");
-        String sr = this.currentImportValues.get("SR");
-        String sBO = this.currentImportValues.get("SBO");
-
-        // Story 1374616: Requirement for INAC / NAC :Mukesh
-        String inac = data.getInacCd();
-        if ((inac != null || !StringUtils.isEmpty(inac)) && inac.length() > 4) {
-          data.setInacCd(inac.substring(0, 4));
-        }
-        // Checking Company CMR
-        if (((!StringUtils.isEmpty(data.getCompany())) && (!StringUtils.isEmpty(data.getCmrNo())))
-            && (data.getCompany().equalsIgnoreCase(data.getCmrNo()))) {
-          LOG.debug("It is Company CMR (Node1 equal to CMR No):: " + data.getCompany() + " equal to " + data.getCmrNo());
-
-          if (mainRecord.getCmrSortl() != null && mainRecord.getCmrSortl().length() >= 10) {
-            data.setSalesBusOffCd(mainRecord.getCmrSortl().substring(1, 3)); // lenght2
-            data.setRepTeamMemberNo(mainRecord.getCmrSortl().substring(4, 10)); // lenght6
-          }
-          // data.setCollectionCd(StringUtils.isEmpty(collCd) ? "" :
-          // collCd.substring(0, 5)); // lenght5
-
+          data.setRepTeamMemberNo(mainRecord.getCmrSortl().substring(4));
+          LOG.trace("Rep No from Sortl (IL) : " + data.getRepTeamMemberNo());
         } else {
-          LOG.debug("It is not Company CMR (Node1 not equal to CMR No): " + data.getCompany() + " not equal to " + data.getCmrNo());
-
-          if (!StringUtils.isEmpty(data.getIsuCd()) && !"32".equalsIgnoreCase(data.getIsuCd().substring(0, 2))) {
-            data.setRepTeamMemberNo("");
-            data.setSalesBusOffCd("");
-          }
-
+          // defect fix 1329919 changed from 5 to 4
+          data.setRepTeamMemberNo(mainRecord.getCmrSortl().substring(4, 10));
+          LOG.trace("Rep No from Sortl : " + data.getRepTeamMemberNo());
         }
+      }
+      // 1299146
+      // Translate and auto-populate for next release
+      if (SystemLocation.ISRAEL.equals(data.getCmrIssuingCntry()) && StringUtils.isEmpty(data.getCollectionCd())) {
+        data.setCollectionCd("TC0");
+      }
 
-        String iBO = this.currentImportValues.get("IBO");
-        String eBo = this.currentImportValues.get("DPCEBO");
-
-        if (!(StringUtils.isEmpty(iBO))) {
-          if (iBO.length() > 3) {
-            data.setInstallBranchOff(iBO.substring(0, 3));
-          }
-        }
-        if (!(StringUtils.isEmpty(eBo))) {
-          if (eBo.length() > 3) {
-            data.setEngineeringBo(eBo.substring(0, 3));
+      // Changed abbreviated location if cross border to country
+      if (SystemLocation.ISRAEL.equals(data.getCmrIssuingCntry())) {
+        if (!this.currentImportValues.isEmpty() && !(mainRecord.getCmrCountryLanded().equalsIgnoreCase("IL"))) {
+          String country = DropdownListController.getDescription("LandedCountry", mainRecord.getCmrCountryLanded(), SystemLocation.ISRAEL);
+          if (!StringUtils.isEmpty(country) && admin.getReqType() == "C") {
+            data.setAbbrevLocn(country.length() > 12 ? country.substring(0, 12) : country);
           }
         }
-        // Story 1374607 : Mukesh
-        String abbrerLocn = this.currentImportValues.get("AbbreviatedLocation");
-        if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
-          if (!StringUtils.isEmpty(abbrerLocn)) {
-            data.setAbbrevLocn(abbrerLocn);
-            if (abbrerLocn != null && abbrerLocn.length() > 12) {
-              data.setAbbrevLocn(abbrerLocn.substring(0, 12));
-            }
-          } else {
-            data.setAbbrevLocn("");
+
+      }
+
+      // For IBO, SBO & EBO values exceeding 3 char length
+      String iBO = this.currentImportValues.get("IBO");
+      String sBO = this.currentImportValues.get("SBO");
+      String eBo = this.currentImportValues.get("DPCEBO");
+      String accAdBo = this.currentImportValues.get("AccAdBo");
+
+      if (!(StringUtils.isEmpty(iBO))) {
+        if (iBO.length() > 3) {
+          data.setInstallBranchOff(iBO.substring(0, 3));
+        }
+      }
+      if (!(StringUtils.isEmpty(sBO))) {
+        if (sBO.length() > 3) {
+          data.setSalesBusOffCd(sBO.substring(0, 3));
+        }
+      }
+      if (!(StringUtils.isEmpty(eBo))) {
+        if (eBo.length() > 3) {
+          data.setEngineeringBo(eBo.substring(0, 3));
+        }
+      }
+
+      if (StringUtils.isNotBlank(data.getCmrNo())) {
+        String kunnrExtCapInd = getZS01CapInd(data.getCmrNo());
+        if (StringUtils.isNotEmpty(kunnrExtCapInd)) {
+          data.setCapInd(kunnrExtCapInd);
+        }
+      }
+
+      if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+        if (StringUtils.isNotEmpty(mainRecord.getCmrDuns())) {
+          data.setDunsNo(mainRecord.getCmrDuns());
+        } else { // manually query KNA1.zzkv_duns
+          EntityManager entityManager = JpaManager.getEntityManager();
+          String sql = ExternalizedQuery.getSql("IL.GET.KNA1_ZS01DUNS");
+          PreparedQuery query = new PreparedQuery(entityManager, sql);
+          query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+          query.setParameter("ZZKV_CUSNO", data.getCmrNo());
+
+          List<String> record = query.getResults(String.class);
+          if (record != null && !record.isEmpty()) {
+            data.setDunsNo(record.get(0));
           }
         }
-      } // End of Story 1389065
+
+        String codflag = !StringUtils.isEmpty(legacyObjects.getCustomer().getDeptCd()) ? legacyObjects.getCustomer().getDeptCd() : "";
+        data.setCreditCd(codflag);
+      }
     } else {
       super.setDataValuesOnImport(admin, data, results, mainRecord);
     }
