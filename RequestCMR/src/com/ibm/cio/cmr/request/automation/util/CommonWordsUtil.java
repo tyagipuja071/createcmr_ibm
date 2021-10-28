@@ -72,6 +72,7 @@ public class CommonWordsUtil {
     addEqual("nw", "northwest");
     addEqual("ofc", "office");
     addEqual(true, "org", "organization");
+    addEqual(true, "pvt", "private");
     addEqual("pkwy", "parkway");
     addEqual("pt", "point");
     addEqual("rd", "road");
