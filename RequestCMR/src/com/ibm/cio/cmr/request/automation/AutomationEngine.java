@@ -41,9 +41,12 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDowntimes;
+import com.ibm.cio.cmr.request.util.mail.Email;
+import com.ibm.cio.cmr.request.util.mail.MessageType;
 
 /**
  * The engine that runs a set of {@link AutomationElement} objects. This engine
@@ -214,6 +217,10 @@ public class AutomationEngine {
             result.setOnError(true);
             systemError = true;
             createSystemErrorResult(entityManager, reqId, resultId, element, appUser);
+            StringBuilder details = new StringBuilder();
+            details.append("System error for element " + element.getProcessDesc() + " with Req ID -> " + requestData.getAdmin().getId().getReqId()
+                + " has occured. Please check concerned logs for the same.");
+            sendBlueSquadEmail(requestData.getAdmin(), requestData.getData(), details);
             break;
           }
         }
@@ -801,5 +808,30 @@ public class AutomationEngine {
    */
   public static String getRejectionReason(String code) {
     return rejectionReasons.get(code);
+  }
+
+  private void sendBlueSquadEmail(Admin admin, Data data, StringBuilder details) {
+    String blueSquad = null;
+    try {
+      blueSquad = SystemParameters.getString("AUT_ENG_SYSTEM_ERR");
+    } catch (Exception e) {
+      LOG.debug("Failed in getting blue squad Ids. ReqID = " + data.getId().getReqId() + ", requester = " + admin.getRequesterId());
+      e.printStackTrace();
+    }
+    if (blueSquad != null) {
+      LOG.debug("Sending email notification to blue squad as System error has occurred. ReqID = " + data.getId().getReqId() + ", requester = "
+          + admin.getRequesterId());
+      String host = SystemConfiguration.getValue("MAIL_HOST");
+      String subject = "System Error has occurred for Request " + data.getId().getReqId();
+      String from = "CreateCMR_Automation_GBL";
+      String email = details.toString();
+      Email mail = new Email();
+      mail.setSubject(subject);
+      mail.setTo(blueSquad);
+      mail.setFrom(from);
+      mail.setMessage(email);
+      mail.setType(MessageType.HTML);
+      mail.send(host);
+    }
   }
 }
