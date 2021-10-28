@@ -217,7 +217,7 @@ function addAfterConfigAP() {
   }
 }
 
-function setClusternProvByScenarioForIndia() {
+function setClusterAndProvByScenarioForIndia() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   if (cntry == SysLoc.INDIA) {
     if(custSubGrp == 'IGF'){
@@ -3665,7 +3665,8 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(addAfterConfigAP, GEOHandler.AP);
   GEOHandler.addAfterTemplateLoad(addAfterConfigAP, GEOHandler.AP);
-  GEOHandler.addAfterTemplateLoad(setClusternProvByScenarioForIndia, [ SysLoc.INDIA ]);
+  GEOHandler.addAfterConfig(setClusterAndProvByScenarioForIndia, [ SysLoc.INDIA ]);
+  
   GEOHandler.addAfterConfig(updateIndustryClass, GEOHandler.AP);
   GEOHandler.addAfterConfig(updateProvCd, GEOHandler.AP);
   GEOHandler.addAfterConfig(updateRegionCd, GEOHandler.AP);
