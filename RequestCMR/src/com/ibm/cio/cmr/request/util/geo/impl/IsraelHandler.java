@@ -382,6 +382,7 @@ public class IsraelHandler extends EMEAHandler {
         address.setPairedAddrSeq(currentRecord.getTransAddrNo());
         address.setVat(currentRecord.getCmrTaxNumber());
         // set tax office here
+        address.setIerpSitePrtyId(currentRecord.getCmrSitePartyID());
 
         address.setTaxOffice(currentRecord.getCmrTaxOffice());
         address.setVat(currentRecord.getCmrTaxNumber());

@@ -51,6 +51,17 @@
     </cmr:column>
   </cmr:row>
 </cmr:view>
+<cmr:view forCountry="755">
+  <cmr:row>
+      <cmr:column span="2">
+      <p>
+	  <cmr:label fieldId="ierpSitePrtyId" cssClass="cmr-inline">
+        <cmr:fieldLabel fieldId="SitePartyID" />:</cmr:label>
+      <cmr:field fieldId="IERPSitePrtyId" id="ierpSitePrtyId" path="ierpSitePrtyId" />
+      </p>
+    </cmr:column>
+  </cmr:row>
+</cmr:view>
 <cmr:row addBackground="true">
   <cmr:column span="4">
     <cmr:label fieldId="custNm1">
@@ -149,21 +160,12 @@
     </p>
   </cmr:column>
   </cmr:view> --%>
-  <cmr:column span="2" exceptForCountry="755,758">
+  <cmr:column span="2" exceptForCountry="758">
     <p>
       <cmr:label fieldId="addrTxt2">
         <cmr:fieldLabel fieldId="StreetAddress2" />: 
           </cmr:label>
       <cmr:field fieldId="StreetAddress2" id="addrTxt2" path="addrTxt2" />
-    </p>
-  </cmr:column>
-  <cmr:column span="2" containerForField="POBox" forCountry="755">
-    <p>
-      <cmr:label fieldId="poBox">
-        <cmr:fieldLabel fieldId="POBox" />:
-             <cmr:delta text="-" id="delta-poBox" />
-      </cmr:label>
-      <cmr:field fieldId="POBox" id="poBox" path="poBox" />
     </p>
   </cmr:column>
 </cmr:row>
@@ -257,6 +259,15 @@
     </p>
     </cmr:column>
   </cmr:view>
+  <cmr:column span="2" containerForField="POBox" forCountry="755">
+    <p>
+      <cmr:label fieldId="poBox">
+        <cmr:fieldLabel fieldId="POBox" />:
+             <cmr:delta text="-" id="delta-poBox" />
+      </cmr:label>
+      <cmr:field fieldId="POBox" id="poBox" path="poBox" />
+    </p>
+  </cmr:column>
 
 </cmr:row>
 
