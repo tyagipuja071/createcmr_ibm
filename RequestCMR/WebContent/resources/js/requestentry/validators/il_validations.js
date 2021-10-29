@@ -7,6 +7,7 @@ var _gtcAddrTypesIL = [ 'ZS01', 'ZP01', 'ZD01', 'ZI01', 'ZS02', 'CTYA', 'CTYB', 
 var _prolifCountries = [ 'AF', 'AM', 'AZ', 'BH', 'BY', 'KH', 'CN', 'CU', 'EG', 'GE', 'IR', 'IQ', 'IL', 'JO', 'KZ', 'KP', 'KW', 'KG', 'LA', 'LB', 'LY', 'MO', 'MD', 'MN', 'MM', 'OM', 'PK', 'QA', 'RU',
     'SA', 'SD', 'SY', 'TW', 'TJ', 'TM', 'UA', 'AE', 'UZ', 'VE', 'VN', 'YE' ];
 var _requestingLOBHandler = null;
+var _streetHandler = null;
 
 function addHandlersForIL() {
   for (var i = 0; i < _gtcAddrTypesIL.length; i++) {
@@ -14,6 +15,7 @@ function addHandlersForIL() {
     if (_gtcAddrTypeHandlerIL[i] == null) {
       _gtcAddrTypeHandlerIL[i] = dojo.connect(FormManager.getField('addrType_' + _gtcAddrTypesIL[i]), 'onClick', function(value) {
         countryUseAISRAEL();
+        setAddrFieldsBehavior();
       });
     }
   }
@@ -35,6 +37,13 @@ function addHandlersForIL() {
       setSrSboValuesOnEnterprise(value);
     });
   }
+
+  if (_streetHandler == null) {
+    _streetHandler = dojo.connect(FormManager.getField('addrTxt'), 'onChange', function(value) {
+      setStreetContBehavior();
+    });
+  }
+
 }
 
 function addEMEALandedCountryHandler(cntry, addressMode, saving, finalSave) {
@@ -384,8 +393,6 @@ function addILAddressTypeValidator() {
             return new ValidationResult(null, false, 'For Mailing address, only one in Latin and in Hebrew is allowed.');
           } else if (billingCnt > 1 || ctyBCnt > 1) {
             return new ValidationResult(null, false, 'For Billing address, only one in Latin and in Hebrew is allowed.');
-          } else if (installingCnt > 1) {
-            return new ValidationResult(null, false, 'For Installing address, only one in Latin is allowed.');
           } else if (eplCnt > 1) {
             return new ValidationResult(null, false, 'For EPL address, only one in Latin is allowed.');
           } else if (shippingCnt != ctyCCnt) {
@@ -990,17 +997,14 @@ function addLatinCharValidator() {
     checkAndAddValidator('custNm1', Validators.LATIN, [ 'Customer Name' ]);
     checkAndAddValidator('addrTxt', Validators.LATIN, [ 'Street Address' ]);
     checkAndAddValidator('city1', Validators.LATIN, [ 'City' ]);
-    checkAndAddValidator('postCd', Validators.LATIN, [ 'Postal Code' ]);
-    // checkAndAddValidator('custPhone', Validators.LATIN, [ 'Phone #' ]);
+
   } else {
     FormManager.removeValidator('custNm1', Validators.LATIN);
     FormManager.removeValidator('custNm2', Validators.LATIN);
     FormManager.removeValidator('addrTxt', Validators.LATIN);
     FormManager.removeValidator('addrTxt2', Validators.LATIN);
     FormManager.removeValidator('city1', Validators.LATIN);
-    FormManager.removeValidator('postCd', Validators.LATIN);
     FormManager.removeValidator('dept', Validators.LATIN);
-    // FormManager.removeValidator('custPhone', Validators.LATIN);
   }
 }
 
@@ -1030,22 +1034,14 @@ function addNonLatinCharValidator() {
     }
     checkAndAddValidator('addrTxt', Validators.NON_LATIN, [ 'Street Address' ]);
     checkAndAddValidator('city1', Validators.NON_LATIN, [ 'City' ]);
-    checkAndAddValidator('postCd', Validators.NON_LATIN, [ 'Postal Code' ]);
-    // checkAndAddValidator('custPhone', Validators.NON_LATIN, [ 'Phone #'
-    // ]);
 
-    if (cntry == SysLoc.ISRAEL && custType == 'CROSS') {
-      FormManager.removeValidator('postCd', Validators.NON_LATIN);
-    }
   } else {
     FormManager.removeValidator('custNm1', Validators.NON_LATIN);
     FormManager.removeValidator('custNm2', Validators.NON_LATIN);
     FormManager.removeValidator('addrTxt', Validators.NON_LATIN);
     FormManager.removeValidator('addrTxt2', Validators.NON_LATIN);
     FormManager.removeValidator('city1', Validators.NON_LATIN);
-    FormManager.removeValidator('postCd', Validators.NON_LATIN);
     FormManager.removeValidator('dept', Validators.NON_LATIN);
-    // FormManager.removeValidator('custPhone', Validators.NON_LATIN);
     FormManager.removeValidator('taxOffice', Validators.NON_LATIN);
   }
 }
@@ -1233,6 +1229,18 @@ function countryUseAISRAEL() {
     } else {
       FormManager.enable('landCntry');
     }
+  }
+}
+
+function setAddrFieldsBehavior() {
+  var addrType = FormManager.getActualValue('addrType');
+
+  if (addrType == 'ZD01' || addrType == 'ZI01' || addrType == 'ZS02' || addrType == 'CTYC') {
+    FormManager.hide('POBox', 'poBox');
+    checkAndAddValidator('addrTxt', Validators.REQUIRED, [ 'Street' ]);
+  } else {
+    FormManager.show('POBox', 'poBox');
+    FormManager.removeValidator('addrTxt', Validators.REQUIRED);
   }
 }
 
@@ -1725,6 +1733,97 @@ function toggleAddressTypesForIL(cntry, addressMode, details) {
   }
 }
 
+function setStreetContBehavior() {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+
+  var street = FormManager.getActualValue('addrTxt');
+  if (street != null && street != '') {
+    FormManager.enable('addrTxt2');
+  } else {
+    FormManager.clearValue('addrTxt2');
+    FormManager.disable('addrTxt2');
+  }
+}
+
+function addPostalCdCityValidator() {
+  // City + PostCd should not exceed 29 characters
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var city = FormManager.getActualValue('city1');
+        var postCd = FormManager.getActualValue('postCd');
+        var val = city;
+
+        if (postCd != '') {
+          val += postCd;
+          if (val.length > 28) {
+            return new ValidationResult(null, false, 'Total computed length of City and Postal Code should not exceed 29 characters.');
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+}
+
+function addAddressGridValidatorStreetPOBox() {
+  console.log("addAddressGridValidatorStreetPOBox..............");
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+          var record = null;
+          var type = null;
+
+          var missingPOBoxStreetAddrs = '';
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+            record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+            if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+              record = _allAddressData[i];
+            }
+            type = record.addrType;
+            if (typeof (type) == 'object') {
+              type = type[0];
+            }
+
+            var addrIsNewOrUpdated = null;
+            var reqType = FormManager.getActualValue('reqType');
+
+            if (reqType == 'U') {
+              if (record.updateInd[0] == 'U' || record.updateInd[0] == 'N') {
+                addrIsNewOrUpdated = true;
+              } else {
+                addrIsNewOrUpdated = false;
+              }
+            } else {
+              addrIsNewOrUpdated = true;
+            }
+
+            var isPOBoxOrStreetFilled = (record.poBox[0] != null && record.poBox[0] != '') || (record.addrTxt[0] != null && record.addrTxt[0] != '');
+            if (!isPOBoxOrStreetFilled && addrIsNewOrUpdated) {
+              if (missingPOBoxStreetAddrs != '') {
+                missingPOBoxStreetAddrs += ', ' + record.addrTypeText[0] + ' (' + record.addrSeq[0] + ') ';
+              } else {
+                missingPOBoxStreetAddrs += record.addrTypeText[0] + ' (' + record.addrSeq[0] + ') ';
+              }
+            }
+          }
+
+          if (missingPOBoxStreetAddrs != '') {
+            return new ValidationResult(null, false, 'Please fill-out either Street or PO BOX for the following address: ' + missingPOBoxStreetAddrs);
+          }
+
+          return new ValidationResult(null, true);
+
+        }
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding Israel functions...');
@@ -1775,6 +1874,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(sboLengthValidator, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.addAfterConfig(addHandlersForIL, [ SysLoc.ISRAEL ]);
   GEOHandler.addAddrFunction(countryUseAISRAEL, [ SysLoc.ISRAEL ]);
+  GEOHandler.addAddrFunction(setAddrFieldsBehavior, [ SysLoc.ISRAEL ]);
   GEOHandler.addAddrFunction(validatePoBox, [ SysLoc.ISRAEL ]);
   GEOHandler.addAddrFunction(markAddrSaveSuperUser, [ SysLoc.ISRAEL ]);
   GEOHandler.addAddrFunction(toggleAddressTypesForIL, [ SysLoc.ISRAEL ]);
@@ -1790,7 +1890,11 @@ dojo.addOnLoad(function() {
 
   GEOHandler.registerValidator(addISICKUKLAValidator, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(addCollectionValidator, [ SysLoc.ISRAEL ], null, true);
+  GEOHandler.registerValidator(addPostalCdCityValidator, [ SysLoc.ISRAEL ], null, true);
+  GEOHandler.registerValidator(addAddressGridValidatorStreetPOBox, [ SysLoc.ISRAEL ], null, true);
 
   GEOHandler.addAfterTemplateLoad(preTickVatExempt, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(showVatExempt, [ SysLoc.ISRAEL ]);
+  GEOHandler.addAfterConfig(setStreetContBehavior, [ SysLoc.ISRAEL ]);
+
 });
