@@ -141,6 +141,7 @@ public class USHandler extends GEOHandler {
     if (kna1List != null && !kna1List.isEmpty() && kna1List.size() > 0) {
       for (Kna1 kna1 : kna1List) {
         address = new FindCMRRecordModel();
+        // paygo billing
         address.setCmrAddrTypeCode(CmrConstants.RDC_PAYGO_BILLING);
         address.setCmrName(kna1.getName1());
         address.setCmrName2(kna1.getName2());
