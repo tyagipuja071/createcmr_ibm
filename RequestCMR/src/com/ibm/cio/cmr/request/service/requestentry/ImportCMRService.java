@@ -663,7 +663,7 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
       addr.setLandCntry(cmr.getCmrCountryLanded());
       if ("U".equals(reqModel.getReqType()) || "X".equals(reqModel.getReqType())) {
         addr.setSapNo(cmr.getCmrSapNumber());
-        addr.setIerpSitePrtyId(cmr.getCmrSitePartyID());
+        addr.setIerpSitePrtyId(cmr.getCmrSitePartyID()); // ierpSitePrtyId
         addr.setAddrStdResult("X");
         addr.setRdcCreateDt(cmr.getCmrRdcCreateDate());
         addr.setRdcLastUpdtDt(SystemUtil.getCurrentTimestamp()); // placeholder
