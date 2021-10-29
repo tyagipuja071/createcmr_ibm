@@ -826,7 +826,7 @@ public class IERPProcessService extends BaseBatchService {
 
               if (response.getRecords() != null && response.getRecords().size() != 0) {
 
-                if (CmrConstants.ADDR_TYPE.ZS01.equals(response.getRecords().get(index).getAddressType())) {
+                if (CmrConstants.RDC_SOLD_TO.equals(response.getRecords().get(index).getAddressType())) {
                   String[] addrSeqs = response.getRecords().get(index).getSeqNo().split(",");
                   addr.setPairedAddrSeq(addrSeqs[0]);
                   addr.setSapNo(response.getRecords().get(index).getSapNo());
@@ -841,10 +841,19 @@ public class IERPProcessService extends BaseBatchService {
 
                     if (red.getAddressType().equalsIgnoreCase(addr.getId().getAddrType())
                         && addrSeqs[1].equalsIgnoreCase(addr.getId().getAddrSeq())) {
+                      LOG.debug("Address matched");
                       addr.setPairedAddrSeq(addrSeqs[0]);
                       addr.setSapNo(red.getSapNo());
                       addr.setIerpSitePrtyId(red.getIerpSitePartyId());
                     }
+
+                    if (("ZP01").equalsIgnoreCase(red.getAddressType()) && addrSeqs[1].equalsIgnoreCase(addr.getId().getAddrSeq())) {
+                      LOG.debug("ZP01 matched");
+                      addr.setPairedAddrSeq(addrSeqs[0]);
+                      addr.setSapNo(red.getSapNo());
+                      addr.setIerpSitePrtyId(red.getIerpSitePartyId());
+                    }
+
                   }
                 }
 
