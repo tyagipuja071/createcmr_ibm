@@ -826,7 +826,7 @@ public class IERPProcessService extends BaseBatchService {
 
               if (response.getRecords() != null && response.getRecords().size() != 0) {
 
-                if (CmrConstants.ADDR_TYPE.ZS01.equals(response.getRecords().get(index).getAddressType())) {
+                if (CmrConstants.RDC_SOLD_TO.equals(response.getRecords().get(index).getAddressType())) {
                   String[] addrSeqs = response.getRecords().get(index).getSeqNo().split(",");
                   addr.setPairedAddrSeq(addrSeqs[0]);
                   addr.setSapNo(response.getRecords().get(index).getSapNo());
