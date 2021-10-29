@@ -587,6 +587,7 @@ public class IsraelHandler extends EMEAHandler {
 
       lockLandedCountry(entityManager, data, admin, addr);
       assignPairedSequence(entityManager, addr, admin.getReqType());
+      clearPOBox(addr);
 
       switch (cmrIssuingCntry) {
       case SystemLocation.ISRAEL:
@@ -630,6 +631,14 @@ public class IsraelHandler extends EMEAHandler {
       }
     } else {
       super.doBeforeAddrSave(entityManager, addr, cmrIssuingCntry);
+    }
+  }
+
+  private void clearPOBox(Addr addr) {
+    String[] hiddenPOBoxAddrs = { "ZD01", "ZI01", "ZS02", "CTYC" };
+    String addrType = addr.getId().getAddrType();
+    if (Arrays.asList(hiddenPOBoxAddrs).contains(addrType)) {
+      addr.setPoBox("");
     }
   }
 
