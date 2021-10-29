@@ -219,22 +219,26 @@ function addAfterConfigAP() {
 
 function setClusterAndProvByScenarioForIndia() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  if (cntry == SysLoc.INDIA) {
-    if(custSubGrp == 'IGF'){
-       FormManager.resetDropdownValues(FormManager.getField('busnType'));
-       FormManager.setValue('busnType','000');
-       FormManager.readOnly('busnType');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var reqType = FormManager.getActualValue('reqType');
+  if (role == 'REQUESTER' && reqType == 'C') {
+    if (cntry == '744') {
+      if(custSubGrp == 'IGF'){
+         FormManager.resetDropdownValues(FormManager.getField('busnType'));
+         FormManager.setValue('busnType','000');
+         FormManager.readOnly('busnType');
+      }
+      if(custSubGrp == 'NRML'){
+        FormManager.setValue('busnType','');
+        FormManager.setValue('apCustClusterId','');
     }
-    if(custSubGrp == 'NRML'){
-      FormManager.setValue('busnType','');
-      FormManager.setValue('apCustClusterId','');
-  }
-    if(custSubGrp == 'AQSTN' || custSubGrp == 'CROSS'){
-      FormManager.setValue('apCustClusterId','');
-  }
-    if(custSubGrp == 'PRIV'){
-      FormManager.setValue('busnType','');
-  }   
+      if(custSubGrp == 'AQSTN' || custSubGrp == 'CROSS'){
+        FormManager.setValue('apCustClusterId','');
+    }
+      if(custSubGrp == 'PRIV'){
+        FormManager.setValue('busnType','');
+    }   
+    }
   }
 }
 
