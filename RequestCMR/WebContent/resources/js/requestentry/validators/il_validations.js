@@ -1791,7 +1791,7 @@ function addPostalCdCityValidator() {
 
         if (postCd != '') {
           val += postCd;
-          if (val.length > 28) {
+          if (val.length > 29) {
             return new ValidationResult(null, false, 'Total computed length of City and Postal Code should not exceed 29 characters.');
           }
         }

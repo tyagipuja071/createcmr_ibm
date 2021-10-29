@@ -381,19 +381,13 @@ public class IsraelHandler extends EMEAHandler {
 
         address.setPairedAddrSeq(currentRecord.getTransAddrNo());
         address.setVat(currentRecord.getCmrTaxNumber());
-        // set tax office here
         address.setIerpSitePrtyId(currentRecord.getCmrSitePartyID());
-
         address.setTaxOffice(currentRecord.getCmrTaxOffice());
         address.setVat(currentRecord.getCmrTaxNumber());
         if (currentRecord.getCmrAddrSeq() != null && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())
             && "CTYA".equalsIgnoreCase(address.getId().getAddrType())) {
-          boolean isProspects = currentRecord != null && CmrConstants.PROSPECT_ORDER_BLOCK.equals(currentRecord.getCmrOrderBlock());
-          if (isProspects) {
-            address.getId().setAddrSeq("00006");
-          } else {
-            address.getId().setAddrSeq("00001");
-          }
+          address.getId().setAddrSeq("00006");
+          address.setPairedAddrSeq("");
         }
         if ("D".equals(address.getImportInd())) {
           String seq = StringUtils.leftPad(address.getId().getAddrSeq(), 5, '0');
