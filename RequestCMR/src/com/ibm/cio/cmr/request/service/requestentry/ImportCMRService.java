@@ -664,6 +664,7 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
       if ("U".equals(reqModel.getReqType()) || "X".equals(reqModel.getReqType())) {
         addr.setSapNo(cmr.getCmrSapNumber());
         addr.setIerpSitePrtyId(cmr.getCmrSitePartyID()); // ierpSitePrtyId
+        addr.setExtWalletId(cmr.getCmrExtWalletId());
         addr.setAddrStdResult("X");
         addr.setRdcCreateDt(cmr.getCmrRdcCreateDate());
         addr.setRdcLastUpdtDt(SystemUtil.getCurrentTimestamp()); // placeholder
