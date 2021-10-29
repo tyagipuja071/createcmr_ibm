@@ -175,7 +175,15 @@ function addILChecklistValidator() {
       validate : function() {
         rType = FormManager.getActualValue('reqType');
         if (rType == 'U') {
-          return;
+          var requestId = FormManager.getActualValue('reqId');
+          var queryParams = {
+            REQ_ID : requestId,
+            ADDR_TYPE : 'CTYA'
+          };
+          var resultq = cmr.query('CHECK.ADDR.UPDATED_IL', queryParams);
+          if (resultq.ret1 != '1') {
+            return;
+          }
         }
         custSubScnrio = FormManager.getActualValue('custSubGrp');
         var zs01ReqId = FormManager.getActualValue('reqId');
@@ -842,6 +850,16 @@ function fieldsReadOnlyIsrael() {
   FormManager.addValidator('salesBusOffCd', Validators.NUMBER, [ 'SBO' ]);
 }
 
+function adjustChecklistContact() {
+  var custSubScnrio = FormManager.getActualValue('custSubGrp');
+
+  if (custSubScnrio == 'CROSS') {
+    document.getElementById("checklistcontact").innerHTML = "your Country ERC";
+  } else {
+    document.getElementById("checklistcontact").innerHTML = "Israeli ERC (Yifat Siner @ NOTES ID: IJB@il.ibm.com, Yifat Singer/Israel/IBM)";
+  }
+}
+
 function updateAbbrevNmLocnIsrael(cntry, addressMode, saving, finalSave, force) {
   var role = null;
   var reqType = null;
@@ -1473,6 +1491,18 @@ function setCapInd() {
     if (reqType == 'C') {
       FormManager.readOnly('capInd');
       FormManager.setValue('capInd', true);
+    } else if (reqType == 'U') {
+      var params = {
+        USERID : _pagemodel.requesterId
+      };
+      var result1 = cmr.query('GET.ND.USER_ROLE', params);
+      var result2 = cmr.query('GET.ND.USER_PROC_CENTER_NM', params);
+      reqType = FormManager.getActualValue('reqType');
+      if (reqType == 'U') {
+        if (result1.ret1 > 0 && result2.ret1 == 'Bratislava') {
+          FormManager.enable('capInd');
+        }
+      }
     }
   }
 }
@@ -1689,6 +1719,20 @@ function resetVatRequired() {
   }
 }
 
+/**
+ * Downloads the DPL checklist file
+ */
+function downloadDPLChecklistTemplate() {
+  var token = new Date().getTime();
+  FormManager.setValue('dlDocType', 'TEMPLATE');
+  FormManager.setValue('dlTokenId', token);
+  FormManager.setValue('dlReqId', FormManager.getActualValue('reqId'));
+  cmr.showProgress('Downloading file. Please wait...');
+  document.forms['fileTemplateDownloadForm'].submit();
+  window.setTimeout('checkToken("' + token + '")', 1000);
+
+}
+
 function toggleAddressTypesForIL(cntry, addressMode, details) {
   if (addressMode == 'newAddress' || addressMode == 'copyAddress') {
     var record = null;
@@ -1887,6 +1931,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(showHideKuklaField, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterTemplateLoad(lockCustomerClassByLob, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterTemplateLoad(finalizeAbbrevName, [ SysLoc.ISRAEL ]);
+  GEOHandler.addAfterTemplateLoad(adjustChecklistContact, [ SysLoc.ISRAEL ]);
 
   GEOHandler.registerValidator(addISICKUKLAValidator, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(addCollectionValidator, [ SysLoc.ISRAEL ], null, true);

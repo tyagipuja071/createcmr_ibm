@@ -14,8 +14,26 @@
     readOnly = false;
   }
 %>
+<cmr:section>
+<form>
+	<input name="dummyform" type="hidden">
+</form>
+<form id="fileTemplateDownloadForm" name="fileTemplateDownloadForm" method="POST" action="${contextPath}/template/download" target="fileTemplateDownloadFrame">
+  <input name="dlTokenId" id="dlTokenId" type="hidden">
+  <input name="dlDocType" id="dlDocType" type="hidden">
+  <input name="dlReqId" id="dlReqId" type="hidden">
+  <input name="dlIterId" id="dlIterId" type="hidden">
+  <input type="hidden" name="cmrIssuingCntry" value="${reqentry.cmrIssuingCntry}">
+</form>
+</cmr:section>
+<iframe id="fileTemplateDownloadFrame" style="display:none" name="fileTemplateDownloadFrame"></iframe>
 <cmr:checklist title1="CMR Military and Proliferation Screening Checklist" title2="CUSTOMER ELIGIBILITY CHECKLIST">
-
+  <cmr:column span="7">
+    <p align="right">
+      <label for="massUpdtTmpl"> ${ui.il.dplchecklisttemplate}: <cmr:info text="${ui.info.dplchecklisttemplateIL}"></cmr:info> </label>
+      <a href="javascript:downloadDPLChecklistTemplate()">${ui.massDnlTmpl}</a>
+    </p>
+  </cmr:column>
   <cmr:chk-section name="Section A">
     <cmr:chk-entry number="1" section="A">
       Is the customer on the DPL?    
@@ -98,7 +116,7 @@
   <cmr:chk-block boldText="false">
     If any of the above questions have answered 
     <span style="font-weight: bold; text-decoration: underline">YES</span>
-    , please STOP and CONTACT Israeli ERC (Yifat Siner @ NOTES ID: IJB@il.ibm.com, Yifat Singer/Israel/IBM) or legal counsel for further guidance.
+    , please STOP and CONTACT <span id="checklistcontact"> Israeli ERC (Yifat Siner @ NOTES ID: IJB@il.ibm.com, Yifat Singer/Israel/IBM) </span> or legal counsel for further guidance.
     Transactions (with customers found to be engaged in prohibited activities) may only proceed as reviewed and authorized by IBM ERC and/or STC.
   </cmr:chk-block>
  
