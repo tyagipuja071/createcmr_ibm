@@ -485,28 +485,6 @@ public class IsraelHandler extends EMEAHandler {
     String processingType = PageManager.getProcessingType(SystemLocation.ISRAEL, "U");
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
       if (SystemLocation.ISRAEL.equals(data.getCmrIssuingCntry())) {
-        // Auto-populate SBO, IBO field based on Sales rep number
-        // jz: this is an israel requirement, so adding check
-        if (data.getRepTeamMemberNo() != null && data.getRepTeamMemberNo().length() > 0) {
-          StringBuffer sboIBO = new StringBuffer("00");
-
-          char[] salesRepCode = data.getRepTeamMemberNo().toCharArray();
-          int salesRepIndex = -1;
-
-          for (int i = 0; i < salesRepCode.length; i++) {
-            if (Character.isDigit(salesRepCode[i]) && salesRepCode[i] != '0') {
-              salesRepIndex = i;
-              break;
-            }
-          }
-
-          if (salesRepIndex >= 0) {
-            sboIBO.append(salesRepCode[salesRepIndex]);
-            data.setSalesBusOffCd(sboIBO.toString());
-            data.setInstallBranchOff(sboIBO.toString());
-          }
-        }
-
         if (data.getSubIndustryCd() != null) {
           data.setEconomicCd("0" + data.getSubIndustryCd());
         }

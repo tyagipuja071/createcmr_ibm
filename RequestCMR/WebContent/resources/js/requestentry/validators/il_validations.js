@@ -1,6 +1,5 @@
 /* Register Israel Javascripts */
 var _CTCHandlerIL = null;
-var _ILentConnect = null;
 var _vatExemptHandler = null;
 var _gtcAddrTypeHandlerIL = [];
 var _gtcAddrTypesIL = [ 'ZS01', 'ZP01', 'ZD01', 'ZI01', 'ZS02', 'CTYA', 'CTYB', 'CTYC' ];
@@ -29,12 +28,6 @@ function addHandlersForIL() {
           FormManager.setValue('repTeamMemberNo', '000651');
         }
       }
-    });
-  }
-
-  if (_ILentConnect == null) {
-    _ILentConnect = dojo.connect(FormManager.getField('enterprise'), 'onChange', function(value) {
-      setSrSboValuesOnEnterprise(value);
     });
   }
 
@@ -782,48 +775,6 @@ function addStreetAddressFormValidator() {
       }
     };
   })(), null, 'frmCMR_addressModal');
-}
-
-/*
- * Set SR SBO Values based on Enterprise
- */
-function setSrSboValuesOnEnterprise(enterprise) {
-  var reqType = FormManager.getActualValue('reqType');
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var enterprise = FormManager.getActualValue('enterprise');
-
-  if (reqType != 'C') {
-    return;
-  }
-
-  var srlist = [];
-  var sbolist = [];
-  if (enterprise != '') {
-    var qParams = {
-      _qall : 'Y',
-      ISSUING_CNTRY : cntry,
-      SALES_BO_DESC : '%' + enterprise + '%'
-    };
-    var results = cmr.query('GET.SRSBOTLIST.BYENTR', qParams);
-    if (results != null) {
-      for (var i = 0; i < results.length; i++) {
-        srlist.push(results[i].ret1);
-        sbolist.push(results[i].ret2);
-      }
-      if (srlist != null) {
-        FormManager.limitDropdownValues(FormManager.getField('repTeamMemberNo'), srlist);
-        if (srlist.length >= 1) {
-          FormManager.setValue('repTeamMemberNo', srlist[0]);
-        }
-      }
-
-      if (sbolist != null) {
-        if (sbolist.length >= 1) {
-          FormManager.setValue('salesBusOffCd', sbolist[0]);
-        }
-      }
-    }
-  }
 }
 
 function fieldsReadOnlyIsrael() {
@@ -1877,7 +1828,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.ISRAEL, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(addStreetAddressFormValidator, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(addEmbargoCodeValidator, SysLoc.ISRAEL, null, true);
-  GEOHandler.addAfterConfig(setSrSboValuesOnEnterprise, [ SysLoc.ISRAEL ]);
+
   GEOHandler.addAfterConfig(fieldsReadOnlyIsrael, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterTemplateLoad(fieldsReadOnlyIsrael, [ SysLoc.ISRAEL ]);
   GEOHandler.addAddrFunction(updateAbbrevNmLocnIsrael, [ SysLoc.ISRAEL ]);
