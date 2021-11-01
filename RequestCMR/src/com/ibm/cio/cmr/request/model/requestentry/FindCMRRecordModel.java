@@ -244,7 +244,6 @@ public class FindCMRRecordModel implements Serializable, Comparable<FindCMRRecor
   private String usCmrBpAccountType;
 
   private String militaryFlag;
-  private String extWalletId;
 
   public String getCustClass() {
     return custClass;
