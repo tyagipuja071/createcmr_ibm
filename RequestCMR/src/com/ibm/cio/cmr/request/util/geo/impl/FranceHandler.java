@@ -129,14 +129,14 @@ public class FranceHandler extends GEOHandler {
                 && !zs01kunnr.equalsIgnoreCase(tempRec.getCmrSapNumber())) {
               tempRec.setCmrAddrTypeCode(CmrConstants.ADDR_TYPE.ZS02.toString());
             }
-            if (CmrConstants.ADDR_TYPE.ZD01.toString().equals(tempRec.getCmrAddrTypeCode()) && "598".equals(tempRec.getExtWalletId())) {
+            if (CmrConstants.ADDR_TYPE.ZD01.toString().equals(tempRec.getCmrAddrTypeCode()) && "598".equals(tempRec.getCmrAddrSeq())) {
               tempRec.setCmrAddrTypeCode("ZD02");
             }
 
             if (CmrConstants.ADDR_TYPE.ZP01.toString().equals(tempRec.getCmrAddrTypeCode()) && "599".equals(tempRec.getCmrAddrSeq())) {
               tempRec.setCmrAddrTypeCode("ZP02");
             }
-            if (CmrConstants.ADDR_TYPE.ZP01.toString().equals(tempRec.getCmrAddrTypeCode()) && StringUtils.isNotEmpty(tempRec.getCmrOffice())) {
+            if (CmrConstants.ADDR_TYPE.ZP01.toString().equals(tempRec.getCmrAddrTypeCode()) && StringUtils.isNotEmpty(tempRec.getExtWalletId())) {
               tempRec.setCmrAddrTypeCode("PG01");
             }
             recordsToReturn.add(tempRec);
