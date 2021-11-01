@@ -201,23 +201,6 @@ function addAfterConfigAP() {
    * 'XMKTP') FormManager.readOnly('clientTier'); else
    * FormManager.enable('clientTier'); }
    */
-    if (cntry == SysLoc.INDIA) {
-      if(custSubGrp == 'IGF'){
-         FormManager.resetDropdownValues(FormManager.getField('busnType'));
-         FormManager.setValue('busnType','000');
-         FormManager.readOnly('busnType');
-      }
-      if(custSubGrp == 'NRML'){
-        FormManager.setValue('busnType','');
-        FormManager.setValue('apCustClusterId','');
-    }
-      if(custSubGrp == 'AQSTN' || custSubGrp == 'CROSS'){
-        FormManager.setValue('apCustClusterId','');
-    }
-      if(custSubGrp == 'PRIV'){
-        FormManager.setValue('busnType','');
-    }   
-    }
     if((cntry == SysLoc.NEW_ZEALAND || cntry == SysLoc.AUSTRALIA ||cntry == SysLoc.INDONESIA || cntry == SysLoc.PHILIPPINES ||cntry == SysLoc.SINGAPORE ||cntry == SysLoc.VIETNAM || cntry == SysLoc.THAILAND || cntry == SysLoc.MALASIA) && (custSubGrp == 'ECSYS' ||custSubGrp == 'XECO' )){
         FormManager.setValue('mrcCd', '3');
         FormManager.setValue('clientTier', 'Y');
@@ -3686,8 +3669,7 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(addAfterConfigAP, GEOHandler.AP);
   GEOHandler.addAfterTemplateLoad(addAfterConfigAP, GEOHandler.AP);
-  // GEOHandler.addAfterConfig(setClusterAndProvByScenarioForIndia, [
-  // SysLoc.INDIA ]);
+  GEOHandler.addAfterConfig(setClusterAndProvByScenarioForIndia, [ SysLoc.INDIA ]);
   
   GEOHandler.addAfterConfig(updateIndustryClass, GEOHandler.AP);
   GEOHandler.addAfterConfig(updateProvCd, GEOHandler.AP);
