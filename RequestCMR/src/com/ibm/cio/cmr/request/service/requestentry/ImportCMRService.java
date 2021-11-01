@@ -696,6 +696,7 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
       addr.setBldg(cmr.getCmrBldg());
       addr.setFloor(cmr.getCmrFloor());
       addr.setOffice(cmr.getCmrOffice());
+      addr.setExtWalletId(cmr.getExtWalletId());
       addr.setDept(cmr.getCmrDept());
       if (converter != null) {
         converter.setAddressValuesOnImport(addr, admin, cmr, cmrNo);
