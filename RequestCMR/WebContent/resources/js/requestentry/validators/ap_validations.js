@@ -5,6 +5,7 @@ var _isicHandlerGCG = null;
 var _clusterHandlerGCG = null;
 var _vatExemptHandler = null;
 var _bpRelTypeHandlerGCG = null;
+var _custSubGrpHandler = null;
 
 function addHandlersForAP() {
   if (_isicHandlerAP == null) {
@@ -19,6 +20,18 @@ function addHandlersForAP() {
       setIsuOnIsic();
     });
   }
+  
+  /*
+   * if (_custSubGrpHandler == null) { _custSubGrpHandler =
+   * dojo.connect(FormManager.getField('custSubGrp'), 'onChange',
+   * function(value) { var custSubGrp =
+   * FormManager.getActualValue('custSubGrp'); if
+   * (FormManager.getActualValue('reqType') == 'C') { if (custSubGrp == 'NRML') {
+   * FormManager.setValue('busnType','');
+   * FormManager.setValue('apCustClusterId',''); } if (custSubGrp == 'AQSTN') {
+   * FormManager.setValue('apCustClusterId',''); } } }); }
+   */
+  
 }
 
 function addHandlersForGCG() {
@@ -3665,7 +3678,8 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(addAfterConfigAP, GEOHandler.AP);
   GEOHandler.addAfterTemplateLoad(addAfterConfigAP, GEOHandler.AP);
-  GEOHandler.addAfterConfig(setClusterAndProvByScenarioForIndia, [ SysLoc.INDIA ]);
+  // GEOHandler.addAfterConfig(setClusterAndProvByScenarioForIndia, [
+  // SysLoc.INDIA ]);
   
   GEOHandler.addAfterConfig(updateIndustryClass, GEOHandler.AP);
   GEOHandler.addAfterConfig(updateProvCd, GEOHandler.AP);
