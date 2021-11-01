@@ -234,7 +234,9 @@ public class CEMEAHandler extends BaseSOFHandler {
                     && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(addr.getCmrAddrTypeCode())) && "599".equals(addr.getCmrAddrSeq())) {
                   addr.setCmrAddrTypeCode("ZP03");
                 }
-                if(CEE_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry()) &&  (CmrConstants.ADDR_TYPE.ZP01.toString().equals(addr.getCmrAddrTypeCode())) && StringUtils.isNotEmpty(record.getCmrOffice())) {
+                if (CEE_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry())
+                    && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(addr.getCmrAddrTypeCode()))
+                    && StringUtils.isNotEmpty(record.getExtWalletId())) {
                   addr.setCmrAddrTypeCode("PG01");
                 }
                 if ((CmrConstants.ADDR_TYPE.ZD01.toString().equals(addr.getCmrAddrTypeCode()))) {
@@ -1270,21 +1272,21 @@ public class CEMEAHandler extends BaseSOFHandler {
     }
 
     if (!CEE_COUNTRIES_LIST.contains(currentRecord.getCmrIssuedBy())) {
-    KunnrExt addlAddDetail = getKunnrExtDetails(currentRecord.getCmrSapNumber());
-    if (addlAddDetail != null) {
-      if (SystemLocation.AUSTRIA.equals(country)) {
-        address.setBldg(addlAddDetail.getBuilding() != null ? addlAddDetail.getBuilding() : "");
-        address.setDept(addlAddDetail.getDepartment() != null ? addlAddDetail.getDepartment() : "");
-      }
+      KunnrExt addlAddDetail = getKunnrExtDetails(currentRecord.getCmrSapNumber());
+      if (addlAddDetail != null) {
+        if (SystemLocation.AUSTRIA.equals(country)) {
+          address.setBldg(addlAddDetail.getBuilding() != null ? addlAddDetail.getBuilding() : "");
+          address.setDept(addlAddDetail.getDepartment() != null ? addlAddDetail.getDepartment() : "");
+        }
 
-      if (!StringUtils.isEmpty(address.getDept())) {
-        addrDetailsList.add(address.getDept());
-      }
-      if (!StringUtils.isEmpty(address.getBldg())) {
-        addrDetailsList.add(address.getBldg());
+        if (!StringUtils.isEmpty(address.getDept())) {
+          addrDetailsList.add(address.getDept());
+        }
+        if (!StringUtils.isEmpty(address.getBldg())) {
+          addrDetailsList.add(address.getBldg());
+        }
       }
     }
-  }
   }
 
   @Override

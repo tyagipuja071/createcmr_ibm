@@ -420,6 +420,16 @@ public class RequestEntryModel extends BaseModel {
   // CMR-5910 - military flag
   private String military;
 
+  private String extWalletId;
+
+  public String getExtWalletId() {
+    return extWalletId;
+  }
+
+  public void setExtWalletId(String extWalletId) {
+    this.extWalletId = extWalletId;
+  }
+
   // canada fields
   private String invoiceDistCd;
   private String cusInvoiceCopies;
