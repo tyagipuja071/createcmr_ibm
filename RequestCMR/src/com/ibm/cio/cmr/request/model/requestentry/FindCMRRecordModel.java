@@ -24,6 +24,7 @@ public class FindCMRRecordModel implements Serializable, Comparable<FindCMRRecor
   private String cmrPostalCode;
   private int cmrResultRows;
   private String cmrCoverage;
+  private String extWalletId;
   // base cov
   private String cmrBaseCoverage;
   private String cmrRevenue;
