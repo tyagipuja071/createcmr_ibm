@@ -155,6 +155,7 @@ public class USHandler extends GEOHandler {
         address.setCmrCounty(kna1.getCounc());
         address.setCmrAddrType(kna1.getKtokd());
         address.setCmrSapNumber(kna1.getId().getKunnr());
+        address.setCmrSitePartyID(kna1.getBran5());
         addressList.add(address);
       }
     }
