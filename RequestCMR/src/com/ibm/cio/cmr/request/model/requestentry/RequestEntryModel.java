@@ -422,14 +422,6 @@ public class RequestEntryModel extends BaseModel {
 
   private String extWalletId;
 
-  public String getExtWalletId() {
-    return extWalletId;
-  }
-
-  public void setExtWalletId(String extWalletId) {
-    this.extWalletId = extWalletId;
-  }
-
   // canada fields
   private String invoiceDistCd;
   private String cusInvoiceCopies;
@@ -3101,6 +3093,14 @@ public class RequestEntryModel extends BaseModel {
 
   public void setSourceSystId(String sourceSystId) {
     this.sourceSystId = sourceSystId;
+  }
+
+  public String getExtWalletId() {
+    return extWalletId;
+  }
+
+  public void setExtWalletId(String extWalletId) {
+    this.extWalletId = extWalletId;
   }
 
 }
