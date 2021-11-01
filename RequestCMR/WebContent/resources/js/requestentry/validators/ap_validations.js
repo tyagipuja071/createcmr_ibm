@@ -18,7 +18,7 @@ function addHandlersForAP() {
       setInacByCluster();
       setIsuOnIsic();
     });
-  }
+  }  
 }
 
 function addHandlersForGCG() {
@@ -213,32 +213,6 @@ function addAfterConfigAP() {
     setIsuOnIsic();
     onInacTypeChange();
     setInacByCluster();
-  }
-}
-
-function setClusterAndProvByScenarioForIndia() {
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var role = FormManager.getActualValue('userRole').toUpperCase();
-  var reqType = FormManager.getActualValue('reqType');
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
-  if (role == 'REQUESTER' && reqType == 'C') {
-    if (cntry == '744') {
-      if(custSubGrp == 'IGF'){
-         FormManager.resetDropdownValues(FormManager.getField('busnType'));
-         FormManager.setValue('busnType','000');
-         FormManager.readOnly('busnType');
-      }
-      if(custSubGrp == 'NRML'){
-        FormManager.setValue('busnType','');
-        FormManager.setValue('apCustClusterId','');
-    }
-      if(custSubGrp == 'AQSTN' || custSubGrp == 'CROSS'){
-        FormManager.setValue('apCustClusterId','');
-    }
-      if(custSubGrp == 'PRIV'){
-        FormManager.setValue('busnType','');
-    }   
-    }
   }
 }
 
@@ -3669,7 +3643,6 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(addAfterConfigAP, GEOHandler.AP);
   GEOHandler.addAfterTemplateLoad(addAfterConfigAP, GEOHandler.AP);
-  GEOHandler.addAfterConfig(setClusterAndProvByScenarioForIndia, [ SysLoc.INDIA ]);
   
   GEOHandler.addAfterConfig(updateIndustryClass, GEOHandler.AP);
   GEOHandler.addAfterConfig(updateProvCd, GEOHandler.AP);
