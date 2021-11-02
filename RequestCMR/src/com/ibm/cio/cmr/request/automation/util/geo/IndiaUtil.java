@@ -147,6 +147,8 @@ public class IndiaUtil extends AutomationUtil {
       break;
     case SCENARIO_BLUEMIX:
     case SCENARIO_MARKETPLACE:
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
+      break;
     case SCENARIO_DUMMY:
     case SCENARIO_IGF:
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
