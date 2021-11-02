@@ -128,7 +128,7 @@ public class IsraelTransformer extends EMEATransformer {
       String dataEmbargoCd = data.getEmbargoCd();
       String rdcEmbargoCd = LegacyDirectUtil.getEmbargoCdFromDataRdc(entityManager, admin);
 
-      if (StringUtils.isNotBlank(admin.getReqReason()) && StringUtils.isNotBlank(rdcEmbargoCd) && "Y".equals(rdcEmbargoCd)) {
+      if (StringUtils.isNotBlank(admin.getReqReason()) && StringUtils.isNotBlank(rdcEmbargoCd) && "D".equals(rdcEmbargoCd)) {
         if (StringUtils.isBlank(data.getEmbargoCd()) && !CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason())) {
           legacyCust.setEmbargoCd("");
         } else if (CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason()) && StringUtils.isNotEmpty(admin.getReqStatus())
