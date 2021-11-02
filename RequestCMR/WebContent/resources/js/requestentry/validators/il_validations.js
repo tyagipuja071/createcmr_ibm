@@ -551,8 +551,8 @@ function addAddressLandedPairingValidatorBilling() {
           var record = null;
           var type = null;
           var updateInd = null;
-          var mailingLanded = '';
-          var ctyALanded = '';
+          var billingLanded = '';
+          var ctyBLanded = '';
           for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
             record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
             if (record == null && _allAddressData != null && _allAddressData[i] != null) {
@@ -564,16 +564,78 @@ function addAddressLandedPairingValidatorBilling() {
             }
 
             if (type == 'ZP01') {
-              mailingLanded = record.landCntry[0];
+              billingLanded = record.landCntry[0];
             } else if (type == 'CTYB') {
-              ctyALanded = record.landCntry[0];
+              ctyBLanded = record.landCntry[0];
             }
           }
-          if (mailingLanded != '' && ctyALanded != '') {
-            if (mailingLanded != ctyALanded) {
+          if (billingLanded != '' && ctyBLanded != '') {
+            if (billingLanded != ctyBLanded) {
               return new ValidationResult(null, false, '\'Country (Landed)\' of Billing should match Country Use B (Billing).');
             }
           }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
+function addAddressLandedPairingValidatorShipping() {
+  console.log("addAddressPairingValidatorShipping..............");
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        if (FormManager.getActualValue('cmrIssuingCntry') != '755') {
+          return new ValidationResult(null, true);
+        }
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+          var record = null;
+          var type = null;
+          var updateInd = null;
+          var shippingLanded = '';
+          var shippingSeq = '';
+          var ctyCLanded = '';
+          var ctyCPairedSeq = '';
+          var ctyCSeq = '';
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+            record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+            if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+              record = _allAddressData[i];
+            }
+            type = record.addrType;
+            if (typeof (type) == 'object') {
+              type = type[0];
+            }
+
+            if (type == 'ZD01') {
+              shippingLanded = record.landCntry[0];
+              shippingSeq = record.addrSeq[0];
+              for (var j = 0; j < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; j++) {
+                var ctyCrecord = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(j);
+                if (ctyCrecord == null && _allAddressData != null && _allAddressData[j] != null) {
+                  ctyCrecord = _allAddressData[i];
+                }
+                var ctyCtype = ctyCrecord.addrType;
+                if (typeof (ctyCtype) == 'object') {
+                  ctyCtype = ctyCtype[0];
+                }
+
+                if (ctyCtype == 'CTYC') {
+                  ctyCLanded = ctyCrecord.landCntry[0];
+                  ctyCPairedSeq = ctyCrecord.pairedSeq[0];
+                  ctyCSeq = ctyCrecord.addrSeq[0];
+
+                  if (shippingLanded != '' && ctyCLanded != '' && ctyCPairedSeq != null && shippingSeq != null && ctyCPairedSeq != '' && shippingSeq != '') {
+                    if ((ctyCPairedSeq == shippingSeq) && (shippingLanded != ctyCLanded)) {
+                      return new ValidationResult(null, false, '\'Country (Landed)\' of Shipping - (' + shippingSeq + ') should match Country Use C (Shipping) - (' + ctyCSeq + ')');
+                    }
+                  }
+                }
+              }
+            }
+          }
+
         }
         return new ValidationResult(null, true);
       }
@@ -1845,6 +1907,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addILChecklistValidator, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(addAddressLandedPairingValidatorMailing, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(addAddressLandedPairingValidatorBilling, [ SysLoc.ISRAEL ], null, true);
+  GEOHandler.registerValidator(addAddressLandedPairingValidatorShipping, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.addAfterConfig(setCapInd, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(lockDunsNo, [ SysLoc.ISRAEL ]);
 
