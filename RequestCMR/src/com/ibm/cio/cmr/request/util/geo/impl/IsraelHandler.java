@@ -642,7 +642,7 @@ public class IsraelHandler extends EMEAHandler {
         String pairedShipping = getLatestShipping(entityManager, addr.getId().getReqId());
         addr.setPairedAddrSeq(pairedShipping);
       }
-    } else {
+    } else if (!"CTYC".equals(addr.getId().getAddrType())) {
       addr.setPairedAddrSeq("");
     }
   }
