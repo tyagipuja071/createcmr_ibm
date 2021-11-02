@@ -156,9 +156,22 @@ public class USHandler extends GEOHandler {
         address.setCmrAddrType(kna1.getKtokd());
         address.setCmrSapNumber(kna1.getId().getKunnr());
         address.setCmrSitePartyID(kna1.getBran5());
-        addressList.add(address);
+        // addressList.add(address);
       }
     }
+
+    // importing extWalletId
+    String sqlRDC1 = ExternalizedQuery.getSql("KUNNR_EXT.CHECK_EXT_WALLET_ID");
+    PreparedQuery queryRDC1 = new PreparedQuery(entityManager, sqlRDC1);
+    queryRDC1.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    queryRDC1.setParameter("KUNNR", address.getCmrSapNumber());
+    queryRDC1.setForReadOnly(true);
+    String extWalletId1 = queryRDC1.getSingleResult(String.class);
+    if ("PG01".equals(address.getCmrAddrTypeCode()) && extWalletId1 != null) {
+      address.setExtWalletId(extWalletId1);
+    }
+    addressList.add(address);
+
     return addressList;
   }
 
