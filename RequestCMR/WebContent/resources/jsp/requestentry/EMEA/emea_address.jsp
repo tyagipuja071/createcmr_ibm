@@ -53,6 +53,14 @@
 </cmr:view>
 <cmr:view forCountry="755">
   <cmr:row>
+	  <cmr:column span="2">
+	    <p>
+	      <cmr:label fieldId="sapNo" cssClass="cmr-inline">
+	        <cmr:fieldLabel fieldId="SAPNumber" />:</cmr:label>
+	      <cmr:delta text="-" id="delta-sapNo" />
+	      <cmr:field fieldId="SAPNumber" id="sapNo" path="sapNo" />
+	    </p>
+	  </cmr:column>
       <cmr:column span="2">
       <p>
 	  <cmr:label fieldId="ierpSitePrtyId" cssClass="cmr-inline">
@@ -351,6 +359,7 @@
 
 
 <cmr:row topPad="10" addBackground="true">
+  <cmr:view exceptForCountry="755">
   <cmr:column span="2">
     <p>
       <cmr:label fieldId="sapNo" cssClass="cmr-inline">
@@ -359,6 +368,7 @@
       <cmr:field fieldId="SAPNumber" id="sapNo" path="sapNo" />
     </p>
   </cmr:column>
+  </cmr:view>
   <cmr:view forCountry="758,862">
   	<cmr:column span="2">
      <p>
