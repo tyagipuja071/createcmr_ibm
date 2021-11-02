@@ -1419,4 +1419,18 @@ public class IsraelHandler extends EMEAHandler {
     return null;
   }
 
+  @Override
+  public boolean checkCopyToAdditionalAddress(EntityManager entityManager, Addr copyAddr, String cmrIssuingCntry) throws Exception {
+    if (copyAddr != null && copyAddr.getId() != null) {
+      Admin adminRec = LegacyCommonUtil.getAdminByReqId(entityManager, copyAddr.getId().getReqId());
+      if (adminRec != null) {
+        boolean isCreateReq = CmrConstants.REQ_TYPE_CREATE.equals(adminRec.getReqType());
+        if (isCreateReq && copyAddr.getId().getAddrSeq().compareTo("00009") >= 0) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
 }
