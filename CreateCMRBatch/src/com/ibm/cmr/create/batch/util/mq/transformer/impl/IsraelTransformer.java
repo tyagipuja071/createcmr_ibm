@@ -56,6 +56,10 @@ public class IsraelTransformer extends EMEATransformer {
   private static final String MAIL_KEY = "ADDRMAIL";
   private static final String BILL_KEY = "ADDRBILL";
 
+  private static final String CMR_REQUEST_REASON_TEMP_REACT_EMBARGO = "TREC";
+  private static final String CMR_REQUEST_STATUS_CPR = "CPR";
+  private static final String CMR_REQUEST_STATUS_PCR = "PCR";
+
   // private static final String RIGHT_TO_LEFT_MARKER = "\u202e";
 
   /**
@@ -120,6 +124,29 @@ public class IsraelTransformer extends EMEATransformer {
 
       String cod = !StringUtils.isEmpty(data.getCreditCd()) ? data.getCreditCd() : "";
       legacyCust.setDeptCd(cod);
+
+      String dataEmbargoCd = data.getEmbargoCd();
+      String rdcEmbargoCd = LegacyDirectUtil.getEmbargoCdFromDataRdc(entityManager, admin);
+
+      if (StringUtils.isNotBlank(admin.getReqReason()) && StringUtils.isNotBlank(rdcEmbargoCd) && "Y".equals(rdcEmbargoCd)) {
+        if (StringUtils.isBlank(data.getEmbargoCd()) && !CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason())) {
+          legacyCust.setEmbargoCd("");
+        } else if (CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason()) && StringUtils.isNotEmpty(admin.getReqStatus())
+            && StringUtils.isBlank(dataEmbargoCd)) {
+          if (admin.getReqStatus().equals(CMR_REQUEST_STATUS_CPR)) {
+            legacyCust.setEmbargoCd("");
+            data.setOrdBlk("");
+            entityManager.merge(data);
+            entityManager.flush();
+          } else if (admin.getReqStatus().equals(CMR_REQUEST_STATUS_PCR)) {
+            legacyCust.setEmbargoCd(rdcEmbargoCd);
+            data.setOrdBlk("88");
+            entityManager.merge(data);
+            entityManager.flush();
+          }
+        }
+      }
+
     }
 
     for (Addr addr : cmrObjects.getAddresses()) {
