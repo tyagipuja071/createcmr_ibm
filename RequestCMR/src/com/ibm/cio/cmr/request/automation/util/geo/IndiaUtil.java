@@ -54,6 +54,8 @@ public class IndiaUtil extends AutomationUtil {
   public static final String SCENARIO_IGF = "IGF";
   public static final String SCENARIO_PRIVATE_CUSTOMER = "PRIV";
   public static final String SCENARIO_FOREIGN = "CROSS";
+  public static final String SCENARIO_BLUEMIX = "BLUMX";
+  public static final String SCENARIO_MARKETPLACE = "MKTPC";
   private static final List<String> India_LEGAL_ENDINGS = Arrays.asList("PRIVATE LIMITED", "ORGANIZATION", "ORGANISATION", "INC.", "ORG.",
       "INCORPORATE", "COMPANY", "CORP.", "CORPORATION", "LIMITED", "LTD", "PVT", "PRIVATE", "PVT LTD");
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
@@ -142,6 +144,10 @@ public class IndiaUtil extends AutomationUtil {
           }
         }
       }
+      break;
+    case SCENARIO_BLUEMIX:
+    case SCENARIO_MARKETPLACE:
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
       break;
     case SCENARIO_DUMMY:
     case SCENARIO_IGF:
