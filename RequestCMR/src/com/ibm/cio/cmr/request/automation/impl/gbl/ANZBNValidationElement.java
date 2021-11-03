@@ -63,7 +63,7 @@ public class ANZBNValidationElement extends ValidatingElement implements Company
     log.debug("Calling BNValidation Service for Req_id : " + reqId);
     try {
       try {
-        response = null;
+        response = getVatLayerInfo(admin, data);
       } finally {
         if (response == null || !response.isSuccess()) {
           details.append("Failed to Connect to ABN Service.");
@@ -139,7 +139,7 @@ public class ANZBNValidationElement extends ValidatingElement implements Company
             details.append("\nBusiness Number and Legal Name verified using ABN/NBN lookup service");
             details.append("\nCompany details from VAT Layer :");
             details.append("\nCountry Code =" + response.getRecord().getCountryCode());
-            details.append("\nBusiness Number =" + response.getRecord().getBusinessNumber());
+            details.append("\nBuisness Number =" + response.getRecord().getBusinessNumber());
             details.append("\nCompany Name =" + response.getRecord().getCompanyName());
             details.append("\nStreet =" + response.getRecord().getStreet());
             details.append("\nCity =" + response.getRecord().getCity());
@@ -163,7 +163,7 @@ public class ANZBNValidationElement extends ValidatingElement implements Company
             validation.setMessage("Business no. invalid");
             output.setDetails("The information on the request does not match the information from the service");
             output.setOnError(true);
-            engineData.addRejectionComment("OTH", "Business Number is not Valid.", "", "");
+            engineData.addRejectionComment("OTH", "Buisness Number is not Valid.", "", "");
             log.debug("The Company business number is not the same as the one on the request.");
           } else {
             // validation.setSuccess(false);
