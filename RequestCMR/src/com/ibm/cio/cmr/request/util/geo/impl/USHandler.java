@@ -95,37 +95,40 @@ public class USHandler extends GEOHandler {
         } else if ("ZP01".equals(record.getCmrAddrTypeCode()) && seqList.contains(record.getCmrAddrSeq())) {
           // set the address type to Invoice To for CreateCMR
           record.setCmrAddrTypeCode("ZI01");
-        } else if (StringUtils.isNotBlank(record.getCmrAddrSeq()) && "ZP01".equals(record.getCmrAddrTypeCode())
-            && Integer.parseInt(record.getCmrAddrSeq()) >= 200) {
-          record.setCmrAddrTypeCode("PG01");
         }
+      }
+      if (StringUtils.isNotBlank(record.getCmrAddrSeq()) && "ZP01".equals(record.getCmrAddrTypeCode())
+          && Integer.parseInt(record.getCmrAddrSeq()) >= 200) {
+        record.setCmrAddrTypeCode("PG01");
+      }
 
-        converted.add(record);
+      converted.add(record);
 
-        // move Tax Code 2 to Tax Code 1 for US
-        record.setCmrBusinessReg(record.getCmrLocalTax2());
-        record.setCmrLocalTax2(null);
+      // move Tax Code 2 to Tax Code 1 for US
+      record.setCmrBusinessReg(record.getCmrLocalTax2());
+      record.setCmrLocalTax2(null);
 
-        // do some manipulations of DATA fields here
-        if (StringUtils.isBlank(main.getCmrBusinessReg()) && !StringUtils.isBlank(record.getCmrBusinessReg())) {
-          // move the TAX code from non-Main to main
-          main.setCmrBusinessReg(record.getCmrBusinessReg());
-        }
+      // do some manipulations of DATA fields here
+      if (StringUtils.isBlank(main.getCmrBusinessReg()) && !StringUtils.isBlank(record.getCmrBusinessReg())) {
+        // move the TAX code from non-Main to main
+        main.setCmrBusinessReg(record.getCmrBusinessReg());
+      }
 
-        if (StringUtils.isEmpty(record.getCmrTier()) || CmrConstants.FIND_CMR_BLANK_CLIENT_TIER.equals(record.getCmrTier())) {
-          record.setCmrTier(CmrConstants.CLIENT_TIER_UNASSIGNED);
-        }
+      if (StringUtils.isEmpty(record.getCmrTier()) || CmrConstants.FIND_CMR_BLANK_CLIENT_TIER.equals(record.getCmrTier())) {
+        record.setCmrTier(CmrConstants.CLIENT_TIER_UNASSIGNED);
       }
     }
 
     // check if ZP01 records exist in RDC & import
-    List<FindCMRRecordModel> addressesList = null;
-    addressesList = getZP01FromRDC(entityManager, main.getCmrNum());
-    if (!addressesList.isEmpty() && addressesList.size() > 0) {
-      converted.addAll(addressesList);
-    }
+    // List<FindCMRRecordModel> record2 = source.getItems();
+    // List<FindCMRRecordModel> addressesList = null;
+    // addressesList = getZP01FromRDC(entityManager, main.getCmrNum());
+    // if (!addressesList.isEmpty() && addressesList.size() > 0) {
+    // converted.addAll(addressesList);
+    // }
     Collections.sort(converted);
     source.setItems(converted);
+
   }
 
   private List<FindCMRRecordModel> getZP01FromRDC(EntityManager entityManager, String cmrNo) {
@@ -141,7 +144,8 @@ public class USHandler extends GEOHandler {
     if (kna1List != null && !kna1List.isEmpty() && kna1List.size() > 0) {
       for (Kna1 kna1 : kna1List) {
         address = new FindCMRRecordModel();
-        address.setCmrAddrTypeCode(CmrConstants.RDC_BILL_TO);
+        // paygo billing
+        address.setCmrAddrTypeCode(CmrConstants.RDC_PAYGO_BILLING);
         address.setCmrName(kna1.getName1());
         address.setCmrName2(kna1.getName2());
         address.setCmrAddrSeq(kna1.getZzkvSeqno());
@@ -154,9 +158,11 @@ public class USHandler extends GEOHandler {
         address.setCmrCounty(kna1.getCounc());
         address.setCmrAddrType(kna1.getKtokd());
         address.setCmrSapNumber(kna1.getId().getKunnr());
+        address.setCmrSitePartyID(kna1.getBran5());
         addressList.add(address);
       }
     }
+
     return addressList;
   }
 

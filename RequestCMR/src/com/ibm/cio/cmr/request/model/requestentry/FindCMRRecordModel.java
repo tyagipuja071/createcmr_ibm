@@ -7,7 +7,8 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 import com.ibm.cio.cmr.request.CmrConstants;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonIgnoreProperties(
+    ignoreUnknown = true)
 public class FindCMRRecordModel implements Serializable, Comparable<FindCMRRecordModel> {
 
   private static final long serialVersionUID = 1L;
@@ -23,6 +24,7 @@ public class FindCMRRecordModel implements Serializable, Comparable<FindCMRRecor
   private String cmrPostalCode;
   private int cmrResultRows;
   private String cmrCoverage;
+  private String extWalletId;
   // base cov
   private String cmrBaseCoverage;
   private String cmrRevenue;
@@ -1880,6 +1882,14 @@ public class FindCMRRecordModel implements Serializable, Comparable<FindCMRRecor
 
   public void setMilitaryFlag(String militaryFlag) {
     this.militaryFlag = militaryFlag;
+  }
+
+  public String getExtWalletId() {
+    return extWalletId;
+  }
+
+  public void setExtWalletId(String extWalletId) {
+    this.extWalletId = extWalletId;
   }
 
 }

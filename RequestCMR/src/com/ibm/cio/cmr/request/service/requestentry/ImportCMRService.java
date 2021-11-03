@@ -664,6 +664,7 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
       if ("U".equals(reqModel.getReqType()) || "X".equals(reqModel.getReqType())) {
         addr.setSapNo(cmr.getCmrSapNumber());
         addr.setIerpSitePrtyId(cmr.getCmrSitePartyID()); // ierpSitePrtyId
+        addr.setExtWalletId(cmr.getExtWalletId());
         addr.setAddrStdResult("X");
         addr.setRdcCreateDt(cmr.getCmrRdcCreateDate());
         addr.setRdcLastUpdtDt(SystemUtil.getCurrentTimestamp()); // placeholder
@@ -695,6 +696,7 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
       addr.setBldg(cmr.getCmrBldg());
       addr.setFloor(cmr.getCmrFloor());
       addr.setOffice(cmr.getCmrOffice());
+      addr.setExtWalletId(cmr.getExtWalletId());
       addr.setDept(cmr.getCmrDept());
       if (converter != null) {
         converter.setAddressValuesOnImport(addr, admin, cmr, cmrNo);
