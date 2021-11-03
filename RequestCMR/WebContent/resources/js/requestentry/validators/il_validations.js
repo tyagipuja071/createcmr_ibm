@@ -1730,6 +1730,7 @@ function toggleAddressTypesForIL(cntry, addressMode, details) {
       FormManager.setValue('addrType_CTYC', true)
       setAddrFieldsBehavior();
       setCustPhone();
+      countryUseAISRAEL();
     } else {
       cmr.showNode('radiocont_ZS01');
       cmr.showNode('radiocont_ZP01');
