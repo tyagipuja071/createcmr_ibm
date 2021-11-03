@@ -121,7 +121,8 @@ public class DnBUtil {
     registerDnBVATCode("NO", 1699); // Register of Business Enterprises Number
     registerDnBVATCode("NZ", 578); // New Zealand Company Number
     registerDnBVATCode("PE", 1382); // Peruvian Sole Commercial Registry Number
-    registerDnBVATCode("AU", 17890); // Business Registration Number (Australia)
+    // registerDnBVATCode("AU", 17890); // Business Registration Number
+    // (Australia)
     registerDnBVATCode("PL", 1385); // Polish Tax Identifier
     registerDnBVATCode("PT", 11659); // Chamber Of Commerce Number
     registerDnBVATCode("PY", 1381); // Paraguayan Unique Tax Registration
