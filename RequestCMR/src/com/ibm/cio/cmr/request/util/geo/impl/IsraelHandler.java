@@ -1426,6 +1426,9 @@ public class IsraelHandler extends EMEAHandler {
       if (adminRec != null) {
         boolean isCreateReq = CmrConstants.REQ_TYPE_CREATE.equals(adminRec.getReqType());
         if (isCreateReq && copyAddr.getId().getAddrSeq().compareTo("00009") >= 0) {
+          assignPairedSeqForNewAddr(entityManager, copyAddr);
+          entityManager.merge(copyAddr);
+          entityManager.flush();
           return true;
         }
       }
