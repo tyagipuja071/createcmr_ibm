@@ -257,42 +257,6 @@ function validateEMEACopy(addrType, arrayOfTargetTypes) {
     if (!hebrewSource && (arrayOfTargetTypes.indexOf('ZS01') >= 0 || arrayOfTargetTypes.indexOf('ZP01') >= 0 || arrayOfTargetTypes.indexOf('ZD01') >= 0)) {
       return 'Cannot copy non-Hebrew address to Hebrew addresses. Please select only non-Hebrew target addresses.';
     }
-  } else if (cntry == SysLoc.GREECE) {
-    var greekSource = addrType == 'ZP01';
-    if (greekSource && custType != 'CROSS' && (arrayOfTargetTypes.indexOf('ZS01') >= 0 || arrayOfTargetTypes.indexOf('ZD01') >= 0)) {
-      return 'Cannot copy Greek address to non-Greek addresses. Please select only Greek target addresses.';
-    }
-    if (!greekSource && custType != 'CROSS' && arrayOfTargetTypes.indexOf('ZP01') >= 0) {
-      return 'Cannot copy non-Greek address to Greek addresses. Please select only non-Greek target addresses.';
-    }
-  } else if (cntry == SysLoc.ITALY) {
-    if (typeof (_allAddressData) == 'undefined' || !_allAddressData || _allAddressData.length == 0) {
-      return null;
-    }
-    if (reqType == 'C') {
-      var trg = null;
-      for (var i = 0; i < arrayOfTargetTypes.length; i++) {
-        trg = arrayOfTargetTypes[i];
-        for (var j = 0; j < _allAddressData.length; j++) {
-          console.log('Type: ' + _allAddressData[j].addrType[0] + ' Import: ' + _allAddressData[j].importInd[0]);
-          if (trg == _allAddressData[j].addrType[0] && _allAddressData[j].importInd[0] == 'Y') {
-            return 'Cannot copy to an address that cannot be modified.';
-          }
-        }
-      }
-    } else if (reqType == 'U' || reqType == 'X') {
-      var cmrNo = FormManager.getActualValue('cmrNo');
-      var trg = null;
-      for (var i = 0; i < arrayOfTargetTypes.length; i++) {
-        trg = arrayOfTargetTypes[i];
-        for (var j = 0; j < _allAddressData.length; j++) {
-          console.log('Type: ' + _allAddressData[j].addrType[0] + ' Par CMR: ' + _allAddressData[j].parCmrNo[0]);
-          if (trg == _allAddressData[j].addrType[0] && _allAddressData[j].parCmrNo[0] != cmrNo) {
-            return 'Cannot copy to an address under a different CMR No.';
-          }
-        }
-      }
-    }
   }
   return null;
 }
@@ -614,7 +578,7 @@ function addAddressLandedPairingValidatorShipping() {
               for (var j = 0; j < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; j++) {
                 var ctyCrecord = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(j);
                 if (ctyCrecord == null && _allAddressData != null && _allAddressData[j] != null) {
-                  ctyCrecord = _allAddressData[i];
+                  ctyCrecord = _allAddressData[j];
                 }
                 var ctyCtype = ctyCrecord.addrType;
                 if (typeof (ctyCtype) == 'object') {
@@ -1897,6 +1861,140 @@ function addValidatorSalesRepEnterpriseNo() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+function addPairedAddressFieldsMismatchValidatorMailing() {
+  getAddrMismatchFieldsValidationError('ZS01', 'CTYA', false);
+}
+
+function addPairedAddressFieldsMismatchValidatorBilling() {
+  getAddrMismatchFieldsValidationError('ZP01', 'CTYB', false);
+}
+
+function addPairedAddressFieldsMismatchValidatorShipping() {
+  getAddrMismatchFieldsValidationError('ZD01', 'CTYC', true);
+}
+
+function getAddrMismatchFieldsValidationError(localLangType, translatedType, isMulti) {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+          var record = null;
+          var type = null;
+          var localLangData = null;
+          var translatedData = null;
+
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+            record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+            if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+              record = _allAddressData[i];
+            }
+            type = record.addrType;
+            if (typeof (type) == 'object') {
+              type = type[0];
+            }
+
+            if (!isMulti) {
+              if (type == localLangType) {
+                localLangData = record;
+              } else if (type == translatedType) {
+                translatedData = record;
+              }
+            } else {
+              if (type == localLangType) {
+                localLangData = record;
+                translatedData = getPairedTranslatedAddrData(localLangData, translatedType);
+                var mismatchFields = getMismatchFields(localLangData, translatedData);
+                if (mismatchFields != '') {
+                  return new ValidationResult(null, false, localLangData.addrTypeText[0] + ' (' + localLangData.addrSeq[0] + ') ' + ' and ' + translatedData.addrTypeText[0] + ' ('
+                      + translatedData.addrSeq[0] + ') ' + ' mismatch, please make sure the same fields are filled.' + ' Mismatched fields: ' + mismatchFields);
+                }
+              }
+            }
+          }
+
+          var mismatchFields = getMismatchFields(localLangData, translatedData);
+          if (mismatchFields != '') {
+            return new ValidationResult(null, false, localLangData.addrTypeText[0] + ' and ' + translatedData.addrTypeText[0] + ' mismatch, please make sure the same fields are filled.'
+                + ' Mismatched fields: ' + mismatchFields);
+          }
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
+function getPairedTranslatedAddrData(localLangData, translatedType) {
+  var translatedData = null;
+
+  for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+    record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+    if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+      record = _allAddressData[i];
+    }
+    type = record.addrType;
+    if (typeof (type) == 'object') {
+      type = type[0];
+    }
+
+    if (type == translatedType) {
+      if (localLangData.addrSeq[0] == record.pairedSeq[0]) {
+        translatedData = record;
+        break;
+      }
+    }
+  }
+
+  return translatedData;
+}
+
+function getMismatchFields(localLangField, translatedField) {
+  var mismatchFields = '';
+  if (localLangField == null || translatedField == null) {
+    return mismatchFields;
+  }
+  if (!hasMatchingFieldsFilled(localLangField.addrTxt[0], translatedField.addrTxt[0])) {
+    mismatchFields += 'Street';
+  }
+  if (!hasMatchingFieldsFilled(localLangField.poBox[0], translatedField.poBox[0])) {
+    mismatchFields += mismatchFields != '' ? ', ' : '';
+    mismatchFields += 'PO BOX';
+  }
+  if (!hasMatchingFieldsFilled(localLangField.dept[0], translatedField.dept[0])) {
+    mismatchFields += mismatchFields != '' ? ', ' : '';
+    mismatchFields += 'Att. Person';
+  }
+  if (!hasMatchingFieldsFilled(localLangField.custNm1[0], translatedField.custNm1[0])) {
+    mismatchFields += mismatchFields != '' ? ', ' : '';
+    mismatchFields += 'Customer Name';
+  }
+  if (!hasMatchingFieldsFilled(localLangField.postCd[0], translatedField.postCd[0])) {
+    mismatchFields += mismatchFields != '' ? ', ' : '';
+    mismatchFields += 'Postal Code';
+  }
+  if (!hasMatchingFieldsFilled(localLangField.city1[0], translatedField.city1[0])) {
+    mismatchFields += mismatchFields != '' ? ', ' : '';
+    mismatchFields += 'City';
+  }
+  return mismatchFields;
+}
+
+function hasMatchingFieldsFilled(localLangField, translatedField) {
+  if (localLangField != '' && localLangField != null) {
+    if (translatedField == '' || translatedField == null) {
+      return false;
+    }
+  }
+
+  if (translatedField != '' && translatedField != null) {
+    if (localLangField == '' || localLangField == null) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding Israel functions...');
@@ -1922,7 +2020,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(fieldsReadOnlyIsrael, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterTemplateLoad(fieldsReadOnlyIsrael, [ SysLoc.ISRAEL ]);
   GEOHandler.addAddrFunction(updateAbbrevNmLocnIsrael, [ SysLoc.ISRAEL ]);
-  GEOHandler.registerValidator(addNameContAttnDeptValidator, [ SysLoc.ISRAEL ], null, true);
+  // GEOHandler.registerValidator(addNameContAttnDeptValidator, [ SysLoc.ISRAEL
+  // ], null, true);
   GEOHandler.addAddrFunction(addLatinCharValidator, [ SysLoc.ISRAEL ]);
   GEOHandler.addAddrFunction(addNonLatinCharValidator, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(resetSubIndustryCd, [ SysLoc.ISRAEL ]);
@@ -1936,6 +2035,10 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addAddressLandedPairingValidatorMailing, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(addAddressLandedPairingValidatorBilling, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(addAddressLandedPairingValidatorShipping, [ SysLoc.ISRAEL ], null, true);
+  GEOHandler.registerValidator(addPairedAddressFieldsMismatchValidatorMailing, [ SysLoc.ISRAEL ], null, true);
+  GEOHandler.registerValidator(addPairedAddressFieldsMismatchValidatorBilling, [ SysLoc.ISRAEL ], null, true);
+  GEOHandler.registerValidator(addPairedAddressFieldsMismatchValidatorShipping, [ SysLoc.ISRAEL ], null, true);
+
   GEOHandler.addAfterConfig(setCapInd, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(lockDunsNo, [ SysLoc.ISRAEL ]);
 
