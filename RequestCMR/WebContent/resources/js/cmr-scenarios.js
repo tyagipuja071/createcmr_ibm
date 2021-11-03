@@ -587,7 +587,8 @@ var TemplateService = (function() {
             }
           }
 
-          if ((FormManager.getActualValue('cmrIssuingCntry') == '724' || FormManager.getActualValue('cmrIssuingCntry') == '618') && name == 'enterprise') {
+          if ((FormManager.getActualValue('cmrIssuingCntry') == '724' || FormManager.getActualValue('cmrIssuingCntry') == '618' || FormManager.getActualValue('cmrIssuingCntry') == '755')
+              && name == 'enterprise') {
             // SKIP for CMR-2617 Germany
             // SKIP for CMR-2001 Austria
           } else if (name == 'enterprise' || name == 'affiliate' || name == 'company') {
