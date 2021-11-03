@@ -167,6 +167,13 @@ function addEMEALandedCountryHandler(cntry, addressMode, saving, finalSave) {
       GEOHandler.disableCopyAddress();
     }
   }
+  var issu_cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType == 'U' && FormManager.getActualValue('addrType') == 'ZS01' && (issu_cntry == SysLoc.IRELAND || issu_cntry == SysLoc.UK)) {
+    FormManager.readOnly('landCntry');
+  } else {
+    FormManager.enable('landCntry');
+  }
 }
 
 /**
@@ -9752,7 +9759,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addIRAddressTypeValidator, [ SysLoc.IRELAND ], null, true);
   GEOHandler.registerValidator(addPostCdCityValidator, [ SysLoc.IRELAND, SysLoc.UK ], null, true);
   GEOHandler.addAddrFunction(addLatinCharValidatorUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
-  //GEOHandler.registerValidator(addNameContAttnDeptValidatorUKI, [ SysLoc.IRELAND, SysLoc.UK ], null, true);
+  // GEOHandler.registerValidator(addNameContAttnDeptValidatorUKI, [
+  // SysLoc.IRELAND, SysLoc.UK ], null, true);
   GEOHandler.registerValidator(validateCompanyNoForUKI, [ SysLoc.IRELAND, SysLoc.UK ], null, true);
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.UK, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.UK ], null, true);
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.IRELAND, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.IRELAND ], null, true);
