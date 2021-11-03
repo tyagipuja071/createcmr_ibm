@@ -161,6 +161,9 @@ public class AddrRdc extends BaseEntity<AddrPK> implements Serializable {
   @Column(name = "TAX_OFFICE")
   private String taxOffice;
 
+  @Column(name = "EXT_WALLET_ID")
+  private String extWalletId;
+
   public String getBillingPstlAddr() {
     return billingPstlAddr;
   }
@@ -495,5 +498,13 @@ public class AddrRdc extends BaseEntity<AddrPK> implements Serializable {
 
   public void setHwInstlMstrFlg(String hwInstlMstrFlg) {
     this.hwInstlMstrFlg = hwInstlMstrFlg;
+  }
+
+  public String getExtWalletId() {
+    return extWalletId;
+  }
+
+  public void setExtWalletId(String extWalletId) {
+    this.extWalletId = extWalletId;
   }
 }
