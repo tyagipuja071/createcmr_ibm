@@ -1727,6 +1727,9 @@ function toggleAddressTypesForIL(cntry, addressMode, details) {
       cmr.hideNode('radiocont_CTYA');
       cmr.hideNode('radiocont_CTYB');
       cmr.showNode('radiocont_CTYC');
+      FormManager.setValue('addrType_CTYC', true)
+      setAddrFieldsBehavior();
+      setCustPhone();
     } else {
       cmr.showNode('radiocont_ZS01');
       cmr.showNode('radiocont_ZP01');
