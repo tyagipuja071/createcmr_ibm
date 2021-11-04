@@ -21,13 +21,7 @@ function addHandlersForIL() {
 
   if (_CTCHandlerIL == null) {
     _CTCHandlerIL = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
-      if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.ISRAEL) {
-        if (FormManager.getActualValue('isuCd') == '34' && FormManager.getActualValue('clientTier') == 'Y') {
-          FormManager.setValue('enterprise', '003290');
-          FormManager.setValue('salesBusOffCd', '000');
-          FormManager.setValue('repTeamMemberNo', '000651');
-        }
-      }
+      setEnterpriseSalesRepSBP();
     });
   }
 
@@ -2001,6 +1995,32 @@ function validateEnterpriseNo() {
       }
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
+function setEnterpriseSalesRepSBP() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
+
+  var isuCd = FormManager.getActualValue('isuCd');
+  var clientTier = FormManager.getActualValue('clientTier');
+
+  if (isuCd == '34' && clientTier == 'Q') {
+    FormManager.setValue('enterprise', '006510');
+    FormManager.setValue('salesBusOffCd', '006');
+    FormManager.setValue('repTeamMemberNo', '000651');
+  } else if (isuCd == '34' && clientTier == 'Y') {
+    FormManager.setValue('enterprise', '003290');
+    FormManager.setValue('salesBusOffCd', '006');
+    FormManager.setValue('repTeamMemberNo', '000651');
+  } else if (isuCd == '21' && clientTier == '7') {
+    FormManager.setValue('enterprise', '985999');
+    FormManager.setValue('salesBusOffCd', '009');
+    FormManager.setValue('repTeamMemberNo', '000993');
+  }
 }
 
 dojo.addOnLoad(function() {
