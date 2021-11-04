@@ -50,13 +50,9 @@ function addEMEALandedCountryHandler(cntry, addressMode, saving, finalSave) {
     } else {
       FilteringDropdown['val_landCntry'] = null;
     }
-  }
 
-  var landCntry = FormManager.getActualValue('landCntry');
-  if (landCntry == 'GR') {
-    var scenario = FormManager.getActualValue('custGrp');
-    if ((scenario == 'LOCAL' || FormManager.getActualValue('reqType') == 'U') && FormManager.getActualValue('addrType') == 'ZP01') {
-      GEOHandler.disableCopyAddress();
+    if (addressMode == 'updateAddress' && FormManager.getActualValue('reqType') == 'C') {
+      FormManager.setValue('landCntry', cmr.oldlandcntry);
     }
   }
 }
