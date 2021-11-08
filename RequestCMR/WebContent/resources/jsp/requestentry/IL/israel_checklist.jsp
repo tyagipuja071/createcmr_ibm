@@ -1,5 +1,6 @@
 <%@page import="com.ibm.cio.cmr.request.util.RequestUtils"%>
 <%@page import="com.ibm.cio.cmr.request.config.SystemConfiguration"%>
+<%@page import="com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel"%>
 <%@page import="org.codehaus.jackson.map.ObjectMapper"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles"%>
@@ -9,6 +10,7 @@
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 <c:set var="resourcesPath" value="${contextPath}/resources" />
 <%
+  RequestEntryModel reqentry = (RequestEntryModel) request.getAttribute("reqentry");
   Boolean readOnly = (Boolean) request.getAttribute("yourActionsViewOnly");
   if (readOnly == null) {
     readOnly = false;
@@ -116,7 +118,12 @@
   <cmr:chk-block boldText="false">
     If any of the above questions have answered 
     <span style="font-weight: bold; text-decoration: underline">YES</span>
-    , please STOP and CONTACT <span id="checklistcontact"> Israeli ERC (Yifat Siner @ NOTES ID: IJB@il.ibm.com, Yifat Singer/Israel/IBM) </span> or legal counsel for further guidance.
+    , please STOP and CONTACT <span id="checklistcontact">
+    <% if("CROSS".equals(reqentry.getCustGrp())) {
+     %> your Country ERC  <% } else {%>
+       Israeli ERC (Yifat Siner @ NOTES ID: IJB@il.ibm.com, Yifat Singer/Israel/IBM)
+     <% } %> </span>
+     or legal counsel for further guidance.
     Transactions (with customers found to be engaged in prohibited activities) may only proceed as reviewed and authorized by IBM ERC and/or STC.
   </cmr:chk-block>
  
