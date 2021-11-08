@@ -783,7 +783,8 @@ function addStreetAddressFormValidator() {
         if (FormManager.getActualValue('cmrIssuingCntry') != SysLoc.ISRAEL) {
           return new ValidationResult(null, true);
         }
-        if (FormManager.getActualValue('addrTxt') == '' && FormManager.getActualValue('poBox') == '') {
+        var addrPOBOXStreetEnabled = [ 'ZS01', 'ZP01', 'CTYA', 'CTYB' ];
+        if (addrPOBOXStreetEnabled.includes(FormManager.getActualValue('addrType')) && FormManager.getActualValue('addrTxt') == '' && FormManager.getActualValue('poBox') == '') {
           return new ValidationResult(null, false, 'Please fill-out either Street Address or PO Box.');
         }
         return new ValidationResult(null, true);
@@ -1218,6 +1219,7 @@ function setAddrFieldsBehavior() {
 
   if (addrType == 'ZD01' || addrType == 'ZI01' || addrType == 'ZS02' || addrType == 'CTYC') {
     FormManager.hide('POBox', 'poBox');
+    FormManager.clearValue('poBox');
     checkAndAddValidator('addrTxt', Validators.REQUIRED, [ 'Street' ]);
   } else {
     FormManager.show('POBox', 'poBox');
@@ -2025,7 +2027,7 @@ dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding Israel functions...');
   GEOHandler.addAddrFunction(addEMEALandedCountryHandler, GEOHandler.EMEA);
-  GEOHandler.enableCopyAddress(GEOHandler.EMEA, validateEMEACopy, [ 'ZD01', 'CTYC' ]);
+  GEOHandler.enableCopyAddress(GEOHandler.EMEA, validateEMEACopy, [ 'ZD01', 'CTYC', 'ZI01' ]);
   GEOHandler.enableCustomerNamesOnAddress(GEOHandler.EMEA);
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.EMEA);
   GEOHandler.setRevertIsicBehavior(false);
