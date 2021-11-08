@@ -125,6 +125,22 @@ public class IsraelTransformer extends EMEATransformer {
       String cod = !StringUtils.isEmpty(data.getCreditCd()) ? data.getCreditCd() : "";
       legacyCust.setDeptCd(cod);
 
+      if (!StringUtils.isEmpty(data.getEnterprise())) {
+        legacyCust.setEnterpriseNo(data.getEnterprise());
+      } else {
+        legacyCust.setEnterpriseNo("");
+      }
+
+      if (!StringUtils.isEmpty(data.getVat())) {
+        legacyCust.setVat(data.getVat());
+      } else {
+        legacyCust.setVat("");
+      }
+
+      if (StringUtils.isEmpty(data.getClientTier())) {
+        legacyCust.setIsuCd((!StringUtils.isEmpty(data.getIsuCd()) ? data.getIsuCd() : ""));
+      }
+
       String dataEmbargoCd = data.getEmbargoCd();
       String rdcEmbargoCd = LegacyDirectUtil.getEmbargoCdFromDataRdc(entityManager, admin);
 

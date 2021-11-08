@@ -529,6 +529,11 @@ public class IsraelHandler extends EMEAHandler {
               data.setCustClass(rdcData.getCustClass());
             }
           }
+
+          if (StringUtils.isEmpty(data.getIsuCd()) && !StringUtils.isEmpty(rdcData.getIsuCd())) {
+            data.setIsuCd(rdcData.getIsuCd());
+          }
+
         }
 
         if (StringUtils.isEmpty(data.getCapInd())) {
