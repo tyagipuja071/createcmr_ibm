@@ -636,7 +636,7 @@ function doAddToAddressList() {
       showEPLError = Number(zs02count) >= 1 && cmr.addressType == 'ZS02';
     }
 
-    if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.ISRAEL) {
+    if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.ISRAEL && cmr.addressMode == 'newAddress') {
       if (cmr.addressType == 'ZD01') {
         cmr.showConfirm('actualAddToAddressList()', 'Country Use C (Shipping) is required to be created after the Shipping address.');
         return;
@@ -2153,6 +2153,29 @@ function copyAddressData() {
     GEOHandler.executeAddrFuncs(true, false, true);
   }
 
+  if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.ISRAEL && targetCopyTypes.includes('ZD01')) {
+    showConfirmCopyShippingIL();
+  } else {
+    FormManager.doHiddenAction('frmCMRCopyAddrChanges', 'COPY_DATA', cmr.CONTEXT_ROOT + '/request/address/copydata.json', true, refreshAfterAddressCopy, true);
+  }
+}
+
+function showConfirmCopyShippingIL() {
+  var reqType = FormManager.getActualValue('reqType');
+  var countShipping = 0;
+  for (var a = 0; a < _allAddressData.length; a++) {
+    if (_allAddressData[a].addrType[0] == 'ZD01') {
+      countShipping++;
+    }
+  }
+  if (('C' == reqType && countShipping == 0) || ('U' == reqType && countShipping > 1)) {
+    cmr.showConfirm('copyDoHiddenAction()', 'Country Use C (Shipping) is required to be created after copying Shipping address.');
+  } else {
+    copyDoHiddenAction();
+  }
+}
+
+function copyDoHiddenAction() {
   FormManager.doHiddenAction('frmCMRCopyAddrChanges', 'COPY_DATA', cmr.CONTEXT_ROOT + '/request/address/copydata.json', true, refreshAfterAddressCopy, true);
 }
 
