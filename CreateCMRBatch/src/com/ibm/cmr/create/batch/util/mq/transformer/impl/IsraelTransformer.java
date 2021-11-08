@@ -184,10 +184,6 @@ public class IsraelTransformer extends EMEATransformer {
       legacyCust.setSalesGroupRep(data.getRepTeamMemberNo());
     }
 
-    if (StringUtils.isNotBlank(data.getRepTeamMemberNo())) {
-      legacyCust.setSalesGroupRep(data.getRepTeamMemberNo());
-    }
-
     legacyCust.getId().setSofCntryCode(SystemLocation.SAP_ISRAEL_SOF_ONLY);
 
     legacyCust.setEconomicCd("");
