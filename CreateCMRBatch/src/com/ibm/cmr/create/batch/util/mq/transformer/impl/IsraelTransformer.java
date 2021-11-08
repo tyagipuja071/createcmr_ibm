@@ -112,6 +112,11 @@ public class IsraelTransformer extends EMEATransformer {
         legacyCust.setCreditCd("90");
       }
 
+      String subtype = data.getCustGrp();
+      if (subtype.equals("LOCAL")) {
+        legacyCust.setBankNo("0");
+      }
+
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       // Update only mapping
       DataRdc dataRdc = LegacyDirectUtil.getOldData(entityManager, String.valueOf(data.getId().getReqId()));
@@ -179,7 +184,14 @@ public class IsraelTransformer extends EMEATransformer {
       legacyCust.setSalesGroupRep(data.getRepTeamMemberNo());
     }
 
+    if (StringUtils.isNotBlank(data.getRepTeamMemberNo())) {
+      legacyCust.setSalesGroupRep(data.getRepTeamMemberNo());
+    }
+
     legacyCust.getId().setSofCntryCode(SystemLocation.SAP_ISRAEL_SOF_ONLY);
+
+    legacyCust.setEconomicCd("");
+
   }
 
   private String getDB2KuklaValue(String kukla) {
