@@ -1220,7 +1220,11 @@ function setAddrFieldsBehavior() {
   if (addrType == 'ZD01' || addrType == 'ZI01' || addrType == 'ZS02' || addrType == 'CTYC') {
     FormManager.hide('POBox', 'poBox');
     FormManager.clearValue('poBox');
+    FormManager.removeValidator('addrTxt', Validators.NON_LATIN);
     checkAndAddValidator('addrTxt', Validators.REQUIRED, [ 'Street' ]);
+    if (addrType == 'ZD01') {
+      checkAndAddValidator('addrTxt', Validators.NON_LATIN, [ 'Street Address' ]);
+    }
   } else {
     FormManager.show('POBox', 'poBox');
     FormManager.removeValidator('addrTxt', Validators.REQUIRED);
@@ -2035,7 +2039,7 @@ dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding Israel functions...');
   GEOHandler.addAddrFunction(addEMEALandedCountryHandler, GEOHandler.EMEA);
-  GEOHandler.enableCopyAddress(GEOHandler.EMEA, validateEMEACopy, [ 'ZD01', 'CTYC', 'ZI01' ]);
+  GEOHandler.enableCopyAddress(GEOHandler.EMEA, validateEMEACopy, [ 'ZD01', 'ZI01' ]);
   GEOHandler.enableCustomerNamesOnAddress(GEOHandler.EMEA);
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.EMEA);
   GEOHandler.setRevertIsicBehavior(false);
