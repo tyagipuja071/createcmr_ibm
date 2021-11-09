@@ -1298,6 +1298,10 @@ function showHideKuklaField() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
 
+  if (!custSubGrp) {
+    custSubGrp = _pagemodel['custSubGrp'];
+  }
+
   /*
    * In CREATES, KUKLA is visible only for COMMERCIAL (local & cross) & BP and
    * hidden from UI for other scenarios. In UPDATES, KUKLA is visible for all
@@ -1306,6 +1310,10 @@ function showHideKuklaField() {
   if (reqType == 'C') {
     if (custSubGrp == 'COMME' || custSubGrp == 'CROSS' || custSubGrp == 'BUSPR') {
       FormManager.show('CustClass', 'custClass');
+      if (viewOnlyPage) {
+        FormManager.readOnly('custClass');
+        return;
+      }
       limitCustomerClassValues(custSubGrp);
     } else {
       FormManager.hide('CustClass', 'custClass');
