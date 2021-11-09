@@ -4427,6 +4427,7 @@ function lockIBMTabFields() {
   }
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var subGrpBPCds = [ 'BUSPR', 'CBBUS', 'DKBUS', 'ISBUS', 'FOBUS', 'GLBUS', 'FIBUS', 'LTBUS', 'LVBUS', 'EEBUS' ];
 
   reqType = FormManager.getActualValue('reqType');
 
@@ -4440,7 +4441,7 @@ function lockIBMTabFields() {
     FormManager.readOnly('repTeamMemberNo');
     FormManager.readOnly('searchTerm');
     FormManager.readOnly('dunsNo');
-    if (custSubGrp != 'BUSPR' && custSubGrp != 'CBBUS') {
+    if (!subGrpBPCds.includes(custSubGrp)) {
       FormManager.readOnly('ppsceid');
     }
   }
