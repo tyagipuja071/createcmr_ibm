@@ -4420,6 +4420,32 @@ function hideACAdminDSC() {
 }
 // CREATCMR-2674
 
+// CREATCMR-4200
+function lockIBMTabFields() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+
+  reqType = FormManager.getActualValue('reqType');
+
+  if (reqType == 'C' && role == 'REQUESTER') {
+    FormManager.readOnly('cmrNo');
+    FormManager.readOnly('cmrOwner');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('clientTier');
+    FormManager.readOnly('inacCd');
+    FormManager.readOnly('company');
+    FormManager.readOnly('repTeamMemberNo');
+    FormManager.readOnly('searchTerm');
+    FormManager.readOnly('dunsNo');
+    if (custSubGrp != 'BUSPR' && custSubGrp != 'CBBUS') {
+      FormManager.readOnly('ppsceid');
+    }
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.NORDX = [ '846', '806', '702', '678' ];
 
@@ -4457,8 +4483,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addNORDXAddressTypeValidator, GEOHandler.NORDX, null, true);
   // GEOHandler.registerValidator(addNORDXInstallingShipping, GEOHandler.NORDX,
   // null, true);
-  GEOHandler.registerValidator(addGenericVATValidator('', 'MAIN_CUST_TAB', 'frmCMR', 'ZS01'), [ SysLoc.DENMARK, SysLoc.FINLAND, SysLoc.SWEDEN,
-      SysLoc.NORWAY ], null, true);
+  GEOHandler.registerValidator(addGenericVATValidator('', 'MAIN_CUST_TAB', 'frmCMR', 'ZS01'), [ SysLoc.DENMARK, SysLoc.FINLAND, SysLoc.SWEDEN, SysLoc.NORWAY ], null, true);
   // GEOHandler.registerValidator(norwayCustomVATValidator('', 'MAIN_CUST_TAB',
   // 'frmCMR', 'ZS01'), [ SysLoc.NORWAY ], null, true);
   // GEOHandler.registerValidator(addACAdminValidator, GEOHandler.NORDX, null,
@@ -4502,5 +4527,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(searchTermValidation, GEOHandler.NORDX, null, true);
   // GEOHandler.addAfterConfig(searchTermValidation, GEOHandler.NORDX);
   // GEOHandler.addAfterTemplateLoad(searchTermValidation, GEOHandler.NORDX);
+  // CREATCMR-4200
+  GEOHandler.addAfterConfig(lockIBMTabFields, GEOHandler.NORDX);
+  GEOHandler.addAfterTemplateLoad(lockIBMTabFields, GEOHandler.NORDX);
 
 });
