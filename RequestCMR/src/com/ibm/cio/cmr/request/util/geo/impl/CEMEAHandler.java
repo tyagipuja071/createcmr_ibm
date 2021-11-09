@@ -332,6 +332,42 @@ public class CEMEAHandler extends BaseSOFHandler {
                       converted.add(installing);
                     }
                   }
+                } else {
+                  CmrtAddr gAddr = getLegacyGAddress(entityManager, reqEntry.getCmrIssuingCntry(), searchModel.getCmrNum());
+                  if (gAddr != null) {
+                    LOG.debug("Adding installing to the records");
+                    FindCMRRecordModel installing = new FindCMRRecordModel();
+                    PropertyUtils.copyProperties(installing, mainRecord);
+                    // copyAddrData(installing, installingAddr, gAddrSeq);
+                    installing.setCmrAddrTypeCode("ZP02");
+                    installing.setCmrAddrSeq(gAddrSeq);
+                    // add value
+                    installing.setCmrName1Plain(gAddr.getAddrLine1());
+                    if (!StringUtils.isBlank(gAddr.getAddrLine2())) {
+                      installing.setCmrName2Plain(gAddr.getAddrLine2());
+                    } else {
+                      installing.setCmrName2Plain("");
+                    }
+                    // installing.setCmrStreetAddress(gAddr.getAddrLine3());
+                    if (!StringUtils.isBlank(gAddr.getAddrLine3())) {
+                      installing.setCmrStreetAddress(gAddr.getAddrLine3());
+                    } else {
+                      installing.setCmrStreetAddress(gAddr.getAddrLine4());
+                    }
+                    installing.setCmrCity(record.getCmrCity());
+                    installing.setCmrCity2(record.getCmrCity2());
+                    installing.setCmrCountry(gAddr.getAddrLine6());
+                    installing.setCmrCountryLanded("");
+                    installing.setCmrPostalCode(record.getCmrPostalCode());
+                    installing.setCmrState(record.getCmrState());
+                    installing.setCmrBldg(legacyGaddrLN6);
+                    if (StringUtils.isBlank(gAddr.getAddrLine3())) {
+                      installing.setCmrStreetAddressCont("");
+                    } else {
+                      installing.setCmrStreetAddressCont(gAddr.getAddrLine4());
+                    }
+                    converted.add(installing);
+                  }
                 }
 
                 // add new here
