@@ -293,7 +293,6 @@ function scenarioHandlerForAutomation() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
 
   FormManager.setValue("inacCd", ""); // true for all scenarios
-  FormManager.readOnly("inacCd");
 
   if (reqType == 'C' && custSubGrp == 'BUSP') {
     FormManager.setValue("taxCd1", "I");
