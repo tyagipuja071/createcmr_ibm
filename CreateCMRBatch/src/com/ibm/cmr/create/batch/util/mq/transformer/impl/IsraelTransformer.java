@@ -813,41 +813,92 @@ public class IsraelTransformer extends EMEATransformer {
 
   @Override
   public void transformLegacyCustomerDataMassUpdate(EntityManager entityManager, CmrtCust cust, CMRRequestContainer cmrObjects, MassUpdtData muData) {
-
+    // Abbrev Name
     if (StringUtils.isNotBlank(muData.getAbbrevNm())) {
       cust.setAbbrevNm(muData.getAbbrevNm());
     }
-
+    // Abbrev Location
     if (StringUtils.isNotBlank(muData.getAbbrevLocn())) {
       cust.setAbbrevLocn(muData.getAbbrevLocn());
     }
-
+    // ISIC
     if (StringUtils.isNotBlank(muData.getIsicCd())) {
       cust.setIsicCd(muData.getIsicCd());
     }
-
+    // Preferred Language
+    if (StringUtils.isNotBlank(muData.getSvcArOffice())) {
+      cust.setLangCd(muData.getSvcArOffice());
+    }
+    // Tax Code
+    if (StringUtils.isNotBlank(muData.getSpecialTaxCd()) && !"@".equals(muData.getSpecialTaxCd())) {
+      cust.setTaxCd(muData.getSpecialTaxCd());
+    }
+    // Collection Code
+    if (StringUtils.isNotBlank(muData.getCollectionCd())) {
+      if ("@".equals(muData.getCollectionCd())) {
+        cust.setCollectionCd("");
+      } else {
+        cust.setCollectionCd(muData.getCollectionCd());
+      }
+    }
+    // COD Flag
+    if (StringUtils.isNotBlank(muData.getEntpUpdtTyp()) && !"@".equals(muData.getEntpUpdtTyp())) {
+      cust.setDeptCd(muData.getEntpUpdtTyp());
+    }
+    // Embargo Code
+    if (StringUtils.isNotBlank(muData.getMiscBillCd())) {
+      if ("@".equals(muData.getMiscBillCd())) {
+        cust.setEmbargoCd("");
+      } else {
+        cust.setEmbargoCd(muData.getMiscBillCd());
+      }
+    }
+    // VAT
     if (StringUtils.isNotBlank(muData.getVat())) {
       cust.setVat(muData.getVat());
     }
-
-    if (StringUtils.isNotBlank(muData.getCollectionCd())) {
-      cust.setCollectionCd(muData.getCollectionCd());
-    }
-
-    if (StringUtils.isNotBlank(muData.getEnterprise())) {
-      cust.setEnterpriseNo(muData.getEnterprise());
-    }
-
-    if (StringUtils.isNotBlank(muData.getInacCd())) {
-      cust.setInacCd(muData.getInacCd());
-    }
-
+    // ISU Code
     if (StringUtils.isNotBlank(muData.getIsuCd())) {
       cust.setIsuCd(muData.getIsuCd());
     }
-
+    // Enterprise Number
+    if (StringUtils.isNotBlank(muData.getEnterprise())) {
+      cust.setEnterpriseNo(muData.getEnterprise());
+    }
+    // SBO
+    if (StringUtils.isNotBlank(muData.getCustNm1())) {
+      cust.setSbo(muData.getCustNm1());
+    }
+    // INAC/NAC
+    if (StringUtils.isNotBlank(muData.getInacCd())) {
+      if ("@@@@".equals(muData.getInacCd())) {
+        cust.setInacCd("");
+      } else {
+        cust.setInacCd(muData.getInacCd());
+      }
+    }
+    // Sales Rep
     if (StringUtils.isNotBlank(muData.getRepTeamMemberNo())) {
       cust.setSalesRepNo(muData.getRepTeamMemberNo());
+    }
+    // Phone Number
+    if (StringUtils.isNotBlank(muData.getEmail1())) {
+      if ("@".equals(muData.getEmail1())) {
+        cust.setTelNoOrVat("");
+      } else {
+        cust.setTelNoOrVat(muData.getEmail1());
+      }
+    }
+    // KUKLA
+    String kukla = muData.getCustClass();
+    if (StringUtils.isNotBlank(kukla)) {
+      if ("71".equals(kukla)) {
+        cust.setCustType("98");
+      } else if ("33".equals(kukla)) {
+        cust.setCustType(kukla);
+      } else {
+        cust.setCustType("WR");
+      }
     }
 
     cust.setUpdateTs(SystemUtil.getCurrentTimestamp());
@@ -856,6 +907,10 @@ public class IsraelTransformer extends EMEATransformer {
   @Override
   public void transformLegacyAddressDataMassUpdate(EntityManager entityManager, CmrtAddr legacyAddr, MassUpdtAddr addr, String cntry, CmrtCust cust,
       Data data, LegacyDirectObjectContainer legacyObjects) {
+    String addrType = null;
+    if (addr.getId() != null && StringUtils.isNotBlank(addr.getId().getAddrType())) {
+      addrType = addr.getId().getAddrType();
+    }
 
     legacyAddr.setForUpdate(true);
     if (StringUtils.isNotBlank(addr.getAddrTxt())) {
@@ -870,9 +925,18 @@ public class IsraelTransformer extends EMEATransformer {
       legacyAddr.setZipCode(addr.getPostCd());
     }
 
-    if (StringUtils.isNotBlank(addr.getPoBox())) {
-      legacyAddr.setPoBox(addr.getPoBox());
+    if (StringUtils.isNotBlank(addrType)) {
+      if ("ZS01".equals(addrType) || "ZP01".equals(addrType) || "ZD01".equals(addrType)) {
+        if (StringUtils.isNotBlank(addr.getPoBox()) && !(addr.getPoBox()).contains("מ.ד")) {
+          legacyAddr.setAddrLine3(reverseNumbers(addr.getPoBox()) + " מ.ד");
+        } else {
+          legacyAddr.setAddrLine3(addr.getPoBox());
+        }
+      } else {
+        legacyAddr.setAddrLine3("PO BOX " + addr.getPoBox());
+      }
     }
+
   }
 
   @Override

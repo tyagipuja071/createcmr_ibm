@@ -1168,122 +1168,180 @@ public class IsraelHandler extends EMEAHandler {
   public void validateMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country) {
     String[] sheetNames = { "Data", "Mailing", "Billing", "Installing", "Shipping", "EPL", "Country Use A (Mailing)", "Country Use B (Billing)",
         "Country Use C (Shipping)" };
-    XSSFRow row = null;
+    List<String> dataSheetCmrList = new ArrayList<String>();
+    List<String> divCmrList = new ArrayList<String>();
+    boolean isSheetEmpty = true;
 
     for (String name : sheetNames) {
       XSSFSheet sheet = book.getSheet(name);
       LOG.debug("validating for sheet " + name);
       if (sheet != null) {
         TemplateValidation error = new TemplateValidation(name);
-        for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
-          row = sheet.getRow(rowIndex);
-          if (row == null) {
-            rowIndex = maxRows;
-          }
-
-          if (rowIndex != maxRows) {
-            // Validate CMR No
-            String cmrNo = ""; // 0
-            cmrNo = validateColValFromCell(row.getCell(0));
-            if (StringUtils.isBlank(cmrNo)) {
-              error.addError(rowIndex, "<br>CMR No.", "CMR number is required.");
-            } else if (isDivCMR(cmrNo, country)) {
-              error.addError(rowIndex, "<br>CMR No.",
-                  "Note the entered CMR number is either cancelled, divestiture or doesn't exist. Please check the template and correct.");
-            }
-
-            if (!name.equals("Data")) {
-              // Validate Addr Sequence No
-              String addrSeqNo = ""; // 1
-              addrSeqNo = validateColValFromCell(row.getCell(1));
-              if (StringUtils.isNotBlank(cmrNo) && StringUtils.isBlank(addrSeqNo)) {
-                error.addError(rowIndex, "<br>Address Seq. No.", "Address Sequence No is required.");
-              }
-
-              String localCity = ""; // 5
-              String cbCity = ""; // 6
-              String localPostalCode = ""; // 7
-              String cbPostalCode = ""; // 8
-              // validate local and cross-border city
-              localCity = validateColValFromCell(row.getCell(5));
-              cbCity = validateColValFromCell(row.getCell(6));
-              if (StringUtils.isNotBlank(localCity) && StringUtils.isNotBlank(cbCity)) {
-                error.addError(rowIndex, "<br>Local City",
-                    "Local City and Cross Border City must not be populated at the same time. If one is populated, the other must be empty.");
-              }
-
-              // validate Local and cross-border postal code
-              localPostalCode = validateColValFromCell(row.getCell(7));
-              cbPostalCode = validateColValFromCell(row.getCell(8));
-              if (StringUtils.isNotBlank(localPostalCode) && StringUtils.isNotBlank(cbPostalCode)) {
-                error.addError(rowIndex, "<br>Local Postal Code",
-                    "Local Postal Code and Cross Border Postal Code must not be populated at the same time. "
-                        + "If one is populated, the other must be empty.");
-              }
-
-              // validate hebrew addresses
-              if (name.equals("Mailing") || name.equals("Billing") || name.equals("Shipping")) {
-                // customer name
-                String custName = ""; // 2
-                if (isHebrewFieldNotBlank(row.getCell(2))) {
-                  custName = row.getCell(2).getRichStringCellValue().getString();
-                  if (!containsHebrewChar(custName)) {
-                    error.addError(rowIndex, "<br>Customer Name", name + " address Customer Name must be in Hebrew.");
-                  }
-                }
-
-                // customer name con't
-                String custNameCont = ""; // 3
-                if (isHebrewFieldNotBlank(row.getCell(3))) {
-                  custNameCont = row.getCell(3).getRichStringCellValue().getString();
-                  if (!containsHebrewChar(custNameCont)) {
-                    error.addError(rowIndex, "<br>Customer Name Continuation", name + " address Customer Name Continuation must be in Hebrew.");
-                  }
-                }
-
-                // Street
-                String street = ""; // 4
-                if (isHebrewFieldNotBlank(row.getCell(4))) {
-                  street = row.getCell(4).getRichStringCellValue().getString();
-                  if (!containsHebrewChar(street)) {
-                    error.addError(rowIndex, "<br>Street", name + " address Street must be in Hebrew.");
-                  }
-                }
-
-                // Local City
-                if (isHebrewFieldNotBlank(row.getCell(5))) {
-                  localCity = row.getCell(5).getRichStringCellValue().getString();
-                  if (!containsHebrewChar(localCity)) {
-                    error.addError(rowIndex, "<br>Local City", name + " address Local City must be in Hebrew.");
-                  }
-                }
-
-                // Cross-border City
-                if (isHebrewFieldNotBlank(row.getCell(6))) {
-                  cbCity = row.getCell(6).getRichStringCellValue().getString();
-                  if (!containsHebrewChar(cbCity)) {
-                    error.addError(rowIndex, "<br>Cross Border City", name + " address Cross Border City must be in Hebrew.");
-                  }
-                }
-              }
-            }
-          }
+        if (name.equals(sheetNames[0])) {// data sheet
+          validateDataSheet(dataSheetCmrList, divCmrList, error, sheet, maxRows, country);
+        } else {
+          validateAddressSheet(name, dataSheetCmrList, divCmrList, error, sheet, maxRows);
         }
 
         if (error.hasErrors()) {
+          isSheetEmpty = false;
           validations.add(error);
         }
-
       }
     }
-    // compare sheet with translation
-    // Mailing vs Country Use A
-    compareAddressSheets(book.getSheet(sheetNames[1]), book.getSheet(sheetNames[6]), maxRows, validations);
-    // Billing vs Country Use B
-    compareAddressSheets(book.getSheet(sheetNames[2]), book.getSheet(sheetNames[7]), maxRows, validations);
-    // Shipping vs Country Use C
-    compareAddressSheets(book.getSheet(sheetNames[4]), book.getSheet(sheetNames[8]), maxRows, validations);
 
+    if (isSheetEmpty && dataSheetCmrList.size() == 0) {
+      TemplateValidation sheetEmptyError = new TemplateValidation(sheetNames[0]);
+      sheetEmptyError.addError(1, "<br>Template File", "Mass Update file does not contain any record to update.");
+      validations.add(sheetEmptyError);
+    }
+
+  }
+
+  private void validateDataSheet(List<String> dataSheetCmrList, List<String> divCmrList, TemplateValidation error, XSSFSheet sheet, int maxRows,
+      String country) {
+    XSSFRow row = null;
+    String embargoCodes[] = { "D", "J", "@" };
+
+    for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
+      row = sheet.getRow(rowIndex);
+      if (row != null) {
+        // CMR No
+        String cmrNo = validateColValFromCell(row.getCell(0));
+        if (StringUtils.isBlank(cmrNo)) {
+          error.addError(rowIndex, "<br>CMR No.", "CMR number is required.");
+        } else if (isDivCMR(cmrNo, country)) {
+          error.addError(rowIndex, "<br>CMR No.",
+              "Note the entered CMR number is either cancelled, divestiture or doesn't exist. Please check the template and correct.");
+          divCmrList.add(cmrNo);
+        } else {
+          dataSheetCmrList.add(cmrNo);
+        }
+        // Tax Code
+        String taxCode = validateColValFromCell(row.getCell(5));
+        if (StringUtils.isNotBlank(taxCode) && "@".equals(taxCode)) {
+          error.addError(rowIndex, "<br>Tax Code", "@ value for Tax Code is not allowed.");
+        }
+        // COD Flag
+        String codFlag = validateColValFromCell(row.getCell(7));
+        if (StringUtils.isNotBlank(codFlag) && "@".equals(codFlag)) {
+          error.addError(rowIndex, "<br>COD Flag", "@ value for COD Flag is not allowed.");
+        }
+        // Embargo Code
+        String embargoCode = validateColValFromCell(row.getCell(8));
+        if (StringUtils.isNotBlank(embargoCode) && !(Arrays.asList(embargoCodes).contains(embargoCode))) {
+          error.addError(rowIndex, "<br>Embargo Code", "Invalid Embargo Code. Only D, J and @ are valid.");
+        }
+        // INAC/NAC
+        String inac = validateColValFromCell(row.getCell(14));
+        if (StringUtils.isNotBlank(inac) && StringUtils.isAlphanumeric(inac)) {
+          String firstTwoInacChar = StringUtils.substring(inac, 0, 2);
+          String lastTwoInacChar = StringUtils.substring(inac, 2);
+          if (!StringUtils.isAlpha(firstTwoInacChar) || !StringUtils.isNumeric(lastTwoInacChar)) {
+            error.addError(rowIndex, "<br>INAC/NAC", "Does not match country INAC/NAC type rules.");
+          }
+        }
+        // KUKLA
+        String isic = validateColValFromCell(row.getCell(3));
+        String kukla = validateColValFromCell(row.getCell(17));
+        if (StringUtils.isNotBlank(isic) && StringUtils.isNotBlank(kukla)) {
+          if ("9500".equals(isic) && !"60".equals(kukla)) {
+            error.addError(rowIndex, "<br>KUKLA", "KUKLA value should be 60 if ISIC is 9500.");
+          }
+        }
+      }
+    }
+  }
+
+  private void validateAddressSheet(String sheetName, List<String> dataSheetCmrList, List<String> divCmrList, TemplateValidation error,
+      XSSFSheet sheet, int maxRows) {
+    XSSFRow row = null;
+    for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
+      row = sheet.getRow(rowIndex);
+      if (row != null) {
+        // validate CMR No
+        String cmrNo = validateColValFromCell(row.getCell(0));
+        if (StringUtils.isBlank(cmrNo)) {
+          error.addError(rowIndex, "<br>CMR No.", "CMR number is required.");
+        } else if (StringUtils.isNotBlank(cmrNo) && divCmrList != null && divCmrList.contains(cmrNo)) {
+          error.addError(rowIndex, "<br>CMR No.",
+              "Note the entered CMR number is either cancelled, divestiture or doesn't exist. Please check the template and correct.");
+        } else if (StringUtils.isNotBlank(cmrNo) && dataSheetCmrList != null && !dataSheetCmrList.contains(cmrNo)) {
+          error.addError(rowIndex, "<br>CMR No.", "CMR number is not in Data sheet.");
+        }
+        // Validate Addr Sequence No
+        String addrSeqNo = validateColValFromCell(row.getCell(1));
+        if (StringUtils.isNotBlank(cmrNo) && StringUtils.isBlank(addrSeqNo)) {
+          error.addError(rowIndex, "<br>Sequence", "Address Sequence No is required.");
+        }
+        if (sheetName.equals("Mailing") || sheetName.equals("Billing") || sheetName.equals("Shipping")) {
+          // Validate Customer Name
+          if (isHebrewFieldNotBlank(row.getCell(2))) {
+            String custName = row.getCell(2).getRichStringCellValue().getString();
+            if (!containsHebrewChar(custName)) {
+              error.addError(rowIndex, "<br>Customer Name", sheetName + " Customer Name should be in Hebrew.");
+            }
+          }
+          // Validate Customer Name Con't
+          if (isHebrewFieldNotBlank(row.getCell(3))) {
+            String custNameCont = row.getCell(3).getRichStringCellValue().getString();
+            if (!containsHebrewChar(custNameCont)) {
+              error.addError(rowIndex, "<br>Customer Name Con't", sheetName + " Customer Name Continuation should be in Hebrew.");
+            }
+          }
+          // Validate Att Person
+          if (isHebrewFieldNotBlank(row.getCell(4))) {
+            String attPerson = row.getCell(4).getRichStringCellValue().getString();
+            if (!containsHebrewChar(attPerson)) {
+              error.addError(rowIndex, "<br>Att. Person", sheetName + " Attention Person should be in Hebrew.");
+            }
+          }
+          // Validate Street
+          if (isHebrewFieldNotBlank(row.getCell(5))) {
+            String street = row.getCell(5).getRichStringCellValue().getString();
+            if (!containsHebrewChar(street)) {
+              error.addError(rowIndex, "<br>Street", sheetName + " Street should be in Hebrew.");
+            }
+          }
+          // Validate Address Con't
+          if (isHebrewFieldNotBlank(row.getCell(7))) {
+            String addrCont = row.getCell(7).getRichStringCellValue().getString();
+            if (!containsHebrewChar(addrCont)) {
+              error.addError(rowIndex, "<br>Address Con't", sheetName + " Address Continuation should be in Hebrew.");
+            }
+          }
+          // Validate City
+          if (isHebrewFieldNotBlank(row.getCell(8))) {
+            String city = row.getCell(8).getRichStringCellValue().getString();
+            if (!containsHebrewChar(city)) {
+              error.addError(rowIndex, "<br>City", sheetName + " City should be in Hebrew.");
+            }
+          }
+          // Validate Postal Code
+          if (isHebrewFieldNotBlank(row.getCell(9))) {
+            String postalCd = row.getCell(9).getRichStringCellValue().getString();
+            if (postalCd.contains("מ.ד") && !StringUtils.isNumeric(StringUtils.remove(postalCd, "מ.ד"))) {
+              error.addError(rowIndex, "<br>Postal Code", sheetName + " Postal Code should be numeric.");
+            }
+          }
+        } else {// end hebrew fields
+          String postalCd = validateColValFromCell(row.getCell(9));
+          if (StringUtils.isNotBlank(postalCd) && !StringUtils.isNumeric(postalCd)) {
+            error.addError(rowIndex, "<br>Postal Code", sheetName + " Postal Code should be numeric.");
+          }
+        }
+        // Validate Postal Code
+        String postalCd = validateColValFromCell(row.getCell(9));
+        String landedCntry = validateColValFromCell(row.getCell(10));
+        if (StringUtils.isNotBlank(landedCntry) && StringUtils.isNotBlank(postalCd)) {
+          if ("IE".equals(landedCntry) && postalCd.length() != 8) {
+            error.addError(rowIndex, "<br>Postal Code", sheetName + " Postal Code should be 8 characters long.");
+          } else if ("IL".equals(landedCntry) && (postalCd.length() < 5 || postalCd.length() == 6)) {
+            error.addError(rowIndex, "<br>Postal Code", sheetName + " Postal Code should be either 5 or 7 characters long.");
+          }
+        }
+      }
+    }
   }
 
   private static boolean isDivCMR(String cmrNo, String cntry) {
