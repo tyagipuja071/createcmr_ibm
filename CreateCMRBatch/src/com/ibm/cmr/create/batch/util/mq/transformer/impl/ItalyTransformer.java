@@ -1618,159 +1618,102 @@ public class ItalyTransformer extends EMEATransformer {
   public void transformLegacyCustomerDataMassUpdate(EntityManager entityManager, CmrtCust cust, CMRRequestContainer cmrObjects, MassUpdtData muData) {
     // default mapping for DATA and CMRTCUST
     LOG.debug("IT >> Mapping default Data values..");
+
     // LegacyDirectUtil.get
-
-    if (!StringUtils.isBlank(muData.getAbbrevNm())) {
-      cust.setAbbrevNm(muData.getAbbrevNm());
-    }
-
-    if (!StringUtils.isBlank(muData.getAbbrevLocn())) {
-      cust.setAbbrevLocn(muData.getAbbrevLocn());
-    }
-
-    if (!StringUtils.isBlank(muData.getModeOfPayment())) {
-      if (DEFAULT_CLEAR_CHAR.equals(muData.getModeOfPayment().trim())) {
-        cust.setModeOfPayment("");
-      } else {
-        cust.setModeOfPayment(muData.getModeOfPayment());
+    String cntry = cust.getRealCtyCd();
+    String status = cust.getStatus();
+    if ("758".equals(cntry) && "A".equalsIgnoreCase(status)) {
+      if (!StringUtils.isBlank(muData.getAbbrevNm())) {
+        cust.setAbbrevNm(muData.getAbbrevNm());
       }
-    }
-
-    String isuClientTier = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "")
-        + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
-    if (isuClientTier != null && isuClientTier.length() == 3) {
-      cust.setIsuCd(isuClientTier);
-    }
-
-    // CMR-1110: DB2 validations Mismatch for Mass Updates
-    // if (!StringUtils.isEmpty(muData.getIsuCd())) {
-    // if (DEFAULT_CLEAR_CHAR.equals(muData.getIsuCd().trim())) {
-    // cust.setIsuCd("");
-    // } else {
-    // cust.setIsuCd(muData.getIsuCd());
-    // }
-    // }
-
-    // CMR-1334: MassUpdate: TAX code
-    // if (!StringUtils.isBlank(muData.getSpecialTaxCd())) {
-    // if (DEFAULT_CLEAR_CHAR.equals(muData.getSpecialTaxCd().trim())) {
-    // cust.setTaxCd("");
-    // } else {
-    // cust.setTaxCd(muData.getSpecialTaxCd());
-    // }
-    // }
-
-    if (!StringUtils.isBlank(muData.getRepTeamMemberNo())) {
-      cust.setSalesRepNo(muData.getRepTeamMemberNo());
-      cust.setSalesGroupRep(muData.getRepTeamMemberNo());
-
-      // CMR-1109 Setting to SBO
-      String sbo = muData.getRepTeamMemberNo().substring(2, 4);
-      cust.setSbo("0" + sbo + "B000"); // 0NMB000
-      cust.setIbo("0" + sbo + "B000");
-    }
-
-    if (!StringUtils.isBlank(muData.getEnterprise())) {
-      if (DEFAULT_CLEAR_6_CHAR.equals(muData.getEnterprise().trim())) {
-        cust.setEnterpriseNo("");
-      } else {
-        cust.setEnterpriseNo(muData.getEnterprise());
+      if (!StringUtils.isBlank(muData.getAbbrevLocn())) {
+        cust.setAbbrevLocn(muData.getAbbrevLocn());
       }
-    }
-
-    if (!StringUtils.isBlank(muData.getCustNm2())) {
-      cust.setCeBo(muData.getCustNm2());
-    }
-
-    if (!StringUtils.isBlank(muData.getIsicCd())) {
-      cust.setIsicCd(muData.getIsicCd());
-    }
-
-    // CMR-1350
-    if (!StringUtils.isBlank(muData.getVat())) {
-      if ("@".equals(muData.getVat().trim())) {
-        cust.setVat("");
-      } else {
-        cust.setVat(muData.getVat());
+      if (!StringUtils.isBlank(muData.getModeOfPayment())) {
+        if (DEFAULT_CLEAR_CHAR.equals(muData.getModeOfPayment().trim())) {
+          cust.setModeOfPayment("");
+        } else {
+          cust.setModeOfPayment(muData.getModeOfPayment());
+        }
       }
-    }
-
-    // if (!StringUtils.isBlank(muData.getCustNm1())) {
-    // cust.setSbo(muData.getCustNm1());
-    // cust.setIbo(muData.getCustNm1());
-    // }
-
-    if (!StringUtils.isBlank(muData.getInacCd())) {
-      if (DEFAULT_CLEAR_4_CHAR.equals(muData.getInacCd().trim())) {
-        cust.setInacCd("");
-      } else {
-        cust.setInacCd(muData.getInacCd());
+      String isuClientTier = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "")
+          + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
+      if (isuClientTier != null && isuClientTier.length() == 3) {
+        cust.setIsuCd(isuClientTier);
       }
-    }
 
-    if (!StringUtils.isBlank(muData.getMiscBillCd())) {
-      if (DEFAULT_CLEAR_CHAR.equals(muData.getMiscBillCd().trim())) {
-        cust.setEmbargoCd("");
-      } else {
-        cust.setEmbargoCd(muData.getMiscBillCd());
+      if (!StringUtils.isBlank(muData.getRepTeamMemberNo())) {
+        cust.setSalesRepNo(muData.getRepTeamMemberNo());
+        cust.setSalesGroupRep(muData.getRepTeamMemberNo());
       }
-    }
-
-    if (!StringUtils.isBlank(muData.getSubIndustryCd())) {
-      String subInd = muData.getSubIndustryCd();
-      cust.setImsCd(subInd);
-      // Defect 1776715: Fix for Economic code
-      String firstChar = String.valueOf(subInd.charAt(0));
-      StringBuilder builder = new StringBuilder();
-      builder.append(firstChar);
-      builder.append(subInd);
-      LOG.debug("***Auto setting Economic code as > " + builder.toString());
-      cust.setEconomicCd(builder.toString());
-    }
-
-    // DENNIS: CMR-1332: MassUpdate: Collection code
-    // if (!StringUtils.isBlank(muData.getCollectionCd())) {
-    // if (DEFAULT_CLEAR_6_CHAR.equals(muData.getCollectionCd())) {
-    // cust.setCollectionCd("");
-    // } else {
-    // cust.setCollectionCd(muData.getCollectionCd());
-    // }
-    // }
-
-    // Type of Customer : CMRTCUST.CCUAI
-    // legacyCust.setCustType(!StringUtils.isBlank(data.getCrosSubTyp()) ?
-    // data.getCrosSubTyp() : "");
-    // Type Of Customer
-    if (!StringUtils.isBlank(muData.getCurrencyCd())) {
-      if (DEFAULT_CLEAR_CHAR.equals(muData.getCurrencyCd() != null ? muData.getCurrencyCd().trim() : "")) {
-        cust.setCustType("");
-      } else {
-        cust.setCustType(muData.getCurrencyCd() != null ? muData.getCurrencyCd().trim() : "");
+      if (!StringUtils.isBlank(muData.getCustNm1())) {
+        cust.setSbo("0" + muData.getCustNm1() + "B000"); // 0NMB000
+        cust.setIbo("0" + muData.getCustNm1() + "B000");
       }
-    }
 
-    cust.setUpdateTs(SystemUtil.getCurrentTimestamp());
-    // cust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
+      if (!StringUtils.isBlank(muData.getEnterprise())) {
+        if (DEFAULT_CLEAR_6_CHAR.equals(muData.getEnterprise().trim())) {
+          cust.setEnterpriseNo("");
+        } else {
+          cust.setEnterpriseNo(muData.getEnterprise());
+        }
+      }
+
+      if (!StringUtils.isBlank(muData.getCustNm2())) {
+        cust.setCeBo(muData.getCustNm2());
+      }
+      if (!StringUtils.isBlank(muData.getIsicCd())) {
+        cust.setIsicCd(muData.getIsicCd());
+      }
+
+      // CMR-1350
+      if (!StringUtils.isBlank(muData.getVat())) {
+        if ("@".equals(muData.getVat().trim())) {
+          cust.setVat("");
+        } else {
+          cust.setVat(muData.getVat());
+        }
+      }
+
+      if (!StringUtils.isBlank(muData.getInacCd())) {
+        if (DEFAULT_CLEAR_4_CHAR.equals(muData.getInacCd().trim())) {
+          cust.setInacCd("");
+        } else {
+          cust.setInacCd(muData.getInacCd());
+        }
+      }
+
+      if (!StringUtils.isBlank(muData.getMiscBillCd())) {
+        if (DEFAULT_CLEAR_CHAR.equals(muData.getMiscBillCd().trim())) {
+          cust.setEmbargoCd("");
+        } else {
+          cust.setEmbargoCd(muData.getMiscBillCd());
+        }
+      }
+
+      if (!StringUtils.isBlank(muData.getSubIndustryCd())) {
+        String subInd = muData.getSubIndustryCd();
+        cust.setImsCd(subInd);
+        // Defect 1776715: Fix for Economic code
+        String firstChar = String.valueOf(subInd.charAt(0));
+        StringBuilder builder = new StringBuilder();
+        builder.append(firstChar);
+        builder.append(subInd);
+        LOG.debug("***Auto setting Economic code as > " + builder.toString());
+        cust.setEconomicCd(builder.toString());
+      }
+
+      // Type Of Customer
+      if (!StringUtils.isBlank(muData.getCurrencyCd())) {
+        if (DEFAULT_CLEAR_CHAR.equals(muData.getCurrencyCd() != null ? muData.getCurrencyCd().trim() : "")) {
+          cust.setCustType("");
+        } else {
+          cust.setCustType(muData.getCurrencyCd() != null ? muData.getCurrencyCd().trim() : "");
+        }
+      }
+      cust.setUpdateTs(SystemUtil.getCurrentTimestamp());
+    }
   }
-
-  // private boolean isFisCodeUsed(EntityManager entityManager, String cntry,
-  // String fisCode, String cmr) {
-  // boolean isFisCodeUsed = false;
-  // String sql =
-  // ExternalizedQuery.getSql("LD.MASS_UPDT.GET_EXISTS_FISCAL_CD_FROM_LEGACY");
-  // PreparedQuery q = new PreparedQuery(entityManager, sql);
-  // q.setParameter("CNTRY", cntry);
-  // q.setParameter("FISCOD", fisCode);
-  // q.setParameter("CMR", cmr);
-  // Object results = q.getSingleResult(Object.class);
-  //
-  // if (results != null) {
-  // String result = results.toString();
-  // isFisCodeUsed = "1".equals(result) ? true : false;
-  // }
-  //
-  // return isFisCodeUsed;
-  // }
 
   @Override
   public boolean hasCmrtCustExtErrorMessage(EntityManager entityManager, CmrtCust cust, CmrtCustExt custExt, boolean flag) {
