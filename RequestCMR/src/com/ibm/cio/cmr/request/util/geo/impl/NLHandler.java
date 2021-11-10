@@ -171,7 +171,7 @@ public class NLHandler extends BaseSOFHandler {
                     converted.add(addr);
                   }
                 }
-              } else if (sofUses.isEmpty() && "ZP01".equals(record.getCmrAddrTypeCode()) && StringUtils.isNotEmpty(intrSysId)) {
+              } else if (sofUses.isEmpty() && "ZP01".equals(record.getCmrAddrTypeCode()) && StringUtils.isNotEmpty(record.getExtWalletId())) {
                 record.setCmrAddrTypeCode("PG01");
                 addrType = record.getCmrAddrTypeCode();
                 if (!StringUtils.isEmpty(addrType)) {
