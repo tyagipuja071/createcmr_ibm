@@ -1189,6 +1189,13 @@ public class IsraelHandler extends EMEAHandler {
         }
       }
     }
+    // Compare Address and Translation
+    // Mailing vs Country Use A
+    compareAddressSheets(book.getSheet(sheetNames[1]), book.getSheet(sheetNames[6]), maxRows, validations);
+    // Billing vs Country Use B
+    compareAddressSheets(book.getSheet(sheetNames[2]), book.getSheet(sheetNames[7]), maxRows, validations);
+    // Shipping vs Country Use C
+    compareAddressSheets(book.getSheet(sheetNames[4]), book.getSheet(sheetNames[8]), maxRows, validations);
 
     if (isSheetEmpty && dataSheetCmrList.size() == 0) {
       TemplateValidation sheetEmptyError = new TemplateValidation(sheetNames[0]);
@@ -1367,11 +1374,16 @@ public class IsraelHandler extends EMEAHandler {
 
   private boolean containsHebrewChar(String str) {
     int strLen = str.length();
-    for (int i = 0; i < strLen; i++) {
-      if (Character.UnicodeBlock.HEBREW.equals(Character.UnicodeBlock.of(str.codePointAt(i)))) {
-        return true;
+    if (StringUtils.isNotBlank(str) && StringUtils.isNumeric(str)) {
+      return true;
+    } else {
+      for (int i = 0; i < strLen; i++) {
+        if (Character.UnicodeBlock.HEBREW.equals(Character.UnicodeBlock.of(str.codePointAt(i)))) {
+          return true;
+        }
       }
     }
+
     return false;
   }
 
