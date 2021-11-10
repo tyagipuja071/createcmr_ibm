@@ -1651,6 +1651,33 @@ function isVatRequired() {
   return false;
 }
 
+function addDPLChecklistAttachmentValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        if (typeof (_pagemodel) != 'undefined') {
+          if (custSubGrp == 'THDPT') {
+            var id = FormManager.getActualValue('reqId');
+            var ret = cmr.query('CHECK_DPL_CHECKLIST_ATTACHMENT', {
+              ID : id
+            });
+
+            if (ret == null || ret.ret1 == null) {
+              return new ValidationResult(null, false, 'DPL Checklist in Attachment tab is required.');
+            } else {
+              return new ValidationResult(null, true);
+            }
+
+          } else {
+            return new ValidationResult(null, true);
+          }
+        }
+      }
+    };
+  })(), 'MAIN_ATTACH_TAB', 'frmCMR');
+}
+
 function preTickVatExempt(fromAddress, scenario, scenarioChanged) {
 
   if (FormManager.getActualValue('reqType') == 'C' && scenarioChanged) {
@@ -2109,6 +2136,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addISICKUKLAValidator, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(addCollectionValidator, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(addPostalCdCityValidator, [ SysLoc.ISRAEL ], null, true);
+  GEOHandler.registerValidator(addDPLChecklistAttachmentValidator, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(addAddressGridValidatorStreetPOBox, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(validateSalesRep, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(validateEnterpriseNo, [ SysLoc.ISRAEL ], null, true);
