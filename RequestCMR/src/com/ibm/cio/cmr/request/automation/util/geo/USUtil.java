@@ -1290,11 +1290,13 @@ public class USUtil extends AutomationUtil {
 
     // US restrict to LOV mapping
     String usRestrictToLOV = "";
-    if (StringUtils.isNotBlank(usRestricTo) && "NO_VALUE_RETRIEVED".equalsIgnoreCase(usRestricTo)) {
+    if (StringUtils.isNotBlank(usRestricTo) && StringUtils.isNumeric(usRestricTo)) {
       sql = ExternalizedQuery.getSql("AUTO.US.GET_US_RESTR_TO_LOV");
       query = new PreparedQuery(entityManager, sql);
       query.setParameter("RESTRICT_TO", usRestricTo);
       usRestrictToLOV = query.getSingleResult(String.class);
+    } else {
+      usRestrictToLOV = usRestricTo;
     }
 
     // determine cust scenarios
