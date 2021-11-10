@@ -795,6 +795,7 @@ function addStreetAddressFormValidator() {
 
 function fieldsReadOnlyIsrael() {
   var custType = FormManager.getActualValue('custSubGrp');
+  var reqType = FormManager.getActualValue('reqType');
   var role = null;
 
   if (typeof (_pagemodel) != 'undefined') {
@@ -803,6 +804,9 @@ function fieldsReadOnlyIsrael() {
   if (role == 'Requester') {
     FormManager.readOnly('abbrevNm');
     FormManager.readOnly('abbrevLocn');
+    if (reqType == 'U') {
+      FormManager.readOnly('sensitiveFlag');
+    }
   } else if (role == 'Processor') {
     FormManager.enable('abbrevNm');
     FormManager.enable('abbrevLocn');
