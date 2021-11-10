@@ -1848,11 +1848,10 @@ function applyAddrChangesModal_onLoad() {
         for (var a = 0; a < _allAddressData.length; a++) {
           if (_allAddressData[a].addrType[0] == 'ZD01') {
             countShipping++;
-            break;
           }
         }
 
-        if (countShipping == 0) {
+        if ((reqType == 'C' && countShipping == 0) || (reqType == 'U' && countShipping > 1)) {
           continue;
         }
       }
