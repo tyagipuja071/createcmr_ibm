@@ -20,6 +20,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
@@ -31,9 +32,12 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.automation.util.geo.FranceUtil;
 import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation.ValidationRow;
 import com.ibm.cio.cmr.request.util.IERPRequestUtils;
+import com.ibm.cio.cmr.request.util.MessageUtil;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.at.ATUtil;
 import com.ibm.cio.cmr.request.util.geo.impl.FranceHandler;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
@@ -54,6 +58,7 @@ public class MassChangeTemplate {
   private String id;
   private String type;
   private List<TemplateTab> tabs = new ArrayList<>();
+  private static final int CMR_ROW_NO = 1;
 
   /**
    * Generates the xlsx template based on the setup of this template
@@ -97,6 +102,20 @@ public class MassChangeTemplate {
     } finally {
       book.close();
     }
+  }
+
+  private boolean isRowValid(Row row) {
+    // if row is empty, skip
+    DataFormatter df = new DataFormatter();
+    boolean hasContents = false;
+    for (Cell cell : row) {
+      String val = df.formatCellValue(cell);
+      if (val != null && !StringUtils.isEmpty(val.trim())) {
+        hasContents = true;
+        break;
+      }
+    }
+    return hasContents;
   }
 
   /**
@@ -203,6 +222,21 @@ public class MassChangeTemplate {
           validations.add(tab.validateSwiss(entityManager, book, country, maxRows, hwFlagMap));
         }
       } else if (IERPRequestUtils.isCountryDREnabled(entityManager, country)) {
+        if (SystemLocation.GERMANY.equals(country)) {
+          XSSFSheet dataSheet = book.getSheet("Data");
+          int cmrRecords = 0;
+          for (Row cmrRow : dataSheet) {
+            if (cmrRow.getRowNum() >= CMR_ROW_NO) {
+              if (isRowValid(cmrRow)) {
+                cmrRecords++;
+              }
+            }
+          }
+          // validate if has CMR No. Present in DATA Sheet
+          if (cmrRecords <= 1) {
+            throw new CmrException(MessageUtil.ERROR_MASS_FILE_CMR_NO_DATA);
+          }
+        }
         IERPRequestUtils.validateMassUpdateTemplateDupFills(validations, book, maxRows, country);
         for (TemplateTab tab : this.tabs) {
           validations.add(tab.validate(entityManager, book, country, maxRows));
