@@ -64,8 +64,9 @@ public class ANZBNValidationElement extends ValidatingElement implements Company
     try {
       try {
         response = getVatLayerInfo(admin, data);
-      } finally {
+      } catch (Exception e) {
         if (response == null || !response.isSuccess()) {
+          log.debug("Failed to connect to ABN Service. Checking ABN and Company Name with D&B.");
           details.append("Failed to Connect to ABN Service.");
           details.append("\nD&B Matching Results are:");
           List<DnBMatchingResponse> matches = getMatches(requestData, engineData, zs01, false);
