@@ -804,7 +804,11 @@ function fieldsReadOnlyIsrael() {
   if (role == 'Requester') {
     FormManager.readOnly('abbrevNm');
     FormManager.readOnly('abbrevLocn');
-    if (reqType == 'U') {
+    if (reqType == 'C') {
+      FormManager.removeValidator('salesBusOffCd', Validators.REQUIRED);
+      FormManager.removeValidator('enterprise', Validators.REQUIRED);
+      FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
+    } else if (reqType == 'U') {
       FormManager.readOnly('sensitiveFlag');
     }
   } else if (role == 'Processor') {
