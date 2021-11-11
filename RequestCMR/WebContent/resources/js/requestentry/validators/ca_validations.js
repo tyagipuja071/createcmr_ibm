@@ -8,6 +8,7 @@ var regexNumeric = /^[0-9]+$/;
 var regexAlphanumeric = /^[0-9a-zA-Z]+$/;
 var _importedIndc = null;
 var _scenarioArFaar = '';
+var _gtcAddrTypesCA = [ 'ZS01', 'ZD01', 'ZI01', 'ZP01', 'ZP02', 'ZP03' ]
 /**
  * Adds the validator for the mandatory sold to and single address types
  * 
@@ -557,6 +558,7 @@ var _custSubGrpHandler = null;
 var _pstExemptHandlers = null;
 var _postalCodeHandler = null;
 var _salesBusOffCdHandler = null;
+var _gtcAddrTypeHandlerCA = [];
 function addFieldHandlers() {
 
   if (_inacCodeHandler == null) {
@@ -612,6 +614,15 @@ function addFieldHandlers() {
     _salesBusOffCdHandler = dojo.connect(FormManager.getField('salesBusOffCd'), 'onChange', function(value) {
       setDefaultARFAARBySBO(value);
     });
+  }
+
+  for (var i = 0; i < _gtcAddrTypesCA.length; i++) {
+    _gtcAddrTypeHandlerCA[i] = null;
+    if (_gtcAddrTypeHandlerCA[i] == null) {
+      _gtcAddrTypeHandlerCA[i] = dojo.connect(FormManager.getField('addrType_' + _gtcAddrTypesCA[i]), 'onClick', function(value) {
+        setAddrFieldsValues();
+      });
+    }
   }
 
 }
@@ -1160,6 +1171,21 @@ function setDefaultARFAARByScenario(fromAddress, scenario, scenarioChanged) {
     }
     FormManager.setValue('adminDeptCd', arFaar);
     _scenarioArFaar = arFaar;
+  }
+}
+
+function setAddrFieldsValues() {
+  var addrType = FormManager.getActualValue('addrType');
+  if (addrType == 'ZP03') {
+    FormManager.setValue('addrTxt', '3600 STEELES AVE E');
+    FormManager.setValue('city1', 'MARKHAM');
+    FormManager.setValue('postCd', 'L3R 9Z7');
+    FormManager.setValue('stateProv', 'ON');
+  } else {
+    FormManager.setValue('addrTxt', '');
+    FormManager.setValue('city1', '');
+    FormManager.setValue('postCd', '');
+    FormManager.setValue('stateProv', '');
   }
 }
 
