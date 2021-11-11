@@ -919,10 +919,14 @@ public class IsraelTransformer extends EMEATransformer {
 
     if (StringUtils.isNotBlank(addr.getCity1())) {
       legacyAddr.setCity(addr.getCity1());
+    } else if (StringUtils.isNotBlank(addr.getCustNm1()) && StringUtils.isBlank(addr.getCity1())) {
+      legacyAddr.setCity("");
     }
 
     if (StringUtils.isNotBlank(addr.getPostCd())) {
       legacyAddr.setZipCode(addr.getPostCd());
+    } else if (StringUtils.isNotBlank(addr.getCustNm1()) && StringUtils.isBlank(addr.getPostCd())) {
+      legacyAddr.setZipCode("");
     }
 
     if (StringUtils.isNotBlank(addrType)) {
@@ -933,7 +937,11 @@ public class IsraelTransformer extends EMEATransformer {
           legacyAddr.setAddrLine3(addr.getPoBox());
         }
       } else {
-        legacyAddr.setAddrLine3("PO BOX " + addr.getPoBox());
+        if (StringUtils.isNotBlank(addr.getPoBox())) {
+          legacyAddr.setAddrLine3("PO BOX " + addr.getPoBox());
+        } else if (StringUtils.isNotBlank(addr.getCustNm1()) && StringUtils.isBlank(addr.getPoBox())) {
+          legacyAddr.setAddrLine3("");
+        }
       }
     }
 

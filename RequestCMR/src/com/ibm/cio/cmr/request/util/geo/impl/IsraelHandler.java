@@ -52,6 +52,10 @@ import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.legacy.LegacyCommonUtil;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
+import com.ibm.cmr.services.client.CmrServicesFactory;
+import com.ibm.cmr.services.client.ValidatorClient;
+import com.ibm.cmr.services.client.validator.PostalCodeValidateRequest;
+import com.ibm.cmr.services.client.validator.ValidationResult;
 import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
 
 /**
@@ -1170,6 +1174,7 @@ public class IsraelHandler extends EMEAHandler {
         "Country Use C (Shipping)" };
     List<String> dataSheetCmrList = new ArrayList<String>();
     List<String> divCmrList = new ArrayList<String>();
+    HashMap<String, HashMap<String, String>> postalCdValidationCache = new HashMap<String, HashMap<String, String>>();
     boolean isSheetEmpty = true;
 
     for (String name : sheetNames) {
@@ -1180,7 +1185,7 @@ public class IsraelHandler extends EMEAHandler {
         if (name.equals(sheetNames[0])) {// data sheet
           validateDataSheet(dataSheetCmrList, divCmrList, error, sheet, maxRows, country);
         } else {
-          validateAddressSheet(name, dataSheetCmrList, divCmrList, error, sheet, maxRows);
+          validateAddressSheet(name, dataSheetCmrList, divCmrList, error, sheet, maxRows, postalCdValidationCache);
         }
 
         if (error.hasErrors()) {
@@ -1261,7 +1266,7 @@ public class IsraelHandler extends EMEAHandler {
   }
 
   private void validateAddressSheet(String sheetName, List<String> dataSheetCmrList, List<String> divCmrList, TemplateValidation error,
-      XSSFSheet sheet, int maxRows) {
+      XSSFSheet sheet, int maxRows, HashMap<String, HashMap<String, String>> postalCdValidationCache) {
     XSSFRow row = null;
     for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
       row = sheet.getRow(rowIndex);
@@ -1281,6 +1286,9 @@ public class IsraelHandler extends EMEAHandler {
         if (StringUtils.isNotBlank(cmrNo) && StringUtils.isBlank(addrSeqNo)) {
           error.addError(rowIndex, "<br>Sequence", "Address Sequence No is required.");
         }
+        // Validate required fields
+        validateAddrRequiredFields(row, error, sheetName);
+
         if (sheetName.equals("Mailing") || sheetName.equals("Billing") || sheetName.equals("Shipping")) {
           // Validate Customer Name
           if (isHebrewFieldNotBlank(row.getCell(2))) {
@@ -1324,30 +1332,100 @@ public class IsraelHandler extends EMEAHandler {
               error.addError(rowIndex, "<br>City", sheetName + " City should be in Hebrew.");
             }
           }
+        } // end validate Mailing Billing Shipping hebrew fields
           // Validate Postal Code
-          if (isHebrewFieldNotBlank(row.getCell(9))) {
-            String postalCd = row.getCell(9).getRichStringCellValue().getString();
-            if (postalCd.contains("מ.ד") && !StringUtils.isNumeric(StringUtils.remove(postalCd, "מ.ד"))) {
-              error.addError(rowIndex, "<br>Postal Code", sheetName + " Postal Code should be numeric.");
-            }
-          }
-        } else {// end hebrew fields
-          String postalCd = validateColValFromCell(row.getCell(9));
-          if (StringUtils.isNotBlank(postalCd) && !StringUtils.isNumeric(postalCd)) {
-            error.addError(rowIndex, "<br>Postal Code", sheetName + " Postal Code should be numeric.");
-          }
-        }
-        // Validate Postal Code
         String postalCd = validateColValFromCell(row.getCell(9));
         String landedCntry = validateColValFromCell(row.getCell(10));
-        if (StringUtils.isNotBlank(landedCntry) && StringUtils.isNotBlank(postalCd)) {
-          if ("IE".equals(landedCntry) && postalCd.length() != 8) {
-            error.addError(rowIndex, "<br>Postal Code", sheetName + " Postal Code should be 8 characters long.");
-          } else if ("IL".equals(landedCntry) && (postalCd.length() < 5 || postalCd.length() == 6)) {
-            error.addError(rowIndex, "<br>Postal Code", sheetName + " Postal Code should be either 5 or 7 characters long.");
+        if (StringUtils.isNotBlank(postalCd) && StringUtils.isNotBlank(landedCntry)) {
+          // Check postalCode cache
+          boolean isLandCountryInCache = postalCdValidationCache.containsKey(landedCntry);
+          if (isLandCountryInCache && postalCdValidationCache.get(landedCntry).containsKey(postalCd)
+              && !(postalCdValidationCache.get(landedCntry).get(postalCd)).equals("")) {
+            error.addError(rowIndex, "<br>Postal Code.", postalCdValidationCache.get(landedCntry).get(postalCd));
+          } else if (!isLandCountryInCache || (isLandCountryInCache && !postalCdValidationCache.get(landedCntry).containsKey(postalCd))) {
+            try {
+              ValidationResult validation = checkPostalCode(landedCntry, postalCd);
+              if (!validation.isSuccess()) {
+                error.addError(rowIndex, "<br>Postal Code.", validation.getErrorMessage());
+                // put invalid postal code in cache
+                if (isLandCountryInCache) {
+                  (postalCdValidationCache.get(landedCntry)).put(postalCd, validation.getErrorMessage());
+                } else {
+                  HashMap<String, String> postalCdValErrorMap = new HashMap<String, String>();
+                  postalCdValErrorMap.put(postalCd, validation.getErrorMessage());
+                  postalCdValidationCache.put(landedCntry, postalCdValErrorMap);
+                }
+              }
+            } catch (Exception e) {
+              LOG.error("Error occured on connecting postal code validation service.");
+              e.printStackTrace();
+            }
           }
         }
       }
+    }
+  }
+
+  private void validateAddrRequiredFields(XSSFRow row, TemplateValidation error, String sheetName) {
+    // Check required fields
+    boolean checkRequiredFields = false;
+    if (row != null) {
+      for (int i = 2; i <= 10; i++) {
+        if (isHebrewFieldNotBlank(row.getCell(i))) {
+          checkRequiredFields = true;
+          break;
+        }
+      }
+
+      if (checkRequiredFields) {
+        if (!isHebrewFieldNotBlank(row.getCell(2))) {
+          error.addError(row.getRowNum(), "<br>Customer Name", "Customer Name is required when updating " + sheetName + " address.");
+        }
+        if (!isHebrewFieldNotBlank(row.getCell(5))) {
+          error.addError(row.getRowNum(), "<br>Street", "Street is required when updating " + sheetName + " address.");
+        }
+        if (!isHebrewFieldNotBlank(row.getCell(10))) {
+          error.addError(row.getRowNum(), "<br>Landed Country", "Landed Country is required when updating " + sheetName + " address.");
+        }
+
+        if (sheetName.equals("Mailing") || sheetName.equals("Billing") || sheetName.equals("Country Use A (Mailing)")
+            || sheetName.equals("Country Use B (Billing)")) {
+          if (!isHebrewFieldNotBlank(row.getCell(6))) {
+            error.addError(row.getRowNum(), "<br>PO Box", "PO Box is required when updating " + sheetName + " address.");
+          }
+        } else { // Installing, Shipping, EPL and Country Use C
+          if (!isHebrewFieldNotBlank(row.getCell(8))) {
+            error.addError(row.getRowNum(), "<br>City", "City is required when updating " + sheetName + " address.");
+          }
+        }
+        // Validate Address Con't
+        if (isHebrewFieldNotBlank(row.getCell(7)) && !isHebrewFieldNotBlank(row.getCell(5))) {
+          error.addError(row.getRowNum(), "<br>Address Con't", "Address Con't can only be filled if Street is filled.");
+        }
+      }
+    }
+
+  }
+
+  private static ValidationResult checkPostalCode(String landedCountry, String postalCode) throws Exception {
+    String baseUrl = SystemConfiguration.getValue("CMR_SERVICES_URL");
+    String mandt = SystemConfiguration.getValue("MANDT");
+
+    PostalCodeValidateRequest zipRequest = new PostalCodeValidateRequest();
+    zipRequest.setMandt(mandt);
+    zipRequest.setPostalCode(postalCode);
+    zipRequest.setSysLoc(SystemLocation.ISRAEL);
+    zipRequest.setCountry(landedCountry);
+
+    LOG.debug("Validating Postal Code " + postalCode + " for landedCountry " + landedCountry + " (mandt: " + mandt + " sysloc: 755" + ")");
+
+    ValidatorClient client = CmrServicesFactory.getInstance().createClient(baseUrl, ValidatorClient.class);
+    try {
+      ValidationResult validation = client.executeAndWrap(ValidatorClient.POSTAL_CODE_APP_ID, zipRequest, ValidationResult.class);
+      return validation;
+    } catch (Exception e) {
+      LOG.error("Error in postal code validation", e);
+      return null;
     }
   }
 
