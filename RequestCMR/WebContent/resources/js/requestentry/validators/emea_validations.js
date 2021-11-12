@@ -6517,9 +6517,9 @@ function setVATOnIdentClientChangeIT() {
       FormManager.readOnly('vat');
       FormManager.setValue('vat', '');
       FormManager.resetValidations('vat');
-    }  } else if ((ident == 'A' || ident == 'D' || ident == 'C') && checkImportIndc == 'Y') {
+    } else if ((ident == 'A' || ident == 'D' || ident == 'C') && checkImportIndc == 'Y') {
       FormManager.readOnly('vat');
-    }     
+    }
 
   }
 
