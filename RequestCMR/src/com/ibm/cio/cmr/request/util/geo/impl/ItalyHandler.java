@@ -1591,9 +1591,9 @@ public class ItalyHandler extends BaseSOFHandler {
         }
       }
     }
-    if (BILLING_ADDR_TYPE.equals(chosenType) || INSTALLING_ADDR_TYPE.equals(chosenType)) {
+    if ((BILLING_ADDR_TYPE.equals(chosenType) || INSTALLING_ADDR_TYPE.equals(chosenType)) && "impBill".equals(reqEntry.getLockByNm())) {
       // when installing is chosen, company and billing will be imported
-      LOG.debug("Intsalling was chosen, also importing billing");
+      LOG.debug("Installing was chosen, also importing billing");
 
       boolean billingFound = false;
       FindCMRRecordModel billing = null;
@@ -1641,6 +1641,7 @@ public class ItalyHandler extends BaseSOFHandler {
           }
         }
       }
+      reqEntry.setLockByNm("");
       converted.add(billing);
     }
 
@@ -1653,7 +1654,7 @@ public class ItalyHandler extends BaseSOFHandler {
         FindCMRRecordModel installing = new FindCMRRecordModel();
         PropertyUtils.copyProperties(installing, mainRecord);
         copyAddrData(installing, installingAddr);
-        // installing.setParentCMRNo(mainRecord.getCmrNum());
+        installing.setParentCMRNo(mainRecord.getCmrNum());
         converted.add(installing);
         // do a dummy import based on the installing
       }

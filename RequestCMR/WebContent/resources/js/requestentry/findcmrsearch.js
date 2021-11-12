@@ -282,6 +282,24 @@ function continueCreateCMR() {
   FormManager.setValue('reqType', 'C');
   FormManager.setValue('enterCMRNo', '');
   importCMRs(result.data.cmrNum, result.data.issuedBy, result.data.issuedByDesc);
+  if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.ITALY) {
+    cmr.showConfirm('importOnlyCompany()', 'Do you want to create a new Billing Address or use the Billing CMR ' + result.data.cmrNum + '?', null, 'importBillingCompany()', {
+      OK : 'Create New',
+      CANCEL : 'Use Existing'
+    });
+  }
+}
+
+function importOnlyCompany() {
+  var result = cmr.currentCmrResult;
+  FormManager.setValue('lockByNm', '');
+  importCMRs(result.data.cmrNum, result.data.issuedBy, result.data.issuedByDesc);
+}
+
+function importBillingCompany() {
+  var result = cmr.currentCmrResult;
+  FormManager.setValue('lockByNm', 'impBill');
+  importCMRs(result.data.cmrNum, result.data.issuedBy, result.data.issuedByDesc);
 }
 
 /**
