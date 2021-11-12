@@ -6091,6 +6091,7 @@ function getOldValuesIT(fromAddress, scenario, scenarioChanged) {
     var custSubType = scenario;
     var reqId = FormManager.getActualValue('reqId');
     var checkImportIndc = getImportedIndcForItaly();
+    var addrType = FormManager.getActualValue('addrType');
     if (_oldISUIT == "" && _oldCTCIT == "") {
       var result = cmr.query("GET.CMRINFO.IMPORTED", {
         REQ_ID : reqId
@@ -6485,6 +6486,7 @@ function setVATOnIdentClientChangeIT() {
   var ident = FormManager.getActualValue('identClient');
   var landCntry = FormManager.getActualValue('landCntry');
   var role = FormManager.getActualValue('userRole').toUpperCase();
+  var checkImportIndc = getImportedIndcForItaly();
 
   if (ident != '') {
     if (ident == 'B') {
@@ -6515,7 +6517,9 @@ function setVATOnIdentClientChangeIT() {
       FormManager.readOnly('vat');
       FormManager.setValue('vat', '');
       FormManager.resetValidations('vat');
-    }
+    }  } else if ((ident == 'A' || ident == 'D' || ident == 'C') && checkImportIndc == 'Y') {
+      FormManager.readOnly('vat');
+    }     
 
   }
 
