@@ -636,7 +636,7 @@ function doAddToAddressList() {
       showEPLError = Number(zs02count) >= 1 && cmr.addressType == 'ZS02';
     }
 
-    if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.ISRAEL && cmr.addressMode == 'newAddress') {
+    if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.ISRAEL && (cmr.addressMode == 'newAddress' || cmr.addressMode == 'copyAddress')) {
       if (cmr.addressType == 'ZD01') {
         cmr.showConfirm('actualAddToAddressList()', 'Country Use C (Shipping) is required to be created after the Shipping address.');
         return;
@@ -1856,6 +1856,9 @@ function applyAddrChangesModal_onLoad() {
         }
       }
 
+      if (SysLoc.ISRAEL == cntry && reqType == 'U' && FormManager.getActualValue('addrType') == 'ZD01' && type.ret1 == 'ZD01') {
+        continue;
+      }
       if (type.ret3 == cntry) {
         useCntry = true;
       }
