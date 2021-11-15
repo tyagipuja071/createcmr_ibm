@@ -1644,8 +1644,9 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(restrictDuplicateAddr, GEOHandler.NL, null, true);
   GEOHandler.registerValidator(rdcDupZP01Check, GEOHandler.NL, null, true);
   GEOHandler.registerValidator(rdcDupZP01CheckValidator, GEOHandler.NL, null, true);
-  GEOHandler.addAfterConfig(resetVATValidationsForPayGo, GEOHandler.NL);
-  GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, GEOHandler.NL);
+  // GEOHandler.addAfterConfig(resetVATValidationsForPayGo, GEOHandler.NL);
+  // GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo,
+  // GEOHandler.NL);
   GEOHandler.registerValidator(addIGFZP02Validator, GEOHandler.NL, null, true);
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.NL, null, true);
 });
