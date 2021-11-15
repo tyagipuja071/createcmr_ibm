@@ -14,6 +14,10 @@ import javax.persistence.EntityManager;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.ibm.cio.cmr.request.CmrConstants;
@@ -25,6 +29,7 @@ import com.ibm.cio.cmr.request.entity.CmrCloningQueue;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.entity.KunnrExt;
+import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.model.requestentry.ImportCMRModel;
@@ -53,7 +58,7 @@ public class DEHandler extends GEOHandler {
 
   private static final Logger LOG = Logger.getLogger(DEHandler.class);
   private static final List<String> IERP_ISSUING_COUNTRY_VAL = Arrays.asList("724");
-
+  protected static final String[] MT_MASS_UPDATE_SHEET_NAMES = { "Data", "Sold To", "Bill To", "Install-At", "Ship-To" };
   private static final String[] DE_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "LocalTax1", "LocalTax2", "SitePartyID", "Division", "POBoxCity", "CustFAX",
       "City2", "Affiliate", "Company", "INACType", "TransportZone", "Office", "Floor" };
 
@@ -689,7 +694,192 @@ public class DEHandler extends GEOHandler {
 
   @Override
   public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
-    return false;
+    if ("724".equals(issuingCountry)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  @Override
+  public void validateMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country) {
+
+    XSSFCell currCell = null;
+    for (String name : MT_MASS_UPDATE_SHEET_NAMES) {
+      XSSFSheet sheet = book.getSheet(name);
+      if (sheet != null) {
+        TemplateValidation error = new TemplateValidation(name);
+        for (Row row : sheet) {
+          if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
+           
+            String cmrNo = ""; // 0
+           
+            // Address Sheet
+            String seqNo = ""; // 1
+            String custName1 = ""; // 2
+            String name2 = ""; // 3
+            String name3 = ""; // 4
+            String name4 = ""; // 5
+            String deptExt = ""; // 6
+            String BuildingExt = ""; // 7
+            String street = ""; // 8
+            String poBox = ""; // 9
+            String city = "";// 10
+            String postalCode = ""; // 11
+            String landCntry = ""; // 12
+            String phone = "";// 13
+
+            // Data Sheet
+            String cmrNodata = "";
+            String isic = ""; // 3
+            String vat = ""; // 4
+            String sbo = ""; // 5
+            String classificationCd = ""; // 10
+            String inac = ""; // 8
+            String ordBlk = ""; // 11
+
+            if (row.getRowNum() == 2001) {
+              continue;
+            }
+
+            String rowNumber = "Row" + row.getRowNum() + ": ";
+
+            if (!"Data".equalsIgnoreCase(sheet.getSheetName())) {
+              // iterate all the rows and check each column value
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(1);
+              seqNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(2);
+              custName1 = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(3);
+              name2 = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(4);
+              name3 = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(5);
+              name4 = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(6);
+              deptExt = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(7);
+              BuildingExt = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(8);
+              street = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(9);
+              poBox = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(10);
+              city = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(11);
+              postalCode = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(12);
+              landCntry = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(13);
+              phone = validateColValFromCell(currCell);
+
+              if (!StringUtils.isBlank(cmrNo) && !StringUtils.isBlank(seqNo)) {
+                if (StringUtils.isBlank(custName1)) {
+                  LOG.trace("Customer Name is mandatory");
+                  error.addError(row.getRowNum(), "Customer Name", "Customer Name is mandatory.");
+                }
+
+                if (StringUtils.isBlank(street)) {
+                  LOG.trace("Street is mandatory");
+                  error.addError(row.getRowNum(), "Street", "Street is mandatory.");
+                }
+
+                if (StringUtils.isBlank(city)) {
+                  LOG.trace("City is mandatory");
+                  error.addError(row.getRowNum(), "City", "City is mandatory.");
+                }
+
+                if (StringUtils.isBlank(landCntry)) {
+                  LOG.trace("Landed Country is mandatory");
+                  error.addError(row.getRowNum(), "Landed Country", "Landed Country is mandatory.");
+                }
+
+                if (StringUtils.isBlank(postalCode)) {
+                  LOG.trace("Postal code is mandatory.");
+                  error.addError(row.getRowNum(), "Postal Code", "Postal code is mandatory.");
+                }
+              }
+
+              if ((!StringUtils.isBlank(cmrNo) && StringUtils.isBlank(seqNo) && !"Data".equalsIgnoreCase(sheet.getSheetName()))
+                  || (StringUtils.isBlank(cmrNo) && !StringUtils.isBlank(seqNo) && !"Data".equalsIgnoreCase(sheet.getSheetName()))) {
+                LOG.trace("Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
+                error.addError(row.getRowNum(), "Address Sequence No.",
+                    "Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
+                // validations.add(error);
+              }
+
+            } else if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNodata = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(2);
+              isic = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(3);
+              vat = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(4);
+              sbo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(7);
+              inac = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(9);
+              classificationCd = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(10);
+              ordBlk = validateColValFromCell(currCell);
+
+              if (!StringUtils.isBlank(isic) && !StringUtils.isBlank(classificationCd)
+                  && ((!"9500".equals(isic) && "60".equals(classificationCd)) || ("9500".equals(isic) && !"60".equals(classificationCd)))) {
+                LOG.trace(
+                    "Note that ISIC value 9500 can be entered only for CMR with Classification code 60. Please fix and upload the template again.");
+                error.addError(row.getRowNum(), "Classification Code",
+                    "Note that ISIC value 9500 can be entered only for CMR with Classification code 60. Please fix and upload the template again.");
+                // validations.add(error);
+              }
+
+              if (!StringUtils.isBlank(inac) && inac.length() == 4 && !StringUtils.isNumeric(inac) && !"@@@@".equals(inac)
+                  && !inac.matches("^[a-zA-Z][a-zA-Z][0-9][0-9]$") && !inac.matches("^[a-zA-Z][0-9][0-9][0-9]$")) {
+                LOG.trace("INAC should have all 4 digits or 2 letters and 2 digits or 1 letter and 3 digits in order.");
+                error.addError(row.getRowNum(), "INAC/NAC",
+                    "INAC should have all 4 digits or 2 letters and 2 digits or 1 letter and 3 digits in order.");
+              }
+
+              if (!StringUtils.isBlank(sbo) && !StringUtils.isAlphanumeric(sbo)) {
+                LOG.trace("Enter valid values for SBO/Search Term.");
+                error.addError(row.getRowNum(), "SBO/Search Term", "Enter valid values for SBO/Search Term");
+              }
+
+              if (!StringUtils.isBlank(ordBlk) && !("88".equals(ordBlk) || "94".equals(ordBlk) || "@".equals(ordBlk))) {
+                LOG.trace("Note that value of Order block can only be 88 or 94 or @ or blank. Please fix and upload the template again.");
+                error.addError(row.getRowNum(), "Order block",
+                    "Note that value of Order block can only be 88 or 94 or @ or blank. Please fix and upload the template again.");
+                // validations.add(error);
+              }
+            }
+          }
+        } // end row loop
+        if (error.hasErrors()) {
+          validations.add(error);
+        }
+      }
+    }
   }
 
   @Override

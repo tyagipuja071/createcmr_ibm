@@ -1379,8 +1379,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     if (CmrConstants.REQ_TYPE_MASS_UPDATE.equals(model.getReqType()) && PageManager.fromGeo("EMEA", cmrIssuingCntry)) {
       performMassUpdateValidationsEMEA(model, entityManager, request);
     }
-    if (CmrConstants.REQ_TYPE_MASS_UPDATE.equals(model.getReqType())
-        && (CNDHandler.isCNDCountry(cmrIssuingCntry) || DEHandler.isIERPCountry(cmrIssuingCntry))) {
+    if (CmrConstants.REQ_TYPE_MASS_UPDATE.equals(model.getReqType()) && CNDHandler.isCNDCountry(cmrIssuingCntry)) {
       performMassUpdateValidationsDECND(model, entityManager, request);
     } else if (JPHandler.isJPIssuingCountry(cmrIssuingCntry)) {
       performMassUpdateJP(model, entityManager, request);
@@ -1840,7 +1839,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                     throw new CmrException(MessageUtil.ERROR_MASS_FILE);
                   }
                   log.info("mass update file validated");
-                } else if (DEHandler.isIERPCountry(cmrIssuingCntry) || CNDHandler.isCNDCountry(cmrIssuingCntry)) {
+                } else if (CNDHandler.isCNDCountry(cmrIssuingCntry)) {
                   if (!validateMassUpdateFileDECND(item.getInputStream(), data, admin)) {
                     throw new CmrException(MessageUtil.ERROR_MASS_FILE);
                   }
@@ -1950,7 +1949,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                   List<MassUpdateModel> modelList = new ArrayList<>();
                   if (PageManager.fromGeo("EMEA", cmrIssuingCntry)) {
                     setMassUpdateListEMEA(modelList, item.getInputStream(), reqId, newIterId, filePath);
-                  } else if (DEHandler.isIERPCountry(cmrIssuingCntry) || CNDHandler.isCNDCountry(cmrIssuingCntry)) {
+                  } else if (CNDHandler.isCNDCountry(cmrIssuingCntry)) {
                     setMassUpdateListDECND(modelList, item.getInputStream(), reqId, newIterId, filePath);
                   } else if (LAHandler.isLACountry(cmrIssuingCntry)) {
                     setMassUpdateListLA(modelList, item.getInputStream(), reqId, newIterId, filePath);
@@ -4598,22 +4597,18 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
           validations = template.validate(em, is, country, 2000);
           LOG.debug(new ObjectMapper().writeValueAsString(validations));
           for (TemplateValidation validation : validations) {
-            for (ValidationRow row : validation.getRows()) {
-              if (!row.isSuccess()) {
-                // if (StringUtils.isEmpty(errTxt.toString())) {
-                errTxt.append("Tab name :" + validation.getTabName() + ", " + row.getError());
-                // } else {
-                // errTxt.append("\nTab name :" + validation.getTabName() + ", "
-                // +
-                // row.getError());
-                // }
+            if (validation.hasErrors()) {
+              if (StringUtils.isEmpty(errTxt.toString())) {
+                errTxt.append("Tab name :" + validation.getTabName() + ", " + validation.getAllError());
+              } else {
+                errTxt.append("\nTab name :" + validation.getTabName() + ", " + validation.getAllError());
               }
             }
           }
         }
 
         if (!StringUtils.isEmpty(errTxt.toString())) {
-          throw new Exception(new ObjectMapper().writeValueAsString(errTxt.toString()));
+          throw new Exception(errTxt.toString());
         }
 
         try (InputStream is = new ByteArrayInputStream(bookBytes)) {
@@ -4626,7 +4621,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       } catch (Exception e) {
 
         LOG.error(e.getMessage());
-        LOG.error("An error occurred in validating Malta Mass Update File.");
+        LOG.error("An error occurred in validating DR Mass Update File.");
         // return false;
 
         throw new Exception(e.getMessage());
@@ -4703,7 +4698,6 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     }
 
   }
-
 
   public boolean validateSWISSMassUpdateFile(String path, Data data, Admin admin) throws Exception {
     List<Boolean> isErr = new ArrayList<Boolean>();
@@ -4907,7 +4901,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                     throw new CmrException(MessageUtil.ERROR_MASS_FILE);
                   }
                   log.info("mass update file validated");
-                } else if (DEHandler.isIERPCountry(cmrIssuingCntry) || CNDHandler.isCNDCountry(cmrIssuingCntry)) {
+                } else if (CNDHandler.isCNDCountry(cmrIssuingCntry)) {
                   if (!validateMassUpdateFileDECND(item.getInputStream(), data, admin)) {
                     throw new CmrException(MessageUtil.ERROR_MASS_FILE);
                   }
