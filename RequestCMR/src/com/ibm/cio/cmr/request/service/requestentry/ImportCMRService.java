@@ -5,6 +5,7 @@ package com.ibm.cio.cmr.request.service.requestentry;
 
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -57,7 +58,6 @@ import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.RequestUtils;
-import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.CNHandler;
@@ -647,10 +647,17 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
         addrPk.setAddrSeq((seq + 1) + "");
         seqMap.put(type, new Integer(seq + 1));
       }
-      if ("618".equals(reqModel.getCmrIssuingCntry()) && "C".equals(reqModel.getReqType())) {
-        addrPk.setAddrSeq(cmr.getCmrAddrSeq());
-      }
-      if (SystemLocation.UNITED_STATES.equals(reqModel.getCmrIssuingCntry()) && CmrConstants.RDC_BILL_TO.equals(type)) {
+      // if ("618".equals(reqModel.getCmrIssuingCntry()) &&
+      // "C".equals(reqModel.getReqType())) {
+      // addrPk.setAddrSeq(cmr.getCmrAddrSeq());
+      // }
+      // if (SystemLocation.UNITED_STATES.equals(reqModel.getCmrIssuingCntry())
+      // && CmrConstants.RDC_BILL_TO.equals(type)) {
+      // addrPk.setAddrSeq(cmr.getCmrAddrSeq());
+      // }
+
+      if (Arrays.asList("897", "866", "754", "618", "624", "788", "706", "848").contains(reqModel.getCmrIssuingCntry())
+          && ("C".equals(reqModel.getReqType()) || "U".equals(reqModel.getReqType()))) {
         addrPk.setAddrSeq(cmr.getCmrAddrSeq());
       }
 

@@ -893,7 +893,7 @@ public abstract class AutomationUtil {
     }
     if (payGoAddredited) {
       if (addrToCheck.getExtWalletId() != null) {
-        query.append(" and lower(EXT_WALLET_ID) like lower(:EXT_WALLET_ID)");
+        query.append(" and EXT_WALLET_ID = :EXT_WALLET_ID");
         query.setParameter("EXT_WALLET_ID", addrToCheck.getExtWalletId());
       }
     }
