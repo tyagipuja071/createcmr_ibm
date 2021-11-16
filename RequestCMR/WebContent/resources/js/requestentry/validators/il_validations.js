@@ -794,6 +794,10 @@ function addStreetAddressFormValidator() {
 }
 
 function fieldsReadOnlyIsrael() {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
   var custType = FormManager.getActualValue('custSubGrp');
   var reqType = FormManager.getActualValue('reqType');
   var role = null;
@@ -801,21 +805,32 @@ function fieldsReadOnlyIsrael() {
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
   }
-  if (role == 'Requester') {
-    FormManager.readOnly('abbrevNm');
-    FormManager.readOnly('abbrevLocn');
-    if (reqType == 'C') {
+
+  if (reqType == 'C') {
+    if (role == 'Requester') {
+      FormManager.readOnly('abbrevNm');
+      FormManager.readOnly('abbrevLocn');
+
+      FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
+      FormManager.removeValidator('abbrevLocn', Validators.REQUIRED);
+
       FormManager.removeValidator('salesBusOffCd', Validators.REQUIRED);
       FormManager.removeValidator('enterprise', Validators.REQUIRED);
       FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
-    } else if (reqType == 'U') {
-      FormManager.readOnly('sensitiveFlag');
+    } else if (role == 'Processor') {
+      FormManager.enable('abbrevNm');
+      FormManager.enable('abbrevLocn');
     }
-  } else if (role == 'Processor') {
+  } else if (reqType == 'U') {
     FormManager.enable('abbrevNm');
     FormManager.enable('abbrevLocn');
-  }
 
+    if (role == 'Requester') {
+      FormManager.readOnly('sensitiveFlag');
+    } else if (role == 'Processor') {
+
+    }
+  }
   if (custType == 'PRICU') {
     FormManager.resetValidations('vat');
     FormManager.readOnly('vat');
