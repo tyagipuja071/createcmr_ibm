@@ -1132,6 +1132,7 @@ function addPostlCdLogic(cntry, addressMode, details) {
 }
 
 function setDefaultARFAARBySBO(sboValue) {
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (sboValue != '') {
     if (_scenarioArFaar != '') {
       FormManager.setValue('adminDeptCd', _scenarioArFaar);
@@ -1147,6 +1148,9 @@ function setDefaultARFAARBySBO(sboValue) {
     if (results != null && results.ret1 != '' && results.ret1 != undefined) {
       FormManager.setValue('adminDeptCd', results.ret1);
     } else {
+      if (custSubGrp == 'KYND') {
+        return;
+      }
       FormManager.setValue('adminDeptCd', '120V');
     }
   }
@@ -1154,7 +1158,7 @@ function setDefaultARFAARBySBO(sboValue) {
 
 function setDefaultARFAARByScenario(fromAddress, scenario, scenarioChanged) {
   var isCmrImported = getImportedIndc();
-  if (FormManager.getActualValue('reqType') == 'C' && isCmrImported == 'Y' && scenarioChanged && (scenario == 'COMME' || scenario == 'GOVT')) {
+  if (FormManager.getActualValue('reqType') == 'C' && isCmrImported == 'Y' && scenarioChanged && (scenario == 'COMME' || scenario == 'GOVT' || scenario == 'KYND')) {
     return;
   }
 
