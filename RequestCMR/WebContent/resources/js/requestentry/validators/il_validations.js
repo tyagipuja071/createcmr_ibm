@@ -178,18 +178,6 @@ function addILChecklistValidator() {
         if (_prolifCountries.includes(landCntry)) {
           prolif = true;
         }
-        var prolifInst = false;
-        var qParams2 = {
-          REQ_ID : zs01ReqId,
-        };
-        var result2 = cmr.query('ADDR.GET.ZI01LAND.BY_REQID', qParams2);
-        landCntry2 = result2.ret1;
-        if (_prolifCountries.includes(landCntry2)) {
-          prolifInst = true;
-        }
-        if (custSubScnrio == 'THDPT' && !prolifInst) {
-          return;
-        }
         if (custSubScnrio == 'CROSS' && !prolif) {
           return;
         }
