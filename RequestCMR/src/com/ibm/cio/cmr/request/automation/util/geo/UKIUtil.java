@@ -390,7 +390,7 @@ public class UKIUtil extends AutomationUtil {
 
   @Override
   public boolean addressExists(EntityManager entityManager, Addr addrToCheck, RequestData requestData) {
-
+    boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, requestData.getAdmin().getSourceSystId());
     String sql = ExternalizedQuery.getSql("AUTO.UKI.CHECK_IF_ADDRESS_EXIST");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", addrToCheck.getId().getReqId());
@@ -444,6 +444,12 @@ public class UKIUtil extends AutomationUtil {
       query.setParameter("COUNTY", addrToCheck.getCounty());
     }
 
+    if (payGoAddredited) {
+      if (addrToCheck.getExtWalletId() != null) {
+        query.append(" and EXT_WALLET_ID = :EXT_WALLET_ID");
+        query.setParameter("EXT_WALLET_ID", addrToCheck.getExtWalletId());
+      }
+    }
     return query.exists();
   }
 

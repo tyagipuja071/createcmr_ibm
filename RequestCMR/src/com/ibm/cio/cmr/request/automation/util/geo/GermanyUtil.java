@@ -615,10 +615,12 @@ public class GermanyUtil extends AutomationUtil {
     boolean isNegativeCheckNeedeed = false;
     boolean isInstallAtExistOnReq = false;
     boolean isBillToExistOnReq = false;
+    boolean isPayGoBillToExistOnReq = false;
     boolean isShipToExistOnReq = false;
     Addr installAt = requestData.getAddress("ZI01");
     Addr billTo = requestData.getAddress("ZP01");
     Addr shipTo = requestData.getAddress("ZD01");
+    Addr payGoBillTo = requestData.getAddress("PG01");
     String details = StringUtils.isNotBlank(output.getDetails()) ? output.getDetails() : "";
     StringBuilder detail = new StringBuilder(details);
     long reqId = requestData.getAdmin().getId().getReqId();
@@ -707,7 +709,22 @@ public class GermanyUtil extends AutomationUtil {
         }
       }
 
-      if (isNegativeCheckNeedeed || isShipToExistOnReq || isInstallAtExistOnReq || isBillToExistOnReq) {
+      if (payGoBillTo != null && (changes.isAddressChanged("PG01") || isAddressAdded(payGoBillTo))) {
+        // Check If Address already exists on request
+        isPayGoBillToExistOnReq = addressExists(entityManager, payGoBillTo, requestData);
+        if (isPayGoBillToExistOnReq) {
+          detail.append(" PayGo Billing details provided matches an existing address.");
+          engineData.addRejectionComment("OTH", "PayGo Billing details provided matches an existing address.", "", "");
+          LOG.debug("PayGo Billing details provided matches an existing address.");
+          output.setOnError(true);
+          validation.setSuccess(false);
+          validation.setMessage("Not validated");
+          output.setDetails(detail.toString());
+          output.setProcessOutput(validation);
+          return true;
+        }
+      }
+      if (isNegativeCheckNeedeed || isShipToExistOnReq || isInstallAtExistOnReq || isBillToExistOnReq || isPayGoBillToExistOnReq) {
         validation.setSuccess(false);
         validation.setMessage("Not validated");
         engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updated elements cannot be checked automatically.");

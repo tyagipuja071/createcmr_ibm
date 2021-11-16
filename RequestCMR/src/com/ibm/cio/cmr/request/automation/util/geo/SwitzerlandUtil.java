@@ -57,7 +57,7 @@ public class SwitzerlandUtil extends AutomationUtil {
   private static final String SCENARIO_CROSS_BORDER = "XCHCM";
 
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
-      CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO);
+      CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO, CmrConstants.RDC_PAYGO_BILLING);
 
   private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Building", "Floor", "Department", "PostBox", "Att. Person",
       "Phone #", "FAX", "Customer Name 4");
@@ -206,6 +206,9 @@ public class SwitzerlandUtil extends AutomationUtil {
               if (CmrConstants.RDC_SHIP_TO.equals(addrType)) {
                 LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
                 checkDetails.append("Addition of new ZD01 (" + addr.getId().getAddrSeq() + ") address skipped in the checks.\n");
+              } else if (CmrConstants.RDC_PAYGO_BILLING.equals(addrType)) {
+                LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+                checkDetails.append("Addition of new PG01 (" + addr.getId().getAddrSeq() + ") address validated in the checks.\n");
               } else {
                 List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addr, false);
                 boolean matchesDnb = false;
@@ -416,7 +419,7 @@ public class SwitzerlandUtil extends AutomationUtil {
     }
     if (payGoAddredited) {
       if (addrToCheck.getExtWalletId() != null) {
-        query.append(" and lower(EXT_WALLET_ID) like lower(:EXT_WALLET_ID)");
+        query.append(" and EXT_WALLET_ID = :EXT_WALLET_ID)");
         query.setParameter("EXT_WALLET_ID", addrToCheck.getExtWalletId());
       }
     }
