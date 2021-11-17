@@ -127,8 +127,9 @@ public class IsraelTransformer extends EMEATransformer {
         }
       }
 
-      String cod = !StringUtils.isEmpty(data.getCreditCd()) ? data.getCreditCd() : "";
-      legacyCust.setDeptCd(cod);
+      if (!StringUtils.isEmpty(data.getCreditCd())) {
+        legacyCust.setDeptCd(data.getCreditCd());
+      }
 
       if (!StringUtils.isEmpty(data.getEnterprise())) {
         legacyCust.setEnterpriseNo(data.getEnterprise());
