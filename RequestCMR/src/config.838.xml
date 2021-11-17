@@ -29,13 +29,12 @@
           <label>Collection Code</label>
           <dbColumn>COLLECTION_CD</dbColumn>
           <width>30</width>
-          <lovId>CollectionCd</lovId>
+          <length>2</length>
         </column>
         <column>
           <label>Tax Code</label>
           <dbColumn>SPECIAL_TAX_CD</dbColumn>
           <width>30</width>
-          <lovId>SpecialTaxCd</lovId>
         </column>
         <column>
           <label>Mailing Condition</label>
@@ -51,7 +50,7 @@
           <width>30</width>
         </column>
          -->
-        <column exactLength="true">
+        <column>
           <label>Enterprise Number</label>
           <dbColumn>ENTERPRISE</dbColumn>
           <width>30</width>
@@ -81,11 +80,11 @@
           <width>20</width>
           <lovId>SalesBusOff2</lovId>
         </column>
-        <column>
+        <column exactLength="true">
           <label>Sales Rep. No.</label>
           <dbColumn>REP_TEAM_MEMBER_NO</dbColumn>
           <width>30</width>
-          <lovId>SalRepNameNo</lovId>
+          <length>6</length>
         </column>
         <column>
           <label>Embargo Code</label>
