@@ -1378,7 +1378,7 @@ public class MCOPtEsHandler extends MCOHandler {
               validations.add(error);
             }
 
-            if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
+            if ("Data".equalsIgnoreCase(sheet.getSheetName()) && !country.equals(SystemLocation.SPAIN)) {
               if (!StringUtils.isBlank(dataEnterpriseNo) && !dataEnterpriseNo.equals("@@@@@@")) {
                 if (!StringUtils.isNumeric(dataEnterpriseNo)) {
                   LOG.trace("Enterprise Number should have numeric values only.");
@@ -1388,6 +1388,57 @@ public class MCOPtEsHandler extends MCOHandler {
               }
             }
 
+            if (country.equals(SystemLocation.SPAIN)) {
+              for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
+                String collectionCd = null;
+                String salesRep = null;
+                String enterprise = null;
+                row = sheet.getRow(rowIndex);
+                if (row == null) {
+                  return; // stop immediately when row is blank
+                }
+                if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
+                  currCell = (XSSFCell) row.getCell(4);
+                  collectionCd = validateColValFromCell(currCell);
+                  currCell = (XSSFCell) row.getCell(7);
+                  enterprise = validateColValFromCell(currCell);
+                  currCell = (XSSFCell) row.getCell(12);
+                  salesRep = validateColValFromCell(currCell);
+                }
+
+                if ((!("@").equals(collectionCd)) && (!StringUtils.isEmpty(collectionCd))) {
+                  if (collectionCd.length() == 2 && !collectionCd.chars().allMatch(Character::isLetterOrDigit)) {
+                    LOG.trace("Collection code should be exactly 2 characters (alphanumeric). Please fix and upload the template again.");
+                    error.addError(rowIndex, "Collection Code",
+                        "Collection code should be exactly 2 characters (alphanumeric). Please fix and upload the template again.");
+                  } else if (collectionCd.length() != 2) {
+                    LOG.trace("Collection code should be exactly 2 characters. Please fix and upload the template again.");
+                    error.addError(rowIndex, "Collection Code",
+                        "Collection code should be exactly 2 characters. Please fix and upload the template again.");
+                  }
+                }
+
+                if ((!("@").equals(enterprise)) && (!StringUtils.isEmpty(enterprise))) {
+                  if (enterprise.length() == 6 && !enterprise.chars().allMatch(Character::isLetterOrDigit)) {
+                    LOG.trace("Enterprise Number should be exactly 6 characters (alphanumeric). Please fix and upload the template again.");
+                    error.addError(rowIndex, "Enterprise Number",
+                        "Enterprise Number should be exactly 6 characters (alphanumeric). Please fix and upload the template again.");
+                  } else if (enterprise.length() != 6) {
+                    LOG.trace("Enterprise Number should be exactly 6 characters. Please fix and upload the template again.");
+                    error.addError(rowIndex, "Enterprise Number",
+                        "Enterprise Number should be exactly 6 characters. Please fix and upload the template again.");
+                  }
+                }
+
+                if (!StringUtils.isEmpty(salesRep)) {
+                  if (salesRep.length() == 6 && !(salesRep.chars().allMatch(Character::isLetterOrDigit))) {
+                    LOG.trace("Sales Rep. No. should be alphanumeric. Please fix and upload the template again.");
+                    error.addError(rowIndex, "Sales Rep. No.", "Sales Rep. No. should be alphanumeric. Please fix and upload the template again.");
+                  }
+                }
+                validations.add(error);
+              }
+            }
           }
         }
       }
