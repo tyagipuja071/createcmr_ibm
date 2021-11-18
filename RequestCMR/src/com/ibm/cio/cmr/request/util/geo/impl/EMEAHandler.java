@@ -4644,4 +4644,9 @@ public class EMEAHandler extends BaseSOFHandler {
     return zd01count;
   }
 
+  @Override
+  public boolean setAddrSeqByImport(AddrPK addrPk, EntityManager entityManager, FindCMRResultModel result) {
+    return true;
+  }
+
 }
