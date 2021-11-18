@@ -5,7 +5,6 @@ package com.ibm.cio.cmr.request.service.requestentry;
 
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -656,8 +655,15 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
       // addrPk.setAddrSeq(cmr.getCmrAddrSeq());
       // }
 
-      if (Arrays.asList("897", "866", "754", "618", "624", "788", "706", "848").contains(reqModel.getCmrIssuingCntry())
-          && ("C".equals(reqModel.getReqType()) || "U".equals(reqModel.getReqType()))) {
+      // if (Arrays.asList("897", "866", "754", "618", "624", "788", "706",
+      // "848").contains(reqModel.getCmrIssuingCntry())
+      // && ("C".equals(reqModel.getReqType()) ||
+      // "U".equals(reqModel.getReqType()))) {
+      // addrPk.setAddrSeq(cmr.getCmrAddrSeq());
+      // }
+
+      GEOHandler geoHandler = RequestUtils.getGEOHandler(reqModel.getCmrIssuingCntry());
+      if (geoHandler.setAddrSeqByImport(addrPk, entityManager, result) && ("C".equals(reqModel.getReqType()) || "U".equals(reqModel.getReqType()))) {
         addrPk.setAddrSeq(cmr.getCmrAddrSeq());
       }
 
