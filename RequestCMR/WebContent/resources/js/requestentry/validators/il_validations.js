@@ -2144,6 +2144,78 @@ function checkCmrUpdateBeforeImport() {
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
 
+function lockUnlockSalesRepEnterpriseSBO() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+
+  if (role == 'PROCESSOR') {
+    FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [ 'Sales Rep' ], 'MAIN_IBM_TAB');
+    FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise Number' ], 'MAIN_IBM_TAB');
+    FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SBO' ], 'MAIN_IBM_TAB');
+  }
+}
+function setSalesRepEnterpriseNoSBO(fromAddress, scenario, scenarioChanged) {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType != 'C') {
+    return;
+  }
+  if (reqType == 'C' && scenarioChanged) {
+
+    switch (scenario.toUpperCase()) {
+    case 'BUSPR':
+      FormManager.setValue('repTeamMemberNo', '000993');
+      FormManager.setValue('enterprise', '985999');
+      FormManager.setValue('salesBusOffCd', '009');
+      break;
+    case 'COMME':
+      FormManager.setValue('repTeamMemberNo', '000651');
+      FormManager.setValue('enterprise', '006510');
+      FormManager.setValue('salesBusOffCd', '006');
+      break;
+    case 'GOVRN':
+      FormManager.setValue('repTeamMemberNo', '000651');
+      FormManager.setValue('enterprise', '006510');
+      FormManager.setValue('salesBusOffCd', '006');
+      break;
+    case 'INTER':
+      FormManager.setValue('repTeamMemberNo', '000993');
+      FormManager.setValue('enterprise', '985999');
+      FormManager.setValue('salesBusOffCd', '009');
+      break;
+    case 'INTSO':
+      FormManager.setValue('repTeamMemberNo', '000993');
+      FormManager.setValue('enterprise', '985999');
+      FormManager.setValue('salesBusOffCd', '009');
+      break;
+    case 'PRIPE':
+      FormManager.setValue('repTeamMemberNo', '000651');
+      FormManager.setValue('enterprise', '006510');
+      FormManager.setValue('salesBusOffCd', '006');
+      break;
+    case 'THDPT':
+      FormManager.setValue('repTeamMemberNo', '000651');
+      FormManager.setValue('enterprise', '006510');
+      FormManager.setValue('salesBusOffCd', '006');
+      break;
+    case 'CROSS':
+      FormManager.setValue('repTeamMemberNo', '000651');
+      FormManager.setValue('enterprise', '006510');
+      FormManager.setValue('salesBusOffCd', '006');
+      break;
+    default:
+      break;
+    }
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding Israel functions...');
@@ -2215,6 +2287,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(lockCustomerClassByLob, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterTemplateLoad(finalizeAbbrevName, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterTemplateLoad(adjustChecklistContact, [ SysLoc.ISRAEL ]);
+  GEOHandler.addAfterTemplateLoad(setSalesRepEnterpriseNoSBO, [ SysLoc.ISRAEL ]);
 
   GEOHandler.registerValidator(addISICKUKLAValidator, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(addCollectionValidator, [ SysLoc.ISRAEL ], null, true);
@@ -2227,5 +2300,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(preTickVatExempt, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(showVatExempt, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(setStreetContBehavior, [ SysLoc.ISRAEL ]);
-
+  GEOHandler.addAfterConfig(lockUnlockSalesRepEnterpriseSBO, [ SysLoc.ISRAEL ]);
 });
