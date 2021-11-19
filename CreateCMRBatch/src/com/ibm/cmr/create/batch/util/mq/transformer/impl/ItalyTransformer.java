@@ -1374,7 +1374,7 @@ public class ItalyTransformer extends EMEATransformer {
     legacyCustExt.setItCodeSSV(!StringUtils.isBlank(data.getCollectionCd()) ? data.getCollectionCd() : "");
 
     // Customer Tab
-    legacyCustExt.setiTaxCode(!StringUtils.isBlank(data.getVat()) ? data.getVat() : "");
+    legacyCustExt.setiTaxCode(!StringUtils.isBlank(data.getTaxCd1()) ? data.getTaxCd1() : "");
     legacyCustExt.setItIVA(!StringUtils.isBlank(data.getSpecialTaxCd()) ? data.getSpecialTaxCd() : "");
     legacyCustExt.setItIdentClient(!StringUtils.isBlank(data.getIdentClient()) ? data.getIdentClient() : "");
 
