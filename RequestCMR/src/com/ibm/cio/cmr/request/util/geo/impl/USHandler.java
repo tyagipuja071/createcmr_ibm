@@ -22,6 +22,7 @@ import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.AddrPK;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataRdc;
@@ -1053,6 +1054,11 @@ public class USHandler extends GEOHandler {
   @Override
   public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
     return false;
+  }
+
+  @Override
+  public boolean setAddrSeqByImport(AddrPK addrPk, EntityManager entityManager, FindCMRResultModel result) {
+    return true;
   }
 
   protected String getSubIndusryValue(EntityManager entityManager, String isic) {

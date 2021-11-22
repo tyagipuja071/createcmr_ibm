@@ -31,6 +31,7 @@ import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.AddrPK;
 import com.ibm.cio.cmr.request.entity.AddrRdc;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
@@ -233,11 +234,6 @@ public class CEMEAHandler extends BaseSOFHandler {
                 if (CEE_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry())
                     && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(addr.getCmrAddrTypeCode())) && "599".equals(addr.getCmrAddrSeq())) {
                   addr.setCmrAddrTypeCode("ZP03");
-                }
-                if (CEE_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry())
-                    && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(addr.getCmrAddrTypeCode()))
-                    && StringUtils.isNotEmpty(record.getExtWalletId())) {
-                  addr.setCmrAddrTypeCode("PG01");
                 }
                 if ((CmrConstants.ADDR_TYPE.ZD01.toString().equals(addr.getCmrAddrTypeCode()))) {
                   String stkzn = "";
@@ -503,6 +499,11 @@ public class CEMEAHandler extends BaseSOFHandler {
             if ("618".equals(reqEntry.getCmrIssuingCntry()) && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(record.getCmrAddrTypeCode()))
                 && "599".equals(record.getCmrAddrSeq())) {
               record.setCmrAddrTypeCode("ZP02");
+            }
+
+            if ("618".equals(reqEntry.getCmrIssuingCntry()) && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(record.getCmrAddrTypeCode()))
+                && StringUtils.isNotEmpty(record.getExtWalletId())) {
+              record.setCmrAddrTypeCode("PG01");
             }
 
             // if
@@ -2532,6 +2533,11 @@ public class CEMEAHandler extends BaseSOFHandler {
         addr.setTaxOffice(addressDataMap.get("taxOffice"));
       }
     }
+  }
+
+  @Override
+  public boolean setAddrSeqByImport(AddrPK addrPk, EntityManager entityManager, FindCMRResultModel result) {
+    return true;
   }
 
   @Override

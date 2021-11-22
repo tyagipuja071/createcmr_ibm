@@ -1153,7 +1153,7 @@ public class NLHandler extends BaseSOFHandler {
 
     for (Addr addr : addresses) {
       try {
-        addr.setIerpSitePrtyId(data.getSitePartyId());
+        addr.setIerpSitePrtyId(addr.getIerpSitePrtyId());
         entityManager.merge(addr);
         entityManager.flush();
       } catch (Exception e) {
@@ -2745,6 +2745,11 @@ public class NLHandler extends BaseSOFHandler {
         addr.setTaxOffice(addressDataMap.get("taxOffice"));
       }
     }
+  }
+
+  @Override
+  public boolean setAddrSeqByImport(AddrPK addrPk, EntityManager entityManager, FindCMRResultModel result) {
+    return true;
   }
 
 }
