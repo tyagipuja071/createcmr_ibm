@@ -126,6 +126,9 @@ public class UpdatedAddr implements Serializable {
   @Column(name = "TAX_OFFICE")
   private String taxOffice;
 
+  @Column(name = "EXT_WALLET_ID")
+  private String extWalletId;
+
   /* Old Fields */
   @Column(name = "SAP_NO_OLD")
   private String sapNoOld;
@@ -225,6 +228,9 @@ public class UpdatedAddr implements Serializable {
 
   @Column(name = "TAX_OFFICE_OLD")
   private String taxOfficeOld;
+
+  @Column(name = "EXT_WALLET_ID_OLD")
+  private String extWalletIdOld;
 
   public String getSapNo() {
     return sapNo;
@@ -768,6 +774,22 @@ public class UpdatedAddr implements Serializable {
 
   public void setTaxOffice(String taxOffice) {
     this.taxOffice = taxOffice;
+  }
+
+  public String getExtWalletId() {
+    return extWalletId;
+  }
+
+  public void setExtWalletId(String extWalletId) {
+    this.extWalletId = extWalletId;
+  }
+
+  public String getExtWalletIdOld() {
+    return extWalletIdOld;
+  }
+
+  public void setExtWalletIdOld(String extWalletIdOld) {
+    this.extWalletIdOld = extWalletIdOld;
   }
 
 }

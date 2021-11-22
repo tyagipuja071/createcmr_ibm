@@ -10,6 +10,7 @@
 <%
   RequestEntryModel reqentry = (RequestEntryModel) request.getAttribute("reqentry");
 %>
+  <form:hidden path="extWalletId" />
 <cmr:row topPad="10">
   <cmr:column span="2">
 
