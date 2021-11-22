@@ -814,9 +814,6 @@ function fieldsReadOnlyIsrael() {
       FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
       FormManager.removeValidator('abbrevLocn', Validators.REQUIRED);
 
-      FormManager.removeValidator('salesBusOffCd', Validators.REQUIRED);
-      FormManager.removeValidator('enterprise', Validators.REQUIRED);
-      FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
     } else if (role == 'Processor') {
       FormManager.enable('abbrevNm');
       FormManager.enable('abbrevLocn');
@@ -2144,7 +2141,7 @@ function checkCmrUpdateBeforeImport() {
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
 
-function lockUnlockSalesRepEnterpriseSBO() {
+function requireSalesRepEnterpriseSBOByRole() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
@@ -2164,54 +2161,40 @@ function setSalesRepEnterpriseNoSBO(fromAddress, scenario, scenarioChanged) {
     return;
   }
   var reqType = FormManager.getActualValue('reqType');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+
   if (reqType != 'C') {
     return;
   }
   if (reqType == 'C' && scenarioChanged) {
 
-    switch (scenario.toUpperCase()) {
-    case 'BUSPR':
+    if (scenario == 'BUSPR' || scenario == 'INTER' || scenario == 'INTSO') {
       FormManager.setValue('repTeamMemberNo', '000993');
       FormManager.setValue('enterprise', '985999');
       FormManager.setValue('salesBusOffCd', '009');
-      break;
-    case 'COMME':
+
+      FormManager.readOnly('repTeamMemberNo');
+      FormManager.readOnly('enterprise');
+      FormManager.readOnly('salesBusOffCd');
+      requireSalesRepEnterpriseSBOByRole();
+    } else {
       FormManager.setValue('repTeamMemberNo', '000651');
       FormManager.setValue('enterprise', '006510');
       FormManager.setValue('salesBusOffCd', '006');
-      break;
-    case 'GOVRN':
-      FormManager.setValue('repTeamMemberNo', '000651');
-      FormManager.setValue('enterprise', '006510');
-      FormManager.setValue('salesBusOffCd', '006');
-      break;
-    case 'INTER':
-      FormManager.setValue('repTeamMemberNo', '000993');
-      FormManager.setValue('enterprise', '985999');
-      FormManager.setValue('salesBusOffCd', '009');
-      break;
-    case 'INTSO':
-      FormManager.setValue('repTeamMemberNo', '000993');
-      FormManager.setValue('enterprise', '985999');
-      FormManager.setValue('salesBusOffCd', '009');
-      break;
-    case 'PRIPE':
-      FormManager.setValue('repTeamMemberNo', '000651');
-      FormManager.setValue('enterprise', '006510');
-      FormManager.setValue('salesBusOffCd', '006');
-      break;
-    case 'THDPT':
-      FormManager.setValue('repTeamMemberNo', '000651');
-      FormManager.setValue('enterprise', '006510');
-      FormManager.setValue('salesBusOffCd', '006');
-      break;
-    case 'CROSS':
-      FormManager.setValue('repTeamMemberNo', '000651');
-      FormManager.setValue('enterprise', '006510');
-      FormManager.setValue('salesBusOffCd', '006');
-      break;
-    default:
-      break;
+      if (scenario == 'PRIPE') {
+        FormManager.readOnly('repTeamMemberNo');
+        FormManager.readOnly('enterprise');
+        FormManager.readOnly('salesBusOffCd');
+      }
+      requireSalesRepEnterpriseSBOByRole();
+    }
+  } else if (reqType == 'C' && !scenarioChanged) {
+    if (role == 'PROCESSOR') {
+      if (scenario == 'BUSPR' || scenario == 'INTER' || scenario == 'INTSO' || scenario == 'PRIPE') {
+        FormManager.readOnly('repTeamMemberNo');
+        FormManager.readOnly('enterprise');
+        FormManager.readOnly('salesBusOffCd');
+      }
     }
   }
 }
@@ -2300,5 +2283,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(preTickVatExempt, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(showVatExempt, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(setStreetContBehavior, [ SysLoc.ISRAEL ]);
-  GEOHandler.addAfterConfig(lockUnlockSalesRepEnterpriseSBO, [ SysLoc.ISRAEL ]);
+  GEOHandler.addAfterConfig(requireSalesRepEnterpriseSBOByRole, [ SysLoc.ISRAEL ]);
 });
