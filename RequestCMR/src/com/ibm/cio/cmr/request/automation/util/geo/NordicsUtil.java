@@ -196,11 +196,20 @@ public class NordicsUtil extends AutomationUtil {
     Addr zp01 = requestData.getAddress("ZP01");
     String customerName = getCustomerFullName(zs01);
 
-    if ((DK_BUSPR_LOCAL.equals(scenario) || FI_BUSPR_LOCAL.equals(scenario) || BUSPR_LOCAL.equals(scenario) || CROSS_BUSPR.equals(scenario))
-        && zp01 != null && !compareCustomerNames(zs01, zp01)) {
-      details.append("Sold-to and Bill-to name are not identical for BP Scenario. Request will require CMDE review before proceeding.").append("\n");
-      engineData.addNegativeCheckStatus("SOLDTO_BILLTO_DIFF", "Sold-to Bill-to name are not identical for BP Scenario.");
+    if (zp01 != null && !compareCustomerNames(zs01, zp01)) {
+      details.append("Sold-to and Bill-to name are not identical. Request will require CMDE review before proceeding.").append("\n");
+      engineData.addNegativeCheckStatus("SOLDTO_BILLTO_DIFF", "Sold-to and Bill-to name are not identical.");
     }
+
+    // if ((DK_BUSPR_LOCAL.equals(scenario) || FI_BUSPR_LOCAL.equals(scenario)
+    // || BUSPR_LOCAL.equals(scenario) || CROSS_BUSPR.equals(scenario))
+    // && zp01 != null && !compareCustomerNames(zs01, zp01)) {
+    // details.append("Sold-to and Bill-to name are not identical for BP
+    // Scenario. Request will require CMDE review before
+    // proceeding.").append("\n");
+    // engineData.addNegativeCheckStatus("SOLDTO_BILLTO_DIFF", "Sold-to Bill-to
+    // name are not identical for BP Scenario.");
+    // }
 
     switch (scenario) {
 
