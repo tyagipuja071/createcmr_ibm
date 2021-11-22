@@ -447,7 +447,7 @@ public class NetherlandsUtil extends AutomationUtil {
               }
               if (!matchesDnb) {
                 LOG.debug("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
-                resultCodes.add("R");
+                resultCodes.add("D");
                 checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
               } else {
                 checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
@@ -474,7 +474,7 @@ public class NetherlandsUtil extends AutomationUtil {
                 }
                 if (!matchesDnb) {
                   LOG.debug("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
-                  resultCodes.add("R");
+                  resultCodes.add("D");
                   checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
                 } else {
                   checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
