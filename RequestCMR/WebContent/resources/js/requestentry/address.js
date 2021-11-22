@@ -1856,7 +1856,7 @@ function applyAddrChangesModal_onLoad() {
         }
       }
 
-      if (SysLoc.ISRAEL == cntry && reqType == 'U' && FormManager.getActualValue('addrType') == 'ZD01' && type.ret1 == 'ZD01') {
+      if (SysLoc.ISRAEL == cntry && reqType == 'U' && FormManager.getActualValue('addrType') == 'ZD01' && type.ret1 == 'ZD01' && cmr.addressMode == 'newAddress') {
         continue;
       }
       if (type.ret3 == cntry) {
