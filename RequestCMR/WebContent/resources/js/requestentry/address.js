@@ -1856,8 +1856,23 @@ function applyAddrChangesModal_onLoad() {
         }
       }
 
-      if (SysLoc.ISRAEL == cntry && reqType == 'U' && FormManager.getActualValue('addrType') == 'ZD01' && type.ret1 == 'ZD01' && cmr.addressMode == 'newAddress') {
-        continue;
+      if (SysLoc.ISRAEL == cntry && reqType == 'U' && FormManager.getActualValue('addrType') == 'ZD01' && type.ret1 == 'ZD01') {
+        if (cmr.addressMode == 'newAddress') {
+          continue;
+        } else if (cmr.addressMode == 'updateAddress') {
+          var countShipping = 0;
+          var countCtyc = 0;
+          for (var a = 0; a < _allAddressData.length; a++) {
+            if (_allAddressData[a].addrType[0] == 'ZD01') {
+              countShipping++;
+            } else if (_allAddressData[a].addrType[0] == 'CTYC') {
+              countCtyc++;
+            }
+          }
+          if (countShipping != countCtyc) {
+            continue;
+          }
+        }
       }
       if (type.ret3 == cntry) {
         useCntry = true;
