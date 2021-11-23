@@ -146,21 +146,21 @@ public class DuplicateChecksUtil {
         request.setCustClass(data.getCustClass());
       }
     case SystemLocation.NETHERLANDS:
-        if (NetherlandsUtil.SCENARIO_INTERNAL.equals(data.getCustSubGrp())) {
-          if ("ZS01".equals(addr.getId().getAddrType())) {
-            request.setCustClass("81");
-          }
+      if (NetherlandsUtil.SCENARIO_INTERNAL.equals(data.getCustSubGrp())) {
+        if ("ZS01".equals(addr.getId().getAddrType())) {
+          request.setCustClass("81");
         }
-        if (NetherlandsUtil.SCENARIO_PRIVATE_CUSTOMER.equals(data.getCustSubGrp())) {
-          if ("ZS01".equals(addr.getId().getAddrType())) {
-            request.setCustClass("60");
-          }
+      }
+      if (NetherlandsUtil.SCENARIO_PRIVATE_CUSTOMER.equals(data.getCustSubGrp())) {
+        if ("ZS01".equals(addr.getId().getAddrType())) {
+          request.setCustClass("60");
         }
-        if (NetherlandsUtil.SCENARIO_BP_LOCAL.equals(data.getCustSubGrp()) || NetherlandsUtil.SCENARIO_BP_CROSS.equals(data.getCustSubGrp())) {
-          if ("ZS01".equals(addr.getId().getAddrType())) {
-            request.setCustClass("49");
-          }
+      }
+      if (NetherlandsUtil.SCENARIO_BP_LOCAL.equals(data.getCustSubGrp()) || NetherlandsUtil.SCENARIO_BP_CROSS.equals(data.getCustSubGrp())) {
+        if ("ZS01".equals(addr.getId().getAddrType())) {
+          request.setCustClass("49");
         }
+      }
     case SystemLocation.BELGIUM:
       if (BeLuxUtil.SCENARIO_INTERNAL.equals(data.getCustSubGrp()) || BeLuxUtil.SCENARIO_INTERNAL_LU.equals(data.getCustSubGrp())) {
         if ("ZS01".equals(addr.getId().getAddrType())) {
@@ -180,53 +180,53 @@ public class DuplicateChecksUtil {
       }
     case SystemLocation.SWEDEN:
     case SystemLocation.NORWAY:
-    	if (NordicsUtil.INTER_LOCAL.equals(data.getCustSubGrp()) || NordicsUtil.INTSO_LOCAL.equals(data.getCustSubGrp()) || NordicsUtil.CROSS_INTSO.equals(data.getCustSubGrp())) {
-            if ("ZS01".equals(addr.getId().getAddrType())) {
-              request.setCustClass("81");
-            }
-          }
-    	if (NordicsUtil.PRIPE_LOCAL.equals(data.getCustSubGrp())){
-    		if ("ZS01".equals(addr.getId().getAddrType())){
-    			request.setCustClass("60");
-    		}
-    	}
-    	if (NordicsUtil.IBMEM_LOCAL.equals(data.getCustSubGrp())){
-    		if ("ZS01".equals(addr.getId().getAddrType())){
-    			request.setCustClass("71");
-    		}
-    	}
+      if (NordicsUtil.INTER_LOCAL.equals(data.getCustSubGrp()) || NordicsUtil.CROSS_INTER.equals(data.getCustSubGrp())) {
+        if ("ZS01".equals(addr.getId().getAddrType())) {
+          request.setCustClass("81");
+        }
+      }
+      if (NordicsUtil.PRIPE_LOCAL.equals(data.getCustSubGrp())) {
+        if ("ZS01".equals(addr.getId().getAddrType())) {
+          request.setCustClass("60");
+        }
+      }
+      if (NordicsUtil.IBMEM_LOCAL.equals(data.getCustSubGrp())) {
+        if ("ZS01".equals(addr.getId().getAddrType())) {
+          request.setCustClass("71");
+        }
+      }
     case SystemLocation.FINLAND:
-    	if (NordicsUtil.FI_INTER_LOCAL.equals(data.getCustSubGrp()) || NordicsUtil.FI_INTSO_LOCAL.equals(data.getCustSubGrp()) || NordicsUtil.CROSS_INTSO.equals(data.getCustSubGrp())) {
-            if ("ZS01".equals(addr.getId().getAddrType())) {
-              request.setCustClass("81");
-            }
-          }
-    	if (NordicsUtil.FI_PRIPE_LOCAL.equals(data.getCustSubGrp())){
-    		if ("ZS01".equals(addr.getId().getAddrType())){
-    			request.setCustClass("60");
-    		}
-    	}
-    	if (NordicsUtil.FI_IBMEM_LOCAL.equals(data.getCustSubGrp())){
-    		if ("ZS01".equals(addr.getId().getAddrType())){
-    			request.setCustClass("71");
-    		}
-    	}
+      if (NordicsUtil.FI_INTER_LOCAL.equals(data.getCustSubGrp()) || NordicsUtil.CROSS_INTER.equals(data.getCustSubGrp())) {
+        if ("ZS01".equals(addr.getId().getAddrType())) {
+          request.setCustClass("81");
+        }
+      }
+      if (NordicsUtil.FI_PRIPE_LOCAL.equals(data.getCustSubGrp())) {
+        if ("ZS01".equals(addr.getId().getAddrType())) {
+          request.setCustClass("60");
+        }
+      }
+      if (NordicsUtil.FI_IBMEM_LOCAL.equals(data.getCustSubGrp())) {
+        if ("ZS01".equals(addr.getId().getAddrType())) {
+          request.setCustClass("71");
+        }
+      }
     case SystemLocation.DENMARK:
-    	if (NordicsUtil.DK_INTER_LOCAL.equals(data.getCustSubGrp()) || NordicsUtil.DK_INTSO_LOCAL.equals(data.getCustSubGrp()) || NordicsUtil.CROSS_INTSO.equals(data.getCustSubGrp())) {
-            if ("ZS01".equals(addr.getId().getAddrType())) {
-              request.setCustClass("81");
-            }
-          }
-    	if (NordicsUtil.DK_PRIPE_LOCAL.equals(data.getCustSubGrp())){
-    		if ("ZS01".equals(addr.getId().getAddrType())){
-    			request.setCustClass("60");
-    		}
-    	}
-    	if (NordicsUtil.DK_IBMEM_LOCAL.equals(data.getCustSubGrp())){
-    		if ("ZS01".equals(addr.getId().getAddrType())){
-    			request.setCustClass("71");
-    		}
-    	}
+      if (NordicsUtil.DK_INTER_LOCAL.equals(data.getCustSubGrp()) || NordicsUtil.CROSS_INTER.equals(data.getCustSubGrp())) {
+        if ("ZS01".equals(addr.getId().getAddrType())) {
+          request.setCustClass("81");
+        }
+      }
+      if (NordicsUtil.DK_PRIPE_LOCAL.equals(data.getCustSubGrp())) {
+        if ("ZS01".equals(addr.getId().getAddrType())) {
+          request.setCustClass("60");
+        }
+      }
+      if (NordicsUtil.DK_IBMEM_LOCAL.equals(data.getCustSubGrp())) {
+        if ("ZS01".equals(addr.getId().getAddrType())) {
+          request.setCustClass("71");
+        }
+      }
     }
 
   }

@@ -252,17 +252,47 @@ public class NordicsUtil extends AutomationUtil {
   @Override
   public void filterDuplicateCMRMatches(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
       MatchingResponse<DuplicateCMRCheckResponse> response) {
-    String[] scenariosToBeChecked = { "BUSPR", "FIBUS", "DKBUS", "CBBUS" };
-    String scenario = requestData.getData().getCustSubGrp();
-    String[] kuklaBuspr = { "43", "44", "45" };
+    String[] bpScenariosToBeChecked = { "BUSPR", "FIBUS", "DKBUS", "CBBUS" };
+    String[] isoScenariosToBeChecked = { "INTSO", "DKISO", "FIISO", "CBISO" };
+    String[] intScenariosToBeChecked = { "INTER", "DKINT", "FIINT", "CBINT" };
 
-    if (Arrays.asList(scenariosToBeChecked).contains(scenario)) {
-      List<DuplicateCMRCheckResponse> matches = response.getMatches();
-      List<DuplicateCMRCheckResponse> filteredMatches = new ArrayList<DuplicateCMRCheckResponse>();
+    String scenario = requestData.getData().getCustSubGrp();
+    String[] kuklaBUSPR = { "43", "44", "45" };
+    String[] kuklaISO = { "81", "85" };
+
+    List<DuplicateCMRCheckResponse> matches = response.getMatches();
+    List<DuplicateCMRCheckResponse> filteredMatches = new ArrayList<DuplicateCMRCheckResponse>();
+
+    if (Arrays.asList(bpScenariosToBeChecked).contains(scenario)) {
       for (DuplicateCMRCheckResponse match : matches) {
         if (StringUtils.isNotBlank(match.getCustClass())) {
           String kukla = match.getCustClass() != null ? match.getCustClass() : "";
-          if (Arrays.asList(kuklaBuspr).contains(kukla) && Arrays.asList(scenariosToBeChecked).contains(scenario)) {
+          if (Arrays.asList(kuklaBUSPR).contains(kukla)) {
+            filteredMatches.add(match);
+          }
+        }
+      }
+      // set filtered matches in response
+      response.setMatches(filteredMatches);
+    }
+
+    else if (Arrays.asList(isoScenariosToBeChecked).contains(scenario)) {
+      for (DuplicateCMRCheckResponse match : matches) {
+        if (StringUtils.isNotBlank(match.getCustClass())) {
+          String kukla = match.getCustClass() != null ? match.getCustClass() : "";
+          if (Arrays.asList(kuklaISO).contains(kukla) && (match.getCmrNo().startsWith("997"))) {
+            filteredMatches.add(match);
+          }
+        }
+      }
+      // set filtered matches in response
+      response.setMatches(filteredMatches);
+    }
+
+    else if (Arrays.asList(intScenariosToBeChecked).contains(scenario)) {
+      for (DuplicateCMRCheckResponse match : matches) {
+        if (StringUtils.isNotBlank(match.getCustClass())) {
+          if ((match.getCmrNo().startsWith("99") && !match.getCmrNo().startsWith("997"))) {
             filteredMatches.add(match);
           }
         }
