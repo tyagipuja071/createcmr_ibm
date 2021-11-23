@@ -681,11 +681,6 @@ public class CanadaUtil extends AutomationUtil {
     return isDnBRelevantFieldUpdated;
   }
 
-  @Override
-  public List<String> getSkipChecksRequestTypesforCMDE() {
-    return Arrays.asList("C", "U", "M");
-  }
-
   /**
    * Checks to perform if INAC field updated.
    * 
