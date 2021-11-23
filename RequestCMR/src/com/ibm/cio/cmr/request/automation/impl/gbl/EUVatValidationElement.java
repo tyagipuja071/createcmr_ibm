@@ -40,6 +40,7 @@ public class EUVatValidationElement extends ValidatingElement implements Company
   private static final Logger LOG = Logger.getLogger(EUVatValidationElement.class);
   private static final List<String> EU_COUNTRIES = Arrays.asList("BE", "AT", "BG", "CY", "CZ", "DE", "DK", "EE", "EL", "ES", "FI", "FR", "GB", "HR",
       "HU", "IE", "IT", "LT", "LU", "LV", "MT", "NL", "PL", "PT", "RO", "SE", "SI", "SK", "IS", "FO", "GL");
+  List<String> dkSubRegion = Arrays.asList("IS", "FO", "GL");
 
   public EUVatValidationElement(String requestTypes, String actionOnError, boolean overrideData, boolean stopOnError) {
     super(requestTypes, actionOnError, overrideData, stopOnError);
@@ -83,7 +84,7 @@ public class EUVatValidationElement extends ValidatingElement implements Company
           validation.setMessage("Skipped.");
           output.setDetails("VAT has been marked verified through previous process executions. Skipping VIES verification.");
           LOG.debug("VAT has been marked verified through previous process executions. Skipping VIES verification.");
-        } else if (!EU_COUNTRIES.contains(landCntryForVies)) {
+        } else if (!EU_COUNTRIES.contains(landCntryForVies) || dkSubRegion.contains(landCntryForVies)) {
           validation.setSuccess(true);
           validation.setMessage("Skipped.");
           output.setDetails("Landed Country does not belong to the European Union. Skipping VAT Validation.");
