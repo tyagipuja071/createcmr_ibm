@@ -207,11 +207,97 @@ public class IsraelHandler extends EMEAHandler {
               }
             }
           }
+          // iterate legacy address and add those not in RDC
+          if (this.legacyObjects != null && this.legacyObjects.getAddresses() != null) {
+            String legacyAddrSeqNo = null;
+            String legacyAddrType = null;
+            List<String> legacyAddrUses = null;
+
+            for (CmrtAddr cmrtAddr : this.legacyObjects.getAddresses()) {
+              legacyAddrSeqNo = cmrtAddr.getId().getAddrNo();
+              if (!isLegacyAddrInRdc(legacyAddrSeqNo, converted)) {
+                legacyAddrUses = this.legacyObjects.getUsesBySequenceNo(legacyAddrSeqNo);
+
+                if (legacyAddrUses != null && legacyAddrUses.size() > 0) {
+                  for (String legacyAddrUse : legacyAddrUses) {
+                    legacyAddrType = getAddressTypeByUse(legacyAddrUse);
+                    if (StringUtils.isNotEmpty(legacyAddrType)
+                        && ("ZI01".equals(legacyAddrType) || "ZD01".equals(legacyAddrType) || "CTYC".equals(legacyAddrType))) {
+                      FindCMRRecordModel addrModel = getAddrTypeAndClone(converted, legacyAddrType);
+                      if (addrModel != null) {
+                        // Get country code
+                        String sql = null;
+                        if (CmrConstants.ADDR_TYPE.ZD01.equals(legacyAddrType)) {
+                          sql = ExternalizedQuery.getSql("IL.GET.COUNGTRYCODE_BYLOCALCOUNTRYDESC");
+                        } else {
+                          sql = ExternalizedQuery.getSql("IL.GET.COUNTRYCODE_BYCOUNTRYDESC");
+                        }
+                        PreparedQuery query = new PreparedQuery(entityManager, sql);
+                        query.setParameter("COUNTRY_DESC", cmrtAddr.getAddrLine6());
+
+                        // List<String> record = query.getResults(String.class);
+                        List<Object[]> results = query.getResults();
+                        if (results != null && results.size() > 0) {
+                          // addrModel.setCmrCountryLanded(record.get(0));
+                          // addrModel.setCmrCountryLandedDesc(record.get(1));
+                          Object[] result = results.get(0);
+                          if (result != null && result.length > 0) {
+                            if (result[0] != null) {
+                              addrModel.setCmrCountryLanded((String) result[0]);
+                            }
+                            if (result[1] != null) {
+                              addrModel.setCmrCountryLandedDesc((String) result[1]);
+                            }
+                          }
+                        }
+                        addrModel.setCmrName(cmrtAddr.getAddrLine1());
+                        addrModel.setCmrName1Plain(cmrtAddr.getAddrLine1());
+                        addrModel.setCmrAddrSeq(cmrtAddr.getId().getAddrNo());
+                        addrModel.setCmrStreet(cmrtAddr.getStreet());
+                        addrModel.setCmrStreetAddress(cmrtAddr.getStreet());
+                        addrModel.setCmrCity(cmrtAddr.getCity());
+                        addrModel.setCmrPostalCode(cmrtAddr.getZipCode());
+                        addrModel.setCmrDept(cmrtAddr.getAddrLine2());
+                        addrModel.setCmrPOBox(cmrtAddr.getPoBox());
+                        addrModel.setCmrName3(null);
+                        addrModel.setCmrSapNumber("");
+
+                        converted.add(addrModel);
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+
         }
       }
     } else {
       super.handleSOFConvertFrom(entityManager, source, reqEntry, mainRecord, converted, searchModel);
     }
+  }
+
+  private boolean isLegacyAddrInRdc(String addrNo, List<FindCMRRecordModel> converted) {
+    if (converted != null && converted.size() > 0) {
+      for (FindCMRRecordModel findCMRRecordModel : converted) {
+        if (addrNo.equals(findCMRRecordModel.getCmrAddrSeq())) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  private FindCMRRecordModel getAddrTypeAndClone(List<FindCMRRecordModel> converted, String addrType) throws Exception {
+    if (converted != null && converted.size() > 0) {
+      for (FindCMRRecordModel findCMRRecordModel : converted) {
+        if (addrType.equals(findCMRRecordModel.getCmrAddrTypeCode())) {
+          return cloneAddress(findCMRRecordModel, addrType);
+        }
+      }
+    }
+    return null;
   }
 
   // TODO: Local language mapping - waiting for final rdc sadr mapping
