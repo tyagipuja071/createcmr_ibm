@@ -68,14 +68,20 @@ public class NordicsUtil extends AutomationUtil {
   public static final String FO_COMME_LOCAL = "FOCOM";
   public static final String FO_GOV_LOCAL = "FOGOV";
   public static final String FO_INTSO_LOCAL = "FOISO";
+  public static final String FO_IBME_LOCAL = "FOIBM";
+  public static final String FO_PRIPE_LOCAL = "FOPRI";
 
   public static final String IS_COMME_LOCAL = "ISCOM";
   public static final String IS_GOV_LOCAL = "ISGOV";
   public static final String IS_INTSO_LOCAL = "ISISO";
+  public static final String IS_IBME_LOCAL = "ISIBM";
+  public static final String IS_PRIPE_LOCAL = "ISPRI";
 
   public static final String GL_COMME_LOCAL = "GLCOM";
   public static final String GL_GOV_LOCAL = "GLGOV";
   public static final String GL_INTSO_LOCAL = "GLISO";
+  public static final String GL_IBME_LOCAL = "GLIBM";
+  public static final String GL_PRIPE_LOCAL = "GLPRI";
 
   // Finland
   public static final String FI_COMME_LOCAL = "FICOM";
@@ -91,14 +97,20 @@ public class NordicsUtil extends AutomationUtil {
   public static final String EE_COMME_LOCAL = "EECOM";
   public static final String EE_GOV_LOCAL = "EEGOV";
   public static final String EE_INTSO_LOCAL = "EEISO";
+  public static final String EE_IBME_LOCAL = "EEIBM";
+  public static final String EE_PRIPE_LOCAL = "EETPRI";
 
   public static final String LT_COMME_LOCAL = "LTCOM";
   public static final String LT_GOV_LOCAL = "LTGOV";
   public static final String LT_INTSO_LOCAL = "LTISO";
+  public static final String LT_IBME_LOCAL = "LTIBM";
+  public static final String LT_PRIPE_LOCAL = "LTPRI";
 
   public static final String LV_COMME_LOCAL = "LVCOM";
   public static final String LV_GOV_LOCAL = "LVGOV";
   public static final String LV_INTSO_LOCAL = "LVISO";
+  public static final String LV_IBME_LOCAL = "LVIBM";
+  public static final String LV_PRIPE_LOCAL = "LVPRI";
 
   // Norway and Sweden
   public static final String COMME_LOCAL = "COMME";
@@ -239,8 +251,23 @@ public class NordicsUtil extends AutomationUtil {
     case CROSS_BUSPR:
       return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
     case DK_PRIPE_LOCAL:
+    case DK_IBMEM_LOCAL:
     case FI_PRIPE_LOCAL:
+    case FI_IBMEM_LOCAL:
     case PRIPE_LOCAL:
+    case IBMEM_LOCAL:
+    case FO_PRIPE_LOCAL:
+    case FO_IBME_LOCAL:
+    case GL_PRIPE_LOCAL:
+    case GL_IBME_LOCAL:
+    case IS_PRIPE_LOCAL:
+    case IS_IBME_LOCAL:
+    case EE_PRIPE_LOCAL:
+    case EE_IBME_LOCAL:
+    case LT_PRIPE_LOCAL:
+    case LT_IBME_LOCAL:
+    case LV_PRIPE_LOCAL:
+    case LV_IBME_LOCAL:
     case CROSS_PRIPE:
       return doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details, false, requestData);
     }
