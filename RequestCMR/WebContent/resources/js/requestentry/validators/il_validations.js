@@ -1191,6 +1191,9 @@ function lockEmbargo() {
     if (FormManager.getActualValue('reqType') == 'X') {
       FormManager.readOnly('embargoCd');
     }
+    if (FormManager.getActualValue('reqType') == 'C' && issu_cntry == SysLoc.ISRAEL) {
+      FormManager.readOnly('embargoCd');
+    }
   }
 }
 
