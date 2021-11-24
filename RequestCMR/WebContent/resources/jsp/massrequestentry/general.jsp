@@ -132,7 +132,7 @@ boolean autoProcCapable = PageManager.autoProcEnabled(reqentry.getCmrIssuingCntr
         </cmr:view>  
       </cmr:row>
       
-      <cmr:view forCountry="758,864,848,678,702,806,846">
+      <cmr:view forCountry="758,864,848,678,702">
  	<cmr:row addBackground="false">
     	<cmr:column span="2" containerForField="CountrySubRegion">
           <p>
