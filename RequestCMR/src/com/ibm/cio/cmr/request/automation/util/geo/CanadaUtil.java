@@ -93,10 +93,10 @@ public class CanadaUtil extends AutomationUtil {
     LOG.info("Starting scenario validations for Request ID " + data.getId().getReqId());
     LOG.debug("Scenario to check: " + scenario);
 
-    if ("C".equals(requestData.getAdmin().getReqType())) {
-      // remove duplicates
-      removeDuplicateAddresses(entityManager, requestData, details);
-    }
+    // if ("C".equals(requestData.getAdmin().getReqType())) {
+    // // remove duplicates
+    // removeDuplicateAddresses(entityManager, requestData, details);
+    // }
     // engineData.setMatchDepartment(true);
 
     if (StringUtils.isNotBlank(scenario)) {
