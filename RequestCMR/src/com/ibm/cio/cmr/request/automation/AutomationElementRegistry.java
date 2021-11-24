@@ -5,6 +5,7 @@ package com.ibm.cio.cmr.request.automation;
 
 import java.util.HashMap;
 
+import com.ibm.cio.cmr.request.automation.impl.ca.CACMDERequesterCheck;
 import com.ibm.cio.cmr.request.automation.impl.gbl.ANZBNValidationElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.CMDERequesterCheck;
 import com.ibm.cio.cmr.request.automation.impl.gbl.CalculateCoverageElement;
@@ -14,8 +15,8 @@ import com.ibm.cio.cmr.request.automation.impl.gbl.DefaultApprovalsElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.DnBCheckElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.DnBMatchingElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.DnBOrgIdValidationElement;
-import com.ibm.cio.cmr.request.automation.impl.gbl.DupCMRCheckElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.DupAbbrevCheckElement;
+import com.ibm.cio.cmr.request.automation.impl.gbl.DupCMRCheckElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.DupReqCheckElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.EUVatValidationElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.FieldComputationElement;
@@ -81,7 +82,11 @@ public class AutomationElementRegistry extends HashMap<String, Class<? extends A
   public static final String US_DUP_CHK = "US_DUP_CHK";
   public static final String US_BP_PROCESS = "US_BP_PROCESS";
   public static final String US_SOS_RPA_CHECK = "US_SOS_RPA_CHECK";
-  //EMEA
+
+  // CA
+  public static final String CA_CMDE_CHECK = "CA_CMDE_CHECK";
+
+  // EMEA
   public static final String EMEA_ABBREV_CHECK = "EMEA_ABBREV_CHECK";
   
   private static AutomationElementRegistry registry = new AutomationElementRegistry();
@@ -123,13 +128,16 @@ public class AutomationElementRegistry extends HashMap<String, Class<? extends A
 
     // EU
     put(EU_VAT_VALIDATION, EUVatValidationElement.class);
-    //EMEA
+    // EMEA
     put(EMEA_ABBREV_CHECK, DupAbbrevCheckElement.class);
     // US
     put(US_DEL_REAC_CHECK, USDelReacCheckElement.class);
     put(US_DUP_CHK, USDuplicateCheckElement.class);
     put(US_BP_PROCESS, USBusinessPartnerElement.class);
     put(US_SOS_RPA_CHECK, USSosRpaCheckElement.class);
+
+    // CA
+    put(CA_CMDE_CHECK, CACMDERequesterCheck.class);
   }
 
   @Override
