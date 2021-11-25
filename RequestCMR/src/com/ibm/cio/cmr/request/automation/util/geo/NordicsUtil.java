@@ -70,18 +70,24 @@ public class NordicsUtil extends AutomationUtil {
   public static final String FO_INTSO_LOCAL = "FOISO";
   public static final String FO_IBME_LOCAL = "FOIBM";
   public static final String FO_PRIPE_LOCAL = "FOPRI";
+  public static final String FO_BP_LOCAL = "FOBUS";
+  public static final String FO_INT_LOCAL = "FOINT";
 
   public static final String IS_COMME_LOCAL = "ISCOM";
   public static final String IS_GOV_LOCAL = "ISGOV";
   public static final String IS_INTSO_LOCAL = "ISISO";
   public static final String IS_IBME_LOCAL = "ISIBM";
   public static final String IS_PRIPE_LOCAL = "ISPRI";
+  public static final String IS_INT_LOCAL = "ISINT";
+  public static final String IS_BP_LOCAL = "ISBUS";
 
   public static final String GL_COMME_LOCAL = "GLCOM";
   public static final String GL_GOV_LOCAL = "GLGOV";
   public static final String GL_INTSO_LOCAL = "GLISO";
   public static final String GL_IBME_LOCAL = "GLIBM";
   public static final String GL_PRIPE_LOCAL = "GLPRI";
+  public static final String GL_INT_LOCAL = "GLINT";
+  public static final String GL_BP_LOCAL = "GLBUS";
 
   // Finland
   public static final String FI_COMME_LOCAL = "FICOM";
@@ -270,6 +276,24 @@ public class NordicsUtil extends AutomationUtil {
     case LV_IBME_LOCAL:
     case CROSS_PRIPE:
       return doPrivatePersonChecks(engineData, data.getCmrIssuingCntry(), zs01.getLandCntry(), customerName, details, false, requestData);
+
+    case FO_GOV_LOCAL:
+    case FO_INTSO_LOCAL:
+    case FO_BP_LOCAL:
+    case FO_INT_LOCAL:
+    case IS_GOV_LOCAL:
+    case IS_INTSO_LOCAL:
+    case IS_INT_LOCAL:
+    case IS_BP_LOCAL:
+    case GL_COMME_LOCAL:
+    case GL_GOV_LOCAL:
+    case GL_INTSO_LOCAL:
+    case GL_INT_LOCAL:
+    case GL_BP_LOCAL:
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_FIELD_COMPUTATION);
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_ODM);
     }
 
     return true;
