@@ -170,25 +170,12 @@ public class CanadaUtil extends AutomationUtil {
       for (CustScenarios custScenario : custScenarioList) {
         String scenariofieldValue = custScenario.getValue();
         // Sales Branch Office
-        String coverageId = data.getCovId();
         if (custScenario.getFieldName().equals("salesBusOffCd")) {
           String dataSalesBusOffCd = data.getSalesBusOffCd();
           if (StringUtils.isNotBlank(scenariofieldValue) && !dataSalesBusOffCd.equals(scenariofieldValue)) {
             details.append("Setting Sales Branch Office to ").append(scenariofieldValue).append("\n");
             overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SALES_BO_CD", dataSalesBusOffCd, scenariofieldValue);
             data.setSalesBusOffCd(scenariofieldValue);
-          } else if (StringUtils.isNotBlank(coverageId) && StringUtils.isBlank(dataSalesBusOffCd)) {
-            String sbo = getSbrFromCoverageId(coverageId, entityManager);
-            if (StringUtils.isNotBlank(sbo)) {
-              details.append("Setting SBO based on Coverage ").append(coverageId).append(" to ").append(sbo).append("\n");
-              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SALES_BO_CD", dataSalesBusOffCd, sbo);
-              // set Install Branch Office if blank
-              if (StringUtils.isBlank(data.getInstallBranchOff())) {
-                details.append("Setting IBO based on Coverage ").append(coverageId).append(" to ").append(sbo).append("\n");
-                overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(), sbo);
-              }
-              data.setSalesBusOffCd(sbo);
-            }
           }
         }
         // Marketing Rep
@@ -223,16 +210,6 @@ public class CanadaUtil extends AutomationUtil {
           if (StringUtils.isNotBlank(scenariofieldValue) && !dataAdminDeptCd.equals(scenariofieldValue)) {
             details.append("Setting AR-FAAR to ").append(scenariofieldValue).append("\n");
             overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ADMIN_DEPT_CD", dataAdminDeptCd, scenariofieldValue);
-          } else {
-            String arfaar = getArfarrBySbo(sbo, entityManager);
-            if (StringUtils.isNotBlank(arfaar)) {
-              details.append("Setting AR-FAAR based on SBO ").append(sbo).append(" to ").append(arfaar).append("\n");
-              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ADMIN_DEPT_CD", data.getAdminDeptCd(), arfaar);
-            } else if (StringUtils.isBlank(arfaar) && StringUtils.isNotBlank(data.getCustSubGrp()) && !"KYND".equals(data.getCustSubGrp())) {
-              String defaultArfaar = "120V";
-              details.append("Setting AR-FAAR based on SBO ").append(sbo).append(" to default ").append(defaultArfaar).append("\n");
-              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ADMIN_DEPT_CD", data.getAdminDeptCd(), defaultArfaar);
-            }
           }
         }
         // Credit Code creditCd
@@ -422,6 +399,31 @@ public class CanadaUtil extends AutomationUtil {
       overrides.addOverride(covElement.getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), "922");
       engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
       results.setResults("Calculated");
+    }
+
+    String coverageId = data.getCovId();
+    // Compute SBO based on Coverage if blank
+    if (StringUtils.isNotBlank(coverageId) && StringUtils.isBlank(data.getSalesBusOffCd())) {
+      String sbo = getSbrFromCoverageId(coverageId, entityManager);
+      if (StringUtils.isNotBlank(sbo)) {
+        details.append("Setting SBO based on Coverage ").append(coverageId).append(" to ").append(sbo).append("\n");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sbo);
+        // set Install Branch Office if blank
+        if (StringUtils.isBlank(data.getInstallBranchOff())) {
+          details.append("Setting IBO based on Coverage ").append(coverageId).append(" to ").append(sbo).append("\n");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(), sbo);
+        }
+        // set AR-FAAR after sbo computation
+        String arfaar = getArfarrBySbo(sbo, entityManager);
+        if (StringUtils.isNotBlank(arfaar)) {
+          details.append("Setting AR-FAAR based on SBO ").append(sbo).append(" to ").append(arfaar).append("\n");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ADMIN_DEPT_CD", data.getAdminDeptCd(), arfaar);
+        } else if (StringUtils.isBlank(arfaar) && StringUtils.isNotBlank(data.getCustSubGrp()) && !"KYND".equals(data.getCustSubGrp())) {
+          String defaultArfaar = "120V";
+          details.append("Setting AR-FAAR based on SBO ").append(sbo).append(" to default ").append(defaultArfaar).append("\n");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ADMIN_DEPT_CD", data.getAdminDeptCd(), defaultArfaar);
+        }
+      }
     }
 
     return true;
