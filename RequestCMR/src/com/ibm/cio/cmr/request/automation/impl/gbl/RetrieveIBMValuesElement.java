@@ -45,6 +45,12 @@ public class RetrieveIBMValuesElement extends OverridingElement {
     Addr soldTo = requestData.getAddress("ZS01");
     ModelMap response = new ModelMap();
 
+    if (engineData.hasPositiveCheckStatus(AutomationEngineData.SKIP_ODM)) {
+      results.setDetails("Skipped element due to previous element execution results.");
+      results.setResults("Skipped");
+      results.setProcessOutput(results.getProcessOutput());
+      return results;
+    }
     // glc
     details.append("Values retrieved from ODM based on current request values:\n\n");
     boolean success = odmService.getGlc(entityManager, soldTo, model, response);
