@@ -39,6 +39,7 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.CmrClientService;
 import com.ibm.cio.cmr.request.util.JpaManager;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
@@ -168,85 +169,108 @@ public class CanadaUtil extends AutomationUtil {
     if (custScenarioList != null && custScenarioList.size() > 0) {
       for (CustScenarios custScenario : custScenarioList) {
         String scenariofieldValue = custScenario.getValue();
-        if (StringUtils.isNotBlank(scenariofieldValue)) {
-          // Sales Branch Office
-          if (custScenario.getFieldName().equals("salesBusOffCd")) {
-            String dataSalesBusOffCd = data.getSalesBusOffCd();
-            if (StringUtils.isBlank(dataSalesBusOffCd) || (StringUtils.isNotBlank(dataSalesBusOffCd) && StringUtils.isNotBlank(scenariofieldValue)
-                && !dataSalesBusOffCd.equals(scenariofieldValue))) {
-              details.append("Setting Sales Branch Office to ").append(scenariofieldValue).append("\n");
-              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SALES_BO_CD", dataSalesBusOffCd, scenariofieldValue);
-            }
-          }
-          // Marketing Rep
-          else if (custScenario.getFieldName().equals("repTeamMemberNo")) {
-            String dataRepTeamMemberNo = data.getRepTeamMemberNo();
-            if (StringUtils.isBlank(dataRepTeamMemberNo) || (StringUtils.isNotBlank(dataRepTeamMemberNo) && StringUtils.isNotBlank(scenariofieldValue)
-                && !dataRepTeamMemberNo.equals(scenariofieldValue))) {
-              details.append("Setting Mktg Rep to ").append(scenariofieldValue).append("\n");
-              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "REP_TEAM_MEMBER_NO", dataRepTeamMemberNo,
-                  scenariofieldValue);
-            }
-          }
-          // CS Branch
-          else if (custScenario.getFieldName().equals("salesTeamCd")) {
-            String dataSalesTeamCd = data.getSalesTeamCd();
-            if (StringUtils.isNotBlank(dataSalesTeamCd) && StringUtils.isNotBlank(scenariofieldValue)
-                && !dataSalesTeamCd.equals(scenariofieldValue)) {
-              details.append("Setting CS Branch to ").append(scenariofieldValue).append("\n");
-              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SALES_TEAM_CD", dataSalesTeamCd, scenariofieldValue);
-            } else if (StringUtils.isBlank(dataSalesTeamCd)) {
-              if (soldTo != null && StringUtils.isNotBlank(soldTo.getPostCd()) && soldTo.getPostCd().length() >= 3) {
-                String computedCsBranch = soldTo.getPostCd().substring(0, 3);
-                details.append("Setting computed CS Branch to").append(computedCsBranch).append("\n");
-                overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SALES_TEAM_CD", dataSalesTeamCd, computedCsBranch);
-              } else if (soldTo == null) {
-                isFieldCompSuccessful = false;
-                details.append("No Sold-To Address. Cannot compute CS Branch").append("\n");
+        // Sales Branch Office
+        String coverageId = data.getCovId();
+        if (custScenario.getFieldName().equals("salesBusOffCd")) {
+          String dataSalesBusOffCd = data.getSalesBusOffCd();
+          if (StringUtils.isNotBlank(scenariofieldValue) && !dataSalesBusOffCd.equals(scenariofieldValue)) {
+            details.append("Setting Sales Branch Office to ").append(scenariofieldValue).append("\n");
+            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SALES_BO_CD", dataSalesBusOffCd, scenariofieldValue);
+            data.setSalesBusOffCd(scenariofieldValue);
+          } else if (StringUtils.isNotBlank(data.getGbgId()) && StringUtils.isNotBlank(coverageId) && StringUtils.isBlank(dataSalesBusOffCd)) {
+            String sbo = getSbrFromCoverageId(coverageId, entityManager);
+            if (StringUtils.isNotBlank(sbo)) {
+              details.append("Setting SBO based on Coverage ").append(coverageId).append(" to ").append(sbo).append("\n");
+              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SALES_BO_CD", dataSalesBusOffCd, sbo);
+              // set Install Branch Office if blank
+              if (StringUtils.isBlank(data.getInstallBranchOff())) {
+                details.append("Setting IBO based on Coverage ").append(coverageId).append(" to ").append(sbo).append("\n");
+                overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(), sbo);
               }
-            }
-          }
-          // AR-FAAR
-          else if (custScenario.getFieldName().equals("adminDeptCd")) {
-            String dataAdminDeptCd = data.getAdminDeptCd();
-            if (StringUtils.isBlank(dataAdminDeptCd) || (StringUtils.isNotBlank(dataAdminDeptCd) && StringUtils.isNotBlank(scenariofieldValue)
-                && !dataAdminDeptCd.equals(scenariofieldValue))) {
-              details.append("Setting AR-FAAR to ").append(scenariofieldValue).append("\n");
-              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ADMIN_DEPT_CD", dataAdminDeptCd, scenariofieldValue);
-            }
-          }
-          // Credit Code creditCd
-          else if (custScenario.getFieldName().equals("creditCd")) {
-            String dataCreditCd = data.getCreditCd();
-            if (StringUtils.isBlank(dataCreditCd)
-                || (StringUtils.isNotBlank(dataCreditCd) && StringUtils.isNotBlank(scenariofieldValue) && !dataCreditCd.equals(scenariofieldValue))) {
-              details.append("Setting Credit Code to ").append(scenariofieldValue).append("\n");
-              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CREDIT_CD", dataCreditCd, scenariofieldValue);
-            }
-          }
-          // Pref Lang
-          else if (custScenario.getFieldName().equals("custPrefLang")) {
-            String dataCustPrefLang = data.getCustPrefLang();
-            if (StringUtils.isBlank(dataCustPrefLang) && soldTo != null && "QC".equals(soldTo.getStateProv())) {
-              details.append("Setting Preferred Language to French").append("\n");
-              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CUST_PREF_LANG", dataCustPrefLang, "F");
-            } else if (StringUtils.isBlank(dataCustPrefLang) || (StringUtils.isNotBlank(dataCustPrefLang)
-                && StringUtils.isNotBlank(scenariofieldValue) && !dataCustPrefLang.equals(scenariofieldValue))) {
-              details.append("Setting Preferred Language to ").append(scenariofieldValue).append("\n");
-              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CUST_PREF_LANG", dataCustPrefLang, scenariofieldValue);
-            }
-          }
-          // Tax Code/Estab Function Code (EFC)
-          else if (custScenario.getFieldName().equals("taxCd1")) {
-            String dataTaxCd1 = data.getTaxCd1();
-            if (StringUtils.isBlank(dataTaxCd1)
-                || (StringUtils.isNotBlank(dataTaxCd1) && StringUtils.isNotBlank(scenariofieldValue) && !dataTaxCd1.equals(scenariofieldValue))) {
-              details.append("Setting Tax Code/EFC to ").append(scenariofieldValue).append("\n");
-              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "TAX_CD1", dataTaxCd1, scenariofieldValue);
+              data.setSalesBusOffCd(sbo);
             }
           }
         }
+        // Marketing Rep
+        else if (custScenario.getFieldName().equals("repTeamMemberNo")) {
+          String dataRepTeamMemberNo = data.getRepTeamMemberNo();
+          if (StringUtils.isNotBlank(scenariofieldValue) && !dataRepTeamMemberNo.equals(scenariofieldValue)) {
+            details.append("Setting Mktg Rep to ").append(scenariofieldValue).append("\n");
+            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "REP_TEAM_MEMBER_NO", dataRepTeamMemberNo, scenariofieldValue);
+          }
+        }
+        // CS Branch
+        else if (custScenario.getFieldName().equals("salesTeamCd")) {
+          String dataSalesTeamCd = data.getSalesTeamCd();
+          if (StringUtils.isNotBlank(scenariofieldValue) && !dataSalesTeamCd.equals(scenariofieldValue)) {
+            details.append("Setting CS Branch to ").append(scenariofieldValue).append("\n");
+            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SALES_TEAM_CD", dataSalesTeamCd, scenariofieldValue);
+          } else if (StringUtils.isBlank(dataSalesTeamCd)) {
+            if (soldTo != null && StringUtils.isNotBlank(soldTo.getPostCd()) && soldTo.getPostCd().length() >= 3) {
+              String computedCsBranch = soldTo.getPostCd().substring(0, 3);
+              details.append("Setting computed CS Branch to").append(computedCsBranch).append("\n");
+              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SALES_TEAM_CD", dataSalesTeamCd, computedCsBranch);
+            } else if (soldTo == null) {
+              isFieldCompSuccessful = false;
+              details.append("No Sold-To Address. Cannot compute CS Branch").append("\n");
+            }
+          }
+        }
+        // AR-FAAR
+        else if (custScenario.getFieldName().equals("adminDeptCd")) {
+          String dataAdminDeptCd = data.getAdminDeptCd();
+          String sbo = data.getSalesBusOffCd();
+          if (StringUtils.isNotBlank(scenariofieldValue) && !dataAdminDeptCd.equals(scenariofieldValue)) {
+            details.append("Setting AR-FAAR to ").append(scenariofieldValue).append("\n");
+            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ADMIN_DEPT_CD", dataAdminDeptCd, scenariofieldValue);
+          } else {
+            String arfaar = getArfarrBySbo(sbo, entityManager);
+            if (StringUtils.isNotBlank(arfaar)) {
+              details.append("Setting AR-FAAR based on SBO ").append(sbo).append(" to ").append(arfaar).append("\n");
+              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ADMIN_DEPT_CD", data.getAdminDeptCd(), arfaar);
+            } else if (StringUtils.isBlank(arfaar) && StringUtils.isNotBlank(data.getCustSubGrp()) && !"KYND".equals(data.getCustSubGrp())) {
+              String defaultArfaar = "120V";
+              details.append("Setting AR-FAAR based on SBO ").append(sbo).append(" to default ").append(defaultArfaar).append("\n");
+              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ADMIN_DEPT_CD", data.getAdminDeptCd(), defaultArfaar);
+            }
+          }
+        }
+        // Credit Code creditCd
+        else if (custScenario.getFieldName().equals("creditCd")) {
+          String dataCreditCd = data.getCreditCd();
+          if (StringUtils.isNotBlank(scenariofieldValue) && !dataCreditCd.equals(scenariofieldValue)) {
+            details.append("Setting Credit Code to ").append(scenariofieldValue).append("\n");
+            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CREDIT_CD", dataCreditCd, scenariofieldValue);
+          }
+        }
+        // Pref Lang
+        else if (custScenario.getFieldName().equals("custPrefLang")) {
+          String dataCustPrefLang = data.getCustPrefLang();
+          if (soldTo != null && "QC".equals(soldTo.getStateProv())) {
+            details.append("Setting Preferred Language to French").append("\n");
+            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CUST_PREF_LANG", dataCustPrefLang, "F");
+            data.setCustPrefLang("F");
+          } else if (StringUtils.isNotBlank(scenariofieldValue) && !dataCustPrefLang.equals(scenariofieldValue)) {
+            details.append("Setting Preferred Language to ").append(scenariofieldValue).append("\n");
+            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CUST_PREF_LANG", dataCustPrefLang, scenariofieldValue);
+          }
+        }
+        // Tax Code/Estab Function Code (EFC)
+        else if (custScenario.getFieldName().equals("taxCd1")) {
+          String dataTaxCd1 = data.getTaxCd1();
+          if (StringUtils.isBlank(dataTaxCd1)
+              || (StringUtils.isNotBlank(dataTaxCd1) && StringUtils.isNotBlank(scenariofieldValue) && !dataTaxCd1.equals(scenariofieldValue))) {
+            details.append("Setting Tax Code/EFC to ").append(scenariofieldValue).append("\n");
+            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "TAX_CD1", dataTaxCd1, scenariofieldValue);
+          }
+        }
+
       }
+    }
+    // Pref Lang - ensure French if sold-to prov is Quebec
+    if (soldTo != null && "QC".equals(soldTo.getStateProv()) && !"F".equals(data.getCustPrefLang())) {
+      details.append("Setting Preferred Language to French").append("\n");
+      overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CUST_PREF_LANG", data.getCustPrefLang(), "F");
     }
     // Location Code
     if (soldTo != null) {
@@ -837,6 +861,45 @@ public class CanadaUtil extends AutomationUtil {
         } else {
           return error + "\n- Duns No. is blank";
         }
+      }
+    }
+    return null;
+  }
+
+  private String getSbrFromCoverageId(String coverageId, EntityManager entityManager) {
+    if (StringUtils.isNotBlank(coverageId)) {
+      String covType = StringUtils.substring(coverageId, 0, 1);
+      String covId = StringUtils.substring(coverageId, 1);
+
+      String sql = ExternalizedQuery.getSql("AUTO.CA.GETSBO_BY_COVID");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+      query.setParameter("COVTYPE", covType);
+      query.setParameter("COVID", covId);
+
+      List<Object[]> results = query.getResults();
+      if (results != null && results.size() > 0) {
+        Object[] result = results.get(0);
+        if (result != null && result.length > 0) {
+          String sbr = (String) result[2];
+          return sbr;
+        }
+      }
+    }
+    return null;
+  }
+
+  private String getArfarrBySbo(String sbo, EntityManager entityManager) {
+    if (StringUtils.isNotBlank(sbo)) {
+      String sql = ExternalizedQuery.getSql("QUERY.GET.SBODESC");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("ISSUING_CNTRY", SystemLocation.CANADA);
+      query.setParameter("SALES_BO_CD", sbo);
+
+      List<String> results = query.getResults(String.class);
+      if (results != null && results.size() > 0) {
+        String arfaar = results.get(0);
+        return arfaar;
       }
     }
     return null;
