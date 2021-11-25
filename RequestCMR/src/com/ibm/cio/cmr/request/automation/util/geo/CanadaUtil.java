@@ -177,7 +177,7 @@ public class CanadaUtil extends AutomationUtil {
             details.append("Setting Sales Branch Office to ").append(scenariofieldValue).append("\n");
             overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SALES_BO_CD", dataSalesBusOffCd, scenariofieldValue);
             data.setSalesBusOffCd(scenariofieldValue);
-          } else if (StringUtils.isNotBlank(data.getGbgId()) && StringUtils.isNotBlank(coverageId) && StringUtils.isBlank(dataSalesBusOffCd)) {
+          } else if (StringUtils.isNotBlank(coverageId) && StringUtils.isBlank(dataSalesBusOffCd)) {
             String sbo = getSbrFromCoverageId(coverageId, entityManager);
             if (StringUtils.isNotBlank(sbo)) {
               details.append("Setting SBO based on Coverage ").append(coverageId).append(" to ").append(sbo).append("\n");
