@@ -84,6 +84,13 @@ public class IsraelHandler extends EMEAHandler {
   protected static final String[] LD_MASS_UPDATE_SHEET_NAMES = { "Billing Address", "Mailing Address", "Installing Address",
       "Shipping Address (Update)", "EPL Address" };
 
+  private static final String[] IL_MASSUPDATE_SHEET_NAMES = { "Data", "Mailing", "Billing", "Installing", "Shipping", "EPL",
+      "Country Use A (Mailing)", "Country Use B (Billing)", "Country Use C (Shipping)" };
+
+  private static enum IL_MASSUPDATE_ADDR {
+    CMRNO, SEQNO, CUSTNAME, CUSTNAMECONT, ATTPERSON, STREET, POBOX, ADDRCONT, CITY, POSTCODE, LANDCOUNTRY
+  };
+
   private static final String CUSTGRP_LOCAL = "LOCAL";
   private static final int MANDATORY_ADDR_COUNT = 8;
   private static final int MAX_ADDR_SEQ = 99999;
@@ -1260,19 +1267,20 @@ public class IsraelHandler extends EMEAHandler {
 
   @Override
   public void validateMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country) {
-    String[] sheetNames = { "Data", "Mailing", "Billing", "Installing", "Shipping", "EPL", "Country Use A (Mailing)", "Country Use B (Billing)",
-        "Country Use C (Shipping)" };
+    // String[] sheetNames = { "Data", "Mailing", "Billing", "Installing",
+    // "Shipping", "EPL", "Country Use A (Mailing)", "Country Use B (Billing)",
+    // "Country Use C (Shipping)" };
     List<String> dataSheetCmrList = new ArrayList<String>();
     List<String> divCmrList = new ArrayList<String>();
     HashMap<String, HashMap<String, String>> postalCdValidationCache = new HashMap<String, HashMap<String, String>>();
     boolean isSheetEmpty = true;
 
-    for (String name : sheetNames) {
+    for (String name : IL_MASSUPDATE_SHEET_NAMES) {
       XSSFSheet sheet = book.getSheet(name);
       LOG.debug("validating for sheet " + name);
       if (sheet != null) {
         TemplateValidation error = new TemplateValidation(name);
-        if (name.equals(sheetNames[0])) {// data sheet
+        if (name.equals(IL_MASSUPDATE_SHEET_NAMES[0])) {// data sheet
           validateDataSheet(dataSheetCmrList, divCmrList, error, sheet, maxRows, country);
         } else {
           validateAddressSheet(name, dataSheetCmrList, divCmrList, error, sheet, maxRows, postalCdValidationCache);
@@ -1286,14 +1294,14 @@ public class IsraelHandler extends EMEAHandler {
     }
     // Compare Address and Translation
     // Mailing vs Country Use A
-    compareAddressSheets(book.getSheet(sheetNames[1]), book.getSheet(sheetNames[6]), maxRows, validations);
+    compareAddressSheets(book.getSheet(IL_MASSUPDATE_SHEET_NAMES[1]), book.getSheet(IL_MASSUPDATE_SHEET_NAMES[6]), maxRows, validations);
     // Billing vs Country Use B
-    compareAddressSheets(book.getSheet(sheetNames[2]), book.getSheet(sheetNames[7]), maxRows, validations);
+    compareAddressSheets(book.getSheet(IL_MASSUPDATE_SHEET_NAMES[2]), book.getSheet(IL_MASSUPDATE_SHEET_NAMES[7]), maxRows, validations);
     // Shipping vs Country Use C
-    compareAddressSheets(book.getSheet(sheetNames[4]), book.getSheet(sheetNames[8]), maxRows, validations);
+    compareAddressSheets(book.getSheet(IL_MASSUPDATE_SHEET_NAMES[4]), book.getSheet(IL_MASSUPDATE_SHEET_NAMES[8]), maxRows, validations);
 
     if (isSheetEmpty && dataSheetCmrList.size() == 0) {
-      TemplateValidation sheetEmptyError = new TemplateValidation(sheetNames[0]);
+      TemplateValidation sheetEmptyError = new TemplateValidation(IL_MASSUPDATE_SHEET_NAMES[0]);
       sheetEmptyError.addError(1, "<br>Template File", "Mass Update file does not contain any record to update.");
       validations.add(sheetEmptyError);
     }
@@ -1409,23 +1417,25 @@ public class IsraelHandler extends EMEAHandler {
             }
           }
           // Validate Address Con't
-          if (isHebrewFieldNotBlank(row.getCell(7))) {
-            String addrCont = row.getCell(7).getRichStringCellValue().getString();
+          XSSFCell addrContCell = getAddressCell(IL_MASSUPDATE_ADDR.ADDRCONT, row, sheetName);
+          if (isHebrewFieldNotBlank(addrContCell)) {
+            String addrCont = addrContCell.getRichStringCellValue().getString();
             if (!containsHebrewChar(addrCont)) {
               error.addError(rowIndex, "<br>Address Con't", sheetName + " Address Continuation should be in Hebrew.");
             }
           }
           // Validate City
-          if (isHebrewFieldNotBlank(row.getCell(8))) {
-            String city = row.getCell(8).getRichStringCellValue().getString();
+          XSSFCell cityCell = getAddressCell(IL_MASSUPDATE_ADDR.CITY, row, sheetName);
+          if (isHebrewFieldNotBlank(cityCell)) {
+            String city = cityCell.getRichStringCellValue().getString();
             if (!containsHebrewChar(city)) {
               error.addError(rowIndex, "<br>City", sheetName + " City should be in Hebrew.");
             }
           }
         } // end validate Mailing Billing Shipping hebrew fields
           // Validate Postal Code
-        String postalCd = validateColValFromCell(row.getCell(9));
-        String landedCntry = validateColValFromCell(row.getCell(10));
+        String postalCd = validateColValFromCell(getAddressCell(IL_MASSUPDATE_ADDR.POSTCODE, row, sheetName));
+        String landedCntry = validateColValFromCell(getAddressCell(IL_MASSUPDATE_ADDR.LANDCOUNTRY, row, sheetName));
         if (StringUtils.isNotBlank(postalCd) && StringUtils.isNotBlank(landedCntry)) {
           // Check postalCode cache
           boolean isLandCountryInCache = postalCdValidationCache.containsKey(landedCntry);
@@ -1474,7 +1484,7 @@ public class IsraelHandler extends EMEAHandler {
         if (!isHebrewFieldNotBlank(row.getCell(5))) {
           error.addError(row.getRowNum(), "<br>Street", "Street is required when updating " + sheetName + " address.");
         }
-        if (!isHebrewFieldNotBlank(row.getCell(10))) {
+        if (!isHebrewFieldNotBlank(getAddressCell(IL_MASSUPDATE_ADDR.LANDCOUNTRY, row, sheetName))) {
           error.addError(row.getRowNum(), "<br>Landed Country", "Landed Country is required when updating " + sheetName + " address.");
         }
 
@@ -1484,17 +1494,69 @@ public class IsraelHandler extends EMEAHandler {
             error.addError(row.getRowNum(), "<br>PO Box", "PO Box is required when updating " + sheetName + " address.");
           }
         } else { // Installing, Shipping, EPL and Country Use C
-          if (!isHebrewFieldNotBlank(row.getCell(8))) {
+          if (!isHebrewFieldNotBlank(getAddressCell(IL_MASSUPDATE_ADDR.CITY, row, sheetName))) {
             error.addError(row.getRowNum(), "<br>City", "City is required when updating " + sheetName + " address.");
           }
         }
         // Validate Address Con't
-        if (isHebrewFieldNotBlank(row.getCell(7)) && !isHebrewFieldNotBlank(row.getCell(5))) {
+        if (isHebrewFieldNotBlank(getAddressCell(IL_MASSUPDATE_ADDR.ADDRCONT, row, sheetName)) && !isHebrewFieldNotBlank(row.getCell(5))) {
           error.addError(row.getRowNum(), "<br>Address Con't", "Address Con't can only be filled if Street is filled.");
         }
       }
     }
 
+  }
+
+  private XSSFCell getAddressCell(IL_MASSUPDATE_ADDR addrField, XSSFRow row, String sheetName) {
+    if (StringUtils.isNotBlank(sheetName)) {
+      boolean adjustColIndex = false;
+      if (sheetName.equals(IL_MASSUPDATE_SHEET_NAMES[3]) || sheetName.equals(IL_MASSUPDATE_SHEET_NAMES[4])
+          || sheetName.equals(IL_MASSUPDATE_SHEET_NAMES[5]) || sheetName.equals(IL_MASSUPDATE_SHEET_NAMES[8])) {
+        adjustColIndex = true;
+      }
+      switch (addrField) {
+      case CMRNO:
+        return row.getCell(0);
+      case SEQNO:
+        return row.getCell(1);
+      case CUSTNAME:
+        return row.getCell(2);
+      case CUSTNAMECONT:
+        return row.getCell(3);
+      case ATTPERSON:
+        return row.getCell(4);
+      case STREET:
+        return row.getCell(5);
+      case POBOX:
+        return row.getCell(6);
+      case ADDRCONT:
+        if (adjustColIndex) {
+          return row.getCell(6);
+        } else {
+          return row.getCell(7);
+        }
+      case CITY:
+        if (adjustColIndex) {
+          return row.getCell(7);
+        } else {
+          return row.getCell(8);
+        }
+      case POSTCODE:
+        if (adjustColIndex) {
+          return row.getCell(8);
+        } else {
+          return row.getCell(9);
+        }
+      case LANDCOUNTRY:
+        if (adjustColIndex) {
+          return row.getCell(9);
+        } else {
+          return row.getCell(10);
+        }
+      }
+    }
+
+    return null;
   }
 
   private static ValidationResult checkPostalCode(String landedCountry, String postalCode) throws Exception {
