@@ -133,26 +133,20 @@ public class BELUXHandler extends BaseSOFHandler {
           for (FindCMRRecordModel record : source.getItems()) {
             seqNo = record.getCmrAddrSeq();
             if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo)) {
-              sofUses = this.legacyObjects.getUsesBySequenceNo(seqNo);
-              if (StringUtils.isNotBlank(record.getCmrAddrSeq()) && !sofUses.isEmpty()) {
-                for (String sofUse : sofUses) {
-                  addrType = record.getCmrAddrTypeCode();
-                  if (!StringUtils.isEmpty(addrType)) {
-                    addr = cloneAddress(record, addrType);
-                    addr.setCmrDept(record.getCmrCity2());
-                    addr.setCmrName4(record.getCmrName4());
-                    converted.add(addr);
-                  }
-                }
-              } else if (sofUses.isEmpty() && "ZP01".equals(record.getCmrAddrTypeCode()) && "PG".equals(record.getCmrOrderBlock())) {
-                record.setCmrAddrTypeCode("PG01");
-                addrType = record.getCmrAddrTypeCode();
-                if (!StringUtils.isEmpty(addrType)) {
-                  addr = cloneAddress(record, addrType);
-                  addr.setCmrDept(record.getCmrCity2());
-                  addr.setCmrName4(record.getCmrName4());
-                  converted.add(addr);
-                }
+              addrType = record.getCmrAddrTypeCode();
+              if (!StringUtils.isEmpty(addrType)) {
+                addr = cloneAddress(record, addrType);
+                addr.setCmrDept(record.getCmrCity2());
+                addr.setCmrName4(record.getCmrName4());
+                converted.add(addr);
+              }
+            } else if ("ZP01".equals(record.getCmrAddrTypeCode()) && StringUtils.isNotEmpty(record.getExtWalletId())) {
+              addrType = record.getCmrAddrTypeCode();
+              if (!StringUtils.isEmpty(addrType)) {
+                addr = cloneAddress(record, "PG01");
+                addr.setCmrDept(record.getCmrCity2());
+                addr.setCmrName4(record.getCmrName4());
+                converted.add(addr);
               }
             }
           }
@@ -174,6 +168,7 @@ public class BELUXHandler extends BaseSOFHandler {
                 newRecord.setCmrName2(null);
                 newRecord.setCmrName3(null);
                 newRecord.setCmrName4(null);
+                newRecord.setCmrSapNumber(null);
                 mapCmrtAddr2FindCMRRec(newRecord, cmrAddr);
                 newRecord.setCmrAddrTypeCode(getSingleAddrType(cmrAddr));
                 converted.add(newRecord);
@@ -208,7 +203,7 @@ public class BELUXHandler extends BaseSOFHandler {
             benchmarkAddrType = getBenchmarkAddr(seq, rdcRecords);
             shareSeqAddrList = getShareSeqAddrList(cmrtaddr);
 
-            if (isShareSeq(cmrtaddr) && !benchmarkAddrType.isEmpty() && !shareSeqAddrList.isEmpty()) {
+            if (isShareSeq(cmrtaddr) && StringUtils.isNotEmpty(benchmarkAddrType) && !shareSeqAddrList.isEmpty()) {
               for (String shareSeqAddrType : shareSeqAddrList) {
                 if (!benchmarkAddrType.equals(shareSeqAddrType)) {
                   splitSharedAddr(benchmarkAddrType, seq, null, shareSeqAddrType, maxSeq, converted);
@@ -1238,6 +1233,7 @@ public class BELUXHandler extends BaseSOFHandler {
     data.setInstallBranchOff("");
     data.setInacType("");
     data.setIbmDeptCostCenter(getInternalDepartment(mainRecord.getCmrNum()));
+    data.setCommercialFinanced(results.getItems().get(0).getCmrSortl());
 
     boolean prospectCmrChosen = mainRecord != null && CmrConstants.PROSPECT_ORDER_BLOCK.equals(mainRecord.getCmrOrderBlock());
     if (prospectCmrChosen) {
@@ -1599,7 +1595,7 @@ public class BELUXHandler extends BaseSOFHandler {
     String addrSeq = addr.getId().getAddrSeq();
     String addrType = addr.getId().getAddrType();
     for (Kna1 kna1 : kna1Records) {
-      if ((addrType.equals(kna1.getKtokd()) && addrSeq.equals(kna1.getZzkvSeqno())) || "PG01".equals(addr.getId().getAddrType())) {
+      if (addrType.equals(kna1.getKtokd()) && addrSeq.equals(kna1.getZzkvSeqno())) {
         result = true;
       }
     }
@@ -1717,6 +1713,14 @@ public class BELUXHandler extends BaseSOFHandler {
       update.setDataField(PageManager.getLabel(cmrCountry, "IbmDeptCostCenter", "-"));
       update.setNewData(service.getCodeAndDescription(newData.getIbmDeptCostCenter(), "IbmDeptCostCenter", cmrCountry));
       update.setOldData(service.getCodeAndDescription(oldData.getSoProjectCd(), "IbmDeptCostCenter", cmrCountry));
+      results.add(update);
+    }
+    // SORTL
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getCommercialFinanced(), newData.getCommercialFinanced())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "CommercialFinanced", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getCommercialFinanced(), "CommercialFinanced", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getCommercialFinanced(), "CommercialFinanced", cmrCountry));
       results.add(update);
     }
   }
@@ -2227,7 +2231,7 @@ public class BELUXHandler extends BaseSOFHandler {
 
     XSSFSheet sheet = book.getSheet("Data");// validate Data sheet
     row = sheet.getRow(0);// data field name row
-    int ordBlkIndex = 15;// default index
+    int ordBlkIndex = 16;// default index
     int cmrNoIndex = 0;// 0
     String cmrNo = null;
     for (int cellIndex = 0; cellIndex < row.getLastCellNum(); cellIndex++) {
