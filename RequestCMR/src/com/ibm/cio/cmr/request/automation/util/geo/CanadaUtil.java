@@ -401,17 +401,22 @@ public class CanadaUtil extends AutomationUtil {
       results.setResults("Calculated");
     }
 
-    String coverageId = data.getCovId();
-    // Compute SBO based on Coverage if blank
-    if (StringUtils.isNotBlank(coverageId) && StringUtils.isBlank(data.getSalesBusOffCd())) {
-      String sbo = getSbrFromCoverageId(coverageId, entityManager);
-      if (StringUtils.isNotBlank(sbo)) {
-        details.append("Setting SBO based on Coverage ").append(coverageId).append(" to ").append(sbo).append("\n");
-        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sbo);
-        // set Install Branch Office if blank
-        if (StringUtils.isBlank(data.getInstallBranchOff())) {
-          details.append("Setting IBO based on Coverage ").append(coverageId).append(" to ").append(sbo).append("\n");
-          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(), sbo);
+    if (isCoverageCalculated) {
+      String coverageId = container.getFinalCoverage();
+      // Compute SBO based on Coverage if blank
+      if (StringUtils.isNotBlank(coverageId) && StringUtils.isBlank(data.getSalesBusOffCd())) {
+        details.append("Calculating SBO based on Coverage: ").append(coverageId).append("\n");
+        String sbo = getSbrFromCoverageId(coverageId, entityManager);
+        if (StringUtils.isNotBlank(sbo)) {
+          details.append("Setting SBO based on Coverage ").append(coverageId).append(" to ").append(sbo).append("\n");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sbo);
+          // set Install Branch Office if blank
+          if (StringUtils.isBlank(data.getInstallBranchOff())) {
+            details.append("Setting IBO based on Coverage ").append(coverageId).append(" to ").append(sbo).append("\n");
+            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(), sbo);
+          }
+        } else {
+          details.append("Cannot derive SBO from coverage");
         }
         // set AR-FAAR after sbo computation
         String arfaar = getArfarrBySbo(sbo, entityManager);
