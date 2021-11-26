@@ -5,6 +5,7 @@ package com.ibm.cio.cmr.request.automation.impl.gbl;
 
 import javax.persistence.EntityManager;
 
+import org.apache.log4j.Logger;
 import org.springframework.ui.ModelMap;
 
 import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
@@ -25,6 +26,7 @@ import com.ibm.cmr.services.client.matching.gbg.GBGResponse;
  * 
  */
 public class RetrieveIBMValuesElement extends OverridingElement {
+  private static final Logger LOG = Logger.getLogger(RetrieveIBMValuesElement.class);
 
   public RetrieveIBMValuesElement(String requestTypes, String actionOnError, boolean overrideData, boolean stopOnError) {
     super(requestTypes, actionOnError, overrideData, stopOnError);
@@ -45,10 +47,15 @@ public class RetrieveIBMValuesElement extends OverridingElement {
     Addr soldTo = requestData.getAddress("ZS01");
     ModelMap response = new ModelMap();
 
-    if (engineData.hasPositiveCheckStatus(AutomationEngineData.SKIP_ODM)) {
-      results.setDetails("Skipped element due to previous element execution results.");
+    // added flow to skip retrieve IBM
+    if (engineData.hasPositiveCheckStatus(AutomationEngineData.SKIP_RETRIEVE_VALUES)) {
+      // ensure a retrieve IBM is set
+      LOG.debug("Skip retrieve IBM for Create contains Positive Check");
+      results.setDetails("ODM Coverage, BG, and GLC calculation skipped due to setting results.");
       results.setResults("Skipped");
-      results.setProcessOutput(results.getProcessOutput());
+      results.setProcessOutput(overrides);
+      LOG.debug("After ODM Coverage, BG, and GLC for Create ...");
+
       return results;
     }
     // glc
