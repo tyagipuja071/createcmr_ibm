@@ -293,7 +293,7 @@ public class NordicsUtil extends AutomationUtil {
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_FIELD_COMPUTATION);
-      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_ODM);
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_RETRIEVE_VALUES);
     }
 
     return true;
