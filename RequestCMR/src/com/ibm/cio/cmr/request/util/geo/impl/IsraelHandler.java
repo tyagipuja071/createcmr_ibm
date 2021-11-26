@@ -371,6 +371,10 @@ public class IsraelHandler extends EMEAHandler {
         }
       }
 
+      if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+        data.setIsicCd("");
+        data.setEngineeringBo("");
+      }
       // defect 1299146
       if (mainRecord.getCmrSortl() != null && mainRecord.getCmrSortl().length() >= 10) {
         data.setSalesBusOffCd(mainRecord.getCmrSortl().substring(0, 3));
