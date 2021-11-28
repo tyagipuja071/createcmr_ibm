@@ -9,6 +9,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -78,6 +79,7 @@ import com.ibm.cio.cmr.request.masschange.obj.TemplateTab;
 import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation;
 import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation.ValidationRow;
 import com.ibm.cio.cmr.request.model.BaseModel;
+import com.ibm.cio.cmr.request.model.ParamContainer;
 import com.ibm.cio.cmr.request.model.requestentry.AddressModel;
 import com.ibm.cio.cmr.request.model.requestentry.DataModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
@@ -89,6 +91,7 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.BaseService;
 import com.ibm.cio.cmr.request.service.approval.ApprovalService;
+import com.ibm.cio.cmr.request.service.dpl.DPLSearchService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
@@ -101,6 +104,7 @@ import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.at.ATUtil;
+import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.CNDHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.DEHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.JPHandler;
@@ -146,6 +150,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
   private static HashMap<String, Integer> ZD01_FLD = new HashMap<>();
   private static HashMap<String, Integer> ZS02_FLD = new HashMap<>();
   private static HashMap<String, Integer> ZP02_FLD = new HashMap<>();
+  private static final List<String> IL_AUTO_DPL_SEACRH = Arrays.asList("CTYA", "CTYB", "CTYC", "ZI01", "ZS02");
 
   private String massUpdtRdcOnly;
 
@@ -254,6 +259,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     // query all addresses where name1 or name2 is not empty.
     List<MassUpdtAddr> addrs = LegacyDirectUtil.getMassUpdtAddrsForDPLCheck(entityManager, String.valueOf(model.getReqId()),
         String.valueOf(admin.getIterationId()));
+    GEOHandler handler = RequestUtils.getGEOHandler(model.getCmrIssuingCntry());
     if (addrs != null && addrs.size() > 0) {
       for (MassUpdtAddr addr : addrs) {
         String cmrNoVal = addr.getCmrNo();
@@ -278,6 +284,33 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
             addr.setDplChkTimestamp(SystemUtil.getCurrentTimestamp());
             LOG.debug(">>> Setting the DPL Result Timestamp of > " + dplStatRowMap.get("ROW_DPL_RUN_DATE"));
             entityManager.merge(addr);
+
+            if (handler != null && handler.shouldAutoDplSearchMassUpdate()) {
+              if (addr.getDplChkResult().equals("F")) {
+                LOG.debug("Start performing auto search DPL...");
+                if (model.getCmrIssuingCntry().equals((SystemLocation.ISRAEL))) {
+                  if (!IL_AUTO_DPL_SEACRH.contains(addr.getId().getAddrType())) {
+                    continue;
+                  }
+                }
+                ParamContainer params = new ParamContainer();
+                params.addParam("processType", "ATTACHMASSUPDT");
+                params.addParam("reqId", admin.getId().getReqId());
+                params.addParam("user", user);
+                params.addParam("filePrefix", "AutoDPLSearch_");
+                params.addParam("custname1", custName1Val);
+                params.addParam("custname2", custName2Val);
+                params.addParam("addrType", addr.getId().getAddrType());
+                params.addParam("dplChkResult", addr.getDplChkResult());
+                try {
+                  DPLSearchService dplService = new DPLSearchService();
+                  dplService.process(null, params);
+                } catch (Exception e) {
+                  this.log.warn("DPL results not attached to the request", e);
+                }
+              }
+              LOG.debug("End performing auto search DPL...");
+            }
           }
         }
       }
@@ -719,6 +752,14 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         // muAddr.setDplChkResult("F");
         mapTrans.put("ROW_DPL_STAT", "F");
       }
+
+      if (model.getCmrIssuingCntry().equals(SystemLocation.ISRAEL)) {
+        if (muAddr.getId().getAddrType().equals("ZS01") || muAddr.getId().getAddrType().equals("ZP01")
+            || muAddr.getId().getAddrType().equals("ZD01")) {
+          mapTrans.put("ROW_DPL_STAT", "N");
+        }
+      }
+
       mapTrans.put("ROW_DPL_RUN_DATE", SystemUtil.getCurrentTimestamp().toString());
       // muAddr.setDplChkTimestamp(SystemUtil.getCurrentTimestamp());
       // entityManager.merge(muAddr);
@@ -751,11 +792,17 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       // those are already in rdc, skip them
       extAddrQuery.append("and ADDRNO not in (" + sequences.toString() + ")");
     }
+    if (cmrCntry.equals("755")) {
+      cmrCntry = "756";
+    }
     extAddrQuery.setParameter("CNTRY", cmrCntry);
     extAddrQuery.setParameter("CMR_NO", cmrNo);
     extAddrQuery.setForReadOnly(true);
     List<CmrtAddr> addresses = extAddrQuery.getResults(CmrtAddr.class);
     List<FindCMRRecordModel> extAddresses = new ArrayList<FindCMRRecordModel>();
+    if (cmrCntry.equals("756")) {
+      cmrCntry = "755";
+    }
     if (addresses != null && !addresses.isEmpty()) {
       for (CmrtAddr addr : addresses) {
         FindCMRRecordModel rec = new FindCMRRecordModel();

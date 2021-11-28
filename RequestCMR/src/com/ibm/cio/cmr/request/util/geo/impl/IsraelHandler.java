@@ -1741,4 +1741,9 @@ public class IsraelHandler extends EMEAHandler {
     return false;
   }
 
+  @Override
+  public boolean shouldAutoDplSearchMassUpdate() {
+    return true;
+  }
+
 }

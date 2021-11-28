@@ -999,4 +999,13 @@ public abstract class GEOHandler {
     return null;
   }
 
+  /**
+   * Return true if mass update auto dpl search is enabled
+   * 
+   * @return
+   */
+  public boolean shouldAutoDplSearchMassUpdate() {
+    return false;
+  }
+
 }
