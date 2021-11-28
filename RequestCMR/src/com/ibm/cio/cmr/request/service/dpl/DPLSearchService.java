@@ -25,6 +25,7 @@ import com.ibm.cio.cmr.request.automation.util.CommonWordsUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
 import com.ibm.cio.cmr.request.entity.Scorecard;
 import com.ibm.cio.cmr.request.entity.ScorecardPK;
 import com.ibm.cio.cmr.request.model.ParamContainer;
@@ -70,6 +71,8 @@ public class DPLSearchService extends BaseSimpleService<Object> {
       return attachResultsToRequest(entityManager, params);
     case "ASSESS":
       return assessDPL(entityManager, params);
+    case "ATTACHMASSUPDT":
+      return attachResultsToMassUpdateRequest(entityManager, params);
     }
     return null;
   }
@@ -413,6 +416,219 @@ public class DPLSearchService extends BaseSimpleService<Object> {
     entityManager.merge(scorecard);
 
     return reqData;
+  }
+
+  /**
+   * Attaches the results of the automated DPL search to the request
+   * 
+   * @param entityManager
+   * @param params
+   * @return
+   * @throws Exception
+   */
+  private Boolean attachResultsToMassUpdateRequest(EntityManager entityManager, ParamContainer params) throws Exception {
+    Long reqId = (Long) params.getParam("reqId");
+    if (reqId == null) {
+      throw new Exception("Request ID is required.");
+    }
+    AppUser user = (AppUser) params.getParam("user");
+
+    RequestData reqData = processRequest(entityManager, params);
+    String companyName = extractMainCompanyMassUpdtName(reqData, params);
+    List<DPLSearchResults> results = getPlainDPLMassUpdateSearchResults(entityManager, params);
+
+    int resultCount = 0;
+    for (DPLSearchResults result : results) {
+      if (result.getDeniedPartyRecords() != null) {
+        resultCount += result.getDeniedPartyRecords().size();
+      }
+    }
+    ScorecardPK scorecardPk = new ScorecardPK();
+    scorecardPk.setReqId(reqId);
+    Scorecard scorecard = entityManager.find(Scorecard.class, scorecardPk);
+    if (scorecard != null && resultCount == 0) {
+      LOG.debug("Auto assessinging DPL check results.");
+      scorecard.setDplAssessmentBy("CreateCMR");
+      scorecard.setDplAssessmentCmt("No actual results found during the search.");
+      scorecard.setDplAssessmentResult("N");
+      scorecard.setDplAssessmentDate(SystemUtil.getActualTimestamp());
+      entityManager.merge(scorecard);
+    }
+
+    AttachmentService attachmentService = new AttachmentService();
+    Timestamp ts = SystemUtil.getActualTimestamp();
+    DPLSearchPDFConverter pdf = new DPLSearchPDFConverter(user.getIntranetId(), ts.getTime(), companyName, results);
+    pdf.setScorecard(scorecard);
+
+    String type = "";
+    try {
+      type = MIME_TYPES.getContentType("temp.pdf");
+    } catch (Exception e) {
+    }
+    if (StringUtils.isEmpty(type)) {
+      type = "application/octet-stream";
+    }
+
+    String prefix = (String) params.getParam("filePrefix");
+    if (prefix == null) {
+      prefix = "DPLSearch_";
+    }
+
+    SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmm");
+    String fileName = prefix + formatter.format(ts) + ".pdf";
+
+    LOG.debug("Attaching " + fileName + " to Request " + reqId);
+
+    boolean success = true;
+    try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+      pdf.exportToPdf(null, null, null, bos, null);
+
+      byte[] pdfBytes = bos.toByteArray();
+
+      try (ByteArrayInputStream bis = new ByteArrayInputStream(pdfBytes)) {
+        try {
+          attachmentService.removeAttachmentsOfType(entityManager, reqId, "DPL", prefix);
+          attachmentService.addExternalAttachment(entityManager, user, reqId, "DPL", fileName, "DPL Search Results", bis);
+        } catch (Exception e) {
+          LOG.warn("Unable to save DPL attachment.", e);
+          success = false;
+        }
+      }
+    }
+    return success;
+
+  }
+
+  /**
+   * Extracts the company name to use
+   * 
+   * @param reqData
+   * @return
+   */
+  private String extractMainCompanyMassUpdtName(RequestData reqData, ParamContainer params) {
+    Data data = reqData.getData();
+    String addrType = (String) params.getParam("addrType");
+    String custname1 = (String) params.getParam("custname1");
+    String custname2 = (String) params.getParam("custname2");
+
+    String companyName = null;
+    switch (data.getCmrIssuingCntry()) {
+    case SystemLocation.ISRAEL:
+      if ("CTYA".equals(addrType) || "CTYB".equals(addrType) || "CTYC".equals(addrType) || "ZI01".equals(addrType) || "ZS02".equals(addrType)) {
+        companyName = custname1 + (StringUtils.isBlank(custname2) ? " " + custname2 : "");
+      }
+      break;
+    case SystemLocation.JAPAN:
+      for (MassUpdtAddr muAddr : reqData.getMuAddr()) {
+        if ("ZS01".equals(muAddr.getId().getAddrType())) {
+          companyName = muAddr.getCustNm3();
+        }
+      }
+      break;
+
+    }
+    if (StringUtils.isBlank(companyName)) {
+      companyName = reqData.getAdmin().getMainCustNm1();
+      if (!StringUtils.isBlank(reqData.getAdmin().getMainCustNm2())) {
+        companyName += " " + reqData.getAdmin().getMainCustNm2();
+      }
+    }
+    return companyName;
+  }
+
+  /**
+   * Executes a DPL search and returns a list of results based on name
+   * variations
+   * 
+   * @param entityManager
+   * @param params
+   * @return
+   * @throws Exception
+   */
+  private List<DPLSearchResults> getPlainDPLMassUpdateSearchResults(EntityManager entityManager, ParamContainer params) throws Exception {
+    List<String> names = new ArrayList<String>();
+    List<DPLSearchResults> results = new ArrayList<DPLSearchResults>();
+
+    Long reqId = (Long) params.getParam("reqId");
+    if (reqId == null || reqId == 0) {
+      String searchString = (String) params.getParam("searchString");
+      if (searchString != null) {
+        names.add(searchString.toUpperCase().trim());
+      }
+    } else {
+      RequestData reqData = processRequest(entityManager, params);
+      GEOHandler handler = RequestUtils.getGEOHandler(reqData.getData().getCmrIssuingCntry());
+      if (handler != null && !handler.customerNamesOnAddress()) {
+        String name = reqData.getAdmin().getMainCustNm1().toUpperCase();
+        if (!StringUtils.isBlank(reqData.getAdmin().getMainCustNm2())) {
+          name += " " + reqData.getAdmin().getMainCustNm2().toUpperCase();
+        }
+        names.add(name);
+      } else {
+        String cntry = reqData.getData().getCmrIssuingCntry();
+        String addrType = (String) params.getParam("addrType");
+        String dplChkResult = (String) params.getParam("dplChkResult");
+        String custname1 = (String) params.getParam("custname1");
+        String custname2 = (String) params.getParam("custname2");
+        if (addrType.contains("X")) {
+          // no DPL check for uwanted addresses
+          // continue;
+        }
+        if (!"P".equals(dplChkResult) && !"X".equals(dplChkResult) && !"N".equals(dplChkResult)) {
+          String name = "";
+          // for japan, name is on cust nm3, CMR-7419
+          if (SystemLocation.JAPAN.equals(cntry)) {
+            // name = muAddr.getCustNm3();
+          } else {
+            name = custname1 != null ? custname1.toUpperCase() : "";
+            if (!StringUtils.isBlank(custname2)) {
+              name += " " + custname2.toUpperCase();
+            }
+          }
+          if (!StringUtils.isBlank(name) && !names.contains(name)) {
+            names.add(name);
+          }
+        }
+      }
+    }
+
+    if (names.isEmpty()) {
+      LOG.debug("No name specified to search.");
+      return null;
+    }
+
+    // get a minimized name from search name
+    List<String> minimizedList = new ArrayList<String>();
+    for (String name : names) {
+      String minimized = CommonWordsUtil.minimize(name).toUpperCase();
+      if (!names.contains(minimized) && !minimizedList.contains(minimized)) {
+        minimizedList.add(minimized);
+      }
+    }
+    names.addAll(minimizedList);
+
+    String baseUrl = SystemConfiguration.getValue("CMR_SERVICES_URL");
+    DPLCheckClient client = CmrServicesFactory.getInstance().createClient(baseUrl, DPLCheckClient.class);
+    for (String searchString : names) {
+      DPLSearchRequest request = new DPLSearchRequest();
+      request.setCompanyName(searchString);
+      try {
+        LOG.debug("Performing DPL Search on " + searchString);
+        DPLSearchResponse resp = client.executeAndWrap(DPLCheckClient.DPL_SEARCH_APP_ID, request, DPLSearchResponse.class);
+        if (resp.isSuccess()) {
+          DPLSearchResults result = resp.getResults();
+          result.setSearchArgument(searchString);
+          results.add(result);
+        } else {
+          LOG.debug("An error was encountered when trying to search: " + resp.getMsg());
+          break;
+        }
+      } catch (Exception e) {
+        LOG.warn("DPL Search encountered an error for " + searchString, e);
+      }
+    }
+
+    return results;
   }
 
   @Override
