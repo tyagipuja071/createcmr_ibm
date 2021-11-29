@@ -226,6 +226,10 @@ public class RequestUtils {
       hist.setRejReason(hist.getRejReason().substring(0, 60));
     }
 
+    // trim comment
+    if (hist.getCmt() != null && hist.getCmt().length() > 1000) {
+      hist.setCmt(hist.getCmt().substring(0, 999));
+    }
     if (complete) {
       hist.setCompleteTs(SystemUtil.getCurrentTimestamp());
     }
