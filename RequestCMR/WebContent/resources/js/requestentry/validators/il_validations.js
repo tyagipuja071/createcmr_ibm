@@ -2286,7 +2286,7 @@ function getAddrMismatchInUpdateMsg() {
         var addrTextLocal = (allLocalAddrMap.get(addrSeqLocal).addrTypeText[0]);
         var addrSeqTrans = (allTransAddrsMap.get(addrSeqLocal).addrSeq[0]);
         var addrTextTrans = (allTransAddrsMap.get(addrSeqLocal).addrTypeText[0]);
-        errorMsg += '<br>Address ' + addrTextLocal + ' (' + addrSeqLocal + ') was updated, but ' + addrTextTrans + ' (' + addrSeqTrans + ') was not.';
+        errorMsg += '<br>Address with sequence ' + addrSeqLocal +' from pair ' + addrSeqLocal + ' - ' + addrSeqTrans + ' was updated, but sequence ' + addrSeqTrans + ' was not.';
       }
 
       for (var t = 0; t < updateMismatchTrans.length; t++) {
@@ -2297,7 +2297,7 @@ function getAddrMismatchInUpdateMsg() {
         var addrSeqTrans = (allTransAddrsMap.get(addrSeqLocal).addrSeq[0]);
         var addrTextTrans = (allTransAddrsMap.get(addrSeqTrans).addrTypeText[0]);
         var addrTextLocal = (allLocalAddrMap.get(addrSeqLocal).addrTypeText[0]);
-        errorMsg += '<br>Address ' + addrTextTrans + ' (' + addrSeqTrans + ') was updated, but ' + addrTextLocal + ' (' + addrSeqLocal + ') was not.';
+        errorMsg += '<br>Address with sequence ' + addrSeqTrans +' from pair ' + addrSeqLocal + ' - ' + addrSeqTrans + ' was updated, but sequence ' + addrSeqLocal + ' was not.';
       }
       
       if(errorMsg != '') {
