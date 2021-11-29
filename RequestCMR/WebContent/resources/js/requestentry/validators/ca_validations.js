@@ -249,7 +249,6 @@ function afterConfigForCA() {
   }
 
   addFieldHandlers();
-  FormManager.setValue("inacCd", "");
 }
 
 var _inacCodeHandler = null;
