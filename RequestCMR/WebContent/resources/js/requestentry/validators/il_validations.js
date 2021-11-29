@@ -2212,6 +2212,106 @@ function lockCMROwner() {
   FormManager.readOnly('cmrOwner');
 }
 
+
+function executeBeforeSubmit(action) {
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType == 'U') {
+    var addrMismatchInUpdateErr = getAddrMismatchInUpdateMsg();
+    if (addrMismatchInUpdateErr != '' && action != 'CRU') {
+      cmr.showConfirm('showVerificationModal()', addrMismatchInUpdateErr, 'Warning', null, {
+        OK : 'Yes',
+        CANCEL : 'No'
+      });
+    } else if (addrMismatchInUpdateErr != '' && action == 'CRU') {
+      cmr.showConfirm('doYourAction()', addrMismatchInUpdateErr, 'Warning', null, {
+        OK : 'Yes',
+        CANCEL : 'No'
+      });
+    } else if(action == 'CRU') {
+      doYourAction();
+    } else {
+      showVerificationModal();
+    }
+  } else {
+    showVerificationModal();
+  }
+}
+
+function getAddrMismatchInUpdateMsg() {
+  var errorMsg = '';
+
+  if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+    var record = null;
+    var type = null;
+    var updateInd = null;
+    var updatedLocalAddrs = [];
+    var updatedTransAddrsPair = [];
+    var allTransAddrsMap = new Map();
+    var allLocalAddrMap = new Map();
+    for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+      record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+      if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+        record = _allAddressData[i];
+      }
+      type = record.addrType;
+      updateInd = record.updateInd;
+      if (typeof (type) == 'object') {
+        type = type[0];
+      }
+      if (typeof (updateInd) == 'object') {
+        updateInd = updateInd[0];
+      }
+      if ((type == 'ZS01' || type == 'ZP01' || type == 'ZD01')) {
+        allLocalAddrMap.set(record.addrSeq[0], record);
+        if(updateInd == 'U') {
+          updatedLocalAddrs.push(record.addrSeq[0]);  
+        }
+      } else if ((type == 'CTYA' || type == 'CTYB' || type == 'CTYC')) {
+        allTransAddrsMap.set(record.pairedSeq[0], record);
+        allTransAddrsMap.set(record.addrSeq[0], record);
+        if(updateInd == 'U') {
+          updatedTransAddrsPair.push(record.pairedSeq[0]);  
+        }
+      }
+    }
+     var updateMismatchLocal = updatedLocalAddrs.filter(val => !updatedTransAddrsPair.includes(val));
+     var updateMismatchTrans = updatedTransAddrsPair.filter(val => !updatedLocalAddrs.includes(val));
+
+    if (updateMismatchTrans.length != 0 || updateMismatchLocal.length != 0) {
+      for (var l = 0; l < updateMismatchLocal.length; l++) {
+        if(errorMsg != '') {
+          errorMsg += '<br>';
+        }
+        var addrSeqLocal = updateMismatchLocal[l];
+        var addrTextLocal = (allLocalAddrMap.get(addrSeqLocal).addrTypeText[0]);
+        var addrSeqTrans = (allTransAddrsMap.get(addrSeqLocal).addrSeq[0]);
+        var addrTextTrans = (allTransAddrsMap.get(addrSeqLocal).addrTypeText[0]);
+        errorMsg += '<br>Address ' + addrTextLocal + ' (' + addrSeqLocal + ') was updated, but ' + addrTextTrans + ' (' + addrSeqTrans + ') was not.';
+      }
+
+      for (var t = 0; t < updateMismatchTrans.length; t++) {
+        if(errorMsg != '') {
+          errorMsg += '<br>';
+        }
+        var addrSeqLocal = updateMismatchTrans[t];
+        console.log(allTransAddrsMap.get(addrSeqLocal).addrSeq[0]);
+        var addrSeqTrans = (allTransAddrsMap.get(addrSeqLocal).addrSeq[0]);
+        var addrTextTrans = (allTransAddrsMap.get(addrSeqTrans).addrTypeText[0]);
+        var addrTextLocal = (allLocalAddrMap.get(addrSeqLocal).addrTypeText[0]);
+        errorMsg += '<br>Address ' + addrTextTrans + ' (' + addrSeqTrans + ') was updated, but ' + addrTextLocal + ' (' + addrSeqLocal + ') was not.';
+      }
+      
+      if(errorMsg != '') {
+        errorMsg += '<br><br>Do you want to proceed with this request?';
+      }
+    }
+  }
+  return errorMsg;
+}
+
+function showVerificationModal() {
+  cmr.showModal('addressVerificationModal');
+}
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding Israel functions...');
@@ -2225,11 +2325,16 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(afterConfigForIsrael, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(addILClientTierISULogic, [ SysLoc.ISRAEL ]);
   GEOHandler.registerValidator(addILAddressTypeValidator, [ SysLoc.ISRAEL ], null, true);
-  GEOHandler.registerValidator(addILAddressTypeMailingValidator, [ SysLoc.ISRAEL ], null, true);
-  GEOHandler.registerValidator(addILAddressTypeBillingValidator, [ SysLoc.ISRAEL ], null, true);
-  GEOHandler.registerValidator(addShippingAddrTypeValidator, [ SysLoc.ISRAEL ], null, true);
-  GEOHandler.registerValidator(addILAddressTypeCntyAValidator, [ SysLoc.ISRAEL ], null, true);
-  GEOHandler.registerValidator(addILAddressTypeCntyBValidator, [ SysLoc.ISRAEL ], null, true);
+  // GEOHandler.registerValidator(addILAddressTypeMailingValidator, [
+  // SysLoc.ISRAEL ], null, true);
+  // GEOHandler.registerValidator(addILAddressTypeBillingValidator, [
+  // SysLoc.ISRAEL ], null, true);
+  // GEOHandler.registerValidator(addShippingAddrTypeValidator, [ SysLoc.ISRAEL
+  // ], null, true);
+  // GEOHandler.registerValidator(addILAddressTypeCntyAValidator, [
+  // SysLoc.ISRAEL ], null, true);
+// GEOHandler.registerValidator(addILAddressTypeCntyBValidator, [ SysLoc.ISRAEL
+// ], null, true);
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.ISRAEL, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(addStreetAddressFormValidator, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(addEmbargoCodeValidator, SysLoc.ISRAEL, null, true);
