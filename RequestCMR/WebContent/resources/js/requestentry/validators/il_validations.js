@@ -21,7 +21,7 @@ function addHandlersForIL() {
 
   if (_CTCHandlerIL == null) {
     _CTCHandlerIL = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
-      setEnterpriseSalesRepSBP();
+      setEnterpriseSalesRepSBO();
     });
   }
 
@@ -2069,7 +2069,7 @@ function validateEnterpriseNo() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
-function setEnterpriseSalesRepSBP() {
+function setEnterpriseSalesRepSBO() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
@@ -2088,10 +2088,14 @@ function setEnterpriseSalesRepSBP() {
     FormManager.setValue('enterprise', '003290');
     FormManager.setValue('salesBusOffCd', '006');
     FormManager.setValue('repTeamMemberNo', '000651');
-  } else if (isuCd == '21' && clientTier == '7') {
+  } else if (isuCd == '21' && clientTier == '') {
     FormManager.setValue('enterprise', '985999');
     FormManager.setValue('salesBusOffCd', '009');
     FormManager.setValue('repTeamMemberNo', '000993');
+  } else if (isuCd == '5K' && clientTier == '') {
+    FormManager.setValue('enterprise', '006510');
+    FormManager.setValue('salesBusOffCd', '006');
+    FormManager.setValue('repTeamMemberNo', '000651');
   }
 }
 
