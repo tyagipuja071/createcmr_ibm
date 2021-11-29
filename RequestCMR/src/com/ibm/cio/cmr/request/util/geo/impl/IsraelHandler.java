@@ -383,18 +383,22 @@ public class IsraelHandler extends EMEAHandler {
         data.setEngineeringBo("");
         data.setIsuCd("");
         data.setClientTier("");
-      }
-      // defect 1299146
-      if (mainRecord.getCmrSortl() != null && mainRecord.getCmrSortl().length() >= 10) {
-        data.setSalesBusOffCd(mainRecord.getCmrSortl().substring(0, 3));
-        LOG.trace("SBO from Sortl : " + data.getSalesBusOffCd());
-        if (SystemLocation.ISRAEL.equals(data.getCmrIssuingCntry())) {
-          data.setRepTeamMemberNo(mainRecord.getCmrSortl().substring(4));
-          LOG.trace("Rep No from Sortl (IL) : " + data.getRepTeamMemberNo());
-        } else {
-          // defect fix 1329919 changed from 5 to 4
-          data.setRepTeamMemberNo(mainRecord.getCmrSortl().substring(4, 10));
-          LOG.trace("Rep No from Sortl : " + data.getRepTeamMemberNo());
+        data.setRepTeamMemberNo("");
+        data.setSalesBusOffCd("");
+        data.setEnterprise("");
+      } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+        // defect 1299146
+        if (mainRecord.getCmrSortl() != null && mainRecord.getCmrSortl().length() >= 10) {
+          data.setSalesBusOffCd(mainRecord.getCmrSortl().substring(0, 3));
+          LOG.trace("SBO from Sortl : " + data.getSalesBusOffCd());
+          if (SystemLocation.ISRAEL.equals(data.getCmrIssuingCntry())) {
+            data.setRepTeamMemberNo(mainRecord.getCmrSortl().substring(4));
+            LOG.trace("Rep No from Sortl (IL) : " + data.getRepTeamMemberNo());
+          } else {
+            // defect fix 1329919 changed from 5 to 4
+            data.setRepTeamMemberNo(mainRecord.getCmrSortl().substring(4, 10));
+            LOG.trace("Rep No from Sortl : " + data.getRepTeamMemberNo());
+          }
         }
       }
       // 1299146
