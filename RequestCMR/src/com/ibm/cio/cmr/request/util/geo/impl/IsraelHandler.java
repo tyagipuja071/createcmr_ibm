@@ -757,7 +757,8 @@ public class IsraelHandler extends EMEAHandler {
     String sql = ExternalizedQuery.getSql("GET.ADDRSEQ.LATEST.BY_REQID_TYPE");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", reqId);
-    query.setParameter("ADDR_TYPE", "ZD01");
+    query.setParameter("ADDR_TYPE_LOCAL", "ZD01");
+    query.setParameter("ADDR_TYPE_TRANS", "CTYC");
     List<String> results = query.getResults(String.class);
     if (!results.isEmpty() && !results.get(0).isEmpty()) {
       return results.get(0);

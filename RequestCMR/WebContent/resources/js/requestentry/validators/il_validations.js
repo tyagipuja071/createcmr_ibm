@@ -2294,7 +2294,6 @@ function getAddrMismatchInUpdateMsg() {
           errorMsg += '<br>';
         }
         var addrSeqLocal = updateMismatchTrans[t];
-        console.log(allTransAddrsMap.get(addrSeqLocal).addrSeq[0]);
         var addrSeqTrans = (allTransAddrsMap.get(addrSeqLocal).addrSeq[0]);
         var addrTextTrans = (allTransAddrsMap.get(addrSeqTrans).addrTypeText[0]);
         var addrTextLocal = (allLocalAddrMap.get(addrSeqLocal).addrTypeText[0]);
