@@ -593,38 +593,43 @@ public class CanadaUtil extends AutomationUtil {
         for (Addr addr : addresses) {
           if ("N".equals(addr.getImportInd())) {
             // new address
-            LOG.debug("Checking duplicates for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
-            boolean duplicate = addressExists(entityManager, addr);
-            if (duplicate) {
-              LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
-              duplicateDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");
-              resultCodes.add("D");
+            // LOG.debug("Checking duplicates for " + addrType + "(" +
+            // addr.getId().getAddrSeq() + ")");
+            // boolean duplicate = addressExists(entityManager, addr);
+            // if (duplicate) {
+            // LOG.debug(" - Duplicates found for " + addrType + "(" +
+            // addr.getId().getAddrSeq() + ")");
+            // duplicateDetails.append("Address " + addrType + "(" +
+            // addr.getId().getAddrSeq() + ") provided matches an existing
+            // address.\n");
+            // resultCodes.add("D");
+            // } else {
+            // LOG.debug(" - NO duplicates found for " + addrType + "(" +
+            // addr.getId().getAddrSeq() + ")");
+            if (addrType.startsWith("ZP")) {
+              LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+              checkDetails.append("Addition of new " + addrType + "(" + addr.getId().getAddrSeq() + ") address skipped in the checks.\n");
             } else {
-              LOG.debug(" - NO duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
-              if (addrType.startsWith("ZP")) {
-                LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
-                checkDetails.append("Addition of new " + addrType + "(" + addr.getId().getAddrSeq() + ") address skipped in the checks.\n");
+              List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addr, false);
+              boolean matchesDnb = false;
+              if (matches != null) {
+                // check against D&B
+                matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
+              }
+              if (!matchesDnb) {
+                LOG.debug("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
+                resultCodes.add("R");
+                checkDetails.append("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
               } else {
-                List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addr, false);
-                boolean matchesDnb = false;
-                if (matches != null) {
-                  // check against D&B
-                  matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
-                }
-                if (!matchesDnb) {
-                  LOG.debug("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
-                  resultCodes.add("R");
-                  checkDetails.append("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
-                } else {
-                  checkDetails.append("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
-                  for (DnBMatchingResponse dnb : matches) {
-                    checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
-                    checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
-                    checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
-                        + dnb.getDnbCountry() + "\n\n");
-                  }
+                checkDetails.append("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
+                for (DnBMatchingResponse dnb : matches) {
+                  checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
+                  checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
+                  checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
+                      + dnb.getDnbCountry() + "\n\n");
                 }
               }
+              // }
             }
           } else if ("Y".equals(addr.getChangedIndc())) {
             // updated addresses
