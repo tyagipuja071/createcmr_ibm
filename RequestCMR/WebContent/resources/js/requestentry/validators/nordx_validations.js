@@ -4556,7 +4556,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(searchTermValidation, GEOHandler.NORDX, null, true);
   // GEOHandler.addAfterConfig(searchTermValidation, GEOHandler.NORDX);
   // GEOHandler.addAfterTemplateLoad(searchTermValidation, GEOHandler.NORDX);
-  // GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.NORDX,
-  // null, true);
+  GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.NORDX, null, true);
 
 });
