@@ -121,14 +121,15 @@ public abstract class AutomationUtil {
       "AS", "as", "Aktienges.", "Aktiengesellschaft", "asbl", "ASBL", "b.v.", "B.V.", "BVBA", "bvba", "C/O", "CBC", "CCC", "chez", "CIC", "CJSC",
       "CLG", "CLS", "Companhia", "companhia", "COMPANHIA", "company", "Company", "COMPANY", "cooperacao", "Cooperacao", "COOPERACAO", "COOPERATIVA",
       "Corp", "corp", "CORP", "Corp.", "corp.", "CORP.", "Corporation", "corporation", "CORPORATION", "CVBA", "d.d.", "d.n.o.", "d.o.o.", "EBVBA",
-      "EEIG", "EURL", "FCP", "FZCO", "Ges.M.B.H.", "Gesellschaft", "gesmbh", "Gesmbh", "GmbH", "gmbh", "GMBH", "HF.", "Hf.", "HOLDING", "HOLDINGS",
-      "I/S", "Incorporated", "incorporated", "INTERNATIONAL", "k.d.", "k.s.", "k/s", "K/S", "kansainvalinen", "KFT", "kg", "Kg", "KG",
-      "Kommanditgesellschaft", "KOOP", "LDA", "lda", "LIMITADA", "Limited", "limited", "limtada", "llc", "LLP", "Ltd", "ltd", "Ltd.", "ltd.", "LTD.",
-      "Ltda", "ltda", "ltda.", "MANAGEMENT", "MBH", "N.V.", "n.v.", "OHG", "OJSC", "OY", "PLC", "PTE", "PTY", "PTY.", "PVT", "RTE", "RTM", "s.a.r.l.",
-      "S.A.R.L.", "S.A.S.", "s.a.s.", "S.A.U.", "s.a.u.", "s.c.", "S.C.A.", "s.c.a.", "s.c.s.", "s.l.", "S.L.", "s.p.", "S.P.A.", "S.p.A.", "s.p.a.",
-      "S.P.R.L.", "s.p.r.l.", "s.r.l.", "S.R.L.", "s.r.o.", "sarl", "SARL", "SCOP", "SCP", "SCRL", "SCS", "SERVICE", "Services", "SERVICES",
-      "services", "SHA", "SICAV", "SLU", "snc", "SNC", "sociedada", "SOCIEDADE", "societe", "Societe", "sp. z o.o.", "SPJ", "spol. s r.o.", "SPRL",
-      "sprl", "srl", "SRL", "SRLS", "T/A", "T/AS", "TRADING", "UAB", "ULC", "UNIPESSOAL", "unipessoal");
+      "EEIG", "EHF", "EHF.", "ehf", "ehf.", "EURL", "FCP", "FZCO", "Ges.M.B.H.", "Gesellschaft", "gesmbh", "Gesmbh", "GmbH", "gmbh", "GMBH", "HF.",
+      "Hf.", "HOLDING", "HOLDINGS", "I/S", "Incorporated", "incorporated", "INTERNATIONAL", "k.d.", "k.s.", "k/s", "K/S", "kansainvalinen", "KFT",
+      "kg", "Kg", "KG", "Kommanditgesellschaft", "KOOP", "LDA", "lda", "LIMITADA", "Limited", "limited", "limtada", "llc", "LLP", "Ltd", "ltd",
+      "Ltd.", "ltd.", "LTD.", "Ltda", "ltda", "ltda.", "MANAGEMENT", "MBH", "N.V.", "n.v.", "OHG", "OJSC", "OU", "ou", "OY", "PLC", "PTE", "PTY",
+      "PTY.", "PVT", "RTE", "RTM", "s.a.r.l.", "S.A.R.L.", "S.A.S.", "s.a.s.", "S.A.U.", "s.a.u.", "s.c.", "S.C.A.", "s.c.a.", "s.c.s.", "s.l.",
+      "S.L.", "s.p.", "S.P.A.", "S.p.A.", "s.p.a.", "S.P.R.L.", "s.p.r.l.", "s.r.l.", "S.R.L.", "s.r.o.", "sarl", "SARL", "SCOP", "SCP", "SCRL",
+      "SCS", "SERVICE", "Services", "SERVICES", "services", "SHA", "SIA", "sia", "SICAV", "SLU", "snc", "SNC", "sociedada", "SOCIEDADE", "societe",
+      "Societe", "sp. z o.o.", "SPJ", "spol. s r.o.", "SPRL", "sprl", "srl", "SRL", "SRLS", "T/A", "T/AS", "TRADING", "UAB", "ULC", "UNIPESSOAL",
+      "unipessoal");
 
   /**
    * Holds the possible return values of
