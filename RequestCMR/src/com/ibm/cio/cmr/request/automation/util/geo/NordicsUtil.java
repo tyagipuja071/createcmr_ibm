@@ -104,7 +104,7 @@ public class NordicsUtil extends AutomationUtil {
   public static final String EE_GOV_LOCAL = "EEGOV";
   public static final String EE_INTSO_LOCAL = "EEISO";
   public static final String EE_IBME_LOCAL = "EEIBM";
-  public static final String EE_PRIPE_LOCAL = "EETPRI";
+  public static final String EE_PRIPE_LOCAL = "EEPRI";
 
   public static final String LT_COMME_LOCAL = "LTCOM";
   public static final String LT_GOV_LOCAL = "LTGOV";
