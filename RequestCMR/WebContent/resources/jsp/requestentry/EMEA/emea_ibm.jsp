@@ -187,3 +187,17 @@
     </cmr:column> 
   </cmr:row>
 </cmr:view>
+
+<cmr:view forCountry="755">
+  <cmr:row topPad="10" addBackground="true">
+    <cmr:column span="2" containerForField="MiscBillCode">
+      <p>
+        <cmr:label fieldId="MiscBillCode">
+        <cmr:fieldLabel fieldId="MiscBillCode" />: 
+           <cmr:delta text="${rdcdata.miscBillCd}" oldValue="${reqentry.miscBillCd}" id="delta-miscBillCd" />
+        </cmr:label>
+        <cmr:field path="miscBillCd" id="miscBillCd" fieldId="MiscBillCode" tabId="MAIN_IBM_TAB" />
+      </p>
+    </cmr:column>
+  </cmr:row>
+</cmr:view>
