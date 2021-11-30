@@ -438,13 +438,15 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
     if (issuingCntry && issuingCntry.length > 3) {
       return issuingCntry;
     }
-    var ret = cmr.query('QUICK.CHECK_SUBREGION', {
+    
+ // for Cmr-4514 
+/*    var ret = cmr.query('QUICK.CHECK_SUBREGION', {
       CNTRY : issuingCntry,
       CD : issuingCntry + countryCd
     });
     if (ret && ret.ret1) {
       return issuingCntry + countryCd;
-    }
+    }*/
     ret = cmr.query('QUICK.CHECK_SUBREGION_DEFLT', {
       CNTRY : issuingCntry,
       CD : issuingCntry
