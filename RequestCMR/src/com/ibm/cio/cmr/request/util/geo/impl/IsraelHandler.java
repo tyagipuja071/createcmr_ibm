@@ -465,6 +465,25 @@ public class IsraelHandler extends EMEAHandler {
 
         String codflag = !StringUtils.isEmpty(legacyObjects.getCustomer().getDeptCd()) ? legacyObjects.getCustomer().getDeptCd() : "";
         data.setCreditCd(codflag);
+
+        String realcity = !StringUtils.isEmpty(legacyObjects.getCustomer().getRealCtyCd()) ? legacyObjects.getCustomer().getRealCtyCd() : "";
+        String bankNo = !StringUtils.isEmpty(legacyObjects.getCustomer().getBankNo()) ? legacyObjects.getCustomer().getBankNo() : "";
+        if (StringUtils.isNotBlank(data.getRepTeamMemberNo())) {
+          boolean reservedSrep = false;
+          int salesRepInt = Integer.parseInt(data.getRepTeamMemberNo());
+          int minRange = 220;
+          int maxRange = 239;
+          if (salesRepInt >= minRange && salesRepInt <= maxRange) {
+            reservedSrep = true;
+          }
+          if (realcity.equals("755") && bankNo.substring(0, 1).equals("0") && !reservedSrep) {
+            data.setMiscBillCd("NO");
+          } else if (realcity.equals("756") && bankNo.substring(0, 1).equals("9") && !reservedSrep) {
+            data.setMiscBillCd("IBM");
+          } else if (realcity.equals("756") && bankNo.substring(0, 1).equals("0") && reservedSrep) {
+            data.setMiscBillCd("WTC");
+          }
+        }
       }
     } else {
       super.setDataValuesOnImport(admin, data, results, mainRecord);

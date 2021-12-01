@@ -117,6 +117,31 @@ public class IsraelTransformer extends EMEATransformer {
         legacyCust.setBankNo("0");
       }
 
+      if (StringUtils.isNotEmpty(data.getMiscBillCd())) {
+        if (data.getMiscBillCd().equals("NO")) {
+          legacyCust.setRealCtyCd("755");
+          legacyCust.setBankNo("0"); // RBKXA
+          if (!"INTER".equals(custType) || !"INTSO".equals(custType)) {
+            legacyCust.setCreditCd("90");
+          }
+        } else if (data.getMiscBillCd().equals("IBM")) {
+          legacyCust.setRealCtyCd("756");
+          legacyCust.setBankNo("9");
+          if (!"INTER".equals(custType) || !"INTSO".equals(custType)) {
+            legacyCust.setCreditCd("01");
+          }
+        } else if (data.getMiscBillCd().equals("WTC")) {
+          legacyCust.setRealCtyCd("756");
+          legacyCust.setBankNo("0");
+          if (!"INTER".equals(custType) || !"INTSO".equals(custType)) {
+            legacyCust.setCreditCd("01");
+          }
+        }
+      }
+      if ("INTER".equals(custType) || "INTSO".equals(custType)) {
+        legacyCust.setCreditCd("91");
+      }
+
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       // Update only mapping
       DataRdc dataRdc = LegacyDirectUtil.getOldData(entityManager, String.valueOf(data.getId().getReqId()));
