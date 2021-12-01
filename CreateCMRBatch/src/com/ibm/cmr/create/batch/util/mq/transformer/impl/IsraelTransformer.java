@@ -318,7 +318,7 @@ public class IsraelTransformer extends EMEATransformer {
       CMRRequestContainer cmrObjects, Addr currAddr) {
     LOG.debug("LD - transformLegacyAddressData ISRAEL transformer...");
 
-    formatAddressLinesLD(dummyHandler);
+    formatAddressLinesLD(dummyHandler, legacyAddr);
     legacyAddr.getId().setSofCntryCode(SystemLocation.SAP_ISRAEL_SOF_ONLY);
 
     String addrType = currAddr.getId().getAddrType();
@@ -337,15 +337,9 @@ public class IsraelTransformer extends EMEATransformer {
         legacyAddr.setAddrLineO(currAddr.getPairedAddrSeq());
       }
     }
-
-    if (addrType.equals("ZS01") || addrType.equals("ZP01") || addrType.equals("ZD01")) {
-      legacyAddr.setAddrLine3(reverseNumbers(currAddr.getPoBox()) + " מ.ד");
-    } else {
-      legacyAddr.setAddrLine3("PO BOX " + currAddr.getPoBox());
-    }
   }
 
-  public void formatAddressLinesLD(MQMessageHandler handler) {
+  public void formatAddressLinesLD(MQMessageHandler handler, CmrtAddr legacyAddr) {
     Addr addrData = handler.addrData;
     boolean update = "U".equals(handler.adminData.getReqType());
     boolean crossBorder = !"IL".equals(addrData.getLandCntry());
@@ -361,156 +355,100 @@ public class IsraelTransformer extends EMEATransformer {
     messageHash.remove(addrKey + "POBox");
 
     LOG.debug("Handling  Data for " + addrData.getCustNm1());
-    // <XXXAddress1> -> name
-    // <XXXAddress2> -> ? no contact
-    // <XXXAddress3> -> PO BOX (Department when street is not filled)
-    // <XXXAddress4> -> Street (PO BOX when street is not filled)
-    // <XXXAddress5> -> Postal code + City
-    // <XXXAddress6> -> Country
+    String addrlU = "";
 
     // customer name
-    String line1 = addrData.getCustNm1();
-
-    // name con't or attn
-    String line2 = StringUtils.isBlank(addrData.getCustNm2()) ? addrData.getDept() : addrData.getCustNm2();
-
-    // add phone to line 2
-    if (!StringUtils.isBlank(addrData.getCustPhone())) {
-      line2 += ", " + addrData.getCustPhone();
+    String line1 = "";
+    if (StringUtils.isNotBlank(addrData.getCustNm1())) {
+      line1 = addrData.getCustNm1();
+      addrlU += "D";
     }
 
-    // PO BOX
-    String line3 = "";
-    if (!StringUtils.isBlank(addrData.getPoBox())) {
-      String addrType = addrData.getId().getAddrType();
-      if (StringUtils.isNotBlank(addrType) && (addrType.equals("ZS01") || addrType.equals("ZP01") || addrType.equals("ZD01"))) {
-        line3 = reverseNumbers(addrData.getPoBox()) + " מ.ד";
-      } else {
-        line3 = "PO BOX " + addrData.getPoBox();
-      }
+    // customer name con't
+    String line2 = "";
+    if (StringUtils.isNotBlank(addrData.getCustNm2())) {
+      line2 = addrData.getCustNm2();
+      addrlU += "E";
+    }
+
+    // attention person
+    String line3 = addrData.getDept();
+    if (StringUtils.isNotBlank(addrData.getDept())) {
+      line3 = addrData.getDept();
+      addrlU += "B";
     }
 
     // Street
     String line4 = "";
-    if (!StringUtils.isBlank(addrData.getAddrTxt())) {
+    if (StringUtils.isNotBlank(addrData.getAddrTxt())) {
       line4 = addrData.getAddrTxt();
+      addrlU += "F";
     }
 
+    // Address Cont
+    String line5 = "";
+    if (StringUtils.isNotBlank(addrData.getAddrTxt2())) {
+      line5 = addrData.getAddrTxt2();
+      addrlU += "G";
+    }
+
+    // PO BOX
+    String line6 = "";
+    if (StringUtils.isNotBlank(addrData.getPoBox())) {
+      String addrType = addrData.getId().getAddrType();
+      if (addrType.equals("ZS01") || addrType.equals("ZP01") || addrType.equals("ZD01")) {
+        line6 = addrData.getPoBox() + " מ.ד";
+      } else {
+        line6 = "PO BOX " + addrData.getPoBox();
+      }
+      addrlU += "H";
+    }
+
+    String line7 = "";
     // postal code + city
-    String line5 = (!StringUtils.isEmpty(addrData.getPostCd()) ? addrData.getPostCd() : "") + " "
-        + (!StringUtils.isEmpty(addrData.getCity1()) ? addrData.getCity1() : "");
-    line5 = line5.trim();
+    if (StringUtils.isNotBlank(addrData.getPostCd()) || StringUtils.isNotBlank(addrData.getCity1())) {
+      line7 = (StringUtils.isNotBlank(addrData.getPostCd()) ? addrData.getPostCd() : "") + " "
+          + (StringUtils.isNotBlank(addrData.getCity1()) ? addrData.getCity1() : "");
+      line7 = line7.trim();
+      addrlU += "I";
+    }
 
     // country
-    String line6 = "";
-
+    String line8 = "";
     boolean localAddressType = isLocalAddress(addrData);
-
     if (crossBorder) {
       if (localAddressType) {
-        line6 = LandedCountryMap.getLovCountryName(addrData.getLandCntry());
+        line8 = LandedCountryMap.getLovCountryName(addrData.getLandCntry());
       } else {
-        line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
+        line8 = LandedCountryMap.getCountryName(addrData.getLandCntry());
       }
+      addrlU += "J";
     }
 
     int lineNo = 1;
-    String[] lines = new String[] { line1, line2, line3, line4, line5, line6 };
-    LOG.debug("Lines: " + line1 + " | " + line2 + " | " + line3 + " | " + line4 + " | " + line5 + " | " + line6);
-    // fixed mapping value, not move up if blank
+    String[] lines = new String[] { line1, line2, line3, line4, line5, line6, line7, line8 };
+    LOG.debug("Lines: " + line1 + " | " + line2 + " | " + line3 + " | " + line4 + " | " + line5 + " | " + line6 + " | " + line7 + " | " + line8);
     for (String line : lines) {
-      if (line != null && line.length() > 30) {
-        line = line.substring(0, 30);
+      // shifting logic - move up if blank
+      if (StringUtils.isNotBlank(line)) {
+        if (line != null && line.length() > 30) {
+          line = line.substring(0, 30);
+        }
+        messageHash.put(addrKey + "AddressLD" + lineNo, localAddressType ? reverseNumbers(line) : line);
+        lineNo++;
       }
-      messageHash.put(addrKey + "Address" + lineNo, localAddressType ? reverseNumbers(line) : line);
-      lineNo++;
     }
 
     String countryName = LandedCountryMap.getCountryName(addrData.getLandCntry());
     messageHash.put(getAddressKey(addrData.getId().getAddrType()) + "Country", crossBorder ? countryName : "");
 
-    if (!update) {
-      // for creates, send TransAddressNumber
-      if (CmrConstants.ADDR_TYPE.CTYA.toString().equals(addrData.getId().getAddrType())) {
-        messageHash.put("TransAddressNumber", "00001");
-      } else if (CmrConstants.ADDR_TYPE.CTYB.toString().equals(addrData.getId().getAddrType())) {
-        messageHash.put("TransAddressNumber", "00002");
-      } else if (CmrConstants.ADDR_TYPE.CTYC.toString().equals(addrData.getId().getAddrType())) {
-        List<Addr> addresses = handler.currentAddresses;
-
-        int ctyCIndex = -1;
-        int shipIndex = -1;
-
-        int running = -1;
-        for (Addr addr : addresses) {
-          // count index from CTYC types only
-          if (CmrConstants.ADDR_TYPE.CTYC.toString().equals(addr.getId().getAddrType())) {
-            running++;
-            if (addr.getId().getAddrType().equals(addrData.getId().getAddrType())
-                && addr.getId().getAddrSeq().equals(addrData.getId().getAddrSeq())) {
-              ctyCIndex = running;
-              break;
-            }
-          }
-        }
-
-        running = -1;
-        shipIndex = -1;
-        if (ctyCIndex >= 0) {
-          for (Addr addr : addresses) {
-            running++;
-            if (CmrConstants.ADDR_TYPE.ZD01.toString().equals(addr.getId().getAddrType())) {
-              shipIndex++;
-              if (shipIndex == ctyCIndex) {
-                // found the shipping index for the country use c
-                messageHash.put("TransAddressNumber", StringUtils.leftPad((running + 1) + "", 5, '0'));
-                LOG.trace("Country Use Trans Address Number: " + messageHash.get("TransAddressNumber"));
-              }
-            }
-          }
-        }
-      }
-
-    } else {
-      LOG.debug("Checking TransNumber for new shipping addresses...");
-      if (CmrConstants.ADDR_TYPE.CTYC.toString().equals(addrData.getId().getAddrType())) {
-        List<Addr> addresses = handler.currentAddresses;
-
-        int ctyCIndex = -1;
-        int shipIndex = -1;
-
-        int running = -1;
-        for (Addr addr : addresses) {
-          // count index from CTYC types only
-          if (CmrConstants.ADDR_TYPE.CTYC.toString().equals(addr.getId().getAddrType()) && !"Y".equals(addr.getImportInd())) {
-            running++;
-            if (addr.getId().getAddrType().equals(addrData.getId().getAddrType())
-                && addr.getId().getAddrSeq().equals(addrData.getId().getAddrSeq())) {
-              ctyCIndex = running;
-              break;
-            }
-          }
-        }
-
-        running = -1;
-        shipIndex = -1;
-        if (ctyCIndex >= 0) {
-          for (Addr addr : addresses) {
-            running++;
-            if (CmrConstants.ADDR_TYPE.ZD01.toString().equals(addr.getId().getAddrType()) && !"Y".equals(addr.getImportInd())) {
-              shipIndex++;
-              if (shipIndex == ctyCIndex) {
-                // found the shipping index for the country use c
-                messageHash.put("TransAddressNumber",
-                    addr.getId().getAddrSeq().length() == 5 ? addr.getId().getAddrSeq() : StringUtils.leftPad((running + 1) + "", 5, '0'));
-                LOG.trace("Country Use Trans Address Number: " + messageHash.get("TransAddressNumber"));
-              }
-            }
-          }
-        }
-      }
-
-    }
+    legacyAddr.setAddrLine1(messageHash.get(addrKey + "AddressLD1"));
+    legacyAddr.setAddrLine2(messageHash.get(addrKey + "AddressLD2"));
+    legacyAddr.setAddrLine3(messageHash.get(addrKey + "AddressLD3"));
+    legacyAddr.setAddrLine4(messageHash.get(addrKey + "AddressLD4"));
+    legacyAddr.setAddrLine5(messageHash.get(addrKey + "AddressLD5"));
+    legacyAddr.setAddrLine6(messageHash.get(addrKey + "AddressLD6"));
+    legacyAddr.setAddrLineU(addrlU);
   }
 
   @Override
