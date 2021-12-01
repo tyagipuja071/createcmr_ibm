@@ -2329,6 +2329,55 @@ function getAddrMismatchInUpdateMsg() {
   return errorMsg;
 }
 
+function addAddrFieldsLimitation() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var fieldsFilledCount = 0;
+        if(FormManager.getActualValue('custNm1') != '') {
+          fieldsFilledCount++;
+        }
+        
+        if(FormManager.getActualValue('custNm2') != '') {
+          fieldsFilledCount++;
+        }  
+       
+        if(FormManager.getActualValue('addrTxt') != '') {
+          fieldsFilledCount++;
+        }
+        
+        if(FormManager.getActualValue('addrTxt2') != '') {
+          fieldsFilledCount++;
+        }
+
+        if(FormManager.getActualValue('city1') != '' || FormManager.getActualValue('postCd') != '') {
+          fieldsFilledCount++;
+        }
+        
+        if(FormManager.getActualValue('poBox') != '') {
+          fieldsFilledCount++;
+        }
+        
+        if(FormManager.getActualValue('dept') != '') {
+          fieldsFilledCount++;
+        }
+        
+        if (FormManager.getActualValue('landCntry') != "IL") {
+          fieldsFilledCount++;
+        }
+
+        console.log('fields filled count address: ' + fieldsFilledCount);
+        if (fieldsFilledCount == 7) {
+          return new ValidationResult(null, false, 'Please remove value from one of the optional fields. You exceeded limitation which allows only 6 lines to be sent to DB2.');
+        } else if (fieldsFilledCount == 8) {
+          return new ValidationResult(null, false, 'Please remove value from two of the optional fields. You exceeded limitation which allows only 6 lines to be sent to DB2.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+}
+
 function showVerificationModal() {
   cmr.showModal('addressVerificationModal');
 }
@@ -2418,6 +2467,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addAddressGridValidatorStreetPOBox, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(validateSalesRep, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(validateEnterpriseNo, [ SysLoc.ISRAEL ], null, true);
+  GEOHandler.registerValidator(addAddrFieldsLimitation, [ SysLoc.ISRAEL ], null, true);
 
   GEOHandler.addAfterTemplateLoad(preTickVatExempt, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(showVatExempt, [ SysLoc.ISRAEL ]);
