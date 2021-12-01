@@ -362,7 +362,7 @@ public class NordicsUtil extends AutomationUtil {
     String sql = ExternalizedQuery.getSql("KNA1.NORDICS.BP.ISUCTC");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
-    query.setParameter("KATR6", cntry);
+    query.setParameter("CNTRY", cntry);
     query.setParameter("CMR", cmr);
     query.setForReadOnly(true);
     isuCTC = query.getSingleResult(String.class);
