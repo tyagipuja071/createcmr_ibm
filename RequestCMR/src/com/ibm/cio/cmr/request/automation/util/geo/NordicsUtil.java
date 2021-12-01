@@ -33,6 +33,8 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.ConfigUtil;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cmr.services.client.AutomationServiceClient;
@@ -310,6 +312,7 @@ public class NordicsUtil extends AutomationUtil {
     String scenario = requestData.getData().getCustSubGrp();
     String[] kuklaBUSPR = { "43", "44", "45" };
     String[] kuklaISO = { "81", "85" };
+    String cntry = requestData.getData().getCmrIssuingCntry();
 
     List<DuplicateCMRCheckResponse> matches = response.getMatches();
     List<DuplicateCMRCheckResponse> filteredMatches = new ArrayList<DuplicateCMRCheckResponse>();
@@ -318,7 +321,7 @@ public class NordicsUtil extends AutomationUtil {
       for (DuplicateCMRCheckResponse match : matches) {
         if (StringUtils.isNotBlank(match.getCustClass())) {
           String kukla = match.getCustClass() != null ? match.getCustClass() : "";
-          if (Arrays.asList(kuklaBUSPR).contains(kukla)) {
+          if (Arrays.asList(kuklaBUSPR).contains(kukla) || isuCTCMatch(match.getCmrNo(), entityManager, cntry)) {
             filteredMatches.add(match);
           }
         }
@@ -351,6 +354,23 @@ public class NordicsUtil extends AutomationUtil {
       // set filtered matches in response
       response.setMatches(filteredMatches);
     }
+  }
+
+  private boolean isuCTCMatch(String cmr, EntityManager entityManager, String cntry) {
+    boolean def = false;
+    String isuCTC = "";
+    String sql = ExternalizedQuery.getSql("KNA1.NORDICS.BP.ISUCTC");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("KATR6", cntry);
+    query.setParameter("CMR", cmr);
+    query.setForReadOnly(true);
+    isuCTC = query.getSingleResult(String.class);
+    if ("8B7".equalsIgnoreCase(isuCTC)) {
+      def = true;
+    }
+
+    return def;
   }
 
   @Override
