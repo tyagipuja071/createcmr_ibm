@@ -2042,6 +2042,23 @@ function validateSalesRep() {
           if ((salesRep.length != 6) || !salesRep.match("^[0-9]*$")) {
             return new ValidationResult(null, false, 'Sales Rep should be of 6 numeric characters.');
           }
+          var modCust =  FormManager.getActualValue('miscBillCd');
+          var salesRepInt = parseInt(salesRep);
+          var minRange = 220;
+          var maxRange = 239;
+          
+          if (modCust != null && modCust != undefined && modCust != '') {
+            if (modCust == 'NO' || modCust == 'IBM') {
+              if (salesRepInt >= minRange && salesRepInt <= maxRange) {
+                return new ValidationResult(null, false, 'Only MOD scenario can use Sales Rep from range 000220-000239. Please change it.');
+              }
+            } else if (modCust == 'WTC') {
+              if (salesRepInt < minRange || salesRepInt > maxRange) {
+                return new ValidationResult(null, false, 'You selected a type of MOD customer that can only use Sales Rep from range 000220-000239. Please change it.');
+              }
+            }
+          }
+          
         } else {
           return new ValidationResult(null, true);
         }
