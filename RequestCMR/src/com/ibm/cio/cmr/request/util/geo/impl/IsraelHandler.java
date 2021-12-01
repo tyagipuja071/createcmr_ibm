@@ -1462,6 +1462,58 @@ public class IsraelHandler extends EMEAHandler {
             }
           }
         }
+        // Validate address lines flow through
+        if (StringUtils.isNotBlank(landedCntry)) {
+          XSSFCell custNameCell = getAddressCell(IL_MASSUPDATE_ADDR.CUSTNAME, row, sheetName);
+          XSSFCell custNameContCell = getAddressCell(IL_MASSUPDATE_ADDR.CUSTNAMECONT, row, sheetName);
+          XSSFCell attPersonCell = getAddressCell(IL_MASSUPDATE_ADDR.ATTPERSON, row, sheetName);
+          XSSFCell streetCell = getAddressCell(IL_MASSUPDATE_ADDR.STREET, row, sheetName);
+          XSSFCell poBoxCell = getAddressCell(IL_MASSUPDATE_ADDR.POBOX, row, sheetName);
+          XSSFCell addrContCell = getAddressCell(IL_MASSUPDATE_ADDR.ADDRCONT, row, sheetName);
+          XSSFCell postCdCell = getAddressCell(IL_MASSUPDATE_ADDR.POSTCODE, row, sheetName);
+
+          if ("IL".equals(landedCntry)) {
+            if (isHebrewFieldNotBlank(custNameCell) && isHebrewFieldNotBlank(custNameContCell) && isHebrewFieldNotBlank(attPersonCell)
+                && isHebrewFieldNotBlank(streetCell) && isHebrewFieldNotBlank(addrContCell) && isHebrewFieldNotBlank(poBoxCell)
+                && isHebrewFieldNotBlank(postCdCell)) {
+              error.addError(rowIndex, "<br> ",
+                  "Please remove value from one of the optional fields. You exceeded limitation which allows only 6 lines to be sent to DB2.");
+            }
+          } else {
+            int ctr = 0;
+            if (isHebrewFieldNotBlank(custNameCell)) {
+              ctr += 1;
+            }
+            if (isHebrewFieldNotBlank(custNameContCell)) {
+              ctr += 1;
+            }
+            if (isHebrewFieldNotBlank(attPersonCell)) {
+              ctr += 1;
+            }
+            if (isHebrewFieldNotBlank(streetCell)) {
+              ctr += 1;
+            }
+            if (isHebrewFieldNotBlank(addrContCell)) {
+              ctr += 1;
+            }
+            if (isHebrewFieldNotBlank(poBoxCell)) {
+              ctr += 1;
+            }
+            if (isHebrewFieldNotBlank(postCdCell)) {
+              ctr += 1;
+            }
+            if (StringUtils.isNotBlank(landedCntry)) {
+              ctr += 1;
+            }
+            if (ctr == 7) {
+              error.addError(rowIndex, "<br> ",
+                  "Please remove value from one of the optional fields. You exceeded limitation which allows only 6 lines to be sent to DB2.");
+            } else if (ctr == 8) {
+              error.addError(rowIndex, "<br> ",
+                  "Please remove value from two of the optional fields. You exceeded limitation which allows only 6 lines to be sent to DB2.");
+            }
+          }
+        }
       }
     }
   }
@@ -1481,19 +1533,23 @@ public class IsraelHandler extends EMEAHandler {
         if (!isHebrewFieldNotBlank(row.getCell(2))) {
           error.addError(row.getRowNum(), "<br>Customer Name", "Customer Name is required when updating " + sheetName + " address.");
         }
-        if (!isHebrewFieldNotBlank(row.getCell(5))) {
-          error.addError(row.getRowNum(), "<br>Street", "Street is required when updating " + sheetName + " address.");
-        }
+
         if (!isHebrewFieldNotBlank(getAddressCell(IL_MASSUPDATE_ADDR.LANDCOUNTRY, row, sheetName))) {
           error.addError(row.getRowNum(), "<br>Landed Country", "Landed Country is required when updating " + sheetName + " address.");
         }
 
         if (sheetName.equals("Mailing") || sheetName.equals("Billing") || sheetName.equals("Country Use A (Mailing)")
             || sheetName.equals("Country Use B (Billing)")) {
-          if (!isHebrewFieldNotBlank(row.getCell(6))) {
-            error.addError(row.getRowNum(), "<br>PO Box", "PO Box is required when updating " + sheetName + " address.");
+          // Street or PO Box
+          if (!isHebrewFieldNotBlank(row.getCell(5)) && !isHebrewFieldNotBlank(row.getCell(6))) {
+            error.addError(row.getRowNum(), "<br>Street-PO Box", "Street or PO Box is required when updating " + sheetName + " address.");
           }
         } else { // Installing, Shipping, EPL and Country Use C
+          // Street
+          if (!isHebrewFieldNotBlank(row.getCell(5))) {
+            error.addError(row.getRowNum(), "<br>Street", "Street is required when updating " + sheetName + " address.");
+          }
+          // City
           if (!isHebrewFieldNotBlank(getAddressCell(IL_MASSUPDATE_ADDR.CITY, row, sheetName))) {
             error.addError(row.getRowNum(), "<br>City", "City is required when updating " + sheetName + " address.");
           }
