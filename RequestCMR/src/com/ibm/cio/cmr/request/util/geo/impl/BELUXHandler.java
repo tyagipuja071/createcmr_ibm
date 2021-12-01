@@ -132,7 +132,7 @@ public class BELUXHandler extends BaseSOFHandler {
           // map RDc - SOF - CreateCMR by sequence no
           for (FindCMRRecordModel record : source.getItems()) {
             seqNo = record.getCmrAddrSeq();
-            if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo)) {
+            if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo) && StringUtils.isEmpty(record.getExtWalletId())) {
               addrType = record.getCmrAddrTypeCode();
               if (!StringUtils.isEmpty(addrType)) {
                 addr = cloneAddress(record, addrType);
