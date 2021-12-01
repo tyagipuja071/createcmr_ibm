@@ -3,6 +3,7 @@
  */
 package com.ibm.cmr.create.batch.util.mq.transformer.impl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -893,22 +894,102 @@ public class IsraelTransformer extends EMEATransformer {
       legacyAddr.setZipCode("");
     }
 
+    // Set Address Lines
+    StringBuilder sbAddrLu = new StringBuilder();
+    List<String> lstAddrLines = new ArrayList<String>();
+    // Cust Name
+    if (StringUtils.isNotBlank(addr.getCustNm1())) {
+      lstAddrLines.add(addr.getCustNm1());
+      sbAddrLu.append("D");
+    }
+    // Cust Name Cont
+    if (StringUtils.isNotBlank(addr.getCustNm2())) {
+      lstAddrLines.add(addr.getCustNm2());
+      sbAddrLu.append("E");
+    }
+    // Att Person
+    if (StringUtils.isNotBlank(addr.getCustNm4())) {
+      lstAddrLines.add(addr.getCustNm4());
+      sbAddrLu.append("B");
+    }
+    // Street
+    if (StringUtils.isNotBlank(addr.getAddrTxt())) {
+      lstAddrLines.add(addr.getAddrTxt());
+      sbAddrLu.append("F");
+    }
+    // PO Box
     if (StringUtils.isNotBlank(addrType)) {
-      if ("ZS01".equals(addrType) || "ZP01".equals(addrType) || "ZD01".equals(addrType)) {
+      if ("ZS01".equals(addrType) || "ZP01".equals(addrType)) {
         if (StringUtils.isNotBlank(addr.getPoBox()) && !(addr.getPoBox()).contains("מ.ד")) {
-          legacyAddr.setAddrLine3(reverseNumbers(addr.getPoBox()) + " מ.ד");
+          lstAddrLines.add(reverseNumbers(addr.getPoBox()) + " מ.ד");
         } else {
-          legacyAddr.setAddrLine3(addr.getPoBox());
+          lstAddrLines.add(addr.getPoBox());
         }
-      } else {
+        sbAddrLu.append("H");
+      } else if ("CTYA".equals(addrType) || "CTYB".equals(addrType)) {
         if (StringUtils.isNotBlank(addr.getPoBox())) {
-          legacyAddr.setAddrLine3("PO BOX " + addr.getPoBox());
+          lstAddrLines.add("PO BOX " + addr.getPoBox());
+          sbAddrLu.append("H");
         } else if (StringUtils.isNotBlank(addr.getCustNm1()) && StringUtils.isBlank(addr.getPoBox())) {
-          legacyAddr.setAddrLine3("");
+          lstAddrLines.add("");
+          sbAddrLu.append("H");
         }
       }
     }
+    // Address Cont
+    if (StringUtils.isNotBlank(addr.getAddrTxt2())) {
+      lstAddrLines.add(addr.getAddrTxt2());
+      sbAddrLu.append("G");
+    }
+    // Postal Code
+    String poboxCity = null;
+    if (StringUtils.isNotBlank(addr.getPostCd())) {
+      poboxCity = addr.getPostCd();
+    }
+    // City
+    if (StringUtils.isNotBlank(addr.getCity1())) {
+      if (StringUtils.isNotBlank(poboxCity)) {
+        poboxCity = poboxCity + " " + addr.getCity1();
+      } else {
+        poboxCity = addr.getCity1();
+      }
+    }
+    if (StringUtils.isNotBlank(poboxCity)) {
+      lstAddrLines.add(poboxCity);
+      sbAddrLu.append("I");
+    }
 
+    // Land Country
+    if (StringUtils.isNotBlank(addr.getLandCntry()) && !"IL".equals(addr.getLandCntry())) {
+      lstAddrLines.add(addr.getLandCntry());
+      sbAddrLu.append("J");
+    }
+
+    if (lstAddrLines.size() > 0) {
+      for (int i = 0; i < 6; i++) {
+        switch (i) {
+        case 0:
+          legacyAddr.setAddrLine1(lstAddrLines.get(i));
+          break;
+        case 1:
+          legacyAddr.setAddrLine2(lstAddrLines.get(i));
+          break;
+        case 2:
+          legacyAddr.setAddrLine3(lstAddrLines.get(i));
+          break;
+        case 3:
+          legacyAddr.setAddrLine4(lstAddrLines.get(i));
+          break;
+        case 4:
+          legacyAddr.setAddrLine5(lstAddrLines.get(i));
+          break;
+        case 5:
+          legacyAddr.setAddrLine6(lstAddrLines.get(i));
+          break;
+        }
+      }
+      legacyAddr.setAddrLineU(sbAddrLu.toString());
+    }
   }
 
   @Override
