@@ -1595,7 +1595,7 @@ public class BELUXHandler extends BaseSOFHandler {
     String addrSeq = addr.getId().getAddrSeq();
     String addrType = addr.getId().getAddrType();
     for (Kna1 kna1 : kna1Records) {
-      if (addrType.equals(kna1.getKtokd()) && addrSeq.equals(kna1.getZzkvSeqno())) {
+      if ((addrType.equals(kna1.getKtokd()) && addrSeq.equals(kna1.getZzkvSeqno())) || "PG01".equals(addr.getId().getAddrType())) {
         result = true;
       }
     }
