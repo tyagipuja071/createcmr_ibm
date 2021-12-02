@@ -305,9 +305,9 @@ public class NordicsUtil extends AutomationUtil {
   @Override
   public void filterDuplicateCMRMatches(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
       MatchingResponse<DuplicateCMRCheckResponse> response) {
-    String[] bpScenariosToBeChecked = { "BUSPR", "FIBUS", "DKBUS", "CBBUS" };
-    String[] isoScenariosToBeChecked = { "INTSO", "DKISO", "FIISO", "CBISO" };
-    String[] intScenariosToBeChecked = { "INTER", "DKINT", "FIINT", "CBINT" };
+    String[] bpScenariosToBeChecked = { "BUSPR", "FIBUS", "DKBUS", "CBBUS", "LTBUS", "LVBUS", "EEBUS", "FOBUS", "GLBUS", "ISBUS" };
+    String[] isoScenariosToBeChecked = { "INTSO", "DKISO", "FIISO", "FOISO", "GLISO", "ISISO", "LTISO", "LVISO", "EEISO", "CBISO" };
+    String[] intScenariosToBeChecked = { "INTER", "DKINT", "FIINT", "CBINT", "GLINT", "FOINT", "ISINT", "LTINT", "LVINT", "EEINT" };
 
     String scenario = requestData.getData().getCustSubGrp();
     String[] kuklaBUSPR = { "43", "44", "45" };
