@@ -94,6 +94,12 @@
 					<width>5</width>
 					<length>20</length>
 				</column>
+				<column number="true">
+					<label>Fiscal Code</label>
+					<dbColumn>TAX_CD1</dbColumn>
+					<width>30</width>
+					<length>9</length>
+				</column>
 				<column>
 					<label>Collection Code</label>
 					<dbColumn>COLLECTION_CD</dbColumn>

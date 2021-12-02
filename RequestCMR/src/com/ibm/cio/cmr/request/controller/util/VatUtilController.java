@@ -20,6 +20,8 @@ import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.ServiceClient.Method;
 import com.ibm.cmr.services.client.ValidatorClient;
 import com.ibm.cmr.services.client.automation.AutomationResponse;
+import com.ibm.cmr.services.client.automation.cn.CNRequest;
+import com.ibm.cmr.services.client.automation.cn.CNResponse;
 import com.ibm.cmr.services.client.automation.eu.VatLayerRequest;
 import com.ibm.cmr.services.client.automation.eu.VatLayerResponse;
 import com.ibm.cmr.services.client.automation.in.GstLayerRequest;
@@ -123,9 +125,9 @@ public class VatUtilController {
     ModelMap map = new ModelMap();
 
     ValidationResult validation = null;
-    String country = request.getParameter("country");
-    if (StringUtils.isEmpty(country)) {
-      validation = ValidationResult.error("'country' param is required.");
+    String state = "";
+    if (!StringUtils.isEmpty(request.getParameter("country"))) {
+      state = request.getParameter("country");
     }
     String vat = request.getParameter("vat");
     if (StringUtils.isEmpty(vat)) {
@@ -149,7 +151,7 @@ public class VatUtilController {
     }
     if (validation == null || validation.isSuccess()) {
 
-      LOG.debug("Validating GST# " + vat + " for country " + country);
+      LOG.debug("Validating GST# " + vat + " for India");
 
       String baseUrl = SystemConfiguration.getValue("CMR_SERVICES_URL");
       AutomationServiceClient autoClient = CmrServicesFactory.getInstance().createClient(baseUrl, AutomationServiceClient.class);
@@ -158,7 +160,7 @@ public class VatUtilController {
 
       GstLayerRequest gstLayerRequest = new GstLayerRequest();
       gstLayerRequest.setGst(vat);
-      gstLayerRequest.setCountry(country);
+      gstLayerRequest.setCountry(state);
       gstLayerRequest.setName(name);
       gstLayerRequest.setAddress(address);
       gstLayerRequest.setCity(city);
@@ -173,7 +175,8 @@ public class VatUtilController {
       };
       AutomationResponse<GstLayerResponse> gstResponse = mapper.readValue(json, ref);
       if (gstResponse != null && gstResponse.isSuccess()) {
-        if (gstResponse.getMessage().equals("Valid GST")) {
+        if (gstResponse.getMessage().equals("Valid GST and Company Name entered on the Request")
+            || gstResponse.getMessage().equals("Valid Address and Company Name entered on the Request")) {
           validation = ValidationResult.success();
         } else {
           validation = ValidationResult.error("GST# provided on the request is not valid as per GST Validation. Please verify the GST# provided.");
@@ -224,4 +227,37 @@ public class VatUtilController {
     return map;
   }
 
+  @RequestMapping(value = "/cn/tyc")
+  public ModelMap checkCnAddr(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    ModelMap map = new ModelMap();
+    // ValidationResult validation = null;
+    String busnType = request.getParameter("busnType");
+    String cnName = request.getParameter("cnName");
+    String keyword = "";
+    CNRequest cnRequest = new CNRequest();
+    if (StringUtils.isEmpty(busnType)) {
+      keyword = cnName;
+    } else {
+      keyword = busnType;
+    }
+    cnRequest.setKeyword(keyword);
+
+    AutomationServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
+        AutomationServiceClient.class);
+    client.setReadTimeout(1000 * 60 * 5);
+    client.setRequestMethod(Method.Get);
+
+    LOG.debug("Connecting to the CNValidation service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
+    AutomationResponse<?> rawResponse = client.executeAndWrap(AutomationServiceClient.CN_TYC_SERVICE_ID, cnRequest, AutomationResponse.class);
+    ObjectMapper mapper = new ObjectMapper();
+    String json = mapper.writeValueAsString(rawResponse);
+    TypeReference<AutomationResponse<CNResponse>> ref = new TypeReference<AutomationResponse<CNResponse>>() {
+    };
+    AutomationResponse<CNResponse> tycResponse = mapper.readValue(json, ref);
+
+    if (tycResponse != null && tycResponse.isSuccess()) {
+      map.addAttribute("result", tycResponse.getRecord());
+    }
+    return map;
+  }
 }

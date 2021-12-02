@@ -25,8 +25,13 @@ import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.service.CmrClientService;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
+import com.ibm.cmr.services.client.AutomationServiceClient;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.MatchingServiceClient;
+import com.ibm.cmr.services.client.ServiceClient.Method;
+import com.ibm.cmr.services.client.automation.AutomationResponse;
+import com.ibm.cmr.services.client.automation.cn.CNRequest;
+import com.ibm.cmr.services.client.automation.cn.CNResponse;
 import com.ibm.cmr.services.client.dnb.DnbData;
 import com.ibm.cmr.services.client.dnb.DnbOrganizationId;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
@@ -160,6 +165,10 @@ public class CompanyFinder {
       request.setUsRestrictTo(searchModel.getRestrictTo());
       if (searchModel.isPoolRecord()) {
         request.setIncludeDeleted("Y");
+      }
+
+      if (StringUtils.isNotBlank(searchModel.getCied())) {
+        request.setPpsCeId(searchModel.getCied());
       }
 
       LOG.debug("Connecting to CMR matching service for " + request.getIssuingCountry() + " - " + request.getCustomerName());
@@ -331,6 +340,8 @@ public class CompanyFinder {
         cmr.setAltName(record.getCmrIntlName1() + (record.getCmrIntlName2() != null ? record.getCmrIntlName2() : ""));
         cmr.setAltStreet(record.getCmrIntlAddress() + (record.getCmrIntlName3() != null ? record.getCmrIntlName3() : ""));
         cmr.setAltCity(record.getCmrIntlCity1());
+
+        cmr.setCied(record.getCmrPpsceid());
 
         if (!StringUtils.isBlank(searchModel.getVat()) || !StringUtils.isBlank(searchModel.getTaxCd1())) {
           cmr.setOrgIdMatch(searchModel.getVat().equals(cmr.getVat()) || searchModel.getTaxCd1().equals(cmr.getTaxCd1()));
@@ -576,4 +587,78 @@ public class CompanyFinder {
     return isLatinResult;
   }
 
+  /**
+   * Get chinese name and address from China's TianYanCha Api
+   * 
+   * @param searchModel
+   * @return
+   * @throws Exception
+   */
+  public static AutomationResponse<CNResponse> getCNApiInfo(CompanyRecordModel searchModel, String key) throws Exception {
+    AutomationServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
+        AutomationServiceClient.class);
+    client.setReadTimeout(1000 * 60 * 5);
+    client.setRequestMethod(Method.Get);
+
+    CNRequest request = new CNRequest();
+    switch (key) {
+    case "TAXCD":
+      request.setKeyword(searchModel.getTaxCd1());
+      break;
+    case "ALTNAME":
+      request.setKeyword(searchModel.getAltName());
+      break;
+    case "DEFAULT":
+      request.setKeyword(searchModel.getTaxCd1());
+      break;
+    }
+
+    LOG.debug(request + request.getKeyword());
+
+    LOG.debug("Connecting to the CNValidation service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
+    AutomationResponse<?> rawResponse = client.executeAndWrap(AutomationServiceClient.CN_TYC_SERVICE_ID, request, AutomationResponse.class);
+    ObjectMapper mapper = new ObjectMapper();
+    String json = mapper.writeValueAsString(rawResponse);
+    TypeReference<AutomationResponse<CNResponse>> ref = new TypeReference<AutomationResponse<CNResponse>>() {
+    };
+    return mapper.readValue(json, ref);
+  }
+
+  /**
+   * Get chinese name and address from China's TianYanCha Api
+   * 
+   * @param searchModel
+   * @return
+   * @throws Exception
+   */
+  public static AutomationResponse<CNResponse> getCNApiInfo4GBG(CompanyRecordModel searchModel, String key) throws Exception {
+    AutomationServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
+        AutomationServiceClient.class);
+    client.setReadTimeout(1000 * 60 * 5);
+    client.setRequestMethod(Method.Get);
+
+    CNRequest request = new CNRequest();
+    switch (key) {
+    case "TAXCD":
+      request.setKeyword(searchModel.getTaxCd1());
+      break;
+    case "ALTNAME":
+      request.setKeyword(searchModel.getAltName());
+      break;
+    case "DEFAULT":
+      request.setKeyword(searchModel.getTaxCd1());
+      break;
+    }
+    request.setQueryType("2");
+
+    System.out.println(request + request.getKeyword());
+
+    LOG.debug("Connecting to the CNValidation service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
+    AutomationResponse<?> rawResponse = client.executeAndWrap(AutomationServiceClient.CN_TYC_SERVICE_ID, request, AutomationResponse.class);
+    ObjectMapper mapper = new ObjectMapper();
+    String json = mapper.writeValueAsString(rawResponse);
+    TypeReference<AutomationResponse<CNResponse>> ref = new TypeReference<AutomationResponse<CNResponse>>() {
+    };
+    return mapper.readValue(json, ref);
+  }
 }

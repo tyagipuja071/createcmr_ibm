@@ -227,6 +227,8 @@ public class DropDownService extends BaseSimpleService<DropdownModel> {
         if ("CMRIssuingCountry".equalsIgnoreCase(fieldId) && "Y".equals(params.getParam("newRequest"))) {
           // special handling
           bdsQuery.append(" order by CD asc");
+        } else if ("Cluster".equals(fieldId) && PageManager.fromGeo("AP", (String) params.getParam("cmrIssuingCntry"))) {
+          bdsQuery.append(" order by case when CLUSTER_DESC LIKE 'Expired%' then 2  else 1 end");
         } else {
           bdsQuery.append(" order by " + bds.getOrderByField() + " asc");
         }

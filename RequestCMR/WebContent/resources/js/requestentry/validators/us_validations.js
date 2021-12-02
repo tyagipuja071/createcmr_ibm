@@ -60,31 +60,31 @@ function addInvoiceAddressLinesValidator() {
 }
 
 function addCountyValidator() {
-      FormManager.addFormValidator((function() {
-        return {
-          validate : function() {
-            var reqType = FormManager.getActualValue('reqType');
-            var id = FormManager.getActualValue('reqId');
-            var county = FormManager.getActualValue('county');
-            if (typeof (_pagemodel) != 'undefined') {
-              if (reqType == 'U') {
-                var result = cmr.query('ADDRESS.GETCOUNTYFORJS', {
-                  REQ_ID : id,
-                  ADDR_TYPE : 'ZI01'
-                });
-                if (result.ret1 == "") {
-                  return new ValidationResult(null, false, 'County in Invoice-to address is required.');
-                } else {
-                  return new ValidationResult(null, true);
-                }
-              } else {
-                return new ValidationResult(null, true);
-              }
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqType = FormManager.getActualValue('reqType');
+        var id = FormManager.getActualValue('reqId');
+        var county = FormManager.getActualValue('county');
+        if (typeof (_pagemodel) != 'undefined') {
+          if (reqType == 'U') {
+            var result = cmr.query('ADDRESS.GETCOUNTYFORJS', {
+              REQ_ID : id,
+              ADDR_TYPE : 'ZI01'
+            });
+            if (result.ret1 == "") {
+              return new ValidationResult(null, false, 'County in Invoice-to address is required.');
+            } else {
+              return new ValidationResult(null, true);
             }
+          } else {
+            return new ValidationResult(null, true);
           }
-        };
-      })(), null,'frmCMR');
-    }
+        }
+      }
+    };
+  })(), null, 'frmCMR');
+}
 
 function addCreateByModelValidator() {
   FormManager.addFormValidator((function() {
@@ -156,6 +156,8 @@ function addAddressRecordTypeValidator() {
 function afterConfigForUS() {
 
   var reqType = FormManager.getActualValue('reqType');
+  var custGrp = FormManager.getActualValue('custGrp');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
   var role = null;
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
@@ -163,6 +165,9 @@ function afterConfigForUS() {
   if (reqType == 'U' && role == 'Requester') {
     FormManager.enable('isuCd');
     FormManager.enable('clientTier');
+  }
+  if (reqType == 'C' && role == 'Requester' && custGrp == '9' && custSubGrp == 'POA') {
+    FormManager.enable('miscBillCd');
   }
 
   // Enterprise field as mandatory for BP scenario
@@ -361,6 +366,19 @@ function canRemoveAddress(value, rowIndex, grid) {
   }
 }
 
+function usRestrictCode() {
+  if (FormManager.getActualValue('custSubGrp') == 'KYN') {
+    FormManager.setValue('inacType', 'I');
+    FormManager.setValue('inacCd', '6272');
+    FormManager.setValue('mtkgArDept', 'SD3');
+    FormManager.setValue('svcArOffice', 'IJ9');
+    FormManager.readOnly('inacType');
+    FormManager.readOnly('inacCd');
+    FormManager.readOnly('mtkgArDept');
+    FormManager.readOnly('svcArOffice');
+  }
+}
+
 /* Register US Javascripts */
 dojo.addOnLoad(function() {
   console.log('adding US scripts...');
@@ -369,14 +387,16 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addCreateByModelValidator, [ SysLoc.USA ], null, true);
   GEOHandler.registerValidator(addAddressRecordTypeValidator, [ SysLoc.USA ], null, true);
   GEOHandler.addAfterConfig(afterConfigForUS, [ SysLoc.USA ]);
+  GEOHandler.addAfterTemplateLoad(afterConfigForUS, [ SysLoc.USA ]);
   GEOHandler.addAfterConfig(initUSTemplateHandler, [ SysLoc.USA ]);
   GEOHandler.addAddrFunction(addUSAddressHandler, [ SysLoc.USA ]);
   GEOHandler.addToggleAddrTypeFunction(toggleAddrTypesForUS, [ SysLoc.USA ]);
   GEOHandler.addAfterTemplateLoad(setCSPValues, [ SysLoc.USA ]);
   GEOHandler.addAfterTemplateLoad(enableUSSicMenForScenarios, [ SysLoc.USA ]);
   GEOHandler.addAfterConfig(enableUSSicMenForScenarios, [ SysLoc.USA ]);
-  
-  /* requireDPL check ad assessment for all users*/
+  GEOHandler.addAfterTemplateLoad(usRestrictCode, [ SysLoc.USA ]);
+
+  /* requireDPL check ad assessment for all users */
   GEOHandler.registerValidator(addDPLCheckValidator, [ SysLoc.USA ], GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(addDPLAssessmentValidator, [ SysLoc.USA ], null, true);
 });

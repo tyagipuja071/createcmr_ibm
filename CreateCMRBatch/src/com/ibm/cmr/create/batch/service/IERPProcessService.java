@@ -33,6 +33,7 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.IERPRequestUtils;
 import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.CNHandler;
@@ -362,6 +363,10 @@ public class IERPProcessService extends BaseBatchService {
         GEOHandler cntryHandler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
         boolean enableTempReact = cntryHandler.enableTempReactivateOnUpdate() && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason());
 
+        if (SystemLocation.GERMANY.equals(data.getCmrIssuingCntry()) && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason())) {
+          enableTempReact = true;
+        }
+
         ProcessResponse response = null;
         String overallStatus = null;
 
@@ -534,10 +539,14 @@ public class IERPProcessService extends BaseBatchService {
           String rdcProcessingMessage = "";
           String wfHistCmt = "";
           String rdcOrderBlk = IERPRequestUtils.getOrderBlockFromDataRdc(em, admin);
+          DataRdc dataRdc = getDataRdcRecords(em, data);
           String dataOrderBlk = data.getCustAcctType();
           StringBuilder comment = new StringBuilder();
           HashMap<String, Object> overallResponse = null;
           boolean firstRun = false;
+          if (SystemLocation.GERMANY.equals(data.getCmrIssuingCntry())) {
+            rdcOrderBlk = dataRdc.getOrdBlk();
+          }
           if ((admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason()))
               && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason()) && (rdcOrderBlk != null && !StringUtils.isBlank(rdcOrderBlk))
               && CmrConstants.ORDER_BLK_LIST.contains(rdcOrderBlk) && (dataOrderBlk == null || StringUtils.isBlank(dataOrderBlk))) {
@@ -678,7 +687,11 @@ public class IERPProcessService extends BaseBatchService {
             admin.setRdcProcessingTs(SystemUtil.getCurrentTimestamp());
             updateEntity(admin, em);
 
-            siteIds = new StringBuffer((String) overallResponse.get("siteIds"));
+            if (!SystemLocation.GERMANY.equals(data.getCmrIssuingCntry())) {
+              siteIds = new StringBuffer((String) overallResponse.get("siteIds"));
+            } else {
+              siteIds = new StringBuffer(dataRdc.getSitePartyId());
+            }
 
             if (!CmrConstants.RDC_STATUS_IGNORED.equals(overallStatus) && !firstRun) {
               IERPRequestUtils.createWorkflowHistoryFromBatch(em, BATCH_USER_ID, admin, wfHistCmt.trim(), actionRdc, null, null,
@@ -1272,7 +1285,7 @@ public class IERPProcessService extends BaseBatchService {
     }
     // save cmtlockedIn as Y default for current realese
     reqCmtLog.setCmtLockedIn(CmrConstants.CMT_LOCK_IND_YES);
-    reqCmtLog.setCreateById(admin.getLastUpdtBy());
+    reqCmtLog.setCreateById(COMMENT_LOGGER);
     reqCmtLog.setCreateByNm(COMMENT_LOGGER);
     // set createTs as current timestamp and updateTs same as CreateTs
     reqCmtLog.setCreateTs(SystemUtil.getCurrentTimestamp());

@@ -39,9 +39,11 @@ import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.entity.DefaultApprovalRecipients;
 import com.ibm.cio.cmr.request.entity.DefaultApprovals;
+import com.ibm.cio.cmr.request.entity.IntlAddr;
 import com.ibm.cio.cmr.request.entity.UpdatedAddr;
 import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation;
 import com.ibm.cio.cmr.request.model.ParamContainer;
+import com.ibm.cio.cmr.request.model.approval.ApprovalResponseModel;
 import com.ibm.cio.cmr.request.model.auto.BaseV2RequestModel;
 import com.ibm.cio.cmr.request.model.requestentry.AddressModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
@@ -57,6 +59,7 @@ import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.SystemUtil;
+import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
 
 /**
@@ -964,6 +967,97 @@ public abstract class GEOHandler {
 
   public String[] getAddressOrder() {
     return null;
+  }
+
+  /**
+   * Return true if the country supports 3 lines of addresses
+   * 
+   * @return
+   */
+  public boolean has3AddressLines(String country) {
+    return false;
+  }
+
+  /**
+   * Called for import, sets the value of the 3rd address line, if supported
+   * 
+   * @param addr
+   * @param line3
+   */
+  public void setAddressLine3(String country, Addr addr, FindCMRRecordModel cmrModel, String line3) {
+
+  }
+
+  /**
+   * Called from
+   * {@link DnBUtil#closelyMatchesDnb(String, Addr, Admin, com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse, String, boolean, boolean)},
+   * builds the address used for close matching in D&B. Should return null if
+   * the default address construction is used
+   * 
+   * @param addr
+   * @return
+   */
+  public String buildAddressForDnbMatching(String country, Addr addr) {
+    return null;
+  }
+
+  public IntlAddr getIntlAddrById(Addr addr, EntityManager entityManager) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  public void handleMEUCondApproval(EntityManager entityManager, ApprovalResponseModel approval, Data data) {
+
+    // TODO Auto-generated method stub
+
+  }
+
+  public String[] splitName123(String name1, String name2, String name3, int length1, int length2, int length3) {
+    String name = name1 + " " + (name2 != null ? name2 : "") + " " + (name3 != null ? name3 : "");
+    String[] parts = name.split("[ ]");
+
+    String namePart1 = "";
+    String namePart2 = "";
+    String namePart3 = "";
+    boolean part1Ok = false;
+    boolean part2Ok = false;
+    for (String part : parts) {
+      if ((namePart1 + " " + part).trim().length() > length1 || part1Ok) {
+        part1Ok = true;
+        if ((namePart2 + " " + part).trim().length() > length2 || part2Ok) {
+          part2Ok = true;
+          namePart3 += " " + part;
+        } else {
+          namePart2 += " " + part;
+        }
+      } else {
+        namePart1 += " " + part;
+      }
+    }
+    namePart1 = namePart1.trim();
+
+    if (namePart1.length() == 0) {
+      namePart1 = name.substring(0, length1);
+      namePart2 = name.substring(length1, length2);
+      namePart2 = name.substring(length2);
+    }
+    if (namePart1.length() > length1) {
+      namePart1 = namePart1.substring(0, length1);
+    }
+    namePart2 = namePart2.trim();
+    if (namePart2.length() > length2) {
+      namePart2 = namePart2.substring(0, length2);
+    }
+    namePart3 = namePart3.trim();
+    if (namePart3.length() > length3) {
+      namePart3 = namePart3.substring(0, length3);
+    }
+
+    return new String[] { namePart1, namePart2, namePart3 };
+  }
+
+  public void setReqStatusAfterApprove(EntityManager entityManager, ApprovalResponseModel approval, ApprovalReq req, Admin admin) {
+    // TODO Auto-generated method stub
   }
 
 }

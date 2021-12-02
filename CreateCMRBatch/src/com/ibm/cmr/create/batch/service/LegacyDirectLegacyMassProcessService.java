@@ -422,6 +422,7 @@ public class LegacyDirectLegacyMassProcessService extends TransConnService {
    * @return
    * @throws Exception
    */
+  @Override
   public <T> T initEmpty(Class<T> entityClass) throws Exception {
     try {
       T object = entityClass.newInstance();
@@ -448,6 +449,7 @@ public class LegacyDirectLegacyMassProcessService extends TransConnService {
    * @return
    * @throws Exception
    */
+  @Override
   public void capsAndFillNulls(Object entity, boolean capitalize) throws Exception {
     try {
       Class<?> entityClass = entity.getClass();
@@ -874,6 +876,9 @@ public class LegacyDirectLegacyMassProcessService extends TransConnService {
         CMRRequestContainer cmrObjects = prepareRequest(entityManager, massUpdt, admin);
         Data data = cmrObjects.getData();
 
+        if (!isOwnerCorrect(entityManager, massUpdt.getCmrNo(), data.getCmrIssuingCntry())) {
+          throw new Exception("Some CMRs on the request are not owned by IBM. Please check input CMRs");
+        }
         // for every mass update data
         // prepare the createCMR data to be saved
         LegacyDirectObjectContainer legacyObjects = mapRequestDataForMassUpdate(entityManager, cmrObjects, massUpdt, errorCmrs, admin);
@@ -1126,6 +1131,24 @@ public class LegacyDirectLegacyMassProcessService extends TransConnService {
         legacyObjects.setCustomerExt(custExt);
       } else if (transformer != null
           && (SystemLocation.SLOVAKIA.equals(data.getCmrIssuingCntry()) || SystemLocation.CZECH_REPUBLIC.equals(data.getCmrIssuingCntry()))) {
+        CmrtCustExtPK custExtPk = null;
+        LOG.debug("Mapping default Data values with Legacy CmrtCustExt table.....");
+        // Initialize the object
+        custExt = initEmpty(CmrtCustExt.class);
+        // default mapping for ADDR and CMRTCEXT
+        custExtPk = new CmrtCustExtPK();
+        custExtPk.setCustomerNo(massUpdt.getCmrNo());
+        custExtPk.setSofCntryCode(cntry);
+        custExt.setId(custExtPk);
+
+        if (transformer != null) {
+          transformer.transformLegacyCustomerExtDataMassUpdate(entityManager, custExt, cmrObjects, muData, massUpdt.getCmrNo());
+        }
+        custExt.setUpdateTs(SystemUtil.getCurrentTimestamp());
+        custExt.setAeciSubDt(SystemUtil.getDummyDefaultDate());
+        createEntity(custExt, entityManager);
+        legacyObjects.setCustomerExt(custExt);
+      } else if (transformer != null && (SystemLocation.ROMANIA.equals(data.getCmrIssuingCntry()))) {
         CmrtCustExtPK custExtPk = null;
         LOG.debug("Mapping default Data values with Legacy CmrtCustExt table.....");
         // Initialize the object

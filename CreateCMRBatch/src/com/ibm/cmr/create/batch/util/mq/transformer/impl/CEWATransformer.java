@@ -88,8 +88,8 @@ public class CEWATransformer extends MCOTransformer {
       }
       legacyCust.setCreditCd("");
 
-      legacyCust.setSalesRepNo(data.getRepTeamMemberNo());
-      legacyCust.setSalesGroupRep(data.getRepTeamMemberNo());
+      // legacyCust.setSalesRepNo(data.getRepTeamMemberNo());
+      // legacyCust.setSalesGroupRep(data.getRepTeamMemberNo());
 
       String dataEmbargoCd = data.getEmbargoCd();
       String rdcEmbargoCd = LegacyDirectUtil.getEmbargoCdFromDataRdc(entityManager, admin); // permanent
@@ -136,11 +136,7 @@ public class CEWATransformer extends MCOTransformer {
     } else {
       legacyCust.setMrcCd("3");
     }
-    if (!StringUtils.isBlank(data.getRepTeamMemberNo())) {
-      legacyCust.setSalesGroupRep(data.getRepTeamMemberNo());
-    } else {
-      legacyCust.setSalesGroupRep("");
-    }
+
     if (!StringUtils.isBlank(data.getVat())) {
       legacyCust.setVat(data.getVat());
     } else {
@@ -834,7 +830,7 @@ public class CEWATransformer extends MCOTransformer {
 
   @Override
   public String getDupCreationCountryId(EntityManager entityManager, String cntry, String cmrNo) {
-    if ("764".equals(cntry))
+    if ("764".equals(cntry) || "780".equals(cntry))
       return "NA";
     else
       return "764";

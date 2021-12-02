@@ -411,6 +411,50 @@ public class UnitedKingdomTransformer extends EMEATransformer {
           }
         }
       }
+      // CREATCMR-1559 UkI Db flow change if street and street con't both are
+      // filled
+      if (!StringUtils.isBlank(addrData.getAddrTxt()) && !StringUtils.isBlank(addrData.getAddrTxt2())) {
+        line1 = addrData.getCustNm1();
+        // Billing & Shipping -name con't OR Att. Person + phones
+        if (MQMsgConstants.ADDR_ZS01.equals(addrType) || MQMsgConstants.ADDR_ZD01.equals(addrType)) {
+
+          if (!StringUtils.isBlank(addrData.getCustNm2())) {
+            line2 = addrData.getCustNm2();
+          } else if (!StringUtils.isBlank(addrData.getDept())) {
+            line2 = addrData.getDept().trim();
+            if (!StringUtils.isEmpty(line2) && !line2.toUpperCase().startsWith("ATT ") && !line2.toUpperCase().startsWith("ATT:")) {
+              line2 = "ATT " + line2;
+            }
+            if (!StringUtils.isBlank(addrData.getCustPhone())) {
+              line2 += (line2.length() > 0 ? ", " : "") + addrData.getCustPhone();
+            }
+          } else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
+            line2 = addrData.getCustPhone();
+          }
+
+        }
+        // mailing,installing and EPL(Software Update)-name con't OR Att. Person
+        if (MQMsgConstants.ADDR_ZP01.equals(addrType) || MQMsgConstants.ADDR_ZI01.equals(addrType) || MQMsgConstants.ADDR_ZS02.equals(addrType)) {
+
+          if (!StringUtils.isBlank(addrData.getCustNm2())) {
+            line2 = addrData.getCustNm2();
+          } else if (!StringUtils.isBlank(addrData.getDept())) {
+            line2 = addrData.getDept().trim();
+            if (!StringUtils.isEmpty(line2) && !line2.toUpperCase().startsWith("ATT ") && !line2.toUpperCase().startsWith("ATT:")) {
+              line2 = "ATT " + line2;
+            }
+          }
+        }
+        // street
+        line3 = addrData.getAddrTxt();
+        // street con't
+        line4 = addrData.getAddrTxt2();
+        // Postal Code + city -postCd +city1
+        line5 = addrData.getPostCd() + ", " + addrData.getCity1();
+
+        // landCntry
+        line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
+      }
     } else {
       // domestic
 
@@ -608,6 +652,78 @@ public class UnitedKingdomTransformer extends EMEATransformer {
           if (!StringUtils.isBlank(addrData.getPostCd())) {
             line6 = addrData.getPostCd();
           }
+        }
+      }
+      // CREATCMR-1559 UkI Db flow change if street and street con't both are
+      // filled
+      if (!StringUtils.isBlank(addrData.getAddrTxt()) && !StringUtils.isBlank(addrData.getAddrTxt2())) {
+        line1 = addrData.getCustNm1();
+        line2 = addrData.getCustNm2();
+        // mailling- Att Person OR PO BOX
+        if (MQMsgConstants.ADDR_ZP01.equals(addrType)) {
+
+          if (!StringUtils.isBlank(addrData.getDept())) {
+            line2 = addrData.getDept().trim();
+            if (!StringUtils.isEmpty(line2) && !line2.toUpperCase().startsWith("ATT ") && !line2.toUpperCase().startsWith("ATT:")) {
+              line2 = "ATT " + line2;
+            }
+          } else if (!StringUtils.isEmpty(addrData.getPoBox())) {
+            line2 = "PO BOX " + addrData.getPoBox();
+          }
+        }
+        // Billing -Street Con't OR Att Person + Phone OR PO BOX
+        if (MQMsgConstants.ADDR_ZS01.equals(addrType)) {
+
+          if (!StringUtils.isBlank(addrData.getDept())) {
+            line2 = addrData.getDept().trim();
+            if (!StringUtils.isEmpty(line2) && !line2.toUpperCase().startsWith("ATT ") && !line2.toUpperCase().startsWith("ATT:")) {
+              line2 = "ATT " + line2;
+            }
+            if (!StringUtils.isBlank(addrData.getCustPhone())) {
+              line2 += (line2.length() > 0 ? ", " : "") + addrData.getCustPhone();
+            }
+          } else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
+            line2 = addrData.getCustPhone();
+          } else if (!StringUtils.isEmpty(addrData.getPoBox())) {
+            line2 = "PO BOX " + addrData.getPoBox().trim();
+          }
+        }
+        // Installing, EPL/SU-Street Con't OR Att Person
+        if (MQMsgConstants.ADDR_ZI01.equals(addrType) || MQMsgConstants.ADDR_ZS02.equals(addrType)) {
+          if (!StringUtils.isBlank(addrData.getDept())) {
+            line2 = addrData.getDept().trim();
+            if (!StringUtils.isEmpty(line2) && !line2.toUpperCase().startsWith("ATT ") && !line2.toUpperCase().startsWith("ATT:")) {
+              line2 = "ATT " + line2;
+            }
+          }
+        }
+        // Shipping ZD01-Street Con't OR Att Person + Phone
+        if (MQMsgConstants.ADDR_ZD01.equals(addrType)) {
+          if (!StringUtils.isBlank(addrData.getDept())) {
+            line2 = addrData.getDept().trim();
+            if (!StringUtils.isEmpty(line2) && !line2.toUpperCase().startsWith("ATT ") && !line2.toUpperCase().startsWith("ATT:")) {
+              line2 = "ATT " + line2;
+            }
+            if (!StringUtils.isBlank(addrData.getCustPhone())) {
+              line2 += (line2.length() > 0 ? ", " : "") + addrData.getCustPhone();
+            }
+          } else if (!StringUtils.isEmpty(addrData.getCustPhone())) {
+            line2 = addrData.getCustPhone();
+          }
+        }
+
+        // street
+        line3 = addrData.getAddrTxt();
+        // street con't
+        line4 = addrData.getAddrTxt2();
+        // city
+        if (!StringUtils.isBlank(addrData.getCity1())) {
+          line5 = addrData.getCity1();
+        }
+
+        // Postal Code -postCd
+        if (!StringUtils.isBlank(addrData.getPostCd())) {
+          line6 = addrData.getPostCd();
         }
       }
     }
@@ -895,8 +1011,21 @@ public class UnitedKingdomTransformer extends EMEATransformer {
     }
 
     formatAddressLinesLD(dummyHandler, legacyAddr);
-    if ("ZD01".equals(currAddr.getId().getAddrType()) && !StringUtils.isEmpty(currAddr.getCustPhone())) {
+    if (("ZD01".equals(currAddr.getId().getAddrType()) || "ZS01".equals(currAddr.getId().getAddrType()))
+        && !StringUtils.isEmpty(currAddr.getCustPhone())) {
       legacyAddr.setAddrPhone(currAddr.getCustPhone().trim());
+    }
+    String poBox = currAddr.getPoBox();
+    if (!StringUtils.isEmpty(poBox) && ("ZS01".equals(currAddr.getId().getAddrType()) || "ZP01".equals(currAddr.getId().getAddrType()))) {
+      if (!poBox.startsWith("PO BOX ")) {
+        if (poBox.toUpperCase().startsWith("APTO"))
+          poBox = poBox.substring(5);
+        legacyAddr.setPoBox("PO BOX " + poBox);
+      } else {
+        legacyAddr.setPoBox(poBox);
+      }
+    } else if (StringUtils.isEmpty(poBox) && ("ZS01".equals(currAddr.getId().getAddrType()) || "ZP01".equals(currAddr.getId().getAddrType()))) {
+      legacyAddr.setPoBox("");
     }
   }
 

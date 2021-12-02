@@ -22,6 +22,7 @@ public class AutomationConst {
   public static final String STATUS_AWAITING_REPLIES = "REP";
   public static final String STATUS_AUTOMATED_PROCESSING_RETRY = "RET";
   public static final String STATUS_AWAITING_PROCESSING = "AWA";
+  public static final String STATUS_AWAITING_LEGACY = "LEG";
 
   public static final int ITEM_NO_ALL = -1;
   public static final int ITEM_NO_FIRST = 1;

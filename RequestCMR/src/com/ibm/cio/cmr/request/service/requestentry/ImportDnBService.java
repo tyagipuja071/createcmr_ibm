@@ -32,11 +32,13 @@ import com.ibm.cio.cmr.request.entity.CompoundEntity;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.entity.DataRdc;
+import com.ibm.cio.cmr.request.entity.IntlAddr;
 import com.ibm.cio.cmr.request.entity.ReqCmtLog;
 import com.ibm.cio.cmr.request.entity.ReqCmtLogPK;
 import com.ibm.cio.cmr.request.entity.Scorecard;
 import com.ibm.cio.cmr.request.entity.ScorecardPK;
 import com.ibm.cio.cmr.request.model.ParamContainer;
+import com.ibm.cio.cmr.request.model.requestentry.AddressModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.model.requestentry.ImportCMRModel;
@@ -52,6 +54,7 @@ import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
+import com.ibm.cio.cmr.request.util.geo.impl.CNHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.LAHandler;
 import com.ibm.cio.cmr.request.util.pdf.impl.DnBPDFConverter;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
@@ -167,10 +170,18 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
         importAddress = false;
       }
 
+      if (SystemLocation.CHINA.equals(data.getCmrIssuingCntry())) {
+        // do import for CHINA update
+        if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && CmrConstants.REQUEST_STATUS.DRA.toString().equals(admin.getReqStatus())) {
+          importAddress = true;
+        }
+      }
+
       LOG.debug("D&B Address to be imported? " + importAddress);
 
       if (!StringUtils.isBlank(mainRecord.getCmrIsic())) {
-        if (!CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+        if (!CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())
+            || (SystemLocation.CHINA.equals(data.getCmrIssuingCntry()) && CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()))) {
           LOG.debug("Retrieving ISIC and Subindustry [ISIC=" + mainRecord.getCmrIsic() + "]");
           data.setIsicCd(mainRecord.getCmrIsic());
           data.setSubIndustryCd(getSubindCode(mainRecord.getCmrIsic(), entityManager));
@@ -180,13 +191,23 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
 
       if (!StringUtils.isBlank(mainRecord.getCmrDuns())) {
         LOG.debug("Retrieveing CMR dunsNo [CmrDusNumber=" + mainRecord.getCmrDuns() + "]");
-        data.setDunsNo(mainRecord.getCmrDuns());
+        if ("678".equals(reqModel.getCmrIssuingCntry()) || "702".equals(reqModel.getCmrIssuingCntry()) || "806".equals(reqModel.getCmrIssuingCntry())
+            || "846".equals(reqModel.getCmrIssuingCntry())) {
+          if (CmrConstants.REQ_TYPE_CREATE.equalsIgnoreCase(reqModel.getReqType())) {
+            data.setDunsNo(mainRecord.getCmrDuns());
+          }
+        } else {
+          data.setDunsNo(mainRecord.getCmrDuns());
+        }
       }
       if (!StringUtils.isBlank(mainRecord.getCmrVat()) && importAddress) {
         data.setVat(mainRecord.getCmrVat());
       }
       if (!StringUtils.isBlank(mainRecord.getCmrBusinessReg()) && importAddress) {
         data.setTaxCd1(mainRecord.getCmrBusinessReg());
+      }
+      if (SystemLocation.CHINA.equals(reqModel.getCmrIssuingCntry()) && !StringUtils.isBlank(mainRecord.getCreditCd()) && importAddress) {
+        data.setBusnType(mainRecord.getCreditCd());
       }
 
       if (newRequest) {
@@ -337,6 +358,13 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
           reqEntryService.deleteEntity(currRdc, entityManager);
         }
 
+        if ("641".equals(reqModel.getCmrIssuingCntry())) {
+          IntlAddr iAddr = getCurrSoldToIntlAddr(entityManager, reqIdToUse);
+          if (iAddr != null) {
+            LOG.debug("Deleting current sold to (IntlAddr) address..");
+            reqEntryService.deleteEntity(iAddr, entityManager);
+          }
+        }
         extractAddresses(entityManager, mainRecord, converter, reqIdToUse, reqModel);
       }
       if (geoHandler != null) {
@@ -432,6 +460,14 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
     return query.getSingleResult(AddrRdc.class);
   }
 
+  private IntlAddr getCurrSoldToIntlAddr(EntityManager entityManager, long reqId) {
+    // TODO Auto-generated method stub
+    String sql = ExternalizedQuery.getSql("DNB.GET_CURR_SOLD_TO_INTLADDR");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    return query.getSingleResult(IntlAddr.class);
+  }
+
   /**
    * Uses the country-specific address sequence generation to get the next
    * sold-to sequence
@@ -501,6 +537,11 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
 
     addr.setCity1(cmr.getCmrCity());
     addr.setStateProv(cmr.getCmrState());
+    if (converter != null && (converter instanceof CNHandler) && SystemLocation.CHINA.equals(reqModel.getCmrIssuingCntry())
+        && StringUtils.isNotBlank(cmr.getCmrState())) {
+      CNHandler cnHandler = (CNHandler) converter;
+      cnHandler.convertChinaStateNameToStateCode(addr, cmr, entityManager);
+    }
     if (!StringUtils.isBlank(addr.getStateProv()) && addr.getStateProv().length() > 3) {
       addr.setStateProv(null);
     }
@@ -528,11 +569,54 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
         addr.setAddrTxt(street);
       }
 
+    } else if (SystemLocation.CHINA.equals(reqModel.getCmrIssuingCntry())) {
+      addr.setPostCd(cmr.getCmrPostalCode());
+      int addrLength = 35;
+      String street = cmr.getCmrStreet();
+      if (street != null && street.length() > addrLength) {
+        if (!StringUtils.isBlank(cmr.getCmrStreetAddressCont())) {
+          // there is a con't, trim this only
+          addr.setAddrTxt(street.substring(0, addrLength));
+          if (cmr.getCmrStreetAddressCont().length() > addrLength) {
+            addr.setAddrTxt2(cmr.getCmrStreetAddressCont().substring(0, addrLength));
+          } else {
+            addr.setAddrTxt2(cmr.getCmrStreetAddressCont());
+          }
+        } else {
+          // no street address con't, overflow
+          String[] streetParts;
+          streetParts = converter.splitName123(street, "", "", 35, 24, 100);
+          String street1 = streetParts[0];
+          String street2 = streetParts[1];
+          String dept = streetParts[2];
+          addr.setAddrTxt(street1);
+          addr.setAddrTxt2(street2);
+          addr.setDept(dept);
+          if (StringUtils.isBlank(cmr.getCmrDept())) {
+            cmr.setCmrDept(dept);
+          }
+        }
+      } else {
+        addr.setAddrTxt(street);
+        if (!StringUtils.isBlank(cmr.getCmrStreetAddressCont())) {
+          if (cmr.getCmrStreetAddressCont().length() > addrLength) {
+            addr.setAddrTxt2(cmr.getCmrStreetAddressCont().substring(0, addrLength));
+          } else {
+            addr.setAddrTxt2(cmr.getCmrStreetAddressCont());
+          }
+        }
+      }
+
+      cmr.setCmrStreet(addr.getAddrTxt());
+      cmr.setCmrStreetAddress(addr.getAddrTxt());
+      cmr.setCmrStreetAddressCont(addr.getAddrTxt2());
+
     } else {
       addr.setPostCd(cmr.getCmrPostalCode());
       int addrLength = SystemLocation.UNITED_STATES.equals(reqModel.getCmrIssuingCntry()) ? 24 : 30;
-      if (SystemLocation.FRANCE.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.GERMANY.equals(reqModel.getCmrIssuingCntry()) || 
-    		  SystemLocation.AUSTRIA.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.SWITZERLAND.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.LIECHTENSTEIN.equals(reqModel.getCmrIssuingCntry())) {
+      if (SystemLocation.FRANCE.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.GERMANY.equals(reqModel.getCmrIssuingCntry())
+          || SystemLocation.AUSTRIA.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.SWITZERLAND.equals(reqModel.getCmrIssuingCntry())
+          || SystemLocation.LIECHTENSTEIN.equals(reqModel.getCmrIssuingCntry())) {
         addrLength = 35;
       }
       String street = cmr.getCmrStreet();
@@ -547,12 +631,14 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
           }
         } else {
           // no street address con't, overflow
-        	String[] streetParts;
-        	if (SystemLocation.AUSTRIA.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.GERMANY.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.LIECHTENSTEIN.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.SWITZERLAND.equals(reqModel.getCmrIssuingCntry())){
-        		streetParts = converter.doSplitName(street, "", 35, 35);
-        	}else {
-        		streetParts = converter.doSplitName(street, "", 30, 30);
-        	}
+          String[] streetParts;
+          if (SystemLocation.AUSTRIA.equals(reqModel.getCmrIssuingCntry()) || SystemLocation.GERMANY.equals(reqModel.getCmrIssuingCntry())
+              || SystemLocation.LIECHTENSTEIN.equals(reqModel.getCmrIssuingCntry())
+              || SystemLocation.SWITZERLAND.equals(reqModel.getCmrIssuingCntry())) {
+            streetParts = converter.doSplitName(street, "", 35, 35);
+          } else {
+            streetParts = converter.doSplitName(street, "", 30, 30);
+          }
           String street1 = streetParts[0];
           String street2 = streetParts[1];
           addr.setAddrTxt(street1);
@@ -575,6 +661,31 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
         }
         addr.setAddrTxt(street);
         addr.setAddrTxt2(null); // addr con't removed from UI of FR
+      }
+
+      if (converter.has3AddressLines(reqModel.getCmrIssuingCntry())) {
+        // special handling for countries supporting 3 address lines (AP)
+        String fullStreet = cmr.getCmrStreet();
+        fullStreet += !StringUtils.isBlank(cmr.getCmrStreetAddressCont()) ? " " + cmr.getCmrStreetAddressCont() : "";
+
+        // use name splitting
+        String[] linesA = converter.doSplitName(fullStreet, "", addrLength, addrLength);
+        String line1 = linesA[0];
+        String remaining = "";
+        if (fullStreet.length() > line1.length()) {
+          remaining = fullStreet.substring(line1.length()).trim();
+        }
+        String[] linesB = converter.doSplitName(remaining, "", addrLength, addrLength);
+        String line2 = linesB[0];
+        String line3 = linesB[1];
+        LOG.debug("3 Line Split: " + fullStreet);
+        LOG.debug(" - 1: " + line1);
+        LOG.debug(" - 2: " + line2);
+        LOG.debug(" - 3: " + line3);
+
+        addr.setAddrTxt(line1);
+        addr.setAddrTxt2(line2);
+        converter.setAddressLine3(reqModel.getCmrIssuingCntry(), addr, cmr, line3);
       }
       cmr.setCmrStreet(addr.getAddrTxt());
       cmr.setCmrStreetAddress(addr.getAddrTxt());
@@ -626,6 +737,12 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
       addr.setDplChkInfo(null);
     }
 
+    if (converter != null && (converter instanceof CNHandler) && SystemLocation.CHINA.equals(reqModel.getCmrIssuingCntry())
+        && StringUtils.isNotBlank(addr.getCity1())) {
+      CNHandler cnHandler = (CNHandler) converter;
+      cnHandler.setCNAddressENCityOnImport(addr, cmr, entityManager);
+    }
+
     reqEntryService.createEntity(addr, entityManager);
 
     AddrRdc rdc = new AddrRdc();
@@ -635,11 +752,32 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
     rdc.setId(rdcpk);
     reqEntryService.createEntity(rdc, entityManager);
 
+    if (SystemLocation.CHINA.equals(reqModel.getCmrIssuingCntry())
+        && (StringUtils.isNotBlank(cmr.getCmrIntlAddress()) || StringUtils.isNotBlank(cmr.getCmrIntlName()))) {
+      AddressModel model = new AddressModel();
+      if (converter != null && (converter instanceof CNHandler) && StringUtils.isNotBlank(cmr.getCmrIntlCity1())) {
+        CNHandler cnHandler = (CNHandler) converter;
+        cnHandler.setCNAddressCityOnImport(model, cmr, addr, entityManager);
+      }
+      setCNIntlAddrModel(model, cmr);
+      addressService.createCNIntlAddr(model, addr, entityManager);
+    }
+
     // Ed|1043386| Only require DPL check for Create requests
     if (CmrConstants.REQ_TYPE_CREATE.equalsIgnoreCase(reqModel.getReqType())) {
       AddressService.clearDplResults(entityManager, reqId);
     }
 
+  }
+
+  private void setCNIntlAddrModel(AddressModel model, FindCMRRecordModel cmr) {
+    // TODO Auto-generated method stub
+    model.setCnAddrTxt(cmr.getCmrIntlAddress());
+    model.setCnAddrTxt2("");
+    model.setCnCustName1(cmr.getCmrIntlName());
+    model.setCnCustName2("");
+    model.setCnCustName3("");
+    model.setCnDistrict(cmr.getCmrIntlCity2());
   }
 
   /**

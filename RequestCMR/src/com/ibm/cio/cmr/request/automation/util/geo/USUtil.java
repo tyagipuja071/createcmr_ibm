@@ -21,12 +21,15 @@ import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
+import com.ibm.cio.cmr.request.automation.impl.gbl.CalculateCoverageElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.DupCMRCheckElement;
 import com.ibm.cio.cmr.request.automation.impl.us.USDuplicateCheckElement;
+import com.ibm.cio.cmr.request.automation.impl.us.USSosRpaCheckElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
+import com.ibm.cio.cmr.request.automation.util.CoverageContainer;
 import com.ibm.cio.cmr.request.automation.util.DummyServletRequest;
 import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
 import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
@@ -127,10 +130,12 @@ public class USUtil extends AutomationUtil {
   public static final String SC_REST_SSI = "SSI";
   public static final String SC_REST_ICC = "ICC";
   public static final String SC_REST_SVMP = "SVMP";
+  public static final String SC_REST_KYN = "KYN";
   // IGS
   public static final String SC_IGSF = "IGSF";
   public static final String SC_IGS = "IGS";
   // State/Local Government
+  public static final String SC_STATE = "LOCAL GOV";
   public static final String SC_STATE_DIST = "SPEC DIST";
   public static final String SC_STATE_COUNTY = "COUNTY";
   public static final String SC_STATE_CITY = "CITY";
@@ -174,6 +179,9 @@ public class USUtil extends AutomationUtil {
   private static final List<String> CSP_IRRELEVANT_UPDATE_FIELDS = Arrays.asList("ISU Code", "GEO Location Code", "Coverage Type/ID", "BG LDE Rule",
       "Buying Group ID", "Client Tier", "DUNS No.");
   private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("County", "PO Box");
+
+  private static final List<String> RELEVANT_ADDRESS_FIELDS_RPA_UPDATES = Arrays.asList("Customer Name", "Customer Name 2", "Address", "Address Con",
+      "City", "State/Province");
 
   private static final List<String> HEALTH_CARE_EDUCATION_ISIC = Arrays.asList("8030", "8010", "8511");
 
@@ -431,6 +439,22 @@ public class USUtil extends AutomationUtil {
         }
       }
 
+      // if scenario is KYN
+      if (SC_REST_KYN.equals(scenarioSubType)) {
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISIC_CD", data.getIsicCd(), "7229");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "RESTRICT_TO", data.getRestrictTo(), "KYN");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), "BD");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "US_SICMEN", data.getUsSicmen(), "7229");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "AFFILIATE", data.getAffiliate(), "6500871");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "COMPANY", data.getCompany(), "12641341");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ENTERPRISE", data.getEnterprise(), "6500871");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "INAC_CD", data.getInacCd(), "6272");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "INAC_TYPE", data.getInacType(), "I");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "TAX_CD1", data.getTaxCd1(), "J666");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "MTKG_AR_DEPT", data.getMtkgArDept(), "SD3");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SVC_AR_OFFICE", data.getSvcArOffice(), "IJ9");
+      }
+
       if (CG_BY_MODEL.equals(data.getCustGrp()) && StringUtils.isNotEmpty(data.getMiscBillCd())) {
         String miscBillCode = "";
         miscBillCode = data.getMiscBillCd().toUpperCase();
@@ -468,7 +492,7 @@ public class USUtil extends AutomationUtil {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
     boolean valid = true;
-    String[] scenarioList = { SC_SCHOOL_PUBLIC, SC_SCHOOL_CHARTER, SC_SCHOOL_PRIV, SC_SCHOOL_PAROCHL, SC_SCHOOL_COLLEGE, SC_STATE_STATE,
+    String[] scenarioList = { SC_STATE, SC_SCHOOL_PUBLIC, SC_SCHOOL_CHARTER, SC_SCHOOL_PRIV, SC_SCHOOL_PAROCHL, SC_SCHOOL_COLLEGE, SC_STATE_STATE,
         SC_STATE_DIST, SC_STATE_COUNTY, SC_STATE_CITY, SC_LEASE_LPMA, SC_FED_REGULAR, SC_FED_CLINIC, SC_FED_FEDSTATE, SC_FED_HEALTHCARE,
         SC_FED_HOSPITAL, SC_FED_INDIAN_TRIBE, SC_FED_NATIVE_CORP, SC_FED_POA, SC_FED_TRIBAL_BUS };
     String[] skipCompanyChecksScenarioList = { SC_BP_DEVELOP, SC_BP_E_HOST, SC_BP_END_USER, SC_LEASE_3CC, SC_LEASE_SVR_CONT, SC_INTERNAL, SC_DUMMY,
@@ -1038,6 +1062,9 @@ public class USUtil extends AutomationUtil {
           }
           if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZS01.toString())) {
             closelyMatchAddressWithDnbRecords(entityManager, requestData, engineData, "ZS01", details, validation, output);
+            if (relevantAddressFieldForUpdates(changes, requestData.getAddress("ZS01"))) {
+              matchAddressWithSosRecords(entityManager, requestData, engineData, "ZS01", details, validation, output);
+            }
           }
 
           if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZI01.toString())) {
@@ -1071,6 +1098,9 @@ public class USUtil extends AutomationUtil {
             if (isRelevantAddressFieldUpdated(changes, requestData.getAddress("ZI01"))) {
               closelyMatchAddressWithDnbRecords(entityManager, requestData, engineData, "ZI01", details, validation, output);
             }
+            if (relevantAddressFieldForUpdates(changes, requestData.getAddress("ZI01"))) {
+              matchAddressWithSosRecords(entityManager, requestData, engineData, "ZI01", details, validation, output);
+            }
           }
         }
 
@@ -1089,6 +1119,35 @@ public class USUtil extends AutomationUtil {
       output.setDetails(details.toString());
     }
     return true;
+  }
+
+  /**
+   * Validates if address closely matches with SOS records matched.
+   * 
+   * @param requestData
+   * @param engineData
+   * @param addrType
+   * @param details
+   * @param validation
+   * @throws Exception
+   */
+  private void matchAddressWithSosRecords(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData, String addrType,
+      StringBuilder details, ValidationOutput validation, AutomationResult<ValidationOutput> output) throws Exception {
+    String addrDesc = "ZS01".equals(addrType) ? "Install-at" : "Invoice-at";
+    Addr addr = requestData.getAddress(addrType);
+    Admin admin = requestData.getAdmin();
+    AutomationResponse<SosResponse> response = USSosRpaCheckElement.getSosMatches(admin.getId().getReqId(), addr, admin);
+    if (response != null && response.isSuccess() && response.getRecord() != null) {
+      details.append(addrDesc + " address details matched successfully with SOS.").append("\n");
+    } else {
+      /*
+       * engineData.addNegativeCheckStatus("DNB_MATCH_FAIL_" + "ZS01",
+       * "SOS Matching couldn't be performed for " + addrDesc + " address.");
+       */
+      details.append(addrDesc + " address details did not match with SOS.").append("\n");
+    }
+    validation.setMessage("Validated.");
+    validation.setSuccess(true);
   }
 
   /**
@@ -1231,11 +1290,13 @@ public class USUtil extends AutomationUtil {
 
     // US restrict to LOV mapping
     String usRestrictToLOV = "";
-    if (StringUtils.isNotBlank(usRestricTo)) {
+    if (StringUtils.isNotBlank(usRestricTo) && StringUtils.isNumeric(usRestricTo)) {
       sql = ExternalizedQuery.getSql("AUTO.US.GET_US_RESTR_TO_LOV");
       query = new PreparedQuery(entityManager, sql);
       query.setParameter("RESTRICT_TO", usRestricTo);
       usRestrictToLOV = query.getSingleResult(String.class);
+    } else {
+      usRestrictToLOV = usRestricTo;
     }
 
     // determine cust scenarios
@@ -1310,6 +1371,8 @@ public class USUtil extends AutomationUtil {
       if (("13".equals(custClass) || "14".equals(custClass) || "16".equals(custClass) || "17".equals(custClass))
           && StringUtils.isBlank(usRestricTo)) {
         custSubGroup = SC_STATE_DIST;
+      } else {
+        custSubGroup = SC_STATE;
       }
       engineData.addPositiveCheckStatus("SKIP_COMP_CHECK");
     } else if (LEASING.equals(custTypCd)) {
@@ -1382,7 +1445,7 @@ public class USUtil extends AutomationUtil {
     query.addField("I_BP_ACCOUNT_TYPE");
     query.addField("C_LEASING_CO");
     query.addField("C_GEM");
-    query.addField("C_COM_RESTRCT_CODE");
+    // query.addField("C_COM_RESTRCT_CODE");
     query.addField("I_CO");
     query.addField("I_CUST_OFF_5");
     query.addField("I_CUST_OFF_3");
@@ -1401,7 +1464,7 @@ public class USUtil extends AutomationUtil {
       leasingCo = (String) record.get("C_LEASING_CO");
       bpAccTyp = (String) record.get("I_BP_ACCOUNT_TYPE");
       cGem = (String) record.get("C_GEM");
-      usRestrictTo = (String) record.get("C_COM_RESTRCT_CODE");
+      // usRestrictTo = (String) record.get("C_COM_RESTRCT_CODE");
       companyNo = String.valueOf(record.get("I_CO"));
       pccArDept = (String) record.get("I_CUST_OFF_5");
       mtkgArDept = (String) record.get("I_CUST_OFF_3");
@@ -1421,18 +1484,44 @@ public class USUtil extends AutomationUtil {
         custTypCd = COMMERCIAL;
       }
     }
+
+    // GET US_RESTRICT_TO_CODE
+    String restrictCd = getUSRestrictToCode(entityManager, cmrNo);
+
     usDetails.setCustTypCd(custTypCd);
     usDetails.setEntType(entType);
     usDetails.setLeasingCo(leasingCo);
     usDetails.setBpAccTyp(bpAccTyp);
     usDetails.setcGem(cGem);
-    usDetails.setUsRestrictTo(usRestrictTo);
+    // usDetails.setUsRestrictTo(usRestrictTo);
+    usDetails.setUsRestrictTo(restrictCd);
     usDetails.setCompanyNo(companyNo);
     usDetails.setMktgArDept(mtkgArDept);
 
     usDetails.setPccArDept(pccArDept);
     usDetailsMap.put(cmrNo, usDetails);
     return usDetails;
+  }
+
+  public static String getUSRestrictToCode(EntityManager entityManager, String cmrNo) {
+    String code = "";
+    try {
+      LOG.debug("Getting US restrict To code from ADDLCTRYDATA...");
+      String sql = ExternalizedQuery.getSql("AUTO.GET_US_RESTRICT_TO");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+      query.setParameter("CMR_NO", cmrNo);
+      query.setForReadOnly(true);
+      code = query.getSingleResult(String.class);
+
+      if ("NO_VALUE_RETRIEVED".equalsIgnoreCase(code)) {
+        code = "";
+      }
+    } catch (Exception e) {
+      LOG.error("Error in querying the database table ADDLCTRYDATA ! ");
+    }
+
+    return code;
   }
 
   /**
@@ -1444,27 +1533,27 @@ public class USUtil extends AutomationUtil {
    * @return
    * @throws Exception
    */
-  public static List<SosResponse> getSosRpaMatchesForBPEndUser(GEOHandler handler, RequestData requestData, AutomationEngineData engineData)
-      throws Exception {
+  public static List<SosResponse> getSosRpaMatchesForBPEndUser(GEOHandler handler, RequestData requestData, AutomationEngineData engineData,
+      String addrType) throws Exception {
     List<SosResponse> closeMatch = new ArrayList<SosResponse>();
     AutomationResponse<SosResponse> response = new AutomationResponse<SosResponse>();
     Admin admin = requestData.getAdmin();
-    Addr zs01 = requestData.getAddress("ZS01");
     long reqId = admin.getId().getReqId();
-    if (zs01 != null) {
+    Addr address = requestData.getAddress(addrType);
+    if (address != null) {
       AutomationServiceClient autoClient = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
           AutomationServiceClient.class);
       autoClient.setReadTimeout(1000 * 60 * 5);
       autoClient.setRequestMethod(Method.Post);
 
       // calling SOS-RPA Service
-      LOG.debug("Calling SOS-RPA Service for Install - At (ZS01) address for Req_id : " + reqId);
+      LOG.debug("Calling SOS-RPA Service for" + addrType + " address for Req_id : " + reqId);
       SosRequest requestInstallAt = new SosRequest();
-      requestInstallAt.setName((StringUtils.isNotBlank(zs01.getDivn()) ? zs01.getDivn() : ""));
-      requestInstallAt.setCity1(zs01.getCity1());
-      requestInstallAt.setAddrTxt((StringUtils.isNotBlank(zs01.getAddrTxt()) ? zs01.getAddrTxt() : "")
-          + (StringUtils.isNotBlank(zs01.getAddrTxt2()) ? " " + zs01.getAddrTxt2() : ""));
-      requestInstallAt.setState(zs01.getStateProv());
+      requestInstallAt.setName((StringUtils.isNotBlank(address.getDivn()) ? address.getDivn() : ""));
+      requestInstallAt.setCity1(address.getCity1());
+      requestInstallAt.setAddrTxt((StringUtils.isNotBlank(address.getAddrTxt()) ? address.getAddrTxt() : "")
+          + (StringUtils.isNotBlank(address.getAddrTxt2()) ? " " + address.getAddrTxt2() : ""));
+      requestInstallAt.setState(address.getStateProv());
 
       LOG.debug("Connecting to the SOS - RPA Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
       AutomationResponse<?> rawResponseInstallAt = autoClient.executeAndWrap(AutomationServiceClient.US_SOS_RPA_SERVICE_ID, requestInstallAt,
@@ -1552,16 +1641,52 @@ public class USUtil extends AutomationUtil {
   }
 
   private boolean isRelevantAddressFieldUpdated(RequestChangeContainer changes, Addr addr) {
-    List<UpdatedNameAddrModel> addrChanges = changes.getAddressChanges(addr.getId().getAddrType(), addr.getId().getAddrSeq());
-    if (addrChanges == null) {
-      return false;
-    }
-    for (UpdatedNameAddrModel change : addrChanges) {
-      if (!NON_RELEVANT_ADDRESS_FIELDS.contains(change.getDataField())) {
-        return true;
+    if (addr != null) {
+      List<UpdatedNameAddrModel> addrChanges = changes.getAddressChanges(addr.getId().getAddrType(), addr.getId().getAddrSeq());
+      if (addrChanges == null) {
+        return false;
+      }
+      for (UpdatedNameAddrModel change : addrChanges) {
+        if (!NON_RELEVANT_ADDRESS_FIELDS.contains(change.getDataField())) {
+          return true;
+        }
       }
     }
     return false;
+  }
+
+  private boolean relevantAddressFieldForUpdates(RequestChangeContainer changes, Addr addr) {
+    if (addr != null) {
+      List<UpdatedNameAddrModel> addrChanges = changes.getAddressChanges(addr.getId().getAddrType(), addr.getId().getAddrSeq());
+      if (addrChanges == null) {
+        return false;
+      }
+      for (UpdatedNameAddrModel change : addrChanges) {
+        if (RELEVANT_ADDRESS_FIELDS_RPA_UPDATES.contains(change.getDataField())) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  @Override
+  public boolean performCountrySpecificCoverageCalculations(CalculateCoverageElement covElement, EntityManager entityManager,
+      AutomationResult<OverrideOutput> results, StringBuilder details, OverrideOutput overrides, RequestData requestData,
+      AutomationEngineData engineData, String covFrom, CoverageContainer container, boolean isCoverageCalculated) throws Exception {
+    String scenarioSubType = "";
+    Data data = requestData.getData();
+    scenarioSubType = data.getCustSubGrp();
+    if (SC_REST_KYN.equals(scenarioSubType)) {
+      overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ISIC_CD", data.getIsicCd(), "7229");
+      overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "US_SICMEN", data.getUsSicmen(), "7229");
+      overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "INAC_TYPE", data.getInacType(), "I");
+      overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "INAC_CD", data.getInacCd(), "6272");
+      overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "AFFILIATE", data.getAffiliate(), "6500871");
+      overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "COMPANY", data.getCompany(), "12641341");
+      overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ENTERPRISE", data.getEnterprise(), "6500871");
+    }
+    return true;
   }
 
 }

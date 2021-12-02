@@ -9,6 +9,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.persistence.EntityManager;
 
@@ -841,7 +843,7 @@ public class ItalyHandler extends BaseSOFHandler {
         collectionCd = cExt.getItCodeSSV();
       }
       if (cust != null) {
-        vat = cust.getVat();
+        // vat = cust.getVat();
         abbrevNm = cust.getAbbrevNm();
         abbrevLoc = cust.getAbbrevLocn();
         sbo = cust.getSbo();
@@ -917,6 +919,10 @@ public class ItalyHandler extends BaseSOFHandler {
           data.setCollectionCd(collectionCode);
         }
         break;
+      }
+      if (result.getCmrAddrTypeCode().equals(COMPANY_ADDR_TYPE)) {
+        // For ZORG addresses
+        countryLanded = result.getCmrCountryLanded();
       }
     }
     // no data from RDc? get DB2
@@ -1544,9 +1550,9 @@ public class ItalyHandler extends BaseSOFHandler {
   @Override
   public List<String> getDataFieldsForUpdateCheckLegacy(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
-    fields.addAll(Arrays.asList("SALES_BO_CD", "REP_TEAM_MEMBER_NO","CUST_CLASS", "SPECIAL_TAX_CD", "VAT", "ISIC_CD", "EMBARGO_CD", "COLLECTION_CD", "ABBREV_NM",
-        "SENSITIVE_FLAG", "CLIENT_TIER", "COMPANY", "INAC_TYPE", "INAC_CD", "ISU_CD", "SUB_INDUSTRY_CD", "ABBREV_LOCN", "PPSCEID", "MEM_LVL",
-        "BP_REL_TYPE","CROS_SUB_TYP", "TAX_CD1", "NATIONAL_CUS_IND", "MODE_OF_PAYMENT", "ENTERPRISE"));
+    fields.addAll(Arrays.asList("SALES_BO_CD", "REP_TEAM_MEMBER_NO", "CUST_CLASS", "SPECIAL_TAX_CD", "VAT", "ISIC_CD", "EMBARGO_CD", "COLLECTION_CD",
+        "ABBREV_NM", "SENSITIVE_FLAG", "CLIENT_TIER", "COMPANY", "INAC_TYPE", "INAC_CD", "ISU_CD", "SUB_INDUSTRY_CD", "ABBREV_LOCN", "PPSCEID",
+        "MEM_LVL", "BP_REL_TYPE", "CROS_SUB_TYP", "TAX_CD1", "NATIONAL_CUS_IND", "MODE_OF_PAYMENT", "ENTERPRISE"));
     return fields;
   }
 
@@ -1585,9 +1591,9 @@ public class ItalyHandler extends BaseSOFHandler {
         }
       }
     }
-    if (BILLING_ADDR_TYPE.equals(chosenType) || INSTALLING_ADDR_TYPE.equals(chosenType)) {
+    if ((BILLING_ADDR_TYPE.equals(chosenType) || INSTALLING_ADDR_TYPE.equals(chosenType)) && "impBill".equals(reqEntry.getLockByNm())) {
       // when installing is chosen, company and billing will be imported
-      LOG.debug("Intsalling was chosen, also importing billing");
+      LOG.debug("Installing was chosen, also importing billing");
 
       boolean billingFound = false;
       FindCMRRecordModel billing = null;
@@ -1635,6 +1641,7 @@ public class ItalyHandler extends BaseSOFHandler {
           }
         }
       }
+      reqEntry.setLockByNm("");
       converted.add(billing);
     }
 
@@ -1647,7 +1654,7 @@ public class ItalyHandler extends BaseSOFHandler {
         FindCMRRecordModel installing = new FindCMRRecordModel();
         PropertyUtils.copyProperties(installing, mainRecord);
         copyAddrData(installing, installingAddr);
-        // installing.setParentCMRNo(mainRecord.getCmrNum());
+        installing.setParentCMRNo(mainRecord.getCmrNum());
         converted.add(installing);
         // do a dummy import based on the installing
       }
@@ -1714,78 +1721,78 @@ public class ItalyHandler extends BaseSOFHandler {
 
       for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
 
-        String fiscalCode = ""; // 2
-        String vatNumPartitaIVA = ""; // 3
-        String taxCodeIVACode = ""; // 4
-        String identClient = ""; // 5
-        String enterpriseNumber = ""; // 6
-        String affiliateNumber = ""; // 7
-        String collectionCode = ""; // 8
-        String salesRepNo = ""; // 9
-        String sbo = ""; // 10
-        String inac = ""; // 11
-        String tipoCliente = ""; // 12
-        String typeOfCustomer = ""; // 13
-        String codiceDestUfficio = ""; // 14
-        String pec = ""; // 15
-        String indirizzoEmail = ""; // 16
-        String isu = ""; // 17
-        String clientTier = ""; // 18
+        String fiscalCode = ""; // 3
+        String vatNumPartitaIVA = ""; // 4
+        String taxCodeIVACode = ""; // 5
+        String identClient = ""; // 6
+        String enterpriseNumber = ""; // 7
+        String affiliateNumber = ""; // 8
+        String collectionCode = ""; // 9
+        String salesRepNo = ""; // 10
+        String sbo = ""; // 11
+        String inac = ""; // 12
+        String tipoCliente = ""; // 13
+        String typeOfCustomer = ""; // 14
+        String codiceDestUfficio = "";// 15
+        String pec = ""; // 16
+        String indirizzoEmail = ""; // 17
+        String isu = ""; // 18
+        String clientTier = ""; // 19
 
         row = sheet.getRow(rowIndex);
         if (row == null) {
           return; // stop immediately when row is blank
         }
         // iterate all the rows and check each column value
-        currCell = row.getCell(1);
+        currCell = row.getCell(3);
         fiscalCode = validateColValFromCell(currCell);
 
-        currCell = row.getCell(2);
+        currCell = row.getCell(4);
         vatNumPartitaIVA = validateColValFromCell(currCell);
 
-        currCell = row.getCell(3);
+        currCell = row.getCell(5);
         taxCodeIVACode = validateColValFromCell(currCell);
 
-        currCell = row.getCell(4);
+        currCell = row.getCell(6);
         identClient = validateColValFromCell(currCell);
 
-        currCell = row.getCell(5);
+        currCell = row.getCell(7);
         enterpriseNumber = validateColValFromCell(currCell);
 
-        currCell = row.getCell(6);
+        currCell = row.getCell(8);
         affiliateNumber = validateColValFromCell(currCell);
 
-        currCell = row.getCell(7);
+        currCell = row.getCell(9);
         collectionCode = validateColValFromCell(currCell);
 
-        currCell = row.getCell(8);
+        currCell = row.getCell(10);
         salesRepNo = validateColValFromCell(currCell);
 
-        // currCell = row.getCell(9);
-        // sbo = validateColValFromCell(currCell);
-
-        currCell = row.getCell(9);
-        inac = validateColValFromCell(currCell);
-
-        currCell = row.getCell(10);
-        tipoCliente = validateColValFromCell(currCell);
-
         currCell = row.getCell(11);
-        typeOfCustomer = validateColValFromCell(currCell);
+        sbo = validateColValFromCell(currCell);
 
         currCell = row.getCell(12);
-        codiceDestUfficio = validateColValFromCell(currCell);
+        inac = validateColValFromCell(currCell);
 
         currCell = row.getCell(13);
-        pec = validateColValFromCell(currCell);
+        tipoCliente = validateColValFromCell(currCell);
 
         currCell = row.getCell(14);
-        indirizzoEmail = validateColValFromCell(currCell);
+        typeOfCustomer = validateColValFromCell(currCell);
 
         currCell = row.getCell(15);
-        isu = validateColValFromCell(currCell);
+        codiceDestUfficio = validateColValFromCell(currCell);
 
         currCell = row.getCell(16);
+        pec = validateColValFromCell(currCell);
+
+        currCell = row.getCell(17);
+        indirizzoEmail = validateColValFromCell(currCell);
+
+        currCell = row.getCell(18);
+        isu = validateColValFromCell(currCell);
+
+        currCell = row.getCell(19);
         clientTier = validateColValFromCell(currCell);
 
         LOG.debug("Fiscal Code =====> " + fiscalCode);
@@ -1796,7 +1803,7 @@ public class ItalyHandler extends BaseSOFHandler {
         LOG.debug("Affiliate Number =====> " + affiliateNumber);
         LOG.debug("Collection Code =====> " + collectionCode);
         LOG.debug("Sales Rep. No. =====> " + salesRepNo);
-        // LOG.debug("SBO =====> " + sbo);
+        LOG.debug("SBO =====> " + sbo);
         LOG.debug("INAC =====> " + inac);
         LOG.debug("Tipo Cliente =====> " + tipoCliente);
         LOG.debug("Type Of Customer =====> " + typeOfCustomer);
@@ -1820,6 +1827,32 @@ public class ItalyHandler extends BaseSOFHandler {
           LOG.trace("ISU and Client Tier must both be filled if either one was suppplied on the template");
           error.addError(rowIndex, "Data Tab", "ISU and Client Tier must both be filled if either one was suppplied on the template");
           validations.add(error);
+        }
+
+        if (!StringUtils.isBlank(salesRepNo)) {
+          if (!StringUtils.isAlphanumeric(salesRepNo)) {
+            LOG.trace("Sales Rep Number should have Alphanumeric values only.");
+            error.addError(row.getRowNum(), "Sales Rep No.", "Sales Rep Number should have Alphanumeric values only. ");
+            validations.add(error);
+          }
+        }
+
+        if (!StringUtils.isBlank(sbo)) {
+          if (!StringUtils.isAlphanumeric(sbo)) {
+            LOG.trace("SBO should have Alphanumeric values only.");
+            error.addError(row.getRowNum(), "SBO.", "SBO should have Alphanumeric values only. ");
+            validations.add(error);
+          }
+        }
+
+        if (!StringUtils.isBlank(collectionCode)) {
+          Pattern upperCaseNumeric = Pattern.compile("^[A-Z0-9]*$");
+          Matcher matcher = upperCaseNumeric.matcher(collectionCode);
+          if (!matcher.matches()) {
+            LOG.trace("Collection Code should contain only upper-case latin and numeric characters.");
+            error.addError(row.getRowNum(), "Collection Code.", "Collection Code should contain only upper-case latin and numeric characters. ");
+            validations.add(error);
+          }
         }
       }
     }

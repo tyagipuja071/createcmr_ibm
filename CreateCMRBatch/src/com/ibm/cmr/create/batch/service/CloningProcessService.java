@@ -102,8 +102,8 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
   private static final String BATCH_SERVICE_URL = SystemConfiguration.getValue("BATCH_SERVICES_URL");
   private static final String COMMENT_LOGGER = "Cloning Process Service";
   private boolean devMode;
-  private static final String KUNNR_KEY = "KUNNR";
-  private static final String ADRNR_KEY = "ADRNR";
+  protected static final String KUNNR_KEY = "KUNNR";
+  protected static final String ADRNR_KEY = "ADRNR";
   private static final String PARNR_KEY = "PARNR";
 
   private static final String LEGACY_CUST_TABLE = "CMRTCUST";
@@ -138,13 +138,13 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     this.devMode = devMode;
   }
 
-  private List<CmrCloningQueue> getCloningPendingRecords(EntityManager entityManager) {
+  protected List<CmrCloningQueue> getCloningPendingRecords(EntityManager entityManager) {
     String sql = ExternalizedQuery.getSql("CLONING_PENDING_RECORDS");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     return query.getResults(CmrCloningQueue.class);
   }
 
-  private void processCloningRecord(EntityManager entityManager, CmrCloningQueue cloningQueue) throws Exception {
+  protected synchronized void processCloningRecord(EntityManager entityManager, CmrCloningQueue cloningQueue) throws Exception {
     String cmrNo = cloningQueue.getId().getCmrNo();
     String cntry = cloningQueue.getId().getCmrIssuingCntry();
     LOG.debug("Inside processCloningRecord Started Cloning process for CMR No " + cmrNo);
@@ -212,8 +212,14 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     updateEntity(cloningQueue, entityManager);
 
     if ("641".equals(cntry)) {
-      // CloningUtil cUtil = new CloningUtil();
-      String kukla = CloningUtil.getKuklaFromCMR(entityManager, cntry, cmrNo, SystemConfiguration.getValue("MANDT"));
+      String kukla = "";
+      if (StringUtils.isBlank(cloningQueue.getLastUpdtBy())) {
+        kukla = CloningUtil.getKuklaFromCMR(entityManager, cntry, cmrNo, SystemConfiguration.getValue("MANDT"));
+      } else {
+        kukla = cloningQueue.getLastUpdtBy();
+      }
+      // String kukla = CloningUtil.getKuklaFromCMR(entityManager, cntry, cmrNo,
+      // SystemConfiguration.getValue("MANDT"));
       setCNLastUsedCMR(entityManager, cloningCmrNo, SystemConfiguration.getValue("MANDT"), kukla, cntry);
     }
 
@@ -356,7 +362,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
   }
 
-  private String generateCMRNoLegacy(EntityManager entityManager, String cmrIssuingCntry, String cmrNo, CmrCloningQueue cloningQueue)
+  private synchronized String generateCMRNoLegacy(EntityManager entityManager, String cmrIssuingCntry, String cmrNo, CmrCloningQueue cloningQueue)
       throws Exception {
     GenerateCMRNoRequest request = new GenerateCMRNoRequest();
     request.setLoc1(cmrIssuingCntry);
@@ -767,7 +773,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     return query.getResults(RdcCloningRefn.class);
   }
 
-  private String generateId(String mandt, String key, EntityManager entityManager) {
+  protected String generateId(String mandt, String key, EntityManager entityManager) {
     LOG.debug("Calling stored procedure to produce next " + key);
     String generatedId = "";
 
@@ -1339,6 +1345,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     kunnrExt = getKunnrExtByKunnr(entityManager, kna1.getId().getMandt(), kna1.getId().getKunnr());
     kunnrExtClone = getKunnrExtByKunnr(entityManager, kna1Clone.getId().getMandt(), kna1Clone.getId().getKunnr());
     if (kunnrExt != null && kunnrExt.size() > 0 && kunnrExtClone.size() == 0) {
+      LOG.info("Inside KUNNR_EXT record Insert with KUNNR " + kna1.getId().getKunnr());
       try {
         for (KunnrExt current : kunnrExt) {
           cloneInsert = new KunnrExt();
@@ -1363,7 +1370,30 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
         LOG.debug("Error in copy kunnrext :", e);
       }
     } else {
-      LOG.info("KUNNR_EXT record not exist with KUNNR " + kna1.getId().getKunnr());
+      LOG.info("Inside KUNNR_EXT record updating with KUNNR " + kna1.getId().getKunnr());
+      try {
+        for (KunnrExt current : kunnrExt) {
+          KunnrExtPK pk = new KunnrExtPK();
+          pk.setKunnr(kna1Clone.getId().getKunnr());
+          pk.setMandt(kna1Clone.getId().getMandt());
+
+          KunnrExt cloneInsertKE = entityManager.find(KunnrExt.class, pk);
+
+          PropertyUtils.copyProperties(cloneInsertKE, current);
+
+          overrideConfigChanges(entityManager, overrideValues, cloneInsertKE, "KUNNR_EXT", pk);
+
+          cloneInsertKE.setId(pk);
+
+          cloneInsertKE.setUpdateInd("U");
+          cloneInsertKE.setUpdateTs(ts);
+
+          updateEntity(cloneInsertKE, entityManager);
+        }
+
+      } catch (Exception e) {
+        LOG.debug("Error in updating kunnrext :", e);
+      }
     }
 
   }
@@ -1722,7 +1752,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     }
   }
 
-  private String generateCMRNoNonLegacy(EntityManager entityManager, String cmrIssuingCntry, String cmrNo, CmrCloningQueue cloningQueue)
+  private synchronized String generateCMRNoNonLegacy(EntityManager entityManager, String cmrIssuingCntry, String cmrNo, CmrCloningQueue cloningQueue)
       throws Exception {
     LOG.debug("Inside generateCMRNoNonLegacy method ");
     String mandt = SystemConfiguration.getValue("MANDT");
@@ -1759,19 +1789,21 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     for (CmrCloningQueue cloningQueue : pendingLists) {
       switch (cloningQueue.getStatus()) {
       case "PENDING":
-        try {
-          processCloningRecord(entityManager, cloningQueue);
-        } catch (Exception e) {
-          partialRollback(entityManager);
-          LOG.error("Unexpected error occurred during reservedcmr and cloning queue insertion " + cloningQueue.getId().getCmrNo(), e);
-          if ("CMR No or Country missing".equals(e.getMessage())) {
-            cloningQueue.setStatus("STOP");
-            cloningQueue.setErrorMsg("CMR No or Country missing");
-            updateEntity(cloningQueue, entityManager);
+        synchronized (this) {
+          try {
+            processCloningRecord(entityManager, cloningQueue);
+          } catch (Exception e) {
+            partialRollback(entityManager);
+            LOG.error("Unexpected error occurred during reservedcmr and cloning queue insertion " + cloningQueue.getId().getCmrNo(), e);
+            if ("CMR No or Country missing".equals(e.getMessage())) {
+              cloningQueue.setStatus("STOP");
+              cloningQueue.setErrorMsg("CMR No or Country missing");
+              updateEntity(cloningQueue, entityManager);
+            }
+            break;
           }
-          break;
+          partialCommit(entityManager);
         }
-        partialCommit(entityManager);
 
       case "IN_PROG":
       case "LEGACY_ERR":
@@ -1959,7 +1991,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     sql = StringUtils.replaceOnce(sql, ":KATR6", "'" + katr6 + "'");
     sql = StringUtils.replaceOnce(sql, ":LST_USED", "'" + newLastUsed + "'");
 
-    if (CmrConstants.CN_KUKLA81.equals(kukla)) {
+    if (CmrConstants.CN_KUKLA81.equals(kukla) || CmrConstants.CN_KUKLA85.equals(kukla)) {
       sql = StringUtils.replaceOnce(sql, ":KEYID", "'" + CmrConstants.CN_KUKLA81_KEYID + "'");
     } else if (CmrConstants.CN_KUKLA45.equals(kukla)) {
       sql = StringUtils.replaceOnce(sql, ":KEYID", "'" + CmrConstants.CN_KUKLA45_KEYID + "'");
@@ -2014,7 +2046,7 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
 
           cloneInsert.setId(pk);
 
-          if ("ZS01".equalsIgnoreCase(kna1Clone.getKtokd()))
+          if ("ZS01".equalsIgnoreCase(kna1Clone.getKtokd()) && !"90".equals(kna1Clone.getAufsd()))
             cloneInsert.setParSitePrtyId(kna1Clone.getBran5());
           else {
             String parSitePartyid = getParSitePartyId(entityManager, kna1Clone);
@@ -2165,6 +2197,11 @@ public class CloningProcessService extends MultiThreadedBatchService<CmrCloningQ
     query.setParameter("MANDT", mandt);
     query.setParameter("PARNR", parnr);
     return query.getResults(Stxl.class);
+  }
+
+  @Override
+  public boolean flushOnCommitOnly() {
+    return true;
   }
 
 }

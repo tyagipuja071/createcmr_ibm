@@ -129,6 +129,16 @@ public abstract class MultiThreadedBatchService<T> extends BaseBatchService {
   }
 
   /**
+   * Override and set to true if flushes will only be done on explicit calls and
+   * commits
+   * 
+   * @return
+   */
+  public boolean flushOnCommitOnly() {
+    return false;
+  }
+
+  /**
    * Distributes the requests evenly on lists that equate to the thread count
    * 
    * @param requests

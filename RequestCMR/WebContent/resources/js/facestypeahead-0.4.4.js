@@ -600,7 +600,7 @@ if (!Function.prototype.bind) {
       moreResultsLabel2 : 'See more Faces (over ${count})',
       moreResultsUrl : '//w3-services1.w3-969.ibm.com/myw3/unified-profile/v1#${query}',
       host : protocol + '//w3-services1.w3-969.ibm.com/myw3/unified-profile/v1',
-      imageHost : protocol + '//w3-services1.w3-969.ibm.com/myw3/unified-profile-photo/v1',
+      imageHost : protocol + '//unified-profile-api.us-south-k8s.intranet.ibm.com/v3',
       largeImageSize : 50,
       smallImageSize : 32,
       url : function(host) {
@@ -613,7 +613,7 @@ if (!Function.prototype.bind) {
       // 'user': 'finleyt@us.ibm.com',
       },
       onclick : function(person) {
-        location.href = protocol + '//w3-services1.w3-969.ibm.com/myw3/unified-profile/v1/#uid:' + person.uid + '/' + person.name;
+        location.href = protocol + '//unified-profile-api.us-south-k8s.intranet.ibm.com/v3/#uid:' + person.uid + '/' + person.name;
         // Alternative: opens Connections profile
         // location.href =
         // 'http://w3.ibm.com/connections/profiles/html/profileView.do?email=' +
@@ -1629,7 +1629,8 @@ if (!Function.prototype.bind) {
         port += 10000;
       }
 
-      img.src = [ settings.faces.imageHost, ':', port, '/image/', user.uid, '.jpg?s=', imageSize ].join('');
+      //img.src = [ settings.faces.imageHost, ':', port, '/image/', user.uid, '.jpg?s=128'].join('');
+      img.src = [ settings.faces.imageHost, '/image/', user.uid, '.jpg' ].join('');
       img.setAttribute('alt', user.name);
       fragment.appendChild(img);
 

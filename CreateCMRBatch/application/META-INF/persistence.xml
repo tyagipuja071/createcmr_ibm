@@ -172,6 +172,8 @@
     <class>com.ibm.cio.cmr.request.entity.ChangelogPK</class>
     <class>com.ibm.cio.cmr.request.entity.Stxl</class>
     <class>com.ibm.cio.cmr.request.entity.StxlPK</class>
+    <class>com.ibm.cio.cmr.request.entity.ScAccountCmrStg</class>
+    <class>com.ibm.cio.cmr.request.entity.ScAccountCmrStgPK</class>
 
     <properties>
 
@@ -193,7 +195,7 @@
       <property name="javax.persistence.query.timeout" value="600000" />
       <property name="eclipselink.cache.shared.default" value="false"/>
       <property name="eclipselink.jdbc.exclusive-connection.mode" value="Always" />
-      <property name="eclipselink.target-server" value="Default"/>
+      <property name="eclipselink.target-server" value="None"/>
 
     </properties>
   </persistence-unit>

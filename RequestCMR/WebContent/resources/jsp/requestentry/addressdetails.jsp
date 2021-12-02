@@ -370,7 +370,7 @@
   </cmr:view>
   
   <!-- defect : 1444422 for FR -->
-  <cmr:view forGEO="IERP,CND,MCO1,MCO2,FR,CEMEA,CN,EMEA,SWISS" exceptForCountry="618,866,754,755,726,666">
+  <cmr:view forGEO="IERP,CND,MCO1,MCO2,FR,CEMEA,CN,EMEA,SWISS,NORDX,LA" exceptForCountry="618,866,754,755,726,666">
     <cmr:row>
       <cmr:column span="1">
         <cmr:label fieldId="ierpSitePrtyId_view">
@@ -418,6 +418,19 @@
         <div id="custNm2_view">-</div>
       </cmr:column>
     </cmr:row>
+    <cmr:view forGEO="NORDX">
+      <cmr:row>
+        <cmr:column span="1">
+          <cmr:label fieldId="custNm3_view">
+            <span class="lbl-CustomerName3">${ui.custName3}:</span>
+            <cmr:info text="${ui.info.NordicsForAdditionalInfo}" />
+          </cmr:label>:
+        </cmr:column>
+        <cmr:column span="2">
+          <div id="custNm3_view">-</div>
+        </cmr:column>
+      </cmr:row>
+    </cmr:view>
     <cmr:row>
       <cmr:column span="1" exceptForCountry="618">
         <cmr:label fieldId="custNm4_view">
@@ -626,14 +639,16 @@
   </cmr:view>
 
   <cmr:view forGEO="CN">
-	<c:if test="${reqentry.reqType == 'C' && reqentry.mainAddrType == 'ZS01'}">
+	<%-- <c:if test="${reqentry.reqType == 'C' && reqentry.mainAddrType == 'ZS01'}"> --%>
      <cmr:row addBackground="true">
+      <%-- 
       <cmr:column span="1">
         <cmr:label fieldId="cnCustContPhone2_view">Customer Contact's Phone Number 2:</cmr:label>
       </cmr:column>
       <cmr:column span="2">
         <div id="cnCustContPhone2_view">${ui.custContPhone2}</div>
       </cmr:column>
+      --%>
       <cmr:column span="1">
         <cmr:label fieldId="cnCustContJobTitle_view">Customer Contact's Job Title:</cmr:label>
       </cmr:column>
@@ -656,7 +671,7 @@
         <div id="custPhone_view">-</div>
       </cmr:column>
     </cmr:row>
-</c:if>
+   <%-- </c:if> --%>
     <cmr:row addBackground="false">
       <cmr:column span="1">
         <cmr:label fieldId="custNm1_view">${ui.custName1}:</cmr:label>
@@ -1143,7 +1158,7 @@
       <cmr:column span="2">
         <div id="addrTxt_view">-</div>
       </cmr:column>
-      <cmr:column span="1" exceptForGEO="IERP,CND,CEMEA,NL,BELUX,NORDX,SWISS,TW,KR" exceptForCountry='758,858,766'>
+      <cmr:column span="1" exceptForGEO="IERP,CND,CEMEA,NL,NORDX,SWISS,TW,KR" exceptForCountry='758,858,766'>
         <cmr:label fieldId="addrTxt2_view">
           <span class="lbl-StreetAddress2">${ui.street2}</span>:</cmr:label>
       </cmr:column>
@@ -1374,7 +1389,7 @@
         <div id="city2_view">-</div>
       </cmr:column>
     </cmr:view>
-    <cmr:view exceptForGEO="MCO1,MCO2,CEMEA,CN,NORDX,BELUX,NL,JP,AP,FR,TW,KR" exceptForCountry="862,726,666,822,838,758,760,724,858,766,649">
+    <cmr:view exceptForGEO="MCO1,MCO2,CEMEA,CN,NORDX,BELUX,NL,JP,AP,FR,TW,KR" exceptForCountry="862,726,666,822,838,758,760,724,858,766">
       <cmr:column span="1">
         <cmr:label fieldId="bldg_view">
           <span class="lbl-Building">${ui.bldng}</span>:</cmr:label>
@@ -1397,7 +1412,7 @@
   </cmr:row> --%>
 
   <cmr:row addBackground="true">
-    <cmr:view exceptForGEO="CEMEA,CN,JP,SWISS,TW,KR" exceptForCountry="862,858,766">
+    <cmr:view exceptForGEO="CEMEA,CN,JP,SWISS,TW,KR,NORDX" exceptForCountry="862,858,766">
       <cmr:column span="1">
         <cmr:label fieldId="stateProv_view">
           <span class="lbl-StateProv">${ui.stateProve}</span>:</cmr:label>
@@ -1426,7 +1441,7 @@
     </cmr:view>
   </cmr:row>
 
-  <cmr:view exceptForGEO="CN,TW,KR" exceptForCountry="618,724,858,766,649">
+  <cmr:view exceptForGEO="CN,TW,KR,NORDX" exceptForCountry="618,724,858,766,649">
     <cmr:row addBackground="true">
       <cmr:column span="1">
         <cmr:label fieldId="stateProv_view">

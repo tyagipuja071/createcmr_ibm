@@ -35,6 +35,7 @@ import com.ibm.cio.cmr.request.entity.ApprovalReq;
 import com.ibm.cio.cmr.request.entity.ApprovalReqPK;
 import com.ibm.cio.cmr.request.entity.ApprovalTyp;
 import com.ibm.cio.cmr.request.entity.CompoundEntity;
+import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DefaultApprovalRecipients;
 import com.ibm.cio.cmr.request.entity.DefaultApprovals;
 import com.ibm.cio.cmr.request.model.approval.ApprovalCommentModel;
@@ -43,6 +44,7 @@ import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.BaseService;
+import com.ibm.cio.cmr.request.service.requestentry.DataService;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.ConfigUtil;
@@ -55,6 +57,7 @@ import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.approval.ApprovalUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
+import com.ibm.cio.cmr.request.util.legacy.LegacyDowntimes;
 import com.ibm.cio.cmr.request.util.mail.Email;
 import com.ibm.cio.cmr.request.util.mail.MessageType;
 
@@ -71,6 +74,7 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
   private static final List<String> PENDING_STATUSES_TO_MOVE = Arrays.asList("DRA", "REP");
   private static final List<String> PENDING_STATUSES_TO_RETURN = Arrays.asList("REP");
   private static final String BP_MANAGER_ID = "BPMANAGER";
+  private final DataService dataService = new DataService();
 
   public static void main(String[] args) {
 
@@ -135,6 +139,15 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
         updateApprovalStatus(entityManager, req, CmrConstants.APPROVAL_APPROVED, approval, admin);
         if (!"REP".equals(admin.getReqStatus())) {
           moveToNextStep(entityManager, admin);
+
+          // CREATCMR-3377 - CN 2.0
+          String cmrIssuingCntry = getCmrIssuingCntry(entityManager, req.getReqId());
+          if (SystemLocation.CHINA.equals(cmrIssuingCntry)) {
+            GEOHandler geoHandler = RequestUtils.getGEOHandler(cmrIssuingCntry);
+            geoHandler.setReqStatusAfterApprove(entityManager, approval, req, admin);
+            log.debug("Updating Approval Request ID " + req.getId().getApprovalId() + " to " + admin.getReqStatus());
+            updateEntity(admin, entityManager);
+          }
         }
         approval.setProcessed(true);
         approval.setActionDone(CmrConstants.YES_NO.Y.toString());
@@ -148,6 +161,13 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
         break;
       case "C":
         updateApprovalStatus(entityManager, req, CmrConstants.APPROVAL_CONDITIONALLY_APPROVED, approval, admin);
+        if (admin != null && admin.getId() != null && dataService != null) {
+          Data data = dataService.getCurrentRecordById(admin.getId().getReqId(), entityManager);
+          if (data != null && SystemLocation.CHINA.equals(data.getCmrIssuingCntry())) {
+            GEOHandler geoHandler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
+            geoHandler.handleMEUCondApproval(entityManager, approval, data);
+          }
+        }
         if (!"REP".equals(admin.getReqStatus())) {
           moveToNextStep(entityManager, admin);
         }
@@ -402,6 +422,21 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
     query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", admin.getId().getReqId());
     boolean conditionallyApproved = query.exists();
+    boolean cnConditionallyApproved = false;
+    Data data = null;
+    try {
+      if (dataService != null) {
+        data = dataService.getCurrentRecordById(admin.getId().getReqId(), entityManager);
+      }
+    } catch (Exception e) {
+      this.log.debug("Error in Querying data table using admin's reqid in ApprovalService.java");
+    }
+    if (conditionallyApproved && admin != null && admin.getId() != null && dataService != null) {
+      if (data != null && SystemLocation.CHINA.equals(data.getCmrIssuingCntry())) {
+        cnConditionallyApproved = true;
+      }
+      conditionallyApproved = conditionallyApproved && !cnConditionallyApproved;
+    }
 
     if (approvalsReceived && PENDING_STATUSES_TO_MOVE.contains(admin.getReqStatus())) {
       // move only if it is one of the middle statuses
@@ -414,7 +449,11 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
           boolean processOnCompletion = isProcessOnCompletionChk(entityManager, admin.getId().getReqId(), admin.getReqType())
               && !conditionallyApproved;
           if (processOnCompletion) {
-            admin.setReqStatus(CmrConstants.REQUEST_STATUS.PCP.toString());
+            if (data == null || LegacyDowntimes.isUp(data.getCmrIssuingCntry(), SystemUtil.getActualTimestamp())) {
+              admin.setReqStatus(CmrConstants.REQUEST_STATUS.PCP.toString());
+            } else {
+              admin.setReqStatus("LEG");
+            }
           } else {
             admin.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
           }
@@ -1370,6 +1409,19 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
       }
     }
     return false;
+  }
+
+  private String getCmrIssuingCntry(EntityManager entityManager, long reqId) {
+    String sql = ExternalizedQuery.getSql("DATA.GET.RECORD.BYID");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+
+    List<Data> rs = query.getResults(1, Data.class);
+
+    if (rs != null && rs.size() > 0) {
+      return rs.get(0).getCmrIssuingCntry();
+    }
+    return null;
   }
 
 }

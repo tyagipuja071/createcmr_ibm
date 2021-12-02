@@ -92,8 +92,8 @@ public class FstTransformer extends MCOTransformer {
       }
       legacyCust.setCreditCd("");
 
-      legacyCust.setSalesRepNo(data.getRepTeamMemberNo());
-      legacyCust.setSalesGroupRep(data.getRepTeamMemberNo());
+      // legacyCust.setSalesRepNo(data.getRepTeamMemberNo());
+      // legacyCust.setSalesGroupRep(data.getRepTeamMemberNo());
 
       String dataEmbargoCd = data.getEmbargoCd();
       String rdcEmbargoCd = LegacyDirectUtil.getEmbargoCdFromDataRdc(entityManager, admin); // permanent
@@ -139,11 +139,6 @@ public class FstTransformer extends MCOTransformer {
       legacyCust.setAuthRemarketerInd("1");
     } else {
       legacyCust.setMrcCd("3");
-    }
-    if (!StringUtils.isBlank(data.getRepTeamMemberNo())) {
-      legacyCust.setSalesGroupRep(data.getRepTeamMemberNo());
-    } else {
-      legacyCust.setSalesGroupRep("");
     }
 
     if (!StringUtils.isBlank(data.getVat())) {

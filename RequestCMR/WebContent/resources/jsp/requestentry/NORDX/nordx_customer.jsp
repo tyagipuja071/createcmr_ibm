@@ -86,6 +86,7 @@
         <cmr:label fieldId="modeOfPayment">
           <cmr:fieldLabel fieldId="ModeOfPayment" />: 
             <cmr:delta text="${rdcdata.modeOfPayment}" oldValue="${reqentry.paymentMode}" id="delta-modeOfPayment" />
+            <cmr:info text="${ui.info.NordicsForPaymentTerms}" />
         </cmr:label>
         <cmr:field path="paymentMode" id="modeOfPayment" fieldId="ModeOfPayment" tabId="MAIN_CUST_TAB" />
       </p>
@@ -99,6 +100,15 @@
             <cmr:delta text="${rdcdata.embargoCd}" oldValue="${reqentry.embargoCd}" />
         </cmr:label>
         <cmr:field path="embargoCd" id="embargoCd" fieldId="EmbargoCode" tabId="MAIN_CUST_TAB" />
+      </p>
+    </cmr:column>
+    <cmr:column span="2" containerForField="CustClass">
+      <p>
+        <cmr:label fieldId="custClass">
+          <cmr:fieldLabel fieldId="CustClass" />:
+            <cmr:delta text="${rdcdata.custClass}" oldValue="${reqentry.custClass}" />
+        </cmr:label>
+        <cmr:field path="custClass" id="custClass" fieldId="CustClass" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
   </cmr:row>

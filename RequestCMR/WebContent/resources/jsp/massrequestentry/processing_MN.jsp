@@ -204,8 +204,23 @@
     <%
       } else {
     %>
+    <%
+      if("Viewer".equalsIgnoreCase(reqentry.getUserRole())){
+        if("COM".equals(reqentry.getReqStatus()) || "PCP".equals(reqentry.getReqStatus())) {
+    %>
     <cmr:column span="4">
+      <p style="height:45px"></p>
     </cmr:column>
+    <cmr:column span="2">
+      <div style="padding-top: 12px">
+        <cmr:button label="DPL Summary" onClick="showDPLSummaryScreen()" highlight="true" id="btnDplSum"></cmr:button>
+        <cmr:info text="Pressing the button will open a pop-up to view the DPL Check summary"></cmr:info>
+      </div>
+    </cmr:column>
+    <%
+        }
+      }
+    %>
     <%
       }
     %>

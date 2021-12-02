@@ -21,6 +21,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.AddrRdc;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.Data;
@@ -501,6 +502,15 @@ public class MCOSaHandler extends MCOHandler {
   @Override
   public void doBeforeAddrSave(EntityManager entityManager, Addr addr, String cmrIssuingCntry) throws Exception {
     serBlankFieldsAtCopy(addr);
+
+    if ("ZS01".equals(addr.getId().getAddrType())) {
+      Admin admin = LegacyCommonUtil.getAdminByReqId(entityManager, addr.getId().getReqId());
+
+      if (CmrConstants.REQ_TYPE_UPDATE.equalsIgnoreCase(admin.getReqType())) {
+        AddrRdc addrRdc = LegacyCommonUtil.getAddrRdcRecord(entityManager, addr);
+        addr.setLandCntry(addrRdc.getLandCntry());
+      }
+    }
   }
 
   @Override

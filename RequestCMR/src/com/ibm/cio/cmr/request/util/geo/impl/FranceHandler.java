@@ -30,6 +30,7 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AdminPK;
 import com.ibm.cio.cmr.request.entity.CmrCloningQueue;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.entity.Kna1;
 import com.ibm.cio.cmr.request.entity.KunnrExt;
@@ -67,7 +68,7 @@ import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
  */
 public class FranceHandler extends GEOHandler {
 
-  private static final Logger LOG = Logger.getLogger(DEHandler.class);
+  private static final Logger LOG = Logger.getLogger(FranceHandler.class);
   private static final List<String> IERP_ISSUING_COUNTRY_VAL = Arrays.asList("706");
 
   private static final String[] CH_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "LocalTax2", "SitePartyID", "Division", "POBoxCity", "City2", "Affiliate",
@@ -586,6 +587,66 @@ public class FranceHandler extends GEOHandler {
     if (addrDetailsList.isEmpty() && "C".equals(admin.getReqType())) {
       // addr.setCustNm3("");
     }
+
+    if ("C".equals(admin.getReqType()) && "ZS01".equals(addr.getId().getAddrType())) {
+      DataPK dataPK = new DataPK();
+      dataPK.setReqId(addr.getId().getReqId());
+      Data data = entityManager.find(Data.class, dataPK);
+      setSortlBasedOnLanded(entityManager, addr, data);
+    }
+  }
+
+  private void setSortlBasedOnLanded(EntityManager entityManager, Addr addr, Data data) {
+    String currentLanded = addr.getLandCntry();
+
+    if (shouldSetSBO(currentLanded, data.getCustSubGrp())) {
+      String origLandedCntry = getOriginalLandedCountry(entityManager, data.getId().getReqId());
+
+      if (StringUtils.isNotBlank(currentLanded) && !currentLanded.equals(origLandedCntry)) {
+        if (currentLanded.equals("TF") || currentLanded.equals("RE")) {
+          data.setSalesBusOffCd("ID1ID1");
+        } else if (currentLanded.equals("MQ")) {
+          data.setSalesBusOffCd("YF1YF1");
+        } else if (currentLanded.equals("GP")) {
+          data.setSalesBusOffCd("YD1YD1");
+        } else if (currentLanded.equals("GF") || currentLanded.equals("PM")) {
+          data.setSalesBusOffCd("XF1XF1");
+        } else if (currentLanded.equals("YT")) {
+          data.setSalesBusOffCd("XD1XD1");
+        } else if (currentLanded.equals("NC") || currentLanded.equals("VU") || currentLanded.equals("WF")) {
+          data.setSalesBusOffCd("GD1GD1");
+        } else if (currentLanded.equals("PF")) {
+          data.setSalesBusOffCd("DD1DD1");
+        } else if (currentLanded.equals("AD") || currentLanded.equals("MC")) {
+          data.setSalesBusOffCd("NNNNNN");
+        } else if (currentLanded.equals("DZ")) {
+          data.setSalesBusOffCd("711711");
+        }
+        entityManager.merge(data);
+        entityManager.flush();
+      }
+    }
+  }
+
+  private String getOriginalLandedCountry(EntityManager entityManager, long reqId) {
+    String origLandedCntry = "";
+    String sql = ExternalizedQuery.getSql("QUERY.ADDR.GET.LANDCNTRY.BY_REQID");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    List<String> results = query.getResults(String.class);
+    if (results != null && !results.isEmpty()) {
+      origLandedCntry = results.get(0);
+    }
+    return origLandedCntry;
+  }
+
+  private boolean shouldSetSBO(String currentLanded, String scenario) {
+    List<String> excludedScenarios = Arrays.asList("INTER", "BUSPR", "XBUSP", "CBTER");
+    List<String> crossCoverageCountries = Arrays.asList("TF", "RE", "MQ", "GP", "GF", "PM", "YT", "NC", "VU", "WF", "PF", "DZ");
+    if (!"FR".equals(currentLanded) && !excludedScenarios.contains(scenario) && crossCoverageCountries.contains(currentLanded)) {
+      return true;
+    }
+    return false;
   }
 
   @Override
@@ -1572,7 +1633,7 @@ public class FranceHandler extends GEOHandler {
     query.setForReadOnly(true);
     query.setParameter("KATR6", SystemLocation.FRANCE);
     query.setParameter("MANDT", mandt);
-    query.setParameter("CMR", cmrNo);
+    query.setParameter("CMR", cmrNo.length() > 6 ? cmrNo.substring(0, 6) : cmrNo);
 
     Kna1 zs01 = query.getSingleResult(Kna1.class);
     if (zs01 != null) {

@@ -15,6 +15,7 @@ import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 
+import com.ibm.cio.cmr.request.automation.ActionOnError;
 import com.ibm.cio.cmr.request.automation.AutomationElement;
 import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
@@ -30,6 +31,7 @@ import com.ibm.cio.cmr.request.entity.AutomationMatching;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.MatchingServiceClient;
@@ -141,7 +143,7 @@ public class GBGMatchingElement extends MatchingElement {
       MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
           MatchingServiceClient.class);
       client.setRequestMethod(Method.Get);
-      client.setReadTimeout(1000 * 60 * 5);
+      client.setReadTimeout(1000 * 60 * 30);
 
       LOG.debug("Connecting to the GBG Finder Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
       MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.GBG_SERVICE_ID, request, MatchingResponse.class);
@@ -212,6 +214,17 @@ public class GBGMatchingElement extends MatchingElement {
             }
 
             if (itemNo == 1 && gbg.isDomesticGBG()) {
+              if ("641".equals(data.getCmrIssuingCntry()) && "C".equals(admin.getReqType()) && "ECOSY".equals(data.getCustSubGrp())) {
+                List<String> s1GBGIDList = SystemParameters.getList("CN_S1_GBG_ID_LIST");
+                if (s1GBGIDList.contains(gbg.getGbgId())) {
+                  result.setDetails("GBG computing result is S1 GBG ID on the request.");
+                  engineData.addRejectionComment("OTH", "GBG computing result is S1 GBG ID on the request.", "", "");
+                  result.setResults("S1 GBG ID");
+                  result.setOnError(true);
+                  super.setStopOnError(true);
+                  super.setActionOnError(ActionOnError.fromCode("R"));
+                }
+              }
               engineData.put(AutomationEngineData.GBG_MATCH, gbg);
             }
           }
@@ -231,6 +244,10 @@ public class GBGMatchingElement extends MatchingElement {
         result.setProcessOutput(output);
         result.setDetails(details.toString());
       } else {
+        countryUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
+        if (countryUtil != null) {
+          countryUtil.emptyINAC(entityManager, requestData, engineData);
+        }
         result.setDetails("No GBG was found using DUNS hierarchy matching.");
         result.setResults("No Matches");
         result.setOnError(false);

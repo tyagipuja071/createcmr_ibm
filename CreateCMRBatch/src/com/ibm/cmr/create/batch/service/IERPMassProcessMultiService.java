@@ -39,7 +39,7 @@ import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cmr.create.batch.util.BatchUtil;
 import com.ibm.cmr.create.batch.util.CMRRequestContainer;
 import com.ibm.cmr.create.batch.util.masscreate.WorkerThreadFactory;
-import com.ibm.cmr.create.batch.util.masscreate.handler.impl.IERPMassWorker;
+import com.ibm.cmr.create.batch.util.worker.impl.IERPMassUpdtMultiWorker;
 import com.ibm.cmr.services.client.process.ProcessRequest;
 import com.ibm.cmr.services.client.process.ProcessResponse;
 
@@ -98,6 +98,8 @@ public class IERPMassProcessMultiService extends MultiThreadedBatchService<Long>
             || CmrConstants.RDC_STATUS_NOT_COMPLETED.equalsIgnoreCase(admin.getRdcProcessingStatus())) {
           admin.setReqStatus("PPN");
           admin.setProcessedFlag("E"); // set request status to error.
+          RequestUtils.clearClaimDetails(admin);
+          admin.setLockInd("N");
           createHistory(entityManager, "Sending back to processor due to error on RDC processing", "PPN", "RDC Processing", admin.getId().getReqId());
         } else if ((CmrConstants.RDC_STATUS_COMPLETED.equalsIgnoreCase(admin.getRdcProcessingStatus())
             || CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equalsIgnoreCase(admin.getRdcProcessingStatus()))
@@ -228,14 +230,14 @@ public class IERPMassProcessMultiService extends MultiThreadedBatchService<Long>
       sql.setParameter("REQ_ID", admin.getId().getReqId());
       sql.setParameter("ITER_ID", admin.getIterationId());
 
-      List<MassUpdt> results = sql.getResults(MassUpdt.class);
+      List<MassUpdt> resultsMain = sql.getResults(MassUpdt.class);
       List<String> statusCodes = new ArrayList<String>();
-      StringBuilder comment = null;
+      StringBuilder comment = new StringBuilder();
 
       List<String> rdcProcessStatusMsgs = new ArrayList<String>();
       HashMap<String, String> overallStatus = new HashMap<String, String>();
 
-      if (results != null && results.size() > 0) {
+      if (resultsMain != null && resultsMain.size() > 0) {
 
         int threads = 5;
         String massThreads = SystemParameters.getString("PROCESS.THREAD.COUNT");
@@ -250,15 +252,20 @@ public class IERPMassProcessMultiService extends MultiThreadedBatchService<Long>
 
         LOG.debug("Worker threads to use: " + threads);
         LOG.debug("Starting processing IERP mass update at " + new Date());
-        LOG.debug("Number of records found: " + results.size());
-        List<IERPMassWorker> workers = new ArrayList<IERPMassWorker>();
+        LOG.debug("Number of records found: " + resultsMain.size());
+        List<IERPMassUpdtMultiWorker> workers = new ArrayList<IERPMassUpdtMultiWorker>();
+
         ExecutorService executor = Executors.newFixedThreadPool(threads, new WorkerThreadFactory("IERPMassWorker-" + reqId));
-        for (MassUpdt sMassUpdt : results) {
-          IERPMassWorker worker = new IERPMassWorker(entityManager, sMassUpdt, admin, data, BATCH_USER_ID);
+        for (MassUpdt sMassUpdt : resultsMain) {
+          // ensure the mass update entity is not updated on this persistence
+          // context
+          entityManager.detach(sMassUpdt);
+          IERPMassUpdtMultiWorker worker = new IERPMassUpdtMultiWorker(this, admin, sMassUpdt);
           executor.execute(worker);
           workers.add(worker);
         }
 
+        LOG.debug(workers.size() + " workers added...");
         executor.shutdown();
         while (!executor.isTerminated()) {
           try {
@@ -269,9 +276,28 @@ public class IERPMassProcessMultiService extends MultiThreadedBatchService<Long>
         }
         LOG.debug("Mass create processing finished at " + new Date());
 
-        for (IERPMassWorker worker : workers) {
-          statusCodes.addAll(worker.getStatusCodes());
-          rdcProcessStatusMsgs.addAll(worker.getRdcProcessStatusMsgs());
+        Throwable processError = null;
+        for (IERPMassUpdtMultiWorker worker : workers) {
+          if (worker != null) {
+            if (worker.isError()) {
+              LOG.error("Error in processing mass update rdc for Request ID " + admin.getId().getReqId() + ": " + worker.getErrorMsg());
+              if (processError == null && worker.getErrorMsg() != null) {
+                processError = worker.getErrorMsg();
+              }
+            } else {
+              statusCodes.addAll(worker.getStatusCodes());
+              rdcProcessStatusMsgs.addAll(worker.getRdcProcessStatusMsgs());
+              isIndexNotUpdated = isIndexNotUpdated || worker.isIndexNotUpdated();
+              comment.append(worker.getComments());
+            }
+          }
+        }
+
+        LOG.debug("**** Status CODES --> " + statusCodes);
+        LOG.debug("Worker Process Message" + comment);
+
+        if (processError != null) {
+          throw new Exception(processError);
         }
 
         admin.setReqStatus(CmrConstants.REQUEST_STATUS.COM.toString());
@@ -395,6 +421,11 @@ public class IERPMassProcessMultiService extends MultiThreadedBatchService<Long>
     createComment(entityManager, "An error occurred during processing:\n" + errorMsg, admin.getId().getReqId());
 
     RequestUtils.sendEmailNotifications(entityManager, admin, hist);
+  }
+
+  @Override
+  public boolean flushOnCommitOnly() {
+    return true;
   }
 
   /**

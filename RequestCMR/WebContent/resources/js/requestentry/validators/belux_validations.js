@@ -136,6 +136,56 @@ function afterConfigForBELUX() {
   disableIBMTab();
 }
 
+function checkCmrUpdateBeforeImport() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var cmrNo = FormManager.getActualValue('cmrNo');
+        var reqId = FormManager.getActualValue('reqId');
+        var reqType = FormManager.getActualValue('reqType');
+        var uptsrdc = '';
+        var lastupts = '';
+
+        if (reqType == 'C') {
+          // console.log('reqType = ' + reqType);
+          return new ValidationResult(null, true);
+        }
+
+        var resultsCC = cmr.query('GETUPTSRDC', {
+          COUNTRY : cntry,
+          CMRNO : cmrNo,
+          MANDT : cmr.MANDT
+        });
+
+        if (resultsCC != null && resultsCC != undefined && resultsCC.ret1 != '') {
+          uptsrdc = resultsCC.ret1;
+          // console.log('lastupdatets in RDC = ' + uptsrdc);
+        }
+
+        var results11 = cmr.query('GETUPTSADDR', {
+          REQ_ID : reqId
+        });
+        if (results11 != null && results11 != undefined && results11.ret1 != '') {
+          lastupts = results11.ret1;
+          // console.log('lastupdatets in CreateCMR = ' + lastupts);
+        }
+
+        if (lastupts != '' && uptsrdc != '') {
+          if (uptsrdc > lastupts) {
+            return new ValidationResult(null, false, 'This CMR has a new update , please re-import this CMR.');
+          } else {
+            return new ValidationResult(null, true);
+          }
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+
 function disableIBMTab() {
 
   var reqType = FormManager.getActualValue('reqType');
@@ -265,6 +315,51 @@ function setAccTemNumValueOnScenarios() {
     break;
   case 'LUPRI':
     FormManager.setValue('searchTerm', 'LU0000');
+    break;
+  default:
+    break;
+  }
+}
+
+function setSortlOnScenarios() {
+  var cntryUse = FormManager.getActualValue('countryUse');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var reqType = FormManager.getActualValue('reqType');
+  if (typeof (_pagemodel) != 'undefined') {
+    reqType = FormManager.getActualValue('reqType');
+    role = _pagemodel.userRole;
+  }
+
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+
+  if (reqType != 'C') {
+    return;
+  }
+
+  if (custSubGrp == '') {
+    return;
+  }
+
+  switch (custSubGrp) {
+  case 'CBCOM':
+    if (role == 'Requester') {
+      if (cntryUse == '624') {
+        FormManager.setValue('commercialFinanced', 'T0003601');
+      } else if (cntryUse == '624LU') {
+        FormManager.setValue('commercialFinanced', 'T0003500');
+      }
+    }
+    break;
+  case 'CBBUS':
+    if (role == 'Requester') {
+      if (cntryUse == '624') {
+        FormManager.setValue('commercialFinanced', 'BP0000');
+      } else if (cntryUse == '624LU') {
+        FormManager.setValue('commercialFinanced', 'LP0000');
+      }
+    }
     break;
   default:
     break;
@@ -536,6 +631,40 @@ function setAbbrevNameLocn(cntry, addressMode, saving, finalSave, force) {
   }
 }
 
+function setAbbrevNameLocnProc(cntry, addressMode, saving, finalSave, force) {
+  if (typeof (_pagemodel) != 'undefined') {
+    reqType = FormManager.getActualValue('reqType');
+    role = _pagemodel.userRole;
+  }
+  if (reqType == 'U') {
+    return;
+  }
+  if (role != 'PROCESSOR') {
+    console.log("REQUESTER, return");
+    return;
+  }
+  if (finalSave || force || addressMode == 'ZS01') {
+    var copyTypes = document.getElementsByName('copyTypes');
+    var copyingToA = false;
+    if (copyTypes != null && copyTypes.length > 0) {
+      copyTypes.forEach(function(input, i) {
+        if (input.value == 'ZS01' && input.checked) {
+          copyingToA = true;
+        }
+      });
+    }
+    var addrType = FormManager.getActualValue('addrType');
+    var cmpnyName = FormManager.getActualValue('abbrevNm');
+    var city1 = FormManager.getActualValue('city1');
+    if (addrType == 'ZS01' || copyingToA) {
+      FormManager.setValue('abbrevNm', cmpnyName);
+      FormManager.setValue('abbrevLocn', city1);
+    }
+    FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
+    FormManager.removeValidator('abbrevLocn', Validators.REQUIRED);
+  }
+}
+
 /**
  * Lock Embargo Code field
  */
@@ -582,6 +711,7 @@ function addHandlersForBELUX() {
       // setINACValues(value);
       setEconomicCodeValues(value);
       setSBO();
+      setSORTL();
 
     });
   }
@@ -772,8 +902,10 @@ function setAccountTeamNumberValues(clientTier) {
     var qParams = null;
     var results = null;
 
+    // 32S changed to 34Q on 2021 2H Coverage
     // Account Team Number will be based on IMS for 32S
-    if (ims != '' && ims.length > 1 && (isuCtc == '32S')) {
+    // if (ims != '' && ims.length > 1 && (isuCtc == '32S')) {
+    if (ims != '' && ims.length > 1 && (isuCtc == '34Q')) {
       qParams = {
         _qall : 'Y',
         ISSUING_CNTRY : cntry + geoCd,
@@ -1322,9 +1454,9 @@ function setAbbrvNmLoc() {
   if (FormManager.getActualValue('reqType') != 'C') {
     return;
   }
-  // if (role != 'REQUESTER') {
-  // return;
-  // }
+  if (role != 'REQUESTER') {
+    return;
+  }
   var reqId = FormManager.getActualValue('reqId');
   if (reqId != null) {
     reqParam = {
@@ -1332,6 +1464,56 @@ function setAbbrvNmLoc() {
     };
   }
   var custNm = cmr.query('ADDR.GET.CUSTNM1.BY_REQID', reqParam);
+  var city;
+  var abbrevLocn = null;
+  var abbrvNm = custNm.ret1;
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var custGrp = FormManager.getActualValue('custGrp');
+
+  if (custSubGrp == 'CBCOM' || custGrp == 'LOCAL' || custGrp.substring(2, 5) == 'LOC') {
+    city = cmr.query('ADDR.GET.CITY1.BY_REQID', reqParam);
+    abbrevLocn = city.ret1;
+  } else {
+    city = cmr.query('ADDR.GET.LANDCNTRY.BY_REQID', reqParam);
+    abbrevLocn = getLandCntryDesc(city.ret1);
+  }
+
+  if (abbrvNm && abbrvNm.length > 22) {
+    abbrvNm = abbrvNm.substring(0, 22);
+  }
+  if (abbrevLocn && abbrevLocn.length > 12) {
+    abbrevLocn = abbrevLocn.substring(0, 12);
+  }
+
+  if (abbrevLocn != null && custSubGrp.substring(2, 5) != 'SOF') {
+    FormManager.setValue('abbrevLocn', abbrevLocn);
+  }
+  if (abbrvNm != null) {
+    FormManager.setValue('abbrevNm', abbrvNm);
+  }
+}
+
+// CMR - 1282
+
+function setAbbrvNmLocFrProc() {
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var reqParam = null;
+
+  if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
+
+  if (role != 'PROCESSOR') {
+    return;
+  }
+
+  var reqId = FormManager.getActualValue('reqId');
+  if (reqId != null) {
+    reqParam = {
+      REQ_ID : reqId
+    };
+  }
+  var custNm = cmr.query('DATA.GET.ABBREV_NM.BY_REQID', reqParam);
   var city;
   var abbrevLocn = null;
   var abbrvNm = custNm.ret1;
@@ -1451,6 +1633,57 @@ function setSBO(searchTerm) {
     }
   } else if (FormManager.getActualValue('countryUse') == '624LU') {
     FormManager.setValue('salesBusOffCd', '0'.concat(accTeam.substring(0, 2) + '0001'));
+  }
+}
+
+function setSORTL() {
+
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+
+  var acctTeamNum = FormManager.getActualValue('searchTerm');
+  var custSubType = FormManager.getActualValue('custSubGrp');
+  var reqType = FormManager.getActualValue('reqType');
+
+  if (reqType != 'C') {
+    return;
+  }
+  switch (custSubType) {
+  case 'BEINT':
+  case 'BEISO':
+  case 'BEPRI':
+  case 'BEBUS':
+    if (acctTeamNum != _pagemodel.searchTerm) {
+      FormManager.setValue('commercialFinanced', acctTeamNum);
+    }
+    break;
+  case 'BECOM':
+  case 'BEPUB':
+  case 'BE3PA':
+  case 'BEDAT':
+    // do nothing
+    break;
+  case 'LUINT':
+  case 'LUISO':
+  case 'LUPRI':
+  case 'LUBUS':
+    if (acctTeamNum != _pagemodel.searchTerm) {
+      FormManager.setValue('commercialFinanced', acctTeamNum);
+    }
+    break;
+  case 'LUCOM':
+  case 'LUPUB':
+  case 'LU3PA':
+  case 'LUDAT':
+    // do nothing
+    break;
+  case 'CBCOM':
+  case 'CBBUS':
+    // do nothing
+    break;
+  default:
+    break;
   }
 }
 
@@ -1667,6 +1900,7 @@ dojo.addOnLoad(function() {
   GEOHandler.enableCustomerNamesOnAddress(GEOHandler.BELUX);
   GEOHandler.enableCopyAddress(GEOHandler.BELUX, validateBELUXCopy, [ 'ZD01' ]);
 
+  // GEOHandler.addAddrFunction(setAbbrevNameLocnProc, GEOHandler.BELUX);
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.BELUX);
   GEOHandler.addAfterConfig(addHandlersForBELUX, GEOHandler.BELUX);
   GEOHandler.addAfterConfig(setCollectionCodeValues, GEOHandler.BELUX);
@@ -1687,6 +1921,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setCollectionCodeValues, GEOHandler.BELUX);
   GEOHandler.addAfterTemplateLoad(afterConfigForBELUX, GEOHandler.BELUX);
   GEOHandler.addAfterTemplateLoad(setAbbrvNmLoc, GEOHandler.BELUX);
+  GEOHandler.addAfterTemplateLoad(setAbbrvNmLocFrProc, GEOHandler.BELUX);
   // GEOHandler.addAfterTemplateLoad(setINACfrLux, GEOHandler.BELUX);
   // GEOHandler.addAfterTemplateLoad(setPreferredLanguage, GEOHandler.BELUX);
   // GEOHandler.addAfterTemplateLoad(setINACValues, GEOHandler.BELUX);
@@ -1694,6 +1929,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.BELUX);
   GEOHandler.addAfterTemplateLoad(setISUDropDown, GEOHandler.BELUX);
   GEOHandler.addAfterTemplateLoad(setClientTierDropDown, GEOHandler.BELUX);
+  GEOHandler.addAfterTemplateLoad(setSortlOnScenarios, GEOHandler.BELUX);
 
   GEOHandler.addAddrFunction(disableLandCntry, GEOHandler.BELUX);
   GEOHandler.addAddrFunction(addLandedCountryHandler, GEOHandler.BELUX);
@@ -1714,5 +1950,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addCmrNoValidator, GEOHandler.BELUX, null, true);
   GEOHandler.registerValidator(addDepartmentNumberValidator, GEOHandler.BELUX, null, true);
   GEOHandler.registerValidator(addREALCTYValidator, GEOHandler.BELUX, null, true);
+  GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.BELUX, null, true);
 
 });

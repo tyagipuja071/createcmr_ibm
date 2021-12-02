@@ -1,4 +1,10 @@
+/**
+ *@author Shivangi
+ */
 package com.ibm.cio.cmr.request.automation.impl.us;
+
+import java.util.Arrays;
+import java.util.List;
 
 import javax.persistence.EntityManager;
 
@@ -7,6 +13,7 @@ import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 
+import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.CompanyVerifier;
@@ -39,6 +46,7 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
   public static final String SC_BP_POOL = "POOL";
   public static final String SC_BP_DEVELOP = "DEVELOP";
   public static final String SC_BP_E_HOST = "E-HOST";
+  private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_INSTALL_AT);
   private static final Logger log = Logger.getLogger(USSosRpaCheckElement.class);
 
   public USSosRpaCheckElement(String requestTypes, String actionOnError, boolean overrideData, boolean stopOnError) {
@@ -56,6 +64,7 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
     AutomationResult<ValidationOutput> output = buildResult(admin.getId().getReqId());
     ValidationOutput validation = new ValidationOutput();
     Scorecard scorecard = requestData.getScorecard();
+    StringBuilder details = new StringBuilder();
     // skip sos matching if matching records are found in SOS-RPA
     /*
      * if (engineData.isDnbVerified() ||
@@ -73,46 +82,69 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
       log.debug("Skipping SOS-RPA Check Element for US BP Scenario");
       return output;
     }
-
-    Addr zs01 = requestData.getAddress("ZS01");
-    StringBuilder details = new StringBuilder();
-
-    if (zs01 != null) {
-      AutomationResponse<SosResponse> response = getSosMatches(admin.getId().getReqId(), zs01, admin);
-      scorecard.setRpaMatchingResult("");
-      log.debug("Scorecard Updated for SOS-RPA to Not Done");
-      if (response != null && response.isSuccess() && response.getRecord() != null) {
-        admin.setCompVerifiedIndc("Y");
-        scorecard.setRpaMatchingResult("Y");
-        log.debug("Scorecard Updated for SOS-RPA to" + scorecard.getRpaMatchingResult());
-        validation.setSuccess(true);
-        validation.setMessage("Successful Execution");
-        log.debug(response.getMessage());
-        details.append("Record found in SOS.");
-        details.append("\nCompany Id = " + (StringUtils.isBlank(response.getRecord().getCompanyId()) ? "" : response.getRecord().getCompanyId()));
-        details.append("\nCustomer Name = " + (StringUtils.isBlank(response.getRecord().getLegalName()) ? "" : response.getRecord().getLegalName()));
-        details.append("\nAddress = " + (StringUtils.isBlank(response.getRecord().getAddress1()) ? "" : response.getRecord().getAddress1()));
-        details.append("\nState = " + (StringUtils.isBlank(response.getRecord().getState()) ? "" : response.getRecord().getState()));
-        details.append("\nZip = " + (StringUtils.isBlank(response.getRecord().getZip()) ? "" : response.getRecord().getZip()));
-        output.setDetails(details.toString());
-        engineData.addPositiveCheckStatus(AutomationEngineData.SOS_MATCH);
-        engineData.clearNegativeCheckStatus("DnBMatch");
-        engineData.clearNegativeCheckStatus("DNB_VAT_MATCH_CHECK_FAIL");
-      } else {
-        scorecard.setRpaMatchingResult("N");
-        updateEntity(admin, entityManager);
-        log.debug("Scorecard Updated for SOS-RPA to" + scorecard.getRpaMatchingResult());
-        validation.setSuccess(true);
-        if ("O".equals(admin.getCompVerifiedIndc()) || "Y".equals(admin.getCompVerifiedIndc())) {
-          output.setOnError(false);
+    String matchRPA = "";
+    int itr = 0;
+    for (String addrType : RELEVANT_ADDRESSES) {
+      Addr address = requestData.getAddress(addrType);
+      Boolean containsInvoice = true;
+      Addr invoice = requestData.getAddress("ZI01");
+      if (invoice == null) {
+        containsInvoice = false;
+      }
+      if (address != null) {
+        AutomationResponse<SosResponse> response = getSosMatches(admin.getId().getReqId(), address, admin);
+        scorecard.setRpaMatchingResult("");
+        log.debug("Scorecard Updated for SOS-RPA to Not Done");
+        details.append("SOS-RPA Matching Results for " + addrType + "\n");
+        if (response != null && response.isSuccess() && response.getRecord() != null) {
           admin.setCompVerifiedIndc("Y");
+          scorecard.setRpaMatchingResult("Y");
+          log.debug("Scorecard Updated for SOS-RPA to" + scorecard.getRpaMatchingResult());
+          validation.setSuccess(true);
+          if ((matchRPA == "Y" && itr == 1) || !containsInvoice) {
+            validation.setMessage("Successful Execution");
+          } else if (matchRPA != "Y" && itr == 1) {
+            validation.setMessage("Partial Matches found");
+          }
+          matchRPA = "Y";
+          log.debug(response.getMessage());
+          details.append("Record found in SOS.");
+          details.append("\nCompany Id = " + (StringUtils.isBlank(response.getRecord().getCompanyId()) ? "" : response.getRecord().getCompanyId()));
+          details
+              .append("\nCustomer Name = " + (StringUtils.isBlank(response.getRecord().getLegalName()) ? "" : response.getRecord().getLegalName()));
+          details.append("\nAddress = " + (StringUtils.isBlank(response.getRecord().getAddress1()) ? "" : response.getRecord().getAddress1()));
+          details.append("\nState = " + (StringUtils.isBlank(response.getRecord().getState()) ? "" : response.getRecord().getState()));
+          details.append("\nZip = " + (StringUtils.isBlank(response.getRecord().getZip()) ? "" : response.getRecord().getZip()) + "\n\n");
+          output.setDetails(details.toString());
+          engineData.addPositiveCheckStatus(AutomationEngineData.SOS_MATCH);
+          engineData.clearNegativeCheckStatus("DnBMatch");
+          engineData.clearNegativeCheckStatus("DNB_VAT_MATCH_CHECK_FAIL");
+          engineData.clearNegativeCheckStatus("DnBSoSMatch");
         } else {
-          output.setOnError(true);
-          engineData.addNegativeCheckStatus("DnBSoSMatch", "No high quality matches with D&B and SOS-RPA records.");
+          if ((itr == 1 || !containsInvoice) && ("N".equals(scorecard.getRpaMatchingResult()) || "".equals(scorecard.getRpaMatchingResult()))) {
+            scorecard.setRpaMatchingResult("N");
+          }
+          log.debug("Scorecard Updated for SOS-RPA to" + scorecard.getRpaMatchingResult());
+          validation.setSuccess(true);
+          if ("O".equals(admin.getCompVerifiedIndc()) || "Y".equals(admin.getCompVerifiedIndc())) {
+            output.setOnError(false);
+            admin.setCompVerifiedIndc("Y");
+          } else {
+            if (itr == 1 || !containsInvoice) {
+              output.setOnError(true);
+              engineData.addNegativeCheckStatus("DnBSoSMatch", "No high quality matches with D&B and SOS-RPA records.");
+            }
+          }
+          if (matchRPA == "Y" && itr == 1) {
+            validation.setMessage("Partial Matches found");
+          } else if ((matchRPA != "Y" && itr == 1) || !containsInvoice) {
+            validation.setMessage("No Matches found");
+          }
+          details.append("No Matches Found\n\n");
+          output.setDetails(details.toString());
+          log.debug(response.getMessage());
         }
-        validation.setMessage("No Matches found");
-        output.setDetails(response.getMessage());
-        log.debug(response.getMessage());
+        itr = 1;
       }
     }
     output.setResults(validation.getMessage());
@@ -120,26 +152,23 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
     return output;
   }
 
-  private AutomationResponse<SosResponse> getSosMatches(long reqId, Addr zs01, Admin admin) throws Exception {
+  public static AutomationResponse<SosResponse> getSosMatches(long reqId, Addr addr, Admin admin) throws Exception {
     AutomationServiceClient autoClient = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
         AutomationServiceClient.class);
     autoClient.setReadTimeout(1000 * 60 * 5);
     autoClient.setRequestMethod(Method.Post);
-
     // calling SOS-RPA Service
-    log.debug("Calling SOS-RPA Service for Install - At (ZS01) address for Req_id : " + reqId);
-    SosRequest requestInstallAt = new SosRequest();
-    requestInstallAt.setName((StringUtils.isNotBlank(admin.getMainCustNm1()) ? admin.getMainCustNm1() : "")
+    log.debug("Calling SOS-RPA Service for Req_id : " + reqId);
+    SosRequest requestAddr = new SosRequest();
+    requestAddr.setName((StringUtils.isNotBlank(admin.getMainCustNm1()) ? admin.getMainCustNm1() : "")
         + (StringUtils.isNotBlank(admin.getMainCustNm2()) ? " " + admin.getMainCustNm2() : ""));
-    requestInstallAt.setCity1(zs01.getCity1());
-    requestInstallAt.setAddrTxt((StringUtils.isNotBlank(zs01.getAddrTxt()) ? zs01.getAddrTxt() : "")
-        + (StringUtils.isNotBlank(zs01.getAddrTxt2()) ? " " + zs01.getAddrTxt2() : ""));
-    requestInstallAt.setState(zs01.getStateProv());
-
+    requestAddr.setCity1(addr.getCity1());
+    requestAddr.setAddrTxt((StringUtils.isNotBlank(addr.getAddrTxt()) ? addr.getAddrTxt() : "")
+        + (StringUtils.isNotBlank(addr.getAddrTxt2()) ? " " + addr.getAddrTxt2() : ""));
+    requestAddr.setState(addr.getStateProv());
     log.debug("Connecting to the SOS - RPA Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
-    AutomationResponse<?> rawResponseInstallAt = autoClient.executeAndWrap(AutomationServiceClient.US_SOS_RPA_SERVICE_ID, requestInstallAt,
+    AutomationResponse<?> rawResponseInstallAt = autoClient.executeAndWrap(AutomationServiceClient.US_SOS_RPA_SERVICE_ID, requestAddr,
         AutomationResponse.class);
-
     ObjectMapper mapper = new ObjectMapper();
     String json = mapper.writeValueAsString(rawResponseInstallAt);
     log.trace("SOS-RPA Service Response : " + json);
@@ -157,5 +186,4 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
   public String getProcessDesc() {
     return "US - SOS-RPA CHECK";
   }
-
 }

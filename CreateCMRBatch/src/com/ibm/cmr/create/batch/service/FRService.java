@@ -1780,6 +1780,10 @@ public class FRService extends TransConnService {
           // partialCommit(entityManager);
           // }
 
+          if (!isOwnerCorrect(entityManager, sMassUpdt.getCmrNo(), data.getCmrIssuingCntry())) {
+            throw new Exception("Some CMRs on the request are not owned by IBM. Please check input CMRs");
+          }
+
           request.setCmrNo(sMassUpdt.getCmrNo());
           request.setMandt(SystemConfiguration.getValue("MANDT"));
           request.setReqId(admin.getId().getReqId());
@@ -1991,6 +1995,7 @@ public class FRService extends TransConnService {
     } catch (Exception e) {
       LOG.error("Error in processing Update Request " + admin.getId().getReqId(), e);
       addError("Update Request " + admin.getId().getReqId() + " Error: " + e.getMessage());
+      throw e;
     }
   }
 

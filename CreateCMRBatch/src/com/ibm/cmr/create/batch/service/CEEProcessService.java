@@ -157,9 +157,10 @@ public class CEEProcessService extends LegacyDirectService {
     String cmrNo = data.getCmrNo();
     String cntry = data.getDupIssuingCntryCd();
     String companyBK = data.getEnterprise();
+    String sboBK = data.getSalesBusOffCd();
     data.setEnterprise(data.getDupEnterpriseNo());
-    data.setDupSalesBoCd(data.getSalesBusOffCd());
     data.setDupSalesRepNo(data.getSalesBusOffCd());
+    data.setSalesBusOffCd(data.getDupSalesBoCd());
 
     LOG.debug("Issued country. " + cntry + " duplicate issued country used to generated and assigned.");
 
@@ -351,6 +352,7 @@ public class CEEProcessService extends LegacyDirectService {
       // }
       transformer.transformOtherData(entityManager, legacyObjects, cmrObjects);
       data.setEnterprise(companyBK);
+      data.setSalesBusOffCd(sboBK);
     }
 
     return legacyObjects;
@@ -515,13 +517,16 @@ public class CEEProcessService extends LegacyDirectService {
     String clientTBK = data.getClientTier();
     String companyBK = data.getEnterprise();
     String enterpriseBK = data.getTaxCd2();
-    data.setDupSalesBoCd(data.getSalesBusOffCd());
-    data.setDupSalesRepNo(data.getSalesBusOffCd());
+    String dupSBO = data.getDupSalesBoCd();
+    String sboBK = data.getSalesBusOffCd();
+
+    data.setDupSalesRepNo(dupSBO);
     data.setCmrIssuingCntry(cntry);
     data.setIsuCd(data.getDupIsuCd());
     data.setClientTier(data.getDupClientTierCd());
     data.setEnterprise(data.getDupEnterpriseNo());
     data.setTaxCd2(data.getTaxCd3());
+    data.setSalesBusOffCd(dupSBO);
 
     MessageTransformer transformer = TransformerManager.getTransformer(cntry);
 
@@ -921,8 +926,9 @@ public class CEEProcessService extends LegacyDirectService {
       // }
       // rebuild the address use table
 
-      data.setDupSalesBoCd(data.getSalesBusOffCd());
-      data.setDupSalesRepNo(data.getSalesBusOffCd());
+//      data.setDupSalesBoCd(data.getSalesBusOffCd());
+      data.setDupSalesRepNo(data.getDupSalesBoCd());
+      data.setSalesBusOffCd(sboBK);
       data.setCmrIssuingCntry(cntryBK);
       data.setIsuCd(isuCd);
       data.setClientTier(clientTBK);

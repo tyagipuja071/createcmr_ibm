@@ -1193,6 +1193,7 @@ public class LegacyDirectService extends TransConnService {
     MessageTransformer transformer = TransformerManager.getTransformer(cntry);
     String targetCountry = null;
 
+    // CREATCMR-1690
     if (!StringUtils.isEmpty(cmrNo) && !"Y".equals(admin.getProspLegalInd())) {
       boolean isCMRExist = LegacyDirectUtil.checkCMRNoInLegacyDB(entityManager, data);
       LOG.info("Checking existing CMR in create Process...");
@@ -1858,6 +1859,24 @@ public class LegacyDirectService extends TransConnService {
           custExt.setAeciSubDt(SystemUtil.getDummyDefaultDate());
           createEntity(custExt, entityManager);
           legacyObjects.setCustomerExt(custExt);
+        } else if (SystemLocation.ROMANIA.equals(data.getCmrIssuingCntry())) {
+          CmrtCustExtPK custExtPk = null;
+          LOG.debug("Mapping default Data values with Legacy CmrtCustExt table.....");
+          // Initialize the object
+          custExt = initEmpty(CmrtCustExt.class);
+          // default mapping for ADDR and CMRTCEXT
+          custExtPk = new CmrtCustExtPK();
+          custExtPk.setCustomerNo(cmrNo);
+          custExtPk.setSofCntryCode(cntry);
+          custExt.setId(custExtPk);
+
+          if (transformer != null) {
+            transformer.transformLegacyCustomerExtData(entityManager, dummyHandler, custExt, cmrObjects);
+          }
+          custExt.setUpdateTs(SystemUtil.getCurrentTimestamp());
+          custExt.setAeciSubDt(SystemUtil.getDummyDefaultDate());
+          createEntity(custExt, entityManager);
+          legacyObjects.setCustomerExt(custExt);
         }
       }
       // rebuild the address use table
@@ -2096,6 +2115,7 @@ public class LegacyDirectService extends TransConnService {
    * @return
    * @throws Exception
    */
+  @Override
   public <T> T initEmpty(Class<T> entityClass) throws Exception {
     try {
       T object = entityClass.newInstance();
@@ -2122,6 +2142,7 @@ public class LegacyDirectService extends TransConnService {
    * @return
    * @throws Exception
    */
+  @Override
   public void capsAndFillNulls(Object entity, boolean capitalize) throws Exception {
     try {
       Class<?> entityClass = entity.getClass();

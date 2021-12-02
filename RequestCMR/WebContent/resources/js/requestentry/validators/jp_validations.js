@@ -2929,7 +2929,7 @@ function setAccountAbbNmOnAddrSaveUpdate() {
 function addLogicOnOfficeCdChange() {
   dojo.connect(FormManager.getField('salesBusOffCd'), 'onChange', function(value) {
     setINACCodeMandatory();
-    addJSICLogic();
+    // addJSICLogic();
     setClusterOnOfcdChange();
   });
 }
@@ -4187,6 +4187,7 @@ function initGenericTemplateHandler() {
           // add here code to enable/disable fields when a scenario is selected
           // for updates
           disableFieldsForUpdateOnScenarios();
+          clearFieldsForUpdateOnScenarios();
         }
       }
     });
@@ -4198,6 +4199,23 @@ function initGenericTemplateHandler() {
     TemplateService.init();
   }
 }
+
+function clearFieldsForUpdateOnScenarios() {
+  var reqType = FormManager.getActualValue('reqType');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  if (reqType != "U") {
+    return;
+  }
+
+  if (custSubGrp != 'BQICL') {
+    FormManager.setValue('proxiLocnNo', '');
+  }
+}
+
 function disableFieldsForUpdateOnScenarios() {
   var reqType = FormManager.getActualValue('reqType');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
@@ -4794,7 +4812,7 @@ function disableFieldsForUpdateOnScenarios() {
     FormManager.removeValidator('chargeCd', Validators.REQUIRED);
     FormManager.removeValidator('soProjectCd', Validators.REQUIRED);
 
-    FormManager.disable('proxiLocnNo');
+    FormManager.enable('proxiLocnNo');
     FormManager.disable('privIndc_1');
     FormManager.disable('privIndc_2');
     FormManager.disable('privIndc_3');
@@ -4892,12 +4910,16 @@ function handleIBMRelatedCMR(fromAddress, scenario, scenarioChanged) {
   // 1686132: Special requirement for Subscenario = BQ - IBM Japan Credit LLC
   var relatedCMRName = 'proxiLocnNo';
   var reqType = FormManager.getActualValue('reqType');
+  var subGrp = FormManager.getActualValue('custSubGrp');
   if (reqType != 'C') {
-    FormManager.setValue(relatedCMRName, '');
-    FormManager.disable(relatedCMRName);
+    if (subGrp == 'BQICL') {
+      FormManager.enable(relatedCMRName);
+    } else {
+      FormManager.setValue(relatedCMRName, '');
+      FormManager.disable(relatedCMRName);
+    }
     return;
   }
-  var subGrp = FormManager.getActualValue('custSubGrp');
   FormManager.resetValidations(relatedCMRName);
   if (subGrp == 'BQICL') {
     FormManager.enable(relatedCMRName);
@@ -5332,7 +5354,6 @@ function replaceAndSymbol(value) {
   }
   return modifiedVal;
 };
-
 dojo.addOnLoad(function() {
   GEOHandler.JP = [ SysLoc.JAPAN ];
   console.log('adding JP functions...');
@@ -5408,10 +5429,10 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addDPLCheckValidatorJP, GEOHandler.JP, GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(addFailedDPLValidatorJP, GEOHandler.JP, null, true);
   GEOHandler.registerValidator(addINACValidator, GEOHandler.JP, null, true);
-  GEOHandler.registerValidator(ofcdJsicMismatchValidatorJP, GEOHandler.JP, GEOHandler.ROLE_REQUESTER, true);
+  // GEOHandler.registerValidator(ofcdJsicMismatchValidatorJP, GEOHandler.JP,
+  // GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(addressDuplicateValidator, GEOHandler.JP, null, true);
   GEOHandler.registerValidator(ROLValidatorForZC01, GEOHandler.JP, null, true);
-
   // GEOHandler.registerValidator(addAddressRecordsValidatorJP, GEOHandler.JP,
   // GEOHandler.ROLE_PROCESSOR, true);
 

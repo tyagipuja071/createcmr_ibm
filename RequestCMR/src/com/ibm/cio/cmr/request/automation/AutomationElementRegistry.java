@@ -7,6 +7,9 @@ import java.util.HashMap;
 
 import com.ibm.cio.cmr.request.automation.impl.gbl.ANZBNValidationElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.CMDERequesterCheck;
+import com.ibm.cio.cmr.request.automation.impl.gbl.CNAPICheckElement;
+import com.ibm.cio.cmr.request.automation.impl.gbl.CNDupCMRCheckElement;
+import com.ibm.cio.cmr.request.automation.impl.gbl.CNDupReqCheckElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.CalculateCoverageElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.DPLCheckElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.DPLSearchElement;
@@ -14,14 +17,15 @@ import com.ibm.cio.cmr.request.automation.impl.gbl.DefaultApprovalsElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.DnBCheckElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.DnBMatchingElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.DnBOrgIdValidationElement;
-import com.ibm.cio.cmr.request.automation.impl.gbl.DupCMRCheckElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.DupAbbrevCheckElement;
+import com.ibm.cio.cmr.request.automation.impl.gbl.DupCMRCheckElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.DupReqCheckElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.EUVatValidationElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.FieldComputationElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.GBGMatchingElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.GBLScenarioCheckElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.GOEDeterminationElement;
+import com.ibm.cio.cmr.request.automation.impl.gbl.INGSTValidationElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.ImportCMRElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.RetrieveIBMValuesElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.USAddrStdElement;
@@ -81,9 +85,16 @@ public class AutomationElementRegistry extends HashMap<String, Class<? extends A
   public static final String US_DUP_CHK = "US_DUP_CHK";
   public static final String US_BP_PROCESS = "US_BP_PROCESS";
   public static final String US_SOS_RPA_CHECK = "US_SOS_RPA_CHECK";
-  //EMEA
+  // EMEA
   public static final String EMEA_ABBREV_CHECK = "EMEA_ABBREV_CHECK";
-  
+
+  // India
+  public static final String IN_GST_VALIDATION = "IN_GST_VALIDATION";
+
+  // CN
+  public static final String CN_API_CHECK = "CN_API_CHECK";
+  public static final String CN_DUP_CMR_CHECK = "CN_DUP_CMR_CHECK";
+  public static final String CN_DUP_REQ_CHECK = "CN_DUP_REQ_CHECK";
   private static AutomationElementRegistry registry = new AutomationElementRegistry();
 
   public static AutomationElementRegistry getInstance() {
@@ -123,13 +134,17 @@ public class AutomationElementRegistry extends HashMap<String, Class<? extends A
 
     // EU
     put(EU_VAT_VALIDATION, EUVatValidationElement.class);
-    //EMEA
+    // EMEA
     put(EMEA_ABBREV_CHECK, DupAbbrevCheckElement.class);
     // US
     put(US_DEL_REAC_CHECK, USDelReacCheckElement.class);
     put(US_DUP_CHK, USDuplicateCheckElement.class);
     put(US_BP_PROCESS, USBusinessPartnerElement.class);
     put(US_SOS_RPA_CHECK, USSosRpaCheckElement.class);
+    put(IN_GST_VALIDATION, INGSTValidationElement.class);
+    put(CN_API_CHECK, CNAPICheckElement.class);
+    put(CN_DUP_CMR_CHECK, CNDupCMRCheckElement.class);
+    put(CN_DUP_REQ_CHECK, CNDupReqCheckElement.class);
   }
 
   @Override

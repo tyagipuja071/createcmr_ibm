@@ -4,12 +4,15 @@
 package com.ibm.cmr.create.batch.service;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -40,6 +43,7 @@ import com.ibm.cmr.create.batch.util.mq.RecordCollector;
 import com.ibm.cmr.create.batch.util.mq.config.MQConfig;
 import com.ibm.cmr.create.batch.util.mq.handler.MQMessageHandler;
 import com.ibm.cmr.create.batch.util.mq.handler.MessageHandlerFactory;
+import com.ibm.json.java.JSONObject;
 
 /**
  * Generic MQ Interface that should be able to handle countries connecting to
@@ -392,31 +396,7 @@ public class MQInterfaceService extends BaseBatchService {
 
             if (uniqueNum != null) {
               if (uniqueNum.startsWith("G")) {
-                LOG.debug("GTS Unique Number " + uniqueNum + " found. Creating local XML.");
-                String gtsXmlDir = SystemParameters.getString("GTS.XML.DIR");
-                if (!StringUtils.isBlank(gtsXmlDir)) {
-                  File xmlDir = new File(gtsXmlDir);
-                  if (!xmlDir.exists() || !xmlDir.isDirectory()) {
-                    LOG.error("GTS XML Directory " + gtsXmlDir + " does not exist or is not a directory. Skipping this record.");
-                  } else {
-                    String xmlFileName = XML_DATE_FORMAT.format(new Date()) + "_" + uniqueNum + ".xml";
-                    LOG.debug("Storing GTS XML " + uniqueNum + " as " + xmlFileName);
-                    try {
-                      try (FileOutputStream fos = new FileOutputStream(xmlDir.getAbsolutePath() + File.separator + xmlFileName)) {
-                        try (OutputStreamWriter osw = new OutputStreamWriter(fos, "UTF-8")) {
-                          try (ByteArrayInputStream bis = new ByteArrayInputStream(xmlString.getBytes())) {
-                            IOUtils.copy(bis, osw);
-                            LOG.debug(" - XML written successfully.");
-                          }
-                        }
-                      }
-                    } catch (Exception e) {
-                      LOG.error("Error in writing GTS XML.", e);
-                    }
-                  }
-                } else {
-                  LOG.error("GTS XML Directory not defined. Skipping this record.");
-                }
+                sendXMLtoGTS(uniqueNum, xmlString);
                 collectCount++;
               } else {
                 mqIntfReqQueue = getQueueRecordById(entityManager, uniqueNum);
@@ -452,6 +432,83 @@ public class MQInterfaceService extends BaseBatchService {
       return collectCount;
     }
 
+  }
+
+  private void sendXMLtoGTS(String uniqueNum, String xmlString) {
+    LOG.debug("GTS Unique Number " + uniqueNum + " found. Sending XML to GTS.");
+    String xmlFileName = XML_DATE_FORMAT.format(new Date()) + "_" + uniqueNum + ".xml";
+
+    boolean sent = sendXMltoGtsViaInterface(uniqueNum, xmlFileName, xmlString);
+
+    if (!sent) {
+      LOG.debug("Interface attempt failed. Creating local XML copy for GTS...");
+      String gtsXmlDir = SystemParameters.getString("GTS.XML.DIR");
+      if (!StringUtils.isBlank(gtsXmlDir)) {
+        File xmlDir = new File(gtsXmlDir);
+        if (!xmlDir.exists() || !xmlDir.isDirectory()) {
+          LOG.error("GTS XML Directory " + gtsXmlDir + " does not exist or is not a directory. Skipping this record.");
+        } else {
+          LOG.debug("Storing GTS XML " + uniqueNum + " as " + xmlFileName);
+          try {
+            try (FileOutputStream fos = new FileOutputStream(xmlDir.getAbsolutePath() + File.separator + xmlFileName)) {
+              try (OutputStreamWriter osw = new OutputStreamWriter(fos, "UTF-8")) {
+                try (ByteArrayInputStream bis = new ByteArrayInputStream(xmlString.getBytes())) {
+                  IOUtils.copy(bis, osw);
+                  LOG.debug(" - XML written successfully.");
+                }
+              }
+            }
+          } catch (Exception e) {
+            LOG.error("Error in writing GTS XML.", e);
+          }
+        }
+      } else {
+        LOG.error("GTS XML Directory not defined. Skipping this record.");
+      }
+    }
+  }
+
+  private boolean sendXMltoGtsViaInterface(String uniqueNum, String xmlFileName, String xmlString) {
+    try {
+
+      String gtsMqUrl = SystemParameters.getString("GTS.MQ.URL");
+      if (!StringUtils.isBlank(gtsMqUrl)) {
+        LOG.debug("Trying to send XML via MQ URL " + gtsMqUrl);
+
+        String fullUrl = gtsMqUrl + "?name=" + xmlFileName;
+        URL url = new URL(fullUrl);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("POST");
+        conn.setDoInput(true);
+        conn.setDoOutput(true);
+        conn.setRequestProperty("Content-Type", "text/xml; charset=UTF-8");
+
+        try (ByteArrayInputStream bis = new ByteArrayInputStream(xmlString.getBytes())) {
+          IOUtils.copy(bis, conn.getOutputStream());
+        }
+
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+          IOUtils.copy(conn.getInputStream(), bos);
+          String json = new String(bos.toByteArray());
+          JSONObject resp = JSONObject.parse(json);
+          boolean success = (boolean) resp.get("success");
+          if (success) {
+            String path = (String) resp.get("path");
+            LOG.debug("Sent xml to GTS under " + path);
+          } else {
+            LOG.debug("Error response received: " + resp.get("msg"));
+          }
+          return success;
+        }
+
+      } else {
+        LOG.debug("GTS MQ URL not found.");
+        return false;
+      }
+    } catch (Exception e) {
+      LOG.warn("Error in sending XML to GTS for Unique ID " + uniqueNum, e);
+      return false;
+    }
   }
 
   /**

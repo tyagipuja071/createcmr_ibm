@@ -135,6 +135,23 @@ function addDnBMatchingAttachmentValidator() {
         var ifReprocessAllowed = FormManager.getActualValue('autoEngineIndc');
         if (reqId > 0 && reqType == 'C' && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B')
             && !isSkipDnbMatching() && FormManager.getActualValue('matchOverrideIndc') == 'Y') {
+          // FOR CN
+          var cntry = FormManager.getActualValue('landCntry');
+          var loc = FormManager.getActualValue('cmrIssuingCntry');
+          if(cntry == 'CN' || loc == '641') {
+            var id = FormManager.getActualValue('reqId');
+            var ret = cmr.query('CHECK_CN_API_ATTACHMENT', {
+              ID : id
+            });
+            if (ret == null || ret.ret1 == null) {
+              return new ValidationResult(null, false, "By overriding the D&B matching, you\'re obliged to provide either one of the following documentation as backup - "
+                  + "client\'s official website, Secretary of State business registration proof, client\'s confirmation email and signed PO, attach it under the file content "
+                  + "of <strong>Name and Address Change(China Specific)</strong>. Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.");
+            } else {
+              return new ValidationResult(null, true);
+            }
+          }
+          
           // FOR US Temporary
           var id = FormManager.getActualValue('reqId');
           var ret = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
@@ -164,6 +181,9 @@ function isSkipDnbMatching() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var countryUse = FormManager.getActualValue("countryUse");
   var subRegionCd = countryUse != null && countryUse.length > 0 ? countryUse : cntry;
+  if(SysLoc.INDIA == FormManager.getActualValue('cmrIssuingCntry')){
+        return false;
+    }
   if(dnbPrimary == 'Y') {
     if (custGrp != null && custGrp != '' && custSubGrp != null && custSubGrp != '') {
       var qParams = {
@@ -613,32 +633,64 @@ function addGenericZIPValidator() {
         var postCd = FormManager.getActualValue('postCd');
 
         console.log('Country: ' + cntry + ' Postal Code: ' + postCd);
-
-        var result = cmr.validateZIP(cntry, postCd, loc);
-        if (result && !result.success) {
-          if (result.errorPattern == null) {
+        if(cntry == 'LV') {
+          if(postCd == ''){
             return new ValidationResult({
               id : 'postCd',
               type : 'text',
               name : 'postCd'
-            }, false, (result.errorMessage ? result.errorMessage : 'Cannot get error message for Postal Code.') + '.');
-          } else {
-            var msg;
-
-            if (loc == '754' || loc == '866') {
-              msg = result.errorMessage + '. Please refer to info bubble for the correct format.';
-            } else {
-              msg = result.errorMessage + '. Format should be ' + result.errorPattern.formatReadable;
+            }, false, ('Postal Code for LV is required.'));
+          }
+          
+          if(!postCd.startsWith("LV-")){
+            return new ValidationResult({
+              id : 'postCd',
+              type : 'text',
+              name : 'postCd'
+            }, false, ('Postal Code format should be LV-nnnn.'));
+          } else if(postCd.length != '7') {
+            return new ValidationResult({
+              id : 'postCd',
+              type : 'text',
+              name : 'postCd'
+            }, false, ('Postal Code format should be LV-nnnn.'));
+          } else if(postCd.length == '7'){
+            var numPattern = /^[0-9]+$/;
+            if (!postCd.substr(3,7).match(numPattern)){
+              return new ValidationResult({
+                id : 'postCd',
+                type : 'text',
+                name : 'postCd'
+              }, false, ('Postal Code format should be LV-nnnn.'));
             }
-
-            return new ValidationResult({
-              id : 'postCd',
-              type : 'text',
-              name : 'postCd'
-            }, false, msg);
           }
         } else {
-          return new ValidationResult(null, true);
+          var result = cmr.validateZIP(cntry, postCd, loc);
+          if (result && !result.success) {
+            if (result.errorPattern == null) {
+              return new ValidationResult({
+                id : 'postCd',
+                type : 'text',
+                name : 'postCd'
+              }, false, (result.errorMessage ? result.errorMessage : 'Cannot get error message for Postal Code.') + '.');
+            } else {
+              var msg;
+  
+              if (loc == '754' || loc == '866') {
+                msg = result.errorMessage + '. Please refer to info bubble for the correct format.';
+              } else {
+                msg = result.errorMessage + '. Format should be ' + result.errorPattern.formatReadable;
+              }
+  
+              return new ValidationResult({
+                id : 'postCd',
+                type : 'text',
+                name : 'postCd'
+              }, false, msg);
+            }
+          } else {
+            return new ValidationResult(null, true);
+          }
         }
       }
     };
@@ -896,7 +948,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addSoldToValidator, [ '897', '755', '726', '866', '754', '862', '666', '822', '838', '864', '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667',
       '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770', '780', '782', '804', '810', '825', '827', '831', '833', '835', '840', '841', '842', '851',
       '857', '876', '879', '880', '881', '883', '358', '359', '363', '603', '607', '620', '626', '644', '642', '651', '668', '677', '680', '693', '694', '695', '699', '704', '705', '707', '708',
-      '740', '741', '752', '762', '767', '768', '772', '787', '805', '808', '820', '821', '823', '826', '832', '849', '850', '865', '889', '618', '758', '760', '848', '729', '649' ], null, false, true);
+      '740', '741', '752', '762', '767', '768', '772', '787', '805', '808', '820', '821', '823', '826', '832', '849', '850', '865', '889', '618', '758', '760', '848', '649', '729', '678', '702', '806', '846' ], null, false, true);
   GEOHandler.registerWWValidator(addAddrStdValidator);
   // exclude for LA
   GEOHandler.registerWWValidator(addTaxCodesValidator, GEOHandler.LA, null, false, true);
@@ -932,5 +984,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerWWValidator(addINACValidator);
 
   GEOHandler.VAT_RQD_CROSS_LNDCNTRY = [ 'AR', 'AT', 'BE', 'BG', 'BO', 'BR', 'CL', 'CO', 'CR', 'CY', 'CZ', 'DE', 'DO', 'EC', 'EG', 'ES', 'FR', 'GB', 'GR', 'GT', 'HN', 'HR', 'HU', 'IE', 'IL', 'IT',
-      'LU', 'MT', 'MX', 'NI', 'NL', 'PA', 'PE', 'PK', 'PL', 'PT', 'PY', 'RO', 'RU', 'RS', 'SI', 'SK', 'SV', 'TR', 'UA', 'UY', 'ZA', 'VE', 'AO', 'MG', 'TZ','TW' ];
+    'LU', 'MT', 'MX', 'NI', 'NL', 'PA', 'PE', 'PK', 'PL', 'PT', 'PY', 'RO', 'RU', 'RS', 'SI', 'SK', 'SV', 'TR', 'UA', 'UY', 'ZA', 'VE', 'AO', 'MG', 'TZ','TW', 'LT', 'LV', 'EE', 'IS', 'GL', 'FO', 'SE', 'NO', 'DK', 'FI' ];
 });

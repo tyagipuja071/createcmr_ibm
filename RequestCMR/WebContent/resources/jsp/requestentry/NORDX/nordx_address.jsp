@@ -51,6 +51,21 @@
     <cmr:field fieldId="CustomerName2" id="custNm2" path="custNm2" size="400" />
   </cmr:column>
 </cmr:row>
+
+<!-- CREATCMR-1752 -->
+<cmr:row addBackground="true">
+  <cmr:column span="4">
+    <cmr:label fieldId="custNm3">
+      <cmr:fieldLabel fieldId="CustomerName3" />: 
+      <cmr:delta text="-" id="delta-custNm3" code="L" />
+        <cmr:info text="${ui.info.NordicsForAdditionalInfo}" />
+    </cmr:label>
+    <cmr:delta text="-" id="delta-custNm3" />
+    <cmr:field fieldId="CustomerName3" id="custNm3" path="custNm3" size="400" />
+  </cmr:column>
+</cmr:row>
+<!-- CREATCMR-1752 -->
+
 <cmr:row addBackground="true">
   <cmr:column span="4">
     <cmr:label fieldId="custNm4">
@@ -97,19 +112,19 @@
     </p>
   </cmr:column>
   <cmr:column span="2">
-  <!-- Defect : 1565616 <p>
+  	<p>
       <cmr:label fieldId="addrTxt2">
         <cmr:fieldLabel fieldId="StreetAddress2" />: 
           </cmr:label>
       <cmr:field fieldId="StreetAddress2" id="addrTxt2" path="addrTxt2" />
-    </p>  -->
+    </p> 
   </cmr:column>
 </cmr:row>
 <cmr:row>
 
 </cmr:row>
 <cmr:row>
-  <cmr:column span="2">
+  <cmr:column span="2" containerForField="StateProv">
     <p>
       <cmr:label fieldId="stateProv">
         <cmr:fieldLabel fieldId="StateProv" />:
@@ -231,6 +246,14 @@
       <cmr:delta text="-" id="delta-sapNo" />
       <cmr:field fieldId="SAPNumber" id="sapNo" path="sapNo" />
     </p>
+  </cmr:column>
+  <cmr:column span="2">
+     <p>
+      <cmr:label fieldId="ierpSitePrtyId" cssClass="cmr-inline">
+        <cmr:fieldLabel fieldId="IERPSitePrtyId" />:</cmr:label>
+      <cmr:delta text="-" id="delta-ierpSitePrtyId" />
+      <cmr:field fieldId="IERPSitePrtyId" id="ierpSitePrtyId" path="ierpSitePrtyId" />
+     </p>
   </cmr:column>
 </cmr:row>
 

@@ -132,6 +132,7 @@ public class CmrConstants {
   public static final String RDC_SHIP_TO = "ZD01";
   public static final String RDC_SECONDARY_SOLD_TO = "ZS02";
   public static final String RDC_SHIPPING = "ZH02";
+  public static final String RDC_SECONDARY_SHIPPING = "ZH01";
 
   // REQUEST ACTIONS
   public static final String All_Processing_Complete() {
@@ -912,10 +913,15 @@ public class CmrConstants {
   public static final int LD_MASS_UPDATE_UPPER_LIMIT = 40;
 
   public static final String CN_KUKLA81 = "81";
+  public static final String CN_KUKLA85 = "85";
   public static final String CN_KUKLA45 = "45";
   public static final String CN_KUKLA81_KEYID = "CMRNO_ZS01_81";
   public static final String CN_KUKLA45_KEYID = "CMRNO_ZS01_45";
   public static final String CN_DEFAULT_KEYID = "CMRNO_ZS01";
+
+  public static final String CN_ERO_APPROVAL_DESC = "Approval For both ERO Proliferation Checklist and DPL Matching (CN)";
+  public static final String CN_ECO_LEADER_APPROVAL_DESC = "Ecosystem market leader Approval Request China";
+  public static final String CN_TECH_LEADER_APPROVAL_DESC = "Technology market leader Approval Request China";
 
   public static final List<String> DE_CND_ISSUING_COUNTRY_VAL = Arrays.asList("724", "619", "621", "627", "647", "791", "640", "759", "839", "843",
       "859");

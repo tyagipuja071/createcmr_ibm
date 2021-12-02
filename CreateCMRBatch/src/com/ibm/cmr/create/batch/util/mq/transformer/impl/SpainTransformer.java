@@ -526,6 +526,8 @@ public class SpainTransformer extends MessageTransformer {
         }
       }
 
+      legacyCust.setSalesGroupRep(data.getRepTeamMemberNo() != null ? data.getRepTeamMemberNo() : "");
+
       String dataEmbargoCd = data.getEmbargoCd();
       String rdcEmbargoCd = LegacyDirectUtil.getEmbargoCdFromDataRdc(entityManager, admin);
 
@@ -723,15 +725,6 @@ public class SpainTransformer extends MessageTransformer {
       cust.setSalesGroupRep(muData.getRepTeamMemberNo());
     }
 
-    if (!StringUtils.isBlank(muData.getEnterprise())) {
-      if ("@@@@@@".equals(muData.getEnterprise())) {
-        cust.setEnterpriseNo("");
-      } else {
-        cust.setEnterpriseNo(muData.getEnterprise());
-      }
-
-    }
-
     if (!StringUtils.isBlank(muData.getCustNm2())) {
       cust.setCeBo(muData.getCustNm2());
     }
@@ -780,6 +773,14 @@ public class SpainTransformer extends MessageTransformer {
         cust.setMailingCond("");
       } else {
         cust.setMailingCond(muData.getOutCityLimit());
+      }
+    }
+
+    if (!StringUtils.isBlank(muData.getEnterprise())) {
+      if ("@".equals(muData.getEnterprise().trim())) {
+        cust.setEnterpriseNo("");
+      } else {
+        cust.setEnterpriseNo(muData.getEnterprise());
       }
     }
 

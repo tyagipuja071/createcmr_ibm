@@ -30,7 +30,6 @@
 					<label>Collection Code</label>
 					<dbColumn>COLLECTION_CD</dbColumn>
 					<width>30</width>
-					<lovId>CollectionCd</lovId>
 					<length>6</length>
 				</column>
 				<column number="true" exactLength="true">

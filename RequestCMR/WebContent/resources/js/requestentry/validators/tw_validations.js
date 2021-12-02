@@ -99,6 +99,22 @@ function afterConfigTW() {
   if (custSubGrp == 'LOINT') {
     FormManager.addValidator('isicCd', Validators.REQUIRED, [ 'ISIC' ], 'MAIN_CUST_TAB');
   }
+  if (reqType == 'C' && custSubGrp == 'ECOSY') {
+    FormManager.readOnly('searchTerm');
+    FormManager.readOnly('clientTier');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('mrcCd');
+    FormManager.setValue('apCustClusterId', '08043');
+    FormManager.setValue('clientTier', 'Y');
+    FormManager.setValue('isuCd', '34');
+    FormManager.setValue('mrcCd', '3');
+  }
+  if (reqType == 'C' && custSubGrp == 'LOECO') {
+    FormManager.readOnly('searchTerm');
+    FormManager.readOnly('clientTier');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('mrcCd');
+  }
 
   setVatValidator();
 }
@@ -119,7 +135,7 @@ function addHandlersForTW() {
 
   if (_ISICHandler == null) {
     _ISICHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
-      setISUCodeValues(value);
+      // setISUCodeValues(value);
     });
   }
 
@@ -316,6 +332,46 @@ function addSingleByteValidatorTW(cntry, details) {
 
 }
 
+function setAbbrevNmLocnOnAddressSave(cntry, addressMode, saving, finalSave, force) {
+  console.log(">>>> setAbbrevNmLocnOnAddressSave >>>>");
+  var reqType = null;
+  var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
+  if (typeof (_pagemodel) != 'undefined') {
+    reqType = FormManager.getActualValue('reqType');
+  }
+  var addrType = FormManager.getActualValue('addrType');
+  var copyTypes = document.getElementsByName('copyTypes');
+  // var copyingToA = false;
+  if (addrType == 'ZS01') {
+    // copyingToA = true;
+    autoSetAbbrevNmLocnLogic();
+  }
+}
+
+function autoSetAbbrevNmLocnLogic() {
+  console.log("autoSetAbbrevNmLocnLogic");
+  var _abbrevNm = null;
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+
+  var zs01ReqId = FormManager.getActualValue('reqId');
+  var qParams = {
+    REQ_ID : zs01ReqId,
+  };
+  var result = cmr.query('ADDR.GET.CUSTNM1.BY_REQID', qParams);
+  var custNm1 = FormManager.getActualValue('custNm1');
+
+  if (custNm1 == '') {
+    custNm1 = result.ret1;
+  }
+  _abbrevNm = custNm1;
+
+  if (_abbrevNm && _abbrevNm.length > 21) {
+    _abbrevNm = _abbrevNm.substring(0, 21);
+  }
+  FormManager.setValue('abbrevNm', _abbrevNm);
+
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.TW = [ '858' ];
   GEOHandler.TW_CHECKLIST = [ '858' ];
@@ -340,6 +396,8 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.TW);
   GEOHandler.addAddrFunction(addSingleByteValidatorTW, GEOHandler.TW);
+  GEOHandler.addAddrFunction(setAbbrevNmLocnOnAddressSave, GEOHandler.TW);
+
   GEOHandler.registerValidator(addTWChecklistValidator, GEOHandler.TW_CHECKLIST);
   // GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.TW,
   // GEOHandler.ROLE_PROCESSOR, true);

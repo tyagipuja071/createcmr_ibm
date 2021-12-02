@@ -26,6 +26,7 @@ import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.AddrPK;
 import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.entity.AdminPK;
 import com.ibm.cio.cmr.request.entity.CompoundEntity;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataRdc;
@@ -334,7 +335,20 @@ public class LAHandler extends GEOHandler {
     // 2
     String orgName4 = !StringUtils.isEmpty(currentRecord.getCmrName4()) ? currentRecord.getCmrName4() : "";
     LOG.debug(orgName4);
+    // CREATCMR-531
+    String spid = "";
 
+    if (CmrConstants.REQ_TYPE_UPDATE.equalsIgnoreCase(admin.getReqType())) {
+      address.getId().setAddrSeq(currentRecord.getCmrAddrSeq());
+      spid = getRDcIerpSitePartyId(currentRecord.getCmrSapNumber());
+      address.setIerpSitePrtyId(spid);
+
+    } else {
+      // String addrSeq = address.getId().getAddrSeq();
+      // addrSeq = StringUtils.leftPad(addrSeq, 5, '0');
+      address.getId().setAddrSeq("1");
+      address.setIerpSitePrtyId(spid);
+    }
     if (isMXIssuingCountry(issuingCountry)) {
       /* #1164406 */
       if (!StringUtils.isEmpty(streetAddr1)) {
@@ -2072,6 +2086,18 @@ public class LAHandler extends GEOHandler {
     String streetAddr2 = addr.getAddrTxt2();
     String streetAddr3 = addr.getCity2();
 
+    AdminPK adminPK = new AdminPK();
+    ArrayList<String> addrDetailsList = new ArrayList<String>();
+    adminPK.setReqId(addr.getId().getReqId());
+    Admin admin = entityManager.find(Admin.class, adminPK);
+    // CREATCMR-531
+    String sapNo = addr.getSapNo();
+    if (!StringUtils.isEmpty(sapNo) && "U".equals(admin.getReqType())) {
+      if (addr.getSapNo().length() > 1) {
+        addr.setIerpSitePrtyId("S".concat(addr.getSapNo().substring(1)));
+      }
+    }
+
     if (isMXIssuingCountry(cmrIssuingCntry) && !(addr.getImportInd() == "Y")) {
       /* #1164406 FOR MANUAL CREATION OF ADDRESS */
       if (!StringUtils.isEmpty(streetAddr1)) {
@@ -2390,6 +2416,36 @@ public class LAHandler extends GEOHandler {
     }
 
     return ret;
+  }
+
+  // CREATCMR-531
+  private String getRDcIerpSitePartyId(String kunnr) throws Exception {
+    String spid = "";
+
+    String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
+    String mandt = SystemConfiguration.getValue("MANDT");
+    String sql = ExternalizedQuery.getSql("GET.IERP.BRAN5");
+    sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
+    sql = StringUtils.replace(sql, ":KUNNR", "'" + kunnr + "'");
+    String dbId = QueryClient.RDC_APP_ID;
+
+    QueryRequest query = new QueryRequest();
+    query.setSql(sql);
+    query.addField("BRAN5");
+    query.addField("MANDT");
+    query.addField("KUNNR");
+
+    LOG.debug("Getting existing BRAN5 value from RDc DB..");
+    QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
+    QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
+
+    if (response.isSuccess() && response.getRecords() != null && response.getRecords().size() != 0) {
+      List<Map<String, Object>> records = response.getRecords();
+      Map<String, Object> record = records.get(0);
+      spid = record.get("BRAN5") != null ? record.get("BRAN5").toString() : "";
+      LOG.debug("***RETURNING BRAN5 > " + spid + " WHERE KUNNR IS > " + kunnr);
+    }
+    return spid;
   }
 
   /**
@@ -3012,6 +3068,8 @@ public class LAHandler extends GEOHandler {
   @Override
   public Map<String, String> getUIFieldIdMap() {
     Map<String, String> map = new HashMap<String, String>();
+    // CREATCMR-531
+    map.put("##IERPSitePrtyId", "ierpSitePrtyId");
     map.put("##OriginatorName", "originatorNm");
     map.put("##OldMainCustomerName1", "oldCustNm1");
     map.put("##MainCustomerName2", "mainCustNm2");

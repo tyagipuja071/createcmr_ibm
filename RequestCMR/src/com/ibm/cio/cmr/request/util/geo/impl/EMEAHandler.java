@@ -2656,6 +2656,10 @@ public class EMEAHandler extends BaseSOFHandler {
         entityManager.flush();
       }
 
+      if (!("ZS01".equals(addr.getId().getAddrType()) || ("ZP01".equals(addr.getId().getAddrType())))) {
+        addr.setPoBox("");
+      }
+
       if (!StringUtils.isEmpty(addr.getCustPhone()) && !"ZS01".equals(addr.getId().getAddrType()) && !"ZD01".equals(addr.getId().getAddrType())) {
         addr.setCustPhone("");
       }
@@ -2715,6 +2719,10 @@ public class EMEAHandler extends BaseSOFHandler {
         admin.setMainCustNm2(addr.getCustNm2() != null ? addr.getCustNm2() : "");
         entityManager.merge(admin);
         entityManager.flush();
+      }
+
+      if (!("ZS01".equals(addr.getId().getAddrType()) || ("ZP01".equals(addr.getId().getAddrType())))) {
+        addr.setPoBox("");
       }
 
       if (!StringUtils.isEmpty(addr.getCustPhone()) && !"ZS01".equals(addr.getId().getAddrType()) && !"ZD01".equals(addr.getId().getAddrType())) {
@@ -3919,7 +3927,7 @@ public class EMEAHandler extends BaseSOFHandler {
           }
           salesRep = validateColValFromCell(currCell);
 
-				}
+        }
         if ((!("@").equals(collectionCd)) && (!StringUtils.isEmpty(collectionCd))) {
           if (((collectionCd.length() == 2 && !collectionCd.chars().allMatch(Character::isDigit))
               || (collectionCd.length() == 6 && !collectionCd.chars().allMatch(Character::isLetterOrDigit)))) {

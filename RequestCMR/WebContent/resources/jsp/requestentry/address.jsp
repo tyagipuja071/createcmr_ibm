@@ -270,7 +270,7 @@ visibility: hidden !IMPORTANT;
         
         <%if (showName){%>       
           <!--  Sequence -->
-           <cmr:view exceptForGEO="SWISS">
+           <cmr:view exceptForGEO="SWISS,LA">
           <cmr:gridCol width="45px" field="addrSeq" header="Seq." >
             <cmr:formatter functionName="addrSeqFormatter" />
           </cmr:gridCol>
@@ -319,6 +319,11 @@ visibility: hidden !IMPORTANT;
               <cmr:formatter functionName="customerNameFormatter" />
             </cmr:gridCol>
           </cmr:view>
+          
+          <!-- Additional Info for Nordics -->
+          <cmr:view forGEO="NORDX" exceptForCountry="780">
+            <cmr:gridCol width="100px" field="custNm3" header="Additional Info" />
+          </cmr:view>
 
 			<!-- MALTA LEGACY -->	
 			<cmr:view forCountry="780">	
@@ -355,13 +360,7 @@ visibility: hidden !IMPORTANT;
         <cmr:view forCountry="649">
         	<cmr:gridCol width="60px" field="addrSeq" header="Sequence" />
         </cmr:view>
-        
-        <!-- Defect : 1444422 for FR-->
-        <!-- iERP Site Party ID -->
-        <cmr:view forGEO="IERP,CND,FR,SWISS">
-          <cmr:gridCol width="70px" field="ierpSitePrtyId" header="${ui.grid.ierpSitePrtyId}" />
-        </cmr:view>
-        
+         
         <cmr:view forCountry="862">
           <cmr:gridCol width="70px" field="custNm4" header="Name 4" />
         </cmr:view>
@@ -572,7 +571,16 @@ visibility: hidden !IMPORTANT;
         </cmr:gridCol>
         
         <!--  SAP No -->
+        <cmr:view exceptForGEO="LA">
         <cmr:gridCol width="70px" field="sapNo" header="${ui.grid.sapNo}" />
+        </cmr:view>
+        
+             <!-- Defect : 1444422 for FR-->
+        <!-- iERP Site Party ID -->
+<!--         CREATCMR-531 -->
+        <cmr:view forGEO="IERP,CND,FR,SWISS,LA">
+          <cmr:gridCol width="70px" field="ierpSitePrtyId" header="${ui.grid.ierpSitePrtyId}" />
+        </cmr:view>
         
         <cmr:view forCountry="780">	
            <cmr:gridCol width="70px" field="ierpSitePrtyId" header="${ui.grid.ierpSitePrtyId}" />	

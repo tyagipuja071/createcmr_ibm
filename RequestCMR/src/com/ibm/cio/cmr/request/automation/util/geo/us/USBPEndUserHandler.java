@@ -24,7 +24,6 @@ import com.ibm.cio.cmr.request.util.CompanyFinder;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
-import com.ibm.cmr.services.client.automation.us.SosResponse;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.matching.gbg.GBGResponse;
@@ -90,9 +89,7 @@ public class USBPEndUserHandler extends USBPHandler {
     DnBMatchingResponse dnbMatch = matchAgainstDnB(handler, requestData, addr, engineData, details, overrides, ibmCmr != null);
 
     // match against SOS-RPA
-    if (dnbMatch == null) {
-      SosResponse sosMatch = matchAgainstSosRpa(handler, requestData, addr, engineData, details, overrides, ibmCmr != null);
-    }
+    matchAgainstSosRpa(handler, requestData, addr, engineData, details, overrides, ibmCmr != null);
 
     // check CEID
     boolean t1 = isTier1BP(data);
@@ -413,10 +410,11 @@ public class USBPEndUserHandler extends USBPHandler {
     String custType = null;
 
     int isicNumeric = 0;
-    if (StringUtils.isNumeric(isic.substring(0, 2))) {
-      isicNumeric = Integer.parseInt(isic.substring(0, 2));
+    if (!StringUtils.isEmpty(isic)) {
+      if (StringUtils.isNumeric(isic.substring(0, 2))) {
+        isicNumeric = Integer.parseInt(isic.substring(0, 2));
+      }
     }
-
     if (isicNumeric >= 94 && isicNumeric <= 97) {
       typeDesc = "State and Local";
       type = TYPE_STATE_AND_LOCAL;

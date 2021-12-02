@@ -484,6 +484,8 @@ function resetIbmBankNumber() {
 function afterConfigForLA() {
   var _reqType = FormManager.getActualValue('reqType');
   // var _country = FormManager.getActualValue('cmrIssuingCntry');
+  // CREATCMR-531
+  setIERPSitePartyIDForLA()
 
   if (dojo.byId('isuCd')) {
     // FormManager.disable('isuCd');
@@ -949,6 +951,7 @@ function addLatinAmericaAddressHandler(cntry, addressMode, saving) {
   var latinAmericaCntryJSON2 = JSON.stringify(latinAmericaCntryJSON);
   var land1Json = JSON.parse(latinAmericaCntryJSON2);
   var issuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var reqType = FormManager.getActualValue('reqType');
   if (!saving) {
     if (addressMode == 'newAddress') {
       /*
@@ -962,8 +965,12 @@ function addLatinAmericaAddressHandler(cntry, addressMode, saving) {
       FilteringDropdown['val_landCntry'] = null;
     }
   }
+  if (reqType == 'U' && FormManager.getActualValue('addrType') == 'ZS01') {
+    FormManager.readOnly('landCntry');
+  } else {
+    FormManager.enable('landCntry');
+  }
 }
-
 function addTaxCode1ValidatorForOtherLACntries() {
   FormManager.addFormValidator((function() {
     return {
@@ -2235,6 +2242,24 @@ function addPostalCdValidator() {
   })(), null, 'frmCMR_addressModal');
 }
 
+function addPostalCdValidatorPE() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqType = cmr.currentRequestType;
+        var postCd = FormManager.getActualValue('postCd');
+        if (postCd && postCd.length > 0 && !postCd.match(/^\d{5}$/)) {
+          return new ValidationResult(null, false, 'Postal Code should be 5 digits long.');
+        }
+        if (reqType != null && reqType == 'U' && (postCd.length == 0 || postCd == '')) {
+          return new ValidationResult(null, false, 'Postal Code is required.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+}
+
 function validateCustNameChangeForDPLCheck() {
   // CRU
   console.log("validateCustNameChangeForDPLCheck..............");
@@ -2274,6 +2299,23 @@ function validateCustNameChangeForDPLCheck() {
       }
     };
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+// CREATCMR-531
+function setIERPSitePartyIDForLA() {
+  var role = null;
+  var sapNo = FormManager.getActualValue('sapNo');
+  var reqType = FormManager.getActualValue('reqType');
+  let
+  str = sapNo.substring(1);
+  if (typeof (_pagemodel) != 'undefined') {
+    role = _pagemodel.userRole;
+  }
+  // FormManager.setValue('ierpSitePrtyId', 'S' + str);
+  if (reqType == 'U') {
+    if (sapNo != null) {
+      FormManager.setValue('ierpSitePrtyId', 'S' + str);
+    }
+  }
 }
 
 function makeFieldManadatoryLAReactivate() {
@@ -2526,6 +2568,50 @@ function setLocNoLockedForRequesterBR() {
   }
 }
 
+function setSortlForStateProvince() {
+  var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var reqType = FormManager.getActualValue('reqType');
+  if (cmrIssuingCntry != '631' || reqType != 'C') {
+    return;
+  }
+  var _reqId = FormManager.getActualValue('reqId');
+  var stateProvParams = {
+    REQ_ID : _reqId,
+    ADDR_TYPE : "ZS01",
+  };
+  var stateProvResult = cmr.query('ADDR.GET.STATEPROV.BY_REQID_ADDRTYP', stateProvParams);
+  var stateProv = stateProvResult.ret1;
+  if (stateProv != null && stateProv.length > 2) {
+    stateProv = stateProv.substring(0, 2);
+  }
+  if (stateProv == 'AM' || stateProv == 'PA' || stateProv == 'AC' || stateProv == 'RO' || stateProv == 'RR' || stateProv == 'AP' || stateProv == 'TO' || stateProv == 'MA' || stateProv == 'PI'
+      || stateProv == 'CE' || stateProv == 'RN' || stateProv == 'PB' || stateProv == 'PE' || stateProv == 'AL' || stateProv == 'SE' || stateProv == 'BA') {
+    FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
+    FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), [ '763','515' ]);
+    FormManager.enable('salesBusOffCd');
+  } else if (stateProv == 'DF' || stateProv == 'GO' || stateProv == 'MT' || stateProv == 'MS') {
+    FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
+    FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), [ '504','515' ]);
+    FormManager.enable('salesBusOffCd');
+  } else if (stateProv == 'PR' || stateProv == 'ES' || stateProv == 'MG') {
+    FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
+    FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), [ '556','515' ]);
+    FormManager.enable('salesBusOffCd');
+  } else if (stateProv == 'PR' || stateProv == 'SC' || stateProv == 'RS') {
+    FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
+    FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), [ '758','515' ]);
+    FormManager.enable('salesBusOffCd');
+  } else if (stateProv == 'RJ') {
+    FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
+    FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), [ '761','515' ]);
+    FormManager.enable('salesBusOffCd');
+  } else if (stateProv == 'SP') {
+    FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
+    FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), [ '764','515' ]);
+    FormManager.enable('salesBusOffCd');
+  } 
+}
+
 /* Register LA Validators */
 dojo.addOnLoad(function() {
   GEOHandler.LA = [ SysLoc.ARGENTINA, SysLoc.BOLIVIA, SysLoc.BRAZIL, SysLoc.CHILE, SysLoc.COLOMBIA, SysLoc.COSTA_RICA, SysLoc.DOMINICAN_REPUBLIC, SysLoc.ECUADOR, SysLoc.GUATEMALA, SysLoc.HONDURAS,
@@ -2540,6 +2626,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addDPLCheckValidatorLAReactivate, GEOHandler.LA, GEOHandler.ROLE_PROCESSOR, false, false);
 
   GEOHandler.addAddrFunction(addLatinAmericaAddressHandler, GEOHandler.LA);
+  GEOHandler.addAddrFunction(setIERPSitePartyIDForLA, GEOHandler.LA);
+  // CREATCMR-531
   GEOHandler.registerValidator(addTaxCode1ValidatorForOtherLACntries, SSAMX_COUNTRIES, null, false, false);
   // GEOHandler.registerValidator(addTaxCodesValidator, GEOHandler.LA);
   // GEOHandler.registerValidator(addTaxCodesValidator, [ SysLoc.BRAZIL ],
@@ -2589,9 +2677,10 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.LA, GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(validateVATChile, [ SysLoc.CHILE ], null, true);
   GEOHandler.registerValidator(addPostalCdValidator, [ SysLoc.ECUADOR ], GEOHandler.ROLE_REQUESTER, true);
+  GEOHandler.registerValidator(addPostalCdValidatorPE, [ SysLoc.PERU ], null, true);
   GEOHandler.registerValidator(validateCustNameChangeForDPLCheck, GEOHandler.LA, GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(validateAddlContactEmailFieldForReactivate, [ SysLoc.BRAZIL ], GEOHandler.ROLE_PROCESSOR, true);
-
+    
   // GEOHandler.addAfterConfig(disableFieldsForBrazil, [ SysLoc.BRAZIL ]);
   // 
   /* 1640462 - MRC should be optional for requester for SSA&MX */
@@ -2600,5 +2689,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setMrcCdOptionalForRequester, [ SysLoc.BRAZIL ]);
   GEOHandler.addAddrFunction(setLocationNumberForBR, GEOHandler.LA);
   GEOHandler.addAfterConfig(setLocNoLockedForRequesterBR, [ SysLoc.BRAZIL ]);
-
+  GEOHandler.addAfterConfig(setSortlForStateProvince, [ SysLoc.BRAZIL ]);
+  GEOHandler.addAfterTemplateLoad(setSortlForStateProvince, [ SysLoc.BRAZIL ]);
+  
 });

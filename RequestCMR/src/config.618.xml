@@ -50,10 +50,10 @@
         </column>
  
          <column>
-          <label>SBO</label>
+          <label>SORTL</label>
           <dbColumn>SALES_BO_CD</dbColumn>
           <width>15</width>
-          <length>3</length>
+          <length>8</length>
         </column>
         <column>
           <label>Company number</label>
