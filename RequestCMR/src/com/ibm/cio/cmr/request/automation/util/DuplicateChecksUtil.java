@@ -4,6 +4,7 @@
 package com.ibm.cio.cmr.request.automation.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -32,6 +33,14 @@ import com.ibm.cmr.services.client.matching.request.ReqCheckRequest;
  *
  */
 public class DuplicateChecksUtil {
+
+  public static String[] FIINTER = { "FIINT", "CBINT", "LTINT", "LVINT", "EEINT" };
+  public static String[] FIPRIPE = { "FIPRI", "LTPRI", "LVPRI", "EEPRI" };
+  public static String[] FIIBMEM = { "FIIBM", "LTIBM", "LVIBM", "EEIBM" };
+
+  public static String[] DKINTER = { "DKINT", "CBINT", "FOINT", "GLINT", "ISINT" };
+  public static String[] DKPRIPE = { "DKPRI", "FOPRI", "ISPRI", "GLPRI" };
+  public static String[] DKIBMEM = { "DKIBM", "FOIBM", "GLIBM", "ISIBM" };
 
   /**
    * Sets country-specific values for duplicate request checks
@@ -196,33 +205,33 @@ public class DuplicateChecksUtil {
         }
       }
     case SystemLocation.FINLAND:
-      if (NordicsUtil.FI_INTER_LOCAL.equals(data.getCustSubGrp()) || NordicsUtil.CROSS_INTER.equals(data.getCustSubGrp())) {
+      if (Arrays.asList(FIINTER).contains(data.getCustSubGrp())) {
         if ("ZS01".equals(addr.getId().getAddrType())) {
           request.setCustClass("81");
         }
       }
-      if (NordicsUtil.FI_PRIPE_LOCAL.equals(data.getCustSubGrp())) {
+      if (Arrays.asList(FIPRIPE).contains(data.getCustSubGrp())) {
         if ("ZS01".equals(addr.getId().getAddrType())) {
           request.setCustClass("60");
         }
       }
-      if (NordicsUtil.FI_IBMEM_LOCAL.equals(data.getCustSubGrp())) {
+      if (Arrays.asList(FIIBMEM).contains(data.getCustSubGrp())) {
         if ("ZS01".equals(addr.getId().getAddrType())) {
           request.setCustClass("71");
         }
       }
     case SystemLocation.DENMARK:
-      if (NordicsUtil.DK_INTER_LOCAL.equals(data.getCustSubGrp()) || NordicsUtil.CROSS_INTER.equals(data.getCustSubGrp())) {
+      if (Arrays.asList(DKINTER).contains(data.getCustSubGrp())) {
         if ("ZS01".equals(addr.getId().getAddrType())) {
           request.setCustClass("81");
         }
       }
-      if (NordicsUtil.DK_PRIPE_LOCAL.equals(data.getCustSubGrp())) {
+      if (Arrays.asList(DKPRIPE).contains(data.getCustSubGrp())) {
         if ("ZS01".equals(addr.getId().getAddrType())) {
           request.setCustClass("60");
         }
       }
-      if (NordicsUtil.DK_IBMEM_LOCAL.equals(data.getCustSubGrp())) {
+      if (Arrays.asList(DKIBMEM).contains(data.getCustSubGrp())) {
         if ("ZS01".equals(addr.getId().getAddrType())) {
           request.setCustClass("71");
         }
