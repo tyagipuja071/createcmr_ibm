@@ -69,12 +69,14 @@
           <dbColumn>ISU_CD</dbColumn>
           <width>15</width>
 		  <lovId>ISU</lovId>
+		  <length>1</length>
         </column>
         <column>
           <label>Client Tier</label>
           <dbColumn>CLIENT_TIER</dbColumn>
           <width>15</width>
           <length>1</length>
+          <lovId>ClientTier</lovId>
         </column>
         <column exactLength="true" number="true">
           <label>Enterprise Number</label>

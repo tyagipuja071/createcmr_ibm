@@ -136,6 +136,15 @@ public class IsraelTransformer extends EMEATransformer {
       if (subtype.equals("LOCAL")) {
         legacyCust.setBankNo("0");
       }
+      if (!StringUtils.isEmpty(data.getIsuCd()) && "5K".equals(data.getIsuCd())) {
+        legacyCust.setIsuCd(data.getIsuCd() + "7");
+      } else {
+        String isuClientTier = (!StringUtils.isEmpty(data.getIsuCd()) ? data.getIsuCd() : "")
+            + (!StringUtils.isEmpty(data.getClientTier()) ? data.getClientTier() : "");
+        if (isuClientTier != null && isuClientTier.length() == 3) {
+          legacyCust.setIsuCd(isuClientTier);
+        }
+      }
 
       if (StringUtils.isNotEmpty(data.getMiscBillCd())) {
         if (data.getMiscBillCd().equals("NO")) {
@@ -220,6 +229,15 @@ public class IsraelTransformer extends EMEATransformer {
             entityManager.merge(data);
             entityManager.flush();
           }
+        }
+      }
+      if (!StringUtils.isEmpty(data.getIsuCd()) && "5K".equals(data.getIsuCd())) {
+        legacyCust.setIsuCd(data.getIsuCd() + "7");
+      } else {
+        String isuClientTier = (!StringUtils.isEmpty(data.getIsuCd()) ? data.getIsuCd() : "")
+            + (!StringUtils.isEmpty(data.getClientTier()) ? data.getClientTier() : "");
+        if (isuClientTier != null && isuClientTier.length() == 3) {
+          legacyCust.setIsuCd(isuClientTier);
         }
       }
 
