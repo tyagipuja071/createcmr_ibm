@@ -966,30 +966,42 @@ public class IsraelTransformer extends EMEATransformer {
     }
 
     if (lstAddrLines.size() > 0) {
-      for (int i = 0; i < 6; i++) {
+      for (int i = 0; i < lstAddrLines.size(); i++) {
         switch (i) {
         case 0:
-          legacyAddr.setAddrLine1(lstAddrLines.get(i));
+          legacyAddr.setAddrLine1(getAddrLineValue(lstAddrLines.get(i), addrType));
           break;
         case 1:
-          legacyAddr.setAddrLine2(lstAddrLines.get(i));
+          legacyAddr.setAddrLine2(getAddrLineValue(lstAddrLines.get(i), addrType));
           break;
         case 2:
-          legacyAddr.setAddrLine3(lstAddrLines.get(i));
+          legacyAddr.setAddrLine3(getAddrLineValue(lstAddrLines.get(i), addrType));
           break;
         case 3:
-          legacyAddr.setAddrLine4(lstAddrLines.get(i));
+          legacyAddr.setAddrLine4(getAddrLineValue(lstAddrLines.get(i), addrType));
           break;
         case 4:
-          legacyAddr.setAddrLine5(lstAddrLines.get(i));
+          legacyAddr.setAddrLine5(getAddrLineValue(lstAddrLines.get(i), addrType));
           break;
         case 5:
-          legacyAddr.setAddrLine6(lstAddrLines.get(i));
+          legacyAddr.setAddrLine6(getAddrLineValue(lstAddrLines.get(i), addrType));
           break;
         }
       }
       legacyAddr.setAddrLineU(sbAddrLu.toString());
     }
+  }
+
+  private String getAddrLineValue(String addrFieldValue, String addrType) {
+    if (StringUtils.isNotBlank(addrType) && StringUtils.isNotBlank(addrFieldValue)) {
+      if ("ZS01".equals(addrType) || "ZP01".equals(addrType) || "ZD01".equals(addrType)) {
+        if (StringUtils.isNumeric(addrFieldValue)) {
+          return reverseNumbers(addrFieldValue);
+        }
+      }
+    }
+
+    return addrFieldValue;
   }
 
   @Override
