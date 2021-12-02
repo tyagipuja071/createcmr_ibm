@@ -216,6 +216,15 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       // }
 
       // }
+      if (NORDXHandler.isNordicsCountry(model.getCmrIssuingCntry())) {
+        if ("U".equals(admin.getReqType())) {
+          String maxAddrSeq = null;
+          maxAddrSeq = getMaxSequenceAddr(entityManager, model.getReqId());
+          if (Integer.parseInt(maxAddrSeq) > Integer.parseInt(newAddrSeq)) {
+            newAddrSeq = maxAddrSeq;
+          }
+        }
+      }
       model.setAddrSeq(newAddrSeq);
       if (addrExists(entityManager, model.getAddrType(), model.getAddrSeq(), model.getReqId())) {
         throw new CmrException(MessageUtil.ERROR_ALREADY_ADDRESS, uniqAddr.toString());
@@ -2310,4 +2319,74 @@ public class AddressService extends BaseService<AddressModel, Addr> {
     return zi01count;
   }
 
+  public String getMaxSequenceAddr(EntityManager entityManager, long reqId) {
+
+    int maxintSeqLegacy = 0;
+
+    try {
+
+      Data data = dataService.getCurrentRecordById(reqId, entityManager);
+
+      int maxintSeqFromLegacy = getMaxSequenceOnLegacyAddr(entityManager, data.getCmrIssuingCntry(), data.getCmrNo());
+      int maxintSeqFromRdc = getMaxSequenceFromRdc(entityManager, SystemConfiguration.getValue("MANDT"), data.getCmrIssuingCntry(), data.getCmrNo());
+
+      if (maxintSeqFromRdc > maxintSeqFromLegacy) {
+        maxintSeqLegacy = maxintSeqFromRdc;
+      } else {
+        maxintSeqLegacy = maxintSeqFromLegacy;
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+    return StringUtils.leftPad(Integer.toString(maxintSeqLegacy), 5, '0');
+
+  }
+
+  public int getMaxSequenceOnLegacyAddr(EntityManager entityManager, String rcyaa, String cmrNo) {
+    String maxAddrSeq = null;
+    int addrSeq = 0;
+    String sql = ExternalizedQuery.getSql("CEE.GETADDRSEQ.MAX.FROM.LEGACY");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("RCYAA", rcyaa);
+    query.setParameter("RCUXA", cmrNo);
+
+    List<Object[]> results = query.getResults();
+    if (results != null && results.size() > 0) {
+      Object[] result = results.get(0);
+      maxAddrSeq = (String) (result != null && result.length > 0 ? result[0] : "0");
+      if (StringUtils.isEmpty(maxAddrSeq)) {
+        maxAddrSeq = "0";
+      }
+      addrSeq = Integer.parseInt(maxAddrSeq);
+      addrSeq = ++addrSeq;
+      System.out.println("maxseqOnLegacy = " + addrSeq);
+    }
+    return addrSeq;
+
+  }
+
+  public int getMaxSequenceFromRdc(EntityManager entityManager, String mandt, String katr6, String cmrNo) {
+    String maxAddrSeq = null;
+    int addrSeq = 0;
+    String sql = ExternalizedQuery.getSql("CEE.GETADDRSEQ.MAX1");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("MANDT", mandt);
+    query.setParameter("KATR6", katr6);
+    query.setParameter("ZZKV_CUSNO", cmrNo);
+
+    List<Object[]> results = query.getResults();
+    if (results != null && results.size() > 0) {
+      Object[] result = results.get(0);
+      maxAddrSeq = (String) (result != null && result.length > 0 ? result[0] : "0");
+      if (StringUtils.isEmpty(maxAddrSeq)) {
+        maxAddrSeq = "0";
+      }
+      addrSeq = Integer.parseInt(maxAddrSeq);
+      addrSeq = ++addrSeq;
+      System.out.println("maxseqRdc = " + addrSeq);
+    }
+
+    return addrSeq;
+  }
 }
