@@ -34,7 +34,7 @@ import com.ibm.cmr.services.client.matching.request.ReqCheckRequest;
  */
 public class DuplicateChecksUtil {
 
-  public static String[] FIINTER = { "FIINT", "CBINT", "GLINT", "FOINT", "ISINT", "CBINT" };
+  public static String[] FIINTER = { "FIINT", "CBINT", "LTINT", "LVINT", "EEINT" };
   public static String[] FIPRIPE = { "FIPRI", "LTPRI", "LVPRI", "EEPRI" };
   public static String[] FIIBMEM = { "FIIBM", "LTIBM", "LVIBM", "EEIBM" };
 
