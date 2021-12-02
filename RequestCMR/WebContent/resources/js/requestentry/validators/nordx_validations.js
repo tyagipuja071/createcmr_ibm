@@ -93,6 +93,20 @@ function afterConfigForNORDX() {
     // FormManager.removeValidator('engineeringBo', Validators.REQUIRED); //
     // CMR-1903
   }
+  // EECRO
+  var cntryBaltics = FormManager.getActualValue('countryUse');
+  if ((role == 'Requester' || role == 'Processor') && (reqType == 'C' || reqType == 'U')) {
+    if (cntryBaltics == '702EE' || cntryBaltics == '702LT' || cntryBaltics == '702LV') {
+      checkAndAddValidator('custNm1', LATINBALTICS, [ 'Customer Name' ]);
+      checkAndAddValidator('custNm2', LATINBALTICS, [ 'Customer Name Con\'t' ]);
+      checkAndAddValidator('custNm3', LATINBALTICS, [ 'Additional Info' ]);
+      checkAndAddValidator('custNm4', LATINBALTICS, [ 'Att. Person' ]);
+      checkAndAddValidator('city1', LATINBALTICS, [ 'City' ]);
+      checkAndAddValidator('addrTxt', LATINBALTICS, [ 'Street Address' ]);
+      checkAndAddValidator('addrTxt2', LATINBALTICS, [ 'Street Con\'t' ]);
+      checkAndAddValidator('custPhone', LATINBALTICS, [ 'Phone #' ]);
+    }
+  }
 
   var landCntry = '';
   var cntryRegion = FormManager.getActualValue('countryUse');
@@ -1456,6 +1470,17 @@ function hidePOBoxandHandleStreet() {
 
     }
   }
+  var cntryBalticsUpd = FormManager.getActualValue('countryUse')
+  if (cntryBalticsUpd == '702EE' || cntryBalticsUpd == '702LT' || cntryBalticsUpd == '702LV') {
+    checkAndAddValidator('custNm1', LATINBALTICS, [ 'Customer Name' ]);
+    checkAndAddValidator('custNm2', LATINBALTICS, [ 'Customer Name Con\'t' ]);
+    checkAndAddValidator('custNm3', LATINBALTICS, [ 'Additional Info' ]);
+    checkAndAddValidator('custNm4', LATINBALTICS, [ 'Att. Person' ]);
+    checkAndAddValidator('city1', LATINBALTICS, [ 'City' ]);
+    checkAndAddValidator('addrTxt', LATINBALTICS, [ 'Street Address' ]);
+    checkAndAddValidator('addrTxt2', LATINBALTICS, [ 'Street Con\'t' ]);
+    checkAndAddValidator('custPhone', LATINBALTICS, [ 'Phone #' ]);
+  }
 }
 
 function setPOBOXandSteet(value) {
@@ -1477,6 +1502,17 @@ function setPOBOXandSteet(value) {
     // FormManager.setValue('poBox', value);
     FormManager.show('POBox', 'poBox');
     FormManager.resetValidations('addrTxt');
+  }
+  var cntryBalticsM = FormManager.getActualValue('countryUse')
+  if (cntryBalticsM == '702EE' || cntryBalticsM == '702LT' || cntryBalticsM == '702LV') {
+    checkAndAddValidator('custNm1', LATINBALTICS, [ 'Customer Name' ]);
+    checkAndAddValidator('custNm2', LATINBALTICS, [ 'Customer Name Con\'t' ]);
+    checkAndAddValidator('custNm3', LATINBALTICS, [ 'Additional Info' ]);
+    checkAndAddValidator('custNm4', LATINBALTICS, [ 'Att. Person' ]);
+    checkAndAddValidator('city1', LATINBALTICS, [ 'City' ]);
+    checkAndAddValidator('addrTxt', LATINBALTICS, [ 'Street Address' ]);
+    checkAndAddValidator('addrTxt2', LATINBALTICS, [ 'Street Con\'t' ]);
+    checkAndAddValidator('custPhone', LATINBALTICS, [ 'Phone #' ]);
   }
 }
 
@@ -2312,6 +2348,19 @@ function LATINNORDX(input) {
   var reg = /[^\u0000-\u007f]/;
   if (reg.test(value)) {
     return new ValidationResult(input, false, MessageMgr.MESSAGES.LATIN);
+  } else {
+    return new ValidationResult(input, true);
+  }
+}
+
+function LATINBALTICS(input) {
+  var value = FormManager.getActualValue(input);
+  if (!value || value == '' || value.length == 0) {
+    return new ValidationResult(input, true);
+  }
+  var reg = /[^\u0000-\u00bf\u00d7\u00f7\u0100-\u024f]/;
+  if (reg.test(value)) {
+    return new ValidationResult(input, false, MessageMgr.MESSAGES.LATIN1);
   } else {
     return new ValidationResult(input, true);
   }
