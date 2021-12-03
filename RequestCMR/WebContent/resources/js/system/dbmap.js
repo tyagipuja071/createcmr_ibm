@@ -292,8 +292,10 @@ var DB_DATA_FIELDS = [ {
 }, {
   id : 'EngineeringBo',
   name : 'ENGINEERING_BO'
-}
-];
+}, {
+  id : 'AdminDeptCd',
+  name : 'ADMIN_DEPT_CD'
+} ];
 DB_DATA_FIELDS.sort(function(a, b) {
   if (a.id > b.id) {
     return 1;
