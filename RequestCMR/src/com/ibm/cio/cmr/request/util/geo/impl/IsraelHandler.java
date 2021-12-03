@@ -1603,7 +1603,7 @@ public class IsraelHandler extends EMEAHandler {
         String isuCd = validateColValFromCell(row.getCell(10));
         String ctc = validateColValFromCell(row.getCell(11));
         if (isuCd.equalsIgnoreCase("5k") && !ctc.equalsIgnoreCase("@")) {
-          LOG.trace("For IsuCd set to '5K' Ctc should be '@'");
+          LOG.trace("Client Tier Value should always be @ for IsuCd Value: 5K");
           error.addError(row.getRowNum(), "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd);
         } else if (!StringUtils.isEmpty(isuCd) && !isuCd.equalsIgnoreCase("5k") && ctc.equalsIgnoreCase("@")) {
           LOG.trace("Ctc can't be @ for IsuCd Value :" + isuCd);
