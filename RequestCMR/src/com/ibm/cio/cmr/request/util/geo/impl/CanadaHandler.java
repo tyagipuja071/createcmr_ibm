@@ -59,7 +59,8 @@ public class CanadaHandler extends GEOHandler {
 
     if (CmrConstants.REQ_TYPE_CREATE.equals(reqEntry.getReqType())) {
       for (FindCMRRecordModel record : records) {
-        if ("ZS01".equals(record.getCmrAddrTypeCode()) && (StringUtils.isBlank(record.getCmrOrderBlock()))) {
+        if (("ZS01".equals(record.getCmrAddrTypeCode()) && (StringUtils.isBlank(record.getCmrOrderBlock())))
+            || ("ZS01".equals(record.getCmrAddrTypeCode()) && (record.getCmrOrderBlock().equals("75")))) {
           record.setCmrAddrTypeCode("ZS01");
           converted.add(record);
         }
