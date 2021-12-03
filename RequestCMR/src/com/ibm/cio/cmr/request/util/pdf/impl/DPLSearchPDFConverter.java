@@ -133,10 +133,18 @@ public class DPLSearchPDFConverter extends DefaultPDFConverter {
                 section.addCell(createValueCell(assessResult));
               }
               section.addCell(createLabelCell("Assessed By:"));
-              section.addCell(createValueCell(this.scorecard.getDplAssessmentBy() != null ? this.scorecard.getDplAssessmentBy() : ""));
+              if (this.scorecard != null) {
+                section.addCell(createValueCell(this.scorecard.getDplAssessmentBy() != null ? this.scorecard.getDplAssessmentBy() : ""));
+              } else {
+                section.addCell("");
+              }
               section.addCell(createLabelCell("Assessed Date:"));
-              if (this.scorecard.getDplAssessmentDate() != null) {
-                section.addCell(createValueCell(formatter.format(this.scorecard.getDplAssessmentDate())));
+              if (this.scorecard != null) {
+                if (this.scorecard.getDplAssessmentDate() != null) {
+                  section.addCell(createValueCell(formatter.format(this.scorecard.getDplAssessmentDate())));
+                } else {
+                  section.addCell(createValueCell(""));
+                }
               } else {
                 section.addCell(createValueCell(""));
               }
