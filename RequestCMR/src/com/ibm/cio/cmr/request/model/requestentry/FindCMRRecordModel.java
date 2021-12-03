@@ -7,7 +7,8 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 import com.ibm.cio.cmr.request.CmrConstants;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonIgnoreProperties(
+    ignoreUnknown = true)
 public class FindCMRRecordModel implements Serializable, Comparable<FindCMRRecordModel> {
 
   private static final long serialVersionUID = 1L;
@@ -242,6 +243,29 @@ public class FindCMRRecordModel implements Serializable, Comparable<FindCMRRecor
   private String usCmrBpAccountType;
 
   private String militaryFlag;
+
+  // new canada fields
+  private String cmrSellBoGrp;
+  private String cmrInstlBoGrp;
+  private String cmrTaxCertStatus;
+  private String cmrAddrUse;
+  private String cmrDataLine;
+  private String cmrQstNo;
+  private String cmrTaxExInd;
+  private String cmrLicNo;
+  private String cmrTaxExemptReas;
+  private String cmrLeasingInd;
+  private String cmrPurOrdNo;
+  private String cmrEstabFnInd;
+  private String cmrSellBoNum;
+  private String cmrInstlBoNum;
+  private String cmrAccRecvBo;
+  private String cmrPymtTerms;
+  private String cmrBillPlnTyp;
+  private String cmrNoInvc;
+  private String cmrEnggBoGrp;
+  private String cmrLtPymntInd;
+  private String cmrCustCreditCode;
 
   public String getCustClass() {
     return custClass;
@@ -1880,6 +1904,174 @@ public class FindCMRRecordModel implements Serializable, Comparable<FindCMRRecor
 
   public void setMilitaryFlag(String militaryFlag) {
     this.militaryFlag = militaryFlag;
+  }
+
+  public String getCmrSellBoGrp() {
+    return cmrSellBoGrp;
+  }
+
+  public void setCmrSellBoGrp(String cmrSellBoGrp) {
+    this.cmrSellBoGrp = cmrSellBoGrp;
+  }
+
+  public String getCmrInstlBoGrp() {
+    return cmrInstlBoGrp;
+  }
+
+  public void setCmrInstlBoGrp(String cmrInstlBoGrp) {
+    this.cmrInstlBoGrp = cmrInstlBoGrp;
+  }
+
+  public String getCmrTaxCertStatus() {
+    return cmrTaxCertStatus;
+  }
+
+  public void setCmrTaxCertStatus(String cmrTaxCertStatus) {
+    this.cmrTaxCertStatus = cmrTaxCertStatus;
+  }
+
+  public String getCmrAddrUse() {
+    return cmrAddrUse;
+  }
+
+  public void setCmrAddrUse(String cmrAddrUse) {
+    this.cmrAddrUse = cmrAddrUse;
+  }
+
+  public String getCmrDataLine() {
+    return cmrDataLine;
+  }
+
+  public void setCmrDataLine(String cmrDataLine) {
+    this.cmrDataLine = cmrDataLine;
+  }
+
+  public String getCmrQstNo() {
+    return cmrQstNo;
+  }
+
+  public void setCmrQstNo(String cmrQstNo) {
+    this.cmrQstNo = cmrQstNo;
+  }
+
+  public String getCmrTaxExInd() {
+    return cmrTaxExInd;
+  }
+
+  public void setCmrTaxExInd(String cmrTaxExInd) {
+    this.cmrTaxExInd = cmrTaxExInd;
+  }
+
+  public String getCmrLicNo() {
+    return cmrLicNo;
+  }
+
+  public void setCmrLicNo(String cmrLicNo) {
+    this.cmrLicNo = cmrLicNo;
+  }
+
+  public String getCmrTaxExemptReas() {
+    return cmrTaxExemptReas;
+  }
+
+  public void setCmrTaxExemptReas(String cmrTaxExemptReas) {
+    this.cmrTaxExemptReas = cmrTaxExemptReas;
+  }
+
+  public String getCmrLeasingInd() {
+    return cmrLeasingInd;
+  }
+
+  public void setCmrLeasingInd(String cmrLeasingInd) {
+    this.cmrLeasingInd = cmrLeasingInd;
+  }
+
+  public String getCmrPurOrdNo() {
+    return cmrPurOrdNo;
+  }
+
+  public void setCmrPurOrdNo(String cmrPurOrdNo) {
+    this.cmrPurOrdNo = cmrPurOrdNo;
+  }
+
+  public String getCmrEstabFnInd() {
+    return cmrEstabFnInd;
+  }
+
+  public void setCmrEstabFnInd(String cmrEstabFnInd) {
+    this.cmrEstabFnInd = cmrEstabFnInd;
+  }
+
+  public String getCmrSellBoNum() {
+    return cmrSellBoNum;
+  }
+
+  public void setCmrSellBoNum(String cmrSellBoNum) {
+    this.cmrSellBoNum = cmrSellBoNum;
+  }
+
+  public String getCmrInstlBoNum() {
+    return cmrInstlBoNum;
+  }
+
+  public void setCmrInstlBoNum(String cmrInstlBoNum) {
+    this.cmrInstlBoNum = cmrInstlBoNum;
+  }
+
+  public String getCmrAccRecvBo() {
+    return cmrAccRecvBo;
+  }
+
+  public void setCmrAccRecvBo(String cmrAccRecvBo) {
+    this.cmrAccRecvBo = cmrAccRecvBo;
+  }
+
+  public String getCmrPymtTerms() {
+    return cmrPymtTerms;
+  }
+
+  public void setCmrPymtTerms(String cmrPymtTerms) {
+    this.cmrPymtTerms = cmrPymtTerms;
+  }
+
+  public String getCmrBillPlnTyp() {
+    return cmrBillPlnTyp;
+  }
+
+  public void setCmrBillPlnTyp(String cmrBillPlnTyp) {
+    this.cmrBillPlnTyp = cmrBillPlnTyp;
+  }
+
+  public String getCmrNoInvc() {
+    return cmrNoInvc;
+  }
+
+  public void setCmrNoInvc(String cmrNoInvc) {
+    this.cmrNoInvc = cmrNoInvc;
+  }
+
+  public String getCmrEnggBoGrp() {
+    return cmrEnggBoGrp;
+  }
+
+  public void setCmrEnggBoGrp(String cmrEnggBoGrp) {
+    this.cmrEnggBoGrp = cmrEnggBoGrp;
+  }
+
+  public String getCmrLtPymntInd() {
+    return cmrLtPymntInd;
+  }
+
+  public void setCmrLtPymntInd(String cmrLtPymntInd) {
+    this.cmrLtPymntInd = cmrLtPymntInd;
+  }
+
+  public String getCmrCustCreditCode() {
+    return cmrCustCreditCode;
+  }
+
+  public void setCmrCustCreditCode(String cmrCustCreditCode) {
+    this.cmrCustCreditCode = cmrCustCreditCode;
   }
 
 }
