@@ -254,6 +254,11 @@ public class NordicsUtil extends AutomationUtil {
       return true;
 
     case DK_BUSPR_LOCAL:
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_FIELD_COMPUTATION);
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_RETRIEVE_VALUES);
+      return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
     case FI_BUSPR_LOCAL:
     case BUSPR_LOCAL:
     case CROSS_BUSPR:
