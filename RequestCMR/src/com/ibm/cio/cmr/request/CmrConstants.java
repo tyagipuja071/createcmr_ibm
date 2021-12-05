@@ -926,4 +926,6 @@ public class CmrConstants {
   public static final List<String> DE_CND_ISSUING_COUNTRY_VAL = Arrays.asList("724", "619", "621", "627", "647", "791", "640", "759", "839", "843",
       "859");
   public static final List<String> ORDER_BLK_LIST = Arrays.asList("88");
+
+  public static final List<String> BP_GBM_SBM_COUNTRIES = Arrays.asList("620", "677", "680", "767", "805", "823", "832");
 }
