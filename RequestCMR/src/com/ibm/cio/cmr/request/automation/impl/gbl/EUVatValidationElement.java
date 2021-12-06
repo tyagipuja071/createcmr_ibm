@@ -25,9 +25,9 @@ import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.ui.PageManager;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
-import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cmr.services.client.AutomationServiceClient;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.ServiceClient.Method;
@@ -39,7 +39,8 @@ public class EUVatValidationElement extends ValidatingElement implements Company
 
   private static final Logger LOG = Logger.getLogger(EUVatValidationElement.class);
   private static final List<String> EU_COUNTRIES = Arrays.asList("BE", "AT", "BG", "CY", "CZ", "DE", "DK", "EE", "EL", "ES", "FI", "FR", "GB", "HR",
-      "HU", "IE", "IT", "LT", "LU", "LV", "MT", "NL", "PL", "PT", "RO", "SE", "SI", "SK");
+      "HU", "IE", "IT", "LT", "LU", "LV", "MT", "NL", "PL", "PT", "RO", "SE", "SI", "SK", "IS", "FO", "GL");
+  List<String> dkSubRegion = Arrays.asList("IS", "FO", "GL");
 
   public EUVatValidationElement(String requestTypes, String actionOnError, boolean overrideData, boolean stopOnError) {
     super(requestTypes, actionOnError, overrideData, stopOnError);
@@ -83,7 +84,7 @@ public class EUVatValidationElement extends ValidatingElement implements Company
           validation.setMessage("Skipped.");
           output.setDetails("VAT has been marked verified through previous process executions. Skipping VIES verification.");
           LOG.debug("VAT has been marked verified through previous process executions. Skipping VIES verification.");
-        } else if (!EU_COUNTRIES.contains(landCntryForVies)) {
+        } else if (!EU_COUNTRIES.contains(landCntryForVies) || dkSubRegion.contains(landCntryForVies)) {
           validation.setSuccess(true);
           validation.setMessage("Skipped.");
           output.setDetails("Landed Country does not belong to the European Union. Skipping VAT Validation.");
@@ -121,7 +122,7 @@ public class EUVatValidationElement extends ValidatingElement implements Company
               output.setDetails(details.toString());
               engineData.setCompanySource("VIES");
               updateEntity(admin, entityManager);
-            } else if (data.getCustSubGrp().equals("PUBCU") && SystemLocation.NETHERLANDS.equals(data.getCmrIssuingCntry())) {
+            } else if (SystemLocation.NETHERLANDS.equals(data.getCmrIssuingCntry()) && "PUBCU".equalsIgnoreCase(data.getCustSubGrp())) {
               validation.setSuccess(true);
               validation.setMessage("Review needed.");
               output.setDetails("VAT is invalid. Need review.");
@@ -193,9 +194,9 @@ public class EUVatValidationElement extends ValidatingElement implements Company
   private String getLandedCountryForVies(String cmrIssuingCntry, String landCntry, String countryUse) {
     String defaultLandedCountry = PageManager.getDefaultLandedCountry(cmrIssuingCntry);
     String subRegion = !StringUtils.isBlank(countryUse) && countryUse.length() > 3 ? countryUse.substring(3) : "";
+    // if subregion is part of EU countries eligible for VAT matching, use
+    // subregion as default country
     if (StringUtils.isNotBlank(subRegion) && EU_COUNTRIES.contains(subRegion)) {
-      // if subregion is part of EU countries eligible for VAT matching, use
-      // subregion as default country
       defaultLandedCountry = subRegion;
     }
     if (!landCntry.equals(defaultLandedCountry) && !landCntry.equals(subRegion)) {
