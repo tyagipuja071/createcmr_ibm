@@ -211,6 +211,14 @@ public class CanadaHandler extends GEOHandler {
       String name1 = StringUtils.isEmpty(currentRecord.getCmrName1Plain()) ? "" : currentRecord.getCmrName1Plain();
       String name2 = StringUtils.isEmpty(currentRecord.getCmrName2Plain()) ? "" : currentRecord.getCmrName2Plain();
 
+      if (name1.length() > 30) {
+        name1 = name1.substring(0, 30);
+      }
+
+      if (name2.length() > 30) {
+        name2 = name2.substring(0, 30);
+      }
+
       admin.setMainCustNm1(name1);
       admin.setOldCustNm1(name1);
       admin.setMainCustNm2(name2);
