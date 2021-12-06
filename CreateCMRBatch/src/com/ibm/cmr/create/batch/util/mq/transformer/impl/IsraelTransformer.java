@@ -197,6 +197,15 @@ public class IsraelTransformer extends EMEATransformer {
 
     }
 
+    if (StringUtils.isEmpty(data.getClientTier())) {
+      String isuCd = !StringUtils.isEmpty(data.getIsuCd()) ? data.getIsuCd() : "";
+
+      if (!StringUtils.isEmpty(isuCd)) {
+        isuCd = isuCd.concat("7");
+      }
+      legacyCust.setIsuCd(isuCd);
+    }
+
     for (Addr addr : cmrObjects.getAddresses()) {
       if (MQMsgConstants.ADDR_ZS01.equals(addr.getId().getAddrType())) {
         legacyCust.setTelNoOrVat(addr.getCustPhone());

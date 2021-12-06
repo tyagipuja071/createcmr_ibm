@@ -1,5 +1,6 @@
 /* Register Israel Javascripts */
 var _CTCHandlerIL = null;
+var _ISUHandlerIL = null;
 var _vatExemptHandler = null;
 var _gtcAddrTypeHandlerIL = [];
 var _gtcAddrTypesIL = [ 'ZS01', 'ZP01', 'ZD01', 'ZI01', 'ZS02', 'CTYA', 'CTYB', 'CTYC' ];
@@ -21,10 +22,16 @@ function addHandlersForIL() {
 
   if (_CTCHandlerIL == null) {
     _CTCHandlerIL = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
-      setEnterpriseSalesRepSBO();
+      setEnterpriseSalesRepSBO(value);
     });
   }
 
+  if (_ISUHandlerIL == null) {
+    _ISUHandlerIL = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+      setEnterpriseSalesRepSBO(value);
+    });
+  }
+  
   if (_streetHandler == null) {
     _streetHandler = dojo.connect(FormManager.getField('addrTxt'), 'onChange', function(value) {
       setStreetContBehavior();
@@ -2086,7 +2093,7 @@ function validateEnterpriseNo() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
-function setEnterpriseSalesRepSBO() {
+function setEnterpriseSalesRepSBO(_clientTier) {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
@@ -2097,6 +2104,12 @@ function setEnterpriseSalesRepSBO() {
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
 
+  if (isuCd != "34") {
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+  } else {
+    checkAndAddValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ]);
+  }
+  
   if (isuCd == '34' && clientTier == 'Q') {
     FormManager.setValue('enterprise', '006510');
     FormManager.setValue('salesBusOffCd', '006');
@@ -2110,7 +2123,7 @@ function setEnterpriseSalesRepSBO() {
     FormManager.setValue('salesBusOffCd', '009');
     FormManager.setValue('repTeamMemberNo', '000993');
   } else if (isuCd == '5K' && clientTier == '') {
-    FormManager.setValue('enterprise', '006510');
+    FormManager.setValue('enterprise', '985999');
     FormManager.setValue('salesBusOffCd', '006');
     FormManager.setValue('repTeamMemberNo', '000651');
   }
@@ -2381,6 +2394,47 @@ function addAddrFieldsLimitation() {
 function showVerificationModal() {
   cmr.showModal('addressVerificationModal');
 }
+
+
+function setCTCByScenario(fromAddress, scenario, scenarioChanged) {
+
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+  if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
+  var isuCd = FormManager.getActualValue('isuCd');
+  
+  if (isuCd != "34") {
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+  } else {
+    checkAndAddValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ]);
+  }
+  
+  if (scenarioChanged) {
+    var custType = FormManager.getActualValue('custSubGrp');
+    
+    if (custType == 'COMME') {
+      FormManager.setValue('clientTier', 'Q');
+    } else if (custType == 'BUSPR') {
+      FormManager.setValue('clientTier', '');
+    } else if (custType == 'INTER') {
+      FormManager.setValue('clientTier', '');
+    } else if (custType == 'INTSO') {
+      FormManager.setValue('clientTier', '');
+    } else if (custType == 'PRIPE') {
+      FormManager.setValue('clientTier', 'Q');
+    } else if (custType == 'GOVRN') {
+      FormManager.setValue('clientTier', 'Q');
+    } else if (custType == 'THDPT') {
+      FormManager.setValue('clientTier', 'Q');
+    } else if (custType == 'CROSS') {
+      FormManager.setValue('clientTier', 'Q');
+    }
+  }
+}
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding Israel functions...');
@@ -2459,6 +2513,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(adjustChecklistContact, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterTemplateLoad(setSalesRepEnterpriseNoSBO, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterTemplateLoad(lockCMROwner, [ SysLoc.ISRAEL ]);
+  GEOHandler.addAfterTemplateLoad(setCTCByScenario, [ SysLoc.ISRAEL ]);
 
   GEOHandler.registerValidator(addISICKUKLAValidator, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(addCollectionValidator, [ SysLoc.ISRAEL ], null, true);
