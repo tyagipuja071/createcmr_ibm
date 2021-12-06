@@ -4,6 +4,7 @@
 package com.ibm.cio.cmr.request.automation.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -13,6 +14,7 @@ import org.apache.commons.lang.StringUtils;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.util.geo.BeLuxUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.NetherlandsUtil;
+import com.ibm.cio.cmr.request.automation.util.geo.NordicsUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.SpainUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.UKIUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.USUtil;
@@ -31,6 +33,14 @@ import com.ibm.cmr.services.client.matching.request.ReqCheckRequest;
  *
  */
 public class DuplicateChecksUtil {
+
+  public static String[] FIINTER = { "FIINT", "CBINT", "LTINT", "LVINT", "EEINT" };
+  public static String[] FIPRIPE = { "FIPRI", "LTPRI", "LVPRI", "EEPRI" };
+  public static String[] FIIBMEM = { "FIIBM", "LTIBM", "LVIBM", "EEIBM" };
+
+  public static String[] DKINTER = { "DKINT", "CBINT", "FOINT", "GLINT", "ISINT" };
+  public static String[] DKPRIPE = { "DKPRI", "FOPRI", "ISPRI", "GLPRI" };
+  public static String[] DKIBMEM = { "DKIBM", "FOIBM", "GLIBM", "ISIBM" };
 
   /**
    * Sets country-specific values for duplicate request checks
@@ -145,21 +155,21 @@ public class DuplicateChecksUtil {
         request.setCustClass(data.getCustClass());
       }
     case SystemLocation.NETHERLANDS:
-        if (NetherlandsUtil.SCENARIO_INTERNAL.equals(data.getCustSubGrp())) {
-          if ("ZS01".equals(addr.getId().getAddrType())) {
-            request.setCustClass("81");
-          }
+      if (NetherlandsUtil.SCENARIO_INTERNAL.equals(data.getCustSubGrp())) {
+        if ("ZS01".equals(addr.getId().getAddrType())) {
+          request.setCustClass("81");
         }
-        if (NetherlandsUtil.SCENARIO_PRIVATE_CUSTOMER.equals(data.getCustSubGrp())) {
-          if ("ZS01".equals(addr.getId().getAddrType())) {
-            request.setCustClass("60");
-          }
+      }
+      if (NetherlandsUtil.SCENARIO_PRIVATE_CUSTOMER.equals(data.getCustSubGrp())) {
+        if ("ZS01".equals(addr.getId().getAddrType())) {
+          request.setCustClass("60");
         }
-        if (NetherlandsUtil.SCENARIO_BP_LOCAL.equals(data.getCustSubGrp()) || NetherlandsUtil.SCENARIO_BP_CROSS.equals(data.getCustSubGrp())) {
-          if ("ZS01".equals(addr.getId().getAddrType())) {
-            request.setCustClass("49");
-          }
+      }
+      if (NetherlandsUtil.SCENARIO_BP_LOCAL.equals(data.getCustSubGrp()) || NetherlandsUtil.SCENARIO_BP_CROSS.equals(data.getCustSubGrp())) {
+        if ("ZS01".equals(addr.getId().getAddrType())) {
+          request.setCustClass("49");
         }
+      }
     case SystemLocation.BELGIUM:
       if (BeLuxUtil.SCENARIO_INTERNAL.equals(data.getCustSubGrp()) || BeLuxUtil.SCENARIO_INTERNAL_LU.equals(data.getCustSubGrp())) {
         if ("ZS01".equals(addr.getId().getAddrType())) {
@@ -175,6 +185,55 @@ public class DuplicateChecksUtil {
           || BeLuxUtil.SCENARIO_BP_CROSS.equals(data.getCustSubGrp())) {
         if ("ZS01".equals(addr.getId().getAddrType())) {
           request.setCustClass("49");
+        }
+      }
+    case SystemLocation.SWEDEN:
+    case SystemLocation.NORWAY:
+      if (NordicsUtil.INTER_LOCAL.equals(data.getCustSubGrp()) || NordicsUtil.CROSS_INTER.equals(data.getCustSubGrp())) {
+        if ("ZS01".equals(addr.getId().getAddrType())) {
+          request.setCustClass("81");
+        }
+      }
+      if (NordicsUtil.PRIPE_LOCAL.equals(data.getCustSubGrp())) {
+        if ("ZS01".equals(addr.getId().getAddrType())) {
+          request.setCustClass("60");
+        }
+      }
+      if (NordicsUtil.IBMEM_LOCAL.equals(data.getCustSubGrp())) {
+        if ("ZS01".equals(addr.getId().getAddrType())) {
+          request.setCustClass("71");
+        }
+      }
+    case SystemLocation.FINLAND:
+      if (Arrays.asList(FIINTER).contains(data.getCustSubGrp())) {
+        if ("ZS01".equals(addr.getId().getAddrType())) {
+          request.setCustClass("81");
+        }
+      }
+      if (Arrays.asList(FIPRIPE).contains(data.getCustSubGrp())) {
+        if ("ZS01".equals(addr.getId().getAddrType())) {
+          request.setCustClass("60");
+        }
+      }
+      if (Arrays.asList(FIIBMEM).contains(data.getCustSubGrp())) {
+        if ("ZS01".equals(addr.getId().getAddrType())) {
+          request.setCustClass("71");
+        }
+      }
+    case SystemLocation.DENMARK:
+      if (Arrays.asList(DKINTER).contains(data.getCustSubGrp())) {
+        if ("ZS01".equals(addr.getId().getAddrType())) {
+          request.setCustClass("81");
+        }
+      }
+      if (Arrays.asList(DKPRIPE).contains(data.getCustSubGrp())) {
+        if ("ZS01".equals(addr.getId().getAddrType())) {
+          request.setCustClass("60");
+        }
+      }
+      if (Arrays.asList(DKIBMEM).contains(data.getCustSubGrp())) {
+        if ("ZS01".equals(addr.getId().getAddrType())) {
+          request.setCustClass("71");
         }
       }
     }
