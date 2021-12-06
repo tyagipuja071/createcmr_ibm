@@ -75,7 +75,6 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
   private static final List<String> PENDING_STATUSES_TO_RETURN = Arrays.asList("REP");
   private static final String BP_MANAGER_ID = "BPMANAGER";
   private final DataService dataService = new DataService();
-  private static final List<String> BP_VAT_EXEMPT_APPROVAL_COUNTRY_LIST = Arrays.asList("862", "864", "832", "620", "805", "677", "680");
 
   public static void main(String[] args) {
 
@@ -155,12 +154,6 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
         break;
       case "R":
         updateApprovalStatus(entityManager, req, CmrConstants.APPROVAL_REJECTED, approval, admin);
-        String cmrIssuingCntry = getCmrIssuingCntry(entityManager, req.getReqId());
-
-        if (BP_VAT_EXEMPT_APPROVAL_COUNTRY_LIST.contains(cmrIssuingCntry) && admin.getSourceSystId() != null
-            && admin.getSourceSystId().equals("CreateCMR-BP")) {
-          moveBackToRequesterNoAuto(entityManager, admin);
-        }
         // moveBackToRequester(entityManager, admin);
         // defunctCurrentApprovals(entityManager, approval, req);
         approval.setProcessed(true);
@@ -579,65 +572,6 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
     } else {
       this.log.debug("The request " + admin.getId().getReqId() + " is not in any automation statuses.");
     }
-  }
-
-  /**
-   * Moves the request to the next step
-   * 
-   * @param entityManager
-   * @param admin
-   * @throws CmrException
-   * @throws SQLException
-   */
-  private void moveBackToRequesterNoAuto(EntityManager entityManager, Admin admin) throws CmrException, SQLException {
-
-    // move only if it is one of the auto statuses
-    this.log.debug("Moving Request ID " + admin.getId().getReqId() + " back to requester because of rejection.");
-    admin.setReqStatus(CmrConstants.REQUEST_STATUS.PRJ.toString());
-    admin.setLastProcCenterNm(null);
-    admin.setLockInd("N");
-    admin.setLockByNm(null);
-    admin.setLockBy(null);
-    admin.setLockTs(null);
-
-    updateEntity(admin, entityManager);
-    String user = SystemConfiguration.getValue("BATCH_USERID");
-    String comment = "Request has been rejected due to rejected approvals. Please check the approval comments.";
-    AppUser appuser = new AppUser();
-    appuser.setIntranetId(user);
-    appuser.setBluePagesName(user);
-    List<ApprovalComments> rejApprovalComments = getRejectionCmtAsRejRsn(entityManager, admin);
-    String rejectReasonCmt = null;
-    String rejectReasonCd = null;
-    // filter automated comments out
-    if (!rejApprovalComments.isEmpty()) {
-      for (ApprovalComments apprCmt : rejApprovalComments) {
-        this.log.debug("Iterating through approval comments...");
-        String createBy = StringUtils.isNotBlank(apprCmt.getCreateBy()) ? apprCmt.getCreateBy() : "";
-        Person p = null;
-        try {
-          p = BluePagesHelper.getPerson(createBy);
-        } catch (Exception e) {
-          this.log.debug("Error in Querying BluepagesHelper service in ApprovalService.java");
-        }
-        String rsn = StringUtils.isNotBlank(apprCmt.getRejReason()) ? apprCmt.getRejReason() : "";
-        if (p != null && !"Automatically rejected.".equalsIgnoreCase(rsn) && rsn != "") {
-          this.log.debug("Approval Comments are -> " + apprCmt.getComments() + " \n Reject reason is -> " + apprCmt.getRejReason());
-          rejectReasonCmt = apprCmt.getComments();
-          rejectReasonCd = apprCmt.getRejReason();
-          break;
-        }
-      }
-    }
-
-    if (StringUtils.isNotBlank(rejectReasonCmt)) {
-      this.log.debug("Appending the rejection reason comment with general comments.");
-      comment = comment + "\n" + rejectReasonCmt;
-    }
-    this.log.debug("Creating workflow history and sending notifications.");
-    RequestUtils.createWorkflowHistory(this, entityManager, user, admin, comment, "Approval", null, null, false, null, rejectReasonCd);
-    RequestUtils.createCommentLog(this, entityManager, appuser, admin.getId().getReqId(), comment);
-
   }
 
   private List<ApprovalComments> getRejectionCmtAsRejRsn(EntityManager entityManager, Admin admin) {
