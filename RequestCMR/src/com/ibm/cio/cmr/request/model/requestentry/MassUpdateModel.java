@@ -161,6 +161,16 @@ public class MassUpdateModel extends BaseModel {
 
   private String newEntpName1;
 
+  private String taxExemptStatus;
+
+  public String getTaxExemptStatus() {
+    return taxExemptStatus;
+  }
+
+  public void setTaxExemptStatus(String taxExemptStatus) {
+    this.taxExemptStatus = taxExemptStatus;
+  }
+
   // JP new fields
   private Date requestDueDate;
   private String requestDueDateTemp;
