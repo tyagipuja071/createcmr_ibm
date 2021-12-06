@@ -15,12 +15,10 @@ import javax.persistence.EntityManager;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
-import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.ProlifChecklist;
-import com.ibm.cio.cmr.request.entity.ReqCmtLog;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.ui.PageManager;
@@ -87,11 +85,6 @@ public class CEMEAPDFConverter extends DefaultPDFConverter {
             if (Arrays.asList("REACTIVATE", "DELETE", "R", "D").contains(admin.getReqType().toUpperCase())) {
               document.add(blankLine());
               addDeleteReactivateDetails(admin, entityManager, document);
-            }
-
-            if ("CreateCMR-BP".equals(admin.getSourceSystId()) && CmrConstants.BP_GBM_SBM_COUNTRIES.contains(data.getCmrIssuingCntry())) {
-              document.add(blankLine());
-              addReqCmtLogSections(entityManager, data.getId().getReqId(), document);
             }
 
           } finally {
@@ -613,31 +606,6 @@ public class CEMEAPDFConverter extends DefaultPDFConverter {
       return cell;
     }
     return cell;
-  }
-
-  private void addReqCmtLogSections(EntityManager entityManager, long reqId, Document document) {
-    String sql = ExternalizedQuery.getSql("REQUESTENTRY.REQ_CMT_LOG.SEARCH_BY_REQID");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("REQ_ID", reqId);
-    query.setForReadOnly(true);
-    List<ReqCmtLog> rs = null;
-    rs = query.getResults(ReqCmtLog.class);
-
-    if (rs != null) {
-      document.add(createSubHeader("General Information"));
-      Table reqCmtLog = createDetailsTable();
-
-      reqCmtLog.addCell(createLabelCell("TimeStamp (GMT):"));
-      reqCmtLog.addCell(createLabelCell("Entered By:"));
-      reqCmtLog.addCell(createLabelCell("Comment:", 1, 2));
-      for (ReqCmtLog cmtLog : rs) {
-        SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss");
-        reqCmtLog.addCell(createValueCell(cmtLog.getCreateTs() != null ? sdf.format(cmtLog.getCreateTs()) : ""));
-        reqCmtLog.addCell(createValueCell(cmtLog.getCreateById()));
-        reqCmtLog.addCell(createValueCell(cmtLog.getCmt(), 1, 2));
-      }
-    }
-
   }
 
 }

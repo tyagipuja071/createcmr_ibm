@@ -927,5 +927,4 @@ public class CmrConstants {
       "859");
   public static final List<String> ORDER_BLK_LIST = Arrays.asList("88");
 
-  public static final List<String> BP_GBM_SBM_COUNTRIES = Arrays.asList("620", "677", "680", "767", "805", "823", "832");
 }
