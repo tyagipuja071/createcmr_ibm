@@ -2435,6 +2435,17 @@ function setCTCByScenario(fromAddress, scenario, scenarioChanged) {
     }
   }
 }
+
+function showVatOnLocal(fromAddress, scenario, scenarioChanged) {
+  
+  var custGrp = FormManager.getActualValue('custGrp');
+  if (scenarioChanged && custGrp == 'LOCAL') {
+    cmr.showNode('vatInfo');
+  } else {
+    cmr.hideNode('vatInfo');
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding Israel functions...');
@@ -2505,6 +2516,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addPpsceidValidator, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(validateCMRNumberForLegacy, [ SysLoc.ISRAEL ], GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.addAfterConfig(enableCmrNoForProcessor, [ SysLoc.ISRAEL ]);
+  GEOHandler.addAfterConfig(showVatOnLocal, [ SysLoc.ISRAEL ]);
 
   GEOHandler.addAfterConfig(showHideKuklaField, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterTemplateLoad(showHideKuklaField, [ SysLoc.ISRAEL ]);
@@ -2514,6 +2526,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setSalesRepEnterpriseNoSBO, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterTemplateLoad(lockCMROwner, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterTemplateLoad(setCTCByScenario, [ SysLoc.ISRAEL ]);
+  GEOHandler.addAfterTemplateLoad(showVatOnLocal, [ SysLoc.ISRAEL ]);
 
   GEOHandler.registerValidator(addISICKUKLAValidator, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(addCollectionValidator, [ SysLoc.ISRAEL ], null, true);
