@@ -2057,7 +2057,7 @@ function validateSalesRep() {
           if (modCust != null && modCust != undefined && modCust != '') {
             if (modCust == 'NO' || modCust == 'IBM') {
               if (salesRepInt >= minRange && salesRepInt <= maxRange) {
-                return new ValidationResult(null, false, 'Only ESW IBM WTC IL - IBM business type of MOD scenario can use Sales Rep from range 000220-000239. Please change it.');
+                return new ValidationResult(null, false, 'Only ESW WTC IL - IBM business type of MOD scenario can use Sales Rep from range 000220-000239. Please change it.');
               }
             } else if (modCust == 'WTC') {
               if (salesRepInt < minRange || salesRepInt > maxRange) {
