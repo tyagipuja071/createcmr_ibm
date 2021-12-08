@@ -9,6 +9,8 @@ var _prolifCountries = [ 'AF', 'AM', 'AZ', 'BH', 'BY', 'KH', 'CN', 'CU', 'EG', '
     'SA', 'SD', 'SY', 'TW', 'TJ', 'TM', 'UA', 'AE', 'UZ', 'VE', 'VN', 'YE' ];
 var _requestingLOBHandler = null;
 var _streetHandler = null;
+var _ISUHandler = null;
+
 
 function addHandlersForIL() {
   for (var i = 0; i < _gtcAddrTypesIL.length; i++) {
@@ -39,6 +41,12 @@ function addHandlersForIL() {
       setStreetContBehavior();
     });
   }
+  if (_ISUHandler == null) {
+    _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+      setClientTierValue(value);
+   });
+  }
+} 
 
   if (_SubindustryHandlerIL == null) {
     _SubindustryHandlerIL = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
@@ -47,6 +55,20 @@ function addHandlersForIL() {
   }
 }
 
+function setClientTierValue(value) {
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  if (value ==  null) {
+    var value = FormManager.getActualValue('isuCd');
+  }
+  if (value == '5K') {
+    FormManager.clearValue('clientTier');
+    FormManager.disable('clientTier');
+    FormManager.resetValidations('clientTier');
+  } else {
+    FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'clientTier' ], 'MAIN_CUST_TAB');
+    FormManager.enable('clientTier');
+  }
+}
 function addEMEALandedCountryHandler(cntry, addressMode, saving, finalSave) {
   var scenario = FormManager.getActualValue('custGrp');
   if (!saving) {
@@ -284,6 +306,51 @@ function requireCtcByISU(value) {
     FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
   } else {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
+  }
+}
+
+function addILClientTierISULogic() {
+  var reqType = null;
+  reqType = FormManager.getActualValue('reqType');
+  _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+    if (!value) {
+      value = FormManager.getActualValue('isuCd');
+    }
+    if (!value) {
+      FormManager.setValue('clientTier', '');
+    }
+    if (value == '5K') {
+      FormManager.clearValue('clientTier');
+      FormManager.disable('clientTier');
+      FormManager.resetValidations('clientTier');
+    } else {
+      FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'clientTier' ], 'MAIN_CUST_TAB');
+      FormManager.enable('clientTier');
+    }
+  if (reqType != 'C') {
+    return;
+  }
+  if (!PageManager.isReadOnly()) {
+    FormManager.enable('clientTier');
+  }
+
+    var tierValues = null;
+    if (value == '32') {
+      tierValues = [ 'B', 'M', 'N', 'S', 'Z' ];
+    } else if (value == '34') {
+      tierValues = [ '4', '6', 'A', 'E', 'Q', 'V', 'Y', 'Z' ];
+    } else if (value != '') {
+      tierValues = [ '7', 'Z' ];
+    }
+
+    if (tierValues != null) {
+      FormManager.limitDropdownValues(FormManager.getField('clientTier'), tierValues);
+    } else {
+      FormManager.resetDropdownValues(FormManager.getField('clientTier'));
+    }
+  });
+  if (_ISUHandler && _ISUHandler[0]) {
+    _ISUHandler[0].onChange();
   }
 }
 
@@ -2202,6 +2269,12 @@ function setEnterpriseSalesRepSBO(isuCd, clientTier) {
 
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
+
+  if (isuCd != "34") {
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+  } else {
+    checkAndAddValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ]);
+  }
   
   if (isuCd == '34' && clientTier == 'Q') {
     FormManager.setValue('enterprise', '006510');
@@ -2675,4 +2748,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setStreetContBehavior, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(requireSalesRepEnterpriseSBOByRole, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(lockCMROwner, [ SysLoc.ISRAEL ]);
+  GEOHandler.addAfterConfig(setClientTierValue, [ SysLoc.ISRAEL ]);
+  GEOHandler.addAfterTemplateLoad(setClientTierValue, [ SysLoc.ISRAEL ]);
+  GEOHandler.addAfterTemplateLoad(addILClientTierISULogic, [ SysLoc.ISRAEL ]);
 });
