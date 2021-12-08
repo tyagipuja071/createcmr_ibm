@@ -2104,7 +2104,7 @@ function setEnterpriseSalesRepSBO(_clientTier) {
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
 
-  if (isuCd != "34") {
+  if (isuCd != '' & isuCd != "34") {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
   } else {
     checkAndAddValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ]);
@@ -2407,7 +2407,7 @@ function setCTCByScenario(fromAddress, scenario, scenarioChanged) {
   }
   var isuCd = FormManager.getActualValue('isuCd');
   
-  if (isuCd != "34") {
+  if (isuCd != '' & isuCd != "34") {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
   } else {
     checkAndAddValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ]);
@@ -2420,12 +2420,16 @@ function setCTCByScenario(fromAddress, scenario, scenarioChanged) {
       FormManager.setValue('clientTier', 'Q');
     } else if (custType == 'BUSPR') {
       FormManager.setValue('clientTier', '');
+      FormManager.readOnly('clientTier');
     } else if (custType == 'INTER') {
       FormManager.setValue('clientTier', '');
+      FormManager.readOnly('clientTier');
     } else if (custType == 'INTSO') {
       FormManager.setValue('clientTier', '');
+      FormManager.readOnly('clientTier');
     } else if (custType == 'PRIPE') {
       FormManager.setValue('clientTier', 'Q');
+      FormManager.readOnly('clientTier');
     } else if (custType == 'GOVRN') {
       FormManager.setValue('clientTier', 'Q');
     } else if (custType == 'THDPT') {
