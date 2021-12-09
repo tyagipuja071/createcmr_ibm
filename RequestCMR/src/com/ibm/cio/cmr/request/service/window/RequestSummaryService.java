@@ -108,10 +108,6 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
     try {
       List<UpdatedNameAddrModel> results = new ArrayList<UpdatedNameAddrModel>();
 
-      // 1 Query request country
-      // 2 if Israel query mismatch
-      // 3 loop query1 and update imporInd to L
-
       String sql = ExternalizedQuery.getSql("SUMMARY.NAMEADDR");
       PreparedQuery query = new PreparedQuery(entityManager, sql);
       query.setParameter("REQ_ID", reqId);
