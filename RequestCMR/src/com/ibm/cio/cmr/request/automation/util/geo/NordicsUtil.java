@@ -642,4 +642,8 @@ public class NordicsUtil extends AutomationUtil {
     return mapper.readValue(json, ref);
   }
 
+  @Override
+  public List<String> getSkipChecksRequestTypesforCMDE() {
+    return Arrays.asList("C", "U", "M", "D", "R");
+  }
 }
