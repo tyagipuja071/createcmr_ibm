@@ -263,9 +263,6 @@ function addILClientTierISULogic() {
   if (reqType != 'C') {
     return;
   }
-  if (!PageManager.isReadOnly()) {
-    FormManager.enable('clientTier');
-  }
   _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
     if (!value) {
       value = FormManager.getActualValue('isuCd');
