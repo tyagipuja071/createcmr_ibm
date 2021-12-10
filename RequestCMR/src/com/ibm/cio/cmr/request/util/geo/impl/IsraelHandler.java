@@ -1368,6 +1368,11 @@ public class IsraelHandler extends EMEAHandler {
         if (StringUtils.isNotBlank(embargoCode) && !(Arrays.asList(embargoCodes).contains(embargoCode))) {
           error.addError(rowIndex, "<br>Embargo Code", "Invalid Embargo Code. Only D, J and @ are valid.");
         }
+        // Client Tier
+        String ctc = validateColValFromCell(row.getCell(11));
+        if (StringUtils.isNotBlank(ctc) && (!"Q".equals(ctc) && !"Y".equals(ctc) && !"@".equals(ctc))) {
+          error.addError(rowIndex, "<br>Client Tier", "Invalid Client Tier. Only uppercase Q, Y and @ are valid.");
+        }
         // INAC/NAC
         String inac = validateColValFromCell(row.getCell(14));
         if (StringUtils.isNotBlank(inac) && StringUtils.isAlphanumeric(inac)) {

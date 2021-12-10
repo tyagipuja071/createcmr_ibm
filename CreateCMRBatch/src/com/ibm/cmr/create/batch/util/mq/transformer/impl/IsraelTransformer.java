@@ -835,6 +835,21 @@ public class IsraelTransformer extends EMEATransformer {
     if (StringUtils.isNotBlank(muData.getIsuCd())) {
       cust.setIsuCd(muData.getIsuCd());
     }
+    // Client Tier
+    String ctc = muData.getClientTier();
+    if (StringUtils.isNotBlank(ctc)) {
+      String isuCd = cust.getIsuCd();
+      if (StringUtils.isNotBlank(isuCd)) {
+        if (isuCd.length() == 3) {
+          isuCd = StringUtils.substring(isuCd, 0, 2);
+        }
+        if ("@".equals(ctc)) {
+          cust.setIsuCd(isuCd.concat("7"));
+        } else {
+          cust.setIsuCd(isuCd.concat(ctc));
+        }
+      }
+    }
     // Enterprise Number
     if (StringUtils.isNotBlank(muData.getEnterprise())) {
       cust.setEnterpriseNo(muData.getEnterprise());
