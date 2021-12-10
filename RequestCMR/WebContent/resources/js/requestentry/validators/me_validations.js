@@ -1979,7 +1979,9 @@ function setTelecoverageRep() {
   }
   var custGrp = FormManager.getActualValue('custGrp');
   if (custGrp != null && (custGrp == 'GBM' || custGrp == 'SBM')) {
-    FormManager.addValidator('bpSalesRepNo', Validators.REQUIRED, [ 'Tele-coverage rep.' ], 'MAIN_CUST_TAB');
+    if (FormManager.getActualValue('cmrIssuingCntry') != '832') {
+      FormManager.addValidator('bpSalesRepNo', Validators.REQUIRED, [ 'Tele-coverage rep.' ], 'MAIN_CUST_TAB');
+    }
     FormManager.addValidator('bpSalesRepNo', Validators.DIGIT, [ 'Tele-coverage rep.' ], 'MAIN_CUST_TAB');
     FormManager.addValidator('bpSalesRepNo', validTeleCoverageRep6Length, [ 'Tele-coverage rep.' ], 'MAIN_CUST_TAB');
     FormManager.show('TeleCoverageRep', 'bpSalesRepNo');
