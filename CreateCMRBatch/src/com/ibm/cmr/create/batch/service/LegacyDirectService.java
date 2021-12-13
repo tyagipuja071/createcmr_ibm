@@ -1568,6 +1568,9 @@ public class LegacyDirectService extends TransConnService {
     boolean zs01Updated = false;
     String zs01SeqNo = null;
 
+    boolean ctyaUpdated = false;
+    String ctyaSeqNo = null;
+
     Map<String, Integer> sequences = new HashMap<String, Integer>();
     for (Addr addr : cmrObjects.getAddresses()) {
       if ("ZS01".equals(addr.getId().getAddrType())) {
@@ -1575,11 +1578,23 @@ public class LegacyDirectService extends TransConnService {
 
         zs01Updated = "Y".equals(addr.getChangedIndc());
       }
+
+      if (SystemLocation.ISRAEL.equals(data.getCmrIssuingCntry()) && "CTYA".equals(addr.getId().getAddrType())) {
+        ctyaSeqNo = addr.getId().getAddrSeq();
+        ctyaUpdated = "Y".equals(addr.getChangedIndc());
+      }
+
       if (!sequences.containsKey(addr.getId().getAddrSeq())) {
         sequences.put(addr.getId().getAddrSeq(), 0);
       }
       sequences.put(addr.getId().getAddrSeq(), sequences.get(addr.getId().getAddrSeq()) + 1);
     }
+
+    if (SystemLocation.ISRAEL.equals(data.getCmrIssuingCntry()) && (zs01Updated || ctyaUpdated)) {
+      zs01Updated = true;
+      ctyaUpdated = true;
+    }
+
     LOG.debug("Sequences : " + sequences);
 
     Queue<Integer> availableSequences = new LinkedList<Integer>();
@@ -1626,11 +1641,19 @@ public class LegacyDirectService extends TransConnService {
 
         addrUpdated = "N".equals(addr.getImportInd()) || "Y".equals(addr.getChangedIndc());
 
+        boolean isSharedWithSoldToPairIL = SystemLocation.ISRAEL.equals(data.getCmrIssuingCntry()) && ctyaUpdated
+            && ctyaSeqNo.equals(addr.getId().getAddrSeq());
+
+        if (SystemLocation.ISRAEL.equals(data.getCmrIssuingCntry()) && !addrUpdated) {
+          addrUpdated = isAddrPairUpdatedIL(addr, cmrObjects.getAddresses());
+        }
+
         // address was directly updated, or was not updated and shares sequence
         // with sold to
-        if (addrUpdated || (zs01Updated && zs01SeqNo.equals(addr.getId().getAddrSeq()))) {
+        if (addrUpdated || (zs01Updated && zs01SeqNo.equals(addr.getId().getAddrSeq()) || isSharedWithSoldToPairIL)) {
 
-          if ("ZS01".equals(addr.getId().getAddrType())) {
+          boolean isSoldToPairIL = SystemLocation.ISRAEL.equals(data.getCmrIssuingCntry()) && "CTYA".equals(addr.getId().getAddrType());
+          if ("ZS01".equals(addr.getId().getAddrType()) || isSoldToPairIL) {
             LOG.debug("ZS01 address is updated, directly updating relevant records");
             // zs01 addresses should not change sequence, move everything else
             // Mukesh:Story 1698123
@@ -1885,6 +1908,57 @@ public class LegacyDirectService extends TransConnService {
     }
 
     return legacyObjects;
+  }
+
+  private boolean isAddrPairUpdatedIL(Addr currentAddr, List<Addr> addrList) {
+    String[] transAddrTypes = { "CTYA", "CTYB", "CTYC" };
+    String[] localAddrTypes = { "ZS01", "ZP01", "ZD01" };
+    String pairType = getAddrPairTypeIL(currentAddr.getId().getAddrType());
+    String curAddrType = currentAddr.getId().getAddrType();
+    String pairedAddrSeq = null;
+    String addrSeq = null;
+    for (Addr addr : addrList) {
+      if (pairType.equals(addr.getId().getAddrType())) {
+        if (Arrays.asList(localAddrTypes).contains(curAddrType)) {
+
+          pairedAddrSeq = formatAddrSeqLDStyle(addr.getPairedAddrSeq());
+          addrSeq = formatAddrSeqLDStyle(currentAddr.getId().getAddrSeq());
+
+        } else if (Arrays.asList(transAddrTypes).contains(curAddrType)) {
+
+          pairedAddrSeq = formatAddrSeqLDStyle(currentAddr.getPairedAddrSeq());
+          addrSeq = formatAddrSeqLDStyle(addr.getId().getAddrSeq());
+
+        }
+        if (addrSeq.equals(pairedAddrSeq)) {
+          return "Y".equals(addr.getChangedIndc());
+        }
+      }
+    }
+    return false;
+  }
+
+  private String formatAddrSeqLDStyle(String addrSeq) {
+    return addrSeq.replaceFirst("^0*", "");
+  }
+
+  private String getAddrPairTypeIL(String addrType) {
+    switch (addrType) {
+    case "ZS01":
+      return "CTYA";
+    case "ZP01":
+      return "CTYB";
+    case "ZD01":
+      return "CTYC";
+    case "CTYA":
+      return "ZS01";
+    case "CTYB":
+      return "ZP01";
+    case "CTYC":
+      return "ZD01";
+    default:
+      return "";
+    }
   }
 
   private void blankOrdBlockFromData(EntityManager entityManager, Data data) {
