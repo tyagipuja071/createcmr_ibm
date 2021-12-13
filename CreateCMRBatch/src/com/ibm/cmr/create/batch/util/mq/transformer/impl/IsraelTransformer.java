@@ -220,8 +220,6 @@ public class IsraelTransformer extends EMEATransformer {
       legacyCust.setSalesGroupRep(data.getRepTeamMemberNo());
     }
 
-    legacyCust.getId().setSofCntryCode(SystemLocation.SAP_ISRAEL_SOF_ONLY);
-
     legacyCust.setEconomicCd("");
 
   }
@@ -354,7 +352,6 @@ public class IsraelTransformer extends EMEATransformer {
     LOG.debug("LD - transformLegacyAddressData ISRAEL transformer...");
 
     formatAddressLinesLD(dummyHandler, legacyAddr);
-    legacyAddr.getId().setSofCntryCode(SystemLocation.SAP_ISRAEL_SOF_ONLY);
 
     String addrType = currAddr.getId().getAddrType();
     if (Arrays.asList(LOCAL_LANG_ADDR).contains(addrType)) {

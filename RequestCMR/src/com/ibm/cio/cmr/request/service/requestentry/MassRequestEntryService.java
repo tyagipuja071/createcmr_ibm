@@ -792,17 +792,11 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       // those are already in rdc, skip them
       extAddrQuery.append("and ADDRNO not in (" + sequences.toString() + ")");
     }
-    if (cmrCntry.equals("755")) {
-      cmrCntry = "756";
-    }
     extAddrQuery.setParameter("CNTRY", cmrCntry);
     extAddrQuery.setParameter("CMR_NO", cmrNo);
     extAddrQuery.setForReadOnly(true);
     List<CmrtAddr> addresses = extAddrQuery.getResults(CmrtAddr.class);
     List<FindCMRRecordModel> extAddresses = new ArrayList<FindCMRRecordModel>();
-    if (cmrCntry.equals("756")) {
-      cmrCntry = "755";
-    }
     if (addresses != null && !addresses.isEmpty()) {
       for (CmrtAddr addr : addresses) {
         FindCMRRecordModel rec = new FindCMRRecordModel();
