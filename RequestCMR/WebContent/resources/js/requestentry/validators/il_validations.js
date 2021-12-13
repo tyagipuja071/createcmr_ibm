@@ -2293,15 +2293,15 @@ function getAddrMismatchInUpdateMsg() {
         updateInd = updateInd[0];
       }
       if ((type == 'ZS01' || type == 'ZP01' || type == 'ZD01')) {
-        allLocalAddrMap.set(record.addrSeq[0], record);
+        allLocalAddrMap.set(record.addrSeq[0].padStart(5, '0'), record);
         if(updateInd == 'U') {
-          updatedLocalAddrs.push(record.addrSeq[0]);  
+          updatedLocalAddrs.push(record.addrSeq[0].padStart(5, '0'));  
         }
       } else if ((type == 'CTYA' || type == 'CTYB' || type == 'CTYC')) {
-        allTransAddrsMap.set(record.pairedSeq[0], record);
-        allTransAddrsMap.set(record.addrSeq[0], record);
+        allTransAddrsMap.set(record.pairedSeq[0].padStart(5, '0'), record);
+        allTransAddrsMap.set(record.addrSeq[0].padStart(5, '0'), record);
         if(updateInd == 'U') {
-          updatedTransAddrsPair.push(record.pairedSeq[0]);  
+          updatedTransAddrsPair.push(record.pairedSeq[0].padStart(5, '0'));  
         }
       }
     }

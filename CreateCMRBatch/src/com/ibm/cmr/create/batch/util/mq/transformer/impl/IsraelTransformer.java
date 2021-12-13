@@ -5,7 +5,6 @@ package com.ibm.cmr.create.batch.util.mq.transformer.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -50,12 +49,8 @@ public class IsraelTransformer extends EMEATransformer {
 
   private static final String[] ADDRESS_ORDER = { "ZS01", "ZP01", "ZI01", "ZD01", "ZS02", "CTYA", "CTYB", "CTYC" };
 
-  private static final String[] LOCAL_LANG_ADDR = { "ZS01", "ZP01", "ZD01" };
-
-  private Map<String, String> pairedSeqVal = new HashMap<>();
-
-  private static final String MAIL_KEY = "ADDRMAIL";
-  private static final String BILL_KEY = "ADDRBILL";
+  private static final String[] TRANS_ADDRS = { "CTYA", "CTYB", "CTYC" };
+  private static final String SPLIT_MARKER = "SPLIT";
 
   private static final String CMR_REQUEST_REASON_TEMP_REACT_EMBARGO = "TREC";
   private static final String CMR_REQUEST_STATUS_CPR = "CPR";
@@ -366,20 +361,23 @@ public class IsraelTransformer extends EMEATransformer {
     formatAddressLinesLD(dummyHandler, legacyAddr);
 
     String addrType = currAddr.getId().getAddrType();
-    if (Arrays.asList(LOCAL_LANG_ADDR).contains(addrType)) {
-      if ("ZS01".equals(addrType)) {
-        pairedSeqVal.put(MAIL_KEY, legacyAddr.getId().getAddrNo());
-      } else if ("ZP01".equals(addrType)) {
-        pairedSeqVal.put(BILL_KEY, legacyAddr.getId().getAddrNo());
+    boolean isUpdate = "U".equals(cmrObjects.getAdmin().getReqType());
+    boolean isNewPairedCreateReq = !isUpdate && Arrays.asList(TRANS_ADDRS).contains(addrType);
+    boolean isNewPairedUpdateReq = isUpdate && Arrays.asList(TRANS_ADDRS).contains(addrType) && ("N".equals(currAddr.getImportInd()));
+
+    if (isNewPairedCreateReq || isNewPairedUpdateReq) {
+      legacyAddr.setAddrLineO(currAddr.getPairedAddrSeq());
+
+      if (!isUpdate) {
+        if ("CTYA".equals(addrType)) {
+          legacyAddr.setAddrLineO("00001");
+        } else if ("CTYB".equals(addrType)) {
+          legacyAddr.setAddrLineO("00002");
+        }
       }
-    } else if ("CTYC".equals(addrType)) {
-      boolean isUpdate = "U".equals(cmrObjects.getAdmin().getReqType());
-      // Assign addl shipping in Create request and only for new addresses in
-      // Update
-      // request
-      if (!isUpdate || (isUpdate && "N".equals(currAddr.getImportInd()))) {
-        legacyAddr.setAddrLineO(currAddr.getPairedAddrSeq());
-      }
+
+    } else if (isUpdate && !"N".equals(currAddr.getImportInd()) && legacyAddr.isForCreate() && Arrays.asList(TRANS_ADDRS).contains(addrType)) {
+      legacyAddr.setAddrLineO(SPLIT_MARKER);
     }
   }
 
@@ -771,24 +769,93 @@ public class IsraelTransformer extends EMEATransformer {
 
   @Override
   public void transformOtherData(EntityManager entityManager, LegacyDirectObjectContainer legacyObjects, CMRRequestContainer cmrObjects) {
-
+    boolean isUpdate = "U".equals(cmrObjects.getAdmin().getReqType());
     // Do not execute for mass update
     if (cmrObjects != null && cmrObjects.getAdmin() != null && StringUtils.isNotEmpty(cmrObjects.getAdmin().getReqType())
         && !"M".equals(cmrObjects.getAdmin().getReqType())) {
-      List<CmrtAddr> legacyAddrList = legacyObjects.getAddresses();
-      for (CmrtAddr addr : legacyAddrList) {
-        String pairedSeq = "";
-        if ("Y".equals(addr.getIsAddressUseA())) {
-          pairedSeq = pairedSeqVal.get(MAIL_KEY);
-        } else if ("Y".equals(addr.getIsAddressUseB())) {
-          pairedSeq = pairedSeqVal.get(BILL_KEY);
-        }
 
-        if (!"Y".equals(addr.getIsAddressUseC())) {
-          addr.setAddrLineO(pairedSeq);
-        }
+      if (isUpdate) {
+        List<CmrtAddr> legacyAddrList = legacyObjects.getAddresses();
+        setAddrlOSharedSplit(legacyAddrList);
       }
     }
+  }
+
+  private void setAddrlOSharedSplit(List<CmrtAddr> legacyAddrList) {
+    String mailingSeq = "";
+    String billingSeq = "";
+    String shippingSeq = "";
+    boolean soldToUpdated = false;
+    for (CmrtAddr addr : legacyAddrList) {
+      if (isAddrsSharedSeq(addr)) {
+        continue;
+      }
+
+      // Note: Local addrs comes before the translated addrs -- see
+      // getAddressOrder for the address order
+      if ("Y".equals(addr.getIsAddrUseMailing())) {
+        mailingSeq = addr.getId().getAddrNo();
+      } else if ("Y".equals(addr.getIsAddrUseBilling())) {
+        billingSeq = addr.getId().getAddrNo();
+      } else if ("Y".equals(addr.getIsAddrUseShipping())) {
+        shippingSeq = addr.getId().getAddrNo();
+      } else if ("Y".equals(addr.getIsAddressUseA()) && SPLIT_MARKER.equals(addr.getAddrLineO())) {
+        addr.setAddrLineO(mailingSeq);
+        soldToUpdated = true;
+      } else if ("Y".equals(addr.getIsAddressUseB()) && (SPLIT_MARKER.equals(addr.getAddrLineO()) || soldToUpdated)) {
+        addr.setAddrLineO(billingSeq);
+      } else if ("Y".equals(addr.getIsAddressUseC()) && (SPLIT_MARKER.equals(addr.getAddrLineO()) || soldToUpdated)) {
+        addr.setAddrLineO(shippingSeq);
+      }
+    }
+  }
+
+  private boolean isAddrsSharedSeq(CmrtAddr legacyAddr) {
+
+    int yFlags = countYFlags(legacyAddr);
+    if (yFlags > 1) {
+      return true;
+    }
+
+    return false;
+  }
+
+  private int countYFlags(CmrtAddr addr) {
+    int count = 0;
+
+    if ("Y".equals(addr.getIsAddrUseMailing())) {
+      count++;
+    }
+
+    if ("Y".equals(addr.getIsAddrUseBilling())) {
+      count++;
+    }
+
+    if ("Y".equals(addr.getIsAddrUseInstalling())) {
+      count++;
+    }
+
+    if ("Y".equals(addr.getIsAddrUseShipping())) {
+      count++;
+    }
+
+    if ("Y".equals(addr.getIsAddrUseEPL())) {
+      count++;
+    }
+
+    if ("Y".equals(addr.getIsAddressUseA())) {
+      count++;
+    }
+
+    if ("Y".equals(addr.getIsAddressUseB())) {
+      count++;
+    }
+
+    if ("Y".equals(addr.getIsAddressUseC())) {
+      count++;
+    }
+
+    return count;
   }
 
   @Override

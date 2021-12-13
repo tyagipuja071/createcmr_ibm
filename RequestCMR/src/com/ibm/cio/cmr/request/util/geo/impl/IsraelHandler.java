@@ -204,8 +204,8 @@ public class IsraelHandler extends EMEAHandler {
                       record.setCmrCustPhone(mainRecord.getCmrCustPhone());
                     }
 
-                    converted.add(mapEnglishAddr(addr, legacyAddr));
-                    converted.add(mapLocalLanguageAddr(record, legacyAddr));
+                    converted.add(mapEnglishAddr(addr, legacyAddr, addrType));
+                    converted.add(mapLocalLanguageAddr(record, legacyAddr, addrType));
 
                   } else {
                     converted.add(addr);
@@ -288,7 +288,7 @@ public class IsraelHandler extends EMEAHandler {
   private boolean isLegacyAddrInRdc(String addrNo, List<FindCMRRecordModel> converted) {
     if (converted != null && converted.size() > 0) {
       for (FindCMRRecordModel findCMRRecordModel : converted) {
-        if (addrNo.equals(findCMRRecordModel.getCmrAddrSeq())) {
+        if (addrNo.equals(String.format("%05d", Integer.parseInt(findCMRRecordModel.getCmrAddrSeq())))) {
           return true;
         }
       }
@@ -307,8 +307,7 @@ public class IsraelHandler extends EMEAHandler {
     return null;
   }
 
-  // TODO: Local language mapping - waiting for final rdc sadr mapping
-  private FindCMRRecordModel mapLocalLanguageAddr(FindCMRRecordModel record, CmrtAddr legacyAddr)
+  private FindCMRRecordModel mapLocalLanguageAddr(FindCMRRecordModel record, CmrtAddr legacyAddr, String addrType)
       throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
     FindCMRRecordModel localLangAddr = new FindCMRRecordModel();
     PropertyUtils.copyProperties(localLangAddr, record);
@@ -317,16 +316,21 @@ public class IsraelHandler extends EMEAHandler {
     localLangAddr.setCmrStreetAddress(record.getCmrIntlAddress());
     localLangAddr.setCmrStreetAddressCont(record.getCmrIntlName3());
     localLangAddr.setCmrCity(record.getCmrIntlCity1());
+    localLangAddr.setCmrAddrTypeCode(addrType);
 
     return localLangAddr;
   }
 
   private FindCMRRecordModel mapEnglishAddr(FindCMRRecordModel addr, CmrtAddr legacyAddr) {
-    if ("ZS01".equals(addr.getCmrAddrTypeCode())) {
+    return mapEnglishAddr(addr, legacyAddr, "ZS01");
+  }
+
+  private FindCMRRecordModel mapEnglishAddr(FindCMRRecordModel addr, CmrtAddr legacyAddr, String addrType) {
+    if ("ZS01".equals(addrType)) {
       addr.setCmrAddrTypeCode("CTYA");
-    } else if ("ZP01".equals(addr.getCmrAddrTypeCode())) {
+    } else if ("ZP01".equals(addrType)) {
       addr.setCmrAddrTypeCode("CTYB");
-    } else if ("ZD01".equals(addr.getCmrAddrTypeCode())) {
+    } else if ("ZD01".equals(addrType)) {
       addr.setCmrAddrTypeCode("CTYC");
     }
 
@@ -337,7 +341,8 @@ public class IsraelHandler extends EMEAHandler {
   }
 
   private CmrtAddr getLegacyAddrByAddrPair(List<CmrtAddr> legacyAddrList, String pairedAddrSeq) {
-    CmrtAddr legacyAddr = legacyAddrList.stream().filter(a -> pairedAddrSeq.equals(a.getAddrLineO())).findAny().orElse(null);
+    String pairedSeq = String.format("%05d", Integer.parseInt(pairedAddrSeq));
+    CmrtAddr legacyAddr = legacyAddrList.stream().filter(a -> pairedSeq.equals(a.getAddrLineO())).findAny().orElse(null);
     return legacyAddr;
   }
 
@@ -476,12 +481,18 @@ public class IsraelHandler extends EMEAHandler {
           if (salesRepInt >= minRange && salesRepInt <= maxRange) {
             reservedSrep = true;
           }
-          if (realcity.equals("755") && bankNo.substring(0, 1).equals("0") && !reservedSrep) {
+          if (StringUtils.isNotBlank(bankNo)) {
+            if (realcity.equals("755") && bankNo.substring(0, 1).equals("0") && !reservedSrep) {
+              data.setMiscBillCd("NO");
+            } else if (realcity.equals("756") && bankNo.substring(0, 1).equals("9") && !reservedSrep) {
+              data.setMiscBillCd("IBM");
+            } else if (realcity.equals("756") && bankNo.substring(0, 1).equals("0") && reservedSrep) {
+              data.setMiscBillCd("WTC");
+            } else {
+              data.setMiscBillCd("NO");
+            }
+          } else {
             data.setMiscBillCd("NO");
-          } else if (realcity.equals("756") && bankNo.substring(0, 1).equals("9") && !reservedSrep) {
-            data.setMiscBillCd("IBM");
-          } else if (realcity.equals("756") && bankNo.substring(0, 1).equals("0") && reservedSrep) {
-            data.setMiscBillCd("WTC");
           }
         }
       }
