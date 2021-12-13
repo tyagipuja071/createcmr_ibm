@@ -77,9 +77,6 @@ public abstract class BaseSOFHandler extends GEOHandler {
       if (!CmrConstants.REQ_TYPE_CREATE.equals(reqEntry.getReqType())) {
         String cmrCountry = mainRecord.getCmrIssuedBy();
         // have to put ISRAEL specific logic here, no other way
-        if (SystemLocation.SAP_ISRAEL_SOF_ONLY.equals(cmrCountry)) {
-          cmrCountry = SystemLocation.ISRAEL;
-        }
         converted = assignSOFSequencesAndCleanRecords(converted, cmrCountry);
       }
 
@@ -140,9 +137,6 @@ public abstract class BaseSOFHandler extends GEOHandler {
     if (SystemLocation.IRELAND.equals(cmrIssuingCntry)) {
       // for Ireland, also query from 866
       cmrIssuingCntry = SystemLocation.UNITED_KINGDOM;
-    }
-    if (SystemLocation.ISRAEL.equals(cmrIssuingCntry)) {
-      cmrIssuingCntry = SystemLocation.SAP_ISRAEL_SOF_ONLY;
     }
     String cmrNo = mainRecord.getCmrNum();
 
@@ -546,9 +540,6 @@ public abstract class BaseSOFHandler extends GEOHandler {
     if (SystemLocation.IRELAND.equals(cmrIssuingCntry)) {
       // for Ireland, also query from 866
       cmrIssuingCntry = SystemLocation.UNITED_KINGDOM;
-    }
-    if (SystemLocation.ISRAEL.equals(cmrIssuingCntry)) {
-      cmrIssuingCntry = SystemLocation.SAP_ISRAEL_SOF_ONLY;
     }
     String cmrNo = mainRecord.getCmrNum();
     SOFQueryRequest request = new SOFQueryRequest();

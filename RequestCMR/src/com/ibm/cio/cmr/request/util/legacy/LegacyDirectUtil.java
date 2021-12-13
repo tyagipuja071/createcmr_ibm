@@ -157,9 +157,6 @@ public class LegacyDirectUtil {
       // for Ireland, also query from 866
       cmrIssuingCntry = SystemLocation.UNITED_KINGDOM;
     }
-    if (SystemLocation.ISRAEL.equals(cmrIssuingCntry)) {
-      cmrIssuingCntry = SystemLocation.SAP_ISRAEL_SOF_ONLY;
-    }
 
     LegacyDirectObjectContainer legacyObjects = new LegacyDirectObjectContainer();
 
@@ -182,9 +179,6 @@ public class LegacyDirectUtil {
     if (SystemLocation.IRELAND.equals(cmrIssuingCntry)) {
       // for Ireland, also query from 866
       cmrIssuingCntry = SystemLocation.UNITED_KINGDOM;
-    }
-    if (SystemLocation.ISRAEL.equals(cmrIssuingCntry)) {
-      cmrIssuingCntry = SystemLocation.SAP_ISRAEL_SOF_ONLY;
     }
 
     LegacyDirectObjectContainer legacyObjects = new LegacyDirectObjectContainer();
@@ -378,9 +372,6 @@ public class LegacyDirectUtil {
     if (SystemLocation.IRELAND.equals(cmrIssuingCntry)) {
       // for Ireland, also query from 866
       cmrIssuingCntry = SystemLocation.UNITED_KINGDOM;
-    }
-    if (SystemLocation.ISRAEL.equals(cmrIssuingCntry)) {
-      cmrIssuingCntry = SystemLocation.SAP_ISRAEL_SOF_ONLY;
     }
 
     LegacyDirectObjectContainer legacyObjects = new LegacyDirectObjectContainer();
@@ -720,9 +711,6 @@ public class LegacyDirectUtil {
       // for Ireland, also query from 866
       cmrIssuingCntry = SystemLocation.UNITED_KINGDOM;
     }
-    if (SystemLocation.ISRAEL.equals(cmrIssuingCntry)) {
-      cmrIssuingCntry = SystemLocation.SAP_ISRAEL_SOF_ONLY;
-    }
 
     LegacyDirectObjectContainer legacyObjects = new LegacyDirectObjectContainer();
 
@@ -747,9 +735,6 @@ public class LegacyDirectUtil {
     if (SystemLocation.IRELAND.equals(cmrIssuingCntry)) {
       // for Ireland, also query from 866
       cmrIssuingCntry = SystemLocation.UNITED_KINGDOM;
-    }
-    if (SystemLocation.ISRAEL.equals(cmrIssuingCntry)) {
-      cmrIssuingCntry = SystemLocation.SAP_ISRAEL_SOF_ONLY;
     }
 
     String sql = ExternalizedQuery.getSql("LEGACYD.GETADDR_FISCAL");
@@ -1246,9 +1231,6 @@ public class LegacyDirectUtil {
     if (SystemLocation.IRELAND.equals(cmrIssuingCntry)) {
       // for Ireland, also query from 866
       cmrIssuingCntry = SystemLocation.UNITED_KINGDOM;
-    }
-    if (SystemLocation.ISRAEL.equals(cmrIssuingCntry)) {
-      cmrIssuingCntry = SystemLocation.SAP_ISRAEL_SOF_ONLY;
     }
 
     LegacyDirectObjectContainer legacyObjects = new LegacyDirectObjectContainer();
