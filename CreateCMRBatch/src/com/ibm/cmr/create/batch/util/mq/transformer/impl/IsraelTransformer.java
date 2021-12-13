@@ -751,9 +751,6 @@ public class IsraelTransformer extends EMEATransformer {
     String custSubGrp = data.getCustSubGrp();
     LOG.debug("Set max and min range For IL...");
     String loc1 = generateCMRNoObj.getLoc1();
-    if (loc1.equals("755")) {
-      generateCMRNoObj.setLoc1("756");
-    }
     if (custSubGrp != null && ("INTER".equals(custSubGrp) || "INTSO".equals(custSubGrp))) {
       generateCMRNoObj.setMin(990000);
       generateCMRNoObj.setMax(999999);
@@ -1049,6 +1046,11 @@ public class IsraelTransformer extends EMEATransformer {
     if (addrRdc != null) {
       return false;
     }
+    return true;
+  }
+
+  @Override
+  public boolean skipCreditCodeUpdateForCountry() {
     return true;
   }
 
