@@ -28,6 +28,8 @@ function addHandlersForIL() {
 
   if (_ISUHandlerIL == null) {
     _ISUHandlerIL = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+      limitClientTierValues(value);
+      requireCtcByISU(value);
       setEnterpriseSalesRepSBO(value);
     });
   }
@@ -62,6 +64,7 @@ var _addrTypesIL = [ 'ZS01', 'ZP01', 'ZI01', 'ZD01', 'ZS02', 'CTYA', 'CTYB', 'CT
 var _addrTypeHandler = [];
 function afterConfigForIsrael() {
   // addrType Handler
+  limitClientTierValues();
   for (var i = 0; i < _addrTypesIL.length; i++) {
     _addrTypeHandler[i] = null;
     if (_addrTypeHandler[i] == null) {
@@ -257,20 +260,16 @@ function validateEMEACopy(addrType, arrayOfTargetTypes) {
   return null;
 }
 
-function addILClientTierISULogic() {
-  var reqType = null;
-  reqType = FormManager.getActualValue('reqType');
-  if (reqType != 'C') {
-    return;
+function limitClientTierValues(value) {
+  var reqType = FormManager.getActualValue('reqType');
+  
+  if (!value) {
+    value = FormManager.getActualValue('isuCd');
   }
-  _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
-    if (!value) {
-      value = FormManager.getActualValue('isuCd');
-    }
-    if (!value) {
-      FormManager.setValue('clientTier', '');
-    }
-    var tierValues = null;
+
+  var tierValues = null;
+  
+  if (reqType == 'C') {
     if (value == '32') {
       tierValues = [ 'B', 'M', 'N', 'S', 'Z' ];
     } else if (value == '34') {
@@ -278,15 +277,29 @@ function addILClientTierISULogic() {
     } else if (value != '') {
       tierValues = [ '7', 'Z' ];
     }
+  }
+  if (tierValues != null) {
+    FormManager.limitDropdownValues(FormManager.getField('clientTier'), tierValues);
+  } else {
+    FormManager.resetDropdownValues(FormManager.getField('clientTier'));
+  }  
+}
 
-    if (tierValues != null) {
-      FormManager.limitDropdownValues(FormManager.getField('clientTier'), tierValues);
-    } else {
-      FormManager.resetDropdownValues(FormManager.getField('clientTier'));
-    }
-  });
-  if (_ISUHandler && _ISUHandler[0]) {
-    _ISUHandler[0].onChange();
+function requireCtcByISU(value) {
+  var reqType = FormManager.getActualValue('reqType');
+  
+  if (reqType != 'C') {
+    return;
+  }
+  
+  if (!value) {
+    value = FormManager.getActualValue('isuCd');
+  }
+
+  if (value == "34") {
+    FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
+  } else {
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
   }
 }
 
@@ -2090,7 +2103,7 @@ function validateEnterpriseNo() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
-function setEnterpriseSalesRepSBO(_clientTier) {
+function setEnterpriseSalesRepSBO(isuCd, clientTier) {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
@@ -2100,12 +2113,6 @@ function setEnterpriseSalesRepSBO(_clientTier) {
 
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
-
-  if (isuCd != '' & isuCd != "34") {
-    FormManager.removeValidator('clientTier', Validators.REQUIRED);
-  } else {
-    checkAndAddValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ]);
-  }
   
   if (isuCd == '34' && clientTier == 'Q') {
     FormManager.setValue('enterprise', '006510');
@@ -2458,7 +2465,6 @@ dojo.addOnLoad(function() {
 
   // Israel Specific
   GEOHandler.addAfterConfig(afterConfigForIsrael, [ SysLoc.ISRAEL ]);
-  GEOHandler.addAfterConfig(addILClientTierISULogic, [ SysLoc.ISRAEL ]);
   GEOHandler.registerValidator(addILAddressTypeValidator, [ SysLoc.ISRAEL ], null, true);
   // GEOHandler.registerValidator(addILAddressTypeMailingValidator, [
   // SysLoc.ISRAEL ], null, true);
@@ -2528,6 +2534,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(lockCMROwner, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterTemplateLoad(setCTCByScenario, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterTemplateLoad(showVatOnLocal, [ SysLoc.ISRAEL ]);
+  GEOHandler.addAfterTemplateLoad(limitClientTierValues, [ SysLoc.ISRAEL ]);
+  GEOHandler.addAfterTemplateLoad(requireCtcByISU, [ SysLoc.ISRAEL ]);
 
   GEOHandler.registerValidator(addISICKUKLAValidator, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(addCollectionValidator, [ SysLoc.ISRAEL ], null, true);
