@@ -195,6 +195,18 @@ public class IsraelTransformer extends EMEATransformer {
         }
       }
 
+      if (StringUtils.isNotEmpty(data.getMiscBillCd())) {
+        if (data.getMiscBillCd().equals("NO")) {
+          legacyCust.setRealCtyCd("755");
+          legacyCust.setBankNo("0"); // RBKXA
+        } else if (data.getMiscBillCd().equals("IBM")) {
+          legacyCust.setRealCtyCd("756");
+          legacyCust.setBankNo("9");
+        } else if (data.getMiscBillCd().equals("WTC")) {
+          legacyCust.setRealCtyCd("756");
+          legacyCust.setBankNo("0");
+        }
+      }
     }
 
     if (StringUtils.isEmpty(data.getClientTier())) {
