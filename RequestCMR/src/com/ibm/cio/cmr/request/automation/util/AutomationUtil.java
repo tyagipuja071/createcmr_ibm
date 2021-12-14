@@ -855,7 +855,9 @@ public abstract class AutomationUtil {
   protected boolean addressExists(EntityManager entityManager, Addr addrToCheck, RequestData requestData) {
     Data data = requestData.getData();
     String sql = "";
-    if (SystemLocation.BELGIUM.equals(data.getCmrIssuingCntry()) || SystemLocation.NETHERLANDS.equals(data.getCmrIssuingCntry())) {
+    if (SystemLocation.BELGIUM.equals(data.getCmrIssuingCntry()) || SystemLocation.NETHERLANDS.equals(data.getCmrIssuingCntry())
+        || SystemLocation.SWEDEN.equals(data.getCmrIssuingCntry()) || SystemLocation.NORWAY.equals(data.getCmrIssuingCntry())
+        || SystemLocation.FINLAND.equals(data.getCmrIssuingCntry()) || SystemLocation.DENMARK.equals(data.getCmrIssuingCntry())) {
       sql = ExternalizedQuery.getSql("AUTO.UKI.CHECK_IF_ADDRESS_EXIST");
     } else {
       sql = ExternalizedQuery.getSql("AUTO.CHECK_IF_ADDRESS_EXIST");
