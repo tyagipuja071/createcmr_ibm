@@ -3,6 +3,9 @@
  */
 package com.ibm.cmr.create.batch.entry;
 
+import java.io.File;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
@@ -10,7 +13,6 @@ import java.util.TimeZone;
 import javax.persistence.EntityManager;
 
 import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
 
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.listener.CmrContextListener;
@@ -43,21 +45,31 @@ public abstract class BatchEntryPoint {
     System.out.println("Initializing batch context");
     System.setProperty("BATCH_APP", batchAppName);
     // start entity manager
-    startBatchContext("batch-log4j.properties", initUI);
+    startBatchContext("log4j2-batch.xml", initUI);
   }
 
   protected static void initPlainContext(String batchAppName) {
     System.out.println("Initializing plain batch context");
     System.setProperty("BATCH_APP", batchAppName);
     // start entity manager
-    startPlainBatchContext("batch-log4j.properties");
+    startPlainBatchContext("log4j2-batch.xml");
   }
 
   private static void startBatchContext(String log4jFile, boolean initUI) {
+    URL url = BatchEntryPoint.class.getClassLoader().getResource(log4jFile);
+    File log4jPath = null;
+    try {
+      log4jPath = new File(url.toURI());
+      System.setProperty("log4j2.configurationFile", log4jPath.getAbsolutePath());
+    } catch (URISyntaxException e2) {
+      e2.printStackTrace();
+    }
+
     ConfigUtil.initFromBatch();
     System.err.println("CMR Home Dir: " + System.getProperty("cmr.home"));
     System.err.println("Initializing Log4J for Request CMR...");
-    PropertyConfigurator.configure(CmrContextListener.class.getClassLoader().getResource(log4jFile));
+
+    // PropertyConfigurator.configure(CmrContextListener.class.getClassLoader().getResource(log4jFile));
 
     logger = Logger.getLogger(CmrContextListener.class);
     logger.debug("Log4j Inititialized.");
@@ -148,7 +160,8 @@ public abstract class BatchEntryPoint {
 
   private static void startPlainBatchContext(String log4jFile) {
     System.err.println("Initializing Log4J for Request CMR...");
-    PropertyConfigurator.configure(CmrContextListener.class.getClassLoader().getResource(log4jFile));
+    System.setProperty("log4j2.configurationFile", "log4j2-batch.xml");
+    // PropertyConfigurator.configure(CmrContextListener.class.getClassLoader().getResource(log4jFile));
 
     logger = Logger.getLogger(CmrContextListener.class);
     logger.debug("Log4j Inititialized.");
