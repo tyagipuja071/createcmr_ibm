@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="DEBUG">
+  <Properties>
+    <Property name="logPath">logs</Property>
+  </Properties>
+
+  <Appenders>
+    <Console name="console" target="SYSTEM_OUT">
+      <PatternLayout pattern="[%d{dd MMM yyyy HH:mm:ss:SSS}] %-5p (%13F:%L) : %m%n" charset="UTF-8"/>
+    </Console>
+
+    <RollingFile name="rollingFile" fileName="/cmr/batch/logs/${sys:BATCH_APP}.log" filePattern="/cmr/batch/logs/${sys:BATCH_APP}.log-%d{yyyy-MM-dd}-%i.log.gz">
+      <PatternLayout pattern="[%d{dd MMM yyyy HH:mm:ss:SSS}] %-5p (%13F:%L) : %m%n" charset="UTF-8"/>
+      <Policies>
+        <TimeBasedTriggeringPolicy interval="1" modulate="true" />
+      </Policies>
+    </RollingFile>
+  </Appenders>
+
+  <Loggers>
+    <Root level="ERROR" additivity="false">
+      <AppenderRef ref="console" />
+    </Root> 
+    <Logger name="com.ibm" level="DEBUG" additivity="false">
+      <!-- <AppenderRef ref="console" level="DEBUG"/>-->
+      <AppenderRef ref="rollingFile" level="DEBUG"/>
+    </Logger>
+  </Loggers>
+</Configuration>
