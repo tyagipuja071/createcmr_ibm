@@ -154,6 +154,9 @@ public class IsraelHandler extends EMEAHandler {
           List<CmrtAddr> legacyAddrList = legacyObjects.getAddresses();
           CmrtAddr legacyAddr = getLegacyAddrByAddrPair(legacyAddrList, pairedAddrSeq);
 
+          if (legacyAddr == null) {
+            legacyAddr = getDefaultPairedLegacyAddr("ZS01");
+          }
           FindCMRRecordModel addr = cloneAddress(record, "ZS01");
 
           converted.add(mapEnglishAddr(addr, legacyAddr));
@@ -178,7 +181,7 @@ public class IsraelHandler extends EMEAHandler {
                 addrType = getAddressTypeByUse(sofUse);
                 if (!StringUtils.isEmpty(addrType)) {
                   addr = cloneAddress(record, addrType);
-                  LOG.trace("Adding address type " + addrType + " for sequence " + seqNo);
+                  LOG.info("Adding address type " + addrType + " for sequence " + seqNo);
 
                   // name3 in rdc = Address Con't on SOF
                   addr.setCmrStreetAddressCont(record.getCmrName3());
@@ -200,6 +203,10 @@ public class IsraelHandler extends EMEAHandler {
                     List<CmrtAddr> legacyAddrList = legacyObjects.getAddresses();
                     CmrtAddr legacyAddr = getLegacyAddrByAddrPair(legacyAddrList, pairedAddrSeq);
 
+                    if (legacyAddr == null) {
+                      legacyAddr = getDefaultPairedLegacyAddr(addrType);
+                    }
+
                     if ("ZS01".equals(addrType)) {
                       record.setCmrCustPhone(mainRecord.getCmrCustPhone());
                     }
@@ -207,6 +214,20 @@ public class IsraelHandler extends EMEAHandler {
                     converted.add(mapEnglishAddr(addr, legacyAddr, addrType));
                     converted.add(mapLocalLanguageAddr(record, legacyAddr, addrType));
 
+                    // Handle Sold to shared sequence -- EPL and Installing
+                    if ("ZS01".equals(addrType)) {
+                      if ("Y".equals(legacyAddr.getIsAddrUseInstalling())) {
+                        FindCMRRecordModel installing = cloneAddress(addr, "ZI01");
+                        installing.setTransAddrNo("");
+
+                        converted.add(installing);
+                      }
+                      if ("Y".equals(legacyAddr.getIsAddrUseEPL())) {
+                        FindCMRRecordModel epl = cloneAddress(addr, "ZS02");
+                        epl.setTransAddrNo("");
+                        converted.add(epl);
+                      }
+                    }
                   } else {
                     converted.add(addr);
                   }
@@ -335,7 +356,13 @@ public class IsraelHandler extends EMEAHandler {
     }
 
     addr.setCmrAddrSeq(legacyAddr.getId().getAddrNo());
-    addr.setTransAddrNo(legacyAddr.getAddrLineO());
+
+    if (StringUtils.isNotBlank(legacyAddr.getAddrLineO())) {
+      addr.setTransAddrNo(legacyAddr.getAddrLineO());
+    } else {
+      CmrtAddr localAddr = getDefaultPairedLegacyAddr(addr.getCmrAddrTypeCode());
+      addr.setTransAddrNo(localAddr.getId().getAddrNo());
+    }
 
     return addr;
   }
@@ -344,6 +371,28 @@ public class IsraelHandler extends EMEAHandler {
     String pairedSeq = String.format("%05d", Integer.parseInt(pairedAddrSeq));
     CmrtAddr legacyAddr = legacyAddrList.stream().filter(a -> pairedSeq.equals(a.getAddrLineO())).findAny().orElse(null);
     return legacyAddr;
+  }
+
+  private CmrtAddr getDefaultPairedLegacyAddr(String pairAddrType) {
+    List<CmrtAddr> legacyAddrList = legacyObjects.getAddresses();
+
+    for (CmrtAddr legacyAddr : legacyAddrList) {
+
+      if ("ZS01".equals(pairAddrType) && "Y".equals(legacyAddr.getIsAddressUseA())) {
+        return legacyAddr;
+      } else if ("ZP01".equals(pairAddrType) && "Y".equals(legacyAddr.getIsAddressUseB())) {
+        return legacyAddr;
+      } else if ("ZD01".equals(pairAddrType) && "Y".equals(legacyAddr.getIsAddressUseC())) {
+        return legacyAddr;
+      } else if ("CTYA".equals(pairAddrType) && "Y".equals(legacyAddr.getIsAddrUseMailing())) {
+        return legacyAddr;
+      } else if ("CTYB".equals(pairAddrType) && "Y".equals(legacyAddr.getIsAddrUseBilling())) {
+        return legacyAddr;
+      } else if ("CTYC".equals(pairAddrType) && "Y".equals(legacyAddr.getIsAddrUseShipping())) {
+        return legacyAddr;
+      }
+    }
+    return null;
   }
 
   @Override
