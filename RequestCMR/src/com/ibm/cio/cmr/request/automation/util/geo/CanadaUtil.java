@@ -612,14 +612,22 @@ public class CanadaUtil extends AutomationUtil {
             } else {
               List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addr, false);
               boolean matchesDnb = false;
+              boolean companyProofProvided = DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId());
               if (matches != null) {
                 // check against D&B
                 matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
               }
               if (!matchesDnb) {
                 LOG.debug("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
-                resultCodes.add("R");
-                checkDetails.append("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
+                if (companyProofProvided) {
+                  checkDetails.append("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
+                  checkDetails.append(
+                      "Supporting documentation is provided by the requester as attachment for " + addrType + "(" + addr.getId().getAddrSeq() + ")")
+                      .append("\n");
+                } else {
+                  resultCodes.add("R");
+                  checkDetails.append("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
+                }
               } else {
                 checkDetails.append("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
                 for (DnBMatchingResponse dnb : matches) {
