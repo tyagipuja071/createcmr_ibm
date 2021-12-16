@@ -1039,20 +1039,23 @@ public class IsraelTransformer extends EMEATransformer {
       sbAddrLu.append("G");
     }
     // Postal Code
-    String poboxCity = null;
+    String postalCdAndCity = null;
     if (StringUtils.isNotBlank(addr.getPostCd())) {
-      poboxCity = addr.getPostCd();
+      postalCdAndCity = addr.getPostCd();
     }
     // City
     if (StringUtils.isNotBlank(addr.getCity1())) {
-      if (StringUtils.isNotBlank(poboxCity)) {
-        poboxCity = poboxCity + " " + addr.getCity1();
+      if (StringUtils.isNotBlank(postalCdAndCity)) {
+        if (StringUtils.isNumeric(postalCdAndCity)) {
+          postalCdAndCity = reverseNumbers(postalCdAndCity);
+        }
+        postalCdAndCity = postalCdAndCity + " " + addr.getCity1();
       } else {
-        poboxCity = addr.getCity1();
+        postalCdAndCity = addr.getCity1();
       }
     }
-    if (StringUtils.isNotBlank(poboxCity)) {
-      lstAddrLines.add(poboxCity);
+    if (StringUtils.isNotBlank(postalCdAndCity)) {
+      lstAddrLines.add(postalCdAndCity);
       sbAddrLu.append("I");
     }
 
