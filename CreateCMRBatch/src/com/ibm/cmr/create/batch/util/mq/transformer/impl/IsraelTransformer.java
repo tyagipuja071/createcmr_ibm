@@ -1046,7 +1046,7 @@ public class IsraelTransformer extends EMEATransformer {
     // City
     if (StringUtils.isNotBlank(addr.getCity1())) {
       if (StringUtils.isNotBlank(postalCdAndCity)) {
-        if (StringUtils.isNumeric(postalCdAndCity)) {
+        if (StringUtils.isNumeric(postalCdAndCity) && ("ZS01".equals(addrType) || "ZP01".equals(addrType) || "ZD01".equals(addrType))) {
           postalCdAndCity = reverseNumbers(postalCdAndCity);
         }
         postalCdAndCity = postalCdAndCity + " " + addr.getCity1();
