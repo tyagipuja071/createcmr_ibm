@@ -164,10 +164,6 @@ public class IsraelTransformer extends EMEATransformer {
         legacyCust.setVat("");
       }
 
-      if (StringUtils.isEmpty(data.getClientTier())) {
-        legacyCust.setIsuCd((!StringUtils.isEmpty(data.getIsuCd()) ? data.getIsuCd() : ""));
-      }
-
       String dataEmbargoCd = data.getEmbargoCd();
       String rdcEmbargoCd = LegacyDirectUtil.getEmbargoCdFromDataRdc(entityManager, admin);
 
@@ -204,13 +200,16 @@ public class IsraelTransformer extends EMEATransformer {
       }
     }
 
-    if (StringUtils.isEmpty(data.getClientTier())) {
-      String isuCd = !StringUtils.isEmpty(data.getIsuCd()) ? data.getIsuCd() : "";
+    String isuCd = !StringUtils.isEmpty(data.getIsuCd()) ? data.getIsuCd() : "";
+    String clientTier = !StringUtils.isEmpty(data.getClientTier()) ? data.getClientTier() : "";
 
+    if (StringUtils.isEmpty(clientTier)) {
       if (!StringUtils.isEmpty(isuCd)) {
         isuCd = isuCd.concat("7");
       }
       legacyCust.setIsuCd(isuCd);
+    } else {
+      legacyCust.setIsuCd(isuCd.concat(clientTier));
     }
 
     for (Addr addr : cmrObjects.getAddresses()) {

@@ -28,7 +28,6 @@ function addHandlersForIL() {
 
   if (_ISUHandlerIL == null) {
     _ISUHandlerIL = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
-      limitClientTierValues(value);
       requireCtcByISU(value);
       setEnterpriseSalesRepSBO(value);
     });
@@ -64,7 +63,6 @@ var _addrTypesIL = [ 'ZS01', 'ZP01', 'ZI01', 'ZD01', 'ZS02', 'CTYA', 'CTYB', 'CT
 var _addrTypeHandler = [];
 function afterConfigForIsrael() {
   // addrType Handler
-  limitClientTierValues();
   for (var i = 0; i < _addrTypesIL.length; i++) {
     _addrTypeHandler[i] = null;
     if (_addrTypeHandler[i] == null) {
@@ -258,31 +256,6 @@ function validateEMEACopy(addrType, arrayOfTargetTypes) {
     }
   }
   return null;
-}
-
-function limitClientTierValues(value) {
-  var reqType = FormManager.getActualValue('reqType');
-  
-  if (!value) {
-    value = FormManager.getActualValue('isuCd');
-  }
-
-  var tierValues = null;
-  
-  if (reqType == 'C') {
-    if (value == '32') {
-      tierValues = [ 'B', 'M', 'N', 'S', 'Z' ];
-    } else if (value == '34') {
-      tierValues = [ '4', '6', 'A', 'E', 'Q', 'V', 'Y', 'Z' ];
-    } else if (value != '') {
-      tierValues = [ '7', 'Z' ];
-    }
-  }
-  if (tierValues != null) {
-    FormManager.limitDropdownValues(FormManager.getField('clientTier'), tierValues);
-  } else {
-    FormManager.resetDropdownValues(FormManager.getField('clientTier'));
-  }  
 }
 
 function requireCtcByISU(value) {
@@ -2454,6 +2427,26 @@ function showVatOnLocal(fromAddress, scenario, scenarioChanged) {
   }
 }
 
+function clientTierValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var clientTier = FormManager.getActualValue('clientTier');
+        var validCtcValues = [ 'Q', 'Y', '' ];
+        if (clientTier != null && clientTier != undefined) {
+          if (validCtcValues.indexOf(clientTier) >= 0) {
+            return new ValidationResult(null, true);
+          } else {
+            return new ValidationResult(null, false, 'Client Tier can only accept Q, Y or blank.');
+          }
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding Israel functions...');
@@ -2534,7 +2527,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(lockCMROwner, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterTemplateLoad(setCTCByScenario, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterTemplateLoad(showVatOnLocal, [ SysLoc.ISRAEL ]);
-  GEOHandler.addAfterTemplateLoad(limitClientTierValues, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterTemplateLoad(requireCtcByISU, [ SysLoc.ISRAEL ]);
 
   GEOHandler.registerValidator(addISICKUKLAValidator, [ SysLoc.ISRAEL ], null, true);
@@ -2545,6 +2537,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateSalesRep, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(validateEnterpriseNo, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(addAddrFieldsLimitation, [ SysLoc.ISRAEL ], null, true);
+  GEOHandler.registerValidator(clientTierValidator, [ SysLoc.ISRAEL ], null, true);
 
   GEOHandler.addAfterTemplateLoad(preTickVatExempt, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(showVatExempt, [ SysLoc.ISRAEL ]);
