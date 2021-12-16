@@ -8598,6 +8598,10 @@ function setCollCdOnSBOIT(salesBusOffCd) {
 }
 
 function validateExistingCMRNo() {
+  var ifProspect = FormManager.getActualValue('prospLegalInd');
+  if (ifProspect == 'Y') {
+    return;
+  }
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
