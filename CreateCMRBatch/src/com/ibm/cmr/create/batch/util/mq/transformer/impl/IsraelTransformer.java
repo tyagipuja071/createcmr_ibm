@@ -1019,7 +1019,7 @@ public class IsraelTransformer extends EMEATransformer {
     if (StringUtils.isNotBlank(addrType)) {
       if ("ZS01".equals(addrType) || "ZP01".equals(addrType)) {
         if (StringUtils.isNotBlank(addr.getPoBox()) && !(addr.getPoBox()).contains("מ.ד")) {
-          lstAddrLines.add(" מ.ד" + reverseNumbers(addr.getPoBox()));
+          lstAddrLines.add(reverseNumbers(addr.getPoBox()) + " מ.ד");
         } else {
           lstAddrLines.add(addr.getPoBox());
         }
