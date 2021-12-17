@@ -377,6 +377,8 @@ public class IsraelTransformer extends EMEATransformer {
 
     } else if (isUpdate && !"N".equals(currAddr.getImportInd()) && legacyAddr.isForCreate() && Arrays.asList(TRANS_ADDRS).contains(addrType)) {
       legacyAddr.setAddrLineO(SPLIT_MARKER);
+    } else if (isUpdate && Arrays.asList(TRANS_ADDRS).contains(addrType) && StringUtils.isBlank(legacyAddr.getAddrLineO())) {
+      legacyAddr.setAddrLineO(currAddr.getPairedAddrSeq());
     }
   }
 
