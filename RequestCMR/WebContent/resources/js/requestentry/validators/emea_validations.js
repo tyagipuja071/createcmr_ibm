@@ -8598,17 +8598,19 @@ function setCollCdOnSBOIT(salesBusOffCd) {
 }
 
 function validateExistingCMRNo() {
-  var ifProspect = FormManager.getActualValue('prospLegalInd');
-  if (ifProspect == 'Y') {
-    return;
-  }
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
+        console.log('checking if prospect cmr...');
+        var cmrNo = FormManager.getActualValue('cmrNo');
+        if (cmrNo.match('^P[0-9]{5}')) {
+          return;
+        }
         console.log('checking requested cmr number...');
         var reqType = FormManager.getActualValue('reqType');
-        var cmrNo = FormManager.getActualValue('cmrNo');
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var reqId = FormManager.getActualValue('reqId');
+        var action = FormManager.getActualValue('yourAction');
         if (reqType == 'C' && cmrNo) {
           var exists = cmr.query('LD.CHECK_EXISTING_CMR_NO', {
             COUNTRY : cntry,
@@ -9099,6 +9101,7 @@ function ibmFieldsBehaviourInCreateByScratchIT() {
 }
 
 function disableProcpectCmrIT() {
+  var cmrNo = FormManager.getActualValue('cmrNo');
   if (FormManager.getActualValue('reqType') != 'C') {
     return;
   }
@@ -9106,9 +9109,14 @@ function disableProcpectCmrIT() {
   if (dijit.byId('prospLegalInd')) {
     ifProspect = dijit.byId('prospLegalInd').get('checked') ? 'Y' : 'N';
   }
+  if (ifProspect == 'N') {
+    FormManager.setValue('prospLegalInd', 'N');
+  }
   console.log("disable prospect CMR");
-  if ('Y' == ifProspect) {
+  if (cmrNo.match('^P[0-9]{5}')) {
     FormManager.readOnly('cmrNo');
+  } else {
+    FormManager.enable('cmrNo');
   }
 }
 
