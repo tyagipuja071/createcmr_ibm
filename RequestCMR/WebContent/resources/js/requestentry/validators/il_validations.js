@@ -119,6 +119,7 @@ function afterConfigForIsrael() {
       });
     }
   }
+  limitMODValues();
 }
 
 function setChecklistStatus() {
@@ -2445,6 +2446,16 @@ function clientTierValidator() {
       }
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
+function limitMODValues() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  var modValues = [ 'NO', 'IBM', 'WTC' ];
+  if (modValues != null) {
+    FormManager.limitDropdownValues(FormManager.getField('miscBillCd'), modValues);
+  }
 }
 
 dojo.addOnLoad(function() {
