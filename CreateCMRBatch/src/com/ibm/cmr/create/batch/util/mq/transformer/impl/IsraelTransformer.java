@@ -440,7 +440,7 @@ public class IsraelTransformer extends EMEATransformer {
     if (StringUtils.isNotBlank(addrData.getPoBox())) {
       String addrType = addrData.getId().getAddrType();
       if (addrType.equals("ZS01") || addrType.equals("ZP01") || addrType.equals("ZD01")) {
-        line6 = addrData.getPoBox() + " מ.ד";
+        line6 = "מ.ד " + addrData.getPoBox();
       } else {
         line6 = "PO BOX " + addrData.getPoBox();
       }
@@ -477,7 +477,7 @@ public class IsraelTransformer extends EMEATransformer {
         if (line != null && line.length() > 30) {
           line = line.substring(0, 30);
         }
-        messageHash.put(addrKey + "AddressLD" + lineNo, localAddressType ? reverseNumbers(line) : line);
+        messageHash.put(addrKey + "AddressLD" + lineNo, line);
         lineNo++;
       }
     }
@@ -1019,7 +1019,7 @@ public class IsraelTransformer extends EMEATransformer {
     if (StringUtils.isNotBlank(addrType)) {
       if ("ZS01".equals(addrType) || "ZP01".equals(addrType)) {
         if (StringUtils.isNotBlank(addr.getPoBox()) && !(addr.getPoBox()).contains("מ.ד")) {
-          lstAddrLines.add(reverseNumbers(addr.getPoBox()) + " מ.ד");
+          lstAddrLines.add("מ.ד " + addr.getPoBox());
         } else {
           lstAddrLines.add(addr.getPoBox());
         }
@@ -1047,9 +1047,6 @@ public class IsraelTransformer extends EMEATransformer {
     // City
     if (StringUtils.isNotBlank(addr.getCity1())) {
       if (StringUtils.isNotBlank(postalCdAndCity)) {
-        if (StringUtils.isNumeric(postalCdAndCity) && ("ZS01".equals(addrType) || "ZP01".equals(addrType) || "ZD01".equals(addrType))) {
-          postalCdAndCity = reverseNumbers(postalCdAndCity);
-        }
         postalCdAndCity = postalCdAndCity + " " + addr.getCity1();
       } else {
         postalCdAndCity = addr.getCity1();
@@ -1070,39 +1067,27 @@ public class IsraelTransformer extends EMEATransformer {
       for (int i = 0; i < lstAddrLines.size(); i++) {
         switch (i) {
         case 0:
-          legacyAddr.setAddrLine1(getAddrLineValue(lstAddrLines.get(i), addrType));
+          legacyAddr.setAddrLine1(lstAddrLines.get(i));
           break;
         case 1:
-          legacyAddr.setAddrLine2(getAddrLineValue(lstAddrLines.get(i), addrType));
+          legacyAddr.setAddrLine2(lstAddrLines.get(i));
           break;
         case 2:
-          legacyAddr.setAddrLine3(getAddrLineValue(lstAddrLines.get(i), addrType));
+          legacyAddr.setAddrLine3(lstAddrLines.get(i));
           break;
         case 3:
-          legacyAddr.setAddrLine4(getAddrLineValue(lstAddrLines.get(i), addrType));
+          legacyAddr.setAddrLine4(lstAddrLines.get(i));
           break;
         case 4:
-          legacyAddr.setAddrLine5(getAddrLineValue(lstAddrLines.get(i), addrType));
+          legacyAddr.setAddrLine5(lstAddrLines.get(i));
           break;
         case 5:
-          legacyAddr.setAddrLine6(getAddrLineValue(lstAddrLines.get(i), addrType));
+          legacyAddr.setAddrLine6(lstAddrLines.get(i));
           break;
         }
       }
       legacyAddr.setAddrLineU(sbAddrLu.toString());
     }
-  }
-
-  private String getAddrLineValue(String addrFieldValue, String addrType) {
-    if (StringUtils.isNotBlank(addrType) && StringUtils.isNotBlank(addrFieldValue)) {
-      if ("ZS01".equals(addrType) || "ZP01".equals(addrType) || "ZD01".equals(addrType)) {
-        if (StringUtils.isNumeric(addrFieldValue)) {
-          return reverseNumbers(addrFieldValue);
-        }
-      }
-    }
-
-    return addrFieldValue;
   }
 
   @Override
