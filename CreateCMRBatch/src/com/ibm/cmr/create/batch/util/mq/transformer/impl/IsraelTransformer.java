@@ -440,7 +440,7 @@ public class IsraelTransformer extends EMEATransformer {
     if (StringUtils.isNotBlank(addrData.getPoBox())) {
       String addrType = addrData.getId().getAddrType();
       if (addrType.equals("ZS01") || addrType.equals("ZP01") || addrType.equals("ZD01")) {
-        line6 = addrData.getPoBox() + " מ.ד";
+        line6 = "מ.ד " + addrData.getPoBox();
       } else {
         line6 = "PO BOX " + addrData.getPoBox();
       }
@@ -477,7 +477,7 @@ public class IsraelTransformer extends EMEATransformer {
         if (line != null && line.length() > 30) {
           line = line.substring(0, 30);
         }
-        messageHash.put(addrKey + "AddressLD" + lineNo, localAddressType ? reverseNumbers(line) : line);
+        messageHash.put(addrKey + "AddressLD" + lineNo, line);
         lineNo++;
       }
     }
@@ -1019,7 +1019,7 @@ public class IsraelTransformer extends EMEATransformer {
     if (StringUtils.isNotBlank(addrType)) {
       if ("ZS01".equals(addrType) || "ZP01".equals(addrType)) {
         if (StringUtils.isNotBlank(addr.getPoBox()) && !(addr.getPoBox()).contains("מ.ד")) {
-          lstAddrLines.add(addr.getPoBox() + " מ.ד");
+          lstAddrLines.add("מ.ד " + addr.getPoBox());
         } else {
           lstAddrLines.add(addr.getPoBox());
         }
