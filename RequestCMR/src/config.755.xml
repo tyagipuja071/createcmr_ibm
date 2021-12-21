@@ -76,7 +76,6 @@
           <dbColumn>CLIENT_TIER</dbColumn>
           <width>15</width>
           <length>1</length>
-          <lovId>ClientTier</lovId>
         </column>
         <column exactLength="true" number="true">
           <label>Enterprise Number</label>
@@ -156,7 +155,7 @@
           <width>20</width>
           <length>30</length>
         </column>
-        <column>
+        <column number="true">
           <label>PO Box</label>
           <dbColumn>PO_BOX</dbColumn>
           <width>20</width>
@@ -227,7 +226,7 @@
           <width>20</width>
           <length>30</length>
         </column>
-        <column>
+        <column number="true">
           <label>PO Box</label>
           <dbColumn>PO_BOX</dbColumn>
           <width>20</width>
@@ -493,7 +492,7 @@
           <width>20</width>
           <length>30</length>
         </column>
-        <column>
+        <column number="true">
           <label>PO Box</label>
           <dbColumn>PO_BOX</dbColumn>
           <width>20</width>
@@ -564,7 +563,7 @@
           <width>20</width>
           <length>30</length>
         </column>
-        <column>
+        <column number="true">
           <label>PO Box</label>
           <dbColumn>PO_BOX</dbColumn>
           <width>20</width>

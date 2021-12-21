@@ -1565,8 +1565,8 @@ public class IsraelHandler extends EMEAHandler {
 
           if ("IL".equals(landedCntry)) {
             if (isHebrewFieldNotBlank(custNameCell) && isHebrewFieldNotBlank(custNameContCell) && isHebrewFieldNotBlank(attPersonCell)
-                && isHebrewFieldNotBlank(streetCell) && isHebrewFieldNotBlank(addrContCell) && isHebrewFieldNotBlank(poBoxCell)
-                && isHebrewFieldNotBlank(postCdCell)) {
+                && isHebrewFieldNotBlank(streetCell) && isHebrewFieldNotBlank(addrContCell)
+                && StringUtils.isNotBlank(validateColValFromCell(poBoxCell)) && isHebrewFieldNotBlank(postCdCell)) {
               error.addError(rowIndex, "<br> ",
                   "Please remove value from one of the optional fields. You exceeded limitation which allows only 6 lines to be sent to DB2.");
             }
@@ -1587,7 +1587,7 @@ public class IsraelHandler extends EMEAHandler {
             if (isHebrewFieldNotBlank(addrContCell)) {
               ctr += 1;
             }
-            if (isHebrewFieldNotBlank(poBoxCell)) {
+            if (StringUtils.isNotBlank(validateColValFromCell(poBoxCell))) {
               ctr += 1;
             }
             if (isHebrewFieldNotBlank(postCdCell)) {
@@ -1632,7 +1632,7 @@ public class IsraelHandler extends EMEAHandler {
         if (sheetName.equals("Mailing") || sheetName.equals("Billing") || sheetName.equals("Country Use A (Mailing)")
             || sheetName.equals("Country Use B (Billing)")) {
           // Street or PO Box
-          if (!isHebrewFieldNotBlank(row.getCell(5)) && !isHebrewFieldNotBlank(row.getCell(6))) {
+          if (!isHebrewFieldNotBlank(row.getCell(5)) && StringUtils.isBlank(validateColValFromCell(row.getCell(6)))) {
             error.addError(row.getRowNum(), "<br>Street-PO Box", "Street or PO Box is required when updating " + sheetName + " address.");
           }
         } else { // Installing, Shipping, EPL and Country Use C
