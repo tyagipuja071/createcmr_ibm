@@ -432,10 +432,11 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
       this.log.debug("Error in Querying data table using admin's reqid in ApprovalService.java");
     }
     if (conditionallyApproved && admin != null && admin.getId() != null && dataService != null) {
-      if (data != null && SystemLocation.CHINA.equals(data.getCmrIssuingCntry())) {
+      if (data != null && SystemLocation.CHINA.equals(data.getCmrIssuingCntry()) && conditionallyApproved) {
         cnConditionallyApproved = true;
       }
-      conditionallyApproved = conditionallyApproved && !cnConditionallyApproved;
+      // conditionallyApproved = conditionallyApproved &&
+      // !cnConditionallyApproved;
     }
 
     if (approvalsReceived && PENDING_STATUSES_TO_MOVE.contains(admin.getReqStatus())) {
@@ -454,6 +455,8 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
             } else {
               admin.setReqStatus("LEG");
             }
+          } else if (cnConditionallyApproved) {
+            admin.setReqStatus(CmrConstants.REQUEST_STATUS.PCP.toString());
           } else {
             admin.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
           }
