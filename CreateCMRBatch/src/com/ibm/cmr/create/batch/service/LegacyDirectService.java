@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 
@@ -4332,6 +4333,7 @@ public class LegacyDirectService extends TransConnService {
       addresses = cmrobjects.getAddresses();
       int maxseqno = 1;
       boolean isUpdate = "U".equals(cmrobjects.getAdmin().getReqType());
+      List<String> existingSeq = addresses.stream().filter(e-> !"PG01".equals(e.getId().getAddrType())).map(e -> e.getId().getAddrSeq()).collect(Collectors.toList());
       for (Addr addr : addresses) {
         if ("PG01".equals(addr.getId().getAddrType())) {
           pgs.add(addr);
@@ -4352,7 +4354,8 @@ public class LegacyDirectService extends TransConnService {
         maxseqno = maxseqno + 1;
 
         for (Addr pg : pgs) {
-          if ((isUpdate == false) || (isUpdate && ("N".equals(pg.getImportInd()) || "Y".equals(pg.getChangedIndc())))) {
+          if ((isUpdate == false) || (isUpdate && !existingSeq.isEmpty() && existingSeq.contains(pg.getId().getAddrSeq())
+              && ("N".equals(pg.getImportInd()) || "Y".equals(pg.getChangedIndc())))) {
             String newSeqNo = StringUtils.leftPad(Integer.toString(maxseqno), 5, '0');
             updateAddrSeq(entityManager, cmrobjects.getAdmin().getId().getReqId(), pg.getId().getAddrType(), pg.getId().getAddrSeq(), newSeqNo,
                 pg.getSapNo(), false);
