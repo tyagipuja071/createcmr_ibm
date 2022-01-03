@@ -59,7 +59,8 @@ public class CanadaHandler extends GEOHandler {
 
     if (CmrConstants.REQ_TYPE_CREATE.equals(reqEntry.getReqType())) {
       for (FindCMRRecordModel record : records) {
-        if ("ZS01".equals(record.getCmrAddrTypeCode()) && (StringUtils.isBlank(record.getCmrOrderBlock()))) {
+        if (("ZS01".equals(record.getCmrAddrTypeCode()) && (StringUtils.isBlank(record.getCmrOrderBlock())))
+            || ("ZS01".equals(record.getCmrAddrTypeCode()) && (record.getCmrOrderBlock().equals("75")))) {
           record.setCmrAddrTypeCode("ZS01");
           converted.add(record);
         }
@@ -209,6 +210,14 @@ public class CanadaHandler extends GEOHandler {
     if (currentRecord != null) {
       String name1 = StringUtils.isEmpty(currentRecord.getCmrName1Plain()) ? "" : currentRecord.getCmrName1Plain();
       String name2 = StringUtils.isEmpty(currentRecord.getCmrName2Plain()) ? "" : currentRecord.getCmrName2Plain();
+
+      if (name1.length() > 30) {
+        name1 = name1.substring(0, 30);
+      }
+
+      if (name2.length() > 30) {
+        name2 = name2.substring(0, 30);
+      }
 
       admin.setMainCustNm1(name1);
       admin.setOldCustNm1(name1);
