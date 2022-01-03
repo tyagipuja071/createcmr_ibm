@@ -1057,7 +1057,11 @@ function resetSubIndustryCd() {
       }
     }
     if (isicValue != null && isicValue.length > 0 && viewOnlyPage != 'true') {
-      FormManager.enable('subIndustryCd');
+      if (FormManager.getActualValue('reqType') == 'U') {
+        FormManager.readOnly('subIndustryCd');
+      } else {
+        FormManager.enable('subIndustryCd');
+      }
       clearInterval(interval);
     } else {
       FormManager.readOnly('subIndustryCd');
