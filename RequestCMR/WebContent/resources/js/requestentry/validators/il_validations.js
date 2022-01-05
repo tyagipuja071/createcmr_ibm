@@ -823,6 +823,7 @@ function fieldsReadOnlyIsrael() {
     FormManager.resetValidations('vat');
     FormManager.readOnly('vat');
   }
+  FormManager.disable('subIndustryCd');
 }
 
 function adjustChecklistContact() {
@@ -1059,8 +1060,6 @@ function resetSubIndustryCd() {
     if (isicValue != null && isicValue.length > 0 && viewOnlyPage != 'true') {
       if (FormManager.getActualValue('reqType') == 'U') {
         FormManager.readOnly('subIndustryCd');
-      } else {
-        FormManager.enable('subIndustryCd');
       }
       clearInterval(interval);
     } else {
