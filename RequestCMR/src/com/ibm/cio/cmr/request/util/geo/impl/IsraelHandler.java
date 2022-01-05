@@ -18,6 +18,7 @@ import javax.persistence.EntityManager;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -1478,6 +1479,15 @@ public class IsraelHandler extends EMEAHandler {
         // Validate required fields
         validateAddrRequiredFields(row, error, sheetName);
 
+        // validate PO Box
+        if (sheetName.equals("Mailing") || sheetName.equals("Billing") || sheetName.equals("Country Use A (Mailing)")
+            || sheetName.equals("Country Use B (Billing)")) {
+          String strPoBox = validateColValFromCell(row.getCell(6));
+          if (StringUtils.isNotBlank(strPoBox) && !StringUtils.isNumeric(strPoBox)) {
+            error.addError(rowIndex, "<br>PO Box", "PO Box value should be numeric.");
+          }
+        }
+
         if (sheetName.equals("Mailing") || sheetName.equals("Billing") || sheetName.equals("Shipping")) {
           // Validate Customer Name
           if (isHebrewFieldNotBlank(row.getCell(2))) {
@@ -1766,9 +1776,19 @@ public class IsraelHandler extends EMEAHandler {
 
   private boolean isHebrewFieldNotBlank(XSSFCell cell) {
     boolean isHebrewFieldNotBlank = false;
-    if (cell != null && cell.getRichStringCellValue() != null && StringUtils.isNotBlank(cell.getRichStringCellValue().getString())) {
-      isHebrewFieldNotBlank = true;
+    if (cell != null) {
+      if (CellType.NUMERIC == cell.getCellTypeEnum()) {
+        String numericCellStrVal = validateColValFromCell(cell);
+        if (StringUtils.isNotBlank(numericCellStrVal)) {
+          isHebrewFieldNotBlank = true;
+        }
+      } else {
+        if (cell.getRichStringCellValue() != null && StringUtils.isNotBlank(cell.getRichStringCellValue().getString())) {
+          isHebrewFieldNotBlank = true;
+        }
+      }
     }
+
     return isHebrewFieldNotBlank;
   }
 
