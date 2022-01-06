@@ -1627,6 +1627,10 @@ public class LegacyDirectService extends TransConnService {
     int seqNo = 0;
     LOG.debug("Mapping default address values..");
     if (transformer != null) {
+      List<Integer> secondarySoldToListIL = null;
+      if (SystemLocation.ISRAEL.equals(data.getCmrIssuingCntry())) {
+        secondarySoldToListIL = getSecondarySoldToFromRDC(entityManager, cmrNo, cntry);
+      }
 
       for (Addr addr : cmrObjects.getAddresses()) {
         if (transformer.skipLegacyAddressData(entityManager, cmrObjects, addr, false)) {
@@ -1651,6 +1655,10 @@ public class LegacyDirectService extends TransConnService {
         // address was directly updated, or was not updated and shares sequence
         // with sold to
         if (addrUpdated || (zs01Updated && zs01SeqNo.equals(addr.getId().getAddrSeq()) || isSharedWithSoldToPairIL)) {
+          boolean isSecondarySoldToIL = false;
+          if (SystemLocation.ISRAEL.equals(data.getCmrIssuingCntry()) && sequences.get(addr.getId().getAddrSeq()) == 1) {
+            isSecondarySoldToIL = checkIfAddrIsSecondarySoldToIL(secondarySoldToListIL, addr);
+          }
 
           boolean isSoldToPairIL = SystemLocation.ISRAEL.equals(data.getCmrIssuingCntry()) && "CTYA".equals(addr.getId().getAddrType());
           if ("ZS01".equals(addr.getId().getAddrType()) || isSoldToPairIL) {
@@ -1662,7 +1670,7 @@ public class LegacyDirectService extends TransConnService {
               throw new Exception("Cannot find legacy address with sequence " + addr.getId().getAddrSeq());
             }
             legacyAddr.setForUpdate(true);
-          } else if ("N".equals(addr.getImportInd()) || sequences.get(addr.getId().getAddrSeq()) > 1) {
+          } else if ("N".equals(addr.getImportInd()) || sequences.get(addr.getId().getAddrSeq()) > 1 || isSecondarySoldToIL) {
             // a. an added address
             // b. address shares a sequence
             LOG.trace("Created? " + ("N".equals(addr.getImportInd())) + " Shared? " + (sequences.get(addr.getId().getAddrSeq()) > 1));
@@ -4409,4 +4417,28 @@ public class LegacyDirectService extends TransConnService {
     LOG.debug("RDC sequences =" + rdcSequences);
     return rdcSequences;
   }
+
+  private List<Integer> getSecondarySoldToFromRDC(EntityManager entityManager, String cmrNo, String cntry) {
+    LOG.debug("Retrieve secondary sold to from RDC for Legacy Processing ");
+    String sql = ExternalizedQuery.getSql("GET.RDC_SEQ.SECONDARY.SOLDTO");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("ZZKV_CUSNO", cmrNo);
+    query.setParameter("KATR6", cntry);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setForReadOnly(true);
+    List<Integer> rdcSequences = query.getResults(Integer.class);
+    LOG.debug("RDC sequences =" + rdcSequences);
+    return rdcSequences;
+  }
+
+  private boolean checkIfAddrIsSecondarySoldToIL(List<Integer> secondarySoldToListIL, Addr addr) {
+    if (secondarySoldToListIL != null && !secondarySoldToListIL.isEmpty()) {
+      int curAddrSeq = Integer.parseInt(addr.getId().getAddrSeq());
+      if (secondarySoldToListIL.contains(curAddrSeq)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
 }
