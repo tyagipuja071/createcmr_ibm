@@ -2428,13 +2428,13 @@ function setCTCByScenario(fromAddress, scenario, scenarioChanged) {
   }
 }
 
-function showVatOnLocal(fromAddress, scenario, scenarioChanged) {
+function showVatInfoOnLocal(fromAddress, scenario, scenarioChanged) {
   
   var custGrp = FormManager.getActualValue('custGrp');
-  if (scenarioChanged && custGrp == 'LOCAL') {
-    cmr.showNode('vatInfo');
+  if (custGrp == 'LOCAL') {
+    $("span[id='vatInfo'] img[class='cmr-info-bubble']").show();
   } else {
-    cmr.hideNode('vatInfo');
+    $("span[id='vatInfo'] img[class='cmr-info-bubble']").hide();
   }
 }
 
@@ -2537,7 +2537,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addPpsceidValidator, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(validateCMRNumberForLegacy, [ SysLoc.ISRAEL ], GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.addAfterConfig(enableCmrNoForProcessor, [ SysLoc.ISRAEL ]);
-  GEOHandler.addAfterConfig(showVatOnLocal, [ SysLoc.ISRAEL ]);
+  GEOHandler.addAfterConfig(showVatInfoOnLocal, [ SysLoc.ISRAEL ]);
 
   GEOHandler.addAfterConfig(showHideKuklaField, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterTemplateLoad(showHideKuklaField, [ SysLoc.ISRAEL ]);
@@ -2547,7 +2547,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setSalesRepEnterpriseNoSBO, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterTemplateLoad(lockCMROwner, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterTemplateLoad(setCTCByScenario, [ SysLoc.ISRAEL ]);
-  GEOHandler.addAfterTemplateLoad(showVatOnLocal, [ SysLoc.ISRAEL ]);
+  GEOHandler.addAfterTemplateLoad(showVatInfoOnLocal, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterTemplateLoad(requireCtcByISU, [ SysLoc.ISRAEL ]);
 
   GEOHandler.registerValidator(addISICKUKLAValidator, [ SysLoc.ISRAEL ], null, true);
