@@ -283,8 +283,9 @@ public class IsraelTransformer extends EMEATransformer {
     messageHash.put("LangCode", "1");
     messageHash.put("CEdivision", "2");
     messageHash.put("InvNumber", "04");
-    messageHash.put("DistrictCode", "0" + cmrData.getSubIndustryCd().substring(0, 1));
-
+    if (StringUtils.isNotBlank(cmrData.getSubIndustryCd())) {
+      messageHash.put("DistrictCode", "0" + cmrData.getSubIndustryCd().substring(0, 1));
+    }
     messageHash.put("BankNumber", "");
     messageHash.put("BankBranchNumber", "");
 
