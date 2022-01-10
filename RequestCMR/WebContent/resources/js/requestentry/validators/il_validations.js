@@ -1,7 +1,6 @@
 /* Register Israel Javascripts */
 var _CTCHandlerIL = null;
 var _ISUHandlerIL = null;
-var _SubindustryHandlerIL = null;
 var _vatExemptHandler = null;
 var _gtcAddrTypeHandlerIL = [];
 var _gtcAddrTypesIL = [ 'ZS01', 'ZP01', 'ZD01', 'ZI01', 'ZS02', 'CTYA', 'CTYB', 'CTYC' ];
@@ -31,12 +30,6 @@ function addHandlersForIL() {
     _ISUHandlerIL = dojo.connect(FormManager.getField('isuCd'), 'onClick', function(value) {
       requireCtcByISU(value);
       setEnterpriseSalesRepSBO(value);
-    });
-  }
-  
-  if (_SubindustryHandlerIL == null) {
-    _SubindustryHandlerIL = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
-      FormManager.readOnly('subIndustryCd');
     });
   }
   
