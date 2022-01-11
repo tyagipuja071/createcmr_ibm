@@ -527,7 +527,12 @@ public class CanadaUtil extends AutomationUtil {
           }
           break;
         case "Tax Code":
-          // noop, for switch handling only
+        case "PST Exemption License Number":
+          if (!isVatDocAttachmentProvided(entityManager, admin.getId().getReqId())) {
+            details.append("\nVAT/TAX Docmentation required to be attached when updating EFC/PST Exemption License Number.");
+            engineData.addNegativeCheckStatus("_vatDocument",
+                "VAT/TAX Docmentation required to be attached when updating EFC/PST Exemption License Number.");
+          }
           break;
         case "Client Tier Code":
           // noop, for switch handling only
@@ -923,6 +928,13 @@ public class CanadaUtil extends AutomationUtil {
       }
     }
     return null;
+  }
+
+  private boolean isVatDocAttachmentProvided(EntityManager entityManager, long reqId) {
+    String sql = ExternalizedQuery.getSql("QUERY.CHECK_VATD_ATTACHMENT");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("ID", reqId);
+    return query.exists();
   }
 
 }
