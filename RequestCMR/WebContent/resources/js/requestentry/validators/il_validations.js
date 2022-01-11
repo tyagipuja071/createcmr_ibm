@@ -1,6 +1,7 @@
 /* Register Israel Javascripts */
 var _CTCHandlerIL = null;
 var _ISUHandlerIL = null;
+var _SubindustryHandlerIL = null;
 var _vatExemptHandler = null;
 var _gtcAddrTypeHandlerIL = [];
 var _gtcAddrTypesIL = [ 'ZS01', 'ZP01', 'ZD01', 'ZI01', 'ZS02', 'CTYA', 'CTYB', 'CTYC' ];
@@ -39,6 +40,11 @@ function addHandlersForIL() {
     });
   }
 
+  if (_SubindustryHandlerIL == null) {
+    _SubindustryHandlerIL = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
+      FormManager.readOnly('subIndustryCd');
+    });
+  }
 }
 
 function addEMEALandedCountryHandler(cntry, addressMode, saving, finalSave) {
@@ -823,7 +829,7 @@ function fieldsReadOnlyIsrael() {
     FormManager.resetValidations('vat');
     FormManager.readOnly('vat');
   }
-  FormManager.disable('subIndustryCd');
+  FormManager.readOnly('subIndustryCd');
 }
 
 function adjustChecklistContact() {
