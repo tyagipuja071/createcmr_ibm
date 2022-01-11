@@ -1446,10 +1446,17 @@ public class IsraelHandler extends EMEAHandler {
         // KUKLA
         String isic = validateColValFromCell(row.getCell(3));
         String kukla = validateColValFromCell(row.getCell(17));
-        if (StringUtils.isNotBlank(isic) && StringUtils.isNotBlank(kukla)) {
-          if ("9500".equals(isic) && !"60".equals(kukla)) {
-            error.addError(rowIndex, "<br>KUKLA", "KUKLA value should be 60 if ISIC is 9500.");
-          }
+        if (StringUtils.isEmpty(isic)) {
+          isic = "";
+        }
+        if (StringUtils.isEmpty(kukla)) {
+          kukla = "";
+        }
+
+        if ("9500".equals(isic) && !"60".equals(kukla)) {
+          error.addError(rowIndex, "<br>KUKLA", "KUKLA value should be 60 if ISIC is 9500.");
+        } else if (!"9500".equals(isic) && "60".equals(kukla)) {
+          error.addError(rowIndex, "<br>KUKLA", "ISIC value should be 9500 if KUKLA is 60.");
         }
       }
     }
