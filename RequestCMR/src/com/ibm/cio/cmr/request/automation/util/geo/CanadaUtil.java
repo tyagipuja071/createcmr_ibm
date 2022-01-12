@@ -529,9 +529,10 @@ public class CanadaUtil extends AutomationUtil {
         case "Tax Code":
         case "PST Exemption License Number":
           if (!isVatDocAttachmentProvided(entityManager, admin.getId().getReqId())) {
-            details.append("\nVAT/TAX Docmentation required to be attached when updating EFC/PST Exemption License Number.");
-            engineData.addNegativeCheckStatus("_vatDocument",
-                "VAT/TAX Docmentation required to be attached when updating EFC/PST Exemption License Number.");
+            details.append("\nVAT/TAX Documentation required to be attached when updating EFC/PST Exemption License Number.");
+            engineData.addRejectionComment("TAX", "VAT/TAX Documentation required when updating EFC/PST Exemption Licenso No.",
+                "VAT/TAX Documentation required when updating EFC/PST Exemption Licenso No", "");
+            output.setOnError(true);
           }
           break;
         case "Client Tier Code":
