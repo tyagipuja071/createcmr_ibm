@@ -3223,6 +3223,13 @@ public class LegacyDirectService extends TransConnService {
                   LOG.debug("Updating SAP No. to " + rdcRec.getSapNo() + " for Type " + rdcRec.getAddressType() + "/" + rdcRec.getSeqNo());
                   addrNew.setSapNo(rdcRec.getSapNo());
                   addrNew.setIerpSitePrtyId(rdcRec.getIerpSitePartyId());
+                  if (SystemLocation.ISRAEL.equals(data.getCmrIssuingCntry())
+                      && ("CTYB".equals(addrNew.getId().getAddrType()) || "CTYC".equals(addrNew.getId().getAddrType()))) {
+                    LegacyDirectObjectContainer legacyObjects = LegacyDirectUtil.getLegacyDBValues(entityManager, data.getCmrIssuingCntry(),
+                        response.getCmrNo(), false, false);
+                    CmrtAddr legacyAddr = legacyObjects.findBySeqNo(addrNew.getId().getAddrSeq());
+                    addrNew.setPairedAddrSeq(legacyAddr.getAddrLineO());
+                  }
                 }
               }
             }
