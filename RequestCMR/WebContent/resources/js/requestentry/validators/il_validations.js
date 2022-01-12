@@ -2427,7 +2427,11 @@ function setCTCByScenario(fromAddress, scenario, scenarioChanged) {
   }
 }
 
-function showVatInfoOnLocal(fromAddress, scenario, scenarioChanged) {
+function showVatInfoOnLocal() {
+  
+  if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
   
   var custGrp = FormManager.getActualValue('custGrp');
   if (custGrp == 'LOCAL') {
