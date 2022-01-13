@@ -549,6 +549,9 @@ var DB_MASS_CREATE_DATA_FIELDS = [ {
 }, {
   id : 'RequesterID',
   name : 'ADMIN.REQUESTER_ID'
+}, {
+  id : 'TaxPayerCustCd',
+  name : 'TAX_PAYER_CUST_CD'
 } ];
 
 var DB_MASS_CREATE_ADDR_FIELDS = [ {
