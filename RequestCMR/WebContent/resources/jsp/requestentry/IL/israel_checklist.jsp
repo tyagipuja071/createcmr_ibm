@@ -121,7 +121,7 @@
     , please STOP and CONTACT <span id="checklistcontact">
     <% if("CROSS".equals(reqentry.getCustGrp())) {
      %> your Country ERC  <% } else {%>
-       Israeli ERC (Yifat Siner @ NOTES ID: IJB@il.ibm.com, Yifat Singer/Israel/IBM)
+       Israeli ERC (Yifat Singer @ NOTES ID: IJB@il.ibm.com, Yifat Singer/Israel/IBM)
      <% } %> </span>
      or legal counsel for further guidance.
     Transactions (with customers found to be engaged in prohibited activities) may only proceed as reviewed and authorized by IBM ERC and/or STC.

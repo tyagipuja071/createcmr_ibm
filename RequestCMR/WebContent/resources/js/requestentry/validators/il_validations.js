@@ -838,7 +838,7 @@ function adjustChecklistContact() {
   if (custSubScnrio == 'CROSS') {
     document.getElementById("checklistcontact").innerHTML = "your Country ERC";
   } else {
-    document.getElementById("checklistcontact").innerHTML = "Israeli ERC (Yifat Siner @ NOTES ID: IJB@il.ibm.com, Yifat Singer/Israel/IBM)";
+    document.getElementById("checklistcontact").innerHTML = "Israeli ERC (Yifat Singer @ NOTES ID: IJB@il.ibm.com, Yifat Singer/Israel/IBM)";
   }
 }
 
