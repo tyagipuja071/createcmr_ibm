@@ -1617,7 +1617,6 @@ function checkIfDnBCheckReqForAUSG() {
           || custSubGrp == 'XAQST' || custSubGrp == 'CROSS' || custSubGrp == 'XIGF')) {
     if (result && result.ret1) {
       return false;
-      admin.setMatchOverrideIndc("Y");
     } else {
       return true;
     }
