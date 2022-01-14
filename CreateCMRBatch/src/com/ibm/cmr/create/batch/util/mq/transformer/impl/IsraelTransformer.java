@@ -137,6 +137,7 @@ public class IsraelTransformer extends EMEATransformer {
       if ("INTER".equals(custType) || "INTSO".equals(custType)) {
         legacyCust.setCreditCd("91");
       }
+      legacyCust.setLeasingInd("0"); // default Leasing Indicator
 
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       // Update only mapping
