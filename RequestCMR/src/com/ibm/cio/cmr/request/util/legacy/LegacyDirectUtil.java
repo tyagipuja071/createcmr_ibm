@@ -23,6 +23,7 @@ import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.codehaus.jackson.map.ObjectMapper;
 
@@ -39,6 +40,7 @@ import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
 import com.ibm.cio.cmr.request.entity.MassUpdtData;
+import com.ibm.cio.cmr.request.masschange.obj.TemplateTab;
 import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
@@ -155,9 +157,6 @@ public class LegacyDirectUtil {
       // for Ireland, also query from 866
       cmrIssuingCntry = SystemLocation.UNITED_KINGDOM;
     }
-    if (SystemLocation.ISRAEL.equals(cmrIssuingCntry)) {
-      cmrIssuingCntry = SystemLocation.SAP_ISRAEL_SOF_ONLY;
-    }
 
     LegacyDirectObjectContainer legacyObjects = new LegacyDirectObjectContainer();
 
@@ -180,9 +179,6 @@ public class LegacyDirectUtil {
     if (SystemLocation.IRELAND.equals(cmrIssuingCntry)) {
       // for Ireland, also query from 866
       cmrIssuingCntry = SystemLocation.UNITED_KINGDOM;
-    }
-    if (SystemLocation.ISRAEL.equals(cmrIssuingCntry)) {
-      cmrIssuingCntry = SystemLocation.SAP_ISRAEL_SOF_ONLY;
     }
 
     LegacyDirectObjectContainer legacyObjects = new LegacyDirectObjectContainer();
@@ -376,9 +372,6 @@ public class LegacyDirectUtil {
     if (SystemLocation.IRELAND.equals(cmrIssuingCntry)) {
       // for Ireland, also query from 866
       cmrIssuingCntry = SystemLocation.UNITED_KINGDOM;
-    }
-    if (SystemLocation.ISRAEL.equals(cmrIssuingCntry)) {
-      cmrIssuingCntry = SystemLocation.SAP_ISRAEL_SOF_ONLY;
     }
 
     LegacyDirectObjectContainer legacyObjects = new LegacyDirectObjectContainer();
@@ -718,9 +711,6 @@ public class LegacyDirectUtil {
       // for Ireland, also query from 866
       cmrIssuingCntry = SystemLocation.UNITED_KINGDOM;
     }
-    if (SystemLocation.ISRAEL.equals(cmrIssuingCntry)) {
-      cmrIssuingCntry = SystemLocation.SAP_ISRAEL_SOF_ONLY;
-    }
 
     LegacyDirectObjectContainer legacyObjects = new LegacyDirectObjectContainer();
 
@@ -745,9 +735,6 @@ public class LegacyDirectUtil {
     if (SystemLocation.IRELAND.equals(cmrIssuingCntry)) {
       // for Ireland, also query from 866
       cmrIssuingCntry = SystemLocation.UNITED_KINGDOM;
-    }
-    if (SystemLocation.ISRAEL.equals(cmrIssuingCntry)) {
-      cmrIssuingCntry = SystemLocation.SAP_ISRAEL_SOF_ONLY;
     }
 
     String sql = ExternalizedQuery.getSql("LEGACYD.GETADDR_FISCAL");
@@ -841,6 +828,17 @@ public class LegacyDirectUtil {
     }
 
     handler.validateMassUpdateTemplateDupFills(validations, book, maxRows, country);
+  }
+
+  public static void checkIsraelMassTemplate(List<TemplateTab> tabs, XSSFWorkbook book, String country) throws Exception {
+    if (SystemLocation.ISRAEL.equals(country)) {
+      for (TemplateTab templateTab : tabs) {
+        XSSFSheet sheet = book.getSheet(templateTab.getName());
+        if (sheet == null) {
+          throw new Exception("Invalid Template. Only MassUpdateTemplateAutoIL is accepted.");
+        }
+      }
+    }
   }
 
   public static List<MassUpdtAddr> getMassUpdtAddrsForDPLCheck(EntityManager entityManager, String reqId, String iterId) {
@@ -1234,9 +1232,6 @@ public class LegacyDirectUtil {
       // for Ireland, also query from 866
       cmrIssuingCntry = SystemLocation.UNITED_KINGDOM;
     }
-    if (SystemLocation.ISRAEL.equals(cmrIssuingCntry)) {
-      cmrIssuingCntry = SystemLocation.SAP_ISRAEL_SOF_ONLY;
-    }
 
     LegacyDirectObjectContainer legacyObjects = new LegacyDirectObjectContainer();
 
@@ -1422,7 +1417,7 @@ public class LegacyDirectUtil {
 
     return isDR;
   }
-  
+
   public static DataRdc getOldData(EntityManager entityManager, String reqId) {
     String sql = ExternalizedQuery.getSql("SUMMARY.OLDDATA");
     PreparedQuery query = new PreparedQuery(entityManager, sql);

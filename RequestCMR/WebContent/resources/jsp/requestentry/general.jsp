@@ -258,11 +258,14 @@ if (readOnly){
                 <td>-</td>
               </tr>
               <%}%>
-              <cmr:view forCountry="358,359,363,607,620,626,651,675,677,680,694,695,713,741,752,762,767,768,772,787,805,808,821,823,832,849,850,865,889,641,766,858">
+              <cmr:view forCountry="358,359,363,607,620,626,651,675,677,680,694,695,713,741,752,762,767,768,772,787,805,808,821,823,832,849,850,865,889,641,766,858,755">
               <tr>
                 <td>Proliferation Checklist
                     <%if (!readOnly){%>
-                      <span class="ibm-required cmr-required-spacer">*</span>
+                      <% if("755".equals(reqentry.getCmrIssuingCntry()) && "U".equals(reqentry.getReqType())) %>
+                      <% else { %>
+                      	<span class="ibm-required cmr-required-spacer">*</span>
+                      <% } %>	
                     <%} %>
                 </td>
                 <td id="checklistStatus">

@@ -168,7 +168,7 @@ function processRequestAction() {
       } else if (checkIfUpfrontUpdateChecksRequired()) {
         addUpdateChecksExecution(frmCMR);
       } else {
-        if (cmrCntry == '821') {
+        if (cmrCntry == '821' || cmrCntry == '755') {
           executeBeforeSubmit();
         } else {
           // if there are no errors, show the Address Verification modal window
@@ -243,6 +243,8 @@ function processRequestAction() {
         var nm2 = _pagemodel.mainCustNm2 == null ? '' : _pagemodel.mainCustNm2;
         if (nm1 != FormManager.getActualValue('mainCustNm1') || nm2 != FormManager.getActualValue('mainCustNm2')) {
           cmr.showAlert("The Customer Name/s have changed. The record has to be saved first. Please select Save from the actions. A DPL check will also be necessary after saving. ");
+        } else if (FormManager.getActualValue('reqType') == 'U' && cmrCntry == '755') {
+          executeBeforeSubmit(action);
         } else {
           doYourAction();
         }

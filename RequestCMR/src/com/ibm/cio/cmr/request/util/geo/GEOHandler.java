@@ -1001,6 +1001,15 @@ public abstract class GEOHandler {
     return null;
   }
 
+  /**
+   * Return true if mass update auto dpl search is enabled
+   * 
+   * @return
+   */
+  public boolean shouldAutoDplSearchMassUpdate() {
+    return false;
+  }
+  
   public IntlAddr getIntlAddrById(Addr addr, EntityManager entityManager) {
     // TODO Auto-generated method stub
     return null;
