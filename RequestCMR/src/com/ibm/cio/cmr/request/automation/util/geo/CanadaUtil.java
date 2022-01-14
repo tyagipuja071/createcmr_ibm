@@ -481,7 +481,7 @@ public class CanadaUtil extends AutomationUtil {
               validation.setSuccess(false);
               if (StringUtils.isBlank(admin.getSourceSystId())) {
                 engineData.addRejectionComment("OTH", error, "", "");
-                output.setOnError(true);
+                output.setOnError(false);
               } else {
                 engineData.addNegativeCheckStatus("BP_" + change.getDataField(), error);
               }
@@ -505,7 +505,7 @@ public class CanadaUtil extends AutomationUtil {
               validation.setSuccess(false);
               if (StringUtils.isBlank(admin.getSourceSystId())) {
                 engineData.addRejectionComment("OTH", error, "", "");
-                output.setOnError(true);
+                output.setOnError(false);
               } else {
                 engineData.addNegativeCheckStatus("BP_" + change.getDataField(), error);
               }
@@ -520,7 +520,7 @@ public class CanadaUtil extends AutomationUtil {
               validation.setMessage("Validation Failed");
               if (StringUtils.isBlank(admin.getSourceSystId())) {
                 engineData.addRejectionComment("OTH", error, "", "");
-                output.setOnError(true);
+                output.setOnError(false);
               } else {
                 engineData.addNegativeCheckStatus("BP_" + change.getDataField(), error);
               }
@@ -528,10 +528,10 @@ public class CanadaUtil extends AutomationUtil {
             }
           }
           break;
-        case "Tax Code":
+        case "Tax Code / Estab. Function Code":
         case "PST Exemption License Number":
           if (!isVatDocAttachmentProvided(entityManager, admin.getId().getReqId())) {
-            details.append("\nVAT/TAX Documentation required to be attached when updating EFC/PST Exemption License Number.");
+            details.append("\nVAT/TAX Documentation required to be attached when updating EFC/PST Exemption License Number.\n");
             engineData.addRejectionComment("TAX", "VAT/TAX Documentation required when updating EFC/PST Exemption Licenso No.",
                 "VAT/TAX Documentation required when updating EFC/PST Exemption Licenso No", "");
             output.setOnError(true);
