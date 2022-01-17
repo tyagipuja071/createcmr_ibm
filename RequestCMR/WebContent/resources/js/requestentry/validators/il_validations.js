@@ -69,6 +69,36 @@ function setClientTierValue(value) {
     FormManager.enable('clientTier');
   }
 }
+
+function addISUHandler() {
+  var _CTCHandler = null;
+  _isuCdHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+    setClientTierAndISR(value);
+    setValuesWRTIsuCtc();   
+  });
+  _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
+    setClientTierAndISR(); 
+    setValuesWRTIsuCtc(value);
+ });
+}
+
+function setClientTierAndISR(value) {
+  var reqType = null;
+  reqType = FormManager.getActualValue('reqType');
+  var clientTier = FormManager.getActualValue('clientTier');
+  if (!value) {
+    value = FormManager.getActualValue('isuCd');
+  }
+  if (value == '5K') {
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    FormManager.setValue('clientTier', '');
+    FormManager.readOnly('clientTier');
+    return;
+  } else {
+    FormManager.enable('clientTier');
+  }
+}
+
 function addEMEALandedCountryHandler(cntry, addressMode, saving, finalSave) {
   var scenario = FormManager.getActualValue('custGrp');
   if (!saving) {
@@ -1637,6 +1667,10 @@ function addISICKUKLAValidator() {
         var kukla = FormManager.getActualValue('custClass');
         var reqType = FormManager.getActualValue('reqType').toUpperCase();
 
+        if (reqType != 'U') {
+          return;
+        }
+
         if (isicCD == '9500' && kukla != '60') {
           return new ValidationResult(null, false, 'Invalid value for ISIC/KUKLA.  ISIC value 9500 and KUKLA 60 should be linked together.');
         } else if (kukla == '60' && isicCD != '9500') {
@@ -2650,6 +2684,30 @@ function limitMODValues() {
   }
 }
 
+function setValuesWRTIsuCtc(ctc){
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var isu = FormManager.getActualValue('isuCd');
+  if(ctc==null){
+    var ctc = FormManager.getActualValue('clientTier');
+  }
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  if (isu == '34' && ctc == 'Y') {
+  FormManager.setValue('enterprise', '003290');
+  FormManager.setValue('salesBusOffCd', '006');
+  FormManager.setValue('repTeamMemberNo', '000651'); 
+  } else if (isu == '5K' && ctc == '') {
+    FormManager.setValue('enterprise', '985999');
+    FormManager.setValue('salesBusOffCd', '006');
+    FormManager.setValue('repTeamMemberNo', '000651');
+  }
+  if(role == 'REQUESTER') {
+    FormManager.removeValidator('enterprise', Validators.REQUIRED);
+  } else {
+    FormManager.addValidator('enterprise', Validators.REQUIRED);
+  }
+}
+
+
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding Israel functions...');
@@ -2752,4 +2810,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setClientTierValue, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterTemplateLoad(setClientTierValue, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterTemplateLoad(addILClientTierISULogic, [ SysLoc.ISRAEL ]);
+  GEOHandler.addAfterTemplateLoad(addISUHandler, [ SysLoc.ISRAEL ]);
+  GEOHandler.addAfterConfig(addISUHandler, [ SysLoc.ISRAEL ]);
+  GEOHandler.addAfterTemplateLoad(setClientTierAndISR, [ SysLoc.ISRAEL ]);
+  GEOHandler.addAfterConfig(setClientTierAndISR, [ SysLoc.ISRAEL ]);
 });
