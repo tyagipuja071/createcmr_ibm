@@ -105,15 +105,6 @@
       <cmr:field fieldId="LandedCountry" id="landCntry" path="landCntry" />
     </p>
   </cmr:column>
-  <cmr:column span="2" forCountry="755">
-    <p>
-      <cmr:label fieldId="translate">&nbsp;
-      </cmr:label>
-      Translate: 
-      <a class="translate" href="javascript: cmr.openTranslateWindow('en','iw', ['custNm1', 'addrTxt', 'poBox', 'city1', 'dept'])" >to Local Language</a>
-      <a class="translate" href="javascript: cmr.openTranslateWindow('iw','en', ['custNm1', 'addrTxt', 'poBox', 'city1', 'dept'])" >to English</a>
-    </p>
-  </cmr:column>
   <cmr:column span="2" forCountry="726,666">
     <p>
     <cmr:label fieldId="custNm4">
