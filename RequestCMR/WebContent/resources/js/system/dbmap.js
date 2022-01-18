@@ -366,6 +366,9 @@ var DB_ADDR_FIELDS = [ {
 }, {
   id : 'DPLCheckResult',
   name : 'DPL_CHK_RESULT'
+}, {
+  id : 'AddrType',
+  name : 'ADDR_TYPE'
 } ];
 
 DB_ADDR_FIELDS.sort(function(a, b) {
