@@ -91,12 +91,18 @@ public class IsraelTransformer extends EMEATransformer {
       }
 
       if (isLocalFlag) {
-        String currentVat = data.getVat().toUpperCase();
-        String vatSubstr = currentVat.contains("IL") ? currentVat.replace("IL", "") : currentVat;
-        legacyCust.setVat(vatSubstr);
+        if (!StringUtils.isEmpty(data.getVat())) {
+          String currentVat = data.getVat().toUpperCase();
+          String vatSubstr = currentVat.contains("IL") ? currentVat.replace("IL", "") : currentVat;
+          legacyCust.setVat(vatSubstr);
+        } else {
+          legacyCust.setVat("");
+        }
       } else {
         if (!StringUtils.isEmpty(data.getVat())) {
           legacyCust.setVat(data.getVat());
+        } else {
+          legacyCust.setVat("");
         }
       }
       legacyCust.setCollectionCd("TC0");
