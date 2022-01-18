@@ -168,80 +168,82 @@ public class CanadaUtil extends AutomationUtil {
 
     if (custScenarioList != null && custScenarioList.size() > 0) {
       for (CustScenarios custScenario : custScenarioList) {
-        String scenariofieldValue = custScenario.getValue();
-        // Sales Branch Office
-        if (custScenario.getFieldName().equals("salesBusOffCd")) {
-          String dataSalesBusOffCd = data.getSalesBusOffCd();
-          if (StringUtils.isNotBlank(scenariofieldValue) && !dataSalesBusOffCd.equals(scenariofieldValue)) {
-            details.append("Setting Sales Branch Office to ").append(scenariofieldValue).append("\n");
-            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SALES_BO_CD", dataSalesBusOffCd, scenariofieldValue);
-            data.setSalesBusOffCd(scenariofieldValue);
+        if (StringUtils.isNotEmpty(custScenario.getFieldName())) {
+          String scenariofieldValue = custScenario.getValue();
+          // Sales Branch Office
+          if (custScenario.getFieldName().equals("salesBusOffCd")) {
+            String dataSalesBusOffCd = data.getSalesBusOffCd();
+            if (StringUtils.isNotBlank(scenariofieldValue) && !dataSalesBusOffCd.equals(scenariofieldValue)) {
+              details.append("Setting Sales Branch Office to ").append(scenariofieldValue).append("\n");
+              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SALES_BO_CD", dataSalesBusOffCd, scenariofieldValue);
+              data.setSalesBusOffCd(scenariofieldValue);
+            }
           }
-        }
-        // Marketing Rep
-        else if (custScenario.getFieldName().equals("repTeamMemberNo")) {
-          String dataRepTeamMemberNo = data.getRepTeamMemberNo();
-          if (StringUtils.isNotBlank(scenariofieldValue) && !dataRepTeamMemberNo.equals(scenariofieldValue)) {
-            details.append("Setting Mktg Rep to ").append(scenariofieldValue).append("\n");
-            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "REP_TEAM_MEMBER_NO", dataRepTeamMemberNo, scenariofieldValue);
+          // Marketing Rep
+          else if (custScenario.getFieldName().equals("repTeamMemberNo")) {
+            String dataRepTeamMemberNo = data.getRepTeamMemberNo();
+            if (StringUtils.isNotBlank(scenariofieldValue) && !dataRepTeamMemberNo.equals(scenariofieldValue)) {
+              details.append("Setting Mktg Rep to ").append(scenariofieldValue).append("\n");
+              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "REP_TEAM_MEMBER_NO", dataRepTeamMemberNo,
+                  scenariofieldValue);
+            }
           }
-        }
-        // CS Branch
-        else if (custScenario.getFieldName().equals("salesTeamCd")) {
-          String dataSalesTeamCd = data.getSalesTeamCd();
-          if (StringUtils.isNotBlank(scenariofieldValue) && !dataSalesTeamCd.equals(scenariofieldValue)) {
-            details.append("Setting CS Branch to ").append(scenariofieldValue).append("\n");
-            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SALES_TEAM_CD", dataSalesTeamCd, scenariofieldValue);
-          } else if (StringUtils.isBlank(dataSalesTeamCd)) {
-            if (soldTo != null && StringUtils.isNotBlank(soldTo.getPostCd()) && soldTo.getPostCd().length() >= 3) {
-              String computedCsBranch = soldTo.getPostCd().substring(0, 3);
-              details.append("Setting computed CS Branch to").append(computedCsBranch).append("\n");
-              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SALES_TEAM_CD", dataSalesTeamCd, computedCsBranch);
-            } else if (soldTo == null) {
-              isFieldCompSuccessful = false;
-              details.append("No Sold-To Address. Cannot compute CS Branch").append("\n");
+          // CS Branch
+          else if (custScenario.getFieldName().equals("salesTeamCd")) {
+            String dataSalesTeamCd = data.getSalesTeamCd();
+            if (StringUtils.isNotBlank(scenariofieldValue) && !dataSalesTeamCd.equals(scenariofieldValue)) {
+              details.append("Setting CS Branch to ").append(scenariofieldValue).append("\n");
+              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SALES_TEAM_CD", dataSalesTeamCd, scenariofieldValue);
+            } else if (StringUtils.isBlank(dataSalesTeamCd)) {
+              if (soldTo != null && StringUtils.isNotBlank(soldTo.getPostCd()) && soldTo.getPostCd().length() >= 3) {
+                String computedCsBranch = soldTo.getPostCd().substring(0, 3);
+                details.append("Setting computed CS Branch to").append(computedCsBranch).append("\n");
+                overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SALES_TEAM_CD", dataSalesTeamCd, computedCsBranch);
+              } else if (soldTo == null) {
+                isFieldCompSuccessful = false;
+                details.append("No Sold-To Address. Cannot compute CS Branch").append("\n");
+              }
+            }
+          }
+          // AR-FAAR
+          else if (custScenario.getFieldName().equals("adminDeptCd")) {
+            String dataAdminDeptCd = data.getAdminDeptCd();
+            String sbo = data.getSalesBusOffCd();
+            if (StringUtils.isNotBlank(scenariofieldValue) && !dataAdminDeptCd.equals(scenariofieldValue)) {
+              details.append("Setting AR-FAAR to ").append(scenariofieldValue).append("\n");
+              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ADMIN_DEPT_CD", dataAdminDeptCd, scenariofieldValue);
+            }
+          }
+          // Credit Code creditCd
+          else if (custScenario.getFieldName().equals("creditCd")) {
+            String dataCreditCd = data.getCreditCd();
+            if (StringUtils.isNotBlank(scenariofieldValue) && !dataCreditCd.equals(scenariofieldValue)) {
+              details.append("Setting Credit Code to ").append(scenariofieldValue).append("\n");
+              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CREDIT_CD", dataCreditCd, scenariofieldValue);
+            }
+          }
+          // Pref Lang
+          else if (custScenario.getFieldName().equals("custPrefLang")) {
+            String dataCustPrefLang = data.getCustPrefLang();
+            if (soldTo != null && "QC".equals(soldTo.getStateProv())) {
+              details.append("Setting Preferred Language to French").append("\n");
+              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CUST_PREF_LANG", dataCustPrefLang, "F");
+              data.setCustPrefLang("F");
+            } else if (StringUtils.isNotBlank(scenariofieldValue) && !dataCustPrefLang.equals(scenariofieldValue)) {
+              details.append("Setting Preferred Language to ").append(scenariofieldValue).append("\n");
+              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CUST_PREF_LANG", dataCustPrefLang, scenariofieldValue);
+            }
+          }
+          // Tax Code/Estab Function Code (EFC)
+          else if (custScenario.getFieldName().equals("taxCd1")) {
+            String dataTaxCd1 = data.getTaxCd1();
+            if (StringUtils.isBlank(dataTaxCd1)
+                || (StringUtils.isNotBlank(dataTaxCd1) && StringUtils.isNotBlank(scenariofieldValue) && !dataTaxCd1.equals(scenariofieldValue))) {
+              details.append("Setting Tax Code/EFC to ").append(scenariofieldValue).append("\n");
+              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "TAX_CD1", dataTaxCd1, scenariofieldValue);
             }
           }
         }
-        // AR-FAAR
-        else if (custScenario.getFieldName().equals("adminDeptCd")) {
-          String dataAdminDeptCd = data.getAdminDeptCd();
-          String sbo = data.getSalesBusOffCd();
-          if (StringUtils.isNotBlank(scenariofieldValue) && !dataAdminDeptCd.equals(scenariofieldValue)) {
-            details.append("Setting AR-FAAR to ").append(scenariofieldValue).append("\n");
-            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ADMIN_DEPT_CD", dataAdminDeptCd, scenariofieldValue);
-          }
-        }
-        // Credit Code creditCd
-        else if (custScenario.getFieldName().equals("creditCd")) {
-          String dataCreditCd = data.getCreditCd();
-          if (StringUtils.isNotBlank(scenariofieldValue) && !dataCreditCd.equals(scenariofieldValue)) {
-            details.append("Setting Credit Code to ").append(scenariofieldValue).append("\n");
-            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CREDIT_CD", dataCreditCd, scenariofieldValue);
-          }
-        }
-        // Pref Lang
-        else if (custScenario.getFieldName().equals("custPrefLang")) {
-          String dataCustPrefLang = data.getCustPrefLang();
-          if (soldTo != null && "QC".equals(soldTo.getStateProv())) {
-            details.append("Setting Preferred Language to French").append("\n");
-            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CUST_PREF_LANG", dataCustPrefLang, "F");
-            data.setCustPrefLang("F");
-          } else if (StringUtils.isNotBlank(scenariofieldValue) && !dataCustPrefLang.equals(scenariofieldValue)) {
-            details.append("Setting Preferred Language to ").append(scenariofieldValue).append("\n");
-            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CUST_PREF_LANG", dataCustPrefLang, scenariofieldValue);
-          }
-        }
-        // Tax Code/Estab Function Code (EFC)
-        else if (custScenario.getFieldName().equals("taxCd1")) {
-          String dataTaxCd1 = data.getTaxCd1();
-          if (StringUtils.isBlank(dataTaxCd1)
-              || (StringUtils.isNotBlank(dataTaxCd1) && StringUtils.isNotBlank(scenariofieldValue) && !dataTaxCd1.equals(scenariofieldValue))) {
-            details.append("Setting Tax Code/EFC to ").append(scenariofieldValue).append("\n");
-            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "TAX_CD1", dataTaxCd1, scenariofieldValue);
-          }
-        }
-
       }
     }
     // Pref Lang - ensure French if sold-to prov is Quebec
@@ -479,7 +481,7 @@ public class CanadaUtil extends AutomationUtil {
               validation.setSuccess(false);
               if (StringUtils.isBlank(admin.getSourceSystId())) {
                 engineData.addRejectionComment("OTH", error, "", "");
-                output.setOnError(true);
+                output.setOnError(false);
               } else {
                 engineData.addNegativeCheckStatus("BP_" + change.getDataField(), error);
               }
@@ -503,7 +505,7 @@ public class CanadaUtil extends AutomationUtil {
               validation.setSuccess(false);
               if (StringUtils.isBlank(admin.getSourceSystId())) {
                 engineData.addRejectionComment("OTH", error, "", "");
-                output.setOnError(true);
+                output.setOnError(false);
               } else {
                 engineData.addNegativeCheckStatus("BP_" + change.getDataField(), error);
               }
@@ -518,7 +520,7 @@ public class CanadaUtil extends AutomationUtil {
               validation.setMessage("Validation Failed");
               if (StringUtils.isBlank(admin.getSourceSystId())) {
                 engineData.addRejectionComment("OTH", error, "", "");
-                output.setOnError(true);
+                output.setOnError(false);
               } else {
                 engineData.addNegativeCheckStatus("BP_" + change.getDataField(), error);
               }
@@ -526,8 +528,14 @@ public class CanadaUtil extends AutomationUtil {
             }
           }
           break;
-        case "Tax Code":
-          // noop, for switch handling only
+        case "Tax Code / Estab. Function Code":
+        case "PST Exemption License Number":
+          if (!isVatDocAttachmentProvided(entityManager, admin.getId().getReqId())) {
+            details.append("\nVAT/TAX Documentation required to be attached when updating EFC/PST Exemption License Number.\n");
+            engineData.addRejectionComment("TAX", "VAT/TAX Documentation required when updating EFC/PST Exemption Licenso No.",
+                "VAT/TAX Documentation required when updating EFC/PST Exemption Licenso No", "");
+            output.setOnError(true);
+          }
           break;
         case "Client Tier Code":
           // noop, for switch handling only
@@ -923,6 +931,13 @@ public class CanadaUtil extends AutomationUtil {
       }
     }
     return null;
+  }
+
+  private boolean isVatDocAttachmentProvided(EntityManager entityManager, long reqId) {
+    String sql = ExternalizedQuery.getSql("QUERY.CHECK_VATD_ATTACHMENT");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("ID", reqId);
+    return query.exists();
   }
 
 }
