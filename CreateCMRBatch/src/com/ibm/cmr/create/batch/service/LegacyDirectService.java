@@ -47,6 +47,7 @@ import com.ibm.cio.cmr.request.entity.CompoundEntity;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.entity.DataRdc;
+import com.ibm.cio.cmr.request.entity.Kna1;
 import com.ibm.cio.cmr.request.entity.MassUpdt;
 import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
 import com.ibm.cio.cmr.request.entity.MassUpdtData;
@@ -300,6 +301,9 @@ public class LegacyDirectService extends TransConnService {
     // get CreateCMR data
     CMRRequestContainer cmrObjects = prepareRequest(entityManager, admin);
 
+    boolean rdcRecExists = checkIfRecExistOnRDC(entityManager, cmrObjects.getData().getCmrNo(), cmrObjects.getData().getCmrIssuingCntry()).size() > 0;
+    boolean legacyRecExists = checkIfRecExistOnLegacy(entityManager, cmrObjects.getData().getCmrNo(), cmrObjects.getData().getCmrIssuingCntry()).size() > 0;
+    
     if (admin.getRdcProcessingStatus() != null
         && (CmrConstants.RDC_STATUS_ABORTED.equals(admin.getRdcProcessingStatus())
             || CmrConstants.RDC_STATUS_NOT_COMPLETED.equals(admin.getRdcProcessingStatus()))
@@ -307,6 +311,11 @@ public class LegacyDirectService extends TransConnService {
 
       skipLegacyProcessingforCreateUpdate(entityManager, admin);
 
+    } else if (SystemLocation.ITALY.equals(cmrObjects.getData().getCmrIssuingCntry())
+        && CmrConstants.REQ_TYPE_CREATE.equals(cmrObjects.getAdmin().getReqType()) && !rdcRecExists && legacyRecExists) {
+
+      LOG.info("Legacy record already exists for the current request. Skipping Legacy Processing...");
+      skipLegacyProcessingforCreateUpdate(entityManager, admin);
     } else {
       // prepare legacy data, map to the values needed
       LegacyDirectObjectContainer legacyObjects = mapRequestDataForCreate(entityManager, cmrObjects);
@@ -4321,6 +4330,27 @@ public class LegacyDirectService extends TransConnService {
     query.setForReadOnly(true);
     return query.getSingleResult(AddrRdc.class);
 
+  }
+  
+  private List<Kna1> checkIfRecExistOnRDC(EntityManager entityManager, String cmrNo, String cntry) {
+    String sql = ExternalizedQuery.getSql("BATCH.GET.KNA1_MANDT_CMRNO");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CMR_NO", cmrNo);
+    query.setParameter("KATR6", cntry);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setForReadOnly(true);
+    List<Kna1> rdcRecs = query.getResults(Kna1.class);
+    return rdcRecs;
+  }
+
+  private List<CmrtCust> checkIfRecExistOnLegacy(EntityManager entityManager, String cmrNo, String cntry) {
+    String sql = ExternalizedQuery.getSql("LEGACYD.GETCUST");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CMR_NO", cmrNo);
+    query.setParameter("COUNTRY", cntry);
+    query.setForReadOnly(true);
+    List<CmrtCust> legacyRecs = query.getResults(CmrtCust.class);
+    return legacyRecs;
   }
 
   private List<String> checkIfSeqExistOnRDC(EntityManager entityManager, String cmrNo, String cntry) {

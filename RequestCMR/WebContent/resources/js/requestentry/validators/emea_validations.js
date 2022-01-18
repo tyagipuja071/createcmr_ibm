@@ -8601,17 +8601,27 @@ function validateExistingCMRNo() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
+        console.log('checking if prospect cmr...');
+        var cmrNo = FormManager.getActualValue('cmrNo');
+        if (cmrNo.match('^P[0-9]{5}')) {
+          return;
+        }
         console.log('checking requested cmr number...');
         var reqType = FormManager.getActualValue('reqType');
-        var cmrNo = FormManager.getActualValue('cmrNo');
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var reqId = FormManager.getActualValue('reqId');
+        var action = FormManager.getActualValue('yourAction');
         if (reqType == 'C' && cmrNo) {
-          var exists = cmr.query('LD.CHECK_CMR_EXIST_IN_RDC', {
+          var exists = cmr.query('LD.CHECK_EXISTING_CMR_NO', {
             COUNTRY : cntry,
             CMR_NO : cmrNo,
             MANDT : cmr.MANDT
           });
-          if (exists && exists.ret1) {
+          var processed = cmr.query('LD.CHECK_RDC_PROCESSING_STATUS', {
+            REQ_ID : reqId
+          });
+
+          if (exists && exists.ret1 && !processed.ret1) {
             return new ValidationResult({
               id : 'cmrNo',
               type : 'text',
@@ -8630,6 +8640,18 @@ function validateExistingCMRNo() {
                 name : 'cmrNo'
               }, false, 'The requested CMR Number ' + cmrNo + ' already exists in the system.');
             }
+          }
+          var exists1 = cmr.query('LD.CHECK_CMR_EXIST_IN_RDC', {
+            COUNTRY : cntry,
+            CMR_NO : cmrNo,
+            MANDT : cmr.MANDT
+          });
+          if (exists1 && exists1.ret1 && action != 'PCM') {
+            return new ValidationResult({
+              id : 'cmrNo',
+              type : 'text',
+              name : 'cmrNo'
+            }, false, 'The requested CMR: ' + cmrNo + ' already exists in the system for country : ' + cntry);
           }
         }
         return new ValidationResult({
@@ -9079,6 +9101,7 @@ function ibmFieldsBehaviourInCreateByScratchIT() {
 }
 
 function disableProcpectCmrIT() {
+  var cmrNo = FormManager.getActualValue('cmrNo');
   if (FormManager.getActualValue('reqType') != 'C') {
     return;
   }
@@ -9086,9 +9109,14 @@ function disableProcpectCmrIT() {
   if (dijit.byId('prospLegalInd')) {
     ifProspect = dijit.byId('prospLegalInd').get('checked') ? 'Y' : 'N';
   }
+  if (ifProspect == 'N') {
+    FormManager.setValue('prospLegalInd', 'N');
+  }
   console.log("disable prospect CMR");
-  if ('Y' == ifProspect) {
+  if (cmrNo.match('^P[0-9]{5}')) {
     FormManager.readOnly('cmrNo');
+  } else {
+    FormManager.enable('cmrNo');
   }
 }
 

@@ -8,6 +8,7 @@ import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -405,10 +406,12 @@ public class CalculateCoverageElement extends OverridingElement {
 
     if (!coverageIds.contains(currCovId) && currCovRules != null && !currCovRules.isEmpty()) {
       // create overrides for first logged/manually logged coverage only
+      Collections.sort(currCovRules);
       Rule rule = currCovRules.get(0);
       boolean createOverrides = coverageIds.isEmpty() && !COV_ODM.equals(covFrom);
       List<Rule> matchedRules = coverageRules.matchWithCoverage(input, currCovId);
       if (matchedRules != null && !matchedRules.isEmpty()) {
+        Collections.sort(matchedRules);
         rule = matchedRules.get(0);
       }
       details.append("\nCoverage ID = " + currCovId).append(" (" + currCovLevel + ")").append("\n");
@@ -468,6 +471,9 @@ public class CalculateCoverageElement extends OverridingElement {
                   }
                 }
                 break;
+              case "LengthGreaterThan":
+                break;
+
               default:
                 notDeterminedFields.put(field, val);
                 break;

@@ -90,6 +90,18 @@ public class MassCreateData extends BaseEntity<MassCreateDataPK> implements Seri
   @Column(name = "TAX_CD3")
   private String taxCd3;
 
+  // @Column(
+  // name = "TAX_EXEMPT_STATUS_1")
+  // private String taxExemp;
+  //
+  // public String getTaxExemp() {
+  // return taxExemp;
+  // }
+  //
+  // public void setTaxExemp(String taxExemp) {
+  // this.taxExemp = taxExemp;
+  // }
+
   @Column(name = "SEARCH_TERM")
   private String searchTerm;
 

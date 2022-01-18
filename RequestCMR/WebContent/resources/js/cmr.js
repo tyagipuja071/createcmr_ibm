@@ -1140,7 +1140,7 @@ var BrowserCheck = (function() {
   var edge = !IE && !!window.StyleMedia;
 
   // Chrome 1+
-  var chrome = !!window.chrome && !!window.chrome.webstore;
+  var chrome = !!window.chrome;
 
   // Blink engine detection
   var blink = (chrome || opera) && !!window.CSS;
