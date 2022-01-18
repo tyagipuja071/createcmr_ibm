@@ -749,6 +749,11 @@ function actualAddToAddressList() {
   } else if (cmr.addressMode == 'updateAddress') {
     FormManager.doHiddenAction('frmCMR_addressModal', 'UPDATE_ADDRESS', cmr.CONTEXT_ROOT + '/request/address/process.json?reqId=' + cmr.addrReqId,
         true, refreshAddressAfterResult, true);
+
+    if (FormManager.getActualValue('cmrIssuingCntry') == '649' && cmr.currentAddressType == 'ZS01' && cmr.currentAddressSeq == '00001') {
+      toggleCATaxFieldsByProvCd(FormManager.getActualValue('stateProv'));
+      setPrefLangByProvCd(cmr.currentAddressSeq, FormManager.getActualValue('stateProv'));
+    }
   }
   if (FormManager.getActualValue('cmrIssuingCntry') == '631') {
     // 1164561
@@ -1634,7 +1639,12 @@ function actualRemoveAddr() {
   if (FormManager.getActualValue('cmrIssuingCntry') == '758' && cmr.removeDetails.remAddrType == 'ZS01') {
     setBlankAbbrevNmLocationIT();
   }
-  if (FormManager.getActualValue('cmrIssuingCntry') == '678' || FormManager.getActualValue('cmrIssuingCntry') == '702'
+
+  if (FormManager.getActualValue('cmrIssuingCntry') == '649' && cmr.removeDetails.remAddrType == 'ZS01') {
+    clearCATaxFields();
+  }
+  
+    if (FormManager.getActualValue('cmrIssuingCntry') == '678' || FormManager.getActualValue('cmrIssuingCntry') == '702'
       || FormManager.getActualValue('cmrIssuingCntry') == '806' || FormManager.getActualValue('cmrIssuingCntry') == '846') {
     if (cmr.removeDetails.remAddrType == 'ZI01') {
       resetAbbNmRemoveAddrNORDX();
@@ -1859,6 +1869,10 @@ function applyAddrChangesModal_onLoad() {
         if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZP01') {
           continue;
         }
+      }
+
+      if (SysLoc.CANADA == cntry && [ 'ZD02', 'ZP08', 'ZP04', 'ZP05', 'ZE01', 'ZP06', 'ZP09' ].includes(type.ret1)) {
+        continue;
       }
 
       if (type.ret3 == cntry) {
