@@ -82,8 +82,22 @@ public class IsraelTransformer extends EMEATransformer {
       if (!StringUtils.isEmpty(kuklaVal)) {
         legacyCust.setCustType(kuklaVal);
       }
-      if (!StringUtils.isEmpty(data.getVat())) {
-        legacyCust.setVat(data.getVat());
+      boolean isLocalFlag = false;
+      for (Addr addrVal : cmrObjects.getAddresses()) {
+        if ("ZS01".equals(addrVal.getId().getAddrType()) && "IL".equals(addrVal.getLandCntry())) {
+          isLocalFlag = true;
+          break;
+        }
+      }
+
+      if (isLocalFlag) {
+        String currentVat = data.getVat().toUpperCase();
+        String vatSubstr = currentVat.contains("IL") ? currentVat.replace("IL", "") : currentVat;
+        legacyCust.setVat(vatSubstr);
+      } else {
+        if (!StringUtils.isEmpty(data.getVat())) {
+          legacyCust.setVat(data.getVat());
+        }
       }
       legacyCust.setCollectionCd("TC0");
       legacyCust.setDcRepeatAgreement("0");
@@ -159,10 +173,22 @@ public class IsraelTransformer extends EMEATransformer {
         legacyCust.setEnterpriseNo("");
       }
 
-      if (!StringUtils.isEmpty(data.getVat())) {
-        legacyCust.setVat(data.getVat());
+      boolean isLocalFlag = false;
+      for (Addr addrVal : cmrObjects.getAddresses()) {
+        if ("ZS01".equals(addrVal.getId().getAddrType()) && "IL".equals(addrVal.getLandCntry())) {
+          isLocalFlag = true;
+          break;
+        }
+      }
+
+      if (isLocalFlag) {
+        String currentVat = data.getVat().toUpperCase();
+        String vatSubstr = currentVat.contains("IL") ? currentVat.replace("IL", "") : currentVat;
+        legacyCust.setVat(vatSubstr);
       } else {
-        legacyCust.setVat("");
+        if (!StringUtils.isEmpty(data.getVat())) {
+          legacyCust.setVat(data.getVat());
+        }
       }
 
       String dataEmbargoCd = data.getEmbargoCd();
