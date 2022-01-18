@@ -1027,7 +1027,11 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                           if (searchTerm08036.equals(cmrsMods.getCmrSortl())) {
                             // should not be rejected
                             log.debug("Not a duplicate CMR.");
-                          } else {
+                          } else if ("04182".equals(cmrsMods.getCmrSortl())
+                              || (data.getSearchTerm() == null || StringUtils.isBlank(data.getSearchTerm())
+                                  || (data.getSearchTerm() != null && (data.getSearchTerm().trim().equalsIgnoreCase("000000")
+                                      || data.getSearchTerm().trim().equalsIgnoreCase("00000") || data.getSearchTerm().matches("[^0-9]+"))))
+                                  && (data.getCmrNo().startsWith("1") || data.getCmrNo().startsWith("2"))) {
                             // should be rejected
                             log.debug("Duplicate CMR. Request should be rejected.");
                             shouldBeRejected = true;
@@ -1085,7 +1089,11 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                             if (searchTerm08036.equals(cmrsMods.getCmrSortl())) {
                               // should not be rejected
                               log.debug("Not a duplicate CMR.");
-                            } else {
+                            } else if ("04182".equals(cmrsMods.getCmrSortl())
+                                || (data.getSearchTerm() == null || StringUtils.isBlank(data.getSearchTerm())
+                                    || (data.getSearchTerm() != null && (data.getSearchTerm().trim().equalsIgnoreCase("000000")
+                                        || data.getSearchTerm().trim().equalsIgnoreCase("00000") || data.getSearchTerm().matches("[^0-9]+"))))
+                                    && (data.getCmrNo().startsWith("1") || data.getCmrNo().startsWith("2"))) {
                               // should be rejected
                               log.debug("Duplicate CMR. Request should be rejected.");
                               shouldBeRejected = true;
@@ -1145,7 +1153,11 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                               if (searchTerm08036.equals(cmrsMods.getCmrSortl())) {
                                 // should not be rejected
                                 log.debug("Not a duplicate CMR.");
-                              } else {
+                              } else if ("04182".equals(cmrsMods.getCmrSortl())
+                                  || (data.getSearchTerm() == null || StringUtils.isBlank(data.getSearchTerm())
+                                      || (data.getSearchTerm() != null && (data.getSearchTerm().trim().equalsIgnoreCase("000000")
+                                          || data.getSearchTerm().trim().equalsIgnoreCase("00000") || data.getSearchTerm().matches("[^0-9]+"))))
+                                      && (data.getCmrNo().startsWith("1") || data.getCmrNo().startsWith("2"))) {
                                 // should be rejected
                                 log.debug("Duplicate CMR. Request should be rejected.");
                                 shouldBeRejected = true;
@@ -1211,7 +1223,11 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                               if (searchTerm08036.equals(cmrsMods.getCmrSortl())) {
                                 // should not be rejected
                                 log.debug("Not a duplicate CMR.");
-                              } else {
+                              } else if ("04182".equals(cmrsMods.getCmrSortl())
+                                  || (data.getSearchTerm() == null || StringUtils.isBlank(data.getSearchTerm())
+                                      || (data.getSearchTerm() != null && (data.getSearchTerm().trim().equalsIgnoreCase("000000")
+                                          || data.getSearchTerm().trim().equalsIgnoreCase("00000") || data.getSearchTerm().matches("[^0-9]+"))))
+                                      && (data.getCmrNo().startsWith("1") || data.getCmrNo().startsWith("2"))) {
                                 // should be rejected
                                 log.debug("Duplicate CMR. Request should be rejected.");
                                 shouldBeRejected = true;
@@ -1263,7 +1279,11 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                         if (searchTerm08036.equals(cmrsMods.getCmrSortl())) {
                           // should not be rejected
                           log.debug("Not a duplicate CMR.");
-                        } else {
+                        } else if ("04182".equals(cmrsMods.getCmrSortl())
+                            || (data.getSearchTerm() == null || StringUtils.isBlank(data.getSearchTerm())
+                                || (data.getSearchTerm() != null && (data.getSearchTerm().trim().equalsIgnoreCase("000000")
+                                    || data.getSearchTerm().trim().equalsIgnoreCase("00000") || data.getSearchTerm().matches("[^0-9]+"))))
+                                && (data.getCmrNo().startsWith("1") || data.getCmrNo().startsWith("2"))) {
                           // should be rejected
                           log.debug("Duplicate CMR. Request should be rejected.");
                           shouldBeRejected = true;

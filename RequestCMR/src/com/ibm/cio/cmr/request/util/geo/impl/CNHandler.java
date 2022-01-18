@@ -306,6 +306,8 @@ public class CNHandler extends GEOHandler {
             || !(data.getCustSubGrp().equals("INTER") || data.getCustSubGrp().equals("BUSPR") || data.getCustSubGrp().equals("PRIV")))
         && StringUtils.isBlank(data.getIsicCd()) && StringUtils.isNotBlank(data.getBusnType())) {
       getIsicByDNB(entityManager, data);
+    } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && (data.getCapInd() == null || data.getCapInd().equals("N"))) {
+      getIsicByDNB(entityManager, data);
     }
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())
         && (data.getCustSubGrp() != null
@@ -475,28 +477,35 @@ public class CNHandler extends GEOHandler {
   }
 
   private void getGBGId(EntityManager entityManager, Admin admin, Data data, Addr currentAddress) throws Exception {
-    getGBGIdByGBGservice(entityManager, admin, data, currentAddress, null, false);
-    if (StringUtils.isBlank(data.getGbgId())) {
-      String companyName = null;
-      if (StringUtils.isNotBlank(data.getBusnType())) {
-        companyName = DnBUtil.getCNApiCompanyNameData4GBG(data.getBusnType());
-      }
-      if (StringUtils.isNotBlank(companyName)) {
-        // 2, Check FindCMR NON Latin with Chinese name - single byte
-        CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
-        searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
-        searchModelFindCmrCN.setName(companyName);
-        List<CompanyRecordModel> resultFindCmrCN = null;
-        resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
-        if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
-          if (StringUtils.isNotBlank(resultFindCmrCN.get(0).getDunsNo())) {
-            getGBGIdByGBGservice(entityManager, admin, data, currentAddress, resultFindCmrCN.get(0).getDunsNo(), false);
-          } else {
-            getGBGIdByGBGservice(entityManager, admin, data, currentAddress, resultFindCmrCN.get(0).getCmrNo(), true);
-          }
+
+    String companyName = null;
+    if (StringUtils.isNotBlank(data.getBusnType())) {
+      companyName = DnBUtil.getCNApiCompanyNameData4GBG(data.getBusnType());
+    }
+    if (StringUtils.isNotBlank(companyName)) {
+      // 2, Check FindCMR NON Latin with Chinese name - single byte
+      CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
+      searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
+      searchModelFindCmrCN.setName(companyName);
+      List<CompanyRecordModel> resultFindCmrCN = null;
+      resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
+      if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
+        // if (StringUtils.isNotBlank(resultFindCmrCN.get(0).getDunsNo())) {
+        // getGBGIdByGBGservice(entityManager, admin, data, currentAddress,
+        // resultFindCmrCN.get(0).getDunsNo(), false);
+        // } else {
+        getGBGIdByGBGservice(entityManager, admin, data, currentAddress, resultFindCmrCN.get(0).getCmrNo(), true);
+        if (StringUtils.isBlank(data.getGbgId()) && StringUtils.isBlank(data.getBgId())) {
+          getGBGIdByGBGservice(entityManager, admin, data, currentAddress, resultFindCmrCN.get(0).getDunsNo(), false);
         }
+        // }
       }
     }
+    // else {
+    // getGBGIdByGBGservice(entityManager, admin, data, currentAddress, null,
+    // false);
+    // }
+
   }
 
   /**
@@ -807,8 +816,8 @@ public class CNHandler extends GEOHandler {
       data.setClientTier("BL");
     }
 
-    if (!StringUtils.isBlank(admin.getReqType()) && admin.getReqType().equalsIgnoreCase("U") && !StringUtils.isBlank(data.getPpsceid())
-        && !StringUtils.isBlank(admin.getReqStatus()) && admin.getReqStatus().equalsIgnoreCase("DRA")) {
+    if (!StringUtils.isBlank(admin.getReqType()) && admin.getReqType().equalsIgnoreCase("U") && !StringUtils.isBlank(admin.getReqStatus())
+        && admin.getReqStatus().equalsIgnoreCase("DRA")) {
       if (data.getSearchTerm() == null || StringUtils.isBlank(data.getSearchTerm())
           || (data.getSearchTerm() != null && (data.getSearchTerm().trim().equalsIgnoreCase("00000") || data.getSearchTerm().matches("[^0-9]+")))) {
         if (data.getCmrNo().startsWith("1") || data.getCmrNo().startsWith("2")) {
@@ -816,6 +825,9 @@ public class CNHandler extends GEOHandler {
           data.setSearchTerm("04182");
         }
       }
+    }
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && StringUtils.isBlank(data.getDunsNo())) {
+      getDunsNo(entityManager, data);
     }
   }
 
@@ -2150,7 +2162,30 @@ public class CNHandler extends GEOHandler {
     if (model.getReqType().equals("C") && model.getCustSubGrp() != null
         && !(model.getCustSubGrp().equals("INTER") || model.getCustSubGrp().equals("BUSPR") || model.getCustSubGrp().equals("PRIV"))) {
       getIsicByDNB(entityManager, data);
+    } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && StringUtils.isBlank(data.getIsicCd())
+        && (data.getCapInd() == null || data.getCapInd().equals("N"))) {
+      getIsicByDNB(entityManager, data);
     }
+  }
+
+  private static void getDunsNo(EntityManager entityManager, Data data) {
+
+    String dunsNo = null;
+    RequestData requestData = new RequestData(entityManager, data.getId().getReqId());
+    MatchingResponse<DnBMatchingResponse> response = null;
+    try {
+      response = DnBUtil.getMatches(requestData, null, "ZS01");
+      if (response != null && DnBUtil.hasValidMatches(response)) {
+        DnBMatchingResponse dnbRecord = response.getMatches().get(0);
+        if (dnbRecord.getConfidenceCode() >= 8) {
+          dunsNo = dnbRecord.getDunsNo();
+        }
+      }
+    } catch (Exception e) {
+      LOG.error("Error occured on get dunsNo from DNB.", e);
+    }
+
+    data.setDunsNo(dunsNo);
   }
 
   public static void getIsicByDNB(EntityManager entityManager, Data data) {

@@ -456,10 +456,12 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
               admin.setReqStatus("LEG");
             }
           } else if (cnConditionallyApproved) {
-            admin.setReqStatus(CmrConstants.REQUEST_STATUS.PCP.toString());
+            setAdminStatus4CN(entityManager, admin);
           } else {
             admin.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
           }
+        } else if (cnConditionallyApproved) {
+          setAdminStatus4CN(entityManager, admin);
         } else {
           admin.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
         }
@@ -488,6 +490,18 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
       RequestUtils.createCommentLog(this, entityManager, appuser, admin.getId().getReqId(), comment);
     } else {
       this.log.debug("The request is not in Draft Status and/or Pending Approvals need to be received.");
+    }
+  }
+
+  private void setAdminStatus4CN(EntityManager entityManager, Admin admin) {
+    String sqlRej = ExternalizedQuery.getSql("APPROVAL.CHECKIFREJAPPROVED");
+    PreparedQuery queryRej = new PreparedQuery(entityManager, sqlRej);
+    queryRej.setParameter("REQ_ID", admin.getId().getReqId());
+    boolean approvalsRej = queryRej.exists();
+    if (approvalsRej) {
+      admin.setReqStatus("AUT");
+    } else {
+      admin.setReqStatus(CmrConstants.REQUEST_STATUS.PCP.toString());
     }
   }
 
