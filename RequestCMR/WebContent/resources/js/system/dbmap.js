@@ -293,6 +293,9 @@ var DB_DATA_FIELDS = [ {
   id : 'EngineeringBo',
   name : 'ENGINEERING_BO'
 }, {
+  id : 'AdminDeptCd',
+  name : 'ADMIN_DEPT_CD'
+}, {
   id : 'TaxPayerCustCd',
   name : 'TAX_PAYER_CUST_CD'
 } ];

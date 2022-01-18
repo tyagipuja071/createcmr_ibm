@@ -559,6 +559,10 @@ public class DataRdc extends BaseEntity<DataPK> implements Serializable {
   private String custAcctType;
 
   @Column(
+      name = "TAX_PAYER_CUST_CD")
+  private String taxPayerCustCd;
+  
+  @Column(
       name = "CUST_INVOICE_COPIES")
   private String cusInvoiceCopies;
 
@@ -1694,6 +1698,14 @@ public class DataRdc extends BaseEntity<DataPK> implements Serializable {
     this.custAcctType = custAcctType;
   }
 
+  public String getTaxPayerCustCd() {
+    return taxPayerCustCd;
+  }
+
+  public void setTaxPayerCustCd(String taxPayerCustCd) {
+    this.taxPayerCustCd = taxPayerCustCd;
+  }
+  
   public String getLocationNumber() {
     return locationNumber;
   }

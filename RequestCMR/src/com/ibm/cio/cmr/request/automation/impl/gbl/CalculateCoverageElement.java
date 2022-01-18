@@ -224,7 +224,7 @@ public class CalculateCoverageElement extends OverridingElement {
           withCmrData = true;
         }
         covFrom = COV_BG;
-      } else if (StringUtils.isNotEmpty(data.getVat())) {
+      } else if (StringUtils.isNotEmpty(data.getVat()) && !SystemLocation.CANADA.equals(data.getCmrIssuingCntry())) {
         coverages = computeCoverageFromRDCQuery(entityManager, QUERY_VAT, data.getVat(), data.getCmrIssuingCntry());
         if (coverages == null || coverages.isEmpty()) {
           CoverageInput inputBG = extractCoverageInput(entityManager, requestData, data, addr, gbgId, bgId);

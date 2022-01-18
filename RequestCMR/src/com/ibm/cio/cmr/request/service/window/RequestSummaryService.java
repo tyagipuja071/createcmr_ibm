@@ -356,6 +356,14 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
               update.setOldData(oldData.getVat());
               results.add(update);
             }
+            if (TYPE_CUSTOMER.equals(type) && !equals(oldData.getTaxPayerCustCd(), newData.getTaxPayerCustCd())
+                && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "PSTExemptLicNum"))) {
+              update = new UpdatedDataModel();
+              update.setDataField(PageManager.getLabel(cmrCountry, "PSTExemptLicNum", "-"));
+              update.setNewData(newData.getTaxPayerCustCd());
+              update.setOldData(oldData.getTaxPayerCustCd());
+              results.add(update);
+            }
             if (TYPE_IBM.equals(type) && !equals(oldData.getEnterprise(), newData.getEnterprise())
                 && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "Enterprise"))) {
               update = new UpdatedDataModel();
