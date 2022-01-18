@@ -33,6 +33,7 @@ import com.ibm.cio.cmr.request.entity.AutomationMatching;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.Scorecard;
 import com.ibm.cio.cmr.request.service.requestentry.ImportDnBService;
+import com.ibm.cio.cmr.request.service.requestentry.RequestEntryService;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
@@ -53,6 +54,10 @@ import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 public class DnBMatchingElement extends MatchingElement implements CompanyVerifier {
 
   private static final Logger LOG = Logger.getLogger(DnBMatchingElement.class);
+  private static final List<String> AuIsicScenarioList = Arrays.asList("AQSTN", "BLUMX", "ESOSW", "IGF", "MKTPC", "NRML", "SOFT", "XAQST", "CROSS",
+      "XIGF");
+  private static final List<String> SGIsicScenarioList = Arrays.asList("ASLOM", "AQSTN", "BLUMX", "BUSPR", "MKTPC", "NRML", "SOFT", "XAQST", "XBLUM",
+      "XBUSP", "XMKTP", "CROSS", "SPOFF", "XIGF");
 
   public DnBMatchingElement(String requestTypes, String actionOnError, boolean overrideData, boolean stopOnError) {
     super(requestTypes, actionOnError, overrideData, stopOnError);
@@ -75,11 +80,6 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
     Boolean override = false;
     // skip dnb matching if dnb matches on UI are overriden and attachment is
     // provided
-    if (SystemLocation.AUSTRALIA.equals(data.getCmrIssuingCntry()) || SystemLocation.SINGAPORE.equals(data.getCmrIssuingCntry())) {
-      if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
-        admin.setMatchOverrideIndc("Y");
-      }
-    }
     if ("Y".equals(admin.getMatchOverrideIndc()) && DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
       LOG.debug("DNB Overriden");
       result.setResults("Overriden");
@@ -188,6 +188,24 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
           Boolean processDnbFlag = false;
           // assess the matches here
           if (perfectMatch != null) {
+            // Cmr-1701-AU_SG Dnb matches found & Isic doesn't match dnb record.
+            // Supporting doc provided requires cmde review
+            if (((SystemLocation.AUSTRALIA.equals(data.getCmrIssuingCntry()) && AuIsicScenarioList.contains(data.getCustSubGrp()))
+                || (SystemLocation.SINGAPORE.equals(data.getCmrIssuingCntry()) && SGIsicScenarioList.contains(data.getCustSubGrp())))
+                && (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId()))
+                && !(RequestEntryService.getDnBDetailsUI(perfectMatch.getDunsNo()).getIbmIsic().equals(data.getIsicCd()))) {
+              LOG.debug("Perfect match was found with DUNS " + perfectMatch.getDunsNo());
+              admin.setCompVerifiedIndc("Y");
+              details.append("High Quality match D&B record matched the request name/address.\n ");
+              details.append("ISIC not matched with Dnb record.\n");
+              details.append("CMDE review required.\n");
+              engineData.addNegativeCheckStatus("_dnbOverride", "D&B matches were chosen to be overridden by the requester.");
+              result.setDetails(details.toString().trim());
+              result.setResults("ISIC not matched");
+              result.setOnError(false);
+              return result;
+            }
+
             LOG.debug("Perfect match was found with DUNS " + perfectMatch.getDunsNo());
             result.setResults("Matched");
             admin.setCompVerifiedIndc("Y");

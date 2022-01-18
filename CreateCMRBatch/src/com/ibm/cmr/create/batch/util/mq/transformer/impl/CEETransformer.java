@@ -627,7 +627,11 @@ public class CEETransformer extends EMEATransformer {
       String cntryUse = cmrData.getCountryUse();
       if ("ZP02".equals(addrData.getId().getAddrType())) {
         if (!StringUtils.isBlank(addrData.getBldg())) {
-          line6 = addrData.getBldg();
+          if (addrData.getBldg().length() <= 50) {
+            line6 = addrData.getBldg();
+          } else {
+            line6 = addrData.getBldg().substring(0, 49);
+          }
         } else {
           line6 = "";
         }
@@ -652,7 +656,11 @@ public class CEETransformer extends EMEATransformer {
     } else {
       if ("ZP02".equals(addrData.getId().getAddrType())) {
         if (!StringUtils.isBlank(addrData.getBldg())) {
-          line6 = addrData.getBldg();
+          if (addrData.getBldg().length() <= 50) {
+            line6 = addrData.getBldg();
+          } else {
+            line6 = addrData.getBldg().substring(0, 49);
+          }
         } else {
           line6 = "";
         }

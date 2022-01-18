@@ -134,22 +134,25 @@ public class ASEANHandler extends APHandler {
     // country + postal code
 
     String[] countries = new String[] { "BRUNEI", "CAMBODIA", "LAOS", "MYANMAR", "SINGAPORE" };
+    String line = "";
 
-    String line = lines.get(lines.size() - 1);
-    for (String countryName : countries) {
-      if (line.toUpperCase().replaceAll(" ", "").contains(countryName)) {
-        parseCityState = false;
+    if (lines.size() > 0) {
+      line = lines.get(lines.size() - 1);
+      for (String countryName : countries) {
+        if (line.toUpperCase().replaceAll(" ", "").contains(countryName)) {
+          parseCityState = false;
+        }
       }
-    }
-    if (!parseCityState) {
-      // postal code is right after country name
-      if (line.contains(" ")) {
-        postalCode = line.substring(line.indexOf(" ")).trim();
-      }
-    } else {
-      if (line.contains(" ")) {
-        city = line.substring(0, line.lastIndexOf(" ")).trim();
-        postalCode = line.substring(line.lastIndexOf(" ")).trim();
+      if (!parseCityState) {
+        // postal code is right after country name
+        if (line.contains(" ")) {
+          postalCode = line.substring(line.indexOf(" ")).trim();
+        }
+      } else {
+        if (line.contains(" ")) {
+          city = line.substring(0, line.lastIndexOf(" ")).trim();
+          postalCode = line.substring(line.lastIndexOf(" ")).trim();
+        }
       }
     }
 

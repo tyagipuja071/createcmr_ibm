@@ -86,6 +86,18 @@ public class MassUpdtData extends BaseEntity<MassUpdtDataPK> implements Serializ
   @Column(name = "TAX_CD3")
   private String taxCd3;
 
+  // @Column(
+  // name = "TAX_EXEMPT_STATUS_1")
+  // private String taxExemptStatus;
+  //
+  // public String getTaxExemptStatus() {
+  // return taxExemptStatus;
+  // }
+  //
+  // public void setTaxExemptStatus(String taxExemptStatus) {
+  // this.taxExemptStatus = taxExemptStatus;
+  // }
+
   @Column(name = "ISU_CD")
   private String isuCd;
 

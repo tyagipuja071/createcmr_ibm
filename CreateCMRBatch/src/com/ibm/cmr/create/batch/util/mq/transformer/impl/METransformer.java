@@ -629,7 +629,13 @@ public class METransformer extends EMEATransformer {
     if (SystemLocation.JORDAN.equals(cmrData.getCmrIssuingCntry())) {
       String cntryUse = cmrData.getCountryUse();
       if ("ZP02".equals(addrData.getId().getAddrType())) {
-        line6 = addrData.getBldg() == null ? "" : addrData.getBldg();
+        if (!StringUtils.isBlank(addrData.getBldg())) {
+          if (addrData.getBldg().length() <= 50) {
+            line6 = addrData.getBldg();
+          } else {
+            line6 = addrData.getBldg().substring(0, 49);
+          }
+        }
       } else {
         if (!StringUtils.isBlank(cntryUse)) {
           if ("762PS".equals(cntryUse)) {
@@ -648,7 +654,13 @@ public class METransformer extends EMEATransformer {
       String cntryUse = cmrData.getCountryUse();
 
       if ("ZP02".equals(addrData.getId().getAddrType())) {
-        line6 = addrData.getBldg() == null ? "" : addrData.getBldg();
+        if (!StringUtils.isBlank(addrData.getBldg())) {
+          if (addrData.getBldg().length() <= 50) {
+            line6 = addrData.getBldg();
+          } else {
+            line6 = addrData.getBldg().substring(0, 49);
+          }
+        }
       } else {
         if (!StringUtils.isBlank(cntryUse)) {
           if ("808AF".equals(cntryUse)) {
@@ -664,7 +676,13 @@ public class METransformer extends EMEATransformer {
       }
     } else {
       if ("ZP02".equals(addrData.getId().getAddrType())) {
-        line6 = addrData.getBldg() == null ? "" : addrData.getBldg();
+        if (!StringUtils.isBlank(addrData.getBldg())) {
+          if (addrData.getBldg().length() <= 50) {
+            line6 = addrData.getBldg();
+          } else {
+            line6 = addrData.getBldg().substring(0, 49);
+          }
+        }
       } else {
         if (!StringUtils.isBlank(addrData.getLandCntry())) {
           line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
