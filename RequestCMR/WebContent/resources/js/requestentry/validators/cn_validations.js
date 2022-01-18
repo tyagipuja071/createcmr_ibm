@@ -212,6 +212,13 @@ function afterConfigForCN() {
 // });
 // }
 
+  
+  if (_isuHandler == null) {
+    _isuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+      setCtcOnIsuCdChangeCN();
+    });
+  }
+
   if (FormManager.getActualValue('reqType') == 'U') {
 
     FormManager.hide('IbmDeptCostCenter', 'ibmDeptCostCenter');
@@ -302,6 +309,23 @@ function updateBPSearchTerm() {
         FormManager.readOnly('inacCd');
       }
     }
+  }
+}
+
+function setCtcOnIsuCdChangeCN() {
+  isuCd = FormManager.getActualValue('isuCd');
+  if (isuCd == '5K') {
+    FormManager.resetValidations('clientTier');
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    FormManager.setValue('clientTier', '');
+    FormManager.readOnly('clientTier');
+  } else {
+    if (FormManager.getActualValue('reqType') == 'U') {
+      FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    } else {
+      FormManager.addValidator('clientTier', Validators.REQUIRED);
+    }
+      FormManager.enable('clientTier');
   }
 }
 
@@ -2921,4 +2945,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateSearchTermForCROSS, GEOHandler.CN, null, false);
   GEOHandler.registerValidator(validateISICForCROSS, GEOHandler.CN, null, false);
   GEOHandler.registerValidator(s1GBGIdValidator, GEOHandler.CN,　null, false, false);
+  GEOHandler.addAfterConfig(setCtcOnIsuCdChangeCN, GEOHandler.CN);
+  GEOHandler.addAfterTemplateLoad(setCtcOnIsuCdChangeCN, GEOHandler.CN);
 });
