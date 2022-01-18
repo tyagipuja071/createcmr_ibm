@@ -429,6 +429,7 @@ public class RequestEntryModel extends BaseModel {
   // canada fields
   private String invoiceDistCd;
   private String cusInvoiceCopies;
+  private String taxPayerCustCd;
 
   private String sourceSystId;
 
@@ -940,6 +941,14 @@ public class RequestEntryModel extends BaseModel {
 
   public void setSearchTerm(String searchTerm) {
     this.searchTerm = searchTerm;
+  }
+
+  public String getTaxPayerCustCd() {
+	return taxPayerCustCd;
+  }
+
+  public void setTaxPayerCustCd(String taxPayerCustCd) {
+	this.taxPayerCustCd = taxPayerCustCd;
   }
 
   public String getSensitiveFlag() {

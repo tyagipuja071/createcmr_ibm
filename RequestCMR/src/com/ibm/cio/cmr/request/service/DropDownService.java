@@ -476,7 +476,8 @@ public class DropDownService extends BaseSimpleService<DropdownModel> {
           && !PageManager.fromGeo("NORDX", (String) params.getParam("cmrIssuingCntry"))
           && !PageManager.fromGeo("BELUX", (String) params.getParam("cmrIssuingCntry"))
           && !PageManager.fromGeo("NL", (String) params.getParam("cmrIssuingCntry"))
-          && !SystemLocation.PORTUGAL.equals(params.getParam("cmrIssuingCntry"))) {
+          && !SystemLocation.PORTUGAL.equals(params.getParam("cmrIssuingCntry"))
+          && !SystemLocation.CANADA.equals(params.getParam("cmrIssuingCntry"))) {
         query.append("  and ISSUING_CNTRY = :ISSUING_CNTRY");
         query.setParameter("ISSUING_CNTRY", params.getParam("cmrIssuingCntry"));
       }

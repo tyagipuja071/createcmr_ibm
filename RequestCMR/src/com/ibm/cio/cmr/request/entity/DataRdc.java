@@ -561,6 +561,22 @@ public class DataRdc extends BaseEntity<DataPK> implements Serializable {
   @Column(
       name = "TAX_PAYER_CUST_CD")
   private String taxPayerCustCd;
+  
+  @Column(
+      name = "CUST_INVOICE_COPIES")
+  private String cusInvoiceCopies;
+
+  @Column(
+      name = "LOCN_NO")
+  private String locationNumber;
+
+  public String getCusInvoiceCopies() {
+    return cusInvoiceCopies;
+  }
+
+  public void setCusInvoiceCopies(String cusInvoiceCopies) {
+    this.cusInvoiceCopies = cusInvoiceCopies;
+  }
 
   public String getAbbrevNm() {
     return this.abbrevNm;
@@ -1688,6 +1704,14 @@ public class DataRdc extends BaseEntity<DataPK> implements Serializable {
 
   public void setTaxPayerCustCd(String taxPayerCustCd) {
     this.taxPayerCustCd = taxPayerCustCd;
+  }
+  
+  public String getLocationNumber() {
+    return locationNumber;
+  }
+
+  public void setLocationNumber(String locationNumber) {
+    this.locationNumber = locationNumber;
   }
 
 }
