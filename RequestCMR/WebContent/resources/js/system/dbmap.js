@@ -292,8 +292,10 @@ var DB_DATA_FIELDS = [ {
 }, {
   id : 'EngineeringBo',
   name : 'ENGINEERING_BO'
-}
-];
+}, {
+  id : 'TaxPayerCustCd',
+  name : 'TAX_PAYER_CUST_CD'
+} ];
 DB_DATA_FIELDS.sort(function(a, b) {
   if (a.id > b.id) {
     return 1;
@@ -364,6 +366,9 @@ var DB_ADDR_FIELDS = [ {
 }, {
   id : 'DPLCheckResult',
   name : 'DPL_CHK_RESULT'
+}, {
+  id : 'AddrType',
+  name : 'ADDR_TYPE'
 } ];
 
 DB_ADDR_FIELDS.sort(function(a, b) {

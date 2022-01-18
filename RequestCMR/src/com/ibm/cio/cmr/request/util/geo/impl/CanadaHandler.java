@@ -161,9 +161,8 @@ public class CanadaHandler extends GEOHandler {
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       String efc = mainRecord.getCmrEstabFnInd();
-      if (StringUtils.isNotBlank(efc) && ArrayUtils.contains(new String[] { "8", "R", "Z", "7", "P", "E", "T" }, efc)) {
-        efc = "6";
-        // TODO: send email to Tax Team for Verification
+      if (StringUtils.isNotBlank(efc) && ArrayUtils.contains(new String[] { "8", "R", "Z", "7", "P" }, efc)) {
+        data.setIccTaxExemptStatus(efc);
       }
       data.setTaxCd1(efc);
     } else {
@@ -188,6 +187,9 @@ public class CanadaHandler extends GEOHandler {
     data.setCreditCd(mainRecord.getCmrCustCreditCode());
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       data.setCustAcctType("");
+      if (StringUtils.isNotBlank(mainRecord.getCmrLicNo())) {
+        data.setAffiliate(mainRecord.getCmrLicNo());
+      }
     } else {
       data.setCustAcctType(mainRecord.getCmrOrderBlock());
     }
