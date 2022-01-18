@@ -244,6 +244,7 @@
         <cmr:field path="cusInvoiceCopies" id="cusInvoiceCopies" fieldId="InvoiceSplitCd" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
-  </cmr:row>
-  
+  </cmr:row>  
+  <form:hidden path="iccTaxExemptStatus" id="iccTaxExemptStatus" />
+  <form:hidden path="affiliate" id="affiliate" />	
 </cmr:view>

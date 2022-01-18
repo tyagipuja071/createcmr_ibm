@@ -59,7 +59,8 @@ public class CanadaHandler extends GEOHandler {
 
     if (CmrConstants.REQ_TYPE_CREATE.equals(reqEntry.getReqType())) {
       for (FindCMRRecordModel record : records) {
-        if ("ZS01".equals(record.getCmrAddrTypeCode()) && (StringUtils.isBlank(record.getCmrOrderBlock()))) {
+        if (("ZS01".equals(record.getCmrAddrTypeCode()) && (StringUtils.isBlank(record.getCmrOrderBlock())))
+            || ("ZS01".equals(record.getCmrAddrTypeCode()) && (record.getCmrOrderBlock().equals("75")))) {
           record.setCmrAddrTypeCode("ZS01");
           converted.add(record);
         }
@@ -160,9 +161,8 @@ public class CanadaHandler extends GEOHandler {
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       String efc = mainRecord.getCmrEstabFnInd();
-      if (StringUtils.isNotBlank(efc) && ArrayUtils.contains(new String[] { "8", "R", "Z", "7", "P", "E", "T" }, efc)) {
-        efc = "6";
-        // TODO: send email to Tax Team for Verification
+      if (StringUtils.isNotBlank(efc) && ArrayUtils.contains(new String[] { "8", "R", "Z", "7", "P" }, efc)) {
+        data.setIccTaxExemptStatus(efc);
       }
       data.setTaxCd1(efc);
     } else {
@@ -187,6 +187,9 @@ public class CanadaHandler extends GEOHandler {
     data.setCreditCd(mainRecord.getCmrCustCreditCode());
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       data.setCustAcctType("");
+      if (StringUtils.isNotBlank(mainRecord.getCmrLicNo())) {
+        data.setAffiliate(mainRecord.getCmrLicNo());
+      }
     } else {
       data.setCustAcctType(mainRecord.getCmrOrderBlock());
     }
@@ -209,6 +212,14 @@ public class CanadaHandler extends GEOHandler {
     if (currentRecord != null) {
       String name1 = StringUtils.isEmpty(currentRecord.getCmrName1Plain()) ? "" : currentRecord.getCmrName1Plain();
       String name2 = StringUtils.isEmpty(currentRecord.getCmrName2Plain()) ? "" : currentRecord.getCmrName2Plain();
+
+      if (name1.length() > 30) {
+        name1 = name1.substring(0, 30);
+      }
+
+      if (name2.length() > 30) {
+        name2 = name2.substring(0, 30);
+      }
 
       admin.setMainCustNm1(name1);
       admin.setOldCustNm1(name1);
