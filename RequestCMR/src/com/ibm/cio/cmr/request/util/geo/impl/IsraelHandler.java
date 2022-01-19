@@ -95,6 +95,7 @@ public class IsraelHandler extends EMEAHandler {
   private static final String CUSTGRP_LOCAL = "LOCAL";
   private static final int MANDATORY_ADDR_COUNT = 8;
   private static final int MAX_ADDR_SEQ = 99999;
+  private static final String DEFAULT_COUNTRY_CODE = "IL";
 
   static {
     LANDED_CNTRY_MAP.put(SystemLocation.UNITED_KINGDOM, "GB");
@@ -160,7 +161,7 @@ public class IsraelHandler extends EMEAHandler {
           }
           FindCMRRecordModel addr = cloneAddress(record, "ZS01");
 
-          converted.add(mapEnglishAddr(addr, legacyAddr));
+          converted.add(mapEnglishAddr(entityManager, addr, legacyAddr));
         } else {
           record.setCmrAddrSeq("00006");
           record.setCmrAddrTypeCode("CTYA");
@@ -187,7 +188,7 @@ public class IsraelHandler extends EMEAHandler {
                   // name3 in rdc = Address Con't on SOF
                   addr.setCmrStreetAddressCont(record.getCmrName3());
                   addr.setCmrName3(null);
-                  addr.setCmrName2Plain(!StringUtils.isEmpty(record.getCmrName2Plain()) ? record.getCmrName2Plain() : record.getCmrName4());
+                  addr.setCmrDept(record.getCmrName4());
 
                   if (!StringUtils.isBlank(record.getCmrPOBox())) {
                     addr.setCmrPOBox(record.getCmrPOBox());
@@ -212,8 +213,8 @@ public class IsraelHandler extends EMEAHandler {
                       record.setCmrCustPhone(mainRecord.getCmrCustPhone());
                     }
 
-                    converted.add(mapEnglishAddr(addr, legacyAddr, addrType));
-                    converted.add(mapLocalLanguageAddr(record, legacyAddr, addrType));
+                    converted.add(mapEnglishAddr(entityManager, addr, legacyAddr, addrType));
+                    converted.add(mapLocalLanguageAddr(entityManager, record, addrType));
 
                     // Handle Sold to shared sequence -- EPL and Installing
                     if ("ZS01".equals(addrType)) {
@@ -329,7 +330,7 @@ public class IsraelHandler extends EMEAHandler {
     return null;
   }
 
-  private FindCMRRecordModel mapLocalLanguageAddr(FindCMRRecordModel record, CmrtAddr legacyAddr, String addrType)
+  private FindCMRRecordModel mapLocalLanguageAddr(EntityManager entityManager, FindCMRRecordModel record, String addrType)
       throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
     FindCMRRecordModel localLangAddr = new FindCMRRecordModel();
     PropertyUtils.copyProperties(localLangAddr, record);
@@ -339,15 +340,18 @@ public class IsraelHandler extends EMEAHandler {
     localLangAddr.setCmrStreetAddressCont(record.getCmrIntlName3());
     localLangAddr.setCmrCity(record.getCmrIntlCity1());
     localLangAddr.setCmrAddrTypeCode(addrType);
+    localLangAddr.setCmrDept(record.getCmrIntlName4());
 
+    CmrtAddr legacyAddr = legacyObjects.findBySeqNo(String.format("%05d", Integer.parseInt(localLangAddr.getCmrAddrSeq())));
+    fillInMissingAddrDataFromLegacy(entityManager, localLangAddr, legacyAddr, true);
     return localLangAddr;
   }
 
-  private FindCMRRecordModel mapEnglishAddr(FindCMRRecordModel addr, CmrtAddr legacyAddr) {
-    return mapEnglishAddr(addr, legacyAddr, "ZS01");
+  private FindCMRRecordModel mapEnglishAddr(EntityManager entityManager, FindCMRRecordModel addr, CmrtAddr legacyAddr) {
+    return mapEnglishAddr(entityManager, addr, legacyAddr, "ZS01");
   }
 
-  private FindCMRRecordModel mapEnglishAddr(FindCMRRecordModel addr, CmrtAddr legacyAddr, String addrType) {
+  private FindCMRRecordModel mapEnglishAddr(EntityManager entityManager, FindCMRRecordModel addr, CmrtAddr legacyAddr, String addrType) {
     if ("ZS01".equals(addrType)) {
       addr.setCmrAddrTypeCode("CTYA");
     } else if ("ZP01".equals(addrType)) {
@@ -365,7 +369,144 @@ public class IsraelHandler extends EMEAHandler {
       addr.setTransAddrNo(localAddr.getId().getAddrNo());
     }
 
+    fillInMissingAddrDataFromLegacy(entityManager, addr, legacyAddr, false);
     return addr;
+  }
+
+  private void fillInMissingAddrDataFromLegacy(EntityManager entityManager, FindCMRRecordModel addr, CmrtAddr legacyAddr, boolean isLocalLanguage) {
+    if (!isLocalLanguage) {
+      mapEnglishAddrFromLegacyData(entityManager, addr, legacyAddr);
+    } else {
+      mapLocalLangAddrFromLegacyData(entityManager, addr, legacyAddr);
+    }
+  }
+
+  private void mapLocalLangAddrFromLegacyData(EntityManager entityManager, FindCMRRecordModel addr, CmrtAddr legacyAddr) {
+    if (StringUtils.isEmpty(addr.getCmrIntlName1())) {
+      addr.setCmrName1Plain(getLegacyAddrBasedOnAddrlU(legacyAddr, "D"));
+    }
+    if (StringUtils.isEmpty(addr.getCmrIntlName2())) {
+      addr.setCmrName2Plain(getLegacyAddrBasedOnAddrlU(legacyAddr, "E"));
+    }
+    if (StringUtils.isEmpty(addr.getCmrDept())) {
+      addr.setCmrDept(getLegacyAddrBasedOnAddrlU(legacyAddr, "B"));
+    }
+    if (StringUtils.isEmpty(addr.getCmrIntlAddress())) {
+      addr.setCmrStreetAddress(getLegacyAddrBasedOnAddrlU(legacyAddr, "F"));
+    }
+    if (StringUtils.isEmpty(addr.getCmrIntlName3())) {
+      addr.setCmrStreetAddressCont(getLegacyAddrBasedOnAddrlU(legacyAddr, "G"));
+    }
+    if (StringUtils.isEmpty(addr.getCmrPOBox())) {
+      addr.setCmrPOBox(getLegacyAddrBasedOnAddrlU(legacyAddr, "H"));
+    }
+    if (StringUtils.isEmpty(addr.getCmrIntlCity1())) {
+      addr.setCmrCity(getLegacyAddrBasedOnAddrlU(legacyAddr, "IC"));
+    }
+    if (StringUtils.isEmpty(addr.getCmrPostalCode())) {
+      addr.setCmrPostalCode(getLegacyAddrBasedOnAddrlU(legacyAddr, "IP"));
+    }
+    if (StringUtils.isEmpty(addr.getCmrCountryLanded())) {
+      String landedCountryCode = getCountryCodeByDesc(entityManager, true, getLegacyAddrBasedOnAddrlU(legacyAddr, "J"));
+      // landed country is not mapped in DB2 if the address is IL
+      if (StringUtils.isEmpty(landedCountryCode)) {
+        landedCountryCode = DEFAULT_COUNTRY_CODE;
+      }
+      addr.setCmrCountryLanded(landedCountryCode);
+    }
+  }
+
+  private void mapEnglishAddrFromLegacyData(EntityManager entityManager, FindCMRRecordModel addr, CmrtAddr legacyAddr) {
+    if (StringUtils.isEmpty(addr.getCmrName1Plain())) {
+      addr.setCmrName1Plain(getLegacyAddrBasedOnAddrlU(legacyAddr, "D"));
+    }
+    if (StringUtils.isEmpty(addr.getCmrName2Plain())) {
+      addr.setCmrName2Plain(getLegacyAddrBasedOnAddrlU(legacyAddr, "E"));
+    }
+    if (StringUtils.isEmpty(addr.getCmrDept())) {
+      addr.setCmrDept(getLegacyAddrBasedOnAddrlU(legacyAddr, "B"));
+    }
+    if (StringUtils.isEmpty(addr.getCmrStreetAddress())) {
+      addr.setCmrStreetAddress(getLegacyAddrBasedOnAddrlU(legacyAddr, "F"));
+    }
+    if (StringUtils.isEmpty(addr.getCmrStreetAddressCont())) {
+      addr.setCmrStreetAddressCont(getLegacyAddrBasedOnAddrlU(legacyAddr, "G"));
+    }
+    if (StringUtils.isEmpty(addr.getCmrPOBox())) {
+      addr.setCmrPOBox(getLegacyAddrBasedOnAddrlU(legacyAddr, "H"));
+    }
+    if (StringUtils.isEmpty(addr.getCmrCity())) {
+      addr.setCmrCity(getLegacyAddrBasedOnAddrlU(legacyAddr, "IC"));
+    }
+    if (StringUtils.isEmpty(addr.getCmrPostalCode())) {
+      addr.setCmrPostalCode(getLegacyAddrBasedOnAddrlU(legacyAddr, "IP"));
+    }
+    if (StringUtils.isEmpty(addr.getCmrCountryLanded())) {
+      String landedCountryCode = getCountryCodeByDesc(entityManager, false, getLegacyAddrBasedOnAddrlU(legacyAddr, "J"));
+      // landed country is not mapped in DB2 if the address is IL
+      if (StringUtils.isEmpty(landedCountryCode)) {
+        landedCountryCode = DEFAULT_COUNTRY_CODE;
+      }
+      addr.setCmrCountryLanded(landedCountryCode);
+    }
+
+  }
+
+  private String getLegacyAddrBasedOnAddrlU(CmrtAddr legacyAddr, String addrlUVal) {
+    char addrlUChar = addrlUVal.charAt(0);
+
+    int addrlUCharIndex = legacyAddr.getAddrLineU().indexOf(addrlUChar);
+    String addressLineVal;
+    switch (addrlUCharIndex) {
+    case 0:
+      addressLineVal = legacyAddr.getAddrLine1();
+      break;
+    case 1:
+      addressLineVal = legacyAddr.getAddrLine2();
+      break;
+    case 2:
+      addressLineVal = legacyAddr.getAddrLine3();
+      break;
+    case 3:
+      addressLineVal = legacyAddr.getAddrLine4();
+      break;
+    case 4:
+      addressLineVal = legacyAddr.getAddrLine5();
+      break;
+    case 5:
+      addressLineVal = legacyAddr.getAddrLine6();
+      break;
+    default:
+      addressLineVal = "";
+      break;
+    }
+
+    if (addrlUChar == 'I' && StringUtils.isNotEmpty(addressLineVal)) {
+      if (addressLineVal.contains(" ")) {
+        String postalCode = addressLineVal.substring(0, addressLineVal.indexOf(' '));
+        String city = addressLineVal.substring(addressLineVal.indexOf(' ') + 1);
+
+        if ("IP".equals(addrlUVal) && StringUtils.isNumeric(postalCode)) {
+          addressLineVal = postalCode;
+        } else if ("IC".equals(addrlUVal) && StringUtils.isNumeric(postalCode)) {
+          addressLineVal = city;
+        }
+      } else {
+        if (StringUtils.isNumeric(addressLineVal)) {
+          if ("IC".equals(addrlUVal)) {
+            addressLineVal = "";
+          }
+        } else {
+          if ("IP".equals(addrlUVal)) {
+            addressLineVal = "";
+          }
+        }
+      }
+    } else if (addrlUChar == 'H' && StringUtils.isNotEmpty(addressLineVal)) {
+      addressLineVal = addressLineVal.replace("מ.ד", "").replace("PO BOX", "").trim();
+    }
+
+    return addressLineVal;
   }
 
   private CmrtAddr getLegacyAddrByAddrPair(List<CmrtAddr> legacyAddrList, String pairedAddrSeq) {
@@ -1896,6 +2037,20 @@ public class IsraelHandler extends EMEAHandler {
       return addrList.get(0);
     }
     return null;
+  }
+
+  private String getCountryCodeByDesc(EntityManager entityManager, boolean isLocal, String countryDesc) {
+    String sql = null;
+    if (isLocal) {
+      sql = ExternalizedQuery.getSql("IL.GET.COUNGTRYCODE_BYLOCALCOUNTRYDESC");
+    } else {
+      sql = ExternalizedQuery.getSql("IL.GET.COUNTRYCODE_BYCOUNTRYDESC");
+    }
+
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("COUNTRY_DESC", countryDesc);
+    String countryCode = query.getSingleResult(String.class);
+    return countryCode;
   }
 
   @Override
