@@ -717,10 +717,6 @@ public class IsraelHandler extends EMEAHandler {
           address.getId().setAddrSeq("00006");
           address.setPairedAddrSeq("");
         }
-        if ("D".equals(address.getImportInd())) {
-          String seq = StringUtils.leftPad(address.getId().getAddrSeq(), 5, '0');
-          address.getId().setAddrSeq(seq);
-        }
 
         if (!"ZS01".equalsIgnoreCase(address.getId().getAddrType())) {
           address.setCustPhone("");
