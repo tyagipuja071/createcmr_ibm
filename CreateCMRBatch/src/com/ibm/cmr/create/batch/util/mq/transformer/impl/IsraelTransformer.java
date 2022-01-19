@@ -14,6 +14,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.CmrConstants;
+import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.AddrRdc;
 import com.ibm.cio.cmr.request.entity.Admin;
@@ -21,8 +22,11 @@ import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataRdc;
+import com.ibm.cio.cmr.request.entity.Kna1;
 import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
 import com.ibm.cio.cmr.request.entity.MassUpdtData;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.legacy.LegacyCommonUtil;
@@ -936,8 +940,47 @@ public class IsraelTransformer extends EMEATransformer {
       }
     }
     // VAT
-    if (StringUtils.isNotBlank(muData.getVat())) {
-      cust.setVat(muData.getVat());
+    String updatedVat = muData.getVat();
+    if (StringUtils.isNotBlank(updatedVat)) {
+      String updatedLandCntry = null;
+      String oldLandCntry = null;
+
+      // check if zs01 land country is updated
+      List<MassUpdtAddr> massUpdtAddresses = cmrObjects.getMassUpdateAddresses();
+      if (massUpdtAddresses != null && massUpdtAddresses.size() > 0) {
+        for (MassUpdtAddr massUpdtAddr : massUpdtAddresses) {
+          String addrType = massUpdtAddr.getId().getAddrType();
+          if (StringUtils.isNotEmpty(addrType) && "ZS01".equals(addrType)) {
+            updatedLandCntry = massUpdtAddr.getLandCntry();
+          }
+        }
+      }
+
+      // check old zs01 land country value
+      if (StringUtils.isBlank(updatedLandCntry)) {
+        String mandt = SystemConfiguration.getValue("MANDT");
+        String sql = ExternalizedQuery.getSql("IL.GET.ZS01KATR10");
+
+        PreparedQuery query = new PreparedQuery(entityManager, sql);
+        query.setForReadOnly(true);
+        query.setParameter("KATR6", SystemLocation.ISRAEL);
+        query.setParameter("MANDT", mandt);
+        query.setParameter("CMR", cust.getId().getCustomerNo());
+
+        Kna1 zs01 = query.getSingleResult(Kna1.class);
+        if (zs01 != null && StringUtils.isNotBlank(zs01.getLand1())) {
+          oldLandCntry = zs01.getLand1();
+        }
+      }
+
+      if ((StringUtils.isNotEmpty(updatedLandCntry) && "IL".equals(updatedLandCntry))
+          || (StringUtils.isNotEmpty(oldLandCntry) && "IL".equals(oldLandCntry))) {
+        if (StringUtils.substring(updatedVat, 0, 2).equals("IL")) {
+          updatedVat = StringUtils.substring(updatedVat, 2);
+        }
+      }
+
+      cust.setVat(updatedVat);
     }
     // ISU Code
     if (StringUtils.isNotBlank(muData.getIsuCd())) {
@@ -1067,6 +1110,13 @@ public class IsraelTransformer extends EMEATransformer {
           sbAddrLu.append("H");
         }
       }
+      // remove IL prefix in VAT
+      if ("ZS01".equals(addrType) && StringUtils.isNotBlank(cust.getVat())) {
+        String custVat = cust.getVat();
+        if ("IL".equals(StringUtils.substring(custVat, 0, 1))) {
+          cust.setVat(StringUtils.substring(custVat, 2));
+        }
+      }
     }
     // Address Cont
     if (StringUtils.isNotBlank(addr.getAddrTxt2())) {
@@ -1092,9 +1142,19 @@ public class IsraelTransformer extends EMEATransformer {
     }
 
     // Land Country
-    if (StringUtils.isNotBlank(addr.getLandCntry()) && !"IL".equals(addr.getLandCntry())) {
-      lstAddrLines.add(addr.getLandCntry());
-      sbAddrLu.append("J");
+    if (StringUtils.isNotBlank(addr.getLandCntry())) {
+      if ("IL".equals(addr.getLandCntry())) {
+        // check if Local and remove prefix IL
+        if (addrType.equals("ZS01") && cust != null && StringUtils.isNotBlank(cust.getVat())) {
+          String custVat = cust.getVat();
+          if (StringUtils.isNotBlank(custVat) && "IL".equals(StringUtils.substring(custVat, 0, 1))) {
+            cust.setVat(StringUtils.substring(custVat, 2));
+          }
+        }
+      } else {
+        lstAddrLines.add(addr.getLandCntry());
+        sbAddrLu.append("J");
+      }
     }
 
     if (lstAddrLines.size() > 0) {
