@@ -38,11 +38,11 @@
     model1.items.push({id : 'MKT-US', name : 'AMERICAS - US'});
 
     //ANZ,ASEAN,GCG,ISA
-    model1.items.push({id : 'MKT-ANZ', name : 'APAC - ANZ'});
-    model1.items.push({id : 'MKT-ASEAN', name : 'APAC - ASEAN'});
+    model1.items.push({id : 'MKT-ASEANZK', name : 'APAC - ASEANZK'});
+    //model1.items.push({id : 'MKT-ASEAN', name : 'APAC - ASEAN'});
     model1.items.push({id : 'MKT-GCG', name : 'APAC - GCG'});
     model1.items.push({id : 'MKT-ISA', name : 'APAC - ISA'});
-    model1.items.push({id : 'MKT-KR', name : 'APAC - KR'});
+    //model1.items.push({id : 'MKT-KR', name : 'APAC - KR'});
 
     // BENELUX,CEE,DACH,FRANCE,ITALY,MEA,NORDICS,SPGI,UKI
     model1.items.push({id : 'MKT-BENELUX', name : 'EMEA - BENELUX'});
