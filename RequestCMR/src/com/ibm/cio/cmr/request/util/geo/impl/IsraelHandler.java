@@ -718,6 +718,10 @@ public class IsraelHandler extends EMEAHandler {
           address.setPairedAddrSeq("");
         }
 
+        if ("D".equals(address.getImportInd()) && "CTYA".equalsIgnoreCase(address.getId().getAddrType())) {
+          address.getId().setAddrSeq("00006");
+        }
+
         if (!"ZS01".equalsIgnoreCase(address.getId().getAddrType())) {
           address.setCustPhone("");
         }
