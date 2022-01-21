@@ -1852,6 +1852,9 @@ function addAddressGridValidatorStreetPOBox() {
           var type = null;
 
           var missingPOBoxStreetAddrs = '';
+          var missingAddrType = '';
+          var addrStreetPOBox = [ 'ZS01', 'ZP01', 'CTYA', 'CTYB' ];
+          
           for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
             record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
             if (record == null && _allAddressData != null && _allAddressData[i] != null) {
@@ -1879,18 +1882,24 @@ function addAddressGridValidatorStreetPOBox() {
             if (!isPOBoxOrStreetFilled && addrIsNewOrUpdated) {
               if (missingPOBoxStreetAddrs != '') {
                 missingPOBoxStreetAddrs += ', ' + record.addrTypeText[0] + ' (' + record.addrSeq[0] + ') ';
+                missingAddrType += ', ' + record.addrType[0];
               } else {
                 missingPOBoxStreetAddrs += record.addrTypeText[0] + ' (' + record.addrSeq[0] + ') ';
+                missingAddrType += record.addrType[0];
               }
             }
           }
 
           if (missingPOBoxStreetAddrs != '') {
-            return new ValidationResult(null, false, 'Please fill-out either Street or PO BOX for the following address: ' + missingPOBoxStreetAddrs);
+            for (index = 0; index < addrStreetPOBox.length; index++) {
+              if(missingAddrType.includes(addrStreetPOBox[index])) {
+                return new ValidationResult(null, false, 'Please fill-out either Street or PO BOX for the following address: ' + missingPOBoxStreetAddrs);
+              } else {
+                return new ValidationResult(null, false, 'Please fill-out Street for the following address: ' + missingPOBoxStreetAddrs);
+              }
+            }
           }
-
           return new ValidationResult(null, true);
-
         }
       }
     };
