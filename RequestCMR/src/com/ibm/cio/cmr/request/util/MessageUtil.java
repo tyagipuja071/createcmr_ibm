@@ -345,6 +345,8 @@ public class MessageUtil {
   public static final int INFO_MACHINE_REMOVE_LIST = 9044;
   public static final int INFO_GEN_IMPORT_SUCCESS = 9045;
   public static final int INFO_NO_CMR_ONLY_CRIS_IMPORTED = 9046;
+  // revived cmrs
+  public static final int INFO_REV_CMR_FILE_PROCESSED = 9055;
   // CRIS Errors 100-199
   public static final int CRIS_ERROR_QUERY = 101;
   public static final int CRIS_ERROR_NO_COMPANY = 102;

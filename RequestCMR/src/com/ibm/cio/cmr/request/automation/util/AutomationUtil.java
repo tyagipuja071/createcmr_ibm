@@ -43,6 +43,7 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.entity.DataRdc;
+import com.ibm.cio.cmr.request.model.revivedcmr.RevivedCMRModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
@@ -235,6 +236,16 @@ public abstract class AutomationUtil {
   public boolean performCountrySpecificCoverageCalculations(CalculateCoverageElement covElement, EntityManager entityManager,
       AutomationResult<OverrideOutput> results, StringBuilder details, OverrideOutput overrides, RequestData requestData,
       AutomationEngineData engineData, String covFrom, CoverageContainer container, boolean isCoverageCalculated) throws Exception {
+    return false;
+  }
+
+  public boolean performCountrySpecificCoverageCalculationsForRevivedCMRs(RevivedCMRModel revCmrModel, String scenario, String covFrom,
+      CoverageContainer container, boolean isCoverageCalculated) throws Exception {
+    return false;
+  }
+
+  public boolean doCountryFieldComputationsForRevivedCMRs(EntityManager entityManager, RevivedCMRModel revCmrModel, String scenario)
+      throws Exception {
     return false;
   }
 
@@ -845,14 +856,14 @@ public abstract class AutomationUtil {
    * @param reqId
    * @return
    */
-  protected boolean addressExists(EntityManager entityManager, Addr addrToCheck , RequestData requestData) {
-	Data data = requestData.getData();
-	String sql = "";
-	if(SystemLocation.BELGIUM.equals(data.getCmrIssuingCntry()) || SystemLocation.NETHERLANDS.equals(data.getCmrIssuingCntry())){
-	    sql = ExternalizedQuery.getSql("AUTO.UKI.CHECK_IF_ADDRESS_EXIST");
-	} else {
-	    sql = ExternalizedQuery.getSql("AUTO.CHECK_IF_ADDRESS_EXIST");
-	}
+  protected boolean addressExists(EntityManager entityManager, Addr addrToCheck, RequestData requestData) {
+    Data data = requestData.getData();
+    String sql = "";
+    if (SystemLocation.BELGIUM.equals(data.getCmrIssuingCntry()) || SystemLocation.NETHERLANDS.equals(data.getCmrIssuingCntry())) {
+      sql = ExternalizedQuery.getSql("AUTO.UKI.CHECK_IF_ADDRESS_EXIST");
+    } else {
+      sql = ExternalizedQuery.getSql("AUTO.CHECK_IF_ADDRESS_EXIST");
+    }
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", addrToCheck.getId().getReqId());
     query.setParameter("ADDR_TYPE", addrToCheck.getId().getAddrType());
@@ -1239,6 +1250,10 @@ public abstract class AutomationUtil {
       }
     }
     return rejectRequest;
+  }
+
+  public String getOriginalScenarioForRevivedCMRs(EntityManager entityManager, String cmrNo) throws Exception {
+    return "";
   }
 
   /**
