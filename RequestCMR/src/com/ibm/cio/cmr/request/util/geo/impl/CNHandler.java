@@ -62,7 +62,6 @@ import com.ibm.cio.cmr.request.service.requestentry.GeoContactInfoService;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.CompanyFinder;
-import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
@@ -152,48 +151,6 @@ public class CNHandler extends GEOHandler {
     if (CmrConstants.PROSPECT_ORDER_BLOCK.equals(mainRecord.getCmrOrderBlock())) {
       data.setProspectSeqNo(mainRecord.getCmrAddrSeq());
     }
-    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
-      //data.setClientTier("");
-      EntityManager entityManager = JpaManager.getEntityManager();
-      try {
-        if (expiredSearchTerm(entityManager, data.getSearchTerm())) {
-          data.setSearchTerm("00000");
-        }
-      } catch (Exception e) {
-        LOG.error("error in checking expired Search Term: " + e);
-      } finally {
-        entityManager.clear();
-        entityManager.close();
-      }
-
-    }
-  }
-
-  private boolean expiredSearchTerm(EntityManager entityManager, String searchTerm) {
-    if (!StringUtils.isEmpty(searchTerm)) {
-      if (!existInList(entityManager, searchTerm)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private boolean existInList(EntityManager entityManager, String searchTerm) {
-    if (StringUtils.isEmpty(searchTerm)) {
-      return true;
-    }
-    if (searchTerm.length() > 5) {
-      searchTerm = searchTerm.substring(0, 5);
-    }
-    String sql = ExternalizedQuery.getSql("QUERY.CHECK.CLUSTER");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("ISSUING_CNTRY", "641");
-    query.setParameter("AP_CUST_CLUSTER_ID", searchTerm);
-    String result = query.getSingleResult(String.class);
-    if (result != null && !result.isEmpty()) {
-      return true;
-    }
-    return false;
   }
 
   @Override
@@ -860,6 +817,40 @@ public class CNHandler extends GEOHandler {
         }
       }
     }
+
+    // Coverage 1H22 CREATCMR-4790, set expired Search Term 00000
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+      if (expiredSearchTerm(entityManager, data.getSearchTerm())) {
+        data.setSearchTerm("00000");
+      }
+    }
+  }
+
+  private boolean expiredSearchTerm(EntityManager entityManager, String searchTerm) {
+    if (!StringUtils.isEmpty(searchTerm)) {
+      if (!existInList(entityManager, searchTerm)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private boolean existInList(EntityManager entityManager, String searchTerm) {
+    if (StringUtils.isEmpty(searchTerm)) {
+      return true;
+    }
+    if (searchTerm.length() > 5) {
+      searchTerm = searchTerm.substring(0, 5);
+    }
+    String sql = ExternalizedQuery.getSql("QUERY.CHECK.CLUSTER");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("ISSUING_CNTRY", "641");
+    query.setParameter("AP_CUST_CLUSTER_ID", searchTerm);
+    String result = query.getSingleResult(String.class);
+    if (result != null && !result.isEmpty()) {
+      return true;
+    }
+    return false;
   }
 
   private IntlAddr getIntlAddr(EntityManager entityManager, Addr address) {
