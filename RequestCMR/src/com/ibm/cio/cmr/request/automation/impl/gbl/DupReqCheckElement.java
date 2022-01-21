@@ -230,6 +230,7 @@ public class DupReqCheckElement extends DuplicateCheckElement {
       AutomationEngineData engineData) {
     ReqCheckRequest request = new ReqCheckRequest();
     request.setReqId(admin.getId().getReqId());
+    boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
     if (addr != null) {
       request.setAddrType(addr.getId().getAddrType());
       request.setCity(addr.getCity1());
@@ -245,6 +246,12 @@ public class DupReqCheckElement extends DuplicateCheckElement {
       request.setIssuingCountry(data.getCmrIssuingCntry());
       request.setPostalCode(addr.getPostCd());
       request.setStateProv(addr.getStateProv());
+      // extWallet
+      if (payGoAddredited) {
+        if ("PG01".equals(addr.getId().getAddrType()) && StringUtils.isNotBlank(addr.getExtWalletId())) {
+          request.setExtWalletId(addr.getExtWalletId());
+        }
+      }
       if (StringUtils.isNotBlank(data.getVat())) {
         request.setVat(data.getVat());
       } else if (StringUtils.isNotBlank(addr.getVat())) {
