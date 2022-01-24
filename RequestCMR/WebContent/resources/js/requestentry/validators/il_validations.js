@@ -593,6 +593,103 @@ function addAddressLandedPairingValidatorShipping() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
+function validateAddrFieldsNumericTranslation() {
+  addressNumericFieldsValidator('ZS01', 'CTYA', 'Street');
+  addressNumericFieldsValidator('ZS01', 'CTYA', 'PO Box');
+  addressNumericFieldsValidator('ZS01', 'CTYA', 'Postal Code');
+  
+  addressNumericFieldsValidator('ZP01', 'CTYB', 'Street');
+  addressNumericFieldsValidator('ZP01', 'CTYB', 'PO Box');
+  addressNumericFieldsValidator('ZP01', 'CTYB', 'Postal Code');
+  
+  addressNumericFieldsValidator('ZD01', 'CTYC', 'Street');
+  addressNumericFieldsValidator('ZD01', 'CTYC', 'PO Box');
+  addressNumericFieldsValidator('ZD01', 'CTYC', 'Postal Code');
+} 
+
+function addressNumericFieldsValidator(addrTypeHeb, addrTypeEng, addrField) {
+  console.log("addAddressNumericFieldsValidator..............");
+  
+    FormManager.addFormValidator((function() {
+      return {
+        validate : function() {
+          if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+            var record = null;
+            var type = null;
+            var addrTypeHebDisplay = '';
+            var addrTypeEngDisplay = '';
+            var addrFieldHeb = null;
+            var addrFieldEng = null;
+            
+            if (addrTypeHeb == 'ZS01') {
+              addrTypeHebDisplay = 'Mailing';
+            } else if (addrTypeHeb == 'ZP01') {
+              addrTypeHebDisplay = 'Billing';
+            } else if (addrTypeHeb == 'ZD01') {
+              addrTypeHebDisplay = 'Shipping';
+            }
+            
+            if (addrTypeEng == 'CTYA') {
+              addrTypeEngDisplay = 'Country Use A';
+            } else if (addrTypeEng == 'CTYB') {
+              addrTypeEngDisplay = 'Country Use B';
+            } else if (addrTypeEng == 'CTYC') {
+              addrTypeEngDisplay = 'Country Use C';
+            }
+            
+            for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+              record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+              if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+                record = _allAddressData[i];
+              }
+              type = record.addrType;
+              if (typeof (type) == 'object') {
+                type = type[0];
+              }
+              if (type == addrTypeHeb) {
+                if (addrField == 'Street') {
+                  addrFieldHeb = record.addrTxt[0];
+                } else if (addrField == 'PO Box') {
+                  addrFieldHeb = record.poBox[0];
+                } else if (addrField == 'Postal Code') {
+                  addrFieldHeb = record.postCd[0];
+                }
+              } else if (type == addrTypeEng) {
+                if (addrField == 'Street') {
+                  addrFieldEng = record.addrTxt[0];
+                } else if (addrField == 'PO Box') {
+                  addrFieldEng = record.poBox[0];
+                } else if (addrField == 'Postal Code') {
+                  addrFieldEng = record.postCd[0];
+                }
+              }
+            }
+            if (!isNumericValueEqual(addrFieldHeb, addrFieldEng)) {
+              return new ValidationResult(null, false, 'Mismatch ' + addrTypeHebDisplay + ' and ' + addrTypeEngDisplay + ' ' + addrField + ' numeric values.');
+            }
+          }
+          return new ValidationResult(null, true);
+        }
+      };
+    })(), 'MAIN_NAME_TAB', 'frmCMR');
+  
+}
+
+function isNumericValueEqual(strA, strB) {
+  if ( (strA != null && strA != '') && (strB != null && strB != '')) {
+    var strANum = strA.replace(/[^0-9]/g,'');
+    var strBNum = strB.replace(/[^0-9]/g,'');
+    
+    if ((strANum != null && strANum != '') && (strBNum != null && strBNum != '')) {
+      if(strANum != strBNum) {
+        return false;
+      }
+    }
+  }
+  
+  return true;
+}
+
 function addShippingAddrTypeValidator() {
   console.log("addShippingAddrTypeValidator..............");
   FormManager.addFormValidator((function() {
@@ -2519,6 +2616,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addPairedAddressFieldsMismatchValidatorMailing, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(addPairedAddressFieldsMismatchValidatorBilling, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(addPairedAddressFieldsMismatchValidatorShipping, [ SysLoc.ISRAEL ], null, true);
+  GEOHandler.registerValidator(validateAddrFieldsNumericTranslation, [ SysLoc.ISRAEL ], null, true);
 
   GEOHandler.addAfterConfig(setCapInd, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(lockDunsNo, [ SysLoc.ISRAEL ]);
