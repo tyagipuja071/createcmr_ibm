@@ -22,13 +22,13 @@ function addHandlersForIL() {
   }
 
   if (_CTCHandlerIL == null) {
-    _CTCHandlerIL = dojo.connect(FormManager.getField('clientTier'), 'onClick', function(value) {
+    _CTCHandlerIL = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
       setEnterpriseSalesRepSBO(value);
     });
   }
 
   if (_ISUHandlerIL == null) {
-    _ISUHandlerIL = dojo.connect(FormManager.getField('isuCd'), 'onClick', function(value) {
+    _ISUHandlerIL = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       requireCtcByISU(value);
       setEnterpriseSalesRepSBO(value);
     });
