@@ -848,8 +848,8 @@ public abstract class APHandler extends GEOHandler {
     case SystemLocation.MACAO:
       // Coverage 1H22 CREATCMR-4790, set expired Search Term "00000"
       if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
-        if (expiredSearchTerm(entityManager, data.getSearchTerm(), data.getCmrIssuingCntry())) {
-          data.setSearchTerm("00000");
+        if (expiredSearchTerm(entityManager, data.getApCustClusterId(), data.getCmrIssuingCntry())) {
+          data.setApCustClusterId("00000");
         }
       }
       break;
