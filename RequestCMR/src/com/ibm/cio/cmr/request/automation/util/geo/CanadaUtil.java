@@ -491,42 +491,52 @@ public class CanadaUtil extends AutomationUtil {
           }
           break;
         case "NAT/INAC":
-          String error = performInacCheck(cedpManager, entityManager, requestData);
-          if (StringUtils.isNotBlank(error)) {
-            if ("BG_ERROR".equals(error)) {
-              cmdeReview = true;
-              engineData.addNegativeCheckStatus("_chINACCheckFailed",
-                  "The projected global buying group during INAC checks did not match the one on the request.");
-              details.append("The projected global buying group during INAC checks did not match the one on the request.\n");
-            } else {
-              LOG.debug(error);
-              output.setDetails(error);
-              validation.setMessage("Validation Failed");
-              validation.setSuccess(false);
-              if (StringUtils.isBlank(admin.getSourceSystId())) {
-                engineData.addRejectionComment("OTH", error, "", "");
-                output.setOnError(false);
-              } else {
-                engineData.addNegativeCheckStatus("BP_" + change.getDataField(), error);
-              }
-              return true;
-            }
-          } else {
-            String ageError = performCMRNewCheck(cedpManager, entityManager, requestData);
-            if (StringUtils.isNotBlank(ageError)) {
-              engineData.addNegativeCheckStatus("_chINACCheckFailed", ageError);
-              details.append(ageError);
-              validation.setSuccess(false);
-              validation.setMessage("Validation Failed");
-              if (StringUtils.isBlank(admin.getSourceSystId())) {
-                engineData.addRejectionComment("OTH", error, "", "");
-                output.setOnError(false);
-              } else {
-                engineData.addNegativeCheckStatus("BP_" + change.getDataField(), error);
-              }
-              return true;
-            }
-          }
+          details.append("\nUpdate of NAC/INAT should be done via JIRA. Please submit the request in JIRA.\n");
+          engineData.addRejectionComment("NAC", "Update of NAC/INAT should be done via JIRA. Please submit the request in JIRA.",
+              "Update of NAC/INAT should be done via JIRA. Please submit the request in JIRA.", "");
+          output.setOnError(true);
+          // String error = performInacCheck(cedpManager, entityManager,
+          // requestData);
+          // if (StringUtils.isNotBlank(error)) {
+          // if ("BG_ERROR".equals(error)) {
+          // cmdeReview = true;
+          // engineData.addNegativeCheckStatus("_chINACCheckFailed",
+          // "The projected global buying group during INAC checks did not match
+          // the one on the request.");
+          // details.append("The projected global buying group during INAC
+          // checks did not match the one on the request.\n");
+          // } else {
+          // LOG.debug(error);
+          // output.setDetails(error);
+          // validation.setMessage("Validation Failed");
+          // validation.setSuccess(false);
+          // if (StringUtils.isBlank(admin.getSourceSystId())) {
+          // engineData.addRejectionComment("OTH", error, "", "");
+          // output.setOnError(false);
+          // } else {
+          // engineData.addNegativeCheckStatus("BP_" + change.getDataField(),
+          // error);
+          // }
+          // return true;
+          // }
+          // } else {
+          // String ageError = performCMRNewCheck(cedpManager, entityManager,
+          // requestData);
+          // if (StringUtils.isNotBlank(ageError)) {
+          // engineData.addNegativeCheckStatus("_chINACCheckFailed", ageError);
+          // details.append(ageError);
+          // validation.setSuccess(false);
+          // validation.setMessage("Validation Failed");
+          // if (StringUtils.isBlank(admin.getSourceSystId())) {
+          // engineData.addRejectionComment("OTH", error, "", "");
+          // output.setOnError(false);
+          // } else {
+          // engineData.addNegativeCheckStatus("BP_" + change.getDataField(),
+          // error);
+          // }
+          // return true;
+          // }
+          // }
           break;
         case "Tax Code / Estab. Function Code":
         case "PST Exemption License Number":
