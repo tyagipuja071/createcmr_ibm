@@ -219,6 +219,10 @@ function addILChecklistValidator() {
           REQID : reqId
         });
         if (!record || !record.sectionA1) {
+          var action = FormManager.getActualValue('yourAction')
+          if(action == YourActions.Save) {
+            return new ValidationResult(null, true);
+          }
           return new ValidationResult(null, false, 'Checklist has not been registered yet. Please execute a \'Save\' action before sending for processing to avoid any data loss.');
         }
         return new ValidationResult(null, true);
