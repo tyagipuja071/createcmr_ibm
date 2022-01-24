@@ -239,6 +239,15 @@ public class CanadaHandler extends GEOHandler {
       addrSeq = StringUtils.leftPad(addrSeq, 5, '0');
       address.getId().setAddrSeq(addrSeq);
     }
+
+    if (StringUtils.isNotBlank(currentRecord.getCmrName3())) {
+      address.setDept(currentRecord.getCmrName3());
+    }
+
+    if (StringUtils.isNotBlank(currentRecord.getCmrName4())) {
+      address.setAddrTxt2(currentRecord.getCmrName4());
+    }
+
   }
 
   @Override
