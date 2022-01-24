@@ -1473,10 +1473,6 @@ function addISICKUKLAValidator() {
         var kukla = FormManager.getActualValue('custClass');
         var reqType = FormManager.getActualValue('reqType').toUpperCase();
 
-        if (reqType != 'U') {
-          return;
-        }
-
         if (isicCD == '9500' && kukla != '60') {
           return new ValidationResult(null, false, 'Invalid value for ISIC/KUKLA.  ISIC value 9500 and KUKLA 60 should be linked together.');
         } else if (kukla == '60' && isicCD != '9500') {
