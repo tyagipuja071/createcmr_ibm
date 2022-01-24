@@ -228,7 +228,7 @@ public class DropDownService extends BaseSimpleService<DropdownModel> {
           // special handling
           bdsQuery.append(" order by CD asc");
         } else if ("Cluster".equals(fieldId) && PageManager.fromGeo("AP", (String) params.getParam("cmrIssuingCntry"))) {
-          bdsQuery.append(" order by case when CLUSTER_DESC LIKE 'Expired%' then 2  else 1 end");
+          bdsQuery.append(" order by case when CLUSTER_DESC LIKE 'DEFAULT%' then 5 when CLUSTER_DESC LIKE 'Kyndryl%' then 4 when CLUSTER_DESC LIKE '%Ecosystem%' then 3 when CLUSTER_DESC LIKE 'ISA Select Core%' then 2 else 1 end");
         } else {
           bdsQuery.append(" order by " + bds.getOrderByField() + " asc");
         }
