@@ -10,15 +10,6 @@
 <script src="${resourcesPath}/js/system/system.js?${cmrv}" type="text/javascript"></script>
 <script src="${resourcesPath}/js/revivedcmrs/revivedcmrs.js" type="text/javascript"></script>
 <script>
-  function downloadRevCMRTemplate() {
-	  var token = new Date().getTime();
-	  FormManager.setValue('dlDocType', 'TEMPLATE');
-	  FormManager.setValue('dlTokenId', token);
-	  cmr.showProgress('Downloading file. Please wait...');
-	  document.forms['fileTemplateDownloadForm'].submit();
-	  window.setTimeout('checkToken("' + token + '")', 1000);
-	
-	}
   dojo.addOnLoad(function() {
     if (FormManager) {
 	  // add validators here
@@ -32,22 +23,12 @@
   <form:form method="POST" action="${contextPath}/revivedcmrs/process" name="frmCMRRevived" class="ibm-column-form ibm-styled-form" 
 	 id="frmCMRRevived" enctype="multipart/form-data" target="processFrame">
     <cmr:section>
-      	<form>
-			<input name="dummyform" type="hidden">
-		</form>
-		<form id="fileTemplateDownloadForm" name="fileTemplateDownloadForm" method="POST" action="${contextPath}/revcmrs/template/download" target="fileTemplateDownloadFrame">
-		  <input name="dlTokenId" id="dlTokenId" type="hidden">
-		  <input name="dlDocType" id="dlDocType" type="hidden">
-		  <input name="dlReqId" id="dlReqId" type="hidden">
-		  <input name="dlIterId" id="dlIterId" type="hidden">
-		</form>
-		<iframe id="fileTemplateDownloadFrame" style="display:none" name="fileTemplateDownloadFrame"></iframe>
 		      <cmr:row topPad="10" addBackground="true">
         <cmr:column span="7">
 		    <p align="right">
 		      <a href="javascript:downloadRevCMRTemplate()">${ui.massDnlTmpl}</a>
 		    </p>
-		  </cmr:column>
+		</cmr:column>
 	    <cmr:column span="2">
 	      <p>
 	      	
@@ -68,4 +49,14 @@
     <input name="processTokenId" id="processTokenId" type="hidden">
   </form:form>
   <iframe id="processFrame" style="display:none" name="processFrame"></iframe>
+        	<form>
+			<input name="dummyform" type="hidden">
+		</form>
+		<form id="fileTemplateDownloadForm" name="fileTemplateDownloadForm" method="POST" action="${contextPath}/revcmrs/template/download" target="fileTemplateDownloadFrame">
+		  <input name="dlTokenId" id="dlTokenId" type="hidden">
+		  <input name="dlDocType" id="dlDocType" type="hidden">
+		  <input name="dlReqId" id="dlReqId" type="hidden">
+		  <input name="dlIterId" id="dlIterId" type="hidden">
+		</form>
+		<iframe id="fileTemplateDownloadFrame" style="display:none" name="fileTemplateDownloadFrame"></iframe>
 </cmr:boxContent>

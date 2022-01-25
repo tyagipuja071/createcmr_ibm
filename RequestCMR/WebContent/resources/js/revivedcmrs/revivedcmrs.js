@@ -67,6 +67,16 @@ function processRevivedCMRS() {
   });
 }
 
+function downloadRevCMRTemplate() {
+  var token = new Date().getTime();
+  FormManager.setValue('dlDocType', 'TEMPLATE');
+  FormManager.setValue('dlTokenId', token);
+  cmr.showProgress('Downloading file. Please wait...');
+  document.forms['fileTemplateDownloadForm'].submit();
+  window.setTimeout('checkToken("' + token + '")', 1000);
+
+}
+
 function submitRevCMRSFile() {
   if (FormManager.getActualValue('revivedcmrsFile') == '') {
     cmr.showAlert('No file selected to upload...');
