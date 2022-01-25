@@ -1442,7 +1442,14 @@ function setAddrFieldsBehavior() {
     FormManager.hide('POBox', 'poBox');
     FormManager.clearValue('poBox');
     FormManager.removeValidator('addrTxt', Validators.NON_LATIN);
-    checkAndAddValidator('addrTxt', Validators.REQUIRED, [ 'Street' ]);
+
+    // Fix for CREATCMR-4927 -- REQUIRED validator not working, if it is the last
+    // item in FormManager.GETFIELD_VALIDATIONS['addrTxt']
+    // reset validations and add the validators again
+    FormManager.resetValidations('addrTxt');
+    FormManager.addValidator('addrTxt', Validators.REQUIRED, [ "Street" ], null);
+    FormManager.addValidator('addrTxt', Validators.MAXLENGTH, [ "Street", 30 ], null);
+    
     if (addrType == 'ZD01') {
       checkAndAddValidator('addrTxt', Validators.NON_LATIN, [ 'Street Address' ]);
     }
@@ -2741,6 +2748,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(updateAbbrevNmLocnIsrael, [ SysLoc.ISRAEL ]);
   // GEOHandler.registerValidator(addNameContAttnDeptValidator, [ SysLoc.ISRAEL
   // ], null, true);
+  GEOHandler.addAddrFunction(setAddrFieldsBehavior, [ SysLoc.ISRAEL ]);
   GEOHandler.addAddrFunction(addLatinCharValidator, [ SysLoc.ISRAEL ]);
   GEOHandler.addAddrFunction(addNonLatinCharValidator, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(resetSubIndustryCd, [ SysLoc.ISRAEL ]);
@@ -2771,7 +2779,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(sboLengthValidator, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.addAfterConfig(addHandlersForIL, [ SysLoc.ISRAEL ]);
   GEOHandler.addAddrFunction(countryUseAISRAEL, [ SysLoc.ISRAEL ]);
-  GEOHandler.addAddrFunction(setAddrFieldsBehavior, [ SysLoc.ISRAEL ]);
   GEOHandler.addAddrFunction(validatePoBox, [ SysLoc.ISRAEL ]);
   GEOHandler.addAddrFunction(markAddrSaveSuperUser, [ SysLoc.ISRAEL ]);
   GEOHandler.addAddrFunction(toggleAddressTypesForIL, [ SysLoc.ISRAEL ]);
