@@ -549,13 +549,13 @@ public class CanadaUtil extends AutomationUtil {
           break;
         case "Client Tier":
           details.append("\nUpdate of Client Tier should be done via JIRA. Please submit the request in JIRA.\n");
-          engineData.addRejectionComment("NAC", "Update of Client Tier should be done via JIRA. Please submit the request in JIRA.",
+          engineData.addRejectionComment("CTC", "Update of Client Tier should be done via JIRA. Please submit the request in JIRA.",
               "Update of Client Tier should be done via JIRA. Please submit the request in JIRA.", "");
           output.setOnError(true);
           break;
         case "ISU Code":
           details.append("\nUpdate of ISU Code should be done via JIRA. Please submit the request in JIRA.\n");
-          engineData.addRejectionComment("NAC", "Update of ISU Code should be done via JIRA. Please submit the request in JIRA.",
+          engineData.addRejectionComment("ISU", "Update of ISU Code should be done via JIRA. Please submit the request in JIRA.",
               "Update of ISU Code should be done via JIRA. Please submit the request in JIRA.", "");
           output.setOnError(true);
           break;
