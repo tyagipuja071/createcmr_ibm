@@ -9,8 +9,6 @@ var _prolifCountries = [ 'AF', 'AM', 'AZ', 'BH', 'BY', 'KH', 'CN', 'CU', 'EG', '
     'SA', 'SD', 'SY', 'TW', 'TJ', 'TM', 'UA', 'AE', 'UZ', 'VE', 'VN', 'YE' ];
 var _requestingLOBHandler = null;
 var _streetHandler = null;
-var _ISUHandler = null;
-
 
 function addHandlersForIL() {
   for (var i = 0; i < _gtcAddrTypesIL.length; i++) {
@@ -41,61 +39,11 @@ function addHandlersForIL() {
       setStreetContBehavior();
     });
   }
-  if (_ISUHandler == null) {
-    _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
-      setClientTierValue(value);
-   });
-  }
-} 
 
   if (_SubindustryHandlerIL == null) {
     _SubindustryHandlerIL = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
       FormManager.readOnly('subIndustryCd');
     });
-  }
-}
-
-function setClientTierValue(value) {
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  if (value ==  null) {
-    var value = FormManager.getActualValue('isuCd');
-  }
-  if (value == '5K') {
-    FormManager.clearValue('clientTier');
-    FormManager.disable('clientTier');
-    FormManager.resetValidations('clientTier');
-  } else {
-    FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'clientTier' ], 'MAIN_CUST_TAB');
-    FormManager.enable('clientTier');
-  }
-}
-
-function addISUHandler() {
-  var _CTCHandler = null;
-  _isuCdHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
-    setClientTierAndISR(value);
-    setValuesWRTIsuCtc();   
-  });
-  _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
-    setClientTierAndISR(); 
-    setValuesWRTIsuCtc(value);
- });
-}
-
-function setClientTierAndISR(value) {
-  var reqType = null;
-  reqType = FormManager.getActualValue('reqType');
-  var clientTier = FormManager.getActualValue('clientTier');
-  if (!value) {
-    value = FormManager.getActualValue('isuCd');
-  }
-  if (value == '5K') {
-    FormManager.removeValidator('clientTier', Validators.REQUIRED);
-    FormManager.setValue('clientTier', '');
-    FormManager.readOnly('clientTier');
-    return;
-  } else {
-    FormManager.enable('clientTier');
   }
 }
 
@@ -336,51 +284,6 @@ function requireCtcByISU(value) {
     FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
   } else {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
-  }
-}
-
-function addILClientTierISULogic() {
-  var reqType = null;
-  reqType = FormManager.getActualValue('reqType');
-  _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
-    if (!value) {
-      value = FormManager.getActualValue('isuCd');
-    }
-    if (!value) {
-      FormManager.setValue('clientTier', '');
-    }
-    if (value == '5K') {
-      FormManager.clearValue('clientTier');
-      FormManager.disable('clientTier');
-      FormManager.resetValidations('clientTier');
-    } else {
-      FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'clientTier' ], 'MAIN_CUST_TAB');
-      FormManager.enable('clientTier');
-    }
-  if (reqType != 'C') {
-    return;
-  }
-  if (!PageManager.isReadOnly()) {
-    FormManager.enable('clientTier');
-  }
-
-    var tierValues = null;
-    if (value == '32') {
-      tierValues = [ 'B', 'M', 'N', 'S', 'Z' ];
-    } else if (value == '34') {
-      tierValues = [ '4', '6', 'A', 'E', 'Q', 'V', 'Y', 'Z' ];
-    } else if (value != '') {
-      tierValues = [ '7', 'Z' ];
-    }
-
-    if (tierValues != null) {
-      FormManager.limitDropdownValues(FormManager.getField('clientTier'), tierValues);
-    } else {
-      FormManager.resetDropdownValues(FormManager.getField('clientTier'));
-    }
-  });
-  if (_ISUHandler && _ISUHandler[0]) {
-    _ISUHandler[0].onChange();
   }
 }
 
@@ -1443,7 +1346,8 @@ function setAddrFieldsBehavior() {
     FormManager.clearValue('poBox');
     FormManager.removeValidator('addrTxt', Validators.NON_LATIN);
 
-    // Fix for CREATCMR-4927 -- REQUIRED validator not working, if it is the last
+    // Fix for CREATCMR-4927 -- REQUIRED validator not working, if it is the
+    // last
     // item in FormManager.GETFIELD_VALIDATIONS['addrTxt']
     // reset validations and add the validators again
     FormManager.resetValidations('addrTxt');
@@ -2691,30 +2595,6 @@ function limitMODValues() {
   }
 }
 
-function setValuesWRTIsuCtc(ctc){
-  var role = FormManager.getActualValue('userRole').toUpperCase();
-  var isu = FormManager.getActualValue('isuCd');
-  if(ctc==null){
-    var ctc = FormManager.getActualValue('clientTier');
-  }
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  if (isu == '34' && ctc == 'Y') {
-  FormManager.setValue('enterprise', '003290');
-  FormManager.setValue('salesBusOffCd', '006');
-  FormManager.setValue('repTeamMemberNo', '000651'); 
-  } else if (isu == '5K' && ctc == '') {
-    FormManager.setValue('enterprise', '985999');
-    FormManager.setValue('salesBusOffCd', '006');
-    FormManager.setValue('repTeamMemberNo', '000651');
-  }
-  if(role == 'REQUESTER') {
-    FormManager.removeValidator('enterprise', Validators.REQUIRED);
-  } else {
-    FormManager.addValidator('enterprise', Validators.REQUIRED);
-  }
-}
-
-
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding Israel functions...');
@@ -2726,7 +2606,6 @@ dojo.addOnLoad(function() {
 
   // Israel Specific
   GEOHandler.addAfterConfig(afterConfigForIsrael, [ SysLoc.ISRAEL ]);
-  GEOHandler.addAfterConfig(addILClientTierISULogic, [ SysLoc.ISRAEL ]);
   GEOHandler.registerValidator(addILAddressTypeValidator, [ SysLoc.ISRAEL ], null, true);
   // GEOHandler.registerValidator(addILAddressTypeMailingValidator, [
   // SysLoc.ISRAEL ], null, true);
@@ -2814,11 +2693,4 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setStreetContBehavior, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(requireSalesRepEnterpriseSBOByRole, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(lockCMROwner, [ SysLoc.ISRAEL ]);
-  GEOHandler.addAfterConfig(setClientTierValue, [ SysLoc.ISRAEL ]);
-  GEOHandler.addAfterTemplateLoad(setClientTierValue, [ SysLoc.ISRAEL ]);
-  GEOHandler.addAfterTemplateLoad(addILClientTierISULogic, [ SysLoc.ISRAEL ]);
-  GEOHandler.addAfterTemplateLoad(addISUHandler, [ SysLoc.ISRAEL ]);
-  GEOHandler.addAfterConfig(addISUHandler, [ SysLoc.ISRAEL ]);
-  GEOHandler.addAfterTemplateLoad(setClientTierAndISR, [ SysLoc.ISRAEL ]);
-  GEOHandler.addAfterConfig(setClientTierAndISR, [ SysLoc.ISRAEL ]);
 });
