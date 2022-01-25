@@ -135,7 +135,7 @@
 				</column>				
 			</columns>
 		</tab>
-		<tab name="Sold To" type="Address" typeCode="ZS01">
+		<tab name="Sold-To" type="Address" typeCode="ZS01">
 			<columns>
 				<column exactLength="true">
 					<label>CMR. No</label>
@@ -214,7 +214,7 @@
 			</columns>
 		</tab>
 		
-		<tab name="Invoice To" type="Address" typeCode="ZP02">
+		<tab name="Invoice-To" type="Address" typeCode="ZP02">
 			<columns>
 				<column exactLength="true">
 					<label>CMR. No</label>
