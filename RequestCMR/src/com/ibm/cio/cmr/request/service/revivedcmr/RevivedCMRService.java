@@ -160,7 +160,7 @@ public class RevivedCMRService extends BaseSimpleService<List<RevivedCMRModel>> 
           if (dnbMatches.size() == 0) { // there are no matches, automation gets
                                         // it from data.getDunsNo. how to get
                                         // from here?
-            revCmr.setDunsNo("No matches");
+            revCmr.setDunsNo("");
             break;
           }
 
@@ -282,11 +282,6 @@ public class RevivedCMRService extends BaseSimpleService<List<RevivedCMRModel>> 
             details.append("The preferred coverage '" + preferredCoverage.getFinalCoverage() + "' determined using Buying Group '" + bgId
                 + "' was not found in coverage rules.").append("\n");
             details.append("Proceeding with other calculated coverages -").append("\n");
-            // LOG.debug("PREFERRED_COVERAGE_ERROR", "The preferred
-            // coverage
-            // '" + preferredCoverage.getFinalCoverage()
-            // + "' determined using Buying Group '" + bgId + "' was not
-            // found in coverage rules.");
             coverages = getValidCoverages(coverages);
           }
         }
@@ -364,11 +359,8 @@ public class RevivedCMRService extends BaseSimpleService<List<RevivedCMRModel>> 
           details.append("\nCoverages from Buying Group ID " + bgId + " (" + gbgId + ")" + (withCmrData ? "[from current CMRs]" : "")).append("\n");
           break;
         case COV_VAT:
-          // details.append("\nCoverages from CMR VAT data for VAT Number
-          // "
-          // + data.getVat() + (withCmrData ? " [from current CMRs]" :
-          // ""))
-          // .append("\n");
+          details.append("\nCoverages from CMR VAT data for VAT Number " + revCmr.getVat() + (withCmrData ? " [from current CMRs]" : ""))
+              .append("\n");
           break;
         case COV_ODM:
           // details.append("\nCoverage from ODM Projected/User Specified
@@ -423,7 +415,6 @@ public class RevivedCMRService extends BaseSimpleService<List<RevivedCMRModel>> 
 
       // if it is the first calculated coverage, use it to do country
       // specific coverage calculations
-      boolean hasCountryCheck = false;
       if (countryUtil != null) {
         // RequestData requestData = new RequestData(entityManager);
         // Data data = new Data();
@@ -431,38 +422,8 @@ public class RevivedCMRService extends BaseSimpleService<List<RevivedCMRModel>> 
         // data.setCustSubGrp(originalScenario);
         // requestData.setData(data);
         // hook to perform calculations and update results
-        hasCountryCheck = countryUtil.performCountrySpecificCoverageCalculationsForRevivedCMRs(revCmr, originalScenario, covFrom,
-            calculatedCoverageContainer, isCoverageCalculated);
-      }
-
-      if (!hasCountryCheck) {
-        if ("NONE".equals(covFrom)) {
-          if (coverageNotFound) {
-            // details.append("Coverage ID " + data.getCovId() + " not
-            // found
-            // in the coverage rules.");
-          } else {
-            // result.setResults("Skipped");
-            details.append("No projected Buying Group or ODM Coverage found, coverage adjustments will be skipped.");
-          }
-        } else if (!isCoverageCalculated && !BG_NONE.equals(covFrom)) {
-          details.setLength(0);
-          details.append("Coverage could not be calculated.");
-        } else if (isCoverageCalculated) {
-          // engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
-          if (calculatedCoverageContainer != null) {
-            // engineData.put(AutomationEngineData.COVERAGE_CALCULATED,
-            // calculatedCoverageContainer.getFinalCoverage());
-
-            details.append("\n").append("Final Coverage: " + calculatedCoverageContainer.getFinalCoverage());
-          }
-
-        }
-
-      } else
-
-      {
-        LOG.debug("NO GBG FOUND!");
+        countryUtil.performCountrySpecificCoverageCalculationsForRevivedCMRs(revCmr, originalScenario, covFrom, calculatedCoverageContainer,
+            isCoverageCalculated);
       }
     }
   }
@@ -482,7 +443,6 @@ public class RevivedCMRService extends BaseSimpleService<List<RevivedCMRModel>> 
 
     String massUpdtDir = SystemConfiguration.getValue("MASS_UPDATE_FILES_DIR");
     String tmpDir = massUpdtDir + "/" + "revcmrtmp";
-    String cmrIssuingCntry = "";
     File uploadDir = new File(tmpDir);
     if (!uploadDir.exists()) {
       uploadDir.mkdirs();
@@ -494,8 +454,8 @@ public class RevivedCMRService extends BaseSimpleService<List<RevivedCMRModel>> 
     // Create a new file upload handler
     ServletFileUpload upload = new ServletFileUpload(factory);
     List<FileItem> items = upload.parseRequest(request);
-    String extName = ".xlsx";
-    String fileName = "revcmrs-test.xlsx";
+
+    String fileName = "revcmrs.xlsx";
 
     List<RevivedCMRModel> revCMRList = new ArrayList<RevivedCMRModel>();
     for (FileItem item : items) {
@@ -508,12 +468,10 @@ public class RevivedCMRService extends BaseSimpleService<List<RevivedCMRModel>> 
           String filePath = uploadDir.getAbsolutePath() + "/" + fileName;
           filePath = filePath.replaceAll("[\\\\]", "/");
 
-          // MASS FILE | write the file
           File file = new File(filePath);
 
           if (file.exists()) {
             file.delete();
-            // log.info("Existing mass file will be replaced.");
           }
           FileOutputStream fos = new FileOutputStream(file);
           try {
@@ -535,19 +493,6 @@ public class RevivedCMRService extends BaseSimpleService<List<RevivedCMRModel>> 
               int columnIndex = 0;
               int rowIndex = 0;
 
-              // track the column names first
-              // for (Cell cell : sheetRow) {
-              // sheetCell = (XSSFCell) cell;
-              // fieldName = sheetCell.getStringCellValue();
-              // if (!StringUtils.isBlank(fieldName)) {
-              // columnMap.put(columnIndex, fieldName);
-              // if (columnIndex > maxMappedCol) {
-              // maxMappedCol = columnIndex;
-              // }
-              // }
-              // columnIndex++;
-              // }
-
               columnMap.put(0, SystemConfiguration.getSystemProperty("excelcolumn.0"));
               columnMap.put(1, SystemConfiguration.getSystemProperty("excelcolumn.1"));
               columnMap.put(2, SystemConfiguration.getSystemProperty("excelcolumn.2"));
@@ -567,6 +512,7 @@ public class RevivedCMRService extends BaseSimpleService<List<RevivedCMRModel>> 
               columnMap.put(16, SystemConfiguration.getSystemProperty("excelcolumn.16"));
               columnMap.put(17, SystemConfiguration.getSystemProperty("excelcolumn.17"));
               columnMap.put(18, SystemConfiguration.getSystemProperty("excelcolumn.18"));
+              columnMap.put(19, SystemConfiguration.getSystemProperty("excelcolumn.19"));
               // massCreateFile.setColumnMap(columnMap);
               int maxMappedCol = columnMap.size();
               // parse the records
@@ -819,12 +765,9 @@ public class RevivedCMRService extends BaseSimpleService<List<RevivedCMRModel>> 
   public void exportToExcel(List<RevivedCMRModel> revCMRList, HttpServletResponse response)
       throws IOException, ParseException, IllegalArgumentException, IllegalAccessException {
 
-    // if (config == null) {
-    // initConfig();
-    // }
     String columnName = null;
     Object rawValue = null;
-    // List<AutomationStatsModel> stats = container.getAutomationRecords();
+
     LOG.info("Exporting records to excel..");
     XSSFWorkbook report = new XSSFWorkbook();
     try {
@@ -845,33 +788,6 @@ public class RevivedCMRService extends BaseSimpleService<List<RevivedCMRModel>> 
       regularStyle.setFont(regular);
       regularStyle.setWrapText(true);
       regularStyle.setVerticalAlignment(VerticalAlignment.TOP);
-
-      // StatXLSConfig sc = null;
-      // for (int i = 0; i < config.size(); i++) {
-      // sc = config.get(i);
-      // sheet.setColumnWidth(i, sc.getWidth() * 256);
-      // }
-      // create title
-      // XSSFRow titleRow = sheet.createRow(0);
-      // XSSFCell cell = titleRow.createCell(0);
-      // cell.setCellStyle(boldStyle);
-      // String title = "Automation Statistics";
-      // // if (model != null) {
-      // // title = "Automation Statistics from " + model.getDateFrom() + " to "
-      // +
-      // // model.getDateTo();
-      // // if (!StringUtils.isEmpty(model.getCountry())) {
-      // // title += " for " + model.getCountry();
-      // // } else {
-      // // if (!StringUtils.isEmpty(model.getGroupByProcCenter())) {
-      // // title += " for " + model.getGroupByProcCenter();
-      // // }
-      // // if (!StringUtils.isEmpty(model.getGroupByGeo())) {
-      // // title += " (" + model.getGroupByGeo() + ")";
-      // // }
-      // // }
-      // // }
-      // cell.setCellValue(title);
 
       // create headers
       XSSFRow headerRow = sheet.createRow(0);
@@ -936,21 +852,7 @@ public class RevivedCMRService extends BaseSimpleService<List<RevivedCMRModel>> 
 
       String type = "application/octet-stream";
       String fileName = "RevCMR-results";
-      // if (model != null) {
-      // fileName += StringUtils.replace(model.getDateFrom(), "-", "");
-      // fileName += "-";
-      // fileName += StringUtils.replace(model.getDateTo(), "-", "");
-      // if (!StringUtils.isEmpty(model.getCountry())) {
-      // fileName += "_" + model.getCountry();
-      // } else {
-      // if (!StringUtils.isEmpty(model.getGroupByProcCenter())) {
-      // fileName += "_" + model.getGroupByProcCenter();
-      // }
-      // if (!StringUtils.isBlank(model.getGroupByGeo())) {
-      // fileName += "_" + model.getGroupByGeo();
-      // }
-      // }
-      // }
+
       if (response != null) {
         response.setContentType(type);
         response.addHeader("Content-Type", type);
