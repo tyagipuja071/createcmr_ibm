@@ -547,11 +547,17 @@ public class CanadaUtil extends AutomationUtil {
             output.setOnError(true);
           }
           break;
-        case "Client Tier Code":
-          // noop, for switch handling only
+        case "Client Tier":
+          details.append("\nUpdate of Client Tier should be done via JIRA. Please submit the request in JIRA.\n");
+          engineData.addRejectionComment("NAC", "Update of Client Tier should be done via JIRA. Please submit the request in JIRA.",
+              "Update of Client Tier should be done via JIRA. Please submit the request in JIRA.", "");
+          output.setOnError(true);
           break;
         case "ISU Code":
-          // noop, for switch handling only
+          details.append("\nUpdate of ISU Code should be done via JIRA. Please submit the request in JIRA.\n");
+          engineData.addRejectionComment("NAC", "Update of ISU Code should be done via JIRA. Please submit the request in JIRA.",
+              "Update of ISU Code should be done via JIRA. Please submit the request in JIRA.", "");
+          output.setOnError(true);
           break;
         case "SORTL":
           // noop, for switch handling only
