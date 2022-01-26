@@ -582,6 +582,7 @@ public class IsraelHandler extends EMEAHandler {
         data.setRepTeamMemberNo("");
         data.setSalesBusOffCd("");
         data.setEnterprise("");
+        data.setInacCd("");
       } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
         // defect 1299146
         if (mainRecord.getCmrSortl() != null && mainRecord.getCmrSortl().length() >= 10) {
