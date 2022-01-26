@@ -695,10 +695,8 @@ function isNumericValueEqual(strA, strB) {
     var strANum = strA.replace(/[^0-9]/g,'');
     var strBNum = strB.replace(/[^0-9]/g,'');
     
-    if ((strANum != null && strANum != '') && (strBNum != null && strBNum != '')) {
-      if(strANum != strBNum) {
-        return false;
-      }
+    if (strANum != null && strBNum != null && strANum != strBNum) {
+      return false;
     }
   }
   
