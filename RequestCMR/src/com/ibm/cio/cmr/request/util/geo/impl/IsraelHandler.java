@@ -1601,7 +1601,6 @@ public class IsraelHandler extends EMEAHandler {
           error.addError(rowIndex, "<br>KUKLA", "ISIC value should be 9500 if KUKLA is 60.");
         }
         String isuCd = validateColValFromCell(row.getCell(10));
-        String ctc = validateColValFromCell(row.getCell(11));
         if (isuCd.equalsIgnoreCase("5k") && !ctc.equalsIgnoreCase("@")) {
           LOG.trace("Client Tier Value should always be @ for IsuCd Value: 5K");
           error.addError(row.getRowNum(), "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd);
