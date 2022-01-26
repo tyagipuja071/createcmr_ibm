@@ -616,6 +616,8 @@ function addressNumericFieldsValidator(addrTypeHeb, addrTypeEng, addrField) {
           if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
             var record = null;
             var type = null;
+            var updateIndHeb = null;
+            var updateIndEng = null;
             var addrTypeHebDisplay = '';
             var addrTypeEngDisplay = '';
             var addrFieldHeb = null;
@@ -646,7 +648,9 @@ function addressNumericFieldsValidator(addrTypeHeb, addrTypeEng, addrField) {
               if (typeof (type) == 'object') {
                 type = type[0];
               }
+              
               if (type == addrTypeHeb) {
+                updateIndHeb = record.updateInd[0];
                 if (addrField == 'Street') {
                   addrFieldHeb = record.addrTxt[0];
                 } else if (addrField == 'PO Box') {
@@ -655,6 +659,7 @@ function addressNumericFieldsValidator(addrTypeHeb, addrTypeEng, addrField) {
                   addrFieldHeb = record.postCd[0];
                 }
               } else if (type == addrTypeEng) {
+                updateIndEng = record.updateInd[0];
                 if (addrField == 'Street') {
                   addrFieldEng = record.addrTxt[0];
                 } else if (addrField == 'PO Box') {
@@ -664,8 +669,14 @@ function addressNumericFieldsValidator(addrTypeHeb, addrTypeEng, addrField) {
                 }
               }
             }
-            if (!isNumericValueEqual(addrFieldHeb, addrFieldEng)) {
-              return new ValidationResult(null, false, 'Mismatch ' + addrTypeHebDisplay + ' and ' + addrTypeEngDisplay + ' ' + addrField + ' numeric values.');
+            if ( (updateIndHeb != null && (updateIndHeb == 'N' || updateIndHeb == 'U')) || (updateIndEng != null && (updateIndEng == 'N' || updateIndEng == 'U')) ) {
+              if (!isNumericValueEqual(addrFieldHeb, addrFieldEng)) {
+                return new ValidationResult(null, false, 'Mismatch ' + addrTypeHebDisplay + ' and ' + addrTypeEngDisplay + ' ('+ addrTypeHebDisplay +') ' + addrField + ' numeric values.');
+              }
+            } else if (FormManager.getActualValue('reqType') == 'C') {
+              if (!isNumericValueEqual(addrFieldHeb, addrFieldEng)) {
+                return new ValidationResult(null, false, 'Mismatch ' + addrTypeHebDisplay + ' and ' + addrTypeEngDisplay + ' ('+ addrTypeHebDisplay +') ' + addrField + ' numeric values.');
+              }
             }
           }
           return new ValidationResult(null, true);
