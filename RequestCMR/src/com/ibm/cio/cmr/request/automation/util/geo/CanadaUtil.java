@@ -74,7 +74,7 @@ public class CanadaUtil extends AutomationUtil {
       CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO, "ZP02", "ZP03", "ZP04", "ZP05", "ZP06", "ZP07", "ZP08", "ZP09");
 
   private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Building", "Floor", "Office", "Department / Attn.", "Street con't",
-      "Customer Name 2", "Phone #", "PostBox", "State/Province");
+      "Customer Name 2", "Phone #", "PostBox", "State/Province", "Transport Zone");
 
   private static final List<String> CARIB_CNTRIES = Arrays.asList("BS", "BB", "BM", "GY", "KY", "JM", "AW", "LC", "SR", "TT");
 
