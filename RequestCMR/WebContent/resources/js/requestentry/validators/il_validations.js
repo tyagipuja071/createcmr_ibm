@@ -1685,9 +1685,9 @@ function enableCmrNoForProcessor() {
     ifProspect = dijit.byId('prospLegalInd').get('checked') ? 'Y' : 'N';
   }
   console.log("enableCmrNoForProcessor ifProspect:" + ifProspect);
-  if (role == 'REQUESTER' || 'Y' == ifProspect || (role != 'REQUESTER' && cmrNO.startsWith('P'))) {
+  if (role == 'REQUESTER' || (role != 'REQUESTER' && cmrNO.startsWith('P'))) {
     FormManager.readOnly('cmrNo');
-  } else if ('Y' != ifProspect && (role == 'PROCESSOR') && reqType != 'U') {
+  } else if (role == 'PROCESSOR' && reqType != 'U') {
     FormManager.enable('cmrNo');
   } else {
     FormManager.readOnly('cmrNo');
