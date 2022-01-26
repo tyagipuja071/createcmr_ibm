@@ -69,7 +69,7 @@
           <dbColumn>ISU_CD</dbColumn>
           <width>15</width>
 		  <lovId>ISU</lovId>
-		  <length>1</length>
+		  <length>2</length>
         </column>
         <column>
           <label>Client Tier</label>
