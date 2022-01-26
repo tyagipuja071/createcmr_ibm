@@ -2604,6 +2604,68 @@ function limitMODValues() {
   }
 }
 
+function validateExistingCMRNo() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        console.log('checking requested cmr number il...');
+        var reqType = FormManager.getActualValue('reqType');
+        var cmrNo = FormManager.getActualValue('cmrNo');
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var action = FormManager.getActualValue('yourAction');
+        var _custSubGrp = FormManager.getActualValue('custSubGrp');
+        if (reqType == 'C' && cmrNo) {
+          if (cmrNo.startsWith('P')) { 
+            return new ValidationResult(null, true);
+          }          
+          var exists = cmr.query('LD.CHECK_CMR_EXIST_IN_RDC', {
+            COUNTRY : cntry,
+            CMR_NO : cmrNo,
+            MANDT : cmr.MANDT
+          });
+          
+          var results2 = cmr.query('GET.CHECK_EXISTS_CMR_NO', {
+            CMR_NO : cmrNo,
+            CNTRY : cntry
+          });
+          
+          if (exists && exists.ret1 && action != 'PCM') {
+            return new ValidationResult({
+              id : 'cmrNo',
+              type : 'text',
+              name : 'cmrNo'
+            }, false, 'The requested CMR Number ' + cmrNo + ' already exists in the system.');
+          } else if (results2.ret1 != null && action != 'PCM') {
+            return new ValidationResult({
+              id : 'cmrNo',
+              type : 'text',
+              name : 'cmrNo'
+            }, false, 'The requested CMR Number ' + cmrNo + ' already exists in the system.');
+          } else {
+            exists = cmr.query('LD.CHECK_EXISTING_CMR_NO_RESERVED', {
+              COUNTRY : cntry,
+              CMR_NO : cmrNo,
+              MANDT : cmr.MANDT
+            });
+            if (exists && exists.ret1) {
+              return new ValidationResult({
+                id : 'cmrNo',
+                type : 'text',
+                name : 'cmrNo'
+              }, false, 'The requested CMR Number ' + cmrNo + ' already exists in the system.');
+            }
+          }
+        }
+        return new ValidationResult({
+          id : 'cmrNo',
+          type : 'text',
+          name : 'cmrNo'
+        }, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding Israel functions...');
