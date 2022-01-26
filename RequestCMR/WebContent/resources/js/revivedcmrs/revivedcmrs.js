@@ -88,7 +88,8 @@ function submitRevCMRSFile() {
   }
   var token = new Date().getTime();
   FormManager.setValue('processTokenId', token);
-  cmr.showProgress('Processing file. Please wait...');
+  // cmr.showProgress('Processing file. Please wait...');
+  cmr.showAlert('Processing stated. Please wait for the processing result email.', null, null, true);
   document.forms['frmCMRRevived'].submit();
-  window.setTimeout('checkToken("' + token + '")', 1000);
+  // window.setTimeout('checkToken("' + token + '")', 1000);
 }

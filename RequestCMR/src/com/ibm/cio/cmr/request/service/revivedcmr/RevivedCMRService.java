@@ -1,10 +1,9 @@
 package com.ibm.cio.cmr.request.service.revivedcmr;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.text.DecimalFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -53,10 +52,12 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.BaseSimpleService;
 import com.ibm.cio.cmr.request.ui.PageManager;
+import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
+import com.ibm.cio.cmr.request.util.mail.Email;
 import com.ibm.cio.cmr.utils.coverage.CoverageRules;
 import com.ibm.cio.cmr.utils.coverage.JarProperties;
 import com.ibm.cio.cmr.utils.coverage.objects.CoverageInput;
@@ -762,8 +763,7 @@ public class RevivedCMRService extends BaseSimpleService<List<RevivedCMRModel>> 
 
   }
 
-  public void exportToExcel(List<RevivedCMRModel> revCMRList, HttpServletResponse response)
-      throws IOException, ParseException, IllegalArgumentException, IllegalAccessException {
+  public void exportToExcel(List<RevivedCMRModel> revCMRList, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
     String columnName = null;
     Object rawValue = null;
@@ -854,10 +854,25 @@ public class RevivedCMRService extends BaseSimpleService<List<RevivedCMRModel>> 
       String fileName = "RevCMR-results";
 
       if (response != null) {
-        response.setContentType(type);
-        response.addHeader("Content-Type", type);
-        response.addHeader("Content-Disposition", "attachment; filename=\"" + fileName + ".xlsx\"");
-        report.write(response.getOutputStream());
+        // response.setContentType(type);
+        // response.addHeader("Content-Type", type);
+        // response.addHeader("Content-Disposition", "attachment; filename=\"" +
+        // fileName + ".xlsx\"");
+        // report.write(response.getOutputStream());
+        String host = SystemConfiguration.getValue("MAIL_HOST");
+        AppUser user = AppUser.getUser(request);
+
+        Email mail = new Email();
+        String from = SystemConfiguration.getValue("MAIL_FROM");
+        mail.setSubject("Revived CMRs processing result");
+        mail.setTo(user.getIntranetId());
+        mail.setFrom(from);
+        mail.setMessage("Revived CMRs processed successfully.");
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        report.write(bos);
+        mail.addAttachment("RevCMR-results.xlsx", bos);
+
+        mail.send(host);
       } else {
         FileOutputStream fos = new FileOutputStream("C:/" + fileName + ".xlsx");
         try {

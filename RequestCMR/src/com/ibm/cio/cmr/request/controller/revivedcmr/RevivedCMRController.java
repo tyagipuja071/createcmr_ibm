@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.ibm.cio.cmr.request.CmrException;
+import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.controller.BaseController;
 import com.ibm.cio.cmr.request.controller.automation.DuplicateCheckController;
 import com.ibm.cio.cmr.request.model.ParamContainer;
@@ -23,7 +24,7 @@ import com.ibm.cio.cmr.request.model.system.ForcedStatusChangeModel;
 import com.ibm.cio.cmr.request.model.system.UserModel;
 import com.ibm.cio.cmr.request.service.revivedcmr.RevivedCMRService;
 import com.ibm.cio.cmr.request.user.AppUser;
-import com.ibm.cio.cmr.request.util.MessageUtil;
+import com.ibm.cio.cmr.request.util.mail.Email;
 
 /**
  * Controller for revived cmrs process
@@ -78,13 +79,27 @@ public class RevivedCMRController extends BaseController {
       boolean isMultipart = ServletFileUpload.isMultipartContent(request);
       if (isMultipart) {
         List<RevivedCMRModel> revivedCMRModel = this.service.process(request, params);
-        service.exportToExcel(revivedCMRModel, response);
-        request.getSession().setAttribute((String) params.getParam("token"), "Y," + MessageUtil.getMessage(MessageUtil.INFO_REV_CMR_FILE_PROCESSED));
+        service.exportToExcel(revivedCMRModel, request, response);
+        // request.getSession().setAttribute((String) params.getParam("token"),
+        // "Y," +
+        // MessageUtil.getMessage(MessageUtil.INFO_REV_CMR_FILE_PROCESSED));
       }
     } catch (Exception e) {
       e.printStackTrace();
       LOG.error("Failed processing the revived cmrs file...");
-      request.getSession().setAttribute((String) params.getParam("token"), "N," + MessageUtil.getMessage(MessageUtil.ERROR_GENERAL));
+      // request.getSession().setAttribute((String) params.getParam("token"),
+      // "N," + MessageUtil.getMessage(MessageUtil.ERROR_GENERAL));
+      String host = SystemConfiguration.getValue("MAIL_HOST");
+      AppUser user = AppUser.getUser(request);
+
+      Email mail = new Email();
+      String from = SystemConfiguration.getValue("MAIL_FROM");
+      mail.setSubject("Revived CMRs processing result");
+      mail.setTo(user.getIntranetId());
+      mail.setFrom(from);
+      mail.setMessage("Revived CMRs processing encountered an error. Please try again.");
+
+      mail.send(host);
     }
   }
 
