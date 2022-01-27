@@ -2346,13 +2346,11 @@ function setSalesRepEnterpriseNoSBO(fromAddress, scenario, scenarioChanged) {
       requireSalesRepEnterpriseSBOByRole();
     }
   } else if (reqType == 'C' && !scenarioChanged) {
-    if (role == 'PROCESSOR') {
       if (scenario == 'BUSPR' || scenario == 'INTER' || scenario == 'INTSO' || scenario == 'PRIPE') {
         FormManager.readOnly('repTeamMemberNo');
         FormManager.readOnly('enterprise');
         FormManager.readOnly('salesBusOffCd');
       }
-    }
   }
 }
 
@@ -2526,6 +2524,7 @@ function setCTCByScenario(fromAddress, scenario, scenarioChanged) {
     return;
   }
   var isuCd = FormManager.getActualValue('isuCd');
+  var custType = FormManager.getActualValue('custSubGrp');
   
   if (isuCd != '' & isuCd != "34") {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
@@ -2534,29 +2533,26 @@ function setCTCByScenario(fromAddress, scenario, scenarioChanged) {
   }
   
   if (scenarioChanged) {
-    var custType = FormManager.getActualValue('custSubGrp');
-    
-    if (custType == 'COMME') {
+    if (scenario == 'COMME') {
       FormManager.setValue('clientTier', 'Q');
-    } else if (custType == 'BUSPR') {
+    } else if (scenario == 'BUSPR') {
       FormManager.setValue('clientTier', '');
-      FormManager.readOnly('clientTier');
-    } else if (custType == 'INTER') {
+    } else if (scenario == 'INTER') {
       FormManager.setValue('clientTier', '');
-      FormManager.readOnly('clientTier');
-    } else if (custType == 'INTSO') {
+    } else if (scenario == 'INTSO') {
       FormManager.setValue('clientTier', '');
-      FormManager.readOnly('clientTier');
-    } else if (custType == 'PRIPE') {
+    } else if (scenario == 'PRIPE') {
       FormManager.setValue('clientTier', 'Q');
-      FormManager.readOnly('clientTier');
-    } else if (custType == 'GOVRN') {
+    } else if (scenario == 'GOVRN') {
       FormManager.setValue('clientTier', 'Q');
-    } else if (custType == 'THDPT') {
+    } else if (scenario == 'THDPT') {
       FormManager.setValue('clientTier', 'Q');
-    } else if (custType == 'CROSS') {
+    } else if (scenario == 'CROSS') {
       FormManager.setValue('clientTier', 'Q');
     }
+  }
+  if (scenario == 'BUSPR' || scenario == 'INTER' || scenario == 'INTSO' || scenario == 'PRIPE') {
+    FormManager.readOnly('clientTier');
   }
 }
 
