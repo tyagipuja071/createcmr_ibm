@@ -595,14 +595,17 @@ function addAddressLandedPairingValidatorShipping() {
 
 function validateAddrFieldsNumericTranslation() {
   addressNumericFieldsValidator('ZS01', 'CTYA', 'Street');
+  addressNumericFieldsValidator('ZS01', 'CTYA', 'Address Cont');
   addressNumericFieldsValidator('ZS01', 'CTYA', 'PO Box');
   addressNumericFieldsValidator('ZS01', 'CTYA', 'Postal Code');
   
   addressNumericFieldsValidator('ZP01', 'CTYB', 'Street');
+  addressNumericFieldsValidator('ZP01', 'CTYB', 'Address Cont');
   addressNumericFieldsValidator('ZP01', 'CTYB', 'PO Box');
   addressNumericFieldsValidator('ZP01', 'CTYB', 'Postal Code');
   
   addressNumericFieldsValidator('ZD01', 'CTYC', 'Street');
+  addressNumericFieldsValidator('ZD01', 'CTYC', 'Address Cont');
   addressNumericFieldsValidator('ZD01', 'CTYC', 'PO Box');
   addressNumericFieldsValidator('ZD01', 'CTYC', 'Postal Code');
 } 
@@ -653,6 +656,8 @@ function addressNumericFieldsValidator(addrTypeHeb, addrTypeEng, addrField) {
                 updateIndHeb = record.updateInd[0];
                 if (addrField == 'Street') {
                   addrFieldHeb = record.addrTxt[0];
+                } else if (addrField == 'Address Cont') {
+                  addrFieldHeb = record.addrTxt2[0];
                 } else if (addrField == 'PO Box') {
                   addrFieldHeb = record.poBox[0];
                 } else if (addrField == 'Postal Code') {
@@ -662,6 +667,8 @@ function addressNumericFieldsValidator(addrTypeHeb, addrTypeEng, addrField) {
                 updateIndEng = record.updateInd[0];
                 if (addrField == 'Street') {
                   addrFieldEng = record.addrTxt[0];
+                } else if (addrField == 'Address Cont') {
+                  addrFieldEng = record.addrTxt2[0];
                 } else if (addrField == 'PO Box') {
                   addrFieldEng = record.poBox[0];
                 } else if (addrField == 'Postal Code') {
@@ -687,13 +694,18 @@ function addressNumericFieldsValidator(addrTypeHeb, addrTypeEng, addrField) {
 }
 
 function isNumericValueEqual(strA, strB) {
-  if ( (strA != null && strA != '') && (strB != null && strB != '')) {
-    var strANum = strA.replace(/[^0-9]/g,'');
-    var strBNum = strB.replace(/[^0-9]/g,'');
-    
-    if (strANum != null && strBNum != null && strANum != strBNum) {
-      return false;
-    }
+  var strANum = '';
+  var strBNum = '';
+  
+  if (strA != null && strA != '') {
+    strANum = strA.replace(/[^0-9]/g,'');
+  }
+  if (strB != null && strB != '') {
+    strBNum = strB.replace(/[^0-9]/g,'');
+  }
+  
+  if (strANum != strBNum) {
+    return false;
   }
   
   return true;
