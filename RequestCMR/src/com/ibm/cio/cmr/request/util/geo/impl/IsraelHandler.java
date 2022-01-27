@@ -12,6 +12,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.persistence.EntityManager;
 
@@ -1579,11 +1581,20 @@ public class IsraelHandler extends EMEAHandler {
         }
         // INAC/NAC
         String inac = validateColValFromCell(row.getCell(14));
-        if (StringUtils.isNotBlank(inac) && StringUtils.isAlphanumeric(inac)) {
-          String firstTwoInacChar = StringUtils.substring(inac, 0, 2);
-          String lastTwoInacChar = StringUtils.substring(inac, 2);
-          if (!StringUtils.isAlpha(firstTwoInacChar) || !StringUtils.isNumeric(lastTwoInacChar)) {
-            error.addError(rowIndex, "<br>INAC/NAC", "Does not match country INAC/NAC type rules.");
+        if (StringUtils.isNotBlank(inac)) {
+          if (!StringUtils.isNumeric(inac)) {
+            String firstTwoInacChar = StringUtils.substring(inac, 0, 2);
+            String lastTwoInacChar = StringUtils.substring(inac, 2);
+
+            Pattern upperCaseChars = Pattern.compile("^[A-Z]*$");
+            Matcher matcherFirstTwo = upperCaseChars.matcher(firstTwoInacChar);
+
+            Pattern digitsChars = Pattern.compile("^[0-9]+$");
+            Matcher matcherLastTwo = digitsChars.matcher(lastTwoInacChar);
+
+            if (!matcherFirstTwo.matches() || !matcherLastTwo.matches()) {
+              error.addError(rowIndex, "<br>INAC/NAC", "INAC should be 4 digits or two letters (Uppercase Latin characters) followed by 2 digits.");
+            }
           }
         }
         // KUKLA
