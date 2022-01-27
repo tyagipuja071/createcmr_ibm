@@ -84,6 +84,8 @@ public class RevivedCMRService extends BaseSimpleService<List<RevivedCMRModel>> 
   public static final String COV_ODM = "COV_ODM";
   public static final String BG_NONE = "BG_NONE";
   public static final String NONE = "NONE";
+  private long startTime;
+  private long endTime;
 
   private Map<Integer, String> columnMap = new HashMap<>();
 
@@ -95,6 +97,7 @@ public class RevivedCMRService extends BaseSimpleService<List<RevivedCMRModel>> 
   @Override
   protected List<RevivedCMRModel> doProcess(EntityManager entityManager, HttpServletRequest request, ParamContainer params) throws Exception {
     // parse file
+    this.startTime = new Date().getTime();
     List<RevivedCMRModel> revCMRList = parseFile(request, params);
 
     StringBuilder details = new StringBuilder();
@@ -708,13 +711,15 @@ public class RevivedCMRService extends BaseSimpleService<List<RevivedCMRModel>> 
         String host = SystemConfiguration.getValue("MAIL_HOST");
         AppUser user = AppUser.getUser(request);
 
+        this.endTime = new Date().getTime();
+        long elapsed = (endTime - startTime) / 1000;
         Email mail = new Email();
         String from = SystemConfiguration.getValue("MAIL_FROM");
         mail.setSubject("Revived CMRs processing result");
         mail.setTo(user.getIntranetId());
         mail.setFrom(from);
         mail.setType(MessageType.HTML);
-        mail.setMessage("Revived CMRs processed successfully.");
+        mail.setMessage("Revived CMRs processed successfully.<br> Execution took " + elapsed + " seconds.");
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         report.write(bos);
         mail.addAttachment("RevCMR-results.xlsx", bos);
