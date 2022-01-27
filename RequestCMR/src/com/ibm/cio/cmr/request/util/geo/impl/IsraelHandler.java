@@ -599,7 +599,7 @@ public class IsraelHandler extends EMEAHandler {
             LOG.trace("Rep No from Sortl : " + data.getRepTeamMemberNo());
           }
         }
-        data.setClientTier("");
+
       }
       // 1299146
       // Translate and auto-populate for next release
