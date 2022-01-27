@@ -877,7 +877,7 @@ public abstract class APHandler extends GEOHandler {
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("ISSUING_CNTRY", cmrIssuingCntry);
     query.setParameter("AP_CUST_CLUSTER_ID", searchTerm);
-    String result = query.getSingleResult(String.class);
+    List<String> result = query.getResults(String.class);
     if (result != null && !result.isEmpty()) {
       return true;
     }
