@@ -2679,7 +2679,7 @@ function inacValidator() {
     return {
       validate : function() {
         var inacCd = FormManager.getActualValue('inacCd');
-        if (inacCd != null && inacCd != undefined) {
+        if (inacCd != null && inacCd != undefined && inacCd != '') {
           if (inacCd.length != 4) {
             return new ValidationResult(null, false, 'INAC should be exactly 4 characters.');
           }
