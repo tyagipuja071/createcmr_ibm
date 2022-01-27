@@ -73,8 +73,8 @@ public class CanadaUtil extends AutomationUtil {
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
       CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO, "ZP02", "ZP03", "ZP04", "ZP05", "ZP06", "ZP07", "ZP08", "ZP09");
 
-  private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Building", "Floor", "Office", "Department", "Customer Name 2",
-      "Phone #", "PostBox", "State/Province");
+  private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Building", "Floor", "Office", "Department / Attn.", "Street con't",
+      "Customer Name 2", "Phone #", "PostBox", "State/Province", "Transport Zone");
 
   private static final List<String> CARIB_CNTRIES = Arrays.asList("BS", "BB", "BM", "GY", "KY", "JM", "AW", "LC", "SR", "TT");
 
@@ -491,42 +491,52 @@ public class CanadaUtil extends AutomationUtil {
           }
           break;
         case "NAT/INAC":
-          String error = performInacCheck(cedpManager, entityManager, requestData);
-          if (StringUtils.isNotBlank(error)) {
-            if ("BG_ERROR".equals(error)) {
-              cmdeReview = true;
-              engineData.addNegativeCheckStatus("_chINACCheckFailed",
-                  "The projected global buying group during INAC checks did not match the one on the request.");
-              details.append("The projected global buying group during INAC checks did not match the one on the request.\n");
-            } else {
-              LOG.debug(error);
-              output.setDetails(error);
-              validation.setMessage("Validation Failed");
-              validation.setSuccess(false);
-              if (StringUtils.isBlank(admin.getSourceSystId())) {
-                engineData.addRejectionComment("OTH", error, "", "");
-                output.setOnError(false);
-              } else {
-                engineData.addNegativeCheckStatus("BP_" + change.getDataField(), error);
-              }
-              return true;
-            }
-          } else {
-            String ageError = performCMRNewCheck(cedpManager, entityManager, requestData);
-            if (StringUtils.isNotBlank(ageError)) {
-              engineData.addNegativeCheckStatus("_chINACCheckFailed", ageError);
-              details.append(ageError);
-              validation.setSuccess(false);
-              validation.setMessage("Validation Failed");
-              if (StringUtils.isBlank(admin.getSourceSystId())) {
-                engineData.addRejectionComment("OTH", error, "", "");
-                output.setOnError(false);
-              } else {
-                engineData.addNegativeCheckStatus("BP_" + change.getDataField(), error);
-              }
-              return true;
-            }
-          }
+          details.append("\nUpdate of NAC/INAT should be done via JIRA. Please submit the request in JIRA.\n");
+          engineData.addRejectionComment("NAC", "Update of NAC/INAT should be done via JIRA. Please submit the request in JIRA.",
+              "Update of NAC/INAT should be done via JIRA. Please submit the request in JIRA.", "");
+          output.setOnError(true);
+          // String error = performInacCheck(cedpManager, entityManager,
+          // requestData);
+          // if (StringUtils.isNotBlank(error)) {
+          // if ("BG_ERROR".equals(error)) {
+          // cmdeReview = true;
+          // engineData.addNegativeCheckStatus("_chINACCheckFailed",
+          // "The projected global buying group during INAC checks did not match
+          // the one on the request.");
+          // details.append("The projected global buying group during INAC
+          // checks did not match the one on the request.\n");
+          // } else {
+          // LOG.debug(error);
+          // output.setDetails(error);
+          // validation.setMessage("Validation Failed");
+          // validation.setSuccess(false);
+          // if (StringUtils.isBlank(admin.getSourceSystId())) {
+          // engineData.addRejectionComment("OTH", error, "", "");
+          // output.setOnError(false);
+          // } else {
+          // engineData.addNegativeCheckStatus("BP_" + change.getDataField(),
+          // error);
+          // }
+          // return true;
+          // }
+          // } else {
+          // String ageError = performCMRNewCheck(cedpManager, entityManager,
+          // requestData);
+          // if (StringUtils.isNotBlank(ageError)) {
+          // engineData.addNegativeCheckStatus("_chINACCheckFailed", ageError);
+          // details.append(ageError);
+          // validation.setSuccess(false);
+          // validation.setMessage("Validation Failed");
+          // if (StringUtils.isBlank(admin.getSourceSystId())) {
+          // engineData.addRejectionComment("OTH", error, "", "");
+          // output.setOnError(false);
+          // } else {
+          // engineData.addNegativeCheckStatus("BP_" + change.getDataField(),
+          // error);
+          // }
+          // return true;
+          // }
+          // }
           break;
         case "Tax Code / Estab. Function Code":
         case "PST Exemption License Number":
@@ -537,11 +547,17 @@ public class CanadaUtil extends AutomationUtil {
             output.setOnError(true);
           }
           break;
-        case "Client Tier Code":
-          // noop, for switch handling only
+        case "Client Tier":
+          details.append("\nUpdate of Client Tier should be done via JIRA. Please submit the request in JIRA.\n");
+          engineData.addRejectionComment("CTC", "Update of Client Tier should be done via JIRA. Please submit the request in JIRA.",
+              "Update of Client Tier should be done via JIRA. Please submit the request in JIRA.", "");
+          output.setOnError(true);
           break;
         case "ISU Code":
-          // noop, for switch handling only
+          details.append("\nUpdate of ISU Code should be done via JIRA. Please submit the request in JIRA.\n");
+          engineData.addRejectionComment("ISU", "Update of ISU Code should be done via JIRA. Please submit the request in JIRA.",
+              "Update of ISU Code should be done via JIRA. Please submit the request in JIRA.", "");
+          output.setOnError(true);
           break;
         case "SORTL":
           // noop, for switch handling only
