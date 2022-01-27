@@ -936,7 +936,7 @@ function addINACValidator() {
               isValid = true;
             }
           } else {
-            isValid = false;
+            isValid = true; // remove inac validation as per CREATCMR-4935
             if (inacType == 'I') {
               message = 'INAC ' + inac + ' is invalid.';
             } else {
