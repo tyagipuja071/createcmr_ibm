@@ -31,6 +31,7 @@ public class RevivedCMRModel extends BaseModel {
   private String isicCd;
   private String subIndustryCd;
   private String usSicmen;
+  private String miscBilling;
 
   public String getIssuingCountry() {
     return issuingCountry;
@@ -154,6 +155,14 @@ public class RevivedCMRModel extends BaseModel {
 
   public String getFinalCoverage() {
     return finalCoverage;
+  }
+
+  public String getMiscBilling() {
+    return miscBilling;
+  }
+
+  public void setMiscBilling(String miscBilling) {
+    this.miscBilling = miscBilling;
   }
 
   public void setFinalCoverage(String finalCoverage) {

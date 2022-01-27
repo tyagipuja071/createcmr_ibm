@@ -1614,23 +1614,14 @@ public class USUtil extends AutomationUtil {
   public boolean doCountryFieldComputationsForRevivedCMRs(EntityManager entityManager, RevivedCMRModel revCmrModel, String scenario)
       throws Exception {
 
-    if (!boMappings.isEmpty() && StringUtils.isNotBlank(scenario) && !SC_INTERNAL.equals(scenario)) {
-      for (USBranchOffcMapping mapping : boMappings) {
-        if (mapping.getScenario().equalsIgnoreCase(scenario)) {
-          String csoSite = mapping.getCsoSiteForRevivedCMRs(scenario);
-          String pccArDept = mapping.getPccArDeptForRevivedCMRs(entityManager, scenario, revCmrModel);
-          String mtkgArDept = mapping.getMtkgArDeptForRevivedCMRs(scenario);
-          String mktgDept = mapping.getMktgDeptForRevivedCMRs(scenario, revCmrModel);
-          String svcArOffice = mapping.getSvcArOfficeForRevivedCMRs(scenario);
-          revCmrModel.setCsoSite(csoSite);
-          revCmrModel.setPccArDept(pccArDept);
-          revCmrModel.setMtkgArDept(mtkgArDept);
-          revCmrModel.setMktgDept(mktgDept);
-          revCmrModel.setSvcArOffice(svcArOffice);
-          break;
-        }
-      }
-    }
+    USDetailsContainer usDetails = determineUSCMRDetails(entityManager, revCmrModel.getCmrNo());
+    revCmrModel.setCsoSite(usDetails.getCsoSite());
+    revCmrModel.setPccArDept(usDetails.getPccArDept());
+    revCmrModel.setMtkgArDept(usDetails.getMktgArDept());
+    revCmrModel.setMktgDept(usDetails.getMktgDept());
+    revCmrModel.setSvcArOffice(usDetails.getSvrArOffice());
+    revCmrModel.setMiscBilling(usDetails.getMiscBilling());
+    revCmrModel.setUsSicmen(usDetails.getSicmen());
 
     revCmrModel.setIsuCd("32");
     revCmrModel.setClientTier("S");
@@ -1652,40 +1643,8 @@ public class USUtil extends AutomationUtil {
       revCmrModel.setUsSicmen("7229");
       revCmrModel.setMtkgArDept("SD3");
       revCmrModel.setSvcArOffice("IJ9");
-      // overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE,
-      // "DATA", "RESTRICT_TO", data.getRestrictTo(), "KYN");
-      // overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE,
-      // "DATA", "AFFILIATE", data.getAffiliate(), "6500871");
-      // overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE,
-      // "DATA", "COMPANY", data.getCompany(), "12641341");
-      // overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE,
-      // "DATA", "ENTERPRISE", data.getEnterprise(), "6500871");
-      // overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE,
-      // "DATA", "INAC_CD", data.getInacCd(), "6272");
-      // overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE,
-      // "DATA", "INAC_TYPE", data.getInacType(), "I");
-      // overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE,
-      // "DATA", "TAX_CD1", data.getTaxCd1(), "J666");
 
     }
-
-    // if (CG_BY_MODEL.equals(data.getCustGrp()) &&
-    // StringUtils.isNotEmpty(data.getMiscBillCd())) {
-    // String miscBillCode = "";
-    // miscBillCode = data.getMiscBillCd().toUpperCase();
-    // if (miscBillCode.matches(".*[ABMNH]+.*")) {
-    // miscBillCode = miscBillCode.replaceAll("[ABMNH]", "");
-    // overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE,
-    // "DATA", "MISC_BILL_CD", data.getMiscBillCd(), miscBillCode.trim());
-    // }
-    // }
-    //
-    // if ("X".equals(data.getSpecialTaxCd())) {
-    // details.append("Tax Exempt Status cannot be 'X'. Clearing Tax Exempt
-    // Status value.").append("\n");
-    // overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE,
-    // "DATA", "SPECIAL_TAX_CD", data.getSpecialTaxCd(), "");
-    // }
 
     return true;
   }
@@ -1705,6 +1664,11 @@ public class USUtil extends AutomationUtil {
     String companyNo = "";
     String pccArDept = "";
     String mtkgArDept = "";
+    String mktgDept = "";
+    String csoSite = "";
+    String svrArOffice = "";
+    String miscBilling = "";
+    String sicmen = "";
 
     String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
     String usSchema = SystemConfiguration.getValue("US_CMR_SCHEMA");
@@ -1723,6 +1687,11 @@ public class USUtil extends AutomationUtil {
     query.addField("I_CO");
     query.addField("I_CUST_OFF_5");
     query.addField("I_CUST_OFF_3");
+    query.addField("I_CUST_OFF_1");
+    query.addField("I_CUST_OFF_2");
+    query.addField("I_CUST_OFF_9");
+    query.addField("F_MISC_BILLING");
+    query.addField("C_SIC_MEN");
 
     QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
     QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
@@ -1740,8 +1709,13 @@ public class USUtil extends AutomationUtil {
       cGem = (String) record.get("C_GEM");
       // usRestrictTo = (String) record.get("C_COM_RESTRCT_CODE");
       companyNo = String.valueOf(record.get("I_CO"));
-      pccArDept = (String) record.get("I_CUST_OFF_5");
-      mtkgArDept = (String) record.get("I_CUST_OFF_3");
+      pccArDept = String.valueOf(record.get("I_CUST_OFF_5"));
+      mtkgArDept = String.valueOf(record.get("I_CUST_OFF_3"));
+      mktgDept = String.valueOf(record.get("I_CUST_OFF_1"));
+      csoSite = String.valueOf(record.get("I_CUST_OFF_2"));
+      svrArOffice = String.valueOf(record.get("I_CUST_OFF_9"));
+      miscBilling = String.valueOf(record.get("F_MISC_BILLING"));
+      sicmen = String.valueOf(record.get("C_SIC_MEN"));
       if ("P".equals(entType)) {
         custTypCd = POWER_OF_ATTORNEY;
       } else if ("F".equals(entType)) {
@@ -1771,6 +1745,11 @@ public class USUtil extends AutomationUtil {
     usDetails.setUsRestrictTo(restrictCd);
     usDetails.setCompanyNo(companyNo);
     usDetails.setMktgArDept(mtkgArDept);
+    usDetails.setMktgDept(mktgDept);
+    usDetails.setCsoSite(csoSite);
+    usDetails.setSvrArOffice(svrArOffice);
+    usDetails.setMiscBilling(miscBilling);
+    usDetails.setSicmen(sicmen);
 
     usDetails.setPccArDept(pccArDept);
     usDetailsMap.put(cmrNo, usDetails);

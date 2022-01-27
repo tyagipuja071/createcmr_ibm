@@ -39,12 +39,9 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.springframework.stereotype.Component;
 
-import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.CoverageContainer;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
-import com.ibm.cio.cmr.request.entity.Addr;
-import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.Kna1;
 import com.ibm.cio.cmr.request.model.ParamContainer;
 import com.ibm.cio.cmr.request.model.revivedcmr.RevivedCMRModel;
@@ -53,11 +50,10 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.BaseSimpleService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.user.AppUser;
-import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
-import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.mail.Email;
+import com.ibm.cio.cmr.request.util.mail.MessageType;
 import com.ibm.cio.cmr.utils.coverage.CoverageRules;
 import com.ibm.cio.cmr.utils.coverage.JarProperties;
 import com.ibm.cio.cmr.utils.coverage.objects.CoverageInput;
@@ -107,16 +103,11 @@ public class RevivedCMRService extends BaseSimpleService<List<RevivedCMRModel>> 
     calculateCoverage(revCMRList, entityManager, details);
     computeFields(revCMRList, entityManager, details);
 
-    LOG.debug("details: " + details);
-
     return revCMRList;
   }
 
   public void findGBG(List<RevivedCMRModel> revCMRList, EntityManager entityManager, StringBuilder details) throws Exception {
     for (RevivedCMRModel revCmr : revCMRList) {
-      GEOHandler geoHandler = RequestUtils.getGEOHandler(revCmr.getIssuingCountry());
-      AutomationUtil countryUtil = AutomationUtil.getNewCountryUtil(revCmr.getIssuingCountry());
-      // if model not null
       GBGFinderRequest gbgRequest = new GBGFinderRequest();
       GBGFinderRequest dnbrequest = new GBGFinderRequest();
       String sql = ExternalizedQuery.getSql("GET.KNA1.REVIVED");
@@ -265,11 +256,8 @@ public class RevivedCMRService extends BaseSimpleService<List<RevivedCMRModel>> 
       }
     }
     for (RevivedCMRModel revCmr : revCMRList) {
-      GEOHandler geoHandler = RequestUtils.getGEOHandler(revCmr.getIssuingCountry());
       AutomationUtil countryUtil = AutomationUtil.getNewCountryUtil(revCmr.getIssuingCountry());
       List<CoverageContainer> coverages = null;
-      boolean withCmrData = false;
-      boolean coverageNotFound = false;
       boolean isCoverageCalculated = false;
       CoverageContainer calculatedCoverageContainer = new CoverageContainer();
       String covFrom = "XXX";
@@ -286,104 +274,20 @@ public class RevivedCMRService extends BaseSimpleService<List<RevivedCMRModel>> 
             coverages = getValidCoverages(coverages);
           }
         }
-
-        if (coverages == null || coverages.isEmpty()) {
-          // if (countryUtil != null) { TODO implement for country
-          // specific
-          // LOG.debug("Performing Gbg based on coverage");
-          // countryUtil.performCoverageBasedOnGBG(this, entityManager,
-          // result, details, output, requestData, engineData, covFrom,
-          // calculatedCoverageContainer, isCoverageCalculated);
-          // }
-          // CoverageInput inputBG = extractCoverageInput(entityManager,
-          // requestData, data, addr, gbgId, bgId);
-          CoverageInput inputBG = extractCoverageInput(entityManager, null, null, null, gbgId, bgId);
-          List<Coverage> currCoverage = coverageRules.findCoverage(inputBG);
-          if (currCoverage != null && !currCoverage.isEmpty()) {
-            CoverageContainer cont = new CoverageContainer();
-            cont.setFinalCoverage(currCoverage.get(0).getType() + currCoverage.get(0).getId());
-            cont.setFinalCoverageRules(coverageRules.findRule(currCoverage.get(0).getType() + currCoverage.get(0).getId()));
-            if (currCoverage.size() > 1) {
-              cont.setBaseCoverage(currCoverage.get(1).getType() + currCoverage.get(1).getId());
-              cont.setBaseCoverageRules(coverageRules.findRule(currCoverage.get(1).getType() + currCoverage.get(1).getId()));
-            }
-            coverages.add(cont);
-          }
-        } else {
-          withCmrData = true;
-        }
         covFrom = COV_BG;
       } else if (StringUtils.isNotEmpty(revCmr.getVat())) {
         coverages = computeCoverageFromRDCQuery(entityManager, QUERY_VAT, revCmr.getVat(), revCmr.getIssuingCountry(), false);
-        if (coverages == null || coverages.isEmpty()) {
-          // CoverageInput inputBG = extractCoverageInput(entityManager,
-          // requestData, data, addr, gbgId, bgId);
-          CoverageInput inputBG = extractCoverageInput(entityManager, null, null, null, gbgId, bgId);
-          List<Coverage> currCoverage = coverageRules.findCoverage(inputBG);
-          if (currCoverage != null && !currCoverage.isEmpty()) {
-            CoverageContainer cont = new CoverageContainer();
-            cont.setFinalCoverage(currCoverage.get(0).getType() + currCoverage.get(0).getId());
-            cont.setFinalCoverageRules(coverageRules.findRule(currCoverage.get(0).getType() + currCoverage.get(0).getId()));
-            if (currCoverage.size() > 1) {
-              cont.setBaseCoverage(currCoverage.get(1).getType() + currCoverage.get(1).getId());
-              cont.setBaseCoverageRules(coverageRules.findRule(currCoverage.get(1).getType() + currCoverage.get(1).getId()));
-            }
-            coverages.add(cont);
-          }
-        } else {
-          withCmrData = true;
-        }
         covFrom = COV_VAT;
-        // } else if (!StringUtils.isBlank(data.getCovId()) &&
-        // data.getCovId().matches("[AITP]{1}[0-9]{7}")) {
-        // try {
-        // coverages = getCoverageRuleForID(data.getCovId());
-        // } catch (Exception e) {
-        // coverages = new ArrayList<CoverageContainer>();
-        // coverageNotFound = true;
-        // }
-        // covFrom = COV_ODM;
-      } else if (bgId != null && "BGNONE".equals(bgId.trim())) {
-        details.append("Projected Buying Group on the request is 'BGNONE'. Skipping Coverage Calculation from Buying Group.\n");
-        covFrom = BG_NONE;
       }
-
       // TO-DO: get default coverage
       String defaultCoverage = getDefaultCoverage(revCmr.getIssuingCountry());
-      // CoverageInput input = null;
-      // // coverage id calculation from BG/VAT
-      // input = extractCoverageInput(entityManager, null, null, null,
-      // gbgId, bgId);
       if (coverages != null && !coverages.isEmpty()) {
-        switch (covFrom) {
-        case COV_BG:
-          details.append("\nCoverages from Buying Group ID " + bgId + " (" + gbgId + ")" + (withCmrData ? "[from current CMRs]" : "")).append("\n");
-          break;
-        case COV_VAT:
-          details.append("\nCoverages from CMR VAT data for VAT Number " + revCmr.getVat() + (withCmrData ? " [from current CMRs]" : ""))
-              .append("\n");
-          break;
-        case COV_ODM:
-          // details.append("\nCoverage from ODM Projected/User Specified
-          // Coverage ID " + data.getCovId()).append("\n");
-          break;
-        }
-
-        List<String> coverageIds = new ArrayList<String>();
-        boolean logNegativeCheck = !COV_ODM.equals(covFrom);
         for (CoverageContainer container : coverages) {
           if (coverages.size() > 3 && coverages.indexOf(container) > 3) {
             break;
           }
           LOG.debug("Logging Final Coverage ID: " + container.getFinalCoverage());
-          // logCoverage(entityManager, engineData, requestData,
-          // coverageIds, details, output, input, container, FINAL,
-          // covFrom,
-          // logNegativeCheck);
-          logNegativeCheck = false;
-          // Save the first calculated coverage ID in the engine data to
-          // allow
-          // next elements to use it
+
           if (!isCoverageCalculated
               && (StringUtils.isNotBlank(container.getFinalCoverage()) || StringUtils.isNotBlank(container.getBaseCoverage()))) {
             String finalCoverage = container.getFinalCoverage();
@@ -417,12 +321,7 @@ public class RevivedCMRService extends BaseSimpleService<List<RevivedCMRModel>> 
       // if it is the first calculated coverage, use it to do country
       // specific coverage calculations
       if (countryUtil != null) {
-        // RequestData requestData = new RequestData(entityManager);
-        // Data data = new Data();
         String originalScenario = countryUtil.getOriginalScenarioForRevivedCMRs(entityManager, revCmr.getCmrNo());
-        // data.setCustSubGrp(originalScenario);
-        // requestData.setData(data);
-        // hook to perform calculations and update results
         countryUtil.performCountrySpecificCoverageCalculationsForRevivedCMRs(revCmr, originalScenario, covFrom, calculatedCoverageContainer,
             isCoverageCalculated);
       }
@@ -514,6 +413,7 @@ public class RevivedCMRService extends BaseSimpleService<List<RevivedCMRModel>> 
               columnMap.put(17, SystemConfiguration.getSystemProperty("excelcolumn.17"));
               columnMap.put(18, SystemConfiguration.getSystemProperty("excelcolumn.18"));
               columnMap.put(19, SystemConfiguration.getSystemProperty("excelcolumn.19"));
+              columnMap.put(20, SystemConfiguration.getSystemProperty("excelcolumn.20"));
               // massCreateFile.setColumnMap(columnMap);
               int maxMappedCol = columnMap.size();
               // parse the records
@@ -656,59 +556,6 @@ public class RevivedCMRService extends BaseSimpleService<List<RevivedCMRModel>> 
     coverageRules.initializeFrom(zipFile);
   }
 
-  private CoverageInput extractCoverageInput(EntityManager entityManager, RequestData requestData, Data data, Addr addr, String gbgId, String bgId)
-      throws Exception {
-    CoverageInput coverage = new CoverageInput();
-
-    coverage.setAffiliateGroup(data.getAffiliate());
-    coverage.setClassification(data.getCustClass());
-    coverage.setCompanyNumber(data.getCompany());
-    coverage.setSegmentation("IBM".equals(data.getCmrOwner()) ? null : data.getCmrOwner());
-    String isoCntryCd = SystemUtil.getISOCountryCode(data.getCmrIssuingCntry());
-    LOG.debug("System Location: " + data.getCmrIssuingCntry() + " ISO Code: " + isoCntryCd);
-    coverage.setCountryCode(isoCntryCd != null ? isoCntryCd : data.getCmrIssuingCntry());
-    coverage.setDb2ID(data.getCmrNo());
-    coverage.setEnterprise(data.getEnterprise());
-    coverage.setGbQuadSectorTier(data.getClientTier());
-    coverage.setInac(data.getInacCd());
-    coverage.setIndustryClass(data.getSubIndustryCd());
-    coverage
-        .setIndustryCode(data.getSubIndustryCd() != null && data.getSubIndustryCd().length() > 0 ? data.getSubIndustryCd().substring(0, 1) : null);
-    coverage.setIndustrySolutionUnit(data.getIsuCd());
-    coverage.setNationalTaxID(data.getTaxCd1());
-    coverage.setSORTL(data.getSearchTerm());
-    coverage.setUnISIC(data.getIsicCd());
-    coverage.setSitePartyID(data.getSitePartyId());
-    coverage.setCity(addr.getCity1());
-    coverage.setCounty(addr.getCounty());
-    coverage.setPostalCode(addr.getPostCd());
-    if (!"''".equals(addr.getStateProv())) {
-      coverage.setStatePrefectureCode(addr.getStateProv());
-    }
-    coverage.setPhysicalAddressCountry(addr.getLandCntry());
-
-    coverage.setGlobalBuyingGroupID(gbgId);
-    coverage.setDomesticBuyingGroupID(bgId);
-    coverage.setGeoLocationCode(data.getGeoLocationCd());
-
-    GEOHandler geoHandler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
-    if (geoHandler != null) {
-      geoHandler.convertCoverageRulesInput(entityManager, coverage, addr, requestData.createModelFromRequest());
-    }
-
-    return coverage;
-  }
-
-  private List<CoverageContainer> getCoverageRuleForID(String coverageId) {
-    List<CoverageContainer> coverages = new ArrayList<>();
-    List<Rule> rule = coverageRules.findRule(coverageId);
-    CoverageContainer container = new CoverageContainer();
-    container.setFinalCoverage(coverageId);
-    container.setFinalCoverageRules(rule);
-    coverages.add(container);
-    return coverages;
-  }
-
   private String getDefaultCoverage(String cmrIssuingCntry) throws Exception {
     CoverageInput input = new CoverageInput();
     String isoCntryCd = SystemUtil.getISOCountryCode(cmrIssuingCntry);
@@ -766,7 +613,6 @@ public class RevivedCMRService extends BaseSimpleService<List<RevivedCMRModel>> 
   public void exportToExcel(List<RevivedCMRModel> revCMRList, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
     String columnName = null;
-    Object rawValue = null;
 
     LOG.info("Exporting records to excel..");
     XSSFWorkbook report = new XSSFWorkbook();
@@ -800,7 +646,6 @@ public class RevivedCMRService extends BaseSimpleService<List<RevivedCMRModel>> 
         cell.setCellStyle(boldStyle);
         cell.setCellValue(columnName);
       }
-      // createHeaders(header, boldStyle, drawing, config, helper);
 
       List<List<String>> rawValues = new ArrayList<List<String>>();
 
@@ -826,6 +671,7 @@ public class RevivedCMRService extends BaseSimpleService<List<RevivedCMRModel>> 
         strValues.add(revivedCMRModel.getIsicCd());
         strValues.add(revivedCMRModel.getSubIndustryCd());
         strValues.add(revivedCMRModel.getUsSicmen());
+        strValues.add(revivedCMRModel.getMiscBilling());
         rawValues.add(strValues);
       }
 
@@ -867,6 +713,7 @@ public class RevivedCMRService extends BaseSimpleService<List<RevivedCMRModel>> 
         mail.setSubject("Revived CMRs processing result");
         mail.setTo(user.getIntranetId());
         mail.setFrom(from);
+        mail.setType(MessageType.HTML);
         mail.setMessage("Revived CMRs processed successfully.");
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         report.write(bos);

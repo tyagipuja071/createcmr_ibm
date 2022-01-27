@@ -18,13 +18,13 @@ import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.controller.BaseController;
 import com.ibm.cio.cmr.request.controller.automation.DuplicateCheckController;
 import com.ibm.cio.cmr.request.model.ParamContainer;
-import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.model.revivedcmr.RevivedCMRModel;
 import com.ibm.cio.cmr.request.model.system.ForcedStatusChangeModel;
 import com.ibm.cio.cmr.request.model.system.UserModel;
 import com.ibm.cio.cmr.request.service.revivedcmr.RevivedCMRService;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.mail.Email;
+import com.ibm.cio.cmr.request.util.mail.MessageType;
 
 /**
  * Controller for revived cmrs process
@@ -53,18 +53,6 @@ public class RevivedCMRController extends BaseController {
       return mv;
     }
 
-    // if (!StringUtils.isEmpty(model.getSearchReqId())) {
-    // model.setReqId(Long.parseLong(model.getSearchReqId()));
-    // List<ForcedStatusChangeModel> records = service.search(model, request);
-    // if (records != null && records.size() > 0) {
-    // mv = new ModelAndView("statuschange", "status", records.get(0));
-    // } else {
-    // mv = new ModelAndView("redirect:/statuschange", "status", new
-    // ForcedStatusChangeModel());
-    // MessageUtil.setErrorMessage(mv, MessageUtil.ERROR_INVALID_REQ_ID,
-    // model.getSearchReqId());
-    // }
-    // }
     setPageKeys("ADMIN", "REVIVED_CMRS_ADMIN", mv);
     return mv;
   }
@@ -97,26 +85,11 @@ public class RevivedCMRController extends BaseController {
       mail.setSubject("Revived CMRs processing result");
       mail.setTo(user.getIntranetId());
       mail.setFrom(from);
+      mail.setType(MessageType.HTML);
       mail.setMessage("Revived CMRs processing encountered an error. Please try again.");
 
       mail.send(host);
     }
   }
 
-  @RequestMapping(
-      value = "/revivedcmrs/processfile",
-      method = { RequestMethod.POST, RequestMethod.GET })
-  public void processMassFile(HttpServletRequest request, HttpServletResponse response, RequestEntryModel model) throws CmrException {
-    try {
-      boolean isMultipart = ServletFileUpload.isMultipartContent(request);
-      if (isMultipart) {
-        // process mass file here
-        model.setAction("PROCESS_FILE");
-        // service.processTransaction(model, request);
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-      LOG.error("Failed processing the mass file...");
-    }
-  }
 }
