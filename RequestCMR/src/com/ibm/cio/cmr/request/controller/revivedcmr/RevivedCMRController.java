@@ -1,6 +1,5 @@
 package com.ibm.cio.cmr.request.controller.revivedcmr;
 
-import java.awt.TrayIcon.MessageType;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -13,6 +12,17 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
+
+import com.ibm.cio.cmr.request.CmrException;
+import com.ibm.cio.cmr.request.config.SystemConfiguration;
+import com.ibm.cio.cmr.request.controller.BaseController;
+import com.ibm.cio.cmr.request.model.ParamContainer;
+import com.ibm.cio.cmr.request.model.revivedcmr.RevivedCMRModel;
+import com.ibm.cio.cmr.request.model.system.UserModel;
+import com.ibm.cio.cmr.request.service.revivedcmr.RevivedCMRService;
+import com.ibm.cio.cmr.request.user.AppUser;
+import com.ibm.cio.cmr.request.util.mail.Email;
+import com.ibm.cio.cmr.request.util.mail.MessageType;
 
 /**
  * Controller for revived cmrs process
@@ -30,8 +40,7 @@ public class RevivedCMRController extends BaseController {
 
   @RequestMapping(
       value = "/revivedcmrs")
-  public ModelAndView showRevivedCMRsPage(HttpServletRequest request, HttpServletResponse response, ForcedStatusChangeModel model)
-      throws CmrException {
+  public ModelAndView showRevivedCMRsPage(HttpServletRequest request, HttpServletResponse response, RevivedCMRModel model) throws CmrException {
     ModelAndView mv = new ModelAndView("revivedcmrs", "revived", model);
 
     AppUser user = AppUser.getUser(request);
