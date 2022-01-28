@@ -119,10 +119,8 @@ public class CanadaUtil extends AutomationUtil {
           engineData.addRejectionComment("LAND", "Invalid Landed Country.", "Landed country is not Canada", "");
           details.append("Landed Country is not Canada").append("\n");
         }
-        // engineData.addNegativeCheckStatus("_caGovt", "Government/Public
-        // request needs further validation.");
-        // details.append("Government/Public request needs further
-        // validation.").append("\n");
+        engineData.addNegativeCheckStatus("_caGovt", "Government/Public request needs further validation.");
+        details.append("Government/Public request needs further validation.").append("\n");
         break;
       case SCENARIO_CROSS_BORDER_USA:
         if ("CA".equalsIgnoreCase(zs01.getLandCntry()) || CARIB_CNTRIES.contains(zs01.getLandCntry())) {
