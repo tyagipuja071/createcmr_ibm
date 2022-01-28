@@ -2123,31 +2123,31 @@ function getPairedTranslatedAddrData(localLangData, translatedType) {
   return translatedData;
 }
 
-function getMismatchFields(localLangField, translatedField) {
+function getMismatchFields(localLangData, translatedData) {
   var mismatchFields = '';
-  if (localLangField == null || translatedField == null) {
+  if (localLangData == null || translatedData == null) {
     return mismatchFields;
   }
-  if (!hasMatchingFieldsFilled(localLangField.addrTxt[0], translatedField.addrTxt[0])) {
+  if (isAddrPairNewOrUpdated(localLangData, translatedData) && !hasMatchingFieldsFilled(localLangData.addrTxt[0], translatedData.addrTxt[0])) {
     mismatchFields += 'Street';
   }
-  if (!hasMatchingFieldsFilled(localLangField.poBox[0], translatedField.poBox[0])) {
+  if (isAddrPairNewOrUpdated(localLangData, translatedData) && !hasMatchingFieldsFilled(localLangData.poBox[0], translatedData.poBox[0])) {
     mismatchFields += mismatchFields != '' ? ', ' : '';
     mismatchFields += 'PO BOX';
   }
-  if (!hasMatchingFieldsFilled(localLangField.dept[0], translatedField.dept[0])) {
+  if (isAddrPairNewOrUpdated(localLangData, translatedData) && !hasMatchingFieldsFilled(localLangData.dept[0], translatedData.dept[0])) {
     mismatchFields += mismatchFields != '' ? ', ' : '';
     mismatchFields += 'Att. Person';
   }
-  if (!hasMatchingFieldsFilled(localLangField.custNm1[0], translatedField.custNm1[0])) {
+  if (isAddrPairNewOrUpdated(localLangData, translatedData) && !hasMatchingFieldsFilled(localLangData.custNm1[0], translatedData.custNm1[0])) {
     mismatchFields += mismatchFields != '' ? ', ' : '';
     mismatchFields += 'Customer Name';
   }
-  if (!hasMatchingFieldsFilled(localLangField.postCd[0], translatedField.postCd[0])) {
+  if (isAddrPairNewOrUpdated(localLangData, translatedData) && !hasMatchingFieldsFilled(localLangData.postCd[0], translatedData.postCd[0])) {
     mismatchFields += mismatchFields != '' ? ', ' : '';
     mismatchFields += 'Postal Code';
   }
-  if (!hasMatchingFieldsFilled(localLangField.city1[0], translatedField.city1[0])) {
+  if (isAddrPairNewOrUpdated(localLangData, translatedData) && !hasMatchingFieldsFilled(localLangData.city1[0], translatedData.city1[0])) {
     mismatchFields += mismatchFields != '' ? ', ' : '';
     mismatchFields += 'City';
   }
@@ -2168,6 +2168,24 @@ function hasMatchingFieldsFilled(localLangField, translatedField) {
   }
 
   return true;
+}
+
+function isAddrPairNewOrUpdated(localLang, translated) {
+  var reqType = FormManager.getActualValue('reqType');
+  if(reqType == 'C') {
+    return true;
+  }
+  if(addrNewOrUpdated(localLang) || addrNewOrUpdated(translated)) {
+    return true;
+  }
+  return false;
+}
+
+function addrNewOrUpdated(addrData) {
+  if(addrData != null) {
+    return (addrData.updateInd[0] == 'N' || addrData.updateInd[0] == 'U');  
+  }
+  return false;
 }
 
 function validateSalesRep() {
@@ -2426,15 +2444,15 @@ function getAddrMismatchInUpdateMsg() {
         updateInd = updateInd[0];
       }
       if ((type == 'ZS01' || type == 'ZP01' || type == 'ZD01')) {
-        allLocalAddrMap.set(record.addrSeq[0].padStart(5, '0'), record);
+        allLocalAddrMap.set(getKeyPrefix(type) + record.addrSeq[0].padStart(5, '0'), record);
         if(updateInd == 'U') {
-          updatedLocalAddrs.push(record.addrSeq[0].padStart(5, '0'));  
+          updatedLocalAddrs.push(getKeyPrefix(type) + record.addrSeq[0].padStart(5, '0'));  
         }
       } else if ((type == 'CTYA' || type == 'CTYB' || type == 'CTYC')) {
-        allTransAddrsMap.set(record.pairedSeq[0].padStart(5, '0'), record);
-        allTransAddrsMap.set(record.addrSeq[0].padStart(5, '0'), record);
+        allTransAddrsMap.set(getKeyPrefix(type) + record.pairedSeq[0].padStart(5, '0'), record);
+        allTransAddrsMap.set(getKeyPrefix(type) + record.addrSeq[0].padStart(5, '0'), record);
         if(updateInd == 'U') {
-          updatedTransAddrsPair.push(record.pairedSeq[0].padStart(5, '0'));  
+          updatedTransAddrsPair.push(getKeyPrefix(type) + record.pairedSeq[0].padStart(5, '0'));  
         }
       }
     }
@@ -2446,22 +2464,31 @@ function getAddrMismatchInUpdateMsg() {
         if(errorMsg != '') {
           errorMsg += '<br>';
         }
-        var addrSeqLocal = updateMismatchLocal[l];
-        var addrTextLocal = (allLocalAddrMap.get(addrSeqLocal).addrTypeText[0]);
-        var addrSeqTrans = (allTransAddrsMap.get(addrSeqLocal).addrSeq[0]);
-        var addrTextTrans = (allTransAddrsMap.get(addrSeqLocal).addrTypeText[0]);
-        errorMsg += '<br>Address with sequence ' + addrSeqLocal +' from pair ' + addrSeqLocal + ' - ' + addrSeqTrans + ' was updated, but sequence ' + addrSeqTrans + ' was not.';
+        var mismatchKey = updateMismatchLocal[l];
+        
+        var addrSeqLocal = allLocalAddrMap.get(mismatchKey).addrSeq[0];
+        var addrSeqTrans = (allTransAddrsMap.get(mismatchKey).addrSeq[0]);
+
+        var addrTextLocal = (allLocalAddrMap.get(mismatchKey).addrTypeText[0]);
+        var addrTextTrans = (allTransAddrsMap.get(mismatchKey).addrTypeText[0]);
+       
+        errorMsg += '<br>Address with sequence ' + addrSeqLocal + ' from pair ' + addrSeqLocal + ' (' + addrTextLocal + ')' + ' - ' + addrSeqTrans + ' ('+ addrTextTrans +') ' + ' was updated, but sequence ' + addrSeqTrans  + ' was not.';
       }
 
       for (var t = 0; t < updateMismatchTrans.length; t++) {
         if(errorMsg != '') {
           errorMsg += '<br>';
         }
-        var addrSeqLocal = updateMismatchTrans[t];
-        var addrSeqTrans = (allTransAddrsMap.get(addrSeqLocal).addrSeq[0]);
-        var addrTextTrans = (allTransAddrsMap.get(addrSeqTrans).addrTypeText[0]);
-        var addrTextLocal = (allLocalAddrMap.get(addrSeqLocal).addrTypeText[0]);
-        errorMsg += '<br>Address with sequence ' + addrSeqTrans +' from pair ' + addrSeqLocal + ' - ' + addrSeqTrans + ' was updated, but sequence ' + addrSeqLocal + ' was not.';
+        
+        var mismatchKey = updateMismatchTrans[t];
+        
+        var addrSeqTrans = (allTransAddrsMap.get(mismatchKey).addrSeq[0]);
+        var addrSeqLocal = (allLocalAddrMap.get(mismatchKey).addrSeq[0]);
+
+        var addrTextTrans = (allTransAddrsMap.get(mismatchKey).addrTypeText[0]);
+        var addrTextLocal = (allLocalAddrMap.get(mismatchKey).addrTypeText[0]);
+        
+        errorMsg += '<br>Address with sequence ' + addrSeqTrans + ' from pair ' + addrSeqLocal + ' (' + addrTextLocal + ') ' + ' - ' + addrSeqTrans + ' ('+ addrTextTrans +') ' + ' was updated, but sequence ' + addrSeqLocal + ' was not.';
       }
       
       if(errorMsg != '') {
@@ -2470,6 +2497,16 @@ function getAddrMismatchInUpdateMsg() {
     }
   }
   return errorMsg;
+}
+
+function getKeyPrefix(addrType) {
+  if(addrType == 'ZS01' || addrType == 'CTYA') {
+    return 'MAIL_';
+  } else if (addrType == 'ZP01' || addrType == 'CTYB') {
+    return 'BILL_';
+  } else if (addrType == 'ZD01' || addrType == 'CTYC') {
+    return 'SHIP_';
+  }
 }
 
 function addAddrFieldsLimitation() {
