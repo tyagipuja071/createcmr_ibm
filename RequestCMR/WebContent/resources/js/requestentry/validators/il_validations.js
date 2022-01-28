@@ -1599,14 +1599,41 @@ function addISICKUKLAValidator() {
         var kukla = FormManager.getActualValue('custClass');
         var reqType = FormManager.getActualValue('reqType').toUpperCase();
 
-        if (reqType != 'U') {
-          return;
+        var errMessage = '';
+        
+        if (reqType == 'C') {
+          var custType = FormManager.getActualValue('custSubGrp');
+          
+          if (custType != 'PRIPE' && isicCD == '9500') {
+            if (isicCD == '9500' || kukla == '60') {
+              errMessage = 'Invalid value for ISIC. ISIC 9500 can only be used in Private Person scenario.';
+            }
+          }
+       } else {
+          var oldISIC = null;
+          var oldKukla = null;
+          
+          var currentISIC = FormManager.getActualValue('isicCd');
+          var currentKukla = FormManager.getActualValue('custClass');
+          var requestId = FormManager.getActualValue('reqId');
+          
+          qParams = {
+              REQ_ID : requestId,
+          };
+          var result = cmr.query('GET.IL.ISIC_KUKLA_OLD_BY_REQID', qParams);
+          
+          if (result != null && result != '') {
+            oldISIC = result.ret1 != null ? result.ret1 : '';
+            oldKukla = result.ret2 != null ? result.ret2 : '';
+          }
+          if ((currentISIC == '9500' && currentKukla != '60') || (currentISIC != '9500' && currentKukla == '60')) {
+            if (currentISIC != oldISIC || currentKukla != oldKukla) {
+              errMessage = 'Invalid value for ISIC/KUKLA.  ISIC value 9500 and KUKLA 60 should be linked together.';
+            }
+          }
         }
-
-        if (isicCD == '9500' && kukla != '60') {
-          return new ValidationResult(null, false, 'Invalid value for ISIC/KUKLA.  ISIC value 9500 and KUKLA 60 should be linked together.');
-        } else if (kukla == '60' && isicCD != '9500') {
-          return new ValidationResult(null, false, 'Invalid value for ISIC/KUKLA.  ISIC value 9500 and KUKLA 60 should be linked together.');
+        if (errMessage != '' && errMessage.length > 0) {
+          return new ValidationResult(null, false, errMessage);
         }
 
         return new ValidationResult(null, true);
