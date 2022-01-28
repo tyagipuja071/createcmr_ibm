@@ -42,7 +42,7 @@ public class RevivedCMRController extends BaseController {
 
   @RequestMapping(
       value = "/revivedcmrs")
-  public ModelAndView showForcedStatusChangePage(HttpServletRequest request, HttpServletResponse response, ForcedStatusChangeModel model)
+  public ModelAndView showRevivedCMRsPage(HttpServletRequest request, HttpServletResponse response, ForcedStatusChangeModel model)
       throws CmrException {
     ModelAndView mv = new ModelAndView("revivedcmrs", "revived", model);
 
