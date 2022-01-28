@@ -1,5 +1,6 @@
 package com.ibm.cio.cmr.request.controller.revivedcmr;
 
+import java.awt.TrayIcon.MessageType;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -13,19 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.ibm.cio.cmr.request.CmrException;
-import com.ibm.cio.cmr.request.config.SystemConfiguration;
-import com.ibm.cio.cmr.request.controller.BaseController;
-import com.ibm.cio.cmr.request.controller.automation.DuplicateCheckController;
-import com.ibm.cio.cmr.request.model.ParamContainer;
-import com.ibm.cio.cmr.request.model.revivedcmr.RevivedCMRModel;
-import com.ibm.cio.cmr.request.model.system.ForcedStatusChangeModel;
-import com.ibm.cio.cmr.request.model.system.UserModel;
-import com.ibm.cio.cmr.request.service.revivedcmr.RevivedCMRService;
-import com.ibm.cio.cmr.request.user.AppUser;
-import com.ibm.cio.cmr.request.util.mail.Email;
-import com.ibm.cio.cmr.request.util.mail.MessageType;
-
 /**
  * Controller for revived cmrs process
  * 
@@ -35,7 +23,7 @@ import com.ibm.cio.cmr.request.util.mail.MessageType;
 @Controller
 public class RevivedCMRController extends BaseController {
 
-  private static final Logger LOG = Logger.getLogger(DuplicateCheckController.class);
+  private static final Logger LOG = Logger.getLogger(RevivedCMRController.class);
 
   @Autowired
   private RevivedCMRService service;
