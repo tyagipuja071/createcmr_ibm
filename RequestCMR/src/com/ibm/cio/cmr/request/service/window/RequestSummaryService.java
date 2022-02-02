@@ -149,7 +149,8 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
           for (UpdatedAddr updatedAddr : updatedRecords) {
             for (UpdatedAddr mismatchAddr : mismatchRecords) {
               String updatedAddrSeq = updatedAddr.getId().getAddrSeq();
-              if (StringUtils.isNotEmpty(updatedAddrSeq) && updatedAddrSeq.equals(mismatchAddr.getId().getAddrSeq())) {
+              if (StringUtils.isNotEmpty(updatedAddrSeq) && updatedAddrSeq.equals(mismatchAddr.getId().getAddrSeq())
+                  && !"N".equals(updatedAddr.getImportInd())) {
                 updatedAddr.setImportInd("L");
               }
             }
