@@ -22,13 +22,13 @@ function addHandlersForIL() {
   }
 
   if (_CTCHandlerIL == null) {
-    _CTCHandlerIL = dojo.connect(FormManager.getField('clientTier'), 'onClick', function(value) {
+    _CTCHandlerIL = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
       setEnterpriseSalesRepSBO(value);
     });
   }
 
   if (_ISUHandlerIL == null) {
-    _ISUHandlerIL = dojo.connect(FormManager.getField('isuCd'), 'onClick', function(value) {
+    _ISUHandlerIL = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       requireCtcByISU(value);
       setEnterpriseSalesRepSBO(value);
     });
@@ -219,6 +219,10 @@ function addILChecklistValidator() {
           REQID : reqId
         });
         if (!record || !record.sectionA1) {
+          var action = FormManager.getActualValue('yourAction')
+          if(action == YourActions.Save) {
+            return new ValidationResult(null, true);
+          }
           return new ValidationResult(null, false, 'Checklist has not been registered yet. Please execute a \'Save\' action before sending for processing to avoid any data loss.');
         }
         return new ValidationResult(null, true);
@@ -591,6 +595,135 @@ function addAddressLandedPairingValidatorShipping() {
       }
     };
   })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
+function validatePairedAddrFieldNumericValue() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+          var record = null;
+          var type = null;
+          var arrErrorMsg = new Array();
+          
+          const addrTypeDisplayMap = new Map();
+          addrTypeDisplayMap.set('ZS01', 'Mailing');
+          addrTypeDisplayMap.set('ZP01', 'Billing');
+          addrTypeDisplayMap.set('ZD01', 'Shipping');
+          addrTypeDisplayMap.set('CTYA','Country Use A (Mailing)');
+          addrTypeDisplayMap.set('CTYB','Country Use B (Billing)');
+          addrTypeDisplayMap.set('CTYC','Country Use C (Shipping)');
+          
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+            var localAddress = null;
+            var translatedAddress = null;
+            var localAddrType = null;
+            var translatedAddrType = null;
+            var localAddrSeqNo = '';
+            var translatedAddrSeqNo = '';
+            var indentSpace = '&nbsp;&nbsp;&nbsp;&nbsp;';
+            
+            record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+            if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+              record = _allAddressData[i];
+            }
+            type = record.addrType;
+            if (typeof (type) == 'object') {
+              type = type[0];
+            }
+            
+            if (type == 'ZS01') {
+              localAddress = record;
+              translatedAddress = getPairedTranslatedAddrData(localAddress, 'CTYA');
+              if (translatedAddress == null) {
+                translatedAddress = getAddressByType('CTYA');
+              }
+              localAddrType = 'ZS01';
+              translatedAddrType = 'CTYA';
+            } else if (type == 'ZP01') {
+              localAddress = record;
+              translatedAddress = getPairedTranslatedAddrData(localAddress, 'CTYB');
+              if (translatedAddress == null) {
+                translatedAddress = getAddressByType('CTYB');
+              }
+              localAddrType = 'ZP01';
+              translatedAddrType = 'CTYB';
+            } else if (type == 'ZD01') {
+              localAddress = record;
+              translatedAddress = getPairedTranslatedAddrData(localAddress, 'CTYC');
+              if (translatedAddress == null) {
+                translatedAddress = getAddressByType('CTYC');
+              }
+              localAddrType = 'ZD01';
+              translatedAddrType = 'CTYC';
+              localAddrSeqNo = '(' + localAddress.addrSeq[0] + ')';
+              translatedAddrSeqNo = '(' + translatedAddress.addrSeq[0] + ')';
+            }
+            
+            if (localAddress != null && translatedAddress != null && isAddrPairNewOrUpdated(localAddress, translatedAddress)) {
+              let errorMsg = `Mismatch ${addrTypeDisplayMap.get(localAddrType)} ${localAddrSeqNo} and ${addrTypeDisplayMap.get(translatedAddrType)} ${translatedAddrSeqNo}`;
+              // street
+              if (!isNumericValueEqual(localAddress.addrTxt[0], translatedAddress.addrTxt[0])) {
+                if (arrErrorMsg.length > 0) {
+                  arrErrorMsg.push(indentSpace + errorMsg + ' Street numeric values.<br>');
+                } else {
+                  arrErrorMsg.push(errorMsg + ' Street numeric values.<br>');
+                }
+              }
+              // address cont
+              if (!isNumericValueEqual(localAddress.addrTxt2[0], translatedAddress.addrTxt2[0])) {
+                if (arrErrorMsg.length > 0) {
+                  arrErrorMsg.push(indentSpace + errorMsg + ' Address Cont numeric values.<br>');
+                } else {
+                  arrErrorMsg.push(errorMsg + ' Address Cont numeric values.<br>');
+                }
+              }
+              // po box
+              if (localAddrType != null && localAddrType != 'ZD01') {
+                if (!isNumericValueEqual(localAddress.poBox[0], translatedAddress.poBox[0])) {
+                  if (arrErrorMsg.length > 0) {
+                    arrErrorMsg.push(indentSpace + errorMsg + ' PO Box numeric values.<br>');
+                  } else {
+                    arrErrorMsg.push(errorMsg + ' PO Box numeric values.<br>');
+                  }
+                }
+              }
+              // postal code
+              if (!isNumericValueEqual(localAddress.postCd[0], translatedAddress.postCd[0])) {
+                if (arrErrorMsg.length > 0) {
+                  arrErrorMsg.push(indentSpace + errorMsg + ' Postal Code numeric values.<br>');
+                } else {
+                  arrErrorMsg.push(errorMsg + ' Postal Code numeric values.<br>');
+                }
+              }
+            }
+          } // for
+          if (arrErrorMsg.length > 0) {
+            return new ValidationResult(null, false, arrErrorMsg.join(''));
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+  
+}
+
+function isNumericValueEqual(strA, strB) {
+  var strANum = '';
+  var strBNum = '';
+  
+  if (strA != null && strA != '') {
+    strANum = strA.replace(/[^0-9]/g,'');
+  }
+  if (strB != null && strB != '') {
+    strBNum = strB.replace(/[^0-9]/g,'');
+  }
+  
+  if (strANum != strBNum) {
+    return false;
+  }
+  return true;
 }
 
 function addShippingAddrTypeValidator() {
@@ -1244,7 +1377,15 @@ function setAddrFieldsBehavior() {
     FormManager.hide('POBox', 'poBox');
     FormManager.clearValue('poBox');
     FormManager.removeValidator('addrTxt', Validators.NON_LATIN);
-    checkAndAddValidator('addrTxt', Validators.REQUIRED, [ 'Street' ]);
+
+    // Fix for CREATCMR-4927 -- REQUIRED validator not working, if it is the
+    // last
+    // item in FormManager.GETFIELD_VALIDATIONS['addrTxt']
+    // reset validations and add the validators again
+    FormManager.resetValidations('addrTxt');
+    FormManager.addValidator('addrTxt', Validators.REQUIRED, [ "Street" ], null);
+    FormManager.addValidator('addrTxt', Validators.MAXLENGTH, [ "Street", 30 ], null);
+    
     if (addrType == 'ZD01') {
       checkAndAddValidator('addrTxt', Validators.NON_LATIN, [ 'Street Address' ]);
     }
@@ -1469,14 +1610,41 @@ function addISICKUKLAValidator() {
         var kukla = FormManager.getActualValue('custClass');
         var reqType = FormManager.getActualValue('reqType').toUpperCase();
 
-        if (reqType != 'U') {
-          return;
+        var errMessage = '';
+        
+        if (reqType == 'C') {
+          var custType = FormManager.getActualValue('custSubGrp');
+          
+          if (custType != 'PRIPE' && isicCD == '9500') {
+            if (isicCD == '9500' || kukla == '60') {
+              errMessage = 'Invalid value for ISIC. ISIC 9500 can only be used in Private Person scenario.';
+            }
+          }
+       } else {
+          var oldISIC = null;
+          var oldKukla = null;
+          
+          var currentISIC = FormManager.getActualValue('isicCd');
+          var currentKukla = FormManager.getActualValue('custClass');
+          var requestId = FormManager.getActualValue('reqId');
+          
+          qParams = {
+              REQ_ID : requestId,
+          };
+          var result = cmr.query('GET.IL.ISIC_KUKLA_OLD_BY_REQID', qParams);
+          
+          if (result != null && result != '') {
+            oldISIC = result.ret1 != null ? result.ret1 : '';
+            oldKukla = result.ret2 != null ? result.ret2 : '';
+          }
+          if ((currentISIC == '9500' && currentKukla != '60') || (currentISIC != '9500' && currentKukla == '60')) {
+            if (currentISIC != oldISIC || currentKukla != oldKukla) {
+              errMessage = 'Invalid value for ISIC/KUKLA.  ISIC value 9500 and KUKLA 60 should be linked together.';
+            }
+          }
         }
-
-        if (isicCD == '9500' && kukla != '60') {
-          return new ValidationResult(null, false, 'Invalid value for ISIC/KUKLA.  ISIC value 9500 and KUKLA 60 should be linked together.');
-        } else if (kukla == '60' && isicCD != '9500') {
-          return new ValidationResult(null, false, 'Invalid value for ISIC/KUKLA.  ISIC value 9500 and KUKLA 60 should be linked together.');
+        if (errMessage != '' && errMessage.length > 0) {
+          return new ValidationResult(null, false, errMessage);
         }
 
         return new ValidationResult(null, true);
@@ -1576,9 +1744,9 @@ function enableCmrNoForProcessor() {
     ifProspect = dijit.byId('prospLegalInd').get('checked') ? 'Y' : 'N';
   }
   console.log("enableCmrNoForProcessor ifProspect:" + ifProspect);
-  if (role == 'REQUESTER' || 'Y' == ifProspect || (role != 'REQUESTER' && cmrNO.startsWith('P'))) {
+  if (role == 'REQUESTER' || (role != 'REQUESTER' && cmrNO.startsWith('P'))) {
     FormManager.readOnly('cmrNo');
-  } else if ('Y' != ifProspect && (role == 'PROCESSOR') && reqType != 'U') {
+  } else if (role == 'PROCESSOR' && reqType != 'U') {
     FormManager.enable('cmrNo');
   } else {
     FormManager.readOnly('cmrNo');
@@ -1852,6 +2020,9 @@ function addAddressGridValidatorStreetPOBox() {
           var type = null;
 
           var missingPOBoxStreetAddrs = '';
+          var missingAddrType = '';
+          var addrStreetPOBox = [ 'ZS01', 'ZP01', 'CTYA', 'CTYB' ];
+          
           for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
             record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
             if (record == null && _allAddressData != null && _allAddressData[i] != null) {
@@ -1879,18 +2050,24 @@ function addAddressGridValidatorStreetPOBox() {
             if (!isPOBoxOrStreetFilled && addrIsNewOrUpdated) {
               if (missingPOBoxStreetAddrs != '') {
                 missingPOBoxStreetAddrs += ', ' + record.addrTypeText[0] + ' (' + record.addrSeq[0] + ') ';
+                missingAddrType += ', ' + record.addrType[0];
               } else {
                 missingPOBoxStreetAddrs += record.addrTypeText[0] + ' (' + record.addrSeq[0] + ') ';
+                missingAddrType += record.addrType[0];
               }
             }
           }
 
           if (missingPOBoxStreetAddrs != '') {
-            return new ValidationResult(null, false, 'Please fill-out either Street or PO BOX for the following address: ' + missingPOBoxStreetAddrs);
+            for (index = 0; index < addrStreetPOBox.length; index++) {
+              if(missingAddrType.includes(addrStreetPOBox[index])) {
+                return new ValidationResult(null, false, 'Please fill-out either Street or PO BOX for the following address: ' + missingPOBoxStreetAddrs);
+              } else {
+                return new ValidationResult(null, false, 'Please fill-out Street for the following address: ' + missingPOBoxStreetAddrs);
+              }
+            }
           }
-
           return new ValidationResult(null, true);
-
         }
       }
     };
@@ -1984,31 +2161,31 @@ function getPairedTranslatedAddrData(localLangData, translatedType) {
   return translatedData;
 }
 
-function getMismatchFields(localLangField, translatedField) {
+function getMismatchFields(localLangData, translatedData) {
   var mismatchFields = '';
-  if (localLangField == null || translatedField == null) {
+  if (localLangData == null || translatedData == null) {
     return mismatchFields;
   }
-  if (!hasMatchingFieldsFilled(localLangField.addrTxt[0], translatedField.addrTxt[0])) {
+  if (isAddrPairNewOrUpdated(localLangData, translatedData) && !hasMatchingFieldsFilled(localLangData.addrTxt[0], translatedData.addrTxt[0])) {
     mismatchFields += 'Street';
   }
-  if (!hasMatchingFieldsFilled(localLangField.poBox[0], translatedField.poBox[0])) {
+  if (isAddrPairNewOrUpdated(localLangData, translatedData) && !hasMatchingFieldsFilled(localLangData.poBox[0], translatedData.poBox[0])) {
     mismatchFields += mismatchFields != '' ? ', ' : '';
     mismatchFields += 'PO BOX';
   }
-  if (!hasMatchingFieldsFilled(localLangField.dept[0], translatedField.dept[0])) {
+  if (isAddrPairNewOrUpdated(localLangData, translatedData) && !hasMatchingFieldsFilled(localLangData.dept[0], translatedData.dept[0])) {
     mismatchFields += mismatchFields != '' ? ', ' : '';
     mismatchFields += 'Att. Person';
   }
-  if (!hasMatchingFieldsFilled(localLangField.custNm1[0], translatedField.custNm1[0])) {
+  if (isAddrPairNewOrUpdated(localLangData, translatedData) && !hasMatchingFieldsFilled(localLangData.custNm1[0], translatedData.custNm1[0])) {
     mismatchFields += mismatchFields != '' ? ', ' : '';
     mismatchFields += 'Customer Name';
   }
-  if (!hasMatchingFieldsFilled(localLangField.postCd[0], translatedField.postCd[0])) {
+  if (isAddrPairNewOrUpdated(localLangData, translatedData) && !hasMatchingFieldsFilled(localLangData.postCd[0], translatedData.postCd[0])) {
     mismatchFields += mismatchFields != '' ? ', ' : '';
     mismatchFields += 'Postal Code';
   }
-  if (!hasMatchingFieldsFilled(localLangField.city1[0], translatedField.city1[0])) {
+  if (isAddrPairNewOrUpdated(localLangData, translatedData) && !hasMatchingFieldsFilled(localLangData.city1[0], translatedData.city1[0])) {
     mismatchFields += mismatchFields != '' ? ', ' : '';
     mismatchFields += 'City';
   }
@@ -2029,6 +2206,24 @@ function hasMatchingFieldsFilled(localLangField, translatedField) {
   }
 
   return true;
+}
+
+function isAddrPairNewOrUpdated(localLang, translated) {
+  var reqType = FormManager.getActualValue('reqType');
+  if(reqType == 'C') {
+    return true;
+  }
+  if(addrNewOrUpdated(localLang) || addrNewOrUpdated(translated)) {
+    return true;
+  }
+  return false;
+}
+
+function addrNewOrUpdated(addrData) {
+  if(addrData != null) {
+    return (addrData.updateInd[0] == 'N' || addrData.updateInd[0] == 'U');  
+  }
+  return false;
 }
 
 function validateSalesRep() {
@@ -2096,6 +2291,12 @@ function setEnterpriseSalesRepSBO(isuCd, clientTier) {
 
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
+
+  if (isuCd != "34") {
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+  } else {
+    checkAndAddValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ]);
+  }
   
   if (isuCd == '34' && clientTier == 'Q') {
     FormManager.setValue('enterprise', '006510');
@@ -2209,17 +2410,19 @@ function setSalesRepEnterpriseNoSBO(fromAddress, scenario, scenarioChanged) {
         FormManager.readOnly('repTeamMemberNo');
         FormManager.readOnly('enterprise');
         FormManager.readOnly('salesBusOffCd');
+      } else {
+        FormManager.enable('repTeamMemberNo');
       }
       requireSalesRepEnterpriseSBOByRole();
     }
   } else if (reqType == 'C' && !scenarioChanged) {
-    if (role == 'PROCESSOR') {
       if (scenario == 'BUSPR' || scenario == 'INTER' || scenario == 'INTSO' || scenario == 'PRIPE') {
         FormManager.readOnly('repTeamMemberNo');
         FormManager.readOnly('enterprise');
         FormManager.readOnly('salesBusOffCd');
+      } else {
+        FormManager.enable('repTeamMemberNo');
       }
-    }
   }
 }
 
@@ -2283,15 +2486,15 @@ function getAddrMismatchInUpdateMsg() {
         updateInd = updateInd[0];
       }
       if ((type == 'ZS01' || type == 'ZP01' || type == 'ZD01')) {
-        allLocalAddrMap.set(record.addrSeq[0].padStart(5, '0'), record);
+        allLocalAddrMap.set(getKeyPrefix(type) + record.addrSeq[0].padStart(5, '0'), record);
         if(updateInd == 'U') {
-          updatedLocalAddrs.push(record.addrSeq[0].padStart(5, '0'));  
+          updatedLocalAddrs.push(getKeyPrefix(type) + record.addrSeq[0].padStart(5, '0'));  
         }
       } else if ((type == 'CTYA' || type == 'CTYB' || type == 'CTYC')) {
-        allTransAddrsMap.set(record.pairedSeq[0].padStart(5, '0'), record);
-        allTransAddrsMap.set(record.addrSeq[0].padStart(5, '0'), record);
+        allTransAddrsMap.set(getKeyPrefix(type) + record.pairedSeq[0].padStart(5, '0'), record);
+        allTransAddrsMap.set(getKeyPrefix(type) + record.addrSeq[0].padStart(5, '0'), record);
         if(updateInd == 'U') {
-          updatedTransAddrsPair.push(record.pairedSeq[0].padStart(5, '0'));  
+          updatedTransAddrsPair.push(getKeyPrefix(type) + record.pairedSeq[0].padStart(5, '0'));  
         }
       }
     }
@@ -2303,22 +2506,31 @@ function getAddrMismatchInUpdateMsg() {
         if(errorMsg != '') {
           errorMsg += '<br>';
         }
-        var addrSeqLocal = updateMismatchLocal[l];
-        var addrTextLocal = (allLocalAddrMap.get(addrSeqLocal).addrTypeText[0]);
-        var addrSeqTrans = (allTransAddrsMap.get(addrSeqLocal).addrSeq[0]);
-        var addrTextTrans = (allTransAddrsMap.get(addrSeqLocal).addrTypeText[0]);
-        errorMsg += '<br>Address with sequence ' + addrSeqLocal +' from pair ' + addrSeqLocal + ' - ' + addrSeqTrans + ' was updated, but sequence ' + addrSeqTrans + ' was not.';
+        var mismatchKey = updateMismatchLocal[l];
+        
+        var addrSeqLocal = allLocalAddrMap.get(mismatchKey).addrSeq[0];
+        var addrSeqTrans = (allTransAddrsMap.get(mismatchKey).addrSeq[0]);
+
+        var addrTextLocal = (allLocalAddrMap.get(mismatchKey).addrTypeText[0]);
+        var addrTextTrans = (allTransAddrsMap.get(mismatchKey).addrTypeText[0]);
+       
+        errorMsg += '<br>Address with sequence ' + addrSeqLocal + ' from pair ' + addrSeqLocal + ' (' + addrTextLocal + ')' + ' - ' + addrSeqTrans + ' ('+ addrTextTrans +') ' + ' was updated, but sequence ' + addrSeqTrans  + ' was not.';
       }
 
       for (var t = 0; t < updateMismatchTrans.length; t++) {
         if(errorMsg != '') {
           errorMsg += '<br>';
         }
-        var addrSeqLocal = updateMismatchTrans[t];
-        var addrSeqTrans = (allTransAddrsMap.get(addrSeqLocal).addrSeq[0]);
-        var addrTextTrans = (allTransAddrsMap.get(addrSeqTrans).addrTypeText[0]);
-        var addrTextLocal = (allLocalAddrMap.get(addrSeqLocal).addrTypeText[0]);
-        errorMsg += '<br>Address with sequence ' + addrSeqTrans +' from pair ' + addrSeqLocal + ' - ' + addrSeqTrans + ' was updated, but sequence ' + addrSeqLocal + ' was not.';
+        
+        var mismatchKey = updateMismatchTrans[t];
+        
+        var addrSeqTrans = (allTransAddrsMap.get(mismatchKey).addrSeq[0]);
+        var addrSeqLocal = (allLocalAddrMap.get(mismatchKey).addrSeq[0]);
+
+        var addrTextTrans = (allTransAddrsMap.get(mismatchKey).addrTypeText[0]);
+        var addrTextLocal = (allLocalAddrMap.get(mismatchKey).addrTypeText[0]);
+        
+        errorMsg += '<br>Address with sequence ' + addrSeqTrans + ' from pair ' + addrSeqLocal + ' (' + addrTextLocal + ') ' + ' - ' + addrSeqTrans + ' ('+ addrTextTrans +') ' + ' was updated, but sequence ' + addrSeqLocal + ' was not.';
       }
       
       if(errorMsg != '') {
@@ -2327,6 +2539,16 @@ function getAddrMismatchInUpdateMsg() {
     }
   }
   return errorMsg;
+}
+
+function getKeyPrefix(addrType) {
+  if(addrType == 'ZS01' || addrType == 'CTYA') {
+    return 'MAIL_';
+  } else if (addrType == 'ZP01' || addrType == 'CTYB') {
+    return 'BILL_';
+  } else if (addrType == 'ZD01' || addrType == 'CTYC') {
+    return 'SHIP_';
+  }
 }
 
 function addAddrFieldsLimitation() {
@@ -2393,6 +2615,7 @@ function setCTCByScenario(fromAddress, scenario, scenarioChanged) {
     return;
   }
   var isuCd = FormManager.getActualValue('isuCd');
+  var custType = FormManager.getActualValue('custSubGrp');
   
   if (isuCd != '' & isuCd != "34") {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
@@ -2401,29 +2624,26 @@ function setCTCByScenario(fromAddress, scenario, scenarioChanged) {
   }
   
   if (scenarioChanged) {
-    var custType = FormManager.getActualValue('custSubGrp');
-    
-    if (custType == 'COMME') {
+    if (scenario == 'COMME') {
       FormManager.setValue('clientTier', 'Q');
-    } else if (custType == 'BUSPR') {
+    } else if (scenario == 'BUSPR') {
       FormManager.setValue('clientTier', '');
-      FormManager.readOnly('clientTier');
-    } else if (custType == 'INTER') {
+    } else if (scenario == 'INTER') {
       FormManager.setValue('clientTier', '');
-      FormManager.readOnly('clientTier');
-    } else if (custType == 'INTSO') {
+    } else if (scenario == 'INTSO') {
       FormManager.setValue('clientTier', '');
-      FormManager.readOnly('clientTier');
-    } else if (custType == 'PRIPE') {
+    } else if (scenario == 'PRIPE') {
       FormManager.setValue('clientTier', 'Q');
-      FormManager.readOnly('clientTier');
-    } else if (custType == 'GOVRN') {
+    } else if (scenario == 'GOVRN') {
       FormManager.setValue('clientTier', 'Q');
-    } else if (custType == 'THDPT') {
+    } else if (scenario == 'THDPT') {
       FormManager.setValue('clientTier', 'Q');
-    } else if (custType == 'CROSS') {
+    } else if (scenario == 'CROSS') {
       FormManager.setValue('clientTier', 'Q');
     }
+  }
+  if (scenario == 'BUSPR' || scenario == 'INTER' || scenario == 'INTSO' || scenario == 'PRIPE') {
+    FormManager.readOnly('clientTier');
   }
 }
 
@@ -2471,6 +2691,93 @@ function limitMODValues() {
   }
 }
 
+function validateExistingCMRNo() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        console.log('checking requested cmr number il...');
+        var reqType = FormManager.getActualValue('reqType');
+        var cmrNo = FormManager.getActualValue('cmrNo');
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var action = FormManager.getActualValue('yourAction');
+        var _custSubGrp = FormManager.getActualValue('custSubGrp');
+        if (reqType == 'C' && cmrNo) {
+          if (cmrNo.startsWith('P')) { 
+            return new ValidationResult(null, true);
+          }          
+          var exists = cmr.query('LD.CHECK_CMR_EXIST_IN_RDC', {
+            COUNTRY : cntry,
+            CMR_NO : cmrNo,
+            MANDT : cmr.MANDT
+          });
+          
+          var results2 = cmr.query('GET.CHECK_EXISTS_CMR_NO', {
+            CMR_NO : cmrNo,
+            CNTRY : cntry
+          });
+          
+          if (exists && exists.ret1 && action != 'PCM') {
+            return new ValidationResult({
+              id : 'cmrNo',
+              type : 'text',
+              name : 'cmrNo'
+            }, false, 'The requested CMR Number ' + cmrNo + ' already exists in the system.');
+          } else if (results2.ret1 != null && action != 'PCM') {
+            return new ValidationResult({
+              id : 'cmrNo',
+              type : 'text',
+              name : 'cmrNo'
+            }, false, 'The requested CMR Number ' + cmrNo + ' already exists in the system.');
+          } else {
+            exists = cmr.query('LD.CHECK_EXISTING_CMR_NO_RESERVED', {
+              COUNTRY : cntry,
+              CMR_NO : cmrNo,
+              MANDT : cmr.MANDT
+            });
+            if (exists && exists.ret1) {
+              return new ValidationResult({
+                id : 'cmrNo',
+                type : 'text',
+                name : 'cmrNo'
+              }, false, 'The requested CMR Number ' + cmrNo + ' already exists in the system.');
+            }
+          }
+        }
+        return new ValidationResult({
+          id : 'cmrNo',
+          type : 'text',
+          name : 'cmrNo'
+        }, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
+function inacValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var inacCd = FormManager.getActualValue('inacCd');
+        if (inacCd != null && inacCd != undefined && inacCd != '') {
+          if (inacCd.length != 4) {
+            return new ValidationResult(null, false, 'INAC should be exactly 4 characters.');
+          }
+          
+          if(!inacCd.match("^[0-9]*$")) {
+            var firstTwoChars = inacCd.substring(0, 2);
+            var lastTwoChars = inacCd.substring(2);
+            if (!firstTwoChars.match(/^[A-Z]*$/) || !lastTwoChars.match(/^[0-9]+$/)) {
+              return new ValidationResult(null, false, 'INAC should be 4 digits or two letters (Uppercase Latin characters) followed by 2 digits.');
+            }
+          }
+          return new ValidationResult(null, true);
+        } 
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding Israel functions...');
@@ -2503,6 +2810,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(updateAbbrevNmLocnIsrael, [ SysLoc.ISRAEL ]);
   // GEOHandler.registerValidator(addNameContAttnDeptValidator, [ SysLoc.ISRAEL
   // ], null, true);
+  GEOHandler.addAddrFunction(setAddrFieldsBehavior, [ SysLoc.ISRAEL ]);
   GEOHandler.addAddrFunction(addLatinCharValidator, [ SysLoc.ISRAEL ]);
   GEOHandler.addAddrFunction(addNonLatinCharValidator, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(resetSubIndustryCd, [ SysLoc.ISRAEL ]);
@@ -2519,6 +2827,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addPairedAddressFieldsMismatchValidatorMailing, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(addPairedAddressFieldsMismatchValidatorBilling, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(addPairedAddressFieldsMismatchValidatorShipping, [ SysLoc.ISRAEL ], null, true);
+  GEOHandler.registerValidator(validatePairedAddrFieldNumericValue, [ SysLoc.ISRAEL ], null, true);
 
   GEOHandler.addAfterConfig(setCapInd, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(lockDunsNo, [ SysLoc.ISRAEL ]);
@@ -2532,7 +2841,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(sboLengthValidator, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.addAfterConfig(addHandlersForIL, [ SysLoc.ISRAEL ]);
   GEOHandler.addAddrFunction(countryUseAISRAEL, [ SysLoc.ISRAEL ]);
-  GEOHandler.addAddrFunction(setAddrFieldsBehavior, [ SysLoc.ISRAEL ]);
   GEOHandler.addAddrFunction(validatePoBox, [ SysLoc.ISRAEL ]);
   GEOHandler.addAddrFunction(markAddrSaveSuperUser, [ SysLoc.ISRAEL ]);
   GEOHandler.addAddrFunction(toggleAddressTypesForIL, [ SysLoc.ISRAEL ]);
@@ -2562,7 +2870,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateEnterpriseNo, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(addAddrFieldsLimitation, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(clientTierValidator, [ SysLoc.ISRAEL ], null, true);
-
+  GEOHandler.registerValidator(inacValidator, [ SysLoc.ISRAEL ], null, true);
+  
   GEOHandler.addAfterTemplateLoad(preTickVatExempt, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(showVatExempt, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(setStreetContBehavior, [ SysLoc.ISRAEL ]);

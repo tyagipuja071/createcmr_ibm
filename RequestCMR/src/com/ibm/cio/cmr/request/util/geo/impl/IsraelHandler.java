@@ -12,6 +12,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.persistence.EntityManager;
 
@@ -95,6 +97,7 @@ public class IsraelHandler extends EMEAHandler {
   private static final String CUSTGRP_LOCAL = "LOCAL";
   private static final int MANDATORY_ADDR_COUNT = 8;
   private static final int MAX_ADDR_SEQ = 99999;
+  private static final String DEFAULT_COUNTRY_CODE = "IL";
 
   static {
     LANDED_CNTRY_MAP.put(SystemLocation.UNITED_KINGDOM, "GB");
@@ -160,7 +163,7 @@ public class IsraelHandler extends EMEAHandler {
           }
           FindCMRRecordModel addr = cloneAddress(record, "ZS01");
 
-          converted.add(mapEnglishAddr(addr, legacyAddr));
+          converted.add(mapEnglishAddr(entityManager, addr, legacyAddr));
         } else {
           record.setCmrAddrSeq("00006");
           record.setCmrAddrTypeCode("CTYA");
@@ -187,7 +190,7 @@ public class IsraelHandler extends EMEAHandler {
                   // name3 in rdc = Address Con't on SOF
                   addr.setCmrStreetAddressCont(record.getCmrName3());
                   addr.setCmrName3(null);
-                  addr.setCmrName2Plain(!StringUtils.isEmpty(record.getCmrName2Plain()) ? record.getCmrName2Plain() : record.getCmrName4());
+                  addr.setCmrDept(record.getCmrName4());
 
                   if (!StringUtils.isBlank(record.getCmrPOBox())) {
                     addr.setCmrPOBox(record.getCmrPOBox());
@@ -212,8 +215,8 @@ public class IsraelHandler extends EMEAHandler {
                       record.setCmrCustPhone(mainRecord.getCmrCustPhone());
                     }
 
-                    converted.add(mapEnglishAddr(addr, legacyAddr, addrType));
-                    converted.add(mapLocalLanguageAddr(record, legacyAddr, addrType));
+                    converted.add(mapEnglishAddr(entityManager, addr, legacyAddr, addrType));
+                    converted.add(mapLocalLanguageAddr(entityManager, record, addrType));
 
                     // Handle Sold to shared sequence -- EPL and Installing
                     if ("ZS01".equals(addrType)) {
@@ -329,7 +332,7 @@ public class IsraelHandler extends EMEAHandler {
     return null;
   }
 
-  private FindCMRRecordModel mapLocalLanguageAddr(FindCMRRecordModel record, CmrtAddr legacyAddr, String addrType)
+  private FindCMRRecordModel mapLocalLanguageAddr(EntityManager entityManager, FindCMRRecordModel record, String addrType)
       throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
     FindCMRRecordModel localLangAddr = new FindCMRRecordModel();
     PropertyUtils.copyProperties(localLangAddr, record);
@@ -339,15 +342,18 @@ public class IsraelHandler extends EMEAHandler {
     localLangAddr.setCmrStreetAddressCont(record.getCmrIntlName3());
     localLangAddr.setCmrCity(record.getCmrIntlCity1());
     localLangAddr.setCmrAddrTypeCode(addrType);
+    localLangAddr.setCmrDept(record.getCmrIntlName4());
 
+    CmrtAddr legacyAddr = legacyObjects.findBySeqNo(String.format("%05d", Integer.parseInt(localLangAddr.getCmrAddrSeq())));
+    fillInMissingAddrDataFromLegacy(entityManager, localLangAddr, legacyAddr, true);
     return localLangAddr;
   }
 
-  private FindCMRRecordModel mapEnglishAddr(FindCMRRecordModel addr, CmrtAddr legacyAddr) {
-    return mapEnglishAddr(addr, legacyAddr, "ZS01");
+  private FindCMRRecordModel mapEnglishAddr(EntityManager entityManager, FindCMRRecordModel addr, CmrtAddr legacyAddr) {
+    return mapEnglishAddr(entityManager, addr, legacyAddr, "ZS01");
   }
 
-  private FindCMRRecordModel mapEnglishAddr(FindCMRRecordModel addr, CmrtAddr legacyAddr, String addrType) {
+  private FindCMRRecordModel mapEnglishAddr(EntityManager entityManager, FindCMRRecordModel addr, CmrtAddr legacyAddr, String addrType) {
     if ("ZS01".equals(addrType)) {
       addr.setCmrAddrTypeCode("CTYA");
     } else if ("ZP01".equals(addrType)) {
@@ -365,7 +371,144 @@ public class IsraelHandler extends EMEAHandler {
       addr.setTransAddrNo(localAddr.getId().getAddrNo());
     }
 
+    fillInMissingAddrDataFromLegacy(entityManager, addr, legacyAddr, false);
     return addr;
+  }
+
+  private void fillInMissingAddrDataFromLegacy(EntityManager entityManager, FindCMRRecordModel addr, CmrtAddr legacyAddr, boolean isLocalLanguage) {
+    if (!isLocalLanguage) {
+      mapEnglishAddrFromLegacyData(entityManager, addr, legacyAddr);
+    } else {
+      mapLocalLangAddrFromLegacyData(entityManager, addr, legacyAddr);
+    }
+  }
+
+  private void mapLocalLangAddrFromLegacyData(EntityManager entityManager, FindCMRRecordModel addr, CmrtAddr legacyAddr) {
+    if (StringUtils.isEmpty(addr.getCmrIntlName1())) {
+      addr.setCmrName1Plain(getLegacyAddrBasedOnAddrlU(legacyAddr, "D"));
+    }
+    if (StringUtils.isEmpty(addr.getCmrIntlName2())) {
+      addr.setCmrName2Plain(getLegacyAddrBasedOnAddrlU(legacyAddr, "E"));
+    }
+    if (StringUtils.isEmpty(addr.getCmrDept())) {
+      addr.setCmrDept(getLegacyAddrBasedOnAddrlU(legacyAddr, "B"));
+    }
+    if (StringUtils.isEmpty(addr.getCmrIntlAddress())) {
+      addr.setCmrStreetAddress(getLegacyAddrBasedOnAddrlU(legacyAddr, "F"));
+    }
+    if (StringUtils.isEmpty(addr.getCmrIntlName3())) {
+      addr.setCmrStreetAddressCont(getLegacyAddrBasedOnAddrlU(legacyAddr, "G"));
+    }
+    if (StringUtils.isEmpty(addr.getCmrPOBox())) {
+      addr.setCmrPOBox(getLegacyAddrBasedOnAddrlU(legacyAddr, "H"));
+    }
+    if (StringUtils.isEmpty(addr.getCmrIntlCity1())) {
+      addr.setCmrCity(getLegacyAddrBasedOnAddrlU(legacyAddr, "IC"));
+    }
+    if (StringUtils.isEmpty(addr.getCmrPostalCode())) {
+      addr.setCmrPostalCode(getLegacyAddrBasedOnAddrlU(legacyAddr, "IP"));
+    }
+    if (StringUtils.isEmpty(addr.getCmrCountryLanded())) {
+      String landedCountryCode = getCountryCodeByDesc(entityManager, true, getLegacyAddrBasedOnAddrlU(legacyAddr, "J"));
+      // landed country is not mapped in DB2 if the address is IL
+      if (StringUtils.isEmpty(landedCountryCode)) {
+        landedCountryCode = DEFAULT_COUNTRY_CODE;
+      }
+      addr.setCmrCountryLanded(landedCountryCode);
+    }
+  }
+
+  private void mapEnglishAddrFromLegacyData(EntityManager entityManager, FindCMRRecordModel addr, CmrtAddr legacyAddr) {
+    if (StringUtils.isEmpty(addr.getCmrName1Plain())) {
+      addr.setCmrName1Plain(getLegacyAddrBasedOnAddrlU(legacyAddr, "D"));
+    }
+    if (StringUtils.isEmpty(addr.getCmrName2Plain())) {
+      addr.setCmrName2Plain(getLegacyAddrBasedOnAddrlU(legacyAddr, "E"));
+    }
+    if (StringUtils.isEmpty(addr.getCmrDept())) {
+      addr.setCmrDept(getLegacyAddrBasedOnAddrlU(legacyAddr, "B"));
+    }
+    if (StringUtils.isEmpty(addr.getCmrStreetAddress())) {
+      addr.setCmrStreetAddress(getLegacyAddrBasedOnAddrlU(legacyAddr, "F"));
+    }
+    if (StringUtils.isEmpty(addr.getCmrStreetAddressCont())) {
+      addr.setCmrStreetAddressCont(getLegacyAddrBasedOnAddrlU(legacyAddr, "G"));
+    }
+    if (StringUtils.isEmpty(addr.getCmrPOBox())) {
+      addr.setCmrPOBox(getLegacyAddrBasedOnAddrlU(legacyAddr, "H"));
+    }
+    if (StringUtils.isEmpty(addr.getCmrCity())) {
+      addr.setCmrCity(getLegacyAddrBasedOnAddrlU(legacyAddr, "IC"));
+    }
+    if (StringUtils.isEmpty(addr.getCmrPostalCode())) {
+      addr.setCmrPostalCode(getLegacyAddrBasedOnAddrlU(legacyAddr, "IP"));
+    }
+    if (StringUtils.isEmpty(addr.getCmrCountryLanded())) {
+      String landedCountryCode = getCountryCodeByDesc(entityManager, false, getLegacyAddrBasedOnAddrlU(legacyAddr, "J"));
+      // landed country is not mapped in DB2 if the address is IL
+      if (StringUtils.isEmpty(landedCountryCode)) {
+        landedCountryCode = DEFAULT_COUNTRY_CODE;
+      }
+      addr.setCmrCountryLanded(landedCountryCode);
+    }
+
+  }
+
+  private String getLegacyAddrBasedOnAddrlU(CmrtAddr legacyAddr, String addrlUVal) {
+    char addrlUChar = addrlUVal.charAt(0);
+
+    int addrlUCharIndex = legacyAddr.getAddrLineU().indexOf(addrlUChar);
+    String addressLineVal;
+    switch (addrlUCharIndex) {
+    case 0:
+      addressLineVal = legacyAddr.getAddrLine1();
+      break;
+    case 1:
+      addressLineVal = legacyAddr.getAddrLine2();
+      break;
+    case 2:
+      addressLineVal = legacyAddr.getAddrLine3();
+      break;
+    case 3:
+      addressLineVal = legacyAddr.getAddrLine4();
+      break;
+    case 4:
+      addressLineVal = legacyAddr.getAddrLine5();
+      break;
+    case 5:
+      addressLineVal = legacyAddr.getAddrLine6();
+      break;
+    default:
+      addressLineVal = "";
+      break;
+    }
+
+    if (addrlUChar == 'I' && StringUtils.isNotEmpty(addressLineVal)) {
+      if (addressLineVal.contains(" ")) {
+        String postalCode = addressLineVal.substring(0, addressLineVal.indexOf(' '));
+        String city = addressLineVal.substring(addressLineVal.indexOf(' ') + 1);
+
+        if ("IP".equals(addrlUVal) && StringUtils.isNumeric(postalCode)) {
+          addressLineVal = postalCode;
+        } else if ("IC".equals(addrlUVal) && StringUtils.isNumeric(postalCode)) {
+          addressLineVal = city;
+        }
+      } else {
+        if (StringUtils.isNumeric(addressLineVal)) {
+          if ("IC".equals(addrlUVal)) {
+            addressLineVal = "";
+          }
+        } else {
+          if ("IP".equals(addrlUVal)) {
+            addressLineVal = "";
+          }
+        }
+      }
+    } else if (addrlUChar == 'H' && StringUtils.isNotEmpty(addressLineVal)) {
+      addressLineVal = addressLineVal.replace("מ.ד", "").replace("PO BOX", "").trim();
+    }
+
+    return addressLineVal;
   }
 
   private CmrtAddr getLegacyAddrByAddrPair(List<CmrtAddr> legacyAddrList, String pairedAddrSeq) {
@@ -441,6 +584,7 @@ public class IsraelHandler extends EMEAHandler {
         data.setRepTeamMemberNo("");
         data.setSalesBusOffCd("");
         data.setEnterprise("");
+        data.setInacCd("");
       } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
         // defect 1299146
         if (mainRecord.getCmrSortl() != null && mainRecord.getCmrSortl().length() >= 10) {
@@ -455,6 +599,7 @@ public class IsraelHandler extends EMEAHandler {
             LOG.trace("Rep No from Sortl : " + data.getRepTeamMemberNo());
           }
         }
+
       }
       // 1299146
       // Translate and auto-populate for next release
@@ -576,9 +721,9 @@ public class IsraelHandler extends EMEAHandler {
           address.getId().setAddrSeq("00006");
           address.setPairedAddrSeq("");
         }
-        if ("D".equals(address.getImportInd())) {
-          String seq = StringUtils.leftPad(address.getId().getAddrSeq(), 5, '0');
-          address.getId().setAddrSeq(seq);
+
+        if ("D".equals(address.getImportInd()) && "CTYA".equalsIgnoreCase(address.getId().getAddrType())) {
+          address.getId().setAddrSeq("00006");
         }
 
         if (!"ZS01".equalsIgnoreCase(address.getId().getAddrType())) {
@@ -1436,11 +1581,20 @@ public class IsraelHandler extends EMEAHandler {
         }
         // INAC/NAC
         String inac = validateColValFromCell(row.getCell(14));
-        if (StringUtils.isNotBlank(inac) && StringUtils.isAlphanumeric(inac)) {
-          String firstTwoInacChar = StringUtils.substring(inac, 0, 2);
-          String lastTwoInacChar = StringUtils.substring(inac, 2);
-          if (!StringUtils.isAlpha(firstTwoInacChar) || !StringUtils.isNumeric(lastTwoInacChar)) {
-            error.addError(rowIndex, "<br>INAC/NAC", "Does not match country INAC/NAC type rules.");
+        if (StringUtils.isNotBlank(inac)) {
+          if (!StringUtils.isNumeric(inac)) {
+            String firstTwoInacChar = StringUtils.substring(inac, 0, 2);
+            String lastTwoInacChar = StringUtils.substring(inac, 2);
+
+            Pattern upperCaseChars = Pattern.compile("^[A-Z]*$");
+            Matcher matcherFirstTwo = upperCaseChars.matcher(firstTwoInacChar);
+
+            Pattern digitsChars = Pattern.compile("^[0-9]+$");
+            Matcher matcherLastTwo = digitsChars.matcher(lastTwoInacChar);
+
+            if (!matcherFirstTwo.matches() || !matcherLastTwo.matches()) {
+              error.addError(rowIndex, "<br>INAC/NAC", "INAC should be 4 digits or two letters (Uppercase Latin characters) followed by 2 digits.");
+            }
           }
         }
         // KUKLA
@@ -1457,6 +1611,14 @@ public class IsraelHandler extends EMEAHandler {
           error.addError(rowIndex, "<br>KUKLA", "KUKLA value should be 60 if ISIC is 9500.");
         } else if (!"9500".equals(isic) && "60".equals(kukla)) {
           error.addError(rowIndex, "<br>KUKLA", "ISIC value should be 9500 if KUKLA is 60.");
+        }
+        String isuCd = validateColValFromCell(row.getCell(10));
+        if (isuCd.equalsIgnoreCase("5k") && !ctc.equalsIgnoreCase("@")) {
+          LOG.trace("Client Tier Value should always be @ for IsuCd Value: 5K");
+          error.addError(row.getRowNum(), "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd);
+        } else if (!StringUtils.isEmpty(isuCd) && !isuCd.equalsIgnoreCase("5k") && ctc.equalsIgnoreCase("@")) {
+          LOG.trace("Ctc can't be @ for IsuCd Value :" + isuCd);
+          error.addError(row.getRowNum(), "Client Tier", "Client Tier Value can't be cleared for IsuCd Value :" + isuCd);
         }
       }
     }
@@ -1846,6 +2008,33 @@ public class IsraelHandler extends EMEAHandler {
           error.addError(i, "<br>Mismatch",
               "Same fields needs to be filled for both " + sheet1.getSheetName() + " and " + sheet2.getSheetName() + " address.");
         }
+        // check digits chars vs the translation address
+        // Street
+        String street1 = validateColValFromCell(getAddressCell(IL_MASSUPDATE_ADDR.STREET, rowA, sheet1.getSheetName()));
+        String street2 = validateColValFromCell(getAddressCell(IL_MASSUPDATE_ADDR.STREET, rowB, sheet2.getSheetName()));
+        if (!isNumericValueEqual(street1, street2)) {
+          error.addError(i, "<br>Street", "Mismatch numeric Street value.");
+        }
+        // PO Box
+        if (!IL_MASSUPDATE_SHEET_NAMES[4].equals(sheet1.getSheetName())) {
+          String poBox1 = validateColValFromCell(getAddressCell(IL_MASSUPDATE_ADDR.POBOX, rowA, sheet1.getSheetName()));
+          String poBox2 = validateColValFromCell(getAddressCell(IL_MASSUPDATE_ADDR.POBOX, rowB, sheet2.getSheetName()));
+          if (!isNumericValueEqual(poBox1, poBox2)) {
+            error.addError(i, "<br>PO Box", "Mismatch numeric PO Box value.");
+          }
+        }
+        // Address Cont
+        String addrCont1 = validateColValFromCell(getAddressCell(IL_MASSUPDATE_ADDR.ADDRCONT, rowA, sheet1.getSheetName()));
+        String addrCont2 = validateColValFromCell(getAddressCell(IL_MASSUPDATE_ADDR.ADDRCONT, rowB, sheet2.getSheetName()));
+        if (!isNumericValueEqual(addrCont1, addrCont2)) {
+          error.addError(i, "<br>Address Cont", "Mismatch numeric Address Cont value.");
+        }
+        // Postal Code
+        String postalCd1 = validateColValFromCell(getAddressCell(IL_MASSUPDATE_ADDR.POSTCODE, rowA, sheet1.getSheetName()));
+        String postalCd2 = validateColValFromCell(getAddressCell(IL_MASSUPDATE_ADDR.POSTCODE, rowB, sheet2.getSheetName()));
+        if (!isNumericValueEqual(postalCd1, postalCd2)) {
+          error.addError(i, "<br>Postal Code", "Mismatch numeric Postal Code value.");
+        }
       }
       if (error.hasErrors()) {
         validations.add(error);
@@ -1884,6 +2073,23 @@ public class IsraelHandler extends EMEAHandler {
     return isRowEqual;
   }
 
+  private boolean isNumericValueEqual(String strA, String strB) {
+    boolean isNumValEqual = true;
+
+    if (StringUtils.isNotBlank(strA) && StringUtils.isNotBlank(strB)) {
+      String strANumbers = strA.replaceAll("[^0-9]", "");
+      String strBNumbers = strB.replaceAll("[^0-9]", "");
+      // compare digits
+      if (StringUtils.isNumeric(strANumbers) && StringUtils.isNumeric(strBNumbers)) {
+        if (!strANumbers.equals(strBNumbers)) {
+          isNumValEqual = false;
+        }
+      }
+    }
+
+    return isNumValEqual;
+  }
+
   private Addr getAddrByAddrSeq(EntityManager entityManager, long reqId, String addrType, String addrSeq) {
     String sql = ExternalizedQuery.getSql("ADDRESS.GETRECORDS");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
@@ -1896,6 +2102,20 @@ public class IsraelHandler extends EMEAHandler {
       return addrList.get(0);
     }
     return null;
+  }
+
+  private String getCountryCodeByDesc(EntityManager entityManager, boolean isLocal, String countryDesc) {
+    String sql = null;
+    if (isLocal) {
+      sql = ExternalizedQuery.getSql("IL.GET.COUNGTRYCODE_BYLOCALCOUNTRYDESC");
+    } else {
+      sql = ExternalizedQuery.getSql("IL.GET.COUNTRYCODE_BYCOUNTRYDESC");
+    }
+
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("COUNTRY_DESC", countryDesc);
+    String countryCode = query.getSingleResult(String.class);
+    return countryCode;
   }
 
   @Override

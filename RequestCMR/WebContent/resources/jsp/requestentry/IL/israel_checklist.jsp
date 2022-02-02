@@ -96,7 +96,7 @@
     <cmr:chk-entry number="1" section="C">To the best of your knowledge or belief is your customer involved with
      <span style="font-weight: bold; text-decoration: underline">Military</span> end use and or is a
      <span style="font-weight: bold;">Military end user</span> in or by one of the countries listed below?  (USERP Section, 4 Part 2.3.1) <br>
-     Afghanistan, Armenia, Azerbaijan, Belarus, Cambodia, People's Republic of China, Cuba, Georgia, Iran, Iraq, Kazakhstan, Korea (North), Kyrgyzstan, Laos, Libya, Macao, Moldova, Mongolia, Myanmar (Burma) Russia, Sudan, Syria, Tajikistan, Turkmenistan, Ukraine, Uzbekistan, Venezuela & Vietnam 
+     Afghanistan, Armenia, Azerbaijan, Belarus, Cambodia, People's Republic of China, Cuba, Georgia, Iran, Iraq, Kazakhstan, Korea (North), Kyrgyzstan, Laos, Libya, Macau, Moldova, Mongolia, Myanmar (Burma) Russia, Sudan, Syria, Tajikistan, Turkmenistan, Ukraine, Uzbekistan, Venezuela & Vietnam 
      <br>
      <span style="font-weight: bold; text-decoration: underline">Definitions </span>
      <br>
