@@ -2790,6 +2790,7 @@ dojo.addOnLoad(function() {
   // Israel Specific
   GEOHandler.addAfterConfig(afterConfigForIsrael, [ SysLoc.ISRAEL ]);
   GEOHandler.registerValidator(addILAddressTypeValidator, [ SysLoc.ISRAEL ], null, true);
+  GEOHandler.registerValidator(validateExistingCMRNo, [ SysLoc.ISRAEL ], null, true);
   // GEOHandler.registerValidator(addILAddressTypeMailingValidator, [
   // SysLoc.ISRAEL ], null, true);
   // GEOHandler.registerValidator(addILAddressTypeBillingValidator, [
