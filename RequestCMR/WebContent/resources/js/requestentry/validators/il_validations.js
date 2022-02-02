@@ -2847,7 +2847,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(toggleAddressTypesForIL, [ SysLoc.ISRAEL ]);
 
   GEOHandler.registerValidator(addPpsceidValidator, [ SysLoc.ISRAEL ], null, true);
-  GEOHandler.registerValidator(validateCMRNumberForLegacy, [ SysLoc.ISRAEL ], GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.registerValidator(validateCMRNumberForLegacy, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.addAfterConfig(enableCmrNoForProcessor, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(showVatInfoOnLocal, [ SysLoc.ISRAEL ]);
 
