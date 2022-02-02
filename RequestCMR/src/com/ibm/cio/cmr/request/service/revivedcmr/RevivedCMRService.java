@@ -250,14 +250,14 @@ public class RevivedCMRService extends BaseSimpleService<List<RevivedCMRModel>> 
   }
 
   public void calculateCoverage(List<RevivedCMRModel> revCMRList, EntityManager entityManager, StringBuilder details) throws Exception {
-    if (coverageRules == null) {
-      try {
-        initCoverageRules();
-      } catch (Exception e) {
-        LOG.error("Error in initialization", e);
-        // noInit = true;
-      }
+    // if (coverageRules == null) {
+    try {
+      initCoverageRules();
+    } catch (Exception e) {
+      LOG.error("Error in initialization", e);
+      // noInit = true;
     }
+    // }
     for (RevivedCMRModel revCmr : revCMRList) {
       AutomationUtil countryUtil = AutomationUtil.getNewCountryUtil(revCmr.getIssuingCountry());
       List<CoverageContainer> coverages = null;
