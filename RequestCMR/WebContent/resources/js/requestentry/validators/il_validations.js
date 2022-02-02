@@ -2410,6 +2410,8 @@ function setSalesRepEnterpriseNoSBO(fromAddress, scenario, scenarioChanged) {
         FormManager.readOnly('repTeamMemberNo');
         FormManager.readOnly('enterprise');
         FormManager.readOnly('salesBusOffCd');
+      } else {
+        FormManager.enable('repTeamMemberNo');
       }
       requireSalesRepEnterpriseSBOByRole();
     }
@@ -2418,6 +2420,8 @@ function setSalesRepEnterpriseNoSBO(fromAddress, scenario, scenarioChanged) {
         FormManager.readOnly('repTeamMemberNo');
         FormManager.readOnly('enterprise');
         FormManager.readOnly('salesBusOffCd');
+      } else {
+        FormManager.enable('repTeamMemberNo');
       }
   }
 }
