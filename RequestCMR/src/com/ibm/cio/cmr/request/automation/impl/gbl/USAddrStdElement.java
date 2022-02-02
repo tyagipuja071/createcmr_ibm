@@ -203,11 +203,27 @@ public class USAddrStdElement extends OverridingElement {
       ModelMap map = new ModelMap();
       stdCity.getStandardCity(addrModel, SystemLocation.UNITED_STATES, map);
       StandardCityResponse stdCityResp = (StandardCityResponse) map.get("result");
+      String addrTypeName= addr.getId().getAddrType();
+      switch(addrTypeName){
+      case "ZS01":
+        details.append("Install-at");
+        break;
+      case "PG01":
+        details.append("PayGo Billing");
+        break;
+      case "ZI01":
+        details.append("Invoice-to");
+        break;
+      }
+      
       if (stdCityResp != null) {
         if (stdCityResp.isCityMatched()) {
-          LOG.debug("Standard City Name: " + stdCityResp.getStandardCity());
-          details.append(("ZS01".equals(addr.getId().getAddrType()) ? "Install-at" : "Invoice-to") + " Standard City Name: "
+          LOG.debug("Standard City Name: " + stdCityResp.getStandardCity());   
+        
+          //if(string is not empty and pgo1 not = exectue 
+          details.append(addrTypeName + " Standard City Name: "
               + stdCityResp.getStandardCity() + "\n");
+  
           if (!addr.getCity1().trim().equalsIgnoreCase(stdCityResp.getStandardCity().trim())) {
             overrides.addOverride(getProcessCode(), addr.getId().getAddrType(), "CITY1", addr.getCity1(), stdCityResp.getStandardCity());
           }
@@ -217,12 +233,12 @@ public class USAddrStdElement extends OverridingElement {
         }
         if (stdCityResp.getSuggested() == null || stdCityResp.getSuggested().isEmpty()) {
           LOG.debug("County: " + stdCityResp.getStandardCountyCd() + " - " + stdCityResp.getStandardCountyName());
-          details.append(("ZS01".equals(addr.getId().getAddrType()) ? "Install-at" : "Invoice-to") + " County: " + stdCityResp.getStandardCountyCd()
+          details.append(addrTypeName + " County: " + stdCityResp.getStandardCountyCd()
               + " - " + stdCityResp.getStandardCountyName() + "\n");
           if (addr.getCounty() == null || !addr.getCounty().equals(stdCityResp.getStandardCountyCd())) {
             overrides.addOverride(getProcessCode(), addr.getId().getAddrType(), "COUNTY", addr.getCounty(), stdCityResp.getStandardCountyCd());
           }
-          if (addr.getCountyName() == null || !addr.getCountyName().trim().equalsIgnoreCase(stdCityResp.getStandardCountyName().trim())) {
+          if (addr.getCountyName() == null || (stdCityResp.getStandardCountyName()!=null  && !addr.getCountyName().trim().equalsIgnoreCase(stdCityResp.getStandardCountyName().trim()))) {
             overrides.addOverride(getProcessCode(), addr.getId().getAddrType(), "COUNTY_NAME", addr.getCountyName(),
                 stdCityResp.getStandardCountyName());
           }
@@ -230,10 +246,10 @@ public class USAddrStdElement extends OverridingElement {
           if (!StringUtils.isBlank(addr.getCounty()) && !StringUtils.isBlank(addr.getCountyName())) {
             details
                 .append("County cannot be determined. Multiple counties match the address. Using " + addr.getCounty() + " - " + addr.getCountyName()
-                    + " for the " + ("ZS01".equals(addr.getId().getAddrType()) ? "Install-at" : "Invoice-to") + " Address record.\n");
+                    + " for the " + addrTypeName + " Address record.\n");
           } else {
             details.append("County cannot be determined and no county data on the request. Multiple counties match the address. "
-                + ("ZS01".equals(addr.getId().getAddrType()) ? "Install-at" : "Invoice-to") + " Address record needs to be checked.\n");
+                + addrTypeName + " Address record needs to be checked.\n");
             hasIssues = true;
           }
         }
