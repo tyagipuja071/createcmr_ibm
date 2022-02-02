@@ -597,103 +597,115 @@ function addAddressLandedPairingValidatorShipping() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
-function validateAddrFieldsNumericTranslation() {
-  addressNumericFieldsValidator('ZS01', 'CTYA', 'Street');
-  addressNumericFieldsValidator('ZS01', 'CTYA', 'Address Cont');
-  addressNumericFieldsValidator('ZS01', 'CTYA', 'PO Box');
-  addressNumericFieldsValidator('ZS01', 'CTYA', 'Postal Code');
-  
-  addressNumericFieldsValidator('ZP01', 'CTYB', 'Street');
-  addressNumericFieldsValidator('ZP01', 'CTYB', 'Address Cont');
-  addressNumericFieldsValidator('ZP01', 'CTYB', 'PO Box');
-  addressNumericFieldsValidator('ZP01', 'CTYB', 'Postal Code');
-  
-  addressNumericFieldsValidator('ZD01', 'CTYC', 'Street');
-  addressNumericFieldsValidator('ZD01', 'CTYC', 'Address Cont');
-  addressNumericFieldsValidator('ZD01', 'CTYC', 'PO Box');
-  addressNumericFieldsValidator('ZD01', 'CTYC', 'Postal Code');
-} 
-
-function addressNumericFieldsValidator(addrTypeHeb, addrTypeEng, addrField) {
-  console.log("addAddressNumericFieldsValidator..............");
-  
-    FormManager.addFormValidator((function() {
-      return {
-        validate : function() {
-          if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
-            var record = null;
-            var type = null;
-            var updateIndHeb = null;
-            var updateIndEng = null;
-            var addrTypeHebDisplay = '';
-            var addrTypeEngDisplay = '';
-            var addrFieldHeb = null;
-            var addrFieldEng = null;
+function validatePairedAddrFieldNumericValue() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+          var record = null;
+          var type = null;
+          var arrErrorMsg = new Array();
+          
+          const addrTypeDisplayMap = new Map();
+          addrTypeDisplayMap.set('ZS01', 'Mailing');
+          addrTypeDisplayMap.set('ZP01', 'Billing');
+          addrTypeDisplayMap.set('ZD01', 'Shipping');
+          addrTypeDisplayMap.set('CTYA','Country Use A (Mailing)');
+          addrTypeDisplayMap.set('CTYB','Country Use B (Billing)');
+          addrTypeDisplayMap.set('CTYC','Country Use C (Shipping)');
+          
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+            var localAddress = null;
+            var translatedAddress = null;
+            var localAddrType = null;
+            var translatedAddrType = null;
+            var localAddrSeqNo = '';
+            var translatedAddrSeqNo = '';
+            var indentSpace = '&nbsp;&nbsp;&nbsp;&nbsp;';
             
-            if (addrTypeHeb == 'ZS01') {
-              addrTypeHebDisplay = 'Mailing';
-            } else if (addrTypeHeb == 'ZP01') {
-              addrTypeHebDisplay = 'Billing';
-            } else if (addrTypeHeb == 'ZD01') {
-              addrTypeHebDisplay = 'Shipping';
+            record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+            if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+              record = _allAddressData[i];
+            }
+            type = record.addrType;
+            if (typeof (type) == 'object') {
+              type = type[0];
             }
             
-            if (addrTypeEng == 'CTYA') {
-              addrTypeEngDisplay = 'Country Use A';
-            } else if (addrTypeEng == 'CTYB') {
-              addrTypeEngDisplay = 'Country Use B';
-            } else if (addrTypeEng == 'CTYC') {
-              addrTypeEngDisplay = 'Country Use C';
+            if (type == 'ZS01') {
+              localAddress = record;
+              translatedAddress = getPairedTranslatedAddrData(localAddress, 'CTYA');
+              if (translatedAddress == null) {
+                translatedAddress = getAddressByType('CTYA');
+              }
+              localAddrType = 'ZS01';
+              translatedAddrType = 'CTYA';
+            } else if (type == 'ZP01') {
+              localAddress = record;
+              translatedAddress = getPairedTranslatedAddrData(localAddress, 'CTYB');
+              if (translatedAddress == null) {
+                translatedAddress = getAddressByType('CTYB');
+              }
+              localAddrType = 'ZP01';
+              translatedAddrType = 'CTYB';
+            } else if (type == 'ZD01') {
+              localAddress = record;
+              translatedAddress = getPairedTranslatedAddrData(localAddress, 'CTYC');
+              if (translatedAddress == null) {
+                translatedAddress = getAddressByType('CTYC');
+              }
+              localAddrType = 'ZD01';
+              translatedAddrType = 'CTYC';
+              localAddrSeqNo = '(' + localAddress.addrSeq[0] + ')';
+              translatedAddrSeqNo = '(' + translatedAddress.addrSeq[0] + ')';
             }
             
-            for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
-              record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
-              if (record == null && _allAddressData != null && _allAddressData[i] != null) {
-                record = _allAddressData[i];
-              }
-              type = record.addrType;
-              if (typeof (type) == 'object') {
-                type = type[0];
-              }
-              
-              if (type == addrTypeHeb) {
-                updateIndHeb = record.updateInd[0];
-                if (addrField == 'Street') {
-                  addrFieldHeb = record.addrTxt[0];
-                } else if (addrField == 'Address Cont') {
-                  addrFieldHeb = record.addrTxt2[0];
-                } else if (addrField == 'PO Box') {
-                  addrFieldHeb = record.poBox[0];
-                } else if (addrField == 'Postal Code') {
-                  addrFieldHeb = record.postCd[0];
-                }
-              } else if (type == addrTypeEng) {
-                updateIndEng = record.updateInd[0];
-                if (addrField == 'Street') {
-                  addrFieldEng = record.addrTxt[0];
-                } else if (addrField == 'Address Cont') {
-                  addrFieldEng = record.addrTxt2[0];
-                } else if (addrField == 'PO Box') {
-                  addrFieldEng = record.poBox[0];
-                } else if (addrField == 'Postal Code') {
-                  addrFieldEng = record.postCd[0];
+            if (localAddress != null && translatedAddress != null && isAddrPairNewOrUpdated(localAddress, translatedAddress)) {
+              let errorMsg = `Mismatch ${addrTypeDisplayMap.get(localAddrType)} ${localAddrSeqNo} and ${addrTypeDisplayMap.get(translatedAddrType)} ${translatedAddrSeqNo}`;
+              // street
+              if (!isNumericValueEqual(localAddress.addrTxt[0], translatedAddress.addrTxt[0])) {
+                if (arrErrorMsg.length > 0) {
+                  arrErrorMsg.push(indentSpace + errorMsg + ' Street numeric values.<br>');
+                } else {
+                  arrErrorMsg.push(errorMsg + ' Street numeric values.<br>');
                 }
               }
-            }
-            if ( (updateIndHeb != null && (updateIndHeb == 'N' || updateIndHeb == 'U')) || (updateIndEng != null && (updateIndEng == 'N' || updateIndEng == 'U')) ) {
-              if (!isNumericValueEqual(addrFieldHeb, addrFieldEng)) {
-                return new ValidationResult(null, false, 'Mismatch ' + addrTypeHebDisplay + ' and ' + addrTypeEngDisplay + ' ('+ addrTypeHebDisplay +') ' + addrField + ' numeric values.');
+              // address cont
+              if (!isNumericValueEqual(localAddress.addrTxt2[0], translatedAddress.addrTxt2[0])) {
+                if (arrErrorMsg.length > 0) {
+                  arrErrorMsg.push(indentSpace + errorMsg + ' Address Cont numeric values.<br>');
+                } else {
+                  arrErrorMsg.push(errorMsg + ' Address Cont numeric values.<br>');
+                }
               }
-            } else if (FormManager.getActualValue('reqType') == 'C') {
-              if (!isNumericValueEqual(addrFieldHeb, addrFieldEng)) {
-                return new ValidationResult(null, false, 'Mismatch ' + addrTypeHebDisplay + ' and ' + addrTypeEngDisplay + ' ('+ addrTypeHebDisplay +') ' + addrField + ' numeric values.');
+              // po box
+              if (localAddrType != null && localAddrType != 'ZD01') {
+                if (!isNumericValueEqual(localAddress.poBox[0], translatedAddress.poBox[0])) {
+                  if (arrErrorMsg.length > 0) {
+                    arrErrorMsg.push(indentSpace + errorMsg + ' PO Box numeric values.<br>');
+                  } else {
+                    arrErrorMsg.push(errorMsg + ' PO Box numeric values.<br>');
+                  }
+                }
+              }
+              // postal code
+              if (!isNumericValueEqual(localAddress.postCd[0], translatedAddress.postCd[0])) {
+                if (arrErrorMsg.length > 0) {
+                  arrErrorMsg.push(indentSpace + errorMsg + ' Postal Code numeric values.<br>');
+                } else {
+                  arrErrorMsg.push(errorMsg + ' Postal Code numeric values.<br>');
+                }
               }
             }
+          } // for
+          if (arrErrorMsg.length > 0) {
+            return new ValidationResult(null, false, arrErrorMsg.join(''));
           }
-          return new ValidationResult(null, true);
         }
-      };
-    })(), 'MAIN_NAME_TAB', 'frmCMR');
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
   
 }
 
@@ -711,7 +723,6 @@ function isNumericValueEqual(strA, strB) {
   if (strANum != strBNum) {
     return false;
   }
-  
   return true;
 }
 
@@ -2812,7 +2823,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addPairedAddressFieldsMismatchValidatorMailing, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(addPairedAddressFieldsMismatchValidatorBilling, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(addPairedAddressFieldsMismatchValidatorShipping, [ SysLoc.ISRAEL ], null, true);
-  GEOHandler.registerValidator(validateAddrFieldsNumericTranslation, [ SysLoc.ISRAEL ], null, true);
+  GEOHandler.registerValidator(validatePairedAddrFieldNumericValue, [ SysLoc.ISRAEL ], null, true);
 
   GEOHandler.addAfterConfig(setCapInd, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(lockDunsNo, [ SysLoc.ISRAEL ]);
