@@ -56,6 +56,7 @@
 
         <cmr:gridParam fieldId="reqId" value="${reqentry.reqId}" />
         <cmr:gridParam fieldId="reqType" value="${reqentry.reqType}" />
+        <cmr:gridParam fieldId="cmrIssuingCntry" value="${reqentry.cmrIssuingCntry}" />
         <cmr:gridCol width="20%" field="cmrNo" header="CMR No" />
         <cmr:gridCol width="*" field="name" header="Name" />
         <cmr:gridCol width="10%" field="orderBlock" header="Order Block" />
@@ -68,6 +69,7 @@
 
         <cmr:gridParam fieldId="reqId" value="${reqentry.reqId}" />
         <cmr:gridParam fieldId="reqType" value="${reqentry.reqType}" />
+        <cmr:gridParam fieldId="cmrIssuingCntry" value="${reqentry.cmrIssuingCntry}" />
         <cmr:gridCol width="70%" field="cmrNo" header="CMR No" />
       </cmr:grid>
       <%
