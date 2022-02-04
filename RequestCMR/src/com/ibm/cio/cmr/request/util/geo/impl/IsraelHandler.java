@@ -253,35 +253,66 @@ public class IsraelHandler extends EMEAHandler {
                 if (legacyAddrUses != null && legacyAddrUses.size() > 0) {
                   for (String legacyAddrUse : legacyAddrUses) {
                     legacyAddrType = getAddressTypeByUse(legacyAddrUse);
-                    if (StringUtils.isNotEmpty(legacyAddrType)
-                        && ("ZI01".equals(legacyAddrType) || "ZD01".equals(legacyAddrType) || "CTYC".equals(legacyAddrType))) {
+                    if (StringUtils.isNotEmpty(legacyAddrType)) {
                       FindCMRRecordModel addrModel = getAddrTypeAndClone(converted, legacyAddrType);
+                      if (addrModel == null) {
+                        if (CmrConstants.ADDR_TYPE.ZS01.equals(legacyAddrType) || CmrConstants.ADDR_TYPE.ZP01.equals(legacyAddrType)
+                            || CmrConstants.ADDR_TYPE.ZD01.equals(legacyAddrType)) {
+                          // clone ZS01 as object template for hebrew address
+                          addrModel = getAddrTypeAndClone(converted, "ZS01");
+                        } else {
+                          // clone CTYA as object template for english address
+                          addrModel = getAddrTypeAndClone(converted, "CTYA");
+                        }
+                      }
                       if (addrModel != null) {
-                        // Get country code
-                        if (StringUtils.isNotEmpty(cmrtAddr.getAddrLine6())) {
-                          String sql = null;
-                          if (CmrConstants.ADDR_TYPE.ZD01.equals(legacyAddrType)) {
-                            sql = ExternalizedQuery.getSql("IL.GET.COUNGTRYCODE_BYLOCALCOUNTRYDESC");
-                          } else {
-                            sql = ExternalizedQuery.getSql("IL.GET.COUNTRYCODE_BYCOUNTRYDESC");
+                        // Identify address landed country
+                        String addrlu = cmrtAddr.getAddrLineU();
+                        if (StringUtils.isNotBlank(addrlu) && StringUtils.contains(addrlu, "J")) {
+                          // iterate addrlines to get the landed country
+                          String legacyAddrLandCntry = null;
+                          for (int i = 6; i >= 4; i--) {
+                            if (i == 6 && StringUtils.isNotBlank(cmrtAddr.getAddrLine6())) {
+                              legacyAddrLandCntry = cmrtAddr.getAddrLine6();
+                              break;
+                            } else if (i == 5 && StringUtils.isNotBlank(cmrtAddr.getAddrLine5())) {
+                              legacyAddrLandCntry = cmrtAddr.getAddrLine5();
+                              break;
+                            } else if (i == 4 && StringUtils.isNotBlank(cmrtAddr.getAddrLine4())) {
+                              legacyAddrLandCntry = cmrtAddr.getAddrLine4();
+                              break;
+                            }
                           }
-                          PreparedQuery query = new PreparedQuery(entityManager, sql);
-                          query.setParameter("COUNTRY_DESC", cmrtAddr.getAddrLine6());
+                          // Get country code
+                          if (StringUtils.isNotEmpty(legacyAddrLandCntry)) {
+                            String sql = null;
+                            if (CmrConstants.ADDR_TYPE.ZS01.equals(legacyAddrType) || CmrConstants.ADDR_TYPE.ZP01.equals(legacyAddrType)
+                                || CmrConstants.ADDR_TYPE.ZD01.equals(legacyAddrType)) {
+                              sql = ExternalizedQuery.getSql("IL.GET.COUNGTRYCODE_BYLOCALCOUNTRYDESC");
+                            } else {
+                              sql = ExternalizedQuery.getSql("IL.GET.COUNTRYCODE_BYCOUNTRYDESC");
+                            }
+                            PreparedQuery query = new PreparedQuery(entityManager, sql);
+                            query.setParameter("COUNTRY_DESC", legacyAddrLandCntry);
 
-                          List<Object[]> results = query.getResults();
-                          if (results != null && results.size() > 0) {
-                            Object[] result = results.get(0);
-                            if (result != null && result.length > 0) {
-                              if (result[0] != null) {
-                                addrModel.setCmrCountryLanded((String) result[0]);
-                              }
-                              if (result[1] != null) {
-                                addrModel.setCmrCountryLandedDesc((String) result[1]);
+                            List<Object[]> results = query.getResults();
+                            if (results != null && results.size() > 0) {
+                              Object[] result = results.get(0);
+                              if (result != null && result.length > 0) {
+                                if (result[0] != null) {
+                                  addrModel.setCmrCountryLanded((String) result[0]);
+                                }
+                                if (result[1] != null) {
+                                  addrModel.setCmrCountryLandedDesc((String) result[1]);
+                                }
                               }
                             }
                           }
                         }
 
+                        addrModel.setCmrAddrTypeCode(legacyAddrType);
+                        addrModel.setTransAddrNo(cmrtAddr.getAddrLineO());
+                        addrModel.setCmrSitePartyID("");
                         addrModel.setCmrName(cmrtAddr.getAddrLine1());
                         addrModel.setCmrName1Plain(cmrtAddr.getAddrLine1());
                         addrModel.setCmrAddrSeq(cmrtAddr.getId().getAddrNo());
