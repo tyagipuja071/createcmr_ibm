@@ -231,6 +231,9 @@ function setInacByCluster() {
       FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
       FormManager.addValidator('inacType', Validators.REQUIRED, [ 'INAC Type' ], 'MAIN_IBM_TAB');
       FormManager.setValue('mrcCd', '2');
+      if( (_cluster == '09062'  || _cluster == '09063'  || _cluster == '09064') && (cntry == '744' || cntry == '615' || cntry == '652')){
+        FormManager.setValue('mrcCd', '3');
+      }
       var qParams = {
         _qall : 'Y',
         ISSUING_CNTRY : cntry,
