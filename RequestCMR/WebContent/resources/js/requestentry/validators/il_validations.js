@@ -565,8 +565,10 @@ function validatePairedAddrFieldNumericValue() {
               }
               localAddrType = 'ZD01';
               translatedAddrType = 'CTYC';
-              localAddrSeqNo = '(' + localAddress.addrSeq[0] + ')';
-              translatedAddrSeqNo = '(' + translatedAddress.addrSeq[0] + ')';
+              if (localAddress != null && translatedAddress != null) {
+                localAddrSeqNo = '(' + localAddress.addrSeq[0] + ')';
+                translatedAddrSeqNo = '(' + translatedAddress.addrSeq[0] + ')';
+              }
             }
             
             if (localAddress != null && translatedAddress != null && isAddrPairNewOrUpdated(localAddress, translatedAddress)) {
