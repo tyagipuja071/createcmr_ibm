@@ -360,51 +360,6 @@ function addILAddressTypeValidator() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
-function addILAddressTypeMailingValidator() {
-  console.log("addILAddressTypeMailingValidator..............");
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        if (FormManager.getActualValue('cmrIssuingCntry') != '755') {
-          return new ValidationResult(null, true);
-        }
-        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
-          var record = null;
-          var type = null;
-          var updateInd = null;
-          var mailingUpdated = false;
-          var ctyACntUpdated = false;
-          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
-            record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
-            if (record == null && _allAddressData != null && _allAddressData[i] != null) {
-              record = _allAddressData[i];
-            }
-            type = record.addrType;
-            updateInd = record.updateInd;
-            if (typeof (type) == 'object') {
-              type = type[0];
-            }
-            if (typeof (updateInd) == 'object') {
-              updateInd = updateInd[0];
-            }
-            if (type == 'ZS01' && updateInd == 'U') {
-              mailingUpdated = isAddrFieldsUpdatedExcludingLanded('ZS01', record);
-            } else if (type == 'CTYA' && updateInd == 'U') {
-              ctyACntUpdated = isAddrFieldsUpdatedExcludingLanded('CTYA', record);
-            }
-          }
-          if (FormManager.getActualValue('reqType') == 'U') {
-            if (mailingUpdated == true && ctyACntUpdated == false) {
-              return new ValidationResult(null, false, 'Mailing address is updated, please also update Country Use A (Mailing) address.');
-            }
-          }
-        }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), 'MAIN_NAME_TAB', 'frmCMR');
-}
-
 function addAddressLandedPairingValidatorMailing() {
   console.log("addAddressPairingValidatorMailing..............");
   FormManager.addFormValidator((function() {
@@ -438,52 +393,6 @@ function addAddressLandedPairingValidatorMailing() {
           if (mailingLanded != '' && ctyALanded != '') {
             if (mailingLanded != ctyALanded) {
               return new ValidationResult(null, false, '\'Country (Landed)\' of Mailing should match Country Use A (Mailing).');
-            }
-          }
-        }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), 'MAIN_NAME_TAB', 'frmCMR');
-}
-
-function addILAddressTypeBillingValidator() {
-  console.log("addILAddressTypeBillingValidator..............");
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        if (FormManager.getActualValue('cmrIssuingCntry') != '755') {
-          return new ValidationResult(null, true);
-        }
-        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
-          var record = null;
-          var type = null;
-          var updateInd = null;
-          var billingUpdated = false;
-          var ctyBCntUpdated = false;
-          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
-            record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
-            if (record == null && _allAddressData != null && _allAddressData[i] != null) {
-              record = _allAddressData[i];
-            }
-            type = record.addrType;
-            updateInd = record.updateInd;
-            if (typeof (type) == 'object') {
-              type = type[0];
-            }
-            if (typeof (updateInd) == 'object') {
-              updateInd = updateInd[0];
-            }
-            if (type == 'ZP01' && updateInd == 'U') {
-              billingUpdated = isAddrFieldsUpdatedExcludingLanded('ZP01', record);
-            } else if (type == 'CTYB' && updateInd == 'U') {
-              ctyBCntUpdated = isAddrFieldsUpdatedExcludingLanded('CTYB', record);
-              ;
-            }
-          }
-          if (FormManager.getActualValue('reqType') == 'U' || FormManager.getActualValue('reqType') == 'X') {
-            if (billingUpdated == true && ctyBCntUpdated == false) {
-              return new ValidationResult(null, false, 'Billing address is updated, please also update Country Use B (Billing) address.');
             }
           }
         }
@@ -724,183 +633,6 @@ function isNumericValueEqual(strA, strB) {
     return false;
   }
   return true;
-}
-
-function addShippingAddrTypeValidator() {
-  console.log("addShippingAddrTypeValidator..............");
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        if (FormManager.getActualValue('cmrIssuingCntry') != '755') {
-          return new ValidationResult(null, true);
-        }
-
-        if (FormManager.getActualValue('reqType') == 'U') {
-          if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
-            var recordList = null;
-            var addrType = null;
-            var updateIndicator = null;
-            var addrSequence = null;
-            var recordLists = null;
-            var updateIndicators = null;
-            var pairedSequence = null;
-            var pairedSequences = null;
-            var addrSequences = null;
-            for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
-              recordList = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
-              if (recordList == null && _allAddressData != null && _allAddressData[i] != null) {
-                recordList = _allAddressData[i];
-              }
-              addrType = recordList.addrType;
-              updateIndicator = recordList.updateInd;
-              addrSequence = recordList.addrSeq;
-              pairedSequences = recordList.pairedSeq;
-
-              if (typeof (updateIndicator) == 'object') {
-                updateIndicator = updateIndicator[0];
-              }
-              if (typeof (addrSequence) == 'object') {
-                addrSequence = addrSequence[0];
-              }
-              if (typeof (pairedSequences) == 'object') {
-                pairedSequences = pairedSequences[0];
-              }
-
-              if (addrType == 'ZD01' && updateIndicator == 'U') {
-                for (var j = 0; j < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; j++) {
-                  recordLists = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(j);
-                  updateIndicators = recordLists.updateInd;
-                  pairedSequence = recordLists.pairedSeq;
-                  if (typeof (pairedSequence) == 'object') {
-                    pairedSequence = pairedSequence[0];
-                  }
-                  if (typeof (updateIndicators) == 'object') {
-                    updateIndicators = updateIndicators[0];
-                  }
-
-                  if (recordLists.addrType == 'CTYC' && addrSequence == pairedSequence && updateIndicators != 'U') {
-                    return new ValidationResult(null, false, 'The translated Country Use C address ' + addrSequence + ' should also be updated.');
-                  }
-                }
-              }
-
-              if (addrType == 'CTYC' && updateIndicator == 'U') {
-                for (var j = 0; j < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; j++) {
-                  recordLists = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(j);
-                  updateIndicators = recordLists.updateInd;
-                  pairedSequence = recordLists.pairedSeq;
-                  addrSequences = recordLists.addrSeq;
-                  if (typeof (addrSequences) == 'object') {
-                    addrSequences = addrSequences[0];
-                  }
-                  if (typeof (pairedSequence) == 'object') {
-                    pairedSequence = pairedSequence[0];
-                  }
-                  if (typeof (updateIndicators) == 'object') {
-                    updateIndicators = updateIndicators[0];
-                  }
-                  if (recordLists.addrType == 'ZD01' && addrSequences == pairedSequences && updateIndicators != 'U') {
-                    return new ValidationResult(null, false, 'The Shipping address ' + addrSequences + ' should also be updated.');
-                  }
-                }
-              }
-            }
-          }
-        }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), 'MAIN_NAME_TAB', 'frmCMR');
-}
-
-function addILAddressTypeCntyAValidator() {
-  console.log("addILAddressTypeCntyAValidator..............");
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        if (FormManager.getActualValue('cmrIssuingCntry') != '755') {
-          return new ValidationResult(null, true);
-        }
-        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
-          var record = null;
-          var type = null;
-          var updateInd = null;
-          var mailingUpdated = false;
-          var ctyACntUpdated = false;
-          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
-            record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
-            if (record == null && _allAddressData != null && _allAddressData[i] != null) {
-              record = _allAddressData[i];
-            }
-            type = record.addrType;
-            updateInd = record.updateInd;
-            if (typeof (type) == 'object') {
-              type = type[0];
-            }
-            if (typeof (updateInd) == 'object') {
-              updateInd = updateInd[0];
-            }
-            if (type == 'ZS01' && updateInd == 'U') {
-              mailingUpdated = isAddrFieldsUpdatedExcludingLanded('ZS01', record);
-            } else if (type == 'CTYA' && updateInd == 'U') {
-              ctyACntUpdated = isAddrFieldsUpdatedExcludingLanded('CTYA', record);
-            }
-          }
-          if (FormManager.getActualValue('reqType') == 'U' || FormManager.getActualValue('reqType') == 'X') {
-            if (mailingUpdated == false && ctyACntUpdated == true) {
-              return new ValidationResult(null, false, 'Country Use A (Mailing) address is updated, please also update Mailing address.');
-            }
-          }
-        }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), 'MAIN_NAME_TAB', 'frmCMR');
-}
-
-function addILAddressTypeCntyBValidator() {
-  console.log("addILAddressTypeCntyBValidator..............");
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        if (FormManager.getActualValue('cmrIssuingCntry') != '755') {
-          return new ValidationResult(null, true);
-        }
-        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
-          var record = null;
-          var type = null;
-          var updateInd = null;
-          var billingUpdated = false;
-          var ctyBCntUpdated = false;
-          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
-            record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
-            if (record == null && _allAddressData != null && _allAddressData[i] != null) {
-              record = _allAddressData[i];
-            }
-            type = record.addrType;
-            updateInd = record.updateInd;
-            if (typeof (type) == 'object') {
-              type = type[0];
-            }
-            if (typeof (updateInd) == 'object') {
-              updateInd = updateInd[0];
-            }
-            if (type == 'ZP01' && updateInd == 'U') {
-              billingUpdated = isAddrFieldsUpdatedExcludingLanded('ZP01', record);
-            } else if (type == 'CTYB' && updateInd == 'U') {
-              ctyBCntUpdated = isAddrFieldsUpdatedExcludingLanded('CTYB', record);
-            }
-          }
-          if (FormManager.getActualValue('reqType') == 'U') {
-            if (billingUpdated == false && ctyBCntUpdated == true) {
-              return new ValidationResult(null, false, 'Country Use B (Billing) is updated, please also update Billing address.');
-            }
-          }
-        }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
 /**
@@ -1555,7 +1287,7 @@ function markAddrSaveSuperUser(cntry, addressMode, saving) {
   }
 }
 
-function isAddrFieldsUpdatedExcludingLanded(type, addrRecord) {
+function isAddrFieldsUpdatedExcludingPhone(type, addrRecord) {
   var reqId = FormManager.getActualValue('reqId');
 
   if (reqId != null) {
@@ -1566,24 +1298,26 @@ function isAddrFieldsUpdatedExcludingLanded(type, addrRecord) {
 
     var origCustNm1;
     var origCustNm2;
-    // var origLandCntry;
+    var origLandCntry;
     var origAddrTxt;
     var origPOBox;
     var origCity1;
     var origPostCd;
     var origDept;
+    var origAddrTxt2;
 
     var result = cmr.query('ADDR.GET.OLDADDR.BY_REQID_ADDRTYP_IL', reqParam);
 
     if (result != null && result != '') {
       origCustNm1 = result.ret1;
       origCustNm2 = result.ret2;
-      // origLandCntry = result.ret3;
+      origLandCntry = result.ret3;
       origAddrTxt = result.ret4;
       origPOBox = result.ret5;
       origCity1 = result.ret6;
       origPostCd = result.ret7;
       origDept = result.ret8;
+      origAddrTxt2 = result.ret9;
     }
 
     var curCustNm1 = (addrRecord.custNm1[0] == null) ? '' : addrRecord.custNm1[0];
@@ -1593,8 +1327,11 @@ function isAddrFieldsUpdatedExcludingLanded(type, addrRecord) {
     var curCity1 = (addrRecord.city1[0] == null) ? '' : addrRecord.city1[0];
     var curPostCd = (addrRecord.postCd[0] == null) ? '' : addrRecord.postCd[0];
     var curDept = (addrRecord.dept[0] == null) ? '' : addrRecord.dept[0];
+    var curLandCntry = (addrRecord.landCntry[0] == null) ? '' : addrRecord.landCntry[0];
+    var curAddrTxt2 = (addrRecord.addrTxt2[0] == null) ? '' : addrRecord.addrTxt2[0];
 
-    if (origCustNm1 != curCustNm1 || origCustNm2 != curCustNm2 || origAddrTxt != curAddrTxt || origPOBox != curPOBox || origCity1 != curCity1 || origPostCd != curPostCd || origDept != curDept) {
+    if (origCustNm1 != curCustNm1 || origCustNm2 != curCustNm2 || origAddrTxt != curAddrTxt || origPOBox != curPOBox || origCity1 != curCity1 
+    || origPostCd != curPostCd || origDept != curDept || origLandCntry != curLandCntry || origAddrTxt2 != curAddrTxt2 ) {
       return true;
     }
 
@@ -2488,6 +2225,9 @@ function getAddrMismatchInUpdateMsg() {
       if ((type == 'ZS01' || type == 'ZP01' || type == 'ZD01')) {
         allLocalAddrMap.set(getKeyPrefix(type) + record.addrSeq[0].padStart(5, '0'), record);
         if(updateInd == 'U') {
+          if(type == 'ZS01' && !isAddrFieldsUpdatedExcludingPhone(type, record)) {
+            continue;
+          }
           updatedLocalAddrs.push(getKeyPrefix(type) + record.addrSeq[0].padStart(5, '0'));  
         }
       } else if ((type == 'CTYA' || type == 'CTYB' || type == 'CTYC')) {
@@ -2791,16 +2531,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(afterConfigForIsrael, [ SysLoc.ISRAEL ]);
   GEOHandler.registerValidator(addILAddressTypeValidator, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(validateExistingCMRNo, [ SysLoc.ISRAEL ], null, true);
-  // GEOHandler.registerValidator(addILAddressTypeMailingValidator, [
-  // SysLoc.ISRAEL ], null, true);
-  // GEOHandler.registerValidator(addILAddressTypeBillingValidator, [
-  // SysLoc.ISRAEL ], null, true);
-  // GEOHandler.registerValidator(addShippingAddrTypeValidator, [ SysLoc.ISRAEL
-  // ], null, true);
-  // GEOHandler.registerValidator(addILAddressTypeCntyAValidator, [
-  // SysLoc.ISRAEL ], null, true);
-// GEOHandler.registerValidator(addILAddressTypeCntyBValidator, [ SysLoc.ISRAEL
-// ], null, true);
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.ISRAEL, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(addStreetAddressFormValidator, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(addEmbargoCodeValidator, SysLoc.ISRAEL, null, true);
