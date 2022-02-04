@@ -1157,15 +1157,28 @@ function addEmbargoCodeValidator() {
         var embargoCd = FormManager.getActualValue('embargoCd').toUpperCase();
         var reqType = FormManager.getActualValue('reqType');
         var role = FormManager.getActualValue('userRole').toUpperCase();
+        var requestId = FormManager.getActualValue('reqId');
+        var validEmbargoValues = [ 'D', 'J', '' ];
+        var oldEmbargo = null;
         embargoCd = embargoCd.trim();
-        if (embargoCd == '' || embargoCd == 'D' || embargoCd == 'J') {
+
+        if (embargoCd != null && embargoCd != undefined) {
+          qParams = {
+              REQ_ID : requestId,
+          };
+          
+          var result = cmr.query('GET.IL.CLIENT_TIER_EMBARGO_CD_OLD_BY_REQID', qParams);
+          
+          if (result != null && result != '') {
+            oldEmbargo = result.ret2 != null ? result.ret2 : '';
+          }
+          
+          if (embargoCd != oldEmbargo) {
+            if (!validEmbargoValues.includes(embargoCd)) {
+              return new ValidationResult(null, false, 'Embargo Code value should be only D, J or Blank.');
+            }
+          }
           return new ValidationResult(null, true);
-        } else {
-          return new ValidationResult({
-            id : 'embargoCd',
-            type : 'text',
-            name : 'embargoCd'
-          }, false, 'Embargo Code value should be only D, J or Blank.');
         }
         return new ValidationResult(null, true);
       }
@@ -2407,12 +2420,27 @@ function clientTierValidator() {
       validate : function() {
         var clientTier = FormManager.getActualValue('clientTier');
         var validCtcValues = [ 'Q', 'Y', '' ];
+        var oldClientTier = null;
+        var requestId = FormManager.getActualValue('reqId');
+        
         if (clientTier != null && clientTier != undefined) {
-          if (validCtcValues.indexOf(clientTier) >= 0) {
-            return new ValidationResult(null, true);
-          } else {
-            return new ValidationResult(null, false, 'Client Tier can only accept Q, Y or blank.');
+          
+          qParams = {
+              REQ_ID : requestId,
+          };
+        
+          var result = cmr.query('GET.IL.CLIENT_TIER_EMBARGO_CD_OLD_BY_REQID', qParams);
+          
+          if (result != null && result != '') {
+            oldClientTier = result.ret1 != null ? result.ret1 : '';
           }
+          
+          if (clientTier != oldClientTier) {
+            if (!validCtcValues.includes(clientTier)) {
+              return new ValidationResult(null, false, 'Client Tier can only accept Q, Y or blank.');
+            }
+          }
+          return new ValidationResult(null, true);
         } else {
           return new ValidationResult(null, true);
         }
