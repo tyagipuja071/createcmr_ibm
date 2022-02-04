@@ -156,7 +156,7 @@ dojo.addOnLoad(function(){
           </p>
         </cmr:column>
     </cmr:view>
-      <cmr:column span="1" width="120" containerForField="INACType" exceptForCountry="666,726,862,822,838,618,758,848" exceptForGEO="MCO1,MCO2,FR,CEMEA,NORDX,BELUX,NL">
+      <cmr:column span="1" width="120" containerForField="INACType" exceptForCountry="666,726,862,822,838,618,758,848,755" exceptForGEO="MCO1,MCO2,FR,CEMEA,NORDX,BELUX,NL">
               <p>
           <cmr:label fieldId="inacType">
             <cmr:fieldLabel fieldId="INACType" />
