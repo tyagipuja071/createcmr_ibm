@@ -58,7 +58,7 @@ public class RulesContainer {
    * @return
    */
   public boolean isValid() {
-    return !this.integratedCoverageFiles.isEmpty() && !this.delegationFiles.isEmpty() && !this.countryCoverageFiles.isEmpty();
+    return !this.integratedCoverageFiles.isEmpty() || !this.delegationFiles.isEmpty() || !this.countryCoverageFiles.isEmpty();
   }
 
   public List<File> getIntegratedCoverageFiles() {

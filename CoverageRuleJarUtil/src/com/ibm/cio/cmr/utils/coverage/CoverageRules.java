@@ -50,12 +50,12 @@ public class CoverageRules {
    */
   public static void main(String[] args) throws Exception {
     LOG.info("Starting..");
-    CoverageRules cov = new CoverageRules("2H2021");
-    String zipFile = "C:/ci/shared/data/batch/coverage/zip/2H2021.jar";
-    cov.initializeFrom(zipFile);
+    CoverageRules cov = new CoverageRules("1H2022");
+    String zipFile = "C:/ci/shared/data/batch/coverage/zip/1H2022.jar";
+    // cov.initializeFrom(zipFile);
     cov.initialize();
 
-    String id = "T0006880";
+    String id = "T0001732";
     List<Rule> rules1 = cov.findRule(id);
     if (rules1 != null) {
       System.out.println("Rules for " + id);
@@ -67,6 +67,16 @@ public class CoverageRules {
       }
     } else {
       System.out.println("No rules found");
+    }
+    CoverageInput input = new CoverageInput();
+    input.setCountryCode("US");
+    List<Coverage> covs = cov.findCoverage(input);
+    for (Coverage c : covs) {
+      System.out.println(c.getType() + c.getId() + " : ");
+      for (Condition c1 : c.getAttachedRule().getRuleConditions()) {
+        System.out.println(c1.getField() + " " + c1.getOperation() + " " + c1.getValues());
+      }
+
     }
 
   }
@@ -165,6 +175,9 @@ public class CoverageRules {
         this.coverageMap.get(r.getCoverage().getType() + r.getCoverage().getId()).add(r);
       }
     }
+    if (this.integratedCovRules == null) {
+      this.integratedCovRules = new ArrayList<Rule>();
+    }
     for (File f : container.getDelegationFiles()) {
       RuleFileParser p = new RuleFileParser(f);
       this.delegationRules = p.extractRules();
@@ -184,11 +197,14 @@ public class CoverageRules {
       }
       Collections.sort(ruleGroup.getRules());
       for (Rule r : ruleGroup.getRules()) {
-        String cov = r.getCoverage().getType() + r.getCoverage().getId();
+        // String cov = r.getCoverage().getType() + r.getCoverage().getId();
         if (this.coverageMap.get(r.getCoverage().getType() + r.getCoverage().getId()) == null) {
           this.coverageMap.put(r.getCoverage().getType() + r.getCoverage().getId(), new ArrayList<Rule>());
         }
         this.coverageMap.get(r.getCoverage().getType() + r.getCoverage().getId()).add(r);
+        if ("I".equals(r.getCoverage().getType())) {
+          this.integratedCovRules.add(r);
+        }
       }
       this.countryRules.add(ruleGroup);
       priority++;
