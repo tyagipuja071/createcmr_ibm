@@ -31,7 +31,7 @@
 	      <dbColumn>SVC_AR_OFFICE</dbColumn>
 		  <width>20</width>
 		  <length>1</length>
-		  <bdsId>CustLang</bdsId>
+		  <lovId>CustLang</lovId>
 		</column>
 		<column>
           <label>Tax Code</label>
@@ -39,18 +39,17 @@
           <width>15</width>
           <lovId>SpecialTaxCd</lovId>
         </column>
-        <column exactLength="true">
+        <column>
           <label>Collection Code</label>
           <dbColumn>COLLECTION_CD</dbColumn>
           <width>20</width>
           <length>3</length>
-          <lovId>CollectionCd</lovId>
         </column>
         <column>
 		  <label>COD Flag</label>
 		  <dbColumn>ENTP_UPDT_TYP</dbColumn>
 		  <width>15</width>
-		  <lovId>CodFlag</lovId>
+		  <lovId>MassUpdateCodFlag</lovId>
 		</column>
         <column>
           <label>Embargo Code</label>
@@ -76,7 +75,6 @@
           <dbColumn>CLIENT_TIER</dbColumn>
           <width>15</width>
           <length>1</length>
-          <lovId>ClientTier</lovId>
         </column>
         <column exactLength="true" number="true">
           <label>Enterprise Number</label>
