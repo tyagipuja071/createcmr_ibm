@@ -716,9 +716,9 @@ function updateAbbrevNmLocnIsrael(cntry, addressMode, saving, finalSave, force) 
     role = _pagemodel.userRole;
     reqType = FormManager.getActualValue('reqType');
   }
-  if (reqType != 'C') {
-    return;
-  }
+  // if (reqType != 'C') {
+    // return;
+  // }
   if (role != 'Requester') {
     // do not update for non-requesters
     return;
