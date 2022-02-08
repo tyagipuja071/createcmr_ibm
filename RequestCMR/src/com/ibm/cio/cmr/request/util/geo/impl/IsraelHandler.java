@@ -2044,33 +2044,34 @@ public class IsraelHandler extends EMEAHandler {
         if (!compareTwoRows(rowA, rowB, error)) {
           error.addError(i, "<br>Mismatch",
               "Same fields needs to be filled for both " + sheet1.getSheetName() + " and " + sheet2.getSheetName() + " address.");
-        }
-        // check digits chars vs the translation address
-        // Street
-        String street1 = validateColValFromCell(getAddressCell(IL_MASSUPDATE_ADDR.STREET, rowA, sheet1.getSheetName()));
-        String street2 = validateColValFromCell(getAddressCell(IL_MASSUPDATE_ADDR.STREET, rowB, sheet2.getSheetName()));
-        if (!isNumericValueEqual(street1, street2)) {
-          error.addError(i, "<br>Street", "Mismatch numeric Street value.");
-        }
-        // PO Box
-        if (!IL_MASSUPDATE_SHEET_NAMES[4].equals(sheet1.getSheetName())) {
-          String poBox1 = validateColValFromCell(getAddressCell(IL_MASSUPDATE_ADDR.POBOX, rowA, sheet1.getSheetName()));
-          String poBox2 = validateColValFromCell(getAddressCell(IL_MASSUPDATE_ADDR.POBOX, rowB, sheet2.getSheetName()));
-          if (!isNumericValueEqual(poBox1, poBox2)) {
-            error.addError(i, "<br>PO Box", "Mismatch numeric PO Box value.");
+        } else {
+          // check digits chars vs the translation address
+          // Street
+          String street1 = validateColValFromCell(getAddressCell(IL_MASSUPDATE_ADDR.STREET, rowA, sheet1.getSheetName()));
+          String street2 = validateColValFromCell(getAddressCell(IL_MASSUPDATE_ADDR.STREET, rowB, sheet2.getSheetName()));
+          if (!isNumericValueEqual(street1, street2)) {
+            error.addError(i, "<br>Street", "Mismatch numeric Street value.");
           }
-        }
-        // Address Cont
-        String addrCont1 = validateColValFromCell(getAddressCell(IL_MASSUPDATE_ADDR.ADDRCONT, rowA, sheet1.getSheetName()));
-        String addrCont2 = validateColValFromCell(getAddressCell(IL_MASSUPDATE_ADDR.ADDRCONT, rowB, sheet2.getSheetName()));
-        if (!isNumericValueEqual(addrCont1, addrCont2)) {
-          error.addError(i, "<br>Address Cont", "Mismatch numeric Address Cont value.");
-        }
-        // Postal Code
-        String postalCd1 = validateColValFromCell(getAddressCell(IL_MASSUPDATE_ADDR.POSTCODE, rowA, sheet1.getSheetName()));
-        String postalCd2 = validateColValFromCell(getAddressCell(IL_MASSUPDATE_ADDR.POSTCODE, rowB, sheet2.getSheetName()));
-        if (!isNumericValueEqual(postalCd1, postalCd2)) {
-          error.addError(i, "<br>Postal Code", "Mismatch numeric Postal Code value.");
+          // PO Box
+          if (!IL_MASSUPDATE_SHEET_NAMES[4].equals(sheet1.getSheetName())) {
+            String poBox1 = validateColValFromCell(getAddressCell(IL_MASSUPDATE_ADDR.POBOX, rowA, sheet1.getSheetName()));
+            String poBox2 = validateColValFromCell(getAddressCell(IL_MASSUPDATE_ADDR.POBOX, rowB, sheet2.getSheetName()));
+            if (!isNumericValueEqual(poBox1, poBox2)) {
+              error.addError(i, "<br>PO Box", "Mismatch numeric PO Box value.");
+            }
+          }
+          // Address Cont
+          String addrCont1 = validateColValFromCell(getAddressCell(IL_MASSUPDATE_ADDR.ADDRCONT, rowA, sheet1.getSheetName()));
+          String addrCont2 = validateColValFromCell(getAddressCell(IL_MASSUPDATE_ADDR.ADDRCONT, rowB, sheet2.getSheetName()));
+          if (!isNumericValueEqual(addrCont1, addrCont2)) {
+            error.addError(i, "<br>Address Cont", "Mismatch numeric Address Cont value.");
+          }
+          // Postal Code
+          String postalCd1 = validateColValFromCell(getAddressCell(IL_MASSUPDATE_ADDR.POSTCODE, rowA, sheet1.getSheetName()));
+          String postalCd2 = validateColValFromCell(getAddressCell(IL_MASSUPDATE_ADDR.POSTCODE, rowB, sheet2.getSheetName()));
+          if (!isNumericValueEqual(postalCd1, postalCd2)) {
+            error.addError(i, "<br>Postal Code", "Mismatch numeric Postal Code value.");
+          }
         }
       }
       if (error.hasErrors()) {
