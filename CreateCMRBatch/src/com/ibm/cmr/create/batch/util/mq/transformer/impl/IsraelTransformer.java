@@ -61,6 +61,7 @@ public class IsraelTransformer extends EMEATransformer {
   private static final String CMR_REQUEST_STATUS_PCR = "PCR";
 
   // private static final String RIGHT_TO_LEFT_MARKER = "\u202e";
+  private List<String> shippingBeforeSplitList = new ArrayList<>();
 
   /**
    */
@@ -420,6 +421,16 @@ public class IsraelTransformer extends EMEATransformer {
 
     } else if (isUpdate && !"N".equals(currAddr.getImportInd()) && legacyAddr.isForCreate() && Arrays.asList(TRANS_ADDRS).contains(addrType)) {
       legacyAddr.setAddrLineO(SPLIT_MARKER);
+
+      // need to split shipping
+      if ("CTYC".equals(addrType)) {
+        // add all shipping address from UI before the framework split shipping
+        for (Addr addr : dummyHandler.currentAddresses) {
+          if ("ZD01".equals(addr.getId().getAddrType())) {
+            shippingBeforeSplitList.add(addr.getId().getAddrSeq());
+          }
+        }
+      }
     } else if (isUpdate && Arrays.asList(TRANS_ADDRS).contains(addrType) && StringUtils.isBlank(legacyAddr.getAddrLineO())) {
       legacyAddr.setAddrLineO(currAddr.getPairedAddrSeq());
     }
@@ -841,7 +852,7 @@ public class IsraelTransformer extends EMEATransformer {
         mailingSeq = addr.getId().getAddrNo();
       } else if ("Y".equals(addr.getIsAddrUseBilling())) {
         billingSeq = addr.getId().getAddrNo();
-      } else if ("Y".equals(addr.getIsAddrUseShipping())) {
+      } else if ("Y".equals(addr.getIsAddrUseShipping()) && !shippingBeforeSplitList.contains(addr.getId().getAddrNo())) {
         shippingSeq = addr.getId().getAddrNo();
       } else if ("Y".equals(addr.getIsAddressUseA()) && SPLIT_MARKER.equals(addr.getAddrLineO())) {
         addr.setAddrLineO(mailingSeq);

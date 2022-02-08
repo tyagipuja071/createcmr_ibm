@@ -1903,7 +1903,7 @@ function getPairedTranslatedAddrData(localLangData, translatedType) {
     }
 
     if (type == translatedType) {
-      if (localLangData.addrSeq[0] == record.pairedSeq[0]) {
+      if (localLangData.addrSeq[0].padStart(5, '0') == record.pairedSeq[0].padStart(5, '0')) {
         translatedData = record;
         break;
       }
