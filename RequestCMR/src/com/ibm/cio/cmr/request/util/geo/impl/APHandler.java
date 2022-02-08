@@ -850,6 +850,7 @@ public abstract class APHandler extends GEOHandler {
       if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
         if (expiredSearchTerm(entityManager, data.getApCustClusterId(), data.getCmrIssuingCntry())) {
           data.setApCustClusterId("00000");
+          data.setClientTier("Q");
         }
       }
       break;

@@ -2867,6 +2867,48 @@ function foreignValidator() {
   })(), 'MAIN_ATTACH_TAB', 'frmCMR');
 }
 
+function handleExpiredClusterCN() {
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType != 'U' || FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  
+  var clusterDataRdc = getClusterDataRdc();
+  if (clusterDataRdc != null && clusterDataRdc != undefined && clusterDataRdc != '') {
+    var clusterExpired = checkClusterExpired(clusterDataRdc);
+    if (clusterExpired) {
+      FormManager.readOnly('clientTier');
+    }
+  }
+}
+
+function getClusterDataRdc() {
+  var clusterDataRdc = '';
+  var reqId = FormManager.getActualValue('reqId');
+  var qParams = {
+    REQ_ID : reqId,
+  };
+  var result = cmr.query('GET.SEARCH_TERM_DATA_RDC', qParams);
+  if (result != null) {
+    clusterDataRdc = result.ret1;
+  }
+  return clusterDataRdc;
+}
+
+function checkClusterExpired(clusterDataRdc) {
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var qParams = {
+      ISSUING_CNTRY : cntry,
+      AP_CUST_CLUSTER_ID : clusterDataRdc,
+  };
+  var results = cmr.query('CHECK.CLUSTER', qParams);
+  if (results != null && results.ret1 == '1') {
+    return false;
+  }
+  return true;
+}
+
+
 dojo.addOnLoad(function() {
   GEOHandler.CN = [ SysLoc.CHINA ];
   console.log('adding CN validators...');
@@ -2888,6 +2930,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setCompanyOnInacCd, GEOHandler.CN);
   GEOHandler.addAfterConfig(updateBPSearchTerm, GEOHandler.CN);
   GEOHandler.addAfterConfig(setReadOnly4Update, GEOHandler.CN);
+  GEOHandler.addAfterConfig(setCtcOnIsuCdChangeCN, GEOHandler.CN);
+  GEOHandler.addAfterConfig(handleExpiredClusterCN, GEOHandler.CN);
   
   GEOHandler.addAfterTemplateLoad(autoSetIBMDeptCostCenter, GEOHandler.CN);
   GEOHandler.addAfterTemplateLoad(afterConfigForCN, GEOHandler.CN);
@@ -2900,6 +2944,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setValuesForScenarios, GEOHandler.CN);
   GEOHandler.addAfterTemplateLoad(setReadOnlyFields, GEOHandler.CN);
   GEOHandler.addAfterTemplateLoad(updateBPSearchTerm, GEOHandler.CN);
+  GEOHandler.addAfterTemplateLoad(setCtcOnIsuCdChangeCN, GEOHandler.CN);
   
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.CN);
   GEOHandler.addAddrFunction(autoSetAddrFieldsForCN, GEOHandler.CN);
@@ -2945,6 +2990,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateSearchTermForCROSS, GEOHandler.CN, null, false);
   GEOHandler.registerValidator(validateISICForCROSS, GEOHandler.CN, null, false);
   GEOHandler.registerValidator(s1GBGIdValidator, GEOHandler.CN,　null, false, false);
-  GEOHandler.addAfterConfig(setCtcOnIsuCdChangeCN, GEOHandler.CN);
-  GEOHandler.addAfterTemplateLoad(setCtcOnIsuCdChangeCN, GEOHandler.CN);
+  
 });
