@@ -822,6 +822,7 @@ public class CNHandler extends GEOHandler {
     if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       if (expiredSearchTerm(entityManager, data.getSearchTerm())) {
         data.setSearchTerm("00000");
+        data.setClientTier("Q");
       }
     }
   }
