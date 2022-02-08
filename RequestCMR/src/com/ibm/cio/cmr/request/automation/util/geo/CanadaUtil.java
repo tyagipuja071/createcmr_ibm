@@ -26,18 +26,23 @@ import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.CoverageContainer;
+import com.ibm.cio.cmr.request.automation.util.DummyServletRequest;
 import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CustScenarios;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.model.BaseModel;
+import com.ibm.cio.cmr.request.model.requestentry.AddressModel;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.CmrClientService;
+import com.ibm.cio.cmr.request.service.requestentry.AddressService;
+import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
@@ -67,6 +72,7 @@ public class CanadaUtil extends AutomationUtil {
   private static final String SCENARIO_OEM = "OEM";
   private static final String SCENARIO_STRATEGIC_OUTSOURCING = "SOCUS";
   private static final String SCENARIO_GOVERNMENT = "GOVT";
+  private static final String SCENARIO_KYNDRYL = "KYND";
   private static final String SCENARIO_CROSS_BORDER_USA = "USA";
   private static final String SCENARIO_CROSS_BORDER_CARIB = "CND";
 
@@ -156,6 +162,7 @@ public class CanadaUtil extends AutomationUtil {
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {
 
+    Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
     Addr soldTo = requestData.getAddress("ZS01");
     String custSubGrp = data.getCustSubGrp();
@@ -165,6 +172,108 @@ public class CanadaUtil extends AutomationUtil {
     query.setParameter("CUST_TYP", custSubGrp);
     List<CustScenarios> custScenarioList = query.getResults(CustScenarios.class);
     boolean isFieldCompSuccessful = true;
+
+    if ("C".equals(admin.getReqType()) && data != null) {
+      String scenarioSubType = data.getCustSubGrp();
+      if (SCENARIO_KYNDRYL.equals(scenarioSubType)) {
+        AddressModel addrCopy = new AddressModel();
+        Addr invoiceTo = requestData.getAddress(CmrConstants.ADDR_TYPE.ZP02.toString(), "00002");
+        if (invoiceTo != null) {
+          AddressService addrService = new AddressService();
+          AddressModel addrRemModel = new AddressModel();
+          addrService.copyValuesFromEntity(invoiceTo, addrCopy);
+          addrService.copyValuesFromEntity(invoiceTo, addrRemModel);
+          addrRemModel.setAction("REMOVE_ADDRESS");
+          addrRemModel.setCmrIssuingCntry(data.getCmrIssuingCntry());
+          try {
+            AppUser user = new AppUser();
+            user.setIntranetId(requestData.getAdmin().getRequesterId());
+            user.setBluePagesName(requestData.getAdmin().getRequesterNm());
+            DummyServletRequest dummyReq = new DummyServletRequest();
+            if (dummyReq.getSession() != null) {
+              LOG.trace("Session found for dummy req");
+              dummyReq.getSession().setAttribute(CmrConstants.SESSION_APPUSER_KEY, user);
+            } else {
+              LOG.warn("Session not found for dummy req");
+            }
+            addrService.performTransaction(addrRemModel, entityManager, dummyReq);
+          } catch (Exception e) {
+            LOG.error("An error occurred while removing main invoice-to", e);
+          }
+          entityManager.flush();
+        }
+
+        String addrSeq = "00002";
+        String divn = "";
+        String dept = "";
+        String address = "3600 STEELES AVE E";
+        String address2 = "";
+        String city = "MARKHAM";
+        String state = "ON";
+        String postCd = "L3R 9Z7";
+        String landCntry = "CA";
+
+        LOG.debug("Adding invoice-to address for Kyndryl scenario..");
+        AddressService addrService = new AddressService();
+        AddressModel addrModel = new AddressModel();
+        addrModel.setReqId(data.getId().getReqId());
+        addrModel.setAddrSeq(addrSeq);
+        addrModel.setDivn(divn);
+        addrModel.setDept(dept);
+        addrModel.setLandCntry(landCntry);
+        addrModel.setAddrTxt(address);
+        addrModel.setAddrTxt2(address2);
+        addrModel.setCity1(city);
+        addrModel.setStateProv(state);
+        addrModel.setPostCd(postCd);
+        addrModel.setState(BaseModel.STATE_NEW);
+        addrModel.setAction("ADD_ADDRESS");
+        addrModel.setAddrType(CmrConstants.ADDR_TYPE.ZP02.toString());
+        addrModel.setCmrIssuingCntry(data.getCmrIssuingCntry());
+
+        try {
+          AppUser user = new AppUser();
+          user.setIntranetId(requestData.getAdmin().getRequesterId());
+          user.setBluePagesName(requestData.getAdmin().getRequesterNm());
+          DummyServletRequest dummyReq = new DummyServletRequest();
+          if (dummyReq.getSession() != null) {
+            LOG.trace("Session found for dummy req");
+            dummyReq.getSession().setAttribute(CmrConstants.SESSION_APPUSER_KEY, user);
+          } else {
+            LOG.warn("Session not found for dummy req");
+          }
+          addrService.performTransaction(addrModel, entityManager, dummyReq);
+        } catch (Exception e) {
+          LOG.error("An error occurred while adding ZP01 address", e);
+        }
+        entityManager.flush();
+
+        if (invoiceTo != null) {
+          LOG.debug("Re-adding invoice-to address..");
+          addrCopy.setState(BaseModel.STATE_NEW);
+          addrCopy.setAction("ADD_ADDRESS");
+          addrCopy.setAddrType(CmrConstants.ADDR_TYPE.ZP02.toString());
+          addrCopy.setCmrIssuingCntry(data.getCmrIssuingCntry());
+
+          try {
+            AppUser user = new AppUser();
+            user.setIntranetId(requestData.getAdmin().getRequesterId());
+            user.setBluePagesName(requestData.getAdmin().getRequesterNm());
+            DummyServletRequest dummyReq = new DummyServletRequest();
+            if (dummyReq.getSession() != null) {
+              LOG.trace("Session found for dummy req");
+              dummyReq.getSession().setAttribute(CmrConstants.SESSION_APPUSER_KEY, user);
+            } else {
+              LOG.warn("Session not found for dummy req");
+            }
+            addrService.performTransaction(addrCopy, entityManager, dummyReq);
+          } catch (Exception e) {
+            LOG.error("An error occurred while adding cloned invoice-to address", e);
+          }
+          entityManager.flush();
+        }
+      }
+    }
 
     if (custScenarioList != null && custScenarioList.size() > 0) {
       for (CustScenarios custScenario : custScenarioList) {
