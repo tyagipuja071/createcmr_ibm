@@ -170,7 +170,12 @@ function processRequestAction() {
       } else {
         if (cmrCntry == '821') {
           executeBeforeSubmit();
+        } else if (cmrCntry == '858') {
+          cmr.showNode('personalInformationDiv');
+          cmr.showModal('addressVerificationModal');
+
         } else {
+          cmr.hideNode('personalInformationDiv');
           // if there are no errors, show the Address Verification modal window
           cmr.showModal('addressVerificationModal');
         }
@@ -279,7 +284,11 @@ function showAddressVerificationModal() {
  * Accept the address verification disclaimer
  */
 function doAcceptAddressVerification() {
-  if (!dojo.byId('addrVerAgree').checked) {
+  var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
+  if (!dojo.byId('addrVerAgree').checked && cmrCntry == '858') {
+    cmr.showAlert('You must agree to the Address Verification and PI - Business Contact Rules to proceed.');
+    return;
+  } else if (!dojo.byId('addrVerAgree').checked) {
     cmr.showAlert('You must agree to the Address Verification Rules to proceed.');
     return;
   }
