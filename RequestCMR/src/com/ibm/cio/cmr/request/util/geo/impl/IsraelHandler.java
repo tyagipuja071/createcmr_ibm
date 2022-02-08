@@ -1580,6 +1580,15 @@ public class IsraelHandler extends EMEAHandler {
         if (StringUtils.isNotBlank(taxCode) && "@".equals(taxCode)) {
           error.addError(rowIndex, "<br>Tax Code", "@ value for Tax Code is not allowed.");
         }
+        // Collection Code
+        String collectionCode = validateColValFromCell(row.getCell(6));
+        if (StringUtils.isNotBlank(collectionCode)) {
+          if (!StringUtils.isAlphanumeric(collectionCode) && !"@".equals(collectionCode)) {
+            error.addError(rowIndex, "<br>Collection Code", "Collection Code should be alphanumeric only.");
+          } else if (collectionCode.length() < 3 && !"@".equals(collectionCode)) {
+            error.addError(rowIndex, "<br>Collection Code", "Collection Code should be exactly 3 characters.");
+          }
+        }
         // COD Flag
         String codFlag = validateColValFromCell(row.getCell(7));
         if (StringUtils.isNotBlank(codFlag) && "@".equals(codFlag)) {
@@ -1613,6 +1622,11 @@ public class IsraelHandler extends EMEAHandler {
             }
           }
         }
+        // Sales Rep
+        String salesRep = validateColValFromCell(row.getCell(15));
+        if (StringUtils.isNotBlank(salesRep) && !StringUtils.isAlphanumeric(salesRep)) {
+          error.addError(rowIndex, "<br>Sales Rep", "Sales Rep should be alphanumeric only.");
+        }
         // KUKLA
         String isic = validateColValFromCell(row.getCell(3));
         String kukla = validateColValFromCell(row.getCell(17));
@@ -1628,13 +1642,20 @@ public class IsraelHandler extends EMEAHandler {
         } else if (!"9500".equals(isic) && "60".equals(kukla)) {
           error.addError(rowIndex, "<br>KUKLA", "ISIC value should be 9500 if KUKLA is 60.");
         }
+        // validate ISU and CTC combination
         String isuCd = validateColValFromCell(row.getCell(10));
-        if (isuCd.equalsIgnoreCase("5k") && !ctc.equalsIgnoreCase("@")) {
-          LOG.trace("Client Tier Value should always be @ for IsuCd Value: 5K");
-          error.addError(row.getRowNum(), "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd);
-        } else if (!StringUtils.isEmpty(isuCd) && !isuCd.equalsIgnoreCase("5k") && ctc.equalsIgnoreCase("@")) {
-          LOG.trace("Ctc can't be @ for IsuCd Value :" + isuCd);
-          error.addError(row.getRowNum(), "Client Tier", "Client Tier Value can't be cleared for IsuCd Value :" + isuCd);
+        if (StringUtils.isNotBlank(isuCd) || StringUtils.isNotBlank(ctc)) {
+          if (StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(ctc)) {
+            error.addError(row.getRowNum(), "<br>Client Tier", "Client Tier should be filled when updating ISU.");
+          } else if (StringUtils.isBlank(isuCd) && StringUtils.isNotBlank(ctc)) {
+            error.addError(row.getRowNum(), "<br>ISU Code", "ISU Code should be filled when updating Client Tier.");
+          } else if (StringUtils.isNotBlank(isuCd) && StringUtils.isNotBlank(ctc)) {
+            if (isuCd.equals("34") && (!ctc.equals("Q") && !ctc.equals("Y"))) {
+              error.addError(row.getRowNum(), "<br>Client Tier", "Client Tier value should be either Q or Y for ISU Code 34.");
+            } else if ((isuCd.equals("21") || isuCd.equals("5K")) && !ctc.equals("@")) {
+              error.addError(row.getRowNum(), "<br>Client Tier", "Client Tier value should always be @ for ISU Code " + isuCd);
+            }
+          }
         }
       }
     }
