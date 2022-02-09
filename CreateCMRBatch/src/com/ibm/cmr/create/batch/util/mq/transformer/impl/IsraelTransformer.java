@@ -1097,21 +1097,21 @@ public class IsraelTransformer extends EMEATransformer {
       lstAddrLines.add(addr.getAddrTxt());
       sbAddrLu.append("F");
     }
-    // PO Box
+
     if (StringUtils.isNotBlank(addrType)) {
+      // PO Box
       if ("ZS01".equals(addrType) || "ZP01".equals(addrType)) {
-        if (StringUtils.isNotBlank(addr.getPoBox()) && !(addr.getPoBox()).contains("מ.ד")) {
-          lstAddrLines.add("מ.ד " + addr.getPoBox());
-        } else {
-          lstAddrLines.add(addr.getPoBox());
+        if (StringUtils.isNotBlank(addr.getPoBox())) {
+          if (!(addr.getPoBox()).contains("מ.ד")) {
+            lstAddrLines.add("מ.ד " + addr.getPoBox());
+          } else {
+            lstAddrLines.add(addr.getPoBox());
+          }
+          sbAddrLu.append("H");
         }
-        sbAddrLu.append("H");
       } else if ("CTYA".equals(addrType) || "CTYB".equals(addrType)) {
         if (StringUtils.isNotBlank(addr.getPoBox())) {
           lstAddrLines.add("PO BOX " + addr.getPoBox());
-          sbAddrLu.append("H");
-        } else if (StringUtils.isNotBlank(addr.getCustNm1()) && StringUtils.isBlank(addr.getPoBox())) {
-          lstAddrLines.add("");
           sbAddrLu.append("H");
         }
       }
