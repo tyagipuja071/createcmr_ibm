@@ -905,6 +905,25 @@ function addDPLAssessmentValidator() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
+function addIsuCdObsoleteValidator(){
+	var oldIsuCd = _pagemodel.isuCd;
+	FormManager.addFormValidator((function() {
+		return {
+			validate : function() {
+				var reqType = FormManager.getActualValue('reqType');
+	             var isuCd = FormManager.getActualValue('isuCd');
+	             if (reqType == 'C' && isuCd == '32') {
+	            	 return new ValidationResult(null, false, 'ISU-32 is obsoleted. Please select valid value for ISU. ');
+	             }else  if (reqType == 'U' && isuCd == '32' && oldIsuCd != '32') {
+	            	 return new ValidationResult(null, false, 'ISU-32 is obsoleted. Please select valid value for ISU. ');
+	             }
+	             else {
+        			 return new ValidationResult(null, true);
+        		 }
+			}
+		}
+	})(), 'MAIN_NAME_TAB', 'frmCMR');
+}
 
 /* Register WW Validators */
 dojo.addOnLoad(function() {
@@ -982,6 +1001,7 @@ dojo.addOnLoad(function() {
   // GEOHandler.NO_ME_CEMEA, null, true);
 
   GEOHandler.registerWWValidator(addINACValidator);
+  GEOHandler.registerWWValidator(addIsuCdObsoleteValidator);
 
   GEOHandler.VAT_RQD_CROSS_LNDCNTRY = [ 'AR', 'AT', 'BE', 'BG', 'BO', 'BR', 'CL', 'CO', 'CR', 'CY', 'CZ', 'DE', 'DO', 'EC', 'EG', 'ES', 'FR', 'GB', 'GR', 'GT', 'HN', 'HR', 'HU', 'IE', 'IL', 'IT',
     'LU', 'MT', 'MX', 'NI', 'NL', 'PA', 'PE', 'PK', 'PL', 'PT', 'PY', 'RO', 'RU', 'RS', 'SI', 'SK', 'SV', 'TR', 'UA', 'UY', 'ZA', 'VE', 'AO', 'MG', 'TZ','TW', 'LT', 'LV', 'EE', 'IS', 'GL', 'FO', 'SE', 'NO', 'DK', 'FI' ];
