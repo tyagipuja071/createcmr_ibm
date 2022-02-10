@@ -108,6 +108,9 @@ public class MCOCewaHandler extends MCOHandler {
           data.setCreditCd("");
           data.setCommercialFinanced("");
         }
+        if ("5K".equals(data.getIsuCd())) {
+          data.setClientTier("");
+        }
       }
     }
 
@@ -558,6 +561,8 @@ public class MCOCewaHandler extends MCOHandler {
             String addnameinfo = ""; // 9
             String poBox = "";// 10
             String tin = "";// 15
+            String isuCd = "";// 7
+            String clientTier = "";// 8
 
             if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
               currCell = (XSSFCell) row.getCell(0);
@@ -578,6 +583,10 @@ public class MCOCewaHandler extends MCOHandler {
               deptNo = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(13);
               phoneNoData = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(7);
+              isuCd = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(8);
+              clientTier = validateColValFromCell(currCell);
               if (currCell != null) {
                 DataFormatter df = new DataFormatter();
                 phoneNoData = df.formatCellValue(row.getCell(13));
@@ -792,7 +801,23 @@ public class MCOCewaHandler extends MCOHandler {
                 }
               }
             }
+            if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
+              if (!StringUtils.isBlank(isuCd)) {
+                if ("5K".equals(isuCd)) {
+                  if (!"@".equals(clientTier)) {
+                    LOG.trace("Client Tier should be '@' for the selected ISU Code.");
+                    error.addError(row.getRowNum(), "Client Tier", "Client Tier should be '@' for the selected ISU Code. ");
+                  }
+                }
+              }
+              if (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier)) {
+                LOG.trace("The row " + (row.getRowNum())
+                    + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
+                error.addError(row.getRowNum(), "Client Tier",
+                    ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
+              }
 
+            }
           }
         } // end row loop
 

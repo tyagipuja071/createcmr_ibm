@@ -635,6 +635,14 @@ function addHandlersForPTES() {
 }
 
 function setClientTierValues(value) {
+  value = FormManager.getActualValue('isuCd');
+  if (value == '5K') {
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    FormManager.setValue('clientTier', '');
+    FormManager.readOnly('clientTier');
+  } else {
+    FormManager.enable('clientTier');
+  }
   if (FormManager.getActualValue('reqType') != 'C') {
     return;
   }
@@ -655,6 +663,8 @@ function setClientTierValues(value) {
       tierValues = [ 'B', 'S', 'T', 'N', 'Z', 'M' ];
     } else if (value == '21' || value == '5B' || value == '04' || value == '3T' || value == '60') {
       tierValues = [ '7' ];
+    } else if (value == '5K') {
+      tierValues = [ '' ];
     }
   }
   if (tierValues != null) {
@@ -1365,7 +1375,7 @@ function setFieldMandatoryForProcessorPT() {
   if (typeof (_pagemodel) != 'undefined') {
     if (reqType == 'C' && _pagemodel.userRole == GEOHandler.ROLE_PROCESSOR) {
       checkAndAddValidator('isuCd', Validators.REQUIRED, [ 'ISU Code' ]);
-      checkAndAddValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ]);
+      // checkAndAddValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ]);
       checkAndAddValidator('repTeamMemberNo', Validators.REQUIRED, [ 'Sales Rep' ]);
       checkAndAddValidator('salesBusOffCd', Validators.REQUIRED, [ 'SBO' ]);
     }
@@ -2226,7 +2236,7 @@ function setFieldMandatoryForProcessorSpain() {
       FormManager.resetValidations('salesBusOffCd');
       checkAndAddValidator('enterprise', Validators.REQUIRED, [ 'Enterprise Number' ]);
       checkAndAddValidator('isuCd', Validators.REQUIRED, [ 'ISU Code' ]);
-      checkAndAddValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ]);
+      // checkAndAddValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ]);
       checkAndAddValidator('repTeamMemberNo', Validators.REQUIRED, [ 'Sales Rep' ]);
       checkAndAddValidator('salesBusOffCd', Validators.REQUIRED, [ 'SBO' ]);
 
@@ -2234,7 +2244,7 @@ function setFieldMandatoryForProcessorSpain() {
 
     if (reqType == 'U' && FormManager.getActualValue('ordBlk') == '93' && _pagemodel.userRole == GEOHandler.ROLE_PROCESSOR) {
       FormManager.addValidator('isuCd', Validators.REQUIRED, [ 'ISU Code' ], 'MAIN_CUST_TAB');
-      FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_CUST_TAB');
+      // FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_CUST_TAB');
       FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise Number' ], 'MAIN_CUST_TAB');
       FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [ 'Sales Rep' ], 'MAIN_IBM_TAB');
       FormManager.addValidator('isicCd', Validators.REQUIRED, [ 'ISIC' ], 'MAIN_CUST_TAB');

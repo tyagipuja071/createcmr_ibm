@@ -90,13 +90,14 @@ function addHandlersForZA() {
   }
 
   if (_isuHandler == null) {
-    if (FormManager.getActualValue('reqType') == 'C') {
-      _isuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+    _isuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+      if (FormManager.getActualValue('reqType') == 'C') {
         calledByIsuHandler = true;
         calledByCtcHandler = false;
         setCtcSalesRepSBO(value);
-      });
-    }
+      }
+      setClientTierValues(value);
+    });
   }
   if (_ctcHandler == null) {
     if (FormManager.getActualValue('reqType') == 'C') {
@@ -143,6 +144,23 @@ function postalCodeRequired(){
     FormManager.addValidator('postCd', Validators.REQUIRED, [ 'Postal Code' ]);
   } else {
     FormManager.removeValidator('postCd', Validators.REQUIRED);
+  }
+}
+
+function setClientTierValues(isuCd) {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  isuCd = FormManager.getActualValue('isuCd');
+  if (isuCd == '5K') {
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    FormManager.setValue('clientTier', '');
+    FormManager.readOnly('clientTier');
+    FormManager.setValue('salesBusOffCd', '0000');
+    FormManager.setValue('repTeamMemberNo', 'SALES0');
+  } else {
+    var reqType = FormManager.getActualValue('reqType');
+    FormManager.enable('clientTier');
   }
 }
 
@@ -1958,6 +1976,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(mandatoryForBusinessPartner, [ SysLoc.SOUTH_AFRICA ]);
   GEOHandler.addAfterTemplateLoad(mandatoryForBusinessPartner, [ SysLoc.SOUTH_AFRICA ]);
   GEOHandler.addAfterConfig(validateTypeOfCustomer, GEOHandler.MCO1);
+  GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.MCO1);
 
   // GEOHandler.registerValidator(addInacCodeValidator, [ SysLoc.SOUTH_AFRICA ],
   // null, true);

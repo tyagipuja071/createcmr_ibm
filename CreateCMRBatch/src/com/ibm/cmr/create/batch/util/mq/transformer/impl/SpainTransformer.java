@@ -582,6 +582,10 @@ public class SpainTransformer extends MessageTransformer {
     legacyCust.setDistrictCd(data.getCollectionCd() != null ? data.getCollectionCd() : "");
 
     legacyCust.setBankBranchNo(data.getIbmDeptCostCenter() != null ? data.getIbmDeptCostCenter() : "");
+  	
+  	if (!StringUtils.isEmpty(data.getIsuCd()) && ("5K".equals(data.getIsuCd()) || "3T".equals(data.getIsuCd()))) {
+      legacyCust.setIsuCd(data.getIsuCd() + "7");
+    }
   }
 
   private void blankOrdBlockFromData(EntityManager entityManager, Data data) {
@@ -706,10 +710,13 @@ public class SpainTransformer extends MessageTransformer {
       }
     }
 
-    String isuClientTier = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "")
-        + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
-    if (isuClientTier != null && isuClientTier.length() == 3) {
-      cust.setIsuCd(isuClientTier);
+    if (StringUtils.isNotBlank(muData.getClientTier()) && ("5K".equals(muData.getIsuCd()) || "3T".equals(muData.getIsuCd()))) {
+      cust.setIsuCd(muData.getIsuCd() + "7");
+    } else {
+      String isuCd = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "");
+      if (isuCd != null) {
+        cust.setIsuCd(isuCd);
+      }
     }
 
     if (!StringUtils.isBlank(muData.getSpecialTaxCd())) {

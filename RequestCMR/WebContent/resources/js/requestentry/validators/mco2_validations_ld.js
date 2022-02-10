@@ -33,6 +33,7 @@ function addHandlersForMCO2() {
 
   if (_ISUHandler == null) {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+      setClientTierValues(value);
       limitClientTierValues(value);
       setSalesRepValues(value);
     });
@@ -96,6 +97,20 @@ function addHandlersForMCO2() {
         resetNumeroRequired();
       });
     }
+  }
+}
+
+function setClientTierValues(isuCd) {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  isuCd = FormManager.getActualValue('isuCd');
+  if (isuCd == '5K') {
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    FormManager.setValue('clientTier', '');
+    FormManager.readOnly('clientTier');
+  } else {
+    FormManager.enable('clientTier');
   }
 }
 
@@ -994,6 +1009,7 @@ function addTinBillingValidator() {
 
 function setFieldsBehavior(fromAddress, scenario, scenarioChanged) {
   var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  var isuCd = isuCd = FormManager.getActualValue('isuCd');
   if (viewOnly != '' && viewOnly == 'true') {
     return;
   }
@@ -1003,11 +1019,15 @@ function setFieldsBehavior(fromAddress, scenario, scenarioChanged) {
   }
   if (role == 'Requester') {
     FormManager.removeValidator('isuCd', Validators.REQUIRED);
-    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    if (isuCd == '5K') {
+      FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    }
   }
   if (role == 'Processor') {
     FormManager.addValidator('isuCd', Validators.REQUIRED, [ 'ISU Code' ], 'MAIN_IBM_TAB');
-    FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
+    if (isuCd != '5K') {
+      FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
+    }
   }
 }
 
@@ -2078,6 +2098,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addAttachmentValidatorOnTaxRegMadagascar, [ SysLoc.MADAGASCAR ], null, true);
   GEOHandler.registerValidator(addTinNumberValidationTz, [ SysLoc.TANZANIA ], null, true);
   GEOHandler.addAfterTemplateLoad(retainImportValues, GEOHandler.MCO2);
+  GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.MCO2);
+  GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.MCO2);
 
   GEOHandler.registerValidator(validateCMRForMCO2GMLLCScenario, GEOHandler.MCO2, null, true);
   GEOHandler.registerValidator(gmllcExistingCustomerAdditionalValidations, GEOHandler.MCO2, null, true);

@@ -980,6 +980,9 @@ public class TurkeyTransformer extends EMEATransformer {
       if (isuClientTier != null && isuClientTier.length() == 3) {
         legacyCust.setIsuCd(isuClientTier);
       }
+      if (!StringUtils.isEmpty(data.getIsuCd()) && "5K".equals(data.getIsuCd())) {
+        legacyCust.setIsuCd(data.getIsuCd() + "7");
+      }
 
       // CMR-2279:Turkey-ISR set based on SBO
       if (!StringUtils.isBlank(data.getSalesBusOffCd())) {
@@ -1199,10 +1202,16 @@ public class TurkeyTransformer extends EMEATransformer {
       }
     }
 
-    String isuClientTier = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "")
-        + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
-    if (isuClientTier != null && isuClientTier.length() == 3) {
-      cust.setIsuCd(isuClientTier);
+    if (StringUtils.isNotBlank(muData.getClientTier()) && "5K".equals(muData.getIsuCd())) {
+      cust.setIsuCd(muData.getIsuCd() + "7");
+    } else {
+      String isuCd = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "")
+          + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
+      if (isuCd != null && isuCd.endsWith("@")) {
+        cust.setIsuCd((!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : cust.getIsuCd().substring(0, 2)) + "7");
+      } else if (isuCd != null) {
+        cust.setIsuCd(isuCd);
+      }
     }
 
     if (!StringUtils.isBlank(muData.getSpecialTaxCd())) {

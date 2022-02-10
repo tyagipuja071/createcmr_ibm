@@ -1013,6 +1013,9 @@ public class MEHandler extends BaseSOFHandler {
       LOG.trace("CoF: " + data.getCommercialFinanced());
 
       data.setPhone1(this.currentImportValues.get("TelephoneNo"));
+      if ("5K".equals(data.getIsuCd())) {
+        data.setClientTier("");
+      }
       if (data.getPhone1() != null) {
         // Phone - remove non numeric characters
         data.setPhone1(data.getPhone1().replaceAll("[^0-9]", ""));
@@ -2186,6 +2189,9 @@ public class MEHandler extends BaseSOFHandler {
     if (ME_COUNTRIES_LIST.contains(country)) {
       countryAddrss = ME_MASS_UPDATE_SHEET_NAMES;
 
+      String isuCd = ""; // 6
+      String clientTier = ""; // 7
+
       XSSFSheet sheet = book.getSheet("Data");// validate Data sheet
       row = sheet.getRow(0);// data field name row
       int ordBlkIndex = 14;// default index
@@ -2206,12 +2212,32 @@ public class MEHandler extends BaseSOFHandler {
         }
         currCell = row.getCell(ordBlkIndex);
         String ordBlk = validateColValFromCell(currCell);
+        currCell = row.getCell(6);
+        isuCd = validateColValFromCell(currCell);
+        currCell = row.getCell(7);
+        clientTier = validateColValFromCell(currCell);
         if (StringUtils.isNotBlank(ordBlk) && !("@".equals(ordBlk) || "J".equals(ordBlk) || "E".equals(ordBlk) || "S".equals(ordBlk))) {
           LOG.trace("Order Block Code should only @, E, S, J. >> ");
           error.addError(rowIndex, "Order Block Code", "Order Block Code should be only @, E, S, J. ");
-          validations.add(error);
+        }
+        if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
+          if (!StringUtils.isBlank(isuCd)) {
+            if ("5K".equals(isuCd)) {
+              if (!"@".equals(clientTier)) {
+                LOG.trace("Client Tier should be '@' for the selected ISU Code.");
+                error.addError(rowIndex, "Client Tier", "Client Tier should be '@' for the selected ISU Code. ");
+              }
+            }
+          }
+          if (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier)) {
+            LOG.trace(
+                "The row " + (rowIndex) + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
+            error.addError((rowIndex), "Client Tier",
+                ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
+          }
         }
       }
+      validations.add(error);
 
       for (String name : countryAddrss) {
         sheet = book.getSheet(name);
