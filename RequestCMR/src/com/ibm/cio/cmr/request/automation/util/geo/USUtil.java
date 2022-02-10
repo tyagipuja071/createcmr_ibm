@@ -1623,8 +1623,8 @@ public class USUtil extends AutomationUtil {
     revCmrModel.setMiscBilling(usDetails.getMiscBilling());
     revCmrModel.setUsSicmen(usDetails.getSicmen());
 
-    revCmrModel.setIsuCd("32");
-    revCmrModel.setClientTier("S");
+    revCmrModel.setIsuCd("34");
+    revCmrModel.setClientTier("Q");
 
     // if scenario is OEMSW or OEMHW set isic to 357X
     if (SC_REST_OEMSW.equals(scenario) || SC_REST_OEMHW.equals(scenario) || SC_REST_TPD.equals(scenario) || SC_REST_SSD.equals(scenario)
