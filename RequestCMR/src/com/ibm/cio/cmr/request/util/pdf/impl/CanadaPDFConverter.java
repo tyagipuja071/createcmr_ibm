@@ -81,6 +81,9 @@ public class CanadaPDFConverter extends DefaultPDFConverter {
         writer.close();
       }
       return true;
+    } catch (IOException io) {
+      LOG.warn("IO Error in Generating PDF for Request ID " + admin.getId().getReqId() + ":" + io.getMessage());
+      return true;
     } catch (Exception e) {
       LOG.error("Error in Generating PDF for Request ID " + admin.getId().getReqId(), e);
       return false;
@@ -112,12 +115,14 @@ public class CanadaPDFConverter extends DefaultPDFConverter {
     customer.addCell(createValueCell(data.getTaxPayerCustCd()));
     customer.addCell(createLabelCell("Authorization Exemption Type:"));
     customer.addCell(createValueCell(data.getSectorCd()));
-    customer.addCell(createLabelCell("Purchase Order Number:"));
-    customer.addCell(createValueCell(data.getContactName1()));
+    customer.addCell(createLabelCell("Profile EFC:"));
+    customer.addCell(createValueCell(data.getIccTaxExemptStatus()));
     customer.addCell(createLabelCell("Order Block Code:"));
     customer.addCell(createValueCell(data.getCustAcctType()));
     customer.addCell(createLabelCell("Established Function Code:"));
     customer.addCell(createValueCell(data.getTaxCd1()));
+    customer.addCell(createLabelCell("Purchase Order Number:"));
+    customer.addCell(createValueCell(data.getContactName1()));
     customer.addCell(createLabelCell("PPS CEID:"));
     customer.addCell(createValueCell(data.getPpsceid()));
     customer.addCell(createLabelCell("Sales Branch Office:"));

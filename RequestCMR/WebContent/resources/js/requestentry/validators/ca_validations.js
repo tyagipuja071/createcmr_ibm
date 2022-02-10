@@ -1180,16 +1180,19 @@ function setDefaultARFAARByScenario(fromAddress, scenario, scenarioChanged) {
 
 function setAddrFieldsValues() {
   var addrType = FormManager.getActualValue('addrType');
-  if (addrType == 'ZP02') {
-    FormManager.setValue('addrTxt', '3600 STEELES AVE E');
-    FormManager.setValue('city1', 'MARKHAM');
-    FormManager.setValue('postCd', 'L3R 9Z7');
-    FormManager.setValue('stateProv', 'ON');
-  } else {
-    FormManager.setValue('addrTxt', '');
-    FormManager.setValue('city1', '');
-    FormManager.setValue('postCd', '');
-    FormManager.setValue('stateProv', '');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (FormManager.getActualValue('reqType') == 'C' && custSubGrp == 'KYND') {
+    if (addrType == 'ZP02') {
+      FormManager.setValue('addrTxt', '3600 STEELES AVE E');
+      FormManager.setValue('city1', 'MARKHAM');
+      FormManager.setValue('postCd', 'L3R 9Z7');
+      FormManager.setValue('stateProv', 'ON');
+    } else {
+      FormManager.setValue('addrTxt', '');
+      FormManager.setValue('city1', '');
+      FormManager.setValue('postCd', '');
+      FormManager.setValue('stateProv', '');
+    }
   }
 }
 
