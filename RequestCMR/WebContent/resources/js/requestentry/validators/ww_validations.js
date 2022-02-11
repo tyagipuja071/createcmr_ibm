@@ -922,7 +922,7 @@ function addIsuCdObsoleteValidator(){
         		 }
 			}
 		}
-	})(), 'MAIN_NAME_TAB', 'frmCMR');
+	})(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
 /* Register WW Validators */
