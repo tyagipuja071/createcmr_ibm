@@ -204,24 +204,23 @@ public class USAddrStdElement extends OverridingElement {
       stdCity.getStandardCity(addrModel, SystemLocation.UNITED_STATES, map);
       StandardCityResponse stdCityResp = (StandardCityResponse) map.get("result");
       String addrTypeName= addr.getId().getAddrType();
+      StringBuilder addrDetails=null;
       switch(addrTypeName){
       case "ZS01":
-        details.append("Install-at");
+        details.append("Install-at ");
         break;
       case "PG01":
-        details.append("PayGo Billing");
+        details.append("PayGo Billing ");
         break;
       case "ZI01":
-        details.append("Invoice-to");
+        details.append("Invoice-to ");
         break;
       }
       
       if (stdCityResp != null) {
         if (stdCityResp.isCityMatched()) {
           LOG.debug("Standard City Name: " + stdCityResp.getStandardCity());   
-        
-          //if(string is not empty and pgo1 not = exectue 
-          details.append(addrTypeName + " Standard City Name: "
+          details.append(" Standard City Name: "
               + stdCityResp.getStandardCity() + "\n");
   
           if (!addr.getCity1().trim().equalsIgnoreCase(stdCityResp.getStandardCity().trim())) {
@@ -233,7 +232,7 @@ public class USAddrStdElement extends OverridingElement {
         }
         if (stdCityResp.getSuggested() == null || stdCityResp.getSuggested().isEmpty()) {
           LOG.debug("County: " + stdCityResp.getStandardCountyCd() + " - " + stdCityResp.getStandardCountyName());
-          details.append(addrTypeName + " County: " + stdCityResp.getStandardCountyCd()
+          details.append(" "+ "County: " + stdCityResp.getStandardCountyCd()
               + " - " + stdCityResp.getStandardCountyName() + "\n");
           if (addr.getCounty() == null || !addr.getCounty().equals(stdCityResp.getStandardCountyCd())) {
             overrides.addOverride(getProcessCode(), addr.getId().getAddrType(), "COUNTY", addr.getCounty(), stdCityResp.getStandardCountyCd());
@@ -246,10 +245,10 @@ public class USAddrStdElement extends OverridingElement {
           if (!StringUtils.isBlank(addr.getCounty()) && !StringUtils.isBlank(addr.getCountyName())) {
             details
                 .append("County cannot be determined. Multiple counties match the address. Using " + addr.getCounty() + " - " + addr.getCountyName()
-                    + " for the " + addrTypeName + " Address record.\n");
+                    + " for the "  + " " + " Address record.\n");
           } else {
             details.append("County cannot be determined and no county data on the request. Multiple counties match the address. "
-                + addrTypeName + " Address record needs to be checked.\n");
+                 + " Address record needs to be checked.\n");
             hasIssues = true;
           }
         }
