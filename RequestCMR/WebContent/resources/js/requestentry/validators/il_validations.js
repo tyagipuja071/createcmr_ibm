@@ -2541,18 +2541,6 @@ function inacValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
-function clearPOBoxFromGrid() {
-  var hiddenPOBoxAddrs = ['ZD01', 'ZI01', 'ZS02', 'CTYC'];
-  for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
-    recordList = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
-    if (_allAddressData != null && _allAddressData[i] != null) {
-      if (hiddenPOBoxAddrs.includes(_allAddressData[i].addrType[0])) {
-        _allAddressData[i].poBox[0] = '';
-      }
-    }
-  }
-}
-
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding Israel functions...');
@@ -2643,5 +2631,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setStreetContBehavior, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(requireSalesRepEnterpriseSBOByRole, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(lockCMROwner, [ SysLoc.ISRAEL ]);
-  GEOHandler.addAfterConfig(clearPOBoxFromGrid, [ SysLoc.ISRAEL ]);
+  
 });
