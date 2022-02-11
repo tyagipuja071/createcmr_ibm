@@ -37,7 +37,7 @@
           <label>Tax Code</label>
           <dbColumn>SPECIAL_TAX_CD</dbColumn>
           <width>15</width>
-          <lovId>SpecialTaxCd</lovId>
+          <lovId>SpecialTaxCdIL</lovId>
         </column>
         <column>
           <label>Collection Code</label>
