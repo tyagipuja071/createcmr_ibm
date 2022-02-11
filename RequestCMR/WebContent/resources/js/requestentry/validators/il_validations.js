@@ -716,13 +716,7 @@ function updateAbbrevNmLocnIsrael(cntry, addressMode, saving, finalSave, force) 
     role = _pagemodel.userRole;
     reqType = FormManager.getActualValue('reqType');
   }
-  // if (reqType != 'C') {
-    // return;
-  // }
-  if (role != 'Requester') {
-    // do not update for non-requesters
-    return;
-  }
+  
   if (finalSave || force || addressMode == 'COPY') {
     var copyTypes = document.getElementsByName('copyTypes');
     var copyingToA = false;
@@ -750,7 +744,7 @@ function updateAbbrevNmLocnIsrael(cntry, addressMode, saving, finalSave, force) 
   }
 }
 
-function finalizeAbbrevName() {
+function finalizeAbbrevName(fromAddress, scenario, scenarioChanged) {
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
     reqType = FormManager.getActualValue('reqType');
@@ -759,13 +753,12 @@ function finalizeAbbrevName() {
     return;
   }
 
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
-  if (custSubGrp != null) {
+  if(scenarioChanged) {
     var installingAddr = getAddressByType('ZI01');
     var countryUseAAddr = getAddressByType('CTYA');
     var finalAbbrevName = '';
 
-    if (custSubGrp == 'THDPT') {// Third Party Sub scenario
+    if (scenario == 'THDPT') {// Third Party Sub scenario
       if ((installingAddr != null && installingAddr != '') && (countryUseAAddr != null && countryUseAAddr != '')) {
         var installCustName = '' + installingAddr.custNm1;
         var cntryUseACustName = '' + countryUseAAddr.custNm1;
@@ -773,7 +766,7 @@ function finalizeAbbrevName() {
           finalAbbrevName = cntryUseACustName.substring(0, 8) + ' for ' + installCustName.substring(0, 9);
         }
       }
-    } else if (custSubGrp == 'INTSO') {// Internal SO Sub scenario
+    } else if (scenario == 'INTSO') {// Internal SO Sub scenario
       if (installingAddr != null && installingAddr != '') {
         var installCustName = '' + installingAddr.custNm1;
         if (installCustName != null && installCustName != '') {
