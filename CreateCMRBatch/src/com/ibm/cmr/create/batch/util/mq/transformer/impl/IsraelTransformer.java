@@ -957,7 +957,7 @@ public class IsraelTransformer extends EMEATransformer {
     }
     // VAT
     String updatedVat = muData.getVat();
-    if (StringUtils.isNotBlank(updatedVat)) {
+    if (StringUtils.isNotBlank(updatedVat) && !"@".equals(updatedVat)) {
       String updatedLandCntry = null;
       String oldLandCntry = null;
 
@@ -991,13 +991,15 @@ public class IsraelTransformer extends EMEATransformer {
 
       if ((StringUtils.isNotEmpty(updatedLandCntry) && "IL".equals(updatedLandCntry))
           || (StringUtils.isNotEmpty(oldLandCntry) && "IL".equals(oldLandCntry))) {
-        if (StringUtils.substring(updatedVat, 0, 2).equals("IL")) {
+        if (updatedVat.length() > 2 && StringUtils.substring(updatedVat, 0, 2).equals("IL")) {
           updatedVat = StringUtils.substring(updatedVat, 2);
         }
       }
-
       cust.setVat(updatedVat);
+    } else if (StringUtils.isNotBlank(updatedVat) && "@".equals(updatedVat)) {
+      cust.setVat("");
     }
+
     // ISU Code
     if (StringUtils.isNotBlank(muData.getIsuCd())) {
       cust.setIsuCd(muData.getIsuCd());
