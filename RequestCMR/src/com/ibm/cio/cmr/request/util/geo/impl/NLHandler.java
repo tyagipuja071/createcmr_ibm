@@ -2242,6 +2242,13 @@ public class NLHandler extends BaseSOFHandler {
 
         currCell = row.getCell(cmrNoIndex);
         cmrNo = validateColValFromCell(currCell);
+        String isuCd = ""; // 6
+        String ctc = ""; // 7
+        currCell = row.getCell(6);
+        isuCd = validateColValFromCell(currCell);
+        currCell = row.getCell(7);
+        ctc = validateColValFromCell(currCell);
+
         if (isDivCMR(cmrNo)) {
           LOG.trace("The row " + (row.getRowNum() + 1) + ":Note the CMR number is a divestiture CMR records.");
           error.addError((row.getRowNum() + 1), "CMR No.",
@@ -2255,6 +2262,12 @@ public class NLHandler extends BaseSOFHandler {
           validations.add(error);
         }
 
+        List<String> isuBlankCtc = Arrays.asList("5K", "15", "04", "28", "4A");
+        if (isuBlankCtc.contains(isuCd) && !ctc.equalsIgnoreCase("@")) {
+          LOG.trace("For IsuCd set to '" + isuCd + "' Ctc should be '@'");
+          error.addError(rowIndex, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd);
+          validations.add(error);
+        }
       }
 
       for (String name : countryAddrss) {
