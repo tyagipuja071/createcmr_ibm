@@ -927,10 +927,6 @@ public class IsraelTransformer extends EMEATransformer {
     if (StringUtils.isNotBlank(muData.getIsicCd())) {
       cust.setIsicCd(muData.getIsicCd());
     }
-    // Preferred Language
-    if (StringUtils.isNotBlank(muData.getSvcArOffice())) {
-      cust.setLangCd(muData.getSvcArOffice());
-    }
     // Tax Code
     if (StringUtils.isNotBlank(muData.getSpecialTaxCd()) && !"@".equals(muData.getSpecialTaxCd())) {
       cust.setTaxCd(muData.getSpecialTaxCd());
@@ -1026,6 +1022,7 @@ public class IsraelTransformer extends EMEATransformer {
     // SBO
     if (StringUtils.isNotBlank(muData.getCustNm1())) {
       cust.setSbo(muData.getCustNm1());
+      cust.setIbo(muData.getCustNm1());
     }
     // INAC/NAC
     if (StringUtils.isNotBlank(muData.getInacCd())) {
@@ -1038,6 +1035,7 @@ public class IsraelTransformer extends EMEATransformer {
     // Sales Rep
     if (StringUtils.isNotBlank(muData.getRepTeamMemberNo())) {
       cust.setSalesRepNo(muData.getRepTeamMemberNo());
+      cust.setSalesGroupRep(muData.getRepTeamMemberNo());
     }
     // Phone Number
     if (StringUtils.isNotBlank(muData.getEmail1())) {
