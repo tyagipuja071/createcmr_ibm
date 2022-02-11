@@ -76,13 +76,13 @@
           <width>15</width>
           <length>1</length>
         </column>
-        <column exactLength="true" number="true">
+        <column exactLength="true">
           <label>Enterprise Number</label>
           <dbColumn>ENTERPRISE</dbColumn>
           <width>20</width>
          <length>6</length>
         </column>
-        <column exactLength="true" number="true">
+        <column exactLength="true">
 		  <label>SBO</label>
 		  <dbColumn>SALES_BO_CD</dbColumn>
 		  <width>15</width>

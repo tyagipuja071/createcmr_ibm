@@ -1604,6 +1604,16 @@ public class IsraelHandler extends EMEAHandler {
         if (StringUtils.isNotBlank(ctc) && (!"Q".equals(ctc) && !"Y".equals(ctc) && !"@".equals(ctc))) {
           error.addError(rowIndex, "<br>Client Tier", "Invalid Client Tier. Only uppercase Q, Y and @ are valid.");
         }
+        // Enterprise Number
+        String enterpriseNumber = validateColValFromCell(row.getCell(12));
+        if (StringUtils.isNotBlank(enterpriseNumber) && !StringUtils.isNumeric(enterpriseNumber)) {
+          error.addError(rowIndex, "<br>Enterprise Number", "Enterprise Number should be numeric only.");
+        }
+        // SBO
+        String sbo = validateColValFromCell(row.getCell(13));
+        if (StringUtils.isNotBlank(sbo) && !StringUtils.isNumeric(sbo)) {
+          error.addError(rowIndex, "<br>SBO", "SBO should be numeric only.");
+        }
         // INAC/NAC
         String inac = validateColValFromCell(row.getCell(14));
         if (StringUtils.isNotBlank(inac)) {
@@ -1671,79 +1681,96 @@ public class IsraelHandler extends EMEAHandler {
         String cmrNo = validateColValFromCell(row.getCell(0));
         if (StringUtils.isBlank(cmrNo)) {
           error.addError(rowIndex, "<br>CMR No.", "CMR number is required.");
-        } else if (StringUtils.isNotBlank(cmrNo) && divCmrList != null && divCmrList.contains(cmrNo)) {
-          error.addError(rowIndex, "<br>CMR No.",
-              "Note the entered CMR number is either cancelled, divestiture or doesn't exist. Please check the template and correct.");
-        } else if (StringUtils.isNotBlank(cmrNo) && dataSheetCmrList != null && !dataSheetCmrList.contains(cmrNo)) {
-          error.addError(rowIndex, "<br>CMR No.", "CMR number is not in Data sheet.");
+        } else if (StringUtils.isNotBlank(cmrNo)) {
+          if (!StringUtils.isNumeric(cmrNo)) {
+            error.addError(rowIndex, "<br>CMR No.", "CMR number should be numeric.");
+          } else if (dataSheetCmrList != null && !dataSheetCmrList.contains(cmrNo)) {
+            error.addError(rowIndex, "<br>CMR No.", "CMR number is not in Data sheet.");
+          } else if (divCmrList != null && divCmrList.contains(cmrNo)) {
+            error.addError(rowIndex, "<br>CMR No.",
+                "Note the entered CMR number is either cancelled, divestiture or doesn't exist. Please check the template and correct.");
+          }
         }
         // Validate Addr Sequence No
         String addrSeqNo = validateColValFromCell(row.getCell(1));
-        if (StringUtils.isNotBlank(cmrNo) && StringUtils.isBlank(addrSeqNo)) {
-          error.addError(rowIndex, "<br>Sequence", "Address Sequence No is required.");
+        if (StringUtils.isNotBlank(cmrNo)) {
+          if (StringUtils.isBlank(addrSeqNo)) {
+            error.addError(rowIndex, "<br>Sequence", "Address Sequence No is required.");
+          } else if (StringUtils.isNotBlank(addrSeqNo) && !StringUtils.isNumeric(addrSeqNo)) {
+            error.addError(rowIndex, "<br>Sequence", "Address Sequence No should be numeric.");
+          }
         }
         // Validate required fields
         validateAddrRequiredFields(row, error, sheetName);
 
-        // validate PO Box
-        if (sheetName.equals("Mailing") || sheetName.equals("Billing") || sheetName.equals("Country Use A (Mailing)")
-            || sheetName.equals("Country Use B (Billing)")) {
-          String strPoBox = validateColValFromCell(row.getCell(6));
-          if (StringUtils.isNotBlank(strPoBox) && !StringUtils.isNumeric(strPoBox)) {
-            error.addError(rowIndex, "<br>PO Box", "PO Box value should be numeric.");
+        // Hebrew validation
+        boolean validateHebrewField = false;
+        if (sheetName.equals("Mailing") || sheetName.equals("Billing") || sheetName.equals("Shipping")) {
+          validateHebrewField = true;
+        }
+        // Validate Customer Name
+        if (isHebrewFieldNotBlank(row.getCell(2))) {
+          String custName = row.getCell(2).getRichStringCellValue().getString();
+          if (validateHebrewField && !containsHebrewChar(custName)) {
+            error.addError(rowIndex, "<br>Customer Name", sheetName + " Customer Name should be in Hebrew.");
+          } else if (!validateHebrewField && containsHebrewChar(custName)) {
+            error.addError(rowIndex, "<br>Customer Name", sheetName + " Customer Name should be in Latin characters.");
           }
         }
+        // Validate Customer Name Con't
+        if (isHebrewFieldNotBlank(row.getCell(3))) {
+          String custNameCont = row.getCell(3).getRichStringCellValue().getString();
+          if (validateHebrewField && !containsHebrewChar(custNameCont)) {
+            error.addError(rowIndex, "<br>Customer Name Con't", sheetName + " Customer Name Continuation should be in Hebrew.");
+          } else if (!validateHebrewField && containsHebrewChar(custNameCont)) {
+            error.addError(rowIndex, "<br>Customer Name Con't", sheetName + " Customer Name Continuation should be in Latin characters.");
+          }
+        }
+        // Validate Att Person
+        if (isHebrewFieldNotBlank(row.getCell(4))) {
+          String attPerson = row.getCell(4).getRichStringCellValue().getString();
+          if (validateHebrewField && !containsHebrewChar(attPerson)) {
+            error.addError(rowIndex, "<br>Att. Person", sheetName + " Attention Person should be in Hebrew.");
+          } else if (!validateHebrewField && containsHebrewChar(attPerson)) {
+            error.addError(rowIndex, "<br>Att. Person", sheetName + " Attention Person should be in Latin characters.");
+          }
+        }
+        // Validate Street
+        if (isHebrewFieldNotBlank(row.getCell(5))) {
+          String street = row.getCell(5).getRichStringCellValue().getString();
+          if (validateHebrewField && !containsHebrewChar(street)) {
+            error.addError(rowIndex, "<br>Street", sheetName + " Street should be in Hebrew.");
+          } else if (!validateHebrewField && containsHebrewChar(street)) {
+            error.addError(rowIndex, "<br>Street", sheetName + " Street should be in Latin characters.");
+          }
+        }
+        // Validate Address Con't
+        XSSFCell addressContCell = getAddressCell(IL_MASSUPDATE_ADDR.ADDRCONT, row, sheetName);
+        if (isHebrewFieldNotBlank(addressContCell)) {
+          String addrCont = addressContCell.getRichStringCellValue().getString();
+          if (validateHebrewField && !containsHebrewChar(addrCont)) {
+            error.addError(rowIndex, "<br>Address Con't", sheetName + " Address Continuation should be in Hebrew.");
+          } else if (!validateHebrewField && containsHebrewChar(addrCont)) {
+            error.addError(rowIndex, "<br>Address Con't", sheetName + " Address Continuation should be in Latin characters.");
+          }
+        }
+        // Validate City
+        XSSFCell cityCell = getAddressCell(IL_MASSUPDATE_ADDR.CITY, row, sheetName);
+        if (isHebrewFieldNotBlank(cityCell)) {
+          String city = cityCell.getRichStringCellValue().getString();
+          if (validateHebrewField && !containsHebrewChar(city)) {
+            error.addError(rowIndex, "<br>City", sheetName + " City should be in Hebrew.");
+          } else if (!validateHebrewField && containsHebrewChar(city)) {
+            error.addError(rowIndex, "<br>City", sheetName + " City should be in Latin characters.");
+          }
+        }
+        // end validate Mailing Billing Shipping hebrew fields
 
-        if (sheetName.equals("Mailing") || sheetName.equals("Billing") || sheetName.equals("Shipping")) {
-          // Validate Customer Name
-          if (isHebrewFieldNotBlank(row.getCell(2))) {
-            String custName = row.getCell(2).getRichStringCellValue().getString();
-            if (!containsHebrewChar(custName)) {
-              error.addError(rowIndex, "<br>Customer Name", sheetName + " Customer Name should be in Hebrew.");
-            }
-          }
-          // Validate Customer Name Con't
-          if (isHebrewFieldNotBlank(row.getCell(3))) {
-            String custNameCont = row.getCell(3).getRichStringCellValue().getString();
-            if (!containsHebrewChar(custNameCont)) {
-              error.addError(rowIndex, "<br>Customer Name Con't", sheetName + " Customer Name Continuation should be in Hebrew.");
-            }
-          }
-          // Validate Att Person
-          if (isHebrewFieldNotBlank(row.getCell(4))) {
-            String attPerson = row.getCell(4).getRichStringCellValue().getString();
-            if (!containsHebrewChar(attPerson)) {
-              error.addError(rowIndex, "<br>Att. Person", sheetName + " Attention Person should be in Hebrew.");
-            }
-          }
-          // Validate Street
-          if (isHebrewFieldNotBlank(row.getCell(5))) {
-            String street = row.getCell(5).getRichStringCellValue().getString();
-            if (!containsHebrewChar(street)) {
-              error.addError(rowIndex, "<br>Street", sheetName + " Street should be in Hebrew.");
-            }
-          }
-          // Validate Address Con't
-          XSSFCell addrContCell = getAddressCell(IL_MASSUPDATE_ADDR.ADDRCONT, row, sheetName);
-          if (isHebrewFieldNotBlank(addrContCell)) {
-            String addrCont = addrContCell.getRichStringCellValue().getString();
-            if (!containsHebrewChar(addrCont)) {
-              error.addError(rowIndex, "<br>Address Con't", sheetName + " Address Continuation should be in Hebrew.");
-            }
-          }
-          // Validate City
-          XSSFCell cityCell = getAddressCell(IL_MASSUPDATE_ADDR.CITY, row, sheetName);
-          if (isHebrewFieldNotBlank(cityCell)) {
-            String city = cityCell.getRichStringCellValue().getString();
-            if (!containsHebrewChar(city)) {
-              error.addError(rowIndex, "<br>City", sheetName + " City should be in Hebrew.");
-            }
-          }
-        } // end validate Mailing Billing Shipping hebrew fields
-          // Validate Postal Code
+        // Validate Postal Code
         String postalCd = validateColValFromCell(getAddressCell(IL_MASSUPDATE_ADDR.POSTCODE, row, sheetName));
         String landedCntry = validateColValFromCell(getAddressCell(IL_MASSUPDATE_ADDR.LANDCOUNTRY, row, sheetName));
-        if (StringUtils.isNotBlank(postalCd) && StringUtils.isNotBlank(landedCntry)) {
+
+        if (StringUtils.isNotBlank(landedCntry)) {
           // Check postalCode cache
           boolean isLandCountryInCache = postalCdValidationCache.containsKey(landedCntry);
           if (isLandCountryInCache && postalCdValidationCache.get(landedCntry).containsKey(postalCd)
@@ -1837,14 +1864,15 @@ public class IsraelHandler extends EMEAHandler {
       }
 
       if (checkRequiredFields) {
+        // Customer Name
         if (!isHebrewFieldNotBlank(row.getCell(2))) {
           error.addError(row.getRowNum(), "<br>Customer Name", "Customer Name is required when updating " + sheetName + " address.");
         }
-
+        // Landed Country
         if (!isHebrewFieldNotBlank(getAddressCell(IL_MASSUPDATE_ADDR.LANDCOUNTRY, row, sheetName))) {
           error.addError(row.getRowNum(), "<br>Landed Country", "Landed Country is required when updating " + sheetName + " address.");
         }
-
+        // Street
         if (sheetName.equals("Mailing") || sheetName.equals("Billing") || sheetName.equals("Country Use A (Mailing)")
             || sheetName.equals("Country Use B (Billing)")) {
           // Street or PO Box
@@ -1852,18 +1880,21 @@ public class IsraelHandler extends EMEAHandler {
             error.addError(row.getRowNum(), "<br>Street-PO Box", "Street or PO Box is required when updating " + sheetName + " address.");
           }
         } else { // Installing, Shipping, EPL and Country Use C
-          // Street
           if (!isHebrewFieldNotBlank(row.getCell(5))) {
             error.addError(row.getRowNum(), "<br>Street", "Street is required when updating " + sheetName + " address.");
-          }
-          // City
-          if (!isHebrewFieldNotBlank(getAddressCell(IL_MASSUPDATE_ADDR.CITY, row, sheetName))) {
-            error.addError(row.getRowNum(), "<br>City", "City is required when updating " + sheetName + " address.");
           }
         }
         // Validate Address Con't
         if (isHebrewFieldNotBlank(getAddressCell(IL_MASSUPDATE_ADDR.ADDRCONT, row, sheetName)) && !isHebrewFieldNotBlank(row.getCell(5))) {
           error.addError(row.getRowNum(), "<br>Address Con't", "Address Con't can only be filled if Street is filled.");
+        }
+        // City
+        if (!isHebrewFieldNotBlank(getAddressCell(IL_MASSUPDATE_ADDR.CITY, row, sheetName))) {
+          error.addError(row.getRowNum(), "<br>City", "City is required when updating " + sheetName + " address.");
+        }
+        // Land Country
+        if (!isHebrewFieldNotBlank(getAddressCell(IL_MASSUPDATE_ADDR.LANDCOUNTRY, row, sheetName))) {
+          error.addError(row.getRowNum(), "<br>Landed Country", "Landed Country is required when updating " + sheetName + " address.");
         }
       }
     }
@@ -2071,6 +2102,12 @@ public class IsraelHandler extends EMEAHandler {
           String postalCd2 = validateColValFromCell(getAddressCell(IL_MASSUPDATE_ADDR.POSTCODE, rowB, sheet2.getSheetName()));
           if (!isNumericValueEqual(postalCd1, postalCd2)) {
             error.addError(i, "<br>Postal Code", "Mismatch numeric Postal Code value.");
+          }
+          // Landed Country
+          String landedCntry1 = validateColValFromCell(getAddressCell(IL_MASSUPDATE_ADDR.LANDCOUNTRY, rowA, sheet1.getSheetName()));
+          String landedCntry2 = validateColValFromCell(getAddressCell(IL_MASSUPDATE_ADDR.LANDCOUNTRY, rowB, sheet2.getSheetName()));
+          if (StringUtils.isNotBlank(landedCntry1) && StringUtils.isNotBlank(landedCntry2) && !landedCntry1.equals(landedCntry2)) {
+            error.addError(i, "<br>Landed Country", "Mismatch Landed Country value.");
           }
         }
       }
