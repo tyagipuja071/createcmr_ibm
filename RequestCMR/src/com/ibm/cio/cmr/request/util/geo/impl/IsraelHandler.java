@@ -1647,6 +1647,23 @@ public class IsraelHandler extends EMEAHandler {
           kukla = "";
         }
 
+        // phone
+        if (row.getCell(16) != null) {
+          row.getCell(16).setCellType(CellType.STRING);
+        }
+        String phoneNum = validateColValFromCell(row.getCell(16));
+        if (StringUtils.isNotBlank(phoneNum)) {
+          if (phoneNum.charAt(0) == '+' || phoneNum.charAt(0) == '-') {
+            phoneNum = phoneNum.substring(1);
+          }
+
+          if (StringUtils.isNumeric(phoneNum)) {
+            if (!row.getCell(16).getCellStyle().getCoreXf().getQuotePrefix()) {
+              error.addError(rowIndex, "<br>Phone Number", "Please add leading apostrophe (').");
+            }
+          }
+        }
+
         if ("9500".equals(isic) && !"60".equals(kukla)) {
           error.addError(rowIndex, "<br>KUKLA", "KUKLA value should be 60 if ISIC is 9500.");
         } else if (!"9500".equals(isic) && "60".equals(kukla)) {
