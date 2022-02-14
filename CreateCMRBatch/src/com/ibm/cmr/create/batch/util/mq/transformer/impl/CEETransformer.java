@@ -1024,6 +1024,13 @@ public class CEETransformer extends EMEATransformer {
         legacyCust.setRealCtyCd("713");
       }
 
+      if (!StringUtils.isEmpty(data.getIsuCd()) && "5K".equals(data.getIsuCd())) {
+        legacyCust.setIsuCd(data.getIsuCd() + "7");
+      } else {
+        legacyCust.setIsuCd((!StringUtils.isEmpty(data.getIsuCd()) ? data.getIsuCd() : "")
+            + (!StringUtils.isEmpty(data.getClientTier()) ? data.getClientTier() : ""));
+      }
+
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       for (Addr addr : cmrObjects.getAddresses()) {
         if ("ZS01".equals(addr.getId().getAddrType())) {
@@ -1172,6 +1179,16 @@ public class CEETransformer extends EMEATransformer {
         legacyCust.setEmbargoCd("E");
         resetOrdBlockToData(entityManager, data);
       }
+      String isuClientTier;
+      if (!StringUtils.isEmpty(data.getIsuCd()) && "5K".equals(data.getIsuCd())) {
+        legacyCust.setIsuCd(data.getIsuCd() + "7");
+      } else {
+        isuClientTier = (!StringUtils.isEmpty(data.getIsuCd()) ? data.getIsuCd() : "")
+            + (!StringUtils.isEmpty(data.getClientTier()) ? data.getClientTier() : "");
+        if (isuClientTier != null && isuClientTier.length() == 3) {
+          legacyCust.setIsuCd(isuClientTier);
+        }
+      }
     }
 
     if (!StringUtils.isBlank(data.getSubIndustryCd())) {
@@ -1290,7 +1307,6 @@ public class CEETransformer extends EMEATransformer {
     } else {
       legacyCust.setMrcCd("3");
     }
-
   }
 
   @Override
@@ -1363,12 +1379,17 @@ public class CEETransformer extends EMEATransformer {
       }
     }
 
-    String isuClientTier = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "")
-        + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
-    if (isuClientTier != null && isuClientTier.length() == 3) {
-      cust.setIsuCd(isuClientTier);
-    } else if (isuClientTier.contains("@")) {
-      cust.setIsuCd("");
+    String isuClientTier;
+    if (!StringUtils.isEmpty(muData.getIsuCd()) && "5K".equals(muData.getIsuCd())) {
+      cust.setIsuCd(muData.getIsuCd() + "7");
+    } else {
+      isuClientTier = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "")
+          + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
+      if (isuClientTier != null && isuClientTier.endsWith("@")) {
+        cust.setIsuCd((!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : cust.getIsuCd().substring(0, 2)) + "7");
+      } else if (isuClientTier != null && isuClientTier.length() == 3) {
+        cust.setIsuCd(isuClientTier);
+      }
     }
 
     if (!StringUtils.isBlank(muData.getRepTeamMemberNo())) {

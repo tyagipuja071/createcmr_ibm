@@ -1047,6 +1047,9 @@ public class CEMEAHandler extends BaseSOFHandler {
         }
       }
       data.setTaxCd2(mainRecord.getCmrEnterpriseNumber());
+      if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && "5K".equals(data.getIsuCd())) {
+        data.setClientTier("");
+      }
     }
     // ICO field
     if (SystemLocation.SLOVAKIA.equals(data.getCmrIssuingCntry())) {
@@ -2174,12 +2177,22 @@ public class CEMEAHandler extends BaseSOFHandler {
       XSSFSheet sheet = book.getSheet("Data");// validate Data sheet
       row = sheet.getRow(0);// data field name row
       int ordBlkIndex = 12;// default index
+      int isuCdIndex = 6; //
+      int ctcIndex = 7; //
       int fiscalCdIndex = 15; // default index
       for (int cellIndex = 0; cellIndex < row.getLastCellNum(); cellIndex++) {
         currCell = row.getCell(cellIndex);
         String cellVal = validateColValFromCell(currCell);
         if ("Order block code".equals(cellVal)) {
           ordBlkIndex = cellIndex;
+          // break;
+        }
+        if ("ISU Code".equals(cellVal)) {
+          isuCdIndex = cellIndex;
+          // break;
+        }
+        if ("Client Tier".equals(cellVal)) {
+          ctcIndex = cellIndex;
           // break;
         }
         if ("Fiscal Code".equals(cellVal)) {
@@ -2206,6 +2219,22 @@ public class CEMEAHandler extends BaseSOFHandler {
         if (StringUtils.isNotBlank(fiscalCd) && !(fiscalCd.matches("^[0-9]*$")) && "826".equals(country)) {
           LOG.trace("fiscal code should consist only of digits");
           error.addError(rowIndex, "Fiscal Code", " fiscal code should consist only of digits.");
+          validations.add(error);
+        }
+        currCell = row.getCell(isuCdIndex);
+        String isuCd = validateColValFromCell(currCell);
+        currCell = row.getCell(ctcIndex);
+        String ctc = validateColValFromCell(currCell);
+        if (isuCd.equalsIgnoreCase("5k") && !ctc.equalsIgnoreCase("@")) {
+          LOG.trace("For IsuCd set to '5K' Ctc should be '@'");
+          error.addError(rowIndex, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd);
+          validations.add(error);
+        }
+        if (StringUtils.isNotBlank(ctc) && !"@QY".contains(ctc)) {
+          LOG.trace(
+              "The row " + (rowIndex) + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
+          error.addError((rowIndex), "Client Tier",
+              ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
           validations.add(error);
         }
       }
