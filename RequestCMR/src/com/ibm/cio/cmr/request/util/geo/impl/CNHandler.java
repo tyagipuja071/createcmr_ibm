@@ -26,13 +26,16 @@ import org.springframework.web.servlet.ModelAndView;
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.automation.RequestData;
+import com.ibm.cio.cmr.request.automation.util.AutomationConst;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.AddrRdc;
 import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.entity.ApprovalReq;
 import com.ibm.cio.cmr.request.entity.CmrCloningQueue;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataRdc;
+import com.ibm.cio.cmr.request.entity.DefaultApprovals;
 import com.ibm.cio.cmr.request.entity.GeoContactInfo;
 import com.ibm.cio.cmr.request.entity.GeoContactInfoPK;
 import com.ibm.cio.cmr.request.entity.IntlAddr;
@@ -44,6 +47,7 @@ import com.ibm.cio.cmr.request.entity.ReqCmtLog;
 import com.ibm.cio.cmr.request.entity.ReqCmtLogPK;
 import com.ibm.cio.cmr.request.entity.Sadr;
 import com.ibm.cio.cmr.request.entity.UpdatedAddr;
+import com.ibm.cio.cmr.request.model.CompanyRecordModel;
 import com.ibm.cio.cmr.request.model.approval.ApprovalResponseModel;
 import com.ibm.cio.cmr.request.model.requestentry.AddressModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
@@ -57,6 +61,7 @@ import com.ibm.cio.cmr.request.service.requestentry.AddressService;
 import com.ibm.cio.cmr.request.service.requestentry.GeoContactInfoService;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
+import com.ibm.cio.cmr.request.util.CompanyFinder;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
@@ -303,9 +308,9 @@ public class CNHandler extends GEOHandler {
       getIsicByDNB(entityManager, data);
     }
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())
-        && (data.getCustSubGrp() == null
-            || !(data.getCustSubGrp().equals("INTER") || data.getCustSubGrp().equals("BUSPR") || data.getCustSubGrp().equals("PRIV")))
-        && StringUtils.isBlank(data.getGbgId()) && StringUtils.isNotBlank(data.getDunsNo())) {
+        && (data.getCustSubGrp() != null
+            && !(data.getCustSubGrp().equals("INTER") || data.getCustSubGrp().equals("BUSPR") || data.getCustSubGrp().equals("PRIV")))
+        && StringUtils.isBlank(data.getGbgId())) {
       Addr soldToAddr = null;
       if (StringUtils.isNotEmpty(admin.getMainCustNm1())) {
         String sql = ExternalizedQuery.getSql("BATCH.GET_ADDR_FOR_SAP_NO_ZS01");
@@ -314,7 +319,7 @@ public class CNHandler extends GEOHandler {
         soldToAddr = query.getSingleResult(Addr.class);
       }
       if (soldToAddr != null) {
-        getGBGIdByGBGservice(entityManager, admin, data, soldToAddr);
+        getGBGId(entityManager, admin, data, soldToAddr);
       }
 
     }
@@ -338,90 +343,160 @@ public class CNHandler extends GEOHandler {
 
   }
 
-  private void getGBGIdByGBGservice(EntityManager entityManager, Admin admin, Data data, Addr currentAddress) throws Exception {
-    // TODO Auto-generated method stub
-    GBGFinderRequest request = new GBGFinderRequest();
-    request.setMandt(SystemConfiguration.getValue("MANDT"));
+  private void getGBGIdByGBGservice(EntityManager entityManager, Admin admin, Data data, Addr currentAddress, String dunsNo, boolean flag)
+      throws Exception {
+    if (!flag) {
+      // TODO Auto-generated method stub
+      GBGFinderRequest request = new GBGFinderRequest();
+      request.setMandt(SystemConfiguration.getValue("MANDT"));
 
-    request.setCity(currentAddress.getCity1());
-    request
-        .setCustomerName(currentAddress.getCustNm1() + (StringUtils.isBlank(currentAddress.getCustNm2()) ? "" : " " + currentAddress.getCustNm2()));
+      request.setCity(currentAddress.getCity1());
+      request
+          .setCustomerName(currentAddress.getCustNm1() + (StringUtils.isBlank(currentAddress.getCustNm2()) ? "" : " " + currentAddress.getCustNm2()));
 
-    String nameUsed = request.getCustomerName();
-    LOG.debug("Checking GBG for " + nameUsed);
-    // usedNames.add(nameUsed.toUpperCase());
-    request.setIssuingCountry(data.getCmrIssuingCntry());
-    request.setStreetLine1(currentAddress.getAddrTxt());
-    request.setStreetLine2(currentAddress.getAddrTxt2());
-    request.setLandedCountry(currentAddress.getLandCntry());
-    request.setPostalCode(currentAddress.getPostCd());
-    request.setStateProv(currentAddress.getStateProv());
-    if (!StringUtils.isBlank(data.getVat())) {
-      request.setOrgId(data.getVat());
-    }
-    request.setMinConfidence("6");
-
-    request.setDunsNo(data.getDunsNo());
-
-    MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
-        MatchingServiceClient.class);
-    client.setRequestMethod(Method.Get);
-    client.setReadTimeout(1000 * 60 * 5);
-
-    LOG.debug("Connecting to the GBG Finder Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
-    MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.GBG_SERVICE_ID, request, MatchingResponse.class);
-    ObjectMapper mapper = new ObjectMapper();
-    String json = mapper.writeValueAsString(rawResponse);
-
-    TypeReference<MatchingResponse<GBGResponse>> ref = new TypeReference<MatchingResponse<GBGResponse>>() {
-    };
-    MatchingResponse<GBGResponse> response = mapper.readValue(json, ref);
-
-    if (response != null && response.getMatched()) {
-      List<GBGResponse> gbgMatches = response.getMatches();
-      Collections.sort(gbgMatches, new GBGComparator(data.getCmrIssuingCntry()));
-
-      // get default landed country
-      String defaultLandCntry = PageManager.getDefaultLandedCountry(data.getCmrIssuingCntry());
-
-      if (gbgMatches.size() > 5) {
-        gbgMatches = gbgMatches.subList(0, 4);
+      String nameUsed = request.getCustomerName();
+      LOG.debug("Checking GBG for " + nameUsed);
+      // usedNames.add(nameUsed.toUpperCase());
+      request.setIssuingCountry(data.getCmrIssuingCntry());
+      request.setStreetLine1(currentAddress.getAddrTxt());
+      request.setStreetLine2(currentAddress.getAddrTxt2());
+      request.setLandedCountry(currentAddress.getLandCntry());
+      request.setPostalCode(currentAddress.getPostCd());
+      request.setStateProv(currentAddress.getStateProv());
+      if (!StringUtils.isBlank(data.getVat())) {
+        request.setOrgId(data.getVat());
       }
-      boolean domesticGBGFound = false;
-      for (GBGResponse gbg : gbgMatches) {
-        if (gbg.isDomesticGBG()) {
-          domesticGBGFound = true;
-          break;
+      request.setMinConfidence("6");
+      if (StringUtils.isNotBlank(dunsNo)) {
+        request.setDunsNo(dunsNo);
+      } else {
+        request.setDunsNo(data.getDunsNo());
+      }
+      MatchingResponse<?> rawResponse = null;
+      try {
+        MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
+            MatchingServiceClient.class);
+        client.setRequestMethod(Method.Get);
+        client.setReadTimeout(1000 * 60 * 5);
+
+        LOG.debug("Connecting to the GBG Finder Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
+        rawResponse = client.executeAndWrap(MatchingServiceClient.GBG_SERVICE_ID, request, MatchingResponse.class);
+
+      } catch (Exception e) {
+        LOG.error("CMR Error:" + e.getMessage());
+      }
+      ObjectMapper mapper = new ObjectMapper();
+      String json = null;
+      if (rawResponse == null) {
+        json = "";
+      } else {
+        json = mapper.writeValueAsString(rawResponse);
+      }
+
+      TypeReference<MatchingResponse<GBGResponse>> ref = new TypeReference<MatchingResponse<GBGResponse>>() {
+      };
+      MatchingResponse<GBGResponse> response = null;
+      if (StringUtils.isNotBlank(json)) {
+        response = mapper.readValue(json, ref);
+      }
+
+      if (response != null && response.getMatched()) {
+        List<GBGResponse> gbgMatches = response.getMatches();
+        Collections.sort(gbgMatches, new GBGComparator(data.getCmrIssuingCntry()));
+
+        if (gbgMatches.size() > 5) {
+          gbgMatches = gbgMatches.subList(0, 4);
+        }
+        boolean domesticGBGFound = false;
+        for (GBGResponse gbg : gbgMatches) {
+          if (gbg.isDomesticGBG()) {
+            domesticGBGFound = true;
+            break;
+          }
+        }
+
+        for (GBGResponse gbg : gbgMatches) {
+          if (gbg.isDomesticGBG() || !domesticGBGFound) {
+            data.setGbgId(gbg.getGbgId());
+            data.setGbgDesc(gbg.getGbgName());
+            data.setBgId(gbg.getBgId());
+            data.setBgDesc(gbg.getBgName());
+            data.setBgRuleId(gbg.getLdeRule());
+            entityManager.merge(data);
+            entityManager.flush();
+            break;
+          }
         }
       }
+    } else {
+      try {
+        // List<GBGResponse> matches = new ArrayList<GBGResponse>();
 
-      int itemNo = 0;
-      for (GBGResponse gbg : gbgMatches) {
-        if (gbg.isDomesticGBG() || !domesticGBGFound) {
-          itemNo++;
-          data.setGbgId(gbg.getGbgId());
-          data.setGbgDesc(gbg.getGbgName());
-          data.setBgId(gbg.getBgId());
-          data.setBgDesc(gbg.getBgName());
-          entityManager.merge(data);
-          entityManager.flush();
-          /*
-           * if (itemNo == 1 && gbg.isDomesticGBG()) { if
-           * ("641".equals(data.getCmrIssuingCntry()) &&
-           * "C".equals(admin.getReqType()) &&
-           * "ECOSY".equals(data.getCustSubGrp())) { List<String> s1GBGIDList =
-           * SystemParameters.getList("CN_S1_GBG_ID_LIST"); if
-           * (s1GBGIDList.contains(gbg.getGbgId())) { result.
-           * setDetails("GBG computing result is S1 GBG ID on the request.");
-           * engineData.addRejectionComment("OTH",
-           * "GBG computing result is S1 GBG ID on the request.", "", "");
-           * result.setResults("S1 GBG ID"); } } }
-           */
-          break;
+        // do a matching against GU DUNS first
+        String sql = ExternalizedQuery.getSql("GBG.QUERY_BY_CMRNO");
+        PreparedQuery query = new PreparedQuery(entityManager, sql);
+        query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+        query.setParameter("KATR6", data.getCmrIssuingCntry());
+        query.setParameter("CMR_NO", dunsNo);
+        query.setForReadOnly(true);
+
+        // 0 gbg id
+        // 1 gbg name
+        // 2 bg id
+        // 3 bg name
+        // 4 lde rule
+        // 5 int acct type
+        // 6 cmr count
+        List<Object[]> results = query.getResults();
+        if (results != null) {
+          GBGResponse gbg = null;
+          for (Object[] result : results) {
+            gbg = new GBGResponse();
+            gbg.setGbgId((String) result[0]);
+            gbg.setGbgName((String) result[1]);
+            gbg.setBgId((String) result[2]);
+            gbg.setBgName((String) result[3]);
+            gbg.setLdeRule((String) result[4]);
+            data.setGbgId(gbg.getGbgId());
+            data.setGbgDesc(gbg.getGbgName());
+            data.setBgId(gbg.getBgId());
+            data.setBgDesc(gbg.getBgName());
+            data.setBgRuleId(gbg.getLdeRule());
+            entityManager.merge(data);
+            entityManager.flush();
+            break;
+          }
         }
+      } catch (Exception e) {
+        LOG.error("CMR Error:" + e.getMessage());
       }
     }
 
+  }
+
+  private void getGBGId(EntityManager entityManager, Admin admin, Data data, Addr currentAddress) throws Exception {
+    getGBGIdByGBGservice(entityManager, admin, data, currentAddress, null, false);
+    if (StringUtils.isBlank(data.getGbgId())) {
+      String companyName = null;
+      if (StringUtils.isNotBlank(data.getBusnType())) {
+        companyName = DnBUtil.getCNApiCompanyNameData4GBG(data.getBusnType());
+      }
+      if (StringUtils.isNotBlank(companyName)) {
+        // 2, Check FindCMR NON Latin with Chinese name - single byte
+        CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
+        searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
+        searchModelFindCmrCN.setName(companyName);
+        List<CompanyRecordModel> resultFindCmrCN = null;
+        resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
+        if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
+          if (StringUtils.isNotBlank(resultFindCmrCN.get(0).getDunsNo())) {
+            getGBGIdByGBGservice(entityManager, admin, data, currentAddress, resultFindCmrCN.get(0).getDunsNo(), false);
+          } else {
+            getGBGIdByGBGservice(entityManager, admin, data, currentAddress, resultFindCmrCN.get(0).getCmrNo(), true);
+          }
+        }
+      }
+    }
   }
 
   /**
@@ -734,10 +809,12 @@ public class CNHandler extends GEOHandler {
 
     if (!StringUtils.isBlank(admin.getReqType()) && admin.getReqType().equalsIgnoreCase("U") && !StringUtils.isBlank(data.getPpsceid())
         && !StringUtils.isBlank(admin.getReqStatus()) && admin.getReqStatus().equalsIgnoreCase("DRA")) {
-      if (data.getSearchTerm() == null || StringUtils.isBlank(data.getSearchTerm()) || (data.getSearchTerm() != null && (data.getSearchTerm().trim().equalsIgnoreCase("00000")
-          || data.getSearchTerm().matches("[a-zA-Z]")))) {
-        data.setClientTier("Z");
-        data.setSearchTerm("04182");
+      if (data.getSearchTerm() == null || StringUtils.isBlank(data.getSearchTerm())
+          || (data.getSearchTerm() != null && (data.getSearchTerm().trim().equalsIgnoreCase("00000") || data.getSearchTerm().matches("[^0-9]+")))) {
+        if (data.getCmrNo().startsWith("1") || data.getCmrNo().startsWith("2")) {
+          data.setClientTier("Z");
+          data.setSearchTerm("04182");
+        }
       }
     }
   }
@@ -1261,41 +1338,81 @@ public class CNHandler extends GEOHandler {
       aCnStreetAddrTxt = iAddr.getAddrTxt();
       aCnStreetAddrTxt2 = iAddr.getIntlCustNm4();
     }
+    aCnDistrict = aCnDistrict != null ? aCnDistrict.trim().toLowerCase() : "";
+    aCnCustName = aCnCustName != null ? aCnCustName.trim().toLowerCase() : "";
+    aCnCustNameCont = aCnCustNameCont != null ? aCnCustNameCont.trim().toLowerCase() : "";
+    aCnStreetAddrTxt = aCnStreetAddrTxt != null ? aCnStreetAddrTxt.trim().toLowerCase() : "";
+    aCnStreetAddrTxt2 = aCnStreetAddrTxt2 != null ? aCnStreetAddrTxt2.trim().toLowerCase() : "";
 
     String aDept = addr.getDept() != null ? addr.getDept().trim().toLowerCase() : "";
     String aOfc = addr.getOffice() != null ? addr.getOffice().trim().toLowerCase() : "";
     String aPostBox = addr.getPoBox() != null ? addr.getPoBox().trim().toLowerCase() : "";
-    String aPhoneNum = addr.getCustPhone() != null ? addr.getCustPhone().trim().toLowerCase() : "";
+    // String aPhoneNum = addr.getCustPhone() != null ?
+    // addr.getCustPhone().trim().toLowerCase() : "";
     String aTransportZone = addr.getTransportZone() != null ? addr.getTransportZone().trim().toLowerCase() : "";
 
     String mAddrTxt = model.getAddrTxt() != null ? model.getAddrTxt().trim().toLowerCase() : "";
     String mAddrTxt2 = model.getAddrTxt2() != null ? model.getAddrTxt2().trim().toLowerCase() : "";
-    String mCity1 = model.getCity1() != null ? model.getCity1().trim().toLowerCase() : "";
+    String mCity1 = model.getCity1DrpDown() != null ? model.getCity1DrpDown().trim().toLowerCase() : "";
     String mCity2 = model.getCity2() != null ? model.getCity2().trim().toLowerCase() : "";
     String mBldg = model.getBldg() != null ? model.getBldg().trim().toLowerCase() : "";
     String mStateProv = model.getStateProv() != null ? model.getStateProv().trim().toLowerCase() : "";
     String mPostCd = model.getPostCd() != null ? model.getPostCd().trim().toLowerCase() : "";
-    String mCnDistrict = model.getCnDistrict() != null ? model.getPostCd().trim().toLowerCase() : "";
+    String mCnDistrict = model.getCnDistrict() != null ? model.getCnDistrict().trim().toLowerCase() : "";
     String mDept = model.getDept() != null ? model.getDept().trim().toLowerCase() : "";
     String mOfc = model.getOffice() != null ? model.getOffice().trim().toLowerCase() : "";
     String mPostBox = model.getPoBox() != null ? model.getPoBox().trim().toLowerCase() : "";
-    String mPhoneNum = model.getCustPhone() != null ? model.getCustPhone().trim().toLowerCase() : "";
+    // String mPhoneNum = model.getCustPhone() != null ?
+    // model.getCustPhone().trim().toLowerCase() : "";
     String mTransportZone = model.getTransportZone() != null ? model.getTransportZone().trim().toLowerCase() : "";
     String mCnCustName = model.getCnCustName1() != null ? model.getCnCustName1().trim().toLowerCase() : "";
     String mCnCustNameCont = model.getCnCustName2() != null ? model.getCnCustName2().trim().toLowerCase() : "";
     String mCnStreetAddrTxt = model.getCnAddrTxt() != null ? model.getCnAddrTxt().trim().toLowerCase() : "";
     String mCnStreetAddrTxt2 = model.getCnAddrTxt2() != null ? model.getCnAddrTxt2().trim().toLowerCase() : "";
 
+    LOG.debug(aAddrTxt);
+    LOG.debug(mAddrTxt);
+    LOG.debug(aAddrTxt2);
+    LOG.debug(mAddrTxt2);
+    LOG.debug(aCity1);
+    LOG.debug(mCity1);
+    LOG.debug(aCity2);
+    LOG.debug(mCity2);
+    LOG.debug(aBldg);
+    LOG.debug(mBldg);
+    LOG.debug(aStateProv);
+    LOG.debug(mStateProv);
+    LOG.debug(aPostCd);
+    LOG.debug(mPostCd);
+    LOG.debug(aCnDistrict);
+    LOG.debug(mCnDistrict);
+    LOG.debug(aCnCustName);
+    LOG.debug(mCnCustName);
+    LOG.debug(aCnCustNameCont);
+    LOG.debug(mCnCustNameCont);
+    LOG.debug(aCnStreetAddrTxt);
+    LOG.debug(mCnStreetAddrTxt);
+    LOG.debug(aCnStreetAddrTxt2);
+    LOG.debug(mCnStreetAddrTxt2);
+    LOG.debug(aDept);
+    LOG.debug(mDept);
+    LOG.debug(aOfc);
+    LOG.debug(mOfc);
+    LOG.debug(aPostBox);
+    LOG.debug(mPostBox);
+    LOG.debug(aTransportZone);
+    LOG.debug(mTransportZone);
+
     if (!StringUtils.equals(aAddrTxt, mAddrTxt) || !StringUtils.equals(aAddrTxt2, mAddrTxt2) || !StringUtils.equals(aCity1, mCity1)
         || !StringUtils.equals(aCity2, mCity2) || !StringUtils.equals(aBldg, mBldg) || !StringUtils.equals(aStateProv, mStateProv)
         || !StringUtils.equals(aPostCd, mPostCd) || !StringUtils.equals(aCnDistrict, mCnDistrict) || !StringUtils.equals(aDept, mDept)
-        || !StringUtils.equals(aOfc, mOfc) || !StringUtils.equals(aPostBox, mPostBox) || !StringUtils.equals(aPhoneNum, mPhoneNum)
-        || !StringUtils.equals(aTransportZone, mTransportZone) || !StringUtils.equals(aCnCustName, mCnCustName)
-        || !StringUtils.equals(aCnCustNameCont, mCnCustNameCont) || !StringUtils.equals(aCnStreetAddrTxt, mCnStreetAddrTxt)
-        || !StringUtils.equals(aCnStreetAddrTxt2, mCnStreetAddrTxt2)) {
+        || !StringUtils.equals(aOfc, mOfc) || !StringUtils.equals(aPostBox, mPostBox) || !StringUtils.equals(aTransportZone, mTransportZone)
+        || !StringUtils.equals(aCnCustName, mCnCustName) || !StringUtils.equals(aCnCustNameCont, mCnCustNameCont)
+        || !StringUtils.equals(aCnStreetAddrTxt, mCnStreetAddrTxt) || !StringUtils.equals(aCnStreetAddrTxt2, mCnStreetAddrTxt2)) {
+      LOG.debug("isClearDPL=true");
       return true;
     }
-
+    LOG.debug("isClearDPL=false");
     return false;
   }
 
@@ -2026,9 +2143,11 @@ public class CNHandler extends GEOHandler {
     if (shouldSetAsterisk()) {
       setAddrNmAsterisk(entityManager, admin, data);
     }
-    if (model.getReqType() != null && model.getReqType().equals("U") && (data.getCapInd() == null || !data.getCapInd().equals("Y"))) {
-      getIsicByDNB(entityManager, data);
-    } else if (model.getReqType().equals("C") && model.getCustSubGrp() != null
+    // if (model.getReqType() != null && model.getReqType().equals("U") &&
+    // (data.getCapInd() == null || !data.getCapInd().equals("Y"))) {
+    // getIsicByDNB(entityManager, data);
+    // } else
+    if (model.getReqType().equals("C") && model.getCustSubGrp() != null
         && !(model.getCustSubGrp().equals("INTER") || model.getCustSubGrp().equals("BUSPR") || model.getCustSubGrp().equals("PRIV"))) {
       getIsicByDNB(entityManager, data);
     }
@@ -2109,6 +2228,37 @@ public class CNHandler extends GEOHandler {
     query.setParameter("ADDR_SEQ", addrSeq);
     query.setForReadOnly(true);
     return query.getSingleResult(AddrRdc.class);
+  }
+
+  @Override
+  public void setReqStatusAfterApprove(EntityManager entityManager, ApprovalResponseModel approval, ApprovalReq req, Admin admin) {
+    String reqTypeId = String.valueOf(req.getTypId());
+    String defaultApprovalId = String.valueOf(req.getDefaultApprovalId());
+    String approvalDesc = getApprovalDesc(entityManager, defaultApprovalId);
+    LOG.debug(">>> CN setReqStatusAfterApprove...");
+    LOG.debug("reqTypeId = " + reqTypeId);
+    LOG.debug("defaultApprovalId = " + defaultApprovalId);
+    LOG.debug("approvalDesc = " + approvalDesc);
+    LOG.debug("currentStatus = " + approval.getCurrentStatus());
+    LOG.debug("processing = " + approval.getProcessing());
+    if (approvalDesc != null
+        && (CmrConstants.CN_ERO_APPROVAL_DESC.equals(approvalDesc) || CmrConstants.CN_ECO_LEADER_APPROVAL_DESC.equals(approvalDesc)
+            || CmrConstants.CN_TECH_LEADER_APPROVAL_DESC.equals(approvalDesc))
+        && "Approved".equals(approval.getCurrentStatus()) && "Y".equals(approval.getProcessing()) && "PPN".equals(admin.getReqStatus())) {
+      LOG.debug("Setting request " + req.getTypId() + " to automation process");
+      admin.setReqStatus(AutomationConst.STATUS_AUTOMATED_PROCESSING);
+    }
+  }
+
+  private String getApprovalDesc(EntityManager entityManager, String id) {
+    String sql = ExternalizedQuery.getSql("SYSTEM.GET_DEFAULT_APPR.DETAILS");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("ID", id);
+    DefaultApprovals approve = query.getSingleResult(DefaultApprovals.class);
+    if (approve != null) {
+      return approve.getDefaultApprovalDesc();
+    }
+    return null;
   }
 
 }

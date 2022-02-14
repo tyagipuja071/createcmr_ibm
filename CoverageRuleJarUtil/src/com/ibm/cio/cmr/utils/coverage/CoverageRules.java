@@ -51,11 +51,11 @@ public class CoverageRules {
   public static void main(String[] args) throws Exception {
     LOG.info("Starting..");
     CoverageRules cov = new CoverageRules("2H2021");
-    String zipFile = "C:/cloud/workspace/createcmr/CoverageRuleJarUtil/zip_dir/2H2021.jar";
+    String zipFile = "C:/ci/shared/data/batch/coverage/zip/2H2021.jar";
     cov.initializeFrom(zipFile);
     cov.initialize();
 
-    String id = "T0006708";
+    String id = "T0006880";
     List<Rule> rules1 = cov.findRule(id);
     if (rules1 != null) {
       System.out.println("Rules for " + id);
@@ -188,21 +188,12 @@ public class CoverageRules {
         if (this.coverageMap.get(r.getCoverage().getType() + r.getCoverage().getId()) == null) {
           this.coverageMap.put(r.getCoverage().getType() + r.getCoverage().getId(), new ArrayList<Rule>());
         }
-        if ("T0006335".equals(cov)) {
-          LOG.info("COVERAGE T0006335 FOUND IN THE RULES.");
-        }
         this.coverageMap.get(r.getCoverage().getType() + r.getCoverage().getId()).add(r);
       }
       this.countryRules.add(ruleGroup);
       priority++;
     }
 
-    List<Rule> extraRules = findRule("T0006335");
-    if (extraRules == null || extraRules.isEmpty()) {
-      LOG.error("COVERAGE T0006335 NOT FOUND IN THE RULES.");
-    } else {
-      LOG.error(" - COVERAGE T0006335 FOUND IN THE RULES AFTER INIT. - ");
-    }
     this.initialized = true;
   }
 
@@ -335,6 +326,7 @@ public class CoverageRules {
     // throw new IllegalArgumentException("Coverage " + coverageTypeAndId + "
     // not found in current rules.");
     // }
+    Collections.sort(rule);
     return rule;
   }
 

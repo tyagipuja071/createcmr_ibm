@@ -2836,6 +2836,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
           model.setIsuCd(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("ISU_CD") - 1)));
           model.setInacCd(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("INAC_CD") - 1)));
           model.setClientTier(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("CLIENT_TIER") - 1)));
+          // model.setTaxExemptStatus(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("TAX_EXEMPT_STATUS_1")
+          // - 1)));
 
           // if (!"Y".equals(massUpdtRdcOnly)) {
           List<MassUpdateAddressModel> addrList = new ArrayList<>();

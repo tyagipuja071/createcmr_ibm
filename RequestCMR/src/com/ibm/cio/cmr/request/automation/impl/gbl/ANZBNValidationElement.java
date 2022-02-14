@@ -1,5 +1,8 @@
 package com.ibm.cio.cmr.request.automation.impl.gbl;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
@@ -20,12 +23,17 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cmr.services.client.AutomationServiceClient;
 import com.ibm.cmr.services.client.CmrServicesFactory;
+import com.ibm.cmr.services.client.MatchingServiceClient;
 import com.ibm.cmr.services.client.ServiceClient.Method;
 import com.ibm.cmr.services.client.automation.AutomationResponse;
 import com.ibm.cmr.services.client.automation.ap.anz.BNValidationRequest;
 import com.ibm.cmr.services.client.automation.ap.anz.BNValidationResponse;
+import com.ibm.cmr.services.client.matching.MatchingResponse;
+import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
+import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
 
 public class ANZBNValidationElement extends ValidatingElement implements CompanyVerifier {
 
@@ -42,6 +50,7 @@ public class ANZBNValidationElement extends ValidatingElement implements Company
     long reqId = requestData.getAdmin().getId().getReqId();
 
     AutomationResult<ValidationOutput> output = buildResult(reqId);
+    AutomationResponse<BNValidationResponse> response = null;
     ValidationOutput validation = new ValidationOutput();
     // Log.debug("Entering global performScenarioCheck()");
     ChangeLogListener.setManager(entityManager);
@@ -53,7 +62,68 @@ public class ANZBNValidationElement extends ValidatingElement implements Company
 
     log.debug("Calling BNValidation Service for Req_id : " + reqId);
     try {
-      AutomationResponse<BNValidationResponse> response = getVatLayerInfo(admin, data);
+      try {
+        response = getVatLayerInfo(admin, data);
+      } catch (Exception e) {
+        if (response == null || !response.isSuccess()) {
+          log.debug("Failed to connect to ABN Service. Checking ABN and Company Name with D&B.");
+          details.append("Failed to Connect to ABN Service.");
+          details.append("\nD&B Matching Results are:");
+          List<DnBMatchingResponse> matches = getMatches(requestData, engineData, zs01, false);
+          if (data.getVat() != null && !StringUtils.isBlank(data.getVat())) {
+            boolean orgIdFound = false;
+            boolean isOrgIdMatched = false;
+            if (!matches.isEmpty()) {
+              for (DnBMatchingResponse dnbRecord : matches) {
+                if (dnbRecord.getConfidenceCode() > 7) {
+                  // check if the record closely matches D&B. This really
+                  // validates
+                  // input against record
+                  boolean closelyMatches = DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), zs01, admin, dnbRecord);
+                  if (closelyMatches) {
+                    log.debug("DUNS " + dnbRecord.getDunsNo() + " matches the request data.");
+                    isOrgIdMatched = "Y".equals(dnbRecord.getOrgIdMatch());
+                    orgIdFound = StringUtils.isNotBlank(DnBUtil.getVAT(dnbRecord.getDnbCountry(), dnbRecord.getOrgIdDetails()));
+                    if (orgIdFound && isOrgIdMatched) {
+                      engineData.setVatVerified(true, "VAT Verified");
+                      validation.setSuccess(true);
+                      validation.setMessage("Execution done.");
+                      details.append("\nBusiness Number is Valid");
+                      details.append("\nBusiness Number and Legal Name verified using D&B");
+                      output.setDetails(details.toString());
+                      engineData.addPositiveCheckStatus(AutomationEngineData.VAT_VERIFIED);
+                      break;
+                    } else {
+                      validation.setSuccess(false);
+                      validation.setMessage("\nBusiness no. invalid");
+                      details.append("\nThe information on the request does not match the information from the service");
+                      output.setDetails(details.toString());
+                      output.setOnError(true);
+                      engineData.addRejectionComment("OTH", "Business Number is not Valid.", "", "");
+                      log.debug("The Company business number is not the same as the one on the request.");
+                      break;
+                    }
+                  } else {
+                    validation.setMessage("\nLegal Name not same as D&B's");
+                    details.append("\nThe Customer Legal Name on the request does not match the information from the service.");
+                    output.setDetails(details.toString());
+                    engineData.addNegativeCheckStatus("ABNLegalName", "Legal Name on request and D&B doesn't match.");
+                    log.debug("The Customer Legal Name on the request does not match the information from the service.");
+                  }
+                }
+              }
+            } else {
+              validation.setSuccess(false);
+              validation.setMessage("\nNo Matches Found in D&B");
+              details.append("\nThe information on the request does not match the information from the D&B");
+              output.setDetails(details.toString());
+              output.setOnError(true);
+              engineData.addRejectionComment("OTH", "No Matches found in D&B.", "", "");
+              log.debug("No Matches found in D&B.");
+            }
+          }
+        }
+      }
       if (StringUtils.isBlank(data.getVat())) {
         validation.setSuccess(true);
         validation.setMessage("Execution done.");
@@ -65,9 +135,9 @@ public class ANZBNValidationElement extends ValidatingElement implements Company
               .equalsIgnoreCase(StringUtils.isBlank(response.getRecord().getCompanyName()) ? "" : response.getRecord().getCompanyName())) {
             validation.setSuccess(true);
             validation.setMessage("Execution done.");
-            log.debug("Buisness Number and Legal Name verified using ABN/NBN lookup service");
-            details.append("Buisness Number is Valid");
-            details.append("\nBuisness Number and Legal Name verified using ABN/NBN lookup service");
+            log.debug("Business Number and Legal Name verified using ABN/NBN lookup service");
+            details.append("Business Number is Valid");
+            details.append("\nBusiness Number and Legal Name verified using ABN/NBN lookup service");
             details.append("\nCompany details from VAT Layer :");
             details.append("\nCountry Code =" + response.getRecord().getCountryCode());
             details.append("\nBuisness Number =" + response.getRecord().getBusinessNumber());
@@ -91,11 +161,11 @@ public class ANZBNValidationElement extends ValidatingElement implements Company
             }
           } else if (!response.getRecord().isValid()) {
             validation.setSuccess(false);
-            validation.setMessage("Buisness no. invalid");
+            validation.setMessage("Business no. invalid");
             output.setDetails("The information on the request does not match the information from the service");
             output.setOnError(true);
             engineData.addRejectionComment("OTH", "Buisness Number is not Valid.", "", "");
-            log.debug("The Company buisness number is not the same as the one on the request.");
+            log.debug("The Company business number is not the same as the one on the request.");
           } else {
             // validation.setSuccess(false);
             validation.setMessage("Legal Name not same as API's");
@@ -106,13 +176,6 @@ public class ANZBNValidationElement extends ValidatingElement implements Company
             engineData.addNegativeCheckStatus("ABNLegalName", "Legal Name on request and API doesn't match.");
             log.debug("The Customer Legal Name on the request does not match the information from the service.");
           }
-        } else {
-          validation.setSuccess(false);
-          validation.setMessage("Execution failed");
-          output.setDetails(response.getMessage());
-          output.setOnError(true);
-          engineData.addRejectionComment("OTH", response.getMessage(), "", "");
-          log.debug(response.getMessage());
         }
       }
     } finally {
@@ -154,5 +217,60 @@ public class ANZBNValidationElement extends ValidatingElement implements Company
   public String getProcessDesc() {
     // TODO Auto-generated method stub
     return "ANZ - Business Number Validation";
+  }
+
+  public List<DnBMatchingResponse> getMatches(RequestData requestData, AutomationEngineData engineData, Addr addr, boolean isOrgIdMatchOnly)
+      throws Exception {
+    Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
+    List<DnBMatchingResponse> dnbMatches = new ArrayList<DnBMatchingResponse>();
+    if (addr == null) {
+      addr = requestData.getAddress("ZS01");
+    }
+    GBGFinderRequest request = createRequest(admin, data, addr, isOrgIdMatchOnly);
+    MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
+        MatchingServiceClient.class);
+    client.setReadTimeout(1000 * 60 * 5);
+    log.debug("Connecting to the Advanced D&B Matching Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
+    MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.DNB_SERVICE_ID, request, MatchingResponse.class);
+    ObjectMapper mapper = new ObjectMapper();
+    String json = mapper.writeValueAsString(rawResponse);
+
+    TypeReference<MatchingResponse<DnBMatchingResponse>> ref = new TypeReference<MatchingResponse<DnBMatchingResponse>>() {
+    };
+
+    MatchingResponse<DnBMatchingResponse> response = mapper.readValue(json, ref);
+    if (response != null) {
+      dnbMatches = response.getMatches();
+    }
+
+    return dnbMatches;
+  }
+
+  public GBGFinderRequest createRequest(Admin admin, Data data, Addr addr, Boolean isOrgIdMatchOnly) {
+    GBGFinderRequest request = new GBGFinderRequest();
+    request.setMandt(SystemConfiguration.getValue("MANDT"));
+    if (StringUtils.isNotBlank(data.getVat())) {
+      request.setOrgId(data.getVat());
+    } else if (StringUtils.isNotBlank(addr.getVat())) {
+      request.setOrgId(addr.getVat());
+    }
+
+    if (addr != null) {
+      if (isOrgIdMatchOnly) {
+        request.setLandedCountry(addr.getLandCntry());
+      } else {
+        request.setCity(addr.getCity1());
+        request.setCustomerName(addr.getCustNm1() + (StringUtils.isBlank(addr.getCustNm2()) ? "" : " " + addr.getCustNm2()));
+        request.setStreetLine1(addr.getAddrTxt());
+        request.setStreetLine2(addr.getAddrTxt2());
+        request.setLandedCountry(addr.getLandCntry());
+        request.setPostalCode(addr.getPostCd());
+        request.setStateProv(addr.getStateProv());
+        // request.setMinConfidence("8");
+      }
+    }
+
+    return request;
   }
 }

@@ -17,26 +17,89 @@
 %>
 
 <cmr:view forCountry="649">
-  <%if ("U".equals(reqentry.getReqType())){ %>
-  <cmr:row addBackground="true" topPad="20">
-     <cmr:column span="6">
-       <img src="${resourcesPath}/images/warn-icon.png" class="cmr-error-icon">
-       <cmr:note text="For updates to any of the fields below, leave the fields below blank if you will not be changing the current values." />
-     </cmr:column>
-  </cmr:row>
-  <%} %>
-
   <cmr:row>
-  	<cmr:column span="2">
+  	<cmr:column span="2" containerForField="HST">
   		<p>
-  			<cmr:label fieldId="ProfileNo">
-        		<cmr:fieldLabel fieldId="ProfileNo" />:
+  			<cmr:label fieldId="HST">
+        		<cmr:fieldLabel fieldId="HST" />:
           	</cmr:label>
-        	<cmr:field path="modelCmrNo" id="modelCmrNo" fieldId="ProfileNo" tabId="MAIN_CUST_TAB" />	
+        	<cmr:field path="vat" id="HST" fieldId="HST" tabId="MAIN_CUST_TAB" />
+  		</p>		
+  	</cmr:column>
+  	<cmr:column span="2" containerForField="QST">
+  		<p>
+  			<cmr:label fieldId="QST">
+        		<cmr:fieldLabel fieldId="QST" />:
+          	</cmr:label>
+        	<cmr:field path="taxCd3" id="QST" fieldId="QST" tabId="MAIN_CUST_TAB" />
+  		</p>		
+  	</cmr:column>
+  </cmr:row>
+  
+  <cmr:row>
+  	<cmr:column span="2" containerForField="PSTExempt">
+  		<p>
+  			<cmr:label fieldId="PSTExempt">
+        		<cmr:fieldLabel fieldId="PSTExempt" />:
+          	</cmr:label>
+        	<cmr:field path="vatExempt" id="PSTExempt" fieldId="PSTExempt" tabId="MAIN_CUST_TAB" />
+  		</p>		
+  	</cmr:column>
+  	<cmr:column span="2" containerForField="PSTExemptLicNum">
+  		<p> 
+  			<cmr:label fieldId="PSTExemptLicNum">
+        		<cmr:fieldLabel fieldId="PSTExemptLicNum" />:
+          	</cmr:label>
+        	<cmr:field path="taxPayerCustCd" id="PSTExemptLicNum" fieldId="PSTExemptLicNum" tabId="MAIN_CUST_TAB" />
+  		</p>		
+  	</cmr:column>
+  	<cmr:column span="2" containerForField="AuthExemptType">
+  		<p> 
+  			<cmr:label fieldId="AuthExemptType">
+        		<cmr:fieldLabel fieldId="AuthExemptType" />:
+          	</cmr:label><%--TODO path is temporary --%>
+        	<cmr:field path="sectorCd" id="AuthExemptType" fieldId="AuthExemptType" tabId="MAIN_CUST_TAB" />
   		</p>
   	</cmr:column>
   </cmr:row>
   
+  <cmr:row>
+	<cmr:column span="2" containerForField="LeasingCompIndc">
+		<p>
+			<cmr:label fieldId="LeasingCompIndc">
+				<cmr:fieldLabel fieldId="LeasingCompIndc" />
+			</cmr:label>
+			<cmr:field path="leasingCompanyIndc" id="leasingCompanyIndc" fieldId="LeasingCompIndc" tabId="MAIN_CUST_TAB" />
+		</p>
+	</cmr:column>
+  	<cmr:column span="2" containerForField="PurchaseOrdNo">
+		<p>
+			<cmr:label fieldId="PurchaseOrdNo">
+				<cmr:fieldLabel fieldId="PurchaseOrdNo" />:
+			</cmr:label>
+			<cmr:field path="contactName1" id="contactName1" fieldId="PurchaseOrdNo" tabId="MAIN_CUST_TAB" />
+		</p>
+	</cmr:column>
+	<cmr:column span="2" containerForField="OrderBlock">
+		<p>
+			<cmr:label fieldId="custAcctType">
+				<cmr:fieldLabel fieldId="OrderBlock" />:
+				<cmr:delta text="${rdcdata.custAcctType}" oldValue="${reqentry.custAcctType}" />
+			</cmr:label>
+			<cmr:field path="custAcctType" id="custAcctType" fieldId="OrderBlock" tabId="MAIN_CUST_TAB" />
+		</p>
+	</cmr:column>
+  </cmr:row>
+  <cmr:row>
+	<cmr:column span="2" containerForField="MiscBillCode">
+		<p>
+			<cmr:label fieldId="MiscBillCode">
+				<cmr:fieldLabel fieldId="MiscBillCode" />
+			</cmr:label>
+			<cmr:field path="miscBillCd" id="miscBillCd" fieldId="MiscBillCode" tabId="MAIN_CUST_TAB" />
+		</p>
+	</cmr:column>
+  </cmr:row>
   <cmr:row addBackground="true" >
     <cmr:column span="2" containerForField="LocalTax1">
       <p>
@@ -141,22 +204,24 @@
       <p>
         <label for="collectorNameNo"> 
           <cmr:fieldLabel fieldId="BillingProcCd" />: 
-          <cmr:delta text="${rdcdata.collectorNo}" oldValue="${reqentry.collectorNameNo}" />
+          <cmr:delta text="${rdcdata.sizeCd}" oldValue="${reqentry.sizeCd}" />
         </label>
         <cmr:field path="collectorNameNo" id="collectorNameNo" fieldId="BillingProcCd" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
+    <%-- 
     <cmr:column span="2" containerForField="CustomerData">
       <p>
         <label for="taxCd3"> 
-          <cmr:fieldLabel fieldId="CustomerData" />: 
+          <cmr:fieldLabel fieldId="CustomerData" />:--%> 
           <%-- uncomment after DM changes or remap field
           <cmr:delta text="${rdcdata.taxCd3}" oldValue="${reqentry.taxCd3}" />
-          --%>
+          --%><%-- 
         </label>
         <cmr:field path="taxCd3" id="taxCd3" fieldId="CustomerData" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
+    --%>
   </cmr:row>
 
   <cmr:row addBackground="true">
@@ -164,33 +229,22 @@
       <p>
         <label for="locationNumber"> 
           <cmr:fieldLabel fieldId="LocationCode" />:
-          <%-- uncomment after DM changes or remap field 
           <cmr:delta text="${rdcdata.locationNumber}" oldValue="${reqentry.locationNumber}" />
-          --%>
         </label>
         <cmr:field path="locationNumber" id="locationNumber" fieldId="LocationCode" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
-    <cmr:column span="2" containerForField="SizeCode">
-      <p>
-        <label for="orgNo"> 
-          <cmr:fieldLabel fieldId="SizeCode" />:
-          <cmr:delta text="${rdcdata.orgNo}" oldValue="${reqentry.orgNo}" />
-        </label>
-        <cmr:field path="orgNo" id="orgNo" fieldId="SizeCode" tabId="MAIN_CUST_TAB" />
-      </p>
-    </cmr:column>
+
     <cmr:column span="2" containerForField="InvoiceSplitCd">
       <p>
         <label for="cusInvoiceCopies"> 
           <cmr:fieldLabel fieldId="InvoiceSplitCd" />:
-          <%-- uncomment after DM changes or remap field 
           <cmr:delta text="${rdcdata.cusInvoiceCopies}" oldValue="${reqentry.cusInvoiceCopies}" />
-          --%>
         </label>
         <cmr:field path="cusInvoiceCopies" id="cusInvoiceCopies" fieldId="InvoiceSplitCd" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
-  </cmr:row>
-  
+  </cmr:row>  
+  <form:hidden path="iccTaxExemptStatus" id="iccTaxExemptStatus" />
+  <form:hidden path="affiliate" id="affiliate" />	
 </cmr:view>

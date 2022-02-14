@@ -15,7 +15,6 @@ import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 
 import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
 
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
@@ -60,8 +59,8 @@ public class CmrContextListener implements ServletContextListener, HttpSessionLi
     ConfigUtil.init();
 
     System.err.println("CMR Home Dir: " + System.getProperty("cmr.home"));
-    System.err.println("Initializing Log4J for Request CMR...");
-    PropertyConfigurator.configure(ConfigUtil.getResourceStream(log4jFile));
+    // System.err.println("Initializing Log4J for CreateCMR...");
+    // PropertyConfigurator.configure(ConfigUtil.getResourceStream(log4jFile));
 
     logger = Logger.getLogger(CmrContextListener.class);
     logger.debug("Log4j Inititialized.");

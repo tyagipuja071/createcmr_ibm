@@ -16,6 +16,16 @@
       ${ui.addressverificationtext}
     </cmr:column>
 	</cmr:row>
+	
+	<div style="display:none;" id="personalInformationDiv">
+	<br><b>${ui.title.personalinformation}</b>
+	<cmr:row>
+		<cmr:column span="3" width="520">
+      ${ui.personalinformationtext}
+    </cmr:column>
+	</cmr:row>
+	</div>
+	
 	<cmr:row topPad="20">
 		<cmr:column span="3" width="520">
 			<input type="checkbox" id="addrVerAgree"

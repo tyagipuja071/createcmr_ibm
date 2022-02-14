@@ -40,6 +40,7 @@ import com.ibm.cmr.services.client.AutomationServiceClient;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.ServiceClient.Method;
 import com.ibm.cmr.services.client.automation.AutomationResponse;
+import com.ibm.cmr.services.client.automation.la.br.ConsultaCCCResponse;
 import com.ibm.cmr.services.client.automation.la.br.MidasRequest;
 import com.ibm.cmr.services.client.automation.la.br.MidasResponse;
 import com.ibm.cmr.services.client.automation.la.br.SintegraResponse;
@@ -54,7 +55,7 @@ public class BrazilCalculateIBMElement extends OverridingElement {
 
   private static final Logger LOG = Logger.getLogger(BrazilCalculateIBMElement.class);
 
-  private static final List<String> sboToBeChecked = Arrays.asList("504", "505", "556", "657 ", "758", "759", "761", "763", "764 ", "765");
+  private static final List<String> sboToBeChecked = Arrays.asList("504", "505", "556", "657", "758", "759", "761", "763", "764", "765");
   public boolean sboToBeUnchanged = false;
 
   public BrazilCalculateIBMElement(String requestTypes, String actionOnError, boolean overrideData, boolean stopOnError) {
@@ -266,6 +267,15 @@ public class BrazilCalculateIBMElement extends OverridingElement {
         }
         details.append("Country Use = " + data.getMrcCd() + "\n");
 
+        // SET MRC & Country Use as per sboToBeChecked only
+        String autoSbo = sbo.getSbo();
+        if (sboToBeChecked.contains(autoSbo)) {
+          overrides.addOverride(getProcessCode(), "DATA", "MRC_CD", data.getMrcCd(), "Q");
+          LOG.debug("Override value of MRC_CD" + data.getMrcCd());
+          overrides.addOverride(getProcessCode(), "DATA", "CNTRY_USE", data.getMrcCd(), "Q");
+          LOG.debug("Override value of CNTRY_USE" + data.getMrcCd());
+        }
+
         details.append("Sales Rep No = " + sbo.getSbo() + "001" + "\n");
         overrides.addOverride(getProcessCode(), "DATA", "REP_TEAM_MEMBER_NO", data.getRepTeamMemberNo(), sbo.getSbo() + "001");
       }
@@ -474,6 +484,15 @@ public class BrazilCalculateIBMElement extends OverridingElement {
         }
         details.append("Country Use = " + data.getMrcCd() + "\n");
 
+        // SET MRC & Country Use as per sboToBeChecked only
+        String autoSbo = (String) rootMatch[8];
+        if (sboToBeChecked.contains(autoSbo)) {
+          overrides.addOverride(getProcessCode(), "DATA", "MRC_CD", data.getMrcCd(), "Q");
+          LOG.debug("Override value of MRC_CD" + data.getMrcCd());
+          overrides.addOverride(getProcessCode(), "DATA", "CNTRY_USE", data.getMrcCd(), "Q");
+          LOG.debug("Override value of CNTRY_USE" + data.getMrcCd());
+        }
+
         details.append("Sales Rep No = " + (String) rootMatch[8] + "001" + "\n");
         overrides.addOverride(getProcessCode(), "DATA", "REP_TEAM_MEMBER_NO", data.getRepTeamMemberNo(), (String) rootMatch[8] + "001");
 
@@ -611,6 +630,15 @@ public class BrazilCalculateIBMElement extends OverridingElement {
         }
         details.append("Country Use = " + data.getMrcCd() + "\n");
 
+        // SET MRC & Country Use as per sboToBeChecked only
+        String autoSbo = sbo.getSbo();
+        if (sboToBeChecked.contains(autoSbo)) {
+          overrides.addOverride(getProcessCode(), "DATA", "MRC_CD", data.getMrcCd(), "Q");
+          LOG.debug("Override value of MRC_CD" + data.getMrcCd());
+          overrides.addOverride(getProcessCode(), "DATA", "CNTRY_USE", data.getMrcCd(), "Q");
+          LOG.debug("Override value of CNTRY_USE" + data.getMrcCd());
+        }
+
         details.append("Sales Rep No = " + sbo.getSbo() + "001" + "\n");
         overrides.addOverride(getProcessCode(), "DATA", "REP_TEAM_MEMBER_NO", data.getRepTeamMemberNo(), sbo.getSbo() + "001");
       }
@@ -666,6 +694,17 @@ public class BrazilCalculateIBMElement extends OverridingElement {
             // data.getMrcCd(), sboMSP.getMrcCd());
             // }
             // details.append("Country Use = " + data.getMrcCd() + "\n");
+            // SET MRC & Country Use as per sboToBeChecked only
+            // String autoSbo = sboMSP.getSbo();
+            // if (sboToBeChecked.contains(autoSbo)) {
+            // overrides.addOverride(getProcessCode(), "DATA", "MRC_CD",
+            // data.getMrcCd(), "Q");
+            // LOG.debug("Override value of MRC_CD" + data.getMrcCd());
+            // overrides.addOverride(getProcessCode(), "DATA", "CNTRY_USE",
+            // data.getMrcCd(), "Q");
+            // LOG.debug("Override value of CNTRY_USE" + data.getMrcCd());
+            // data.getMrcCd(), "Q");
+            // }
           }
 
           sql = ExternalizedQuery.getSql("BR.AUTO.GET_COLLECTOR_FROM_STATE");
@@ -1198,6 +1237,7 @@ public class BrazilCalculateIBMElement extends OverridingElement {
       Addr addr, String addrTypeDesc, StringBuilder details, Data data) {
     LOG.debug("State Fiscal code not found on the request. Querying Sintgra API again.");
     AutomationResponse<SintegraResponse> response = null;
+    AutomationResponse<ConsultaCCCResponse> consultaResponse = null;
     boolean ifError = false;
     String status = null;
     String stateFiscalCode = null;
@@ -1227,6 +1267,23 @@ public class BrazilCalculateIBMElement extends OverridingElement {
                 icms = "1";
                 code = "ISENTO";
               }
+
+              if ("ISENTO".equals(code)) {
+                consultaResponse = BrazilUtil.querySintegraByConsulata(vat, state);
+                if (consultaResponse.isSuccess()) {
+                  ConsultaCCCResponse consulta = consultaResponse.getRecord();
+                  if (consulta != null) {
+                    status = consulta.getStateFiscalCodeStatus();
+                    if ("Habilitado".equalsIgnoreCase(status) || "Ativo".equalsIgnoreCase(status) || "habilitada".equalsIgnoreCase(status)
+                        || "Ativa".equalsIgnoreCase(status)) {
+                      code = consulta.getStateFiscalCode();
+                    } else {
+                      code = "ISENTO";
+                    }
+                  }
+                }
+              }
+
               details.append(addrTypeDesc + " State Fiscal Code Status = " + status + "\n");
               if ("ZS01".equals(addrType)) {
                 LOG.debug("Setting ICMS and TAX_PAYER_CUST_CD to " + icms);
@@ -1247,8 +1304,24 @@ public class BrazilCalculateIBMElement extends OverridingElement {
             LOG.debug("Warning: State Fiscal Code cannot be determined from Sintegra .\n");
           }
         } else {
+            consultaResponse = BrazilUtil.querySintegraByConsulata(vat, state);
+            if (consultaResponse.isSuccess()) {
+              ConsultaCCCResponse consulta = consultaResponse.getRecord();
+              if (consulta != null) {
+                status = consulta.getStateFiscalCodeStatus();
+                if ("Habilitado".equalsIgnoreCase(status) || "Ativo".equalsIgnoreCase(status) || "habilitada".equalsIgnoreCase(status)
+                    || "Ativa".equalsIgnoreCase(status)) {
+                  stateFiscalCode = consulta.getStateFiscalCode();
+                } else {
           status = "ISENTO";
           stateFiscalCode = "ISENTO";
+                }
+              }
+            } else {
+              status = "ISENTO";
+              stateFiscalCode = "ISENTO";
+            }
+
           details.append(addrTypeDesc + " State Fiscal Code cannot be determined from Sintegra.Setting to ISENTO\n");
           details.append(addrTypeDesc + " State Fiscal Code Status = " + status + "\n");
           details.append(addrTypeDesc + " State Fiscal Code= " + "ISENTO" + "\n");

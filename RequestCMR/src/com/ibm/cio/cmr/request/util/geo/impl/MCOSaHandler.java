@@ -505,6 +505,15 @@ public class MCOSaHandler extends MCOHandler {
   @Override
   public void doBeforeAddrSave(EntityManager entityManager, Addr addr, String cmrIssuingCntry) throws Exception {
     serBlankFieldsAtCopy(addr);
+
+    if ("ZS01".equals(addr.getId().getAddrType())) {
+      Admin admin = LegacyCommonUtil.getAdminByReqId(entityManager, addr.getId().getReqId());
+
+      if (CmrConstants.REQ_TYPE_UPDATE.equalsIgnoreCase(admin.getReqType())) {
+        AddrRdc addrRdc = LegacyCommonUtil.getAddrRdcRecord(entityManager, addr);
+        addr.setLandCntry(addrRdc.getLandCntry());
+      }
+    }
   }
 
   @Override

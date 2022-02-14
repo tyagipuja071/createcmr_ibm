@@ -143,7 +143,7 @@ public class GBGMatchingElement extends MatchingElement {
       MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
           MatchingServiceClient.class);
       client.setRequestMethod(Method.Get);
-      client.setReadTimeout(1000 * 60 * 5);
+      client.setReadTimeout(1000 * 60 * 30);
 
       LOG.debug("Connecting to the GBG Finder Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
       MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.GBG_SERVICE_ID, request, MatchingResponse.class);

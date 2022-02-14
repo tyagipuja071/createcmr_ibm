@@ -34,6 +34,13 @@ public class FieldComputationElement extends OverridingElement {
     AutomationResult<OverrideOutput> result = null;
     AutomationUtil countryUtil = AutomationUtil.getNewCountryUtil(issuingCntry);
     log.debug("Automation Util for " + issuingCntry + " = " + (countryUtil != null ? countryUtil.getClass().getSimpleName() : "none"));
+    if (engineData.hasPositiveCheckStatus(AutomationEngineData.SKIP_FIELD_COMPUTATION)) {
+      results.setDetails("Coverage calculation skipped due to previous element execution results.");
+      results.setResults("Skipped");
+      results.setProcessOutput(results.getProcessOutput());
+      log.debug("Skipping field compuation..");
+      return results;
+    }
     if (countryUtil != null) {
       result = countryUtil.doCountryFieldComputations(entityManager, results, details, overrides, requestData, engineData);
     }

@@ -15,6 +15,7 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
@@ -110,7 +111,9 @@ public class MassCreateFileParser {
    */
   private ValidationResult validateFile(XSSFWorkbook book) {
     XSSFSheet sheet = book.getSheet(META_SHEET_NAME);
-    String version = sheet.getRow(0).getCell(1).getStringCellValue();
+    XSSFCell cell = sheet.getRow(0).getCell(1);
+    cell.setCellType(CellType.STRING);
+    String version = cell.getStringCellValue();
     String currentVersion = SystemConfiguration.getValue("MASS_CREATE_TEMPLATE_VER", "0.1");
     if (StringUtils.isBlank(version) || !version.equals(currentVersion)) {
       LOG.debug("Invalid version:" + version + " Current: " + currentVersion);

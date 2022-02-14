@@ -55,7 +55,6 @@
 					<dbColumn>COLLECTION_CD</dbColumn>
 					<width>30</width>
 					<length>6</length>
-					<lovId>CollectionCd</lovId>
 				</column>
 
 				<column exactLength="true">

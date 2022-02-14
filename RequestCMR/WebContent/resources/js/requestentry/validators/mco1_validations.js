@@ -403,12 +403,13 @@ function lockRequireFieldsZA() {
 function disableAddrFieldsZA() {
   var custType = FormManager.getActualValue('custGrp');
   var addrType = FormManager.getActualValue('addrType');
+  var reqType = FormManager.getActualValue('reqType');
 
   if (custType != null && custType.includes('LOC')) {
     custType = 'LOCAL';
   }
 
-  if (custType == 'LOCAL' && addrType == 'ZS01') {
+  if ((custType == 'LOCAL' || reqType == 'U') && addrType == 'ZS01') {
     FormManager.readOnly('landCntry');
   } else {
     FormManager.enable('landCntry');

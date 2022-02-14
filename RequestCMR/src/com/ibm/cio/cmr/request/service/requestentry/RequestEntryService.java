@@ -1486,7 +1486,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
    * @return
    * @throws Exception
    */
-  private DnBCompany getDnBDetailsUI(String dunsNo) throws Exception {
+  public static DnBCompany getDnBDetailsUI(String dunsNo) throws Exception {
     CmrClientService service = new CmrClientService();
     ModelMap map = new ModelMap();
     service.getDnBDetails(map, dunsNo);
