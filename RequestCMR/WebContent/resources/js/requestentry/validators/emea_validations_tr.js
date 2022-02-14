@@ -68,6 +68,16 @@ function getImportedIndcForItaly() {
 
 }
 
+function addISUHandler() {
+  var _CTCHandler = null;
+  _isuCdHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+    setClientTierValuesTR(value);
+  });
+  _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
+    setClientTierValuesTR();
+  });
+}
+
 // CREATCMR-2657 for TURKEY
 function setSORTL() {
   if (FormManager.getActualValue('cmrIssuingCntry') != '862') {
@@ -2132,8 +2142,10 @@ function setClientTierValuesTR(isuCd) {
   }
   if (_isuCdHandler == null && FormManager.getField('isuCd')) {
     _isuCdHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
-      isuCd = FormManager.getActualValue('isuCd');
-      if (isuCd == '5K') {
+      if (value == null) {
+        value = FormManager.getActualValue('isuCd');
+      }
+      if (value == '5K') {
         FormManager.removeValidator('clientTier', Validators.REQUIRED);
         FormManager.setValue('clientTier', '');
         FormManager.readOnly('clientTier');
@@ -9977,6 +9989,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(afterConfigForTR, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(afterConfigForTR, [ SysLoc.TURKEY ]);
   GEOHandler.addAddrFunction(addLatinCharValidator, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterTemplateLoad(addISUHandler, [ SysLoc.TURKEY ]);
 
   // Greece
   GEOHandler.addAfterConfig(addHandlersForGRCYTR, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
