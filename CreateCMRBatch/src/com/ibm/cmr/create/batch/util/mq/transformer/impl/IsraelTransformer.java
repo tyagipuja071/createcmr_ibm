@@ -1168,7 +1168,11 @@ public class IsraelTransformer extends EMEATransformer {
           }
         }
       } else {
-        lstAddrLines.add(addr.getLandCntry());
+        if (Arrays.asList("ZS01", "ZP01", "ZD01").contains(addr.getId().getAddrType())) {
+          lstAddrLines.add(LandedCountryMap.getLovCountryName(addr.getLandCntry()));
+        } else {
+          lstAddrLines.add(LandedCountryMap.getCountryName(addr.getLandCntry()));
+        }
         sbAddrLu.append("J");
       }
     }
