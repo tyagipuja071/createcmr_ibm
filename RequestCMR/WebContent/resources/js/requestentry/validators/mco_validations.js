@@ -2715,6 +2715,144 @@ function streetValueFormatter(value, rowIndex) {
 }
 
 /* End 1430539 */
+
+function enableCMRNUMForPROCESSOR() {
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  if (role == "PROCESSOR" && FormManager.getActualValue('cmrIssuingCntry') == '838') {
+    if (FormManager.getActualValue('reqType') == 'C') {
+      FormManager.enable('cmrNo');
+    } else {
+      FormManager.readOnly('cmrNo');
+    }
+  }
+}
+
+function validateCMRNumberForSpain() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var cmrNo = FormManager.getActualValue('cmrNo');
+        var _custSubGrp = FormManager.getActualValue('custSubGrp');
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var numPattern = /^[0-9]+$/;
+        if (cmrNo == '000000') {
+          return new ValidationResult(null, false, 'CMR Number should be number only Except -> 000000');
+        }
+        if (FormManager.getActualValue('reqType') != 'C') {
+          return new ValidationResult(null, true);
+        }
+        if (cmrNo == '') {
+          return new ValidationResult(null, true);
+        } else {
+          // Skip validation for Prospect Request
+          var ifProspect = FormManager.getActualValue('prospLegalInd');
+          if (dijit.byId('prospLegalInd')) {
+            ifProspect = dijit.byId('prospLegalInd').get('checked') ? 'Y' : 'N';
+          }
+          console.log("validateCMRNumberForLegacy ifProspect:" + ifProspect);
+          if ('Y' == ifProspect) {
+            return new ValidationResult(null, true);
+          }
+          if (_custSubGrp == 'INTSO') {
+            if (!cmrNo.startsWith("997")) {
+              return new ValidationResult(null, false, 'Internal SO CMR should begin with 997.');
+            }
+          } else if (_custSubGrp != 'INTSO' || _custSubGrp == 'INTER') {
+            if (cmrNo.startsWith("997")) {
+              return new ValidationResult(null, false, 'CMR Starting with 997 is allowed for InternalSO Scenario Only.');
+            }
+          }
+          // Validation for Internal Scenario
+          if (_custSubGrp == 'INTER') {
+            if (!cmrNo.startsWith("99")) {
+              return new ValidationResult(null, false, 'Internal CMR should begin with 99.');
+            }
+          } else if (_custSubGrp != 'INTER' && _custSubGrp != 'INTSO') {
+            if (cmrNo.startsWith("99")) {
+              return new ValidationResult(null, false,
+                  'CMR Starting with 99 is allowed for Internal Scenario Only and CMR Starting with 997 is allowed for InternalSO Scenario Only.');
+            }
+          }
+          if (cmrNo.length >= 1 && cmrNo.length != 6) {
+            return new ValidationResult(null, false, 'CMR Number should be 6 digit long.');
+          }
+          if (cmrNo.length > 1 && !cmrNo.match(numPattern)) {
+            return new ValidationResult({
+              id : 'cmrNo',
+              type : 'text',
+              name : 'cmrNo'
+            }, false, 'CMR Number should be number only.');
+          }
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
+function validateExistingCMRNo() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        console.log('checking requested cmr number...');
+        var reqType = FormManager.getActualValue('reqType');
+        var cmrNo = FormManager.getActualValue('cmrNo');
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var action = FormManager.getActualValue('yourAction');
+        var _custSubGrp = FormManager.getActualValue('custSubGrp');
+        if (reqType == 'C' && cmrNo) {
+          if (cmrNo.startsWith('P')) {
+            return new ValidationResult(null, true);
+          }
+          var exists = cmr.query('LD.CHECK_CMR_EXIST_IN_RDC', {
+            COUNTRY : cntry,
+            CMR_NO : cmrNo,
+            MANDT : cmr.MANDT
+          });
+          if (exists && exists.ret1 && action != 'PCM') {
+            return new ValidationResult({
+              id : 'cmrNo',
+              type : 'text',
+              name : 'cmrNo'
+            }, false, 'The requested CMR Number ' + cmrNo + ' already exists in the system.');
+          } else {
+            exists = cmr.query('LD.CHECK_EXISTING_CMR_NO_RESERVED', {
+              COUNTRY : cntry,
+              CMR_NO : cmrNo,
+              MANDT : cmr.MANDT
+            });
+            if (exists && exists.ret1) {
+              return new ValidationResult({
+                id : 'cmrNo',
+                type : 'text',
+                name : 'cmrNo'
+              }, false, 'The requested CMR Number ' + cmrNo + ' already exists in the system.');
+            } else {
+              var exists = cmr.query('LD.CHECK_EXISTING_CMR_NO', {
+                COUNTRY : cntry,
+                CMR_NO : cmrNo,
+                MANDT : cmr.MANDT
+              });
+              if (exists && exists.ret1) {
+                return new ValidationResult({
+                  id : 'cmrNo',
+                  type : 'text',
+                  name : 'cmrNo'
+                }, false, 'The requested CMR Number ' + cmrNo + ' already exists in the system.');
+              }
+            }
+          }
+        }
+        return new ValidationResult({
+          id : 'cmrNo',
+          type : 'text',
+          name : 'cmrNo'
+        }, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.MCO = [ SysLoc.PORTUGAL, SysLoc.SPAIN ];
   console.log('adding MCO functions...');
