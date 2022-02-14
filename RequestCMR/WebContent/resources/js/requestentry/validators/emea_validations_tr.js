@@ -2126,6 +2126,25 @@ function set32SBOLogicOnFieldChange() {
   }
 }
 
+function setClientTierValuesTR(isuCd) {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  if (_isuCdHandler == null && FormManager.getField('isuCd')) {
+    _isuCdHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+      isuCd = FormManager.getActualValue('isuCd');
+      if (isuCd == '5K') {
+        FormManager.removeValidator('clientTier', Validators.REQUIRED);
+        FormManager.setValue('clientTier', '');
+        FormManager.readOnly('clientTier');
+      } else {
+        var reqType = FormManager.getActualValue('reqType');
+        FormManager.enable('clientTier');
+      }
+    });
+  }
+}
+
 function autoSetSboSrOnAddrSaveUK() {
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.UK) {
 
@@ -9934,6 +9953,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(salesSRforUpdateOnChange, [ SysLoc.TURKEY ]);
   // GEOHandler.registerValidator(addDPLCheckValidatorTR, [ SysLoc.TURKEY ],
   // null, true);
+  GEOHandler.addAfterConfig(setClientTierValuesTR, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterTemplateLoad(setClientTierValuesTR, [ SysLoc.TURKEY ]);
 
   GEOHandler.addAddrFunction(updateAbbrNameWithZS01TR, [ SysLoc.TURKEY ]);
   GEOHandler.addAddrFunction(updateAbbrLocWithZS01TR, [ SysLoc.TURKEY ]);

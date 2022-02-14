@@ -163,6 +163,10 @@ public class FstTransformer extends MCOTransformer {
     } else {
       legacyCust.setDeptCd("");
     }
+    
+    if (!StringUtils.isEmpty(data.getIsuCd()) && "5K".equals(data.getIsuCd())) {
+      legacyCust.setIsuCd(data.getIsuCd() + "7");
+    }
   }
 
   private boolean isInternalScenario(Data data, Admin admin) {
@@ -658,6 +662,18 @@ public class FstTransformer extends MCOTransformer {
         } else if ("N".equals(cod)) {
           legacyCust.setModeOfPayment("");
         }
+      }
+    }
+
+    if (StringUtils.isNotBlank(muData.getClientTier()) && "5K".equals(muData.getIsuCd())) {
+      legacyCust.setIsuCd(muData.getIsuCd() + "7");
+    } else {
+      String isuCd = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "")
+          + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
+      if (isuCd != null && isuCd.endsWith("@")) {
+        legacyCust.setIsuCd((!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : legacyCust.getIsuCd().substring(0, 2)) + "7");
+      } else if (isuCd != null) {
+        legacyCust.setIsuCd(isuCd);
       }
     }
 
