@@ -99,6 +99,22 @@ function afterConfigTW() {
   if (custSubGrp == 'LOINT') {
     FormManager.addValidator('isicCd', Validators.REQUIRED, [ 'ISIC' ], 'MAIN_CUST_TAB');
   }
+  if (reqType == 'C' && custSubGrp == 'ECOSY') {
+    FormManager.readOnly('searchTerm');
+    FormManager.readOnly('clientTier');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('mrcCd');
+    FormManager.setValue('apCustClusterId', '08043');
+    FormManager.setValue('clientTier', 'Y');
+    FormManager.setValue('isuCd', '34');
+    FormManager.setValue('mrcCd', '3');
+  }
+  if (reqType == 'C' && custSubGrp == 'LOECO') {
+    FormManager.readOnly('searchTerm');
+    FormManager.readOnly('clientTier');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('mrcCd');
+  }
 
   setVatValidator();
 }
@@ -119,7 +135,7 @@ function addHandlersForTW() {
 
   if (_ISICHandler == null) {
     _ISICHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
-      setISUCodeValues(value);
+      // setISUCodeValues(value);
     });
   }
 

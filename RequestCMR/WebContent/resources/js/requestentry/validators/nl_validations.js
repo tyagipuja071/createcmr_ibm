@@ -81,8 +81,15 @@ function afterConfigForNL() {
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
   }
+  var sourceSystId = FormManager.getActualValue('sourceSystId');
+  // PayGo_check
+  var qParams = {
+    SYST_ID : sourceSystId
+  };
+  var paygoUser = cmr.query('PAYGO.CHECK.CRN', qParams);
+  var countpaygo = paygoUser.ret1;
   if ((custSubScnrio == 'PUBCU' && role == 'Processor') || custSubScnrio == 'PRICU' || custSubScnrio == 'CBCOM' || custSubScnrio == 'CBBUS'
-      || (custSubScnrio == 'INTER' && vatExempt && vatExemptChecked) || viewOnlyPage == 'true') {
+      || (custSubScnrio == 'INTER' && vatExempt && vatExemptChecked) || viewOnlyPage == 'true' || (Number(countpaygo) == 1 && role == 'Processor')) {
     FormManager.removeValidator('taxCd2', Validators.REQUIRED);
   } else if (reqType != 'U') {
     FormManager.addValidator('taxCd2', Validators.REQUIRED, [ 'KVK' ], 'MAIN_CUST_TAB');
@@ -114,6 +121,56 @@ function lockDunsNo() {
   if (role == 'REQUESTER') {
     FormManager.readOnly('dunsNo');
   }
+}
+
+function checkCmrUpdateBeforeImport() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var cmrNo = FormManager.getActualValue('cmrNo');
+        var reqId = FormManager.getActualValue('reqId');
+        var reqType = FormManager.getActualValue('reqType');
+        var uptsrdc = '';
+        var lastupts = '';
+
+        if (reqType == 'C') {
+          // console.log('reqType = ' + reqType);
+          return new ValidationResult(null, true);
+        }
+
+        var resultsCC = cmr.query('GETUPTSRDC', {
+          COUNTRY : cntry,
+          CMRNO : cmrNo,
+          MANDT : cmr.MANDT
+        });
+
+        if (resultsCC != null && resultsCC != undefined && resultsCC.ret1 != '') {
+          uptsrdc = resultsCC.ret1;
+          // console.log('lastupdatets in RDC = ' + uptsrdc);
+        }
+
+        var results11 = cmr.query('GETUPTSADDR', {
+          REQ_ID : reqId
+        });
+        if (results11 != null && results11 != undefined && results11.ret1 != '') {
+          lastupts = results11.ret1;
+          // console.log('lastupdatets in CreateCMR = ' + lastupts);
+        }
+
+        if (lastupts != '' && uptsrdc != '') {
+          if (uptsrdc > lastupts) {
+            return new ValidationResult(null, false, 'This CMR has a new update , please re-import this CMR.');
+          } else {
+            return new ValidationResult(null, true);
+          }
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
 
 function disableCmrNo() {
@@ -767,10 +824,10 @@ function setAbbrvNmLoc() {
   if (abbrvNm && abbrvNm.length > 22) {
     abbrvNm = abbrvNm.substring(0, 22);
   }
+
   if (abbrevLocn && abbrevLocn.length > 12) {
     abbrevLocn = abbrevLocn.substring(0, 12);
   }
-
   if (abbrevLocn != null) {
     FormManager.setValue('abbrevLocn', abbrevLocn);
   }
@@ -1587,6 +1644,9 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(restrictDuplicateAddr, GEOHandler.NL, null, true);
   GEOHandler.registerValidator(rdcDupZP01Check, GEOHandler.NL, null, true);
   GEOHandler.registerValidator(rdcDupZP01CheckValidator, GEOHandler.NL, null, true);
+  // GEOHandler.addAfterConfig(resetVATValidationsForPayGo, GEOHandler.NL);
+  // GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo,
+  // GEOHandler.NL);
   GEOHandler.registerValidator(addIGFZP02Validator, GEOHandler.NL, null, true);
-
+  GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.NL, null, true);
 });

@@ -304,7 +304,7 @@ if (window.dojo) {
       delete options.data;
 
       options.callbackParamName = 'callback';
-      // options.handleAs = 'json';
+      //options.handleAs = 'json';
 
       var success = options.success;
       delete options.success;
@@ -319,7 +319,20 @@ if (window.dojo) {
       // var deferred = dojo.xhrGet(options);
       // 
       // return deferred.ioArgs.xhr;
-      dojo.io.script.get(options);
+      
+      dojo.xhrGet({
+        url : options.url,
+        handleAs : 'json',
+        method : 'GET',
+        timeout : options.timeout,
+        sync : false,
+        load : function(json, data) {
+          return success(json, undefined, data.xhr);
+        },
+        error : options.error
+      });
+
+      //dojo.io.script.get(options);
     };
 
     // Uses the dojo.NodeList-data module
@@ -599,17 +612,20 @@ if (!Function.prototype.bind) {
       moreResultsLabel : 'See more Faces (${count})',
       moreResultsLabel2 : 'See more Faces (over ${count})',
       moreResultsUrl : '//w3-services1.w3-969.ibm.com/myw3/unified-profile/v1#${query}',
-      host : protocol + '//w3-services1.w3-969.ibm.com/myw3/unified-profile/v1',
+      host : protocol + '//unified-profile-search-service.us-south-k8s.intranet.ibm.com',
       imageHost : protocol + '//unified-profile-api.us-south-k8s.intranet.ibm.com/v3',
       largeImageSize : 50,
       smallImageSize : 32,
       url : function(host) {
-        return API.buildURL('/find/', host);
+        return API.buildURL('/search', host);
       },
       extraParams : {
-        'threshold' : 0,
-        'limit' : 13,
-        'format' : 'faces'
+        'searchConfig' : 'optimized_search',
+        'start' : 0,
+        'rows' : 20,
+        'timeout' : 2000,
+        'distributionList' : false,
+        'facetCounts' : false
       // 'user': 'finleyt@us.ibm.com',
       },
       onclick : function(person) {
@@ -802,11 +818,11 @@ if (!Function.prototype.bind) {
 
     buildURL : function(str, host) {
       if (typeof host != "undefined") {
-        return host + '/api' + str;
+        return host + str;
       } else if (/^\/faces/.test(window.location.pathname)) {
         return "/faces/api" + str;
       } else {
-        return "/api" + str;
+        return str; 
       }
     },
 
@@ -1310,7 +1326,7 @@ if (!Function.prototype.bind) {
           setTimeout(function() {
             for ( var f in settings.features) {
               var cachedResults = caches[f].get(query), data = {
-                'q' : query,
+                'query' : query,
                 key : settings.key
               }, isPaging = false;
 
@@ -1344,7 +1360,7 @@ if (!Function.prototype.bind) {
 
       var xhr; // = {};
       var f = feature;
-
+      
       xhr = h.fetchJSON({
         'url' : settings[f].url(settings[f].host),
         'data' : h.extendObject({}, settings[feature].extraParams, data),
@@ -1359,7 +1375,7 @@ if (!Function.prototype.bind) {
               if (!isPaging) {
                 caches[f].add(query, results);
               }
-
+              console.log(results);
               outputHtml(f, query, results, params);
             }
 
@@ -1368,7 +1384,7 @@ if (!Function.prototype.bind) {
           };
         }(ajaxCounter),
 
-        'error' : function(xhrId) {
+        'error' : function(xhrId, a) {
           return function() {
             settings.extraOptions = null;
 
@@ -1434,11 +1450,11 @@ if (!Function.prototype.bind) {
         // Removed a section of code which set persons to an empty array if it
         // didn't exist. So just to be safe check to make sure persons array
         // exists first.
-        numResults = resultsJson.persons ? resultsJson.persons.length : 0;
+        numResults = resultsJson.results ? resultsJson.results.length : 0;
 
         // Prepare results
         for ( var i = 0; i < numResults; i++) {
-          results.push(API.fixReturnedPerson(resultsJson.persons[i]));
+          results.push(API.fixReturnedPerson(resultsJson.results[i]));
         }
 
         numTopResults = calculateNumberTopResults(results);
@@ -1633,8 +1649,8 @@ if (!Function.prototype.bind) {
       img.src = [ settings.faces.imageHost, '/image/', user.uid, '.jpg' ].join('');
       img.setAttribute('alt', user.name);
       fragment.appendChild(img);
-
-      name.appendChild(document.createTextNode(user.name));
+      
+      name.appendChild(document.createTextNode(user.nameDisplay));
       name.className = 'name';
       info.appendChild(name);
       info.appendChild(document.createElement('br'));
@@ -1659,17 +1675,21 @@ if (!Function.prototype.bind) {
         meta.appendChild(phone);
       }
 
-      email.appendChild(document.createTextNode(user.email));
+      email.appendChild(document.createTextNode(user.preferredIdentity));
       email.className = 'email';
       // email.href = 'mailto:' + user.email;
       meta.appendChild(email);
       meta.appendChild(document.createElement('br'));
 
-      if (user.bio) {
+      if (user.role) {
         bio.className = 'bio';
-        bio.appendChild(document.createTextNode(user.bio));
+        bio.appendChild(document.createTextNode(user.role));
         meta.appendChild(bio);
       }
+      
+      user.email = user.preferredIdentity;
+      user.name = user.nameDisplay
+      user['notes-id'] = user.notesEmail;
 
       fragment.appendChild(info);
 

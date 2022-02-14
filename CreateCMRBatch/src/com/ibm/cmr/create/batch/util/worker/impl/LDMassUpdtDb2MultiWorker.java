@@ -53,6 +53,10 @@ public class LDMassUpdtDb2MultiWorker extends MassUpdateMultiWorker {
     CMRRequestContainer cmrObjects = service.prepareRequest(entityManager, this.parentRow, this.parentAdmin);
     Data data = cmrObjects.getData();
 
+    if (!isOwnerCorrect(entityManager, this.parentRow.getCmrNo(), data.getCmrIssuingCntry())) {
+      throw new Exception("Some CMRs on the request are not owned by IBM. Please check input CMRs");
+    }
+
     // for every mass update data
     // prepare the createCMR data to be saved
     LegacyDirectObjectContainer legacyObjects = service.mapRequestDataForMassUpdate(entityManager, cmrObjects, this.parentRow, this.errorCmrs,

@@ -194,10 +194,10 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
         scorecard.setId(scorecardPK);
         setScorecardDefaults(scorecard);
       }
-	  
-	   if (searchModel.isPoolRecord()) {
-          geoHandler.setPoolProcessing(true);
-        }
+
+      if (searchModel.isPoolRecord()) {
+        geoHandler.setPoolProcessing(true);
+      }
 
       if (mainRecord != null) {
         cmrNo = mainRecord.getCmrNum();
@@ -667,6 +667,7 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
       addr.setLandCntry(cmr.getCmrCountryLanded());
       if ("U".equals(reqModel.getReqType()) || "X".equals(reqModel.getReqType())) {
         addr.setSapNo(cmr.getCmrSapNumber());
+        addr.setIerpSitePrtyId(cmr.getCmrSitePartyID()); // ierpSitePrtyId
         addr.setAddrStdResult("X");
         addr.setRdcCreateDt(cmr.getCmrRdcCreateDate());
         addr.setRdcLastUpdtDt(SystemUtil.getCurrentTimestamp()); // placeholder

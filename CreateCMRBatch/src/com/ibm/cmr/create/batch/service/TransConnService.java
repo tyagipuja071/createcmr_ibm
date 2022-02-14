@@ -1482,6 +1482,7 @@ public class TransConnService extends BaseBatchService {
     List<Addr> addrList = addrQuery.getResults(Addr.class);
     for (Addr addr : addrList) {
       addr.setSapNo(record.getSapNo());
+      addr.setIerpSitePrtyId(record.getIerpSitePartyId());
       addr.setRdcCreateDt(record.getCreateDate());
       addr.setRdcLastUpdtDt(SystemUtil.getCurrentTimestamp());
       LOG.info("Address Record Updated [Request ID: " + addr.getId().getReqId() + " Type: " + addr.getId().getAddrType() + " SAP No: "
@@ -1658,6 +1659,9 @@ public class TransConnService extends BaseBatchService {
                   comment = comment.append(response.getRecords().get(i).getSapNo() + " ");
                   if (StringUtils.isBlank(addr.getSapNo())) {
                     addr.setSapNo(response.getRecords().get(i).getSapNo());
+                  }
+                  if (StringUtils.isBlank(addr.getIerpSitePrtyId())) {
+                    addr.setIerpSitePrtyId(response.getRecords().get(i).getIerpSitePartyId());
                   }
                 }
               }
@@ -2574,6 +2578,28 @@ public class TransConnService extends BaseBatchService {
     }
 
     return lists;
+  }
+
+  /**
+   * 
+   * @param entityManager
+   * @param cmrNo
+   * @param cmrIssuingCntry
+   * @return
+   */
+  protected boolean isOwnerCorrect(EntityManager entityManager, String cmrNo, String cmrIssuingCntry) {
+    String sql = "select KATR10 from SAPR3.KNA1 where MANDT = :MANDT and KATR6 = :COUNTRY and ZZKV_CUSNO = :CMR_NO and KTOKD = 'ZS01'";
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("COUNTRY", cmrIssuingCntry);
+    query.setParameter("CMR_NO", cmrNo);
+    String katr10 = query.getSingleResult(String.class);
+    if (katr10 == null) {
+      // non existent, return true;
+      return true;
+    } else {
+      return "".equals(katr10.trim());
+    }
   }
 
   public boolean isMultiMode() {

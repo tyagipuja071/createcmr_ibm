@@ -312,10 +312,9 @@ public class GermanyUtil extends AutomationUtil {
       if (!"ZS01".equals(addr.getId().getAddrType())) {
         removed = true;
         String custNm = (addr.getCustNm1().trim() + (StringUtils.isNotBlank(addr.getCustNm2()) ? " " + addr.getCustNm2().trim() : "")).toUpperCase();
-        String streetaddress = ((StringUtils.isNotBlank(addr.getAddrTxt()) ? addr.getAddrTxt().trim() : ""))
-                .toUpperCase();
-        if (custNm.equals(mainCustNm) && streetaddress.equals(mainStreetAddress1) 
-            && addr.getCity1().trim().toUpperCase().equals(mainCity) && addr.getPostCd().trim().equals(mainPostalCd)) {
+        String streetaddress = ((StringUtils.isNotBlank(addr.getAddrTxt()) ? addr.getAddrTxt().trim() : "")).toUpperCase();
+        if (custNm.equals(mainCustNm) && streetaddress.equals(mainStreetAddress1) && addr.getCity1().trim().toUpperCase().equals(mainCity)
+            && addr.getPostCd().trim().equals(mainPostalCd)) {
           details.append("Removing duplicate address record: " + addr.getId().getAddrType() + " from the request.").append("\n");
           Addr merged = entityManager.merge(addr);
           if (merged != null) {
@@ -615,6 +614,16 @@ public class GermanyUtil extends AutomationUtil {
           }
 
         }
+      } else if (changes.isDataChanged("Order Block")) {
+        UpdatedDataModel OBChange = changes.getDataChange("Order Block");
+        if (OBChange != null) {
+          if ("88".equals(OBChange.getOldData()) || "88".equals(OBChange.getNewData()) || "94".equals(OBChange.getOldData())
+              || "94".equals(OBChange.getOldData())) {
+            // noop
+            detail.append("Updates to the Order Block field are validated.\n");
+            LOG.debug("Updates to the Order Block field are validated.");
+          }
+        }
       } else {
         boolean otherFieldsChanged = false;
         for (UpdatedDataModel dataChange : changes.getDataUpdates()) {
@@ -679,7 +688,7 @@ public class GermanyUtil extends AutomationUtil {
 
       if (shipTo != null && (changes.isAddressChanged("ZD01") || isAddressAdded(shipTo))) {
         // Check If Address already exists on request
-        isShipToExistOnReq = addressExists(entityManager, shipTo ,requestData);
+        isShipToExistOnReq = addressExists(entityManager, shipTo, requestData);
         if (isShipToExistOnReq) {
           detail.append("Ship To details provided matches an existing address.");
           validation.setMessage("ShipTo already exists");
@@ -696,7 +705,7 @@ public class GermanyUtil extends AutomationUtil {
 
       if (installAt != null && (changes.isAddressChanged("ZI01") || isAddressAdded(installAt))) {
         // Check If Address already exists on request
-        isInstallAtExistOnReq = addressExists(entityManager, installAt , requestData);
+        isInstallAtExistOnReq = addressExists(entityManager, installAt, requestData);
         if (isInstallAtExistOnReq) {
           detail.append("Install At details provided matches an existing address.");
           engineData.addRejectionComment("OTH", "Install At details provided matches an existing address.", "", "");
@@ -724,7 +733,7 @@ public class GermanyUtil extends AutomationUtil {
 
       if (billTo != null && (changes.isAddressChanged("ZP01") || isAddressAdded(billTo))) {
         // Check If Address already exists on request
-        isBillToExistOnReq = addressExists(entityManager, billTo , requestData);
+        isBillToExistOnReq = addressExists(entityManager, billTo, requestData);
         if (isBillToExistOnReq) {
           detail.append("Bill To details provided matches an existing address.");
           engineData.addRejectionComment("OTH", "Bill To details provided matches an existing address.", "", "");

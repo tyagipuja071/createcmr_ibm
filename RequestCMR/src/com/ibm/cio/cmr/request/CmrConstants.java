@@ -919,7 +919,12 @@ public class CmrConstants {
   public static final String CN_KUKLA45_KEYID = "CMRNO_ZS01_45";
   public static final String CN_DEFAULT_KEYID = "CMRNO_ZS01";
 
+  public static final String CN_ERO_APPROVAL_DESC = "Approval For both ERO Proliferation Checklist and DPL Matching (CN)";
+  public static final String CN_ECO_LEADER_APPROVAL_DESC = "Ecosystem market leader Approval Request China";
+  public static final String CN_TECH_LEADER_APPROVAL_DESC = "Technology market leader Approval Request China";
+
   public static final List<String> DE_CND_ISSUING_COUNTRY_VAL = Arrays.asList("724", "619", "621", "627", "647", "791", "640", "759", "839", "843",
       "859");
   public static final List<String> ORDER_BLK_LIST = Arrays.asList("88");
+
 }

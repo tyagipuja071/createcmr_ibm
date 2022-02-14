@@ -170,7 +170,12 @@ function processRequestAction() {
       } else {
         if (cmrCntry == '821') {
           executeBeforeSubmit();
+        } else if (cmrCntry == '858') {
+          cmr.showNode('personalInformationDiv');
+          cmr.showModal('addressVerificationModal');
+
         } else {
+          cmr.hideNode('personalInformationDiv');
           // if there are no errors, show the Address Verification modal window
           cmr.showModal('addressVerificationModal');
         }
@@ -279,7 +284,11 @@ function showAddressVerificationModal() {
  * Accept the address verification disclaimer
  */
 function doAcceptAddressVerification() {
-  if (!dojo.byId('addrVerAgree').checked) {
+  var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
+  if (!dojo.byId('addrVerAgree').checked && cmrCntry == '858') {
+    cmr.showAlert('You must agree to the Address Verification and PI - Business Contact Rules to proceed.');
+    return;
+  } else if (!dojo.byId('addrVerAgree').checked) {
     cmr.showAlert('You must agree to the Address Verification Rules to proceed.');
     return;
   }
@@ -1617,7 +1626,6 @@ function checkIfDnBCheckReqForAUSG() {
           || custSubGrp == 'XAQST' || custSubGrp == 'CROSS' || custSubGrp == 'XIGF')) {
     if (result && result.ret1) {
       return false;
-      admin.setMatchOverrideIndc("Y");
     } else {
       return true;
     }
@@ -1675,7 +1683,7 @@ function matchDnBForAutomationCountries() {
             } else if (data.confidenceCd) {
               showDnBMatchModal();
             } else {
-              if (cntry != SysLoc.INDIA && cntry != '641') {
+              if (cntry != SysLoc.INDIA && cntry != '641' && cntry != SysLoc.CANADA && cntry != '649') {
                 cmr.showAlert('No matches found in dnb : Data Overidden.\nPlease attach company proof');
                 FormManager.setValue('matchOverrideIndc', 'Y');
               }
@@ -1683,6 +1691,12 @@ function matchDnBForAutomationCountries() {
               else if(cntry == SysLoc.INDIA && (custSubGrp == 'BLUMX'|| custSubGrp == 'MKTPC'|| custSubGrp == 'IGF' || custSubGrp == 'AQSTN' || custSubGrp == 'NRML' || custSubGrp == 'ESOSW' || custSubGrp =='CROSS') && !flag){      
                 cmr.showAlert('Please attach company proof as no matches found in dnb.');
                 checkNoMatchingAttachmentValidator();
+              } else if (cntry == SysLoc.CANADA) {
+                cmr
+                    .showAlert('This action will override the D&B Matching Process. By overriding the D&B matching, you\'re obliged to provide either one of the following documentation '
+                        + 'as backup-client\'s official website, business registration proof, government issued documents, client\'s confirmation email and signed PO, attach it under the file content of Company Proof. '
+                        + 'Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.');
+                FormManager.setValue('matchOverrideIndc', 'Y');                
               } else {
                 cmr.showModal('addressVerificationModal');
               }

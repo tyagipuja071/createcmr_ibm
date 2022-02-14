@@ -41,8 +41,12 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
+import com.ibm.cio.cmr.request.util.legacy.LegacyDowntimes;
+import com.ibm.cio.cmr.request.util.mail.Email;
+import com.ibm.cio.cmr.request.util.mail.MessageType;
 
 /**
  * The engine that runs a set of {@link AutomationElement} objects. This engine
@@ -213,6 +217,10 @@ public class AutomationEngine {
             result.setOnError(true);
             systemError = true;
             createSystemErrorResult(entityManager, reqId, resultId, element, appUser);
+            StringBuilder details = new StringBuilder();
+            details.append("System error for element " + element.getProcessDesc() + " with Req ID -> " + requestData.getAdmin().getId().getReqId()
+                + " has occured. Please check concerned logs for the same.");
+            sendBlueSquadEmail(requestData.getAdmin(), requestData.getData(), details);
             break;
           }
         }
@@ -465,12 +473,21 @@ public class AutomationEngine {
             pendingChecks.clear();
           }
           if (processOnCompletion && (pendingChecks == null || pendingChecks.isEmpty())) {
-            // move to PCP
-            LOG.debug("Moving Request " + reqId + " to PCP");
-            admin.setReqStatus("PCP");
-            String cmt = "Automated checks completed successfully. Request is ready for processing.";
-            createComment(entityManager, cmt, reqId, appUser);
-            createHistory(entityManager, admin, cmt, "PCP", "Automated Processing", reqId, appUser, processingCenter, null, true, null);
+            String country = data.getCmrIssuingCntry();
+            if (LegacyDowntimes.isUp(country, SystemUtil.getActualTimestamp())) {
+              // move to PCP
+              LOG.debug("Moving Request " + reqId + " to PCP");
+              admin.setReqStatus("PCP");
+              String cmt = "Automated checks completed successfully. Request is ready for processing.";
+              createComment(entityManager, cmt, reqId, appUser);
+              createHistory(entityManager, admin, cmt, "PCP", "Automated Processing", reqId, appUser, processingCenter, null, true, null);
+            } else {
+              LOG.debug("Country " + country + " is down in legacy. Moving to LEG ");
+              admin.setReqStatus("LEG");
+              String cmt = "Automated checks completed successfully. Request is ready for processing once Legacy system comes up.";
+              createComment(entityManager, cmt, reqId, appUser);
+              createHistory(entityManager, admin, cmt, "LEG", "Automated Processing", reqId, appUser, processingCenter, null, true, null);
+            }
           } else {
             // move to PPN
             LOG.debug("Moving Request " + reqId + " to PPN");
@@ -636,7 +653,7 @@ public class AutomationEngine {
    * @throws SQLException
    * @throws CmrException
    */
-  protected WfHist createHistory(EntityManager entityManager, Admin admin, String comment, String status, String action, long reqId, AppUser user,
+  public static WfHist createHistory(EntityManager entityManager, Admin admin, String comment, String status, String action, long reqId, AppUser user,
       String processingCenter, String rejectReason, boolean sendMail, RejectionContainer rejectCont) throws CmrException, SQLException {
     // create workflow history record
     completeLastHistoryRecord(entityManager, admin.getId().getReqId());
@@ -708,7 +725,7 @@ public class AutomationEngine {
    * @throws SQLException
    * @throws CmrException
    */
-  protected void createComment(EntityManager entityManager, String comment, long reqId, AppUser user) throws CmrException, SQLException {
+  public static void createComment(EntityManager entityManager, String comment, long reqId, AppUser user) throws CmrException, SQLException {
     // create request comment
     ReqCmtLog cmt = new ReqCmtLog();
     ReqCmtLogPK cmtPk = new ReqCmtLogPK();
@@ -730,7 +747,7 @@ public class AutomationEngine {
    * 
    * @return
    */
-  private AppUser createAutomationAppUser() {
+  public static AppUser createAutomationAppUser() {
     AppUser user = new AppUser();
     user.setBluePagesName("AutomationEngine");
     user.setIntranetId("AutomationEngine");
@@ -789,7 +806,32 @@ public class AutomationEngine {
    * @param code
    * @return
    */
-  public String getRejectionReason(String code) {
+  public static String getRejectionReason(String code) {
     return rejectionReasons.get(code);
+  }
+
+  private void sendBlueSquadEmail(Admin admin, Data data, StringBuilder details) {
+    String blueSquad = null;
+    try {
+      blueSquad = SystemParameters.getString("AUT_ENG_SYSTEM_ERR");
+    } catch (Exception e) {
+      LOG.debug("Failed in getting blue squad Ids. ReqID = " + data.getId().getReqId() + ", requester = " + admin.getRequesterId());
+      e.printStackTrace();
+    }
+    if (blueSquad != null) {
+      LOG.debug("Sending email notification to blue squad as System error has occurred. ReqID = " + data.getId().getReqId() + ", requester = "
+          + admin.getRequesterId());
+      String host = SystemConfiguration.getValue("MAIL_HOST");
+      String subject = "System Error has occurred for Request " + data.getId().getReqId();
+      String from = "CreateCMR_Automation_GBL";
+      String email = details.toString();
+      Email mail = new Email();
+      mail.setSubject(subject);
+      mail.setTo(blueSquad);
+      mail.setFrom(from);
+      mail.setMessage(email);
+      mail.setType(MessageType.HTML);
+      mail.send(host);
+    }
   }
 }

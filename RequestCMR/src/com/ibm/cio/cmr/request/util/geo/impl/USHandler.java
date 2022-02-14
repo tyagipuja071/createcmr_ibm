@@ -975,7 +975,7 @@ public class USHandler extends GEOHandler {
   public void setGBGValues(EntityManager entityManager, RequestData requestData, String ldeField, String ldeValue) {
     Data data = requestData.getData();
     Admin admin = requestData.getAdmin();
-    if (!"C".equals(admin.getReqType())) {
+    if (!"C".equals(admin.getReqType()) || "KYN".equalsIgnoreCase(data.getCustSubGrp())) {
       return;
     }
     if ("AFFNO".equals(ldeField)) {

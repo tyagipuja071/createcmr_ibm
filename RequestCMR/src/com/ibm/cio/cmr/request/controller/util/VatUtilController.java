@@ -125,9 +125,9 @@ public class VatUtilController {
     ModelMap map = new ModelMap();
 
     ValidationResult validation = null;
-    String country = request.getParameter("country");
-    if (StringUtils.isEmpty(country)) {
-      validation = ValidationResult.error("'country' param is required.");
+    String state = "";
+    if (!StringUtils.isEmpty(request.getParameter("country"))) {
+      state = request.getParameter("country");
     }
     String vat = request.getParameter("vat");
     if (StringUtils.isEmpty(vat)) {
@@ -151,7 +151,7 @@ public class VatUtilController {
     }
     if (validation == null || validation.isSuccess()) {
 
-      LOG.debug("Validating GST# " + vat + " for country " + country);
+      LOG.debug("Validating GST# " + vat + " for India");
 
       String baseUrl = SystemConfiguration.getValue("CMR_SERVICES_URL");
       AutomationServiceClient autoClient = CmrServicesFactory.getInstance().createClient(baseUrl, AutomationServiceClient.class);
@@ -160,7 +160,7 @@ public class VatUtilController {
 
       GstLayerRequest gstLayerRequest = new GstLayerRequest();
       gstLayerRequest.setGst(vat);
-      gstLayerRequest.setCountry(country);
+      gstLayerRequest.setCountry(state);
       gstLayerRequest.setName(name);
       gstLayerRequest.setAddress(address);
       gstLayerRequest.setCity(city);
@@ -175,7 +175,8 @@ public class VatUtilController {
       };
       AutomationResponse<GstLayerResponse> gstResponse = mapper.readValue(json, ref);
       if (gstResponse != null && gstResponse.isSuccess()) {
-        if (gstResponse.getMessage().equals("Valid GST and Company Name entered on the Request")) {
+        if (gstResponse.getMessage().equals("Valid GST and Company Name entered on the Request")
+            || gstResponse.getMessage().equals("Valid Address and Company Name entered on the Request")) {
           validation = ValidationResult.success();
         } else {
           validation = ValidationResult.error("GST# provided on the request is not valid as per GST Validation. Please verify the GST# provided.");

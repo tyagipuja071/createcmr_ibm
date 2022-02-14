@@ -28,10 +28,12 @@ import com.ibm.cio.cmr.request.automation.util.geo.AustriaUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.BeLuxUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.BrazilUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.ChinaUtil;
+import com.ibm.cio.cmr.request.automation.util.geo.CanadaUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.FranceUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.GermanyUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.IndiaUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.NetherlandsUtil;
+import com.ibm.cio.cmr.request.automation.util.geo.NordicsUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.SingaporeUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.SpainUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.SwitzerlandUtil;
@@ -110,21 +112,28 @@ public abstract class AutomationUtil {
       put(SystemLocation.NETHERLANDS, NetherlandsUtil.class);
       put(SystemLocation.CHINA, ChinaUtil.class);
 
+      put(SystemLocation.CANADA, CanadaUtil.class);
+      
+      put(SystemLocation.SWEDEN, NordicsUtil.class);
+      put(SystemLocation.NORWAY, NordicsUtil.class);
+      put(SystemLocation.FINLAND, NordicsUtil.class);
+      put(SystemLocation.DENMARK, NordicsUtil.class);
     }
   };
 
   private static final List<String> GLOBAL_LEGAL_ENDINGS = Arrays.asList("CO", "LTD", "LIMITED", "LLC", "INC", "INCORPORATED", "a.s.", "A/S", "a/s",
-      "Aktienges.", "Aktiengesellschaft", "asbl", "ASBL", "b.v.", "B.V.", "BVBA", "bvba", "C/O", "CBC", "CCC", "chez", "CIC", "CJSC", "CLG", "CLS",
-      "Companhia", "companhia", "COMPANHIA", "company", "Company", "COMPANY", "cooperacao", "Cooperacao", "COOPERACAO", "COOPERATIVA", "Corp", "corp",
-      "CORP", "Corp.", "corp.", "CORP.", "Corporation", "corporation", "CORPORATION", "CVBA", "d.d.", "d.n.o.", "d.o.o.", "EBVBA", "EEIG", "EURL",
-      "FCP", "FZCO", "Ges.M.B.H.", "Gesellschaft", "gesmbh", "Gesmbh", "GmbH", "gmbh", "GMBH", "HOLDING", "HOLDINGS", "I/S", "Incorporated",
-      "incorporated", "INTERNATIONAL", "k.d.", "k.s.", "k/s", "K/S", "kansainvalinen", "KFT", "kg", "Kg", "KG", "Kommanditgesellschaft", "KOOP",
-      "LDA", "lda", "LIMITADA", "Limited", "limited", "limtada", "llc", "LLP", "Ltd", "ltd", "Ltd.", "ltd.", "LTD.", "Ltda", "ltda", "ltda.",
-      "MANAGEMENT", "MBH", "N.V.", "n.v.", "OHG", "OJSC", "PLC", "PTE", "PTY", "PTY.", "PVT", "RTE", "RTM", "s.a.r.l.", "S.A.R.L.", "S.A.S.",
-      "s.a.s.", "S.A.U.", "s.a.u.", "s.c.", "S.C.A.", "s.c.a.", "s.c.s.", "s.l.", "S.L.", "s.p.", "S.P.A.", "S.p.A.", "s.p.a.", "S.P.R.L.",
-      "s.p.r.l.", "s.r.l.", "S.R.L.", "s.r.o.", "sarl", "SARL", "SCOP", "SCP", "SCRL", "SCS", "SERVICE", "Services", "SERVICES", "services", "SHA",
-      "SICAV", "SLU", "snc", "SNC", "sociedada", "SOCIEDADE", "societe", "Societe", "sp. z o.o.", "SPJ", "spol. s r.o.", "SPRL", "sprl", "srl", "SRL",
-      "SRLS", "T/A", "T/AS", "TRADING", "UAB", "ULC", "UNIPESSOAL", "unipessoal");
+      "AS", "as", "Aktienges.", "Aktiengesellschaft", "asbl", "ASBL", "b.v.", "B.V.", "BVBA", "bvba", "C/O", "CBC", "CCC", "chez", "CIC", "CJSC",
+      "CLG", "CLS", "Companhia", "companhia", "COMPANHIA", "company", "Company", "COMPANY", "cooperacao", "Cooperacao", "COOPERACAO", "COOPERATIVA",
+      "Corp", "corp", "CORP", "Corp.", "corp.", "CORP.", "Corporation", "corporation", "CORPORATION", "CVBA", "d.d.", "d.n.o.", "d.o.o.", "EBVBA",
+      "EEIG", "EHF", "EHF.", "ehf", "ehf.", "EURL", "FCP", "FZCO", "Ges.M.B.H.", "Gesellschaft", "gesmbh", "Gesmbh", "GmbH", "gmbh", "GMBH", "HF.",
+      "Hf.", "HOLDING", "HOLDINGS", "I/S", "Incorporated", "incorporated", "INTERNATIONAL", "k.d.", "k.s.", "k/s", "K/S", "kansainvalinen", "KFT",
+      "kg", "Kg", "KG", "Kommanditgesellschaft", "KOOP", "LDA", "lda", "LIMITADA", "Limited", "limited", "limtada", "llc", "LLP", "Ltd", "ltd",
+      "Ltd.", "ltd.", "LTD.", "Ltda", "ltda", "ltda.", "MANAGEMENT", "MBH", "N.V.", "n.v.", "OHG", "OJSC", "OU", "ou", "OY", "PLC", "PTE", "PTY",
+      "PTY.", "PVT", "RTE", "RTM", "s.a.r.l.", "S.A.R.L.", "S.A.S.", "s.a.s.", "S.A.U.", "s.a.u.", "s.c.", "S.C.A.", "s.c.a.", "s.c.s.", "s.l.",
+      "S.L.", "s.p.", "S.P.A.", "S.p.A.", "s.p.a.", "S.P.R.L.", "s.p.r.l.", "s.r.l.", "S.R.L.", "s.r.o.", "sarl", "SARL", "SCOP", "SCP", "SCRL",
+      "SCS", "SERVICE", "Services", "SERVICES", "services", "SHA", "SIA", "sia", "SICAV", "SLU", "snc", "SNC", "sociedada", "SOCIEDADE", "societe",
+      "Societe", "sp. z o.o.", "SPJ", "spol. s r.o.", "SPRL", "sprl", "srl", "SRL", "SRLS", "T/A", "T/AS", "TRADING", "UAB", "ULC", "UNIPESSOAL",
+      "unipessoal");
 
   /**
    * Holds the possible return values of
@@ -845,14 +854,16 @@ public abstract class AutomationUtil {
    * @param reqId
    * @return
    */
-  protected boolean addressExists(EntityManager entityManager, Addr addrToCheck , RequestData requestData) {
-	Data data = requestData.getData();
-	String sql = "";
-	if(SystemLocation.BELGIUM.equals(data.getCmrIssuingCntry()) || SystemLocation.NETHERLANDS.equals(data.getCmrIssuingCntry())){
-	    sql = ExternalizedQuery.getSql("AUTO.UKI.CHECK_IF_ADDRESS_EXIST");
-	} else {
-	    sql = ExternalizedQuery.getSql("AUTO.CHECK_IF_ADDRESS_EXIST");
-	}
+  protected boolean addressExists(EntityManager entityManager, Addr addrToCheck, RequestData requestData) {
+    Data data = requestData.getData();
+    String sql = "";
+    if (SystemLocation.BELGIUM.equals(data.getCmrIssuingCntry()) || SystemLocation.NETHERLANDS.equals(data.getCmrIssuingCntry())
+        || SystemLocation.SWEDEN.equals(data.getCmrIssuingCntry()) || SystemLocation.NORWAY.equals(data.getCmrIssuingCntry())
+        || SystemLocation.FINLAND.equals(data.getCmrIssuingCntry()) || SystemLocation.DENMARK.equals(data.getCmrIssuingCntry())) {
+      sql = ExternalizedQuery.getSql("AUTO.UKI.CHECK_IF_ADDRESS_EXIST");
+    } else {
+      sql = ExternalizedQuery.getSql("AUTO.CHECK_IF_ADDRESS_EXIST");
+    }
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", addrToCheck.getId().getReqId());
     query.setParameter("ADDR_TYPE", addrToCheck.getId().getAddrType());

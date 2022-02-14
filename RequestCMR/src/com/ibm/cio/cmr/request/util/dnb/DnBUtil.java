@@ -121,7 +121,8 @@ public class DnBUtil {
     registerDnBVATCode("NO", 1699); // Register of Business Enterprises Number
     registerDnBVATCode("NZ", 578); // New Zealand Company Number
     registerDnBVATCode("PE", 1382); // Peruvian Sole Commercial Registry Number
-    registerDnBVATCode("AU", 17890); // Business Registration Number (Australia)
+    // registerDnBVATCode("AU", 17890); // Business Registration Number
+    // (Australia)
     registerDnBVATCode("PL", 1385); // Polish Tax Identifier
     registerDnBVATCode("PT", 11659); // Chamber Of Commerce Number
     registerDnBVATCode("PY", 1381); // Paraguayan Unique Tax Registration
@@ -356,6 +357,27 @@ public class DnBUtil {
       // TODO Auto-generated catch block
       LOG.error("Error in getting Chiese API details ", e);
     }
+  }
+
+  public static String getCNApiCompanyNameData4GBG(String organizationId) {
+    // TODO Auto-generated method stub
+    CompanyRecordModel companyRecordModel = new CompanyRecordModel();
+    companyRecordModel.setTaxCd1(organizationId);
+    String cnName = null;
+    try {
+      AutomationResponse<CNResponse> cmrsData = CompanyFinder.getCNApiInfo4GBG(companyRecordModel, "TAXCD");
+      if (cmrsData != null && cmrsData.isSuccess()) {
+        LOG.debug("Get Chiese API Info successful>>>");
+        cnName = StringUtils.isNotBlank(cmrsData.getRecord().getName()) ? cmrsData.getRecord().getName().trim() : "";
+        LOG.debug("Get Chiese API Info Social credit code is " + cnName);
+      } else {
+        LOG.debug("No China API Data were found.");
+      }
+    } catch (Exception e) {
+      // TODO Auto-generated catch block
+      LOG.error("Error in getting Chiese API details ", e);
+    }
+    return cnName;
   }
 
   /**

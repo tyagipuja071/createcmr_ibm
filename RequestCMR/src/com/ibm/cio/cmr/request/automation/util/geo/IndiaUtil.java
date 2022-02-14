@@ -21,10 +21,13 @@ import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
+import com.ibm.cio.cmr.request.automation.impl.gbl.CalculateCoverageElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
+import com.ibm.cio.cmr.request.automation.out.FieldResultKey;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
+import com.ibm.cio.cmr.request.automation.util.CoverageContainer;
 import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
 import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
@@ -33,6 +36,9 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cmr.services.client.AutomationServiceClient;
 import com.ibm.cmr.services.client.CmrServicesFactory;
@@ -54,6 +60,8 @@ public class IndiaUtil extends AutomationUtil {
   public static final String SCENARIO_IGF = "IGF";
   public static final String SCENARIO_PRIVATE_CUSTOMER = "PRIV";
   public static final String SCENARIO_FOREIGN = "CROSS";
+  public static final String SCENARIO_BLUEMIX = "BLUMX";
+  public static final String SCENARIO_MARKETPLACE = "MKTPC";
   private static final List<String> India_LEGAL_ENDINGS = Arrays.asList("PRIVATE LIMITED", "ORGANIZATION", "ORGANISATION", "INC.", "ORG.",
       "INCORPORATE", "COMPANY", "CORP.", "CORPORATION", "LIMITED", "LTD", "PVT", "PRIVATE", "PVT LTD");
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
@@ -96,7 +104,6 @@ public class IndiaUtil extends AutomationUtil {
     switch (scenario) {
     case SCENARIO_ACQUISITION:
     case SCENARIO_NORMAL:
-    case SCENARIO_ESOSW:
     case SCENARIO_FOREIGN:
       if (data.getApCustClusterId().contains("08033")) {
         details.append("Cluster is set to 08033 Ecosystem Partners.").append("\n");
@@ -110,6 +117,10 @@ public class IndiaUtil extends AutomationUtil {
         return false;
       }
       break;
+    case SCENARIO_ESOSW:
+      engineData.addNegativeCheckStatus("_atESO", "ESOSW request need to be send to CMDE queue for review. ");
+      details.append("ESOSW request need to be send to CMDE queue for review. ").append("\n");
+      return true;
     case SCENARIO_INTERNAL:
       for (String addrType : RELEVANT_ADDRESSES) {
         List<Addr> addresses = requestData.getAddresses(addrType);
@@ -129,9 +140,8 @@ public class IndiaUtil extends AutomationUtil {
         for (Addr addr : addresses) {
           String custNmTrimmed = getCustomerFullName(addr).toUpperCase();
           if (hasINLegalEndings(custNmTrimmed)) {
-            details
-                .append(
-                    "Customer name should not contain 'Private Limited', 'Company', 'Corporation', 'Incorporate', 'Organization', 'Organisation', 'Pvt Ltd', 'Private', 'Limited', 'Pvt', 'Ltd', 'Inc.', 'Org.', 'Corp.' .")
+            details.append(
+                "Customer name should not contain 'Private Limited', 'Company', 'Corporation', 'Incorporate', 'Organization', 'Organisation', 'Pvt Ltd', 'Private', 'Limited', 'Pvt', 'Ltd', 'Inc.', 'Org.', 'Corp.' .")
                 .append("\n");
             engineData.addRejectionComment("OTH",
                 "Customer name should not contain 'Private Limited', 'Company', 'Corporation', 'Incorporate', 'Organization', 'Organisation', 'Pvt Ltd', 'Private', 'Limited', 'Pvt', 'Ltd', 'Inc.', 'Org.', 'Corp.' .",
@@ -140,6 +150,10 @@ public class IndiaUtil extends AutomationUtil {
           }
         }
       }
+      break;
+    case SCENARIO_BLUEMIX:
+    case SCENARIO_MARKETPLACE:
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
       break;
     case SCENARIO_DUMMY:
     case SCENARIO_IGF:
@@ -440,6 +454,34 @@ public class IndiaUtil extends AutomationUtil {
     data.setInacCd("");
     LOG.debug("INAC type value " + data.getInacType());
     data.setInacType("");
+  }
+
+  @Override
+  public boolean performCountrySpecificCoverageCalculations(CalculateCoverageElement covElement, EntityManager entityManager,
+      AutomationResult<OverrideOutput> results, StringBuilder details, OverrideOutput overrides, RequestData requestData,
+      AutomationEngineData engineData, String covFrom, CoverageContainer container, boolean isCoverageCalculated) throws Exception {
+    Admin admin = requestData.getAdmin();
+    String ecoSystemCluster = SystemParameters.getString("IN_ECO_SYSTEM");
+    FieldResultKey cluster = new FieldResultKey("DATA", "AP_CUST_CLUSTER_ID");
+    String clusterVal = ""; // overriden cluster value is 08033
+    if (overrides.getData().containsKey(cluster)) {
+      clusterVal = overrides.getData().get(cluster).getNewValue();
+    }
+    if (isCoverageCalculated && StringUtils.isNotBlank(clusterVal) && clusterVal.equals(ecoSystemCluster)) {
+      if (!isEcoSystemAttachmentProvided(entityManager, admin.getId().getReqId())) {
+        details.append("\nEcoSystem cluster computed on coverage requires CMDE review.");
+        engineData.addNegativeCheckStatus("_esCoverage", "EcoSystem cluster computed on coverage requires CMDE review.");
+      }
+    }
+    return true;
+  }
+
+  private boolean isEcoSystemAttachmentProvided(EntityManager entityManager, long reqId) {
+    // TODO Auto-generated method stub
+    String sql = ExternalizedQuery.getSql("QUERY.CHECK_ECSYS_ATTACHMENT");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("ID", reqId);
+    return query.exists();
   }
 
 }

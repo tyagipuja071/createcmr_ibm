@@ -17,6 +17,7 @@ import com.ibm.cmr.services.client.AutomationServiceClient;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.ServiceClient.Method;
 import com.ibm.cmr.services.client.automation.AutomationResponse;
+import com.ibm.cmr.services.client.automation.la.br.ConsultaCCCResponse;
 import com.ibm.cmr.services.client.automation.la.br.MidasRequest;
 import com.ibm.cmr.services.client.automation.la.br.SintegraResponse;
 
@@ -66,6 +67,40 @@ public class BrazilUtil extends AutomationUtil {
     TypeReference<AutomationResponse<SintegraResponse>> refSoldTo = new TypeReference<AutomationResponse<SintegraResponse>>() {
     };
     AutomationResponse<SintegraResponse> response = mapperSoldTo.readValue(jsonSoldTo, refSoldTo);
+
+    return response;
+  }
+
+  /**
+   * Calls the ConsultaCCC service
+   * 
+   * @param vat
+   * @param state
+   * @return
+   * @throws Exception
+   */
+  public static AutomationResponse<ConsultaCCCResponse> querySintegraByConsulata(String vat, String state) throws Exception {
+    AutomationServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
+        AutomationServiceClient.class);
+    client.setReadTimeout(1000 * 60 * 3);
+    client.setRequestMethod(Method.Get);
+
+    // calling SINTEGRA
+    LOG.debug("Calling ConsultaCCC Service for VAT " + vat);
+    MidasRequest requestSoldTo = new MidasRequest();
+    requestSoldTo.setCnpj(vat);
+    requestSoldTo.setUf(state);
+
+    LOG.debug("Connecting to the ConsultaCCC Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
+    AutomationResponse<?> rawResponseSoldTo = client.executeAndWrap(AutomationServiceClient.BR_CONSULTA_SERVICE_ID, requestSoldTo,
+        AutomationResponse.class);
+    ObjectMapper mapperSoldTo = new ObjectMapper();
+    String jsonSoldTo = mapperSoldTo.writeValueAsString(rawResponseSoldTo);
+    LOG.trace("ConsultaCCC Service Response for VAT " + vat + ": " + jsonSoldTo);
+
+    TypeReference<AutomationResponse<ConsultaCCCResponse>> refSoldTo = new TypeReference<AutomationResponse<ConsultaCCCResponse>>() {
+    };
+    AutomationResponse<ConsultaCCCResponse> response = mapperSoldTo.readValue(jsonSoldTo, refSoldTo);
 
     return response;
   }

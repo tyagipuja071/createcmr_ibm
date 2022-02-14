@@ -32,6 +32,7 @@ import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
+import com.ibm.cio.cmr.request.util.geo.impl.NORDXHandler;
 
 /**
  * @author Jeffrey Zamora
@@ -232,6 +233,19 @@ public class CopyAddressService extends BaseService<CopyAddressModel, Addr> {
         // newAddrSeq = generateMAddrSeqCopy(entityManager, model.getReqId());
         // System.out.println("newAdd =" + newAddrSeq);
         // }
+        if (NORDXHandler.isNordicsCountry(model.getCmrIssuingCntry())) {
+          AdminPK pk = new AdminPK();
+          pk.setReqId(model.getReqId());
+          Admin admin = entityManager.find(Admin.class, pk);
+          if ("U".equals(admin.getReqType())) {
+            String maxAddrSeq = null;
+            AddressService addressService1 = new AddressService();
+            maxAddrSeq = addressService1.getMaxSequenceAddr(entityManager, model.getReqId());
+            if (Integer.parseInt(maxAddrSeq) > Integer.parseInt(newAddrSeq)) {
+              newAddrSeq = maxAddrSeq;
+            }
+          }
+        }
 
         if (!StringUtils.isEmpty(newAddrSeq)) {
           newPk.setAddrSeq(newAddrSeq);

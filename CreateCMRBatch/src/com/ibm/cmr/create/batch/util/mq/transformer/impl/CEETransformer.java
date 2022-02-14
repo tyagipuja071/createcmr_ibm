@@ -627,7 +627,11 @@ public class CEETransformer extends EMEATransformer {
       String cntryUse = cmrData.getCountryUse();
       if ("ZP02".equals(addrData.getId().getAddrType())) {
         if (!StringUtils.isBlank(addrData.getBldg())) {
-          line6 = addrData.getBldg();
+          if (addrData.getBldg().length() <= 50) {
+            line6 = addrData.getBldg();
+          } else {
+            line6 = addrData.getBldg().substring(0, 49);
+          }
         } else {
           line6 = "";
         }
@@ -652,7 +656,11 @@ public class CEETransformer extends EMEATransformer {
     } else {
       if ("ZP02".equals(addrData.getId().getAddrType())) {
         if (!StringUtils.isBlank(addrData.getBldg())) {
-          line6 = addrData.getBldg();
+          if (addrData.getBldg().length() <= 50) {
+            line6 = addrData.getBldg();
+          } else {
+            line6 = addrData.getBldg().substring(0, 49);
+          }
         } else {
           line6 = "";
         }
@@ -1661,18 +1669,20 @@ public class CEETransformer extends EMEATransformer {
     List<CmrtAddr> legacyAddrList = legacyObjects.getAddresses();
 
     int seqStartForRequiredAddr = 1;
-    for (int i = 0; i < addrList.size(); i++) {
-      Addr addr = addrList.get(i);
-      String addrSeq = addr.getId().getAddrSeq();
-      String addrType = addr.getId().getAddrType();
-
-      if (addrSeq.equals("1")) {
-
-        updateRequiredAddresses(entityManager, reqId, addrList.get(i).getId().getAddrType(), legacyAddrList.get(i).getId().getAddrNo(),
-            changeSeqNo(seqStartForRequiredAddr++), legacyObjects, i);
-      }
-
-    }
+    // for (int i = 0; i < addrList.size(); i++) {
+    // Addr addr = addrList.get(i);
+    // String addrSeq = addr.getId().getAddrSeq();
+    // String addrType = addr.getId().getAddrType();
+    //
+    // if (addrSeq.equals("1")) {
+    //
+    // updateRequiredAddresses(entityManager, reqId,
+    // addrList.get(i).getId().getAddrType(),
+    // legacyAddrList.get(i).getId().getAddrNo(),
+    // changeSeqNo(seqStartForRequiredAddr++), legacyObjects, i);
+    // }
+    //
+    // }
 
     Data data = cmrObjects.getData();
     CmrtCustExt legacyCustExt = legacyObjects.getCustomerExt();
