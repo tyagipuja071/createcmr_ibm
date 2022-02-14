@@ -13,6 +13,17 @@ var CEE_INCL = new Set([ '603', '607', '626', '644', '651', '668', '693', '694',
     '820', '821', '826', '889', '358', '359', '363' ]);
 var isicCds = new Set([ '6010', '6411', '6421', '7320', '7511', '7512', '7513', '7514', '7521', '7522', '7523', '7530', '7704', '7706', '7707',
     '7720', '8010', '8021', '8022', '8030', '8090', '8511', '8512', '8519', '8532', '8809', '8813', '8818', '9900' ]);
+var WEST_INCL = new Set([ '101', '102', '103', '104', '105', '106', '107', '108', '109', '111', '115', '117', '119', '121', '123', '124', '125', '127', '129', '130', '135', '140', '141', '142',
+    '143', '144', '150', '152', '153', '155', '156', '160', '161', '162', '163', '170', '173', '180', '183', '184', '185', '186', '187', '188', '190', '191', '192', '193', '194', '195', '196', '197',
+    '198', '199', '214', '236', '241', '242', '243', '249', '295', '296', '297', '298', '299', '300', '301', '302', '305', '307', '308', '344', '346', '347', '350', '355', '356', '357', '358', '359',
+    '360', '361', '362', '363', '364', '367', '368', '369', '385', '386', '390', '392', '394', '396', '397', '398', '400', '403', '404', '410', '414', '420', '421', '422', '423', '424', '425', '430',
+    '431', '440', '442', '443', '445', '446', '454', '455', '457', '600', '601', '602', '603', '606', '607', '610', '612', '613' ]);
+var EAST_INCL = new Set([ '166', '167', '168', '169', '426', '428', '429', '432', '433', '450', '452', '453', '460', '461', '462', '614', '617', '618', '619', '620', '622', '623', '624', '625',
+    '626', '627', '628', '629', '630', '632', '633', '634', '636', '640', '641', '644', '646', '647', '648', '649', '650', '652', '654', '655', '656', '658', '659', '660', '664', '665', '667', '669',
+    '670', '671', '672', '675', '677', '678', '679', '680', '683', '685', '687', '688', '689', '690', '693' ]);
+var CEE_INCL = new Set([ '603', '607', '626', '644', '651', '668', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '787', '820', '821', '826', '889', '358', '359', '363' ]);
+var isicCds = new Set([ '6010', '6411', '6421', '7320', '7511', '7512', '7513', '7514', '7521', '7522', '7523', '7530', '7704', '7706', '7707', '7720', '8010', '8021', '8022', '8030', '8090', '8511',
+    '8512', '8519', '8532', '8809', '8813', '8818', '9900' ]);
 var landedCntryMapping = {
   "XX" : "000",
   "AD" : "706",
@@ -670,7 +681,7 @@ function addHandlersForCEMEA() {
       // } else {
       // setEnterpriseValues(value);
       // }
-
+      ctcCovHandler = true;
       if (!CEE_INCL.has(cntry)) {
         setEnterpriseValues(value);
       }
@@ -1594,6 +1605,8 @@ function setClientTierValues(isuCd) {
  */
 
 // CreateCMR-811 coverage update for CEE
+var changeFlag = 'N';
+
 function setISUCTCValuesForCEE(isuCd) {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
@@ -2207,9 +2220,9 @@ function afterConfigForRussia() {
 }
 
 function setSBOafterAddrConfig() {
-  if (FormManager.getActualValue('reqType') != 'C') {
-    return;
-  }
+  // if (FormManager.getActualValue('reqType') != 'C') {
+  // return;
+  // }
   if (FormManager.getActualValue('addrType') == 'ZS01') {
 
     var custType = FormManager.getActualValue('custGrp');
@@ -2240,11 +2253,7 @@ function setSBOafterAddrConfig() {
               head3 = postalCode.substring(0, 3);
             }
             var sbo = "";
-            if (WEST_INCL.has(head3)
-                || ((parseInt(head3) > 100 && parseInt(head3) < 130) || (parseInt(head3) > 139 && parseInt(head3) < 143)
-                    || (parseInt(head3) > 159 && parseInt(head3) < 163) || (parseInt(head3) > 186 && parseInt(head3) < 189)
-                    || (parseInt(head3) > 189 && parseInt(head3) < 200) || (parseInt(head3) > 240 && parseInt(head3) < 244)
-                    || (parseInt(head3) > 294 && parseInt(head3) < 300) || (parseInt(head3) > 354 && parseInt(head3) < 358))) {
+              if (WEST_INCL.has(head3)) {
               sbo = "R02";
             } else if (EAST_INCL.has(head3)) {
               sbo = "R03";
@@ -2264,9 +2273,9 @@ function setSBOafterAddrConfig() {
 }
 
 function setSBOValues() {
-  if (FormManager.getActualValue('reqType') != 'C') {
-    return;
-  }
+//  if (FormManager.getActualValue('reqType') != 'C') {
+//    return;
+//  }
   var custType = FormManager.getActualValue('custGrp');
   var isu = FormManager.getActualValue('isuCd');
   var ctc = FormManager.getActualValue('clientTier');
@@ -2312,11 +2321,7 @@ function setSBOValues() {
                     head3 = postalCode[0].substring(0, 3);
                   }
                   var sbo = "";
-                  if (WEST_INCL.has(head3)
-                      || ((parseInt(head3) > 100 && parseInt(head3) < 130) || (parseInt(head3) > 139 && parseInt(head3) < 143)
-                          || (parseInt(head3) > 159 && parseInt(head3) < 163) || (parseInt(head3) > 186 && parseInt(head3) < 189)
-                          || (parseInt(head3) > 189 && parseInt(head3) < 200) || (parseInt(head3) > 240 && parseInt(head3) < 244)
-                          || (parseInt(head3) > 294 && parseInt(head3) < 300) || (parseInt(head3) > 354 && parseInt(head3) < 358))) {
+                    if (WEST_INCL.has(head3)) {
                     sbo = "R02";
                   } else if (EAST_INCL.has(head3)) {
                     sbo = "R03";
@@ -4806,6 +4811,9 @@ function setCEESBOValuesForIsuCtc() {
       } else if (isuCtc == '34Y') {
         FormManager.setValue('salesBusOffCd', "V01");
       }
+    }
+    if (isuCtc == '5K') {
+      FormManager.setValue('salesBusOffCd', "999");
     }
 
     if (readOnly) {
