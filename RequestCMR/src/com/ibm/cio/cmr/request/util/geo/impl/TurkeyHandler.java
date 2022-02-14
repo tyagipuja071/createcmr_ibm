@@ -2263,6 +2263,9 @@ public class TurkeyHandler extends BaseSOFHandler {
           data.setCrosSubTyp(null);
         }
       }
+      if ("5K".equals(data.getIsuCd())) {
+        data.setClientTier("");
+      }
     }
   }
 
