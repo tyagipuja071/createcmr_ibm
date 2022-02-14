@@ -629,7 +629,13 @@ public class METransformer extends EMEATransformer {
     if (SystemLocation.JORDAN.equals(cmrData.getCmrIssuingCntry())) {
       String cntryUse = cmrData.getCountryUse();
       if ("ZP02".equals(addrData.getId().getAddrType())) {
-        line6 = addrData.getBldg() == null ? "" : addrData.getBldg();
+        if (!StringUtils.isBlank(addrData.getBldg())) {
+          if (addrData.getBldg().length() <= 50) {
+            line6 = addrData.getBldg();
+          } else {
+            line6 = addrData.getBldg().substring(0, 49);
+          }
+        }
       } else {
         if (!StringUtils.isBlank(cntryUse)) {
           if ("762PS".equals(cntryUse)) {
@@ -648,7 +654,13 @@ public class METransformer extends EMEATransformer {
       String cntryUse = cmrData.getCountryUse();
 
       if ("ZP02".equals(addrData.getId().getAddrType())) {
-        line6 = addrData.getBldg() == null ? "" : addrData.getBldg();
+        if (!StringUtils.isBlank(addrData.getBldg())) {
+          if (addrData.getBldg().length() <= 50) {
+            line6 = addrData.getBldg();
+          } else {
+            line6 = addrData.getBldg().substring(0, 49);
+          }
+        }
       } else {
         if (!StringUtils.isBlank(cntryUse)) {
           if ("808AF".equals(cntryUse)) {
@@ -664,7 +676,13 @@ public class METransformer extends EMEATransformer {
       }
     } else {
       if ("ZP02".equals(addrData.getId().getAddrType())) {
-        line6 = addrData.getBldg() == null ? "" : addrData.getBldg();
+        if (!StringUtils.isBlank(addrData.getBldg())) {
+          if (addrData.getBldg().length() <= 50) {
+            line6 = addrData.getBldg();
+          } else {
+            line6 = addrData.getBldg().substring(0, 49);
+          }
+        }
       } else {
         if (!StringUtils.isBlank(addrData.getLandCntry())) {
           line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
@@ -1777,18 +1795,20 @@ public class METransformer extends EMEATransformer {
     List<CmrtAddr> legacyAddrList = legacyObjects.getAddresses();
 
     int seqStartForRequiredAddr = 1;
-    for (int i = 0; i < addrList.size(); i++) {
-      Addr addr = addrList.get(i);
-      String addrSeq = addr.getId().getAddrSeq();
-      String addrType = addr.getId().getAddrType();
-
-      if (addrSeq.equals("1")) {
-
-        updateRequiredAddresses(entityManager, reqId, addrList.get(i).getId().getAddrType(), legacyAddrList.get(i).getId().getAddrNo(),
-            changeSeqNo(seqStartForRequiredAddr++), legacyObjects, i);
-      }
-
-    }
+    // for (int i = 0; i < addrList.size(); i++) {
+    // Addr addr = addrList.get(i);
+    // String addrSeq = addr.getId().getAddrSeq();
+    // String addrType = addr.getId().getAddrType();
+    //
+    // if (addrSeq.equals("1")) {
+    //
+    // updateRequiredAddresses(entityManager, reqId,
+    // addrList.get(i).getId().getAddrType(),
+    // legacyAddrList.get(i).getId().getAddrNo(),
+    // changeSeqNo(seqStartForRequiredAddr++), legacyObjects, i);
+    // }
+    //
+    // }
 
     String reqType = cmrObjects.getAdmin().getReqType();
     long requestId = cmrObjects.getAdmin().getId().getReqId();

@@ -371,7 +371,7 @@ function omanVat() {
       FormManager.removeValidator('vat', Validators.REQUIRED);
     }
   }
- 
+
   setVatValidatorOMAN();
 }
 
@@ -383,7 +383,7 @@ function setVatValidatorOMAN() {
   if (custSubGrp == 'INTER' || custSubGrp == 'PRICU') {
     return;
   }
-  
+
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
   if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
     FormManager.resetValidations('vat');
@@ -1258,7 +1258,6 @@ function setClientTierValues(isuCd) {
   }
   isuCd = FormManager.getActualValue('isuCd');
   if (isuCd == '5K') {
-    clientTiers = [];
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
     FormManager.setValue('clientTier', '');
     FormManager.readOnly('clientTier');
@@ -1994,7 +1993,9 @@ function setTelecoverageRep() {
   }
   var custGrp = FormManager.getActualValue('custGrp');
   if (custGrp != null && (custGrp == 'GBM' || custGrp == 'SBM')) {
-    FormManager.addValidator('bpSalesRepNo', Validators.REQUIRED, [ 'Tele-coverage rep.' ], 'MAIN_CUST_TAB');
+    if (FormManager.getActualValue('cmrIssuingCntry') != '832') {
+      FormManager.addValidator('bpSalesRepNo', Validators.REQUIRED, [ 'Tele-coverage rep.' ], 'MAIN_CUST_TAB');
+    }
     FormManager.addValidator('bpSalesRepNo', Validators.DIGIT, [ 'Tele-coverage rep.' ], 'MAIN_CUST_TAB');
     FormManager.addValidator('bpSalesRepNo', validTeleCoverageRep6Length, [ 'Tele-coverage rep.' ], 'MAIN_CUST_TAB');
     FormManager.show('TeleCoverageRep', 'bpSalesRepNo');
@@ -3781,7 +3782,8 @@ function setTypeOfCustomerRequiredProcessor() {
 }
 
 function canCopyAddress(value, rowIndex, grid) {
-  return false;
+  // CREATCMR-1961 (CEE, ME: Copy icon disappeared)
+  return true;
 }
 
 function filterCmrnoForME() {
@@ -4418,6 +4420,56 @@ function setIsuCtcOnScenarioChange() {
   }
 }
 
+function checkCmrUpdateBeforeImport() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var cmrNo = FormManager.getActualValue('cmrNo');
+        var reqId = FormManager.getActualValue('reqId');
+        var reqType = FormManager.getActualValue('reqType');
+        var uptsrdc = '';
+        var lastupts = '';
+
+        if (reqType == 'C') {
+          // console.log('reqType = ' + reqType);
+          return new ValidationResult(null, true);
+        }
+
+        var resultsCC = cmr.query('GETUPTSRDC', {
+          COUNTRY : cntry,
+          CMRNO : cmrNo,
+          MANDT : cmr.MANDT
+        });
+
+        if (resultsCC != null && resultsCC != undefined && resultsCC.ret1 != '') {
+          uptsrdc = resultsCC.ret1;
+          // console.log('lastupdatets in RDC = ' + uptsrdc);
+        }
+
+        var results11 = cmr.query('GETUPTSADDR', {
+          REQ_ID : reqId
+        });
+        if (results11 != null && results11 != undefined && results11.ret1 != '') {
+          lastupts = results11.ret1;
+          // console.log('lastupdatets in CreateCMR = ' + lastupts);
+        }
+
+        if (lastupts != '' && uptsrdc != '') {
+          if (uptsrdc > lastupts) {
+            return new ValidationResult(null, false, 'This CMR has a new update , please re-import this CMR.');
+          } else {
+            return new ValidationResult(null, true);
+          }
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+
 dojo
     .addOnLoad(function() {
       GEOHandler.CEMEA_COPY = [ '358', '359', '363', '603', '607', '620', '626', '644', '642', '651', '668', '677', '680', '693', '694', '695',
@@ -4634,9 +4686,10 @@ dojo
       // GEOHandler.addAfterConfig(addPrefixVat, GEOHandler.CEE);
       // GEOHandler.addAfterTemplateLoad(addPrefixVat, GEOHandler.CEE);
       // GEOHandler.addAddrFunction(addPrefixVat, GEOHandler.CEE);
-      
+
       GEOHandler.addAfterConfig(omanVat, GEOHandler.ME);
       GEOHandler.addAfterTemplateLoad(omanVat, GEOHandler.ME);
       GEOHandler.addAfterConfig(addHandlersForOman, GEOHandler.ME);
+      GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.ME, null, true);
 
     });
