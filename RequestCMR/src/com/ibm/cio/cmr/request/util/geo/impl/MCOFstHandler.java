@@ -875,7 +875,7 @@ public class MCOFstHandler extends MCOHandler {
                 }
               }
             }
-						if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
+            if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
               if (!StringUtils.isBlank(isuCd)) {
                 if ("5K".equals(isuCd)) {
                   if (!"@".equals(clientTier)) {
