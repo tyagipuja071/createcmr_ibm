@@ -612,6 +612,9 @@ function setPrivacyIndcReqdForProc() {
 }
 
 function filterISUOnChange() {
+  if (FormManager.getActualValue('reqType') != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
   console.log(">>> RUNNING filterISUOnChange!!");
   var searchTerm = FormManager.getActualValue('searchTerm');
   var searchTermParams = {
