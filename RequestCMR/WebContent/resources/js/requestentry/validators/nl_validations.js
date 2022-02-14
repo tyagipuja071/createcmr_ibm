@@ -332,12 +332,14 @@ function addHandlersForNL() {
   if (_ISUHandler == null) {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       setClientTierValues(value);
+      setSORTLBasedOnIsuCtc();
     });
   }
 
   if (_CTCHandler == null) {
     _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
       setBOTeamValues(value);
+      setSORTLBasedOnIsuCtc();
     });
   }
 
@@ -1596,6 +1598,40 @@ function addIGFZP02Validator() {
       }
     };
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+
+function setSORTLBasedOnIsuCtc() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  var isuCd = FormManager.getActualValue('isuCd');
+  var clientTier = FormManager.getActualValue('clientTier');
+  var reqType = FormManager.getActualValue('reqType');
+  var isuList = ['34', '5K', '15', '4A', '04', '28'];
+  if (isuCd == '34' && clientTier == 'Y') {
+    FormManager.setValue('commercialFinanced', 'T0007969');
+  } else if (isuCd == '34' && clientTier == 'Q') {
+    FormManager.setValue('commercialFinanced', 'T0003611');
+  } else if (isuCd == '5K' && clientTier == '') {
+    FormManager.setValue('commercialFinanced', 'T0009067');
+  } else if (isuCd == '28' && clientTier == '') {
+    FormManager.setValue('commercialFinanced', 'I0000270');
+  } else if (isuCd == '15' && clientTier == '') {
+    FormManager.setValue('commercialFinanced', 'A0005229');
+  } else if (isuCd == '4A' && clientTier == '') {
+    FormManager.setValue('commercialFinanced', 'A0005236');
+  } else if (isuCd == '04' && clientTier == '') {
+    FormManager.setValue('commercialFinanced', 'I0000002');
+  } else {
+    FormManager.setValue('commercialFinanced', '');
+  }
+  if (isuList.slice(1, 6).includes(isuCd)) {
+    FormManager.resetValidations('clientTier');
+    FormManager.setValue('clientTier', '');
+    FormManager.readOnly('clientTier');
+  } else {
+    FormManager.enable('clientTier');
+  }
 }
 
 dojo.addOnLoad(function() {

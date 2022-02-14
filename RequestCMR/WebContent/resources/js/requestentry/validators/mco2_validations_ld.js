@@ -837,7 +837,10 @@ function setSalesRepValues(isuCd, clientTier) {
      * "BUSPR" && custSubGrp != "XBP") { FormManager.setValue('repTeamMemberNo',
      * '016757'); } else { FormManager.setValue('repTeamMemberNo', '780780'); } }
      */
-
+    if (isuCd == '5K' && clientTier == '') {
+      FormManager.setValue('salesBusOffCd', '0010');
+    }
+    
   }
 }
 

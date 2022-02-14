@@ -90,13 +90,14 @@ function addHandlersForZA() {
   }
 
   if (_isuHandler == null) {
-    if (FormManager.getActualValue('reqType') == 'C') {
-      _isuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+    _isuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+      if (FormManager.getActualValue('reqType') == 'C') {
         calledByIsuHandler = true;
         calledByCtcHandler = false;
         setCtcSalesRepSBO(value);
-      });
-    }
+      }
+      setClientTierValues(value);
+    });
   }
   if (_ctcHandler == null) {
     if (FormManager.getActualValue('reqType') == 'C') {
@@ -158,7 +159,7 @@ function setCtcSalesRepSBO(value) {
   if (reqType != 'C') {
     return;
   }
-  if (scenario && scenario != null && !internalBUScenarios.includes(scenario) && isuCtc != '34Q' && isuCtc != '34V' && (countryUse == '864' || countryUse == '864LS' || countryUse == '864SZ' || countryUse == '864NA')) {
+  if (scenario && scenario != null && !internalBUScenarios.includes(scenario) && isuCtc != '34Q' && isuCtc != '34V' && isuCtc != '5K' && (countryUse == '864' || countryUse == '864LS' || countryUse == '864SZ' || countryUse == '864NA')) {
     if (calledByIsuHandler) {
       if (!scenarioChangeSalesRepSBO) {
         FormManager.setValue('salesBusOffCd', '');

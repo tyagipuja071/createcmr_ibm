@@ -944,6 +944,11 @@ public class NLTransformer extends EMEATransformer {
     } else {
       legacyCust.setMrcCd("3");
     }
+	
+		List<String> isuCdList = Arrays.asList("5K", "15", "4A", "04", "28");
+    if (!StringUtils.isEmpty(data.getIsuCd()) && isuCdList.contains(data.getIsuCd())) {
+      legacyCust.setIsuCd(data.getIsuCd() + "7");
+    }
 
   }
 

@@ -2256,6 +2256,18 @@ public class BELUXHandler extends BaseSOFHandler {
             "The row " + (row.getRowNum() + 1) + ":Note the CMR number is a divestiture CMR records.<br>");
         validations.add(error);
       }
+      
+      currCell = row.getCell(7);
+      String ctc = validateColValFromCell(currCell);
+      String isuCd = ""; // 6
+      currCell = row.getCell(6);
+      isuCd = validateColValFromCell(currCell);
+      if ((isuCd.equalsIgnoreCase("5K") || isuCd.equalsIgnoreCase("28")) && !ctc.equalsIgnoreCase("@")) {
+        LOG.trace("For IsuCd set to '5K' or '28' Ctc should be '@'");
+        error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd);
+        validations.add(error);
+      }
+      
       if (is93CMR(cmrNo)) {
         LOG.trace("The row " + (row.getRowNum() + 1) + ":Note the CMR number is a deleted record in RDC.");
         error.addError((row.getRowNum() + 1), "CMR No.", "The row " + (row.getRowNum() + 1) + ":Note the CMR number is a deleted record in RDC.<br>");
