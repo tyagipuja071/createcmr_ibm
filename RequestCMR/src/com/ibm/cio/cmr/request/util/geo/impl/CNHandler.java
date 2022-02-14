@@ -89,6 +89,8 @@ public class CNHandler extends GEOHandler {
   public static final int CN_STREET_ADD_TXT2 = 70;
   public static final int CN_CUST_NAME_1 = 70;
   public static final int CN_CUST_NAME_2 = 70;
+  private String[] CN_S_S_CLUSTER = { "00260", "04629", "04630", "04749" };
+  private String KYNDRYL_CLUSTER = "09058";
 
   public static List<String> getDataFieldsForUpdateCheck(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
@@ -821,8 +823,14 @@ public class CNHandler extends GEOHandler {
     // Coverage 1H22 CREATCMR-4790, set expired Search Term 00000
     if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       if (expiredSearchTerm(entityManager, data.getSearchTerm())) {
+        if (Arrays.asList(CN_S_S_CLUSTER).contains(data.getSearchTerm())) {
+          data.setClientTier("0");
+        } else if ("21".equals(data.getIsuCd()) || "60".equals(data.getIsuCd())) {
+          data.setClientTier("Z");
+        } else {
+          data.setClientTier("Q");
+        }
         data.setSearchTerm("00000");
-        data.setClientTier("Q");
       }
     }
   }
