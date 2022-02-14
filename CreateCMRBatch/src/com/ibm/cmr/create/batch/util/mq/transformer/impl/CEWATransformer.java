@@ -159,6 +159,10 @@ public class CEWATransformer extends MCOTransformer {
     } else {
       legacyCust.setDeptCd("");
     }
+    
+    if (!StringUtils.isEmpty(data.getIsuCd()) && "5K".equals(data.getIsuCd()) && !SystemLocation.MALTA.equals(data.getCmrIssuingCntry())) {
+      legacyCust.setIsuCd(data.getIsuCd() + "7");
+    }	
   }
 
   private boolean isInternalScenario(Data data, Admin admin) {
@@ -518,6 +522,18 @@ public class CEWATransformer extends MCOTransformer {
         } else if ("N".equals(cod)) {
           legacyCust.setModeOfPayment("");
         }
+      }
+    }
+
+    if (StringUtils.isNotBlank(muData.getClientTier()) && "5K".equals(muData.getIsuCd())) {
+      legacyCust.setIsuCd(muData.getIsuCd() + "7");
+    } else {
+      String isuClientTier = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "")
+          + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
+      if (isuClientTier != null && isuClientTier.endsWith("@")) {
+        legacyCust.setIsuCd((!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : legacyCust.getIsuCd().substring(0, 2)) + "7");
+      } else if (isuClientTier != null) {
+        legacyCust.setIsuCd(isuClientTier);
       }
     }
 

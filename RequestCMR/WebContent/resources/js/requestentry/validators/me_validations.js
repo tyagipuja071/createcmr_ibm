@@ -687,7 +687,7 @@ function addHandlersForCEMEA() {
 
   if (_ISUHandler == null) {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
-      // setClientTierValues(value);
+      setClientTierValues(value);
       if (ME_INCL.has(FormManager.getActualValue('cmrIssuingCntry'))) {
         togglePPSCeidME();
       }
@@ -1249,6 +1249,20 @@ function setPreferredLang() {
       FormManager.setValue('custPrefLang', 'E');
     }
     FormManager.enable('custPrefLang');
+  }
+}
+
+function setClientTierValues(isuCd) {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  isuCd = FormManager.getActualValue('isuCd');
+  if (isuCd == '5K') {
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    FormManager.setValue('clientTier', '');
+    FormManager.readOnly('clientTier');
+  } else {
+    FormManager.enable('clientTier');
   }
 }
 
@@ -4537,8 +4551,8 @@ dojo
       GEOHandler.addAfterTemplateLoad(afterConfigForCEMEA, GEOHandler.CEMEA);
       GEOHandler.addAfterConfig(setCountryDuplicateFields, SysLoc.RUSSIA);
       GEOHandler.addAfterTemplateLoad(setCountryDuplicateFields, SysLoc.RUSSIA);
-      // GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.CEMEA);
-      // GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.CEMEA);
+      GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.CEMEA);
+      GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.CEMEA);
       GEOHandler.addAfterConfig(setSBOValuesForIsuCtc, [ SysLoc.AUSTRIA ]); // CMR-2101
       GEOHandler.addAfterConfig(resetVatExempt, GEOHandler.CEMEA);
       GEOHandler.addAfterTemplateLoad(resetVatExempt, GEOHandler.CEMEA);

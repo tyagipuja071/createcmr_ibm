@@ -659,6 +659,10 @@ public class MaltaHandler extends BaseSOFHandler {
       data.setAbbrevLocn(getAbbrLocation(mainRecord.getCmrSapNumber()));
     }
 
+    if (CmrConstants.REQ_TYPE_UPDATE.equalsIgnoreCase(admin.getReqType()) && "5K".equals(data.getIsuCd())) {
+      data.setClientTier("");
+    }
+
   }
 
   /* Abbreviated Location */
@@ -965,6 +969,8 @@ public class MaltaHandler extends BaseSOFHandler {
             String classificationCd = ""; // 10
             String inac = ""; // 7
             String ordBlk = ""; // 11
+            String isuCd = ""; // 6
+            String clientTier = ""; // 9
 
             if (row.getRowNum() == 2001) {
               continue;
@@ -1085,6 +1091,12 @@ public class MaltaHandler extends BaseSOFHandler {
               currCell = (XSSFCell) row.getCell(11);
               ordBlk = validateColValFromCell(currCell);
 
+              currCell = (XSSFCell) row.getCell(9);
+              clientTier = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(6);
+              isuCd = validateColValFromCell(currCell);
+
               if (!StringUtils.isBlank(isic) && !StringUtils.isBlank(classificationCd)
                   && ((!"9500".equals(isic) && "60".equals(classificationCd)) || ("9500".equals(isic) && !"60".equals(classificationCd)))) {
                 LOG.trace(
@@ -1111,6 +1123,21 @@ public class MaltaHandler extends BaseSOFHandler {
                 error.addError(row.getRowNum(), rowNumber + "Order block",
                     "Note that value of Order block can only be 88 or 94 or @ or blank. Please fix and upload the template again.");
                 // validations.add(error);
+              }
+
+              if (!StringUtils.isBlank(isuCd)) {
+                if ("5K".equals(isuCd)) {
+                  if (!"@".equals(clientTier)) {
+                    LOG.trace("Client Tier should be '@' for the selected ISU Code.");
+                    error.addError(row.getRowNum(), "Client Tier", "Client Tier should be '@' for the selected ISU Code. ");
+                  }
+                }
+              }
+              if (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier)) {
+                LOG.trace("The row " + row.getRowNum()
+                    + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
+                error.addError(row.getRowNum(), "Client Tier",
+                    ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
               }
             }
 

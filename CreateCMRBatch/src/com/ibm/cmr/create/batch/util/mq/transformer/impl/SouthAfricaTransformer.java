@@ -344,6 +344,10 @@ public class SouthAfricaTransformer extends MCOTransformer {
     } else {
       legacyCust.setVat(data.getVat());
     }
+		
+		if (!StringUtils.isEmpty(data.getIsuCd()) && "5K".equals(data.getIsuCd())) {
+      legacyCust.setIsuCd(data.getIsuCd() + "7");
+    }
 
   }
 
@@ -484,6 +488,19 @@ public class SouthAfricaTransformer extends MCOTransformer {
       }
     } else if (StringUtils.isNotBlank(muData.getSvcArOffice()) && DEFAULT_CLEAR_CHAR.equals(muData.getSvcArOffice())) {
       legacyCust.setModeOfPayment("");
+    }
+
+    if (StringUtils.isNotBlank(muData.getClientTier()) && "5K".equals(muData.getIsuCd())) {
+      legacyCust.setIsuCd(muData.getIsuCd() + "7");
+    } else {
+      String isuCd = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "")
+          + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
+      if (isuCd != null && isuCd.endsWith("@")) {
+        legacyCust.setIsuCd((!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : legacyCust.getIsuCd().substring(0, 2)) + "7");
+      } else if (isuCd != null) {
+        legacyCust.setIsuCd(isuCd);
+      }
+
     }
 
   }

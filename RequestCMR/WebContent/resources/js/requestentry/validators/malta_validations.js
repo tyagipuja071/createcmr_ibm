@@ -49,7 +49,13 @@ function addHandlersForMT() {
       });
     }
   }
+}
 
+function addISUHandler() {
+  var isuHandler = null;
+  _isuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+    setClientTierValuesMT(value);
+  });
 }
 
 /*
@@ -596,6 +602,23 @@ function enterpriseMalta() {
 
 }
 
+function setClientTierValuesMT(isuCd) {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  if (isuCd == null) {
+    isuCd = FormManager.getActualValue('isuCd');
+  }
+  if (isuCd == '5K') {
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    FormManager.setValue('clientTier', '');
+    FormManager.readOnly('clientTier');
+  } else {
+    var reqType = FormManager.getActualValue('reqType');
+    FormManager.enable('clientTier');
+  }
+}
+
 function enterpriseValidation() {
   FormManager.addFormValidator((function() {
     return {
@@ -995,4 +1018,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateCMRNumForProspect, [ SysLoc.MALTA ], GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.addAfterConfig(hideCustPhoneonSummary, [ SysLoc.MALTA ]);
   GEOHandler.addAfterTemplateLoad(checkScenarioChanged, [ SysLoc.MALTA ]);
+  GEOHandler.addAfterConfig(addISUHandler, [ SysLoc.MALTA ]);
+  GEOHandler.addAfterConfig(setClientTierValuesMT, [ SysLoc.MALTA ]);
+
 });

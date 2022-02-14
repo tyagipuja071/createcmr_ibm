@@ -125,7 +125,9 @@ public class MCOFstHandler extends MCOHandler {
       }
 
       data.setDunsNo(mainRecord.getCmrDuns());
-
+      if ("5K".equals(data.getIsuCd())) {
+        data.setClientTier("");
+      }
       String zs01sapNo = getKunnrSapr3Kna1(data.getCmrNo(), data.getCmrIssuingCntry());
       data.setIbmDeptCostCenter(getDepartment(zs01sapNo));
       data.setAdminDeptLine(data.getIbmDeptCostCenter());
@@ -630,6 +632,8 @@ public class MCOFstHandler extends MCOHandler {
             String addnameinfo = ""; // 9
             String poBox = "";// 10
             String numero = "";// 15
+            String isuCd = ""; // 7
+            String clientTier = ""; // 8
 
             if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
               currCell = (XSSFCell) row.getCell(0);
@@ -650,6 +654,10 @@ public class MCOFstHandler extends MCOHandler {
               deptNo = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(13);
               phoneNoData = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(8);
+              clientTier = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(7);
+              isuCd = validateColValFromCell(currCell);
               if (currCell != null) {
                 DataFormatter df = new DataFormatter();
                 phoneNoData = df.formatCellValue(row.getCell(13));
@@ -867,7 +875,23 @@ public class MCOFstHandler extends MCOHandler {
                 }
               }
             }
+            if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
+              if (!StringUtils.isBlank(isuCd)) {
+                if ("5K".equals(isuCd)) {
+                  if (!"@".equals(clientTier)) {
+                    LOG.trace("Client Tier should be '@' for the selected ISU Code.");
+                    error.addError(row.getRowNum(), "Client Tier", "Client Tier should be '@' for the selected ISU Code. ");
+                  }
+                }
+              }
 
+              if (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier)) {
+                LOG.trace("The row " + (row.getRowNum() + 1)
+                    + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
+                error.addError(row.getRowNum(), "Client Tier",
+                    ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
+              }
+            }
           }
         } // end row loop
 

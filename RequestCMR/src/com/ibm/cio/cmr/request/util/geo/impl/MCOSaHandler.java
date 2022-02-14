@@ -405,6 +405,9 @@ public class MCOSaHandler extends MCOHandler {
 
       data.setIbmDeptCostCenter(getInternalDepartment(mainRecord.getCmrNum()));
       data.setAdminDeptLine(data.getIbmDeptCostCenter());
+      if ("5K".equals(data.getIsuCd())) {
+        data.setClientTier("");
+      }
     }
 
   }
@@ -1052,6 +1055,8 @@ public class MCOSaHandler extends MCOHandler {
             String codFlag = ""; // 13
             String zs01Phone = "";
             String intDeptNum = ""; // 16
+            String isuCd = ""; // 10
+            String clientTier = ""; // 11
 
             boolean isDummyUpdate = true;
 
@@ -1115,6 +1120,11 @@ public class MCOSaHandler extends MCOHandler {
               currCell = (XSSFCell) row.getCell(16);
               intDeptNum = validateColValFromCell(currCell);
 
+              currCell = (XSSFCell) row.getCell(11);
+              clientTier = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(10);
+              isuCd = validateColValFromCell(currCell);
             }
 
             checkListSubRegion = Arrays.asList(nameCont, streetCont);
@@ -1142,6 +1152,25 @@ public class MCOSaHandler extends MCOHandler {
               LOG.trace("Phone Number should contain only digits.");
               error.addError(row.getRowNum(), "Phone #", "Phone Number should contain only digits.");
               validations.add(error);
+            }
+
+            if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
+              if (!StringUtils.isBlank(isuCd)) {
+                if ("5K".equals(isuCd)) {
+                  if (!"@".equals(clientTier)) {
+                    LOG.trace("Client Tier should be '@' for the selected ISU Code.");
+                    error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier should be '@' for the selected ISU Code. ");
+                    validations.add(error);
+                  }
+                }
+              }
+              if (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier)) {
+                LOG.trace("The row " + (row.getRowNum() + 1)
+                    + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
+                error.addError((row.getRowNum() + 1), "Client Tier",
+                    ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
+                validations.add(error);
+              }
             }
 
             /*

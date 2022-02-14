@@ -266,6 +266,8 @@ var landedCntryMapping = {
   "ZM" : "883",
   "ZW" : "825"
 }
+var isuCovHandler = false;
+var ctcCovHandler = false;
 function addCEMEALandedCountryHandler(cntry, addressMode, saving, finalSave) {
   if (!saving) {
     if (addressMode == 'newAddress') {
@@ -644,6 +646,9 @@ function addHandlersForCEMEA() {
 
   if (_ISUHandler == null) {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+      if (!value) {
+        value = FormManager.getActualValue('isuCd');
+      }
       var cntry = FormManager.getActualValue('cmrIssuingCntry');
       // CreateCMR-811
       // if (CEE_INCL.has(cntry)) {
@@ -653,6 +658,19 @@ function addHandlersForCEMEA() {
       // }
       if (!CEE_INCL.has(cntry)) {
         setEnterpriseValues(value);
+      }
+
+      var isuCd = FormManager.getActualValue('isuCd');
+      isuCovHandler = true;
+      if (isuCd == '5K') {
+        FormManager.clearValue('clientTier');
+        FormManager.disable('clientTier');
+        FormManager.resetValidations('clientTier');
+        if (GEOHandler.CEE.includes(cntry)) {
+          FormManager.setValue('salesBusOffCd', '999');
+        }
+      } else {
+        FormManager.enable('clientTier');
       }
 
       if (CEE_INCL.has(FormManager.getActualValue('cmrIssuingCntry'))) {
@@ -670,7 +688,7 @@ function addHandlersForCEMEA() {
       // } else {
       // setEnterpriseValues(value);
       // }
-
+      ctcCovHandler = true;
       if (!CEE_INCL.has(cntry)) {
         setEnterpriseValues(value);
       }
@@ -1599,6 +1617,13 @@ function setISUCTCValuesForCEE(isuCd) {
     return;
   }
   isuCd = FormManager.getActualValue('isuCd');
+  if (isuCd == '5K') {
+    FormManager.clearValue('clientTier');
+    FormManager.disable('clientTier');
+    FormManager.resetValidations('clientTier');
+    FormManager.setValue('salesBusOffCd', '999');
+    return;
+  }
 
   if ((FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'XCE'
       || FormManager.getActualValue('custSubGrp') == 'THDPT' || FormManager.getActualValue('custSubGrp') == 'COMME'

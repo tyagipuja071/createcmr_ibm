@@ -55,6 +55,8 @@ public class MCOPtEsHandler extends MCOHandler {
 
   protected static final String[] PT_MASS_UPDATE_SHEET_NAMES = { "Billing Address", "Mailing Address", "Installing Address",
       "Shipping Address (Update)", "EPL Address", "Data" };
+  protected static final String[] ES_MASS_UPDATE_SHEET_NAMES = { "Billing Address", "Mailing Address", "Installing Address",
+      "Shipping Address (Update)", "EPL Address", "Data" };
 
   private static final String[] SPAIN_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "LocalTax1" };
 
@@ -464,10 +466,15 @@ public class MCOPtEsHandler extends MCOHandler {
       data.setCollectionCd(this.currentImportValues.get("DistrictCode"));
       LOG.trace("Collection Code: " + data.getCollectionCd());
 
-      if ("U".equals(admin.getReqType()) && data.getAbbrevLocn() != null) {
-        String abbrevLocn = data.getAbbrevLocn().trim();
-        data.setAbbrevLocn(abbrevLocn.length() > 12 ? abbrevLocn.substring(0, 12) : abbrevLocn);
-        data.getAbbrevLocn();
+      if ("U".equals(admin.getReqType())) {
+        if (data.getAbbrevLocn() != null) {
+          String abbrevLocn = data.getAbbrevLocn().trim();
+          data.setAbbrevLocn(abbrevLocn.length() > 12 ? abbrevLocn.substring(0, 12) : abbrevLocn);
+          data.getAbbrevLocn();
+        }
+        if ("5K".equals(data.getIsuCd())) {
+          data.setClientTier("");
+        }
       }
 
       if (this.legacyObjects != null) {
@@ -488,6 +495,10 @@ public class MCOPtEsHandler extends MCOHandler {
       data.setTaxCd1("");
     }
 
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())
+        && (data.getCmrIssuingCntry().equals("838") || data.getCmrIssuingCntry().equals("822")) && "5K".equals(data.getIsuCd())) {
+      data.setClientTier("");
+    }
   }
 
   @Override
@@ -1158,7 +1169,13 @@ public class MCOPtEsHandler extends MCOHandler {
   @Override
   public void validateMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country) {
     XSSFCell currCell = null;
-    for (String name : PT_MASS_UPDATE_SHEET_NAMES) {
+    String[] sheetNames = null;
+    if (SystemLocation.SPAIN.equals(country)) {
+      sheetNames = ES_MASS_UPDATE_SHEET_NAMES;
+    } else {
+      sheetNames = PT_MASS_UPDATE_SHEET_NAMES;
+    }
+    for (String name : sheetNames) {
       XSSFSheet sheet = book.getSheet(name);
       if (sheet != null) {
         for (Row row : sheet) {
@@ -1177,6 +1194,8 @@ public class MCOPtEsHandler extends MCOHandler {
             String landCountry = ""; // 11
             String dataCmrNo = ""; // 0
             String dataEnterpriseNo = ""; // 5
+            String isuCd = ""; // 9
+            String clientTier = ""; // 10
             List<String> checkList = null;
             long count = 0;
             if (row.getRowNum() == 2001) {
@@ -1232,6 +1251,10 @@ public class MCOPtEsHandler extends MCOHandler {
                 currCell = (XSSFCell) row.getCell(7);
                 dataEnterpriseNo = validateColValFromCell(currCell);
               }
+              currCell = (XSSFCell) row.getCell(7);
+              isuCd = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(8);
+              clientTier = validateColValFromCell(currCell);
             }
 
             checkList = Arrays.asList(addressCont, poBox, attPerson);
@@ -1386,6 +1409,22 @@ public class MCOPtEsHandler extends MCOHandler {
                   validations.add(error);
                 }
               }
+              if ((isuCd.equalsIgnoreCase("5k") || isuCd.equalsIgnoreCase("3T")) && !clientTier.equalsIgnoreCase("@")) {
+                LOG.trace("For IsuCd set to '5K' Ctc should be '@'");
+                error.addError(row.getRowNum(), "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd);
+                validations.add(error);
+              } else if (!StringUtils.isEmpty(isuCd) && (!isuCd.equalsIgnoreCase("5k") || !isuCd.equalsIgnoreCase("3T")) && clientTier.equalsIgnoreCase("@")) {
+                LOG.trace("Ctc can't be @ for IsuCd Value :" + isuCd);
+                error.addError(row.getRowNum(), "Client Tier", "Client Tier Value can't be cleared for IsuCd Value :" + isuCd);
+                validations.add(error);
+              }
+              if (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier)) {
+                LOG.trace("The row " + row.getRowNum()
+                    + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
+                error.addError(row.getRowNum(), "Client Tier",
+                    ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
+                validations.add(error);
+              }
             }
 
             if (country.equals(SystemLocation.SPAIN)) {
@@ -1395,6 +1434,7 @@ public class MCOPtEsHandler extends MCOHandler {
                 String enterprise = null;
                 row = sheet.getRow(rowIndex);
                 if (row == null) {
+                  validations.add(error);
                   return; // stop immediately when row is blank
                 }
                 if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
@@ -1404,6 +1444,10 @@ public class MCOPtEsHandler extends MCOHandler {
                   enterprise = validateColValFromCell(currCell);
                   currCell = (XSSFCell) row.getCell(12);
                   salesRep = validateColValFromCell(currCell);
+                  currCell = (XSSFCell) row.getCell(9);
+                  isuCd = validateColValFromCell(currCell);
+                  currCell = (XSSFCell) row.getCell(10);
+                  clientTier = validateColValFromCell(currCell);
                 }
 
                 if ((!("@").equals(collectionCd)) && (!StringUtils.isEmpty(collectionCd))) {
@@ -1436,7 +1480,24 @@ public class MCOPtEsHandler extends MCOHandler {
                     error.addError(rowIndex, "Sales Rep. No.", "Sales Rep. No. should be alphanumeric. Please fix and upload the template again.");
                   }
                 }
-                validations.add(error);
+
+                if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
+                  if (!StringUtils.isBlank(isuCd)) {
+                    if ("5K".equals(isuCd) || "3T".equals(isuCd)) {
+                      if (!"@".equals(clientTier)) {
+                        LOG.trace("Client Tier should be '@' for the selected ISU Code.");
+                        error.addError(rowIndex, "Client Tier", "Client Tier should be '@' for the selected ISU Code. ");
+                      }
+                    }
+                  }
+                  if (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier)) {
+                    LOG.trace("The row " + row.getRowNum()
+                        + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
+                    error.addError(rowIndex, "Client Tier",
+                        ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
+                    validations.add(error);
+                  }
+                }
               }
             }
           }
