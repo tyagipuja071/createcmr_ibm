@@ -697,12 +697,14 @@ function addHandlersForBELUX() {
   if (_ISUHandler == null) {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       setClientTierValues(value);
+      setSBOValuesForIsuCtc();
     });
   }
 
   if (_CTCHandler == null) {
     _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
       setAccountTeamNumberValues(value);
+      setSBOValuesForIsuCtc();
     });
   }
 
@@ -1684,6 +1686,43 @@ function setSORTL() {
     break;
   default:
     break;
+  }
+}
+
+function setSBOValuesForIsuCtc() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  var isuCd = FormManager.getActualValue('isuCd');
+  var clientTier = FormManager.getActualValue('clientTier');
+  var reqType = FormManager.getActualValue('reqType');
+  var countryUse = FormManager.getActualValue('countryUse');
+  var isuList = ['34', '5K', '28'];
+  if (isuCd == '34' && clientTier == 'Y') {
+    if (countryUse == '624') {
+      FormManager.setValue('commercialFinanced', 'T0007967');
+    } else {
+      FormManager.setValue('commercialFinanced', 'T0007968');
+    }
+  } else if (isuCd == '34' && clientTier == 'Q') {
+    if (countryUse == '624') {
+      FormManager.setValue('commercialFinanced', 'T0003601');
+    } else {
+      FormManager.setValue('commercialFinanced', 'T0003500');
+    }
+  } else if (isuCd == '5K' && clientTier == '') {
+    FormManager.setValue('commercialFinanced', 'T0009066');
+  } else if (isuCd == '28' && clientTier == '') {
+    FormManager.setValue('commercialFinanced', 'A0004504');
+  } else {
+    FormManager.setValue('commercialFinanced', '');
+  }
+  if ([ '5K', '28' ].includes(isuCd)) {
+    FormManager.resetValidations('clientTier');
+    FormManager.setValue('clientTier', '');
+    FormManager.readOnly('clientTier');
+  } else {
+    FormManager.enable('clientTier');
   }
 }
 
