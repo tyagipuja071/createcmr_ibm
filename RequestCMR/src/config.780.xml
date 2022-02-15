@@ -60,7 +60,7 @@
 					<label>Client Tier</label>
 					<dbColumn>CLIENT_TIER</dbColumn>
 					<width>25</width>
-					<lovId>ClientTier</lovId>
+					<length>1</length>
 				</column>
 				<column>
 					<label>Classification Code</label>
