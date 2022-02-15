@@ -55,6 +55,11 @@ function addISUHandler() {
   var isuHandler = null;
   _isuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
     setClientTierValuesMT(value);
+    setValuesWRTIsuCtc();
+  });
+  _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
+    setClientTierValuesMT();
+    setValuesWRTIsuCtc(value);
   });
 }
 
@@ -976,6 +981,31 @@ function setVatExemptValidatorMalta() {
   }
 }
 
+function setValuesWRTIsuCtc(ctc) {
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var isu = FormManager.getActualValue('isuCd');
+  if (ctc == null) {
+    var ctc = FormManager.getActualValue('clientTier');
+  }
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  if (isu == '34' && ctc == 'Y') {
+    FormManager.setValue('enterprise', '985205');
+    FormManager.enable('enterprise');
+    FormManager.setValue('salesBusOffCd', '0010');
+    FormManager.enable('salesBusOffCd');
+  } else if (isu == '5K' && ctc == '') {
+    FormManager.setValue('enterprise', '985999');
+    FormManager.enable('enterprise');
+    FormManager.setValue('salesBusOffCd', '0010');
+    FormManager.enable('salesBusOffCd');
+  }
+  if (role == 'REQUESTER') {
+    FormManager.removeValidator('enterprise', Validators.REQUIRED);
+  } else {
+    FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise' ]);
+  }
+}
+
 /* End 1430539 */
 dojo.addOnLoad(function() {
   GEOHandler.MCO2 = [ '780' ];
@@ -1027,5 +1057,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addCTCHandler, [ SysLoc.MALTA ]);
   GEOHandler.addAfterConfig(setClientTierValuesMT, [ SysLoc.MALTA ]);
   GEOHandler.addAfterTemplateLoad(setClientTierValuesMT, [ SysLoc.MALTA ]);
+  GEOHandler.addAfterTemplateLoad(addISUHandler, [ SysLoc.MALTA ]);
 
 });
