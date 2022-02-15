@@ -1178,25 +1178,30 @@ public class IsraelTransformer extends EMEATransformer {
     }
 
     if (lstAddrLines.size() > 0) {
+      String addrLine = "";
       for (int i = 0; i < lstAddrLines.size(); i++) {
+        addrLine = lstAddrLines.get(i);
+        if (StringUtils.isNotBlank(addrLine) && addrLine.length() > 30) {
+          addrLine = StringUtils.substring(addrLine, 0, 30);
+        }
         switch (i) {
         case 0:
-          legacyAddr.setAddrLine1(lstAddrLines.get(i));
+          legacyAddr.setAddrLine1(addrLine);
           break;
         case 1:
-          legacyAddr.setAddrLine2(lstAddrLines.get(i));
+          legacyAddr.setAddrLine2(addrLine);
           break;
         case 2:
-          legacyAddr.setAddrLine3(lstAddrLines.get(i));
+          legacyAddr.setAddrLine3(addrLine);
           break;
         case 3:
-          legacyAddr.setAddrLine4(lstAddrLines.get(i));
+          legacyAddr.setAddrLine4(addrLine);
           break;
         case 4:
-          legacyAddr.setAddrLine5(lstAddrLines.get(i));
+          legacyAddr.setAddrLine5(addrLine);
           break;
         case 5:
-          legacyAddr.setAddrLine6(lstAddrLines.get(i));
+          legacyAddr.setAddrLine6(addrLine);
           break;
         }
       }
