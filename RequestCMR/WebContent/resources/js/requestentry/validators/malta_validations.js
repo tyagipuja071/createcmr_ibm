@@ -58,6 +58,13 @@ function addISUHandler() {
   });
 }
 
+function addCTCHandler() {
+  var _ctcHandler = null;
+  _ctcHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+    setClientTierValuesMT(value);
+  });
+}
+
 /*
  * Order Block field
  */
@@ -606,9 +613,7 @@ function setClientTierValuesMT(isuCd) {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
-  if (isuCd == null) {
-    isuCd = FormManager.getActualValue('isuCd');
-  }
+  isuCd = FormManager.getActualValue('isuCd');
   if (isuCd == '5K') {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
     FormManager.setValue('clientTier', '');
@@ -1019,6 +1024,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(hideCustPhoneonSummary, [ SysLoc.MALTA ]);
   GEOHandler.addAfterTemplateLoad(checkScenarioChanged, [ SysLoc.MALTA ]);
   GEOHandler.addAfterConfig(addISUHandler, [ SysLoc.MALTA ]);
+  GEOHandler.addAfterConfig(addCTCHandler, [ SysLoc.MALTA ]);
   GEOHandler.addAfterConfig(setClientTierValuesMT, [ SysLoc.MALTA ]);
+  GEOHandler.addAfterTemplateLoad(setClientTierValuesMT, [ SysLoc.MALTA ]);
 
 });
