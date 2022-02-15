@@ -9878,7 +9878,7 @@ function setValuesWRTIsuCtc(ctc) {
   if (role == 'REQUESTER') {
     FormManager.removeValidator('enterprise', Validators.REQUIRED);
   } else {
-    FormManager.addValidator('enterprise', Validators.REQUIRED,[ 'Enterprise' ]);
+    FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise' ]);
   }
 }
 
