@@ -68,6 +68,18 @@ function getImportedIndcForItaly() {
 
 }
 
+function addISUHandler() {
+  var _CTCHandler = null;
+  _isuCdHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+    setClientTierValuesTR(value);
+    setValuesWRTIsuCtc();
+  });
+  _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
+    setClientTierValuesTR();
+    setValuesWRTIsuCtc(value);
+  });
+}
+
 // CREATCMR-2657 for TURKEY
 function setSORTL() {
   if (FormManager.getActualValue('cmrIssuingCntry') != '862') {
@@ -9841,6 +9853,36 @@ function checkCmrUpdateBeforeImport() {
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
 
+function setValuesWRTIsuCtc(ctc) {
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var isu = FormManager.getActualValue('isuCd');
+  if (ctc == null) {
+    var ctc = FormManager.getActualValue('clientTier');
+  }
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  if (isu == '34' && ctc == 'Y') {
+    FormManager.setValue('salesBusOffCd', 'A20');
+    if (role == 'REQUESTER' || role == 'PROCESSOR') {
+      FormManager.enable('salesBusOffCd');
+    }
+  } else if (isu == '5K') {
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    FormManager.setValue('clientTier', '');
+    FormManager.readOnly('clientTier');
+    FormManager.setValue('salesBusOffCd', 'A00');
+    if (role == 'REQUESTER' || role == 'PROCESSOR') {
+      FormManager.enable('salesBusOffCd');
+    }
+  }
+  
+  if (role == 'REQUESTER') {
+    FormManager.removeValidator('enterprise', Validators.REQUIRED);
+  } else {
+    FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise' ]);
+  }
+}
+
+
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding EMEA functions...');
@@ -10108,4 +10150,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(handleClassCode, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(hideCollectionCode, [ SysLoc.TURKEY ]);
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, [ SysLoc.TURKEY ], null, true);
+  GEOHandler.addAfterTemplateLoad(addISUHandler, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterConfig(addISUHandler, [ SysLoc.TURKEY ]);
 });
