@@ -14,7 +14,23 @@ var TemplateService = (function() {
   var READONLY_CLEARVALUE = '$';
   var EDITABLE_CLEARVALUE = '@';
   var BLANK_CUSTOMIZABLE = "~";
-  var ADDRESS_TYPES = [ 'ZS01', 'ZI01', 'ZP01', 'ZD01', 'ZS02', 'ZP02', 'CTYA', 'CTYB', 'CTYC', 'CTYD', 'CTYE', 'CTYF', 'CTYG', 'CTYH', 'EDUC', 'MAIL', 'PUBB', 'PUBS', 'STAT', 'ZF01', 'ZH01' ];
+  var ADDRESS_TYPES = [ 'ZS01', 'ZI01', 'ZP01', 'ZD01', 'ZS02', 'ZP02', 'CTYA', 'CTYB', 'CTYC', 'CTYD', 'CTYE', 'CTYF', 'CTYG', 'CTYH', 'EDUC',
+      'MAIL', 'PUBB', 'PUBS', 'STAT', 'ZF01', 'ZH01' ];
+
+  // CREATCMR-4293
+  var CMR_ISSUING_CNTRY_ARRAY = [ '624', '603', '607', '626', '644', '651', '668', '693', '694', '695', '699', '704', '705', '707', '708', '740',
+      '741', '787', '820', '821', '826', '889', '358', '359', '363', '862', '864', '610', '636', '645', '669', '698', '725', '745', '764', '769',
+      '770', '782', '804', '825', '827', '831', '833', '835', '842', '851', '857', '883', '620', '642', '675', '677', '680', '752', '762', '767',
+      '768', '772', '805', '808', '823', '832', '849', '850', '865', '729', '846', '806', '702', '678' ];
+
+  var CUST_SUB_GRP_FOR_BUSINESS_PARTNER_ARRAY = [ 'AFBP', 'BEBUS', 'BUSPR', 'BUSSM', 'BUSVA', 'CBBUS', 'CHBUS', 'CRBUS', 'CROBP', 'CSBP', 'DKBUS',
+      'EEBUS', 'ELBP', 'EXBP', 'FIBUS', 'FOBUS', 'GLBUS', 'ISBUS', 'JOBP', 'JOXBP', 'LIBUS', 'LSBP', 'LSXBP', 'LTBUS', 'LUBUS', 'LVBUS', 'MEBP',
+      'NABP', 'NAXBP', 'PKBP', 'PKXBP', 'PSBP', 'RSBP', 'RSXBP', 'SZBP', 'SZXBP', 'XBP', 'XBUSP', 'ZABP', 'ZAXBP' ];
+
+  var CUST_SUB_GRP_FOR_INTERNAL_ARRAY = [ 'AFINT', 'BEINT', 'CBINT', 'CBTER', 'CHINT', 'CRINT', 'CROIN', 'CSINT', 'DKINT', 'EEINT', 'FIINT', 'FOINT',
+      'GLINT', 'INTER', 'INTIN', 'INTSM', 'INTVA', 'ISINT', 'JOINT', 'JOXIN', 'LIINT', 'LSINT', 'LSXIN', 'LTINT', 'LUINT', 'LVINT', 'MEINT', 'NAINT',
+      'NAXIN', 'PKINT', 'PKXIN', 'PSINT', 'RSINT', 'RSXIN', 'SZINT', 'SZXIN', 'XINT', 'XINTE', 'XINTR', 'ZAINT', 'ZAXIN' ]
+  // CREATCMR-4293
 
   var getUserRole = function() {
     var role = null;
@@ -265,7 +281,8 @@ var TemplateService = (function() {
 
               FormManager.addValidator(name, Validators.REQUIRED, [ label ], field.parentTab);
 
-            } else if (name == 'isicCd' && (values[0].indexOf('%') >= 0 || values[0].indexOf('LOV') == 0 || values[0].indexOf('^') >= 0 || values[0].indexOf('-') > 0)) {
+            } else if (name == 'isicCd'
+                && (values[0].indexOf('%') >= 0 || values[0].indexOf('LOV') == 0 || values[0].indexOf('^') >= 0 || values[0].indexOf('-') > 0)) {
 
               // has wildcard, LOV, exclusions, or range, dirty dirty fix for
               // ISIC/subindustry :( grr
@@ -281,7 +298,8 @@ var TemplateService = (function() {
               // 2. load isic,
               FormManager.setValue(name, '');
               FilteringDropdown['val_isicCd'] = null;
-              FilteringDropdown.loadItems('isicCd', 'isicCd_spinner', 'bds', 'fieldId=ISIC&cmrIssuingCntry=_cmrIssuingCntry&isicCd=' + values[0] + '&nocache=y');
+              FilteringDropdown.loadItems('isicCd', 'isicCd_spinner', 'bds', 'fieldId=ISIC&cmrIssuingCntry=_cmrIssuingCntry&isicCd=' + values[0]
+                  + '&nocache=y');
 
               FormManager.addValidator(name, Validators.REQUIRED, [ label ], field.parentTab);
               FormManager.enable(name);
@@ -291,7 +309,8 @@ var TemplateService = (function() {
               limitDropdownValues(FormManager.getField('subIndustryCd'), []);
               FormManager.setValue('subIndustryCd', '');
               FilteringDropdown['val_subIndustryCd'] = null;
-              FilteringDropdown.loadOnChange('subIndustryCd', 'subIndustryCd_spinner', 'bds', 'fieldId=Subindustry&cmrIssuingCntry=_cmrIssuingCntry&nocache=y&isicCd=_isicCd', 'isicCd');
+              FilteringDropdown.loadOnChange('subIndustryCd', 'subIndustryCd_spinner', 'bds',
+                  'fieldId=Subindustry&cmrIssuingCntry=_cmrIssuingCntry&nocache=y&isicCd=_isicCd', 'isicCd');
 
               subIndLabel = dojo.byId('cmr-fld-lbl-Subindustry') ? dojo.byId('cmr-fld-lbl-Subindustry').innerHTML : 'Subindustry';
               FormManager.addValidator('subIndustryCd', Validators.REQUIRED, [ subIndLabel ], field.parentTab);
@@ -437,6 +456,29 @@ var TemplateService = (function() {
                     }
                     if (processorCheck && (!retainValue || (retainValue && FormManager.getActualValue(name) == ''))) {
                       FormManager.setValue(name, values[0]);
+
+                      // CREATCMR-4293
+                      var ctc = '';
+                      var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+
+                      if (CMR_ISSUING_CNTRY_ARRAY.includes(cmrIssuingCntry)) {
+
+                        // if (name == 'isuCd') {
+                        // if (_pagemodel.clientTier == null) {
+                        // ctc = '';
+                        // }
+                        // FormManager.setValue(name, values[0]);
+                        // }
+
+                        if (name == 'clientTier') {
+                          if (_pagemodel.clientTier == null) {
+                            ctc = '';
+                          }
+                          FormManager.setValue(name, ctc);
+                        }
+                      }
+                      // CREATCMR-4293
+
                     }
                   }
 
@@ -506,8 +548,9 @@ var TemplateService = (function() {
               }
             } else {
               if (dojo.byId('templatevalue-' + name) == null) {
-                var button = '<input title="Select a value from the list" type="button" id="templatevalue-' + name + '" class="templateButton" fieldId="' + name + '" field="' + id + '" values="'
-                    + values + '"onclick="TemplateService.openChoices(this)" value="..." />';
+                var button = '<input title="Select a value from the list" type="button" id="templatevalue-' + name
+                    + '" class="templateButton" fieldId="' + name + '" field="' + id + '" values="' + values
+                    + '"onclick="TemplateService.openChoices(this)" value="..." />';
                 var widget = dojo.byId('widget_' + name);
                 if (!widget) {
                   widget = dojo.byId(name);
@@ -587,7 +630,8 @@ var TemplateService = (function() {
             }
           }
 
-          if ((FormManager.getActualValue('cmrIssuingCntry') == '724' || FormManager.getActualValue('cmrIssuingCntry') == '618') && name == 'enterprise') {
+          if ((FormManager.getActualValue('cmrIssuingCntry') == '724' || FormManager.getActualValue('cmrIssuingCntry') == '618')
+              && name == 'enterprise') {
             // SKIP for CMR-2617 Germany
             // SKIP for CMR-2001 Austria
           } else if (name == 'enterprise' || name == 'affiliate' || name == 'company') {
@@ -596,7 +640,9 @@ var TemplateService = (function() {
 
         }
         if (scenarioChanged) {
-          cmr.showAlert("Default values for the scenario have been loaded. Any existing value from a previous template has been cleared/overwritten.", "Warning");
+          cmr.showAlert(
+              "Default values for the scenario have been loaded. Any existing value from a previous template has been cleared/overwritten.",
+              "Warning");
         }
 
         if ((typeof GEOHandler) != 'undefined') {
@@ -784,8 +830,9 @@ var TemplateService = (function() {
               }
             } else {
               if (dojo.byId('templatevalue-' + name) == null) {
-                var button = '<input title="Select a value from the list" type="button" id="templatevalue-' + name + '" class="templateButton" fieldId="' + name + '" field="' + id + '" values="'
-                    + values + '"onclick="TemplateService.openChoices(this)" value="..." />';
+                var button = '<input title="Select a value from the list" type="button" id="templatevalue-' + name
+                    + '" class="templateButton" fieldId="' + name + '" field="' + id + '" values="' + values
+                    + '"onclick="TemplateService.openChoices(this)" value="..." />';
                 var widget = dojo.byId('widget_' + name);
                 if (!widget) {
                   widget = dojo.byId(name);
@@ -902,10 +949,12 @@ var TemplateService = (function() {
               var isicFilter = false;
               if (fields[i].fieldName == 'isicCd') {
                 if (fields[i].values && fields[i].values.length > 0) {
-                  isicFilter = fields[i].values[0].indexOf('%') >= 0 || fields[i].values[0].indexOf('LOV') == 0 || fields[i].values[0].indexOf('-') > 0 || fields[i].values[0].indexOf('^') >= 0;
+                  isicFilter = fields[i].values[0].indexOf('%') >= 0 || fields[i].values[0].indexOf('LOV') == 0
+                      || fields[i].values[0].indexOf('-') > 0 || fields[i].values[0].indexOf('^') >= 0;
                 }
               }
-              return fields[i].values && fields[i].values.length > 0 && fields[i].values[0] != '*' && fields[i].values[0] != '@' && fields[i].values[0].indexOf('%') < 0 && !isicFilter && !retain;
+              return fields[i].values && fields[i].values.length > 0 && fields[i].values[0] != '*' && fields[i].values[0] != '@'
+                  && fields[i].values[0].indexOf('%') < 0 && !isicFilter && !retain;
             }
           }
         }
@@ -970,6 +1019,7 @@ function revertISICBehavior() {
     FilteringDropdown['val_subIndustryCd'] = null;
     FilteringDropdown['val_isicCd'] = null;
     FilteringDropdown.loadItems('subIndustryCd', 'subIndustryCd_spinner', 'bds', 'fieldId=Subindustry&cmrIssuingCntry=_cmrIssuingCntry');
-    FilteringDropdown.loadOnChange('isicCd', 'isicCd_spinner', 'bds', 'fieldId=ISIC&cmrIssuingCntry=_cmrIssuingCntry&subIndustryCd=_subIndustryCd', 'subIndustryCd');
+    FilteringDropdown.loadOnChange('isicCd', 'isicCd_spinner', 'bds', 'fieldId=ISIC&cmrIssuingCntry=_cmrIssuingCntry&subIndustryCd=_subIndustryCd',
+        'subIndustryCd');
   }
 }
