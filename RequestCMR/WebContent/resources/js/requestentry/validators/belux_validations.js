@@ -697,6 +697,7 @@ function addHandlersForBELUX() {
   if (_ISUHandler == null) {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       setClientTierValues(value);
+      setClientTierValuesForUpdate();
       setSBOValuesForIsuCtc();
     });
   }
@@ -1931,6 +1932,19 @@ function addREALCTYValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+function setClientTierValuesForUpdate() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  var isuCd = FormManager.getActualValue('isuCd');
+  if (isuCd == '5K') {
+    FormManager.setValue('clientTier', '');
+    FormManager.readOnly('clientTier');
+  } else {
+    FormManager.enable('clientTier');
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.BELUX = [ '624' ];
 
@@ -1990,5 +2004,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addDepartmentNumberValidator, GEOHandler.BELUX, null, true);
   GEOHandler.registerValidator(addREALCTYValidator, GEOHandler.BELUX, null, true);
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.BELUX, null, true);
-
+  GEOHandler.addAfterConfig(setClientTierValuesForUpdate, GEOHandler.BELUX);
+  GEOHandler.addAfterTemplateLoad(setClientTierValuesForUpdate, GEOHandler.BELUX);
+  
 });
