@@ -4470,6 +4470,73 @@ function checkCmrUpdateBeforeImport() {
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
 
+// CREATCMR-4293
+function setCTCValues() {
+
+  FormManager.removeValidator('clientTier', Validators.REQUIRED);
+
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+
+  // Business Partner
+  var custSubGrpForBusinessPartner = [ 'AFBP', 'BUSPR', 'ELBP', 'EXBP', 'JOBP', 'JOXBP', 'PKBP', 'PKXBP', 'PSBP', 'XBP' ];
+
+  // Business Partner
+  if (custSubGrpForBusinessPartner.includes(custSubGrp)) {
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    var isuCd = FormManager.getActualValue('isuCd');
+    if (isuCd == '8B') {
+      FormManager.setValue('clientTier', '');
+    }
+  }
+
+  // Internal
+  var custSubGrpForInternal = [ 'AFINT', 'INTER', 'JOINT', 'JOXIN', 'PKINT', 'PKXIN', 'PSINT', 'XINT' ];
+
+  // Internal
+  if (custSubGrpForInternal.includes(custSubGrp)) {
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    var isuCd = FormManager.getActualValue('isuCd');
+    if (isuCd == '21') {
+      FormManager.setValue('clientTier', '');
+    }
+  }
+}
+
+function clientTierCodeValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var isuCode = FormManager.getActualValue('isuCd');
+        var clientTierCode = FormManager.getActualValue('clientTier');
+
+        if (isuCode == '21' || isuCode == '8B') {
+          if (clientTierCode == '') {
+            return new ValidationResult(null, true);
+          } else {
+            return new ValidationResult({
+              id : 'clientTier',
+              type : 'text',
+              name : 'clientTier'
+            }, false, 'Client Tier can only accept blank.');
+          }
+        } else {
+          if (clientTierCode == 'Q' || clientTierCode == 'Y' || clientTierCode == '') {
+            return new ValidationResult(null, true);
+          } else {
+            return new ValidationResult({
+              id : 'clientTier',
+              type : 'text',
+              name : 'clientTier'
+            }, false, 'Client Tier can only accept \'Q\', \'Y\' or blank.');
+          }
+        }
+
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+// CREATCMR-4293
+
 dojo
     .addOnLoad(function() {
       GEOHandler.CEMEA_COPY = [ '358', '359', '363', '603', '607', '620', '626', '644', '642', '651', '668', '677', '680', '693', '694', '695',
@@ -4691,5 +4758,9 @@ dojo
       GEOHandler.addAfterTemplateLoad(omanVat, GEOHandler.ME);
       GEOHandler.addAfterConfig(addHandlersForOman, GEOHandler.ME);
       GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.ME, null, true);
+
+      // CREATCMR-4293
+      GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.ME);
+      GEOHandler.registerValidator(clientTierCodeValidator, GEOHandler.ME, null, true);
 
     });
