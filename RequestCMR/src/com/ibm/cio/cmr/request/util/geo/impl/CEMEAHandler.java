@@ -1292,6 +1292,11 @@ public class CEMEAHandler extends BaseSOFHandler {
         }
       }
     }
+
+    if ("821".equals(currentRecord.getCmrIssuedBy())) {
+      address.setStateProv("");
+    }
+
     }
 
   @Override
