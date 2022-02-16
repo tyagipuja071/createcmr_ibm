@@ -2977,4 +2977,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setEnterpriseBasedOnSubIndustry, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
   GEOHandler.registerValidator(validateExistingCMRNo, [ SysLoc.SPAIN ], GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.addAfterConfig(enableCMRNUMForPROCESSOR, [ SysLoc.SPAIN ]);
+  GEOHandler.registerValidator(validateCMRNumberForSpain, [ SysLoc.SPAIN ], GEOHandler.ROLE_PROCESSOR, true);
 });
