@@ -2201,8 +2201,8 @@ public class CEMEAHandler extends BaseSOFHandler {
         }
       }
 
-      TemplateValidation error = new TemplateValidation("Data");
       for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
+      TemplateValidation error = new TemplateValidation("Data");
         row = sheet.getRow(rowIndex);
         if (row == null) {
           return; // stop immediately when row is blank
@@ -2212,14 +2212,12 @@ public class CEMEAHandler extends BaseSOFHandler {
         if (StringUtils.isNotBlank(ordBlk) && !("@".equals(ordBlk) || "E".equals(ordBlk) || "J".equals(ordBlk) || "R".equals(ordBlk))) {
           LOG.trace("Order Block Code should only @, E, R, J. >> ");
           error.addError(rowIndex, "Order Block Code", "Order Block Code should be only @, E, R, J. ");
-          validations.add(error);
         }
         currCell = row.getCell(fiscalCdIndex);
         String fiscalCd = validateColValFromCell(currCell);
         if (StringUtils.isNotBlank(fiscalCd) && !(fiscalCd.matches("^[0-9]*$")) && "826".equals(country)) {
           LOG.trace("fiscal code should consist only of digits");
           error.addError(rowIndex, "Fiscal Code", " fiscal code should consist only of digits.");
-          validations.add(error);
         }
         currCell = row.getCell(isuCdIndex);
         String isuCd = validateColValFromCell(currCell);
@@ -2228,13 +2226,28 @@ public class CEMEAHandler extends BaseSOFHandler {
         if (isuCd.equalsIgnoreCase("5k") && !ctc.equalsIgnoreCase("@")) {
           LOG.trace("For IsuCd set to '5K' Ctc should be '@'");
           error.addError(rowIndex, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd);
-          validations.add(error);
+        } else if (!StringUtils.isEmpty(isuCd) && StringUtils.isNotBlank(ctc) && "21,8B".contains(isuCd) && !ctc.equalsIgnoreCase("@")) {
+          LOG.trace("Ctc only accept @ for IsuCd Value :" + isuCd);
+          error.addError(rowIndex, "Client Tier", "Ctc only accept @ for IsuCd Value :" + isuCd);
+        } else if (!StringUtils.isEmpty(isuCd) && !isuCd.equalsIgnoreCase("5k") && ctc.equalsIgnoreCase("@")) {
+          LOG.trace("Ctc can't be @ for IsuCd Value :" + isuCd);
+          error.addError(rowIndex, "Client Tier", "Client Tier Value can't be cleared for IsuCd Value :" + isuCd);
+        }
+        if (!StringUtils.isBlank(isuCd) && "34".equals(isuCd)) {
+          if (StringUtils.isNotBlank(ctc) && !"QY".contains(ctc)) {
+            LOG.trace("The row " + rowIndex
+                + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
+            error.addError(rowIndex, "Client Tier",
+                ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
+        }
         }
         if (StringUtils.isNotBlank(ctc) && !"@QY".contains(ctc)) {
           LOG.trace(
               "The row " + (rowIndex) + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
           error.addError((rowIndex), "Client Tier",
               ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
+        }
+        if (error.hasErrors()) {
           validations.add(error);
         }
       }

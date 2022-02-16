@@ -1465,14 +1465,15 @@ public class NORDXTransformer extends EMEATransformer {
       }
     }
 
-    String isuClientTier = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "")
+    String isuClientTier;
+    isuClientTier = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "") 
         + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
-    if (isuClientTier != null && isuClientTier.length() == 3) {
+    if (isuClientTier != null && isuClientTier.endsWith("@")) {
+      cust.setIsuCd((!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : cust.getIsuCd().substring(0, 2)) + "7");
+    } else if (isuClientTier != null && isuClientTier.length() == 3) {
       cust.setIsuCd(isuClientTier);
-    } else if (isuClientTier.contains("@")) {
-      cust.setIsuCd("");
     }
-
+    
     if (!StringUtils.isBlank(muData.getRepTeamMemberNo())) {
       if ("@".equals(muData.getRepTeamMemberNo())) {
         cust.setSalesRepNo("");
