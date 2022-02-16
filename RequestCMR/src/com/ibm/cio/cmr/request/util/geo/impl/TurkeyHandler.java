@@ -4045,7 +4045,6 @@ public class TurkeyHandler extends BaseSOFHandler {
             String district = "";// 12
             String taxOffice = ""; // 14
             String name4 = "";// 10
-
             TemplateValidation error = new TemplateValidation(name);
             if ("Data".equalsIgnoreCase(name)) {
               String isuCd = ""; // 10
@@ -4061,17 +4060,29 @@ public class TurkeyHandler extends BaseSOFHandler {
                   if (!"@".equals(clientTier)) {
                     LOG.trace("Client Tier should be '@' for the selected ISU Code.");
                     error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier should be '@' for the selected ISU Code. ");
-                    validations.add(error);
                   }
+                } else if (!StringUtils.isEmpty(isuCd) && StringUtils.isNotBlank(clientTier) && "21,8B".contains(isuCd)
+                    && !clientTier.equalsIgnoreCase("@")) {
+                  LOG.trace("Ctc only accept @ for IsuCd Value :" + isuCd);
+                  error.addError((row.getRowNum() + 1), "Client Tier", "Ctc only accept @ for IsuCd Value :" + isuCd);
                 }
               }
-              if (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier)) {
-                LOG.trace("The row " + (row.getRowNum() + 1)
-                    + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
-                error.addError((row.getRowNum() + 1), "Client Tier",
-                    ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
-                validations.add(error);
+              if (!StringUtils.isBlank(isuCd) && "34".equals(isuCd)) {
+                if (StringUtils.isNotBlank(clientTier) && !"QY".contains(clientTier)) {
+                  LOG.trace("The row " + (row.getRowNum() + 1)
+                      + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "Client Tier",
+                      ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
+                }
               }
+                if (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier)) {
+                  LOG.trace("The row " + (row.getRowNum() + 1)
+                      + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "Client Tier",
+                      ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
+                }
+              validations.add(error);
+
             } else {
               // iterate all the rows and check each column value
               currCell = (XSSFCell) row.getCell(6);
@@ -4094,7 +4105,7 @@ public class TurkeyHandler extends BaseSOFHandler {
   
               if (!StringUtils.isEmpty(cbCity) && !StringUtils.isEmpty(localCity)) {
                 LOG.trace("Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty. >> ");
-                error.addError(row.getRowNum(), "Local City",
+                error.addError((row.getRowNum() + 1), "Local City",
                     "Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty.");
                 validations.add(error);
               }
@@ -4102,7 +4113,7 @@ public class TurkeyHandler extends BaseSOFHandler {
               if (!StringUtils.isEmpty(cbPostal) && !StringUtils.isEmpty(localPostal)) {
                 LOG.trace("Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
                     + "If one is populated, the other must be empty. >>");
-                error.addError(row.getRowNum(), "Local Postal Code",
+                error.addError((row.getRowNum() + 1), "Local Postal Code",
                     "Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
                         + "If one is populated, the other must be empty.");
                 validations.add(error);
@@ -4110,7 +4121,7 @@ public class TurkeyHandler extends BaseSOFHandler {
   
               if (!StringUtils.isEmpty(name4) && !StringUtils.isEmpty(streetCont)) {
                 LOG.trace("Name4 and Street Cont must not be populated at the same time. " + "If one is populated, the other must be empty. >>");
-                error.addError(row.getRowNum(), "Name4",
+                error.addError((row.getRowNum() + 1), "Name4",
                     "Name4 and Street Cont must not be populated at the same time. " + "If one is populated, the other must be empty.");
                 validations.add(error);
               }
@@ -4118,13 +4129,13 @@ public class TurkeyHandler extends BaseSOFHandler {
               if ((!StringUtils.isEmpty(localCity) || !StringUtils.isEmpty(localPostal))) {
                 if ("@".equals(district)) {
                   LOG.trace("Local address must not be populate District with @. ");
-                  error.addError(row.getRowNum(), "District", "Local address must not be populate District with @. ");
+                  error.addError((row.getRowNum() + 1), "District", "Local address must not be populate District with @. ");
                   validations.add(error);
                 }
   
                 if ("@".equals(taxOffice)) {
                   LOG.trace("Local address must not be populate Tax Office with @. ");
-                  error.addError(row.getRowNum(), "Tax Office", "Local address must not be populate Tax Office with @. ");
+                  error.addError((row.getRowNum() + 1), "Tax Office", "Local address must not be populate Tax Office with @. ");
                   validations.add(error);
                 }
               }
