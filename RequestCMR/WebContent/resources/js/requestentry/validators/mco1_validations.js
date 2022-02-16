@@ -160,6 +160,10 @@ function setClientTierValues(isuCd) {
     FormManager.setValue('repTeamMemberNo', 'SALES0');
   } else {
     var reqType = FormManager.getActualValue('reqType');
+    if (reqType != 'U') {
+      // CREATCMR-4293
+      // FormManager.addValidator('clientTier', Validators.REQUIRED);
+    }
     FormManager.enable('clientTier');
   }
 }
@@ -1919,6 +1923,91 @@ function vatExemptOnScenario() {
 }
 
 /* End 1430539 */
+
+// CREATCMR-4293
+function setCTCValues() {
+
+  FormManager.removeValidator('clientTier', Validators.REQUIRED);
+
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+
+  // Business Partner
+  var custSubGrpForBusinessPartner = [ 'BUSPR', 'LSBP', 'LSXBP', 'NABP', 'NAXBP', 'SZBP', 'SZXBP', 'XBP', 'ZABP', 'ZAXBP' ];
+
+  // Business Partner
+  if (custSubGrpForBusinessPartner.includes(custSubGrp)) {
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    var isuCd = FormManager.getActualValue('isuCd');
+    if (isuCd == '8B') {
+      FormManager.setValue('clientTier', '');
+    }
+  }
+
+  // Internal
+  var custSubGrpForInternal = [ 'INTER', 'LSINT', 'LSXIN', 'NAINT', 'NAXIN', 'SZINT', 'SZXIN', 'XINTE', 'ZAINT', 'ZAXIN' ];
+
+  // Internal
+  if (custSubGrpForInternal.includes(custSubGrp)) {
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    var isuCd = FormManager.getActualValue('isuCd');
+    if (isuCd == '21') {
+      FormManager.setValue('clientTier', '');
+    }
+  }
+}
+
+function clientTierCodeValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var isuCode = FormManager.getActualValue('isuCd');
+        var clientTierCode = FormManager.getActualValue('clientTier');
+        
+        if(isuCode == '21' || isuCode == '8B') {
+          if (clientTierCode == '') {
+            return new ValidationResult(null, true);
+          } else {
+            return new ValidationResult({
+              id : 'clientTier',
+              type : 'text',
+              name : 'clientTier'
+            }, false, 'Client Tier can only accept blank.');
+          }
+        } else if (isuCode == '34') {
+          if(clientTierCode == ''){
+            FormManager.addValidator('clientTier', Validators.REQUIRED);
+            return new ValidationResult({
+              id : 'clientTier',
+              type : 'text',
+              name : 'clientTier'
+            }, false, 'Client Tier code is Mandatory.');
+          } else if (clientTierCode == 'Q' || clientTierCode == 'Y'){
+            return new ValidationResult(null, true);
+          } else {
+            return new ValidationResult({
+              id : 'clientTier',
+              type : 'text',
+              name : 'clientTier'
+            }, false, 'Client Tier can only accept \'Q\' or \'Y\'.');
+          }
+        } else {
+          if (clientTierCode == 'Q' || clientTierCode == 'Y' || clientTierCode == '') {
+            return new ValidationResult(null, true);
+          } else {
+            return new ValidationResult({
+              id : 'clientTier',
+              type : 'text',
+              name : 'clientTier'
+            }, false, 'Client Tier can only accept \'Q\', \'Y\' or blank.');
+          }
+        }
+        
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+// CREATCMR-4293
+
 dojo.addOnLoad(function() {
   GEOHandler.MCO1 = [ SysLoc.SOUTH_AFRICA ];
   console.log('adding MCO1 functions...');
@@ -1995,5 +2084,9 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(resetVatExempt, GEOHandler.MCO1);
   GEOHandler.addAfterTemplateLoad(resetVatExempt, GEOHandler.MCO1);
   GEOHandler.addAfterTemplateLoad(vatExemptOnScenario, GEOHandler.MCO1);
+  
+  // CREATCMR-4293
+  GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.MCO1);
+  GEOHandler.registerValidator(clientTierCodeValidator, GEOHandler.MCO1, null, true);
   
 });
