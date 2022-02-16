@@ -1307,6 +1307,28 @@ public class CEETransformer extends EMEATransformer {
     } else {
       legacyCust.setMrcCd("3");
     }
+    // CREATCMR-4293
+    List<String> custSubGrp_list = Arrays.asList("XBP", "BUSPR", "CSBP", "MEBP", "RSXBP", "RSBP", "XINT", "INTER", "CSINT", "RSXIN", "MEINT",
+        "RSINT");
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+      if (!StringUtils.isEmpty(data.getIsuCd()) && ("21".equals(data.getIsuCd()) || "8B".equals(data.getIsuCd()))) {
+        if (StringUtils.isEmpty(data.getClientTier())) {
+          legacyCust.setIsuCd(data.getIsuCd() + "7");
+        }
+      }
+    }
+    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      if (!StringUtils.isEmpty(data.getCustSubGrp())) {
+        if (custSubGrp_list.contains(data.getCustSubGrp())) {
+          if (!StringUtils.isEmpty(data.getIsuCd()) && ("21".equals(data.getIsuCd()) || "8B".equals(data.getIsuCd()))) {
+            if (StringUtils.isEmpty(data.getClientTier())) {
+              legacyCust.setIsuCd(data.getIsuCd() + "7");
+            }
+          }
+        }
+      }
+    }
+
   }
 
   @Override

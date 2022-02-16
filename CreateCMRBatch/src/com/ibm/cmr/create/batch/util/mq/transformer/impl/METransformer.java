@@ -1408,7 +1408,28 @@ public class METransformer extends EMEATransformer {
     } else {
       legacyCust.setMrcCd("3");
     }
-    
+    // CREATCMR-4293
+    List<String> custSubGrp_list = Arrays.asList("AFINT", "INTER", "JOINT", "JOXIN", "PKINT", "PKXIN", "PSINT", "XINT", "AFBP", "BUSPR", "ELBP",
+        "EXBP", "JOBP", "JOXBP", "PKBP", "PKXBP", "PSBP", "XBP");
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+      if (!StringUtils.isEmpty(data.getIsuCd()) && ("21".equals(data.getIsuCd()) || "8B".equals(data.getIsuCd()))) {
+        if (StringUtils.isEmpty(data.getClientTier())) {
+          legacyCust.setIsuCd(data.getIsuCd() + "7");
+        }
+      }
+    }
+    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      if (!StringUtils.isEmpty(data.getCustSubGrp())) {
+        if (custSubGrp_list.contains(data.getCustSubGrp())) {
+          if (!StringUtils.isEmpty(data.getIsuCd()) && ("21".equals(data.getIsuCd()) || "8B".equals(data.getIsuCd()))) {
+            if (StringUtils.isEmpty(data.getClientTier())) {
+              legacyCust.setIsuCd(data.getIsuCd() + "7");
+            }
+          }
+        }
+      }
+    }
+
     if (!StringUtils.isEmpty(data.getIsuCd()) && "5K".equals(data.getIsuCd())) {
       legacyCust.setIsuCd(data.getIsuCd() + "7");
     }
