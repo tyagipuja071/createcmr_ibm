@@ -27,19 +27,18 @@
     <cmr:column span="2" width="350">
     <div>
       <span class="role" id="ADMIN|"><input type="checkbox" name="role" value="ADMIN|" id="chk_ADMIN|">Admin [All]<br></span>
-      
-      <span class="role" id="REQUESTER|"><input type="checkbox" name="role" value="REQUESTER|" id="chk_REQUESTER|">Requester [CreateCMR]<br></span>
-      <span class="role" id="PROCESSOR|PROC_BASIC"><input type="checkbox" name="role" value="PROCESSOR|PROC_BASIC" id="chk_PROCESSOR|PROC_BASIC">Processor (Basic) [CreateCMR]<br></span>
-      <span class="role" id="PROCESSOR|PROC_VALIDATOR"><input type="checkbox" name="role" value="PROCESSOR|PROC_VALIDATOR" id="chk_PROCESSOR|PROC_VALIDATOR">Processor (Complex/Validator) [CreateCMR]<br></span>
-      <span class="role" id="PROCESSOR|PROC_SUBMITTER"><input type="checkbox" name="role" value="PROCESSOR|PROC_SUBMITTER" id="chk_PROCESSOR|PROC_SUBMITTER">Processor (Complex/Submitter) [CreateCMR]<br></span>
-
-      <span class="role" id="USER|"><input type="checkbox" name="role" value="USER|" id="chk_USER|">General User [FindCMR]<br></span>
+      <span class="role" id="CMDE|"><input type="checkbox" name="role" value="CMDE|" id="chk_CMDE|">CMDE Administrator [CreateCMR]<br></span>
       <span class="role" id="WS_ADMIN|"><input type="checkbox" name="role" value="WS_ADMIN|" id="chk_WS_ADMIN|">WebService Administrator [FindCMR]<br></span>
-
       
-      <span class="role" id="CMDE|"><input type="checkbox" name="role" value="CMDE|" id="chk_CMDE|">CMDE Administrator [All]<br></span>
+      <!-- 
+      <span class="role" id="REQUESTER|"><input type="checkbox" disabled name="role" value="REQUESTER|" id="chk_REQUESTER|">Requester [CreateCMR]<br></span>
+      <span class="role" id="PROCESSOR|PROC_BASIC"><input type="checkbox" disabled name="role" value="PROCESSOR|PROC_BASIC" id="chk_PROCESSOR|PROC_BASIC">Processor (Basic) [CreateCMR]<br></span>
+      <span class="role" id="PROCESSOR|PROC_VALIDATOR"><input type="checkbox" disabled name="role" value="PROCESSOR|PROC_VALIDATOR" id="chk_PROCESSOR|PROC_VALIDATOR">Processor (Complex/Validator) [CreateCMR]<br></span>
+      <span class="role" id="PROCESSOR|PROC_SUBMITTER"><input type="checkbox" disabled name="role" value="PROCESSOR|PROC_SUBMITTER" id="chk_PROCESSOR|PROC_SUBMITTER">Processor (Complex/Submitter) [CreateCMR]<br></span>
+      <span class="role" id="USER|"><input type="checkbox" name="role" value="USER|" id="chk_USER|">General User [FindCMR]<br></span>
+      -->
+      
 
-      <span class="role" id="GTS_CROSS|"><input type="checkbox" name="role" value="GTS_CROSS|" id="chk_GTS_CROSS|">CMDE Team (Cross-Platform) [NewCo]<br></span>
       
 
     </div>
@@ -47,7 +46,13 @@
   </cmr:row>
   <cmr:row topPad="15">
     <cmr:column span="2" width="350">
-      <label>Comments:<span style="color:red" class="cmr-ast">*</span></label>
+      <label>Request Details:<span style="color:red" class="cmr-ast">*</span></label>
+    </cmr:column>
+  </cmr:row>
+  <cmr:row>
+    <cmr:column span="2" width="350">
+      <cmr:info text="Please indicate here the fully approved JIRA ticket ID or link for the access request." />
+      <cmr:note text="Please indicate here the fully approved JIRA ticket ID or link for the access request." />
     </cmr:column>
   </cmr:row>
   <cmr:row topPad="10">
