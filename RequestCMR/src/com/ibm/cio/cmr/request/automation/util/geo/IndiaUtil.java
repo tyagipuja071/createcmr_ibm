@@ -133,6 +133,7 @@ public class IndiaUtil extends AutomationUtil {
           }
         }
       }
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
       break;
     case SCENARIO_PRIVATE_CUSTOMER:
       for (String addrType : RELEVANT_ADDRESSES) {
@@ -158,6 +159,7 @@ public class IndiaUtil extends AutomationUtil {
     case SCENARIO_DUMMY:
     case SCENARIO_IGF:
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
       break;
 
     }
