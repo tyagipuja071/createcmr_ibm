@@ -1079,11 +1079,14 @@ public class NORDXHandler extends BaseSOFHandler {
       XSSFSheet sheet = book.getSheet(name);
       LOG.debug("validating for sheet " + name);
       if (sheet != null) {
-        TemplateValidation error = new TemplateValidation(name);
         int rowCount = 0;
         for (Row row : sheet) {
+          TemplateValidation error = new TemplateValidation(name);
           if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
             rowCount++;
+            if (rowCount < 2) {
+              continue;
+            }
             DataFormatter df = new DataFormatter();
             String cmrNo = ""; // 0
             String abbName = ""; // 1
@@ -1190,6 +1193,32 @@ public class NORDXHandler extends BaseSOFHandler {
                     + ":Note that Embargo code only accept @,J,D,K values. Please fix and upload the template again.");
                 error.addError((row.getRowNum() + 1), "Embargo code",
                     ":Note that Embargo code only accept @,J,D,K values. Please fix and upload the template again.<br>");
+              }
+              currCell = (XSSFCell) row.getCell(11);
+              ctc = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(10);
+              isu = validateColValFromCell(currCell);
+              if (!StringUtils.isBlank(isu) && "34".equals(isu)) {
+                if (StringUtils.isNotBlank(ctc) && !"QY".contains(ctc)) {
+                  LOG.trace("The row " + (row.getRowNum() + 1)
+                      + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "Client Tier",
+                      ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
+                }
+              } else if (!StringUtils.isEmpty(isu) && StringUtils.isNotBlank(ctc) && "21,8B".contains(isu) && !"@".equals(ctc)) {
+                LOG.trace("Ctc only accept @ for IsuCd Value :" + isu);
+                error.addError((row.getRowNum() + 1), "Client Tier", "Ctc only accept @ for IsuCd Value :" + isu);
+              }
+
+              if (StringUtils.isNotBlank(ctc) && !"@QY".contains(ctc)) {
+                LOG.trace("The row " + (row.getRowNum() + 1)
+                    + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
+                error.addError((row.getRowNum() + 1), "Client Tier",
+                    ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
+              }
+              if (!isAllClientTierAllowed(country, isu) && !ctc.equalsIgnoreCase("@")) {
+                LOG.trace("For IsuCd set to '5K' Ctc should be '@'");
+                error.addError(row.getRowNum(), "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isu);
               }
               currCell = (XSSFCell) row.getCell(12);
               leadingAccount = validateColValFromCell(currCell);
@@ -1473,18 +1502,12 @@ public class NORDXHandler extends BaseSOFHandler {
               }
             }
           }
-        }
-        if (rowCount < 2 && "Data".equals(name)) {
-          LOG.trace("Note that Blank template uploaded is not allowed. Please input and upload the template again.");
-          error.addError((rowCount), "Data Sheet",
-              "Note that Blank template uploaded is not allowed. Please input and upload the template again.<br>");
-          rowCount = 0;
-        }
         if (error.hasErrors()) {
           validations.add(error);
         }
       }
     }
+  }
   }
 
   private static ValidationResult checkPostalCode(String landedCountry, String postalCode, String cntryCode) throws Exception {
@@ -2921,6 +2944,20 @@ public class NORDXHandler extends BaseSOFHandler {
     }
 
     return addrSeq;
+  }
+
+  private boolean isAllClientTierAllowed(String country, String isuCd) {
+    boolean isAllClientTierAllowed = true;
+    if (country.equals("678") && (isuCd == "5K" || isuCd == "19")) {
+      isAllClientTierAllowed = false;
+    } else if (country.equals("806") && (isuCd == "5K" || isuCd == "04")) {
+      isAllClientTierAllowed = false;
+    } else if (country.equals("846") && Arrays.asList("5K", "5E", "1R", "04").contains(isuCd)) {
+      isAllClientTierAllowed = false;
+    } else if (country.equals("702") && isuCd.equals("5K")) {
+      isAllClientTierAllowed = false;
+    }
+    return isAllClientTierAllowed;
   }
 
 }

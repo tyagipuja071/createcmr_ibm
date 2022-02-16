@@ -2220,22 +2220,35 @@ public class MEHandler extends BaseSOFHandler {
           LOG.trace("Order Block Code should only @, E, S, J. >> ");
           error.addError(rowIndex, "Order Block Code", "Order Block Code should be only @, E, S, J. ");
         }
-        if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
-          if (!StringUtils.isBlank(isuCd)) {
-            if ("5K".equals(isuCd)) {
-              if (!"@".equals(clientTier)) {
-                LOG.trace("Client Tier should be '@' for the selected ISU Code.");
-                error.addError(rowIndex, "Client Tier", "Client Tier should be '@' for the selected ISU Code. ");
-              }
+
+        if (!StringUtils.isBlank(isuCd)) {
+          if ("5K".equals(isuCd)) {
+            if (!"@".equals(clientTier)) {
+              LOG.trace("Client Tier should be '@' for the selected ISU Code.");
+              error.addError(row.getRowNum(), "Client Tier", "Client Tier should be '@' for the selected ISU Code. ");
+            }
+          } else if (StringUtils.isNotBlank(clientTier) && "21,8B".contains(isuCd) && !"@".equals(clientTier)) {
+            LOG.trace("Ctc only accept @ for IsuCd Value :" + isuCd);
+            error.addError(row.getRowNum(), "Client Tier", "Ctc only accept @ for IsuCd Value :" + isuCd);
+          }
+          if ("34".equals(isuCd)) {
+            if (StringUtils.isNotBlank(clientTier) && !"QY".contains(clientTier)) {
+              LOG.trace("The row " + row.getRowNum()
+                  + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
+              error.addError(row.getRowNum(), "Client Tier",
+                  ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
             }
           }
-          if (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier)) {
-            LOG.trace(
-                "The row " + (rowIndex) + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
-            error.addError((rowIndex), "Client Tier",
-                ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
-          }
+
         }
+        if (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier)) {
+          LOG.trace("The row " + (row.getRowNum())
+              + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
+          error.addError(row.getRowNum(), "Client Tier",
+              ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
+        }
+
+      
       }
       validations.add(error);
 
