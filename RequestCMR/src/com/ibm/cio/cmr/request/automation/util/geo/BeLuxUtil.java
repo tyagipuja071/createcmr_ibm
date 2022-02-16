@@ -195,6 +195,27 @@ public class BeLuxUtil extends AutomationUtil {
 
       BeLuxFieldsContainer fields = calculate32SValuesFromIMSBeLux(entityManager, data.getCmrIssuingCntry(), data.getCountryUse(),
           data.getSubIndustryCd(), data.getIsuCd(), data.getClientTier());
+
+      String commercialFinanced = calculateSortlByRepTeamCd(entityManager, data.getCmrIssuingCntry(), data.getCountryUse(), data.getIsuCd(),
+          data.getClientTier());
+      if (StringUtils.isNotBlank(commercialFinanced)) {
+        details.append("Coverage calculated successfully using Sortl logic.").append("\n");
+        details.append("SORTL : " + data.getCommercialFinanced()).append("\n");
+        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SORTL", data.getCommercialFinanced(), commercialFinanced);
+        results.setResults("Calculated");
+        results.setDetails(details.toString());
+      } else if (StringUtils.isNotBlank(data.getCommercialFinanced())) {
+        details.append("Coverage could not be calculated using Sortl logic. Using values from request").append("\n");
+        details.append("SORTL : " + data.getCommercialFinanced()).append("\n");
+        results.setResults("Calculated");
+        results.setDetails(details.toString());
+      } else {
+        String msg = "Coverage cannot be calculated. No valid Sortl mapping found from request data.";
+        details.append(msg);
+        results.setResults("Cannot Calculate");
+        results.setDetails(details.toString());
+      }
+
       if (fields != null) {
         if (StringUtils.isNotBlank(fields.getSearchterm())) {
           details.append("Coverage calculated successfully using 32S logic.").append("\n");
@@ -638,5 +659,35 @@ public class BeLuxUtil extends AutomationUtil {
   @Override
   public List<String> getSkipChecksRequestTypesforCMDE() {
     return Arrays.asList("C", "U", "M", "D", "R");
+  }
+
+  public String calculateSortlByRepTeamCd(EntityManager entityManager, String cmrIssuingctry, String countryUse, String isuCd, String clientTier) {
+    List<Object[]> commercialFinancedResults = new ArrayList<>();
+    String commercialFinanced = "";
+    String salesRepTeam = "";
+    String isuCtc = (StringUtils.isNotBlank(isuCd) ? isuCd : "") + (StringUtils.isNotBlank(clientTier) ? clientTier : "");
+    String geoCd = "";
+    if (countryUse.length() > 3) {
+      geoCd = countryUse.substring(3, 5);
+    }
+    String cmrCntry = cmrIssuingctry + geoCd;
+    if (countryUse.length() == 3) {
+      salesRepTeam = isuCtc + "BG";
+    } else {
+      salesRepTeam = isuCtc + "LU";
+    }
+    String sql = ExternalizedQuery.getSql("QUERY.GET.DSCLIST.BYSR");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("ISSUING_CNTRY", cmrCntry);
+    query.setParameter("ISU", "%" + isuCtc + "%");
+    query.setParameter("REP_TEAM_CD", salesRepTeam);
+    query.setForReadOnly(true);
+    commercialFinancedResults = query.getResults();
+    if (commercialFinancedResults != null && commercialFinancedResults.size() == 1) {
+      commercialFinanced = (String) commercialFinancedResults.get(0)[0];
+      return commercialFinanced;
+    } else {
+      return null;
+    }
   }
 }
