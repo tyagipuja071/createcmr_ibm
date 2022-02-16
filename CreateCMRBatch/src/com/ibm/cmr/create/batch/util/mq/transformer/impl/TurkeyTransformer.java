@@ -1086,6 +1086,10 @@ public class TurkeyTransformer extends EMEATransformer {
         legacyCust.setEmbargoCd(rdcEmbargoCd);
         resetOrdBlockToData(entityManager, data);
       }
+      
+      if (!StringUtils.isEmpty(data.getIsuCd()) && "5K".equals(data.getIsuCd())) {
+        legacyCust.setIsuCd(data.getIsuCd() + "7");
+      }
     }
 
     // extract the phone from billing as main phone
