@@ -4029,8 +4029,8 @@ public class TurkeyHandler extends BaseSOFHandler {
           if (row == null) {
             break;
           }
-          if ((row.getRowNum() + 1) > 0 && (row.getRowNum() + 1) < 2002) {
-            if ((row.getRowNum() + 1) == 2001) {
+          if (row.getRowNum() > 0 && (row.getRowNum() + 1) < 2002) {
+            if (row.getRowNum() == 2001) {
               break;
             }
             String cbCity = ""; // 8
@@ -4061,14 +4061,13 @@ public class TurkeyHandler extends BaseSOFHandler {
                     LOG.trace("Client Tier should be '@' for the selected ISU Code.");
                     error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier should be '@' for the selected ISU Code. ");
                   }
-                } else if (!StringUtils.isEmpty(isuCd) && StringUtils.isNotBlank(clientTier) && "21,8B".contains(isuCd)
-                    && !clientTier.equalsIgnoreCase("@")) {
+                } else if (!StringUtils.isEmpty(isuCd) && "21,8B".contains(isuCd) && !"@".equalsIgnoreCase(clientTier)) {
                   LOG.trace("Ctc only accept @ for IsuCd Value :" + isuCd);
                   error.addError((row.getRowNum() + 1), "Client Tier", "Ctc only accept @ for IsuCd Value :" + isuCd);
                 }
               }
               if (!StringUtils.isBlank(isuCd) && "34".equals(isuCd)) {
-                if (StringUtils.isNotBlank(clientTier) && !"QY".contains(clientTier)) {
+                if ( !"QY".contains(clientTier)) {
                   LOG.trace("The row " + (row.getRowNum() + 1)
                       + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
                   error.addError((row.getRowNum() + 1), "Client Tier",
