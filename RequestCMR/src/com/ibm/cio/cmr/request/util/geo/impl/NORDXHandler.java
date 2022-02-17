@@ -1209,8 +1209,8 @@ public class NORDXHandler extends BaseSOFHandler {
                       ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
                 }
               } else if (!StringUtils.isEmpty(isu) && "21,8B".contains(isu) && !"@".equals(ctc)) {
-                LOG.trace("Ctc only accept @ for IsuCd Value :" + isu);
-                error.addError((row.getRowNum() + 1), "Client Tier", "Ctc only accept @ for IsuCd Value :" + isu);
+                LOG.trace("Client Tier should be '@' for the selected ISU Code.");
+                error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier should be '@' for the selected ISU Code.");
               }
 
               if (StringUtils.isNotBlank(ctc) && !"@QY".contains(ctc)) {
