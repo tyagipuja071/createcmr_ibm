@@ -2231,15 +2231,13 @@ public class CEMEAHandler extends BaseSOFHandler {
         if (isuCd.equalsIgnoreCase("5k") && !ctc.equalsIgnoreCase("@")) {
           LOG.trace("For IsuCd set to '5K' Ctc should be '@'");
           error.addError(rowIndex, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd);
-        } else if (!StringUtils.isEmpty(isuCd) && StringUtils.isNotBlank(ctc) && "21,8B".contains(isuCd) && !ctc.equalsIgnoreCase("@")) {
-          LOG.trace("Ctc only accept @ for IsuCd Value :" + isuCd);
-          error.addError(rowIndex, "Client Tier", "Ctc only accept @ for IsuCd Value :" + isuCd);
-        } else if (!StringUtils.isEmpty(isuCd) && !isuCd.equalsIgnoreCase("5k") && ctc.equalsIgnoreCase("@")) {
-          LOG.trace("Ctc can't be @ for IsuCd Value :" + isuCd);
-          error.addError(rowIndex, "Client Tier", "Client Tier Value can't be cleared for IsuCd Value :" + isuCd);
+        } else if (!StringUtils.isEmpty(isuCd) && "21,8B".contains(isuCd) && !"@".equalsIgnoreCase(ctc)) {
+          LOG.trace("Client Tier should be '@' for the selected ISU Code.");
+          error.addError(rowIndex, "Client Tier", "Client Tier should be '@' for the selected ISU Code.");
         }
+
         if (!StringUtils.isBlank(isuCd) && "34".equals(isuCd)) {
-          if (StringUtils.isNotBlank(ctc) && !"QY".contains(ctc)) {
+          if (!"QY".contains(ctc)) {
             LOG.trace("The row " + rowIndex
                 + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
             error.addError(rowIndex, "Client Tier",

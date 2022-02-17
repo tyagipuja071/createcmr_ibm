@@ -4665,9 +4665,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
             for (ValidationRow row : validation.getRows()) {
               if (!row.isSuccess()) {
                 if (StringUtils.isEmpty(errTxt.toString())) {
-                  errTxt.append("Tab name :" + validation.getTabName() + ", " + row.getError());
+                  errTxt.append("Tab name :" + validation.getTabName() + ", " + validation.getAllError());
                 } else {
-                  errTxt.append("\nTab name :" + validation.getTabName() + ", " + row.getError());
+                  errTxt.append("\nTab name :" + validation.getTabName() + ", " + validation.getAllError());
                 }
               }
             }
@@ -4722,9 +4722,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
             for (ValidationRow row : validation.getRows()) {
               if (!row.isSuccess()) {
                 if (StringUtils.isEmpty(errTxt.toString())) {
-                  errTxt.append("Tab name :" + validation.getTabName() + ", " + row.getError());
+                  errTxt.append("Tab name :" + validation.getTabName() + ", " + validation.getAllError());
                 } else {
-                  errTxt.append("\nTab name :" + validation.getTabName() + ", " + row.getError());
+                  errTxt.append("\nTab name :" + validation.getTabName() + ", " + validation.getAllError());
                 }
               }
             }
@@ -6009,9 +6009,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
             for (ValidationRow row : validation.getRows()) {
               if (!row.isSuccess()) {
                 if (StringUtils.isEmpty(errTxt.toString())) {
-                  errTxt.append("Tab name :" + validation.getTabName() + ", " + row.getError());
+                  errTxt.append("Tab name :" + validation.getTabName() + ", " + validation.getAllError());
                 } else {
-                  errTxt.append("\nTab name :" + validation.getTabName() + ", " + row.getError());
+                  errTxt.append("\nTab name :" + validation.getTabName() + ", " + validation.getAllError());
                 }
               }
             }
