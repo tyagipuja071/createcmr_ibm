@@ -1020,6 +1020,9 @@ public class NORDXHandler extends BaseSOFHandler {
     // data.setSitePartyId("");
     // data.setPpsceid("");
     // }
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && "5K".equals(data.getIsuCd())) {
+      data.setClientTier("");
+    }
   }
 
   @Override
@@ -1502,12 +1505,12 @@ public class NORDXHandler extends BaseSOFHandler {
               }
             }
           }
-        if (error.hasErrors()) {
-          validations.add(error);
+          if (error.hasErrors()) {
+            validations.add(error);
+          }
         }
       }
     }
-  }
   }
 
   private static ValidationResult checkPostalCode(String landedCountry, String postalCode, String cntryCode) throws Exception {
