@@ -1020,6 +1020,9 @@ public class NORDXHandler extends BaseSOFHandler {
     // data.setSitePartyId("");
     // data.setPpsceid("");
     // }
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && "5K".equals(data.getIsuCd())) {
+      data.setClientTier("");
+    }
   }
 
   @Override
@@ -1199,15 +1202,15 @@ public class NORDXHandler extends BaseSOFHandler {
               currCell = (XSSFCell) row.getCell(10);
               isu = validateColValFromCell(currCell);
               if (!StringUtils.isBlank(isu) && "34".equals(isu)) {
-                if (StringUtils.isNotBlank(ctc) && !"QY".contains(ctc)) {
+                if (!"QY".contains(ctc)) {
                   LOG.trace("The row " + (row.getRowNum() + 1)
                       + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
                   error.addError((row.getRowNum() + 1), "Client Tier",
                       ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
                 }
-              } else if (!StringUtils.isEmpty(isu) && StringUtils.isNotBlank(ctc) && "21,8B".contains(isu) && !"@".equals(ctc)) {
-                LOG.trace("Ctc only accept @ for IsuCd Value :" + isu);
-                error.addError((row.getRowNum() + 1), "Client Tier", "Ctc only accept @ for IsuCd Value :" + isu);
+              } else if (!StringUtils.isEmpty(isu) && "21,8B".contains(isu) && !"@".equals(ctc)) {
+                LOG.trace("Client Tier should be '@' for the selected ISU Code.");
+                error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier should be '@' for the selected ISU Code.");
               }
 
               if (StringUtils.isNotBlank(ctc) && !"@QY".contains(ctc)) {
@@ -1502,12 +1505,12 @@ public class NORDXHandler extends BaseSOFHandler {
               }
             }
           }
-        if (error.hasErrors()) {
-          validations.add(error);
+          if (error.hasErrors()) {
+            validations.add(error);
+          }
         }
       }
     }
-  }
   }
 
   private static ValidationResult checkPostalCode(String landedCountry, String postalCode, String cntryCode) throws Exception {

@@ -2266,13 +2266,13 @@ public class BELUXHandler extends BaseSOFHandler {
       isuCd = validateColValFromCell(currCell);
 
       if (!StringUtils.isBlank(isuCd) && "34".equals(isuCd)) {
-        if (StringUtils.isNotBlank(ctc) && !"QY".contains(ctc)) {
+        if (!"QY".contains(ctc)) {
           LOG.trace("The row " + (row.getRowNum() + 1)
               + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
           error.addError((row.getRowNum() + 1), "Client Tier",
               ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
         }
-      } else if (!StringUtils.isEmpty(isuCd) && StringUtils.isNotBlank(ctc) && "21,8B".contains(isuCd) && !ctc.equalsIgnoreCase("@")) {
+      } else if (!StringUtils.isEmpty(isuCd) && "21,8B".contains(isuCd) && !"@".equalsIgnoreCase(ctc)) {
         LOG.trace("Ctc only accept @ for IsuCd Value :" + isuCd);
         error.addError((row.getRowNum() + 1), "Client Tier", "Ctc only accept @ for IsuCd Value :" + isuCd);
       }
