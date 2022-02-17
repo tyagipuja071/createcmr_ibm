@@ -808,7 +808,19 @@ public class MCOCewaHandler extends MCOHandler {
                     LOG.trace("Client Tier should be '@' for the selected ISU Code.");
                     error.addError(row.getRowNum(), "Client Tier", "Client Tier should be '@' for the selected ISU Code. ");
                   }
+                } else if (StringUtils.isNotBlank(clientTier) && "21,8B".contains(isuCd) && !"@".equals(clientTier)) {
+                  LOG.trace("Ctc only accept @ for IsuCd Value :" + isuCd);
+                  error.addError(row.getRowNum(), "Client Tier", "Ctc only accept @ for IsuCd Value :" + isuCd);
                 }
+                if ("34".equals(isuCd)) {
+                  if (StringUtils.isNotBlank(clientTier) && !"QY".contains(clientTier)) {
+                    LOG.trace("The row " + row.getRowNum()
+                        + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
+                    error.addError(row.getRowNum(), "Client Tier",
+                        ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
+                  }
+                }
+
               }
               if (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier)) {
                 LOG.trace("The row " + (row.getRowNum())

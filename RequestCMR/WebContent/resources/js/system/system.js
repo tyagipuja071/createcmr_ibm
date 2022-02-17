@@ -98,7 +98,7 @@ var UserService = (function() {
     addSelectedRoles : function() {
       var comments = FormManager.getActualValue('addrolecomments');
       if (comments == '') {
-        cmr.showAlert('Please input comments for this change.', 'Stop');
+        cmr.showAlert('Please input the full request details for this change.', 'Stop');
         return;
       }
       dojo.byId('userrolecmt').value = comments;
@@ -208,7 +208,7 @@ function submitbds(value) {
   document.forms['frmCMRSearch'].submit();
 }
 
-var _CMR_ROLES = [ 'ADMIN|', 'REQUESTER|', 'PROCESSOR|PROC_BASIC', 'PROCESSOR|PROC_VALIDATOR', 'PROCESSOR|PROC_SUBMITTER', 'USER|', 'CMDE|', 'WS_ADMIN|', 'GTS_CROSS|' ];
+var _CMR_ROLES = [ 'ADMIN|', 'REQUESTER|', 'PROCESSOR|PROC_BASIC', 'PROCESSOR|PROC_VALIDATOR', 'PROCESSOR|PROC_SUBMITTER', 'USER|', 'CMDE|', 'WS_ADMIN|'];
 function addRolesModal_onLoad() {
   for ( var i = 0; i < _CMR_ROLES.length; i++) {
     cmr.showNode(_CMR_ROLES[i]);
@@ -284,4 +284,14 @@ var SCCService = (function() {
 
 function backToCodeMaintHome() {
   window.location = cmr.CONTEXT_ROOT + '/code';
+}
+
+function userRoleListGrid_showCheck(value, rowIndex, grid) {
+  var rowData = grid.getItem(rowIndex);
+  var role = rowData.roleId[0];
+  console.log(role);
+  if (role == 'USER' || role == 'REQUESTER' || role == 'PROCESSOR'){
+    return false;
+  }
+  return true;
 }

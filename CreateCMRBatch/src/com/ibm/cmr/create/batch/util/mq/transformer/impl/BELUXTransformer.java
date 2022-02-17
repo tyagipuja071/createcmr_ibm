@@ -955,6 +955,27 @@ public class BELUXTransformer extends EMEATransformer {
     } else {
       legacyCust.setMrcCd("3");
     }
+    // CREATCMR-4293
+    List<String> custSubGrp_list = Arrays.asList("CBBUS", "BEBUS", "BEINT", "BEISO", "LUBUS", "LUINT", "LUISO");
+
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+      if (!StringUtils.isEmpty(data.getIsuCd()) && ("21".equals(data.getIsuCd()))) {
+        if (StringUtils.isEmpty(data.getClientTier())) {
+          legacyCust.setIsuCd(data.getIsuCd() + "7");
+        }
+      }
+    }
+    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      if (!StringUtils.isEmpty(data.getCustSubGrp())) {
+        if (custSubGrp_list.contains(data.getCustSubGrp())) {
+          if (!StringUtils.isEmpty(data.getIsuCd()) && ("21".equals(data.getIsuCd()))) {
+            if (StringUtils.isEmpty(data.getClientTier())) {
+              legacyCust.setIsuCd(data.getIsuCd() + "7");
+            }
+          }
+        }
+      }
+    }
     
     if (!StringUtils.isEmpty(data.getIsuCd()) && ("5K".equals(data.getIsuCd()) || "28".equals(data.getIsuCd()))) {
       legacyCust.setIsuCd(data.getIsuCd() + "7");
@@ -1074,12 +1095,16 @@ public class BELUXTransformer extends EMEATransformer {
     // }
     // }
 
+    if (!StringUtils.isEmpty(muData.getIsuCd()) && "5K".equals(muData.getIsuCd())) {
+      cust.setIsuCd(muData.getIsuCd() + "7");
+    } else {
     String isuClientTier = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "")
         + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
-    if (isuClientTier != null && isuClientTier.length() == 3) {
+    if (isuClientTier != null && isuClientTier.endsWith("@")) {
+      cust.setIsuCd((!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : cust.getIsuCd().substring(0, 2)) + "7");
+    } else if (isuClientTier != null && isuClientTier.length() == 3) {
       cust.setIsuCd(isuClientTier);
-    } else if (isuClientTier.contains("@")) {
-      cust.setIsuCd("");
+    }
     }
 
     String cebo = "";

@@ -1628,7 +1628,11 @@ function forceLockScenariosSpain() {
   FormManager.enable('clientTier');
   FormManager.enable('specialTaxCd');
   FormManager.enable('repTeamMemberNo');
-  fieldsToDisable.push('cmrNo');
+  if (role == "PROCESSOR" && FormManager.getActualValue('cmrIssuingCntry') == '838' && FormManager.getActualValue('reqType') == 'C') {
+    FormManager.enable('cmrNo');
+  } else {
+    fieldsToDisable.push('cmrNo');
+  }
   fieldsToDisable.push('soeReqNo');
 
   if (custSubGroup == 'COMME') {
@@ -2971,4 +2975,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addTypeOfCustomerValidatorPT, [ SysLoc.PORTUGAL ], null, true);
   GEOHandler.addAfterTemplateLoad(checkScenarioChanged, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(setEnterpriseBasedOnSubIndustry, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
+  GEOHandler.registerValidator(validateExistingCMRNo, [ SysLoc.SPAIN ], GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.addAfterConfig(enableCMRNUMForPROCESSOR, [ SysLoc.SPAIN ]);
+  GEOHandler.registerValidator(validateCMRNumberForSpain, [ SysLoc.SPAIN ], GEOHandler.ROLE_PROCESSOR, true);
 });

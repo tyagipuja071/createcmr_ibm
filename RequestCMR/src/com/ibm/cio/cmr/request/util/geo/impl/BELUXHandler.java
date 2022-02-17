@@ -1230,6 +1230,10 @@ public class BELUXHandler extends BaseSOFHandler {
     if (prospectCmrChosen) {
       data.setCmrNo("");
     }
+
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && "5K".equals(data.getIsuCd())) {
+      data.setClientTier("");
+    }
   }
 
   private String getInternalDepartment(String cmrNo) throws Exception {
@@ -2244,8 +2248,7 @@ public class BELUXHandler extends BaseSOFHandler {
       String ordBlk = validateColValFromCell(currCell);
       if (StringUtils.isNotBlank(ordBlk) && !("@".equals(ordBlk) || "D".equals(ordBlk) || "P".equals(ordBlk) || "J".equals(ordBlk))) {
         LOG.trace("Order Block Code should only @, D, P, J. >> ");
-        error.addError(rowIndex, "Order Block Code", "Order Block Code should be only @, D, P, J. ");
-        validations.add(error);
+        error.addError(row.getRowNum() + 1, "Order Block Code", "Order Block Code should be only @, D, P, J. ");
       }
 
       currCell = row.getCell(cmrNoIndex);
@@ -2254,7 +2257,6 @@ public class BELUXHandler extends BaseSOFHandler {
         LOG.trace("The row " + (row.getRowNum() + 1) + ":Note the CMR number is a divestiture CMR records.");
         error.addError((row.getRowNum() + 1), "CMR No.",
             "The row " + (row.getRowNum() + 1) + ":Note the CMR number is a divestiture CMR records.<br>");
-        validations.add(error);
       }
       
       currCell = row.getCell(7);
@@ -2262,15 +2264,34 @@ public class BELUXHandler extends BaseSOFHandler {
       String isuCd = ""; // 6
       currCell = row.getCell(6);
       isuCd = validateColValFromCell(currCell);
+
+      if (!StringUtils.isBlank(isuCd) && "34".equals(isuCd)) {
+        if (StringUtils.isNotBlank(ctc) && !"QY".contains(ctc)) {
+          LOG.trace("The row " + (row.getRowNum() + 1)
+              + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
+          error.addError((row.getRowNum() + 1), "Client Tier",
+              ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
+        }
+      } else if (!StringUtils.isEmpty(isuCd) && StringUtils.isNotBlank(ctc) && "21,8B".contains(isuCd) && !ctc.equalsIgnoreCase("@")) {
+        LOG.trace("Ctc only accept @ for IsuCd Value :" + isuCd);
+        error.addError((row.getRowNum() + 1), "Client Tier", "Ctc only accept @ for IsuCd Value :" + isuCd);
+      }
+      if (StringUtils.isNotBlank(ctc) && !"@QY".contains(ctc)) {
+        LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
+        error.addError((row.getRowNum() + 1), "Client Tier",
+            ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
+      }
+
       if ((isuCd.equalsIgnoreCase("5K") || isuCd.equalsIgnoreCase("28")) && !ctc.equalsIgnoreCase("@")) {
         LOG.trace("For IsuCd set to '5K' or '28' Ctc should be '@'");
         error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd);
         validations.add(error);
       }
-      
       if (is93CMR(cmrNo)) {
         LOG.trace("The row " + (row.getRowNum() + 1) + ":Note the CMR number is a deleted record in RDC.");
         error.addError((row.getRowNum() + 1), "CMR No.", "The row " + (row.getRowNum() + 1) + ":Note the CMR number is a deleted record in RDC.<br>");
+      }
+      if (error.hasErrors()) {
         validations.add(error);
       }
 
@@ -2309,7 +2330,7 @@ public class BELUXHandler extends BaseSOFHandler {
         if (addrFldCnt1 > 1) {
           TemplateValidation errorAddr = new TemplateValidation(name);
           LOG.trace("Customer Name (3) and PO BOX should not be input at the sametime.");
-          errorAddr.addError(row.getRowNum(), "PO BOX", "Customer Name 3, Attention person and PO Box - only 1 out of 3 can be filled.");
+          errorAddr.addError((row.getRowNum() + 1), "PO BOX", "Customer Name 3, Attention person and PO Box - only 1 out of 3 can be filled.");
           validations.add(errorAddr);
         }
       }

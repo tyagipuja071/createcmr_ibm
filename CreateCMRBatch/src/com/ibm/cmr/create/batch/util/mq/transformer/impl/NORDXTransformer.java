@@ -1277,6 +1277,27 @@ public class NORDXTransformer extends EMEATransformer {
     } else {
       legacyCust.setIsuCd("");
     }
+    // CREATCMR-4293
+    List<String> custSubGrp_list = Arrays.asList("BUSPR", "CBBUS", "DKBUS", "EEBUS", "FIBUS", "FOBUS", "GLBUS", "ISBUS", "LTBUS", "LVBUS", "CBINT",
+        "DKINT", "EEINT", "FIINT", "FOINT", "GLINT", "INTER", "ISINT", "LTINT", "LVINT");
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+      if (!StringUtils.isEmpty(data.getIsuCd()) && ("21".equals(data.getIsuCd()) || "8B".equals(data.getIsuCd()))) {
+        if (StringUtils.isEmpty(data.getClientTier())) {
+          legacyCust.setIsuCd(data.getIsuCd() + "7");
+        }
+      }
+    }
+    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      if (!StringUtils.isEmpty(data.getCustSubGrp())) {
+        if (custSubGrp_list.contains(data.getCustSubGrp())) {
+          if (!StringUtils.isEmpty(data.getIsuCd()) && ("21".equals(data.getIsuCd()) || "8B".equals(data.getIsuCd()))) {
+            if (StringUtils.isEmpty(data.getClientTier())) {
+              legacyCust.setIsuCd(data.getIsuCd() + "7");
+            }
+          }
+        }
+      }
+    }
 
     String newSbo = "";
     if (SystemLocation.DENMARK.equals(data.getCmrIssuingCntry())) {
@@ -1465,14 +1486,15 @@ public class NORDXTransformer extends EMEATransformer {
       }
     }
 
-    String isuClientTier = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "")
+    String isuClientTier;
+    isuClientTier = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "") 
         + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
-    if (isuClientTier != null && isuClientTier.length() == 3) {
+    if (isuClientTier != null && isuClientTier.endsWith("@")) {
+      cust.setIsuCd((!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : cust.getIsuCd().substring(0, 2)) + "7");
+    } else if (isuClientTier != null && isuClientTier.length() == 3) {
       cust.setIsuCd(isuClientTier);
-    } else if (isuClientTier.contains("@")) {
-      cust.setIsuCd("");
     }
-
+    
     if (!StringUtils.isBlank(muData.getRepTeamMemberNo())) {
       if ("@".equals(muData.getRepTeamMemberNo())) {
         cust.setSalesRepNo("");
