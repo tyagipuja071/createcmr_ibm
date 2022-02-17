@@ -1693,7 +1693,7 @@ function limitClientTierValues(value) {
     } else if (value == '34') {
       tierValues = [ 'V', 'A', 'Q', 'Y' ];
     } else if (value == '21' || value == '8B') {
-      tierValues = [ '7' ];
+      // tierValues = [ '7' ];
     } else {
       FormManager.resetDropdownValues(FormManager.getField('clientTier'));
     }
