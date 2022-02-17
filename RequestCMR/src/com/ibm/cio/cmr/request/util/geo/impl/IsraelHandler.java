@@ -35,6 +35,7 @@ import com.ibm.cio.cmr.request.entity.AddrRdc;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AdminPK;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
+import com.ibm.cio.cmr.request.entity.CmrtCust;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.entity.DataRdc;
@@ -1637,6 +1638,10 @@ public class IsraelHandler extends EMEAHandler {
         if (StringUtils.isNotBlank(salesRep) && !StringUtils.isAlphanumeric(salesRep)) {
           error.addError(rowIndex, "<br>Sales Rep", "Sales Rep should be alphanumeric only.");
         }
+        String errMsg = validateSalesRep(cmrNo, country, salesRep);
+        if (StringUtils.isNotBlank(errMsg)) {
+          error.addError(rowIndex, "<br>Sales Rep", errMsg);
+        }
         // KUKLA
         String isic = validateColValFromCell(row.getCell(3));
         String kukla = validateColValFromCell(row.getCell(17));
@@ -2011,6 +2016,45 @@ public class IsraelHandler extends EMEAHandler {
       }
     }
     return isDivestiture;
+  }
+
+  private static String validateSalesRep(String cmrNo, String cntry, String userSalesRep) {
+    String errMessage = "";
+
+    if (StringUtils.isNotBlank(cmrNo) && StringUtils.isNotBlank(cntry) && StringUtils.isNotBlank(userSalesRep)) {
+      EntityManager entityManager = JpaManager.getEntityManager();
+      String sql = ExternalizedQuery.getSql("IL.GET.REALCTY.RBKXA");
+
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setForReadOnly(true);
+      query.setParameter("RCYAA", cntry);
+      query.setParameter("RCUXA", cmrNo);
+
+      List<CmrtCust> db2List = query.getResults(CmrtCust.class);
+      if (!db2List.isEmpty() && !db2List.isEmpty()) {
+        CmrtCust db2 = db2List.get(0);
+
+        String realCtyCd = StringUtils.isNotEmpty(db2.getRealCtyCd()) ? db2.getRealCtyCd() : "";
+        String bankNumber = StringUtils.isNotEmpty(db2.getBankNo()) ? db2.getBankNo() : "";
+
+        if (StringUtils.isNotEmpty(realCtyCd) && StringUtils.isNotEmpty(bankNumber)) {
+          int salesRepInt = Integer.parseInt(userSalesRep);
+          int minRange = 220;
+          int maxRange = 239;
+
+          if (realCtyCd.equals("755") && bankNumber.equals("0") || realCtyCd.equals("756") && bankNumber.equals("9")) {
+            if (salesRepInt >= minRange && salesRepInt <= maxRange) {
+              errMessage = "Invalid Sales Rep value.  Sales Rep cannot be from 000220-000239 range. Please change it.";
+            }
+          } else if (realCtyCd.equals("756") && bankNumber.equals("0")) {
+            if (salesRepInt < minRange || salesRepInt > maxRange) {
+              errMessage = "Invalid Sales Rep value. Sales Rep must be from 000220-000239 range. Please change it.";
+            }
+          }
+        }
+      }
+    }
+    return errMessage;
   }
 
   private boolean containsHebrewChar(String str) {
