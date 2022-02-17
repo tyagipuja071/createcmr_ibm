@@ -256,7 +256,7 @@ function addHandlersForNORDX() {
 
   if (_ISUHandler == null) {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
-      // setClientTierValues(value);
+      setClientTierValues();
       // CREATCMR-2674
       console.log('_ISUHandler');
       setSalesRepValues();
@@ -467,40 +467,65 @@ function getLandedCountryByAddType(addType) {
 /**
  * Set Client Tier Value
  */
-// function setClientTierValues(isuCd) {
-//
-// if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-// return;
-// }
-//
-// if (FormManager.getActualValue('reqType') != 'C') {
-// return;
-// }
-//
-// isuCd = FormManager.getActualValue('isuCd');
-// var cntry = FormManager.getActualValue('cmrIssuingCntry');
-// var clientTiers = [];
-// if (isuCd != '') {
-// var qParams = {
-// _qall : 'Y',
-// ISSUING_CNTRY : cntry,
-// ISU : '%' + isuCd + '%'
-// };
-// var results = cmr.query('GET.CTCLIST.BYISU', qParams);
-// if (results != null) {
-// for (var i = 0; i < results.length; i++) {
-// clientTiers.push(results[i].ret1);
-// }
-// if (clientTiers != null) {
-// FormManager.limitDropdownValues(FormManager.getField('clientTier'),
-// clientTiers);
-// if (clientTiers.length == 1) {
-// FormManager.setValue('clientTier', clientTiers[0]);
-// }
-// }
-// }
-// }
-// }
+function setClientTierValues(isuCd) {
+
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+
+  var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var countryUse = FormManager.getActualValue('countryUse');
+  isuCd = FormManager.getActualValue('isuCd');
+  var lockClientTier = false;
+
+  if (cmrIssuingCntry == '678') {
+    if ([ '5K', '19' ].includes(isuCd)) {
+      lockClientTier = true;
+    }
+  } else if (cmrIssuingCntry == '806' || countryUse == '702') {
+    if ([ '5K', '04' ].includes(isuCd)) {
+      lockClientTier = true;
+    }
+  } else if (cmrIssuingCntry == '846') {
+    if ([ '5K', '5E', '1R', '04' ].includes(isuCd)) {
+      lockClientTier = true;
+    }
+  } else if (countryUse == '702EE' || countryUse == '702LT' || countryUse == '702LV') {
+    if ([ '5K', '21', '8B' ].includes(isuCd)) {
+      lockClientTier = true;
+    }
+  }
+  if (lockClientTier) {
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    FormManager.setValue('clientTier', '');
+    FormManager.readOnly('clientTier');
+    lockClientTier = false;
+  } else {
+    FormManager.enable('clientTier');
+  }
+  // var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  // var clientTiers = [];
+  // if (isuCd != '') {
+  // var qParams = {
+  // _qall : 'Y',
+  // ISSUING_CNTRY : cntry,
+  // ISU : '%' + isuCd + '%'
+  // };
+  // var results = cmr.query('GET.CTCLIST.BYISU', qParams);
+  // if (results != null) {
+  // for (var i = 0; i < results.length; i++) {
+  // clientTiers.push(results[i].ret1);
+  // }
+  // if (clientTiers != null) {
+  // FormManager.limitDropdownValues(FormManager.getField('clientTier'),
+  // clientTiers);
+  // if (clientTiers.length == 1) {
+  // FormManager.setValue('clientTier', clientTiers[0]);
+  // }
+  // }
+  // }
+  // }
+}
 /**
  * NORDIX - CMR-1709
  */
@@ -4658,8 +4683,8 @@ dojo.addOnLoad(function() {
   GEOHandler.enableCopyAddress(GEOHandler.NORDX, validateNORDXCopy, [ 'ZI01', 'ZD01', 'ZP02' ]);
   GEOHandler.addAddrFunction(updateAddrTypeList, GEOHandler.NORDX);
   GEOHandler.registerValidator(addCrossBorderValidatorNORS, GEOHandler.NORDX, null, true);
-  // GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.NORDX);
-  // GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.NORDX);
+  GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.NORDX);
+  GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.NORDX);
   // GEOHandler.addAfterTemplateLoad(setSalesRepValues, GEOHandler.NORDX);
   // GEOHandler.addAfterTemplateLoad(setAdminDSCValues, GEOHandler.NORDX);
   // GEOHandler.addAfterConfig(setSalesRepValues, GEOHandler.NORDX);
