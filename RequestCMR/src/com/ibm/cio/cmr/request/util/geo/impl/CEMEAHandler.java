@@ -2234,10 +2234,8 @@ public class CEMEAHandler extends BaseSOFHandler {
         } else if (!StringUtils.isEmpty(isuCd) && "21,8B".contains(isuCd) && !"@".equalsIgnoreCase(ctc)) {
           LOG.trace("Client Tier should be '@' for the selected ISU Code.");
           error.addError(rowIndex, "Client Tier", "Client Tier should be '@' for the selected ISU Code.");
-        } else if (!StringUtils.isEmpty(isuCd) && !isuCd.equalsIgnoreCase("5k") && ctc.equalsIgnoreCase("@")) {
-          LOG.trace("Ctc can't be @ for IsuCd Value :" + isuCd);
-          error.addError(rowIndex, "Client Tier", "Client Tier Value can't be cleared for IsuCd Value :" + isuCd);
         }
+
         if (!StringUtils.isBlank(isuCd) && "34".equals(isuCd)) {
           if (!"QY".contains(ctc)) {
             LOG.trace("The row " + rowIndex
