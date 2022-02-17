@@ -2228,8 +2228,8 @@ public class MEHandler extends BaseSOFHandler {
                 error.addError(rowIndex, "Client Tier", "Client Tier should be '@' for the selected ISU Code. ");
               }
             } else if ("21,8B".contains(isuCd) && !"@".equals(clientTier)) {
-              LOG.trace("Ctc only accept @ for IsuCd Value :" + isuCd);
-              error.addError(rowIndex, "Client Tier", "Ctc only accept @ for IsuCd Value :" + isuCd);
+              LOG.trace("Client Tier should be '@' for the selected ISU Code.");
+              error.addError(rowIndex, "Client Tier", "Client Tier should be '@' for the selected ISU Code.");
             } else if ("34".equals(isuCd)) {
               if (!"QY".contains(clientTier)) {
                 LOG.trace("The row " + rowIndex
