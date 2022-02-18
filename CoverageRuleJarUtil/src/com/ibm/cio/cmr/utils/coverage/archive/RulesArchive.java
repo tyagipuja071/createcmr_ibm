@@ -49,7 +49,7 @@ public class RulesArchive {
    * @throws Exception
    */
   public File unpackArchivedRuleset(File zipFile, File target) throws Exception {
-    LOG.debug("Unpacking rules from " + zipFile.getAbsolutePath() + " into " + target.getAbsolutePath());
+    LOG.trace("Unpacking rules from " + zipFile.getAbsolutePath() + " into " + target.getAbsolutePath());
     if (!zipFile.exists()) {
       throw new FileNotFoundException("File " + zipFile.getAbsolutePath() + " does not exist.");
     }
@@ -142,7 +142,10 @@ public class RulesArchive {
         container.addIntegratedCoverageFile(file);
         LOG.trace(" - Integrated Coverage File: " + file.getName());
       }
+    } else {
+      LOG.warn("Integrated Coverage Dir " + JarProperties.getIntegratedCoverageDir() + " not found.");
     }
+
     dir = lookFor(rootDir, JarProperties.getDelegationDir(), true);
     if (dir != null) {
       LOG.trace("Delegated Coverage Dir: " + dir.getName());
@@ -152,6 +155,8 @@ public class RulesArchive {
         container.addDelegationFile(file);
         LOG.trace(" - Delegated Coverage File: " + file.getName());
       }
+    } else {
+      LOG.warn("Delegated Coverage Dir " + JarProperties.getDelegationDir() + " not found.");
     }
 
     List<String> countryDirs = JarProperties.getCountryCoverageDirectoryProps();
@@ -161,18 +166,18 @@ public class RulesArchive {
         desc = countryDir;
       }
       String regExp = JarProperties.getProperty(countryDir);
-      LOG.trace("Looking for country dir : " + countryDir + " under " + rootDir + " (Reg Exp: " + regExp + ")");
+      LOG.trace("Looking for country dir : " + countryDir + " (" + regExp + ") under " + rootDir + " (Reg Exp: " + regExp + ")");
       dir = lookFor(rootDir, regExp, true);
       if (dir != null) {
-        LOG.trace("Country Coverage Dir: " + dir.getName());
         List<File> files = new ArrayList<File>();
         addAllFiles(files, dir);
+        LOG.trace("Country Coverage Dir: " + dir.getName() + " [" + files.size() + "]");
         for (File file : files) {
           LOG.trace(" - Country Coverage File: " + file.getName());
           container.addCountryCoverageFile(desc, file);
         }
       } else {
-        LOG.warn("Country Dir " + countryDir + " not found.");
+        LOG.warn("Country Dir " + countryDir + " (" + regExp + ") not found.");
       }
 
     }
