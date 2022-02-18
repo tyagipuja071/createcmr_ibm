@@ -4565,12 +4565,12 @@ function searchTermValidation() {
 
           var countryUse = FormManager.getActualValue('countryUse');
           if (countryUse == '702EE' || countryUse == '702LT' || countryUse == '702LV') {
-            if (searchTerm.length != 4 && sortlFlag) {
+            if (searchTerm.length != 8 && sortlFlag) {
               return new ValidationResult({
                 id : 'searchTerm',
                 type : 'text',
                 name : 'searchTerm'
-              }, false, 'SORTL should be exactly 4 digits long.');
+              }, false, 'SORTL should be exactly 8 digits long.');
             }
             return new ValidationResult(null, true);
           } else {
