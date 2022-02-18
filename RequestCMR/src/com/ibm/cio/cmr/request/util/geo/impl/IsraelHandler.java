@@ -1618,7 +1618,7 @@ public class IsraelHandler extends EMEAHandler {
         // INAC/NAC
         String inac = validateColValFromCell(row.getCell(14));
         if (StringUtils.isNotBlank(inac)) {
-          if (!StringUtils.isNumeric(inac)) {
+          if (!StringUtils.isNumeric(inac) && !"@@@@".equals(inac)) {
             String firstTwoInacChar = StringUtils.substring(inac, 0, 2);
             String lastTwoInacChar = StringUtils.substring(inac, 2);
 
