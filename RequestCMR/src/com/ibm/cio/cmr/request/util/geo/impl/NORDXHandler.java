@@ -1214,7 +1214,8 @@ public class NORDXHandler extends BaseSOFHandler {
               } else if (!isAllClientTierAllowed(country, isu) && !ctc.equalsIgnoreCase("@")) {
                 LOG.trace("For IsuCd set to '5K' Ctc should be '@'");
                 error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isu);
-              } else if (StringUtils.isNotBlank(ctc) && !"@QY".contains(ctc)) {
+              }
+              if (StringUtils.isNotBlank(ctc) && !"@QY".contains(ctc)) {
                 LOG.trace("The row " + (row.getRowNum() + 1)
                     + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
                 error.addError((row.getRowNum() + 1), "Client Tier",

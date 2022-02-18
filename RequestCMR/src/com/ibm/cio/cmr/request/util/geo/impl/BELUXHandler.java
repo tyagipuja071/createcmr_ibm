@@ -2278,7 +2278,8 @@ public class BELUXHandler extends BaseSOFHandler {
       } else if ((isuCd.equalsIgnoreCase("5K") || isuCd.equalsIgnoreCase("28")) && !ctc.equalsIgnoreCase("@")) {
         LOG.trace("For IsuCd set to '5K' or '28' Ctc should be '@'");
         error.addError(row.getRowNum() + 1, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd);
-      } else if (StringUtils.isNotBlank(ctc) && !"@QY".contains(ctc)) {
+      }
+      if (StringUtils.isNotBlank(ctc) && !"@QY".contains(ctc)) {
         LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
         error.addError((row.getRowNum() + 1), "Client Tier",
             ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");

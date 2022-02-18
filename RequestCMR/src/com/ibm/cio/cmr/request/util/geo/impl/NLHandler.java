@@ -2277,7 +2277,8 @@ public class NLHandler extends BaseSOFHandler {
             error.addError((row.getRowNum() + 1), "Client Tier",
                 ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
           }
-        } else if (StringUtils.isNotBlank(ctc) && !"@QY".contains(ctc)) {
+        }
+        if (StringUtils.isNotBlank(ctc) && !"@QY".contains(ctc)) {
           LOG.trace(
               "The row " + (row.getRowNum() + 1) + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
           error.addError((row.getRowNum() + 1), "Client Tier",
