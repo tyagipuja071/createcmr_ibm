@@ -1202,7 +1202,7 @@ public class NORDXHandler extends BaseSOFHandler {
               currCell = (XSSFCell) row.getCell(10);
               isu = validateColValFromCell(currCell);
               if (!StringUtils.isBlank(isu) && "34".equals(isu)) {
-                if (!"QY".contains(ctc)) {
+                if (!"QY".contains(ctc) || StringUtils.isBlank(ctc)) {
                   LOG.trace("The row " + (row.getRowNum() + 1)
                       + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
                   error.addError((row.getRowNum() + 1), "Client Tier",
