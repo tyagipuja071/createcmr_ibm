@@ -1973,7 +1973,6 @@ function clientTierCodeValidator() {
       validate : function() {
         var isuCode = FormManager.getActualValue('isuCd');
         var clientTierCode = FormManager.getActualValue('clientTier');
-
         if (isuCode == '21' || isuCode == '8B') {
           if (clientTierCode == '') {
             return new ValidationResult(null, true);
@@ -1983,6 +1982,23 @@ function clientTierCodeValidator() {
               type : 'text',
               name : 'clientTier'
             }, false, 'Client Tier can only accept blank.');
+          }
+        } else if (isuCode == '34') {
+          if (clientTierCode == '') {
+            FormManager.addValidator('clientTier', Validators.REQUIRED);
+            return new ValidationResult({
+              id : 'clientTier',
+              type : 'text',
+              name : 'clientTier'
+            }, false, 'Client Tier code is Mandatory.');
+          } else if (clientTierCode == 'Q' || clientTierCode == 'Y') {
+            return new ValidationResult(null, true);
+          } else {
+            return new ValidationResult({
+              id : 'clientTier',
+              type : 'text',
+              name : 'clientTier'
+            }, false, 'Client Tier can only accept \'Q\' or \'Y\'.');
           }
         } else {
           if (clientTierCode == 'Q' || clientTierCode == 'Y' || clientTierCode == '') {
