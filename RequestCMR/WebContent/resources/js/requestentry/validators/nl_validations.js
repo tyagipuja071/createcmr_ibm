@@ -1742,5 +1742,5 @@ dojo.addOnLoad(function() {
   // GEOHandler.NL);
   GEOHandler.registerValidator(addIGFZP02Validator, GEOHandler.NL, null, true);
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.NL, null, true);
-  GEOHandler.registerValidator(clientTierCodeValidator, GEOHandler.NORDX, null, true);
+  GEOHandler.registerValidator(clientTierCodeValidator, GEOHandler.NL, null, true);
 });
