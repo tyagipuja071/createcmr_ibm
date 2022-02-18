@@ -1308,24 +1308,9 @@ public class CEETransformer extends EMEATransformer {
       legacyCust.setMrcCd("3");
     }
     // CREATCMR-4293
-    List<String> custSubGrp_list = Arrays.asList("XBP", "BUSPR", "CSBP", "MEBP", "RSXBP", "RSBP", "XINT", "INTER", "CSINT", "RSXIN", "MEINT",
-        "RSINT");
-    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
-      if (!StringUtils.isEmpty(data.getIsuCd()) && ("21".equals(data.getIsuCd()) || "8B".equals(data.getIsuCd()))) {
-        if (StringUtils.isEmpty(data.getClientTier())) {
-          legacyCust.setIsuCd(data.getIsuCd() + "7");
-        }
-      }
-    }
-    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
-      if (!StringUtils.isEmpty(data.getCustSubGrp())) {
-        if (custSubGrp_list.contains(data.getCustSubGrp())) {
-          if (!StringUtils.isEmpty(data.getIsuCd()) && ("21".equals(data.getIsuCd()) || "8B".equals(data.getIsuCd()))) {
-            if (StringUtils.isEmpty(data.getClientTier())) {
-              legacyCust.setIsuCd(data.getIsuCd() + "7");
-            }
-          }
-        }
+    if (!StringUtils.isEmpty(data.getIsuCd()) && ("21".equals(data.getIsuCd()) || "8B".equals(data.getIsuCd()))) {
+      if (StringUtils.isEmpty(data.getClientTier())) {
+        legacyCust.setIsuCd(data.getIsuCd() + "7");
       }
     }
 
@@ -1352,11 +1337,10 @@ public class CEETransformer extends EMEATransformer {
     if (!StringUtils.isBlank(muData.getNewEntpName1())) {
       if ("@".equals(muData.getNewEntpName1())) {
         cust.setBankBranchNo("");
-    } else {
-          cust.setBankBranchNo(muData.getNewEntpName1());
+      } else {
+        cust.setBankBranchNo(muData.getNewEntpName1());
       }
-  }
-      
+    }
 
     if (!StringUtils.isBlank(muData.getSubIndustryCd())) {
       cust.setLocNo(cust.getId().getSofCntryCode() + muData.getSubIndustryCd());
@@ -1851,7 +1835,6 @@ public class CEETransformer extends EMEATransformer {
     }
   }
 
-
   @Override
   public void transformLegacyCustomerExtDataMassUpdate(EntityManager entityManager, CmrtCustExt custExt, CMRRequestContainer cmrObjects,
       MassUpdtData muData, String cmr) throws Exception {
@@ -2064,6 +2047,7 @@ public class CEETransformer extends EMEATransformer {
       return false;
     }
   }
+
   public <T> T initEmpty(Class<T> entityClass) throws Exception {
     try {
       T object = entityClass.newInstance();

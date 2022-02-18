@@ -344,29 +344,15 @@ public class SouthAfricaTransformer extends MCOTransformer {
     } else {
       legacyCust.setVat(data.getVat());
     }
+
     // CREATCMR-4293
-    List<String> custSubGrp_list = Arrays.asList("BUSPR", "LSBP", "LSXBP", "NABP", "NAXBP", "SZBP", "SZXBP", "XBP", "ZABP", "ZAXBP", "INTER", "LSINT",
-        "LSXIN", "NAINT", "NAXIN", "SZINT", "SZXIN", "XINTE", "ZAINT", "ZAXIN");
-    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
-      if (!StringUtils.isEmpty(data.getIsuCd()) && ("21".equals(data.getIsuCd()) || "8B".equals(data.getIsuCd()))) {
-        if (StringUtils.isEmpty(data.getClientTier())) {
-          legacyCust.setIsuCd(data.getIsuCd() + "7");
-        }
+    if (!StringUtils.isEmpty(data.getIsuCd()) && ("21".equals(data.getIsuCd()) || "8B".equals(data.getIsuCd()))) {
+      if (StringUtils.isEmpty(data.getClientTier())) {
+        legacyCust.setIsuCd(data.getIsuCd() + "7");
       }
     }
-    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
-      if (!StringUtils.isEmpty(data.getCustSubGrp())) {
-        if (custSubGrp_list.contains(data.getCustSubGrp())) {
-          if (!StringUtils.isEmpty(data.getIsuCd()) && ("21".equals(data.getIsuCd()) || "8B".equals(data.getIsuCd()))) {
-            if (StringUtils.isEmpty(data.getClientTier())) {
-              legacyCust.setIsuCd(data.getIsuCd() + "7");
-            }
-          }
-        }
-      }
-    }
-		
-		if (!StringUtils.isEmpty(data.getIsuCd()) && "5K".equals(data.getIsuCd())) {
+
+    if (!StringUtils.isEmpty(data.getIsuCd()) && "5K".equals(data.getIsuCd())) {
       legacyCust.setIsuCd(data.getIsuCd() + "7");
     }
 

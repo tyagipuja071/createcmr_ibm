@@ -1280,24 +1280,9 @@ public class NORDXTransformer extends EMEATransformer {
       legacyCust.setIsuCd("");
     }
     // CREATCMR-4293
-    List<String> custSubGrp_list = Arrays.asList("BUSPR", "CBBUS", "DKBUS", "EEBUS", "FIBUS", "FOBUS", "GLBUS", "ISBUS", "LTBUS", "LVBUS", "CBINT",
-        "DKINT", "EEINT", "FIINT", "FOINT", "GLINT", "INTER", "ISINT", "LTINT", "LVINT");
-    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
-      if (!StringUtils.isEmpty(data.getIsuCd()) && ("21".equals(data.getIsuCd()) || "8B".equals(data.getIsuCd()))) {
-        if (StringUtils.isEmpty(data.getClientTier())) {
-          legacyCust.setIsuCd(data.getIsuCd() + "7");
-        }
-      }
-    }
-    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
-      if (!StringUtils.isEmpty(data.getCustSubGrp())) {
-        if (custSubGrp_list.contains(data.getCustSubGrp())) {
-          if (!StringUtils.isEmpty(data.getIsuCd()) && ("21".equals(data.getIsuCd()) || "8B".equals(data.getIsuCd()))) {
-            if (StringUtils.isEmpty(data.getClientTier())) {
-              legacyCust.setIsuCd(data.getIsuCd() + "7");
-            }
-          }
-        }
+    if (!StringUtils.isEmpty(data.getIsuCd()) && ("21".equals(data.getIsuCd()) || "8B".equals(data.getIsuCd()))) {
+      if (StringUtils.isEmpty(data.getClientTier())) {
+        legacyCust.setIsuCd(data.getIsuCd() + "7");
       }
     }
 

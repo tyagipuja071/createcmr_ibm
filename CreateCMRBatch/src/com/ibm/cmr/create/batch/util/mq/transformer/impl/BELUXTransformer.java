@@ -956,27 +956,12 @@ public class BELUXTransformer extends EMEATransformer {
       legacyCust.setMrcCd("3");
     }
     // CREATCMR-4293
-    List<String> custSubGrp_list = Arrays.asList("CBBUS", "BEBUS", "BEINT", "BEISO", "LUBUS", "LUINT", "LUISO");
+    if (!StringUtils.isEmpty(data.getIsuCd()) && ("21".equals(data.getIsuCd()))) {
+      if (StringUtils.isEmpty(data.getClientTier())) {
+        legacyCust.setIsuCd(data.getIsuCd() + "7");
+      }
+    }
 
-    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
-      if (!StringUtils.isEmpty(data.getIsuCd()) && ("21".equals(data.getIsuCd()))) {
-        if (StringUtils.isEmpty(data.getClientTier())) {
-          legacyCust.setIsuCd(data.getIsuCd() + "7");
-        }
-      }
-    }
-    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
-      if (!StringUtils.isEmpty(data.getCustSubGrp())) {
-        if (custSubGrp_list.contains(data.getCustSubGrp())) {
-          if (!StringUtils.isEmpty(data.getIsuCd()) && ("21".equals(data.getIsuCd()))) {
-            if (StringUtils.isEmpty(data.getClientTier())) {
-              legacyCust.setIsuCd(data.getIsuCd() + "7");
-            }
-          }
-        }
-      }
-    }
-    
     if (!StringUtils.isEmpty(data.getIsuCd()) && ("5K".equals(data.getIsuCd()) || "28".equals(data.getIsuCd()))) {
       legacyCust.setIsuCd(data.getIsuCd() + "7");
     }
