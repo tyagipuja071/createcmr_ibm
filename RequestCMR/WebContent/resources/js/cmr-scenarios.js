@@ -19,13 +19,14 @@ var TemplateService = (function() {
 
   // CREATCMR-4293
   var CMR_ISSUING_CNTRY_ARRAY = [ '624', '603', '607', '626', '644', '651', '668', '693', '694', '695', '699', '704', '705', '707', '708', '740',
-      '741', '787', '820', '821', '826', '889', '358', '359', '363', '862', '864', '610', '636', '645', '669', '698', '725', '745', '764', '769',
-      '770', '782', '804', '825', '827', '831', '833', '835', '842', '851', '857', '883', '620', '642', '675', '677', '680', '752', '762', '767',
-      '768', '772', '805', '808', '823', '832', '849', '850', '865', '729', '846', '806', '702', '678' ];
+      '741', '787', '820', '821', '826', '889', '358', '359', '363', '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667',
+      '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770', '780', '782', '804', '810', '825', '827',
+      '831', '833', '835', '840', '841', '842', '851', '857', '864', '876', '879', '880', '881', '883', '862', '620', '642', '675', '677', '680',
+      '752', '762', '767', '768', '772', '805', '808', '823', '832', '849', '850', '865', '729', '846', '806', '702', '678' ];
 
   var CUST_SUB_GRP_FOR_BUSINESS_PARTNER_ARRAY = [ 'AFBP', 'BEBUS', 'BUSPR', 'BUSSM', 'BUSVA', 'CBBUS', 'CHBUS', 'CRBUS', 'CROBP', 'CSBP', 'DKBUS',
       'EEBUS', 'ELBP', 'EXBP', 'FIBUS', 'FOBUS', 'GLBUS', 'ISBUS', 'JOBP', 'JOXBP', 'LIBUS', 'LSBP', 'LSXBP', 'LTBUS', 'LUBUS', 'LVBUS', 'MEBP',
-      'NABP', 'NAXBP', 'PKBP', 'PKXBP', 'PSBP', 'RSBP', 'RSXBP', 'SZBP', 'SZXBP', 'XBP', 'XBUSP', 'ZABP', 'ZAXBP' ];
+      'NABP', 'NAXBP', 'PKBP', 'PKXBP', 'PSBP', 'RSBP', 'RSXBP', 'SZBP', 'SZXBP', 'XBP', 'XBUSP', 'ZABP', 'ZAXBP', 'LLCBP', 'LSLOC', 'NALOC', 'SZLOC' ];
 
   var CUST_SUB_GRP_FOR_INTERNAL_ARRAY = [ 'AFINT', 'BEINT', 'CBINT', 'CBTER', 'CHINT', 'CRINT', 'CROIN', 'CSINT', 'DKINT', 'EEINT', 'FIINT', 'FOINT',
       'GLINT', 'INTER', 'INTIN', 'INTSM', 'INTVA', 'ISINT', 'JOINT', 'JOXIN', 'LIINT', 'LSINT', 'LSXIN', 'LTINT', 'LUINT', 'LVINT', 'MEINT', 'NAINT',
