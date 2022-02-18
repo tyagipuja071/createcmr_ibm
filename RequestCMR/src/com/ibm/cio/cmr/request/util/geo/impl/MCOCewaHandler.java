@@ -813,17 +813,21 @@ public class MCOCewaHandler extends MCOHandler {
                 } else if ("21,8B".contains(isuCd) && !"@".equals(clientTier)) {
                   LOG.trace("Client Tier should be '@' for the selected ISU Code.");
                   error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier should be '@' for the selected ISU Code.");
-                }
-                if ("34".equals(isuCd)) {
-                  if (!"QY".contains(clientTier)) {
+                } else if ("34".equals(isuCd)) {
+                  if (StringUtils.isBlank(clientTier) || !"QY".contains(clientTier)) {
                     LOG.trace("The row " + (row.getRowNum() + 1)
                         + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
                     error.addError((row.getRowNum() + 1), "Client Tier",
                         ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
                   }
+                } else if (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier)) {
+                  LOG.trace("The row " + ((row.getRowNum() + 1))
+                      + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "Client Tier",
+                      ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
                 }
               }
-              if (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier)) {
+              if (StringUtils.isBlank(isuCd) && StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier)) {
                 LOG.trace("The row " + ((row.getRowNum() + 1))
                     + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
                 error.addError((row.getRowNum() + 1), "Client Tier",

@@ -1020,22 +1020,22 @@ public class MaltaHandler extends BaseSOFHandler {
               if (!StringUtils.isBlank(cmrNo) && !StringUtils.isBlank(seqNo)) {
                 if (StringUtils.isBlank(custName1)) {
                   LOG.trace("Customer Name is mandatory");
-                  error.addError(row.getRowNum(), rowNumber + "Customer Name", "Customer Name is mandatory.");
+                  error.addError(row.getRowNum(), "Customer Name", "Customer Name is mandatory.");
                 }
 
                 if (StringUtils.isBlank(street)) {
                   LOG.trace("Street is mandatory");
-                  error.addError(row.getRowNum(), rowNumber + "Street", "Street is mandatory.");
+                  error.addError(row.getRowNum(), "Street", "Street is mandatory.");
                 }
 
                 if (StringUtils.isBlank(city)) {
                   LOG.trace("City is mandatory");
-                  error.addError(row.getRowNum(), rowNumber + "City", "City is mandatory.");
+                  error.addError(row.getRowNum(), "City", "City is mandatory.");
                 }
 
                 if (StringUtils.isBlank(landCntry)) {
                   LOG.trace("Landed Country is mandatory");
-                  error.addError(row.getRowNum(), rowNumber + "Landed Country", "Landed Country is mandatory.");
+                  error.addError(row.getRowNum(), "Landed Country", "Landed Country is mandatory.");
                 }
 
                 if (StringUtils.isBlank(postalCode)) {
@@ -1131,11 +1131,26 @@ public class MaltaHandler extends BaseSOFHandler {
                     LOG.trace("Client Tier should be '@' for the selected ISU Code.");
                     error.addError(row.getRowNum(), "Client Tier", "Client Tier should be '@' for the selected ISU Code. ");
                   }
+                } else if ("21,8B".contains(isuCd) && !"@".equals(clientTier)) {
+                  LOG.trace("Client Tier should be '@' for the selected ISU Code.");
+                  error.addError(row.getRowNum(), "Client Tier", "Client Tier should be '@' for the selected ISU Code.");
+                } else if ("34".equals(isuCd)) {
+                  if (StringUtils.isBlank(clientTier) || !"QY".contains(clientTier)) {
+                    LOG.trace("The row " + row.getRowNum()
+                        + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
+                    error.addError(row.getRowNum(), "Client Tier",
+                        ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
+                  }
+                } else if (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier)) {
+                  LOG.trace(
+                      "The row " + row.getRowNum() + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
+                  error.addError(row.getRowNum(), "Client Tier",
+                      ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
                 }
               }
-              if (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier)) {
-                LOG.trace("The row " + row.getRowNum()
-                    + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
+              if (StringUtils.isBlank(isuCd) && StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier)) {
+                LOG.trace(
+                    "The row " + row.getRowNum() + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
                 error.addError(row.getRowNum(), "Client Tier",
                     ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
               }

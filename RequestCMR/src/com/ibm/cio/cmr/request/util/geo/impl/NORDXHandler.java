@@ -1202,7 +1202,7 @@ public class NORDXHandler extends BaseSOFHandler {
               currCell = (XSSFCell) row.getCell(10);
               isu = validateColValFromCell(currCell);
               if (!StringUtils.isBlank(isu) && "34".equals(isu)) {
-                if (!"QY".contains(ctc)) {
+                if (!"QY".contains(ctc) || StringUtils.isBlank(ctc)) {
                   LOG.trace("The row " + (row.getRowNum() + 1)
                       + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
                   error.addError((row.getRowNum() + 1), "Client Tier",
@@ -1211,17 +1211,14 @@ public class NORDXHandler extends BaseSOFHandler {
               } else if (!StringUtils.isEmpty(isu) && "21,8B".contains(isu) && !"@".equals(ctc)) {
                 LOG.trace("Client Tier should be '@' for the selected ISU Code.");
                 error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier should be '@' for the selected ISU Code.");
-              }
-
-              if (StringUtils.isNotBlank(ctc) && !"@QY".contains(ctc)) {
+              } else if (!isAllClientTierAllowed(country, isu) && !ctc.equalsIgnoreCase("@")) {
+                LOG.trace("For IsuCd set to '5K' Ctc should be '@'");
+                error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isu);
+              } else if (StringUtils.isNotBlank(ctc) && !"@QY".contains(ctc)) {
                 LOG.trace("The row " + (row.getRowNum() + 1)
                     + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
                 error.addError((row.getRowNum() + 1), "Client Tier",
                     ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
-              }
-              if (!isAllClientTierAllowed(country, isu) && !ctc.equalsIgnoreCase("@")) {
-                LOG.trace("For IsuCd set to '5K' Ctc should be '@'");
-                error.addError(row.getRowNum(), "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isu);
               }
               currCell = (XSSFCell) row.getCell(12);
               leadingAccount = validateColValFromCell(currCell);
