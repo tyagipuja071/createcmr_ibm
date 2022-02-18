@@ -1086,7 +1086,7 @@ public class TurkeyTransformer extends EMEATransformer {
         legacyCust.setEmbargoCd(rdcEmbargoCd);
         resetOrdBlockToData(entityManager, data);
       }
-      
+
       if (!StringUtils.isEmpty(data.getIsuCd()) && "5K".equals(data.getIsuCd())) {
         legacyCust.setIsuCd(data.getIsuCd() + "7");
       }
@@ -1161,23 +1161,9 @@ public class TurkeyTransformer extends EMEATransformer {
       legacyCust.setVat("");
     }
     // CREATCMR-4293
-    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
-      if (!StringUtils.isEmpty(data.getIsuCd()) && ("21".equals(data.getIsuCd()) || "8B".equals(data.getIsuCd()))) {
-        if (StringUtils.isEmpty(data.getClientTier())) {
-          legacyCust.setIsuCd(data.getIsuCd() + "7");
-        }
-      }
-    }
-    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
-      if (!StringUtils.isEmpty(data.getCustSubGrp())) {
-        if ("XBP".equals(data.getCustSubGrp()) || "XINT".equals(data.getCustSubGrp()) || "BUSPR".equals(data.getCustSubGrp())
-            || "INTER".equals(data.getCustSubGrp())) {
-          if (!StringUtils.isEmpty(data.getIsuCd()) && ("21".equals(data.getIsuCd()) || "8B".equals(data.getIsuCd()))) {
-            if (StringUtils.isEmpty(data.getClientTier())) {
-              legacyCust.setIsuCd(data.getIsuCd() + "7");
-            }
-          }
-        }
+    if (!StringUtils.isEmpty(data.getIsuCd()) && ("21".equals(data.getIsuCd()) || "8B".equals(data.getIsuCd()))) {
+      if (StringUtils.isEmpty(data.getClientTier())) {
+        legacyCust.setIsuCd(data.getIsuCd() + "7");
       }
     }
 
