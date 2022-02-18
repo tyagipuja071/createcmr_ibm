@@ -1693,6 +1693,7 @@ function limitClientTierValues(value) {
     } else if (value == '34') {
       tierValues = [ 'V', 'A', 'Q', 'Y' ];
     } else if (value == '21' || value == '8B') {
+      // CREATCMR-4293
       // tierValues = [ '7' ];
     } else {
       FormManager.resetDropdownValues(FormManager.getField('clientTier'));
@@ -2063,7 +2064,7 @@ function setCTCValues() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
 
   // Business Partner
-  var custSubGrpForBusinessPartner = [ 'BUSPR', 'LSBP', 'LSXBP', 'NABP', 'NAXBP', 'SZBP', 'SZXBP', 'XBP', 'ZABP', 'ZAXBP' ];
+  var custSubGrpForBusinessPartner = [ 'BUSPR', 'LSBP', 'LSXBP', 'NABP', 'NAXBP', 'SZBP', 'SZXBP', 'XBP', 'ZABP', 'ZAXBP', 'LLCBP' ];
 
   // Business Partner
   if (custSubGrpForBusinessPartner.includes(custSubGrp)) {
