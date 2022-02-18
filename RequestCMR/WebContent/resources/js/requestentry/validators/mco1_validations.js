@@ -2067,6 +2067,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(mandatoryForBusinessPartner, [ SysLoc.SOUTH_AFRICA ]);
   GEOHandler.addAfterConfig(validateTypeOfCustomer, GEOHandler.MCO1);
   GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.MCO1);
+  GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.MCO1);
 
   // GEOHandler.registerValidator(addInacCodeValidator, [ SysLoc.SOUTH_AFRICA ],
   // null, true);
