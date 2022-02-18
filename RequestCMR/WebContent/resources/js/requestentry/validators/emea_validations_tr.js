@@ -2142,12 +2142,8 @@ function setClientTierValuesTR(isuCd) {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
-  if (_isuCdHandler == null && FormManager.getField('isuCd')) {
-    _isuCdHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
-      if (value == null) {
-        value = FormManager.getActualValue('isuCd');
-      }
-      if (value == '5K') {
+ isuCd = FormManager.getActualValue('isuCd');
+      if (isuCd == '5K') {
         FormManager.removeValidator('clientTier', Validators.REQUIRED);
         FormManager.setValue('clientTier', '');
         FormManager.readOnly('clientTier');
@@ -2164,8 +2160,6 @@ function setClientTierValuesTR(isuCd) {
         }
         FormManager.enable('clientTier');
       }
-    });
-  }
 }
 
 function autoSetSboSrOnAddrSaveUK() {
