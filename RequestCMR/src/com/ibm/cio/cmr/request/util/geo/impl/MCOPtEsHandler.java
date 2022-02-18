@@ -1408,7 +1408,8 @@ public class MCOPtEsHandler extends MCOHandler {
                   error.addError(row.getRowNum(), "Enterprise No.", "Enterprise Number should have numeric values only. ");
                 }
               }
-              if ((isuCd.equalsIgnoreCase("5k") || isuCd.equalsIgnoreCase("3T") || "21,8B".contains(isuCd)) && !"@".equalsIgnoreCase(clientTier)) {
+              if ((isuCd.equalsIgnoreCase("5k") || isuCd.equalsIgnoreCase("3T") || (!StringUtils.isEmpty(isuCd) && "21,8B".contains(isuCd)))
+                  && !"@".equalsIgnoreCase(clientTier)) {
                 LOG.trace("Client Tier should be '@' for the selected ISU Code.");
                 error.addError(row.getRowNum(), "Client Tier", "Client Tier should be '@' for the selected ISU Code.");
               } else if (!StringUtils.isBlank(isuCd) && "34".equals(isuCd)) {

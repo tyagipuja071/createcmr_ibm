@@ -1162,7 +1162,7 @@ public class MCOSaHandler extends MCOHandler {
                     LOG.trace("Client Tier should be '@' for the selected ISU Code.");
                     error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier should be '@' for the selected ISU Code. ");
                   }
-                } else if ("21,8B".contains(isuCd) && !"@".equals(clientTier)) {
+                } else if (!StringUtils.isEmpty(isuCd) && "21,8B".contains(isuCd) && !"@".equals(clientTier)) {
                   LOG.trace("Client Tier should be '@' for the selected ISU Code.");
                   error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier should be '@' for the selected ISU Code.");
                 } else if (!StringUtils.isBlank(isuCd) && "34".equals(isuCd)) {

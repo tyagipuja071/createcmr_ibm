@@ -2227,7 +2227,7 @@ public class MEHandler extends BaseSOFHandler {
                 LOG.trace("Client Tier should be '@' for the selected ISU Code.");
                 error.addError(rowIndex, "Client Tier", "Client Tier should be '@' for the selected ISU Code. ");
               }
-            } else if ("21,8B".contains(isuCd) && !"@".equals(clientTier)) {
+            } else if (!StringUtils.isEmpty(isuCd) && "21,8B".contains(isuCd) && !"@".equals(clientTier)) {
               LOG.trace("Client Tier should be '@' for the selected ISU Code.");
               error.addError(rowIndex, "Client Tier", "Client Tier should be '@' for the selected ISU Code.");
             } else if ("34".equals(isuCd)) {
