@@ -1,6 +1,8 @@
 /* Register Malta Javascripts */
-var fstCEWA = [ "373", "382", "383", "635", "637", "656", "662", "667", "670", "691", "692", "700", "717", "718", "753", "810", "840", "841", "876", "879", "880", "881" ];
-var othCEWA = [ "610", "636", "645", "669", "698", "725", "745", "764", "769", "770", "782", "804", "825", "827", "831", "833", "835", "842", "851", "857", "883", "780" ];
+var fstCEWA = [ "373", "382", "383", "635", "637", "656", "662", "667", "670", "691", "692", "700", "717", "718", "753", "810", "840", "841", "876",
+    "879", "880", "881" ];
+var othCEWA = [ "610", "636", "645", "669", "698", "725", "745", "764", "769", "770", "782", "804", "825", "827", "831", "833", "835", "842", "851",
+    "857", "883", "780" ];
 var _vatExemptHandler = null;
 
 function addMaltaLandedCountryHandler(cntry, addressMode, saving, finalSave) {
@@ -576,7 +578,7 @@ function lockAbbrv() {
     }
   }
 }
- var _CTCHandlerMT = null;
+var _CTCHandlerMT = null;
 function enterpriseMalta() {
   var reqType = FormManager.getActualValue('reqType').toUpperCase();
   var role = FormManager.getActualValue('userRole').toUpperCase();
@@ -597,7 +599,7 @@ function enterpriseMalta() {
   } else {
     FormManager.enable('enterprise');
   }
-  
+
   if (_CTCHandlerMT == null) {
     _CTCHandlerMT = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
       if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.MALTA) {
@@ -625,6 +627,10 @@ function setClientTierValuesMT(isuCd) {
     FormManager.readOnly('clientTier');
   } else {
     var reqType = FormManager.getActualValue('reqType');
+    if (reqType != 'U') {
+      // CREATCMR-4293
+      // FormManager.addValidator('clientTier', Validators.REQUIRED);
+    }
     FormManager.enable('clientTier');
   }
 }
@@ -1007,6 +1013,81 @@ function setValuesWRTIsuCtc(ctc) {
 }
 
 /* End 1430539 */
+
+// CREATCMR-4293
+function setCTCValues() {
+
+  FormManager.removeValidator('clientTier', Validators.REQUIRED);
+
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+
+  // Business Partner
+  var custSubGrpArray = [ 'BUSPR', 'LSBP', 'LSXBP', 'NABP', 'NAXBP', 'SZBP', 'SZXBP', 'XBP', 'ZABP', 'ZAXBP', 'INTER', 'LSINT', 'LSXIN', 'NAINT',
+      'NAXIN', 'SZINT', 'SZXIN', 'XINTE', 'ZAINT', 'ZAXIN' ];
+
+  // Business Partner OR Internal
+  if (custSubGrpArray.includes(custSubGrp)) {
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    var isuCd = FormManager.getActualValue('isuCd');
+    if (isuCd == '21') {
+      FormManager.setValue('clientTier', '');
+    }
+  }
+
+}
+
+function clientTierCodeValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var isuCode = FormManager.getActualValue('isuCd');
+        var clientTierCode = FormManager.getActualValue('clientTier');
+
+        if (isuCode == '21' || isuCode == '8B') {
+          if (clientTierCode == '') {
+            return new ValidationResult(null, true);
+          } else {
+            return new ValidationResult({
+              id : 'clientTier',
+              type : 'text',
+              name : 'clientTier'
+            }, false, 'Client Tier can only accept blank.');
+          }
+        } else if (isuCode == '34') {
+          if (clientTierCode == '') {
+            FormManager.addValidator('clientTier', Validators.REQUIRED);
+            return new ValidationResult({
+              id : 'clientTier',
+              type : 'text',
+              name : 'clientTier'
+            }, false, 'Client Tier code is Mandatory.');
+          } else if (clientTierCode == 'Q' || clientTierCode == 'Y') {
+            return new ValidationResult(null, true);
+          } else {
+            return new ValidationResult({
+              id : 'clientTier',
+              type : 'text',
+              name : 'clientTier'
+            }, false, 'Client Tier can only accept \'Q\' or \'Y\'.');
+          }
+        } else {
+          if (clientTierCode == 'Q' || clientTierCode == 'Y' || clientTierCode == '') {
+            return new ValidationResult(null, true);
+          } else {
+            return new ValidationResult({
+              id : 'clientTier',
+              type : 'text',
+              name : 'clientTier'
+            }, false, 'Client Tier can only accept \'Q\', \'Y\' or blank.');
+          }
+        }
+
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+// CREATCMR-4293
+
 dojo.addOnLoad(function() {
   GEOHandler.MCO2 = [ '780' ];
   console.log('adding MALTA functions...');
@@ -1058,5 +1139,9 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setClientTierValuesMT, [ SysLoc.MALTA ]);
   GEOHandler.addAfterTemplateLoad(setClientTierValuesMT, [ SysLoc.MALTA ]);
   GEOHandler.addAfterTemplateLoad(addISUHandler, [ SysLoc.MALTA ]);
+
+  // CREATCMR-4293
+  GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.MCO2);
+  GEOHandler.registerValidator(clientTierCodeValidator, GEOHandler.MCO2, null, true);
 
 });
