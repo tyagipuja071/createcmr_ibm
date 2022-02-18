@@ -1649,6 +1649,45 @@ function setClientTierValuesForUpdate() {
   }
 }
 
+function clientTierCodeValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var isuCode = FormManager.getActualValue('isuCd');
+        var clientTierCode = FormManager.getActualValue('clientTier');
+        if (isuCode == '34') {
+          if (clientTierCode == '') {
+            FormManager.addValidator('clientTier', Validators.REQUIRED);
+            return new ValidationResult({
+              id : 'clientTier',
+              type : 'text',
+              name : 'clientTier'
+            }, false, 'Client Tier code is Mandatory.');
+          } else if (clientTierCode == 'Q' || clientTierCode == 'Y') {
+            return new ValidationResult(null, true);
+          } else {
+            return new ValidationResult({
+              id : 'clientTier',
+              type : 'text',
+              name : 'clientTier'
+            }, false, 'Client Tier can only accept \'Q\' or \'Y\'.');
+          }
+        } else {
+          if (clientTierCode == 'Q' || clientTierCode == 'Y' || clientTierCode == '') {
+            return new ValidationResult(null, true);
+          } else {
+            return new ValidationResult({
+              id : 'clientTier',
+              type : 'text',
+              name : 'clientTier'
+            }, false, 'Client Tier can only accept \'Q\', \'Y\' or blank.');
+          }
+        }
+
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
 
 dojo.addOnLoad(function() {
   GEOHandler.NL = [ '788' ];
@@ -1703,4 +1742,5 @@ dojo.addOnLoad(function() {
   // GEOHandler.NL);
   GEOHandler.registerValidator(addIGFZP02Validator, GEOHandler.NL, null, true);
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, GEOHandler.NL, null, true);
+  GEOHandler.registerValidator(clientTierCodeValidator, GEOHandler.NL, null, true);
 });
