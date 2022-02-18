@@ -9923,12 +9923,6 @@ function setValuesWRTIsuCtc(ctc) {
       FormManager.enable('salesBusOffCd');
     }
   }
-  
-  if (role == 'REQUESTER') {
-    FormManager.removeValidator('enterprise', Validators.REQUIRED);
-  } else {
-    FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise' ]);
-  }
 }
 
 // CREATCMR-4293
