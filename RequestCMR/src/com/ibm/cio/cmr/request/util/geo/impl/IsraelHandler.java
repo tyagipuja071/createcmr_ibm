@@ -1652,6 +1652,12 @@ public class IsraelHandler extends EMEAHandler {
           kukla = "";
         }
 
+        String err = validateISICKukla(cmrNo, country, isic, kukla);
+
+        if (StringUtils.isNotBlank(err)) {
+          error.addError(rowIndex, "<br>ISIC/KUKLA", err);
+        }
+
         // phone
         if (row.getCell(16) != null) {
           row.getCell(16).setCellType(CellType.STRING);
@@ -2018,6 +2024,46 @@ public class IsraelHandler extends EMEAHandler {
     return isDivestiture;
   }
 
+  private static String validateISICKukla(String cmrNo, String cntry, String usrIsic, String usrKukla) {
+    String errMessage = "";
+
+    if (StringUtils.isNotBlank(cmrNo) && StringUtils.isNotBlank(cntry) && (StringUtils.isNotBlank(usrIsic) || StringUtils.isNotBlank(usrKukla))) {
+      EntityManager entityManager = JpaManager.getEntityManager();
+      String mandt = SystemConfiguration.getValue("MANDT");
+      String sql = ExternalizedQuery.getSql("IL.GET.ISIC.KUKLA");
+
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setForReadOnly(true);
+      query.setParameter("MANDT", mandt);
+      query.setParameter("KATR6", cntry);
+      query.setParameter("ZZKV_CUSNO", cmrNo);
+
+      List<Kna1> kna1List = query.getResults(Kna1.class);
+      if (!kna1List.isEmpty()) {
+        Kna1 kna1 = kna1List.get(0);
+        if (kna1 != null) {
+          String isic = StringUtils.isNotBlank(kna1.getZzkvSic()) ? kna1.getZzkvSic() : "";
+          String kukla = StringUtils.isNotBlank(kna1.getKukla()) ? kna1.getKukla() : "";
+
+          if (StringUtils.isNotBlank(isic) && StringUtils.isNotBlank(kukla)) {
+            if (isic.equals("9500") && kukla.equals("60")) {
+              if (StringUtils.isNotBlank(usrIsic)) {
+                if (StringUtils.isBlank(usrKukla)) {
+                  errMessage = "CMR currently has ISIC 9500/KUKLA 60.  Please change both ISIC and KUKLA.";
+                }
+              } else if (StringUtils.isNotBlank(usrKukla)) {
+                if (StringUtils.isBlank(usrIsic)) {
+                  errMessage = "CMR currently has ISIC 9500/KUKLA 60.  Please change both ISIC and KUKLA.";
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    return errMessage;
+  }
+
   private static String validateSalesRep(String cmrNo, String cntry, String userSalesRep) {
     String errMessage = "";
 
@@ -2031,7 +2077,7 @@ public class IsraelHandler extends EMEAHandler {
       query.setParameter("RCUXA", cmrNo);
 
       List<CmrtCust> db2List = query.getResults(CmrtCust.class);
-      if (!db2List.isEmpty() && !db2List.isEmpty()) {
+      if (!db2List.isEmpty()) {
         CmrtCust db2 = db2List.get(0);
 
         String realCtyCd = StringUtils.isNotEmpty(db2.getRealCtyCd()) ? db2.getRealCtyCd() : "";
