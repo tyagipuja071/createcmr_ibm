@@ -1308,7 +1308,7 @@ public class CEETransformer extends EMEATransformer {
       legacyCust.setMrcCd("3");
     }
     // CREATCMR-4293
-    if (!StringUtils.isEmpty(data.getIsuCd()) && ("21".equals(data.getIsuCd()) || "8B".equals(data.getIsuCd()))) {
+    if (!StringUtils.isEmpty(data.getIsuCd())) {
       if (StringUtils.isEmpty(data.getClientTier())) {
         legacyCust.setIsuCd(data.getIsuCd() + "7");
       }

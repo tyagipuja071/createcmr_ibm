@@ -161,7 +161,7 @@ public class CEWATransformer extends MCOTransformer {
     }
     // CREATCMR-4293
     if (!SystemLocation.MALTA.equals(cmrIssuingCntry)) {
-      if (!StringUtils.isEmpty(data.getIsuCd()) && ("21".equals(data.getIsuCd()) || "8B".equals(data.getIsuCd()))) {
+      if (!StringUtils.isEmpty(data.getIsuCd())) {
         if (StringUtils.isEmpty(data.getClientTier())) {
           legacyCust.setIsuCd(data.getIsuCd() + "7");
         }
