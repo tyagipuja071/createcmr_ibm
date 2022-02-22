@@ -1516,10 +1516,7 @@ public class IsraelHandler extends EMEAHandler {
 
   @Override
   public void validateMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country) {
-    // String[] sheetNames = { "Data", "Mailing", "Billing", "Installing",
-    // "Shipping", "EPL", "Country Use A (Mailing)", "Country Use B (Billing)",
-    // "Country Use C (Shipping)" };
-    List<String> dataSheetCmrList = new ArrayList<String>();
+    Map<String, HashSet<String>> mapCmrSeq = new HashMap<String, HashSet<String>>();
     List<String> divCmrList = new ArrayList<String>();
     HashMap<String, HashMap<String, String>> postalCdValidationCache = new HashMap<String, HashMap<String, String>>();
     boolean isSheetEmpty = true;
@@ -1530,9 +1527,9 @@ public class IsraelHandler extends EMEAHandler {
       if (sheet != null) {
         TemplateValidation error = new TemplateValidation(name);
         if (name.equals(IL_MASSUPDATE_SHEET_NAMES[0])) {// data sheet
-          validateDataSheet(dataSheetCmrList, divCmrList, error, sheet, maxRows, country);
+          validateDataSheet(mapCmrSeq, divCmrList, error, sheet, maxRows, country);
         } else {
-          validateAddressSheet(name, dataSheetCmrList, divCmrList, error, sheet, maxRows, postalCdValidationCache);
+          validateAddressSheet(name, mapCmrSeq, divCmrList, error, sheet, maxRows, postalCdValidationCache);
         }
 
         if (error.hasErrors()) {
@@ -1549,7 +1546,7 @@ public class IsraelHandler extends EMEAHandler {
     // Shipping vs Country Use C
     compareAddressSheets(book.getSheet(IL_MASSUPDATE_SHEET_NAMES[4]), book.getSheet(IL_MASSUPDATE_SHEET_NAMES[8]), maxRows, validations);
 
-    if (isSheetEmpty && dataSheetCmrList.size() == 0) {
+    if (isSheetEmpty && mapCmrSeq.size() == 0) {
       TemplateValidation sheetEmptyError = new TemplateValidation(IL_MASSUPDATE_SHEET_NAMES[0]);
       sheetEmptyError.addError(1, "<br>Template File", "Mass Update file does not contain any record to update.");
       validations.add(sheetEmptyError);
@@ -1557,8 +1554,8 @@ public class IsraelHandler extends EMEAHandler {
 
   }
 
-  private void validateDataSheet(List<String> dataSheetCmrList, List<String> divCmrList, TemplateValidation error, XSSFSheet sheet, int maxRows,
-      String country) {
+  private void validateDataSheet(Map<String, HashSet<String>> mapCmrSeq, List<String> divCmrList, TemplateValidation error, XSSFSheet sheet,
+      int maxRows, String country) {
     XSSFRow row = null;
     String embargoCodes[] = { "D", "J", "@" };
 
@@ -1568,13 +1565,15 @@ public class IsraelHandler extends EMEAHandler {
         // CMR No
         String cmrNo = validateColValFromCell(row.getCell(0));
         if (StringUtils.isBlank(cmrNo)) {
-          error.addError(rowIndex, "<br>CMR No.", "CMR number is required.");
+          error.addError(rowIndex, "<br>CMR No.", "CMR Number is required.");
         } else if (isDivCMR(cmrNo, country)) {
           error.addError(rowIndex, "<br>CMR No.",
-              "Note the entered CMR number is either cancelled, divestiture or doesn't exist. Please check the template and correct.");
+              "Note the entered CMR Number is either cancelled, divestiture or doesn't exist. Please check the template and correct.");
           divCmrList.add(cmrNo);
+        } else if (mapCmrSeq.containsKey(cmrNo)) {
+          error.addError(rowIndex, "<br>CMR No.", "Duplicate CMR No. It should be entered only once in Data Sheet.");
         } else {
-          dataSheetCmrList.add(cmrNo);
+          mapCmrSeq.put(cmrNo, new HashSet<String>());
         }
         // Tax Code
         String taxCode = validateColValFromCell(row.getCell(5));
@@ -1699,8 +1698,9 @@ public class IsraelHandler extends EMEAHandler {
     }
   }
 
-  private void validateAddressSheet(String sheetName, List<String> dataSheetCmrList, List<String> divCmrList, TemplateValidation error,
+  private void validateAddressSheet(String sheetName, Map<String, HashSet<String>> mapCmrSeq, List<String> divCmrList, TemplateValidation error,
       XSSFSheet sheet, int maxRows, HashMap<String, HashMap<String, String>> postalCdValidationCache) {
+
     XSSFRow row = null;
     for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
       row = sheet.getRow(rowIndex);
@@ -1712,7 +1712,7 @@ public class IsraelHandler extends EMEAHandler {
         } else if (StringUtils.isNotBlank(cmrNo)) {
           if (!StringUtils.isNumeric(cmrNo)) {
             error.addError(rowIndex, "<br>CMR No.", "CMR number should be numeric.");
-          } else if (dataSheetCmrList != null && !dataSheetCmrList.contains(cmrNo)) {
+          } else if (mapCmrSeq != null && !mapCmrSeq.containsKey(cmrNo)) {
             error.addError(rowIndex, "<br>CMR No.", "CMR number is not in Data sheet.");
           } else if (divCmrList != null && divCmrList.contains(cmrNo)) {
             error.addError(rowIndex, "<br>CMR No.",
@@ -1726,6 +1726,11 @@ public class IsraelHandler extends EMEAHandler {
             error.addError(rowIndex, "<br>Sequence", "Address Sequence No is required.");
           } else if (StringUtils.isNotBlank(addrSeqNo) && !StringUtils.isNumeric(addrSeqNo)) {
             error.addError(rowIndex, "<br>Sequence", "Address Sequence No should be numeric.");
+          } else {
+            if (mapCmrSeq != null && mapCmrSeq.containsKey(cmrNo) && !(mapCmrSeq.get(cmrNo).add(addrSeqNo))) {
+              error.addError(rowIndex, "<br>CMR No - Sequence",
+                  "Duplicate CMR No and Sequence combination. Already existing in one of the Address Sheet.");
+            }
           }
         }
         // Validate required fields
