@@ -76,7 +76,7 @@ function setSearchTermByGBGId() {
     if(_GBGId == 'GB000HK1'){
       FormManager.setValue('searchTerm', '04472');
     }else if(_GBGId == 'GB000YEN'){
-      FormManager.setValue('searchTerm', '04474');
+      FormManager.setValue('searchTerm', '00260');
     }else if(_GBGId == 'GB001CPW'){
       FormManager.setValue('searchTerm', '04491');
     }else if(_GBGId == 'GB001CPY'){
@@ -212,6 +212,13 @@ function afterConfigForCN() {
 // });
 // }
 
+  
+  if (_isuHandler == null) {
+    _isuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+      setCtcOnIsuCdChangeCN();
+    });
+  }
+
   if (FormManager.getActualValue('reqType') == 'U') {
 
     FormManager.hide('IbmDeptCostCenter', 'ibmDeptCostCenter');
@@ -305,6 +312,23 @@ function updateBPSearchTerm() {
   }
 }
 
+function setCtcOnIsuCdChangeCN() {
+  isuCd = FormManager.getActualValue('isuCd');
+  if (isuCd == '5K') {
+    FormManager.resetValidations('clientTier');
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    FormManager.setValue('clientTier', '');
+    FormManager.readOnly('clientTier');
+  } else {
+    if (FormManager.getActualValue('reqType') == 'U') {
+      FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    } else {
+      FormManager.addValidator('clientTier', Validators.REQUIRED);
+    }
+      FormManager.enable('clientTier');
+  }
+}
+
 function setInacBySearchTerm() {
   if (FormManager.getActualValue('reqType') != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
@@ -321,9 +345,9 @@ function setInacBySearchTerm() {
     FormManager.readOnly('inacType');
     return;
   }
-  if ((searchTerm == '04687' || searchTerm == '04488' || searchTerm == '04630' || searchTerm == '04472' || searchTerm == '04474' || searchTerm == '04480' || searchTerm == '04484'
+  if ((searchTerm == '04687' || searchTerm == '04488' || searchTerm == '04630' || searchTerm == '04472' || searchTerm == '00260' || searchTerm == '04480' || searchTerm == '04484'
       || searchTerm == '04486' || searchTerm == '04491' || searchTerm == '04493' || searchTerm == '04495' || searchTerm == '04497' || searchTerm == '04499' || searchTerm == '04502'
-      || searchTerm == '04629' || searchTerm == '04689' || searchTerm == '04489'|| searchTerm == '04747' || searchTerm == '04748' || searchTerm == '04749')) {
+      || searchTerm == '04629' || searchTerm == '04689' || searchTerm == '04489' || searchTerm == '04747' || searchTerm == '04748' || searchTerm == '04749'|| searchTerm == '09058')) {
     FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('inacType', Validators.REQUIRED, [ 'INAC Type' ], 'MAIN_IBM_TAB');
     var qParams = {
@@ -419,7 +443,7 @@ function setIsuOnIsic() {
   }
 
   var searchTerm = FormManager.getActualValue('searchTerm');
-  if (!(searchTerm == '04687' || searchTerm == '04488' || searchTerm == '04630' || searchTerm == '04472' || searchTerm == '04474' || searchTerm == '04480' || searchTerm == '04484'
+  if (!(searchTerm == '04687' || searchTerm == '04488' || searchTerm == '04630' || searchTerm == '04472' || searchTerm == '00260' || searchTerm == '04480' || searchTerm == '04484'
       || searchTerm == '04486' || searchTerm == '04491' || searchTerm == '04493' || searchTerm == '04495' || searchTerm == '04497' || searchTerm == '04499' || searchTerm == '04502'
       || searchTerm == '04629' || searchTerm == '04689' || searchTerm == '04489' || searchTerm == '04747' || searchTerm == '04748' || searchTerm == '04749')) {
     return;
@@ -484,7 +508,7 @@ function onInacTypeChange() {
           console.log(value);
           if (value != null) {
             var inacCdValue = [];
-            if(searchTerm == '04687' || searchTerm == '04488' || searchTerm == '04630' || searchTerm == '04472' || searchTerm == '04474' || searchTerm == '04480' || searchTerm == '04484'
+            if(searchTerm == '04687' || searchTerm == '04488' || searchTerm == '04630' || searchTerm == '04472' || searchTerm == '00260' || searchTerm == '04480' || searchTerm == '04484'
               || searchTerm == '04486' || searchTerm == '04491' || searchTerm == '04493' || searchTerm == '04495' || searchTerm == '04497' || searchTerm == '04499' || searchTerm == '04502'
                 || searchTerm == '04629' || searchTerm == '04689' || searchTerm == '04489'  || searchTerm == '04747' || searchTerm == '04748' || searchTerm == '04749') {
               var qParams = {
@@ -588,6 +612,9 @@ function setPrivacyIndcReqdForProc() {
 }
 
 function filterISUOnChange() {
+  if (FormManager.getActualValue('reqType') != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
   console.log(">>> RUNNING filterISUOnChange!!");
   var searchTerm = FormManager.getActualValue('searchTerm');
   var searchTermParams = {
@@ -2687,14 +2714,14 @@ function validateSearchTermForCROSS() {
             ID : _GBGId
           });
           if (ret == null || ret.ret1 == null || ret.ret1 == 0) {
-            if(searchTerm == '04472' || searchTerm == '04474' || searchTerm == '04491' || searchTerm == '04493' || searchTerm == '04687' || searchTerm == '04497'
+            if(searchTerm == '04472' || searchTerm == '00260' || searchTerm == '04491' || searchTerm == '04493' || searchTerm == '04687' || searchTerm == '04497'
               || searchTerm == '04629' || searchTerm == '04495' || searchTerm == '04630' || searchTerm == '04484' || searchTerm == '04480' || searchTerm == '04488'
                 || searchTerm == '04499' || searchTerm == '04486' || searchTerm == '04747' || searchTerm == '04748' || searchTerm == '04749' || searchTerm == '04502'){
               return new ValidationResult(null, false, 'It is not allowed to apply S1 search term for none S1 GBGId  under ' + subType + ' Sub_scenario.');
             }
             }
           }else{
-            if(searchTerm == '04472' || searchTerm == '04474' || searchTerm == '04491' || searchTerm == '04493' || searchTerm == '04687' || searchTerm == '04497'
+            if(searchTerm == '04472' || searchTerm == '00260' || searchTerm == '04491' || searchTerm == '04493' || searchTerm == '04687' || searchTerm == '04497'
               || searchTerm == '04629' || searchTerm == '04495' || searchTerm == '04630' || searchTerm == '04484' || searchTerm == '04480' || searchTerm == '04488'
                 || searchTerm == '04499' || searchTerm == '04486' || searchTerm == '04747' || searchTerm == '04748' || searchTerm == '04749' || searchTerm == '04502'){
               return new ValidationResult(null, false, 'It is not allowed to apply S1 search term for none S1 GBGId  under ' + subType + ' Sub_scenario.');
@@ -2843,6 +2870,48 @@ function foreignValidator() {
   })(), 'MAIN_ATTACH_TAB', 'frmCMR');
 }
 
+function handleExpiredClusterCN() {
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType != 'U' || FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  
+  var clusterDataRdc = getClusterDataRdc();
+  if (clusterDataRdc != null && clusterDataRdc != undefined && clusterDataRdc != '') {
+    var clusterExpired = checkClusterExpired(clusterDataRdc);
+    if (clusterExpired) {
+      FormManager.readOnly('clientTier');
+    }
+  }
+}
+
+function getClusterDataRdc() {
+  var clusterDataRdc = '';
+  var reqId = FormManager.getActualValue('reqId');
+  var qParams = {
+    REQ_ID : reqId,
+  };
+  var result = cmr.query('GET.SEARCH_TERM_DATA_RDC', qParams);
+  if (result != null) {
+    clusterDataRdc = result.ret1;
+  }
+  return clusterDataRdc;
+}
+
+function checkClusterExpired(clusterDataRdc) {
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var qParams = {
+      ISSUING_CNTRY : cntry,
+      AP_CUST_CLUSTER_ID : clusterDataRdc,
+  };
+  var results = cmr.query('CHECK.CLUSTER', qParams);
+  if (results != null && results.ret1 == '1') {
+    return false;
+  }
+  return true;
+}
+
+
 dojo.addOnLoad(function() {
   GEOHandler.CN = [ SysLoc.CHINA ];
   console.log('adding CN validators...');
@@ -2864,6 +2933,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setCompanyOnInacCd, GEOHandler.CN);
   GEOHandler.addAfterConfig(updateBPSearchTerm, GEOHandler.CN);
   GEOHandler.addAfterConfig(setReadOnly4Update, GEOHandler.CN);
+  GEOHandler.addAfterConfig(setCtcOnIsuCdChangeCN, GEOHandler.CN);
+  GEOHandler.addAfterConfig(handleExpiredClusterCN, GEOHandler.CN);
   
   GEOHandler.addAfterTemplateLoad(autoSetIBMDeptCostCenter, GEOHandler.CN);
   GEOHandler.addAfterTemplateLoad(afterConfigForCN, GEOHandler.CN);
@@ -2876,6 +2947,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setValuesForScenarios, GEOHandler.CN);
   GEOHandler.addAfterTemplateLoad(setReadOnlyFields, GEOHandler.CN);
   GEOHandler.addAfterTemplateLoad(updateBPSearchTerm, GEOHandler.CN);
+  GEOHandler.addAfterTemplateLoad(setCtcOnIsuCdChangeCN, GEOHandler.CN);
   
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.CN);
   GEOHandler.addAddrFunction(autoSetAddrFieldsForCN, GEOHandler.CN);
@@ -2921,4 +2993,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateSearchTermForCROSS, GEOHandler.CN, null, false);
   GEOHandler.registerValidator(validateISICForCROSS, GEOHandler.CN, null, false);
   GEOHandler.registerValidator(s1GBGIdValidator, GEOHandler.CN,　null, false, false);
+  
 });

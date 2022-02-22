@@ -842,6 +842,47 @@ public abstract class APHandler extends GEOHandler {
     setSector(admin, data);
     setMRC(admin, data);
     setISBU(admin, data);
+
+    switch (data.getCmrIssuingCntry()) {
+    case SystemLocation.HONG_KONG:
+    case SystemLocation.MACAO:
+      // Coverage 1H22 CREATCMR-4790, set expired Search Term "00000"
+      if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+        if (expiredSearchTerm(entityManager, data.getApCustClusterId(), data.getCmrIssuingCntry())) {
+          data.setApCustClusterId("00000");
+          data.setClientTier("Q");
+        }
+      }
+      break;
+    }
+
+  }
+
+  private boolean expiredSearchTerm(EntityManager entityManager, String searchTerm, String cmrIssuingCntry) {
+    if (!StringUtils.isEmpty(searchTerm)) {
+      if (!existInList(entityManager, searchTerm, cmrIssuingCntry)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private boolean existInList(EntityManager entityManager, String searchTerm, String cmrIssuingCntry) {
+    if (StringUtils.isEmpty(searchTerm)) {
+      return true;
+    }
+    if (searchTerm.length() > 5) {
+      searchTerm = searchTerm.substring(0, 5);
+    }
+    String sql = ExternalizedQuery.getSql("QUERY.CHECK.CLUSTER");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("ISSUING_CNTRY", cmrIssuingCntry);
+    query.setParameter("AP_CUST_CLUSTER_ID", searchTerm);
+    List<String> result = query.getResults(String.class);
+    if (result != null && !result.isEmpty()) {
+      return true;
+    }
+    return false;
   }
 
   // private void createOtherAddrs(EntityManager entityManager, Admin admin,

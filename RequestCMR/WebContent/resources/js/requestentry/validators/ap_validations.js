@@ -303,10 +303,12 @@ function setInacByClusterHKMO() {
   if (!_cluster) {
     return;
   }
-  if (_cluster == '04501' || _cluster == '04683' || _cluster == '04690') {
+  if (_cluster == '04501' || _cluster == '04683' || _cluster == '04690'|| _cluster == '09060'|| _cluster == '09059') {
     FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('inacType', Validators.REQUIRED, [ 'INAC Type' ], 'MAIN_IBM_TAB');
-    FormManager.setValue('mrcCd', '2');
+    if (_cluster == '04501' || _cluster == '04683' || _cluster == '04690') {
+      FormManager.setValue('mrcCd', '2');
+    }
     var qParams = {
       _qall : 'Y',
       ISSUING_CNTRY : cntry,
@@ -3626,6 +3628,47 @@ function lockAbbvNameOnScenarioChangeGCG() {
   } 
 }
 
+function handleExpiredClusterGCG() {
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType != 'U' || FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  
+  var clusterDataRdc = getAPClusterDataRdc();
+  if (clusterDataRdc != null && clusterDataRdc != undefined && clusterDataRdc != '') {
+    var clusterExpired = checkClusterExpired(clusterDataRdc);
+    if (clusterExpired) {
+      FormManager.readOnly('clientTier');
+    }
+  }
+}
+
+function getAPClusterDataRdc() {
+  var clusterDataRdc = '';
+  var reqId = FormManager.getActualValue('reqId');
+  var qParams = {
+    REQ_ID : reqId,
+  };
+  var result = cmr.query('GET.CLUSTER_DATA_RDC', qParams);
+  if (result != null) {
+    clusterDataRdc = result.ret1;
+  }
+  return clusterDataRdc;
+}
+
+function checkClusterExpired(clusterDataRdc) {
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var qParams = {
+      ISSUING_CNTRY : cntry,
+      AP_CUST_CLUSTER_ID : clusterDataRdc,
+  };
+  var results = cmr.query('CHECK.CLUSTER', qParams);
+  if (results != null && results.ret1 == '1') {
+    return false;
+  }
+  return true;
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.AP = [ SysLoc.AUSTRALIA, SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE, SysLoc.VIETNAM,
       SysLoc.THAILAND, SysLoc.HONG_KONG, SysLoc.NEW_ZEALAND, SysLoc.LAOS, SysLoc.MACAO, SysLoc.MALASIA, SysLoc.NEPAL, SysLoc.CAMBODIA ];
@@ -3763,6 +3806,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addValidatorBasedOnCluster, GEOHandler.ASEAN, GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.addAfterTemplateLoad(lockAbbvNameOnScenarioChangeGCG, GEOHandler.GCG);
   GEOHandler.addAfterTemplateLoad(setAbbrvNameBPScen, GEOHandler.GCG);
+	GEOHandler.addAfterConfig(handleExpiredClusterGCG, GEOHandler.GCG);
   
   // India Handler
 });

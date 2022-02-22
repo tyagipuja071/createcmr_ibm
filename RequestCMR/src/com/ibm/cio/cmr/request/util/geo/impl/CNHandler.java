@@ -89,6 +89,8 @@ public class CNHandler extends GEOHandler {
   public static final int CN_STREET_ADD_TXT2 = 70;
   public static final int CN_CUST_NAME_1 = 70;
   public static final int CN_CUST_NAME_2 = 70;
+  private String[] CN_S_S_INAC_CODE = { "GC58", "GC55", "GC34", "G063", "N670", "J273", "5395", "N806", "J258", "CG06", "4089", "1922" };
+  private String KYNDRYL_CLUSTER = "09058";
 
   public static List<String> getDataFieldsForUpdateCheck(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
@@ -817,6 +819,65 @@ public class CNHandler extends GEOHandler {
         }
       }
     }
+
+    // Coverage 1H22 CREATCMR-4790, set expired Search Term 00000
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+      if (expiredSearchTerm(entityManager, data.getSearchTerm())) {
+        if (Arrays.asList(CN_S_S_INAC_CODE).contains(data.getInacCd())) {
+          data.setClientTier("0");
+          data.setSearchTerm(getSSSearchTerm(entityManager, data.getInacCd()));
+        } else if ("21".equals(data.getIsuCd()) || "60".equals(data.getIsuCd())) {
+          data.setClientTier("Z");
+          data.setSearchTerm("00000");
+        } else {
+          data.setClientTier("Q");
+          data.setSearchTerm("00000");
+        }
+      }
+    }
+  }
+
+  private boolean expiredSearchTerm(EntityManager entityManager, String searchTerm) {
+    if (!StringUtils.isEmpty(searchTerm)) {
+      if (!existInList(entityManager, searchTerm)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private boolean existInList(EntityManager entityManager, String searchTerm) {
+    if (StringUtils.isEmpty(searchTerm)) {
+      return true;
+    }
+    if (searchTerm.length() > 5) {
+      searchTerm = searchTerm.substring(0, 5);
+    }
+    String sql = ExternalizedQuery.getSql("QUERY.CHECK.CLUSTER");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("ISSUING_CNTRY", "641");
+    query.setParameter("AP_CUST_CLUSTER_ID", searchTerm);
+    List<String> result = query.getResults(String.class);
+    if (result != null && !result.isEmpty()) {
+      return true;
+    }
+    return false;
+  }
+
+  private String getSSSearchTerm(EntityManager entityManager, String inacCd) {
+    if (StringUtils.isEmpty(inacCd)) {
+      return null;
+    }
+    String searchTerm = "";
+    String sql = ExternalizedQuery.getSql("QUERY.GET.CLUSTER_BY_INACCD");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("ISSUING_CNTRY", "641");
+    query.setParameter("INACCD", "%" + inacCd + "%");
+    List<String> results = query.getResults(String.class);
+    if (results != null && !results.isEmpty()) {
+      searchTerm = results.get(0);
+    }
+    return searchTerm;
   }
 
   private IntlAddr getIntlAddr(EntityManager entityManager, Addr address) {
