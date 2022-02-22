@@ -1179,8 +1179,12 @@ public class IsraelTransformer extends EMEATransformer {
 
     if (lstAddrLines.size() > 0) {
       String addrLine = "";
-      for (int i = 0; i < lstAddrLines.size(); i++) {
-        addrLine = lstAddrLines.get(i);
+      int addrLineSize = lstAddrLines.size();
+      for (int i = 0; i < 6; i++) {
+        addrLine = "";
+        if (i < addrLineSize) {
+          addrLine = lstAddrLines.get(i);
+        }
         if (StringUtils.isNotBlank(addrLine) && addrLine.length() > 30) {
           addrLine = StringUtils.substring(addrLine, 0, 30);
         }
