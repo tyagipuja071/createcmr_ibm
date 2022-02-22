@@ -1375,6 +1375,11 @@ public class CEMEAHandler extends BaseSOFHandler {
     if (CEE_COUNTRIES_LIST.contains(data.getCmrIssuingCntry()) && data != null && "ZP02".equals(addr.getId().getAddrType())) {
       upperChar(addr);
     }
+
+    if ("821".equals(cmrIssuingCntry)) {
+      addr.setStateProv("");
+    }
+
   }
 
   @Override
