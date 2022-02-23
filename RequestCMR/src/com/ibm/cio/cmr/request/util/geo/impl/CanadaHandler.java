@@ -502,6 +502,7 @@ public class CanadaHandler extends GEOHandler {
       newAddr.setId(newAddrId);
       newAddr.setImportInd("Y");
       newAddr.setSapNo("");
+      newAddr.setIerpSitePrtyId("");
 
       entityManager.persist(newAddr);
       entityManager.flush();
