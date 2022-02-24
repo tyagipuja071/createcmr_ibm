@@ -4675,7 +4675,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         }
 
         if (!StringUtils.isEmpty(errTxt.toString())) {
-          throw new Exception(new ObjectMapper().writeValueAsString(errTxt.toString()));
+          throw new Exception(errTxt.toString());
         }
 
         try (InputStream is = new ByteArrayInputStream(bookBytes)) {
@@ -4687,7 +4687,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         // modify the country for testing
       } catch (Exception e) {
         LOG.error("An error occurred in validating AT Mass Update File.");
-        return false;
+        throw new Exception(e.getMessage());
       } finally {
         em.close();
       }
@@ -4732,7 +4732,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         }
 
         if (!StringUtils.isEmpty(errTxt.toString())) {
-          throw new Exception(new ObjectMapper().writeValueAsString(errTxt.toString()));
+          throw new Exception(errTxt.toString());
         }
 
         try (InputStream is = new ByteArrayInputStream(bookBytes)) {
@@ -4744,7 +4744,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         // modify the country for testing
       } catch (Exception e) {
         LOG.error("An error occurred in validating Swiss Mass Update File.");
-        return false;
+        throw new Exception(e.getMessage());
       } finally {
         em.close();
       }

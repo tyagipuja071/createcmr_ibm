@@ -576,6 +576,12 @@ public class SwitzerlandUtil extends AutomationUtil {
       overrides.addOverride(covElement.getProcessCode(), "DATA", "CLIENT_TIER", data.getClientTier(), "Y");
       overrides.addOverride(covElement.getProcessCode(), "DATA", "SEARCH_TERM", data.getSearchTerm(), "T0007971");
     }
+    if (result != null || bgId.equals("DB502GQG")) {
+      LOG.debug("Setting isu ctc to 5K based on gbg matching.");
+      details.append("Setting isu ctc to 5K based on gbg matching.");
+      overrides.addOverride(covElement.getProcessCode(), "DATA", "ISU_CD", data.getIsuCd(), "5K");
+      overrides.addOverride(covElement.getProcessCode(), "DATA", "CLIENT_TIER", data.getClientTier(), "");
+    }
 
     LOG.debug("isu" + data.getIsuCd());
     LOG.debug("client tier" + data.getClientTier());

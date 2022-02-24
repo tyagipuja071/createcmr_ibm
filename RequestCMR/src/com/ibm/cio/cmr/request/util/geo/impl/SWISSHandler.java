@@ -182,8 +182,13 @@ public class SWISSHandler extends GEOHandler {
       e.printStackTrace();
     }
 
-    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && StringUtils.isNotBlank(mainRecord.getCmrSortl())) {
-      data.setSearchTerm(mainRecord.getCmrSortl());
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+      if (StringUtils.isNotBlank(mainRecord.getCmrSortl())) {
+        data.setSearchTerm(mainRecord.getCmrSortl());
+      }
+      if ("5K".equals(data.getIsuCd())) {
+        data.setClientTier("");
+      }
     }
 
   }

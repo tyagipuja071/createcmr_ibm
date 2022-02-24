@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -42,6 +43,7 @@ import com.ibm.cio.cmr.request.util.at.ATUtil;
 import com.ibm.cio.cmr.request.util.geo.impl.FranceHandler;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
 import com.ibm.cio.cmr.request.util.swiss.SwissUtil;
+import com.ibm.math.BigDecimal;
 
 /**
  * Represents a template for mass update or create. This template is generated
@@ -133,86 +135,126 @@ public class MassChangeTemplate {
     try {
       List<TemplateValidation> validations = new ArrayList<TemplateValidation>();
       if (SwissUtil.isCountrySwissEnabled(entityManager, country)) {
-        String[] sheetNames = { "Contract", "Bill To Address", "Install At Address", "Ship To" };
+        String[] sheetNames = { "Data", "Contract", "Bill To Address", "Install At Address", "Ship To" };
         for (String name : sheetNames) {
           XSSFSheet sheet = book.getSheet(name);
-          LOG.debug("validating name 3 for sheet " + name);
-          for (Row row : sheet) {
-            if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
-              String dept = "";
-              String building = "";
-              String floor = "";
-              Cell cmrCell1 = row.getCell(7);
-              if (cmrCell1 != null) {
-                switch (cmrCell1.getCellTypeEnum()) {
-                case STRING:
-                  dept = cmrCell1.getStringCellValue();
-                  break;
-                case NUMERIC:
-                  double nvalue = cmrCell1.getNumericCellValue();
-                  if (nvalue > 0) {
-                    dept = "" + nvalue;
+          XSSFCell currCell = null;
+          if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
+            String isuCd = "";
+            String clientTier = "";
+            List<String> isuBlankCtc = Arrays.asList("5K", "18", "28");
+            for (Row row : sheet) {
+              TemplateValidation error = new TemplateValidation(name);
+              currCell = (XSSFCell) row.getCell(5);
+              isuCd = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(6);
+              clientTier = validateColValFromCell(currCell);
+
+              isuCd = !StringUtils.isBlank(isuCd) ? isuCd.substring(0, 2) : "";
+
+              if (!clientTier.equals("Client Tier")) {
+                if (isuBlankCtc.contains(isuCd)) {
+                  if (!"@".equals(clientTier)) {
+                    LOG.trace("Client Tier should be '@' for the selected ISU Code: " + isuCd + ".");
+                    error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier should be '@' for the selected ISU Code: " + isuCd + ".<br>");
                   }
-                  break;
-                default:
-                  continue;
+                } else if (!StringUtils.isEmpty(isuCd) && "21,8B".contains(isuCd) && !"@".equalsIgnoreCase(clientTier)) {
+                  LOG.trace("Ctc only accept @ for IsuCd Value :" + isuCd);
+                  error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier should be '@' for the selected ISU Code.<br>");
+                } else if ("34".equals(isuCd)) {
+                  if (!"QY".contains(clientTier) || StringUtils.isBlank(clientTier)) {
+                    LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code.");
+                    error.addError((row.getRowNum() + 1), "Client Tier", ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code.<br>");
+                  }
+                } else if ((StringUtils.isNotBlank(isuCd) && (StringUtils.isBlank(clientTier) || !"@QY".contains(clientTier)))
+                    || (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier))) {
+                  LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that Client Tier only accept @,Q,Y values.");
+                  error.addError((row.getRowNum() + 1), "Client Tier", "Note that Client Tier only accept @,Q,Y values.<br>");
                 }
               }
-              Cell cmrCell2 = row.getCell(8);
-              if (cmrCell2 != null) {
-                switch (cmrCell2.getCellTypeEnum()) {
-                case STRING:
-                  floor = cmrCell2.getStringCellValue();
-                  break;
-                case NUMERIC:
-                  double nvalue = cmrCell2.getNumericCellValue();
-                  if (nvalue > 0) {
-                    floor = nvalue + "";
+              validations.add(error);
+            }
+          } else {
+            LOG.debug("validating name 3 for sheet " + name);
+            for (Row row : sheet) {
+              TemplateValidation error = new TemplateValidation(name);
+              if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
+                String dept = "";
+                String building = "";
+                String floor = "";
+                Cell cmrCell1 = row.getCell(7);
+                if (cmrCell1 != null) {
+                  switch (cmrCell1.getCellTypeEnum()) {
+                  case STRING:
+                    dept = cmrCell1.getStringCellValue();
+                    break;
+                  case NUMERIC:
+                    double nvalue = cmrCell1.getNumericCellValue();
+                    if (nvalue > 0) {
+                      dept = "" + nvalue;
+                    }
+                    break;
+                  default:
+                    continue;
                   }
-                  break;
-                default:
-                  continue;
                 }
-              }
-              Cell cmrCell3 = row.getCell(9);
-              if (cmrCell3 != null) {
-                switch (cmrCell3.getCellTypeEnum()) {
-                case STRING:
-                  building = cmrCell3.getStringCellValue();
-                  break;
-                case NUMERIC:
-                  double nvalue = cmrCell3.getNumericCellValue();
-                  if (nvalue > 0) {
-                    building = nvalue + "";
+                Cell cmrCell2 = row.getCell(8);
+                if (cmrCell2 != null) {
+                  switch (cmrCell2.getCellTypeEnum()) {
+                  case STRING:
+                    floor = cmrCell2.getStringCellValue();
+                    break;
+                  case NUMERIC:
+                    double nvalue = cmrCell2.getNumericCellValue();
+                    if (nvalue > 0) {
+                      floor = nvalue + "";
+                    }
+                    break;
+                  default:
+                    continue;
                   }
-                  break;
-                default:
-                  continue;
                 }
-              }
-              String name3 = "";
-              if (StringUtils.isNotBlank(dept) && !StringUtils.equals(dept, "@")) {
-                name3 += dept;
+                Cell cmrCell3 = row.getCell(9);
+                if (cmrCell3 != null) {
+                  switch (cmrCell3.getCellTypeEnum()) {
+                  case STRING:
+                    building = cmrCell3.getStringCellValue();
+                    break;
+                  case NUMERIC:
+                    double nvalue = cmrCell3.getNumericCellValue();
+                    if (nvalue > 0) {
+                      building = nvalue + "";
+                    }
+                    break;
+                  default:
+                    continue;
+                  }
+                }
+                String name3 = "";
+                if (StringUtils.isNotBlank(dept) && !StringUtils.equals(dept, "@")) {
+                  name3 += dept;
+                  if (StringUtils.isNotBlank(building) && !StringUtils.equals(building, "@")) {
+                    name3 += ", ";
+                  } else if (StringUtils.isNotBlank(floor) && !StringUtils.equals(floor, "@")) {
+                    name3 += ", ";
+                  }
+                }
                 if (StringUtils.isNotBlank(building) && !StringUtils.equals(building, "@")) {
-                  name3 += ", ";
-                } else if (StringUtils.isNotBlank(floor) && !StringUtils.equals(floor, "@")) {
-                  name3 += ", ";
+                  name3 += building;
+                  if (StringUtils.isNotBlank(floor) && !StringUtils.equals(floor, "@")) {
+                    name3 += ", ";
+                  }
                 }
-              }
-              if (StringUtils.isNotBlank(building) && !StringUtils.equals(building, "@")) {
-                name3 += building;
                 if (StringUtils.isNotBlank(floor) && !StringUtils.equals(floor, "@")) {
-                  name3 += ", ";
+                  name3 += floor;
                 }
-              }
-              if (StringUtils.isNotBlank(floor) && !StringUtils.equals(floor, "@")) {
-                name3 += floor;
-              }
-              if (name3.length() > 30) {
-                LOG.debug("Total computed length of building, department and floor should not exeed 30. Sheet: " + name + " Row: " + row.getRowNum());
-                TemplateValidation error = new TemplateValidation(name);
-                error.addError(row.getRowNum(), "building", "Total computed length of building, department and floor should not exeed 30");
-                validations.add(error);
+                if (name3.length() > 30) {
+                  LOG.debug("Total computed length of building, department and floor should not exeed 30. Sheet: " + name + " Row: "
+                      + (row.getRowNum() + 1));
+                  error.addError((row.getRowNum() + 1), "building", "Total computed length of building, department and floor should not exeed 30");
+                  validations.add(error);
+                }
               }
             }
           }
@@ -253,7 +295,7 @@ public class MassChangeTemplate {
         }
 
       } else if (ATUtil.isCountryATEnabled(entityManager, country)) {// CMR-800
-        String[] sheetNames = { "Sold To", "Mail to", "Bill To", "Ship To", "Install At" };// CMR-2065
+        String[] sheetNames = { "Data", "Sold To", "Mail to", "Bill To", "Ship To", "Install At" };// CMR-2065
         // installing
         // change
         // to
@@ -261,30 +303,71 @@ public class MassChangeTemplate {
         // To
         for (String name : sheetNames) {
           XSSFSheet sheet = book.getSheet(name);
-          LOG.debug("validating name 3 for sheet " + name);
-          for (Row row : sheet) {
-            if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
-              Cell cmrCell1 = row.getCell(4);
-              if (cmrCell1 != null) {
-                String name3 = "";
-                switch (cmrCell1.getCellTypeEnum()) {
-                case STRING:
-                  name3 = cmrCell1.getStringCellValue();
-                  break;
-                case NUMERIC:
-                  double nvalue = cmrCell1.getNumericCellValue();
-                  if (nvalue > 0) {
-                    name3 = "" + nvalue;
-                    break;
+          XSSFCell currCell = null;
+          if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
+            String isuCd = "";
+            String clientTier = "";
+            List<String> isuBlankCtc = Arrays.asList("5K", "04");
+            for (Row row : sheet) {
+              TemplateValidation error = new TemplateValidation(name);
+              if (row.getRowNum() < 1) {
+                continue;
+              }
+              currCell = (XSSFCell) row.getCell(5);
+              isuCd = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(6);
+              clientTier = validateColValFromCell(currCell);
+
+              if (!clientTier.equals("Client Tier")) {
+                if (isuBlankCtc.contains(isuCd)) {
+                  if (!"@".equals(clientTier)) {
+                    LOG.trace("Client Tier should be '@' for the selected ISU Code: " + isuCd + ".");
+                    error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier should be '@' for the selected ISU Code: " + isuCd + ".<br>");
                   }
-                default:
-                  continue;
+                } else if (!StringUtils.isEmpty(isuCd) && "21,8B".contains(isuCd) && !"@".equalsIgnoreCase(clientTier)) {
+                  LOG.trace("Ctc only accept @ for IsuCd Value :" + isuCd);
+                  error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier should be '@' for the selected ISU Code.<br>");
+                } else if ("34".equals(isuCd)) {
+                  if (!"QY".contains(clientTier) || StringUtils.isBlank(clientTier)) {
+                    LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code.");
+                    error.addError((row.getRowNum() + 1), "Client Tier", ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code.<br>");
+                  }
+                } else if ((StringUtils.isNotBlank(isuCd) && (StringUtils.isBlank(clientTier) || !"@QY".contains(clientTier)))
+                    || (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier))) {
+                  LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that Client Tier only accept @,Q,Y values.");
+                  error.addError((row.getRowNum() + 1), "Client Tier", "Note that Client Tier only accept @,Q,Y values.<br>");
                 }
-                if (name3.length() > 30) {
-                  LOG.debug("Total computed length of name3 should not exeed 30. Sheet: " + name + ", Row: " + row.getRowNum() + ", Name3:" + name3);
-                  TemplateValidation error = new TemplateValidation(name);
-                  error.addError(row.getRowNum(), "building", "Total computed length of customer name3 should not exeed 30");
-                  validations.add(error);
+              }
+              validations.add(error);
+            }
+          } else {
+            LOG.debug("validating name 3 for sheet " + name);
+            for (Row row : sheet) {
+              TemplateValidation error = new TemplateValidation(name);
+              if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
+                Cell cmrCell1 = row.getCell(4);
+                if (cmrCell1 != null) {
+                  String name3 = "";
+                  switch (cmrCell1.getCellTypeEnum()) {
+                  case STRING:
+                    name3 = cmrCell1.getStringCellValue();
+                    break;
+                  case NUMERIC:
+                    double nvalue = cmrCell1.getNumericCellValue();
+                    if (nvalue > 0) {
+                      name3 = "" + nvalue;
+                      break;
+                    }
+                  default:
+                    continue;
+                  }
+                  if (name3.length() > 30) {
+                    LOG.debug("Total computed length of name3 should not exeed 30. Sheet: " + name + ", Row: " + (row.getRowNum() + 1) + ", Name3:"
+                        + name3);
+                    error.addError((row.getRowNum() + 1), "building", "Total computed length of customer name3 should not exeed 30");
+                    validations.add(error);
+                  }
                 }
               }
               // String dept = "";
@@ -503,6 +586,30 @@ public class MassChangeTemplate {
       IOUtils.copy(is, bos);
       return bos.toByteArray();
     }
+  }
+
+  protected static String validateColValFromCell(XSSFCell cell) {
+    String colVal = "";
+    if (cell != null) {
+      switch (cell.getCellTypeEnum()) {
+      case STRING:
+        colVal = cell.getStringCellValue();
+        break;
+      case NUMERIC:
+        double nvalue = cell.getNumericCellValue();
+        if (nvalue >= 0) {
+          colVal = "" + nvalue;
+        }
+
+        BigDecimal bd = new BigDecimal(colVal);
+        long val = bd.longValue();
+        colVal = Long.toString(val);
+        break;
+      default:
+        break;
+      }
+    }
+    return colVal;
   }
 
   /**
