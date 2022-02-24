@@ -83,25 +83,30 @@ import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
 public class CNHandler extends GEOHandler {
 
   private static final Logger LOG = Logger.getLogger(CNHandler.class);
-  private static final String[] DE_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "LocalTax1", "LocalTax2", "SitePartyID", "Division", "POBoxCity", "CustFAX",
+  private static final String[] DE_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "LocalTax1", "LocalTax2", "SitePartyID",
+      "Division", "POBoxCity", "CustFAX",
       "City2", "Affiliate", "Company", "INACType" };
   public static final int CN_STREET_ADD_TXT = 70;
   public static final int CN_STREET_ADD_TXT2 = 70;
   public static final int CN_CUST_NAME_1 = 70;
   public static final int CN_CUST_NAME_2 = 70;
-  private String[] CN_S_S_INAC_CODE = { "GC58", "GC55", "GC34", "G063", "N670", "J273", "5395", "N806", "J258", "CG06", "4089", "1922" };
+  private String[] CN_S_S_INAC_CODE = { "GC58", "GC55", "GC34", "G063", "N670", "J273", "5395", "N806", "J258", "CG06",
+      "4089", "1922" };
   private String KYNDRYL_CLUSTER = "09058";
 
   public static List<String> getDataFieldsForUpdateCheck(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
-    fields.addAll(Arrays.asList("ABBREV_NM", "CLIENT_TIER", "CUST_CLASS", "CUST_PREF_LANG", "INAC_CD", "ISU_CD", "SEARCH_TERM", "ISIC_CD",
-        "SUB_INDUSTRY_CD", "VAT", "COV_DESC", "COV_ID", "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC", "GEO_LOCATION_CD",
+    fields.addAll(Arrays.asList("ABBREV_NM", "CLIENT_TIER", "CUST_CLASS", "CUST_PREF_LANG", "INAC_CD", "ISU_CD",
+        "SEARCH_TERM", "ISIC_CD",
+        "SUB_INDUSTRY_CD", "VAT", "COV_DESC", "COV_ID", "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID",
+        "GEO_LOC_DESC", "GEO_LOCATION_CD",
         "DUNS_NO", "PPSCEID", "MEM_LVL", "BP_REL_TYPE"));
     return fields;
   }
 
   @Override
-  public void convertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry, ImportCMRModel searchModel)
+  public void convertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry,
+      ImportCMRModel searchModel)
       throws Exception {
     List<FindCMRRecordModel> recordsFromSearch = source.getItems();
     List<FindCMRRecordModel> filteredRecords = new ArrayList<>();
@@ -149,7 +154,8 @@ public class CNHandler extends GEOHandler {
   }
 
   @Override
-  public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
+  public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord)
+      throws Exception {
     if (CmrConstants.PROSPECT_ORDER_BLOCK.equals(mainRecord.getCmrOrderBlock())) {
       data.setProspectSeqNo(mainRecord.getCmrAddrSeq());
     }
@@ -169,7 +175,8 @@ public class CNHandler extends GEOHandler {
   }
 
   @Override
-  public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo) throws Exception {
+  public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo)
+      throws Exception {
     String[] parts = null;
     String name1 = currentRecord.getCmrName1Plain();
     String name2 = currentRecord.getCmrName2Plain();
@@ -187,7 +194,8 @@ public class CNHandler extends GEOHandler {
       address.setDept(parts[2]);
     }
 
-    if (currentRecord.getCmrOrderBlock() != null && CmrConstants.LEGAL_ORDER_BLOCK.equals(currentRecord.getCmrOrderBlock())) {
+    if (currentRecord.getCmrOrderBlock() != null
+        && CmrConstants.LEGAL_ORDER_BLOCK.equals(currentRecord.getCmrOrderBlock())) {
       address.setPairedAddrSeq(currentRecord.getCmrAddrSeq());
     }
   }
@@ -212,7 +220,8 @@ public class CNHandler extends GEOHandler {
   }
 
   @Override
-  public void appendExtraModelEntries(EntityManager entityManager, ModelAndView mv, RequestEntryModel model) throws Exception {
+  public void appendExtraModelEntries(EntityManager entityManager, ModelAndView mv, RequestEntryModel model)
+      throws Exception {
   }
 
   @Override
@@ -220,7 +229,8 @@ public class CNHandler extends GEOHandler {
   }
 
   @Override
-  public void convertCoverageInput(EntityManager entityManager, CoverageInput request, Addr mainAddr, RequestEntryModel data) {
+  public void convertCoverageInput(EntityManager entityManager, CoverageInput request, Addr mainAddr,
+      RequestEntryModel data) {
   }
 
   @Override
@@ -247,7 +257,8 @@ public class CNHandler extends GEOHandler {
   }
 
   @Override
-  public void doBeforeDataSave(EntityManager entityManager, Admin admin, Data data, String cmrIssuingCntry) throws Exception {
+  public void doBeforeDataSave(EntityManager entityManager, Admin admin, Data data, String cmrIssuingCntry)
+      throws Exception {
     if (data.getInacCd() != null) {
       if (data.getInacCd().matches("[a-zA-Z]{1}[a-zA-Z0-9]{3}")) {
         if ("XXXX".equals(data.getInacCd())) {
@@ -267,7 +278,8 @@ public class CNHandler extends GEOHandler {
         if (data.getIbmDeptCostCenter() == null || "".equals(data.getIbmDeptCostCenter())) {
           data.setIbmDeptCostCenter(CmrConstants.DEFAULT_IBM_DEPT_COST_CENTER);
         }
-      } else if (data.getCustSubGrp() != null && !"INTAM".equals(data.getCustSubGrp()) && !"INTIN".equals(data.getCustSubGrp())) {
+      } else if (data.getCustSubGrp() != null && !"INTAM".equals(data.getCustSubGrp())
+          && !"INTIN".equals(data.getCustSubGrp())) {
         data.setIbmDeptCostCenter("");
       }
       if (data.getAbbrevNm() == null || "".equals(data.getAbbrevNm())) {
@@ -305,13 +317,18 @@ public class CNHandler extends GEOHandler {
 
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())
         && (data.getCustSubGrp() == null
-            || !(data.getCustSubGrp().equals("INTER") || data.getCustSubGrp().equals("BUSPR") || data.getCustSubGrp().equals("PRIV")))
+            || !(data.getCustSubGrp().equals("INTER") || data.getCustSubGrp().equals("BUSPR")
+                || data.getCustSubGrp().equals("PRIV")))
         && StringUtils.isBlank(data.getIsicCd()) && StringUtils.isNotBlank(data.getBusnType())) {
+      getIsicByDNB(entityManager, data);
+    } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())
+        && (data.getCapInd() == null || data.getCapInd().equals("N"))) {
       getIsicByDNB(entityManager, data);
     }
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())
         && (data.getCustSubGrp() != null
-            && !(data.getCustSubGrp().equals("INTER") || data.getCustSubGrp().equals("BUSPR") || data.getCustSubGrp().equals("PRIV")))
+            && !(data.getCustSubGrp().equals("INTER") || data.getCustSubGrp().equals("BUSPR")
+                || data.getCustSubGrp().equals("PRIV")))
         && StringUtils.isBlank(data.getGbgId())) {
       Addr soldToAddr = null;
       if (StringUtils.isNotEmpty(admin.getMainCustNm1())) {
@@ -345,7 +362,8 @@ public class CNHandler extends GEOHandler {
 
   }
 
-  private void getGBGIdByGBGservice(EntityManager entityManager, Admin admin, Data data, Addr currentAddress, String dunsNo, boolean flag)
+  private void getGBGIdByGBGservice(EntityManager entityManager, Admin admin, Data data, Addr currentAddress,
+      String dunsNo, boolean flag)
       throws Exception {
     if (!flag) {
       // TODO Auto-generated method stub
@@ -354,7 +372,8 @@ public class CNHandler extends GEOHandler {
 
       request.setCity(currentAddress.getCity1());
       request
-          .setCustomerName(currentAddress.getCustNm1() + (StringUtils.isBlank(currentAddress.getCustNm2()) ? "" : " " + currentAddress.getCustNm2()));
+          .setCustomerName(currentAddress.getCustNm1()
+              + (StringUtils.isBlank(currentAddress.getCustNm2()) ? "" : " " + currentAddress.getCustNm2()));
 
       String nameUsed = request.getCustomerName();
       LOG.debug("Checking GBG for " + nameUsed);
@@ -376,7 +395,8 @@ public class CNHandler extends GEOHandler {
       }
       MatchingResponse<?> rawResponse = null;
       try {
-        MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
+        MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(
+            SystemConfiguration.getValue("BATCH_SERVICES_URL"),
             MatchingServiceClient.class);
         client.setRequestMethod(Method.Get);
         client.setReadTimeout(1000 * 60 * 5);
@@ -477,28 +497,35 @@ public class CNHandler extends GEOHandler {
   }
 
   private void getGBGId(EntityManager entityManager, Admin admin, Data data, Addr currentAddress) throws Exception {
-    getGBGIdByGBGservice(entityManager, admin, data, currentAddress, null, false);
-    if (StringUtils.isBlank(data.getGbgId())) {
-      String companyName = null;
-      if (StringUtils.isNotBlank(data.getBusnType())) {
-        companyName = DnBUtil.getCNApiCompanyNameData4GBG(data.getBusnType());
-      }
-      if (StringUtils.isNotBlank(companyName)) {
-        // 2, Check FindCMR NON Latin with Chinese name - single byte
-        CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
-        searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
-        searchModelFindCmrCN.setName(companyName);
-        List<CompanyRecordModel> resultFindCmrCN = null;
-        resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
-        if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
-          if (StringUtils.isNotBlank(resultFindCmrCN.get(0).getDunsNo())) {
-            getGBGIdByGBGservice(entityManager, admin, data, currentAddress, resultFindCmrCN.get(0).getDunsNo(), false);
-          } else {
-            getGBGIdByGBGservice(entityManager, admin, data, currentAddress, resultFindCmrCN.get(0).getCmrNo(), true);
-          }
+
+    String companyName = null;
+    if (StringUtils.isNotBlank(data.getBusnType())) {
+      companyName = DnBUtil.getCNApiCompanyNameData4GBG(data.getBusnType());
+    }
+    if (StringUtils.isNotBlank(companyName)) {
+      // 2, Check FindCMR NON Latin with Chinese name - single byte
+      CompanyRecordModel searchModelFindCmrCN = new CompanyRecordModel();
+      searchModelFindCmrCN.setIssuingCntry(data.getCmrIssuingCntry());
+      searchModelFindCmrCN.setName(companyName);
+      List<CompanyRecordModel> resultFindCmrCN = null;
+      resultFindCmrCN = CompanyFinder.findCompanies(searchModelFindCmrCN);
+      if (!resultFindCmrCN.isEmpty() && resultFindCmrCN.size() > 0) {
+        // if (StringUtils.isNotBlank(resultFindCmrCN.get(0).getDunsNo())) {
+        // getGBGIdByGBGservice(entityManager, admin, data, currentAddress,
+        // resultFindCmrCN.get(0).getDunsNo(), false);
+        // } else {
+        getGBGIdByGBGservice(entityManager, admin, data, currentAddress, resultFindCmrCN.get(0).getCmrNo(), true);
+        if (StringUtils.isBlank(data.getGbgId()) && StringUtils.isBlank(data.getBgId())) {
+          getGBGIdByGBGservice(entityManager, admin, data, currentAddress, resultFindCmrCN.get(0).getDunsNo(), false);
         }
+        // }
       }
     }
+    // else {
+    // getGBGIdByGBGservice(entityManager, admin, data, currentAddress, null,
+    // false);
+    // }
+
   }
 
   /**
@@ -630,7 +657,8 @@ public class CNHandler extends GEOHandler {
           spid = getRDcIerpSitePartyId(sapNo);
           KunnrExt addlAddDetail = getKunnrExtDetails(entityManager, sapNo);
           addr.setIerpSitePrtyId(spid);
-          addr.setPairedAddrSeq(getCnAddrSeqById(entityManager, addr.getSapNo(), SystemConfiguration.getValue("MANDT")));
+          addr.setPairedAddrSeq(
+              getCnAddrSeqById(entityManager, addr.getSapNo(), SystemConfiguration.getValue("MANDT")));
 
           if (addlAddDetail != null) {
             addr.setBldg(addlAddDetail.getBuilding() != null ? addlAddDetail.getBuilding() : "");
@@ -654,9 +682,11 @@ public class CNHandler extends GEOHandler {
         // to the value on our list.
         String city1Upper = addr.getCity1() != null ? addr.getCity1().toUpperCase() : "";
         city1Upper = city1Upper.replaceAll("[^a-zA-Z]+", "");
-        String cmtMsg = "Your address city value on address type " + addr.getId().getAddrType() + ", sequence number " + addr.getId().getAddrSeq()
+        String cmtMsg = "Your address city value on address type " + addr.getId().getAddrType() + ", sequence number "
+            + addr.getId().getAddrSeq()
             + " has been changed because the city value is not on CreateCMR.";
-        if (!containsWhiteSpace(addr.getCity1()) && !StringUtils.isEmpty(city1Upper) && !CmrConstants.CN_NON_SPACED_CITIES.contains(city1Upper)) {
+        if (!containsWhiteSpace(addr.getCity1()) && !StringUtils.isEmpty(city1Upper)
+            && !CmrConstants.CN_NON_SPACED_CITIES.contains(city1Upper)) {
           // 1. query code from LOV
           String cdOfUpperDesc = getCNCityCdByUpperDesc(entityManager, city1Upper);
           // 2. query desc from lov with the use of code from 1
@@ -700,7 +730,8 @@ public class CNHandler extends GEOHandler {
         entityManager.merge(data);
         entityManager.flush();
 
-        String adrnr = getAddressAdrnr(entityManager, SystemConfiguration.getValue("MANDT"), cmr, addr.getId().getAddrType(),
+        String adrnr = getAddressAdrnr(entityManager, SystemConfiguration.getValue("MANDT"), cmr,
+            addr.getId().getAddrType(),
             addr.getPairedAddrSeq());
         Sadr sadr = getChinaAddtlAddr(entityManager, adrnr, SystemConfiguration.getValue("MANDT"));
 
@@ -767,7 +798,8 @@ public class CNHandler extends GEOHandler {
           geoContactInfo.setCreateTs(SystemUtil.getCurrentTimestamp());
 
           try {
-            contactId = new GeoContactInfoService().generateNewContactId(null, entityManager, null, String.valueOf(admin.getId().getReqId()));
+            contactId = new GeoContactInfoService().generateNewContactId(null, entityManager, null,
+                String.valueOf(admin.getId().getReqId()));
             ePk.setContactInfoId(contactId);
           } catch (CmrException ex) {
             LOG.debug("Exception while getting contactId : " + ex.getMessage(), ex);
@@ -780,7 +812,8 @@ public class CNHandler extends GEOHandler {
           addr.setCustPhone(geoContactInfo.getContactPhone());
           entityManager.merge(addr);
 
-          AddrRdc addrRdc = getAddrRdc(entityManager, addr.getId().getReqId(), addr.getId().getAddrType(), addr.getId().getAddrSeq());
+          AddrRdc addrRdc = getAddrRdc(entityManager, addr.getId().getReqId(), addr.getId().getAddrType(),
+              addr.getId().getAddrSeq());
           String contactName = geoContactInfo.getContactName();
           String contactTitle = geoContactInfo.getContactFunc();
           addrRdc.setDivn(contactName);
@@ -809,10 +842,12 @@ public class CNHandler extends GEOHandler {
       data.setClientTier("BL");
     }
 
-    if (!StringUtils.isBlank(admin.getReqType()) && admin.getReqType().equalsIgnoreCase("U") && !StringUtils.isBlank(data.getPpsceid())
-        && !StringUtils.isBlank(admin.getReqStatus()) && admin.getReqStatus().equalsIgnoreCase("DRA")) {
+    if (!StringUtils.isBlank(admin.getReqType()) && admin.getReqType().equalsIgnoreCase("U")
+        && !StringUtils.isBlank(admin.getReqStatus())
+        && admin.getReqStatus().equalsIgnoreCase("DRA")) {
       if (data.getSearchTerm() == null || StringUtils.isBlank(data.getSearchTerm())
-          || (data.getSearchTerm() != null && (data.getSearchTerm().trim().equalsIgnoreCase("00000") || data.getSearchTerm().matches("[^0-9]+")))) {
+          || (data.getSearchTerm() != null
+              && (data.getSearchTerm().trim().equalsIgnoreCase("00000") || data.getSearchTerm().matches("[^0-9]+")))) {
         if (data.getCmrNo().startsWith("1") || data.getCmrNo().startsWith("2")) {
           data.setClientTier("Z");
           data.setSearchTerm("04182");
@@ -878,6 +913,9 @@ public class CNHandler extends GEOHandler {
       searchTerm = results.get(0);
     }
     return searchTerm;
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && StringUtils.isBlank(data.getDunsNo())) {
+      getDunsNo(entityManager, data);
+    }
   }
 
   private IntlAddr getIntlAddr(EntityManager entityManager, Addr address) {
@@ -890,14 +928,16 @@ public class CNHandler extends GEOHandler {
   @Override
   public List<String> getAddressFieldsForUpdateCheck(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
-    fields.addAll(Arrays.asList("CUST_NM1", "CUST_NM2", "CUST_NM3", "CUST_NM4", "DEPT", "ADDR_TXT", "ADDR_TXT_2", "BLDG", "OFFICE", "CITY1", "CITY2",
+    fields.addAll(Arrays.asList("CUST_NM1", "CUST_NM2", "CUST_NM3", "CUST_NM4", "DEPT", "ADDR_TXT", "ADDR_TXT_2",
+        "BLDG", "OFFICE", "CITY1", "CITY2",
         "POST_CD", "LAND_CNTRY", "PO_BOX", "CUST_PHONE", "DIVN", "TAX_OFFICE"));
     return fields;
   }
 
   public static List<String> getAddressFieldsForBatchUpdateCheck(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
-    fields.addAll(Arrays.asList("CUST_NM1", "CUST_NM2", "CUST_NM3", "CUST_NM4", "DEPT", "ADDR_TXT", "ADDR_TXT_2", "BLDG", "OFFICE", "CITY1", "CITY2",
+    fields.addAll(Arrays.asList("CUST_NM1", "CUST_NM2", "CUST_NM3", "CUST_NM4", "DEPT", "ADDR_TXT", "ADDR_TXT_2",
+        "BLDG", "OFFICE", "CITY1", "CITY2",
         "POST_CD", "LAND_CNTRY", "PO_BOX", "CUST_PHONE", "DIVN", "TAX_OFFICE"));
     return fields;
   }
@@ -1276,7 +1316,8 @@ public class CNHandler extends GEOHandler {
     Field trgField = null;
 
     for (Field field : Data.class.getDeclaredFields()) {
-      if (!(Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers()) || Modifier.isAbstract(field.getModifiers()))) {
+      if (!(Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers())
+          || Modifier.isAbstract(field.getModifiers()))) {
         srcCol = field.getAnnotation(Column.class);
         if (srcCol != null) {
           srcName = srcCol.name();
@@ -1332,7 +1373,8 @@ public class CNHandler extends GEOHandler {
     return false;
   }
 
-  public boolean isAddrUpdated(Addr addr, AddrRdc addrRdc, String cmrIssuingCntry, Data data, EntityManager entityManager) {
+  public boolean isAddrUpdated(Addr addr, AddrRdc addrRdc, String cmrIssuingCntry, Data data,
+      EntityManager entityManager) {
     boolean isAddrUpdated = false;
 
     isAddrUpdated = RequestUtils.isUpdated(addr, addrRdc, cmrIssuingCntry);
@@ -1344,22 +1386,27 @@ public class CNHandler extends GEOHandler {
       // get INTL_ADDR
       IntlAddr iAddr = aService.getIntlAddrById(addr, entityManager);
       // get SADR
-      String adrnr = getAddressAdrnr(entityManager, SystemConfiguration.getValue("MANDT"), data.getCmrNo(), addr.getId().getAddrType(),
+      String adrnr = getAddressAdrnr(entityManager, SystemConfiguration.getValue("MANDT"), data.getCmrNo(),
+          addr.getId().getAddrType(),
           addr.getPairedAddrSeq());
       Sadr sadr = getChinaAddtlAddr(entityManager, adrnr, SystemConfiguration.getValue("MANDT"));
 
       if (iAddr != null && sadr != null) {
-        if (iAddr.getIntlCustNm1() != null && sadr != null && !iAddr.getIntlCustNm1().equalsIgnoreCase(sadr.getName1())) {
+        if (iAddr.getIntlCustNm1() != null && sadr != null
+            && !iAddr.getIntlCustNm1().equalsIgnoreCase(sadr.getName1())) {
           return true;
-        } else if (iAddr.getIntlCustNm2() != null && sadr != null && !iAddr.getIntlCustNm2().equalsIgnoreCase(sadr.getName2())) {
+        } else if (iAddr.getIntlCustNm2() != null && sadr != null
+            && !iAddr.getIntlCustNm2().equalsIgnoreCase(sadr.getName2())) {
           return true;
         } else if (iAddr.getCity1() != null && sadr != null && !iAddr.getCity1().equalsIgnoreCase(sadr.getOrt01())) {
           return true;
         } else if (iAddr.getCity2() != null && sadr != null && !iAddr.getCity2().equalsIgnoreCase(sadr.getOrt02())) {
           return true;
-        } else if (iAddr.getAddrTxt() != null && sadr != null && !iAddr.getAddrTxt().equalsIgnoreCase(sadr.getStras())) {
+        } else if (iAddr.getAddrTxt() != null && sadr != null
+            && !iAddr.getAddrTxt().equalsIgnoreCase(sadr.getStras())) {
           return true;
-        } else if (iAddr.getIntlCustNm4() != null && sadr != null && !iAddr.getIntlCustNm4().equalsIgnoreCase(sadr.getStrs2())) {
+        } else if (iAddr.getIntlCustNm4() != null && sadr != null
+            && !iAddr.getIntlCustNm4().equalsIgnoreCase(sadr.getStrs2())) {
           return true;
         } else {
           return false;
@@ -1464,12 +1511,17 @@ public class CNHandler extends GEOHandler {
     LOG.debug(aTransportZone);
     LOG.debug(mTransportZone);
 
-    if (!StringUtils.equals(aAddrTxt, mAddrTxt) || !StringUtils.equals(aAddrTxt2, mAddrTxt2) || !StringUtils.equals(aCity1, mCity1)
-        || !StringUtils.equals(aCity2, mCity2) || !StringUtils.equals(aBldg, mBldg) || !StringUtils.equals(aStateProv, mStateProv)
-        || !StringUtils.equals(aPostCd, mPostCd) || !StringUtils.equals(aCnDistrict, mCnDistrict) || !StringUtils.equals(aDept, mDept)
-        || !StringUtils.equals(aOfc, mOfc) || !StringUtils.equals(aPostBox, mPostBox) || !StringUtils.equals(aTransportZone, mTransportZone)
+    if (!StringUtils.equals(aAddrTxt, mAddrTxt) || !StringUtils.equals(aAddrTxt2, mAddrTxt2)
+        || !StringUtils.equals(aCity1, mCity1)
+        || !StringUtils.equals(aCity2, mCity2) || !StringUtils.equals(aBldg, mBldg)
+        || !StringUtils.equals(aStateProv, mStateProv)
+        || !StringUtils.equals(aPostCd, mPostCd) || !StringUtils.equals(aCnDistrict, mCnDistrict)
+        || !StringUtils.equals(aDept, mDept)
+        || !StringUtils.equals(aOfc, mOfc) || !StringUtils.equals(aPostBox, mPostBox)
+        || !StringUtils.equals(aTransportZone, mTransportZone)
         || !StringUtils.equals(aCnCustName, mCnCustName) || !StringUtils.equals(aCnCustNameCont, mCnCustNameCont)
-        || !StringUtils.equals(aCnStreetAddrTxt, mCnStreetAddrTxt) || !StringUtils.equals(aCnStreetAddrTxt2, mCnStreetAddrTxt2)) {
+        || !StringUtils.equals(aCnStreetAddrTxt, mCnStreetAddrTxt)
+        || !StringUtils.equals(aCnStreetAddrTxt2, mCnStreetAddrTxt2)) {
       LOG.debug("isClearDPL=true");
       return true;
     }
@@ -1478,7 +1530,8 @@ public class CNHandler extends GEOHandler {
   }
 
   @Override
-  public void addSummaryUpdatedFieldsForAddress(RequestSummaryService service, String cmrCountry, String addrTypeDesc, String sapNumber,
+  public void addSummaryUpdatedFieldsForAddress(RequestSummaryService service, String cmrCountry, String addrTypeDesc,
+      String sapNumber,
       UpdatedAddr addr, List<UpdatedNameAddrModel> results, EntityManager entityManager) {
 
     String addrType = addr.getId().getAddrType();
@@ -1499,7 +1552,8 @@ public class CNHandler extends GEOHandler {
         pairedSeqNo = addr.getPairedAddrSeq();
       }
 
-      String adrnr = getAddressAdrnr(entityManager, SystemConfiguration.getValue("MANDT"), addr.getCmrNumber(), addr.getId().getAddrType(),
+      String adrnr = getAddressAdrnr(entityManager, SystemConfiguration.getValue("MANDT"), addr.getCmrNumber(),
+          addr.getId().getAddrType(),
           pairedSeqNo);
       Sadr sadr = getChinaAddtlAddr(entityManager, adrnr, SystemConfiguration.getValue("MANDT"));
 
@@ -1606,7 +1660,8 @@ public class CNHandler extends GEOHandler {
     List<GeoContactInfo> geoAddrList = getGeoContactInfoByReqId(entityManager, addr.getId().getReqId());
     GeoContactInfo geoAddr = null;
     for (GeoContactInfo gAddr : geoAddrList) {
-      if (gAddr.getContactType().equals(addr.getId().getAddrType()) && gAddr.getContactSeqNum().equals(addr.getId().getAddrSeq())) {
+      if (gAddr.getContactType().equals(addr.getId().getAddrType())
+          && gAddr.getContactSeqNum().equals(addr.getId().getAddrSeq())) {
         geoAddr = gAddr;
       }
     }
@@ -1938,7 +1993,8 @@ public class CNHandler extends GEOHandler {
   }
 
   @Override
-  public String getCMRNo(EntityManager rdcMgr, String kukla, String mandt, String katr6, String cmrNo, CmrCloningQueue cloningQueue) {
+  public String getCMRNo(EntityManager rdcMgr, String kukla, String mandt, String katr6, String cmrNo,
+      CmrCloningQueue cloningQueue) {
     LOG.debug("getChinaCMR :: START");
     List<Object[]> results;
     String cmr = "";
@@ -1997,7 +2053,8 @@ public class CNHandler extends GEOHandler {
     LOG.debug("Convert China ENCITY Begin >>>");
     String city1Upper = addr.getCity1() != null ? addr.getCity1().toUpperCase() : "";
     city1Upper = city1Upper.replaceAll("[^a-zA-Z]+", "");
-    if (!containsWhiteSpace(addr.getCity1()) && !StringUtils.isEmpty(city1Upper) && !CmrConstants.CN_NON_SPACED_CITIES.contains(city1Upper)) {
+    if (!containsWhiteSpace(addr.getCity1()) && !StringUtils.isEmpty(city1Upper)
+        && !CmrConstants.CN_NON_SPACED_CITIES.contains(city1Upper)) {
       // 1. query code from LOV
       String cdOfUpperDesc = getCNCityCdByUpperDesc(entityManager, city1Upper);
       // 2. query desc from lov with the use of code from 1
@@ -2022,7 +2079,8 @@ public class CNHandler extends GEOHandler {
     }
   }
 
-  public void setCNAddressCityOnImport(AddressModel model, FindCMRRecordModel cmr, Addr addr, EntityManager entityManager) {
+  public void setCNAddressCityOnImport(AddressModel model, FindCMRRecordModel cmr, Addr addr,
+      EntityManager entityManager) {
     // TODO Auto-generated method stub
     LOG.debug("Convert China CNCITY Begin >>>");
     String stateProv = addr.getStateProv();
@@ -2143,42 +2201,54 @@ public class CNHandler extends GEOHandler {
     int tempNewLen = 0;
     String newTxt = "";
 
-    if (StringUtils.isNotBlank(intlAddr.getAddrTxt()) && CNHandler.getLengthInUtf8(intlAddr.getAddrTxt()) > CNHandler.CN_STREET_ADD_TXT) {
-      tempNewLen = CNHandler.getMaxWordLengthInUtf8(intlAddr.getAddrTxt(), CNHandler.CN_STREET_ADD_TXT, CNHandler.CN_STREET_ADD_TXT);
+    if (StringUtils.isNotBlank(intlAddr.getAddrTxt())
+        && CNHandler.getLengthInUtf8(intlAddr.getAddrTxt()) > CNHandler.CN_STREET_ADD_TXT) {
+      tempNewLen = CNHandler.getMaxWordLengthInUtf8(intlAddr.getAddrTxt(), CNHandler.CN_STREET_ADD_TXT,
+          CNHandler.CN_STREET_ADD_TXT);
       newTxt = intlAddr.getAddrTxt() != null ? intlAddr.getAddrTxt().substring(0, tempNewLen) : "";
       String excess = intlAddr.getAddrTxt().substring(tempNewLen);
       intlAddr.setAddrTxt(newTxt);
       intlAddr.setIntlCustNm4(excess + (intlAddr.getIntlCustNm4() != null ? intlAddr.getIntlCustNm4() : ""));
     }
 
-    if (StringUtils.isNotBlank(intlAddr.getIntlCustNm4()) && CNHandler.getLengthInUtf8(intlAddr.getIntlCustNm4()) > CNHandler.CN_STREET_ADD_TXT2) {
-      tempNewLen = CNHandler.getMaxWordLengthInUtf8(intlAddr.getIntlCustNm4(), CNHandler.CN_STREET_ADD_TXT2, CNHandler.CN_STREET_ADD_TXT2);
+    if (StringUtils.isNotBlank(intlAddr.getIntlCustNm4())
+        && CNHandler.getLengthInUtf8(intlAddr.getIntlCustNm4()) > CNHandler.CN_STREET_ADD_TXT2) {
+      tempNewLen = CNHandler.getMaxWordLengthInUtf8(intlAddr.getIntlCustNm4(), CNHandler.CN_STREET_ADD_TXT2,
+          CNHandler.CN_STREET_ADD_TXT2);
       newTxt = intlAddr.getIntlCustNm4() != null ? intlAddr.getIntlCustNm4().substring(0, tempNewLen) : "";
       intlAddr.setIntlCustNm4(newTxt);
     }
 
-    if (StringUtils.isNotBlank(intlAddr.getIntlCustNm1()) && CNHandler.getLengthInUtf8(intlAddr.getIntlCustNm1()) > CNHandler.CN_CUST_NAME_1) {
-      tempNewLen = CNHandler.getMaxWordLengthInUtf8(intlAddr.getIntlCustNm1(), CNHandler.CN_CUST_NAME_1, CNHandler.CN_CUST_NAME_1);
+    if (StringUtils.isNotBlank(intlAddr.getIntlCustNm1())
+        && CNHandler.getLengthInUtf8(intlAddr.getIntlCustNm1()) > CNHandler.CN_CUST_NAME_1) {
+      tempNewLen = CNHandler.getMaxWordLengthInUtf8(intlAddr.getIntlCustNm1(), CNHandler.CN_CUST_NAME_1,
+          CNHandler.CN_CUST_NAME_1);
       newTxt = intlAddr.getIntlCustNm1() != null ? intlAddr.getIntlCustNm1().substring(0, tempNewLen) : "";
       String excess = intlAddr.getIntlCustNm1().substring(tempNewLen);
       intlAddr.setIntlCustNm1(newTxt);
       intlAddr.setIntlCustNm2(excess + (intlAddr.getIntlCustNm2() != null ? intlAddr.getIntlCustNm2() : ""));
     }
 
-    if (StringUtils.isNotBlank(intlAddr.getIntlCustNm2()) && CNHandler.getLengthInUtf8(intlAddr.getIntlCustNm2()) > CNHandler.CN_CUST_NAME_2) {
-      tempNewLen = CNHandler.getMaxWordLengthInUtf8(intlAddr.getIntlCustNm2(), CNHandler.CN_CUST_NAME_2, CNHandler.CN_CUST_NAME_2);
+    if (StringUtils.isNotBlank(intlAddr.getIntlCustNm2())
+        && CNHandler.getLengthInUtf8(intlAddr.getIntlCustNm2()) > CNHandler.CN_CUST_NAME_2) {
+      tempNewLen = CNHandler.getMaxWordLengthInUtf8(intlAddr.getIntlCustNm2(), CNHandler.CN_CUST_NAME_2,
+          CNHandler.CN_CUST_NAME_2);
       newTxt = intlAddr.getIntlCustNm2() != null ? intlAddr.getIntlCustNm2().substring(0, tempNewLen) : "";
       intlAddr.setIntlCustNm2(newTxt);
     }
 
-    if (StringUtils.isNotBlank(intlAddr.getIntlCustNm3()) && CNHandler.getLengthInUtf8(intlAddr.getIntlCustNm3()) > CNHandler.CN_CUST_NAME_2) {
-      tempNewLen = CNHandler.getMaxWordLengthInUtf8(intlAddr.getIntlCustNm3(), CNHandler.CN_CUST_NAME_2, CNHandler.CN_CUST_NAME_2);
+    if (StringUtils.isNotBlank(intlAddr.getIntlCustNm3())
+        && CNHandler.getLengthInUtf8(intlAddr.getIntlCustNm3()) > CNHandler.CN_CUST_NAME_2) {
+      tempNewLen = CNHandler.getMaxWordLengthInUtf8(intlAddr.getIntlCustNm3(), CNHandler.CN_CUST_NAME_2,
+          CNHandler.CN_CUST_NAME_2);
       newTxt = intlAddr.getIntlCustNm3() != null ? intlAddr.getIntlCustNm3().substring(0, tempNewLen) : "";
       intlAddr.setIntlCustNm3(newTxt);
     }
 
-    if (StringUtils.isNotBlank(intlAddr.getCity2()) && CNHandler.getLengthInUtf8(intlAddr.getCity2()) > CNHandler.CN_CUST_NAME_2) {
-      tempNewLen = CNHandler.getMaxWordLengthInUtf8(intlAddr.getCity2(), CNHandler.CN_CUST_NAME_2, CNHandler.CN_CUST_NAME_2);
+    if (StringUtils.isNotBlank(intlAddr.getCity2())
+        && CNHandler.getLengthInUtf8(intlAddr.getCity2()) > CNHandler.CN_CUST_NAME_2) {
+      tempNewLen = CNHandler.getMaxWordLengthInUtf8(intlAddr.getCity2(), CNHandler.CN_CUST_NAME_2,
+          CNHandler.CN_CUST_NAME_2);
       newTxt = intlAddr.getCity2() != null ? intlAddr.getCity2().substring(0, tempNewLen) : "";
       intlAddr.setCity2(newTxt);
     }
@@ -2190,7 +2260,9 @@ public class CNHandler extends GEOHandler {
   public void handleMEUCondApproval(EntityManager entityManager, ApprovalResponseModel approval, Data data) {
     data.setCustAcctType("US");
     data.setBioChemMissleMfg(
-        SystemUtil.getCurrentTimestamp() != null ? SystemUtil.getCurrentTimestamp().toString().substring(0, 10).replaceAll("-", "") : "");
+        SystemUtil.getCurrentTimestamp() != null
+            ? SystemUtil.getCurrentTimestamp().toString().substring(0, 10).replaceAll("-", "")
+            : "");
     data.setIcmsInd("Y");
     // TODO Auto-generated method stub
     if (approval != null && approval.getComments() != null && approval.getComments().contains("MEU")) {
@@ -2200,7 +2272,8 @@ public class CNHandler extends GEOHandler {
     entityManager.flush();
   }
 
-  public static void doBeforeSendForProcessing(EntityManager entityManager, Admin admin, Data data, RequestEntryModel model) {
+  public static void doBeforeSendForProcessing(EntityManager entityManager, Admin admin, Data data,
+      RequestEntryModel model) {
     if (shouldSetAsterisk()) {
       setAddrNmAsterisk(entityManager, admin, data);
     }
@@ -2209,9 +2282,33 @@ public class CNHandler extends GEOHandler {
     // getIsicByDNB(entityManager, data);
     // } else
     if (model.getReqType().equals("C") && model.getCustSubGrp() != null
-        && !(model.getCustSubGrp().equals("INTER") || model.getCustSubGrp().equals("BUSPR") || model.getCustSubGrp().equals("PRIV"))) {
+        && !(model.getCustSubGrp().equals("INTER") || model.getCustSubGrp().equals("BUSPR")
+            || model.getCustSubGrp().equals("PRIV"))) {
+      getIsicByDNB(entityManager, data);
+    } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && StringUtils.isBlank(data.getIsicCd())
+        && (data.getCapInd() == null || data.getCapInd().equals("N"))) {
       getIsicByDNB(entityManager, data);
     }
+  }
+
+  private static void getDunsNo(EntityManager entityManager, Data data) {
+
+    String dunsNo = null;
+    RequestData requestData = new RequestData(entityManager, data.getId().getReqId());
+    MatchingResponse<DnBMatchingResponse> response = null;
+    try {
+      response = DnBUtil.getMatches(requestData, null, "ZS01");
+      if (response != null && DnBUtil.hasValidMatches(response)) {
+        DnBMatchingResponse dnbRecord = response.getMatches().get(0);
+        if (dnbRecord.getConfidenceCode() >= 8) {
+          dunsNo = dnbRecord.getDunsNo();
+        }
+      }
+    } catch (Exception e) {
+      LOG.error("Error occured on get dunsNo from DNB.", e);
+    }
+
+    data.setDunsNo(dunsNo);
   }
 
   public static void getIsicByDNB(EntityManager entityManager, Data data) {
@@ -2263,7 +2360,8 @@ public class CNHandler extends GEOHandler {
     List<Addr> addresses = getAddrByReqId(entityManager, data.getId().getReqId());
     if (addresses != null && addresses.size() > 0) {
       for (Addr addr : addresses) {
-        if ("PRIV".equals(data.getCustSubGrp()) || "INTER".equals(data.getCustSubGrp()) || "AQSTN".equals(data.getCustSubGrp())) {
+        if ("PRIV".equals(data.getCustSubGrp()) || "INTER".equals(data.getCustSubGrp())
+            || "AQSTN".equals(data.getCustSubGrp())) {
           IntlAddr intlAddr = handler.getIntlAddrById(addr, entityManager);
           if (intlAddr != null) {
             if (StringUtils.isBlank(intlAddr.getIntlCustNm1())) {
@@ -2292,7 +2390,8 @@ public class CNHandler extends GEOHandler {
   }
 
   @Override
-  public void setReqStatusAfterApprove(EntityManager entityManager, ApprovalResponseModel approval, ApprovalReq req, Admin admin) {
+  public void setReqStatusAfterApprove(EntityManager entityManager, ApprovalResponseModel approval, ApprovalReq req,
+      Admin admin) {
     String reqTypeId = String.valueOf(req.getTypId());
     String defaultApprovalId = String.valueOf(req.getDefaultApprovalId());
     String approvalDesc = getApprovalDesc(entityManager, defaultApprovalId);
@@ -2303,9 +2402,11 @@ public class CNHandler extends GEOHandler {
     LOG.debug("currentStatus = " + approval.getCurrentStatus());
     LOG.debug("processing = " + approval.getProcessing());
     if (approvalDesc != null
-        && (CmrConstants.CN_ERO_APPROVAL_DESC.equals(approvalDesc) || CmrConstants.CN_ECO_LEADER_APPROVAL_DESC.equals(approvalDesc)
+        && (CmrConstants.CN_ERO_APPROVAL_DESC.equals(approvalDesc)
+            || CmrConstants.CN_ECO_LEADER_APPROVAL_DESC.equals(approvalDesc)
             || CmrConstants.CN_TECH_LEADER_APPROVAL_DESC.equals(approvalDesc))
-        && "Approved".equals(approval.getCurrentStatus()) && "Y".equals(approval.getProcessing()) && "PPN".equals(admin.getReqStatus())) {
+        && "Approved".equals(approval.getCurrentStatus()) && "Y".equals(approval.getProcessing())
+        && "PPN".equals(admin.getReqStatus())) {
       LOG.debug("Setting request " + req.getTypId() + " to automation process");
       admin.setReqStatus(AutomationConst.STATUS_AUTOMATED_PROCESSING);
     }

@@ -510,7 +510,7 @@ function onInacTypeChange() {
             var inacCdValue = [];
             if(searchTerm == '04687' || searchTerm == '04488' || searchTerm == '04630' || searchTerm == '04472' || searchTerm == '00260' || searchTerm == '04480' || searchTerm == '04484'
               || searchTerm == '04486' || searchTerm == '04491' || searchTerm == '04493' || searchTerm == '04495' || searchTerm == '04497' || searchTerm == '04499' || searchTerm == '04502'
-                || searchTerm == '04629' || searchTerm == '04689' || searchTerm == '04489'  || searchTerm == '04747' || searchTerm == '04748' || searchTerm == '04749') {
+                || searchTerm == '04629' || searchTerm == '04689' || searchTerm == '04489' || searchTerm == '04747' || searchTerm == '04748' || searchTerm == '04749') {
               var qParams = {
               _qall : 'Y',
               ISSUING_CNTRY : cntry ,
@@ -2675,7 +2675,20 @@ function validateCnNameAndAddr() {
                   } else {
                     return new ValidationResult(null, true);
                   }
-                } else {
+                } else if(nameEqualFlag && addressEqualFlag){
+                  var id = FormManager.getActualValue('reqId');
+                  var ret = cmr.query('CHECK_CN_API_ATTACHMENT', {
+                    ID : id
+                  });
+        
+                  if (ret && ret.ret1 && ret.ret1 != '') {
+                    return new ValidationResult(null, false, 'Your request are not allowed to send for processing if the Chinese company name '
+                        + 'and address match with Tian Yan Cha 100%, but you still select attach type  "Name and Address Change(China Specific)", please remove this Attachment, then try again.'
+                        );
+                  }else{
+                    return new ValidationResult(null, true);
+                  }
+                }else {
                   return new ValidationResult(null, true);
                 }
               }

@@ -342,10 +342,12 @@ public class ChinaUtil extends AutomationUtil {
 
     StringBuilder details = new StringBuilder();
     String scenario = data.getCustSubGrp();
-    if (StringUtils.isNotBlank(scenario) && SCENARIO_LOCAL_BUSPR.equals(scenario)
-        || StringUtils.isNotBlank(data.getPpsceid()) && ("04182".equals(data.getSearchTerm()) || StringUtils.isBlank(data.getSearchTerm()))) {
-      List<String> managerID = SystemParameters.getList("AUTO_CN_MGR_BP_LIST");
-      boolean managerCheck = BluePagesHelper.isBluePagesHeirarchyManager(admin.getRequesterId(), managerID);
+    List<String> managerID = SystemParameters.getList("AUTO_CN_MGR_BP_LIST");
+    boolean managerCheck = BluePagesHelper.isBluePagesHeirarchyManager(admin.getRequesterId(), managerID);
+
+    if (StringUtils.isNotBlank(scenario) && SCENARIO_LOCAL_BUSPR.equals(scenario) || "04182".equals(data.getSearchTerm())
+        || (data.getSearchTerm().equals("00000") || StringUtils.isBlank(data.getSearchTerm()) || !StringUtils.isNumeric(data.getSearchTerm()))
+            && (data.getCmrNo().startsWith("1") || data.getCmrNo().startsWith("2"))) {
       if (!managerCheck) {
         details.append("BP CMR related,please contact Dalian BPCM team to raise request.Squad Leader:"
             + (managerID != null && managerID.size() > 0 ? managerID.get(0) : ""));
@@ -359,11 +361,20 @@ public class ChinaUtil extends AutomationUtil {
         validation.setSuccess(true);
         validation.setMessage("Successful");
       }
-
     } else {
-      details.append("Skipping validation for this scenario. scenario = " + scenario + ".\n");
-      validation.setSuccess(true);
-      validation.setMessage("Successful");
+      if (managerCheck) {
+        details.append("BPCM team is not allowed to update information for End User.Thank You! Squad Leader:"
+            + (managerID != null && managerID.size() > 0 ? managerID.get(0) : ""));
+        engineData.addRejectionComment("OTH", "BPCM team is not allowed to update information for End User.Thank You! Squad Leader:"
+            + (managerID != null && managerID.size() > 0 ? managerID.get(0) : ""), "", "");
+        output.setOnError(true);
+        validation.setSuccess(false);
+        validation.setMessage("Rejected");
+      } else {
+        details.append("Skipping validation for this scenario. scenario = " + scenario + ".\n");
+        validation.setSuccess(true);
+        validation.setMessage("Successful");
+      }
     }
 
     String ret = geDocContent(entityManager, admin.getId().getReqId());
