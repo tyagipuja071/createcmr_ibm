@@ -510,7 +510,7 @@ function setAustriaUIFields() {
     FormManager.readOnly("inacCd");
     FormManager.setValue("enterprise", "");
     FormManager.readOnly("enterprise");
-    FormManager.setValue("salesBusOffCd", "080");
+    // FormManager.setValue("salesBusOffCd", "080");
     FormManager.readOnly("salesBusOffCd");
 
   }
@@ -521,7 +521,7 @@ function setAustriaUIFields() {
     FormManager.resetValidations('enterprise');
     FormManager.setValue("vat", "");
     FormManager.readOnly("vat");
-    FormManager.setValue("salesBusOffCd", "000");
+    // FormManager.setValue("salesBusOffCd", "000");
     FormManager.readOnly("salesBusOffCd");
     FormManager.setValue("inacCd", "");
     FormManager.readOnly("inacCd");
