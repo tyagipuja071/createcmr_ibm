@@ -1895,10 +1895,6 @@ public class IsraelHandler extends EMEAHandler {
         if (!isHebrewFieldNotBlank(row.getCell(2))) {
           error.addError(row.getRowNum(), "<br>Customer Name", "Customer Name is required when updating " + sheetName + " address.");
         }
-        // Landed Country
-        if (!isHebrewFieldNotBlank(getAddressCell(IL_MASSUPDATE_ADDR.LANDCOUNTRY, row, sheetName))) {
-          error.addError(row.getRowNum(), "<br>Landed Country", "Landed Country is required when updating " + sheetName + " address.");
-        }
         // Street
         if (sheetName.equals("Mailing") || sheetName.equals("Billing") || sheetName.equals("Country Use A (Mailing)")
             || sheetName.equals("Country Use B (Billing)")) {
