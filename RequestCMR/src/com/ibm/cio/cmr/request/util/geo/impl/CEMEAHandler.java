@@ -1082,8 +1082,12 @@ public class CEMEAHandler extends BaseSOFHandler {
     }
 
     // Austria create - enterprise is model cmrNo
-    if (SystemLocation.AUSTRIA.equals(data.getCmrIssuingCntry()) && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
-      data.setEnterprise(mainRecord.getCmrNum());
+    if (SystemLocation.AUSTRIA.equals(data.getCmrIssuingCntry())) {
+      if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+        data.setEnterprise(mainRecord.getCmrNum());
+      } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && "5K".equals(data.getIsuCd())) {
+        data.setClientTier("");
+      }
     }
 
     // CMR-2001 AT:Preferred language not changed by SOF source
@@ -2212,7 +2216,7 @@ public class CEMEAHandler extends BaseSOFHandler {
       }
 
       for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
-      TemplateValidation error = new TemplateValidation("Data");
+        TemplateValidation error = new TemplateValidation("Data");
         row = sheet.getRow(rowIndex);
         if (row == null) {
           return; // stop immediately when row is blank
@@ -2239,21 +2243,17 @@ public class CEMEAHandler extends BaseSOFHandler {
         } else if (!StringUtils.isEmpty(isuCd) && "21,8B".contains(isuCd) && !"@".equalsIgnoreCase(ctc)) {
           LOG.trace("Client Tier should be '@' for the selected ISU Code.");
           error.addError(rowIndex, "Client Tier", "Client Tier should be '@' for the selected ISU Code.");
-        }
-
-        if (!StringUtils.isBlank(isuCd) && "34".equals(isuCd)) {
-          if (!"QY".contains(ctc)) {
+        } else if (!StringUtils.isBlank(isuCd) && "34".equals(isuCd)) {
+          if (StringUtils.isBlank(ctc) || !"QY".contains(ctc)) {
             LOG.trace("The row " + rowIndex
                 + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
             error.addError(rowIndex, "Client Tier",
                 ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
-        }
-        }
-        if (StringUtils.isNotBlank(ctc) && !"@QY".contains(ctc)) {
-          LOG.trace(
-              "The row " + (rowIndex) + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
-          error.addError((rowIndex), "Client Tier",
-              ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
+          }
+        } else if ((StringUtils.isNotBlank(isuCd) && (StringUtils.isBlank(ctc) || !"@QY".contains(ctc))) || 
+            (StringUtils.isNotBlank(ctc) && !"@QY".contains(ctc))) {
+          LOG.trace("The row " + (rowIndex) + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
+          error.addError((rowIndex), "Client Tier", ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
         }
         if (error.hasErrors()) {
           validations.add(error);

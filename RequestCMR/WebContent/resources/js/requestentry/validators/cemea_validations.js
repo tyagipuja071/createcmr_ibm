@@ -510,7 +510,7 @@ function setAustriaUIFields() {
     FormManager.readOnly("inacCd");
     FormManager.setValue("enterprise", "");
     FormManager.readOnly("enterprise");
-    FormManager.setValue("salesBusOffCd", "080");
+    // FormManager.setValue("salesBusOffCd", "080");
     FormManager.readOnly("salesBusOffCd");
 
   }
@@ -521,7 +521,7 @@ function setAustriaUIFields() {
     FormManager.resetValidations('enterprise');
     FormManager.setValue("vat", "");
     FormManager.readOnly("vat");
-    FormManager.setValue("salesBusOffCd", "000");
+    // FormManager.setValue("salesBusOffCd", "000");
     FormManager.readOnly("salesBusOffCd");
     FormManager.setValue("inacCd", "");
     FormManager.readOnly("inacCd");
@@ -536,6 +536,22 @@ function setAustriaUIFields() {
   }
 }
 
+function setSBOValuesOnCustType() {
+  if (FormManager.getActualValue('cmrIssuingCntry') != SysLoc.AUSTRIA) {
+    return;
+  }
+  var custType = FormManager.getActualValue('custGrp');
+  var custSubType = FormManager.getActualValue('custSubGrp');
+  if (custSubType != null && custSubType != ''
+      && (custSubType == 'BUSPR' || (custType != null && custType != '' && custType == 'CROSS' && custSubType == 'XBP'))) {
+    FormManager.setValue("salesBusOffCd", "P0000008");
+  }
+  if (custType != null && custType != '' && custType == 'LOCAL' && custSubType != null && custSubType != ''
+      && (custSubType == 'INTER' || custSubType == 'INTSO' || custSubType == 'IBMEM')) {
+    FormManager.setValue("salesBusOffCd", "T0000459");
+  }
+}
+
 function lockIBMtab() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubType = FormManager.getActualValue('custSubGrp');
@@ -544,7 +560,7 @@ function lockIBMtab() {
     FormManager.readOnly('cmrOwner');
     FormManager.readOnly('isuCd');
     // CREATCMR-4293
-    // FormManager.readOnly('clientTier');
+    FormManager.readOnly('clientTier');
     FormManager.readOnly('inacCd');
     FormManager.readOnly('enterprise');
     FormManager.readOnly('buyingGroupId');
@@ -686,7 +702,15 @@ function addHandlersForCEMEA() {
           FormManager.setValue('salesBusOffCd', '999');
         }
       } else {
-        FormManager.enable('clientTier');
+        if (cntry == '618') {
+          var role = FormManager.getActualValue('userRole').toUpperCase();
+          var reqType = FormManager.getActualValue('reqType');
+          if (reqType == 'U' || (reqType != 'U' && userRole == 'PROCESSOR')) {
+            FormManager.enable('clientTier');
+          }
+        } else {
+          FormManager.enable('clientTier');
+        }
         // CREATCMR-4293
         if (GEOHandler.CEE.includes(cntry)) {
           var custSubGrp = FormManager.getActualValue('custSubGrp');
@@ -704,6 +728,10 @@ function addHandlersForCEMEA() {
 
       if (CEE_INCL.has(FormManager.getActualValue('cmrIssuingCntry'))) {
         togglePPSCeidCEE();
+      }
+      if (cntry == '618') {
+        setClientTierValuesAT(value);
+        setSBOValuesForIsuCtcAT();
       }
     });
   }
@@ -731,6 +759,9 @@ function addHandlersForCEMEA() {
       if (CEE_INCL.has(FormManager.getActualValue('cmrIssuingCntry'))) {
         togglePPSCeidCEE();
       }
+      if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.AUSTRIA) {
+        setSBOValuesForIsuCtcAT();
+      }
     });
   }
 
@@ -755,6 +786,24 @@ function addHandlersForCEMEA() {
     });
   }
 
+}
+
+function setClientTierValuesAT(isuCd) {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  isuCd = FormManager.getActualValue('isuCd');
+  if (isuCd == '5K') {
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    FormManager.setValue('clientTier', '');
+    FormManager.readOnly('clientTier');
+  } else {
+    var reqType = FormManager.getActualValue('reqType');
+    var role = FormManager.getActualValue('userRole').toUpperCase();
+    if (reqType == 'U' || (reqType != 'U' && userRole == 'PROCESSOR')) {
+      FormManager.enable('clientTier');
+    }
+  }
 }
 
 function setISUCTCOnIMSChange() {
@@ -1996,6 +2045,36 @@ function setSBOValuesForIsuCtc() {
       FormManager.readOnly('salesBusOffCd');
     }
   }
+}
+
+function setSBOValuesForIsuCtcAT() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  var isuCd = FormManager.getActualValue('isuCd');
+  var clientTier = FormManager.getActualValue('clientTier');
+  var reqType = FormManager.getActualValue('reqType');
+  var isuList = [ '34', '5K', '04' ];
+  if (ctcCovHandler || isuCovHandler) {
+    if (isuCd == '34' && clientTier == 'Y') {
+      FormManager.setValue('salesBusOffCd', 'T0007972');
+    } else if (isuCd == '5K' && clientTier == '') {
+      FormManager.setValue('salesBusOffCd', 'T0009082');
+    } else if (isuCd == '04' && clientTier == '') {
+      FormManager.setValue('salesBusOffCd', 'A0004580');
+    }
+    if ([ '5K', '04' ].includes(isuCd)) {
+      FormManager.resetValidations('clientTier');
+      FormManager.setValue('clientTier', '');
+      FormManager.readOnly('clientTier');
+    } else {
+      if (reqType == 'U') {
+        FormManager.enable('clientTier');
+      }
+    }
+  }
+  ctcCovHandler = false;
+  isuCovHandler = false;
 }
 
 /**
@@ -4997,6 +5076,8 @@ function setCTCValuesAT() {
   FormManager.removeValidator('clientTier', Validators.REQUIRED);
 
   var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var reqType = FormManager.getActualValue('reqType');
 
   // Business Partner
   var custSubGrpForBusinessPartner = [ 'XBP' ];
@@ -5007,7 +5088,9 @@ function setCTCValuesAT() {
     var isuCd = FormManager.getActualValue('isuCd');
     if (isuCd == '8B') {
       FormManager.setValue('clientTier', _pagemodel.clientTier == null ? '' : _pagemodel.clientTier);
-      FormManager.enable('clientTier');
+      if (reqType == 'U' || (reqType != 'U' && userRole == 'PROCESSOR')) {
+        FormManager.enable('clientTier');
+      }
     }
   }
 
@@ -5020,7 +5103,9 @@ function setCTCValuesAT() {
     var isuCd = FormManager.getActualValue('isuCd');
     if (isuCd == '21') {
       FormManager.setValue('clientTier', _pagemodel.clientTier == null ? '' : _pagemodel.clientTier);
-      FormManager.enable('clientTier');
+      if (reqType == 'U' || (reqType != 'U' && userRole == 'PROCESSOR')) {
+        FormManager.enable('clientTier');
+      }
     }
   }
 }
@@ -5041,6 +5126,23 @@ function clientTierCodeValidator() {
               type : 'text',
               name : 'clientTier'
             }, false, 'Client Tier can only accept blank.');
+          }
+        } else if (isuCode == '34') {
+          if (clientTierCode == '') {
+            FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
+            return new ValidationResult({
+              id : 'clientTier',
+              type : 'text',
+              name : 'clientTier'
+            }, false, 'Client Tier code is Mandatory.');
+          } else if (clientTierCode == 'Q' || clientTierCode == 'Y') {
+            return new ValidationResult(null, true);
+          } else {
+            return new ValidationResult({
+              id : 'clientTier',
+              type : 'text',
+              name : 'clientTier'
+            }, false, 'Client Tier can only accept \'Q\' or \'Y\'.');
           }
         } else {
           if (clientTierCode == 'Q' || clientTierCode == 'Y' || clientTierCode == '') {
@@ -5101,6 +5203,8 @@ dojo
       // GEOHandler.addAfterConfig(setScenarioTo3PA, [ SysLoc.AUSTRIA ]);
       GEOHandler.addAfterTemplateLoad(lockAbbrvLocnForScenrio, [ SysLoc.AUSTRIA ]);
       GEOHandler.addAddrFunction(lockAbbrvLocnForScenrio, [ SysLoc.AUSTRIA ]);
+      GEOHandler.addAfterConfig(setClientTierValuesAT, [ SysLoc.AUSTRIA ]);
+      GEOHandler.addAfterTemplateLoad(setClientTierValuesAT, [ SysLoc.AUSTRIA ]);
       // GEOHandler.addAddrFunction(setScenarioTo3PAOnAddrSave, [ SysLoc.AUSTRIA
       // ]);
 
@@ -5304,5 +5408,8 @@ dojo
 
       GEOHandler.addAfterTemplateLoad(setCTCValuesAT, [ SysLoc.AUSTRIA ]);
       GEOHandler.registerValidator(clientTierCodeValidator, SysLoc.AUSTRIA, null, true);
+			
+			GEOHandler.addAfterTemplateLoad(setSBOValuesOnCustType, [ SysLoc.AUSTRIA ]);
+      GEOHandler.addAfterTemplateLoad(setSBOValuesOnCustType, SysLoc.AUSTRIA);
 
     });
