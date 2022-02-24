@@ -528,6 +528,27 @@ public class CanadaUtil extends AutomationUtil {
           }
         } else {
           details.append("Cannot derive SBO from coverage");
+          LOG.debug("Cannot derive SBO from coverage - using default sbo");
+          LOG.debug("Final Coverage: " + coverageId);
+          if (StringUtils.isNotBlank(coverageId) && coverageId.equals("T0007992")) {
+            sbo = "458";
+            setDeafaultSBO(details, overrides, coverageId, data, sbo);
+          } else if (StringUtils.isNotBlank(coverageId) && coverageId.equals("T0008059")) {
+            sbo = "570";
+            setDeafaultSBO(details, overrides, coverageId, data, sbo);
+          } else if (StringUtils.isNotBlank(coverageId) && coverageId.equals("T0000604")) {
+            sbo = "486";
+            setDeafaultSBO(details, overrides, coverageId, data, sbo);
+          } else if (StringUtils.isNotBlank(coverageId) && coverageId.equals("T0000549")) {
+            sbo = "481";
+            setDeafaultSBO(details, overrides, coverageId, data, sbo);
+          } else if (StringUtils.isNotBlank(coverageId) && coverageId.equals("T0000595")) {
+            sbo = "457";
+            setDeafaultSBO(details, overrides, coverageId, data, sbo);
+          } else if (StringUtils.isNotBlank(coverageId) && coverageId.equals("T0000597")) {
+            sbo = "460";
+            setDeafaultSBO(details, overrides, coverageId, data, sbo);
+          }
         }
         // set AR-FAAR after sbo computation
         String arfaar = getArfarrBySbo(sbo, entityManager);
@@ -1070,6 +1091,16 @@ public class CanadaUtil extends AutomationUtil {
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("ID", reqId);
     return query.exists();
+  }
+
+  private void setDeafaultSBO(StringBuilder details, OverrideOutput overrides, String coverageId, Data data, String sbo) {
+    details.append("Setting SBO based on Coverage ").append(coverageId).append(" to ").append(sbo).append("\n");
+    overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sbo);
+    // set Install Branch Office if blank
+    if (StringUtils.isBlank(data.getInstallBranchOff())) {
+      details.append("Setting IBO based on Coverage ").append(coverageId).append(" to ").append(sbo).append("\n");
+      overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(), sbo);
+    }
   }
 
 }
