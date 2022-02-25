@@ -520,8 +520,6 @@ function setSORTLOnIsuCtc() {
     FormManager.setValue('searchTerm', 'A0004577');
   } else if (isuCd == '28' && clientTier == '') {
     FormManager.setValue('searchTerm', 'A0005227');
-  } else {
-    FormManager.setValue('searchTerm', '');
   }
   if ([ '5K', '18', '28' ].includes(isuCd)) {
     FormManager.resetValidations('clientTier');
