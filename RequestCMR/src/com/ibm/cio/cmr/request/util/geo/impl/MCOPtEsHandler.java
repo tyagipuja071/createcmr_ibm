@@ -1283,31 +1283,32 @@ public class MCOPtEsHandler extends MCOHandler {
                 return;
               }
               LOG.trace("Note that CMR No. is mandatory. Please fix and upload the template again.");
-              error.addError(row.getRowNum(), "CMR No.", "Note that CMR No. is mandatory. Please fix and upload the template again.");
+              error.addError((row.getRowNum() + 1), "CMR No.", "Note that CMR No. is mandatory. Please fix and upload the template again.");
               validations.add(error);
             }
 
             if (!StringUtils.isBlank(cmrNo) && StringUtils.isBlank(seqNo)) {
               LOG.trace("Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
-              error.addError(row.getRowNum(), "Address Sequence No.",
+              error.addError((row.getRowNum() + 1), "Address Sequence No.",
                   "Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
               validations.add(error);
             }
             if (StringUtils.isEmpty(street) && !StringUtils.isEmpty(addressCont)) {
               LOG.trace("Address Continuation cannot be filled if Street is empty. >> ");
-              error.addError(row.getRowNum(), "Address Continuation", "Address Continuation cannot be filled if Street is empty.");
+              error.addError((row.getRowNum() + 1), "Address Continuation", "Address Continuation cannot be filled if Street is empty.");
               validations.add(error);
             }
             if (!StringUtils.isEmpty(crossCity) && !StringUtils.isEmpty(localCity)) {
               LOG.trace("Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty. >> ");
-              error.addError(row.getRowNum(), "City",
+              error.addError((row.getRowNum() + 1), "City",
                   "Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty.");
               validations.add(error);
             }
             if (!StringUtils.isEmpty(cbPostal) && !StringUtils.isEmpty(localPostal)) {
               LOG.trace("Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
                   + "If one is populated, the other must be empty. >>");
-              error.addError(row.getRowNum(), "Postal Code", "Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
+              error.addError((row.getRowNum() + 1), "Postal Code",
+                  "Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
                   + "If one is populated, the other must be empty.");
               validations.add(error);
             }
@@ -1315,14 +1316,14 @@ public class MCOPtEsHandler extends MCOHandler {
               int maxlengthcomputed = crossCity.length() + cbPostal.length();
               if (maxlengthcomputed > 32) {
                 LOG.trace("Crossborder city and crossborder postal code should have a maximun of 30 characters.");
-                error.addError(row.getRowNum(), "Crossborder City/Postal",
+                error.addError((row.getRowNum() + 1), "Crossborder City/Postal",
                     "Crossborder city and crossborder postal code should have a maximun of 30 characters.");
                 validations.add(error);
               }
             }
             if (count > 1) {
               LOG.trace("Out of Address Con't, PO BOX and Att Person only 1 can be filled at the same time .");
-              error.addError(row.getRowNum(), "Address Con't/PO BOX/Att Person",
+              error.addError((row.getRowNum() + 1), "Address Con't/PO BOX/Att Person",
                   "Out of Address Con't, PO BOX and Att Person only 1 can be filled at the same time. ");
               validations.add(error);
               count = 0;
@@ -1331,7 +1332,7 @@ public class MCOPtEsHandler extends MCOHandler {
             if (!StringUtils.isEmpty(crossCity) && !StringUtils.isEmpty(localPostal)) {
               LOG.trace(
                   "Cross Border City and Local Postal Code must not be populated at the same time. If one is populated, the other must be empty.");
-              error.addError(row.getRowNum(), "Local Postal Code",
+              error.addError((row.getRowNum() + 1), "Local Postal Code",
                   "Cross Border City and Local Postal Code must not be populated at the same time. If one is populated, the other must be empty.");
               validations.add(error);
             }
@@ -1339,7 +1340,7 @@ public class MCOPtEsHandler extends MCOHandler {
             if (!StringUtils.isEmpty(localCity) && !StringUtils.isEmpty(cbPostal)) {
               LOG.trace(
                   "Local City and Cross Border Postal Code must not be populated at the same time. If one is populated, the other must be empty.");
-              error.addError(row.getRowNum(), "Local City",
+              error.addError((row.getRowNum() + 1), "Local City",
                   "Local City and Cross Border Postal Code must not be populated at the same time. If one is populated, the other must be empty.");
               validations.add(error);
             }
@@ -1347,23 +1348,23 @@ public class MCOPtEsHandler extends MCOHandler {
             if (!StringUtils.isEmpty(landCountry)) {
               if (!("PT").equals(landCountry) && (!StringUtils.isEmpty(localCity) || !StringUtils.isEmpty(localPostal))) {
                 LOG.trace("Landed Country should be PT for Local Scenario.");
-                error.addError(row.getRowNum(), "Landed Country", "Landed Country should be PT for Local Scenario.");
+                error.addError((row.getRowNum() + 1), "Landed Country", "Landed Country should be PT for Local Scenario.");
                 validations.add(error);
               } else if (("PT").equals(landCountry) && (!StringUtils.isEmpty(crossCity) || !StringUtils.isEmpty(cbPostal))) {
                 LOG.trace("Landed Country shouldn't be PT for Cross borders.");
-                error.addError(row.getRowNum(), "Landed Country", "Landed Country shouldn't be PT for Cross Borders.");
+                error.addError((row.getRowNum() + 1), "Landed Country", "Landed Country shouldn't be PT for Cross Borders.");
                 validations.add(error);
               }
             }
             if ("Billing Address".equalsIgnoreCase(sheet.getSheetName())) {
               if (poBox.contains("+")) {
                 LOG.trace("Please input value in numeric format. Please fix and upload the template again.");
-                error.addError(row.getRowNum(), "PO Box", "Please input value in numeric format. Please fix and upload the template again.");
+                error.addError((row.getRowNum() + 1), "PO Box", "Please input value in numeric format. Please fix and upload the template again.");
                 validations.add(error);
               }
               if (phoneNo.contains("+")) {
                 LOG.trace("Please input value in numeric format. Please fix and upload the template again.");
-                error.addError(row.getRowNum(), "Phone No.", "Please input value in numeric format. Please fix and upload the template again.");
+                error.addError((row.getRowNum() + 1), "Phone No.", "Please input value in numeric format. Please fix and upload the template again.");
                 validations.add(error);
               }
             }
@@ -1371,32 +1372,34 @@ public class MCOPtEsHandler extends MCOHandler {
             if ("Shipping Address (Update)".equalsIgnoreCase(sheet.getSheetName())) {
               if (phoneNo.contains("+")) {
                 LOG.trace("Please input value in numeric format. Please fix and upload the template again.");
-                error.addError(row.getRowNum(), "Phone No.", "Please input value in numeric format. Please fix and upload the template again.");
+                error.addError((row.getRowNum() + 1), "Phone No.", "Please input value in numeric format. Please fix and upload the template again.");
                 validations.add(error);
               }
             }
 
             if (localCity.contains("@") && localCity.length() > 0) {
               LOG.trace("Field contains invalid character. Please fix and upload the template again.");
-              error.addError(row.getRowNum(), "Local City", "Field contains invalid character. Please fix and upload the template again.");
+              error.addError((row.getRowNum() + 1), "Local City", "Field contains invalid character. Please fix and upload the template again.");
               validations.add(error);
             }
 
             if (crossCity.contains("@") && crossCity.length() > 0) {
               LOG.trace("Field contains invalid character. Please fix and upload the template again.");
-              error.addError(row.getRowNum(), "Cross Border City", "Field contains invalid character. Please fix and upload the template again.");
+              error.addError((row.getRowNum() + 1), "Cross Border City",
+                  "Field contains invalid character. Please fix and upload the template again.");
               validations.add(error);
             }
 
             if (localPostal.contains("@") && localPostal.length() > 0) {
               LOG.trace("Field contains invalid character. Please fix and upload the template again.");
-              error.addError(row.getRowNum(), "Local Postal Code", "Field contains invalid character. Please fix and upload the template again.");
+              error.addError((row.getRowNum() + 1), "Local Postal Code",
+                  "Field contains invalid character. Please fix and upload the template again.");
               validations.add(error);
             }
 
             if (cbPostal.contains("@") && cbPostal.length() > 0) {
               LOG.trace("Field contains invalid character. Please fix and upload the template again.");
-              error.addError(row.getRowNum(), "Cross Border Postal Code",
+              error.addError((row.getRowNum() + 1), "Cross Border Postal Code",
                   "Field contains invalid character. Please fix and upload the template again.");
               validations.add(error);
             }
@@ -1405,25 +1408,25 @@ public class MCOPtEsHandler extends MCOHandler {
               if (!StringUtils.isBlank(dataEnterpriseNo) && !dataEnterpriseNo.equals("@@@@@@")) {
                 if (!StringUtils.isNumeric(dataEnterpriseNo)) {
                   LOG.trace("Enterprise Number should have numeric values only.");
-                  error.addError(row.getRowNum(), "Enterprise No.", "Enterprise Number should have numeric values only. ");
+                  error.addError((row.getRowNum() + 1), "Enterprise No.", "Enterprise Number should have numeric values only. ");
                 }
               }
-              if ((isuCd.equalsIgnoreCase("5k") || isuCd.equalsIgnoreCase("3T") || (!StringUtils.isEmpty(isuCd) && "21,8B".contains(isuCd)))
+              if (StringUtils.isNotBlank(isuCd) && (isuCd.equalsIgnoreCase("5k") || isuCd.equalsIgnoreCase("3T") || "21,8B".contains(isuCd))
                   && !"@".equalsIgnoreCase(clientTier)) {
                 LOG.trace("Client Tier should be '@' for the selected ISU Code.");
-                error.addError(row.getRowNum(), "Client Tier", "Client Tier should be '@' for the selected ISU Code.");
+                error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier should be '@' for the selected ISU Code.");
               } else if (!StringUtils.isBlank(isuCd) && "34".equals(isuCd)) {
                 if (StringUtils.isBlank(clientTier) || !"QY".contains(clientTier)) {
-                  LOG.trace("The row " + row.getRowNum()
+                  LOG.trace("The row " + (row.getRowNum() + 1)
                       + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
-                  error.addError(row.getRowNum(), "Client Tier",
+                  error.addError((row.getRowNum() + 1), "Client Tier",
                       ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
                 }
-              }
-              if (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier)) {
-                LOG.trace("The row " + row.getRowNum()
+              } else if ((StringUtils.isNotBlank(isuCd) && (StringUtils.isBlank(clientTier) || !"@QY".contains(clientTier)))
+                  || (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier))) {
+                LOG.trace("The row " + (row.getRowNum() + 1)
                     + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
-                error.addError(row.getRowNum(), "Client Tier",
+                error.addError((row.getRowNum() + 1), "Client Tier",
                     ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
               }
               if (error.hasErrors()) {
@@ -1457,11 +1460,11 @@ public class MCOPtEsHandler extends MCOHandler {
                 if ((!("@").equals(collectionCd)) && (!StringUtils.isEmpty(collectionCd))) {
                   if (collectionCd.length() == 2 && !collectionCd.chars().allMatch(Character::isLetterOrDigit)) {
                     LOG.trace("Collection code should be exactly 2 characters (alphanumeric). Please fix and upload the template again.");
-                    error.addError(rowIndex, "Collection Code",
+                    error.addError((row.getRowNum() + 1), "Collection Code",
                         "Collection code should be exactly 2 characters (alphanumeric). Please fix and upload the template again.");
                   } else if (collectionCd.length() != 2) {
                     LOG.trace("Collection code should be exactly 2 characters. Please fix and upload the template again.");
-                    error.addError(rowIndex, "Collection Code",
+                    error.addError((row.getRowNum() + 1), "Collection Code",
                         "Collection code should be exactly 2 characters. Please fix and upload the template again.");
                   }
                 }
@@ -1469,11 +1472,11 @@ public class MCOPtEsHandler extends MCOHandler {
                 if ((!("@").equals(enterprise)) && (!StringUtils.isEmpty(enterprise))) {
                   if (enterprise.length() == 6 && !enterprise.chars().allMatch(Character::isLetterOrDigit)) {
                     LOG.trace("Enterprise Number should be exactly 6 characters (alphanumeric). Please fix and upload the template again.");
-                    error.addError(rowIndex, "Enterprise Number",
+                    error.addError((row.getRowNum() + 1), "Enterprise Number",
                         "Enterprise Number should be exactly 6 characters (alphanumeric). Please fix and upload the template again.");
                   } else if (enterprise.length() != 6) {
                     LOG.trace("Enterprise Number should be exactly 6 characters. Please fix and upload the template again.");
-                    error.addError(rowIndex, "Enterprise Number",
+                    error.addError((row.getRowNum() + 1), "Enterprise Number",
                         "Enterprise Number should be exactly 6 characters. Please fix and upload the template again.");
                   }
                 }
@@ -1481,31 +1484,29 @@ public class MCOPtEsHandler extends MCOHandler {
                 if (!StringUtils.isEmpty(salesRep)) {
                   if (salesRep.length() == 6 && !(salesRep.chars().allMatch(Character::isLetterOrDigit))) {
                     LOG.trace("Sales Rep. No. should be alphanumeric. Please fix and upload the template again.");
-                    error.addError(rowIndex, "Sales Rep. No.", "Sales Rep. No. should be alphanumeric. Please fix and upload the template again.");
+                    error.addError((row.getRowNum() + 1), "Sales Rep. No.", "Sales Rep. No. should be alphanumeric. Please fix and upload the template again.");
                   }
                 }
 
                 if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
-                  if (!StringUtils.isBlank(isuCd)) {
-                    if ((isuCd.equalsIgnoreCase("5k") || isuCd.equalsIgnoreCase("3T")) && !clientTier.equalsIgnoreCase("@")) {
-                      LOG.trace("For IsuCd set to " + isuCd + " Ctc should be '@'");
-                      error.addError(rowIndex, "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd);
-                    } else if ("21,8B".contains(isuCd) && !clientTier.equalsIgnoreCase("@")) {
-                      LOG.trace("Client Tier should be '@' for the selected ISU Code.");
-                      error.addError(rowIndex, "Client Tier", "Client Tier should be '@' for the selected ISU Code.");
-                    } else if ("34".equals(isuCd)) {
-                      if (StringUtils.isBlank(clientTier) || !"QY".contains(clientTier)) {
-                        LOG.trace("The row " + rowIndex
-                            + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
-                        error.addError(rowIndex, "Client Tier",
-                            ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
-                      }
+                  if ((isuCd.equalsIgnoreCase("5k") || isuCd.equalsIgnoreCase("3T")) && !clientTier.equalsIgnoreCase("@")) {
+                    LOG.trace("For IsuCd set to " + isuCd + " Ctc should be '@'");
+                    error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd);
+                  } else if (StringUtils.isNotBlank(isuCd) && "21,8B".contains(isuCd) && !clientTier.equalsIgnoreCase("@")) {
+                    LOG.trace("Client Tier should be '@' for the selected ISU Code.");
+                    error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier should be '@' for the selected ISU Code.");
+                  } else if ("34".equals(isuCd)) {
+                    if (StringUtils.isBlank(clientTier) || !"QY".contains(clientTier)) {
+                      LOG.trace("The row " + (row.getRowNum() + 1)
+                          + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
+                      error.addError((row.getRowNum() + 1), "Client Tier",
+                          ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
                     }
-                  }
-                  if (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier)) {
-                    LOG.trace("The row " + rowIndex
+                  } else if ((StringUtils.isNotBlank(isuCd) && (StringUtils.isBlank(clientTier) || !"@QY".contains(clientTier)))
+                      || (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier))) {
+                    LOG.trace("The row " + (row.getRowNum() + 1)
                         + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
-                    error.addError(rowIndex, "Client Tier",
+                    error.addError((row.getRowNum() + 1), "Client Tier",
                         ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
                   }
                 }
