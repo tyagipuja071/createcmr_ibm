@@ -319,26 +319,23 @@ public class MassChangeTemplate {
               currCell = (XSSFCell) row.getCell(6);
               clientTier = validateColValFromCell(currCell);
 
-              if (!StringUtils.isBlank(isuCd)) {
-                isuCd = isuCd.substring(0, 2);
-                if (isuBlankCtc.contains(isuCd)) {
-                  if (!"@".equals(clientTier)) {
-                    LOG.trace("Client Tier should be '@' for the selected ISU Code: " + isuCd + ".");
-                    error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier should be '@' for the selected ISU Code: " + isuCd + ". ");
-                  }
-                } else if ("34".equals(isuCd)) {
-                  if (!"QY".contains(clientTier) || StringUtils.isBlank(clientTier)) {
-                    LOG.trace("The row " + (row.getRowNum() + 1)
-                        + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
-                    error.addError((row.getRowNum() + 1), "Client Tier",
-                        ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
-                  }
-                } else if (!StringUtils.isEmpty(isuCd) && "21,8B".contains(isuCd) && !"@".equalsIgnoreCase(clientTier)) {
-                  LOG.trace("Ctc only accept @ for IsuCd Value :" + isuCd);
-                  error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier should be '@' for the selected ISU Code.");
+              isuCd = !StringUtils.isBlank(isuCd) ? isuCd.substring(0, 2) : "";
+              if (isuBlankCtc.contains(isuCd)) {
+                if (!"@".equals(clientTier)) {
+                  LOG.trace("Client Tier should be '@' for the selected ISU Code: " + isuCd + ".");
+                  error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier should be '@' for the selected ISU Code: " + isuCd + ". ");
                 }
-              }
-              if ((StringUtils.isNotBlank(isuCd) && (StringUtils.isBlank(clientTier) || !"@QY".contains(clientTier)))
+              } else if ("34".equals(isuCd)) {
+                if (!"QY".contains(clientTier) || StringUtils.isBlank(clientTier)) {
+                  LOG.trace("The row " + (row.getRowNum() + 1)
+                      + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "Client Tier",
+                      ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
+                }
+              } else if (!StringUtils.isEmpty(isuCd) && "21,8B".contains(isuCd) && !"@".equalsIgnoreCase(clientTier)) {
+                LOG.trace("Ctc only accept @ for IsuCd Value :" + isuCd);
+                error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier should be '@' for the selected ISU Code.");
+              } else if ((StringUtils.isNotBlank(isuCd) && (StringUtils.isBlank(clientTier) || !"@QY".contains(clientTier)))
                   || (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier))) {
                 LOG.trace("The row " + (row.getRowNum() + 1)
                     + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
