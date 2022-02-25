@@ -1946,7 +1946,6 @@ function setClientTierValuesForUpdate() {
   }
 }
 
-
 // CREATCMR-4293
 function setCTCValues() {
 
@@ -1975,8 +1974,12 @@ function clientTierCodeValidator() {
         var clientTierCode = FormManager.getActualValue('clientTier');
         if (isuCode == '21' || isuCode == '8B') {
           if (clientTierCode == '') {
+            $("#clientTierSpan").html('');
+
             return new ValidationResult(null, true);
           } else {
+            $("#clientTierSpan").html('');
+
             return new ValidationResult({
               id : 'clientTier',
               type : 'text',
@@ -2002,8 +2005,13 @@ function clientTierCodeValidator() {
           }
         } else {
           if (clientTierCode == 'Q' || clientTierCode == 'Y' || clientTierCode == '') {
+            $("#clientTierSpan").html('');
+
             return new ValidationResult(null, true);
           } else {
+            $("#clientTierSpan").html('');
+            $("#clientTierSpan").append('<span style="color:red" class="cmr-ast" id="ast-clientTier">* </span>');
+
             return new ValidationResult({
               id : 'clientTier',
               type : 'text',

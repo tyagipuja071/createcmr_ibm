@@ -1731,7 +1731,14 @@ function setISUCTCValuesForCEE(isuCd) {
       || FormManager.getActualValue('custSubGrp') == 'RSXPC' || FormManager.getActualValue('custSubGrp') == 'RSXTP'
       || FormManager.getActualValue('custSubGrp') == 'RSCOM' || FormManager.getActualValue('custSubGrp') == 'RSPC' || FormManager
       .getActualValue('custSubGrp') == 'RSTP')) {
-    FormManager.setValue('isuCd', '34');
+    // CREATCMR-4293
+    if (changeFlag == 'N') {
+      FormManager.setValue('isuCd', _pagemodel.isuCd == null ? '34' : _pagemodel.isuCd);
+      changeFlag = 'Y';
+    } else {
+      FormManager.setValue('isuCd', '34');
+    }
+    // CREATCMR-4293
     FormManager.setValue('clientTier', 'Q');
   }
   if (FormManager.getActualValue('custSubGrp') == 'MEINT') {
@@ -5119,8 +5126,12 @@ function clientTierCodeValidator() {
 
         if (isuCode == '21' || isuCode == '8B') {
           if (clientTierCode == '') {
+            $("#clientTierSpan").html('');
+
             return new ValidationResult(null, true);
           } else {
+            $("#clientTierSpan").html('');
+
             return new ValidationResult({
               id : 'clientTier',
               type : 'text',
@@ -5146,8 +5157,13 @@ function clientTierCodeValidator() {
           }
         } else {
           if (clientTierCode == 'Q' || clientTierCode == 'Y' || clientTierCode == '') {
+            $("#clientTierSpan").html('');
+
             return new ValidationResult(null, true);
           } else {
+            $("#clientTierSpan").html('');
+            $("#clientTierSpan").append('<span style="color:red" class="cmr-ast" id="ast-clientTier">* </span>');
+
             return new ValidationResult({
               id : 'clientTier',
               type : 'text',
@@ -5408,8 +5424,8 @@ dojo
 
       GEOHandler.addAfterTemplateLoad(setCTCValuesAT, [ SysLoc.AUSTRIA ]);
       GEOHandler.registerValidator(clientTierCodeValidator, SysLoc.AUSTRIA, null, true);
-			
-			GEOHandler.addAfterTemplateLoad(setSBOValuesOnCustType, [ SysLoc.AUSTRIA ]);
+
+      GEOHandler.addAfterTemplateLoad(setSBOValuesOnCustType, [ SysLoc.AUSTRIA ]);
       GEOHandler.addAfterTemplateLoad(setSBOValuesOnCustType, SysLoc.AUSTRIA);
 
     });

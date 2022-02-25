@@ -9956,8 +9956,12 @@ function clientTierCodeValidator() {
 
         if (isuCode == '21' || isuCode == '8B') {
           if (clientTierCode == '') {
+            $("#clientTierSpan").html('');
+
             return new ValidationResult(null, true);
           } else {
+            $("#clientTierSpan").html('');
+
             return new ValidationResult({
               id : 'clientTier',
               type : 'text',
@@ -9966,15 +9970,22 @@ function clientTierCodeValidator() {
           }
         } else if (isuCode == '34') {
           if (clientTierCode == '') {
-            FormManager.addValidator('clientTier', Validators.REQUIRED);
+            $("#clientTierSpan").html('');
+            $("#clientTierSpan").append('<span style="color:red" class="cmr-ast" id="ast-clientTier">* </span>');
+
             return new ValidationResult({
               id : 'clientTier',
               type : 'text',
               name : 'clientTier'
             }, false, 'Client Tier code is Mandatory.');
           } else if (clientTierCode == 'Q' || clientTierCode == 'Y') {
+            $("#clientTierSpan").html('');
+
             return new ValidationResult(null, true);
           } else {
+            $("#clientTierSpan").html('');
+            $("#clientTierSpan").append('<span style="color:red" class="cmr-ast" id="ast-clientTier">* </span>');
+
             return new ValidationResult({
               id : 'clientTier',
               type : 'text',
@@ -9983,8 +9994,13 @@ function clientTierCodeValidator() {
           }
         } else {
           if (clientTierCode == 'Q' || clientTierCode == 'Y' || clientTierCode == '') {
+            $("#clientTierSpan").html('');
+
             return new ValidationResult(null, true);
           } else {
+            $("#clientTierSpan").html('');
+            $("#clientTierSpan").append('<span style="color:red" class="cmr-ast" id="ast-clientTier">* </span>');
+
             return new ValidationResult({
               id : 'clientTier',
               type : 'text',

@@ -53,7 +53,7 @@ function addAfterConfigForSWISS() {
       && (custSubGrp == 'CHCOM' || custSubGrp == 'LICOM' || custSubGrp == 'CHGOV' || custSubGrp == 'LIGOV' || custSubGrp == 'CHSOF'
           || custSubGrp == 'LISOF' || custSubGrp == 'CH3PA' || custSubGrp == 'LI3PA' || custSubGrp == 'XCHCM' || custSubGrp == 'XCHGV'
           || custSubGrp == 'XCHSF' || custSubGrp == 'XCH3P')) {
-//    FormManager.enable('clientTier');
+    // FormManager.enable('clientTier');
   } else if (reqType == 'C'
       && role == 'REQUESTER'
       && (custSubGrp == 'CHINT' || custSubGrp == 'XCHIN' || custSubGrp == 'LIINT' || custSubGrp == 'CHPRI' || custSubGrp == 'XCHPR'
@@ -752,7 +752,9 @@ function setFieldsMandtStatus() {
   FormManager.readOnly('cmrOwner');
   FormManager.addValidator('sensitiveFlag', Validators.REQUIRED, [ 'Sensitive Flag' ], 'MAIN_CUST_TAB');
   FormManager.addValidator('cmrOwner', Validators.REQUIRED, [ 'CMR Owner' ], 'MAIN_IBM_TAB');
-  // FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
+  // CREATCMR-4293
+  // FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier'
+  // ], 'MAIN_IBM_TAB');
   FormManager.addValidator('isicCd', Validators.REQUIRED, [ 'ISIC' ], 'MAIN_CUST_TAB');
 
   if (role == 'REQUESTER') {
@@ -778,7 +780,8 @@ function setFieldsMandtStatus() {
     FormManager.addValidator('custClass', Validators.REQUIRED, [ 'Customer Class' ], 'MAIN_CUST_TAB');
     if (custSubGrp) {
       FormManager.addValidator('isuCd', Validators.REQUIRED, [ 'ISU' ], 'MAIN_IBM_TAB');
-     // FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier Code' ], 'MAIN_IBM_TAB');
+      // FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client
+      // Tier Code' ], 'MAIN_IBM_TAB');
       FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'Tax Code' ], 'MAIN_CUST_TAB');
     }
   } else {
@@ -1569,6 +1572,107 @@ function setAddressDetailsForView() {
   }
 }
 
+// CREATCMR-4293
+function setCTCValues() {
+
+  FormManager.removeValidator('clientTier', Validators.REQUIRED);
+
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var reqType = FormManager.getActualValue('reqType');
+
+  // Business Partner
+  var custSubGrpForBusinessPartner = [ 'CHBUS', 'LIBUS' ];
+
+  // Business Partner
+  if (custSubGrpForBusinessPartner.includes(custSubGrp)) {
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    var isuCd = FormManager.getActualValue('isuCd');
+    if (isuCd == '8B') {
+      FormManager.setValue('clientTier', _pagemodel.clientTier == null ? '' : _pagemodel.clientTier);
+      if (reqType == 'U' || (reqType != 'U' && userRole == 'PROCESSOR')) {
+        FormManager.enable('clientTier');
+      }
+    }
+  }
+
+  // Internal
+  var custSubGrpForInternal = [ 'CHINT', 'LIINT' ];
+
+  // Internal
+  if (custSubGrpForInternal.includes(custSubGrp)) {
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    var isuCd = FormManager.getActualValue('isuCd');
+    if (isuCd == '21') {
+      FormManager.setValue('clientTier', _pagemodel.clientTier == null ? '' : _pagemodel.clientTier);
+      if (reqType == 'U' || (reqType != 'U' && userRole == 'PROCESSOR')) {
+        FormManager.enable('clientTier');
+      }
+    }
+  }
+}
+
+function clientTierCodeValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var isuCode = FormManager.getActualValue('isuCd');
+        var clientTierCode = FormManager.getActualValue('clientTier');
+
+        if (isuCode == '21' || isuCode == '8B') {
+          if (clientTierCode == '') {
+            $("#clientTierSpan").html('');
+
+            return new ValidationResult(null, true);
+          } else {
+            $("#clientTierSpan").html('');
+
+            return new ValidationResult({
+              id : 'clientTier',
+              type : 'text',
+              name : 'clientTier'
+            }, false, 'Client Tier can only accept blank.');
+          }
+        } else if (isuCode == '34') {
+          if (clientTierCode == '') {
+            FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
+            return new ValidationResult({
+              id : 'clientTier',
+              type : 'text',
+              name : 'clientTier'
+            }, false, 'Client Tier code is Mandatory.');
+          } else if (clientTierCode == 'Q' || clientTierCode == 'Y') {
+            return new ValidationResult(null, true);
+          } else {
+            return new ValidationResult({
+              id : 'clientTier',
+              type : 'text',
+              name : 'clientTier'
+            }, false, 'Client Tier can only accept \'Q\' or \'Y\'.');
+          }
+        } else {
+          if (clientTierCode == 'Q' || clientTierCode == 'Y' || clientTierCode == '') {
+            $("#clientTierSpan").html('');
+
+            return new ValidationResult(null, true);
+          } else {
+            $("#clientTierSpan").html('');
+            $("#clientTierSpan").append('<span style="color:red" class="cmr-ast" id="ast-clientTier">* </span>');
+
+            return new ValidationResult({
+              id : 'clientTier',
+              type : 'text',
+              name : 'clientTier'
+            }, false, 'Client Tier can only accept \'Q\', \'Y\' or blank.');
+          }
+        }
+
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+// CREATCMR-4293
+
 dojo.addOnLoad(function() {
   GEOHandler.SWISS = [ '848' ];
   console.log('adding SWISS functions...');
@@ -1623,4 +1727,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(lockIBMTabForSWISS, GEOHandler.SWISS);
   GEOHandler.registerValidator(validateDeptAttnBldg, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(setAddressDetailsForView, GEOHandler.SWISS);
+
+  // CREATCMR-4293
+  GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.SWISS);
+  GEOHandler.registerValidator(clientTierCodeValidator, GEOHandler.SWISS, null, true);
 });

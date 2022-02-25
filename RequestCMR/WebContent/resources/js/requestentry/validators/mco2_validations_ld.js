@@ -2097,8 +2097,12 @@ function clientTierCodeValidator() {
 
         if (isuCode == '21' || isuCode == '8B') {
           if (clientTierCode == '') {
+            $("#clientTierSpan").html('');
+
             return new ValidationResult(null, true);
           } else {
+            $("#clientTierSpan").html('');
+
             return new ValidationResult({
               id : 'clientTier',
               type : 'text',
@@ -2124,8 +2128,13 @@ function clientTierCodeValidator() {
           }
         } else {
           if (clientTierCode == 'Q' || clientTierCode == 'Y' || clientTierCode == '') {
+            $("#clientTierSpan").html('');
+
             return new ValidationResult(null, true);
           } else {
+            $("#clientTierSpan").html('');
+            $("#clientTierSpan").append('<span style="color:red" class="cmr-ast" id="ast-clientTier">* </span>');
+
             return new ValidationResult({
               id : 'clientTier',
               type : 'text',
@@ -2139,6 +2148,7 @@ function clientTierCodeValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 // CREATCMR-4293
+
 dojo.addOnLoad(function() {
   GEOHandler.MCO2 = [ '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717',
       '718', '725', '745', '753', '764', '769', '770', '782', '804', '810', '825', '827', '831', '833', '835', '840', '841', '842', '851', '857',
