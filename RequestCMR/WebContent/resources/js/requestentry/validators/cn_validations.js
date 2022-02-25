@@ -927,7 +927,7 @@ function setValuesForScenarios() {
             ID : _GBGId
           });
           if (ret && ret.ret1 && ret.ret1 != 0) {
-            cmr.showAlert("S1 client and subsidiary is not allowed to apply for ecosystem CMR type, pls change other 'Scenario Sub-type' in General Tab.", "Warning");
+            cmr.showAlert("S&S Account client and subsidiary is not allowed to apply for ecosystem CMR type, pls change other 'Scenario Sub-type' in General Tab.", "Warning");
           }
         }
       }
@@ -2843,7 +2843,7 @@ function s1GBGIdValidator() {
             });
 
             if (ret && ret.ret1 && ret.ret1 != 0) {
-              return new ValidationResult(null, false, 'S1 client and subsidiary is not allowed to apply for ecosystem CMR type, pls change other "Scenario Sub-type" in General Tab.');
+              return new ValidationResult(null, false, 'S&S Account client and subsidiary is not allowed to apply for ecosystem CMR type, pls change other "Scenario Sub-type" in General Tab.');
             } else {
               return new ValidationResult(null, true);
             }
