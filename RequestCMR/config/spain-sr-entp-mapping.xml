@@ -289,4 +289,40 @@
 			None
 		</isicBelongs>
 	</postalMapping>
+
+	<postalMapping>
+		<isuCTC>
+			5K
+		</isuCTC>
+		<enterprise>
+			985999
+		</enterprise>
+		<salesRep>
+			1FICTI
+		</salesRep>
+	</postalMapping>
+	
+	<postalMapping>
+		<isuCTC>
+			3T
+		</isuCTC>
+		<enterprise>
+			045250
+		</enterprise>
+		<salesRep>
+			012540
+		</salesRep>
+	</postalMapping>
+	
+	<postalMapping>
+		<isuCTC>
+			34Y
+		</isuCTC>
+		<enterprise>
+			985999
+		</enterprise>
+		<salesRep>
+			985129
+		</salesRep>
+	</postalMapping>
 </mappings>  

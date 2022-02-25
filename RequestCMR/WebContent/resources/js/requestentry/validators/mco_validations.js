@@ -149,6 +149,30 @@ function addHandlersForPT() {
   }
 }
 
+function addISUHandlerPt() {
+  var _CTCHandler = null;
+  _isuCdHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+    setValuesWRTIsuCtcPt();
+  });
+  _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
+    setValuesWRTIsuCtcPt(value);
+  });
+}
+
+function addISUHandlerEs() {
+  var _CTCHandler = null;
+  _isuCdHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+    setValuesWRTIsuCtcEs();
+  });
+  _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
+    setValuesWRTIsuCtcEs(value);
+  });
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  if (role == "VIEWER") {
+    FormManager.readOnly('clientTier');
+  }
+}
+
 function getImportedIndcForPT() {
   if (_importedIndc) {
     console.log('Returning imported indc = ' + _importedIndc);
@@ -632,18 +656,31 @@ function addHandlersForPTES() {
 }
 
 function setClientTierValues(value) {
-  value = FormManager.getActualValue('isuCd');
-  if (value == '5K') {
+ value = FormManager.getActualValue('isuCd');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var userRole = FormManager.getActualValue('userRole').toUpperCase();
+  if (value == '5K' || value == '3T') {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
     FormManager.setValue('clientTier', '');
     FormManager.readOnly('clientTier');
   } else {
-    FormManager.enable('clientTier');
+    var reqType = FormManager.getActualValue('reqType');
+    var scenario = FormManager.getActualValue('custSubGrp');
+    if (cntry == SysLoc.SPAIN) {
+      if (reqType == 'U' || (reqType != 'U' && userRole == 'PROCESSOR')) {
+        FormManager.enable('clientTier');
+      }
+    } else {
+      if ([ 'INTER', 'INTSO', 'PRICU', 'IBMEM', 'BUSPR', 'SAAPA', 'XBP', 'CRINT', 'CRPRI' ].includes(scenario)) {
+        FormManager.readOnly('clientTier');
+      } else {
+        FormManager.enable('clientTier');
+      }
+    }
   }
   if (FormManager.getActualValue('reqType') != 'C') {
     return;
   }
-  value = FormManager.getActualValue('isuCd');
   var tierValues = null;
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.PORTUGAL) {
     if (value == '32') {
@@ -1497,6 +1534,8 @@ function forceLockScenariosPortugal() {
 
   } else if (custSubGroup == 'XBP') {
     fieldsToDisable.push('isuCd');
+    fieldsToDisable.push('clientTier');
+  } else if (custSubGroup == 'CRINT') {
     fieldsToDisable.push('clientTier');
   }
 
@@ -2867,6 +2906,91 @@ function validateExistingCMRNo() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+function clientTierCodeValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var isuCode = FormManager.getActualValue('isuCd');
+        var clientTierCode = FormManager.getActualValue('clientTier');
+        if (isuCode == '34') {
+          if (clientTierCode == '') {
+            FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
+            return new ValidationResult({
+              id : 'clientTier',
+              type : 'text',
+              name : 'clientTier'
+            }, false, 'Client Tier code is Mandatory.');
+          } else if (clientTierCode == 'Q' || clientTierCode == 'Y') {
+            return new ValidationResult(null, true);
+          } else {
+            return new ValidationResult({
+              id : 'clientTier',
+              type : 'text',
+              name : 'clientTier'
+            }, false, 'Client Tier can only accept \'Q\' or \'Y\'.');
+          }
+        } else {
+          if (clientTierCode == 'Q' || clientTierCode == 'Y' || clientTierCode == '') {
+            return new ValidationResult(null, true);
+          } else {
+            return new ValidationResult({
+              id : 'clientTier',
+              type : 'text',
+              name : 'clientTier'
+            }, false, 'Client Tier can only accept \'Q\', \'Y\' or blank.');
+          }
+        }
+
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
+function setValuesWRTIsuCtcPt(ctc) {
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var isu = FormManager.getActualValue('isuCd');
+  if (ctc == null) {
+    var ctc = FormManager.getActualValue('clientTier');
+  }
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  if (isu == '34' && ctc == 'Y') {
+    FormManager.setValue('enterprise', '990305');
+    FormManager.setValue('repTeamMemberNo', '1FICTI');
+  } else if (isu == '5K' && ctc == '') {
+    FormManager.setValue('enterprise', '985999');
+    FormManager.setValue('repTeamMemberNo', '1FICTI');
+  }
+  if (role == 'REQUESTER') {
+    FormManager.removeValidator('enterprise', Validators.REQUIRED);
+  } else {
+    FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise' ]);
+  }
+}
+
+function setValuesWRTIsuCtcEs(ctc) {
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var isu = FormManager.getActualValue('isuCd');
+  if (ctc == null) {
+    var ctc = FormManager.getActualValue('clientTier');
+  }
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  if (isu == '34' && ctc == 'Y') {
+    FormManager.setValue('enterprise', '985129');
+    FormManager.setValue('repTeamMemberNo', '1FICTI');
+  } else if (isu == '5K' && ctc == '') {
+    FormManager.setValue('enterprise', '985999');
+    FormManager.setValue('repTeamMemberNo', '1FICTI');
+  } else if (isu == '3T' && ctc == '') {
+    FormManager.setValue('enterprise', '045250');
+    FormManager.setValue('repTeamMemberNo', '012540');
+  }
+  if (role == 'REQUESTER') {
+    FormManager.removeValidator('enterprise', Validators.REQUIRED);
+  } else {
+    FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise' ]);
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.MCO = [ SysLoc.PORTUGAL, SysLoc.SPAIN ];
   console.log('adding MCO functions...');
@@ -2978,4 +3102,9 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateExistingCMRNo, [ SysLoc.SPAIN ], GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.addAfterConfig(enableCMRNUMForPROCESSOR, [ SysLoc.SPAIN ]);
   GEOHandler.registerValidator(validateCMRNumberForSpain, [ SysLoc.SPAIN ], GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.addAfterTemplateLoad(addISUHandlerPt, [ SysLoc.PORTUGAL ]);
+  GEOHandler.addAfterConfig(addISUHandlerPt, [ SysLoc.PORTUGAL ]);
+  GEOHandler.addAfterTemplateLoad(addISUHandlerEs, [ SysLoc.SPAIN ]);
+  GEOHandler.addAfterConfig(addISUHandlerEs, [ SysLoc.SPAIN ]);
+   GEOHandler.registerValidator(clientTierCodeValidator, GEOHandler.MCO, null, true);
 });

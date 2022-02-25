@@ -514,7 +514,12 @@ public class SpainTransformer extends MessageTransformer {
       }
 
       legacyCust.setSalesGroupRep(data.getRepTeamMemberNo() != null ? data.getRepTeamMemberNo() : "");
-
+      if (!StringUtils.isEmpty(data.getIsuCd()) && ("5K".equals(data.getIsuCd()) || "3T".equals(data.getIsuCd()))) {
+        legacyCust.setIsuCd(data.getIsuCd() + "7");
+      } else {
+        legacyCust.setIsuCd((!StringUtils.isEmpty(data.getIsuCd()) ? data.getIsuCd() : "")
+            + (!StringUtils.isEmpty(data.getClientTier()) ? data.getClientTier() : ""));
+      }
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       for (Addr addr : cmrObjects.getAddresses()) {
         if ("ZS01".equals(addr.getId().getAddrType())) {
@@ -557,6 +562,12 @@ public class SpainTransformer extends MessageTransformer {
         legacyCust.setEmbargoCd(rdcEmbargoCd);
         resetOrdBlockToData(entityManager, data);
       }
+      if (!StringUtils.isEmpty(data.getIsuCd()) && ("5K".equals(data.getIsuCd()) || "3T".equals(data.getIsuCd()))) {
+        legacyCust.setIsuCd(data.getIsuCd() + "7");
+      } else {
+        legacyCust.setIsuCd((!StringUtils.isEmpty(data.getIsuCd()) ? data.getIsuCd() : "")
+            + (!StringUtils.isEmpty(data.getClientTier()) ? data.getClientTier() : ""));
+      }
     }
 
     // common data for C/U
@@ -583,8 +594,12 @@ public class SpainTransformer extends MessageTransformer {
 
     legacyCust.setBankBranchNo(data.getIbmDeptCostCenter() != null ? data.getIbmDeptCostCenter() : "");
   	
-  	if (!StringUtils.isEmpty(data.getIsuCd()) && ("5K".equals(data.getIsuCd()) || "3T".equals(data.getIsuCd()))) {
-      legacyCust.setIsuCd(data.getIsuCd() + "7");
+
+      if (!StringUtils.isEmpty(data.getIsuCd()) && ("5K".equals(data.getIsuCd()) || "3T".equals(data.getIsuCd()))) {
+        legacyCust.setIsuCd(data.getIsuCd() + "7");     
+      } else {
+        legacyCust.setIsuCd((!StringUtils.isEmpty(data.getIsuCd()) ? data.getIsuCd() : "")
+            + (!StringUtils.isEmpty(data.getClientTier()) ? data.getClientTier() : ""));
     }
   }
 
@@ -801,6 +816,14 @@ public class SpainTransformer extends MessageTransformer {
       builder.append(subInd);
       LOG.debug("***Auto setting Economic code as > " + builder.toString());
       cust.setEconomicCd(builder.toString());
+      if (StringUtils.isNotBlank(muData.getClientTier()) && ("5K".equals(muData.getIsuCd()) || "3T".equals(muData.getIsuCd()))) {
+        cust.setIsuCd(muData.getIsuCd() + "7");
+      } else {
+        String isuCd = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "");
+        if (isuCd != null) {
+          cust.setIsuCd(isuCd);
+        }
+      }
     }
 
     cust.setUpdateTs(SystemUtil.getCurrentTimestamp());
