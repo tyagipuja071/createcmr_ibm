@@ -806,6 +806,19 @@ public class SpainTransformer extends MessageTransformer {
     cust.setUpdateTs(SystemUtil.getCurrentTimestamp());
     // cust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
 
+    String isuClientTier;
+    if (!StringUtils.isEmpty(muData.getIsuCd()) && ("5K".equals(muData.getIsuCd()) || "3T".equals(muData.getIsuCd()))) {
+      cust.setIsuCd(muData.getIsuCd() + "7");
+    } else {
+      isuClientTier = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "")
+          + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
+      if (isuClientTier != null && isuClientTier.contains("@")) {
+        cust.setIsuCd("7");
+      } else if (isuClientTier != null && isuClientTier.length() == 3) {
+        cust.setIsuCd(isuClientTier);
+      }
+    }
+
   }
 
   @Override

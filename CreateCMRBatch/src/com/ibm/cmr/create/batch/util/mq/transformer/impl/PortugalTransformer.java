@@ -607,7 +607,9 @@ public class PortugalTransformer extends MessageTransformer {
 
     String isuClientTier = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "")
         + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
-    if (isuClientTier != null && isuClientTier.length() == 3) {
+    if (isuClientTier != null && isuClientTier.endsWith("@")) {
+      legacyCust.setIsuCd((!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : legacyCust.getIsuCd().substring(0, 2)) + "7");
+    } else if (isuClientTier != null && isuClientTier.length() == 3) {
       legacyCust.setIsuCd(isuClientTier);
     }
 
@@ -700,6 +702,15 @@ public class PortugalTransformer extends MessageTransformer {
     }
     legacyCust.setUpdateTs(SystemUtil.getCurrentTimestamp());
     // legacyCust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
+    if (!StringUtils.isEmpty(muData.getIsuCd()) && "5K".equals(muData.getIsuCd())) {
+      legacyCust.setIsuCd(muData.getIsuCd() + "7");
+    } else {
+      isuClientTier = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "")
+          + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
+      if (isuClientTier != null && isuClientTier.length() == 3) {
+        legacyCust.setIsuCd(isuClientTier);
+      }
+  }
   }
 
   @Override
