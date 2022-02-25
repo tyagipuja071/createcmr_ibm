@@ -582,6 +582,12 @@ public class SpainTransformer extends MessageTransformer {
     legacyCust.setDistrictCd(data.getCollectionCd() != null ? data.getCollectionCd() : "");
 
     legacyCust.setBankBranchNo(data.getIbmDeptCostCenter() != null ? data.getIbmDeptCostCenter() : "");
+    // CREATCMR-4293
+    if (!StringUtils.isEmpty(data.getIsuCd())) {
+      if (StringUtils.isEmpty(data.getClientTier())) {
+        legacyCust.setIsuCd(data.getIsuCd() + "7");
+      }
+    }
   	
   	if (!StringUtils.isEmpty(data.getIsuCd()) && ("5K".equals(data.getIsuCd()) || "3T".equals(data.getIsuCd()))) {
       legacyCust.setIsuCd(data.getIsuCd() + "7");
