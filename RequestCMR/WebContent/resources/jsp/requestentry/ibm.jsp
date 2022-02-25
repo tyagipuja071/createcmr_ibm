@@ -150,6 +150,7 @@ dojo.addOnLoad(function(){
           <p>
             <cmr:label fieldId="clientTier">
                <cmr:fieldLabel fieldId="ClientTier" />: 
+               <span id="clientTierSpan"></span>
                <cmr:delta text="${rdcdata.clientTier}" oldValue="${reqentry.clientTier}" code="L"/>
             </cmr:label>
             <cmr:field fieldId="ClientTier" id="clientTier" path="clientTier" tabId="MAIN_IBM_TAB" />
