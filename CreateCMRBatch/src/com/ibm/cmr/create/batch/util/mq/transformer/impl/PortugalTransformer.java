@@ -564,7 +564,7 @@ public class PortugalTransformer extends MessageTransformer {
     if (MQMsgConstants.ADDR_ZS01.equals(currAddr.getId().getAddrType())) {
       legacyAddr.setAddrLineT("");
     }
-
+    legacyAddr.setLanguage(!StringUtils.isBlank(currAddr.getLandCntry()) ? currAddr.getLandCntry() : "");
   }
 
   @Override
@@ -731,6 +731,7 @@ public class PortugalTransformer extends MessageTransformer {
         }
       }
     }
+    legacyAddr.setLanguage(!StringUtils.isBlank(addr.getLandCntry()) ? addr.getLandCntry() : "");
     formatMassUpdateAddressLines(entityManager, legacyAddr, addr, false);
     legacyObjects.addAddress(legacyAddr);
 
