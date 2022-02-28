@@ -234,7 +234,8 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                           if ("04182".equals(cmrsMods.getCmrSortl()) || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
                               || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
                                   || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
-                              && cmrsMods.getCmrNum() != null && (cmrsMods.getCmrNum().startsWith("1") || cmrsMods.getCmrNum().startsWith("2"))) {
+                              && cmrsMods.getCmrNum() != null && (cmrsMods.getCmrNum().startsWith("0") || cmrsMods.getCmrNum().startsWith("1")
+                                  || cmrsMods.getCmrNum().startsWith("2"))) {
                             // should not be rejected
                             log.debug("Not a duplicate CMR.");
                           } else {
@@ -320,7 +321,8 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                                     || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
                                         || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
                                     && cmrsMods.getCmrNum() != null
-                                    && (cmrsMods.getCmrNum().startsWith("1") || cmrsMods.getCmrNum().startsWith("2"))) {
+                                    && (cmrsMods.getCmrNum().startsWith("0") || cmrsMods.getCmrNum().startsWith("1")
+                                        || cmrsMods.getCmrNum().startsWith("2"))) {
                               // should not be rejected
                               log.debug("Not a duplicate CMR.");
                             } else {
@@ -409,7 +411,8 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                                       || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
                                           || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
                                       && cmrsMods.getCmrNum() != null
-                                      && (cmrsMods.getCmrNum().startsWith("1") || cmrsMods.getCmrNum().startsWith("2"))) {
+                                      && (cmrsMods.getCmrNum().startsWith("0") || cmrsMods.getCmrNum().startsWith("1")
+                                          || cmrsMods.getCmrNum().startsWith("2"))) {
                                 // should not be rejected
                                 log.debug("Not a duplicate CMR.");
                               } else {
@@ -504,7 +507,8 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                                       || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
                                           || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
                                       && cmrsMods.getCmrNum() != null
-                                      && (cmrsMods.getCmrNum().startsWith("1") || cmrsMods.getCmrNum().startsWith("2"))) {
+                                      && (cmrsMods.getCmrNum().startsWith("0") || cmrsMods.getCmrNum().startsWith("1")
+                                          || cmrsMods.getCmrNum().startsWith("2"))) {
                                 // should not be rejected
                                 log.debug("Not a duplicate CMR.");
                               } else {
@@ -1105,7 +1109,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                           if ("04182".equals(cmrsMods.getCmrSortl()) || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
                               || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
                                   || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
-                              && cmrsMods.getCmrNum() != null && (cmrsMods.getCmrNum().startsWith("0") || cmrsMods.getCmrNum().startsWith("1")
+                              && cmrsMods.getCmrNum() != null && (cmrsMods.getCmrNum().startsWith("1")
                                   || cmrsMods.getCmrNum().startsWith("2"))) {
                             // should be rejected
                             log.debug("Duplicate CMR. Request should be rejected.");
@@ -1184,7 +1188,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                                     || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
                                         || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
                                     && cmrsMods.getCmrNum() != null
-                                    && (cmrsMods.getCmrNum().startsWith("0") || cmrsMods.getCmrNum().startsWith("1")
+                                    && (cmrsMods.getCmrNum().startsWith("1")
                                         || cmrsMods.getCmrNum().startsWith("2"))) {
                               // should be rejected
                               log.debug("Duplicate CMR. Request should be rejected.");
@@ -1266,7 +1270,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                                       || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
                                           || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
                                       && cmrsMods.getCmrNum() != null
-                                      && (cmrsMods.getCmrNum().startsWith("0") || cmrsMods.getCmrNum().startsWith("1")
+                                      && (cmrsMods.getCmrNum().startsWith("1")
                                           || cmrsMods.getCmrNum().startsWith("2"))) {
                                 // should be rejected
                                 log.debug("Duplicate CMR. Request should be rejected.");
@@ -1354,7 +1358,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                                       || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
                                           || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
                                       && cmrsMods.getCmrNum() != null
-                                      && (cmrsMods.getCmrNum().startsWith("0") || cmrsMods.getCmrNum().startsWith("1")
+                                      && (cmrsMods.getCmrNum().startsWith("1")
                                           || cmrsMods.getCmrNum().startsWith("2"))) {
                                 // should be rejected
                                 log.debug("Duplicate CMR. Request should be rejected.");
@@ -1582,7 +1586,8 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                           if ("04182".equals(cmrsMods.getCmrSortl()) || (cmrsMods.getCmrSortl() == null || StringUtils.isBlank(cmrsMods.getCmrSortl())
                               || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
                                   || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
-                              && cmrsMods.getCmrNum() != null && (cmrsMods.getCmrNum().startsWith("1") || cmrsMods.getCmrNum().startsWith("2"))) {
+                              && cmrsMods.getCmrNum() != null && (cmrsMods.getCmrNum().startsWith("0") || cmrsMods.getCmrNum().startsWith("1")
+                                  || cmrsMods.getCmrNum().startsWith("2"))) {
                             // should not be rejected
                             log.debug("Not a duplicate CMR.");
                           } else {
@@ -1705,7 +1710,8 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                                     || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
                                         || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
                                     && cmrsMods.getCmrNum() != null
-                                    && (cmrsMods.getCmrNum().startsWith("1") || cmrsMods.getCmrNum().startsWith("2"))) {
+                                    && (cmrsMods.getCmrNum().startsWith("0") || cmrsMods.getCmrNum().startsWith("1")
+                                        || cmrsMods.getCmrNum().startsWith("2"))) {
                               // should not be rejected
                               log.debug("Not a duplicate CMR.");
                             } else {
@@ -1832,7 +1838,8 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                                       || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
                                           || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
                                       && cmrsMods.getCmrNum() != null
-                                      && (cmrsMods.getCmrNum().startsWith("1") || cmrsMods.getCmrNum().startsWith("2"))) {
+                                      && (cmrsMods.getCmrNum().startsWith("0") || cmrsMods.getCmrNum().startsWith("1")
+                                          || cmrsMods.getCmrNum().startsWith("2"))) {
                                 // should not be rejected
                                 log.debug("Not a duplicate CMR.");
                               } else {
@@ -1967,7 +1974,8 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
                                       || (cmrsMods.getCmrSortl() != null && (cmrsMods.getCmrSortl().trim().equalsIgnoreCase("000000")
                                           || cmrsMods.getCmrSortl().trim().equalsIgnoreCase("00000") || cmrsMods.getCmrSortl().matches("[^0-9]+"))))
                                       && cmrsMods.getCmrNum() != null
-                                      && (cmrsMods.getCmrNum().startsWith("1") || cmrsMods.getCmrNum().startsWith("2"))) {
+                                      && (cmrsMods.getCmrNum().startsWith("0") || cmrsMods.getCmrNum().startsWith("1")
+                                          || cmrsMods.getCmrNum().startsWith("2"))) {
                                 // should not be rejected
                                 log.debug("Not a duplicate CMR.");
                               } else {
