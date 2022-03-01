@@ -160,8 +160,15 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
         performGenericAction(trans, model, entityManager, request, null);
       } else if (CmrConstants.Cancel_Request().equalsIgnoreCase(action)) {
         performCancelRequest(trans, model, entityManager, request);
+      } else if (CmrConstants.Reprocess_Rdc().equalsIgnoreCase(action)) {
+        performReprocessRdcRequest(trans, model, entityManager, request, null);
       }
     }
+  }
+
+  private void performReprocessRdcRequest(StatusTrans trans, RequestEntryModel model, EntityManager entityManager, HttpServletRequest request,
+      String processingCenter) throws Exception {
+    performGenericAction(trans, model, entityManager, request, null, null, true);
   }
 
   private void updateDeprecatedAttachmentTypes(RequestEntryModel model, EntityManager entityManager, HttpServletRequest request) {

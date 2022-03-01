@@ -34,6 +34,10 @@
     <div class="cmtlog">
       <div class="section-header">Comments:</div>
       <div class="add-cmt">
+      <%if (user.isProcessor() && !readOnly && "PVA".equals(reqentry.getReqStatus()) 
+        && ("A".equals(reqentry.getRdcProcessingStatus()) || "N".equals(reqentry.getRdcProcessingStatus())) ){ %>
+        <input type="button" id="reprocessRdc" class="cmr-grid-btn-o" style="margin-left: 20px" onclick="cmr.reprocessRdc()" value="Reprocess RDC">
+      <%} %> 
       <%if (user.isProcessor() && !readOnly){ %>
         <input type="button" id="superUserModeBtn" class="cmr-grid-btn-o" style="margin-left: 20px" onclick="cmr.superUserMode()" value="Super User Mode">
       <%} %> 
