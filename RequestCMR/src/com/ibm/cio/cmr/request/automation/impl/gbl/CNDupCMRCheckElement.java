@@ -3278,6 +3278,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
       }
       params += "&streetAddress=" + street;
     }
+    params += "&addressType=ZS01";
     FindCMRResultModel results = SystemUtil.findCMRs(cmrNo, issuingCntry, 10, null, params);
     return results;
   }
