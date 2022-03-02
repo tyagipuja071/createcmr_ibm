@@ -161,13 +161,13 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       } else if (CmrConstants.Cancel_Request().equalsIgnoreCase(action)) {
         performCancelRequest(trans, model, entityManager, request);
       } else if (CmrConstants.Reprocess_Rdc().equalsIgnoreCase(action)) {
-        performReprocessRdcRequest(trans, model, entityManager, request, null);
+        performReprocessRdcRequest(trans, model, entityManager, request);
       }
     }
   }
 
-  private void performReprocessRdcRequest(StatusTrans trans, RequestEntryModel model, EntityManager entityManager, HttpServletRequest request,
-      String processingCenter) throws Exception {
+  private void performReprocessRdcRequest(StatusTrans trans, RequestEntryModel model, EntityManager entityManager, HttpServletRequest request)
+      throws Exception {
 
     AppUser user = AppUser.getUser(request);
     CompoundEntity entity = getCurrentRecord(model, entityManager, request);
@@ -1596,8 +1596,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
           cmrRecord.setCmrTier("");
           cmrRecord.setCmrInacType("");
           cmrRecord.setCmrIsic(!StringUtils.isEmpty(kna1.getZzkvSic())
-              ? (kna1.getZzkvSic().trim().length() > 4 ? kna1.getZzkvSic().trim().substring(0, 4) : kna1.getZzkvSic().trim())
-              : "");
+              ? (kna1.getZzkvSic().trim().length() > 4 ? kna1.getZzkvSic().trim().substring(0, 4) : kna1.getZzkvSic().trim()) : "");
           cmrRecord.setCmrSortl("");
           cmrRecord.setCmrIssuedByDesc("");
           cmrRecord.setCmrRdcCreateDate("");
