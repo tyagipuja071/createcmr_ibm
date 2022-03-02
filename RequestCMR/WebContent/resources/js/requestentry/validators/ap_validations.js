@@ -1892,51 +1892,6 @@ function setCtcOnIsuCdChangeASEAN() {
   }
 }
 
-function setCtcOnIsuCdChangeANZ(isuCd) {
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-  if (isuCd == null) {
-    isuCd = FormManager.getActualValue('isuCd');
-  }
-  if (isuCd == '5K') {
-    FormManager.removeValidator('clientTier', Validators.REQUIRED);
-    FormManager.setValue('clientTier', '');
-    FormManager.readOnly('clientTier');
-  } else {
-    FormManager.enable('clientTier');
-  }
-}
-
-function setCtcOnIsuCdChangeGCG() {
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-  isuCd = FormManager.getActualValue('isuCd');
-  if (isuCd == '5K') {
-    FormManager.removeValidator('clientTier', Validators.REQUIRED);
-    FormManager.setValue('clientTier', '');
-    FormManager.readOnly('clientTier');
-  } else {
-    FormManager.enable('clientTier');
-  }
-}
-
-function setCtcOnIsuCdChangeISA() {
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-  isuCd = FormManager.getActualValue('isuCd');
-  if (isuCd == '5K') {
-    FormManager.removeValidator('clientTier', Validators.REQUIRED);
-    FormManager.setValue('clientTier', '');
-    FormManager.readOnly('clientTier');
-  } else {
-      FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
-      FormManager.enable('clientTier');
-  }
-}
-
 function onIsuCdChangeAseanAnzIsa() {
   console.log(">>>> onIsuCdChangeAseanAnzIsa >>>>");
   var reqType = null;
