@@ -565,7 +565,18 @@ public class CyprusTransformer extends EMEATransformer {
         }
       }
     }
-
+    String isuClientTier;
+    if (!StringUtils.isEmpty(muData.getIsuCd()) && "5K".equals(muData.getIsuCd())) {
+      cust.setIsuCd(muData.getIsuCd() + "7");
+    } else {
+      isuClientTier = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "")
+          + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
+      if (isuClientTier != null && isuClientTier.endsWith("@")) {
+        cust.setIsuCd((!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : cust.getIsuCd().substring(0, 2)) + "7");
+      } else if (isuClientTier != null && isuClientTier.length() == 3) {
+        cust.setIsuCd(isuClientTier);
+      }
+    }
   }
 
   @Override
