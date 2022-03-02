@@ -30,7 +30,7 @@ function addDPLChecklistAttachmentValidator() {
 
           if (results != null) {
             for (var i = 0; i < results.length; i++) {
-              if (!checklistNames.toString().includes(results[i].ret1 + results[i].ret2)) {
+              if (!checklistNames.toString().includes(results[i].ret1 + ' ' + results[i].ret2)) {
                 errornames.push(results[i].ret1 + ' ' + results[i].ret2);
               }
             }
