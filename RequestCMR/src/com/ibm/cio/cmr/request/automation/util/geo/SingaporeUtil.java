@@ -606,12 +606,6 @@ public class SingaporeUtil extends AutomationUtil {
     LOG.debug("client tier" + data.getClientTier());
   }
 
-  @Override
-  protected List<String> getCountryLegalEndings() {
-    return Arrays.asList("PTY LTD", "LTD", "company", "limited", "PT", "SDN BHD", "berhad", "CO. LTD", "company limited", "JSC", "JOINT STOCK",
-        "INC.", "PTE LTD", "PVT LTD", "private limited", "CORPORATION", "hospital", "university");
-  }
-
   public static void addToNotifyListASEAN(EntityManager entityManager, long reqId) {
     StringBuilder anzEcoNotifyList = getASEANEcoNotifyList();
     List<String> users = Arrays.asList(anzEcoNotifyList.toString().split("\\s*,\\s*"));
