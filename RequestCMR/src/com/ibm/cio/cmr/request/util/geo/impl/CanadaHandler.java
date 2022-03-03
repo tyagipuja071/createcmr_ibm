@@ -205,6 +205,10 @@ public class CanadaHandler extends GEOHandler {
       data.setSizeCd(data.getCollectorNameNo());
     }
     setLocationNumber(data, mainRecord.getCmrCountryLanded(), mainRecord.getCmrState());
+
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && "5K".equals(data.getIsuCd())) {
+      data.setClientTier("");
+    }
   }
 
   @Override

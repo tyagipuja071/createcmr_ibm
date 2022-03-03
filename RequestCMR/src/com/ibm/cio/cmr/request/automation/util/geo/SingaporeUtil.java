@@ -16,10 +16,12 @@ import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
+import com.ibm.cio.cmr.request.automation.impl.gbl.CalculateCoverageElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
+import com.ibm.cio.cmr.request.automation.util.CoverageContainer;
 import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
 import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
@@ -576,6 +578,38 @@ public class SingaporeUtil extends AutomationUtil {
     output.setDetails(details);
     output.setProcessOutput(validation);
     return true;
+  }
+
+  @Override
+  public void performCoverageBasedOnGBG(CalculateCoverageElement covElement, EntityManager entityManager, AutomationResult<OverrideOutput> results,
+      StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData, String covFrom,
+      CoverageContainer container, boolean isCoverageCalculated) throws Exception {
+    Data data = requestData.getData();
+    String bgId = data.getBgId();
+    String gbgId = data.getGbgId();
+    String country = data.getCmrIssuingCntry();
+    String sql = ExternalizedQuery.getSql("QUERY.GET_GBG_FROM_LOV");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CD", gbgId);
+    query.setParameter("COUNTRY", country);
+    query.setForReadOnly(true);
+    String result = query.getSingleResult(String.class);
+    LOG.debug("perform coverage based on GBG-------------");
+    LOG.debug("result--------" + result);
+    if (result != null || bgId.equals("DB502GQG")) {
+      LOG.debug("Setting isu ctc to 5K based on gbg matching.");
+      details.append("Setting isu ctc to 5K based on gbg matching.");
+      overrides.addOverride(covElement.getProcessCode(), "DATA", "ISU_CD", data.getIsuCd(), "5K");
+      overrides.addOverride(covElement.getProcessCode(), "DATA", "CLIENT_TIER", data.getClientTier(), "");
+    }
+    LOG.debug("isu" + data.getIsuCd());
+    LOG.debug("client tier" + data.getClientTier());
+  }
+
+  @Override
+  protected List<String> getCountryLegalEndings() {
+    return Arrays.asList("PTY LTD", "LTD", "company", "limited", "PT", "SDN BHD", "berhad", "CO. LTD", "company limited", "JSC", "JOINT STOCK",
+        "INC.", "PTE LTD", "PVT LTD", "private limited", "CORPORATION", "hospital", "university");
   }
 
   public static void addToNotifyListASEAN(EntityManager entityManager, long reqId) {
