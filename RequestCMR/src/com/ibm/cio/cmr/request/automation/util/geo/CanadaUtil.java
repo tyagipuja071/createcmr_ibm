@@ -1112,7 +1112,7 @@ public class CanadaUtil extends AutomationUtil {
     Data data = requestData.getData();
     String coverageId = covType + covId;
     String sbo = "";
-    if (StringUtils.isBlank(data.getSalesBusOffCd()) && StringUtils.isBlank(data.getInstallBranchOff())) {
+    if (StringUtils.isBlank(data.getSalesBusOffCd())) {
       if (StringUtils.isNotBlank(coverageId) && coverageId.equals("T0007992")) {
         sbo = "458";
         setDefaultSBO(details, overrides, coverageId, data, sbo);
