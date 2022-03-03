@@ -840,7 +840,8 @@ function setClientTierAndISR(value) {
     } else if (value == '32') {
       tierValues = ['N', 'S'];
     } else if (value == '21') {
-      tierValues = [ '7' ];
+      // CREATCMR-4293
+      // tierValues = [ '7' ];
     }
   }
   if (tierValues != null) {
@@ -1414,7 +1415,8 @@ function setCustSubTypeBpGRTRCY(fromAddress, scenario, scenarioChanged) {
     
     if (custType == 'BUSPR' || custType == 'CRBUS' || custType == 'INTER' || custType == 'CRINT') {
       FormManager.readOnly('clientTier');
-      FormManager.setValue('clientTier', '7');
+      // CREATCMR-4293
+      // FormManager.setValue('clientTier', '7');
       FormManager.readOnly('isuCd');
       FormManager.setValue('isuCd', '21');
       if(scenarioChanged){
@@ -2150,7 +2152,8 @@ function autoSetISUClientTierUK() {
       }
     } else {
       FormManager.setValue('isuCd', '21');
-      FormManager.setValue('clientTier', '7');
+      // CREATCMR-4293
+      // FormManager.setValue('clientTier', '7');
     }
   }
 }
@@ -2679,6 +2682,70 @@ function addEnterpriseValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+// CREATCMR-4293
+function setCTCValues() {
+  
+  FormManager.removeValidator('clientTier', Validators.REQUIRED);
+  
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  
+  // Business Partner OR Internal
+  if(custSubGrp == 'CRBUS' || custSubGrp == 'CRINT'|| custSubGrp == 'BUSPR' || custSubGrp == 'INTER') {
+    var isuCd = FormManager.getActualValue('isuCd');
+    if(isuCd =='21'){
+      // FormManager.setValue('clientTier', _pagemodel.clientTier == null ? '' :
+      // _pagemodel.clientTier);
+      // FormManager.enable('clientTier');
+      FormManager.setValue('clientTier', '');
+      FormManager.readOnly('clientTier');
+    }
+  }
+}
+
+function clientTierCodeValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var isuCode = FormManager.getActualValue('isuCd');
+        var clientTierCode = FormManager.getActualValue('clientTier');
+
+        if (isuCode == '21' || isuCode == '8B') {
+          if (clientTierCode == '') {
+            $("#clientTierSpan").html('');
+
+            return new ValidationResult(null, true);
+          } else {
+            $("#clientTierSpan").html('');
+
+            return new ValidationResult({
+              id : 'clientTier',
+              type : 'text',
+              name : 'clientTier'
+            }, false, 'Client Tier can only accept blank.');
+          }
+        } else {
+          if (clientTierCode == 'Q' || clientTierCode == 'Y' || clientTierCode == '') {
+            $("#clientTierSpan").html('');
+
+            return new ValidationResult(null, true);
+          } else {
+            $("#clientTierSpan").html('');
+            $("#clientTierSpan").append('<span style="color:red" class="cmr-ast" id="ast-clientTier">* </span>');
+
+            return new ValidationResult({
+              id : 'clientTier',
+              type : 'text',
+              name : 'clientTier'
+            }, false, 'Client Tier can only accept \'Q\', \'Y\' or blank.');
+          }
+        }
+
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+// CREATCMR-4293
+
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding EMEA functions...');
@@ -2771,4 +2838,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateISR, [ SysLoc.CYPRUS ], null, true);
   GEOHandler.registerValidator(addEnterpriseValidator,  [ SysLoc.CYPRUS ], null, true);
   GEOHandler.registerValidator(addStreetPoBoxValidator, [ SysLoc.CYPRUS ], null, true);
+  
+  // CREATCMR-4293
+  GEOHandler.addAfterTemplateLoad(setCTCValues, [ SysLoc.CYPRUS ]);
+  GEOHandler.registerValidator(clientTierCodeValidator, [ SysLoc.CYPRUS ], null, true);
 });
