@@ -106,7 +106,8 @@ function afterConfigForFR() {
 
   if (role == 'Processor' && reqType == 'C') {
     FormManager.addValidator('isuCd', Validators.REQUIRED, [ 'ISU Code' ], 'MAIN_IBM_TAB');
-    FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
+    // FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client
+    // Tier' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'Search Term (SORTL)' ], 'MAIN_IBM_TAB');
     // FormManager.addValidator('installBranchOff', Validators.REQUIRED, [
     // 'Installing BO' ], 'MAIN_IBM_TAB');
@@ -625,8 +626,165 @@ function setSalesRepLogic() {
 }
 
 var _isuHandler = null;
+var _postCdHandler = null;
+var _isicHandler = null;
+function addISUHandler() {
+  if (_isuHandler == null) {
+    _isuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+      if (!value) {
+        value = FormManager.getActualValue('isuCd');
+      }
+      setCoverageSBOBasedOnIsuCtc();
+    });
+  }
+}
+
+function addPostCdHandler() {
+  var addrType = FormManager.getActualValue('addrType');
+  if (addrType != null && addrType == 'ZS01') {
+    var currPostCd = FormManager.getActualValue('postCd');
+    currPostCd = currPostCd.substring(0, 2);
+    // CREATCMR-4530 For Local scenarios except Internal BP
+    autoSetValuesOnPostalCode(currPostCd);
+  }
+}
+
+function addIsicCdHandler() {
+  if (_isicHandler == null) {
+    _isicHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
+      var custGrp = FormManager.getActualValue('custGrp');
+      if (custGrp == 'LOCAL') {
+        add34QPostalCdLogic();
+      }
+    });
+  }
+}
+// CREATCMR - 4530 Postal code logic
+function add34QPostalCdLogic() {
+  var _zs01ReqId = FormManager.getActualValue('reqId');
+  var postCdParams = {
+    REQ_ID : _zs01ReqId,
+    ADDR_TYPE : "ZS01",
+  };
+  var postCdResult = cmr.query('ADDR.GET.POSTCD.BY_REQID_ADDRTYP', postCdParams);
+  postCd = postCdResult.ret1;
+  if (postCd != null && postCd.length > 2) {
+    postCd = postCd.substring(0, 2);
+  }
+  // autoSetSboOnPostalCode(false, currPostCd);
+  // CREATCMR-4530 For Local scenarios except Internal BP
+  autoSetValuesOnPostalCode(postCd);
+  // }
+}
+
+function autoSetValuesOnPostalCode(postCd) {
+  var isuCd = FormManager.getActualValue('isuCd');
+  var clientTier = FormManager.getActualValue('clientTier');
+  var isuCtc = isuCd + clientTier;
+  var isicCd = FormManager.getActualValue('isicCd');
+
+  // add scenario check
+  if (isuCtc != "34Q") {
+    return;
+  }
+  var PostCdList1 = [ '02', '14', '27', '50', '59', '60', '61', '62', '76', '80' ];
+  var PostCdList2 = [ '18', '22', '28', '29', '35', '36', '37', '41', '44', '45', '49', '53', '56', '72', '79', '85', '86' ];
+  var PostCdList3 = [ '01', '03', '07', '15', '26', '38', '42', '43', '63', '69', '73', '74' ];
+  var PostCdList4 = [ '08', '10', '21', '25', '39', '51', '52', '54', '55', '57', '58', '67', '68', '70', '71', '88', '89', '90' ];
+  var PostCdList5 = [ '82', '87', '81', '65', '64', '47', '46', '40', '33', '32', '31', '24', '23', '19', '17', '16', '12', '09' ];
+  var PostCdList6 = [ '04', '05', '06', '11', '13', '20', '30', '34', '48', '66', '83', '84' ];
+  var sboSetbyPostalCdLogic = false;
+  if (PostCdList1.includes(postCd)) {
+    FormManager.setValue('salesBusOffCd', "06N06N");
+    sboSetbyPostalCdLogic = true;
+  } else if (PostCdList2.includes(postCd)) {
+    FormManager.setValue('salesBusOffCd', "03N03N");
+    sboSetbyPostalCdLogic = true;
+  } else if (PostCdList3.includes(postCd)) {
+    FormManager.setValue('salesBusOffCd', "02L02L");
+    sboSetbyPostalCdLogic = true;
+  } else if (PostCdList4.includes(postCd)) {
+    FormManager.setValue('salesBusOffCd', "06E06E");
+    sboSetbyPostalCdLogic = true;
+  } else if (PostCdList5.includes(postCd)) {
+    FormManager.setValue('salesBusOffCd', "03M03M");
+    sboSetbyPostalCdLogic = true;
+  } else if (PostCdList6.includes(postCd)) {
+    FormManager.setValue('salesBusOffCd', "5EB5EB");
+    sboSetbyPostalCdLogic = true;
+  }
+  // If Sbo not set by PostalCd logic then ISIC logic
+  if (!sboSetbyPostalCdLogic) {
+
+    var IsicCdList1 = [ '9806', '6519', '6591', '6592', '7020', '7705', '9819', '6511', '6599', '6711', '6712', '6719', '7715' ];
+    var IsicCdList2 = [ '9811', '4888', '9213', '2230', '9211', '9212', '9214', '9219', '9249', '2211', '2212', '2213', '2219', '2221', '2222',
+        '7413', '9220', '9241', '7430', '7709', '9233', '9801', '6420', '7700', '9111', '9112', '9120', '9191', '9192', '9199', '9232' ];
+    var IsicCdList3 = [ '9808', '8512', '8511', '8519', '7707' ];
+    var IsicCdList4 = [ '9821', '4010', '4020', '4030', '4100', '9000', '7717', '9822', '2330', '2411', '2412', '2413', '2421', '2422', '2429',
+        '2430', '1110', '1120', '2320', '5050', '5141', '6030', '7713' ];
+    var IsicCdList5 = [ '9816', '3530', '2927', '3511', '7718' ];
+    var IsicCdList6 = [ '0140', '0150', '0200', '0501', '0502', '7495', '9812', '1513', '1514', '1520', '1541', '1542', '1543', '1544', '1549',
+        '1551', '1552', '1553', '1554', '1600', '0111', '0112', '0113', '0121', '0122', '0130', '1511', '1512', '1531', '1532', '1533', '8520',
+        '7703', '5121', '5122', '5139', '5142', '5149', '5151', '5152', '5159', '5190', '5020', '5110', '5260', '7112', '7113', '7121', '7129',
+        '7130', '7422', '7491', '7492', '7493', '7494', '7499', '8531', '9301', '9302', '9303', '9309', '9500', '7719', '9804', '5219', '5251',
+        '5030', '5240', '5211', '5220', '5252', '5259', '5520', '5233', '5234', '7714' ];
+    var IsicCdList7 = [ '7511', '7523', '9900', '7706', '9807', '7513', '7514', '7521', '7522', '7720', '9818', '8030', '8090', '8010', '8021',
+        '8022', '7704', '9231', '7512', '7320' ];
+    var IsicCdList8 = [ '8532', '7530' ];
+    var IsicCdList9 = [ '9814', '6601', '6603', '6602', '6720', '7712' ];
+    var IsicCdList10 = [ '9813', '2930', '3410', '3420', '3591', '2511', '3430', '2911', '2921', '3520', '3599', '5010', '5040', '7708', '2811',
+        '2812', '2813', '2892', '2893', '2899', '2912', '2913', '2914', '2915', '2919', '2922', '2923', '2925', '2926', '2929', '3320', '3512',
+        '3592', '3610', '3691', '3692', '3693', '3694', '3699', '4510', '4530', '4540', '7010', '2010', '2021', '2022', '2023', '2029', '2101',
+        '2102', '2109', '1711', '1712', '1722', '1723', '1729', '2310', '2710', '2720', '2731', '2732', '2891', '3710', '1010', '1020', '1030',
+        '1200', '1310', '1320', '1410', '1421', '1422', '1429', '2519', '2520', '2610', '2691', '2692', '2693', '2694', '2695', '2696', '2699',
+        '3720', '7711', '9817', '3110', '3120', '3130', '3140', '3150', '3190', '3210', '3220', '3230', '3311', '3312', '3313', '3330', '3000',
+        '7710' ];
+    var IsicCdList11 = [ '2924', '4520', '7421', '5143', '4550', '7122' ];
+    var IsicCdList12 = [ '2424', '5131', '1721', '1730', '1810', '1820', '1911', '1912', '1920', '5232', '5239', '5231' ];
+    var IsicCdList13 = [ '7310', '2423', '7721' ];
+    var IsicCdList14 = [ '9820', '6210', '6220', '6010', '6021', '6022', '6023', '6110', '6120', '6301', '6302', '6303', '6304', '5510', '7111',
+        '6309', '6411', '6412', '7716' ];
+    var IsicCdList15 = [ '9802', '7230', '7240', '7290', '7210', '7221', '7229', '7250', '7123', '7701', '7702' ];
+    var IsicCdList16 = [ '7414', '7411', '7412' ];
+
+    if (IsicCdList1.includes(isicCd)) {
+      FormManager.setValue('salesBusOffCd', "MC2MC2");
+    } else if (IsicCdList2.includes(isicCd)) {
+      FormManager.setValue('salesBusOffCd', "MC6MC6");
+    } else if (IsicCdList3.includes(isicCd)) {
+      FormManager.setValue('salesBusOffCd', "MC3MC3");
+    } else if (IsicCdList4.includes(isicCd)) {
+      FormManager.setValue('salesBusOffCd', "MN1MN1");
+    } else if (IsicCdList5.includes(isicCd)) {
+      FormManager.setValue('salesBusOffCd', "MN3MN3");
+    } else if (IsicCdList6.includes(isicCd)) {
+      FormManager.setValue('salesBusOffCd', "MC9MC9");
+    } else if (IsicCdList7.includes(isicCd)) {
+      FormManager.setValue('salesBusOffCd', "MN5MN5");
+    } else if (IsicCdList8.includes(isicCd)) {
+      FormManager.setValue('salesBusOffCd', "28S28S");
+    } else if (IsicCdList9.includes(isicCd)) {
+      FormManager.setValue('salesBusOffCd', "MC1MC1");
+    } else if (IsicCdList10.includes(isicCd)) {
+      FormManager.setValue('salesBusOffCd', "MC7MC7");
+    } else if (IsicCdList11.includes(isicCd)) {
+      FormManager.setValue('salesBusOffCd', "MC8MC8");
+    } else if (IsicCdList12.includes(isicCd)) {
+      FormManager.setValue('salesBusOffCd', "4AG4AG");
+    } else if (IsicCdList13.includes(isicCd)) {
+      FormManager.setValue('salesBusOffCd', "MC0MC0");
+    } else if (IsicCdList14.includes(isicCd)) {
+      FormManager.setValue('salesBusOffCd', "MN2MN2");
+    } else if (IsicCdList15.includes(isicCd)) {
+      FormManager.setValue('salesBusOffCd', "IF1IF1");
+    } else if (IsicCdList16.includes(isicCd)) {
+      FormManager.setValue('salesBusOffCd', "11S11S");
+    }
+  }
+}
+
 function add32PostCdCntrySBOlogicOnISUChange() {
-  isuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+  _isuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
     // add32PostCdCntrySBOlogic();
   });
   if (_isuHandler && _isuHandler[0]) {
@@ -851,6 +1009,21 @@ function included(cntryCd) {
     return true;
   } else {
     return false;
+  }
+}
+
+function setCtcForIsu5K() {
+  isuCd = FormManager.getActualValue('isuCd');
+  var ctc = FormManager.getActualValue('clientTier');
+  var reqType = FormManager.getActualValue('reqType');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  if (isuCd == '5K' || isuCd == '14' || isuCd == '18' || isuCd == '19' || isuCd == '1R' || isuCd == '31' || isuCd == '3T' || isuCd == '4A') {
+    FormManager.setValue('clientTier', '');
+    FormManager.readOnly('clientTier');
+  } else {
+    if (reqType == 'U' || (reqType != 'U' && userRole == 'PROCESSOR')) {
+      FormManager.enable('clientTier');
+    }
   }
 }
 
@@ -3666,21 +3839,33 @@ function isExcludedScenario(scenario) {
 function setCoverageSBOBasedOnIsuCtc(currentLanded) {
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
-  if (isuCd != '34' || FormManager.getActualValue('reqType') == 'U') {
-    return;
-  }
-  if (isuCd == '34') {
-    if (clientTier == 'Y') {
-      FormManager.setValue('salesBusOffCd', '09A09A');
+
+  setCtcForIsu5K();
+
+  if (isuCd == '5K') {
+    FormManager.setValue('salesBusOffCd', '98F98F');
+  } else if (isuCd == '14') {
+    FormManager.setValue('salesBusOffCd', '14W14W');
+  } else if (isuCd == '18') {
+    FormManager.setValue('salesBusOffCd', '05W05W');
+  } else if (isuCd == '19') {
+    FormManager.setValue('salesBusOffCd', '5ES5ES');
+  } else if (isuCd == '1R') {
+    FormManager.setValue('salesBusOffCd', '090090');
+  } else if (isuCd == '31') {
+    FormManager.setValue('salesBusOffCd', '040040');
+  } else if (isuCd == '3T') {
+    FormManager.setValue('salesBusOffCd', '4DF4DF');
+  } else if (isuCd == '4A') {
+    FormManager.setValue('salesBusOffCd', '5EF5EF');
+  } else if (isuCd == '34' && clientTier == 'Y') {
+    FormManager.setValue('salesBusOffCd', '09A09A');
+  } else if (isuCd == '34' && clientTier == 'Q') {
+    var custSubGrp = FormManager.getActualValue('custSubGrp');
+    var custGrp = FormManager.getActualValue('custGrp');
+    if (isExcludedScenario(custSubGrp)) {
+      return;
     }
-
-    if (clientTier == 'Q') {
-      var custSubGrp = FormManager.getActualValue('custSubGrp');
-      var custGrp = FormManager.getActualValue('custGrp');
-
-      if (isExcludedScenario(custSubGrp)) {
-        return;
-      }
 
       var landedCountry = '';
       if (currentLanded != undefined) {
@@ -3689,29 +3874,32 @@ function setCoverageSBOBasedOnIsuCtc(currentLanded) {
         landedCountry = getSoldToLanded();
       }
 
-      if (custGrp == 'CROSS') {
-        if (landedCountry == 'TF' || landedCountry == 'RE') {
-          FormManager.setValue('salesBusOffCd', 'ID1ID1');
-        } else if (landedCountry == 'MQ') {
-          FormManager.setValue('salesBusOffCd', 'YF1YF1');
-        } else if (landedCountry == 'GP') {
-          FormManager.setValue('salesBusOffCd', 'YD1YD1');
-        } else if (landedCountry == 'GF' || landedCountry == 'PM') {
-          FormManager.setValue('salesBusOffCd', 'XF1XF1');
-        } else if (landedCountry == 'YT') {
-          FormManager.setValue('salesBusOffCd', 'XD1XD1');
-        } else if (landedCountry == 'NC' || landedCountry == 'VU' || landedCountry == 'WF') {
-          FormManager.setValue('salesBusOffCd', 'GD1GD1');
-        } else if (landedCountry == 'PF') {
-          FormManager.setValue('salesBusOffCd', 'DD1DD1');
-        } else if (landedCountry == 'AD' || landedCountry == 'MC') {
-          FormManager.setValue('salesBusOffCd', 'NNNNNN');
-        } else if (landedCountry == 'DZ') {
-          FormManager.setValue('salesBusOffCd', '711711');
-        }
-      } else if (custGrp == 'LOCAL') {
-        FormManager.setValue('salesBusOffCd', 'NNNNNN');
+    if (custGrp == 'CROSS') {
+      if (landedCountry == 'TF' || landedCountry == 'RE') {
+        FormManager.setValue('salesBusOffCd', 'ID1ID1');
+      } else if (landedCountry == 'MQ') {
+        FormManager.setValue('salesBusOffCd', 'YF1YF1');
+      } else if (landedCountry == 'GP') {
+        FormManager.setValue('salesBusOffCd', 'YD1YD1');
+      } else if (landedCountry == 'GF' || landedCountry == 'PM') {
+        FormManager.setValue('salesBusOffCd', 'XF1XF1');
+      } else if (landedCountry == 'YT') {
+        FormManager.setValue('salesBusOffCd', 'XD1XD1');
+      } else if (landedCountry == 'NC' || landedCountry == 'VU' || landedCountry == 'WF') {
+        FormManager.setValue('salesBusOffCd', 'GD1GD1');
+      } else if (landedCountry == 'PF') {
+        FormManager.setValue('salesBusOffCd', 'DD1DD1');
+      } else if (landedCountry == 'AD') {
+        FormManager.setValue('salesBusOffCd', '03M03M');
+      } else if (landedCountry == 'MC') {
+        FormManager.setValue('salesBusOffCd', '5EB5EB');
+      } else if (landedCountry == 'DZ') {
+        FormManager.setValue('salesBusOffCd', '711711');
       }
+    } else if (custGrp == 'LOCAL') {
+      // FormManager.setValue('salesBusOffCd', 'NNNNNN');
+      // 4530
+      add34QPostalCdLogic();
     }
   }
 }
@@ -3814,6 +4002,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(afterConfigForFR, '706');
   GEOHandler.addAfterConfig(addFRClientTierLogic, '706');
   // GEOHandler.addAfterConfig(add32PostCdCntrySBOlogicOnISUChange, '706');
+  GEOHandler.addAfterConfig(addISUHandler, '706');
+  GEOHandler.addAfterConfig(addIsicCdHandler, '706');
   // GEOHandler.addAfterConfig(addIBOlogic, '706');
   GEOHandler.registerValidator(addFRAddressTypeValidator, '706', null, true);
   // GEOHandler.registerValidator(addPpsceidValidator, '706', null, true);
@@ -3855,6 +4045,8 @@ dojo.addOnLoad(function() {
   // GEOHandler.addAfterTemplateLoad(unlockAbbrevNmForInternalScenario, '706');
   GEOHandler.addAfterConfig(lockIBMTabForFR, '706');
   GEOHandler.addAfterTemplateLoad(lockIBMTabForFR, '706');
+  GEOHandler.addAfterConfig(setCtcForIsu5K, '706');
+  GEOHandler.addAfterTemplateLoad(setCtcForIsu5K, '706');
   GEOHandler.registerValidator(restrictDuplicateAddr, [ '706' ], null, true);
   GEOHandler.addAfterTemplateLoad(filterCmrnoP, '706');
   GEOHandler.registerValidator(addCmrNoValidator, [ '706' ], null, true);
@@ -3863,10 +4055,16 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setSensitiveFlag, '706');
   GEOHandler.addAfterTemplateLoad(setSensitiveFlag, '706');
   GEOHandler.addAddrFunction(setIERPSitePartyIDForFR, '706');
+  GEOHandler.addAddrFunction(addPostCdHandler, '706');
   GEOHandler.registerValidator(addAddressFieldValidators, [ '706' ], null, true);
   GEOHandler.addAddrFunction(showIGFOnOpen, '706');
-
+  GEOHandler.addAfterTemplateLoad(setCoverageSBOBasedOnIsuCtc, '706');
   GEOHandler.addAfterTemplateLoad(setCoverageFieldsOnScenarioChange, '706');
   GEOHandler.addAddrFunction(setFieldsOnLandedCountryChange, '706');
   GEOHandler.registerValidator(checkCmrUpdateBeforeImport, '706', null, true);
+
+  // CREATCMR-4293
+  GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.FR);
+  GEOHandler.registerValidator(clientTierCodeValidator, GEOHandler.FR, null, true);
+
 });

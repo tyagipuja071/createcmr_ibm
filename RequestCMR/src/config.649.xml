@@ -61,7 +61,7 @@
 					<label>Client Tier</label>
 					<dbColumn>CLIENT_TIER</dbColumn>
 					<width>25</width>
-					<bdsId>ClientTier</bdsId>
+					<lovId>ClientTier</lovId>
 				</column>
 				<column>
 					<label>SBO</label>

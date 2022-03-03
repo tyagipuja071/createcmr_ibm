@@ -321,6 +321,12 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
       }
     }
 
+    // CREATCMR-4293
+    if (!StringUtils.isEmpty(data.getIsuCd())) {
+      if (StringUtils.isEmpty(data.getClientTier())) {
+        legacyCust.setIsuCd(data.getIsuCd() + "7");
+      }
+    }
   }
 
   private void blankOrdBlockFromData(EntityManager entityManager, Data data) {
@@ -1296,7 +1302,7 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
       cust.setIsuCd(muData.getIsuCd() + "7");
     } else {
       String isuClientTier = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "")
-          + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
+        + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
       if (isuClientTier != null && isuClientTier.endsWith("@")) {
         cust.setIsuCd((!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : cust.getIsuCd().substring(0, 2)) + "7");
       } else if (isuClientTier != null && isuClientTier.length() == 3) {
