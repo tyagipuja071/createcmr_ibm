@@ -309,6 +309,12 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
     if (!StringUtils.isBlank(data.getRepTeamMemberNo())) {
       legacyCust.setSalesGroupRep(data.getRepTeamMemberNo());
     }
+    // CREATCMR-4293
+    if (!StringUtils.isEmpty(data.getIsuCd())) {
+      if (StringUtils.isEmpty(data.getClientTier())) {
+        legacyCust.setIsuCd(data.getIsuCd() + "7");
+      }
+    }
   }
 
   private void blankOrdBlockFromData(EntityManager entityManager, Data data) {
