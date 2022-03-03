@@ -2166,6 +2166,7 @@ function clientTierCodeValidator() {
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
+
 function setValuesWRTIsuCtc(ctc) {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var isu = FormManager.getActualValue('isuCd');
@@ -2202,6 +2203,7 @@ function setValuesWRTIsuCtc(ctc) {
     FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise' ]);
   }
 }
+
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding EMEA functions...');
