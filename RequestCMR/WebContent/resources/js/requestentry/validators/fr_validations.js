@@ -106,6 +106,7 @@ function afterConfigForFR() {
 
   if (role == 'Processor' && reqType == 'C') {
     FormManager.addValidator('isuCd', Validators.REQUIRED, [ 'ISU Code' ], 'MAIN_IBM_TAB');
+    // CREATCMR-4293
     // FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client
     // Tier' ], 'MAIN_IBM_TAB');
     FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'Search Term (SORTL)' ], 'MAIN_IBM_TAB');
@@ -3867,12 +3868,12 @@ function setCoverageSBOBasedOnIsuCtc(currentLanded) {
       return;
     }
 
-      var landedCountry = '';
-      if (currentLanded != undefined) {
-        landedCountry = currentLanded;
-      } else {
-        landedCountry = getSoldToLanded();
-      }
+    var landedCountry = '';
+    if (currentLanded != undefined) {
+      landedCountry = currentLanded;
+    } else {
+      landedCountry = getSoldToLanded();
+    }
 
     if (custGrp == 'CROSS') {
       if (landedCountry == 'TF' || landedCountry == 'RE') {
@@ -3993,6 +3994,70 @@ function checkCmrUpdateBeforeImport() {
     };
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
+
+// CREATCMR-4293
+function setCTCValues() {
+
+  FormManager.removeValidator('clientTier', Validators.REQUIRED);
+
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+
+  var custSubGrpArray = [ 'BUSPR', 'INTER', 'CBDPT', 'CBFIN', 'CBIEM', 'CBMME', 'CBSTC', 'CBTER', 'CBTSO', 'CBVRN', 'XBLUM', 'XBUSP' ];
+
+  // Business Partner OR Internal OR CROSS scenarios
+  if (custSubGrpArray.includes(custSubGrp)) {
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    var isuCd = FormManager.getActualValue('isuCd');
+    if (isuCd == '21') {
+      FormManager.setValue('clientTier', '');
+    }
+  }
+
+}
+
+function clientTierCodeValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var isuCode = FormManager.getActualValue('isuCd');
+        var clientTierCode = FormManager.getActualValue('clientTier');
+
+        if (isuCode == '21' || isuCode == '8B') {
+          if (clientTierCode == '') {
+            $("#clientTierSpan").html('');
+
+            return new ValidationResult(null, true);
+          } else {
+            $("#clientTierSpan").html('');
+
+            return new ValidationResult({
+              id : 'clientTier',
+              type : 'text',
+              name : 'clientTier'
+            }, false, 'Client Tier can only accept blank.');
+          }
+        } else {
+          if (clientTierCode == 'Q' || clientTierCode == 'Y' || clientTierCode == '') {
+            $("#clientTierSpan").html('');
+
+            return new ValidationResult(null, true);
+          } else {
+            $("#clientTierSpan").html('');
+            $("#clientTierSpan").append('<span style="color:red" class="cmr-ast" id="ast-clientTier">* </span>');
+
+            return new ValidationResult({
+              id : 'clientTier',
+              type : 'text',
+              name : 'clientTier'
+            }, false, 'Client Tier can only accept \'Q\', \'Y\' or blank.');
+          }
+        }
+
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+// CREATCMR-4293
 
 dojo.addOnLoad(function() {
   GEOHandler.FR = [ SysLoc.FRANCE ];
