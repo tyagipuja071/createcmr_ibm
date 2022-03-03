@@ -3,6 +3,7 @@
  */
 package com.ibm.cmr.create.batch.util.mq.transformer.impl;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -988,6 +989,18 @@ public class UnitedKingdomTransformer extends EMEATransformer {
       legacyCust.setSalesGroupRep(data.getRepTeamMemberNo());
     }
 
+    List<String> isuCdList = Arrays.asList("5K", "11", "05", "4F");
+    if (!StringUtils.isEmpty(data.getIsuCd()) && isuCdList.contains(data.getIsuCd())) {
+      legacyCust.setIsuCd(data.getIsuCd() + "7");
+    } else {
+      String isuCtc;
+      isuCtc = (!StringUtils.isEmpty(data.getIsuCd()) ? data.getIsuCd() : "")
+          + (!StringUtils.isEmpty(data.getClientTier()) ? data.getClientTier() : "");
+      if (isuCtc != null) {
+        legacyCust.setIsuCd(isuCtc);
+      }
+    }
+
   }
 
   private void blankOrdBlockFromData(EntityManager entityManager, Data data) {
@@ -1496,10 +1509,19 @@ public class UnitedKingdomTransformer extends EMEATransformer {
       }
     }
 
-    String isuClientTier = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "")
-        + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
-    if (isuClientTier != null && isuClientTier.length() == 3) {
-      cust.setIsuCd(isuClientTier);
+    List<String> isuCdList = Arrays.asList("5K", "11", "05", "4F");
+    if (!StringUtils.isEmpty(muData.getIsuCd()) && isuCdList.contains(muData.getIsuCd())) {
+      cust.setIsuCd(muData.getIsuCd() + "7");
+    } else if (!StringUtils.isEmpty(muData.getIsuCd()) && "34".equals(muData.getIsuCd()) && StringUtils.isBlank(muData.getClientTier())) {
+      cust.setIsuCd(muData.getIsuCd() + "7");
+    } else {
+      String isuClientTier = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "")
+          + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
+      if (isuClientTier != null && isuClientTier.endsWith("@")) {
+        cust.setIsuCd((!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : cust.getIsuCd().substring(0, 2)) + "7");
+      } else if (isuClientTier != null && isuClientTier.length() == 3) {
+        cust.setIsuCd(isuClientTier);
+      }
     }
 
     if (!StringUtils.isBlank(muData.getSpecialTaxCd())) {

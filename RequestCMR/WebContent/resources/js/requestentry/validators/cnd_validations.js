@@ -5,6 +5,7 @@
 var _vatExemptHandler = null;
 var _membLvlBPRelTypeHandler=null;
 var _taxExemptHandler = null;
+var _isuHandler = null;
 
 function afterConfigForCND() {
   
@@ -31,6 +32,27 @@ function afterConfigForCND() {
       resetMembLvlBpRelType();
     });
   }
+  
+  if (_isuHandler == null && FormManager.getField('isuCd')) {
+    _isuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+      setClientTierValues();
+    });
+  }
+}
+
+function setClientTierValues() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  isuCd = FormManager.getActualValue('isuCd');
+  if (isuCd == '5K') {
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    FormManager.resetValidations('clientTier');
+    FormManager.setValue('clientTier', '');
+    FormManager.readOnly('clientTier');
+  } else {
+    FormManager.enable('clientTier');
+  }
 }
 
 function autoSetTax(){
@@ -52,6 +74,10 @@ function setDefaultFieldValuesForCND(){
   if(FormManager.getActualValue('reqType') == 'C'){
     if (!PageManager.isReadOnly()) {
       FormManager.enable('clientTier');
+    }
+    if (FormManager.getActualValue('isuCd') == '5K') {
+      setClientTierValues();
+      return;
     }
     if (typeof (_pagemodel) != 'undefined'){
       if((_pagemodel['custClass'] == null) || (_pagemodel['custClass'] == '')) {
@@ -157,4 +183,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setPrivacyIndcReqdForProc, GEOHandler.CND);
   GEOHandler.addAfterConfig(resetMembLvlBpRelType, GEOHandler.CND);
   GEOHandler.setRevertIsicBehavior(false);
+  GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.CND );
+  GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.CND );
 });

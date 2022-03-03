@@ -119,6 +119,9 @@ public class DEHandler extends GEOHandler {
     if (CmrConstants.PROSPECT_ORDER_BLOCK.equals(mainRecord.getCmrOrderBlock())) {
       data.setProspectSeqNo(mainRecord.getCmrAddrSeq());
     }
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && "5K".equals(data.getIsuCd())) {
+      data.setClientTier("");
+    }
   }
 
   @Override
@@ -708,12 +711,12 @@ public class DEHandler extends GEOHandler {
     for (String name : MT_MASS_UPDATE_SHEET_NAMES) {
       XSSFSheet sheet = book.getSheet(name);
       if (sheet != null) {
-        TemplateValidation error = new TemplateValidation(name);
         for (Row row : sheet) {
+          TemplateValidation error = new TemplateValidation(name);
           if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
-           
+
             String cmrNo = ""; // 0
-           
+
             // Address Sheet
             String seqNo = ""; // 1
             String custName1 = ""; // 2
@@ -737,12 +740,14 @@ public class DEHandler extends GEOHandler {
             String classificationCd = ""; // 10
             String inac = ""; // 8
             String ordBlk = ""; // 11
+            String isuCd = ""; // 6
+            String clientTier = ""; // 8
 
             if (row.getRowNum() == 2001) {
               continue;
             }
 
-            String rowNumber = "Row" + row.getRowNum() + ": ";
+            String rowNumber = "Row" + (row.getRowNum() + 1) + ": ";
 
             if (!"Data".equalsIgnoreCase(sheet.getSheetName())) {
               // iterate all the rows and check each column value
@@ -791,34 +796,34 @@ public class DEHandler extends GEOHandler {
               if (!StringUtils.isBlank(cmrNo) && !StringUtils.isBlank(seqNo)) {
                 if (StringUtils.isBlank(custName1)) {
                   LOG.trace("Customer Name is mandatory");
-                  error.addError(row.getRowNum(), "Customer Name", "Customer Name is mandatory.");
+                  error.addError((row.getRowNum() + 1), "Customer Name", "Customer Name is mandatory.");
                 }
 
                 if (StringUtils.isBlank(street)) {
                   LOG.trace("Street is mandatory");
-                  error.addError(row.getRowNum(), "Street", "Street is mandatory.");
+                  error.addError((row.getRowNum() + 1), "Street", "Street is mandatory.");
                 }
 
                 if (StringUtils.isBlank(city)) {
                   LOG.trace("City is mandatory");
-                  error.addError(row.getRowNum(), "City", "City is mandatory.");
+                  error.addError((row.getRowNum() + 1), "City", "City is mandatory.");
                 }
 
                 if (StringUtils.isBlank(landCntry)) {
                   LOG.trace("Landed Country is mandatory");
-                  error.addError(row.getRowNum(), "Landed Country", "Landed Country is mandatory.");
+                  error.addError((row.getRowNum() + 1), "Landed Country", "Landed Country is mandatory.");
                 }
 
                 if (StringUtils.isBlank(postalCode)) {
                   LOG.trace("Postal code is mandatory.");
-                  error.addError(row.getRowNum(), "Postal Code", "Postal code is mandatory.");
+                  error.addError((row.getRowNum() + 1), "Postal Code", "Postal code is mandatory.");
                 }
               }
 
               if ((!StringUtils.isBlank(cmrNo) && StringUtils.isBlank(seqNo) && !"Data".equalsIgnoreCase(sheet.getSheetName()))
                   || (StringUtils.isBlank(cmrNo) && !StringUtils.isBlank(seqNo) && !"Data".equalsIgnoreCase(sheet.getSheetName()))) {
                 LOG.trace("Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
-                error.addError(row.getRowNum(), "Address Sequence No.",
+                error.addError((row.getRowNum() + 1), "Address Sequence No.",
                     "Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
                 // validations.add(error);
               }
@@ -845,11 +850,17 @@ public class DEHandler extends GEOHandler {
               currCell = (XSSFCell) row.getCell(10);
               ordBlk = validateColValFromCell(currCell);
 
+              currCell = (XSSFCell) row.getCell(6);
+              isuCd = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(8);
+              clientTier = validateColValFromCell(currCell);
+
               if (!StringUtils.isBlank(isic) && !StringUtils.isBlank(classificationCd)
                   && ((!"9500".equals(isic) && "60".equals(classificationCd)) || ("9500".equals(isic) && !"60".equals(classificationCd)))) {
                 LOG.trace(
                     "Note that ISIC value 9500 can be entered only for CMR with Classification code 60. Please fix and upload the template again.");
-                error.addError(row.getRowNum(), "Classification Code",
+                error.addError((row.getRowNum() + 1), "Classification Code",
                     "Note that ISIC value 9500 can be entered only for CMR with Classification code 60. Please fix and upload the template again.");
                 // validations.add(error);
               }
@@ -857,27 +868,51 @@ public class DEHandler extends GEOHandler {
               if (!StringUtils.isBlank(inac) && inac.length() == 4 && !StringUtils.isNumeric(inac) && !"@@@@".equals(inac)
                   && !inac.matches("^[a-zA-Z][a-zA-Z][0-9][0-9]$") && !inac.matches("^[a-zA-Z][0-9][0-9][0-9]$")) {
                 LOG.trace("INAC should have all 4 digits or 2 letters and 2 digits or 1 letter and 3 digits in order.");
-                error.addError(row.getRowNum(), "INAC/NAC",
+                error.addError((row.getRowNum() + 1), "INAC/NAC",
                     "INAC should have all 4 digits or 2 letters and 2 digits or 1 letter and 3 digits in order.");
               }
 
               if (!StringUtils.isBlank(sbo) && !StringUtils.isAlphanumeric(sbo)) {
                 LOG.trace("Enter valid values for SBO/Search Term.");
-                error.addError(row.getRowNum(), "SBO/Search Term", "Enter valid values for SBO/Search Term");
+                error.addError((row.getRowNum() + 1), "SBO/Search Term", "Enter valid values for SBO/Search Term");
               }
 
               if (!StringUtils.isBlank(ordBlk) && !("88".equals(ordBlk) || "94".equals(ordBlk) || "@".equals(ordBlk))) {
                 LOG.trace("Note that value of Order block can only be 88 or 94 or @ or blank. Please fix and upload the template again.");
-                error.addError(row.getRowNum(), "Order block",
+                error.addError((row.getRowNum() + 1), "Order block",
                     "Note that value of Order block can only be 88 or 94 or @ or blank. Please fix and upload the template again.");
                 // validations.add(error);
               }
+
+              List<String> isuBlankCtc = Arrays.asList("5K", "19", "3T", "4F");
+              if (isuBlankCtc.contains(isuCd)) {
+                if (!"@".equals(clientTier)) {
+                  LOG.trace("Client Tier should be '@' for the selected ISU Code: " + isuCd + ".");
+                  error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier should be '@' for the selected ISU Code: " + isuCd + ". ");
+                }
+              } else if (!StringUtils.isBlank(isuCd) && "21,8B".contains(isuCd) && !"@".equals(clientTier)) {
+                LOG.trace("Client Tier should be '@' for the selected ISU Code.");
+                error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier should be '@' for the selected ISU Code.");
+              } else if (!StringUtils.isBlank(isuCd) && "34".equals(isuCd)) {
+                if (StringUtils.isBlank(clientTier) || !"QY".contains(clientTier)) {
+                  LOG.trace("The row " + (row.getRowNum() + 1)
+                      + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "Client Tier",
+                      ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
+                }
+              } else if ((StringUtils.isNotBlank(isuCd) && (StringUtils.isBlank(clientTier) || !"@QY".contains(clientTier)))
+                  || (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier))) {
+                LOG.trace("The row " + (row.getRowNum() + 1)
+                    + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
+                error.addError((row.getRowNum() + 1), "Client Tier",
+                    ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
+              }
             }
           }
+          if (error.hasErrors()) {
+            validations.add(error);
+          }
         } // end row loop
-        if (error.hasErrors()) {
-          validations.add(error);
-        }
       }
     }
   }

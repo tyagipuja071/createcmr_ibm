@@ -87,6 +87,9 @@ public class TWHandler extends GEOHandler {
       abbName = abbName.substring(0, 21);
     }
     data.setAbbrevNm(abbName);
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && "5K".equals(data.getIsuCd())) {
+      data.setClientTier("");
+    }
   }
 
   @Override
