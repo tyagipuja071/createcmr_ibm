@@ -163,7 +163,13 @@ public class FstTransformer extends MCOTransformer {
     } else {
       legacyCust.setDeptCd("");
     }
-    
+    // CREATCMR-4293
+    if (!StringUtils.isEmpty(data.getIsuCd())) {
+      if (StringUtils.isEmpty(data.getClientTier())) {
+        legacyCust.setIsuCd(data.getIsuCd() + "7");
+      }
+    }
+
     if (!StringUtils.isEmpty(data.getIsuCd()) && "5K".equals(data.getIsuCd())) {
       legacyCust.setIsuCd(data.getIsuCd() + "7");
     }

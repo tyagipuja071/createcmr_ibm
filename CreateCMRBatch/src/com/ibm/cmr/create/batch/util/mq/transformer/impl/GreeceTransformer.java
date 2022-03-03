@@ -563,6 +563,12 @@ public class GreeceTransformer extends EMEATransformer {
       legacyCust.setEnterpriseNo("");
     }
     legacyCust.setCeBo("");
+    // CREATCMR-4293
+    if (!StringUtils.isEmpty(data.getIsuCd())) {
+      if (StringUtils.isEmpty(data.getClientTier())) {
+        legacyCust.setIsuCd(data.getIsuCd() + "7");
+      }
+    }
   }
 
   private void blankOrdBlockFromData(EntityManager entityManager, Data data) {
