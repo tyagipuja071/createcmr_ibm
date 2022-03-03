@@ -2159,7 +2159,12 @@ public class EMEAHandler extends BaseSOFHandler {
         }
 
         if (StringUtils.isEmpty(data.getClientTier()) && !StringUtils.isEmpty(rdcData.getClientTier())) {
-          data.setClientTier(rdcData.getClientTier());
+          List<String> isuCdList = Arrays.asList("5K", "11", "05", "4F", "21", "8B");
+          if (isuCdList.contains(data.getIsuCd())) {
+            data.setClientTier("");
+          } else {
+            data.setClientTier(rdcData.getClientTier());
+          }
         }
 
         // sales rep
@@ -3917,8 +3922,8 @@ public class EMEAHandler extends BaseSOFHandler {
         if ((StringUtils.isNotBlank(isuCd) && (StringUtils.isBlank(clientTier) || !"@QY".contains(clientTier))) || 
             (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier))) {
           LOG.trace(
-              "The row " + (rowIndex) + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
-          error.addError((rowIndex), "Client Tier",
+              "The row " + (row.getRowNum()+1) + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
+          error.addError((row.getRowNum()+1), "Client Tier",
               ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
           validations.add(error);
         }
@@ -4004,7 +4009,7 @@ public class EMEAHandler extends BaseSOFHandler {
                   + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
               error.addError(((row.getRowNum() + 1)), "Client Tier",
                   ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
-            }
+            } 
           } else {
             List<String> isuCdList = Arrays.asList("5K", "11", "05", "4F");
             if (isuCdList.contains(isuCd) && !"@".equals(clientTier)) {
@@ -4081,7 +4086,7 @@ public class EMEAHandler extends BaseSOFHandler {
 
           if (!StringUtils.isEmpty(cbCity) && !StringUtils.isEmpty(localCity)) {
             LOG.trace("Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty. >> ");
-            error.addError(rowIndex, "Local City",
+            error.addError((row.getRowNum()+1), "Local City",
                 "Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty.");
             validations.add(error);
           }
@@ -4089,14 +4094,14 @@ public class EMEAHandler extends BaseSOFHandler {
           if (!StringUtils.isEmpty(cbPostal) && !StringUtils.isEmpty(localPostal)) {
             LOG.trace("Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
                 + "If one is populated, the other must be empty. >>");
-            error.addError(rowIndex, "Local Postal Code", "Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
+            error.addError((row.getRowNum()+1), "Local Postal Code", "Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
                 + "If one is populated, the other must be empty.");
             validations.add(error);
           }
 
           if (!StringUtils.isEmpty(name4) && !StringUtils.isEmpty(streetCont)) {
             LOG.trace("Name4 and Street Cont must not be populated at the same time. " + "If one is populated, the other must be empty. >>");
-            error.addError(rowIndex, "Name4",
+            error.addError((row.getRowNum()+1), "Name4",
                 "Name4 and Street Cont must not be populated at the same time. " + "If one is populated, the other must be empty.");
             validations.add(error);
           }
@@ -4104,13 +4109,13 @@ public class EMEAHandler extends BaseSOFHandler {
           if ((!StringUtils.isEmpty(localCity) || !StringUtils.isEmpty(localPostal))) {
             if ("@".equals(district)) {
               LOG.trace("Local address must not be populate District with @. ");
-              error.addError(rowIndex, "District", "Local address must not be populate District with @. ");
+              error.addError((row.getRowNum()+1), "District", "Local address must not be populate District with @. ");
               validations.add(error);
             }
 
             if ("@".equals(taxOffice)) {
               LOG.trace("Local address must not be populate Tax Office with @. ");
-              error.addError(rowIndex, "Tax Office", "Local address must not be populate Tax Office with @. ");
+              error.addError((row.getRowNum()+1), "Tax Office", "Local address must not be populate Tax Office with @. ");
               validations.add(error);
             }
           }
@@ -4129,7 +4134,7 @@ public class EMEAHandler extends BaseSOFHandler {
            */
           if (!StringUtils.isEmpty(cbCity) && !StringUtils.isEmpty(localCity)) {
             LOG.trace("Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty. >> ");
-            error.addError(rowIndex, "Local City",
+            error.addError((row.getRowNum()+1), "Local City",
                 "Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty.");
             validations.add(error);
           }
@@ -4137,7 +4142,7 @@ public class EMEAHandler extends BaseSOFHandler {
           if (!StringUtils.isEmpty(cbPostal) && !StringUtils.isEmpty(localPostal)) {
             LOG.trace("Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
                 + "If one is populated, the other must be empty. >>");
-            error.addError(rowIndex, "Local Postal Code", "Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
+            error.addError((row.getRowNum()+1), "Local Postal Code", "Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
                 + "If one is populated, the other must be empty.");
             validations.add(error);
           }
@@ -4146,17 +4151,17 @@ public class EMEAHandler extends BaseSOFHandler {
             // if local
             if (!StringUtils.isEmpty(streetCont) && !StringUtils.isEmpty(poBox)) {
               LOG.trace("Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
-              error.addError((row.getRowNum() + 1), "Street Con't/PO Box",
+              error.addError((row.getRowNum()+1), "Street Con't/PO Box",
                   "Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
               validations.add(error);
             } else if (!StringUtils.isEmpty(poBox) && !StringUtils.isEmpty(attPerson)) {
               LOG.trace("Note that PO Box/ATT Person cannot be filled at same time. Please fix and upload the template again.");
-              error.addError((row.getRowNum() + 1), "PO Box/ATT Person",
+              error.addError((row.getRowNum()+1), "PO Box/ATT Person",
                   "Note that PO Box/ATT Person cannot be filled at same time. Please fix and upload the template again.");
               validations.add(error);
             } else if (!StringUtils.isEmpty(attPerson) && !StringUtils.isEmpty(streetCont)) {
               LOG.trace("Note that ATT Person/Street Con't cannot be filled at same time. Please fix and upload the template again.");
-              error.addError((row.getRowNum() + 1), "ATT Person/Street Con't",
+              error.addError((row.getRowNum()+1), "ATT Person/Street Con't",
                   "Note that ATT Person/Street Con't cannot be filled at same time. Please fix and upload the template again.");
               validations.add(error);
             }
@@ -4164,7 +4169,7 @@ public class EMEAHandler extends BaseSOFHandler {
             // else cross border
             if (!StringUtils.isEmpty(streetCont) && !StringUtils.isEmpty(poBox)) {
               LOG.trace("Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
-              error.addError((row.getRowNum() + 1), "Street Con't/PO Box",
+              error.addError((row.getRowNum()+1), "Street Con't/PO Box",
                   "Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
               validations.add(error);
             }
@@ -4768,5 +4773,6 @@ public class EMEAHandler extends BaseSOFHandler {
 
     return zd01count;
   }
-
+  
+  
 }
