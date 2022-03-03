@@ -4034,6 +4034,7 @@ public class EMEAHandler extends BaseSOFHandler {
         }
       }
     }
+    }
 
     for (String name : countryAddrss) {
       XSSFSheet sheet = book.getSheet(name);
@@ -4146,17 +4147,17 @@ public class EMEAHandler extends BaseSOFHandler {
             // if local
             if (!StringUtils.isEmpty(streetCont) && !StringUtils.isEmpty(poBox)) {
               LOG.trace("Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
-              error.addError(rowIndex, "Street Con't/PO Box",
+              error.addError((row.getRowNum() + 1), "Street Con't/PO Box",
                   "Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
               validations.add(error);
             } else if (!StringUtils.isEmpty(poBox) && !StringUtils.isEmpty(attPerson)) {
               LOG.trace("Note that PO Box/ATT Person cannot be filled at same time. Please fix and upload the template again.");
-              error.addError(rowIndex, "PO Box/ATT Person",
+              error.addError((row.getRowNum() + 1), "PO Box/ATT Person",
                   "Note that PO Box/ATT Person cannot be filled at same time. Please fix and upload the template again.");
               validations.add(error);
             } else if (!StringUtils.isEmpty(attPerson) && !StringUtils.isEmpty(streetCont)) {
               LOG.trace("Note that ATT Person/Street Con't cannot be filled at same time. Please fix and upload the template again.");
-              error.addError(rowIndex, "ATT Person/Street Con't",
+              error.addError((row.getRowNum() + 1), "ATT Person/Street Con't",
                   "Note that ATT Person/Street Con't cannot be filled at same time. Please fix and upload the template again.");
               validations.add(error);
             }
@@ -4164,7 +4165,7 @@ public class EMEAHandler extends BaseSOFHandler {
             // else cross border
             if (!StringUtils.isEmpty(streetCont) && !StringUtils.isEmpty(poBox)) {
               LOG.trace("Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
-              error.addError(rowIndex, "Street Con't/PO Box",
+              error.addError((row.getRowNum() + 1), "Street Con't/PO Box",
                   "Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
               validations.add(error);
             }

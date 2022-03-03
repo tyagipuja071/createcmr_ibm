@@ -1569,7 +1569,7 @@ public class ItalyTransformer extends EMEATransformer {
         cust.setIsuCd(muData.getIsuCd() + "7");
       } else {
         String isuClientTier = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "")
-            + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
+          + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
         if (isuClientTier != null && isuClientTier.endsWith("@")) {
           cust.setIsuCd((!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : cust.getIsuCd().substring(0, 2)) + "7");
         } else if (isuClientTier != null && isuClientTier.length() == 3) {
