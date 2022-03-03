@@ -1883,6 +1883,7 @@ public class ItalyHandler extends BaseSOFHandler {
         }
       }
     }
+  }
 
   private void createMissingAddressForSingleReact(FindCMRResultModel source, List<FindCMRRecordModel> converted, FindCMRRecordModel mainRecord) {
     FindCMRRecordModel record = source.getItems().get(0);
