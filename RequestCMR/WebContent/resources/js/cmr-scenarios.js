@@ -18,19 +18,20 @@ var TemplateService = (function() {
       'MAIL', 'PUBB', 'PUBS', 'STAT', 'ZF01', 'ZH01' ];
 
   // CREATCMR-4293
-  var CMR_ISSUING_CNTRY_ARRAY = [ '624', '603', '607', '626', '644', '651', '668', '693', '694', '695', '699', '704', '705', '707', '708', '740',
-      '741', '787', '820', '821', '826', '889', '358', '359', '363', '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667',
-      '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770', '780', '782', '804', '810', '825', '827',
-      '831', '833', '835', '840', '841', '842', '851', '857', '864', '876', '879', '880', '881', '883', '862', '620', '642', '675', '677', '680',
-      '752', '762', '767', '768', '772', '805', '808', '823', '832', '849', '850', '865', '729', '846', '806', '702', '678' ];
+  var CMR_ISSUING_CNTRY_ARRAY = [ '358', '359', '363', '373', '382', '383', '603', '607', '610', '618', '620', '624', '626', '635', '636', '637',
+      '642', '644', '645', '651', '656', '662', '666', '667', '668', '669', '670', '675', '677', '678', '680', '691', '692', '693', '694', '695',
+      '698', '699', '700', '702', '704', '705', '706', '707', '708', '717', '718', '724', '725', '726', '729', '740', '741', '745', '752', '753',
+      '754', '755', '758', '762', '764', '767', '768', '769', '770', '772', '780', '782', '787', '788', '804', '805', '806', '808', '810', '820',
+      '821', '822', '823', '825', '826', '827', '831', '832', '833', '835', '838', '840', '841', '842', '846', '848', '849', '850', '851', '857',
+      '862', '864', '865', '866', '876', '879', '880', '881', '883', '889' ];
 
   var CUST_SUB_GRP_FOR_BUSINESS_PARTNER_ARRAY = [ 'AFBP', 'BEBUS', 'BUSPR', 'BUSSM', 'BUSVA', 'CBBUS', 'CHBUS', 'CRBUS', 'CROBP', 'CSBP', 'DKBUS',
       'EEBUS', 'ELBP', 'EXBP', 'FIBUS', 'FOBUS', 'GLBUS', 'ISBUS', 'JOBP', 'JOXBP', 'LIBUS', 'LSBP', 'LSXBP', 'LTBUS', 'LUBUS', 'LVBUS', 'MEBP',
-      'NABP', 'NAXBP', 'PKBP', 'PKXBP', 'PSBP', 'RSBP', 'RSXBP', 'SZBP', 'SZXBP', 'XBP', 'XBUSP', 'ZABP', 'ZAXBP', 'LLCBP', 'LSLOC', 'NALOC', 'SZLOC' ];
+      'NABP', 'NAXBP', 'PKBP', 'PKXBP', 'PSBP', 'RSBP', 'RSXBP', 'SZBP', 'SZXBP', 'XBP', 'XBUSP', 'ZABP', 'ZAXBP' ];
 
   var CUST_SUB_GRP_FOR_INTERNAL_ARRAY = [ 'AFINT', 'BEINT', 'CBINT', 'CBTER', 'CHINT', 'CRINT', 'CROIN', 'CSINT', 'DKINT', 'EEINT', 'FIINT', 'FOINT',
       'GLINT', 'INTER', 'INTIN', 'INTSM', 'INTVA', 'ISINT', 'JOINT', 'JOXIN', 'LIINT', 'LSINT', 'LSXIN', 'LTINT', 'LUINT', 'LVINT', 'MEINT', 'NAINT',
-      'NAXIN', 'PKINT', 'PKXIN', 'PSINT', 'RSINT', 'RSXIN', 'SZINT', 'SZXIN', 'XINT', 'XINTE', 'XINTR', 'ZAINT', 'ZAXIN' ]
+      'NAXIN', 'PKINT', 'PKXIN', 'PSINT', 'RSINT', 'RSXIN', 'SZINT', 'SZXIN', 'XINT', 'XINTE', 'XINTR', 'ZAINT', 'ZAXIN' ];
   // CREATCMR-4293
 
   var getUserRole = function() {
@@ -478,6 +479,7 @@ var TemplateService = (function() {
                           FormManager.setValue(name, ctc);
                         }
                       }
+
                       // CREATCMR-4293
 
                     }
@@ -649,6 +651,28 @@ var TemplateService = (function() {
         if ((typeof GEOHandler) != 'undefined') {
           GEOHandler.executeAfterTemplateLoad(false, currentChosenScenario, scenarioChanged);
         }
+
+        // CREATCMR-4293
+        if (scenarioChanged == false) {
+          if (CMR_ISSUING_CNTRY_ARRAY.includes(FormManager.getActualValue('cmrIssuingCntry'))) {
+            // FormManager.setValue('isuCd', _pagemodel.isuCd);
+            FormManager.setValue('clientTier', _pagemodel.clientTier);
+          }
+        }
+
+        if (scenarioChanged == true) {
+          if (CMR_ISSUING_CNTRY_ARRAY.includes(FormManager.getActualValue('cmrIssuingCntry'))) {
+            if (CUST_SUB_GRP_FOR_BUSINESS_PARTNER_ARRAY.includes(FormManager.getActualValue('custSubGrp'))
+                || CUST_SUB_GRP_FOR_INTERNAL_ARRAY.includes(FormManager.getActualValue('custSubGrp'))) {
+              var isuCd = FormManager.getActualValue('isuCd');
+              if (isuCd == '8B' || isuCd == '21') {
+                FormManager.setValue('clientTier', '');
+              }
+            }
+          }
+        }
+        // CREATCMR-4293
+
       }
     },
     loadAddressTemplate : function(template, formId, addrType) {
