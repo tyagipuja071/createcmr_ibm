@@ -3,7 +3,14 @@
 function afterConfigKR() {
   var role = null;
   var reqType = null;
+  var _isuHandler = null;
 
+  if (_isuHandler == null) {
+    _isuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+      setClientTierValues();
+    });
+  }
+  
   reqType = FormManager.getActualValue('reqType');
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
@@ -66,6 +73,25 @@ function afterConfigKR() {
   RemoveCrossAddressMandatory();
   setChecklistStatus();
   addKRChecklistValidator();
+}
+
+function setClientTierValues() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  isuCd = FormManager.getActualValue('isuCd');
+  if (isuCd == '5K') {
+    clientTiers = [];
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    FormManager.setValue('clientTier', '');
+    FormManager.readOnly('clientTier');
+  } else {
+    var reqType = FormManager.getActualValue('reqType');
+    if (reqType != 'U') {
+      FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
+    }
+    FormManager.enable('clientTier');
+  }
 }
 
 function setChecklistStatus() {
@@ -343,4 +369,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addDPLCheckValidator, GEOHandler.KR, GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(addAttachmentValidator, GEOHandler.KR);
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.KR);
+  GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.KR);
+  GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.KR);
 });

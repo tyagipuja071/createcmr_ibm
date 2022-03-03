@@ -9,6 +9,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -61,6 +62,7 @@ import com.ibm.cio.cmr.request.entity.CmrInternalTypes;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CompoundEntity;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.Kna1;
 import com.ibm.cio.cmr.request.entity.MassUpdt;
 import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
 import com.ibm.cio.cmr.request.entity.MassUpdtAddrPK;
@@ -2082,6 +2084,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     // Required: Check cmrNo, and field lengths
     int cmrRecords = 0;
     String isuCd = null;
+    String clientTier = null;
     for (Row cmrRow : dataSheet) {
       if (cmrRow.getRowNum() >= CMR_ROW_NO) {
         if (isRowValid(cmrRow)) {
@@ -2095,9 +2098,19 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
           }
 
           isuCd = df.formatCellValue(cmrRow.getCell(DATA_FLD.get("ISU_CD") - 1)).trim();
+          clientTier = df.formatCellValue(cmrRow.getCell(DATA_FLD.get("CLIENT_TIER") - 1)).trim();
           if (!StringUtils.isEmpty(isuCd) && !validISUCodes.contains(isuCd)) {
             log.error("Mass file has invalid ISU Code in row " + (cmrRow.getRowNum() + 1));
             throw new CmrException(MessageUtil.ERROR_MASS_FILE_ISU_CD, Integer.toString(cmrRow.getRowNum() + 1));
+          }
+
+          if (!StringUtils.isBlank(isuCd)) {
+            if ("5K".equals(isuCd)) {
+              if (!"@".equals(clientTier)) {
+                log.error("Client Tier should be '@' for the selected ISU Code: row " + (cmrRow.getRowNum() + 1));
+                throw new CmrException(MessageUtil.ERROR_MASS_FILE_INVALID_ISU_CTC, Integer.toString(cmrRow.getRowNum() + 1));
+              }
+            }
           }
 
           for (String key : dataLmt.keySet()) {
@@ -4080,7 +4093,6 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
 
     // Required: Check cmrNo, and field lengths
     int cmrRecords = 0;
-    String isuCd = null;
     for (Row cmrRow : dataSheet) {
       if (cmrRow.getRowNum() >= CMR_ROW_NO) {
         if (isRowValid(cmrRow)) {
@@ -4152,6 +4164,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
               countDataFld++;
             }
           }
+          
+          String isuCd = df.formatCellValue(cmrRow.getCell(DATA_FLD.get("ISU_CD") - 1)).trim();
+          String clientTier = df.formatCellValue(cmrRow.getCell(DATA_FLD.get("CLIENT_TIER") - 1)).trim();
 
           if (countZD01 > 0 || countZI01 > 0 || countZP01 > 0 || countDataFld > 0) {
             if (StringUtils.isEmpty(df.formatCellValue(cmrRow.getCell(DATA_FLD.get("CMR_NO") - 1)).trim())
@@ -4159,7 +4174,15 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
               log.error("CMR number field is required and should be alphanumeric: row " + (cmrRow.getRowNum() + 1));
               throw new CmrException(MessageUtil.ERROR_MASS_FILE_CMR_ROW, Integer.toString(cmrRow.getRowNum() + 1));
             }
-
+            
+            if (!StringUtils.isBlank(isuCd)) {
+              if ("5K".equals(isuCd)) {
+                if (!"@".equals(clientTier)) {
+                  log.error("Client Tier should be '@' for the selected ISU Code: row " + (cmrRow.getRowNum() + 1));
+                  throw new CmrException(MessageUtil.ERROR_MASS_FILE_INVALID_ISU_CTC, Integer.toString(cmrRow.getRowNum() + 1));
+                }
+              }
+            }
           }
 
           for (String key : addrLmt.keySet()) {
@@ -4967,8 +4990,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                       }
                     } catch (Exception e) {
                       throw new CmrException(e);
-                    } 
-                    }else {
+                    }
+                  } else {
                     if (!validateMassUpdateFile(item.getInputStream())) {
                       throw new CmrException(MessageUtil.ERROR_MASS_FILE);
                     }
@@ -5372,7 +5395,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     }
   }
 
-    private void setMassUpdateListForFR(EntityManager entityManager, Map<String, Object> massUpdtCol, String filepath, long reqId, int newIterId,
+  private void setMassUpdateListForFR(EntityManager entityManager, Map<String, Object> massUpdtCol, String filepath, long reqId, int newIterId,
       String filePath) throws Exception {
 
     // 1. get the config file and get all the valid tabs

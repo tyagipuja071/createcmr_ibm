@@ -279,6 +279,9 @@ public class MessageUtil {
   public static final int ERROR_MASS_FILE_CMR_SITE_ID_ROW = 8048;
   public static final int ERROR_MASS_FILE_CMR_ALPHANUMERIC_ROW = 8049;
   public static final int INFO_PDF_GENERATED = 8050;
+  
+  //CND region messages for mass updates
+  public static final int ERROR_MASS_FILE_INVALID_ISU_CTC = 8052;
 
   /* Module specific codes */
   /* test 9001-9099 */

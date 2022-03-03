@@ -16,7 +16,11 @@ import javax.persistence.EntityManager;
 import org.apache.commons.lang.StringUtils;
 
 import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.CmrConstants;
+import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
+import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.wtaas.WtaasAddress;
@@ -193,6 +197,14 @@ public class ISAHandler extends APHandler {
       record.setCmrDept(null);
     }
     logExtracts(record);
+
+  }
+
+  @Override
+  public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && "5K".equals(data.getIsuCd())) {
+      data.setClientTier("");
+    }
 
   }
 

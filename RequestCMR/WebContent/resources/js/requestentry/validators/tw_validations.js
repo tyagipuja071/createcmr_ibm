@@ -125,6 +125,7 @@ function afterConfigTW() {
 var _taxTypeHandler = null;
 var _ISICHandler = null;
 var _dupCmrIndcHandler = null;
+var _ISUHandler = null;
 
 function addHandlersForTW() {
   if (_taxTypeHandler == null) {
@@ -142,6 +143,12 @@ function addHandlersForTW() {
   if (_dupCmrIndcHandler == null) {
     _ISICHandler = dojo.connect(FormManager.getField('dupCmrIndc'), 'onChange', function(value) {
       setDupCmrIndcWarning();
+    });
+  }
+
+  if (_ISUHandler == null) {
+    _isuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+      setClientTierValuesTW();
     });
   }
 }
@@ -166,6 +173,17 @@ function setDupCmrIndcWarning() {
     } else {
       $('#duplicateCMR').text('');
     }
+  }
+}
+
+function setClientTierValuesTW() {
+  isuCd = FormManager.getActualValue('isuCd');
+  if (isuCd == '5K') {
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    FormManager.setValue('clientTier', '');
+    FormManager.readOnly('clientTier');
+  } else {
+    FormManager.enable('clientTier');
   }
 }
 
@@ -403,6 +421,8 @@ dojo.addOnLoad(function() {
   // GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(addDPLCheckValidator, GEOHandler.TW, GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.TW);
+  GEOHandler.addAfterConfig(setClientTierValuesTW, GEOHandler.TW);
+  GEOHandler.addAfterTemplateLoad(setClientTierValuesTW, GEOHandler.TW);
 
   // skip byte checks
   FormManager.skipByteChecks([ 'cmt', 'bldg', 'dept', 'custNm3', 'custNm4', 'busnType', 'footnoteTxt2', 'contactName1', 'bpName', 'footnoteTxt1',
