@@ -3751,14 +3751,15 @@ public class GreeceHandler extends BaseSOFHandler {
             TemplateValidation error = new TemplateValidation(name);
             if (!StringUtils.isEmpty(crossCity) && !StringUtils.isEmpty(localCity)) {
               LOG.trace("Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty. >> ");
-              error.addError(row.getRowNum(), "City",
+              error.addError((row.getRowNum() + 1), "City",
                   "Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty.");
               validations.add(error);
             }
             if (!StringUtils.isEmpty(cbPostal) && !StringUtils.isEmpty(localPostal)) {
               LOG.trace("Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
                   + "If one is populated, the other must be empty. >>");
-              error.addError(row.getRowNum(), "Postal Code", "Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
+              error.addError((row.getRowNum() + 1), "Postal Code",
+                  "Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
                   + "If one is populated, the other must be empty.");
               validations.add(error);
             }
@@ -3767,7 +3768,7 @@ public class GreeceHandler extends BaseSOFHandler {
               int maxlengthcomputed = crossCity.length() + cbPostal.length();
               if (maxlengthcomputed > 32) {
                 LOG.trace("Crossborder city and crossborder postal code should have a maximun of 30 characters.");
-                error.addError(row.getRowNum(), "Crossborder City/Postal",
+                error.addError((row.getRowNum() + 1), "Crossborder City/Postal",
                     "Crossborder city and crossborder postal code should have a maximun of 30 characters.");
                 validations.add(error);
               }
@@ -3775,27 +3776,27 @@ public class GreeceHandler extends BaseSOFHandler {
 
             if (!StringUtils.isEmpty(localPostal) && !localPostal.matches("-?\\d+(\\.\\d+)?")) {
               LOG.trace("Local postal code should have numeric values only.");
-              error.addError(row.getRowNum(), "Local Postal Code", "Only numeric values are allowed.");
+              error.addError((row.getRowNum() + 1), "Local Postal Code", "Only numeric values are allowed.");
               validations.add(error);
             }
 
             if ("Sold To Address".equalsIgnoreCase(sheet.getSheetName()) || "Local Lang translation Sold-to".equalsIgnoreCase(sheet.getSheetName())) {
               if (!StringUtils.isEmpty(street) && !StringUtils.isEmpty(poBox)) {
                 LOG.trace("Note that Street/PO Box cannot be filled at same time. Please fix and upload the template again.");
-                error.addError(row.getRowNum(), "Street/PO Box",
+                error.addError((row.getRowNum() + 1), "Street/PO Box",
                     "Note that Street/PO Box cannot be filled at same time. Please fix and upload the template again.");
                 validations.add(error);
               }
               if (!StringUtils.isEmpty(addressCont) && !StringUtils.isEmpty(attPerson)) {
                 LOG.trace("Note that Address Con't/Att. Person cannot be filled at same time. Please fix and upload the template again.");
-                error.addError(row.getRowNum(), "Address Con't/Att. Person",
+                error.addError((row.getRowNum() + 1), "Address Con't/Att. Person",
                     "Note that Address Con't/Att. Person cannot be filled at same time. Please fix and upload the template again.");
                 validations.add(error);
               }
 
               if (poBox1.contains("+")) {
                 LOG.trace("Please input value in numeric format. Please fix and upload the template again.");
-                error.addError(row.getRowNum(), "PO Box", "Please input value in numeric format. Please fix and upload the template again.");
+                error.addError((row.getRowNum() + 1), "PO Box", "Please input value in numeric format. Please fix and upload the template again.");
                 validations.add(error);
               }
             }
@@ -3803,14 +3804,14 @@ public class GreeceHandler extends BaseSOFHandler {
             if ("Ship To Address".equalsIgnoreCase(sheet.getSheetName()) || "Data".equalsIgnoreCase(sheet.getSheetName())) {
               if (phoneNo.contains("+")) {
                 LOG.trace("Please input value in numeric format. Please fix and upload the template again.");
-                error.addError(row.getRowNum(), "Phone No.", "Please input value in numeric format. Please fix and upload the template again.");
+                error.addError((row.getRowNum() + 1), "Phone No.", "Please input value in numeric format. Please fix and upload the template again.");
                 validations.add(error);
               }
             }
 
             if ((!StringUtils.isBlank(cmrNo) && StringUtils.isBlank(seqNo)) || (StringUtils.isBlank(cmrNo) && !StringUtils.isBlank(seqNo))) {
               LOG.trace("Note that CMR No. and Sequence No. should be filled at same time. ");
-              error.addError(row.getRowNum(), "Address Sequence No.",
+              error.addError((row.getRowNum() + 1), "Address Sequence No.",
                   "Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
               validations.add(error);
             }
@@ -3818,7 +3819,29 @@ public class GreeceHandler extends BaseSOFHandler {
             if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
               if ((isDataFilled) && StringUtils.isBlank(dataCmrNo)) {
                 LOG.trace("Please input CMR No. Please fix and upload the template again.");
-                error.addError(row.getRowNum(), "CMR No.", "Please input CMR No. Please fix and upload the template again.");
+                error.addError((row.getRowNum() + 1), "CMR No.", "Please input CMR No. Please fix and upload the template again.");
+              }
+              if (dataIsu.equalsIgnoreCase("5k") && !"@".equalsIgnoreCase(dataCtc)) {
+                LOG.trace("For IsuCd set to " + dataIsu + ", Ctc should be '@'");
+                error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + dataIsu);
+              } else if (!StringUtils.isBlank(dataIsu) && "21,8B".contains(dataIsu) && !"@".equalsIgnoreCase(dataCtc)) {
+                LOG.trace("Client Tier should be '@' for the selected ISU Code.");
+                error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier should be '@' for the selected ISU Code.");
+              } else if (!StringUtils.isBlank(dataIsu) && "34".equals(dataIsu)) {
+                if (StringUtils.isBlank(dataCtc) || !"QY".contains(dataCtc)) {
+                  LOG.trace("The row " + ((row.getRowNum() + 1))
+                      + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
+                  error.addError(((row.getRowNum() + 1)), "Client Tier",
+                      ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
+                }
+              } else if ((StringUtils.isNotBlank(dataIsu) && (StringUtils.isBlank(dataCtc) || !"@QY".contains(dataCtc))) || 
+                  (StringUtils.isNotBlank(dataCtc) && !"@QY".contains(dataCtc))) {
+                LOG.trace("The row " + (row.getRowNum() + 1)
+                    + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
+                error.addError((row.getRowNum() + 1), "Client Tier",
+                    ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
+              }
+              if (error.hasErrors()) {
                 validations.add(error);
               }
             }
@@ -3826,32 +3849,34 @@ public class GreeceHandler extends BaseSOFHandler {
             if (!"Data".equalsIgnoreCase(sheet.getSheetName())) {
               if ((isAddrFilled) && (StringUtils.isBlank(cmrNo) || StringUtils.isBlank(seqNo))) {
                 LOG.trace("Please input CMR Number and Address Sequence Number.");
-                error.addError(row.getRowNum(), "", "Please input CMR Number and Address Sequence Number.");
+                error.addError((row.getRowNum() + 1), "", "Please input CMR Number and Address Sequence Number.");
                 validations.add(error);
               }
             }
 
             if (localCity.contains("@") && localCity.length() > 0) {
               LOG.trace("Field contains invalid character. Please fix and upload the template again.");
-              error.addError(row.getRowNum(), "Local City", "Field contains invalid character. Please fix and upload the template again.");
+              error.addError((row.getRowNum() + 1), "Local City", "Field contains invalid character. Please fix and upload the template again.");
               validations.add(error);
             }
 
             if (crossCity.contains("@") && crossCity.length() > 0) {
               LOG.trace("Field contains invalid character. Please fix and upload the template again.");
-              error.addError(row.getRowNum(), "Cross Border City", "Field contains invalid character. Please fix and upload the template again.");
+              error.addError((row.getRowNum() + 1), "Cross Border City",
+                  "Field contains invalid character. Please fix and upload the template again.");
               validations.add(error);
             }
 
             if (localPostal.contains("@") && localPostal.length() > 0) {
               LOG.trace("Field contains invalid character. Please fix and upload the template again.");
-              error.addError(row.getRowNum(), "Local Postal Code", "Field contains invalid character. Please fix and upload the template again.");
+              error.addError((row.getRowNum() + 1), "Local Postal Code",
+                  "Field contains invalid character. Please fix and upload the template again.");
               validations.add(error);
             }
 
             if (cbPostal.contains("@") && cbPostal.length() > 0) {
               LOG.trace("Field contains invalid character. Please fix and upload the template again.");
-              error.addError(row.getRowNum(), "Cross Border Postal Code",
+              error.addError((row.getRowNum() + 1), "Cross Border Postal Code",
                   "Field contains invalid character. Please fix and upload the template again.");
               validations.add(error);
             }
@@ -3860,7 +3885,7 @@ public class GreeceHandler extends BaseSOFHandler {
               if (!StringUtils.isBlank(dataEnterprise)) {
                 if (!StringUtils.isNumeric(dataEnterprise) && !dataEnterprise.equals("@@@@@@")) {
                   LOG.trace("Enterprise number should have numeric values only.");
-                  error.addError(row.getRowNum(), "Enterprise No.", "Enterprise number should have numeric values only. ");
+                  error.addError((row.getRowNum() + 1), "Enterprise No.", "Enterprise number should have numeric values only. ");
                   validations.add(error);
                 }
               }

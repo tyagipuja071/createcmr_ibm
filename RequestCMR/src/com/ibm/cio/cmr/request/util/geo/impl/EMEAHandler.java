@@ -3912,6 +3912,8 @@ public class EMEAHandler extends BaseSOFHandler {
       for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
         String collectionCd = null;
         String salesRep = null;
+        String isuCd = null; // 8
+        String clientTier = null; // 9
         TemplateValidation error = new TemplateValidation("Data");
         row = sheet.getRow(rowIndex);
         if (row == null) {
@@ -3926,20 +3928,23 @@ public class EMEAHandler extends BaseSOFHandler {
             currCell = row.getCell(11);
           }
           salesRep = validateColValFromCell(currCell);
-
+          currCell = row.getCell(8);
+          isuCd = validateColValFromCell(currCell);
+          currCell = row.getCell(9);
+          clientTier = validateColValFromCell(currCell);
         }
         if ((!("@").equals(collectionCd)) && (!StringUtils.isEmpty(collectionCd))) {
           if (((collectionCd.length() == 2 && !collectionCd.chars().allMatch(Character::isDigit))
               || (collectionCd.length() == 6 && !collectionCd.chars().allMatch(Character::isLetterOrDigit)))) {
             LOG.trace(
                 "Note that Collection code can be either exactly 2 characters (both digits) or exactly 6 characters (alphanumeric). Please fix and upload the template again.");
-            error.addError(rowIndex, "Collection Code",
+            error.addError((row.getRowNum()+1), "Collection Code",
                 "Note that Collection code can be either exactly 2 characters (both digits) or exactly 6 characters (alphanumeric). Please fix and upload the template again.");
             validations.add(error);
           } else if (collectionCd.length() != 2 && collectionCd.length() != 6) {
             LOG.trace(
                 "Note that Collection code can be either exactly 2 characters or exactly 6 characters. Please fix and upload the template again.");
-            error.addError(rowIndex, "Collection Code",
+            error.addError((row.getRowNum()+1), "Collection Code",
                 "Note that Collection code can be either exactly 2 characters or exactly 6 characters. Please fix and upload the template again.");
             validations.add(error);
           }
@@ -3947,10 +3952,60 @@ public class EMEAHandler extends BaseSOFHandler {
 
         if ((!StringUtils.isEmpty(salesRep)) && !(salesRep.chars().allMatch(Character::isLetterOrDigit))) {
           LOG.trace("Note that Sales Rep. No. should be alphanumeric. Please fix and upload the template again.");
-          error.addError(rowIndex, "Sales Rep. No.", "Note that Sales Rep. No. should be alphanumeric. Please fix and upload the template again.");
+          error.addError((row.getRowNum()+1), "Sales Rep. No.", "Note that Sales Rep. No. should be alphanumeric. Please fix and upload the template again.");
+          validations.add(error);
+        }
+
+        if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
+          if (!SystemLocation.UNITED_KINGDOM.equals(country)) {
+            if ("5K".equals(isuCd) && !"@".equals(clientTier)) {
+              LOG.trace("Client Tier should be '@' for the selected ISU Code.");
+              error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier should be '@' for the selected ISU Code. ");
+            } else if (!StringUtils.isEmpty(isuCd) && "21,8B".contains(isuCd) && !"@".equals(clientTier)) {
+              LOG.trace("Client Tier should be '@' for the selected ISU Code.");
+              error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier should be '@' for the selected ISU Code.");
+            } else if (!StringUtils.isBlank(isuCd) && "34".equals(isuCd)) {
+              if (StringUtils.isBlank(clientTier) || !"QY".contains(clientTier)) {
+                LOG.trace("The row " + (row.getRowNum() + 1)
+                    + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
+                error.addError((row.getRowNum() + 1), "Client Tier",
+                    ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
+              }
+            } else if ((StringUtils.isNotBlank(isuCd) && (StringUtils.isBlank(clientTier) || !"@QY".contains(clientTier)))
+                || (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier))) {
+              LOG.trace("The row " + ((row.getRowNum() + 1))
+                  + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
+              error.addError(((row.getRowNum() + 1)), "Client Tier",
+                  ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
+            }
+          } else {
+            List<String> isuCdList = Arrays.asList("5K", "11", "05", "4F");
+            if (isuCdList.contains(isuCd) && !"@".equals(clientTier)) {
+              LOG.trace("Client Tier should be '@' for the selected ISU Code.");
+              error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier should be '@' for the selected ISU Code. ");
+            } else if (!StringUtils.isEmpty(isuCd) && "21,8B".contains(isuCd) && !"@".equals(clientTier)) {
+              LOG.trace("Client Tier should be '@' for the selected ISU Code.");
+              error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier should be '@' for the selected ISU Code.");
+            } else if (!StringUtils.isBlank(isuCd) && "34".equals(isuCd)) {
+              if (StringUtils.isBlank(clientTier) || !"QY".contains(clientTier)) {
+                LOG.trace("The row " + (row.getRowNum() + 1)
+                    + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
+                error.addError((row.getRowNum() + 1), "Client Tier",
+                    ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
+              }
+            } else if ((StringUtils.isNotBlank(isuCd) && (StringUtils.isBlank(clientTier) || !"@QY".contains(clientTier)))
+                || (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier))) {
+              LOG.trace("The row " + ((row.getRowNum() + 1))
+                  + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
+              error.addError(((row.getRowNum() + 1)), "Client Tier",
+                  ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
+            }
+          }
+          if (error.hasErrors()) {
           validations.add(error);
         }
       }
+    }
     }
 
     for (String name : countryAddrss) {
@@ -4064,17 +4119,17 @@ public class EMEAHandler extends BaseSOFHandler {
             // if local
             if (!StringUtils.isEmpty(streetCont) && !StringUtils.isEmpty(poBox)) {
               LOG.trace("Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
-              error.addError(rowIndex, "Street Con't/PO Box",
+              error.addError((row.getRowNum() + 1), "Street Con't/PO Box",
                   "Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
               validations.add(error);
             } else if (!StringUtils.isEmpty(poBox) && !StringUtils.isEmpty(attPerson)) {
               LOG.trace("Note that PO Box/ATT Person cannot be filled at same time. Please fix and upload the template again.");
-              error.addError(rowIndex, "PO Box/ATT Person",
+              error.addError((row.getRowNum() + 1), "PO Box/ATT Person",
                   "Note that PO Box/ATT Person cannot be filled at same time. Please fix and upload the template again.");
               validations.add(error);
             } else if (!StringUtils.isEmpty(attPerson) && !StringUtils.isEmpty(streetCont)) {
               LOG.trace("Note that ATT Person/Street Con't cannot be filled at same time. Please fix and upload the template again.");
-              error.addError(rowIndex, "ATT Person/Street Con't",
+              error.addError((row.getRowNum() + 1), "ATT Person/Street Con't",
                   "Note that ATT Person/Street Con't cannot be filled at same time. Please fix and upload the template again.");
               validations.add(error);
             }
@@ -4082,7 +4137,7 @@ public class EMEAHandler extends BaseSOFHandler {
             // else cross border
             if (!StringUtils.isEmpty(streetCont) && !StringUtils.isEmpty(poBox)) {
               LOG.trace("Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
-              error.addError(rowIndex, "Street Con't/PO Box",
+              error.addError((row.getRowNum() + 1), "Street Con't/PO Box",
                   "Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
               validations.add(error);
             }
