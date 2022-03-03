@@ -24,7 +24,15 @@ function addHandlersForAP() {
       setInacByCluster();
       setIsuOnIsic();
     });
-  }  
+  }
+}
+
+function addHandlersForISA() {
+  if (_isuHandler == null) {
+    _isuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+      setCtcOnIsuCdChangeISA();
+    });
+  }
 }
 
 function addHandlersForGCG() {
@@ -44,6 +52,12 @@ function addHandlersForGCG() {
   if (_bpRelTypeHandlerGCG == null && FormManager.getActualValue('reqType') != 'U') {
     _bpRelTypeHandlerGCG = dojo.connect(FormManager.getField('bpRelType'), 'onChange', function(value) {
       setAbbrvNameBPScen();
+    });
+  }
+
+  if (_isuHandler == null) {
+    _isuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+      setCtcOnIsuCdChangeGCG();
     });
   }
 
@@ -1889,6 +1903,35 @@ function setCtcOnIsuCdChangeASEAN() {
     if (reqType == 'U' || (reqType != 'U' && userRole == 'PROCESSOR')) {
       FormManager.enable('clientTier');
     }
+  }
+}
+
+function setCtcOnIsuCdChangeGCG() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  isuCd = FormManager.getActualValue('isuCd');
+  if (isuCd == '5K') {
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    FormManager.setValue('clientTier', '');
+    FormManager.readOnly('clientTier');
+  } else {
+    FormManager.enable('clientTier');
+  }
+}
+
+function setCtcOnIsuCdChangeISA() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  isuCd = FormManager.getActualValue('isuCd');
+  if (isuCd == '5K') {
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    FormManager.setValue('clientTier', '');
+    FormManager.readOnly('clientTier');
+  } else {
+      FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
+      FormManager.enable('clientTier');
   }
 }
 
@@ -3854,6 +3897,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(onIsicChange, [ SysLoc.AUSTRALIA, SysLoc.SINGAPORE, SysLoc.HONG_KONG, SysLoc.MACAO ]);
 
   GEOHandler.addAfterConfig(addHandlersForAP, GEOHandler.AP);
+  GEOHandler.addAfterConfig(addHandlersForISA, GEOHandler.ISA);
   GEOHandler.addAfterConfig(addHandlersForGCG, GEOHandler.GCG);
   GEOHandler.addAfterTemplateLoad(setInacByClusterHKMO, GEOHandler.GCG);
   GEOHandler.registerValidator(validateGSTForIndia, [ SysLoc.INDIA ], null, true);
@@ -3872,6 +3916,9 @@ dojo.addOnLoad(function() {
 	GEOHandler.addAfterConfig(handleExpiredClusterGCG, GEOHandler.GCG);
   GEOHandler.addAfterConfig(setCtcOnIsuCdChangeASEAN, GEOHandler.ASEAN);
   GEOHandler.addAfterTemplateLoad(setCtcOnIsuCdChangeASEAN, GEOHandler.ASEAN);
-  
+  GEOHandler.addAfterTemplateLoad(setCtcOnIsuCdChangeISA, GEOHandler.ISA);
+  GEOHandler.addAfterConfig(setCtcOnIsuCdChangeISA, GEOHandler.ISA);
+  GEOHandler.addAfterConfig(setCtcOnIsuCdChangeGCG, GEOHandler.GCG);
+  GEOHandler.addAfterTemplateLoad(setCtcOnIsuCdChangeGCG, GEOHandler.GCG);
   // India Handler
 });

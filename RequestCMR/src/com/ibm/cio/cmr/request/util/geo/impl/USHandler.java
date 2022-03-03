@@ -203,6 +203,10 @@ public class USHandler extends GEOHandler {
     } else {
       throw new CmrException(MessageUtil.ERROR_LEGACY_RETRIEVE);
     }
+    
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && "5K".equals(data.getIsuCd())) {
+      data.setClientTier("");
+    }
 
   }
 

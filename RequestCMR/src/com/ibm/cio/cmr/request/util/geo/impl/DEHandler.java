@@ -119,6 +119,9 @@ public class DEHandler extends GEOHandler {
     if (CmrConstants.PROSPECT_ORDER_BLOCK.equals(mainRecord.getCmrOrderBlock())) {
       data.setProspectSeqNo(mainRecord.getCmrAddrSeq());
     }
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && "5K".equals(data.getIsuCd())) {
+      data.setClientTier("");
+    }
   }
 
   @Override
@@ -711,9 +714,9 @@ public class DEHandler extends GEOHandler {
         for (Row row : sheet) {
           TemplateValidation error = new TemplateValidation(name);
           if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
-           
+
             String cmrNo = ""; // 0
-           
+
             // Address Sheet
             String seqNo = ""; // 1
             String custName1 = ""; // 2
@@ -906,9 +909,9 @@ public class DEHandler extends GEOHandler {
               }
             }
           }
-        if (error.hasErrors()) {
-          validations.add(error);
-        }
+          if (error.hasErrors()) {
+            validations.add(error);
+          }
         } // end row loop
       }
     }

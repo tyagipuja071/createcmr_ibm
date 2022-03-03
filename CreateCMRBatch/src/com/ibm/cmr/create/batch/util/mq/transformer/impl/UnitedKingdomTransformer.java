@@ -989,6 +989,18 @@ public class UnitedKingdomTransformer extends EMEATransformer {
       legacyCust.setSalesGroupRep(data.getRepTeamMemberNo());
     }
 
+    List<String> isuCdList = Arrays.asList("5K", "11", "05", "4F");
+    if (!StringUtils.isEmpty(data.getIsuCd()) && isuCdList.contains(data.getIsuCd())) {
+      legacyCust.setIsuCd(data.getIsuCd() + "7");
+    } else {
+      String isuCtc;
+      isuCtc = (!StringUtils.isEmpty(data.getIsuCd()) ? data.getIsuCd() : "")
+          + (!StringUtils.isEmpty(data.getClientTier()) ? data.getClientTier() : "");
+      if (isuCtc != null) {
+        legacyCust.setIsuCd(isuCtc);
+      }
+    }
+
     // CREATCMR-4293
     if (!StringUtils.isEmpty(data.getIsuCd())) {
       if (StringUtils.isEmpty(data.getClientTier())) {
@@ -1509,13 +1521,13 @@ public class UnitedKingdomTransformer extends EMEATransformer {
     } else if (!StringUtils.isEmpty(muData.getIsuCd()) && "34".equals(muData.getIsuCd()) && StringUtils.isBlank(muData.getClientTier())) {
       cust.setIsuCd(muData.getIsuCd() + "7");
     } else {
-    String isuClientTier = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "")
+      String isuClientTier = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "")
         + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
       if (isuClientTier != null && isuClientTier.endsWith("@")) {
         cust.setIsuCd((!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : cust.getIsuCd().substring(0, 2)) + "7");
       } else if (isuClientTier != null && isuClientTier.length() == 3) {
-      cust.setIsuCd(isuClientTier);
-    }
+        cust.setIsuCd(isuClientTier);
+      }
     }
 
     if (!StringUtils.isBlank(muData.getSpecialTaxCd())) {

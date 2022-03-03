@@ -859,7 +859,11 @@ public class ItalyHandler extends BaseSOFHandler {
     // Defect 1517492: ISU & CTC should be copied from imported company number
     if (isuClientTier != null) {
       data.setIsuCd(isuClientTier.substring(0, 2));
-      data.setClientTier(isuClientTier.substring(2));
+      if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && "5K".equals(data.getIsuCd())) {
+        data.setClientTier("");
+      } else {
+        data.setClientTier(isuClientTier.substring(2));
+      }
     }
     if (sbo != null && sbo.length() == 7) {
       sbo = sbo.substring(1, 3);
@@ -1875,8 +1879,7 @@ public class ItalyHandler extends BaseSOFHandler {
         }
 
         if (error.hasErrors()) {
-            validations.add(error);
-          }
+          validations.add(error);
         }
       }
     }
