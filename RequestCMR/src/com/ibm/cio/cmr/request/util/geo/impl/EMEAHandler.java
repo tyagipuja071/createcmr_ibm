@@ -4034,7 +4034,6 @@ public class EMEAHandler extends BaseSOFHandler {
         }
       }
     }
-    }
 
     for (String name : countryAddrss) {
       XSSFSheet sheet = book.getSheet(name);
