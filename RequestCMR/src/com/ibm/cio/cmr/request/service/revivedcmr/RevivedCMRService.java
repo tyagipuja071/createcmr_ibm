@@ -513,10 +513,14 @@ public class RevivedCMRService extends BaseSimpleService<List<RevivedCMRModel>> 
           container.setFinalCoverage((String) coverage[1]);
         }
 
-        List<Rule> rule = coverageRules.findRule(container.getFinalCoverage());
-        container.setFinalCoverageRules(rule);
-        rule = coverageRules.findRule(container.getBaseCoverage());
-        container.setBaseCoverageRules(rule);
+        try {
+          List<Rule> rule = coverageRules.findRule(container.getFinalCoverage());
+          container.setFinalCoverageRules(rule);
+          rule = coverageRules.findRule(container.getBaseCoverage());
+          container.setBaseCoverageRules(rule);
+        } catch (Exception e) {
+          LOG.debug(e.getMessage());
+        }
 
         container.setIsuCd((String) coverage[2]);
         container.setClientTierCd((String) coverage[3]);
