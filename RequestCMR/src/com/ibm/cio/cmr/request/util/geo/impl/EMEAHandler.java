@@ -2159,7 +2159,12 @@ public class EMEAHandler extends BaseSOFHandler {
         }
 
         if (StringUtils.isEmpty(data.getClientTier()) && !StringUtils.isEmpty(rdcData.getClientTier())) {
-          data.setClientTier(rdcData.getClientTier());
+          List<String> isuCdList = Arrays.asList("5K", "11", "05", "4F");
+          if (isuCdList.contains(data.getIsuCd())) {
+            data.setClientTier("");
+          } else {
+            data.setClientTier(rdcData.getClientTier());
+          }
         }
 
         // sales rep
