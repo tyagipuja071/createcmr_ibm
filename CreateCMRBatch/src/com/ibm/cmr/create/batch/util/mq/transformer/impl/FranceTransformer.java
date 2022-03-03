@@ -204,6 +204,12 @@ public class FranceTransformer extends MessageTransformer {
         messageHash.remove(field);
       }
     }
+    if (cmrData.getIsuCd().equals("5K") || cmrData.getIsuCd().equals("14") || cmrData.getIsuCd().equals("18") || cmrData.getIsuCd().equals("3T")
+        || cmrData.getIsuCd().equals("19") || cmrData.getIsuCd().equals("1R") || cmrData.getIsuCd().equals("31") || cmrData.getIsuCd().equals("4A")) {
+      handler.messageHash.put("ISU", cmrData.getIsuCd() + "7");
+    } else {
+      handler.messageHash.put("ISU", cmrData.getIsuCd() + handler.cmrData.getClientTier());
+    }
   }
 
   @Override
@@ -813,7 +819,13 @@ public class FranceTransformer extends MessageTransformer {
     handler.messageHash.put(MQMsgConstants.SIRET, "");
     handler.messageHash.put(MQMsgConstants.CODE_APE, "");
     handler.messageHash.put("TaxCode", "");
-    handler.messageHash.put("ISU", handler.cmrData.getIsuCd() + handler.cmrData.getClientTier());
+    if (handler.cmrData.getIsuCd().equals("5K") || handler.cmrData.getIsuCd().equals("14") || handler.cmrData.getIsuCd().equals("18")
+        || handler.cmrData.getIsuCd().equals("19") || handler.cmrData.getIsuCd().equals("1R") || handler.cmrData.getIsuCd().equals("31")
+        || handler.cmrData.getIsuCd().equals("3T") || handler.cmrData.getIsuCd().equals("4A")) {
+      handler.messageHash.put("ISU", handler.cmrData.getIsuCd() + "7");
+    } else {
+      handler.messageHash.put("ISU", handler.cmrData.getIsuCd() + handler.cmrData.getClientTier());
+    }
     handler.messageHash.put("VAT", "");
 
     LOG.debug("Request Type " + handler.mqIntfReqQueue.getReqType());
