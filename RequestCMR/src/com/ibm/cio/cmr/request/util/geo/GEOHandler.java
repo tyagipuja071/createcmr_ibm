@@ -943,6 +943,26 @@ public abstract class GEOHandler {
     return false;
   }
 
+  public boolean isAdminUpdate(Admin admin, String cmrIssuingCntry) {
+    String mainCustNm1 = admin.getMainCustNm1();
+    String mainCustNm2 = admin.getMainCustNm2();
+    String oldCustNm1 = admin.getOldCustNm1();
+    String oldCustNm2 = admin.getOldCustNm2();
+    if (mainCustNm1 != null && oldCustNm1 != null) {
+      if (!StringUtils.equals(admin.getMainCustNm1().trim(), admin.getOldCustNm1().trim())) {
+        LOG.trace(" - Field: " + mainCustNm1 + " Not equal " + oldCustNm1 + " - ");
+        return true;
+      }
+    }
+    if (mainCustNm2 != null && oldCustNm2 != null) {
+      if (!StringUtils.equals(admin.getMainCustNm2().trim(), admin.getOldCustNm2().trim())) {
+        LOG.trace(" - Field: " + mainCustNm2 + " Not equal " + oldCustNm2 + " - ");
+        return true;
+      }
+    }
+    return false;
+  }
+
   /**
    * @param cmrIssuingCntry
    */
