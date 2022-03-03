@@ -4009,7 +4009,7 @@ public class EMEAHandler extends BaseSOFHandler {
                   + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
               error.addError(((row.getRowNum() + 1)), "Client Tier",
                   ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
-            }
+            } 
           } else {
             List<String> isuCdList = Arrays.asList("5K", "11", "05", "4F");
             if (isuCdList.contains(isuCd) && !"@".equals(clientTier)) {
