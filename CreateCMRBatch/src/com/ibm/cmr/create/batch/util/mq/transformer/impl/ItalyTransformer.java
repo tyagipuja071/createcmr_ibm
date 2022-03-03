@@ -1065,6 +1065,12 @@ public class ItalyTransformer extends EMEATransformer {
       }
     }
 
+    // CREATCMR-4293
+    if (!StringUtils.isEmpty(data.getIsuCd())) {
+      if (StringUtils.isEmpty(data.getClientTier())) {
+        legacyCust.setIsuCd(data.getIsuCd() + "7");
+      }
+    }
   }
 
   private void updateFiscalDataForDoubleUpdates(EntityManager entityManager, Data data) {

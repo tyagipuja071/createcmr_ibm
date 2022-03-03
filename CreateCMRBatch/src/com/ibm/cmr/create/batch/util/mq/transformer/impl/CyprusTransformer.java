@@ -477,6 +477,12 @@ public class CyprusTransformer extends EMEATransformer {
     // other fields to be transformed is pending
     legacyCust.setBankBranchNo(data.getIbmDeptCostCenter() != null ? data.getIbmDeptCostCenter() : "");
     legacyCust.setEnterpriseNo(!StringUtils.isEmpty(data.getEnterprise()) ? data.getEnterprise() : "");
+    // CREATCMR-4293
+    if (!StringUtils.isEmpty(data.getIsuCd())) {
+      if (StringUtils.isEmpty(data.getClientTier())) {
+        legacyCust.setIsuCd(data.getIsuCd() + "7");
+      }
+    }
 
   }
 
