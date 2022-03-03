@@ -2261,7 +2261,7 @@ function addEMEAClientTierISULogic() {
 function addILClientTierISULogic() {
   var reqType = null;
   reqType = FormManager.getActualValue('reqType');
-  if (reqType != 'C') {
+  if (reqType != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true' || isuCd == '5k') {
     return;
   }
   if (!PageManager.isReadOnly()) {
