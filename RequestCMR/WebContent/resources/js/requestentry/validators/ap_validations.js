@@ -130,7 +130,6 @@ function addAfterConfigAP() {
     FormManager.readOnly('territoryCd');
     FormManager.readOnly('IndustryClass');
     FormManager.readOnly('subIndustryCd');
-    FormManager.readOnly('clientTier');   
   } else {
     FormManager.enable('mrcCd');
     FormManager.enable('isbuCd');
