@@ -1000,6 +1000,8 @@ public class USUtil extends AutomationUtil {
 
     LOG.debug("Verifying PayGo Accreditation for " + admin.getSourceSystId());
     boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
+    boolean isOnlyPayGoUpdated = changes != null && changes.isAddressChanged("PG01") && !changes.isAddressChanged("ZS01")
+        && !changes.isAddressChanged("ZI01");
     // do an initial check for PayGo cmrs
     /*
      * if (payGoAddredited && "PG".equals(data.getOrdBlk())) {
@@ -1029,7 +1031,7 @@ public class USUtil extends AutomationUtil {
 
       // check addresses
       if (StringUtils.isNotBlank(custTypCd) && !"NA".equals(custTypCd)) {
-        if (BUSINESS_PARTNER.equals(custTypCd) || LEASING.equals(custTypCd)) {
+        if (BUSINESS_PARTNER.equals(custTypCd) || LEASING.equals(custTypCd) && !isOnlyPayGoUpdated) {
           engineData.addNegativeCheckStatus("UPD_REVIEW_NEEDED",
               "Address updates for " + (custTypCd.equals(LEASING) ? "Leasing" : "Business Partner") + " scenario found.");
           details.append("Address updates for " + (custTypCd.equals(LEASING) ? "Leasing" : "Business Partner")
