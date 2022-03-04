@@ -20,6 +20,7 @@ import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.impl.gbl.CMDERequesterCheck;
 import com.ibm.cio.cmr.request.automation.impl.gbl.CalculateCoverageElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.DnBMatchingElement;
+import com.ibm.cio.cmr.request.automation.impl.gbl.RetrieveIBMValuesElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
@@ -27,8 +28,8 @@ import com.ibm.cio.cmr.request.automation.util.geo.AustraliaUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.AustriaUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.BeLuxUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.BrazilUtil;
-import com.ibm.cio.cmr.request.automation.util.geo.ChinaUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.CanadaUtil;
+import com.ibm.cio.cmr.request.automation.util.geo.ChinaUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.FranceUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.GermanyUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.IndiaUtil;
@@ -113,7 +114,7 @@ public abstract class AutomationUtil {
       put(SystemLocation.CHINA, ChinaUtil.class);
 
       put(SystemLocation.CANADA, CanadaUtil.class);
-      
+
       put(SystemLocation.SWEDEN, NordicsUtil.class);
       put(SystemLocation.NORWAY, NordicsUtil.class);
       put(SystemLocation.FINLAND, NordicsUtil.class);
@@ -1312,6 +1313,12 @@ public abstract class AutomationUtil {
       CoverageContainer container, boolean isCoverageCalculated) throws Exception {
     // TODO Auto-generated method stub
 
+  }
+
+  public boolean fillCoverageAttributes(RetrieveIBMValuesElement retrieveElement, EntityManager entityManager,
+      AutomationResult<OverrideOutput> results, StringBuilder details, OverrideOutput overrides, RequestData requestData,
+      AutomationEngineData engineData, String covType, String covId, String covDesc) throws Exception {
+    return false;
   }
 
 }

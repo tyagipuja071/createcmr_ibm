@@ -105,6 +105,14 @@ function setSboOnIMS(postCd, subIndustryCd, clientTier) {
   var ims = FormManager.getActualValue('subIndustryCd').substring(0, 1);
   var clientTier = FormManager.getActualValue('clientTier');
 
+  // CREATCMR-5252
+  var custSubGrpArray = [ 'INTAM', 'INTSO', 'INTIN', 'CROSS', 'IBMEM' ];
+
+  if (custSubGrpArray.includes(custSubGrp)) {
+    ims = 'N/A';
+  }
+  // CREATCMR-5252
+
   var result = cmr.query('DE.GET.SORTL_BY_ISUCTCIMS', {
     ISU_CD : '34',
     CLIENT_TIER : 'Q',
@@ -376,7 +384,8 @@ function ADDRESS_GRID_showCheck(value, rowIndex, grid) {
 
 function disableAutoProcForProcessor() {
   var _custSubGrp = FormManager.getActualValue('custSubGrp');
-  if (_pagemodel.userRole.toUpperCase() == "PROCESSOR" && FormManager.getActualValue('reqType') == 'C' && _custSubGrp != 'undefined' && _custSubGrp != '' && _custSubGrp == 'BUSPR') {
+  if (_pagemodel.userRole.toUpperCase() == "PROCESSOR" && FormManager.getActualValue('reqType') == 'C' && _custSubGrp != 'undefined'
+      && _custSubGrp != '' && _custSubGrp == 'BUSPR') {
     FormManager.show('DisableAutoProcessing', 'disableAutoProc');
     FormManager.enable('disableAutoProc');
     FormManager.getField('disableAutoProc').checked = false;
@@ -518,7 +527,8 @@ function validateAddressTypeForScenario() {
             scenarioDesc = 'IBM Employee';
           }
           if (Number(count) >= 1) {
-            return new ValidationResult(null, false, 'Only Sold To Address is allowed for ' + scenarioDesc + ' scenario. Please remove other addresses.');
+            return new ValidationResult(null, false, 'Only Sold To Address is allowed for ' + scenarioDesc
+                + ' scenario. Please remove other addresses.');
           } else {
             return new ValidationResult(null, true);
           }
@@ -575,7 +585,8 @@ function setAbbrevNameDEUpdate(cntry, addressMode, saving, finalSave, force) {
     var currCustNm = FormManager.getActualValue('custNm1');
 
     var addrType = FormManager.getActualValue('addrType');
-    if ((zs01Reccount == '' || (zs01Reccount != '' && Number(zs01Reccount) == 0)) && (oldCustNm != undefined && oldCustNm != '' && currCustNm != '' && currCustNm != oldCustNm)) {
+    if ((zs01Reccount == '' || (zs01Reccount != '' && Number(zs01Reccount) == 0))
+        && (oldCustNm != undefined && oldCustNm != '' && currCustNm != '' && currCustNm != oldCustNm)) {
       FormManager.setValue('abbrevNm', FormManager.getActualValue('custNm1').substring(0, 30));
     }
   }
@@ -858,6 +869,38 @@ function setAddressDetailsForView() {
   }
 }
 
+// CREATCMR-4293
+function setCTCValues() {
+
+  FormManager.removeValidator('clientTier', Validators.REQUIRED);
+
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+
+  // Business Partner
+  var custSubGrpForBusinessPartner = [ 'BUSPR' ];
+
+  // Business Partner
+  if (custSubGrpForBusinessPartner.includes(custSubGrp)) {
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    var isuCd = FormManager.getActualValue('isuCd');
+    if (isuCd == '8B') {
+      FormManager.setValue('clientTier', '');
+    }
+  }
+
+  // Internal AM, Internal - Internal, Internal SO
+  var custSubGrpForInternal = [ 'INTAM', 'INTIN', 'INTSO' ];
+
+  // Internal AM, Internal - Internal, Internal SO
+  if (custSubGrpForInternal.includes(custSubGrp)) {
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    var isuCd = FormManager.getActualValue('isuCd');
+    if (isuCd == '21') {
+      FormManager.setValue('clientTier', '');
+    }
+  }
+}
+
 function clientTierCodeValidator() {
   FormManager.addFormValidator((function() {
     return {
@@ -865,7 +908,21 @@ function clientTierCodeValidator() {
         var isuCode = FormManager.getActualValue('isuCd');
         var clientTierCode = FormManager.getActualValue('clientTier');
 
-        if (isuCode == '34') {
+        if (isuCode == '21' || isuCode == '8B') {
+          if (clientTierCode == '') {
+            $("#clientTierSpan").html('');
+
+            return new ValidationResult(null, true);
+          } else {
+            $("#clientTierSpan").html('');
+
+            return new ValidationResult({
+              id : 'clientTier',
+              type : 'text',
+              name : 'clientTier'
+            }, false, 'Client Tier can only accept blank.');
+          }
+        } else if (isuCode == '34') {
           if (clientTierCode == '') {
             FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
             return new ValidationResult({
@@ -881,6 +938,21 @@ function clientTierCodeValidator() {
               type : 'text',
               name : 'clientTier'
             }, false, 'Client Tier can only accept \'Q\' or \'Y\'.');
+          }
+        } else {
+          if (clientTierCode == 'Q' || clientTierCode == 'Y' || clientTierCode == '') {
+            $("#clientTierSpan").html('');
+
+            return new ValidationResult(null, true);
+          } else {
+            $("#clientTierSpan").html('');
+            $("#clientTierSpan").append('<span style="color:red" class="cmr-ast" id="ast-clientTier">* </span>');
+
+            return new ValidationResult({
+              id : 'clientTier',
+              type : 'text',
+              name : 'clientTier'
+            }, false, 'Client Tier can only accept \'Q\', \'Y\' or blank.');
           }
         }
 
@@ -933,6 +1005,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(lockCtcFieldOnIsu, GEOHandler.DE);
   GEOHandler.addAfterConfig(lockCtcFieldOnIsu, SysLoc.GERMANY);
 
+  // CREATCMR-4293
+  GEOHandler.addAfterTemplateLoad(setCTCValues, [ SysLoc.GERMANY ]);
   GEOHandler.registerValidator(clientTierCodeValidator, [ SysLoc.GERMANY ], null, true);
 
   GEOHandler.addAfterConfig(lockIBMTabForDE, GEOHandler.DE);

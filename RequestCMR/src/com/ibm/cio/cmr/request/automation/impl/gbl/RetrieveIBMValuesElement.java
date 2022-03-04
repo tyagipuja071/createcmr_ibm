@@ -14,6 +14,7 @@ import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.impl.OverridingElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
+import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.service.CmrClientService;
@@ -46,6 +47,7 @@ public class RetrieveIBMValuesElement extends OverridingElement {
     RequestEntryModel model = requestData.createModelFromRequest();
     Addr soldTo = requestData.getAddress("ZS01");
     ModelMap response = new ModelMap();
+    AutomationUtil countryUtil = AutomationUtil.getNewCountryUtil(requestData.getData().getCmrIssuingCntry());
 
     // added flow to skip retrieve IBM
     if (engineData.hasPositiveCheckStatus(AutomationEngineData.SKIP_RETRIEVE_VALUES)) {
@@ -139,6 +141,11 @@ public class RetrieveIBMValuesElement extends OverridingElement {
     }
 
     overrides.addOverride(getProcessCode(), "ADMN", "COV_BG_RETRIEVED_IND", model.getCovBgRetrievedInd(), "Y");
+
+    if (countryUtil != null) {
+      // hook to perform final calculations
+      countryUtil.fillCoverageAttributes(this, entityManager, results, details, overrides, requestData, engineData, covType, covId, covDesc);
+    }
 
     results.setResults("Successful Execution");
     results.setDetails(details.toString());

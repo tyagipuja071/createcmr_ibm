@@ -21,6 +21,7 @@ import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.impl.gbl.CalculateCoverageElement;
+import com.ibm.cio.cmr.request.automation.impl.gbl.RetrieveIBMValuesElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
@@ -528,6 +529,27 @@ public class CanadaUtil extends AutomationUtil {
           }
         } else {
           details.append("Cannot derive SBO from coverage");
+          LOG.debug("Cannot derive SBO from coverage - using default sbo");
+          LOG.debug("Final Coverage: " + coverageId);
+          if (StringUtils.isNotBlank(coverageId) && coverageId.equals("T0007992")) {
+            sbo = "458";
+            setDefaultSBO(details, overrides, coverageId, data, sbo);
+          } else if (StringUtils.isNotBlank(coverageId) && coverageId.equals("T0008059")) {
+            sbo = "570";
+            setDefaultSBO(details, overrides, coverageId, data, sbo);
+          } else if (StringUtils.isNotBlank(coverageId) && coverageId.equals("T0000604")) {
+            sbo = "486";
+            setDefaultSBO(details, overrides, coverageId, data, sbo);
+          } else if (StringUtils.isNotBlank(coverageId) && coverageId.equals("T0000549")) {
+            sbo = "481";
+            setDefaultSBO(details, overrides, coverageId, data, sbo);
+          } else if (StringUtils.isNotBlank(coverageId) && coverageId.equals("T0000595")) {
+            sbo = "457";
+            setDefaultSBO(details, overrides, coverageId, data, sbo);
+          } else if (StringUtils.isNotBlank(coverageId) && coverageId.equals("T0000597")) {
+            sbo = "460";
+            setDefaultSBO(details, overrides, coverageId, data, sbo);
+          }
         }
         // set AR-FAAR after sbo computation
         String arfaar = getArfarrBySbo(sbo, entityManager);
@@ -1070,6 +1092,48 @@ public class CanadaUtil extends AutomationUtil {
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("ID", reqId);
     return query.exists();
+  }
+
+  private void setDefaultSBO(StringBuilder details, OverrideOutput overrides, String coverageId, Data data, String sbo) {
+    details.append("Setting SBO based on Coverage ").append(coverageId).append(" to ").append(sbo).append("\n");
+    overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sbo);
+    // set Install Branch Office if blank
+    if (StringUtils.isBlank(data.getInstallBranchOff())) {
+      details.append("Setting IBO based on Coverage ").append(coverageId).append(" to ").append(sbo).append("\n");
+      overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(), sbo);
+    }
+  }
+
+  @Override
+  public boolean fillCoverageAttributes(RetrieveIBMValuesElement retrieveElement, EntityManager entityManager,
+      AutomationResult<OverrideOutput> results, StringBuilder details, OverrideOutput overrides, RequestData requestData,
+      AutomationEngineData engineData, String covType, String covId, String covDesc) throws Exception {
+    LOG.debug("Performing Canada final fillCoverageAttributes...");
+    Data data = requestData.getData();
+    String coverageId = covType + covId;
+    String sbo = "";
+    if (StringUtils.isBlank(data.getSalesBusOffCd())) {
+      if (StringUtils.isNotBlank(coverageId) && coverageId.equals("T0007992")) {
+        sbo = "458";
+        setDefaultSBO(details, overrides, coverageId, data, sbo);
+      } else if (StringUtils.isNotBlank(coverageId) && coverageId.equals("T0008059")) {
+        sbo = "570";
+        setDefaultSBO(details, overrides, coverageId, data, sbo);
+      } else if (StringUtils.isNotBlank(coverageId) && coverageId.equals("T0000604")) {
+        sbo = "486";
+        setDefaultSBO(details, overrides, coverageId, data, sbo);
+      } else if (StringUtils.isNotBlank(coverageId) && coverageId.equals("T0000549")) {
+        sbo = "481";
+        setDefaultSBO(details, overrides, coverageId, data, sbo);
+      } else if (StringUtils.isNotBlank(coverageId) && coverageId.equals("T0000595")) {
+        sbo = "457";
+        setDefaultSBO(details, overrides, coverageId, data, sbo);
+      } else if (StringUtils.isNotBlank(coverageId) && coverageId.equals("T0000597")) {
+        sbo = "460";
+        setDefaultSBO(details, overrides, coverageId, data, sbo);
+      }
+    }
+    return true;
   }
 
 }
