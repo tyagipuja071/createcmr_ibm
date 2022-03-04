@@ -37,6 +37,7 @@ function addDPLChecklistAttachmentValidator() {
               for (var j = 0; j < chkListNameSplit.length; j++) {
                 if (chkListNameSplit[j] == custName.trim()) {
                   results.splice(i, 1);
+                  i--;
                 }
               }
             }
