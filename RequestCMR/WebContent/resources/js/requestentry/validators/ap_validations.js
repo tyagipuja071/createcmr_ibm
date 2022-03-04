@@ -121,14 +121,16 @@ function addAfterConfigAP() {
   if (role == 'REQUESTER' || role == 'VIEWER') {
     FormManager.readOnly('mrcCd');
     FormManager.readOnly('isbuCd');
-    if (role == 'VIEWER')
-    FormManager.readOnly('abbrevNm');
+    if (role == 'VIEWER') {
+      FormManager.readOnly('abbrevNm');
+      FormManager.readOnly('clientTier');
+    }
     FormManager.readOnly('sectorCd');
     FormManager.readOnly('abbrevLocn');
     FormManager.readOnly('territoryCd');
     FormManager.readOnly('IndustryClass');
     FormManager.readOnly('subIndustryCd');
-    FormManager.readOnly('clientTier');
+    FormManager.readOnly('clientTier');   
   } else {
     FormManager.enable('mrcCd');
     FormManager.enable('isbuCd');
@@ -203,18 +205,6 @@ function addAfterConfigAP() {
   }
 
   if (role == 'REQUESTER' && reqType == 'C') {
-    if (cntry == SysLoc.SINGAPORE) {
-      if (custSubGrp == 'INTER'|| custSubGrp == 'XINT'|| custSubGrp == 'DUMMY' || custSubGrp == 'BLUMX' || custSubGrp == 'MKTPC')
-        FormManager.readOnly('clientTier');
-      else
-        FormManager.enable('clientTier');
-    }
-    if (cntry == SysLoc.PHILIPPINES || cntry == SysLoc.MALASIA || cntry == SysLoc.BRUNEI || cntry == SysLoc.INDONESIA || cntry == SysLoc.THAILAND) {
-      if (custSubGrp == 'INTER'|| custSubGrp == 'XINT' || custSubGrp == 'DUMMY' || custSubGrp == 'XDUMM')
-        FormManager.readOnly('clientTier');
-      else
-        FormManager.enable('clientTier');
-    }
  /*
    * if (cntry == SysLoc.NEW_ZEALAND) { if (custSubGrp == 'INTER' || custSubGrp ==
    * 'XINT' || custSubGrp == 'DUMMY' || custSubGrp == 'XDUMM' || custSubGrp ==
@@ -3181,10 +3171,10 @@ function setISUDropDownValues() {
   var cluster = FormManager.getActualValue('apCustClusterId');
   var ctc = FormManager.getActualValue('clientTier');
   var isuCd = FormManager.getActualValue('isuCd');
-  if (!cluster || !ctc || !isuCd) {
+  var _cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  if (!cluster || !ctc || !isuCd || _cmrIssuingCntry == '796' || _cmrIssuingCntry == '616'  || _cmrIssuingCntry == '834' || _cmrIssuingCntry == '852' || _cmrIssuingCntry == '818' || _cmrIssuingCntry == '856' || _cmrIssuingCntry == '749') {
     return;
   }
-  var _cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
   var _cluster = FormManager.getActualValue('apCustClusterId');
   var scenario = FormManager.getActualValue('custGrp');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
