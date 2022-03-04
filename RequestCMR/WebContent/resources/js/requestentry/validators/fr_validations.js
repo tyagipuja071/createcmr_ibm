@@ -1019,10 +1019,11 @@ function setCtcForIsu5K() {
   var reqType = FormManager.getActualValue('reqType');
   var role = FormManager.getActualValue('userRole').toUpperCase();
   if (isuCd == '5K' || isuCd == '14' || isuCd == '18' || isuCd == '19' || isuCd == '1R' || isuCd == '31' || isuCd == '3T' || isuCd == '4A') {
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
     FormManager.setValue('clientTier', '');
     FormManager.readOnly('clientTier');
   } else {
-    if (reqType == 'U' || (reqType != 'U' && userRole == 'PROCESSOR')) {
+    if (reqType == 'U' || (reqType != 'U' && role == 'PROCESSOR')) {
       FormManager.enable('clientTier');
     }
   }
