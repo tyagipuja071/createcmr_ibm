@@ -23,17 +23,26 @@ function addDPLChecklistAttachmentValidator() {
           var resultsChecklist = cmr.query('GET_DPL_CHECKLIST_ATTACHMENT', qParams);
           if (resultsChecklist != null) {
             for (var i = 0; i < resultsChecklist.length; i++) {
-              checklistNames.push(resultsChecklist[i].ret1);
-              checklistNames.push(resultsChecklist[i].ret2);
+              var rawfilename = resultsChecklist[i].ret1;
+              var fileStr = rawfilename.substring(rawfilename.lastIndexOf('/') + 1, rawfilename.indexOf('.'));
+              checklistNames.push(fileStr); // filename
+              checklistNames.push(resultsChecklist[i].ret2); // comment
             }
           }
 
           if (results != null) {
+            var chkListNameSplit = checklistNames.toString().split(',');
             for (var i = 0; i < results.length; i++) {
               var custName = results[i].ret1 + ' ' + results[i].ret2;
-              if (!checklistNames.toString().includes(custName.trim())) {
-                errornames.push(results[i].ret1 + ' ' + results[i].ret2);
+              for (var j = 0; j < chkListNameSplit.length; j++) {
+                if (chkListNameSplit[j] == custName.trim()) {
+                  results.splice(i, 1);
+                }
               }
+            }
+            for (var i = 0; i < results.length; i++) {
+              var errname = results[i].ret1 + ' ' + results[i].ret2;
+              errornames.push(errname.trim());
             }
           }
           if (errornames.length > 0) {
