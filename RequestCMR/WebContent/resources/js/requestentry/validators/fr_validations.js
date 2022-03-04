@@ -4131,6 +4131,6 @@ dojo.addOnLoad(function() {
 
   // CREATCMR-4293
   GEOHandler.addAfterTemplateLoad(setCTCValues, GEOHandler.FR);
-  GEOHandler.registerValidator(clientTierCodeValidator, GEOHandler.FR, null, true);
+  GEOHandler.registerValidator(clientTierCodeValidator, [ '706' ], null, true);
 
 });
