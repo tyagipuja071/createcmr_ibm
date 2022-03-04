@@ -13,6 +13,10 @@ function addAfterConfigGR() {
   if (viewOnlyPage == 'true') {
     FormManager.readOnly('inacCd');
     FormManager.readOnly('enterprise');
+    FormManager.readOnly('salesTeamCd');
+    FormManager.readOnly('repTeamMemberNo');
+    FormManager.readOnly('salesBusOffCd');
+    FormManager.readOnly('clientTier');
   }
 
   var role = FormManager.getActualValue('userRole').toUpperCase();
@@ -36,6 +40,20 @@ function addAfterConfigGR() {
 
   FormManager.readOnly('salesTeamCd');
   FormManager.readOnly('subIndustryCd');
+}
+
+function addISUHandler() {
+  var _CTCHandler = null;
+  _isuCdHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+    setValuesWRTIsuCtc();
+  });
+  _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
+    setValuesWRTIsuCtc(value);
+  });
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  if (role == "VIEWER") {
+    FormManager.readOnly('clientTier');
+  }
 }
 
 function getImportedIndcForGreece() {
@@ -810,17 +828,15 @@ function addHandlersForGR() {
   }
 
   if (_gtcISUHandler == null) {
-    if (FormManager.getActualValue('reqType') == 'C') {
-      _gtcISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
-        setClientTierForCreates(value);
-      });
-    }
+    _gtcISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+      setClientTierForCreates(value);
+    });
   }
 
   if (_CTCHandler == null) {
     _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
       setISRValuesGR();
-      setClientTierForCreates(value);
+      setClientTierForCreates();
       addEnterpriseValidatorGR();
     });
   }
@@ -852,11 +868,27 @@ function addHandlersForGR() {
   }
 }
 
-function setClientTierForCreates(isuCd, clientTier) {
+function setClientTierForCreates(isuCd) {
   var reqType = null;
   reqType = FormManager.getActualValue('reqType');
-  var isuCd = FormManager.getActualValue('isuCd');
+  if (isuCd == null || !isuCd) {
+    var isuCd = FormManager.getActualValue('isuCd');
+  }
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
   var clientTiers = FormManager.getActualValue('clientTier');
+  if (isuCd == '5K') {
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    FormManager.setValue('clientTier', '');
+    FormManager.readOnly('clientTier');
+    return;
+  } else if ((custSubGrp == 'PRICU' || custSubGrp == 'SPAS') && isuCd == '34') {
+    FormManager.setValue('clientTier', 'Q');
+    FormManager.readOnly('clientTier');
+  } else if (custSubGrp == 'BUSPR' || custSubGrp == 'INTER' || custSubGrp == 'XBP' || custSubGrp == 'XINTR') {
+    FormManager.readOnly('clientTier');
+  } else {
+    FormManager.enable('clientTier');
+  }
   if (reqType != 'C') {
     return;
   }
@@ -2121,14 +2153,12 @@ function setCTCValues() {
   }
 
 }
-
 function clientTierCodeValidator() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
         var isuCode = FormManager.getActualValue('isuCd');
         var clientTierCode = FormManager.getActualValue('clientTier');
-
         if (isuCode == '21' || isuCode == '8B') {
           if (clientTierCode == '') {
             $("#clientTierSpan").html('');
@@ -2142,6 +2172,23 @@ function clientTierCodeValidator() {
               type : 'text',
               name : 'clientTier'
             }, false, 'Client Tier can only accept blank.');
+          }
+        } else if (isuCode == '34') {
+          if (clientTierCode == '') {
+            FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
+            return new ValidationResult({
+              id : 'clientTier',
+              type : 'text',
+              name : 'clientTier'
+            }, false, 'Client Tier code is Mandatory.');
+          } else if (clientTierCode == 'Q' || clientTierCode == 'Y') {
+            return new ValidationResult(null, true);
+          } else {
+            return new ValidationResult({
+              id : 'clientTier',
+              type : 'text',
+              name : 'clientTier'
+            }, false, 'Client Tier can only accept \'Q\' or \'Y\'.');
           }
         } else {
           if (clientTierCode == 'Q' || clientTierCode == 'Y' || clientTierCode == '') {
@@ -2164,7 +2211,43 @@ function clientTierCodeValidator() {
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
-// CREATCMR-4293
+
+function setValuesWRTIsuCtc(ctc) {
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var isu = FormManager.getActualValue('isuCd');
+  if (ctc == null) {
+    var ctc = FormManager.getActualValue('clientTier');
+  }
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  if (isu == '34' && ctc == 'Y') {
+    FormManager.setValue('enterprise', '822840');
+    FormManager.setValue('salesTeamCd', '000000');
+    FormManager.setValue('repTeamMemberNo', '000000');
+    FormManager.setValue('salesBusOffCd', '000');
+    if (role == 'REQUESTER' || role == 'PROCESSOR') {
+      FormManager.enable('enterprise');
+      FormManager.enable('salesTeamCd')
+      FormManager.enable('repTeamMemberNo');
+      FormManager.enable('salesBusOffCd');
+    }
+  } else if (isu == '5K' && ctc == '') {
+    FormManager.setValue('enterprise', '985999');
+    FormManager.setValue('salesTeamCd', '000000');
+    FormManager.setValue('repTeamMemberNo', '000000');
+    FormManager.setValue('salesBusOffCd', '000');
+    if (role == 'REQUESTER' || role == 'PROCESSOR') {
+      FormManager.enable('enterprise');
+      FormManager.enable('salesTeamCd')
+      FormManager.enable('repTeamMemberNo');
+      FormManager.enable('salesBusOffCd');
+    }
+  }
+  if (role == 'REQUESTER') {
+    FormManager.removeValidator('enterprise', Validators.REQUIRED);
+  } else {
+    FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise' ]);
+  }
+}
 
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
@@ -2232,10 +2315,13 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addInacCodeValidator, [ SysLoc.GREECE ], null, true);
   GEOHandler.registerValidator(addPaymentModeValidator, [ SysLoc.GREECE ], null, true);
   GEOHandler.registerValidator(addEnterpriseValidator, [ SysLoc.GREECE ], null, true);
+  GEOHandler.addAfterConfig(setClientTierForCreates, [ SysLoc.GREECE ]);
   GEOHandler.addAddrFunction(preFillTranslationAddrWithSoldToForTR, [ SysLoc.GREECE ]);
 
   // CREATCMR-4293
   GEOHandler.addAfterTemplateLoad(setCTCValues, [ SysLoc.GREECE ]);
   GEOHandler.registerValidator(clientTierCodeValidator, [ SysLoc.GREECE ], null, true);
 
+  GEOHandler.addAfterTemplateLoad(addISUHandler, [ SysLoc.GREECE ]);
+  GEOHandler.addAfterConfig(addISUHandler, [ SysLoc.GREECE ]);
 });

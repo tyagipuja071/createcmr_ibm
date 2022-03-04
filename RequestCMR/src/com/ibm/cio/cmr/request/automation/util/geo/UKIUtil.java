@@ -642,7 +642,7 @@ public class UKIUtil extends AutomationUtil {
       if (SystemLocation.UNITED_KINGDOM.equals(data.getCmrIssuingCntry())) {
         fields = calculate32SValuesForUK(entityManager, data.getIsuCd(), data.getClientTier(), data.getIsicCd(), requestData);
       } else if (SystemLocation.IRELAND.equals(data.getCmrIssuingCntry())) {
-        fields = calculate32SValuesForIE(entityManager, data.getIsuCd(), data.getClientTier(), data.getIsicCd());
+        fields = calculate32SValuesForIE(entityManager, data.getIsuCd(), data.getClientTier(), data.getIsicCd(), data.getCmrIssuingCntry());
       }
       if (fields != null) {
         details.append("Coverage calculated successfully using 34Q logic.").append("\n");
@@ -708,17 +708,16 @@ public class UKIUtil extends AutomationUtil {
           return container;
         }
       }
-    }
-    return null;
-
-  }
-
-  private UkiFieldsContainer calculate32SValuesForIE(EntityManager entityManager, String isuCd, String clientTier, String isicCd) {
-    if ("34".equals(isuCd) && StringUtils.isNotBlank(clientTier) && StringUtils.isNotBlank(isicCd)) {
+    } else { 
       UkiFieldsContainer container = new UkiFieldsContainer();
-      String sql = ExternalizedQuery.getSql("QUERY.GET.SALESREPSBO.IRELAND");
+      String sql = ExternalizedQuery.getSql("QUERY.UK.GET.SBOSR_FOR_ISIC");
+      String repTeamCd = "";
+      String isuCtc = (StringUtils.isNotBlank(isuCd) ? isuCd : "") + (StringUtils.isNotBlank(clientTier) ? clientTier : "");
+      //2P0 in repTeamCd refers to 2.0 for distinguishing and fetching the values according to CREATCMR-4530 logic.
+      repTeamCd = isuCtc + "2P0";
       PreparedQuery query = new PreparedQuery(entityManager, sql);
       query.setParameter("ISU_CD", "%" + isuCd + "%");
+      query.setParameter("ISIC_CD", repTeamCd);
       query.setParameter("CLIENT_TIER", "%" + clientTier + "%");
       query.setForReadOnly(true);
       List<Object[]> results = query.getResults();
@@ -734,6 +733,27 @@ public class UKIUtil extends AutomationUtil {
 
   }
 
+  private UkiFieldsContainer calculate32SValuesForIE(EntityManager entityManager, String isuCd, String clientTier, String isicCd, 
+  String issuingCntry) {
+    String isuCtc = (StringUtils.isNotBlank(isuCd) ? isuCd : "") + (StringUtils.isNotBlank(clientTier) ? clientTier : "");
+    if (isuCtc.equals("34Y") || isuCtc.equals("5K")) {
+      UkiFieldsContainer container = new UkiFieldsContainer();
+      String sql = ExternalizedQuery.getSql("QUERY.GET.SALESREP.IRELAND");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("ISSUING_CNTRY", issuingCntry);
+      query.setParameter("ISU_CD", "%" + isuCtc + "%");
+      query.setForReadOnly(true);
+      List<Object[]> results = query.getResults();
+      if (results != null && results.size() == 1) {
+        String sbo = (String) results.get(0)[0];
+        String salesRep = (String) results.get(0)[1];
+        container.setSbo(sbo);
+        container.setSalesRep(salesRep);
+        return container;
+      }
+    }
+    return null;
+  }
   @Override
   public String getAddressTypeForGbgCovCalcs(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData) throws Exception {
     Data data = requestData.getData();
@@ -826,4 +846,31 @@ public class UKIUtil extends AutomationUtil {
   public List<String> getSkipChecksRequestTypesforCMDE() {
     return Arrays.asList("C", "U", "M", "D", "R");
   }
+
+  @Override
+  public void performCoverageBasedOnGBG(CalculateCoverageElement covElement, EntityManager entityManager, AutomationResult<OverrideOutput> results,
+      StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData, String covFrom,
+      CoverageContainer container, boolean isCoverageCalculated) throws Exception {
+    Data data = requestData.getData();
+    String bgId = data.getBgId();
+    String gbgId = data.getGbgId();
+    String country = data.getCmrIssuingCntry();
+    String sql = ExternalizedQuery.getSql("QUERY.GET_GBG_FROM_LOV");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CD", gbgId);
+    query.setParameter("COUNTRY", country);
+    query.setForReadOnly(true);
+    String result = query.getSingleResult(String.class);
+    LOG.debug("perform coverage based on GBG-------------");
+    LOG.debug("result--------" + result);
+    if (result != null || bgId.equals("DB502GQG")) {
+      LOG.debug("Setting isu ctc to 5K based on gbg matching.");
+      details.append("Setting isu ctc to 5K based on gbg matching.");
+      overrides.addOverride(covElement.getProcessCode(), "DATA", "ISU_CD", data.getIsuCd(), "5K");
+      overrides.addOverride(covElement.getProcessCode(), "DATA", "CLIENT_TIER", data.getClientTier(), "");
+    }
+    LOG.debug("isu" + data.getIsuCd());
+    LOG.debug("client tier" + data.getClientTier());
+  }
+
 }
