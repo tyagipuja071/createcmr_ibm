@@ -859,7 +859,11 @@ public class ItalyHandler extends BaseSOFHandler {
     // Defect 1517492: ISU & CTC should be copied from imported company number
     if (isuClientTier != null) {
       data.setIsuCd(isuClientTier.substring(0, 2));
-      data.setClientTier(isuClientTier.substring(2));
+      if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && "5K".equals(data.getIsuCd())) {
+        data.setClientTier("");
+      } else {
+        data.setClientTier(isuClientTier.substring(2));
+      }
     }
     if (sbo != null && sbo.length() == 7) {
       sbo = sbo.substring(1, 3);
@@ -1818,30 +1822,50 @@ public class ItalyHandler extends BaseSOFHandler {
         if ((!StringUtils.isEmpty(fiscalCode) || !StringUtils.isEmpty(identClient) || !StringUtils.isEmpty(vatNumPartitaIVA)
             || !StringUtils.isEmpty(enterpriseNumber)) && (!StringUtils.isEmpty(taxCodeIVACode) || !StringUtils.isEmpty(collectionCode))) {
           LOG.trace("Company level fields and Billing level fields can not be filled at the same time");
-          error.addError(rowIndex, "Company [Fiscal code, Vat#, Ident. Cliente, Enterprise number] | Billing [Tax Code/ Code IVA, Collection Code]",
+          error.addError((row.getRowNum() + 1), "Company [Fiscal code, Vat#, Ident. Cliente, Enterprise number] | Billing [Tax Code/ Code IVA, Collection Code]",
               "Company level fields and Billing level fields can not be filled at the same time");
-          validations.add(error);
         }
 
         if ((!StringUtils.isEmpty(isu) && StringUtils.isEmpty(clientTier)) || (StringUtils.isEmpty(isu) && !StringUtils.isEmpty(clientTier))) {
           LOG.trace("ISU and Client Tier must both be filled if either one was suppplied on the template");
-          error.addError(rowIndex, "Data Tab", "ISU and Client Tier must both be filled if either one was suppplied on the template");
-          validations.add(error);
+          error.addError((row.getRowNum() + 1), "Data Tab", "ISU and Client Tier must both be filled if either one was suppplied on the template");
+        }
+
+        List<String> isuBlankCtc = Arrays.asList("5K", "14", "19", "3T", "4A");
+        if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
+          if (isuBlankCtc.contains(isu)) {
+            if (!"@".equals(clientTier)) {
+              LOG.trace("Client Tier should be '@' for the ISU Code: " + isu + ".");
+              error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier should be '@' for the selected ISU Code: " + isu + ".<br>");
+            }
+          } else if (StringUtils.isNotBlank(isu) && "21,8B".contains(isu) && !"@".equals(clientTier)) {
+            LOG.trace("Client Tier should be '@' for the selected ISU Code.");
+            error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier should be '@' for the selected ISU Code.<br>");
+          } else if (!StringUtils.isBlank(isu) && "34".equals(isu)) {
+            if (StringUtils.isBlank(clientTier) || !"QY".contains(clientTier)) {
+              LOG.trace("The row " + (row.getRowNum() + 1)
+                  + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
+              error.addError((row.getRowNum() + 1), "Client Tier",
+                  ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
+            }
+          } else if ((StringUtils.isNotBlank(isu) && (StringUtils.isBlank(clientTier) || !"@QY".contains(clientTier)))
+              || (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier))) {
+            LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
+            error.addError((row.getRowNum() + 1), "Client Tier", ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
+          }
         }
 
         if (!StringUtils.isBlank(salesRepNo)) {
           if (!StringUtils.isAlphanumeric(salesRepNo)) {
             LOG.trace("Sales Rep Number should have Alphanumeric values only.");
-            error.addError(row.getRowNum(), "Sales Rep No.", "Sales Rep Number should have Alphanumeric values only. ");
-            validations.add(error);
+            error.addError((row.getRowNum() + 1), "Sales Rep No.", "Sales Rep Number should have Alphanumeric values only. ");
           }
         }
 
         if (!StringUtils.isBlank(sbo)) {
           if (!StringUtils.isAlphanumeric(sbo)) {
             LOG.trace("SBO should have Alphanumeric values only.");
-            error.addError(row.getRowNum(), "SBO.", "SBO should have Alphanumeric values only. ");
-            validations.add(error);
+            error.addError((row.getRowNum() + 1), "SBO.", "SBO should have Alphanumeric values only. ");
           }
         }
 
@@ -1850,9 +1874,12 @@ public class ItalyHandler extends BaseSOFHandler {
           Matcher matcher = upperCaseNumeric.matcher(collectionCode);
           if (!matcher.matches()) {
             LOG.trace("Collection Code should contain only upper-case latin and numeric characters.");
-            error.addError(row.getRowNum(), "Collection Code.", "Collection Code should contain only upper-case latin and numeric characters. ");
-            validations.add(error);
+            error.addError((row.getRowNum() + 1), "Collection Code.", "Collection Code should contain only upper-case latin and numeric characters. ");
           }
+        }
+
+        if (error.hasErrors()) {
+          validations.add(error);
         }
       }
     }

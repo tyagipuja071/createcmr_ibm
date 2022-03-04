@@ -5,6 +5,7 @@
  */
 
 var _usSicmenHandler = null;
+var _usIsuHandler = null;
 /**
  * Adds the validator for Invoice-to that only 3 address lines can be specified
  */
@@ -233,6 +234,12 @@ function afterConfigForUS() {
   if (reqType == 'U') {
     FormManager.readOnly('custType');
   }
+	
+	if (_usIsuHandler == null && FormManager.getField('isuCd')) {
+    _usIsuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+      setClientTierValuesUS();
+    });
+  }
 
 }
 
@@ -376,6 +383,25 @@ function canRemoveAddress(value, rowIndex, grid) {
   }
 }
 
+function setClientTierValuesUS() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  isuCd = FormManager.getActualValue('isuCd');
+  if (isuCd == '5K') {
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+    FormManager.resetValidations('clientTier');
+    FormManager.setValue('clientTier', '');
+    FormManager.readOnly('clientTier');
+  } else {
+    var role = FormManager.getActualValue('userRole').toUpperCase();
+    var reqType = FormManager.getActualValue('reqType');
+    if (reqType == 'U' || (reqType != 'U' && userRole == 'PROCESSOR')) {
+      FormManager.enable('clientTier');
+    }
+  }
+}
+
 function usRestrictCode() {
   if (FormManager.getActualValue('custSubGrp') == 'KYN') {
     FormManager.setValue('inacType', 'I');
@@ -409,4 +435,6 @@ dojo.addOnLoad(function() {
   /* requireDPL check ad assessment for all users */
   GEOHandler.registerValidator(addDPLCheckValidator, [ SysLoc.USA ], GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(addDPLAssessmentValidator, [ SysLoc.USA ], null, true);
+  GEOHandler.addAfterTemplateLoad(setClientTierValuesUS, [ SysLoc.USA ] );
+  GEOHandler.addAfterConfig(setClientTierValuesUS, [ SysLoc.USA ] );
 });

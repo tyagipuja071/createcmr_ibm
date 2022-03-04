@@ -559,6 +559,7 @@ var _pstExemptHandlers = null;
 var _postalCodeHandler = null;
 var _salesBusOffCdHandler = null;
 var _gtcAddrTypeHandlerCA = [];
+var _ISUHandler = null;
 function addFieldHandlers() {
 
   if (_inacCodeHandler == null) {
@@ -624,7 +625,14 @@ function addFieldHandlers() {
       });
     }
   }
-
+  if (_ISUHandler == null) {
+    _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+      if (!value) {
+        value = FormManager.getActualValue('isuCd');
+      }
+      setIsuCtcFor5k();
+    });
+  }
 }
 
 var _pstExemptHandler = null;
@@ -671,6 +679,25 @@ function addPSTExemptHandler() {
         dojo.byId('ast-PSTExemptLicNum').style.display = 'none';
       }
     });
+  }
+}
+
+function setIsuCtcFor5k() {
+  isuCd = FormManager.getActualValue('isuCd');
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (viewOnlyPage == 'true') {
+    return;
+  }
+  if (custSubGrp == 'ECO') {
+    return;
+  }
+  if (isuCd == '5K') {
+    FormManager.setValue('clientTier', '');
+    FormManager.readOnly('clientTier');
+  } else {
+    var reqType = FormManager.getActualValue('reqType');
+    FormManager.enable('clientTier');
   }
 }
 
@@ -1219,6 +1246,9 @@ dojo.addOnLoad(function() {
   // GEOHandler.addToggleAddrTypeFunction(toggleAddrTypesForCA, [ SysLoc.CANADA
   // ]);
   GEOHandler.addToggleAddrTypeFunction(addPostlCdLogic, [ SysLoc.CANADA ]);
+  GEOHandler.addAfterConfig(setIsuCtcFor5k, [ SysLoc.CANADA ]);
+  GEOHandler.addAfterTemplateLoad(setIsuCtcFor5k, [ SysLoc.CANADA ]);
+
   GEOHandler.addAddrFunction(addCAAddressHandler, [ SysLoc.CANADA ]);
   GEOHandler.enableCopyAddress([ SysLoc.CANADA ], validateCACopy, [ 'ZP01', 'ZP02' ]);
 

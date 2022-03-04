@@ -211,6 +211,12 @@ public class FranceHandler extends GEOHandler {
     String search_term = data.getSearchTerm();
     data.setSalesBusOffCd(search_term);
     LOG.trace("SORTL: " + data.getSalesBusOffCd());
+
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())
+        && ("5K".equals(data.getIsuCd()) || "14".equals(data.getIsuCd()) || "18".equals(data.getIsuCd()) || "19".equals(data.getIsuCd())
+            || "1R".equals(data.getIsuCd()) || "31".equals(data.getIsuCd()) || "3T".equals(data.getIsuCd()) || "4A".equals(data.getIsuCd()))) {
+      data.setClientTier("");
+    }
   }
 
   @Override
@@ -1353,7 +1359,12 @@ public class FranceHandler extends GEOHandler {
       XSSFSheet sheet = book.getSheet(name);
       LOG.debug("validating for sheet " + name);
       if (sheet != null) {
-        for (Row row : sheet) {
+        for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
+          Row row = sheet.getRow(rowIndex);
+          if (row == null) {
+            return;
+          }
+
           if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
             DataFormatter df = new DataFormatter();
             String cmrNo = ""; // 0
@@ -1380,6 +1391,42 @@ public class FranceHandler extends GEOHandler {
             }
 
             if ("Data".equals(name)) {
+              String isuCd = ""; // 5
+              String ctc = ""; // 6
+              currCell = (XSSFCell) row.getCell(5);
+              isuCd = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(6);
+              ctc = validateColValFromCell(currCell);
+
+              if (isuCd.equalsIgnoreCase("5K | 5K-Comp Int Sys Design") && !ctc.equalsIgnoreCase("@")) {
+                TemplateValidation error = new TemplateValidation(name);
+                LOG.trace("For IsuCd set to '5K' Ctc should be '@'");
+                error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier Value should always be @ for IsuCd Value :" + isuCd);
+                validations.add(error);
+              } else if (!StringUtils.isEmpty(isuCd) && (isuCd.startsWith("21") || isuCd.startsWith("8B")) && !"@".equals(ctc)) {
+                TemplateValidation error = new TemplateValidation(name);
+                LOG.trace("Client Tier should be '@' for the selected ISU Code.");
+                error.addError((row.getRowNum() + 1), "Client Tier", "Client Tier should be '@' for the selected ISU Code.");
+                validations.add(error);
+              } else if (!StringUtils.isBlank(isuCd) && isuCd.startsWith("34")) {
+                if (StringUtils.isBlank(ctc) || !"QY".contains(ctc)) {
+                  TemplateValidation error = new TemplateValidation(name);
+                  LOG.trace("The row " + (row.getRowNum() + 1)
+                      + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.");
+                  error.addError((row.getRowNum() + 1), "Client Tier",
+                      ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
+                  validations.add(error);
+                }
+              } else if ((StringUtils.isNotBlank(isuCd) && (StringUtils.isBlank(ctc) || !"@QY".contains(ctc))) || 
+                  (StringUtils.isNotBlank(ctc) && !"@QY".contains(ctc))) {
+                TemplateValidation error = new TemplateValidation(name);
+                LOG.trace("The row " + (row.getRowNum() + 1)
+                    + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
+                error.addError((row.getRowNum() + 1), "Client Tier",
+                    ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
+                validations.add(error);
+              }
+
               // String vat = "";// 12
               // currCell = (XSSFCell) row.getCell(12);
               // vat = validateColValFromCell(currCell);
