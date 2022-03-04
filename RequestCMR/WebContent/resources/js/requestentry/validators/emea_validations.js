@@ -1826,7 +1826,8 @@ function setSrSboValuesOnEnterprise(enterprise) {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var enterprise = FormManager.getActualValue('enterprise');
   var isuCd = FormManager.getActualValue('isuCd');
-  if (reqType != 'C' || isuCd == '5K') {
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (reqType != 'C' || isuCd == '5K' || custSubGrp == 'BUSPR') {
     return;
   }
 
