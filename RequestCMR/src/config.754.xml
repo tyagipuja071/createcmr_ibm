@@ -76,7 +76,7 @@
           <width>30</width>
           <length>6</length>
         </column>
-        <column number="true" exactLength="true">
+        <column number="false" exactLength="true">
           <label>SBO</label>
           <dbColumn>SALES_BO_CD</dbColumn>
           <width>20</width>
