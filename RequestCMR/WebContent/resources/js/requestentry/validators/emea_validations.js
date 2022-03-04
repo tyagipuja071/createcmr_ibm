@@ -577,7 +577,7 @@ function afterConfigForUKI() {
 function addHandlersForUK() {
   if (_isuCdHandler == null && FormManager.getField('isuCd')) {
     _isuCdHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
-      if (_pagemodel.userRole == 'PROCESSOR') {
+      if (_pagemodel.userRole.toUpperCase() == 'PROCESSOR') {
         setClientTierValuesUKI();
       }
       autoSetSBO(value, _pagemodel.isuCd);
