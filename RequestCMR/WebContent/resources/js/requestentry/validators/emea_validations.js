@@ -33,6 +33,7 @@ var _gtcVatExemptHandler = null;
 var _postCdHandlerUK = null;
 
 var _CTCHandlerIL = null;
+var _isuCdHandlerIL = null;
 var _CTCHandlerIE = null;
 function addHandlersForIL() {
   for (var i = 0; i < _gtcAddrTypesIL.length; i++) {
@@ -52,7 +53,16 @@ function addHandlersForIL() {
           FormManager.setValue('salesBusOffCd', '000');
           FormManager.setValue('repTeamMemberNo', '000651');
         }
+        var isuCd = FormManager.getActualValue('isuCd');
+        setEnterpriseSalesRepSBO(isuCd);
       }
+    });
+  }
+
+  if (_isuCdHandlerIL == null && FormManager.getField('isuCd')) {
+    _isuCdHandlerIL = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+      var clientTier = FormManager.getActualValue('clientTier');
+      setEnterpriseSalesRepSBO(value);
     });
   }
 
@@ -1817,7 +1827,7 @@ function setSrSboValuesOnEnterprise(enterprise) {
   var enterprise = FormManager.getActualValue('enterprise');
   var isuCd = FormManager.getActualValue('isuCd');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  if (reqType != 'C') {
+  if (reqType != 'C' || isuCd == '5K' || custSubGrp == 'BUSPR') {
     return;
   }
 
@@ -3844,6 +3854,22 @@ function resetSubIndustryCdGR() {
       FormManager.readOnly('subIndustryCd');
     }
   }, 1000);
+}
+
+function setEnterpriseSalesRepSBO(isuCd) {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
+  var isuCd = FormManager.getActualValue('isuCd');
+  if (isuCd == '5K') {
+    FormManager.setValue('enterprise', '985999');
+    FormManager.setValue('salesBusOffCd', '006');
+    FormManager.setValue('repTeamMemberNo', '000651');
+    FormManager.setValue('clientTier', '7')
+  }
 }
 
 function setISRValues() {
@@ -10066,6 +10092,48 @@ function emeaPpsCeidValidator() {
   }
 }
 
+function clientTierValidatorIS() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var clientTier = FormManager.getActualValue('clientTier');
+        var validCtcValuesFor34 = [ 'Q', 'Y' ];
+        var isuCd = FormManager.getActualValue('isuCd');
+        if (isuCd == '34') {
+          if (clientTier != null && clientTier != undefined) {
+            if (!validCtcValuesFor34.includes(clientTier)) {
+              return new ValidationResult(null, false, 'Client Tier can only accept Q, Y for ISU : 34');
+            }
+          }
+          return new ValidationResult(null, true);
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var clientTier = FormManager.getActualValue('clientTier');
+        var isuCd = FormManager.getActualValue('isuCd');
+        var validCtcValues = [ '7' ];
+        if (isuCd != '34') {
+          if (clientTier != null && clientTier != undefined) {
+            if (!validCtcValues.includes(clientTier)) {
+              return new ValidationResult(null, false, 'Client Tier can only accept 7 for ISU :' + isuCd);
+            }
+          }
+          return new ValidationResult(null, true);
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 function clientTierCodeValidator() {
   FormManager.addFormValidator((function() {
     return {
@@ -10292,6 +10360,11 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addPostalCodeLengthValidator, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.addAfterConfig(setAbbrvLocCrossBorderScenario, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(setAbbrvLocCrossBorderScenarioOnChange, [ SysLoc.ISRAEL ]);
+  GEOHandler.addAfterConfig(addHandlersForIL, [ SysLoc.ISRAEL ]);
+  GEOHandler.addAfterTemplateLoad(addHandlersForIL, [ SysLoc.ISRAEL ]);
+  GEOHandler.addAfterConfig(setEnterpriseSalesRepSBO, [ SysLoc.ISRAEL ]);
+  GEOHandler.addAfterTemplateLoad(setEnterpriseSalesRepSBO, [ SysLoc.ISRAEL ]);
+  GEOHandler.registerValidator(clientTierValidatorIS, [ SysLoc.ISRAEL ], null, true);
 
   // Turkey
   GEOHandler.addAfterConfig(setFieldsToReadOnlyTR, [ SysLoc.TURKEY ]);
