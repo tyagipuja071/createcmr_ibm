@@ -2312,42 +2312,6 @@ function addISUHandlerIT() {
   });
 }
 
-function addILClientTierISULogic() {
-  var reqType = null;
-  reqType = FormManager.getActualValue('reqType');
-  if (reqType != 'C') {
-    return;
-  }
-  if (!PageManager.isReadOnly()) {
-    FormManager.enable('clientTier');
-  }
-  _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
-    if (!value) {
-      value = FormManager.getActualValue('isuCd');
-    }
-    if (!value) {
-      FormManager.setValue('clientTier', '');
-    }
-    var tierValues = null;
-    if (value == '32') {
-      tierValues = [ 'B', 'M', 'N', 'S', 'Z' ];
-    } else if (value == '34') {
-      tierValues = [ '4', '6', 'A', 'E', 'Q', 'V', 'Y', 'Z' ];
-    } else if (value != '') {
-      tierValues = [ '7', 'Z' ];
-    }
-
-    if (tierValues != null) {
-      FormManager.limitDropdownValues(FormManager.getField('clientTier'), tierValues);
-    } else {
-      FormManager.resetDropdownValues(FormManager.getField('clientTier'));
-    }
-  });
-  if (_ISUHandler && _ISUHandler[0]) {
-    _ISUHandler[0].onChange();
-  }
-}
-
 function setClientTierValuesIT(isuCd) {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
@@ -10338,7 +10302,6 @@ dojo.addOnLoad(function() {
 
   // Israel Specific
   GEOHandler.addAfterConfig(afterConfigForIsrael, [ SysLoc.ISRAEL ]);
-  GEOHandler.addAfterConfig(addILClientTierISULogic, [ SysLoc.ISRAEL ]);
   GEOHandler.registerValidator(addILAddressTypeValidator, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(addILAddressTypeMailingValidator, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(addILAddressTypeBillingValidator, [ SysLoc.ISRAEL ], null, true);
