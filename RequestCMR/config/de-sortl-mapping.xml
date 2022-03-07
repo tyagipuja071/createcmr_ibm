@@ -493,4 +493,55 @@
       T0005957
     </sortl>
   </mapping>
+  <mapping>
+    <isu>
+      34
+    </isu>
+    <ctc>
+      Y
+    </ctc>
+    <sortl>
+      T0007970
+    </sortl>
+  </mapping>
+  <mapping>
+    <isu>
+      5K
+    </isu>
+    <ctc>
+    </ctc>
+    <sortl>
+      T0009083
+    </sortl>
+  </mapping>
+  <mapping>
+    <isu>
+      19
+    </isu>
+    <ctc>
+    </ctc>
+    <sortl>
+      A0005226
+    </sortl>
+  </mapping>
+  <mapping>
+    <isu>
+      3T
+    </isu>
+    <ctc>
+    </ctc>
+    <sortl>
+      I0000046
+    </sortl>
+  </mapping>
+  <mapping>
+    <isu>
+      4F
+    </isu>
+    <ctc>
+    </ctc>
+    <sortl>
+      I0000045
+    </sortl>
+  </mapping>
 </mappings>
