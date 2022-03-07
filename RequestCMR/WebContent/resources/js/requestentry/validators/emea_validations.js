@@ -8615,7 +8615,8 @@ function setCtcFieldMandtUKI() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var isuCd = FormManager.getActualValue('isuCd');
-  if (role != 'PROCESSOR') {
+  var reqType = FormManager.getActualValue('reqType');
+  if (role != 'PROCESSOR' || reqType != 'C') {
     return;
   }
   if (cntry == '866') {
