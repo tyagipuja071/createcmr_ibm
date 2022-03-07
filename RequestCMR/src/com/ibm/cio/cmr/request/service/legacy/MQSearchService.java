@@ -132,7 +132,7 @@ public class MQSearchService extends BaseSimpleService<MQSearchResult<?>> {
       useCountry = "866";
       break;
     case SystemLocation.ISRAEL:
-      useCountry = "754";
+      useCountry = "756";
       break;
     default:
       useCountry = country;
