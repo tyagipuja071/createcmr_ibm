@@ -1133,6 +1133,9 @@ function addPostlCdLogic(cntry, addressMode, details) {
 
 function setDefaultARFAARBySBO(sboValue) {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
   if (sboValue != '') {
     if (_scenarioArFaar != '') {
       FormManager.setValue('adminDeptCd', _scenarioArFaar);
