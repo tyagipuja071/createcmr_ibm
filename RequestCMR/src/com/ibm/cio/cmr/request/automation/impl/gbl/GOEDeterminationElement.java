@@ -7,7 +7,7 @@ import java.io.IOException;
 
 import javax.persistence.EntityManager;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.wink.client.ClientConfig;
 import org.apache.wink.client.ClientResponse;

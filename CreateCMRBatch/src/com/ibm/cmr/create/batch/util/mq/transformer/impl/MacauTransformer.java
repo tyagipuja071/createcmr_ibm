@@ -1,6 +1,6 @@
 package com.ibm.cmr.create.batch.util.mq.transformer.impl;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cmr.create.batch.util.mq.LandedCountryMap;

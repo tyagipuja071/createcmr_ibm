@@ -8,7 +8,7 @@ import java.io.IOException;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.TagSupport;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 
 /**
  * 
@@ -29,7 +29,7 @@ public class CheckListSectionTag extends TagSupport {
     sb.append("    <td colspan=\"3\">\n");
     sb.append("      <table class=\"checklist-questions\">\n");
     sb.append("        <tr>\n");
-    sb.append("          <th colspan=\"3\">" + StringEscapeUtils.escapeHtml(this.name) + "</th>\n");
+    sb.append("          <th colspan=\"3\">" + StringEscapeUtils.escapeHtml4(this.name) + "</th>\n");
     sb.append("        </tr>\n");
     try {
       this.pageContext.getOut().write(sb.toString());

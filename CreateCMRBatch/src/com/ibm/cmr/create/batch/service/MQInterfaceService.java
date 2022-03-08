@@ -24,7 +24,7 @@ import java.util.Properties;
 import javax.persistence.EntityManager;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jdom.JDOMException;
 
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
