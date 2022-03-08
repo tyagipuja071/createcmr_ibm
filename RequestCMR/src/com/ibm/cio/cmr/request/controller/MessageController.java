@@ -35,8 +35,8 @@ public class MessageController extends BaseController {
    * @param response
    * @throws IOException
    */
-  @RequestMapping(value = "/messages/{msgCode}")
-  public void getMessage(@PathVariable int msgCode, HttpServletRequest request, HttpServletResponse response) throws IOException {
+  @RequestMapping(value = "/messages/{msgCode1}")
+  public void getMessage(@PathVariable("msgCode1") int msgCode, HttpServletRequest request, HttpServletResponse response) throws IOException {
     String params = request.getParameter("params");
     String msg = MessageUtil.getMessage(msgCode);
     if (params != null) {

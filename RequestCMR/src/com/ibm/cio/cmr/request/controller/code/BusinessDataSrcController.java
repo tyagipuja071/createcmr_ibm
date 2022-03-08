@@ -40,8 +40,7 @@ public class BusinessDataSrcController extends BaseController {
   private BdsMaintainService addservice;
 
   @RequestMapping(value = "/code/bds_tbl_info", method = RequestMethod.GET)
-  public @ResponseBody
-  ModelAndView showbds(HttpServletRequest request, ModelMap model) {
+  public @ResponseBody ModelAndView showbds(HttpServletRequest request, ModelMap model) {
     AppUser user = AppUser.getUser(request);
     if (!user.isAdmin()) {
       LOG.warn("User " + user.getIntranetId() + " (" + user.getBluePagesName() + ") tried accessing the Users system function.");
@@ -57,8 +56,8 @@ public class BusinessDataSrcController extends BaseController {
   }
 
   @RequestMapping(value = "/code/addbds")
-  public @ResponseBody
-  ModelAndView maintainBds(HttpServletRequest request, HttpServletResponse response, BusinessDataSrcModel model) throws CmrException {
+  public @ResponseBody ModelAndView maintainBds(HttpServletRequest request, HttpServletResponse response, BusinessDataSrcModel model)
+      throws CmrException {
     AppUser user = AppUser.getUser(request);
     if (!user.isAdmin()) {
       LOG.warn("User " + user.getIntranetId() + " (" + user.getBluePagesName() + ") tried accessing the Users system function.");
@@ -95,10 +94,9 @@ public class BusinessDataSrcController extends BaseController {
     return mv;
   }
 
-  @RequestMapping(value = "/code/bdsdetails/{fieldId}")
-  public @ResponseBody
-  ModelAndView maintainBdsDetails(@PathVariable("fieldId") String fieldId, HttpServletRequest request, HttpServletResponse response,
-      BusinessDataSrcModel model) throws CmrException {
+  @RequestMapping(value = "/code/bdsdetails/{fieldId1}")
+  public @ResponseBody ModelAndView maintainBdsDetails(@PathVariable("fieldId1") String fieldId, HttpServletRequest request,
+      HttpServletResponse response, BusinessDataSrcModel model) throws CmrException {
     AppUser user = AppUser.getUser(request);
     if (!user.isAdmin()) {
       LOG.warn("User " + user.getIntranetId() + " (" + user.getBluePagesName() + ") tried accessing the Users system function.");
