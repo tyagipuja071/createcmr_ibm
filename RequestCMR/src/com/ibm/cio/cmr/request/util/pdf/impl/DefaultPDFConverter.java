@@ -26,8 +26,8 @@ import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.pdf.PDFConverter;
-import com.itextpdf.io.font.FontConstants;
-import com.itextpdf.kernel.color.Color;
+import com.itextpdf.io.font.constants.StandardFonts;
+import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
 import com.itextpdf.kernel.pdf.PdfDocument;
@@ -36,9 +36,9 @@ import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Cell;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
-import com.itextpdf.layout.property.HorizontalAlignment;
-import com.itextpdf.layout.property.TextAlignment;
-import com.itextpdf.layout.property.UnitValue;
+import com.itextpdf.layout.properties.HorizontalAlignment;
+import com.itextpdf.layout.properties.TextAlignment;
+import com.itextpdf.layout.properties.UnitValue;
 
 /**
  * Generates PDF files for a <strong>single-request</strong> type
@@ -61,8 +61,8 @@ public class DefaultPDFConverter implements PDFConverter {
    * @throws IOException
    */
   public DefaultPDFConverter(String cmrIssuingCntry) throws IOException {
-    this.regularFont = PdfFontFactory.createFont(FontConstants.HELVETICA);
-    this.boldFont = PdfFontFactory.createFont(FontConstants.HELVETICA_BOLD);
+    this.regularFont = PdfFontFactory.createFont(StandardFonts.HELVETICA);
+    this.boldFont = PdfFontFactory.createFont(StandardFonts.HELVETICA_BOLD);
     this.cmrIssuingCntry = cmrIssuingCntry;
   }
 
@@ -219,7 +219,7 @@ public class DefaultPDFConverter implements PDFConverter {
       }
       Cell dplCell = createValueCell(dplCheckText, 1, 3);
       if ("F".equals(dplCheck)) {
-        dplCell.setFontColor(Color.RED);
+        dplCell.setFontColor(ColorConstants.RED);
       }
       address.addCell(dplCell);
 
@@ -469,7 +469,7 @@ public class DefaultPDFConverter implements PDFConverter {
 
   protected Table createDetailsTable(float[] percentArray) {
     Table table = new Table(UnitValue.createPercentArray(percentArray));
-    table.setWidthPercent(100).setTextAlignment(TextAlignment.LEFT).setHorizontalAlignment(HorizontalAlignment.LEFT);
+    table.setWidth(UnitValue.createPercentValue(100)).setTextAlignment(TextAlignment.LEFT).setHorizontalAlignment(HorizontalAlignment.LEFT);
     return table;
   }
 

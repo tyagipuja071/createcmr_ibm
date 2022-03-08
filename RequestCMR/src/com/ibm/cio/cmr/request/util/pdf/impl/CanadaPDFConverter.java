@@ -15,7 +15,7 @@ import org.apache.log4j.Logger;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
-import com.itextpdf.io.font.FontConstants;
+import com.itextpdf.io.font.constants.StandardFonts;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
 import com.itextpdf.kernel.pdf.PdfDocument;
@@ -33,7 +33,7 @@ public class CanadaPDFConverter extends DefaultPDFConverter {
 
   public CanadaPDFConverter(String cmrIssuingCntry) throws IOException {
     super(cmrIssuingCntry);
-    this.regularFont = PdfFontFactory.createFont(FontConstants.HELVETICA);
+    this.regularFont = PdfFontFactory.createFont(StandardFonts.HELVETICA);
   }
 
   @Override

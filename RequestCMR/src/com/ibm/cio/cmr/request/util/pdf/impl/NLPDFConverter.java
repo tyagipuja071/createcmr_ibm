@@ -22,11 +22,12 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
-import com.itextpdf.io.font.FontConstants;
+import com.itextpdf.io.font.constants.StandardFonts;
 import com.itextpdf.io.font.PdfEncodings;
-import com.itextpdf.kernel.color.Color;
+import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
+import com.itextpdf.kernel.font.PdfFontFactory.EmbeddingStrategy;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
@@ -44,7 +45,7 @@ public class NLPDFConverter extends DefaultPDFConverter {
 
   public NLPDFConverter(String cmrIssuingCntry) throws IOException {
     super(cmrIssuingCntry);
-    this.regularFont = PdfFontFactory.createFont(FontConstants.HELVETICA);
+    this.regularFont = PdfFontFactory.createFont(StandardFonts.HELVETICA);
   }
 
   @Override
@@ -220,7 +221,7 @@ public class NLPDFConverter extends DefaultPDFConverter {
       }
       Cell dplCell = createValueCell(dplCheckText, 1, 3);
       if ("F".equals(dplCheck)) {
-        dplCell.setFontColor(Color.RED);
+        dplCell.setFontColor(ColorConstants.RED);
       }
       address.addCell(dplCell);
 
@@ -370,11 +371,11 @@ public class NLPDFConverter extends DefaultPDFConverter {
         switch (textContainingLanguage(text)) {
         case "ARABIC":
           FONT = classLoader.getResource("Behdad-Regular.ttf").getPath();
-          font = PdfFontFactory.createFont(FONT, PdfEncodings.IDENTITY_H, true);
+          font = PdfFontFactory.createFont(FONT, PdfEncodings.IDENTITY_H, EmbeddingStrategy.PREFER_EMBEDDED);
           break;
         case "RUSSIAN":
           FONT = classLoader.getResource("Lora-Regular.ttf").getPath();
-          font = PdfFontFactory.createFont(FONT, PdfEncodings.IDENTITY_H, true);
+          font = PdfFontFactory.createFont(FONT, PdfEncodings.IDENTITY_H, EmbeddingStrategy.PREFER_EMBEDDED);
           break;
         default:
           Paragraph label = new Paragraph();

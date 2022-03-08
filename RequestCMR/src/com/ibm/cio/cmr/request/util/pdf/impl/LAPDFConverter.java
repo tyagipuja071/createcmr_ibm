@@ -19,8 +19,8 @@ import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.LAHandler;
-import com.itextpdf.io.font.FontConstants;
-import com.itextpdf.kernel.color.Color;
+import com.itextpdf.io.font.constants.StandardFonts;
+import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
 import com.itextpdf.kernel.pdf.PdfDocument;
@@ -39,7 +39,7 @@ public class LAPDFConverter extends DefaultPDFConverter {
 
   public LAPDFConverter(String cmrIssuingCntry) throws IOException {
     super(cmrIssuingCntry);
-    this.regularFont = PdfFontFactory.createFont(FontConstants.HELVETICA);
+    this.regularFont = PdfFontFactory.createFont(StandardFonts.HELVETICA);
   }
 
   @Override
@@ -196,7 +196,7 @@ public class LAPDFConverter extends DefaultPDFConverter {
       }
       Cell dplCell = createValueCell(dplCheckText, 1, 3);
       if ("F".equals(dplCheck)) {
-        dplCell.setFontColor(Color.RED);
+        dplCell.setFontColor(ColorConstants.RED);
       }
       address.addCell(dplCell);
 
