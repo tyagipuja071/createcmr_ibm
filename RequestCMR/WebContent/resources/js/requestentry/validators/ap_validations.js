@@ -3658,11 +3658,13 @@ function addValidatorBasedOnCluster() {
       validate : function() {
         var custSubType = FormManager.getActualValue('custSubGrp');
         var cluster = FormManager.getActualValue('apCustClusterId');
-        if ((custSubType != 'ECSYS' && custSubType != 'XECO' ) && (cluster == '08039' || cluster == '08037'|| cluster == '08038' || cluster == '08040' || cluster == '08042' ||cluster == '08044' || cluster == '08047'|| cluster == '08046')) {
-          return new ValidationResult(null, false, 'Ecosytem Partners Cluster is not allowed for selected scenario.');
+        if(FormManager.getActualValue('reqType') != 'C') {
+          return new ValidationResult(null, true);
         }
-     else{
-        return new ValidationResult(null, true);
+        if ((custSubType != 'ECSYS' && custSubType != 'XECO' ) && (cluster == '08039' || cluster == '08037' || cluster == '08038' || cluster == '08040' || cluster == '08042' ||cluster == '08044' || cluster == '08047'|| cluster == '08046')) {
+          return new ValidationResult(null, false, 'Ecosystem Partners Cluster is not allowed for selected scenario.');
+        } else {
+          return new ValidationResult(null, true);
         }
       }
     };
