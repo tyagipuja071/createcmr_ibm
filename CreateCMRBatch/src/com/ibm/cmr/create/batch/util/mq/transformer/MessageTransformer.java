@@ -5,7 +5,7 @@ package com.ibm.cmr.create.batch.util.mq.transformer;
 
 import javax.persistence.EntityManager;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 
