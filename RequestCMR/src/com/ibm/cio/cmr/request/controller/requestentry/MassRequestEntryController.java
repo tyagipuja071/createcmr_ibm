@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -93,8 +93,8 @@ public class MassRequestEntryController extends BaseController {
   @Autowired
   private DeleteReactivateService delReactivateService;
 
-  @RequestMapping(value = "/massrequest/{reqId}")
-  public ModelAndView showRequestDetail(@PathVariable("reqId") long reqId, HttpServletRequest request, HttpServletResponse response,
+  @RequestMapping(value = "/massrequest/{reqId1}")
+  public ModelAndView showRequestDetail(@PathVariable("reqId1") long reqId, HttpServletRequest request, HttpServletResponse response,
       RequestEntryModel model) throws Exception {
     ModelAndView mv = null;
     request.getSession().setAttribute("lastReqId", reqId);

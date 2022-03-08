@@ -6,7 +6,7 @@ package com.ibm.cio.cmr.request.automation.util;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.utils.coverage.rules.Condition;
