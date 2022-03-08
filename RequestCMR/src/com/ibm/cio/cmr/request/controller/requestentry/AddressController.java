@@ -50,8 +50,7 @@ public class AddressController extends BaseController {
   @Autowired
   MachineService machineService;
 
-  @RequestMapping(
-      value = "/request/address/list")
+  @RequestMapping(value = "/request/address/list")
   public ModelMap doSearch(HttpServletRequest request, HttpServletResponse response, AddressModel model) throws CmrException {
 
     List<AddressModel> results = service.search(model, request);
@@ -60,9 +59,7 @@ public class AddressController extends BaseController {
     return map;
   }
 
-  @RequestMapping(
-      value = "/request/address/process",
-      method = { RequestMethod.POST, RequestMethod.GET })
+  @RequestMapping(value = "/request/address/process", method = { RequestMethod.POST, RequestMethod.GET })
   public ModelMap processAddressModal(HttpServletRequest request, HttpServletResponse response, AddressModel model) throws CmrException {
 
     ProcessResultModel result = new ProcessResultModel();
@@ -102,9 +99,7 @@ public class AddressController extends BaseController {
     return wrapAsProcessResult(result);
   }
 
-  @RequestMapping(
-      value = "/request/address/copydata",
-      method = { RequestMethod.POST, RequestMethod.GET })
+  @RequestMapping(value = "/request/address/copydata", method = { RequestMethod.POST, RequestMethod.GET })
   public ModelMap copyAddressData(HttpServletRequest request, HttpServletResponse response, CopyAddressModel model) throws CmrException {
 
     ProcessResultModel result = new ProcessResultModel();
@@ -123,9 +118,8 @@ public class AddressController extends BaseController {
     return wrapAsProcessResult(result);
   }
 
-  @RequestMapping(
-      value = "/dpl/{reqId}")
-  public ModelMap performDPLCheck(HttpServletRequest request, HttpServletResponse response, @PathVariable long reqId) throws Exception {
+  @RequestMapping(value = "/dpl/{reqId1}")
+  public ModelMap performDPLCheck(HttpServletRequest request, HttpServletResponse response, @PathVariable("reqId1") long reqId) throws Exception {
     ProcessResultModel result = new ProcessResultModel();
     try {
       AppUser user = AppUser.getUser(request);
@@ -141,8 +135,7 @@ public class AddressController extends BaseController {
     return wrapAsProcessResult(result);
   }
 
-  @RequestMapping(
-      value = "/request/address/filter")
+  @RequestMapping(value = "/request/address/filter")
   public ModelMap doSearchWithFilter(HttpServletRequest request, HttpServletResponse response, AddressModel model) throws CmrException {
     model.setFilterInd("Y");
     List<AddressModel> orgResults = service.search(model, request);
@@ -151,8 +144,7 @@ public class AddressController extends BaseController {
     return map;
   }
 
-  @RequestMapping(
-      value = "/request/address/machines/list")
+  @RequestMapping(value = "/request/address/machines/list")
   public ModelMap doMachineSearch(HttpServletRequest request, HttpServletResponse response, AddressModel model) throws CmrException {
 
     MachineModel machineModel = new MachineModel();

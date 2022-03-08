@@ -119,8 +119,8 @@ public class SingleReactSearchController extends BaseWindowController {
     return map;
   }
 
-  @RequestMapping(value = WINDOW_URL + "/singlereactdet/{cntry}/{kunnr}")
-  public ModelAndView showCompanyDetails(@PathVariable String cntry, @PathVariable String kunnr, HttpServletRequest request,
+  @RequestMapping(value = WINDOW_URL + "/singlereactdet/{cntry1}/{kunnr1}")
+  public ModelAndView showCompanyDetails(@PathVariable("cntry1") String cntry, @PathVariable("kunnr1") String kunnr, HttpServletRequest request,
       HttpServletResponse response) throws Exception {
     ModelAndView mv = new ModelAndView("singlereactdet");
     SingleReactQueryRequest query = new SingleReactQueryRequest();

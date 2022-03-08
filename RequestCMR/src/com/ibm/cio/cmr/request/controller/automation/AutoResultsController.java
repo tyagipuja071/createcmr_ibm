@@ -36,16 +36,14 @@ public class AutoResultsController extends BaseWindowController {
   @Autowired
   private AutoResultsService service;
 
-  @RequestMapping(
-      value = "/auto/results/{reqId}")
-  public ModelAndView showAutomationResults(@PathVariable("reqId") long reqId, HttpServletRequest request, HttpServletResponse response,
+  @RequestMapping(value = "/auto/results/{reqId1}")
+  public ModelAndView showAutomationResults(@PathVariable("reqId1") long reqId, HttpServletRequest request, HttpServletResponse response,
       RequestEntryModel model) throws Exception {
     LOG.debug("Displaying results for Request " + reqId);
     return new ModelAndView("auto_results");
   }
 
-  @RequestMapping(
-      value = "/auto/results/list")
+  @RequestMapping(value = "/auto/results/list")
   public ModelMap doSearch(HttpServletRequest request, HttpServletResponse response, AutoResultsModel model) throws CmrException {
 
     List<AutoResultsModel> results = service.search(model, request);

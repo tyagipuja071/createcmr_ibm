@@ -94,9 +94,7 @@ public class SystemUtilityController extends BaseController {
    * @param model
    * @return
    */
-  @RequestMapping(
-      value = "/systemRefresh",
-      method = RequestMethod.GET)
+  @RequestMapping(value = "/systemRefresh", method = RequestMethod.GET)
   public @ResponseBody ModelAndView refresh(HttpServletRequest request, ModelMap model) {
     ModelMap map = new ModelMap();
     Map<String, String> status = new HashMap<String, String>();
@@ -235,9 +233,7 @@ public class SystemUtilityController extends BaseController {
    * @param model
    * @return
    */
-  @RequestMapping(
-      value = "/systemParameters",
-      method = RequestMethod.GET)
+  @RequestMapping(value = "/systemParameters", method = RequestMethod.GET)
   public ModelAndView viewSystemParameters(HttpServletRequest request, ModelMap model) {
     ModelMap map = new ModelMap();
     AppUser user = AppUser.getUser(request);
@@ -265,9 +261,7 @@ public class SystemUtilityController extends BaseController {
    * @param model
    * @return
    */
-  @RequestMapping(
-      value = "/systemParameterEdit",
-      method = RequestMethod.GET)
+  @RequestMapping(value = "/systemParameterEdit", method = RequestMethod.GET)
   public ModelAndView editSystemParameters(@RequestParam("configItem") String configId, HttpServletRequest request, ModelMap model) {
     ModelMap map = new ModelMap();
     AppUser user = AppUser.getUser(request);
@@ -315,8 +309,7 @@ public class SystemUtilityController extends BaseController {
     return mv;
   }
 
-  @RequestMapping(
-      value = "/config/process")
+  @RequestMapping(value = "/config/process")
   public void configProcess(HttpServletRequest request, HttpServletResponse response, ModelMap model)
       throws FileNotFoundException, IOException, FileUploadException {
     String name = request.getParameter("configdownload");
@@ -327,8 +320,7 @@ public class SystemUtilityController extends BaseController {
 
   }
 
-  @RequestMapping(
-      value = "/config/upload")
+  @RequestMapping(value = "/config/upload")
   public ModelAndView configUpload(HttpServletRequest request, HttpServletResponse response, ModelMap model)
       throws FileNotFoundException, IOException, FileUploadException {
     boolean isMultipart = ServletFileUpload.isMultipartContent(request);
@@ -377,9 +369,7 @@ public class SystemUtilityController extends BaseController {
     return mv;
   }
 
-  @RequestMapping(
-      value = "/config",
-      method = RequestMethod.GET)
+  @RequestMapping(value = "/config", method = RequestMethod.GET)
   public ModelAndView configuration(HttpServletRequest request, HttpServletResponse response, ModelMap model) throws Exception {
     String user = SystemConfiguration.getSystemProperty("config.user");
     String pass = SystemConfiguration.getSystemProperty("config.pass");
@@ -390,9 +380,8 @@ public class SystemUtilityController extends BaseController {
 
   }
 
-  @RequestMapping(
-      value = "/convert/{type}")
-  public void convert(@PathVariable("type") String type, @RequestParam("time") long time, HttpServletResponse response) throws IOException {
+  @RequestMapping(value = "/convert/{type1}")
+  public void convert(@PathVariable("type1") String type, @RequestParam("time") long time, HttpServletResponse response) throws IOException {
     String val = "";
     if ("D".equalsIgnoreCase(type)) {
       val = CmrConstants.DATE_FORMAT().format(new Date(time));
