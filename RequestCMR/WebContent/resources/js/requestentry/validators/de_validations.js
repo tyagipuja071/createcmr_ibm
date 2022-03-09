@@ -104,6 +104,10 @@ function setSboOnIMS(postCd, subIndustryCd, clientTier) {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var ims = FormManager.getActualValue('subIndustryCd').substring(0, 1);
   var clientTier = FormManager.getActualValue('clientTier');
+  
+  if (custSubGrp == 'BUSPR') {
+    return;
+  }
 
   // CREATCMR-5252
   var custSubGrpArray = [ 'INTAM', 'INTSO', 'INTIN', 'CROSS', 'IBMEM' ];
@@ -132,12 +136,12 @@ function setSboOnIMS(postCd, subIndustryCd, clientTier) {
 }
 
 function setSearchTermDE() {
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+  var subScenario = FormManager.getActualValue('custSubGrp');
+  if (FormManager.getActualValue('viewOnlyPage') == 'true' || subScenario == 'BUSPR') {
     return;
   }
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
-  var subScenario = FormManager.getActualValue('custSubGrp');
   if (userRole == 'PROCESSOR') {
     FormManager.addValidator('searchTerm', Validators.REQUIRED, [ 'SORTL' ], 'MAIN_IBM_TAB');
   }
@@ -152,10 +156,6 @@ function setSearchTermDE() {
     FormManager.setValue('searchTerm', 'I0000046');
   } else if (isuCd == '4F' && clientTier == '') {
     FormManager.setValue('searchTerm', 'I0000045');
-  }
-
-  if (subScenario == 'BUSPR') {
-    FormManager.setValue('searchTerm', 'P0000009');
   }
   
 }
