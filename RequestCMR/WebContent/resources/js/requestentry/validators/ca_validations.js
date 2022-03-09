@@ -1161,7 +1161,7 @@ function setDefaultARFAARBySBO(sboValue) {
 
 function setDefaultARFAARByScenario(fromAddress, scenario, scenarioChanged) {
   var isCmrImported = getImportedIndc();
-  if (FormManager.getActualValue('reqType') == 'C' && isCmrImported == 'Y' && scenarioChanged && (scenario == 'COMME' || scenario == 'GOVT' || scenario == 'KYND')) {
+  if (FormManager.getActualValue('reqType') == 'C' && isCmrImported == 'Y' && scenarioChanged && (scenario == 'COMME' || scenario == 'GOVT' || scenario == 'KYND'  || scenario == 'ECO')) {
     return;
   }
 
