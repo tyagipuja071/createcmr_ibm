@@ -93,10 +93,13 @@ public class MassRequestEntryController extends BaseController {
   @Autowired
   private DeleteReactivateService delReactivateService;
 
-  @RequestMapping(value = "/massrequest/{reqId}")
-  public ModelAndView showRequestDetail(@PathVariable("reqId") long reqId, HttpServletRequest request, HttpServletResponse response,
+  @RequestMapping(value = "/massrequest/{reqId1}")
+  public ModelAndView showRequestDetail(@PathVariable("reqId1") long reqId, HttpServletRequest request, HttpServletResponse response,
       RequestEntryModel model) throws Exception {
     ModelAndView mv = null;
+    if (model.getReqId() == 0) {
+      model.setReqId(reqId);
+    }
     request.getSession().setAttribute("lastReqId", reqId);
     String fromUrl = model.getFromUrl();
     String redirectUrl = model.getRedirectUrl();

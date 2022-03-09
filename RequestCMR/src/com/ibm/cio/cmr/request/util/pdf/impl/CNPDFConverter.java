@@ -26,11 +26,12 @@ import com.ibm.cio.cmr.request.util.approval.ChecklistUtil;
 import com.ibm.cio.cmr.request.util.approval.ChecklistUtil.ChecklistResponse;
 import com.ibm.cio.cmr.request.util.geo.impl.CNHandler;
 import com.ibm.cio.cmr.request.util.pdf.RequestToPDFConverter;
-import com.itextpdf.io.font.FontConstants;
+import com.itextpdf.io.font.constants.StandardFonts;
 import com.itextpdf.io.font.PdfEncodings;
-import com.itextpdf.kernel.color.Color;
+import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
+import com.itextpdf.kernel.font.PdfFontFactory.EmbeddingStrategy;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Cell;
 import com.itextpdf.layout.element.Paragraph;
@@ -47,15 +48,15 @@ public class CNPDFConverter extends DefaultPDFConverter {
 
   public CNPDFConverter(String cmrIssuingCntry) throws IOException {
     super(cmrIssuingCntry);
-    this.regularFont = PdfFontFactory.createFont(FontConstants.HELVETICA);
+    this.regularFont = PdfFontFactory.createFont(StandardFonts.HELVETICA);
     String webConfig = ConfigUtil.getConfigDir();
     String fontLocation = webConfig + File.separator + "ARIALUNI.TTF";
     LOG.debug("Chinese Font Location " + fontLocation);
     try {
-      this.chineseFont = PdfFontFactory.createFont(fontLocation, PdfEncodings.IDENTITY_H, true);
+      this.chineseFont = PdfFontFactory.createFont(fontLocation, PdfEncodings.IDENTITY_H, EmbeddingStrategy.PREFER_EMBEDDED);
     } catch (IOException e) {
       LOG.debug("Error in initializing Chinese font.", e);
-      this.chineseFont = PdfFontFactory.createFont(FontConstants.HELVETICA);
+      this.chineseFont = PdfFontFactory.createFont(StandardFonts.HELVETICA);
     }
 
   }
@@ -117,7 +118,7 @@ public class CNPDFConverter extends DefaultPDFConverter {
           answer = "Y".equals(item.getAnswer()) ? "Yes" : "No";
           answerCell = createValueCell(answer);
           if ("Y".equals(item.getAnswer())) {
-            answerCell.setFontColor(Color.RED);
+            answerCell.setFontColor(ColorConstants.RED);
           }
           checklistSection.addCell(answerCell);
         }
