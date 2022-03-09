@@ -3,6 +3,11 @@
  */
 package com.ibm.cmr.create.batch.util.mq.transformer.impl;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import org.apache.commons.lang.StringUtils;
+
 import com.ibm.cmr.create.batch.util.mq.handler.MQMessageHandler;
 import com.ibm.cmr.create.batch.util.mq.transformer.MessageTransformer;
 
@@ -37,6 +42,16 @@ public abstract class ANZTransformer extends APTransformer {
     } else {
       handler.messageHash.put("MrktRespCode", "2");
     }
+    String clusterCd = handler.cmrData.getApCustClusterId();
+    String cmrIssuingCntry = handler.cmrData.getCmrIssuingCntry();
+    List<String> clusterList = new ArrayList<String>();
+    List<String> countryList = new ArrayList<String>();
+    Collections.addAll(countryList, "616", "796");
+    Collections.addAll(clusterList, "01147", "71101", "08037", "00002", "09056", "04694", "01150", "71100", "00001", "08039", "09057", "00035",
+        "05221", "00105", "04485", "04500", "04746", "04744", "04745", "05222", "00001");
+    if (!StringUtils.isBlank(clusterCd) && clusterList.contains(clusterCd) && countryList.contains(cmrIssuingCntry)) {
+      handler.messageHash.put("MrktRespCode", handler.cmrData.getMrcCd());
+    }
 
     String clusterID = handler.cmrData.getApCustClusterId();
     if (clusterID.contains("BLAN")) {
@@ -45,8 +60,11 @@ public abstract class ANZTransformer extends APTransformer {
       handler.messageHash.put("ClusterNo", clusterID);
     }
 
+    String gb_SegCode = handler.cmrData.getClientTier();
     if ("0".equalsIgnoreCase(handler.cmrData.getClientTier())) {
       handler.messageHash.put("GB_SegCode", "");
+    } else {
+      handler.messageHash.put("GB_SegCode", gb_SegCode);
     }
 
   }
