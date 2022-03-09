@@ -137,6 +137,7 @@ function setSearchTermDE() {
   }
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
+  var subScenario = FormManager.getActualValue('custSubGrp');
   if (userRole == 'PROCESSOR') {
     FormManager.addValidator('searchTerm', Validators.REQUIRED, [ 'SORTL' ], 'MAIN_IBM_TAB');
   }
@@ -152,6 +153,11 @@ function setSearchTermDE() {
   } else if (isuCd == '4F' && clientTier == '') {
     FormManager.setValue('searchTerm', 'I0000045');
   }
+
+  if (subScenario == 'BUSPR') {
+    FormManager.setValue('searchTerm', 'P0000009');
+  }
+  
 }
 
 function lockCtcFieldOnIsu() {
