@@ -104,6 +104,10 @@ function setSboOnIMS(postCd, subIndustryCd, clientTier) {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var ims = FormManager.getActualValue('subIndustryCd').substring(0, 1);
   var clientTier = FormManager.getActualValue('clientTier');
+  
+  if (custSubGrp == 'BUSPR') {
+    return;
+  }
 
   // CREATCMR-5252
   var custSubGrpArray = [ 'INTAM', 'INTSO', 'INTIN', 'CROSS', 'IBMEM' ];
@@ -132,7 +136,8 @@ function setSboOnIMS(postCd, subIndustryCd, clientTier) {
 }
 
 function setSearchTermDE() {
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+  var subScenario = FormManager.getActualValue('custSubGrp');
+  if (FormManager.getActualValue('viewOnlyPage') == 'true' || subScenario == 'BUSPR') {
     return;
   }
   var isuCd = FormManager.getActualValue('isuCd');
@@ -152,6 +157,7 @@ function setSearchTermDE() {
   } else if (isuCd == '4F' && clientTier == '') {
     FormManager.setValue('searchTerm', 'I0000045');
   }
+  
 }
 
 function lockCtcFieldOnIsu() {
@@ -1001,7 +1007,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(restrictDuplicateAddr, GEOHandler.DE, null, true);
   GEOHandler.registerValidator(validateDeptAttnBldg, GEOHandler.DE, null, true);
   GEOHandler.addAfterConfig(setAddressDetailsForView, SysLoc.GERMANY);
-  GEOHandler.addAfterTemplateLoad(setSboOnIMS, GEOHandler.DE);
+//  GEOHandler.addAfterTemplateLoad(setSboOnIMS, GEOHandler.DE);
   GEOHandler.addAfterTemplateLoad(lockCtcFieldOnIsu, GEOHandler.DE);
   GEOHandler.addAfterConfig(lockCtcFieldOnIsu, SysLoc.GERMANY);
 
