@@ -473,9 +473,9 @@ public class EmailEngine {
     RuntimeServices runtimeServices = RuntimeSingleton.getRuntimeServices();
     StringReader reader = new StringReader(subject);
     try {
-      SimpleNode node = runtimeServices.parse(reader, "SubjTempl");
       Template template = new Template();
       template.setRuntimeServices(runtimeServices);
+      SimpleNode node = runtimeServices.parse(reader, template);
       template.setData(node);
       template.initDocument();
 
