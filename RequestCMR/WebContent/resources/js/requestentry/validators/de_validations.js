@@ -1001,7 +1001,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(restrictDuplicateAddr, GEOHandler.DE, null, true);
   GEOHandler.registerValidator(validateDeptAttnBldg, GEOHandler.DE, null, true);
   GEOHandler.addAfterConfig(setAddressDetailsForView, SysLoc.GERMANY);
-  GEOHandler.addAfterTemplateLoad(setSboOnIMS, GEOHandler.DE);
+//  GEOHandler.addAfterTemplateLoad(setSboOnIMS, GEOHandler.DE);
   GEOHandler.addAfterTemplateLoad(lockCtcFieldOnIsu, GEOHandler.DE);
   GEOHandler.addAfterConfig(lockCtcFieldOnIsu, SysLoc.GERMANY);
 
