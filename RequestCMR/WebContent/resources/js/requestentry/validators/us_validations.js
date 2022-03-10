@@ -173,6 +173,16 @@ function afterConfigForUS() {
   if (reqType == 'C' && role == 'Requester' && custGrp == '9' && custSubGrp == 'POA') {
     FormManager.enable('miscBillCd');
   }
+  
+  if (reqType == 'C' && role == 'Requester' && custGrp == '1' && custSubGrp == 'ECOSYSTEM') {
+    FormManager.setValue('isuCd', '34');
+    FormManager.setValue('clientTier','Y');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('clientTier');
+  } else {
+    FormManager.enable('isuCd');
+    FormManager.enable('clientTier');
+  }
 
   // Enterprise field as mandatory for BP scenario
   var custTypeHandler = null;
