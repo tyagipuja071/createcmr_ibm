@@ -1827,7 +1827,7 @@ function setSrSboValuesOnEnterprise(enterprise) {
   var enterprise = FormManager.getActualValue('enterprise');
   var isuCd = FormManager.getActualValue('isuCd');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  if (reqType != 'C' || isuCd == '5K' || custSubGrp == 'BUSPR') {
+  if (reqType != 'C' || isuCd == '5K' || custSubGrp == 'BUSPR' || custSubGrp == '') {
     return;
   }
 
