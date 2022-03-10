@@ -1136,6 +1136,9 @@ function setDefaultARFAARBySBO(sboValue) {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
+  if (cmr.currentTab != "CUST_REQ_TAB") {
+    return;
+  }
   if (sboValue != '') {
     if (_scenarioArFaar != '') {
       FormManager.setValue('adminDeptCd', _scenarioArFaar);
@@ -1161,7 +1164,7 @@ function setDefaultARFAARBySBO(sboValue) {
 
 function setDefaultARFAARByScenario(fromAddress, scenario, scenarioChanged) {
   var isCmrImported = getImportedIndc();
-  if (FormManager.getActualValue('reqType') == 'C' && isCmrImported == 'Y' && scenarioChanged && (scenario == 'COMME' || scenario == 'GOVT' || scenario == 'KYND'  || scenario == 'ECO')) {
+  if (FormManager.getActualValue('reqType') == 'C' && isCmrImported == 'Y' && scenarioChanged && (scenario == 'COMME' || scenario == 'GOVT' || scenario == 'KYND' || scenario == 'ECO')) {
     return;
   }
 
