@@ -473,6 +473,9 @@ public class CalculateCoverageElement extends OverridingElement {
                 break;
               case "LengthGreaterThan":
                 break;
+                
+              case "NotIn":
+                break;
 
               default:
                 notDeterminedFields.put(field, val);
