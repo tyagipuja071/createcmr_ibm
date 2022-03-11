@@ -470,7 +470,7 @@ public class CanadaHandler extends GEOHandler {
 
   @Override
   public boolean skipOnSummaryUpdate(String cntry, String field) {
-    return Arrays.asList("PPSCEID", "LocalTax2", "Company", "Enterprise", "SearchTerm", "SitePartyID").contains(field);
+    return Arrays.asList("PPSCEID", "LocalTax2", "Company", "Enterprise", "SearchTerm", "SitePartyID", "TransportZone").contains(field);
   }
 
   @Override

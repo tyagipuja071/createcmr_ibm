@@ -1160,6 +1160,12 @@ function addPostlCdLogic(cntry, addressMode, details) {
 
 function setDefaultARFAARBySBO(sboValue) {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  if (cmr.currentTab != "CUST_REQ_TAB") {
+    return;
+  }
   if (sboValue != '') {
     if (_scenarioArFaar != '') {
       FormManager.setValue('adminDeptCd', _scenarioArFaar);
@@ -1185,7 +1191,7 @@ function setDefaultARFAARBySBO(sboValue) {
 
 function setDefaultARFAARByScenario(fromAddress, scenario, scenarioChanged) {
   var isCmrImported = getImportedIndc();
-  if (FormManager.getActualValue('reqType') == 'C' && isCmrImported == 'Y' && scenarioChanged && (scenario == 'COMME' || scenario == 'GOVT' || scenario == 'KYND')) {
+  if (FormManager.getActualValue('reqType') == 'C' && isCmrImported == 'Y' && scenarioChanged && (scenario == 'COMME' || scenario == 'GOVT' || scenario == 'KYND' || scenario == 'ECO')) {
     return;
   }
 
