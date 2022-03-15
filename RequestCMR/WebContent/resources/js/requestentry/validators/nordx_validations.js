@@ -4564,28 +4564,37 @@ function searchTermValidation() {
             }, false, 'The value of SORTL is invalid, please use only alphanumeric characters.');
           }
 
-          var countryUse = FormManager.getActualValue('countryUse');
-          if (countryUse == '702EE' || countryUse == '702LT' || countryUse == '702LV') {
-            if (searchTerm.length != 8 && sortlFlag) {
-              return new ValidationResult({
-                id : 'searchTerm',
-                type : 'text',
-                name : 'searchTerm'
-              }, false, 'SORTL should be exactly 8 digits long.');
+          // CREATCMR - 5358
+          var dataSearchTerm = FormManager.getActualValue('searchTerm');
+          var rdcSearchTerm = FormManager.getActualValue('rdcSearchTerm');
+
+          // CREATCMR - 5358
+          // if (dataSearchTerm == rdcSearchTerm) {
+          // return new ValidationResult(null, true);
+          // }
+          if (dataSearchTerm != rdcSearchTerm) {
+            var countryUse = FormManager.getActualValue('countryUse');
+            if (countryUse == '702EE' || countryUse == '702LT' || countryUse == '702LV') {
+              if (searchTerm.length != 8 && sortlFlag) {
+                return new ValidationResult({
+                  id : 'searchTerm',
+                  type : 'text',
+                  name : 'searchTerm'
+                }, false, 'SORTL should be exactly 8 digits long.');
+              }
+              return new ValidationResult(null, true);
+            } else {
+              if (searchTerm.length != 8) {
+                return new ValidationResult({
+                  id : 'searchTerm',
+                  type : 'text',
+                  name : 'searchTerm'
+                }, false, 'SORTL should be exactly 8 digits long.');
+              }
+              return new ValidationResult(null, true);
             }
-            return new ValidationResult(null, true);
-          } else {
-            if (searchTerm.length != 8) {
-              return new ValidationResult({
-                id : 'searchTerm',
-                type : 'text',
-                name : 'searchTerm'
-              }, false, 'SORTL should be exactly 8 digits long.');
-            }
-            return new ValidationResult(null, true);
           }
 
-          return new ValidationResult(null, true);
         }
       }
     };

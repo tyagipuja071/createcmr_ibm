@@ -43,6 +43,8 @@
            <cmr:delta text="${rdcdata.searchTerm}" oldValue="${reqentry.searchTerm}" id="delta-searchTerm" />
         </cmr:label>
         <cmr:field fieldId="SearchTerm" id="searchTerm" path="searchTerm" tabId="MAIN_IBM_TAB"/>
+        <!-- CREATCMR-5358 -->
+        <input type="hidden" id="rdcSearchTerm" value="${rdcdata.searchTerm}" />
       </p>
     </cmr:column>
     
