@@ -1759,6 +1759,71 @@ public class LAHandler extends GEOHandler {
         // DTN:1669799:BR: Mode of Payment to be corrected for Internal
         // Cross
         // Boarder
+        if (StringUtils.isBlank(data.getCustomerIdCd())) {
+          data.setCustomerIdCd(CmrConstants.DEFAULT_CUSTOMERID_CD);
+        }
+        if (StringUtils.isBlank(data.getTerritoryCd())) {
+          data.setTerritoryCd(CmrConstants.DEFAULT_TERRITORY_CD);// 001
+        }
+        if (StringUtils.isBlank(data.getNationalCusId())) {
+          data.setNationalCusId(CmrConstants.DEFAULT_NATIONALCUS_ID);// N
+        }
+        if (StringUtils.isBlank(data.getInstallBranchOff())) {
+          data.setInstallBranchOff(CmrConstants.DEFAULT_INSTALL_BRANCH_OFF);// 204
+        }
+
+        if (StringUtils.isBlank(data.getSalesTeamCd())) {
+          data.setSalesTeamCd(CmrConstants.DEFAULT_TEAM_CD);// T
+        }
+
+        if (StringUtils.isBlank(data.getSalesTerritoryCd())) {
+          data.setSalesTerritoryCd(CmrConstants.DEFAULT_TERRITORY_CD);// 001
+        }
+        if (StringUtils.isBlank(data.getInstallTeamCd())) {
+          data.setInstallTeamCd(CmrConstants.DEFAULT_TEAM_CD);// T
+        }
+        if (StringUtils.isBlank(data.getInstallRep())) {
+          data.setInstallRep(CmrConstants.DEFAULT_INSTALL_REP);// 204199
+        }
+
+        if (StringUtils.isBlank(data.getFomeZero())) {
+          data.setFomeZero(CmrConstants.DEFAULT_FOME_ZERO);
+        }
+        if (StringUtils.isBlank(data.getCodReason())) {
+          data.setCodReason(CmrConstants.DEFAULT_COD_REASON); // 00
+        }
+        if (StringUtils.isBlank(data.getCodCondition())) {
+          data.setCodCondition(CmrConstants.DEFAULT_COD_CONDITION); // 0
+        }
+        if (StringUtils.isBlank(data.getRemoteCustInd())) {
+          data.setRemoteCustInd(CmrConstants.DEFAULT_REMOTE_CUSTOMER_IND); // Y
+        }
+        if (StringUtils.isBlank(data.getTaxPayerCustCd())) {
+          if (CmrConstants.YES_NO.N.equals(data.getIcmsInd())) {
+            LOG.debug("*** ICMS Indicator is N, setting Tax Payet Cust cd to 1");
+            data.setTaxPayerCustCd(CmrConstants.DEFAULT_TAX_PAYER_CUS_CD_1);
+          } else if (CmrConstants.YES_NO.Y.equals(data.getIcmsInd())) {
+            LOG.debug("*** ICMS Indicator is Y, setting Tax Payet Cust cd to 2");
+            data.setTaxPayerCustCd(CmrConstants.DEFAULT_TAX_PAYER_CUS_CD_2);
+          } else {
+            LOG.debug("*** ICMS Indicator is either 1 or 2, setting Tax Payet Cust cd to either 1 or 2");
+            data.setTaxPayerCustCd(data.getIcmsInd());
+          }
+        }
+        data.setSalesRepTeamDateOfAssignment(SystemUtil.getCurrentTimestamp());
+        data.setInstallRepTeamDateOfAssignment(SystemUtil.getCurrentTimestamp());
+
+        if (StringUtils.isNotBlank(data.getLocationNumber()) && data.getLocationNumber().equals("90000")) {
+          data.setLocationNumber("");
+        }
+
+        String sql = ExternalizedQuery.getSql("BATCH.GET_ADDR_FOR_SAP_NO_ZS01");
+        PreparedQuery query = new PreparedQuery(entityManager, sql);
+        query.setParameter("REQ_ID", admin.getId().getReqId());
+        Addr soldToAddr = query.getSingleResult(Addr.class);
+        if (soldToAddr != null && soldToAddr.getStateProv().equals("RS")) {
+          data.setLocationNumber("91000");
+        }
         if ("CROSS".equals(data.getCustGrp())) {
           data.setModeOfPayment("CI");
         } else {
@@ -2056,6 +2121,13 @@ public class LAHandler extends GEOHandler {
       if (soldToAddr != null) {
         AddressService addrService = new AddressService();
         Map<String, Object> hwBoRepTeam = addrService.getHWBranchOffRepTeam(soldToAddr.getStateProv());
+        if (hwBoRepTeam != null) {
+          data.setLocationNumber(hwBoRepTeam.get("locationNo").toString());
+          data.setHwSvcsBoNo(hwBoRepTeam.get("hardwBO") != null ? hwBoRepTeam.get("hardwBO").toString() : "");
+          data.setHwSvcsRepTeamNo(hwBoRepTeam.get("hardwRTNo") != null ? hwBoRepTeam.get("hardwRTNo").toString() : "");
+          data.setLocationNumber(hwBoRepTeam.get("locationNo") != null ? hwBoRepTeam.get("locationNo").toString() : "");
+          data.setHwSvcsTeamCd(CmrConstants.DEFAULT_TEAM_CD);
+        }
         if (hwBoRepTeam == null || hwBoRepTeam.isEmpty()) {
           addrService.updateDataForBRCreate(entityManager, null, soldToAddr);
         }
