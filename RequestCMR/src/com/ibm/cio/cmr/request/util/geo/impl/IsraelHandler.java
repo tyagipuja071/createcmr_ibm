@@ -2234,6 +2234,10 @@ public class IsraelHandler extends EMEAHandler {
         String currCellB = validateColValFromCell(rowB.getCell(i));
         if ((StringUtils.isNotBlank(currCellA) && StringUtils.isBlank(currCellB))
             || (StringUtils.isBlank(currCellA) && StringUtils.isNotBlank(currCellB))) {
+          // always return true for name cont and address cont
+          if (i == 3 || i == 7) {
+            return true;
+          }
           return false;
         }
       }
