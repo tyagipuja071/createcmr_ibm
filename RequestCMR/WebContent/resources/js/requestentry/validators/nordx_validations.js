@@ -3413,13 +3413,26 @@ function setCustPrefLangByCountry() {
 
   reqType = FormManager.getActualValue('reqType');
 
+  // CREATCMR-5437
+  var reqId = FormManager.getActualValue('reqId');
+  var custPrefLang = '';
+  var results = cmr.query('GET.DATA_CUST_PREF_LANG_FOR_NORDX', {
+    REQ_ID : reqId
+  });
+
+  if (results != null && results != undefined && results.ret1 != '') {
+    custPrefLang = results.ret1;
+  }
+
   // Denmark, Faroe Islands, Greenland, Iceland
   if (cmrIssuingCntry == '678') {
     if (countryUse == '678' || countryUse == '678FO' || countryUse == '678GL' || countryUse == '678IS') {
       FormManager.limitDropdownValues(field, [ 'K', 'E' ]);
       if (reqType == 'U') {
         if (typeof (_pagemodel) != 'undefined') {
-          FormManager.setValue('custPrefLang', _pagemodel.custPrefLang);
+          // CREATCMR-5437
+          // FormManager.setValue('custPrefLang', _pagemodel.custPrefLang);
+          FormManager.setValue('custPrefLang', custPrefLang);
           return;
         }
       }
@@ -3434,7 +3447,9 @@ function setCustPrefLangByCountry() {
 
       if (reqType == 'U') {
         if (typeof (_pagemodel) != 'undefined') {
-          FormManager.setValue('custPrefLang', _pagemodel.custPrefLang);
+          // CREATCMR-5437
+          // FormManager.setValue('custPrefLang', _pagemodel.custPrefLang);
+          FormManager.setValue('custPrefLang', custPrefLang);
           return;
         }
       }
@@ -3446,7 +3461,9 @@ function setCustPrefLangByCountry() {
 
       if (reqType == 'U') {
         if (typeof (_pagemodel) != 'undefined') {
-          FormManager.setValue('custPrefLang', _pagemodel.custPrefLang);
+          // CREATCMR-5437
+          // FormManager.setValue('custPrefLang', _pagemodel.custPrefLang);
+          FormManager.setValue('custPrefLang', custPrefLang);
           return;
         }
       }
@@ -3461,7 +3478,9 @@ function setCustPrefLangByCountry() {
 
     if (reqType == 'U') {
       if (typeof (_pagemodel) != 'undefined') {
-        FormManager.setValue('custPrefLang', _pagemodel.custPrefLang);
+        // CREATCMR-5437
+        // FormManager.setValue('custPrefLang', _pagemodel.custPrefLang);
+        FormManager.setValue('custPrefLang', custPrefLang);
         return;
       }
     }
@@ -3475,7 +3494,9 @@ function setCustPrefLangByCountry() {
 
     if (reqType == 'U') {
       if (typeof (_pagemodel) != 'undefined') {
-        FormManager.setValue('custPrefLang', _pagemodel.custPrefLang);
+        // CREATCMR-5437
+        // FormManager.setValue('custPrefLang', _pagemodel.custPrefLang);
+        FormManager.setValue('custPrefLang', custPrefLang);
         return;
       }
     }
