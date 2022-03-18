@@ -1829,6 +1829,24 @@ public class IsraelHandler extends EMEAHandler {
             }
           }
         }
+
+        if ("IL".equals(landedCntry)) {
+          if (StringUtils.isNotBlank(postalCd)) {
+            if (postalCd.length() < 5 || postalCd.length() == 6) {
+              error.addError(rowIndex, "<br>Postal Code", sheetName + " Postal Code should be either 5 or 7 characters long.");
+            }
+          }
+        }
+
+        // Validate Postal Code+City
+        String cityString = cityCell.getRichStringCellValue().getString();
+        if (StringUtils.isNotBlank(cityString) || StringUtils.isNotBlank(postalCd)) {
+          cityString += postalCd;
+          if (cityString.length() > 29) {
+            error.addError(rowIndex, "<br>", "Total computed length of City and Postal Code should not exceed 29 characters.");
+          }
+        }
+
         // Validate address lines flow through
         if (StringUtils.isNotBlank(landedCntry)) {
           XSSFCell custNameCell = getAddressCell(IL_MASSUPDATE_ADDR.CUSTNAME, row, sheetName);
