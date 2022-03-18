@@ -204,6 +204,12 @@ public class RequestSearchService extends BaseService<RequestSearchCriteriaModel
 
       query.append(" ORDER BY a.REQ_ID " + order + " ");
 
+      if (resultRows > 0) {
+        query.append(" limit " + resultRows);
+      } else {
+        query.append(" limit 500");
+      }
+
       query.setParameter("REQUESTER_ID", user.getIntranetId());
       query.setParameter("PROC_CENTER", user.getProcessingCenter());
       query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));

@@ -204,7 +204,6 @@
           <p>
             <cmr:label fieldId="sourceSystem">
               Source System:
-              <cmr:spinner fieldId="sourceSystem" />
             </cmr:label>
             <form:select dojoType="dijit.form.FilteringSelect" id="sourceSystem" searchAttr="name" style="display: block;" maxHeight="200" path="sourceSystem" placeHolder="">
             </form:select>
