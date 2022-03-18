@@ -15,8 +15,8 @@ import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.CmrConstants;
+import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
@@ -202,6 +202,7 @@ public class ISAHandler extends APHandler {
 
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
+    super.setDataValuesOnImport(admin, data, results, mainRecord);
     if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && "5K".equals(data.getIsuCd())) {
       data.setClientTier("");
     }
