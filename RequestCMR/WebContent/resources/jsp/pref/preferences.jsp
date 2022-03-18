@@ -219,10 +219,6 @@ _profilecomplete = true;
             <form:radiobutton path="defaultNoOfRecords" value="100"/>
             <cmr:label fieldId="defaultNoOfRecords_100" forRadioOrCheckbox="true">100</cmr:label>
 
-            <form:radiobutton path="defaultNoOfRecords" value="-1"/>
-            <cmr:label fieldId="defaultNoOfRecords_ALL" forRadioOrCheckbox="true">Show All</cmr:label>
-
-
           </p>
         </cmr:column>
       </cmr:row>

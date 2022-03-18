@@ -149,7 +149,7 @@ public class WorkflowService extends BaseService<WorkflowRequestsModel, Admin> {
     String order = user.isShowLatestFirst() ? "desc" : "asc";
 
     if ("open".equals(type)) {
-      sql = ExternalizedQuery.getSql("WORKFLOW.OPEN_REQ_LIST");
+      sql = ExternalizedQuery.getSql("WORKFLOW.OPEN_REQ_LIST_TEMP");
       if (user.isHasCountries()) {
         sql += " and data.CMR_ISSUING_CNTRY in (select ISSUING_CNTRY from CREQCMR.USER_PREF_COUNTRIES where REQUESTER_ID = :REQUESTER_ID) ";
       }
@@ -185,7 +185,9 @@ public class WorkflowService extends BaseService<WorkflowRequestsModel, Admin> {
       sql = ExternalizedQuery.getSql("WORKFLOW.ALL_REQ_LIST");
       sql += " order by a.REQ_ID " + order;
     }
-
+    if (user.getDefaultNoOfRecords() <= 0) {
+      sql += " limit 200";
+    }
     // order by a.REQ_ID desc
     // String sql = ExternalizedQuery.getSql("WORKFLOW.OPEN_REQ_LIST");
     if (sql != null && !(sql.trim().isEmpty())) {
