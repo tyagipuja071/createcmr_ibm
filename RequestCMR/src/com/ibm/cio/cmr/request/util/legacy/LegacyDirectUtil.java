@@ -1467,4 +1467,21 @@ public class LegacyDirectUtil {
     CmrtCust cmrtCust = query.getSingleResult(CmrtCust.class);
     return cmrtCust;
   }
+
+  public static CmrtAddr getLegacyAddrBySeqNo(EntityManager entityManager, String cmrNo, String country, String seqNo) {
+    if (entityManager == null) {
+      entityManager = JpaManager.getEntityManager();
+    }
+
+    String sql = ExternalizedQuery.getSql("LEGACYD.GETADDR.BY_ADDRNO");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("COUNTRY", country);
+    query.setParameter("CMR_NO", cmrNo);
+    query.setParameter("ADDR_SEQ", seqNo);
+    query.setForReadOnly(true);
+
+    CmrtAddr cmrtAddr = query.getSingleResult(CmrtAddr.class);
+
+    return cmrtAddr;
+  }
 }

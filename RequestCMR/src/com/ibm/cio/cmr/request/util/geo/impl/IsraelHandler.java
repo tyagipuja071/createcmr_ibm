@@ -2203,6 +2203,27 @@ public class IsraelHandler extends EMEAHandler {
           if (StringUtils.isNotBlank(landedCntry1) && StringUtils.isNotBlank(landedCntry2) && !landedCntry1.equals(landedCntry2)) {
             error.addError(i, "<br>Landed Country", "Mismatch Landed Country value.");
           }
+
+          if (IL_MASSUPDATE_SHEET_NAMES[6].equals(sheet2.getSheetName()) || IL_MASSUPDATE_SHEET_NAMES[7].equals(sheet2.getSheetName())
+              || IL_MASSUPDATE_SHEET_NAMES[8].equals(sheet2.getSheetName())) {
+            String localAddrSeqTemplate = validateColValFromCell(getAddressCell(IL_MASSUPDATE_ADDR.SEQNO, rowA, sheet1.getSheetName()));
+            String transAddrSeqTemplate = validateColValFromCell(getAddressCell(IL_MASSUPDATE_ADDR.SEQNO, rowB, sheet2.getSheetName()));
+
+            String cmrNo = validateColValFromCell(getAddressCell(IL_MASSUPDATE_ADDR.CMRNO, rowB, sheet2.getSheetName()));
+
+            EntityManager entityManager = JpaManager.getEntityManager();
+            CmrtAddr transLegacyAddr = LegacyDirectUtil.getLegacyAddrBySeqNo(entityManager, cmrNo, SystemLocation.ISRAEL,
+                (String.format("%05d", Integer.parseInt(transAddrSeqTemplate))));
+
+            if (transLegacyAddr != null) {
+              String localAddrSeqDB2 = transLegacyAddr.getAddrLineO();
+              if (StringUtils.isNotEmpty(localAddrSeqDB2) && !localAddrSeqDB2.equals(localAddrSeqTemplate)) {
+                String errorMsg = "Please check and fix sequences of paired addresses " + sheet1.getSheetName() + " (" + localAddrSeqTemplate
+                    + ") and " + sheet2.getSheetName() + " (" + transAddrSeqTemplate + "). " + "Sequences entered are not a matching pair.";
+                error.addError(i, "<br>Address Sequence", errorMsg);
+              }
+            }
+          }
         }
       }
       if (error.hasErrors()) {
