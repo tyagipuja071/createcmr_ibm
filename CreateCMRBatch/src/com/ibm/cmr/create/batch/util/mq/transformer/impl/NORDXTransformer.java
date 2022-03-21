@@ -1272,7 +1272,7 @@ public class NORDXTransformer extends EMEATransformer {
       legacyCust.setImsCd("");
     }
 
-    if (!StringUtils.isEmpty(data.getIsuCd())) {
+    if (!StringUtils.isEmpty(data.getIsuCd()) && !StringUtils.isEmpty(data.getClientTier())) {
       legacyCust.setIsuCd(data.getIsuCd() + data.getClientTier());
     } else if (!StringUtils.isEmpty(data.getIsuCd()) && StringUtils.isEmpty(data.getClientTier())) {
       legacyCust.setIsuCd(data.getIsuCd() + "7");
@@ -1280,7 +1280,7 @@ public class NORDXTransformer extends EMEATransformer {
       legacyCust.setIsuCd("");
     }
     // CREATCMR-4293
-    if (!StringUtils.isEmpty(data.getIsuCd()) && ("21".equals(data.getIsuCd()) || "8B".equals(data.getIsuCd()))) {
+    if (!StringUtils.isEmpty(data.getIsuCd())) {
       if (StringUtils.isEmpty(data.getClientTier())) {
         legacyCust.setIsuCd(data.getIsuCd() + "7");
       }
@@ -1474,14 +1474,14 @@ public class NORDXTransformer extends EMEATransformer {
     }
 
     String isuClientTier;
-    isuClientTier = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "") 
+    isuClientTier = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "")
         + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
     if (isuClientTier != null && isuClientTier.endsWith("@")) {
       cust.setIsuCd((!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : cust.getIsuCd().substring(0, 2)) + "7");
     } else if (isuClientTier != null && isuClientTier.length() == 3) {
       cust.setIsuCd(isuClientTier);
     }
-    
+
     if (data.getCmrIssuingCntry().equals("702")) {
       if (data.getCountryUse().equals("702")) {
         if (isuClientTier != null && ("5K".equals(muData.getIsuCd()) || "04".equals(muData.getIsuCd()))) {
@@ -1491,7 +1491,6 @@ public class NORDXTransformer extends EMEATransformer {
         cust.setIsuCd((!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : cust.getIsuCd().substring(0, 2)) + "7");
       }
     }
-    
 
     if (!StringUtils.isBlank(muData.getRepTeamMemberNo())) {
       if ("@".equals(muData.getRepTeamMemberNo())) {
