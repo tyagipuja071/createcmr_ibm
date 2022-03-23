@@ -2234,13 +2234,20 @@ public class IsraelHandler extends EMEAHandler {
             CmrtAddr transLegacyAddr = LegacyDirectUtil.getLegacyAddrBySeqNo(entityManager, cmrNo, SystemLocation.ISRAEL,
                 (String.format("%05d", Integer.parseInt(transAddrSeqTemplate))));
 
-            if (transLegacyAddr != null) {
-              String localAddrSeqDB2 = transLegacyAddr.getAddrLineO();
-              if (StringUtils.isNotEmpty(localAddrSeqDB2) && !localAddrSeqDB2.equals(localAddrSeqTemplate)) {
-                String errorMsg = "Please check and fix sequences of paired addresses " + sheet1.getSheetName() + " (" + localAddrSeqTemplate
-                    + ") and " + sheet2.getSheetName() + " (" + transAddrSeqTemplate + "). " + "Sequences entered are not a matching pair.";
-                error.addError(i + 1, "<br>Address Sequence", errorMsg);
-              }
+            boolean isSeqPairMismatch = false;
+            boolean isAddrlOMismatch = (transLegacyAddr != null && StringUtils.isNotEmpty(transLegacyAddr.getAddrLineO())
+                && !transLegacyAddr.getAddrLineO().equals(localAddrSeqTemplate));
+            boolean isAddrlOMissing = transLegacyAddr != null && StringUtils.isEmpty(transLegacyAddr.getAddrLineO());
+
+            if (transLegacyAddr == null || isAddrlOMismatch || isAddrlOMissing) {
+              isSeqPairMismatch = true;
+            }
+
+            if (isSeqPairMismatch) {
+              String errorMsg = "Please check and fix sequences of paired addresses " + sheet1.getSheetName() + " (" + localAddrSeqTemplate + ") and "
+                  + sheet2.getSheetName() + " (" + transAddrSeqTemplate + "). " + "Sequences entered are not a matching pair.";
+              error.addError(i + 1, "<br>Address Sequence", errorMsg);
+
             }
           }
         }
