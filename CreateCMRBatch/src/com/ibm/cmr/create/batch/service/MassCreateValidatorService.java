@@ -38,7 +38,9 @@ import com.ibm.cmr.create.batch.util.masscreate.ValidatorWorker;
 import com.ibm.cmr.create.batch.util.masscreate.WorkerThreadFactory;
 import com.ibm.cmr.create.batch.util.masscreate.handler.HandlerEngine;
 import com.ibm.cmr.create.batch.util.masscreate.handler.impl.AddressHandler;
+import com.ibm.cmr.create.batch.util.masscreate.handler.impl.CAPostalCdAndStateHandler;
 import com.ibm.cmr.create.batch.util.masscreate.handler.impl.CMRNoHandler;
+import com.ibm.cmr.create.batch.util.masscreate.handler.impl.CMRNoNonUSHandler;
 import com.ibm.cmr.create.batch.util.masscreate.handler.impl.CityAndCountyHandler;
 import com.ibm.cmr.create.batch.util.masscreate.handler.impl.CoverageBgGlcISUHandler;
 import com.ibm.cmr.create.batch.util.masscreate.handler.impl.CreatebyModelHandler;
@@ -146,6 +148,8 @@ public class MassCreateValidatorService extends BaseBatchService {
     LOG.debug("Request Status: " + request.getReqStatus() + " Locked By: " + request.getLockBy());
 
     if ((!"SVA".equals(request.getReqStatus()) && !"SV2".equals(request.getReqStatus()))) {
+      // if ((!"SMA".equals(request.getReqStatus()) &&
+      // !"SM2".equals(request.getReqStatus()))) { TODO
       LOG.debug("Request " + request.getId().getReqId() + " already locked by another process or has invalid status. Skipping.");
       return;
     }
@@ -165,6 +169,7 @@ public class MassCreateValidatorService extends BaseBatchService {
       LOG.info("Mass Create Request ID: " + request.getId().getReqId() + " passed system validations.");
       switch (originalStatus) {
       case "SVA":
+        // case "SMA": TODO
         if (!hasRecordsForIteration(entityManager, request.getId().getReqId(), request.getIterationId())) {
           LOG.debug("Mass Create records does not exist for the current iteration, creating...");
           MassCreateUtil.createMassCreateRecords(massCreate, entityManager);
@@ -197,6 +202,7 @@ public class MassCreateValidatorService extends BaseBatchService {
         }
         break;
       case "SV2":
+        // case "SM2": TODO
         if (!hasRecordsForIteration(entityManager, request.getId().getReqId(), request.getIterationId())) {
           LOG.debug("Mass Create records does not exist for the current iteration, creating...");
           MassCreateUtil.createMassCreateRecords(massCreate, entityManager);
@@ -227,6 +233,7 @@ public class MassCreateValidatorService extends BaseBatchService {
 
       switch (originalStatus) {
       case "SVA":
+        // case "SMA": TODO
         LOG.debug("Sending back to requester..");
         request.setReqStatus(CmrConstants.REQUEST_STATUS.DRA.toString());
         request.setLastProcCenterNm(processingCenter);
@@ -236,6 +243,7 @@ public class MassCreateValidatorService extends BaseBatchService {
         request.setLockTs(SystemUtil.getCurrentTimestamp());
         break;
       case "SV2":
+        // case "SM2": TODO
         LOG.debug("Setting to processing pending.");
         request.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
         request.setLockBy(null);
@@ -258,8 +266,8 @@ public class MassCreateValidatorService extends BaseBatchService {
 
       LOG.debug("Mass Create Request ID: " + request.getId().getReqId() + " creating Workflow History and Change Logs");
       RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, request, comment, VALIDATION_ACTION, sendToId, null, false);
-      RequestUtils.createCommentLogFromBatch(entityManager, BATCH_USER_ID, request.getId().getReqId(), comment
-          + (unexpectedError ? "" : "\nDownload the current file from the Processing Tab."));
+      RequestUtils.createCommentLogFromBatch(entityManager, BATCH_USER_ID, request.getId().getReqId(),
+          comment + (unexpectedError ? "" : "\nDownload the current file from the Processing Tab."));
 
       partialCommit(entityManager);
     }
@@ -372,17 +380,22 @@ public class MassCreateValidatorService extends BaseBatchService {
       engine.addHandler(new SubindustryISICHandler());
       engine.addHandler(new DPLCheckHandler());
       engine.addHandler(new INACHandler());
-      engine.addHandler(new CoverageBgGlcISUHandler());
 
       // per country handler
       switch (cmrIssuingCountry) {
       case "897":
+        engine.addHandler(new CoverageBgGlcISUHandler());
         engine.addHandler(new TgmeAddrStdHandler());
         engine.addHandler(new USPostCodeAndStateHandler());
         engine.addHandler(new CityAndCountyHandler());
         engine.addHandler(new CMRNoHandler());
         engine.addHandler(new EnterpriseAffiliateHandler());
         engine.addHandler(new InternalTypeAbbrevNameHandler());
+        break;
+      case "649": // canada
+        engine.addHandler(new CMRNoNonUSHandler());
+        engine.addHandler(new CAPostalCdAndStateHandler());
+        break;
       }
 
       engines.put(cmrIssuingCountry, engine);
