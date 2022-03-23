@@ -1675,11 +1675,6 @@ public class IsraelHandler extends EMEAHandler {
           }
         }
 
-        if ("9500".equals(isic) && !"60".equals(kukla)) {
-          error.addError(rowIndex + 1, "<br>KUKLA", "KUKLA value should be 60 if ISIC is 9500.");
-        } else if (!"9500".equals(isic) && "60".equals(kukla)) {
-          error.addError(rowIndex + 1, "<br>KUKLA", "ISIC value should be 9500 if KUKLA is 60.");
-        }
         // validate ISU and CTC combination
         String isuCd = validateColValFromCell(row.getCell(10));
         if (StringUtils.isNotBlank(isuCd) || StringUtils.isNotBlank(ctc)) {
@@ -2059,14 +2054,32 @@ public class IsraelHandler extends EMEAHandler {
 
         if (StringUtils.isNotBlank(isic) && StringUtils.isNotBlank(kukla)) {
           if (isic.equals("9500") && kukla.equals("60")) {
-            if (StringUtils.isNotBlank(usrIsic)) {
+            if (StringUtils.isNotBlank(usrIsic) && !usrIsic.equals("9500")) {
               if (StringUtils.isBlank(usrKukla)) {
                 mismatch = true;
-              }
-            } else if (StringUtils.isNotBlank(usrKukla)) {
-              if (StringUtils.isBlank(usrIsic)) {
+              } else if (StringUtils.isNotBlank(usrKukla) && usrKukla.equals("60")) {
                 mismatch = true;
               }
+            } else if (StringUtils.isNotBlank(usrKukla) && !usrKukla.equals("60")) {
+              if (StringUtils.isBlank(usrIsic)) {
+                mismatch = true;
+              } else if (StringUtils.isNotBlank(usrIsic) && usrIsic.equals("9500")) {
+                mismatch = true;
+              }
+            }
+          } else if (isic.equals("9500") && !kukla.equals("60")) {
+            if (StringUtils.isNotBlank(usrKukla) && !usrKukla.equals("60")) {
+              mismatch = true;
+            }
+          } else if (!isic.equals("9500") && kukla.equals("60")) {
+            if (StringUtils.isNotBlank(usrIsic) && !usrIsic.equals("9500")) {
+              mismatch = true;
+            }
+          } else {
+            if ("9500".equals(usrIsic) && !"60".equals(usrKukla)) {
+              errMessage = "KUKLA value should be 60 if ISIC is 9500.";
+            } else if (!"9500".equals(usrIsic) && "60".equals(usrKukla)) {
+              errMessage = "ISIC value should be 9500 if KUKLA is 60.";
             }
           }
         }
