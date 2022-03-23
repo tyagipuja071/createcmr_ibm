@@ -3578,6 +3578,9 @@ function lockDunsNo() {
 // CREATCMR-2674
 function setSalesRepValues() {
   console.log('setSalesRepValues=====');
+  if (FormManager.getActualValue('viewOnlyPage') == 'true' || FormManager.getActualValue('reqType') == 'U') {
+    return;
+  }
   reqType = FormManager.getActualValue('reqType');
 
   var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
@@ -3600,7 +3603,7 @@ function setSalesRepValues() {
    * subIndDB != null) { checkFlag = true; return; } }
    */
 
-  if (reqType == 'C' || reqType == 'U') {
+  if (reqType == 'C') {
     if (isuCd != '') {
 
       var isuAndCtc = isuCd + clientTier;
