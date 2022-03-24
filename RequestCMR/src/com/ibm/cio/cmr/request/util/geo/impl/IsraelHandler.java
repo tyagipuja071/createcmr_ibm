@@ -2104,18 +2104,21 @@ public class IsraelHandler extends EMEAHandler {
       CmrtCust cmrtCust = LegacyDirectUtil.getRealCountryCodeBankNumber(entityManager, cmrNo, cntry);
       if (cmrtCust != null) {
         String realCtyCd = StringUtils.isNotEmpty(cmrtCust.getRealCtyCd()) ? cmrtCust.getRealCtyCd() : "";
-        String bankNumber = StringUtils.isNotEmpty(cmrtCust.getBankNo()) ? cmrtCust.getBankNo() : "";
+        String bankNoInitial = StringUtils.isNotEmpty(cmrtCust.getBankNo()) ? cmrtCust.getBankNo().substring(0, 1) : "";
+        if (!bankNoInitial.equals("9")) {
+          bankNoInitial = "0";
+        }
 
-        if (StringUtils.isNotEmpty(realCtyCd) && StringUtils.isNotEmpty(bankNumber)) {
+        if (StringUtils.isNotEmpty(realCtyCd) && StringUtils.isNotEmpty(bankNoInitial)) {
           int salesRepInt = Integer.parseInt(userSalesRep);
           int minRange = 220;
           int maxRange = 239;
 
-          if (realCtyCd.equals("755") && bankNumber.equals("0") || realCtyCd.equals("756") && bankNumber.equals("9")) {
+          if (realCtyCd.equals("755") && bankNoInitial.equals("0") || realCtyCd.equals("756") && bankNoInitial.equals("9")) {
             if (salesRepInt >= minRange && salesRepInt <= maxRange) {
               errMessage = "Invalid Sales Rep value.  Sales Rep cannot be from 000220-000239 range. Please change it.";
             }
-          } else if (realCtyCd.equals("756") && bankNumber.equals("0")) {
+          } else if (realCtyCd.equals("756") && bankNoInitial.equals("0")) {
             if (salesRepInt < minRange || salesRepInt > maxRange) {
               errMessage = "Invalid Sales Rep value. Sales Rep must be from 000220-000239 range. Please change it.";
             }
