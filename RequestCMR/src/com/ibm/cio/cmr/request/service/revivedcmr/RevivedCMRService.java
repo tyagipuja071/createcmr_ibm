@@ -174,6 +174,9 @@ public class RevivedCMRService extends BaseSimpleService<List<RevivedCMRModel>> 
           revCmr.setDunsNo(dnbRecord.getDunsNo());
           gbgRequest.setMinConfidence("6");
           revCmr.setVat(kna1.getStcd1());
+          revCmr.setKunnr(kna1.getId().getKunnr());
+          revCmr.setIsicCd(kna1.getZzkvSic());
+          revCmr.setUsSicmen(kna1.getZzkvSic());
         }
       }
 
@@ -335,8 +338,10 @@ public class RevivedCMRService extends BaseSimpleService<List<RevivedCMRModel>> 
     for (RevivedCMRModel revCmr : revCMRList) {
       AutomationUtil countryUtil = AutomationUtil.getNewCountryUtil(revCmr.getIssuingCountry());
       if (countryUtil != null) {
-        String originalScenario = countryUtil.getOriginalScenarioForRevivedCMRs(entityManager, revCmr.getCmrNo());
-        countryUtil.doCountryFieldComputationsForRevivedCMRs(entityManager, revCmr, originalScenario);
+        // String originalScenario =
+        // countryUtil.getOriginalScenarioForRevivedCMRs(entityManager,
+        // revCmr.getCmrNo());
+        countryUtil.doCountryFieldComputationsForRevivedCMRs(entityManager, revCmr);
       }
     }
   }

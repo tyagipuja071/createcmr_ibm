@@ -244,8 +244,7 @@ public abstract class AutomationUtil {
     return false;
   }
 
-  public boolean doCountryFieldComputationsForRevivedCMRs(EntityManager entityManager, RevivedCMRModel revCmrModel, String scenario)
-      throws Exception {
+  public boolean doCountryFieldComputationsForRevivedCMRs(EntityManager entityManager, RevivedCMRModel revCmrModel) throws Exception {
     return false;
   }
 

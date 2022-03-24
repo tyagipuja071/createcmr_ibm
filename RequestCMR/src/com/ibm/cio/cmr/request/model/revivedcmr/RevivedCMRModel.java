@@ -9,6 +9,7 @@ public class RevivedCMRModel extends BaseModel {
 
   private static final long serialVersionUID = 1L;
   private String issuingCountry;
+  private String kunnr;
   private String cmrNo;
   private String cmrState;
   private String county;
@@ -247,6 +248,14 @@ public class RevivedCMRModel extends BaseModel {
 
   public void setUsSicmen(String usSicmen) {
     this.usSicmen = usSicmen;
+  }
+
+  public String getKunnr() {
+    return kunnr;
+  }
+
+  public void setKunnr(String kunnr) {
+    this.kunnr = kunnr;
   }
 
 }

@@ -38,6 +38,7 @@ import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.KnvvExt;
 import com.ibm.cio.cmr.request.model.BaseModel;
 import com.ibm.cio.cmr.request.model.requestentry.AddressModel;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
@@ -1611,10 +1612,9 @@ public class USUtil extends AutomationUtil {
   }
 
   @Override
-  public boolean doCountryFieldComputationsForRevivedCMRs(EntityManager entityManager, RevivedCMRModel revCmrModel, String scenario)
-      throws Exception {
+  public boolean doCountryFieldComputationsForRevivedCMRs(EntityManager entityManager, RevivedCMRModel revCmrModel) throws Exception {
 
-    USDetailsContainer usDetails = determineUSCMRDetails(entityManager, revCmrModel.getCmrNo());
+    USDetailsContainer usDetails = determineFields(entityManager, revCmrModel.getKunnr());
     revCmrModel.setCsoSite(usDetails.getCsoSite());
     revCmrModel.setPccArDept(usDetails.getPccArDept());
     revCmrModel.setMtkgArDept(usDetails.getMktgArDept());
@@ -1627,24 +1627,26 @@ public class USUtil extends AutomationUtil {
     revCmrModel.setClientTier("Q");
 
     // if scenario is OEMSW or OEMHW set isic to 357X
-    if (SC_REST_OEMSW.equals(scenario) || SC_REST_OEMHW.equals(scenario) || SC_REST_TPD.equals(scenario) || SC_REST_SSD.equals(scenario)
-        || SC_REST_DB4.equals(scenario)) {
-      revCmrModel.setIsicCd("357X");
-      if (SC_REST_TPD.equals(scenario) || SC_REST_SSD.equals(scenario) || SC_REST_DB4.equals(scenario)) {
-        revCmrModel.setSubIndustryCd("ZC");
-        revCmrModel.setUsSicmen("357X");
-      }
-    }
-
-    // if scenario is KYN
-    if (SC_REST_KYN.equals(scenario)) {
-      revCmrModel.setIsicCd("7229");
-      revCmrModel.setSubIndustryCd("BD");
-      revCmrModel.setUsSicmen("7229");
-      revCmrModel.setMtkgArDept("SD3");
-      revCmrModel.setSvcArOffice("IJ9");
-
-    }
+    // if (SC_REST_OEMSW.equals(scenario) || SC_REST_OEMHW.equals(scenario) ||
+    // SC_REST_TPD.equals(scenario) || SC_REST_SSD.equals(scenario)
+    // || SC_REST_DB4.equals(scenario)) {
+    // revCmrModel.setIsicCd("357X");
+    // if (SC_REST_TPD.equals(scenario) || SC_REST_SSD.equals(scenario) ||
+    // SC_REST_DB4.equals(scenario)) {
+    // revCmrModel.setSubIndustryCd("ZC");
+    // revCmrModel.setUsSicmen("357X");
+    // }
+    // }
+    //
+    // // if scenario is KYN
+    // if (SC_REST_KYN.equals(scenario)) {
+    // revCmrModel.setIsicCd("7229");
+    // revCmrModel.setSubIndustryCd("BD");
+    // revCmrModel.setUsSicmen("7229");
+    // revCmrModel.setMtkgArDept("SD3");
+    // revCmrModel.setSvcArOffice("IJ9");
+    //
+    // }
 
     return true;
   }
@@ -1753,6 +1755,58 @@ public class USUtil extends AutomationUtil {
 
     usDetails.setPccArDept(pccArDept);
     usDetailsMap.put(cmrNo, usDetails);
+    return usDetails;
+  }
+
+  public static USDetailsContainer determineFields(EntityManager entityManager, String kunnr) throws Exception {
+    // get request admin and data
+    // if (usDetailsMap.containsKey(cmrNo) && usDetailsMap.get(cmrNo) != null) {
+    // return usDetailsMap.get(cmrNo);
+    // }
+    USDetailsContainer usDetails = new USDetailsContainer();
+    String custTypCd = "NA";
+    String entType = "";
+    String leasingCo = "";
+    String bpAccTyp = "";
+    String cGem = "";
+    String usRestrictTo = "";
+    String companyNo = "";
+    String pccArDept = "";
+    String mtkgArDept = "";
+    String mktgDept = "";
+    String csoSite = "";
+    String svrArOffice = "";
+    String miscBilling = "";
+    String sicmen = "";
+
+    String sql = ExternalizedQuery.getSql("GET.KNVVEXT.REVIVED");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("KUNNR", kunnr);
+
+    List<KnvvExt> knvvExtList = query.getResults(KnvvExt.class);
+    if (knvvExtList == null && knvvExtList.size() == 0) {
+      custTypCd = "NA";
+    } else {
+      for (KnvvExt knvvExt : knvvExtList) {
+        pccArDept = knvvExt.getPccArBo();
+        mtkgArDept = knvvExt.getMktgArDept();
+        mktgDept = knvvExt.getMktgDept();
+        csoSite = knvvExt.getCsoSite();
+        svrArOffice = knvvExt.getSvcArOfc();
+        miscBilling = knvvExt.getMiscBilling();
+      }
+    }
+
+    usDetails.setMktgArDept(mtkgArDept);
+    usDetails.setMktgDept(mktgDept);
+    usDetails.setCsoSite(csoSite);
+    usDetails.setSvrArOffice(svrArOffice);
+    usDetails.setMiscBilling(miscBilling);
+    // usDetails.setSicmen(sicmen);
+
+    usDetails.setPccArDept(pccArDept);
+    // usDetailsMap.put(cmrNo, usDetails);
     return usDetails;
   }
 
