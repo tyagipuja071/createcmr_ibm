@@ -1835,7 +1835,11 @@ public class IsraelHandler extends EMEAHandler {
         }
 
         // Validate Postal Code+City
-        String cityString = cityCell.getRichStringCellValue().getString();
+        String cityString = "";
+        if (cityCell != null && cityCell.getRichStringCellValue() != null) {
+          cityString = cityCell.getRichStringCellValue().getString();
+        }
+
         if (StringUtils.isNotBlank(cityString) || StringUtils.isNotBlank(postalCd)) {
           cityString += postalCd;
           if (cityString.length() > 29) {
