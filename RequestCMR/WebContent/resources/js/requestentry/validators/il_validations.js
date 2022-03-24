@@ -717,6 +717,10 @@ function updateAbbrevNmLocnIsrael(cntry, addressMode, saving, finalSave, force) 
     reqType = FormManager.getActualValue('reqType');
   }
   
+  if (reqType != 'C') {
+    return;
+  }
+  
   if (finalSave || force || addressMode == 'COPY') {
     var copyTypes = document.getElementsByName('copyTypes');
     var copyingToA = false;
