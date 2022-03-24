@@ -1776,7 +1776,10 @@ public class EMEAHandler extends BaseSOFHandler {
       if (SystemLocation.ISRAEL.equals(data.getCmrIssuingCntry()) && StringUtils.isEmpty(data.getCollectionCd())) {
         data.setCollectionCd("TC0");
       }
-
+      //special tax code
+      if (SystemLocation.UNITED_KINGDOM.equals(data.getCmrIssuingCntry()) && data.getSpecialTaxCd().isEmpty() && admin.getReqType()=="U"){
+        data.setSpecialTaxCd("Bl");
+      }
       // Changed abbreviated location if cross border to country
       if (SystemLocation.ISRAEL.equals(data.getCmrIssuingCntry())) {
         if (!this.currentImportValues.isEmpty() && !(mainRecord.getCmrCountryLanded().equalsIgnoreCase("IL"))) {
