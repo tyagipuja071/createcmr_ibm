@@ -27,6 +27,7 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.approval.ApprovalService;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.masscreate.MassCreateFile;
 import com.ibm.cio.cmr.request.util.masscreate.MassCreateFile.ValidationResult;
@@ -38,6 +39,8 @@ import com.ibm.cmr.create.batch.util.masscreate.ValidatorWorker;
 import com.ibm.cmr.create.batch.util.masscreate.WorkerThreadFactory;
 import com.ibm.cmr.create.batch.util.masscreate.handler.HandlerEngine;
 import com.ibm.cmr.create.batch.util.masscreate.handler.impl.AddressHandler;
+import com.ibm.cmr.create.batch.util.masscreate.handler.impl.CALocationNoHandler;
+import com.ibm.cmr.create.batch.util.masscreate.handler.impl.CAPhoneNoHandler;
 import com.ibm.cmr.create.batch.util.masscreate.handler.impl.CAPostalCdAndStateHandler;
 import com.ibm.cmr.create.batch.util.masscreate.handler.impl.CMRNoHandler;
 import com.ibm.cmr.create.batch.util.masscreate.handler.impl.CMRNoNonUSHandler;
@@ -383,7 +386,7 @@ public class MassCreateValidatorService extends BaseBatchService {
 
       // per country handler
       switch (cmrIssuingCountry) {
-      case "897":
+      case SystemLocation.UNITED_STATES:
         engine.addHandler(new CoverageBgGlcISUHandler());
         engine.addHandler(new TgmeAddrStdHandler());
         engine.addHandler(new USPostCodeAndStateHandler());
@@ -392,9 +395,11 @@ public class MassCreateValidatorService extends BaseBatchService {
         engine.addHandler(new EnterpriseAffiliateHandler());
         engine.addHandler(new InternalTypeAbbrevNameHandler());
         break;
-      case "649": // canada
+      case SystemLocation.CANADA:
         engine.addHandler(new CMRNoNonUSHandler());
+        engine.addHandler(new CALocationNoHandler());
         engine.addHandler(new CAPostalCdAndStateHandler());
+        engine.addHandler(new CAPhoneNoHandler());
         break;
       }
 

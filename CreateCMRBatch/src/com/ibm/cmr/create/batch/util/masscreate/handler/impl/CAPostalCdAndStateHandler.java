@@ -50,7 +50,7 @@ public class CAPostalCdAndStateHandler implements RowHandler {
   public RowResult validate(EntityManager entityManager, MassCreateFileRow row) throws Exception {
     RowResult result = new RowResult();
 
-    if (row.getAddresses() != null) {
+    if (row.getAddresses() != null && row.getAddresses().size() > 0) {
       String postalCd = null;
       String stateProv = null;
       String addrType = null;
@@ -64,9 +64,9 @@ public class CAPostalCdAndStateHandler implements RowHandler {
           // validate State/Prov
           LOG.debug("Validating State/Prov: " + stateProv);
           if (StringUtils.isEmpty(stateProv)) {
-            result.addError(addrType + " State/Prov is empty.");
+            result.addError(addrType + " State/Prov is empty. ");
           } else if (StringUtils.isNotBlank(stateProv) && !stateExists(entityManager, stateProv, addr.getLandCntry())) {
-            result.addError(addrType + " State/Prov is invalid.");
+            result.addError(addrType + " State/Prov is invalid. ");
           }
 
           // validate Postal Cd
@@ -74,10 +74,10 @@ public class CAPostalCdAndStateHandler implements RowHandler {
           if (StringUtils.isNotBlank(stateProv) && StringUtils.isNotBlank(postalCd)) {
             if (!stateProv.equals("NU") && !stateProv.equals("NT") && caStatePostalCd.get(stateProv) != null
                 && !caStatePostalCd.get(stateProv).contains(postalCd.substring(0, 1))) {
-              result.addError(addrType + " Postal Code first character should be " + caStatePostalCd.get(stateProv).get(0));
+              result.addError(addrType + " Postal Code first character should be " + caStatePostalCd.get(stateProv).get(0) + ". ");
             } else if ((stateProv.equals("NU") || stateProv.equals("NT")) && caStatePostalCd.get(stateProv) != null
                 && !caStatePostalCd.get(stateProv).contains(postalCd.substring(0, 3))) {
-              result.addError(addrType + " Postal Code first 3 characters should be " + String.join("or ", caStatePostalCd.get(stateProv)));
+              result.addError(addrType + " Postal Code first 3 characters should be " + String.join(" or ", caStatePostalCd.get(stateProv)) + ". ");
             }
           }
         }

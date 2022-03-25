@@ -20,13 +20,13 @@ public class INACHandler implements RowHandler {
     RowResult result = new RowResult();
 
     if (!StringUtils.isEmpty(data.getInacType()) && StringUtils.isEmpty(data.getInacCd())) {
-      result.addError("INAC Code is required when INAC Type is specified.");
+      result.addError("INAC Code is required when INAC Type is specified. ");
     }
     if (StringUtils.isEmpty(data.getInacType()) && !StringUtils.isEmpty(data.getInacCd())) {
-      result.addError("INAC Type is required when INAC Code is specified.");
+      result.addError("INAC Type is required when INAC Code is specified. ");
     }
     if (!StringUtils.isEmpty(data.getInacCd()) && !StringUtils.isNumeric(data.getInacCd()) && "I".equals(data.getInacType())) {
-      result.addError("INAC Code should be numeric for INAC Type I");
+      result.addError("INAC Code should be numeric for INAC Type I. ");
     }
 
     return result;
