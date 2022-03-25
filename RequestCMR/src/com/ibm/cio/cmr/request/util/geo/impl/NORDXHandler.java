@@ -1987,6 +1987,7 @@ public class NORDXHandler extends BaseSOFHandler {
       query.setParameter("REQ_ID", reqId);
 
       List<Object[]> resultsCMR = query.getResults();
+      String maxAddrSeq = null;
       int maxSeq = 0;
       if (resultsCMR != null && resultsCMR.size() > 0) {
         boolean seqExistCMR = false;
@@ -2019,27 +2020,45 @@ public class NORDXHandler extends BaseSOFHandler {
       if (CmrConstants.REQ_TYPE_UPDATE.equals(reqType)) {
         String cmrNo = getCMRNo(entityManager, reqId);
         if (!StringUtils.isEmpty(cmrNo)) {
-          String sqlRDC = ExternalizedQuery.getSql("FR.ADDRESS.GETMADDRSEQ_RDC");
+          // String sqlRDC =
+          // ExternalizedQuery.getSql("FR.ADDRESS.GETMADDRSEQ_RDC");
+          // PreparedQuery queryRDC = new PreparedQuery(entityManager, sqlRDC);
+          // queryRDC.setParameter("MANDT",
+          // SystemConfiguration.getValue("MANDT"));
+          // queryRDC.setParameter("ZZKV_CUSNO", cmrNo);
+
+          String sqlRDC = ExternalizedQuery.getSql("NORDX.GETMADDRSEQ_CREATECMR");
           PreparedQuery queryRDC = new PreparedQuery(entityManager, sqlRDC);
-          queryRDC.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
-          queryRDC.setParameter("ZZKV_CUSNO", cmrNo);
-          List<Object[]> resultsRDC = queryRDC.getResults();
-          List<Integer> seqListRDC = new ArrayList<Integer>();
-          for (int i = 0; i < resultsRDC.size(); i++) {
-            String item = String.valueOf(resultsRDC.get(i));
-            if (!StringUtils.isEmpty(item)) {
-              seqListRDC.add(Integer.parseInt(item));
+          queryRDC.setParameter("REQ_ID", reqId);
+
+          // List<Object[]> resultsRDC = queryRDC.getResults();
+          // List<Integer> seqListRDC = new ArrayList<Integer>();
+          // for (int i = 0; i < resultsRDC.size(); i++) {
+          // String item = String.valueOf(resultsRDC.get(i));
+          // if (!StringUtils.isEmpty(item)) {
+          // seqListRDC.add(Integer.parseInt(item));
+          // }
+          // }
+          // if (addrSeq < 6 && seqListRDC.contains(addrSeq)) {
+          // if (maxSeq < 6) {
+          // addrSeq = 6;
+          // } else {
+          // addrSeq = maxSeq + 1;
+          // }
+          // }
+          // while (seqListRDC.contains(addrSeq)) {
+          // addrSeq++;
+          // }
+          List<Object[]> results = queryRDC.getResults();
+          if (results != null && results.size() > 0) {
+            Object[] result = results.get(0);
+            maxAddrSeq = (String) (result != null && result.length > 0 ? result[0] : "0");
+            if (StringUtils.isEmpty(maxAddrSeq)) {
+              maxAddrSeq = "0";
             }
-          }
-          if (addrSeq < 6 && seqListRDC.contains(addrSeq)) {
-            if (maxSeq < 6) {
-              addrSeq = 6;
-            } else {
-              addrSeq = maxSeq + 1;
-            }
-          }
-          while (seqListRDC.contains(addrSeq)) {
-            addrSeq++;
+            addrSeq = Integer.parseInt(maxAddrSeq);
+            addrSeq = ++addrSeq;
+            System.out.println("maxseq = " + addrSeq);
           }
         }
       }
