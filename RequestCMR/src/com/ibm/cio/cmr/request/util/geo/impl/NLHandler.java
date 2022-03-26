@@ -149,28 +149,58 @@ public class NLHandler extends BaseSOFHandler {
 
             System.out.println("seqNo = " + seqNo);
             if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo)) {
-              addrType = record.getCmrAddrTypeCode();
-              if (!StringUtils.isEmpty(addrType)) {
-                addr = cloneAddress(record, addrType);
-                addr.setCmrDept(record.getCmrCity2());
-                addr.setCmrName4(record.getCmrName4());
-                if (NL_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry())
-                    && (CmrConstants.ADDR_TYPE.ZD01.toString().equals(addr.getCmrAddrTypeCode())) && "598".equals(addr.getCmrAddrSeq())) {
-                  addr.setCmrAddrTypeCode("ZD02");
-                }
-                if (NL_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry())
-                    && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(addr.getCmrAddrTypeCode())) && "28801".equals(addr.getCmrAddrSeq())) {
-                  addr.setCmrAddrTypeCode("ZP02");
-                }
-                if ((CmrConstants.ADDR_TYPE.ZD01.toString().equals(addr.getCmrAddrTypeCode()))) {
-                  String stkzn = "";
-                  stkzn = getStkznFromDataRdc(entityManager, addr.getCmrSapNumber(), SystemConfiguration.getValue("MANDT"));
-                  int parvmCount = getCeeKnvpParvmCount(addr.getCmrSapNumber());
-                  if ("0".equals(stkzn) || parvmCount > 0) {
-                    addr.setCmrAddrTypeCode("ZS02");
+              sofUses = this.legacyObjects.getUsesBySequenceNo(seqNo);
+              if (StringUtils.isNotBlank(record.getCmrAddrSeq()) && !sofUses.isEmpty()) {
+                for (String sofUse : sofUses) {
+                  addrType = record.getCmrAddrTypeCode();
+                  if (!StringUtils.isEmpty(addrType)) {
+                    addr = cloneAddress(record, addrType);
+                    addr.setCmrDept(record.getCmrCity2());
+                    addr.setCmrName4(record.getCmrName4());
+                    if (NL_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry())
+                        && (CmrConstants.ADDR_TYPE.ZD01.toString().equals(addr.getCmrAddrTypeCode())) && "598".equals(addr.getCmrAddrSeq())) {
+                      addr.setCmrAddrTypeCode("ZD02");
+                    }
+                    if (NL_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry())
+                        && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(addr.getCmrAddrTypeCode())) && "28801".equals(addr.getCmrAddrSeq())) {
+                      addr.setCmrAddrTypeCode("ZP02");
+                    }
+                    if ((CmrConstants.ADDR_TYPE.ZD01.toString().equals(addr.getCmrAddrTypeCode()))) {
+                      String stkzn = "";
+                      stkzn = getStkznFromDataRdc(entityManager, addr.getCmrSapNumber(), SystemConfiguration.getValue("MANDT"));
+                      int parvmCount = getCeeKnvpParvmCount(addr.getCmrSapNumber());
+                      if ("0".equals(stkzn) || parvmCount > 0) {
+                        addr.setCmrAddrTypeCode("ZS02");
+                      }
+                    }
+                    converted.add(addr);
                   }
                 }
-                converted.add(addr);
+              } else if (sofUses.isEmpty() && "ZP01".equals(record.getCmrAddrTypeCode()) && StringUtils.isNotEmpty(record.getExtWalletId())) {
+                record.setCmrAddrTypeCode("PG01");
+                addrType = record.getCmrAddrTypeCode();
+                if (!StringUtils.isEmpty(addrType)) {
+                  addr = cloneAddress(record, addrType);
+                  addr.setCmrDept(record.getCmrCity2());
+                  addr.setCmrName4(record.getCmrName4());
+                  if (NL_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry())
+                      && (CmrConstants.ADDR_TYPE.ZD01.toString().equals(addr.getCmrAddrTypeCode())) && "598".equals(addr.getCmrAddrSeq())) {
+                    addr.setCmrAddrTypeCode("ZD02");
+                  }
+                  if (NL_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry())
+                      && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(addr.getCmrAddrTypeCode())) && "28801".equals(addr.getCmrAddrSeq())) {
+                    addr.setCmrAddrTypeCode("ZP02");
+                  }
+                  if ((CmrConstants.ADDR_TYPE.ZD01.toString().equals(addr.getCmrAddrTypeCode()))) {
+                    String stkzn = "";
+                    stkzn = getStkznFromDataRdc(entityManager, addr.getCmrSapNumber(), SystemConfiguration.getValue("MANDT"));
+                    int parvmCount = getCeeKnvpParvmCount(addr.getCmrSapNumber());
+                    if ("0".equals(stkzn) || parvmCount > 0) {
+                      addr.setCmrAddrTypeCode("ZS02");
+                    }
+                  }
+                  converted.add(addr);
+                }
               }
               if (CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode())) {
                 String kunnr = addr.getCmrSapNumber();
@@ -838,7 +868,7 @@ public class NLHandler extends BaseSOFHandler {
 
     if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && "5K".equals(data.getIsuCd())) {
       data.setClientTier("");
-  }
+    }
   }
 
   private String getInternalDepartment(String cmrNo) throws Exception {
@@ -2284,7 +2314,7 @@ public class NLHandler extends BaseSOFHandler {
           error.addError((row.getRowNum() + 1), "Client Tier",
               ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
         }
-        
+
         if (error.hasErrors()) {
           validations.add(error);
         }
@@ -2745,5 +2775,9 @@ public class NLHandler extends BaseSOFHandler {
       }
     }
   }
-
+  
+  @Override
+  public boolean setAddrSeqByImport(AddrPK addrPk, EntityManager entityManager, FindCMRResultModel result) {
+    return true;
+  }
 }

@@ -22,6 +22,7 @@ import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.AddrPK;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataRdc;
@@ -95,9 +96,11 @@ public class USHandler extends GEOHandler {
         } else if ("ZP01".equals(record.getCmrAddrTypeCode()) && seqList.contains(record.getCmrAddrSeq())) {
           // set the address type to Invoice To for CreateCMR
           record.setCmrAddrTypeCode("ZI01");
-        } else if (StringUtils.isNotBlank(record.getCmrAddrSeq()) && "ZP01".equals(record.getCmrAddrTypeCode())
+        }
+      }
+      if (StringUtils.isNotBlank(record.getCmrAddrSeq()) && "ZP01".equals(record.getCmrAddrTypeCode())
             && Integer.parseInt(record.getCmrAddrSeq()) >= 200) {
-          continue;
+        record.setCmrAddrTypeCode("PG01");
         }
 
         converted.add(record);
@@ -116,14 +119,14 @@ public class USHandler extends GEOHandler {
           record.setCmrTier(CmrConstants.CLIENT_TIER_UNASSIGNED);
         }
       }
-    }
+    
 
     // check if ZP01 records exist in RDC & import
-    List<FindCMRRecordModel> addressesList = null;
-    addressesList = getZP01FromRDC(entityManager, main.getCmrNum());
-    if (!addressesList.isEmpty() && addressesList.size() > 0) {
-      converted.addAll(addressesList);
-    }
+//    List<FindCMRRecordModel> addressesList = null;
+//    addressesList = getZP01FromRDC(entityManager, main.getCmrNum());
+//    if (!addressesList.isEmpty() && addressesList.size() > 0) {
+//      converted.addAll(addressesList);
+//    }
     Collections.sort(converted);
     source.setItems(converted);
   }
@@ -1051,6 +1054,11 @@ public class USHandler extends GEOHandler {
   @Override
   public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
     return false;
+  }
+  
+  @Override
+  public boolean setAddrSeqByImport(AddrPK addrPk, EntityManager entityManager, FindCMRResultModel result) {
+    return true;
   }
 
   protected String getSubIndusryValue(EntityManager entityManager, String isic) {

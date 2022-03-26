@@ -625,19 +625,7 @@ public class ATService extends TransConnService {
                 addrSeqs = red.getSeqNo().split(",");
               }
 
-<<<<<<< HEAD
               if (red.getAddressType().equalsIgnoreCase(addr.getId().getAddrType()) && addrSeqs[1].equalsIgnoreCase(addr.getId().getAddrSeq())) {
-=======
-              if ((red.getAddressType().equalsIgnoreCase(addr.getId().getAddrType()) || "ZS02".equalsIgnoreCase(addr.getId().getAddrType()))
-                  && addrSeqs[1].equalsIgnoreCase(addr.getId().getAddrSeq())) {
-                LOG.debug("Address matched");
-                addr.setPairedAddrSeq(addrSeqs[0]);
-                addr.setSapNo(red.getSapNo());
-                addr.setIerpSitePrtyId(red.getIerpSitePartyId());
-              }
-              if (("ZP01").equalsIgnoreCase(red.getAddressType()) && addrSeqs[1].equalsIgnoreCase(addr.getId().getAddrSeq())) {
-                LOG.debug("ZP01 matched");
->>>>>>> origin/saas_paygo_group1
                 addr.setPairedAddrSeq(addrSeqs[0]);
                 addr.setSapNo(red.getSapNo());
                 addr.setIerpSitePrtyId(red.getIerpSitePartyId());

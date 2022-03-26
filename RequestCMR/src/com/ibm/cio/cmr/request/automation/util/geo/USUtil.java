@@ -1072,9 +1072,10 @@ public class USUtil extends AutomationUtil {
 
           if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZS01.toString()) && !payGoAddredited) {
             closelyMatchAddressWithDnbRecords(entityManager, requestData, engineData, "ZS01", details, validation, output);
-            if (relevantAddressFieldForUpdates(changes, requestData.getAddress("ZS01"))) {
-              matchAddressWithSosRecords(entityManager, requestData, engineData, "ZS01", details, validation, output);
-            }
+          }
+          if (relevantAddressFieldForUpdates(changes, requestData.getAddress("ZS01"))) {
+            matchAddressWithSosRecords(entityManager, requestData, engineData, "ZS01", details, validation, output);
+          }
 
           if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZI01.toString()) && !payGoAddredited) {
             UpdatedNameAddrModel addrTxt = changes.getAddressChange("ZI01", "Address");
@@ -1110,8 +1111,8 @@ public class USUtil extends AutomationUtil {
 
             if (relevantAddressFieldForUpdates(changes, requestData.getAddress("ZI01"))) {
               matchAddressWithSosRecords(entityManager, requestData, engineData, "ZI01", details, validation, output);
+            }
           }
-
           if (payGoAddredited && addrTypesChanged.contains(CmrConstants.RDC_PAYGO_BILLING.toString())) {
             addresses = requestData.getAddresses(CmrConstants.RDC_PAYGO_BILLING.toString());
             for (Addr addr : addresses) {
@@ -1152,10 +1153,14 @@ public class USUtil extends AutomationUtil {
         validation.setMessage("Unknown CustType");
         details.append("Customer Type could not be determined. Update checks for address could not be run.").append("\n");
         output.setOnError(true);
+
       }
       output.setDetails(details.toString());
+
     }
+
     return true;
+
   }
 
   /**
@@ -1706,7 +1711,8 @@ public class USUtil extends AutomationUtil {
     }
     return false;
   }
-  
+
+  @Override
   public void performCoverageBasedOnGBG(CalculateCoverageElement covElement, EntityManager entityManager, AutomationResult<OverrideOutput> results,
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData, String covFrom,
       CoverageContainer container, boolean isCoverageCalculated) throws Exception {
@@ -1749,6 +1755,7 @@ public class USUtil extends AutomationUtil {
       overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ENTERPRISE", data.getEnterprise(), "6500871");
     }
     return true;
+  }
 
   public boolean addressExists(EntityManager entityManager, Addr addrToCheck) {
 
