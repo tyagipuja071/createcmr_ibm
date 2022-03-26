@@ -56,7 +56,7 @@ public class AustriaUtil extends AutomationUtil {
   private static final String SCENARIO_GOVERNMENT = "GOVRN";
 
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
-      CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO, CmrConstants.RDC_SECONDARY_SOLD_TO);
+      CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO, CmrConstants.RDC_SECONDARY_SOLD_TO, CmrConstants.RDC_PAYGO_BILLING);
 
   private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Attention Person", "Phone number", "FAX", "Customer Name 4");
 
@@ -220,7 +220,7 @@ public class AustriaUtil extends AutomationUtil {
           if ("N".equals(addr.getImportInd())) {
             // new address
             LOG.debug("Checking duplicates for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
-            boolean duplicate = addressExists(entityManager, addr , requestData);
+            boolean duplicate = addressExists(entityManager, addr, requestData);
             if (duplicate) {
               LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
               duplicateDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");
@@ -230,6 +230,9 @@ public class AustriaUtil extends AutomationUtil {
               if (CmrConstants.RDC_SHIP_TO.equals(addrType)) {
                 LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
                 checkDetails.append("Addition of new ZD01 (" + addr.getId().getAddrSeq() + ") address skipped in the checks.\n");
+              } else if (CmrConstants.RDC_PAYGO_BILLING.equals(addrType)) {
+                LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+                checkDetails.append("Addition of new PG01 (" + addr.getId().getAddrSeq() + ") address validated in the checks.\n");
               } else {
                 List<DnBMatchingResponse> matches = getMatches(requestData, engineData, addr, false);
                 boolean matchesDnb = false;

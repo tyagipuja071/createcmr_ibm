@@ -24,6 +24,7 @@ public class FindCMRRecordModel implements Serializable, Comparable<FindCMRRecor
   private String cmrPostalCode;
   private int cmrResultRows;
   private String cmrCoverage;
+  private String extWalletId;
   // base cov
   private String cmrBaseCoverage;
   private String cmrRevenue;
@@ -1906,7 +1907,15 @@ public class FindCMRRecordModel implements Serializable, Comparable<FindCMRRecor
     this.militaryFlag = militaryFlag;
   }
 
-  public String getCmrSellBoGrp() {
+  public String getExtWalletId() {
+    return extWalletId;
+  }
+
+  public void setExtWalletId(String extWalletId) {
+    this.extWalletId = extWalletId;
+  }
+  
+   public String getCmrSellBoGrp() {
     return cmrSellBoGrp;
   }
 

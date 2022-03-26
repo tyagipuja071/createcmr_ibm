@@ -25,12 +25,20 @@ import org.springframework.web.servlet.ModelAndView;
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
+
+import com.ibm.cio.cmr.request.entity.AddrPK;
 import com.ibm.cio.cmr.request.entity.AddrRdc;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AdminPK;
 import com.ibm.cio.cmr.request.entity.CmrCloningQueue;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataPK;
+
+import com.ibm.cio.cmr.request.entity.AddrPK;
+import com.ibm.cio.cmr.request.entity.AddrRdc;
+import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.entity.AdminPK;
+import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.entity.Kna1;
 import com.ibm.cio.cmr.request.entity.KunnrExt;
@@ -137,6 +145,10 @@ public class FranceHandler extends GEOHandler {
 
             if (CmrConstants.ADDR_TYPE.ZP01.toString().equals(tempRec.getCmrAddrTypeCode()) && "599".equals(tempRec.getCmrAddrSeq())) {
               tempRec.setCmrAddrTypeCode("ZP02");
+            }
+			
+            if (CmrConstants.ADDR_TYPE.ZP01.toString().equals(tempRec.getCmrAddrTypeCode()) && StringUtils.isNotEmpty(tempRec.getExtWalletId())) {
+              tempRec.setCmrAddrTypeCode("PG01");
             }
             recordsToReturn.add(tempRec);
           }
@@ -1365,6 +1377,7 @@ public class FranceHandler extends GEOHandler {
             return;
           }
 
+        for (Row row : sheet) {
           if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
             DataFormatter df = new DataFormatter();
             String cmrNo = ""; // 0
@@ -1923,6 +1936,11 @@ public class FranceHandler extends GEOHandler {
     LOG.debug("generateCNDCmr :: returnung cndCMR = " + cndCMR);
     LOG.debug("generateCNDCmr :: END");
     return cndCMR;
+  }
+
+  @Override
+  public boolean setAddrSeqByImport(AddrPK addrPk, EntityManager entityManager, FindCMRResultModel result) {
+    return true;
   }
 
 }

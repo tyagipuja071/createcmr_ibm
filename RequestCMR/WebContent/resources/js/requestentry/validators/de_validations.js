@@ -520,11 +520,22 @@ function validateAddressTypeForScenario() {
         var requestId = FormManager.getActualValue('reqId');
         var reqType = FormManager.getActualValue('reqType');
         var scenarioType = FormManager.getActualValue('custSubGrp');
+        var systemId = FormManager.getActualValue('sourceSystId');
         if (reqType == 'C' && scenarioType != undefined && scenarioType != '' && (scenarioType == 'PRIPE' || scenarioType == 'IBMEM')) {
           var qParams = {
             REQ_ID : requestId,
           };
           var record = cmr.query('COUNT_NON_SOLD_TO_ADDR', qParams);
+
+          // PayGo_check_DE_PrivateScenario
+          var qParams = {
+            SYST_ID : systemId,
+          };
+          var paygorecord = cmr.query('DE.PAYGO.CHECK', qParams);
+          var countpaygo = paygorecord.ret1;
+          if (Number(countpaygo) == 1) {
+            return new ValidationResult(null, true);
+          }
           var count = record.ret1;
           var scenarioDesc = "";
           if (scenarioType == 'PRIPE') {
@@ -1017,4 +1028,7 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(lockIBMTabForDE, GEOHandler.DE);
   GEOHandler.addAfterTemplateLoad(lockIBMTabForDE, GEOHandler.DE);
+  GEOHandler.addAfterConfig(resetVATValidationsForPayGo, GEOHandler.DE);
+  GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, GEOHandler.DE);
+  GEOHandler.addAfterConfig(setAddressDetailsForView, SysLoc.GERMANY);
 });

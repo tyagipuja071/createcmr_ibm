@@ -1438,6 +1438,9 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
   }
 
   @Override
+  public boolean isPG01Supported() {
+    return true;
+  }
   public void getTargetCountryId(EntityManager entityManager, GenerateCMRNoRequest generateCMRNoObj, String cntry, String cmrNo) {
     LOG.debug("Set LOC1 = 866 in case of IssuingCntry = 754");
     if (cntry.equals("754")) {

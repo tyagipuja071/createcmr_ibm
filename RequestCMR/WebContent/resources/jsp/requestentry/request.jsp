@@ -509,7 +509,7 @@ div#cmr-info-box, div#cmr-error-box, div#cmr-validation-box {
     <%} %>
     </cmr:view>
     <br>
-      <cmr:view>
+      <cmr:view forCountry="618,754,866,788,724,848,706,624">
     <%if (!StringUtils.isEmpty(reqentry.getPaygoProcessIndc()) && "Y".equals(reqentry.getPaygoProcessIndc()) && reqentry.getUserRole() != null && reqentry.getUserRole().equalsIgnoreCase("PROCESSOR")){%>
       <cmr:row>
         <cmr:column span="6">

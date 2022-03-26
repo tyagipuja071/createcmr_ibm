@@ -420,6 +420,8 @@ public class RequestEntryModel extends BaseModel {
   // CMR-5910 - military flag
   private String military;
 
+  private String extWalletId;
+
   // dpl assessment internal fields
   private String intDplAssessmentResult;
   private String intDplAssessmentDate;
@@ -3141,5 +3143,13 @@ public String getInstallRep() {
 public void setInstallRep(String installRep) {
 	this.installRep = installRep;
 }
+
+  public String getExtWalletId() {
+    return extWalletId;
+  }
+
+  public void setExtWalletId(String extWalletId) {
+    this.extWalletId = extWalletId;
+  }
 
 }

@@ -632,9 +632,21 @@ function configureCRNForUKI() {
       FormManager.readOnly('restrictInd');
     } else {
       if (!dijit.byId('restrictInd').get('checked')) {
-        console.log(">>> Adding CRN Mandatory Validation >>>");
-        FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'Company Registration Number' ], 'MAIN_CUST_TAB');
-        FormManager.enable('taxCd1');
+        var sourceSystId = FormManager.getActualValue('sourceSystId');
+        // PayGo_check
+        var qParams = {
+          SYST_ID : sourceSystId
+        };
+        var paygoUser = cmr.query('PAYGO.CHECK.CRN', qParams);
+        var countpaygo = paygoUser.ret1;
+        if (!(Number(countpaygo) == 1 && role == 'PROCESSOR')) {
+          console.log(">>> Adding CRN Mandatory Validation >>>");
+          FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'Company Registration Number' ], 'MAIN_CUST_TAB');
+          FormManager.enable('taxCd1');
+        } else {
+          console.log(">>> CRN is non mandatory for PayGO Users>>>");
+          FormManager.resetValidations('taxCd1');
+        }
       } else {
         console.log(">>> Removing CRN Mandatory Validation >>>");
         FormManager.resetValidations('taxCd1');
@@ -10522,5 +10534,7 @@ dojo.addOnLoad(function() {
   // CREATCMR-4293
   GEOHandler.addAfterTemplateLoad(setCTCValues, [ SysLoc.IRELAND, SysLoc.ITALY, SysLoc.UK ]);
   GEOHandler.registerValidator(clientTierCodeValidator, [ SysLoc.IRELAND, SysLoc.ITALY, SysLoc.UK ], null, true);
+  GEOHandler.addAfterConfig(resetVATValidationsForPayGo, [ SysLoc.UK, SysLoc.IRELAND ]);
+  GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, [ SysLoc.UK, SysLoc.IRELAND ]);
 
 });
