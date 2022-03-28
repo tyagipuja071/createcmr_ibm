@@ -167,6 +167,11 @@ function afterConfigForUS() {
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
   }
+  
+  if (role == 'Requester' || role == 'Processor') {  
+    FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'Tax Class / Code 1' ], 'MAIN_CUST_TAB');
+  }
+
   if (reqType == 'U' && role == 'Requester') {
     FormManager.enable('isuCd');
     FormManager.enable('clientTier');
