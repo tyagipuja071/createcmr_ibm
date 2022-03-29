@@ -33,10 +33,11 @@ public class AttributesPerLineOutputter extends XMLOutputter {
     int result = 0;
     while (element != null) {
       result++;
-      if(element.getParent() instanceof Element)
+      if (element.getParent() instanceof Element) {
         element = (Element) element.getParent();
-      else 
-        element=null;
+      } else {
+        element = null;
+      }
     }
     return result;
   }
