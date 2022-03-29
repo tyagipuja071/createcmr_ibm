@@ -1677,16 +1677,16 @@ public class IsraelHandler extends EMEAHandler {
 
         // validate ISU and CTC combination
         String isuCd = validateColValFromCell(row.getCell(10));
-        if (StringUtils.isNotBlank(isuCd) || StringUtils.isNotBlank(ctc)) {
+				if (StringUtils.isNotBlank(isuCd) || StringUtils.isNotBlank(ctc)) {
           if (StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(ctc)) {
             error.addError(rowIndex + 1, "<br>Client Tier", "Client Tier should be filled when updating ISU.");
           } else if (StringUtils.isBlank(isuCd) && StringUtils.isNotBlank(ctc)) {
             error.addError(rowIndex + 1, "<br>ISU Code", "ISU Code should be filled when updating Client Tier.");
           } else if (StringUtils.isNotBlank(isuCd) && StringUtils.isNotBlank(ctc)) {
-            if (isuCd.equals("34") && (!ctc.equals("Q") && !ctc.equals("Y"))) {
+            if (isuCd.equals("34") && (!ctc.equals("Q") || !ctc.equals("Y"))) {
               error.addError(rowIndex + 1, "<br>Client Tier", "Client Tier value should be either Q or Y for ISU Code 34.");
-            } else if ((isuCd.equals("21") || isuCd.equals("5K")) && !ctc.equals("@")) {
-              error.addError(rowIndex + 1, "<br>Client Tier", "Client Tier value should always be @ for ISU Code " + isuCd);
+            } else if (!isuCd.equals("34") && !ctc.equals("@")) {
+              error.addError(rowIndex + 1, "<br>Client Tier", "Client Tier value should always be @ for all other ISU except 34.");
             }
           }
         }
