@@ -1619,7 +1619,7 @@ function addIGFZP02Validator() {
 }
 
 function setSORTLBasedOnIsuCtc() {
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true' || FormManager.getActualValue('reqType') == 'U') {
     return;
   }
   var isuCd = FormManager.getActualValue('isuCd');
