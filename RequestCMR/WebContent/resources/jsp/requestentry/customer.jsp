@@ -269,7 +269,7 @@
   <cmr:row addBackground="true">
     <!-- // 1164558 -->
     <cmr:view exceptForCountry="631,848,649" exceptForGEO="LA,JP">
-      <cmr:view exceptForCountry='897' exceptForGEO="EMEA,AP,MCO1,MCO,MCO2,CEMEA,NORDX,BELUX,NL,CN,FR,TW,KR">
+      <cmr:view exceptForCountry="897" exceptForGEO="EMEA,AP,MCO1,MCO,MCO2,CEMEA,NORDX,BELUX,NL,CN,FR,TW,KR">
         <cmr:column span="2" containerForField="LocalTax2">
           <p>
             <label for="taxCd2">
