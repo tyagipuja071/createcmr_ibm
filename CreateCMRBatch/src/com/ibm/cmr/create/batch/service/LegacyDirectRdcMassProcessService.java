@@ -148,8 +148,9 @@ public class LegacyDirectRdcMassProcessService extends TransConnService {
           }
 
           createHistory(entityManager, histMessage, "PPN", "RDC Processing", admin.getId().getReqId());
-        } else if ((CmrConstants.RDC_STATUS_COMPLETED.equalsIgnoreCase(admin.getRdcProcessingStatus()) || CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS
-            .equalsIgnoreCase(admin.getRdcProcessingStatus())) && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+        } else if ((CmrConstants.RDC_STATUS_COMPLETED.equalsIgnoreCase(admin.getRdcProcessingStatus())
+            || CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equalsIgnoreCase(admin.getRdcProcessingStatus()))
+            && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
           admin.setReqStatus("COM");
           admin.setProcessedFlag("Y"); // set request status to processed
           createHistory(entityManager, "Request processing Completed Successfully", "COM", "RDC Processing", admin.getId().getReqId());
@@ -234,8 +235,8 @@ public class LegacyDirectRdcMassProcessService extends TransConnService {
    * @throws SQLException
    * @throws CmrException
    */
-  private void completeRecord(EntityManager entityManager, Admin admin, String cmrNo, LegacyDirectObjectContainer legacyObjects) throws CmrException,
-      SQLException {
+  private void completeRecord(EntityManager entityManager, Admin admin, String cmrNo, LegacyDirectObjectContainer legacyObjects)
+      throws CmrException, SQLException {
     LOG.info("Completing legacy processing for  Request " + admin.getId().getReqId());
     admin.setLockBy(null);
     admin.setLockByNm(null);
@@ -505,8 +506,8 @@ public class LegacyDirectRdcMassProcessService extends TransConnService {
     admin.setLastUpdtBy(BATCH_USER_ID);
     updateEntity(admin, entityManager);
 
-    WfHist hist = createHistory(entityManager, "An error occurred during processing: " + errorMsg, "PPN", "Processing Error", admin.getId()
-        .getReqId());
+    WfHist hist = createHistory(entityManager, "An error occurred during processing: " + errorMsg, "PPN", "Processing Error",
+        admin.getId().getReqId());
     createComment(entityManager, "An error occurred during processing:\n" + errorMsg, admin.getId().getReqId());
 
     RequestUtils.sendEmailNotifications(entityManager, admin, hist);
@@ -773,8 +774,8 @@ public class LegacyDirectRdcMassProcessService extends TransConnService {
       updateEntity(admin, entityManager);
     }
     if (!CmrConstants.RDC_STATUS_IGNORED.equals(resultCode)) {
-      RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin, comment, "C".equals(admin.getReqType()) ? ACTION_RDC_CREATE
-          : ACTION_RDC_UPDATE, null, null, true, false);
+      RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin, comment,
+          "C".equals(admin.getReqType()) ? ACTION_RDC_CREATE : ACTION_RDC_UPDATE, null, null, true, false);
     }
   }
 
@@ -866,18 +867,18 @@ public class LegacyDirectRdcMassProcessService extends TransConnService {
             MassUpdtData muData = entityManager.find(MassUpdtData.class, muDataPK);
 
             if (!StringUtils.isBlank(muData.getCustNm1())) {
-            String sql = ExternalizedQuery.getSql("LEGACY.GET_ISR_BYSBO");
-            PreparedQuery q = new PreparedQuery(entityManager, sql);
-            q.setParameter("SBO", muData.getCustNm1());
-            q.setParameter("CNTRY", SystemLocation.TURKEY);
-            String isr = q.getSingleResult(String.class);
-            if (!StringUtils.isBlank(isr)) {
-              muData.setRepTeamMemberNo(isr);
-              updateEntity(muData, entityManager);
+              String sql = ExternalizedQuery.getSql("LEGACY.GET_ISR_BYSBO");
+              PreparedQuery q = new PreparedQuery(entityManager, sql);
+              q.setParameter("SBO", muData.getCustNm1());
+              q.setParameter("CNTRY", SystemLocation.TURKEY);
+              String isr = q.getSingleResult(String.class);
+              if (!StringUtils.isBlank(isr)) {
+                muData.setRepTeamMemberNo(isr);
+                updateEntity(muData, entityManager);
               } else {
                 muData.setRepTeamMemberNo("");
                 updateEntity(muData, entityManager);
-            }
+              }
             }
           }
 
@@ -973,9 +974,23 @@ public class LegacyDirectRdcMassProcessService extends TransConnService {
             }
 
             if (StringUtils.isEmpty(sMassUpdt.getErrorTxt())) {
-              sMassUpdt.setErrorTxt(comment.toString());
+              // CREATCMR-5259
+              // sMassUpdt.setErrorTxt(comment.toString());
+              if (comment.toString().length() > 10000) {
+                sMassUpdt.setErrorTxt(comment.toString().substring(0, 10000));
+              } else {
+                sMassUpdt.setErrorTxt(comment.toString());
+              }
             } else {
-              sMassUpdt.setErrorTxt(sMassUpdt.getErrorTxt() + comment.toString());
+              // CREATCMR-5259
+              // sMassUpdt.setErrorTxt(sMassUpdt.getErrorTxt() +
+              // comment.toString());
+              String errMsg = sMassUpdt.getErrorTxt() + comment.toString();
+              if (errMsg.length() > 10000) {
+                sMassUpdt.setErrorTxt(errMsg.substring(0, 10000));
+              } else {
+                sMassUpdt.setErrorTxt(errMsg);
+              }
             }
 
             sMassUpdt.setRowStatusCd(MASS_UPDATE_DONE);
@@ -1059,8 +1074,8 @@ public class LegacyDirectRdcMassProcessService extends TransConnService {
           admin.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
         } else if (statusCodes.contains(CmrConstants.RDC_STATUS_ABORTED)) {
           admin.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
-          admin.setRdcProcessingStatus(processingStatus.equals(CmrConstants.RDC_STATUS_ABORTED) ? CmrConstants.RDC_STATUS_NOT_COMPLETED
-              : CmrConstants.RDC_STATUS_ABORTED);
+          admin.setRdcProcessingStatus(
+              processingStatus.equals(CmrConstants.RDC_STATUS_ABORTED) ? CmrConstants.RDC_STATUS_NOT_COMPLETED : CmrConstants.RDC_STATUS_ABORTED);
         } else if (statusCodes.contains(CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS)) {
           admin.setRdcProcessingStatus(CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS);
         } else {
@@ -1097,14 +1112,14 @@ public class LegacyDirectRdcMassProcessService extends TransConnService {
         }
 
         partialCommit(entityManager);
-        LOG.debug("Request ID " + admin.getId().getReqId() + " Status: " + admin.getRdcProcessingStatus() + " Message: "
-            + admin.getRdcProcessingMsg());
+        LOG.debug(
+            "Request ID " + admin.getId().getReqId() + " Status: " + admin.getRdcProcessingStatus() + " Message: " + admin.getRdcProcessingMsg());
         // *** END OF FIX
       } else {
         LOG.error("*****There are no mass update requests for RDC processing.*****");
         admin.setRdcProcessingStatus(CmrConstants.RDC_STATUS_ABORTED);
-        admin.setRdcProcessingMsg("There are no Mass Update records completed on Legacy that can be processed on RDc. "
-            + "This request is being sent back in error.");
+        admin.setRdcProcessingMsg(
+            "There are no Mass Update records completed on Legacy that can be processed on RDc. " + "This request is being sent back in error.");
         histMessage = "There are no Mass Update records completed on Legacy that can be processed on RDc. "
             + "This request is being sent back in error.";
         RequestUtils.createCommentLogFromBatch(entityManager, BATCH_USER_ID, reqId, histMessage);
