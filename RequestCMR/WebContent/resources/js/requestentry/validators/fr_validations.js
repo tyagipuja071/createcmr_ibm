@@ -683,9 +683,12 @@ function autoSetValuesOnPostalCode(postCd) {
   var clientTier = FormManager.getActualValue('clientTier');
   var isuCtc = isuCd + clientTier;
   var isicCd = FormManager.getActualValue('isicCd');
+  var reqType = FormManager.getActualValue('reqType');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var isViewPage = FormManager.getActualValue('viewOnlyPage');
 
   // add scenario check
-  if (isuCtc != "34Q") {
+  if (isuCtc != "34Q" || isViewPage == 'true' || reqType == 'U' || custSubGrp == '') {
     return;
   }
   var PostCdList1 = [ '02', '14', '27', '50', '59', '60', '61', '62', '76', '80' ];
@@ -3843,6 +3846,9 @@ function setCoverageSBOBasedOnIsuCtc(currentLanded) {
   var clientTier = FormManager.getActualValue('clientTier');
 
   setCtcForIsu5K();
+  if (FormManager.getActualValue('viewOnlyPage') == 'true' || FormManager.getActualValue('reqType') == 'U') {
+    return;
+  }
 
   if (isuCd == '5K') {
     FormManager.setValue('salesBusOffCd', '98F98F');
