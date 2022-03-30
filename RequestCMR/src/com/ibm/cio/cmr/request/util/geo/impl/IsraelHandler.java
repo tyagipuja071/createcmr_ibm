@@ -1469,7 +1469,7 @@ public class IsraelHandler extends EMEAHandler {
     List<String> fields = new ArrayList<>();
     fields.addAll(Arrays.asList("SALES_BO_CD", "REP_TEAM_MEMBER_NO", "SPECIAL_TAX_CD", "VAT", "ISIC_CD", "EMBARGO_CD", "COLLECTION_CD", "ABBREV_NM",
         "SENSITIVE_FLAG", "CLIENT_TIER", "COMPANY", "INAC_TYPE", "INAC_CD", "ISU_CD", "SUB_INDUSTRY_CD", "ABBREV_LOCN", "PPSCEID", "MEM_LVL",
-        "BP_REL_TYPE", "CUST_CLASS", "CUST_PREF_LANG", "MISC_BILL_CD"));
+        "BP_REL_TYPE", "CUST_CLASS", "CUST_PREF_LANG", "MISC_BILL_CD", "CREDIT_CD"));
     return fields;
   }
 
@@ -1677,7 +1677,7 @@ public class IsraelHandler extends EMEAHandler {
 
         // validate ISU and CTC combination
         String isuCd = validateColValFromCell(row.getCell(10));
-				if (StringUtils.isNotBlank(isuCd) || StringUtils.isNotBlank(ctc)) {
+        if (StringUtils.isNotBlank(isuCd) || StringUtils.isNotBlank(ctc)) {
           if (StringUtils.isNotBlank(isuCd) && StringUtils.isBlank(ctc)) {
             error.addError(rowIndex + 1, "<br>Client Tier", "Client Tier should be filled when updating ISU.");
           } else if (StringUtils.isBlank(isuCd) && StringUtils.isNotBlank(ctc)) {
