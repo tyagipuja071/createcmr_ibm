@@ -39,9 +39,12 @@ import com.ibm.cmr.create.batch.util.masscreate.ValidatorWorker;
 import com.ibm.cmr.create.batch.util.masscreate.WorkerThreadFactory;
 import com.ibm.cmr.create.batch.util.masscreate.handler.HandlerEngine;
 import com.ibm.cmr.create.batch.util.masscreate.handler.impl.AddressHandler;
+import com.ibm.cmr.create.batch.util.masscreate.handler.impl.CAAddressHandler;
+import com.ibm.cmr.create.batch.util.masscreate.handler.impl.CACreatebyModelHandler;
+import com.ibm.cmr.create.batch.util.masscreate.handler.impl.CADefaultFields;
 import com.ibm.cmr.create.batch.util.masscreate.handler.impl.CALocationNoHandler;
 import com.ibm.cmr.create.batch.util.masscreate.handler.impl.CAPhoneNoHandler;
-import com.ibm.cmr.create.batch.util.masscreate.handler.impl.CAPostalCdAndStateHandler;
+import com.ibm.cmr.create.batch.util.masscreate.handler.impl.CATaxHandler;
 import com.ibm.cmr.create.batch.util.masscreate.handler.impl.CMRNoHandler;
 import com.ibm.cmr.create.batch.util.masscreate.handler.impl.CMRNoNonUSHandler;
 import com.ibm.cmr.create.batch.util.masscreate.handler.impl.CityAndCountyHandler;
@@ -171,8 +174,8 @@ public class MassCreateValidatorService extends BaseBatchService {
       boolean approvalsNeeded = false;
       LOG.info("Mass Create Request ID: " + request.getId().getReqId() + " passed system validations.");
       switch (originalStatus) {
-      case "SVA":
-        // case "SMA": TODO
+      // case "SVA":
+      case "SMA":
         if (!hasRecordsForIteration(entityManager, request.getId().getReqId(), request.getIterationId())) {
           LOG.debug("Mass Create records does not exist for the current iteration, creating...");
           MassCreateUtil.createMassCreateRecords(massCreate, entityManager);
@@ -204,8 +207,8 @@ public class MassCreateValidatorService extends BaseBatchService {
           sendToId = null;
         }
         break;
-      case "SV2":
-        // case "SM2": TODO
+      // case "SV2":
+      case "SM2":
         if (!hasRecordsForIteration(entityManager, request.getId().getReqId(), request.getIterationId())) {
           LOG.debug("Mass Create records does not exist for the current iteration, creating...");
           MassCreateUtil.createMassCreateRecords(massCreate, entityManager);
@@ -377,9 +380,7 @@ public class MassCreateValidatorService extends BaseBatchService {
       HandlerEngine engine = new HandlerEngine();
 
       // ww handlers
-      engine.addHandler(new CreatebyModelHandler());
       engine.addHandler(new DataHandler());
-      engine.addHandler(new AddressHandler());
       engine.addHandler(new SubindustryISICHandler());
       engine.addHandler(new DPLCheckHandler());
       engine.addHandler(new INACHandler());
@@ -387,6 +388,8 @@ public class MassCreateValidatorService extends BaseBatchService {
       // per country handler
       switch (cmrIssuingCountry) {
       case SystemLocation.UNITED_STATES:
+        engine.addHandler(new CreatebyModelHandler());
+        engine.addHandler(new AddressHandler());
         engine.addHandler(new CoverageBgGlcISUHandler());
         engine.addHandler(new TgmeAddrStdHandler());
         engine.addHandler(new USPostCodeAndStateHandler());
@@ -396,9 +399,12 @@ public class MassCreateValidatorService extends BaseBatchService {
         engine.addHandler(new InternalTypeAbbrevNameHandler());
         break;
       case SystemLocation.CANADA:
+        engine.addHandler(new CADefaultFields());
+        engine.addHandler(new CACreatebyModelHandler());
         engine.addHandler(new CMRNoNonUSHandler());
+        engine.addHandler(new CATaxHandler());
         engine.addHandler(new CALocationNoHandler());
-        engine.addHandler(new CAPostalCdAndStateHandler());
+        engine.addHandler(new CAAddressHandler());
         engine.addHandler(new CAPhoneNoHandler());
         break;
       }

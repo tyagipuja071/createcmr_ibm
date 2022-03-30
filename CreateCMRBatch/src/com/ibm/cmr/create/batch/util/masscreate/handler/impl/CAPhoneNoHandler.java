@@ -34,7 +34,7 @@ public class CAPhoneNoHandler implements RowHandler {
       MassCreateData data = row.getData();
 
       for (MassCreateAddr addr : row.getAddresses()) {
-        custPhone = addr.getCounty(); // TODO change to cust_phone
+        custPhone = addr.getCustPhone();
         landCntry = addr.getLandCntry();
 
         LOG.debug("Validating " + addr.getId().getAddrType() + " Phone# " + custPhone);

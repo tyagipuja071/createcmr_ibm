@@ -34,11 +34,11 @@ public class CALocationNoHandler implements RowHandler {
     MassCreateData data = row.getData();
     List<MassCreateAddr> addrs = row.getAddresses();
     RowResult result = new RowResult();
-    // TODO change getLoc to locn_no
-    if (!row.isCreateByModel() && data != null && StringUtils.isNotBlank(data.getEnterprise()) && addrs != null && addrs.size() > 0) {
+
+    if (!row.isCreateByModel() && data != null && StringUtils.isNotBlank(data.getLocationNumber()) && addrs != null && addrs.size() > 0) {
       String custSubGrp = data.getCustSubGrp();
       String custTyp = data.getCustTyp();
-      String locationNo = data.getEnterprise(); // TODO change
+      String locationNo = data.getLocationNumber();
 
       for (MassCreateAddr massCreateAddr : addrs) {
         if ("ZS01".equals(massCreateAddr.getId().getAddrType())) {
