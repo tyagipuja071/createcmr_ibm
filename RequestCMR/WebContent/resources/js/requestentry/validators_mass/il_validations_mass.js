@@ -57,9 +57,55 @@ function addDPLChecklistAttachmentValidator() {
   })(), 'MAIN_ATTACH_TAB', 'frmCMR');
 }
 
+function addFilenameCommentValidator() {
+  FormManager.addFormValidator(
+      (function() {
+        return {
+          validate : function() {
+
+            if (FormManager.getActualValue('docContent') != 'DPLC') {
+              return new ValidationResult(null, true);
+            }
+
+            var rawfilename = FormManager.getActualValue('filename');
+            var fileStr = rawfilename.substring(rawfilename.lastIndexOf('\\') + 1, rawfilename.indexOf('.'));
+            var comment = FormManager.getActualValue('attach_cmt');
+            var reqId = FormManager.getActualValue('reqId');
+            var qParams = {
+              _qall : 'Y',
+              REQ_ID : reqId
+            };
+            var results = cmr.query('MASS.GET.NAMECHANGE.BY_REQID', qParams);
+            var validComment = false;
+            var validFilename = false;
+            if (fileStr != comment) {
+              for (var i = 0; i < results.length; i++) {
+                if (results[i].ret1 == fileStr) {
+                  validFilename = true;
+                }
+
+                if (results[i].ret1 == comment) {
+                  validComment = true;
+                }
+              }
+            }
+
+            if (validFilename && validComment) {
+              return new ValidationResult(null, false,
+                  'File name and Comment contain two distinct Customer names. Checklist can always be just for one customer only. Please use just one Customer name.');
+            } else {
+              return new ValidationResult(null, true);
+            }
+          }
+        };
+      })(), null, 'frmCMR_addAttachmentModal');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.IL = [ SysLoc.ISRAEL ];
   console.log('adding Mass Change IL validators...');
 
   GEOHandler.registerValidator(addDPLChecklistAttachmentValidator, GEOHandler.IL, null, true);
+  GEOHandler.registerValidator(addFilenameCommentValidator, GEOHandler.IL, null, true);
+
 });
