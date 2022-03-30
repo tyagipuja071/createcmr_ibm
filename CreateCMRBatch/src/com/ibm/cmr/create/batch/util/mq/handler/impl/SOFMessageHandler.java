@@ -1003,8 +1003,10 @@ public class SOFMessageHandler extends MQMessageHandler {
         GenericSOFMessageParser handler = new GenericSOFMessageParser();
         ByteArrayInputStream bis = new ByteArrayInputStream(xmlData.getBytes());
         try {
-          SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
-          parser.parse(new InputSource(bis), handler);
+          SAXParserFactory factory = SAXParserFactory.newInstance();
+          factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+          factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);      
+          factory.newSAXParser().parse(new InputSource(bis), handler);
         } finally {
           bis.close();
         }
