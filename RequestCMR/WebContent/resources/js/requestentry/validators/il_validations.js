@@ -621,20 +621,34 @@ function validatePairedAddrFieldNumericValue() {
 }
 
 function isNumericValueEqual(strA, strB) {
-  var strANum = '';
-  var strBNum = '';
+  var arrStrA = [];
+  var arrStrB = [];
   
   if (strA != null && strA != '') {
-    strANum = strA.replace(/[^0-9]/g,'');
+    arrStrA = strA.replace(/[^0-9]/g,' ').trim().split(' ');
+    arrStrA = arrStrA.filter(item => item);
   }
   if (strB != null && strB != '') {
-    strBNum = strB.replace(/[^0-9]/g,'');
+    arrStrB = strB.replace(/[^0-9]/g,' ').trim().split(' ');
+    arrStrB = arrStrB.filter(item => item);
   }
-  
-  if (strANum != strBNum) {
-    return false;
+    
+  if (areEqual(arrStrA, arrStrB)) {
+    return true;
   }
-  return true;
+  return false;
+}
+
+function areEqual(array1, array2) {
+  if (array1.length === array2.length) {
+    return array1.every(element => {
+      if (array2.includes(element)) {
+        return true;
+      }
+      return false;
+    });
+  }
+  return false;
 }
 
 /**
