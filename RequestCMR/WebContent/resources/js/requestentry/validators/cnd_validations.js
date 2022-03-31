@@ -129,7 +129,6 @@ function addCtcObsoleteValidator() {
               var reqType = FormManager.getActualValue('reqType');
               var reqId = FormManager.getActualValue('reqId');
               var clientTier = FormManager.getActualValue('clientTier');
-              var obsolete = false;
               var oldCtc;
               var qParams = {
                REQ_ID : reqId
@@ -137,14 +136,11 @@ function addCtcObsoleteValidator() {
         var result = cmr.query('GET.DATA_RDC.CLIENT_TIER_REQID', qParams);
         if (result != null && result != '') {
          oldCtc = result.ret1;
-          if (oldCtc == "4"  ||oldCtc == "6"|| oldCtc == "A" || oldCtc == "B" ||oldCtc == "M"|| oldCtc == "V" || oldCtc == "Z" || oldCtc == "T" || oldCtc == "S" || oldCtc == "N" || oldCtc == "C" || oldCtc == "0") {
-           obsolete = true; 
-          }
          }
 
         if (reqType == 'C' && (clientTier == "4" ||clientTier == "6"|| clientTier == "A" || clientTier == "B" || clientTier == "M"|| clientTier == "V" || clientTier == "Z" || clientTier == "T" || clientTier == "S" || clientTier == "N" || clientTier == "C"  || clientTier == "0")) {
            return new ValidationResult(null, false, 'Client tier is obsoleted. Please select valid value from list.');
-          } else if(reqType == 'U'&& oldCtc != null && oldCtc != clientTier && !obsolete && (clientTier == "4" ||clientTier == "6" || clientTier == "A" || clientTier == "B" ||clientTier == "M"|| clientTier == "V" || clientTier == "Z" || clientTier == "T" || clientTier == "S" || clientTier == "N" || clientTier == "C" || clientTier == "0"))         
+          } else if(reqType == 'U'&& oldCtc != null && oldCtc != clientTier && (clientTier == "4" ||clientTier == "6" || clientTier == "A" || clientTier == "B" ||clientTier == "M"|| clientTier == "V" || clientTier == "Z" || clientTier == "T" || clientTier == "S" || clientTier == "N" || clientTier == "C" || clientTier == "0"))         
            {
             return new ValidationResult(null, false, 'Client tier is obsoleted. Please select valid Client tier value from list.');
            } else {
