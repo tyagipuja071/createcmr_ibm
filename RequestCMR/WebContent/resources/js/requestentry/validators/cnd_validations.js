@@ -122,6 +122,39 @@ function resetMembLvlBpRelType(){
   }
 }
 
+function addCtcObsoleteValidator() {
+    FormManager.addFormValidator((function() {
+        return {
+            validate : function() {
+              var reqType = FormManager.getActualValue('reqType');
+              var reqId = FormManager.getActualValue('reqId');
+              var clientTier = FormManager.getActualValue('clientTier');
+              var obsolete = false;
+              var oldCtc;
+              var qParams = {
+               REQ_ID : reqId
+               };
+        var result = cmr.query('GET.DATA_RDC.CLIENT_TIER_REQID', qParams);
+        if (result != null && result != '') {
+         oldCtc = result.ret1;
+          if (oldCtc == "4"  ||oldCtc == "6"|| oldCtc == "A" || oldCtc == "B" ||oldCtc == "M"|| oldCtc == "V" || oldCtc == "Z" || oldCtc == "T" || oldCtc == "S" || oldCtc == "N" || oldCtc == "C" || oldCtc == "0") {
+           obsolete = true; 
+          }
+         }
+
+        if (reqType == 'C' && (clientTier == "4" ||clientTier == "6"|| clientTier == "A" || clientTier == "B" || clientTier == "M"|| clientTier == "V" || clientTier == "Z" || clientTier == "T" || clientTier == "S" || clientTier == "N" || clientTier == "C"  || clientTier == "0")) {
+           return new ValidationResult(null, false, 'Client tier is obsoleted. Please select valid value from list.');
+          } else if(reqType == 'U'&& oldCtc != null && oldCtc != clientTier && !obsolete && (clientTier == "4" ||clientTier == "6" || clientTier == "A" || clientTier == "B" ||clientTier == "M"|| clientTier == "V" || clientTier == "Z" || clientTier == "T" || clientTier == "S" || clientTier == "N" || clientTier == "C" || clientTier == "0"))         
+           {
+            return new ValidationResult(null, false, 'Client tier is obsoleted. Please select valid Client tier value from list.');
+           } else {
+             return new ValidationResult(null, true);
+            }
+          }
+        }
+    })(), 'MAIN_IBM_TAB', 'frmCMR');
+ }
+
 //  Defect 1370022: By Mukesh
 function canRemoveAddress(value, rowIndex, grid) {
   console.log("Remove address button..");
@@ -185,4 +218,5 @@ dojo.addOnLoad(function() {
   GEOHandler.setRevertIsicBehavior(false);
   GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.CND );
   GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.CND );
+  GEOHandler.registerValidator(addCtcObsoleteValidator,GEOHandler.CND , null, true);
 });

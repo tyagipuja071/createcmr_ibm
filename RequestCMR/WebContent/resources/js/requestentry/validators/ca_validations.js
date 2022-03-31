@@ -933,6 +933,38 @@ function addProvincePostalCdValidator() {
   })(), null, 'frmCMR_addressModal');
 }
 
+function addCtcObsoleteValidator() {
+  FormManager.addFormValidator((function() {
+        return {
+            validate : function() {
+              var reqType = FormManager.getActualValue('reqType');
+              var reqId = FormManager.getActualValue('reqId');
+              var clientTier = FormManager.getActualValue('clientTier');
+              var obsolete = false;
+              var oldCtc;
+              var qParams = {
+               REQ_ID : reqId
+               };
+
+        var result = cmr.query('GET.DATA_RDC.CLIENT_TIER_REQID', qParams);
+        if (result != null && result != '') {
+         oldCtc = result.ret1;
+        if (oldCtc == "4" ||oldCtc == "6"|| oldCtc == "A" || oldCtc == "B" || oldCtc == "M"|| oldCtc == "V" || oldCtc == "Z" || oldCtc == "T" || oldCtc == "S" || oldCtc == "N" || oldCtc == "C" || oldCtc == "0") {
+         obsolete = true; 
+         }
+         }
+        if (reqType == 'C' && (clientTier == "4" ||clientTier == "6"|| clientTier == "A" ||clientTier == "M"|| clientTier == "V" || clientTier == "Z" || clientTier == "T" || clientTier == "S" || clientTier == "N" || clientTier == "C" || clientTier == "B" || clientTier == "0")) {
+           return new ValidationResult(null, false, 'Client tier is obsoleted. Please select valid value from list.');
+          } else if (reqType == 'U'&& oldCtc != null && oldCtc != clientTier && !obsolete && (clientTier == "4" ||clientTier == "6" || clientTier == "A" ||clientTier == "M"|| clientTier == "V" || clientTier == "Z" || clientTier == "T" || clientTier == "S" || clientTier == "N" || clientTier == "C"|| clientTier == "B" || clientTier == "0")) {
+           return new ValidationResult(null, false, 'Client tier is obsoleted. Please select valid Client tier value from list.');
+           } else {
+             return new ValidationResult(null, true);
+            }
+          }
+        }
+    })(), 'MAIN_IBM_TAB', 'frmCMR');
+  } 
+
 function addINACValidator() {
   FormManager.addFormValidator((function() {
     return {
@@ -1244,6 +1276,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addPhoneNumberValidationCa, [ SysLoc.CANADA ], null, true);
   GEOHandler.registerValidator(addNumberOfInvoiceValidator, [ SysLoc.CANADA ], null, true);
   GEOHandler.registerValidator(addProvincePostalCdValidator, [ SysLoc.CANADA ], null, true);
+  GEOHandler.registerValidator(addCtcObsoleteValidator, [ SysLoc.CANADA ], null, true);
   // NOTE: do not add multiple addAfterConfig calls to avoid confusion, club the
   // functions on afterConfigForCA
   GEOHandler.addAfterConfig(afterConfigForCA, [ SysLoc.CANADA ]);
