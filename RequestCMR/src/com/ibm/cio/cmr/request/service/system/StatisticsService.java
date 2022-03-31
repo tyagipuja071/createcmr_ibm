@@ -394,6 +394,7 @@ public class StatisticsService extends BaseSimpleService<RequestStatsContainer> 
     config.add(new StatXLSConfig("Prospect Conversion", "PROSPECT", 18, null));
     config.add(new StatXLSConfig("Customer Name", "CUST_NM", 35, null));
     config.add(new StatXLSConfig("CMR No.", "CMR_NO", 10, null));
+    config.add(new StatXLSConfig("VAT / GST#", "VAT", 20, null));
     config.add(new StatXLSConfig("Request Reason", "REQ_REASON", 20, null));
     config.add(new StatXLSConfig("Scenario Type", "SCENARIO_TYPE_DESC", 20, null));
     config.add(new StatXLSConfig("Scenario Subtype", "SCENARIO_SUBTYPE_DESC", 20, null));

@@ -35,6 +35,9 @@ public class AutomationStatsModel {
   @Column(name = "CMR_NO")
   private String cmrNo;
 
+  @Column(name = "VAT")
+  private String vat;
+
   @Column(name = "SOURCE_SYST_ID")
   private String sourceSystId;
 
@@ -155,6 +158,14 @@ public class AutomationStatsModel {
 
   public void setCmrNo(String cmrNo) {
     this.cmrNo = cmrNo;
+  }
+
+  public String getVat() {
+    return vat;
+  }
+
+  public void setVat(String vat) {
+    this.vat = vat;
   }
 
   public String getSourceSystId() {
