@@ -2317,17 +2317,20 @@ public class IsraelHandler extends EMEAHandler {
     boolean isNumValEqual = true;
 
     if (StringUtils.isNotBlank(strA) && StringUtils.isNotBlank(strB)) {
-      String strANumbers = strA.replaceAll("[^0-9]", "");
-      String strBNumbers = strB.replaceAll("[^0-9]", "");
-      // compare digits
-      if (StringUtils.isNumeric(strANumbers) && StringUtils.isNumeric(strBNumbers)) {
-        if (!strANumbers.equals(strBNumbers)) {
-          isNumValEqual = false;
-        }
+      Integer[] arrIntA = getSortedDigitsFromString(strA);
+      Integer[] arrIntB = getSortedDigitsFromString(strB);
+      // compare numbers
+      if (!Arrays.equals(arrIntA, arrIntB)) {
+        return false;
       }
     }
 
     return isNumValEqual;
+  }
+
+  private Integer[] getSortedDigitsFromString(String str) {
+    return Arrays.stream(str.replaceAll("[^0-9]", " ").trim().split(" ")).filter(StringUtils::isNotBlank).map(s -> Integer.parseInt(s)).sorted()
+        .toArray(Integer[]::new);
   }
 
   private Addr getAddrByAddrSeq(EntityManager entityManager, long reqId, String addrType, String addrSeq) {
