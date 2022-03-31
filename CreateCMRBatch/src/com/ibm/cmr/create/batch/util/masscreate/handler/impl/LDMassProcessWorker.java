@@ -165,6 +165,9 @@ public class LDMassProcessWorker implements Runnable {
         LOG.info("massUpdt.getCmrNo()==" + massUpdt.getCmrNo());
         massUpdt.setRowStatusCd(MASS_UPDATE_LEGACYDONE);
         massUpdt.setErrorTxt("Legacy data processing completed.\n\n");
+        if (massUpdt.getErrorTxt() != null && massUpdt.getErrorTxt().length() > 10000) {
+          massUpdt.setErrorTxt(massUpdt.getErrorTxt().substring(0, 9999));
+        }
         entityManager.merge(massUpdt);
         entityManager.flush();
         LOG.info("legacyObjects.getErrTxt()==" + massUpdt.getRowStatusCd() + "==CMR==" + massUpdt.getCmrNo());
