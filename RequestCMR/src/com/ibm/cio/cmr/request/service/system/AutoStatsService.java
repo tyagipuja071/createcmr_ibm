@@ -561,6 +561,7 @@ public class AutoStatsService extends BaseSimpleService<RequestStatsContainer> {
     config.add(new StatXLSConfig("Request Status", "REQ_STATUS", 25, null));
     config.add(new StatXLSConfig("Customer Name", "CUST_NM", 35, null));
     config.add(new StatXLSConfig("CMR No.", "CMR_NO", 10, null));
+    config.add(new StatXLSConfig("VAT / GST#", "VAT", 20, null));
     config.add(new StatXLSConfig("Create Date", "CREATE_TS", 18, null));
     config.add(new StatXLSConfig("Scenario Code", "CUST_GRP", 20, null));
     config.add(new StatXLSConfig("Scenario Subtype Code", "CUST_SUB_GRP", 20, null));
