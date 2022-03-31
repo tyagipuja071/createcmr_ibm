@@ -698,8 +698,10 @@ public class ItalyTransformer extends EMEATransformer {
         GenericSOFMessageParser dupHandler = new GenericSOFMessageParser();
         ByteArrayInputStream bis = new ByteArrayInputStream(xmlData.getBytes());
         try {
-          SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
-          parser.parse(new InputSource(bis), dupHandler);
+          SAXParserFactory factory = SAXParserFactory.newInstance();
+          factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+          factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);      
+          factory.newSAXParser().parse(new InputSource(bis), dupHandler);
         } finally {
           bis.close();
         }

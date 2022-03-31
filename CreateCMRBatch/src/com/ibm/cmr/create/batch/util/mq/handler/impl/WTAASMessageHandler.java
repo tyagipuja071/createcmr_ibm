@@ -748,7 +748,10 @@ public class WTAASMessageHandler extends MQMessageHandler {
     try {
       InputSource source = new InputSource(read);
 
-      SAXParserFactory.newInstance().newSAXParser().parse(source, handler);
+      SAXParserFactory factory = SAXParserFactory.newInstance();
+      factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+      factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);      
+      factory.newSAXParser().parse(source, handler);
 
       reply = handler.getReply();
 
