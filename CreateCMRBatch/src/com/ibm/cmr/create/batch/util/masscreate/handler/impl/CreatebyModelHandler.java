@@ -46,7 +46,7 @@ public class CreatebyModelHandler implements RowHandler {
     }
     RowResult result = new RowResult();
     if (StringUtils.isEmpty(row.getData().getModelCmrNo())) {
-      result.addError("Model CMR No is not specified.");
+      result.addError("Model CMR No is not specified. ");
     }
 
     MassCreateData data = row.getData();
@@ -57,7 +57,7 @@ public class CreatebyModelHandler implements RowHandler {
     FindCMRRecordModel mainRecord = resultModel.getItems().size() > 0 ? resultModel.getItems().get(0) : null;
     if (mainRecord == null) {
       LOG.debug("There are no records found for this CMR");
-      result.addError("There are no records found for this CMR.");
+      result.addError("There are no records found for this CMR. ");
       return result;
     }
     GEOHandler geoHandler = RequestUtils.getGEOHandler(cmrIssuingCntry);
@@ -71,7 +71,7 @@ public class CreatebyModelHandler implements RowHandler {
     mainRecord = resultModel.getItems().size() > 0 ? resultModel.getItems().get(0) : null;
     if (mainRecord == null) {
       LOG.debug("There are no valid records found for this CMR");
-      result.addError("There are no valid records found for this CMR.");
+      result.addError("There are no valid records found for this CMR. ");
       return result;
     }
 

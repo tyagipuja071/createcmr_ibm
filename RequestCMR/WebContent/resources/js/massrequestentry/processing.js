@@ -75,17 +75,10 @@ function submitMassFile() {
     return;
   }
 
-  var massCreateCountryXLSMSupport = [ '897' ];
+  var massCreateCountryXLSMSupport = [ '897', '649' ];
   if (massCreateCountryXLSMSupport.indexOf(FormManager.getActualValue('cmrIssuingCntry')) > -1
       && (FormManager.getActualValue('massFile').endsWith(".xlsm") != true && FormManager.getActualValue('reqType') == 'N')) {
     cmr.showAlert('Invalid mass file type selected. Please select \".xlsm\" file only.');
-    return;
-  }
-
-  var massCreateCountryXLSXSupport = [ '649' ];
-  if (massCreateCountryXLSXSupport.indexOf(FormManager.getActualValue('cmrIssuingCntry')) > -1
-      && (FormManager.getActualValue('massFile').endsWith(".xlsx") != true && FormManager.getActualValue('reqType') == 'N')) {
-    cmr.showAlert('Invalid mass file type selected. Please select \".xlsx\" file only.');
     return;
   }
 
@@ -138,13 +131,11 @@ function actualAddToCMRList() {
   cmr.cmrList = textAreaString;
   // validation added to not import invalid CMR number for Swiss
 
-  var MCOAFRICA = [ '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717',
-      '718', '725', '745', '753', '764', '769', '770', '782', '804', '810', '825', '827', '831', '833', '835', '840', '841', '842', '851', '857',
-      '876', '879', '880', '881', '883' ];
+  var MCOAFRICA = [ '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770',
+      '782', '804', '810', '825', '827', '831', '833', '835', '840', '841', '842', '851', '857', '876', '879', '880', '881', '883' ];
 
-  if (cmrCntry == SysLoc.SWITZERLAND || cmrCntry == SysLoc.SPAIN || cmrCntry == SysLoc.AUSTRIA || cmrCntry == SysLoc.GREECE
-      || cmrCntry == SysLoc.CYPRUS || cmrCntry == SysLoc.PORTUGAL || cmrCntry == SysLoc.SOUTH_AFRICA || (MCOAFRICA.indexOf(cmrCntry) > -1)
-      || cmrCntry == SysLoc.MALTA || cmrCntry == '702' || cmrCntry == '806' || cmrCntry == '678' || cmrCntry == '846') {
+  if (cmrCntry == SysLoc.SWITZERLAND || cmrCntry == SysLoc.SPAIN || cmrCntry == SysLoc.AUSTRIA || cmrCntry == SysLoc.GREECE || cmrCntry == SysLoc.CYPRUS || cmrCntry == SysLoc.PORTUGAL
+      || cmrCntry == SysLoc.SOUTH_AFRICA || (MCOAFRICA.indexOf(cmrCntry) > -1) || cmrCntry == SysLoc.MALTA || cmrCntry == '702' || cmrCntry == '806' || cmrCntry == '678' || cmrCntry == '846') {
     var cmrsArr = cmr.cmrList.split(',');
     var reqtype = FormManager.getActualValue('reqType');
     var invalidCount = 0;
@@ -233,8 +224,8 @@ function actualAddToCMRList() {
       return;
     }
   }
-  FormManager.doHiddenCMRAction('frmReactivate', 'ADD_CMR', cmr.CONTEXT_ROOT + '/reactivaterequest/process.json?reqId=' + cmr.parReqId + '&&cmrList='
-      + cmr.cmrList + '&&reqType=' + cmr.parReqType, true, refreshCMRAfterAdd);
+  FormManager.doHiddenCMRAction('frmReactivate', 'ADD_CMR', cmr.CONTEXT_ROOT + '/reactivaterequest/process.json?reqId=' + cmr.parReqId + '&&cmrList=' + cmr.cmrList + '&&reqType=' + cmr.parReqType,
+      true, refreshCMRAfterAdd);
 }
 
 /**
@@ -319,8 +310,8 @@ function actualRemoveFromCMRList() {
   }
 
   console.log(cmr.cmrList);
-  FormManager.doHiddenCMRAction('frmReactivate', 'REMOVE_CMR', cmr.CONTEXT_ROOT + '/reactivaterequest/process.json?reqId=' + cmr.parReqId
-      + '&&cmrList=' + cmr.cmrList + '&&reqType=' + cmr.parReqType, true, refreshCMRAfterRemove);
+  FormManager.doHiddenCMRAction('frmReactivate', 'REMOVE_CMR', cmr.CONTEXT_ROOT + '/reactivaterequest/process.json?reqId=' + cmr.parReqId + '&&cmrList=' + cmr.cmrList + '&&reqType=' + cmr.parReqType,
+      true, refreshCMRAfterRemove);
 }
 
 function addCmrs() {
@@ -336,8 +327,8 @@ function doImportAddToCMRList(cmrNo) {
   cmr.cmrList = cmrNo;
   cmr.parReqId = FormManager.getActualValue('reqId');
   cmr.parReqType = FormManager.getActualValue('reqType');
-  FormManager.doHiddenCMRAction('frmReactivate', 'ADD_CMR', cmr.CONTEXT_ROOT + '/reactivaterequest/process.json?reqId=' + cmr.parReqId + '&&cmrList='
-      + cmr.cmrList + '&&reqType=' + cmr.parReqType, true, refreshCMRAfterAdd);
+  FormManager.doHiddenCMRAction('frmReactivate', 'ADD_CMR', cmr.CONTEXT_ROOT + '/reactivaterequest/process.json?reqId=' + cmr.parReqId + '&&cmrList=' + cmr.cmrList + '&&reqType=' + cmr.parReqType,
+      true, refreshCMRAfterAdd);
 }
 
 /**
@@ -393,10 +384,7 @@ function addDplCheckValidator() {
  * customer name con't are changed
  */
 function doDplCheck() {
-  cmr
-      .showConfirm(
-          'doRunDpl()',
-          'DPL Check will be performed on the addresses on the mass update template where customer names (Customer Name and Customer Name Con\'t) are provided. Proceed?');
+  cmr.showConfirm('doRunDpl()', 'DPL Check will be performed on the addresses on the mass update template where customer names (Customer Name and Customer Name Con\'t) are provided. Proceed?');
 }
 /**
  * DTN: 1897817: ITALY - DPL check for mass update when customer name and/or
@@ -451,8 +439,7 @@ function importCMRs(cmrNo, cntry, cntryDesc, addressOnly) {
         CANCEL : 'Cancel'
       });
     } else {
-      cmr.showConfirm('doImportCmrs()', 'Records with CMR Number ' + cmrNo
-          + ' will be imported by the system. The data will replace all the current data on the request. Continue?', null, null, {
+      cmr.showConfirm('doImportCmrs()', 'Records with CMR Number ' + cmrNo + ' will be imported by the system. The data will replace all the current data on the request. Continue?', null, null, {
         OK : 'Yes',
         CANCEL : 'Cancel'
       });

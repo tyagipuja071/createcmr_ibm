@@ -40,7 +40,7 @@ public class SubindustryISICHandler implements RowHandler {
     String[] combination = getSubIndustryISIC(entityManager, data.getIsicCd());
     if (combination == null) {
       LOG.debug("ISIC " + data.getIsicCd() + " Not found.");
-      result.addError("ISIC is invalid/not found.");
+      result.addError("ISIC is invalid/not found. ");
     }
     return result;
   }

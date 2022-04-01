@@ -10,6 +10,7 @@
 <%@page import="com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil" %>
 <%@page import="com.ibm.cio.cmr.request.util.geo.GEOHandler" %>
 <%@page import="com.ibm.cio.cmr.request.util.RequestUtils" %>
+<%@page import="com.ibm.cio.cmr.request.util.SystemParameters" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
@@ -28,6 +29,9 @@
     readOnly = false;
   }
   String mcFileVersion = SystemConfiguration.getValue("MASS_CREATE_TEMPLATE_VER");
+  if (reqentry != null && "649".equals(reqentry.getCmrIssuingCntry())) {
+  	mcFileVersion = SystemParameters.getString("CA_MASS_CREATE_TEMPLATE_VER");
+  }
   String procCenter = reqentry.getProcCenter() != null ? reqentry.getProcCenter() : "";
 %>
 <form:form method="POST" action="${contextPath}/massrequest/process" name="frmCMRProcess" class="ibm-column-form ibm-styled-form"
