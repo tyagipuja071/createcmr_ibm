@@ -269,6 +269,23 @@ public class FindCMRUtil {
         record.setSearchScore(object.getSEARCH_SCORE() != null ? Float.parseFloat(object.getSEARCH_SCORE()) : 0);
 
         record.setCmrAddrSeq(object.getADDR_SEQ());
+
+        // CREATCMR-1277 CA MASSCREATE
+        record.setCmrSellBoNum(object.getSELLING_BO_NUM());
+        record.setCmrInstlBoNum(object.getINSTL_BO_NUM());
+        record.setCmrTaxExInd(object.getPROV_TAX_EX_IND());
+        record.setCmrEnggBoGrp(object.getENGG_BO_GRP());
+        record.setCmrAccRecvBo(object.getACC_RECV_BO());
+        record.setCmrCustCreditCode(object.getCUST_CREDIT_CD());
+        record.setCmrBillPlnTyp(object.getBILL_PLN_TYP());
+        record.setCmrQstNo(object.getQST_ID());
+        record.setCmrLicNo(object.getSW_EXEMPT_LIC_NUM());
+        record.setCmrTaxExemptReas(object.getTAX_EXEMPT_REASON());
+        record.setCmrLeasingInd(object.getLEASING_IND());
+        record.setCmrPurOrdNo(object.getPUR_ORD_NO());
+        record.setCmrLtPymntInd(object.getLT_PYMNT_IND());
+        record.setCmrEstabFnInd(object.getEST_FUNC_CD());
+        record.setCmrNoInvc(object.getNO_OF_INVC());
       }
       records.add(record);
     }
@@ -470,6 +487,23 @@ public class FindCMRUtil {
 
     result.setADDR_SEQ(getString("ADDR_SEQ", main));
 
+    // CREATCMR-1277 CA MASSCREATE
+    result.setSELLING_BO_NUM(getString("SELLING_BO_NUM", main));
+    result.setINSTL_BO_NUM(getString("INSTL_BO_NUM", main));
+    result.setPROV_TAX_EX_IND(getString("PROV_TAX_EX_IND", main));
+    result.setENGG_BO_GRP(getString("ENGG_BO_GRP", main));
+    result.setACC_RECV_BO(getString("ACC_RECV_BO", main));
+    result.setCUST_CREDIT_CD(getString("CUST_CREDIT_CD", main));
+    result.setBILL_PLN_TYP(getString("BILL_PLN_TYP", main));
+    result.setQST_ID(getString("QST_ID", main));
+    result.setSW_EXEMPT_LIC_NUM(getString("SW_EXEMPT_LIC_NUM", main));
+    result.setTAX_EXEMPT_REASON(getString("TAX_EXEMPT_REASON", main));
+    result.setLEASING_IND(getString("LEASING_IND", main));
+    result.setPUR_ORD_NO(getString("PUR_ORD_NO", main));
+    result.setLT_PYMNT_IND(getString("LT_PYMNT_IND", main));
+    result.setEST_FUNC_CD(getString("EST_FUNC_CD", main));
+    result.setNO_OF_INVC(getString("NO_OF_INVC", main));
+
     return result;
   }
 
@@ -479,8 +513,8 @@ public class FindCMRUtil {
   }
 
   @SuppressWarnings("unchecked")
-  private static <T> T getObject(JSONObject json, String key, Class<T> targetClass) throws JSONException, IllegalAccessException,
-      InstantiationException {
+  private static <T> T getObject(JSONObject json, String key, Class<T> targetClass)
+      throws JSONException, IllegalAccessException, InstantiationException {
     if (!json.containsKey(key)) {
       return null;
     }

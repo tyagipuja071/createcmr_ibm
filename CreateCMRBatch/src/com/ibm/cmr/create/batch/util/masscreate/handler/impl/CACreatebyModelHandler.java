@@ -12,6 +12,7 @@ import javax.persistence.EntityManager;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.AddrPK;
 import com.ibm.cio.cmr.request.entity.Admin;
@@ -63,6 +64,7 @@ public class CACreatebyModelHandler implements RowHandler {
     GEOHandler geoHandler = RequestUtils.getGEOHandler(cmrIssuingCntry);
     Data dataTemp = new Data();
     Admin adminTemp = new Admin();
+    adminTemp.setReqType(CmrConstants.REQ_TYPE_CREATE);
     RequestEntryModel mockEntryModel = new RequestEntryModel();
     mockEntryModel.setReqType("C");
     if (geoHandler != null) {
@@ -85,7 +87,7 @@ public class CACreatebyModelHandler implements RowHandler {
     fillData(mainRecord, row, data, dataTemp, adminTemp);
 
     LOG.debug("Getting current address values..");
-    extractAddresses(resultModel, cmrNo, geoHandler, row);
+    extractAddresses(resultModel, cmrNo, geoHandler, row, adminTemp);
 
     return result;
   }
@@ -99,10 +101,10 @@ public class CACreatebyModelHandler implements RowHandler {
 
   private void fillData(FindCMRRecordModel mainRecord, MassCreateFileRow row, MassCreateData data, Data dataTemp, Admin adminTemp) {
     if (StringUtils.isBlank(data.getCustNm1()) && StringUtils.isNotBlank(adminTemp.getMainCustNm1())) {
-      data.setCustNm1(adminTemp.getMainCustNm1());
+      data.setCustNm1(adminTemp.getMainCustNm1()); // Customer Name
     }
     if (StringUtils.isBlank(data.getCustNm2()) && StringUtils.isNotBlank(adminTemp.getMainCustNm2())) {
-      data.setCustNm2(adminTemp.getMainCustNm2());
+      data.setCustNm2(adminTemp.getMainCustNm2()); // Customer Name Cont
     }
     /*
      * if (StringUtils.isBlank(data.getOemInd()) &&
@@ -110,42 +112,45 @@ public class CACreatebyModelHandler implements RowHandler {
      * data.setOemInd(dataTemp.getOemInd()); }
      */
     if (StringUtils.isBlank(data.getCustPrefLang()) && StringUtils.isNotBlank(dataTemp.getCustPrefLang())) {
-      data.setCustPrefLang(dataTemp.getCustPrefLang());
+      data.setCustPrefLang(dataTemp.getCustPrefLang()); // Preferred Lang
     }
     if (StringUtils.isBlank(data.getSubIndustryCd()) && StringUtils.isNotBlank(dataTemp.getSubIndustryCd())) {
-      data.setSubIndustryCd(dataTemp.getSubIndustryCd());
+      data.setSubIndustryCd(dataTemp.getSubIndustryCd()); // Sub Industry
     }
     if (StringUtils.isBlank(data.getSensitiveFlag()) && StringUtils.isNotBlank(dataTemp.getSensitiveFlag())) {
-      data.setSensitiveFlag(dataTemp.getSensitiveFlag());
+      data.setSensitiveFlag(dataTemp.getSensitiveFlag()); // Sensitive Flag
     }
     if (StringUtils.isBlank(data.getIsicCd()) && StringUtils.isNotBlank(dataTemp.getIsicCd())) {
-      data.setIsicCd(dataTemp.getIsicCd());
+      data.setIsicCd(dataTemp.getIsicCd()); // ISIC
     }
     if (StringUtils.isBlank(data.getVat()) && StringUtils.isNotBlank(dataTemp.getVat())) {
-      data.setVat(dataTemp.getVat());
+      data.setVat(dataTemp.getVat()); // GST/HST
     }
     if (StringUtils.isBlank(data.getTaxCd3()) && StringUtils.isNotBlank(dataTemp.getTaxCd3())) {
-      data.setTaxCd3(dataTemp.getTaxCd3());
+      data.setTaxCd3(dataTemp.getTaxCd3()); // QST
+    }
+    if (StringUtils.isBlank(data.getTaxExemp()) && StringUtils.isNotBlank(dataTemp.getVatExempt())) {
+      data.setTaxExemp(dataTemp.getVatExempt()); // PST Exempt
     }
     if (StringUtils.isBlank(data.getTaxPayerCustCd()) && StringUtils.isNotBlank(dataTemp.getTaxPayerCustCd())) {
-      data.setTaxPayerCustCd(dataTemp.getTaxPayerCustCd());
+      data.setTaxPayerCustCd(dataTemp.getTaxPayerCustCd()); // PST LicNo
     }
     if (StringUtils.isBlank(data.getSectorCd()) && StringUtils.isNotBlank(dataTemp.getSectorCd())) {
-      data.setSectorCd(dataTemp.getSectorCd());
+      data.setSectorCd(dataTemp.getSectorCd()); // Auth Exemption Type
     }
     if (StringUtils.isBlank(data.getLeasingCompanyIndc()) && StringUtils.isNotBlank(dataTemp.getLeasingCompanyIndc())) {
-      data.setLeasingCompanyIndc(dataTemp.getLeasingCompanyIndc());
+      data.setLeasingCompanyIndc(dataTemp.getLeasingCompanyIndc()); // LeasingIndicator
     }
     if (StringUtils.isBlank(data.getContactName1()) && StringUtils.isNotBlank(dataTemp.getContactName1())) {
-      data.setContactName1(dataTemp.getContactName1());
+      data.setContactName1(dataTemp.getContactName1()); // PurchaseOrderNo
     }
     if (StringUtils.isBlank(data.getMiscBillCd()) && StringUtils.isNotBlank(dataTemp.getMiscBillCd())) {
-      data.setMiscBillCd(dataTemp.getMiscBillCd());
+      data.setMiscBillCd(dataTemp.getMiscBillCd()); // LatePaymentChargeInd
     }
     if (StringUtils.isBlank(data.getTaxCd1()) && StringUtils.isNotBlank(dataTemp.getTaxCd1())) {
-      data.setTaxCd1(dataTemp.getTaxCd1());
+      data.setTaxCd1(dataTemp.getTaxCd1()); // Est FunctionCode
     }
-    if (StringUtils.isBlank(data.getPpsceid())) {
+    if (StringUtils.isBlank(data.getPpsceid())) { // PPSCEID
       if (StringUtils.isNotBlank(dataTemp.getPpsceid())) {
         data.setPpsceid(dataTemp.getPpsceid());
       } else if (StringUtils.isNotBlank(mainRecord.getCmrPpsceid())) {
@@ -153,46 +158,50 @@ public class CACreatebyModelHandler implements RowHandler {
       }
     }
     if (StringUtils.isBlank(data.getTaxCd2()) && StringUtils.isNotBlank(dataTemp.getTaxCd2())) {
-      data.setTaxCd2(dataTemp.getTaxCd2());
+      data.setTaxCd2(dataTemp.getTaxCd2()); // VAD Number
     }
     if (StringUtils.isBlank(data.getSalesBusOffCd()) && StringUtils.isNotBlank(dataTemp.getSalesBusOffCd())) {
-      data.setSalesBusOffCd(dataTemp.getSalesBusOffCd());
+      data.setSalesBusOffCd(dataTemp.getSalesBusOffCd()); // SBO
     }
     if (StringUtils.isBlank(data.getInstallBranchOff()) && StringUtils.isNotBlank(dataTemp.getInstallBranchOff())) {
-      data.setInstallBranchOff(dataTemp.getInstallBranchOff());
+      data.setInstallBranchOff(dataTemp.getInstallBranchOff()); // IBO
     }
     if (StringUtils.isBlank(data.getSalesTeamCd()) && StringUtils.isNotBlank(dataTemp.getSalesTeamCd())) {
-      data.setSalesTeamCd(dataTemp.getSalesTeamCd());
+      data.setSalesTeamCd(dataTemp.getSalesTeamCd()); // CS Branch
     }
     if (StringUtils.isBlank(data.getAdminDeptCd()) && StringUtils.isNotBlank(dataTemp.getAdminDeptCd())) {
-      data.setAdminDeptCd(dataTemp.getAdminDeptCd());
+      data.setAdminDeptCd(dataTemp.getAdminDeptCd()); // AR-FAAR
     }
     if (StringUtils.isBlank(data.getCreditCd()) && StringUtils.isNotBlank(dataTemp.getCreditCd())) {
-      data.setCreditCd(dataTemp.getCreditCd());
+      data.setCreditCd(dataTemp.getCreditCd()); // Credit Code
     }
     if (StringUtils.isBlank(data.getCollectorNo()) && StringUtils.isNotBlank(dataTemp.getCollectorNameNo())) {
-      data.setCollectorNo(dataTemp.getCollectorNameNo());
+      data.setCollectorNo(dataTemp.getCollectorNameNo()); // SW Billing Freq
     }
     if (StringUtils.isBlank(data.getLocationNumber()) && StringUtils.isNotBlank(dataTemp.getLocationNumber())) {
-      data.setLocationNumber(dataTemp.getLocationNumber());
+      data.setLocationNumber(dataTemp.getLocationNumber()); // Prov Code
     }
     if (StringUtils.isBlank(data.getCusInvoiceCopies()) && StringUtils.isNotBlank(dataTemp.getCusInvoiceCopies())) {
-      data.setCusInvoiceCopies(dataTemp.getCusInvoiceCopies());
+      data.setCusInvoiceCopies(dataTemp.getCusInvoiceCopies()); // NumofInvoices
     }
     if (StringUtils.isBlank(data.getIsuCd()) && StringUtils.isNotBlank(dataTemp.getIsuCd())) {
-      data.setIsuCd(dataTemp.getIsuCd());
+      data.setIsuCd(dataTemp.getIsuCd()); // ISU
     }
     if (StringUtils.isBlank(data.getClientTier()) && StringUtils.isNotBlank(dataTemp.getClientTier())) {
-      data.setClientTier(dataTemp.getClientTier());
+      data.setClientTier(dataTemp.getClientTier()); // Client Tier
     }
     if (StringUtils.isBlank(data.getInacCd()) && StringUtils.isNotBlank(dataTemp.getInacCd())) {
-      data.setInacCd(dataTemp.getInacCd());
+      data.setInacCd(dataTemp.getInacCd()); // INAC
     }
     if (StringUtils.isBlank(data.getInacType()) && StringUtils.isNotBlank(dataTemp.getInacType())) {
-      data.setInacType(dataTemp.getInacType());
+      data.setInacType(dataTemp.getInacType()); // INAC Type
     }
-    if (StringUtils.isBlank(data.getDunsNo()) && StringUtils.isNotBlank(dataTemp.getDunsNo())) {
-      data.setDunsNo(dataTemp.getDunsNo());
+    if (StringUtils.isBlank(data.getDunsNo())) { // Duns No
+      if (StringUtils.isNotBlank(dataTemp.getDunsNo())) {
+        data.setDunsNo(dataTemp.getDunsNo());
+      } else {
+        data.setDunsNo(mainRecord.getCmrDuns());
+      }
     }
 
     if (StringUtils.isBlank(data.getCmrIssuingCntry()) && StringUtils.isNotBlank(dataTemp.getCmrIssuingCntry())) {
@@ -239,7 +248,8 @@ public class CACreatebyModelHandler implements RowHandler {
     }
   }
 
-  private void extractAddresses(FindCMRResultModel result, String cmrNo, GEOHandler converter, MassCreateFileRow row) throws Exception {
+  private void extractAddresses(FindCMRResultModel result, String cmrNo, GEOHandler converter, MassCreateFileRow row, Admin adminTemp)
+      throws Exception {
     List<FindCMRRecordModel> cmrs = result.getItems();
     MassCreateAddr addr = null;
     MassCreateAddrPK addrPk = null;
@@ -254,7 +264,8 @@ public class CACreatebyModelHandler implements RowHandler {
         addrPk.setParReqId(row.getData().getId().getParReqId());
         addrPk.setSeqNo(row.getData().getId().getSeqNo());
         addr.setId(addrPk);
-        addr.setVirtual(true);
+        // addr.setVirtual(true);
+        addr.setSapNo(cmr.getCmrAddrSeq());
         row.addAddresses(Collections.singletonList(addr));
         LOG.debug("Adding " + cmr.getCmrAddrTypeCode() + " record");
 
@@ -269,6 +280,14 @@ public class CACreatebyModelHandler implements RowHandler {
           addr.setAddrTxt(cmr.getCmrStreetAddress());
           updatedFields.add("ADDR_TXT");
         }
+        if (StringUtils.isBlank(addr.getAddrTxt2()) && StringUtils.isNotBlank(cmr.getCmrName4())) {
+          addr.setAddrTxt2(cmr.getCmrName4());
+          updatedFields.add("ADDR_TXT2");
+        }
+        if (StringUtils.isBlank(addr.getDept()) && StringUtils.isNotBlank(cmr.getCmrName3())) {
+          addr.setDept(cmr.getCmrName3());
+          updatedFields.add("DEPT");
+        }
         if (StringUtils.isBlank(addr.getCity1()) && StringUtils.isNotBlank(cmr.getCmrCity())) {
           addr.setCity1(cmr.getCmrCity());
           updatedFields.add("CITY1");
@@ -277,9 +296,25 @@ public class CACreatebyModelHandler implements RowHandler {
           addr.setStateProv(cmr.getCmrState());
           updatedFields.add("STATE_PROV");
         }
+        if (StringUtils.isBlank(addr.getCity2()) && StringUtils.isNotBlank(cmr.getCmrCity2())) {
+          addr.setCity2(cmr.getCmrCity2());
+          updatedFields.add("CITY2");
+        }
         if (StringUtils.isBlank(addr.getPostCd()) && StringUtils.isNotBlank(cmr.getCmrPostalCode())) {
           addr.setPostCd(cmr.getCmrPostalCode());
           updatedFields.add("POST_CD");
+        }
+        if (StringUtils.isBlank(addr.getCustPhone()) && StringUtils.isNotBlank(cmr.getCmrCustPhone())) {
+          addr.setCustPhone(cmr.getCmrCustPhone());
+          updatedFields.add("CUST_PHONE");
+        }
+        if (StringUtils.isBlank(addr.getPoBox()) && StringUtils.isNotBlank(cmr.getCmrPOBox())) {
+          addr.setPoBox(cmr.getCmrPOBox());
+          updatedFields.add("PO_BOX");
+        }
+        if (StringUtils.isBlank(addr.getPoBoxCity()) && StringUtils.isNotBlank(cmr.getCmrPOBoxCity())) {
+          addr.setPoBoxCity(cmr.getCmrPOBoxCity());
+          updatedFields.add("PO_BOX_CITY");
         }
 
         Addr addrTemp = new Addr();
@@ -287,12 +322,18 @@ public class CACreatebyModelHandler implements RowHandler {
         pk.setAddrType(addr.getId().getAddrType());
         addrTemp.setId(pk);
         if (converter != null) {
-          converter.setAddressValuesOnImport(addrTemp, null, cmr, cmrNo);
+          converter.setAddressValuesOnImport(addrTemp, adminTemp, cmr, cmrNo);
           if (updatedFields.contains("LAND_CNTRY") && StringUtils.isNotBlank(addrTemp.getLandCntry())) {
             addr.setLandCntry(addrTemp.getLandCntry());
           }
           if (updatedFields.contains("ADDR_TXT") && StringUtils.isNotBlank(addrTemp.getAddrTxt())) {
             addr.setAddrTxt(addrTemp.getAddrTxt());
+          }
+          if (updatedFields.contains("ADDR_TXT2") && StringUtils.isNotBlank(addrTemp.getAddrTxt2())) {
+            addr.setAddrTxt2(addrTemp.getAddrTxt2());
+          }
+          if (updatedFields.contains("DEPT") && StringUtils.isNotBlank(addrTemp.getDept())) {
+            addr.setDept(addrTemp.getDept());
           }
           if (updatedFields.contains("CITY1") && StringUtils.isNotBlank(addrTemp.getCity1())) {
             addr.setCity1(addrTemp.getCity1());
@@ -300,8 +341,20 @@ public class CACreatebyModelHandler implements RowHandler {
           if (updatedFields.contains("STATE_PROV") && StringUtils.isNotBlank(addrTemp.getStateProv())) {
             addr.setStateProv(addrTemp.getStateProv());
           }
+          if (updatedFields.contains("CITY2") && StringUtils.isNotBlank(addrTemp.getCity2())) {
+            addr.setCity2(addrTemp.getCity2());
+          }
           if (updatedFields.contains("POST_CD") && StringUtils.isNotBlank(addrTemp.getPostCd())) {
             addr.setPostCd(addrTemp.getPostCd());
+          }
+          if (updatedFields.contains("CUST_PHONE") && StringUtils.isNotBlank(addrTemp.getCustPhone())) {
+            addr.setCustPhone(addrTemp.getCustPhone());
+          }
+          if (updatedFields.contains("PO_BOX") && StringUtils.isNotBlank(addrTemp.getPoBox())) {
+            addr.setPoBox(addrTemp.getPoBox());
+          }
+          if (updatedFields.contains("PO_BOX_CITY") && StringUtils.isNotBlank(addrTemp.getPoBoxCity())) {
+            addr.setPoBoxCity(addrTemp.getPoBoxCity());
           }
         }
       }
