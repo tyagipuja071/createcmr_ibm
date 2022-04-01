@@ -1069,8 +1069,8 @@ public class USUtil extends AutomationUtil {
               addrTypesChanged.add(addrModel.getAddrTypeCode());
             }
           }
-
-          if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZS01.toString()) && !payGoAddredited) {
+          if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZS01.toString())
+              && (!payGoAddredited || ("".equals(data.getOrdBlk()) && payGoAddredited))) {
             closelyMatchAddressWithDnbRecords(entityManager, requestData, engineData, "ZS01", details, validation, output);
           }
           if (relevantAddressFieldForUpdates(changes, requestData.getAddress("ZS01"))) {
@@ -1105,7 +1105,8 @@ public class USUtil extends AutomationUtil {
               }
             }
 
-            if (isRelevantAddressFieldUpdated(changes, requestData.getAddress("ZI01"))) {
+            if (isRelevantAddressFieldUpdated(changes, requestData.getAddress("ZI01"))
+                && (!payGoAddredited || ("".equals(data.getOrdBlk()) && payGoAddredited))) {
               closelyMatchAddressWithDnbRecords(entityManager, requestData, engineData, "ZI01", details, validation, output);
             }
 
@@ -1208,6 +1209,7 @@ public class USUtil extends AutomationUtil {
     Addr addr = requestData.getAddress(addrType);
     Data data = requestData.getData();
     Admin admin = requestData.getAdmin();
+    boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
     MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, engineData, addrType);
     if (response.getSuccess()) {
       if (response.getMatched() && !response.getMatches().isEmpty()) {
@@ -1238,6 +1240,9 @@ public class USUtil extends AutomationUtil {
               engineData.addRejectionComment("OTH", "No supporting documentation is provided by the requester for " + addrDesc + " address.", "", "");
               output.setOnError(true);
               output.setDetails(details.toString());
+              if (payGoAddredited) {
+                admin.setPaygoProcessIndc("Y");
+              }
               LOG.debug("D&B matches were chosen to be overridden by the requester and needs to be reviewed");
             }
           }
@@ -1256,6 +1261,9 @@ public class USUtil extends AutomationUtil {
             engineData.addRejectionComment("OTH", "No supporting documentation is provided by the requester for " + addrDesc + " address.", "", "");
             output.setOnError(true);
             output.setDetails(details.toString());
+            if (payGoAddredited) {
+              admin.setPaygoProcessIndc("Y");
+            }
             LOG.debug("D&B matches were chosen to be overridden by the requester and needs to be reviewed");
           }
         }
@@ -1273,6 +1281,9 @@ public class USUtil extends AutomationUtil {
           engineData.addRejectionComment("OTH", "No supporting documentation is provided by the requester for " + addrDesc + " address.", "", "");
           output.setOnError(true);
           output.setDetails(details.toString());
+          if (payGoAddredited) {
+            admin.setPaygoProcessIndc("Y");
+          }
           LOG.debug("D&B matches were chosen to be overridden by the requester and needs to be reviewed");
         }
       }
