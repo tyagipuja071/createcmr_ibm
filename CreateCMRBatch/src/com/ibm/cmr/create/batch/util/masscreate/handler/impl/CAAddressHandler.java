@@ -59,13 +59,13 @@ public class CAAddressHandler implements RowHandler {
         addrType = addr.getId().getAddrType();
 
         if (StringUtils.isNotBlank(addrType)) {
-          if ("ZP01".equals(addrType)) {
+          if ("ZP02".equals(addrType)) {
             if (StringUtils.isNotBlank(addr.getLandCntry()) || StringUtils.isNotBlank(addr.getAddrTxt()) || StringUtils.isNotBlank(addr.getAddrTxt2())
                 || StringUtils.isNotBlank(addr.getCity1()) || StringUtils.isNotBlank(addr.getDept()) || StringUtils.isNotBlank(addr.getStateProv())
                 || StringUtils.isNotBlank(addr.getCity2()) || StringUtils.isNotBlank(addr.getPostCd()) || StringUtils.isNotBlank(addr.getCustPhone())
                 || StringUtils.isNotBlank(addr.getPoBox()) || StringUtils.isNotBlank(addr.getPoBoxCity())) {
               boolean isInvoiceToAddrError = false;
-              StringBuilder sbInvoiceToErrMsg = new StringBuilder("ZP01 Adress requires");
+              StringBuilder sbInvoiceToErrMsg = new StringBuilder("Invoice-To Adress requires");
               if (StringUtils.isBlank(addr.getLandCntry())) {
                 isInvoiceToAddrError = true;
                 sbInvoiceToErrMsg.append(" Landed Country,");

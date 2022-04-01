@@ -154,8 +154,6 @@ public class MassCreateValidatorService extends BaseBatchService {
     LOG.debug("Request Status: " + request.getReqStatus() + " Locked By: " + request.getLockBy());
 
     if ((!"SVA".equals(request.getReqStatus()) && !"SV2".equals(request.getReqStatus()))) {
-      // if ((!"SMA".equals(request.getReqStatus()) &&
-      // !"SM2".equals(request.getReqStatus()))) { TODO
       LOG.debug("Request " + request.getId().getReqId() + " already locked by another process or has invalid status. Skipping.");
       return;
     }
@@ -239,7 +237,6 @@ public class MassCreateValidatorService extends BaseBatchService {
 
       switch (originalStatus) {
       case "SVA":
-        // case "SMA": TODO
         LOG.debug("Sending back to requester..");
         request.setReqStatus(CmrConstants.REQUEST_STATUS.DRA.toString());
         request.setLastProcCenterNm(processingCenter);
@@ -249,7 +246,6 @@ public class MassCreateValidatorService extends BaseBatchService {
         request.setLockTs(SystemUtil.getCurrentTimestamp());
         break;
       case "SV2":
-        // case "SM2": TODO
         LOG.debug("Setting to processing pending.");
         request.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
         request.setLockBy(null);
