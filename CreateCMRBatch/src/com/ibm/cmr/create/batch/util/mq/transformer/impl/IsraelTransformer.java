@@ -61,6 +61,7 @@ public class IsraelTransformer extends EMEATransformer {
   private static final String CMR_REQUEST_STATUS_PCR = "PCR";
 
   // private static final String RIGHT_TO_LEFT_MARKER = "\u202e";
+  private List<String> shippingBeforeSplitList = new ArrayList<>();
 
   /**
    */
@@ -192,12 +193,18 @@ public class IsraelTransformer extends EMEATransformer {
       }
 
       if (isLocalFlag) {
-        String currentVat = data.getVat().toUpperCase();
-        String vatSubstr = currentVat.contains("IL") ? currentVat.replace("IL", "") : currentVat;
-        legacyCust.setVat(vatSubstr);
+        if (!StringUtils.isEmpty(data.getVat())) {
+          String currentVat = data.getVat().toUpperCase();
+          String vatSubstr = currentVat.contains("IL") ? currentVat.replace("IL", "") : currentVat;
+          legacyCust.setVat(vatSubstr);
+        } else {
+          legacyCust.setVat("");
+        }
       } else {
         if (!StringUtils.isEmpty(data.getVat())) {
           legacyCust.setVat(data.getVat());
+        } else {
+          legacyCust.setVat("");
         }
       }
 
@@ -414,6 +421,16 @@ public class IsraelTransformer extends EMEATransformer {
 
     } else if (isUpdate && !"N".equals(currAddr.getImportInd()) && legacyAddr.isForCreate() && Arrays.asList(TRANS_ADDRS).contains(addrType)) {
       legacyAddr.setAddrLineO(SPLIT_MARKER);
+
+      // need to split shipping
+      if ("CTYC".equals(addrType)) {
+        // add all shipping address from UI before the framework split shipping
+        for (Addr addr : dummyHandler.currentAddresses) {
+          if ("ZD01".equals(addr.getId().getAddrType())) {
+            shippingBeforeSplitList.add(addr.getId().getAddrSeq());
+          }
+        }
+      }
     } else if (isUpdate && Arrays.asList(TRANS_ADDRS).contains(addrType) && StringUtils.isBlank(legacyAddr.getAddrLineO())) {
       legacyAddr.setAddrLineO(currAddr.getPairedAddrSeq());
     }
@@ -835,7 +852,7 @@ public class IsraelTransformer extends EMEATransformer {
         mailingSeq = addr.getId().getAddrNo();
       } else if ("Y".equals(addr.getIsAddrUseBilling())) {
         billingSeq = addr.getId().getAddrNo();
-      } else if ("Y".equals(addr.getIsAddrUseShipping())) {
+      } else if ("Y".equals(addr.getIsAddrUseShipping()) && !shippingBeforeSplitList.contains(addr.getId().getAddrNo())) {
         shippingSeq = addr.getId().getAddrNo();
       } else if ("Y".equals(addr.getIsAddressUseA()) && SPLIT_MARKER.equals(addr.getAddrLineO())) {
         addr.setAddrLineO(mailingSeq);
@@ -910,10 +927,6 @@ public class IsraelTransformer extends EMEATransformer {
     if (StringUtils.isNotBlank(muData.getIsicCd())) {
       cust.setIsicCd(muData.getIsicCd());
     }
-    // Preferred Language
-    if (StringUtils.isNotBlank(muData.getSvcArOffice())) {
-      cust.setLangCd(muData.getSvcArOffice());
-    }
     // Tax Code
     if (StringUtils.isNotBlank(muData.getSpecialTaxCd()) && !"@".equals(muData.getSpecialTaxCd())) {
       cust.setTaxCd(muData.getSpecialTaxCd());
@@ -940,7 +953,7 @@ public class IsraelTransformer extends EMEATransformer {
     }
     // VAT
     String updatedVat = muData.getVat();
-    if (StringUtils.isNotBlank(updatedVat)) {
+    if (StringUtils.isNotBlank(updatedVat) && !"@".equals(updatedVat)) {
       String updatedLandCntry = null;
       String oldLandCntry = null;
 
@@ -974,13 +987,15 @@ public class IsraelTransformer extends EMEATransformer {
 
       if ((StringUtils.isNotEmpty(updatedLandCntry) && "IL".equals(updatedLandCntry))
           || (StringUtils.isNotEmpty(oldLandCntry) && "IL".equals(oldLandCntry))) {
-        if (StringUtils.substring(updatedVat, 0, 2).equals("IL")) {
+        if (updatedVat.length() > 2 && StringUtils.substring(updatedVat, 0, 2).equals("IL")) {
           updatedVat = StringUtils.substring(updatedVat, 2);
         }
       }
-
       cust.setVat(updatedVat);
+    } else if (StringUtils.isNotBlank(updatedVat) && "@".equals(updatedVat)) {
+      cust.setVat("");
     }
+
     // ISU Code
     if (StringUtils.isNotBlank(muData.getIsuCd())) {
       cust.setIsuCd(muData.getIsuCd());
@@ -1007,6 +1022,7 @@ public class IsraelTransformer extends EMEATransformer {
     // SBO
     if (StringUtils.isNotBlank(muData.getCustNm1())) {
       cust.setSbo(muData.getCustNm1());
+      cust.setIbo(muData.getCustNm1());
     }
     // INAC/NAC
     if (StringUtils.isNotBlank(muData.getInacCd())) {
@@ -1019,6 +1035,7 @@ public class IsraelTransformer extends EMEATransformer {
     // Sales Rep
     if (StringUtils.isNotBlank(muData.getRepTeamMemberNo())) {
       cust.setSalesRepNo(muData.getRepTeamMemberNo());
+      cust.setSalesGroupRep(muData.getRepTeamMemberNo());
     }
     // Phone Number
     if (StringUtils.isNotBlank(muData.getEmail1())) {
@@ -1091,21 +1108,21 @@ public class IsraelTransformer extends EMEATransformer {
       lstAddrLines.add(addr.getAddrTxt());
       sbAddrLu.append("F");
     }
-    // PO Box
+
     if (StringUtils.isNotBlank(addrType)) {
+      // PO Box
       if ("ZS01".equals(addrType) || "ZP01".equals(addrType)) {
-        if (StringUtils.isNotBlank(addr.getPoBox()) && !(addr.getPoBox()).contains("מ.ד")) {
-          lstAddrLines.add("מ.ד " + addr.getPoBox());
-        } else {
-          lstAddrLines.add(addr.getPoBox());
+        if (StringUtils.isNotBlank(addr.getPoBox())) {
+          if (!(addr.getPoBox()).contains("מ.ד")) {
+            lstAddrLines.add("מ.ד " + addr.getPoBox());
+          } else {
+            lstAddrLines.add(addr.getPoBox());
+          }
+          sbAddrLu.append("H");
         }
-        sbAddrLu.append("H");
       } else if ("CTYA".equals(addrType) || "CTYB".equals(addrType)) {
         if (StringUtils.isNotBlank(addr.getPoBox())) {
           lstAddrLines.add("PO BOX " + addr.getPoBox());
-          sbAddrLu.append("H");
-        } else if (StringUtils.isNotBlank(addr.getCustNm1()) && StringUtils.isBlank(addr.getPoBox())) {
-          lstAddrLines.add("");
           sbAddrLu.append("H");
         }
       }
@@ -1151,31 +1168,44 @@ public class IsraelTransformer extends EMEATransformer {
           }
         }
       } else {
-        lstAddrLines.add(addr.getLandCntry());
+        if (Arrays.asList("ZS01", "ZP01", "ZD01").contains(addr.getId().getAddrType())) {
+          lstAddrLines.add(LandedCountryMap.getLovCountryName(addr.getLandCntry()));
+        } else {
+          lstAddrLines.add(LandedCountryMap.getCountryName(addr.getLandCntry()));
+        }
         sbAddrLu.append("J");
       }
     }
 
     if (lstAddrLines.size() > 0) {
-      for (int i = 0; i < lstAddrLines.size(); i++) {
+      String addrLine = "";
+      int addrLineSize = lstAddrLines.size();
+      for (int i = 0; i < 6; i++) {
+        addrLine = "";
+        if (i < addrLineSize) {
+          addrLine = lstAddrLines.get(i);
+        }
+        if (StringUtils.isNotBlank(addrLine) && addrLine.length() > 30) {
+          addrLine = StringUtils.substring(addrLine, 0, 30);
+        }
         switch (i) {
         case 0:
-          legacyAddr.setAddrLine1(lstAddrLines.get(i));
+          legacyAddr.setAddrLine1(addrLine);
           break;
         case 1:
-          legacyAddr.setAddrLine2(lstAddrLines.get(i));
+          legacyAddr.setAddrLine2(addrLine);
           break;
         case 2:
-          legacyAddr.setAddrLine3(lstAddrLines.get(i));
+          legacyAddr.setAddrLine3(addrLine);
           break;
         case 3:
-          legacyAddr.setAddrLine4(lstAddrLines.get(i));
+          legacyAddr.setAddrLine4(addrLine);
           break;
         case 4:
-          legacyAddr.setAddrLine5(lstAddrLines.get(i));
+          legacyAddr.setAddrLine5(addrLine);
           break;
         case 5:
-          legacyAddr.setAddrLine6(lstAddrLines.get(i));
+          legacyAddr.setAddrLine6(addrLine);
           break;
         }
       }

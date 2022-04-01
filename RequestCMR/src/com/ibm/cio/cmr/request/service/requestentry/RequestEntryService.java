@@ -161,8 +161,48 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
         performGenericAction(trans, model, entityManager, request, null);
       } else if (CmrConstants.Cancel_Request().equalsIgnoreCase(action)) {
         performCancelRequest(trans, model, entityManager, request);
+      } else if (CmrConstants.Reprocess_Rdc().equalsIgnoreCase(action)) {
+        performReprocessRdcRequest(trans, model, entityManager, request);
       }
     }
+  }
+
+  private void performReprocessRdcRequest(StatusTrans trans, RequestEntryModel model, EntityManager entityManager, HttpServletRequest request)
+      throws Exception {
+
+    AppUser user = AppUser.getUser(request);
+    CompoundEntity entity = getCurrentRecord(model, entityManager, request);
+
+    Admin admin = entity.getEntity(Admin.class);
+
+    // update the Admin record
+    admin = entity.getEntity(Admin.class);
+    admin.setLastUpdtBy(user.getIntranetId());
+    admin.setLastUpdtTs(SystemUtil.getCurrentTimestamp());
+    admin.setReqStatus(trans.getNewReqStatus());
+
+    if (CmrConstants.YES_NO.N.toString().equals(trans.getNewLockedInd())
+        && CmrConstants.YES_NO.Y.toString().equals(trans.getId().getCurrLockedInd())) {
+      // request to be unlocked
+      RequestUtils.clearClaimDetails(admin);
+    }
+
+    if (StringUtils.isEmpty(admin.getLockInd())) {
+      admin.setLockInd(CmrConstants.YES_NO.N.toString());
+    }
+    if (StringUtils.isEmpty(admin.getProcessedFlag())) {
+      admin.setLockInd(CmrConstants.YES_NO.N.toString());
+    }
+    if (StringUtils.isEmpty(admin.getDisableAutoProc())) {
+      admin.setDisableAutoProc(CmrConstants.YES_NO.N.toString());
+    }
+    if (!PageManager.autoProcEnabled(model.getCmrIssuingCntry(), model.getReqType())) {
+      admin.setDisableAutoProc(CmrConstants.YES_NO.Y.toString());
+    }
+    saveAccessToken(admin, request);
+    setLockByName(admin);
+    updateEntity(admin, entityManager);
+    computeInternalType(entityManager, model, admin);
   }
 
   private void updateDeprecatedAttachmentTypes(RequestEntryModel model, EntityManager entityManager, HttpServletRequest request) {
@@ -1577,8 +1617,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
           cmrRecord.setCmrTier("");
           cmrRecord.setCmrInacType("");
           cmrRecord.setCmrIsic(!StringUtils.isEmpty(kna1.getZzkvSic())
-              ? (kna1.getZzkvSic().trim().length() > 4 ? kna1.getZzkvSic().trim().substring(0, 4) : kna1.getZzkvSic().trim())
-              : "");
+              ? (kna1.getZzkvSic().trim().length() > 4 ? kna1.getZzkvSic().trim().substring(0, 4) : kna1.getZzkvSic().trim()) : "");
           cmrRecord.setCmrSortl("");
           cmrRecord.setCmrIssuedByDesc("");
           cmrRecord.setCmrRdcCreateDate("");
