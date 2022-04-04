@@ -21,3 +21,7 @@
 <cmr:view forGEO="JP">
   <script src="${resourcesPath}/js/requestentry/validators_mass/jp_validations_mass.js?${cmrv}" type="text/javascript"></script>
 </cmr:view>
+
+<cmr:view forCountry="755">
+  <script src="${resourcesPath}/js/requestentry/validators_mass/il_validations_mass.js?${cmrv}" type="text/javascript"></script>
+</cmr:view>

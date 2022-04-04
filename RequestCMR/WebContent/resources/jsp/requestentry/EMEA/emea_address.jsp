@@ -51,6 +51,25 @@
     </cmr:column>
   </cmr:row>
 </cmr:view>
+<cmr:view forCountry="755">
+  <cmr:row>
+	  <cmr:column span="2">
+	    <p>
+	      <cmr:label fieldId="sapNo" cssClass="cmr-inline">
+	        <cmr:fieldLabel fieldId="SAPNumber" />:</cmr:label>
+	      <cmr:delta text="-" id="delta-sapNo" />
+	      <cmr:field fieldId="SAPNumber" id="sapNo" path="sapNo" />
+	    </p>
+	  </cmr:column>
+      <cmr:column span="2">
+      <p>
+	  <cmr:label fieldId="ierpSitePrtyId" cssClass="cmr-inline">
+        <cmr:fieldLabel fieldId="SitePartyID" />:</cmr:label>
+      <cmr:field fieldId="IERPSitePrtyId" id="ierpSitePrtyId" path="ierpSitePrtyId" />
+      </p>
+    </cmr:column>
+  </cmr:row>
+</cmr:view>
 <cmr:row addBackground="true">
   <cmr:column span="4">
     <cmr:label fieldId="custNm1">
@@ -84,15 +103,6 @@
              <cmr:delta text="-" id="delta-landCntry" code="R" />
       </cmr:label>
       <cmr:field fieldId="LandedCountry" id="landCntry" path="landCntry" />
-    </p>
-  </cmr:column>
-  <cmr:column span="2" forCountry="755">
-    <p>
-      <cmr:label fieldId="translate">&nbsp;
-      </cmr:label>
-      Translate: 
-      <a class="translate" href="javascript: cmr.openTranslateWindow('en','iw', ['custNm1', 'addrTxt', 'poBox', 'city1', 'dept'])" >to Local Language</a>
-      <a class="translate" href="javascript: cmr.openTranslateWindow('iw','en', ['custNm1', 'addrTxt', 'poBox', 'city1', 'dept'])" >to English</a>
     </p>
   </cmr:column>
   <cmr:column span="2" forCountry="726,666">
@@ -149,21 +159,12 @@
     </p>
   </cmr:column>
   </cmr:view> --%>
-  <cmr:column span="2" exceptForCountry="755,758">
+  <cmr:column span="2" exceptForCountry="758">
     <p>
       <cmr:label fieldId="addrTxt2">
         <cmr:fieldLabel fieldId="StreetAddress2" />: 
           </cmr:label>
       <cmr:field fieldId="StreetAddress2" id="addrTxt2" path="addrTxt2" />
-    </p>
-  </cmr:column>
-  <cmr:column span="2" containerForField="POBox" forCountry="755">
-    <p>
-      <cmr:label fieldId="poBox">
-        <cmr:fieldLabel fieldId="POBox" />:
-             <cmr:delta text="-" id="delta-poBox" />
-      </cmr:label>
-      <cmr:field fieldId="POBox" id="poBox" path="poBox" />
     </p>
   </cmr:column>
 </cmr:row>
@@ -199,7 +200,7 @@
     </p>
   </cmr:column>
   </cmr:view>
-  <cmr:column span="2" exceptForCountry="758,862">
+  <cmr:column span="2" exceptForCountry="758,862,755">
     <p>
       <cmr:label fieldId="stateProv">
         <cmr:fieldLabel fieldId="StateProv" />:
@@ -257,6 +258,15 @@
     </p>
     </cmr:column>
   </cmr:view>
+  <cmr:column span="2" containerForField="POBox" forCountry="755">
+    <p>
+      <cmr:label fieldId="poBox">
+        <cmr:fieldLabel fieldId="POBox" />:
+             <cmr:delta text="-" id="delta-poBox" />
+      </cmr:label>
+      <cmr:field fieldId="POBox" id="poBox" path="poBox" />
+    </p>
+  </cmr:column>
 
 </cmr:row>
 
@@ -289,6 +299,7 @@
 
   <form:hidden path="poBoxPostCd" forCountry="758"/>
   <form:hidden path="transportZone" forCountry="838,758,866,754"/>
+  <form:hidden path="bldg" forCountry="755"/>
 </cmr:row>
 <cmr:row>
 	<cmr:column span="2" containerForField="TaxOffice" forCountry="862">
@@ -339,6 +350,7 @@
 
 
 <cmr:row topPad="10" addBackground="true">
+  <cmr:view exceptForCountry="755">
   <cmr:column span="2">
     <p>
       <cmr:label fieldId="sapNo" cssClass="cmr-inline">
@@ -347,6 +359,7 @@
       <cmr:field fieldId="SAPNumber" id="sapNo" path="sapNo" />
     </p>
   </cmr:column>
+  </cmr:view>
   <cmr:view forCountry="758,862">
   	<cmr:column span="2">
      <p>

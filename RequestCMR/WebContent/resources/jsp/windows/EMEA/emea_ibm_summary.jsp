@@ -58,15 +58,17 @@
       </cmr:view>
              ${summary.data.inacCd != null ? summary.data.inacCd : ""}
         </cmr:column>
-    <cmr:column span="1" width="130">
-      <label><cmr:fieldLabel fieldId="CollectionCd" />: </label>
-    </cmr:column>
-    <cmr:column span="1" width="200">
-      <%
-        String collCd = DropdownListController.getDescription("CollectionCd", data.getCollectionCd(), cntry);
-      %>
-      <%=collCd != null ? collCd : ""%>
-    </cmr:column>
+    <cmr:view exceptForCountry="755">
+	  <cmr:column span="1" width="130">
+	      <label><cmr:fieldLabel fieldId="CollectionCd" />: </label>
+	  </cmr:column>
+	  <cmr:column span="1" width="200">
+	    <%
+	      String collCd = DropdownListController.getDescription("CollectionCd", data.getCollectionCd(), cntry);
+	    %>
+	    <%=collCd != null ? collCd : ""%>
+	  </cmr:column>
+    </cmr:view>
   </cmr:row>
 
   <cmr:row>
@@ -111,6 +113,7 @@
         <%=cebo != null ? cebo : ""%>
       </cmr:column>
     </cmr:row>
+    <cmr:view exceptForCountry="755">
     <cmr:row>
       <cmr:column span="1" width="127">
       </cmr:column>
@@ -124,6 +127,7 @@
         <%=codflag != null ? codflag : ""%>
       </cmr:column>
     </cmr:row>
+    </cmr:view>
   </cmr:view>
   
   <cmr:view forCountry="758">

@@ -23,6 +23,7 @@ import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.codehaus.jackson.map.ObjectMapper;
 
@@ -37,8 +38,10 @@ import com.ibm.cio.cmr.request.entity.CmrtCust;
 import com.ibm.cio.cmr.request.entity.CmrtCustExt;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataRdc;
+import com.ibm.cio.cmr.request.entity.Kna1;
 import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
 import com.ibm.cio.cmr.request.entity.MassUpdtData;
+import com.ibm.cio.cmr.request.masschange.obj.TemplateTab;
 import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
@@ -155,9 +158,6 @@ public class LegacyDirectUtil {
       // for Ireland, also query from 866
       cmrIssuingCntry = SystemLocation.UNITED_KINGDOM;
     }
-    if (SystemLocation.ISRAEL.equals(cmrIssuingCntry)) {
-      cmrIssuingCntry = SystemLocation.SAP_ISRAEL_SOF_ONLY;
-    }
 
     LegacyDirectObjectContainer legacyObjects = new LegacyDirectObjectContainer();
 
@@ -180,9 +180,6 @@ public class LegacyDirectUtil {
     if (SystemLocation.IRELAND.equals(cmrIssuingCntry)) {
       // for Ireland, also query from 866
       cmrIssuingCntry = SystemLocation.UNITED_KINGDOM;
-    }
-    if (SystemLocation.ISRAEL.equals(cmrIssuingCntry)) {
-      cmrIssuingCntry = SystemLocation.SAP_ISRAEL_SOF_ONLY;
     }
 
     LegacyDirectObjectContainer legacyObjects = new LegacyDirectObjectContainer();
@@ -376,9 +373,6 @@ public class LegacyDirectUtil {
     if (SystemLocation.IRELAND.equals(cmrIssuingCntry)) {
       // for Ireland, also query from 866
       cmrIssuingCntry = SystemLocation.UNITED_KINGDOM;
-    }
-    if (SystemLocation.ISRAEL.equals(cmrIssuingCntry)) {
-      cmrIssuingCntry = SystemLocation.SAP_ISRAEL_SOF_ONLY;
     }
 
     LegacyDirectObjectContainer legacyObjects = new LegacyDirectObjectContainer();
@@ -718,9 +712,6 @@ public class LegacyDirectUtil {
       // for Ireland, also query from 866
       cmrIssuingCntry = SystemLocation.UNITED_KINGDOM;
     }
-    if (SystemLocation.ISRAEL.equals(cmrIssuingCntry)) {
-      cmrIssuingCntry = SystemLocation.SAP_ISRAEL_SOF_ONLY;
-    }
 
     LegacyDirectObjectContainer legacyObjects = new LegacyDirectObjectContainer();
 
@@ -745,9 +736,6 @@ public class LegacyDirectUtil {
     if (SystemLocation.IRELAND.equals(cmrIssuingCntry)) {
       // for Ireland, also query from 866
       cmrIssuingCntry = SystemLocation.UNITED_KINGDOM;
-    }
-    if (SystemLocation.ISRAEL.equals(cmrIssuingCntry)) {
-      cmrIssuingCntry = SystemLocation.SAP_ISRAEL_SOF_ONLY;
     }
 
     String sql = ExternalizedQuery.getSql("LEGACYD.GETADDR_FISCAL");
@@ -841,6 +829,17 @@ public class LegacyDirectUtil {
     }
 
     handler.validateMassUpdateTemplateDupFills(validations, book, maxRows, country);
+  }
+
+  public static void checkIsraelMassTemplate(List<TemplateTab> tabs, XSSFWorkbook book, String country) throws Exception {
+    if (SystemLocation.ISRAEL.equals(country)) {
+      for (TemplateTab templateTab : tabs) {
+        XSSFSheet sheet = book.getSheet(templateTab.getName());
+        if (sheet == null) {
+          throw new Exception("Invalid Template. Only MassUpdateTemplateAutoIL is accepted.");
+        }
+      }
+    }
   }
 
   public static List<MassUpdtAddr> getMassUpdtAddrsForDPLCheck(EntityManager entityManager, String reqId, String iterId) {
@@ -1234,9 +1233,6 @@ public class LegacyDirectUtil {
       // for Ireland, also query from 866
       cmrIssuingCntry = SystemLocation.UNITED_KINGDOM;
     }
-    if (SystemLocation.ISRAEL.equals(cmrIssuingCntry)) {
-      cmrIssuingCntry = SystemLocation.SAP_ISRAEL_SOF_ONLY;
-    }
 
     LegacyDirectObjectContainer legacyObjects = new LegacyDirectObjectContainer();
 
@@ -1422,7 +1418,7 @@ public class LegacyDirectUtil {
 
     return isDR;
   }
-  
+
   public static DataRdc getOldData(EntityManager entityManager, String reqId) {
     String sql = ExternalizedQuery.getSql("SUMMARY.OLDDATA");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
@@ -1438,5 +1434,54 @@ public class LegacyDirectUtil {
     }
 
     return oldData;
+  }
+
+  public static Kna1 getIsicKukla(EntityManager entityManager, String cmrNo, String cntry) {
+    LOG.debug("Retrieving ISIC/KUKLA for " + cntry + " - " + cmrNo);
+    if (entityManager == null) {
+      entityManager = JpaManager.getEntityManager();
+    }
+    String sql = ExternalizedQuery.getSql("IL.GET.ISIC.KUKLA");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("KATR6", cntry);
+    query.setParameter("ZZKV_CUSNO", cmrNo);
+    query.setForReadOnly(true);
+
+    Kna1 kna1 = query.getSingleResult(Kna1.class);
+    return kna1;
+  }
+
+  public static CmrtCust getRealCountryCodeBankNumber(EntityManager entityManager, String cmrNo, String cntry) {
+    LOG.debug("Retrieving Real Country Code/Bank Number for " + cntry + " - " + cmrNo);
+    if (entityManager == null) {
+      entityManager = JpaManager.getEntityManager();
+    }
+
+    String sql = ExternalizedQuery.getSql("IL.GET.REALCTY.RBKXA");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("RCYAA", cntry);
+    query.setParameter("RCUXA", cmrNo);
+    query.setForReadOnly(true);
+
+    CmrtCust cmrtCust = query.getSingleResult(CmrtCust.class);
+    return cmrtCust;
+  }
+
+  public static CmrtAddr getLegacyAddrBySeqNo(EntityManager entityManager, String cmrNo, String country, String seqNo) {
+    if (entityManager == null) {
+      entityManager = JpaManager.getEntityManager();
+    }
+
+    String sql = ExternalizedQuery.getSql("LEGACYD.GETADDR.BY_ADDRNO");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("COUNTRY", country);
+    query.setParameter("CMR_NO", cmrNo);
+    query.setParameter("ADDR_SEQ", seqNo);
+    query.setForReadOnly(true);
+
+    CmrtAddr cmrtAddr = query.getSingleResult(CmrtAddr.class);
+
+    return cmrtAddr;
   }
 }
