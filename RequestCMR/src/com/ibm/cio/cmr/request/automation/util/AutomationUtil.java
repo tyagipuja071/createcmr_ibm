@@ -51,6 +51,7 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.Person;
+import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cmr.services.client.CmrServicesFactory;
@@ -856,7 +857,9 @@ public abstract class AutomationUtil {
    * @return
    */
   protected boolean addressExists(EntityManager entityManager, Addr addrToCheck, RequestData requestData) {
+    Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
+    boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
     String sql = "";
     if (SystemLocation.BELGIUM.equals(data.getCmrIssuingCntry()) || SystemLocation.NETHERLANDS.equals(data.getCmrIssuingCntry())
         || SystemLocation.SWEDEN.equals(data.getCmrIssuingCntry()) || SystemLocation.NORWAY.equals(data.getCmrIssuingCntry())
@@ -873,31 +876,31 @@ public abstract class AutomationUtil {
     query.setParameter("LAND_CNTRY", addrToCheck.getLandCntry());
     query.setParameter("CITY", addrToCheck.getCity1());
     if (addrToCheck.getAddrTxt() != null) {
-      query.append(" and ADDR_TXT = :ADDR_TXT");
+      query.append(" and lower(ADDR_TXT) like lower(:ADDR_TXT)");
       query.setParameter("ADDR_TXT", addrToCheck.getAddrTxt());
     }
     if (addrToCheck.getCustNm2() != null) {
-      query.append(" and CUST_NM2 = :NAME2");
+      query.append(" and lower(CUST_NM2) like lower(:NAME2)");
       query.setParameter("NAME2", addrToCheck.getCustNm2());
     }
     if (addrToCheck.getDept() != null) {
-      query.append(" and DEPT = :DEPT");
+      query.append(" and lower(DEPT) like lower(:DEPT)");
       query.setParameter("DEPT", addrToCheck.getDept());
     }
     if (addrToCheck.getFloor() != null) {
-      query.append(" and FLOOR= :FLOOR");
+      query.append(" and lower(FLOOR) like lower(:FLOOR)");
       query.setParameter("FLOOR", addrToCheck.getFloor());
     }
     if (addrToCheck.getBldg() != null) {
-      query.append(" and BLDG= :BLDG");
+      query.append(" and lower(BLDG) like lower(:BLDG)");
       query.setParameter("BLDG", addrToCheck.getBldg());
     }
     if (addrToCheck.getOffice() != null) {
-      query.append(" and OFFICE =:OFFICE");
+      query.append(" and lower(OFFICE) like lower(:OFFICE)");
       query.setParameter("OFFICE", addrToCheck.getOffice());
     }
     if (addrToCheck.getStateProv() != null) {
-      query.append(" and STATE_PROV = :STATE");
+      query.append(" and lower(STATE_PROV) like lower(:STATE)");
       query.setParameter("STATE", addrToCheck.getStateProv());
     }
     if (addrToCheck.getPoBox() != null) {
@@ -916,6 +919,12 @@ public abstract class AutomationUtil {
       query.append(" and COUNTY= :COUNTY");
       query.setParameter("COUNTY", addrToCheck.getCounty());
     }
+    if (payGoAddredited) {
+      if (addrToCheck.getExtWalletId() != null) {
+        query.append(" and EXT_WALLET_ID = :EXT_WALLET_ID");
+        query.setParameter("EXT_WALLET_ID", addrToCheck.getExtWalletId());
+      }
+    }
 
     return query.exists();
   }
@@ -929,14 +938,20 @@ public abstract class AutomationUtil {
    */
   protected boolean removeDuplicateAddresses(EntityManager entityManager, RequestData requestData, StringBuilder details) {
     Addr zs01 = requestData.getAddress("ZS01");
+    Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
+    boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
     String mainStreetAddress1 = (StringUtils.isNotBlank(zs01.getAddrTxt()) ? zs01.getAddrTxt() : "").trim().toUpperCase();
     String mainCity = (StringUtils.isNotBlank(zs01.getCity1()) ? zs01.getCity1() : "").trim().toUpperCase();
     String mainPostalCd = (StringUtils.isNotBlank(zs01.getPostCd()) ? zs01.getPostCd() : "").trim();
+    String mainExtWalletId = (StringUtils.isNotBlank(zs01.getExtWalletId()) ? zs01.getExtWalletId() : "").trim();
+    String mainCity2 = (StringUtils.isNotBlank(zs01.getCity2()) ? zs01.getCity2() : "").trim();
     Iterator<Addr> it = requestData.getAddresses().iterator();
     boolean removed = false;
     details.append("Checking for duplicate address records - ").append("\n");
     while (it.hasNext()) {
       Addr addr = it.next();
+      if (!payGoAddredited) {
       if (!"ZS01".equals(addr.getId().getAddrType())) {
         if (compareCustomerNames(zs01, addr) && addr.getAddrTxt().trim().toUpperCase().equals(mainStreetAddress1)
             && addr.getCity1().trim().toUpperCase().equals(mainCity) && addr.getPostCd().trim().equals(mainPostalCd)) {
@@ -947,6 +962,22 @@ public abstract class AutomationUtil {
           }
           it.remove();
           removed = true;
+        }
+        }
+      } else {
+        if (!"ZS01".equals(addr.getId().getAddrType())) {
+          if (compareCustomerNames(zs01, addr)
+              && (StringUtils.isNotBlank(addr.getAddrTxt()) && addr.getAddrTxt().trim().toUpperCase().equals(mainStreetAddress1))
+              && addr.getCity1().trim().toUpperCase().equals(mainCity) && addr.getPostCd().trim().equals(mainPostalCd)
+              && addr.getExtWalletId().trim().toUpperCase().equals(mainExtWalletId)) {
+            details.append("Removing duplicate address record: " + addr.getId().getAddrType() + " from the request.").append("\n");
+            Addr merged = entityManager.merge(addr);
+            if (merged != null) {
+              entityManager.remove(merged);
+            }
+            it.remove();
+            removed = true;
+          }
         }
       }
     }

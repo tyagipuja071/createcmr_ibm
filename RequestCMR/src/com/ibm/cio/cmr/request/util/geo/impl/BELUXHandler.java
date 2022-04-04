@@ -29,6 +29,7 @@ import org.springframework.web.servlet.ModelAndView;
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.AddrPK;
 import com.ibm.cio.cmr.request.entity.AddrRdc;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
@@ -131,10 +132,18 @@ public class BELUXHandler extends BaseSOFHandler {
           // map RDc - SOF - CreateCMR by sequence no
           for (FindCMRRecordModel record : source.getItems()) {
             seqNo = record.getCmrAddrSeq();
-            if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo)) {
+            if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo) && StringUtils.isEmpty(record.getExtWalletId())) {
               addrType = record.getCmrAddrTypeCode();
               if (!StringUtils.isEmpty(addrType)) {
                 addr = cloneAddress(record, addrType);
+                addr.setCmrDept(record.getCmrCity2());
+                addr.setCmrName4(record.getCmrName4());
+                converted.add(addr);
+              }
+            } else if ("ZP01".equals(record.getCmrAddrTypeCode()) && StringUtils.isNotEmpty(record.getExtWalletId())) {
+              addrType = record.getCmrAddrTypeCode();
+              if (!StringUtils.isEmpty(addrType)) {
+                addr = cloneAddress(record, "PG01");
                 addr.setCmrDept(record.getCmrCity2());
                 addr.setCmrName4(record.getCmrName4());
                 converted.add(addr);
@@ -1590,7 +1599,7 @@ public class BELUXHandler extends BaseSOFHandler {
     String addrSeq = addr.getId().getAddrSeq();
     String addrType = addr.getId().getAddrType();
     for (Kna1 kna1 : kna1Records) {
-      if (addrType.equals(kna1.getKtokd()) && addrSeq.equals(kna1.getZzkvSeqno())) {
+      if ((addrType.equals(kna1.getKtokd()) && addrSeq.equals(kna1.getZzkvSeqno())) || "PG01".equals(addr.getId().getAddrType())) {
         result = true;
       }
     }
@@ -2590,6 +2599,11 @@ public class BELUXHandler extends BaseSOFHandler {
     }
     LOG.debug("ZP02ImportInit " + ZP02ImportInit);
     return ZP02ImportInit;
+  }
+
+  @Override
+  public boolean setAddrSeqByImport(AddrPK addrPk, EntityManager entityManager, FindCMRResultModel result) {
+    return true;
   }
 
 }

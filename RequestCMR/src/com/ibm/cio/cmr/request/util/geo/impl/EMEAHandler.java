@@ -243,7 +243,9 @@ public class EMEAHandler extends BaseSOFHandler {
           for (FindCMRRecordModel record : source.getItems()) {
             seqNo = record.getCmrAddrSeq();
             if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo) && !("862".equals(cmrIssueCd) || "726".equals(cmrIssueCd))) {
+
               sofUses = this.legacyObjects.getUsesBySequenceNo(seqNo);
+              if (StringUtils.isNotBlank(record.getCmrAddrSeq()) && !sofUses.isEmpty()) {
               for (String sofUse : sofUses) {
                 addrType = getAddressTypeByUse(sofUse);
                 if (!StringUtils.isEmpty(addrType)) {
@@ -282,7 +284,48 @@ public class EMEAHandler extends BaseSOFHandler {
                   converted.add(addr);
                 }
               }
+            } else if (sofUses.isEmpty() && "ZP01".equals(record.getCmrAddrTypeCode()) && StringUtils.isNotEmpty(record.getExtWalletId())) {
+              record.setCmrAddrTypeCode("PG01");
+              addrType = record.getCmrAddrTypeCode();
+              if (!StringUtils.isEmpty(addrType)) {
+                addr = cloneAddress(record, addrType);
+                LOG.trace("Adding address type " + addrType + " for sequence " + seqNo);
+
+                if (SystemLocation.UNITED_KINGDOM.equals(record.getCmrIssuedBy()) || SystemLocation.IRELAND.equals(record.getCmrIssuedBy())) {
+                  addr.setCmrStreetAddressCont(record.getCmrName4());
+                  addr.setCmrName3(record.getCmrName3());
+
+                  addr.setCmrName2Plain(record.getCmrName2Plain());
+                  addr.setCmrOffice(record.getCmrOffice());
+                } else {
+                  // name3 in rdc = Address Con't on SOF
+                  addr.setCmrStreetAddressCont(record.getCmrName3());
+                  addr.setCmrName3(null);
+
+                  addr.setCmrName2Plain(!StringUtils.isEmpty(record.getCmrName2Plain()) ? record.getCmrName2Plain() : record.getCmrName4());
+                }
+
+                // addr.setCmrName2Plain(!StringUtils.isEmpty(record.getCmrName2Plain())
+                // ? record.getCmrName2Plain() :
+                // record.getCmrName4());
+
+                if (!StringUtils.isBlank(record.getCmrPOBox())) {
+                  if (SystemLocation.UNITED_KINGDOM.equals(record.getCmrIssuedBy()) || SystemLocation.IRELAND.equals(record.getCmrIssuedBy())) {
+                    addr.setCmrPOBox(record.getCmrPOBox());
+                  } else {
+                    addr.setCmrPOBox("PO BOX " + record.getCmrPOBox());
+                  }
+                }
+
+                if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
+                  addr.setCmrAddrSeq("00001");
+                }
+
+                converted.add(addr);
+              }
             }
+          }
+
             if ("862".equals(cmrIssueCd)) {
               seqNo = record.getCmrAddrSeq();
               System.out.println("seqNo = " + seqNo);
@@ -4773,6 +4816,10 @@ public class EMEAHandler extends BaseSOFHandler {
 
     return zd01count;
   }
-  
- 
+
+  @Override
+  public boolean setAddrSeqByImport(AddrPK addrPk, EntityManager entityManager, FindCMRResultModel result) {
+    return true;
+  }
+
 }

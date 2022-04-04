@@ -20,6 +20,7 @@ import org.springframework.web.servlet.ModelAndView;
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.AddrPK;
 import com.ibm.cio.cmr.request.entity.AddrRdc;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AdminPK;
@@ -122,6 +123,9 @@ public class SWISSHandler extends GEOHandler {
 
             if (CmrConstants.ADDR_TYPE.ZP01.toString().equals(tempRec.getCmrAddrTypeCode()) && "599".equals(tempRec.getCmrAddrSeq())) {
               tempRec.setCmrAddrTypeCode("ZP02");
+            }
+            if (CmrConstants.ADDR_TYPE.ZP01.toString().equals(tempRec.getCmrAddrTypeCode()) && StringUtils.isNotEmpty(tempRec.getExtWalletId())) {
+              tempRec.setCmrAddrTypeCode("PG01");
             }
             recordsToReturn.add(tempRec);
           }
@@ -237,7 +241,7 @@ public class SWISSHandler extends GEOHandler {
       }
       String name3 = getName3FrmKna1(currentRecord.getCmrSapNumber());
       String name4 = getName4FrmKna1(currentRecord.getCmrSapNumber());
-      address.setCustNm4(name4);
+      // address.setCustNm4(name4);
       address.setDivn(name3);
       address.setCity2(name4);
       if ("U".equalsIgnoreCase(admin.getReqType())) {
@@ -1224,6 +1228,11 @@ public class SWISSHandler extends GEOHandler {
     LOG.debug("generateCNDCmr :: returnung cndCMR = " + cndCMR);
     LOG.debug("generateCNDCmr :: END");
     return cndCMR;
+  }
+
+  @Override
+  public boolean setAddrSeqByImport(AddrPK addrPk, EntityManager entityManager, FindCMRResultModel result) {
+    return true;
   }
 
 }

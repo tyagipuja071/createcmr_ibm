@@ -3,6 +3,7 @@
  */
 package com.ibm.cmr.create.batch.util.mq.transformer.impl;
 
+
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -49,7 +50,9 @@ public class UnitedKingdomTransformer extends EMEATransformer {
 
   // added marekting response code to preserve BP = 5 for updates
   private static final String[] NO_UPDATE_FIELDS = { "OrganizationNo", "CurrencyCode" };
-  private static final String[] ADDRESS_ORDER = { "ZP01", "ZS01", "ZI01", "ZD01", "ZS02" };
+  
+  private static final String[] ADDRESS_ORDER = { "ZP01", "ZS01", "ZI01", "ZD01", "ZS02", "PG01" };
+
   private static final String DEFAULT_LANDED_COUNTRY = "UK";
   private static final String DEFAULT_CLEAR_CHAR = "@";
   private static final String DEFAULT_CLEAR_6_CHAR = "@@@@@@";
@@ -1648,4 +1651,10 @@ public class UnitedKingdomTransformer extends EMEATransformer {
     // Customer Tab
     legacyCustExt.setiTaxCode(!StringUtils.isBlank(data.getTaxCd1()) ? data.getTaxCd1() : "");
   }
+
+  @Override
+  public boolean isPG01Supported() {
+    return true;
+  }
+
 }

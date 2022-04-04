@@ -5,8 +5,10 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 
@@ -1016,17 +1018,24 @@ public class USUtil extends AutomationUtil {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
 
+    List<Addr> addresses = null;
+    // D - duplicates, R - review
+    Set<String> resultCodes = new HashSet<String>();
+
     LOG.debug("Verifying PayGo Accreditation for " + admin.getSourceSystId());
     boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
+    boolean isOnlyPayGoUpdated = changes != null && changes.isAddressChanged("PG01") && !changes.isAddressChanged("ZS01")
+        && !changes.isAddressChanged("ZI01");
     // do an initial check for PayGo cmrs
-    if (payGoAddredited && "PG".equals(data.getOrdBlk())) {
-      LOG.debug("Allowing name/address changes for PayGo accredited partner " + admin.getSourceSystId() + " Request: " + admin.getId().getReqId());
-      output.setDetails("Skipped checks on updates to PayGo CMR. Partner accredited for PayGo.\n");
-      validation.setMessage("Validated");
-      validation.setSuccess(true);
-      return true;
-    }
-
+    /*
+     * if (payGoAddredited && "PG".equals(data.getOrdBlk())) {
+     * LOG.debug("Allowing name/address changes for PayGo accredited partner " +
+     * admin.getSourceSystId() + " Request: " + admin.getId().getReqId());
+     * output.
+     * setDetails("Skipped checks on updates to PayGo CMR. Partner accredited for PayGo.\n"
+     * ); validation.setMessage("Validated"); validation.setSuccess(true);
+     * return true; }
+     */
     String sqlKey = ExternalizedQuery.getSql("AUTO.US.CHECK_CMDE");
     PreparedQuery query = new PreparedQuery(entityManager, sqlKey);
     query.setParameter("EMAIL", admin.getRequesterId());
@@ -1046,7 +1055,7 @@ public class USUtil extends AutomationUtil {
 
       // check addresses
       if (StringUtils.isNotBlank(custTypCd) && !"NA".equals(custTypCd)) {
-        if (BUSINESS_PARTNER.equals(custTypCd) || LEASING.equals(custTypCd)) {
+        if (BUSINESS_PARTNER.equals(custTypCd) || LEASING.equals(custTypCd) && !isOnlyPayGoUpdated) {
           engineData.addNegativeCheckStatus("UPD_REVIEW_NEEDED",
               "Address updates for " + (custTypCd.equals(LEASING) ? "Leasing" : "Business Partner") + " scenario found.");
           details.append("Address updates for " + (custTypCd.equals(LEASING) ? "Leasing" : "Business Partner")
@@ -1060,14 +1069,15 @@ public class USUtil extends AutomationUtil {
               addrTypesChanged.add(addrModel.getAddrTypeCode());
             }
           }
-          if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZS01.toString())) {
+          if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZS01.toString())
+              && (!payGoAddredited || ("".equals(data.getOrdBlk()) && payGoAddredited))) {
             closelyMatchAddressWithDnbRecords(entityManager, requestData, engineData, "ZS01", details, validation, output);
-            if (relevantAddressFieldForUpdates(changes, requestData.getAddress("ZS01"))) {
-              matchAddressWithSosRecords(entityManager, requestData, engineData, "ZS01", details, validation, output);
-            }
+          }
+          if (relevantAddressFieldForUpdates(changes, requestData.getAddress("ZS01"))) {
+            matchAddressWithSosRecords(entityManager, requestData, engineData, "ZS01", details, validation, output);
           }
 
-          if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZI01.toString())) {
+          if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZI01.toString()) && !payGoAddredited) {
             UpdatedNameAddrModel addrTxt = changes.getAddressChange("ZI01", "Address");
             UpdatedNameAddrModel addrTxt2 = changes.getAddressChange("ZI01", "Address Cont");
             if (addrTxt != null) {
@@ -1095,13 +1105,42 @@ public class USUtil extends AutomationUtil {
               }
             }
 
-            if (isRelevantAddressFieldUpdated(changes, requestData.getAddress("ZI01"))) {
+            if (isRelevantAddressFieldUpdated(changes, requestData.getAddress("ZI01"))
+                && (!payGoAddredited || ("".equals(data.getOrdBlk()) && payGoAddredited))) {
               closelyMatchAddressWithDnbRecords(entityManager, requestData, engineData, "ZI01", details, validation, output);
             }
+
             if (relevantAddressFieldForUpdates(changes, requestData.getAddress("ZI01"))) {
               matchAddressWithSosRecords(entityManager, requestData, engineData, "ZI01", details, validation, output);
             }
           }
+          if (payGoAddredited && addrTypesChanged.contains(CmrConstants.RDC_PAYGO_BILLING.toString())) {
+            addresses = requestData.getAddresses(CmrConstants.RDC_PAYGO_BILLING.toString());
+            for (Addr addr : addresses) {
+              String addrType = addr.getId().getAddrType();
+              if ("N".equals(addr.getImportInd()) && !StringUtils.isEmpty(addr.getExtWalletId())) {
+                LOG.debug("Checking duplicates for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+                boolean duplicate = addressExists(entityManager, addr);
+                if (duplicate) {
+                  LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+                  details.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing Bill-To address.\n");
+                  resultCodes.add("D");
+                } else {
+                  LOG.debug(" - NO duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+                  details.append(" - NO duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")" + "with same attentionTo");
+                }
+              }
+            }
+          }
+        }
+
+        if (resultCodes.contains("D")) {
+          // prioritize duplicates, set error
+          output.setOnError(true);
+          engineData.addRejectionComment("DUPADDR", "One or more new addresses matches existing addresses on record.", "", "");
+          validation.setSuccess(false);
+          validation.setMessage("Duplicate Address");
+
         }
 
         // check if validated
@@ -1115,10 +1154,14 @@ public class USUtil extends AutomationUtil {
         validation.setMessage("Unknown CustType");
         details.append("Customer Type could not be determined. Update checks for address could not be run.").append("\n");
         output.setOnError(true);
+
       }
       output.setDetails(details.toString());
+
     }
+
     return true;
+
   }
 
   /**
@@ -1166,6 +1209,7 @@ public class USUtil extends AutomationUtil {
     Addr addr = requestData.getAddress(addrType);
     Data data = requestData.getData();
     Admin admin = requestData.getAdmin();
+    boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
     MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, engineData, addrType);
     if (response.getSuccess()) {
       if (response.getMatched() && !response.getMatches().isEmpty()) {
@@ -1196,6 +1240,9 @@ public class USUtil extends AutomationUtil {
               engineData.addRejectionComment("OTH", "No supporting documentation is provided by the requester for " + addrDesc + " address.", "", "");
               output.setOnError(true);
               output.setDetails(details.toString());
+              if (payGoAddredited) {
+                admin.setPaygoProcessIndc("Y");
+              }
               LOG.debug("D&B matches were chosen to be overridden by the requester and needs to be reviewed");
             }
           }
@@ -1214,6 +1261,9 @@ public class USUtil extends AutomationUtil {
             engineData.addRejectionComment("OTH", "No supporting documentation is provided by the requester for " + addrDesc + " address.", "", "");
             output.setOnError(true);
             output.setDetails(details.toString());
+            if (payGoAddredited) {
+              admin.setPaygoProcessIndc("Y");
+            }
             LOG.debug("D&B matches were chosen to be overridden by the requester and needs to be reviewed");
           }
         }
@@ -1231,6 +1281,9 @@ public class USUtil extends AutomationUtil {
           engineData.addRejectionComment("OTH", "No supporting documentation is provided by the requester for " + addrDesc + " address.", "", "");
           output.setOnError(true);
           output.setDetails(details.toString());
+          if (payGoAddredited) {
+            admin.setPaygoProcessIndc("Y");
+          }
           LOG.debug("D&B matches were chosen to be overridden by the requester and needs to be reviewed");
         }
       }
@@ -1669,7 +1722,8 @@ public class USUtil extends AutomationUtil {
     }
     return false;
   }
-  
+
+  @Override
   public void performCoverageBasedOnGBG(CalculateCoverageElement covElement, EntityManager entityManager, AutomationResult<OverrideOutput> results,
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData, String covFrom,
       CoverageContainer container, boolean isCoverageCalculated) throws Exception {
@@ -1712,6 +1766,58 @@ public class USUtil extends AutomationUtil {
       overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ENTERPRISE", data.getEnterprise(), "6500871");
     }
     return true;
+  }
+
+  public boolean addressExists(EntityManager entityManager, Addr addrToCheck) {
+
+    String sql = ExternalizedQuery.getSql("AUTO.US.CHECK_IF_ADDRESS_EXIST_ZP01PAYGO");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", addrToCheck.getId().getReqId());
+    query.setParameter("ADDR_SEQ", addrToCheck.getId().getAddrSeq());
+    query.setParameter("LAND_CNTRY", addrToCheck.getLandCntry());
+    query.setParameter("CITY", addrToCheck.getCity1());
+    if (addrToCheck.getAddrTxt() != null) {
+      query.append(" and lower(ADDR_TXT) like lower(:ADDR_TXT)");
+      query.setParameter("ADDR_TXT", addrToCheck.getAddrTxt());
+    }
+    if (addrToCheck.getAddrTxt2() != null) {
+      query.append(" and lower(DEPT) like lower(:DEPT)");
+      query.setParameter("DEPT", "%" + addrToCheck.getAddrTxt2() + "%");
+    }
+    if (addrToCheck.getDept() != null) {
+      query.append(" and lower(DEPT) like lower(:DEPT)");
+      query.setParameter("DEPT", "%" + addrToCheck.getDept() + "%");
+    }
+    if (addrToCheck.getFloor() != null) {
+      query.append(" and lower(FLOOR) like lower(:FLOOR)");
+      query.setParameter("FLOOR", addrToCheck.getFloor());
+    }
+    if (addrToCheck.getBldg() != null) {
+      query.append(" and BLDG= :BLDG");
+      query.setParameter("BLDG", addrToCheck.getBldg());
+    }
+    if (addrToCheck.getStateProv() != null) {
+      query.append(" and STATE_PROV = :STATE");
+      query.setParameter("STATE", addrToCheck.getStateProv());
+    }
+    if (addrToCheck.getPostCd() != null) {
+      query.append(" and POST_CD= :POST_CD");
+      query.setParameter("POST_CD", addrToCheck.getPostCd());
+    }
+    if (addrToCheck.getCustPhone() != null) {
+      query.append(" and CUST_PHONE = :PHONE");
+      query.setParameter("PHONE", addrToCheck.getCustPhone());
+    }
+    if (addrToCheck.getCounty() != null) {
+      query.append(" and COUNTY= :COUNTY");
+      query.setParameter("COUNTY", addrToCheck.getCounty());
+    }
+    if (addrToCheck.getExtWalletId() != null) {
+      query.append(" and EXT_WALLET_ID= :EXT_WALLET_ID");
+      query.setParameter("EXT_WALLET_ID", addrToCheck.getExtWalletId());
+    }
+
+    return query.exists();
   }
 
 }

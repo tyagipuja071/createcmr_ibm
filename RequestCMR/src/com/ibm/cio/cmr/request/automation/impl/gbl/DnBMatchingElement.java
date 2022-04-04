@@ -78,6 +78,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
     Scorecard scorecard = requestData.getScorecard();
     scorecard.setDnbMatchingResult("");
     Boolean override = false;
+    boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
     // skip dnb matching if dnb matches on UI are overriden and attachment is
     // provided
     if ("Y".equals(admin.getMatchOverrideIndc()) && DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
@@ -114,14 +115,14 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
           } else {
             result.setOnError(false);
           }
-          if (!override) {
+          if (!override && !payGoAddredited) {
             LOG.debug("No Matches in DNB");
             result.setResults("No Matches");
             result.setDetails("No high quality matches with D&B records. Please import from D&B search.");
             if (!(SystemLocation.INDIA.equals(data.getCmrIssuingCntry()) && !(StringUtils.isBlank(data.getVat()) || "CROSS".equals(scenario)))) {
               engineData.addNegativeCheckStatus("DnBMatch", "No high quality matches with D&B records. Please import from D&B search.");
             }
-          } else {
+          } else if (!payGoAddredited) {
             result.setDetails("No high quality matches with D&B records. Please import from D&B search.");
           }
         } else {
@@ -316,9 +317,16 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
         }
       } else {
         scorecard.setDnbMatchingResult("N");
+        if ("C".equals(admin.getReqType()) && payGoAddredited) {
+          result.setOnError(false);
+          result.setDetails("No D&B record was found using advanced matching. Skipping checks for PayGo Addredited Customers.");
+          result.setResults("No Matches");
+          admin.setPaygoProcessIndc("Y");
+        } else {
         result.setDetails("No D&B record was found using advanced matching.");
         result.setResults("No Matches");
-        if (!override) {
+        }
+        if (!override && !payGoAddredited)) {
           engineData.addRejectionComment("OTH", "No matches with D&B records. Please import from D&B search.", "", "");
           result.setOnError(true);
         } else {

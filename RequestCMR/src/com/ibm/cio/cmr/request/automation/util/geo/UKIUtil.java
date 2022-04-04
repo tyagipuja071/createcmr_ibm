@@ -58,7 +58,7 @@ public class UKIUtil extends AutomationUtil {
   public static final String SCENARIO_CROSS_IGF = "XIGF";
   private static final List<String> SCENARIOS_TO_SKIP_COVERAGE = Arrays.asList(SCENARIO_INTERNAL, SCENARIO_PRIVATE_PERSON, SCENARIO_BUSINESS_PARTNER);
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
-      CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO, CmrConstants.RDC_SECONDARY_SOLD_TO);
+      CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO, CmrConstants.RDC_SECONDARY_SOLD_TO, CmrConstants.RDC_PAYGO_BILLING);
   private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Attn", "Phone #", "Hardware Master");
   private static final List<String> SCOTLAND_POST_CD = Arrays.asList("AB", "KA", "DD", "KW", "DG", "KY", "EH", "ML", "FK", "PA", "G1", "G2", "G3",
       "G4", "G5", "G6", "G7", "G8", "G9", "PH", "TD", "IV");
@@ -294,8 +294,10 @@ public class UKIUtil extends AutomationUtil {
         for (Addr addr : addresses) {
           if ("N".equals(addr.getImportInd())) {
             // new address
-            if (CmrConstants.RDC_SHIP_TO.equals(addrType) || CmrConstants.RDC_SECONDARY_SOLD_TO.equals(addrType)) {
-              if (addressExists(entityManager, addr ,requestData)) {
+
+            if (CmrConstants.RDC_SHIP_TO.equals(addrType) || CmrConstants.RDC_SECONDARY_SOLD_TO.equals(addrType)
+                || CmrConstants.RDC_PAYGO_BILLING.equals(addrType)) {
+              if (addressExists(entityManager, addr, requestData)) {
                 LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
                 checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");
                 resultCodes.add("R");
@@ -312,7 +314,9 @@ public class UKIUtil extends AutomationUtil {
                 billToName = getCustomerFullName(zs01);
               }
               if (installAtName.equals(billToName)) {
-                if (addressExists(entityManager, addr , requestData)) {
+
+                if (addressExists(entityManager, addr, requestData)) {
+
                   LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
                   checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");
                   resultCodes.add("R");
@@ -395,8 +399,8 @@ public class UKIUtil extends AutomationUtil {
   }
 
   @Override
-  public boolean addressExists(EntityManager entityManager, Addr addrToCheck , RequestData requestData) {
-
+  public boolean addressExists(EntityManager entityManager, Addr addrToCheck, RequestData requestData) {
+    boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, requestData.getAdmin().getSourceSystId());
     String sql = ExternalizedQuery.getSql("AUTO.UKI.CHECK_IF_ADDRESS_EXIST");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", addrToCheck.getId().getReqId());
@@ -406,31 +410,31 @@ public class UKIUtil extends AutomationUtil {
     query.setParameter("CITY", addrToCheck.getCity1());
     query.setParameter("ADDR_TYPE", addrToCheck.getId().getAddrType());
     if (addrToCheck.getAddrTxt() != null) {
-      query.append(" and ADDR_TXT = :ADDR_TXT");
+      query.append(" and lower(ADDR_TXT) like lower(:ADDR_TXT)");
       query.setParameter("ADDR_TXT", addrToCheck.getAddrTxt());
     }
     if (addrToCheck.getCustNm2() != null) {
-      query.append(" and CUST_NM2 = :NAME2");
+      query.append(" and lower(CUST_NM2) like lower(:NAME2)");
       query.setParameter("NAME2", addrToCheck.getCustNm2());
     }
     if (addrToCheck.getDept() != null) {
-      query.append(" and DEPT = :DEPT");
+      query.append(" and lower(DEPT) like lower(:DEPT)");
       query.setParameter("DEPT", addrToCheck.getDept());
     }
     if (addrToCheck.getFloor() != null) {
-      query.append(" and FLOOR= :FLOOR");
+      query.append(" and lower(FLOOR) like lower(:FLOOR)");
       query.setParameter("FLOOR", addrToCheck.getFloor());
     }
     if (addrToCheck.getBldg() != null) {
-      query.append(" and BLDG= :BLDG");
+      query.append(" and lower(BLDG) like lower(:BLDG)");
       query.setParameter("BLDG", addrToCheck.getBldg());
     }
     if (addrToCheck.getOffice() != null) {
-      query.append(" and OFFICE =:OFFICE");
+      query.append(" and lower(OFFICE) like lower(:OFFICE)");
       query.setParameter("OFFICE", addrToCheck.getOffice());
     }
     if (addrToCheck.getStateProv() != null) {
-      query.append(" and STATE_PROV = :STATE");
+      query.append(" and lower(STATE_PROV) like lower(:STATE)");
       query.setParameter("STATE", addrToCheck.getStateProv());
     }
     if (addrToCheck.getPoBox() != null) {
@@ -450,6 +454,12 @@ public class UKIUtil extends AutomationUtil {
       query.setParameter("COUNTY", addrToCheck.getCounty());
     }
 
+    if (payGoAddredited) {
+      if (addrToCheck.getExtWalletId() != null) {
+        query.append(" and EXT_WALLET_ID = :EXT_WALLET_ID");
+        query.setParameter("EXT_WALLET_ID", addrToCheck.getExtWalletId());
+      }
+    }
     return query.exists();
   }
 

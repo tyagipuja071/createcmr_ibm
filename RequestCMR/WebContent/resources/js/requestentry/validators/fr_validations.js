@@ -1450,7 +1450,16 @@ function setDummySIRETOnCustSubGrpChange(value) {
   if (reqType == 'U' || FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
-  if (value == "COMME" || value == "HOSTC" || value == "THDPT" || value == "BUSPR" || value == "GOVRN" || value == "INTER" || value == "INTSO"
+  var sourceSystId = FormManager.getActualValue('sourceSystId');
+  // PayGo_check
+  var qParams = {
+    SYST_ID : sourceSystId
+  };
+  var paygoUser = cmr.query('PAYGO.CHECK.CRN', qParams);
+  var countpaygo = paygoUser.ret1;
+  if ((Number(countpaygo) == 1 && role == 'Processor')) {
+    FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+  } else if (value == "COMME" || value == "HOSTC" || value == "THDPT" || value == "BUSPR" || value == "GOVRN" || value == "INTER" || value == "INTSO"
       || value == "LCFIN") {
     FormManager.enable('taxCd1');
     FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'SIRET' ], 'MAIN_CUST_TAB');
@@ -3492,8 +3501,19 @@ function orderBlockCodeValidator() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
+        var cmrno = FormManager.getActualValue('enterCMRNo');
+        var mandt = FormManager.getActualValue('mandt');
+        var isscntry = FormManager.getActualValue('cmrIssuingCntry');
+        // PayGo_check
+        var qParams = {
+          ZZKV_CUSNO : cmrno,
+          MANDT : mandt,
+          KATR6 : isscntry
+        };
+        var paygorecord = cmr.query('CMR_CHECK_PAYGO', qParams);
+        var countpaygo = paygorecord.ret1;
         var orderBlockCd = FormManager.getActualValue('ordBlk');
-        if (orderBlockCd == '94' || orderBlockCd == '88' || orderBlockCd == '') {
+        if (orderBlockCd == '94' || orderBlockCd == '88' || orderBlockCd == '' || (Number(countpaygo) == 1 && role == 'Processor')) {
           return new ValidationResult(null, true);
         } else {
           return new ValidationResult({
@@ -4119,6 +4139,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(lockIBMTabForFR, '706');
   GEOHandler.addAfterConfig(setCtcForIsu5K, '706');
   GEOHandler.addAfterTemplateLoad(setCtcForIsu5K, '706');
+  GEOHandler.addAfterConfig(resetVATValidationsForPayGo, [ '706' ]);
+  GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, [ '706' ]);
   GEOHandler.registerValidator(restrictDuplicateAddr, [ '706' ], null, true);
   GEOHandler.addAfterTemplateLoad(filterCmrnoP, '706');
   GEOHandler.registerValidator(addCmrNoValidator, [ '706' ], null, true);

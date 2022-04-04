@@ -1705,7 +1705,7 @@ public class DataRdc extends BaseEntity<DataPK> implements Serializable {
   public void setTaxPayerCustCd(String taxPayerCustCd) {
     this.taxPayerCustCd = taxPayerCustCd;
   }
-  
+
   public String getLocationNumber() {
     return locationNumber;
   }

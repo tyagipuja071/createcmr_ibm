@@ -74,6 +74,11 @@ public class CanadaHandler extends GEOHandler {
           } else {
             handleMultipleAddrUse(addrUse, converted, record);
           }
+        } else if (StringUtils.isBlank(addrUse) && !StringUtils.isEmpty(record.getExtWalletId())) {
+          FindCMRRecordModel tempRecord = new FindCMRRecordModel();
+          PropertyUtils.copyProperties(tempRecord, record);
+          tempRecord.setCmrAddrTypeCode("PG01");
+          converted.add(tempRecord);
         }
       }
     }

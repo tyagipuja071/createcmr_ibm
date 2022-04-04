@@ -1070,6 +1070,19 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
           results.add(update);
         }
 
+        // ExtWalletId
+        if (!equals(addr.getExtWalletId(), addr.getExtWalletIdOld())) {
+          update = new UpdatedNameAddrModel();
+          update.setAddrTypeCode(addrType);
+          update.setAddrSeq(seqNo);
+          update.setAddrType(DropdownListController.getDescription("AddressType", addrType, cmrCountry));
+          update.setSapNumber(sapNumber);
+          update.setDataField(PageManager.getLabel(cmrCountry, "ExtWalletId", "-"));
+          update.setNewData(addr.getExtWalletId());
+          update.setOldData(addr.getExtWalletIdOld());
+          results.add(update);
+        }
+
         if (geoHandler != null) {
           geoHandler.addSummaryUpdatedFieldsForAddress(this, cmrCountry, addrTypeDesc, sapNumber, addr, results, entityManager);
         }

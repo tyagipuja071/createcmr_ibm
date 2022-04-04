@@ -25,6 +25,7 @@ import org.springframework.web.servlet.ModelAndView;
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.AddrPK;
 import com.ibm.cio.cmr.request.entity.AddrRdc;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AdminPK;
@@ -137,6 +138,10 @@ public class FranceHandler extends GEOHandler {
 
             if (CmrConstants.ADDR_TYPE.ZP01.toString().equals(tempRec.getCmrAddrTypeCode()) && "599".equals(tempRec.getCmrAddrSeq())) {
               tempRec.setCmrAddrTypeCode("ZP02");
+            }
+
+            if (CmrConstants.ADDR_TYPE.ZP01.toString().equals(tempRec.getCmrAddrTypeCode()) && StringUtils.isNotEmpty(tempRec.getExtWalletId())) {
+              tempRec.setCmrAddrTypeCode("PG01");
             }
             recordsToReturn.add(tempRec);
           }
@@ -1417,8 +1422,8 @@ public class FranceHandler extends GEOHandler {
                       ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code. Please fix and upload the template again.<br>");
                   validations.add(error);
                 }
-              } else if ((StringUtils.isNotBlank(isuCd) && (StringUtils.isBlank(ctc) || !"@QY".contains(ctc))) || 
-                  (StringUtils.isNotBlank(ctc) && !"@QY".contains(ctc))) {
+              } else if ((StringUtils.isNotBlank(isuCd) && (StringUtils.isBlank(ctc) || !"@QY".contains(ctc)))
+                  || (StringUtils.isNotBlank(ctc) && !"@QY".contains(ctc))) {
                 TemplateValidation error = new TemplateValidation(name);
                 LOG.trace("The row " + (row.getRowNum() + 1)
                     + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
@@ -1923,6 +1928,11 @@ public class FranceHandler extends GEOHandler {
     LOG.debug("generateCNDCmr :: returnung cndCMR = " + cndCMR);
     LOG.debug("generateCNDCmr :: END");
     return cndCMR;
+  }
+
+  @Override
+  public boolean setAddrSeqByImport(AddrPK addrPk, EntityManager entityManager, FindCMRResultModel result) {
+    return true;
   }
 
 }

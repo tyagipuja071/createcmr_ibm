@@ -73,7 +73,7 @@ public class FranceUtil extends AutomationUtil {
   public static final String SCENARIO_CROSSBORDER_INTERNAL = "CBTER";
   public static final String SCENARIO_CROSSBORDER_COMMERCIAL = "CBMME";
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
-      CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO);
+      CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO, CmrConstants.RDC_PAYGO_BILLING);
   private static final Logger LOG = Logger.getLogger(FranceUtil.class);
   private static List<FrSboMapping> sortlMappings = new ArrayList<FrSboMapping>();
   private static final String MATCHING = "matching";
@@ -1003,7 +1003,8 @@ public class FranceUtil extends AutomationUtil {
             if (!CmrConstants.RDC_SOLD_TO.equals(addrType) && !CmrConstants.RDC_BILL_TO.equals(addrType)) {
               engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_DNB_ORGID_VAL);
             }
-            if (CmrConstants.RDC_SHIP_TO.equals(addrType)) {
+            if (CmrConstants.RDC_SHIP_TO.equals(addrType) || CmrConstants.RDC_PAYGO_BILLING.equals(addrType)) {
+
               if (addressExists(entityManager, addr, requestData)) {
                 LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
                 checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");

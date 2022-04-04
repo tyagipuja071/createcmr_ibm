@@ -905,6 +905,21 @@ function addDPLAssessmentValidator() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
+function resetVATValidationsForPayGo(){
+  var systemId = FormManager.getActualValue('sourceSystId');
+  var cntry= FormManager.getActualValue('cmrIssuingCntry');
+  var vat = FormManager.getActualValue('vat');
+  var results = cmr.query('GET_PARTNER_VAT_EXCEPTIONS', {
+    COUNTRY : cntry,
+    SERVICE_ID : systemId
+  });
+  if(results!= null && results!= undefined && results.ret1!='' && results.ret1 == 'Y' && vat == ''){
+    FormManager.resetValidations('vat');
+    // FormManager.getField('vatExempt').checked = true;
+    console.log('VAT is non mandatory for PayGO');
+  }
+}
+
 function addIsuCdObsoleteValidator(){
 	var oldIsuCd = _pagemodel.isuCd;
 	FormManager.addFormValidator((function() {

@@ -839,7 +839,7 @@ public class IERPProcessService extends BaseBatchService {
 
               if (response.getRecords() != null && response.getRecords().size() != 0) {
 
-                if (CmrConstants.ADDR_TYPE.ZS01.equals(response.getRecords().get(index).getAddressType())) {
+                if (CmrConstants.RDC_SOLD_TO.equals(response.getRecords().get(index).getAddressType())) {
                   String[] addrSeqs = response.getRecords().get(index).getSeqNo().split(",");
                   addr.setPairedAddrSeq(addrSeqs[0]);
                   addr.setSapNo(response.getRecords().get(index).getSapNo());
@@ -854,6 +854,14 @@ public class IERPProcessService extends BaseBatchService {
 
                     if (red.getAddressType().equalsIgnoreCase(addr.getId().getAddrType())
                         && addrSeqs[1].equalsIgnoreCase(addr.getId().getAddrSeq())) {
+                      LOG.debug("Address matched");
+                      addr.setPairedAddrSeq(addrSeqs[0]);
+                      addr.setSapNo(red.getSapNo());
+                      addr.setIerpSitePrtyId(red.getIerpSitePartyId());
+                    }
+                    if (("ZP01").equalsIgnoreCase(red.getAddressType()) && "PG01".equals(addr.getId().getAddrType())
+                        && addrSeqs[1].equalsIgnoreCase(addr.getId().getAddrSeq())) {
+                      LOG.debug("ZP01 matched");
                       addr.setPairedAddrSeq(addrSeqs[0]);
                       addr.setSapNo(red.getSapNo());
                       addr.setIerpSitePrtyId(red.getIerpSitePartyId());
@@ -1131,6 +1139,7 @@ public class IERPProcessService extends BaseBatchService {
       // addresses
       DataRdc dataRdc = getDataRdcRecords(em, data);
       boolean isDataUpdated = false;
+      boolean isAdminUpdated = false;
 
       if (CNHandler.isCNIssuingCountry(data.getCmrIssuingCntry())) {
         isDataUpdated = CNHandler.isDataUpdated(data, dataRdc, data.getCmrIssuingCntry());
@@ -1139,6 +1148,8 @@ public class IERPProcessService extends BaseBatchService {
       } else {
         GEOHandler cntryHandler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
         isDataUpdated = cntryHandler.isDataUpdate(data, dataRdc, data.getCmrIssuingCntry());
+        isAdminUpdated = cntryHandler.isAdminUpdate(admin, data.getCmrIssuingCntry());
+        isDataUpdated = isAdminUpdated || isDataUpdated;
       }
 
       if (handleTempReact && CMR_REQUEST_STATUS_CPR.equals(admin.getReqStatus())) {
@@ -1406,7 +1417,10 @@ public class IERPProcessService extends BaseBatchService {
 
       DataRdc dataRdc = getDataRdcRecords(em, data);
       boolean isDataUpdated = false;
+      boolean isAdminUpdated = false;
       isDataUpdated = cntryHandler.isDataUpdate(data, dataRdc, data.getCmrIssuingCntry());
+      isAdminUpdated = cntryHandler.isAdminUpdate(admin, data.getCmrIssuingCntry());
+      isDataUpdated = isAdminUpdated || isDataUpdated;
 
       // 3. Check if there are customer and IBM changes, propagate to other
       // addresses

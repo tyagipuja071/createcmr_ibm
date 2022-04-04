@@ -37,6 +37,7 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.ConfigUtil;
 import com.ibm.cio.cmr.request.util.Person;
+import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.MatchingServiceClient;
@@ -298,29 +299,51 @@ public class GermanyUtil extends AutomationUtil {
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {
     Data data = requestData.getData();
     Addr zs01 = requestData.getAddress("ZS01");
+    Admin admin = requestData.getAdmin();
+    boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
     String custNm1 = StringUtils.isNotBlank(zs01.getCustNm1()) ? zs01.getCustNm1().trim() : "";
     String custNm2 = StringUtils.isNotBlank(zs01.getCustNm2()) ? zs01.getCustNm2().trim() : "";
     String mainCustNm = (custNm1 + (StringUtils.isNotBlank(custNm2) ? " " + custNm2 : "")).toUpperCase();
     String mainStreetAddress1 = (StringUtils.isNotBlank(zs01.getAddrTxt()) ? zs01.getAddrTxt() : "").trim().toUpperCase();
     String mainCity = (StringUtils.isNotBlank(zs01.getCity1()) ? zs01.getCity1() : "").trim().toUpperCase();
     String mainPostalCd = (StringUtils.isNotBlank(zs01.getPostCd()) ? zs01.getPostCd() : "").trim();
+    String mainExtWalletId = (StringUtils.isNotBlank(zs01.getExtWalletId()) ? zs01.getExtWalletId() : "").trim();
     Iterator<Addr> it = requestData.getAddresses().iterator();
     boolean removed = false;
     details.append("Checking for duplicate address records - ").append("\n");
     while (it.hasNext()) {
       Addr addr = it.next();
-      if (!"ZS01".equals(addr.getId().getAddrType())) {
-        removed = true;
-        String custNm = (addr.getCustNm1().trim() + (StringUtils.isNotBlank(addr.getCustNm2()) ? " " + addr.getCustNm2().trim() : "")).toUpperCase();
-        String streetaddress = ((StringUtils.isNotBlank(addr.getAddrTxt()) ? addr.getAddrTxt().trim() : "")).toUpperCase();
-        if (custNm.equals(mainCustNm) && streetaddress.equals(mainStreetAddress1) && addr.getCity1().trim().toUpperCase().equals(mainCity)
-            && addr.getPostCd().trim().equals(mainPostalCd)) {
-          details.append("Removing duplicate address record: " + addr.getId().getAddrType() + " from the request.").append("\n");
-          Addr merged = entityManager.merge(addr);
-          if (merged != null) {
-            entityManager.remove(merged);
+      if (!payGoAddredited) {
+        if (!"ZS01".equals(addr.getId().getAddrType())) {
+          removed = true;
+          String custNm = (addr.getCustNm1().trim() + (StringUtils.isNotBlank(addr.getCustNm2()) ? " " + addr.getCustNm2().trim() : ""))
+              .toUpperCase();
+		  String streetaddress = ((StringUtils.isNotBlank(addr.getAddrTxt()) ? addr.getAddrTxt().trim() : "")).toUpperCase();
+          if (custNm.equals(mainCustNm) && streetaddress.equals(mainStreetAddress1)
+              && addr.getCity1().trim().toUpperCase().equals(mainCity) && addr.getPostCd().trim().equals(mainPostalCd)) {
+            details.append("Removing duplicate address record: " + addr.getId().getAddrType() + " from the request.").append("\n");
+            Addr merged = entityManager.merge(addr);
+            if (merged != null) {
+              entityManager.remove(merged);
+            }
+            it.remove();
           }
-          it.remove();
+        }
+      } else {
+        if (!"ZS01".equals(addr.getId().getAddrType())) {
+          removed = true;
+          String custNm = (addr.getCustNm1().trim() + (StringUtils.isNotBlank(addr.getCustNm2()) ? " " + addr.getCustNm2().trim() : ""))
+              .toUpperCase();
+          if (custNm.equals(mainCustNm) && addr.getAddrTxt().trim().toUpperCase().equals(mainStreetAddress1)
+              && addr.getCity1().trim().toUpperCase().equals(mainCity) && addr.getPostCd().trim().equals(mainPostalCd)
+              && zs01.getExtWalletId().trim().toUpperCase().equals(mainExtWalletId)) {
+            details.append("Removing duplicate address record: " + addr.getId().getAddrType() + " from the request.").append("\n");
+            Addr merged = entityManager.merge(addr);
+            if (merged != null) {
+              entityManager.remove(merged);
+            }
+            it.remove();
+          }
         }
       }
     }
@@ -668,10 +691,12 @@ public class GermanyUtil extends AutomationUtil {
     boolean isNegativeCheckNeedeed = false;
     boolean isInstallAtExistOnReq = false;
     boolean isBillToExistOnReq = false;
+    boolean isPayGoBillToExistOnReq = false;
     boolean isShipToExistOnReq = false;
     Addr installAt = requestData.getAddress("ZI01");
     Addr billTo = requestData.getAddress("ZP01");
     Addr shipTo = requestData.getAddress("ZD01");
+    Addr payGoBillTo = requestData.getAddress("PG01");
     String details = StringUtils.isNotBlank(output.getDetails()) ? output.getDetails() : "";
     StringBuilder detail = new StringBuilder(details);
     long reqId = requestData.getAdmin().getId().getReqId();
@@ -760,7 +785,22 @@ public class GermanyUtil extends AutomationUtil {
         }
       }
 
-      if (isNegativeCheckNeedeed || isShipToExistOnReq || isInstallAtExistOnReq || isBillToExistOnReq) {
+      if (payGoBillTo != null && (changes.isAddressChanged("PG01") || isAddressAdded(payGoBillTo))) {
+        // Check If Address already exists on request
+        isPayGoBillToExistOnReq = addressExists(entityManager, payGoBillTo, requestData);
+        if (isPayGoBillToExistOnReq) {
+          detail.append(" PayGo Billing details provided matches an existing address.");
+          engineData.addRejectionComment("OTH", "PayGo Billing details provided matches an existing address.", "", "");
+          LOG.debug("PayGo Billing details provided matches an existing address.");
+          output.setOnError(true);
+          validation.setSuccess(false);
+          validation.setMessage("Not validated");
+          output.setDetails(detail.toString());
+          output.setProcessOutput(validation);
+          return true;
+        }
+      }
+      if (isNegativeCheckNeedeed || isShipToExistOnReq || isInstallAtExistOnReq || isBillToExistOnReq || isPayGoBillToExistOnReq) {
         validation.setSuccess(false);
         validation.setMessage("Not validated");
         engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updated elements cannot be checked automatically.");

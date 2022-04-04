@@ -61,7 +61,7 @@ public class BeLuxUtil extends AutomationUtil {
   public static final String SCENARIO_DATA_CENTER_LU = "LUDAT";
 
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
-      CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO, CmrConstants.RDC_SECONDARY_SOLD_TO);
+      CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO, CmrConstants.RDC_SECONDARY_SOLD_TO, CmrConstants.RDC_PAYGO_BILLING);
   private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Attention Person", "Phone #");
 
   @Override
@@ -565,7 +565,8 @@ public class BeLuxUtil extends AutomationUtil {
             String soldToCustNm1 = requestData.getAddress("ZS01").getCustNm1();
             String installAtCustNm = requestData.getAddress("ZI01") != null ? requestData.getAddress("ZI01").getCustNm1() : "";
             if ((addrType.equalsIgnoreCase(CmrConstants.RDC_INSTALL_AT) && soldToCustNm1.equalsIgnoreCase(installAtCustNm))
-                || (addrType.equalsIgnoreCase(CmrConstants.RDC_SHIP_TO) && "N".equals(addr.getImportInd()))) {
+                || ((addrType.equalsIgnoreCase(CmrConstants.RDC_SHIP_TO) || addrType.equalsIgnoreCase(CmrConstants.RDC_PAYGO_BILLING))
+                    && "N".equals(addr.getImportInd()))) {
               LOG.debug("Checking duplicates for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
               boolean duplicate = addressExists(entityManager, addr, requestData);
               if (duplicate) {

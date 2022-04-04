@@ -626,10 +626,18 @@ public class SWISSService extends TransConnService {
               }
 
               if (red.getAddressType().equalsIgnoreCase(addr.getId().getAddrType()) && addrSeqs[1].equalsIgnoreCase(addr.getId().getAddrSeq())) {
+                LOG.debug("Address matched");
                 addr.setPairedAddrSeq(addrSeqs[0]);
                 addr.setSapNo(red.getSapNo());
                 addr.setIerpSitePrtyId(red.getIerpSitePartyId());
               }
+              if (("ZP01").equalsIgnoreCase(red.getAddressType()) && addrSeqs[1].equalsIgnoreCase(addr.getId().getAddrSeq())) {
+                LOG.debug("ZP01 matched");
+                addr.setPairedAddrSeq(addrSeqs[0]);
+                addr.setSapNo(red.getSapNo());
+                addr.setIerpSitePrtyId(red.getIerpSitePartyId());
+              }
+
             }
           }
 

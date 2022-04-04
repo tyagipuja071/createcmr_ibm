@@ -31,6 +31,7 @@ import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 
@@ -46,7 +47,7 @@ public class NetherlandsUtil extends AutomationUtil {
   public static final String SCENARIO_INTERNAL = "INTER";
 
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
-      CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO);
+      CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO, CmrConstants.RDC_PAYGO_BILLING);
   private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Attention Person", "Phone #", "Collection Code");
 
   @Override
@@ -449,6 +450,7 @@ public class NetherlandsUtil extends AutomationUtil {
     StringBuilder checkDetails = new StringBuilder();
     Set<String> resultCodes = new HashSet<String>();// R - review
     Addr zs01 = requestData.getAddress("ZS01");
+    boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, requestData.getAdmin().getSourceSystId());
     if (admin.getReqType().equals("U")) {
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_DNB_ORGID_VAL);
     }
@@ -468,7 +470,11 @@ public class NetherlandsUtil extends AutomationUtil {
               }
               if (!matchesDnb) {
                 LOG.debug("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
-                resultCodes.add("R");
+                if (payGoAddredited) {
+                  resultCodes.add("D");
+                } else {
+                  resultCodes.add("R");
+                }
                 checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
               } else {
                 checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
@@ -495,7 +501,11 @@ public class NetherlandsUtil extends AutomationUtil {
                 }
                 if (!matchesDnb) {
                   LOG.debug("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
-                  resultCodes.add("R");
+                  if (payGoAddredited) {
+                    resultCodes.add("D");
+                  } else {
+                    resultCodes.add("R");
+                  }
                   checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
                 } else {
                   checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
@@ -514,7 +524,8 @@ public class NetherlandsUtil extends AutomationUtil {
               String installAtName = getCustomerFullName(addr);
               String soldToName = getCustomerFullName(zs01);
               if (installAtName.equals(soldToName)) {
-                if (addressExists(entityManager, addr ,requestData)) {
+                if (addressExists(entityManager, addr, requestData)) {
+
                   LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
                   checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");
                   resultCodes.add("R");
@@ -529,9 +540,12 @@ public class NetherlandsUtil extends AutomationUtil {
               }
             }
 
-            if (addrType.equalsIgnoreCase(CmrConstants.RDC_SHIP_TO) && "N".equals(addr.getImportInd())) {
+            if ((addrType.equalsIgnoreCase(CmrConstants.RDC_SHIP_TO) || addrType.equalsIgnoreCase(CmrConstants.RDC_PAYGO_BILLING))
+                && "N".equals(addr.getImportInd())) {
               LOG.debug("Checking duplicates for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
-              boolean duplicate = addressExists(entityManager, addr , requestData);
+
+              boolean duplicate = addressExists(entityManager, addr, requestData);
+
               if (duplicate) {
                 LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
                 checkDetails.append("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");

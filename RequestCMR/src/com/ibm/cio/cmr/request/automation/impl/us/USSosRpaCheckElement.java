@@ -26,6 +26,7 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.Scorecard;
+import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cmr.services.client.AutomationServiceClient;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.ServiceClient.Method;
@@ -65,6 +66,7 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
     ValidationOutput validation = new ValidationOutput();
     Scorecard scorecard = requestData.getScorecard();
     StringBuilder details = new StringBuilder();
+    boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
     // skip sos matching if matching records are found in SOS-RPA
     /*
      * if (engineData.isDnbVerified() ||
@@ -126,11 +128,16 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
           }
           log.debug("Scorecard Updated for SOS-RPA to" + scorecard.getRpaMatchingResult());
           validation.setSuccess(true);
+          if ("C".equals(admin.getReqType()) && payGoAddredited) {
+            output.setOnError(false);
+            admin.setPaygoProcessIndc("Y");
+            details.append("Skipping checks for PayGo Addredited Customers.");
+            }
           if ("O".equals(admin.getCompVerifiedIndc()) || "Y".equals(admin.getCompVerifiedIndc())) {
             output.setOnError(false);
             admin.setCompVerifiedIndc("Y");
           } else {
-            if (itr == 1 || !containsInvoice) {
+            if (itr == 1 || !containsInvoice && !payGoAddredited) {
               output.setOnError(true);
               engineData.addNegativeCheckStatus("DnBSoSMatch", "No high quality matches with D&B and SOS-RPA records.");
             }

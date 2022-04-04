@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 
@@ -390,6 +392,10 @@ public class LegacyDirectService extends TransConnService {
       }
 
       completeRecord(entityManager, admin, legacyObjects.getCustomerNo(), legacyObjects, cmrObjects);
+
+      if (transformer.isPG01Supported()) {
+        modifyPG01Sequences(cmrObjects, entityManager);
+      }
     }
   }
 
@@ -561,6 +567,11 @@ public class LegacyDirectService extends TransConnService {
          * createEntity(legacyAddrUse, entityManager); }
          */
         completeRecord(entityManager, admin, legacyObjects.getCustomerNo(), legacyObjects, cmrObjects);
+
+        MessageTransformer transformer = TransformerManager.getTransformer(cmrObjects.getData().getCmrIssuingCntry());
+        if (transformer.isPG01Supported()) {
+          modifyPG01Sequences(cmrObjects, entityManager);
+        }
 
         // CMR-1025 Legacy processing failed when updated Billing seq 0000B
         if (SystemLocation.ITALY.equals(legacyCust.getId().getSofCntryCode())) {
@@ -4455,6 +4466,70 @@ public class LegacyDirectService extends TransConnService {
     return rdcSequences;
   }
 
+  private void modifyPG01Sequences(CMRRequestContainer cmrobjects, EntityManager entityManager) {
+    try {
+      List<Addr> pgs = new ArrayList<Addr>();
+      List<Addr> addresses = new ArrayList<Addr>();
+      addresses = cmrobjects.getAddresses();
+      int maxseqno = 1;
+      boolean isUpdate = "U".equals(cmrobjects.getAdmin().getReqType());
+      List<String> existingSeq = addresses.stream().filter(e-> !"PG01".equals(e.getId().getAddrType())).map(e -> e.getId().getAddrSeq()).collect(Collectors.toList());
+      for (Addr addr : addresses) {
+        if ("PG01".equals(addr.getId().getAddrType())) {
+          pgs.add(addr);
+        }
+      }
+      if (pgs.size() != 0) {
+        Collections.sort(pgs, new Comparator<Addr>() {
+          @Override
+          public int compare(Addr a1, Addr a2) {
+            return a1.getId().getAddrSeq().compareTo(a2.getId().getAddrSeq());
+          }
+        });
+
+        maxseqno = getMaxSequenceOnAddr(entityManager, cmrobjects.getAdmin().getId().getReqId());
+
+        LOG.debug("Max Sequence on non PG01 address = " + maxseqno);
+
+        maxseqno = maxseqno + 1;
+
+        for (Addr pg : pgs) {
+          if ((isUpdate == false) || (isUpdate && !existingSeq.isEmpty() && existingSeq.contains(pg.getId().getAddrSeq())
+              && ("N".equals(pg.getImportInd()) || "Y".equals(pg.getChangedIndc())))) {
+            String newSeqNo = StringUtils.leftPad(Integer.toString(maxseqno), 5, '0');
+            updateAddrSeq(entityManager, cmrobjects.getAdmin().getId().getReqId(), pg.getId().getAddrType(), pg.getId().getAddrSeq(), newSeqNo,
+                pg.getSapNo(), false);
+            // updateEntity(pg, entityManager);
+            maxseqno++;
+          }
+        }
+      }
+
+    } catch (Exception e) {
+      LOG.debug("Error occured while updating PG01 sequences" + e.getMessage());
+    }
+
+  }
+
+  private int getMaxSequenceOnAddr(EntityManager entityManager, long reqId) {
+    String maxAddrSeq = null;
+    int addrSeq = 0;
+    String sql = ExternalizedQuery.getSql("GETADDRSEQ.NON_PG01.MAX");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+
+    List<Object[]> results = query.getResults();
+    if (results != null && results.size() > 0) {
+      Object[] result = results.get(0);
+      maxAddrSeq = (String) (result != null && result.length > 0 ? result[0] : "0");
+      if (StringUtils.isEmpty(maxAddrSeq)) {
+        maxAddrSeq = "0";
+      }
+      addrSeq = Integer.parseInt(maxAddrSeq);
+    }
+
+    return addrSeq;
+  }
   private List<Integer> getSecondarySoldToFromRDC(EntityManager entityManager, String cmrNo, String cntry) {
     LOG.debug("Retrieve secondary sold to from RDC for Legacy Processing ");
     String sql = ExternalizedQuery.getSql("GET.RDC_SEQ.SECONDARY.SOLDTO");
