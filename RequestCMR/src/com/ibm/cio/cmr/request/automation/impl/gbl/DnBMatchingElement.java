@@ -323,10 +323,10 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
           result.setResults("No Matches");
           admin.setPaygoProcessIndc("Y");
         } else {
-        result.setDetails("No D&B record was found using advanced matching.");
-        result.setResults("No Matches");
+          result.setDetails("No D&B record was found using advanced matching.");
+          result.setResults("No Matches");
         }
-        if (!override && !payGoAddredited)) {
+        if (!override && !payGoAddredited) {
           engineData.addRejectionComment("OTH", "No matches with D&B records. Please import from D&B search.", "", "");
           result.setOnError(true);
         } else {

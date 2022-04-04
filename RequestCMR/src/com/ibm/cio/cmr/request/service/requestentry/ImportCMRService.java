@@ -61,6 +61,7 @@ import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.CNHandler;
 import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 
 /**
  * @author Jeffrey Zamora
