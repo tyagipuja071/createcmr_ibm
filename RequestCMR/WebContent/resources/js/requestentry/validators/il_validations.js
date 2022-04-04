@@ -2427,24 +2427,57 @@ function showVatInfoOnLocal() {
   }
 }
 
+function validateIsuClientTier(isuCd, ctc) {
+  var validCtcValues = [ 'Q', 'Y' ];
+  var errMsg = '';
+  if (isuCd == '34') {
+    if (!validCtcValues.includes(ctc)) {
+      errMsg = 'Client Tier can only accept Q and Y for ISU 34.';
+    }
+  } else {
+    if (isuCd != '34' && ctc != '') {
+      errMsg = 'Client Tier should be blank only for all other ISU except 34.';
+    }
+  }
+  return errMsg;
+}
+
 function clientTierValidator() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
-        var ctc = FormManager.getActualValue('clientTier');
+        var clientTier = FormManager.getActualValue('clientTier');
         var isuCd = FormManager.getActualValue('isuCd');
-        var validCtcValues = [ 'Q', 'Y' ];
+        var reqType = FormManager.getActualValue('reqType');
+        var errMessage = '';
         
-        if (isuCd == '34') {
-          if (!validCtcValues.includes(ctc)) {
-            return new ValidationResult(null, false, 'Client Tier can only accept Q and Y for ISU 34.');
-          }
+        var oldClientTier = null;
+        var oldISU = null;
+        var requestId = FormManager.getActualValue('reqId');
+        
+        if (reqType == 'C') {
+          errMessage = validateIsuClientTier(isuCd, clientTier);
         } else {
-          if (isuCd != '34' && ctc != '') {
-            return new ValidationResult(null, false, 'Client Tier should be blank only for all other ISU except 34.');
+          qParams = {
+              REQ_ID : requestId,
+          };
+        
+          var result = cmr.query('GET.IL.CLIENT_TIER_EMBARGO_CD_OLD_BY_REQID', qParams);
+          
+          if (result != null && result != '') {
+            oldClientTier = result.ret1 != null ? result.ret1 : '';
+            oldISU =  result.ret3 != null ? result.ret3 : '';
+            
+            if (clientTier != oldClientTier || isuCd != oldISU) {
+              errMessage = validateIsuClientTier(isuCd, clientTier);
+            }
           }
         }
-        return new ValidationResult(null, true);
+        if (errMessage.length > 0) {
+          return new ValidationResult(null, false, errMessage);
+        } else {
+          return new ValidationResult(null, true);
+        }
       }
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
