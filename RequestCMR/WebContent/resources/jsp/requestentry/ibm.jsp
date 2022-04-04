@@ -157,7 +157,7 @@ dojo.addOnLoad(function(){
           </p>
         </cmr:column>
     </cmr:view>
-      <cmr:column span="1" width="120" containerForField="INACType" exceptForCountry="666,726,862,822,838,618,758,848" exceptForGEO="MCO1,MCO2,FR,CEMEA,NORDX,BELUX,NL">
+      <cmr:column span="1" width="120" containerForField="INACType" exceptForCountry="666,726,862,822,838,618,758,848,755" exceptForGEO="MCO1,MCO2,FR,CEMEA,NORDX,BELUX,NL">
               <p>
           <cmr:label fieldId="inacType">
             <cmr:fieldLabel fieldId="INACType" />
@@ -420,7 +420,7 @@ dojo.addOnLoad(function(){
             <cmr:field fieldId="PPSCEID" id="ppsceid" path="ppsceid" tabId="MAIN_IBM_TAB" />
   				</p>
   			</cmr:column>
-        <cmr:column exceptForGEO="MCO2,NORDX" span="2" containerForField="MembLevel" exceptForCountry="754,758,866,822,666,644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889,838,620,642,675,677,680,752,762,767,768,772,805,808,823,832,849,850,865,729,780,706,624,788,858,766">
+        <cmr:column exceptForGEO="MCO2,NORDX" span="2" containerForField="MembLevel" exceptForCountry="754,758,866,822,666,644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889,838,620,642,675,677,680,752,762,767,768,772,805,808,823,832,849,850,865,729,780,706,624,788,858,766,755">
           <p>
             <cmr:label fieldId="memLvl">
               <cmr:fieldLabel fieldId="MembLevel" />:
@@ -429,7 +429,7 @@ dojo.addOnLoad(function(){
             <cmr:field fieldId="MembLevel" id="memLvl" path="memLvl" tabId="MAIN_IBM_TAB" />
           </p>
         </cmr:column>
-        <cmr:column exceptForGEO="MCO2,NORDX" span="2" containerForField="BPRelationType" exceptForCountry="754,758,866,822,666,644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889,838,620,642,675,677,680,752,762,767,768,772,805,808,823,832,849,850,865,729,780,706,624,788,858">
+        <cmr:column exceptForGEO="MCO2,NORDX" span="2" containerForField="BPRelationType" exceptForCountry="754,758,866,822,666,644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889,838,620,642,675,677,680,752,762,767,768,772,805,808,823,832,849,850,865,729,780,706,624,788,858,755">
           <p>
             <cmr:label fieldId="bpRelType">
               <cmr:fieldLabel fieldId="BPRelationType" />:

@@ -205,6 +205,10 @@ public class CmrConstants {
     return UIMgr.getText("trans.Mark_as_Completed");
   }
 
+  public static final String Reprocess_Rdc() {
+    return UIMgr.getText("trans.Reprocess_Rdc");
+  }
+
   // User Role
   public static final String Role_Requester = "Requester";
   public static final String Role_Processor = "Processor";

@@ -266,6 +266,11 @@ public class LDMassProcessRdcWorker implements Runnable {
         // Completing in request status
         LOG.debug(comment.toString());
       }
+
+      if (massUpdt.getErrorTxt() != null && massUpdt.getErrorTxt().length() > 10000) {
+        massUpdt.setErrorTxt(massUpdt.getErrorTxt().substring(0, 9999));
+      }
+
       entityManager.merge(massUpdt);
       // entityManager.merge(admin);
       entityManager.flush();

@@ -284,6 +284,7 @@ public class MassChangeTemplate {
           validations.add(tab.validate(entityManager, book, country, maxRows));
         }
       } else if (LegacyDirectUtil.isCountryLegacyDirectEnabled(entityManager, country)) {
+        LegacyDirectUtil.checkIsraelMassTemplate(this.tabs, book, country);
         LegacyDirectUtil.validateMassUpdateTemplateDupFills(validations, book, maxRows, country);
         for (TemplateTab tab : this.tabs) {
           validations.add(tab.validate(entityManager, book, country, maxRows));

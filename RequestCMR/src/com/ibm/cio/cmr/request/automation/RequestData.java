@@ -17,6 +17,7 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AdminPK;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataPK;
+import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
 import com.ibm.cio.cmr.request.entity.Scorecard;
 import com.ibm.cio.cmr.request.entity.ScorecardPK;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
@@ -36,6 +37,7 @@ public class RequestData {
   private Data data;
   private Scorecard scorecard;
   private List<Addr> addresses = new ArrayList<>();
+  private List<MassUpdtAddr> muAddr = new ArrayList<>();
 
   /**
    * Constructs a {@link RequestData} instance based on the reqId supplied. This
@@ -229,5 +231,13 @@ public class RequestData {
 
   public void setAddresses(List<Addr> addresses) {
     this.addresses = addresses;
+  }
+
+  public List<MassUpdtAddr> getMuAddr() {
+    return muAddr;
+  }
+
+  public void setMuAddr(List<MassUpdtAddr> muAddr) {
+    this.muAddr = muAddr;
   }
 }

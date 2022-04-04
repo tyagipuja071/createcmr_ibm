@@ -1742,7 +1742,7 @@ function forceLockScenariosSpain() {
       fieldsToDisable.push('ppsceid');
       fieldsToDisable.push('salesBusOffCd');
     }
-    // fieldsToDisable.push('repTeamMemberNo');
+    fieldsToDisable.push('repTeamMemberNo');
   } else {
     FormManager.enable('isuCd');
     FormManager.enable('clientTier');

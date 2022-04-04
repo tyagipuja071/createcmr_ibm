@@ -168,6 +168,10 @@ function lockCtcFieldOnIsu() {
   var reqType = FormManager.getActualValue('reqType');
   var userRole = _pagemodel.userRole.toUpperCase();
   var isuCd = FormManager.getActualValue('isuCd');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (custSubGrp == 'IBMEM') {
+    FormManager.setValue('clientTier', '');
+  }
   if (isuList.slice(1, 5).includes(isuCd)) {
     FormManager.resetValidations('clientTier');
     FormManager.setValue('clientTier', '');

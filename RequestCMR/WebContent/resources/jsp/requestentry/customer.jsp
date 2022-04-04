@@ -240,6 +240,14 @@
     </cmr:view>
 
     <cmr:view forCountry="897">
+      <cmr:column span="2" containerForField="LocalTax2">
+       <p>
+         <label for="taxCd2">
+         <cmr:fieldLabel fieldId="LocalTax2" />: <cmr:delta text="${rdcdata.taxCd2}" oldValue="${reqentry.taxCd2}" />   
+         </label>
+         <cmr:field path="taxCd2" id="taxCd2" fieldId="LocalTax2" tabId="MAIN_CUST_TAB" />
+        </p>
+       </cmr:column>
       <!-- // 1164558 -->
       <cmr:column span="2" containerForField="LocalTax3">
         <p>
@@ -261,7 +269,7 @@
   <cmr:row addBackground="true">
     <!-- // 1164558 -->
     <cmr:view exceptForCountry="631,848,649" exceptForGEO="LA,JP">
-      <cmr:view exceptForGEO="EMEA,AP,MCO1,MCO,MCO2,CEMEA,NORDX,BELUX,NL,CN,FR,TW,KR">
+      <cmr:view exceptForCountry="897" exceptForGEO="EMEA,AP,MCO1,MCO,MCO2,CEMEA,NORDX,BELUX,NL,CN,FR,TW,KR">
         <cmr:column span="2" containerForField="LocalTax2">
           <p>
             <label for="taxCd2">
@@ -289,7 +297,7 @@
         <p>
           <label for="vat"> <cmr:fieldLabel fieldId="VAT" />: <cmr:delta text="${rdcdata.vat}" oldValue="${reqentry.vat}" /> <cmr:view
               forCountry="755">
-              <cmr:info text="${ui.info.vatNumberCodeFormat}" />
+              <span id="vatInfo"><cmr:info text="${ui.info.vatNumberCodeFormatIL}" /></span>
             </cmr:view> <cmr:view forCountry="726">
               <cmr:info text="${ui.info.vatNumberCodeFormatGR}" />
             </cmr:view> <cmr:view forCountry="666">
@@ -375,7 +383,7 @@
           <cmr:field path="vat" id="vat" fieldId="VAT" tabId="MAIN_CUST_TAB" />
         </p>
       </cmr:column>
-      <cmr:view forGEO="EMEA,MCO,CEMEA,NL,BELUX,NORDX,FR">
+      <cmr:view forGEO="EMEA,MCO,CEMEA,NL,BELUX,NORDX,FR" exceptForCountry="755">
         <cmr:column span="1" containerForField="VATExempt">
           <p>
             <cmr:label fieldId="vatExempt2">&nbsp;</cmr:label>
@@ -401,7 +409,7 @@
         </cmr:column>
       </c:if>
     </cmr:view>
-    <cmr:view forCountry="724,619">
+    <cmr:view forCountry="724,619,755">
       <c:if test="${reqentry.reqType != 'U'}">
         <cmr:column span="1" containerForField="VATExempt">
           <p>

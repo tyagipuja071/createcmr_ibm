@@ -125,8 +125,37 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
 
       List<UpdatedAddr> removedRecords = query.getResults(UpdatedAddr.class);
 
+      // Israel mismatch legacy - RDC address
+      sql = ExternalizedQuery.getSql("GET_REQ_ISSUING_CNTRY");
+      query = new PreparedQuery(entityManager, sql);
+      query.setParameter("REQ_ID", reqId);
+      String cmrIssuingCntry = query.getSingleResult(String.class);
+
+      List<UpdatedAddr> mismatchRecords = null;
+      if (StringUtils.isNotEmpty(cmrIssuingCntry) && SystemLocation.ISRAEL.equals(cmrIssuingCntry)) {
+        sql = ExternalizedQuery.getSql("IL.SUMMARY.NAMEADDR.MISMATCH");
+        query = new PreparedQuery(entityManager, sql);
+        query.setParameter("REQ_ID", reqId);
+        query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+        query.setForReadOnly(true);
+
+        mismatchRecords = query.getResults(UpdatedAddr.class);
+      }
+
       List<UpdatedAddr> records = new ArrayList<UpdatedAddr>();
       if (updatedRecords != null) {
+        if (mismatchRecords != null && mismatchRecords.size() > 0) {
+          // mark mismatch address with L as importInd
+          for (UpdatedAddr updatedAddr : updatedRecords) {
+            for (UpdatedAddr mismatchAddr : mismatchRecords) {
+              String updatedAddrSeq = updatedAddr.getId().getAddrSeq();
+              if (StringUtils.isNotEmpty(updatedAddrSeq) && updatedAddrSeq.equals(mismatchAddr.getId().getAddrSeq())
+                  && !"N".equals(updatedAddr.getImportInd())) {
+                updatedAddr.setImportInd("L");
+              }
+            }
+          }
+        }
         records.addAll(updatedRecords);
       }
       if (removedRecords != null) {
@@ -660,7 +689,15 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
       update.setSapNumber("[removed]");
       update.setDataField("- Address Removed -");
       results.add(update);
-    } else if (StringUtils.isEmpty(addr.getSapNo()) && !"Y".equals(addr.getImportInd())) {
+    } else if ("L".equals(addr.getImportInd())) {
+      update = new UpdatedNameAddrModel();
+      update.setAddrTypeCode(addrType);
+      update.setAddrType(addrTypeDesc);
+      update.setAddrSeq(seqNo);
+      update.setSapNumber("Existing DB2 Address not in RDC");
+      update.setDataField("All fields");
+      results.add(update);
+    } else if (StringUtils.isEmpty(addr.getSapNo()) && !"Y".equals(addr.getImportInd()) && !"L".equals(addr.getImportInd())) {
       update = new UpdatedNameAddrModel();
       update.setAddrTypeCode(addrType);
       update.setAddrType(addrTypeDesc);
