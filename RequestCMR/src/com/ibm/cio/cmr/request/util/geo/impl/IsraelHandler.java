@@ -1683,8 +1683,11 @@ public class IsraelHandler extends EMEAHandler {
           } else if (StringUtils.isBlank(isuCd) && StringUtils.isNotBlank(ctc)) {
             error.addError(rowIndex + 1, "<br>ISU Code", "ISU Code should be filled when updating Client Tier.");
           } else if (StringUtils.isNotBlank(isuCd) && StringUtils.isNotBlank(ctc)) {
-            if (isuCd.equals("34") && (!ctc.equals("Q") || !ctc.equals("Y"))) {
-              error.addError(rowIndex + 1, "<br>Client Tier", "Client Tier value should be either Q or Y for ISU Code 34.");
+            List<String> validCtcList = Arrays.asList("Q", "Y");
+            if (isuCd.equals("34")) {
+              if (!validCtcList.contains(ctc)) {
+                error.addError(rowIndex + 1, "<br>Client Tier", "Client Tier value should be either Q or Y for ISU Code 34.");
+              }
             } else if (!isuCd.equals("34") && !ctc.equals("@")) {
               error.addError(rowIndex + 1, "<br>Client Tier", "Client Tier value should always be @ for all other ISU except 34.");
             }
