@@ -432,6 +432,11 @@ public class AddressService extends BaseService<AddressModel, Addr> {
         deleteMachines(model, addrList, entityManager, request);
       }
 
+      String processingType = PageManager.getProcessingType(model.getCmrIssuingCntry(), "U");
+      if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType) && SystemLocation.ISRAEL.equals(model.getCmrIssuingCntry())) {
+        deleteShippingPairedSeq(addrList, entityManager);
+      }
+
       // after removing an address, recompute DPL
       recomputeDPLResult(user, entityManager, model.getReqId());
       // Defect 1744532
@@ -489,6 +494,10 @@ public class AddressService extends BaseService<AddressModel, Addr> {
             deleteMachines(model, addr, entityManager, request);
           }
 
+          String processingType = PageManager.getProcessingType(model.getCmrIssuingCntry(), "U");
+          if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType) && SystemLocation.ISRAEL.equals(model.getCmrIssuingCntry())) {
+            deleteShippingPairedSeq(addr, entityManager);
+          }
         }
       }
 
@@ -502,6 +511,48 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       deleteSingleMachine(model, addr, entityManager, request);
 
     }
+  }
+
+  private void deleteShippingPairedSeq(Addr addr, EntityManager entityManager) {
+    if ("ZD01".equals(addr.getId().getAddrType())) {
+      Addr pairedAddr = getAddrByPairedAddrSeq(entityManager, addr.getId().getReqId(), "CTYC", addr.getId().getAddrSeq());
+      if (pairedAddr != null) {
+        deleteEntity(pairedAddr, entityManager);
+      }
+    } else if ("CTYC".equals(addr.getId().getAddrType())) {
+      Addr pairedAddr = getAddrByAddrSeq(entityManager, addr.getId().getReqId(), "ZD01", addr.getPairedAddrSeq());
+      if (pairedAddr != null) {
+        deleteEntity(pairedAddr, entityManager);
+      }
+    }
+  }
+
+  private Addr getAddrByAddrSeq(EntityManager entityManager, long reqId, String addrType, String addrSeq) {
+    String sql = ExternalizedQuery.getSql("ADDRESS.GETRECORDS");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    query.setParameter("ADDR_TYPE", addrType);
+    query.setParameter("ADDR_SEQ", addrSeq);
+    List<Addr> addrList = query.getResults(Addr.class);
+
+    if (!addrList.isEmpty()) {
+      return addrList.get(0);
+    }
+    return null;
+  }
+
+  private Addr getAddrByPairedAddrSeq(EntityManager entityManager, long reqId, String addrType, String pairedAddrSeq) {
+    String sql = ExternalizedQuery.getSql("GET.ADDR.BY_PAIRED_SEQ");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    query.setParameter("ADDR_TYPE", addrType);
+    query.setParameter("PAIRED_ADDR_SEQ", pairedAddrSeq);
+    List<Addr> addrList = query.getResults(Addr.class);
+
+    if (!addrList.isEmpty()) {
+      return addrList.get(0);
+    }
+    return null;
   }
 
   private boolean addrExists(EntityManager entityManager, String addrType, String addrSeq, long reqId) {

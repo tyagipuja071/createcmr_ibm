@@ -297,7 +297,7 @@
         <p>
           <label for="vat"> <cmr:fieldLabel fieldId="VAT" />: <cmr:delta text="${rdcdata.vat}" oldValue="${reqentry.vat}" /> <cmr:view
               forCountry="755">
-              <cmr:info text="${ui.info.vatNumberCodeFormat}" />
+              <span id="vatInfo"><cmr:info text="${ui.info.vatNumberCodeFormatIL}" /></span>
             </cmr:view> <cmr:view forCountry="726">
               <cmr:info text="${ui.info.vatNumberCodeFormatGR}" />
             </cmr:view> <cmr:view forCountry="666">
@@ -383,7 +383,7 @@
           <cmr:field path="vat" id="vat" fieldId="VAT" tabId="MAIN_CUST_TAB" />
         </p>
       </cmr:column>
-      <cmr:view forGEO="EMEA,MCO,CEMEA,NL,BELUX,NORDX,FR">
+      <cmr:view forGEO="EMEA,MCO,CEMEA,NL,BELUX,NORDX,FR" exceptForCountry="755">
         <cmr:column span="1" containerForField="VATExempt">
           <p>
             <cmr:label fieldId="vatExempt2">&nbsp;</cmr:label>
@@ -409,7 +409,7 @@
         </cmr:column>
       </c:if>
     </cmr:view>
-    <cmr:view forCountry="724,619">
+    <cmr:view forCountry="724,619,755">
       <c:if test="${reqentry.reqType != 'U'}">
         <cmr:column span="1" containerForField="VATExempt">
           <p>

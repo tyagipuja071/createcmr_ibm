@@ -148,7 +148,6 @@ public class DPLSearchPDFConverter extends DefaultPDFConverter {
               } else {
                 section.addCell(createValueCell(""));
               }
-
               document.add(section);
               document.add(blankLine());
 

@@ -853,6 +853,13 @@ var cmr = {
   },
   isSuperUserMode : function(){
    return this.superUser; 
+  },
+  reprocessRdc : function(){
+    var msg = 'This will directly reprocess the request in RDC, do you want to proceed?';
+    cmr.showConfirm('cmr.executeReprocessRdc()', msg, 'Warning', null);
+  },
+  executeReprocessRdc() {
+    FormManager.doAction('frmCMR', 'RER', true);
   }
 };
 
