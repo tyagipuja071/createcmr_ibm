@@ -3828,6 +3828,35 @@ function checkClusterExpired(clusterDataRdc) {
   return true;
 }
 
+function addCtcObsoleteValidator() {
+    FormManager.addFormValidator((function() {
+        return {
+            validate : function() {
+              var reqType = FormManager.getActualValue('reqType');
+              var reqId = FormManager.getActualValue('reqId');
+              var clientTier = FormManager.getActualValue('clientTier');
+              var oldCtc;
+              var qParams = {
+               REQ_ID : reqId
+               };
+
+        var result = cmr.query('GET.DATA_RDC.CLIENT_TIER_REQID', qParams);
+        if (result != null && result != '') {
+         var oldCtc = result.ret1;
+        }
+
+        if (reqType == 'C' && (clientTier == "4" ||clientTier == "6"|| clientTier == "A" || clientTier == "B"  ||clientTier == "M"|| clientTier == "V" || clientTier == "T" || clientTier == "S" || clientTier == "N" || clientTier == "C" )) {
+           return new ValidationResult(null, false, 'Client tier is obsoleted. Please select valid value from list.');
+          } else if (reqType == 'U' && oldCtc != null && oldCtc != clientTier && (clientTier == "4" ||clientTier == "6"|| clientTier == "A" || clientTier == "B" ||clientTier == "M"|| clientTier == "V" || clientTier == "T" || clientTier == "S" || clientTier == "N" || clientTier == "C")) {
+           return new ValidationResult(null, false, 'Client tier is obsoleted. Please select valid Client tier value from list.');
+           } else {
+             return new ValidationResult(null, true);
+            }
+          }
+        }
+    })(), 'MAIN_IBM_TAB', 'frmCMR');
+ }
+
 function clusterCdValidatorAU() {
   FormManager.addFormValidator((function() {
     return {
@@ -4004,6 +4033,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setCtcOnIsuCdChangeANZ, GEOHandler.ANZ);
   GEOHandler.addAfterConfig(lockFieldsForIndia, [ SysLoc.INDIA ]);
   GEOHandler.registerValidator(clusterCdValidatorAU, [ SysLoc.AUSTRALIA ], null, true);
+  GEOHandler.registerValidator(addCtcObsoleteValidator, GEOHandler.AP, null, true);
   
   // India Handler
 });

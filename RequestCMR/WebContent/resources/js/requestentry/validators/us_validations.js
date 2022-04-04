@@ -155,6 +155,43 @@ function addAddressRecordTypeValidator() {
 
 }
 
+
+function addCtcObsoleteValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqType = FormManager.getActualValue('reqType');
+        var reqId = FormManager.getActualValue('reqId');
+        var clientTier = FormManager.getActualValue('clientTier');
+        var oldCtc;
+        var qParams = {
+          REQ_ID : reqId
+        };
+
+        var result = cmr.query('GET.DATA_RDC.CLIENT_TIER_REQID', qParams);
+        if (result != null && result != '') {
+         oldCtc = result.ret1;
+        }
+        
+        if (reqType == 'C'
+            && (clientTier == "4" || clientTier == "6" || clientTier == "A" || clientTier == "M" || clientTier == "V" || clientTier == "Z"
+                || clientTier == "T" || clientTier == "S" || clientTier == "N" || clientTier == "C" || clientTier == "0")) {
+          return new ValidationResult(null, false, 'Client tier is obsoleted. Please select valid value from list.');
+        } else if (reqType == 'U'
+            && oldCtc != null
+            && oldCtc != clientTier
+            && (clientTier == "4" || clientTier == "6" || clientTier == "A" || clientTier == "M" || clientTier == "V" || clientTier == "Z"
+                || clientTier == "T" || clientTier == "S" || clientTier == "N" || clientTier == "C" || clientTier == "0")) {
+          return new ValidationResult(null, false, 'Client tier is obsoleted. Please select valid Client tier value from list.');
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    }
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
+
 /**
  * After configuration for US
  */
@@ -437,6 +474,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addCountyValidator, [ SysLoc.USA ], null, true);
   GEOHandler.registerValidator(addCreateByModelValidator, [ SysLoc.USA ], null, true);
   GEOHandler.registerValidator(addAddressRecordTypeValidator, [ SysLoc.USA ], null, true);
+  GEOHandler.registerValidator(addCtcObsoleteValidator, [ SysLoc.USA ], null, true);
   GEOHandler.addAfterConfig(afterConfigForUS, [ SysLoc.USA ]);
   GEOHandler.addAfterTemplateLoad(afterConfigForUS, [ SysLoc.USA ]);
   GEOHandler.addAfterConfig(initUSTemplateHandler, [ SysLoc.USA ]);
