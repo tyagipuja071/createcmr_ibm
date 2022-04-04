@@ -1743,5 +1743,4 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(resetVATValidationsForPayGo, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, GEOHandler.SWISS);
-  GEOHandler.registerValidator(validateDeptAttnBldg, GEOHandler.SWISS);
 });
