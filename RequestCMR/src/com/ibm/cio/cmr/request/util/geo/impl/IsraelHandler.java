@@ -1683,8 +1683,11 @@ public class IsraelHandler extends EMEAHandler {
           } else if (StringUtils.isBlank(isuCd) && StringUtils.isNotBlank(ctc)) {
             error.addError(rowIndex + 1, "<br>ISU Code", "ISU Code should be filled when updating Client Tier.");
           } else if (StringUtils.isNotBlank(isuCd) && StringUtils.isNotBlank(ctc)) {
-            if (isuCd.equals("34") && (!ctc.equals("Q") || !ctc.equals("Y"))) {
-              error.addError(rowIndex + 1, "<br>Client Tier", "Client Tier value should be either Q or Y for ISU Code 34.");
+            List<String> validCtcList = Arrays.asList("Q", "Y");
+            if (isuCd.equals("34")) {
+              if (!validCtcList.contains(ctc)) {
+                error.addError(rowIndex + 1, "<br>Client Tier", "Client Tier value should be either Q or Y for ISU Code 34.");
+              }
             } else if (!isuCd.equals("34") && !ctc.equals("@")) {
               error.addError(rowIndex + 1, "<br>Client Tier", "Client Tier value should always be @ for all other ISU except 34.");
             }
@@ -2245,29 +2248,32 @@ public class IsraelHandler extends EMEAHandler {
 
           if (IL_MASSUPDATE_SHEET_NAMES[6].equals(sheet2.getSheetName()) || IL_MASSUPDATE_SHEET_NAMES[7].equals(sheet2.getSheetName())
               || IL_MASSUPDATE_SHEET_NAMES[8].equals(sheet2.getSheetName())) {
-            String localAddrSeqTemplate = validateColValFromCell(getAddressCell(IL_MASSUPDATE_ADDR.SEQNO, rowA, sheet1.getSheetName()));
-            String transAddrSeqTemplate = validateColValFromCell(getAddressCell(IL_MASSUPDATE_ADDR.SEQNO, rowB, sheet2.getSheetName()));
+            String localSeqNumFromTemplate = validateColValFromCell(getAddressCell(IL_MASSUPDATE_ADDR.SEQNO, rowA, sheet1.getSheetName()));
+            String transSeqNumFromTemplate = validateColValFromCell(getAddressCell(IL_MASSUPDATE_ADDR.SEQNO, rowB, sheet2.getSheetName()));
 
             String cmrNo = validateColValFromCell(getAddressCell(IL_MASSUPDATE_ADDR.CMRNO, rowB, sheet2.getSheetName()));
 
             EntityManager entityManager = JpaManager.getEntityManager();
             CmrtAddr transLegacyAddr = LegacyDirectUtil.getLegacyAddrBySeqNo(entityManager, cmrNo, SystemLocation.ISRAEL,
-                (String.format("%05d", Integer.parseInt(transAddrSeqTemplate))));
+                (String.format("%05d", Integer.parseInt(transSeqNumFromTemplate))));
 
             boolean isSeqPairMismatch = false;
-            boolean isAddrlOMismatch = (transLegacyAddr != null && StringUtils.isNotEmpty(transLegacyAddr.getAddrLineO())
-                && !transLegacyAddr.getAddrLineO().equals(localAddrSeqTemplate));
-            boolean isAddrlOMissing = transLegacyAddr != null && StringUtils.isEmpty(transLegacyAddr.getAddrLineO());
+            boolean isInputMismatchWithLegacyPair = false;
+            boolean isUseABC = checkIfAddrIsUseABC(transLegacyAddr);
 
-            if (transLegacyAddr == null || isAddrlOMismatch || isAddrlOMissing) {
+            if (isUseABC) {
+              isSeqPairMismatch = !checkIfLegacyPairMatches(entityManager, transLegacyAddr,
+                  (String.format("%05d", Integer.parseInt(localSeqNumFromTemplate))));
+            }
+
+            if (transLegacyAddr == null || isInputMismatchWithLegacyPair || !isUseABC) {
               isSeqPairMismatch = true;
             }
 
             if (isSeqPairMismatch) {
-              String errorMsg = "Please check and fix sequences of paired addresses " + sheet1.getSheetName() + " (" + localAddrSeqTemplate + ") and "
-                  + sheet2.getSheetName() + " (" + transAddrSeqTemplate + "). " + "Sequences entered are not a matching pair.";
+              String errorMsg = "Please check and fix sequences of paired addresses " + sheet1.getSheetName() + " (" + localSeqNumFromTemplate
+                  + ") and " + sheet2.getSheetName() + " (" + transSeqNumFromTemplate + "). " + "Sequences entered are not a matching pair.";
               error.addError(i + 1, "<br>Address Sequence", errorMsg);
-
             }
           }
         }
@@ -2276,6 +2282,52 @@ public class IsraelHandler extends EMEAHandler {
         validations.add(error);
       }
     }
+  }
+
+  private boolean checkIfLegacyPairMatches(EntityManager entityManager, CmrtAddr legacyAddr, String localSeqNumFromTemplate) {
+    if (StringUtils.isNotEmpty(legacyAddr.getAddrLineO())) {
+      return legacyAddr.getAddrLineO().equals(localSeqNumFromTemplate);
+    } else {
+      String defaultPairSeq = null;
+      if ("Y".equals(legacyAddr.getIsAddressUseA())) {
+        defaultPairSeq = getDefaultPairSequence(entityManager, legacyAddr.getId().getCustomerNo(), legacyAddr.getId().getSofCntryCode(),
+            "GET.ADDRNO.BY_MAILING");
+      } else if ("Y".equals(legacyAddr.getIsAddressUseB())) {
+        defaultPairSeq = getDefaultPairSequence(entityManager, legacyAddr.getId().getCustomerNo(), legacyAddr.getId().getSofCntryCode(),
+            "GET.ADDRNO.BY_BILLING");
+      } else if ("Y".equals(legacyAddr.getIsAddressUseC())) {
+        defaultPairSeq = getDefaultPairSequence(entityManager, legacyAddr.getId().getCustomerNo(), legacyAddr.getId().getSofCntryCode(),
+            "GET.ADDRNO.BY_SHIPPING");
+      }
+      if (StringUtils.isNotBlank(defaultPairSeq) && defaultPairSeq.equals(localSeqNumFromTemplate)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private boolean checkIfAddrIsUseABC(CmrtAddr legacyAddr) {
+    if (legacyAddr == null) {
+      return false;
+    }
+
+    boolean isUseA = "Y".equals(legacyAddr.getIsAddressUseA());
+    boolean isUseB = "Y".equals(legacyAddr.getIsAddressUseB());
+    boolean isUseC = "Y".equals(legacyAddr.getIsAddressUseC());
+
+    return isUseA || isUseB || isUseC;
+  }
+
+  private String getDefaultPairSequence(EntityManager entityManager, String cmrNo, String country, String sqlQuery) {
+    String sql = ExternalizedQuery.getSql(sqlQuery);
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("COUNTRY", country);
+    query.setParameter("CMR_NO", cmrNo);
+    query.setForReadOnly(true);
+
+    String addrno = query.getSingleResult(String.class);
+
+    return addrno;
   }
 
   private boolean compareTwoRows(XSSFRow rowA, XSSFRow rowB, TemplateValidation error) {
