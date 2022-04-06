@@ -366,6 +366,10 @@ public class USBranchOffcMapping {
       }
       break;
     }
+    // catch all for paygo
+    if (StringUtils.isBlank(calculatedSvcArOffice) && "Y".equals(admin.getPaygoProcessIndc())) {
+      calculatedSvcArOffice = PAYGO_SVC_ARBO;
+    }
     return calculatedSvcArOffice;
   }
 
