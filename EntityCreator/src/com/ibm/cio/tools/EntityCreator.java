@@ -6,10 +6,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ResourceBundle;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLSession;
-
 import com.ibm.db2.jcc.DB2Driver;
 
 /**
@@ -26,10 +22,7 @@ public class EntityCreator {
 
   private static final ResourceBundle BUNDLE = ResourceBundle.getBundle("db");
   private static final String SQL = "select trim(t.CREATOR) SCHEMA, t.NAME TABNAME, c.NAME COLNAME, case when c.KEYSEQ > 0 then 'Y' else null end PK, trim(c.COLTYPE) TYPENAME, c.COLNO ORDER, c.REMARKS "
-      + " from SYSIBM.SYSTABLES t, SYSIBM.SYSCOLUMNS c"
-      + " where t.CREATOR = ?"
-      + " and t.NAME = ?"
-      + " and t.CREATOR = c.TBCREATOR"
+      + " from SYSIBM.SYSTABLES t, SYSIBM.SYSCOLUMNS c" + " where t.CREATOR = ?" + " and t.NAME = ?" + " and t.CREATOR = c.TBCREATOR"
       + " and t.NAME = c.TBNAME";
 
   public static void main(String[] args) throws Exception {
@@ -114,14 +107,6 @@ public class EntityCreator {
     System.setProperty("javax.net.ssl.keyStore", BUNDLE.getString("KEYSTORE_LOC"));
     System.setProperty("javax.net.ssl.trustStore", BUNDLE.getString("KEYSTORE_LOC"));
     System.setProperty("javax.net.ssl.keyStorePassword", BUNDLE.getString("KEYSTORE_PASS"));
-
-    HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
-
-      @Override
-      public boolean verify(String arg0, SSLSession arg1) {
-        return true;
-      }
-    });
   }
 
 }
