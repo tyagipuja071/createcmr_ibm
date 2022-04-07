@@ -12,8 +12,10 @@ import java.util.TimeZone;
 
 import javax.persistence.EntityManager;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.listener.CmrContextListener;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
@@ -37,25 +39,25 @@ public abstract class BatchEntryPoint {
 
   public static final String DEFAULT_BATCH_PERSISTENCE_UNIT = "BATCH";
 
-  protected static void initContext(String batchAppName) {
+  protected static void initContext(String batchAppName) throws CmrException {
     initContext(batchAppName, false);
   }
 
-  protected static void initContext(String batchAppName, boolean initUI) {
+  protected static void initContext(String batchAppName, boolean initUI) throws CmrException {
     System.out.println("Initializing batch context");
     System.setProperty("BATCH_APP", batchAppName);
     // start entity manager
-    startBatchContext("log4j2-batch.xml", initUI);
+    startBatchContext("log4j2-batch.xml", batchAppName, initUI);
   }
 
-  protected static void initPlainContext(String batchAppName) {
+  protected static void initPlainContext(String batchAppName) throws CmrException {
     System.out.println("Initializing plain batch context");
     System.setProperty("BATCH_APP", batchAppName);
     // start entity manager
     startPlainBatchContext("log4j2-batch.xml");
   }
 
-  private static void startBatchContext(String log4jFile, boolean initUI) {
+  private static void startBatchContext(String log4jFile, String batchAppName, boolean initUI) throws CmrException {
     URL url = BatchEntryPoint.class.getClassLoader().getResource(log4jFile);
     File log4jPath = null;
     try {
@@ -74,6 +76,18 @@ public abstract class BatchEntryPoint {
     logger = Logger.getLogger(CmrContextListener.class);
     logger.debug("Log4j Inititialized.");
 
+    logger.debug("Initializing System Configuration...");
+    try {
+      SystemConfiguration.refresh();
+      logger.debug("System Configuration initialized.");
+    } catch (Exception e1) {
+      logger.error("Error in initializing System Configuration", e1);
+    }
+    String skipBatch = SystemConfiguration.getValue("SKIP_BATCH_APPS", "N");
+    if ("Y".equals(skipBatch)) {
+      throw new CmrException(new Exception("Batches are skipped on this environment."));
+    }
+
     logger.debug("Initializing JPA Manager...");
     JpaManager.init();
     logger.debug("JPA Manager Inititialized.");
@@ -81,20 +95,22 @@ public abstract class BatchEntryPoint {
     EntityManager entityManager = JpaManager.getEntityManager();
     try {
 
-      logger.debug("Initializing System Configuration...");
-      try {
-        SystemConfiguration.refresh();
-        logger.debug("System Configuration initialized.");
-      } catch (Exception e1) {
-        logger.error("Error in initializing System Configuration", e1);
-      }
-
       logger.debug("Initializing Externalized Queries...");
       try {
         ExternalizedQuery.refresh();
         logger.debug("Externalized Queries initialized.");
       } catch (Exception e1) {
         logger.error("Error in initializing Externalized Queries", e1);
+      }
+
+      logger.debug("Initializing System Parameters...");
+      try {
+        SystemParameters.refresh(entityManager);
+      } catch (Exception e1) {
+        logger.error("Error in initializing system parameters", e1);
+      }
+      if (!shouldBatchRun(batchAppName)) {
+        throw new CmrException(new Exception("XRUN param for " + batchAppName + " caused execution to stop."));
       }
 
       logger.debug("Initializing Message Util...");
@@ -119,15 +135,6 @@ public abstract class BatchEntryPoint {
         logger.debug("MQ Util initialized.");
       } catch (Exception e1) {
         logger.error("Error in initializing MQ Util", e1);
-      }
-
-      logger.debug("Initializing System Parameters...");
-      try {
-        SystemParameters.refresh(entityManager);
-        SystemConfiguration.LAST_REFRESH_TIME = SystemParameters.getString("LAST_REFRESH");
-        logger.info("Last System Refresh " + SystemParameters.getString("LAST_REFRESH"));
-      } catch (Exception e1) {
-        logger.error("Error in initializing system parameters", e1);
       }
 
       if (initUI) {
@@ -158,7 +165,7 @@ public abstract class BatchEntryPoint {
     }
   }
 
-  private static void startPlainBatchContext(String log4jFile) {
+  private static void startPlainBatchContext(String log4jFile) throws CmrException {
     System.err.println("Initializing Log4J for Request CMR...");
     System.setProperty("log4j2.configurationFile", "log4j2-batch.xml");
     // PropertyConfigurator.configure(CmrContextListener.class.getClassLoader().getResource(log4jFile));
@@ -173,7 +180,41 @@ public abstract class BatchEntryPoint {
     } catch (Exception e1) {
       logger.error("Error in initializing System Configuration", e1);
     }
+    String skipBatch = SystemConfiguration.getValue("SKIP_BATCH_APPS", "N");
+    if ("Y".equals(skipBatch)) {
+      throw new CmrException(new Exception("Batches are skipped on this environment."));
+    }
 
+  }
+
+  /**
+   * Checks if batch should run on this environment
+   * 
+   * @param contextName
+   * @return
+   */
+  private static boolean shouldBatchRun(String contextName) {
+    logger.info("Checking XRUN param for this application..");
+    String environment = SystemConfiguration.getValue("SYSTEM_TYPE");
+    if (StringUtils.isBlank(environment)) {
+      // system type is not specified, run all the time
+      logger.info("No environment specified, running..");
+      return true;
+    }
+    String paramValue = SystemParameters.getString("XRUN." + contextName);
+    if (StringUtils.isBlank(paramValue)) {
+      // value is not specified, run all the time
+      logger.info("No XRUN param specified, running..");
+      return true;
+    }
+
+    // match param with environment
+    boolean run = paramValue.equalsIgnoreCase(environment);
+    if (!run) {
+      logger.warn("XRUN param for " + contextName + " set to " + paramValue + ", currently: " + environment + ". Skipping execution.");
+    }
+    logger.info("XRUN param matches environment, running...");
+    return run;
   }
 
 }
