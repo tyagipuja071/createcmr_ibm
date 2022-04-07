@@ -246,8 +246,47 @@ public class EMEAHandler extends BaseSOFHandler {
 
               sofUses = this.legacyObjects.getUsesBySequenceNo(seqNo);
               if (StringUtils.isNotBlank(record.getCmrAddrSeq()) && !sofUses.isEmpty()) {
-              for (String sofUse : sofUses) {
-                addrType = getAddressTypeByUse(sofUse);
+                for (String sofUse : sofUses) {
+                  addrType = getAddressTypeByUse(sofUse);
+                  if (!StringUtils.isEmpty(addrType)) {
+                    addr = cloneAddress(record, addrType);
+                    LOG.trace("Adding address type " + addrType + " for sequence " + seqNo);
+
+                    if (SystemLocation.UNITED_KINGDOM.equals(record.getCmrIssuedBy()) || SystemLocation.IRELAND.equals(record.getCmrIssuedBy())) {
+                      addr.setCmrStreetAddressCont(record.getCmrName4());
+                      addr.setCmrName3(record.getCmrName3());
+
+                      addr.setCmrName2Plain(record.getCmrName2Plain());
+                    } else {
+                      // name3 in rdc = Address Con't on SOF
+                      addr.setCmrStreetAddressCont(record.getCmrName3());
+                      addr.setCmrName3(null);
+
+                      addr.setCmrName2Plain(!StringUtils.isEmpty(record.getCmrName2Plain()) ? record.getCmrName2Plain() : record.getCmrName4());
+                    }
+
+                    // addr.setCmrName2Plain(!StringUtils.isEmpty(record.getCmrName2Plain())
+                    // ? record.getCmrName2Plain() :
+                    // record.getCmrName4());
+
+                    if (!StringUtils.isBlank(record.getCmrPOBox())) {
+                      if (SystemLocation.UNITED_KINGDOM.equals(record.getCmrIssuedBy()) || SystemLocation.IRELAND.equals(record.getCmrIssuedBy())) {
+                        addr.setCmrPOBox(record.getCmrPOBox());
+                      } else {
+                        addr.setCmrPOBox("PO BOX " + record.getCmrPOBox());
+                      }
+                    }
+
+                    if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
+                      addr.setCmrAddrSeq("00001");
+                    }
+
+                    converted.add(addr);
+                  }
+                }
+              } else if (sofUses.isEmpty() && "ZP01".equals(record.getCmrAddrTypeCode()) && StringUtils.isNotEmpty(record.getExtWalletId())) {
+                record.setCmrAddrTypeCode("PG01");
+                addrType = record.getCmrAddrTypeCode();
                 if (!StringUtils.isEmpty(addrType)) {
                   addr = cloneAddress(record, addrType);
                   LOG.trace("Adding address type " + addrType + " for sequence " + seqNo);
@@ -257,6 +296,7 @@ public class EMEAHandler extends BaseSOFHandler {
                     addr.setCmrName3(record.getCmrName3());
 
                     addr.setCmrName2Plain(record.getCmrName2Plain());
+                    addr.setCmrOffice(record.getCmrOffice());
                   } else {
                     // name3 in rdc = Address Con't on SOF
                     addr.setCmrStreetAddressCont(record.getCmrName3());
@@ -284,47 +324,7 @@ public class EMEAHandler extends BaseSOFHandler {
                   converted.add(addr);
                 }
               }
-            } else if (sofUses.isEmpty() && "ZP01".equals(record.getCmrAddrTypeCode()) && StringUtils.isNotEmpty(record.getExtWalletId())) {
-              record.setCmrAddrTypeCode("PG01");
-              addrType = record.getCmrAddrTypeCode();
-              if (!StringUtils.isEmpty(addrType)) {
-                addr = cloneAddress(record, addrType);
-                LOG.trace("Adding address type " + addrType + " for sequence " + seqNo);
-
-                if (SystemLocation.UNITED_KINGDOM.equals(record.getCmrIssuedBy()) || SystemLocation.IRELAND.equals(record.getCmrIssuedBy())) {
-                  addr.setCmrStreetAddressCont(record.getCmrName4());
-                  addr.setCmrName3(record.getCmrName3());
-
-                  addr.setCmrName2Plain(record.getCmrName2Plain());
-                  addr.setCmrOffice(record.getCmrOffice());
-                } else {
-                  // name3 in rdc = Address Con't on SOF
-                  addr.setCmrStreetAddressCont(record.getCmrName3());
-                  addr.setCmrName3(null);
-
-                  addr.setCmrName2Plain(!StringUtils.isEmpty(record.getCmrName2Plain()) ? record.getCmrName2Plain() : record.getCmrName4());
-                }
-
-                // addr.setCmrName2Plain(!StringUtils.isEmpty(record.getCmrName2Plain())
-                // ? record.getCmrName2Plain() :
-                // record.getCmrName4());
-
-                if (!StringUtils.isBlank(record.getCmrPOBox())) {
-                  if (SystemLocation.UNITED_KINGDOM.equals(record.getCmrIssuedBy()) || SystemLocation.IRELAND.equals(record.getCmrIssuedBy())) {
-                    addr.setCmrPOBox(record.getCmrPOBox());
-                  } else {
-                    addr.setCmrPOBox("PO BOX " + record.getCmrPOBox());
-                  }
-                }
-
-                if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
-                  addr.setCmrAddrSeq("00001");
-                }
-
-                converted.add(addr);
-              }
             }
-          }
 
             if ("862".equals(cmrIssueCd)) {
               seqNo = record.getCmrAddrSeq();
@@ -1787,7 +1787,12 @@ public class EMEAHandler extends BaseSOFHandler {
       if (SystemLocation.ISRAEL.equals(data.getCmrIssuingCntry()) && StringUtils.isEmpty(data.getCollectionCd())) {
         data.setCollectionCd("TC0");
       }
-
+      // special tax code
+      if ((SystemLocation.UNITED_KINGDOM.equals(data.getCmrIssuingCntry()) || SystemLocation.IRELAND.equals(data.getCmrIssuingCntry()))
+          && (data.getSpecialTaxCd().isEmpty() || data.getSpecialTaxCd() != null || !StringUtils.isNotBlank(data.getSpecialTaxCd()))
+          && ("U".equals(admin.getReqType()))) {
+        data.setSpecialTaxCd("Bl");
+      }
       // Changed abbreviated location if cross border to country
       if (SystemLocation.ISRAEL.equals(data.getCmrIssuingCntry())) {
         if (!this.currentImportValues.isEmpty() && !(mainRecord.getCmrCountryLanded().equalsIgnoreCase("IL"))) {
@@ -3958,15 +3963,15 @@ public class EMEAHandler extends BaseSOFHandler {
         if (row == null) {
           return; // stop immediately when row is blank
         }
-        currCell = (XSSFCell) row.getCell(10);
+        currCell = row.getCell(10);
         isuCd = validateColValFromCell(currCell);
         currCell = row.getCell(11);
         clientTier = validateColValFromCell(currCell);
-        if ((StringUtils.isNotBlank(isuCd) && (StringUtils.isBlank(clientTier) || !"@QY".contains(clientTier))) || 
-            (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier))) {
+        if ((StringUtils.isNotBlank(isuCd) && (StringUtils.isBlank(clientTier) || !"@QY".contains(clientTier)))
+            || (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier))) {
           LOG.trace(
-              "The row " + (row.getRowNum()+1) + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
-          error.addError((row.getRowNum()+1), "Client Tier",
+              "The row " + (row.getRowNum() + 1) + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
+          error.addError((row.getRowNum() + 1), "Client Tier",
               ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
           validations.add(error);
         }
@@ -4013,13 +4018,13 @@ public class EMEAHandler extends BaseSOFHandler {
               || (collectionCd.length() == 6 && !collectionCd.chars().allMatch(Character::isLetterOrDigit)))) {
             LOG.trace(
                 "Note that Collection code can be either exactly 2 characters (both digits) or exactly 6 characters (alphanumeric). Please fix and upload the template again.");
-            error.addError((row.getRowNum()+1), "Collection Code",
+            error.addError((row.getRowNum() + 1), "Collection Code",
                 "Note that Collection code can be either exactly 2 characters (both digits) or exactly 6 characters (alphanumeric). Please fix and upload the template again.");
             validations.add(error);
           } else if (collectionCd.length() != 2 && collectionCd.length() != 6) {
             LOG.trace(
                 "Note that Collection code can be either exactly 2 characters or exactly 6 characters. Please fix and upload the template again.");
-            error.addError((row.getRowNum()+1), "Collection Code",
+            error.addError((row.getRowNum() + 1), "Collection Code",
                 "Note that Collection code can be either exactly 2 characters or exactly 6 characters. Please fix and upload the template again.");
             validations.add(error);
           }
@@ -4027,7 +4032,8 @@ public class EMEAHandler extends BaseSOFHandler {
 
         if ((!StringUtils.isEmpty(salesRep)) && !(salesRep.chars().allMatch(Character::isLetterOrDigit))) {
           LOG.trace("Note that Sales Rep. No. should be alphanumeric. Please fix and upload the template again.");
-          error.addError((row.getRowNum()+1), "Sales Rep. No.", "Note that Sales Rep. No. should be alphanumeric. Please fix and upload the template again.");
+          error.addError((row.getRowNum() + 1), "Sales Rep. No.",
+              "Note that Sales Rep. No. should be alphanumeric. Please fix and upload the template again.");
           validations.add(error);
         }
 
@@ -4052,7 +4058,7 @@ public class EMEAHandler extends BaseSOFHandler {
                   + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
               error.addError(((row.getRowNum() + 1)), "Client Tier",
                   ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
-            } 
+            }
           } else {
             List<String> isuCdList = Arrays.asList("5K", "11", "05", "4F");
             if (isuCdList.contains(isuCd) && !"@".equals(clientTier)) {
@@ -4129,7 +4135,7 @@ public class EMEAHandler extends BaseSOFHandler {
 
           if (!StringUtils.isEmpty(cbCity) && !StringUtils.isEmpty(localCity)) {
             LOG.trace("Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty. >> ");
-            error.addError((row.getRowNum()+1), "Local City",
+            error.addError((row.getRowNum() + 1), "Local City",
                 "Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty.");
             validations.add(error);
           }
@@ -4137,14 +4143,15 @@ public class EMEAHandler extends BaseSOFHandler {
           if (!StringUtils.isEmpty(cbPostal) && !StringUtils.isEmpty(localPostal)) {
             LOG.trace("Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
                 + "If one is populated, the other must be empty. >>");
-            error.addError((row.getRowNum()+1), "Local Postal Code", "Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
-                + "If one is populated, the other must be empty.");
+            error.addError((row.getRowNum() + 1), "Local Postal Code",
+                "Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
+                    + "If one is populated, the other must be empty.");
             validations.add(error);
           }
 
           if (!StringUtils.isEmpty(name4) && !StringUtils.isEmpty(streetCont)) {
             LOG.trace("Name4 and Street Cont must not be populated at the same time. " + "If one is populated, the other must be empty. >>");
-            error.addError((row.getRowNum()+1), "Name4",
+            error.addError((row.getRowNum() + 1), "Name4",
                 "Name4 and Street Cont must not be populated at the same time. " + "If one is populated, the other must be empty.");
             validations.add(error);
           }
@@ -4152,13 +4159,13 @@ public class EMEAHandler extends BaseSOFHandler {
           if ((!StringUtils.isEmpty(localCity) || !StringUtils.isEmpty(localPostal))) {
             if ("@".equals(district)) {
               LOG.trace("Local address must not be populate District with @. ");
-              error.addError((row.getRowNum()+1), "District", "Local address must not be populate District with @. ");
+              error.addError((row.getRowNum() + 1), "District", "Local address must not be populate District with @. ");
               validations.add(error);
             }
 
             if ("@".equals(taxOffice)) {
               LOG.trace("Local address must not be populate Tax Office with @. ");
-              error.addError((row.getRowNum()+1), "Tax Office", "Local address must not be populate Tax Office with @. ");
+              error.addError((row.getRowNum() + 1), "Tax Office", "Local address must not be populate Tax Office with @. ");
               validations.add(error);
             }
           }
@@ -4177,7 +4184,7 @@ public class EMEAHandler extends BaseSOFHandler {
            */
           if (!StringUtils.isEmpty(cbCity) && !StringUtils.isEmpty(localCity)) {
             LOG.trace("Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty. >> ");
-            error.addError((row.getRowNum()+1), "Local City",
+            error.addError((row.getRowNum() + 1), "Local City",
                 "Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty.");
             validations.add(error);
           }
@@ -4185,8 +4192,9 @@ public class EMEAHandler extends BaseSOFHandler {
           if (!StringUtils.isEmpty(cbPostal) && !StringUtils.isEmpty(localPostal)) {
             LOG.trace("Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
                 + "If one is populated, the other must be empty. >>");
-            error.addError((row.getRowNum()+1), "Local Postal Code", "Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
-                + "If one is populated, the other must be empty.");
+            error.addError((row.getRowNum() + 1), "Local Postal Code",
+                "Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
+                    + "If one is populated, the other must be empty.");
             validations.add(error);
           }
           if ((!StringUtils.isEmpty(cbCity) || !StringUtils.isEmpty(cbPostal))
@@ -4194,17 +4202,17 @@ public class EMEAHandler extends BaseSOFHandler {
             // if local
             if (!StringUtils.isEmpty(streetCont) && !StringUtils.isEmpty(poBox)) {
               LOG.trace("Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
-              error.addError((row.getRowNum()+1), "Street Con't/PO Box",
+              error.addError((row.getRowNum() + 1), "Street Con't/PO Box",
                   "Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
               validations.add(error);
             } else if (!StringUtils.isEmpty(poBox) && !StringUtils.isEmpty(attPerson)) {
               LOG.trace("Note that PO Box/ATT Person cannot be filled at same time. Please fix and upload the template again.");
-              error.addError((row.getRowNum()+1), "PO Box/ATT Person",
+              error.addError((row.getRowNum() + 1), "PO Box/ATT Person",
                   "Note that PO Box/ATT Person cannot be filled at same time. Please fix and upload the template again.");
               validations.add(error);
             } else if (!StringUtils.isEmpty(attPerson) && !StringUtils.isEmpty(streetCont)) {
               LOG.trace("Note that ATT Person/Street Con't cannot be filled at same time. Please fix and upload the template again.");
-              error.addError((row.getRowNum()+1), "ATT Person/Street Con't",
+              error.addError((row.getRowNum() + 1), "ATT Person/Street Con't",
                   "Note that ATT Person/Street Con't cannot be filled at same time. Please fix and upload the template again.");
               validations.add(error);
             }
@@ -4212,7 +4220,7 @@ public class EMEAHandler extends BaseSOFHandler {
             // else cross border
             if (!StringUtils.isEmpty(streetCont) && !StringUtils.isEmpty(poBox)) {
               LOG.trace("Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
-              error.addError((row.getRowNum()+1), "Street Con't/PO Box",
+              error.addError((row.getRowNum() + 1), "Street Con't/PO Box",
                   "Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
               validations.add(error);
             }
@@ -4351,10 +4359,9 @@ public class EMEAHandler extends BaseSOFHandler {
         currCell = (XSSFCell) row.getCell(10);
         clientTier = validateColValFromCell(currCell);
         TemplateValidation error = new TemplateValidation("DATA");
-        if ((StringUtils.isNotBlank(isuCd) && (StringUtils.isBlank(clientTier) || !"@QY".contains(clientTier))) || 
-            (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier))) {
-          LOG.trace(
-              "The row " + (row.getRowNum()) + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
+        if ((StringUtils.isNotBlank(isuCd) && (StringUtils.isBlank(clientTier) || !"@QY".contains(clientTier)))
+            || (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier))) {
+          LOG.trace("The row " + (row.getRowNum()) + ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.");
           error.addError((row.getRowNum()), "Client Tier",
               ":Note that Client Tier only accept @,Q,Y values. Please fix and upload the template again.<br>");
           validations.add(error);
