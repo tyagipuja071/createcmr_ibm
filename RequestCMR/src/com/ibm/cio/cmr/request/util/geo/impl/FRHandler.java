@@ -1236,7 +1236,7 @@ public class FRHandler extends BaseSOFHandler {
           Cell cmrCell1 = row.getCell(4);
           if (cmrCell1 != null) {
             String name3 = "";
-            switch (cmrCell1.getCellTypeEnum()) {
+            switch (cmrCell1.getCellType()) {
             case STRING:
               name3 = cmrCell1.getStringCellValue();
               break;
