@@ -8,8 +8,9 @@ import com.ibm.cmr.create.batch.service.ISULoaderService;
 
 /**
  * @author Jeffrey Zamora
- * 
+ * @deprecated non used anymore
  */
+@Deprecated
 public class ISULoaderEntryPoint extends BatchEntryPoint {
 
   public static void main(String[] args) throws CmrException {
