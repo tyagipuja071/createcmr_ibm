@@ -85,7 +85,7 @@ boolean approver = user != null && user.isApprover();
  
 <link rel="stylesheet" type="text/css" href="${resourcesPath}/css/cmr.css?${cmrv}" />
 <link rel="stylesheet" href="${resourcesPath}/css/ext/jquery-ui.css"/>
-<script src="${resourcesPath}/js/ext/jquery-1.10.2.js"></script>
+<script src="${resourcesPath}/js/ext/jquery-3.6.0.js"></script>
 <script src="${resourcesPath}/js/ext/jquery-ui.js"></script>
 <link rel="stylesheet" type="text/css" href="${resourcesPath}/css/cmr-v2.css?${cmrv}" />
 

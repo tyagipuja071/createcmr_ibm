@@ -60,8 +60,6 @@ public class USAddrStdElement extends OverridingElement {
 
     LOG.debug("Connecting to the TGME (Addr Std) service...");
     TgmeClient tgmeClient = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("CMR_SERVICES_URL"), TgmeClient.class);
-    tgmeClient.setUser(SystemConfiguration.getSystemProperty("cmrservices.user"));
-    tgmeClient.setPassword(SystemConfiguration.getSystemProperty("cmrservices.password"));
     StringBuilder details = new StringBuilder();
 
     List<Addr> a = requestData.getAddresses();
@@ -71,7 +69,7 @@ public class USAddrStdElement extends OverridingElement {
           + (addr.getId().getAddrSeq() != null ? addr.getId().getAddrSeq() : "");
       // Calling Address Std Service
       AddressStdRequest requestadd = new AddressStdRequest();
-      requestadd.setSystemId(SystemConfiguration.getSystemProperty("tgme.appID"));
+      requestadd.setSystemId("CreateCMR");
       requestadd.setAddressId(key);
       requestadd.setAddressType(addr.getId().getAddrType());
       requestadd.setCity(addr.getCity1());

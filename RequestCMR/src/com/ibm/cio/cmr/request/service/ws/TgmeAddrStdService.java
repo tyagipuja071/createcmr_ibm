@@ -66,9 +66,6 @@ public class TgmeAddrStdService extends BaseSimpleService<TgmeAddrStdModel> {
       LOG.debug("Connecting to the TGME (Addr Std) service...");
       TgmeClient tgmeClient = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("CMR_SERVICES_URL"), TgmeClient.class);
 
-      tgmeClient.setUser(SystemConfiguration.getSystemProperty("cmrservices.user"));
-      tgmeClient.setPassword(SystemConfiguration.getSystemProperty("cmrservices.password"));
-
       AddressStdRequest tgmeRequest = new AddressStdRequest();
       tgmeRequest.setSystemId(SystemConfiguration.getSystemProperty("tgme.appID"));
       tgmeRequest.setAddressId(key);

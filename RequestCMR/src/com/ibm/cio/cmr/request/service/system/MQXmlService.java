@@ -51,7 +51,10 @@ public class MQXmlService extends BaseSimpleService<MQXmlModel> {
         model.setErrorMsg("Data not found for this request.");
       } else {
         MQXmlHandler handler = null;
-        SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
+        SAXParserFactory factory = SAXParserFactory.newInstance();
+        factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+        factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);      
+        SAXParser parser=factory.newSAXParser();
         MQXml mqXml = null;
         String xmlString = null;
 

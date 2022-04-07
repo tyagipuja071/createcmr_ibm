@@ -13,9 +13,6 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLSession;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.servlet.http.HttpServletRequest;
@@ -357,13 +354,6 @@ public abstract class BaseBatchService extends BaseSimpleService<Boolean> {
       }
       System.setProperty("javax.net.ssl.keyStorePassword", BatchUtil.getProperty("ssl.keystore.pass"));
 
-      HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
-
-        @Override
-        public boolean verify(String arg0, SSLSession arg1) {
-          return true;
-        }
-      });
     } catch (Exception e) {
       LOG.error("Error in initializing SSL context");
     }
