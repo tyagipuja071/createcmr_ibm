@@ -4,6 +4,7 @@ import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.ibm.cio.cmr.request.entity.MassCreateAddr;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.masscreate.MassCreateFileRow;
 import com.ibm.cmr.create.batch.util.masscreate.handler.RowHandler;
@@ -39,6 +40,18 @@ public class CADefaultFields implements RowHandler {
         abbrevName = (custName.length() > 20 ? custName.substring(0, 20).toUpperCase() : custName.toUpperCase());
       }
       row.getData().setAbbrevNm(abbrevName);
+    }
+
+    // Set Abbreviated Location
+    String addrType = null;
+    String zs01City = null;
+    for (MassCreateAddr addr : row.getAddresses()) {
+      addrType = addr.getId().getAddrType();
+      zs01City = addr.getCity1();
+
+      if (StringUtils.isNotBlank(addrType) && "ZS01".equals(addrType) && StringUtils.isNotBlank(zs01City)) {
+        row.getData().setCompany(zs01City.length() > 12 ? zs01City.substring(0, 12) : zs01City);
+      }
     }
   }
 
