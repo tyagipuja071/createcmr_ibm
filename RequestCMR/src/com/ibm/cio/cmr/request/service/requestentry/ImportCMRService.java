@@ -57,11 +57,11 @@ import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.CNHandler;
 import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
-import com.ibm.cio.cmr.request.util.SystemLocation;
 
 /**
  * @author Jeffrey Zamora
@@ -735,18 +735,18 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
         PropertyUtils.copyProperties(rdc, addr);
         PropertyUtils.copyProperties(rdcpk, addr.getId());
         rdc.setId(rdcpk);
-        if (this.autoEngineProcess) {
-          reqEntryService.updateEntity(rdc, entityManager);
-        } else {
-          reqEntryService.createEntity(rdc, entityManager);
-        }
+        reqEntryService.updateEntity(rdc, entityManager);
+        // if (this.autoEngineProcess) {
+        // } else {
+        // reqEntryService.createEntity(rdc, entityManager);
+        // }
       }
 
-      if (this.autoEngineProcess) {
-        reqEntryService.updateEntity(addr, entityManager);
-      } else {
-        reqEntryService.createEntity(addr, entityManager);
-      }
+      reqEntryService.updateEntity(addr, entityManager);
+      // if (this.autoEngineProcess) {
+      // } else {
+      // reqEntryService.createEntity(addr, entityManager);
+      // }
     }
 
     // Ed|1043386| Only require DPL check for Create requests
