@@ -128,16 +128,16 @@ public class USSosRpaCheckElement extends ValidatingElement implements CompanyVe
           }
           log.debug("Scorecard Updated for SOS-RPA to" + scorecard.getRpaMatchingResult());
           validation.setSuccess(true);
-          if ("C".equals(admin.getReqType()) && payGoAddredited) {
+          if ("C".equals(admin.getReqType()) && payGoAddredited && ("ZI01".equals(addrType) || ("ZS01".equals(addrType)))) {
             output.setOnError(false);
             admin.setPaygoProcessIndc("Y");
             details.append("Skipping checks for PayGo Addredited Customers.");
-            }
+          }
           if ("O".equals(admin.getCompVerifiedIndc()) || "Y".equals(admin.getCompVerifiedIndc())) {
             output.setOnError(false);
             admin.setCompVerifiedIndc("Y");
           } else {
-            if (itr == 1 || !containsInvoice && !payGoAddredited) {
+            if ((itr == 1 || !containsInvoice) && !payGoAddredited) {
               output.setOnError(true);
               engineData.addNegativeCheckStatus("DnBSoSMatch", "No high quality matches with D&B and SOS-RPA records.");
             }

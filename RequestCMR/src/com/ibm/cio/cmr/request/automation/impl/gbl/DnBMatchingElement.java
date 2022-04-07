@@ -124,7 +124,11 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
             }
           } else if (!payGoAddredited) {
             result.setDetails("No high quality matches with D&B records. Please import from D&B search.");
-          }
+          } else if (!override && payGoAddredited) {
+            LOG.debug("No Matches in DNB");
+            result.setResults("No Matches");
+            result.setDetails("No high quality matches with D&B records.");
+          }  
         } else {
           // actions to be performed only when matches with high confidence are
           // found
@@ -246,9 +250,9 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
                 processAddressFields(data.getCmrIssuingCntry(), highestCloseMatch, output, 1, scenarioExceptions, handler, eligibleAddresses);
               }
             }
-            if (isTaxCdMatch) {
+            if (isTaxCdMatch && !"Y".equals(admin.getPaygoProcessIndc())) {
               engineData.addNegativeCheckStatus("DNB_VAT_MATCH_CHECK_FAIL", "Org ID value did not match with the highest confidence D&B match.");
-            } else {
+            } else if (!"Y".equals(admin.getPaygoProcessIndc())) {
               engineData.setVatVerified(false, "VAT value did not match with the highest confidence D&B match.");
             }
             LOG.trace(new ObjectMapper().writeValueAsString(highestCloseMatch));
@@ -333,7 +337,6 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
           result.setOnError(false);
         }
       }
-
     } else {
       result.setDetails("Missing main address on the request.");
       engineData.addRejectionComment("OTH", "Missing main address on the request.", "", "");
