@@ -212,8 +212,9 @@ public abstract class BatchEntryPoint {
     boolean run = paramValue.equalsIgnoreCase(environment);
     if (!run) {
       logger.warn("XRUN param for " + contextName + " set to " + paramValue + ", currently: " + environment + ". Skipping execution.");
+    } else {
+      logger.info("XRUN param matches environment, running...");
     }
-    logger.info("XRUN param matches environment, running...");
     return run;
   }
 
