@@ -671,7 +671,15 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
       if (geoHandler.setAddrSeqByImport(addrPk, entityManager, result) && ("C".equals(reqModel.getReqType()) || "U".equals(reqModel.getReqType()))) {
         addrPk.setAddrSeq(cmr.getCmrAddrSeq());
       }
-
+      // start- US ZI01 null sequence Import fix - 8 Apr 2022 - garima
+      if (SystemLocation.UNITED_STATES.equals(reqModel.getCmrIssuingCntry()) && CmrConstants.RDC_BILL_TO.equals(type)) {
+        addrPk.setAddrSeq(cmr.getCmrAddrSeq());
+      }
+      if (SystemLocation.UNITED_STATES.equals(reqModel.getCmrIssuingCntry()) && "C".equals(reqModel.getReqType())
+          && (CmrConstants.RDC_SOLD_TO.equals(type) || CmrConstants.RDC_INSTALL_AT.equals(type))) {
+        addrPk.setAddrSeq(cmr.getCmrAddrSeq());
+      }
+      // end -US ZI01 null sequence Import fix - 8 Apr 2022 - garima
       addr.setId(addrPk);
 
       addr.setCity1(cmr.getCmrCity());
