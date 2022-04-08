@@ -667,10 +667,14 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
       // addrPk.setAddrSeq(cmr.getCmrAddrSeq());
       // }
 
-      GEOHandler geoHandler = RequestUtils.getGEOHandler(reqModel.getCmrIssuingCntry());
-      if (geoHandler.setAddrSeqByImport(addrPk, entityManager, result) && ("C".equals(reqModel.getReqType()) || "U".equals(reqModel.getReqType()))) {
-        addrPk.setAddrSeq(cmr.getCmrAddrSeq());
-      }
+      /*
+       * GEOHandler geoHandler =
+       * RequestUtils.getGEOHandler(reqModel.getCmrIssuingCntry()); if
+       * (geoHandler.setAddrSeqByImport(addrPk, entityManager, result) &&
+       * ("C".equals(reqModel.getReqType()) ||
+       * "U".equals(reqModel.getReqType()))) {
+       * addrPk.setAddrSeq(cmr.getCmrAddrSeq()); }
+       */
       // start- US ZI01 null sequence Import fix - 8 Apr 2022 - garima
       if (SystemLocation.UNITED_STATES.equals(reqModel.getCmrIssuingCntry()) && CmrConstants.RDC_BILL_TO.equals(type)) {
         addrPk.setAddrSeq(cmr.getCmrAddrSeq());
