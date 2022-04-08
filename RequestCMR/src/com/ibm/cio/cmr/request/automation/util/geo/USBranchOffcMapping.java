@@ -281,7 +281,7 @@ public class USBranchOffcMapping {
           calculatedMtkgArDept = "7NZ";
         }
       } else if ("Y".equals(admin.getPaygoProcessIndc())) {
-        calculatedMtkgArDept = PAYGO_SVC_ARBO;
+        calculatedMtkgArDept = PAYGO_MKT_ARBO;
       } else {
         if (data != null && StringUtils.isNotBlank(data.getEnterprise())) {
           LOG.debug("Getting Marketing A/R BO with highest CMR count belonging to the enterprise=" + data.getEnterprise());
@@ -360,7 +360,7 @@ public class USBranchOffcMapping {
       break;
     default:
       if ("Y".equals(admin.getPaygoProcessIndc())) {
-        calculatedSvcArOffice = PAYGO_SVC_ARBO;
+        calculatedSvcArOffice = PAYGO_MKT_ARBO;
       } else {
         calculatedSvcArOffice = StringUtils.isBlank(svcArOffice) ? "" : svcArOffice;
       }
@@ -368,7 +368,7 @@ public class USBranchOffcMapping {
     }
     // catch all for paygo
     if (StringUtils.isBlank(calculatedSvcArOffice) && "Y".equals(admin.getPaygoProcessIndc())) {
-      calculatedSvcArOffice = PAYGO_SVC_ARBO;
+      calculatedSvcArOffice = PAYGO_MKT_ARBO;
     }
     return calculatedSvcArOffice;
   }
