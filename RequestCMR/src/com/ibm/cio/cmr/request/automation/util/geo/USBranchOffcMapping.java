@@ -360,7 +360,7 @@ public class USBranchOffcMapping {
       break;
     default:
       if ("Y".equals(admin.getPaygoProcessIndc())) {
-        calculatedSvcArOffice = PAYGO_MKT_ARBO;
+        calculatedSvcArOffice = PAYGO_SVC_ARBO;
       } else {
         calculatedSvcArOffice = StringUtils.isBlank(svcArOffice) ? "" : svcArOffice;
       }
@@ -368,7 +368,7 @@ public class USBranchOffcMapping {
     }
     // catch all for paygo
     if (StringUtils.isBlank(calculatedSvcArOffice) && "Y".equals(admin.getPaygoProcessIndc())) {
-      calculatedSvcArOffice = PAYGO_MKT_ARBO;
+      calculatedSvcArOffice = PAYGO_SVC_ARBO;
     }
     return calculatedSvcArOffice;
   }
