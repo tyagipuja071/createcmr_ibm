@@ -835,7 +835,6 @@ public class ItalyHandler extends BaseSOFHandler {
         identClient = cExt.getItIdentClient();
         fiscalCode = cExt.getiTaxCode();
         taxCode = cExt.getItIVA();
-        affiliate = cExt.getAffiliate();
         tipoClinte = cExt.getTipoCliente();
         coddes = cExt.getCoddes();
         pec = cExt.getPec();
@@ -850,7 +849,6 @@ public class ItalyHandler extends BaseSOFHandler {
         isuClientTier = cust.getIsuCd();
         modePayment = cust.getModeOfPayment();
         embargo = cust.getEmbargoCd();
-        enterprise = cust.getEnterpriseNo();
         inac = cust.getInacCd();
         salesRep = cust.getSalesRepNo();
         customerType = cust.getCustType();
@@ -927,6 +925,10 @@ public class ItalyHandler extends BaseSOFHandler {
       if (result.getCmrAddrTypeCode().equals(COMPANY_ADDR_TYPE)) {
         // For ZORG addresses
         countryLanded = result.getCmrCountryLanded();
+      }
+      if (result.getCmrAddrTypeCode().equals(INSTALLING_ADDR_TYPE)) {
+        enterprise = result.getCmrEnterpriseNumber();
+        affiliate = result.getCmrAffiliate();
       }
     }
     // no data from RDc? get DB2
