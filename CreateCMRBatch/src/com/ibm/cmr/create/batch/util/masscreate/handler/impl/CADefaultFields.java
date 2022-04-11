@@ -20,7 +20,35 @@ public class CADefaultFields implements RowHandler {
 
   @Override
   public RowResult validate(EntityManager entityManager, MassCreateFileRow row) throws Exception {
-    return RowResult.passed();
+    RowResult result = new RowResult();
+
+    if (row.getAddresses() != null && row.getAddresses().size() > 0) {
+      String zs01PostalCd = null;
+      String addrType = null;
+      String custSubGrp = row.getData().getCustSubGrp();
+      String csBranch = row.getData().getSalesTeamCd();
+
+      for (MassCreateAddr addr : row.getAddresses()) {
+        addrType = addr.getId().getAddrType();
+        if (StringUtils.isNotBlank(addrType) && "ZS01".equals(addrType)) {
+          zs01PostalCd = addr.getPostCd();
+        }
+      }
+
+      // Validate CS Branch
+      if (StringUtils.isNotBlank(custSubGrp)) {
+        if (("USA".equals(custSubGrp) || "CND".equals(custSubGrp)) && !"000".equals(csBranch)) {
+          result.addError("CS Branch value should be 000. ");
+        } else {
+          if (StringUtils.isNotBlank(zs01PostalCd) && zs01PostalCd.length() >= 3 && StringUtils.isNotBlank(csBranch)
+              && !zs01PostalCd.substring(0, 3).equals(csBranch)) {
+            result.addError("CS Branch value should be " + zs01PostalCd.substring(0, 3) + ". ");
+          }
+        }
+      }
+    }
+
+    return result;
   }
 
   @Override
