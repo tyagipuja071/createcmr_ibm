@@ -77,6 +77,7 @@ public class BrazilCalculateIBMElement extends OverridingElement {
     Addr installAt = requestData.getAddress("ZI01");
     boolean ifErrorSoldTo = false;
     boolean ifErrorInstallAt = false;
+    String reqType = admin.getReqType();
     sboToBeUnchanged = sboToBeChecked.contains(data.getSalesBusOffCd());
 
     // save the request data, this populates the internally computed and default
@@ -111,7 +112,7 @@ public class BrazilCalculateIBMElement extends OverridingElement {
     final List<String> STATEPROV_763 = Arrays.asList("AM", "PA", "AC", "RO", "RR", "AP", "TO", "MA", "PI", "CE", "RN", "PB", "PE", "AL", "SE", "BA");
     final List<String> STATEPROV_504 = Arrays.asList("DF", "GO", "MT", "MS");
     final List<String> STATEPROV_758 = Arrays.asList("PR", "SC", "RS");
-    if (SystemLocation.BRAZIL.equals(data.getCmrIssuingCntry()) && soldTo != null) {
+    if (SystemLocation.BRAZIL.equals(data.getCmrIssuingCntry()) && soldTo != null && reqType.equals("C") ) {
       if ("RJ".equals(soldTo.getStateProv())) {
         overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), "761");
       } else if ("SP".equals(soldTo.getStateProv())) {
@@ -240,7 +241,7 @@ public class BrazilCalculateIBMElement extends OverridingElement {
         details.append("Collector Number = " + sbo.getCollectorNo() + "\n");
         overrides.addOverride(getProcessCode(), "DATA", "COLLECTOR_NO", data.getCollectorNameNo(), sbo.getCollectorNo());
 
-        if (!sboToBeUnchanged) {
+        if (!sboToBeUnchanged && reqType.equals("C")) {
           overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sbo.getSbo());
         }
         details.append("Search Term/Sales Branch Office = " + data.getSalesBusOffCd() + "\n");
@@ -330,11 +331,11 @@ public class BrazilCalculateIBMElement extends OverridingElement {
       }
 
       // root matching first
-      boolean rootMatchFound = performRootMatching(entityManager, data, vat, reqId, overrides, details, scenarioSubType);
+      boolean rootMatchFound = performRootMatching(entityManager, data, vat, reqId, overrides, details, scenarioSubType, reqType);
       if (!rootMatchFound) {
         // no matches, calculate using check tables
         LOG.debug("No root matches found for VAT " + vat);
-        computeValuesPerMappings(entityManager, details, overrides, reqId, data, midasResponse, soldTo);
+        computeValuesPerMappings(entityManager, details, overrides, reqId, data, midasResponse, soldTo, reqType);
       } else {
         // Defect CMR-392
         computeISICPerMappings(entityManager, details, overrides, reqId, data, midasResponse, soldTo);
@@ -417,7 +418,7 @@ public class BrazilCalculateIBMElement extends OverridingElement {
    * @return
    */
   private boolean performRootMatching(EntityManager entityManager, Data data, String vat, long reqId, OverrideOutput overrides, StringBuilder details,
-      String scenarioSubType) {
+      String scenarioSubType, String reqType) {
     EntityManager cedpManager = JpaManager.getEntityManager("CEDP");
     String kukla = "";
     sboToBeUnchanged = sboToBeChecked.contains(data.getSalesBusOffCd());
@@ -468,7 +469,7 @@ public class BrazilCalculateIBMElement extends OverridingElement {
         details.append("Collector Number = " + (String) rootMatch[11] + "\n");
         overrides.addOverride(getProcessCode(), "DATA", "COLLECTOR_NO", data.getCollectorNameNo(), (String) rootMatch[11]);
 
-        if (!sboToBeUnchanged) {
+        if (!sboToBeUnchanged && reqType.equals("C")) {
           overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), (String) rootMatch[8]);
         }
         details.append("Search Term/Sales Branch Office = " + data.getSalesBusOffCd() + "\n");
@@ -589,7 +590,7 @@ public class BrazilCalculateIBMElement extends OverridingElement {
    * @param soldTo
    */
   private void computeValuesPerMappings(EntityManager entityManager, StringBuilder details, OverrideOutput overrides, long reqId, Data data,
-      AutomationResponse<MidasResponse> midasResponse, Addr soldTo) {
+      AutomationResponse<MidasResponse> midasResponse, Addr soldTo, String reqType) {
     sboToBeUnchanged = sboToBeChecked.contains(data.getSalesBusOffCd());
     LOG.debug("Setting computed values for data fields for Req_id : " + reqId);
 
@@ -615,7 +616,7 @@ public class BrazilCalculateIBMElement extends OverridingElement {
         details.append("Collector Number = " + sbo.getCollectorNo() + "\n");
         overrides.addOverride(getProcessCode(), "DATA", "COLLECTOR_NO", data.getCollectorNameNo(), sbo.getCollectorNo());
 
-        if (!sboToBeUnchanged) {
+        if (!sboToBeUnchanged && reqType.equals("C")) {
           overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sbo.getSbo());
         }
         details.append("Search Term/Sales Branch Office = " + data.getSalesBusOffCd() + "\n");
