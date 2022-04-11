@@ -316,17 +316,11 @@ public class AutomationEngine {
             reqId, appUser);
       }
     } else {
-      if (systemError || "N".equalsIgnoreCase(admin.getCompVerifiedIndc())) {
+      if (systemError) {
         if (AutomationConst.STATUS_AUTOMATED_PROCESSING.equals(reqStatus)) {
           // change status to retry
-          if ("N".equalsIgnoreCase(admin.getCompVerifiedIndc())) {
-            createComment(entityManager, "Processing error encountered as data is not company verified.", reqId, appUser);
-            admin.setReqStatus("PPN");
-          } else {
-            createComment(entityManager, "A system error occurred during the processing. A retry will be attempted shortly.", reqId, appUser);
-            admin.setReqStatus(AutomationConst.STATUS_AUTOMATED_PROCESSING_RETRY);
-          }
-
+          createComment(entityManager, "A system error occurred during the processing. A retry will be attempted shortly.", reqId, appUser);
+          admin.setReqStatus(AutomationConst.STATUS_AUTOMATED_PROCESSING_RETRY);
         } else {
           String processingCenter = RequestUtils.getProcessingCenter(entityManager, data.getCmrIssuingCntry());
           // change status to awaiting processing
@@ -525,6 +519,9 @@ public class AutomationEngine {
               cmt += "\n\nPlease view system processing results for more details.";
             } else {
               cmt = "Automated checks completed successfully.";
+            }
+            if ("N".equalsIgnoreCase(admin.getCompVerifiedIndc())) {
+              createComment(entityManager, "Processing error encountered as data is not company verified.", reqId, appUser);
             }
             if (stopExecution) {
               cmt = "Automated checks stopped execution due to an error reported by one of the processes.";
