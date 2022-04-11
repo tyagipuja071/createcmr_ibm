@@ -89,7 +89,7 @@ public class QuickSearchService extends BaseSimpleService<RequestEntryModel> {
 
     // check CMR Details for OB 93
     FindCMRResultModel result = CompanyFinder.getCMRDetails(model.getIssuingCntry(), model.getCmrNo(), 5, null, null);
-    if (result != null && result.getItems() != null && !result.getItems().isEmpty()) {
+    if (result != null && result.getItems() != null && !result.getItems().isEmpty() && !model.isPoolRecord()) {
       Collections.sort(result.getItems());
       if ("93".equals(result.getItems().get(0).getCmrOrderBlock())) {
         throw new CmrException(new Exception(
