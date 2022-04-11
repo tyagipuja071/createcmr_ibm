@@ -260,6 +260,7 @@ public class DupReqCheckElement extends DuplicateCheckElement {
       if (AutomationUtil.isCheckVatForDuplicates(data.getCmrIssuingCntry())) {
         request.setMatchType("V");
       }
+      request.setScenario(data.getCustSubGrp());
 
       DuplicateChecksUtil.setCountrySpecificsForRequestChecks(entityManager, admin, data, addr, request, engineData);
 

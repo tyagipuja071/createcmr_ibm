@@ -274,7 +274,11 @@ public class ApprovalUtil {
       sql = sql.append("cast(" + fieldName + " as integer) >= " + value);
       break;
     case "NE":
-      sql = sql.append(fieldName + " <> '" + value + "'");
+      if (fieldName.equals("ADMIN.REQUESTER_ID")) {
+        sql = sql.append(fieldName + " <> LOWER('" + value + "')");
+      } else {
+        sql = sql.append(fieldName + " <> '" + value + "'");
+      }
       break;
     case "*":
       sql = sql.append(fieldName + " is not null");
