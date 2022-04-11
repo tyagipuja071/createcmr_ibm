@@ -3896,28 +3896,30 @@ function setCoverageSBOBasedOnIsuCtc(currentLanded) {
     }
 
     var landedCountry = '';
-    if (currentLanded != undefined) {
-      landedCountry = currentLanded;
-    } else {
       landedCountry = getSoldToLanded();
-    }
 
-    if (custGrp == 'CROSS') {
-      if (landedCountry == 'TF' || landedCountry == 'RE') {
-        FormManager.setValue('salesBusOffCd', 'ID1ID1');
-      } else if (landedCountry == 'MQ') {
-        FormManager.setValue('salesBusOffCd', 'YF1YF1');
-      } else if (landedCountry == 'GP') {
-        FormManager.setValue('salesBusOffCd', 'YD1YD1');
-      } else if (landedCountry == 'GF' || landedCountry == 'PM') {
-        FormManager.setValue('salesBusOffCd', 'XF1XF1');
-      } else if (landedCountry == 'YT') {
-        FormManager.setValue('salesBusOffCd', 'XD1XD1');
-      } else if (landedCountry == 'NC' || landedCountry == 'VU' || landedCountry == 'WF') {
-        FormManager.setValue('salesBusOffCd', 'GD1GD1');
-      } else if (landedCountry == 'PF') {
-        FormManager.setValue('salesBusOffCd', 'DD1DD1');
-      } else if (landedCountry == 'AD') {
+    if (custSubGrp == 'INTSO' && custGrp == 'LOCAL') {
+      FormManager.setValue('salesBusOffCd', '98F98F');
+      return;
+    }
+    if (landedCountry == 'RE' || landedCountry == 'TF') {
+      FormManager.setValue('salesBusOffCd', 'ID1ID1');
+    } else if (landedCountry == 'KM') {
+      FormManager.setValue('salesBusOffCd', '89X89X');
+    } else if (landedCountry == 'MQ') {
+      FormManager.setValue('salesBusOffCd', 'YF1YF1');
+    } else if (landedCountry == 'GP') {
+      FormManager.setValue('salesBusOffCd', 'YD1YD1');
+    } else if (landedCountry == 'GF' || landedCountry == 'PM') {
+      FormManager.setValue('salesBusOffCd', 'XF1XF1');
+    } else if (landedCountry == 'YT') {
+      FormManager.setValue('salesBusOffCd', 'XD1XD1');
+    } else if (landedCountry == 'NC' || landedCountry == 'WF' || landedCountry == 'VU') {
+      FormManager.setValue('salesBusOffCd', 'GD1GD1');
+    } else if (landedCountry == 'PF') {
+      FormManager.setValue('salesBusOffCd', 'DD1DD1');
+    } else if (custGrp == 'CROSS') {
+      if (landedCountry == 'AD') {
         FormManager.setValue('salesBusOffCd', '03M03M');
       } else if (landedCountry == 'MC') {
         FormManager.setValue('salesBusOffCd', '5EB5EB');
