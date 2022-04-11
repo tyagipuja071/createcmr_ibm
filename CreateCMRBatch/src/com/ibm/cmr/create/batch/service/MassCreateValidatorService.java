@@ -172,8 +172,7 @@ public class MassCreateValidatorService extends BaseBatchService {
       boolean approvalsNeeded = false;
       LOG.info("Mass Create Request ID: " + request.getId().getReqId() + " passed system validations.");
       switch (originalStatus) {
-      // case "SVA":
-      case "SMA":
+      case "SVA":
         if (!hasRecordsForIteration(entityManager, request.getId().getReqId(), request.getIterationId())) {
           LOG.debug("Mass Create records does not exist for the current iteration, creating...");
           MassCreateUtil.createMassCreateRecords(massCreate, entityManager);
@@ -205,8 +204,7 @@ public class MassCreateValidatorService extends BaseBatchService {
           sendToId = null;
         }
         break;
-      // case "SV2":
-      case "SM2":
+      case "SV2":
         if (!hasRecordsForIteration(entityManager, request.getId().getReqId(), request.getIterationId())) {
           LOG.debug("Mass Create records does not exist for the current iteration, creating...");
           MassCreateUtil.createMassCreateRecords(massCreate, entityManager);
