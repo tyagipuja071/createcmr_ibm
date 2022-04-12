@@ -54,6 +54,7 @@ public class CAAddressHandler implements RowHandler {
       String postalCd = null;
       String stateProv = null;
       String addrType = null;
+      String custType = row.getData().getCustTyp();
 
       for (MassCreateAddr addr : row.getAddresses()) {
         addrType = addr.getId().getAddrType();
@@ -90,7 +91,9 @@ public class CAAddressHandler implements RowHandler {
             }
           }
 
-          if (StringUtils.isNotBlank(addr.getLandCntry()) && "CA".equals(addr.getLandCntry())) {
+          if ("ZS01".equals(addrType) && "CROSS".equals(custType) && "CA".equals(addr.getLandCntry())) {
+            result.addError("ZS01 Canada Landed Country is invalid for Cross-Border scenario. ");
+          } else if (StringUtils.isNotBlank(addr.getLandCntry()) && "CA".equals(addr.getLandCntry())) {
             postalCd = addr.getPostCd();
             stateProv = addr.getStateProv();
             // validate State/Prov
