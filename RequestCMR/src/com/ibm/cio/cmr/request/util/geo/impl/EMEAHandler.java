@@ -1789,7 +1789,7 @@ public class EMEAHandler extends BaseSOFHandler {
       }
       // special tax code
       if ((SystemLocation.UNITED_KINGDOM.equals(data.getCmrIssuingCntry()) || SystemLocation.IRELAND.equals(data.getCmrIssuingCntry()))
-          && (data.getSpecialTaxCd().isEmpty() || data.getSpecialTaxCd() != null || !StringUtils.isNotBlank(data.getSpecialTaxCd()))
+          && (StringUtils.isEmpty(data.getSpecialTaxCd()) || data.getSpecialTaxCd() != null || !StringUtils.isNotBlank(data.getSpecialTaxCd()))
           && ("U".equals(admin.getReqType()))) {
         data.setSpecialTaxCd("Bl");
       }
