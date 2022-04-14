@@ -497,11 +497,7 @@ public class NetherlandsUtil extends AutomationUtil {
                 }
                 if (!matchesDnb) {
                   LOG.debug("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
-                  if (payGoAddredited) {
-                    resultCodes.add("D");
-                  } else {
-                    resultCodes.add("R");
-                  }
+                  resultCodes.add("D");
                   checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
                 } else {
                   checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
@@ -524,7 +520,7 @@ public class NetherlandsUtil extends AutomationUtil {
 
                   LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
                   checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");
-                  resultCodes.add("R");
+                  resultCodes.add("D");
                 } else {
                   LOG.debug("Addition/Updation of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
                   checkDetails.append("Address (" + addr.getId().getAddrSeq() + ") is validated.\n");
@@ -545,7 +541,7 @@ public class NetherlandsUtil extends AutomationUtil {
               if (duplicate) {
                 LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
                 checkDetails.append("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");
-                resultCodes.add("R");
+                resultCodes.add("D");
               }
             }
 
