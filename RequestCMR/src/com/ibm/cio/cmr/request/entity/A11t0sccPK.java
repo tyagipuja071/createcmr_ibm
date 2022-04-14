@@ -33,14 +33,6 @@ public class A11t0sccPK extends BaseEntityPk implements Serializable {
   @Column(name = "C_ZIP")
   private float cZip;
 
-  public String getNCity() {
-    return this.nCity;
-  }
-
-  public void setNCity(String nCity) {
-    this.nCity = nCity;
-  }
-
   @Override
   public boolean equals(Object other) {
     if (this == other) {
