@@ -2329,44 +2329,12 @@ function setClientTierValuesIT(isuCd) {
     return;
   }
   isuCd = FormManager.getActualValue('isuCd');
-  if (isuCd == '5K') {
+  if (isuCd == '5K' || isuCd == '28') {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
     FormManager.setValue('clientTier', '');
-    FormManager.readOnly('clientTier');
-  } else {
-    var reqType = FormManager.getActualValue('reqType');
-    var custSubGrp = FormManager.getActualValue('custSubGrp');
-    if (reqType != 'U') {
-      FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
-      if (isuCd == '34') {
-        FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
-      } else {
-        FormManager.removeValidator('clientTier', Validators.REQUIRED);
-      }
-      // CREATCMR-4293
-      if (custSubGrp == 'CROBP' || custSubGrp == 'CROIN' || custSubGrp == 'INTER' || custSubGrp == 'BUSPR' || custSubGrp == 'BUSSM' || custSubGrp == 'INTSM' || custSubGrp == 'BUSVA'
-          || custSubGrp == 'INTVA') {
-        FormManager.removeValidator('clientTier', Validators.REQUIRED);
-      }
-    }
-    if ([ 'IBMIT', 'PRICU', 'BUSPR', 'INTER', 'XIBM', 'CROPR', 'CROBP', 'CROIN', 'BUSVA', 'PRIVA', 'INTVA', 'INTSM', 'BUSSM', 'PRISM' ].includes(custSubGrp)) {
+    if (isuCd == '5K') {
       FormManager.readOnly('clientTier');
-    } else {
-      FormManager.enable('clientTier');
-    }
-  }
-  setSboValueBasedOnIsuCtcIT();
-}
-
-function setClientTierValuesIT(isuCd) {
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-  isuCd = FormManager.getActualValue('isuCd');
-  if (isuCd == '5K') {
-    FormManager.removeValidator('clientTier', Validators.REQUIRED);
-    FormManager.setValue('clientTier', '');
-    FormManager.readOnly('clientTier');
+    }  
   } else {
     var reqType = FormManager.getActualValue('reqType');
     var custSubGrp = FormManager.getActualValue('custSubGrp');
