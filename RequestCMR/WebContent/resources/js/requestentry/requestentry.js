@@ -1713,7 +1713,7 @@ function matchDnBForAutomationCountries() {
                 CANCEL : 'No'
               });
             } else {
-              cmr.showConfirm("cmr.showModal('addressVerificationModal')", 'An error occurred while matching dnb. Do you want to proceed with this request?', 'Warning', null, {
+              cmr.showConfirm('showAddressVerificationModal()', 'An error occurred while matching dnb. Do you want to proceed with this request?', 'Warning', null, {
                 OK : 'Yes',
                 CANCEL : 'No'
               });
