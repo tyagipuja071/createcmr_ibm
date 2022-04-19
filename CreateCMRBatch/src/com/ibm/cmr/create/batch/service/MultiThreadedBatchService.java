@@ -98,7 +98,7 @@ public abstract class MultiThreadedBatchService<T> extends BaseBatchService {
     // continue checking pending items and requeue
     while (rollover) {
       try {
-        Thread.sleep(1000 * 20);
+        Thread.sleep(1000 * 60 * 2);
       } catch (InterruptedException e) {
       }
       Queue<T> newPendingItems = preparePendingItems();
