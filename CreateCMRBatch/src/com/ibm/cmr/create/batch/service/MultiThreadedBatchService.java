@@ -5,6 +5,7 @@ package com.ibm.cmr.create.batch.service;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.Executors;
@@ -38,22 +39,11 @@ public abstract class MultiThreadedBatchService<T> extends BaseBatchService {
   @Override
   public Boolean process(HttpServletRequest request, ParamContainer params) throws CmrException {
 
-    LOG.debug("Retrieving requests to process..");
-    // get first all request ids using one entitymanager
-    Queue<T> requestIds = null;
-    EntityManager entityManager = JpaManager.getEntityManager();
-    try {
-      requestIds = getRequestsToProcess(entityManager);
-      if (requestIds == null || requestIds.isEmpty()) {
-        LOG.info("No pending requests to process at this time.");
-        return true;
-      }
-      LOG.info(requestIds.size() + " requests to process..");
-    } finally {
-      // empty the manager
-      entityManager.clear();
-      entityManager.close();
-    }
+    Queue<T> requestIds = preparePendingItems();
+    List<T> allProcessed = new ArrayList<T>();
+    allProcessed.addAll(requestIds);
+
+    boolean rollover = !requestIds.isEmpty();
 
     int terminatorTime = 40; // 40 mins default;
     String terminatorMins = BatchUtil.getProperty("TERMINATOR.MINS");
@@ -67,7 +57,7 @@ public abstract class MultiThreadedBatchService<T> extends BaseBatchService {
 
     if (terminateOnLongExecution()) {
       LOG.info("Starting terminator thread. Wait time: " + terminatorTime + " mins");
-      this.terminator = new TerminatorThread(1000 * 60 * terminatorTime, entityManager);
+      this.terminator = new TerminatorThread(1000 * 60 * terminatorTime, null);
       this.terminator.start();
     } else {
       LOG.warn("Terminator thread skipped for the run.");
@@ -97,15 +87,46 @@ public abstract class MultiThreadedBatchService<T> extends BaseBatchService {
       workers.add(worker);
     }
 
-    // try {
+    String rolloverParam = BatchUtil.getProperty("multithreaded.rollover");
+    if (!rolloverSupported() || rolloverParam == null || !"Y".equals(rolloverParam)) {
+      rollover = false;
+      LOG.debug("No roll over of queue.");
+    } else {
+      LOG.debug("-Rolling over queueing of requests-");
+    }
+
+    // continue checking pending items and requeue
+    while (rollover) {
+      try {
+        Thread.sleep(1000 * 60 * 2);
+      } catch (InterruptedException e) {
+      }
+      Queue<T> newPendingItems = preparePendingItems();
+      LOG.debug(newPendingItems.size() + " items gathered on rollover..");
+      Queue<T> truePendingItems = new LinkedList<>();
+      for (T item : newPendingItems) {
+        if (!allProcessed.contains(item)) {
+          truePendingItems.add(item);
+          allProcessed.add(item);
+        }
+      }
+      LOG.debug(" - " + truePendingItems.size() + " NEW items gathered.");
+
+      rollover = !truePendingItems.isEmpty();
+      if (!truePendingItems.isEmpty()) {
+        List<List<T>> newAllocatedRequests = allocateRequests(truePendingItems, threads);
+        for (List<T> requestBatch : newAllocatedRequests) {
+          worker = new BatchThreadWorker(this, requestBatch);
+          if (worker != null) {
+            executor.execute(worker);
+          }
+          workers.add(worker);
+        }
+      }
+    }
+
+    LOG.debug("Initiating shutdown of executor...");
     executor.shutdown();
-    // executor.awaitTermination(30, TimeUnit.MINUTES);
-    // } catch (InterruptedException e1) {
-    // LOG.warn("Executor encountered an error while awaiting task execution",
-    // e1);
-    // }
-    // wait till execution finish
-    // executor.shutdown();
 
     while (!executor.isTerminated()) {
       try {
@@ -126,6 +147,32 @@ public abstract class MultiThreadedBatchService<T> extends BaseBatchService {
     LOG.info("Batch thread workers finished.");
 
     return success;
+  }
+
+  /**
+   * Gets the latest pending items from the queue
+   * 
+   * @return
+   */
+  private Queue<T> preparePendingItems() {
+    LOG.debug("Retrieving requests to process..");
+    // get first all request ids using one entitymanager
+    Queue<T> requestIds = null;
+    EntityManager entityManager = JpaManager.getEntityManager();
+    try {
+      requestIds = getRequestsToProcess(entityManager);
+      if (requestIds == null || requestIds.isEmpty()) {
+        LOG.info("No pending requests to process at this time.");
+      } else {
+        LOG.info(requestIds.size() + " requests to process..");
+      }
+      return requestIds;
+    } finally {
+      // empty the manager
+      entityManager.clear();
+      entityManager.close();
+    }
+
   }
 
   /**
@@ -226,4 +273,12 @@ public abstract class MultiThreadedBatchService<T> extends BaseBatchService {
    */
   protected abstract String getThreadName();
 
+  /**
+   * Indicates whether this batch supports rollover of queues
+   * 
+   * @return
+   */
+  protected boolean rolloverSupported() {
+    return false;
+  }
 }

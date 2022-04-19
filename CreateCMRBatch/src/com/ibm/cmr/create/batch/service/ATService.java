@@ -197,7 +197,6 @@ public class ATService extends TransConnService {
     }
   }
 
-  @Override
   public void monitorAbortedRecords(EntityManager entityManager) throws JsonGenerationException, JsonMappingException, IOException, Exception {
 
     // search the aborted records from Admin table
@@ -2076,7 +2075,8 @@ public class ATService extends TransConnService {
    * @param reqId
    * @throws Exception
    */
-  private void convertToProspectToLegalCMRInput(ProcessRequest request, EntityManager entityManager, long reqId) throws Exception {
+  @Override
+  protected void convertToProspectToLegalCMRInput(ProcessRequest request, EntityManager entityManager, long reqId) throws Exception {
     String sql = ExternalizedQuery.getSql("BATCH.GET_PROSPECT");
     PreparedQuery q = new PreparedQuery(entityManager, sql);
     q.setParameter("REQ_ID", reqId);
