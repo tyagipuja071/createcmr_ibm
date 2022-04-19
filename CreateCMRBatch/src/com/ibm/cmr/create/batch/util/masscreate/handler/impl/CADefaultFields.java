@@ -39,11 +39,9 @@ public class CADefaultFields implements RowHandler {
       if (StringUtils.isNotBlank(custSubGrp)) {
         if (("USA".equals(custSubGrp) || "CND".equals(custSubGrp)) && !"000".equals(csBranch)) {
           result.addError("CS Branch value should be 000. ");
-        } else {
-          if (StringUtils.isNotBlank(zs01PostalCd) && zs01PostalCd.length() >= 3 && StringUtils.isNotBlank(csBranch)
-              && !zs01PostalCd.substring(0, 3).equals(csBranch)) {
-            result.addError("CS Branch value should be " + zs01PostalCd.substring(0, 3) + ". ");
-          }
+        } else if (!"USA".equals(custSubGrp) && !"CND".equals(custSubGrp) && StringUtils.isNotBlank(zs01PostalCd) && zs01PostalCd.length() >= 3
+            && StringUtils.isNotBlank(csBranch) && !zs01PostalCd.substring(0, 3).equals(csBranch)) {
+          result.addError("CS Branch value should be " + zs01PostalCd.substring(0, 3) + ". ");
         }
       }
     }
