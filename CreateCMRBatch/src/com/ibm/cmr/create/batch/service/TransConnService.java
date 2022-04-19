@@ -28,6 +28,7 @@ import com.ibm.ci.search.client.IndexServiceClient;
 import com.ibm.ci.search.client.impl.index.DeleteFromIndexRequest;
 import com.ibm.ci.search.client.impl.index.IndexResponse;
 import com.ibm.cio.cmr.create.entity.NotifyReq;
+import com.ibm.cio.cmr.create.entity.NotifyReqPK;
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.automation.util.DummyServletRequest;
@@ -46,6 +47,7 @@ import com.ibm.cio.cmr.request.entity.MassUpdt;
 import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
 import com.ibm.cio.cmr.request.entity.MassUpdtData;
 import com.ibm.cio.cmr.request.entity.MqIntfReqQueue;
+import com.ibm.cio.cmr.request.entity.MqIntfReqQueuePK;
 import com.ibm.cio.cmr.request.entity.ReqCmtLog;
 import com.ibm.cio.cmr.request.entity.ReqCmtLogPK;
 import com.ibm.cio.cmr.request.entity.ReservedCMRNos;
@@ -108,24 +110,24 @@ public class TransConnService extends BaseBatchService {
   public static final String ACTION_RDC_REACTIVATE = "System Action:RDc Mass Reactivate";
   public static final String ACTION_RDC_SINGLE_REACTIVATE = "System Action:RDc Single Reactivate";
   protected static final String ACTION_RDC_MASS_UPDATE = "System Action:RDc Mass Update";
-  private static final String FORCED_CHANGE_ACTION = "System Action: Forced Changes.";
-  private static final String ACTION_RDC_UPDT_BY_ENT = "System Action:RDc Enterprise update";
-  private static final String FORCED_UPDATE_COMMENT = "System Action:  Status changed to 'Processing Create/Updt Pending', Request Type changed to 'Update' for further automatic processing";
-  private static final String REVERT_TO_CREATE_COMMENT = "System Action:  Request Type reverted to 'Create' (original request type)";
+  protected static final String FORCED_CHANGE_ACTION = "System Action: Forced Changes.";
+  protected static final String ACTION_RDC_UPDT_BY_ENT = "System Action:RDc Enterprise update";
+  protected static final String FORCED_UPDATE_COMMENT = "System Action:  Status changed to 'Processing Create/Updt Pending', Request Type changed to 'Update' for further automatic processing";
+  protected static final String REVERT_TO_CREATE_COMMENT = "System Action:  Request Type reverted to 'Create' (original request type)";
 
   protected ProcessClient serviceClient;
-  private MassProcessClient massServiceClient;
-  private UpdateByEntClient updtByEntClient;
+  protected MassProcessClient massServiceClient;
+  protected UpdateByEntClient updtByEntClient;
 
-  private SimpleDateFormat ERDAT_FORMATTER = new SimpleDateFormat("yyyyMMdd");
+  protected SimpleDateFormat ERDAT_FORMATTER = new SimpleDateFormat("yyyyMMdd");
 
-  private static final List<String> SINGLE_REQUEST_TYPES = Arrays.asList(CmrConstants.REQ_TYPE_CREATE, CmrConstants.REQ_TYPE_UPDATE);
-  private static final List<String> MASS_REQUEST_TYPES = Arrays.asList(CmrConstants.REQ_TYPE_MASS_UPDATE, CmrConstants.REQ_TYPE_REACTIVATE,
+  protected static final List<String> SINGLE_REQUEST_TYPES = Arrays.asList(CmrConstants.REQ_TYPE_CREATE, CmrConstants.REQ_TYPE_UPDATE);
+  protected static final List<String> MASS_REQUEST_TYPES = Arrays.asList(CmrConstants.REQ_TYPE_MASS_UPDATE, CmrConstants.REQ_TYPE_REACTIVATE,
       CmrConstants.REQ_TYPE_DELETE);
 
-  private boolean deleteRDcTargets;
+  protected boolean deleteRDcTargets;
 
-  private boolean multiMode;
+  protected boolean multiMode;
 
   public TransConnService() {
     super();
@@ -141,20 +143,25 @@ public class TransConnService extends BaseBatchService {
       ChangeLogListener.setUser(BATCH_USER_ID);
 
       LOG.info("Processing Aborted records (retry)...");
-      monitorAbortedRecords(entityManager);
+      List<Long> records = gatherAbortedRecords(entityManager);
+      monitorAbortedRecords(entityManager, records);
 
       LOG.info("Processing TransConn records...");
-      monitorTransconn(entityManager);
+      records = gatherTransConnRecords(entityManager);
+      monitorTransconn(entityManager, records);
 
       LOG.info("Processing MQ Interface records...");
-      monitorMQInterfaceRequests(entityManager);
+      records = gatherMQInterfaceRequests(entityManager);
+      monitorMQInterfaceRequests(entityManager, records);
 
       LOG.info("Processing Completed Manual records...");
-      monitorDisAutoProcRec(entityManager);
+      records = gatherDisAutoProcRecords(entityManager);
+      monitorDisAutoProcRec(entityManager, records);
 
       if ("Y".equals(SystemParameters.getString("POOL.CMR.STATUS"))) {
         LOG.info("Processing Pending if Host is Down...");
-        monitorLegacyPending(entityManager);
+        records = gatherLegacyPending(entityManager);
+        monitorLegacyPending(entityManager, records);
       }
 
       return true;
@@ -162,6 +169,25 @@ public class TransConnService extends BaseBatchService {
       addError(e);
       return false;
     }
+  }
+
+  /**
+   * Prepares a list of request IDs to process for the aborted flow
+   * 
+   * @param entityManager
+   * @return
+   */
+  protected List<Long> gatherAbortedRecords(EntityManager entityManager) {
+    // search the aborted records from Admin table
+    String sql = ExternalizedQuery.getSql("BATCH.MONITOR_ABORTED_REC");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    List<Admin> abortedRecords = query.getResults(Admin.class);
+    LOG.debug("Size of Aborted Records : " + abortedRecords.size());
+    List<Long> queue = new ArrayList<>();
+    for (Admin admin : abortedRecords) {
+      queue.add(admin.getId().getReqId());
+    }
+    return queue;
   }
 
   /**
@@ -173,24 +199,22 @@ public class TransConnService extends BaseBatchService {
    * @throws IOException
    * @throws Exception
    */
-  public void monitorAbortedRecords(EntityManager entityManager) throws JsonGenerationException, JsonMappingException, IOException, Exception {
-
-    // search the aborted records from Admin table
-    String sql = ExternalizedQuery.getSql("BATCH.MONITOR_ABORTED_REC");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    List<Admin> abortedRecords = query.getResults(Admin.class);
-    LOG.debug("Size of Aborted Records : " + abortedRecords.size());
+  public void monitorAbortedRecords(EntityManager entityManager, List<Long> abortedRecords)
+      throws JsonGenerationException, JsonMappingException, IOException, Exception {
 
     // lockAdminRecordsForProcessing(abortedRecords, entityManager);
 
-    for (Admin admin : abortedRecords) {
+    for (Long id : abortedRecords) {
       try {
+        AdminPK pk = new AdminPK();
+        pk.setReqId(id);
+        Admin admin = entityManager.find(Admin.class, pk);
 
         LOG.info("Processing Aborted Record " + admin.getId().getReqId() + " [Request ID: " + admin.getId().getReqId() + "]");
 
         // get the data
-        sql = ExternalizedQuery.getSql("BATCH.GET_DATA");
-        query = new PreparedQuery(entityManager, sql);
+        String sql = ExternalizedQuery.getSql("BATCH.GET_DATA");
+        PreparedQuery query = new PreparedQuery(entityManager, sql);
         query.setParameter("REQ_ID", admin.getId().getReqId());
 
         Data data = query.getSingleResult(Data.class);
@@ -212,10 +236,31 @@ public class TransConnService extends BaseBatchService {
         partialCommit(entityManager);
 
       } catch (Exception e) {
-        LOG.error("Error in processing Aborted Record " + admin.getId().getReqId() + " for Request ID " + admin.getId().getReqId() + " ["
-            + e.getMessage() + "]", e);
+        LOG.error("Error in processing Aborted Record wit Request ID " + id + " [" + e.getMessage() + "]", e);
       }
     }
+  }
+
+  /**
+   * Prepares a list of request IDs to process for the transconn flow
+   * 
+   * @param entityManager
+   * @return
+   */
+  protected List<Long> gatherTransConnRecords(EntityManager entityManager) {
+    // search the notify requests from transconn where NOTIFIED_IND <> 'Y'
+    String sql = ExternalizedQuery.getSql("BATCH.MONITOR_TRANSCONN");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("NOTIFIED_IND", CmrConstants.NOTIFY_IND_YES);
+
+    List<NotifyReq> notifyList = query.getResults(NotifyReq.class);
+    LOG.debug("Size of Notify List : " + notifyList.size());
+    List<Long> queue = new ArrayList<>();
+    for (NotifyReq notif : notifyList) {
+      queue.add(notif.getId().getNotifyId());
+    }
+    return queue;
+
   }
 
   /**
@@ -227,18 +272,13 @@ public class TransConnService extends BaseBatchService {
    * @throws IOException
    * @throws Exception
    */
-  public void monitorTransconn(EntityManager entityManager) throws JsonGenerationException, JsonMappingException, IOException, Exception {
+  public void monitorTransconn(EntityManager entityManager, List<Long> notifyList) throws Exception {
 
-    // search the notify requests from transconn where NOTIFIED_IND <> 'Y'
-    String sql = ExternalizedQuery.getSql("BATCH.MONITOR_TRANSCONN");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("NOTIFIED_IND", CmrConstants.NOTIFY_IND_YES);
-
-    List<NotifyReq> notifyList = query.getResults(NotifyReq.class);
-    LOG.debug("Size of Notify List : " + notifyList.size());
-
-    for (NotifyReq notify : notifyList) {
+    for (Long id : notifyList) {
       try {
+        NotifyReqPK pk = new NotifyReqPK();
+        pk.setNotifyId(id);
+        NotifyReq notify = entityManager.find(NotifyReq.class, pk);
         LOG.info("Processing Notify Req " + notify.getId().getNotifyId() + " [Request ID: " + notify.getReqId() + "]");
         NotifyReqModel notifyReqModel = new NotifyReqModel();
         copyValuesFromEntity(notify, notifyReqModel);
@@ -292,10 +332,31 @@ public class TransConnService extends BaseBatchService {
         partialCommit(entityManager);
 
       } catch (Exception e) {
-        LOG.error("Error in processing TransConn Record " + notify.getId().getNotifyId() + " for Request ID " + notify.getReqId() + " ["
-            + e.getMessage() + "]", e);
+        LOG.error("Error in processing TransConn Record with Notify ID " + id + " [" + e.getMessage() + "]", e);
       }
     }
+  }
+
+  /**
+   * Prepares a list of request IDs to process for the mq flow
+   * 
+   * @param entityManager
+   * @return
+   */
+  protected List<Long> gatherMQInterfaceRequests(EntityManager entityManager) {
+    String sql = ExternalizedQuery.getSql("BATCH.MONITOR_MQ_INTF_REQ_QUEUE");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("MQ_IND", CmrConstants.MQ_IND_YES);
+
+    List<MqIntfReqQueue> mqIntfList = query.getResults(MqIntfReqQueue.class);
+    LOG.debug("Size of MQ Intf List : " + mqIntfList.size());
+
+    List<Long> queue = new ArrayList<>();
+    for (MqIntfReqQueue mq : mqIntfList) {
+      queue.add(mq.getId().getQueryReqId());
+    }
+    return queue;
+
   }
 
   /**
@@ -307,19 +368,14 @@ public class TransConnService extends BaseBatchService {
    * @throws IOException
    * @throws Exception
    */
-  public void monitorMQInterfaceRequests(EntityManager entityManager) throws JsonGenerationException, JsonMappingException, IOException, Exception {
-
-    // search the mq intf requests where MQ_IND <> 'Y' AND
-    // MQ_INTF_REQ_QUEUE.REQ_STATUS = 'COM'
-    String sql = ExternalizedQuery.getSql("BATCH.MONITOR_MQ_INTF_REQ_QUEUE");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("MQ_IND", CmrConstants.MQ_IND_YES);
-
-    List<MqIntfReqQueue> mqIntfList = query.getResults(MqIntfReqQueue.class);
-    LOG.debug("Size of MQ Intf List : " + mqIntfList.size());
+  public void monitorMQInterfaceRequests(EntityManager entityManager, List<Long> mqIntfList)
+      throws JsonGenerationException, JsonMappingException, IOException, Exception {
 
     boolean isError = false;
-    for (MqIntfReqQueue mqIntfReq : mqIntfList) {
+    for (Long id : mqIntfList) {
+      MqIntfReqQueuePK pk = new MqIntfReqQueuePK();
+      pk.setQueryReqId(id);
+      MqIntfReqQueue mqIntfReq = entityManager.find(MqIntfReqQueue.class, pk);
 
       isError = mqIntfReq.getReqStatus() != null && mqIntfReq.getReqStatus().contains(MQMsgConstants.REQ_STATUS_SER);
       try {
@@ -401,6 +457,25 @@ public class TransConnService extends BaseBatchService {
   }
 
   /**
+   * Prepares a list of request IDs to process for the manual flow
+   * 
+   * @param entityManager
+   * @return
+   */
+  protected List<Long> gatherDisAutoProcRecords(EntityManager entityManager) {
+    // search the manual processed records from Admin table
+    String sql = ExternalizedQuery.getSql("BATCH.MONITOR_DISABLE_AUTO_PROC");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    List<Admin> manualRecList = query.getResults(Admin.class);
+    LOG.debug("Size of Manually Completed Requests : " + manualRecList.size());
+    List<Long> queue = new ArrayList<>();
+    for (Admin admin : manualRecList) {
+      queue.add(admin.getId().getReqId());
+    }
+    return queue;
+  }
+
+  /**
    * Monitor manually processed records
    * 
    * @param entityManager
@@ -409,21 +484,18 @@ public class TransConnService extends BaseBatchService {
    * @throws IOException
    * @throws Exception
    */
-  public void monitorDisAutoProcRec(EntityManager entityManager) throws JsonGenerationException, JsonMappingException, IOException, Exception {
+  public void monitorDisAutoProcRec(EntityManager entityManager, List<Long> manualRecList) throws Exception {
 
-    // search the manual processed records from Admin table
-    String sql = ExternalizedQuery.getSql("BATCH.MONITOR_DISABLE_AUTO_PROC");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    List<Admin> manualRecList = query.getResults(Admin.class);
-    LOG.debug("Size of Manually Completed Requests : " + manualRecList.size());
-
-    for (Admin admin : manualRecList) {
+    for (Long id : manualRecList) {
       try {
+        AdminPK pk = new AdminPK();
+        pk.setReqId(id);
+        Admin admin = entityManager.find(Admin.class, pk);
         LOG.info("Processing Manually Completed Record [Request ID: " + admin.getId().getReqId() + "]");
 
         // get the data
-        sql = ExternalizedQuery.getSql("BATCH.GET_DATA");
-        query = new PreparedQuery(entityManager, sql);
+        String sql = ExternalizedQuery.getSql("BATCH.GET_DATA");
+        PreparedQuery query = new PreparedQuery(entityManager, sql);
         query.setParameter("REQ_ID", admin.getId().getReqId());
 
         Data data = query.getSingleResult(Data.class);
@@ -437,15 +509,18 @@ public class TransConnService extends BaseBatchService {
 
         partialCommit(entityManager);
       } catch (Exception e) {
-        LOG.error("Error in processing Manual Record " + admin.getId().getReqId() + " for Request ID " + admin.getId().getReqId() + " ["
-            + e.getMessage() + "]", e);
+        LOG.error("Error in processing Manual Record with Request ID " + id + " [" + e.getMessage() + "]", e);
       }
     }
   }
 
-  private void monitorLegacyPending(EntityManager entityManager) {
-    // Search the records with Status PCP and check if current timestamp falls
-    // within host down outage
+  /**
+   * Prepares a list of request IDs to process for the pool flow
+   * 
+   * @param entityManager
+   * @return
+   */
+  protected List<Long> gatherLegacyPending(EntityManager entityManager) {
     String sql = ExternalizedQuery.getSql("BATCH.MONITOR_LEGACY_PENDING");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("PROC_TYPE", SystemConfiguration.getValue("BATCH_CMR_POOL_PROCESSING_TYPE"));
@@ -456,11 +531,24 @@ public class TransConnService extends BaseBatchService {
     // query.setParameter("SCENARIO", "REGULAR");
     List<Admin> pvcRecords = query.getResults(Admin.class);
     LOG.debug("Size of PVC Records : " + pvcRecords.size());
+    List<Long> queue = new ArrayList<>();
+    for (Admin admin : pvcRecords) {
+      queue.add(admin.getId().getReqId());
+    }
+    return queue;
+  }
+
+  protected void monitorLegacyPending(EntityManager entityManager, List<Long> pvcRecords) {
+    // Search the records with Status PCP and check if current timestamp falls
+    // within host down outage
 
     // Update CREQCMR.ADMIN set STATUS to 'PCR' (Processing Validation), Lock
     // info CreateCMR, DISABLE_AUTO_PROC = 'Y'
-    for (Admin admin : pvcRecords) {
+    for (Long id : pvcRecords) {
       try {
+        AdminPK pk = new AdminPK();
+        pk.setReqId(id);
+        Admin admin = entityManager.find(Admin.class, pk);
 
         LOG.info("Processing PVC Record " + admin.getId().getReqId() + " [Request ID: " + admin.getId().getReqId() + "]");
         admin.setReqStatus("PCR");
@@ -469,8 +557,8 @@ public class TransConnService extends BaseBatchService {
         admin.setLockByNm(BATCH_USER_ID);
         admin.setLockTs(SystemUtil.getCurrentTimestamp());
 
-        sql = ExternalizedQuery.getSql("BATCH.GET_DATA");
-        query = new PreparedQuery(entityManager, sql);
+        String sql = ExternalizedQuery.getSql("BATCH.GET_DATA");
+        PreparedQuery query = new PreparedQuery(entityManager, sql);
         query.setParameter("REQ_ID", admin.getId().getReqId());
 
         Data data = query.getSingleResult(Data.class);
@@ -740,8 +828,7 @@ public class TransConnService extends BaseBatchService {
         partialCommit(entityManager);
 
       } catch (Exception e) {
-        LOG.error("Error in processing PVC Record " + admin.getId().getReqId() + " for Request ID " + admin.getId().getReqId() + " [" + e.getMessage()
-            + "]", e);
+        LOG.error("Error in processing PVC Record with Request ID " + id + " [" + e.getMessage() + "]", e);
       }
     }
   }
@@ -1513,7 +1600,7 @@ public class TransConnService extends BaseBatchService {
    * @param admin
    */
 
-  private boolean isNotInternalAndChile(Data data, Admin admin) {
+  protected boolean isNotInternalAndChile(Data data, Admin admin) {
     boolean ret = false;
 
     if (SystemLocation.CHILE.equals(data.getCmrIssuingCntry()) && !CmrConstants.SSAMX_INTERNAL_TYPES.contains(admin.getCustType())) {
@@ -1530,7 +1617,7 @@ public class TransConnService extends BaseBatchService {
    * @param data
    * @param admin
    */
-  private boolean isInternalAndSSAMX(Data data, Admin admin) {
+  protected boolean isInternalAndSSAMX(Data data, Admin admin) {
     boolean ret = false;
 
     if ((LAHandler.isSSAIssuingCountry(data.getCmrIssuingCntry()) || LAHandler.isMXIssuingCountry(data.getCmrIssuingCntry()))
@@ -1769,7 +1856,7 @@ public class TransConnService extends BaseBatchService {
    * @throws CmrException
    * @throws SQLException
    */
-  private void forceChangeToUpdate(EntityManager entityManager, Admin admin, Data data, boolean oneTaxInfoNotEmpty)
+  protected void forceChangeToUpdate(EntityManager entityManager, Admin admin, Data data, boolean oneTaxInfoNotEmpty)
       throws CmrException, SQLException {
     LOG.info("Forced Update : Checking type of completed request...");
 
@@ -1852,7 +1939,7 @@ public class TransConnService extends BaseBatchService {
     }
   }
 
-  private boolean isT2PoolCMRRequest(Admin admin, Data data) {
+  protected boolean isT2PoolCMRRequest(Admin admin, Data data) {
     if (USUtil.BUSINESS_PARTNER.equals(admin.getCustType()) && "TT2".equals(data.getCsoSite()) && "P".equals(data.getBpAcctTyp())
         && "IRMR".equals(data.getBpName())) {
       return true;
@@ -1870,7 +1957,7 @@ public class TransConnService extends BaseBatchService {
    * @throws CmrException
    * @throws SQLException
    */
-  private void revertToCreate(EntityManager entityManager, Admin admin) throws CmrException, SQLException {
+  protected void revertToCreate(EntityManager entityManager, Admin admin) throws CmrException, SQLException {
     String sql = ExternalizedQuery.getSql("BATCH.CHECK_FORCED_UPDATE");
     long reqId = admin.getId().getReqId();
     PreparedQuery q = new PreparedQuery(entityManager, sql);
@@ -1914,7 +2001,7 @@ public class TransConnService extends BaseBatchService {
    * @param reqId
    * @throws Exception
    */
-  private void convertToProspectToLegalCMRInput(ProcessRequest request, EntityManager entityManager, long reqId) throws Exception {
+  protected void convertToProspectToLegalCMRInput(ProcessRequest request, EntityManager entityManager, long reqId) throws Exception {
     String sql = ExternalizedQuery.getSql("BATCH.GET_PROSPECT");
     PreparedQuery q = new PreparedQuery(entityManager, sql);
     q.setParameter("REQ_ID", reqId);
@@ -2066,7 +2153,7 @@ public class TransConnService extends BaseBatchService {
    * @param sysLoc
    * @param updtRecordsList
    */
-  private void fetchMassUpdateDataDetails(EntityManager entityManager, Admin admin, Data data, List<MassUpdateRecord> updtRecordsList) {
+  protected void fetchMassUpdateDataDetails(EntityManager entityManager, Admin admin, Data data, List<MassUpdateRecord> updtRecordsList) {
     long reqId = admin.getId().getReqId();
     int itrId = admin.getIterationId();
     String sysLoc = data.getCmrIssuingCntry();
@@ -2199,7 +2286,7 @@ public class TransConnService extends BaseBatchService {
    * @param sysLoc
    * @param updtRecordsList
    */
-  private void fetchMassUpdateAddressDetails(EntityManager entityManager, Admin admin, Data data, List<MassUpdateRecord> updtRecordsList) {
+  protected void fetchMassUpdateAddressDetails(EntityManager entityManager, Admin admin, Data data, List<MassUpdateRecord> updtRecordsList) {
     // code to retrieve the cmrNo,addrType and other fields
 
     long reqId = admin.getId().getReqId();
@@ -2429,7 +2516,7 @@ public class TransConnService extends BaseBatchService {
    * @param entityManager
    * @param parReqId
    */
-  private void updateMassUpdateRowStatus(String statusCode, EntityManager entityManager, long parReqId) {
+  protected void updateMassUpdateRowStatus(String statusCode, EntityManager entityManager, long parReqId) {
     String sql = null;
     if (statusCode.equalsIgnoreCase("C") || statusCode.equalsIgnoreCase("W")) {
       sql = ExternalizedQuery.getSql("ENTERPRISE.MASS.UPDATE.DATA.DONE");
@@ -2468,7 +2555,7 @@ public class TransConnService extends BaseBatchService {
     return true;
   }
 
-  private List<Object[]> getGeoTaxInfo(EntityManager em, String reqid) {
+  protected List<Object[]> getGeoTaxInfo(EntityManager em, String reqid) {
     String sql1 = ExternalizedQuery.getSql("QUERY.TAXINFORECORDSBYREQID");
     PreparedQuery query = new PreparedQuery(em, sql1);
     query.setParameter("REQ_ID", reqid);
@@ -2485,7 +2572,7 @@ public class TransConnService extends BaseBatchService {
    * @param cmrNo
    * @param country
    */
-  private void deleteRDcTargetRecords(EntityManager entityManager, String cmrNo, String country) {
+  protected void deleteRDcTargetRecords(EntityManager entityManager, String cmrNo, String country) {
     try {
 
       // get target kunnrs
@@ -2553,7 +2640,7 @@ public class TransConnService extends BaseBatchService {
    * @param threadCount
    * @return
    */
-  private <T> List<List<T>> allocateRequests(Queue<T> requests, int threadCount) {
+  protected <T> List<List<T>> allocateRequests(Queue<T> requests, int threadCount) {
     List<List<T>> lists = new ArrayList<List<T>>();
     if (requests.size() < threadCount) {
       for (int i = 0; i < threadCount; i++) {

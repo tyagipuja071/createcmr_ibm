@@ -96,7 +96,7 @@ public class AutomationService extends MultiThreadedBatchService<Long> {
 
             if (AutomationConst.STATUS_AUTOMATED_PROCESSING_RETRY.equals(requestData.getAdmin().getReqStatus())) {
               // check if the request should be retried
-              if (!shouldRetry(requestData.getAdmin().getLastUpdtTs(), current)) {
+              if (!shouldRetry(requestData.getAdmin(), requestData.getAdmin().getLastUpdtTs(), current)) {
                 LOG.debug("Request ID " + id + " is for retry but is not yet within the retry threshold, skipping.");
                 proceedWithExecution = false;
               }
@@ -175,7 +175,11 @@ public class AutomationService extends MultiThreadedBatchService<Long> {
    * @param lastUpdateTs
    * @return
    */
-  private boolean shouldRetry(Date lastUpdateTs, Date current) {
+  private boolean shouldRetry(Admin admin, Date lastUpdateTs, Date current) {
+    if (!StringUtils.isBlank(admin.getSourceSystId())) {
+      LOG.debug("Request " + admin.getId().getReqId() + " from external systems, retrying..");
+      return true;
+    }
     int retryTime = SystemParameters.getInt("ENGINE_RETRY_CYCLE");
     if (retryTime <= 0) {
       retryTime = 10;
@@ -187,14 +191,6 @@ public class AutomationService extends MultiThreadedBatchService<Long> {
       return false;
     }
     return true;
-  }
-
-  public static void main(String[] args) {
-    Calendar cal = new GregorianCalendar();
-    cal.setTime(new Date());
-    System.out.println(cal.getTime());
-    cal.add(Calendar.MINUTE, -1 * 30);
-    System.out.println(cal.getTime());
   }
 
   /**
@@ -303,4 +299,8 @@ public class AutomationService extends MultiThreadedBatchService<Long> {
     return true;
   }
 
+  @Override
+  protected boolean rolloverSupported() {
+    return true;
+  }
 }

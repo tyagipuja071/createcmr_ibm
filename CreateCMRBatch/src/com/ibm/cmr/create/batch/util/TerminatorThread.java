@@ -51,6 +51,8 @@ public class TerminatorThread extends Thread {
             LOG.debug("Closing entity manager..");
             this.entityManager.clear();
             this.entityManager.close();
+          } else {
+            LOG.debug("No EntityManager assigned, proceeding with termination..");
           }
 
         } catch (Exception e) {

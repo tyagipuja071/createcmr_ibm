@@ -58,7 +58,7 @@ public class BatchThreadWorker<T> implements Runnable {
         EntityTransaction transaction = null;
         try {
 
-          LOG.info("Batch User ID: " + this.batchService.getUserId());
+          LOG.trace("Batch User ID: " + this.batchService.getUserId());
           if (this.batchService.isTransactional()) {
             ChangeLogListener.setManager(entityManager);
             transaction = entityManager.getTransaction();
