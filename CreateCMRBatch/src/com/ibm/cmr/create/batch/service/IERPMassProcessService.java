@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 
@@ -15,13 +16,16 @@ import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.entity.CompoundEntity;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.entity.MassCreate;
+import com.ibm.cio.cmr.request.entity.MassCreateData;
 import com.ibm.cio.cmr.request.entity.MassUpdt;
 import com.ibm.cio.cmr.request.entity.ReqCmtLog;
 import com.ibm.cio.cmr.request.entity.SuppCntry;
 import com.ibm.cio.cmr.request.entity.WfHist;
+import com.ibm.cio.cmr.request.model.requestentry.MassCreateBatchEmailModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.RequestUtils;
@@ -571,6 +575,7 @@ public class IERPMassProcessService extends TransConnService {
       String applicationId = BatchUtil.getAppId(data.getCmrIssuingCntry());
       List<String> rdcProcessStatusMsgs = new ArrayList<String>();
       HashMap<String, String> overallStatus = new HashMap<String, String>();
+      Map<String, List<String>> cmrNoSapNoMap = new HashMap<String, List<String>>();
 
       if (results != null && results.size() > 0) {
         for (MassCreate massCreate : results) {
@@ -651,10 +656,16 @@ public class IERPMassProcessService extends TransConnService {
                 } else {
                   comment.append("Record with the following Kunnr, Address sequence and address types on request ID " + admin.getId().getReqId()
                       + " was SUCCESSFULLY processed:\n");
+
                   for (RDcRecord pRecord : response.getRecords()) {
                     comment.append("Kunnr: " + pRecord.getSapNo() + ", sequence number: " + pRecord.getSeqNo() + ", ");
                     comment.append(" address type: " + pRecord.getAddressType() + "\n");
-                  }
+
+                    if (!cmrNoSapNoMap.containsKey(response.getCmrNo())) {
+                      cmrNoSapNoMap.put(response.getCmrNo(), new ArrayList<String>());
+                    }
+                    cmrNoSapNoMap.get(response.getCmrNo()).add(pRecord.getSapNo());
+                  } // for
                 }
               }
 
@@ -706,7 +717,7 @@ public class IERPMassProcessService extends TransConnService {
           admin.setProcessedFlag("Y");
           updateEntity(admin, entityManager);
           partialCommit(entityManager);
-        }
+        } // FOR
 
         LOG.debug("**** Placing comment on success --> " + comment);
         comment = new StringBuilder();
@@ -786,12 +797,62 @@ public class IERPMassProcessService extends TransConnService {
         partialCommit(entityManager);
         LOG.debug(
             "Request ID " + admin.getId().getReqId() + " Status: " + admin.getRdcProcessingStatus() + " Message: " + admin.getRdcProcessingMsg());
+
+        if (resultCode != CmrConstants.RDC_STATUS_ABORTED) {
+          sendMasscreateCMRNos(entityManager, reqId, admin.getIterationId(), cmrNoSapNoMap);
+        }
+
       } else {
         LOG.error("*****There are no mass create requests for RDC processing.*****");
       }
     } catch (Exception e) {
       LOG.error("Error in processing Create Request " + admin.getId().getReqId(), e);
       addError("Create Request " + admin.getId().getReqId() + " Error: " + e.getMessage());
+    }
+  }
+
+  private void sendMasscreateCMRNos(EntityManager em, long reqId, int itrId, Map<String, List<String>> cmrNoSapNoMap) throws Exception {
+    PreparedQuery cmrSuccessQuery = new PreparedQuery(em, ExternalizedQuery.getSql("BATCH.MASS_CREATE_DATA_CMR_RECORDS"));
+    cmrSuccessQuery.setParameter("REQ_ID", reqId);
+    cmrSuccessQuery.setParameter("ITERATION_ID", itrId);
+    String map = Admin.BATCH_CMR_DATA_MAPPING;
+    List<CompoundEntity> resultSuccessful = cmrSuccessQuery.getCompundResults(Admin.class, map);
+
+    MassCreate massCreate = null;
+    MassCreateData massCreateData = null;
+    Admin adminData = null;
+    List<MassCreateBatchEmailModel> cmrList = new ArrayList<MassCreateBatchEmailModel>();
+    MassCreateBatchEmailModel record = null;
+    for (CompoundEntity entity : resultSuccessful) {
+      massCreate = entity.getEntity(MassCreate.class);
+      record = new MassCreateBatchEmailModel();
+      adminData = entity.getEntity(Admin.class);
+      massCreateData = entity.getEntity(MassCreateData.class);
+
+      record.setCmrNo(massCreate.getCmrNo());
+      record.setCustName(massCreateData.getCustNm1() + (massCreateData.getCustNm2() != null ? massCreateData.getCustNm2() : ""));
+      record.setRowNo(massCreate.getId().getSeqNo());
+      if ("DONE".equals(massCreate.getRowStatusCd())) {
+        record.setErrorMsg("");
+      } else {
+        record.setErrorMsg(massCreate.getErrorTxt());
+      }
+
+      StringBuilder sapNoAll = new StringBuilder();
+      List<String> sapNos = cmrNoSapNoMap.get(record.getCmrNo());
+      if (sapNos != null) {
+        for (String sapNo : sapNos) {
+          sapNoAll.append(sapNoAll.length() > 0 ? "<br>" : "");
+          sapNoAll.append(sapNo);
+        }
+      }
+      record.setSapNo(sapNoAll.toString());
+      cmrList.add(record);
+    }
+
+    LOG.info("CMRs records size : " + cmrList.size());
+    if (cmrList.size() > 0) {
+      RequestUtils.sendMassCreateCMRNotifications(em, cmrList, adminData);
     }
   }
 
