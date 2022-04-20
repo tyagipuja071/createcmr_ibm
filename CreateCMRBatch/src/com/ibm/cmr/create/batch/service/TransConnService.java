@@ -142,8 +142,9 @@ public class TransConnService extends BaseBatchService {
 
       ChangeLogListener.setUser(BATCH_USER_ID);
 
+      List<Long> records = null;
       LOG.info("Processing Aborted records (retry)...");
-      List<Long> records = gatherAbortedRecords(entityManager);
+      records = gatherAbortedRecords(entityManager);
       monitorAbortedRecords(entityManager, records);
 
       LOG.info("Processing TransConn records...");
@@ -159,7 +160,7 @@ public class TransConnService extends BaseBatchService {
       monitorDisAutoProcRec(entityManager, records);
 
       if ("Y".equals(SystemParameters.getString("POOL.CMR.STATUS"))) {
-        LOG.info("Processing Pending if Host is Down...");
+        LOG.info("Processing Pool records..");
         records = gatherLegacyPending(entityManager);
         monitorLegacyPending(entityManager, records);
       }
