@@ -2329,10 +2329,12 @@ function setClientTierValuesIT(isuCd) {
     return;
   }
   isuCd = FormManager.getActualValue('isuCd');
-  if (isuCd == '5K') {
+  if (isuCd == '5K' || isuCd == '28') {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
     FormManager.setValue('clientTier', '');
-    FormManager.readOnly('clientTier');
+    if (isuCd == '5K') {
+      FormManager.readOnly('clientTier');
+    }
   } else {
     var reqType = FormManager.getActualValue('reqType');
     var custSubGrp = FormManager.getActualValue('custSubGrp');
