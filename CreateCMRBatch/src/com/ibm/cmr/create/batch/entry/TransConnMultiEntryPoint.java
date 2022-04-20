@@ -18,6 +18,7 @@ public class TransConnMultiEntryPoint extends BatchEntryPoint {
     BatchEntryPoint.initContext("TransConnMulti", true);
 
     TransConnMultiService service = new TransConnMultiService();
+    service.setSkipExit(true);
     service.setMode(Mode.Aborted);
     service.execute();
 
@@ -27,10 +28,14 @@ public class TransConnMultiEntryPoint extends BatchEntryPoint {
     service.setMode(Mode.MQ);
     service.execute();
 
+    if (!"Y".equals(SystemParameters.getString("POOL.CMR.STATUS"))) {
+      service.setSkipExit(false);
+    }
     service.setMode(Mode.Manual);
     service.execute();
 
     if ("Y".equals(SystemParameters.getString("POOL.CMR.STATUS"))) {
+      service.setSkipExit(false);
       service.setMode(Mode.Pool);
       service.execute();
     }

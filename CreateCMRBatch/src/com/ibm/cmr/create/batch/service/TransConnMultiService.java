@@ -46,9 +46,9 @@ public class TransConnMultiService extends MultiThreadedBatchService<Long> {
       break;
     default:
       break;
-
     }
-    return null;
+    keepAlive();
+    return true;
   }
 
   @Override

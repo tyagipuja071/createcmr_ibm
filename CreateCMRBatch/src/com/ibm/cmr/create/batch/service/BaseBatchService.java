@@ -56,6 +56,7 @@ public abstract class BaseBatchService extends BaseSimpleService<Boolean> {
   protected static String BATCH_USER_ID = "CreateCMR";
   public static String BATCH_SERVICE_URL = "";
   protected TerminatorThread terminator = null;
+  protected boolean skipExit;
 
   /**
    * Constructor
@@ -114,17 +115,19 @@ public abstract class BaseBatchService extends BaseSimpleService<Boolean> {
     long elapsed = (endTime - startTime) / 1000;
     LOG.info("Application finished execution at " + TIME_FORMATTER.format(new Date(endTime)));
     LOG.info("Took " + elapsed + " seconds.");
-    Timer timer = new Timer();
-    timer.schedule(new TimerTask() {
+    if (!this.skipExit) {
+      Timer timer = new Timer();
+      timer.schedule(new TimerTask() {
 
-      @Override
-      public void run() {
-        LOG.info("System exiting...");
-        Runtime.getRuntime().halt(0);
-      }
-    }, 5000);
+        @Override
+        public void run() {
+          LOG.info("System exiting...");
+          Runtime.getRuntime().halt(0);
+        }
+      }, 5000);
 
-    // System.exit(0);
+      // System.exit(0);
+    }
   }
 
   @Override
@@ -498,6 +501,14 @@ public abstract class BaseBatchService extends BaseSimpleService<Boolean> {
 
   protected int getTerminatorWaitTime() {
     return 0;
+  }
+
+  public boolean isSkipExit() {
+    return skipExit;
+  }
+
+  public void setSkipExit(boolean skipExit) {
+    this.skipExit = skipExit;
   }
 
 }
