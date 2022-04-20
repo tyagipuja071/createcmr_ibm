@@ -24,6 +24,7 @@ public class TransConnMultiService extends MultiThreadedBatchService<Long> {
   };
 
   private Mode mode = Mode.Pending;
+  private boolean poolMode;
 
   @Override
   public Boolean executeBatchForRequests(EntityManager entityManager, List<Long> requests) throws Exception {
@@ -45,9 +46,9 @@ public class TransConnMultiService extends MultiThreadedBatchService<Long> {
       break;
     default:
       break;
-
     }
-    return null;
+    keepAlive();
+    return true;
   }
 
   @Override
@@ -99,6 +100,14 @@ public class TransConnMultiService extends MultiThreadedBatchService<Long> {
 
   public void setMode(Mode mode) {
     this.mode = mode;
+  }
+
+  public boolean isPoolMode() {
+    return poolMode;
+  }
+
+  public void setPoolMode(boolean poolMode) {
+    this.poolMode = poolMode;
   }
 
 }
