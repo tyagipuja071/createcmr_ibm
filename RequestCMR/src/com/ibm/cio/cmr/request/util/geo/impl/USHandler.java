@@ -849,7 +849,7 @@ public class USHandler extends GEOHandler {
 
   @Override
   public boolean useSeqNoFromImport() {
-    return false;
+    return true;
   }
 
   @Override
