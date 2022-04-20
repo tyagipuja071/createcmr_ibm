@@ -2333,7 +2333,7 @@ function setClientTierValuesIT(isuCd) {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
     FormManager.setValue('clientTier', '');
     if (isuCd == '5K') {
-    FormManager.readOnly('clientTier');
+      FormManager.readOnly('clientTier');
     }
   } else {
     var reqType = FormManager.getActualValue('reqType');
