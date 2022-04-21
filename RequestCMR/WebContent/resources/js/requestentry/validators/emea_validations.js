@@ -2329,12 +2329,15 @@ function setClientTierValuesIT(isuCd) {
     return;
   }
   isuCd = FormManager.getActualValue('isuCd');
-  if (isuCd == '5K' || isuCd == '28') {
+  _isuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+  if (value == '5K' || value == '28') {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
     FormManager.setValue('clientTier', '');
-    if (isuCd == '5K') {
+    if (value == '5K') {
       FormManager.readOnly('clientTier');
     }
+  }
+  }
   } else {
     var reqType = FormManager.getActualValue('reqType');
     var custSubGrp = FormManager.getActualValue('custSubGrp');
@@ -10498,6 +10501,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addHandlersForIL, [ SysLoc.ISRAEL ]);
   GEOHandler.addAddrFunction(countryUseAISRAEL, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(addHandlersForIE, [ SysLoc.IRELAND ]);
+  GEOHandler.addAfterConfig(addISUHandlerIT), [ SysLoc.ITALY ]);
 
   // CREATCMR-4293
   GEOHandler.addAfterTemplateLoad(setCTCValues, [ SysLoc.IRELAND, SysLoc.ITALY, SysLoc.UK ]);
