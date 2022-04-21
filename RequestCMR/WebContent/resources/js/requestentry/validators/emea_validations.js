@@ -2329,15 +2329,12 @@ function setClientTierValuesIT(isuCd) {
     return;
   }
   isuCd = FormManager.getActualValue('isuCd');
-  _isuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
   if (value == '5K' || value == '28') {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
     FormManager.setValue('clientTier', '');
     if (value == '5K') {
       FormManager.readOnly('clientTier');
     }
-  }
-  }
   } else {
     var reqType = FormManager.getActualValue('reqType');
     var custSubGrp = FormManager.getActualValue('custSubGrp');
