@@ -636,9 +636,6 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
     Map<String, Integer> seqMap = new HashMap<String, Integer>();
     Integer seq = null;
     for (FindCMRRecordModel cmr : cmrs) {
-      if(cmr.getCmrAddrTypeCode().equals("ZLST") && cmr.getCmrIssuedBy().equals("897")) {
-        continue;
-      }
       addr = new Addr();
       addrPk = new AddrPK();
       addrPk.setReqId(reqId);
