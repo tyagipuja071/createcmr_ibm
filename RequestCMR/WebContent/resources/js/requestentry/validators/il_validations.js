@@ -145,7 +145,13 @@ function setChecklistStatus() {
           checkCount++;
         }
       }
-      if (noOfQuestions != checkCount) {
+      if(isChecklistNotRequired()) {
+        document.getElementById("checklistStatus").innerHTML = "Not Required";
+        FormManager.setValue('checklistStatus', "Not Required");
+      } else if (checkCount == 0) {
+        document.getElementById("checklistStatus").innerHTML = "Not Done";
+        FormManager.setValue('checklistStatus', "Not Done");
+      } else if (noOfQuestions != checkCount) {
         document.getElementById("checklistStatus").innerHTML = "Incomplete";
         FormManager.setValue('checklistStatus', "Incomplete");
       } else {
@@ -157,6 +163,38 @@ function setChecklistStatus() {
       FormManager.setValue('checklistStatus', "Complete");
     }
   }
+}
+
+function isChecklistNotRequired() {
+  var reqType = FormManager.getActualValue('reqType');
+
+  if (reqType == 'U') {
+    var requestId = FormManager.getActualValue('reqId');
+    var queryParams = {
+      REQ_ID : requestId,
+      ADDR_TYPE : 'CTYA'
+    };
+    var resultq = cmr.query('CHECK.ADDR.UPDATED_IL', queryParams);
+    if (resultq.ret1 != '1') {
+      return true;
+    }
+  } else if(reqType == 'C') {
+    var scenario = FormManager.getActualValue('custSubGrp');
+    var zs01ReqId = FormManager.getActualValue('reqId');
+    var prolif = false;
+    var qParams = {
+      REQ_ID : zs01ReqId,
+    };
+    var result = cmr.query('ADDR.GET.LANDCNTRY.BY_REQID', qParams);
+    landCntry = result.ret1;
+    if (_prolifCountries.includes(landCntry)) {
+      prolif = true;
+    }
+    if (scenario == 'CROSS' && !prolif) {
+      return true;
+    }
+  }
+  return false;
 }
 
 function addILChecklistValidator() {
@@ -2653,6 +2691,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setCTCByScenario, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterTemplateLoad(showVatInfoOnLocal, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterTemplateLoad(requireCtcByISU, [ SysLoc.ISRAEL ]);
+  GEOHandler.addAfterTemplateLoad(setChecklistStatus, [ SysLoc.ISRAEL ]);
 
   GEOHandler.registerValidator(addISICKUKLAValidator, [ SysLoc.ISRAEL ], null, true);
   GEOHandler.registerValidator(addCollectionValidator, [ SysLoc.ISRAEL ], null, true);
