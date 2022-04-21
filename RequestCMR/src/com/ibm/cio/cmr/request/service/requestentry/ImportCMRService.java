@@ -646,6 +646,7 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
       addrPk.setAddrType(type);
       if (("U".equals(reqModel.getReqType()) || "X".equals(reqModel.getReqType())) && converter != null && converter.useSeqNoFromImport()) {
         addrPk.setAddrSeq(cmr.getCmrAddrSeq());
+       
       } else {
         if (seqMap.get(type) == null) {
           seqMap.put(type, new Integer(0));
@@ -691,6 +692,13 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
           addrPk.setAddrSeq(cmr.getCmrAddrSeq());
         }
       }
+      if (!StringUtils.isBlank(cmr.getCmrAddrSeq())) {
+        addrPk.setAddrSeq(cmr.getCmrAddrSeq());
+      } else if (StringUtils.isBlank(cmr.getCmrAddrSeq()) && "897".equals(reqModel.getCmrIssuingCntry())) {
+        addrPk.setAddrSeq("ZI01".equals(type) ? "002" : ("ZP01".equals(type) ? "1" : "001"));
+      }
+      
+      
       // end -US ZI01 null sequence Import fix - 8 Apr 2022 - garima
       addr.setId(addrPk);
 
