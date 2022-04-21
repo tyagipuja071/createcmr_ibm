@@ -798,7 +798,7 @@ public class IERPMassProcessService extends TransConnService {
         LOG.debug(
             "Request ID " + admin.getId().getReqId() + " Status: " + admin.getRdcProcessingStatus() + " Message: " + admin.getRdcProcessingMsg());
 
-        if (resultCode != CmrConstants.RDC_STATUS_ABORTED) {
+        if ("COM".equals(admin.getReqStatus())) {
           sendMasscreateCMRNos(entityManager, reqId, admin.getIterationId(), cmrNoSapNoMap);
         }
 

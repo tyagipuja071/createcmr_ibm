@@ -3,6 +3,10 @@
  */
 package com.ibm.cmr.create.batch.util.worker.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
@@ -33,10 +37,12 @@ public class IERPMassCreateMultiWorker extends MassCreateMultiWorker {
 
   private static final Logger LOG = Logger.getLogger(IERPMassUpdtMultiWorker.class);
   private boolean indexNotUpdated;
+  private Map<String, List<String>> cmrNoSapNoMap;
 
-  public IERPMassCreateMultiWorker(MultiThreadedBatchService<?> parentService, Admin parentAdmin, MassCreate parentEntity) {
+  public IERPMassCreateMultiWorker(MultiThreadedBatchService<?> parentService, Admin parentAdmin, MassCreate parentEntity,
+      Map<String, List<String>> cmrNoSapNoMap) {
     super(parentService, parentAdmin, parentEntity);
-
+    this.cmrNoSapNoMap = cmrNoSapNoMap;
   }
 
   @Override
@@ -128,6 +134,11 @@ public class IERPMassCreateMultiWorker extends MassCreateMultiWorker {
             for (RDcRecord pRecord : response.getRecords()) {
               addComment("Kunnr: " + pRecord.getSapNo() + ", sequence number: " + pRecord.getSeqNo() + ", ");
               addComment(" address type: " + pRecord.getAddressType() + "\n");
+
+              if (!cmrNoSapNoMap.containsKey(response.getCmrNo())) {
+                cmrNoSapNoMap.put(response.getCmrNo(), new ArrayList<String>());
+              }
+              cmrNoSapNoMap.get(response.getCmrNo()).add(pRecord.getSapNo());
             }
           }
         }

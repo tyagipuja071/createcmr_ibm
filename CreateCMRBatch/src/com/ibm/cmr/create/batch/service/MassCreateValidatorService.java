@@ -58,6 +58,7 @@ import com.ibm.cmr.create.batch.util.masscreate.handler.impl.InternalTypeAbbrevN
 import com.ibm.cmr.create.batch.util.masscreate.handler.impl.SubindustryISICHandler;
 import com.ibm.cmr.create.batch.util.masscreate.handler.impl.TgmeAddrStdHandler;
 import com.ibm.cmr.create.batch.util.masscreate.handler.impl.USPostCodeAndStateHandler;
+import com.ibm.cmr.create.batch.util.masscreate.handler.impl.WWSubindustryISICHandler;
 
 /**
  * @author Jeffrey Zamora
@@ -375,7 +376,6 @@ public class MassCreateValidatorService extends BaseBatchService {
 
       // ww handlers
       engine.addHandler(new DataHandler());
-      engine.addHandler(new SubindustryISICHandler());
       engine.addHandler(new DPLCheckHandler());
       engine.addHandler(new INACHandler());
 
@@ -384,6 +384,7 @@ public class MassCreateValidatorService extends BaseBatchService {
       case SystemLocation.UNITED_STATES:
         engine.addHandler(new CreatebyModelHandler());
         engine.addHandler(new AddressHandler());
+        engine.addHandler(new SubindustryISICHandler());
         engine.addHandler(new CoverageBgGlcISUHandler());
         engine.addHandler(new TgmeAddrStdHandler());
         engine.addHandler(new USPostCodeAndStateHandler());
@@ -394,6 +395,7 @@ public class MassCreateValidatorService extends BaseBatchService {
         break;
       case SystemLocation.CANADA:
         engine.addHandler(new CADefaultFields());
+        engine.addHandler(new WWSubindustryISICHandler());
         engine.addHandler(new CACreatebyModelHandler());
         engine.addHandler(new CMRNoNonUSHandler());
         engine.addHandler(new CATaxHandler());

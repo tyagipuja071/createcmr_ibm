@@ -5,10 +5,12 @@ package com.ibm.cmr.create.batch.service;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -24,14 +26,17 @@ import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AdminPK;
+import com.ibm.cio.cmr.request.entity.CompoundEntity;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.entity.MassCreate;
+import com.ibm.cio.cmr.request.entity.MassCreateData;
 import com.ibm.cio.cmr.request.entity.MassUpdt;
 import com.ibm.cio.cmr.request.entity.ReqCmtLog;
 import com.ibm.cio.cmr.request.entity.SuppCntry;
 import com.ibm.cio.cmr.request.entity.WfHist;
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
+import com.ibm.cio.cmr.request.model.requestentry.MassCreateBatchEmailModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.RequestUtils;
@@ -459,6 +464,8 @@ public class IERPMassProcessMultiService extends MultiThreadedBatchService<Long>
 
       List<String> rdcProcessStatusMsgs = new ArrayList<String>();
       HashMap<String, String> overallStatus = new HashMap<String, String>();
+      Map<String, List<String>> backing = new HashMap<String, List<String>>();
+      Map<String, List<String>> cmrNoSapNoMap = Collections.synchronizedMap(backing);
 
       if (resultsMain != null && resultsMain.size() > 0) {
 
@@ -483,7 +490,7 @@ public class IERPMassProcessMultiService extends MultiThreadedBatchService<Long>
           // ensure the mass create entity is not updated on this persistence
           // context
           entityManager.detach(sMassCreate);
-          IERPMassCreateMultiWorker worker = new IERPMassCreateMultiWorker(this, admin, sMassCreate);
+          IERPMassCreateMultiWorker worker = new IERPMassCreateMultiWorker(this, admin, sMassCreate, cmrNoSapNoMap);
           executor.execute(worker);
           workers.add(worker);
         }
@@ -607,6 +614,11 @@ public class IERPMassProcessMultiService extends MultiThreadedBatchService<Long>
         LOG.debug(
             "Request ID " + admin.getId().getReqId() + " Status: " + admin.getRdcProcessingStatus() + " Message: " + admin.getRdcProcessingMsg());
         // *** END OF FIX
+
+        if ("COM".equals(admin.getReqStatus())) {
+          sendMasscreateCMRNos(entityManager, reqId, admin.getIterationId(), cmrNoSapNoMap);
+        }
+
       } else {
         LOG.error("*****There are no mass create requests for RDC processing.*****");
       }
@@ -644,6 +656,51 @@ public class IERPMassProcessMultiService extends MultiThreadedBatchService<Long>
     createComment(entityManager, "An error occurred during processing:\n" + errorMsg, admin.getId().getReqId());
 
     RequestUtils.sendEmailNotifications(entityManager, admin, hist);
+  }
+
+  private void sendMasscreateCMRNos(EntityManager em, long reqId, int itrId, Map<String, List<String>> cmrNoSapNoMap) throws Exception {
+    PreparedQuery cmrSuccessQuery = new PreparedQuery(em, ExternalizedQuery.getSql("BATCH.MASS_CREATE_DATA_CMR_RECORDS"));
+    cmrSuccessQuery.setParameter("REQ_ID", reqId);
+    cmrSuccessQuery.setParameter("ITERATION_ID", itrId);
+    String map = Admin.BATCH_CMR_DATA_MAPPING;
+    List<CompoundEntity> resultSuccessful = cmrSuccessQuery.getCompundResults(Admin.class, map);
+
+    MassCreate massCreate = null;
+    MassCreateData massCreateData = null;
+    Admin adminData = null;
+    List<MassCreateBatchEmailModel> cmrList = new ArrayList<MassCreateBatchEmailModel>();
+    MassCreateBatchEmailModel record = null;
+    for (CompoundEntity entity : resultSuccessful) {
+      massCreate = entity.getEntity(MassCreate.class);
+      record = new MassCreateBatchEmailModel();
+      adminData = entity.getEntity(Admin.class);
+      massCreateData = entity.getEntity(MassCreateData.class);
+
+      record.setCmrNo(massCreate.getCmrNo());
+      record.setCustName(massCreateData.getCustNm1() + (massCreateData.getCustNm2() != null ? massCreateData.getCustNm2() : ""));
+      record.setRowNo(massCreate.getId().getSeqNo());
+      if ("DONE".equals(massCreate.getRowStatusCd())) {
+        record.setErrorMsg("");
+      } else {
+        record.setErrorMsg(massCreate.getErrorTxt());
+      }
+
+      StringBuilder sapNoAll = new StringBuilder();
+      List<String> sapNos = cmrNoSapNoMap.get(record.getCmrNo());
+      if (sapNos != null) {
+        for (String sapNo : sapNos) {
+          sapNoAll.append(sapNoAll.length() > 0 ? "<br>" : "");
+          sapNoAll.append(sapNo);
+        }
+      }
+      record.setSapNo(sapNoAll.toString());
+      cmrList.add(record);
+    }
+
+    LOG.info("CMRs records size : " + cmrList.size());
+    if (cmrList.size() > 0) {
+      RequestUtils.sendMassCreateCMRNotifications(em, cmrList, adminData);
+    }
   }
 
   @Override
