@@ -20,12 +20,12 @@ import com.ibm.cmr.create.batch.util.masscreate.handler.RowResult;
 /**
  * ISIC and Subindustry handler
  * 
- * @author Jeffrey Zamora
+ * @author Joseph Ramos
  * 
  */
-public class SubindustryISICHandler implements RowHandler {
+public class WWSubindustryISICHandler implements RowHandler {
 
-  private static final Logger LOG = Logger.getLogger(SubindustryISICHandler.class);
+  private static final Logger LOG = Logger.getLogger(WWSubindustryISICHandler.class);
 
   @Override
   public RowResult validate(EntityManager entityManager, MassCreateFileRow row) throws Exception {
@@ -55,9 +55,10 @@ public class SubindustryISICHandler implements RowHandler {
   }
 
   private String[] getSubIndustryISIC(EntityManager entityManager, String isicCd) {
-    String sql = ExternalizedQuery.getSql("MC.GET_ISIC_SUBIND");
+    String sql = ExternalizedQuery.getSql("MC.WW.GET_ISIC_SUBIND");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("ISIC", isicCd);
+    query.setParameter("GEO_CD", "WW");
     List<Object[]> result = query.getResults(1);
     if (result != null && result.size() > 0) {
       return new String[] { (String) result.get(0)[0], (String) result.get(0)[1] };

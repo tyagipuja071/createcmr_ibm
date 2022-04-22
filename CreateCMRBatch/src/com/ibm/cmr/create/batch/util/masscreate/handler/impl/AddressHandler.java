@@ -35,16 +35,16 @@ public class AddressHandler implements RowHandler {
         } else {
           LOG.debug("Validating address lines for " + addr.getId().getAddrType());
           if (StringUtils.isBlank(addr.getLandCntry())) {
-            result.addError(addr.getId().getAddrType() + " Landed Country is required.");
+            result.addError(addr.getId().getAddrType() + " Landed Country is required. ");
           }
           if (StringUtils.isBlank(addr.getAddrTxt())) {
-            result.addError(addr.getId().getAddrType() + " Address is required.");
+            result.addError(addr.getId().getAddrType() + " Address is required. ");
           }
           if (StringUtils.isBlank(addr.getStateProv())) {
-            result.addError(addr.getId().getAddrType() + " State/Province is required.");
+            result.addError(addr.getId().getAddrType() + " State/Province is required. ");
           }
           if (StringUtils.isBlank(addr.getCity1())) {
-            result.addError(addr.getId().getAddrType() + " City is required.");
+            result.addError(addr.getId().getAddrType() + " City is required. ");
           }
         }
       }

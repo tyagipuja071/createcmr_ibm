@@ -34,6 +34,7 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.approval.ApprovalService;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.masscreate.MassCreateFile;
@@ -45,7 +46,14 @@ import com.ibm.cmr.create.batch.util.BatchUtil;
 import com.ibm.cmr.create.batch.util.masscreate.WorkerThreadFactory;
 import com.ibm.cmr.create.batch.util.masscreate.handler.HandlerEngine;
 import com.ibm.cmr.create.batch.util.masscreate.handler.impl.AddressHandler;
+import com.ibm.cmr.create.batch.util.masscreate.handler.impl.CAAddressHandler;
+import com.ibm.cmr.create.batch.util.masscreate.handler.impl.CACreatebyModelHandler;
+import com.ibm.cmr.create.batch.util.masscreate.handler.impl.CADefaultFields;
+import com.ibm.cmr.create.batch.util.masscreate.handler.impl.CALocationNoHandler;
+import com.ibm.cmr.create.batch.util.masscreate.handler.impl.CAPhoneNoHandler;
+import com.ibm.cmr.create.batch.util.masscreate.handler.impl.CATaxHandler;
 import com.ibm.cmr.create.batch.util.masscreate.handler.impl.CMRNoHandler;
+import com.ibm.cmr.create.batch.util.masscreate.handler.impl.CMRNoNonUSHandler;
 import com.ibm.cmr.create.batch.util.masscreate.handler.impl.CityAndCountyHandler;
 import com.ibm.cmr.create.batch.util.masscreate.handler.impl.CoverageBgGlcISUHandler;
 import com.ibm.cmr.create.batch.util.masscreate.handler.impl.CreatebyModelHandler;
@@ -57,6 +65,7 @@ import com.ibm.cmr.create.batch.util.masscreate.handler.impl.InternalTypeAbbrevN
 import com.ibm.cmr.create.batch.util.masscreate.handler.impl.SubindustryISICHandler;
 import com.ibm.cmr.create.batch.util.masscreate.handler.impl.TgmeAddrStdHandler;
 import com.ibm.cmr.create.batch.util.masscreate.handler.impl.USPostCodeAndStateHandler;
+import com.ibm.cmr.create.batch.util.masscreate.handler.impl.WWSubindustryISICHandler;
 import com.ibm.cmr.create.batch.util.worker.impl.USMassCreateValidateMultiWorker;
 
 /**
@@ -355,23 +364,34 @@ public class MassCreateValidatorMultiService extends MultiThreadedBatchService<L
       HandlerEngine engine = new HandlerEngine();
 
       // ww handlers
-      engine.addHandler(new CreatebyModelHandler());
       engine.addHandler(new DataHandler());
-      engine.addHandler(new AddressHandler());
-      engine.addHandler(new SubindustryISICHandler());
       engine.addHandler(new DPLCheckHandler());
       engine.addHandler(new INACHandler());
-      engine.addHandler(new CoverageBgGlcISUHandler());
 
       // per country handler
       switch (cmrIssuingCountry) {
-      case "897":
+      case SystemLocation.UNITED_STATES:
+        engine.addHandler(new CreatebyModelHandler());
+        engine.addHandler(new AddressHandler());
+        engine.addHandler(new SubindustryISICHandler());
+        engine.addHandler(new CoverageBgGlcISUHandler());
         engine.addHandler(new TgmeAddrStdHandler());
         engine.addHandler(new USPostCodeAndStateHandler());
         engine.addHandler(new CityAndCountyHandler());
         engine.addHandler(new CMRNoHandler());
         engine.addHandler(new EnterpriseAffiliateHandler());
         engine.addHandler(new InternalTypeAbbrevNameHandler());
+        break;
+      case SystemLocation.CANADA:
+        engine.addHandler(new CADefaultFields());
+        engine.addHandler(new WWSubindustryISICHandler());
+        engine.addHandler(new CACreatebyModelHandler());
+        engine.addHandler(new CMRNoNonUSHandler());
+        engine.addHandler(new CATaxHandler());
+        engine.addHandler(new CALocationNoHandler());
+        engine.addHandler(new CAAddressHandler());
+        engine.addHandler(new CAPhoneNoHandler());
+        break;
       }
 
       engines.put(cmrIssuingCountry, engine);

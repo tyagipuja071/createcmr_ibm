@@ -177,6 +177,23 @@ public class SearchResultObject {
 
   private String ADDR_SEQ;
 
+  // CreatCMR-1277 CA MassCreate
+  private String SELLING_BO_NUM;
+  private String INSTL_BO_NUM;
+  private String PROV_TAX_EX_IND;
+  private String ENGG_BO_GRP;
+  private String ACC_RECV_BO;
+  private String CUST_CREDIT_CD;
+  private String BILL_PLN_TYP;
+  private String QST_ID;
+  private String SW_EXEMPT_LIC_NUM;
+  private String TAX_EXEMPT_REASON;
+  private String LEASING_IND;
+  private String PUR_ORD_NO;
+  private String LT_PYMNT_IND;
+  private String EST_FUNC_CD;
+  private String NO_OF_INVC;
+
   public String getKUNNR() {
     return KUNNR;
   }
@@ -1256,4 +1273,125 @@ public class SearchResultObject {
   public void setADDR_SEQ(String aDDR_SEQ) {
     ADDR_SEQ = aDDR_SEQ;
   }
+
+  public String getSELLING_BO_NUM() {
+    return SELLING_BO_NUM;
+  }
+
+  public void setSELLING_BO_NUM(String sELLING_BO_NUM) {
+    SELLING_BO_NUM = sELLING_BO_NUM;
+  }
+
+  public String getINSTL_BO_NUM() {
+    return INSTL_BO_NUM;
+  }
+
+  public void setINSTL_BO_NUM(String iNSTL_BO_NUM) {
+    INSTL_BO_NUM = iNSTL_BO_NUM;
+  }
+
+  public String getPROV_TAX_EX_IND() {
+    return PROV_TAX_EX_IND;
+  }
+
+  public void setPROV_TAX_EX_IND(String pROV_TAX_EX_IND) {
+    PROV_TAX_EX_IND = pROV_TAX_EX_IND;
+  }
+
+  public String getENGG_BO_GRP() {
+    return ENGG_BO_GRP;
+  }
+
+  public void setENGG_BO_GRP(String eNGG_BO_GRP) {
+    ENGG_BO_GRP = eNGG_BO_GRP;
+  }
+
+  public String getACC_RECV_BO() {
+    return ACC_RECV_BO;
+  }
+
+  public void setACC_RECV_BO(String aCC_RECV_BO) {
+    ACC_RECV_BO = aCC_RECV_BO;
+  }
+
+  public String getCUST_CREDIT_CD() {
+    return CUST_CREDIT_CD;
+  }
+
+  public void setCUST_CREDIT_CD(String cUST_CREDIT_CD) {
+    CUST_CREDIT_CD = cUST_CREDIT_CD;
+  }
+
+  public String getBILL_PLN_TYP() {
+    return BILL_PLN_TYP;
+  }
+
+  public void setBILL_PLN_TYP(String bILL_PLN_TYP) {
+    BILL_PLN_TYP = bILL_PLN_TYP;
+  }
+
+  public String getQST_ID() {
+    return QST_ID;
+  }
+
+  public void setQST_ID(String qST_ID) {
+    QST_ID = qST_ID;
+  }
+
+  public String getSW_EXEMPT_LIC_NUM() {
+    return SW_EXEMPT_LIC_NUM;
+  }
+
+  public void setSW_EXEMPT_LIC_NUM(String sW_EXEMPT_LIC_NUM) {
+    SW_EXEMPT_LIC_NUM = sW_EXEMPT_LIC_NUM;
+  }
+
+  public String getTAX_EXEMPT_REASON() {
+    return TAX_EXEMPT_REASON;
+  }
+
+  public void setTAX_EXEMPT_REASON(String tAX_EXEMPT_REASON) {
+    TAX_EXEMPT_REASON = tAX_EXEMPT_REASON;
+  }
+
+  public String getLEASING_IND() {
+    return LEASING_IND;
+  }
+
+  public void setLEASING_IND(String lEASING_IND) {
+    LEASING_IND = lEASING_IND;
+  }
+
+  public String getPUR_ORD_NO() {
+    return PUR_ORD_NO;
+  }
+
+  public void setPUR_ORD_NO(String pUR_ORD_NO) {
+    PUR_ORD_NO = pUR_ORD_NO;
+  }
+
+  public String getLT_PYMNT_IND() {
+    return LT_PYMNT_IND;
+  }
+
+  public void setLT_PYMNT_IND(String lT_PYMNT_IND) {
+    LT_PYMNT_IND = lT_PYMNT_IND;
+  }
+
+  public String getEST_FUNC_CD() {
+    return EST_FUNC_CD;
+  }
+
+  public void setEST_FUNC_CD(String eST_FUNC_CD) {
+    EST_FUNC_CD = eST_FUNC_CD;
+  }
+
+  public String getNO_OF_INVC() {
+    return NO_OF_INVC;
+  }
+
+  public void setNO_OF_INVC(String nO_OF_INVC) {
+    NO_OF_INVC = nO_OF_INVC;
+  }
+
 }
