@@ -578,7 +578,8 @@ public class MassRequestEntryController extends BaseController {
           response.addHeader("Content-Disposition", "attachment; filename=\"" + templateName + "\"");
           GEOHandler geoHandler = RequestUtils.getGEOHandler(cmrIssuingCntry);
 
-          if (!"848".equals(cmrIssuingCntry) && geoHandler != null && geoHandler.isNewMassUpdtTemplateSupported(cmrIssuingCntry)) {
+          if (!CmrConstants.REQ_TYPE_MASS_CREATE.equals(admin.getReqType()) && !"848".equals(cmrIssuingCntry) && geoHandler != null
+              && geoHandler.isNewMassUpdtTemplateSupported(cmrIssuingCntry)) {
             MassChangeTemplateManager.initTemplatesAndValidators(cmrIssuingCntry);
 
             // change to the ID of the config you are generating

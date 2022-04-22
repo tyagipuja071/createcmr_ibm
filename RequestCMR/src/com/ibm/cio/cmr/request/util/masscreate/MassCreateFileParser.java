@@ -30,6 +30,8 @@ import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.MassCreateAddr;
 import com.ibm.cio.cmr.request.entity.listeners.TrimListener;
+import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.masscreate.MassCreateFile.ValidationResult;
 
 /**
@@ -111,10 +113,22 @@ public class MassCreateFileParser {
    */
   private ValidationResult validateFile(XSSFWorkbook book) {
     XSSFSheet sheet = book.getSheet(META_SHEET_NAME);
+    String currentVersion = SystemConfiguration.getValue("MASS_CREATE_TEMPLATE_VER", "0.1");
+    // Get country code
+    if (null != sheet.getRow(2) && null != sheet.getRow(2).getCell(1)) {
+      XSSFCell cellCountryCd = sheet.getRow(2).getCell(1);
+      cellCountryCd.setCellType(CellType.STRING);
+      if (StringUtils.isNotBlank(cellCountryCd.getStringCellValue())) {
+        if (SystemLocation.CANADA.equals(cellCountryCd.getStringCellValue())) {
+          currentVersion = SystemParameters.getString("CA_MASS_CREATE_TEMPLATE_VER");
+        }
+      }
+    }
+
     XSSFCell cell = sheet.getRow(0).getCell(1);
     cell.setCellType(CellType.STRING);
     String version = cell.getStringCellValue();
-    String currentVersion = SystemConfiguration.getValue("MASS_CREATE_TEMPLATE_VER", "0.1");
+
     if (StringUtils.isBlank(version) || !version.equals(currentVersion)) {
       LOG.debug("Invalid version:" + version + " Current: " + currentVersion);
       return ValidationResult.IncorrectVersion;

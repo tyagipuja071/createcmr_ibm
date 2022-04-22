@@ -1229,17 +1229,20 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       if (CmrConstants.REQ_TYPE_MASS_CREATE.equalsIgnoreCase(admin.getReqType())
           && CmrConstants.Send_for_Processing().equalsIgnoreCase(model.getAction())
           && CmrConstants.REQUEST_STATUS.DRA.toString().equals(trans.getId().getCurrReqStatus())) {
-        if (StringUtils.isNotEmpty(model.getCmrIssuingCntry()) && "649".equals(model.getCmrIssuingCntry())) {
-          trans.setNewReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
-          trans.setNewLockedInd(CmrConstants.YES_NO.N.toString());
-        } else {
+        if (StringUtils.isNotEmpty(model.getCmrIssuingCntry())) {
           trans.setNewReqStatus(CmrConstants.REQUEST_STATUS.SVA.toString());
+          // trans.setNewReqStatus(CmrConstants.REQUEST_STATUS.SMA.toString());
           trans.setNewLockedInd(CmrConstants.YES_NO.N.toString());
-        }
+        } /*
+           * else {
+           * trans.setNewReqStatus(CmrConstants.REQUEST_STATUS.SVA.toString());
+           * trans.setNewLockedInd(CmrConstants.YES_NO.N.toString()); }
+           */
       } else if (CmrConstants.REQ_TYPE_MASS_CREATE.equalsIgnoreCase(admin.getReqType())
           && CmrConstants.Create_Update_CMR().equalsIgnoreCase(model.getAction())
           && CmrConstants.REQUEST_STATUS.PVA.toString().equals(trans.getId().getCurrReqStatus())) {
         trans.setNewReqStatus(CmrConstants.REQUEST_STATUS.SV2.toString());
+        // trans.setNewReqStatus(CmrConstants.REQUEST_STATUS.SM2.toString());
         trans.setNewLockedInd(CmrConstants.YES_NO.N.toString());
       }
       admin.setReqStatus(trans.getNewReqStatus());
@@ -1825,7 +1828,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         return;
       }
 
-      if (cmrIssuingCntry != null && IERPRequestUtils.isCountryDREnabled(entityManager, cmrIssuingCntry)) {
+      if (cmrIssuingCntry != null && IERPRequestUtils.isCountryDREnabled(entityManager, cmrIssuingCntry)
+          && ((!cmrIssuingCntry.equals(SystemLocation.CANADA) && !CmrConstants.REQ_TYPE_MASS_CREATE.equals(admin.getReqType()))
+              || (cmrIssuingCntry.equals(SystemLocation.CANADA) && CmrConstants.REQ_TYPE_MASS_UPDATE.equals(admin.getReqType())))) {
         processLegacyDirectMassFile(entityManager, request, reqId, token, items);
         return;
       }
@@ -1864,15 +1869,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
 
               // MASS FILE | validate the mass file
               if (massCreate) {
-                if (PageManager.fromGeo("CA", cmrIssuingCntry)) {
-                  // if (!validateMassCreateCA(item.getInputStream())) {
-                  // throw new CmrException(MessageUtil.ERROR_MASS_FILE);
-                  // }
-                } // else default US
-                else {
-                  if (!validateMassCreateFile(item.getInputStream(), reqId, newIterId)) {
-                    throw new CmrException(MessageUtil.ERROR_MASS_FILE);
-                  }
+                if (!validateMassCreateFile(item.getInputStream(), reqId, newIterId)) {
+                  throw new CmrException(MessageUtil.ERROR_MASS_FILE);
                 }
                 log.info("mass create file validated");
               } else {
@@ -6165,51 +6163,39 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     }
   }
 
-  private boolean validateMassCreateCA(InputStream fileStream) throws Exception {
-    XSSFWorkbook book = new XSSFWorkbook(fileStream);
-    XSSFSheet sheet = book.getSheet(MASS_DATA);
-    XSSFCell rowCell = null;
-    XSSFRow sheetRow = null;
-
-    int rowIndex = 0;
-    int maxRows = Integer.parseInt(SystemConfiguration.getValue("MASS_CREATE_MAX_ROWS", "100"));
-    StringBuilder sbErrorRow = new StringBuilder();
-    boolean isInvalidRow = false;
-    for (Row row : sheet) {
-      sheetRow = (XSSFRow) row;
-      // validate CMR No if numeric
-      if (rowIndex > 0) {
-        rowCell = sheetRow.getCell(0);
-        if (rowCell == null) {
-          rowCell = sheetRow.createCell(0);
-        }
-
-        if (rowIndex > maxRows) {
-          log.error("Total cmrRecords exceed the maximum limit of " + maxRows);
-          throw new CmrException(MessageUtil.ERROR_MASS_FILE_ROWS, "" + maxRows);
-        }
-
-        String cellValue = rowCell.getStringCellValue();
-        if (StringUtils.isBlank(cellValue) || (StringUtils.isNotBlank(cellValue) && !StringUtils.isNumeric(cellValue))) {
-          isInvalidRow = true;
-          sbErrorRow.append("" + rowIndex);
-          sbErrorRow.append(",");
-        }
-      }
-
-      rowIndex++;
-    }
-
-    book.close();
-    if (isInvalidRow) {
-      String errorRow = sbErrorRow.toString();
-      errorRow = StringUtils.removeEnd(errorRow, ",");
-      log.error("CMR number field is required and should be numeric: row " + errorRow);
-      throw new CmrException(MessageUtil.ERROR_MASS_FILE_INVALID_CMRNO, errorRow);
-    }
-
-    return !isInvalidRow;
-  }
+  /*
+   * private boolean validateMassCreateCA(InputStream fileStream) throws
+   * Exception { XSSFWorkbook book = new XSSFWorkbook(fileStream); XSSFSheet
+   * sheet = book.getSheet(MASS_DATA); XSSFCell rowCell = null; XSSFRow sheetRow
+   * = null;
+   * 
+   * int rowIndex = 0; int maxRows =
+   * Integer.parseInt(SystemConfiguration.getValue("MASS_CREATE_MAX_ROWS",
+   * "100")); StringBuilder sbErrorRow = new StringBuilder(); boolean
+   * isInvalidRow = false; for (Row row : sheet) { sheetRow = (XSSFRow) row; //
+   * validate CMR No if numeric if (rowIndex > 0) { rowCell =
+   * sheetRow.getCell(0); if (rowCell == null) { rowCell =
+   * sheetRow.createCell(0); }
+   * 
+   * if (rowIndex > maxRows) {
+   * log.error("Total cmrRecords exceed the maximum limit of " + maxRows); throw
+   * new CmrException(MessageUtil.ERROR_MASS_FILE_ROWS, "" + maxRows); }
+   * 
+   * String cellValue = rowCell.getStringCellValue(); if
+   * (StringUtils.isBlank(cellValue) || (StringUtils.isNotBlank(cellValue) &&
+   * !StringUtils.isNumeric(cellValue))) { isInvalidRow = true;
+   * sbErrorRow.append("" + rowIndex); sbErrorRow.append(","); } }
+   * 
+   * rowIndex++; }
+   * 
+   * book.close(); if (isInvalidRow) { String errorRow = sbErrorRow.toString();
+   * errorRow = StringUtils.removeEnd(errorRow, ",");
+   * log.error("CMR number field is required and should be numeric: row " +
+   * errorRow); throw new
+   * CmrException(MessageUtil.ERROR_MASS_FILE_INVALID_CMRNO, errorRow); }
+   * 
+   * return !isInvalidRow; }
+   */
 
   private boolean validateMassUpdateCA(InputStream fileStream) throws Exception {
     XSSFWorkbook book = new XSSFWorkbook(fileStream);

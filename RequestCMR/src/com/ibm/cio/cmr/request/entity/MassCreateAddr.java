@@ -17,7 +17,9 @@ import javax.persistence.Transient;
  * @author Eduard Bernardo
  */
 @Entity
-@Table(name = "MASS_CREATE_ADDR", schema = "CREQCMR")
+@Table(
+    name = "MASS_CREATE_ADDR",
+    schema = "CREQCMR")
 public class MassCreateAddr extends BaseEntity<MassCreateAddrPK> implements Serializable {
   private static final long serialVersionUID = 1L;
 
@@ -34,21 +36,32 @@ public class MassCreateAddr extends BaseEntity<MassCreateAddrPK> implements Seri
     this.id = id;
   }
 
-  @Column(name = "LAND_CNTRY")
+  @Column(
+      name = "LAND_CNTRY")
   private String landCntry;
 
-  @Column(name = "STATE_PROV")
+  @Column(
+      name = "STATE_PROV")
   private String stateProv;
 
-  @Column(name = "ADDR_TXT")
+  @Column(
+      name = "ADDR_TXT")
   private String addrTxt;
 
-  @Column(name = "ADDR_TXT2")
+  @Column(
+      name = "ADDR_TXT2")
   private String addrTxt2;
 
+  @Column(
+      name = "CITY1")
   private String city1;
 
-  @Column(name = "POST_CD")
+  @Column(
+      name = "CITY2")
+  private String city2;
+
+  @Column(
+      name = "POST_CD")
   private String postCd;
 
   private String county;
@@ -57,10 +70,23 @@ public class MassCreateAddr extends BaseEntity<MassCreateAddrPK> implements Seri
 
   private String dept;
 
+  @Column(
+      name = "CUST_PHONE")
+  private String custPhone;
+
+  @Column(
+      name = "PO_BOX")
+  private String poBox;
+
+  @Column(
+      name = "PO_BOX_CITY")
+  private String poBoxCity;
+
   @Transient
   private boolean virtual;
 
-  @Column(name = "SAP_NO")
+  @Column(
+      name = "SAP_NO")
   private String sapNo;
 
   public String getLandCntry() {
@@ -149,6 +175,38 @@ public class MassCreateAddr extends BaseEntity<MassCreateAddrPK> implements Seri
 
   public void setVirtual(boolean virtual) {
     this.virtual = virtual;
+  }
+
+  public String getCity2() {
+    return city2;
+  }
+
+  public void setCity2(String city2) {
+    this.city2 = city2;
+  }
+
+  public String getCustPhone() {
+    return custPhone;
+  }
+
+  public void setCustPhone(String custPhone) {
+    this.custPhone = custPhone;
+  }
+
+  public String getPoBox() {
+    return poBox;
+  }
+
+  public void setPoBox(String poBox) {
+    this.poBox = poBox;
+  }
+
+  public String getPoBoxCity() {
+    return poBoxCity;
+  }
+
+  public void setPoBoxCity(String poBoxCity) {
+    this.poBoxCity = poBoxCity;
   }
 
 }

@@ -199,10 +199,10 @@ public class CanadaHandler extends GEOHandler {
       data.setCustAcctType(mainRecord.getCmrOrderBlock());
     }
     String mainRecBillFreq = mainRecord.getCmrBillPlnTyp();
-    if (mainRecBillFreq.equals("YM")) {
+    if ("YM".equals(mainRecBillFreq)) {
       data.setCollectorNameNo("1");
       data.setSizeCd(data.getCollectorNameNo());
-    } else if (mainRecBillFreq.equals("YQ")) {
+    } else if ("YQ".equals(mainRecBillFreq)) {
       data.setCollectorNameNo("3");
       data.setSizeCd(data.getCollectorNameNo());
     } else {
