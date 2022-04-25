@@ -14,7 +14,7 @@ import java.util.Set;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -63,8 +63,10 @@ public class GenericSOFMessageParser extends DefaultHandler {
         GenericSOFMessageParser handler = new GenericSOFMessageParser();
         ByteArrayInputStream bis = new ByteArrayInputStream(xmlData.getBytes());
         try {
-          SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
-          parser.parse(new InputSource(bis), handler);
+          SAXParserFactory factory = SAXParserFactory.newInstance();
+          factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+          factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);      
+          factory.newSAXParser().parse(new InputSource(bis), handler);
         } finally {
           bis.close();
         }

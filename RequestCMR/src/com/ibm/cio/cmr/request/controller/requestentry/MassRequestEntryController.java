@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -93,11 +93,13 @@ public class MassRequestEntryController extends BaseController {
   @Autowired
   private DeleteReactivateService delReactivateService;
 
-  @RequestMapping(
-      value = "/massrequest/{reqId}")
-  public ModelAndView showRequestDetail(@PathVariable("reqId") long reqId, HttpServletRequest request, HttpServletResponse response,
+  @RequestMapping(value = "/massrequest/{reqId1}")
+  public ModelAndView showRequestDetail(@PathVariable("reqId1") long reqId, HttpServletRequest request, HttpServletResponse response,
       RequestEntryModel model) throws Exception {
     ModelAndView mv = null;
+    if (model.getReqId() == 0) {
+      model.setReqId(reqId);
+    }
     request.getSession().setAttribute("lastReqId", reqId);
     String fromUrl = model.getFromUrl();
     String redirectUrl = model.getRedirectUrl();
@@ -202,8 +204,7 @@ public class MassRequestEntryController extends BaseController {
     return true;
   }
 
-  @RequestMapping(
-      value = "/massrequest")
+  @RequestMapping(value = "/massrequest")
   public ModelAndView showRequestEntryPage(HttpServletRequest request, HttpServletResponse response, RequestEntryModel model) throws Exception {
 
     ModelAndView mv = null;
@@ -528,9 +529,7 @@ public class MassRequestEntryController extends BaseController {
     return mv;
   }
 
-  @RequestMapping(
-      value = "/massrequest/download",
-      method = RequestMethod.POST)
+  @RequestMapping(value = "/massrequest/download", method = RequestMethod.POST)
   public void downloadMassFile(HttpServletRequest request, HttpServletResponse response) throws Exception {
     String token = request.getParameter("dlTokenId");
     String reqId = request.getParameter("dlReqId");
@@ -758,9 +757,7 @@ public class MassRequestEntryController extends BaseController {
     }
   }
 
-  @RequestMapping(
-      value = "/massrequest/process",
-      method = { RequestMethod.POST, RequestMethod.GET })
+  @RequestMapping(value = "/massrequest/process", method = { RequestMethod.POST, RequestMethod.GET })
   public void processMassFile(HttpServletRequest request, HttpServletResponse response, RequestEntryModel model) throws CmrException {
     try {
       boolean isMultipart = ServletFileUpload.isMultipartContent(request);
@@ -784,8 +781,7 @@ public class MassRequestEntryController extends BaseController {
    * @return
    */
 
-  @RequestMapping(
-      value = "/requestentry/reactivate/cmrNolist")
+  @RequestMapping(value = "/requestentry/reactivate/cmrNolist")
   public ModelMap getCMRList(HttpServletRequest request, HttpServletResponse response, @RequestParam("reqId") long reqId,
       @RequestParam("reqType") String reqType, @RequestParam("cmrIssuingCntry") String cmrIssuingCntry) throws CmrException {
 
@@ -810,9 +806,7 @@ public class MassRequestEntryController extends BaseController {
 
   }
 
-  @RequestMapping(
-      value = "/reactivaterequest/process",
-      method = { RequestMethod.POST, RequestMethod.GET })
+  @RequestMapping(value = "/reactivaterequest/process", method = { RequestMethod.POST, RequestMethod.GET })
   public ModelMap maintainCMRList(HttpServletRequest request, HttpServletResponse response, @RequestParam("reqId") long reqId,
       @RequestParam("cmrList") String cmrList, @RequestParam("reqType") String reqType, MassUpdateModel model) throws CmrException {
 
@@ -850,8 +844,7 @@ public class MassRequestEntryController extends BaseController {
     return wrapAsProcessResult(result);
   }
 
-  @RequestMapping(
-      value = "/massrequest/ld_dpl")
+  @RequestMapping(value = "/massrequest/ld_dpl")
   public ModelMap performLDDPLChcek(HttpServletRequest request, HttpServletResponse response, RequestEntryModel model) throws Exception {
     ProcessResultModel result = new ProcessResultModel();
     try {
@@ -866,8 +859,7 @@ public class MassRequestEntryController extends BaseController {
     return wrapAsProcessResult(result);
   }
 
-  @RequestMapping(
-      value = "/massrequest/dpl")
+  @RequestMapping(value = "/massrequest/dpl")
   public ModelMap performDPLCheck(HttpServletRequest request, HttpServletResponse response, RequestEntryModel model) throws Exception {
     ProcessResultModel result = new ProcessResultModel();
     try {

@@ -8,7 +8,7 @@ import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * The primary key class for the A11T0SCC database table.
@@ -32,14 +32,6 @@ public class A11t0sccPK extends BaseEntityPk implements Serializable {
 
   @Column(name = "C_ZIP")
   private float cZip;
-
-  public String getNCity() {
-    return this.nCity;
-  }
-
-  public void setNCity(String nCity) {
-    this.nCity = nCity;
-  }
 
   @Override
   public boolean equals(Object other) {

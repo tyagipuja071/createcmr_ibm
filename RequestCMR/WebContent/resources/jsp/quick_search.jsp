@@ -11,7 +11,7 @@
 <script src="${resourcesPath}/js/angular.min.js"></script>
 <script src="${resourcesPath}/js/angular-route.min.js"></script>
 <script src="${resourcesPath}/js/angular-sanitize.min.js"></script>
-<script src="${resourcesPath}/js/ext/jquery-1.10.2.js"></script>
+<script src="${resourcesPath}/js/ext/jquery-3.6.0.js"></script>
 <script src="${resourcesPath}/js/ext/typeahead.bundle.js"></script>
 <script src="${resourcesPath}/js/ext/dnb_utilities.js"></script>
 <link rel="stylesheet" href="${resourcesPath}/css/quick_search.css?${cmrv}"/>

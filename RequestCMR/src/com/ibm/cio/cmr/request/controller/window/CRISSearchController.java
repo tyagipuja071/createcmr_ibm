@@ -9,7 +9,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -44,8 +44,7 @@ public class CRISSearchController extends BaseWindowController {
   @Autowired
   private CRISService service;
 
-  @RequestMapping(
-      value = WINDOW_URL + "/crissearch")
+  @RequestMapping(value = WINDOW_URL + "/crissearch")
   public ModelAndView showSearchPage(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelAndView mv = new ModelAndView("crissearch");
     if ("Y".equals(request.getParameter("clear"))) {
@@ -55,8 +54,7 @@ public class CRISSearchController extends BaseWindowController {
     return getWindow(mv, "CRIS - Search");
   }
 
-  @RequestMapping(
-      value = WINDOW_URL + "/criscomplist")
+  @RequestMapping(value = WINDOW_URL + "/criscomplist")
   public ModelAndView showCompanyList(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelAndView mv = new ModelAndView("criscomplist");
     CRISData data = (CRISData) request.getSession().getAttribute(SESSION_KEY_RESULTS);
@@ -65,8 +63,7 @@ public class CRISSearchController extends BaseWindowController {
     return getWindow(mv, "CRIS - Company List Results");
   }
 
-  @RequestMapping(
-      value = "/criscomplistget")
+  @RequestMapping(value = "/criscomplistget")
   public ModelMap getCompanyList(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelMap map = new ModelMap();
     CRISData data = (CRISData) request.getSession().getAttribute(SESSION_KEY_RESULTS);
@@ -74,9 +71,8 @@ public class CRISSearchController extends BaseWindowController {
     return map;
   }
 
-  @RequestMapping(
-      value = WINDOW_URL + "/criscompdet/{id}")
-  public ModelAndView showCompanyDetails(@PathVariable String id, HttpServletRequest request, HttpServletResponse response) throws Exception {
+  @RequestMapping(value = WINDOW_URL + "/criscompdet/{id1}")
+  public ModelAndView showCompanyDetails(@PathVariable("id1") String id, HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelAndView mv = new ModelAndView("criscompdet");
     CRISQueryRequest query = new CRISQueryRequest();
     query.setCompanyNo(id);
@@ -93,8 +89,7 @@ public class CRISSearchController extends BaseWindowController {
     return getWindow(mv, "CRIS - Company Details - " + id);
   }
 
-  @RequestMapping(
-      value = WINDOW_URL + "/crisestablist")
+  @RequestMapping(value = WINDOW_URL + "/crisestablist")
   public ModelAndView showEstablishmentList(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelAndView mv = new ModelAndView("crisestablist");
     CRISData data = (CRISData) request.getSession().getAttribute(SESSION_KEY_RESULTS);
@@ -108,8 +103,7 @@ public class CRISSearchController extends BaseWindowController {
     }
   }
 
-  @RequestMapping(
-      value = "/crisestablistget")
+  @RequestMapping(value = "/crisestablistget")
   public ModelMap getEstablishments(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelMap map = new ModelMap();
     String companyNo = request.getParameter("companyNo");
@@ -131,9 +125,9 @@ public class CRISSearchController extends BaseWindowController {
     return map;
   }
 
-  @RequestMapping(
-      value = WINDOW_URL + "/crisestabdet/{id}")
-  public ModelAndView showEstablishmentDetails(@PathVariable String id, HttpServletRequest request, HttpServletResponse response) throws Exception {
+  @RequestMapping(value = WINDOW_URL + "/crisestabdet/{id1}")
+  public ModelAndView showEstablishmentDetails(@PathVariable("id1") String id, HttpServletRequest request, HttpServletResponse response)
+      throws Exception {
     ModelAndView mv = new ModelAndView("crisestabdet");
 
     CRISQueryRequest query = new CRISQueryRequest();
@@ -166,8 +160,7 @@ public class CRISSearchController extends BaseWindowController {
     return getWindow(mv, "CRIS - Establishment Details - " + id);
   }
 
-  @RequestMapping(
-      value = WINDOW_URL + "/crisaccountlist")
+  @RequestMapping(value = WINDOW_URL + "/crisaccountlist")
   public ModelAndView showAccountList(ModelMap map, HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelAndView mv = new ModelAndView("crisaccountlist");
     CRISData data = (CRISData) request.getSession().getAttribute(SESSION_KEY_RESULTS);
@@ -181,8 +174,7 @@ public class CRISSearchController extends BaseWindowController {
     }
   }
 
-  @RequestMapping(
-      value = "/crisaccountlistget")
+  @RequestMapping(value = "/crisaccountlistget")
   public ModelMap getAccounts(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelMap map = new ModelMap();
     String establishmentNo = request.getParameter("establishmentNo");
@@ -204,9 +196,8 @@ public class CRISSearchController extends BaseWindowController {
     return map;
   }
 
-  @RequestMapping(
-      value = WINDOW_URL + "/crisaccountdet/{id}")
-  public ModelAndView showAccountDetails(@PathVariable String id, HttpServletRequest request, HttpServletResponse response) throws Exception {
+  @RequestMapping(value = WINDOW_URL + "/crisaccountdet/{id1}")
+  public ModelAndView showAccountDetails(@PathVariable("id1") String id, HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelAndView mv = new ModelAndView("crisaccountdet");
     CRISAccount record = null;
     CRISQueryRequest query = new CRISQueryRequest();
@@ -214,7 +205,8 @@ public class CRISSearchController extends BaseWindowController {
     ParamContainer params = new ParamContainer();
     params.addParam("criteria", query);
     CRISQueryResponse queryResp = this.service.process(request, params);
-    if (queryResp != null && queryResp.isSuccess() && "A".equals(queryResp.getData().getResultType()) && queryResp.getData().getAccounts().size() > 0) {
+    if (queryResp != null && queryResp.isSuccess() && "A".equals(queryResp.getData().getResultType())
+        && queryResp.getData().getAccounts().size() > 0) {
       record = queryResp.getData().getAccounts().get(0);
     }
     if (record != null) {
@@ -260,8 +252,7 @@ public class CRISSearchController extends BaseWindowController {
     return getWindow(mv, "CRIS - Account Details - " + id);
   }
 
-  @RequestMapping(
-      value = WINDOW_URL + "/crisnoresults")
+  @RequestMapping(value = WINDOW_URL + "/crisnoresults")
   public ModelAndView showNoResults(HttpServletRequest request, HttpServletResponse response) throws Exception {
     ModelAndView mv = new ModelAndView("crisnoresults");
     addCriteria(request, mv);
@@ -280,8 +271,7 @@ public class CRISSearchController extends BaseWindowController {
     request.getSession().setAttribute(key, object);
   }
 
-  @RequestMapping(
-      value = WINDOW_URL + "/crisprocess")
+  @RequestMapping(value = WINDOW_URL + "/crisprocess")
   public ModelAndView searchAndRedirect(CRISQueryRequest criteria, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
     storeToSession(criteria, SESSION_KEY_CRITERIA, request);

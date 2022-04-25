@@ -216,29 +216,6 @@
       <property name="javax.persistence.query.timeout" value="600000" />
 	  <!-- END ORIGINAL -->
 	  
-	  <!-- TEMP -->
-	  <!-- 
-	  <property name="openjpa.ConnectionFactoryMode" value="local" />
-      <property name="openjpa.ConnectionRetainMode" value="always" />
-
-      <property name="openjpa.jdbc.EagerFetchMode" value="none" />
-      <property name="openjpa.jdbc.DBDictionary" value="db2(maxColumnNameLength=128)" />
-
-      <property name="openjpa.RuntimeUnenhancedClasses" value="supported" />
-      <property name="openjpa.DataCache" value="false" />
-      <property name="openjpa.QueryCache" value="false" />
-      <property name="openjpa.Log" value="log4j" />
-      <property name="openjpa.ReadLockLevel" value="none"/>
-      <property name="openjpa.LockTimeout" value="120000"/>
-
-      <property name="openjpa.ConnectionDriverName" value="com.ibm.db2.jcc.DB2Driver" />
-      <property name="openjpa.ConnectionURL" value="jdbc:db2://n000a273.cloud.icds.ibm.com:50602/FVTCLDDB:sslConnection=true;sslTrustStoreLocation=C:\\Security\\RDC_PP.jks;sslTrustStorePassword=rdcppcer;" />
-      <property name="openjpa.ConnectionUserName" value="rdcfvt" />
-      <property name="openjpa.ConnectionPassword" value="fvt16rdc" />
-      <property name="openjpa.RemoteCommitProvider" value="sjvm" />
-      <property name="openjpa.ConnectionRetainMode" value="always" />
-       -->
-      <!-- END TEMP -->
     </properties>
   </persistence-unit>
 
