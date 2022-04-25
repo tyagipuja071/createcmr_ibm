@@ -9,6 +9,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -440,7 +441,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
             dplWorkBookNewFile.delete();
             initLogger().error("file deleted " + newFileName + " will create new file");
           }
-          try(FileOutputStream newOutStream= new FileOutputStream(dplWorkBookNewFile)) {            
+          try (FileOutputStream newOutStream = new FileOutputStream(dplWorkBookNewFile)) {
             workBookFromZip.write(newOutStream);
           } finally {
             workBookFromZip.close();
@@ -4190,7 +4191,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
               countDataFld++;
             }
           }
-          
+
           String isuCd = df.formatCellValue(cmrRow.getCell(DATA_FLD.get("ISU_CD") - 1)).trim();
           String clientTier = df.formatCellValue(cmrRow.getCell(DATA_FLD.get("CLIENT_TIER") - 1)).trim();
 
@@ -4200,7 +4201,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
               log.error("CMR number field is required and should be alphanumeric: row " + (cmrRow.getRowNum() + 1));
               throw new CmrException(MessageUtil.ERROR_MASS_FILE_CMR_ROW, Integer.toString(cmrRow.getRowNum() + 1));
             }
-            
+
             if (!StringUtils.isBlank(isuCd)) {
               if ("5K".equals(isuCd)) {
                 if (!"@".equals(clientTier)) {
@@ -5214,52 +5215,52 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
 
         try (Workbook mfWb = new XSSFWorkbook(mfStream)) {
           for (int i = 0; i < tabs.size(); i++) {
-          // 3. For every sheet, do: Sheet dataSheet =
-          // mfWb.getSheet(CMR_SHEET_NAME);
-          TemplateTab tab = tabs.get(i);
-          Sheet dataSheet = mfWb.getSheet(tab.getName());
+            // 3. For every sheet, do: Sheet dataSheet =
+            // mfWb.getSheet(CMR_SHEET_NAME);
+            TemplateTab tab = tabs.get(i);
+            Sheet dataSheet = mfWb.getSheet(tab.getName());
 
-          // Check row for ISU_CD, INAC_CD, and/or CLIENT_TIER only
-          if ("Data".equals(tab.getName())) {
-            // call method that will set to Data table
-            for (Row cmrRow : dataSheet) {
-              int seqNo = cmrRow.getRowNum() + 1;
+            // Check row for ISU_CD, INAC_CD, and/or CLIENT_TIER only
+            if ("Data".equals(tab.getName())) {
+              // call method that will set to Data table
+              for (Row cmrRow : dataSheet) {
+                int seqNo = cmrRow.getRowNum() + 1;
 
-              if (seqNo > 1) {
-                model = new MassUpdateModel();
-                model.setParReqId(reqId);
-                model.setSeqNo(seqNo);
-                model.setIterationId(newIterId);
-                model.setErrorTxt("");
-                model.setRowStatusCd("");
-                // 4. then for every sheet, get the fields
-                model = setMassUpdateData(entityManager, cmrRow, model, tab, reqId);
+                if (seqNo > 1) {
+                  model = new MassUpdateModel();
+                  model.setParReqId(reqId);
+                  model.setSeqNo(seqNo);
+                  model.setIterationId(newIterId);
+                  model.setErrorTxt("");
+                  model.setRowStatusCd("");
+                  // 4. then for every sheet, get the fields
+                  model = setMassUpdateData(entityManager, cmrRow, model, tab, reqId);
 
-                if (!StringUtils.isEmpty(model.getCmrNo()) && model.getCmrNo().length() <= 8 && model.getCmrNo().length() != 0) {
-                  models.add(model);
+                  if (!StringUtils.isEmpty(model.getCmrNo()) && model.getCmrNo().length() <= 8 && model.getCmrNo().length() != 0) {
+                    models.add(model);
+                  }
                 }
               }
-            }
-          } else {
-            // if it is not Data, that means it is an address
-            MassUpdateAddressModel addrModel = new MassUpdateAddressModel();
+            } else {
+              // if it is not Data, that means it is an address
+              MassUpdateAddressModel addrModel = new MassUpdateAddressModel();
 
-            for (Row cmrRow : dataSheet) {
-              int seqNo = cmrRow.getRowNum() + 1;
+              for (Row cmrRow : dataSheet) {
+                int seqNo = cmrRow.getRowNum() + 1;
 
-              if (seqNo > 1) {
-                // 4. then for every sheet, get the fields
-                addrModel = new MassUpdateAddressModel();
-                addrModel.setParReqId(reqId);
-                addrModel.setSeqNo(seqNo);
-                addrModel.setIterationId(newIterId);
-                addrModel.setAddrType(tab.getTypeCode());
-                addrModel = setMassUpdateAddr(entityManager, cmrRow, addrModel, tab, reqId);
+                if (seqNo > 1) {
+                  // 4. then for every sheet, get the fields
+                  addrModel = new MassUpdateAddressModel();
+                  addrModel.setParReqId(reqId);
+                  addrModel.setSeqNo(seqNo);
+                  addrModel.setIterationId(newIterId);
+                  addrModel.setAddrType(tab.getTypeCode());
+                  addrModel = setMassUpdateAddr(entityManager, cmrRow, addrModel, tab, reqId);
 
-                if (!StringUtils.isEmpty(addrModel.getCmrNo()) && addrModel.getCmrNo().length() <= 8 && addrModel.getCmrNo().length() != 0) {
-                  addrModels.add(addrModel);
+                  if (!StringUtils.isEmpty(addrModel.getCmrNo()) && addrModel.getCmrNo().length() <= 8 && addrModel.getCmrNo().length() != 0) {
+                    addrModels.add(addrModel);
+                  }
                 }
-              }
               }
             }
           }
@@ -5297,7 +5298,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         MassUpdateModel model = new MassUpdateModel();
         List<MassUpdateAddressModel> addrModels = new ArrayList<MassUpdateAddressModel>();
         List<MassUpdateModel> models = new ArrayList<MassUpdateModel>();
-        
+
         try (Workbook mfWb = new XSSFWorkbook(mfStream)) {
           for (int i = 0; i < tabs.size(); i++) {
             // 3. For every sheet, do: Sheet dataSheet =
