@@ -176,20 +176,12 @@
     <class>com.ibm.cio.cmr.request.entity.ScAccountCmrStgPK</class>
 
     <properties>
-
-      <property name="javax.persistence.jdbc.driver" value="com.ibm.db2.jcc.DB2Driver" />
-      <property name="javax.persistence.jdbc.url"
-        value="jdbc:db2://n000a273.cloud.icds.ibm.com:50602/FVTCLDDB:sslConnection=true;sslTrustStoreLocation=ibm-truststore.jks;sslTrustStorePassword=zaq12wsx" />
-      <property name="javax.persistence.jdbc.user" value="rdcfvt" />
-      <property name="javax.persistence.jdbc.password" value="fvt16rdc" />
       
-      <!-- Preprod 
       <property name="javax.persistence.jdbc.driver" value="com.ibm.db2.jcc.DB2Driver" />
       <property name="javax.persistence.jdbc.url"
-        value="jdbc:db2://b06acirdb005.portsmouth.uk.ibm.com:3203/eushdb2a:sslConnection=true;sslTrustStoreLocation=ibm-truststore.jks;sslTrustStorePassword=zaq12wsx" />
-      <property name="javax.persistence.jdbc.user" value="rdhadm" />
-      <property name="javax.persistence.jdbc.password" value="soaked34" />
-      -->
+        value="jdbc:db2://n000a273.cloud.icds.ibm.com:50602/FVTCLDDB:sslConnection=true;sslTrustStoreLocation=ibm-truststore.jks;sslTrustStorePassword=;" />
+      <property name="javax.persistence.jdbc.user" value="" />
+      <property name="javax.persistence.jdbc.password" value="" />
 
       <property name="javax.persistence.lock.timeout" value="300000" />
       <property name="javax.persistence.query.timeout" value="600000" />

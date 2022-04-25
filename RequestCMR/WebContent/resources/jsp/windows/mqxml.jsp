@@ -1,4 +1,4 @@
-<%@page import="org.apache.commons.lang.StringEscapeUtils"%>
+<%@page import="org.apache.commons.lang3.StringEscapeUtils"%>
 <%@page import="java.util.Map"%>
 <%@page import="com.ibm.cio.cmr.request.util.mq.MQXml"%>
 <%@page import="org.codehaus.jackson.map.ObjectMapper"%>
@@ -81,7 +81,7 @@ tr {
                 <%for (String key : map.keySet()){%>
                   <tr>
                     <td style="text-align:right;padding-right:3px;font-weight:bold"><%=key%>:</td>
-                    <td><%=(map.get(key) != null ? StringEscapeUtils.escapeHtml(map.get(key)) : "")%>
+                    <td><%=(map.get(key) != null ? StringEscapeUtils.escapeHtml4(map.get(key)) : "")%>
                   </tr>                  
                 <%}%>
                 </table>

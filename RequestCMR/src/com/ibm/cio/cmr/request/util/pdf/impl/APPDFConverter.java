@@ -8,7 +8,7 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
@@ -19,7 +19,7 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.approval.ChecklistItem;
 import com.ibm.cio.cmr.request.util.approval.ChecklistUtil;
 import com.ibm.cio.cmr.request.util.approval.ChecklistUtil.ChecklistResponse;
-import com.itextpdf.kernel.color.Color;
+import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Cell;
 import com.itextpdf.layout.element.Table;
@@ -84,7 +84,7 @@ public class APPDFConverter extends DefaultPDFConverter {
           answer = "Y".equals(item.getAnswer()) ? "Yes" : "No";
           answerCell = createValueCell(answer);
           if ("Y".equals(item.getAnswer())) {
-            answerCell.setFontColor(Color.RED);
+            answerCell.setFontColor(ColorConstants.RED);
           }
           checklistSection.addCell(answerCell);
         }

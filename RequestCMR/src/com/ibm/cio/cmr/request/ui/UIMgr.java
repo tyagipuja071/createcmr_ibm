@@ -80,6 +80,9 @@ public class UIMgr {
    * @return
    */
   public static String getText(String key) {
+    if ("password".equals(key)) {
+      return "Password";
+    }
     return BUNDLE.getProperty(key);
   }
 }

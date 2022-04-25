@@ -3,7 +3,7 @@
  */
 package com.ibm.cmr.create.batch.entry;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cmr.create.batch.service.MQInterfaceService;

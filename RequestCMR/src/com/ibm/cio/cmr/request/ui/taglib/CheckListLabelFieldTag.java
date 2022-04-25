@@ -8,7 +8,7 @@ import java.io.IOException;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.TagSupport;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 
 /**
  * 
@@ -32,7 +32,7 @@ public class CheckListLabelFieldTag extends TagSupport {
     StringBuilder sb = new StringBuilder();
     sb.append("  <tr>\n");
     sb.append("    <" + tag + " " + colWidth + " " + (this.addSpace ? "class=\"subheader\"" : "") + ">\n");
-    sb.append("      ").append(StringEscapeUtils.escapeHtml(this.label));
+    sb.append("      ").append(StringEscapeUtils.escapeHtml4(this.label));
     sb.append("    </" + tag + ">\n");
     sb.append("    <td width=\"*\">\n");
     try {

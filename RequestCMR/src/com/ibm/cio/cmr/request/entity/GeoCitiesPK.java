@@ -6,7 +6,7 @@ package com.ibm.cio.cmr.request.entity;
 import java.io.Serializable;
 import javax.persistence.*;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * The primary key class for the GEO_CITIES database table.

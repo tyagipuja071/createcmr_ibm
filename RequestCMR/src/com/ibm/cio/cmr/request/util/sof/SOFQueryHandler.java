@@ -76,10 +76,12 @@ public class SOFQueryHandler extends DefaultHandler {
   public List<SOFRecord> extractRecord(byte[] xmlData) throws Exception {
     ByteArrayInputStream bis = new ByteArrayInputStream(xmlData);
     try {
-      SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
       InputSource src = new InputSource(bis);
       src.setEncoding("UTF-8");
-      parser.parse(src, this);
+      SAXParserFactory factory = SAXParserFactory.newInstance();
+      factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+      factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+      factory.newSAXParser().parse(src, this);
     } finally {
       bis.close();
     }
