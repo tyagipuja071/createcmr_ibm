@@ -275,7 +275,7 @@ public class Admin extends BaseEntity<AdminPK> implements Serializable {
   @Column(name = "CUST_SUB_TYP_VAL")
   private String custSubType;
 
-  @Column(name = "SOURCE_SYST_ID", updatable = false)
+  @Column(name = "SOURCE_SYST_ID")
   private String sourceSystId;
 
   @Column(name = "DUPLICATE_CMR_RSN")
