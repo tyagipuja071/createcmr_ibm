@@ -2,17 +2,17 @@
   xmlns:aop="http://www.springframework.org/schema/aop" xmlns:context="http://www.springframework.org/schema/context" xmlns:mvc="http://www.springframework.org/schema/mvc"
   xmlns:tx="http://www.springframework.org/schema/tx" xmlns:ehcache="http://www.springframework.org/schema/cache"
   xsi:schemaLocation="http://www.springframework.org/schema/beans
-           http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+           http://www.springframework.org/schema/beans/spring-beans.xsd
            http://www.springframework.org/schema/context
-           http://www.springframework.org/schema/context/spring-context-4.3.xsd
+           http://www.springframework.org/schema/context/spring-context.xsd
            http://www.springframework.org/schema/mvc
-			http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd 
+			http://www.springframework.org/schema/mvc/spring-mvc.xsd 
 			http://www.springframework.org/schema/tx  
-			http://www.springframework.org/schema/tx/spring-tx-4.3.xsd 
+			http://www.springframework.org/schema/tx/spring-tx.xsd 
 			http://www.springframework.org/schema/aop 
-			http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+			http://www.springframework.org/schema/aop/spring-aop.xsd
 			http://www.springframework.org/schema/cache 
-			http://www.springframework.org/schema/cache/spring-cache-4.3.xsd">
+			http://www.springframework.org/schema/cache/spring-cache.xsd">
 
 	<!-- Scans the classpath for annotated components that will be auto-registered 
 		as Spring beans. For example @Controller and @Service. Make sure to set the 
@@ -31,6 +31,7 @@
 	<!-- below 2 lines goes with <mvc:resources> to get rid of some exceptions 
 		more : http://stackoverflow.com/questions/1483063/spring-mvc-3-and-handling-static-content-am-i-missing-something -->
   <mvc:annotation-driven>
+    <mvc:path-matching suffix-pattern="true" />
     <mvc:message-converters>
       <bean id="jacksonMessageConverter" class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
         <property name="supportedMediaTypes" value="application/json" />
@@ -51,7 +52,7 @@
 	<!-- See http://static.springsource.org/spring/docs/3.0.x/javadoc-api/org/springframework/web/servlet/view/tiles2/TilesViewResolver.html -->
 
 
-  <bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles2.TilesConfigurer">
+  <bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles3.TilesConfigurer">
     <property name="definitions">
       <list>
         <value>/WEB-INF/tiles-def.xml</value>
@@ -103,7 +104,7 @@
 	<!-- If no extension matched, use JSP view -->
   <bean class="org.springframework.web.servlet.view.UrlBasedViewResolver">
     <property name="order" value="2" />
-    <property name="viewClass" value="org.springframework.web.servlet.view.tiles2.TilesView" />
+    <property name="viewClass" value="org.springframework.web.servlet.view.tiles3.TilesView" />
   </bean>
   <bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean" scope="singleton">
     <property name="jndiName">
