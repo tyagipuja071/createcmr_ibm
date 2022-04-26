@@ -816,7 +816,7 @@ public class LegacyDirectUtil {
   private static String validateColValFromCell(XSSFCell cell) {
     String colVal = "";
     if (cell != null) {
-      switch (cell.getCellTypeEnum()) {
+      switch (cell.getCellType()) {
       case STRING:
         colVal = cell.getStringCellValue();
         break;
@@ -1422,7 +1422,7 @@ public class LegacyDirectUtil {
 
     return isDR;
   }
-  
+
   public static DataRdc getOldData(EntityManager entityManager, String reqId) {
     String sql = ExternalizedQuery.getSql("SUMMARY.OLDDATA");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
