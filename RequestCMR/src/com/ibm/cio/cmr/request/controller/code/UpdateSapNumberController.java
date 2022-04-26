@@ -220,7 +220,10 @@ public class UpdateSapNumberController extends BaseController {
   }
 
   private UpdateSapNoService getParserInstance() throws ParserConfigurationException, SAXException, IOException {
-    SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
+    SAXParserFactory factory = SAXParserFactory.newInstance();
+    factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+    factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+    SAXParser parser = factory.newSAXParser();
     UpdateSapNoService handler = new UpdateSapNoService();
     InputStream is = ConfigUtil.getResourceStream("updatesap-addrmap.xml");
     InputSource source = new InputSource(is);
