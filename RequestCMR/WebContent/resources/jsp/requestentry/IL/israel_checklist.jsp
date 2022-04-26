@@ -53,7 +53,7 @@
       The customer has requested unusual payment or delivery terms and conditions. 
     </cmr:chk-entry>
     <cmr:chk-entry number="6" section="A">
-      There is an indication that the products/services are destined for a <span style="font-weight: bold;">sanctioned country/region: (Cuba, Iran, North Korea, Syria and the Crimea, Donetsk and Luhansk regions of Ukraine)</span>.
+      There is an indication that the products are destined for a <span style="font-weight: bold;">sanctioned country/region: (Cuba, Iran, North Korea, Syria and the Crimea, Donetsk and Luhansk regions of Ukraine)</span>.
       <br>
       <span style="font-weight: bold;">In addition,</span> opportunities involving Iraq, please STOP and contact your local ERC.  (USERP Section 1, Part 2.1.4)   
     </cmr:chk-entry>
