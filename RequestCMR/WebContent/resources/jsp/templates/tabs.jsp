@@ -71,6 +71,11 @@ boolean approver = user != null && user.isApprover();
                 Help
               </a>
             </li>
+            <%if (user != null && (user.isAdmin() || user.isCmde() || user.isProcessor()) ){%>            
+            <li id="REV_TAB">
+            	<a href="javascript: goToUrl('${contextPath}/revivedcmrs')">Revive</a>
+            </li>
+            <%}%>
           <%}%>
 				</ul>
 			</div>
@@ -98,7 +103,6 @@ boolean approver = user != null && user.isApprover();
           <li id="APPROVALS_ADMIN_TAB"><a href="javascript: goToUrl('${contextPath}/approvalsadminlist')">Approvals Override</a></li>
           <%if (user != null && (SystemConfiguration.isAdmin(request) || user.isCmde())){ %> 
             <li id="USER_ADMIN_TAB"><a href="javascript: goToUrl('${contextPath}/users')">User Maintenance</a></li>
-            <li id="REVIVED_CMRS_ADMIN_TAB"><a href="javascript: goToUrl('${contextPath}/revivedcmrs')">Revived CMRs</a></li>
           <%} %>
           <li id="CODE_ADMIN_TAB"><a href="javascript: goToUrl('${contextPath}/code')">Code Maintenance</a></li>
 				</c:if>

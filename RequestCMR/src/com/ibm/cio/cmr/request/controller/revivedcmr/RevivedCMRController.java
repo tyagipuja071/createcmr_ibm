@@ -50,7 +50,7 @@ public class RevivedCMRController extends BaseController {
       return mv;
     }
 
-    setPageKeys("ADMIN", "REVIVED_CMRS_ADMIN", mv);
+    setPageKeys("REV", "REV_SUB", mv);
     return mv;
   }
 
