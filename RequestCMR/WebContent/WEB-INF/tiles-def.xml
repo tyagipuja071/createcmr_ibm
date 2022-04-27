@@ -118,6 +118,11 @@
     <put-attribute name="title" value="CreateCMR | Forced Status Change" />
     <put-attribute name="body" value="/resources/jsp/system/statuschange.jsp" />
   </definition>
+  
+  <definition name="revivedcmrs" extends="base">
+    <put-attribute name="title" value="CreateCMR | Revived CMRs" />
+    <put-attribute name="body" value="/resources/jsp/revivedcmrs/revivedcmrs.jsp" />
+  </definition>
 
   <definition name="metrics" extends="base">
     <put-attribute name="title" value="CreateCMR | Metrics" />
