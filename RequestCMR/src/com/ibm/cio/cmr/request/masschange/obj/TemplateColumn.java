@@ -216,7 +216,7 @@ public class TemplateColumn {
         continue; // next value
       }
 
-      switch (currCell.getCellTypeEnum()) {
+      switch (currCell.getCellType()) {
       case STRING:
         value = currCell.getStringCellValue();
         break;
@@ -333,7 +333,7 @@ public class TemplateColumn {
         continue; // next value
       }
 
-      switch (currCell.getCellTypeEnum()) {
+      switch (currCell.getCellType()) {
       case STRING:
         value = currCell.getStringCellValue();
         break;
@@ -406,7 +406,7 @@ public class TemplateColumn {
         LOG.debug(">> hwInstlMstrFlg > " + hwInstlMstrFlg);
         XSSFCell cmrCell = row.getCell(0);
         if (cmrCell != null) {
-          switch (cmrCell.getCellTypeEnum()) {
+          switch (cmrCell.getCellType()) {
           case STRING:
             CMRNo = cmrCell.getStringCellValue();
             break;
@@ -465,7 +465,7 @@ public class TemplateColumn {
         continue; // next value
       }
 
-      switch (currCell.getCellTypeEnum()) {
+      switch (currCell.getCellType()) {
       case STRING:
         value = currCell.getStringCellValue();
         break;
@@ -538,7 +538,7 @@ public class TemplateColumn {
         LOG.debug(">> hwInstlMstrFlg > " + hwInstlMstrFlg);
         XSSFCell cmrCell = row.getCell(0);
         if (cmrCell != null) {
-          switch (cmrCell.getCellTypeEnum()) {
+          switch (cmrCell.getCellType()) {
           case STRING:
             CMRNo = cmrCell.getStringCellValue();
             break;

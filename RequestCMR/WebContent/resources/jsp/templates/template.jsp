@@ -9,6 +9,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles"%>
+<%@ taglib uri="http://tiles.apache.org/tags-tiles-extras" prefix="tilesx" %>
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 <c:set var="resourcesPath" value="${contextPath}/resources" />
 
@@ -103,8 +104,8 @@ boolean approver = user != null && user.isApprover();
 <jsp:include page="xbrowser.jsp" />
 </head>
 <body id="ibm-com" class="nihilo ibm-type" role="main" >
-	<tiles:useAttribute name="primaryTabId" ignore="true" />
-	<tiles:useAttribute name="secondaryTabId" ignore="true" />
+	<tilesx:useAttribute name="primaryTabId" ignore="true" />
+	<tilesx:useAttribute name="secondaryTabId" ignore="true" />
 
 
 	<!-- OVERLAYS --> 

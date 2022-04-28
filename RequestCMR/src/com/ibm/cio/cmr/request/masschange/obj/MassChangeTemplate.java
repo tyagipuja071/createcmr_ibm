@@ -3,7 +3,6 @@
  */
 package com.ibm.cio.cmr.request.masschange.obj;
 
-import java.awt.Color;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,6 +25,7 @@ import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.DefaultIndexedColorMap;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFColor;
@@ -488,7 +488,12 @@ public class MassChangeTemplate {
       XSSFCell cell = null;
       int errorColIndex = -1;
       XSSFCellStyle errorStyle = book.createCellStyle();
-      errorStyle.setFillForegroundColor(new XSSFColor(new Color(252, 228, 214)));
+      byte[] rgb = new byte[3];
+      rgb[0] = (byte) 252;
+      rgb[1] = (byte) 228;
+      rgb[2] = (byte) 214;
+      XSSFColor color = new XSSFColor(rgb, new DefaultIndexedColorMap());
+      errorStyle.setFillForegroundColor(color);
       errorStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
       errorStyle.setWrapText(true);
 
@@ -510,9 +515,9 @@ public class MassChangeTemplate {
             // determine the error column
             for (int colIndex = 0; colIndex < 50; colIndex++) {
               cell = row.getCell(colIndex);
-              if (cell == null || (cell.getCellTypeEnum() == CellType.STRING && StringUtils.isEmpty(cell.getStringCellValue()))
-                  || (cell.getCellTypeEnum() == CellType.NUMERIC && cell.getNumericCellValue() <= 0)
-                  || (cell.getCellTypeEnum() == CellType.STRING && "ERRORS".equalsIgnoreCase(cell.getStringCellValue()))) {
+              if (cell == null || (cell.getCellType() == CellType.STRING && StringUtils.isEmpty(cell.getStringCellValue()))
+                  || (cell.getCellType() == CellType.NUMERIC && cell.getNumericCellValue() <= 0)
+                  || (cell.getCellType() == CellType.STRING && "ERRORS".equalsIgnoreCase(cell.getStringCellValue()))) {
                 // found the error col
                 if (cell == null) {
                   cell = row.createCell(colIndex);
@@ -596,7 +601,7 @@ public class MassChangeTemplate {
   protected static String validateColValFromCell(XSSFCell cell) {
     String colVal = "";
     if (cell != null) {
-      switch (cell.getCellTypeEnum()) {
+      switch (cell.getCellType()) {
       case STRING:
         colVal = cell.getStringCellValue();
         break;
