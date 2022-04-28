@@ -146,7 +146,8 @@
     <class>com.ibm.cio.cmr.request.entity.MqIntfReqData</class>
     <class>com.ibm.cio.cmr.request.entity.MqIntfReqDataPK</class>
 
-
+    <class>com.ibm.cio.cmr.request.entity.KnvvExt</class>
+    <class>com.ibm.cio.cmr.request.entity.KnvvExtPK</class>
 
     <class>com.ibm.cio.cmr.request.entity.MachinesToInstall</class>
     <class>com.ibm.cio.cmr.request.entity.MachinesToInstallPK</class>
