@@ -2183,7 +2183,7 @@ public class IsraelHandler extends EMEAHandler {
   private boolean isHebrewFieldNotBlank(XSSFCell cell) {
     boolean isHebrewFieldNotBlank = false;
     if (cell != null) {
-      if (CellType.NUMERIC == cell.getCellTypeEnum()) {
+      if (CellType.NUMERIC == cell.getCellType()) {
         String numericCellStrVal = validateColValFromCell(cell);
         if (StringUtils.isNotBlank(numericCellStrVal)) {
           isHebrewFieldNotBlank = true;
