@@ -46,6 +46,7 @@ import com.ibm.cmr.services.client.automation.nordics.NorwayVatResponse;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
+import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
 
 /**
  * 
@@ -641,7 +642,7 @@ public class NordicsUtil extends AutomationUtil {
     };
     return mapper.readValue(json, ref);
   }
-  
+
   @Override
   public void performCoverageBasedOnGBG(CalculateCoverageElement covElement, EntityManager entityManager, AutomationResult<OverrideOutput> results,
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData, String covFrom,
@@ -666,6 +667,14 @@ public class NordicsUtil extends AutomationUtil {
     }
     LOG.debug("isu" + data.getIsuCd());
     LOG.debug("client tier" + data.getClientTier());
+  }
+
+  @Override
+  public void tweakDnBMatchingRequest(GBGFinderRequest request, RequestData requestData, AutomationEngineData engineData) {
+    Data data = requestData.getData();
+    if (StringUtils.isNotBlank(data.getVat()) && SystemLocation.SWEDEN.equalsIgnoreCase(data.getCmrIssuingCntry())) {
+      request.setOrgId(data.getVat().substring(2, 12));
+    }
   }
 
   @Override

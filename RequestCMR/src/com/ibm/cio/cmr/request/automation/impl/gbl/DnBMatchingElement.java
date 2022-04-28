@@ -179,6 +179,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
                   // found the perfect match here
                   if (!isTaxCdMatch) {
                     engineData.setVatVerified(true, "VAT Verified");
+                    LOG.debug("VAT verified");
                   }
                   perfectMatch = dnbRecord;
                   break;
