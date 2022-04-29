@@ -2302,15 +2302,18 @@ public class CNHandler extends GEOHandler {
     List<Addr> addresses = getAddrByReqId(entityManager, data.getId().getReqId());
     if (addresses != null && addresses.size() > 0) {
       for (Addr addr : addresses) {
-        if ("PRIV".equals(data.getCustSubGrp()) || "INTER".equals(data.getCustSubGrp()) || "AQSTN".equals(data.getCustSubGrp())) {
+        if ("PRIV".equals(data.getCustSubGrp()) || "INTER".equals(data.getCustSubGrp()) || "AQSTN".equals(data.getCustSubGrp())
+            || "CROSS".equals(data.getCustSubGrp())) {
           IntlAddr intlAddr = handler.getIntlAddrById(addr, entityManager);
           if (intlAddr != null) {
             if (StringUtils.isBlank(intlAddr.getIntlCustNm1())) {
               intlAddr.setIntlCustNm1("*");
-
-              entityManager.merge(intlAddr);
-              entityManager.flush();
             }
+            if (StringUtils.isBlank(intlAddr.getCity1())) {
+              intlAddr.setCity1("*");
+            }
+            entityManager.merge(intlAddr);
+            entityManager.flush();
           } else {
             // TODO
             // creteIntlAddr();
