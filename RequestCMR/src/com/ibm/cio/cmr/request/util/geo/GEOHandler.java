@@ -1033,7 +1033,7 @@ public abstract class GEOHandler {
   public boolean shouldAutoDplSearchMassUpdate() {
     return false;
   }
-  
+
   public IntlAddr getIntlAddrById(Addr addr, EntityManager entityManager) {
     // TODO Auto-generated method stub
     return null;
@@ -1091,6 +1091,17 @@ public abstract class GEOHandler {
 
   public void setReqStatusAfterApprove(EntityManager entityManager, ApprovalResponseModel approval, ApprovalReq req, Admin admin) {
     // TODO Auto-generated method stub
+  }
+
+  public static String getEquivalentAddressType(String addressType, String seqNo) {
+    if (addressType.equals("ZS01"))
+      return "ZS01";
+    else if (addressType.equals("ZI01") && (Integer.parseInt(seqNo) < 200))
+      return "ZP01";
+    else if (addressType.equals("PG01") && (Integer.parseInt(seqNo) >= 200))
+      return "ZP01";
+    else
+      return addressType;
   }
 
 }
