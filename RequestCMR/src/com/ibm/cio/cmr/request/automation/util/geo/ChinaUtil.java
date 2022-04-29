@@ -346,7 +346,7 @@ public class ChinaUtil extends AutomationUtil {
     boolean managerCheck = BluePagesHelper.isBluePagesHeirarchyManager(admin.getRequesterId(), managerID);
 
     if (StringUtils.isNotBlank(scenario) && SCENARIO_LOCAL_BUSPR.equals(scenario) || "04182".equals(data.getSearchTerm())
-        || StringUtils.isBlank(data.getSearchTerm()) || (data.getSearchTerm().equals("00000") || !StringUtils.isNumeric(data.getSearchTerm()))
+        || (StringUtils.isBlank(data.getSearchTerm()) || data.getSearchTerm().equals("00000") || !StringUtils.isNumeric(data.getSearchTerm()))
             && (data.getCmrNo().startsWith("1") || data.getCmrNo().startsWith("2"))) {
       if (!managerCheck) {
         details.append("BP CMR related,please contact Dalian BPCM team to raise request.Squad Leader:"
