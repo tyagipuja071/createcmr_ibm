@@ -641,7 +641,7 @@ var FormManager = (function() {
         handleAs : 'json',
         content : dojo.formToObject(formName),
         method : 'POST',
-        timeout : timeout ? timeout : 50000,
+        timeout : timeout ? timeout : 150000,
         // sync : true,
         load : function(data, ioargs) {
           cmr.hideProgress();
