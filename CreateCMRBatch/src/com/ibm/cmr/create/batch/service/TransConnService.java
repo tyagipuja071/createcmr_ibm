@@ -2751,6 +2751,7 @@ public class TransConnService extends BaseBatchService {
   }
 
   public void monitorUpdateSapNumber(EntityManager entityManager) throws Exception {
+    LOG.debug("Checking ADDR records with missing SAP_NO .. ");
     String sql = ExternalizedQuery.getSql("BATCH.FIND_MISSING_SAP_NUMBER");
     PreparedQuery results = new PreparedQuery(entityManager, sql);
     List<Object[]> missedSapNumberRec = results.getResults();
