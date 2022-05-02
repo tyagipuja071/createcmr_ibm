@@ -2751,7 +2751,6 @@ public class TransConnService extends BaseBatchService {
   }
 
   public void monitorUpdateSapNumber(EntityManager entityManager) throws Exception {
-    LOG.debug("Checking ADDR records with missing SAP_NO .. ");
     String sql = ExternalizedQuery.getSql("BATCH.FIND_MISSING_SAP_NUMBER");
     PreparedQuery results = new PreparedQuery(entityManager, sql);
     List<Object[]> missedSapNumberRec = results.getResults();
@@ -2763,47 +2762,70 @@ public class TransConnService extends BaseBatchService {
           String addrType = (String) obj[3];
           String seqNo = (String) obj[2];
 
-          String mappedAddrType = GEOHandler.getEquivalentAddressType(addrType, seqNo);
+          GEOHandler handler = RequestUtils.getGEOHandler((String) obj[6]);
+          String mappedAddrType = handler.getEquivalentAddressType(addrType, seqNo);
           String sql1 = ExternalizedQuery.getSql("BATCH.FIND_KUNNR");
           PreparedQuery findKunnr = new PreparedQuery(entityManager, sql1);
           Long reqId = (Long) obj[0];
           findKunnr.setParameter("ZZKV_CUSNO", obj[4]);
           findKunnr.setParameter("KTOKD", mappedAddrType);
-          findKunnr.setParameter("LAND1", obj[5]);
           findKunnr.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
           List<Kna1> knaList = findKunnr.getResults(Kna1.class);
 
           if (knaList != null && !knaList.isEmpty()) {
-            Kna1 kna1 = knaList.get(0);
+            Kna1 kna1 = null;
+            for (Kna1 kna1Item : knaList) {
+              // only process for US now, //TODO adjust for LA/JP
+              if ("ZS01".equals(mappedAddrType) && kna1Item.getKtokd().equals(mappedAddrType)) {
+                kna1 = kna1Item;
+                break;
+              }
+              // sure ZP01
+              if ("ZI01".equals(addrType) && "002".equals(kna1Item.getZzkvSeqno())) {
+                kna1 = kna1Item;
+                break;
+              }
+              // sure PG match
+              if ("PG01".equals(addrType) && seqNo.equals(kna1Item.getZzkvSeqno())) {
+                kna1 = kna1Item;
+                break;
+              }
+              // last try to match seqno, padded
+              String paddedSeq = seqNo;
+              if (seqNo.length() < kna1Item.getZzkvSeqno().length()) {
+                paddedSeq = StringUtils.leftPad(seqNo, kna1Item.getZzkvSeqno().length(), '0');
+              }
+              if (paddedSeq.equals(kna1Item.getZzkvSeqno())) {
+                kna1 = kna1Item;
+                break;
+              }
+            }
             if (kna1 != null) {
               LOG.info("kunnr=" + kna1.getId().getKunnr());
               String kunnr = kna1.getId().getKunnr();
-              String landCountry = kna1.getLand1();
-              String addrSequence = kna1.getZzkvSeqno();
-              String sitePartyId = kna1.getBran5();
 
               String sql2 = ExternalizedQuery.getSql("BATCH.GET_ADDR_RECORDS");
               PreparedQuery query2 = new PreparedQuery(entityManager, sql2);
               query2.setParameter("REQ_ID", reqId);
-              query2.setParameter("LAND1", landCountry);
-              query2.setParameter("ADDR_SEQ", addrSequence);
+              query2.setParameter("ADDR_TYPE", addrType);
+              query2.setParameter("ADDR_SEQ", seqNo);
 
               List<Addr> addrList = query2.getResults(Addr.class);
+              LOG.debug("Size of Upadte Addr Record list : " + addrList.size());
               for (Addr addr : addrList) {
                 addr.setSapNo(kunnr);
-                addr.setIerpSitePrtyId(sitePartyId);
+                addr.setIerpSitePrtyId(kna1.getBran5());
                 updateEntity(addr, entityManager);
               }
-              LOG.debug("Size of Upadte Addr Record list : " + addrList.size());
             }
-          } else {
-            LOG.debug("NO RECORD Fetch For Update KUNNR in Kna1 Table");
+
           }
+        } else {
+          LOG.debug("NO RECORD Fetch For Update KUNNR in Kna1 Table");
         }
       }
     } else {
       LOG.debug("NO RECORD Fetch For UPDATE SAP NUMBER IN ADDR TABLE");
     }
   }
-
 }
