@@ -983,6 +983,33 @@ function clientTierCodeValidator() {
 }
 // CREATCMR-4293
 
+
+function validateEnterpriseNum() {
+	  FormManager.addFormValidator((function() {
+	    return {
+	      validate : function() {
+	        var enterprise = FormManager.getActualValue('enterprise');
+	        var letterNumber = /^[0-9a-zA-Z]+$/;
+	        if (enterprise != '') {
+
+	          if (enterprise.length >= 1 && enterprise.length != 6) {
+	            return new ValidationResult(null, false, 'Enterprise Number should be 6 characters long.');
+	          }
+
+	          if (enterprise.length >= 1 && !enterprise.match(letterNumber)) {
+	            return new ValidationResult({
+	              id : 'enterprise',
+	              type : 'text',
+	              name : 'enterprise'
+	            }, false, 'Enterprise Number should be alpha numeric.');
+	          }
+	        }
+	        return new ValidationResult(null, true);
+	      }
+	    };
+	  })(), 'MAIN_IBM_TAB', 'frmCMR');
+	}
+
 dojo.addOnLoad(function() {
   GEOHandler.DE = [ SysLoc.GERMANY ];
   console.log('adding DE validators...');
@@ -1034,4 +1061,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(lockIBMTabForDE, GEOHandler.DE);
   GEOHandler.addAfterConfig(resetVATValidationsForPayGo, GEOHandler.DE);
   GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, GEOHandler.DE);
+  GEOHandler.registerValidator(validateEnterpriseNum, GEOHandler.DE, null, true);  
   });
