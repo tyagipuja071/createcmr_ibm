@@ -475,7 +475,8 @@ public abstract class USBPHandler {
 
       // if (StringUtils.isBlank(installAt.getDept()) &&
       // StringUtils.isNotBlank(dept)) {
-      // overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZS01",
+      // overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS,
+      // "ZS01",
       // "DEPT", installAt.getDept(), dept);
       // details.append("Updated Department to " + dept).append("\n");
       // }
@@ -519,14 +520,16 @@ public abstract class USBPHandler {
       if (!StringUtils.equals(installAt.getCustPhone(), phone)) {
         overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZS01", "CUST_PHONE", installAt.getCustPhone(),
             StringUtils.isNotBlank(phone) ? phone.trim() : "");
-        // details.append("Updated Phone to " + (StringUtils.isNotBlank(phone) ?
+        // details.append("Updated Phone to " +
+        // (StringUtils.isNotBlank(phone) ?
         // phone.trim() : "-blank-")).append("\n");
       }
 
       if (!StringUtils.equals(installAt.getCustFax(), fax)) {
         overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZS01", "CUST_FAX", installAt.getCustFax(),
             StringUtils.isNotBlank(fax) ? fax.trim() : "");
-        // details.append("Updated Fax to " + (StringUtils.isNotBlank(fax) ?
+        // details.append("Updated Fax to " +
+        // (StringUtils.isNotBlank(fax) ?
         // fax.trim() : "-blank-")).append("\n");
       }
       if (!StringUtils.equals(installAt.getCity2(), district)) {
@@ -546,14 +549,16 @@ public abstract class USBPHandler {
       if (!StringUtils.equals(installAt.getFloor(), floor)) {
         overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZS01", "FLOOR", installAt.getFloor(),
             StringUtils.isNotBlank(floor) ? floor.trim() : "");
-        // details.append("Updated Floor to " + (StringUtils.isNotBlank(floor) ?
+        // details.append("Updated Floor to " +
+        // (StringUtils.isNotBlank(floor) ?
         // floor.trim() : "-blank-")).append("\n");
       }
       if (!StringUtils.equals(installAt.getTransportZone(), transportZone)) {
         overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZS01", "TRANSPORT_ZONE", installAt.getTransportZone(),
             StringUtils.isNotBlank(transportZone) ? transportZone.trim() : "");
         // details.append("Updated Transport Zone to " +
-        // (StringUtils.isNotBlank(transportZone) ? transportZone.trim() :
+        // (StringUtils.isNotBlank(transportZone) ? transportZone.trim()
+        // :
         // "-blank-")).append("\n");
       }
     }
@@ -1193,6 +1198,7 @@ public abstract class USBPHandler {
     } catch (Exception e) {
       LOG.warn("Cannot copy properties.", e);
     }
+    model.setSourceSystId("CREATECMR");
     model.setModelCmrNo(null);
     model.setCmrIssuingCntry(SystemLocation.UNITED_STATES);
     // CMR-3880 - ensure scenarios are editable

@@ -99,34 +99,33 @@ public class USHandler extends GEOHandler {
         }
       }
       if (StringUtils.isNotBlank(record.getCmrAddrSeq()) && "ZP01".equals(record.getCmrAddrTypeCode())
-            && Integer.parseInt(record.getCmrAddrSeq()) >= 200) {
+          && Integer.parseInt(record.getCmrAddrSeq()) >= 200) {
         record.setCmrAddrTypeCode("PG01");
-        }
-
-        converted.add(record);
-
-        // move Tax Code 2 to Tax Code 1 for US
-        record.setCmrBusinessReg(record.getCmrLocalTax2());
-        record.setCmrLocalTax2(null);
-
-        // do some manipulations of DATA fields here
-        if (StringUtils.isBlank(main.getCmrBusinessReg()) && !StringUtils.isBlank(record.getCmrBusinessReg())) {
-          // move the TAX code from non-Main to main
-          main.setCmrBusinessReg(record.getCmrBusinessReg());
-        }
-
-        if (StringUtils.isEmpty(record.getCmrTier()) || CmrConstants.FIND_CMR_BLANK_CLIENT_TIER.equals(record.getCmrTier())) {
-          record.setCmrTier(CmrConstants.CLIENT_TIER_UNASSIGNED);
-        }
       }
-    
+
+      converted.add(record);
+
+      // move Tax Code 2 to Tax Code 1 for US
+      record.setCmrBusinessReg(record.getCmrLocalTax2());
+      record.setCmrLocalTax2(null);
+
+      // do some manipulations of DATA fields here
+      if (StringUtils.isBlank(main.getCmrBusinessReg()) && !StringUtils.isBlank(record.getCmrBusinessReg())) {
+        // move the TAX code from non-Main to main
+        main.setCmrBusinessReg(record.getCmrBusinessReg());
+      }
+
+      if (StringUtils.isEmpty(record.getCmrTier()) || CmrConstants.FIND_CMR_BLANK_CLIENT_TIER.equals(record.getCmrTier())) {
+        record.setCmrTier(CmrConstants.CLIENT_TIER_UNASSIGNED);
+      }
+    }
 
     // check if ZP01 records exist in RDC & import
-//    List<FindCMRRecordModel> addressesList = null;
-//    addressesList = getZP01FromRDC(entityManager, main.getCmrNum());
-//    if (!addressesList.isEmpty() && addressesList.size() > 0) {
-//      converted.addAll(addressesList);
-//    }
+    // List<FindCMRRecordModel> addressesList = null;
+    // addressesList = getZP01FromRDC(entityManager, main.getCmrNum());
+    // if (!addressesList.isEmpty() && addressesList.size() > 0) {
+    // converted.addAll(addressesList);
+    // }
     Collections.sort(converted);
     source.setItems(converted);
   }
@@ -206,7 +205,7 @@ public class USHandler extends GEOHandler {
     } else {
       throw new CmrException(MessageUtil.ERROR_LEGACY_RETRIEVE);
     }
-    
+
     if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && "5K".equals(data.getIsuCd())) {
       data.setClientTier("");
     }
@@ -1055,7 +1054,7 @@ public class USHandler extends GEOHandler {
   public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
     return false;
   }
-  
+
   @Override
   public boolean setAddrSeqByImport(AddrPK addrPk, EntityManager entityManager, FindCMRResultModel result) {
     return true;
@@ -1071,5 +1070,18 @@ public class USHandler extends GEOHandler {
       return subInd;
     }
     return subInd;
+  }
+
+  @Override
+  public String getEquivalentAddressType(String addressType, String seqNo) {
+    if (addressType.equals("ZS01")) {
+      return "ZS01";
+    } else if (addressType.equals("ZI01")) {
+      return "ZP01";
+    } else if (addressType.equals("PG01")) {
+      return "ZP01";
+    } else {
+      return addressType;
+    }
   }
 }
