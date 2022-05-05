@@ -3,6 +3,8 @@
  */
 package com.ibm.cio.cmr.request.util.geo.impl;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -10,8 +12,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.Column;
 import javax.persistence.EntityManager;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.log4j.Logger;
@@ -23,10 +27,13 @@ import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.AddrPK;
+import com.ibm.cio.cmr.request.entity.AddrRdc;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.entity.Kna1;
+import com.ibm.cio.cmr.request.entity.KnvvExt;
+import com.ibm.cio.cmr.request.entity.USTaxData;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.model.requestentry.ImportCMRModel;
@@ -38,6 +45,7 @@ import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.MessageUtil;
+import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.QueryClient;
@@ -93,15 +101,19 @@ public class USHandler extends GEOHandler {
         if ("ZS01".equals(record.getCmrAddrTypeCode()) || "ZI01".equals(record.getCmrAddrTypeCode())) {
           // set the address type to Install At for CreateCMR
           record.setCmrAddrTypeCode("ZS01");
+          record.setCmrAddrSeq("001");
         } else if ("ZP01".equals(record.getCmrAddrTypeCode()) && seqList.contains(record.getCmrAddrSeq())) {
           // set the address type to Invoice To for CreateCMR
           record.setCmrAddrTypeCode("ZI01");
+          record.setCmrAddrSeq("002");
         }
       }
       if (StringUtils.isNotBlank(record.getCmrAddrSeq()) && "ZP01".equals(record.getCmrAddrTypeCode())
           && Integer.parseInt(record.getCmrAddrSeq()) >= 200) {
         record.setCmrAddrTypeCode("PG01");
       }
+      record.setCmrDept(record.getCmrName4());
+      record.setCmrStreetAddressCont(record.getCmrName3());
 
       converted.add(record);
 
@@ -121,6 +133,7 @@ public class USHandler extends GEOHandler {
     }
 
     // check if ZP01 records exist in RDC & import
+    // List<FindCMRRecordModel> record2 = source.getItems();
     // List<FindCMRRecordModel> addressesList = null;
     // addressesList = getZP01FromRDC(entityManager, main.getCmrNum());
     // if (!addressesList.isEmpty() && addressesList.size() > 0) {
@@ -128,6 +141,7 @@ public class USHandler extends GEOHandler {
     // }
     Collections.sort(converted);
     source.setItems(converted);
+
   }
 
   private List<FindCMRRecordModel> getZP01FromRDC(EntityManager entityManager, String cmrNo) {
@@ -143,67 +157,207 @@ public class USHandler extends GEOHandler {
     if (kna1List != null && !kna1List.isEmpty() && kna1List.size() > 0) {
       for (Kna1 kna1 : kna1List) {
         address = new FindCMRRecordModel();
-        address.setCmrAddrTypeCode(CmrConstants.RDC_BILL_TO);
+        // paygo billing
+        address.setCmrAddrTypeCode(CmrConstants.RDC_PAYGO_BILLING);
         address.setCmrName(kna1.getName1());
         address.setCmrName2(kna1.getName2());
         address.setCmrAddrSeq(kna1.getZzkvSeqno());
         address.setCmrStreetAddress(kna1.getStras());
         address.setCmrCountryLanded(kna1.getLand1());
         address.setCmrPostalCode(kna1.getPstlz());
-        address.setCmrDept(kna1.getName4());
+        if (kna1.getName4().length() >= 24) {
+          address.setCmrDept(kna1.getName4().substring(0, 24));
+        } else {
+          address.setCmrDept(kna1.getName4());
+        }
         address.setCmrCity(kna1.getOrt01());
         address.setCmrState(kna1.getRegio());
         address.setCmrCounty(kna1.getCounc());
         address.setCmrAddrType(kna1.getKtokd());
         address.setCmrSapNumber(kna1.getId().getKunnr());
+        address.setCmrSitePartyID(kna1.getBran5());
         addressList.add(address);
       }
     }
+
     return addressList;
   }
 
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel cmr) throws Exception {
 
+    String processingType = PageManager.getProcessingType(cmr.getCmrIssuedBy(), "U");
+
     String cmrNo = cmr.getCmrNum();
     if (!NumberUtils.isDigits(cmrNo)) {
       LOG.debug("Non-digits found. Maybe Prospect/Lite conversion.");
       return;
     }
-    String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
 
-    String usSchema = SystemConfiguration.getValue("US_CMR_SCHEMA");
-    // try US CMR DB first
-    String sql = ExternalizedQuery.getSql("IMPORT.US.USCMR", usSchema);
-    sql = StringUtils.replace(sql, ":CMR_NO", "'" + data.getCmrNo() + "'");
-    String dbId = QueryClient.USCMR_APP_ID;
+    String ordBlk = getAufsdCombFromRdc(entityManager, SystemConfiguration.getValue("MANDT"), cmr.getCmrNum());
+    data.setOrdBlk(ordBlk);
 
-    LOG.debug("Getting existing values from US CMR DB..");
-    boolean retrieved = queryAndAssign(url, sql, results, data, dbId);
+    if (!StringUtils.isEmpty(cmr.getCmrIsic())) {
+      data.setUsSicmen(cmr.getCmrIsic());
+    }
 
-    LOG.debug("US CMR Data retrieved? " + retrieved);
-    if (retrieved) {
-      boolean closeMgr = false;
-      if (this.entityManager == null) {
-        this.entityManager = JpaManager.getEntityManager();
-        closeMgr = true;
+    // retrieve BP data on import
+    String bpType = getBPDataFromRdc(entityManager, SystemConfiguration.getValue("MANDT"), cmr.getCmrSapNumber());
+    if (!StringUtils.isEmpty(bpType)) {
+      data.setBpAcctTyp(bpType);
+    }
+
+    // retrieve US_Tax_Data on import
+    USTaxData uTxData = getUSTaxDataById(entityManager, SystemConfiguration.getValue("MANDT"), cmr.getCmrSapNumber());
+
+    if (uTxData != null) {
+
+      if (!StringUtils.isEmpty(uTxData.getcTeCertST1())) {
+        data.setSpecialTaxCd(uTxData.getcTeCertST1());
       }
-      setCodesFromLOV(this.entityManager, url, data);
-      // Check if OEM CMR, throw error if yes
-      if ("C".equals(admin.getReqType()) && StringUtils.isNotBlank(data.getRestrictTo()) && "OEMHQ".equals(data.getRestrictTo())) {
-        throw new CmrException(MessageUtil.OEM_IMPORT_US_CREATE);
+      if (!StringUtils.isEmpty(uTxData.getcTeCertST2())) {
+        data.setTaxExemptStatus2(uTxData.getcTeCertST2());
+      }
+      if (!StringUtils.isEmpty(uTxData.getcTeCertST3())) {
+        data.setTaxExemptStatus3(uTxData.getcTeCertST3());
       }
 
-      if (closeMgr) {
-        this.entityManager.clear();
-        this.entityManager.close();
+      String taxcd1 = uTxData.getiTypeCust1() + uTxData.getiTaxClass1();
+      String taxcd2 = uTxData.getiTypeCust2() + uTxData.getiTaxClass2();
+      String taxcd3 = uTxData.getiTypeCust3() + uTxData.getiTaxClass3();
+
+      if (StringUtils.isEmpty(uTxData.getiTypeCust1()) || StringUtils.isEmpty(uTxData.getiTaxClass1())) {
+        data.setTaxCd1("");
+      } else {
+        data.setTaxCd1(taxcd1);
       }
-      // setCodes(url, data);
-    } else if (!retrieved && isPoolProcessing()) {
-      // do nothing and return
-      return;
+      if (StringUtils.isEmpty(uTxData.getiTypeCust2()) || StringUtils.isEmpty(uTxData.getiTaxClass2())) {
+        data.setTaxCd2("");
+      } else {
+        data.setTaxCd2(taxcd2);
+      }
+      if (StringUtils.isEmpty(uTxData.getiTypeCust3()) || StringUtils.isEmpty(uTxData.getiTaxClass3())) {
+        data.setTaxCd3("");
+      } else {
+        data.setTaxCd3(taxcd3);
+      }
+
+      if (!StringUtils.isEmpty(uTxData.getcICCTe())) {
+        data.setIccTaxExemptStatus(uTxData.getcICCTe());
+      }
+      if (!StringUtils.isEmpty(uTxData.getCICCTaxClass())) {
+        data.setIccTaxClass(uTxData.getCICCTaxClass());
+      }
+      if (!StringUtils.isEmpty(uTxData.getfOCL())) {
+        data.setOutCityLimit(uTxData.getfOCL());
+      }
+      if (!StringUtils.isEmpty(uTxData.getEaStatus())) {
+        data.setEducAllowCd(uTxData.getEaStatus());
+      }
+    }
+
+    // retrieve knvvExt data on import
+    KnvvExt knvvExt = getKnvvExtById(entityManager, SystemConfiguration.getValue("MANDT"), cmr.getCmrSapNumber());
+
+    if (knvvExt != null) {
+      if (!StringUtils.isEmpty(knvvExt.getOemInd())) {
+        data.setOemInd(knvvExt.getOemInd());
+      }
+
+      // Miscellaneous Bill Code
+      data.setMiscBillCd(knvvExt.getMiscBilling());
+
+    }
+
+    List<FindCMRRecordModel> records = results.getItems();
+    FindCMRRecordModel main = records != null && records.size() > 0 ? records.get(0) : new FindCMRRecordModel();
+
+    // CSO Site
+    data.setCsoSite(main.getUsCmrCsoSite());
+
+    // Marketing A/R Department
+    data.setMtkgArDept(main.getUsCmrMktgArDept());
+
+    // Marketing Department
+    data.setMktgDept(main.getUsCmrMktgDept());
+
+    // PCC A/R Department
+    data.setPccArDept(main.getUsCmrPccArBo());
+
+    // PCC Marketing Department
+    data.setPccMktgDept(main.getUsCmrPccMktgBo());
+
+    // SVC A/R Office
+    data.setSvcArOffice(main.getUsCmrSvcArOfc());
+
+    // Restrict To
+    data.setRestrictTo(main.getUsCmrRestrictTo());
+
+    // Tax Class / Code 1
+    String taxcd1 = main.getUsCmrTaxType1() + main.getUsCmrTaxClass1();
+
+    if (StringUtils.isEmpty(main.getUsCmrTaxType1()) || StringUtils.isEmpty(main.getUsCmrTaxClass1())) {
+      data.setTaxCd1("");
     } else {
-      throw new CmrException(MessageUtil.ERROR_LEGACY_RETRIEVE);
+      data.setTaxCd1(taxcd1);
+    }
+
+    // Tax Class / Code 2
+    String taxcd2 = main.getUsCmrTaxType2() + main.getUsCmrTaxClass2();
+    if (StringUtils.isEmpty(main.getUsCmrTaxType2()) || StringUtils.isEmpty(main.getUsCmrTaxClass2())) {
+      data.setTaxCd2("");
+    } else {
+      data.setTaxCd2(taxcd2);
+    }
+
+    // Tax Class / Code 3
+    String taxcd3 = main.getUsCmrTaxType3() + main.getUsCmrTaxClass3();
+    if (StringUtils.isEmpty(main.getUsCmrTaxType3()) || StringUtils.isEmpty(main.getUsCmrTaxClass3())) {
+      data.setTaxCd3("");
+    } else {
+      data.setTaxCd3(taxcd3);
+    }
+
+    // Non-IBM Company
+    // data.setNonIbmCompanyInd(main.getUsCmrNonIbmCompInd());
+
+    if ("TC".equals(processingType)) {
+
+      String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
+
+      String usSchema = SystemConfiguration.getValue("US_CMR_SCHEMA");
+      // try US CMR DB first
+      String sql = ExternalizedQuery.getSql("IMPORT.US.USCMR", usSchema);
+      sql = StringUtils.replace(sql, ":CMR_NO", "'" + data.getCmrNo() + "'");
+      String dbId = QueryClient.USCMR_APP_ID;
+
+      LOG.debug("Getting existing values from US CMR DB..");
+      boolean retrieved = queryAndAssign(url, sql, results, data, dbId);
+
+      LOG.debug("US CMR Data retrieved? " + retrieved);
+      if (retrieved) {
+        boolean closeMgr = false;
+        if (this.entityManager == null) {
+          this.entityManager = JpaManager.getEntityManager();
+          closeMgr = true;
+        }
+        setCodesFromLOV(this.entityManager, url, data);
+        // Check if OEM CMR, throw error if yes
+        if ("C".equals(admin.getReqType()) && StringUtils.isNotBlank(data.getRestrictTo()) && "OEMHQ".equals(data.getRestrictTo())) {
+          throw new CmrException(MessageUtil.OEM_IMPORT_US_CREATE);
+        }
+
+        if (closeMgr) {
+          this.entityManager.clear();
+          this.entityManager.close();
+        }
+        // setCodes(url, data);
+      } else if (!retrieved && isPoolProcessing()) {
+        // do nothing and return
+        return;
+      } else {
+        throw new CmrException(MessageUtil.ERROR_LEGACY_RETRIEVE);
+      }
     }
 
     if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && "5K".equals(data.getIsuCd())) {
@@ -410,8 +564,11 @@ public class USHandler extends GEOHandler {
 
   @Override
   public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel cmr, String cmrNo) throws Exception {
+
     // try US CMR DB first
-    if (cmrNo != null) {
+    String processingType = PageManager.getProcessingType(cmr.getCmrIssuedBy(), "U");
+
+    if (cmrNo != null && "TC".equals(processingType)) {
       String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
       String usSchema = SystemConfiguration.getValue("US_CMR_SCHEMA");
       String sql = ExternalizedQuery.getSql("IMPORT.US.USCMR.ADDR", usSchema);
@@ -464,15 +621,15 @@ public class USHandler extends GEOHandler {
       } else {
         // break everything here if needed
         String addrTxt = address.getAddrTxt();
-        if (addrTxt != null && addrTxt.length() > 24) {
-          splitAddress(address, address.getAddrTxt(), "", 24, 24);
+        if (addrTxt != null && addrTxt.length() > 35) {
+          splitAddress(address, address.getAddrTxt(), "", 35, 35);
         }
       }
     } else {
       // break everything here if needed
       String addrTxt = address.getAddrTxt();
-      if (addrTxt != null && addrTxt.length() > 24) {
-        splitAddress(address, address.getAddrTxt(), "", 24, 24);
+      if (addrTxt != null && addrTxt.length() > 35) {
+        splitAddress(address, address.getAddrTxt(), "", 35, 35);
       }
     }
     // no cmr no, manual parse
@@ -482,6 +639,7 @@ public class USHandler extends GEOHandler {
       LOG.debug("Postal code formatted: " + postCd);
       address.setPostCd(postCd);
     }
+    address.setAddrTxt2(cmr.getCmrStreetAddressCont());
   }
 
   @Override
@@ -835,6 +993,31 @@ public class USHandler extends GEOHandler {
       data.setIsuCd("32");
       data.setClientTier("N");
     }
+
+    // CREATCMR-4569
+    if ("C".equals(admin.getReqType())) {
+      if (StringUtils.isEmpty(data.getAbbrevNm())) {
+        if (!StringUtils.isEmpty(admin.getMainCustNm1())) {
+          if (admin.getMainCustNm1().length() >= 15) {
+            data.setAbbrevNm(admin.getMainCustNm1().substring(0, 15));
+          } else {
+            data.setAbbrevNm(admin.getMainCustNm1().substring(0, admin.getMainCustNm1().length()));
+          }
+        }
+      }
+
+      if (StringUtils.isEmpty(data.getSearchTerm())) {
+        if (!StringUtils.isEmpty(data.getAbbrevNm())) {
+          if (data.getAbbrevNm().length() >= 10) {
+            data.setSearchTerm(data.getAbbrevNm().substring(0, 10));
+          } else {
+            data.setSearchTerm(data.getAbbrevNm().substring(0, data.getAbbrevNm().length()));
+          }
+        }
+      }
+    }
+    // CREATCMR-4569
+
   }
 
   @Override
@@ -862,6 +1045,20 @@ public class USHandler extends GEOHandler {
 
   @Override
   public void doAfterImport(EntityManager entityManager, Admin admin, Data data) {
+    // update data_rdc table
+    // CREATCMR-5447
+    String sql = ExternalizedQuery.getSql("SUMMARY.OLDDATA");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", data.getId().getReqId());
+    List<DataRdc> records = query.getResults(DataRdc.class);
+    if (records != null && records.size() > 0) {
+      DataRdc rdc = records.get(0);
+      rdc.setTaxExempt2(data.getTaxExemptStatus2());
+      rdc.setTaxExempt3(data.getTaxExemptStatus3());
+      rdc.setAbbrevNm(data.getAbbrevNm());
+      entityManager.merge(rdc);
+    }
+    entityManager.flush();
   }
 
   @Override
@@ -1057,7 +1254,7 @@ public class USHandler extends GEOHandler {
 
   @Override
   public boolean setAddrSeqByImport(AddrPK addrPk, EntityManager entityManager, FindCMRResultModel result) {
-    return true;
+    return false;
   }
 
   protected String getSubIndusryValue(EntityManager entityManager, String isic) {
@@ -1072,6 +1269,609 @@ public class USHandler extends GEOHandler {
     return subInd;
   }
 
+  public static String validateForSCC(EntityManager entityManager, Long reqId) {
+
+    String flag = "N";
+
+    String landCntry = "";
+    String stateProv = "";
+    String county = "";
+    String city1 = "";
+
+    String sql1 = ExternalizedQuery.getSql("US.GET.ADDRESS_BY_REQ_ID");
+    PreparedQuery query1 = new PreparedQuery(entityManager, sql1);
+    query1.setParameter("REQ_ID", reqId);
+
+    List<Object[]> results1 = query1.getResults();
+    if (results1 != null && !results1.isEmpty()) {
+      Object[] scc = results1.get(0);
+      landCntry = (String) scc[0];
+      stateProv = (String) scc[1];
+      county = (String) scc[2];
+      city1 = (String) scc[3];
+    }
+
+    boolean isNumber = StringUtils.isNumeric(county);
+
+    if (!isNumber) {
+      county = "0";
+    }
+
+    String sql2 = ExternalizedQuery.getSql("QUERY.US_CMR_SCC.GET_SCC_BY_LAND_CNTRY_ST_CNTY_CITY");
+    PreparedQuery query2 = new PreparedQuery(entityManager, sql2);
+    query2.setParameter("LAND_CNTRY", landCntry);
+    query2.setParameter("N_ST", stateProv);
+    query2.setParameter("C_CNTY", county);
+    query2.setParameter("N_CITY", city1);
+
+    List<Object[]> results2 = query2.getResults();
+    if (results2 != null && !results2.isEmpty()) {
+      Object[] result = results2.get(0);
+      if (!"".equals(result[0])) {
+        flag = "Y";
+      }
+    }
+
+    return flag;
+
+  }
+
+  public static boolean isDataUpdated(Data data, DataRdc dataRdc, String cmrIssuingCntry) {
+    String srcName = null;
+    Column srcCol = null;
+    Field trgField = null;
+
+    for (Field field : Data.class.getDeclaredFields()) {
+      if (!(Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers()) || Modifier.isAbstract(field.getModifiers()))) {
+        srcCol = field.getAnnotation(Column.class);
+        if (srcCol != null) {
+          srcName = srcCol.name();
+        } else {
+          srcName = field.getName().toUpperCase();
+        }
+
+        // check if at least one of the fields is updated
+        if (getDataFieldsForUpdateCheck(cmrIssuingCntry).contains(srcName)) {
+          try {
+            trgField = DataRdc.class.getDeclaredField(field.getName());
+
+            field.setAccessible(true);
+            trgField.setAccessible(true);
+
+            Object srcVal = field.get(data);
+            Object trgVal = trgField.get(dataRdc);
+
+            if (String.class.equals(field.getType())) {
+              String srcStringVal = (String) srcVal;
+              if (srcStringVal == null) {
+                srcStringVal = "";
+              }
+              String trgStringVal = (String) trgVal;
+              if (trgStringVal == null) {
+                trgStringVal = "";
+              }
+              if (!StringUtils.equals(srcStringVal.trim(), trgStringVal.trim())) {
+                LOG.trace(" - Field: " + srcName + " Not equal " + srcVal + " - " + trgVal);
+                return true;
+              }
+            } else {
+              if (!ObjectUtils.equals(srcVal, trgVal)) {
+                LOG.trace(" - Field: " + srcName + " Not equal " + srcVal + " - " + trgVal);
+                return true;
+              }
+            }
+          } catch (NoSuchFieldException e) {
+            // noop
+            continue;
+          } catch (Exception e) {
+            LOG.trace("General error when trying to access field.", e);
+            // no stored value or field not on addr rdc, return null for no
+            // changes
+            continue;
+          }
+        } else {
+          continue;
+        }
+      }
+    }
+
+    return true;
+  }
+
+  public static List<String> getDataFieldsForUpdateCheck(String cmrIssuingCntry) {
+    List<String> fields = new ArrayList<>();
+    fields.addAll(Arrays.asList("ABBREV_NM", "CLIENT_TIER", "CUST_CLASS", "CUST_PREF_LANG", "INAC_CD", "ISU_CD", "SEARCH_TERM", "ISIC_CD",
+        "SUB_INDUSTRY_CD", "VAT", "COV_DESC", "COV_ID", "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC", "GEO_LOCATION_CD",
+        "DUNS_NO", "AFFILIATE", "COMPANY", "ENTERPRISE", "TAX_CD1", "TAX_CD2", "TAX_CD3", "TAX_EXEMPT_STATUS_1", "TAX_EXEMPT_STATUS_2",
+        "TAX_EXEMPT_STATUS_3", "ICC_TAX_CLASS", "ICC_TAX_EXEMPT_STATUS", "ORD_BLK", "US_SICMEN", "EDUC_ALLOW_CD"));
+    return fields;
+  }
+
+  // CREATCMR-4872
+  public static boolean isDataUpdatedTaxIn(Data data, DataRdc dataRdc, String cmrIssuingCntry) {
+    String srcName = null;
+    Column srcCol = null;
+    Field trgField = null;
+
+    for (Field field : Data.class.getDeclaredFields()) {
+      if (!(Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers()) || Modifier.isAbstract(field.getModifiers()))) {
+        srcCol = field.getAnnotation(Column.class);
+        if (srcCol != null) {
+          srcName = srcCol.name();
+        } else {
+          srcName = field.getName().toUpperCase();
+        }
+
+        // check if at least one of the fields is updated
+        if (getDataFieldsForUpdateTaxInCheck(cmrIssuingCntry).contains(srcName)) {
+          try {
+            trgField = DataRdc.class.getDeclaredField(field.getName());
+
+            field.setAccessible(true);
+            trgField.setAccessible(true);
+
+            Object srcVal = field.get(data);
+            Object trgVal = trgField.get(dataRdc);
+
+            if (String.class.equals(field.getType())) {
+              String srcStringVal = (String) srcVal;
+              if (srcStringVal == null) {
+                srcStringVal = "";
+              }
+              String trgStringVal = (String) trgVal;
+              if (trgStringVal == null) {
+                trgStringVal = "";
+              }
+              if (!StringUtils.equals(srcStringVal.trim(), trgStringVal.trim())) {
+                LOG.trace(" - Field: " + srcName + " Not equal " + srcVal + " - " + trgVal);
+                return true;
+              }
+            } else {
+              if (!ObjectUtils.equals(srcVal, trgVal)) {
+                LOG.trace(" - Field: " + srcName + " Not equal " + srcVal + " - " + trgVal);
+                return true;
+              }
+            }
+          } catch (NoSuchFieldException e) {
+            try {
+              field.setAccessible(true);
+              Object srcVal1 = field.get(data);
+              String srcStringVal1 = (String) srcVal1;
+
+              if ("TAX_EXEMPT_STATUS_1".equals(srcName)) {
+                if (StringUtils.isNotBlank(dataRdc.getTaxExempt1()) && StringUtils.isNotBlank(data.getTaxExemptStatus1())) {
+                  if (!dataRdc.getTaxExempt1().equals(srcStringVal1)) {
+                    return true;
+                  }
+                } else if (!StringUtils.isNotBlank(dataRdc.getTaxExempt1()) && !StringUtils.isNotBlank(data.getTaxExemptStatus1())) {
+                  continue;
+                } else {
+                  return true;
+                }
+              } else if ("TAX_EXEMPT_STATUS_2".equals(srcName)) {
+                if (StringUtils.isNotBlank(dataRdc.getTaxExempt2()) && StringUtils.isNotBlank(data.getTaxExemptStatus2())) {
+                  if (!dataRdc.getTaxExempt2().equals(srcStringVal1)) {
+                    return true;
+                  }
+                } else if (!StringUtils.isNotBlank(dataRdc.getTaxExempt2()) && !StringUtils.isNotBlank(data.getTaxExemptStatus2())) {
+                  continue;
+                } else {
+                  return true;
+                }
+              } else if ("TAX_EXEMPT_STATUS_3".equals(srcName)) {
+                if (StringUtils.isNotBlank(dataRdc.getTaxExempt3()) && StringUtils.isNotBlank(data.getTaxExemptStatus3())) {
+                  if (!dataRdc.getTaxExempt3().equals(srcStringVal1)) {
+                    return true;
+                  }
+                } else if (!StringUtils.isNotBlank(dataRdc.getTaxExempt3()) && !StringUtils.isNotBlank(data.getTaxExemptStatus3())) {
+                  continue;
+                } else {
+                  return true;
+                }
+              }
+            } catch (Exception e1) {
+              continue;
+            }
+            continue;
+          } catch (Exception e) {
+            LOG.trace("General error when trying to access field.", e);
+            // no stored value or field not on addr rdc, return null for no
+            // changes
+            continue;
+          }
+        } else {
+          continue;
+        }
+      }
+
+    }
+
+    return false;
+  }
+
+  public static boolean isDataUpdatedTaxOut(Data data, DataRdc dataRdc, String cmrIssuingCntry) {
+    String srcName = null;
+    Column srcCol = null;
+    Field trgField = null;
+
+    for (Field field : Data.class.getDeclaredFields()) {
+      if (!(Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers()) || Modifier.isAbstract(field.getModifiers()))) {
+        srcCol = field.getAnnotation(Column.class);
+        if (srcCol != null) {
+          srcName = srcCol.name();
+        } else {
+          srcName = field.getName().toUpperCase();
+        }
+
+        // check if at least one of the fields is updated
+        if (getDataFieldsForUpdateTaxOutCheck(cmrIssuingCntry).contains(srcName)) {
+          try {
+            trgField = DataRdc.class.getDeclaredField(field.getName());
+
+            field.setAccessible(true);
+            trgField.setAccessible(true);
+
+            Object srcVal = field.get(data);
+            Object trgVal = trgField.get(dataRdc);
+
+            if (String.class.equals(field.getType())) {
+              String srcStringVal = (String) srcVal;
+              if (srcStringVal == null) {
+                srcStringVal = "";
+              }
+              String trgStringVal = (String) trgVal;
+              if (trgStringVal == null) {
+                trgStringVal = "";
+              }
+              if (!StringUtils.equals(srcStringVal.trim(), trgStringVal.trim())) {
+                LOG.trace(" - Field: " + srcName + " Not equal " + srcVal + " - " + trgVal);
+                return true;
+              }
+            } else {
+              if (!ObjectUtils.equals(srcVal, trgVal)) {
+                LOG.trace(" - Field: " + srcName + " Not equal " + srcVal + " - " + trgVal);
+                return true;
+              }
+            }
+          } catch (NoSuchFieldException e) {
+            try {
+              field.setAccessible(true);
+              Object srcVal1 = field.get(data);
+              String srcStringVal1 = (String) srcVal1;
+              if (srcStringVal1 != null || "".equals(srcStringVal1)) {
+                return true;
+              }
+            } catch (Exception e1) {
+              continue;
+            }
+            continue;
+          } catch (Exception e) {
+            LOG.trace("General error when trying to access field.", e);
+            // no stored value or field not on addr rdc, return null for no
+            // changes
+            continue;
+          }
+        } else {
+          continue;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  public static List<String> getDataFieldsForUpdateTaxInCheck(String cmrIssuingCntry) {
+    List<String> fields = new ArrayList<>();
+    fields.addAll(Arrays.asList("TAX_CD1", "TAX_CD2", "TAX_CD3", "TAX_EXEMPT_STATUS_1", "TAX_EXEMPT_STATUS_2", "TAX_EXEMPT_STATUS_3", "ICC_TAX_CLASS",
+        "ICC_TAX_EXEMPT_STATUS", "OUT_CITY_LIMIT"));
+    return fields;
+  }
+
+  public static List<String> getDataFieldsForUpdateTaxOutCheck(String cmrIssuingCntry) {
+    List<String> fields = new ArrayList<>();
+    fields.addAll(Arrays.asList("ABBREV_NM", "CLIENT_TIER", "CUST_CLASS", "CUST_PREF_LANG", "INAC_CD", "ISU_CD", "SEARCH_TERM", "ISIC_CD",
+        "SUB_INDUSTRY_CD", "VAT", "COV_DESC", "COV_ID", "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC", "GEO_LOCATION_CD",
+        "DUNS_NO", "AFFILIATE", "COMPANY", "ENTERPRISE", "ORD_BLK", "US_SICMEN", "EDUC_ALLOW_CD"));
+    return fields;
+  }
+  // CREATCMR-4872
+
+  public boolean isAddrUpdated(Addr addr, AddrRdc addrRdc, String cmrIssuingCntry) {
+    String srcName = null;
+    Column srcCol = null;
+    Field trgField = null;
+
+    GEOHandler handler = RequestUtils.getGEOHandler(cmrIssuingCntry);
+
+    for (Field field : Addr.class.getDeclaredFields()) {
+      if (!(Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers()) || Modifier.isAbstract(field.getModifiers()))) {
+        srcCol = field.getAnnotation(Column.class);
+        if (srcCol != null) {
+          srcName = srcCol.name();
+        } else {
+          srcName = field.getName().toUpperCase();
+        }
+
+        // check if field is part of exemption list or is part of what to check
+        // for the handler, if specified
+        if (GEOHandler.ADDRESS_FIELDS_SKIP_CHECK.contains(srcName)
+            || (handler != null && handler.getAddressFieldsForUpdateCheck(cmrIssuingCntry) != null
+                && !handler.getAddressFieldsForUpdateCheck(cmrIssuingCntry).contains(srcName))) {
+          continue;
+        }
+
+        if ("ID".equals(srcName) || "PCSTATEMANAGER".equals(srcName) || "PCDETACHEDSTATE".equals(srcName)) {
+          continue;
+        }
+
+        try {
+          trgField = AddrRdc.class.getDeclaredField(field.getName());
+
+          field.setAccessible(true);
+          trgField.setAccessible(true);
+
+          Object srcVal = field.get(addr);
+          Object trgVal = trgField.get(addrRdc);
+
+          if (String.class.equals(field.getType())) {
+            String srcStringVal = (String) srcVal;
+            if (srcStringVal == null) {
+              srcStringVal = "";
+            }
+            String trgStringVal = (String) trgVal;
+            if (trgStringVal == null) {
+              trgStringVal = "";
+            }
+            if (!StringUtils.equals(srcStringVal.trim(), trgStringVal.trim())) {
+              LOG.trace(" - Field: " + srcName + " Not equal " + srcVal + " - " + trgVal);
+              return true;
+            }
+          } else {
+            if (!ObjectUtils.equals(srcVal, trgVal)) {
+              LOG.trace(" - Field: " + srcName + " Not equal " + srcVal + " - " + trgVal);
+              return true;
+            }
+          }
+        } catch (NoSuchFieldException e) {
+          // noop
+          continue;
+        } catch (Exception e) {
+          LOG.trace("General error when trying to access field.", e);
+          // no stored value or field not on addr rdc, return null for no
+          // changes
+          continue;
+        }
+
+      }
+    }
+    return false;
+  }
+
+  public String getBPDataFromRdc(EntityManager entityManager, String mandt, String kunnr) {
+    String bptype = "";
+    String sql = ExternalizedQuery.getSql("US.GETBPTYPE");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("MANDT", mandt);
+    query.setParameter("KUNNR", kunnr);
+    String result = query.getSingleResult(String.class);
+
+    if (result != null) {
+      bptype = result;
+    }
+
+    System.out.println("bptype = " + bptype);
+
+    return bptype;
+  }
+
+  public String getAufsdCombFromRdc(EntityManager entityManager, String mandt, String cmrNum) {
+    String ordBlk = "";
+    String sql = ExternalizedQuery.getSql("US.GET.KNA1");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("MANDT", mandt);
+    query.setParameter("ZZKV_CUSNO", cmrNum);
+    List<Object[]> results = query.getResults();
+    if (results != null && results.size() > 0) {
+      String ordBlkZS01 = "";
+      String ordBlkZP01 = "";
+      for (Object[] values : results) {
+        String ktokd = (String) values[0];
+        String aufsd = (String) values[1];
+        if ("ZS01,ZI01".contains(ktokd)) {
+          if (StringUtils.isNotBlank(aufsd)) {
+            if ("88".equals(aufsd)) {
+              ordBlkZS01 = "8S";
+            } else if ("PG".equals(aufsd)) {
+              ordBlkZS01 = "PG";
+            } else {
+              ordBlkZS01 = "9S";
+            }
+          }
+        } else {
+          if (StringUtils.isNotBlank(aufsd)) {
+            if ("88".equals(aufsd)) {
+              ordBlkZP01 = "8I";
+            } else if ("PG".equals(aufsd)) {
+              ordBlkZP01 = "PG";
+            } else {
+              ordBlkZP01 = "9I";
+            }
+          }
+        }
+      }
+      if ("8S".equals(ordBlkZS01) && "8I".equals(ordBlkZP01)) {
+        ordBlk = "8B";
+      } else if ("8S".equals(ordBlkZS01)) {
+        ordBlk = "8S";
+      } else if ("8I".equals(ordBlkZP01)) {
+        ordBlk = "8I";
+      } else if ("9S".equals(ordBlkZS01) && "9I".equals(ordBlkZP01)) {
+        ordBlk = "9B";
+      } else if ("9S".equals(ordBlkZS01)) {
+        ordBlk = "9S";
+      } else if ("9I".equals(ordBlkZP01)) {
+        ordBlk = "9I";
+      } else if ("PG".equals(ordBlkZS01) && "PG".equals(ordBlkZP01)) {
+        ordBlk = "PG";
+      }
+    }
+    return ordBlk;
+  }
+
+  public USTaxData getUSTaxDataById(EntityManager entityManager, String mandt, String kunnr) {
+    if (StringUtils.isEmpty(mandt) || StringUtils.isEmpty(kunnr)) {
+      return null;
+    }
+
+    try {
+      String sql = ExternalizedQuery.getSql("US.GET.US_TAX_DATA");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("KUNNR", kunnr);
+      query.setParameter("MANDT", mandt);
+      query.setForReadOnly(true);
+      return query.getSingleResult(USTaxData.class);
+    } catch (Exception e) {
+      LOG.error("An error encountered in RDC retrieve US TaxData using getUSTaxDataById().", e);
+    }
+    return null;
+  }
+
+  public KnvvExt getKnvvExtById(EntityManager entityManager, String mandt, String kunnr) {
+    if (StringUtils.isEmpty(mandt) || StringUtils.isEmpty(kunnr)) {
+      return null;
+    }
+
+    try {
+      String sql = ExternalizedQuery.getSql("US.GET.KNVVEXT");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("KUNNR", kunnr);
+      query.setParameter("MANDT", mandt);
+      query.setForReadOnly(true);
+      return query.getSingleResult(KnvvExt.class);
+    } catch (Exception e) {
+      LOG.error("An error encountered in RDC retrieve KnvvExt.", e);
+    }
+    return null;
+  }
+
+  // CREATCMR-4872
+  public static DataRdc getDataRdcRecords(EntityManager entityManager, Data data) {
+    String sql = ExternalizedQuery.getSql("SUMMARY.OLDDATA");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", data.getId().getReqId());
+    query.setForReadOnly(true);
+    return query.getSingleResult(DataRdc.class);
+  }
+
+  public static boolean getUSDataSkipToPCP(EntityManager entityManager, Data data) {
+    DataRdc dataRdc = getDataRdcRecords(entityManager, data);
+    Addr addr = getAddrSoldToRecords(entityManager, data);
+    AddrRdc addrRdc = getAddrSoldToRdcRecords(entityManager, data);
+
+    boolean isSkipToPcp = false;
+    boolean isTaxInUpdate = isDataUpdatedTaxIn(data, dataRdc, data.getCmrIssuingCntry());
+    boolean isTaxOutUpdate = isDataUpdatedTaxOut(data, dataRdc, data.getCmrIssuingCntry());
+    // CREATCMR-5447
+    List<String> checkForUpdateAddrTaxOut = Arrays.asList("ADDR_TXT", "ADDR_TXT2", "CITY2", "POST_CD", "DIVN", "DEPT", "PO_BOX", "BLDG", "FLOOR",
+        "CUST_PHONE", "CUST_FAX");
+    List<String> checkForUpdateAddrTaxIn = Arrays.asList("CITY1", "COUNTY", "STATE_PROV", "LAND_CNTRY");
+
+    boolean isTaxInAddrUpdate = isAddrUpdatedForTaxTeam(addr, addrRdc, checkForUpdateAddrTaxIn);
+    boolean isTaxOutAddrUpdate = isAddrUpdatedForTaxTeam(addr, addrRdc, checkForUpdateAddrTaxOut);
+
+    // if (isTaxInUpdate || isTaxInAddrUpdate) {
+    // if (!isTaxOutUpdate && !isTaxOutAddrUpdate) {
+    // isSkipToPcp = true;
+    // }
+    // }
+    if (isTaxInUpdate) {
+      if (!isTaxOutUpdate) {
+        isSkipToPcp = true;
+      }
+    }
+    return isSkipToPcp;
+  }
+
+  // CREATCMR-5447
+  public static boolean getUSDataSkipToPPN(EntityManager entityManager, Data data) {
+    DataRdc dataRdc = getDataRdcRecords(entityManager, data);
+    boolean isSkipToPpn = isDataUpdatedTaxIn(data, dataRdc, data.getCmrIssuingCntry());
+    return isSkipToPpn;
+  }
+
+  public static AddrRdc getAddrSoldToRdcRecords(EntityManager entityManager, Data data) {
+    String sql = ExternalizedQuery.getSql("DNB.GET_CURR_SOLD_TO_RDC");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", data.getId().getReqId());
+    query.setForReadOnly(true);
+    return query.getSingleResult(AddrRdc.class);
+  }
+
+  public static Addr getAddrSoldToRecords(EntityManager entityManager, Data data) {
+    String sql = ExternalizedQuery.getSql("DNB.GET_CURR_SOLD_TO");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", data.getId().getReqId());
+    query.setForReadOnly(true);
+    return query.getSingleResult(Addr.class);
+  }
+
+  public static boolean isAddrUpdatedForTaxTeam(Addr addr, AddrRdc addrRdc, List<String> checkForUpdateAddrList) {
+    String srcName = null;
+    Column srcCol = null;
+    Field trgField = null;
+
+    for (Field field : Addr.class.getDeclaredFields()) {
+      if (!(Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers()) || Modifier.isAbstract(field.getModifiers()))) {
+        srcCol = field.getAnnotation(Column.class);
+        if (srcCol != null) {
+          srcName = srcCol.name();
+        } else {
+          srcName = field.getName().toUpperCase();
+        }
+
+        if (checkForUpdateAddrList.contains(srcName)) {
+          try {
+            trgField = AddrRdc.class.getDeclaredField(field.getName());
+
+            field.setAccessible(true);
+            trgField.setAccessible(true);
+
+            Object srcVal = field.get(addr);
+            Object trgVal = trgField.get(addrRdc);
+
+            if (String.class.equals(field.getType())) {
+              String srcStringVal = (String) srcVal;
+              if (srcStringVal == null) {
+                srcStringVal = "";
+              }
+              String trgStringVal = (String) trgVal;
+              if (trgStringVal == null) {
+                trgStringVal = "";
+              }
+              if (!StringUtils.equals(srcStringVal.trim(), trgStringVal.trim())) {
+                LOG.trace(" - Field: " + srcName + " Not equal " + srcVal + " - " + trgVal);
+                return true;
+              }
+            } else {
+              if (!ObjectUtils.equals(srcVal, trgVal)) {
+                LOG.trace(" - Field: " + srcName + " Not equal " + srcVal + " - " + trgVal);
+                return true;
+              }
+            }
+          } catch (NoSuchFieldException e) {
+            // noop
+            continue;
+          } catch (Exception e) {
+            LOG.trace("General error when trying to access field.", e);
+            continue;
+          }
+        }
+
+      }
+    }
+    return false;
+  }
+
   @Override
   public String getEquivalentAddressType(String addressType, String seqNo) {
     if (addressType.equals("ZS01")) {
@@ -1084,4 +1884,5 @@ public class USHandler extends GEOHandler {
       return addressType;
     }
   }
+
 }

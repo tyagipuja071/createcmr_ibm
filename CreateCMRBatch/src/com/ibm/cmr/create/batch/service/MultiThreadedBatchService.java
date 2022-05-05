@@ -12,6 +12,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
@@ -42,6 +43,7 @@ public abstract class MultiThreadedBatchService<T> extends BaseBatchService {
     Queue<T> requestIds = preparePendingItems();
     List<T> allProcessed = new ArrayList<T>();
     allProcessed.addAll(requestIds);
+    EntityManager entityManager = JpaManager.getEntityManager();
 
     boolean rollover = !requestIds.isEmpty();
 
@@ -133,6 +135,29 @@ public abstract class MultiThreadedBatchService<T> extends BaseBatchService {
         Thread.sleep(5000);
       } catch (InterruptedException e) {
         // noop
+      }
+    }
+
+    if (hasCleanup()) {
+      EntityTransaction tx = null;
+      entityManager = JpaManager.getEntityManager();
+      try {
+        LOG.debug("Performing cleanup activities..");
+        tx = entityManager.getTransaction();
+        tx.begin();
+
+        cleanUp(entityManager);
+
+        tx.commit();
+      } catch (Exception e) {
+        LOG.debug("Error during cleanup", e);
+        if (tx != null && tx.isActive()) {
+          tx.rollback();
+        }
+      } finally {
+        // empty the manager
+        entityManager.clear();
+        entityManager.close();
       }
     }
 
@@ -272,6 +297,24 @@ public abstract class MultiThreadedBatchService<T> extends BaseBatchService {
    * @return
    */
   protected abstract String getThreadName();
+
+  /**
+   * Override to call the cleanup method
+   * 
+   * @return
+   */
+  protected boolean hasCleanup() {
+    return false;
+  }
+
+  /**
+   * Called after all batch processing is done, does a cleanup
+   * 
+   * @throws Exception
+   */
+  protected void cleanUp(EntityManager entityManager) {
+    // NOOP
+  }
 
   /**
    * Indicates whether this batch supports rollover of queues
