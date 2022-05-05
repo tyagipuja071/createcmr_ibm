@@ -3881,6 +3881,60 @@ function clusterCdValidatorAU() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+function validateClusterBaseOnScenario() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var custSubType = FormManager.getActualValue('custSubGrp');
+        var cluster = FormManager.getActualValue('apCustClusterId');
+        if(FormManager.getActualValue('reqType') != 'C') {
+          return new ValidationResult(null, true);
+        }
+        var applicableScenarios = [ "ASLOM", "BUSPR", "NRML", "CROSS", "AQSTN", "XAQST" ];
+        if (applicableScenarios.includes(custSubType) && cluster == '00000') {
+          return new ValidationResult(null, false, "Cluster '00000 - Singapore Default' is not allowed on ASL/OEM, Acquisition, Business Partner, Foreign and Normal scenario sub-type.");
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
+function validateCustNameForInternal() {
+  console.log("running validateCustNameForInternal . . .");
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var custSubType = FormManager.getActualValue('custSubGrp');
+          if (custSubType == 'INTER') {
+            var custNm = '';
+            for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+              record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+              type = record.addrType;
+
+              if (typeof (type) == 'object') {
+                type = type[0];
+              }
+              
+              custNm = record.custNm1 == null ? '' : record.custNm1;
+              custNm = custNm.toString().toUpperCase();
+              console.log("validateCustNameForInternal Customer name value is " + custNm);
+            }
+            var result = custNm.indexOf("IBM");
+            if (result == -1){
+              return new ValidationResult(null, false, "Customer Name should start with 'IBM' for Internal Sub-scenario.");
+            } else {
+              return new ValidationResult(null, true);
+            }
+          } else {
+            return new ValidationResult(null, true);
+          }
+      }
+    }
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.AP = [ SysLoc.AUSTRALIA, SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE, SysLoc.VIETNAM,
       SysLoc.THAILAND, SysLoc.HONG_KONG, SysLoc.NEW_ZEALAND, SysLoc.LAOS, SysLoc.MACAO, SysLoc.MALASIA, SysLoc.NEPAL, SysLoc.CAMBODIA ];
@@ -4032,6 +4086,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setCtcOnIsuCdChangeANZ, GEOHandler.ANZ);
   GEOHandler.addAfterConfig(setCtcOnIsuCdChangeANZ, GEOHandler.ANZ);
   GEOHandler.addAfterConfig(lockFieldsForIndia, [ SysLoc.INDIA ]);
+  GEOHandler.registerValidator(validateCustNameForInternal, [ SysLoc.AUSTRALIA ], null, true);  
   GEOHandler.registerValidator(clusterCdValidatorAU, [ SysLoc.AUSTRALIA ], null, true);
   GEOHandler.registerValidator(addCtcObsoleteValidator, GEOHandler.AP, null, true);
   
