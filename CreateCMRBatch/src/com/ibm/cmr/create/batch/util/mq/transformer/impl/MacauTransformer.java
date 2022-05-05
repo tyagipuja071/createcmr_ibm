@@ -32,21 +32,11 @@ public class MacauTransformer extends GCGTransformer {
     }
     handler.messageHash.put("AddrLine5", line5);
     handler.messageHash.put("AddrLine6", "Macao");
-
-    String line66 = "";
-    if (addrData.getLandCntry() != null && !addrData.getLandCntry().equalsIgnoreCase(convertIssuing2Cd(handler.cmrData.getCmrIssuingCntry()))) {
-      line66 = "<" + LandedCountryMap.getCountryName(addrData.getLandCntry()) + ">";
-      
-      if (!StringUtils.isBlank(addrData.getPostCd())) {
-        line66 += " " + addrData.getPostCd();
-      }
-      handler.messageHash.put("AddrLine6", line66);
-    }
     String city1 = addrData.getCity1();
     if (city1 == null || (handler.messageHash.get("AddrLine5").length() == 0)) {
       handler.messageHash.put("AddrLine5", handler.messageHash.get("AddrLine6"));
       handler.messageHash.put("AddrLine6", "");
     }
-    arrangeAddressLinesData(handler);
+    handleMove(handler, "GCG");
   }
 }
