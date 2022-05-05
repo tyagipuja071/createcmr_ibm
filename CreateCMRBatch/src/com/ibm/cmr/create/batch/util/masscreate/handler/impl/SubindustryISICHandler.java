@@ -7,7 +7,7 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.entity.MassCreateData;
@@ -40,7 +40,7 @@ public class SubindustryISICHandler implements RowHandler {
     String[] combination = getSubIndustryISIC(entityManager, data.getIsicCd());
     if (combination == null) {
       LOG.debug("ISIC " + data.getIsicCd() + " Not found.");
-      result.addError("ISIC is invalid/not found.");
+      result.addError("ISIC is invalid/not found. ");
     }
     return result;
   }

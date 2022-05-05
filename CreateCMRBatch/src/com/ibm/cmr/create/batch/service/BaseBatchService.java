@@ -13,15 +13,12 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLSession;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.beanutils.PropertyUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.CmrException;
@@ -56,6 +53,7 @@ public abstract class BaseBatchService extends BaseSimpleService<Boolean> {
   protected static String BATCH_USER_ID = "CreateCMR";
   public static String BATCH_SERVICE_URL = "";
   protected TerminatorThread terminator = null;
+  protected boolean skipExit;
 
   /**
    * Constructor
@@ -114,17 +112,19 @@ public abstract class BaseBatchService extends BaseSimpleService<Boolean> {
     long elapsed = (endTime - startTime) / 1000;
     LOG.info("Application finished execution at " + TIME_FORMATTER.format(new Date(endTime)));
     LOG.info("Took " + elapsed + " seconds.");
-    Timer timer = new Timer();
-    timer.schedule(new TimerTask() {
+    if (!this.skipExit) {
+      Timer timer = new Timer();
+      timer.schedule(new TimerTask() {
 
-      @Override
-      public void run() {
-        LOG.info("System exiting...");
-        Runtime.getRuntime().halt(0);
-      }
-    }, 5000);
+        @Override
+        public void run() {
+          LOG.info("System exiting...");
+          Runtime.getRuntime().halt(0);
+        }
+      }, 5000);
 
-    // System.exit(0);
+      // System.exit(0);
+    }
   }
 
   @Override
@@ -357,13 +357,6 @@ public abstract class BaseBatchService extends BaseSimpleService<Boolean> {
       }
       System.setProperty("javax.net.ssl.keyStorePassword", BatchUtil.getProperty("ssl.keystore.pass"));
 
-      HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
-
-        @Override
-        public boolean verify(String arg0, SSLSession arg1) {
-          return true;
-        }
-      });
     } catch (Exception e) {
       LOG.error("Error in initializing SSL context");
     }
@@ -498,6 +491,14 @@ public abstract class BaseBatchService extends BaseSimpleService<Boolean> {
 
   protected int getTerminatorWaitTime() {
     return 0;
+  }
+
+  public boolean isSkipExit() {
+    return skipExit;
+  }
+
+  public void setSkipExit(boolean skipExit) {
+    this.skipExit = skipExit;
   }
 
 }

@@ -1,7 +1,7 @@
 package com.ibm.cmr.create.batch.util.mq.transformer.impl;
 
 import javax.persistence.EntityManager;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.config.SystemConfiguration;

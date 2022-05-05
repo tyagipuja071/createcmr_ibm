@@ -14,7 +14,7 @@ import java.util.Map;
 
 import javax.persistence.EntityManager;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
@@ -473,9 +473,9 @@ public class EmailEngine {
     RuntimeServices runtimeServices = RuntimeSingleton.getRuntimeServices();
     StringReader reader = new StringReader(subject);
     try {
-      SimpleNode node = runtimeServices.parse(reader, "SubjTempl");
       Template template = new Template();
       template.setRuntimeServices(runtimeServices);
+      SimpleNode node = runtimeServices.parse(reader, template);
       template.setData(node);
       template.initDocument();
 

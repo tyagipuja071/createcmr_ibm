@@ -12,7 +12,7 @@ import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.EntityManager;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 
@@ -179,6 +179,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
                   // found the perfect match here
                   if (!isTaxCdMatch) {
                     engineData.setVatVerified(true, "VAT Verified");
+                    LOG.debug("VAT verified");
                   }
                   perfectMatch = dnbRecord;
                   break;

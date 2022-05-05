@@ -15,7 +15,7 @@ import javax.persistence.EntityTransaction;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.beanutils.PropertyUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -636,6 +636,9 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
     Map<String, Integer> seqMap = new HashMap<String, Integer>();
     Integer seq = null;
     for (FindCMRRecordModel cmr : cmrs) {
+      if(cmr.getCmrAddrTypeCode().equals("ZLST") && cmr.getCmrIssuedBy().equals("897")) {
+        continue;
+      }
       addr = new Addr();
       addrPk = new AddrPK();
       addrPk.setReqId(reqId);
@@ -643,6 +646,7 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
       addrPk.setAddrType(type);
       if (("U".equals(reqModel.getReqType()) || "X".equals(reqModel.getReqType())) && converter != null && converter.useSeqNoFromImport()) {
         addrPk.setAddrSeq(cmr.getCmrAddrSeq());
+       
       } else {
         if (seqMap.get(type) == null) {
           seqMap.put(type, new Integer(0));
@@ -688,6 +692,13 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
           addrPk.setAddrSeq(cmr.getCmrAddrSeq());
         }
       }
+      if (!StringUtils.isBlank(cmr.getCmrAddrSeq())) {
+        addrPk.setAddrSeq(cmr.getCmrAddrSeq());
+      } else if (StringUtils.isBlank(cmr.getCmrAddrSeq()) && "897".equals(reqModel.getCmrIssuingCntry())) {
+        addrPk.setAddrSeq("ZI01".equals(type) ? "002" : ("ZP01".equals(type) ? "1" : "001"));
+      }
+      
+      
       // end -US ZI01 null sequence Import fix - 8 Apr 2022 - garima
       addr.setId(addrPk);
 

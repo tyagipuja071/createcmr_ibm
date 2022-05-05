@@ -11,7 +11,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -220,7 +220,10 @@ public class UpdateSapNumberController extends BaseController {
   }
 
   private UpdateSapNoService getParserInstance() throws ParserConfigurationException, SAXException, IOException {
-    SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
+    SAXParserFactory factory = SAXParserFactory.newInstance();
+    factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+    factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+    SAXParser parser = factory.newSAXParser();
     UpdateSapNoService handler = new UpdateSapNoService();
     InputStream is = ConfigUtil.getResourceStream("updatesap-addrmap.xml");
     InputSource source = new InputSource(is);

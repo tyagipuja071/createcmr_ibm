@@ -11,7 +11,7 @@ import java.util.Map;
 
 import javax.persistence.EntityManager;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -1236,7 +1236,7 @@ public class FRHandler extends BaseSOFHandler {
           Cell cmrCell1 = row.getCell(4);
           if (cmrCell1 != null) {
             String name3 = "";
-            switch (cmrCell1.getCellTypeEnum()) {
+            switch (cmrCell1.getCellType()) {
             case STRING:
               name3 = cmrCell1.getStringCellValue();
               break;

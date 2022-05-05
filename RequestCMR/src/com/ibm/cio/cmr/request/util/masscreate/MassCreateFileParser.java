@@ -3,7 +3,6 @@
  */
 package com.ibm.cio.cmr.request.util.masscreate;
 
-import java.awt.Color;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,14 +11,14 @@ import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -30,6 +29,8 @@ import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.MassCreateAddr;
 import com.ibm.cio.cmr.request.entity.listeners.TrimListener;
+import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.masscreate.MassCreateFile.ValidationResult;
 
 /**
@@ -111,10 +112,22 @@ public class MassCreateFileParser {
    */
   private ValidationResult validateFile(XSSFWorkbook book) {
     XSSFSheet sheet = book.getSheet(META_SHEET_NAME);
+    String currentVersion = SystemConfiguration.getValue("MASS_CREATE_TEMPLATE_VER", "0.1");
+    // Get country code
+    if (null != sheet.getRow(2) && null != sheet.getRow(2).getCell(1)) {
+      XSSFCell cellCountryCd = sheet.getRow(2).getCell(1);
+      cellCountryCd.setCellType(CellType.STRING);
+      if (StringUtils.isNotBlank(cellCountryCd.getStringCellValue())) {
+        if (SystemLocation.CANADA.equals(cellCountryCd.getStringCellValue())) {
+          currentVersion = SystemParameters.getString("CA_MASS_CREATE_TEMPLATE_VER");
+        }
+      }
+    }
+
     XSSFCell cell = sheet.getRow(0).getCell(1);
     cell.setCellType(CellType.STRING);
     String version = cell.getStringCellValue();
-    String currentVersion = SystemConfiguration.getValue("MASS_CREATE_TEMPLATE_VER", "0.1");
+
     if (StringUtils.isBlank(version) || !version.equals(currentVersion)) {
       LOG.debug("Invalid version:" + version + " Current: " + currentVersion);
       return ValidationResult.IncorrectVersion;
@@ -199,7 +212,7 @@ public class MassCreateFileParser {
                 valid = true;
               }
               if (sheetCell != null && valid) {
-                switch (sheetCell.getCellTypeEnum()) {
+                switch (sheetCell.getCellType()) {
                 case STRING:
                   cellValue = sheetCell.getStringCellValue();
                   break;
@@ -303,7 +316,7 @@ public class MassCreateFileParser {
           updatedStyle = book.createCellStyle();
           updatedStyle.setLocked(xlsCell.getCellStyle().getLocked());
           updatedFont = book.createFont();
-          updatedFont.setColor(new XSSFColor(new Color(0, 0, 255)));
+          updatedFont.setColor(IndexedColors.BLUE.getIndex());
           updatedStyle.setFont(updatedFont);
           xlsCell.setCellStyle(updatedStyle);
         }
@@ -329,7 +342,7 @@ public class MassCreateFileParser {
               updatedStyle = book.createCellStyle();
               updatedStyle.setLocked(xlsCell.getCellStyle().getLocked());
               updatedFont = book.createFont();
-              updatedFont.setColor(new XSSFColor(new Color(0, 0, 255)));
+              updatedFont.setColor(IndexedColors.BLUE.getIndex());
               updatedStyle.setFont(updatedFont);
               xlsCell.setCellStyle(updatedStyle);
             }

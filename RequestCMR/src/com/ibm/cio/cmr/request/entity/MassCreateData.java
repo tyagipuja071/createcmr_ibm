@@ -16,7 +16,9 @@ import javax.persistence.Table;
  * @author Eduard Bernardo
  */
 @Entity
-@Table(name = "MASS_CREATE_DATA", schema = "CREQCMR")
+@Table(
+    name = "MASS_CREATE_DATA",
+    schema = "CREQCMR")
 public class MassCreateData extends BaseEntity<MassCreateDataPK> implements Serializable {
   private static final long serialVersionUID = 1L;
 
@@ -33,171 +35,212 @@ public class MassCreateData extends BaseEntity<MassCreateDataPK> implements Seri
     this.id = id;
   }
 
-  @Column(name = "CUST_NM1")
+  @Column(
+      name = "CUST_NM1")
   private String custNm1;
 
-  @Column(name = "CUST_NM2")
+  @Column(
+      name = "CUST_NM2")
   private String custNm2;
 
-  @Column(name = "ABBREV_NM")
+  @Column(
+      name = "ABBREV_NM")
   private String abbrevNm;
 
   private String affiliate;
 
-  @Column(name = "BP_REL_TYPE")
+  @Column(
+      name = "BP_REL_TYPE")
   private String bpRelType;
 
-  @Column(name = "CAP_IND")
+  @Column(
+      name = "CAP_IND")
   private String capInd;
 
-  @Column(name = "CLIENT_TIER")
+  @Column(
+      name = "CLIENT_TIER")
   private String clientTier;
 
-  @Column(name = "CMR_ISSUING_CNTRY")
+  @Column(
+      name = "CMR_ISSUING_CNTRY")
   private String cmrIssuingCntry;
 
-  @Column(name = "CMR_NO")
+  @Column(
+      name = "CMR_NO")
   private String cmrNo;
 
-  @Column(name = "CMR_OWNER")
+  @Column(
+      name = "CMR_OWNER")
   private String cmrOwner;
 
   private String company;
 
-  @Column(name = "CUST_CLASS")
+  @Column(
+      name = "CUST_CLASS")
   private String custClass;
 
   private String enterprise;
 
-  @Column(name = "CUST_PREF_LANG")
+  @Column(
+      name = "CUST_PREF_LANG")
   private String custPrefLang;
 
-  @Column(name = "INAC_CD")
+  @Column(
+      name = "INAC_CD")
   private String inacCd;
 
-  @Column(name = "INAC_TYPE")
+  @Column(
+      name = "INAC_TYPE")
   private String inacType;
 
-  @Column(name = "ISU_CD")
+  @Column(
+      name = "ISU_CD")
   private String isuCd;
 
-  @Column(name = "TAX_CD1")
+  @Column(
+      name = "TAX_CD1")
   private String taxCd1;
 
-  @Column(name = "TAX_CD2")
+  @Column(
+      name = "TAX_CD2")
   private String taxCd2;
 
-  @Column(name = "TAX_CD3")
+  @Column(
+      name = "TAX_CD3")
   private String taxCd3;
 
-  // @Column(
-  // name = "TAX_EXEMPT_STATUS_1")
-  // private String taxExemp;
-  //
-  // public String getTaxExemp() {
-  // return taxExemp;
-  // }
-  //
-  // public void setTaxExemp(String taxExemp) {
-  // this.taxExemp = taxExemp;
-  // }
+  @Column(
+      name = "TAX_EXEMPT_STATUS_1")
+  private String taxExemp;
 
-  @Column(name = "SEARCH_TERM")
+  @Column(
+      name = "SEARCH_TERM")
   private String searchTerm;
 
-  @Column(name = "MEM_LVL")
+  @Column(
+      name = "MEM_LVL")
   private String memLvl;
 
-  @Column(name = "SENSITIVE_FLAG")
+  @Column(
+      name = "SENSITIVE_FLAG")
   private String sensitiveFlag;
 
-  @Column(name = "ISIC_CD")
+  @Column(
+      name = "ISIC_CD")
   private String isicCd;
 
-  @Column(name = "SITE_PARTY_ID")
+  @Column(
+      name = "SITE_PARTY_ID")
   private String sitePartyId;
 
-  @Column(name = "SUB_INDUSTRY_CD")
+  @Column(
+      name = "SUB_INDUSTRY_CD")
   private String subIndustryCd;
 
   private String vat;
 
-  @Column(name = "COV_ID")
+  @Column(
+      name = "COV_ID")
   private String covId;
 
-  @Column(name = "BG_ID")
+  @Column(
+      name = "BG_ID")
   private String bgId;
 
-  @Column(name = "GEO_LOC_CD")
+  @Column(
+      name = "GEO_LOC_CD")
   private String geoLocCd;
 
-  @Column(name = "DUNS_NO")
+  @Column(
+      name = "DUNS_NO")
   private String dunsNo;
 
-  @Column(name = "CUST_GRP")
+  @Column(
+      name = "CUST_GRP")
   private String custGrp;
 
-  @Column(name = "CUST_SUB_GRP")
+  @Column(
+      name = "CUST_SUB_GRP")
   private String custSubGrp;
 
-  @Column(name = "CUST_TYP")
+  @Column(
+      name = "CUST_TYP")
   private String custTyp;
 
-  @Column(name = "RESTRICT_IND")
+  @Column(
+      name = "RESTRICT_IND")
   private String restrictInd;
 
-  @Column(name = "RESTRICT_TO")
+  @Column(
+      name = "RESTRICT_TO")
   private String restrictTo;
 
-  @Column(name = "OEM_IND")
+  @Column(
+      name = "OEM_IND")
   private String oemInd;
 
-  @Column(name = "BP_ACCT_TYP")
+  @Column(
+      name = "BP_ACCT_TYP")
   private String bpAcctTyp;
 
-  @Column(name = "MKTG_DEPT")
+  @Column(
+      name = "MKTG_DEPT")
   private String mktgDept;
 
-  @Column(name = "MTKG_AR_DEPT")
+  @Column(
+      name = "MTKG_AR_DEPT")
   private String mtkgArDept;
 
-  @Column(name = "PCC_MKTG_DEPT")
+  @Column(
+      name = "PCC_MKTG_DEPT")
   private String pccMktgDept;
 
-  @Column(name = "PCC_AR_DEPT")
+  @Column(
+      name = "PCC_AR_DEPT")
   private String pccArDept;
 
-  @Column(name = "SVC_AR_OFFICE")
+  @Column(
+      name = "SVC_AR_OFFICE")
   private String svcArOffice;
 
-  @Column(name = "OUT_CITY_LIMIT")
+  @Column(
+      name = "OUT_CITY_LIMIT")
   private String outCityLimit;
 
-  @Column(name = "CSO_SITE")
+  @Column(
+      name = "CSO_SITE")
   private String csoSite;
 
-  @Column(name = "FED_SITE_IND")
+  @Column(
+      name = "FED_SITE_IND")
   private String fedSiteInd;
 
-  @Column(name = "SIZE_CD")
+  @Column(
+      name = "SIZE_CD")
   private String sizeCd;
 
-  @Column(name = "SVC_TERRITORY_ZONE")
+  @Column(
+      name = "SVC_TERRITORY_ZONE")
   private String svcTerritoryZone;
 
-  @Column(name = "MISC_BILL_CD")
+  @Column(
+      name = "MISC_BILL_CD")
   private String miscBillCd;
 
-  @Column(name = "BP_NAME")
+  @Column(
+      name = "BP_NAME")
   private String bpName;
 
-  @Column(name = "ICC_TAX_CLASS")
+  @Column(
+      name = "ICC_TAX_CLASS")
   private String iccTaxClass;
 
-  @Column(name = "ICC_TAX_EXEMPT_STATUS")
+  @Column(
+      name = "ICC_TAX_EXEMPT_STATUS")
   private String iccTaxExemptStatus;
 
-  @Column(name = "NON_IBM_COMPANY_IND")
+  @Column(
+      name = "NON_IBM_COMPANY_IND")
   private String nonIbmCompanyInd;
 
   private String div;
@@ -210,29 +253,97 @@ public class MassCreateData extends BaseEntity<MassCreateDataPK> implements Seri
 
   private String loc;
 
-  @Column(name = "ORD_BLK")
+  @Column(
+      name = "ORD_BLK")
   private String ordBlk;
 
-  @Column(name = "BG_RULE_ID")
+  @Column(
+      name = "BG_RULE_ID")
   private String bgRuleId;
 
-  @Column(name = "COV_DESC")
+  @Column(
+      name = "COV_DESC")
   private String covDesc;
 
-  @Column(name = "BG_DESC")
+  @Column(
+      name = "BG_DESC")
   private String bgDesc;
 
-  @Column(name = "GEO_LOC_DESC")
+  @Column(
+      name = "GEO_LOC_DESC")
   private String geoLocDesc;
 
-  @Column(name = "GBG_ID")
+  @Column(
+      name = "GBG_ID")
   private String gbgId;
 
-  @Column(name = "GBG_DESC")
+  @Column(
+      name = "GBG_DESC")
   private String gbgDesc;
 
-  @Column(name = "MODEL_CMR_NO")
+  @Column(
+      name = "MODEL_CMR_NO")
   private String modelCmrNo;
+
+  @Column(
+      name = "TAX_PAYER_CUST_CD")
+  private String taxPayerCustCd;
+
+  @Column(
+      name = "SECTOR_CD")
+  private String sectorCd;
+
+  @Column(
+      name = "LEASING_COMP_INDC")
+  private String leasingCompanyIndc;
+
+  @Column(
+      name = "CONTACT_NAME1")
+  private String contactName1;
+
+  @Column(
+      name = "PPSCEID")
+  private String ppsceid;
+
+  @Column(
+      name = "SALES_BO_CD")
+  private String salesBusOffCd;
+
+  @Column(
+      name = "INSTALL_BRANCH_OFF")
+  private String installBranchOff;
+
+  @Column(
+      name = "REP_TEAM_MEMBER_NO")
+  private String repTeamMemberNo;
+
+  @Column(
+      name = "SALES_TEAM_CD")
+  private String salesTeamCd;
+
+  @Column(
+      name = "INVOICE_DISTRIBUTION_CD")
+  private String invoiceDistCd;
+
+  @Column(
+      name = "ADMIN_DEPT_CD")
+  private String adminDeptCd;
+
+  @Column(
+      name = "CREDIT_CD")
+  private String creditCd;
+
+  @Column(
+      name = "COLLECTOR_NO")
+  private String collectorNo;
+
+  @Column(
+      name = "LOCN_NO")
+  private String locationNumber;
+
+  @Column(
+      name = "CUST_INVOICE_COPIES")
+  private String cusInvoiceCopies;
 
   public String getCustNm1() {
     return this.custNm1;
@@ -762,4 +873,131 @@ public class MassCreateData extends BaseEntity<MassCreateDataPK> implements Seri
     this.modelCmrNo = modelCmrNo;
   }
 
+  public String getTaxPayerCustCd() {
+    return taxPayerCustCd;
+  }
+
+  public void setTaxPayerCustCd(String taxPayerCustCd) {
+    this.taxPayerCustCd = taxPayerCustCd;
+  }
+
+  public String getSectorCd() {
+    return sectorCd;
+  }
+
+  public void setSectorCd(String sectorCd) {
+    this.sectorCd = sectorCd;
+  }
+
+  public String getLeasingCompanyIndc() {
+    return leasingCompanyIndc;
+  }
+
+  public void setLeasingCompanyIndc(String leasingCompanyIndc) {
+    this.leasingCompanyIndc = leasingCompanyIndc;
+  }
+
+  public String getContactName1() {
+    return contactName1;
+  }
+
+  public void setContactName1(String contactName1) {
+    this.contactName1 = contactName1;
+  }
+
+  public String getPpsceid() {
+    return ppsceid;
+  }
+
+  public void setPpsceid(String ppsceid) {
+    this.ppsceid = ppsceid;
+  }
+
+  public String getSalesBusOffCd() {
+    return salesBusOffCd;
+  }
+
+  public void setSalesBusOffCd(String salesBusOffCd) {
+    this.salesBusOffCd = salesBusOffCd;
+  }
+
+  public String getInstallBranchOff() {
+    return installBranchOff;
+  }
+
+  public void setInstallBranchOff(String installBranchOff) {
+    this.installBranchOff = installBranchOff;
+  }
+
+  public String getRepTeamMemberNo() {
+    return repTeamMemberNo;
+  }
+
+  public void setRepTeamMemberNo(String repTeamMemberNo) {
+    this.repTeamMemberNo = repTeamMemberNo;
+  }
+
+  public String getSalesTeamCd() {
+    return salesTeamCd;
+  }
+
+  public void setSalesTeamCd(String salesTeamCd) {
+    this.salesTeamCd = salesTeamCd;
+  }
+
+  public String getInvoiceDistCd() {
+    return invoiceDistCd;
+  }
+
+  public void setInvoiceDistCd(String invoiceDistCd) {
+    this.invoiceDistCd = invoiceDistCd;
+  }
+
+  public String getAdminDeptCd() {
+    return adminDeptCd;
+  }
+
+  public void setAdminDeptCd(String adminDeptCd) {
+    this.adminDeptCd = adminDeptCd;
+  }
+
+  public String getCreditCd() {
+    return creditCd;
+  }
+
+  public void setCreditCd(String creditCd) {
+    this.creditCd = creditCd;
+  }
+
+  public String getCollectorNo() {
+    return collectorNo;
+  }
+
+  public void setCollectorNo(String collectorNo) {
+    this.collectorNo = collectorNo;
+  }
+
+  public String getLocationNumber() {
+    return locationNumber;
+  }
+
+  public void setLocationNumber(String locationNumber) {
+    this.locationNumber = locationNumber;
+  }
+
+  public String getCusInvoiceCopies() {
+    return cusInvoiceCopies;
+  }
+
+  public void setCusInvoiceCopies(String cusInvoiceCopies) {
+    this.cusInvoiceCopies = cusInvoiceCopies;
+  }
+
+  public String getTaxExemp() {
+    return taxExemp;
+  }
+
+  public void setTaxExemp(String taxExemp) {
+    this.taxExemp = taxExemp;
+  }
 }

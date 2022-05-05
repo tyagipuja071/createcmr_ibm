@@ -20,7 +20,7 @@ import java.util.ResourceBundle;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.xml.sax.SAXException;
 
 import com.ibm.cio.cmr.request.user.AppUser;
@@ -173,6 +173,11 @@ public class SystemConfiguration {
    * @return
    */
   public static String getSystemProperty(String key) {
+    String value = System.getProperty(key);
+    if (!StringUtils.isBlank(value)) {
+      System.out.println("Property " + key + " retrieved from System properties.");
+      return value;
+    }
     if (BUILD_NO.containsKey(key)) {
       return BUILD_NO.getString(key);
     }

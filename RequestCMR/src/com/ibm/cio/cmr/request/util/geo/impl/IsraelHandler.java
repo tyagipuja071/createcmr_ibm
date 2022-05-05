@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 import javax.persistence.EntityManager;
 
 import org.apache.commons.beanutils.PropertyUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -314,18 +314,42 @@ public class IsraelHandler extends EMEAHandler {
                         addrModel.setCmrAddrTypeCode(legacyAddrType);
                         addrModel.setTransAddrNo(cmrtAddr.getAddrLineO());
                         addrModel.setCmrSitePartyID("");
+
+                        // set to blank
+                        // to be populated from legacy address lines based on
+                        // ADDRLU
                         addrModel.setCmrName(cmrtAddr.getAddrLine1());
-                        addrModel.setCmrName1Plain(cmrtAddr.getAddrLine1());
-                        addrModel.setCmrAddrSeq(cmrtAddr.getId().getAddrNo());
                         addrModel.setCmrStreet(cmrtAddr.getStreet());
-                        addrModel.setCmrStreetAddress(cmrtAddr.getStreet());
-                        addrModel.setCmrCity(cmrtAddr.getCity());
-                        addrModel.setCmrPostalCode(cmrtAddr.getZipCode());
-                        // addrModel.setCmrDept(cmrtAddr.getAddrLine2());
-                        addrModel.setCmrPOBox(cmrtAddr.getPoBox());
+                        addrModel.setCmrAddrSeq(cmrtAddr.getId().getAddrNo());
+                        addrModel.setCmrName1Plain("");
+                        addrModel.setCmrName2Plain("");
+                        addrModel.setCmrStreetAddress("");
+                        addrModel.setCmrCity("");
+                        addrModel.setCmrPostalCode("");
+                        addrModel.setCmrPOBox("");
                         addrModel.setCmrName3(null);
                         addrModel.setCmrSapNumber("");
+                        addrModel.setCmrIntlName1("");
+                        addrModel.setCmrIntlName2("");
+                        addrModel.setCmrIntlName3("");
+                        addrModel.setCmrIntlAddress("");
+                        addrModel.setCmrIntlCity1("");
+                        addrModel.setCmrDept("");
 
+                        // fill the blank fields with data from legacy DB
+                        if ("ZS01".equals(legacyAddrType) || "ZP01".equals(legacyAddrType) || "ZD01".equals(legacyAddrType)) {
+                          fillInMissingAddrDataFromLegacy(entityManager, addrModel, cmrtAddr, true);
+                        } else {
+                          if ("CTYA".equals(legacyAddrType) || "CTYB".equals(legacyAddrType) || "CTYC".equals(legacyAddrType)) {
+                            if (StringUtils.isNotBlank(cmrtAddr.getAddrLineO())) {
+                              addrModel.setTransAddrNo(cmrtAddr.getAddrLineO());
+                            } else {
+                              CmrtAddr localAddr = getDefaultPairedLegacyAddr(legacyAddrType);
+                              addrModel.setTransAddrNo(localAddr.getId().getAddrNo());
+                            }
+                          }
+                          fillInMissingAddrDataFromLegacy(entityManager, addrModel, cmrtAddr, false);
+                        }
                         converted.add(addrModel);
                       }
                     }
@@ -517,12 +541,21 @@ public class IsraelHandler extends EMEAHandler {
 
     if (addrlUChar == 'I' && StringUtils.isNotEmpty(addressLineVal)) {
       if (addressLineVal.contains(" ")) {
-        String postalCode = addressLineVal.substring(0, addressLineVal.indexOf(' '));
-        String city = addressLineVal.substring(addressLineVal.indexOf(' ') + 1);
+        String postalCode = "";
+        String city = "";
+        String str1 = addressLineVal.substring(0, addressLineVal.indexOf(' '));
+        String str2 = addressLineVal.substring(addressLineVal.indexOf(' ') + 1);
+        if (StringUtils.isNumeric(str1) && !StringUtils.isNumeric(str2)) {
+          postalCode = str1;
+          city = str2;
+        } else if (StringUtils.isNumeric(str2) && !StringUtils.isNumeric(str1)) {
+          postalCode = str2;
+          city = str1;
+        }
 
         if ("IP".equals(addrlUVal) && StringUtils.isNumeric(postalCode)) {
           addressLineVal = postalCode;
-        } else if ("IC".equals(addrlUVal) && StringUtils.isNumeric(postalCode)) {
+        } else if ("IC".equals(addrlUVal) && !StringUtils.isNumeric(city)) {
           addressLineVal = city;
         }
       } else {
@@ -2150,7 +2183,7 @@ public class IsraelHandler extends EMEAHandler {
   private boolean isHebrewFieldNotBlank(XSSFCell cell) {
     boolean isHebrewFieldNotBlank = false;
     if (cell != null) {
-      if (CellType.NUMERIC == cell.getCellTypeEnum()) {
+      if (CellType.NUMERIC == cell.getCellType()) {
         String numericCellStrVal = validateColValFromCell(cell);
         if (StringUtils.isNotBlank(numericCellStrVal)) {
           isHebrewFieldNotBlank = true;

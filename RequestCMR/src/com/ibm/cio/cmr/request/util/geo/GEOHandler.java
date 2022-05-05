@@ -18,8 +18,8 @@ import javax.persistence.EntityTransaction;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.beanutils.PropertyUtils;
-import org.apache.commons.lang.ObjectUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -835,7 +835,7 @@ public abstract class GEOHandler {
   protected static String validateColValFromCell(XSSFCell cell) {
     String colVal = "";
     if (cell != null) {
-      switch (cell.getCellTypeEnum()) {
+      switch (cell.getCellType()) {
       case STRING:
         colVal = cell.getStringCellValue();
         break;
@@ -1033,7 +1033,7 @@ public abstract class GEOHandler {
   public boolean shouldAutoDplSearchMassUpdate() {
     return false;
   }
-  
+
   public IntlAddr getIntlAddrById(Addr addr, EntityManager entityManager) {
     // TODO Auto-generated method stub
     return null;
@@ -1091,6 +1091,17 @@ public abstract class GEOHandler {
 
   public void setReqStatusAfterApprove(EntityManager entityManager, ApprovalResponseModel approval, ApprovalReq req, Admin admin) {
     // TODO Auto-generated method stub
+  }
+
+  public static String getEquivalentAddressType(String addressType, String seqNo) {
+    if (addressType.equals("ZS01"))
+      return "ZS01";
+    else if (addressType.equals("ZI01") && (Integer.parseInt(seqNo) < 200))
+      return "ZP01";
+    else if (addressType.equals("PG01") && (Integer.parseInt(seqNo) >= 200))
+      return "ZP01";
+    else
+      return addressType;
   }
 
 }

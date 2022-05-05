@@ -12,8 +12,8 @@ import java.util.Map;
 
 import javax.persistence.EntityManager;
 
-import org.apache.commons.lang.SerializationUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.SerializationUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.CmrConstants;
@@ -738,6 +738,80 @@ public class GreeceTransformer extends EMEATransformer {
     q.executeSql();
   }
 
+  private void modifyAddrUseFieldsforMassUpdt(String addrUse, CmrtAddr legacyAddr, CmrtAddr oldAddr, String addrType) {
+
+    if (("mail".equalsIgnoreCase(addrType) || "bill".equalsIgnoreCase(addrType)) && oldAddr != null) {
+      legacyAddr.setIsAddrUseMailing(oldAddr.getIsAddrUseMailing());
+      legacyAddr.setIsAddrUseBilling(oldAddr.getIsAddrUseBilling());
+    } else {
+      legacyAddr.setIsAddrUseMailing(ADDRESS_USE_NOT_EXISTS);
+      legacyAddr.setIsAddrUseBilling(ADDRESS_USE_NOT_EXISTS);
+    }
+    legacyAddr.setIsAddrUseInstalling(ADDRESS_USE_NOT_EXISTS);
+    legacyAddr.setIsAddrUseShipping(ADDRESS_USE_NOT_EXISTS);
+    legacyAddr.setIsAddrUseEPL(ADDRESS_USE_NOT_EXISTS);
+    legacyAddr.setIsAddrUseLitMailing(ADDRESS_USE_NOT_EXISTS);
+    legacyAddr.setIsAddressUseA(ADDRESS_USE_NOT_EXISTS);
+    legacyAddr.setIsAddressUseB(ADDRESS_USE_NOT_EXISTS);
+    legacyAddr.setIsAddressUseC(ADDRESS_USE_NOT_EXISTS);
+    legacyAddr.setIsAddressUseD(ADDRESS_USE_NOT_EXISTS);
+    legacyAddr.setIsAddressUseE(ADDRESS_USE_NOT_EXISTS);
+    legacyAddr.setIsAddressUseF(ADDRESS_USE_NOT_EXISTS);
+    legacyAddr.setIsAddressUseG(ADDRESS_USE_NOT_EXISTS);
+    legacyAddr.setIsAddressUseH(ADDRESS_USE_NOT_EXISTS);
+    if (oldAddr != null) {
+      if (ADDRESS_USE_NOT_EXISTS.equalsIgnoreCase(oldAddr.getIsAddrUseMailing())) {
+        return;
+      }
+    }
+    for (String use : addrUse.split("")) {
+      switch (use) {
+      case ADDRESS_USE_MAILING:
+        legacyAddr.setIsAddrUseMailing(ADDRESS_USE_EXISTS);
+        break;
+      case ADDRESS_USE_BILLING:
+        legacyAddr.setIsAddrUseBilling(ADDRESS_USE_EXISTS);
+        break;
+      case ADDRESS_USE_INSTALLING:
+        legacyAddr.setIsAddrUseInstalling(ADDRESS_USE_EXISTS);
+        break;
+      case ADDRESS_USE_SHIPPING:
+        legacyAddr.setIsAddrUseShipping(ADDRESS_USE_EXISTS);
+        break;
+      case ADDRESS_USE_EPL_MAILING:
+        legacyAddr.setIsAddrUseEPL(ADDRESS_USE_EXISTS);
+        break;
+      case ADDRESS_USE_LIT_MAILING:
+        legacyAddr.setIsAddrUseLitMailing(ADDRESS_USE_EXISTS);
+        break;
+      case ADDRESS_USE_COUNTRY_A:
+        legacyAddr.setIsAddressUseA(ADDRESS_USE_EXISTS);
+        break;
+      case ADDRESS_USE_COUNTRY_B:
+        legacyAddr.setIsAddressUseB(ADDRESS_USE_EXISTS);
+        break;
+      case ADDRESS_USE_COUNTRY_C:
+        legacyAddr.setIsAddressUseC(ADDRESS_USE_EXISTS);
+        break;
+      case ADDRESS_USE_COUNTRY_D:
+        legacyAddr.setIsAddressUseD(ADDRESS_USE_EXISTS);
+        break;
+      case ADDRESS_USE_COUNTRY_E:
+        legacyAddr.setIsAddressUseE(ADDRESS_USE_EXISTS);
+        break;
+      case ADDRESS_USE_COUNTRY_F:
+        legacyAddr.setIsAddressUseF(ADDRESS_USE_EXISTS);
+        break;
+      case ADDRESS_USE_COUNTRY_G:
+        legacyAddr.setIsAddressUseG(ADDRESS_USE_EXISTS);
+        break;
+      case ADDRESS_USE_COUNTRY_H:
+        legacyAddr.setIsAddressUseH(ADDRESS_USE_EXISTS);
+        break;
+      }
+    }
+  }
+
   private void modifyAddrUseFields(String addrUse, CmrtAddr legacyAddr) {
     setAddrUseFieldsToN(legacyAddr);
     for (String use : addrUse.split("")) {
@@ -944,6 +1018,22 @@ public class GreeceTransformer extends EMEATransformer {
   public void transformLegacyAddressDataMassUpdate(EntityManager entityManager, CmrtAddr legacyAddr, MassUpdtAddr addr, String cntry, CmrtCust cust,
       Data data, LegacyDirectObjectContainer legacyObjects) {
     legacyAddr.setForUpdate(true);
+    CmrtAddr mailingAddr = null;
+    CmrtAddr billingAddr = null;
+    String sql = ExternalizedQuery.getSql("GREECE.GET.MAILINGADDR");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("RCYAA", SystemLocation.GREECE);
+    query.setParameter("RCUXA", legacyAddr.getId().getCustomerNo());
+    query.setParameter("ADDRMAIL", "Y");
+    mailingAddr = query.getSingleResult(CmrtAddr.class);
+
+    String sqlBillingAddr = ExternalizedQuery.getSql("GREECE.GET.BILLINGADDR");
+    PreparedQuery queryBillingAddr = new PreparedQuery(entityManager, sqlBillingAddr);
+    queryBillingAddr.setParameter("RCYAA", SystemLocation.GREECE);
+    queryBillingAddr.setParameter("RCUXA", legacyAddr.getId().getCustomerNo());
+    queryBillingAddr.setParameter("ADDRBILL", "Y");
+    billingAddr = queryBillingAddr.getSingleResult(CmrtAddr.class);
+
     if (!StringUtils.isBlank(addr.getCustNm1())) {
       legacyAddr.setAddrLine1(addr.getCustNm1());
     }
@@ -987,10 +1077,22 @@ public class GreeceTransformer extends EMEATransformer {
 
     if ("Y".equals(legacyAddr.getIsAddrUseBilling())) {
       CmrtAddr newMailingAddr = (CmrtAddr) SerializationUtils.clone(legacyAddr);
-      newMailingAddr.getId().setAddrNo(String.format("%05d", 1));
-      modifyAddrUseFields(MQMsgConstants.SOF_ADDRESS_USE_MAILING, newMailingAddr);
+      if (!mailingAddr.equals(billingAddr)) {
+        newMailingAddr.getId().setAddrNo(mailingAddr.getId().getAddrNo());
+      } else {
+        newMailingAddr.getId().setAddrNo(String.format("%05d", 1));
+      }
+      modifyAddrUseFieldsforMassUpdt(MQMsgConstants.SOF_ADDRESS_USE_MAILING, newMailingAddr, mailingAddr, "mail");
       newMailingAddr.setForUpdate(true);
       legacyObjects.addAddress(newMailingAddr);
+    }
+
+    if ("N".equals(legacyAddr.getIsAddrUseBilling()) && "Y".equals(legacyAddr.getIsAddrUseMailing())) {
+      CmrtAddr newBillingAddr = (CmrtAddr) SerializationUtils.clone(legacyAddr);
+      newBillingAddr.getId().setAddrNo(billingAddr.getId().getAddrNo());
+      modifyAddrUseFieldsforMassUpdt(MQMsgConstants.SOF_ADDRESS_USE_MAILING, newBillingAddr, billingAddr, "bill");
+      newBillingAddr.setForUpdate(true);
+      legacyObjects.addAddress(newBillingAddr);
     }
 
   }

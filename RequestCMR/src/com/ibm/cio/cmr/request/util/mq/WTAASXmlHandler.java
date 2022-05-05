@@ -3,7 +3,7 @@
  */
 package com.ibm.cio.cmr.request.util.mq;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 

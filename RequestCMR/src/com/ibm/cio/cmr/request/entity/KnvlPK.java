@@ -7,7 +7,7 @@ import java.io.Serializable;
 
 import javax.persistence.Embeddable;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * The primary key class for the KNVL database table.

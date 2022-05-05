@@ -9,6 +9,8 @@ import java.util.Queue;
 
 import javax.persistence.EntityManager;
 
+import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
+
 /**
  * Multi-threaded service for {@link TransConnService}
  * 
@@ -24,9 +26,13 @@ public class TransConnMultiService extends MultiThreadedBatchService<Long> {
   };
 
   private Mode mode = Mode.Pending;
+  private boolean poolMode;
 
   @Override
   public Boolean executeBatchForRequests(EntityManager entityManager, List<Long> requests) throws Exception {
+    this.service.initClient();
+
+    ChangeLogListener.setUser(BATCH_USER_ID);
     switch (mode) {
     case Aborted:
       this.service.monitorAbortedRecords(entityManager, requests);
@@ -45,9 +51,9 @@ public class TransConnMultiService extends MultiThreadedBatchService<Long> {
       break;
     default:
       break;
-
     }
-    return null;
+    keepAlive();
+    return true;
   }
 
   @Override
@@ -99,6 +105,14 @@ public class TransConnMultiService extends MultiThreadedBatchService<Long> {
 
   public void setMode(Mode mode) {
     this.mode = mode;
+  }
+
+  public boolean isPoolMode() {
+    return poolMode;
+  }
+
+  public void setPoolMode(boolean poolMode) {
+    this.poolMode = poolMode;
   }
 
 }

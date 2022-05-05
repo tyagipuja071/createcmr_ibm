@@ -75,17 +75,10 @@ function submitMassFile() {
     return;
   }
 
-  var massCreateCountryXLSMSupport = [ '897' ];
+  var massCreateCountryXLSMSupport = [ '897', '649' ];
   if (massCreateCountryXLSMSupport.indexOf(FormManager.getActualValue('cmrIssuingCntry')) > -1
       && (FormManager.getActualValue('massFile').endsWith(".xlsm") != true && FormManager.getActualValue('reqType') == 'N')) {
     cmr.showAlert('Invalid mass file type selected. Please select \".xlsm\" file only.');
-    return;
-  }
-
-  var massCreateCountryXLSXSupport = [ '649' ];
-  if (massCreateCountryXLSXSupport.indexOf(FormManager.getActualValue('cmrIssuingCntry')) > -1
-      && (FormManager.getActualValue('massFile').endsWith(".xlsx") != true && FormManager.getActualValue('reqType') == 'N')) {
-    cmr.showAlert('Invalid mass file type selected. Please select \".xlsx\" file only.');
     return;
   }
 
@@ -144,12 +137,13 @@ function actualAddToCMRList() {
   if (cmrCntry == SysLoc.SWITZERLAND || cmrCntry == SysLoc.SPAIN || cmrCntry == SysLoc.AUSTRIA || cmrCntry == SysLoc.GREECE || cmrCntry == SysLoc.CYPRUS || cmrCntry == SysLoc.PORTUGAL
       || cmrCntry == SysLoc.SOUTH_AFRICA || (MCOAFRICA.indexOf(cmrCntry) > -1) || cmrCntry == SysLoc.MALTA || cmrCntry == '702' || cmrCntry == '806' || cmrCntry == '678' || cmrCntry == '846'
       || cmrCntry == SysLoc.CANADA || cmrCntry == SysLoc.ISRAEL) {
+
     var cmrsArr = cmr.cmrList.split(',');
     var reqtype = FormManager.getActualValue('reqType');
     var invalidCount = 0;
     var invalidCmr = false;
     var invalidCountRnD = 0;
-    var invalidCmrRnD = false; 
+    var invalidCmrRnD = false;
     var result = null;
     var resultRnD = null;
     var landCntryToCheck = "";

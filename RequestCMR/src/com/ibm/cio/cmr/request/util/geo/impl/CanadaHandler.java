@@ -14,8 +14,8 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 
 import org.apache.commons.beanutils.PropertyUtils;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -199,10 +199,10 @@ public class CanadaHandler extends GEOHandler {
       data.setCustAcctType(mainRecord.getCmrOrderBlock());
     }
     String mainRecBillFreq = mainRecord.getCmrBillPlnTyp();
-    if (mainRecBillFreq.equals("YM")) {
+    if ("YM".equals(mainRecBillFreq)) {
       data.setCollectorNameNo("1");
       data.setSizeCd(data.getCollectorNameNo());
-    } else if (mainRecBillFreq.equals("YQ")) {
+    } else if ("YQ".equals(mainRecBillFreq)) {
       data.setCollectorNameNo("3");
       data.setSizeCd(data.getCollectorNameNo());
     } else {

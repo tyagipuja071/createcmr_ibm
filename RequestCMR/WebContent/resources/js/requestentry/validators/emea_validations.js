@@ -2329,10 +2329,12 @@ function setClientTierValuesIT(isuCd) {
     return;
   }
   isuCd = FormManager.getActualValue('isuCd');
-  if (isuCd == '5K') {
+  if (isuCd == '5K' || isuCd == '28') {
     FormManager.removeValidator('clientTier', Validators.REQUIRED);
     FormManager.setValue('clientTier', '');
-    FormManager.readOnly('clientTier');
+    if (isuCd == '5K') {
+      FormManager.readOnly('clientTier');
+    }
   } else {
     var reqType = FormManager.getActualValue('reqType');
     var custSubGrp = FormManager.getActualValue('custSubGrp');
@@ -4589,6 +4591,7 @@ function afterConfigForIT() {
   if (_fiscalCodeUpdateHandlerIT == null) {
     _fiscalCodeUpdateHandlerIT = dojo.connect(FormManager.getField('taxCd1'), 'onChange', function(value) {
       autoResetFiscalDataStatus();
+      autoPopulateIdentClientIT();
     });
   }
 
@@ -4626,6 +4629,7 @@ function afterConfigForIT() {
   if (_vatUpdateHandlerIT == null) {
     _vatUpdateHandlerIT = dojo.connect(FormManager.getField('vat'), 'onChange', function(value) {
       autoResetFiscalDataStatus();
+      autoPopulateIdentClientIT();
     });
   }
 
@@ -5606,7 +5610,7 @@ function autoPopulateIdentClientIT() {
     if (custSubType == 'COMME') {
       FormManager.limitDropdownValues(FormManager.getField('identClient'), [ 'A', 'D' ]);
     } else if (custSubType == 'BUSPR') {
-      FormManager.limitDropdownValues(FormManager.getField('identClient'), [ 'A' ]);
+      FormManager.limitDropdownValues(FormManager.getField('identClient'), [ 'A', 'D' ]);
     } else if (custSubType == 'PRICU') {
       FormManager.limitDropdownValues(FormManager.getField('identClient'), [ 'X' ]);
     } else if (custSubType == 'LOCEN' || custSubType == 'UNIVE' || custSubType == 'GOVST') {
@@ -5647,7 +5651,7 @@ function autoPopulateIdentClientIT() {
     }
   }
 
-  if (custSubType != undefined && custSubType == 'COMME' && checkImportIndc != 'Y') {
+  if (custSubType != undefined && checkImportIndc != 'Y' && (custSubType == 'COMME' || custSubType == 'BUSPR' || custSubType == '3PAIT')) {
     if ((fiscalCode != '' && fiscalCode.length == 11) && (vat != '' && vat.length == 13)) {
       FormManager.setValue('identClient', 'A');
     }
@@ -10496,6 +10500,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addHandlersForIL, [ SysLoc.ISRAEL ]);
   GEOHandler.addAddrFunction(countryUseAISRAEL, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(addHandlersForIE, [ SysLoc.IRELAND ]);
+  GEOHandler.addAfterConfig(addISUHandlerIT, [ SysLoc.ITALY ]);
 
   // CREATCMR-4293
   GEOHandler.addAfterTemplateLoad(setCTCValues, [ SysLoc.IRELAND, SysLoc.ITALY, SysLoc.UK ]);

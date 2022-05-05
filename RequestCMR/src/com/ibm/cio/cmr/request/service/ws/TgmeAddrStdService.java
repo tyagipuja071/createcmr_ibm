@@ -9,7 +9,7 @@ import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.beanutils.PropertyUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
@@ -65,9 +65,6 @@ public class TgmeAddrStdService extends BaseSimpleService<TgmeAddrStdModel> {
 
       LOG.debug("Connecting to the TGME (Addr Std) service...");
       TgmeClient tgmeClient = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("CMR_SERVICES_URL"), TgmeClient.class);
-
-      tgmeClient.setUser(SystemConfiguration.getSystemProperty("cmrservices.user"));
-      tgmeClient.setPassword(SystemConfiguration.getSystemProperty("cmrservices.password"));
 
       AddressStdRequest tgmeRequest = new AddressStdRequest();
       tgmeRequest.setSystemId(SystemConfiguration.getSystemProperty("tgme.appID"));
