@@ -3,6 +3,9 @@
  */
 package com.ibm.cmr.create.batch.util.mq.transformer.impl;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -77,8 +80,17 @@ public class AustraliaTransformer extends ANZTransformer {
 
       line6 = StringUtils.rightPad(city.toString().trim(), 20, ' ');
     } else {
-      line6 = "<" + LandedCountryMap.getCountryName(addrData.getLandCntry()) + ">";
-      line6 = StringUtils.rightPad(line6, 20, ' ');
+      List<String> abbrevLandCountries = new ArrayList<String>();
+      abbrevLandCountries = (List<String>) Arrays.asList("US", "MY", "GB", "SG", "AE", "CH", "MV", "AU", "FR", "TH", "NL", "IE", "HK", "DE", "ID",
+          "BD", "CA", "LK", "TW", "NZ", "VN", "PH", "KR", "MM", "KH", "BN", "PG");
+      String scenario = handler.cmrData.getCustSubGrp();
+      line6 = addrData.getCity1();
+      if (addrData.getLandCntry() != null && !addrData.getLandCntry().equalsIgnoreCase(convertIssuing2Cd(handler.cmrData.getCmrIssuingCntry()))) {
+        if (abbrevLandCountries.contains(addrData.getLandCntry()) && scenario.equals("CROSS"))
+          line6 += " " + "<" + addrData.getLandCntry() + ">";
+        else
+          line6 += " " + "<" + LandedCountryMap.getCountryName(addrData.getLandCntry()) + ">";
+      }
     }
 
     line6 += state;
