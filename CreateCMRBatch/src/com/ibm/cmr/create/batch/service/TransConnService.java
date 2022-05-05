@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -66,6 +67,7 @@ import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
+import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.LAHandler;
 import com.ibm.cmr.create.batch.model.CmrServiceInput;
 import com.ibm.cmr.create.batch.model.MQIntfReqQueueModel;
@@ -158,6 +160,9 @@ public class TransConnService extends BaseBatchService {
       LOG.info("Processing Completed Manual records...");
       records = gatherDisAutoProcRecords(entityManager);
       monitorDisAutoProcRec(entityManager, records);
+
+      LOG.info("Updation Of Sap Numbers For Completed Request...");
+      monitorUpdateSapNumber(entityManager);
 
       if ("Y".equals(SystemParameters.getString("POOL.CMR.STATUS"))) {
         LOG.info("Processing Pool records..");
@@ -288,11 +293,13 @@ public class TransConnService extends BaseBatchService {
         if (!StringUtils.isBlank(notify.getCmtLogMsg())) {
           createNotifyReqCommentLog(entityManager, notifyReqModel);
         }
-        // update the NOTIFIED_IND of NOTIFY_REQ Table for each record processed
+        // update the NOTIFIED_IND of NOTIFY_REQ Table for each record
+        // processed
         notify.setNotifiedInd(CmrConstants.NOTIFY_IND_YES);
         updateEntity(notify, entityManager);
 
-        partialCommit(entityManager); // commit the transconn changes so that
+        partialCommit(entityManager); // commit the transconn changes so
+        // that
         // they won't be on the next run
 
         // retrieve the mail contents and needed entities
@@ -388,12 +395,14 @@ public class TransConnService extends BaseBatchService {
         if (isError) {
           createMQIntfReqCommentLog(entityManager, mqIntfReqModel);
         }
-        // update the MQ_IND of NOTIFY_REQ Table for each record processed
+        // update the MQ_IND of NOTIFY_REQ Table for each record
+        // processed
         mqIntfReq.setMqInd(CmrConstants.MQ_IND_YES);
         updateEntity(mqIntfReq, entityManager);
 
-        partialCommit(entityManager); // commit the MQ_INTF_REQ_QUEUE changes so
-                                      // that
+        partialCommit(entityManager); // commit the MQ_INTF_REQ_QUEUE
+        // changes so
+        // that
         // they won't be on the next run
 
         // retrieve the mail contents and needed entities
@@ -416,7 +425,8 @@ public class TransConnService extends BaseBatchService {
         if (wfHist != null) {
           entityManager.detach(wfHist);
         } else {
-          // create generic wf hist, will be removed once all functions e2e are
+          // create generic wf hist, will be removed once all
+          // functions e2e are
           // tested
           wfHist = new WfHist();
           wfHist.setReqId(mqIntfReq.getReqId());
@@ -432,7 +442,8 @@ public class TransConnService extends BaseBatchService {
           RequestUtils.sendEmailNotifications(entityManager, admin, wfHist);
         }
         // else {
-        // LOG.warn("Cannot create Workflow History, missing WF_HIST record.");
+        // LOG.warn("Cannot create Workflow History, missing WF_HIST
+        // record.");
         // }
 
         if (SINGLE_REQUEST_TYPES.contains(admin.getReqType()) && CmrConstants.REQUEST_STATUS.COM.toString().equals(admin.getReqStatus())) {
@@ -526,7 +537,8 @@ public class TransConnService extends BaseBatchService {
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("PROC_TYPE", SystemConfiguration.getValue("BATCH_CMR_POOL_PROCESSING_TYPE"));
     query.setParameter("ISSU_CNTRY", SystemConfiguration.getValue("BATCH_CMR_POOL_ISSUING_CNTRY"));
-    // jz: temporary, so that only Commercial REGULAR will be done for now until
+    // jz: temporary, so that only Commercial REGULAR will be done for now
+    // until
     // cm: scenario will be hardcoded for now for REGULAR and PRIV
     // CMR-5564 is implemented
     // query.setParameter("SCENARIO", "REGULAR");
@@ -540,10 +552,12 @@ public class TransConnService extends BaseBatchService {
   }
 
   protected void monitorLegacyPending(EntityManager entityManager, List<Long> pvcRecords) {
-    // Search the records with Status PCP and check if current timestamp falls
+    // Search the records with Status PCP and check if current timestamp
+    // falls
     // within host down outage
 
-    // Update CREQCMR.ADMIN set STATUS to 'PCR' (Processing Validation), Lock
+    // Update CREQCMR.ADMIN set STATUS to 'PCR' (Processing Validation),
+    // Lock
     // info CreateCMR, DISABLE_AUTO_PROC = 'Y'
     for (Long id : pvcRecords) {
       try {
@@ -587,219 +601,205 @@ public class TransConnService extends BaseBatchService {
           return;
         }
 
-        for (CompanyRecordModel record : records) {
-          // check if CMR is in reserved
-          String sqlReservedCMR = ExternalizedQuery.getSql("LD.REACDEL_RESERVED_CMR_CHECK");
-          PreparedQuery queryReservedCMR = new PreparedQuery(entityManager, sqlReservedCMR);
+        synchronized (this) {
+          for (CompanyRecordModel record : records) {
+            // check if CMR is in reserved
+            String sqlReservedCMR = ExternalizedQuery.getSql("LD.REACDEL_RESERVED_CMR_CHECK");
+            PreparedQuery queryReservedCMR = new PreparedQuery(entityManager, sqlReservedCMR);
 
-          queryReservedCMR.setParameter("CMR_NO", record.getCmrNo());
-          queryReservedCMR.setParameter("COUNTRY", record.getIssuingCntry());
-          queryReservedCMR.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
-          if (queryReservedCMR.exists() && (records.indexOf(record) == (records.size() - 1))) {
-            LOG.error("All CMR numbers in the Pool are existing in reserved. Cannot proceed with automatic CMR number assignment");
-            return;
-          } else if (queryReservedCMR.exists()) {
-            continue;
-          }
-          updateEntity(admin, entityManager);
-          // partialCommit(entityManager);
-          LOG.info("CMR no does not exist on reserved. Continuing...");
-          // Update CREQCMR.DATA set CMR_NO = from pool CMR, set CREQCMR.ADMIN
-          // REQ_STATUS to 'COM', put CMR_NO in RESERVED_CMR_NOS
-          data.setCmrNo(record.getCmrNo());
-          updateEntity(data, entityManager);
-
-          admin.setLockInd(CmrConstants.YES_NO.N.toString());
-          admin.setLockTs(null);
-          admin.setLockBy(null);
-          admin.setLockByNm(null);
-          admin.setDisableAutoProc("Y"); // added to send it to processing
-                                         // service 1020
-          admin.setRdcProcessingStatus(null);
-          admin.setReqStatus("COM");
-          admin.setPoolCmrIndc(CmrConstants.YES_NO.Y.toString());
-          // set to aborted so the details can be sent to processing service on
-          // next run
-          admin.setRdcProcessingStatus("A");
-          updateEntity(admin, entityManager);
-
-          ReservedCMRNos reservedCMRNo = new ReservedCMRNos();
-          ReservedCMRNosPK reservedCMRNoPK = new ReservedCMRNosPK();
-
-          reservedCMRNoPK.setCmrIssuingCntry(record.getIssuingCntry());
-          reservedCMRNoPK.setCmrNo(record.getCmrNo());
-          reservedCMRNoPK.setMandt(SystemConfiguration.getValue("MANDT"));
-          reservedCMRNo.setId(reservedCMRNoPK);
-
-          reservedCMRNo.setStatus("A");
-          reservedCMRNo.setCreateTs(SystemUtil.getCurrentTimestamp());
-          reservedCMRNo.setLastUpdtTs(SystemUtil.getCurrentTimestamp());
-          reservedCMRNo.setCreateBy(BATCH_USER_ID);
-          reservedCMRNo.setLastUpdtBy(BATCH_USER_ID);
-
-          createEntity(reservedCMRNo, entityManager);
-
-          String knaSql = ExternalizedQuery.getSql("BATCH.GET.KNA1_MANDT_CMRNO");
-          PreparedQuery knaQuery = new PreparedQuery(entityManager, knaSql);
-          knaQuery.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
-          knaQuery.setParameter("CMR_NO", record.getCmrNo());
-          knaQuery.setParameter("KATR6", data.getCmrIssuingCntry());
-          List<Kna1> kna1List = knaQuery.getResults(Kna1.class);
-          Map<String, String> kna1KunnrMap = new HashMap<String, String>();
-          for (Kna1 kna1 : kna1List) {
-            if (!StringUtils.isBlank(admin.getSourceSystId())) {
-              String source = admin.getSourceSystId();
-              if (source.length() > 12) {
-                source = source.substring(0, 12);
-              }
-              kna1.setErnam(source);
-            } else {
-              kna1.setErnam(BATCH_USER_ID);
+            queryReservedCMR.setParameter("CMR_NO", record.getCmrNo());
+            queryReservedCMR.setParameter("COUNTRY", record.getIssuingCntry());
+            queryReservedCMR.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+            queryReservedCMR.setForReadOnly(true);
+            if (queryReservedCMR.exists() && (records.indexOf(record) == (records.size() - 1))) {
+              LOG.error("All CMR numbers in the Pool are existing in reserved. Cannot proceed with automatic CMR number assignment");
+              return;
+            } else if (queryReservedCMR.exists()) {
+              continue;
             }
-            kna1.setErdat(ERDAT_FORMATTER.format(SystemUtil.getCurrentTimestamp()));
-            if ("ZS01".equals(kna1.getKtokd()) || ("ZP01".equals(kna1.getKtokd()) && !"PG".equals(kna1.getAufsd()))) {
-              // track only CMR KUNNRs, not paygos
-              kna1KunnrMap.put(kna1.getKtokd(), kna1.getId().getKunnr());
-            }
-            updateEntity(kna1, entityManager);
-          }
+            updateEntity(admin, entityManager);
+            // partialCommit(entityManager);
+            LOG.info("CMR no does not exist on reserved. Continuing...");
+            // Update CREQCMR.DATA set CMR_NO = from pool CMR, set
+            // CREQCMR.ADMIN
+            // REQ_STATUS to 'COM', put CMR_NO in RESERVED_CMR_NOS
+            data.setCmrNo(record.getCmrNo());
+            updateEntity(data, entityManager);
 
-          // partialCommit(entityManager);
+            admin.setLockInd(CmrConstants.YES_NO.N.toString());
+            admin.setLockTs(null);
+            admin.setLockBy(null);
+            admin.setLockByNm(null);
+            admin.setDisableAutoProc("Y"); // added to send it to
+            // processing
+            // service 1020
+            admin.setRdcProcessingStatus(null);
+            admin.setReqStatus("COM");
+            admin.setPoolCmrIndc(CmrConstants.YES_NO.Y.toString());
+            // set to aborted so the details can be sent to
+            // processing service
+            // on
+            // next run
+            admin.setRdcProcessingStatus("A");
+            updateEntity(admin, entityManager);
 
-          // Workflow history creation
-          RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin, "Completed using Pool CMR assignment", "Pool Assignment",
-              null, null, true);
-          RequestUtils.createCommentLogFromBatch(entityManager, BATCH_USER_ID, admin.getId().getReqId(), "Completed using Pool CMR assignment");
+            ReservedCMRNos reservedCMRNo = new ReservedCMRNos();
+            ReservedCMRNosPK reservedCMRNoPK = new ReservedCMRNosPK();
 
-          // Create a new Update request using the CMR_NO from Pool and
-          // overwrite with data from original request
-          QuickSearchService qs = new QuickSearchService();
-          ParamContainer params = new ParamContainer();
+            reservedCMRNoPK.setCmrIssuingCntry(record.getIssuingCntry());
+            reservedCMRNoPK.setCmrNo(record.getCmrNo());
+            reservedCMRNoPK.setMandt(SystemConfiguration.getValue("MANDT"));
+            reservedCMRNo.setId(reservedCMRNoPK);
 
-          record.setReqType("C");
-          record.setPoolRecord(true);
-          params.addParam("model", record);
+            reservedCMRNo.setStatus("A");
+            reservedCMRNo.setCreateTs(SystemUtil.getCurrentTimestamp());
+            reservedCMRNo.setLastUpdtTs(SystemUtil.getCurrentTimestamp());
+            reservedCMRNo.setCreateBy(BATCH_USER_ID);
+            reservedCMRNo.setLastUpdtBy(BATCH_USER_ID);
 
-          AppUser user = new AppUser();
-          user.setIntranetId(BATCH_USER_ID);
-          user.setBluePagesName(BATCH_USER_ID);
-          DummyServletRequest dummyReq = new DummyServletRequest();
-          if (dummyReq.getSession() != null) {
-            LOG.trace("Session found for dummy req");
-            dummyReq.getSession().setAttribute(CmrConstants.SESSION_APPUSER_KEY, user);
-          } else {
-            LOG.warn("Session not found for dummy req");
-          }
-          RequestEntryModel reqModel = qs.process(dummyReq, params);
-          // get a request id, get the request and update data from the original
-          // request
-          AdminPK adminPk = new AdminPK();
-          long reqId = reqModel.getReqId();
-          adminPk.setReqId(reqId);
-          Admin newAdmin = entityManager.find(Admin.class, adminPk);
-          copyValuesToEntity(admin, newAdmin);
-          newAdmin.setId(adminPk);
-          newAdmin.setCreateTs(SystemUtil.getCurrentTimestamp());
-          newAdmin.setLastUpdtTs(SystemUtil.getCurrentTimestamp());
-          newAdmin.setInternalTyp("UPD_SIMPLE_AUTO");
-          newAdmin.setLockInd(CmrConstants.YES_NO.N.toString());
-          newAdmin.setLockTs(null);
-          newAdmin.setLockBy(null);
-          newAdmin.setLockByNm(null);
-          newAdmin.setModelCmrNo(null);
-          newAdmin.setReqType("U");
-          newAdmin.setReqReason("POOL");
-          newAdmin.setCustType(null);
-          newAdmin.setLastUpdtBy(BATCH_USER_ID);
-          newAdmin.setProcessedFlag(CmrConstants.YES_NO.N.toString());
-          newAdmin.setProcessedTs(null);
-          newAdmin.setDisableAutoProc(CmrConstants.YES_NO.N.toString());
-          newAdmin.setRdcProcessingStatus(null);
-          newAdmin.setRdcProcessingTs(null);
-          newAdmin.setRdcProcessingMsg(null);
+            createEntity(reservedCMRNo, entityManager);
 
-          updateEntity(newAdmin, entityManager);
-
-          DataPK dataPk = new DataPK();
-          dataPk.setReqId(reqId);
-          Data newData = entityManager.find(Data.class, dataPk);
-
-          copyValuesToEntity(data, newData);
-
-          newData.setId(dataPk);
-          newData.setCustGrp(null);
-          newData.setCustSubGrp(null);
-          if (data.getAffiliate() == null || data.getAffiliate().equals(""))
-            newData.setAffiliate(record.getCmrNo());
-          if (data.getEnterprise() == null || data.getEnterprise().equals(""))
-            newData.setEnterprise(record.getCmrNo());
-
-          updateEntity(newData, entityManager);
-
-          PreparedQuery addrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.GET_ADDR_ENTITY_CREATE_REQ"));
-          addrQuery.setParameter("REQ_ID", admin.getId().getReqId());
-          addrQuery.setParameter("ADDR_TYPE", "ZS01");
-          Addr addr = addrQuery.getSingleResult(Addr.class);
-          addr.setSapNo(kna1KunnrMap.get("ZS01"));
-          updateEntity(addr, entityManager);
-
-          PreparedQuery zi01AddrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.GET_ADDR_ENTITY_CREATE_REQ"));
-          zi01AddrQuery.setParameter("REQ_ID", admin.getId().getReqId());
-          zi01AddrQuery.setParameter("ADDR_TYPE", "ZI01");
-          Addr zi01Addr = zi01AddrQuery.getSingleResult(Addr.class);
-          if (zi01Addr != null) {
-            zi01Addr.setSapNo(kna1KunnrMap.get("ZP01"));
-            if (!StringUtils.isBlank(zi01Addr.getSapNo())) {
-              updateEntity(zi01Addr, entityManager);
-            }
-          }
-
-          PreparedQuery zp01AddrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.GET_ADDR_ENTITY_CREATE_REQ"));
-          zp01AddrQuery.setParameter("REQ_ID", admin.getId().getReqId());
-          zp01AddrQuery.setParameter("ADDR_TYPE", "PG01");
-          List<Addr> zp01Addrs = zp01AddrQuery.getResults(Addr.class);
-
-          PreparedQuery newAddrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.GET_ADDR_FOR_SAP_NO"));
-          newAddrQuery.setParameter("REQ_ID", reqId);
-          List<Addr> newAddresses = newAddrQuery.getResults(Addr.class);
-
-          if (newAddresses != null) {
-            for (Addr newAddr : newAddresses) {
-              AddrPK addrPK = newAddr.getId();
-              if (zi01Addr != null && addrPK.getAddrType().equals("ZI01")) {
-                copyValuesToEntity(zi01Addr, newAddr);
-                newAddr.setSapNo(null);
-                newAddr.setImportInd(CmrConstants.YES_NO.N.toString());
-                newAddr.setChangedIndc(null);
+            String knaSql = ExternalizedQuery.getSql("BATCH.GET.KNA1_MANDT_CMRNO");
+            PreparedQuery knaQuery = new PreparedQuery(entityManager, knaSql);
+            knaQuery.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+            knaQuery.setParameter("CMR_NO", record.getCmrNo());
+            knaQuery.setParameter("KATR6", data.getCmrIssuingCntry());
+            List<Kna1> kna1List = knaQuery.getResults(Kna1.class);
+            Map<String, String> kna1KunnrMap = new HashMap<String, String>();
+            for (Kna1 kna1 : kna1List) {
+              if (!StringUtils.isBlank(admin.getSourceSystId())) {
+                String source = admin.getSourceSystId();
+                if (source.length() > 12) {
+                  source = source.substring(0, 12);
+                }
+                kna1.setErnam(source);
               } else {
-                copyValuesToEntity(addr, newAddr);
-                newAddr.setSapNo(kna1KunnrMap.get("ZS01"));
-                newAddr.setImportInd(CmrConstants.YES_NO.Y.toString());
-                newAddr.setChangedIndc(CmrConstants.YES_NO.Y.toString());
+                kna1.setErnam(BATCH_USER_ID);
               }
-              newAddr.setId(addrPK);
-              newAddr.setAddrStdResult("X");
-              newAddr.setAddrStdAcceptInd(null);
-              newAddr.setAddrStdRejReason(null);
-              newAddr.setAddrStdRejCmt(null);
-              newAddr.setAddrStdTs(null);
-              newAddr.setRdcCreateDt(ERDAT_FORMATTER.format(SystemUtil.getCurrentTimestamp()));
-              newAddr.setRdcLastUpdtDt(SystemUtil.getCurrentTimestamp());
-              updateEntity(newAddr, entityManager);
+              kna1.setErdat(ERDAT_FORMATTER.format(SystemUtil.getCurrentTimestamp()));
+              if ("ZS01".equals(kna1.getKtokd()) || ("ZP01".equals(kna1.getKtokd()) && !"PG".equals(kna1.getAufsd()))) {
+                // track only CMR KUNNRs, not paygos
+                kna1KunnrMap.put(kna1.getKtokd(), kna1.getId().getKunnr());
+              }
+              updateEntity(kna1, entityManager);
             }
 
-            if (zp01Addrs != null && !zp01Addrs.isEmpty()) {
-              // copy zp01 addresses
-              for (Addr zp01 : zp01Addrs) {
-                Addr newAddr = new Addr();
-                AddrPK addrPK = new AddrPK();
-                addrPK.setAddrSeq(zp01.getId().getAddrSeq());
-                addrPK.setReqId(reqId);
-                addrPK.setAddrType("PG01");
-                copyValuesToEntity(zp01, newAddr);
-                newAddr.setSapNo(null);
-                newAddr.setImportInd(CmrConstants.YES_NO.N.toString());
-                newAddr.setChangedIndc(null);
+            // partialCommit(entityManager);
+
+            // Workflow history creation
+            RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin, "Completed using Pool CMR assignment", "Pool Assignment",
+                null, null, true);
+            RequestUtils.createCommentLogFromBatch(entityManager, BATCH_USER_ID, admin.getId().getReqId(), "Completed using Pool CMR assignment");
+
+            // Create a new Update request using the CMR_NO from
+            // Pool and
+            // overwrite with data from original request
+            QuickSearchService qs = new QuickSearchService();
+            ParamContainer params = new ParamContainer();
+
+            record.setReqType("C");
+            record.setPoolRecord(true);
+            params.addParam("model", record);
+
+            AppUser user = new AppUser();
+            user.setIntranetId(BATCH_USER_ID);
+            user.setBluePagesName(BATCH_USER_ID);
+            DummyServletRequest dummyReq = new DummyServletRequest();
+            if (dummyReq.getSession() != null) {
+              LOG.trace("Session found for dummy req");
+              dummyReq.getSession().setAttribute(CmrConstants.SESSION_APPUSER_KEY, user);
+            } else {
+              LOG.warn("Session not found for dummy req");
+            }
+            RequestEntryModel reqModel = qs.process(dummyReq, params);
+            // get a request id, get the request and update data
+            // from the
+            // original
+            // request
+            AdminPK adminPk = new AdminPK();
+            long reqId = reqModel.getReqId();
+            adminPk.setReqId(reqId);
+            Admin newAdmin = entityManager.find(Admin.class, adminPk);
+            copyValuesToEntity(admin, newAdmin);
+            newAdmin.setId(adminPk);
+            newAdmin.setCreateTs(SystemUtil.getCurrentTimestamp());
+            newAdmin.setLastUpdtTs(SystemUtil.getCurrentTimestamp());
+            newAdmin.setInternalTyp("UPD_SIMPLE_AUTO");
+            newAdmin.setLockInd(CmrConstants.YES_NO.N.toString());
+            newAdmin.setLockTs(null);
+            newAdmin.setLockBy(null);
+            newAdmin.setLockByNm(null);
+            newAdmin.setModelCmrNo(null);
+            newAdmin.setReqType("U");
+            newAdmin.setReqReason("POOL");
+            newAdmin.setCustType(null);
+            newAdmin.setLastUpdtBy(BATCH_USER_ID);
+            newAdmin.setProcessedFlag(CmrConstants.YES_NO.N.toString());
+            newAdmin.setProcessedTs(null);
+            newAdmin.setDisableAutoProc(CmrConstants.YES_NO.N.toString());
+            newAdmin.setRdcProcessingStatus(null);
+            newAdmin.setRdcProcessingTs(null);
+            newAdmin.setRdcProcessingMsg(null);
+
+            updateEntity(newAdmin, entityManager);
+
+            DataPK dataPk = new DataPK();
+            dataPk.setReqId(reqId);
+            Data newData = entityManager.find(Data.class, dataPk);
+
+            copyValuesToEntity(data, newData);
+
+            newData.setId(dataPk);
+            newData.setCustGrp(null);
+            newData.setCustSubGrp(null);
+            if (data.getAffiliate() == null || data.getAffiliate().equals(""))
+              newData.setAffiliate(record.getCmrNo());
+            if (data.getEnterprise() == null || data.getEnterprise().equals(""))
+              newData.setEnterprise(record.getCmrNo());
+
+            updateEntity(newData, entityManager);
+
+            PreparedQuery addrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.GET_ADDR_ENTITY_CREATE_REQ"));
+            addrQuery.setParameter("REQ_ID", admin.getId().getReqId());
+            addrQuery.setParameter("ADDR_TYPE", "ZS01");
+            Addr addr = addrQuery.getSingleResult(Addr.class);
+            addr.setSapNo(kna1KunnrMap.get("ZS01"));
+            updateEntity(addr, entityManager);
+
+            PreparedQuery zi01AddrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.GET_ADDR_ENTITY_CREATE_REQ"));
+            zi01AddrQuery.setParameter("REQ_ID", admin.getId().getReqId());
+            zi01AddrQuery.setParameter("ADDR_TYPE", "ZI01");
+            Addr zi01Addr = zi01AddrQuery.getSingleResult(Addr.class);
+            if (zi01Addr != null) {
+              zi01Addr.setSapNo(kna1KunnrMap.get("ZP01"));
+              if (!StringUtils.isBlank(zi01Addr.getSapNo())) {
+                updateEntity(zi01Addr, entityManager);
+              }
+            }
+
+            PreparedQuery zp01AddrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.GET_ADDR_ENTITY_CREATE_REQ"));
+            zp01AddrQuery.setParameter("REQ_ID", admin.getId().getReqId());
+            zp01AddrQuery.setParameter("ADDR_TYPE", "PG01");
+            List<Addr> zp01Addrs = zp01AddrQuery.getResults(Addr.class);
+
+            PreparedQuery newAddrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.GET_ADDR_FOR_SAP_NO"));
+            newAddrQuery.setParameter("REQ_ID", reqId);
+            List<Addr> newAddresses = newAddrQuery.getResults(Addr.class);
+
+            if (newAddresses != null) {
+              for (Addr newAddr : newAddresses) {
+                AddrPK addrPK = newAddr.getId();
+                if (zi01Addr != null && addrPK.getAddrType().equals("ZI01")) {
+                  copyValuesToEntity(zi01Addr, newAddr);
+                  newAddr.setSapNo(null);
+                  newAddr.setImportInd(CmrConstants.YES_NO.N.toString());
+                  newAddr.setChangedIndc(null);
+                } else {
+                  copyValuesToEntity(addr, newAddr);
+                  newAddr.setSapNo(kna1KunnrMap.get("ZS01"));
+                  newAddr.setImportInd(CmrConstants.YES_NO.Y.toString());
+                  newAddr.setChangedIndc(CmrConstants.YES_NO.Y.toString());
+                }
                 newAddr.setId(addrPK);
                 newAddr.setAddrStdResult("X");
                 newAddr.setAddrStdAcceptInd(null);
@@ -809,21 +809,45 @@ public class TransConnService extends BaseBatchService {
                 newAddr.setRdcCreateDt(ERDAT_FORMATTER.format(SystemUtil.getCurrentTimestamp()));
                 newAddr.setRdcLastUpdtDt(SystemUtil.getCurrentTimestamp());
                 updateEntity(newAddr, entityManager);
-                break;
+              }
+
+              if (zp01Addrs != null && !zp01Addrs.isEmpty()) {
+                // copy zp01 addresses
+                for (Addr zp01 : zp01Addrs) {
+                  Addr newAddr = new Addr();
+                  AddrPK addrPK = new AddrPK();
+                  addrPK.setAddrSeq(zp01.getId().getAddrSeq());
+                  addrPK.setReqId(reqId);
+                  addrPK.setAddrType("PG01");
+                  copyValuesToEntity(zp01, newAddr);
+                  newAddr.setSapNo(null);
+                  newAddr.setImportInd(CmrConstants.YES_NO.N.toString());
+                  newAddr.setChangedIndc(null);
+                  newAddr.setId(addrPK);
+                  newAddr.setAddrStdResult("X");
+                  newAddr.setAddrStdAcceptInd(null);
+                  newAddr.setAddrStdRejReason(null);
+                  newAddr.setAddrStdRejCmt(null);
+                  newAddr.setAddrStdTs(null);
+                  newAddr.setRdcCreateDt(ERDAT_FORMATTER.format(SystemUtil.getCurrentTimestamp()));
+                  newAddr.setRdcLastUpdtDt(SystemUtil.getCurrentTimestamp());
+                  updateEntity(newAddr, entityManager);
+                  break;
+                }
               }
             }
+            newAdmin.setReqStatus("PCP");
+            newAdmin.setPoolCmrIndc(CmrConstants.YES_NO.Y.toString());
+            admin.setChildReqId(newAdmin.getId().getReqId());
+            updateEntity(newAdmin, entityManager);
+            updateEntity(admin, entityManager);
+
+            RequestUtils.createCommentLogFromBatch(entityManager, BATCH_USER_ID, admin.getId().getReqId(),
+                "Child Update Request " + reqId + " created.");
+
+            partialCommit(entityManager);
+            break;
           }
-          newAdmin.setReqStatus("PCP");
-          newAdmin.setPoolCmrIndc(CmrConstants.YES_NO.Y.toString());
-          admin.setChildReqId(newAdmin.getId().getReqId());
-          updateEntity(newAdmin, entityManager);
-          updateEntity(admin, entityManager);
-
-          RequestUtils.createCommentLogFromBatch(entityManager, BATCH_USER_ID, admin.getId().getReqId(),
-              "Child Update Request " + reqId + " created.");
-
-          partialCommit(entityManager);
-          break;
         }
 
         partialCommit(entityManager);
@@ -922,7 +946,8 @@ public class TransConnService extends BaseBatchService {
       response.setMsg("No application ID defined for Country: " + data.getCmrIssuingCntry() + ". Cannot process RDc records.");
     } else {
       try {
-        this.massServiceClient.setReadTimeout(60 * 15 * 1000); // 15 mins
+        this.massServiceClient.setReadTimeout(60 * 15 * 1000); // 15
+        // mins
         response = this.massServiceClient.executeAndWrap(applicationId, request, MassProcessResponse.class);
       } catch (Exception e) {
         LOG.error("Error when connecting to the mass change service.", e);
@@ -990,7 +1015,8 @@ public class TransConnService extends BaseBatchService {
         break;
       }
 
-      // create comment log and workflow history entries for update type of
+      // create comment log and workflow history entries for update type
+      // of
       // request
       StringBuilder comment = new StringBuilder();
       if (isCompletedSuccessfully(resultCode)) {
@@ -1013,7 +1039,8 @@ public class TransConnService extends BaseBatchService {
       }
       RequestUtils.createCommentLogFromBatch(entityManager, BATCH_USER_ID, admin.getId().getReqId(), comment.toString().trim());
 
-      // only update Admin record once depending on the overall status of the
+      // only update Admin record once depending on the overall status of
+      // the
       // request
       LOG.debug("Updating Admin record for Request ID " + admin.getId().getReqId());
       if (CmrConstants.RDC_STATUS_ABORTED.equals(resultCode) && CmrConstants.RDC_STATUS_ABORTED.equals(admin.getRdcProcessingStatus())) {
@@ -1177,7 +1204,8 @@ public class TransConnService extends BaseBatchService {
         break;
       }
 
-      // create comment log and workflow history entries for update type of
+      // create comment log and workflow history entries for update type
+      // of
       // request
       StringBuilder comment = new StringBuilder();
       if (isCompletedSuccessfully(resultCode)) {
@@ -1200,7 +1228,8 @@ public class TransConnService extends BaseBatchService {
       }
       RequestUtils.createCommentLogFromBatch(entityManager, BATCH_USER_ID, admin.getId().getReqId(), comment.toString().trim());
 
-      // only update Admin record once depending on the overall status of the
+      // only update Admin record once depending on the overall status of
+      // the
       // request
       LOG.debug("Updating Admin record for Request ID " + admin.getId().getReqId());
       if (CmrConstants.RDC_STATUS_ABORTED.equals(resultCode) && CmrConstants.RDC_STATUS_ABORTED.equals(admin.getRdcProcessingStatus())) {
@@ -1263,9 +1292,13 @@ public class TransConnService extends BaseBatchService {
 
         long startTime = new Date().getTime();
         try {
-          this.updtByEntClient.setConnectTimeout(60 * 1000); // 1 min to connect
-          this.updtByEntClient.setReadTimeout(60 * 30 * 1000); // 30 min to
-                                                               // finish
+          this.updtByEntClient.setConnectTimeout(60 * 1000); // 1 min
+          // to
+          // connect
+          this.updtByEntClient.setReadTimeout(60 * 30 * 1000); // 30
+          // min
+          // to
+          // finish
           response = this.updtByEntClient.executeAndWrap(enterpriseUpdtRequest, EnterpriseUpdtResponse.class);
         } catch (Exception e) {
           LOG.error("Error when connecting to the enterprise service.", e);
@@ -1276,7 +1309,8 @@ public class TransConnService extends BaseBatchService {
             LOG.debug("Wait time is more than 25 mins, setting status to completed.");
             response.setStatus(CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS);
             response.setMessage("Bulk process. Processing will complete asynchronously");
-            // this thread has been waiting more than 50 mins, means backend
+            // this thread has been waiting more than 50 mins, means
+            // backend
             // processing is being completed
           } else {
             response.setStatus(CmrConstants.RDC_STATUS_ABORTED);
@@ -1295,7 +1329,8 @@ public class TransConnService extends BaseBatchService {
 
         StringBuilder comment = new StringBuilder();
 
-        // create comment log and workflow history entries for update type of
+        // create comment log and workflow history entries for update
+        // type of
         // request
         if (isCompletedSuccessfully(resultCode)) {
 
@@ -1324,7 +1359,8 @@ public class TransConnService extends BaseBatchService {
         }
         RequestUtils.createCommentLogFromBatch(entityManager, BATCH_USER_ID, admin.getId().getReqId(), comment.toString().trim());
 
-        // only update Admin record once depending on the overall status of the
+        // only update Admin record once depending on the overall status
+        // of the
         // request
         LOG.debug("Updating Admin record for Request ID " + admin.getId().getReqId());
         if (CmrConstants.RDC_STATUS_ABORTED.equals(resultCode) && CmrConstants.RDC_STATUS_ABORTED.equals(admin.getRdcProcessingStatus())) {
@@ -1419,7 +1455,8 @@ public class TransConnService extends BaseBatchService {
         if (response.getRecords() != null) {
           for (RDcRecord record : response.getRecords()) {
 
-            // update the ADDR Table for each rdc record returned by the
+            // update the ADDR Table for each rdc record returned by
+            // the
             // create cmr service for create request
 
             updateRequestAddress(entityManager, admin, data, record);
@@ -1430,7 +1467,8 @@ public class TransConnService extends BaseBatchService {
 
       StringBuilder comment = new StringBuilder();
 
-      // create comment log and workflow history entries for update type of
+      // create comment log and workflow history entries for update type
+      // of
       // request
       if (isCompletedSuccessfully(resultCode)) {
 
@@ -1477,7 +1515,8 @@ public class TransConnService extends BaseBatchService {
         }
       }
 
-      // only update Admin record once depending on the overall status of the
+      // only update Admin record once depending on the overall status of
+      // the
       // request
       LOG.debug("Updating Admin record for Request ID " + admin.getId().getReqId());
 
@@ -1502,10 +1541,12 @@ public class TransConnService extends BaseBatchService {
        * Defect 1450224 - TransCon batch issue when writing Tax Separation Indc
        * on CROS
        */
-      // create a flag to note if at least one tax separation indc is not empty
+      // create a flag to note if at least one tax separation indc is not
+      // empty
       boolean oneTaxInfoNotEmpty = false;
       if (SystemLocation.CHILE.equals(data.getCmrIssuingCntry())) {
-        // query all tax separation indicators on GEO_TAX_INFO for the request
+        // query all tax separation indicators on GEO_TAX_INFO for the
+        // request
         LOG.debug("***QUERYING DB FOR TAX INFO!!!");
         List<Object[]> geoTaxInfo = getGeoTaxInfo(entityManager, String.valueOf(data.getId().getReqId()));
         LOG.debug("***GOT RESULTS >> " + geoTaxInfo != null ? geoTaxInfo.size() : geoTaxInfo);
@@ -1559,7 +1600,8 @@ public class TransConnService extends BaseBatchService {
         addrQuery.setParameter("ADDR_TYPE", "PG01");
         addrQuery.setParameter("ADDR_SEQ", record.getSeqNo());
       } else {
-        // if returned is ZS01/ZI01, update the ZS01 address. Else, Update
+        // if returned is ZS01/ZI01, update the ZS01 address. Else,
+        // Update
         // the ZI01 address
         addrQuery.setParameter("ADDR_TYPE", "ZS01".equals(record.getAddressType()) || "ZI01".equals(record.getAddressType()) ? "ZS01" : "ZI01");
       }
@@ -1701,7 +1743,8 @@ public class TransConnService extends BaseBatchService {
             response.setMessage("No application ID defined for Country: " + data.getCmrIssuingCntry() + ". Cannot process RDc records.");
           } else {
             try {
-              this.serviceClient.setReadTimeout(60 * 20 * 1000); // 20 mins
+              this.serviceClient.setReadTimeout(60 * 20 * 1000); // 20
+              // mins
               response = this.serviceClient.executeAndWrap(applicationId, request, ProcessResponse.class);
             } catch (Exception e) {
               LOG.error("Error when connecting to the service.", e);
@@ -1732,9 +1775,11 @@ public class TransConnService extends BaseBatchService {
               + addr.getSapNo() + " Status: " + response.getStatus() + " Message: " + (response.getMessage() != null ? response.getMessage() : "-")
               + "]");
 
-          // get the results from the service and process jason response
+          // get the results from the service and process jason
+          // response
 
-          // create comment log and workflow history entries for update type of
+          // create comment log and workflow history entries for
+          // update type of
           // request
           if (isCompletedSuccessfully(resultCode)) {
 
@@ -1797,7 +1842,8 @@ public class TransConnService extends BaseBatchService {
 
       LOG.debug("Updating Admin record for Request ID " + admin.getId().getReqId());
 
-      // only update Admin record once depending on the overall status of the
+      // only update Admin record once depending on the overall status of
+      // the
       // request
       if (statusCodes.contains(CmrConstants.RDC_STATUS_NOT_COMPLETED)) {
         admin.setRdcProcessingStatus(CmrConstants.RDC_STATUS_NOT_COMPLETED);
@@ -1919,7 +1965,8 @@ public class TransConnService extends BaseBatchService {
       partialCommit(entityManager);
     } else if (isInternalAndSSAMX(data, admin)) {
       LOG.debug("Forced Update : EXECUTING FORCE UPDATE CHANGE FOR SSA AND INTERNALS...");
-      // if this is SSA and Internal we need to force update to set the other
+      // if this is SSA and Internal we need to force update to set the
+      // other
       // screens
       admin.setReqStatus(CmrConstants.REQUEST_STATUS.PCP.toString());
       admin.setInternalTyp("UPDT_AUTO");
@@ -2701,6 +2748,61 @@ public class TransConnService extends BaseBatchService {
   @Override
   protected boolean terminateOnLongExecution() {
     return !this.multiMode;
+  }
+
+  public void monitorUpdateSapNumber(EntityManager entityManager) throws Exception {
+    String sql = ExternalizedQuery.getSql("BATCH.FIND_MISSING_SAP_NUMBER");
+    PreparedQuery results = new PreparedQuery(entityManager, sql);
+    List<Object[]> missedSapNumberRec = results.getResults();
+
+    if (missedSapNumberRec != null && !missedSapNumberRec.isEmpty()) {
+      for (Object[] obj : missedSapNumberRec) {
+        Optional<Object> checkNull = Optional.ofNullable(obj);
+        if (checkNull.isPresent()) {
+          String addrType = (String) obj[3];
+          String seqNo = (String) obj[2];
+
+          String mappedAddrType = GEOHandler.getEquivalentAddressType(addrType, seqNo);
+          String sql1 = ExternalizedQuery.getSql("BATCH.FIND_KUNNR");
+          PreparedQuery findKunnr = new PreparedQuery(entityManager, sql1);
+          Long reqId = (Long) obj[0];
+          findKunnr.setParameter("ZZKV_CUSNO", obj[4]);
+          findKunnr.setParameter("KTOKD", mappedAddrType);
+          findKunnr.setParameter("LAND1", obj[5]);
+          findKunnr.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+          List<Kna1> knaList = findKunnr.getResults(Kna1.class);
+
+          if (knaList != null && !knaList.isEmpty()) {
+            Kna1 kna1 = knaList.get(0);
+            if (kna1 != null) {
+              LOG.info("kunnr=" + kna1.getId().getKunnr());
+              String kunnr = kna1.getId().getKunnr();
+              String landCountry = kna1.getLand1();
+              String addrSequence = kna1.getZzkvSeqno();
+              String sitePartyId = kna1.getBran5();
+
+              String sql2 = ExternalizedQuery.getSql("BATCH.GET_ADDR_RECORDS");
+              PreparedQuery query2 = new PreparedQuery(entityManager, sql2);
+              query2.setParameter("REQ_ID", reqId);
+              query2.setParameter("LAND1", landCountry);
+              query2.setParameter("ADDR_SEQ", addrSequence);
+
+              List<Addr> addrList = query2.getResults(Addr.class);
+              for (Addr addr : addrList) {
+                addr.setSapNo(kunnr);
+                addr.setIerpSitePrtyId(sitePartyId);
+                updateEntity(addr, entityManager);
+              }
+              LOG.debug("Size of Upadte Addr Record list : " + addrList.size());
+            }
+          } else {
+            LOG.debug("NO RECORD Fetch For Update KUNNR in Kna1 Table");
+          }
+        }
+      }
+    } else {
+      LOG.debug("NO RECORD Fetch For UPDATE SAP NUMBER IN ADDR TABLE");
+    }
   }
 
 }

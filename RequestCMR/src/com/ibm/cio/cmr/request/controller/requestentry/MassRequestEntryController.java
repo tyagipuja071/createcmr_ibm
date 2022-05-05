@@ -758,10 +758,11 @@ public class MassRequestEntryController extends BaseController {
   }
 
   @RequestMapping(value = "/massrequest/process", method = { RequestMethod.POST, RequestMethod.GET })
-  public void processMassFile(HttpServletRequest request, HttpServletResponse response, RequestEntryModel model) throws CmrException {
+  public void processMassFile(HttpServletRequest request, HttpServletResponse response) throws CmrException {
     try {
       boolean isMultipart = ServletFileUpload.isMultipartContent(request);
       if (isMultipart) {
+        RequestEntryModel model = new RequestEntryModel();
         // process mass file here
         model.setAction("PROCESS_FILE");
         service.processTransaction(model, request);

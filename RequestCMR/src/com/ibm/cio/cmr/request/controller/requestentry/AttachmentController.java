@@ -70,6 +70,27 @@ public class AttachmentController extends BaseController {
     return map;
   }
 
+  @RequestMapping(value = "/request/addattachment", method = { RequestMethod.POST, RequestMethod.GET })
+  public ModelMap addAttachment(HttpServletRequest request, HttpServletResponse response) throws CmrException {
+    ProcessResultModel result = new ProcessResultModel();
+    try {
+      boolean isMultipart = ServletFileUpload.isMultipartContent(request);
+      if (isMultipart) {
+        // add attachment here
+        service.addAttachment(request);
+        result.setMessage(MessageUtil.getMessage(MessageUtil.INFO_ATTACHMENT_ADDED));
+        result.setSuccess(true);
+      } else {
+        result.setSuccess(true);
+        result.setMessage("Invalid request");
+      }
+    } catch (Exception e) {
+      result.setSuccess(false);
+      result.setMessage(e.getMessage());
+    }
+    return wrapAsProcessResult(result);
+  }
+
   @RequestMapping(value = "/request/attachment", method = { RequestMethod.POST, RequestMethod.GET })
   public ModelMap processAttachment(HttpServletRequest request, HttpServletResponse response, AttachmentModel model) throws CmrException {
 

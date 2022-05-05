@@ -1034,4 +1034,4 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(lockIBMTabForDE, GEOHandler.DE);
   GEOHandler.addAfterConfig(resetVATValidationsForPayGo, GEOHandler.DE);
   GEOHandler.addAfterTemplateLoad(resetVATValidationsForPayGo, GEOHandler.DE);
-});
+  });

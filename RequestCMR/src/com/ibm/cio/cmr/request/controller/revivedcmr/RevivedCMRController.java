@@ -38,8 +38,7 @@ public class RevivedCMRController extends BaseController {
   @Autowired
   private RevivedCMRService service;
 
-  @RequestMapping(
-      value = "/revivedcmrs")
+  @RequestMapping(value = "/revivedcmrs")
   public ModelAndView showRevivedCMRsPage(HttpServletRequest request, HttpServletResponse response, RevivedCMRModel model) throws CmrException {
     ModelAndView mv = new ModelAndView("revivedcmrs", "revived", model);
 
@@ -54,11 +53,8 @@ public class RevivedCMRController extends BaseController {
     return mv;
   }
 
-  @SuppressWarnings("unchecked")
-  @RequestMapping(
-      value = "/revivedcmrs/process",
-      method = RequestMethod.POST)
-  public void process(HttpServletRequest request, HttpServletResponse response, RevivedCMRModel model) throws CmrException {
+  @RequestMapping(value = "/revivedcmrs/process", method = RequestMethod.POST)
+  public void process(HttpServletRequest request, HttpServletResponse response) throws CmrException {
     ParamContainer params = new ParamContainer();
     try {
       boolean isMultipart = ServletFileUpload.isMultipartContent(request);
