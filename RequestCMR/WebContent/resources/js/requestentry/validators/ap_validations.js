@@ -3921,8 +3921,8 @@ function validateCustNameForInternal() {
               custNm = custNm.toString().toUpperCase();
               console.log("validateCustNameForInternal Customer name value is " + custNm);
             }
-            var result = custNm.indexOf("IBM");
-            if (result == -1){
+            var result = custNm.startsWith("IBM");
+            if (!result){
               return new ValidationResult(null, false, "Customer Name should start with 'IBM' for Internal Sub-scenario.");
             } else {
               return new ValidationResult(null, true);
