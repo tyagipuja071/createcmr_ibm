@@ -44,6 +44,7 @@ import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
+import com.ibm.cio.cmr.request.util.geo.impl.USHandler;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDowntimes;
 import com.ibm.cio.cmr.request.util.mail.Email;
 import com.ibm.cio.cmr.request.util.mail.MessageType;
@@ -184,6 +185,28 @@ public class AutomationEngine {
     LOG.debug(" PayGo: " + payGoAddredited);
     int nonCompanyVerificationErrorCount = 0;
 
+    // CREATCMR-4872
+    boolean isUsTaxSkipToPcp = false;
+    // CREATCMR-5447
+    boolean isUsTaxSkipToPpn = false;
+    boolean requesterFromTaxTeam = false;
+    String strRequesterId = requestData.getAdmin().getRequesterId().toLowerCase();
+    List<String> TaxTeams = SystemParameters.getList("US.TAX_TEAM_HEAD");
+    for (String taxTeam : TaxTeams) {
+      if (strRequesterId.equals(taxTeam.trim().toLowerCase())) {
+        requesterFromTaxTeam = true;
+        break;
+      }
+    }
+
+    if ("897".equals(requestData.getData().getCmrIssuingCntry()) && "U".equals(requestData.getAdmin().getReqType())) {
+      // CREATCMR-5447
+      if (requesterFromTaxTeam) {
+        isUsTaxSkipToPcp = USHandler.getUSDataSkipToPCP(entityManager, requestData.getData());
+      } else {
+        isUsTaxSkipToPpn = USHandler.getUSDataSkipToPPN(entityManager, requestData.getData());
+      }
+    }
     for (AutomationElement<?> element : this.elements) {
       // determine if element is to be skipped
       boolean skipChecks = scenarioExceptions != null ? scenarioExceptions.isSkipChecks() : false;

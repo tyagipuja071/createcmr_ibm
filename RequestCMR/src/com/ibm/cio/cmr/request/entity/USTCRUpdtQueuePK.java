@@ -69,7 +69,6 @@ public class USTCRUpdtQueuePK extends BaseEntityPk implements Serializable {
     return hash;
   }
 
-  @Override
   protected boolean allKeysAssigned() {
     return !StringUtils.isEmpty(this.mandt) && this.seqNo > 0 && !StringUtils.isEmpty(this.tcrFileNm);
 

@@ -175,7 +175,24 @@ visibility: hidden !IMPORTANT;
       <%} %>
     </cmr:column>
   </cmr:row>
-
+  
+  <!-- // CREATCMR-5447 -->
+  <cmr:view forCountry="897">
+    <cmr:row addBackground="true" topPad="10">
+      <cmr:column span="1" width="220">
+        <p>
+          <cmr:label fieldId="dplCheck">
+            SCC: 
+          </cmr:label>
+          <div>
+            <span id="addressTabSccInfo"></span>
+          </div>
+        </p>
+      </cmr:column>
+    </cmr:row>
+  </cmr:view>
+  <!-- // CREATCMR-5447 -->
+  
   <c:if test="${fn:trim(reqentry.dplChkResult) == 'AF' || fn:trim(reqentry.dplChkResult) == 'SF'}">
     <cmr:row>
       <cmr:column span="1" width="220">
@@ -484,6 +501,7 @@ visibility: hidden !IMPORTANT;
         <cmr:view forGEO="LA">
         	<cmr:gridCol width="100px" field="vat" header="VAT#" />
         </cmr:view>
+     
         <!-- Change indicator -->
         <%if ("U".equals(reqentry.getReqType())){ %>
           <cmr:gridCol width="70px" field="updateInd" header="Change" >

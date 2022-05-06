@@ -278,6 +278,26 @@ public class RequestEntryModel extends BaseModel {
   private String legacyCurrencyCd;
   private String collectionCd;
   private String specialTaxCd;
+
+  private String taxExemptStatus2;
+  private String taxExemptStatus3;
+
+  public String getTaxExemptStatus2() {
+    return taxExemptStatus2;
+  }
+
+  public void setTaxExemptStatus2(String taxExemptStatus2) {
+    this.taxExemptStatus2 = taxExemptStatus2;
+  }
+
+  public String getTaxExemptStatus3() {
+    return taxExemptStatus3;
+  }
+
+  public void setTaxExemptStatus3(String taxExemptStatus3) {
+    this.taxExemptStatus3 = taxExemptStatus3;
+  }
+
   private String acAdminBo;
   private String engineeringBo;
   private String mktgResponsibilityCd;
@@ -431,7 +451,7 @@ public class RequestEntryModel extends BaseModel {
   // canada fields
   private String invoiceDistCd;
   private String cusInvoiceCopies;
-  private String taxPayerCustCd;
+  private String taxPayerCustCd;  
 
   private String sourceSystId;
 
