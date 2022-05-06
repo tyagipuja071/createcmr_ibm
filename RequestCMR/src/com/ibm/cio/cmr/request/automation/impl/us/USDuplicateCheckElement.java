@@ -475,7 +475,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
       for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
         String usRestrictTo = StringUtils.isNotBlank(cmrCheckRecord.getUsRestrictTo()) ? cmrCheckRecord.getUsRestrictTo() : "";
         String subIndustry = StringUtils.isNotBlank(cmrCheckRecord.getSubIndustryCd()) ? cmrCheckRecord.getSubIndustryCd() : "";
-        if (restrictTo.equals(usRestrictTo) && !subIndustry.startsWith("Y")) {
+        if (restrictTo != null && subIndustry != null && restrictTo.equals(usRestrictTo) && !subIndustry.startsWith("Y")) {
           cmrCheckMatchesTmp.add(cmrCheckRecord);
         }
       }
