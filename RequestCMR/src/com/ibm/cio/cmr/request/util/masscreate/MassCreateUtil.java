@@ -23,6 +23,7 @@ import com.ibm.cio.cmr.request.entity.MassCreatePK;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.MessageUtil;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 
 /**
  * Utility functions for mass create
@@ -41,7 +42,7 @@ public class MassCreateUtil {
    * @param file
    * @param entityManager
    */
-  public static void createMassCreateRecords(MassCreateFile file, EntityManager entityManager) {
+  public static void createMassCreateRecords(MassCreateFile file, EntityManager entityManager, String issuingCntry, String originalStatus) {
     LOG.info("Creating Mass Create records for parsed file..");
     for (MassCreateFileRow row : file.getRows()) {
       LOG.debug("Mass Create: ID " + file.getReqId() + " Iteration: " + file.getIterationId() + " Sequence: " + row.getSeqNo());
@@ -51,8 +52,11 @@ public class MassCreateUtil {
       mcPk.setIterationId(file.getIterationId());
       mcPk.setParReqId(file.getReqId());
       mc.setId(mcPk);
-
-      mc.setRowStatusCd(CmrConstants.MASS_CREATE_ROW_STATUS_READY);
+      if (("SVA".equals(originalStatus) || "SV2".equals(originalStatus)) && SystemLocation.UNITED_STATES.equals(issuingCntry)) {
+        mc.setRowStatusCd(CmrConstants.MASS_CREATE_ROW_STATUS_PASS);
+      }else{
+        mc.setRowStatusCd(CmrConstants.MASS_CREATE_ROW_STATUS_READY);        
+      }
 
       MassCreateData data = row.getData();
       if (!StringUtils.isBlank(data.getEnterprise()) || !StringUtils.isBlank(data.getAffiliate()) || !StringUtils.isBlank(data.getIccTaxClass())

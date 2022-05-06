@@ -305,6 +305,16 @@
     <put-attribute name="title" value="CreateCMR | List of SCC" />
     <put-attribute name="body" value="/resources/jsp/code/scclist.jsp" />
   </definition>
+
+  <definition name="bpintlist" extends="base">
+    <put-attribute name="title" value="CreateCMR | List of BPI" />
+    <put-attribute name="body" value="/resources/jsp/code/bpintlist.jsp" />
+  </definition>
+  <definition name="restrictlist" extends="base">
+    <put-attribute name="title" value="CreateCMR | List of RST" />
+    <put-attribute name="body" value="/resources/jsp/code/restrictlist.jsp" />
+  </definition>
+
   
   <definition name="cnae" extends="base">
     <put-attribute name="title" value="CreateCMR | BR CNAE Info" />
@@ -329,6 +339,15 @@
   <definition name="sccdetails" extends="base">
     <put-attribute name="title" value="CreateCMR | SCC Miantenance" />
     <put-attribute name="body" value="/resources/jsp/code/scc.jsp" />
+  </definition>
+  
+    <definition name="bpidetails" extends="base">
+    <put-attribute name="title" value="CreateCMR | BPI Miantenance" />
+    <put-attribute name="body" value="/resources/jsp/code/bpint.jsp" />
+  </definition>
+    <definition name="rstdetails" extends="base">
+    <put-attribute name="title" value="CreateCMR | RST Miantenance" />
+    <put-attribute name="body" value="/resources/jsp/code/restrict.jsp" />
   </definition>
 
   <definition name="roles" extends="base">
@@ -698,6 +717,46 @@
     <put-attribute name="body" value="/resources/jsp/legacy/attachlist.jsp" />
   </definition>
 
+  
+  <definition name="usbpmaster" extends="base">
+    <put-attribute name="title" value="CreateCMR | List of US Business Partner Master Data" />
+    <put-attribute name="body" value="/resources/jsp/code/usbpmasterlist.jsp" />
+  </definition>
+  
+  <definition name="usbpmasterform" extends="base">
+    <put-attribute name="title" value="CreateCMR | US Business Partner Master Maintenance" />
+    <put-attribute name="body" value="/resources/jsp/code/usbpmaster.jsp" />
+  </definition>
+  
+  <definition name="usibmbo" extends="base">
+    <put-attribute name="title" value="CreateCMR | List of US US IBM BO Data" />
+    <put-attribute name="body" value="/resources/jsp/code/usibmbolist.jsp" />
+  </definition>
+  
+  <definition name="usibmboform" extends="base">
+    <put-attribute name="title" value="CreateCMR | US IBM BO Maintenance" />
+    <put-attribute name="body" value="/resources/jsp/code/usibmbo.jsp" />
+  </definition>
+  
+  <definition name="usibmorg" extends="base">
+    <put-attribute name="title" value="CreateCMR | List of US IBM ORG Data" />
+    <put-attribute name="body" value="/resources/jsp/code/usibmorglist.jsp" />
+  </definition>
+  
+  <definition name="usibmorgform" extends="base">
+    <put-attribute name="title" value="CreateCMR | US IBM ORG Maintenance" />
+    <put-attribute name="body" value="/resources/jsp/code/usibmorg.jsp" />
+  </definition>
+  
+  <definition name="ustcrupdtqueue" extends="base">
+    <put-attribute name="title" value="CreateCMR | List of US TCR UPDT QUEUE Data" />
+    <put-attribute name="body" value="/resources/jsp/code/ustcrupdtqueuelist.jsp" />
+  </definition>
+
+  <definition name="ustcrupdtqueueform" extends="base">
+    <put-attribute name="title" value="CreateCMR | US TCR UPDT QUEUE Maintenance" />
+    <put-attribute name="body" value="/resources/jsp/code/ustcrupdtqueue.jsp" />
+  </definition>
   
    <!-- Single Reactivation End -->
 </tiles-definitions>

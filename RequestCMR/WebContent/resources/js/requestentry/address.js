@@ -707,7 +707,7 @@ function doAddToAddressList() {
             // show prompt only if the values are not the same
             cmr.showModal('stdcitynameModal');
           } else if (standardCity.standardCountyCd && standardCity.standardCountyCd != countyCd) {
-            FormManager.setValue('county', standardCity.standardCountyCd);
+            // FormManager.setValue('county', standardCity.standardCountyCd);
             actualAddToAddressList();
           } else {
             // we can save, everything fine
@@ -837,6 +837,12 @@ function refreshAddressAfterResult(result, skipCopy, skipHideModal) {
         }
       }
       CmrGrid.refresh('ADDRESS_GRID');
+
+      // CREATCMR-5447
+      if (FormManager.getActualValue('cmrIssuingCntry') == '897') {
+        window.location.reload();
+      }
+      // CREATCMR-5447
     }
   } else {
     dojo.query('#dialog_addEditAddressModal div.dijitDialogPaneContent')[0].scrollTo(0, 0);
@@ -2289,6 +2295,11 @@ function refreshAfterAddressRemove(result) {
     // }
   }
   // CREATCMR-2262
+  // CREATCMR-5447
+  if (FormManager.getActualValue('cmrIssuingCntry') == '897') {
+    resetSccInfo();
+  }
+  // CREATCMR-5447
 
 }
 
@@ -3024,3 +3035,69 @@ function resetAbbNmOnRemoveSelectedAddrNORDX() {
     return;
   }
 }
+// CREATCMR-5447
+function resetSccInfo() {
+
+  var landCntry = '';
+  var st = '';
+  var cnty = '';
+  var city = '';
+
+  if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+    for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+
+      record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+      type = record.addrType;
+
+      if (typeof (type) == 'object') {
+        type = type[0];
+      }
+
+      if (type == 'ZS01') {
+        landCntry = record.landCntry;
+        st = record.stateProv;
+        cnty = record.county;
+        city = record.city1.toString().toUpperCase();
+      }
+    }
+
+    var numeric = /^[0-9]*$/;
+
+    if (numeric.test(cnty)) {
+
+      var ret = cmr.query('US_CMR_SCC.GET_SCC_MULTIPLE_BY_LAND_CNTRY_ST_CITY', {
+        _qall : 'Y',
+        LAND_CNTRY : landCntry,
+        N_ST : st,
+        N_CITY : city
+      });
+
+      if (ret.length > 1) {
+        $("#addressTabSccInfo").html('');
+        $('#sccMultipleWarn').show();
+      }
+
+      var ret1 = cmr.query('US_CMR_SCC.GET_SCC_BY_LAND_CNTRY_ST_CNTY_CITY', {
+        LAND_CNTRY : landCntry,
+        N_ST : st,
+        C_CNTY : cnty,
+        N_CITY : city
+      });
+
+      var sccValue = '';
+
+      if (ret1 && ret1.ret1 && ret1.ret1 != '') {
+        sccValue = ret1.ret1;
+        $("#addressTabSccInfo").html(sccValue);
+      } else {
+        $('#sccWarn').show();
+      }
+
+    } else {
+      $('#sccWarn').show();
+    }
+  }
+
+}
+// CREATCMR-5447
+

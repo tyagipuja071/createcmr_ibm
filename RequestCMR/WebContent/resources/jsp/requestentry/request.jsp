@@ -312,7 +312,7 @@ div#cmr-info-box, div#cmr-error-box, div#cmr-validation-box {
     </c:if>
     <form:hidden path="covBgRetrievedInd" />
     <form:hidden path="rdcProcessingMsg" />
-    <cmr:view exceptForCountry="848,618,724,706">
+    <cmr:view exceptForCountry="848,618,724,706,897">
     	<form:hidden path="ordBlk" />
     </cmr:view>
     <cmr:view forGEO="LA">
@@ -369,7 +369,7 @@ div#cmr-info-box, div#cmr-error-box, div#cmr-validation-box {
       <form:hidden path="findDnbTs" />
     </c:if>
     
-    <cmr:view exceptForGEO="IERP,CND,CN,JP,SWISS,NORDX" exceptForCountry="706,618,862,780,866,754,644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889,838,620,642,675,677,680,752,762,767,768,772,805,808,823,832,849,850,865,729,755">
+    <cmr:view exceptForGEO="IERP,CND,CN,JP,SWISS,NORDX" exceptForCountry="706,618,862,780,866,754,644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889,838,620,642,675,677,680,752,762,767,768,772,805,808,823,832,849,850,865,729,755,897">
     <form:hidden path="custClass" />
     </cmr:view>
     
@@ -497,6 +497,32 @@ div#cmr-info-box, div#cmr-error-box, div#cmr-validation-box {
       </cmr:row>
     <%} %>
     </cmr:view>
+    <!-- CREATCMR-3298 US -->
+    <cmr:view forCountry="897">
+      <p></p>
+      <div id="sccWarn" style="display:none">
+      <cmr:row>
+        <cmr:column span="6">
+          <div class="embargo" >
+            <img src="${resourcesPath}/images/warn-icon.png" class="cmr-error-icon">
+            <cmr:note text="SCC(State / County / City) values unavailable." />
+          </div>
+        </cmr:column>
+      </cmr:row>
+      </div>
+      <div style="height: 5px"></div>
+      <div id="sccMultipleWarn" style="display:none">
+      <cmr:row>
+        <cmr:column span="6">
+          <div class="embargo" >
+            <img src="${resourcesPath}/images/warn-icon.png" class="cmr-error-icon">
+            <cmr:note text="multiple counties are mapped to the SCC(State / County / City)." />
+          </div>
+        </cmr:column>
+      </cmr:row>
+      </div>
+    </cmr:view>
+    <!-- CREATCMR-3298 US -->
     <cmr:view forGEO="AP">
     <%if ("Y".equals(reqentry.getGovType())){%>
       <cmr:row>

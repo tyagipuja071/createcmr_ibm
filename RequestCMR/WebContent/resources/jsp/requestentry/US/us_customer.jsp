@@ -147,6 +147,24 @@
     </cmr:column>
   </cmr:row>
   <cmr:row addBackground="true">
+    <cmr:column span="2" containerForField="CustClass">
+        <p>
+          <cmr:label fieldId="custClass">
+            <cmr:fieldLabel fieldId="CustClass" />:
+          </cmr:label>
+          <cmr:field fieldId="CustClass" id="custClass" path="custClass" tabId="MAIN_CUST_TAB" />
+        </p>
+    </cmr:column>
+    <cmr:column span="2" containerForField="EducAllowCd">
+        <p>
+          <cmr:label fieldId="educAllowCd">
+            <cmr:fieldLabel fieldId="EducAllowCd" />:
+          </cmr:label>
+          <cmr:field fieldId="EducAllowCd" id="educAllowCd" path="educAllowCd" tabId="MAIN_CUST_TAB" />
+        </p>
+    </cmr:column>
+  </cmr:row>
+  <cmr:row addBackground="true">
     <cmr:column span="2" containerForField="InternalDivision">
       <p>
         <label for="div"> <cmr:fieldLabel fieldId="InternalDivision" />: </label>
