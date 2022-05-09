@@ -758,9 +758,14 @@ public class USUtil extends AutomationUtil {
               // SKIP THESE FIELDS
               break;
             default:
-              // Set Negative check status for any other fields updated.
-              failedChecks.put(field, field + " updated.");
-              hasNegativeCheck = true;
+              boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
+              if ("BP Relation Type".equals(field) && payGoAddredited) {
+                // NOOP
+              } else {
+                // Set Negative check status for any other fields updated.
+                failedChecks.put(field, field + " updated.");
+                hasNegativeCheck = true;
+              }
               break;
             }
           }
