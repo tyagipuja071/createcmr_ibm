@@ -322,8 +322,12 @@ public class AutomationEngine {
 
     // check company verified info
     if (compInfoSrc != null && StringUtils.isNotBlank(compInfoSrc)) {
-      admin.setCompVerifiedIndc("Y");
-      admin.setCompInfoSrc(compInfoSrc);
+      if (!"N".equals(admin.getCompVerifiedIndc())) {
+        admin.setCompVerifiedIndc("Y");
+      }
+      if (!"S".equals(admin.getCompInfoSrc())) {
+        admin.setCompInfoSrc(compInfoSrc);
+      }
     }
     // check scenario verified info
     if (scenarioVerifiedIndc != null && StringUtils.isNotBlank(scenarioVerifiedIndc)) {
@@ -337,11 +341,21 @@ public class AutomationEngine {
             reqId, appUser);
       }
     } else {
-      if (systemError) {
+      if (systemError || "N".equalsIgnoreCase(admin.getCompVerifiedIndc())) {
         if (AutomationConst.STATUS_AUTOMATED_PROCESSING.equals(reqStatus)) {
           // change status to retry
-          createComment(entityManager, "A system error occurred during the processing. A retry will be attempted shortly.", reqId, appUser);
-          admin.setReqStatus(AutomationConst.STATUS_AUTOMATED_PROCESSING_RETRY);
+          if ("N".equalsIgnoreCase(admin.getCompVerifiedIndc())) {
+            if ("S".equalsIgnoreCase(admin.getCompInfoSrc())) {
+              createComment(entityManager, "Processing error encountered as SCC(State / County / City) values unavailable.", reqId, appUser);
+            } else {
+              createComment(entityManager, "Processing error encountered as data is not company verified.", reqId, appUser);
+            }
+            admin.setReqStatus("PPN");
+          } else {
+            createComment(entityManager, "A system error occurred during the processing. A retry will be attempted shortly.", reqId, appUser);
+            admin.setReqStatus(AutomationConst.STATUS_AUTOMATED_PROCESSING_RETRY);
+          }
+
         } else {
           String processingCenter = RequestUtils.getProcessingCenter(entityManager, data.getCmrIssuingCntry());
           // change status to awaiting processing
