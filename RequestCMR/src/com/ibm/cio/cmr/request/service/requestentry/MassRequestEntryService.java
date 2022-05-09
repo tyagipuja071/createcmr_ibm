@@ -2243,6 +2243,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     // CREATCMR-5447
     List<String> validTaxExemptStatus = Arrays.asList("A", "B", "M", "N", "O", "P", "Q", "R", "S", "T", "V", "Z", "X");
     // validate Sheets
+    List<String> errRowNo = new ArrayList<String>();
     if (dataSheet == null || cfgSheet == null) {
       log.error("Mass file does not contain valid sheet names.");
       throw new CmrException(MessageUtil.ERROR_MASS_FILE);
@@ -2313,6 +2314,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
 
               } else {
                 log.error(key + " value on row no. " + (cmrRow.getRowNum() + 1) + " cannot be update");
+                errRowNo.add(Integer.toString(cmrRow.getRowNum() + 1));
                 if (!StringUtils.isEmpty(errTxtVal)) {
                   errTxtVal = errTxtVal + ", row " + Integer.toString(cmrRow.getRowNum() + 1);
                 } else {
@@ -2333,10 +2335,13 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                 }
               } else {
                 log.error(key + " value on row no. " + (cmrRow.getRowNum() + 1) + "  cannot be update");
-                if (!StringUtils.isEmpty(errTxtVal)) {
-                  errTxtVal = errTxtVal + ", row " + Integer.toString(cmrRow.getRowNum() + 1);
-                } else {
-                  errTxtVal = Integer.toString(cmrRow.getRowNum() + 1);
+                if (!errRowNo.contains(Integer.toString(cmrRow.getRowNum() + 1))) {
+                  errRowNo.add(Integer.toString(cmrRow.getRowNum() + 1));
+                  if (!StringUtils.isEmpty(errTxtVal)) {
+                    errTxtVal = errTxtVal + ", row " + Integer.toString(cmrRow.getRowNum() + 1);
+                  } else {
+                    errTxtVal = Integer.toString(cmrRow.getRowNum() + 1);
+                  }
                 }
                 break;
               }
@@ -2345,10 +2350,13 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
             val = df.formatCellValue(cmrRow.getCell(ZI01_FLD.get(key) - 1));
             if (!StringUtils.isEmpty(val)) {
               log.error(key + " value on row no. " + (cmrRow.getRowNum() + 1) + "  cannot be update");
-              if (!StringUtils.isEmpty(errTxtVal)) {
-                errTxtVal = errTxtVal + ", row " + Integer.toString(cmrRow.getRowNum() + 1);
-              } else {
-                errTxtVal = Integer.toString(cmrRow.getRowNum() + 1);
+              if (!errRowNo.contains(Integer.toString(cmrRow.getRowNum() + 1))) {
+                errRowNo.add(Integer.toString(cmrRow.getRowNum() + 1));
+                if (!StringUtils.isEmpty(errTxtVal)) {
+                  errTxtVal = errTxtVal + ", row " + Integer.toString(cmrRow.getRowNum() + 1);
+                } else {
+                  errTxtVal = Integer.toString(cmrRow.getRowNum() + 1);
+                }
               }
               break;
             }
