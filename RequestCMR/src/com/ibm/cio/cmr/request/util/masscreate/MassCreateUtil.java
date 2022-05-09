@@ -42,6 +42,47 @@ public class MassCreateUtil {
    * @param file
    * @param entityManager
    */
+  public static void createMassCreateRecords(MassCreateFile file, EntityManager entityManager) {
+    LOG.info("Creating Mass Create records for parsed file..");
+    for (MassCreateFileRow row : file.getRows()) {
+      LOG.debug("Mass Create: ID " + file.getReqId() + " Iteration: " + file.getIterationId() + " Sequence: " + row.getSeqNo());
+      MassCreate mc = new MassCreate();
+      MassCreatePK mcPk = new MassCreatePK();
+      mcPk.setSeqNo(row.getSeqNo());
+      mcPk.setIterationId(file.getIterationId());
+      mcPk.setParReqId(file.getReqId());
+      mc.setId(mcPk);
+
+      mc.setRowStatusCd(CmrConstants.MASS_CREATE_ROW_STATUS_READY);
+
+      MassCreateData data = row.getData();
+      if (!StringUtils.isBlank(data.getEnterprise()) || !StringUtils.isBlank(data.getAffiliate()) || !StringUtils.isBlank(data.getIccTaxClass())
+          || !StringUtils.isBlank(data.getIccTaxExemptStatus()) || !StringUtils.isBlank(data.getNonIbmCompanyInd())) {
+        mc.setAutoUpdt(CmrConstants.YES_NO.Y.toString());
+      } else {
+        mc.setAutoUpdt(CmrConstants.YES_NO.N.toString());
+      }
+      entityManager.persist(mc);
+      entityManager.persist(data);
+      for (MassCreateAddr addr : row.getAddresses()) {
+        if (addr.isVirtual()) {
+          LOG.debug("Address " + addr.getId().getAddrType() + " is virtual. Will not create.");
+        } else {
+          entityManager.persist(addr);
+        }
+      }
+
+      entityManager.flush();
+    }
+  }
+
+  /**
+   * CReates MASS_CREATE, MASS_CREATE_DATA, and MASS_CREATE_ADDR records based
+   * on the file container
+   * 
+   * @param file
+   * @param entityManager
+   */
   public static void createMassCreateRecords(MassCreateFile file, EntityManager entityManager, String issuingCntry, String originalStatus) {
     LOG.info("Creating Mass Create records for parsed file..");
     for (MassCreateFileRow row : file.getRows()) {
@@ -54,8 +95,8 @@ public class MassCreateUtil {
       mc.setId(mcPk);
       if (("SVA".equals(originalStatus) || "SV2".equals(originalStatus)) && SystemLocation.UNITED_STATES.equals(issuingCntry)) {
         mc.setRowStatusCd(CmrConstants.MASS_CREATE_ROW_STATUS_PASS);
-      }else{
-        mc.setRowStatusCd(CmrConstants.MASS_CREATE_ROW_STATUS_READY);        
+      } else {
+        mc.setRowStatusCd(CmrConstants.MASS_CREATE_ROW_STATUS_READY);
       }
 
       MassCreateData data = row.getData();
