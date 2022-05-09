@@ -234,12 +234,27 @@ public class SCCController extends BaseController {
       sb.append("<td>" + sccModel.getnSt() + "</td>");
       sb.append("<td>" + sccModel.getnCnty() + "</td>");
       sb.append("<td>" + sccModel.getnCity() + "</td>");
-      sb.append("<td>" + StringUtils.leftPad("" + sccModel.getcZip(), 9, "0").substring(0, 5) + "</td>");
+
+      String newZipCode = "";
+      int newZipCodeLength = (sccModel.getcZip() + "").length();
+
+      if (newZipCodeLength < 5) {
+        newZipCode = StringUtils.leftPad("" + sccModel.getcZip(), 5, "0").substring(0, 5);
+      }
+
+      if (newZipCodeLength == 5) {
+        newZipCode = sccModel.getcZip() + "";
+      }
+
+      if (newZipCodeLength > 5 && newZipCodeLength <= 9) {
+        newZipCode = StringUtils.leftPad("" + sccModel.getcZip(), 9, "0").substring(0, 5);
+      }
+
+      sb.append("<td>" + newZipCode + "</td>");
       sb.append("</tr>");
       sb.append("</table>");
 
       mail.setMessage(sb.toString());
-
       mail.send(host);
     } catch (Exception e) {
       e.printStackTrace();

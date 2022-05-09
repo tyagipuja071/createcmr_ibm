@@ -15,16 +15,10 @@ import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.util.geo.us.USBPHandler;
 import com.ibm.cio.cmr.request.automation.util.geo.us.USDetailsContainer;
-import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
-import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
-import com.ibm.cmr.services.client.CmrServicesFactory;
-import com.ibm.cmr.services.client.QueryClient;
-import com.ibm.cmr.services.client.query.QueryRequest;
-import com.ibm.cmr.services.client.query.QueryResponse;
 
 /**
  * 
@@ -179,7 +173,7 @@ public class USBranchOffcMapping {
     default:
       if (USUtil.SC_BYMODEL.equals(data.getCustSubGrp())
           && !(USUtil.SC_FED_REGULAR.equals(scenario) || USUtil.SC_FED_POA.equals(scenario) || USUtil.SC_REST_OIO.equals(scenario))) {
-        USDetailsContainer usDetails = USUtil.determineUSCMRDetails(entityManager, admin.getModelCmrNo());
+        USDetailsContainer usDetails = USUtil.determineUSCMRDetails(entityManager, admin.getModelCmrNo(), requestData);
         if ("5AA".equalsIgnoreCase(usDetails.getPccArDept())) {
           calculatedPccArDept = "G8M";
         } else {
@@ -281,26 +275,35 @@ public class USBranchOffcMapping {
           calculatedMtkgArDept = "7NZ";
         }
       } else if ("Y".equals(admin.getPaygoProcessIndc())) {
-        calculatedMtkgArDept = PAYGO_MKT_ARBO;
+        calculatedMtkgArDept = PAYGO_SVC_ARBO;
       } else {
         if (data != null && StringUtils.isNotBlank(data.getEnterprise())) {
-          LOG.debug("Getting Marketing A/R BO with highest CMR count belonging to the enterprise=" + data.getEnterprise());
-          String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
-          String usSchema = SystemConfiguration.getValue("US_CMR_SCHEMA");
-          String sql = ExternalizedQuery.getSql("AUTO.GET_MKTG_AR_DEPT_USCMR", usSchema);
-          sql = StringUtils.replace(sql, ":ENTERPRISE", "'" + (StringUtils.isNotBlank(data.getEnterprise()) ? data.getEnterprise() : "") + "'");
-          String dbId = QueryClient.USCMR_APP_ID;
-
-          QueryRequest query = new QueryRequest();
-          query.setSql(sql);
-          query.setRows(1);
-          query.addField("I_CUST_OFF_3");
-
-          QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
-          QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
-          if (response.isSuccess() && response.getRecords() != null && response.getRecords().size() != 0) {
-            Map<String, Object> record = response.getRecords().get(0);
-            calculatedMtkgArDept = (String) record.get("I_CUST_OFF_3");
+          /*
+           * LOG.
+           * debug("Getting Marketing A/R BO with highest CMR count belonging to the enterprise="
+           * + data.getEnterprise()); String url =
+           * SystemConfiguration.getValue("CMR_SERVICES_URL"); String usSchema =
+           * SystemConfiguration.getValue("US_CMR_SCHEMA"); String sql =
+           * ExternalizedQuery.getSql("AUTO.GET_MKTG_AR_DEPT_USCMR", usSchema);
+           * sql = StringUtils.replace(sql, ":ENTERPRISE", "'" +
+           * (StringUtils.isNotBlank(data.getEnterprise()) ?
+           * data.getEnterprise() : "") + "'"); String dbId =
+           * QueryClient.USCMR_APP_ID;
+           * 
+           * QueryRequest query = new QueryRequest(); query.setSql(sql);
+           * query.setRows(1); query.addField("I_CUST_OFF_3");
+           * 
+           * QueryClient client =
+           * CmrServicesFactory.getInstance().createClient(url,
+           * QueryClient.class); QueryResponse response =
+           * client.executeAndWrap(dbId, query, QueryResponse.class); if
+           * (response.isSuccess() && response.getRecords() != null &&
+           * response.getRecords().size() != 0) { Map<String, Object> record =
+           * response.getRecords().get(0); calculatedMtkgArDept = (String)
+           * record.get("I_CUST_OFF_3"); }
+           */
+          if (StringUtils.isNotBlank(data.getMtkgArDept())) {
+            calculatedMtkgArDept = data.getMtkgArDept().trim();
           }
         }
         if (StringUtils.isBlank(calculatedMtkgArDept)) {

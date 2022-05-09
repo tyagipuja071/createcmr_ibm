@@ -531,6 +531,13 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
       addrSeq = nextSeq + "";
     }
 
+    if (SystemLocation.UNITED_STATES.equals(reqModel.getCmrIssuingCntry()) && "C".equals(reqModel.getReqType())) {
+      if ("ZS01".equals(addrPk.getAddrType())) {
+        addrSeq = "001";
+      } else if ("ZI01".equals(addrPk.getAddrType())) {
+        addrSeq = "002";
+      }
+    }
     LOG.debug("Assigning address sequence " + addrSeq);
     addrPk.setAddrSeq(addrSeq);
     addr.setId(addrPk);
