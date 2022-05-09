@@ -227,7 +227,7 @@ function afterConfigForUS() {
     FormManager.enable('clientTier');
   }
 
-  if (_pagemodel.reqType == 'U' && (role == 'Requester' || role == 'PROCESSOR')) {
+  if (_pagemodel.reqType == 'U' && (role == 'Requester' || role == 'Processor')) {
     FormManager.show('CustClass', 'custClass');
     FormManager.addValidator('custClass', Validators.REQUIRED, [ 'Classification Code' ], 'MAIN_CUST_TAB');
   } else {
