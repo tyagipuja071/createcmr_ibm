@@ -62,7 +62,6 @@ import com.ibm.cio.cmr.request.entity.CmrInternalTypes;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CompoundEntity;
 import com.ibm.cio.cmr.request.entity.Data;
-import com.ibm.cio.cmr.request.entity.Kna1;
 import com.ibm.cio.cmr.request.entity.MassUpdt;
 import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
 import com.ibm.cio.cmr.request.entity.MassUpdtAddrPK;
@@ -255,34 +254,6 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       }
     }
 
-    long reqId = model.getReqId();
-    Data data = getCurrentDataRecordById(entityManager, reqId);
-    Admin admin = getCurrentRecordById(entityManager, reqId);
-
-    if (admin != null && ("R".equals(admin.getReqType()) || "D".equals(admin.getReqType()) || "X".equals(admin.getReqType()))) {
-      PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("GET.MASS.UPDATE"));
-      query.setParameter("PAR_REQ_ID", reqId);
-      List<MassUpdt> reactDelElements = query.getResults(MassUpdt.class);
-
-      if (reactDelElements.size() > 1) {
-        data.setCmrNo(null);
-        data.setSitePartyId(null);
-        admin.setMainCustNm1(null);
-        updateEntity(data, entityManager);
-        updateEntity(admin, entityManager);
-      } else {
-        for (MassUpdt reactDelElement : reactDelElements) {
-          Kna1 kna1 = getMainCmrRecord(entityManager, data.getCmrIssuingCntry(), reactDelElement.getCmrNo());
-          if (kna1 != null) {
-            data.setCmrNo(kna1.getZzkvCusno());
-            data.setSitePartyId(kna1.getBran5());
-            admin.setMainCustNm1(kna1.getName1());
-            updateEntity(data, entityManager);
-            updateEntity(admin, entityManager);
-          }
-        }
-      }
-    }
   }
 
   private void performLDMassDplChecking(RequestEntryModel model, EntityManager entityManager, HttpServletRequest request, Admin admin)
@@ -6596,20 +6567,6 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     }
 
     return !isInvalidRow;
-  }
-
-  private Kna1 getMainCmrRecord(EntityManager entityManager, String issuingCntry, String cmrNo) {
-    String sql = ExternalizedQuery.getSql("QUERY.GET.CMR_BY_CNTRY_CUSNO_SAPR3");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
-    query.setParameter("CNTRY", issuingCntry);
-    query.setParameter("CMRNO", cmrNo);
-    for (Kna1 kna1 : query.getResults(Kna1.class)) {
-      if ("ZS01".equals(kna1.getKtokd())) {
-        return kna1;
-      }
-    }
-    return null;
   }
 
 }
