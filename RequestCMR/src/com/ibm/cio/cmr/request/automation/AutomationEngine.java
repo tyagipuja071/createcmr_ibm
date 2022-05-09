@@ -217,6 +217,11 @@ public class AutomationEngine {
       boolean skipVerification = scenarioExceptions != null && scenarioExceptions.isSkipCompanyVerification();
       skipVerification = skipVerification && (element instanceof CompanyVerifier);
 
+      // CREATCMR-4872
+      if (isUsTaxSkipToPcp) {
+        break;
+      }
+
       if (ProcessType.StandardProcess.equals(element.getProcessType())) {
         hasOverrideOrMatchingApplied = true;
       }
@@ -511,7 +516,17 @@ public class AutomationEngine {
           if (moveForPayGo) {
             pendingChecks.clear();
           }
-          if (processOnCompletion && (pendingChecks == null || pendingChecks.isEmpty())) {
+          // CREATCMR-4872
+          // if (processOnCompletion && (pendingChecks == null ||
+          // pendingChecks.isEmpty())) {
+          if (isUsTaxSkipToPpn) {
+            LOG.debug("Moving Request " + reqId + " to PPN");
+            String cmt = "A member outside tax team has updated the Tax fields.";
+            admin.setReqStatus("PPN");
+            createComment(entityManager, cmt, reqId, appUser);
+            createHistory(entityManager, admin, cmt, "PPN", "Automated Processing", reqId, appUser, processingCenter, null, false, null);
+            // CREATCMR-5447
+          } else if ((processOnCompletion && (pendingChecks == null || pendingChecks.isEmpty())) || (isUsTaxSkipToPcp)) {
             String country = data.getCmrIssuingCntry();
             if (LegacyDowntimes.isUp(country, SystemUtil.getActualTimestamp())) {
               // move to PCP
