@@ -6,6 +6,7 @@
 
 var _usSicmenHandler = null;
 var _usIsuHandler = null;
+var _usSicm = "";
 /**
  * Adds the validator for Invoice-to that only 3 address lines can be specified
  */
@@ -155,7 +156,6 @@ function addAddressRecordTypeValidator() {
 
 }
 
-
 function addCtcObsoleteValidator() {
   FormManager.addFormValidator((function() {
     return {
@@ -170,9 +170,9 @@ function addCtcObsoleteValidator() {
 
         var result = cmr.query('GET.DATA_RDC.CLIENT_TIER_REQID', qParams);
         if (result != null && result != '') {
-         oldCtc = result.ret1;
+          oldCtc = result.ret1;
         }
-        
+
         if (reqType == 'C'
             && (clientTier == "4" || clientTier == "6" || clientTier == "A" || clientTier == "M" || clientTier == "V" || clientTier == "Z"
                 || clientTier == "T" || clientTier == "S" || clientTier == "N" || clientTier == "C" || clientTier == "0")) {
@@ -191,7 +191,6 @@ function addCtcObsoleteValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
-
 /**
  * After configuration for US
  */
@@ -200,12 +199,17 @@ function afterConfigForUS() {
   var reqType = FormManager.getActualValue('reqType');
   var custGrp = FormManager.getActualValue('custGrp');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
+  _usSicm = FormManager.getActualValue('usSicmen');
+  if (_usSicm.length > 4) {
+    _usSicm = _usSicm.substring(0, 4);
+    FormManager.setValue('usSicmen', _usSicm);
+  }
   var role = null;
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
   }
-  
-  if (role == 'Requester' || role == 'Processor') {  
+
+  if (role == 'Requester' || role == 'Processor') {
     FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'Tax Class / Code 1' ], 'MAIN_CUST_TAB');
   }
 
@@ -216,10 +220,10 @@ function afterConfigForUS() {
   if (reqType == 'C' && role == 'Requester' && custGrp == '9' && custSubGrp == 'POA') {
     FormManager.enable('miscBillCd');
   }
-  
+
   if (reqType == 'C' && role == 'Requester' && custGrp == '1' && custSubGrp == 'ECOSYSTEM') {
     FormManager.setValue('isuCd', '34');
-    FormManager.setValue('clientTier','Y');
+    FormManager.setValue('clientTier', 'Y');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
   } else {
@@ -283,7 +287,7 @@ function afterConfigForUS() {
       } else {
         var currIsic = FormManager.getActualValue('isicCd');
         if (currIsic != '357X') {
-          FormManager.setValue('isicCd', sicmen);
+          FormManager.setValue('isicCd', _usSicm);
         }
       }
     });
@@ -293,8 +297,8 @@ function afterConfigForUS() {
   if (reqType == 'U') {
     FormManager.readOnly('custType');
   }
-	
-	if (_usIsuHandler == null && FormManager.getField('isuCd')) {
+
+  if (_usIsuHandler == null && FormManager.getField('isuCd')) {
     _usIsuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       setClientTierValuesUS();
     });
@@ -890,7 +894,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addCompanyEnterpriseValidation, [ SysLoc.USA ], null, true);
   GEOHandler.addAfterConfig(lockOrdBlk, [ SysLoc.USA ]);
   GEOHandler.registerValidator(orderBlockValidation, [ SysLoc.USA ], null, true);
-  
+
   // CREATCMR-3298
   GEOHandler.addAfterConfig(checkSCCValidate, [ SysLoc.USA ]);
   GEOHandler.registerValidator(sccWarningShowAndHide, [ SysLoc.USA ], null, false);
@@ -898,9 +902,9 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(hideKUKLA, [ SysLoc.USA ]);
   GEOHandler.registerValidator(addKuklaValidator, [ SysLoc.USA ], null, true);
   GEOHandler.registerValidator(addDivStreetCountValidator, [ SysLoc.USA ], null, true);
-  
-  GEOHandler.addAfterTemplateLoad(setClientTierValuesUS, [ SysLoc.USA ] );
-  GEOHandler.addAfterConfig(setClientTierValuesUS, [ SysLoc.USA ] );
+
+  GEOHandler.addAfterTemplateLoad(setClientTierValuesUS, [ SysLoc.USA ]);
+  GEOHandler.addAfterConfig(setClientTierValuesUS, [ SysLoc.USA ]);
   // CREATCMR-5447
   GEOHandler.registerValidator(TaxTeamUpdateDataValidation, [ SysLoc.USA ], null, true);
   GEOHandler.registerValidator(TaxTeamUpdateAddrValidation, [ SysLoc.USA ], null, true);
