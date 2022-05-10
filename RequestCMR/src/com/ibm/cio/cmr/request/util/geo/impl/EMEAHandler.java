@@ -4014,8 +4014,9 @@ public class EMEAHandler extends BaseSOFHandler {
           clientTier = validateColValFromCell(currCell);
         }
         if ((!("@").equals(collectionCd)) && (!StringUtils.isEmpty(collectionCd))) {
+          String colCdPattern = "^[0-9A-Z]+$";
           if (((collectionCd.length() == 2 && !collectionCd.chars().allMatch(Character::isDigit))
-              || (collectionCd.length() == 6 && !collectionCd.chars().allMatch(Character::isLetterOrDigit)))) {
+              || (collectionCd.length() == 6 && !collectionCd.matches(colCdPattern)))) {
             LOG.trace(
                 "Note that Collection code can be either exactly 2 characters (both digits) or exactly 6 characters (alphanumeric). Please fix and upload the template again.");
             error.addError((row.getRowNum() + 1), "Collection Code",
