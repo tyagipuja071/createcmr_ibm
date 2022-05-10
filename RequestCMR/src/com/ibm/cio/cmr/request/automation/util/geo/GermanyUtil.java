@@ -4,7 +4,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -37,7 +36,6 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.ConfigUtil;
 import com.ibm.cio.cmr.request.util.Person;
-import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.MatchingServiceClient;
@@ -106,6 +104,11 @@ public class GermanyUtil extends AutomationUtil {
     // required for BP Portal requests.");
     // skipAllChecks(engineData); // remove after BP is enabled
     // } else
+    if ("C".equals(requestData.getAdmin().getReqType())) {
+      // remove duplicates
+      removeDuplicateAddresses(entityManager, requestData, details);
+    }
+
     if (StringUtils.isNotBlank(scenario)) {
       switch (scenario) {
       case "PRIPE":
@@ -298,59 +301,57 @@ public class GermanyUtil extends AutomationUtil {
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {
     Data data = requestData.getData();
-    Addr zs01 = requestData.getAddress("ZS01");
-    Admin admin = requestData.getAdmin();
-    boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
-    String custNm1 = StringUtils.isNotBlank(zs01.getCustNm1()) ? zs01.getCustNm1().trim() : "";
-    String custNm2 = StringUtils.isNotBlank(zs01.getCustNm2()) ? zs01.getCustNm2().trim() : "";
-    String mainCustNm = (custNm1 + (StringUtils.isNotBlank(custNm2) ? " " + custNm2 : "")).toUpperCase();
-    String mainStreetAddress1 = (StringUtils.isNotBlank(zs01.getAddrTxt()) ? zs01.getAddrTxt() : "").trim().toUpperCase();
-    String mainCity = (StringUtils.isNotBlank(zs01.getCity1()) ? zs01.getCity1() : "").trim().toUpperCase();
-    String mainPostalCd = (StringUtils.isNotBlank(zs01.getPostCd()) ? zs01.getPostCd() : "").trim();
-    String mainExtWalletId = (StringUtils.isNotBlank(zs01.getExtWalletId()) ? zs01.getExtWalletId() : "").trim();
-    Iterator<Addr> it = requestData.getAddresses().iterator();
-    boolean removed = false;
-    details.append("Checking for duplicate address records - ").append("\n");
-    while (it.hasNext()) {
-      Addr addr = it.next();
-      if (!payGoAddredited) {
-        if (!"ZS01".equals(addr.getId().getAddrType())) {
-          removed = true;
-          String custNm = (addr.getCustNm1().trim() + (StringUtils.isNotBlank(addr.getCustNm2()) ? " " + addr.getCustNm2().trim() : ""))
-              .toUpperCase();
-		  String streetaddress = ((StringUtils.isNotBlank(addr.getAddrTxt()) ? addr.getAddrTxt().trim() : "")).toUpperCase();
-          if (custNm.equals(mainCustNm) && streetaddress.equals(mainStreetAddress1)
-              && addr.getCity1().trim().toUpperCase().equals(mainCity) && addr.getPostCd().trim().equals(mainPostalCd)) {
-            details.append("Removing duplicate address record: " + addr.getId().getAddrType() + " from the request.").append("\n");
-            Addr merged = entityManager.merge(addr);
-            if (merged != null) {
-              entityManager.remove(merged);
-            }
-            it.remove();
-          }
-        }
-      } else {
-        if (!"ZS01".equals(addr.getId().getAddrType())) {
-          removed = true;
-          String custNm = (addr.getCustNm1().trim() + (StringUtils.isNotBlank(addr.getCustNm2()) ? " " + addr.getCustNm2().trim() : ""))
-              .toUpperCase();
-          if (custNm.equals(mainCustNm) && addr.getAddrTxt().trim().toUpperCase().equals(mainStreetAddress1)
-              && addr.getCity1().trim().toUpperCase().equals(mainCity) && addr.getPostCd().trim().equals(mainPostalCd)
-              && zs01.getExtWalletId().trim().toUpperCase().equals(mainExtWalletId)) {
-            details.append("Removing duplicate address record: " + addr.getId().getAddrType() + " from the request.").append("\n");
-            Addr merged = entityManager.merge(addr);
-            if (merged != null) {
-              entityManager.remove(merged);
-            }
-            it.remove();
-          }
-        }
-      }
-    }
-
-    if (!removed) {
-      details.append("No duplicate address records found on the request.").append("\n");
-    }
+    /*
+     * Addr zs01 = requestData.getAddress("ZS01"); Admin admin =
+     * requestData.getAdmin(); boolean payGoAddredited =
+     * RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
+     * String custNm1 = StringUtils.isNotBlank(zs01.getCustNm1()) ?
+     * zs01.getCustNm1().trim() : ""; String custNm2 =
+     * StringUtils.isNotBlank(zs01.getCustNm2()) ? zs01.getCustNm2().trim() :
+     * ""; String mainCustNm = (custNm1 + (StringUtils.isNotBlank(custNm2) ? " "
+     * + custNm2 : "")).toUpperCase(); String mainStreetAddress1 =
+     * (StringUtils.isNotBlank(zs01.getAddrTxt()) ? zs01.getAddrTxt() :
+     * "").trim().toUpperCase(); String mainCity =
+     * (StringUtils.isNotBlank(zs01.getCity1()) ? zs01.getCity1() :
+     * "").trim().toUpperCase(); String mainPostalCd =
+     * (StringUtils.isNotBlank(zs01.getPostCd()) ? zs01.getPostCd() :
+     * "").trim(); String mainExtWalletId =
+     * (StringUtils.isNotBlank(zs01.getExtWalletId()) ? zs01.getExtWalletId() :
+     * "").trim(); Iterator<Addr> it = requestData.getAddresses().iterator();
+     * boolean removed = false;
+     * details.append("Checking for duplicate address records - ").append("\n");
+     * while (it.hasNext()) { Addr addr = it.next(); if (!payGoAddredited) { if
+     * (!"ZS01".equals(addr.getId().getAddrType())) { removed = true; String
+     * custNm = (addr.getCustNm1().trim() +
+     * (StringUtils.isNotBlank(addr.getCustNm2()) ? " " +
+     * addr.getCustNm2().trim() : "")) .toUpperCase(); String streetaddress =
+     * ((StringUtils.isNotBlank(addr.getAddrTxt()) ? addr.getAddrTxt().trim() :
+     * "")).toUpperCase(); if (custNm.equals(mainCustNm) &&
+     * streetaddress.equals(mainStreetAddress1) &&
+     * addr.getCity1().trim().toUpperCase().equals(mainCity) &&
+     * addr.getPostCd().trim().equals(mainPostalCd)) {
+     * details.append("Removing duplicate address record: " +
+     * addr.getId().getAddrType() + " from the request.").append("\n"); Addr
+     * merged = entityManager.merge(addr); if (merged != null) {
+     * entityManager.remove(merged); } it.remove(); } } } else { if
+     * (!"ZS01".equals(addr.getId().getAddrType())) { removed = true; String
+     * custNm = (addr.getCustNm1().trim() +
+     * (StringUtils.isNotBlank(addr.getCustNm2()) ? " " +
+     * addr.getCustNm2().trim() : "")) .toUpperCase(); if
+     * (custNm.equals(mainCustNm) &&
+     * addr.getAddrTxt().trim().toUpperCase().equals(mainStreetAddress1) &&
+     * addr.getCity1().trim().toUpperCase().equals(mainCity) &&
+     * addr.getPostCd().trim().equals(mainPostalCd) &&
+     * zs01.getExtWalletId().trim().toUpperCase().equals(mainExtWalletId)) {
+     * details.append("Removing duplicate address record: " +
+     * addr.getId().getAddrType() + " from the request.").append("\n"); Addr
+     * merged = entityManager.merge(addr); if (merged != null) {
+     * entityManager.remove(merged); } it.remove(); } } } }
+     * 
+     * if (!removed) {
+     * details.append("No duplicate address records found on the request.").
+     * append("\n"); }
+     */
 
     // replace special characters from addresses.
     details.append("Replacing German language characters from address fields if any.").append("\n");
