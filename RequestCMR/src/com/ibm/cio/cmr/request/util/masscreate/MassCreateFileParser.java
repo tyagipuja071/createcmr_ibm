@@ -13,6 +13,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.apache.poi.openxml4j.util.ZipSecureFile;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.IndexedColors;
@@ -83,6 +84,7 @@ public class MassCreateFileParser {
   public ValidationResult checkFile(InputStream fileStream, boolean close) throws IOException {
     try {
       LOG.debug("Validating input mass create file..");
+      ZipSecureFile.setMinInflateRatio(0);
       XSSFWorkbook book = new XSSFWorkbook(fileStream);
       try {
 
@@ -159,9 +161,9 @@ public class MassCreateFileParser {
    * @return
    * @throws Exception
    */
-  @SuppressWarnings("deprecation")
   public MassCreateFile parse(InputStream fileStream, long reqId, int iterationId, boolean close) throws Exception {
     MassCreateFile massCreateFile = new MassCreateFile(reqId, iterationId);
+    ZipSecureFile.setMinInflateRatio(0);
     XSSFWorkbook book = new XSSFWorkbook(fileStream);
     try {
       massCreateFile.setValidationResult(validateFile(book));
@@ -271,6 +273,7 @@ public class MassCreateFileParser {
    */
   public void writeToFile(MassCreateFile massCreateFile, InputStream sourceStream, OutputStream targetStream, boolean cmrNosOnly) throws IOException {
     LOG.debug("Writing data to outputstream...");
+    ZipSecureFile.setMinInflateRatio(0);
     XSSFWorkbook book = new XSSFWorkbook(sourceStream);
     XSSFSheet sheet = book.getSheet(DATA_SHEET_NAME);
     Map<Integer, String> columnMap = massCreateFile.getColumnMap();
@@ -359,6 +362,7 @@ public class MassCreateFileParser {
       throws Exception {
     LOG.debug("Copying rows with errors to target stream...");
     try (FileInputStream fis = new FileInputStream(fileName)) {
+      ZipSecureFile.setMinInflateRatio(0);
       XSSFWorkbook book = new XSSFWorkbook(fis);
       XSSFSheet sheet = book.getSheet(DATA_SHEET_NAME);
       XSSFRow xlsRow = null;
