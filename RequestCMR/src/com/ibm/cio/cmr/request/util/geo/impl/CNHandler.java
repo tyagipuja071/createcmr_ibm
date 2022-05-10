@@ -311,7 +311,8 @@ public class CNHandler extends GEOHandler {
             || !(data.getCustSubGrp().equals("INTER") || data.getCustSubGrp().equals("BUSPR") || data.getCustSubGrp().equals("PRIV")))
         && StringUtils.isBlank(data.getIsicCd()) && StringUtils.isNotBlank(data.getBusnType())) {
       getIsicByDNB(entityManager, data);
-    } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && (data.getCapInd() == null || data.getCapInd().equals("N"))) {
+    } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && (data.getCapInd() == null || data.getCapInd().equals("N"))
+        && !isBPUser(data)) {
       getIsicByDNB(entityManager, data);
     }
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())
@@ -348,6 +349,45 @@ public class CNHandler extends GEOHandler {
     }
     entityManager.flush();
 
+  }
+
+  // existing CMR and linked to CEID
+  // 1. Search term = ‘08036’, please do not define it as BP CMR.
+  // 2. Search term = ‘04182’, please define it as BP CMR.
+  // 3. Search term in invalid value (‘00000’,’000000’,BLANK Value, Non numeric
+  // (wording)) and the CMR prefix start with ‘1’ or ‘2’, please define it as BP
+  // CMR
+  // existing CMR but do not linked to CEID
+  // 1. Search term ≠ ‘04182’, please do not define it as BP CMR.
+  // 2. Search term in invalid value (‘00000’,’000000’,BLANK Value, Non numeric
+  // (wording)) and the CMR prefix start with ‘1’ or ‘2’, please define it as BP
+  // CMR
+  // 3. Search term = ‘04182’, please define it as BP CMR.
+  private boolean isBPUser(Data data) {
+    if (StringUtils.isNotBlank(data.getPpsceid())) {
+      if ("08036".equals(data.getSearchTerm())) {
+        return false;
+      }
+      if ("04182".equals(data.getSearchTerm())) {
+        return true;
+      } else if ((StringUtils.isBlank(data.getSearchTerm()) || "00000".equals(data.getSearchTerm()) || "000000".equals(data.getSearchTerm())
+          || data.getSearchTerm().matches("[^0-9]+")) && data.getCmrNo() != null
+          && (data.getCmrNo().startsWith("1") || data.getCmrNo().startsWith("2"))) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      if ((StringUtils.isBlank(data.getSearchTerm()) || "00000".equals(data.getSearchTerm()) || "000000".equals(data.getSearchTerm())
+          || data.getSearchTerm().matches("[^0-9]+")) && data.getCmrNo() != null
+          && (data.getCmrNo().startsWith("1") || data.getCmrNo().startsWith("2"))) {
+        return true;
+      } else if ("04182".equals(data.getSearchTerm())) {
+        return true;
+      } else {
+        return false;
+      }
+    }
   }
 
   private void getGBGIdByGBGservice(EntityManager entityManager, Admin admin, Data data, Addr currentAddress, String dunsNo, boolean flag)
