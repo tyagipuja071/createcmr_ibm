@@ -635,7 +635,7 @@ public class BeLuxUtil extends AutomationUtil {
    * @return
    */
   private String getSORTLfromCoverage(EntityManager entityManager, String coverage, String gbgCntry) {
-    String sortl = "";
+    List<String> sortlList = null;
     try {
       LOG.debug("Computing SORTL for Coverage " + coverage);
       String gbgCntryCd = gbgCntry.equalsIgnoreCase("Belgium") ? "BE" : "LU";
@@ -647,12 +647,16 @@ public class BeLuxUtil extends AutomationUtil {
       query.setParameter("LAND1", gbgCntryCd);
       query.setParameter("KONZS", konzs);
       query.setForReadOnly(true);
-      sortl = query.getSingleResult(String.class);
+      sortlList = query.getResults(20, String.class);
     } catch (Exception e) {
       LOG.debug("Error while computing SORTL for Coverage " + coverage + " from RDc query.");
     }
-    if (sortl != null && !StringUtils.isBlank(sortl)) {
-      return sortl;
+    if (sortlList != null) {
+      for (String sortl : sortlList) {
+        if (StringUtils.isNotBlank(sortl) && sortl.length() == 6) {
+          return sortl;
+        }
+      }
     }
     return null;
   }
