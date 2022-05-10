@@ -147,8 +147,8 @@ public class QuickSearchController extends BaseController {
   public @ResponseBody ModelMap getUpdate(@RequestBody CompanyRecordModel company, @Context HttpServletRequest request) throws Exception {
     ModelMap map = new ModelMap();
     AppUser user = new AppUser();
-    user.setIntranetId("CREATECMR");
-    user.setBluePagesName("CREATECMR");
+    user.setIntranetId("CreateCMR");
+    user.setBluePagesName("CreateCMR");
     user.setDefaultLineOfBusn("XCRM");
     user.setDefaultRequestRsn("OTH");
     DummyServletRequest dummyReq = new DummyServletRequest();

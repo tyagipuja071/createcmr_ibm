@@ -430,6 +430,8 @@ public class USHandler extends GEOHandler {
         sql = StringUtils.replace(sql, ":ADDR_TYPE", "1");
       } else if (CmrConstants.ADDR_TYPE.ZI01.toString().equals(address.getId().getAddrType())) {
         sql = StringUtils.replace(sql, ":ADDR_TYPE", "3");
+      } else {
+        sql = StringUtils.replace(sql, ":ADDR_TYPE", "X");
       }
       query.setSql(sql);
 
