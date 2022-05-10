@@ -90,10 +90,15 @@
     enableYourActionsBar();
     <%if (null != reqentry.getCmrIssuingCntry() && ("852".equals(reqentry.getCmrIssuingCntry()) || "720".equals(reqentry.getCmrIssuingCntry()) || "738".equals(reqentry.getCmrIssuingCntry()) || "736".equals(reqentry.getCmrIssuingCntry()) || "646".equals(reqentry.getCmrIssuingCntry()) || "714".equals(reqentry.getCmrIssuingCntry()))) {%>
     getChecklistStatus();
-    <%}%>
-     <%if (fromQs && "C".equals(reqentry.getReqType()) && !"758".equals(reqentry.getCmrIssuingCntry())){%>
+    <%}%>    
+    <%if (fromQs && "C".equals(reqentry.getReqType())){ %>
+    // && (!"758".equals(reqentry.getCmrIssuingCntry())
+    var cmrIssuingCntry = '<%= reqentry.getCmrIssuingCntry() %>';
+    var cmrIssuingCntryArray = [ '758', '897' ];
+    if (!cmrIssuingCntryArray.includes(cmrIssuingCntry)) {
       cmr.showProgress('Check and verify address created.<br>Please wait while the system opens the address...');
       window.setTimeout('forceAddressValidationFromQS()', 1000);
+    }
     <%}%>
   });
   
