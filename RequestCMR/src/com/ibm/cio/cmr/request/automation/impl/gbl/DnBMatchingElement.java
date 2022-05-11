@@ -125,7 +125,8 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
             result.setDetails("No high quality matches with D&B records. Please import from D&B search.");
           } else if (payGoAddredited) {
             LOG.debug("DnB Matching skipped for PayGo.");
-            result.setOnError(false);
+            
+            result.setOnError(false); 
             result.setResults("DnB Matching skipped for PayGo.");
             result.setDetails("DnB Matching skipped for PayGo.");
           }
