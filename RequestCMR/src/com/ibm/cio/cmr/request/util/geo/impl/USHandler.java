@@ -640,6 +640,14 @@ public class USHandler extends GEOHandler {
       address.setPostCd(postCd);
     }
     address.setAddrTxt2(cmr.getCmrStreetAddressCont());
+    // CREATCMR-5830
+    if (StringUtils.isNotBlank(address.getDivn())) {
+      address.setAddrTxt2(null);
+    } else {
+      address.setAddrTxt2(cmr.getCmrStreetAddressCont());
+    }
+    // CREATCMR-5830
+
   }
 
   @Override
