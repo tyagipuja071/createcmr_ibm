@@ -191,6 +191,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
             }
 
           }
+          
           Boolean processDnbFlag = false;
           // assess the matches here
           if (perfectMatch != null) {
