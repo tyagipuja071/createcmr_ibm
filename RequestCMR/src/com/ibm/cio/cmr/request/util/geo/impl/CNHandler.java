@@ -2347,10 +2347,24 @@ public class CNHandler extends GEOHandler {
           if (intlAddr != null) {
             if (StringUtils.isBlank(intlAddr.getIntlCustNm1())) {
               intlAddr.setIntlCustNm1("*");
-
-              entityManager.merge(intlAddr);
-              entityManager.flush();
             }
+            entityManager.merge(intlAddr);
+            entityManager.flush();
+          } else {
+            // TODO
+            // creteIntlAddr();
+          }
+        } else if ("CROSS".equals(data.getCustSubGrp())) {
+          IntlAddr intlAddr = handler.getIntlAddrById(addr, entityManager);
+          if (intlAddr != null) {
+            if (StringUtils.isBlank(intlAddr.getIntlCustNm1())) {
+              intlAddr.setIntlCustNm1("*");
+            }
+            if (StringUtils.isBlank(intlAddr.getCity1())) {
+              intlAddr.setCity1("*");
+            }
+            entityManager.merge(intlAddr);
+            entityManager.flush();
           } else {
             // TODO
             // creteIntlAddr();
