@@ -56,6 +56,8 @@ public class CompanyRecordModel implements Comparable<CompanyRecordModel> {
 
   private String cied;
 
+  private long overrideReqId;
+
   @Override
   public int compareTo(CompanyRecordModel o) {
     if (o == null) {
@@ -361,5 +363,13 @@ public class CompanyRecordModel implements Comparable<CompanyRecordModel> {
 
   public void setCied(String cied) {
     this.cied = cied;
+  }
+
+  public long getOverrideReqId() {
+    return overrideReqId;
+  }
+
+  public void setOverrideReqId(long overrideReqId) {
+    this.overrideReqId = overrideReqId;
   }
 }
