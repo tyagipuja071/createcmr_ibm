@@ -1089,6 +1089,7 @@ public class IERPProcessService extends BaseBatchService {
     boolean isSeqNoRequired = false;
     boolean handleTempReact = false;
     boolean processTempReact = false;
+    boolean addrUpdateFlag = false;
     if (!CmrConstants.DE_CND_ISSUING_COUNTRY_VAL.contains(data.getCmrIssuingCntry()) && !CNHandler.isCNIssuingCountry(data.getCmrIssuingCntry())) {
       isSeqNoRequired = true;
       handleTempReact = true;
@@ -1127,6 +1128,7 @@ public class IERPProcessService extends BaseBatchService {
           }
 
           if (isAddrUpdated) {
+            addrUpdateFlag = true;
             response = sendAddrForProcessing(addr, request, responses, isIndexNotUpdated, siteIds, em, isSeqNoRequired);
             respStatuses.add(response.getStatus());
           } else {
@@ -1158,6 +1160,14 @@ public class IERPProcessService extends BaseBatchService {
 
       if ((isDataUpdated && (notProcessed != null && notProcessed.size() > 0)) || processTempReact) {
         LOG.debug("Processing CMR Data changes to " + notProcessed.size() + " addresses of CMR# " + data.getCmrNo());
+        for (Addr addr : notProcessed) {
+          response = sendAddrForProcessing(addr, request, responses, isIndexNotUpdated, siteIds, em, isSeqNoRequired);
+          respStatuses.add(response.getStatus());
+        }
+      }
+
+      if (!isDataUpdated && !addrUpdateFlag && notProcessed != null && notProcessed.size() > 0
+          && SystemLocation.GERMANY.equals(data.getCmrIssuingCntry())) {
         for (Addr addr : notProcessed) {
           response = sendAddrForProcessing(addr, request, responses, isIndexNotUpdated, siteIds, em, isSeqNoRequired);
           respStatuses.add(response.getStatus());
