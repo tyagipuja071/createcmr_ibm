@@ -1,5 +1,7 @@
 <%@page import="com.ibm.cio.cmr.request.model.BaseModel"%>
 <%@page import="com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel"%>
+<%@page import="com.ibm.cio.cmr.request.util.BluePagesHelper" %>
+<%@page import="com.ibm.cio.cmr.request.user.AppUser"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles"%>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
@@ -14,6 +16,10 @@
     readOnly = false;
   }
   boolean newEntry = BaseModel.STATE_NEW == reqentry.getState();
+    // CREATCMR-5447
+  boolean isTaxTeamFlg = true;
+  AppUser user = AppUser.getUser(request);
+  isTaxTeamFlg = BluePagesHelper.isUserInUSTAXBlueGroup(user.getIntranetId());
 %>
 
 <cmr:view forCountry="897">
@@ -199,5 +205,6 @@
         <cmr:field path="loc" id="loc" fieldId="InternalLocation" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
+    <input type="hidden" id="isTaxTeamFlg" name="isTaxTeamFlg" value="<%= isTaxTeamFlg %>" />
   </cmr:row>
 </cmr:view>

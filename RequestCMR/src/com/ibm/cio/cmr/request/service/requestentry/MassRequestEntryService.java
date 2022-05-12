@@ -102,7 +102,6 @@ import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
-import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.at.ATUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
@@ -1912,13 +1911,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                   // CREATCMR-4872
                   boolean requesterFromTaxTeam = false;
                   String strRequesterId = admin.getRequesterId().toLowerCase();
-                  List<String> TaxTeams = SystemParameters.getList("US.TAX_TEAM_HEAD");
-                  for (String taxTeam : TaxTeams) {
-                    if (strRequesterId.equals(taxTeam.trim().toLowerCase())) {
-                      requesterFromTaxTeam = true;
-                      break;
-                    }
-                  }
+                  requesterFromTaxTeam = BluePagesHelper.isUserInUSTAXBlueGroup(strRequesterId);
                   if (requesterFromTaxTeam) {
                     if (!validateMassUpdateUSTaxTeam(item.getInputStream())) {
                       throw new CmrException(MessageUtil.ERROR_MASS_FILE);
