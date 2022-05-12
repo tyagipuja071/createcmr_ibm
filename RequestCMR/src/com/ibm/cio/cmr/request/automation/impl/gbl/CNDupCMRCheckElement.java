@@ -124,6 +124,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
       String kukla = null;
 
       boolean shouldGoToCMDE = false;
+      boolean skipAndPpn = false;
 
       if (data.getCustSubGrp() != null) {
         switch (data.getCustSubGrp()) {
@@ -145,6 +146,15 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
           // f) check China API with single byte string value
           // g) check findcmr twice with single byte and double byte value, if
           // they are not equals
+
+          // CREATCMR-5461
+          // check if should skip CNDupCMRCheck and set req status PPN
+          skipAndPpn = getSkipAndPpnInd(entityManager, data);
+          if (skipAndPpn) {
+            log.debug("skip CN Dup CMR Check for req " + data.getId().getReqId());
+            doSkipAndPpn(result, engineData);
+            return result;
+          }
 
           iAddr = handler.getIntlAddrById(soldTo, entityManager);
           if (iAddr != null) {
@@ -599,6 +609,15 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
           // g) when findcmr result's Search Term is "00000" and CEID is empty,
           // if Kukla (classification code) in ('81','85') - not dup
 
+          // CREATCMR-5461
+          // check if should skip CNDupCMRCheck and set req status PPN
+          skipAndPpn = getSkipAndPpnInd(entityManager, data);
+          if (skipAndPpn) {
+            log.debug("skip CN Dup CMR Check for req " + data.getId().getReqId());
+            doSkipAndPpn(result, engineData);
+            return result;
+          }
+
           iAddr = handler.getIntlAddrById(soldTo, entityManager);
           if (iAddr != null) {
 
@@ -1022,6 +1041,15 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
           // d) check China API with single byte string value
           // e) check findcmr twice with single byte and double byte value, if
           // they are not equals
+
+          // CREATCMR-5461
+          // check if should skip CNDupCMRCheck and set req status PPN
+          skipAndPpn = getSkipAndPpnInd(entityManager, data);
+          if (skipAndPpn) {
+            log.debug("skip CN Dup CMR Check for req " + data.getId().getReqId());
+            doSkipAndPpn(result, engineData);
+            return result;
+          }
 
           iAddr = handler.getIntlAddrById(soldTo, entityManager);
           if (iAddr != null) {
@@ -1496,6 +1524,15 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
           // they are not equals
           // h) fastpass - TBD
           // i) scenario ESA would not reject dupliate cmr, just send to CMDE.
+
+          // CREATCMR-5461
+          // check if should skip CNDupCMRCheck and set req status PPN
+          skipAndPpn = getSkipAndPpnInd(entityManager, data);
+          if (skipAndPpn) {
+            log.debug("skip CN Dup CMR Check for req " + data.getId().getReqId());
+            doSkipAndPpn(result, engineData);
+            return result;
+          }
 
           iAddr = handler.getIntlAddrById(soldTo, entityManager);
           // searchModelFindCMR.setCmrNo(cmrNo);
@@ -2108,6 +2145,15 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
           // duplicate request.
           // b) if no Chinese information, then rely on English Name
 
+          // CREATCMR-5461
+          // check if should skip CNDupCMRCheck and set req status PPN
+          skipAndPpn = getSkipAndPpnInd(entityManager, data);
+          if (skipAndPpn) {
+            log.debug("skip CN Dup CMR Check for req " + data.getId().getReqId());
+            doSkipAndPpn(result, engineData);
+            return result;
+          }
+
           boolean ifAQSTNHasCN = true;
           iAddr = handler.getIntlAddrById(soldTo, entityManager);
           if (iAddr != null) {
@@ -2388,6 +2434,15 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
           // logic:
           // a) if the return result has same Chinese name, then it is a
           // duplicate request
+
+          // CREATCMR-5461
+          // check if should skip CNDupCMRCheck and set req status PPN
+          skipAndPpn = getSkipAndPpnInd(entityManager, data);
+          if (skipAndPpn) {
+            log.debug("skip CN Dup CMR Check for req " + data.getId().getReqId());
+            doSkipAndPpn(result, engineData);
+            return result;
+          }
 
           iAddr = handler.getIntlAddrById(soldTo, entityManager);
           if (iAddr != null) {
@@ -3279,7 +3334,7 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
       params += "&streetAddress=" + street;
     }
     params += "&addressType=ZS01";
-    FindCMRResultModel results = SystemUtil.findCMRs(cmrNo, issuingCntry, 10, null, params);
+    FindCMRResultModel results = SystemUtil.findCMRs(cmrNo, issuingCntry, 50, null, params);
     return results;
   }
 
@@ -3613,6 +3668,37 @@ public class CNDupCMRCheckElement extends DuplicateCheckElement {
       }
     }
     return result;
+  }
+
+  public static boolean getSkipAndPpnInd(EntityManager entityManager, Data data) {
+    boolean result = false;
+    boolean hasCNSpecialAttach = checkCNSpecialAttach(entityManager, data.getId().getReqId());
+    if (hasCNSpecialAttach && "Y".equals(data.getVatExempt())) {
+      log.debug("VatExempt is selected. CN specific attachment is found. Should skip and set PPN for req " + data.getId().getReqId());
+      return true;
+    }
+    return result;
+  }
+
+  private static boolean checkCNSpecialAttach(EntityManager entityManager, long reqId) {
+    boolean result = false;
+    String sql = ExternalizedQuery.getSql("QUERY.CHECK_CN_API_ATTACHMENT");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("ID", reqId);
+    List<String> records = query.getResults(String.class);
+    if (records != null && records.size() > 0) {
+      result = true;
+      log.debug("found CN specific attachment for req " + reqId);
+    }
+    return result;
+  }
+
+  private void doSkipAndPpn(AutomationResult<MatchingOutput> result, AutomationEngineData engineData) {
+    result.setDetails("Skip CN Duplicate CMR Check and forword request to CMDE, due to VAT Exempt and CN Specific attachment.");
+    engineData.addPositiveCheckStatus("Skip CN Duplicate CMR Check and forword request to CMDE, due to VAT Exempt and CN Specific attachment.");
+    engineData.setSkipChecks();
+    result.setResults("Skip");
+    result.setOnError(false);
   }
 
 }
