@@ -32,8 +32,8 @@ public class AutoResMatchImportController extends BaseWindowController {
   @Autowired
   private MatchingRecordsService service;
 
-  @RequestMapping(value = "/auto/results/matches/import/{reqId}")
-  public ModelAndView showAutomationResults(@PathVariable("reqId") long reqId, HttpServletRequest request, HttpServletResponse response,
+  @RequestMapping(value = "/auto/results/matches/import/{reqId1}")
+  public ModelAndView showAutomationResults(@PathVariable("reqId1") long reqId, HttpServletRequest request, HttpServletResponse response,
       AutoResImportModel model) throws Exception {
     LOG.debug("Displaying results for Request " + reqId);
     return new ModelAndView("results_match_import");

@@ -9,7 +9,7 @@ import java.util.UUID;
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.stereotype.Component;
@@ -166,7 +166,7 @@ public class CmrClientService extends BaseSimpleService<Object> {
           dnbRecord.setCmrName1Plain(StringUtils.isNotBlank(dnbcompany.getCompanyName()) ? dnbcompany.getCompanyName() : "");
           dnbRecord.setCmrPostalCode(StringUtils.isNotBlank(dnbcompany.getPrimaryPostalCode()) ? dnbcompany.getPrimaryPostalCode() : "");
           dnbRecord.setCmrState(StringUtils.isNotBlank(dnbcompany.getPrimaryStateCode()) ? dnbcompany.getPrimaryStateCode() : "");
-          if("CN".equalsIgnoreCase(dnbcompany.getPrimaryCountry())){
+          if ("CN".equalsIgnoreCase(dnbcompany.getPrimaryCountry())) {
             dnbRecord.setCmrState(StringUtils.isNotBlank(dnbcompany.getPrimaryStateName()) ? dnbcompany.getPrimaryStateName() : "");
           }
           dnbRecord.setCmrStreet(StringUtils.isNotBlank(dnbcompany.getPrimaryAddress()) ? dnbcompany.getPrimaryAddress() : "");
@@ -287,9 +287,6 @@ public class CmrClientService extends BaseSimpleService<Object> {
       DecisionServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("CMR_SERVICES_URL"),
           DecisionServiceClient.class);
 
-      client.setUser(SystemConfiguration.getSystemProperty("cmrservices.user"));
-      client.setPassword(SystemConfiguration.getSystemProperty("cmrservices.password"));
-
       CoverageResponse responseObj = client.executeAndWrap(DecisionServiceClient.COVERAGE_APP_ID, request, CoverageResponse.class);
       if (responseObj.getCoverageOutputList() != null && responseObj.getCoverageOutputList().getCoverageOutput() != null
           && responseObj.getCoverageOutputList().getCoverageOutput().size() > 0) {
@@ -362,9 +359,6 @@ public class CmrClientService extends BaseSimpleService<Object> {
       DecisionServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("CMR_SERVICES_URL"),
           DecisionServiceClient.class);
 
-      client.setUser(SystemConfiguration.getSystemProperty("cmrservices.user"));
-      client.setPassword(SystemConfiguration.getSystemProperty("cmrservices.password"));
-
       BuyingGroupResponse responseObj = client.executeAndWrap(DecisionServiceClient.BUYING_GROUP_APP_ID, request, BuyingGroupResponse.class);
       if (responseObj.getBuyingGroupOutputList() != null && responseObj.getBuyingGroupOutputList().getBuyingGroupOutput() != null
           && responseObj.getBuyingGroupOutputList().getBuyingGroupOutput().size() > 0) {
@@ -405,9 +399,6 @@ public class CmrClientService extends BaseSimpleService<Object> {
       DecisionServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("CMR_SERVICES_URL"),
           DecisionServiceClient.class);
 
-      client.setUser(SystemConfiguration.getSystemProperty("cmrservices.user"));
-      client.setPassword(SystemConfiguration.getSystemProperty("cmrservices.password"));
-
       GlcResponse responseObj = client.executeAndWrap(DecisionServiceClient.GLC_APP_ID, request, GlcResponse.class);
       if (responseObj.getCoverageInputList() != null && responseObj.getCoverageInputList().getCoverageInput() != null
           && responseObj.getCoverageInputList().getCoverageInput().size() > 0) {
@@ -440,9 +431,6 @@ public class CmrClientService extends BaseSimpleService<Object> {
       duns.setCity(addr.getCity1());
       duns.setPostalCode(addr.getPostCd());
       duns.setStreetAddress(addr.getAddrTxt());
-
-      tgme.setUser(SystemConfiguration.getSystemProperty("cmrservices.user"));
-      tgme.setPassword(SystemConfiguration.getSystemProperty("cmrservices.password"));
 
       DunsResponse dunsResponse = tgme.executeAndWrap(TgmeClient.DUNS_APP_ID, duns, DunsResponse.class);
       if (dunsResponse.getStatus() == TgmeClient.STATUS_FAILED) {

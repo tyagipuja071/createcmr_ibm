@@ -12,8 +12,8 @@ import java.util.Map;
 
 import javax.persistence.EntityManager;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.log4j.Logger;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -426,16 +426,28 @@ public class USHandler extends GEOHandler {
       query.addField("POST_CD");
       sql = StringUtils.replace(sql, ":CMR_NO", "'" + cmrNo + "'");
 
+      boolean skipQuery = false;
+      // add skip query
       if (CmrConstants.ADDR_TYPE.ZS01.toString().equals(address.getId().getAddrType())) {
         sql = StringUtils.replace(sql, ":ADDR_TYPE", "1");
       } else if (CmrConstants.ADDR_TYPE.ZI01.toString().equals(address.getId().getAddrType())) {
         sql = StringUtils.replace(sql, ":ADDR_TYPE", "3");
+      } else {
+        skipQuery = true;
       }
       query.setSql(sql);
 
       QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
 
-      QueryResponse response = client.executeAndWrap(QueryClient.USCMR_APP_ID, query, QueryResponse.class);
+      QueryResponse response = null;
+
+      if (skipQuery) {
+        response = new QueryResponse();
+        response.setSuccess(false);
+      } else {
+        response = client.executeAndWrap(QueryClient.USCMR_APP_ID, query, QueryResponse.class);
+      }
+
       if (response.isSuccess() && response.getRecords() != null && response.getRecords().size() > 0) {
         Map<String, Object> record = response.getRecords().get(0);
         address.setDivn((String) record.get("T_ADDR_LINE_1"));

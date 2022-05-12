@@ -8,8 +8,8 @@ import java.io.IOException;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.TagSupport;
 
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * 
@@ -30,11 +30,11 @@ public class CheckListTag extends TagSupport {
     sb.append("<table class=\"checklist\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">\n");
     try {
       sb.append("  <tr>\n");
-      sb.append("    <th colspan=\"3\" class=\"header\">" + StringEscapeUtils.escapeHtml(this.title1) + "</th>\n");
+      sb.append("    <th colspan=\"3\" class=\"header\">" + StringEscapeUtils.escapeHtml4(this.title1) + "</th>\n");
       sb.append("  </tr>\n");
       if (!StringUtils.isBlank(this.title2)) {
         sb.append("  <tr>\n");
-        sb.append("    <th colspan=\"3\" class=\"header\">" + StringEscapeUtils.escapeHtml(this.title2) + "</th>\n");
+        sb.append("    <th colspan=\"3\" class=\"header\">" + StringEscapeUtils.escapeHtml4(this.title2) + "</th>\n");
         sb.append("  </tr>\n");
       }
       this.pageContext.getOut().write(sb.toString());

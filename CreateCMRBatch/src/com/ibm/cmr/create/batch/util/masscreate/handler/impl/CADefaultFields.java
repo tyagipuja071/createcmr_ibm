@@ -2,7 +2,7 @@ package com.ibm.cmr.create.batch.util.masscreate.handler.impl;
 
 import javax.persistence.EntityManager;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.ibm.cio.cmr.request.entity.MassCreateAddr;
 import com.ibm.cio.cmr.request.util.SystemLocation;

@@ -3,11 +3,11 @@
  */
 package com.ibm.cio.cmr.request.masschange.obj;
 
-import java.awt.Color;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -17,7 +17,7 @@ import java.util.UUID;
 import javax.persistence.EntityManager;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
@@ -25,6 +25,7 @@ import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.DefaultIndexedColorMap;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFColor;
@@ -43,7 +44,6 @@ import com.ibm.cio.cmr.request.util.at.ATUtil;
 import com.ibm.cio.cmr.request.util.geo.impl.FranceHandler;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
 import com.ibm.cio.cmr.request.util.swiss.SwissUtil;
-import com.ibm.math.BigDecimal;
 
 /**
  * Represents a template for mass update or create. This template is generated
@@ -165,7 +165,8 @@ public class MassChangeTemplate {
                 } else if ("34".equals(isuCd)) {
                   if (!"QY".contains(clientTier) || StringUtils.isBlank(clientTier)) {
                     LOG.trace("The row " + (row.getRowNum() + 1) + ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code.");
-                    error.addError((row.getRowNum() + 1), "Client Tier", ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code.<br>");
+                    error.addError((row.getRowNum() + 1), "Client Tier",
+                        ":Note that Client Tier should be 'Y' or 'Q' for the selected ISU code.<br>");
                   }
                 } else if ((StringUtils.isNotBlank(isuCd) && (StringUtils.isBlank(clientTier) || !"@QY".contains(clientTier)))
                     || (StringUtils.isNotBlank(clientTier) && !"@QY".contains(clientTier))) {
@@ -185,7 +186,7 @@ public class MassChangeTemplate {
                 String floor = "";
                 Cell cmrCell1 = row.getCell(7);
                 if (cmrCell1 != null) {
-                  switch (cmrCell1.getCellTypeEnum()) {
+                  switch (cmrCell1.getCellType()) {
                   case STRING:
                     dept = cmrCell1.getStringCellValue();
                     break;
@@ -201,7 +202,7 @@ public class MassChangeTemplate {
                 }
                 Cell cmrCell2 = row.getCell(8);
                 if (cmrCell2 != null) {
-                  switch (cmrCell2.getCellTypeEnum()) {
+                  switch (cmrCell2.getCellType()) {
                   case STRING:
                     floor = cmrCell2.getStringCellValue();
                     break;
@@ -217,7 +218,7 @@ public class MassChangeTemplate {
                 }
                 Cell cmrCell3 = row.getCell(9);
                 if (cmrCell3 != null) {
-                  switch (cmrCell3.getCellTypeEnum()) {
+                  switch (cmrCell3.getCellType()) {
                   case STRING:
                     building = cmrCell3.getStringCellValue();
                     break;
@@ -353,7 +354,7 @@ public class MassChangeTemplate {
                 Cell cmrCell1 = row.getCell(4);
                 if (cmrCell1 != null) {
                   String name3 = "";
-                  switch (cmrCell1.getCellTypeEnum()) {
+                  switch (cmrCell1.getCellType()) {
                   case STRING:
                     name3 = cmrCell1.getStringCellValue();
                     break;
@@ -487,7 +488,12 @@ public class MassChangeTemplate {
       XSSFCell cell = null;
       int errorColIndex = -1;
       XSSFCellStyle errorStyle = book.createCellStyle();
-      errorStyle.setFillForegroundColor(new XSSFColor(new Color(252, 228, 214)));
+      byte[] rgb = new byte[3];
+      rgb[0] = (byte) 252;
+      rgb[1] = (byte) 228;
+      rgb[2] = (byte) 214;
+      XSSFColor color = new XSSFColor(rgb, new DefaultIndexedColorMap());
+      errorStyle.setFillForegroundColor(color);
       errorStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
       errorStyle.setWrapText(true);
 
@@ -509,9 +515,9 @@ public class MassChangeTemplate {
             // determine the error column
             for (int colIndex = 0; colIndex < 50; colIndex++) {
               cell = row.getCell(colIndex);
-              if (cell == null || (cell.getCellTypeEnum() == CellType.STRING && StringUtils.isEmpty(cell.getStringCellValue()))
-                  || (cell.getCellTypeEnum() == CellType.NUMERIC && cell.getNumericCellValue() <= 0)
-                  || (cell.getCellTypeEnum() == CellType.STRING && "ERRORS".equalsIgnoreCase(cell.getStringCellValue()))) {
+              if (cell == null || (cell.getCellType() == CellType.STRING && StringUtils.isEmpty(cell.getStringCellValue()))
+                  || (cell.getCellType() == CellType.NUMERIC && cell.getNumericCellValue() <= 0)
+                  || (cell.getCellType() == CellType.STRING && "ERRORS".equalsIgnoreCase(cell.getStringCellValue()))) {
                 // found the error col
                 if (cell == null) {
                   cell = row.createCell(colIndex);
@@ -595,7 +601,7 @@ public class MassChangeTemplate {
   protected static String validateColValFromCell(XSSFCell cell) {
     String colVal = "";
     if (cell != null) {
-      switch (cell.getCellTypeEnum()) {
+      switch (cell.getCellType()) {
       case STRING:
         colVal = cell.getStringCellValue();
         break;

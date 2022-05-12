@@ -8,7 +8,7 @@ var _findCMRWin = null;
 var _findCMROK = false;
 var _findMode = null;
 var CNTRY_LIST_FOR_INVALID_CUSTOMERS = [ '838', '866', '754' ];
-
+var _findCmrServer = '';
 /**
  * Opens Find CMR search
  */
@@ -77,7 +77,7 @@ function waitForResult() {
     cmr.hideProgress();
     return;
   }
-  _findCMRWin.postMessage("cmrconnect", '*');
+  _findCMRWin.postMessage("cmrconnect", _findCmrServer);
   if (!_findCMROK) {
     window.setTimeout('waitForResult()', 2000);
   }
@@ -85,7 +85,7 @@ function waitForResult() {
 
 window.addEventListener("message", function(e) {
   // event listener for the Find CMR window
-  if (e.data && dojo.fromJson(e.data).src == 'cmrconnect') {
+  if (e.origin == _findCmrServer && e.data && dojo.fromJson(e.data).src == 'cmrconnect') {
     var result = dojo.fromJson(e.data);
     if (result && result.accepted != 'x') {
       _findCMROK = true;

@@ -174,7 +174,7 @@ function addAttachment() {
   if (FormManager.validate('frmCMR_addAttachmentModal', true)) {
     cmr.aftertoken = refreshAttachmentGrid;
     cmr.modalmode = true;
-    FormManager.doHiddenFileAction('frmCMR_addAttachmentModal', 'ADD_ATTACHMENT', cmr.CONTEXT_ROOT + '/request/attachment.json', true, 'attachToken', true);
+    FormManager.doHiddenFileAction('frmCMR_addAttachmentModal', 'ADD_ATTACHMENT', cmr.CONTEXT_ROOT + '/request/addattachment.json', true, 'attachToken', true);
   }
 }
 

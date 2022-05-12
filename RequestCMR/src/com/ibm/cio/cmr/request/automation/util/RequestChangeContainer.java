@@ -10,7 +10,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 
 import org.apache.commons.beanutils.PropertyUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.entity.Admin;

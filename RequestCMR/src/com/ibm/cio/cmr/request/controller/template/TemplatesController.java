@@ -80,5 +80,38 @@ public class TemplatesController extends BaseController {
       }
     }
   }
+  
+  @RequestMapping(
+      value = "/revcmrs/template/download",
+      method = RequestMethod.POST)
+  public void downloadRevivedCMRTemplateFile(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    String token = request.getParameter("dlTokenId");
+
+    String docLink = null;
+    String templateName = null;
+    try {
+      docLink = "RevCMR-template.xlsx";
+      templateName = docLink;
+
+      response.setContentType("application/octet-stream");
+      response.addHeader("Content-Type", "application/octet-steam");
+      response.addHeader("Content-Disposition", "attachment; filename=\"" + templateName + "\"");
+
+      SystemConfiguration.download(response.getOutputStream(), docLink);
+      request.getSession().setAttribute(token, "Y," + "Revived CMRs template downloaded successfully.");
+
+    } catch (Exception e) {
+      if (e instanceof CmrException) {
+        CmrException cmre = (CmrException) e;
+        if (MessageUtil.getMessage(MessageUtil.INFO_ERROR_LOG_EMPTY).equals(cmre.getMessage())) {
+          request.getSession().setAttribute(token, "Y," + cmre.getMessage());
+        } else {
+          request.getSession().setAttribute(token, "N," + cmre.getMessage());
+        }
+      } else {
+        request.getSession().setAttribute(token, "N," + MessageUtil.getMessage(MessageUtil.ERROR_GENERAL));
+      }
+    }
+  }
 
 }

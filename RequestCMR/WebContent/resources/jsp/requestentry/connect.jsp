@@ -10,6 +10,10 @@
   String land1 = request.getParameter("land1");
   String details = (String) request.getAttribute("request");
   String reqId = request.getParameter("reqId");
+  String source = "https://"+request.getServerName();
+  if (request.getServerPort() != 443){
+    source += ":"+request.getServerPort();    
+  }
 %>
 
 <html>
@@ -75,6 +79,7 @@ div.bg {
       <input type="hidden" name="land1" value="<%=land1%>">
       <input type="hidden" name="request" value="<%=details%>">
       <input type="hidden" name="reqId" value="<%=reqId%>">
+      <input type="hidden" name="source" value="<%=source%>">
 <%if (auth != null){ %>
       <div class="loader">
         <h3>Please wait while FindCMR is loading...</h3>

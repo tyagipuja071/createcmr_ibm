@@ -1,4 +1,4 @@
-<%@page import="org.apache.commons.lang.StringUtils"%>
+<%@page import="org.apache.commons.lang3.StringUtils"%>
 <%@page import="com.ibm.cio.cmr.request.user.AppUser"%>
 <%@page import="com.ibm.cio.cmr.request.model.approval.ApprovalResponseModel"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>

@@ -13,7 +13,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,8 +69,8 @@ public class ApprovalController extends BaseController {
     return null;
   }
 
-  @RequestMapping(value = "/approval/{approvalCode}")
-  public ModelAndView showApprovalPage(@PathVariable("approvalCode") String approvalCode, HttpServletRequest request, HttpServletResponse response,
+  @RequestMapping(value = "/approval/{approvalCode1}")
+  public ModelAndView showApprovalPage(@PathVariable("approvalCode1") String approvalCode, HttpServletRequest request, HttpServletResponse response,
       ApprovalResponseModel modelFromRequest) throws Exception {
     boolean processing = CmrConstants.YES_NO.Y.toString().equals(request.getParameter("processing"));
     String view = "approve";

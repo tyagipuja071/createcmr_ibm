@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 import javax.persistence.EntityManager;
 
 import org.apache.commons.beanutils.PropertyUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -2183,7 +2183,7 @@ public class IsraelHandler extends EMEAHandler {
   private boolean isHebrewFieldNotBlank(XSSFCell cell) {
     boolean isHebrewFieldNotBlank = false;
     if (cell != null) {
-      if (CellType.NUMERIC == cell.getCellTypeEnum()) {
+      if (CellType.NUMERIC == cell.getCellType()) {
         String numericCellStrVal = validateColValFromCell(cell);
         if (StringUtils.isNotBlank(numericCellStrVal)) {
           isHebrewFieldNotBlank = true;
