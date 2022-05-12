@@ -40,6 +40,7 @@ import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.user.AppUser;
+import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
@@ -191,13 +192,7 @@ public class AutomationEngine {
     boolean isUsTaxSkipToPpn = false;
     boolean requesterFromTaxTeam = false;
     String strRequesterId = requestData.getAdmin().getRequesterId().toLowerCase();
-    List<String> TaxTeams = SystemParameters.getList("US.TAX_TEAM_HEAD");
-    for (String taxTeam : TaxTeams) {
-      if (strRequesterId.equals(taxTeam.trim().toLowerCase())) {
-        requesterFromTaxTeam = true;
-        break;
-      }
-    }
+    requesterFromTaxTeam = BluePagesHelper.isUserInUSTAXBlueGroup(strRequesterId);
 
     if ("897".equals(requestData.getData().getCmrIssuingCntry()) && "U".equals(requestData.getAdmin().getReqType())) {
       // CREATCMR-5447

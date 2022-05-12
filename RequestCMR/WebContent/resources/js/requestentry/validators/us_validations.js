@@ -657,23 +657,9 @@ function TaxTeamUpdateAddrValidation() {
 
           var chkResult = false;
           var isOutTaxAddrChange = false;
-          var isTaxTeamUser = false;
+          var isTaxTeamUser = '';
           var result = {};
-
-          result = cmr.query('GET_PREDEFINED_REQUESTERS_MU', {
-            PARAMETER_CD : "US.TAX_TEAM_HEAD"
-          });
-
-          if (result != null && result.ret1 != '' && result.ret1 != undefined) {
-            var array = new Array();
-            var userArrayTemp = result.ret1.split(",");
-            for (var i = 0; i < userArrayTemp.length; i++) {
-              array[i] = userArrayTemp[i].trim().toLowerCase();
-            }
-            if (array.includes(_pagemodel.yourId)) {
-              isTaxTeamUser = true;
-            }
-          }
+          isTaxTeamUser = FormManager.getActualValue('isTaxTeamFlg');
 
           result = cmr.query('US_TAXTEAM.OUT_ADDR_TAXTEAM', {
             REQ_ID : FormManager.getActualValue('reqId')
@@ -682,7 +668,7 @@ function TaxTeamUpdateAddrValidation() {
             isOutTaxAddrChange = true;
           }
 
-          if (isTaxTeamUser) {
+          if (isTaxTeamUser == 'true') {
             if (!isOutTaxAddrChange) {
               chkResult = true;
             }
@@ -707,25 +693,11 @@ function TaxTeamUpdateDataValidation() {
         if (FormManager.getActualValue('reqType') == 'U') {
 
           var chkResult = false;
-          var isTaxTeamUser = false;
+          var isTaxTeamUser = '';
           var isInTaxDataChange = false;
           var isOutTaxDataChange = false;
           var result = {};
-
-          result = cmr.query('GET_PREDEFINED_REQUESTERS_MU', {
-            PARAMETER_CD : "US.TAX_TEAM_HEAD"
-          });
-
-          if (result != null && result.ret1 != '' && result.ret1 != undefined) {
-            var array = new Array();
-            var userArrayTemp = result.ret1.split(",");
-            for (var i = 0; i < userArrayTemp.length; i++) {
-              array[i] = userArrayTemp[i].trim().toLowerCase();
-            }
-            if (array.includes(_pagemodel.yourId)) {
-              isTaxTeamUser = true;
-            }
-          }
+          isTaxTeamUser = FormManager.getActualValue('isTaxTeamFlg');
 
           result = cmr.query('US_TAXTEAM.IN_TAXTEAM', {
             REQ_ID : FormManager.getActualValue('reqId')
@@ -739,7 +711,7 @@ function TaxTeamUpdateDataValidation() {
           if (result != null && result.ret1 != '' && result.ret1 != undefined) {
             isOutTaxDataChange = true;
           }
-          if (isTaxTeamUser) {
+          if (isTaxTeamUser == 'true') {
             if (!isOutTaxDataChange) {
               chkResult = true;
             }
@@ -895,7 +867,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addDPLCheckValidator, [ SysLoc.USA ], GEOHandler.ROLE_REQUESTER, true);
   GEOHandler.registerValidator(addDPLAssessmentValidator, [ SysLoc.USA ], null, true);
   // CREATCMR-4466
-  GEOHandler.registerValidator(addCompanyEnterpriseValidation, [ SysLoc.USA ], null, true);
+  // GEOHandler.registerValidator(addCompanyEnterpriseValidation, [ SysLoc.USA
+  // ], null, true);
   GEOHandler.addAfterConfig(lockOrdBlk, [ SysLoc.USA ]);
   GEOHandler.registerValidator(orderBlockValidation, [ SysLoc.USA ], null, true);
 

@@ -2,23 +2,20 @@
 <%@page import="org.codehaus.jackson.map.ObjectMapper"%>
 <%@page import="java.util.List" %>
 <%@page import="com.ibm.cio.cmr.request.util.SystemParameters" %>
+<%@page import="com.ibm.cio.cmr.request.util.BluePagesHelper" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles"%>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring"%>
 <%@ taglib uri="/tags/cmr" prefix="cmr"%>
 <%
-	// CREATCMR-5447
-	boolean showFlag = true;
-	AppUser user = AppUser.getUser(request);
-	List<String> TaxTeams = SystemParameters.getList("US.TAX_TEAM_HEAD");
-	
-	for (String taxTeam : TaxTeams) {
-		if (user.getIntranetId().equals(taxTeam.trim().toLowerCase())) {
-			showFlag = false;
-		}
-	}
-	// CREATCMR-5447
+    // CREATCMR-5447
+    boolean showFlag = true;
+    AppUser user = AppUser.getUser(request);
+    if (BluePagesHelper.isUserInUSTAXBlueGroup(user.getIntranetId())) {
+       showFlag = false;
+    }
+    // CREATCMR-5447
 %>
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 <c:set var="resourcesPath" value="${contextPath}/resources" />
