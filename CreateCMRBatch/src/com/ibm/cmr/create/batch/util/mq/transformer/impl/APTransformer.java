@@ -185,7 +185,7 @@ public abstract class APTransformer extends MessageTransformer {
     if (!StringUtils.isBlank(addrData.getCity1())) {
       line66 = addrData.getCity1();
       if (addrData.getLandCntry() != null && !addrData.getLandCntry().equalsIgnoreCase(convertIssuing2Cd(handler.cmrData.getCmrIssuingCntry()))) {
-        if (abbrevLandCountries.contains(addrData.getLandCntry()) && scenario.equals("CROSS"))
+        if (abbrevLandCountries.contains(addrData.getLandCntry()) && "CROSS".equals(scenario))
           line66 += " " + "<" + addrData.getLandCntry() + ">";
         else 
           line66 += " " + "<" + LandedCountryMap.getCountryName(addrData.getLandCntry()) + ">";
