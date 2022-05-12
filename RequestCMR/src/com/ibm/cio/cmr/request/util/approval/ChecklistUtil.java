@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.entity.ProlifChecklist;

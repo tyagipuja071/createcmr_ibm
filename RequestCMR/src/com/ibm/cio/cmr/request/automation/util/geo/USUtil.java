@@ -13,7 +13,7 @@ import java.util.Set;
 import javax.persistence.EntityManager;
 
 import org.apache.commons.digester.Digester;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
@@ -40,9 +40,11 @@ import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.KnvvExt;
 import com.ibm.cio.cmr.request.model.BaseModel;
 import com.ibm.cio.cmr.request.model.requestentry.AddressModel;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
+import com.ibm.cio.cmr.request.model.revivedcmr.RevivedCMRModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
@@ -1474,6 +1476,239 @@ public class USUtil extends AutomationUtil {
 
   }
 
+  @Override
+  public String getOriginalScenarioForRevivedCMRs(EntityManager entityManager, String cmrNo) throws Exception {
+    // get request admin and data
+    String custSubGroup = "";
+
+    String custTypCd = "";
+    String bpAccTyp = "";
+    String usRestricTo = "";
+    String companyNo = "";
+    String mtkgArDept = "";
+
+    String custClass = "";
+    String isicCd = "";
+    String subIndustryCd = "";
+    String affiliate = "";
+
+    USDetailsContainer usDetails = determineUSCMRDetails(entityManager, cmrNo);
+
+    custTypCd = usDetails.getCustTypCd();
+    usRestricTo = usDetails.getUsRestrictTo();
+    companyNo = usDetails.getCompanyNo();
+    bpAccTyp = usDetails.getBpAccTyp();
+    mtkgArDept = usDetails.getMktgArDept();
+
+    // get RDC values
+    String sql = ExternalizedQuery.getSql("AUTO.US.GET_RDC_VALUES");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CMR_NO", cmrNo);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setForReadOnly(true);
+    List<Object[]> results = query.getResults(1);
+    if (results != null && results.size() > 0) {
+      custClass = (String) results.get(0)[0];
+      isicCd = (String) results.get(0)[1];
+      subIndustryCd = (String) results.get(0)[2];
+      affiliate = (String) results.get(0)[3];
+    }
+
+    // US restrict to LOV mapping
+    String usRestrictToLOV = "";
+    if (StringUtils.isNotBlank(usRestricTo) && StringUtils.isNumeric(usRestricTo)) {
+      sql = ExternalizedQuery.getSql("AUTO.US.GET_US_RESTR_TO_LOV");
+      query = new PreparedQuery(entityManager, sql);
+      query.setParameter("RESTRICT_TO", usRestricTo);
+      usRestrictToLOV = query.getSingleResult(String.class);
+    } else {
+      usRestrictToLOV = usRestricTo;
+    }
+
+    // determine cust scenarios
+    if (COMMERCIAL.equals(custTypCd)) {
+      if (StringUtils.isNotBlank(usRestrictToLOV)) {
+        // sql = ExternalizedQuery.getSql("AUTO.US.GET_US_RESTR_TO_LOV");
+        // query = new PreparedQuery(entityManager, sql);
+        // query.setParameter("RESTRICT_TO", usRestricTo);
+        // String usRestrictToLOV = query.getSingleResult(String.class);
+        // US restrict to filters
+        if ("OIO".equals(usRestrictToLOV)) {
+          custSubGroup = SC_REST_OIO;
+        } else if ("OEMHQ".equals(usRestrictToLOV)) {
+          custSubGroup = SC_REST_OEMHW;
+        } else if ("OEMHQ".equals(usRestrictToLOV)) {
+          custSubGroup = SC_REST_OEMSW;
+        } else if ("TPD".equals(usRestrictToLOV)) {
+          custSubGroup = SC_REST_TPD;
+        } else if ("SSD".equals(usRestrictToLOV)) {
+          custSubGroup = SC_REST_SSD;
+        } else if ("DB4".equals(usRestrictToLOV)) {
+          custSubGroup = SC_REST_DB4;
+        } else if ("GRNTS".equals(usRestrictToLOV)) {
+          custSubGroup = SC_REST_GRNTS;
+        } else if ("LBPS".equals(usRestrictToLOV)) {
+          custSubGroup = SC_REST_LBPS;
+        } else if ("LIIS".equals(usRestrictToLOV)) {
+          custSubGroup = SC_REST_LIIS;
+        } else if ("RFBPO".equals(usRestrictToLOV)) {
+          custSubGroup = SC_REST_RFBPO;
+        } else if ("SSI".equals(usRestrictToLOV)) {
+          custSubGroup = SC_REST_SSI;
+        } else if ("ICC".equals(usRestrictToLOV)) {
+          custSubGroup = SC_REST_ICC;
+        } else if ("SVMP".equals(usRestrictToLOV)) {
+          custSubGroup = SC_REST_SVMP;
+        }
+      } else {
+        // affiliate filters with condition of usRestrictTo=blank
+        if ("2539231".equals(affiliate)) {
+          custSubGroup = SC_DOMINO;
+        } else if ("4276400".equals(affiliate)) {
+          custSubGroup = SC_HILTON;
+        } else if ("3435500".equals(affiliate)) {
+          custSubGroup = SC_FLORIDA;
+        }
+      }
+
+      if (StringUtils.isBlank(custSubGroup)) {
+        // If still no cust group found
+        // other filters in order of
+        // 1.company filters
+        // 2.isic filters
+        // 3.kukla filters
+        if ("12554525".equals(companyNo)) {
+          custSubGroup = SC_DUMMY;
+        } else if ("9500".equals(isicCd)) {
+          custSubGroup = SC_PVT_HOUSEHOLD;
+        } else if ("5159".equals(isicCd) && "672".equals(mtkgArDept)) {
+          custSubGroup = SC_BROKER;
+        } else if ("85".equals(custClass)) {
+          custSubGroup = SC_IGS;
+        } else if ("81".equals(custClass)) {
+          custSubGroup = SC_IGSF;
+        } else if ("52".equals(custClass)) {
+          custSubGroup = SC_CSP;
+        } else if (("11".equals(custClass) || "18".equals(custClass) || "19".equals(custClass)) && StringUtils.isBlank(usRestricTo)) {
+          custSubGroup = SC_COMM_REGULAR;
+        }
+      }
+    } else if (STATE_LOCAL.equals(custTypCd)) {
+      if (("13".equals(custClass) || "14".equals(custClass) || "16".equals(custClass) || "17".equals(custClass))
+          && StringUtils.isBlank(usRestricTo)) {
+        custSubGroup = SC_STATE_DIST;
+      } else {
+        custSubGroup = SC_STATE;
+      }
+    } else if (LEASING.equals(custTypCd)) {
+      custSubGroup = SC_LEASE_3CC;
+    } else if (FEDERAL.equals(custTypCd)) {
+      if ("12".equals(custClass)) {
+        custSubGroup = SC_FED_REGULAR;
+      }
+    } else if (POWER_OF_ATTORNEY.equals(custTypCd)) {
+      if ("15".equals(custClass) && StringUtils.isNotBlank(subIndustryCd) && !subIndustryCd.startsWith("Y")) {
+        custSubGroup = SC_FED_FEDSTATE;
+      } else if ("15".equals(custClass) && StringUtils.isNotBlank(subIndustryCd) && subIndustryCd.startsWith("Y")) {
+        custSubGroup = SC_FED_POA;
+      }
+    } else if (INTERNAL.equals(custTypCd)) {
+      if ("81".equals(custClass)) {
+        custSubGroup = SC_INTERNAL;
+      }
+    } else if (BUSINESS_PARTNER.equals(custTypCd)) {
+      if ("P".equals(bpAccTyp)) {
+        custSubGroup = SC_BP_POOL;
+      } else if ("D".equals(bpAccTyp)) {
+        custSubGroup = SC_BP_DEVELOP;
+      } else if ("E".equals(bpAccTyp)) { // TODO convert to providing divn and
+                                         // dept
+        // Addr zs01 = requestData.getAddress("ZS01");
+        // String divn = zs01.getDivn();
+        // String dept = zs01.getDept();
+        // if ((StringUtils.isNotBlank(divn) &&
+        // (divn.toUpperCase().contains("e-host".toUpperCase())
+        // || divn.toUpperCase().contains("ehost".toUpperCase()) ||
+        // divn.toUpperCase().contains("e host".toUpperCase())))
+        // || (StringUtils.isNotBlank(dept) &&
+        // (dept.toUpperCase().contains("e-host".toUpperCase())
+        // || dept.toUpperCase().contains("ehost".toUpperCase()) ||
+        // dept.toUpperCase().contains("e host".toUpperCase())))) {
+        // custSubGroup = SC_BP_E_HOST;
+        // } else if ("IRCSO".equals(usRestrictToLOV) ||
+        // "BPQS".equals(usRestrictToLOV)) {
+        // custSubGroup = SC_BP_END_USER;
+        // }
+      }
+    }
+    return custSubGroup;
+  }
+
+  @Override
+  public boolean performCountrySpecificCoverageCalculationsForRevivedCMRs(RevivedCMRModel revCmrModel, String scenario, String covFrom,
+      CoverageContainer container, boolean isCoverageCalculated) throws Exception {
+    // String scenarioSubType = "";
+    // Data data = requestData.getData();
+    // scenarioSubType = data.getCustSubGrp();
+    if (SC_REST_KYN.equals(scenario)) {
+      // overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA",
+      // "ISIC_CD", data.getIsicCd(), "7229");
+      // overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA",
+      // "US_SICMEN", data.getUsSicmen(), "7229");
+      // overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA",
+      // "INAC_TYPE", data.getInacType(), "I");
+      // overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA",
+      // "INAC_CD", data.getInacCd(), "6272");
+      // overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA",
+      // "AFFILIATE", data.getAffiliate(), "6500871");
+      // overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA",
+      // "COMPANY", data.getCompany(), "12641341");
+      // overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA",
+      // "ENTERPRISE", data.getEnterprise(), "6500871");
+    }
+    return true;
+  }
+
+  @Override
+  public boolean doCountryFieldComputationsForRevivedCMRs(EntityManager entityManager, RevivedCMRModel revCmrModel) throws Exception {
+
+    USDetailsContainer usDetails = determineFields(entityManager, revCmrModel.getKunnr());
+    revCmrModel.setCsoSite(usDetails.getCsoSite());
+    revCmrModel.setPccArDept(usDetails.getPccArDept());
+    revCmrModel.setMtkgArDept(usDetails.getMktgArDept());
+    revCmrModel.setMktgDept(usDetails.getMktgDept());
+    revCmrModel.setSvcArOffice(usDetails.getSvrArOffice());
+    revCmrModel.setMiscBilling(usDetails.getMiscBilling());
+    revCmrModel.setUsSicmen(usDetails.getSicmen());
+
+    revCmrModel.setIsuCd("34");
+    revCmrModel.setClientTier("Q");
+
+    // if scenario is OEMSW or OEMHW set isic to 357X
+    // if (SC_REST_OEMSW.equals(scenario) || SC_REST_OEMHW.equals(scenario) ||
+    // SC_REST_TPD.equals(scenario) || SC_REST_SSD.equals(scenario)
+    // || SC_REST_DB4.equals(scenario)) {
+    // revCmrModel.setIsicCd("357X");
+    // if (SC_REST_TPD.equals(scenario) || SC_REST_SSD.equals(scenario) ||
+    // SC_REST_DB4.equals(scenario)) {
+    // revCmrModel.setSubIndustryCd("ZC");
+    // revCmrModel.setUsSicmen("357X");
+    // }
+    // }
+    //
+    // // if scenario is KYN
+    // if (SC_REST_KYN.equals(scenario)) {
+    // revCmrModel.setIsicCd("7229");
+    // revCmrModel.setSubIndustryCd("BD");
+    // revCmrModel.setUsSicmen("7229");
+    // revCmrModel.setMtkgArDept("SD3");
+    // revCmrModel.setSvcArOffice("IJ9");
+    //
+    // }
+
+    return true;
+  }
+
   public static USDetailsContainer determineUSCMRDetails(EntityManager entityManager, String cmrNo) throws Exception {
     // get request admin and data
     if (usDetailsMap.containsKey(cmrNo) && usDetailsMap.get(cmrNo) != null) {
@@ -1489,6 +1724,11 @@ public class USUtil extends AutomationUtil {
     String companyNo = "";
     String pccArDept = "";
     String mtkgArDept = "";
+    String mktgDept = "";
+    String csoSite = "";
+    String svrArOffice = "";
+    String miscBilling = "";
+    String sicmen = "";
 
     String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
     String usSchema = SystemConfiguration.getValue("US_CMR_SCHEMA");
@@ -1507,6 +1747,11 @@ public class USUtil extends AutomationUtil {
     query.addField("I_CO");
     query.addField("I_CUST_OFF_5");
     query.addField("I_CUST_OFF_3");
+    query.addField("I_CUST_OFF_1");
+    query.addField("I_CUST_OFF_2");
+    query.addField("I_CUST_OFF_9");
+    query.addField("F_MISC_BILLING");
+    query.addField("C_SIC_MEN");
 
     QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
     QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
@@ -1524,8 +1769,13 @@ public class USUtil extends AutomationUtil {
       cGem = (String) record.get("C_GEM");
       // usRestrictTo = (String) record.get("C_COM_RESTRCT_CODE");
       companyNo = String.valueOf(record.get("I_CO"));
-      pccArDept = (String) record.get("I_CUST_OFF_5");
-      mtkgArDept = (String) record.get("I_CUST_OFF_3");
+      pccArDept = String.valueOf(record.get("I_CUST_OFF_5"));
+      mtkgArDept = String.valueOf(record.get("I_CUST_OFF_3"));
+      mktgDept = String.valueOf(record.get("I_CUST_OFF_1"));
+      csoSite = String.valueOf(record.get("I_CUST_OFF_2"));
+      svrArOffice = String.valueOf(record.get("I_CUST_OFF_9"));
+      miscBilling = String.valueOf(record.get("F_MISC_BILLING"));
+      sicmen = String.valueOf(record.get("C_SIC_MEN"));
       if ("P".equals(entType)) {
         custTypCd = POWER_OF_ATTORNEY;
       } else if ("F".equals(entType)) {
@@ -1555,9 +1805,66 @@ public class USUtil extends AutomationUtil {
     usDetails.setUsRestrictTo(restrictCd);
     usDetails.setCompanyNo(companyNo);
     usDetails.setMktgArDept(mtkgArDept);
+    usDetails.setMktgDept(mktgDept);
+    usDetails.setCsoSite(csoSite);
+    usDetails.setSvrArOffice(svrArOffice);
+    usDetails.setMiscBilling(miscBilling);
+    usDetails.setSicmen(sicmen);
 
     usDetails.setPccArDept(pccArDept);
     usDetailsMap.put(cmrNo, usDetails);
+    return usDetails;
+  }
+
+  public static USDetailsContainer determineFields(EntityManager entityManager, String kunnr) throws Exception {
+    // get request admin and data
+    // if (usDetailsMap.containsKey(cmrNo) && usDetailsMap.get(cmrNo) != null) {
+    // return usDetailsMap.get(cmrNo);
+    // }
+    USDetailsContainer usDetails = new USDetailsContainer();
+    String custTypCd = "NA";
+    String entType = "";
+    String leasingCo = "";
+    String bpAccTyp = "";
+    String cGem = "";
+    String usRestrictTo = "";
+    String companyNo = "";
+    String pccArDept = "";
+    String mtkgArDept = "";
+    String mktgDept = "";
+    String csoSite = "";
+    String svrArOffice = "";
+    String miscBilling = "";
+    String sicmen = "";
+
+    String sql = ExternalizedQuery.getSql("GET.KNVVEXT.REVIVED");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("KUNNR", kunnr);
+
+    List<KnvvExt> knvvExtList = query.getResults(KnvvExt.class);
+    if (knvvExtList == null && knvvExtList.size() == 0) {
+      custTypCd = "NA";
+    } else {
+      for (KnvvExt knvvExt : knvvExtList) {
+        pccArDept = knvvExt.getPccArBo();
+        mtkgArDept = knvvExt.getMktgArDept();
+        mktgDept = knvvExt.getMktgDept();
+        csoSite = knvvExt.getCsoSite();
+        svrArOffice = knvvExt.getSvcArOfc();
+        miscBilling = knvvExt.getMiscBilling();
+      }
+    }
+
+    usDetails.setMktgArDept(mtkgArDept);
+    usDetails.setMktgDept(mktgDept);
+    usDetails.setCsoSite(csoSite);
+    usDetails.setSvrArOffice(svrArOffice);
+    usDetails.setMiscBilling(miscBilling);
+    // usDetails.setSicmen(sicmen);
+
+    usDetails.setPccArDept(pccArDept);
+    // usDetailsMap.put(cmrNo, usDetails);
     return usDetails;
   }
 

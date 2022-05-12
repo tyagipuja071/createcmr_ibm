@@ -10,7 +10,7 @@ import java.security.KeyStoreException;
 import javax.net.ssl.SSLHandshakeException;
 import javax.persistence.EntityManager;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.util.mail.Email;

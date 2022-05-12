@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="lib" path="lib/commons-collections-3.2.jar"/>
-	<classpathentry kind="lib" path="lib/commons-lang-2.1.jar"/>
-	<classpathentry kind="lib" path="lib/velocity-1.5.jar"/>
+	<classpathentry kind="lib" path="lib/commons-collections-3.2.2.jar"/>
+	<classpathentry kind="lib" path="lib/commons-lang3-3.12.0.jar"/>
+	<classpathentry kind="lib" path="lib/velocity-engine-core-2.3.jar"/>
 	<classpathentry kind="lib" path="lib/db2jcc_license_cisuz.jar"/>
 	<classpathentry kind="lib" path="lib/db2jcc_license_cu.jar"/>
 	<classpathentry kind="lib" path="lib/db2jcc4.jar"/>

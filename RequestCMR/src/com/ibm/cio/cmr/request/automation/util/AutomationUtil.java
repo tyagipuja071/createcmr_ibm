@@ -10,7 +10,7 @@ import java.util.Map;
 
 import javax.persistence.EntityManager;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
@@ -46,6 +46,7 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.entity.DataRdc;
+import com.ibm.cio.cmr.request.model.revivedcmr.RevivedCMRModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
@@ -246,6 +247,15 @@ public abstract class AutomationUtil {
   public boolean performCountrySpecificCoverageCalculations(CalculateCoverageElement covElement, EntityManager entityManager,
       AutomationResult<OverrideOutput> results, StringBuilder details, OverrideOutput overrides, RequestData requestData,
       AutomationEngineData engineData, String covFrom, CoverageContainer container, boolean isCoverageCalculated) throws Exception {
+    return false;
+  }
+
+  public boolean performCountrySpecificCoverageCalculationsForRevivedCMRs(RevivedCMRModel revCmrModel, String scenario, String covFrom,
+      CoverageContainer container, boolean isCoverageCalculated) throws Exception {
+    return false;
+  }
+
+  public boolean doCountryFieldComputationsForRevivedCMRs(EntityManager entityManager, RevivedCMRModel revCmrModel) throws Exception {
     return false;
   }
 
@@ -1282,6 +1292,10 @@ public abstract class AutomationUtil {
       }
     }
     return rejectRequest;
+  }
+
+  public String getOriginalScenarioForRevivedCMRs(EntityManager entityManager, String cmrNo) throws Exception {
+    return "";
   }
 
   /**

@@ -3,7 +3,6 @@
  */
 package com.ibm.cio.cmr.request.util.masscreate;
 
-import java.awt.Color;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,14 +11,14 @@ import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -213,7 +212,7 @@ public class MassCreateFileParser {
                 valid = true;
               }
               if (sheetCell != null && valid) {
-                switch (sheetCell.getCellTypeEnum()) {
+                switch (sheetCell.getCellType()) {
                 case STRING:
                   cellValue = sheetCell.getStringCellValue();
                   break;
@@ -317,7 +316,7 @@ public class MassCreateFileParser {
           updatedStyle = book.createCellStyle();
           updatedStyle.setLocked(xlsCell.getCellStyle().getLocked());
           updatedFont = book.createFont();
-          updatedFont.setColor(new XSSFColor(new Color(0, 0, 255)));
+          updatedFont.setColor(IndexedColors.BLUE.getIndex());
           updatedStyle.setFont(updatedFont);
           xlsCell.setCellStyle(updatedStyle);
         }
@@ -343,7 +342,7 @@ public class MassCreateFileParser {
               updatedStyle = book.createCellStyle();
               updatedStyle.setLocked(xlsCell.getCellStyle().getLocked());
               updatedFont = book.createFont();
-              updatedFont.setColor(new XSSFColor(new Color(0, 0, 255)));
+              updatedFont.setColor(IndexedColors.BLUE.getIndex());
               updatedStyle.setFont(updatedFont);
               xlsCell.setCellStyle(updatedStyle);
             }

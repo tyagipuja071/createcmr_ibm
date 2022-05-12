@@ -18,8 +18,8 @@ import javax.persistence.EntityTransaction;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.beanutils.PropertyUtils;
-import org.apache.commons.lang.ObjectUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -835,7 +835,7 @@ public abstract class GEOHandler {
   protected static String validateColValFromCell(XSSFCell cell) {
     String colVal = "";
     if (cell != null) {
-      switch (cell.getCellTypeEnum()) {
+      switch (cell.getCellType()) {
       case STRING:
         colVal = cell.getStringCellValue();
         break;
@@ -1097,5 +1097,4 @@ public abstract class GEOHandler {
   public String getEquivalentAddressType(String addressType, String seqNo) {
     return addressType;
   }
-
 }

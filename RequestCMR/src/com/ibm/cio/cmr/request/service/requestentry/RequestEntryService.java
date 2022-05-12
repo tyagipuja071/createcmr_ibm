@@ -13,7 +13,7 @@ import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.beanutils.PropertyUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.ModelMap;
@@ -895,13 +895,15 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     to.setCanClaimAll((String) from.getValue("CAN_CLAIM_ALL"));
     to.setAutoProcessing((String) from.getValue("AUTO_PROCESSING"));
 
-    // copy internal dpl fields, for display only
+    //copy internal dpl fields, for display only
     SimpleDateFormat dateFormat = CmrConstants.DATE_FORMAT();
-    to.setIntDplAssessmentResult(score.getDplAssessmentResult());
-    to.setIntDplAssessmentBy(score.getDplAssessmentBy());
-    to.setIntDplAssessmentCmt(score.getDplAssessmentCmt());
-    if (score.getDplAssessmentDate() != null) {
-      to.setIntDplAssessmentDate(dateFormat.format(score.getDplAssessmentDate()));
+    if (score != null) {
+      to.setIntDplAssessmentResult(score.getDplAssessmentResult());
+      to.setIntDplAssessmentBy(score.getDplAssessmentBy());
+      to.setIntDplAssessmentCmt(score.getDplAssessmentCmt());
+      if (score.getDplAssessmentDate() != null) {
+        to.setIntDplAssessmentDate(dateFormat.format(score.getDplAssessmentDate()));
+      }
     }
   }
 
@@ -917,7 +919,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       dataService.copyValuesToEntity(from, data);
       // 1261175 -Dennis - We need to auto assign the cust type if it is an
       // update type and for BR
-      if (LAHandler.isSSAMXBRIssuingCountry(data.getCmrIssuingCntry()) && CmrConstants.REQ_TYPE_UPDATE.equalsIgnoreCase(admin.getReqType())) {
+      if (LAHandler.isSSAMXBRIssuingCountry(data.getCmrIssuingCntry()) && admin!=null && CmrConstants.REQ_TYPE_UPDATE.equalsIgnoreCase(admin.getReqType())) {
         admin.setCustType(CmrConstants.DEFAULT_CUST_TYPE);
       }
 
@@ -926,11 +928,11 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
         if (!StringUtils.isEmpty(from.getMrcCd())) {
           data.setCountryUse(from.getMrcCd());
         }
-        if (!StringUtils.isEmpty(from.getCrosSubTyp()) && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+        if (!StringUtils.isEmpty(from.getCrosSubTyp()) && admin!=null && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
           data.setModeOfPayment(from.getCrosSubTyp());
         }
       } else {
-        if (!StringUtils.isEmpty(from.getCrosSubTyp()) && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+        if (!StringUtils.isEmpty(from.getCrosSubTyp()) && admin!=null && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
           data.setModeOfPayment(from.getCrosSubTyp());
         }
       }
@@ -1459,7 +1461,10 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
               if (record.getConfidenceCode() >= 8) {
                 confidenceCd = true;
               }
-              isicMatch = getDnBDetailsUI(record.getDunsNo()).getIbmIsic().equals(model.getIsicCd());
+              DnBCompany dnbCompny=getDnBDetailsUI(record.getDunsNo());
+              if (dnbCompny != null) {
+                isicMatch = dnbCompny.getIbmIsic().equals(model.getIsicCd());
+              }
               log.debug("ISIC Match : " + isicMatch);
               if (record.getConfidenceCode() >= 8 && SystemLocation.CHINA.equals(data.getCmrIssuingCntry())
                   && (StringUtils.isBlank(data.getCustSubGrp()) || !data.getCustSubGrp().equals("CROSS"))) {

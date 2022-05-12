@@ -9,7 +9,7 @@ import java.util.Set;
 
 import javax.persistence.EntityManager;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.automation.AutomationElement;
@@ -474,8 +474,8 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
     case USUtil.SC_COMM_REGULAR:
       for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
         String usRestrictTo = StringUtils.isNotBlank(cmrCheckRecord.getUsRestrictTo()) ? cmrCheckRecord.getUsRestrictTo() : "";
-        String subIndustry = StringUtils.isNotBlank(cmrCheckRecord.getSubIndustryCd()) ? cmrCheckRecord.getSubIndustryCd() : "";
-        if (restrictTo.equals(usRestrictTo) && !subIndustry.startsWith("Y")) {
+        String subIndustryCd = StringUtils.isNotBlank(cmrCheckRecord.getSubIndustryCd()) ? cmrCheckRecord.getSubIndustryCd() : "";
+        if (restrictTo != null && subIndustryCd != null && restrictTo.equals(usRestrictTo) && !subIndustryCd.startsWith("Y")) {
           cmrCheckMatchesTmp.add(cmrCheckRecord);
         }
       }

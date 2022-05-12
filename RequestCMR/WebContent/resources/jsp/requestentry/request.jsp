@@ -1,4 +1,4 @@
-<%@page import="org.apache.commons.lang.StringUtils"%>
+<%@page import="org.apache.commons.lang3.StringUtils"%>
 <%@page import="com.ibm.cio.cmr.request.util.SystemParameters"%>
 <%@page import="com.ibm.cio.cmr.request.ui.template.TemplateManager"%>
 <%@page import="com.ibm.cio.cmr.request.model.requestentry.DataModel"%>
@@ -33,6 +33,7 @@
 	String mandt = SystemConfiguration.getValue("MANDT");
 	String autoEngineIndc= (String) request.getAttribute("autoEngineIndc");
   boolean fromQs = "Y".equals(request.getParameter("qs"));
+  String findCmrServer = findCMRUrl.contains("/") ? findCMRUrl.substring(0, findCMRUrl.lastIndexOf("/")) : findCMRUrl;
 %>
 <jsp:include page="approvals_status.jsp" />
 <%
@@ -68,8 +69,8 @@
 
 <jsp:include page="trans.jsp" />
 
-
 <script>
+    _findCmrServer = '<%=findCmrServer%>';
     var _translateUrl = '<%=SystemParameters.getString("TRANSLATE.URL")%>';
     var _delayedLoadComplete = false;
   dojo.addOnLoad(function() {

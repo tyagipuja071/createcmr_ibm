@@ -14,7 +14,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
@@ -1359,13 +1359,13 @@ public class AddressService extends BaseService<AddressModel, Addr> {
   @Deprecated
   protected CEEroData dplCheck(long reqId, String cntry, String name) throws Exception {
     String url = SystemConfiguration.getValue("EVS_URL");
-    String user = SystemConfiguration.getSystemProperty("evs.user");
-    String pass = SystemConfiguration.getSystemProperty("evs.password");
+    String user = System.getProperty("evs.user");
+    String pass = System.getProperty("evs.password");
 
     EWSClient client = new EWSClient(url, user, pass);
 
     CEAppData appData = new CEAppData();
-    appData.setAppID(SystemConfiguration.getSystemProperty("evs.appID"));
+    appData.setAppID(System.getProperty("evs.appID"));
 
     appData.addDownloadSite("ALL");
     appData.setExportOverrideSupport(false);

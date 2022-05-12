@@ -71,6 +71,11 @@ boolean approver = user != null && user.isApprover();
                 Help
               </a>
             </li>
+            <%if (user != null && (user.isAdmin() || user.isCmde() || user.isProcessor()) ){%>            
+            <li id="REV_TAB">
+            	<a href="javascript: goToUrl('${contextPath}/revivedcmrs')">Revive</a>
+            </li>
+            <%}%>
           <%}%>
 				</ul>
 			</div>

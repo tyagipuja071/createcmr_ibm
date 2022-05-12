@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
@@ -649,7 +649,7 @@ public class LegacyDirectService extends TransConnService {
       if (!StringUtils.isEmpty(billingCmr)) {
         LOG.debug("Billing Cmr :" + billingCmr);
         List<CmrtCustExt> custExtList = LegacyDirectUtil.getBillingChildFromCustExt(entityManager, billingCmr, cntry);
-        if (custExtList != null & !custExtList.isEmpty()) {
+        if (custExtList != null && !custExtList.isEmpty()) {
 
           if (custExtList.size() > 1) {
             for (CmrtCustExt cExt : custExtList) {
@@ -677,7 +677,7 @@ public class LegacyDirectService extends TransConnService {
       if (billingCustNo != null && !StringUtils.isEmpty(billingCustNo) && cmrNo.equals(billingCustNo)) {
         LOG.debug("Billing Cmr :" + billingCustNo);
         List<CmrtCustExt> custExtList = LegacyDirectUtil.getBillingChildFromCustExt(entityManager, billingCustNo, cntry);
-        if (custExtList != null & !custExtList.isEmpty()) {
+        if (custExtList != null && !custExtList.isEmpty()) {
 
           for (Addr addr : addrs) {
             if ("ZP01".equals(addr.getId().getAddrType())) {
@@ -708,7 +708,7 @@ public class LegacyDirectService extends TransConnService {
       if (compCustNo != null && !StringUtils.isEmpty(compCustNo) && cmrNo.equals(compCustNo)) {
         LOG.debug("Company Cmr :" + compCustNo);
         List<CmrtCustExt> custExtList = LegacyDirectUtil.getCompanyChildFromCustExt(entityManager, compCustNo, cntry);
-        if (custExtList != null & !custExtList.isEmpty()) {
+        if (custExtList != null && !custExtList.isEmpty()) {
           if (custExtList.size() > 1) {
             List<String> rcuxaList = null;
             for (CmrtCustExt cExt : custExtList) {
@@ -728,7 +728,7 @@ public class LegacyDirectService extends TransConnService {
             partialCommit(entityManager);
             entityManager.clear();
 
-            if (rcuxaList != null & !rcuxaList.isEmpty()) {
+            if (rcuxaList != null && !rcuxaList.isEmpty()) {
               if (rcuxaList.size() > 0) {
                 LegacyDirectUtil.updateCompanyChildCustRecords(entityManager, rcuxaList, cntry, data.getVat(), data.getEnterprise());
                 partialCommit(entityManager);

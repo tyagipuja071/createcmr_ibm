@@ -1,5 +1,5 @@
 <%@page import="com.ibm.cmr.services.client.cris.CRISEstablishment"%>
-<%@page import="org.apache.commons.lang.StringUtils"%>
+<%@page import="org.apache.commons.lang3.StringUtils"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring"%>

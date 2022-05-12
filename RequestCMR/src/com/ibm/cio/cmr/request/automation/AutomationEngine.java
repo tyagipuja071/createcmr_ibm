@@ -13,7 +13,7 @@ import java.util.Map;
 
 import javax.persistence.EntityManager;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.CmrException;
@@ -208,9 +208,7 @@ public class AutomationEngine {
           result = element.createSkippedResult(reqId, "Company verification skipped for this request scenario.");
         } else {
           try {
-            ChangeLogListener.setManager(entityManager);
             result = element.executeAutomationElement(entityManager, requestData, engineData.get());
-            ChangeLogListener.clearManager();
           } catch (Exception e) {
             LOG.warn("System error for element " + element.getProcessDesc(), e);
             result = new AutomationResult<>();
@@ -689,12 +687,18 @@ public class AutomationEngine {
 
     histpk.setWfId(SystemUtil.getNextID(entityManager, SystemConfiguration.getValue("MANDT"), "WF_ID"));
     hist.setId(histpk);
+    if (comment != null && comment.length() > 1000) {
+      comment = comment.substring(0, 980) + "...";
+    }
     hist.setCmt(comment);
     hist.setReqStatus(admin.getReqStatus());
     hist.setCreateById(user.getIntranetId());
     hist.setCreateByNm(user.getIntranetId());
     hist.setCreateTs(SystemUtil.getCurrentTimestamp());
     hist.setReqId(admin.getId().getReqId());
+    if (reason != null && reason.length() > 60) {
+      reason = reason.substring(0, 55) + "..";
+    }
     hist.setRejReason(reason);
     hist.setReqStatusAct(action);
     hist.setRejReasonCd(rejCd);
@@ -739,6 +743,9 @@ public class AutomationEngine {
     long cmtId = SystemUtil.getNextID(entityManager, SystemConfiguration.getValue("MANDT"), "CMT_ID");
     cmtPk.setCmtId(cmtId);
     cmt.setId(cmtPk);
+    if (comment != null && comment.length() > 2000) {
+      comment = comment.substring(0, 1980) + "...";
+    }
     cmt.setCmt(comment);
     cmt.setCmtLockedIn("Y");
     cmt.setCreateById(user.getIntranetId());

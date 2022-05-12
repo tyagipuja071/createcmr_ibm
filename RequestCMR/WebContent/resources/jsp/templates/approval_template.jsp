@@ -8,6 +8,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles"%>
+<%@ taglib uri="http://tiles.apache.org/tags-tiles-extras" prefix="tilesx" %>
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 <c:set var="resourcesPath" value="${contextPath}/resources" />
 
@@ -79,7 +80,7 @@ request.setAttribute("cmrv", SystemConfiguration.getSystemProperty("BUILD"));
 
 <link rel="stylesheet" type="text/css" href="${resourcesPath}/css/cmr.css?${cmrv}" />
 <link rel="stylesheet" href="${resourcesPath}/css/ext/jquery-ui.css"/>
-<script src="${resourcesPath}/js/ext/jquery-1.10.2.js"></script>
+<script src="${resourcesPath}/js/ext/jquery-3.6.0.js"></script>
 <script src="${resourcesPath}/js/ext/jquery-ui.js"></script>
 <link rel="stylesheet" type="text/css" href="${resourcesPath}/css/cmr-v2.css?${cmrv}" />
 
@@ -93,7 +94,7 @@ request.setAttribute("cmrv", SystemConfiguration.getSystemProperty("BUILD"));
 
   <!-- OVERLAYS -->
   <jsp:include page="/resources/jsp/templates/overlays.jsp" />
-  <tiles:useAttribute name="approvalTitle" ignore="true" />
+  <tilesx:useAttribute name="approvalTitle" ignore="true" />
 
   <div id="ibm-loader-screen"></div>
 

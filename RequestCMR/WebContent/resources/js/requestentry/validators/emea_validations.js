@@ -9814,6 +9814,54 @@ function addValidatorForCollectionCdUpdateUKI() {
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
 
+function validateCollectionCdValueUKI() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var collectionCd = FormManager.getActualValue('collectionCd');
+        if (collectionCd == null || collectionCd == '') {
+          return;
+        }
+
+        var reqId = FormManager.getActualValue('reqId');
+        var result = cmr.query('GETDATARDCVALUESIT', {
+          REQ_ID : reqId
+        });
+
+        var collCdOld = null;
+        if (result && result.ret1 != null) {
+          collCdOld = result.ret1;
+        }
+
+        if (FormManager.getActualValue('reqType') == 'U' && collCdOld == collectionCd) {
+          return;
+        }
+
+        var collectionCdValid = true;
+        if (collectionCd.length == 2 || collectionCd.length == 6) {
+          var alphaNumeric = /^[0-9A-Z]+$/;
+          if ((collectionCd.length == 6 && !collectionCd.match(alphaNumeric)) || (collectionCd.length == 2 && isNaN(collectionCd))) {
+            collectionCdValid = false;
+          }
+        } else {
+          collectionCdValid = false;
+        }
+
+        if (!collectionCdValid) {
+
+          return new ValidationResult({
+            id : 'collectionCd',
+            type : 'text',
+            name : 'collectionCd'
+          }, false, 'Collection Code should either be 2 characters (both digits) or 6 characters (digits and/or uppercase latin).');
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 function addValidatorForCompanyRegNum() {
   // CRN
   FormManager.addFormValidator((function() {
@@ -10465,6 +10513,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(checkIsicCodeValidationIT, [ SysLoc.ITALY ]);
   GEOHandler.registerValidator(requestingLOBCheckFrIFSL, [ SysLoc.UK, SysLoc.IRELAND ]);
   GEOHandler.registerValidator(addValidatorForCollectionCdUpdateUKI, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
+  GEOHandler.registerValidator(validateCollectionCdValueUKI, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
   GEOHandler.registerValidator(addValidatorForCompanyRegNum, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
   GEOHandler.registerValidator(addCustClassValidatorBP, [ SysLoc.IRELAND, SysLoc.UK ], null, true);
   GEOHandler.addAfterConfig(addAfterConfigItaly, [ SysLoc.ITALY ]);

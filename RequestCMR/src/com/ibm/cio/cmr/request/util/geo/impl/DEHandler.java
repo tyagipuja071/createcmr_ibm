@@ -11,8 +11,8 @@ import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.EntityManager;
 
-import org.apache.commons.lang.ObjectUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -374,7 +374,7 @@ public class DEHandler extends GEOHandler {
     // CMR-3171 - add ORB_BLK here
     fields.addAll(Arrays.asList("ABBREV_NM", "CLIENT_TIER", "CUST_CLASS", "CUST_PREF_LANG", "INAC_CD", "ISU_CD", "SEARCH_TERM", "ISIC_CD",
         "SUB_INDUSTRY_CD", "VAT", "COV_DESC", "COV_ID", "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC", "GEO_LOCATION_CD",
-        "DUNS_NO", "ORD_BLK"));
+        "DUNS_NO", "ORD_BLK","ENTERPRISE"));
     return fields;
   }
 

@@ -6,7 +6,8 @@ package com.ibm.cmr.create.batch.util.mq.transformer.impl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.apache.commons.lang.StringUtils;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.ibm.cmr.create.batch.util.mq.handler.MQMessageHandler;
 import com.ibm.cmr.create.batch.util.mq.transformer.MessageTransformer;

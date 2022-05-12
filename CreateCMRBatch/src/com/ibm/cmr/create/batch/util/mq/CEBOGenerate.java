@@ -2,7 +2,7 @@ package com.ibm.cmr.create.batch.util.mq;
 
 import java.util.HashMap;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class CEBOGenerate {
 

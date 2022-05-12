@@ -6,7 +6,7 @@ package com.ibm.cio.cmr.request.util.sof;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author Jeffrey Zamora

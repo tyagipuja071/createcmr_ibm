@@ -20,6 +20,11 @@ public class USDetailsContainer {
   private String companyNo;
   private String pccArDept;
   private String mktgArDept;
+  private String mktgDept;
+  private String csoSite;
+  private String svrArOffice;
+  private String miscBilling;
+  private String sicmen;
 
   public String getCustTypCd() {
     return custTypCd;
@@ -91,6 +96,46 @@ public class USDetailsContainer {
 
   public void setMktgArDept(String mktgArDept) {
     this.mktgArDept = mktgArDept;
+  }
+
+  public String getMktgDept() {
+    return mktgDept;
+  }
+
+  public void setMktgDept(String mktgDept) {
+    this.mktgDept = mktgDept;
+  }
+
+  public String getCsoSite() {
+    return csoSite;
+  }
+
+  public void setCsoSite(String csoSite) {
+    this.csoSite = csoSite;
+  }
+
+  public String getSvrArOffice() {
+    return svrArOffice;
+  }
+
+  public void setSvrArOffice(String svrArOffice) {
+    this.svrArOffice = svrArOffice;
+  }
+
+  public String getMiscBilling() {
+    return miscBilling;
+  }
+
+  public void setMiscBilling(String miscBilling) {
+    this.miscBilling = miscBilling;
+  }
+
+  public String getSicmen() {
+    return sicmen;
+  }
+
+  public void setSicmen(String sicmen) {
+    this.sicmen = sicmen;
   }
 
 }

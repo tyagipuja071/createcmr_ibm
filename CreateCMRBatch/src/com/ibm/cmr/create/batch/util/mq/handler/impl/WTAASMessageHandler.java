@@ -16,8 +16,8 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.jdom.Document;
 import org.jdom.Element;
@@ -348,7 +348,10 @@ public class WTAASMessageHandler extends MQMessageHandler {
       InputSource source = new InputSource(read);
       InputSource source2 = new InputSource(read2);
 
-      SAXParserFactory.newInstance().newSAXParser().parse(source, handler);
+      SAXParserFactory factory = SAXParserFactory.newInstance();
+      factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+      factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);      
+      factory.newSAXParser().parse(source, handler);
 
       reply = handler.getReply();
 
@@ -745,7 +748,10 @@ public class WTAASMessageHandler extends MQMessageHandler {
     try {
       InputSource source = new InputSource(read);
 
-      SAXParserFactory.newInstance().newSAXParser().parse(source, handler);
+      SAXParserFactory factory = SAXParserFactory.newInstance();
+      factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+      factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);      
+      factory.newSAXParser().parse(source, handler);
 
       reply = handler.getReply();
 

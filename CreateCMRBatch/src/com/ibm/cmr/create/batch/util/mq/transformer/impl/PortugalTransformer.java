@@ -9,7 +9,7 @@ import java.util.Map;
 
 import javax.persistence.EntityManager;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.CmrConstants;
@@ -473,11 +473,7 @@ public class PortugalTransformer extends MessageTransformer {
 
     // vat
     if (zs01CrossBorder(dummyHandler) && !StringUtils.isEmpty(dummyHandler.cmrData.getVat())) {
-      if (dummyHandler.cmrData.getVat().matches("^[A-Z]{2}.*")) {
-        legacyCust.setVat(landedCntry + dummyHandler.cmrData.getVat().substring(2));
-      } else {
-        legacyCust.setVat(landedCntry + dummyHandler.cmrData.getVat());
-      }
+      legacyCust.setVat(dummyHandler.cmrData.getVat());
     } else {
       if (!StringUtils.isEmpty(dummyHandler.messageHash.get("VAT"))) {
         legacyCust.setVat(dummyHandler.messageHash.get("VAT"));

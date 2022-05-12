@@ -12,7 +12,7 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.entity.Addr;
@@ -23,11 +23,12 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.ConfigUtil;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
-import com.itextpdf.io.font.FontConstants;
+import com.itextpdf.io.font.constants.StandardFonts;
 import com.itextpdf.io.font.PdfEncodings;
-import com.itextpdf.kernel.color.Color;
+import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
+import com.itextpdf.kernel.font.PdfFontFactory.EmbeddingStrategy;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
@@ -46,15 +47,15 @@ public class KRPDFConverter extends DefaultPDFConverter {
 
   public KRPDFConverter(String cmrIssuingCntry) throws IOException {
     super(cmrIssuingCntry);
-    this.regularFont = PdfFontFactory.createFont(FontConstants.HELVETICA);
+    this.regularFont = PdfFontFactory.createFont(StandardFonts.HELVETICA);
     String webConfig = ConfigUtil.getConfigDir();
     String fontLocation = webConfig + File.separator + "ARIALUNI.TTF";
     LOG.debug("Korea Font Location " + fontLocation);
     try {
-      this.koreaFont = PdfFontFactory.createFont(fontLocation, PdfEncodings.IDENTITY_H, true);
+      this.koreaFont = PdfFontFactory.createFont(fontLocation, PdfEncodings.IDENTITY_H, EmbeddingStrategy.PREFER_EMBEDDED);
     } catch (IOException e) {
       LOG.debug("Error in initializing Japanese font.", e);
-      this.koreaFont = PdfFontFactory.createFont(FontConstants.HELVETICA);
+      this.koreaFont = PdfFontFactory.createFont(StandardFonts.HELVETICA);
     }
   }
 
@@ -273,7 +274,7 @@ public class KRPDFConverter extends DefaultPDFConverter {
       }
       Cell dplCell = createValueCell(dplCheckText, 1, 3);
       if ("F".equals(dplCheck)) {
-        dplCell.setFontColor(Color.RED);
+        dplCell.setFontColor(ColorConstants.RED);
       }
       address.addCell(dplCell);
 

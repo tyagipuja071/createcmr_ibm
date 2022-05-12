@@ -1,4 +1,4 @@
-<%@page import="org.apache.commons.lang.StringUtils"%>
+<%@page import="org.apache.commons.lang3.StringUtils"%>
 <%@page import="com.ibm.cmr.services.client.cris.CRISAddress"%>
 <%@page import="com.ibm.cmr.services.client.cris.CRISAccount"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>

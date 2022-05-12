@@ -32,7 +32,10 @@ String autoEngineIndc= (String) request.getAttribute("autoEngineIndc");
 String entUpdType="";
 if(reqentry.getEntUpdTyp()!= null ){
   entUpdType = reqentry.getEntUpdTyp();
-}%>
+}
+String findCmrServer = findCMRUrl.contains("/") ? findCMRUrl.substring(0, findCMRUrl.lastIndexOf("/")) : findCMRUrl;
+
+%>
 <jsp:include page="/resources/jsp/requestentry/approvals_status.jsp" />
 <%
 Boolean readOnly = (Boolean) request.getAttribute("yourActionsViewOnly");
@@ -65,6 +68,7 @@ if (readOnly == null){
 
 <jsp:include page="/resources/jsp/requestentry/trans.jsp" />
 <script>
+_findCmrServer = '<%=findCmrServer%>';
 dojo.addOnLoad(function() {
     loadYourActionsDropDown();
     FormManager.setCheckFunction(promptForSaveBeforeLeave);

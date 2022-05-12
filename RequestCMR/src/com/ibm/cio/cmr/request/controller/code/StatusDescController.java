@@ -40,8 +40,7 @@ public class StatusDescController extends BaseController {
   private StatusDescMaintService addservice;
 
   @RequestMapping(value = "/code/status_desc", method = RequestMethod.GET)
-  public @ResponseBody
-  ModelAndView showStatusDesc(HttpServletRequest request, ModelMap model) {
+  public @ResponseBody ModelAndView showStatusDesc(HttpServletRequest request, ModelMap model) {
     AppUser user = AppUser.getUser(request);
     if (!user.isAdmin()) {
       LOG.warn("User " + user.getIntranetId() + " (" + user.getBluePagesName() + ") tried accessing the Users system function.");
@@ -57,8 +56,8 @@ public class StatusDescController extends BaseController {
   }
 
   @RequestMapping(value = "/code/addstatusdesc")
-  public @ResponseBody
-  ModelAndView maintainStatusDesc(HttpServletRequest request, HttpServletResponse response, StatusDescModel model) throws CmrException {
+  public @ResponseBody ModelAndView maintainStatusDesc(HttpServletRequest request, HttpServletResponse response, StatusDescModel model)
+      throws CmrException {
     AppUser user = AppUser.getUser(request);
     if (!user.isAdmin()) {
       LOG.warn("User " + user.getIntranetId() + " (" + user.getBluePagesName() + ") tried accessing the Users system function.");
@@ -95,10 +94,9 @@ public class StatusDescController extends BaseController {
     return mv;
   }
 
-  @RequestMapping(value = "/code/statusdescdetails/{reqStatus}")
-  public @ResponseBody
-  ModelAndView maintainStatusDescDetails(@PathVariable("reqStatus") String reqStatus, HttpServletRequest request, HttpServletResponse response,
-      StatusDescModel model) throws CmrException {
+  @RequestMapping(value = "/code/statusdescdetails/{reqStatus1}")
+  public @ResponseBody ModelAndView maintainStatusDescDetails(@PathVariable("reqStatus1") String reqStatus, HttpServletRequest request,
+      HttpServletResponse response, StatusDescModel model) throws CmrException {
     AppUser user = AppUser.getUser(request);
     if (!user.isAdmin()) {
       LOG.warn("User " + user.getIntranetId() + " (" + user.getBluePagesName() + ") tried accessing the Users system function.");
